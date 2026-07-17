@@ -17,14 +17,17 @@
 import Image from "next/image";
 import { useCallback, useEffect, useState, type ReactNode } from "react";
 import { blo } from "blo";
-import { useTranslations } from "next-intl";
+import { useFormatter, useTranslations } from "next-intl";
 import {
+  CheckCircle2Icon,
   CheckIcon,
+  CoinsIcon,
   CopyIcon,
   ExternalLinkIcon,
   FingerprintIcon,
   Loader2Icon,
   LockIcon,
+  SendIcon,
   ShieldCheckIcon,
   Trash2Icon,
   WalletIcon,
@@ -32,8 +35,17 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
-import { createVaultPasskey, isPasskeySupported } from "@/lib/splits-vault/passkey";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { createVaultPasskey, isPasskeySupported, signVaultUserOp } from "@/lib/splits-vault/passkey";
 import type { SplitsVaultRecord, VaultPasskeySigner } from "@/lib/splits-vault/shared";
+import {
+  WALLET_TOKENS,
+  formatTokenUnits,
+  getWalletToken,
+  parseTokenUnits,
+  type WalletBalances,
+  type WalletTokenSymbol,
+} from "@/lib/splits-vault/tokens";
 import type { AuthSession } from "@/app/_lib/auth";
 import { cn } from "@/lib/utils";
 
@@ -44,7 +56,36 @@ type WalletState = {
   uri?: string;
   deployed?: boolean;
   holdsFunds?: boolean;
+  balances?: WalletBalances | null;
 };
+
+const TOKEN_COLORS: Record<WalletTokenSymbol, string> = {
+  USDC: "#2775CA",
+  USDT: "#26A17B",
+  ETH: "#627EEA",
+};
+
+const TOKEN_DISPLAY_DECIMALS: Record<WalletTokenSymbol, number> = {
+  USDC: 2,
+  USDT: 2,
+  ETH: 5,
+};
+
+const ADDRESS_PATTERN = /^0x[0-9a-fA-F]{40}$/;
+
+type SendPhase = "idle" | "preparing" | "signing" | "submitting";
+
+function TokenBadge({ symbol }: { symbol: WalletTokenSymbol }) {
+  return (
+    <span
+      aria-hidden
+      className="flex size-8 shrink-0 items-center justify-center rounded-full text-xs font-bold text-white"
+      style={{ backgroundColor: TOKEN_COLORS[symbol] }}
+    >
+      {symbol === "ETH" ? "\u039E" : "$"}
+    </span>
+  );
+}
 
 type OrganizationWalletContext = {
   did: string;
@@ -79,10 +120,18 @@ function CardTitle({ Icon, children }: { Icon: React.ComponentType<{ className?:
   );
 }
 
+class SendRequestError extends Error {
+  constructor(public readonly code?: string) {
+    super(code || "send_failed");
+    this.name = "SendRequestError";
+  }
+}
+
 export function WalletTabClient({ organization }: { organization?: OrganizationWalletContext } = {}) {
   const personalT = useTranslations("common.accountWallet");
   const organizationT = useTranslations("modals.orgWallet");
   const t = organization ? organizationT : personalT;
+  const format = useFormatter();
 
   const [viewer, setViewer] = useState<{ did: string | null; handle: string | null }>({ did: null, handle: null });
   const [state, setState] = useState<WalletState | null>(null);
@@ -92,6 +141,13 @@ export function WalletTabClient({ organization }: { organization?: OrganizationW
   const [copied, setCopied] = useState(false);
   const [newSignerLabel, setNewSignerLabel] = useState("");
   const [confirmingDelete, setConfirmingDelete] = useState(false);
+  const [sendToken, setSendToken] = useState<WalletTokenSymbol>("USDC");
+  const [sendTo, setSendTo] = useState("");
+  const [sendAmount, setSendAmount] = useState("");
+  const [sendPhase, setSendPhase] = useState<SendPhase>("idle");
+  const [sendApproval, setSendApproval] = useState<{ current: number; total: number } | null>(null);
+  const [sendError, setSendError] = useState<string | null>(null);
+  const [sentTxHash, setSentTxHash] = useState<string | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -216,6 +272,140 @@ export function WalletTabClient({ organization }: { organization?: OrganizationW
       t("removeSignerError"),
     );
 
+  // ── Sending funds ─────────────────────────────────────────────────────────
+
+  const sendErrorForCode = (code?: string): string => {
+    switch (code) {
+      case "not_configured":
+        return t("sendErrorNotConfigured");
+      case "insufficient_balance":
+        return t("sendErrorInsufficient");
+      case "network_busy":
+        return t("sendErrorBusy");
+      case "signature_rejected":
+        return t("sendErrorSignature");
+      case "no_signer":
+        return t("sendNoSigner");
+      default:
+        return t("sendErrorGeneric");
+    }
+  };
+
+  const sendRequest = async (payload: Record<string, unknown>): Promise<Record<string, unknown>> => {
+    const response = await fetch(organization ? "/api/org-wallet/send" : "/api/wallet/send", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify(organization ? { repo: organization.did, ...payload } : payload),
+    });
+    const json = (await response.json().catch(() => null)) as Record<string, unknown> | null;
+    if (!response.ok) throw new SendRequestError(typeof json?.code === "string" ? json.code : undefined);
+    if (!json) throw new SendRequestError();
+    return json;
+  };
+
+  const handleSend = async () => {
+    if (sendPhase !== "idle" || isBusy || !state?.record) return;
+    setSendError(null);
+    setSentTxHash(null);
+
+    const token = getWalletToken(sendToken);
+    if (!token) return;
+    const to = sendTo.trim();
+    if (!ADDRESS_PATTERN.test(to)) {
+      setSendError(t("sendRecipientInvalid"));
+      return;
+    }
+    const amountUnits = parseTokenUnits(sendAmount, token.decimals);
+    if (amountUnits === null || amountUnits <= 0n) {
+      setSendError(t("sendAmountInvalid"));
+      return;
+    }
+    const balance = state.balances?.tokens.find((entry) => entry.symbol === sendToken);
+    if (balance && amountUnits > BigInt(balance.units)) {
+      setSendError(t("sendAmountTooHigh"));
+      return;
+    }
+    if (!isPasskeySupported()) {
+      setSendError(t("passkeyUnsupported"));
+      return;
+    }
+
+    try {
+      setSendPhase("preparing");
+      const prepared = await sendRequest({ step: "prepare", token: sendToken, to, amountUnits: amountUnits.toString() });
+      const hash = prepared.hash as `0x${string}` | undefined;
+      const lightHash = prepared.lightHash as `0x${string}` | undefined;
+      const threshold = typeof prepared.threshold === "number" && prepared.threshold >= 1 ? prepared.threshold : 1;
+      const myCredentialIds = (prepared.credentialIds as string[] | undefined) ?? [];
+      const allCredentialIds = (prepared.allCredentialIds as string[] | undefined) ?? myCredentialIds;
+      if (!hash || myCredentialIds.length === 0) throw new SendRequestError();
+      if (threshold > 1 && !lightHash) throw new SendRequestError();
+
+      // Collect the required approvals one after another. All but the last
+      // sign the "light" hash; the final approval signs the full hash. The
+      // first approval must come from the viewer's own passkey; co-signers
+      // present may use any other enrolled passkey.
+      setSendPhase("signing");
+      const collected: Awaited<ReturnType<typeof signVaultUserOp>>[] = [];
+      const used = new Set<string>();
+      for (let i = 0; i < threshold; i += 1) {
+        setSendApproval(threshold > 1 ? { current: i + 1, total: threshold } : null);
+        const pool = (i === 0 ? myCredentialIds : allCredentialIds).filter((id) => !used.has(id));
+        if (pool.length === 0) throw new SendRequestError();
+        const challenge = i === threshold - 1 ? hash : (lightHash as `0x${string}`);
+        let signature: Awaited<ReturnType<typeof signVaultUserOp>>;
+        try {
+          signature = await signVaultUserOp(challenge, pool);
+        } catch {
+          // The user closed or cancelled the passkey prompt — not an error.
+          return;
+        }
+        if (used.has(signature.credentialId)) {
+          setSendError(t("sendDuplicatePasskey"));
+          return;
+        }
+        used.add(signature.credentialId);
+        collected.push(signature);
+      }
+
+      setSendPhase("submitting");
+      const submitted = await sendRequest({ step: "submit", userOp: prepared.userOp, signatures: collected });
+      const transactionHash = submitted.transactionHash as string | undefined;
+      if (!transactionHash) throw new SendRequestError();
+
+      setSentTxHash(transactionHash);
+      setSendAmount("");
+      await load();
+      window.dispatchEvent(new Event("gainforest:wallet-changed"));
+    } catch (err) {
+      setSendError(sendErrorForCode(err instanceof SendRequestError ? err.code : undefined));
+    } finally {
+      setSendPhase("idle");
+      setSendApproval(null);
+    }
+  };
+
+  const handleSetThreshold = (value: string) => {
+    const threshold = Number(value);
+    if (!state?.record || !Number.isInteger(threshold) || threshold === state.record.threshold) return;
+    void runAction(
+      () =>
+        fetch(organization ? "/api/org-wallet" : "/api/wallet", {
+          method: "PATCH",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify(organization ? { repo: organization.did, threshold } : { threshold }),
+        }),
+      t("thresholdUpdateError"),
+    );
+  };
+
+  const applySendMax = () => {
+    const token = getWalletToken(sendToken);
+    const balance = state?.balances?.tokens.find((entry) => entry.symbol === sendToken);
+    if (!token || !balance) return;
+    setSendAmount(formatTokenUnits(balance.units, token.decimals));
+  };
+
   const handleDelete = async () => {
     await runAction(
       () => fetch(organization ? "/api/org-wallet" : "/api/wallet", {
@@ -236,6 +426,14 @@ export function WalletTabClient({ organization }: { organization?: OrganizationW
   const canEditSigners = !!record && !deployed;
   const canRemoveSigner = (signer: VaultPasskeySigner) =>
     canEditSigners && (!organization || canManageWallet || signer.memberDid === viewer.did);
+  const balances = state?.balances ?? null;
+  const totalUsd = balances && balances.tokens.every((entry) => entry.usd !== null)
+    ? balances.tokens.reduce((sum, entry) => sum + (entry.usd ?? 0), 0)
+    : null;
+  const hasFunds = !!balances && balances.tokens.some((entry) => BigInt(entry.units) > 0n);
+  // Only someone whose own passkey is enrolled can approve a send.
+  const canSend = !!record && record.signers.some((signer) => signer.memberDid === viewer.did);
+  const sendBusy = sendPhase !== "idle";
 
   return (
     <div className="mx-auto w-full max-w-2xl space-y-4 py-6">
@@ -314,6 +512,147 @@ export function WalletTabClient({ organization }: { organization?: OrganizationW
             </div>
           </Card>
 
+          {/* ── Balances ──────────────────────────────────────────────── */}
+          <Card>
+            <div className="flex items-center justify-between gap-2">
+              <CardTitle Icon={CoinsIcon}>{t("balancesHeading")}</CardTitle>
+              {totalUsd !== null ? (
+                <span className="text-base font-semibold text-foreground">
+                  {format.number(totalUsd, { style: "currency", currency: "USD" })}
+                </span>
+              ) : null}
+            </div>
+            {balances ? (
+              <>
+                <div className="mt-4 flex flex-col gap-0.5 rounded-xl bg-muted p-1">
+                  {balances.tokens.map((entry) => {
+                    const token = getWalletToken(entry.symbol);
+                    if (!token) return null;
+                    return (
+                      <div key={entry.symbol} className="flex items-center gap-3 rounded-lg bg-background/60 px-3 py-2.5">
+                        <TokenBadge symbol={entry.symbol} />
+                        <div className="min-w-0 flex-1">
+                          <p className="text-sm font-medium text-foreground">{entry.symbol}</p>
+                          <p className="text-xs text-muted-foreground">{token.name}</p>
+                        </div>
+                        <div className="text-right">
+                          <p className="font-mono text-sm text-foreground">
+                            {formatTokenUnits(entry.units, token.decimals, TOKEN_DISPLAY_DECIMALS[entry.symbol]) || "0"}
+                          </p>
+                          {entry.usd !== null ? (
+                            <p className="text-xs text-muted-foreground">
+                              ≈ {format.number(entry.usd, { style: "currency", currency: "USD" })}
+                            </p>
+                          ) : null}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+                {!hasFunds ? <p className="mt-3 text-xs text-muted-foreground">{t("balancesEmpty")}</p> : null}
+              </>
+            ) : (
+              <p className="mt-4 text-sm text-muted-foreground">{t("balancesError")}</p>
+            )}
+          </Card>
+
+          {/* ── Send ──────────────────────────────────────────────────── */}
+          {canSend ? (
+            <Card>
+              <CardTitle Icon={SendIcon}>{t("sendHeading")}</CardTitle>
+              <p className="mt-2 text-xs text-muted-foreground">{t("sendIntro")}</p>
+              {record.threshold > 1 ? (
+                <p className="mt-1 text-xs text-muted-foreground">
+                  {t("sendApprovalsNeeded", { count: record.threshold })}
+                </p>
+              ) : null}
+              <div className="mt-4 space-y-3">
+                <div className="flex flex-col gap-2 sm:flex-row">
+                  <Select
+                    value={sendToken}
+                    onValueChange={(value) => setSendToken(value as WalletTokenSymbol)}
+                    disabled={sendBusy}
+                  >
+                    <SelectTrigger className="sm:w-36" aria-label={t("sendToken")}>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {WALLET_TOKENS.map((token) => (
+                        <SelectItem key={token.symbol} value={token.symbol}>
+                          {token.symbol}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <div className="relative sm:flex-1">
+                    <Input
+                      value={sendAmount}
+                      onChange={(event) => setSendAmount(event.target.value)}
+                      placeholder="0.00"
+                      inputMode="decimal"
+                      aria-label={t("sendAmount")}
+                      disabled={sendBusy}
+                      className="pr-14"
+                    />
+                    <button
+                      type="button"
+                      onClick={applySendMax}
+                      disabled={sendBusy || !balances}
+                      className="absolute right-2 top-1/2 -translate-y-1/2 rounded-md border border-input px-1.5 py-0.5 text-[11px] text-muted-foreground transition-colors hover:text-foreground disabled:opacity-50"
+                    >
+                      {t("sendMax")}
+                    </button>
+                  </div>
+                </div>
+                <Input
+                  value={sendTo}
+                  onChange={(event) => setSendTo(event.target.value)}
+                  placeholder={t("sendRecipientPlaceholder")}
+                  aria-label={t("sendRecipient")}
+                  disabled={sendBusy}
+                  className="font-mono"
+                />
+                {sendError ? <p className="text-sm text-destructive">{sendError}</p> : null}
+                {sentTxHash ? (
+                  <div className="flex items-start gap-2 rounded-md border border-primary/20 bg-primary/5 px-3 py-2">
+                    <CheckCircle2Icon className="mt-0.5 size-4 shrink-0 text-primary" />
+                    <p className="text-xs text-muted-foreground">
+                      {t("sendSuccess")}{" "}
+                      <a
+                        href={`https://etherscan.io/tx/${sentTxHash}`}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="font-medium text-primary underline underline-offset-2"
+                      >
+                        {t("sendViewTx")}
+                      </a>
+                    </p>
+                  </div>
+                ) : null}
+                <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                  <p className="text-xs text-muted-foreground">{t("sendGasNote")}</p>
+                  <Button
+                    onClick={() => void handleSend()}
+                    disabled={sendBusy || isBusy || !sendTo.trim() || !sendAmount.trim()}
+                  >
+                    {sendBusy ? <Loader2Icon className="size-3.5 animate-spin" /> : <FingerprintIcon className="size-3.5" />}
+                    {sendPhase === "preparing"
+                      ? t("sendPreparing")
+                      : sendPhase === "signing"
+                        ? sendApproval
+                          ? t("sendApprovalOf", { current: sendApproval.current, total: sendApproval.total })
+                          : t("sendAwaitingPasskey")
+                        : sendPhase === "submitting"
+                          ? t("sendSubmitting")
+                          : t("sendButton")}
+                  </Button>
+                </div>
+              </div>
+            </Card>
+          ) : hasFunds ? (
+            <p className="px-1 text-xs text-muted-foreground">{t("sendNoSigner")}</p>
+          ) : null}
+
           <Card>
             <div className="flex items-center justify-between gap-2">
               <CardTitle Icon={FingerprintIcon}>{t("signersHeading")}</CardTitle>
@@ -346,6 +685,45 @@ export function WalletTabClient({ organization }: { organization?: OrganizationW
                 </div>
               ))}
             </div>
+
+            {/* ── How many passkeys must approve each transfer ────────────── */}
+            <div className="mt-4 space-y-1.5">
+              <p className="text-sm font-medium text-foreground">{t("thresholdHeading")}</p>
+              {canEditSigners && canManageWallet ? (
+                <>
+                  <Select
+                    value={String(record.threshold)}
+                    onValueChange={handleSetThreshold}
+                    disabled={isBusy || sendBusy || state?.holdsFunds === true}
+                  >
+                    <SelectTrigger aria-label={t("thresholdHeading")}>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {Array.from({ length: record.signers.length }, (_, index) => index + 1).map((count) => (
+                        <SelectItem key={count} value={String(count)}>
+                          {t("thresholdOption", { count, total: record.signers.length })}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  {state?.holdsFunds ? (
+                    <p className="text-xs text-muted-foreground">{t("thresholdLockedFunds")}</p>
+                  ) : null}
+                </>
+              ) : (
+                <p className="text-sm text-foreground">
+                  {t("thresholdOption", { count: record.threshold, total: record.signers.length })}
+                </p>
+              )}
+              <p className="text-xs text-muted-foreground">{t("thresholdHint")}</p>
+              {record.threshold === 1 && record.signers.length > 1 ? (
+                <p className="rounded-md bg-amber-500/10 px-3 py-2 text-xs text-amber-700 dark:text-amber-400">
+                  {t("thresholdSingleWarning")}
+                </p>
+              ) : null}
+            </div>
+
             {canEditSigners ? (
               <div className="mt-3 space-y-2">
                 <div className="flex flex-col gap-2 sm:flex-row">

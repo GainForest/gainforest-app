@@ -6,17 +6,21 @@ import { getAuthBaseUrl } from "@/app/_lib/auth";
 import { fetchCgsMembersForRequest, type CgsServerRole } from "@/app/_lib/cgs-server";
 import {
   SMART_VAULT_FACTORY,
-  SPLITS_VAULT_COLLECTION,
-  SPLITS_VAULT_RKEY,
+  PRIMARY_WALLET_COLLECTION,
+  PRIMARY_WALLET_RKEY,
+  LEGACY_WALLET_COLLECTION,
   VAULT_OWNER,
   VAULT_THRESHOLD,
   VAULT_SALT_SCHEME,
-  splitsVaultUri,
+  clampVaultThreshold,
+  primaryWalletUri,
   type SplitsVaultRecord,
   type VaultPasskeySigner,
+  type WalletCollection,
 } from "@/lib/splits-vault/shared";
 import {
-  fetchSplitsVaultRecord,
+  fetchWalletRecordWithSource,
+  getWalletBalances,
   isVaultDeployed,
   predictVaultAddress,
   vaultHoldsFunds,
@@ -49,6 +53,11 @@ const removeSignerSchema = z.object({
   remove: z.object({ credentialId: z.string().min(1) }),
 });
 
+const setThresholdSchema = z.object({
+  repo: z.string().min(1),
+  threshold: z.number().int().min(1).max(255),
+});
+
 const deleteSchema = z.object({ repo: z.string().min(1) });
 
 async function viewerRole(repo: string, did: string): Promise<CgsServerRole | null> {
@@ -64,6 +73,7 @@ async function writeVaultRecord(
   operation: "putRecord" | "deleteRecord",
   repo: string,
   record?: SplitsVaultRecord,
+  collection: WalletCollection = PRIMARY_WALLET_COLLECTION,
 ): Promise<{ ok: boolean; status: number; body: unknown }> {
   const headerList = await headers();
   const cookie = headerList.get("cookie");
@@ -72,14 +82,19 @@ async function writeVaultRecord(
     headers: { "content-type": "application/json", ...(cookie ? { cookie } : {}) },
     body: JSON.stringify({
       operation,
-      collection: SPLITS_VAULT_COLLECTION,
-      rkey: SPLITS_VAULT_RKEY,
+      collection,
+      rkey: PRIMARY_WALLET_RKEY,
       repo,
       ...(record ? { record } : {}),
     }),
   });
   const body = await upstream.json().catch(() => ({ error: "Invalid response from auth server" }));
   return { ok: upstream.ok, status: upstream.status, body };
+}
+
+/** Best-effort cleanup of a legacy-collection record after a migrating write. */
+async function deleteLegacyRecord(repo: string): Promise<void> {
+  await writeVaultRecord("deleteRecord", repo, undefined, LEGACY_WALLET_COLLECTION).catch(() => undefined);
 }
 
 function toSigner(passkey: z.infer<typeof passkeySchema>, memberDid: string): VaultPasskeySigner {
@@ -98,16 +113,17 @@ async function buildRecord(
   repo: string,
   signers: VaultPasskeySigner[],
   base?: { name?: string; createdAt?: string },
+  threshold: number = VAULT_THRESHOLD,
 ): Promise<SplitsVaultRecord> {
-  const address = await predictVaultAddress(repo, signers);
+  const address = await predictVaultAddress(repo, signers, threshold);
   return {
-    $type: SPLITS_VAULT_COLLECTION,
+    $type: PRIMARY_WALLET_COLLECTION,
     ...(base?.name ? { name: base.name } : {}),
     address,
     factory: SMART_VAULT_FACTORY,
     chainId: CHAIN_ID,
     owner: VAULT_OWNER,
-    threshold: VAULT_THRESHOLD,
+    threshold,
     saltScheme: VAULT_SALT_SCHEME,
     signers,
     createdAt: base?.createdAt || new Date().toISOString(),
@@ -127,21 +143,23 @@ export async function GET(request: NextRequest) {
   const role = await viewerRole(repo, session.did);
   if (!role) return NextResponse.json({ error: "Not a member of this organization" }, { status: 403 });
 
-  const record = await fetchSplitsVaultRecord(repo);
-  if (!record) {
+  const found = await fetchWalletRecordWithSource(repo);
+  if (!found) {
     return NextResponse.json({ exists: false, viewerRole: role });
   }
-  const [deployed, holdsFunds] = await Promise.all([
-    isVaultDeployed(record.address).catch(() => false),
-    vaultHoldsFunds(record.address).catch(() => false),
+  const [deployed, holdsFunds, balances] = await Promise.all([
+    isVaultDeployed(found.record.address).catch(() => false),
+    vaultHoldsFunds(found.record.address).catch(() => false),
+    getWalletBalances(found.record.address).catch(() => null),
   ]);
   return NextResponse.json({
     exists: true,
     viewerRole: role,
-    record,
-    uri: splitsVaultUri(repo),
+    record: found.record,
+    uri: primaryWalletUri(repo, found.collection),
     deployed,
     holdsFunds,
+    balances,
   });
 }
 
@@ -162,7 +180,7 @@ export async function POST(request: NextRequest) {
   if (role !== "owner" && role !== "admin") {
     return NextResponse.json({ error: "Only the organization owner or an admin can create the wallet" }, { status: 403 });
   }
-  if (await fetchSplitsVaultRecord(repo)) {
+  if (await fetchWalletRecordWithSource(repo)) {
     return NextResponse.json({ error: "This organization already has a wallet" }, { status: 409 });
   }
 
@@ -171,7 +189,7 @@ export async function POST(request: NextRequest) {
 
   const result = await writeVaultRecord("putRecord", repo, record);
   if (!result.ok) return NextResponse.json(result.body, { status: result.status });
-  return NextResponse.json({ record, uri: splitsVaultUri(repo), deployed: false });
+  return NextResponse.json({ record, uri: primaryWalletUri(repo), deployed: false });
 }
 
 // ── PATCH — add my passkey (any member) / remove a signer (owner) ────────────
@@ -185,16 +203,24 @@ export async function PATCH(request: NextRequest) {
 
   const add = addSignerSchema.safeParse(json);
   const remove = removeSignerSchema.safeParse(json);
-  if (!add.success && !remove.success) {
+  const setThreshold = setThresholdSchema.safeParse(json);
+  if (!add.success && !remove.success && !setThreshold.success) {
     return NextResponse.json({ error: "Invalid request body" }, { status: 400 });
   }
-  const repo = add.success ? add.data.repo : remove.success ? remove.data.repo : "";
+  const repo = add.success
+    ? add.data.repo
+    : remove.success
+      ? remove.data.repo
+      : setThreshold.success
+        ? setThreshold.data.repo
+        : "";
 
   const role = await viewerRole(repo, session.did);
   if (!role) return NextResponse.json({ error: "Not a member of this organization" }, { status: 403 });
 
-  const existing = await fetchSplitsVaultRecord(repo);
-  if (!existing) return NextResponse.json({ error: "This organization has no wallet yet" }, { status: 404 });
+  const found = await fetchWalletRecordWithSource(repo);
+  if (!found) return NextResponse.json({ error: "This organization has no wallet yet" }, { status: 404 });
+  const existing = found.record;
 
   if (await isVaultDeployed(existing.address).catch(() => false)) {
     return NextResponse.json(
@@ -204,6 +230,7 @@ export async function PATCH(request: NextRequest) {
   }
 
   let signers: VaultPasskeySigner[];
+  let threshold = existing.threshold;
   if (add.success) {
     // Members may only enroll a passkey for themselves.
     if (existing.signers.some((signer) => signer.credentialId === add.data.passkey.credentialId)) {
@@ -221,16 +248,43 @@ export async function PATCH(request: NextRequest) {
     if (signers.length === 0) {
       return NextResponse.json({ error: "The wallet needs at least one signer" }, { status: 400 });
     }
+    // Never leave the threshold above the number of remaining passkeys.
+    threshold = clampVaultThreshold(threshold, signers.length);
+  } else if (setThreshold.success) {
+    // The approval requirement is a security-critical wallet setting.
+    if (role !== "owner" && role !== "admin") {
+      return NextResponse.json(
+        { error: "Only the organization owner or an admin can change the approval requirement" },
+        { status: 403 },
+      );
+    }
+    signers = existing.signers;
+    if (setThreshold.data.threshold > signers.length) {
+      return NextResponse.json({ error: "The wallet does not have that many passkeys" }, { status: 400 });
+    }
+    // The threshold is a CREATE2 input — changing it changes the address, so
+    // refuse once the current address already holds funds.
+    if (await vaultHoldsFunds(existing.address).catch(() => true)) {
+      return NextResponse.json(
+        { error: "The wallet address already holds funds, so the approval requirement can no longer be changed here" },
+        { status: 409 },
+      );
+    }
+    threshold = setThreshold.data.threshold;
   } else {
     return NextResponse.json({ error: "Invalid request body" }, { status: 400 });
   }
 
-  const record = await buildRecord(repo, signers, { name: existing.name, createdAt: existing.createdAt }).catch(() => null);
+  const record = await buildRecord(repo, signers, { name: existing.name, createdAt: existing.createdAt }, threshold).catch(
+    () => null,
+  );
   if (!record) return NextResponse.json({ error: "Could not derive the wallet address" }, { status: 502 });
 
   const result = await writeVaultRecord("putRecord", repo, record);
   if (!result.ok) return NextResponse.json(result.body, { status: result.status });
-  return NextResponse.json({ record, uri: splitsVaultUri(repo), deployed: false });
+  // Migrate-on-write: the updated record now lives in the primary collection.
+  if (found.collection === LEGACY_WALLET_COLLECTION) await deleteLegacyRecord(repo);
+  return NextResponse.json({ record, uri: primaryWalletUri(repo), deployed: false });
 }
 
 // ── DELETE — owner removes an unused wallet ───────────────────────────────────
@@ -249,8 +303,9 @@ export async function DELETE(request: NextRequest) {
     return NextResponse.json({ error: "Only the organization owner or an admin can remove the wallet" }, { status: 403 });
   }
 
-  const existing = await fetchSplitsVaultRecord(repo);
-  if (!existing) return NextResponse.json({ error: "This organization has no wallet" }, { status: 404 });
+  const found = await fetchWalletRecordWithSource(repo);
+  if (!found) return NextResponse.json({ error: "This organization has no wallet" }, { status: 404 });
+  const existing = found.record;
   if (await isVaultDeployed(existing.address).catch(() => false)) {
     return NextResponse.json({ error: "The wallet is already active on the blockchain and cannot be removed" }, { status: 409 });
   }
@@ -258,7 +313,7 @@ export async function DELETE(request: NextRequest) {
     return NextResponse.json({ error: "The wallet address already holds funds and cannot be removed" }, { status: 409 });
   }
 
-  const result = await writeVaultRecord("deleteRecord", repo);
+  const result = await writeVaultRecord("deleteRecord", repo, undefined, found.collection);
   if (!result.ok) return NextResponse.json(result.body, { status: result.status });
   return NextResponse.json({ deleted: true });
 }

@@ -10,6 +10,7 @@
  */
 
 import { createWebAuthnCredential } from "viem/account-abstraction";
+import * as WebAuthnP256 from "ox/WebAuthnP256";
 
 export type CreatedPasskey = {
   credentialId: string;
@@ -37,4 +38,43 @@ export async function createVaultPasskey(orgLabel: string): Promise<CreatedPassk
   const credential = await createWebAuthnCredential({ name: orgLabel });
   const { x, y } = splitPublicKey(credential.publicKey);
   return { credentialId: credential.id, publicKeyX: x, publicKeyY: y };
+}
+
+/** A WebAuthn assertion over a userOp hash, ready for the send API. */
+export type VaultUserOpSignature = {
+  /** The credential the authenticator actually used. */
+  credentialId: string;
+  authenticatorData: `0x${string}`;
+  clientDataJSON: string;
+  challengeIndex: number;
+  typeIndex: number;
+  /** Decimal strings — bigint-safe across JSON. */
+  r: string;
+  s: string;
+};
+
+/**
+ * Ask the user to approve a wallet operation with one of the enrolled
+ * passkeys. `challenge` is the userOpHash; any of `credentialIds` may sign
+ * (the authenticator picks whichever it holds). The signature is normalized
+ * to low-s, as the on-chain P-256 verifier requires.
+ */
+export async function signVaultUserOp(
+  challenge: `0x${string}`,
+  credentialIds: string[],
+): Promise<VaultUserOpSignature> {
+  const { id, metadata, signature } = await WebAuthnP256.sign({
+    challenge,
+    credentialId: credentialIds.length === 1 ? credentialIds[0] : credentialIds,
+    userVerification: "preferred",
+  });
+  return {
+    credentialId: id,
+    authenticatorData: metadata.authenticatorData,
+    clientDataJSON: metadata.clientDataJSON,
+    challengeIndex: metadata.challengeIndex ?? metadata.clientDataJSON.indexOf('"challenge"'),
+    typeIndex: metadata.typeIndex ?? metadata.clientDataJSON.indexOf('"type"'),
+    r: signature.r.toString(),
+    s: signature.s.toString(),
+  };
 }

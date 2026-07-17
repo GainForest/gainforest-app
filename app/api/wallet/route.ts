@@ -5,17 +5,21 @@ import { fetchAuthSession } from "@/app/_lib/auth-server";
 import { getAuthBaseUrl } from "@/app/_lib/auth";
 import {
   SMART_VAULT_FACTORY,
-  SPLITS_VAULT_COLLECTION,
-  SPLITS_VAULT_RKEY,
+  PRIMARY_WALLET_COLLECTION,
+  PRIMARY_WALLET_RKEY,
+  LEGACY_WALLET_COLLECTION,
   VAULT_OWNER,
   VAULT_THRESHOLD,
   VAULT_SALT_SCHEME,
-  splitsVaultUri,
+  clampVaultThreshold,
+  primaryWalletUri,
   type SplitsVaultRecord,
   type VaultPasskeySigner,
+  type WalletCollection,
 } from "@/lib/splits-vault/shared";
 import {
-  fetchSplitsVaultRecord,
+  fetchWalletRecordWithSource,
+  getWalletBalances,
   isVaultDeployed,
   predictVaultAddress,
   vaultHoldsFunds,
@@ -56,6 +60,8 @@ const removeSignerSchema = z.object({
   remove: z.object({ credentialId: z.string().min(1) }),
 });
 
+const setThresholdSchema = z.object({ threshold: z.number().int().min(1).max(255) });
+
 async function requireSessionDid(): Promise<string | null> {
   const session = await fetchAuthSession();
   return session.isLoggedIn && session.did ? session.did : null;
@@ -65,6 +71,7 @@ async function requireSessionDid(): Promise<string | null> {
 async function writeVaultRecord(
   operation: "putRecord" | "deleteRecord",
   record?: SplitsVaultRecord,
+  collection: WalletCollection = PRIMARY_WALLET_COLLECTION,
 ): Promise<{ ok: boolean; status: number; body: unknown }> {
   const headerList = await headers();
   const cookie = headerList.get("cookie");
@@ -73,13 +80,18 @@ async function writeVaultRecord(
     headers: { "content-type": "application/json", ...(cookie ? { cookie } : {}) },
     body: JSON.stringify({
       operation,
-      collection: SPLITS_VAULT_COLLECTION,
-      rkey: SPLITS_VAULT_RKEY,
+      collection,
+      rkey: PRIMARY_WALLET_RKEY,
       ...(record ? { record } : {}),
     }),
   });
   const body = await upstream.json().catch(() => ({ error: "Invalid response from auth server" }));
   return { ok: upstream.ok, status: upstream.status, body };
+}
+
+/** Best-effort cleanup of a legacy-collection record after a migrating write. */
+async function deleteLegacyRecord(): Promise<void> {
+  await writeVaultRecord("deleteRecord", undefined, LEGACY_WALLET_COLLECTION).catch(() => undefined);
 }
 
 function toSigner(passkey: z.infer<typeof passkeySchema>, memberDid: string): VaultPasskeySigner {
@@ -98,16 +110,17 @@ async function buildRecord(
   did: string,
   signers: VaultPasskeySigner[],
   base?: { name?: string; createdAt?: string },
+  threshold: number = VAULT_THRESHOLD,
 ): Promise<SplitsVaultRecord> {
-  const address = await predictVaultAddress(did, signers);
+  const address = await predictVaultAddress(did, signers, threshold);
   return {
-    $type: SPLITS_VAULT_COLLECTION,
+    $type: PRIMARY_WALLET_COLLECTION,
     ...(base?.name ? { name: base.name } : {}),
     address,
     factory: SMART_VAULT_FACTORY,
     chainId: CHAIN_ID,
     owner: VAULT_OWNER,
-    threshold: VAULT_THRESHOLD,
+    threshold,
     saltScheme: VAULT_SALT_SCHEME,
     signers,
     createdAt: base?.createdAt || new Date().toISOString(),
@@ -120,13 +133,21 @@ export async function GET() {
   const did = await requireSessionDid();
   if (!did) return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
 
-  const record = await fetchSplitsVaultRecord(did);
-  if (!record) return NextResponse.json({ exists: false });
-  const [deployed, holdsFunds] = await Promise.all([
-    isVaultDeployed(record.address).catch(() => false),
-    vaultHoldsFunds(record.address).catch(() => false),
+  const found = await fetchWalletRecordWithSource(did);
+  if (!found) return NextResponse.json({ exists: false });
+  const [deployed, holdsFunds, balances] = await Promise.all([
+    isVaultDeployed(found.record.address).catch(() => false),
+    vaultHoldsFunds(found.record.address).catch(() => false),
+    getWalletBalances(found.record.address).catch(() => null),
   ]);
-  return NextResponse.json({ exists: true, record, uri: splitsVaultUri(did), deployed, holdsFunds });
+  return NextResponse.json({
+    exists: true,
+    record: found.record,
+    uri: primaryWalletUri(did, found.collection),
+    deployed,
+    holdsFunds,
+    balances,
+  });
 }
 
 // ── POST — create the wallet with the owner's passkey ────────────────────────
@@ -139,7 +160,7 @@ export async function POST(request: NextRequest) {
   const did = await requireSessionDid();
   if (!did) return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
 
-  if (await fetchSplitsVaultRecord(did)) {
+  if (await fetchWalletRecordWithSource(did)) {
     return NextResponse.json({ error: "You already have a wallet" }, { status: 409 });
   }
 
@@ -149,7 +170,7 @@ export async function POST(request: NextRequest) {
 
   const result = await writeVaultRecord("putRecord", record);
   if (!result.ok) return NextResponse.json(result.body, { status: result.status });
-  return NextResponse.json({ record, uri: splitsVaultUri(did), deployed: false });
+  return NextResponse.json({ record, uri: primaryWalletUri(did), deployed: false });
 }
 
 // ── PATCH — add another passkey / remove a signer ─────────────────────────────
@@ -161,12 +182,14 @@ export async function PATCH(request: NextRequest) {
 
   const add = addSignerSchema.safeParse(json);
   const remove = removeSignerSchema.safeParse(json);
-  if (!add.success && !remove.success) {
+  const setThreshold = setThresholdSchema.safeParse(json);
+  if (!add.success && !remove.success && !setThreshold.success) {
     return NextResponse.json({ error: "Invalid request body" }, { status: 400 });
   }
 
-  const existing = await fetchSplitsVaultRecord(did);
-  if (!existing) return NextResponse.json({ error: "You have no wallet yet" }, { status: 404 });
+  const found = await fetchWalletRecordWithSource(did);
+  if (!found) return NextResponse.json({ error: "You have no wallet yet" }, { status: 404 });
+  const existing = found.record;
 
   if (await isVaultDeployed(existing.address).catch(() => false)) {
     return NextResponse.json(
@@ -176,6 +199,7 @@ export async function PATCH(request: NextRequest) {
   }
 
   let signers: VaultPasskeySigner[];
+  let threshold = existing.threshold;
   if (add.success) {
     if (existing.signers.some((signer) => signer.credentialId === add.data.passkey.credentialId)) {
       return NextResponse.json({ error: "This passkey is already a signer" }, { status: 409 });
@@ -188,16 +212,36 @@ export async function PATCH(request: NextRequest) {
     if (signers.length === 0) {
       return NextResponse.json({ error: "The wallet needs at least one signer" }, { status: 400 });
     }
+    // Never leave the threshold above the number of remaining passkeys.
+    threshold = clampVaultThreshold(threshold, signers.length);
+  } else if (setThreshold.success) {
+    signers = existing.signers;
+    if (setThreshold.data.threshold > signers.length) {
+      return NextResponse.json({ error: "The wallet does not have that many passkeys" }, { status: 400 });
+    }
+    // The threshold is a CREATE2 input — changing it changes the address, so
+    // refuse once the current address already holds funds.
+    if (await vaultHoldsFunds(existing.address).catch(() => true)) {
+      return NextResponse.json(
+        { error: "The wallet address already holds funds, so the approval requirement can no longer be changed here" },
+        { status: 409 },
+      );
+    }
+    threshold = setThreshold.data.threshold;
   } else {
     return NextResponse.json({ error: "Invalid request body" }, { status: 400 });
   }
 
-  const record = await buildRecord(did, signers, { name: existing.name, createdAt: existing.createdAt }).catch(() => null);
+  const record = await buildRecord(did, signers, { name: existing.name, createdAt: existing.createdAt }, threshold).catch(
+    () => null,
+  );
   if (!record) return NextResponse.json({ error: "Could not derive the wallet address" }, { status: 502 });
 
   const result = await writeVaultRecord("putRecord", record);
   if (!result.ok) return NextResponse.json(result.body, { status: result.status });
-  return NextResponse.json({ record, uri: splitsVaultUri(did), deployed: false });
+  // Migrate-on-write: the updated record now lives in the primary collection.
+  if (found.collection === LEGACY_WALLET_COLLECTION) await deleteLegacyRecord();
+  return NextResponse.json({ record, uri: primaryWalletUri(did), deployed: false });
 }
 
 // ── DELETE — the owner removes an unused wallet ───────────────────────────────
@@ -206,8 +250,9 @@ export async function DELETE() {
   const did = await requireSessionDid();
   if (!did) return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
 
-  const existing = await fetchSplitsVaultRecord(did);
-  if (!existing) return NextResponse.json({ error: "You have no wallet" }, { status: 404 });
+  const found = await fetchWalletRecordWithSource(did);
+  if (!found) return NextResponse.json({ error: "You have no wallet" }, { status: 404 });
+  const existing = found.record;
   if (await isVaultDeployed(existing.address).catch(() => false)) {
     return NextResponse.json({ error: "The wallet is already active on the blockchain and cannot be removed" }, { status: 409 });
   }
@@ -215,7 +260,7 @@ export async function DELETE() {
     return NextResponse.json({ error: "The wallet address already holds funds and cannot be removed" }, { status: 409 });
   }
 
-  const result = await writeVaultRecord("deleteRecord");
+  const result = await writeVaultRecord("deleteRecord", undefined, found.collection);
   if (!result.ok) return NextResponse.json(result.body, { status: result.status });
   return NextResponse.json({ deleted: true });
 }

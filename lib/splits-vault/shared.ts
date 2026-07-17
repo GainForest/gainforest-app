@@ -33,21 +33,45 @@ export const SMART_VAULT_FACTORY = "0x8E6Af8Ed94E87B4402D0272C5D6b0D47F0483e7C" 
 /** The vault's superuser slot is always empty (see module docs). */
 export const VAULT_OWNER = "0x0000000000000000000000000000000000000000" as const;
 
-/** v1: any single signer can act. */
+/**
+ * Default threshold at creation: any single signer can act. The owner can
+ * raise it (up to the number of signers) while the vault is undeployed — the
+ * threshold is a CREATE2 input, so changing it re-derives the address.
+ */
 export const VAULT_THRESHOLD = 1 as const;
+
+/** Clamp a stored threshold into the valid 1..signerCount (≤255) range. */
+export function clampVaultThreshold(threshold: number, signerCount: number): number {
+  const max = Math.min(signerCount, 255);
+  if (!Number.isInteger(threshold) || threshold < 1) return 1;
+  return Math.min(threshold, max);
+}
 
 export const VAULT_SALT_SCHEME = "gainforest:org-vault:v1" as const;
 
-/** Record collection + fixed rkey: one canonical vault per organization. */
-export const SPLITS_VAULT_COLLECTION = "app.gainforest.wallet.splitsVault" as const;
-export const SPLITS_VAULT_RKEY = "self" as const;
+/** Record collection + fixed rkey: one canonical wallet per account. */
+export const PRIMARY_WALLET_COLLECTION = "app.gainforest.wallet.primary" as const;
+export const PRIMARY_WALLET_RKEY = "self" as const;
 
-export function splitsVaultUri(did: string): string {
-  return `at://${did}/${SPLITS_VAULT_COLLECTION}/${SPLITS_VAULT_RKEY}`;
+/**
+ * The original collection name the wallet records shipped under. Existing
+ * records are still read from here and migrated to the primary collection on
+ * their next write (see the wallet API routes).
+ */
+export const LEGACY_WALLET_COLLECTION = "app.gainforest.wallet.splitsVault" as const;
+
+export type WalletCollection = typeof PRIMARY_WALLET_COLLECTION | typeof LEGACY_WALLET_COLLECTION;
+
+export function primaryWalletUri(did: string, collection: WalletCollection = PRIMARY_WALLET_COLLECTION): string {
+  return `at://${did}/${collection}/${PRIMARY_WALLET_RKEY}`;
 }
 
-export function isSplitsVaultUri(uri: string | null | undefined): boolean {
-  return typeof uri === "string" && uri.includes(`/${SPLITS_VAULT_COLLECTION}/`);
+/** Whether a URI points at an account's primary-wallet record (either collection). */
+export function isPrimaryWalletUri(uri: string | null | undefined): boolean {
+  return (
+    typeof uri === "string" &&
+    (uri.includes(`/${PRIMARY_WALLET_COLLECTION}/`) || uri.includes(`/${LEGACY_WALLET_COLLECTION}/`))
+  );
 }
 
 /**
@@ -83,7 +107,7 @@ export type VaultPasskeySigner = {
 };
 
 export type SplitsVaultRecord = {
-  $type: typeof SPLITS_VAULT_COLLECTION;
+  $type: WalletCollection;
   name?: string;
   /** Predicted deterministic vault address for the params below. */
   address: `0x${string}`;
@@ -111,10 +135,11 @@ export function toSignerStruct(signer: VaultPasskeySigner): { slot1: `0x${string
 export function parseSplitsVaultRecord(value: unknown): SplitsVaultRecord | null {
   if (typeof value !== "object" || value === null) return null;
   const record = value as Record<string, unknown>;
-  if (record.$type !== SPLITS_VAULT_COLLECTION) return null;
+  if (record.$type !== PRIMARY_WALLET_COLLECTION && record.$type !== LEGACY_WALLET_COLLECTION) return null;
   if (typeof record.address !== "string" || !/^0x[0-9a-fA-F]{40}$/.test(record.address)) return null;
   if (typeof record.factory !== "string" || typeof record.owner !== "string") return null;
   if (typeof record.chainId !== "number" || typeof record.threshold !== "number") return null;
+  if (!Number.isInteger(record.threshold) || record.threshold < 1 || record.threshold > 255) return null;
   if (typeof record.saltScheme !== "string" || !Array.isArray(record.signers)) return null;
   const signers: VaultPasskeySigner[] = [];
   for (const raw of record.signers) {
@@ -133,8 +158,9 @@ export function parseSplitsVaultRecord(value: unknown): SplitsVaultRecord | null
     });
   }
   if (signers.length === 0) return null;
+  if (record.threshold > signers.length) return null;
   return {
-    $type: SPLITS_VAULT_COLLECTION,
+    $type: record.$type,
     name: typeof record.name === "string" ? record.name : undefined,
     address: record.address as `0x${string}`,
     factory: record.factory as `0x${string}`,

@@ -15,7 +15,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { putRecord } from "@/app/(manage)/manage/_lib/mutations";
 import { INDEXER_URL, FACILITATOR_WALLET_ADDRESS } from "@/app/_lib/urls";
-import { isSplitsVaultUri } from "@/lib/splits-vault/shared";
+import { isPrimaryWalletUri } from "@/lib/splits-vault/shared";
 
 // ── Types ───────────────────────────────────────────────────────────────────
 
@@ -209,7 +209,7 @@ export function computeWalletFlags(
   // Organization wallets (Splits smart vaults) are verified by recomputing
   // their deterministic address server-side — the record only exists when
   // that check passed, and every donation re-verifies it.
-  if (isSplitsVaultUri(uri)) return { valid: true, trusted: true };
+  if (isPrimaryWalletUri(uri)) return { valid: true, trusted: true };
   const match = evmLinks.find((l) => l.metadata?.uri === uri);
   if (!match) return { valid: false, trusted: false };
   return {
