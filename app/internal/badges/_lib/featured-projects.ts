@@ -118,7 +118,7 @@ export async function featureProject(repoDid: string, cookie: string | null, sub
       createdAt: new Date().toISOString(),
     },
   });
-  revalidateTag(FEATURED_PROJECTS_CACHE_TAG, "max");
+  revalidateTag(FEATURED_PROJECTS_CACHE_TAG, { expire: 0 });
 }
 
 export async function unfeatureProject(repoDid: string, cookie: string | null, subjectUri: string): Promise<void> {
@@ -133,5 +133,5 @@ export async function unfeatureProject(repoDid: string, cookie: string | null, s
       rkey: award.rkey,
     });
   }
-  revalidateTag(FEATURED_PROJECTS_CACHE_TAG, "max");
+  revalidateTag(FEATURED_PROJECTS_CACHE_TAG, { expire: 0 });
 }

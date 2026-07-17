@@ -53,7 +53,13 @@ async function mutate(request: Request, action: "feature" | "unfeature") {
   try {
     if (action === "feature") await featureProject(loaded.repoDid, cookie, uri);
     else await unfeatureProject(loaded.repoDid, cookie, uri);
-    const uris = await fetchFeaturedProjectUris(loaded.repoDid).catch(() => []);
+    const savedUris = await fetchFeaturedProjectUris(loaded.repoDid).catch(() => []);
+    // The public index can trail a successful group write briefly. Reflect the
+    // confirmed mutation immediately so the admin sees the carousel update,
+    // while the revalidated cache catches up for other visitors.
+    const uris = action === "feature"
+      ? [uri, ...savedUris.filter((savedUri) => savedUri !== uri)]
+      : savedUris.filter((savedUri) => savedUri !== uri);
     return Response.json({ featured: action === "feature", uris }, { headers: { "cache-control": "no-store" } });
   } catch (error) {
     const status = error instanceof FeaturedProjectMutationError ? error.status : 500;
