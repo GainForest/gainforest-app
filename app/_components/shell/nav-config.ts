@@ -9,7 +9,6 @@ import {
   LeafIcon,
   NewspaperIcon,
   SproutIcon,
-  TagsIcon,
 } from "lucide-react";
 
 export type NavLeaf = {
@@ -138,19 +137,6 @@ export const NAV_ITEMS: NavSection[] = [
         Icon: AudioLinesIcon,
         href: "/audiomoth",
         pathCheck: { startsWith: "/audiomoth" },
-        tabExclude: "identifications",
-      },
-      {
-        kind: "leaf",
-        id: "identifications",
-        text: "Identifications",
-        Icon: TagsIcon,
-        href: "/audiomoth?tab=identifications",
-        pathCheck: { startsWith: "/audiomoth" },
-        tabCheck: "identifications",
-        // All labelled AudioMoth occurrences in one place; admin-only preview.
-        // The route re-checks moderator access + feature flag server-side.
-        adminOnly: true,
       },
     ],
   },
