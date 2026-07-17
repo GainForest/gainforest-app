@@ -179,12 +179,6 @@ function ExploreNav({ sessionDid }: { sessionDid: string | null }) {
   const collapsed = useSidebarCollapsed();
   const [moreOpen, setMoreOpen] = useState(false);
 
-  // Minimizing the sidebar is also an intent to dismiss secondary navigation.
-  // Do not restore an expanded More section when the sidebar opens again.
-  useEffect(() => {
-    if (collapsed) setMoreOpen(false);
-  }, [collapsed]);
-
   // GainForest moderators (members of the admin group, any role) see the
   // admin-only entries. Same detection as the account menu's /admin link;
   // the routes themselves re-check access server-side.
@@ -210,7 +204,15 @@ function ExploreNav({ sessionDid }: { sessionDid: string | null }) {
   const secondaryActive = secondarySections.some((section) =>
     section.items.some((item) => isLeafActive(item.pathCheck, pathname)),
   );
-  const showMore = moreOpen || secondaryActive;
+
+  // A secondary route reveals its navigation, but the user can still dismiss
+  // it. Minimizing always closes the disclosure before the sidebar returns.
+  useEffect(() => {
+    if (collapsed) setMoreOpen(false);
+    else if (secondaryActive) setMoreOpen(true);
+  }, [collapsed, secondaryActive]);
+
+  const showMore = moreOpen;
   let leafIndex = 0;
 
   const renderSections = (items: typeof sections, showSectionLabels: boolean) =>
@@ -244,29 +246,51 @@ function ExploreNav({ sessionDid }: { sessionDid: string | null }) {
       {renderSections(primarySections, true)}
       {secondarySections.length > 0 ? (
         <div className="mt-1 border-t border-border/70 pt-1">
-          <SidebarTooltip label={sidebarT("more")}>
-            <button
-              type="button"
-              onClick={() => setMoreOpen((open) => !open)}
-              aria-expanded={showMore}
-              className={cn(
-                buttonVariants({ variant: "ghost" }),
-                "h-8 w-full text-muted-foreground hover:text-foreground",
-                collapsed ? "justify-center px-0" : "justify-start gap-2.5 px-2.5",
-              )}
-            >
-              <span className="flex size-6 shrink-0 items-center justify-center">
-                <LayoutGridIcon className="size-4" />
-              </span>
-              {collapsed ? null : (
-                <>
-                  <span className="flex-1 text-left">{sidebarT("more")}</span>
-                  <ChevronDownIcon className={cn("size-3.5 transition-transform", showMore && "rotate-180")} />
-                </>
-              )}
-            </button>
-          </SidebarTooltip>
-          {showMore ? <div className="mt-1 flex flex-col gap-2">{renderSections(secondarySections, true)}</div> : null}
+          {!showMore ? (
+            <SidebarTooltip label={sidebarT("more")}>
+              <button
+                type="button"
+                onClick={() => setMoreOpen(true)}
+                aria-expanded={false}
+                className={cn(
+                  buttonVariants({ variant: "ghost" }),
+                  "h-8 w-full text-muted-foreground hover:text-foreground",
+                  collapsed ? "justify-center px-0" : "justify-start gap-2.5 px-2.5",
+                )}
+              >
+                <span className="flex size-6 shrink-0 items-center justify-center">
+                  <LayoutGridIcon className="size-4" />
+                </span>
+                {collapsed ? null : (
+                  <>
+                    <span className="flex-1 text-left">{sidebarT("more")}</span>
+                    <ChevronDownIcon className="size-3.5" />
+                  </>
+                )}
+              </button>
+            </SidebarTooltip>
+          ) : (
+            <>
+              <div className="flex flex-col gap-2">{renderSections(secondarySections, true)}</div>
+              <SidebarTooltip label={sidebarT("hideMore")}>
+                <button
+                  type="button"
+                  onClick={() => setMoreOpen(false)}
+                  aria-expanded={true}
+                  className={cn(
+                    buttonVariants({ variant: "ghost" }),
+                    "mt-1 h-8 w-full text-muted-foreground hover:text-foreground",
+                    collapsed ? "justify-center px-0" : "justify-start gap-2.5 px-2.5",
+                  )}
+                >
+                  <span className="flex size-6 shrink-0 items-center justify-center">
+                    <ChevronDownIcon className="size-4 rotate-180" />
+                  </span>
+                  {collapsed ? null : <span className="flex-1 text-left">{sidebarT("hideMore")}</span>}
+                </button>
+              </SidebarTooltip>
+            </>
+          )}
         </div>
       ) : null}
     </div>

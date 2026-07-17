@@ -155,7 +155,8 @@
       "admin": "Admin",
       "submitData": "Submit field data"
     },
-    "more": "More"
+    "more": "More",
+    "hideMore": "Hide"
   },
   "settings": {
     "handle": {

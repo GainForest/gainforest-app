@@ -155,7 +155,8 @@
       "admin": "Administração",
       "submitData": "Enviar dados de campo"
     },
-    "more": "Mais"
+    "more": "Mais",
+    "hideMore": "Ocultar"
   },
   "settings": {
     "handle": {

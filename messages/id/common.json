@@ -155,7 +155,8 @@
       "admin": "Admin",
       "submitData": "Kirim data lapangan"
     },
-    "more": "Lainnya"
+    "more": "Lainnya",
+    "hideMore": "Sembunyikan"
   },
   "settings": {
     "handle": {
