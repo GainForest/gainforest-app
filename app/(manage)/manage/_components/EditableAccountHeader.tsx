@@ -488,60 +488,68 @@ function EditableHero({
         </div>
         </div>
 
-        {/* Detail buttons */}
-        <div className="mt-5 flex flex-wrap items-center gap-2">
+        {/* Editable facts — quiet, text-like chips that open their editors.
+            Mirrors the public hero, where facts read as metadata; the hover
+            pencil (and dashed outline when empty) marks them as editable. */}
+        <div className="mt-5 flex flex-wrap items-center gap-x-1 gap-y-1.5">
           {isOrg ? (
-            <Button variant="outline" onClick={onEditOrgType} disabled={!canEdit} title={editDisabledReason ?? undefined} className={cn(!editState.orgType.trim() && "text-muted-foreground")}>
-              <Building2Icon /> {editState.orgType.trim() || t("hero.addType")}
-            </Button>
+            <FactChip onClick={onEditOrgType} disabled={!canEdit} title={editDisabledReason ?? undefined} empty={!editState.orgType.trim()}>
+              <Building2Icon className="size-3.5 opacity-70" aria-hidden />
+              {editState.orgType.trim() || t("hero.addType")}
+            </FactChip>
           ) : null}
           {isOrg ? (
-            <Button variant="outline" onClick={onEditCountry} disabled={!canEdit} title={editDisabledReason ?? undefined} className={cn(!countryLabel && "text-muted-foreground")}>
-              {flag ? <span className="text-base leading-none" aria-hidden="true">{flag}</span> : <MapPinIcon />}
+            <FactChip onClick={onEditCountry} disabled={!canEdit} title={editDisabledReason ?? undefined} empty={!countryLabel}>
+              {flag ? <span className="text-sm leading-none" aria-hidden="true">{flag}</span> : <MapPinIcon className="size-3.5 opacity-70" aria-hidden />}
               {countryLabel ?? t("hero.addCountry")}
-            </Button>
+            </FactChip>
           ) : null}
           {isOrg ? (
-            <Button variant="outline" onClick={onEditStartDate} disabled={!canEdit} title={editDisabledReason ?? undefined} className={cn(sinceDate.state === "empty" && "text-muted-foreground")}>
-              <CalendarIcon />
+            <FactChip onClick={onEditStartDate} disabled={!canEdit} title={editDisabledReason ?? undefined} empty={sinceDate.state === "empty"}>
+              <CalendarIcon className="size-3.5 opacity-70" aria-hidden />
               {sinceDate.state === "valid" ? t("hero.sinceDate", { date: sinceDate.label ?? "" }) : sinceDate.state === "invalid" ? t("hero.invalidDate") : t("hero.addStartDate")}
-            </Button>
+            </FactChip>
           ) : null}
-          <Button
-            variant="outline"
-            size={resolvedWebsite ? "icon" : "default"}
+          <FactChip
             onClick={onEditWebsite}
             disabled={!canEdit}
             title={resolvedWebsite ? formatWebsite(resolvedWebsite) : editDisabledReason ?? undefined}
-            aria-label={resolvedWebsite ? formatWebsite(resolvedWebsite) : undefined}
-            className={cn(!resolvedWebsite && "text-muted-foreground")}
+            empty={!resolvedWebsite}
           >
-            <GlobeIcon />
-            {resolvedWebsite ? null : t("hero.addWebsite")}
-          </Button>
+            <GlobeIcon className="size-3.5 opacity-70" aria-hidden />
+            {resolvedWebsite ? formatWebsite(resolvedWebsite) : t("hero.addWebsite")}
+          </FactChip>
+          {isOrg ? (
+            <FactChip onClick={onEditVisibility} disabled={!canEdit} title={editDisabledReason ?? undefined}>
+              {editState.visibility === "Unlisted" ? <LockIcon className="size-3.5 opacity-70" aria-hidden /> : <EyeIcon className="size-3.5 opacity-70" aria-hidden />}
+              {editState.visibility}
+            </FactChip>
+          ) : null}
+        </div>
+
+        {/* Actions — same-height pills: direct support, then social links. */}
+        <div className="mt-4 flex flex-wrap items-center gap-2">
           <AccountWalletSupport
             did={account.did}
             name={editState.displayName || account.displayName}
             image={account.avatarUrl}
           />
           {isOrg ? (
-            <Button variant="outline" onClick={onEditVisibility} disabled={!canEdit} title={editDisabledReason ?? undefined}>
-              {editState.visibility === "Unlisted" ? <LockIcon /> : <EyeIcon />} {editState.visibility}
-            </Button>
-          ) : null}
-          {isOrg ? (
             <>
+              {editState.socials.length > 0 ? (
+                <span aria-hidden className="mx-1 hidden h-5 w-px bg-border sm:block" />
+              ) : null}
               {editState.socials.map((url) => {
                 const label = formatWebsite(url);
                 return (
-                  <Button key={url} asChild variant="outline" size="icon" title={label} aria-label={t("hero.openSocialLink", { link: label })}>
+                  <Button key={url} asChild variant="outline" size="icon" className="text-muted-foreground hover:text-foreground" title={label} aria-label={t("hero.openSocialLink", { link: label })}>
                     <Link href={externalHref(url)} target="_blank" rel="noopener noreferrer">
                       <SocialGlyph platform={classifySocial(url)} />
                     </Link>
                   </Button>
                 );
               })}
-              <Button variant="outline" onClick={onEditSocials} disabled={!canEdit} title={editDisabledReason ?? undefined} className={cn(!editState.socials.length && "text-muted-foreground")}>
+              <Button variant="outline" onClick={onEditSocials} disabled={!canEdit} title={editDisabledReason ?? undefined} className="border-dashed text-muted-foreground hover:text-foreground">
                 <Link2Icon />
                 {t("hero.addSocialLinks")}
               </Button>
@@ -550,6 +558,40 @@ function EditableHero({
         </div>
       </div>
     </section>
+  );
+}
+
+/** A quiet, editable fact in the hero: reads as metadata text, reveals a
+ *  pencil on hover, and switches to a dashed outline while still unset. */
+function FactChip({
+  onClick,
+  disabled,
+  title,
+  empty = false,
+  children,
+}: {
+  onClick?: () => void;
+  disabled?: boolean;
+  title?: string;
+  empty?: boolean;
+  children: React.ReactNode;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      disabled={disabled}
+      title={title}
+      className={cn(
+        "group inline-flex h-8 items-center gap-1.5 rounded-full px-3 text-[13px] transition-colors disabled:cursor-not-allowed disabled:opacity-60",
+        empty
+          ? "border border-dashed border-border text-muted-foreground/70 hover:border-foreground/25 hover:text-foreground"
+          : "text-muted-foreground hover:bg-muted hover:text-foreground",
+      )}
+    >
+      {children}
+      <PencilIcon className="size-3 opacity-0 transition-opacity group-hover:opacity-60 group-focus-visible:opacity-60" aria-hidden />
+    </button>
   );
 }
 
