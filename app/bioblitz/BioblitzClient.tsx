@@ -28,6 +28,8 @@ import { BioblitzBestPicture } from "./BioblitzBestPicture";
 import { BioblitzObservationsMap } from "./BioblitzObservationsMap";
 import { RegisterButton } from "./BioblitzRegister";
 import { AuthorInline } from "../_components/AuthorChip";
+import { AwardEmblems, displayAwardKeys } from "../account/_components/AccountAwards";
+import { fetchRecognitionBadgesForDids } from "../_lib/indexer";
 import { PreferredAccountLink } from "../_components/PreferredLinks";
 import { formatNumber } from "../_lib/format";
 import {
@@ -115,6 +117,9 @@ export function BioblitzClient() {
   // Organisation membership per collector account, resolved after the board
   // loads and merged in progressively so the standings never wait on it.
   const [orgs, setOrgs] = useState<Map<string, CollectorOrg>>(new Map());
+  // Recognition awards (previous BioBlitz wins, grants) per collector account,
+  // shown as small emblems on the board rows. Same progressive pattern.
+  const [awards, setAwards] = useState<Map<string, string[]>>(new Map());
   const pastRounds = useMemo(() => endedRounds(snapshotNow).slice(0, 4), [snapshotNow]);
   const pastRoundsKey = pastRounds.map((item) => item.id).join(",");
   const [pastWinners, setPastWinners] = useState<PastRoundSummary[] | null>(null);
@@ -124,9 +129,11 @@ export function BioblitzClient() {
     setBoard(null);
     setError(false);
     setOrgs(new Map());
+    setAwards(new Map());
   }, [round.id, scope]);
 
-  // Resolve organisation labels for the collectors currently on the board.
+  // Resolve organisation labels + recognition awards for the collectors
+  // currently on the board (one cached award-index read serves all rows).
   useEffect(() => {
     if (!board || board.collectors.length === 0) return;
     const dids = board.collectors.slice(0, BOARD_LIMIT).map((c) => c.did);
@@ -135,6 +142,12 @@ export function BioblitzClient() {
     fetchCollectorOrgs(dids, ctrl.signal)
       .then((map) => {
         if (!cancelled) setOrgs(map);
+      })
+      .catch(() => {});
+    fetchRecognitionBadgesForDids(dids, ctrl.signal)
+      .then((map) => {
+        if (cancelled) return;
+        setAwards(new Map([...map].map(([did, keys]) => [did, displayAwardKeys(keys)])));
       })
       .catch(() => {});
     return () => {
@@ -256,6 +269,7 @@ export function BioblitzClient() {
               status={status}
               board={board}
               orgs={orgs}
+              awards={awards}
               error={error}
               now={now}
               scope={scope}
@@ -754,6 +768,7 @@ function Board({
   status,
   board,
   orgs,
+  awards,
   error,
   now,
   scope,
@@ -763,6 +778,7 @@ function Board({
   status: RoundStatus;
   board: RoundBoard | null;
   orgs: Map<string, CollectorOrg>;
+  awards: Map<string, string[]>;
   error: boolean;
   now: number | null;
   scope: BoardScope;
@@ -853,6 +869,7 @@ function Board({
                     avatarRef={collector.avatarRef}
                     count={collector.count}
                     org={orgs.get(collector.did)}
+                    awards={awards.get(collector.did)}
                   />
                 ))}
               </ul>
@@ -887,6 +904,7 @@ function CollectorRow({
   avatarRef,
   count,
   org,
+  awards,
 }: {
   rank: number;
   leader: boolean;
@@ -895,6 +913,7 @@ function CollectorRow({
   avatarRef: string | null;
   count: number;
   org?: CollectorOrg;
+  awards?: string[];
 }) {
   const t = useTranslations("marketplace.bioblitz.board");
   return (
@@ -920,6 +939,7 @@ function CollectorRow({
         <div className="min-w-0 flex-1">
           <span className="flex min-w-0 items-center gap-1.5 text-lg font-medium text-foreground">
             <AuthorInline did={did} nameOverride={name} avatarRefOverride={avatarRef} />
+            {awards && awards.length > 0 ? <AwardEmblems badges={awards} size="sm" /> : null}
           </span>
           <OrgLabel org={org} />
         </div>

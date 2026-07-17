@@ -2058,6 +2058,21 @@ export async function fetchRecognitionBadgesForDid(did: string, signal?: AbortSi
   return index.get(did) ?? new Set<string>();
 }
 
+/** Recognition badge keys for a batch of account DIDs (one cached index read).
+ *  Only DIDs holding at least one badge appear in the returned map. */
+export async function fetchRecognitionBadgesForDids(
+  dids: string[],
+  signal?: AbortSignal,
+): Promise<Map<string, Set<string>>> {
+  const index = await fetchRecognitionAwardIndex(signal).catch(() => new Map<string, Set<string>>());
+  const out = new Map<string, Set<string>>();
+  for (const did of dids) {
+    const keys = index.get(did);
+    if (keys && keys.size > 0) out.set(did, keys);
+  }
+  return out;
+}
+
 /** Resolve the hidden-account set unless the query is scoped to a single owner
  *  account (profile drill-downs intentionally show that account's own records,
  *  flagged or not). */
