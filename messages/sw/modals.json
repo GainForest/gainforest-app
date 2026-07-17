@@ -455,8 +455,20 @@
     "thresholdUpdateError": "Haikuweza kubadilisha hitaji la idhini. Tafadhali jaribu tena.",
     "thresholdLockedFunds": "Pochi tayari ina fedha, kwa hivyo hitaji la idhini haliwezi kubadilishwa tena.",
     "thresholdSingleWarning": "Kwa sasa ufunguo mmoja wa siri unaweza kuhamisha fedha. Fikiria kuhitaji idhini zaidi.",
-    "sendApprovalsNeeded": "Pochi hii inahitaji idhini {count} kwa funguo tofauti za siri, moja baada ya nyingine.",
+    "sendApprovalsNeeded": "Pochi hii inahitaji idhini {count} kwa funguo tofauti za siri. Wewe unatoa ya kwanza; zilizobaki zinaweza kutolewa hapa au kutoka kifaa kingine.",
     "sendApprovalOf": "Idhini ya {current} kati ya {total} — inasubiri ufunguo wa siri…",
-    "sendDuplicatePasskey": "Kila idhini inahitaji ufunguo tofauti wa siri."
+    "sendDuplicatePasskey": "Kila idhini inahitaji ufunguo tofauti wa siri.",
+    "pendingHeading": "Uhamisho unasubiri idhini",
+    "pendingProgress": "Idhini {current} kati ya {total} zimetolewa",
+    "pendingRemoteHint": "Wenye funguo nyingine za siri wanaweza kuidhinisha kutoka kifaa chao — uhamisho unabaki hapa hadi upate idhini za kutosha. Idhini ya mwisho ndiyo inayoutuma.",
+    "pendingApprove": "Idhinisha kwa ufunguo wa siri",
+    "pendingApproveAndSend": "Idhinisha na kutuma",
+    "pendingCancel": "Ghairi uhamisho",
+    "pendingInvalid": "Uhamisho huu unaosubiri si halali tena — pochi ilibadilika tangu ulipoanzishwa. Ughairi ili kuanzisha mpya.",
+    "pendingCancelForbidden": "Ni aliyeanzisha uhamisho huu au msimamizi wa pochi pekee anayeweza kuughairi.",
+    "sendStartButton": "Anzisha uhamisho kwa ufunguo wa siri",
+    "sendErrorExpired": "Uhamisho huu si halali tena — pochi au ada za mtandao zilibadilika. Tafadhali uanzishe tena.",
+    "sendErrorPendingExists": "Tayari kuna uhamisho unaosubiri idhini. Ukamilishe au uughairi kwanza.",
+    "sendErrorApprovalInvalid": "Idhini hii haikuweza kuthibitishwa. Tafadhali jaribu tena."
   }
 }

@@ -37,7 +37,7 @@ import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { createVaultPasskey, isPasskeySupported, signVaultUserOp } from "@/lib/splits-vault/passkey";
-import type { SplitsVaultRecord, VaultPasskeySigner } from "@/lib/splits-vault/shared";
+import type { PendingSendRecord, SplitsVaultRecord, VaultPasskeySigner } from "@/lib/splits-vault/shared";
 import {
   WALLET_TOKENS,
   formatTokenUnits,
@@ -57,6 +57,7 @@ type WalletState = {
   deployed?: boolean;
   holdsFunds?: boolean;
   balances?: WalletBalances | null;
+  pendingSend?: PendingSendRecord | null;
 };
 
 const TOKEN_COLORS: Record<WalletTokenSymbol, string> = {
@@ -145,7 +146,7 @@ export function WalletTabClient({ organization }: { organization?: OrganizationW
   const [sendTo, setSendTo] = useState("");
   const [sendAmount, setSendAmount] = useState("");
   const [sendPhase, setSendPhase] = useState<SendPhase>("idle");
-  const [sendApproval, setSendApproval] = useState<{ current: number; total: number } | null>(null);
+  const [pendingBusy, setPendingBusy] = useState<"approve" | "finalize" | "cancel" | null>(null);
   const [sendError, setSendError] = useState<string | null>(null);
   const [sentTxHash, setSentTxHash] = useState<string | null>(null);
 
@@ -286,6 +287,14 @@ export function WalletTabClient({ organization }: { organization?: OrganizationW
         return t("sendErrorSignature");
       case "no_signer":
         return t("sendNoSigner");
+      case "expired":
+        return t("sendErrorExpired");
+      case "pending_exists":
+        return t("sendErrorPendingExists");
+      case "approval_invalid":
+        return t("sendErrorApprovalInvalid");
+      case "cancel_forbidden":
+        return t("pendingCancelForbidden");
       default:
         return t("sendErrorGeneric");
     }
@@ -337,39 +346,33 @@ export function WalletTabClient({ organization }: { organization?: OrganizationW
       const lightHash = prepared.lightHash as `0x${string}` | undefined;
       const threshold = typeof prepared.threshold === "number" && prepared.threshold >= 1 ? prepared.threshold : 1;
       const myCredentialIds = (prepared.credentialIds as string[] | undefined) ?? [];
-      const allCredentialIds = (prepared.allCredentialIds as string[] | undefined) ?? myCredentialIds;
       if (!hash || myCredentialIds.length === 0) throw new SendRequestError();
       if (threshold > 1 && !lightHash) throw new SendRequestError();
 
-      // Collect the required approvals one after another. All but the last
-      // sign the "light" hash; the final approval signs the full hash. The
-      // first approval must come from the viewer's own passkey; co-signers
-      // present may use any other enrolled passkey.
+      // One approval is signed here. With a single-passkey wallet the full
+      // hash is signed and the transfer settles immediately; with a
+      // multi-approval wallet the LIGHT hash is signed and the transfer is
+      // stored so the remaining passkey holders can approve — on this device
+      // or remotely from their own.
       setSendPhase("signing");
-      const collected: Awaited<ReturnType<typeof signVaultUserOp>>[] = [];
-      const used = new Set<string>();
-      for (let i = 0; i < threshold; i += 1) {
-        setSendApproval(threshold > 1 ? { current: i + 1, total: threshold } : null);
-        const pool = (i === 0 ? myCredentialIds : allCredentialIds).filter((id) => !used.has(id));
-        if (pool.length === 0) throw new SendRequestError();
-        const challenge = i === threshold - 1 ? hash : (lightHash as `0x${string}`);
-        let signature: Awaited<ReturnType<typeof signVaultUserOp>>;
-        try {
-          signature = await signVaultUserOp(challenge, pool);
-        } catch {
-          // The user closed or cancelled the passkey prompt — not an error.
-          return;
-        }
-        if (used.has(signature.credentialId)) {
-          setSendError(t("sendDuplicatePasskey"));
-          return;
-        }
-        used.add(signature.credentialId);
-        collected.push(signature);
+      let signature: Awaited<ReturnType<typeof signVaultUserOp>>;
+      try {
+        signature = await signVaultUserOp(threshold > 1 ? (lightHash as `0x${string}`) : hash, myCredentialIds);
+      } catch {
+        // The user closed or cancelled the passkey prompt — not an error.
+        return;
       }
 
       setSendPhase("submitting");
-      const submitted = await sendRequest({ step: "submit", userOp: prepared.userOp, signatures: collected });
+      if (threshold > 1) {
+        await sendRequest({ step: "start", userOp: prepared.userOp, signature });
+        setSendAmount("");
+        setSendTo("");
+        await load();
+        return;
+      }
+
+      const submitted = await sendRequest({ step: "submit", userOp: prepared.userOp, signatures: [signature] });
       const transactionHash = submitted.transactionHash as string | undefined;
       if (!transactionHash) throw new SendRequestError();
 
@@ -381,7 +384,61 @@ export function WalletTabClient({ organization }: { organization?: OrganizationW
       setSendError(sendErrorForCode(err instanceof SendRequestError ? err.code : undefined));
     } finally {
       setSendPhase("idle");
-      setSendApproval(null);
+    }
+  };
+
+  // ── Pending transfer (remote approvals) ───────────────────────────────
+
+  const handlePendingApproval = async (final: boolean) => {
+    const record = state?.record;
+    const pending = state?.pendingSend;
+    if (pendingBusy || sendPhase !== "idle" || !record || !pending) return;
+    setSendError(null);
+    setSentTxHash(null);
+    if (!isPasskeySupported()) {
+      setSendError(t("passkeyUnsupported"));
+      return;
+    }
+    // Any enrolled passkey that has not approved yet may sign.
+    const used = new Set(pending.approvals.map((approval) => approval.credentialId));
+    const pool = record.signers.map((signer) => signer.credentialId).filter((id) => !used.has(id));
+    if (pool.length === 0) return;
+
+    setPendingBusy(final ? "finalize" : "approve");
+    try {
+      let signature: Awaited<ReturnType<typeof signVaultUserOp>>;
+      try {
+        signature = await signVaultUserOp(final ? pending.hash : pending.lightHash, pool);
+      } catch {
+        return; // cancelled passkey prompt
+      }
+      const result = await sendRequest({ step: final ? "finalize" : "approve", signature });
+      if (final) {
+        const transactionHash = result.transactionHash as string | undefined;
+        if (!transactionHash) throw new SendRequestError();
+        setSentTxHash(transactionHash);
+        window.dispatchEvent(new Event("gainforest:wallet-changed"));
+      }
+      await load();
+    } catch (err) {
+      setSendError(sendErrorForCode(err instanceof SendRequestError ? err.code : undefined));
+      await load();
+    } finally {
+      setPendingBusy(null);
+    }
+  };
+
+  const handlePendingCancel = async () => {
+    if (pendingBusy || sendPhase !== "idle" || !state?.pendingSend) return;
+    setSendError(null);
+    setPendingBusy("cancel");
+    try {
+      await sendRequest({ step: "cancel" });
+      await load();
+    } catch (err) {
+      setSendError(sendErrorForCode(err instanceof SendRequestError ? err.code : undefined));
+    } finally {
+      setPendingBusy(null);
     }
   };
 
@@ -434,6 +491,18 @@ export function WalletTabClient({ organization }: { organization?: OrganizationW
   // Only someone whose own passkey is enrolled can approve a send.
   const canSend = !!record && record.signers.some((signer) => signer.memberDid === viewer.did);
   const sendBusy = sendPhase !== "idle";
+  const pendingSend = state?.pendingSend ?? null;
+  const pendingToken = pendingSend ? getWalletToken(pendingSend.token) : null;
+  // A pending transfer that no longer matches the wallet (threshold or
+  // address changed) can never settle — it can only be cancelled.
+  const pendingValid =
+    !!pendingSend &&
+    !!record &&
+    !!pendingToken &&
+    pendingSend.userOp.sender.toLowerCase() === record.address.toLowerCase() &&
+    pendingSend.threshold === record.threshold;
+  const pendingReadyToSend = !!pendingSend && pendingSend.approvals.length >= pendingSend.threshold - 1;
+  const canCancelPending = !!pendingSend && (!organization || canManageWallet || pendingSend.createdBy === viewer.did);
 
   return (
     <div className="mx-auto w-full max-w-2xl space-y-4 py-6">
@@ -556,8 +625,84 @@ export function WalletTabClient({ organization }: { organization?: OrganizationW
             )}
           </Card>
 
-          {/* ── Send ──────────────────────────────────────────────────── */}
-          {canSend ? (
+          {/* ── Pending transfer awaiting approvals ──────────────────────── */}
+          {pendingSend ? (
+            <Card>
+              <CardTitle Icon={SendIcon}>{t("pendingHeading")}</CardTitle>
+              {pendingValid && pendingToken ? (
+                <>
+                  <div className="mt-4 flex items-center gap-3 rounded-xl bg-muted px-3 py-3">
+                    <TokenBadge symbol={pendingToken.symbol} />
+                    <div className="min-w-0 flex-1">
+                      <p className="text-sm font-semibold text-foreground">
+                        {formatTokenUnits(pendingSend.amountUnits, pendingToken.decimals)} {pendingToken.symbol}
+                      </p>
+                      <p className="mt-0.5 truncate font-mono text-xs text-muted-foreground">{pendingSend.to}</p>
+                    </div>
+                  </div>
+                  <p className="mt-3 text-sm font-medium text-foreground">
+                    {t("pendingProgress", { current: pendingSend.approvals.length, total: pendingSend.threshold })}
+                  </p>
+                  <p className="mt-1 text-xs text-muted-foreground">{t("pendingRemoteHint")}</p>
+                  {sendError ? <p className="mt-3 text-sm text-destructive">{sendError}</p> : null}
+                  <div className="mt-4 flex flex-col gap-2 sm:flex-row">
+                    <Button
+                      onClick={() => void handlePendingApproval(pendingReadyToSend)}
+                      disabled={pendingBusy !== null || isBusy || sendBusy}
+                    >
+                      {pendingBusy === "approve" || pendingBusy === "finalize" ? (
+                        <Loader2Icon className="size-3.5 animate-spin" />
+                      ) : (
+                        <FingerprintIcon className="size-3.5" />
+                      )}
+                      {pendingBusy === "approve"
+                        ? t("sendAwaitingPasskey")
+                        : pendingBusy === "finalize"
+                          ? t("sendSubmitting")
+                          : pendingReadyToSend
+                            ? t("pendingApproveAndSend")
+                            : t("pendingApprove")}
+                    </Button>
+                    {canCancelPending ? (
+                      <Button
+                        variant="outline"
+                        onClick={() => void handlePendingCancel()}
+                        disabled={pendingBusy !== null || isBusy || sendBusy}
+                        className="text-muted-foreground hover:text-destructive"
+                      >
+                        {pendingBusy === "cancel" ? (
+                          <Loader2Icon className="size-3.5 animate-spin" />
+                        ) : (
+                          <Trash2Icon className="size-3.5" />
+                        )}
+                        {t("pendingCancel")}
+                      </Button>
+                    ) : null}
+                  </div>
+                </>
+              ) : (
+                <>
+                  <p className="mt-3 text-sm text-muted-foreground">{t("pendingInvalid")}</p>
+                  {sendError ? <p className="mt-3 text-sm text-destructive">{sendError}</p> : null}
+                  {canCancelPending ? (
+                    <Button
+                      variant="outline"
+                      className="mt-4 text-muted-foreground hover:text-destructive"
+                      onClick={() => void handlePendingCancel()}
+                      disabled={pendingBusy !== null || isBusy || sendBusy}
+                    >
+                      {pendingBusy === "cancel" ? (
+                        <Loader2Icon className="size-3.5 animate-spin" />
+                      ) : (
+                        <Trash2Icon className="size-3.5" />
+                      )}
+                      {t("pendingCancel")}
+                    </Button>
+                  ) : null}
+                </>
+              )}
+            </Card>
+          ) : canSend ? (
             <Card>
               <CardTitle Icon={SendIcon}>{t("sendHeading")}</CardTitle>
               <p className="mt-2 text-xs text-muted-foreground">{t("sendIntro")}</p>
@@ -639,12 +784,12 @@ export function WalletTabClient({ organization }: { organization?: OrganizationW
                     {sendPhase === "preparing"
                       ? t("sendPreparing")
                       : sendPhase === "signing"
-                        ? sendApproval
-                          ? t("sendApprovalOf", { current: sendApproval.current, total: sendApproval.total })
-                          : t("sendAwaitingPasskey")
+                        ? t("sendAwaitingPasskey")
                         : sendPhase === "submitting"
                           ? t("sendSubmitting")
-                          : t("sendButton")}
+                          : record.threshold > 1
+                            ? t("sendStartButton")
+                            : t("sendButton")}
                   </Button>
                 </div>
               </div>

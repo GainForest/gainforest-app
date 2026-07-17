@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { fetchAuthSession } from "@/app/_lib/auth-server";
-import { fetchCgsMembersForRequest } from "@/app/_lib/cgs-server";
+import { fetchCgsMembersForRequest, type CgsServerRole } from "@/app/_lib/cgs-server";
 import { fetchWalletRecordWithSource } from "@/lib/splits-vault/server";
 import { handleSendRequest } from "@/lib/splits-vault/send-route";
 
@@ -29,10 +29,10 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
   }
 
-  const isMember = await fetchCgsMembersForRequest(repo)
-    .then(({ members }) => members.some((member) => member.did === session.did))
-    .catch(() => false);
-  if (!isMember) {
+  const role: CgsServerRole | null = await fetchCgsMembersForRequest(repo)
+    .then(({ members }) => members.find((member) => member.did === session.did)?.role ?? null)
+    .catch(() => null);
+  if (!role) {
     return NextResponse.json({ error: "Not a member of this organization" }, { status: 403 });
   }
 
@@ -44,5 +44,7 @@ export async function POST(request: NextRequest) {
     walletDid: repo,
     sessionDid: session.did,
     record: found.record,
+    org: true,
+    canManagePending: role === "owner" || role === "admin",
   });
 }

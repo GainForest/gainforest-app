@@ -669,9 +669,21 @@
     "thresholdUpdateError": "No se pudo cambiar el requisito de aprobación. Inténtalo de nuevo.",
     "thresholdLockedFunds": "La billetera ya tiene fondos, así que el requisito de aprobación ya no se puede cambiar.",
     "thresholdSingleWarning": "Ahora mismo una sola llave de acceso puede mover fondos. Considera exigir más aprobaciones.",
-    "sendApprovalsNeeded": "Esta billetera necesita {count} aprobaciones con llaves de acceso diferentes, una tras otra.",
+    "sendApprovalsNeeded": "Esta billetera necesita {count} aprobaciones con llaves de acceso diferentes. Tú das la primera; el resto puede darse aquí o desde otro dispositivo.",
     "sendApprovalOf": "Aprobación {current} de {total}: esperando una llave de acceso…",
-    "sendDuplicatePasskey": "Cada aprobación necesita una llave de acceso diferente."
+    "sendDuplicatePasskey": "Cada aprobación necesita una llave de acceso diferente.",
+    "pendingHeading": "Transferencia a la espera de aprobaciones",
+    "pendingProgress": "{current} de {total} aprobaciones dadas",
+    "pendingRemoteHint": "Otras personas con llave de acceso pueden aprobar desde su propio dispositivo: la transferencia se queda aquí hasta reunir suficientes aprobaciones. La última aprobación la envía.",
+    "pendingApprove": "Aprobar con llave de acceso",
+    "pendingApproveAndSend": "Aprobar y enviar",
+    "pendingCancel": "Cancelar transferencia",
+    "pendingInvalid": "Esta transferencia en espera ya no es válida: la billetera cambió desde que se inició. Cancélala para iniciar una nueva.",
+    "pendingCancelForbidden": "Solo quien inició esta transferencia o un gestor de la billetera puede cancelarla.",
+    "sendStartButton": "Iniciar transferencia con llave de acceso",
+    "sendErrorExpired": "Esta transferencia ya no es válida: la billetera o las comisiones de red cambiaron. Iníciala de nuevo.",
+    "sendErrorPendingExists": "Ya hay una transferencia a la espera de aprobaciones. Termínala o cancélala primero.",
+    "sendErrorApprovalInvalid": "No se pudo verificar esta aprobación. Inténtalo de nuevo."
   },
   "accountSupport": {
     "button": "Apoyar",

@@ -58,11 +58,13 @@ import {
 } from "viem/account-abstraction";
 import { RPC_URL, USDC_CONTRACT } from "@/lib/facilitator/usdc";
 import { keccak256 } from "viem";
+import * as WebAuthnP256 from "ox/WebAuthnP256";
 import {
   SMART_VAULT_FACTORY,
   VAULT_OWNER,
   orgVaultSalt,
   toSignerStruct,
+  type PendingSendUserOp,
   type SplitsVaultRecord,
 } from "./shared";
 import { getMainnetClient, isVaultDeployed } from "./server";
@@ -147,7 +149,10 @@ export class SendError extends Error {
       | "insufficient_balance"
       | "network_busy"
       | "signature_rejected"
-      | "submit_failed",
+      | "submit_failed"
+      | "expired"
+      | "pending_exists"
+      | "approval_invalid",
     public readonly status: number,
   ) {
     super(code);
@@ -180,18 +185,7 @@ export type SendParams = {
   amountUnits: string;
 };
 
-export type PreparedUserOp = {
-  sender: `0x${string}`;
-  nonce: string;
-  factory?: `0x${string}`;
-  factoryData?: Hex;
-  callData: Hex;
-  callGasLimit: string;
-  verificationGasLimit: string;
-  preVerificationGas: string;
-  maxFeePerGas: string;
-  maxPriorityFeePerGas: string;
-};
+export type PreparedUserOp = PendingSendUserOp;
 
 export type PreparedSend = {
   userOp: PreparedUserOp;
@@ -298,6 +292,31 @@ function validateParams(params: SendParams, vaultAddress: `0x${string}`): bigint
   }
   if (amount <= 0n) throw new SendError("invalid_request", 400);
   return amount;
+}
+
+/**
+ * Decode a vault `execute` calldata back into plain send parameters.
+ * Throws `invalid_request` when it is not exactly one allowed transfer.
+ */
+export function decodeSendCallData(callData: Hex): SendParams {
+  let decoded: { functionName: string; args: readonly unknown[] };
+  try {
+    decoded = decodeFunctionData({ abi: EXECUTE_ABI, data: callData });
+  } catch {
+    throw new SendError("invalid_request", 400);
+  }
+  if (decoded.functionName !== "execute") throw new SendError("invalid_request", 400);
+  const call = decoded.args[0] as { target: `0x${string}`; value: bigint; data: Hex };
+  if (isAddressEqual(call.target, USDC_CONTRACT) || isAddressEqual(call.target, USDT_CONTRACT)) {
+    const transfer = decodeFunctionData({ abi: erc20Abi, data: call.data });
+    const [to, amount] = transfer.args as [`0x${string}`, bigint];
+    return {
+      token: isAddressEqual(call.target, USDC_CONTRACT) ? "USDC" : "USDT",
+      to,
+      amountUnits: amount.toString(),
+    };
+  }
+  return { token: "ETH", to: call.target, amountUnits: call.value.toString() };
 }
 
 async function currentFees(): Promise<{ maxFeePerGas: bigint; maxPriorityFeePerGas: bigint }> {
@@ -544,16 +563,25 @@ async function validateUserOp(
     }
   }
 
-  // The nonce must be the account's current one (no queued replays).
+  // The nonce must be the account's current one. A mismatch means another
+  // operation confirmed since this one was prepared — it can never succeed.
   const client = getMainnetClient();
   const nonce = parseBigInt(raw.nonce);
-  const currentNonce = await client.readContract({
-    address: ENTRY_POINT,
-    abi: entryPoint07Abi,
-    functionName: "getNonce",
-    args: [record.address, 0n],
-  });
-  if (nonce !== currentNonce) throw new SendError("invalid_request", 409);
+  const [currentNonce, block] = await Promise.all([
+    client.readContract({
+      address: ENTRY_POINT,
+      abi: entryPoint07Abi,
+      functionName: "getNonce",
+      args: [record.address, 0n],
+    }),
+    client.getBlock().catch(() => null),
+  ]);
+  if (nonce !== currentNonce) throw new SendError("expired", 409);
+
+  // Fee staleness: an operation prepared while fees were lower than today's
+  // base fee cannot be mined profitably — ask the user to start over.
+  const maxFeePerGas = parseBigInt(raw.maxFeePerGas);
+  if (block?.baseFeePerGas && block.baseFeePerGas > maxFeePerGas) throw new SendError("expired", 409);
 
   const userOp: UserOperation<"0.7"> = {
     sender: record.address,
@@ -578,6 +606,78 @@ async function validateUserOp(
   if (totalGas(userOp) * userOp.maxFeePerGas > maxSponsoredWei()) throw new SendError("network_busy", 503);
 
   return userOp;
+}
+
+/**
+ * Re-validate a stored/echoed operation and return it with both hashes.
+ * Used when starting a pending transfer and again before finalizing it.
+ */
+export async function validatePreparedSend(
+  did: string,
+  record: SplitsVaultRecord,
+  raw: PreparedUserOp,
+): Promise<{ userOp: UserOperation<"0.7">; hash: Hex; lightHash: Hex }> {
+  const userOp = await validateUserOp(did, record, raw);
+  const hash = getUserOperationHash({
+    chainId: mainnet.id,
+    entryPointAddress: ENTRY_POINT,
+    entryPointVersion: "0.7",
+    userOperation: userOp,
+  });
+  return { userOp, hash, lightHash: computeLightHash(userOp) };
+}
+
+/** A WebAuthn approval as it arrives from a signer's browser. */
+export type ApprovalSignature = {
+  credentialId: string;
+  authenticatorData: Hex;
+  clientDataJSON: string;
+  challengeIndex: number;
+  typeIndex: number;
+  r: string;
+  s: string;
+};
+
+/** secp256r1 curve order — the contract rejects high-s signatures. */
+const P256_N = 0xffffffff00000000ffffffffffffffffbce6faada7179e84f3b9cac2fc632551n;
+
+/**
+ * Verify a WebAuthn approval off-chain against the wallet's enrolled
+ * signers, so an invalid approval can never be stored (it would brick the
+ * final submission). Returns the signer's index in the record.
+ */
+export function verifyApprovalSignature(
+  record: SplitsVaultRecord,
+  signature: ApprovalSignature,
+  challenge: Hex,
+): number {
+  const signerIndex = record.signers.findIndex((signer) => signer.credentialId === signature.credentialId);
+  if (signerIndex < 0) throw new SendError("approval_invalid", 400);
+  const signer = record.signers[signerIndex];
+  let r: bigint;
+  let s: bigint;
+  try {
+    r = BigInt(signature.r);
+    s = BigInt(signature.s);
+  } catch {
+    throw new SendError("approval_invalid", 400);
+  }
+  // The on-chain verifier rejects malleable (high-s) signatures.
+  if (s > P256_N / 2n) throw new SendError("approval_invalid", 400);
+  const valid = WebAuthnP256.verify({
+    challenge,
+    publicKey: { x: BigInt(signer.publicKeyX), y: BigInt(signer.publicKeyY), prefix: 4 },
+    signature: { r, s },
+    metadata: {
+      authenticatorData: signature.authenticatorData,
+      clientDataJSON: signature.clientDataJSON,
+      challengeIndex: signature.challengeIndex,
+      typeIndex: signature.typeIndex,
+      userVerificationRequired: false,
+    },
+  });
+  if (!valid) throw new SendError("approval_invalid", 400);
+  return signerIndex;
 }
 
 /**

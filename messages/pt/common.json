@@ -669,9 +669,21 @@
     "thresholdUpdateError": "Não foi possível alterar o requisito de aprovação. Tente novamente.",
     "thresholdLockedFunds": "A carteira já possui fundos, então o requisito de aprovação não pode mais ser alterado.",
     "thresholdSingleWarning": "No momento, uma única chave de acesso pode mover fundos. Considere exigir mais aprovações.",
-    "sendApprovalsNeeded": "Esta carteira precisa de {count} aprovações com chaves de acesso diferentes, uma após a outra.",
+    "sendApprovalsNeeded": "Esta carteira precisa de {count} aprovações com chaves de acesso diferentes. Você dá a primeira; as demais podem ser dadas aqui ou de outro dispositivo.",
     "sendApprovalOf": "Aprovação {current} de {total} — aguardando uma chave de acesso…",
-    "sendDuplicatePasskey": "Cada aprovação precisa de uma chave de acesso diferente."
+    "sendDuplicatePasskey": "Cada aprovação precisa de uma chave de acesso diferente.",
+    "pendingHeading": "Transferência aguardando aprovações",
+    "pendingProgress": "{current} de {total} aprovações dadas",
+    "pendingRemoteHint": "Outras pessoas com chave de acesso podem aprovar do próprio dispositivo — a transferência fica aqui até reunir aprovações suficientes. A última aprovação a envia.",
+    "pendingApprove": "Aprovar com chave de acesso",
+    "pendingApproveAndSend": "Aprovar e enviar",
+    "pendingCancel": "Cancelar transferência",
+    "pendingInvalid": "Esta transferência em espera não é mais válida — a carteira mudou desde que foi iniciada. Cancele-a para iniciar uma nova.",
+    "pendingCancelForbidden": "Somente quem iniciou esta transferência ou um gestor da carteira pode cancelá-la.",
+    "sendStartButton": "Iniciar transferência com chave de acesso",
+    "sendErrorExpired": "Esta transferência não é mais válida — a carteira ou as taxas de rede mudaram. Inicie-a novamente.",
+    "sendErrorPendingExists": "Já existe uma transferência aguardando aprovações. Conclua-a ou cancele-a primeiro.",
+    "sendErrorApprovalInvalid": "Não foi possível verificar esta aprovação. Tente novamente."
   },
   "accountSupport": {
     "button": "Apoiar",

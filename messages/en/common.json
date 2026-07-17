@@ -669,9 +669,21 @@
     "thresholdUpdateError": "Could not change the approval requirement. Please try again.",
     "thresholdLockedFunds": "The wallet already holds funds, so the approval requirement can no longer be changed.",
     "thresholdSingleWarning": "Right now a single passkey can move funds. Consider requiring more approvals.",
-    "sendApprovalsNeeded": "This wallet needs {count} approvals with different passkeys, one after another.",
+    "sendApprovalsNeeded": "This wallet needs {count} approvals with different passkeys. You give the first one; the rest can be given here or from another device.",
     "sendApprovalOf": "Approval {current} of {total} — waiting for a passkey…",
-    "sendDuplicatePasskey": "Each approval needs a different passkey."
+    "sendDuplicatePasskey": "Each approval needs a different passkey.",
+    "pendingHeading": "Transfer waiting for approvals",
+    "pendingProgress": "{current} of {total} approvals given",
+    "pendingRemoteHint": "Other passkey holders can approve from their own device — the transfer stays here until it has enough approvals. The last approval sends it.",
+    "pendingApprove": "Approve with passkey",
+    "pendingApproveAndSend": "Approve & send",
+    "pendingCancel": "Cancel transfer",
+    "pendingInvalid": "This waiting transfer is no longer valid — the wallet changed since it was started. Cancel it to start a new one.",
+    "pendingCancelForbidden": "Only the person who started this transfer or a wallet manager can cancel it.",
+    "sendStartButton": "Start transfer with passkey",
+    "sendErrorExpired": "This transfer is no longer valid — the wallet or network fees changed. Please start it again.",
+    "sendErrorPendingExists": "There is already a transfer waiting for approvals. Finish or cancel it first.",
+    "sendErrorApprovalInvalid": "This approval could not be verified. Please try again."
   },
   "accountSupport": {
     "button": "Support",

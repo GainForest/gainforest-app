@@ -21,11 +21,15 @@ import {
   PRIMARY_WALLET_COLLECTION,
   PRIMARY_WALLET_RKEY,
   LEGACY_WALLET_COLLECTION,
+  PENDING_SEND_COLLECTION,
+  PENDING_SEND_RKEY,
   VAULT_OWNER,
   VAULT_THRESHOLD,
   orgVaultSalt,
+  parsePendingSendRecord,
   parseSplitsVaultRecord,
   toSignerStruct,
+  type PendingSendRecord,
   type SplitsVaultRecord,
   type VaultPasskeySigner,
   type WalletCollection,
@@ -164,6 +168,20 @@ export async function getWalletBalances(address: `0x${string}`): Promise<WalletB
 export async function fetchSplitsVaultRecord(did: string): Promise<SplitsVaultRecord | null> {
   const found = await fetchWalletRecordWithSource(did);
   return found?.record ?? null;
+}
+
+/** Fetch the wallet's pending multi-approval transfer, if any. */
+export async function fetchPendingSendRecord(did: string): Promise<PendingSendRecord | null> {
+  const { pdsHost } = await resolveDidIdentity(did);
+  if (!pdsHost) return null;
+  const url = new URL(`https://${pdsHost}/xrpc/com.atproto.repo.getRecord`);
+  url.searchParams.set("repo", did);
+  url.searchParams.set("collection", PENDING_SEND_COLLECTION);
+  url.searchParams.set("rkey", PENDING_SEND_RKEY);
+  const response = await fetch(url, { cache: "no-store" });
+  if (!response.ok) return null;
+  const json = (await response.json().catch(() => null)) as { value?: unknown } | null;
+  return parsePendingSendRecord(json?.value);
 }
 
 export type VerifiedVault = {

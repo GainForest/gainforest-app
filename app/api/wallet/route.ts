@@ -18,6 +18,7 @@ import {
   type WalletCollection,
 } from "@/lib/splits-vault/shared";
 import {
+  fetchPendingSendRecord,
   fetchWalletRecordWithSource,
   getWalletBalances,
   isVaultDeployed,
@@ -135,10 +136,11 @@ export async function GET() {
 
   const found = await fetchWalletRecordWithSource(did);
   if (!found) return NextResponse.json({ exists: false });
-  const [deployed, holdsFunds, balances] = await Promise.all([
+  const [deployed, holdsFunds, balances, pendingSend] = await Promise.all([
     isVaultDeployed(found.record.address).catch(() => false),
     vaultHoldsFunds(found.record.address).catch(() => false),
     getWalletBalances(found.record.address).catch(() => null),
+    fetchPendingSendRecord(did).catch(() => null),
   ]);
   return NextResponse.json({
     exists: true,
@@ -147,6 +149,7 @@ export async function GET() {
     deployed,
     holdsFunds,
     balances,
+    pendingSend,
   });
 }
 

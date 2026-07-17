@@ -27,5 +27,8 @@ export async function POST(request: NextRequest) {
     walletDid: session.did,
     sessionDid: session.did,
     record: found.record,
+    org: false,
+    // A personal wallet is fully managed by its owner.
+    canManagePending: true,
   });
 }

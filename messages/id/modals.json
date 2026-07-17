@@ -455,8 +455,20 @@
     "thresholdUpdateError": "Tidak dapat mengubah persyaratan persetujuan. Silakan coba lagi.",
     "thresholdLockedFunds": "Dompet sudah berisi dana, jadi persyaratan persetujuan tidak dapat diubah lagi.",
     "thresholdSingleWarning": "Saat ini satu kunci sandi saja dapat memindahkan dana. Pertimbangkan untuk mewajibkan lebih banyak persetujuan.",
-    "sendApprovalsNeeded": "Dompet ini membutuhkan {count} persetujuan dengan kunci sandi yang berbeda, satu per satu.",
+    "sendApprovalsNeeded": "Dompet ini membutuhkan {count} persetujuan dengan kunci sandi yang berbeda. Anda memberikan yang pertama; sisanya dapat diberikan di sini atau dari perangkat lain.",
     "sendApprovalOf": "Persetujuan {current} dari {total} — menunggu kunci sandi…",
-    "sendDuplicatePasskey": "Setiap persetujuan membutuhkan kunci sandi yang berbeda."
+    "sendDuplicatePasskey": "Setiap persetujuan membutuhkan kunci sandi yang berbeda.",
+    "pendingHeading": "Transfer menunggu persetujuan",
+    "pendingProgress": "{current} dari {total} persetujuan diberikan",
+    "pendingRemoteHint": "Pemegang kunci sandi lain dapat menyetujui dari perangkat mereka sendiri — transfer tetap di sini sampai persetujuannya cukup. Persetujuan terakhir mengirimkannya.",
+    "pendingApprove": "Setujui dengan kunci sandi",
+    "pendingApproveAndSend": "Setujui & kirim",
+    "pendingCancel": "Batalkan transfer",
+    "pendingInvalid": "Transfer yang menunggu ini tidak lagi valid — dompet berubah sejak dimulai. Batalkan untuk memulai yang baru.",
+    "pendingCancelForbidden": "Hanya orang yang memulai transfer ini atau pengelola dompet yang dapat membatalkannya.",
+    "sendStartButton": "Mulai transfer dengan kunci sandi",
+    "sendErrorExpired": "Transfer ini tidak lagi valid — dompet atau biaya jaringan berubah. Silakan mulai lagi.",
+    "sendErrorPendingExists": "Sudah ada transfer yang menunggu persetujuan. Selesaikan atau batalkan dulu.",
+    "sendErrorApprovalInvalid": "Persetujuan ini tidak dapat diverifikasi. Silakan coba lagi."
   }
 }
