@@ -72,6 +72,7 @@ import { getEntriesForActivities } from "./_components/timeline/attachmentSubjec
 import { resolveTimelineReferences } from "./_components/timeline/timelineReferenceResolver";
 import type { TimelineReference } from "./_components/timeline/timelineReferences";
 import { canCreateRecord, canDeleteRecord, canUpdateRecord } from "@/app/(manage)/manage/_lib/cgs-permissions";
+import { ProjectFeaturedToggle } from "@/app/projects/_components/ProjectFeaturedToggle";
 
 export const revalidate = 60;
 
@@ -775,6 +776,7 @@ export async function ProjectDetailView({
             </Link>
             <span className="ml-auto flex items-center gap-2">
               <FollowButton targetDid={record.did} name={owner.displayName} size="default" />
+              {engagementSubjectUri ? <ProjectFeaturedToggle projectUri={engagementSubjectUri} /> : null}
               {editHref && editLabel && canManageDonations ? (
                 <Link
                   href={editHref}

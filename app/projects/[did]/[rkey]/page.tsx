@@ -12,6 +12,7 @@ import { accountHref, localProjectHref } from "../../../_lib/urls";
 import { RecordEngagement } from "../../../_components/RecordEngagement";
 import { localizedAlternates } from "../../../_lib/seo-metadata";
 import { FollowButton } from "../../../_components/FollowButton";
+import { ProjectFeaturedToggle } from "../../_components/ProjectFeaturedToggle";
 import { getRequestOrigin } from "../../../_lib/request-origin";
 import {
   ProjectDetailView,
@@ -272,6 +273,7 @@ async function ProjectFallback({
             <FolderKanbanIcon className="h-3.5 w-3.5" aria-hidden />
             {t("kind")}
           </span>
+          <ProjectFeaturedToggle projectUri={record.atUri} />
         </div>
 
         <h1 className="mt-3 font-instrument text-4xl italic leading-tight tracking-[-0.01em] text-foreground md:text-5xl">

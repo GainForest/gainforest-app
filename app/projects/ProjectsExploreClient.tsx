@@ -566,7 +566,13 @@ export function ProjectsExploreClient({
           </section>
 
           {showExploreHome && featuredRecords.length > 0 ? (
-            <FeaturedProjects records={featuredRecords} onOpen={openRecord} />
+            <FeaturedProjects
+              records={featuredRecords}
+              onOpen={openRecord}
+              canManageFeatured={canManageFeatured}
+              featureBusyUri={featureBusyUri}
+              onToggleFeatured={toggleFeatured}
+            />
           ) : null}
 
           {showExploreHome && supportRecords.length > 0 ? (
@@ -650,7 +656,19 @@ function HeroBackdrop() {
   );
 }
 
-function FeaturedProjects({ records, onOpen }: { records: ProjectRecord[]; onOpen: (record: ProjectRecord) => void }) {
+function FeaturedProjects({
+  records,
+  onOpen,
+  canManageFeatured,
+  featureBusyUri,
+  onToggleFeatured,
+}: {
+  records: ProjectRecord[];
+  onOpen: (record: ProjectRecord) => void;
+  canManageFeatured: boolean;
+  featureBusyUri: string | null;
+  onToggleFeatured: (record: ProjectRecord) => void;
+}) {
   const t = useTranslations("marketplace.projects.featured");
   const carouselRef = useRef<HTMLDivElement | null>(null);
   const isCarousel = records.length > 3;
@@ -695,6 +713,9 @@ function FeaturedProjects({ records, onOpen }: { records: ProjectRecord[]; onOpe
             record={record}
             onOpen={onOpen}
             className={isCarousel ? "w-[86%] shrink-0 snap-start sm:w-[calc((100%-1rem)/2)] lg:w-[calc((100%-2rem)/3)]" : undefined}
+            canManageFeatured={canManageFeatured}
+            featureBusy={featureBusyUri === record.atUri}
+            onToggleFeatured={onToggleFeatured}
           />
         ))}
       </div>
@@ -702,7 +723,21 @@ function FeaturedProjects({ records, onOpen }: { records: ProjectRecord[]; onOpe
   );
 }
 
-function FeaturedProjectCard({ record, onOpen, className }: { record: ProjectRecord; onOpen: (record: ProjectRecord) => void; className?: string }) {
+function FeaturedProjectCard({
+  record,
+  onOpen,
+  className,
+  canManageFeatured,
+  featureBusy,
+  onToggleFeatured,
+}: {
+  record: ProjectRecord;
+  onOpen: (record: ProjectRecord) => void;
+  className?: string;
+  canManageFeatured: boolean;
+  featureBusy: boolean;
+  onToggleFeatured: (record: ProjectRecord) => void;
+}) {
   const t = useTranslations("marketplace.projects.featured");
   const cardT = useTranslations("marketplace.projects.card");
   const [imgError, setImgError] = useState(false);
@@ -727,6 +762,29 @@ function FeaturedProjectCard({ record, onOpen, className }: { record: ProjectRec
           <LeafIcon className="h-3.5 w-3.5" aria-hidden />
           {t("badge")}
         </span>
+        {canManageFeatured ? (
+          <span
+            role="button"
+            tabIndex={featureBusy ? -1 : 0}
+            aria-label={t("manage.remove")}
+            aria-disabled={featureBusy}
+            title={t("manage.remove")}
+            onClick={(event) => {
+              event.stopPropagation();
+              if (!featureBusy) onToggleFeatured(record);
+            }}
+            onKeyDown={(event) => {
+              if ((event.key === "Enter" || event.key === " ") && !featureBusy) {
+                event.preventDefault();
+                event.stopPropagation();
+                onToggleFeatured(record);
+              }
+            }}
+            className="absolute right-3 top-3 grid h-9 w-9 cursor-pointer place-items-center rounded-full border border-amber-400/50 bg-background/92 text-amber-500 shadow-sm backdrop-blur transition hover:scale-105 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60"
+          >
+            {featureBusy ? <Loader2Icon className="h-4 w-4 animate-spin" aria-hidden /> : <StarIcon className="h-4 w-4 fill-current" aria-hidden />}
+          </span>
+        ) : null}
       </span>
 
       <span className="flex flex-1 flex-col p-4">

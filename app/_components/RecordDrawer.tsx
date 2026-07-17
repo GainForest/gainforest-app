@@ -52,6 +52,7 @@ import {
   localProjectHref,
 } from "../_lib/urls";
 import { DonateButton } from "../cert/[did]/[rkey]/_components/donate/DonateButton";
+import { ProjectFeaturedToggle } from "../projects/_components/ProjectFeaturedToggle";
 
 type RecordDrawerT = ReturnType<typeof useTranslations<"marketplace.recordDrawer">>;
 
@@ -684,6 +685,7 @@ export function RecordDrawer({
           {/* Project descriptions come before the action, so people can scan
               what the project does before deciding to open the full page. */}
           {projectHref && <DetailLinkRow href={projectHref} label={t("actions.viewProject")} featured />}
+          {record.kind === "project" ? <ProjectFeaturedToggle projectUri={record.atUri} variant="sidebar" className="mt-3" /> : null}
 
           {record.kind === "project" && projectDonation?.gainforestDonation ? (
             <div className="mt-3">
