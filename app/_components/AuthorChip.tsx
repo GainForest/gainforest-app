@@ -29,6 +29,7 @@ export function AuthorChip({
   nameOverride,
   size = "md",
   className = "",
+  onOpenAccount,
 }: {
   did: string;
   createdAt?: string | null;
@@ -37,6 +38,8 @@ export function AuthorChip({
   nameOverride?: string | null;
   size?: Size;
   className?: string;
+  /** Close a containing sheet before this chip opens the account drawer. */
+  onOpenAccount?: () => void;
 }) {
   const [profile, setProfile] = useState<DidProfile | null>(() => getCachedProfile(did) ?? null);
 
@@ -64,7 +67,10 @@ export function AuthorChip({
     <AccountHoverCard did={did}>
       <button
         type="button"
-        onClick={() => openAccount(did)}
+        onClick={() => {
+          onOpenAccount?.();
+          openAccount(did);
+        }}
         title="View profile"
         className={`-mx-1 flex w-full min-w-0 items-center gap-2 rounded-lg px-1 py-0.5 text-left transition-colors hover:bg-surface-sunken ${className}`}
       >

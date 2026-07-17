@@ -749,6 +749,7 @@ export function RecordDrawer({
                 avatarRefOverride={ownerAvatarRefOverride}
                 nameOverride={ownerNameOverride}
                 className={cn(isProject && "flex-1")}
+                onOpenAccount={onClose}
               />
               {/* When the drawer record *is* an organization/person, opening
                   their profile is the primary action, so keep the full button.
