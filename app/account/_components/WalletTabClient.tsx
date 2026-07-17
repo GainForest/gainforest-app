@@ -74,10 +74,11 @@ type ManageActionPayload =
   | { type: "removeSigner"; signerIndex: number }
   | { type: "setThreshold"; threshold: number };
 
-const TOKEN_COLORS: Record<WalletTokenSymbol, string> = {
-  USDC: "#2775CA",
-  USDT: "#26A17B",
-  ETH: "#627EEA",
+/** Local token logos (see public/icons/tokens, sourced from cryptologos.cc). */
+const TOKEN_LOGOS: Record<WalletTokenSymbol, string> = {
+  ETH: "/icons/tokens/eth.svg",
+  USDC: "/icons/tokens/usdc.svg",
+  USDT: "/icons/tokens/usdt.svg",
 };
 
 const TOKEN_DISPLAY_DECIMALS: Record<WalletTokenSymbol, number> = {
@@ -90,14 +91,22 @@ const ADDRESS_PATTERN = /^0x[0-9a-fA-F]{40}$/;
 
 type SendPhase = "idle" | "preparing" | "signing" | "submitting";
 
-function TokenBadge({ symbol }: { symbol: WalletTokenSymbol }) {
+function TokenBadge({ symbol, className }: { symbol: WalletTokenSymbol; className?: string }) {
   return (
     <span
       aria-hidden
-      className="flex size-8 shrink-0 items-center justify-center rounded-full text-xs font-bold text-white"
-      style={{ backgroundColor: TOKEN_COLORS[symbol] }}
+      className={cn(
+        "flex shrink-0 items-center justify-center overflow-hidden rounded-full bg-white shadow-sm ring-1 ring-border",
+        className ?? "size-8",
+      )}
     >
-      {symbol === "ETH" ? "\u039E" : "$"}
+      <Image
+        src={TOKEN_LOGOS[symbol]}
+        alt=""
+        width={36}
+        height={36}
+        className={symbol === "USDC" ? "size-full" : "size-[58%]"}
+      />
     </span>
   );
 }
@@ -653,6 +662,11 @@ export function WalletTabClient({ organization }: { organization?: OrganizationW
             <div className="flex size-14 items-center justify-center rounded-full bg-muted">
               <WalletIcon className="size-6 text-muted-foreground" />
             </div>
+            <div aria-hidden className="flex -space-x-2.5">
+              {WALLET_TOKENS.map((token) => (
+                <TokenBadge key={token.symbol} symbol={token.symbol} className="size-8 ring-2 ring-card" />
+              ))}
+            </div>
             <div className="space-y-1">
               <p className="text-sm font-medium text-foreground">{t("emptyTitle")}</p>
               <p className="mx-auto max-w-sm text-xs text-muted-foreground">{t("emptyHint")}</p>
@@ -706,29 +720,34 @@ export function WalletTabClient({ organization }: { organization?: OrganizationW
 
           {/* ── Balances ──────────────────────────────────────────────── */}
           <Card>
-            <div className="flex items-center justify-between gap-2">
-              <CardTitle Icon={CoinsIcon}>{t("balancesHeading")}</CardTitle>
-              {totalUsd !== null ? (
-                <span className="text-base font-semibold text-foreground">
-                  {format.number(totalUsd, { style: "currency", currency: "USD" })}
-                </span>
-              ) : null}
-            </div>
+            <CardTitle Icon={CoinsIcon}>{t("balancesHeading")}</CardTitle>
             {balances ? (
               <>
-                <div className="mt-4 flex flex-col gap-0.5 rounded-xl bg-muted p-1">
+                {totalUsd !== null ? (
+                  <div className="mt-4 flex items-center justify-between gap-3 rounded-2xl border border-primary/10 bg-gradient-to-br from-primary/15 via-primary/5 to-transparent px-4 py-4">
+                    <p className="text-3xl font-semibold tracking-tight text-foreground">
+                      {format.number(totalUsd, { style: "currency", currency: "USD" })}
+                    </p>
+                    <div aria-hidden className="flex -space-x-2.5">
+                      {WALLET_TOKENS.map((token) => (
+                        <TokenBadge key={token.symbol} symbol={token.symbol} className="size-7 ring-2 ring-card" />
+                      ))}
+                    </div>
+                  </div>
+                ) : null}
+                <div className="mt-3 flex flex-col gap-0.5 rounded-xl bg-muted p-1">
                   {balances.tokens.map((entry) => {
                     const token = getWalletToken(entry.symbol);
                     if (!token) return null;
                     return (
-                      <div key={entry.symbol} className="flex items-center gap-3 rounded-lg bg-background/60 px-3 py-2.5">
-                        <TokenBadge symbol={entry.symbol} />
+                      <div key={entry.symbol} className="flex items-center gap-3 rounded-lg bg-background/60 px-3 py-3">
+                        <TokenBadge symbol={entry.symbol} className="size-9" />
                         <div className="min-w-0 flex-1">
-                          <p className="text-sm font-medium text-foreground">{entry.symbol}</p>
+                          <p className="text-sm font-semibold text-foreground">{entry.symbol}</p>
                           <p className="text-xs text-muted-foreground">{token.name}</p>
                         </div>
                         <div className="text-right">
-                          <p className="font-mono text-sm text-foreground">
+                          <p className="font-mono text-sm font-medium text-foreground">
                             {formatTokenUnits(entry.units, token.decimals, TOKEN_DISPLAY_DECIMALS[entry.symbol]) || "0"}
                           </p>
                           {entry.usd !== null ? (
@@ -755,7 +774,7 @@ export function WalletTabClient({ organization }: { organization?: OrganizationW
               {pendingValid && pendingToken ? (
                 <>
                   <div className="mt-4 flex items-center gap-3 rounded-xl bg-muted px-3 py-3">
-                    <TokenBadge symbol={pendingToken.symbol} />
+                    <TokenBadge symbol={pendingToken.symbol} className="size-9" />
                     <div className="min-w-0 flex-1">
                       <p className="text-sm font-semibold text-foreground">
                         {formatTokenUnits(pendingSend.amountUnits, pendingToken.decimals)} {pendingToken.symbol}
@@ -841,13 +860,16 @@ export function WalletTabClient({ organization }: { organization?: OrganizationW
                     onValueChange={(value) => setSendToken(value as WalletTokenSymbol)}
                     disabled={sendBusy}
                   >
-                    <SelectTrigger className="sm:w-36" aria-label={t("sendToken")}>
+                    <SelectTrigger className="sm:w-40" aria-label={t("sendToken")}>
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
                       {WALLET_TOKENS.map((token) => (
                         <SelectItem key={token.symbol} value={token.symbol}>
-                          {token.symbol}
+                          <span className="flex items-center gap-2">
+                            <TokenBadge symbol={token.symbol} className="size-5" />
+                            {token.symbol}
+                          </span>
                         </SelectItem>
                       ))}
                     </SelectContent>
