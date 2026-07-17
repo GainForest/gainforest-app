@@ -659,16 +659,16 @@ function FeaturedProjects({ records, onOpen }: { records: ProjectRecord[]; onOpe
         </div>
         <p className="max-w-md text-sm leading-6 text-muted-foreground">{t("description")}</p>
       </div>
-      <div className="grid gap-4 lg:grid-cols-2 lg:grid-rows-2">
-        {records.map((record, index) => (
-          <FeaturedProjectCard key={record.id} record={record} lead={index === 0} onOpen={onOpen} />
+      <div className="grid gap-4 md:grid-cols-3">
+        {records.map((record) => (
+          <FeaturedProjectCard key={record.id} record={record} onOpen={onOpen} />
         ))}
       </div>
     </section>
   );
 }
 
-function FeaturedProjectCard({ record, lead, onOpen }: { record: ProjectRecord; lead: boolean; onOpen: (record: ProjectRecord) => void }) {
+function FeaturedProjectCard({ record, onOpen }: { record: ProjectRecord; onOpen: (record: ProjectRecord) => void }) {
   const t = useTranslations("marketplace.projects.featured");
   const cardT = useTranslations("marketplace.projects.card");
   const [imgError, setImgError] = useState(false);
@@ -678,18 +678,15 @@ function FeaturedProjectCard({ record, lead, onOpen }: { record: ProjectRecord; 
       type="button"
       onClick={() => onOpen(record)}
       aria-label={cardT("open", { title: record.title })}
-      className={cn(
-        "group relative isolate min-h-64 overflow-hidden rounded-[1.75rem] border border-border/70 bg-primary text-left shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:shadow-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60",
-        lead ? "lg:row-span-2 lg:min-h-[34rem]" : "lg:min-h-64",
-      )}
+      className="group relative isolate min-h-72 overflow-hidden rounded-[1.5rem] border border-border/70 bg-primary text-left shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:shadow-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60"
     >
       {record.imageUrl && !imgError ? (
-        <Image src={record.imageUrl} alt="" fill sizes={lead ? "(min-width: 1024px) 50vw, 100vw" : "(min-width: 1024px) 50vw, 100vw"} unoptimized={!isPdsBlobUrl(record.imageUrl)} onError={() => setImgError(true)} className="object-cover transition-transform duration-700 group-hover:scale-[1.04]" />
+        <Image src={record.imageUrl} alt="" fill sizes="(min-width: 768px) 33vw, 100vw" unoptimized={!isPdsBlobUrl(record.imageUrl)} onError={() => setImgError(true)} className="object-cover transition-transform duration-700 group-hover:scale-[1.04]" />
       ) : (
         <div className="absolute inset-0 grid place-items-center bg-primary text-primary-foreground/30"><FolderKanbanIcon className="h-16 w-16" /></div>
       )}
       <div className="absolute inset-0 bg-linear-to-t from-black/90 via-black/35 to-black/5" />
-      <div className={cn("relative flex h-full min-h-64 flex-col justify-between p-5 sm:p-6", lead && "lg:min-h-[34rem]")}>
+      <div className="relative flex min-h-72 flex-col justify-between p-5">
         <span className="inline-flex w-fit items-center gap-1.5 rounded-full bg-white/90 px-3 py-1.5 text-xs font-semibold text-emerald-950 shadow-sm backdrop-blur">
           <LeafIcon className="h-3.5 w-3.5" aria-hidden />
           {t("badge")}
@@ -699,8 +696,8 @@ function FeaturedProjectCard({ record, lead, onOpen }: { record: ProjectRecord; 
             {place ? <span className="inline-flex items-center gap-1"><MapPinIcon className="h-3.5 w-3.5" aria-hidden />{place}</span> : null}
             {record.creatorName ? <span>{record.creatorName}</span> : null}
           </div>
-          <h3 className={cn("max-w-xl font-instrument italic leading-[1.02]", lead ? "text-4xl sm:text-5xl" : "text-3xl")}>{record.title}</h3>
-          {record.shortDescription ? <p className={cn("mt-3 max-w-2xl leading-6 text-white/75", lead ? "line-clamp-3 text-sm sm:text-base" : "line-clamp-2 text-sm")}>{record.shortDescription}</p> : null}
+          <h3 className="line-clamp-3 max-w-xl font-instrument text-3xl italic leading-[1.02]">{record.title}</h3>
+          {record.shortDescription ? <p className="mt-3 line-clamp-2 max-w-2xl text-sm leading-6 text-white/75">{record.shortDescription}</p> : null}
           <span className="mt-5 inline-flex items-center gap-2 text-sm font-semibold text-white">
             {t("action")} <ArrowRightIcon className="h-4 w-4 transition-transform group-hover:translate-x-1" aria-hidden />
           </span>
@@ -721,10 +718,76 @@ function SupportShelf({ records, onOpen, donationSummaries }: { records: Project
         </div>
         <p className="max-w-md text-sm leading-6 text-muted-foreground">{t("description")}</p>
       </div>
-      <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
-        {records.map((record, index) => <ProjectCard key={record.id} record={record} priority={false} index={index} onOpen={onOpen} donationSummary={donationSummaries[record.atUri]} />)}
+      <div className="grid gap-4 lg:grid-cols-2">
+        {records.map((record) => (
+          <SupportProjectCard key={record.id} record={record} onOpen={onOpen} donationSummary={donationSummaries[record.atUri]} />
+        ))}
       </div>
     </section>
+  );
+}
+
+function SupportProjectCard({
+  record,
+  onOpen,
+  donationSummary,
+}: {
+  record: ProjectRecord;
+  onOpen: (record: ProjectRecord) => void;
+  donationSummary?: ProjectDonationSummary;
+}) {
+  const t = useTranslations("marketplace.projects.card");
+  const [imgError, setImgError] = useState(false);
+  const hasImage = Boolean(record.imageUrl) && !imgError;
+  const totalUsd = donationSummary?.totalUsd ?? 0;
+  const donorCount = donationSummary?.donorCount ?? 0;
+  const place = countryName(record.country);
+
+  return (
+    <button
+      type="button"
+      onClick={() => onOpen(record)}
+      aria-label={t("open", { title: record.title })}
+      className="group grid min-h-44 grid-cols-[8.5rem_minmax(0,1fr)] overflow-hidden rounded-2xl border border-border/70 bg-card text-left shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:border-primary/25 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60 sm:grid-cols-[11rem_minmax(0,1fr)]"
+    >
+      <span className="relative min-h-44 overflow-hidden bg-muted">
+        {hasImage ? (
+          <Image
+            src={record.imageUrl!}
+            alt=""
+            fill
+            sizes="176px"
+            unoptimized={!isPdsBlobUrl(record.imageUrl)}
+            onError={() => setImgError(true)}
+            className="object-cover transition-transform duration-500 group-hover:scale-105"
+          />
+        ) : (
+          <span className="grid h-full place-items-center bg-primary/8 text-primary/45">
+            <FolderKanbanIcon className="h-8 w-8" aria-hidden />
+          </span>
+        )}
+      </span>
+
+      <span className="flex min-w-0 flex-col justify-between p-4">
+        <span className="min-w-0">
+          <span className="flex min-w-0 items-center gap-2 text-xs text-muted-foreground">
+            <span className="truncate">{record.creatorName ?? t("projectSteward")}</span>
+            {place ? <><span aria-hidden>·</span><span className="truncate">{place}</span></> : null}
+          </span>
+          <span className="mt-2 line-clamp-2 font-instrument text-2xl italic leading-tight text-foreground">{record.title}</span>
+          {record.shortDescription ? <span className="mt-2 line-clamp-2 text-sm leading-5 text-muted-foreground">{record.shortDescription}</span> : null}
+        </span>
+
+        <span className="mt-3 flex items-end justify-between gap-3 border-t border-border/60 pt-3">
+          <span className="min-w-0 truncate text-sm text-muted-foreground">
+            {totalUsd > 0 && donorCount > 0 ? (
+              <><strong className="font-semibold text-foreground">{formatCompactUsd(totalUsd)}</strong> {t("byDonors", { donors: donorCount })}</>
+            ) : t("openForSupport")}
+          </span>
+          <ArrowRightIcon className="h-4 w-4 shrink-0 text-primary transition-transform group-hover:translate-x-1" aria-hidden />
+        </span>
+      </span>
+    </button>
   );
 }
 
@@ -773,7 +836,7 @@ const ProjectGrid = memo(function ProjectGrid({
   }
 
   return (
-    <div className="mt-5 grid grid-cols-[repeat(auto-fill,minmax(260px,1fr))] items-stretch gap-6 lg:gap-8">
+    <div className="mt-5 grid grid-cols-1 items-stretch gap-5 sm:grid-cols-[repeat(auto-fill,minmax(300px,1fr))] lg:gap-6">
       {records.map((record, index) => (
         <ProjectCard
           key={record.id}
@@ -824,7 +887,7 @@ const ProjectList = memo(function ProjectList({
 function ProjectGridSkeleton() {
   const t = useTranslations("marketplace.projects.card");
   return (
-    <div className="mt-5 grid grid-cols-[repeat(auto-fill,minmax(260px,1fr))] items-stretch gap-6 lg:gap-8" aria-label={t("loading")}>
+    <div className="mt-5 grid grid-cols-1 items-stretch gap-5 sm:grid-cols-[repeat(auto-fill,minmax(300px,1fr))] lg:gap-6" aria-label={t("loading")}>
       {Array.from({ length: 12 }).map((_, index) => (
         <div key={index} className="overflow-hidden rounded-3xl border border-border bg-card">
           <Skeleton className="aspect-[16/10] rounded-none" />
