@@ -633,6 +633,14 @@
     "viewOnExplorer": "View this address on Etherscan",
     "explorer": "Etherscan"
   },
+  "accountSupport": {
+    "button": "Support",
+    "buttonAria": "Support {name} directly",
+    "modalTitle": "Support {name}",
+    "modalDescription": "Choose an amount to give directly to {name}.",
+    "directNote": "100% goes directly to {name} — no platform fee, and the network fee is covered for you.",
+    "cartLabel": "Direct account support"
+  },
   "accountDonations": {
     "emptyHeroDescription": "Support a project and your contributions show up here, each linked to the project you backed.",
     "emptyHeroCta": "Explore projects",

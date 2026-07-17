@@ -1,9 +1,8 @@
 "use client";
 
 /**
- * Checkout for the donation cart. One USDC wallet approval per project plus
- * an optional GainForest tip (slider, default 10%) that goes to the platform
- * wallet covering everyone's network fees.
+ * Checkout for project and direct account donations, plus an optional
+ * GainForest tip that helps cover network fees.
  *
  * Payments run sequentially; each line shows its own progress. Successful
  * lines are removed from the cart immediately, so a partial failure leaves
@@ -403,7 +402,7 @@ export function CheckoutView({ authSession }: { authSession: AuthSession }) {
           body: {
             lines: readyLines.map(({ item }) => ({
               orgDid: item.orgDid,
-              rkey: item.rkey,
+              ...(item.kind === "project" ? { rkey: item.rkey } : {}),
               amount: String(item.amountUsd),
             })),
             ...(includeTip ? { tipAmount: String(tipUsd) } : {}),
@@ -414,8 +413,9 @@ export function CheckoutView({ authSession }: { authSession: AuthSession }) {
 
         if (outcome.ok) {
           for (const { item, key } of readyLines) {
+            const expectedRkey = item.kind === "project" ? item.rkey : undefined;
             const lineResult = outcome.response.lines?.find(
-              (line) => line.orgDid === item.orgDid && line.rkey === item.rkey,
+              (line) => line.orgDid === item.orgDid && line.rkey === expectedRkey,
             );
             if (lineResult?.transactionHash) {
               setLine(key, { phase: "done", txHash: lineResult.transactionHash });
@@ -474,7 +474,9 @@ export function CheckoutView({ authSession }: { authSession: AuthSession }) {
           amountUsd: item.amountUsd,
           endpoint: "/api/fund",
           body: {
-            activityUri: `at://${item.orgDid}/org.hypercerts.claim.activity/${item.rkey}`,
+            ...(item.kind === "project"
+              ? { activityUri: `at://${item.orgDid}/org.hypercerts.claim.activity/${item.rkey}` }
+              : {}),
             orgDid: item.orgDid,
             amount: String(item.amountUsd),
             currency: "USDC",

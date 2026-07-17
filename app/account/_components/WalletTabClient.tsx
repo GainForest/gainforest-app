@@ -144,6 +144,7 @@ export function WalletTabClient({ organization }: { organization?: OrganizationW
       const response = await action();
       if (!response.ok) throw new Error(await readError(response, fallbackError));
       await load();
+      window.dispatchEvent(new Event("gainforest:wallet-changed"));
     } catch (err) {
       setActionError(err instanceof Error ? err.message : fallbackError);
     } finally {

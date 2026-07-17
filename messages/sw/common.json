@@ -633,6 +633,14 @@
     "viewOnExplorer": "Tazama anwani hii kwenye Etherscan",
     "explorer": "Etherscan"
   },
+  "accountSupport": {
+    "button": "Saidia",
+    "buttonAria": "Saidia {name} moja kwa moja",
+    "modalTitle": "Saidia {name}",
+    "modalDescription": "Chagua kiasi cha kumpa {name} moja kwa moja.",
+    "directNote": "100% inaenda moja kwa moja kwa {name}, bila ada ya jukwaa na ada ya mtandao imelipiwa kwa ajili yako.",
+    "cartLabel": "Msaada wa moja kwa moja kwa akaunti"
+  },
   "accountDonations": {
     "emptyHeroDescription": "Unga mkono mradi na michango yako itaonekana hapa, kila moja ikiwa na kiungo kwa mradi uliouunga mkono.",
     "emptyHeroCta": "Gundua miradi",

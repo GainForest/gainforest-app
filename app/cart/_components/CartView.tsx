@@ -6,14 +6,29 @@
  * cart (localStorage) until checkout completes them.
  */
 
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { CompassIcon, ImageIcon, ShoppingCartIcon, XIcon } from "lucide-react";
+import { CompassIcon, ImageIcon, ShoppingCartIcon, WalletIcon, XIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { PreferredBumicertLink } from "@/app/_components/PreferredLinks";
 import { cartItemKey, useCart, type CartItem } from "@/app/_components/cart/CartProvider";
+
+function CartItemLink({ item, className, children }: { item: CartItem; className: string; children: ReactNode }) {
+  if (item.kind === "account") {
+    return (
+      <Link href={`/account/${encodeURIComponent(item.orgDid)}`} className={className}>
+        {children}
+      </Link>
+    );
+  }
+  return (
+    <PreferredBumicertLink did={item.orgDid} rkey={item.rkey} className={className}>
+      {children}
+    </PreferredBumicertLink>
+  );
+}
 
 export function itemAmountValid(item: CartItem): boolean {
   if (!Number.isFinite(item.amountUsd) || item.amountUsd <= 0) return false;
@@ -37,9 +52,8 @@ function CartItemRow({ item }: { item: CartItem }) {
 
   return (
     <li className="flex gap-4 py-5 first:pt-0 last:pb-0">
-      <PreferredBumicertLink
-        did={item.orgDid}
-        rkey={item.rkey}
+      <CartItemLink
+        item={item}
         className="block size-20 shrink-0 overflow-hidden rounded-xl border border-border-soft bg-muted"
       >
         {item.image ? (
@@ -47,21 +61,20 @@ function CartItemRow({ item }: { item: CartItem }) {
           <img src={item.image} alt="" className="size-full object-cover" />
         ) : (
           <span className="grid size-full place-items-center text-muted-foreground">
-            <ImageIcon className="size-6" aria-hidden />
+            {item.kind === "account" ? <WalletIcon className="size-6" aria-hidden /> : <ImageIcon className="size-6" aria-hidden />}
           </span>
         )}
-      </PreferredBumicertLink>
+      </CartItemLink>
 
       <div className="flex min-w-0 flex-1 flex-col gap-2">
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0">
-            <PreferredBumicertLink
-              did={item.orgDid}
-              rkey={item.rkey}
+            <CartItemLink
+              item={item}
               className="line-clamp-2 text-sm font-semibold text-foreground hover:underline"
             >
               {item.title}
-            </PreferredBumicertLink>
+            </CartItemLink>
             <p className="mt-0.5 truncate text-xs text-muted-foreground">{item.orgName}</p>
           </div>
           <button

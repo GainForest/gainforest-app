@@ -18,7 +18,7 @@
   },
   "cartPage": {
     "title": "Carrito",
-    "projectCount": "{count, plural, one {# proyecto} other {# proyectos}}",
+    "projectCount": "{count, plural, one {# artículo} other {# artículos}}",
     "emptyTitle": "Tu carrito está vacío",
     "emptyDescription": "Encuentra un proyecto que te encante y añade una donación — todo lo que hay en tu carrito se paga junto al finalizar la compra.",
     "exploreProjects": "Explorar proyectos",
@@ -29,7 +29,7 @@
     "invalidAmount": "Introduce un monto mayor que cero.",
     "donations": "Donaciones",
     "total": "Total",
-    "feesNote": "Sin comisiones de plataforma — el 100% va a la billetera verificada de cada proyecto. Puedes añadir una propina opcional para GainForest al finalizar.",
+    "feesNote": "Sin comisiones de plataforma: el 100 % va a la billetera verificada de cada destinatario. Puedes añadir una propina opcional para GainForest al finalizar.",
     "checkout": "Finalizar compra",
     "fixAmounts": "Corrige los montos marcados para continuar."
   },
@@ -63,13 +63,13 @@
     "insufficientBalance": "Tu billetera no tiene suficiente USDC para este total.",
     "multiApprovalNote": "{count, plural, one {Tu billetera te pedirá aprobar # pago.} other {Tu billetera te pedirá aprobar # pagos, uno tras otro.}}",
     "donateNow": "Donar {amount} ahora",
-    "footerNote": "El 100% de tu donación va a la billetera verificada de cada proyecto — las tarifas de red están cubiertas para ti.",
+    "footerNote": "El 100 % de tu donación va a la billetera verificada de cada destinatario; las tarifas de red están cubiertas para ti.",
     "processing": "Procesando…",
     "doNotClose": "No cierres esta ventana.",
     "tryAgain": "Intentar de nuevo",
     "blockedItems": "Aún no pueden recibir donaciones, por lo que se excluyen de este pago: {titles}",
     "errorProfile": "No pudimos vincular esta donación a tu perfil. Inicia sesión de nuevo o dona de forma anónima.",
-    "errorCannotReceive": "Esta organización aún no puede recibir donaciones.",
+    "errorCannotReceive": "Esta cuenta aún no puede recibir donaciones.",
     "errorAmount": "Revisa el monto de la donación e inténtalo de nuevo.",
     "errorChanged": "Los detalles del pago cambiaron. Reinicia la donación.",
     "errorGeneric": "El pago falló. Inténtalo de nuevo.",
@@ -89,6 +89,6 @@
     "copyShareText": "Copiar texto para compartir",
     "exploreMore": "Explorar más proyectos",
     "emptyTitle": "Tu carrito está vacío",
-    "singleApprovalNote": "Tu billetera pedirá una sola aprobación por el total. Después, GainForest envía cada donación a su organización."
+    "singleApprovalNote": "Tu billetera pedirá una sola aprobación por el total. Después, GainForest envía cada donación a su destinatario."
   }
 }

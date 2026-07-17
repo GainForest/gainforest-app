@@ -18,6 +18,7 @@ import {
 import type { AccountRouteData } from "../_lib/account-route";
 import type { AccountOrganization } from "./AccountOrganizationsGrid";
 import { AccountMemberships } from "./AccountMemberships";
+import { AccountWalletSupport } from "./AccountWalletSupport";
 import { formatCountry } from "../../_lib/format";
 import { SocialGlyph } from "@/app/_components/SocialIcon";
 import { TrustedByBadges } from "@/app/_components/TrustedByBadges";
@@ -209,6 +210,11 @@ export function AccountHero({
               </Button>
             ) : null}
             <FollowButton targetDid={account.did} name={account.displayName} />
+            <AccountWalletSupport
+              did={account.did}
+              name={account.displayName}
+              image={account.avatarUrl}
+            />
             {account.kind === "organization" ? (
               <Button asChild variant="outline">
                 <Link href={`/globe/${encodeURIComponent(account.urlIdentifier)}`}>
@@ -238,6 +244,11 @@ export function AccountHero({
         ) : (
           <div className="mt-5 flex flex-wrap items-center gap-2">
             <FollowButton targetDid={account.did} name={account.displayName} />
+            <AccountWalletSupport
+              did={account.did}
+              name={account.displayName}
+              image={account.avatarUrl}
+            />
             {account.kind === "organization" ? (
               <Button asChild variant="outline">
                 <Link href={`/globe/${encodeURIComponent(account.urlIdentifier)}`}>

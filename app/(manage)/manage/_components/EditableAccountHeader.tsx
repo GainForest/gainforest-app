@@ -26,6 +26,7 @@ import { cn } from "@/lib/utils";
 import type { AccountRouteData } from "@/app/account/_lib/account-route";
 import type { AccountOrganization } from "@/app/account/_components/AccountOrganizationsGrid";
 import { AccountMemberships } from "@/app/account/_components/AccountMemberships";
+import { AccountWalletSupport } from "@/app/account/_components/AccountWalletSupport";
 import { countryFlag } from "@/app/_lib/format";
 import { resolvePdsHost } from "@/app/_lib/pds";
 import { putRecord, uploadBlob } from "../_lib/mutations";
@@ -518,6 +519,11 @@ function EditableHero({
             <GlobeIcon />
             {resolvedWebsite ? null : t("hero.addWebsite")}
           </Button>
+          <AccountWalletSupport
+            did={account.did}
+            name={editState.displayName || account.displayName}
+            image={account.avatarUrl}
+          />
           {isOrg ? (
             <Button variant="outline" onClick={onEditVisibility} disabled={!canEdit} title={editDisabledReason ?? undefined}>
               {editState.visibility === "Unlisted" ? <LockIcon /> : <EyeIcon />} {editState.visibility}

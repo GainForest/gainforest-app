@@ -51,7 +51,7 @@ function isAtUriString(value: string): value is `at://${string}` {
 function parseBody(raw: unknown): { ok: true; body: ParsedSettlementBody } | { ok: false; error: string } {
   if (!isRecord(raw)) return { ok: false, error: "Invalid request body" };
   const body = raw as SettlementBody;
-  if (typeof body.orgDid !== "string" || !body.orgDid.trim()) return { ok: false, error: "Missing organization profile" };
+  if (typeof body.orgDid !== "string" || !body.orgDid.trim()) return { ok: false, error: "Missing recipient profile" };
   if (typeof body.anonymous !== "boolean") return { ok: false, error: "Missing anonymous flag" };
   if (body.activityUri !== undefined && (typeof body.activityUri !== "string" || !isAtUriString(body.activityUri))) {
     return { ok: false, error: "Invalid activity link" };
@@ -127,10 +127,10 @@ export async function POST(request: Request) {
   const { authorization, signature } = payload.payload;
   const recipientWallet = await fetchVerifiedRecipientAddress(body.orgDid).catch(() => null);
   if (!recipientWallet || !isHexAddress(recipientWallet)) {
-    return Response.json({ error: "This organization cannot receive donations yet" }, { status: 422 });
+    return Response.json({ error: "This account cannot receive donations yet" }, { status: 422 });
   }
   if (authorization.to.toLowerCase() !== recipientWallet.toLowerCase()) {
-    return Response.json({ error: "Wallet details do not match this organization" }, { status: 422 });
+    return Response.json({ error: "Wallet details do not match this account" }, { status: 422 });
   }
 
   const amount = typeof body.amount === "string" ? normalizeUsdcAmountString(body.amount) : formatUsdcAmount(BigInt(authorization.value));

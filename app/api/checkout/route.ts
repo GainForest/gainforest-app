@@ -64,7 +64,7 @@ function parseBody(raw: unknown): { ok: true; body: ParsedBody } | { ok: false; 
   const lines: CheckoutLine[] = [];
   for (const value of raw.lines) {
     if (!isRecord(value)) return { ok: false, error: "Invalid donation line" };
-    if (typeof value.orgDid !== "string" || !value.orgDid.trim()) return { ok: false, error: "Missing organization profile" };
+    if (typeof value.orgDid !== "string" || !value.orgDid.trim()) return { ok: false, error: "Missing recipient profile" };
     if (typeof value.amount !== "string") return { ok: false, error: "Invalid donation amount" };
     const amount = normalizeUsdcAmountString(value.amount);
     if (!amount || parseUsdcAmount(amount) <= 0n) return { ok: false, error: "Invalid donation amount" };
@@ -160,7 +160,7 @@ export async function POST(request: Request) {
     const address = await fetchVerifiedRecipientAddress(line.orgDid).catch(() => null);
     if (!address || !isHexAddress(address)) {
       return Response.json(
-        { error: "This organization cannot receive donations yet", orgDid: line.orgDid },
+        { error: "This account cannot receive donations yet", orgDid: line.orgDid },
         { status: 422 },
       );
     }

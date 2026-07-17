@@ -18,7 +18,7 @@
   },
   "cartPage": {
     "title": "Carrinho",
-    "projectCount": "{count, plural, one {# projeto} other {# projetos}}",
+    "projectCount": "{count, plural, one {# item} other {# itens}}",
     "emptyTitle": "Seu carrinho está vazio",
     "emptyDescription": "Encontre um projeto que você ama e adicione uma doação — tudo no seu carrinho é pago junto na finalização.",
     "exploreProjects": "Explorar projetos",
@@ -29,7 +29,7 @@
     "invalidAmount": "Insira um valor acima de zero.",
     "donations": "Doações",
     "total": "Total",
-    "feesNote": "Sem taxas de plataforma — 100% vai para a carteira verificada de cada projeto. Você pode adicionar uma gorjeta opcional para a GainForest na finalização.",
+    "feesNote": "Sem taxas de plataforma — 100% vai para a carteira verificada de cada destinatário. Você pode adicionar uma gorjeta opcional para a GainForest na finalização.",
     "checkout": "Finalizar",
     "fixAmounts": "Corrija os valores destacados para continuar."
   },
@@ -63,13 +63,13 @@
     "insufficientBalance": "Sua carteira não tem USDC suficiente para este total.",
     "multiApprovalNote": "{count, plural, one {Sua carteira pedirá que você aprove # pagamento.} other {Sua carteira pedirá que você aprove # pagamentos, um após o outro.}}",
     "donateNow": "Doar {amount} agora",
-    "footerNote": "100% da sua doação vai para a carteira verificada de cada projeto — as taxas de rede são cobertas para você.",
+    "footerNote": "100% da sua doação vai para a carteira verificada de cada destinatário — as taxas de rede são cobertas para você.",
     "processing": "Processando…",
     "doNotClose": "Não feche esta janela.",
     "tryAgain": "Tentar novamente",
     "blockedItems": "Ainda não podem receber doações, portanto excluídos deste pagamento: {titles}",
     "errorProfile": "Não conseguimos vincular esta doação ao seu perfil. Entre novamente ou doe anonimamente.",
-    "errorCannotReceive": "Esta organização ainda não pode receber doações.",
+    "errorCannotReceive": "Esta conta ainda não pode receber doações.",
     "errorAmount": "Verifique o valor da doação e tente novamente.",
     "errorChanged": "Os detalhes do pagamento mudaram. Reinicie a doação.",
     "errorGeneric": "O pagamento falhou. Tente novamente.",
@@ -89,6 +89,6 @@
     "copyShareText": "Copiar texto de compartilhamento",
     "exploreMore": "Explorar mais projetos",
     "emptyTitle": "Seu carrinho está vazio",
-    "singleApprovalNote": "Sua carteira pedirá uma única aprovação pelo total. Depois, a GainForest encaminha cada doação para a sua organização."
+    "singleApprovalNote": "Sua carteira pedirá uma única aprovação pelo total. Depois, a GainForest encaminha cada doação para o destinatário."
   }
 }

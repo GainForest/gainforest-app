@@ -18,7 +18,7 @@
   },
   "cartPage": {
     "title": "Cart",
-    "projectCount": "{count, plural, one {# project} other {# projects}}",
+    "projectCount": "{count, plural, one {# item} other {# items}}",
     "emptyTitle": "Your cart is empty",
     "emptyDescription": "Find a project you love and add a donation — everything in your cart is paid together at checkout.",
     "exploreProjects": "Explore projects",
@@ -29,7 +29,7 @@
     "invalidAmount": "Enter an amount above zero.",
     "donations": "Donations",
     "total": "Total",
-    "feesNote": "No platform fees — 100% goes to each project’s verified wallet. You can add an optional tip for GainForest at checkout.",
+    "feesNote": "No platform fees — 100% goes to each recipient’s verified wallet. You can add an optional tip for GainForest at checkout.",
     "checkout": "Check out",
     "fixAmounts": "Fix the highlighted amounts to continue."
   },
@@ -63,13 +63,13 @@
     "insufficientBalance": "Your wallet does not have enough USDC for this total.",
     "multiApprovalNote": "{count, plural, one {Your wallet will ask you to approve # payment.} other {Your wallet will ask you to approve # payments, one after another.}}",
     "donateNow": "Donate {amount} now",
-    "footerNote": "100% of your donation goes to each project’s verified wallet — network fees are covered for you.",
+    "footerNote": "100% of your donation goes to each recipient’s verified wallet — network fees are covered for you.",
     "processing": "Processing…",
     "doNotClose": "Do not close this window.",
     "tryAgain": "Try again",
     "blockedItems": "Not ready to receive donations yet, so excluded from this payment: {titles}",
     "errorProfile": "We couldn’t link this donation to your profile. Sign in again or donate anonymously.",
-    "errorCannotReceive": "This organization cannot receive donations yet.",
+    "errorCannotReceive": "This account cannot receive donations yet.",
     "errorAmount": "Check the donation amount and try again.",
     "errorChanged": "The payment details changed. Please restart the donation.",
     "errorGeneric": "Payment failed. Please try again.",
@@ -89,6 +89,6 @@
     "copyShareText": "Copy share text",
     "exploreMore": "Explore more projects",
     "emptyTitle": "Your cart is empty",
-    "singleApprovalNote": "Your wallet will ask for a single approval covering the whole total. GainForest then forwards each donation to its organization."
+    "singleApprovalNote": "Your wallet will ask for a single approval covering the whole total. GainForest then forwards each donation to its recipient."
   }
 }

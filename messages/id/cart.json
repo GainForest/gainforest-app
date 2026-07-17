@@ -18,7 +18,7 @@
   },
   "cartPage": {
     "title": "Keranjang",
-    "projectCount": "{count, plural, other {# proyek}}",
+    "projectCount": "{count, plural, other {# item}}",
     "emptyTitle": "Keranjang Anda kosong",
     "emptyDescription": "Temukan proyek yang Anda sukai dan tambahkan donasi — semua isi keranjang dibayar bersama saat checkout.",
     "exploreProjects": "Jelajahi proyek",
@@ -29,7 +29,7 @@
     "invalidAmount": "Masukkan jumlah di atas nol.",
     "donations": "Donasi",
     "total": "Total",
-    "feesNote": "Tanpa biaya platform — 100% masuk ke dompet terverifikasi setiap proyek. Anda dapat menambahkan tip opsional untuk GainForest saat checkout.",
+    "feesNote": "Tanpa biaya platform — 100% masuk ke dompet terverifikasi setiap penerima. Anda dapat menambahkan tip opsional untuk GainForest saat checkout.",
     "checkout": "Checkout",
     "fixAmounts": "Perbaiki jumlah yang ditandai untuk melanjutkan."
   },
@@ -63,13 +63,13 @@
     "insufficientBalance": "Dompet Anda tidak memiliki cukup USDC untuk total ini.",
     "multiApprovalNote": "{count, plural, other {Dompet Anda akan meminta persetujuan # pembayaran, satu per satu.}}",
     "donateNow": "Donasi {amount} sekarang",
-    "footerNote": "100% donasi Anda masuk ke dompet terverifikasi setiap proyek — biaya jaringan ditanggung untuk Anda.",
+    "footerNote": "100% donasi Anda masuk ke dompet terverifikasi setiap penerima — biaya jaringan ditanggung untuk Anda.",
     "processing": "Memproses…",
     "doNotClose": "Jangan tutup jendela ini.",
     "tryAgain": "Coba lagi",
     "blockedItems": "Belum siap menerima donasi, jadi dikecualikan dari pembayaran ini: {titles}",
     "errorProfile": "Kami tidak dapat menautkan donasi ini ke profil Anda. Masuk lagi atau donasi secara anonim.",
-    "errorCannotReceive": "Organisasi ini belum dapat menerima donasi.",
+    "errorCannotReceive": "Akun ini belum dapat menerima donasi.",
     "errorAmount": "Periksa jumlah donasi dan coba lagi.",
     "errorChanged": "Detail pembayaran berubah. Mulai ulang donasi.",
     "errorGeneric": "Pembayaran gagal. Silakan coba lagi.",
@@ -89,6 +89,6 @@
     "copyShareText": "Salin teks berbagi",
     "exploreMore": "Jelajahi proyek lainnya",
     "emptyTitle": "Keranjang Anda kosong",
-    "singleApprovalNote": "Dompet Anda akan meminta satu persetujuan untuk seluruh total. GainForest kemudian meneruskan setiap donasi ke organisasinya."
+    "singleApprovalNote": "Dompet Anda akan meminta satu persetujuan untuk seluruh total. GainForest kemudian meneruskan setiap donasi kepada penerimanya."
   }
 }

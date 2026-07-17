@@ -633,6 +633,14 @@
     "viewOnExplorer": "Lihat alamat ini di Etherscan",
     "explorer": "Etherscan"
   },
+  "accountSupport": {
+    "button": "Dukung",
+    "buttonAria": "Dukung {name} secara langsung",
+    "modalTitle": "Dukung {name}",
+    "modalDescription": "Pilih jumlah yang ingin diberikan langsung kepada {name}.",
+    "directNote": "100% langsung diberikan kepada {name}, tanpa biaya platform dan biaya jaringan ditanggung untuk Anda.",
+    "cartLabel": "Dukungan langsung untuk akun"
+  },
   "accountDonations": {
     "emptyHeroDescription": "Dukung sebuah proyek dan kontribusi Anda akan muncul di sini, masing-masing tertaut ke proyek yang Anda dukung.",
     "emptyHeroCta": "Jelajahi proyek",

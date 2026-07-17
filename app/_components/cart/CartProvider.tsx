@@ -1,10 +1,9 @@
 "use client";
 
 /**
- * Donation cart — a localStorage-backed basket of bumicerts the visitor wants
- * to support, MaEarth/Amazon style. Items are added from a cert page, edited
- * on /cart and paid together on /checkout (one USDC approval per project plus
- * an optional GainForest tip).
+ * Donation cart — a localStorage-backed basket of projects and accounts the
+ * visitor wants to support. Items are edited on /cart and paid together on
+ * /checkout with an optional GainForest tip.
  *
  * The tip percentage chosen at checkout is persisted alongside the items so
  * an abandoned checkout keeps the visitor's choice.
@@ -13,9 +12,11 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 
 export type CartItem = {
-  /** Organization (repo) DID that receives the donation. */
+  /** Project donation or direct support for a user/organization account. */
+  kind: "project" | "account";
+  /** Account DID that receives the donation. */
   orgDid: string;
-  /** Bumicert record key — `${orgDid}/${rkey}` identifies a cart line. */
+  /** Project record key, or ACCOUNT_SUPPORT_RKEY for direct account support. */
   rkey: string;
   title: string;
   orgName: string;
@@ -27,6 +28,8 @@ export type CartItem = {
 
 const DEFAULT_TIP_PERCENT = 10;
 export const MAX_TIP_PERCENT = 25;
+/** Stable local cart key for a donation made directly to an account wallet. */
+export const ACCOUNT_SUPPORT_RKEY = "$account";
 
 const STORAGE_KEY = "gainforest.donation-cart.v1";
 
@@ -73,6 +76,7 @@ function parseStoredCart(raw: string | null): StoredCart {
         continue;
       }
       items.push({
+        kind: item.kind === "account" ? "account" : "project",
         orgDid: item.orgDid,
         rkey: item.rkey,
         title: item.title,

@@ -633,6 +633,14 @@
     "viewOnExplorer": "Ver esta dirección en Etherscan",
     "explorer": "Etherscan"
   },
+  "accountSupport": {
+    "button": "Apoyar",
+    "buttonAria": "Apoyar directamente a {name}",
+    "modalTitle": "Apoyar a {name}",
+    "modalDescription": "Elige una cantidad para donar directamente a {name}.",
+    "directNote": "El 100 % va directamente a {name}, sin comisión de plataforma y con la comisión de red cubierta.",
+    "cartLabel": "Apoyo directo a la cuenta"
+  },
   "accountDonations": {
     "emptyHeroDescription": "Apoya un proyecto y tus contribuciones aparecerán aquí, cada una enlazada al proyecto que apoyaste.",
     "emptyHeroCta": "Explorar proyectos",
