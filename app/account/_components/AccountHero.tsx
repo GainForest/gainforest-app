@@ -11,7 +11,6 @@ import {
   CheckIcon,
   EarthIcon,
   GlobeIcon,
-  MapPinIcon,
   PencilIcon,
   Share2Icon,
 } from "lucide-react";
@@ -76,7 +75,7 @@ export function AccountHero({
   const sinceDate = formatSinceDate(account.kind === "organization" ? account.foundedDate ?? account.createdAt : account.createdAt);
   const country = account.country ? formatCountry(account.country) : null;
   const orgType = account.kind === "organization" ? account.orgType ?? account.summary.certOrgType : null;
-  const hasDetails = sinceDate.state === "valid" || country || orgType || account.website || account.socialLinks.length > 0;
+  const hasFacts = Boolean(sinceDate.state === "valid" || country || orgType);
 
   function handleShare() {
     const publicUrl = `${window.location.origin}/account/${encodeURIComponent(account.urlIdentifier)}`;
@@ -178,87 +177,68 @@ export function AccountHero({
               {account.description ?? ""}
             </p>
             <FollowStats targetDid={account.did} identifier={account.urlIdentifier} className="mt-2.5" />
+            {/* Quiet facts — read-only metadata rendered as text, never as
+                fake buttons, so only real actions look pressable. */}
+            {hasFacts ? (
+              <div className="mt-2.5 flex flex-wrap items-center gap-x-4 gap-y-1 text-[13px] text-muted-foreground">
+                {orgType ? (
+                  <span className="inline-flex items-center gap-1.5">
+                    <Building2Icon className="size-3.5 opacity-70" aria-hidden />
+                    {orgType}
+                  </span>
+                ) : null}
+                {country ? <span className="inline-flex items-center gap-1.5">{country}</span> : null}
+                {sinceDate.state === "valid" ? (
+                  <span className="inline-flex items-center gap-1.5">
+                    <CalendarIcon className="size-3.5 opacity-70" aria-hidden />
+                    {heroT("sinceDate", { date: sinceDate.label ?? "" })}
+                  </span>
+                ) : null}
+              </div>
+            ) : null}
             <TrustedByBadges did={account.did} variant="plain" className="mt-3 w-fit" />
             <AccountMemberships organizations={memberships} className="mt-3" />
           </div>
         </div>
 
-        {hasDetails ? (
-          <div className="mt-5 flex flex-wrap items-center gap-2">
-            {orgType ? (
-              <Button asChild variant="outline">
-                <span>
-                  <Building2Icon />
-                  {orgType}
-                </span>
-              </Button>
-            ) : null}
-            {country ? (
-              <Button asChild variant="outline">
-                <span>
-                  <MapPinIcon />
-                  {country}
-                </span>
-              </Button>
-            ) : null}
-            {sinceDate.state === "valid" ? (
-              <Button asChild variant="outline">
-                <span>
-                  <CalendarIcon />
-                  {heroT("sinceDate", { date: sinceDate.label ?? "" })}
-                </span>
-              </Button>
-            ) : null}
-            <FollowButton targetDid={account.did} name={account.displayName} />
-            <AccountWalletSupport
-              did={account.did}
-              name={account.displayName}
-              image={account.avatarUrl}
-            />
-            {account.kind === "organization" ? (
-              <Button asChild variant="outline">
-                <Link href={`/globe/${encodeURIComponent(account.urlIdentifier)}`}>
-                  <EarthIcon />
-                  {globeT("viewOnGlobe")}
+        {/* Actions — one row of same-height pills: follow, direct support,
+            then the outbound links (globe view, website, socials). */}
+        <div className="mt-6 flex flex-wrap items-center gap-2">
+          <FollowButton targetDid={account.did} name={account.displayName} />
+          <AccountWalletSupport
+            did={account.did}
+            name={account.displayName}
+            image={account.avatarUrl}
+          />
+          {account.kind === "organization" ? (
+            <Button asChild variant="outline">
+              <Link href={`/globe/${encodeURIComponent(account.urlIdentifier)}`}>
+                <EarthIcon />
+                {globeT("viewOnGlobe")}
+              </Link>
+            </Button>
+          ) : null}
+          {(account.website || account.socialLinks.length > 0) ? (
+            <span aria-hidden className="mx-1 hidden h-5 w-px bg-border sm:block" />
+          ) : null}
+          {account.website ? (
+            <Button asChild variant="outline" size="icon" className="text-muted-foreground hover:text-foreground" title={formatWebsite(account.website)} aria-label={heroT("openSocialLink", { link: formatWebsite(account.website) })}>
+              <Link href={externalHref(account.website)} target="_blank" rel="noopener noreferrer">
+                <GlobeIcon />
+              </Link>
+            </Button>
+          ) : null}
+          {account.socialLinks.map((url) => {
+            const label = formatWebsite(url);
+            return (
+              <Button key={url} asChild variant="outline" size="icon" className="text-muted-foreground hover:text-foreground" title={label} aria-label={heroT("openSocialLink", { link: label })}>
+                <Link href={externalHref(url)} target="_blank" rel="noopener noreferrer">
+                  <SocialGlyph platform={classifySocial(url)} />
                 </Link>
               </Button>
-            ) : null}
-            {account.website ? (
-              <Button asChild variant="outline" size="icon" title={formatWebsite(account.website)} aria-label={heroT("openSocialLink", { link: formatWebsite(account.website) })}>
-                <Link href={externalHref(account.website)} target="_blank" rel="noopener noreferrer">
-                  <GlobeIcon />
-                </Link>
-              </Button>
-            ) : null}
-            {account.socialLinks.map((url) => {
-              const label = formatWebsite(url);
-              return (
-                <Button key={url} asChild variant="outline" size="icon" title={label} aria-label={heroT("openSocialLink", { link: label })}>
-                  <Link href={externalHref(url)} target="_blank" rel="noopener noreferrer">
-                    <SocialGlyph platform={classifySocial(url)} />
-                  </Link>
-                </Button>
-              );
-            })}
-          </div>
-        ) : (
-          <div className="mt-5 flex flex-wrap items-center gap-2">
-            <FollowButton targetDid={account.did} name={account.displayName} />
-            <AccountWalletSupport
-              did={account.did}
-              name={account.displayName}
-              image={account.avatarUrl}
-            />
-            {account.kind === "organization" ? (
-              <Button asChild variant="outline">
-                <Link href={`/globe/${encodeURIComponent(account.urlIdentifier)}`}>
-                  <EarthIcon />
-                  {globeT("viewOnGlobe")}
-                </Link>
-              </Button>
-            ) : null}
-          </div>
-        )}
+            );
+          })}
+        </div>
       </div>
     </section>
     </FollowProvider>
