@@ -12,6 +12,7 @@ import {
 } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { stripLocaleFromPathname } from "@/lib/i18n/routing";
+import { ACTIVE_MANAGE_CONTEXT_KEY, accountManageBasePath } from "@/lib/links";
 import { renderPetAnimated, type CodexPetState } from "../_lib/codex-pet";
 import { TAINA_GUIDES, getTainaGuide, type TainaGuide } from "../_lib/taina-guides";
 import { TAINA_SIM } from "../_lib/taina-sim";
@@ -91,6 +92,32 @@ async function fetchManagedProjectCount(url: string): Promise<number | null> {
 
 function clamp(value: number, min: number, max: number): number {
   return Math.max(min, Math.min(value, max));
+}
+
+// Tour step routes are written against the legacy /manage/... shim, which
+// always server-redirects to the *personal* account's manage pages. When the
+// user is currently working as an organization (the account switcher context
+// persisted in localStorage), that redirect would yank them out of the org
+// mid-tour — so rewrite /manage routes to the active org's manage path and
+// skip the shim (and its full-page redirect) entirely.
+function resolveTourRoute(route: string): string {
+  if (route !== "/manage" && !route.startsWith("/manage/")) return route;
+  try {
+    const raw = window.localStorage.getItem(ACTIVE_MANAGE_CONTEXT_KEY);
+    if (!raw) return route;
+    const parsed = JSON.parse(raw) as { type?: unknown; did?: unknown; identifier?: unknown };
+    if (parsed?.type !== "group") return route;
+    const identifier =
+      typeof parsed.identifier === "string" && parsed.identifier.trim()
+        ? parsed.identifier.trim()
+        : typeof parsed.did === "string" && parsed.did.startsWith("did:")
+          ? parsed.did
+          : null;
+    if (!identifier) return route;
+    return `${accountManageBasePath(identifier)}${route.slice("/manage".length)}`;
+  } catch {
+    return route;
+  }
 }
 
 // Some tour targets are rendered twice for responsive layouts (e.g. the
@@ -594,16 +621,17 @@ export function FloatingTainaGuide() {
 
     const stepKey = `${tour.guideId}:${tour.index}`;
     activeStepKeyRef.current = stepKey;
+    const stepRoute = activeTourStep.route ? resolveTourRoute(activeTourStep.route) : undefined;
     if (
-      activeTourStep.route &&
-      pathname !== activeTourStep.route &&
+      stepRoute &&
+      pathname !== stepRoute &&
       navigatedStepRef.current !== stepKey &&
       // If the target is already on screen (shim redirects land on a page
       // that contains it), don't navigate at all.
       !(activeTourStep.selector && findVisibleTarget(activeTourStep.selector))
     ) {
       navigatedStepRef.current = stepKey;
-      router.push(`${localePrefix}${activeTourStep.route}`);
+      router.push(`${localePrefix}${stepRoute}`);
     }
 
     if (!activeTourStep.selector) {
