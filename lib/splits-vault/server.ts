@@ -18,6 +18,7 @@ import { resolveDidIdentity } from "@/app/_lib/did-identity";
 import {
   SMART_VAULT_FACTORY,
   SMART_VAULT_FACTORY_ABI,
+  MULTI_SIGNER_AUTH_ABI,
   PRIMARY_WALLET_COLLECTION,
   PRIMARY_WALLET_RKEY,
   LEGACY_WALLET_COLLECTION,
@@ -28,10 +29,13 @@ import {
   orgVaultSalt,
   parsePendingSendRecord,
   parseSplitsVaultRecord,
+  signerDirectory,
   toSignerStruct,
   type PendingSendRecord,
   type SplitsVaultRecord,
+  type VaultLiveSigner,
   type VaultPasskeySigner,
+  type VaultSignerSet,
   type WalletCollection,
 } from "./shared";
 
@@ -168,6 +172,77 @@ export async function getWalletBalances(address: `0x${string}`): Promise<WalletB
 export async function fetchSplitsVaultRecord(did: string): Promise<SplitsVaultRecord | null> {
   const found = await fetchWalletRecordWithSource(did);
   return found?.record ?? null;
+}
+
+// ── Live signer set ──────────────────────────────────────────────────────────
+
+/** How many on-chain signer slots we scan (indexes may have holes after removals). */
+const SIGNER_SCAN_LIMIT = 64;
+
+/**
+ * The wallet's CURRENT signer set + threshold. For an undeployed vault this
+ * is the founding set from the record; for a deployed vault the chain is the
+ * authority (signers/threshold may have been changed on-chain), joined with
+ * the record's passkey-metadata directory so the UI can label signers and
+ * the browser can find the matching WebAuthn credentials.
+ */
+export async function getVaultSignerSet(record: SplitsVaultRecord, deployed: boolean): Promise<VaultSignerSet> {
+  if (!deployed) {
+    return {
+      deployed: false,
+      threshold: record.threshold,
+      signers: record.signers.map((signer, index) => ({
+        index,
+        publicKeyX: signer.publicKeyX,
+        publicKeyY: signer.publicKeyY,
+        credentialId: signer.credentialId,
+        label: signer.label,
+        memberDid: signer.memberDid,
+      })),
+    };
+  }
+
+  const client = getClient();
+  const [threshold, signerCount] = await Promise.all([
+    client.readContract({ address: record.address, abi: MULTI_SIGNER_AUTH_ABI, functionName: "getThreshold" }),
+    client.readContract({ address: record.address, abi: MULTI_SIGNER_AUTH_ABI, functionName: "getSignerCount" }),
+  ]);
+
+  const directory = signerDirectory(record);
+  const scanLimit = Math.min(Math.max(directory.length + 8, 16), SIGNER_SCAN_LIMIT);
+  const slots = await client.multicall({
+    contracts: Array.from({ length: scanLimit }, (_, index) => ({
+      address: record.address,
+      abi: MULTI_SIGNER_AUTH_ABI,
+      functionName: "getSigner" as const,
+      args: [index],
+    })),
+    allowFailure: true,
+  });
+
+  const signers: VaultLiveSigner[] = [];
+  for (let index = 0; index < slots.length && signers.length < signerCount; index += 1) {
+    const slot = slots[index];
+    if (slot.status !== "success") continue;
+    const value = slot.result as { slot1: `0x${string}`; slot2: `0x${string}` };
+    // Empty slot (removed or never used) — both words zero.
+    if (BigInt(value.slot1) === 0n && BigInt(value.slot2) === 0n) continue;
+    const meta = directory.find(
+      (entry) =>
+        entry.publicKeyX.toLowerCase() === value.slot1.toLowerCase() &&
+        entry.publicKeyY.toLowerCase() === value.slot2.toLowerCase(),
+    );
+    signers.push({
+      index,
+      publicKeyX: value.slot1,
+      publicKeyY: value.slot2,
+      credentialId: meta?.credentialId,
+      label: meta?.label,
+      memberDid: meta?.memberDid,
+    });
+  }
+
+  return { deployed: true, threshold: Number(threshold), signers };
 }
 
 /** Fetch the wallet's pending multi-approval transfer, if any. */

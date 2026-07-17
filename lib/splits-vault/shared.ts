@@ -114,11 +114,43 @@ export type SplitsVaultRecord = {
   factory: `0x${string}`;
   chainId: number;
   owner: `0x${string}`;
+  /** FOUNDING threshold — a CREATE2 input. The live threshold of a deployed vault is read on-chain. */
   threshold: number;
   saltScheme: string;
+  /** FOUNDING signer set — a CREATE2 input, frozen once the vault is deployed. */
   signers: VaultPasskeySigner[];
+  /**
+   * Passkeys enrolled ON-CHAIN after deployment (metadata directory only —
+   * the chain is the authority for which signers are live). Append-only;
+   * removals need no record change.
+   */
+  addedSigners?: VaultPasskeySigner[];
   createdAt: string;
 };
+
+/** One live signer slot of the vault, joined with passkey metadata when known. */
+export type VaultLiveSigner = {
+  /** On-chain signer index (SignatureWrapper.signerIndex). */
+  index: number;
+  publicKeyX: `0x${string}`;
+  publicKeyY: `0x${string}`;
+  /** Metadata from the record directory — absent for signers added outside GainForest. */
+  credentialId?: string;
+  label?: string;
+  memberDid?: string;
+};
+
+/** The CURRENT signer set + threshold of a wallet (on-chain when deployed). */
+export type VaultSignerSet = {
+  deployed: boolean;
+  threshold: number;
+  signers: VaultLiveSigner[];
+};
+
+/** All passkey metadata the record knows about (founding + on-chain added). */
+export function signerDirectory(record: SplitsVaultRecord): VaultPasskeySigner[] {
+  return [...record.signers, ...(record.addedSigners ?? [])];
+}
 
 // ── Pending sends (remote multi-approval transfers) ──────────────────────
 
@@ -289,8 +321,28 @@ export function parseSplitsVaultRecord(value: unknown): SplitsVaultRecord | null
   if (typeof record.chainId !== "number" || typeof record.threshold !== "number") return null;
   if (!Number.isInteger(record.threshold) || record.threshold < 1 || record.threshold > 255) return null;
   if (typeof record.saltScheme !== "string" || !Array.isArray(record.signers)) return null;
+  const signers = parseSignerArray(record.signers);
+  if (!signers || signers.length === 0) return null;
+  if (record.threshold > signers.length) return null;
+  const addedSigners = Array.isArray(record.addedSigners) ? parseSignerArray(record.addedSigners) : null;
+  return {
+    $type: record.$type,
+    name: typeof record.name === "string" ? record.name : undefined,
+    address: record.address as `0x${string}`,
+    factory: record.factory as `0x${string}`,
+    chainId: record.chainId,
+    owner: record.owner as `0x${string}`,
+    threshold: record.threshold,
+    saltScheme: record.saltScheme,
+    signers,
+    ...(addedSigners && addedSigners.length > 0 ? { addedSigners } : {}),
+    createdAt: typeof record.createdAt === "string" ? record.createdAt : "",
+  };
+}
+
+function parseSignerArray(value: unknown[]): VaultPasskeySigner[] | null {
   const signers: VaultPasskeySigner[] = [];
-  for (const raw of record.signers) {
+  for (const raw of value) {
     const s = raw as Record<string, unknown>;
     if (s?.kind !== "passkey") return null;
     if (!isHex32(s.publicKeyX) || !isHex32(s.publicKeyY)) return null;
@@ -305,21 +357,74 @@ export function parseSplitsVaultRecord(value: unknown): SplitsVaultRecord | null
       addedAt: typeof s.addedAt === "string" ? s.addedAt : "",
     });
   }
-  if (signers.length === 0) return null;
-  if (record.threshold > signers.length) return null;
-  return {
-    $type: record.$type,
-    name: typeof record.name === "string" ? record.name : undefined,
-    address: record.address as `0x${string}`,
-    factory: record.factory as `0x${string}`,
-    chainId: record.chainId,
-    owner: record.owner as `0x${string}`,
-    threshold: record.threshold,
-    saltScheme: record.saltScheme,
-    signers,
-    createdAt: typeof record.createdAt === "string" ? record.createdAt : "",
-  };
+  return signers;
 }
+
+// ── MultiSignerAuth ABI (live signer set of a deployed vault) ───────────────
+
+export const MULTI_SIGNER_AUTH_ABI = [
+  {
+    type: "function",
+    name: "getSigner",
+    stateMutability: "view",
+    inputs: [{ name: "index_", type: "uint8" }],
+    outputs: [
+      {
+        name: "",
+        type: "tuple",
+        components: [
+          { name: "slot1", type: "bytes32" },
+          { name: "slot2", type: "bytes32" },
+        ],
+      },
+    ],
+  },
+  {
+    type: "function",
+    name: "getSignerCount",
+    stateMutability: "view",
+    inputs: [],
+    outputs: [{ name: "", type: "uint8" }],
+  },
+  {
+    type: "function",
+    name: "getThreshold",
+    stateMutability: "view",
+    inputs: [],
+    outputs: [{ name: "", type: "uint8" }],
+  },
+  {
+    type: "function",
+    name: "addSigner",
+    stateMutability: "nonpayable",
+    inputs: [
+      {
+        name: "signer_",
+        type: "tuple",
+        components: [
+          { name: "slot1", type: "bytes32" },
+          { name: "slot2", type: "bytes32" },
+        ],
+      },
+      { name: "index_", type: "uint8" },
+    ],
+    outputs: [],
+  },
+  {
+    type: "function",
+    name: "removeSigner",
+    stateMutability: "nonpayable",
+    inputs: [{ name: "index_", type: "uint8" }],
+    outputs: [],
+  },
+  {
+    type: "function",
+    name: "updateThreshold",
+    stateMutability: "nonpayable",
+    inputs: [{ name: "threshold_", type: "uint8" }],
+    outputs: [],
+  },
+] as const;
 
 // ── Factory ABI (the slice we use) ────────────────────────────────────────────
 

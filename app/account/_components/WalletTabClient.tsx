@@ -26,7 +26,6 @@ import {
   ExternalLinkIcon,
   FingerprintIcon,
   Loader2Icon,
-  LockIcon,
   SendIcon,
   ShieldCheckIcon,
   Trash2Icon,
@@ -37,7 +36,12 @@ import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { createVaultPasskey, isPasskeySupported, signVaultUserOp } from "@/lib/splits-vault/passkey";
-import type { PendingSendRecord, SplitsVaultRecord, VaultPasskeySigner } from "@/lib/splits-vault/shared";
+import type {
+  PendingSendRecord,
+  SplitsVaultRecord,
+  VaultLiveSigner,
+  VaultSignerSet,
+} from "@/lib/splits-vault/shared";
 import {
   WALLET_TOKENS,
   formatTokenUnits,
@@ -58,7 +62,17 @@ type WalletState = {
   holdsFunds?: boolean;
   balances?: WalletBalances | null;
   pendingSend?: PendingSendRecord | null;
+  /** The CURRENT signer set (on-chain when deployed). */
+  signerSet?: VaultSignerSet | null;
 };
+
+type ManageActionPayload =
+  | {
+      type: "addSigner";
+      passkey: { credentialId: string; publicKeyX: string; publicKeyY: string; label?: string };
+    }
+  | { type: "removeSigner"; signerIndex: number }
+  | { type: "setThreshold"; threshold: number };
 
 const TOKEN_COLORS: Record<WalletTokenSymbol, string> = {
   USDC: "#2775CA",
@@ -149,6 +163,9 @@ export function WalletTabClient({ organization }: { organization?: OrganizationW
   const [pendingBusy, setPendingBusy] = useState<"approve" | "finalize" | "cancel" | null>(null);
   const [sendError, setSendError] = useState<string | null>(null);
   const [sentTxHash, setSentTxHash] = useState<string | null>(null);
+  const [manageBusy, setManageBusy] = useState(false);
+  const [manageError, setManageError] = useState<string | null>(null);
+  const [manageApproval, setManageApproval] = useState<{ current: number; total: number } | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -258,16 +275,14 @@ export function WalletTabClient({ organization }: { organization?: OrganizationW
       newSignerLabel,
     );
 
-  const handleRemoveSigner = (signer: VaultPasskeySigner) =>
+  const handleRemoveSigner = (credentialId: string) =>
     runAction(
       () =>
         fetch(organization ? "/api/org-wallet" : "/api/wallet", {
           method: "PATCH",
           headers: { "content-type": "application/json" },
           body: JSON.stringify(
-            organization
-              ? { repo: organization.did, remove: { credentialId: signer.credentialId } }
-              : { remove: { credentialId: signer.credentialId } },
+            organization ? { repo: organization.did, remove: { credentialId } } : { remove: { credentialId } },
           ),
         }),
       t("removeSignerError"),
@@ -295,6 +310,8 @@ export function WalletTabClient({ organization }: { organization?: OrganizationW
         return t("sendErrorApprovalInvalid");
       case "cancel_forbidden":
         return t("pendingCancelForbidden");
+      case "manage_forbidden":
+        return t("manageForbidden");
       default:
         return t("sendErrorGeneric");
     }
@@ -401,7 +418,9 @@ export function WalletTabClient({ organization }: { organization?: OrganizationW
     }
     // Any enrolled passkey that has not approved yet may sign.
     const used = new Set(pending.approvals.map((approval) => approval.credentialId));
-    const pool = record.signers.map((signer) => signer.credentialId).filter((id) => !used.has(id));
+    const pool = liveSigners
+      .filter((signer) => signer.credentialId && !used.has(signer.credentialId))
+      .map((signer) => signer.credentialId as string);
     if (pool.length === 0) return;
 
     setPendingBusy(final ? "finalize" : "approve");
@@ -456,6 +475,87 @@ export function WalletTabClient({ organization }: { organization?: OrganizationW
     );
   };
 
+  // ── On-chain signer management (deployed or funded wallets) ───────────────
+
+  /**
+   * Run one signer-set change on-chain: prepare the self-call operation,
+   * collect the required passkey approvals one after another (light hash for
+   * all but the last, full hash last), then submit. Gas is sponsored.
+   */
+  const runManageAction = async (action: ManageActionPayload) => {
+    if (manageBusy || isBusy || sendBusy || pendingBusy) return;
+    setManageError(null);
+    if (!isPasskeySupported()) {
+      setManageError(t("passkeyUnsupported"));
+      return;
+    }
+    setManageBusy(true);
+    try {
+      const prepared = await sendRequest({ step: "prepareManage", action });
+      const hash = prepared.hash as `0x${string}` | undefined;
+      const lightHash = prepared.lightHash as `0x${string}` | undefined;
+      const threshold = typeof prepared.threshold === "number" && prepared.threshold >= 1 ? prepared.threshold : 1;
+      const allCredentialIds = (prepared.allCredentialIds as string[] | undefined) ?? [];
+      if (!hash || allCredentialIds.length === 0) throw new SendRequestError();
+      if (threshold > 1 && !lightHash) throw new SendRequestError();
+
+      const collected: Awaited<ReturnType<typeof signVaultUserOp>>[] = [];
+      const used = new Set<string>();
+      for (let i = 0; i < threshold; i += 1) {
+        setManageApproval(threshold > 1 ? { current: i + 1, total: threshold } : null);
+        const pool = allCredentialIds.filter((id) => !used.has(id));
+        if (pool.length === 0) throw new SendRequestError();
+        const challenge = i === threshold - 1 ? hash : (lightHash as `0x${string}`);
+        let signature: Awaited<ReturnType<typeof signVaultUserOp>>;
+        try {
+          signature = await signVaultUserOp(challenge, pool);
+        } catch {
+          return; // cancelled passkey prompt
+        }
+        if (used.has(signature.credentialId)) {
+          setManageError(t("sendDuplicatePasskey"));
+          return;
+        }
+        used.add(signature.credentialId);
+        collected.push(signature);
+      }
+
+      const submitted = await sendRequest({ step: "submitManage", userOp: prepared.userOp, signatures: collected, action });
+      if (!(submitted.transactionHash as string | undefined)) throw new SendRequestError();
+      await load();
+      window.dispatchEvent(new Event("gainforest:wallet-changed"));
+    } catch (err) {
+      setManageError(sendErrorForCode(err instanceof SendRequestError ? err.code : undefined));
+    } finally {
+      setManageBusy(false);
+      setManageApproval(null);
+    }
+  };
+
+  /** Create a new passkey and enroll it on-chain. */
+  const handleAddPasskeyOnchain = async () => {
+    if (manageBusy || isBusy) return;
+    setManageError(null);
+    if (!isPasskeySupported()) {
+      setManageError(t("passkeyUnsupported"));
+      return;
+    }
+    let passkey: Awaited<ReturnType<typeof createVaultPasskey>>;
+    try {
+      const passkeyName = organization
+        ? t("passkeyLabel", { org: organization.name })
+        : viewer.handle
+          ? t("passkeyLabel", { name: viewer.handle })
+          : t("passkeyLabelFallback");
+      passkey = await createVaultPasskey(passkeyName);
+    } catch {
+      return; // cancelled
+    }
+    const label = newSignerLabel.trim() || viewer.handle || undefined;
+    await runManageAction({ type: "addSigner", passkey: { ...passkey, ...(label ? { label } : {}) } });
+    setNewSignerLabel("");
+  };
+
   const applySendMax = () => {
     const token = getWalletToken(sendToken);
     const balance = state?.balances?.tokens.find((entry) => entry.symbol === sendToken);
@@ -480,16 +580,39 @@ export function WalletTabClient({ organization }: { organization?: OrganizationW
   const record = state?.record;
   const deployed = state?.deployed === true;
   const canManageWallet = !organization || state?.viewerRole === "owner" || state?.viewerRole === "admin";
-  const canEditSigners = !!record && !deployed;
-  const canRemoveSigner = (signer: VaultPasskeySigner) =>
-    canEditSigners && (!organization || canManageWallet || signer.memberDid === viewer.did);
+  // The wallet's CURRENT signers + threshold. On-chain state is the
+  // authority once deployed; before that the founding record is.
+  const liveSigners: VaultLiveSigner[] =
+    state?.signerSet?.signers ??
+    (record
+      ? record.signers.map((signer, index) => ({
+          index,
+          publicKeyX: signer.publicKeyX,
+          publicKeyY: signer.publicKeyY,
+          credentialId: signer.credentialId,
+          label: signer.label,
+          memberDid: signer.memberDid,
+        }))
+      : []);
+  const liveThreshold = state?.signerSet?.threshold ?? record?.threshold ?? 1;
+  // Pristine wallets (no code, no funds) edit the record for free; deployed
+  // or funded wallets change signers on-chain with sponsored gas.
+  const onchainManaged = !!record && (deployed || state?.holdsFunds === true);
+  const canEditSigners = !!record && !onchainManaged;
+  const canRemoveSigner = (signer: VaultLiveSigner) => {
+    const mine = !organization || canManageWallet || signer.memberDid === viewer.did;
+    if (!mine || liveSigners.length <= 1) return false;
+    if (canEditSigners) return true;
+    // On-chain removal must not drop the signer count below the threshold.
+    return onchainManaged && liveSigners.length - 1 >= liveThreshold;
+  };
   const balances = state?.balances ?? null;
   const totalUsd = balances && balances.tokens.every((entry) => entry.usd !== null)
     ? balances.tokens.reduce((sum, entry) => sum + (entry.usd ?? 0), 0)
     : null;
   const hasFunds = !!balances && balances.tokens.some((entry) => BigInt(entry.units) > 0n);
   // Only someone whose own passkey is enrolled can approve a send.
-  const canSend = !!record && record.signers.some((signer) => signer.memberDid === viewer.did);
+  const canSend = !!record && liveSigners.some((signer) => signer.memberDid === viewer.did && signer.credentialId);
   const sendBusy = sendPhase !== "idle";
   const pendingSend = state?.pendingSend ?? null;
   const pendingToken = pendingSend ? getWalletToken(pendingSend.token) : null;
@@ -500,7 +623,7 @@ export function WalletTabClient({ organization }: { organization?: OrganizationW
     !!record &&
     !!pendingToken &&
     pendingSend.userOp.sender.toLowerCase() === record.address.toLowerCase() &&
-    pendingSend.threshold === record.threshold;
+    pendingSend.threshold === liveThreshold;
   const pendingReadyToSend = !!pendingSend && pendingSend.approvals.length >= pendingSend.threshold - 1;
   const canCancelPending = !!pendingSend && (!organization || canManageWallet || pendingSend.createdBy === viewer.did);
 
@@ -706,9 +829,9 @@ export function WalletTabClient({ organization }: { organization?: OrganizationW
             <Card>
               <CardTitle Icon={SendIcon}>{t("sendHeading")}</CardTitle>
               <p className="mt-2 text-xs text-muted-foreground">{t("sendIntro")}</p>
-              {record.threshold > 1 ? (
+              {liveThreshold > 1 ? (
                 <p className="mt-1 text-xs text-muted-foreground">
-                  {t("sendApprovalsNeeded", { count: record.threshold })}
+                  {t("sendApprovalsNeeded", { count: liveThreshold })}
                 </p>
               ) : null}
               <div className="mt-4 space-y-3">
@@ -787,7 +910,7 @@ export function WalletTabClient({ organization }: { organization?: OrganizationW
                         ? t("sendAwaitingPasskey")
                         : sendPhase === "submitting"
                           ? t("sendSubmitting")
-                          : record.threshold > 1
+                          : liveThreshold > 1
                             ? t("sendStartButton")
                             : t("sendButton")}
                   </Button>
@@ -799,29 +922,30 @@ export function WalletTabClient({ organization }: { organization?: OrganizationW
           ) : null}
 
           <Card>
-            <div className="flex items-center justify-between gap-2">
-              <CardTitle Icon={FingerprintIcon}>{t("signersHeading")}</CardTitle>
-              {deployed ? (
-                <span className="inline-flex items-center gap-1 text-xs text-muted-foreground">
-                  <LockIcon className="size-3" aria-hidden />
-                  {t("signersLocked")}
-                </span>
-              ) : null}
-            </div>
+            <CardTitle Icon={FingerprintIcon}>{t("signersHeading")}</CardTitle>
             <div className="mt-4 flex flex-col gap-0.5 rounded-xl bg-muted p-1">
-              {record.signers.map((signer) => (
-                <div key={signer.credentialId} className="flex items-center gap-3 rounded-lg bg-background/60 px-3 py-2">
+              {liveSigners.map((signer) => (
+                <div
+                  key={signer.credentialId ?? `signer-${signer.index}`}
+                  className="flex items-center gap-3 rounded-lg bg-background/60 px-3 py-2"
+                >
                   <FingerprintIcon className="size-4 shrink-0 text-muted-foreground" aria-hidden />
                   <span className="min-w-0 flex-1 truncate text-sm leading-snug">
                     {signer.label || t("unnamedPasskey")}
                   </span>
-                  {canRemoveSigner(signer) && record.signers.length > 1 ? (
+                  {canRemoveSigner(signer) ? (
                     <Button
                       size="icon"
                       variant="ghost"
                       className="h-7 w-7 text-muted-foreground hover:text-destructive"
-                      onClick={() => void handleRemoveSigner(signer)}
-                      disabled={isBusy}
+                      onClick={() =>
+                        void (onchainManaged
+                          ? runManageAction({ type: "removeSigner", signerIndex: signer.index })
+                          : signer.credentialId
+                            ? handleRemoveSigner(signer.credentialId)
+                            : undefined)
+                      }
+                      disabled={isBusy || manageBusy}
                       aria-label={t("removeSigner")}
                     >
                       <Trash2Icon className="size-3.5" />
@@ -830,64 +954,78 @@ export function WalletTabClient({ organization }: { organization?: OrganizationW
                 </div>
               ))}
             </div>
+            {onchainManaged ? (
+              <p className="mt-2 text-xs text-muted-foreground">{t("onchainManageHint")}</p>
+            ) : null}
 
             {/* ── How many passkeys must approve each transfer ────────────── */}
             <div className="mt-4 space-y-1.5">
               <p className="text-sm font-medium text-foreground">{t("thresholdHeading")}</p>
-              {canEditSigners && canManageWallet ? (
-                <>
-                  <Select
-                    value={String(record.threshold)}
-                    onValueChange={handleSetThreshold}
-                    disabled={isBusy || sendBusy || state?.holdsFunds === true}
-                  >
-                    <SelectTrigger aria-label={t("thresholdHeading")}>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {Array.from({ length: record.signers.length }, (_, index) => index + 1).map((count) => (
-                        <SelectItem key={count} value={String(count)}>
-                          {t("thresholdOption", { count, total: record.signers.length })}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  {state?.holdsFunds ? (
-                    <p className="text-xs text-muted-foreground">{t("thresholdLockedFunds")}</p>
-                  ) : null}
-                </>
+              {canManageWallet && liveSigners.length > 0 ? (
+                <Select
+                  value={String(liveThreshold)}
+                  onValueChange={(value) => {
+                    const next = Number(value);
+                    if (!Number.isInteger(next) || next === liveThreshold) return;
+                    if (onchainManaged) void runManageAction({ type: "setThreshold", threshold: next });
+                    else handleSetThreshold(value);
+                  }}
+                  disabled={isBusy || sendBusy || manageBusy}
+                >
+                  <SelectTrigger aria-label={t("thresholdHeading")}>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {Array.from({ length: liveSigners.length }, (_, index) => index + 1).map((count) => (
+                      <SelectItem key={count} value={String(count)}>
+                        {t("thresholdOption", { count, total: liveSigners.length })}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               ) : (
                 <p className="text-sm text-foreground">
-                  {t("thresholdOption", { count: record.threshold, total: record.signers.length })}
+                  {t("thresholdOption", { count: liveThreshold, total: liveSigners.length })}
                 </p>
               )}
-              <p className="text-xs text-muted-foreground">{t("thresholdHint")}</p>
-              {record.threshold === 1 && record.signers.length > 1 ? (
+              <p className="text-xs text-muted-foreground">
+                {onchainManaged ? t("thresholdOnchainHint") : t("thresholdHint")}
+              </p>
+              {liveThreshold === 1 && liveSigners.length > 1 ? (
                 <p className="rounded-md bg-amber-500/10 px-3 py-2 text-xs text-amber-700 dark:text-amber-400">
                   {t("thresholdSingleWarning")}
                 </p>
               ) : null}
             </div>
 
-            {canEditSigners ? (
-              <div className="mt-3 space-y-2">
-                <div className="flex flex-col gap-2 sm:flex-row">
-                  <Input
-                    value={newSignerLabel}
-                    onChange={(event) => setNewSignerLabel(event.target.value)}
-                    placeholder={t("signerLabelPlaceholder")}
-                    maxLength={80}
-                    disabled={isBusy}
-                    className="sm:flex-1"
-                  />
-                  <Button variant="outline" onClick={() => void handleAddPasskey()} disabled={isBusy}>
-                    {isBusy ? <Loader2Icon className="size-3.5 animate-spin" /> : <FingerprintIcon className="size-3.5" />}
-                    {t("addPasskey")}
-                  </Button>
-                </div>
-                <p className="text-xs text-muted-foreground">{t("signersHint")}</p>
+            <div className="mt-3 space-y-2">
+              <div className="flex flex-col gap-2 sm:flex-row">
+                <Input
+                  value={newSignerLabel}
+                  onChange={(event) => setNewSignerLabel(event.target.value)}
+                  placeholder={t("signerLabelPlaceholder")}
+                  maxLength={80}
+                  disabled={isBusy || manageBusy}
+                  className="sm:flex-1"
+                />
+                <Button
+                  variant="outline"
+                  onClick={() => void (onchainManaged ? handleAddPasskeyOnchain() : handleAddPasskey())}
+                  disabled={isBusy || manageBusy}
+                >
+                  {isBusy || manageBusy ? (
+                    <Loader2Icon className="size-3.5 animate-spin" />
+                  ) : (
+                    <FingerprintIcon className="size-3.5" />
+                  )}
+                  {manageBusy && manageApproval
+                    ? t("sendApprovalOf", { current: manageApproval.current, total: manageApproval.total })
+                    : t("addPasskey")}
+                </Button>
               </div>
-            ) : null}
+              <p className="text-xs text-muted-foreground">{t("signersHint")}</p>
+              {manageError ? <p className="text-sm text-destructive">{manageError}</p> : null}
+            </div>
           </Card>
 
           {actionError ? <p className="px-1 text-sm text-destructive">{actionError}</p> : null}

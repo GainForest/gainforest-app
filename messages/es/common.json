@@ -683,7 +683,10 @@
     "sendStartButton": "Iniciar transferencia con llave de acceso",
     "sendErrorExpired": "Esta transferencia ya no es válida: la billetera o las comisiones de red cambiaron. Iníciala de nuevo.",
     "sendErrorPendingExists": "Ya hay una transferencia a la espera de aprobaciones. Termínala o cancélala primero.",
-    "sendErrorApprovalInvalid": "No se pudo verificar esta aprobación. Inténtalo de nuevo."
+    "sendErrorApprovalInvalid": "No se pudo verificar esta aprobación. Inténtalo de nuevo.",
+    "onchainManageHint": "Esta billetera está activa en la blockchain, así que los cambios de llaves de acceso se registran en la cadena y necesitan las aprobaciones habituales. GainForest cubre la comisión de red.",
+    "thresholdOnchainHint": "Cuántas llaves de acceso deben aprobar cada transferencia. Este cambio se registra en la blockchain: la dirección de la billetera no cambia.",
+    "manageForbidden": "Solo el propietario de la organización o un administrador puede hacer este cambio."
   },
   "accountSupport": {
     "button": "Apoyar",

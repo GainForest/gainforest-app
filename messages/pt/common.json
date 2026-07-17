@@ -683,7 +683,10 @@
     "sendStartButton": "Iniciar transferência com chave de acesso",
     "sendErrorExpired": "Esta transferência não é mais válida — a carteira ou as taxas de rede mudaram. Inicie-a novamente.",
     "sendErrorPendingExists": "Já existe uma transferência aguardando aprovações. Conclua-a ou cancele-a primeiro.",
-    "sendErrorApprovalInvalid": "Não foi possível verificar esta aprovação. Tente novamente."
+    "sendErrorApprovalInvalid": "Não foi possível verificar esta aprovação. Tente novamente.",
+    "onchainManageHint": "Esta carteira está ativa na blockchain, então as mudanças de chaves de acesso são registradas na cadeia e precisam das aprovações habituais. A GainForest cobre a taxa de rede.",
+    "thresholdOnchainHint": "Quantas chaves de acesso devem aprovar cada transferência. Essa mudança é registrada na blockchain — o endereço da carteira não muda.",
+    "manageForbidden": "Somente o proprietário da organização ou um administrador pode fazer essa mudança."
   },
   "accountSupport": {
     "button": "Apoiar",

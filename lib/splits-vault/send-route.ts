@@ -4,15 +4,22 @@
  * routes. The caller resolves the wallet record + session first; this module
  * enforces the signer policy and drives the steps:
  *
- *   prepare  → build the unsigned operation + hashes to sign
- *   submit   → all approvals collected in one sitting (threshold usually 1)
- *   start    → threshold > 1: store the operation + the initiator's
- *              light-hash approval as ONE pending record in the wallet repo
- *   approve  → add another light-hash approval to the pending record
- *              (remote: any owner/member device, any enrolled passkey)
- *   finalize → the last approver signs the FULL userOp hash; the operation
- *              is submitted on-chain and the pending record deleted
- *   cancel   → drop the pending record (initiator or a wallet manager)
+ *   prepare       → build the unsigned transfer + hashes to sign
+ *   submit        → all approvals collected in one sitting
+ *   start         → threshold > 1: store the transfer + the initiator's
+ *                   light-hash approval as ONE pending record in the wallet repo
+ *   approve       → add another light-hash approval to the pending record
+ *                   (remote: any owner/member device, any enrolled passkey)
+ *   finalize      → the last approver signs the FULL userOp hash; the transfer
+ *                   is submitted on-chain and the pending record deleted
+ *   cancel        → drop the pending record (initiator or a wallet manager)
+ *   prepareManage → build an on-chain signer-set change (add/remove passkey,
+ *                   approval threshold) for deployed or funded wallets
+ *   submitManage  → execute the approved signer-set change on-chain
+ *
+ * All signer resolution runs against the LIVE signer set: for a deployed
+ * vault the chain is the authority (its set may have diverged from the
+ * founding record), joined with the record's passkey-metadata directory.
  *
  * Every approval is verified off-chain before it is stored, and the whole
  * bundle is re-verified + simulated before any gas is sponsored.
@@ -30,24 +37,34 @@ import { getAuthBaseUrl } from "@/app/_lib/auth";
 import {
   PENDING_SEND_COLLECTION,
   PENDING_SEND_RKEY,
+  PRIMARY_WALLET_COLLECTION,
+  PRIMARY_WALLET_RKEY,
+  LEGACY_WALLET_COLLECTION,
   type PendingSendApproval,
   type PendingSendRecord,
   type SplitsVaultRecord,
+  type VaultPasskeySigner,
+  type VaultSignerSet,
+  type WalletCollection,
 } from "./shared";
-import { fetchPendingSendRecord } from "./server";
+import { fetchPendingSendRecord, getVaultSignerSet, isVaultDeployed, vaultHoldsFunds } from "./server";
 import {
   decodeSendCallData,
+  prepareManage,
   prepareSend,
+  submitManage,
   submitSend,
   validatePreparedSend,
   verifyApprovalSignature,
   SendError,
   type ApprovalSignature,
+  type ManageAction,
   type PreparedUserOp,
   type WebAuthnSignaturePayload,
 } from "./send-server";
 
 const hex = z.string().regex(/^0x[0-9a-fA-F]*$/);
+const hex32 = z.string().regex(/^0x[0-9a-fA-F]{64}$/);
 const address = z.string().regex(/^0x[0-9a-fA-F]{40}$/);
 const bigintString = z.string().regex(/^\d{1,78}$/);
 
@@ -109,6 +126,32 @@ const finalizeSchema = z.object({
 
 const cancelSchema = z.object({ step: z.literal("cancel") });
 
+const manageActionSchema = z.discriminatedUnion("type", [
+  z.object({
+    type: z.literal("addSigner"),
+    passkey: z.object({
+      credentialId: z.string().min(1).max(400),
+      publicKeyX: hex32,
+      publicKeyY: hex32,
+      label: z.string().trim().min(1).max(80).optional(),
+    }),
+  }),
+  z.object({ type: z.literal("removeSigner"), signerIndex: z.number().int().min(0).max(255) }),
+  z.object({ type: z.literal("setThreshold"), threshold: z.number().int().min(1).max(255) }),
+]);
+
+const prepareManageSchema = z.object({
+  step: z.literal("prepareManage"),
+  action: manageActionSchema,
+});
+
+const submitManageSchema = z.object({
+  step: z.literal("submitManage"),
+  userOp: userOpSchema,
+  signatures: z.array(signatureSchema).min(1).max(16),
+  action: manageActionSchema,
+});
+
 export const sendRequestSchema = z.discriminatedUnion("step", [
   prepareSchema,
   submitSchema,
@@ -116,6 +159,8 @@ export const sendRequestSchema = z.discriminatedUnion("step", [
   approveSchema,
   finalizeSchema,
   cancelSchema,
+  prepareManageSchema,
+  submitManageSchema,
 ]);
 
 const ERROR_FALLBACKS: Record<string, string> = {
@@ -130,6 +175,7 @@ const ERROR_FALLBACKS: Record<string, string> = {
   pending_exists: "There is already a transfer waiting for approvals",
   approval_invalid: "This approval could not be verified",
   cancel_forbidden: "Only the person who started this transfer or a wallet manager can cancel it",
+  manage_forbidden: "Only a wallet manager can make this change",
 };
 
 function errorResponse(code: string, status: number): NextResponse {
@@ -143,17 +189,23 @@ export type SendRequestContext = {
   /** The signed-in user. */
   sessionDid: string;
   record: SplitsVaultRecord;
-  /** Organization wallet? Determines which mutation proxy stores the pending record. */
+  /** Which collection the wallet record currently lives in (legacy records migrate on write). */
+  walletCollection: WalletCollection;
+  /** Organization wallet? Determines which mutation proxy stores records. */
   org: boolean;
-  /** May the session user cancel any pending transfer (owner/admin)? */
+  /** May the session user manage the wallet (org owner/admin; always for personal)? */
+  canManageWallet: boolean;
+  /** May the session user cancel any pending transfer? */
   canManagePending: boolean;
 };
 
-/** Write the pending-send record through the session's own mutation proxy. */
-async function writePendingRecord(
+/** Write a record in the wallet's repo through the session's own mutation proxy. */
+async function writeRepoRecord(
   ctx: SendRequestContext,
   operation: "putRecord" | "deleteRecord",
-  record?: PendingSendRecord,
+  collection: string,
+  rkey: string,
+  record?: unknown,
 ): Promise<{ ok: boolean; status: number }> {
   const headerList = await headers();
   const cookie = headerList.get("cookie");
@@ -163,13 +215,57 @@ async function writePendingRecord(
     headers: { "content-type": "application/json", ...(cookie ? { cookie } : {}) },
     body: JSON.stringify({
       operation,
-      collection: PENDING_SEND_COLLECTION,
-      rkey: PENDING_SEND_RKEY,
+      collection,
+      rkey,
       ...(ctx.org ? { repo: ctx.walletDid } : {}),
       ...(record ? { record } : {}),
     }),
   });
   return { ok: upstream.ok, status: upstream.status };
+}
+
+async function writePendingRecord(
+  ctx: SendRequestContext,
+  operation: "putRecord" | "deleteRecord",
+  record?: PendingSendRecord,
+): Promise<{ ok: boolean; status: number }> {
+  return writeRepoRecord(ctx, operation, PENDING_SEND_COLLECTION, PENDING_SEND_RKEY, record);
+}
+
+/**
+ * After an on-chain passkey enrolment, remember the passkey's metadata in the
+ * wallet record's `addedSigners` directory (best-effort — the chain already
+ * holds the authority; without metadata the signer just shows unlabeled).
+ */
+async function appendAddedSigner(
+  ctx: SendRequestContext,
+  passkey: { credentialId: string; publicKeyX: string; publicKeyY: string; label?: string },
+): Promise<boolean> {
+  const entry: VaultPasskeySigner = {
+    kind: "passkey",
+    publicKeyX: passkey.publicKeyX as `0x${string}`,
+    publicKeyY: passkey.publicKeyY as `0x${string}`,
+    credentialId: passkey.credentialId,
+    memberDid: ctx.sessionDid,
+    ...(passkey.label ? { label: passkey.label } : {}),
+    addedAt: new Date().toISOString(),
+  };
+  const updated: SplitsVaultRecord = {
+    ...ctx.record,
+    $type: PRIMARY_WALLET_COLLECTION,
+    addedSigners: [
+      ...(ctx.record.addedSigners ?? []).filter((existing) => existing.credentialId !== entry.credentialId),
+      entry,
+    ],
+  };
+  const write = await writeRepoRecord(ctx, "putRecord", PRIMARY_WALLET_COLLECTION, PRIMARY_WALLET_RKEY, updated).catch(
+    () => ({ ok: false, status: 0 }),
+  );
+  if (write.ok && ctx.walletCollection === LEGACY_WALLET_COLLECTION) {
+    // Migrate-on-write: the updated record now lives in the primary collection.
+    await writeRepoRecord(ctx, "deleteRecord", LEGACY_WALLET_COLLECTION, PRIMARY_WALLET_RKEY).catch(() => undefined);
+  }
+  return write.ok;
 }
 
 function toApprovalSignature(signature: z.infer<typeof signatureSchema>): ApprovalSignature {
@@ -188,25 +284,58 @@ function toStoredApproval(signature: ApprovalSignature, sessionDid: string): Pen
   return { ...signature, addedBy: sessionDid, addedAt: new Date().toISOString() };
 }
 
+function toManageAction(action: z.infer<typeof manageActionSchema>): ManageAction {
+  if (action.type === "addSigner") {
+    return {
+      type: "addSigner",
+      publicKeyX: action.passkey.publicKeyX as `0x${string}`,
+      publicKeyY: action.passkey.publicKeyY as `0x${string}`,
+    };
+  }
+  if (action.type === "removeSigner") return { type: "removeSigner", signerIndex: action.signerIndex };
+  return { type: "setThreshold", threshold: action.threshold };
+}
+
 /**
- * Load the pending record and re-verify it against the CURRENT wallet record
- * and chain state. Throws `expired` when it can no longer succeed (wallet
- * changed, nonce consumed, fees moved). Returns the pending record together
- * with the derived signer index of every stored approval.
+ * Role policy for on-chain signer-set changes, mirroring the record-edit
+ * rules: anyone (owner/member, route-gated) may enroll their own passkey;
+ * removing someone else's passkey or changing the threshold needs a wallet
+ * manager; removing your own passkey is always allowed.
+ */
+function canPerformManage(
+  ctx: SendRequestContext,
+  signerSet: VaultSignerSet,
+  action: z.infer<typeof manageActionSchema>,
+): boolean {
+  if (action.type === "addSigner") return true;
+  if (action.type === "removeSigner") {
+    if (ctx.canManageWallet) return true;
+    const target = signerSet.signers.find((signer) => signer.index === action.signerIndex);
+    return target?.memberDid === ctx.sessionDid;
+  }
+  return ctx.canManageWallet;
+}
+
+/**
+ * Load the pending record and re-verify it against the CURRENT wallet state.
+ * Throws `expired` when it can no longer succeed (wallet changed, nonce
+ * consumed, fees moved). Returns the pending record together with the
+ * derived signer index of every stored approval.
  */
 async function loadValidPending(
   ctx: SendRequestContext,
+  signerSet: VaultSignerSet,
 ): Promise<{ pending: PendingSendRecord; approvalIndexes: number[] }> {
   const pending = await fetchPendingSendRecord(ctx.walletDid);
   if (!pending) throw new SendError("expired", 404);
-  if (pending.threshold !== ctx.record.threshold) throw new SendError("expired", 409);
-  const { hash, lightHash } = await validatePreparedSend(ctx.walletDid, ctx.record, pending.userOp);
+  if (pending.threshold !== signerSet.threshold) throw new SendError("expired", 409);
+  const { hash, lightHash } = await validatePreparedSend(ctx.walletDid, ctx.record, signerSet, pending.userOp);
   if (hash !== pending.hash || lightHash !== pending.lightHash) throw new SendError("expired", 409);
   // Stored approvals are re-verified — an approval written to the repo
   // outside this API must never be able to brick or forge the submission.
   const approvalIndexes: number[] = [];
   for (const approval of pending.approvals) {
-    const signerIndex = verifyApprovalSignature(ctx.record, approval, pending.lightHash);
+    const signerIndex = verifyApprovalSignature(signerSet, approval, pending.lightHash);
     if (approvalIndexes.includes(signerIndex)) throw new SendError("approval_invalid", 409);
     approvalIndexes.push(signerIndex);
   }
@@ -218,21 +347,27 @@ export async function handleSendRequest(ctx: SendRequestContext): Promise<NextRe
   if (!parsed.success) return errorResponse("invalid_request", 400);
   const { record, walletDid, sessionDid } = ctx;
 
-  const myCredentialIds = record.signers
-    .filter((signer) => signer.memberDid === sessionDid)
-    .map((signer) => signer.credentialId);
-  const allCredentialIds = record.signers.map((signer) => signer.credentialId);
-
   try {
+    // The LIVE signer set is the authority for every step below.
+    const deployed = await isVaultDeployed(record.address).catch(() => false);
+    const signerSet = await getVaultSignerSet(record, deployed);
+
+    const myCredentialIds = signerSet.signers
+      .filter((signer) => signer.memberDid === sessionDid && signer.credentialId)
+      .map((signer) => signer.credentialId as string);
+    const allCredentialIds = signerSet.signers
+      .filter((signer) => signer.credentialId)
+      .map((signer) => signer.credentialId as string);
+
     switch (parsed.data.step) {
       // ── prepare ─────────────────────────────────────────────────────────
       case "prepare": {
         // Only someone with their own enrolled passkey can start a send.
         if (myCredentialIds.length === 0) return errorResponse("no_signer", 403);
-        if (record.threshold > 1 && (await fetchPendingSendRecord(walletDid))) {
+        if (signerSet.threshold > 1 && (await fetchPendingSendRecord(walletDid))) {
           return errorResponse("pending_exists", 409);
         }
-        const prepared = await prepareSend(walletDid, record, {
+        const prepared = await prepareSend(walletDid, record, signerSet, {
           token: parsed.data.token,
           to: parsed.data.to as `0x${string}`,
           amountUnits: parsed.data.amountUnits,
@@ -246,27 +381,28 @@ export async function handleSendRequest(ctx: SendRequestContext): Promise<NextRe
         const payloads: WebAuthnSignaturePayload[] = [];
         let includesSessionSigner = false;
         for (const signature of signatures) {
-          const signerIndex = record.signers.findIndex((signer) => signer.credentialId === signature.credentialId);
-          if (signerIndex < 0) return errorResponse("no_signer", 403);
-          if (record.signers[signerIndex].memberDid === sessionDid) includesSessionSigner = true;
-          payloads.push({ signerIndex, ...toApprovalSignature(signature) });
+          const signer = signerSet.signers.find((entry) => entry.credentialId === signature.credentialId);
+          if (!signer) return errorResponse("no_signer", 403);
+          if (signer.memberDid === sessionDid) includesSessionSigner = true;
+          payloads.push({ signerIndex: signer.index, ...toApprovalSignature(signature) });
         }
         if (!includesSessionSigner) return errorResponse("no_signer", 403);
-        const result = await submitSend(walletDid, record, userOp as PreparedUserOp, payloads);
+        const result = await submitSend(walletDid, record, signerSet, userOp as PreparedUserOp, payloads);
         return NextResponse.json(result);
       }
 
       // ── start — store the operation + the initiator's approval ──────────
       case "start": {
-        if (record.threshold < 2) return errorResponse("invalid_request", 400);
+        if (signerSet.threshold < 2) return errorResponse("invalid_request", 400);
         if (await fetchPendingSendRecord(walletDid)) return errorResponse("pending_exists", 409);
 
         const raw = parsed.data.userOp as PreparedUserOp;
-        const { hash, lightHash } = await validatePreparedSend(walletDid, record, raw);
+        const { hash, lightHash } = await validatePreparedSend(walletDid, record, signerSet, raw);
         const signature = toApprovalSignature(parsed.data.signature);
-        const signerIndex = verifyApprovalSignature(record, signature, lightHash);
+        const signerIndex = verifyApprovalSignature(signerSet, signature, lightHash);
         // The initiator must approve with their OWN passkey.
-        if (record.signers[signerIndex].memberDid !== sessionDid) return errorResponse("no_signer", 403);
+        const initiator = signerSet.signers.find((signer) => signer.index === signerIndex);
+        if (initiator?.memberDid !== sessionDid) return errorResponse("no_signer", 403);
 
         const params = decodeSendCallData(raw.callData);
         const pending: PendingSendRecord = {
@@ -277,7 +413,7 @@ export async function handleSendRequest(ctx: SendRequestContext): Promise<NextRe
           userOp: raw,
           hash,
           lightHash,
-          threshold: record.threshold,
+          threshold: signerSet.threshold,
           approvals: [toStoredApproval(signature, sessionDid)],
           createdBy: sessionDid,
           createdAt: new Date().toISOString(),
@@ -289,11 +425,11 @@ export async function handleSendRequest(ctx: SendRequestContext): Promise<NextRe
 
       // ── approve — add another light-hash approval ───────────────────────
       case "approve": {
-        const { pending, approvalIndexes } = await loadValidPending(ctx);
-        if (pending.approvals.length >= record.threshold - 1) return errorResponse("invalid_request", 409);
+        const { pending, approvalIndexes } = await loadValidPending(ctx, signerSet);
+        if (pending.approvals.length >= signerSet.threshold - 1) return errorResponse("invalid_request", 409);
 
         const signature = toApprovalSignature(parsed.data.signature);
-        const signerIndex = verifyApprovalSignature(record, signature, pending.lightHash);
+        const signerIndex = verifyApprovalSignature(signerSet, signature, pending.lightHash);
         if (approvalIndexes.includes(signerIndex)) return errorResponse("approval_invalid", 409);
 
         const updated: PendingSendRecord = {
@@ -309,7 +445,7 @@ export async function handleSendRequest(ctx: SendRequestContext): Promise<NextRe
       case "finalize": {
         let pendingState: { pending: PendingSendRecord; approvalIndexes: number[] };
         try {
-          pendingState = await loadValidPending(ctx);
+          pendingState = await loadValidPending(ctx, signerSet);
         } catch (error) {
           // A pending transfer that can never succeed is cleaned up so a new
           // one can be started right away.
@@ -319,10 +455,10 @@ export async function handleSendRequest(ctx: SendRequestContext): Promise<NextRe
           throw error;
         }
         const { pending, approvalIndexes } = pendingState;
-        if (pending.approvals.length !== record.threshold - 1) return errorResponse("invalid_request", 409);
+        if (pending.approvals.length !== signerSet.threshold - 1) return errorResponse("invalid_request", 409);
 
         const finalSignature = toApprovalSignature(parsed.data.signature);
-        const finalIndex = verifyApprovalSignature(record, finalSignature, pending.hash);
+        const finalIndex = verifyApprovalSignature(signerSet, finalSignature, pending.hash);
         if (approvalIndexes.includes(finalIndex)) return errorResponse("approval_invalid", 409);
 
         const payloads: WebAuthnSignaturePayload[] = [
@@ -332,7 +468,7 @@ export async function handleSendRequest(ctx: SendRequestContext): Promise<NextRe
           })),
           { signerIndex: finalIndex, ...finalSignature },
         ];
-        const result = await submitSend(walletDid, record, pending.userOp, payloads);
+        const result = await submitSend(walletDid, record, signerSet, pending.userOp, payloads);
         await writePendingRecord(ctx, "deleteRecord").catch(() => undefined);
         return NextResponse.json(result);
       }
@@ -347,6 +483,44 @@ export async function handleSendRequest(ctx: SendRequestContext): Promise<NextRe
         const write = await writePendingRecord(ctx, "deleteRecord");
         if (!write.ok) return errorResponse("submit_failed", 502);
         return NextResponse.json({ cancelled: true });
+      }
+
+      // ── prepareManage — build an on-chain signer-set change ─────────────
+      case "prepareManage": {
+        // On-chain management is for wallets whose record can no longer be
+        // edited (deployed, or undeployed-but-funded). Pristine wallets edit
+        // the record for free instead.
+        if (!deployed && !(await vaultHoldsFunds(record.address).catch(() => false))) {
+          return errorResponse("invalid_request", 400);
+        }
+        if (!canPerformManage(ctx, signerSet, parsed.data.action)) return errorResponse("manage_forbidden", 403);
+        const prepared = await prepareManage(walletDid, record, signerSet, toManageAction(parsed.data.action));
+        return NextResponse.json({ ...prepared, credentialIds: myCredentialIds, allCredentialIds });
+      }
+
+      // ── submitManage — execute the approved change ──────────────────────
+      case "submitManage": {
+        if (!canPerformManage(ctx, signerSet, parsed.data.action)) return errorResponse("manage_forbidden", 403);
+        const payloads: WebAuthnSignaturePayload[] = [];
+        for (const signature of parsed.data.signatures) {
+          const signer = signerSet.signers.find((entry) => entry.credentialId === signature.credentialId);
+          if (!signer) return errorResponse("approval_invalid", 403);
+          payloads.push({ signerIndex: signer.index, ...toApprovalSignature(signature) });
+        }
+        const result = await submitManage(
+          walletDid,
+          record,
+          signerSet,
+          parsed.data.userOp as PreparedUserOp,
+          payloads,
+          toManageAction(parsed.data.action),
+        );
+        // Remember the new passkey's metadata so it shows labeled in the UI.
+        let recordUpdated = true;
+        if (parsed.data.action.type === "addSigner") {
+          recordUpdated = await appendAddedSigner(ctx, parsed.data.action.passkey);
+        }
+        return NextResponse.json({ ...result, recordUpdated });
       }
     }
     return errorResponse("invalid_request", 400);

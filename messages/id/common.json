@@ -683,7 +683,10 @@
     "sendStartButton": "Mulai transfer dengan kunci sandi",
     "sendErrorExpired": "Transfer ini tidak lagi valid — dompet atau biaya jaringan berubah. Silakan mulai lagi.",
     "sendErrorPendingExists": "Sudah ada transfer yang menunggu persetujuan. Selesaikan atau batalkan dulu.",
-    "sendErrorApprovalInvalid": "Persetujuan ini tidak dapat diverifikasi. Silakan coba lagi."
+    "sendErrorApprovalInvalid": "Persetujuan ini tidak dapat diverifikasi. Silakan coba lagi.",
+    "onchainManageHint": "Dompet ini aktif di blockchain, jadi perubahan kunci sandi dicatat di rantai dan membutuhkan persetujuan seperti biasa. GainForest menanggung biaya jaringan.",
+    "thresholdOnchainHint": "Berapa banyak kunci sandi yang harus menyetujui setiap transfer. Perubahan ini dicatat di blockchain — alamat dompet tetap sama.",
+    "manageForbidden": "Hanya pemilik organisasi atau admin yang dapat melakukan perubahan ini."
   },
   "accountSupport": {
     "button": "Dukung",

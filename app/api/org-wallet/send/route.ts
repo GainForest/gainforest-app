@@ -44,7 +44,9 @@ export async function POST(request: NextRequest) {
     walletDid: repo,
     sessionDid: session.did,
     record: found.record,
+    walletCollection: found.collection,
     org: true,
+    canManageWallet: role === "owner" || role === "admin",
     canManagePending: role === "owner" || role === "admin",
   });
 }

@@ -21,7 +21,12 @@
             "type": "array",
             "minLength": 1,
             "items": { "type": "ref", "ref": "#passkeySigner" },
-            "description": "Founding signer set, in derivation order — a CREATE2 input."
+            "description": "Founding signer set, in derivation order — a CREATE2 input, frozen once the vault is deployed."
+          },
+          "addedSigners": {
+            "type": "array",
+            "items": { "type": "ref", "ref": "#passkeySigner" },
+            "description": "Passkeys enrolled ON-CHAIN after deployment — a metadata directory only (labels + WebAuthn credential ids). The chain is the authority for which signers are live; append-only, removals need no record change."
           },
           "createdAt": { "type": "string", "format": "datetime" }
         }

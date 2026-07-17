@@ -683,7 +683,10 @@
     "sendStartButton": "Start transfer with passkey",
     "sendErrorExpired": "This transfer is no longer valid — the wallet or network fees changed. Please start it again.",
     "sendErrorPendingExists": "There is already a transfer waiting for approvals. Finish or cancel it first.",
-    "sendErrorApprovalInvalid": "This approval could not be verified. Please try again."
+    "sendErrorApprovalInvalid": "This approval could not be verified. Please try again.",
+    "onchainManageHint": "This wallet is active on the blockchain, so passkey changes are recorded on-chain and need the usual approvals. GainForest covers the network fee.",
+    "thresholdOnchainHint": "How many passkeys must approve each transfer. Changing this is recorded on the blockchain — the wallet address stays the same.",
+    "manageForbidden": "Only the organization owner or an admin can make this change."
   },
   "accountSupport": {
     "button": "Support",

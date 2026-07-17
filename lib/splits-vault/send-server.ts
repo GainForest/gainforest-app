@@ -61,13 +61,15 @@ import { keccak256 } from "viem";
 import * as WebAuthnP256 from "ox/WebAuthnP256";
 import {
   SMART_VAULT_FACTORY,
+  MULTI_SIGNER_AUTH_ABI,
   VAULT_OWNER,
   orgVaultSalt,
   toSignerStruct,
   type PendingSendUserOp,
   type SplitsVaultRecord,
+  type VaultSignerSet,
 } from "./shared";
-import { getMainnetClient, isVaultDeployed } from "./server";
+import { getMainnetClient } from "./server";
 import { USDT_CONTRACT, getWalletToken, type WalletTokenSymbol } from "./tokens";
 
 // ── Constants ─────────────────────────────────────────────────────────────────
@@ -348,20 +350,18 @@ async function assertTokenBalance(params: SendParams, vaultAddress: `0x${string}
 }
 
 /**
- * Build the unsigned UserOperation for a send and the hash the passkey must
- * sign. `did` is the account whose wallet record this is (CREATE2 salt input).
+ * Build an unsigned UserOperation around arbitrary (already validated) vault
+ * calldata, with the hashes the passkeys must sign. Shared by sends and
+ * on-chain management operations.
  */
-export async function prepareSend(
+async function buildOperation(
   did: string,
   record: SplitsVaultRecord,
-  params: SendParams,
+  signerSet: VaultSignerSet,
+  callData: Hex,
 ): Promise<PreparedSend> {
   getFacilitatorAccount(); // fail fast when sponsorship is not configured
-  const amount = validateParams(params, record.address);
-  await assertTokenBalance(params, record.address, amount);
-
   const client = getMainnetClient();
-  const deployed = await isVaultDeployed(record.address).catch(() => false);
   const [nonce, fees] = await Promise.all([
     client.readContract({
       address: ENTRY_POINT,
@@ -375,10 +375,10 @@ export async function prepareSend(
   const userOp: UserOperation<"0.7"> = {
     sender: record.address,
     nonce,
-    ...(deployed ? {} : { factory: SMART_VAULT_FACTORY, factoryData: buildFactoryData(did, record) }),
-    callData: buildCallData(params, amount),
+    ...(signerSet.deployed ? {} : { factory: SMART_VAULT_FACTORY, factoryData: buildFactoryData(did, record) }),
+    callData,
     callGasLimit: CALL_GAS_LIMIT,
-    verificationGasLimit: verificationGasLimitFor(deployed, record.threshold),
+    verificationGasLimit: verificationGasLimitFor(signerSet.deployed, signerSet.threshold),
     preVerificationGas: PRE_VERIFICATION_GAS,
     maxFeePerGas: fees.maxFeePerGas,
     maxPriorityFeePerGas: fees.maxPriorityFeePerGas,
@@ -396,7 +396,7 @@ export async function prepareSend(
 
   return {
     lightHash: computeLightHash(userOp),
-    threshold: record.threshold,
+    threshold: signerSet.threshold,
     userOp: {
       sender: userOp.sender,
       nonce: userOp.nonce.toString(),
@@ -410,6 +410,21 @@ export async function prepareSend(
     },
     hash,
   };
+}
+
+/**
+ * Build the unsigned UserOperation for a send and the hash the passkey must
+ * sign. `did` is the account whose wallet record this is (CREATE2 salt input).
+ */
+export async function prepareSend(
+  did: string,
+  record: SplitsVaultRecord,
+  signerSet: VaultSignerSet,
+  params: SendParams,
+): Promise<PreparedSend> {
+  const amount = validateParams(params, record.address);
+  await assertTokenBalance(params, record.address, amount);
+  return buildOperation(did, record, signerSet, buildCallData(params, amount));
 }
 
 // ── Validating + signing + submitting ────────────────────────────────────────
@@ -504,28 +519,21 @@ function parseBigInt(value: string): bigint {
   }
 }
 
-/**
- * Re-validate a client-echoed userOp field by field before sponsoring it.
- * Returns the trusted, parsed operation. Throws SendError on any mismatch.
- */
-async function validateUserOp(
-  did: string,
-  record: SplitsVaultRecord,
-  raw: PreparedUserOp,
-): Promise<UserOperation<"0.7">> {
-  if (!isAddress(raw.sender) || !isAddressEqual(raw.sender, record.address)) {
-    throw new SendError("invalid_request", 400);
-  }
-
-  // The calldata must be exactly one allowed transfer.
+/** Decode the single `execute` Call out of vault calldata. */
+function decodeExecuteCall(callData: Hex): { target: `0x${string}`; value: bigint; data: Hex } {
   let decoded: { functionName: string; args: readonly unknown[] };
   try {
-    decoded = decodeFunctionData({ abi: EXECUTE_ABI, data: raw.callData });
+    decoded = decodeFunctionData({ abi: EXECUTE_ABI, data: callData });
   } catch {
     throw new SendError("invalid_request", 400);
   }
   if (decoded.functionName !== "execute") throw new SendError("invalid_request", 400);
-  const call = decoded.args[0] as { target: `0x${string}`; value: bigint; data: Hex };
+  return decoded.args[0] as { target: `0x${string}`; value: bigint; data: Hex };
+}
+
+/** The calldata must be exactly one allowed transfer; re-checks the balance. */
+async function validateSendCallData(record: SplitsVaultRecord, callData: Hex): Promise<void> {
+  const call = decodeExecuteCall(callData);
   const isErc20 = isAddressEqual(call.target, USDC_CONTRACT) || isAddressEqual(call.target, USDT_CONTRACT);
   let spend: { token: WalletTokenSymbol; to: `0x${string}`; amount: bigint };
   if (isErc20) {
@@ -550,11 +558,30 @@ async function validateUserOp(
 
   // Re-check the balance right before sponsoring — a transfer that would fail
   // in-flight still burns the gas deposit we front.
-  await assertTokenBalance({ token: spend.token, to: spend.to, amountUnits: spend.amount.toString() }, record.address, spend.amount);
+  await assertTokenBalance(
+    { token: spend.token, to: spend.to, amountUnits: spend.amount.toString() },
+    record.address,
+    spend.amount,
+  );
+}
+
+/**
+ * Re-validate the operation-envelope fields (sender, deployment data, nonce,
+ * fees, gas ceilings) of a client-echoed userOp before sponsoring it.
+ * Calldata rules are validated separately per operation kind.
+ */
+async function validateUserOpEnvelope(
+  did: string,
+  record: SplitsVaultRecord,
+  signerSet: VaultSignerSet,
+  raw: PreparedUserOp,
+): Promise<UserOperation<"0.7">> {
+  if (!isAddress(raw.sender) || !isAddressEqual(raw.sender, record.address)) {
+    throw new SendError("invalid_request", 400);
+  }
 
   // Deployment data must be exactly ours, and only when the vault is undeployed.
-  const deployed = await isVaultDeployed(record.address).catch(() => false);
-  if (deployed) {
+  if (signerSet.deployed) {
     if (raw.factory || raw.factoryData) throw new SendError("invalid_request", 400);
   } else {
     if (!raw.factory || !isAddressEqual(raw.factory, SMART_VAULT_FACTORY)) throw new SendError("invalid_request", 400);
@@ -586,7 +613,7 @@ async function validateUserOp(
   const userOp: UserOperation<"0.7"> = {
     sender: record.address,
     nonce,
-    ...(deployed ? {} : { factory: SMART_VAULT_FACTORY, factoryData: raw.factoryData }),
+    ...(signerSet.deployed ? {} : { factory: SMART_VAULT_FACTORY, factoryData: raw.factoryData }),
     callData: raw.callData,
     callGasLimit: parseBigInt(raw.callGasLimit),
     verificationGasLimit: parseBigInt(raw.verificationGasLimit),
@@ -598,13 +625,25 @@ async function validateUserOp(
 
   // Gas ceilings: never sponsor more than our caps.
   if (userOp.callGasLimit > CALL_GAS_LIMIT) throw new SendError("invalid_request", 400);
-  if (userOp.verificationGasLimit > verificationGasLimitFor(false, record.threshold)) {
+  if (userOp.verificationGasLimit > verificationGasLimitFor(false, signerSet.threshold)) {
     throw new SendError("invalid_request", 400);
   }
   if (userOp.preVerificationGas > PRE_VERIFICATION_GAS) throw new SendError("invalid_request", 400);
   if (userOp.maxPriorityFeePerGas > userOp.maxFeePerGas) throw new SendError("invalid_request", 400);
   if (totalGas(userOp) * userOp.maxFeePerGas > maxSponsoredWei()) throw new SendError("network_busy", 503);
 
+  return userOp;
+}
+
+/** Full send validation: envelope + transfer allow-list + balance. */
+async function validateUserOp(
+  did: string,
+  record: SplitsVaultRecord,
+  signerSet: VaultSignerSet,
+  raw: PreparedUserOp,
+): Promise<UserOperation<"0.7">> {
+  const userOp = await validateUserOpEnvelope(did, record, signerSet, raw);
+  await validateSendCallData(record, raw.callData);
   return userOp;
 }
 
@@ -615,9 +654,10 @@ async function validateUserOp(
 export async function validatePreparedSend(
   did: string,
   record: SplitsVaultRecord,
+  signerSet: VaultSignerSet,
   raw: PreparedUserOp,
 ): Promise<{ userOp: UserOperation<"0.7">; hash: Hex; lightHash: Hex }> {
-  const userOp = await validateUserOp(did, record, raw);
+  const userOp = await validateUserOp(did, record, signerSet, raw);
   const hash = getUserOperationHash({
     chainId: mainnet.id,
     entryPointAddress: ENTRY_POINT,
@@ -642,18 +682,17 @@ export type ApprovalSignature = {
 const P256_N = 0xffffffff00000000ffffffffffffffffbce6faada7179e84f3b9cac2fc632551n;
 
 /**
- * Verify a WebAuthn approval off-chain against the wallet's enrolled
- * signers, so an invalid approval can never be stored (it would brick the
- * final submission). Returns the signer's index in the record.
+ * Verify a WebAuthn approval off-chain against the wallet's LIVE signer set,
+ * so an invalid approval can never be stored (it would brick the final
+ * submission). Returns the signer's on-chain index.
  */
 export function verifyApprovalSignature(
-  record: SplitsVaultRecord,
+  signerSet: VaultSignerSet,
   signature: ApprovalSignature,
   challenge: Hex,
 ): number {
-  const signerIndex = record.signers.findIndex((signer) => signer.credentialId === signature.credentialId);
-  if (signerIndex < 0) throw new SendError("approval_invalid", 400);
-  const signer = record.signers[signerIndex];
+  const signer = signerSet.signers.find((entry) => entry.credentialId === signature.credentialId);
+  if (!signer) throw new SendError("approval_invalid", 400);
   let r: bigint;
   let s: bigint;
   try {
@@ -677,7 +716,7 @@ export function verifyApprovalSignature(
     },
   });
   if (!valid) throw new SendError("approval_invalid", 400);
-  return signerIndex;
+  return signer.index;
 }
 
 /**
@@ -686,27 +725,40 @@ export function verifyApprovalSignature(
  * signing order (light hash first, full hash last). Resolves with the
  * transaction hash once the operation is confirmed on-chain.
  */
-export async function submitSend(
-  did: string,
-  record: SplitsVaultRecord,
-  raw: PreparedUserOp,
-  signatures: WebAuthnSignaturePayload[],
-): Promise<{ transactionHash: `0x${string}` }> {
-  if (signatures.length !== record.threshold) throw new SendError("invalid_request", 400);
+function assertSignatureSet(signerSet: VaultSignerSet, signatures: WebAuthnSignaturePayload[]): void {
+  if (signatures.length !== signerSet.threshold) throw new SendError("invalid_request", 400);
+  const liveIndexes = new Set(signerSet.signers.map((signer) => signer.index));
   const seen = new Set<number>();
   for (const signature of signatures) {
     if (
       !Number.isInteger(signature.signerIndex) ||
-      signature.signerIndex < 0 ||
-      signature.signerIndex >= record.signers.length ||
+      !liveIndexes.has(signature.signerIndex) ||
       seen.has(signature.signerIndex)
     ) {
       throw new SendError("invalid_request", 400);
     }
     seen.add(signature.signerIndex);
   }
+}
 
-  const userOp = await validateUserOp(did, record, raw);
+export async function submitSend(
+  did: string,
+  record: SplitsVaultRecord,
+  signerSet: VaultSignerSet,
+  raw: PreparedUserOp,
+  signatures: WebAuthnSignaturePayload[],
+): Promise<{ transactionHash: `0x${string}` }> {
+  assertSignatureSet(signerSet, signatures);
+  const userOp = await validateUserOp(did, record, signerSet, raw);
+  return sponsorAndSubmit(record, userOp, signatures);
+}
+
+/** Sponsor gas, simulate, and submit a fully signed operation. */
+async function sponsorAndSubmit(
+  record: SplitsVaultRecord,
+  userOp: UserOperation<"0.7">,
+  signatures: WebAuthnSignaturePayload[],
+): Promise<{ transactionHash: `0x${string}` }> {
   userOp.signature = encodeVaultSignature(userOp, signatures);
   const packed = toPackedUserOperation(userOp);
 
@@ -767,4 +819,113 @@ export async function submitSend(
   if (!event || !event.args.success) throw new SendError("submit_failed", 502);
 
   return { transactionHash: txHash };
+}
+
+// ── On-chain signer management ─────────────────────────────────────────────
+
+/**
+ * A signer-set change executed by the vault calling ITSELF (the SmartVault's
+ * MultiSignerAuth mutators are self-call-only). Used for wallets that are
+ * deployed — or funded-but-undeployed, where record edits are blocked
+ * because they would change the CREATE2 address; the on-chain path keeps the
+ * address because the founding set stays untouched.
+ */
+export type ManageAction =
+  | { type: "addSigner"; publicKeyX: Hex; publicKeyY: Hex }
+  | { type: "removeSigner"; signerIndex: number }
+  | { type: "setThreshold"; threshold: number };
+
+function lowestFreeSignerIndex(signerSet: VaultSignerSet): number {
+  const used = new Set(signerSet.signers.map((signer) => signer.index));
+  for (let index = 0; index <= 255; index += 1) {
+    if (!used.has(index)) return index;
+  }
+  throw new SendError("invalid_request", 400);
+}
+
+/**
+ * Validate a management action against the LIVE signer set and build the
+ * exact self-call calldata for it. Deterministic — the same signer set and
+ * action always produce the same bytes, which `submitManage` relies on.
+ */
+export function buildManageCallData(record: SplitsVaultRecord, signerSet: VaultSignerSet, action: ManageAction): Hex {
+  let inner: Hex;
+  if (action.type === "addSigner") {
+    let x: bigint;
+    let y: bigint;
+    try {
+      x = BigInt(action.publicKeyX);
+      y = BigInt(action.publicKeyY);
+    } catch {
+      throw new SendError("invalid_request", 400);
+    }
+    // Passkeys always have a non-zero Y; a zero Y would enroll an EOA slot.
+    if (y === 0n || x === 0n) throw new SendError("invalid_request", 400);
+    if (
+      signerSet.signers.some(
+        (signer) =>
+          signer.publicKeyX.toLowerCase() === action.publicKeyX.toLowerCase() &&
+          signer.publicKeyY.toLowerCase() === action.publicKeyY.toLowerCase(),
+      )
+    ) {
+      throw new SendError("invalid_request", 400);
+    }
+    inner = encodeFunctionData({
+      abi: MULTI_SIGNER_AUTH_ABI,
+      functionName: "addSigner",
+      args: [{ slot1: action.publicKeyX as Hex, slot2: action.publicKeyY as Hex }, lowestFreeSignerIndex(signerSet)],
+    });
+  } else if (action.type === "removeSigner") {
+    if (!signerSet.signers.some((signer) => signer.index === action.signerIndex)) {
+      throw new SendError("invalid_request", 400);
+    }
+    // The contract reverts when signerCount would drop below the threshold.
+    if (signerSet.signers.length - 1 < signerSet.threshold) throw new SendError("invalid_request", 400);
+    inner = encodeFunctionData({ abi: MULTI_SIGNER_AUTH_ABI, functionName: "removeSigner", args: [action.signerIndex] });
+  } else {
+    if (
+      !Number.isInteger(action.threshold) ||
+      action.threshold < 1 ||
+      action.threshold > signerSet.signers.length ||
+      action.threshold === signerSet.threshold
+    ) {
+      throw new SendError("invalid_request", 400);
+    }
+    inner = encodeFunctionData({ abi: MULTI_SIGNER_AUTH_ABI, functionName: "updateThreshold", args: [action.threshold] });
+  }
+  return encodeFunctionData({
+    abi: EXECUTE_ABI,
+    functionName: "execute",
+    args: [{ target: record.address, value: 0n, data: inner }],
+  });
+}
+
+/** Build the unsigned management operation + hashes to sign. */
+export async function prepareManage(
+  did: string,
+  record: SplitsVaultRecord,
+  signerSet: VaultSignerSet,
+  action: ManageAction,
+): Promise<PreparedSend> {
+  return buildOperation(did, record, signerSet, buildManageCallData(record, signerSet, action));
+}
+
+/**
+ * Validate and submit a fully approved management operation. The echoed
+ * calldata must be byte-identical to the action re-derived against the
+ * CURRENT chain state — nothing but the declared change can be executed.
+ */
+export async function submitManage(
+  did: string,
+  record: SplitsVaultRecord,
+  signerSet: VaultSignerSet,
+  raw: PreparedUserOp,
+  signatures: WebAuthnSignaturePayload[],
+  action: ManageAction,
+): Promise<{ transactionHash: `0x${string}` }> {
+  assertSignatureSet(signerSet, signatures);
+  const expected = buildManageCallData(record, signerSet, action);
+  if (raw.callData.toLowerCase() !== expected.toLowerCase()) throw new SendError("invalid_request", 400);
+  const userOp = await validateUserOpEnvelope(did, record, signerSet, raw);
+  return sponsorAndSubmit(record, userOp, signatures);
 }

@@ -6,7 +6,7 @@ signer set + threshold, plus the pending multi-approval transfer record.
 
 | NSID | Status | Purpose |
 |---|---|---|
-| `app.gainforest.wallet.primary` | 🟢 published | Canonical wallet record (fixed rkey `self`), personal and organization accounts alike. |
+| `app.gainforest.wallet.primary` | 🟢 published | Canonical wallet record (fixed rkey `self`), personal and organization accounts alike. `signers` + `threshold` are the FOUNDING CREATE2 inputs (frozen once the address holds funds or is deployed); `addedSigners` is an append-only metadata directory for passkeys enrolled ON-CHAIN afterwards — the chain is the authority for the live signer set. |
 | `app.gainforest.wallet.pendingSend` | 🟢 published | A transfer awaiting more passkey approvals (fixed rkey `self`, one at a time). Ephemeral: deleted when the transfer settles or is cancelled. |
 | `app.gainforest.wallet.splitsVault` | 🟢 published (LEGACY) | Original collection name. Still read as a fallback; records migrate to `primary` on their next write. |
 
@@ -26,7 +26,8 @@ goat lex publish \
   lexicons/app/gainforest/wallet
 ```
 
-`goat lex status` shows sync state. Last published: 2026-07-17.
+`goat lex status` shows sync state. Last published: 2026-07-17 (rev 2:
+added `primary.addedSigners`).
 
 ## DNS (Cloudflare)
 

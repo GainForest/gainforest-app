@@ -20,6 +20,7 @@ import {
 import {
   fetchPendingSendRecord,
   fetchWalletRecordWithSource,
+  getVaultSignerSet,
   getWalletBalances,
   isVaultDeployed,
   predictVaultAddress,
@@ -142,6 +143,7 @@ export async function GET() {
     getWalletBalances(found.record.address).catch(() => null),
     fetchPendingSendRecord(did).catch(() => null),
   ]);
+  const signerSet = await getVaultSignerSet(found.record, deployed).catch(() => null);
   return NextResponse.json({
     exists: true,
     record: found.record,
@@ -150,6 +152,7 @@ export async function GET() {
     holdsFunds,
     balances,
     pendingSend,
+    signerSet,
   });
 }
 
@@ -197,6 +200,15 @@ export async function PATCH(request: NextRequest) {
   if (await isVaultDeployed(existing.address).catch(() => false)) {
     return NextResponse.json(
       { error: "The wallet is already active on the blockchain, so its signers can no longer be changed here" },
+      { status: 409 },
+    );
+  }
+  // The signer set and threshold are CREATE2 inputs — editing them re-derives
+  // the address, which would strand funds already sitting at the current one.
+  // Funded wallets change signers on-chain instead (see /api/wallet/send).
+  if (await vaultHoldsFunds(existing.address).catch(() => true)) {
+    return NextResponse.json(
+      { error: "The wallet address already holds funds, so its passkeys are now managed on the blockchain" },
       { status: 409 },
     );
   }
