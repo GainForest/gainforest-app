@@ -1,10 +1,10 @@
 {
   "lexicon": 1,
-  "id": "app.gainforest.wallet.splitsVault",
+  "id": "app.gainforest.wallet.primary",
   "defs": {
     "main": {
       "type": "record",
-      "description": "LEGACY — superseded by app.gainforest.wallet.primary; existing records are still read and are migrated to the primary collection on their next write. An organization's shared donation wallet: a Splits SmartVault (ERC-4337 passkey multisig) whose address is derived deterministically with CREATE2 from the organization DID and the founding signer set. Because owner, signers, threshold, and the salt scheme are all recorded here, anyone can recompute SmartVaultFactory.getAddress(...) and verify that `address` really belongs to this organization — the derivation is the proof; no signature is needed. Fixed rkey `self`: one canonical wallet per organization. While no code exists at the address the signer set may still change (the address is re-derived); once the vault is deployed on-chain this record is frozen and signer changes happen on-chain.",
+      "description": "An account's canonical donation wallet (personal profile or organization): a Splits SmartVault (ERC-4337 passkey multisig) whose address is derived deterministically with CREATE2 from the account DID and the founding signer set. Because owner, signers, threshold, and the salt scheme are all recorded here, anyone can recompute SmartVaultFactory.getAddress(...) and verify that `address` really belongs to this account — the derivation is the proof; no signature is needed. Fixed rkey `self`: one canonical wallet per account. While no code exists at the address and it holds no funds, the signer set and threshold may still change (the address is re-derived); once the vault is deployed on-chain this record is frozen and changes happen on-chain. Succeeds the legacy `app.gainforest.wallet.splitsVault` collection: records are read from both and migrated here on their next write.",
       "key": "literal:self",
       "record": {
         "type": "object",
@@ -15,8 +15,8 @@
           "factory": { "type": "string", "description": "SmartVaultFactory address the prediction was made against." },
           "chainId": { "type": "integer", "description": "EVM chain id the donation flow settles on (the address is identical on every chain where the factory is deployed)." },
           "owner": { "type": "string", "description": "The vault's Ownable superuser slot. Always the zero address: only the signer set controls the vault." },
-          "threshold": { "type": "integer", "minimum": 1, "description": "Number of signer approvals required per operation." },
-          "saltScheme": { "type": "string", "description": "Versioned salt derivation label; the CREATE2 salt is keccak256(saltScheme + ':' + organization DID)." },
+          "threshold": { "type": "integer", "minimum": 1, "maximum": 255, "description": "Number of distinct passkey approvals required per operation (m-of-n). A CREATE2 input — changing it re-derives the address." },
+          "saltScheme": { "type": "string", "description": "Versioned salt derivation label; the CREATE2 salt is keccak256(saltScheme + ':' + account DID)." },
           "signers": {
             "type": "array",
             "minLength": 1,
@@ -35,7 +35,7 @@
         "publicKeyX": { "type": "string", "description": "32-byte hex, secp256r1 public key X coordinate (SmartVault Signer slot1)." },
         "publicKeyY": { "type": "string", "description": "32-byte hex, secp256r1 public key Y coordinate (SmartVault Signer slot2)." },
         "credentialId": { "type": "string", "description": "WebAuthn credential id (base64url) so the member's browser can find the passkey again." },
-        "memberDid": { "type": "string", "format": "did", "description": "DID of the organization member this passkey belongs to." },
+        "memberDid": { "type": "string", "format": "did", "description": "DID of the account member this passkey belongs to." },
         "label": { "type": "string", "maxLength": 800, "maxGraphemes": 80, "description": "Plain-language signer label." },
         "addedAt": { "type": "string", "format": "datetime" }
       }
