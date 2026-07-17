@@ -66,12 +66,14 @@ export function AccountAwards({ did, className = "" }: { did: string; className?
   const names = badges.map(labelFor).join(", ");
 
   return (
+    // No overflow-hidden here: the round-number dot sits just outside the
+    // emblem circle and must not be clipped.
     <span
-      className={`flex min-w-0 items-center gap-2 overflow-hidden text-sm font-medium text-muted-foreground ${className}`}
+      className={`flex min-w-0 items-center gap-2 text-sm font-medium text-muted-foreground ${className}`}
       aria-label={t("aria", { names })}
     >
       <span className="shrink-0 whitespace-nowrap leading-none">{t("awardsLabel")}</span>
-      <span className="inline-flex shrink-0 items-center -space-x-1">
+      <span className="inline-flex shrink-0 items-center -space-x-1 pb-0.5 pr-0.5">
         {badges.map((key) => {
           const Icon = recognitionBadgeIcon(key);
           const parsed = parseRecognitionBadgeKey(key);
