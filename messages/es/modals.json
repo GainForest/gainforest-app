@@ -413,6 +413,10 @@
     "signersHint": "Los miembros de la organización pueden añadir su propia llave de acceso para aprobar pagos también.",
     "deleteButton": "Eliminar billetera",
     "viewOnExplorer": "Ver esta dirección en Etherscan",
-    "explorer": "Etherscan"
+    "explorer": "Etherscan",
+    "intro": "La billetera de donaciones compartida de esta organización, protegida por las llaves de acceso de sus miembros. Las donaciones a sus proyectos llegan a esta dirección.",
+    "unnamedPasskey": "Llave de acceso",
+    "addPasskey": "Añadir mi llave de acceso",
+    "signerLabelPlaceholder": "Nombra esta llave de acceso (p. ej., Mi teléfono)"
   }
 }

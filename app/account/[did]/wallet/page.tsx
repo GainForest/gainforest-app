@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { fetchAuthSession } from "@/app/_lib/auth-server";
+import { resolveAccountManageAccess } from "@/app/_lib/manage-server";
 import { WalletTabClient } from "../../_components/WalletTabClient";
 import { getAccountRouteData, readAccountRouteParams } from "../../_lib/account-route";
 
@@ -12,18 +13,19 @@ export const metadata: Metadata = {
 export default async function AccountWalletPage({ params }: { params: Promise<{ did: string }> }) {
   const { did, urlIdentifier } = await readAccountRouteParams(params);
 
-  // The wallet tab is private: it manages the owner's donation wallet and its
-  // passkey signers. Only the signed-in owner of this profile gets here —
-  // everyone else sees a 404. Ownership is the whole gate: session DIDs can
-  // only ever match personal repos (never CGS group accounts), and some
-  // personal accounts legitimately carry an organization record, so we must
-  // not additionally require kind === "user". (Organization wallets are
-  // managed from the funding settings instead.)
-  const [, session] = await Promise.all([
+  // Wallets are private management surfaces. A personal wallet belongs only
+  // to its signed-in owner; an organization wallet is available to every org
+  // member, with create/delete and signer removal still role-gated by the API.
+  const [account, session, access] = await Promise.all([
     getAccountRouteData(did, urlIdentifier),
     fetchAuthSession().catch(() => ({ isLoggedIn: false as const })),
+    resolveAccountManageAccess(urlIdentifier).catch(() => null),
   ]);
-  if (!session.isLoggedIn || session.did !== did) notFound();
 
+  if (access?.status === "allowed" && access.target.kind === "group") {
+    return <WalletTabClient organization={{ did: access.target.did, name: account.displayName }} />;
+  }
+
+  if (!session.isLoggedIn || session.did !== did) notFound();
   return <WalletTabClient />;
 }

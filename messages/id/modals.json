@@ -413,6 +413,10 @@
     "signersHint": "Anggota organisasi dapat menambahkan kunci sandi mereka sendiri agar juga dapat menyetujui pembayaran.",
     "deleteButton": "Hapus dompet",
     "viewOnExplorer": "Lihat alamat ini di Etherscan",
-    "explorer": "Etherscan"
+    "explorer": "Etherscan",
+    "intro": "Dompet donasi bersama untuk organisasi ini, diamankan dengan kunci sandi anggota. Donasi untuk proyeknya masuk ke alamat ini.",
+    "unnamedPasskey": "Kunci sandi",
+    "addPasskey": "Tambahkan kunci sandi saya",
+    "signerLabelPlaceholder": "Beri nama kunci sandi ini (mis. Ponsel saya)"
   }
 }

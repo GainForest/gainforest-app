@@ -413,6 +413,10 @@
     "signersHint": "Members of the organization can add their own passkey so they can approve payments too.",
     "deleteButton": "Remove wallet",
     "viewOnExplorer": "View this address on Etherscan",
-    "explorer": "Etherscan"
+    "explorer": "Etherscan",
+    "intro": "The shared donation wallet for this organization, secured by member passkeys. Donations to its projects arrive at this address.",
+    "unnamedPasskey": "Passkey",
+    "addPasskey": "Add my passkey",
+    "signerLabelPlaceholder": "Name this passkey (e.g. My phone)"
   }
 }

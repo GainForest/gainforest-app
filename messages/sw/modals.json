@@ -413,6 +413,10 @@
     "signersHint": "Wanachama wa shirika wanaweza kuongeza funguo zao za siri ili nao waweze kuidhinisha malipo.",
     "deleteButton": "Ondoa pochi",
     "viewOnExplorer": "Tazama anwani hii kwenye Etherscan",
-    "explorer": "Etherscan"
+    "explorer": "Etherscan",
+    "intro": "Pochi ya pamoja ya michango ya shirika hili, inayolindwa na funguo za siri za wanachama. Michango kwa miradi yake hufika kwenye anwani hii.",
+    "unnamedPasskey": "Ufunguo wa siri",
+    "addPasskey": "Ongeza ufunguo wangu wa siri",
+    "signerLabelPlaceholder": "Ipe ufunguo huu jina (mf. Simu yangu)"
   }
 }

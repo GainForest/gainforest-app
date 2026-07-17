@@ -210,10 +210,10 @@ export default async function AccountLayout({
               // ever match a personal repo, and some personal accounts carry
               // an organization record, so don't also require kind === "user".
               includeTaina={isOwner}
-              // The personal donation wallet shares the same ownership gate:
-              // it only ever appears to the signed-in owner of this profile
-              // (organization wallets are managed from funding settings).
-              includeWallet={isOwner}
+              // Personal owners and organization members get a private Wallet
+              // entry. The page/API then apply the finer owner/admin/member
+              // permissions for setup and signer management.
+              includeWallet={isOwner || (account.kind === "organization" && canManage)}
               showEndorsementsGiven={showEndorsementsGiven}
               showEquipment={showEquipment}
             />

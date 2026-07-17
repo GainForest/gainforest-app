@@ -8,9 +8,8 @@
  * (see lib/splits-vault/shared.ts). Available actions are gated by the
  * viewer's role in the organization:
  *
- *   • owner            → create the wallet with their passkey, remove signers,
+ *   • owner / admin    → create the wallet with their passkey, remove signers,
  *                        remove an unused wallet
- *   • admin            → remove signers
  *   • any member       → add their own passkey as a signer, remove their own
  *   • everyone         → see the address and signer list
  *

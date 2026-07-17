@@ -413,6 +413,10 @@
     "signersHint": "Os membros da organização podem adicionar sua própria chave de acesso para também aprovar pagamentos.",
     "deleteButton": "Remover carteira",
     "viewOnExplorer": "Ver este endereço no Etherscan",
-    "explorer": "Etherscan"
+    "explorer": "Etherscan",
+    "intro": "A carteira de doações compartilhada desta organização, protegida pelas chaves de acesso dos membros. As doações para seus projetos chegam a este endereço.",
+    "unnamedPasskey": "Chave de acesso",
+    "addPasskey": "Adicionar minha chave de acesso",
+    "signerLabelPlaceholder": "Dê um nome a esta chave (ex.: Meu celular)"
   }
 }

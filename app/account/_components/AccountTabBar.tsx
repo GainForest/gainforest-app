@@ -109,8 +109,8 @@ function buildTabs(
     icon: BotIcon,
     exact: false,
   };
-  // The personal donation wallet is private: the tab only shows on the
-  // owner's own profile, next to Tainá and Settings.
+  // The donation wallet is private: personal owners and organization members
+  // see it inside More; the route/API enforce finer role permissions.
   const walletTab: Tab = {
     labelKey: "wallet",
     href: accountWalletPath(did),

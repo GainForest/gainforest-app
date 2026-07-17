@@ -39,9 +39,15 @@ import { cn } from "@/lib/utils";
 
 type WalletState = {
   exists: boolean;
+  viewerRole?: "owner" | "admin" | "member";
   record?: SplitsVaultRecord;
   uri?: string;
   deployed?: boolean;
+};
+
+type OrganizationWalletContext = {
+  did: string;
+  name: string;
 };
 
 function shortAddress(address: string): string {
@@ -72,10 +78,12 @@ function CardTitle({ Icon, children }: { Icon: React.ComponentType<{ className?:
   );
 }
 
-export function WalletTabClient() {
-  const t = useTranslations("common.accountWallet");
+export function WalletTabClient({ organization }: { organization?: OrganizationWalletContext } = {}) {
+  const personalT = useTranslations("common.accountWallet");
+  const organizationT = useTranslations("modals.orgWallet");
+  const t = organization ? organizationT : personalT;
 
-  const [handle, setHandle] = useState<string | null>(null);
+  const [viewer, setViewer] = useState<{ did: string | null; handle: string | null }>({ did: null, handle: null });
   const [state, setState] = useState<WalletState | null>(null);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [isBusy, setIsBusy] = useState(false);
@@ -88,7 +96,9 @@ export function WalletTabClient() {
     fetch("/api/session")
       .then((res) => (res.ok ? res.json() : null))
       .then((json: { session?: AuthSession } | null) => {
-        if (!cancelled && json?.session?.isLoggedIn) setHandle(json.session.handle ?? null);
+        if (!cancelled && json?.session?.isLoggedIn) {
+          setViewer({ did: json.session.did ?? null, handle: json.session.handle ?? null });
+        }
       })
       .catch(() => undefined);
     return () => {
@@ -99,13 +109,16 @@ export function WalletTabClient() {
   const load = useCallback(async () => {
     setLoadError(null);
     try {
-      const response = await fetch("/api/wallet", { cache: "no-store" });
+      const response = await fetch(
+        organization ? `/api/org-wallet?repo=${encodeURIComponent(organization.did)}` : "/api/wallet",
+        { cache: "no-store" },
+      );
       if (!response.ok) throw new Error(await readError(response, t("loadError")));
       setState((await response.json()) as WalletState);
     } catch (err) {
       setLoadError(err instanceof Error ? err.message : t("loadError"));
     }
-  }, [t]);
+  }, [organization, t]);
 
   useEffect(() => {
     void load();
@@ -148,8 +161,13 @@ export function WalletTabClient() {
       return;
     }
     await runAction(async () => {
-      const passkey = await createVaultPasskey(handle ? t("passkeyLabel", { name: handle }) : t("passkeyLabelFallback"));
-      const signerLabel = label?.trim() || handle || undefined;
+      const passkeyName = organization
+        ? t("passkeyLabel", { org: organization.name })
+        : viewer.handle
+          ? t("passkeyLabel", { name: viewer.handle })
+          : t("passkeyLabelFallback");
+      const passkey = await createVaultPasskey(passkeyName);
+      const signerLabel = label?.trim() || viewer.handle || undefined;
       return send({ ...passkey, ...(signerLabel ? { label: signerLabel } : {}) });
     }, fallbackError);
   };
@@ -157,10 +175,10 @@ export function WalletTabClient() {
   const handleCreate = () =>
     withPasskey(
       (passkey) =>
-        fetch("/api/wallet", {
+        fetch(organization ? "/api/org-wallet" : "/api/wallet", {
           method: "POST",
           headers: { "content-type": "application/json" },
-          body: JSON.stringify({ passkey }),
+          body: JSON.stringify(organization ? { repo: organization.did, name: organization.name, passkey } : { passkey }),
         }),
       t("createError"),
     );
@@ -168,10 +186,10 @@ export function WalletTabClient() {
   const handleAddPasskey = () =>
     withPasskey(
       (passkey) =>
-        fetch("/api/wallet", {
+        fetch(organization ? "/api/org-wallet" : "/api/wallet", {
           method: "PATCH",
           headers: { "content-type": "application/json" },
-          body: JSON.stringify({ passkey }),
+          body: JSON.stringify(organization ? { repo: organization.did, passkey } : { passkey }),
         }).then((response) => {
           if (response.ok) setNewSignerLabel("");
           return response;
@@ -183,17 +201,25 @@ export function WalletTabClient() {
   const handleRemoveSigner = (signer: VaultPasskeySigner) =>
     runAction(
       () =>
-        fetch("/api/wallet", {
+        fetch(organization ? "/api/org-wallet" : "/api/wallet", {
           method: "PATCH",
           headers: { "content-type": "application/json" },
-          body: JSON.stringify({ remove: { credentialId: signer.credentialId } }),
+          body: JSON.stringify(
+            organization
+              ? { repo: organization.did, remove: { credentialId: signer.credentialId } }
+              : { remove: { credentialId: signer.credentialId } },
+          ),
         }),
       t("removeSignerError"),
     );
 
   const handleDelete = () =>
     runAction(
-      () => fetch("/api/wallet", { method: "DELETE" }),
+      () => fetch(organization ? "/api/org-wallet" : "/api/wallet", {
+        method: "DELETE",
+        headers: organization ? { "content-type": "application/json" } : undefined,
+        body: organization ? JSON.stringify({ repo: organization.did }) : undefined,
+      }),
       t("deleteError"),
     );
 
@@ -201,7 +227,10 @@ export function WalletTabClient() {
 
   const record = state?.record;
   const deployed = state?.deployed === true;
+  const canManageWallet = !organization || state?.viewerRole === "owner" || state?.viewerRole === "admin";
   const canEditSigners = !!record && !deployed;
+  const canRemoveSigner = (signer: VaultPasskeySigner) =>
+    canEditSigners && (!organization || canManageWallet || signer.memberDid === viewer.did);
 
   return (
     <div className="mx-auto w-full max-w-2xl space-y-4 py-6">
@@ -234,10 +263,14 @@ export function WalletTabClient() {
               <p className="mx-auto max-w-sm text-xs text-muted-foreground">{t("emptyHint")}</p>
             </div>
             {actionError ? <p className="text-sm text-destructive">{actionError}</p> : null}
-            <Button className="w-full sm:w-auto" onClick={() => void handleCreate()} disabled={isBusy}>
-              {isBusy ? <Loader2Icon className="size-3.5 animate-spin" /> : <FingerprintIcon className="size-3.5" />}
-              {isBusy ? t("creating") : t("createButton")}
-            </Button>
+            {canManageWallet ? (
+              <Button className="w-full sm:w-auto" onClick={() => void handleCreate()} disabled={isBusy}>
+                {isBusy ? <Loader2Icon className="size-3.5 animate-spin" /> : <FingerprintIcon className="size-3.5" />}
+                {isBusy ? t("creating") : t("createButton")}
+              </Button>
+            ) : (
+              <p className="text-xs text-muted-foreground">{organizationT("onlyOwnerCanCreate")}</p>
+            )}
           </div>
         </Card>
       ) : (
@@ -293,7 +326,7 @@ export function WalletTabClient() {
                   <span className="min-w-0 flex-1 truncate text-sm leading-snug">
                     {signer.label || t("unnamedPasskey")}
                   </span>
-                  {canEditSigners && record.signers.length > 1 ? (
+                  {canRemoveSigner(signer) && record.signers.length > 1 ? (
                     <Button
                       size="icon"
                       variant="ghost"
@@ -331,7 +364,7 @@ export function WalletTabClient() {
 
           {actionError ? <p className="px-1 text-sm text-destructive">{actionError}</p> : null}
 
-          {!deployed ? (
+          {!deployed && canManageWallet ? (
             <Button
               variant="ghost"
               className="w-full text-muted-foreground hover:text-destructive"
