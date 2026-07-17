@@ -6,7 +6,7 @@ import type { CgsRole } from "@/app/(manage)/manage/_lib/cgs";
 import { EditableAccountHeader } from "@/app/(manage)/manage/_components/EditableAccountHeader";
 import { fetchHiddenAccountDids, fetchRecognitionBadgesForDid } from "@/app/_lib/indexer";
 import { fetchEndorsementsGivenCount } from "@/app/_lib/endorsements-given";
-import { compareRecognitionBadgeKeys, isManualRecognitionBadgeKey, isRecognitionBadgeKey } from "@/app/_lib/recognition-badges";
+import { isManualRecognitionBadgeKey } from "@/app/_lib/recognition-badges";
 import { getGainForestModeratorAccess } from "@/app/internal/badges/_lib/access";
 import { localizedAlternates } from "@/app/_lib/seo-metadata";
 import { getRequestOrigin } from "@/app/_lib/request-origin";
@@ -14,7 +14,6 @@ import { AccountChrome } from "../_components/AccountChrome";
 import { AccountHero } from "../_components/AccountHero";
 import { AccountTabBar } from "../_components/AccountTabBar";
 import { StewardTools } from "../_components/StewardTools";
-import { RecognitionBadgeChips } from "../_components/RecognitionBadgeChips";
 import { loadAccountMemberships } from "../_components/AccountTabContent";
 import { accountSettingsPath, getAccountRouteData, readAccountRouteParams, readOptionalAccountRouteParams, type AccountRouteData } from "../_lib/account-route";
 
@@ -151,12 +150,14 @@ export default async function AccountLayout({
   const testAccountFlagged = moderator?.isModerator
     ? await fetchHiddenAccountDids().then((dids) => dids.has(account.did)).catch(() => false)
     : null;
-  // Steward-awarded recognition badges shown publicly on the profile (and used
-  // as the moderator control's initial state). One cached index read per view.
-  // A profile can hold several BioBlitz wins across rounds, so this is a list.
-  const awardedRecognition: string[] = await fetchRecognitionBadgesForDid(account.did)
-    .then((keys) => [...keys].filter(isRecognitionBadgeKey).sort(compareRecognitionBadgeKeys))
-    .catch(() => []);
+  // Manually awarded recognition badges seed the moderator control's initial
+  // state; the public "Awards" row in the hero fetches its own data client-side
+  // (AccountAwards), so this read only runs for moderators.
+  const awardedManualRecognition = moderator?.isModerator
+    ? await fetchRecognitionBadgesForDid(account.did)
+        .then((keys) => [...keys].filter(isManualRecognitionBadgeKey))
+        .catch(() => [])
+    : [];
   // The "Endorsements given" tab appears only for organizations that have
   // signed at least one Organization Endorsement badge award. Cached per org.
   const showEndorsementsGiven = account.kind === "organization"
@@ -183,7 +184,7 @@ export default async function AccountLayout({
                 did={account.did}
                 accountName={account.displayName}
                 initialTestFlagged={testAccountFlagged}
-                initialAwarded={awardedRecognition.filter(isManualRecognitionBadgeKey)}
+                initialAwarded={awardedManualRecognition}
               />
             ) : null}
             {canEditProfile && target ? (
@@ -199,7 +200,6 @@ export default async function AccountLayout({
             ) : (
               <AccountHero account={account} memberships={memberships} />
             )}
-            <RecognitionBadgeChips badges={awardedRecognition} />
             <AccountTabBar
               did={account.urlIdentifier}
               accountKind={account.kind}

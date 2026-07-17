@@ -21,6 +21,7 @@ import { AccountWalletSupport } from "./AccountWalletSupport";
 import { formatCountry } from "../../_lib/format";
 import { SocialGlyph } from "@/app/_components/SocialIcon";
 import { TrustedByBadges } from "@/app/_components/TrustedByBadges";
+import { AccountAwards } from "./AccountAwards";
 import { FollowButton, FollowProvider, FollowStats } from "@/app/_components/FollowButton";
 import { Button } from "@/components/ui/button";
 
@@ -196,7 +197,12 @@ export function AccountHero({
                 ) : null}
               </div>
             ) : null}
-            <TrustedByBadges did={account.did} variant="plain" className="mt-3 w-fit" />
+            {/* Trust + awards read as one quiet metadata row under the title;
+                each half renders nothing when the account has none. */}
+            <div className="mt-3 flex flex-wrap items-center gap-x-5 gap-y-2 empty:mt-0">
+              <TrustedByBadges did={account.did} variant="plain" className="w-fit" />
+              <AccountAwards did={account.did} className="w-fit" />
+            </div>
             <AccountMemberships organizations={memberships} className="mt-3" />
           </div>
         </div>

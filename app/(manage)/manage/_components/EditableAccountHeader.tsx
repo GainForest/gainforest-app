@@ -25,6 +25,7 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import type { AccountRouteData } from "@/app/account/_lib/account-route";
 import type { AccountOrganization } from "@/app/account/_components/AccountOrganizationsGrid";
+import { AccountAwards } from "@/app/account/_components/AccountAwards";
 import { AccountMemberships } from "@/app/account/_components/AccountMemberships";
 import { AccountWalletSupport } from "@/app/account/_components/AccountWalletSupport";
 import { countryFlag } from "@/app/_lib/format";
@@ -480,6 +481,7 @@ function EditableHero({
                 {editState.description || t("hero.noBio")}
               </p>
               <FollowStats targetDid={account.did} identifier={account.urlIdentifier} className="mt-2.5" />
+              <AccountAwards did={account.did} className="mt-3 w-fit" />
               <AccountMemberships organizations={memberships} className="mt-3" />
               {editDisabledReason ? <p className="mt-2 text-xs text-muted-foreground">{editDisabledReason}</p> : null}
             </>
