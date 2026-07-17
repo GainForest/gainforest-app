@@ -3,15 +3,16 @@
 import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import { motion } from "framer-motion";
-import { AppWindowIcon, PauseIcon, PlayIcon, ServerIcon, ShieldCheckIcon, WalletCardsIcon } from "lucide-react";
+import { DatabaseIcon, FingerprintIcon, PauseIcon, PlayIcon, SigmaIcon, WalletCardsIcon } from "lucide-react";
 
 type Step = 0 | 1 | 2 | 3;
 
 const STEP_COUNT = 4;
 
-// A step-through graph for getting a wallet. Enrollment rides on a standard
-// AT Protocol pass from the user's own PDS, so the service works with any
-// account, including Bluesky-hosted ones.
+// A step-through graph for getting a wallet. The passkey is created on the
+// user's device, its public half is saved as a record in the user's own
+// account, and the wallet address falls out of deterministic math over
+// exactly those inputs. Nothing touches the blockchain yet.
 export function EnrollJourney() {
   const t = useTranslations("common.walletService.enroll");
   const [step, setStep] = useState<Step>(0);
@@ -31,11 +32,11 @@ export function EnrollJourney() {
     return () => window.clearInterval(timer);
   }, [playing]);
 
-  const labels = [t("nodes.app"), t("nodes.pds"), t("nodes.service"), t("nodes.wallet")];
+  const labels = [t("nodes.device"), t("nodes.account"), t("nodes.math"), t("nodes.wallet")];
   const icons = [
-    <AppWindowIcon key="app" className="h-4 w-4" />,
-    <ServerIcon key="pds" className="h-4 w-4" />,
-    <ShieldCheckIcon key="service" className="h-4 w-4" />,
+    <FingerprintIcon key="device" className="h-4 w-4" />,
+    <DatabaseIcon key="account" className="h-4 w-4" />,
+    <SigmaIcon key="math" className="h-4 w-4" />,
     <WalletCardsIcon key="wallet" className="h-4 w-4" />,
   ];
 

@@ -2589,35 +2589,35 @@
     }
   },
   "walletService": {
-    "metaTitle": "Cómo funciona el servicio de billetera de GainForest",
-    "metaDescription": "Una guía interactiva del servicio de billetera: inscríbete con cualquier cuenta de AT Protocol, divide las claves en tres partes y aprueba los pagos desde tu propio dispositivo.",
-    "kicker": "Servicio de billetera de GainForest",
-    "title": "Una billetera para tu cuenta de AT Protocol",
-    "lead": "El servicio de billetera da a cualquier cuenta de AT Protocol una billetera de custodia propia para Ethereum y Solana. Funciona con todos los PDS, incluido Bluesky. No hay frase semilla que anotar. Tus claves se dividen en tres partes, tu dispositivo aprueba cada pago y puedes exportar tus claves e irte cuando quieras.",
+    "metaTitle": "Cómo funcionan las billeteras de GainForest",
+    "metaDescription": "Una guía interactiva de las billeteras con llaves de acceso: una billetera de donaciones cuya dirección se calcula desde tu propia cuenta, protegida con Face ID o huella digital, sin frase semilla y sin empresas que guarden claves.",
+    "kicker": "Billeteras GainForest",
+    "title": "Una billetera hecha de tu cuenta",
+    "lead": "Cada cuenta y organización en GainForest puede tener su propia billetera de donaciones. Face ID, una huella digital o una llave de seguridad ocupan el lugar de la frase semilla. La dirección de la billetera se calcula a partir de la identidad de tu cuenta, así que cualquiera puede comprobar que de verdad es tuya. Ningún servidor guarda una clave.",
     "facts": {
-      "anyPds": {
-        "title": "Funciona con cualquier cuenta",
-        "text": "Te inscribes con tu identidad actual de AT Protocol. Sin contraseña nueva y sin cuenta nueva."
+      "noSeed": {
+        "title": "Sin frase semilla",
+        "text": "Las claves de tu billetera son llaves de acceso. Tu propio dispositivo las protege con Face ID, huella digital o una llave de seguridad."
       },
-      "protection": {
-        "title": "Las claves quedan protegidas",
-        "text": "La clave completa de la billetera aparece solo un momento dentro del hardware protegido y luego se borra."
+      "fromAccount": {
+        "title": "Tu cuenta es la prueba",
+        "text": "La dirección sale de una fórmula fija sobre la identidad de tu cuenta. Cualquiera puede repetir el cálculo y confirmar el vínculo."
       },
-      "majority": {
-        "title": "Tú tienes la mayoría",
-        "text": "Tu dispositivo y tu copia de recuperación guardan dos de las tres partes de la billetera."
+      "noCustodian": {
+        "title": "Nadie guarda claves por ti",
+        "text": "No existe un servidor de billeteras. Solo las llaves de acceso en la lista de la billetera pueden aprobar un pago."
       }
     },
     "what": {
-      "heading": "¿Qué es el servicio de billetera?",
-      "intro": "Un servicio pequeño e independiente que corre dentro de hardware protegido y guarda una billetera para cada persona.",
-      "p1": "Cada billetera está ligada a un DID, la identidad permanente detrás de una cuenta de AT Protocol. El servicio crea la billetera a partir de un secreto aleatorio nuevo dentro de una máquina virtual confidencial, un tipo de hardware protegido llamado TEE.",
-      "p2": "Ese secreto se divide en tres partes: una para tu dispositivo, una para el servicio protegido y una para tu copia de recuperación. Dos partes cualesquiera pueden restaurar la billetera. Una sola parte no revela nada.",
-      "p3": "El servicio se mantiene pequeño a propósito. Guarda el material de la billetera, verifica pruebas y firma transacciones. Tus publicaciones, perfiles y demás registros permanecen todo el tiempo en tu propio PDS."
+      "heading": "¿Qué es esta billetera?",
+      "intro": "Una cuenta inteligente en Ethereum, controlada por completo con llaves de acceso y descrita por un pequeño registro en tu propia cuenta.",
+      "p1": "Las personas obtienen una billetera de donaciones personal y las organizaciones una compartida desde la que varios miembros pueden aprobar pagos. Ambas funcionan igual. La billetera es una cuenta inteligente de Splits, un diseño de contrato de código abierto que acepta firmas de llaves de acceso directamente.",
+      "p2": "Un pequeño registro público en tu propia cuenta describe la billetera: sus reglas y la lista de llaves de acceso que pueden gastar desde ella. La dirección de la billetera se calcula exactamente a partir de esos datos. No hay servidor de billeteras, ni frase semilla, ni empresas guardando claves por ti.",
+      "p3": "La dirección funciona desde el primer segundo. Las donaciones pueden llegar antes de que exista algo en la blockchain, porque la fórmula ya reserva la dirección para tu cuenta y tus llaves de acceso exactas. El código de la billetera se instala en la cadena solo cuando sale el primer pago."
     },
     "enroll": {
-      "heading": "Cómo obtienes una billetera",
-      "intro": "Pulsa reproducir o elige un paso. La inscripción usa un pase estándar de AT Protocol emitido por tu propio PDS, así que ningún servidor necesita integración especial.",
+      "heading": "Cómo obtienes una",
+      "intro": "Pulsa reproducir o elige un paso. Crear la billetera requiere una sola confirmación con tu llave de acceso y escribe un solo registro. La blockchain todavía no participa.",
       "play": "Reproducir",
       "pause": "Pausa",
       "back": "Atrás",
@@ -2625,129 +2625,131 @@
       "stepLabel": "Paso {n} de {total}",
       "jumpTo": "Ir al paso {step}",
       "nodes": {
-        "app": "Tu aplicación",
-        "pds": "Tu PDS",
-        "service": "Servicio de billetera",
+        "device": "Tu dispositivo",
+        "account": "Tu cuenta",
+        "math": "Cálculo de dirección",
         "wallet": "Tu billetera"
       },
       "steps": {
         "s1": {
-          "title": "Tu aplicación pide un pase",
-          "text": "Tu aplicación pide a tu propio PDS un pase de corta duración que demuestra quién eres. Todos los PDS pueden emitir este pase, porque es una función estándar de AT Protocol."
+          "title": "Tu dispositivo crea una llave de acceso",
+          "text": "Tu teléfono o computadora crea una llave de acceso nueva y la protege con Face ID, huella digital o una llave de seguridad. La parte privada nunca sale del dispositivo. No hay nada que anotar."
         },
         "s2": {
-          "title": "El servicio verifica el pase",
-          "text": "El servicio de billetera lee tu registro público de identidad y compara el pase con él. También guarda una clave pública de tu dispositivo para futuras aprobaciones."
+          "title": "Se guarda un registro en tu cuenta",
+          "text": "La mitad pública de la llave entra en un pequeño registro guardado junto a los datos de tu propia cuenta. El registro también lista las reglas fijas de la billetera y cada llave de acceso autorizada a aprobar pagos."
         },
         "s3": {
-          "title": "El hardware protegido crea la billetera",
-          "text": "Un secreto aleatorio nuevo se convierte en tu billetera dentro de la memoria protegida. El secreto se divide de inmediato en tres partes y la clave completa se borra."
+          "title": "La fórmula produce la dirección",
+          "text": "Una fórmula fija convierte la identidad de tu cuenta y la lista de llaves de acceso en una dirección de billetera. Ejecútala donde sea, las veces que sea, y las mismas entradas dan la misma respuesta."
         },
         "s4": {
-          "title": "Tú te quedas con la mayoría",
-          "text": "Tu dispositivo y tu copia de recuperación reciben una parte cada uno. El servicio guarda su propia parte cifrada. Tus direcciones de Ethereum y Solana quedan listas para usar."
+          "title": "La billetera está lista",
+          "text": "La dirección puede recibir donaciones de inmediato. Todavía no hay nada en la blockchain, y no hace falta. La billetera permanece inactiva hasta que sale el primer pago."
         }
       }
     },
-    "shares": {
-      "heading": "Una billetera que puedes recuperar o llevar contigo",
-      "intro": "El secreto de la billetera se divide en tres partes. Elige una situación para ver qué dos partes la restauran. El operador solo controla una.",
-      "device": {
-        "title": "Tu dispositivo",
-        "text": "Se guarda en tu navegador o aplicación y nunca en el servicio."
+    "address": {
+      "heading": "De dónde sale la dirección",
+      "intro": "Tres entradas públicas pasan por una fórmula fija. Cambia la lista de llaves de acceso y mira cómo la respuesta se mueve con las entradas.",
+      "one": {
+        "tab": "Una llave de acceso",
+        "title": "Mismas entradas, misma dirección, para siempre",
+        "text": "Cualquiera puede ejecutar esta fórmula el año que viene en cualquier computadora y obtener la respuesta idéntica. Por eso el registro en tu cuenta basta como prueba de que la dirección es tuya. No hace falta ninguna firma."
       },
-      "protected": {
-        "title": "Servicio protegido",
-        "text": "Se guarda cifrada y solo se usa dentro de hardware protegido aprobado."
+      "two": {
+        "tab": "Dos llaves de acceso",
+        "title": "Otras llaves, otra dirección",
+        "text": "Cambia la lista de llaves de acceso y la fórmula apunta a otro lugar. Nadie puede producir tu dirección sin tu cuenta exacta y tus llaves de acceso exactas."
       },
-      "recovery": {
-        "title": "Tu copia de recuperación",
-        "text": "Protegida por una contraseña o nube personal bajo tu control."
+      "account": {
+        "title": "La identidad de tu cuenta",
+        "text": "El identificador permanente detrás de tu cuenta de GainForest."
       },
-      "used": "Parte utilizada",
-      "notNeeded": "No necesaria",
-      "threshold": "2 de 3 cualquiera",
-      "scenarios": {
-        "everyday": {
-          "tab": "Uso diario",
-          "title": "Tu dispositivo y el hardware protegido firman juntos",
-          "text": "La billetera se reconstruye brevemente en memoria protegida, se compara con su dirección pública, se usa para firmar y luego se borra."
-        },
-        "recover": {
-          "tab": "Dispositivo perdido",
-          "title": "Tu copia de recuperación reemplaza el dispositivo perdido",
-          "text": "El servicio protegido combina su parte con la tuya, crea partes nuevas y puede registrar tu dispositivo de reemplazo. La parte del dispositivo antiguo ya no funciona con el servicio."
-        },
-        "leave": {
-          "tab": "Dejar el servicio",
-          "title": "Tus dos partes evitan quedar atrapado",
-          "text": "Las partes de tu dispositivo y recuperación forman una mayoría. Puedes reconstruir la billetera sin el operador o exportarla mediante el servicio mientras esté disponible."
-        }
-      }
+      "passkeys": {
+        "title": "La lista de llaves de acceso",
+        "text": "Las mitades públicas de cada llave de acceso autorizada a gastar."
+      },
+      "rules": {
+        "title": "Reglas fijas",
+        "text": "El mismo diseño de contrato y los mismos ajustes para todas las billeteras."
+      },
+      "passkeyOne": "Tu teléfono",
+      "passkeyTwo": "Tu laptop",
+      "mathLabel": "Una fórmula fija",
+      "addressLabel": "Dirección de la billetera"
     },
     "gate": {
-      "heading": "Por qué el operador no puede gastar tu dinero",
-      "intro": "Prueba ambas solicitudes. Un pase de acceso puede mostrar la dirección pública de la billetera. Gastar necesita además la prueba de tu dispositivo y su parte de la billetera.",
-      "tokenAttempt": "Solo el pase",
-      "userAttempt": "Prueba del dispositivo + parte",
-      "tokenNode": "Pase de acceso",
-      "userNode": "Prueba + parte",
-      "teeNode": "Billetera protegida",
-      "approved": "Firma aprobada",
-      "denied": "Solicitud denegada",
-      "approvedDesc": "Tu dispositivo firma una solicitud corta y envía su parte cifrada para el hardware protegido. El servicio verifica la firma, la hora y un número de un solo uso antes de reconstruir la billetera para firmar.",
-      "deniedDesc": "Un pase por sí solo únicamente da acceso a información pública. El servicio protegido guarda una sola parte y se niega a firmar sin una solicitud firmada por tu dispositivo y una segunda parte genuina."
+      "heading": "Quién puede gastar",
+      "intro": "Prueba ambos. La billetera solo acepta firmas de las llaves de acceso de su lista, y esas viven en dispositivos reales de personas reales.",
+      "otherAttempt": "Un servidor o un extraño",
+      "passkeyAttempt": "Tu llave de acceso",
+      "otherNode": "Sin clave alguna",
+      "passkeyNode": "Face ID / huella",
+      "walletNode": "Tu billetera",
+      "approved": "Pago aprobado",
+      "denied": "Nada que robar",
+      "approvedDesc": "Tu dispositivo pide Face ID, huella digital o tu llave de seguridad y firma el pago localmente. La billetera compara la firma con su lista de llaves de acceso y deja pasar el pago.",
+      "deniedDesc": "El registro en tu cuenta es público y solo contiene claves públicas. No hay ningún secreto en ningún servidor que se pueda robar, filtrar o mal usar. GainForest no puede mover tu dinero, y tampoco nadie que lea el registro."
     },
-    "binding": {
-      "heading": "Cómo cualquiera puede verificar el vínculo",
-      "intro": "Tu cuenta y tu billetera se señalan mutuamente en público. Cambia de lado para ver cada mitad de la prueba.",
-      "accountTab": "Lado de la cuenta",
-      "walletTab": "Lado de la billetera",
-      "repoName": "Tu repositorio de datos",
-      "recordName": "Registro de vínculo",
-      "walletName": "Clave de la billetera",
-      "signatureName": "Firma en el registro",
-      "accountResult": "Tu cuenta reclama la billetera",
-      "accountDesc": "Publicas un registro pequeño en tu propio repositorio con tus direcciones de billetera. Solo tú puedes escribir en tu repositorio, así que el registro muestra que tu cuenta respalda esas direcciones.",
-      "walletResult": "Tu billetera está de acuerdo",
-      "walletDesc": "Dentro del registro hay una firma hecha por la clave de la billetera sobre tu identidad y tus direcciones. Muestra que la billetera aceptó el vínculo. Cualquiera puede verificar ambas mitades con datos públicos."
+    "lifecycle": {
+      "heading": "Primero inactiva, luego en vivo",
+      "intro": "La billetera tiene dos vidas. Alterna entre ellas para ver qué puede cambiar en cada una.",
+      "receives": "Puede recibir donaciones",
+      "signersLabel": "Quién puede aprobar pagos",
+      "signerOne": "Tu teléfono",
+      "signerTwo": "Tu laptop",
+      "dormant": {
+        "tab": "Antes del primer pago",
+        "badge": "Inactiva",
+        "editHint": "Agregar o quitar",
+        "title": "Recibir funciona desde el primer día",
+        "text": "Una billetera inactiva es solo una dirección más el registro, y eso basta para recibir donaciones. La lista de llaves de acceso aún puede cambiar: agrega tu segundo dispositivo o invita a tu equipo. La fórmula recalcula la dirección cada vez que la lista cambia, así que conviene definir la lista pronto."
+      },
+      "active": {
+        "tab": "Después del primer pago",
+        "badge": "Activa",
+        "editHint": "Bloqueado",
+        "title": "El primer pago la lleva a la cadena",
+        "text": "El primer pago saliente instala el código de la billetera en la dirección. Desde ese momento el registro queda congelado. Agregar o quitar llaves de acceso ahora ocurre en la propia blockchain y necesita la aprobación de una llave que ya esté en la lista."
+      }
     },
     "proof": {
-      "heading": "¿Cómo puede una aplicación confiar en el servicio?",
-      "intro": "El hardware protegido puede crear un informe llamado atestación. Permite a cualquiera revisar la máquina y el código antes de confiar.",
-      "cardLabel": "Prueba respaldada por hardware",
-      "text": "El servicio crea su identidad dentro de la memoria protegida. Un informe de hardware une esa identidad al código exacto que se está ejecutando. Cualquiera puede pedir este informe al servicio y revisarlo. Si el código cambia, el informe también cambia."
+      "heading": "Cómo cualquiera puede verificar el vínculo",
+      "intro": "El registro y la fórmula son públicos, así que verificar una billetera no exige confiar en GainForest.",
+      "cardLabel": "Prueba matemática",
+      "text": "Solo tú puedes escribir registros en tu propia cuenta, y el registro de la billetera lista las entradas exactas de la fórmula de dirección. Un verificador descarga el registro, ejecuta la fórmula y compara el resultado con la dirección registrada. Si coinciden, la billetera pertenece a tu cuenta. No hace falta firma, ni intermediario, ni ningún servicio especial."
     },
     "limits": {
-      "heading": "Lo que esta protección no resuelve",
-      "intro": "Las claves divididas y el hardware protegido eliminan muchos riesgos. Estos límites permanecen y los nombramos abiertamente.",
-      "onboarding": {
-        "title": "Primera configuración",
-        "text": "El primer registro de dispositivo confía una vez en el servicio. Una versión futura puede usar passkeys para reducir esa confianza."
+      "heading": "Qué tener en cuenta",
+      "intro": "El diseño saca de la ecuación a los servidores y las frases semilla. Quedan algunos límites honestos.",
+      "passkeys": {
+        "title": "Llaves perdidas",
+        "text": "Si se pierden todas las llaves de acceso de la lista, ya nadie puede gastar desde la billetera. Agrega pronto una llave desde un segundo dispositivo o invita a una persona de confianza."
       },
-      "uptime": {
-        "title": "Disponibilidad del servicio",
-        "text": "Un anfitrión todavía puede apagar la máquina o bloquear solicitudes. Tus partes de dispositivo y de recuperación te permiten reconstruir la billetera sin el servicio."
+      "frozen": {
+        "title": "Congelada tras la activación",
+        "text": "Cuando la billetera ya vive en la blockchain, su registro no puede cambiar más. Los cambios de llaves pasan entonces en la cadena y necesitan la aprobación de una llave existente."
       },
-      "backup": {
-        "title": "Tus copias",
-        "text": "Debes mantener segura tu copia de recuperación. Si pierdes tu dispositivo y tu copia al mismo tiempo, el servicio por sí solo no puede restaurar la billetera."
+      "fees": {
+        "title": "Comisiones de red",
+        "text": "El primer pago saliente también instala el código de la billetera, así que cuesta un poco más en comisiones de red que los pagos siguientes."
       },
-      "rollback": {
-        "title": "Retroceso de almacenamiento",
-        "text": "Retroceder el almacenamiento del servicio en el tiempo podría repetir una solicitud antigua ya aprobada. Nunca puede crear una aprobación nueva."
+      "single": {
+        "title": "Una billetera por cuenta",
+        "text": "Cada cuenta y cada organización tiene un único registro canónico de billetera. Solo se puede eliminar mientras la billetera está inactiva y la dirección no tiene fondos."
       }
     },
     "more": {
       "heading": "Sigue explorando",
-      "epdsTitle": "Cómo funciona el acceso ePDS",
-      "epdsDesc": "Mira la entrada sin contraseña y los servicios normales que la rodean.",
+      "epdsTitle": "Cómo funciona el acceso con ePDS",
+      "epdsDesc": "Mira la puerta de entrada sin contraseñas y los servicios normales que la rodean.",
       "lexiconsTitle": "Esquemas de datos",
-      "lexiconsDesc": "Explora los formatos abiertos guardados en cada PDS.",
-      "atprotoTitle": "Cómo funciona el AT Protocol",
+      "lexiconsDesc": "Explora los formatos abiertos de registros, incluido el registro de la billetera.",
+      "atprotoTitle": "Cómo funciona el Protocolo AT",
       "atprotoDesc": "Un recorrido interactivo por la red abierta sobre la que está construido todo esto.",
-      "githubTitle": "El servicio en GitHub",
-      "githubDesc": "Lee el código fuente y ejecuta el servicio tú mismo."
+      "githubTitle": "Cuentas inteligentes en GitHub",
+      "githubDesc": "Lee los contratos de cuenta inteligente de Splits, de código abierto, sobre los que funcionan estas billeteras."
     }
   },
   "identifications": {

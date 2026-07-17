@@ -2589,165 +2589,167 @@
     }
   },
   "walletService": {
-    "metaTitle": "Como funciona o serviço de carteira da GainForest",
-    "metaDescription": "Um guia interativo do serviço de carteira: inscreva-se com qualquer conta AT Protocol, divida as chaves em três partes e aprove pagamentos no seu próprio dispositivo.",
-    "kicker": "Serviço de carteira GainForest",
-    "title": "Uma carteira para a sua conta AT Protocol",
-    "lead": "O serviço de carteira dá a qualquer conta AT Protocol uma carteira de custódia própria para Ethereum e Solana. Funciona com todos os PDS, incluindo o Bluesky. Não há frase-semente para anotar. Suas chaves são divididas em três partes, seu dispositivo aprova cada pagamento e você pode exportar suas chaves e sair quando quiser.",
+    "metaTitle": "Como funcionam as carteiras da GainForest",
+    "metaDescription": "Um guia interativo das carteiras com chaves de acesso: uma carteira de doações cujo endereço é calculado a partir da sua própria conta, protegida com Face ID ou impressão digital, sem frase-semente e sem empresas guardando chaves.",
+    "kicker": "Carteiras GainForest",
+    "title": "Uma carteira feita da sua conta",
+    "lead": "Cada conta e organização na GainForest pode ter sua própria carteira de doações. Face ID, impressão digital ou uma chave de segurança ocupam o lugar da frase-semente. O endereço da carteira é calculado a partir da identidade da sua conta, então qualquer pessoa pode conferir que ele é mesmo seu. Nenhum servidor guarda uma chave.",
     "facts": {
-      "anyPds": {
-        "title": "Funciona com qualquer conta",
-        "text": "Você se inscreve com sua identidade AT Protocol atual. Sem senha nova e sem conta nova."
+      "noSeed": {
+        "title": "Sem frase-semente",
+        "text": "As chaves da sua carteira são chaves de acesso. Seu próprio dispositivo as protege com Face ID, impressão digital ou uma chave de segurança."
       },
-      "protection": {
-        "title": "As chaves ficam protegidas",
-        "text": "A chave completa da carteira aparece só por um instante dentro do hardware protegido e depois é apagada."
+      "fromAccount": {
+        "title": "Sua conta é a prova",
+        "text": "O endereço vem de uma fórmula fixa sobre a identidade da sua conta. Qualquer pessoa pode refazer o cálculo e confirmar o vínculo."
       },
-      "majority": {
-        "title": "Você tem a maioria",
-        "text": "Seu dispositivo e seu backup de recuperação guardam duas das três partes da carteira."
+      "noCustodian": {
+        "title": "Ninguém guarda chaves por você",
+        "text": "Não existe servidor de carteiras. Somente as chaves de acesso na lista da carteira podem aprovar um pagamento."
       }
     },
     "what": {
-      "heading": "O que é o serviço de carteira?",
-      "intro": "Um serviço pequeno e independente que roda dentro de hardware protegido e guarda uma carteira para cada pessoa.",
-      "p1": "Cada carteira está ligada a um DID, a identidade permanente por trás de uma conta AT Protocol. O serviço cria a carteira a partir de um segredo aleatório novo dentro de uma máquina virtual confidencial, um tipo de hardware protegido chamado TEE.",
-      "p2": "Esse segredo é dividido em três partes: uma para o seu dispositivo, uma para o serviço protegido e uma para o seu backup de recuperação. Duas partes quaisquer podem restaurar a carteira. Uma parte sozinha não revela nada.",
-      "p3": "O serviço se mantém pequeno de propósito. Ele guarda o material da carteira, verifica provas e assina transações. Suas publicações, perfis e demais registros ficam o tempo todo no seu próprio PDS."
+      "heading": "O que é esta carteira?",
+      "intro": "Uma conta inteligente na Ethereum, controlada inteiramente por chaves de acesso e descrita por um pequeno registro na sua própria conta.",
+      "p1": "Pessoas recebem uma carteira de doações pessoal e organizações recebem uma compartilhada, da qual vários membros podem aprovar pagamentos. As duas funcionam do mesmo jeito. A carteira é uma conta inteligente da Splits, um desenho de contrato de código aberto que aceita assinaturas de chaves de acesso diretamente.",
+      "p2": "Um pequeno registro público na sua própria conta descreve a carteira: suas regras e a lista de chaves de acesso que podem gastar a partir dela. O endereço da carteira é calculado exatamente a partir desses dados. Não há servidor de carteiras, nem frase-semente, nem empresas guardando chaves por você.",
+      "p3": "O endereço funciona desde o primeiro segundo. Doações podem chegar antes de existir qualquer coisa na blockchain, porque a fórmula já reserva o endereço para a sua conta e as suas chaves de acesso exatas. O código da carteira é instalado na cadeia somente quando o primeiro pagamento sai."
     },
     "enroll": {
-      "heading": "Como você recebe uma carteira",
-      "intro": "Aperte reproduzir ou escolha um passo. A inscrição usa um passe padrão do AT Protocol emitido pelo seu próprio PDS, então nenhum servidor precisa de integração especial.",
+      "heading": "Como você consegue uma",
+      "intro": "Aperte play ou escolha um passo. Criar a carteira pede uma única confirmação com sua chave de acesso e grava um único registro. A blockchain ainda não participa.",
       "play": "Reproduzir",
       "pause": "Pausar",
       "back": "Voltar",
-      "next": "Próximo",
-      "stepLabel": "Etapa {n} de {total}",
-      "jumpTo": "Ir para a etapa {step}",
+      "next": "Avançar",
+      "stepLabel": "Passo {n} de {total}",
+      "jumpTo": "Ir para o passo {step}",
       "nodes": {
-        "app": "Seu app",
-        "pds": "Seu PDS",
-        "service": "Serviço de carteira",
+        "device": "Seu dispositivo",
+        "account": "Sua conta",
+        "math": "Cálculo do endereço",
         "wallet": "Sua carteira"
       },
       "steps": {
         "s1": {
-          "title": "Seu app pede um passe",
-          "text": "Seu app pede ao seu próprio PDS um passe de curta duração que prova quem você é. Todo PDS pode emitir esse passe, porque é um recurso padrão do AT Protocol."
+          "title": "Seu dispositivo cria uma chave de acesso",
+          "text": "Seu celular ou computador cria uma chave de acesso nova e a protege com Face ID, impressão digital ou uma chave de segurança. A parte privada nunca sai do dispositivo. Não há nada para anotar."
         },
         "s2": {
-          "title": "O serviço confere o passe",
-          "text": "O serviço de carteira lê seu registro público de identidade e confere o passe com ele. Também guarda uma chave pública do seu dispositivo para aprovações futuras."
+          "title": "Um registro é salvo na sua conta",
+          "text": "A metade pública da chave entra em um pequeno registro guardado junto aos dados da sua própria conta. O registro também lista as regras fixas da carteira e cada chave de acesso autorizada a aprovar pagamentos."
         },
         "s3": {
-          "title": "O hardware protegido cria a carteira",
-          "text": "Um segredo aleatório novo vira sua carteira dentro da memória protegida. O segredo é dividido em três partes na hora e a chave completa é apagada."
+          "title": "A fórmula produz o endereço",
+          "text": "Uma fórmula fixa transforma a identidade da sua conta e a lista de chaves de acesso em um endereço de carteira. Rode a fórmula onde quiser, quantas vezes quiser, e as mesmas entradas dão a mesma resposta."
         },
         "s4": {
-          "title": "Você fica com a maioria",
-          "text": "Seu dispositivo e seu backup de recuperação recebem uma parte cada um. O serviço guarda a própria parte criptografada. Seus endereços de Ethereum e Solana ficam prontos para usar."
+          "title": "A carteira está pronta",
+          "text": "O endereço já pode receber doações. Ainda não há nada na blockchain, e nem precisa. A carteira fica adormecida até o primeiro pagamento sair."
         }
       }
     },
-    "shares": {
-      "heading": "Uma carteira que você pode recuperar ou levar consigo",
-      "intro": "O segredo da carteira é dividido em três partes. Escolha uma situação para ver quais duas partes a restauram. O operador controla apenas uma.",
-      "device": {
-        "title": "Seu dispositivo",
-        "text": "Guardada pelo seu navegador ou aplicativo e nunca pelo serviço."
+    "address": {
+      "heading": "De onde vem o endereço",
+      "intro": "Três entradas públicas passam por uma fórmula fixa. Troque a lista de chaves de acesso e veja a resposta se mover com as entradas.",
+      "one": {
+        "tab": "Uma chave de acesso",
+        "title": "Mesmas entradas, mesmo endereço, para sempre",
+        "text": "Qualquer pessoa pode rodar esta fórmula no ano que vem, em qualquer computador, e obter a resposta idêntica. Por isso o registro na sua conta basta como prova de que o endereço é seu. Nenhuma assinatura é necessária."
       },
-      "protected": {
-        "title": "Serviço protegido",
-        "text": "Guardada criptografada e utilizável apenas em hardware protegido aprovado."
+      "two": {
+        "tab": "Duas chaves de acesso",
+        "title": "Outras chaves, outro endereço",
+        "text": "Mude a lista de chaves de acesso e a fórmula aponta para outro lugar. Ninguém consegue produzir o seu endereço sem a sua conta exata e as suas chaves de acesso exatas."
       },
-      "recovery": {
-        "title": "Sua cópia de recuperação",
-        "text": "Protegida por uma senha ou nuvem pessoal que você controla."
+      "account": {
+        "title": "A identidade da sua conta",
+        "text": "O identificador permanente por trás da sua conta GainForest."
       },
-      "used": "Parte usada",
-      "notNeeded": "Não necessária",
-      "threshold": "Quaisquer 2 de 3",
-      "scenarios": {
-        "everyday": {
-          "tab": "Uso diário",
-          "title": "Seu dispositivo e o hardware protegido assinam juntos",
-          "text": "A carteira é reconstruída por instantes na memória protegida, comparada ao endereço público, usada para assinar e depois apagada."
-        },
-        "recover": {
-          "tab": "Dispositivo perdido",
-          "title": "Sua cópia de recuperação substitui o dispositivo perdido",
-          "text": "O serviço protegido combina sua parte com a parte de recuperação, cria partes novas e pode cadastrar o dispositivo substituto. A parte do dispositivo antigo deixa de funcionar com o serviço."
-        },
-        "leave": {
-          "tab": "Deixar o serviço",
-          "title": "Suas duas partes evitam aprisionamento",
-          "text": "As partes do dispositivo e da recuperação formam uma maioria. Você pode reconstruir a carteira sem o operador ou exportá-la pelo serviço enquanto ele estiver disponível."
-        }
-      }
+      "passkeys": {
+        "title": "A lista de chaves de acesso",
+        "text": "As metades públicas de cada chave de acesso autorizada a gastar."
+      },
+      "rules": {
+        "title": "Regras fixas",
+        "text": "O mesmo desenho de contrato e os mesmos ajustes para todas as carteiras."
+      },
+      "passkeyOne": "Seu celular",
+      "passkeyTwo": "Seu notebook",
+      "mathLabel": "Uma fórmula fixa",
+      "addressLabel": "Endereço da carteira"
     },
     "gate": {
-      "heading": "Por que o operador não pode gastar seu dinheiro",
-      "intro": "Teste os dois pedidos. Um passe de acesso pode mostrar o endereço público da carteira. Gastar exige também a prova do seu dispositivo e a parte dele.",
-      "tokenAttempt": "Só o passe",
-      "userAttempt": "Prova do dispositivo + parte",
-      "tokenNode": "Passe de acesso",
-      "userNode": "Prova + parte",
-      "teeNode": "Carteira protegida",
-      "approved": "Assinatura aprovada",
-      "denied": "Pedido negado",
-      "approvedDesc": "Seu dispositivo assina um pedido curto e envia sua parte criptografada para o hardware protegido. O serviço confere a assinatura, o horário e um número de uso único antes de reconstruir a carteira para assinar.",
-      "deniedDesc": "Um passe sozinho só dá acesso a informações públicas. O serviço protegido guarda uma única parte e se recusa a assinar sem um pedido assinado pelo seu dispositivo e uma segunda parte genuína."
+      "heading": "Quem pode gastar",
+      "intro": "Teste os dois. A carteira só aceita assinaturas das chaves de acesso da sua lista, e elas vivem em dispositivos reais de pessoas reais.",
+      "otherAttempt": "Um servidor ou um estranho",
+      "passkeyAttempt": "Sua chave de acesso",
+      "otherNode": "Sem chave nenhuma",
+      "passkeyNode": "Face ID / digital",
+      "walletNode": "Sua carteira",
+      "approved": "Pagamento aprovado",
+      "denied": "Nada para roubar",
+      "approvedDesc": "Seu dispositivo pede Face ID, impressão digital ou sua chave de segurança e assina o pagamento localmente. A carteira confere a assinatura com a lista de chaves de acesso e deixa o pagamento passar.",
+      "deniedDesc": "O registro na sua conta é público e contém apenas chaves públicas. Não há segredo em servidor algum para roubar, vazar ou abusar. A GainForest não pode mover o seu dinheiro, e ninguém que leia o registro pode."
     },
-    "binding": {
-      "heading": "Como qualquer pessoa pode conferir o vínculo",
-      "intro": "Sua conta e sua carteira apontam uma para a outra em público. Troque de lado para ver cada metade da prova.",
-      "accountTab": "Lado da conta",
-      "walletTab": "Lado da carteira",
-      "repoName": "Seu repositório de dados",
-      "recordName": "Registro de vínculo",
-      "walletName": "Chave da carteira",
-      "signatureName": "Assinatura no registro",
-      "accountResult": "Sua conta reivindica a carteira",
-      "accountDesc": "Você publica um registro pequeno no seu próprio repositório com os endereços da carteira. Só você pode escrever no seu repositório, então o registro mostra que sua conta assume esses endereços.",
-      "walletResult": "Sua carteira concorda",
-      "walletDesc": "Dentro do registro há uma assinatura feita pela chave da carteira sobre sua identidade e seus endereços. Ela mostra que a carteira aceitou o vínculo. Qualquer pessoa pode verificar as duas metades com dados públicos."
+    "lifecycle": {
+      "heading": "Primeiro adormecida, depois ativa",
+      "intro": "A carteira tem duas vidas. Alterne entre elas para ver o que pode mudar em cada uma.",
+      "receives": "Pode receber doações",
+      "signersLabel": "Quem pode aprovar pagamentos",
+      "signerOne": "Seu celular",
+      "signerTwo": "Seu notebook",
+      "dormant": {
+        "tab": "Antes do primeiro pagamento",
+        "badge": "Adormecida",
+        "editHint": "Adicionar ou remover",
+        "title": "Receber funciona desde o primeiro dia",
+        "text": "Uma carteira adormecida é só um endereço mais o registro, e isso basta para receber doações. A lista de chaves de acesso ainda pode mudar: adicione seu segundo dispositivo ou convide colegas. A fórmula recalcula o endereço sempre que a lista muda, então é melhor definir a lista cedo."
+      },
+      "active": {
+        "tab": "Depois do primeiro pagamento",
+        "badge": "Ativa",
+        "editHint": "Bloqueado",
+        "title": "O primeiro pagamento a leva para a cadeia",
+        "text": "O primeiro pagamento de saída instala o código da carteira no endereço. A partir daí o registro fica congelado. Adicionar ou remover chaves de acesso passa a acontecer na própria blockchain e precisa da aprovação de uma chave que já esteja na lista."
+      }
     },
     "proof": {
-      "heading": "Como um app pode confiar no serviço?",
-      "intro": "O hardware protegido pode criar um relatório chamado atestado. Ele permite que qualquer pessoa confira a máquina e o código antes de confiar.",
-      "cardLabel": "Prova apoiada por hardware",
-      "text": "O serviço cria sua identidade dentro da memória protegida. Um relatório de hardware liga essa identidade ao código exato em execução. Qualquer pessoa pode pedir esse relatório ao serviço e conferi-lo. Se o código mudar, o relatório também muda."
+      "heading": "Como qualquer pessoa pode conferir o vínculo",
+      "intro": "O registro e a fórmula são públicos, então verificar uma carteira não exige confiança na GainForest.",
+      "cardLabel": "Prova matemática",
+      "text": "Somente você pode gravar registros na sua própria conta, e o registro da carteira lista as entradas exatas da fórmula do endereço. Um verificador busca o registro, roda a fórmula e compara o resultado com o endereço registrado. Se baterem, a carteira pertence à sua conta. Não é preciso assinatura, intermediário nem serviço especial."
     },
     "limits": {
-      "heading": "O que esta proteção não resolve",
-      "intro": "Chaves divididas e hardware protegido eliminam muitos riscos. Estes limites permanecem e nós os nomeamos abertamente.",
-      "onboarding": {
-        "title": "Primeira configuração",
-        "text": "O primeiro cadastro de dispositivo confia uma vez no serviço. Uma versão futura pode usar passkeys para reduzir essa confiança."
+      "heading": "O que ter em mente",
+      "intro": "O desenho tira servidores e frases-semente da equação. Restam alguns limites honestos.",
+      "passkeys": {
+        "title": "Chaves perdidas",
+        "text": "Se todas as chaves de acesso da lista forem perdidas, ninguém mais consegue gastar da carteira. Adicione cedo uma chave de um segundo dispositivo ou convide uma pessoa de confiança."
       },
-      "uptime": {
-        "title": "Disponibilidade do serviço",
-        "text": "Um host ainda pode desligar a máquina ou bloquear pedidos. Suas partes do dispositivo e de recuperação permitem reconstruir a carteira sem o serviço."
+      "frozen": {
+        "title": "Congelada após a ativação",
+        "text": "Quando a carteira já vive na blockchain, seu registro não pode mais mudar. Mudanças de chaves passam a acontecer na cadeia e precisam da aprovação de uma chave existente."
       },
-      "backup": {
-        "title": "Seus backups",
-        "text": "Você precisa manter seu backup de recuperação em segurança. Se perder o dispositivo e o backup ao mesmo tempo, o serviço sozinho não consegue restaurar a carteira."
+      "fees": {
+        "title": "Taxas de rede",
+        "text": "O primeiro pagamento de saída também instala o código da carteira, então custa um pouco mais em taxas de rede do que os pagamentos seguintes."
       },
-      "rollback": {
-        "title": "Reversão de armazenamento",
-        "text": "Reverter o armazenamento do serviço no tempo poderia repetir um pedido antigo já aprovado. Isso nunca cria uma aprovação nova."
+      "single": {
+        "title": "Uma carteira por conta",
+        "text": "Cada conta e cada organização tem um único registro canônico de carteira. Ele só pode ser removido enquanto a carteira está adormecida e o endereço não guarda fundos."
       }
     },
     "more": {
       "heading": "Continue explorando",
-      "epdsTitle": "Como o login ePDS funciona",
-      "epdsDesc": "Veja a entrada sem senha e os serviços normais ao redor.",
+      "epdsTitle": "Como funciona o login com ePDS",
+      "epdsDesc": "Veja a porta de entrada sem senhas e os serviços normais ao redor dela.",
       "lexiconsTitle": "Esquemas de dados",
-      "lexiconsDesc": "Explore os formatos abertos guardados em cada PDS.",
+      "lexiconsDesc": "Explore os formatos abertos de registros, incluindo o próprio registro da carteira.",
       "atprotoTitle": "Como funciona o AT Protocol",
       "atprotoDesc": "Um passeio interativo pela rede aberta sobre a qual tudo isto é construído.",
-      "githubTitle": "O serviço no GitHub",
-      "githubDesc": "Leia o código-fonte e rode o serviço você mesmo."
+      "githubTitle": "Contas inteligentes no GitHub",
+      "githubDesc": "Leia os contratos de conta inteligente da Splits, de código aberto, que fazem estas carteiras funcionar."
     }
   },
   "identifications": {

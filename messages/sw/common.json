@@ -2589,165 +2589,167 @@
     }
   },
   "walletService": {
-    "metaTitle": "Jinsi huduma ya pochi ya GainForest inavyofanya kazi",
-    "metaDescription": "Mwongozo shirikishi wa huduma ya pochi: jisajili kwa akaunti yoyote ya AT Protocol, funguo zinagawanywa katika sehemu tatu, na uidhinishe malipo kutoka kwenye kifaa chako mwenyewe.",
-    "kicker": "Huduma ya pochi ya GainForest",
-    "title": "Pochi kwa ajili ya akaunti yako ya AT Protocol",
-    "lead": "Huduma ya pochi inaipa akaunti yoyote ya AT Protocol pochi unayoimiliki mwenyewe kwa Ethereum na Solana. Inafanya kazi na kila PDS, ikiwemo Bluesky. Hakuna maneno ya siri ya kuandika. Funguo zako zinagawanywa katika sehemu tatu, kifaa chako kinaidhinisha kila malipo, na unaweza kuhamisha funguo zako na kuondoka wakati wowote.",
+    "metaTitle": "Jinsi pochi za GainForest zinavyofanya kazi",
+    "metaDescription": "Mwongozo shirikishi wa pochi za funguo za siri: pochi ya michango ambayo anwani yake inakokotolewa kutoka kwenye akaunti yako mwenyewe, ikilindwa kwa Face ID au alama ya kidole, bila maneno ya siri ya kuandika na bila kampuni inayoshika funguo.",
+    "kicker": "Pochi za GainForest",
+    "title": "Pochi iliyoundwa kutoka kwenye akaunti yako",
+    "lead": "Kila akaunti na shirika kwenye GainForest linaweza kuwa na pochi yake ya michango. Face ID, alama ya kidole, au ufunguo wa usalama unachukua nafasi ya maneno ya siri. Anwani ya pochi inakokotolewa kutoka kwenye utambulisho wa akaunti yako, hivyo mtu yeyote anaweza kuthibitisha kuwa ni yako kweli. Hakuna seva inayoshika ufunguo.",
     "facts": {
-      "anyPds": {
-        "title": "Inafanya kazi na akaunti yoyote",
-        "text": "Unajisajili kwa utambulisho wako wa sasa wa AT Protocol. Hakuna nenosiri jipya wala akaunti mpya."
+      "noSeed": {
+        "title": "Hakuna maneno ya siri",
+        "text": "Funguo za pochi yako ni funguo za siri za kifaa. Kifaa chako mwenyewe kinazilinda kwa Face ID, alama ya kidole, au ufunguo wa usalama."
       },
-      "protection": {
-        "title": "Funguo zinabaki salama",
-        "text": "Ufunguo kamili wa pochi unaonekana kwa muda mfupi tu ndani ya vifaa vilivyolindwa, kisha unafutwa."
+      "fromAccount": {
+        "title": "Akaunti yako ndiyo uthibitisho",
+        "text": "Anwani inatokana na fomula isiyobadilika juu ya utambulisho wa akaunti yako. Mtu yeyote anaweza kurudia hesabu hiyo na kuthibitisha uhusiano."
       },
-      "majority": {
-        "title": "Wewe unashikilia wingi",
-        "text": "Kifaa chako na nakala yako ya uokoaji vinashikilia sehemu mbili kati ya tatu za pochi."
+      "noCustodian": {
+        "title": "Hakuna anayeshika funguo kwa niaba yako",
+        "text": "Hakuna seva ya pochi. Funguo za siri zilizo kwenye orodha ya pochi pekee ndizo zinazoweza kuidhinisha malipo."
       }
     },
     "what": {
-      "heading": "Huduma ya pochi ni nini?",
-      "intro": "Huduma ndogo inayojitegemea, inayofanya kazi ndani ya vifaa vilivyolindwa na kuhifadhi pochi kwa kila mtumiaji.",
-      "p1": "Kila pochi imefungwa kwenye DID, utambulisho wa kudumu nyuma ya akaunti ya AT Protocol. Huduma inaunda pochi kutoka kwa siri mpya ya nasibu ndani ya mashine pepe ya siri, aina ya vifaa vilivyolindwa inayoitwa TEE.",
-      "p2": "Siri hiyo inagawanywa katika sehemu tatu: moja kwa kifaa chako, moja kwa huduma iliyolindwa, na moja kwa nakala yako ya uokoaji. Sehemu zozote mbili zinaweza kurejesha pochi. Sehemu moja pekee haifichui chochote.",
-      "p3": "Huduma imewekwa ndogo kwa makusudi. Inahifadhi vifaa vya pochi, inakagua uthibitisho, na inasaini miamala. Machapisho yako, wasifu, na rekodi zako nyingine zinabaki kwenye PDS yako mwenyewe wakati wote."
+      "heading": "Pochi hii ni nini?",
+      "intro": "Akaunti mahiri kwenye Ethereum, inayodhibitiwa kikamilifu na funguo za siri na kuelezwa na rekodi moja ndogo kwenye akaunti yako mwenyewe.",
+      "p1": "Watu binafsi wanapata pochi binafsi ya michango, na mashirika yanapata pochi ya pamoja ambayo wanachama kadhaa wanaweza kuidhinisha malipo kutoka kwayo. Zote mbili zinafanya kazi kwa njia ile ile. Pochi ni akaunti mahiri ya Splits, muundo wa mkataba wa chanzo huria unaokubali saini za funguo za siri moja kwa moja.",
+      "p2": "Rekodi ndogo ya umma kwenye akaunti yako mwenyewe inaeleza pochi: kanuni zake na orodha ya funguo za siri zinazoweza kutumia fedha zake. Anwani ya pochi inakokotolewa kutoka kwenye taarifa hizo hasa. Hakuna seva ya pochi, hakuna maneno ya siri, na hakuna kampuni inayoshika funguo kwa niaba yako.",
+      "p3": "Anwani inafanya kazi tangu sekunde ya kwanza. Michango inaweza kufika kabla ya chochote kuwepo kwenye blockchain, kwa sababu fomula tayari imehifadhi anwani hiyo kwa akaunti yako na funguo zako hasa. Msimbo wa pochi unawekwa kwenye blockchain pale tu malipo ya kwanza yanapotoka."
     },
     "enroll": {
-      "heading": "Jinsi unavyopata pochi",
-      "intro": "Bonyeza cheza au chagua hatua. Usajili unatumia tikiti ya kawaida ya AT Protocol kutoka kwa PDS yako mwenyewe, hivyo hakuna seva inayohitaji muunganisho maalum.",
+      "heading": "Jinsi ya kuipata",
+      "intro": "Bonyeza cheza au chagua hatua. Kuunda pochi kunahitaji uthibitisho mmoja wa ufunguo wa siri na kunaandika rekodi moja. Blockchain bado haihusiki.",
       "play": "Cheza",
-      "pause": "Sitisha",
+      "pause": "Simamisha",
       "back": "Nyuma",
       "next": "Mbele",
       "stepLabel": "Hatua {n} kati ya {total}",
       "jumpTo": "Nenda hatua ya {step}",
       "nodes": {
-        "app": "Programu yako",
-        "pds": "PDS yako",
-        "service": "Huduma ya pochi",
+        "device": "Kifaa chako",
+        "account": "Akaunti yako",
+        "math": "Hesabu ya anwani",
         "wallet": "Pochi yako"
       },
       "steps": {
         "s1": {
-          "title": "Programu yako inaomba tikiti",
-          "text": "Programu yako inaomba PDS yako tikiti ya muda mfupi inayothibitisha wewe ni nani. Kila PDS inaweza kutoa tikiti hii kwa sababu ni kipengele cha kawaida cha AT Protocol."
+          "title": "Kifaa chako kinaunda ufunguo wa siri",
+          "text": "Simu au kompyuta yako inaunda ufunguo mpya wa siri na kuulinda kwa Face ID, alama ya kidole, au ufunguo wa usalama. Sehemu ya siri haitoki kamwe kwenye kifaa. Hakuna cha kuandika."
         },
         "s2": {
-          "title": "Huduma inakagua tikiti",
-          "text": "Huduma ya pochi inasoma rekodi yako ya utambulisho wa umma na kulinganisha tikiti nayo. Pia inahifadhi ufunguo wa umma kutoka kwa kifaa chako kwa idhini za baadaye."
+          "title": "Rekodi inahifadhiwa kwenye akaunti yako",
+          "text": "Sehemu ya umma ya ufunguo inaingia kwenye rekodi ndogo inayohifadhiwa pamoja na taarifa za akaunti yako mwenyewe. Rekodi hiyo pia inaorodhesha kanuni zisizobadilika za pochi na kila ufunguo wa siri unaoruhusiwa kuidhinisha malipo."
         },
         "s3": {
-          "title": "Vifaa vilivyolindwa vinaunda pochi",
-          "text": "Siri mpya ya nasibu inakuwa pochi yako ndani ya kumbukumbu iliyolindwa. Siri hiyo inagawanywa mara moja katika sehemu tatu na ufunguo kamili unafutwa."
+          "title": "Fomula inazalisha anwani",
+          "text": "Fomula isiyobadilika inageuza utambulisho wa akaunti yako na orodha ya funguo za siri kuwa anwani moja ya pochi. Iendeshe popote, mara ngapi zozote, na viingizo vile vile vinatoa jibu lile lile."
         },
         "s4": {
-          "title": "Unabaki na wingi",
-          "text": "Kifaa chako na nakala yako ya uokoaji vinapokea sehemu moja kila kimoja. Huduma inahifadhi sehemu yake ikiwa imesimbwa. Anwani zako za Ethereum na Solana ziko tayari kutumika."
+          "title": "Pochi iko tayari",
+          "text": "Anwani inaweza kupokea michango mara moja. Bado hakuna chochote kwenye blockchain, na hakihitajiki. Pochi inabaki imelala hadi malipo ya kwanza yatoke."
         }
       }
     },
-    "shares": {
-      "heading": "Pochi unayoweza kurejesha au kuondoka nayo",
-      "intro": "Siri ya pochi imegawanywa katika sehemu tatu. Chagua hali kuona sehemu zipi mbili zinazoirejesha. Mwendeshaji hudhibiti moja tu.",
-      "device": {
-        "title": "Kifaa chako",
-        "text": "Huhifadhiwa na kivinjari au programu yako, kamwe si huduma."
+    "address": {
+      "heading": "Anwani inatoka wapi",
+      "intro": "Viingizo vitatu vya umma vinaingia kwenye fomula moja isiyobadilika. Badilisha orodha ya funguo za siri uone jibu likibadilika pamoja na viingizo.",
+      "one": {
+        "tab": "Ufunguo mmoja",
+        "title": "Viingizo vile vile, anwani ile ile, milele",
+        "text": "Mtu yeyote anaweza kuendesha fomula hii mwakani kwenye kompyuta yoyote na kupata jibu lile lile kabisa. Ndiyo maana rekodi kwenye akaunti yako inatosha kuwa uthibitisho kuwa anwani ni yako. Hakuna saini inayohitajika."
       },
-      "protected": {
-        "title": "Huduma salama",
-        "text": "Huhifadhiwa ikiwa imesimbwa na hutumika tu ndani ya maunzi salama yaliyoidhinishwa."
+      "two": {
+        "tab": "Funguo mbili",
+        "title": "Funguo tofauti, anwani tofauti",
+        "text": "Badilisha orodha ya funguo za siri na fomula itaelekeza mahali pengine. Hakuna anayeweza kuzalisha anwani yako bila akaunti yako hasa na funguo zako hasa."
       },
-      "recovery": {
-        "title": "Nakala yako ya urejeshaji",
-        "text": "Imelindwa kwa nenosiri au nakala ya wingu binafsi unayodhibiti."
+      "account": {
+        "title": "Utambulisho wa akaunti yako",
+        "text": "Kitambulisho cha kudumu nyuma ya akaunti yako ya GainForest."
       },
-      "used": "Sehemu inatumika",
-      "notNeeded": "Haihitajiki",
-      "threshold": "Sehemu 2 zozote kati ya 3",
-      "scenarios": {
-        "everyday": {
-          "tab": "Matumizi ya kawaida",
-          "title": "Kifaa chako na maunzi salama husaini pamoja",
-          "text": "Pochi huundwa tena kwa muda ndani ya kumbukumbu salama, hulinganishwa na anwani yake ya umma, hutumika kusaini, kisha hufutwa."
-        },
-        "recover": {
-          "tab": "Kifaa kimepotea",
-          "title": "Nakala ya urejeshaji inachukua nafasi ya kifaa kilichopotea",
-          "text": "Huduma salama huunganisha sehemu yake na sehemu yako ya urejeshaji, hutengeneza sehemu mpya na inaweza kusajili kifaa mbadala. Sehemu ya kifaa cha zamani haiwezi tena kufanya kazi na huduma."
-        },
-        "leave": {
-          "tab": "Ondoka kwenye huduma",
-          "title": "Sehemu zako mbili huzuia kufungiwa",
-          "text": "Sehemu za kifaa na urejeshaji zinaunda wingi. Unaweza kuunda pochi tena bila mwendeshaji, au kuihamisha kupitia huduma wakati bado inapatikana."
-        }
-      }
+      "passkeys": {
+        "title": "Orodha ya funguo za siri",
+        "text": "Sehemu za umma za kila ufunguo wa siri unaoruhusiwa kutumia fedha."
+      },
+      "rules": {
+        "title": "Kanuni zisizobadilika",
+        "text": "Muundo ule ule wa mkataba na mipangilio ile ile kwa kila pochi."
+      },
+      "passkeyOne": "Simu yako",
+      "passkeyTwo": "Kompyuta yako",
+      "mathLabel": "Fomula moja isiyobadilika",
+      "addressLabel": "Anwani ya pochi"
     },
     "gate": {
-      "heading": "Kwa nini mwendeshaji hawezi kutumia pesa zako",
-      "intro": "Jaribu maombi yote mawili. Tikiti ya kuingia inaweza kuonyesha anwani ya umma ya pochi. Kutumia pesa kunahitaji pia uthibitisho kutoka kwa kifaa chako pamoja na sehemu yake ya pochi.",
-      "tokenAttempt": "Tikiti pekee",
-      "userAttempt": "Uthibitisho wa kifaa + sehemu",
-      "tokenNode": "Tikiti ya kuingia",
-      "userNode": "Uthibitisho + sehemu",
-      "teeNode": "Pochi iliyolindwa",
-      "approved": "Sahihi imeidhinishwa",
-      "denied": "Ombi limekataliwa",
-      "approvedDesc": "Kifaa chako kinasaini ombi fupi na kutuma sehemu yake ikiwa imesimbwa kwa ajili ya vifaa vilivyolindwa. Huduma inakagua sahihi, muda, na namba ya matumizi moja kabla ya kuunda upya pochi ili kusaini.",
-      "deniedDesc": "Tikiti pekee inafungua taarifa za umma tu. Huduma iliyolindwa inashikilia sehemu moja tu na inakataa kusaini bila ombi lililosainiwa na kifaa chako pamoja na sehemu ya pili halisi."
+      "heading": "Nani anaweza kutumia fedha",
+      "intro": "Jaribu zote mbili. Pochi inakubali tu saini za funguo za siri zilizo kwenye orodha yake, na funguo hizo zinaishi kwenye vifaa halisi vya watu halisi.",
+      "otherAttempt": "Seva au mgeni",
+      "passkeyAttempt": "Ufunguo wako wa siri",
+      "otherNode": "Hakuna ufunguo kabisa",
+      "passkeyNode": "Face ID / alama ya kidole",
+      "walletNode": "Pochi yako",
+      "approved": "Malipo yameidhinishwa",
+      "denied": "Hakuna cha kuiba",
+      "approvedDesc": "Kifaa chako kinaomba Face ID, alama ya kidole, au ufunguo wako wa usalama, kisha kinasaini malipo papo hapo kwenye kifaa. Pochi inalinganisha saini na orodha yake ya funguo za siri na kuruhusu malipo yapite.",
+      "deniedDesc": "Rekodi kwenye akaunti yako ni ya umma na ina funguo za umma pekee. Hakuna siri kwenye seva yoyote inayoweza kuibiwa, kuvuja, au kutumiwa vibaya. GainForest haiwezi kuhamisha pesa zako, na hakuna anayesoma rekodi anayeweza."
     },
-    "binding": {
-      "heading": "Jinsi mtu yeyote anavyoweza kukagua kiungo",
-      "intro": "Akaunti yako na pochi yako zinaelekezana hadharani. Badilisha upande kuona kila nusu ya uthibitisho.",
-      "accountTab": "Upande wa akaunti",
-      "walletTab": "Upande wa pochi",
-      "repoName": "Hifadhi yako ya data",
-      "recordName": "Rekodi ya kiungo",
-      "walletName": "Ufunguo wa pochi",
-      "signatureName": "Sahihi ndani ya rekodi",
-      "accountResult": "Akaunti yako inadai pochi",
-      "accountDesc": "Unachapisha rekodi ndogo kwenye hifadhi yako mwenyewe yenye anwani za pochi yako. Ni wewe pekee unayeweza kuandika kwenye hifadhi yako, hivyo rekodi hiyo inaonyesha akaunti yako inasimama nyuma ya anwani hizo.",
-      "walletResult": "Pochi yako inakubali",
-      "walletDesc": "Ndani ya rekodi kuna sahihi iliyotengenezwa na ufunguo wa pochi juu ya utambulisho na anwani zako. Inaonyesha pochi ilikubali kiungo hicho. Mtu yeyote anaweza kuthibitisha nusu zote mbili kwa data ya umma."
+    "lifecycle": {
+      "heading": "Kwanza imelala, kisha hai",
+      "intro": "Pochi ina maisha mawili. Badilisha kati yake uone kinachoweza kubadilika katika kila moja.",
+      "receives": "Inaweza kupokea michango",
+      "signersLabel": "Nani anaweza kuidhinisha malipo",
+      "signerOne": "Simu yako",
+      "signerTwo": "Kompyuta yako",
+      "dormant": {
+        "tab": "Kabla ya malipo ya kwanza",
+        "badge": "Imelala",
+        "editHint": "Ongeza au ondoa",
+        "title": "Kupokea kunafanya kazi tangu siku ya kwanza",
+        "text": "Pochi iliyolala ni anwani pamoja na rekodi tu, na hiyo inatosha kupokea michango. Orodha ya funguo za siri bado inaweza kubadilika: ongeza kifaa chako cha pili au alika wenzako. Fomula inakokotoa anwani upya kila orodha inapobadilika, hivyo ni vyema kukamilisha orodha mapema."
+      },
+      "active": {
+        "tab": "Baada ya malipo ya kwanza",
+        "badge": "Hai",
+        "editHint": "Imefungwa",
+        "title": "Malipo ya kwanza yanaipeleka kwenye blockchain",
+        "text": "Malipo ya kwanza yanayotoka yanaweka msimbo wa pochi kwenye anwani hiyo. Kuanzia hapo rekodi inagandishwa. Kuongeza au kuondoa funguo za siri sasa kunafanyika kwenye blockchain yenyewe na kunahitaji idhini ya ufunguo wa siri uliopo tayari kwenye orodha."
+      }
     },
     "proof": {
-      "heading": "Programu inawezaje kuamini huduma?",
-      "intro": "Vifaa vilivyolindwa vinaweza kutengeneza ripoti inayoitwa uthibitisho wa vifaa. Inamruhusu mtu yeyote kukagua mashine na msimbo kabla ya kuamini.",
-      "cardLabel": "Uthibitisho wa maunzi",
-      "text": "Huduma inaunda utambulisho wake ndani ya kumbukumbu iliyolindwa. Ripoti ya vifaa inaunganisha utambulisho huo na msimbo halisi unaoendeshwa. Mtu yeyote anaweza kuomba ripoti hii kutoka kwa huduma na kuikagua. Msimbo ukibadilika, ripoti pia inabadilika."
+      "heading": "Jinsi mtu yeyote anavyoweza kukagua uhusiano",
+      "intro": "Rekodi na fomula zote ni za umma, hivyo kuthibitisha pochi hakuhitaji kuiamini GainForest.",
+      "cardLabel": "Uthibitisho wa kihesabu",
+      "text": "Wewe pekee unaweza kuandika rekodi kwenye akaunti yako mwenyewe, na rekodi ya pochi inaorodhesha viingizo hasa vya fomula ya anwani. Mkaguzi anachukua rekodi, anaendesha fomula, na kulinganisha jibu na anwani iliyorekodiwa. Vikilingana, pochi imethibitika kuwa ya akaunti yako. Hakuna saini, hakuna mpatanishi, na hakuna huduma maalum inayohitajika."
     },
     "limits": {
-      "heading": "Ambacho ulinzi huu hausuluhishi",
-      "intro": "Funguo zilizogawanywa na vifaa vilivyolindwa vinaondoa hatari nyingi. Mipaka ifuatayo inabaki, na tunaitaja waziwazi.",
-      "onboarding": {
-        "title": "Usanidi wa kwanza wa pochi",
-        "text": "Usajili wa kifaa cha kwanza unaamini huduma mara moja. Toleo la baadaye linaweza kutumia passkey kupunguza imani hiyo."
+      "heading": "Ya kuzingatia",
+      "intro": "Muundo huu unaondoa seva na maneno ya siri kwenye picha. Mipaka michache ya wazi inabaki.",
+      "passkeys": {
+        "title": "Funguo zilizopotea",
+        "text": "Ikiwa funguo zote za siri kwenye orodha zimepotea, hakuna tena anayeweza kutumia fedha za pochi. Ongeza mapema ufunguo wa siri kutoka kifaa cha pili, au alika mtu unayemwamini."
       },
-      "uptime": {
-        "title": "Upatikanaji wa huduma",
-        "text": "Mwenyeji bado anaweza kuzima mashine au kuzuia maombi. Sehemu zako za kifaa na uokoaji zinakuwezesha kuunda upya pochi bila huduma."
+      "frozen": {
+        "title": "Inagandishwa baada ya kuwashwa",
+        "text": "Pochi ikishaishi kwenye blockchain, rekodi yake haiwezi kubadilika tena. Mabadiliko ya funguo za siri yanafanyika sasa kwenye blockchain na yanahitaji idhini ya ufunguo uliopo."
       },
-      "backup": {
-        "title": "Nakala zako",
-        "text": "Lazima ulinde nakala yako ya uokoaji. Ukipoteza kifaa chako na nakala yako kwa wakati mmoja, huduma peke yake haiwezi kurejesha pochi."
+      "fees": {
+        "title": "Ada za mtandao",
+        "text": "Malipo ya kwanza yanayotoka pia yanaweka msimbo wa pochi, hivyo yanagharimu ada za mtandao kidogo zaidi kuliko malipo yanayofuata."
       },
-      "rollback": {
-        "title": "Kurudisha nyuma hifadhi",
-        "text": "Kurudisha nyuma hifadhi ya huduma kunaweza kurudia ombi la zamani lililokwisha idhinishwa. Hakuwezi kamwe kuunda idhini mpya."
+      "single": {
+        "title": "Pochi moja kwa kila akaunti",
+        "text": "Kila akaunti na kila shirika lina rekodi moja rasmi ya pochi. Inaweza kuondolewa tu wakati pochi bado imelala na anwani haina fedha."
       }
     },
     "more": {
       "heading": "Endelea kuchunguza",
-      "epdsTitle": "Jinsi kuingia ePDS kunavyofanya kazi",
-      "epdsDesc": "Tazama mlango usio na nenosiri na huduma za kawaida zinazouzunguka.",
+      "epdsTitle": "Jinsi kuingia kwa ePDS kunavyofanya kazi",
+      "epdsDesc": "Ona mlango wa mbele usio na nenosiri na huduma za kawaida zinazouzunguka.",
       "lexiconsTitle": "Miundo ya data",
-      "lexiconsDesc": "Chunguza fomati wazi za rekodi zinazohifadhiwa katika kila PDS.",
+      "lexiconsDesc": "Chunguza fomati huria za rekodi, ikiwemo rekodi ya pochi yenyewe.",
       "atprotoTitle": "Jinsi AT Protocol inavyofanya kazi",
-      "atprotoDesc": "Ziara shirikishi ya mtandao wazi ambao yote haya yamejengwa juu yake.",
-      "githubTitle": "Huduma kwenye GitHub",
-      "githubDesc": "Soma msimbo wa chanzo na uendeshe huduma mwenyewe."
+      "atprotoDesc": "Ziara shirikishi ya mtandao huria ambao kila kitu hapa kimejengwa juu yake.",
+      "githubTitle": "Akaunti mahiri kwenye GitHub",
+      "githubDesc": "Soma mikataba ya akaunti mahiri ya Splits ya chanzo huria inayoendesha pochi hizi."
     }
   },
   "identifications": {

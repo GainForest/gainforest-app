@@ -2589,165 +2589,167 @@
     }
   },
   "walletService": {
-    "metaTitle": "Cara kerja layanan dompet GainForest",
-    "metaDescription": "Panduan interaktif layanan dompet: daftar dengan akun AT Protocol mana pun, kunci dibagi menjadi tiga bagian, dan setujui pembayaran dari perangkat Anda sendiri.",
-    "kicker": "Layanan dompet GainForest",
-    "title": "Dompet untuk akun AT Protocol Anda",
-    "lead": "Layanan dompet memberi setiap akun AT Protocol sebuah dompet swakustodi untuk Ethereum dan Solana. Layanan ini bekerja dengan semua PDS, termasuk Bluesky. Tidak ada frasa benih yang perlu dicatat. Kunci Anda dibagi menjadi tiga bagian, perangkat Anda menyetujui setiap pembayaran, dan Anda bisa mengekspor kunci lalu pergi kapan saja.",
+    "metaTitle": "Cara kerja dompet GainForest",
+    "metaDescription": "Panduan interaktif dompet berbasis kunci sandi: dompet donasi yang alamatnya dihitung dari akun Anda sendiri, diamankan dengan Face ID atau sidik jari, tanpa frasa benih dan tanpa perusahaan yang menyimpan kunci.",
+    "kicker": "Dompet GainForest",
+    "title": "Dompet yang dibuat dari akun Anda",
+    "lead": "Setiap akun dan organisasi di GainForest bisa memiliki dompet donasinya sendiri. Face ID, sidik jari, atau kunci keamanan menggantikan frasa benih. Alamat dompet dihitung dari identitas akun Anda, jadi siapa pun bisa memastikan alamat itu benar milik Anda. Tidak ada server yang menyimpan kunci.",
     "facts": {
-      "anyPds": {
-        "title": "Bekerja dengan akun apa pun",
-        "text": "Anda mendaftar dengan identitas AT Protocol yang sudah ada. Tanpa kata sandi baru dan tanpa akun baru."
+      "noSeed": {
+        "title": "Tanpa frasa benih",
+        "text": "Kunci dompet Anda adalah kunci sandi. Perangkat Anda sendiri melindunginya dengan Face ID, sidik jari, atau kunci keamanan."
       },
-      "protection": {
-        "title": "Kunci tetap terlindungi",
-        "text": "Kunci dompet lengkap hanya muncul sesaat di dalam perangkat keras terlindungi, lalu dihapus."
+      "fromAccount": {
+        "title": "Akun Anda adalah buktinya",
+        "text": "Alamat berasal dari rumus tetap atas identitas akun Anda. Siapa pun bisa mengulang perhitungannya dan memastikan kaitannya."
       },
-      "majority": {
-        "title": "Anda memegang mayoritas",
-        "text": "Perangkat Anda dan cadangan pemulihan menyimpan dua dari tiga bagian dompet."
+      "noCustodian": {
+        "title": "Tidak ada yang menyimpan kunci untuk Anda",
+        "text": "Tidak ada server dompet. Hanya kunci sandi di daftar dompet yang bisa menyetujui pembayaran."
       }
     },
     "what": {
-      "heading": "Apa itu layanan dompet?",
-      "intro": "Layanan kecil yang berdiri sendiri, berjalan di dalam perangkat keras terlindungi, dan menyimpan dompet untuk setiap pengguna.",
-      "p1": "Setiap dompet terikat pada DID, identitas permanen di balik akun AT Protocol. Layanan membuat dompet dari rahasia acak baru di dalam mesin virtual rahasia, sejenis perangkat keras terlindungi yang disebut TEE.",
-      "p2": "Rahasia itu dibagi menjadi tiga bagian: satu untuk perangkat Anda, satu untuk layanan terlindungi, dan satu untuk cadangan pemulihan Anda. Dua bagian mana pun dapat memulihkan dompet. Satu bagian saja tidak mengungkap apa pun.",
-      "p3": "Layanan ini sengaja dibuat kecil. Ia menyimpan materi dompet, memeriksa bukti, dan menandatangani transaksi. Postingan, profil, dan catatan Anda lainnya tetap berada di PDS Anda sendiri sepanjang waktu."
+      "heading": "Apa itu dompet ini?",
+      "intro": "Akun pintar di Ethereum, sepenuhnya dikendalikan kunci sandi dan dijelaskan oleh satu catatan kecil di akun Anda sendiri.",
+      "p1": "Perorangan mendapat dompet donasi pribadi dan organisasi mendapat dompet bersama yang pembayarannya bisa disetujui beberapa anggota. Keduanya bekerja dengan cara yang sama. Dompet ini adalah akun pintar Splits, rancangan kontrak sumber terbuka yang menerima tanda tangan kunci sandi secara langsung.",
+      "p2": "Satu catatan publik kecil di akun Anda sendiri menjelaskan dompet: aturannya dan daftar kunci sandi yang boleh membelanjakannya. Alamat dompet dihitung persis dari data itu. Tidak ada server dompet, tidak ada frasa benih, dan tidak ada perusahaan yang menyimpan kunci untuk Anda.",
+      "p3": "Alamat berfungsi sejak detik pertama. Donasi bisa masuk sebelum apa pun ada di blockchain, karena rumusnya sudah memesan alamat itu untuk akun dan kunci sandi Anda yang persis. Kode dompet baru dipasang di blockchain saat pembayaran pertama keluar."
     },
     "enroll": {
-      "heading": "Cara Anda mendapatkan dompet",
-      "intro": "Tekan putar atau pilih langkah. Pendaftaran memakai tiket standar AT Protocol dari PDS Anda sendiri, jadi tidak ada server yang butuh integrasi khusus.",
+      "heading": "Cara mendapatkannya",
+      "intro": "Tekan putar atau pilih langkah. Membuat dompet hanya butuh satu konfirmasi kunci sandi dan menulis satu catatan. Blockchain belum terlibat.",
       "play": "Putar",
       "pause": "Jeda",
       "back": "Kembali",
-      "next": "Berikutnya",
+      "next": "Lanjut",
       "stepLabel": "Langkah {n} dari {total}",
       "jumpTo": "Ke langkah {step}",
       "nodes": {
-        "app": "Aplikasi Anda",
-        "pds": "PDS Anda",
-        "service": "Layanan dompet",
+        "device": "Perangkat Anda",
+        "account": "Akun Anda",
+        "math": "Perhitungan alamat",
         "wallet": "Dompet Anda"
       },
       "steps": {
         "s1": {
-          "title": "Aplikasi meminta tiket",
-          "text": "Aplikasi Anda meminta tiket berumur pendek dari PDS Anda sendiri yang membuktikan siapa Anda. Semua PDS bisa menerbitkan tiket ini karena ini fitur standar AT Protocol."
+          "title": "Perangkat Anda membuat kunci sandi",
+          "text": "Ponsel atau komputer Anda membuat kunci sandi baru dan menjaganya dengan Face ID, sidik jari, atau kunci keamanan. Bagian privatnya tidak pernah meninggalkan perangkat. Tidak ada yang perlu dicatat."
         },
         "s2": {
-          "title": "Layanan memeriksa tiket",
-          "text": "Layanan dompet membaca catatan identitas publik Anda dan mencocokkan tiket dengannya. Layanan juga menyimpan kunci publik dari perangkat Anda untuk persetujuan di masa depan."
+          "title": "Satu catatan disimpan di akun Anda",
+          "text": "Bagian publik kunci sandi masuk ke catatan kecil yang disimpan bersama data akun Anda sendiri. Catatan itu juga memuat aturan tetap dompet dan setiap kunci sandi yang boleh menyetujui pembayaran."
         },
         "s3": {
-          "title": "Perangkat keras terlindungi membuat dompet",
-          "text": "Rahasia acak baru menjadi dompet Anda di dalam memori terlindungi. Rahasia itu langsung dibagi menjadi tiga bagian dan kunci lengkapnya dihapus."
+          "title": "Rumus menghasilkan alamat",
+          "text": "Rumus tetap mengubah identitas akun Anda dan daftar kunci sandi menjadi satu alamat dompet. Jalankan di mana saja, berapa kali pun, dan masukan yang sama memberi jawaban yang sama."
         },
         "s4": {
-          "title": "Anda memegang mayoritas",
-          "text": "Perangkat Anda dan cadangan pemulihan masing-masing menerima satu bagian. Layanan menyimpan bagiannya sendiri dalam bentuk terenkripsi. Alamat Ethereum dan Solana Anda siap dipakai."
+          "title": "Dompet siap dipakai",
+          "text": "Alamat langsung bisa menerima donasi. Belum ada apa pun di blockchain, dan memang belum perlu. Dompet tetap tidur sampai pembayaran pertama keluar."
         }
       }
     },
-    "shares": {
-      "heading": "Dompet yang dapat dipulihkan atau Anda bawa",
-      "intro": "Rahasia dompet dibagi menjadi tiga bagian. Pilih situasi untuk melihat dua bagian mana yang memulihkannya. Operator hanya mengendalikan satu.",
-      "device": {
-        "title": "Perangkat Anda",
-        "text": "Disimpan oleh browser atau aplikasi Anda dan tidak pernah oleh layanan."
+    "address": {
+      "heading": "Dari mana alamat berasal",
+      "intro": "Tiga masukan publik masuk ke satu rumus tetap. Ganti daftar kunci sandi dan lihat jawabannya bergerak mengikuti masukan.",
+      "one": {
+        "tab": "Satu kunci sandi",
+        "title": "Masukan sama, alamat sama, selamanya",
+        "text": "Siapa pun bisa menjalankan rumus ini tahun depan di komputer mana pun dan mendapatkan jawaban yang identik. Karena itu catatan di akun Anda sudah cukup sebagai bukti bahwa alamat itu milik Anda. Tidak perlu tanda tangan."
       },
-      "protected": {
-        "title": "Layanan terlindungi",
-        "text": "Disimpan terenkripsi dan hanya dapat digunakan di perangkat keras terlindungi yang disetujui."
+      "two": {
+        "tab": "Dua kunci sandi",
+        "title": "Kunci sandi berbeda, alamat berbeda",
+        "text": "Ubah daftar kunci sandi dan rumusnya menunjuk ke tempat lain. Tidak ada yang bisa menghasilkan alamat Anda tanpa akun Anda yang persis dan kunci sandi Anda yang persis."
       },
-      "recovery": {
-        "title": "Cadangan pemulihan Anda",
-        "text": "Dilindungi dengan kata sandi atau cadangan cloud pribadi yang Anda kendalikan."
+      "account": {
+        "title": "Identitas akun Anda",
+        "text": "Pengenal permanen di balik akun GainForest Anda."
       },
-      "used": "Bagian digunakan",
-      "notNeeded": "Tidak diperlukan",
-      "threshold": "2 mana pun dari 3",
-      "scenarios": {
-        "everyday": {
-          "tab": "Penggunaan biasa",
-          "title": "Perangkat dan perangkat keras terlindungi menandatangani bersama",
-          "text": "Dompet dibangun kembali sejenak dalam memori terlindungi, dicocokkan dengan alamat publiknya, dipakai untuk menandatangani, lalu dihapus."
-        },
-        "recover": {
-          "tab": "Perangkat hilang",
-          "title": "Cadangan pemulihan menggantikan perangkat yang hilang",
-          "text": "Layanan terlindungi menggabungkan bagiannya dengan bagian pemulihan Anda, membuat bagian baru, dan dapat mendaftarkan perangkat pengganti. Bagian perangkat lama tidak lagi berfungsi dengan layanan."
-        },
-        "leave": {
-          "tab": "Keluar layanan",
-          "title": "Dua bagian Anda mencegah ketergantungan",
-          "text": "Bagian perangkat dan pemulihan Anda membentuk mayoritas. Anda dapat membangun kembali dompet tanpa operator, atau mengekspornya melalui layanan selama masih tersedia."
-        }
-      }
+      "passkeys": {
+        "title": "Daftar kunci sandi",
+        "text": "Bagian publik dari setiap kunci sandi yang boleh membelanjakan."
+      },
+      "rules": {
+        "title": "Aturan tetap",
+        "text": "Rancangan kontrak dan pengaturan yang sama untuk semua dompet."
+      },
+      "passkeyOne": "Ponsel Anda",
+      "passkeyTwo": "Laptop Anda",
+      "mathLabel": "Satu rumus tetap",
+      "addressLabel": "Alamat dompet"
     },
     "gate": {
-      "heading": "Mengapa operator tidak bisa membelanjakan uang Anda",
-      "intro": "Coba kedua permintaan. Tiket masuk bisa menampilkan alamat dompet publik. Untuk membelanjakan, dibutuhkan juga bukti dari perangkat Anda beserta bagian dompetnya.",
-      "tokenAttempt": "Tiket saja",
-      "userAttempt": "Bukti perangkat + bagian",
-      "tokenNode": "Tiket masuk",
-      "userNode": "Bukti + bagian",
-      "teeNode": "Dompet terlindungi",
-      "approved": "Tanda tangan disetujui",
-      "denied": "Permintaan ditolak",
-      "approvedDesc": "Perangkat Anda menandatangani permintaan singkat dan mengirim bagiannya dalam bentuk terenkripsi untuk perangkat keras terlindungi. Layanan memeriksa tanda tangan, waktu, dan nomor sekali pakai sebelum membangun ulang dompet untuk menandatangani.",
-      "deniedDesc": "Tiket saja hanya membuka informasi publik. Layanan terlindungi memegang satu bagian saja dan menolak menandatangani tanpa permintaan yang ditandatangani perangkat Anda dan bagian kedua yang asli."
+      "heading": "Siapa yang bisa membelanjakan",
+      "intro": "Coba keduanya. Dompet hanya menerima tanda tangan dari kunci sandi di daftarnya, dan kunci itu hidup di perangkat nyata milik orang nyata.",
+      "otherAttempt": "Server atau orang asing",
+      "passkeyAttempt": "Kunci sandi Anda",
+      "otherNode": "Tanpa kunci sama sekali",
+      "passkeyNode": "Face ID / sidik jari",
+      "walletNode": "Dompet Anda",
+      "approved": "Pembayaran disetujui",
+      "denied": "Tidak ada yang bisa dicuri",
+      "approvedDesc": "Perangkat Anda meminta Face ID, sidik jari, atau kunci keamanan Anda, lalu menandatangani pembayaran secara lokal. Dompet mencocokkan tanda tangan dengan daftar kunci sandinya dan meloloskan pembayaran.",
+      "deniedDesc": "Catatan di akun Anda bersifat publik dan hanya berisi kunci publik. Tidak ada rahasia di server mana pun yang bisa dicuri, bocor, atau disalahgunakan. GainForest tidak bisa memindahkan uang Anda, begitu juga siapa pun yang membaca catatan itu."
     },
-    "binding": {
-      "heading": "Cara siapa pun memeriksa tautannya",
-      "intro": "Akun dan dompet Anda saling menunjuk secara publik. Ganti sisi untuk melihat tiap setengah bukti.",
-      "accountTab": "Sisi akun",
-      "walletTab": "Sisi dompet",
-      "repoName": "Repo data Anda",
-      "recordName": "Catatan pengikat",
-      "walletName": "Kunci dompet",
-      "signatureName": "Tanda tangan di catatan",
-      "accountResult": "Akun Anda mengklaim dompet",
-      "accountDesc": "Anda menerbitkan catatan kecil di repo Anda sendiri yang memuat alamat dompet Anda. Hanya Anda yang bisa menulis ke repo itu, jadi catatan ini menunjukkan akun Anda berdiri di belakang alamat tersebut.",
-      "walletResult": "Dompet Anda setuju",
-      "walletDesc": "Di dalam catatan ada tanda tangan yang dibuat kunci dompet atas identitas dan alamat Anda. Itu menunjukkan dompet menerima tautan ini. Siapa pun bisa memverifikasi kedua setengahnya dengan data publik."
+    "lifecycle": {
+      "heading": "Tidur dulu, lalu aktif",
+      "intro": "Dompet punya dua kehidupan. Beralihlah di antara keduanya untuk melihat apa yang bisa berubah di masing-masing.",
+      "receives": "Bisa menerima donasi",
+      "signersLabel": "Siapa yang dapat menyetujui pembayaran",
+      "signerOne": "Ponsel Anda",
+      "signerTwo": "Laptop Anda",
+      "dormant": {
+        "tab": "Sebelum pembayaran pertama",
+        "badge": "Tidur",
+        "editHint": "Tambah atau hapus",
+        "title": "Menerima donasi berjalan sejak hari pertama",
+        "text": "Dompet yang tidur hanyalah alamat plus catatan, dan itu cukup untuk menerima donasi. Daftar kunci sandi masih bisa berubah: tambahkan perangkat kedua Anda atau undang rekan tim. Rumus menghitung ulang alamat setiap kali daftar berubah, jadi sebaiknya tetapkan daftarnya sejak awal."
+      },
+      "active": {
+        "tab": "Setelah pembayaran pertama",
+        "badge": "Aktif",
+        "editHint": "Terkunci",
+        "title": "Pembayaran pertama membawanya ke blockchain",
+        "text": "Pembayaran keluar pertama memasang kode dompet di alamat itu. Sejak saat itu catatannya beku. Menambah atau menghapus kunci sandi kini terjadi di blockchain itu sendiri dan butuh persetujuan dari kunci sandi yang sudah ada di daftar."
+      }
     },
     "proof": {
-      "heading": "Bagaimana aplikasi bisa memercayai layanan?",
-      "intro": "Perangkat keras terlindungi bisa membuat laporan bernama atestasi. Laporan ini memungkinkan siapa pun memeriksa mesin dan kodenya sebelum memberi kepercayaan.",
-      "cardLabel": "Bukti dari perangkat keras",
-      "text": "Layanan membuat identitasnya di dalam memori terlindungi. Laporan perangkat keras mengikat identitas itu ke kode persis yang sedang berjalan. Siapa pun bisa mengambil laporan ini dari layanan dan memeriksanya. Jika kodenya berubah, laporannya ikut berubah."
+      "heading": "Cara siapa pun memeriksa kaitannya",
+      "intro": "Catatan dan rumusnya sama-sama publik, jadi memverifikasi dompet tidak butuh kepercayaan pada GainForest.",
+      "cardLabel": "Bukti matematis",
+      "text": "Hanya Anda yang bisa menulis catatan ke akun Anda sendiri, dan catatan dompet memuat masukan persis dari rumus alamat. Pemeriksa mengambil catatan itu, menjalankan rumusnya, dan membandingkan hasilnya dengan alamat yang tercatat. Jika cocok, dompet itu terbukti milik akun Anda. Tidak perlu tanda tangan, perantara, atau layanan khusus."
     },
     "limits": {
-      "heading": "Apa yang tidak diselesaikan perlindungan ini",
-      "intro": "Kunci yang dibagi dan perangkat keras terlindungi menghilangkan banyak risiko. Batasan berikut tetap ada dan kami menyebutkannya secara terbuka.",
-      "onboarding": {
-        "title": "Pengaturan dompet pertama",
-        "text": "Pendaftaran perangkat pertama mempercayai layanan satu kali. Versi masa depan dapat memakai passkey untuk mengurangi kepercayaan ini."
+      "heading": "Yang perlu diingat",
+      "intro": "Rancangan ini menyingkirkan server dan frasa benih dari gambaran. Beberapa batas yang jujur tetap ada.",
+      "passkeys": {
+        "title": "Kunci sandi hilang",
+        "text": "Jika semua kunci sandi di daftar hilang, tidak ada lagi yang bisa membelanjakan dari dompet. Tambahkan kunci sandi dari perangkat kedua sejak awal, atau undang orang yang Anda percaya."
       },
-      "uptime": {
-        "title": "Ketersediaan layanan",
-        "text": "Penyedia hosting masih bisa mematikan mesin atau memblokir permintaan. Bagian perangkat dan bagian pemulihan Anda memungkinkan dompet dibangun ulang tanpa layanan."
+      "frozen": {
+        "title": "Beku setelah aktivasi",
+        "text": "Begitu dompet hidup di blockchain, catatannya tidak bisa berubah lagi. Perubahan kunci sandi lalu terjadi di blockchain dan butuh persetujuan dari kunci sandi yang sudah ada."
       },
-      "backup": {
-        "title": "Cadangan Anda",
-        "text": "Anda harus menjaga cadangan pemulihan tetap aman. Jika perangkat dan cadangan hilang bersamaan, layanan sendirian tidak bisa memulihkan dompet."
+      "fees": {
+        "title": "Biaya jaringan",
+        "text": "Pembayaran keluar pertama juga memasang kode dompet, jadi biaya jaringannya sedikit lebih tinggi daripada pembayaran berikutnya."
       },
-      "rollback": {
-        "title": "Pemutaran balik penyimpanan",
-        "text": "Memutar balik penyimpanan layanan ke masa lalu bisa mengulang permintaan lama yang sudah disetujui. Itu tidak pernah bisa membuat persetujuan baru."
+      "single": {
+        "title": "Satu dompet per akun",
+        "text": "Setiap akun dan setiap organisasi punya satu catatan dompet kanonis. Catatan itu hanya bisa dihapus selama dompet masih tidur dan alamatnya tidak menyimpan dana."
       }
     },
     "more": {
-      "heading": "Jelajahi lebih lanjut",
-      "epdsTitle": "Cara login ePDS bekerja",
-      "epdsDesc": "Lihat pintu masuk tanpa kata sandi dan layanan biasa di sekitarnya.",
+      "heading": "Lanjutkan menjelajah",
+      "epdsTitle": "Cara kerja login ePDS",
+      "epdsDesc": "Lihat pintu masuk tanpa kata sandi dan layanan normal di sekitarnya.",
       "lexiconsTitle": "Skema data",
-      "lexiconsDesc": "Jelajahi format catatan terbuka yang tersimpan di setiap PDS.",
+      "lexiconsDesc": "Jelajahi format catatan terbuka, termasuk catatan dompet itu sendiri.",
       "atprotoTitle": "Cara kerja AT Protocol",
       "atprotoDesc": "Tur interaktif jaringan terbuka tempat semua ini dibangun.",
-      "githubTitle": "Layanan di GitHub",
-      "githubDesc": "Baca kode sumbernya dan jalankan layanannya sendiri."
+      "githubTitle": "Akun pintar di GitHub",
+      "githubDesc": "Baca kontrak akun pintar Splits yang bersumber terbuka dan menjalankan dompet-dompet ini."
     }
   },
   "identifications": {

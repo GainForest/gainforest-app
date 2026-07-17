@@ -1,15 +1,15 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { getTranslations } from "next-intl/server";
-import { ArrowUpRightIcon, KeyRoundIcon, ShieldCheckIcon, WalletCardsIcon } from "lucide-react";
+import { ArrowUpRightIcon, FingerprintIcon, ShieldCheckIcon, SigmaIcon } from "lucide-react";
 import { LogoMark } from "@/app/_components/Logo";
 import { localizedAlternates } from "@/app/_lib/seo-metadata";
-import { BindingGraph } from "./_components/BindingGraph";
+import { AddressMath } from "./_components/AddressMath";
 import { EnrollJourney } from "./_components/EnrollJourney";
-import { WalletGate } from "./_components/WalletGate";
-import { WalletRecovery } from "./_components/WalletRecovery";
+import { Lifecycle } from "./_components/Lifecycle";
+import { SpendGate } from "./_components/SpendGate";
 
-const GITHUB_URL = "https://github.com/GainForest/atproto-wallet-service";
+const GITHUB_URL = "https://github.com/0xSplits/splits-contracts-monorepo";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations("common.walletService");
@@ -20,10 +20,10 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
-// An interactive plain-language guide to the standalone wallet service.
-// Each graph reveals one idea: how enrollment works, how the three shares
-// combine, why spending needs the user's device, and how the public link
-// between an account and its wallet can be checked.
+// An interactive plain-language guide to the passkey donation wallets.
+// Each graph reveals one idea: how you get a wallet, where the address
+// comes from, who can spend, and what changes once the wallet goes live
+// on the blockchain.
 export default async function WalletServiceDocsPage() {
   const t = await getTranslations("common.walletService");
 
@@ -41,16 +41,16 @@ export default async function WalletServiceDocsPage() {
       </header>
 
       <section className="grid gap-3 sm:grid-cols-3">
-        <FactCard icon={<KeyRoundIcon className="h-4 w-4" />} title={t("facts.anyPds.title")} text={t("facts.anyPds.text")} />
+        <FactCard icon={<FingerprintIcon className="h-4 w-4" />} title={t("facts.noSeed.title")} text={t("facts.noSeed.text")} />
         <FactCard
-          icon={<ShieldCheckIcon className="h-4 w-4" />}
-          title={t("facts.protection.title")}
-          text={t("facts.protection.text")}
+          icon={<SigmaIcon className="h-4 w-4" />}
+          title={t("facts.fromAccount.title")}
+          text={t("facts.fromAccount.text")}
         />
         <FactCard
-          icon={<WalletCardsIcon className="h-4 w-4" />}
-          title={t("facts.majority.title")}
-          text={t("facts.majority.text")}
+          icon={<ShieldCheckIcon className="h-4 w-4" />}
+          title={t("facts.noCustodian.title")}
+          text={t("facts.noCustodian.text")}
         />
       </section>
 
@@ -64,16 +64,16 @@ export default async function WalletServiceDocsPage() {
         <EnrollJourney />
       </Section>
 
-      <Section heading={t("shares.heading")} intro={t("shares.intro")}>
-        <WalletRecovery />
+      <Section heading={t("address.heading")} intro={t("address.intro")}>
+        <AddressMath />
       </Section>
 
       <Section heading={t("gate.heading")} intro={t("gate.intro")}>
-        <WalletGate />
+        <SpendGate />
       </Section>
 
-      <Section heading={t("binding.heading")} intro={t("binding.intro")}>
-        <BindingGraph />
+      <Section heading={t("lifecycle.heading")} intro={t("lifecycle.intro")}>
+        <Lifecycle />
       </Section>
 
       <Section heading={t("proof.heading")} intro={t("proof.intro")}>
@@ -88,10 +88,10 @@ export default async function WalletServiceDocsPage() {
 
       <Section heading={t("limits.heading")} intro={t("limits.intro")}>
         <div className="divide-y divide-border/60 border-y border-border/60">
-          <LimitRow title={t("limits.onboarding.title")} text={t("limits.onboarding.text")} />
-          <LimitRow title={t("limits.uptime.title")} text={t("limits.uptime.text")} />
-          <LimitRow title={t("limits.backup.title")} text={t("limits.backup.text")} />
-          <LimitRow title={t("limits.rollback.title")} text={t("limits.rollback.text")} />
+          <LimitRow title={t("limits.passkeys.title")} text={t("limits.passkeys.text")} />
+          <LimitRow title={t("limits.frozen.title")} text={t("limits.frozen.text")} />
+          <LimitRow title={t("limits.fees.title")} text={t("limits.fees.text")} />
+          <LimitRow title={t("limits.single.title")} text={t("limits.single.text")} />
         </div>
       </Section>
 

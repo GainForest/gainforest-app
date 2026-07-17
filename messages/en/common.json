@@ -2589,35 +2589,35 @@
     }
   },
   "walletService": {
-    "metaTitle": "How the GainForest wallet service works",
-    "metaDescription": "An interactive guide to the wallet service: enroll with any AT Protocol account, split keys into three shares, approve spending from your own device.",
-    "kicker": "GainForest wallet service",
-    "title": "A wallet for your AT Protocol account",
-    "lead": "The wallet service gives any AT Protocol account a self-custodial wallet for Ethereum and Solana. It works with every PDS, including Bluesky. There is no seed phrase to write down. Your keys are split into three shares, your device approves every payment, and you can export your keys and leave whenever you want.",
+    "metaTitle": "How GainForest wallets work",
+    "metaDescription": "An interactive guide to passkey wallets: a donation wallet whose address is computed from your own account, secured by Face ID or a fingerprint, with no seed phrase and no company holding keys.",
+    "kicker": "GainForest wallets",
+    "title": "A wallet made from your account",
+    "lead": "Every account and organization on GainForest can have its own donation wallet. Face ID, a fingerprint, or a security key takes the place of a seed phrase. The wallet address is computed from your account identity, so anyone can check that it really belongs to you. No server ever holds a key.",
     "facts": {
-      "anyPds": {
-        "title": "Works with any account",
-        "text": "You enroll with your existing AT Protocol identity. No new password and no new account."
+      "noSeed": {
+        "title": "No seed phrase",
+        "text": "Your wallet keys are passkeys. Your own device protects them with Face ID, a fingerprint, or a security key."
       },
-      "protection": {
-        "title": "Keys stay protected",
-        "text": "The full wallet key appears only for a moment inside protected hardware, then it is cleared."
+      "fromAccount": {
+        "title": "Your account is the proof",
+        "text": "The address comes from a fixed formula over your account identity. Anyone can redo the math and confirm the link."
       },
-      "majority": {
-        "title": "You hold the majority",
-        "text": "Your device and your recovery backup hold two of the wallet's three shares."
+      "noCustodian": {
+        "title": "Nobody holds keys for you",
+        "text": "There is no wallet server. Only the passkeys on the wallet's own list can approve a payment."
       }
     },
     "what": {
-      "heading": "What is the wallet service?",
-      "intro": "A small standalone service that runs inside protected hardware and keeps a wallet for each user.",
-      "p1": "Every wallet is tied to a DID, the permanent identity behind an AT Protocol account. The service creates the wallet from a fresh random secret inside a confidential virtual machine, a kind of protected hardware called a TEE.",
-      "p2": "That secret is split into three shares: one for your device, one for the protected service, and one for your recovery backup. Any two shares can restore the wallet. A single share reveals nothing on its own.",
-      "p3": "The service stays deliberately small. It holds wallet material, checks proofs, and signs transactions. Your posts, profiles, and other records stay on your own PDS the whole time."
+      "heading": "What is this wallet?",
+      "intro": "A smart account on Ethereum, controlled entirely by passkeys and described by one small record in your own account.",
+      "p1": "Individuals get a personal donation wallet, and organizations get a shared one that several members can approve payments from. Both work the same way. The wallet is a Splits smart account, an open-source contract design that accepts passkey signatures directly.",
+      "p2": "A small public record in your own account describes the wallet: its rules and the list of passkeys that may spend from it. The wallet address itself is computed from exactly those details. There is no wallet server, no seed phrase, and no company holding key material for you.",
+      "p3": "The address works from the first second. Donations can arrive before anything exists on the blockchain, because the formula already reserves the address for your exact account and passkeys. The wallet code is installed on-chain only when the first payment goes out."
     },
     "enroll": {
-      "heading": "How you get a wallet",
-      "intro": "Press play or choose a step. Enrollment uses a standard AT Protocol pass from your own PDS, so no server needs special integration.",
+      "heading": "How you get one",
+      "intro": "Press play or choose a step. Creating a wallet takes one passkey prompt and writes one record. The blockchain is not involved yet.",
       "play": "Play",
       "pause": "Pause",
       "back": "Back",
@@ -2625,117 +2625,119 @@
       "stepLabel": "Step {n} of {total}",
       "jumpTo": "Go to step {step}",
       "nodes": {
-        "app": "Your app",
-        "pds": "Your PDS",
-        "service": "Wallet service",
+        "device": "Your device",
+        "account": "Your account",
+        "math": "Address math",
         "wallet": "Your wallet"
       },
       "steps": {
         "s1": {
-          "title": "Your app asks for a pass",
-          "text": "Your app asks your own PDS for a short-lived pass that proves who you are. Every PDS can issue this pass, because it is a standard AT Protocol feature."
+          "title": "Your device creates a passkey",
+          "text": "Your phone or computer makes a fresh passkey and guards it with Face ID, a fingerprint, or a security key. The private part never leaves the device. There is nothing to write down."
         },
         "s2": {
-          "title": "The service checks the pass",
-          "text": "The wallet service reads your public identity record and checks the pass against it. It also remembers a public key from your device for future approvals."
+          "title": "A record is saved in your account",
+          "text": "The public half of the passkey goes into a small record stored with your own account data. The record also lists the wallet's fixed rules and every passkey allowed to approve payments."
         },
         "s3": {
-          "title": "Protected hardware creates the wallet",
-          "text": "A fresh random secret becomes your wallet inside protected memory. The secret is split into three shares right away, and the full key is cleared."
+          "title": "The formula produces the address",
+          "text": "A fixed formula turns your account identity and the passkey list into one wallet address. Run it anywhere, any number of times, and the same inputs give the same answer."
         },
         "s4": {
-          "title": "You keep the majority",
-          "text": "Your device and your recovery backup each receive one share. The service stores its own share encrypted. Your Ethereum and Solana addresses are ready to use."
+          "title": "The wallet is ready",
+          "text": "The address can receive donations right away. Nothing sits on the blockchain yet, and nothing has to. The wallet stays dormant until the first payment goes out."
         }
       }
     },
-    "shares": {
-      "heading": "A wallet you can recover or take with you",
-      "intro": "The wallet secret is split into three shares. Choose a situation to see which two shares restore it. The operator controls only one.",
-      "device": {
-        "title": "Your device",
-        "text": "Kept by your browser or app and never stored by the service."
+    "address": {
+      "heading": "Where the address comes from",
+      "intro": "Three public inputs go into one fixed formula. Switch the passkey list to watch the answer move with the inputs.",
+      "one": {
+        "tab": "One passkey",
+        "title": "Same inputs, same address, forever",
+        "text": "Anyone can run this formula next year on any computer and get the identical answer. That is why the record in your account is enough proof that the address is yours. No signature is needed."
       },
-      "protected": {
-        "title": "Protected service",
-        "text": "Stored encrypted and usable only inside approved protected hardware."
+      "two": {
+        "tab": "Two passkeys",
+        "title": "Different passkeys, different address",
+        "text": "Change the passkey list and the formula points somewhere else. Nobody can produce your address without your exact account and your exact passkeys."
       },
-      "recovery": {
-        "title": "Your recovery backup",
-        "text": "Protected by a password or personal cloud backup that you control."
+      "account": {
+        "title": "Your account identity",
+        "text": "The permanent identifier behind your GainForest account."
       },
-      "used": "Share used",
-      "notNeeded": "Not needed",
-      "threshold": "Any 2 of 3",
-      "scenarios": {
-        "everyday": {
-          "tab": "Everyday use",
-          "title": "Your device and protected hardware sign together",
-          "text": "The wallet is briefly rebuilt inside protected memory, checked against its public address, used to sign, and then cleared."
-        },
-        "recover": {
-          "tab": "Lost device",
-          "title": "Your recovery backup replaces a lost device",
-          "text": "The protected service combines its share with your recovery share, creates fresh shares, and can enroll your replacement device. The old device share can no longer work with the service."
-        },
-        "leave": {
-          "tab": "Leave service",
-          "title": "Your two shares prevent lock-in",
-          "text": "Your device and recovery shares form a majority. You can reconstruct the wallet without the operator, or export it through the service while it is available."
-        }
-      }
+      "passkeys": {
+        "title": "The passkey list",
+        "text": "The public halves of every passkey allowed to spend."
+      },
+      "rules": {
+        "title": "Fixed rules",
+        "text": "The same contract design and settings for every wallet."
+      },
+      "passkeyOne": "Your phone",
+      "passkeyTwo": "Your laptop",
+      "mathLabel": "One fixed formula",
+      "addressLabel": "Wallet address"
     },
     "gate": {
-      "heading": "Why the operator cannot spend your money",
-      "intro": "Try both requests. A login pass can show the public wallet address. Spending also needs proof from your device and its wallet share.",
-      "tokenAttempt": "Pass alone",
-      "userAttempt": "Device proof + share",
-      "tokenNode": "Login pass",
-      "userNode": "Proof + share",
-      "teeNode": "Protected wallet",
-      "approved": "Signature approved",
-      "denied": "Request denied",
-      "approvedDesc": "Your device signs a short request and sends its wallet share encrypted for the protected hardware. The service checks the signature, the time, and a one-time number before rebuilding the wallet to sign.",
-      "deniedDesc": "A pass by itself only unlocks public information. The protected service holds a single share and refuses to sign without a request signed by your device and a genuine second share."
+      "heading": "Who can spend",
+      "intro": "Try both. The wallet only accepts signatures from passkeys on its list, and those live on real devices held by real people.",
+      "otherAttempt": "A server or a stranger",
+      "passkeyAttempt": "Your passkey",
+      "otherNode": "No key at all",
+      "passkeyNode": "Face ID / fingerprint",
+      "walletNode": "Your wallet",
+      "approved": "Payment approved",
+      "denied": "Nothing to steal",
+      "approvedDesc": "Your device asks for Face ID, a fingerprint, or your security key, then signs the payment locally. The wallet checks the signature against its passkey list and lets the payment through.",
+      "deniedDesc": "The record in your account is public and contains public keys only. There is no secret on any server to steal, leak, or misuse. GainForest cannot move your money, and neither can anyone who reads the record."
     },
-    "binding": {
-      "heading": "How anyone can check the link",
-      "intro": "Your account and your wallet point at each other in public. Switch sides to see each half of the proof.",
-      "accountTab": "Account side",
-      "walletTab": "Wallet side",
-      "repoName": "Your data repo",
-      "recordName": "Binding record",
-      "walletName": "Wallet key",
-      "signatureName": "Signature in the record",
-      "accountResult": "Your account claims the wallet",
-      "accountDesc": "You publish a small record in your own repo that lists your wallet addresses. Only you can write to your repo, so the record shows your account stands behind these addresses.",
-      "walletResult": "Your wallet agrees",
-      "walletDesc": "Inside the record sits a signature made by the wallet key over your identity and addresses. It shows the wallet accepted the link. Anyone can verify both halves with public data."
+    "lifecycle": {
+      "heading": "Dormant first, then live",
+      "intro": "The wallet has two lives. Flip between them to see what can change in each one.",
+      "receives": "Can receive donations",
+      "signersLabel": "Who can approve payments",
+      "signerOne": "Your phone",
+      "signerTwo": "Your laptop",
+      "dormant": {
+        "tab": "Before the first payment",
+        "badge": "Dormant",
+        "editHint": "Add or remove",
+        "title": "Receiving works from day one",
+        "text": "A dormant wallet is just an address plus the record, and that is enough to receive donations. The passkey list can still change: add your second device or invite teammates. The formula recomputes the address whenever the list changes, so it is best to settle the list early."
+      },
+      "active": {
+        "tab": "After the first payment",
+        "badge": "Active",
+        "editHint": "Locked",
+        "title": "The first payment brings it on-chain",
+        "text": "The first outgoing payment installs the wallet code at the address. From that moment the record is frozen. Adding or removing passkeys now happens on the blockchain itself and needs approval from a passkey already on the list."
+      }
     },
     "proof": {
-      "heading": "How can an app trust the service?",
-      "intro": "Protected hardware can create a report called an attestation. It lets anyone check the machine and the code before trusting it.",
-      "cardLabel": "Hardware-backed proof",
-      "text": "The service creates its identity inside protected memory. A hardware report binds that identity to the exact code that is running. Anyone can fetch this report from the service and check it. If the code changes, the report changes too."
+      "heading": "How anyone can check the link",
+      "intro": "The record and the formula are both public, so verifying a wallet needs no trust in GainForest.",
+      "cardLabel": "Math-backed proof",
+      "text": "Only you can write records into your own account, and the wallet record lists the exact inputs of the address formula. A verifier fetches the record, runs the formula, and compares the result with the recorded address. A match proves the wallet belongs to your account. No signature, no middleman, and no special service are needed."
     },
     "limits": {
-      "heading": "What this protection does not solve",
-      "intro": "Split keys and protected hardware remove many risks. These limits remain, and we name them openly.",
-      "onboarding": {
-        "title": "First wallet setup",
-        "text": "The first device enrollment trusts the service once. A stronger future version can use passkeys to reduce that trust."
+      "heading": "What to keep in mind",
+      "intro": "The design removes servers and seed phrases from the picture. A few honest limits remain.",
+      "passkeys": {
+        "title": "Lost passkeys",
+        "text": "If every passkey on the list is lost, nobody can spend from the wallet anymore. Add a passkey from a second device early, or invite a person you trust."
       },
-      "uptime": {
-        "title": "Service availability",
-        "text": "A host can still stop the machine or block requests. Your device and recovery shares let you rebuild the wallet without the service."
+      "frozen": {
+        "title": "Frozen after activation",
+        "text": "Once the wallet is live on the blockchain, its record can no longer change. Passkey changes then happen on-chain and need approval from an existing passkey."
       },
-      "backup": {
-        "title": "Your backups",
-        "text": "You must keep your recovery backup safe. If you lose your device and your backup at the same time, the service alone cannot restore the wallet."
+      "fees": {
+        "title": "Network fees",
+        "text": "The first outgoing payment also installs the wallet code, so it costs a little more in network fees than later payments."
       },
-      "rollback": {
-        "title": "Storage rollback",
-        "text": "Rolling the service storage back in time could replay an old approved request. It can never create a new approval."
+      "single": {
+        "title": "One wallet per account",
+        "text": "Each account and each organization has one canonical wallet record. It can only be removed while the wallet is dormant and the address holds no funds."
       }
     },
     "more": {
@@ -2743,11 +2745,11 @@
       "epdsTitle": "How ePDS login works",
       "epdsDesc": "See the passwordless front door and the normal services around it.",
       "lexiconsTitle": "Data schemas",
-      "lexiconsDesc": "Explore the open record formats stored inside each PDS.",
+      "lexiconsDesc": "Explore the open record formats, including the wallet record itself.",
       "atprotoTitle": "How the AT Protocol works",
       "atprotoDesc": "An interactive tour of the open network everything here is built on.",
-      "githubTitle": "Wallet service on GitHub",
-      "githubDesc": "Read the source code and run the service yourself."
+      "githubTitle": "Smart accounts on GitHub",
+      "githubDesc": "Read the open-source Splits smart account contracts these wallets run on."
     }
   },
   "identifications": {

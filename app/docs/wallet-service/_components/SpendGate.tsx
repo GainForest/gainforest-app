@@ -3,66 +3,66 @@
 import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { motion } from "framer-motion";
-import { CheckCircle2Icon, ShieldXIcon, TicketIcon, UserRoundCheckIcon } from "lucide-react";
+import { CheckCircle2Icon, FingerprintIcon, ServerIcon, ShieldXIcon } from "lucide-react";
 
-type Attempt = "token" | "user";
+type Attempt = "other" | "passkey";
 
-// Shows the wallet's two user-held checks. A login pass can ask for public
-// information, while spending needs both a request signed by the enrolled
-// device and a genuine second wallet share.
-export function WalletGate() {
+// Only a passkey on the wallet's list can approve a payment. The record on
+// the account is public and holds public keys only, so a server, GainForest,
+// or a stranger reading it gains nothing.
+export function SpendGate() {
   const t = useTranslations("common.walletService.gate");
-  const [attempt, setAttempt] = useState<Attempt>("token");
+  const [attempt, setAttempt] = useState<Attempt>("other");
 
   return (
     <div className="rounded-2xl border border-border/60 bg-muted/20 p-4 sm:p-6">
       <div className="mb-6 grid grid-cols-2 gap-2">
         <button
           type="button"
-          onClick={() => setAttempt("token")}
-          aria-pressed={attempt === "token"}
+          onClick={() => setAttempt("other")}
+          aria-pressed={attempt === "other"}
           className={`rounded-xl border px-3 py-3 text-[12.5px] font-medium transition-colors ${
-            attempt === "token"
+            attempt === "other"
               ? "border-destructive/40 bg-destructive/5 text-foreground"
               : "border-border bg-background text-muted-foreground"
           }`}
         >
-          {t("tokenAttempt")}
+          {t("otherAttempt")}
         </button>
         <button
           type="button"
-          onClick={() => setAttempt("user")}
-          aria-pressed={attempt === "user"}
+          onClick={() => setAttempt("passkey")}
+          aria-pressed={attempt === "passkey"}
           className={`rounded-xl border px-3 py-3 text-[12.5px] font-medium transition-colors ${
-            attempt === "user"
+            attempt === "passkey"
               ? "border-primary/40 bg-primary/5 text-foreground"
               : "border-border bg-background text-muted-foreground"
           }`}
         >
-          {t("userAttempt")}
+          {t("passkeyAttempt")}
         </button>
       </div>
 
       <div className="mx-auto flex max-w-2xl items-center justify-between gap-2 sm:gap-4">
         <GateNode
           icon={
-            attempt === "user" ? (
-              <UserRoundCheckIcon className="h-5 w-5" />
+            attempt === "passkey" ? (
+              <FingerprintIcon className="h-5 w-5" />
             ) : (
-              <TicketIcon className="h-5 w-5" />
+              <ServerIcon className="h-5 w-5" />
             )
           }
-          label={attempt === "user" ? t("userNode") : t("tokenNode")}
+          label={attempt === "passkey" ? t("passkeyNode") : t("otherNode")}
           active
         />
 
-        <FlowLine active={attempt === "user"} denied={attempt === "token"} />
+        <FlowLine active={attempt === "passkey"} denied={attempt === "other"} />
 
         <GateNode
-          icon={attempt === "user" ? <CheckCircle2Icon className="h-5 w-5" /> : <ShieldXIcon className="h-5 w-5" />}
-          label={t("teeNode")}
-          active={attempt === "user"}
-          denied={attempt === "token"}
+          icon={attempt === "passkey" ? <CheckCircle2Icon className="h-5 w-5" /> : <ShieldXIcon className="h-5 w-5" />}
+          label={t("walletNode")}
+          active={attempt === "passkey"}
+          denied={attempt === "other"}
         />
       </div>
 
@@ -72,18 +72,18 @@ export function WalletGate() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.18 }}
         className={`mx-auto mt-6 max-w-xl rounded-xl border px-5 py-4 text-center ${
-          attempt === "user" ? "border-primary/30 bg-primary/5" : "border-destructive/30 bg-destructive/5"
+          attempt === "passkey" ? "border-primary/30 bg-primary/5" : "border-destructive/30 bg-destructive/5"
         }`}
       >
         <div
           className={`mb-1 font-mono text-[10.5px] uppercase tracking-[0.1em] ${
-            attempt === "user" ? "text-primary" : "text-destructive"
+            attempt === "passkey" ? "text-primary" : "text-destructive"
           }`}
         >
-          {attempt === "user" ? t("approved") : t("denied")}
+          {attempt === "passkey" ? t("approved") : t("denied")}
         </div>
         <p className="m-0 text-[13.5px] leading-relaxed text-muted-foreground">
-          {attempt === "user" ? t("approvedDesc") : t("deniedDesc")}
+          {attempt === "passkey" ? t("approvedDesc") : t("deniedDesc")}
         </p>
       </motion.div>
     </div>
