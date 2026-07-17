@@ -28,19 +28,18 @@ goat lex publish \
 
 `goat lex status` shows sync state. Last published: 2026-07-17.
 
-## DNS (Cloudflare) — still to add
+## DNS (Cloudflare)
 
-NSID authority resolution for this group needs a TXT record that does not
-exist yet (`gainforest.app` DNS is on Cloudflare; every sibling group —
-`funding`, `organization`, `feed`, `dwc`, … — already has one):
+NSID authority resolution for this group is live (added 2026-07-17, same
+pattern as every sibling group — `funding`, `organization`, `feed`, `dwc`, …):
 
 ```
 _lexicon.wallet.gainforest.app  TXT  "did=did:plc:qoti4acfmc5wg6zzmtix6hse"
 ```
 
-Until it exists, the schema records above are live but `goat lex resolve
-app.gainforest.wallet.primary` (and other network resolvers) cannot discover
-the authority, and `goat lex publish` needs `--skip-dns-check`.
+Verified: `goat lex resolve app.gainforest.wallet.primary` resolves the
+authority via DNS and fetches the schema, and `goat lex status` shows all
+three wallet lexicons 🟢 with no DNS warnings.
 
 ## Indexing
 
