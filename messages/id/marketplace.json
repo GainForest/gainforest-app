@@ -904,7 +904,45 @@
     "search": {
       "ariaLabel": "Cari proyek",
       "placeholder": "Cari proyek berdasarkan nama atau kata kunci",
-      "sortAriaLabel": "Urutkan proyek"
+      "sortAriaLabel": "Urutkan proyek",
+      "action": "Cari"
+    },
+    "categories": {
+      "eyebrow": "Jelajahi berdasarkan minat",
+      "title": "Jelajahi kategori proyek",
+      "description": "Mulai dengan sebuah tema, lalu temukan orang dan tempat yang mewujudkannya.",
+      "items": {
+        "all": "Semua proyek",
+        "forests": "Hutan dan pepohonan",
+        "biodiversity": "Keanekaragaman hayati",
+        "foodWater": "Pangan, air, dan tanah",
+        "communities": "Komunitas",
+        "climate": "Ketahanan iklim"
+      }
+    },
+    "featured": {
+      "eyebrow": "Proyek unggulan",
+      "title": "Cerita untuk memulai",
+      "description": "Pilihan proyek yang terdokumentasi lengkap dari para penjaga alam di seluruh dunia.",
+      "badge": "Unggulan",
+      "action": "Jelajahi proyek",
+      "manage": {
+        "add": "Jadikan proyek unggulan",
+        "remove": "Hapus dari proyek unggulan",
+        "error": "Tidak dapat memperbarui proyek unggulan. Silakan coba lagi.",
+        "max": "Anda dapat menampilkan hingga tiga proyek. Hapus satu sebelum menambahkan yang lain."
+      }
+    },
+    "support": {
+      "eyebrow": "Terbuka untuk dukungan",
+      "title": "Bantu karya baik berkembang",
+      "description": "Dukung proyek yang sedang menerima kontribusi dari komunitas mereka."
+    },
+    "catalog": {
+      "eyebrow": "Pasar proyek",
+      "title": "Jelajahi semua proyek",
+      "description": "Jelajahi proyek dalam kategori ini.",
+      "count": "{count, plural, other {# proyek untuk dijelajahi}}"
     },
     "view": {
       "cards": "Kartu",

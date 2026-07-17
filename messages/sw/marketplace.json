@@ -904,7 +904,45 @@
     "search": {
       "ariaLabel": "Tafuta miradi",
       "placeholder": "Tafuta miradi kwa jina au neno muhimu",
-      "sortAriaLabel": "Panga miradi"
+      "sortAriaLabel": "Panga miradi",
+      "action": "Tafuta"
+    },
+    "categories": {
+      "eyebrow": "Gundua kwa kuvutiwa",
+      "title": "Gundua aina za miradi",
+      "description": "Anza na mada, kisha gundua watu na maeneo yanayoifanya iwe halisi.",
+      "items": {
+        "all": "Miradi yote",
+        "forests": "Misitu na miti",
+        "biodiversity": "Bioanuwai",
+        "foodWater": "Chakula, maji na udongo",
+        "communities": "Jamii",
+        "climate": "Ustahimilivu wa tabianchi"
+      }
+    },
+    "featured": {
+      "eyebrow": "Miradi teule",
+      "title": "Hadithi za kuanzia",
+      "description": "Uteuzi wa miradi iliyoandikwa vizuri kutoka kwa wasimamizi wa mazingira duniani kote.",
+      "badge": "Teule",
+      "action": "Gundua mradi",
+      "manage": {
+        "add": "Teua mradi huu",
+        "remove": "Ondoa kwenye miradi teule",
+        "error": "Imeshindikana kusasisha miradi teule. Tafadhali jaribu tena.",
+        "max": "Unaweza kuteua hadi miradi mitatu. Ondoa mmoja kabla ya kuongeza mwingine."
+      }
+    },
+    "support": {
+      "eyebrow": "Iko wazi kwa msaada",
+      "title": "Saidia kazi nzuri ikue",
+      "description": "Saidia miradi inayokaribisha michango kutoka kwa jamii zao."
+    },
+    "catalog": {
+      "eyebrow": "Soko la miradi",
+      "title": "Gundua miradi yote",
+      "description": "Gundua miradi katika aina hii.",
+      "count": "{count, plural, one {Mradi # wa kugundua} other {Miradi # ya kugundua}}"
     },
     "view": {
       "cards": "Kadi",

@@ -904,7 +904,45 @@
     "search": {
       "ariaLabel": "Search projects",
       "placeholder": "Search projects by name or keyword",
-      "sortAriaLabel": "Sort projects"
+      "sortAriaLabel": "Sort projects",
+      "action": "Search"
+    },
+    "categories": {
+      "eyebrow": "Browse by interest",
+      "title": "Explore project categories",
+      "description": "Start with a theme, then discover the people and places bringing it to life.",
+      "items": {
+        "all": "All projects",
+        "forests": "Forests & trees",
+        "biodiversity": "Biodiversity",
+        "foodWater": "Food, water & soil",
+        "communities": "Communities",
+        "climate": "Climate resilience"
+      }
+    },
+    "featured": {
+      "eyebrow": "Featured projects",
+      "title": "Stories to start with",
+      "description": "A selection of richly documented projects from nature stewards around the world.",
+      "badge": "Featured",
+      "action": "Explore project",
+      "manage": {
+        "add": "Feature this project",
+        "remove": "Remove from featured projects",
+        "error": "Couldn’t update the featured projects. Please try again.",
+        "max": "You can feature up to three projects. Remove one before adding another."
+      }
+    },
+    "support": {
+      "eyebrow": "Open for support",
+      "title": "Help good work grow",
+      "description": "Support projects that are actively welcoming contributions from their community."
+    },
+    "catalog": {
+      "eyebrow": "Project marketplace",
+      "title": "Explore all projects",
+      "description": "Browse projects in this category.",
+      "count": "{count, plural, one {# project to explore} other {# projects to explore}}"
     },
     "view": {
       "cards": "Cards",

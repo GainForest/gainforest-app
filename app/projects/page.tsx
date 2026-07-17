@@ -3,7 +3,8 @@ import { getTranslations } from "next-intl/server";
 import { Suspense } from "react";
 import { localizedAlternates, socialPreviewMetadata } from "@/app/_lib/seo-metadata";
 import { ExploreGridPageSkeleton } from "../_components/PageLoadingSkeletons";
-import { fetchProjects, type ProjectRecord } from "../_lib/indexer";
+import { fetchProjects, fetchRecordByUri, GAINFOREST_MODERATION_REPO_DID, type ProjectRecord } from "../_lib/indexer";
+import { fetchFeaturedProjectUris } from "../internal/badges/_lib/featured-projects";
 import { getRequestOrigin } from "../_lib/request-origin";
 import { localProjectHref } from "../_lib/urls";
 import { ProjectsExploreClient } from "./ProjectsExploreClient";
@@ -46,6 +47,15 @@ function buildProjectsItemListJsonLd(origin: string, records: ProjectRecord[], n
   };
 }
 
+function mergeFeaturedProjects(featured: ProjectRecord[], records: ProjectRecord[]): ProjectRecord[] {
+  const seen = new Set<string>();
+  return [...featured, ...records].filter((record) => {
+    if (seen.has(record.atUri)) return false;
+    seen.add(record.atUri);
+    return true;
+  });
+}
+
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations("marketplace.projects.metadata");
   const title = t("title");
@@ -60,14 +70,19 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function ProjectsPage() {
-  const [t, origin, initialPage] = await Promise.all([
+  const [t, origin, initialPage, initialFeaturedUris] = await Promise.all([
     getTranslations("marketplace.projects.metadata"),
     getRequestOrigin(),
     fetchProjects(INITIAL_PROJECTS_TARGET, null, undefined, undefined, {
       sort: "newest",
       featuredBadgesOnly: true,
     }).catch(() => undefined),
+    fetchFeaturedProjectUris(GAINFOREST_MODERATION_REPO_DID).catch(() => []),
   ]);
+  const initialFeaturedRecords = (await Promise.all(
+    initialFeaturedUris.slice(0, 3).map((uri) => fetchRecordByUri(uri).catch(() => null)),
+  )).filter((record): record is ProjectRecord => record?.kind === "project");
+  const mergedInitialRecords = mergeFeaturedProjects(initialFeaturedRecords, initialPage?.records ?? []);
   const title = t("title");
   const jsonLd = {
     "@context": "https://schema.org",
@@ -81,7 +96,7 @@ export default async function ProjectsPage() {
       url: new URL("/", origin).toString(),
     },
   };
-  const itemListJsonLd = buildProjectsItemListJsonLd(origin, initialPage?.records ?? [], title);
+  const itemListJsonLd = buildProjectsItemListJsonLd(origin, mergedInitialRecords, title);
 
   return (
     <>
@@ -95,7 +110,10 @@ export default async function ProjectsPage() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(itemListJsonLd) }}
       />
       <Suspense fallback={<ExploreGridPageSkeleton />}>
-        <ProjectsExploreClient initialPage={initialPage} />
+        <ProjectsExploreClient
+          initialPage={initialPage ? { ...initialPage, records: mergedInitialRecords } : undefined}
+          initialFeaturedUris={initialFeaturedUris}
+        />
       </Suspense>
     </>
   );

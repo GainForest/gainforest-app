@@ -904,7 +904,45 @@
     "search": {
       "ariaLabel": "Buscar proyectos",
       "placeholder": "Buscar proyectos por nombre o palabra clave",
-      "sortAriaLabel": "Ordenar proyectos"
+      "sortAriaLabel": "Ordenar proyectos",
+      "action": "Buscar"
+    },
+    "categories": {
+      "eyebrow": "Explora por interés",
+      "title": "Explora categorías de proyectos",
+      "description": "Empieza con un tema y descubre a las personas y lugares que lo hacen realidad.",
+      "items": {
+        "all": "Todos los proyectos",
+        "forests": "Bosques y árboles",
+        "biodiversity": "Biodiversidad",
+        "foodWater": "Alimentos, agua y suelo",
+        "communities": "Comunidades",
+        "climate": "Resiliencia climática"
+      }
+    },
+    "featured": {
+      "eyebrow": "Proyectos destacados",
+      "title": "Historias para comenzar",
+      "description": "Una selección de proyectos bien documentados de guardianes de la naturaleza de todo el mundo.",
+      "badge": "Destacado",
+      "action": "Explorar proyecto",
+      "manage": {
+        "add": "Destacar este proyecto",
+        "remove": "Quitar de proyectos destacados",
+        "error": "No se pudieron actualizar los proyectos destacados. Inténtalo de nuevo.",
+        "max": "Puedes destacar hasta tres proyectos. Quita uno antes de añadir otro."
+      }
+    },
+    "support": {
+      "eyebrow": "Abiertos a apoyo",
+      "title": "Ayuda a que crezca un buen trabajo",
+      "description": "Apoya proyectos que reciben activamente contribuciones de su comunidad."
+    },
+    "catalog": {
+      "eyebrow": "Mercado de proyectos",
+      "title": "Explora todos los proyectos",
+      "description": "Explora los proyectos de esta categoría.",
+      "count": "{count, plural, one {# proyecto para explorar} other {# proyectos para explorar}}"
     },
     "view": {
       "cards": "Tarjetas",
