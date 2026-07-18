@@ -609,7 +609,7 @@ export function ProjectsExploreClient({
 
           {records.length > 0 ? (
             <div className="mt-10 flex flex-col items-center gap-3">
-              {totalCount !== null && category === "all" ? <p className="text-sm text-muted-foreground">{t("footer.showing", { shown: visibleRecords.length, total: totalCount })}</p> : null}
+              {totalCount !== null && category === "all" ? <p className="text-sm text-muted-foreground">{t("footer.showing", { shown: renderedRecords.length, total: totalCount })}</p> : null}
               {hasMoreCardsToShow ? (
                 <button type="button" onClick={() => setCardLimit((current) => current + CARD_BATCH_SIZE)} className="inline-flex items-center justify-center rounded-full border border-border bg-background px-6 py-3 text-sm font-medium text-foreground transition-colors hover:bg-muted">
                   {t("footer.showMore")}
