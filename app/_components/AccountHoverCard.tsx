@@ -11,6 +11,7 @@
  */
 
 import { useEffect, useState, type ReactNode } from "react";
+import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { fetchAccountSummary, type AccountSummary } from "../_lib/indexer";
 import {
@@ -46,6 +47,7 @@ export function AccountHoverCard({ did, children }: { did: string; children: Rea
   const avatar = (!avatarFailed && (summary?.avatarUrl ?? profile?.avatar)) || null;
   const bio = summary?.bio?.trim() || null;
   const m = monogram(handle, did);
+  const profileHref = `/account/${encodeURIComponent(handle ?? did)}`;
 
   return (
     <HoverCard openDelay={350} closeDelay={120} onOpenChange={setOpen}>
@@ -53,29 +55,35 @@ export function AccountHoverCard({ did, children }: { did: string; children: Rea
       <HoverCardContent className="w-80">
         <FollowProvider targetDid={did}>
           <div className="flex items-start justify-between gap-3">
-            {avatar ? (
-              // eslint-disable-next-line @next/next/no-img-element -- arbitrary PDS/CDN hosts
-              <img
-                src={avatar}
-                alt=""
-                onError={() => setAvatarFailed(true)}
-                className="size-14 shrink-0 rounded-full object-cover ring-1 ring-border"
-              />
-            ) : (
-              <span
-                aria-hidden
-                className="grid size-14 shrink-0 place-items-center rounded-full text-lg font-semibold text-white/95"
-                style={{ backgroundColor: m.bg }}
-              >
-                {m.char}
-              </span>
-            )}
+            <Link href={profileHref} aria-hidden tabIndex={-1} className="shrink-0">
+              {avatar ? (
+                // eslint-disable-next-line @next/next/no-img-element -- arbitrary PDS/CDN hosts
+                <img
+                  src={avatar}
+                  alt=""
+                  onError={() => setAvatarFailed(true)}
+                  className="size-14 rounded-full object-cover ring-1 ring-border"
+                />
+              ) : (
+                <span
+                  aria-hidden
+                  className="grid size-14 place-items-center rounded-full text-lg font-semibold text-white/95"
+                  style={{ backgroundColor: m.bg }}
+                >
+                  {m.char}
+                </span>
+              )}
+            </Link>
             <FollowButton targetDid={did} name={name} />
           </div>
 
           <div className="mt-3">
-            <p className="truncate text-[15px] font-semibold leading-tight text-foreground">{name}</p>
-            {handle ? <p className="truncate text-sm text-muted-foreground">{handle}</p> : null}
+            <Link href={profileHref} className="group/name block focus-visible:outline-none">
+              <p className="truncate text-[15px] font-semibold leading-tight text-foreground group-hover/name:underline group-focus-visible/name:underline">
+                {name}
+              </p>
+              {handle ? <p className="truncate text-sm text-muted-foreground">{handle}</p> : null}
+            </Link>
           </div>
 
           <FollowStats targetDid={did} className="mt-2" />
