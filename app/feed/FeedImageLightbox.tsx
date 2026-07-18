@@ -18,7 +18,7 @@ import { MentionText } from "@/app/_components/MentionText";
 import { resolveBlobUrl } from "../_lib/pds";
 import { formatRelative } from "../_lib/format";
 import { FeedActionBar, type FeedInteractions } from "./FeedActions";
-import { AccountHoverCard } from "./AccountHoverCard";
+import { AccountHoverCard } from "@/app/_components/AccountHoverCard";
 import { ResolvedAvatar } from "./ResolvedAvatar";
 
 export function FeedImageLightbox({

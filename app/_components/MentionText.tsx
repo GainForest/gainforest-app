@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 
 import { segmentTextWithMentions, type MentionCandidate } from "@/app/_lib/mentions";
 import { accountHref } from "@/app/_lib/urls";
-import { AccountHoverCard } from "@/app/feed/AccountHoverCard";
+import { AccountHoverCard } from "./AccountHoverCard";
 
 /**
  * Post/comment body text with `@Name` mentions linkified to the tagged

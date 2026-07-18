@@ -46,7 +46,7 @@ import { formatCompact, formatCompactUsd, formatRelative } from "../_lib/format"
 import { FeedAudioClip } from "./FeedAudioClip";
 import { FeedImageLightbox } from "./FeedImageLightbox";
 import { ResolvedAvatar } from "./ResolvedAvatar";
-import { AccountHoverCard } from "./AccountHoverCard";
+import { AccountHoverCard } from "@/app/_components/AccountHoverCard";
 import { QuickLikeButton } from "@/app/_components/QuickLike";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";

@@ -64,7 +64,12 @@ export function AuthorChip({
   const primaryCls = size === "sm" ? "text-[12px]" : "text-[13px]";
 
   return (
-    <AccountHoverCard did={did}>
+    <AccountHoverCard
+      did={did}
+      name={primary}
+      avatarRef={avatarRefOverride ?? null}
+      triggerClassName="block w-full min-w-0"
+    >
       <button
         type="button"
         onClick={() => {
@@ -120,8 +125,13 @@ export function AuthorInline({
   const label = nameOverride || profile?.displayName || handle || "Supporter";
 
   return (
-    <AccountHoverCard did={did}>
-      <span className="inline-flex min-w-0 cursor-default items-center gap-1.5 align-middle" title={label}>
+    <AccountHoverCard
+      did={did}
+      name={label}
+      avatarRef={avatarRefOverride ?? null}
+      triggerClassName="inline-flex max-w-full min-w-0 align-middle"
+    >
+      <span className="inline-flex min-w-0 items-center gap-1.5 align-middle" title={label}>
         {showAvatar ? <Avatar did={did} handle={handle} avatar={avatar} avatarRef={avatarRefOverride ?? null} className="h-4 w-4 text-[8px]" /> : null}
         <span className="truncate text-foreground/80">{label}</span>
       </span>

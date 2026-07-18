@@ -56,7 +56,7 @@ import { cn } from "@/lib/utils";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { ModalPortal, useModal } from "@/components/ui/modal/context";
 import { ModalTitle } from "@/components/ui/modal/modal";
-import { AccountHoverCard } from "./AccountHoverCard";
+import { AccountHoverCard } from "@/app/_components/AccountHoverCard";
 import { ResolvedAvatar } from "./ResolvedAvatar";
 
 /** Which account the viewer is currently acting as in the feed. When the
