@@ -618,6 +618,7 @@ function FeedRow({
   const t = useTranslations("common.feed");
   const verb = t(`verbs.${item.kind}`);
   const [editing, setEditing] = useState(false);
+  const isDonation = item.kind === "donation";
   const [overrideText, setOverrideText] = useState<string | null>(null);
   const [overrideMentions, setOverrideMentions] = useState<MentionCandidate[] | null>(null);
   // Only the author of a feed post may edit it (and only posts — other kinds
@@ -626,6 +627,18 @@ function FeedRow({
     item.kind === "post" && Boolean(interactions.viewerDid && item.actorDid === interactions.viewerDid);
   const bodyText = overrideText ?? item.text;
   const bodyMentions = overrideMentions ?? item.mentions;
+
+  if (isDonation) {
+    return (
+      <DonationRow
+        item={item}
+        signedIn={signedIn}
+        interactions={interactions}
+        isAdmin={isAdmin}
+        onModerated={onModerated}
+      />
+    );
+  }
 
   return (
     <li className="relative">
@@ -678,12 +691,6 @@ function FeedRow({
             </p>
           ) : null}
 
-          {/* Donation target line */}
-          {item.kind === "donation" && item.targetTitle ? (
-            <p className="mt-1 truncate text-xs text-muted-foreground">
-              {t("to")}: <span className="text-foreground/80">{item.targetTitle}</span>
-            </p>
-          ) : null}
           </Link>
 
           {/* Cover image — the image itself opens the in-feed lightbox while
@@ -717,15 +724,6 @@ function FeedRow({
           {item.bioacoustics ? <FeedAudioClip clip={item.bioacoustics} /> : null}
         </div>
 
-        {/* Donation amount pill */}
-        {item.kind === "donation" && item.amount != null ? (
-          <Link
-            href={item.href}
-            className="ml-auto mt-0.5 inline-flex shrink-0 items-center rounded-full bg-primary/10 px-2.5 py-1 text-xs font-semibold text-primary tabular-nums"
-          >
-            {item.currency === "USD" ? formatCompactUsd(item.amount) : `${item.amount} ${item.currency}`}
-          </Link>
-        ) : null}
       </div>
 
       {/* Like + comment, aligned under the row content (outside the link). */}
@@ -768,6 +766,98 @@ function FeedRow({
             </div>
           )
         ) : null}
+      </div>
+    </li>
+  );
+}
+
+/** Donations use the same quiet row anatomy as everything else, with two
+ *  small touches: a soft heart badge for anonymous wallet donors, and one
+ *  clean headline line ("1 USDC · to Project") instead of the old stack of
+ *  fragments. The wallet address stays as a tiny mono caption. */
+function DonationRow({
+  item,
+  signedIn,
+  interactions,
+  isAdmin = false,
+  onModerated,
+}: {
+  item: ActivityFeedItem;
+  signedIn: boolean;
+  interactions: FeedInteractions;
+  isAdmin?: boolean;
+  onModerated?: (uri: string) => void;
+}) {
+  const t = useTranslations("common.feed");
+  const donorLabel = item.actorName?.trim() || (item.actorDid ? shortDid(item.actorDid) : t("anonymous"));
+  const amountLabel =
+    item.amount != null
+      ? item.currency === "USD"
+        ? formatCompactUsd(item.amount)
+        : `${item.amount} ${item.currency ?? ""}`.trim()
+      : null;
+
+  return (
+    <li className="relative">
+      <div className="group flex gap-3 rounded-2xl px-3 pb-1.5 pt-3.5 transition-colors hover:bg-muted/40">
+        {/* Donor avatar when they have an account, else a quiet heart badge. */}
+        {item.actorDid ? (
+          <FeedAvatar item={item} />
+        ) : (
+          <span className="mt-0.5 grid size-10 shrink-0 place-items-center rounded-full bg-primary/10 text-primary">
+            <HeartHandshakeIcon className="size-[18px]" />
+          </span>
+        )}
+
+        <Link href={item.href} className="block min-w-0 flex-1">
+          {/* Donor + time */}
+          <div className="flex items-center gap-1.5 text-sm">
+            <span className="truncate font-medium text-foreground">{donorLabel}</span>
+            <span className="text-muted-foreground/60">·</span>
+            <span className="shrink-0 text-xs text-muted-foreground/80" title={fullDate(item.createdAt)}>
+              {formatRelative(item.createdAt)}
+            </span>
+          </div>
+
+          {/* Verb */}
+          <p className="mt-0.5 flex items-center gap-1.5 text-xs text-muted-foreground">
+            <HeartHandshakeIcon className="size-3.5 shrink-0 text-primary/70" />
+            <span className="truncate">{t("verbs.donation")}</span>
+          </p>
+
+          {/* Headline: amount · to project — one calm line. */}
+          {amountLabel || item.targetTitle ? (
+            <p className="mt-1.5 flex min-w-0 items-baseline gap-1.5 text-[15px] leading-snug">
+              {amountLabel ? (
+                <span className="shrink-0 font-medium text-foreground tabular-nums">{amountLabel}</span>
+              ) : null}
+              {item.targetTitle ? (
+                <span className="min-w-0 truncate text-sm text-muted-foreground">
+                  {t("to")} <span className="text-foreground/80">{item.targetTitle}</span>
+                </span>
+              ) : null}
+            </p>
+          ) : null}
+
+          {/* Wallet caption ("via 0x…") — tiny and quiet. */}
+          {item.text ? (
+            <p className="mt-1 truncate font-mono text-[11px] text-muted-foreground/50">{item.text}</p>
+          ) : null}
+        </Link>
+      </div>
+
+      {/* Like + comment, aligned like every other row. */}
+      <div className="pb-2 pl-16 pr-3">
+        <FeedActionBar
+          subjectUri={item.id}
+          signedIn={signedIn}
+          interactions={interactions}
+          extraActions={
+            isAdmin && onModerated && item.id.startsWith("at://") ? (
+              <ModeratorHideButton subjectUri={item.id} onHidden={() => onModerated(item.id)} />
+            ) : null
+          }
+        />
       </div>
     </li>
   );
