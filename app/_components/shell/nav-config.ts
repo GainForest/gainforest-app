@@ -7,6 +7,7 @@ import {
   FolderKanbanIcon,
   HeartHandshakeIcon,
   LeafIcon,
+  MicroscopeIcon,
   NewspaperIcon,
   SproutIcon,
 } from "lucide-react";
@@ -129,6 +130,14 @@ export const NAV_ITEMS: NavSection[] = [
         Icon: BotIcon,
         href: "/taina",
         pathCheck: { startsWith: "/taina" },
+      },
+      {
+        kind: "leaf",
+        id: "labeler",
+        text: "Labeler",
+        Icon: MicroscopeIcon,
+        href: "/labeler",
+        pathCheck: { startsWith: "/labeler" },
       },
       {
         kind: "leaf",

@@ -1566,7 +1566,76 @@
     "metaTitle": "{name} — Pengamatan alam",
     "metaFallback": "Pengamatan alam yang dibagikan di GainForest.",
     "natureSound": "Rekaman suara alam",
-    "unidentified": "Pengamatan tidak teridentifikasi"
+    "unidentified": "Pengamatan tidak teridentifikasi",
+    "suggestions": {
+      "title": "Saran spesies",
+      "description": "Usulan identifikasi dari pakar ekologi. Pengamat dapat meninjaunya sebelum mengubah pengamatan ini.",
+      "expertFallback": "Pakar komunitas",
+      "status": "Menunggu tinjauan"
+    }
+  },
+  "labeler": {
+    "meta": {
+      "title": "Pelabel pengamatan",
+      "description": "Tinjau pengamatan alam terbaru dan sarankan identifikasi spesies."
+    },
+    "eyebrow": "Tinjauan ekologi",
+    "title": "Pelabel pengamatan",
+    "description": "Jelajahi pengamatan terbaru dan yang belum teridentifikasi, periksa data lapangannya, lalu usulkan nama spesies yang konkret.",
+    "unidentified": "Belum teridentifikasi",
+    "filters": {
+      "searchLabel": "Cari pengamatan",
+      "searchPlaceholder": "Cari spesies, genus, famili, atau tempat…",
+      "taxonLabel": "Takson",
+      "allTaxa": "Semua takson",
+      "genusLabel": "Genus",
+      "allGenera": "Semua genus",
+      "mediaLabel": "Jenis bukti",
+      "allMedia": "Semua bukti",
+      "photos": "Foto",
+      "audio": "Audio"
+    },
+    "queue": {
+      "unidentified": "Perlu identifikasi",
+      "recent": "Pengamatan terbaru",
+      "count": "{count, plural, =0 {Tidak ada pengamatan} =1 {1 pengamatan} other {# pengamatan}}",
+      "ariaLabel": "Pengamatan untuk ditinjau",
+      "loadMore": "Muat pengamatan lainnya",
+      "loading": "Memuat pengamatan…"
+    },
+    "empty": {
+      "title": "Tidak ada pengamatan yang cocok",
+      "description": "Coba takson, genus, atau pencarian lain."
+    },
+    "review": {
+      "selectPrompt": "Pilih pengamatan untuk memeriksa bukti dan data lapangannya.",
+      "currentIdentification": "Identifikasi saat ini",
+      "openObservation": "Buka halaman pengamatan",
+      "family": "Famili",
+      "genus": "Genus",
+      "observer": "Pengamat",
+      "communityObserver": "Pengamat komunitas",
+      "observed": "Diamati"
+    },
+    "proposal": {
+      "title": "Sarankan identifikasi",
+      "description": "Saran Anda akan tampil pada pengamatan dan memberi tahu pengamatnya. Nama saat ini tidak akan diganti secara otomatis.",
+      "scientificName": "Nama ilmiah",
+      "scientificPlaceholder": "mis. Panthera onca",
+      "commonNameOptional": "Nama umum (opsional)",
+      "commonPlaceholder": "mis. Jaguar",
+      "noteOptional": "Catatan bukti (opsional)",
+      "notePlaceholder": "Jelaskan ciri yang terlihat atau konteks yang mendukung identifikasi ini.",
+      "recordSuggestion": "Saran spesies",
+      "commonName": "Nama umum",
+      "noteLabel": "Catatan bukti",
+      "submit": "Kirim saran",
+      "submitting": "Mengirim saran…",
+      "success": "Menyarankan {name}. Pengamat akan diberi tahu.",
+      "error": "Saran tidak dapat dikirim. Silakan coba lagi.",
+      "signInDescription": "Masuk untuk mengirim saran dari akun Anda. Semua orang tetap dapat menjelajahi antrean tinjauan.",
+      "signIn": "Masuk untuk menyarankan"
+    }
   },
   "manageProjects": {
     "hero": {

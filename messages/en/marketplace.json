@@ -1566,7 +1566,76 @@
     "metaTitle": "{name} — Nature sighting",
     "metaFallback": "A nature sighting shared on GainForest.",
     "natureSound": "Nature sound recording",
-    "unidentified": "Unidentified sighting"
+    "unidentified": "Unidentified sighting",
+    "suggestions": {
+      "title": "Species suggestions",
+      "description": "Identification proposals from ecological experts. The observer can review them before changing this sighting.",
+      "expertFallback": "Community expert",
+      "status": "Awaiting review"
+    }
+  },
+  "labeler": {
+    "meta": {
+      "title": "Observation labeler",
+      "description": "Review recent nature sightings and suggest species identifications."
+    },
+    "eyebrow": "Ecological review",
+    "title": "Observation labeler",
+    "description": "Explore recent and unidentified sightings, inspect their field data, and propose a concrete species name for the observer to review.",
+    "unidentified": "Unidentified",
+    "filters": {
+      "searchLabel": "Search observations",
+      "searchPlaceholder": "Search species, genus, family or place…",
+      "taxonLabel": "Taxon",
+      "allTaxa": "All taxa",
+      "genusLabel": "Genus",
+      "allGenera": "All genera",
+      "mediaLabel": "Evidence type",
+      "allMedia": "All evidence",
+      "photos": "Photos",
+      "audio": "Audio"
+    },
+    "queue": {
+      "unidentified": "Needs identification",
+      "recent": "Recent sightings",
+      "count": "{count, plural, =0 {No observations} =1 {1 observation} other {# observations}}",
+      "ariaLabel": "Observations to review",
+      "loadMore": "Load more observations",
+      "loading": "Loading observations…"
+    },
+    "empty": {
+      "title": "No matching sightings",
+      "description": "Try another taxon, genus or search."
+    },
+    "review": {
+      "selectPrompt": "Select a sighting to inspect its evidence and field data.",
+      "currentIdentification": "Current identification",
+      "openObservation": "Open observation page",
+      "family": "Family",
+      "genus": "Genus",
+      "observer": "Observer",
+      "communityObserver": "Community observer",
+      "observed": "Observed"
+    },
+    "proposal": {
+      "title": "Suggest an identification",
+      "description": "Your suggestion will appear on the sighting and notify its observer. It will not replace the current name automatically.",
+      "scientificName": "Scientific name",
+      "scientificPlaceholder": "e.g. Panthera onca",
+      "commonNameOptional": "Common name (optional)",
+      "commonPlaceholder": "e.g. Jaguar",
+      "noteOptional": "Evidence note (optional)",
+      "notePlaceholder": "Explain the visible traits or context supporting this identification.",
+      "recordSuggestion": "Species suggestion",
+      "commonName": "Common name",
+      "noteLabel": "Evidence note",
+      "submit": "Send suggestion",
+      "submitting": "Sending suggestion…",
+      "success": "Suggested {name}. The observer will be notified.",
+      "error": "The suggestion could not be sent. Please try again.",
+      "signInDescription": "Sign in to submit suggestions from your account. Anyone can still explore the review queue.",
+      "signIn": "Sign in to suggest"
+    }
   },
   "manageProjects": {
     "hero": {

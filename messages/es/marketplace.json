@@ -1566,7 +1566,76 @@
     "metaTitle": "{name} — Avistamiento de naturaleza",
     "metaFallback": "Un avistamiento de naturaleza compartido en GainForest.",
     "natureSound": "Grabación de sonido de la naturaleza",
-    "unidentified": "Avistamiento sin identificar"
+    "unidentified": "Avistamiento sin identificar",
+    "suggestions": {
+      "title": "Sugerencias de especies",
+      "description": "Propuestas de identificación de expertos ecológicos. La persona observadora puede revisarlas antes de cambiar este avistamiento.",
+      "expertFallback": "Experto de la comunidad",
+      "status": "Pendiente de revisión"
+    }
+  },
+  "labeler": {
+    "meta": {
+      "title": "Etiquetador de observaciones",
+      "description": "Revisa avistamientos recientes y sugiere identificaciones de especies."
+    },
+    "eyebrow": "Revisión ecológica",
+    "title": "Etiquetador de observaciones",
+    "description": "Explora avistamientos recientes y sin identificar, revisa sus datos de campo y propón un nombre de especie concreto.",
+    "unidentified": "Sin identificar",
+    "filters": {
+      "searchLabel": "Buscar observaciones",
+      "searchPlaceholder": "Buscar especie, género, familia o lugar…",
+      "taxonLabel": "Taxón",
+      "allTaxa": "Todos los taxones",
+      "genusLabel": "Género",
+      "allGenera": "Todos los géneros",
+      "mediaLabel": "Tipo de evidencia",
+      "allMedia": "Toda la evidencia",
+      "photos": "Fotos",
+      "audio": "Audio"
+    },
+    "queue": {
+      "unidentified": "Necesita identificación",
+      "recent": "Avistamientos recientes",
+      "count": "{count, plural, =0 {Sin observaciones} =1 {1 observación} other {# observaciones}}",
+      "ariaLabel": "Observaciones para revisar",
+      "loadMore": "Cargar más observaciones",
+      "loading": "Cargando observaciones…"
+    },
+    "empty": {
+      "title": "No hay avistamientos coincidentes",
+      "description": "Prueba otro taxón, género o búsqueda."
+    },
+    "review": {
+      "selectPrompt": "Selecciona un avistamiento para revisar su evidencia y datos de campo.",
+      "currentIdentification": "Identificación actual",
+      "openObservation": "Abrir página de la observación",
+      "family": "Familia",
+      "genus": "Género",
+      "observer": "Observador",
+      "communityObserver": "Observador de la comunidad",
+      "observed": "Observado"
+    },
+    "proposal": {
+      "title": "Sugerir una identificación",
+      "description": "Tu sugerencia aparecerá en el avistamiento y notificará a quien lo observó. No reemplazará el nombre actual automáticamente.",
+      "scientificName": "Nombre científico",
+      "scientificPlaceholder": "p. ej., Panthera onca",
+      "commonNameOptional": "Nombre común (opcional)",
+      "commonPlaceholder": "p. ej., Jaguar",
+      "noteOptional": "Nota de evidencia (opcional)",
+      "notePlaceholder": "Explica los rasgos visibles o el contexto que apoyan esta identificación.",
+      "recordSuggestion": "Sugerencia de especie",
+      "commonName": "Nombre común",
+      "noteLabel": "Nota de evidencia",
+      "submit": "Enviar sugerencia",
+      "submitting": "Enviando sugerencia…",
+      "success": "Sugeriste {name}. Se notificará al observador.",
+      "error": "No se pudo enviar la sugerencia. Inténtalo de nuevo.",
+      "signInDescription": "Inicia sesión para enviar sugerencias desde tu cuenta. Cualquiera puede explorar la cola de revisión.",
+      "signIn": "Iniciar sesión para sugerir"
+    }
   },
   "manageProjects": {
     "hero": {

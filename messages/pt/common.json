@@ -114,6 +114,7 @@
       "myProfile": "Perfil",
       "feed": "Novidades",
       "taina": "Tainá",
+      "labeler": "Identificação",
       "globe": "Globo",
       "audiomoth": "AudioMoth",
       "identifications": "Identificações"
@@ -1034,10 +1035,11 @@
     "ariaLabel": "Notificações",
     "unreadAria": "Notificações — {count} não lidas",
     "empty": "Ainda não há notificações",
-    "emptyHint": "Curtidas e comentários nos seus registros aparecem aqui.",
+    "emptyHint": "Curtidas, comentários e sugestões de espécies nos seus registros aparecem aqui.",
     "someone": "Alguém",
     "likedYour": "curtiu sua {subject}",
     "commentedYour": "comentou na sua {subject}",
+    "identifiedYour": "sugeriu uma identificação para sua {subject}",
     "subject": {
       "observation": "observação",
       "project": "projeto",

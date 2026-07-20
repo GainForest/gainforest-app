@@ -114,6 +114,7 @@
       "myProfile": "Profil",
       "feed": "Aktivitas",
       "taina": "Tainá",
+      "labeler": "Pelabel",
       "globe": "Bola Dunia",
       "audiomoth": "AudioMoth",
       "identifications": "Identifikasi"
@@ -1034,10 +1035,11 @@
     "ariaLabel": "Notifikasi",
     "unreadAria": "Notifikasi — {count} belum dibaca",
     "empty": "Belum ada notifikasi",
-    "emptyHint": "Suka dan komentar pada catatan Anda akan muncul di sini.",
+    "emptyHint": "Suka, komentar, dan saran spesies pada catatan Anda akan muncul di sini.",
     "someone": "Seseorang",
     "likedYour": "menyukai {subject} Anda",
     "commentedYour": "mengomentari {subject} Anda",
+    "identifiedYour": "menyarankan identifikasi untuk {subject} Anda",
     "subject": {
       "observation": "observasi",
       "project": "proyek",

@@ -14,7 +14,7 @@
 import { useRef, useState } from "react";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
-import { AtSignIcon, BellIcon, HeartIcon, MessageCircleIcon, UserIcon } from "lucide-react";
+import { AtSignIcon, BellIcon, HeartIcon, MessageCircleIcon, MicroscopeIcon, UserIcon } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
 
 import type { AuthSession } from "../_lib/auth";
@@ -131,7 +131,9 @@ function NotificationRow({
       ? t("likedYour", { subject: subjectLabel })
       : item.kind === "mention"
         ? t("mentionedYou")
-        : t("commentedYour", { subject: subjectLabel });
+        : item.kind === "identification"
+          ? t("identifiedYour", { subject: subjectLabel })
+          : t("commentedYour", { subject: subjectLabel });
 
   const body = (
     <div
@@ -155,6 +157,8 @@ function NotificationRow({
             <HeartIcon className="size-2.5 fill-current" aria-hidden />
           ) : item.kind === "mention" ? (
             <AtSignIcon className="size-2.5" aria-hidden />
+          ) : item.kind === "identification" ? (
+            <MicroscopeIcon className="size-2.5" aria-hidden />
           ) : (
             <MessageCircleIcon className="size-2.5" aria-hidden />
           )}

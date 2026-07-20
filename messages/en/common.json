@@ -114,6 +114,7 @@
       "myProfile": "Profile",
       "feed": "Feed",
       "taina": "Tainá",
+      "labeler": "Labeler",
       "globe": "Globe",
       "audiomoth": "AudioMoth",
       "identifications": "Identifications"
@@ -1034,10 +1035,11 @@
     "ariaLabel": "Notifications",
     "unreadAria": "Notifications — {count} unread",
     "empty": "No notifications yet",
-    "emptyHint": "Likes and comments on your records show up here.",
+    "emptyHint": "Likes, comments, and species suggestions on your records show up here.",
     "someone": "Someone",
     "likedYour": "liked your {subject}",
     "commentedYour": "commented on your {subject}",
+    "identifiedYour": "suggested an identification for your {subject}",
     "subject": {
       "observation": "observation",
       "project": "project",

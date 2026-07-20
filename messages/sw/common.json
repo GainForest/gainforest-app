@@ -114,6 +114,7 @@
       "myProfile": "Wasifu",
       "feed": "Matukio",
       "taina": "Tainá",
+      "labeler": "Uwekaji lebo",
       "globe": "Dunia",
       "audiomoth": "AudioMoth",
       "identifications": "Vitambulisho"
@@ -1034,10 +1035,11 @@
     "ariaLabel": "Arifa",
     "unreadAria": "Arifa — {count} ambazo hazijasomwa",
     "empty": "Bado hakuna arifa",
-    "emptyHint": "Kupenda na maoni kwenye rekodi zako yataonekana hapa.",
+    "emptyHint": "Kupenda, maoni na mapendekezo ya spishi kwenye rekodi zako yataonekana hapa.",
     "someone": "Mtu fulani",
     "likedYour": "amependa {subject} yako",
     "commentedYour": "ametoa maoni kwenye {subject} yako",
+    "identifiedYour": "amependekeza utambulisho kwa {subject} yako",
     "subject": {
       "observation": "uchunguzi",
       "project": "mradi",

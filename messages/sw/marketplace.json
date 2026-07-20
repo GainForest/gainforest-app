@@ -1566,7 +1566,76 @@
     "metaTitle": "{name} — Uchunguzi wa asili",
     "metaFallback": "Uchunguzi wa asili ulioshirikiwa kwenye GainForest.",
     "natureSound": "Rekodi ya sauti ya asili",
-    "unidentified": "Uchunguzi usiotambulika"
+    "unidentified": "Uchunguzi usiotambulika",
+    "suggestions": {
+      "title": "Mapendekezo ya spishi",
+      "description": "Mapendekezo ya utambulisho kutoka kwa wataalamu wa ikolojia. Mchunguzi anaweza kuyakagua kabla ya kubadilisha uchunguzi huu.",
+      "expertFallback": "Mtaalamu wa jamii",
+      "status": "Inasubiri ukaguzi"
+    }
+  },
+  "labeler": {
+    "meta": {
+      "title": "Kiweka lebo cha uchunguzi",
+      "description": "Kagua uchunguzi wa hivi karibuni na upendekeze utambulisho wa spishi."
+    },
+    "eyebrow": "Ukaguzi wa ikolojia",
+    "title": "Kiweka lebo cha uchunguzi",
+    "description": "Chunguza uchunguzi wa hivi karibuni na usiotambulika, kagua data za uga, na upendekeze jina mahususi la spishi.",
+    "unidentified": "Haujatambulika",
+    "filters": {
+      "searchLabel": "Tafuta uchunguzi",
+      "searchPlaceholder": "Tafuta spishi, jenasi, familia au mahali…",
+      "taxonLabel": "Taksoni",
+      "allTaxa": "Taksoni zote",
+      "genusLabel": "Jenasi",
+      "allGenera": "Jenasi zote",
+      "mediaLabel": "Aina ya ushahidi",
+      "allMedia": "Ushahidi wote",
+      "photos": "Picha",
+      "audio": "Sauti"
+    },
+    "queue": {
+      "unidentified": "Inahitaji utambulisho",
+      "recent": "Uchunguzi wa hivi karibuni",
+      "count": "{count, plural, =0 {Hakuna uchunguzi} =1 {Uchunguzi 1} other {Uchunguzi #}}",
+      "ariaLabel": "Uchunguzi wa kukaguliwa",
+      "loadMore": "Pakia uchunguzi zaidi",
+      "loading": "Inapakia uchunguzi…"
+    },
+    "empty": {
+      "title": "Hakuna uchunguzi unaolingana",
+      "description": "Jaribu taksoni, jenasi au utafutaji mwingine."
+    },
+    "review": {
+      "selectPrompt": "Chagua uchunguzi ili kukagua ushahidi na data zake za uga.",
+      "currentIdentification": "Utambulisho wa sasa",
+      "openObservation": "Fungua ukurasa wa uchunguzi",
+      "family": "Familia",
+      "genus": "Jenasi",
+      "observer": "Mchunguzi",
+      "communityObserver": "Mchunguzi wa jamii",
+      "observed": "Ilionekana"
+    },
+    "proposal": {
+      "title": "Pendekeza utambulisho",
+      "description": "Pendekezo lako litaonekana kwenye uchunguzi na kumjulisha mchunguzi. Halitabadilisha jina la sasa moja kwa moja.",
+      "scientificName": "Jina la kisayansi",
+      "scientificPlaceholder": "mf. Panthera onca",
+      "commonNameOptional": "Jina la kawaida (si lazima)",
+      "commonPlaceholder": "mf. Jaguar",
+      "noteOptional": "Maelezo ya ushahidi (si lazima)",
+      "notePlaceholder": "Eleza sifa zinazoonekana au muktadha unaounga mkono utambulisho huu.",
+      "recordSuggestion": "Pendekezo la spishi",
+      "commonName": "Jina la kawaida",
+      "noteLabel": "Maelezo ya ushahidi",
+      "submit": "Tuma pendekezo",
+      "submitting": "Inatuma pendekezo…",
+      "success": "Umependekeza {name}. Mchunguzi atajulishwa.",
+      "error": "Pendekezo halikuweza kutumwa. Tafadhali jaribu tena.",
+      "signInDescription": "Ingia ili kutuma mapendekezo kutoka kwenye akaunti yako. Mtu yeyote bado anaweza kuchunguza foleni ya ukaguzi.",
+      "signIn": "Ingia ili kupendekeza"
+    }
   },
   "manageProjects": {
     "hero": {

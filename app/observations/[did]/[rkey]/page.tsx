@@ -24,6 +24,7 @@ import { RecordLocationMap } from "../../../_components/RecordLocationMap";
 import { RecordEngagement } from "../../../_components/RecordEngagement";
 import { ObservationMediaViewer, type ObservationViewerImage } from "./_components/ObservationMediaViewer";
 import { ObservationDetailsSection } from "./_components/ObservationDetailsSection";
+import { SpeciesSuggestions } from "./_components/SpeciesSuggestions";
 
 export const revalidate = 60;
 
@@ -154,6 +155,7 @@ export default async function ObservationDetailPage({ params }: { params: Observ
             <div className="mt-4 border-t border-border-soft pt-3">
               <RecordEngagement subjectUri={record.atUri} />
             </div>
+            <SpeciesSuggestions subjectUri={record.atUri} />
           </div>
 
           <aside className="min-w-0 space-y-5">
