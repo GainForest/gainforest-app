@@ -85,6 +85,11 @@ export default defineConfig({
     : undefined,
   projects: [
     {
+      name: "test-registry",
+      testMatch: /test-registry\.spec\.ts/,
+      use: { ...desktopChrome },
+    },
+    {
       name: "auth.setup",
       testMatch: /auth\.setup\.ts/,
     },

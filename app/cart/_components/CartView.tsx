@@ -117,7 +117,7 @@ function CartItemRow({ item }: { item: CartItem }) {
   );
 }
 
-export function CartView() {
+export function CartView({ onCheckout }: { onCheckout?: () => void } = {}) {
   const t = useTranslations("cart.cartPage");
   const router = useRouter();
   const { hydrated, items, count, subtotalUsd } = useCart();
@@ -174,7 +174,7 @@ export function CartView() {
             size="lg"
             className="mt-4 h-12 w-full"
             disabled={!canCheckout}
-            onClick={() => router.push("/checkout")}
+            onClick={() => onCheckout ? onCheckout() : router.push("/checkout")}
           >
             {t("checkout")}
           </Button>

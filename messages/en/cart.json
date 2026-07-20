@@ -90,5 +90,35 @@
     "exploreMore": "Explore more projects",
     "emptyTitle": "Your cart is empty",
     "singleApprovalNote": "Your wallet will ask for a single approval covering the whole total. GainForest then forwards each donation to its recipient."
+  },
+  "testRegistry": {
+    "eyebrow": "UI experiences",
+    "title": "UI experience registry",
+    "description": "Safe, reusable previews of real GainForest flows, powered by mock data and blocked side effects.",
+    "availableTitle": "Available experiences",
+    "availableDescription": "Choose a flow to open its safe, fully interactive preview.",
+    "parityTitle": "Parity contract",
+    "parityBody": "Developers and AI agents: every experience here must render the production component itself. Mock only data and side effects—never copy or fork the interface. Any UI or UX change must affect the mock and live experience in the same way.",
+    "indexingNote": "This route is public but excluded from search engines. Never place secrets or real personal data here.",
+    "scenarioLabel": "Registered experience",
+    "experienceTitle": "Donation flow",
+    "experienceDescription": "Walk through the current production donation experience with safe fixture data and no real payment.",
+    "openExperience": "Open experience",
+    "backToRegistry": "Back to registry",
+    "mockBadge": "Mock mode · no payments",
+    "projectPrompt": "Try the complete donation experience",
+    "projectPromptBody": "Choose an amount, review the cart, connect the simulated wallet, and complete a safe preview payment.",
+    "mockProjectTitle": "Cloud Forest Corridor",
+    "mockOrganization": "Canopy Commons",
+    "mockObjectiveOne": "Forest restoration",
+    "mockObjectiveTwo": "Community stewardship",
+    "mockProjectDescription": "Restoring a living corridor between community forests and protected habitat.",
+    "donate": "Donate",
+    "reset": "Reset",
+    "stage": {
+      "project": "Project",
+      "cart": "Cart",
+      "checkout": "Checkout"
+    }
   }
 }

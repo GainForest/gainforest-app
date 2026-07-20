@@ -23,6 +23,8 @@ export default async function robots(): Promise<MetadataRoute.Robots> {
         "/*/manage",
         "/settings",
         "/*/settings",
+        "/_test",
+        "/*/_test",
       ],
     },
     sitemap: `${origin}/sitemap.xml`,

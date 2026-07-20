@@ -110,14 +110,23 @@ type CartContextValue = {
 
 const CartContext = createContext<CartContextValue | null>(null);
 
-export function CartProvider({ children }: { children: React.ReactNode }) {
-  const [hydrated, setHydrated] = useState(false);
+export function CartProvider({
+  children,
+  persistence = "local",
+}: {
+  children: React.ReactNode;
+  /** Memory mode is reserved for side-effect-free UI experiences such as /_test. */
+  persistence?: "local" | "memory";
+}) {
+  const persistent = persistence === "local";
+  const [hydrated, setHydrated] = useState(!persistent);
   const [items, setItems] = useState<CartItem[]>([]);
   const [tipPercent, setTipPercentState] = useState(DEFAULT_TIP_PERCENT);
   // Guard so the storage-event listener doesn't loop on our own writes.
   const lastWriteRef = useRef<string | null>(null);
 
   useEffect(() => {
+    if (!persistent) return;
     try {
       const stored = parseStoredCart(window.localStorage.getItem(STORAGE_KEY));
       setItems(stored.items);
@@ -126,10 +135,10 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       // Private windows can block storage — in-memory cart still works.
     }
     setHydrated(true);
-  }, []);
+  }, [persistent]);
 
   useEffect(() => {
-    if (!hydrated) return;
+    if (!persistent || !hydrated) return;
     const serialized = JSON.stringify({ items, tipPercent } satisfies StoredCart);
     lastWriteRef.current = serialized;
     try {
@@ -137,10 +146,12 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     } catch {
       // Ignore storage write failures.
     }
-  }, [hydrated, items, tipPercent]);
+  }, [persistent, hydrated, items, tipPercent]);
 
-  // Keep multiple tabs in sync.
+  // Keep multiple tabs in sync. Memory-backed mock experiences must never
+  // observe or mutate the visitor's real donation cart.
   useEffect(() => {
+    if (!persistent) return;
     const onStorage = (event: StorageEvent) => {
       if (event.key !== STORAGE_KEY) return;
       if (event.newValue === lastWriteRef.current) return;
@@ -150,7 +161,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     };
     window.addEventListener("storage", onStorage);
     return () => window.removeEventListener("storage", onStorage);
-  }, []);
+  }, [persistent]);
 
   const addItem = useCallback((item: CartItem) => {
     const amountUsd = sanitizeAmount(item.amountUsd);

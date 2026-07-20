@@ -10,7 +10,7 @@ import "./globals.css";
 import { ChromeGate } from "./_components/ChromeGate";
 import { ClientErrorListener } from "./_components/ClientErrorListener";
 import { AccountDrawerProvider } from "./_components/AccountDrawer";
-import { CartProvider } from "./_components/cart/CartProvider";
+import { AppCartProvider } from "./_components/cart/AppCartProvider";
 import { UploadTray } from "./_components/upload-tray/UploadTray";
 import { UploadTrayProvider } from "./_components/upload-tray/upload-tray-context";
 import { isAudioMothUploadTrayFlagEnabled } from "./_lib/audiomoth/feature-flags";
@@ -229,7 +229,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
             <WagmiProvider>
               <ModalProvider>
                 <AccountDrawerProvider>
-                  <CartProvider>
+                  <AppCartProvider>
                     {/* Recording uploads run above the router so they keep
                         going while people navigate the app; the tray is the
                         visible part of that queue. The provider always mounts
@@ -244,7 +244,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
                         tree so inline modal content pushed via pushModal keeps
                         access to the app-level contexts above this line. */}
                     <ModalHost />
-                  </CartProvider>
+                  </AppCartProvider>
                 </AccountDrawerProvider>
               </ModalProvider>
             </WagmiProvider>

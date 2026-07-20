@@ -78,7 +78,20 @@ type CompletedLine = {
   txHash: string;
 };
 
+export type CheckoutSideEffects = "live" | "mock";
+
 const TIP_LINE_KEY = "gainforest-tip";
+const MOCK_RECIPIENT_ADDRESS = "0x1111111111111111111111111111111111111111";
+const MOCK_WALLET_ADDRESS = "0x2222222222222222222222222222222222222222";
+const MOCK_TIP_ADDRESS = "0x3333333333333333333333333333333333333333";
+
+function mockTransactionHash(index: number): string {
+  return `0x${(index + 1).toString(16).padStart(64, "0")}`;
+}
+
+function waitForMock(milliseconds: number): Promise<void> {
+  return new Promise((resolve) => window.setTimeout(resolve, milliseconds));
+}
 
 /**
  * Client-side guards so the checkout can never hang on "Processing…"
@@ -245,7 +258,18 @@ async function signAndSettleBatch(params: {
   return { ok: true, response: raw };
 }
 
-export function CheckoutView({ authSession }: { authSession: AuthSession }) {
+export function CheckoutView({
+  authSession,
+  sideEffects = "live",
+  onBackToCart,
+  onExploreMore,
+}: {
+  authSession: AuthSession;
+  /** Mock mode preserves this component's UI/state machine but blocks every live payment side effect. */
+  sideEffects?: CheckoutSideEffects;
+  onBackToCart?: () => void;
+  onExploreMore?: () => void;
+}) {
   const t = useTranslations("cart.checkoutPage");
   const cart = useCart();
   const { hydrated, items, tipPercent, setTipPercent, removeItem } = cart;
@@ -265,6 +289,11 @@ export function CheckoutView({ authSession }: { authSession: AuthSession }) {
   // Verify each organization's donation wallet once.
   const orgDids = useMemo(() => [...new Set(items.map((item) => item.orgDid))], [items]);
   useEffect(() => {
+    if (sideEffects === "mock") {
+      setRecipients(Object.fromEntries(orgDids.map((orgDid) => [orgDid, { status: "ready", address: MOCK_RECIPIENT_ADDRESS } satisfies RecipientState])));
+      return;
+    }
+
     let cancelled = false;
     for (const orgDid of orgDids) {
       if (recipients[orgDid]) continue;
@@ -288,9 +317,14 @@ export function CheckoutView({ authSession }: { authSession: AuthSession }) {
       cancelled = true;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [orgDids]);
+  }, [orgDids, sideEffects]);
 
   useEffect(() => {
+    if (sideEffects === "mock") {
+      setTipConfig({ status: "ready", enabled: true, address: MOCK_TIP_ADDRESS });
+      return;
+    }
+
     let cancelled = false;
     fetch("/api/tip")
       .then((response) => response.json())
@@ -305,7 +339,7 @@ export function CheckoutView({ authSession }: { authSession: AuthSession }) {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [sideEffects]);
 
   const payableItems = items.filter(
     (item) => itemAmountValid(item) && recipients[item.orgDid]?.status === "ready",
@@ -320,13 +354,22 @@ export function CheckoutView({ authSession }: { authSession: AuthSession }) {
   const hasEnoughBalance = wallet?.balance != null && wallet.balance >= toUsdcUnits(totalUsd);
 
   const handleConnect = async () => {
+    setConnecting(true);
+    setConnectError(null);
+
+    if (sideEffects === "mock") {
+      await waitForMock(350);
+      setWallet({ address: MOCK_WALLET_ADDRESS, balance: toUsdcUnits(500) });
+      setConnecting(false);
+      return;
+    }
+
     const ethereum = getEthereum();
     if (!ethereum) {
       setConnectError(t("noWallet"));
+      setConnecting(false);
       return;
     }
-    setConnecting(true);
-    setConnectError(null);
     try {
       const accounts = await ethereum.request<string[]>({ method: "eth_requestAccounts" });
       const address = accounts[0];
@@ -358,9 +401,7 @@ export function CheckoutView({ authSession }: { authSession: AuthSession }) {
   };
 
   const handleDonate = async () => {
-    if (payingRef.current) return;
-    const ethereum = getEthereum();
-    if (!ethereum || !wallet) return;
+    if (payingRef.current || !wallet) return;
     payingRef.current = true;
     setPhase("paying");
 
@@ -373,6 +414,52 @@ export function CheckoutView({ authSession }: { authSession: AuthSession }) {
 
     const setLine = (key: string, state: LineState) =>
       setLineStates((current) => ({ ...current, [key]: state }));
+
+    if (sideEffects === "mock") {
+      for (const { key } of lines) setLine(key, { phase: "signing" });
+      if (includeTip) setLine(TIP_LINE_KEY, { phase: "signing" });
+      await waitForMock(550);
+
+      for (const { key } of lines) setLine(key, { phase: "processing" });
+      if (includeTip) setLine(TIP_LINE_KEY, { phase: "processing" });
+      await waitForMock(850);
+
+      const mockResults: CompletedLine[] = lines.map(({ item, key }, index) => {
+        const txHash = mockTransactionHash(index);
+        setLine(key, { phase: "done", txHash });
+        removeItem(item.orgDid, item.rkey);
+        return {
+          kind: "donation",
+          title: item.title,
+          orgName: item.orgName,
+          amountUsd: item.amountUsd,
+          txHash,
+        };
+      });
+      if (includeTip) {
+        const txHash = mockTransactionHash(lines.length);
+        setLine(TIP_LINE_KEY, { phase: "done", txHash });
+        mockResults.push({
+          kind: "tip",
+          title: t("tipLineLabel"),
+          orgName: "GainForest",
+          amountUsd: tipUsd,
+          txHash,
+        });
+      }
+
+      setCompleted((current) => [...current, ...mockResults]);
+      payingRef.current = false;
+      setPhase("done");
+      return;
+    }
+
+    const ethereum = getEthereum();
+    if (!ethereum) {
+      payingRef.current = false;
+      setPhase("review");
+      return;
+    }
 
     const results: CompletedLine[] = [];
     let anyFailed = false;
@@ -638,11 +725,17 @@ export function CheckoutView({ authSession }: { authSession: AuthSession }) {
           </div>
         </div>
 
-        <Button asChild className="mt-6 w-full">
-          <Link href="/projects">
+        {onExploreMore ? (
+          <Button className="mt-6 w-full" onClick={onExploreMore}>
             <CompassIcon className="size-4" /> {t("exploreMore")}
-          </Link>
-        </Button>
+          </Button>
+        ) : (
+          <Button asChild className="mt-6 w-full">
+            <Link href="/projects">
+              <CompassIcon className="size-4" /> {t("exploreMore")}
+            </Link>
+          </Button>
+        )}
       </div>
     );
   }
@@ -655,11 +748,17 @@ export function CheckoutView({ authSession }: { authSession: AuthSession }) {
           <ShoppingCartIcon className="size-7" aria-hidden />
         </div>
         <h1 className="text-2xl font-semibold text-foreground">{t("emptyTitle")}</h1>
-        <Button asChild className="mt-2">
-          <Link href="/projects">
+        {onExploreMore ? (
+          <Button className="mt-2" onClick={onExploreMore}>
             <CompassIcon className="size-4" /> {t("exploreMore")}
-          </Link>
-        </Button>
+          </Button>
+        ) : (
+          <Button asChild className="mt-2">
+            <Link href="/projects">
+              <CompassIcon className="size-4" /> {t("exploreMore")}
+            </Link>
+          </Button>
+        )}
       </div>
     );
   }
@@ -668,9 +767,19 @@ export function CheckoutView({ authSession }: { authSession: AuthSession }) {
 
   return (
     <div className="mx-auto w-full max-w-3xl px-4 py-8">
-      <Link href="/cart" className="inline-flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground">
-        <ArrowLeftIcon className="size-4" aria-hidden /> {t("backToCart")}
-      </Link>
+      {onBackToCart ? (
+        <button
+          type="button"
+          onClick={onBackToCart}
+          className="inline-flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
+        >
+          <ArrowLeftIcon className="size-4" aria-hidden /> {t("backToCart")}
+        </button>
+      ) : (
+        <Link href="/cart" className="inline-flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground">
+          <ArrowLeftIcon className="size-4" aria-hidden /> {t("backToCart")}
+        </Link>
+      )}
       <h1 className="mt-3 text-3xl font-semibold text-foreground">{t("title")}</h1>
 
       <div className="mt-4 flex items-center gap-2.5 rounded-2xl border border-primary/20 bg-primary/5 px-4 py-3">

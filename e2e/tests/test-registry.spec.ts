@@ -1,0 +1,91 @@
+import { expect, test } from "@playwright/test";
+
+const FORBIDDEN_DONATION_PATHS = new Set([
+  "/api/checkout",
+  "/api/fund",
+  "/api/tip",
+  "/api/verify-recipient",
+]);
+
+test("donation registry mirrors the production flow without live side effects", async ({ page }) => {
+  const productionCartSnapshot = JSON.stringify({
+    items: [{
+      kind: "project",
+      orgDid: "did:plc:existingcartowner",
+      rkey: "existing-project",
+      title: "Existing production cart item",
+      orgName: "Existing organization",
+      image: null,
+      amountUsd: 12,
+      minUsd: null,
+      maxUsd: null,
+    }],
+    tipPercent: 17,
+  });
+  await page.addInitScript(({ cartSnapshot }) => {
+    window.localStorage.setItem("gainforest.donation-cart.v1", cartSnapshot);
+    Reflect.set(window, "__testRegistryWalletCalls", []);
+    Reflect.set(window, "ethereum", {
+      request: async ({ method }: { method: string }) => {
+        const calls = Reflect.get(window, "__testRegistryWalletCalls") as string[];
+        calls.push(method);
+        throw new Error(`The mock registry called the live wallet method ${method}`);
+      },
+    });
+  }, { cartSnapshot: productionCartSnapshot });
+
+  const forbiddenRequests: string[] = [];
+  page.on("request", (request) => {
+    const pathname = new URL(request.url()).pathname;
+    if (FORBIDDEN_DONATION_PATHS.has(pathname)) {
+      forbiddenRequests.push(`${request.method()} ${pathname}`);
+    }
+  });
+
+  const response = await page.goto("/_test");
+  expect(response?.headers()["x-robots-tag"]).toContain("noindex");
+  expect(response?.headers()["cache-control"]).toContain("no-store");
+  await expect(page.locator('meta[name="robots"]')).toHaveAttribute("content", /noindex/i);
+  await expect(page.getByRole("heading", { name: "UI experience registry" })).toBeVisible();
+  await expect(page.getByText("Parity contract", { exact: true })).toBeVisible();
+  await expect(page.getByText(/Developers and AI agents:/)).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Donation flow" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Donate", exact: true })).toHaveCount(0);
+
+  await page.locator('a[href="/_test/donation-flow"]').click();
+  await expect(page).toHaveURL(/\/_test\/donation-flow$/);
+  await expect(page.getByRole("heading", { name: "Donation flow", exact: true }).first()).toBeVisible();
+  await expect(page.getByText("Parity contract", { exact: true })).toBeVisible();
+
+  const experienceResponse = await page.request.get("/_test/donation-flow");
+  expect(experienceResponse.headers()["x-robots-tag"]).toContain("noindex");
+  expect(experienceResponse.headers()["cache-control"]).toContain("no-store");
+
+  await page.getByRole("button", { name: "Donate", exact: true }).click();
+  await expect(page.getByRole("heading", { name: "Support this project" }).first()).toBeVisible();
+  await page.getByRole("button", { name: "Add to cart" }).click();
+
+  await expect(page.getByRole("heading", { name: "Cart", exact: true })).toBeVisible();
+  await page.getByRole("button", { name: "Check out" }).click();
+
+  await expect(page.getByRole("heading", { name: "Checkout", exact: true })).toBeVisible();
+  await page.getByRole("button", { name: "Connect wallet" }).click();
+  await expect(page.getByRole("button", { name: /Donate \$27\.50 now/ })).toBeEnabled();
+  await page.getByRole("button", { name: /Donate \$27\.50 now/ }).click();
+
+  await expect(page.getByText("Thank you", { exact: true })).toBeVisible({ timeout: 10_000 });
+  await expect(page.getByText("Your $27.50 in donations was completed successfully.")).toBeVisible();
+
+  const safetyState = await page.evaluate(() => ({
+    cart: window.localStorage.getItem("gainforest.donation-cart.v1"),
+    walletCalls: Reflect.get(window, "__testRegistryWalletCalls") as string[],
+  }));
+  expect(safetyState.cart).toBe(productionCartSnapshot);
+  expect(safetyState.walletCalls).toEqual([]);
+  expect(forbiddenRequests).toEqual([]);
+
+  const robotsResponse = await page.request.get("/robots.txt");
+  const robotsText = await robotsResponse.text();
+  expect(robotsText).toContain("Disallow: /_test");
+  expect(robotsText).toContain("Disallow: /*/_test");
+});
