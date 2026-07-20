@@ -11,16 +11,17 @@ import {
   Loader2Icon,
   ShieldCheckIcon,
 } from "lucide-react";
+import { AdminOnlyIndicator } from "@/app/_components/AdminOnlyIndicator";
 import { formatCgsErrorMessage } from "@/app/_lib/cgs-errors";
-import { RECOGNITION_BADGE_KEYS, type RecognitionBadgeKey } from "@/app/_lib/recognition-badges";
+import { MANUAL_RECOGNITION_BADGE_KEYS, type ManualRecognitionBadgeKey } from "@/app/_lib/recognition-badges";
 import { cn } from "@/lib/utils";
-import { RECOGNITION_BADGE_ICONS } from "./RecognitionBadges";
+import { recognitionBadgeIcon } from "./RecognitionBadges";
 
 type Props = {
   did: string;
   accountName: string;
   initialTestFlagged: boolean;
-  initialAwarded: RecognitionBadgeKey[];
+  initialAwarded: ManualRecognitionBadgeKey[];
 };
 
 /**
@@ -39,9 +40,9 @@ export function StewardTools({ did, accountName, initialTestFlagged, initialAwar
   const [open, setOpen] = useState(false);
   const [flagged, setFlagged] = useState(initialTestFlagged);
   const [confirming, setConfirming] = useState(false);
-  const [awarded, setAwarded] = useState<Set<RecognitionBadgeKey>>(new Set(initialAwarded));
+  const [awarded, setAwarded] = useState<Set<ManualRecognitionBadgeKey>>(new Set(initialAwarded));
   const [busyTest, setBusyTest] = useState(false);
-  const [busyBadge, setBusyBadge] = useState<RecognitionBadgeKey | null>(null);
+  const [busyBadge, setBusyBadge] = useState<ManualRecognitionBadgeKey | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   async function toggleTest(next: boolean) {
@@ -65,7 +66,7 @@ export function StewardTools({ did, accountName, initialTestFlagged, initialAwar
     }
   }
 
-  async function toggleBadge(key: RecognitionBadgeKey, next: boolean) {
+  async function toggleBadge(key: ManualRecognitionBadgeKey, next: boolean) {
     setBusyBadge(key);
     setError(null);
     try {
@@ -103,6 +104,7 @@ export function StewardTools({ did, accountName, initialTestFlagged, initialAwar
           <ShieldCheckIcon className="size-4" />
         </span>
         <span className="min-w-0 flex-1 truncate text-sm font-medium text-foreground">{t("title")}</span>
+        <AdminOnlyIndicator className="text-muted-foreground" />
 
         {/* At-a-glance status: hidden flag + awarded badge icons. */}
         <span className="flex items-center gap-1.5">
@@ -114,8 +116,8 @@ export function StewardTools({ did, accountName, initialTestFlagged, initialAwar
               <EyeOffIcon className="size-3.5" />
             </span>
           ) : null}
-          {RECOGNITION_BADGE_KEYS.filter((key) => awarded.has(key)).map((key) => {
-            const Icon = RECOGNITION_BADGE_ICONS[key];
+          {MANUAL_RECOGNITION_BADGE_KEYS.filter((key) => awarded.has(key)).map((key) => {
+            const Icon = recognitionBadgeIcon(key);
             return (
               <span
                 key={key}
@@ -194,8 +196,8 @@ export function StewardTools({ did, accountName, initialTestFlagged, initialAwar
           <div>
             <p className="mb-2 text-[0.7rem] font-medium uppercase tracking-[0.12em] text-muted-foreground">{t("badges")}</p>
             <div className="flex flex-wrap gap-2">
-              {RECOGNITION_BADGE_KEYS.map((key) => {
-                const Icon = RECOGNITION_BADGE_ICONS[key];
+              {MANUAL_RECOGNITION_BADGE_KEYS.map((key) => {
+                const Icon = recognitionBadgeIcon(key);
                 const isAwarded = awarded.has(key);
                 const busy = busyBadge === key;
                 return (

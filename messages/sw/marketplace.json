@@ -17,8 +17,8 @@
   },
   "explore": {
     "metadata": {
-      "title": "Gundua vyeti — Miradi Iliyothibitishwa ya Athari ya Urejeshaji",
-      "description": "Vinjari vyeti vilivyothibitishwa vya athari za mazingira kutoka kwa watunzaji wa asili duniani kote. Chuja kwa nchi, shirika na eneo la athari."
+      "title": "Gundua vyeti",
+      "description": "Vinjari rekodi za mazingira kutoka kwa walezi wa asili duniani kote, zikiwa na picha, maeneo, na ushahidi nyuma ya kila cheti."
     },
     "structuredData": {
       "name": "Chunguza vyeti",
@@ -117,8 +117,8 @@
   },
   "organizations": {
     "metadata": {
-      "title": "Mashirika — GainForest",
-      "description": "Vinjari mashirika ya watunzaji wa asili yanayounda athari ya mazingira iliyothibitishwa na GainForest."
+      "title": "Mashirika",
+      "description": "Vinjari mashirika ya walezi wa asili yanayoshiriki uchunguzi wa uwandani, miradi, na ushahidi kupitia GainForest."
     },
     "hero": {
       "imageAltLight": "Msitu wa milimani wenye ukungu wakati wa macheo",
@@ -268,7 +268,7 @@
   },
   "bioblitz": {
     "metadata": {
-      "title": "Changamoto ya BioBlitz ya Wiki — GainForest",
+      "title": "Changamoto ya kila wiki ya BioBlitz",
       "description": "Toka nje, piga picha viumbe hai, na ongeza uoni wako. Kila wiki, mkusanyaji bora na picha bora hushinda zawadi."
     },
     "banner": {
@@ -402,7 +402,13 @@
       "pending": "Itatangazwa",
       "compact": "Karibuni",
       "mostSubmitted": "Zilizowasilishwa zaidi",
-      "mostLiked": "Zilizopendwa zaidi"
+      "mostLiked": "Zilizopendwa zaidi",
+      "award": {
+        "action": "Toa beji za washindi",
+        "actionMissing": "Toa beji zilizosalia",
+        "done": "Beji za washindi zimetolewa",
+        "error": "Imeshindikana kutoa beji. Jaribu tena."
+      }
     },
     "map": {
       "title": "Uchunguzi wa wiki",
@@ -539,7 +545,7 @@
   },
   "grants": {
     "metadata": {
-      "title": "Ruzuku — GainForest",
+      "title": "Ruzuku",
       "description": "Omba programu za ruzuku zinazofadhili uhuru wa data na maamuzi kwa jamii zinazotegemea asili."
     },
     "hero": {
@@ -570,6 +576,7 @@
         }
       },
       "apply": "Omba kwa Mbofyo Mmoja",
+      "details": "Soma maelezo ya ruzuku",
       "appliedTitle": "Maombi yametumwa",
       "appliedNote": "Maombi yako kwa {project} sasa yamechapishwa kwenye mlisho.",
       "postText": "Ninaomba ruzuku ya Kurudisha Uasilia kwenye Wavuti kwa mradi wangu \"{project}\" kwa ajili ya uhuru wa data na maamuzi. 🌱"
@@ -891,8 +898,8 @@
   },
   "projects": {
     "metadata": {
-      "title": "Gundua Miradi — Kazi Iliyothibitishwa ya Athari ya Urejeshaji",
-      "description": "Vinjari miradi — kila moja ni kazi inayolenga yenye lengo wazi, ratiba ya muda, na matokeo yanayotarajiwa."
+      "title": "Miradi ya mazingira — ushahidi wa uwandani na rekodi za athari",
+      "description": "Vinjari miradi ya jamii na mashirika yenye maeneo, masasisho, uchunguzi, na ushahidi wa kazi ya urejeshaji."
     },
     "hero": {
       "eyebrow": "Gundua miradi",
@@ -903,7 +910,46 @@
     "search": {
       "ariaLabel": "Tafuta miradi",
       "placeholder": "Tafuta miradi kwa jina au neno muhimu",
-      "sortAriaLabel": "Panga miradi"
+      "sortAriaLabel": "Panga miradi",
+      "action": "Tafuta"
+    },
+    "categories": {
+      "eyebrow": "Gundua kwa kuvutiwa",
+      "title": "Gundua aina za miradi",
+      "description": "Anza na mada, kisha gundua watu na maeneo yanayoifanya iwe halisi.",
+      "items": {
+        "all": "Miradi yote",
+        "forests": "Misitu na miti",
+        "biodiversity": "Bioanuwai",
+        "foodWater": "Chakula, maji na udongo",
+        "communities": "Jamii",
+        "climate": "Ustahimilivu wa tabianchi"
+      }
+    },
+    "featured": {
+      "eyebrow": "Miradi teule",
+      "title": "Hadithi za kuanzia",
+      "description": "Uteuzi wa miradi iliyoandikwa vizuri kutoka kwa wasimamizi wa mazingira duniani kote.",
+      "badge": "Teule",
+      "action": "Gundua mradi",
+      "previous": "Miradi teule iliyotangulia",
+      "next": "Miradi teule inayofuata",
+      "manage": {
+        "add": "Teua mradi huu",
+        "remove": "Ondoa kwenye miradi teule",
+        "error": "Imeshindikana kusasisha miradi teule. Tafadhali jaribu tena."
+      }
+    },
+    "support": {
+      "eyebrow": "Iko wazi kwa msaada",
+      "title": "Saidia kazi nzuri ikue",
+      "description": "Saidia miradi inayokaribisha michango kutoka kwa jamii zao."
+    },
+    "catalog": {
+      "eyebrow": "Gundua miradi",
+      "title": "Gundua miradi yote",
+      "description": "Gundua miradi katika aina hii.",
+      "count": "{count, plural, one {Mradi # wa kugundua} other {Miradi # ya kugundua}}"
     },
     "view": {
       "cards": "Kadi",
@@ -958,6 +1004,7 @@
       "showDetails": "Onyesha maelezo",
       "loading": "Inapakia miradi",
       "donate": "Changia",
+      "gainforestBadge": "Changia kwenye GainForest",
       "acceptsDonations": "Hupokea michango",
       "openForSupport": "Iko wazi kwa msaada",
       "donationSummary": "{amount} kutoka kwa {donors, plural, one {mchangiaji #} other {wachangiaji #}}",
@@ -992,7 +1039,7 @@
   },
   "browseGrid": {
     "heading": "Njia za kugundua",
-    "description": "Njia nne za kuingia kwenye kazi ya GainForest, zilizoundwa kwa wafadhili, watunzaji na timu za nyanjani.",
+    "description": "Njia za kuchunguza kazi ya GainForest, kwa wachunguzi, walezi, na timu za uwandani.",
     "cards": {
       "bumicerts": {
         "label": "Miradi iliyothibitishwa",
@@ -1552,6 +1599,15 @@
       "colSighting": "Uchunguzi",
       "colObserver": "Mwangalizi",
       "colDate": "Tarehe"
+    },
+    "metadata": {
+      "title": "Vivutio vya asili",
+      "description": "Gundua vivutio vya asili kwenye GainForest vyenye picha za uwandani, rekodi za sauti, majina ya spishi, na maeneo kutoka kazi halisi ya uwandani."
+    },
+    "view": {
+      "compact": "Fupi",
+      "comfortable": "Kawaida",
+      "density": "Msongamano wa kadi"
     }
   },
   "manageProjectCerts": {
@@ -1676,6 +1732,12 @@
     "title": "Dunia",
     "subtitle": "Mashirika na maeneo ya miradi yao kwenye Dunia hai ya 3D.",
     "viewOnGlobe": "Tazama kwenye Dunia",
+    "tabs": {
+      "details": "Mashirika",
+      "layers": "Tabaka",
+      "popup": "Fungua kama kidirisha kinachoelea",
+      "dock": "Bandika pembeni"
+    },
     "panel": {
       "searchPlaceholder": "Tafuta mashirika…",
       "treeFilter": "Data ya miti",
@@ -1730,6 +1792,7 @@
         "wetland": "Ardhi oevu",
         "mangroves": "Mikoko"
       },
+      "visibleDetails": "Kwenye ramani",
       "visibleNow": "{count, plural, one {tabaka # kwenye ramani} other {tabaka # kwenye ramani}}",
       "flyTo": "Kuza hadi {name}",
       "hide": "Ficha {name}"

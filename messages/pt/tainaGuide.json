@@ -29,19 +29,30 @@
   "guides": {
     "wallet": {
       "question": "Como recebo doações?",
-      "title": "Configure uma carteira para receber doações",
-      "intro": "As doações vão para uma carteira vinculada à sua conta. Não precisa entender de cripto — dá para criar uma só com seu e-mail.",
+      "title": "Configure a carteira de doações da sua organização",
+      "intro": "As doações vão para uma carteira compartilhada que pertence à sua organização. A pessoa proprietária a cria em segundos com uma chave de acesso (Face ID ou impressão digital) — sem precisar de experiência com cripto.",
       "steps": {
-        "open": { "title": "Abra seu projeto", "body": "Vá em Meus projetos e abra o projeto que deve receber apoio." },
-        "enable": { "title": "Clique em “Enable Donations”", "body": "Na página do projeto você verá o cartão de apoio à direita. Clique em Enable Donations." },
-        "addWallet": { "title": "Adicione uma carteira de doações", "body": "Na janela de configurações de doação, clique em Add a donation wallet." },
-        "signIn": { "title": "Entre — a carteira é criada para você", "body": "Continue com sua conta Bluesky ou e-mail e uma carteira segura é criada em segundos. Já tem uma carteira cripto? Também dá para conectá-la." },
-        "settings": { "title": "Gerencie carteiras quando quiser", "body": "Todas as suas carteiras vinculadas ficam em Configurações → Linked Wallets." }
+        "open": {
+          "title": "Abra seu projeto",
+          "body": "Vá em Meus projetos e abra o projeto que deve receber apoio."
+        },
+        "enable": {
+          "title": "Clique em “Enable Donations”",
+          "body": "Na página do projeto você verá o cartão de apoio à direita. Clique em Enable Donations."
+        },
+        "addWallet": {
+          "title": "Crie a carteira da organização",
+          "body": "Na janela de Configurações de doação, clique em Criar carteira com chave de acesso e confirme com Face ID, impressão digital ou uma chave de segurança. Depois, outros membros da organização podem adicionar suas próprias chaves de acesso."
+        },
+        "passkeys": {
+          "title": "Sua carteira está pronta",
+          "body": "Seu projeto pode aceitar doações assim que a carteira existe. A janela da carteira mostra o endereço e todas as pessoas que podem aprovar pagamentos. Outros membros da sua organização podem abri-la e adicionar a própria chave de acesso também."
+        }
       },
       "tour": {
         "open": "Abra o projeto que deve receber doações.",
         "enable": "Clique em Enable Donations no cartão de apoio.",
-        "addWallet": "Clique em Add a donation wallet e entre com Bluesky ou e-mail — pronto!"
+        "addWallet": "Clique em Criar carteira com chave de acesso e confirme com sua chave de acesso — pronto!"
       }
     },
     "createProject": {
@@ -49,13 +60,34 @@
       "title": "Crie seu primeiro projeto",
       "intro": "Um projeto conta a história do seu trabalho e pode receber apoio. O assistente leva uns dois minutos.",
       "steps": {
-        "start": { "title": "Comece um projeto novo", "body": "Clique em Criar um projeto na barra lateral, ou em Adicionar projeto na página Meus projetos." },
-        "name": { "title": "Dê um nome", "body": "Use um nome claro que as pessoas entendam, mais um resumo de uma linha." },
-        "focus": { "title": "Escolha as áreas de foco", "body": "Selecione os tipos de trabalho que melhor descrevem o projeto — reflorestamento, monitoramento, guardiania…" },
-        "story": { "title": "Adicione datas e história", "body": "Defina uma data de início (pode estar em andamento) e conte o que aconteceu, como o impacto é medido e quem se beneficia." },
-        "people": { "title": "Dê crédito a pessoas e lugares", "body": "Adicione as pessoas e grupos por trás do trabalho e anexe os lugares onde aconteceu." },
-        "photo": { "title": "Adicione uma foto", "body": "Uma boa foto ajuda as pessoas a reconhecer e confiar no seu projeto." },
-        "review": { "title": "Revise e crie", "body": "Confira se está tudo certo e clique em Criar projeto. Ele já pode ser compartilhado e receber apoio." }
+        "start": {
+          "title": "Comece um projeto novo",
+          "body": "Clique em Criar um projeto na barra lateral, ou em Adicionar projeto na página Meus projetos."
+        },
+        "name": {
+          "title": "Dê um nome",
+          "body": "Use um nome claro que as pessoas entendam, mais um resumo de uma linha."
+        },
+        "focus": {
+          "title": "Escolha as áreas de foco",
+          "body": "Selecione os tipos de trabalho que melhor descrevem o projeto — reflorestamento, monitoramento, guardiania…"
+        },
+        "story": {
+          "title": "Adicione datas e história",
+          "body": "Defina uma data de início (pode estar em andamento) e conte o que aconteceu, como o impacto é medido e quem se beneficia."
+        },
+        "people": {
+          "title": "Dê crédito a pessoas e lugares",
+          "body": "Adicione as pessoas e grupos por trás do trabalho e anexe os lugares onde aconteceu."
+        },
+        "photo": {
+          "title": "Adicione uma foto",
+          "body": "Uma boa foto ajuda as pessoas a reconhecer e confiar no seu projeto."
+        },
+        "review": {
+          "title": "Revise e crie",
+          "body": "Confira se está tudo certo e clique em Criar projeto. Ele já pode ser compartilhado e receber apoio."
+        }
       },
       "tour": {
         "start": "Clique em Adicionar projeto para abrir o assistente.",
@@ -67,9 +99,18 @@
       "title": "Editar um projeto",
       "intro": "Você pode mudar tudo em um projeto depois de publicar — nome, história, foto, lugares.",
       "steps": {
-        "myProjects": { "title": "Vá em Meus projetos", "body": "Abra a aba Projetos do seu perfil, ou entre em Gerenciar pelo menu do perfil." },
-        "edit": { "title": "Clique em “Editar projeto”", "body": "Cada cartão de projeto tem um botão de edição." },
-        "save": { "title": "Mude e salve", "body": "Atualize qualquer campo, troque ou remova a foto, e clique em Salvar alterações no final." }
+        "myProjects": {
+          "title": "Vá em Meus projetos",
+          "body": "Abra a aba Projetos do seu perfil, ou entre em Gerenciar pelo menu do perfil."
+        },
+        "edit": {
+          "title": "Clique em “Editar projeto”",
+          "body": "Cada cartão de projeto tem um botão de edição."
+        },
+        "save": {
+          "title": "Mude e salve",
+          "body": "Atualize qualquer campo, troque ou remova a foto, e clique em Salvar alterações no final."
+        }
       },
       "tour": {
         "edit": "Clique em Editar projeto no projeto que você quer mudar.",
@@ -81,9 +122,18 @@
       "title": "Excluir um projeto",
       "intro": "Excluir remove o projeto da sua conta. Não dá para desfazer — mas suas observações nunca são apagadas junto.",
       "steps": {
-        "editor": { "title": "Abra o editor do projeto", "body": "Vá em Meus projetos e clique em Editar projeto — ou abra a página do projeto e procure a seção Gerenciar." },
-        "delete": { "title": "Clique em “Excluir projeto”", "body": "O botão de excluir fica no final do editor." },
-        "confirm": { "title": "Confirme digitando o nome", "body": "Digite o nome exato do projeto para confirmar. Isso não pode ser desfeito." }
+        "editor": {
+          "title": "Abra o editor do projeto",
+          "body": "Vá em Meus projetos e clique em Editar projeto — ou abra a página do projeto e procure a seção Gerenciar."
+        },
+        "delete": {
+          "title": "Clique em “Excluir projeto”",
+          "body": "O botão de excluir fica no final do editor."
+        },
+        "confirm": {
+          "title": "Confirme digitando o nome",
+          "body": "Digite o nome exato do projeto para confirmar. Isso não pode ser desfeito."
+        }
       },
       "tour": {
         "editor": "Primeiro, abra o editor do projeto que você quer remover.",
@@ -96,11 +146,26 @@
       "title": "Enviar e gerenciar observações",
       "intro": "Observações são fotos da natureza com espécie, data e lugar — a evidência por trás do seu trabalho.",
       "steps": {
-        "add": { "title": "Clique em “Adicionar observações”", "body": "Você encontra na barra lateral e no seu perfil." },
-        "photos": { "title": "Solte suas fotos", "body": "Envie até 50 fotos de uma vez — a IA analisa cada uma e sugere o que há nela." },
-        "check": { "title": "Confira e vincule", "body": "Confirme a espécie, a data e o local — e vincule, se quiser, a um dos seus projetos. Também dá para esconder sua localização exata." },
-        "publish": { "title": "Adicione", "body": "Clique em Adicionar e seus registros são publicados na sua conta." },
-        "manage": { "title": "Gerencie depois", "body": "A aba Observações do seu perfil permite buscar, agrupar em conjuntos de dados, ou selecionar e excluir." }
+        "add": {
+          "title": "Clique em “Adicionar observações”",
+          "body": "Você encontra na barra lateral e no seu perfil."
+        },
+        "photos": {
+          "title": "Solte suas fotos",
+          "body": "Envie até 50 fotos de uma vez — a IA analisa cada uma e sugere o que há nela."
+        },
+        "check": {
+          "title": "Confira e vincule",
+          "body": "Confirme a espécie, a data e o local — e vincule, se quiser, a um dos seus projetos. Também dá para esconder sua localização exata."
+        },
+        "publish": {
+          "title": "Adicione",
+          "body": "Clique em Adicionar e seus registros são publicados na sua conta."
+        },
+        "manage": {
+          "title": "Gerencie depois",
+          "body": "A aba Observações do seu perfil permite buscar, agrupar em conjuntos de dados, ou selecionar e excluir."
+        }
       },
       "tour": {
         "add": "Clique em Adicionar observações.",
@@ -113,10 +178,22 @@
       "title": "Participe do desafio BioBlitz",
       "intro": "O BioBlitz é uma corrida semanal e amistosa para registrar a natureza. Fotografe qualquer ser vivo, envie e suba no placar.",
       "steps": {
-        "open": { "title": "Abra o BioBlitz", "body": "Você encontra na barra lateral, em Financiamento." },
-        "register": { "title": "Registre-se para participar", "body": "Um clique só — o registro permite à equipe contar suas entradas e enviar seu prêmio se você ganhar." },
-        "upload": { "title": "Fotografe e envie", "body": "Saia, fotografe qualquer ser vivo e adicione como observações durante a rodada." },
-        "win": { "title": "Ganhe prêmios", "body": "Mais observações e melhor foto ganham prêmios em dinheiro e um selo permanente no perfil — e cada observação continua sua, reutilizável como evidência nos seus projetos." }
+        "open": {
+          "title": "Abra o BioBlitz",
+          "body": "Você encontra na barra lateral, em Financiamento."
+        },
+        "register": {
+          "title": "Registre-se para participar",
+          "body": "Um clique só — o registro permite à equipe contar suas entradas e enviar seu prêmio se você ganhar."
+        },
+        "upload": {
+          "title": "Fotografe e envie",
+          "body": "Saia, fotografe qualquer ser vivo e adicione como observações durante a rodada."
+        },
+        "win": {
+          "title": "Ganhe prêmios",
+          "body": "Mais observações e melhor foto ganham prêmios em dinheiro e um selo permanente no perfil — e cada observação continua sua, reutilizável como evidência nos seus projetos."
+        }
       },
       "tour": {
         "register": "Clique em Registrar para participar — um clique e você está dentro.",

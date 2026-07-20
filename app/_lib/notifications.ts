@@ -1,16 +1,22 @@
 /**
- * Notifications data layer — "who liked or commented on my records".
+ * Notifications data layer — "who liked, commented on, or mentioned me".
  *
  * Everything here is derived from public engagement records on the GainForest
- * hyperindex; nothing is stored server-side. Two sources:
+ * hyperindex; nothing is stored server-side. Three sources:
  *
  *   1. Likes — `app.gainforest.feed.like` (subject is a strongRef).
  *   2. Comments — `app.gainforest.feed.post` reply-posts (a post carrying
  *      `reply.parent`, the Bluesky model). See lexicons/README.md.
+ *   3. Mentions — `app.gainforest.feed.post` records (top-level or reply)
+ *      whose `facets` carry an app.bsky.richtext.facet#mention of the viewer's
+ *      DID (see app/_lib/mentions.ts).
  *
  * The owner DID is embedded in every subject AT-URI, so we scan the most-recent
  * engagement records and keep the ones whose subject belongs to the viewer,
  * dropping the viewer's own likes/comments (you aren't notified about yourself).
+ * Mentions are matched by the tagged DID instead, so anyone tagging the viewer
+ * anywhere notifies them — the indexer can't filter by mention DID, so we scan
+ * the recent posts that have facets at all and match client-side.
  *
  * The only per-user mutable state is a "seen" timestamp stored as
  * `app.gainforest.notification.seen` (rkey "self") on the viewer's PDS, read
@@ -25,6 +31,7 @@
  */
 
 import { indexerQuery } from "./indexer";
+import { mentionDidsOfFacets, type RawIndexedFacet } from "./mentions";
 import { localBumicertHref, localObservationHref } from "./urls";
 import { normaliseRef, parseAtUri, resolvePdsHost } from "./pds";
 
@@ -34,7 +41,7 @@ export const NOTIFICATION_SEEN_COLLECTION = "app.gainforest.notification.seen";
 /** Recent likes/comments scanned per source before client-side filtering. */
 const SCAN_LIMIT = 500;
 
-type NotificationKind = "like" | "comment";
+type NotificationKind = "like" | "comment" | "mention";
 
 /** Plain-language category of the liked/commented record, for display + links. */
 type NotificationSubjectKind = "observation" | "project" | "post" | "recording" | "record";
@@ -53,7 +60,7 @@ export type NotificationItem = {
   subjectKind: NotificationSubjectKind;
   /** In-app link to the subject record, when one exists. */
   subjectHref: string | null;
-  /** Comment body (kind === "comment" only). */
+  /** Comment/post body (kind === "comment" or "mention" only). */
   text: string | null;
 };
 
@@ -121,6 +128,41 @@ type CommentNode = {
   certifiedProfileData?: CertifiedProfileData;
 };
 
+// Posts (top-level or reply) that carry facets at all — the candidates for
+// "you were mentioned". The mention match itself happens client-side.
+const MENTIONS_QUERY = `
+  query NotificationMentions($first: Int!) {
+    appGainforestFeedPost(
+      first: $first
+      sortBy: createdAt
+      sortDirection: DESC
+      where: { facets: { isNull: false } }
+    ) {
+      edges {
+        node {
+          uri did text createdAt
+          reply { root { uri } }
+          facets {
+            index { byteStart byteEnd }
+            features { __typename ... on AppBskyRichtextFacetMention { did } }
+          }
+          ${CERTIFIED_PROFILE_DATA_FIELDS}
+        }
+      }
+    }
+  }
+`;
+
+type MentionNode = {
+  uri?: string | null;
+  did?: string | null;
+  text?: string | null;
+  createdAt?: string | null;
+  reply?: { root?: { uri?: string | null } | null } | null;
+  facets?: RawIndexedFacet[] | null;
+  certifiedProfileData?: CertifiedProfileData;
+};
+
 // ── Subject helpers ─────────────────────────────────────────────────────────
 
 /** Map a subject's collection NSID to a plain-language category. */
@@ -181,7 +223,7 @@ export async function fetchNotificationsForDid(
   const limit = opts.limit ?? 30;
   const seenAt = opts.seenAt ?? null;
 
-  const [likeData, commentData] = await Promise.all([
+  const [likeData, commentData, mentionData] = await Promise.all([
     indexerQuery<{ appGainforestFeedLike?: { edges?: Array<{ node?: LikeNode | null } | null> | null } | null }>(
       LIKES_QUERY,
       { first: SCAN_LIMIT },
@@ -190,9 +232,16 @@ export async function fetchNotificationsForDid(
       COMMENTS_QUERY,
       { first: SCAN_LIMIT },
     ).catch(() => null),
+    indexerQuery<{ appGainforestFeedPost?: { edges?: Array<{ node?: MentionNode | null } | null> | null } | null }>(
+      MENTIONS_QUERY,
+      { first: SCAN_LIMIT },
+    ).catch(() => null),
   ]);
 
   const items: NotificationItem[] = [];
+  // Post URIs that already produced a comment notification — a comment on your
+  // record that ALSO tags you shouldn't notify twice for the same action.
+  const notifiedPostUris = new Set<string>();
 
   for (const edge of likeData?.appGainforestFeedLike?.edges ?? []) {
     const node = edge?.node;
@@ -223,6 +272,7 @@ export async function fetchNotificationsForDid(
     const parts = parseAtUri(subjectUri);
     if (!parts || parts.did !== did) continue;
     if (node.did === did) continue;
+    notifiedPostUris.add(node.uri);
     const subjectKind = subjectKindForCollection(parts.collection);
     items.push({
       id: node.uri,
@@ -234,6 +284,33 @@ export async function fetchNotificationsForDid(
       subjectUri,
       subjectKind,
       subjectHref: subjectHrefFor(subjectKind, parts.did, parts.rkey),
+      text: node.text?.trim() || null,
+    });
+  }
+
+  for (const edge of mentionData?.appGainforestFeedPost?.edges ?? []) {
+    const node = edge?.node;
+    if (!node?.uri || !node.did) continue;
+    if (node.did === did) continue; // tagging yourself isn't news
+    if (notifiedPostUris.has(node.uri)) continue; // already notified as a comment
+    if (!mentionDidsOfFacets(node.facets).includes(did)) continue;
+    // Link to where the conversation lives: the thread's root record when the
+    // mention sits in a comment, otherwise the feed (a top-level post).
+    const rootUri = node.reply?.root?.uri ?? null;
+    const rootParts = rootUri ? parseAtUri(rootUri) : null;
+    const subjectKind = rootParts ? subjectKindForCollection(rootParts.collection) : "post";
+    items.push({
+      id: `${node.uri}#mention`,
+      kind: "mention",
+      createdAt: node.createdAt || new Date(0).toISOString(),
+      actorDid: node.did,
+      actorName: actorName(node.certifiedProfileData),
+      actorAvatarRef: actorAvatarRef(node.certifiedProfileData),
+      subjectUri: node.uri,
+      subjectKind,
+      subjectHref: rootParts
+        ? subjectHrefFor(subjectKind, rootParts.did, rootParts.rkey)
+        : "/feed",
       text: node.text?.trim() || null,
     });
   }

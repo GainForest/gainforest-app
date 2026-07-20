@@ -15,6 +15,16 @@ const nextConfig: NextConfig = {
       static: 1800,
     },
   },
+  async headers() {
+    const privatePreviewHeaders = [
+      { key: "X-Robots-Tag", value: "noindex, nofollow, noarchive, nosnippet, noimageindex" },
+      { key: "Cache-Control", value: "no-store" },
+    ];
+    return [
+      { source: "/_test/:path*", headers: privatePreviewHeaders },
+      { source: "/:locale(en|es|pt|sw|id)/_test/:path*", headers: privatePreviewHeaders },
+    ];
+  },
   images: {
     qualities: [75, 95],
     // Record thumbnails (occurrences, bumicerts, org covers) are resolved to

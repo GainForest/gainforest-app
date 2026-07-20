@@ -17,8 +17,8 @@
   },
   "explore": {
     "metadata": {
-      "title": "Explorar certificados — Projetos de impacto regenerativo verificado",
-      "description": "Explore certificados verificados de impacto ambiental de guardiões da natureza no mundo todo. Filtre por país, organização e área de impacto."
+      "title": "Explorar certificados",
+      "description": "Explore registros ambientais de guardiões da natureza no mundo todo, com fotos, lugares e evidências por trás de cada certificado."
     },
     "structuredData": {
       "name": "Explorar certificados",
@@ -117,8 +117,8 @@
   },
   "organizations": {
     "metadata": {
-      "title": "Organizações — GainForest",
-      "description": "Explore organizações guardiãs da natureza que criam impacto ambiental verificado com a GainForest."
+      "title": "Organizações",
+      "description": "Explore organizações guardiãs da natureza que compartilham observações de campo, projetos e evidências com o GainForest."
     },
     "hero": {
       "imageAltLight": "Floresta de montanha enevoada ao nascer do sol",
@@ -268,7 +268,7 @@
   },
   "bioblitz": {
     "metadata": {
-      "title": "Desafio BioBlitz Semanal — GainForest",
+      "title": "Desafio BioBlitz semanal",
       "description": "Saia, fotografe seres vivos e adicione seus registros. A cada semana, quem mais registrar e a melhor foto ganham um prêmio."
     },
     "banner": {
@@ -402,7 +402,13 @@
       "pending": "A anunciar",
       "compact": "Recentes",
       "mostSubmitted": "Mais envios",
-      "mostLiked": "Mais curtidas"
+      "mostLiked": "Mais curtidas",
+      "award": {
+        "action": "Conceder selos aos vencedores",
+        "actionMissing": "Conceder selos pendentes",
+        "done": "Selos dos vencedores concedidos",
+        "error": "Não foi possível conceder os selos. Tente novamente."
+      }
     },
     "map": {
       "title": "Observações da semana",
@@ -539,7 +545,7 @@
   },
   "grants": {
     "metadata": {
-      "title": "Subsídios — GainForest",
+      "title": "Editais",
       "description": "Candidate-se a programas de subsídios que financiam a soberania de dados e de decisões para comunidades baseadas na natureza."
     },
     "hero": {
@@ -570,6 +576,7 @@
         }
       },
       "apply": "Candidatar-se com um clique",
+      "details": "Ler detalhes do subsídio",
       "appliedTitle": "Candidatura enviada",
       "appliedNote": "Sua candidatura para {project} já foi publicada no feed.",
       "postText": "Candidatando-me ao subsídio Resselvagem da web com o meu projeto \"{project}\": pela soberania de dados e de decisões. 🌱"
@@ -891,8 +898,8 @@
   },
   "projects": {
     "metadata": {
-      "title": "Explorar projetos — Trabalho de impacto regenerativo verificado",
-      "description": "Explore projetos: cada um é um trabalho focado com um objetivo claro, um prazo e os resultados esperados."
+      "title": "Projetos de natureza — evidências de campo e registros de impacto",
+      "description": "Explore projetos de comunidades e organizações com lugares, atualizações, observações e evidências de trabalho regenerativo."
     },
     "hero": {
       "eyebrow": "Explorar projetos",
@@ -903,7 +910,46 @@
     "search": {
       "ariaLabel": "Pesquisar projetos",
       "placeholder": "Pesquisar projetos por nome ou palavra-chave",
-      "sortAriaLabel": "Ordenar projetos"
+      "sortAriaLabel": "Ordenar projetos",
+      "action": "Pesquisar"
+    },
+    "categories": {
+      "eyebrow": "Explore por interesse",
+      "title": "Explore categorias de projetos",
+      "description": "Comece por um tema e descubra as pessoas e os lugares que o tornam realidade.",
+      "items": {
+        "all": "Todos os projetos",
+        "forests": "Florestas e árvores",
+        "biodiversity": "Biodiversidade",
+        "foodWater": "Alimentos, água e solo",
+        "communities": "Comunidades",
+        "climate": "Resiliência climática"
+      }
+    },
+    "featured": {
+      "eyebrow": "Projetos em destaque",
+      "title": "Histórias para começar",
+      "description": "Uma seleção de projetos bem documentados de guardiões da natureza de todo o mundo.",
+      "badge": "Destaque",
+      "action": "Explorar projeto",
+      "previous": "Projetos em destaque anteriores",
+      "next": "Próximos projetos em destaque",
+      "manage": {
+        "add": "Destacar este projeto",
+        "remove": "Remover dos projetos em destaque",
+        "error": "Não foi possível atualizar os projetos em destaque. Tente novamente."
+      }
+    },
+    "support": {
+      "eyebrow": "Abertos a apoio",
+      "title": "Ajude bons trabalhos a crescer",
+      "description": "Apoie projetos que estão recebendo contribuições ativamente de suas comunidades."
+    },
+    "catalog": {
+      "eyebrow": "Explorar projetos",
+      "title": "Explore todos os projetos",
+      "description": "Explore os projetos desta categoria.",
+      "count": "{count, plural, one {# projeto para explorar} other {# projetos para explorar}}"
     },
     "view": {
       "cards": "Cartões",
@@ -958,6 +1004,7 @@
       "showDetails": "Mostrar detalhes",
       "loading": "Carregando projetos",
       "donate": "Doar",
+      "gainforestBadge": "Doe na GainForest",
       "acceptsDonations": "Aceita doações",
       "openForSupport": "Aberto a apoio",
       "donationSummary": "{amount} de {donors, plural, one {# apoiador} other {# apoiadores}}",
@@ -992,7 +1039,7 @@
   },
   "browseGrid": {
     "heading": "Formas de explorar",
-    "description": "Quatro caminhos para o trabalho da GainForest, pensados para financiadores, guardiões e equipes de campo.",
+    "description": "Formas de explorar o trabalho no GainForest, pensadas para exploradores, guardiões e equipes de campo.",
     "cards": {
       "bumicerts": {
         "label": "Projetos verificados",
@@ -1552,6 +1599,15 @@
       "colSighting": "Observação",
       "colObserver": "Observador",
       "colDate": "Data"
+    },
+    "metadata": {
+      "title": "Avistamentos de natureza",
+      "description": "Explore avistamentos de natureza no GainForest com fotos de campo, gravações de som, nomes de espécies e localizações de trabalho real em campo."
+    },
+    "view": {
+      "compact": "Compacta",
+      "comfortable": "Confortável",
+      "density": "Densidade dos cartões"
     }
   },
   "manageProjectCerts": {
@@ -1676,6 +1732,12 @@
     "title": "Globo",
     "subtitle": "Organizações e seus sites de projeto em uma Terra 3D viva.",
     "viewOnGlobe": "Ver no Globo",
+    "tabs": {
+      "details": "Organizações",
+      "layers": "Camadas",
+      "popup": "Abrir como janela flutuante",
+      "dock": "Fixar na lateral"
+    },
     "panel": {
       "searchPlaceholder": "Pesquisar organizações…",
       "treeFilter": "Dados de árvores",
@@ -1730,6 +1792,7 @@
         "wetland": "Zona úmida",
         "mangroves": "Manguezais"
       },
+      "visibleDetails": "No mapa",
       "visibleNow": "{count, plural, one {# camada no mapa} other {# camadas no mapa}}",
       "flyTo": "Aproximar de {name}",
       "hide": "Ocultar {name}"

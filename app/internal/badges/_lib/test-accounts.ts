@@ -25,19 +25,21 @@ export class TestAccountMutationError extends Error {
 
 type CgsMutationResult = { uri?: string; cid?: string; error?: string; message?: string };
 
-type CgsCreatePayload = {
+export type CgsCreatePayload = {
   operation: "createRecord";
   collection: string;
   record: Record<string, unknown>;
 };
 
-type CgsDeletePayload = {
+export type CgsDeletePayload = {
   operation: "deleteRecord";
   collection: string;
   rkey: string;
 };
 
-async function cgsMutate(
+/** Write one create/delete mutation into the moderation group repo through the
+ *  CGS proxy (shared by the test-account and test-record flag helpers). */
+export async function cgsMutate(
   repo: string,
   cookie: string | null,
   payload: CgsCreatePayload | CgsDeletePayload,

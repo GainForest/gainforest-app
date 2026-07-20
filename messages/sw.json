@@ -10,7 +10,10 @@
       "menu": "Menyu",
       "navigation": "Urambazaji",
       "close": "Funga",
-      "theme": "Mandhari"
+      "theme": "Mandhari",
+      "projects": "Miradi",
+      "observations": "Uchunguzi",
+      "bioblitz": "BioBlitz"
     },
     "hero": {
       "imageAlt": "Bonde la msitu wa mvua lenye ukungu",
@@ -21,12 +24,12 @@
     },
     "paths": {
       "title": "Chagua njia yako",
-      "description": "Iwe uko hapa kufadhili athari au kuonyesha kazi yako, kuna nafasi kwa ajili yako.",
+      "description": "Iwe unataka kuchunguza ushahidi wa uwandani au kuonyesha kazi yako, kuna nafasi kwa ajili yako.",
       "cards": {
         "funders": {
-          "label": "Kwa wafadhili",
-          "title": "Nataka kusaidia",
-          "emphasis": "mradi",
+          "label": "Kwa wachunguzi",
+          "title": "Nataka kuchunguza",
+          "emphasis": "ushahidi wa uwandani",
           "description": "Vinjari rekodi zilizothibitishwa za kazi halisi ya mazingira — nyakati kamili za urejeshaji, kama zilivyotokea uwandani.",
           "cta": "Gundua rekodi",
           "alt": "Mto ukipinda ndani ya msitu wa mvua"
@@ -35,7 +38,7 @@
           "label": "Kwa mashirika",
           "title": "Mimi ni mlezi",
           "emphasis": "wa mazingira",
-          "description": "Onyesha kazi yako ya urejeshaji na ungana na wafadhili wanaojali.",
+          "description": "Onyesha kazi yako ya urejeshaji na ushahidi ulio nyuma yake.",
           "cta": "Dhibiti shirika langu",
           "alt": "Maporomoko ya maji katika msitu wa kitropiki"
         }
@@ -44,10 +47,10 @@
     "explainer": {
       "eyebrow": "Tazama maelezo",
       "titlePrefix": "Njia mpya ya",
-      "titleEmphasis": "kufadhili asili",
-      "description": "Kwa dakika mbili, ona jinsi Bumicerts zinavyobadilisha kazi halisi ya shambani kuwa kumbukumbu zinazothibitishwa — na kupeleka ufadhili moja kwa moja kwa walinzi wa asili wa kienyeji wanaofanya kazi hiyo.",
+      "titleEmphasis": "kuandika kumbukumbu za asili",
+      "description": "Kwa dakika mbili, ona jinsi Bumicerts zinavyobadilisha kazi halisi ya uwandani kuwa rekodi zinazoweza kuthibitishwa kwa walezi wa asili wa kienyeji.",
       "play": "Cheza video",
-      "videoTitle": "Bumicerts: mfumo mpya na wa haki wa kufadhili asili kwa walinzi wa asili wa kienyeji"
+      "videoTitle": "Bumicerts: rekodi za asili zinazothibitishwa kwa walezi wa kienyeji"
     },
     "certificate": {
       "eyebrow": "Cheti",
@@ -66,8 +69,8 @@
         },
         "communities": {
           "id": "3",
-          "question": "Njia ya moja kwa moja kwa jamii",
-          "answer": "Unapofadhili cheti, pesa zako huwafikia watu wanaofanya urejeshaji. Hakuna wapatanishi wanaochukua ada au gharama zisizo wazi."
+          "question": "Rekodi inayoshirikiwa na jamii",
+          "answer": "Kila cheti huunganisha ushahidi wa uwandani, muktadha wa mradi, na watu au mashirika yanayofanya kazi hiyo, ili rekodi iwe rahisi kukagua na kushiriki."
         },
         "story": {
           "id": "4",
@@ -83,7 +86,7 @@
       }
     },
     "footer": {
-      "tagline": "Kuunganisha jamii na wafadhili.",
+      "tagline": "Kuunganisha jamii kupitia ushahidi wa uwandani unaoaminika.",
       "infrastructure": "Miundombinu wazi. Imejengwa na GainForest.",
       "documentation": "Nyaraka",
       "copyright": "Chanzo wazi, inaendeshwa na jamii."
@@ -128,7 +131,7 @@
           "blurb": "Jamii zinaweza kutumia ushahidi wao uliothibitishwa wanapoomba awamu za ufadhili zinazoungwa mkono na jamii."
         },
         "gainforest": {
-          "blurb": "GainForest huwasaidia walezi wa mazingira kuchapisha kazi iliyothibitishwa, maeneo, miti, uchunguzi na hadithi za miradi."
+          "blurb": "GainForest husaidia jamii na mashirika kuchapisha uchunguzi wa uwandani, rekodi za bioanuwai, maeneo, na hadithi za miradi."
         },
         "hypercerts": {
           "blurb": "Madai wazi ya athari yanaweza kuunganishwa na zana za Hypercerts na mifumo ya ufadhili wa manufaa ya umma."

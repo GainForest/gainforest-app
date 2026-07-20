@@ -2,13 +2,11 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
-import { ArrowLeftIcon } from "lucide-react";
+import { ArrowLeftIcon, ArrowRightIcon, BookOpenIcon } from "lucide-react";
 import { DefBlock } from "../_components/DefBlock";
 import { byId, groupOf, KNOWN_IDS, LEXICONS } from "../_lib/registry";
 import { lexiconDescription, lexiconHref, mainDefName, shortName } from "../_lib/types";
 import type { DocsLabels } from "../_lib/labels";
-
-export const dynamic = "force-static";
 
 type Params = { nsid: string };
 
@@ -92,6 +90,30 @@ export default async function LexiconPage({ params }: { params: Promise<Params> 
       <p className="m-0 mb-10 max-w-prose text-[14.5px] leading-relaxed text-muted-foreground">
         {lexiconDescription(doc)}
       </p>
+
+      {lexId === "app.gainforest.dwc.occurrence" && (
+        <section className="mb-10 rounded-2xl border border-primary/20 bg-primary/[0.04] p-5" aria-labelledby="audiomoth-occurrence-guide">
+          <div className="flex items-start gap-3">
+            <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-primary/10 text-primary">
+              <BookOpenIcon className="size-4.5" />
+            </span>
+            <div className="min-w-0 flex-1">
+              <p className="m-0 text-[11px] font-medium uppercase tracking-[0.12em] text-primary">{t("guides.usageGuide")}</p>
+              <h2 id="audiomoth-occurrence-guide" className="mb-1 mt-1 font-serif text-lg font-semibold tracking-tight text-foreground">
+                {t("guides.audiomothTitle")}
+              </h2>
+              <p className="m-0 max-w-[680px] text-[13.5px] leading-6 text-muted-foreground">{t("guides.audiomothDescription")}</p>
+              <Link
+                href="/docs/lexicons/guides/audiomoth-spectrogram-occurrences"
+                className="mt-3 inline-flex items-center gap-1.5 text-[13px] font-medium text-primary no-underline hover:underline"
+              >
+                {t("guides.openGuide")}
+                <ArrowRightIcon className="size-3.5" />
+              </Link>
+            </div>
+          </div>
+        </section>
+      )}
 
       <DefBlock name={mainName} def={doc.defs[mainName]} lexiconId={lexId} known={KNOWN_IDS} labels={labels} primary />
 

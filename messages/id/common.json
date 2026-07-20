@@ -1,7 +1,7 @@
 {
   "seo": {
-    "title": "GainForest — Danai dampak regeneratif",
-    "description": "sertifikat menghubungkan pendana dengan penjaga alam yang melakukan kerja regeneratif di lapangan. Danai dampak lingkungan terverifikasi secara langsung."
+    "title": "GainForest — Biodiversitas dan proyek alam",
+    "description": "Jelajahi observasi lapangan, catatan biodiversitas, dan proyek alam dari komunitas serta organisasi yang menggunakan GainForest."
   },
   "language": {
     "label": "Bahasa",
@@ -130,7 +130,8 @@
       "taina": "Tainá",
       "globe": "Bola Dunia",
       "audiomoth": "AudioMoth",
-      "soundscape": "Lanskap suara"
+      "soundscape": "Lanskap suara",
+      "identifications": "Identifikasi"
     },
     "prompts": {
       "signInDescription": "Masuk untuk mengelola akun dan konten Anda.",
@@ -170,7 +171,9 @@
       "submitData": "Kirim data lapangan",
       "personalAccount": "Akun pribadi",
       "organizationAccount": "Akun organisasi"
-    }
+    },
+    "more": "Lainnya",
+    "hideMore": "Sembunyikan"
   },
   "settings": {
     "handle": {
@@ -230,6 +233,56 @@
       "defaultKeyName": "Agen AI",
       "tainaBadge": "Tainá",
       "tainaBadgeTitle": "Kunci ini tertaut ke bot Telegram Tainá Anda"
+    },
+    "inaturalist": {
+      "title": "iNaturalist",
+      "connectTitle": "Verifikasi akun iNaturalist",
+      "description": "Gunakan bukti profil publik agar GainForest hanya mengimpor observasi dari akun iNaturalist Anda sendiri.",
+      "connectedAs": "Terverifikasi sebagai @{account}",
+      "disconnect": "Hapus verifikasi",
+      "proofLabel": "Tautan DID GainForest Anda",
+      "proofHint": "Tambahkan teks persis ini ke bio/tentang iNaturalist Anda. Anda dapat menghapusnya setelah verifikasi.",
+      "copy": "Salin",
+      "copied": "Disalin",
+      "profileLabel": "Handle atau tautan iNaturalist",
+      "profilePlaceholder": "@handle atau https://www.inaturalist.org/people/handle",
+      "verify": "Verifikasi akun",
+      "verifying": "Memverifikasi…",
+      "verifyFailed": "Tidak dapat memverifikasi akun iNaturalist itu.",
+      "connectFirst": "Verifikasi akun iNaturalist Anda terlebih dahulu.",
+      "chooseProject": "Pilih proyek GainForest terlebih dahulu.",
+      "projectLabel": "Proyek GainForest",
+      "inatProjectLabel": "Proyek iNaturalist",
+      "projectsLoading": "Memuat proyek iNaturalist…",
+      "projectsLoadFailed": "Tidak dapat memuat proyek iNaturalist Anda.",
+      "noINaturalistProjects": "Tidak ada proyek iNaturalist yang ditemukan di akun terverifikasi Anda.",
+      "chooseINaturalistProject": "Pilih proyek iNaturalist terlebih dahulu.",
+      "steps": {
+        "openSettings": "1. Buka iNaturalist → Pengaturan Akun → Profil.",
+        "editBio": "2. Temukan kolom bio/tentang Anda.",
+        "pasteCode": "3. Tempel tautan DID GainForest di atas ke bio itu lalu simpan.",
+        "returnVerify": "4. Kembali ke sini, tempel handle atau tautan profil iNaturalist Anda, lalu verifikasi."
+      },
+      "connect": "Hubungkan",
+      "hideSetup": "Sembunyikan penyiapan"
+    },
+    "groups": {
+      "account": {
+        "title": "Akun",
+        "description": "Nama pengguna dan keamanan masuk"
+      },
+      "connections": {
+        "title": "Koneksi",
+        "description": "Akun sosial dan layanan eksternal"
+      },
+      "agents": {
+        "title": "Agen AI",
+        "description": "Kunci untuk alat yang bertindak dengan izin Anda"
+      },
+      "advanced": {
+        "title": "Lanjutan",
+        "description": "Data akun dan penghapusan"
+      }
     }
   },
   "bumicertCard": {
@@ -243,7 +296,7 @@
   },
   "footer": {
     "brandAlt": "GainForest",
-    "tagline": "Menghubungkan komunitas dengan penyandang dana.",
+    "tagline": "Menghubungkan komunitas melalui bukti lapangan tepercaya.",
     "builtWith": "Infrastruktur terbuka. Dibangun dengan GainForest.",
     "dataCollectionsAria": "Koleksi data",
     "footerLinksAria": "Tautan footer",
@@ -266,12 +319,13 @@
       "greenGlobe": "Green Globe",
       "status": "Status",
       "lexicons": "Skema data",
-      "privacyPolicy": "Kebijakan Privasi"
+      "privacyPolicy": "Kebijakan Privasi",
+      "deleteAccount": "Hapus Akun"
     }
   },
   "browseGrid": {
     "title": "Cara Menjelajah",
-    "description": "Berbagai jalan masuk ke karya GainForest, dibuat untuk pendana, penjaga alam, dan tim lapangan.",
+    "description": "Cara menjelajahi karya di GainForest, dirancang untuk penjelajah, penjaga, dan tim lapangan.",
     "loadingAria": "Memuat tautan jelajah",
     "cards": {
       "projects": {
@@ -403,6 +457,10 @@
       "justNow": "baru saja",
       "minutesAgo": "{count, plural, one {# menit lalu} other {# menit lalu}}",
       "hoursAgo": "{count, plural, one {# jam lalu} other {# jam lalu}}"
+    },
+    "metadata": {
+      "title": "Kesehatan situs",
+      "description": "Kesehatan langsung layanan di balik GainForest."
     }
   },
   "accountTabs": {
@@ -430,7 +488,9 @@
     "files": "Berkas",
     "taina": "Tainá",
     "endorsementsGiven": "Dukungan",
-    "equipment": "Peralatan"
+    "equipment": "Peralatan",
+    "wallet": "Dompet",
+    "more": "Lainnya"
   },
   "equipment": {
     "metadataTitle": "Peralatan — {name}",
@@ -560,7 +620,9 @@
   },
   "accountDonations": {
     "emptyHeroDescription": "Dukung sebuah proyek dan kontribusi Anda akan muncul di sini, masing-masing tertaut ke proyek yang Anda dukung.",
-    "emptyHeroCta": "Jelajahi proyek"
+    "emptyHeroCta": "Jelajahi proyek",
+    "anonymousNote": "Donasi anonim juga muncul di sini, tetapi hanya Anda yang dapat melihatnya — donasi itu tidak pernah ditampilkan secara publik atas nama Anda. Beberapa donasi anonim lama tidak dapat ditampilkan.",
+    "anonymousBadge": "Hanya terlihat oleh Anda"
   },
   "accountProjects": {
     "emptyEyebrow": "Belum ada proyek",
@@ -616,7 +678,9 @@
       "errorTooLarge": "{name} lebih besar dari 10 MB.",
       "errorGeneric": "Kami tidak dapat menambahkan gambar ini. Silakan coba lagi.",
       "recordTitleProject": "Galeri {projectTitle}",
-      "recordTitleAccount": "Galeri {name}"
+      "recordTitleAccount": "Galeri {name}",
+      "open": "Tambah gambar",
+      "close": "Tutup"
     }
   },
   "projectManage": {
@@ -902,18 +966,19 @@
       "post": "postingan",
       "recording": "rekaman",
       "record": "catatan"
-    }
+    },
+    "mentionedYou": "menyebut Anda"
   },
   "feed": {
     "meta": {
       "title": "Aktivitas terkini",
-      "description": "Proyek, pengamatan alam, organisasi, dan donasi terbaru di GainForest, dalam satu aliran langsung."
+      "description": "Proyek, temuan alam, organisasi, dan pembaruan komunitas terbaru di GainForest, dalam satu aliran langsung."
     },
     "eyebrow": "Aktivitas langsung",
     "hero": {
       "title": "Apa yang terjadi di",
       "accent": "GainForest",
-      "description": "Aliran langsung dari proyek, pengamatan alam, organisasi, dan donasi terbaru — semua dalam satu tempat."
+      "description": "Aliran langsung proyek terbaru, temuan alam, organisasi, dan pembaruan komunitas — semuanya di satu tempat."
     },
     "filters": {
       "all": "Semua",
@@ -1001,7 +1066,26 @@
       "posting": "Memposting…",
       "postedTitle": "Terposting",
       "postedNote": "Kabar Anda sudah tayang dan akan muncul di feed sebentar lagi.",
-      "postingAs": "Memposting sebagai {name}"
+      "postingAs": "Memposting sebagai {name}",
+      "title": "Bagikan pembaruan",
+      "close": "Tutup"
+    },
+    "quickLike": {
+      "like": "Sukai foto ini",
+      "unlike": "Batalkan suka"
+    },
+    "audio": {
+      "play": "Putar suara",
+      "pause": "Jeda suara",
+      "seek": "Putar dari sini",
+      "playSection": "Putar ulang suara berlabel",
+      "unavailable": "Suara tidak tersedia",
+      "spectrogramAlt": "Spektrogram rekaman dengan suara berlabel yang disorot"
+    },
+    "mentions": {
+      "suggestionsAria": "Saran akun",
+      "searching": "Mencari akun…",
+      "noMatches": "Tidak ada akun yang cocok"
     }
   },
   "testAccount": {
@@ -1028,7 +1112,7 @@
   "recognition": {
     "eyebrow": "Pengelola GainForest",
     "title": "Berikan lencana penghargaan",
-    "description": "Beri {name} lencana atas hibah atau kemenangan BioBlitz. Lencana yang diberikan tampil di profil publik mereka.",
+    "description": "Beri {name} lencana atas hibah. Lencana pemenang BioBlitz diberikan per ronde dari halaman BioBlitz.",
     "award": "Berikan",
     "remove": "Hapus",
     "genericError": "Terjadi kesalahan. Silakan coba lagi.",
@@ -1039,13 +1123,21 @@
         "description": "Menerima hibah Meliarkan Kembali Web."
       },
       "bioblitz-most-images": {
-        "label": "BioBlitz — gambar terbanyak",
-        "description": "Memenangkan ronde BioBlitz untuk observasi terbanyak."
+        "label": "BioBlitz — observasi terbanyak",
+        "description": "Memenangkan ronde BioBlitz untuk observasi terbanyak.",
+        "labelWithRound": "BioBlitz {roundName} — observasi terbanyak"
       },
       "bioblitz-best-picture": {
         "label": "BioBlitz — foto terbaik",
-        "description": "Memenangkan ronde BioBlitz untuk foto terbaik."
+        "description": "Memenangkan ronde BioBlitz untuk foto terbaik.",
+        "labelWithRound": "BioBlitz {roundName} — foto terbaik"
       }
+    },
+    "awardsLabel": "Penghargaan",
+    "aria": "Penghargaan: {names}",
+    "roundName": {
+      "pilot": "Ronde Perintis",
+      "numbered": "Ronde {round}"
     }
   },
   "steward": {
@@ -1186,11 +1278,28 @@
       "certified": "Primitif identitas dari ekosistem Hypercerts — profil aktor, organisasi, pengikut, lencana, dan lokasi.",
       "hypercerts": "Klaim dampak (aktivitas, kontribusi, kontributor, hak), koleksi, tanda terima pendanaan, lampiran, cakupan kerja, dan tipe bersama."
     },
-    "sectionsAria": "Bagian skema"
+    "sectionsAria": "Bagian skema",
+    "epdsLinkTitle": "Cara kerja ePDS",
+    "epdsLinkDesc": "Tur interaktif tentang sistem masuk dan server di balik catatan-catatan ini.",
+    "cgsLinkTitle": "Cara kerja akun grup",
+    "cgsLinkDesc": "Tur interaktif tentang layanan penjaga yang memungkinkan satu tim berbagi satu akun.",
+    "atprotoLinkTitle": "Cara kerja AT Protocol",
+    "atprotoLinkDesc": "Tur interaktif jaringan terbuka tempat semua ini dibangun.",
+    "walletServiceLinkTitle": "Dompet GainForest",
+    "walletServiceLinkDesc": "Bagaimana setiap akun mendapat dompet yang hanya bisa dibelanjakan oleh pemiliknya.",
+    "guides": {
+      "usageGuide": "Panduan penggunaan",
+      "audiomothTitle": "Label spektrogram AudioMoth sebagai kemunculan Darwin Core",
+      "audiomothDescription": "Cara setiap kotak waktu dan frekuensi yang dikonfirmasi menjadi rekaman kemunculan baru yang terhubung ke rekaman audio sumbernya.",
+      "openGuide": "Baca panduan implementasi",
+      "breadcrumbAria": "Jejak navigasi dokumentasi",
+      "schemas": "Skema data",
+      "guideIntro": "Panduan ini menetapkan konvensi aplikasi yang digunakan bersama skema kemunculan. Skemanya tetap berupa Darwin Core umum; panduan ini menjelaskan hubungan antara rekaman AudioMoth, kotak spektrogram, dan rekaman kemunculan."
+    }
   },
   "taina": {
     "meta": {
-      "title": "Tainá — GainForest",
+      "title": "Asisten lapangan Tainá",
       "description": "Hubungkan bot Telegram milik Anda dan ubah apa yang Anda lihat di alam menjadi observasi keanekaragaman hayati yang dapat diverifikasi."
     },
     "hero": {
@@ -1432,7 +1541,7 @@
   },
   "audiomoth": {
     "meta": {
-      "title": "AudioMoth — GainForest",
+      "title": "Pengaturan perekam AudioMoth",
       "description": "Atur jam, konfigurasikan jadwal perekaman, dan perbarui firmware perekam akustik AudioMoth Anda, langsung dari peramban."
     },
     "title": "AudioMoth",
@@ -1599,7 +1708,9 @@
     "mainTabs": {
       "setup": "Penyiapan",
       "deployments": "Penempatan",
-      "upload": "Unggah"
+      "upload": "Unggah",
+      "label": "Beri label",
+      "identifications": "Identifikasi"
     },
     "deployments": {
       "intro": "Penempatan mencatat di mana dan kapan sebuah AudioMoth dipasang di lapangan. Masing-masing memutar nada akustik yang mengatur jam, lokasi, dan ID penempatan perekam.",
@@ -1726,6 +1837,87 @@
       "prevDay": "Hari sebelumnya dengan rekaman",
       "nextDay": "Hari berikutnya dengan rekaman",
       "allHours": "Semua jam"
+    },
+    "label": {
+      "subtitle": "Tinjau rekaman AudioMoth, tandai suara berdasarkan waktu dan frekuensi, lalu buat kumpulan label yang rapi untuk data lapangan Anda.",
+      "signInTitle": "Masuk untuk memberi label rekaman",
+      "signInBody": "Catatan keberadaan disimpan ke akun Anda. Masuk, unggah rekaman AudioMoth, lalu tandai suara satwa yang ditemukan.",
+      "loadingRecordings": "Memuat rekaman AudioMoth Anda…",
+      "loadFailed": "Rekaman Anda tidak dapat dimuat. Silakan coba lagi.",
+      "occurrencesLoadFailed": "Catatan keberadaan tersimpan untuk rekaman ini tidak dapat dimuat.",
+      "noRecordingsTitle": "Unggah rekaman terlebih dahulu",
+      "noRecordingsBody": "Ruang kerja pelabelan menggunakan rekaman yang sudah tersimpan di akun agar setiap kotak menjadi catatan keberadaan biodiversitas yang tertaut.",
+      "uploadFirst": "Unggah rekaman AudioMoth",
+      "refresh": "Muat ulang",
+      "savedAtproto": "Setiap kotak yang disimpan menjadi catatan keberadaan biodiversitas di akun Anda.",
+      "openToLoad": "Buka untuk memuat label",
+      "saved": "Tersimpan",
+      "deleteConfirm": "Hapus catatan keberadaan ini? Catatan akan dihapus dari akun dan tidak dapat dipulihkan.",
+      "deleteFailed": "Catatan keberadaan tidak dapat dihapus. Silakan coba lagi.",
+      "saveFailed": "Catatan keberadaan tidak dapat disimpan. Kotak tetap ada agar Anda dapat mencoba lagi.",
+      "recordedAtMissing": "Rekaman ini tidak memiliki waktu mulai yang sah, sehingga waktu keberadaan tidak dapat dihitung.",
+      "audioUnavailable": "Rekaman ini tidak memiliki berkas asli atau pratinjau yang dapat diputar. Unggah kembali dengan pratinjau diaktifkan.",
+      "commonName": "Nama umum/lokal (opsional)",
+      "commonNamePlaceholder": "Katak pohon",
+      "scientificName": "Nama ilmiah (opsional)",
+      "scientificNamePlaceholder": "Boana faber",
+      "scientificNameHint": "Biarkan kosong untuk menyimpan kelompok luas yang tepat, seperti Anura untuk katak.",
+      "saveOccurrence": "Simpan keberadaan",
+      "saveAtprotoHint": "Membuat catatan Darwin Core yang tertaut ke rekaman audio ini.",
+      "stepImport": "Pilih rekaman",
+      "stepDraw": "Gambar kotak waktu dan frekuensi",
+      "stepDescribe": "Jelaskan suara yang terdengar",
+      "emptyTitle": "Beri label suara satwa dalam rekaman AudioMoth",
+      "emptyBody": "Pilih folder kartu SD atau sekumpulan berkas WAV. Pilih rekaman, tarik kotak di sekitar suara, lalu tandai sebagai burung, katak, serangga, suara lain, atau catatan.",
+      "chooseFolder": "Pilih kartu SD atau folder",
+      "chooseFiles": "Pilih berkas WAV",
+      "privacyNote": "Rekaman tetap berada di perangkat ini saat Anda memberi label.",
+      "workspaceSummary": "{files} rekaman · {labels} label",
+      "savedLocally": "Draf disimpan di peramban ini. Ekspor jika sudah siap.",
+      "addFiles": "Tambah rekaman",
+      "export": "Ekspor CSV",
+      "closeSet": "Tutup kumpulan",
+      "recordings": "Rekaman",
+      "search": "Cari berkas…",
+      "labelCount": "{count} label",
+      "notLabelled": "Belum diberi label",
+      "filePosition": "Rekaman {current} dari {total}",
+      "previousFile": "Rekaman sebelumnya",
+      "nextFile": "Rekaman berikutnya",
+      "labelsTitle": "Label ({count})",
+      "selectToEdit": "Pilih label untuk mengedit",
+      "labelsEmpty": "Belum ada label. Tarik kotak di atas suara pada spektrogram untuk memulai.",
+      "deleteLabel": "Hapus label",
+      "editLabel": "Ubah label",
+      "newLabel": "Label baru",
+      "describeSelection": "Apa yang ada di kotak ini?",
+      "drawFirst": "Gambar kotak untuk memulai",
+      "clearSelection": "Hapus pilihan",
+      "drawHint": "Tarik pada spektrogram untuk menandai suara yang ingin diberi label. Kotak merekam waktu kejadian dan rentang frekuensinya.",
+      "timeRange": "Waktu",
+      "frequencyRange": "Frekuensi",
+      "whatIsIt": "Apa yang Anda dengar?",
+      "categories": {
+        "bird": "Burung",
+        "frog": "Katak",
+        "insect": "Serangga",
+        "other": "Lainnya",
+        "note": "Catatan"
+      },
+      "species": "Spesies (opsional)",
+      "speciesPlaceholder": "Nama umum atau ilmiah",
+      "speciesHint": "Biarkan kosong jika Anda hanya tahu kelompok satwanya.",
+      "noteRequired": "Catatan",
+      "noteOptional": "Catatan (opsional)",
+      "notePlaceholder": "Jenis suara, keyakinan, cuaca, atau hal berguna lainnya…",
+      "updateLabel": "Perbarui label",
+      "saveLabel": "Simpan label",
+      "saveHint": "Disimpan di peramban ini sampai Anda mengekspor kumpulan label.",
+      "drawInstruction": "Tarik untuk menggambar · pilih kotak untuk mengedit",
+      "spectrogramAria": "Spektrogram audio interaktif",
+      "buildingSpectrogram": "Membuat spektrogram…",
+      "spectrogramFailed": "Rekaman ini tidak dapat diubah menjadi spektrogram.",
+      "audioUnsupported": "Peramban Anda tidak dapat memutar rekaman ini."
     }
   },
   "soundscape": {
@@ -1765,6 +1957,909 @@
       "hoverHint": "Gerakkan kursor di atas jam untuk melihat nilai.",
       "datesTitle": "Hari",
       "allDatesChip": "Semua hari"
+    }
+  },
+  "adminOnly": {
+    "label": "Khusus admin"
+  },
+  "accountWallet": {
+    "title": "Dompet",
+    "intro": "Dompet donasi pribadi Anda, diamankan dengan kunci sandi Anda. Donasi untuk proyek Anda masuk ke alamat ini.",
+    "loadError": "Tidak dapat memuat dompet Anda.",
+    "passkeyUnsupported": "Perangkat ini tidak mendukung kunci sandi. Coba perangkat dengan Face ID, sidik jari, atau kunci keamanan.",
+    "passkeyLabel": "GainForest — {name}",
+    "passkeyLabelFallback": "Dompet GainForest",
+    "createError": "Tidak dapat membuat dompet. Silakan coba lagi.",
+    "addSignerError": "Tidak dapat menambahkan kunci sandi. Silakan coba lagi.",
+    "removeSignerError": "Tidak dapat menghapus kunci sandi ini. Silakan coba lagi.",
+    "deleteError": "Tidak dapat menghapus dompet. Silakan coba lagi.",
+    "emptyTitle": "Belum ada dompet",
+    "emptyHint": "Buat dompet donasi Anda dengan kunci sandi (Face ID, sidik jari, atau kunci keamanan). Tanpa frasa benih, tanpa perlu memasang apa pun.",
+    "creating": "Menunggu kunci sandi Anda…",
+    "createButton": "Buat dompet dengan kunci sandi",
+    "defaultName": "Dompet donasi saya",
+    "copyAddress": "Salin alamat",
+    "copied": "Disalin",
+    "copy": "Salin",
+    "readyHint": "Alamat ini bisa langsung menerima donasi. Alamat ini milik Anda dan hanya kunci sandi di bawah yang dapat membelanjakannya.",
+    "activeHint": "Dompet ini sudah aktif di blockchain. Kunci sandinya kini dikelola di rantai.",
+    "signersHeading": "Siapa yang dapat menyetujui pembayaran",
+    "signersLocked": "Terkunci",
+    "unnamedPasskey": "Kunci sandi",
+    "removeSigner": "Hapus kunci sandi",
+    "addPasskey": "Tambahkan kunci sandi lain",
+    "signerLabelPlaceholder": "Beri nama kunci ini (mis. Ponsel saya)",
+    "signersHint": "Tambahkan kunci sandi dari perangkat lain atau orang yang Anda percaya — semuanya dapat menyetujui pembayaran.",
+    "deleteButton": "Hapus dompet",
+    "deleteConfirmTitle": "Hapus dompet ini?",
+    "deleteConfirmBody": "Tindakan ini tidak dapat dibatalkan. Jika nanti Anda membuat dompet baru dengan kunci sandi baru, alamatnya akan berbeda.",
+    "deleteConfirmFunds": "Dompet ini sudah berisi dana, jadi tidak dapat dihapus.",
+    "deleteConfirmCancel": "Batal",
+    "deleteConfirmButton": "Ya, hapus dompet",
+    "viewOnExplorer": "Lihat alamat ini di Etherscan",
+    "explorer": "Etherscan",
+    "balancesHeading": "Saldo",
+    "balancesEmpty": "Belum ada dana. Donasi yang dikirim ke alamat ini akan muncul di sini.",
+    "balancesError": "Saldo tidak tersedia saat ini. Muat ulang untuk mencoba lagi.",
+    "sendHeading": "Kirim dana",
+    "sendIntro": "Pindahkan uang dari dompet ini ke alamat dompet lain mana pun. Anda menyetujui setiap transfer dengan kunci sandi Anda.",
+    "sendToken": "Mata uang",
+    "sendRecipient": "Alamat penerima",
+    "sendRecipientPlaceholder": "Alamat penerima (0x…)",
+    "sendRecipientInvalid": "Masukkan alamat dompet yang valid — dimulai dengan 0x diikuti 40 karakter.",
+    "sendAmount": "Jumlah",
+    "sendAmountInvalid": "Masukkan jumlah yang valid.",
+    "sendAmountTooHigh": "Itu lebih dari yang dimiliki dompet ini.",
+    "sendMax": "Maks",
+    "sendButton": "Kirim dengan kunci sandi",
+    "sendPreparing": "Menyiapkan…",
+    "sendAwaitingPasskey": "Menunggu kunci sandi Anda…",
+    "sendSubmitting": "Mengirim — ini bisa memakan waktu satu menit…",
+    "sendSuccess": "Terkirim! Transfer telah dikonfirmasi.",
+    "sendViewTx": "Lihat transaksi",
+    "sendGasNote": "GainForest menanggung biaya jaringan.",
+    "sendNoSigner": "Hanya orang dengan kunci sandi yang terdaftar di dompet ini yang dapat mengirim darinya.",
+    "sendErrorNotConfigured": "Pengiriman belum diaktifkan di server ini.",
+    "sendErrorInsufficient": "Dompet ini tidak memiliki cukup dana untuk transfer itu.",
+    "sendErrorBusy": "Jaringan sedang sibuk saat ini. Silakan coba lagi dalam beberapa menit.",
+    "sendErrorSignature": "Persetujuan kunci sandi tidak dapat diverifikasi. Silakan coba lagi.",
+    "sendErrorGeneric": "Transfer tidak dapat diselesaikan. Silakan coba lagi.",
+    "thresholdHeading": "Persetujuan yang diperlukan",
+    "thresholdOption": "{count} dari {total, plural, other {# kunci sandi}}",
+    "thresholdHint": "Berapa banyak kunci sandi yang harus menyetujui setiap transfer. Mewajibkan lebih dari satu lebih aman — satu kunci sandi yang hilang atau dicuri tidak bisa memindahkan dana sendirian. Mengubah ini memberi dompet alamat baru, jadi hanya bisa dilakukan sebelum dompet berisi dana.",
+    "thresholdUpdateError": "Tidak dapat mengubah persyaratan persetujuan. Silakan coba lagi.",
+    "thresholdLockedFunds": "Dompet sudah berisi dana, jadi persyaratan persetujuan tidak dapat diubah lagi.",
+    "thresholdSingleWarning": "Saat ini satu kunci sandi saja dapat memindahkan dana. Pertimbangkan untuk mewajibkan lebih banyak persetujuan.",
+    "sendApprovalsNeeded": "Dompet ini membutuhkan {count} persetujuan dengan kunci sandi yang berbeda. Anda memberikan yang pertama; sisanya dapat diberikan di sini atau dari perangkat lain.",
+    "sendApprovalOf": "Persetujuan {current} dari {total} — menunggu kunci sandi…",
+    "sendDuplicatePasskey": "Setiap persetujuan membutuhkan kunci sandi yang berbeda.",
+    "pendingHeading": "Transfer menunggu persetujuan",
+    "pendingProgress": "{current} dari {total} persetujuan diberikan",
+    "pendingRemoteHint": "Pemegang kunci sandi lain dapat menyetujui dari perangkat mereka sendiri — transfer tetap di sini sampai persetujuannya cukup. Persetujuan terakhir mengirimkannya.",
+    "pendingApprove": "Setujui dengan kunci sandi",
+    "pendingApproveAndSend": "Setujui & kirim",
+    "pendingCancel": "Batalkan transfer",
+    "pendingInvalid": "Transfer yang menunggu ini tidak lagi valid — dompet berubah sejak dimulai. Batalkan untuk memulai yang baru.",
+    "pendingCancelForbidden": "Hanya orang yang memulai transfer ini atau pengelola dompet yang dapat membatalkannya.",
+    "sendStartButton": "Mulai transfer dengan kunci sandi",
+    "sendErrorExpired": "Transfer ini tidak lagi valid — dompet atau biaya jaringan berubah. Silakan mulai lagi.",
+    "sendErrorPendingExists": "Sudah ada transfer yang menunggu persetujuan. Selesaikan atau batalkan dulu.",
+    "sendErrorApprovalInvalid": "Persetujuan ini tidak dapat diverifikasi. Silakan coba lagi.",
+    "onchainManageHint": "Dompet ini aktif di blockchain, jadi perubahan kunci sandi dicatat di rantai dan membutuhkan persetujuan seperti biasa. GainForest menanggung biaya jaringan.",
+    "thresholdOnchainHint": "Berapa banyak kunci sandi yang harus menyetujui setiap transfer. Perubahan ini dicatat di blockchain — alamat dompet tetap sama.",
+    "manageForbidden": "Hanya pemilik organisasi atau admin yang dapat melakukan perubahan ini."
+  },
+  "accountSupport": {
+    "button": "Dukung",
+    "buttonAria": "Dukung {name} secara langsung",
+    "modalTitle": "Dukung {name}",
+    "modalDescription": "Pilih jumlah yang ingin diberikan langsung kepada {name}.",
+    "directNote": "100% langsung diberikan kepada {name}, tanpa biaya platform dan biaya jaringan ditanggung untuk Anda.",
+    "cartLabel": "Dukungan langsung untuk akun"
+  },
+  "testRecord": {
+    "hideAction": "Sembunyikan sebagai uji coba",
+    "hideHint": "Sembunyikan entri ini dari feed publik dan halaman jelajah sebagai konten uji coba",
+    "confirmHide": "Sembunyikan dari semua orang",
+    "cancel": "Batal",
+    "genericError": "Terjadi kesalahan. Silakan coba lagi."
+  },
+  "adminTestRecords": {
+    "title": "Postingan & pengamatan tersembunyi",
+    "description": "Postingan dan pengamatan ini ditandai sebagai uji coba, jadi disembunyikan dari feed publik dan halaman jelajah. Bagian lain dari akun pemiliknya tetap terlihat.",
+    "empty": "Belum ada postingan atau pengamatan yang disembunyikan.",
+    "remove": "Tampilkan kembali",
+    "unnamed": "Akun tanpa nama",
+    "error": "Terjadi kesalahan. Silakan coba lagi.",
+    "itemLabel": "{kind} oleh {name}",
+    "hiddenAgo": "Disembunyikan {time}",
+    "kinds": {
+      "post": "Postingan",
+      "observation": "Pengamatan",
+      "project": "Proyek",
+      "organization": "Pembaruan organisasi",
+      "donation": "Donasi",
+      "record": "Entri"
+    }
+  },
+  "devices": {
+    "metadata": {
+      "title": "Perangkat Tainá",
+      "description": "Pembaruan lapangan dari perangkat GainForest yang menjalankan Tainá, termasuk apakah tiap perangkat aktif dan siap."
+    }
+  },
+  "bluesky": {
+    "toggle": "Bagikan juga ke Bluesky",
+    "onHint": "Postingan ini juga akan dibagikan ke Bluesky",
+    "offHint": "Bagikan juga postingan ini ke Bluesky",
+    "composerHint": "Juga dibagikan ke Bluesky",
+    "viewPost": "Lihat di Bluesky",
+    "consent": {
+      "title": "Bagikan postingan Anda di Bluesky",
+      "body": "Saat Anda memposting pembaruan di sini, kami juga dapat menerbitkannya di Bluesky, jejaring sosial terbuka dengan jutaan pengguna.",
+      "discovery": "Ini cara yang bagus untuk ditemukan: pembaruan Anda menjangkau pecinta alam, pendana, dan peneliti jauh di luar GainForest.",
+      "profileNote": "Anda belum punya profil Bluesky, jadi kami akan membuatkannya dari profil GainForest Anda (nama, foto, dan bio).",
+      "profileNoteMaybe": "Jika Anda belum punya profil Bluesky, kami akan membuatkannya dari profil GainForest Anda (nama, foto, dan bio).",
+      "optOutNote": "Hanya postingan baru setelah fitur ini aktif yang dibagikan. Anda bisa menonaktifkannya kapan saja di Pengaturan.",
+      "confirm": "Aktifkan berbagi",
+      "cancel": "Nanti saja",
+      "error": "Kami tidak dapat mengaktifkan berbagi ke Bluesky. Silakan coba lagi."
+    },
+    "settings": {
+      "title": "Bluesky",
+      "toggleLabel": "Bagikan postingan baru ke Bluesky",
+      "toggleDescription": "Pembaruan komunitas yang Anda posting juga diterbitkan ke akun Bluesky Anda, sehingga lebih banyak orang dapat menemukan karya Anda.",
+      "viewProfile": "Lihat profil Bluesky Anda",
+      "error": "Kami tidak dapat menyimpan perubahan itu. Silakan coba lagi."
+    }
+  },
+  "epds": {
+    "metaTitle": "Cara kerja ePDS",
+    "metaDescription": "Tur interaktif tentang ePDS, Personal Data Server yang diperluas sehingga siapa pun bisa bergabung ke jaringan AT Protocol hanya dengan email.",
+    "kicker": "Personal Data Server yang diperluas",
+    "title": "Cara kerja ePDS",
+    "lead": "GainForest berjalan di atas AT Protocol, jaringan terbuka di balik Bluesky. Bergabung ke jaringan itu biasanya butuh kata sandi dan pengaturan teknis. ePDS menghapus penghalang itu: Anda mengetik email, menerima kode, dan langsung masuk. Halaman ini menunjukkan cara kerjanya, langkah demi langkah.",
+    "whatIs": {
+      "heading": "Apa itu PDS, dan apa arti huruf e?",
+      "p1": "Di AT Protocol, setiap orang menyimpan datanya di Personal Data Server, atau PDS. Anggap saja rumah pribadi untuk postingan, observasi, dan proyek Anda. Isinya milik Anda, dan Anda bisa pindah ke server lain kapan saja tanpa kehilangan apa pun.",
+      "p2": "ePDS adalah PDS biasa dengan satu tambahan: pintu depan yang ramah. Alih-alih meminta kata sandi, ia memasukkan Anda dengan kode email sekali pakai atau akun sosial, dan membuatkan akun saat kunjungan pertama. Di balik pintu itu semuanya tetap AT Protocol standar, jadi semua aplikasi di jaringan bisa berkomunikasi dengannya."
+    },
+    "compare": {
+      "heading": "Dua pintu depan",
+      "intro": "Rumah yang sama, pintu yang berbeda. Geser sakelarnya dan coba kedua cara masuk.",
+      "classicTab": "PDS klasik",
+      "epdsTab": "ePDS",
+      "handle": "Handle",
+      "password": "Kata sandi",
+      "inviteCode": "Kode undangan",
+      "email": "Alamat email",
+      "sendCode": "Kirimkan kode",
+      "signIn": "Masuk",
+      "codeLabel": "Ketik kode dari email Anda",
+      "classicCaption": "PDS klasik meminta kata sandi, dan sering juga kode undangan dari admin server. Anda juga harus membuat akun terlebih dahulu.",
+      "epdsCaption": "ePDS meminta email Anda lalu mengirim kode. Kunjungan pertama? Akun Anda langsung dibuat saat itu juga.",
+      "done": "Anda sudah masuk!",
+      "reset": "Coba lagi"
+    },
+    "journey": {
+      "heading": "Perjalanan proses masuk",
+      "intro": "Tekan putar, atau maju selangkah demi selangkah. Titik yang bergerak adalah proses masuk Anda yang menempuh perjalanan pulang pergi.",
+      "play": "Putar",
+      "pause": "Jeda",
+      "back": "Kembali",
+      "next": "Lanjut",
+      "stepLabel": "Langkah {n} dari {total}",
+      "ariaLabel": "Diagram perjalanan proses masuk",
+      "nodes": {
+        "app": "Aplikasi Anda",
+        "pds": "Inti PDS",
+        "auth": "Layanan masuk",
+        "inbox": "Kotak masuk Anda"
+      },
+      "steps": {
+        "s1": {
+          "title": "Anda mengeklik Masuk",
+          "text": "Semuanya dimulai di aplikasi yang Anda pakai, misalnya GainForest. Anda mengeklik Masuk dan mungkin mengetik email Anda."
+        },
+        "s2": {
+          "title": "Aplikasi memanggil PDS",
+          "text": "Aplikasi Anda diam-diam meminta PDS memulai proses masuk. Ini permintaan AT Protocol standar, sama seperti yang dilakukan aplikasi Bluesky mana pun."
+        },
+        "s3": {
+          "title": "PDS membuka pintu depannya",
+          "text": "Inilah trik ePDS. Alih-alih menampilkan formulir kata sandi, PDS mengarahkan peramban Anda ke layanan masuk yang ramah."
+        },
+        "s4": {
+          "title": "Kode terbang ke kotak masuk Anda",
+          "text": "Layanan masuk membuat kode sekali pakai dan mengirimkannya lewat email. Kode hanya berlaku sekali dan kedaluwarsa dalam beberapa menit."
+        },
+        "s5": {
+          "title": "Anda mengetik kode",
+          "text": "Anda menyalin kode dari email ke layar masuk. Itu membuktikan kotak masuk itu milik Anda. Tidak ada kata sandi sama sekali."
+        },
+        "s6": {
+          "title": "Baru di sini? Pilih handle",
+          "text": "Pada kunjungan pertama, ePDS membuatkan akun dan meminta Anda memilih handle, nama publik Anda di jaringan."
+        },
+        "s7": {
+          "title": "Jabat tangan bertanda tangan",
+          "text": "Layanan masuk memberi tahu PDS bahwa Anda sudah terverifikasi. Pesan itu membawa tanda tangan kriptografis, jadi tidak ada yang bisa memalsukannya."
+        },
+        "s8": {
+          "title": "Kembali ke aplikasi Anda",
+          "text": "PDS mengembalikan peramban Anda ke aplikasi dengan kode berumur pendek. Aplikasi Anda menukar kode itu dengan token akses."
+        },
+        "s9": {
+          "title": "Anda sudah masuk",
+          "text": "Aplikasi Anda kini bisa membaca dan menulis data atas nama Anda. Bagi jaringan, Anda terlihat seperti pengguna AT Protocol lainnya."
+        }
+      }
+    },
+    "map": {
+      "heading": "Bagian-bagian yang bergerak",
+      "intro": "ePDS adalah tim kecil berisi beberapa layanan. Ketuk masing-masing untuk melihat tugasnya.",
+      "ariaLabel": "Peta layanan ePDS",
+      "nodes": {
+        "app": {
+          "name": "Aplikasi Anda",
+          "desc": "Aplikasi AT Protocol mana pun, seperti GainForest atau Bluesky. Ia tidak pernah melihat kode email atau kunci apa pun. Ia hanya menerima token akses akhir."
+        },
+        "pds": {
+          "name": "Inti PDS",
+          "desc": "Personal Data Server standar. Ia menyimpan catatan Anda, berbicara dengan jaringan, dan menerbitkan token. ePDS membungkusnya tanpa mengubah caranya berkomunikasi dengan aplikasi lain."
+        },
+        "auth": {
+          "name": "Layanan masuk",
+          "desc": "Pintu depan yang ramah. Ia menampilkan layar masuk, mengirim kode email, menangani login sosial, dan membantu pengguna baru memilih handle."
+        },
+        "email": {
+          "name": "Penyedia email",
+          "desc": "Mengantarkan kode sekali pakai ke kotak masuk Anda. Setiap kode berumur pendek dan hanya bisa dipakai satu kali."
+        },
+        "db": {
+          "name": "Basis data bersama",
+          "desc": "Basis data kecil yang dipakai kedua layanan. Ia mencatat sesi dan kode masuk, tidak lebih."
+        }
+      }
+    },
+    "more": {
+      "heading": "Terus jelajahi",
+      "lexiconsTitle": "Skema data",
+      "lexiconsDesc": "Format catatan terbuka yang hidup di dalam setiap PDS.",
+      "githubTitle": "ePDS di GitHub",
+      "githubDesc": "Seluruh kode sumber, terbuka bagi siapa pun untuk dibaca, dijalankan, dan diperbaiki.",
+      "cgsTitle": "Cara kerja akun grup",
+      "cgsDesc": "Layanan penjaga yang memungkinkan satu tim berbagi satu akun grup dengan aman.",
+      "atprotoTitle": "Cara kerja AT Protocol",
+      "atprotoDesc": "Tur interaktif jaringan terbuka tempat semua ini dibangun.",
+      "walletTitle": "Dompet GainForest",
+      "walletDesc": "Bagaimana setiap akun mendapat dompet yang hanya bisa dibelanjakan oleh pemiliknya.",
+      "routerTitle": "Router ePDS",
+      "routerDesc": "Bagaimana aplikasi menemukan server yang tepat untuk sebuah email saat komunitas menjalankan beberapa."
+    }
+  },
+  "epdsRouter": {
+    "metaTitle": "Cara kerja router ePDS",
+    "metaDescription": "Panduan interaktif router ePDS: bagaimana aplikasi menemukan akun yang tepat untuk masuk dengan email di antara banyak server. Tuan rumah hanya membagikan sidik jari satu arah, tidak pernah kredensial atau alamat.",
+    "kicker": "penemuan email ke akun",
+    "title": "Satu email, banyak server",
+    "lead": "ePDS memungkinkan Anda masuk hanya dengan email. Ketika sebuah komunitas menjalankan beberapa server, aplikasi perlu lebih dulu menjawab pertanyaan kecil: akun mana yang ada untuk email ini? Router menjawabnya dalam satu panggilan. Tidak ada yang menyerahkan alamat atau kata sandi.",
+    "facts": {
+      "routing": {
+        "title": "Satu pencarian, akun yang tepat",
+        "text": "Aplikasi bertanya sekali dan tahu akun mana yang ada untuk email itu. Setiap jawaban adalah identitas yang selalu bisa ditemukan jaringan, bahkan setelah pindah server."
+      },
+      "privacy": {
+        "title": "Email tidak pernah disimpan",
+        "text": "Alamat diacak di servernya sendiri sebelum apa pun keluar dari sana. Router hanya melihat sidik jari, dan mengacaknya lagi sebelum menyimpan."
+      },
+      "zerochange": {
+        "title": "Tuan rumah tetap memegang kendali",
+        "text": "Tidak ada kredensial yang diserahkan, tidak ada yang dipasang di dalam PDS. Tuan rumah menjalankan satu skrip kecil di samping servernya, dengan jadwalnya sendiri."
+      }
+    },
+    "problem": {
+      "heading": "Mengapa penemuan diperlukan",
+      "p1": "Aplikasi dengan masuk lewat email harus mengirim login ke satu server tertentu. Server itu mengirim kode dan menyimpan akun. Dengan satu server jawabannya tetap. Dengan beberapa server aplikasi butuh direktori. Alamat email adalah jenis data yang tidak ingin Anda salin ke satu daftar besar.",
+      "p2": "Router menyelesaikannya dengan trik kecil: ia hanya bekerja dengan sidik jari. Setiap server mengacak alamatnya satu arah di rumah dan tidak membagikan apa pun lagi. Setiap pencarian mengacak email yang masuk dengan cara yang sama lalu membandingkan sidik jarinya. Jawaban sama, tanpa buku alamat, dan tidak ada yang menyerahkan kuncinya."
+    },
+    "demo": {
+      "heading": "Coba sebuah pencarian",
+      "intro": "Tiga server contoh, tiga email contoh. Pilih satu dan lihat bagaimana aplikasi menemukan akun yang tepat.",
+      "reset": "Ulangi",
+      "ariaLabel": "Diagram pencarian email dan resolusi identitas",
+      "nodes": {
+        "app": "Aplikasi Anda",
+        "router": "Router",
+        "directory": "Direktori identitas",
+        "forest": "PDS Hutan",
+        "ocean": "PDS Samudra",
+        "river": "PDS Sungai"
+      },
+      "steps": {
+        "idle": {
+          "title": "Pilih email di atas",
+          "text": "Aplikasi ingin memulai masuk lewat email. Ia belum tahu email ini milik akun yang mana."
+        },
+        "sent": {
+          "title": "Aplikasi bertanya ke router",
+          "text": "Email dikirim lewat panggilan privat yang terautentikasi. Pencarian tidak pernah ditulis ke log mana pun."
+        },
+        "fingerprint": {
+          "title": "Router membandingkan sidik jari",
+          "text": "Email menjadi sidik jari begitu tiba. Router membandingkannya dengan himpunan sidik jari tiap server."
+        },
+        "answer": {
+          "title": "Router menjawab dengan identitas",
+          "text": "Jawabannya bukan alamat server. Jawabannya adalah identitas permanen akun, yang disebut DID. Tugas router selesai di sini."
+        },
+        "resolve": {
+          "title": "Jaringan menemukan rumahnya",
+          "text": "Aplikasi bertanya ke direktori identitas di mana identitas ini tinggal hari ini. Ini resolusi standar AT Protocol dan tetap benar meski akun pindah server."
+        }
+      },
+      "outcomes": {
+        "one": {
+          "title": "Satu akun ditemukan",
+          "text": "Direktori menunjuk ke server rumah akun saat ini. Proses masuk dimulai di sana dan kodenya sampai ke kotak masuk yang benar."
+        },
+        "many": {
+          "title": "Dua akun ditemukan",
+          "text": "Email ini punya dua identitas terpisah. Aplikasi menampilkan pemilih, dan tiap identitas menemukan server rumahnya sendiri."
+        },
+        "none": {
+          "title": "Belum ada akun",
+          "text": "Tidak ada identitas untuk email ini, jadi aplikasi menawarkan membuat akun baru di server bawaannya."
+        }
+      }
+    },
+    "sync": {
+      "heading": "Bagaimana router tetap mutakhir",
+      "intro": "Tidak ada yang diserahkan: tiap tuan rumah mendorong potretnya sendiri, dengan pewaktu pilihannya.",
+      "play": "Putar",
+      "pause": "Jeda",
+      "back": "Kembali",
+      "next": "Lanjut",
+      "stepLabel": "Langkah {n} dari {total}",
+      "ariaLabel": "Diagram siklus sinkronisasi",
+      "nodes": {
+        "pds": "ePDS Anda",
+        "router": "Router",
+        "index": "indeks sidik jari"
+      },
+      "steps": {
+        "s1": {
+          "title": "Server Anda mengumpulkan daftarnya sendiri",
+          "text": "Sebuah skrip kecil berjalan di samping PDS Anda, dengan jadwal yang Anda pilih. Ia membaca email akun secara lokal. Kata sandi admin Anda tidak pernah meninggalkan mesin Anda."
+        },
+        "s2": {
+          "title": "Sidik jari dibuat di rumah",
+          "text": "Setiap alamat diacak satu arah di server Anda sendiri. Sejak saat ini, tidak ada email teks polos di mana pun dalam prosesnya."
+        },
+        "s3": {
+          "title": "Potret didorong",
+          "text": "Skrip mengirim seluruh himpunan sidik jari ke router lewat panggilan terenkripsi yang dilindungi token. Ia menggantikan potret sebelumnya sepenuhnya."
+        },
+        "s4": {
+          "title": "Router menukarnya",
+          "text": "Router mengacak setiap sidik jari untuk kedua kalinya dengan kunci privatnya sendiri, lalu mengganti seluruh himpunan server Anda dalam satu langkah atomik. Akun yang dihapus lenyap pada dorongan berikutnya."
+        }
+      }
+    },
+    "register": {
+      "heading": "Bergabung sebagai tuan rumah ePDS",
+      "intro": "Anda tidak pernah membagikan kata sandi admin dan tidak pernah menunggu siapa pun. Satu skrip mendaftarkan Anda dan langsung mulai mendorong.",
+      "p1": "Pada jalanan pertamanya, skrip mendaftarkan server Anda ke router, menyimpan token kirim di sampingnya (simpan berkas itu), dan mendorong potret pertama Anda. Server Anda dapat ditemukan dalam hitungan detik.",
+      "enrollLabel": "1 · jalankan skrip dorong",
+      "pushLabel": "2 · pasang di pewaktu",
+      "approveNote": "Selesai. Tanpa antrean persetujuan, tanpa menunggu. Keluar sepenuhnya pilihan Anda: berhenti mendorong, atau minta operator router menghapus entri Anda. Operator juga dapat menghapus entri yang menyalahgunakan kapan saja."
+    },
+    "integrate": {
+      "heading": "Integrasikan pencarian di aplikasi Anda",
+      "intro": "Aplikasi klien mendapat token sendiri dari operator router. Satu panggilan sebelum menampilkan layar masuk sudah cukup.",
+      "lookupLabel": "cari sebuah email",
+      "jsLabel": "tangani tiga hasilnya",
+      "cacheTip": "Balasan membawa identitas permanen tiap akun (DID-nya). Jaringan selalu bisa menemukan server terkini dari sebuah DID, bahkan setelah akun pindah. Aplikasi Anda tidak pernah bergantung pada alamat server tersimpan: satu pencarian, lalu resolusi standar AT Protocol menyelesaikan sisanya."
+    },
+    "api": {
+      "heading": "API selayang pandang",
+      "intro": "Pencarian dan status memakai token klien. Tuan rumah memakai token kirimnya. Token operator hanya untuk moderasi.",
+      "lookup": "Tanyakan akun (DID) mana yang ada untuk sebuah email.",
+      "status": "Keadaan sinkronisasi tiap server: jumlah akun, sinkronisasi terakhir, galat terakhir.",
+      "enroll": "Daftarkan server Anda. Panggilan terbuka tanpa kredensial. Langsung aktif, mengembalikan token kirim sekali-tampil.",
+      "digests": "Dorong potret lengkap pasangan sidik jari dan identitas. Setiap dorongan menggantikan yang sebelumnya.",
+      "script": "Skrip dorong siap pakai untuk tuan rumah. Python 3, hanya pustaka standar.",
+      "unregister": "Hapus server terdaftar (hanya operator router)."
+    },
+    "snippets": {
+      "copy": "Salin",
+      "copied": "Tersalin!"
+    },
+    "more": {
+      "heading": "Terus jelajahi",
+      "epdsTitle": "Cara kerja ePDS",
+      "epdsDesc": "Pintu depan yang ramah itu sendiri: masuk dengan kode email di AT Protocol.",
+      "githubTitle": "Router ePDS di GitHub",
+      "githubDesc": "Kode sumber lengkap router: satu layanan Go kecil tanpa dependensi."
+    }
+  },
+  "cgs": {
+    "metaTitle": "Cara kerja akun grup",
+    "metaDescription": "Tur interaktif tentang Certified Group Service, penjaga yang memungkinkan satu tim berbagi satu akun AT Protocol dengan peran, aturan yang jelas, dan jejak audit lengkap.",
+    "kicker": "Certified Group Service",
+    "title": "Cara kerja akun grup",
+    "lead": "Di AT Protocol, sebuah akun biasanya milik satu orang saja. Tapi hutan dipetakan oleh tim. Certified Group Service, disingkat CGS, memungkinkan satu tim berbagi satu akun dengan aman, dengan peran, aturan yang jelas, dan ingatan atas semua yang terjadi. Halaman ini menunjukkan cara kerjanya, langkah demi langkah.",
+    "whatIs": {
+      "heading": "Apa itu akun grup?",
+      "p1": "Setiap organisasi di GainForest tinggal di akun AT Protocol biasa. Akun biasa punya satu kata sandi dan satu pemilik. Itu cukup untuk satu orang, tapi tim butuh lebih: banyak orang menulis ke tempat yang sama, tanpa saling mengoper kata sandi akun.",
+      "p2": "CGS adalah layanan penjaga kecil yang berdiri di depan akun grup. Ia menyimpan kredensial akun dalam kotak tersegel, memegang daftar anggota dengan peran, dan memeriksa setiap permintaan terhadap aturan sebelum meloloskannya. Anggota tim tidak pernah melihat kata sandi. Bagi jaringan lainnya, grup terlihat seperti satu akun biasa, jadi aplikasi mana pun bisa membaca datanya seperti biasa."
+    },
+    "repo": {
+      "heading": "Satu akun, banyak tangan",
+      "intro": "Tiga rekan, satu repo bersama. Ketuk seorang rekan dan ia akan menerbitkan sebuah rekaman. Lihat bagaimana setiap rekaman mengingat penulisnya.",
+      "repoLabel": "Repo milik grup",
+      "empty": "Belum ada apa-apa. Ketuk seorang rekan di atas.",
+      "stamp": "oleh {name}",
+      "roleOwner": "Pemilik",
+      "roleAdmin": "Admin",
+      "roleMember": "Anggota",
+      "clear": "Bersihkan",
+      "caption": "Semua rekaman masuk ke repo yang sama, tapi layanan mencatat siapa yang membuat masing-masing. Ingatan itu membuat anggota bisa menyunting karyanya sendiri, sementara mengubah karya orang lain butuh admin."
+    },
+    "journey": {
+      "heading": "Perjalanan sebuah permintaan",
+      "intro": "Tekan putar, atau melangkah sendiri. Titik yang bergerak adalah permintaanmu dalam perjalanan pulang-pergi.",
+      "play": "Putar",
+      "pause": "Jeda",
+      "back": "Kembali",
+      "next": "Lanjut",
+      "stepLabel": "Langkah {n} dari {total}",
+      "ariaLabel": "Diagram perjalanan permintaan",
+      "nodes": {
+        "app": "Aplikasimu",
+        "pds": "PDS-mu",
+        "cgs": "Layanan grup",
+        "gpds": "PDS grup"
+      },
+      "steps": {
+        "s1": {
+          "title": "Kamu menekan Terbitkan",
+          "text": "Semua dimulai di aplikasi. Kamu masuk sebagai dirimu sendiri dan ingin menambahkan rekaman ke akun grupmu."
+        },
+        "s2": {
+          "title": "Aplikasi memanggil PDS-mu sendiri",
+          "text": "Aplikasi mengirim permintaan ke server data pribadimu dengan catatan penerusan: tolong teruskan ini ke layanan grup."
+        },
+        "s3": {
+          "title": "PDS-mu menandatangani tiket",
+          "text": "PDS-mu membuat tiket berumur pendek yang ditandatangani dengan kuncimu sendiri. Tiket itu menyebut namamu, layanannya, dan aksi persisnya. Ia berlaku sekali dan mati setelah dua menit."
+        },
+        "s4": {
+          "title": "Penjaga memeriksa tiket",
+          "text": "Layanan grup memeriksa tanda tangan terhadap identitas publikmu dan memastikan tiketnya masih segar dan belum dipakai. Tiket salinan tidak berguna."
+        },
+        "s5": {
+          "title": "Pemeriksaan peran",
+          "text": "Layanan mencarimu di daftar anggota grup. Anggota, admin, atau pemilik? Peranmu menentukan aksi mana yang terbuka untukmu."
+        },
+        "s6": {
+          "title": "Pemeriksaan penulis",
+          "text": "Untuk penyuntingan dan penghapusan ada satu pertanyaan lagi: siapa yang menulis rekaman ini? Anggota boleh mengubah rekamannya sendiri. Menyentuh karya orang lain butuh admin."
+        },
+        "s7": {
+          "title": "Semua dicatat",
+          "text": "Apa pun jawabannya, percobaan itu masuk ke log audit grup: siapa, apa, kapan, dan apakah diizinkan atau ditolak."
+        },
+        "s8": {
+          "title": "Layanan melakukan penulisan",
+          "text": "Jika semua pemeriksaan lolos, layanan menjalankan aksi di PDS milik grup, memakai kredensial yang hanya ia pegang, dan mencapmu sebagai penulis."
+        },
+        "s9": {
+          "title": "Selesai",
+          "text": "Jawaban kembali ke aplikasimu. Rekaman itu kini berada di repo grup, terlihat oleh seluruh jaringan seperti rekaman AT Protocol lainnya."
+        }
+      }
+    },
+    "roles": {
+      "heading": "Siapa boleh apa",
+      "intro": "Pilih topi, lalu coba beberapa aksi. Setiap percobaan, diizinkan atau ditolak, masuk ke log audit di bawah.",
+      "youAre": "Kamu adalah",
+      "tryAction": "Coba sebuah aksi",
+      "allowed": "Diizinkan",
+      "denied": "Ditolak",
+      "auditTitle": "Log audit",
+      "auditEmpty": "Belum ada apa-apa. Coba aksi di atas.",
+      "clearLog": "Hapus log",
+      "auditPermitted": "diizinkan",
+      "auditDenied": "ditolak",
+      "role": {
+        "visitor": {
+          "name": "Pengunjung",
+          "desc": "Tidak ada di daftar anggota sama sekali."
+        },
+        "member": {
+          "name": "Anggota",
+          "desc": "Bisa membuat rekaman dan mengelola karyanya sendiri."
+        },
+        "admin": {
+          "name": "Admin",
+          "desc": "Bisa mengelola anggota dan menyunting rekaman apa pun."
+        },
+        "owner": {
+          "name": "Pemilik",
+          "desc": "Satu per grup. Ditetapkan saat grup dibuat."
+        }
+      },
+      "action": {
+        "create": "Buat rekaman",
+        "editOwn": "Sunting rekamanmu sendiri",
+        "editOther": "Sunting rekaman orang lain",
+        "addMember": "Tambah anggota",
+        "setRole": "Ubah peran",
+        "viewAudit": "Baca log audit"
+      },
+      "ok": {
+        "create": "Setiap anggota bisa membuat rekaman. Rekaman ditulis ke repo grup dengan namamu tercap sebagai penulis.",
+        "editOwn": "Ini rekamanmu, jadi peran anggota sudah cukup. Layanan memeriksa cap penulis lebih dulu.",
+        "editOther": "Admin bisa menyunting rekaman apa pun di grup, siapa pun penulisnya.",
+        "addMember": "Admin bisa menambah orang baru sebagai anggota atau admin. Tidak ada yang bisa ditambahkan sebagai pemilik.",
+        "setRole": "Hanya pemilik yang bisa mengubah peran. Bahkan pemilik pun tidak bisa membuat pemilik kedua.",
+        "viewAudit": "Admin dan pemilik bisa membaca riwayat lengkap grup."
+      },
+      "no": {
+        "visitor": "Kamu tidak ada di daftar anggota, jadi permintaan berhenti di pintu. Percobaan itu tetap dicatat di log audit.",
+        "editOther": "Rekaman itu milik orang lain. Anggota hanya bisa menyunting karyanya sendiri. Menyunting rekaman orang lain butuh admin.",
+        "addMember": "Hanya admin dan pemilik yang bisa menambah anggota baru.",
+        "setRole": "Mengubah peran adalah tugas pemilik seorang. Admin tidak bisa menaikkan atau menurunkan siapa pun.",
+        "viewAudit": "Log audit hanya terbuka untuk admin dan pemilik."
+      }
+    },
+    "map": {
+      "heading": "Bagian-bagian yang bergerak",
+      "intro": "CGS adalah tim kecil berisi beberapa bagian. Ketuk masing-masing untuk melihat tugasnya.",
+      "ariaLabel": "Peta bagian layanan grup",
+      "nodes": {
+        "pds": {
+          "name": "PDS-mu",
+          "desc": "Server data milikmu sendiri. Ia menandatangani tiket pendek yang membuktikan siapa kamu dan meneruskan permintaanmu. Kata sandimu tidak pernah bepergian ke mana pun."
+        },
+        "cgs": {
+          "name": "Layanan grup",
+          "desc": "Penjaga di depan pintu. Ia memeriksa tiket, mencari peran, mencatat pembukuan, dan satu-satunya yang bisa bertindak atas akun grup."
+        },
+        "gpds": {
+          "name": "PDS grup",
+          "desc": "Server data yang sepenuhnya biasa yang menyimpan rekaman grup. Ia tidak tahu apa-apa soal peran atau anggota. Ia hanya percaya pada layanan yang memegang kredensialnya."
+        },
+        "members": {
+          "name": "Daftar anggota",
+          "desc": "Basis data kecil dan privat, satu per grup. Ia menyimpan identitas dan peran tiap anggota, serta mengingat siapa penulis setiap rekaman."
+        },
+        "audit": {
+          "name": "Log audit",
+          "desc": "Ingatan grup. Setiap percobaan dicatat: siapa, apa, kapan, dan apakah diizinkan atau ditolak."
+        },
+        "vault": {
+          "name": "Kredensial tersegel",
+          "desc": "Kata sandi aplikasi untuk akun grup, disimpan terenkripsi. Ini kunci cadangan terbatas, bukan kata sandi utama akun: anggota dan aplikasi tidak pernah melihatnya, hanya layanan yang bisa memakainya, dan pemegang kredensial asli akun bisa mencabutnya kapan saja."
+        }
+      }
+    },
+    "safety": {
+      "heading": "Keamanan bawaan",
+      "intro": "Tiga kebiasaan menjaga akun bersama tetap aman.",
+      "pass": {
+        "title": "Tiket cepat mati",
+        "text": "Setiap permintaan membawa tiket segar yang ditandatangani. Ia berlaku tepat satu kali dan kedaluwarsa setelah dua menit, jadi tiket curian nyaris tak berharga."
+      },
+      "vault": {
+        "title": "Kredensial tetap tersegel",
+        "text": "Layanan hanya menyimpan kata sandi aplikasi — kunci cadangan, bukan kata sandi utama akun. Ia disimpan terenkripsi, dan siapa pun yang memegang kredensial asli akun bisa mencabut akses layanan kapan saja. Sebaliknya tidak mungkin."
+      },
+      "log": {
+        "title": "Tidak ada yang luput",
+        "text": "Diizinkan atau ditolak, setiap aksi masuk ke log audit grup lengkap dengan siapa, apa, dan kapan."
+      }
+    },
+    "more": {
+      "heading": "Terus jelajahi",
+      "lexiconsTitle": "Skema data",
+      "lexiconsDesc": "Format rekaman terbuka yang hidup di dalam repo setiap grup.",
+      "epdsTitle": "Cara kerja ePDS",
+      "epdsDesc": "Pintu depan ramah yang memasukkan orang hanya dengan email.",
+      "githubTitle": "CGS di GitHub",
+      "githubDesc": "Kode sumber lengkap layanan grup, terbuka untuk dibaca, dijalankan, dan diperbaiki siapa pun.",
+      "atprotoTitle": "Cara kerja AT Protocol",
+      "atprotoDesc": "Tur interaktif jaringan terbuka tempat semua ini dibangun."
+    }
+  },
+  "atproto": {
+    "metaTitle": "Cara kerja AT Protocol",
+    "metaDescription": "Tur interaktif yang ramah tentang AT Protocol, jaringan terbuka tempat GainForest dibangun. Lihat bagaimana identitas, rekaman, dan aplikasi saling terhubung.",
+    "kicker": "AT Protocol",
+    "title": "Cara kerja AT Protocol",
+    "lead": "GainForest tidak menyimpan datamu di basis data tertutup. Semuanya hidup di AT Protocol, jaringan terbuka tempat orang memiliki datanya sendiri dan banyak aplikasi berbagi data itu. Halaman ini menjelaskan ide-ide besarnya dengan bahasa sederhana, lengkap dengan mainan kecil untuk dicoba.",
+    "whatIs": {
+      "heading": "Apa itu AT Protocol?",
+      "p1": "AT Protocol, disingkat atproto, adalah resep untuk membangun aplikasi sosial di mana data milik orang, bukan milik platform. Setiap orang dan setiap organisasi punya akun, dan setiap akun punya server data yang menyimpan rekamannya. Kiriman, suka, ikuti, observasi keanekaragaman hayati: masing-masing adalah rekaman kecil yang ditandatangani.",
+      "p2": "Aplikasi seperti GainForest atau Bluesky membaca rekaman itu dan mengubahnya menjadi linimasa, peta, dan profil. Rekaman tetap terbuka dan bisa dipindahkan, jadi tidak ada satu perusahaan pun yang bisa menguncimu. Kalau satu aplikasi tutup, nama dan datamu tetap selamat."
+    },
+    "naming": {
+      "heading": "Nama, bukan tempat",
+      "intro": "Di web klasik, tautan menunjuk ke tempat: satu server di suatu tempat. Di atproto, tautan menunjuk ke orang. Coba rusak keduanya.",
+      "linkChip": "tautan",
+      "web": {
+        "title": "Tautan ke tempat",
+        "serverLabel": "satu server",
+        "action": "Matikan servernya",
+        "undo": "Nyalakan lagi",
+        "okCaption": "Tautan ini hanya bekerja selama satu server itu tetap online.",
+        "downCaption": "Servernya hilang, dan kirimannya ikut mati. Semua salinan tautan ini sekarang rusak.",
+        "aria": "Diagram tautan web yang menunjuk ke satu server"
+      },
+      "id": {
+        "title": "Tautan ke orang",
+        "hostA": "rumah lama",
+        "hostB": "rumah baru",
+        "action": "Pindahkan Maria ke rumah baru",
+        "undo": "Pindahkan kembali",
+        "okCaption": "Tautan ini menyebut Maria, bukan mesin. Jaringan mencari tempat datanya tinggal saat ini.",
+        "movedCaption": "Maria pindah, dan tautannya tidak berubah. Tidak ada yang perlu diperbarui, tidak ada yang rusak.",
+        "aria": "Diagram tautan atproto yang menunjuk ke orang yang bisa berganti server"
+      }
+    },
+    "records": {
+      "heading": "Semuanya adalah rekaman",
+      "intro": "Setiap akun menyimpan datanya di repositori: folder publik berisi rekaman kecil yang ditandatangani. Rekaman bisa menunjuk ke rekaman di akun lain. Ketuk satu untuk membacanya.",
+      "aria": "Diagram dua repositori dengan rekaman yang saling terhubung",
+      "repoOfMaria": "Repo milik Maria",
+      "repoOfKai": "Repo milik Kai",
+      "nodes": {
+        "profile": "profil",
+        "post": "kiriman: lihat tukan",
+        "observation": "observasi + foto",
+        "like": "suka",
+        "follow": "ikuti"
+      },
+      "details": {
+        "mProfile": "Rekaman profil Maria. Nama dan bionya hidup di sini, di dalam repositorinya sendiri.",
+        "mPost": "Kiriman dari Maria. Kiriman ini menunjuk ke rekaman observasinya sebagai bukti, memakai alamat rekaman itu.",
+        "mObs": "Observasi keanekaragaman hayati dengan foto. GainForest membaca rekaman seperti ini untuk membangun peta dan halaman proyek.",
+        "kProfile": "Rekaman profil Kai, di dalam repositorinya sendiri.",
+        "kLike": "Suka juga sebuah rekaman. Ia hidup di repositori Kai dan menunjuk ke kiriman Maria lewat alamatnya. Tidak ada yang perlu izin untuk membuat tautan itu.",
+        "kFollow": "Kai mengikuti Maria. Rekaman ikuti menunjuk ke Maria sendiri, jadi tetap bekerja di mana pun datanya tinggal."
+      },
+      "caption": "Alamat dimulai dengan at:// dan menyebut akun, jenis rekaman, dan kunci. Aplikasi mana pun di jaringan bisa mengikutinya."
+    },
+    "flow": {
+      "heading": "Satu rekaman, semua aplikasi",
+      "intro": "Saat seseorang menerbitkan sesuatu, server data pribadinya (PDS) mengumumkan rekaman baru itu. Sebuah relai mengumpulkan pengumuman dari seluruh jaringan menjadi satu aliran besar, dan semua aplikasi mendengarkannya. Ketuk seseorang untuk menerbitkan.",
+      "aria": "Diagram rekaman yang mengalir dari server pribadi melalui relai ke aplikasi",
+      "publishAs": "Terbitkan sebagai {name}",
+      "pdsLabel": "PDS",
+      "relayLabel": "relai",
+      "appForest": "Aplikasi hutan",
+      "appFeed": "Aplikasi sosial",
+      "received": "{count} diterima",
+      "caption": "Kedua aplikasi menerima rekaman yang sama pada saat yang sama. Aplikasi baru bisa bergabung ke aliran itu besok dan membangun sesuatu yang tak terbayangkan, tanpa minta izin siapa pun."
+    },
+    "move": {
+      "heading": "Kamu selalu bisa pindah",
+      "intro": "Nama dan datamu tidak menempel di perusahaan mana pun. Kalau servermu jadi lambat, serakah, atau hilang, kamu tinggal berkemas dan pergi. Coba saja.",
+      "hostA": "Server lama",
+      "hostB": "Server baru",
+      "emptyHost": "kosong",
+      "suitcaseRecords": "128 rekaman",
+      "suitcaseFollowers": "42 pengikut",
+      "moveAction": "Pindah ke server baru",
+      "moveBack": "Pindah kembali",
+      "checkName": "Nama tetap sama",
+      "checkRecords": "Semua rekaman aman",
+      "checkFollowers": "Semua pengikut aman",
+      "checkLinks": "Semua tautan tetap bekerja",
+      "caption": "Ini disebut jalan keluar yang kredibel. Server harus memperlakukan orang dengan baik, karena pergi itu mudah. Kebanyakan orang tidak pernah pindah, tapi semua orang diuntungkan oleh pintu yang terbuka."
+    },
+    "roots": {
+      "heading": "Tiga ide lama, satu jaringan",
+      "intro": "Atproto tidak muncul begitu saja. Ia mencampur bagian terbaik dari tiga gelombang internet sebelumnya.",
+      "web": {
+        "title": "Dari web",
+        "text": "Siapa pun boleh bergabung dan menerbitkan tanpa minta izin, dan semuanya bisa saling tertaut."
+      },
+      "p2p": {
+        "title": "Dari peer-to-peer",
+        "text": "Setiap rekaman ditandatangani pembuatnya, jadi tetap tepercaya dari komputer mana pun ia datang."
+      },
+      "scale": {
+        "title": "Dari platform besar",
+        "text": "Linimasa cepat, pencarian, dan hitungan datang dari layanan pengindeksan kuat yang membaca aliran bersama."
+      }
+    },
+    "trust": {
+      "heading": "Kepercayaan santai",
+      "intro": "Memeriksa setiap tanda tangan di setiap tampilan akan lambat. Atproto mengambil jalan tengah yang santai.",
+      "signed": {
+        "title": "Ditandatangani di sumber",
+        "text": "Setiap rekaman membawa tanda tangan pembuatnya, jadi siapa pun bisa memeriksanya saat itu penting."
+      },
+      "views": {
+        "title": "Tampilan cepat",
+        "text": "Aplikasi menyajikan tampilan siap pakai tanpa memeriksa ulang tiap rekaman. Kalau aplikasi berbohong, rekaman asli yang ditandatangani akan membuktikannya."
+      },
+      "exit": {
+        "title": "Pintu terbuka",
+        "text": "Data dan identitas bisa pindah kapan saja, jadi layanan yang nakal kehilangan penggunanya. Itu membuat semua pihak jujur."
+      }
+    },
+    "lexicon": {
+      "heading": "Berbicara bahasa yang sama",
+      "p1": "Agar aplikasi bisa berbagi rekaman, mereka harus sepakat soal bentuk tiap rekaman. Atproto melakukannya dengan skema bernama lexicon. Setiap skema punya pemilik yang jelas yang boleh mengembangkannya, dan setiap aplikasi bisa memastikan rekaman mengikuti aturan dengan tepat. Struktur itulah yang membuat berbagi bisa berjalan.",
+      "p2": "GainForest menerbitkan skema terbukanya sendiri untuk observasi keanekaragaman hayati, proyek, sertifikat, dan donasi. Aplikasi lain mana pun bisa membaca rekaman kami atau menulis rekaman yang cocok. Kamu bisa menjelajahi semuanya di panduan skema data di bawah."
+    },
+    "more": {
+      "heading": "Terus jelajahi",
+      "lexiconsTitle": "Skema data",
+      "lexiconsDesc": "Semua format rekaman yang diterbitkan GainForest di jaringan.",
+      "cgsTitle": "Cara kerja akun grup",
+      "cgsDesc": "Layanan penjaga yang membuat satu tim bisa berbagi satu akun dengan aman.",
+      "epdsTitle": "Cara kerja ePDS",
+      "epdsDesc": "Sistem masuk dan server di balik setiap akun GainForest.",
+      "siteTitle": "atproto.com",
+      "siteDesc": "Situs resmi protokol, dengan spesifikasi lengkap dan panduan untuk pembangun.",
+      "ethosNote": "Banyak ide di halaman ini berasal dari esai tim protokol tentang filosofi desainnya:",
+      "ethosLink": "Ethos atproto"
+    }
+  },
+  "identifications": {
+    "meta": {
+      "title": "Identifikasi",
+      "description": "Setiap label suara AudioMoth yang kamu simpan, terkumpul di satu tempat."
+    },
+    "title": "Identifikasi",
+    "subtitle": "Semua label AudioMoth tersimpan dari seluruh rekamanmu, dalam satu tempat. Masing-masing adalah kemunculan keanekaragaman hayati di akunmu.",
+    "loading": "Memuat identifikasi…",
+    "loadFailed": "Kami tidak dapat memuat identifikasimu. Silakan coba lagi.",
+    "unknownRecording": "Rekaman tidak dikenal",
+    "summary": "{count} identifikasi",
+    "summaryHint": "Ringkasan hanya-baca dari ruang pelabelanmu.",
+    "openLabeller": "Buka pelabel",
+    "export": "Ekspor CSV",
+    "refresh": "Muat ulang",
+    "searchPlaceholder": "Cari nama, rekaman, atau catatan…",
+    "filterAll": "Semua · {count}",
+    "emptyTitle": "Belum ada identifikasi",
+    "emptyBody": "Gambar dan simpan kotak di pelabel AudioMoth, dan akan muncul di sini.",
+    "noMatches": "Tidak ada identifikasi yang cocok dengan filtermu.",
+    "signInTitle": "Masuk untuk melihat identifikasi",
+    "signInBody": "Label AudioMoth tersimpanmu ada di akunmu. Masuk untuk melihatnya.",
+    "categories": {
+      "bird": "Burung",
+      "frog": "Katak",
+      "insect": "Serangga",
+      "other": "Lainnya",
+      "note": "Catatan"
+    }
+  },
+  "walletExplainer": {
+    "metaTitle": "Anatomi dompet donasi: esai interaktif",
+    "metaDescription": "Tumbuhkan kunci nyata pada kurva kunci sandi di browser Anda, turunkan alamat brankas sungguhan dengan matematika pabriknya sendiri, dan mainkan perjalanan hidup sebuah donasi. Esai interaktif tentang dompet donasi GainForest.",
+    "kicker": "Esai interaktif",
+    "title": "Anatomi dompet donasi",
+    "standfirst": "Setiap organisasi di GainForest dapat menyimpan donasi di dompet tanpa kata sandi, tanpa frasa benih, dan tanpa perusahaan yang memegang kunci. Halaman ini tidak sekadar menjelaskan cara kerjanya. Halaman ini membiarkan Anda menjalankan mesinnya sendiri, langsung di browser Anda.",
+    "intro": {
+      "p1": "Saat seorang pendukung mendanai restorasi bakau atau survei burung, uangnya mendarat di brankas kecil di Ethereum. Brankas itu tidak punya operator dan tidak punya meja bantuan. Ia patuh pada tepat satu hal: tanda tangan kriptografis dari ponsel dan laptop orang-orang yang menjalankan proyek.",
+      "p2": "Tiga gagasan membuatnya mungkin. Kunci yang tumbuh di dalam perangkat Anda dan tidak pernah keluar darinya. Alamat yang bisa dihitung sebelum dompetnya ada. Dan kontrak yang memeriksa tanda tangan sidik jari dengan matematika murni. Mari kita bangun satu per satu, secara langsung."
+    },
+    "part1": {
+      "label": "Eksperimen langsung",
+      "heading": "Sebuah kunci tumbuh di ponsel Anda",
+      "p1": "Di balik setiap permintaan Face ID ada kriptografi tua yang indah: sepasang kunci kurva eliptik pada kurva bernama P-256. Perangkat Anda mengarang bilangan acak yang sangat besar, menguncinya di dalam chip aman, dan hanya menyerahkan titik publik pasangannya: dua koordinat, x dan y.",
+      "p2": "Browser Anda bisa melakukan hal yang sama detik ini juga. Tekan tombol di bawah dan ia akan menumbuhkan kunci baru pada kurva yang persis sama. Bagian privatnya lahir dengan aturan ketat: boleh menandatangani, dan tidak boleh diekspor. Halaman ini pun tidak bisa membacanya.",
+      "p3": "Dua koordinat itu adalah semua yang pernah diketahui dompet tentang Anda. Kontrak menyimpannya sebagai sepasang slot 32 byte dan, saat uang harus bergerak, menuntut tanda tangan yang hanya bisa dibuat oleh bagian yang terkunci. Anda baru saja melihat browser Anda lolos pemeriksaan yang persis sama."
+    },
+    "keyForge": {
+      "bench": "Eksperimen 1 · Tumbuhkan kunci",
+      "invite": "Browser Anda akan membuat pasangan kunci sungguhan pada kurva kunci sandi (P-256). Kunci ini hanya hidup di halaman ini dan lenyap saat Anda pergi.",
+      "growButton": "Tumbuhkan kunci",
+      "unsupported": "Browser Anda tidak mendukung WebCrypto di sini. Sisa esai tetap berfungsi tanpanya.",
+      "privateLabel": "Kunci privat · chip aman",
+      "privateNote": "Ditandai tidak dapat diekspor sejak lahir. Ia bisa menandatangani, dan hanya itu yang akan pernah dilakukannya.",
+      "publicLabel": "Kunci publik · yang disimpan rantai",
+      "publicNote": "X dan y titik publik Anda, persis seperti struct Signer kontrak menyimpannya.",
+      "messageLabel": "Pembayaran untuk disetujui",
+      "sampleMessage": "bayar 20 USDC ke Rio Claro",
+      "signButton": "Tandatangani dengan kunci Anda",
+      "verified": "Tanda tangan sah",
+      "failed": "Verifikasi gagal",
+      "verifyNote": "Kunci Anda menandatangani hash pembayaran dan browser Anda memverifikasinya terhadap titik publik. Di Ethereum, brankas menjalankan pemeriksaan P-256 yang sama.",
+      "privacyNote": "Tidak ada yang disimpan dan tidak ada yang dikirim ke mana pun. Muat ulang halaman dan kunci ini hilang selamanya."
+    },
+    "part2": {
+      "label": "Eksperimen langsung",
+      "heading": "Alamat yang terbuat dari aritmetika",
+      "p1": "Inilah sifat paling aneh dari seluruh sistem: alamat dompet ada sebelum dompetnya ada. Tanpa transaksi, tanpa pemasangan, tanpa pendaftaran di mana pun. Alamat hanyalah jawaban dari sebuah perhitungan, dan siapa pun yang tahu bahan-bahannya mendapat jawaban yang sama.",
+      "p2": "Resepnya punya empat bahan: slot pemilik yang selamanya kosong, daftar kunci penandatangan, ambang persetujuan, dan garam yang di-hash dari identitas organisasi. Kontrak pabrik mengaduknya dengan keccak256 dan aturan CREATE2. Coba di bawah. Ketik sebuah nama dan lihat setiap digit alamat bereaksi.",
+      "p3": "Karena itulah tidak ada yang harus memercayai GainForest soal alamat mana milik organisasi mana. Organisasi menerbitkan bahan-bahannya sebagai catatan publik di akunnya sendiri. Ragu pada sebuah label? Ulangi aritmetikanya, seperti yang baru Anda lakukan, lalu bandingkan."
+    },
+    "addressForge": {
+      "bench": "Eksperimen 2 · Tempa alamat",
+      "liveTag": "matematika pabrik sungguhan, dihitung saat Anda mengetik",
+      "stepAccount": "Bahan: identitas akun",
+      "nameAria": "Nama organisasi",
+      "typeHint": "ketik apa saja",
+      "stepSigners": "Bahan: himpunan penandatangan",
+      "yourKey": "kunci Anda dari eksperimen 1",
+      "sampleKey": "kunci contoh",
+      "secondKey": "perangkat kedua",
+      "addSecond": "tambah perangkat kedua",
+      "thresholdNote": "ambang 1 · kunci mana pun di daftar boleh menandatangani",
+      "stepSalt": "Satu hash atas semua bahan",
+      "stepAddress": "Aturan CREATE2 menamai alamat",
+      "footnote": "Alamat pabrik dan hash kode proxy di atas adalah nilai asli jaringan utama Ethereum, dan turunan ini cocok dengan fungsi getAddress milik pabrik itu sendiri. Setiap hash di bangku ini dihitung oleh browser Anda."
+    },
+    "part3": {
+      "label": "Membaca sumbernya",
+      "heading": "Kontraknya, beranotasi",
+      "p1": "Brankas ini adalah akun pintar Splits: sumber terbuka, teraudit, dan dibangun di atas rancangan Coinbase dan Daimo. Anda tidak perlu memercayai kata-kata esai ini. Berikut tiga bagian yang memikul bebannya, masing-masing dengan catatan tentang artinya.",
+      "p2": "Satu sifat lagi lahir dari rancangan ini. Pabrik memasang dengan CREATE2, jadi bahan yang sama menghasilkan alamat yang sama di setiap rantai tempat pabrik itu ada. Alamat sebuah organisasi portabel di seluruh dunia EVM."
+    },
+    "contract": {
+      "signerNote": "Penandatangan hanyalah dua slot 32 byte. Untuk kunci sandi, keduanya menyimpan x dan y yang Anda tumbuhkan di eksperimen 1. Struct yang sama juga muat alamat Ethereum klasik, dengan slot kedua dibiarkan kosong.",
+      "saltNote": "Seluruh identitas dompet, di-hash menjadi satu garam: siapa pemiliknya (untuk dompet GainForest, tidak ada), kunci mana yang boleh menandatangani, dan berapa yang harus setuju. Ubah bahan mana pun dan alamatnya berpindah.",
+      "webauthnNote": "Begini rantai memeriksa tanda tangan Face ID: ia mencoba dulu pemverifikasi bawaan di alamat 0x100 dan, di rantai yang tidak memilikinya, memverifikasi persamaan kurva langkah demi langkah lewat pustaka."
+    },
+    "part4": {
+      "label": "Alur main",
+      "heading": "Perjalanan hidup sebuah donasi",
+      "p1": "Satukan kepingannya dan muncul urutan yang menarik. Seorang pendukung bisa mengirim uang ke alamat itu sejak hari pertama, saat alamat itu masih bukan apa-apa kecuali jawaban eksperimen 2. Rantai tidak keberatan. Saldo milik alamat, dan alamat ini sama nyatanya dengan alamat mana pun.",
+      "p2": "Entri terakhir menutup lingkarannya. Sebelum pemasangan, daftar penandatangan masih bisa berubah, dan catatan tinggal menunjuk ke alamat yang baru dihitung. Sesudahnya catatan membeku dan brankas mengambil alih: menambah perangkat menjadi aksi di rantai, disetujui oleh kunci yang sudah ada di daftar."
+    },
+    "ledger": {
+      "bench": "Eksperimen 3 · Buku besar sebuah dompet",
+      "replay": "Ulangi",
+      "start": "Mulai",
+      "next": "Lanjut",
+      "empty": "Enam peristiwa, dari dompet yang belum ada sampai dompet yang membayar kerja nyata. Tekan Mulai.",
+      "events": {
+        "record": {
+          "title": "Sebuah resep diterbitkan",
+          "body": "Organisasi menulis bahan-bahan dompetnya di akunnya sendiri. Di luar rantai, gratis, dan publik."
+        },
+        "first": {
+          "title": "Donasi pertama tiba",
+          "body": "Dikirim ke alamat hasil perhitungan. Tidak ada kontrak di sana. Uangnya tetap menunggu."
+        },
+        "second": {
+          "title": "Pendukung lain memberi",
+          "body": "Alamat terus mengumpulkan. Masih tanpa kode, masih tanpa apa pun untuk dirawat."
+        },
+        "deploy": {
+          "title": "Pembayaran pertama: dompet mewujud",
+          "body": "Pembayaran membawa initCode, jadi pabrik memasang brankas di alamat yang dijanjikan matematika. Lalu pembayarannya dieksekusi."
+        },
+        "payout": {
+          "title": "Proyek menerima bayaran",
+          "body": "Seorang penandatangan menyetujui dengan sidik jari. Brankas memverifikasi tanda tangan P-256 di rantai."
+        },
+        "freeze": {
+          "title": "Resepnya membeku",
+          "body": "Alamat kini punya kode, jadi daftar bahan tidak akan pernah bisa berubah diam-diam lagi. Mulai sekarang, brankas sendiri yang mengelola penandatangannya."
+        }
+      },
+      "balanceLabel": "Tersimpan di alamat",
+      "codeLabel": "Kode di alamat",
+      "codeNone": "tidak ada",
+      "codeDeployed": "brankas ERC-1967",
+      "meterNoteBefore": "Uang bisa menunggu di alamat tanpa kode. Satu-satunya kontrak yang bisa muncul di sana adalah brankas yang digambarkan bahan-bahannya.",
+      "meterNoteAfter": "Brankas sudah hidup. Setiap pembayaran keluar kini diperiksa terhadap daftar penandatangan."
+    },
+    "epilogue": {
+      "heading": "Periksa labelnya sendiri",
+      "p1": "Setiap klaim di halaman ini bisa diperiksa. Resep dompet ada di akun organisasi sendiri sebagai catatan publik. Pabriknya ada di alamat yang sama di Ethereum. Ambil catatannya, jalankan eksperimen 2 dengan bahan persisnya, dan alamatnya cocok atau tidak cocok. Tanpa tanda tangan, tanpa otoritas, dan tanpa perlu memercayai situs ini.",
+      "p2": "Catatan jujurnya: jika semua kunci di daftar hilang, uangnya tidak bisa bergerak, jadi organisasi sebaiknya mendaftarkan perangkat kedua sejak awal. Dan sampai pembayaran pertama, mengubah daftar penandatangan mengubah alamat, jadi daftar itu sebaiknya mantap dulu sebelum donasi diarahkan ke sana.",
+      "contractLink": "Baca kontrak brankas pintar di GitHub",
+      "lexiconLink": "Skema catatan dompet, dan semua skema lainnya",
+      "atprotoLink": "Cara AT Protocol menyimpan catatannya"
     }
   }
 }

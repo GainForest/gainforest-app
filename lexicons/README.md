@@ -56,6 +56,40 @@ they ship with `@atproto/api` and are loaded into the proxy agent already:
 deprecated there in favour of `facets`. `app.gainforest.feed.repost` (a verbatim
 port of `app.bsky.feed.repost`) is a trivial add if reposts are wanted later.
 
+## Bluesky cross-posting (`app.gainforest.actor.preferences`)
+
+Because `app.gainforest.feed.post` is a faithful port of `app.bsky.feed.post`,
+cross-posting to Bluesky is just writing the SAME record body a second time
+into the user's own repo under the `app.bsky.feed.post` NSID, **reusing the
+GainForest post's rkey** — so the mapping is deterministic
+(`at://did/app.gainforest.feed.post/RKEY` ⇄ `at://did/app.bsky.feed.post/RKEY`,
+public URL `https://bsky.app/profile/DID/post/RKEY`). The wiring lives in
+`app/_lib/bluesky-crosspost.ts`.
+
+Rules baked into the client:
+
+- **Strictly opt-in.** The switch lives in the feed composer and account
+  Settings; the FIRST activation is gated by an explicit consent modal
+  (`app/_components/BlueskyConsentModal.tsx`). Nothing is ever written to an
+  `app.bsky.*` collection before that consent.
+- The preference + consent timestamp are stored in
+  `app.gainforest.actor.preferences` (rkey `self`) — the same singleton
+  pattern as `app.gainforest.notification.seen`, read straight from the PDS,
+  not indexed.
+- Accounts without an `app.bsky.actor.profile` get one created on consent,
+  derived from their `app.certified.actor.profile` (name, bio, and the avatar
+  blob by reference when it satisfies Bluesky's png/jpeg ≤ 1MB constraint).
+- **Top-level posts only, personal repos only.** Replies reference GainForest
+  records the Bluesky appview can't thread, and organizations (CGS repos)
+  never cross-post.
+- Twin writes are best-effort: the GainForest post is the source of truth and
+  never fails because Bluesky did. Edits/deletes propagate to the twin
+  best-effort too.
+- The feed only renders a "View on Bluesky" link for twins the public Bluesky
+  appview actually returns (`app.bsky.feed.getPosts`), so links never point at
+  posts bsky.app can't show. Note this also means posts only surface on
+  Bluesky if the PDS is crawled by a Bluesky relay (`com.atproto.sync.requestCrawl`).
+
 ## Relationship to the existing comment/review layer
 
 The feed already reads `org.impactindexer.review.comment` (written by

@@ -10,7 +10,10 @@
       "menu": "Menu",
       "navigation": "Navigasi",
       "close": "Tutup",
-      "theme": "Tema"
+      "theme": "Tema",
+      "projects": "Proyek",
+      "observations": "Observasi",
+      "bioblitz": "BioBlitz"
     },
     "hero": {
       "imageAlt": "Lembah hutan hujan berkabut",
@@ -21,12 +24,12 @@
     },
     "paths": {
       "title": "Pilih jalan Anda",
-      "description": "Baik Anda ingin mendanai dampak atau menampilkan karya Anda, ada tempat untuk Anda.",
+      "description": "Baik Anda ingin menjelajahi bukti lapangan maupun menampilkan karya Anda, ada tempat untuk Anda.",
       "cards": {
         "funders": {
-          "label": "Untuk pendana",
-          "title": "Saya ingin mendukung",
-          "emphasis": "sebuah proyek",
+          "label": "Untuk penjelajah",
+          "title": "Saya ingin menjelajah",
+          "emphasis": "bukti lapangan",
           "description": "Jelajahi catatan terverifikasi atas kerja lingkungan nyata — momen restorasi yang sebenarnya, seperti yang terjadi di lapangan.",
           "cta": "Jelajahi catatan",
           "alt": "Sungai berkelok melalui hutan hujan"
@@ -35,7 +38,7 @@
           "label": "Untuk organisasi",
           "title": "Saya adalah penjaga",
           "emphasis": "alam",
-          "description": "Tampilkan kerja regeneratif Anda dan terhubung dengan pendana yang peduli.",
+          "description": "Tampilkan kerja regeneratif Anda beserta bukti di baliknya.",
           "cta": "Kelola organisasi saya",
           "alt": "Air terjun di hutan tropis"
         }
@@ -44,10 +47,10 @@
     "explainer": {
       "eyebrow": "Tonton penjelasannya",
       "titlePrefix": "Cara baru untuk",
-      "titleEmphasis": "mendanai alam",
-      "description": "Dalam dua menit, lihat bagaimana Bumicerts mengubah kerja lapangan nyata menjadi catatan yang dapat diverifikasi — dan menyalurkan pendanaan langsung ke para penjaga alam setempat yang melakukannya.",
+      "titleEmphasis": "mendokumentasikan alam",
+      "description": "Dalam dua menit, lihat bagaimana Bumicerts mengubah kerja lapangan nyata menjadi catatan yang dapat diverifikasi bagi penjaga alam setempat.",
       "play": "Putar video",
-      "videoTitle": "Bumicerts: mekanisme pendanaan alam yang baru dan adil untuk penjaga alam setempat"
+      "videoTitle": "Bumicerts: catatan alam terverifikasi untuk penjaga alam setempat"
     },
     "certificate": {
       "eyebrow": "Sertifikat",
@@ -66,8 +69,8 @@
         },
         "communities": {
           "id": "3",
-          "question": "Jalur langsung ke komunitas",
-          "answer": "Saat Anda mendanai sertifikat, dana Anda sampai ke orang-orang yang melakukan restorasi. Tanpa perantara yang mengambil biaya atau overhead yang kabur."
+          "question": "Catatan bersama dengan komunitas",
+          "answer": "Setiap sertifikat menghubungkan bukti lapangan, konteks proyek, dan orang atau organisasi yang melakukan kerja tersebut, sehingga catatan mudah ditinjau dan dibagikan."
         },
         "story": {
           "id": "4",
@@ -83,7 +86,7 @@
       }
     },
     "footer": {
-      "tagline": "Menghubungkan komunitas dengan pendana.",
+      "tagline": "Menghubungkan komunitas melalui bukti lapangan tepercaya.",
       "infrastructure": "Infrastruktur terbuka. Dibangun bersama GainForest.",
       "documentation": "Dokumentasi",
       "copyright": "Sumber terbuka, digerakkan komunitas."
@@ -128,7 +131,7 @@
           "blurb": "Komunitas dapat memakai bukti terverifikasi mereka saat mendaftar ke putaran pendanaan yang didukung komunitas."
         },
         "gainforest": {
-          "blurb": "GainForest membantu penjaga alam menerbitkan kerja terverifikasi, lokasi, pohon, observasi, dan cerita proyek."
+          "blurb": "GainForest membantu komunitas dan organisasi menerbitkan observasi lapangan, catatan biodiversitas, tempat, dan cerita proyek."
         },
         "hypercerts": {
           "blurb": "Klaim dampak terbuka dapat terhubung dengan alat Hypercerts dan ekosistem pendanaan barang publik."

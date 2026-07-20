@@ -1,9 +1,8 @@
 "use client";
 
 /**
- * Checkout for the donation cart. One USDC wallet approval per project plus
- * an optional GainForest tip (slider, default 10%) that goes to the platform
- * wallet covering everyone's network fees.
+ * Checkout for project and direct account donations, plus an optional
+ * GainForest tip that helps cover network fees.
  *
  * Payments run sequentially; each line shows its own progress. Successful
  * lines are removed from the cart immediately, so a partial failure leaves
@@ -61,6 +60,7 @@ import {
   toUsdcUnits,
   USDC_CONTRACT,
 } from "@/lib/facilitator/usdc";
+import { FACILITATOR_WALLET_ADDRESS } from "@/app/_lib/urls";
 
 type RecipientState = { status: "loading" } | { status: "ready"; address: string } | { status: "unavailable" };
 
@@ -78,7 +78,32 @@ type CompletedLine = {
   txHash: string;
 };
 
+export type CheckoutSideEffects = "live" | "mock";
+
 const TIP_LINE_KEY = "gainforest-tip";
+const MOCK_RECIPIENT_ADDRESS = "0x1111111111111111111111111111111111111111";
+const MOCK_WALLET_ADDRESS = "0x2222222222222222222222222222222222222222";
+const MOCK_TIP_ADDRESS = "0x3333333333333333333333333333333333333333";
+
+function mockTransactionHash(index: number): string {
+  return `0x${(index + 1).toString(16).padStart(64, "0")}`;
+}
+
+function waitForMock(milliseconds: number): Promise<void> {
+  return new Promise((resolve) => window.setTimeout(resolve, milliseconds));
+}
+
+/**
+ * Client-side guards so the checkout can never hang on "Processing…"
+ * forever when the settlement request stalls (server killed, connection
+ * dropped, stuck transaction). Slightly above the payment routes'
+ * maxDuration (300s) so a slow-but-alive server still gets to answer.
+ */
+const SETTLE_TIMEOUT_MS = 180_000;
+const BATCH_SETTLE_TIMEOUT_MS = 320_000;
+
+/** Payment state unknown — it may still complete; never retry blindly. */
+const SETTLEMENT_TIMEOUT_RAW = { code: "SETTLEMENT_TIMEOUT" } as const;
 
 function socialShareUrl(platform: "x" | "bluesky" | "telegram", text: string): string {
   const encoded = encodeURIComponent(text);
@@ -131,17 +156,120 @@ async function signAndSettle(params: {
     validBefore,
   });
 
-  const response = await fetch(params.endpoint, {
-    method: "POST",
-    headers: { "content-type": "application/json", "PAYMENT-SIGNATURE": sigHeader },
-    body: JSON.stringify(params.body),
-  });
+  let response: Response;
+  try {
+    response = await fetch(params.endpoint, {
+      method: "POST",
+      headers: { "content-type": "application/json", "PAYMENT-SIGNATURE": sigHeader },
+      body: JSON.stringify(params.body),
+      signal: AbortSignal.timeout(SETTLE_TIMEOUT_MS),
+    });
+  } catch {
+    // Timed out or the connection dropped mid-settlement: the payment may
+    // still have gone through, so surface the "check your wallet" message.
+    return { errorRaw: SETTLEMENT_TIMEOUT_RAW };
+  }
   const raw = (await response.json().catch(() => null)) as { transactionHash?: string } | null;
   if (!response.ok || typeof raw?.transactionHash !== "string") return { errorRaw: raw };
   return { txHash: raw.transactionHash };
 }
 
-export function CheckoutView({ authSession }: { authSession: AuthSession }) {
+type BatchLineResult = {
+  orgDid: string;
+  rkey?: string;
+  amount: string;
+  transactionHash?: string;
+  error?: string;
+};
+
+type BatchResponse = {
+  success?: boolean;
+  pullTransactionHash?: string;
+  lines?: BatchLineResult[];
+  tip?: { amount: string; transactionHash?: string; error?: string };
+  error?: string;
+  code?: string;
+};
+
+/**
+ * ONE wallet approval for the whole cart: the donor authorizes the TOTAL to
+ * the facilitator wallet, which fans it out to every organization plus the
+ * tip server-side (see /api/checkout).
+ */
+async function signAndSettleBatch(params: {
+  ethereum: EthereumProvider;
+  senderWallet: string;
+  facilitatorWallet: string;
+  totalUnits: bigint;
+  body: Record<string, unknown>;
+  onSigned?: () => void;
+}): Promise<{ ok: true; response: BatchResponse } | { ok: false; errorRaw: unknown }> {
+  const nonce = createNonce();
+  const validBefore = String(Math.floor(Date.now() / 1000) + 300);
+  const typedData = {
+    domain: {
+      name: EIP3009_DOMAIN_NAME,
+      version: EIP3009_DOMAIN_VERSION,
+      chainId: CHAIN_ID,
+      verifyingContract: USDC_CONTRACT,
+    },
+    types: EIP3009_TYPES_FOR_WALLET,
+    primaryType: "TransferWithAuthorization",
+    message: {
+      from: params.senderWallet,
+      to: params.facilitatorWallet,
+      value: params.totalUnits.toString(),
+      validAfter: "0",
+      validBefore,
+      nonce,
+    },
+  };
+
+  const signature = await params.ethereum.request<`0x${string}`>({
+    method: "eth_signTypedData_v4",
+    params: [params.senderWallet, JSON.stringify(typedData)],
+  });
+  params.onSigned?.();
+
+  const sigHeader = createPaymentSignatureHeader({
+    signature,
+    senderWallet: params.senderWallet,
+    recipientWallet: params.facilitatorWallet,
+    usdcAmount: params.totalUnits,
+    nonce,
+    validBefore,
+  });
+
+  let response: Response;
+  try {
+    response = await fetch("/api/checkout", {
+      method: "POST",
+      headers: { "content-type": "application/json", "PAYMENT-SIGNATURE": sigHeader },
+      body: JSON.stringify(params.body),
+      signal: AbortSignal.timeout(BATCH_SETTLE_TIMEOUT_MS),
+    });
+  } catch {
+    // Timed out or the connection dropped mid-settlement: the payment may
+    // still have gone through, so surface the "check your wallet" message.
+    return { ok: false, errorRaw: SETTLEMENT_TIMEOUT_RAW };
+  }
+  const raw = (await response.json().catch(() => null)) as BatchResponse | null;
+  if (!response.ok || !raw?.success) return { ok: false, errorRaw: raw };
+  return { ok: true, response: raw };
+}
+
+export function CheckoutView({
+  authSession,
+  sideEffects = "live",
+  onBackToCart,
+  onExploreMore,
+}: {
+  authSession: AuthSession;
+  /** Mock mode preserves this component's UI/state machine but blocks every live payment side effect. */
+  sideEffects?: CheckoutSideEffects;
+  onBackToCart?: () => void;
+  onExploreMore?: () => void;
+}) {
   const t = useTranslations("cart.checkoutPage");
   const cart = useCart();
   const { hydrated, items, tipPercent, setTipPercent, removeItem } = cart;
@@ -161,6 +289,11 @@ export function CheckoutView({ authSession }: { authSession: AuthSession }) {
   // Verify each organization's donation wallet once.
   const orgDids = useMemo(() => [...new Set(items.map((item) => item.orgDid))], [items]);
   useEffect(() => {
+    if (sideEffects === "mock") {
+      setRecipients(Object.fromEntries(orgDids.map((orgDid) => [orgDid, { status: "ready", address: MOCK_RECIPIENT_ADDRESS } satisfies RecipientState])));
+      return;
+    }
+
     let cancelled = false;
     for (const orgDid of orgDids) {
       if (recipients[orgDid]) continue;
@@ -184,9 +317,14 @@ export function CheckoutView({ authSession }: { authSession: AuthSession }) {
       cancelled = true;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [orgDids]);
+  }, [orgDids, sideEffects]);
 
   useEffect(() => {
+    if (sideEffects === "mock") {
+      setTipConfig({ status: "ready", enabled: true, address: MOCK_TIP_ADDRESS });
+      return;
+    }
+
     let cancelled = false;
     fetch("/api/tip")
       .then((response) => response.json())
@@ -201,7 +339,7 @@ export function CheckoutView({ authSession }: { authSession: AuthSession }) {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [sideEffects]);
 
   const payableItems = items.filter(
     (item) => itemAmountValid(item) && recipients[item.orgDid]?.status === "ready",
@@ -216,13 +354,22 @@ export function CheckoutView({ authSession }: { authSession: AuthSession }) {
   const hasEnoughBalance = wallet?.balance != null && wallet.balance >= toUsdcUnits(totalUsd);
 
   const handleConnect = async () => {
+    setConnecting(true);
+    setConnectError(null);
+
+    if (sideEffects === "mock") {
+      await waitForMock(350);
+      setWallet({ address: MOCK_WALLET_ADDRESS, balance: toUsdcUnits(500) });
+      setConnecting(false);
+      return;
+    }
+
     const ethereum = getEthereum();
     if (!ethereum) {
       setConnectError(t("noWallet"));
+      setConnecting(false);
       return;
     }
-    setConnecting(true);
-    setConnectError(null);
     try {
       const accounts = await ethereum.request<string[]>({ method: "eth_requestAccounts" });
       const address = accounts[0];
@@ -241,6 +388,7 @@ export function CheckoutView({ authSession }: { authSession: AuthSession }) {
     if (raw && typeof raw === "object") {
       const code = Reflect.get(raw, "code");
       if (code === "NON_ANONYMOUS_DONATION_REQUIRES_DONOR_DID") return t("errorProfile");
+      if (code === "SETTLEMENT_TIMEOUT") return t("errorTimeout");
       const error = Reflect.get(raw, "error");
       if (typeof error === "string") {
         const lower = error.toLowerCase();
@@ -253,13 +401,12 @@ export function CheckoutView({ authSession }: { authSession: AuthSession }) {
   };
 
   const handleDonate = async () => {
-    if (payingRef.current) return;
-    const ethereum = getEthereum();
-    if (!ethereum || !wallet) return;
+    if (payingRef.current || !wallet) return;
     payingRef.current = true;
     setPhase("paying");
 
     const lines = payableItems.map((item) => ({ item, key: cartItemKey(item) }));
+    const includeTip = tipUsd > 0 && tipEnabled && tipConfig.status === "ready" && !!tipConfig.address;
     const initialStates: Record<string, LineState> = {};
     for (const line of lines) initialStates[line.key] = { phase: "pending" };
     if (tipUsd > 0 && tipEnabled) initialStates[TIP_LINE_KEY] = { phase: "pending" };
@@ -268,8 +415,139 @@ export function CheckoutView({ authSession }: { authSession: AuthSession }) {
     const setLine = (key: string, state: LineState) =>
       setLineStates((current) => ({ ...current, [key]: state }));
 
+    if (sideEffects === "mock") {
+      for (const { key } of lines) setLine(key, { phase: "signing" });
+      if (includeTip) setLine(TIP_LINE_KEY, { phase: "signing" });
+      await waitForMock(550);
+
+      for (const { key } of lines) setLine(key, { phase: "processing" });
+      if (includeTip) setLine(TIP_LINE_KEY, { phase: "processing" });
+      await waitForMock(850);
+
+      const mockResults: CompletedLine[] = lines.map(({ item, key }, index) => {
+        const txHash = mockTransactionHash(index);
+        setLine(key, { phase: "done", txHash });
+        removeItem(item.orgDid, item.rkey);
+        return {
+          kind: "donation",
+          title: item.title,
+          orgName: item.orgName,
+          amountUsd: item.amountUsd,
+          txHash,
+        };
+      });
+      if (includeTip) {
+        const txHash = mockTransactionHash(lines.length);
+        setLine(TIP_LINE_KEY, { phase: "done", txHash });
+        mockResults.push({
+          kind: "tip",
+          title: t("tipLineLabel"),
+          orgName: "GainForest",
+          amountUsd: tipUsd,
+          txHash,
+        });
+      }
+
+      setCompleted((current) => [...current, ...mockResults]);
+      payingRef.current = false;
+      setPhase("done");
+      return;
+    }
+
+    const ethereum = getEthereum();
+    if (!ethereum) {
+      payingRef.current = false;
+      setPhase("review");
+      return;
+    }
+
     const results: CompletedLine[] = [];
     let anyFailed = false;
+
+    // Batched settlement: one wallet approval for the whole cart. The donor
+    // authorizes the total to the facilitator, which fans it out server-side.
+    // A single donation without a tip keeps the direct donor→org transfer.
+    const facilitatorWallet = FACILITATOR_WALLET_ADDRESS;
+    if (facilitatorWallet && lines.length + (includeTip ? 1 : 0) > 1) {
+      const readyLines = lines.filter(({ item }) => recipients[item.orgDid]?.status === "ready");
+      const totalUnits =
+        readyLines.reduce((sum, { item }) => sum + toUsdcUnits(item.amountUsd), 0n) +
+        (includeTip ? toUsdcUnits(tipUsd) : 0n);
+      for (const { key } of readyLines) setLine(key, { phase: "signing" });
+      if (includeTip) setLine(TIP_LINE_KEY, { phase: "signing" });
+
+      try {
+        const outcome = await signAndSettleBatch({
+          ethereum,
+          senderWallet: wallet.address,
+          facilitatorWallet,
+          totalUnits,
+          onSigned: () => {
+            for (const { key } of readyLines) setLine(key, { phase: "processing" });
+            if (includeTip) setLine(TIP_LINE_KEY, { phase: "processing" });
+          },
+          body: {
+            lines: readyLines.map(({ item }) => ({
+              orgDid: item.orgDid,
+              ...(item.kind === "project" ? { rkey: item.rkey } : {}),
+              amount: String(item.amountUsd),
+            })),
+            ...(includeTip ? { tipAmount: String(tipUsd) } : {}),
+            anonymous: authSession.isLoggedIn ? anonymous : true,
+            donorDid: authSession.isLoggedIn && !anonymous ? authSession.did : undefined,
+          },
+        });
+
+        if (outcome.ok) {
+          for (const { item, key } of readyLines) {
+            const expectedRkey = item.kind === "project" ? item.rkey : undefined;
+            const lineResult = outcome.response.lines?.find(
+              (line) => line.orgDid === item.orgDid && line.rkey === expectedRkey,
+            );
+            if (lineResult?.transactionHash) {
+              setLine(key, { phase: "done", txHash: lineResult.transactionHash });
+              results.push({ kind: "donation", title: item.title, orgName: item.orgName, amountUsd: item.amountUsd, txHash: lineResult.transactionHash });
+              removeItem(item.orgDid, item.rkey);
+            } else {
+              anyFailed = true;
+              setLine(key, { phase: "failed", error: lineResult?.error ?? t("errorGeneric") });
+            }
+          }
+          if (includeTip) {
+            const tipResult = outcome.response.tip;
+            if (tipResult?.transactionHash) {
+              setLine(TIP_LINE_KEY, { phase: "done", txHash: tipResult.transactionHash });
+              results.push({ kind: "tip", title: t("tipLineLabel"), orgName: "GainForest", amountUsd: tipUsd, txHash: tipResult.transactionHash });
+            } else {
+              // A failed tip never blocks the donations that already settled.
+              setLine(TIP_LINE_KEY, { phase: "failed", error: tipResult?.error ?? t("tipFailed") });
+            }
+          }
+        } else {
+          anyFailed = true;
+          const message = parseSettleError(outcome.errorRaw);
+          for (const { key } of readyLines) setLine(key, { phase: "failed", error: message });
+          if (includeTip) setLine(TIP_LINE_KEY, { phase: "failed", error: t("tipSkipped") });
+        }
+      } catch (error) {
+        anyFailed = true;
+        const message = error instanceof Error && error.message ? error.message.split("\n")[0] : t("errorGeneric");
+        for (const { key } of readyLines) setLine(key, { phase: "failed", error: message });
+        if (includeTip) setLine(TIP_LINE_KEY, { phase: "failed", error: t("tipSkipped") });
+      }
+
+      const balance = await readUsdcBalance(ethereum, wallet.address).catch(() => null);
+      setWallet((current) => (current ? { ...current, balance } : current));
+
+      setCompleted((current) => [...current, ...results]);
+      payingRef.current = false;
+      if (!anyFailed && results.length > 0) {
+        setPhase("done");
+      } else {
+        setPhase("review");
+      }
+      return;
+    }
 
     for (const { item, key } of lines) {
       const recipient = recipients[item.orgDid];
@@ -283,7 +561,9 @@ export function CheckoutView({ authSession }: { authSession: AuthSession }) {
           amountUsd: item.amountUsd,
           endpoint: "/api/fund",
           body: {
-            activityUri: `at://${item.orgDid}/org.hypercerts.claim.activity/${item.rkey}`,
+            ...(item.kind === "project"
+              ? { activityUri: `at://${item.orgDid}/org.hypercerts.claim.activity/${item.rkey}` }
+              : {}),
             orgDid: item.orgDid,
             amount: String(item.amountUsd),
             currency: "USDC",
@@ -445,11 +725,17 @@ export function CheckoutView({ authSession }: { authSession: AuthSession }) {
           </div>
         </div>
 
-        <Button asChild className="mt-6 w-full">
-          <Link href="/projects">
+        {onExploreMore ? (
+          <Button className="mt-6 w-full" onClick={onExploreMore}>
             <CompassIcon className="size-4" /> {t("exploreMore")}
-          </Link>
-        </Button>
+          </Button>
+        ) : (
+          <Button asChild className="mt-6 w-full">
+            <Link href="/projects">
+              <CompassIcon className="size-4" /> {t("exploreMore")}
+            </Link>
+          </Button>
+        )}
       </div>
     );
   }
@@ -462,11 +748,17 @@ export function CheckoutView({ authSession }: { authSession: AuthSession }) {
           <ShoppingCartIcon className="size-7" aria-hidden />
         </div>
         <h1 className="text-2xl font-semibold text-foreground">{t("emptyTitle")}</h1>
-        <Button asChild className="mt-2">
-          <Link href="/projects">
+        {onExploreMore ? (
+          <Button className="mt-2" onClick={onExploreMore}>
             <CompassIcon className="size-4" /> {t("exploreMore")}
-          </Link>
-        </Button>
+          </Button>
+        ) : (
+          <Button asChild className="mt-2">
+            <Link href="/projects">
+              <CompassIcon className="size-4" /> {t("exploreMore")}
+            </Link>
+          </Button>
+        )}
       </div>
     );
   }
@@ -475,9 +767,19 @@ export function CheckoutView({ authSession }: { authSession: AuthSession }) {
 
   return (
     <div className="mx-auto w-full max-w-3xl px-4 py-8">
-      <Link href="/cart" className="inline-flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground">
-        <ArrowLeftIcon className="size-4" aria-hidden /> {t("backToCart")}
-      </Link>
+      {onBackToCart ? (
+        <button
+          type="button"
+          onClick={onBackToCart}
+          className="inline-flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
+        >
+          <ArrowLeftIcon className="size-4" aria-hidden /> {t("backToCart")}
+        </button>
+      ) : (
+        <Link href="/cart" className="inline-flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground">
+          <ArrowLeftIcon className="size-4" aria-hidden /> {t("backToCart")}
+        </Link>
+      )}
       <h1 className="mt-3 text-3xl font-semibold text-foreground">{t("title")}</h1>
 
       <div className="mt-4 flex items-center gap-2.5 rounded-2xl border border-primary/20 bg-primary/5 px-4 py-3">
@@ -673,7 +975,9 @@ export function CheckoutView({ authSession }: { authSession: AuthSession }) {
 
           {payableItems.length > 1 || (tipEnabled && tipUsd > 0) ? (
             <p className="mt-3 text-xs leading-5 text-muted-foreground">
-              {t("multiApprovalNote", { count: payableItems.length + (tipEnabled && tipUsd > 0 ? 1 : 0) })}
+              {FACILITATOR_WALLET_ADDRESS
+                ? t("singleApprovalNote")
+                : t("multiApprovalNote", { count: payableItems.length + (tipEnabled && tipUsd > 0 ? 1 : 0) })}
             </p>
           ) : null}
 

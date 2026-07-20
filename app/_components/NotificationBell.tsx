@@ -3,7 +3,8 @@
 /**
  * Notification bell — a small button in the header, next to the account avatar,
  * that shows likes and comments other people left on the signed-in viewer's
- * records. The unread badge polls in the background; opening the panel marks
+ * records, plus posts and comments that @-mention the viewer. The unread badge
+ * polls in the background; opening the panel marks
  * everything seen (writing app.gainforest.notification.seen / rkey "self" to the
  * viewer's repo) so the badge clears.
  *
@@ -13,7 +14,7 @@
 import { useRef, useState } from "react";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
-import { BellIcon, HeartIcon, MessageCircleIcon, UserIcon } from "lucide-react";
+import { AtSignIcon, BellIcon, HeartIcon, MessageCircleIcon, UserIcon } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
 
 import type { AuthSession } from "../_lib/auth";
@@ -128,7 +129,9 @@ function NotificationRow({
   const action =
     item.kind === "like"
       ? t("likedYour", { subject: subjectLabel })
-      : t("commentedYour", { subject: subjectLabel });
+      : item.kind === "mention"
+        ? t("mentionedYou")
+        : t("commentedYour", { subject: subjectLabel });
 
   const body = (
     <div
@@ -150,6 +153,8 @@ function NotificationRow({
         <span className="absolute -bottom-0.5 -right-0.5 grid size-4 place-items-center rounded-full bg-background text-primary ring-1 ring-border">
           {item.kind === "like" ? (
             <HeartIcon className="size-2.5 fill-current" aria-hidden />
+          ) : item.kind === "mention" ? (
+            <AtSignIcon className="size-2.5" aria-hidden />
           ) : (
             <MessageCircleIcon className="size-2.5" aria-hidden />
           )}

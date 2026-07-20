@@ -37,6 +37,8 @@ import { cn } from "@/lib/utils";
 
 // Round 3 applications closed May 31, 2026; the round itself is live, so we
 // point visitors at the participating projects instead of the apply page.
+const REWILDING_GRANT_DOC_URL =
+  "https://docs.gainforest.earth/for-nature-stewards/overview-1/rewilding-the-web-grant";
 const MA_EARTH_ROUND_PROJECTS_URL = "https://maearth.com/projects";
 const MA_EARTH_LOGO_SRC = "/assets/media/images/badges/ma-earth-logo.webp";
 // Keep the application post comfortably under the feed post limit even when a
@@ -223,14 +225,22 @@ function RewildingSection({ viewerDid, signedIn }: { viewerDid: string | null; s
                   </p>
                 </div>
               </div>
-            ) : (
-              <div className="mt-6">
+            ) : null}
+
+            <div className="mt-6 flex flex-wrap gap-3">
+              {appliedProjectTitle ? null : (
                 <Button type="button" size="lg" onClick={openApply}>
                   <SproutIcon />
                   {t("apply")}
                 </Button>
-              </div>
-            )}
+              )}
+              <Button asChild variant="outline" size="lg">
+                <a href={REWILDING_GRANT_DOC_URL} target="_blank" rel="noreferrer">
+                  {t("details")}
+                  <ArrowUpRightIcon />
+                </a>
+              </Button>
+            </div>
           </div>
 
           <PdsVisual

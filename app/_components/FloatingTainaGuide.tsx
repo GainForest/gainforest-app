@@ -12,6 +12,7 @@ import {
 } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { stripLocaleFromPathname } from "@/lib/i18n/routing";
+import { ACTIVE_MANAGE_CONTEXT_KEY, accountManageBasePath } from "@/lib/links";
 import { renderPetAnimated, type CodexPetState } from "../_lib/codex-pet";
 import { TAINA_GUIDES, getTainaGuide, type TainaGuide } from "../_lib/taina-guides";
 import { TAINA_SIM } from "../_lib/taina-sim";
@@ -75,8 +76,48 @@ interface TourState {
   index: number;
 }
 
+// How many projects a manage endpoint reports. `null` means "unknown"
+// (signed out, no access, or a transport error) — callers must not treat
+// that as zero.
+async function fetchManagedProjectCount(url: string): Promise<number | null> {
+  try {
+    const res = await fetch(url);
+    if (!res.ok) return null;
+    const data = (await res.json()) as unknown;
+    return Array.isArray(data) ? data.length : null;
+  } catch {
+    return null;
+  }
+}
+
 function clamp(value: number, min: number, max: number): number {
   return Math.max(min, Math.min(value, max));
+}
+
+// Tour step routes are written against the legacy /manage/... shim, which
+// always server-redirects to the *personal* account's manage pages. When the
+// user is currently working as an organization (the account switcher context
+// persisted in localStorage), that redirect would yank them out of the org
+// mid-tour — so rewrite /manage routes to the active org's manage path and
+// skip the shim (and its full-page redirect) entirely.
+function resolveTourRoute(route: string): string {
+  if (route !== "/manage" && !route.startsWith("/manage/")) return route;
+  try {
+    const raw = window.localStorage.getItem(ACTIVE_MANAGE_CONTEXT_KEY);
+    if (!raw) return route;
+    const parsed = JSON.parse(raw) as { type?: unknown; did?: unknown; identifier?: unknown };
+    if (parsed?.type !== "group") return route;
+    const identifier =
+      typeof parsed.identifier === "string" && parsed.identifier.trim()
+        ? parsed.identifier.trim()
+        : typeof parsed.did === "string" && parsed.did.startsWith("did:")
+          ? parsed.did
+          : null;
+    if (!identifier) return route;
+    return `${accountManageBasePath(identifier)}${route.slice("/manage".length)}`;
+  } catch {
+    return route;
+  }
 }
 
 // Some tour targets are rendered twice for responsive layouts (e.g. the
@@ -356,10 +397,39 @@ export function FloatingTainaGuide() {
     if (getTainaGuide(view.guideId)?.requiresProject) {
       (async () => {
         try {
-          const res = await fetch("/api/manage/projects");
-          if (!res.ok) return; // signed out or error — leave it unknown
-          const data = (await res.json()) as unknown;
-          if (!cancelled && Array.isArray(data)) setHasProjects(data.length > 0);
+          // A project can live in the user's personal profile OR in one of
+          // their organizations (donation wallets are organization-owned, so
+          // org projects absolutely count). Check the personal repo first,
+          // then every organization the user belongs to.
+          const personal = await fetchManagedProjectCount("/api/manage/projects");
+          if (cancelled) return;
+          if (personal === null) return; // signed out or error — leave it unknown
+          if (personal > 0) {
+            setHasProjects(true);
+            return;
+          }
+          const groupsRes = await fetch("/api/cgs/groups");
+          if (!groupsRes.ok) {
+            if (!cancelled) setHasProjects(false);
+            return;
+          }
+          const groupsData = (await groupsRes.json()) as { groups?: Array<{ groupDid?: unknown }> };
+          const groupDids = (Array.isArray(groupsData.groups) ? groupsData.groups : [])
+            .map((group) => (typeof group?.groupDid === "string" ? group.groupDid : null))
+            .filter((did): did is string => Boolean(did?.startsWith("did:")));
+          if (groupDids.length === 0) {
+            if (!cancelled) setHasProjects(false);
+            return;
+          }
+          const counts = await Promise.all(
+            groupDids.map((did) => fetchManagedProjectCount(`/api/manage/projects?repo=${encodeURIComponent(did)}`)),
+          );
+          if (cancelled) return;
+          // Unknown answers (null) for some orgs must not produce a false
+          // "you have no project" — only conclude that when every org
+          // answered and none had projects.
+          if (counts.some((count) => (count ?? 0) > 0)) setHasProjects(true);
+          else if (counts.every((count) => count !== null)) setHasProjects(false);
         } catch {
           // leave it unknown
         }
@@ -551,16 +621,17 @@ export function FloatingTainaGuide() {
 
     const stepKey = `${tour.guideId}:${tour.index}`;
     activeStepKeyRef.current = stepKey;
+    const stepRoute = activeTourStep.route ? resolveTourRoute(activeTourStep.route) : undefined;
     if (
-      activeTourStep.route &&
-      pathname !== activeTourStep.route &&
+      stepRoute &&
+      pathname !== stepRoute &&
       navigatedStepRef.current !== stepKey &&
       // If the target is already on screen (shim redirects land on a page
       // that contains it), don't navigate at all.
       !(activeTourStep.selector && findVisibleTarget(activeTourStep.selector))
     ) {
       navigatedStepRef.current = stepKey;
-      router.push(`${localePrefix}${activeTourStep.route}`);
+      router.push(`${localePrefix}${stepRoute}`);
     }
 
     if (!activeTourStep.selector) {
@@ -748,7 +819,10 @@ export function FloatingTainaGuide() {
         }}
         aria-label={t("restoreLabel")}
         title={t("restoreLabel")}
-        className="fixed bottom-6 right-0 z-[70] flex items-center rounded-l-full border border-r-0 border-border bg-background/95 py-1 pl-2 pr-1.5 shadow-[0_2px_10px_-3px_rgba(40,50,30,0.3)] backdrop-blur-sm transition-transform hover:-translate-x-0.5"
+        // On /feed the phone composer bar sits at the bottom, so lift the tab
+        // above it there (mobile only — the bar is sm:hidden); elsewhere and on
+        // larger screens it keeps its usual bottom-6 spot.
+        className={`fixed right-0 z-[70] flex items-center rounded-l-full border border-r-0 border-border bg-background/95 py-1 pl-2 pr-1.5 shadow-[0_2px_10px_-3px_rgba(40,50,30,0.3)] backdrop-blur-sm transition-transform hover:-translate-x-0.5 ${pathname === "/feed" ? "bottom-24 sm:bottom-6" : "bottom-6"}`}
       >
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img

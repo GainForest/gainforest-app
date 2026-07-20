@@ -1,9 +1,8 @@
 import "server-only";
 import { getAuthBaseUrl } from "@/app/_lib/auth";
 import {
-  RECOGNITION_BADGE_DESCRIPTIONS,
-  RECOGNITION_BADGE_KEYS,
   isRecognitionBadgeKey,
+  recognitionBadgeDescription,
   type RecognitionBadgeKey,
 } from "@/app/_lib/recognition-badges";
 import {
@@ -63,28 +62,16 @@ function findDefinition(
   return match ? { uri: match.uri, cid: match.cid } : null;
 }
 
-type RecognitionBadgeState = {
-  key: RecognitionBadgeKey;
-  awarded: boolean;
-  /** Award records for this account+badge, for revocation. */
-  awards: BadgeAwardRecord[];
-};
-
-/** Read every recognition badge's awarded state for one account. */
-async function readRecognitionState(
+/** Award records held by `subjectDid` for one badge key, for revocation. */
+async function readBadgeAwards(
   repoDid: string,
   subjectDid: string,
-): Promise<Record<RecognitionBadgeKey, RecognitionBadgeState>> {
+  key: RecognitionBadgeKey,
+): Promise<BadgeAwardRecord[]> {
   const data = await fetchInternalBadgeData(repoDid, { includeAwards: true });
-  const result = {} as Record<RecognitionBadgeKey, RecognitionBadgeState>;
-  for (const key of RECOGNITION_BADGE_KEYS) {
-    const definition = findDefinition(data.definitions, key);
-    const awards = definition
-      ? data.awards.filter((award) => award.badge.uri === definition.uri && award.subjectDid === subjectDid)
-      : [];
-    result[key] = { key, awarded: awards.length > 0, awards };
-  }
-  return result;
+  const definition = findDefinition(data.definitions, key);
+  if (!definition) return [];
+  return data.awards.filter((award) => award.badge.uri === definition.uri && award.subjectDid === subjectDid);
 }
 
 /** Ensure a recognition badge definition exists, creating it on first award. */
@@ -100,7 +87,7 @@ async function ensureDefinition(repoDid: string, cookie: string | null, key: Rec
       $type: BADGE_DEFINITION_COLLECTION,
       title: key,
       badgeType: RECOGNITION_BADGE_TYPE,
-      description: RECOGNITION_BADGE_DESCRIPTIONS[key],
+      description: recognitionBadgeDescription(key),
       createdAt: new Date().toISOString(),
     },
   });
@@ -110,12 +97,14 @@ async function ensureDefinition(repoDid: string, cookie: string | null, key: Rec
   return { uri: created.uri, cid: created.cid };
 }
 
-/** Award a recognition badge to an account (idempotent). */
+/** Award a recognition badge to an account (idempotent). The optional note
+ *  overrides the stored award note (e.g. to carry a round name). */
 export async function awardRecognition(
   repoDid: string,
   cookie: string | null,
   subjectDid: string,
   key: string,
+  note?: string,
 ): Promise<void> {
   if (!isRecognitionBadgeKey(key)) throw new RecognitionMutationError("Unknown badge.", 400);
   const data = await fetchInternalBadgeData(repoDid, { includeAwards: true });
@@ -132,7 +121,7 @@ export async function awardRecognition(
       $type: BADGE_AWARD_COLLECTION,
       badge: { uri: definition.uri, cid: definition.cid },
       subject: { $type: "app.certified.defs#did", did: subjectDid },
-      note: RECOGNITION_BADGE_DESCRIPTIONS[key],
+      note: note ?? recognitionBadgeDescription(key),
       createdAt: new Date().toISOString(),
     },
   });
@@ -147,8 +136,8 @@ export async function revokeRecognition(
   key: string,
 ): Promise<void> {
   if (!isRecognitionBadgeKey(key)) throw new RecognitionMutationError("Unknown badge.", 400);
-  const state = await readRecognitionState(repoDid, subjectDid);
-  for (const award of state[key].awards) {
+  const awards = await readBadgeAwards(repoDid, subjectDid, key);
+  for (const award of awards) {
     await cgsMutate(repoDid, cookie, {
       operation: "deleteRecord",
       collection: BADGE_AWARD_COLLECTION,

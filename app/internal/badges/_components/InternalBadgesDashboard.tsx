@@ -19,6 +19,7 @@ import {
   Trash2Icon,
   UserRoundIcon,
 } from "lucide-react";
+import { AdminOnlyIndicator } from "@/app/_components/AdminOnlyIndicator";
 import { formatCgsErrorMessage } from "@/app/_lib/cgs-errors";
 import { Button } from "@/components/ui/button";
 import { useModal } from "@/components/ui/modal/context";
@@ -527,6 +528,7 @@ function BadgesIndexHeader({ onCreate }: { onCreate: () => void }) {
           <div className="inline-flex items-center gap-2 rounded-full bg-primary/10 px-3 py-1 text-xs font-medium text-primary">
             <ShieldCheckIcon className="size-3.5" />
             {t("eyebrow")}
+            <AdminOnlyIndicator />
           </div>
           <h1 className="mt-3 font-instrument text-4xl font-light italic tracking-[-0.04em] md:text-5xl">{t("title")}</h1>
           <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">{t("description")}</p>

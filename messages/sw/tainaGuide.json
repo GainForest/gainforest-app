@@ -29,19 +29,30 @@
   "guides": {
     "wallet": {
       "question": "Ninapokeaje michango?",
-      "title": "Weka pochi ya kupokea michango",
-      "intro": "Michango huenda kwenye pochi iliyounganishwa na akaunti yako. Huhitaji uzoefu wa sarafu za kidijitali — unaweza kutengeneza moja kwa barua pepe tu.",
+      "title": "Sanidi pochi ya michango ya shirika lako",
+      "intro": "Michango huenda kwenye pochi ya pamoja inayomilikiwa na shirika lako. Mmiliki wa shirika huiunda kwa sekunde chache kwa ufunguo wa siri (Face ID au alama ya kidole) — bila uzoefu wa sarafu za kidijitali.",
       "steps": {
-        "open": { "title": "Fungua mradi wako", "body": "Nenda kwenye Miradi Yangu na ufungue mradi unaotaka upokee msaada." },
-        "enable": { "title": "Bofya “Enable Donations”", "body": "Kwenye ukurasa wa mradi wako utaona kadi ya msaada upande wa kulia. Bofya Enable Donations." },
-        "addWallet": { "title": "Ongeza pochi ya michango", "body": "Katika dirisha la mipangilio ya michango, bofya Add a donation wallet." },
-        "signIn": { "title": "Ingia — pochi inatengenezwa kwa ajili yako", "body": "Endelea na akaunti yako ya Bluesky au barua pepe na pochi salama itatengenezwa kwa sekunde chache. Una pochi ya kripto tayari? Unaweza kuiunganisha pia." },
-        "settings": { "title": "Simamia pochi wakati wowote", "body": "Pochi zako zote zilizounganishwa ziko kwenye Mipangilio → Linked Wallets." }
+        "open": {
+          "title": "Fungua mradi wako",
+          "body": "Nenda kwenye Miradi Yangu na ufungue mradi unaotaka upokee msaada."
+        },
+        "enable": {
+          "title": "Bofya “Enable Donations”",
+          "body": "Kwenye ukurasa wa mradi wako utaona kadi ya msaada upande wa kulia. Bofya Enable Donations."
+        },
+        "addWallet": {
+          "title": "Unda pochi ya shirika",
+          "body": "Katika dirisha la Mipangilio ya Michango, bofya Unda pochi kwa ufunguo wa siri kisha uthibitishe kwa Face ID, alama ya kidole, au ufunguo wa usalama. Baadaye, wanachama wengine wa shirika wanaweza kuongeza funguo zao za siri."
+        },
+        "passkeys": {
+          "title": "Pochi yako iko tayari",
+          "body": "Mradi wako unaweza kupokea michango mara tu pochi inapoundwa. Dirisha la pochi linaonyesha anwani na kila mtu anayeweza kuidhinisha malipo. Wanachama wengine wa shirika lako wanaweza kulifungua na kuongeza ufunguo wao wa siri pia."
+        }
       },
       "tour": {
         "open": "Fungua mradi unaotaka upokee michango.",
         "enable": "Bofya Enable Donations kwenye kadi ya msaada.",
-        "addWallet": "Bofya Add a donation wallet, kisha ingia na Bluesky au barua pepe — ndivyo hivyo!"
+        "addWallet": "Bofya Unda pochi kwa ufunguo wa siri kisha uthibitishe kwa ufunguo wako wa siri — ndivyo hivyo!"
       }
     },
     "createProject": {
@@ -49,13 +60,34 @@
       "title": "Unda mradi wako wa kwanza",
       "intro": "Mradi huelezea hadithi ya kazi yako na unaweza kupokea msaada. Mchakato huchukua kama dakika mbili.",
       "steps": {
-        "start": { "title": "Anzisha mradi mpya", "body": "Bofya Unda Mradi kwenye upau wa kando, au Ongeza mradi kwenye ukurasa wa Miradi Yangu." },
-        "name": { "title": "Upe jina", "body": "Tumia jina wazi ambalo watu wataelewa, pamoja na muhtasari wa mstari mmoja." },
-        "focus": { "title": "Chagua maeneo ya kazi", "body": "Chagua aina za kazi zinazoelezea mradi vizuri zaidi — upandaji miti, ufuatiliaji, ulinzi…" },
-        "story": { "title": "Ongeza tarehe na hadithi", "body": "Weka tarehe ya kuanza (inayoendelea ni sawa) na ueleze kilichotokea, jinsi matokeo yanavyopimwa, na nani anafaidika." },
-        "people": { "title": "Tambua watu na maeneo", "body": "Ongeza watu na vikundi walio nyuma ya kazi hii, na ambatisha maeneo ilipofanyika." },
-        "photo": { "title": "Ongeza picha", "body": "Picha nzuri huwasaidia watu kutambua na kuamini mradi wako." },
-        "review": { "title": "Kagua na uunde", "body": "Hakikisha kila kitu kiko sawa, kisha bofya Unda mradi. Uko tayari kushirikiwa na kupokea msaada." }
+        "start": {
+          "title": "Anzisha mradi mpya",
+          "body": "Bofya Unda Mradi kwenye upau wa kando, au Ongeza mradi kwenye ukurasa wa Miradi Yangu."
+        },
+        "name": {
+          "title": "Upe jina",
+          "body": "Tumia jina wazi ambalo watu wataelewa, pamoja na muhtasari wa mstari mmoja."
+        },
+        "focus": {
+          "title": "Chagua maeneo ya kazi",
+          "body": "Chagua aina za kazi zinazoelezea mradi vizuri zaidi — upandaji miti, ufuatiliaji, ulinzi…"
+        },
+        "story": {
+          "title": "Ongeza tarehe na hadithi",
+          "body": "Weka tarehe ya kuanza (inayoendelea ni sawa) na ueleze kilichotokea, jinsi matokeo yanavyopimwa, na nani anafaidika."
+        },
+        "people": {
+          "title": "Tambua watu na maeneo",
+          "body": "Ongeza watu na vikundi walio nyuma ya kazi hii, na ambatisha maeneo ilipofanyika."
+        },
+        "photo": {
+          "title": "Ongeza picha",
+          "body": "Picha nzuri huwasaidia watu kutambua na kuamini mradi wako."
+        },
+        "review": {
+          "title": "Kagua na uunde",
+          "body": "Hakikisha kila kitu kiko sawa, kisha bofya Unda mradi. Uko tayari kushirikiwa na kupokea msaada."
+        }
       },
       "tour": {
         "start": "Bofya Ongeza mradi kufungua mchakato.",
@@ -67,9 +99,18 @@
       "title": "Hariri mradi",
       "intro": "Unaweza kubadilisha kila kitu cha mradi baada ya kuchapisha — jina, hadithi, picha, maeneo.",
       "steps": {
-        "myProjects": { "title": "Nenda kwenye Miradi Yangu", "body": "Fungua kichupo cha Miradi kwenye wasifu wako, au ingia Simamia kupitia menyu ya wasifu." },
-        "edit": { "title": "Bofya “Hariri mradi”", "body": "Kila kadi ya mradi ina kitufe cha kuhariri." },
-        "save": { "title": "Badilisha na uhifadhi", "body": "Sasisha sehemu yoyote, badilisha au ondoa picha, kisha bofya Hifadhi mabadiliko chini." }
+        "myProjects": {
+          "title": "Nenda kwenye Miradi Yangu",
+          "body": "Fungua kichupo cha Miradi kwenye wasifu wako, au ingia Simamia kupitia menyu ya wasifu."
+        },
+        "edit": {
+          "title": "Bofya “Hariri mradi”",
+          "body": "Kila kadi ya mradi ina kitufe cha kuhariri."
+        },
+        "save": {
+          "title": "Badilisha na uhifadhi",
+          "body": "Sasisha sehemu yoyote, badilisha au ondoa picha, kisha bofya Hifadhi mabadiliko chini."
+        }
       },
       "tour": {
         "edit": "Bofya Hariri mradi kwenye mradi unaotaka kubadilisha.",
@@ -81,9 +122,18 @@
       "title": "Futa mradi",
       "intro": "Kufuta huondoa mradi kwenye akaunti yako. Haiwezi kutenduliwa — lakini uchunguzi wako haufutwi kamwe pamoja nao.",
       "steps": {
-        "editor": { "title": "Fungua kihariri cha mradi", "body": "Nenda kwenye Miradi Yangu na ubofye Hariri mradi — au fungua ukurasa wa mradi na utafute sehemu ya Simamia." },
-        "delete": { "title": "Bofya “Futa mradi”", "body": "Kitufe cha kufuta kiko chini ya kihariri." },
-        "confirm": { "title": "Thibitisha kwa kuandika jina", "body": "Andika jina kamili la mradi ili kuthibitisha. Hii haiwezi kutenduliwa." }
+        "editor": {
+          "title": "Fungua kihariri cha mradi",
+          "body": "Nenda kwenye Miradi Yangu na ubofye Hariri mradi — au fungua ukurasa wa mradi na utafute sehemu ya Simamia."
+        },
+        "delete": {
+          "title": "Bofya “Futa mradi”",
+          "body": "Kitufe cha kufuta kiko chini ya kihariri."
+        },
+        "confirm": {
+          "title": "Thibitisha kwa kuandika jina",
+          "body": "Andika jina kamili la mradi ili kuthibitisha. Hii haiwezi kutenduliwa."
+        }
       },
       "tour": {
         "editor": "Kwanza, fungua kihariri cha mradi unaotaka kuondoa.",
@@ -96,11 +146,26 @@
       "title": "Pakia na usimamie uchunguzi",
       "intro": "Uchunguzi ni picha za asili zenye spishi, tarehe, na mahali — ushahidi wa kazi yako.",
       "steps": {
-        "add": { "title": "Bofya “Ongeza uchunguzi”", "body": "Utaipata kwenye upau wa kando na kwenye wasifu wako." },
-        "photos": { "title": "Weka picha zako", "body": "Pakia hadi picha 50 kwa mara moja — AI husoma kila picha na kupendekeza kilichomo." },
-        "check": { "title": "Kagua na uunganishe", "body": "Thibitisha jina la spishi, tarehe, na mahali — na uunganishe na mmoja wa miradi yako ukipenda. Unaweza pia kuficha mahali pako halisi." },
-        "publish": { "title": "Ziongeze", "body": "Bofya Ongeza na uchunguzi wako unachapishwa kwenye akaunti yako." },
-        "manage": { "title": "Simamia baadaye", "body": "Kichupo cha Uchunguzi kwenye wasifu wako kinakuwezesha kutafuta, kupanga kwenye seti za data, au kuchagua na kufuta." }
+        "add": {
+          "title": "Bofya “Ongeza uchunguzi”",
+          "body": "Utaipata kwenye upau wa kando na kwenye wasifu wako."
+        },
+        "photos": {
+          "title": "Weka picha zako",
+          "body": "Pakia hadi picha 50 kwa mara moja — AI husoma kila picha na kupendekeza kilichomo."
+        },
+        "check": {
+          "title": "Kagua na uunganishe",
+          "body": "Thibitisha jina la spishi, tarehe, na mahali — na uunganishe na mmoja wa miradi yako ukipenda. Unaweza pia kuficha mahali pako halisi."
+        },
+        "publish": {
+          "title": "Ziongeze",
+          "body": "Bofya Ongeza na uchunguzi wako unachapishwa kwenye akaunti yako."
+        },
+        "manage": {
+          "title": "Simamia baadaye",
+          "body": "Kichupo cha Uchunguzi kwenye wasifu wako kinakuwezesha kutafuta, kupanga kwenye seti za data, au kuchagua na kufuta."
+        }
       },
       "tour": {
         "add": "Bofya Ongeza uchunguzi.",
@@ -113,10 +178,22 @@
       "title": "Jiunge na changamoto ya BioBlitz",
       "intro": "BioBlitz ni mashindano ya kirafiki ya kila wiki ya kurekodi asili. Piga picha kiumbe chochote hai, pakia, na upande kwenye ubao.",
       "steps": {
-        "open": { "title": "Fungua BioBlitz", "body": "Utaipata kwenye upau wa kando, chini ya Ufadhili." },
-        "register": { "title": "Jisajili kushiriki", "body": "Bofya mara moja tu — kujisajili huruhusu timu kufuatilia maingizo yako na kukutumia zawadi ukishinda." },
-        "upload": { "title": "Piga picha na upakie", "body": "Toka nje, piga picha kiumbe chochote hai, na ukiongeze kama uchunguzi wakati wa raundi." },
-        "win": { "title": "Shinda zawadi", "body": "Uchunguzi mwingi zaidi na picha bora hushinda zawadi za pesa na beji ya kudumu kwenye wasifu — na kila uchunguzi unabaki wako, unaweza kutumika tena kama ushahidi wa miradi yako." }
+        "open": {
+          "title": "Fungua BioBlitz",
+          "body": "Utaipata kwenye upau wa kando, chini ya Ufadhili."
+        },
+        "register": {
+          "title": "Jisajili kushiriki",
+          "body": "Bofya mara moja tu — kujisajili huruhusu timu kufuatilia maingizo yako na kukutumia zawadi ukishinda."
+        },
+        "upload": {
+          "title": "Piga picha na upakie",
+          "body": "Toka nje, piga picha kiumbe chochote hai, na ukiongeze kama uchunguzi wakati wa raundi."
+        },
+        "win": {
+          "title": "Shinda zawadi",
+          "body": "Uchunguzi mwingi zaidi na picha bora hushinda zawadi za pesa na beji ya kudumu kwenye wasifu — na kila uchunguzi unabaki wako, unaweza kutumika tena kama ushahidi wa miradi yako."
+        }
       },
       "tour": {
         "register": "Bofya Jisajili kushiriki — bofya mara moja na umeingia.",

@@ -23,6 +23,9 @@ export type FundingReceipt = {
   bumicertUri: string | null;
   txHash: string | null;
   paymentNetwork: string | null;
+  /** Owner-only view: this receipt is anonymous and matched to the viewer
+   *  via their donor hash (see app/_lib/anonymous-donations.ts). */
+  isAnonymous?: boolean;
 };
 
 const RECEIPTS_QUERY = `

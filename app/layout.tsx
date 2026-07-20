@@ -10,12 +10,13 @@ import "./globals.css";
 import { ChromeGate } from "./_components/ChromeGate";
 import { ClientErrorListener } from "./_components/ClientErrorListener";
 import { AccountDrawerProvider } from "./_components/AccountDrawer";
-import { CartProvider } from "./_components/cart/CartProvider";
+import { AppCartProvider } from "./_components/cart/AppCartProvider";
 import { LinkPrefetcher } from "./_components/LinkPrefetcher";
 import { RouteChangeIndicator } from "./_components/RouteChangeIndicator";
 import { ModalHost, ModalProvider } from "@/components/ui/modal/context";
 import { WagmiProvider } from "@/components/providers/WagmiProvider";
 import { resolveSupportedLanguage } from "@/lib/i18n/languages";
+import { getCanonicalPathname, getSeoLocalizedPathnames, withLocalePrefix } from "@/lib/i18n/routing";
 import { fetchAuthSession } from "./_lib/auth-server";
 import { getRequestOrigin } from "./_lib/request-origin";
 
@@ -53,12 +54,70 @@ const OG_IMAGE = "/og/gainforest-og-2.png";
 const OG_ALT =
   "GainForest — certified impact for nature stewards. Upload field observations and certify your environmental work, beside an aerial photo of humpback whales in turquoise water.";
 
+const PUBLIC_NAVIGATION_ROUTES = [
+  { key: "projects", pathname: "/projects" },
+  { key: "observations", pathname: "/observations" },
+  { key: "organizations", pathname: "/organizations" },
+  { key: "bioblitz", pathname: "/bioblitz" },
+] as const;
+
+type StructuredNavigationItem = {
+  name: string;
+  url: string;
+};
+
+function buildHomeStructuredData(
+  origin: string,
+  description: string,
+  language: string,
+  navigationItems: StructuredNavigationItem[],
+) {
+  const siteUrl = new URL("/", origin).toString();
+  return {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "Organization",
+        "@id": `${siteUrl}#organization`,
+        name: SITE_NAME,
+        alternateName: ["GainForest App", "GainForest Explorer"],
+        url: siteUrl,
+        logo: new URL("/icons/icon-512.png", origin).toString(),
+        sameAs: [
+          "https://gainforest.earth",
+          "https://bsky.app/profile/gainforest.earth",
+          "https://github.com/GainForest/gainforest-explorer",
+        ],
+      },
+      {
+        "@type": "WebSite",
+        "@id": `${siteUrl}#website`,
+        name: SITE_NAME,
+        alternateName: ["GainForest App", "GainForest Explorer"],
+        url: siteUrl,
+        description,
+        publisher: { "@id": `${siteUrl}#organization` },
+        inLanguage: language,
+      },
+      ...navigationItems.map((item, index) => ({
+        "@type": "SiteNavigationElement",
+        "@id": `${item.url}#site-navigation`,
+        position: index + 1,
+        name: item.name,
+        url: item.url,
+      })),
+    ],
+  };
+}
+
 export async function generateMetadata(): Promise<Metadata> {
   const locale = resolveSupportedLanguage(await getLocale());
   const t = await getTranslations("common.seo");
   const title = t("title");
   const description = t("description");
   const origin = await getRequestOrigin();
+
+  const languages = { ...getSeoLocalizedPathnames("/"), "x-default": "/" };
 
   return {
     metadataBase: new URL(origin),
@@ -73,14 +132,14 @@ export async function generateMetadata(): Promise<Metadata> {
     publisher: "GainForest",
     keywords: [
       "GainForest",
-      "projects",
-      "biodiversity",
-      "explorer",
+      "biodiversity observations",
+      "nature projects",
+      "field evidence",
+      "environmental records",
       "impact certification",
-      "donations",
     ],
     category: "sustainability",
-    alternates: { canonical: "/" },
+    alternates: { canonical: getCanonicalPathname("/", locale), languages },
     openGraph: {
       type: "website",
       locale,
@@ -109,6 +168,7 @@ export async function generateMetadata(): Promise<Metadata> {
       apple: [{ url: "/icons/apple-touch-icon.png", sizes: "180x180", type: "image/png" }],
     },
     manifest: "/icons/site.webmanifest",
+    appleWebApp: { title: SITE_NAME, capable: true },
     robots: { index: true, follow: true },
     formatDetection: { telephone: false, email: false, address: false },
   };
@@ -130,11 +190,20 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   // The session is resolved server-side (in parallel with i18n setup) so the
   // shell renders with the real signed-in state on first paint — no
   // signed-out flash, no client-side session fetch waterfall.
-  const [locale, messages, authSession] = await Promise.all([
+  const [locale, messages, authSession, origin, seoT, navT] = await Promise.all([
     getLocale(),
     getMessages(),
     fetchAuthSession(),
+    getRequestOrigin(),
+    getTranslations("common.seo"),
+    getTranslations("landing.nav"),
   ]);
+  const supportedLocale = resolveSupportedLanguage(locale);
+  const navigationItems = PUBLIC_NAVIGATION_ROUTES.map((item) => ({
+    name: navT(item.key),
+    url: new URL(withLocalePrefix(item.pathname, supportedLocale), origin).toString(),
+  }));
+  const structuredData = buildHomeStructuredData(origin, seoT("description"), locale, navigationItems);
 
   return (
     <html lang={locale} suppressHydrationWarning>
@@ -142,6 +211,10 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         className={`${geistSans.variable} ${geistMono.variable} ${cormorant.variable} ${instrument.variable} antialiased`}
       >
         <script dangerouslySetInnerHTML={{ __html: THEME_INIT }} />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
+        />
         <NextIntlClientProvider locale={locale} messages={messages}>
           <ClientErrorListener />
           <DomTranslationFallback />
@@ -153,13 +226,13 @@ export default async function RootLayout({ children }: { children: React.ReactNo
             <WagmiProvider>
               <ModalProvider>
                 <AccountDrawerProvider>
-                  <CartProvider>
+                  <AppCartProvider>
                     <ChromeGate authSession={authSession}>{children}</ChromeGate>
                     {/* The modal chrome mounts at the bottom of the provider
                         tree so inline modal content pushed via pushModal keeps
                         access to the app-level contexts above this line. */}
                     <ModalHost />
-                  </CartProvider>
+                  </AppCartProvider>
                 </AccountDrawerProvider>
               </ModalProvider>
             </WagmiProvider>

@@ -6,7 +6,7 @@ import {
   awardRecognition,
   revokeRecognition,
 } from "@/app/internal/badges/_lib/recognition";
-import { isRecognitionBadgeKey } from "@/app/_lib/recognition-badges";
+import { isManualRecognitionBadgeKey } from "@/app/_lib/recognition-badges";
 
 export const runtime = "nodejs";
 
@@ -18,7 +18,9 @@ function readInput(value: unknown): { did: string; badge: string } | null {
   if (!isRecord(value)) return null;
   const did = typeof value.did === "string" ? value.did.trim() : "";
   const badge = typeof value.badge === "string" ? value.badge.trim() : "";
-  if (!did.startsWith("did:") || !isRecognitionBadgeKey(badge)) return null;
+  // Only manually toggled badges pass through this route — BioBlitz winner
+  // badges are awarded per round from the BioBlitz page instead.
+  if (!did.startsWith("did:") || !isManualRecognitionBadgeKey(badge)) return null;
   return { did, badge };
 }
 

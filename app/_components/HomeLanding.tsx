@@ -32,6 +32,13 @@ type HomeLandingProps = {
   kpis?: ExplorerKpis | null;
 };
 
+const LANDING_NAV_LINKS = [
+  { key: "projects", href: "/projects" },
+  { key: "observations", href: "/observations" },
+  { key: "organizations", href: "/organizations" },
+  { key: "bioblitz", href: "/bioblitz" },
+] as const;
+
 const OPTION_CARDS = [
   {
     key: "funders",
@@ -134,6 +141,18 @@ function LandingTopNavbar() {
             GainForest
           </span>
         </Link>
+
+        <nav aria-label={t("nav.navigation")} className="hidden items-center gap-1 rounded-full border border-border/60 bg-background/60 p-1 shadow-sm shadow-foreground/5 backdrop-blur md:flex">
+          {LANDING_NAV_LINKS.map((item) => (
+            <Link
+              key={item.href}
+              href={item.href}
+              className="rounded-full px-3 py-1.5 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:outline-none"
+            >
+              {t(`nav.${item.key}`)}
+            </Link>
+          ))}
+        </nav>
 
         <div className="flex items-center gap-2 sm:gap-3">
           <GlobalSearch />

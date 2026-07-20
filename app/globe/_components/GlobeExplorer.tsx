@@ -15,15 +15,14 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, useTransition } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { parseAsString, useQueryState } from "nuqs";
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence, animate, motion, useDragControls, useMotionValue, useTransform } from "framer-motion";
 import {
   ArrowLeftIcon,
   ArrowUpRightIcon,
   Building2Icon,
-  ChevronDownIcon,
   ChevronLeftIcon,
   ChevronRightIcon,
   DroneIcon,
@@ -34,6 +33,7 @@ import {
   LeafIcon,
   LocateFixedIcon,
   MapPinnedIcon,
+  MenuIcon,
   MoveHorizontalIcon,
   MoveVerticalIcon,
   PauseIcon,
@@ -41,9 +41,11 @@ import {
   SearchIcon,
   TreePineIcon,
   XIcon,
+  type LucideIcon,
 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
+import { useMobileNav } from "../../_components/shell/mobile-nav-context";
 import { countryFlag, countryName, formatCountry } from "../../_lib/format";
 import { resolveCertifiedLocationCoords } from "../../_lib/coords";
 import { TrustedByBadges } from "../../_components/TrustedByBadges";
@@ -79,6 +81,29 @@ import type {
 
 const WORLD_BOUNDS: LngLatBounds = [-150, -50, 150, 65];
 
+/**
+ * Elevation inside the overlay. The whole panel deliberately avoids hard
+ * borders (only separators get those); a raised surface is expressed with two
+ * cues instead — a faint white tint and a 1px inset top highlight, echoing the
+ * layers cards. Reused everywhere so every elevated element reads the same.
+ */
+const ELEVATED = "bg-white/[0.06] shadow-[inset_0_1px_0_rgb(255_255_255/0.04)]";
+
+/**
+ * Every floating surface except the docked left rail is a confined, outlined
+ * glass card (the rail alone gets the feathered, borderless treatment so it
+ * melts into the map). Kept in one place so the header, hover previews, mobile
+ * sheet, time slider and tree card all read as the same material.
+ */
+const OUTLINE_SURFACE = "border border-white/10 bg-black/80 backdrop-blur-lg";
+
+/** Height (px) of the mobile bottom sheet left visible in the "peek" snap —
+ *  enough to reveal the grabber, search box and filter chips. */
+const SHEET_PEEK = 184;
+/** Height (px) at the lowest "collapsed" snap — just the grabber, so the map
+ *  and its zoom controls are reachable underneath. */
+const SHEET_COLLAPSED = 52;
+
 type GlobeProjectFocus = {
   title: string;
   /** Project page to link back to. */
@@ -98,6 +123,9 @@ type GlobeExplorerProps = {
 
 type GlobeMode = "global" | "organization" | "project";
 type PanelVariant = "floating" | "sheet";
+type OverlayTab = "details" | "layers";
+/** Mobile bottom-sheet drag snap points ("collapsed" clears the map controls). */
+type SheetSnap = "collapsed" | "peek" | "half" | "full";
 
 type SiteState = {
   status: "idle" | "loading" | "ready";
@@ -330,7 +358,7 @@ export function GlobeExplorer({ orgDid = null, orgName = null, orgIdentifier = n
   const [orgLayersLoading, setOrgLayersLoading] = useState(false);
   const [enabledLayerIds, setEnabledLayerIds] = useState<Set<string>>(new Set());
   const [landcoverVisible, setLandcoverVisible] = useState(false);
-  const [layersOpen, setLayersOpen] = useState(false);
+  const [activeOverlayTab, setActiveOverlayTab] = useState<OverlayTab>("details");
   // Drone time-series slider: which series is active, current stop, autoplay.
   const [activeSeriesId, setActiveSeriesId] = useState<string | null>(null);
   const [seriesStep, setSeriesStep] = useState(0);
@@ -617,12 +645,26 @@ export function GlobeExplorer({ orgDid = null, orgName = null, orgIdentifier = n
 
   // ── Mobile bottom sheet + map readiness ──────────────────────────────────
   const [mapReady, setMapReady] = useState(false);
-  const [sheetExpanded, setSheetExpanded] = useState(false);
-  const collapseSheet = useCallback(() => setSheetExpanded(false), []);
+  // Mobile bottom sheet: draggable between three snaps (Google-Maps style).
+  const [sheetSnap, setSheetSnap] = useState<SheetSnap>("peek");
+  // Bumped to focus the roster search box when the quick-search button is hit.
+  const [searchFocusNonce, setSearchFocusNonce] = useState(0);
+  // Desktop: whether the docked left overlay is pinned open. The header nav is
+  // the switcher — clicking a nav item pins its panel; clicking the active one
+  // again dismisses the overlay (back to a clean map + hover previews).
+  const [railOpen, setRailOpen] = useState(true);
+  const selectNav = useCallback(
+    (tab: OverlayTab) => {
+      setRailOpen((open) => !(open && tab === activeOverlayTab));
+      setActiveOverlayTab(tab);
+    },
+    [activeOverlayTab],
+  );
+  const collapseSheet = useCallback(() => setSheetSnap("peek"), []);
 
   // Collapse the sheet whenever the focus changes so the flight is visible.
   useEffect(() => {
-    setSheetExpanded(false);
+    setSheetSnap("peek");
   }, [focusDid]);
 
   // Drop any open tree card when trees are hidden or the org changes.
@@ -654,8 +696,18 @@ export function GlobeExplorer({ orgDid = null, orgName = null, orgIdentifier = n
     [bumpBounds],
   );
 
+  // Mobile quick-search: clear any focused org so the roster (with its search
+  // box) is showing, expand the sheet, and focus the input.
+  const openMobileSearch = useCallback(() => {
+    setActiveOverlayTab("details");
+    if (mode === "global") selectOrganization(null);
+    setSheetSnap("full");
+    setSearchFocusNonce((n) => n + 1);
+  }, [mode, selectOrganization]);
+
   // Shared panel props.
   const globalPanelProps = {
+    autoFocusNonce: searchFocusNonce,
     organizations,
     visibleOrganizations,
     maEarthOnly,
@@ -697,23 +749,53 @@ export function GlobeExplorer({ orgDid = null, orgName = null, orgIdentifier = n
       }
     : null;
 
-  // Bottom-sheet header summary (mobile). A null title means the roster is
-  // still loading (hard refresh of /globe?org=…) — render a skeleton, not "…".
+  const layersPanelProps = {
+    landcoverVisible,
+    onToggleLandcover: () => setLandcoverVisible((value) => !value),
+    categorizedGlobalLayers,
+    globalLayersLoading: globalLayers === null,
+    orgLayers: nonSeriesOrgLayers,
+    orgLayersLoading,
+    showOrgLayers: Boolean(focusDid),
+    enabledLayerIds,
+    onToggleLayer: toggleLayer,
+    onLocateLayer: locateLayer,
+    droneSeries,
+    activeSeriesId,
+    activeSeriesStep: seriesStep,
+    onToggleSeries: toggleSeries,
+    onSelectSeriesStep: selectSeriesStep,
+    onLocateSeries: flyToSeries,
+    treesCount: visibleTrees?.features.length ?? 0,
+    treesLoading: treesState.status === "loading",
+    treesVisible,
+    onToggleTrees: () => setTreesVisible((value) => !value),
+    visibleLayers: looseLayers,
+    legendLayers: activeLegends,
+  };
+
+  // Header title (mobile). A null title means the roster is still loading
+  // (hard refresh of /globe?org=…).
   const sheetTitle = focusDid ? (mode === "project" ? project?.title ?? null : focusName) : t("title");
-  const sheetSubtitle = focusDid
-    ? focusedState.status === "loading"
-      ? t("panel.loading")
-      : mode === "project"
-        ? t("focus.boundaries", { count: focusedState.features.length })
-        : t("focus.sites", { count: focusedState.sites.length })
-    : organizations === null
-      ? t("panel.loading")
-      : t("panel.count", { count: visibleOrganizations.length });
-  const SheetIcon = focusDid ? (mode === "project" ? FolderKanbanIcon : Building2Icon) : EarthIcon;
+
+  // One place that maps a tab → its panel, shared by the docked rail, the
+  // header hover previews, and the mobile sheet so they never drift.
+  const renderPanel = useCallback(
+    (tab: OverlayTab, variant: PanelVariant) =>
+      tab === "layers" ? (
+        <LayersPanel {...layersPanelProps} />
+      ) : focusPanelProps ? (
+        <FocusPanel variant={variant} {...focusPanelProps} />
+      ) : (
+        <GlobalPanel variant={variant} {...globalPanelProps} />
+      ),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [layersPanelProps, focusPanelProps, globalPanelProps],
+  );
 
   // ── Render ───────────────────────────────────────────────────────────────
   return (
-    <div className="globe-glass absolute inset-0 overflow-hidden bg-[#0b0b19]" data-testid="globe-explorer">
+    <div className="dark globe-glass absolute inset-0 overflow-hidden bg-[#0b0b19]" data-testid="globe-explorer">
       <GlobeMap
         className="absolute inset-0"
         organizations={visibleOrganizations}
@@ -727,8 +809,8 @@ export function GlobeExplorer({ orgDid = null, orgName = null, orgIdentifier = n
         boundsKey={`${focusDid ?? "none"}:${selectedSiteUri ?? "all"}:${boundsNonce}:layer${layerFlightNonce}`}
         boundsPadding={
           isDesktop
-            ? { top: 96, bottom: 64, left: 416, right: 64 }
-            : { top: 84, bottom: 150, left: 36, right: 36 }
+            ? { top: 48, bottom: 64, left: 416, right: 64 }
+            : { top: 36, bottom: 150, left: 36, right: 36 }
         }
         spin={mode === "global" && !focusDid}
         landcoverVisible={landcoverVisible}
@@ -768,136 +850,62 @@ export function GlobeExplorer({ orgDid = null, orgName = null, orgIdentifier = n
         ) : null}
       </AnimatePresence>
 
-      {/* ── Layers control (top-right, both breakpoints) ── */}
-      <div className="pointer-events-none absolute right-3 top-[4.25rem] z-20 flex max-h-[calc(100%-11rem)] flex-col items-end gap-2.5 md:right-4 md:max-h-[calc(100%-6rem)]">
-        <button
-          type="button"
-          onClick={() => setLayersOpen((value) => !value)}
-          aria-expanded={layersOpen}
-          aria-label={t("layers.button")}
-          className={cn(
-            "pointer-events-auto inline-flex h-10 items-center gap-2 rounded-full border border-border bg-background/85 px-3.5 text-sm font-medium text-foreground shadow-lg backdrop-blur-xl transition-all hover:border-primary/40 hover:text-primary active:scale-[0.97] sm:px-4",
-            layersOpen && "border-primary/40 text-primary",
-          )}
-        >
-          <LayersIcon className="size-4" />
-          <span className="hidden sm:inline">{t("layers.button")}</span>
-        </button>
+      {/* ── Top header: nav back into the app + panel switcher ── */}
+      <GlobeHeader
+        title={sheetTitle ?? t("title")}
+        activeTab={activeOverlayTab}
+        railOpen={railOpen}
+        onSelectNav={selectNav}
+        onCloseRail={() => setRailOpen(false)}
+        renderPanel={renderPanel}
+        sheetFull={sheetSnap === "full"}
+        onCollapseSheet={() => setSheetSnap("peek")}
+      />
 
-        <AnimatePresence>
-          {layersOpen ? (
-            <motion.div
-              initial={{ opacity: 0, y: -6, scale: 0.98 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: -6, scale: 0.98 }}
-              transition={{ duration: 0.18, ease: [0.25, 0.1, 0.25, 1] }}
-              className="pointer-events-auto flex min-h-0 w-[320px] max-w-[calc(100vw-1.5rem)] flex-col overflow-hidden rounded-2xl border border-border bg-background/90 shadow-xl backdrop-blur-xl"
-            >
-              <LayersPanel
-                landcoverVisible={landcoverVisible}
-                onToggleLandcover={() => setLandcoverVisible((value) => !value)}
-                categorizedGlobalLayers={categorizedGlobalLayers}
-                globalLayersLoading={globalLayers === null}
-                orgLayers={nonSeriesOrgLayers}
-                orgLayersLoading={orgLayersLoading}
-                showOrgLayers={Boolean(focusDid)}
-                enabledLayerIds={enabledLayerIds}
-                onToggleLayer={toggleLayer}
-                onLocateLayer={locateLayer}
-                droneSeries={droneSeries}
-                activeSeriesId={activeSeriesId}
-                activeSeriesStep={seriesStep}
-                onToggleSeries={toggleSeries}
-                onSelectSeriesStep={selectSeriesStep}
-                onLocateSeries={flyToSeries}
-                treesCount={visibleTrees?.features.length ?? 0}
-                treesLoading={treesState.status === "loading"}
-                treesVisible={treesVisible}
-                onToggleTrees={() => setTreesVisible((value) => !value)}
-              />
-            </motion.div>
-          ) : null}
-        </AnimatePresence>
-      </div>
-
-      {/* ── Desktop: floating left panel ── */}
-      <div
-        data-testid="globe-desktop-panel"
-        className="pointer-events-none absolute left-4 top-[4.25rem] z-10 hidden max-h-[calc(100%-6rem)] w-[360px] flex-col gap-3 md:flex"
-      >
-        {!focusDid && mode === "global" ? (
+      {/* ── Desktop: docked left overlay (pinned by the header nav) ── */}
+      <AnimatePresence>
+        {railOpen ? (
           <motion.section
-            initial={{ opacity: 0, x: -10 }}
+            key="globe-rail"
+            data-testid="globe-desktop-panel"
+            initial={{ opacity: 0, x: -12 }}
             animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.3, ease: [0.25, 0.1, 0.25, 1] }}
-            className="pointer-events-auto flex min-h-0 flex-col overflow-hidden rounded-2xl border border-border bg-background/90 shadow-xl backdrop-blur-xl"
+            exit={{ opacity: 0, x: -12 }}
+            transition={{ duration: 0.26, ease: [0.25, 0.1, 0.25, 1] }}
+            // `.globe-feathered-panel` forces position:relative (so its ::before
+            // can anchor), which would beat Tailwind's `absolute` and collapse
+            // the rail to its content height — pin it full-height inline instead.
+            style={{ width: "min(460px, calc(100vw - 3rem))", position: "absolute", top: 0, bottom: 0, left: 0 }}
+            className="globe-feathered-panel globe-feathered-panel--left-rail pointer-events-auto z-10 hidden max-w-[460px] flex-col overflow-hidden pt-16 shadow-xl md:flex"
           >
-            <GlobalPanel variant="floating" {...globalPanelProps} />
+            <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
+              <AnimatePresence mode="wait" initial={false}>
+                <motion.div
+                  key={activeOverlayTab}
+                  initial={{ opacity: 0, y: 4 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -4 }}
+                  transition={{ duration: 0.14, ease: [0.25, 0.1, 0.25, 1] }}
+                  className="flex min-h-0 flex-1 flex-col overflow-hidden"
+                >
+                  {renderPanel(activeOverlayTab, "floating")}
+                </motion.div>
+              </AnimatePresence>
+            </div>
           </motion.section>
         ) : null}
+      </AnimatePresence>
 
-        {focusPanelProps ? (
-          <motion.section
-            key={focusDid}
-            initial={{ opacity: 0, x: -10 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.3, ease: [0.25, 0.1, 0.25, 1] }}
-            className="pointer-events-auto flex min-h-0 flex-col overflow-hidden rounded-2xl border border-border bg-background/90 shadow-xl backdrop-blur-xl"
-          >
-            <FocusPanel variant="floating" {...focusPanelProps} />
-          </motion.section>
-        ) : null}
-      </div>
-
-      {/* ── Mobile: bottom sheet ── */}
+      {/* ── Mobile: draggable bottom sheet + its floating options rail ── */}
       <div className="md:hidden">
-        <section
-          aria-label={sheetTitle ?? t("panel.loading")}
-          data-testid="globe-sheet"
-          className={cn(
-            "pointer-events-auto absolute inset-x-0 bottom-0 z-20 flex h-[min(62dvh,520px)] flex-col rounded-t-2xl border-x border-t border-border bg-background/95 shadow-[0_-8px_32px_rgb(0_0_0/0.25)] backdrop-blur-xl transition-transform duration-300 ease-[cubic-bezier(0.25,0.1,0.25,1)]",
-          )}
-          style={{
-            transform: sheetExpanded ? "translateY(0)" : "translateY(calc(100% - 4.75rem))",
-          }}
-        >
-          <button
-            type="button"
-            onClick={() => setSheetExpanded((value) => !value)}
-            aria-expanded={sheetExpanded}
-            aria-label={sheetExpanded ? t("sheet.collapse") : t("sheet.expand")}
-            className="flex w-full flex-col items-center gap-0 pt-2"
-          >
-            <span aria-hidden className="h-1 w-9 rounded-full bg-border" />
-            <span className="flex w-full items-center gap-3 px-4 pb-2.5 pt-2 text-left">
-              <span className="grid size-9 shrink-0 place-items-center rounded-full bg-primary/10 text-primary">
-                <SheetIcon className="size-4" />
-              </span>
-              <span className="min-w-0 flex-1">
-                {sheetTitle ? (
-                  <span className="block truncate text-sm font-semibold text-foreground">{sheetTitle}</span>
-                ) : (
-                  <Skeleton className="my-0.5 h-4 w-32 rounded-md" />
-                )}
-                <span className="block truncate text-xs text-muted-foreground">{sheetSubtitle}</span>
-              </span>
-              <ChevronDownIcon
-                className={cn(
-                  "size-4 shrink-0 text-muted-foreground transition-transform duration-300",
-                  sheetExpanded ? "rotate-0" : "rotate-180",
-                )}
-              />
-            </span>
-          </button>
-
-          <div className="flex min-h-0 flex-1 flex-col border-t border-border pb-[env(safe-area-inset-bottom)]">
-            {focusPanelProps ? (
-              <FocusPanel variant="sheet" {...focusPanelProps} />
-            ) : (
-              <GlobalPanel variant="sheet" {...globalPanelProps} />
-            )}
-          </div>
-        </section>
+        <MobileSheet
+          snap={sheetSnap}
+          onSnapChange={setSheetSnap}
+          activeTab={activeOverlayTab}
+          onSelectTab={setActiveOverlayTab}
+          onSearch={openMobileSearch}
+          renderPanel={renderPanel}
+        />
       </div>
 
       {/* ── Drone time slider (active series) ── */}
@@ -919,32 +927,374 @@ export function GlobeExplorer({ orgDid = null, orgName = null, orgIdentifier = n
         ) : null}
       </AnimatePresence>
 
-      {/* ── Visible layers summary + active layer legends ── */}
-      {looseLayers.length > 0 || landcoverVisible || activeLegends.length > 0 ? (
-        <div className="pointer-events-none absolute bottom-24 left-3 z-10 flex max-w-[min(320px,calc(100vw-6rem))] flex-col gap-2 md:bottom-8 md:left-4 md:max-w-[min(360px,calc(100vw-1.5rem))]">
-          {looseLayers.length > 0 ? (
-            <ActiveLayersCard layers={looseLayers} onLocate={flyToLayer} onHide={toggleLayer} />
-          ) : null}
-          {landcoverVisible ? <LandcoverLegend /> : null}
-          {activeLegends.map((layer) => (
-            <div
-              key={layer.id}
-              className="pointer-events-auto rounded-xl border border-border bg-background/85 p-3 shadow-lg backdrop-blur-xl"
-            >
-              <p className="text-xs font-semibold text-foreground">{layer.name}</p>
-              <div className="mt-2 flex flex-col gap-1">
-                {layer.legend?.map((entry) => (
-                  <span key={`${layer.id}-${entry.label}`} className="flex items-center gap-2 text-[11px] text-muted-foreground">
-                    <span className="size-2.5 shrink-0 rounded-full" style={{ backgroundColor: entry.color }} />
-                    {entry.label}
-                  </span>
-                ))}
-              </div>
-            </div>
-          ))}
-        </div>
-      ) : null}
     </div>
+  );
+}
+
+// ── Top header ──────────────────────────────────────────────────────────────
+
+/** Panel switcher entries — shared by the desktop header nav and the mobile
+ *  bottom-sheet tabs so the two stay in lockstep. */
+const NAV_ITEMS: Array<{ id: OverlayTab; labelKey: "tabs.details" | "tabs.layers"; icon: LucideIcon }> = [
+  { id: "details", labelKey: "tabs.details", icon: Building2Icon },
+  { id: "layers", labelKey: "tabs.layers", icon: LayersIcon },
+];
+
+/**
+ * Floating top-left header. On mobile it is a hamburger back into the app's
+ * nav drawer (the Globe hides the shell header, so this is the only way out on
+ * small screens) plus the section title. On desktop it is the panel switcher:
+ * hovering an item previews its panel, clicking pins it to the docked left
+ * overlay — and clicking the pinned item again dismisses the overlay.
+ */
+function GlobeHeader({
+  title,
+  activeTab,
+  railOpen,
+  onSelectNav,
+  onCloseRail,
+  renderPanel,
+  sheetFull,
+  onCollapseSheet,
+}: {
+  title: string;
+  activeTab: OverlayTab;
+  railOpen: boolean;
+  onSelectNav: (tab: OverlayTab) => void;
+  /** Desktop: deactivate the pinned tab (close the docked rail). */
+  onCloseRail: () => void;
+  renderPanel: (tab: OverlayTab, variant: PanelVariant) => React.ReactNode;
+  /** Mobile: the sheet is fully expanded — offer a collapse affordance. */
+  sheetFull: boolean;
+  onCollapseSheet: () => void;
+}) {
+  const t = useTranslations("marketplace.globe");
+  const nav = useTranslations("common.navigation");
+  const mobileNav = useMobileNav();
+  const [hoveredTab, setHoveredTab] = useState<OverlayTab | null>(null);
+  const [, startPreview] = useTransition();
+  const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const cancelPreviewClose = useCallback(() => {
+    if (closeTimer.current) clearTimeout(closeTimer.current);
+    closeTimer.current = null;
+  }, []);
+  const schedulePreviewClose = useCallback(() => {
+    cancelPreviewClose();
+    closeTimer.current = setTimeout(() => setHoveredTab(null), 120);
+  }, [cancelPreviewClose]);
+  useEffect(() => cancelPreviewClose, [cancelPreviewClose]);
+
+  const previewTab = hoveredTab && !(railOpen && activeTab === hoveredTab) ? hoveredTab : null;
+
+  return (
+    <div className="pointer-events-none absolute inset-x-0 top-0 z-30 flex items-start justify-between gap-2 p-2.5">
+      {/* Mobile controls float as separate glass elements so they stay legible
+          above the map and don't merge visually with the bottom sheet. */}
+      <div className="pointer-events-auto flex items-center gap-2 md:hidden">
+        {sheetFull ? (
+          <button
+            type="button"
+            onClick={onCollapseSheet}
+            aria-label={t("sheet.collapse")}
+            className={cn("grid size-11 shrink-0 place-items-center rounded-full text-foreground transition-colors hover:bg-white/[0.12]", OUTLINE_SURFACE)}
+          >
+            <ChevronLeftIcon className="size-5" />
+          </button>
+        ) : (
+          <>
+            <button
+              type="button"
+              onClick={() => mobileNav?.open()}
+              aria-label={nav("openNavigation")}
+              className={cn("grid size-11 shrink-0 place-items-center rounded-full text-muted-foreground transition-colors hover:bg-white/[0.12] hover:text-foreground", OUTLINE_SURFACE)}
+            >
+              <MenuIcon className="size-5" />
+            </button>
+            <span className={cn("inline-flex h-11 max-w-[52vw] items-center truncate rounded-full px-4 text-sm font-semibold text-foreground", OUTLINE_SURFACE)}>
+              {title}
+            </span>
+          </>
+        )}
+      </div>
+
+      {/* Desktop panel switcher. Keep this glassy too; preview cards render as
+          their own outlined surfaces below it. */}
+      <div className="pointer-events-auto hidden items-center gap-1 rounded-full border border-white/10 bg-black/80 p-1 shadow-lg backdrop-blur-lg md:flex">
+        {NAV_ITEMS.map((item) => (
+          <HeaderNavItem
+            key={item.id}
+            label={t(item.labelKey)}
+            icon={item.icon}
+            active={railOpen && activeTab === item.id}
+            onSelect={() => {
+              cancelPreviewClose();
+              setHoveredTab(null);
+              onSelectNav(item.id);
+            }}
+            onPreviewStart={() => {
+              cancelPreviewClose();
+              startPreview(() => setHoveredTab(item.id));
+            }}
+            onPreviewEnd={schedulePreviewClose}
+          />
+        ))}
+        {/* Close the pinned tab (desktop). */}
+        {railOpen ? (
+          <button
+            type="button"
+            onClick={onCloseRail}
+            aria-label={t("tree.close")}
+            title={t("tree.close")}
+            className="grid size-9 shrink-0 place-items-center rounded-full text-muted-foreground transition-colors hover:bg-white/[0.12] hover:text-foreground"
+          >
+            <XIcon className="size-4" />
+          </button>
+        ) : null}
+      </div>
+
+      <AnimatePresence>
+        {previewTab ? (
+          // Render outside the blurred tab group. Nested backdrop-filter is
+          // unreliable in Chrome, so the popup gets its own blur root here.
+          <motion.div
+            key={previewTab}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.14, ease: [0.25, 0.1, 0.25, 1] }}
+            onMouseEnter={cancelPreviewClose}
+            onMouseLeave={schedulePreviewClose}
+            className="pointer-events-auto absolute left-2.5 top-[3.75rem] z-40 hidden pt-2 md:block"
+          >
+            <div className={cn("flex h-[min(66vh,600px)] w-[360px] max-w-[calc(100vw-2rem)] flex-col overflow-hidden rounded-2xl border border-white/10 bg-black/70 shadow-xl backdrop-blur-2xl")}>
+              {renderPanel(previewTab, "floating")}
+            </div>
+          </motion.div>
+        ) : null}
+      </AnimatePresence>
+    </div>
+  );
+}
+
+/** One desktop header nav item. Hover preview is rendered by GlobeHeader as
+ *  a sibling of the blurred tab group so the popup can have its own backdrop
+ *  blur instead of being trapped inside a blurred ancestor. */
+function HeaderNavItem({
+  label,
+  icon: Icon,
+  active,
+  onSelect,
+  onPreviewStart,
+  onPreviewEnd,
+}: {
+  label: string;
+  icon: LucideIcon;
+  active: boolean;
+  onSelect: () => void;
+  onPreviewStart: () => void;
+  onPreviewEnd: () => void;
+}) {
+  return (
+    <div className="relative" onMouseEnter={onPreviewStart} onMouseLeave={onPreviewEnd}>
+      <button
+        type="button"
+        onClick={onSelect}
+        aria-pressed={active}
+        className={cn(
+          "inline-flex h-9 items-center gap-1.5 rounded-full px-3 text-xs font-semibold transition-colors",
+          active ? "bg-white/[0.12] text-foreground" : "text-muted-foreground hover:bg-white/[0.06] hover:text-foreground",
+        )}
+      >
+        <Icon className={cn("size-3.5", active && "text-primary")} />
+        {label}
+      </button>
+    </div>
+  );
+}
+
+// ── Mobile: floating tab switcher + draggable bottom sheet ──────────────────
+
+const SHEET_SPRING = { type: "spring" as const, stiffness: 420, damping: 42 };
+/** Snaps ordered top → bottom, for nearest/fling resolution. */
+const SHEET_SNAPS: SheetSnap[] = ["full", "half", "peek", "collapsed"];
+
+/** Google-Maps-style draggable bottom sheet plus its floating options rail.
+ *  Drag the grabber between four snaps (collapsed / peek / half / full); the
+ *  lowest clears the map's zoom controls. The options rail (search + tab
+ *  switch) rides just above the sheet's top edge so it's always reachable. */
+function MobileSheet({
+  snap,
+  onSnapChange,
+  activeTab,
+  onSelectTab,
+  onSearch,
+  renderPanel,
+}: {
+  snap: SheetSnap;
+  onSnapChange: (snap: SheetSnap) => void;
+  activeTab: OverlayTab;
+  onSelectTab: (tab: OverlayTab) => void;
+  onSearch: () => void;
+  renderPanel: (tab: OverlayTab, variant: PanelVariant) => React.ReactNode;
+}) {
+  const t = useTranslations("marketplace.globe");
+  const dragControls = useDragControls();
+  const y = useMotionValue(0);
+  // Distinguishes a real drag from a plain tap on the grabber so the click
+  // handler doesn't also fire after a drag gesture.
+  const dragged = useRef(false);
+
+  const [vh, setVh] = useState(0);
+  useEffect(() => {
+    const measure = () => setVh(window.innerHeight);
+    measure();
+    window.addEventListener("resize", measure);
+    return () => window.removeEventListener("resize", measure);
+  }, []);
+
+  const fullH = vh ? Math.round(vh * 0.9) : 0;
+  const halfH = vh ? Math.round(vh * 0.52) : 0;
+  const targetY = useCallback(
+    (s: SheetSnap) => {
+      if (!fullH) return 0;
+      if (s === "full") return 0;
+      if (s === "half") return fullH - halfH;
+      if (s === "peek") return fullH - SHEET_PEEK;
+      return fullH - SHEET_COLLAPSED;
+    },
+    [fullH, halfH],
+  );
+  const maxY = fullH ? fullH - SHEET_COLLAPSED : 0;
+
+  // Settle to the active snap whenever it (or the viewport) changes. The first
+  // settle jumps (no animation) so the sheet never flashes fully-open on boot.
+  const settled = useRef(false);
+  useEffect(() => {
+    if (!fullH) return;
+    const target = targetY(snap);
+    if (!settled.current) {
+      settled.current = true;
+      y.set(target);
+      return;
+    }
+    const controls = animate(y, target, SHEET_SPRING);
+    return () => controls.stop();
+  }, [snap, fullH, halfH, targetY, y]);
+
+  const handleDragEnd = (_: unknown, info: { velocity: { y: number } }) => {
+    const current = y.get();
+    const v = info.velocity.y;
+    const index = SHEET_SNAPS.indexOf(snap);
+    let next: SheetSnap;
+    if (v < -350) next = SHEET_SNAPS[Math.max(0, index - 1)]!; // fling up → higher
+    else if (v > 350) next = SHEET_SNAPS[Math.min(SHEET_SNAPS.length - 1, index + 1)]!; // fling down → lower
+    else {
+      next = SHEET_SNAPS.reduce((best, s) =>
+        Math.abs(targetY(s) - current) < Math.abs(targetY(best) - current) ? s : best,
+      );
+    }
+    if (next === snap) animate(y, targetY(snap), SHEET_SPRING);
+    else onSnapChange(next);
+  };
+
+  // The options rail rides just above the sheet's top edge. Positioned via
+  // `bottom` (not transform) so each button's own backdrop-blur keeps working.
+  const railBottom = useTransform(y, (v) => (fullH ? fullH - v + 12 : SHEET_PEEK + 12));
+  // Keep the search/tab controls available even at the full snap; only fade
+  // them out when the sheet is intentionally collapsed into the map controls.
+  const railOpacity = useTransform(y, (v) => {
+    if (!fullH) return 1;
+    const peekY = fullH - SHEET_PEEK;
+    const collapsedY = fullH - SHEET_COLLAPSED;
+    if (v <= peekY) return 1;
+    if (v >= collapsedY) return 0;
+    return 1 - (v - peekY) / (collapsedY - peekY);
+  });
+  const railPointer = useTransform(railOpacity, (o) => (o < 0.5 ? "none" : "auto"));
+  const others = NAV_ITEMS.filter((item) => item.id !== activeTab);
+
+  return (
+    <>
+      {/* Floating options rail — search + quick tab switch, riding the sheet. */}
+      <motion.div
+        style={{ bottom: railBottom, opacity: railOpacity, pointerEvents: railPointer }}
+        className="absolute right-2.5 z-30 flex items-center gap-2"
+      >
+        <button
+          type="button"
+          onClick={onSearch}
+          aria-label={t("panel.searchPlaceholder")}
+          className={cn("grid size-11 place-items-center rounded-full text-foreground shadow-lg transition-colors hover:bg-white/[0.12]", OUTLINE_SURFACE)}
+        >
+          <SearchIcon className="size-5" />
+        </button>
+        {others.map(({ id, labelKey, icon: Icon }) => (
+          <button
+            key={id}
+            type="button"
+            onClick={() => onSelectTab(id)}
+            aria-label={t(labelKey)}
+            className={cn("grid size-11 place-items-center rounded-full text-foreground shadow-lg transition-colors hover:bg-white/[0.12]", OUTLINE_SURFACE)}
+          >
+            <Icon className="size-5" />
+          </button>
+        ))}
+      </motion.div>
+
+      <motion.section
+        aria-label={t("title")}
+        data-testid="globe-sheet"
+        drag="y"
+        dragListener={false}
+        dragControls={dragControls}
+        dragConstraints={{ top: 0, bottom: maxY }}
+        dragElastic={0.06}
+        onDragStart={() => {
+          dragged.current = true;
+        }}
+        onDragEnd={handleDragEnd}
+        style={{ y, height: fullH || undefined }}
+        className={cn(
+          "pointer-events-auto absolute inset-x-0 bottom-0 z-20 flex flex-col rounded-t-2xl border-b-0 shadow-[0_-8px_32px_rgb(0_0_0/0.25)]",
+          !fullH && "h-[62dvh]",
+          OUTLINE_SURFACE,
+        )}
+      >
+        {/* Grabber — the only drag surface, so the list below scrolls freely.
+            Tapping it (no drag) steps the sheet through its snaps. */}
+        <div
+          onPointerDown={(event) => {
+            dragged.current = false;
+            dragControls.start(event);
+          }}
+          onClick={() => {
+            if (dragged.current) return;
+            onSnapChange(snap === "full" ? "peek" : snap === "peek" ? "half" : "full");
+          }}
+          role="button"
+          tabIndex={0}
+          aria-label={t("sheet.expand")}
+          className="flex shrink-0 cursor-grab touch-none flex-col items-center pb-1 pt-2.5 active:cursor-grabbing"
+        >
+          <span aria-hidden className="h-1 w-9 rounded-full bg-white/25" />
+        </div>
+        <div className="flex min-h-0 flex-1 flex-col overflow-hidden pb-[env(safe-area-inset-bottom)]">
+          <AnimatePresence mode="wait" initial={false}>
+            <motion.div
+              key={activeTab}
+              initial={{ opacity: 0, y: 4 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -4 }}
+              transition={{ duration: 0.14, ease: [0.25, 0.1, 0.25, 1] }}
+              className="flex min-h-0 flex-1 flex-col overflow-hidden"
+            >
+              {renderPanel(activeTab, "sheet")}
+            </motion.div>
+          </AnimatePresence>
+        </div>
+      </motion.section>
+    </>
   );
 }
 
@@ -952,6 +1302,7 @@ export function GlobeExplorer({ orgDid = null, orgName = null, orgIdentifier = n
 
 function GlobalPanel({
   variant,
+  autoFocusNonce,
   organizations,
   visibleOrganizations,
   maEarthOnly,
@@ -966,6 +1317,8 @@ function GlobalPanel({
   onSelect,
 }: {
   variant: PanelVariant;
+  /** Bumped from outside (mobile quick-search) to focus the search box. */
+  autoFocusNonce?: number;
   organizations: GlobeOrganization[] | null;
   visibleOrganizations: GlobeOrganization[];
   maEarthOnly: boolean;
@@ -982,11 +1335,10 @@ function GlobalPanel({
 }) {
   const t = useTranslations("marketplace.globe");
   const [query, setQuery] = useState("");
-  // The floating (desktop) panel shows the roster right away for
-  // discoverability; the sheet always shows it when expanded.
-  const [listOpen, setListOpen] = useState(true);
-  const showList = variant === "sheet" || listOpen;
-
+  const inputRef = useRef<HTMLInputElement>(null);
+  useEffect(() => {
+    if (autoFocusNonce) inputRef.current?.focus();
+  }, [autoFocusNonce]);
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
     if (!q) return visibleOrganizations;
@@ -995,39 +1347,16 @@ function GlobalPanel({
 
   return (
     <div className="flex min-h-0 flex-1 flex-col">
-      {variant === "floating" ? (
-        <div className="flex items-start justify-between gap-3 px-4 pb-2 pt-3.5">
-          <div className="min-w-0">
-            <h1 className="flex items-center gap-2 text-sm font-semibold text-foreground">
-              <EarthIcon className="size-4 text-primary" />
-              {t("title")}
-            </h1>
-            <p className="mt-0.5 text-xs leading-5 text-muted-foreground">{t("subtitle")}</p>
-          </div>
-          <button
-            type="button"
-            onClick={() => setListOpen((value) => !value)}
-            aria-expanded={listOpen}
-            aria-label={t("panel.toggleList")}
-            className="mt-0.5 grid size-7 shrink-0 place-items-center rounded-full border border-border text-muted-foreground transition-colors hover:border-primary/40 hover:text-primary"
-          >
-            <ChevronDownIcon className={cn("size-4 transition-transform", listOpen && "rotate-180")} />
-          </button>
-        </div>
-      ) : null}
-
-      <div className={cn("flex flex-col gap-2 px-4", variant === "floating" ? "pb-3" : "py-3")}>
+      <div className={cn("flex flex-col gap-2 px-4", variant === "floating" ? "py-4" : "py-3")}>
         <div className="relative min-w-0">
           <SearchIcon className="pointer-events-none absolute left-3 top-1/2 size-3.5 -translate-y-1/2 text-muted-foreground" />
           <input
+            ref={inputRef}
             type="search"
             value={query}
-            onChange={(event) => {
-              setQuery(event.target.value);
-              setListOpen(true);
-            }}
+            onChange={(event) => setQuery(event.target.value)}
             placeholder={t("panel.searchPlaceholder")}
-            className="h-9 w-full rounded-full border border-border bg-background pl-9 pr-3 text-sm text-foreground outline-none transition-colors placeholder:text-muted-foreground focus:border-primary/50"
+            className="h-9 w-full rounded-full bg-white/[0.06] pl-9 pr-3 text-sm text-foreground outline-none transition-colors placeholder:text-muted-foreground focus:bg-white/[0.12]"
           />
         </div>
         <div className="flex flex-wrap items-center gap-1.5">
@@ -1036,10 +1365,10 @@ function GlobalPanel({
             onClick={onToggleMaEarth}
             aria-pressed={maEarthOnly}
             className={cn(
-              "inline-flex h-7 shrink-0 items-center gap-1.5 rounded-full border px-2.5 text-xs font-medium transition-colors",
+              "inline-flex h-7 shrink-0 items-center gap-1.5 rounded-full px-2.5 text-xs font-medium transition-colors",
               maEarthOnly
-                ? "border-primary/50 bg-primary/10 text-primary"
-                : "border-border text-muted-foreground hover:border-primary/40 hover:text-primary",
+                ? "bg-primary/10 text-primary"
+                : "bg-white/[0.06] text-muted-foreground hover:bg-white/[0.12] hover:text-primary",
             )}
           >
             <Image
@@ -1056,10 +1385,10 @@ function GlobalPanel({
             onClick={onToggleLayersOnly}
             aria-pressed={layersOnly}
             className={cn(
-              "inline-flex h-7 shrink-0 items-center gap-1.5 rounded-full border px-2.5 text-xs font-medium transition-colors",
+              "inline-flex h-7 shrink-0 items-center gap-1.5 rounded-full px-2.5 text-xs font-medium transition-colors",
               layersOnly
-                ? "border-primary/50 bg-primary/10 text-primary"
-                : "border-border text-muted-foreground hover:border-primary/40 hover:text-primary",
+                ? "bg-primary/10 text-primary"
+                : "bg-white/[0.06] text-muted-foreground hover:bg-white/[0.12] hover:text-primary",
             )}
           >
             <DroneIcon className="size-3.5" />
@@ -1070,10 +1399,10 @@ function GlobalPanel({
             onClick={onToggleTrees}
             aria-pressed={treesOnly}
             className={cn(
-              "inline-flex h-7 shrink-0 items-center gap-1.5 rounded-full border px-2.5 text-xs font-medium transition-colors",
+              "inline-flex h-7 shrink-0 items-center gap-1.5 rounded-full px-2.5 text-xs font-medium transition-colors",
               treesOnly
-                ? "border-primary/50 bg-primary/10 text-primary"
-                : "border-border text-muted-foreground hover:border-primary/40 hover:text-primary",
+                ? "bg-primary/10 text-primary"
+                : "bg-white/[0.06] text-muted-foreground hover:bg-white/[0.12] hover:text-primary",
             )}
           >
             <TreePineIcon className="size-3.5" />
@@ -1082,19 +1411,15 @@ function GlobalPanel({
         </div>
       </div>
 
-      {showList ? (
-        <div className="flex min-h-0 flex-1 flex-col border-t border-border">
-          {variant === "floating" ? (
-            <p className="px-4 pb-1 pt-2.5 text-[10px] font-medium uppercase tracking-[0.12em] text-muted-foreground">
-              {organizations === null || treeCountsLoading
-                ? t("panel.loading")
-                : t("panel.count", { count: filtered.length })}
-            </p>
-          ) : null}
-          <ul
-            className="min-h-0 flex-1 overflow-y-auto overscroll-contain pb-2"
-            style={variant === "floating" ? { maxHeight: "42vh" } : undefined}
-          >
+      <div className="flex min-h-0 flex-1 flex-col border-t border-border">
+        {variant === "floating" ? (
+          <p className="px-4 pb-1 pt-2.5 text-[10px] font-medium uppercase tracking-[0.12em] text-muted-foreground">
+            {organizations === null || treeCountsLoading
+              ? t("panel.loading")
+              : t("panel.count", { count: filtered.length })}
+          </p>
+        ) : null}
+        <ul className="min-h-0 flex-1 overflow-y-auto overscroll-contain pb-2">
             {organizations === null || treeCountsLoading ? (
               <li className="flex flex-col gap-2 px-4 py-2">
                 <Skeleton className="h-9 w-full rounded-lg" />
@@ -1113,7 +1438,7 @@ function GlobalPanel({
                   <button
                     type="button"
                     onClick={() => onSelect(org.did)}
-                    className="group flex w-full items-center gap-2.5 px-4 py-2 text-left transition-colors hover:bg-muted/60"
+                    className="group flex w-full items-center gap-2.5 px-4 py-2 text-left transition-colors hover:bg-white/[0.06]"
                   >
                     <span className="grid size-8 shrink-0 place-items-center rounded-full bg-primary/10 text-base">
                       {(org.country ? countryFlag(org.country) : "") || "🌍"}
@@ -1165,9 +1490,8 @@ function GlobalPanel({
                 </li>
               ))
             )}
-          </ul>
-        </div>
-      ) : null}
+        </ul>
+      </div>
     </div>
   );
 }
@@ -1223,50 +1547,54 @@ function FocusPanel({
 
   return (
     <div className="flex min-h-0 flex-1 flex-col">
-      {variant === "floating" ? (
-        <div className="flex items-start gap-3 px-4 pb-3 pt-3.5">
-          <span className="grid size-9 shrink-0 place-items-center rounded-full bg-primary/10 text-primary">
-            {mode === "project" ? <FolderKanbanIcon className="size-4" /> : <Building2Icon className="size-4" />}
-          </span>
-          <div className="min-w-0 flex-1">
-            <p className="text-[10px] font-medium uppercase tracking-[0.12em] text-muted-foreground">
-              {mode === "project" ? t("focus.projectLabel") : t("focus.organizationLabel")}
-            </p>
-            {(mode === "project" ? project?.title : focusName) ? (
-              <h2 className="truncate text-sm font-semibold text-foreground">
-                {mode === "project" ? project?.title : focusName}
-              </h2>
-            ) : (
-              // Roster still loading (hard refresh of /globe?org=…): skeleton
-              // lines where the name + country will appear.
-              <>
-                <Skeleton className="mt-1 h-4 w-36 rounded-md" />
-                <Skeleton className="mt-1.5 h-3 w-24 rounded-md" />
-              </>
+      <div className={cn("flex items-start gap-2.5 px-4 pb-3", variant === "sheet" ? "pt-2" : "pt-3.5")}>
+        {/* Back to the roster/search — the intuitive way out of a focused org
+            (global mode only; dedicated pages use "Back to globe" below). */}
+        {onClear ? (
+          <button
+            type="button"
+            onClick={onClear}
+            aria-label={t("focus.clear")}
+            title={t("focus.clear")}
+            className={cn(
+              "grid size-9 shrink-0 place-items-center self-center rounded-full text-muted-foreground transition-colors hover:bg-white/[0.12] hover:text-primary",
+              ELEVATED,
             )}
-            {mode === "project" && focusName ? (
-              <Link href={profileHref} className="mt-0.5 block truncate text-xs text-muted-foreground transition-colors hover:text-primary">
-                {focusName}
-              </Link>
-            ) : selectedOrg?.country ? (
-              <p className="mt-0.5 text-xs text-muted-foreground">
-                {/* formatCountry already includes the flag. */}
-                {formatCountry(selectedOrg.country)}
-              </p>
-            ) : null}
-          </div>
-          {onClear ? (
-            <button
-              type="button"
-              onClick={onClear}
-              aria-label={t("focus.clear")}
-              className="grid size-7 shrink-0 place-items-center rounded-full border border-border text-muted-foreground transition-colors hover:border-primary/40 hover:text-primary"
-            >
-              <XIcon className="size-3.5" />
-            </button>
+          >
+            <ChevronLeftIcon className="size-4" />
+          </button>
+        ) : null}
+        <span className="grid size-9 shrink-0 place-items-center rounded-full bg-primary/10 text-primary">
+          {mode === "project" ? <FolderKanbanIcon className="size-4" /> : <Building2Icon className="size-4" />}
+        </span>
+        <div className="min-w-0 flex-1">
+          <p className="text-[10px] font-medium uppercase tracking-[0.12em] text-muted-foreground">
+            {mode === "project" ? t("focus.projectLabel") : t("focus.organizationLabel")}
+          </p>
+          {(mode === "project" ? project?.title : focusName) ? (
+            <h2 className="truncate text-sm font-semibold text-foreground">
+              {mode === "project" ? project?.title : focusName}
+            </h2>
+          ) : (
+            // Roster still loading (hard refresh of /globe?org=…): skeleton
+            // lines where the name + country will appear.
+            <>
+              <Skeleton className="mt-1 h-4 w-36 rounded-md" />
+              <Skeleton className="mt-1.5 h-3 w-24 rounded-md" />
+            </>
+          )}
+          {mode === "project" && focusName ? (
+            <Link href={profileHref} className="mt-0.5 block truncate text-xs text-muted-foreground transition-colors hover:text-primary">
+              {focusName}
+            </Link>
+          ) : selectedOrg?.country ? (
+            <p className="mt-0.5 text-xs text-muted-foreground">
+              {/* formatCountry already includes the flag. */}
+              {formatCountry(selectedOrg.country)}
+            </p>
           ) : null}
         </div>
-      ) : null}
+      </div>
 
       {mode !== "project" ? (
         <div className={cn("px-4 pb-1", variant === "sheet" && "pt-3")}>
@@ -1295,7 +1623,10 @@ function FocusPanel({
         {mode === "global" ? (
           <Link
             href={orgGlobeHref}
-            className="inline-flex h-8 items-center gap-1.5 rounded-full border border-border bg-background px-3 text-xs font-medium text-foreground transition-colors hover:border-primary/40 hover:text-primary"
+            className={cn(
+              "inline-flex h-8 items-center gap-1.5 rounded-full px-3 text-xs font-medium text-foreground transition-colors hover:bg-white/[0.12] hover:text-primary",
+              ELEVATED,
+            )}
           >
             <EarthIcon className="size-3.5" />
             {t("focus.openGlobe")}
@@ -1304,7 +1635,10 @@ function FocusPanel({
         {mode === "project" && focusName ? (
           <Link
             href={orgGlobeHref}
-            className="inline-flex h-8 items-center gap-1.5 rounded-full border border-border bg-background px-3 text-xs font-medium text-foreground transition-colors hover:border-primary/40 hover:text-primary"
+            className={cn(
+              "inline-flex h-8 items-center gap-1.5 rounded-full px-3 text-xs font-medium text-foreground transition-colors hover:bg-white/[0.12] hover:text-primary",
+              ELEVATED,
+            )}
           >
             <EarthIcon className="size-3.5" />
             {t("focus.orgGlobe")}
@@ -1315,20 +1649,13 @@ function FocusPanel({
           onClick={onRefit}
           aria-label={t("focus.recenter")}
           title={t("focus.recenter")}
-          className="inline-flex size-8 items-center justify-center rounded-full border border-border bg-background text-muted-foreground transition-colors hover:border-primary/40 hover:text-primary"
+          className={cn(
+            "inline-flex size-8 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-white/[0.12] hover:text-primary",
+            ELEVATED,
+          )}
         >
           <LocateFixedIcon className="size-3.5" />
         </button>
-        {variant === "sheet" && onClear ? (
-          <button
-            type="button"
-            onClick={onClear}
-            className="inline-flex h-8 items-center gap-1.5 rounded-full border border-border bg-background px-3 text-xs font-medium text-muted-foreground transition-colors hover:border-primary/40 hover:text-primary"
-          >
-            <XIcon className="size-3.5" />
-            {t("focus.clear")}
-          </button>
-        ) : null}
       </div>
 
       {mode === "organization" && (
@@ -1366,10 +1693,7 @@ function FocusPanel({
         ) : state.sites.length === 0 ? (
           <p className="px-4 py-3 text-sm text-muted-foreground">{t("focus.noSites")}</p>
         ) : (
-          <ul
-            className="min-h-0 flex-1 overflow-y-auto overscroll-contain py-1"
-            style={variant === "floating" ? { maxHeight: "32vh" } : undefined}
-          >
+          <ul className="min-h-0 flex-1 overflow-y-auto overscroll-contain py-1">
             <li>
               <SiteRow
                 label={t("focus.allSites")}
@@ -1461,7 +1785,7 @@ function SiteRow({
       onClick={onClick}
       aria-pressed={active}
       className={cn(
-        "flex w-full items-center gap-2.5 px-4 py-2 text-left text-sm transition-colors hover:bg-muted/60",
+        "flex w-full items-center gap-2.5 px-4 py-2 text-left text-sm transition-colors hover:bg-white/[0.06]",
         active ? "font-medium text-primary" : "text-foreground",
       )}
     >
@@ -1541,6 +1865,8 @@ function LayersPanel({
   treesLoading,
   treesVisible,
   onToggleTrees,
+  visibleLayers,
+  legendLayers,
 }: {
   landcoverVisible: boolean;
   onToggleLandcover: () => void;
@@ -1562,19 +1888,22 @@ function LayersPanel({
   treesLoading: boolean;
   treesVisible: boolean;
   onToggleTrees: () => void;
+  visibleLayers: GlobeLayer[];
+  legendLayers: GlobeLayer[];
 }) {
   const t = useTranslations("marketplace.globe");
   const hasTreesRow = showOrgLayers && (treesLoading || treesCount > 0);
+  const hasVisibleLayerDetails = visibleLayers.length > 0 || landcoverVisible || legendLayers.length > 0;
 
   return (
-    <div className="flex max-h-[min(56vh,520px)] flex-col overflow-y-auto overscroll-contain p-4">
+    <div className="flex min-h-0 flex-1 flex-col overflow-y-auto overscroll-contain p-4">
       <h2 className="flex items-center gap-2 text-sm font-semibold text-foreground">
         <LayersIcon className="size-4 text-primary" />
         {t("layers.title")}
       </h2>
 
       {/* Land cover (static raster) */}
-      <div className="mt-3 rounded-xl border border-border bg-background/60">
+      <div className="mt-3 overflow-hidden rounded-2xl bg-white/[0.06] shadow-[inset_0_1px_0_rgb(255_255_255/0.04)]">
         <LayerToggleRow
           label={t("layers.landcover")}
           description={t("layers.landcoverSource")}
@@ -1589,7 +1918,7 @@ function LayersPanel({
             {t("layers.projectCategory")}
           </h3>
           {hasTreesRow ? (
-            <div className="mb-2 rounded-xl border border-border bg-background/60">
+            <div className="mb-2 overflow-hidden rounded-2xl bg-white/[0.06] shadow-[inset_0_1px_0_rgb(255_255_255/0.04)]">
               {treesLoading ? (
                 <div className="p-2">
                   <Skeleton className="h-8 w-full rounded-lg" />
@@ -1625,7 +1954,7 @@ function LayersPanel({
                 />
               ))}
               {orgLayers.length > 0 ? (
-                <div className="flex flex-col divide-y divide-border rounded-xl border border-border bg-background/60">
+                <div className="flex flex-col divide-y divide-white/10 overflow-hidden rounded-2xl bg-white/[0.06] shadow-[inset_0_1px_0_rgb(255_255_255/0.04)]">
                   {orgLayers.map((layer) => (
                     <LayerToggleRow
                       key={layer.id}
@@ -1653,7 +1982,7 @@ function LayersPanel({
         categorizedGlobalLayers.map(([category, layers]) => (
           <div className="mt-4" key={category}>
             <h3 className="mb-1 text-xs font-semibold capitalize text-muted-foreground">{category}</h3>
-            <div className="flex flex-col divide-y divide-border rounded-xl border border-border bg-background/60">
+            <div className="flex flex-col divide-y divide-white/10 overflow-hidden rounded-2xl bg-white/[0.06] shadow-[inset_0_1px_0_rgb(255_255_255/0.04)]">
               {layers.map((layer) => (
                 <LayerToggleRow
                   key={layer.id}
@@ -1668,6 +1997,19 @@ function LayersPanel({
           </div>
         ))
       )}
+
+      {hasVisibleLayerDetails ? (
+        <div className="mt-5 space-y-2 border-t border-white/10 pt-4">
+          <h3 className="text-xs font-semibold capitalize text-muted-foreground">{t("layers.visibleDetails")}</h3>
+          {visibleLayers.length > 0 ? (
+            <ActiveLayersCard layers={visibleLayers} onLocate={onLocateLayer} onHide={onToggleLayer} />
+          ) : null}
+          {landcoverVisible ? <LandcoverLegend /> : null}
+          {legendLayers.map((layer) => (
+            <LayerLegendCard key={layer.id} layer={layer} />
+          ))}
+        </div>
+      ) : null}
     </div>
   );
 }
@@ -1688,11 +2030,11 @@ function LayerToggleRow({
 }) {
   const t = useTranslations("marketplace.globe");
   return (
-    <label className="flex cursor-pointer items-center justify-between gap-2 px-3.5 py-2.5">
+    <label className="flex cursor-pointer items-center justify-between gap-3 px-3.5 py-3 transition-colors hover:bg-white/[0.04]">
       <span className="min-w-0 flex-1">
-        <span className="block truncate text-sm text-foreground">{label}</span>
+        <span className="block truncate text-sm font-medium text-foreground">{label}</span>
         {description ? (
-          <span className="block truncate text-[11px] text-muted-foreground">{description}</span>
+          <span className="mt-0.5 block truncate text-[11px] text-muted-foreground">{description}</span>
         ) : null}
       </span>
       {onLocate ? (
@@ -1704,7 +2046,7 @@ function LayerToggleRow({
           }}
           aria-label={t("layers.flyTo", { name: label })}
           title={t("layers.flyTo", { name: label })}
-          className="grid size-7 shrink-0 place-items-center rounded-full border border-border text-muted-foreground transition-colors hover:border-primary/40 hover:text-primary"
+          className="grid size-7 shrink-0 place-items-center rounded-full bg-white/[0.06] text-muted-foreground transition-colors hover:bg-white/[0.12] hover:text-primary"
         >
           <LocateFixedIcon className="size-3.5" />
         </button>
@@ -1716,14 +2058,14 @@ function LayerToggleRow({
         aria-label={label}
         onClick={onToggle}
         className={cn(
-          "relative h-5 w-9 shrink-0 rounded-full border transition-colors",
-          checked ? "border-primary bg-primary" : "border-border bg-muted",
+          "relative h-6 w-11 shrink-0 rounded-full transition-colors shadow-[inset_0_0_0_1px_rgb(255_255_255/0.08)]",
+          checked ? "bg-primary/90" : "bg-white/20 hover:bg-white/30",
         )}
       >
         <span
           className={cn(
-            "absolute top-1/2 size-3.5 -translate-y-1/2 rounded-full bg-background shadow transition-[left]",
-            checked ? "left-[calc(100%-1.05rem)]" : "left-0.5",
+            "absolute top-1/2 size-4 -translate-y-1/2 rounded-full shadow transition-[left,background-color]",
+            checked ? "left-[calc(100%-1.25rem)] bg-white" : "left-1 bg-white",
           )}
         />
       </button>
@@ -1759,11 +2101,11 @@ function TimeSeriesCard({
     <div
       data-testid="globe-time-series-card"
       className={cn(
-        "mb-2 rounded-xl border bg-background/60 transition-colors",
-        active ? "border-primary/50" : "border-border",
+        "mb-2 overflow-hidden rounded-2xl bg-white/[0.06] shadow-[inset_0_1px_0_rgb(255_255_255/0.04)] transition-colors",
+        active && "bg-white/[0.12]",
       )}
     >
-      <div className="flex items-center justify-between gap-2 px-3.5 pt-2.5">
+      <div className="flex items-center justify-between gap-3 px-3.5 pt-3">
         <span className="min-w-0 flex-1">
           <span className="flex items-center gap-1.5 text-sm text-foreground">
             <HistoryIcon className="size-3.5 shrink-0 text-primary" />
@@ -1778,7 +2120,7 @@ function TimeSeriesCard({
           onClick={onLocate}
           aria-label={t("layers.flyTo", { name: series.name })}
           title={t("layers.flyTo", { name: series.name })}
-          className="grid size-7 shrink-0 place-items-center rounded-full border border-border text-muted-foreground transition-colors hover:border-primary/40 hover:text-primary"
+          className="grid size-7 shrink-0 place-items-center rounded-full bg-white/[0.06] text-muted-foreground transition-colors hover:bg-white/[0.12] hover:text-primary"
         >
           <LocateFixedIcon className="size-3.5" />
         </button>
@@ -1789,14 +2131,14 @@ function TimeSeriesCard({
           aria-label={t("timeline.toggle", { name: series.name })}
           onClick={onToggle}
           className={cn(
-            "relative h-5 w-9 shrink-0 rounded-full border transition-colors",
-            active ? "border-primary bg-primary" : "border-border bg-muted",
+            "relative h-6 w-11 shrink-0 rounded-full transition-colors shadow-[inset_0_0_0_1px_rgb(255_255_255/0.08)]",
+            active ? "bg-primary/90" : "bg-white/20 hover:bg-white/30",
           )}
         >
           <span
             className={cn(
-              "absolute top-1/2 size-3.5 -translate-y-1/2 rounded-full bg-background shadow transition-[left]",
-              active ? "left-[calc(100%-1.05rem)]" : "left-0.5",
+              "absolute top-1/2 size-4 -translate-y-1/2 rounded-full shadow transition-[left,background-color]",
+              active ? "left-[calc(100%-1.25rem)] bg-white" : "left-1 bg-white",
             )}
           />
         </button>
@@ -1812,10 +2154,10 @@ function TimeSeriesCard({
             onClick={() => onSelectStep(index)}
             aria-pressed={active && index === activeStep}
             className={cn(
-              "rounded-full border px-2 py-0.5 text-[11px] font-medium transition-colors",
+              "rounded-full px-2 py-0.5 text-[11px] font-medium transition-colors",
               active && index === activeStep
-                ? "border-primary/50 bg-primary/10 text-primary"
-                : "border-border text-muted-foreground hover:border-primary/40 hover:text-primary",
+                ? "bg-primary/10 text-primary"
+                : "bg-white/[0.06] text-muted-foreground hover:bg-white/[0.12] hover:text-primary",
             )}
           >
             {formatDay(step.date)}
@@ -1859,7 +2201,7 @@ function TimeSliderCard({
         transition={{ duration: 0.22, ease: [0.25, 0.1, 0.25, 1] }}
         aria-label={t("timeline.title")}
         data-testid="globe-time-slider"
-        className="pointer-events-auto w-full max-w-[460px] rounded-2xl border border-border bg-background/90 p-3.5 shadow-xl backdrop-blur-xl"
+        className={cn("pointer-events-auto w-full max-w-[460px] rounded-2xl p-3.5 shadow-xl", OUTLINE_SURFACE)}
       >
         <div className="flex items-center gap-2">
           <span className="flex min-w-0 flex-1 items-center gap-1.5">
@@ -1961,7 +2303,10 @@ function TreeDetailPanel({ tree, onClose }: { tree: TreeDetail; onClose: () => v
       transition={{ duration: 0.22, ease: [0.25, 0.1, 0.25, 1] }}
       aria-label={t("tree.title")}
       data-testid="globe-tree-detail"
-      className="pointer-events-auto absolute right-3 top-[7.5rem] z-30 flex max-h-[calc(100%-9rem)] w-[300px] max-w-[calc(100vw-1.5rem)] flex-col overflow-hidden rounded-2xl border border-border bg-background/90 shadow-xl backdrop-blur-xl md:right-4"
+      className={cn(
+        "pointer-events-auto absolute right-3 top-4 z-30 flex max-h-[calc(100%-2rem)] w-[300px] max-w-[calc(100vw-1.5rem)] flex-col overflow-hidden rounded-2xl shadow-xl md:right-4",
+        OUTLINE_SURFACE,
+      )}
     >
       <div className="flex items-center justify-between gap-2 border-b border-border px-4 py-2.5">
         <span className="flex items-center gap-1.5 text-[10px] font-medium uppercase tracking-[0.12em] text-muted-foreground">
@@ -2081,10 +2426,7 @@ function ActiveLayersCard({
 }) {
   const t = useTranslations("marketplace.globe");
   return (
-    <div
-      data-testid="globe-active-layers"
-      className="pointer-events-auto rounded-xl border border-border bg-background/85 p-3 shadow-lg backdrop-blur-xl"
-    >
+    <div data-testid="globe-active-layers" className="pointer-events-auto rounded-xl bg-white/[0.06] p-3 shadow-lg">
       <p className="flex items-center gap-1.5 text-xs font-semibold text-foreground">
         <LayersIcon className="size-3.5 text-primary" />
         {t("layers.visibleNow", { count: layers.length })}
@@ -2113,7 +2455,7 @@ function ActiveLayersCard({
               onClick={() => onHide(layer)}
               aria-label={t("layers.hide", { name: layer.name })}
               title={t("layers.hide", { name: layer.name })}
-              className="grid size-5 shrink-0 place-items-center rounded-full text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+              className="grid size-5 shrink-0 place-items-center rounded-full text-muted-foreground transition-colors hover:bg-white/[0.06] hover:text-foreground"
             >
               <XIcon className="size-3" />
             </button>
@@ -2127,13 +2469,29 @@ function ActiveLayersCard({
 function LandcoverLegend() {
   const t = useTranslations("marketplace.globe");
   return (
-    <div className="pointer-events-auto rounded-xl border border-border bg-background/85 p-3 shadow-lg backdrop-blur-xl">
+    <div className="pointer-events-auto rounded-xl bg-white/[0.06] p-3 shadow-lg">
       <p className="text-xs font-semibold text-foreground">{t("layers.landcover")}</p>
       <div className="mt-2 grid grid-cols-2 gap-x-3 gap-y-1">
         {LANDCOVER_LEGEND.map((entry) => (
           <span key={entry.labelKey} className="flex items-center gap-2 text-[11px] text-muted-foreground">
             <span className="size-2.5 shrink-0 rounded-full" style={{ backgroundColor: entry.color }} />
             {t(`layers.landcoverClasses.${entry.labelKey}`)}
+          </span>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function LayerLegendCard({ layer }: { layer: GlobeLayer }) {
+  return (
+    <div className="pointer-events-auto rounded-xl bg-white/[0.06] p-3 shadow-lg">
+      <p className="text-xs font-semibold text-foreground">{layer.name}</p>
+      <div className="mt-2 flex flex-col gap-1">
+        {layer.legend?.map((entry) => (
+          <span key={`${layer.id}-${entry.label}`} className="flex items-center gap-2 text-[11px] text-muted-foreground">
+            <span className="size-2.5 shrink-0 rounded-full" style={{ backgroundColor: entry.color }} />
+            {entry.label}
           </span>
         ))}
       </div>

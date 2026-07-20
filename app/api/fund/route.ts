@@ -1,18 +1,22 @@
 import { formatUsdcAmount, normalizeUsdcAmountString, parseUsdcAmount } from "@/lib/facilitator/amount";
 import { parsePaymentSignature } from "@/lib/facilitator/eip3009";
-import { executeTransferWithAuthorization } from "@/lib/facilitator";
+import { executeTransferWithAuthorization, SettlementTimeoutError } from "@/lib/facilitator";
 import { fetchActivityCid, fetchVerifiedRecipientAddress } from "@/lib/facilitator/recipient";
-import { FACILITATOR_DID } from "@/app/_lib/urls";
-import { PAYMENT_NETWORK, PAYMENT_RAIL } from "@/lib/facilitator/usdc";
+import {
+  computeDonorHash,
+  isDidIdentifier,
+  writeFundingReceipt,
+  type DidIdentifier,
+  type ReceiptSender,
+  type ReceiptText,
+} from "@/lib/facilitator/receipts";
+import { fetchAuthSession } from "@/app/_lib/auth-server";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
-
-type DidIdentifier = `did:${string}:${string}`;
-type ReceiptSender =
-  | { $type: "org.hypercerts.funding.receipt#text"; value: string }
-  | { $type: "app.certified.defs#did"; did: DidIdentifier };
-type ReceiptText = { $type: "org.hypercerts.funding.receipt#text"; value: string };
+// A mainnet transfer + receipt wait can exceed the platform's default
+// duration limit, which would drop the request and hang the donor's UI.
+export const maxDuration = 300;
 
 type SettlementBody = {
   activityUri?: unknown;
@@ -40,10 +44,6 @@ function isHexAddress(value: string): value is `0x${string}` {
   return /^0x[a-fA-F0-9]{40}$/.test(value);
 }
 
-function isDidIdentifier(value: string): value is DidIdentifier {
-  return /^did:[a-z0-9]+:.+$/i.test(value);
-}
-
 function isAtUriString(value: string): value is `at://${string}` {
   return /^at:\/\/[^/]+\/[a-z0-9.]+\/.+$/i.test(value);
 }
@@ -51,7 +51,7 @@ function isAtUriString(value: string): value is `at://${string}` {
 function parseBody(raw: unknown): { ok: true; body: ParsedSettlementBody } | { ok: false; error: string } {
   if (!isRecord(raw)) return { ok: false, error: "Invalid request body" };
   const body = raw as SettlementBody;
-  if (typeof body.orgDid !== "string" || !body.orgDid.trim()) return { ok: false, error: "Missing organization profile" };
+  if (typeof body.orgDid !== "string" || !body.orgDid.trim()) return { ok: false, error: "Missing recipient profile" };
   if (typeof body.anonymous !== "boolean") return { ok: false, error: "Missing anonymous flag" };
   if (body.activityUri !== undefined && (typeof body.activityUri !== "string" || !isAtUriString(body.activityUri))) {
     return { ok: false, error: "Invalid activity link" };
@@ -72,70 +72,6 @@ function parseBody(raw: unknown): { ok: true; body: ParsedSettlementBody } | { o
       donorDid: typeof body.donorDid === "string" ? body.donorDid : undefined,
     },
   };
-}
-
-function getFacilitatorServiceHost(): string {
-  const configuredHost = process.env.FACILITATOR_SERVICE_HOST?.trim().replace(/\/+$/, "");
-  if (!configuredHost) throw new Error("FACILITATOR_SERVICE_HOST env var is not set");
-  return /^https?:\/\//i.test(configuredHost) ? configuredHost : `https://${configuredHost}`;
-}
-
-async function createFacilitatorSession(): Promise<string> {
-  const serviceHost = getFacilitatorServiceHost();
-  const identifier = process.env.NEXT_PUBLIC_FACILITATOR_DID || FACILITATOR_DID;
-  const password = process.env.FACILITATOR_PASSWORD;
-  if (!password) throw new Error("FACILITATOR_PASSWORD env var is not set");
-
-  const response = await fetch(`${serviceHost}/xrpc/com.atproto.server.createSession`, {
-    method: "POST",
-    headers: { "content-type": "application/json" },
-    body: JSON.stringify({ identifier, password }),
-  });
-  const json = (await response.json().catch(() => null)) as { accessJwt?: string; message?: string } | null;
-  if (!response.ok || !json?.accessJwt) throw new Error(json?.message || "Unable to prepare donation service");
-  return json.accessJwt;
-}
-
-async function writeFundingReceipt(params: {
-  from: ReceiptSender;
-  to: ReceiptText;
-  amount: string;
-  currency: "USDC";
-  transactionHash: string;
-  receiptSubject?: { uri: string; cid: string };
-}): Promise<string | null> {
-  const serviceHost = getFacilitatorServiceHost();
-
-  const token = await createFacilitatorSession();
-  const occurredAt = new Date().toISOString();
-  const response = await fetch(`${serviceHost}/xrpc/com.atproto.repo.createRecord`, {
-    method: "POST",
-    headers: {
-      "content-type": "application/json",
-      authorization: `Bearer ${token}`,
-    },
-    body: JSON.stringify({
-      repo: process.env.NEXT_PUBLIC_FACILITATOR_DID || FACILITATOR_DID,
-      collection: "org.hypercerts.funding.receipt",
-      record: {
-        $type: "org.hypercerts.funding.receipt",
-        from: params.from,
-        to: params.to,
-        amount: params.amount,
-        currency: params.currency,
-        paymentRail: PAYMENT_RAIL,
-        paymentNetwork: PAYMENT_NETWORK,
-        transactionId: params.transactionHash,
-        for: params.receiptSubject,
-        notes: `${params.from.$type === "app.certified.defs#did" ? params.from.did : params.from.value} paid ${params.amount}${params.currency} using wallet`,
-        occurredAt,
-      },
-    }),
-  });
-
-  const json = (await response.json().catch(() => null)) as { uri?: string; message?: string } | null;
-  if (!response.ok) throw new Error(json?.message || "Unable to prepare public donation note");
-  return json?.uri ?? null;
 }
 
 export async function POST(request: Request) {
@@ -191,10 +127,10 @@ export async function POST(request: Request) {
   const { authorization, signature } = payload.payload;
   const recipientWallet = await fetchVerifiedRecipientAddress(body.orgDid).catch(() => null);
   if (!recipientWallet || !isHexAddress(recipientWallet)) {
-    return Response.json({ error: "This organization cannot receive donations yet" }, { status: 422 });
+    return Response.json({ error: "This account cannot receive donations yet" }, { status: 422 });
   }
   if (authorization.to.toLowerCase() !== recipientWallet.toLowerCase()) {
-    return Response.json({ error: "Wallet details do not match this organization" }, { status: 422 });
+    return Response.json({ error: "Wallet details do not match this account" }, { status: 422 });
   }
 
   const amount = typeof body.amount === "string" ? normalizeUsdcAmountString(body.amount) : formatUsdcAmount(BigInt(authorization.value));
@@ -208,7 +144,28 @@ export async function POST(request: Request) {
     transactionHash = (await executeTransferWithAuthorization({ authorization, signature })).transactionHash;
   } catch (error) {
     console.error("[fund] On-chain transfer failed:", error);
+    if (error instanceof SettlementTimeoutError) {
+      // Broadcast but unconfirmed — it may still settle. Never invite a
+      // blind retry: a new authorization could double-charge the donor.
+      return Response.json(
+        {
+          code: "SETTLEMENT_TIMEOUT",
+          error: "The payment is taking longer than expected and may still complete.",
+          transactionHash: error.transactionHash,
+        },
+        { status: 504 },
+      );
+    }
     return Response.json({ error: "Payment could not be completed. Please try again later." }, { status: 500 });
+  }
+
+  // Anonymous donations stay unattributed in the public record, but carry an
+  // opaque owner hash (derived from the SESSION, never the request body) so
+  // the donor can still see them on their own donations page.
+  let donorHash: string | null = null;
+  if (body.anonymous) {
+    const session = await fetchAuthSession();
+    if (session.isLoggedIn) donorHash = computeDonorHash(session.did, transactionHash);
   }
 
   const donorRecordedAs = body.anonymous ? "wallet" : "did";
@@ -232,6 +189,7 @@ export async function POST(request: Request) {
       currency: "USDC",
       transactionHash,
       receiptSubject,
+      donorHash,
     });
   } catch (error) {
     // The payment has already settled on-chain. Surface success and log receipt failures.

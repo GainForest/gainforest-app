@@ -24,7 +24,10 @@
  */
 
 import { cachedAsync } from "./async-cache";
-import { fetchHiddenAccountDids, indexerQuery } from "./indexer";
+import type { AudioLabelCategory } from "./audiomoth/labels";
+import { LEGACY_BROAD_VERNACULARS, parseAudioSegmentDynamicProperties } from "./audiomoth/occurrences";
+import { fetchHiddenAccountDids, fetchHiddenRecordUris, indexerQuery } from "./indexer";
+import { mentionCandidatesFromFacets, type MentionCandidate, type RawIndexedFacet } from "./mentions";
 import { normaliseRef } from "./pds";
 import { FACILITATOR_DID, accountHref, localBumicertHref, localObservationHref, localProjectHref } from "./urls";
 
@@ -41,6 +44,21 @@ export type ActivityFeedKind =
   | "organization"
   | "donation"
   | "post";
+
+/** The labelled section of an AudioMoth recording a bioacoustic sighting
+ *  points at — everything the feed needs to preview the spectrogram box and
+ *  play that sound. Parsed from the occurrence's
+ *  `dynamicProperties.gainforestBioacoustics` sidecar. */
+export interface FeedBioacousticsClip {
+  /** AT-URI of the source `app.gainforest.ac.audio` record. */
+  audioUri: string;
+  /** What the labeller heard (bird / frog / insect / other / note). */
+  category: AudioLabelCategory;
+  startTimeSeconds: number;
+  endTimeSeconds: number;
+  minFrequencyHz: number;
+  maxFrequencyHz: number;
+}
 
 /** Normalized, serializable feed row — ready to ship to the client. */
 export interface ActivityFeedItem {
@@ -59,6 +77,8 @@ export interface ActivityFeedItem {
   title: string | null;
   /** Body text (short description, habitat, donation summary). */
   text: string | null;
+  /** Posts only: accounts @-mentioned in the text, for linkified rendering. */
+  mentions?: MentionCandidate[];
   /** In-app detail link for the row. */
   href: string;
   /** Already-resolved external image URL (projects / observations). */
@@ -73,6 +93,13 @@ export interface ActivityFeedItem {
   amount: number | null;
   /** For donations: the currency code (USD/USDC). */
   currency: string | null;
+  /** Observations only: shared event identifier for sightings uploaded together. */
+  observationEventId?: string | null;
+  /** Observations only: shared field note/story for a multi-sighting upload. */
+  observationBatchNote?: string | null;
+  /** Observations only: the labelled audio segment behind a bioacoustic
+   *  sighting, so the feed can preview its spectrogram and play the sound. */
+  bioacoustics?: FeedBioacousticsClip | null;
   /** Observations only, set on the sampled rows of a server-collapsed burst:
    *  how many sightings the burst holds from the collapse point down (counted
    *  for free by the burst scan; includes the sampled rows themselves). Rows
@@ -258,9 +285,9 @@ const FEED_QUERY = `
       sortDirection: DESC
     ) {
       edges { node {
-        did rkey uri createdAt eventDate
+        did rkey uri createdAt eventDate eventID fieldNotes
         scientificName vernacularName kingdom family country countryCode locality habitat
-        thumbnailUrl speciesImageUrl
+        thumbnailUrl speciesImageUrl dynamicProperties associatedMedia
         ${CERTIFIED_PROFILE_DATA_FIELDS}
         imageEvidence { file { ref } }
       } }
@@ -303,6 +330,10 @@ const FEED_QUERY = `
     ) {
       edges { node {
         did uri createdAt text
+        facets {
+          index { byteStart byteEnd }
+          features { __typename ... on AppBskyRichtextFacetMention { did } }
+        }
         ${CERTIFIED_PROFILE_DATA_FIELDS}
       } }
     }
@@ -335,6 +366,8 @@ type RawOccurrence = {
   uri?: string | null;
   createdAt: string;
   eventDate?: string | null;
+  eventID?: string | null;
+  fieldNotes?: string | null;
   scientificName?: string | null;
   vernacularName?: string | null;
   kingdom?: string | null;
@@ -345,6 +378,8 @@ type RawOccurrence = {
   habitat?: string | null;
   thumbnailUrl?: string | null;
   speciesImageUrl?: string | null;
+  dynamicProperties?: string | null;
+  associatedMedia?: string | null;
   certifiedProfileData?: CertifiedProfileData;
   imageEvidence?: { file?: { ref?: string | null } | null } | null;
 };
@@ -363,6 +398,7 @@ type RawPost = {
   uri?: string | null;
   createdAt: string;
   text?: string | null;
+  facets?: RawIndexedFacet[] | null;
   certifiedProfileData?: CertifiedProfileData;
 };
 
@@ -424,12 +460,16 @@ function mapProjects(nodes: RawProject[]): ActivityFeedItem[] {
   });
 }
 
-function observationTitle(n: RawOccurrence): string | null {
-  return (
-    n.vernacularName?.trim() ||
-    n.scientificName?.trim() ||
-    null
-  );
+function observationTitle(n: RawOccurrence, bioacoustics: FeedBioacousticsClip | null): string | null {
+  const vernacular = n.vernacularName?.trim() || "";
+  const scientific = n.scientificName?.trim() || "";
+  // For bioacoustic sightings, an older build could persist a synthetic broad
+  // label ("Bird") as the vernacular name. That is not a real common name, so
+  // prefer the scientific name and never title the sighting with it.
+  if (bioacoustics && vernacular && vernacular === LEGACY_BROAD_VERNACULARS[bioacoustics.category]) {
+    return scientific || null;
+  }
+  return vernacular || scientific || null;
 }
 
 function observationText(n: RawOccurrence): string | null {
@@ -438,10 +478,29 @@ function observationText(n: RawOccurrence): string | null {
   return clampText(n.family?.trim() ? `Family: ${n.family.trim()}` : null);
 }
 
+/** The audio segment behind a bioacoustic sighting, when the occurrence's
+ *  `dynamicProperties` carry a valid `gainforestBioacoustics` sidecar that
+ *  matches its `associatedMedia` (same validation as the labelling tool). */
+function occurrenceBioacoustics(n: RawOccurrence): FeedBioacousticsClip | null {
+  const segment = parseAudioSegmentDynamicProperties(n.dynamicProperties);
+  if (!segment) return null;
+  const media = (n.associatedMedia ?? "").split("|").map((value) => value.trim());
+  if (!media.includes(segment.sourceAudioUri)) return null;
+  return {
+    audioUri: segment.sourceAudioUri,
+    category: segment.labelCategory,
+    startTimeSeconds: segment.startTimeSeconds,
+    endTimeSeconds: segment.endTimeSeconds,
+    minFrequencyHz: segment.minFrequencyHz,
+    maxFrequencyHz: segment.maxFrequencyHz,
+  };
+}
+
 function mapOccurrences(nodes: RawOccurrence[]): ActivityFeedItem[] {
   return nodes.map((n) => {
     const external = n.thumbnailUrl?.trim() || n.speciesImageUrl?.trim() || null;
     const imageRef = normaliseRef(n.imageEvidence?.file?.ref);
+    const bioacoustics = occurrenceBioacoustics(n);
     return {
       id: n.uri ?? `at://${n.did}/app.gainforest.dwc.occurrence/${n.rkey}`,
       kind: "observation",
@@ -449,11 +508,14 @@ function mapOccurrences(nodes: RawOccurrence[]): ActivityFeedItem[] {
       actorDid: n.did,
       actorName: profileName(n.certifiedProfileData),
       actorAvatarRef: profileAvatarRef(n.certifiedProfileData),
-      title: observationTitle(n),
+      title: observationTitle(n, bioacoustics),
       text: observationText(n),
       href: localObservationHref(n.did, n.rkey),
       imageUrl: external,
       imageRef,
+      observationEventId: n.eventID?.trim() || null,
+      observationBatchNote: clampText(n.fieldNotes, 600),
+      bioacoustics,
       targetTitle: null,
       targetHref: null,
       amount: null,
@@ -499,6 +561,7 @@ function mapPosts(nodes: RawPost[]): ActivityFeedItem[] {
     actorAvatarRef: profileAvatarRef(n.certifiedProfileData),
     title: null,
     text: clampText(n.text, 400),
+    mentions: mentionCandidatesFromFacets(n.text ?? "", n.facets),
     href: accountHref(n.did),
     imageUrl: null,
     imageRef: null,
@@ -885,8 +948,13 @@ async function buildFeedPageUncached(
   const { items: donationItems, certUriById } = mapDonations(receiptNodes);
 
   // Accounts a GainForest steward flagged as "test" are hidden from the feed —
-  // every row owned by a flagged DID is dropped before the merge.
-  const hidden = await fetchHiddenAccountDids().catch(() => new Set<string>());
+  // every row owned by a flagged DID is dropped before the merge. Individual
+  // records flagged as test (posts, observations, …) are dropped the same way
+  // by their AT-URI, without hiding the rest of the account.
+  const [hidden, hiddenRecords] = await Promise.all([
+    fetchHiddenAccountDids().catch(() => new Set<string>()),
+    fetchHiddenRecordUris().catch(() => new Set<string>()),
+  ]);
 
   // Merge every wanted kind into one pool ordered purely by recency — no
   // per-kind quota — then keep only rows strictly older than the cursor. A
@@ -897,7 +965,13 @@ async function buildFeedPageUncached(
     ...mapOrganizations(orgNodes),
     ...mapPosts(postNodes),
     ...donationItems,
-  ].filter((item) => item.createdAt && (filter === "all" || item.kind === filter) && !hidden.has(item.actorDid));
+  ].filter(
+    (item) =>
+      item.createdAt &&
+      (filter === "all" || item.kind === filter) &&
+      !hidden.has(item.actorDid) &&
+      !hiddenRecords.has(item.id),
+  );
   pool.sort(compareNewestFirst);
 
   const eligible = cursor ? pool.filter((it) => isStrictlyOlder(it, cursor)) : pool;

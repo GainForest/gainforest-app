@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { Fragment, type ReactNode } from "react";
 import { getTranslations } from "next-intl/server";
+import { localizedAlternates } from "@/app/_lib/seo-metadata";
 
 const INTRO_PARAGRAPH_KEYS = ["p1", "p2"] as const;
 
@@ -32,7 +33,7 @@ export async function generateMetadata(): Promise<Metadata> {
   return {
     title: t("title"),
     description: t("description"),
-    alternates: { canonical: "/privacy" },
+    alternates: await localizedAlternates("/privacy"),
   };
 }
 

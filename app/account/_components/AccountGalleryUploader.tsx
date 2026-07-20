@@ -49,6 +49,7 @@ export function AccountGalleryUploader({
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const inputId = useId();
   const [pendingFiles, setPendingFiles] = useState<PendingFile[]>([]);
+  const [expanded, setExpanded] = useState(false);
   const [projectValue, setProjectValue] = useState<string>(NO_PROJECT_VALUE);
   const [isDragOver, setIsDragOver] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -179,19 +180,29 @@ export function AccountGalleryUploader({
   const percentage = progress && progress.total > 0 ? Math.round((progress.current / progress.total) * 100) : 0;
 
   return (
-    <section className="py-6">
+    <section className="py-4">
       <div className="mx-auto max-w-2xl">
-        <div className="text-center">
-          <h2 className="font-instrument text-2xl italic leading-none text-foreground">{t("title")}</h2>
-          <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-muted-foreground">{t("body")}</p>
+        <div className="flex items-center gap-3 rounded-xl border border-border bg-background px-3 py-3">
+          <span className="grid size-9 shrink-0 place-items-center rounded-lg bg-primary/10 text-primary">
+            <ImagePlusIcon className="size-4" aria-hidden />
+          </span>
+          <div className="min-w-0 flex-1">
+            <h2 className="text-sm font-medium text-foreground">{t("title")}</h2>
+            <p className="mt-0.5 line-clamp-2 text-xs leading-5 text-muted-foreground">{t("body")}</p>
+          </div>
+          {canUpload ? (
+            <Button type="button" size="sm" variant={expanded ? "outline" : "default"} onClick={() => setExpanded((open) => !open)} disabled={busy}>
+              {expanded ? t("close") : t("open")}
+            </Button>
+          ) : null}
         </div>
 
         {!canUpload ? (
-          <p className="mt-6 flex items-center justify-center gap-2 rounded-2xl border border-border-soft bg-surface px-4 py-3 text-center text-sm text-muted-foreground">
+          <p className="mt-3 flex items-center justify-center gap-2 rounded-xl border border-border-soft bg-surface px-4 py-3 text-center text-sm text-muted-foreground">
             <TriangleAlertIcon className="size-4 shrink-0 text-warn" />
             {t("permissionDenied")}
           </p>
-        ) : (
+        ) : expanded ? (
           <>
             <div
               onDragOver={onDragOver}
@@ -209,14 +220,16 @@ export function AccountGalleryUploader({
                 }
               }}
               className={cn(
-                "mt-6 flex cursor-pointer flex-col items-center justify-center rounded-3xl border-2 border-dashed px-6 py-12 text-center transition-colors outline-none focus-visible:ring-2 focus-visible:ring-primary/60",
+                "mt-3 flex cursor-pointer items-center justify-center gap-3 rounded-xl border border-dashed px-4 py-6 text-left transition-colors outline-none focus-visible:ring-2 focus-visible:ring-primary/60",
                 isDragOver ? "border-primary bg-primary/[0.06]" : "border-border-soft bg-surface/70 hover:border-primary/50",
                 busy && "pointer-events-none opacity-60",
               )}
             >
-              <UploadCloudIcon className="size-9 text-primary" aria-hidden />
-              <p className="mt-3 text-sm font-medium text-foreground">{isDragOver ? t("dropActive") : t("dropHint")}</p>
-              <p className="mt-1 text-xs text-muted-foreground">{t("fileHint")}</p>
+              <UploadCloudIcon className="size-6 shrink-0 text-primary" aria-hidden />
+              <div>
+                <p className="text-sm font-medium text-foreground">{isDragOver ? t("dropActive") : t("dropHint")}</p>
+                <p className="mt-0.5 text-xs text-muted-foreground">{t("fileHint")}</p>
+              </div>
               <input
                 ref={fileInputRef}
                 id={inputId}
@@ -297,7 +310,7 @@ export function AccountGalleryUploader({
               </Button>
             </div>
           </>
-        )}
+        ) : null}
       </div>
     </section>
   );

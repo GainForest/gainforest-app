@@ -21,24 +21,33 @@ import {
   UsersRoundIcon,
 } from "lucide-react";
 import type { ActivityFeedItem, ActivityFeedKind, ActivityFeedPage } from "../_lib/feed";
+import type { MentionCandidate } from "../_lib/mentions";
+import { AdminOnlyIndicator } from "@/app/_components/AdminOnlyIndicator";
+import { MentionText } from "@/app/_components/MentionText";
 import { resolveBlobUrl } from "../_lib/pds";
 import {
+  BlueskyPostLink,
   DeleteButton,
   FeedActionBar,
   FeedComposer,
   InlineEditor,
   LikeButton,
   LocalPostsList,
+  MobileComposerBar,
+  ModeratorHideButton,
   ReplyComposer,
   ReplyToggle,
   useFeedInteractions,
   type FeedInteractions,
 } from "./FeedActions";
+import { fetchBlueskyPostLinks } from "../_lib/bluesky-crosspost";
 import { buildCommentTree, type CommentTreeNode } from "../_lib/feed-engagement";
 import { formatCompact, formatCompactUsd, formatRelative } from "../_lib/format";
+import { FeedAudioClip } from "./FeedAudioClip";
 import { FeedImageLightbox } from "./FeedImageLightbox";
 import { ResolvedAvatar } from "./ResolvedAvatar";
-import { AccountHoverCard } from "./AccountHoverCard";
+import { AccountHoverCard } from "@/app/_components/AccountHoverCard";
+import { QuickLikeButton } from "@/app/_components/QuickLike";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 
@@ -68,17 +77,20 @@ type FeedEntry =
 /** Collapse maximal runs of >= MIN_BATCH consecutive observations by the same
  *  account (adjacent in the newest-first timeline AND uploaded within
  *  MAX_BATCH_GAP_MS of each other) into one batch entry. Every other row
- *  passes through unchanged. */
+ *  passes through unchanged. Bioacoustic sightings never join a batch — their
+ *  whole point on the feed is the inline spectrogram + sound preview, which a
+ *  collapsed montage card (built around photos) would hide. */
 function groupFeedEntries(items: ActivityFeedItem[]): FeedEntry[] {
   const entries: FeedEntry[] = [];
   let i = 0;
   while (i < items.length) {
     const item = items[i];
-    if (item.kind === "observation" && item.actorDid) {
+    if (item.kind === "observation" && item.actorDid && !item.bioacoustics) {
       let j = i + 1;
       while (
         j < items.length &&
         items[j].kind === "observation" &&
+        !items[j].bioacoustics &&
         items[j].actorDid === item.actorDid &&
         Math.abs(batchTime(items[j - 1].createdAt) - batchTime(items[j].createdAt)) <= MAX_BATCH_GAP_MS
       )
@@ -116,6 +128,17 @@ function visibleTab(f: { authOnly?: boolean; adminOnly?: boolean }, signedIn: bo
   return true;
 }
 
+function sharedObservationBatchNote(items: ActivityFeedItem[]): string | null {
+  const eventIds = items.map((item) => item.observationEventId?.trim()).filter((value): value is string => Boolean(value));
+  if (eventIds.length !== items.length) return null;
+  const uniqueEventIds = new Set(eventIds);
+  if (uniqueEventIds.size !== 1) return null;
+  const notes = items.map((item) => item.observationBatchNote?.trim()).filter((value): value is string => Boolean(value));
+  if (notes.length === 0) return null;
+  const uniqueNotes = new Set(notes);
+  return uniqueNotes.size === 1 ? notes[0] : null;
+}
+
 function filterLabel(t: (key: string) => string, key: Filter): string {
   return key === "all" ? t("filters.all") : t(`filters.${key}`);
 }
@@ -147,6 +170,12 @@ export function FeedClient({
   const [error, setError] = useState(false);
   // The image a viewer tapped open in the in-feed lightbox (null = closed).
   const [lightboxItem, setLightboxItem] = useState<ActivityFeedItem | null>(null);
+  // AT-URIs an admin just hid as test records, removed from view immediately;
+  // the server-side feed filter takes over once the flag propagates.
+  const [moderatedUris, setModeratedUris] = useState<Set<string>>(() => new Set());
+  const onModerated = useCallback((uri: string) => {
+    setModeratedUris((prev) => new Set(prev).add(uri));
+  }, []);
 
   // Bumped on every first-page request (filter switch / refresh) so an in-flight
   // load-more from a previous filter can't append stale rows.
@@ -250,11 +279,15 @@ export function FeedClient({
     return () => observer.disconnect();
   }, [hasMore]);
 
-  // Hide rows the viewer just deleted until the indexer stops returning them.
+  // Hide rows the viewer just deleted until the indexer stops returning them,
+  // plus rows an admin just hid as test records.
   const removedUris = interactions.removedUris;
   const visibleItems = useMemo(
-    () => (removedUris.size === 0 ? items : items.filter((it) => !removedUris.has(it.id))),
-    [items, removedUris],
+    () =>
+      removedUris.size === 0 && moderatedUris.size === 0
+        ? items
+        : items.filter((it) => !removedUris.has(it.id) && !moderatedUris.has(it.id)),
+    [items, removedUris, moderatedUris],
   );
   const entries = useMemo(() => groupFeedEntries(visibleItems), [visibleItems]);
 
@@ -272,26 +305,46 @@ export function FeedClient({
     [interactions.localPosts, itemIds],
   );
 
+  // Which cross-posted twins actually exist on Bluesky, keyed by the
+  // GainForest post's AT-URI. Post rows are checked once in batches against
+  // the public Bluesky appview as they load; only confirmed twins render a
+  // link, so the feed never points at a post bsky.app can't show.
+  const [blueskyLinks, setBlueskyLinks] = useState<Map<string, string>>(() => new Map());
+  const blueskyCheckedRef = useRef<Set<string>>(new Set());
+  useEffect(() => {
+    const pending = visibleItems
+      .filter((it) => it.kind === "post" && !blueskyCheckedRef.current.has(it.id))
+      .map((it) => it.id);
+    if (pending.length === 0) return;
+    for (const id of pending) blueskyCheckedRef.current.add(id);
+    void fetchBlueskyPostLinks(pending).then((found) => {
+      if (found.size === 0) return;
+      setBlueskyLinks((prev) => {
+        const next = new Map(prev);
+        for (const [uri, url] of found) next.set(uri, url);
+        return next;
+      });
+    });
+  }, [visibleItems]);
+
   return (
     <section className="-mt-14 pb-24 md:pb-32">
       {/* Hero */}
       <div className="relative isolate overflow-hidden">
         <div className="absolute inset-0 -z-10 bg-linear-to-b from-primary/8 via-primary/2 to-transparent" />
-        <div className="mx-auto flex max-w-3xl flex-col px-6 pb-6 pt-[72px] sm:px-8 animate-in lg:max-w-4xl">
-          <div className="flex items-center gap-2 text-primary/70">
-            <NewspaperIcon className="size-5" />
-            <span className="text-xs font-medium uppercase tracking-[0.16em]">{t("eyebrow")}</span>
-          </div>
+        <div className="mx-auto flex max-w-3xl flex-col px-6 pb-4 pt-16 sm:px-8 sm:pb-6 sm:pt-[76px] animate-in lg:max-w-4xl">
           <h1
-            className="mt-3 text-4xl font-light leading-[0.98] tracking-[-0.035em] text-foreground sm:text-5xl"
-            style={{ fontFamily: "var(--font-garamond-var)" }}
+            className="text-3xl italic leading-[1.03] tracking-[-0.02em] text-foreground sm:text-4xl sm:leading-[0.98] lg:text-5xl"
+            style={{ fontFamily: "var(--font-instrument-serif-var)", fontStyle: "italic" }}
           >
-            {t("hero.title")}{" "}
-            <span style={{ fontFamily: "var(--font-instrument-serif-var)", fontStyle: "italic" }}>
-              {t("hero.accent")}
-            </span>
+            {t("hero.title")} {t("hero.accent")}
           </h1>
-          <p className="mt-3 max-w-xl text-base leading-7 text-muted-foreground">{t("hero.description")}</p>
+          {/* The description restates the title on small screens where vertical
+              space is scarce, so it's hidden there and the feed starts higher;
+              it returns from sm up. */}
+          <p className="mt-3 hidden max-w-xl text-base leading-7 text-muted-foreground sm:block">
+            {t("hero.description")}
+          </p>
         </div>
       </div>
 
@@ -306,14 +359,17 @@ export function FeedClient({
                 signedIn={signedIn}
                 isAdmin={isAdmin}
                 onSelect={selectFilter}
-                onRefresh={() => void loadFirst(filter, "refresh")}
-                refreshing={refreshing}
-                loading={loading}
               />
             </div>
           </div>
 
-          <FeedComposer signedIn={signedIn} viewerDid={viewerDid} onPost={interactions.addPost} />
+          {/* On phones the inline composer pushed the feed itself below the fold,
+              so it collapses into a floating bottom bar (MobileComposerBar,
+              rendered at the section level below so it can stick); the inline
+              card stays from sm up. */}
+          <div className="hidden sm:block">
+            <FeedComposer signedIn={signedIn} viewerDid={viewerDid} onPost={interactions.addPost} />
+          </div>
 
           <LocalPostsList
             posts={pendingPosts}
@@ -365,6 +421,9 @@ export function FeedClient({
                     signedIn={signedIn}
                     interactions={interactions}
                     onOpenImage={setLightboxItem}
+                    bskyUrl={blueskyLinks.get(entry.item.id) ?? null}
+                    isAdmin={isAdmin}
+                    onModerated={onModerated}
                   />
                 ),
               )}
@@ -419,6 +478,11 @@ export function FeedClient({
           </div>
         </aside>
       </div>
+
+      {/* Phone composer bar — fixed to the viewport bottom (see note in
+          MobileComposerBar for why not sticky). Section-level placement is fine
+          since fixed is viewport-relative. */}
+      <MobileComposerBar signedIn={signedIn} viewerDid={viewerDid} onPost={interactions.addPost} />
     </section>
   );
 }
@@ -431,54 +495,38 @@ function FeedFilterTabs({
   signedIn,
   isAdmin,
   onSelect,
-  onRefresh,
-  refreshing,
-  loading,
 }: {
   filter: Filter;
   signedIn: boolean;
   isAdmin: boolean;
   onSelect: (next: Filter) => void;
-  onRefresh: () => void;
-  refreshing: boolean;
-  loading: boolean;
 }) {
   const t = useTranslations("common.feed");
   const tabs = FILTERS.filter((f) => visibleTab(f, signedIn, isAdmin));
   return (
-    <div className="flex min-w-0 items-center gap-1">
-      <div className="no-scrollbar flex items-center gap-1 overflow-x-auto">
-        {tabs.map(({ key, Icon }) => {
-          const active = filter === key;
-          const label = filterLabel(t, key);
-          return (
-            <button
-              key={key}
-              type="button"
-              onClick={() => onSelect(key)}
-              aria-pressed={active}
-              className={cn(
-                "inline-flex shrink-0 items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium transition-colors",
-                active
-                  ? "bg-primary text-primary-foreground"
-                  : "text-muted-foreground hover:bg-muted hover:text-foreground",
-              )}
-            >
-              <Icon className="size-3.5" />
-              {label}
-            </button>
-          );
-        })}
-      </div>
-      <button
-        type="button"
-        onClick={onRefresh}
-        disabled={refreshing || loading}
-        aria-label={t("refresh")}
-        className="grid size-8 shrink-0 place-items-center rounded-full text-muted-foreground transition-colors hover:bg-muted hover:text-foreground disabled:opacity-50"
-      >
-        <RefreshCwIcon className={cn("size-4", refreshing && "animate-spin")} />
-      </button>
+    <div className="no-scrollbar flex min-w-0 items-center gap-1 overflow-x-auto">
+      {tabs.map(({ key, Icon, adminOnly }) => {
+        const active = filter === key;
+        const label = filterLabel(t, key);
+        return (
+          <button
+            key={key}
+            type="button"
+            onClick={() => onSelect(key)}
+            aria-pressed={active}
+            className={cn(
+              "inline-flex shrink-0 items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium transition-colors",
+              active
+                ? "bg-primary text-primary-foreground"
+                : "text-muted-foreground hover:bg-muted hover:text-foreground",
+            )}
+          >
+            <Icon className="size-3.5" />
+            {label}
+            {adminOnly ? <AdminOnlyIndicator /> : null}
+          </button>
+        );
+      })}
     </div>
   );
 }
@@ -507,7 +555,7 @@ function FeedFilterRail({
   return (
     <div className="flex flex-col gap-1">
       <nav aria-label={t("filterHeading")} className="flex flex-col gap-0.5">
-        {tabs.map(({ key, Icon }) => {
+        {tabs.map(({ key, Icon, adminOnly }) => {
           const active = filter === key;
           const label = filterLabel(t, key);
           return (
@@ -530,6 +578,7 @@ function FeedFilterRail({
                 )}
               />
               <span className="truncate">{label}</span>
+              {adminOnly ? <AdminOnlyIndicator className="ml-auto" /> : null}
             </button>
           );
         })}
@@ -552,33 +601,45 @@ function FeedRow({
   signedIn,
   interactions,
   onOpenImage,
+  bskyUrl = null,
+  isAdmin = false,
+  onModerated,
 }: {
   item: ActivityFeedItem;
   signedIn: boolean;
   interactions: FeedInteractions;
   onOpenImage: (item: ActivityFeedItem) => void;
+  /** bsky.app URL of this post's confirmed Bluesky twin, when cross-posted. */
+  bskyUrl?: string | null;
+  /** GainForest steward affordances (hide a row as a test record). */
+  isAdmin?: boolean;
+  onModerated?: (uri: string) => void;
 }) {
   const t = useTranslations("common.feed");
   const verb = t(`verbs.${item.kind}`);
   const [editing, setEditing] = useState(false);
   const [overrideText, setOverrideText] = useState<string | null>(null);
+  const [overrideMentions, setOverrideMentions] = useState<MentionCandidate[] | null>(null);
   // Only the author of a feed post may edit it (and only posts — other kinds
   // mirror non-post records whose text isn't a feed post to rewrite).
   const canEditPost =
     item.kind === "post" && Boolean(interactions.viewerDid && item.actorDid === interactions.viewerDid);
   const bodyText = overrideText ?? item.text;
+  const bodyMentions = overrideMentions ?? item.mentions;
 
   return (
     <li className="relative">
-      <Link
-        href={item.href}
-        className="group flex gap-3 rounded-2xl px-3 pb-1.5 pt-3.5 transition-colors hover:bg-muted/40"
-      >
+      <div className="group flex gap-3 rounded-2xl px-3 pb-1.5 pt-3.5 transition-colors hover:bg-muted/40">
         {/* Avatar */}
-        <FeedAvatar item={item} />
+        <Link href={item.href} className="shrink-0">
+          <FeedAvatar item={item} />
+        </Link>
 
         {/* Content */}
         <div className="min-w-0 flex-1">
+          {/* Text opens the record detail; photo and quick-like remain separate
+              controls immediately below it. */}
+          <Link href={item.href} className="block">
           {/* Author line */}
           <div className="flex items-center gap-1.5 text-sm">
             <AccountHoverCard
@@ -612,7 +673,9 @@ function FeedRow({
 
           {/* Body text */}
           {bodyText ? (
-            <p className="mt-0.5 line-clamp-2 text-sm leading-relaxed text-muted-foreground">{bodyText}</p>
+            <p className="mt-0.5 line-clamp-2 text-sm leading-relaxed text-muted-foreground">
+              <MentionText text={bodyText} mentions={bodyMentions} />
+            </p>
           ) : null}
 
           {/* Donation target line */}
@@ -621,52 +684,73 @@ function FeedRow({
               {t("to")}: <span className="text-foreground/80">{item.targetTitle}</span>
             </p>
           ) : null}
+          </Link>
 
-          {/* Cover image — a tap opens the in-feed lightbox (like / comment in
-              place) instead of following the row link to the detail page. */}
+          {/* Cover image — the image itself opens the in-feed lightbox while
+              the separate corner heart likes it immediately. Keeping them as
+              sibling buttons avoids nested interactive controls. */}
           {hasImage(item) ? (
-            <span
-              role="button"
-              tabIndex={0}
-              aria-label={t("actions.openImage")}
-              onClick={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                onOpenImage(item);
-              }}
-              onKeyDown={(e) => {
-                if (e.key === "Enter" || e.key === " ") {
+            <div className="relative mt-2 overflow-hidden rounded-xl border border-border/60">
+              <button
+                type="button"
+                aria-label={t("actions.openImage")}
+                onClick={(e) => {
                   e.preventDefault();
                   e.stopPropagation();
                   onOpenImage(item);
-                }
-              }}
-              className="relative mt-2 block cursor-zoom-in overflow-hidden rounded-xl border border-border/60"
-            >
-              <FeedImage item={item} />
-            </span>
+                }}
+                className="block w-full cursor-zoom-in text-left"
+              >
+                <FeedImage item={item} />
+              </button>
+              <QuickLikeButton
+                subjectUri={item.id}
+                signedIn={signedIn}
+                interactions={interactions}
+                className="absolute bottom-2 right-2"
+              />
+            </div>
           ) : null}
+
+          {/* Bioacoustic sighting — spectrogram of the labelled section with
+              in-place playback of that sound. */}
+          {item.bioacoustics ? <FeedAudioClip clip={item.bioacoustics} /> : null}
         </div>
 
         {/* Donation amount pill */}
         {item.kind === "donation" && item.amount != null ? (
-          <span className="ml-auto mt-0.5 inline-flex shrink-0 items-center rounded-full bg-primary/10 px-2.5 py-1 text-xs font-semibold text-primary tabular-nums">
+          <Link
+            href={item.href}
+            className="ml-auto mt-0.5 inline-flex shrink-0 items-center rounded-full bg-primary/10 px-2.5 py-1 text-xs font-semibold text-primary tabular-nums"
+          >
             {item.currency === "USD" ? formatCompactUsd(item.amount) : `${item.amount} ${item.currency}`}
-          </span>
+          </Link>
         ) : null}
-      </Link>
+      </div>
 
       {/* Like + comment, aligned under the row content (outside the link). */}
       <div className="pb-2 pl-16 pr-3">
-        <FeedActionBar subjectUri={item.id} signedIn={signedIn} interactions={interactions} />
+        <FeedActionBar
+          subjectUri={item.id}
+          signedIn={signedIn}
+          interactions={interactions}
+          extraActions={
+            isAdmin && onModerated && item.id.startsWith("at://") ? (
+              <ModeratorHideButton subjectUri={item.id} onHidden={() => onModerated(item.id)} />
+            ) : null
+          }
+        />
+        {bskyUrl ? <BlueskyPostLink href={bskyUrl} /> : null}
         {canEditPost ? (
           editing ? (
             <InlineEditor
               initial={bodyText ?? ""}
+              initialMentions={bodyMentions}
               max={300}
-              onSave={async (text) => {
-                await interactions.editPost(item.id, text);
+              onSave={async (text, mentions) => {
+                await interactions.editPost(item.id, text, mentions);
                 setOverrideText(text);
+                setOverrideMentions(mentions);
               }}
               onCancel={() => setEditing(false)}
             />
@@ -736,6 +820,7 @@ function ObservationBatchCard({
   );
   const shownSpecies = species.slice(0, 3);
   const moreSpecies = species.length - shownSpecies.length;
+  const batchNote = sharedObservationBatchNote(items);
 
   const href = head.actorDid ? `/observations?by=${encodeURIComponent(head.actorDid)}` : "/observations";
 
@@ -786,6 +871,12 @@ function ObservationBatchCard({
             ) : null}
           </Link>
 
+          {batchNote ? (
+            <p className="mt-2 line-clamp-3 rounded-xl bg-muted/50 px-3 py-2 text-sm leading-6 text-muted-foreground">
+              {batchNote}
+            </p>
+          ) : null}
+
           {/* Image montage — a tap on a thumbnail opens the in-feed lightbox to
               like / comment that sighting; the final "+N" tile opens the full
               set instead. */}
@@ -805,15 +896,23 @@ function ObservationBatchCard({
                   );
                 }
                 return (
-                  <button
-                    key={it.id}
-                    type="button"
-                    onClick={() => onOpenImage(it)}
-                    aria-label={t("actions.openImage")}
-                    className="block cursor-zoom-in rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50"
-                  >
-                    <ObservationThumb item={it} overlay={null} />
-                  </button>
+                  <div key={it.id} className="relative">
+                    <button
+                      type="button"
+                      onClick={() => onOpenImage(it)}
+                      aria-label={t("actions.openImage")}
+                      className="block w-full cursor-zoom-in rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50"
+                    >
+                      <ObservationThumb item={it} overlay={null} />
+                    </button>
+                    <QuickLikeButton
+                      subjectUri={it.id}
+                      signedIn={signedIn}
+                      interactions={interactions}
+                      size="sm"
+                      className="absolute bottom-1.5 right-1.5"
+                    />
+                  </div>
                 );
               })}
             </div>
@@ -943,17 +1042,26 @@ function BatchCommentNode({
 
   return (
     <li className="flex gap-2">
-      <ResolvedAvatar
+      <AccountHoverCard
         did={comment.did}
+        name={comment.authorName}
         avatarRef={comment.authorAvatarRef}
-        name={name}
-        fallbackIcon={<UserIcon className="size-3.5" />}
-        className="mt-0.5 size-7"
-        sizes="28px"
-      />
+        triggerClassName="mt-0.5 shrink-0 self-start"
+      >
+        <ResolvedAvatar
+          did={comment.did}
+          avatarRef={comment.authorAvatarRef}
+          name={name}
+          fallbackIcon={<UserIcon className="size-3.5" />}
+          className="size-7"
+          sizes="28px"
+        />
+      </AccountHoverCard>
       <div className="min-w-0 flex-1">
         <div className="text-sm">
-          <span className="font-medium text-foreground">{name}</span>{" "}
+          <AccountHoverCard did={comment.did} name={comment.authorName} avatarRef={comment.authorAvatarRef}>
+            <span className="font-medium text-foreground hover:underline">{name}</span>
+          </AccountHoverCard>{" "}
           {isRoot && item.title ? (
             <button
               type="button"
@@ -969,12 +1077,15 @@ function BatchCommentNode({
           {editing ? (
             <InlineEditor
               initial={comment.text}
+              initialMentions={comment.mentions}
               max={COMMENT_MAX}
-              onSave={(text) => interactions.editComment(item.id, comment.uri, text)}
+              onSave={(text, mentions) => interactions.editComment(item.id, comment.uri, text, mentions)}
               onCancel={() => setEditing(false)}
             />
           ) : (
-            <p className="whitespace-pre-wrap break-words text-foreground/90">{comment.text}</p>
+            <p className="whitespace-pre-wrap break-words text-foreground/90">
+              <MentionText text={comment.text} mentions={comment.mentions} />
+            </p>
           )}
         </div>
         {!editing ? (
@@ -999,7 +1110,7 @@ function BatchCommentNode({
         {replying ? (
           <ReplyComposer
             viewerDid={interactions.viewerDid}
-            onSubmit={(text) => interactions.addComment(comment.uri, text, item.id)}
+            onSubmit={(text, mentions) => interactions.addComment(comment.uri, text, item.id, mentions)}
             onCancel={() => setReplying(false)}
           />
         ) : null}
@@ -1043,14 +1154,14 @@ function ObservationThumb({ item, overlay }: { item: ActivityFeedItem; overlay: 
   const src = item.imageUrl ?? resolved;
 
   return (
-    <div className="relative aspect-square overflow-hidden rounded-lg border border-border/60 bg-muted">
+    <span className="relative block aspect-square overflow-hidden rounded-lg border border-border/60 bg-muted">
       {src ? <Image src={src} alt="" fill unoptimized sizes="140px" className="object-cover" /> : null}
       {overlay ? (
-        <div className="absolute inset-0 grid place-items-center bg-black/55 text-sm font-semibold text-white">
+        <span className="absolute inset-0 grid place-items-center bg-black/55 text-sm font-semibold text-white">
           {overlay}
-        </div>
+        </span>
       ) : null}
-    </div>
+    </span>
   );
 }
 
@@ -1097,9 +1208,9 @@ function FeedImage({ item }: { item: ActivityFeedItem }) {
   if (!src) return null;
 
   return (
-    <div className="relative aspect-[16/9] w-full bg-muted">
+    <span className="relative block aspect-[16/9] w-full bg-muted">
       <Image src={src} alt="" fill unoptimized sizes="(max-width: 672px) 100vw, 608px" className="object-cover" />
-    </div>
+    </span>
   );
 }
 

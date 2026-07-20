@@ -1,0 +1,45 @@
+{
+  "metadata": {
+    "title": "Hapus Akun Anda",
+    "description": "Cara menghapus akun GainForest Anda, data apa yang dihapus, dan apa yang harus dilakukan jika Anda butuh bantuan."
+  },
+  "title": "Hapus akun Anda",
+  "lastUpdated": "Terakhir diperbarui: 14 Juli 2026",
+  "intro": {
+    "p1": "Akun GainForest Anda digunakan di gainforest.app dan di aplikasi seluler Taina Field. Anda dapat menghapusnya sendiri kapan saja, langsung dari aplikasi web: penghapusan berlaku seketika, permanen, dan tidak dapat dibatalkan."
+  },
+  "sections": {
+    "howTo": {
+      "title": "Cara menghapus akun Anda",
+      "steps": {
+        "s1": "Masuk di gainforest.app.",
+        "s2": "Buka pengaturan akun Anda di gainforest.app/settings.",
+        "s3": "Buka bagian \"Advanced\" (lanjutan) di bagian bawah halaman dan cari \"Danger zone\" (zona berbahaya).",
+        "s4": "Klik \"Delete account…\" (hapus akun). Anda akan melihat ringkasan semua data yang akan dihapus.",
+        "s5": "Ketik frasa konfirmasi lalu konfirmasikan. Data Anda langsung dihapus dan Anda akan keluar dari akun."
+      },
+      "p1": "Tidak ada masa tenggang atau kesempatan pemulihan: setelah dikonfirmasi, data yang dihapus tidak dapat dikembalikan."
+    },
+    "whatIsDeleted": {
+      "title": "Apa yang dihapus",
+      "paragraphs": {
+        "p1": "Semua catatan yang disimpan GainForest di repositori data pribadi Anda dihapus secara permanen: profil GainForest Anda, proyek dan situs, observasi keanekaragaman hayati, cert dan koleksi, postingan dan suka di feed, lencana dan tanda tangan, catatan audio dan multimedia, serta tautan dompet Anda."
+      }
+    },
+    "whatIsNotDeleted": {
+      "title": "Apa yang tidak dihapus",
+      "paragraphs": {
+        "p1": "GainForest dibangun di atas AT Protocol, tempat identitas dan repositori data Anda adalah milik Anda — bukan milik kami. Menghapus akun GainForest akan menghapus semua yang ditulis GainForest di repositori Anda, tetapi identitas AT Protocol Anda (handle dan DID Anda) serta akses masuk Anda tetap ada, begitu pula data yang dibuat oleh aplikasi lain.",
+        "p2": "Jika Anda memiliki organisasi di GainForest, organisasi tersebut akan ditinggalkan tanpa pemilik; Anda akan diminta menyetujui hal ini sebelum penghapusan dijalankan.",
+        "p3": "Data yang disimpan Taina Field secara lokal di perangkat Anda tetap berada di perangkat sampai Anda menghapus aplikasi atau datanya.",
+        "p4": "Karena AT Protocol adalah jaringan terbuka dan terfederasi, salinan catatan yang pernah Anda publikasikan mungkin tersimpan di server pihak ketiga. Penghapusan menghapus catatan di sumbernya dan memberi sinyal kepada layanan yang patuh untuk menghapus salinannya. Lihat kebijakan privasi kami di gainforest.app/privacy untuk detailnya."
+      }
+    },
+    "help": {
+      "title": "Tidak bisa masuk, atau butuh bantuan?",
+      "paragraphs": {
+        "p1": "Kirim email ke team@gainforest.net dari alamat email yang terhubung dengan akun Anda, dengan subjek \"Hapus akun saya\". Kami mungkin perlu memverifikasi identitas Anda, dan kami akan menangani permintaan Anda dalam jangka waktu yang diwajibkan oleh hukum yang berlaku. Alamat yang sama dapat digunakan untuk permintaan lain apa pun terkait data Anda."
+      }
+    }
+  }
+}

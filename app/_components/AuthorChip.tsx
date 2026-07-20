@@ -29,6 +29,7 @@ export function AuthorChip({
   nameOverride,
   size = "md",
   className = "",
+  onOpenAccount,
 }: {
   did: string;
   createdAt?: string | null;
@@ -37,6 +38,8 @@ export function AuthorChip({
   nameOverride?: string | null;
   size?: Size;
   className?: string;
+  /** Close a containing sheet before this chip opens the account drawer. */
+  onOpenAccount?: () => void;
 }) {
   const [profile, setProfile] = useState<DidProfile | null>(() => getCachedProfile(did) ?? null);
 
@@ -61,10 +64,18 @@ export function AuthorChip({
   const primaryCls = size === "sm" ? "text-[12px]" : "text-[13px]";
 
   return (
-    <AccountHoverCard did={did}>
+    <AccountHoverCard
+      did={did}
+      name={primary}
+      avatarRef={avatarRefOverride ?? null}
+      triggerClassName="block w-full min-w-0"
+    >
       <button
         type="button"
-        onClick={() => openAccount(did)}
+        onClick={() => {
+          onOpenAccount?.();
+          openAccount(did);
+        }}
         title="View profile"
         className={`-mx-1 flex w-full min-w-0 items-center gap-2 rounded-lg px-1 py-0.5 text-left transition-colors hover:bg-surface-sunken ${className}`}
       >
@@ -114,8 +125,13 @@ export function AuthorInline({
   const label = nameOverride || profile?.displayName || handle || "Supporter";
 
   return (
-    <AccountHoverCard did={did}>
-      <span className="inline-flex min-w-0 cursor-default items-center gap-1.5 align-middle" title={label}>
+    <AccountHoverCard
+      did={did}
+      name={label}
+      avatarRef={avatarRefOverride ?? null}
+      triggerClassName="inline-flex max-w-full min-w-0 align-middle"
+    >
+      <span className="inline-flex min-w-0 items-center gap-1.5 align-middle" title={label}>
         {showAvatar ? <Avatar did={did} handle={handle} avatar={avatar} avatarRef={avatarRefOverride ?? null} className="h-4 w-4 text-[8px]" /> : null}
         <span className="truncate text-foreground/80">{label}</span>
       </span>

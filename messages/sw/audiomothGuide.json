@@ -1,0 +1,166 @@
+{
+  "meta": {
+    "title": "Jinsi ya kuweka AudioMoth yako",
+    "description": "Mwongozo shirikishi wa kuandaa, kusanidi, kuweka na kuchukua kinasa sauti cha AudioMoth kwa kutumia Arbimon."
+  },
+  "hero": {
+    "kicker": "Mwongozo wa uwanjani · Ufuatiliaji wa sauti",
+    "title": "Jinsi ya kuweka AudioMoth yako",
+    "lead": "Andaa kinasa sauti, weka ratiba thabiti, unganisha eneo na Arbimon, kisha rudisha rekodi salama.",
+    "time": "Takribani dakika 30 za maandalizi",
+    "deployment": "Imepangwa kwa uwekaji wa wiki mbili"
+  },
+  "chapters": {
+    "label": "Sura za mwongozo",
+    "prepare": "Maandalizi",
+    "account": "Arbimon",
+    "configure": "Usanidi",
+    "deploy": "Uwekaji",
+    "retrieve": "Kuchukua",
+    "upload": "Kupakia"
+  },
+  "video": {
+    "title": "Tazama maelekezo ya uwanjani",
+    "caption": "Tazama mchakato mzima kabla ya kupeleka vifaa uwanjani.",
+    "frameTitle": "Video: jinsi ya kuweka AudioMoth"
+  },
+  "prepare": {
+    "heading": "Kabla ya kuanza",
+    "intro": "Tumia orodha hii kuhakikisha hakuna kitu muhimu kinachoachwa. Maendeleo yanahifadhiwa kwenye kifaa hiki na yatabaki baada ya kupakia ukurasa upya.",
+    "equipment": {
+      "computer": "Kompyuta mpakato au kompyuta",
+      "recorder": "AudioMoth na betri 3 za AA",
+      "cable": "Kebo ya data ya Micro USB inayofaa kompyuta yako",
+      "reader": "Kisomaji au adapta ya kadi ya MicroSD",
+      "card": "Kadi ya MicroSD ya GB 32 au chini",
+      "case": "Kifuniko cha simu kisichopitisha maji au mfuko mzito unaofungwa"
+    },
+    "remaining": "{count, plural, =0 {Kila kitu kiko tayari} one {Kitu # kimebaki} other {Vitu # vimebaki}}",
+    "reset": "Anza orodha upya"
+  },
+  "account": {
+    "heading": "Unda mradi wako wa Arbimon",
+    "intro": "Mradi huweka rekodi, maeneo na maelezo ya uwanjani pamoja.",
+    "accountTitle": "1. Unda akaunti",
+    "accountText": "Nenda Arbimon, chagua Sign up au Start Analyzing, jaza fomu na uthibitishe barua pepe yako.",
+    "projectTitle": "2. Unda mradi",
+    "projectText": "Chagua Create a new project, weka jina la kipekee na utume fomu. Mradi utaonekana kwenye My Projects.",
+    "tip": "Chagua jina ambalo timu nzima itatambua, kama mandhari na kipindi cha utafiti."
+  },
+  "configure": {
+    "heading": "Sanidi kinasa sauti",
+    "intro": "Unganisha AudioMoth na kompyuta, kisha pitia hatua hizi nne. Chagua hatua ili kuiona.",
+    "flashTab": "1 · Programu dhibiti",
+    "timeTab": "2 · Saa na ID",
+    "recordTab": "3 · Kurekodi",
+    "cardTab": "4 · Kadi ya SD",
+    "flashTitle": "Sasisha firmware",
+    "flashText": "Weka betri tatu za AA, unganisha kinasa sauti kwa kebo ya Micro USB na ufungue Flash App. Pakua firmware mpya zaidi, kisha uchague Flash AudioMoth.",
+    "timeTitle": "Weka saa na lebo ya kifaa",
+    "timeText": "Fungua Time App na uchague Set Time. Tafuta Device ID, andika herufi mbili za kwanza na mbili za mwisho, kisha bandika ID hiyo fupi kwenye kinasa sauti.",
+    "idExample": "Mfano: 242A2605648778E7 huwa 24E7",
+    "recordTitle": "Tumia ratiba ya kurekodi ya GainForest",
+    "recordText": "Weka mipangilio ifuatayo kwenye Configuration App. Kifaa kitarekodi dakika moja kila dakika tano, inayofaa kwa wiki mbili.",
+    "sampleRate": "Kiwango cha sampuli",
+    "sampleValue": "48 kHz",
+    "recordDuration": "Kurekodi",
+    "recordValue": "Dakika 1",
+    "sleepDuration": "Kupumzika",
+    "sleepValue": "Dakika 4",
+    "schedule": "Ratiba ya kila siku",
+    "scheduleValue": "00:00–24:00",
+    "chime": "Mlilio wa sauti",
+    "chimeValue": "Unahitajika kila wakati ukihamia CUSTOM",
+    "recordWarning": "Kwa lengo au muda tofauti, uliza kiongozi wa bioakustiki kabla ya kubadilisha mipangilio hii.",
+    "save": "Chagua Configure AudioMoth ili kuhifadhi mipangilio.",
+    "cardTitle": "Weka lebo na ingiza kadi ya MicroSD",
+    "cardText": "Weka lebo kwa kalamu nyeupe au stika nyembamba. Ingiza kadi kwenye AudioMoth hadi isikike ikibofya.",
+    "formatNote": "Kadi hadi GB 32 zitumie FAT32. Kadi kubwa zinaweza kutumia exFAT, lakini GB 32 au chini inapendekezwa.",
+    "switchLabel": "Swichi ya kinasa sauti",
+    "switchOff": "USB/OFF",
+    "switchCustom": "CUSTOM",
+    "switchDefault": "DEFAULT",
+    "offStatus": "Imeunganishwa kwa usanidi",
+    "customStatus": "Inasubiri ratiba yake",
+    "defaultStatus": "Inarekodi mara moja",
+    "greenLed": "Taa ya kijani huwaka na kuzimika ikisubiri",
+    "redLed": "Taa nyekundu huwaka na kuzimika ikirekodi"
+  },
+  "test": {
+    "heading": "Jaribu kabla ya kuondoka",
+    "intro": "Jaribio la dakika mbili linaweza kuzuia safari ya uwanjani kupotea.",
+    "s1": "Sogeza swichi hadi DEFAULT na uache kinasa sauti kifanye kazi kwa dakika chache.",
+    "s2": "Rudisha swichi hadi USB/OFF.",
+    "s3": "Ondoa kadi ya MicroSD na uiweke kwenye kompyuta.",
+    "s4": "Fungua kadi na usikilize faili moja mpya ya sauti.",
+    "success": "Ikiwa faili zipo na zinasikika, kinasa sauti kiko tayari kuwekwa."
+  },
+  "deploy": {
+    "heading": "Weka kwa Companion App",
+    "intro": "Kamilisha hatua hizi katika eneo la uwekaji. Programu huunganisha eneo, viwianishi na picha sahihi na kinasa sauti.",
+    "offline": "Utaenda bila intaneti? Ingia kwenye Companion App kabla ya kupoteza mtandao. Uwekaji utalandanishwa utakaporudi mtandaoni.",
+    "back": "Nyuma",
+    "next": "Mbele",
+    "play": "Cheza maelekezo",
+    "pause": "Sitisha maelekezo",
+    "stepLabel": "Hatua {n} kati ya {total}",
+    "steps": {
+      "s1": {
+        "title": "Fungua orodha ya uwekaji",
+        "text": "Chagua mradi wako, gusa kitufe cha kijani cha kuongeza na uchague AudioMoth."
+      },
+      "s2": {
+        "title": "Weka eneo la kifaa",
+        "text": "Chagua Set deployment site, weka alama kwenye eneo la kinasa sauti na uthibitishe."
+      },
+      "s3": {
+        "title": "Landanisha kinasa sauti",
+        "text": "Weka swichi kwenye USB/OFF na uchague Begin Sync. Mlilio ukianza, hamia CUSTOM, weka simu karibu na punguza kelele. Thibitisha kuwa taa nyekundu haijawaka mfululizo."
+      },
+      "s4": {
+        "title": "Piga picha na uweke",
+        "text": "Ukitaka, ongeza hadi picha kumi, kisha uchague DEPLOY. Alama itaonekana kwenye ramani baada ya kuhifadhi."
+      }
+    },
+    "whyHeading": "Programu huhifadhi nini",
+    "whySite": "Mradi na eneo sahihi",
+    "whyLocation": "Viwianishi vya uwekaji",
+    "whyPhotos": "Picha za uwanjani na hali ya ulandanishi"
+  },
+  "tips": {
+    "heading": "Vidokezo vya kuweka kifaa",
+    "water": "Linda kinasa sauti kwa kifuniko kisichopitisha maji au mfuko mzito uliofungwa vizuri.",
+    "camouflage": "Tumia kifuniko cha kuficha kifaa kikipatikana na ukiweke mbali na macho ya watu.",
+    "rope": "Funga kifuniko kwenye mti kwa kamba nyembamba bila kuziba tundu la maikrofoni.",
+    "tide": "Kwenye mikoko, kiweke juu ya kiwango cha juu cha maji kinachotarajiwa.",
+    "sound": "Weka maikrofoni mbali na majani yanayosugua, kamba zilizolegea na vyanzo vingine vya kelele."
+  },
+  "retrieve": {
+    "heading": "Chukua AudioMoth yako",
+    "intro": "Mwisho wa utafiti, simamisha kinasa sauti kabla ya kufungua kifuniko.",
+    "off": "Sogeza swichi kutoka CUSTOM hadi USB/OFF.",
+    "remove": "Ondoa kadi ya MicroSD na uiweke pamoja na ID fupi ya kinasa sauti.",
+    "check": "Ingiza kadi kwenye kompyuta na, ikiwezekana, sikiliza rekodi chache kabla ya kuondoka eneo hilo."
+  },
+  "upload": {
+    "heading": "Ingiza rekodi",
+    "intro": "Timu ya GainForest kwa kawaida hushughulikia hatua hii. Washirika wa jamii wanaweza kufuata mchakato huu inapohitajika.",
+    "s1": "Ingiza kadi ya MicroSD kwenye kompyuta kwa kisomaji au adapta.",
+    "s2": "Fungua Arbimon Uploader na uingie.",
+    "s3": "Chagua Import Files na uchague kadi au folda ya rekodi. Pia unaweza kukokota folda ndani ya programu.",
+    "s4": "Thibitisha kuwa mradi na eneo vinavyoonyeshwa vinafanana na uwekaji.",
+    "s5": "Chagua Import, kisha anza kupakia.",
+    "s6": "Acha programu ikiwa wazi hadi faili zote zipakiwe.",
+    "slow": "Tafiti kubwa zinaweza kuchukua muda mrefu. Unaweza kuendelea na kazi nyingine wakati upakiaji unaendelea.",
+    "checkHeading": "Kagua matokeo",
+    "checkText": "Fungua dashibodi ya mradi wa Arbimon na upakie ukurasa upya. Rekodi mpya na michoro ya sauti zinapaswa kuonekana.",
+    "admin": "Ongeza tech@gainforest.net kama msimamizi wa mradi ukitaka GainForest isaidie kupanga data."
+  },
+  "finish": {
+    "heading": "Uko tayari kwenda uwanjani?",
+    "text": "Kagua orodha ya vifaa tena, pakia betri za ziada na uweke ID ya kinasa sauti pamoja na maelezo ya uwanjani.",
+    "tool": "Fungua zana ya kusanidi AudioMoth",
+    "soundscape": "Dhibiti rekodi za AudioMoth",
+    "arbimon": "Nenda Arbimon"
+  }
+}

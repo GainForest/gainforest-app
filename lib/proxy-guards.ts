@@ -12,6 +12,17 @@ const TRUSTED_PREVIEW_USER_AGENTS = [
   "skypeuripreview",
 ] as const;
 
+const TRUSTED_SEARCH_USER_AGENTS = [
+  "googlebot",
+  "adsbot-google",
+  "google-inspectiontool",
+  "bingbot",
+  "duckduckbot",
+  "baiduspider",
+  "yandexbot",
+  "slurp",
+] as const;
+
 const BLOCKED_BOT_USER_AGENTS = [
   "gptbot",
   "chatgpt-user",
@@ -91,14 +102,18 @@ export function isBlockedBotUserAgent(userAgent: string): boolean {
     return false;
   }
 
-  if (includesAny(normalizedUserAgent, TRUSTED_PREVIEW_USER_AGENTS)) {
+  if (includesAny(normalizedUserAgent, BLOCKED_BOT_USER_AGENTS)) {
+    return true;
+  }
+
+  if (
+    includesAny(normalizedUserAgent, TRUSTED_PREVIEW_USER_AGENTS) ||
+    includesAny(normalizedUserAgent, TRUSTED_SEARCH_USER_AGENTS)
+  ) {
     return false;
   }
 
-  return (
-    includesAny(normalizedUserAgent, BLOCKED_BOT_USER_AGENTS) ||
-    GENERIC_BOT_USER_AGENT_PATTERN.test(normalizedUserAgent)
-  );
+  return GENERIC_BOT_USER_AGENT_PATTERN.test(normalizedUserAgent);
 }
 
 function shouldInspectProxyRequest(

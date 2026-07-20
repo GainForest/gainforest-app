@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
@@ -9,18 +9,21 @@ import {
   Building2Icon,
   CalendarIcon,
   CheckIcon,
+  ChevronDownIcon,
+  CopyIcon,
   EarthIcon,
   GlobeIcon,
-  MapPinIcon,
   PencilIcon,
   Share2Icon,
 } from "lucide-react";
 import type { AccountRouteData } from "../_lib/account-route";
 import type { AccountOrganization } from "./AccountOrganizationsGrid";
 import { AccountMemberships } from "./AccountMemberships";
+import { AccountWalletSupport } from "./AccountWalletSupport";
 import { formatCountry } from "../../_lib/format";
 import { SocialGlyph } from "@/app/_components/SocialIcon";
 import { TrustedByBadges } from "@/app/_components/TrustedByBadges";
+import { AccountAwards } from "./AccountAwards";
 import { FollowButton, FollowProvider, FollowStats } from "@/app/_components/FollowButton";
 import { Button } from "@/components/ui/button";
 
@@ -67,6 +70,9 @@ export function AccountHero({
   memberships?: AccountOrganization[];
 }) {
   const [copied, setCopied] = useState(false);
+  const [detailsOpen, setDetailsOpen] = useState(false);
+  const [copiedIdentifier, setCopiedIdentifier] = useState<"did" | "wallet" | null>(null);
+  const [walletAddress, setWalletAddress] = useState<string | null>(null);
   const heroT = useTranslations("upload.dashboardClient.hero");
   const actionsT = useTranslations("upload.actions");
   const globeT = useTranslations("marketplace.globe");
@@ -75,13 +81,41 @@ export function AccountHero({
   const sinceDate = formatSinceDate(account.kind === "organization" ? account.foundedDate ?? account.createdAt : account.createdAt);
   const country = account.country ? formatCountry(account.country) : null;
   const orgType = account.kind === "organization" ? account.orgType ?? account.summary.certOrgType : null;
-  const hasDetails = sinceDate.state === "valid" || country || orgType || account.website || account.socialLinks.length > 0;
+  const hasFacts = Boolean(sinceDate.state === "valid" || country || orgType);
+
+  useEffect(() => {
+    let cancelled = false;
+    const loadWallet = () => {
+      fetch(`/api/verify-recipient?did=${encodeURIComponent(account.did)}`)
+        .then((response) => response.ok ? response.json() : null)
+        .then((result: { hasAttestation?: boolean; address?: string } | null) => {
+          if (!cancelled) setWalletAddress(result?.hasAttestation && result.address ? result.address : null);
+        })
+        .catch(() => {
+          if (!cancelled) setWalletAddress(null);
+        });
+    };
+
+    loadWallet();
+    window.addEventListener("gainforest:wallet-changed", loadWallet);
+    return () => {
+      cancelled = true;
+      window.removeEventListener("gainforest:wallet-changed", loadWallet);
+    };
+  }, [account.did]);
 
   function handleShare() {
     const publicUrl = `${window.location.origin}/account/${encodeURIComponent(account.urlIdentifier)}`;
     navigator.clipboard.writeText(publicUrl).then(() => {
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
+    });
+  }
+
+  function copyIdentifier(kind: "did" | "wallet", value: string) {
+    navigator.clipboard.writeText(value).then(() => {
+      setCopiedIdentifier(kind);
+      setTimeout(() => setCopiedIdentifier((current) => current === kind ? null : current), 2000);
     });
   }
 
@@ -98,7 +132,7 @@ export function AccountHero({
           {account.coverUrl ? (
             <Image
               src={account.coverUrl}
-              alt={`Cover image for ${account.displayName}`}
+              alt={heroT("coverImageAlt", { name: account.displayName })}
               fill
               priority
               unoptimized
@@ -117,36 +151,89 @@ export function AccountHero({
           <div className="pointer-events-none absolute inset-x-0 bottom-0 h-14 bg-linear-to-t from-card to-transparent" />
         </motion.div>
 
-        <div className="absolute right-3 top-3 z-10 flex items-center gap-2">
-          <Button type="button" variant="outline" size="sm" onClick={handleShare} aria-label="Copy link">
-            <AnimatePresence mode="wait" initial={false}>
-              {copied ? (
-                <motion.span
-                  key="copied"
-                  initial={{ opacity: 0, scale: 0.7 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.7 }}
-                  transition={{ duration: 0.15 }}
-                  className="flex items-center gap-1.5"
+        <div className="absolute right-3 top-3 z-20 flex items-start gap-2">
+          <div className="relative flex flex-col items-end gap-1.5">
+            <Button type="button" variant="outline" size="sm" onClick={handleShare} aria-label={heroT("copyProfileLink")}>
+              <AnimatePresence mode="wait" initial={false}>
+                {copied ? (
+                  <motion.span
+                    key="copied"
+                    initial={{ opacity: 0, scale: 0.7 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.7 }}
+                    transition={{ duration: 0.15 }}
+                    className="flex items-center gap-1.5"
+                  >
+                    <CheckIcon className="size-3.5 text-primary" />
+                    <span className="hidden sm:inline">{heroT("copied")}</span>
+                  </motion.span>
+                ) : (
+                  <motion.span
+                    key="share"
+                    initial={{ opacity: 0, scale: 0.7 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.7 }}
+                    transition={{ duration: 0.15 }}
+                    className="flex items-center gap-1.5"
+                  >
+                    <Share2Icon className="size-3.5" />
+                    <span className="hidden sm:inline">{heroT("share")}</span>
+                  </motion.span>
+                )}
+              </AnimatePresence>
+            </Button>
+
+            <button
+              type="button"
+              onClick={() => setDetailsOpen((open) => !open)}
+              aria-expanded={detailsOpen}
+              aria-label={detailsOpen ? heroT("hideAccountDetails") : heroT("showAccountDetails")}
+              className="inline-flex h-6 items-center gap-1 px-1 text-[10px] font-medium text-muted-foreground/70 transition-colors hover:text-foreground focus-visible:rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            >
+              {heroT("accountDetails")}
+              <ChevronDownIcon
+                aria-hidden
+                className={`size-3 transition-transform duration-200 ${detailsOpen ? "rotate-180" : ""}`}
+              />
+            </button>
+
+            <AnimatePresence>
+              {detailsOpen ? (
+                <motion.div
+                  initial={{ opacity: 0, y: -4, scale: 0.98 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: -4, scale: 0.98 }}
+                  transition={{ duration: 0.16, ease: "easeOut" }}
+                  className="absolute right-0 top-full mt-1 flex w-[calc(100vw-9.5rem)] max-w-[19rem] flex-col items-end gap-1"
                 >
-                  <CheckIcon className="size-3.5 text-primary" />
-                  <span className="hidden sm:inline">Copied</span>
-                </motion.span>
-              ) : (
-                <motion.span
-                  key="share"
-                  initial={{ opacity: 0, scale: 0.7 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.7 }}
-                  transition={{ duration: 0.15 }}
-                  className="flex items-center gap-1.5"
-                >
-                  <Share2Icon className="size-3.5" />
-                  <span className="hidden sm:inline">Share</span>
-                </motion.span>
-              )}
+                  <button
+                    type="button"
+                    onClick={() => copyIdentifier("did", account.did)}
+                    aria-label={heroT("copyDid")}
+                    title={heroT("copyDid")}
+                    className="group flex w-full items-center gap-1.5 text-[11px] text-muted-foreground/75 transition-colors hover:text-foreground focus-visible:rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                  >
+                    <span className="shrink-0 text-[9px] font-medium uppercase tracking-[0.12em] text-muted-foreground/55">{heroT("did")}</span>
+                    <span className="min-w-0 flex-1 truncate text-right font-mono">{account.did}</span>
+                    {copiedIdentifier === "did" ? <CheckIcon className="size-3 text-primary" aria-hidden /> : <CopyIcon className="size-3 shrink-0 opacity-30 transition-opacity group-hover:opacity-70 group-focus-visible:opacity-70" aria-hidden />}
+                  </button>
+                  {walletAddress ? (
+                    <button
+                      type="button"
+                      onClick={() => copyIdentifier("wallet", walletAddress)}
+                      aria-label={heroT("copyWallet")}
+                      title={heroT("copyWallet")}
+                      className="group flex w-full items-center gap-1.5 text-[11px] text-muted-foreground/75 transition-colors hover:text-foreground focus-visible:rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                    >
+                      <span className="shrink-0 text-[9px] font-medium uppercase tracking-[0.12em] text-muted-foreground/55">{heroT("wallet")}</span>
+                      <span className="min-w-0 flex-1 truncate text-right font-mono">{walletAddress}</span>
+                      {copiedIdentifier === "wallet" ? <CheckIcon className="size-3 text-primary" aria-hidden /> : <CopyIcon className="size-3 shrink-0 opacity-30 transition-opacity group-hover:opacity-70 group-focus-visible:opacity-70" aria-hidden />}
+                    </button>
+                  ) : null}
+                </motion.div>
+              ) : null}
             </AnimatePresence>
-          </Button>
+          </div>
           {editHref ? (
             <Button asChild size="sm">
               <Link href={editHref}>
@@ -177,77 +264,74 @@ export function AccountHero({
               {account.description ?? ""}
             </p>
             <FollowStats targetDid={account.did} identifier={account.urlIdentifier} className="mt-2.5" />
-            <TrustedByBadges did={account.did} variant="plain" className="mt-3 w-fit" />
+            {/* Quiet facts — read-only metadata rendered as text, never as
+                fake buttons, so only real actions look pressable. */}
+            {hasFacts ? (
+              <div className="mt-2.5 flex flex-wrap items-center gap-x-4 gap-y-1 text-[13px] text-muted-foreground">
+                {orgType ? (
+                  <span className="inline-flex items-center gap-1.5">
+                    <Building2Icon className="size-3.5 opacity-70" aria-hidden />
+                    {orgType}
+                  </span>
+                ) : null}
+                {country ? <span className="inline-flex items-center gap-1.5">{country}</span> : null}
+                {sinceDate.state === "valid" ? (
+                  <span className="inline-flex items-center gap-1.5">
+                    <CalendarIcon className="size-3.5 opacity-70" aria-hidden />
+                    {heroT("sinceDate", { date: sinceDate.label ?? "" })}
+                  </span>
+                ) : null}
+              </div>
+            ) : null}
+            {/* Trust + awards read as one quiet metadata row under the title;
+                each half renders nothing when the account has none. */}
+            <div className="mt-3 flex flex-wrap items-center gap-x-5 gap-y-2 empty:mt-0">
+              <TrustedByBadges did={account.did} variant="plain" className="w-fit" />
+              <AccountAwards did={account.did} className="w-fit" />
+            </div>
             <AccountMemberships organizations={memberships} className="mt-3" />
           </div>
         </div>
 
-        {hasDetails ? (
-          <div className="mt-5 flex flex-wrap items-center gap-2">
-            {orgType ? (
-              <Button asChild variant="outline">
-                <span>
-                  <Building2Icon />
-                  {orgType}
-                </span>
-              </Button>
-            ) : null}
-            {country ? (
-              <Button asChild variant="outline">
-                <span>
-                  <MapPinIcon />
-                  {country}
-                </span>
-              </Button>
-            ) : null}
-            {sinceDate.state === "valid" ? (
-              <Button asChild variant="outline">
-                <span>
-                  <CalendarIcon />
-                  {heroT("sinceDate", { date: sinceDate.label ?? "" })}
-                </span>
-              </Button>
-            ) : null}
-            <FollowButton targetDid={account.did} name={account.displayName} />
-            {account.kind === "organization" ? (
-              <Button asChild variant="outline">
-                <Link href={`/globe/${encodeURIComponent(account.urlIdentifier)}`}>
-                  <EarthIcon />
-                  {globeT("viewOnGlobe")}
+        {/* Actions — one row of same-height pills: follow, direct support,
+            then the outbound links (globe view, website, socials). */}
+        <div className="mt-6 flex flex-wrap items-center gap-2">
+          <FollowButton targetDid={account.did} name={account.displayName} size="default" />
+          <AccountWalletSupport
+            did={account.did}
+            name={account.displayName}
+            image={account.avatarUrl}
+            walletAddress={walletAddress}
+          />
+          {account.kind === "organization" ? (
+            <Button asChild variant="outline">
+              <Link href={`/globe/${encodeURIComponent(account.urlIdentifier)}`}>
+                <EarthIcon />
+                {globeT("viewOnGlobe")}
+              </Link>
+            </Button>
+          ) : null}
+          {(account.website || account.socialLinks.length > 0) ? (
+            <span aria-hidden className="mx-1 hidden h-5 w-px bg-border sm:block" />
+          ) : null}
+          {account.website ? (
+            <Button asChild variant="outline" size="icon" className="text-muted-foreground hover:text-foreground" title={formatWebsite(account.website)} aria-label={heroT("openSocialLink", { link: formatWebsite(account.website) })}>
+              <Link href={externalHref(account.website)} target="_blank" rel="noopener noreferrer">
+                <GlobeIcon />
+              </Link>
+            </Button>
+          ) : null}
+          {account.socialLinks.map((url) => {
+            const label = formatWebsite(url);
+            return (
+              <Button key={url} asChild variant="outline" size="icon" className="text-muted-foreground hover:text-foreground" title={label} aria-label={heroT("openSocialLink", { link: label })}>
+                <Link href={externalHref(url)} target="_blank" rel="noopener noreferrer">
+                  <SocialGlyph platform={classifySocial(url)} />
                 </Link>
               </Button>
-            ) : null}
-            {account.website ? (
-              <Button asChild variant="outline" size="icon" title={formatWebsite(account.website)} aria-label={heroT("openSocialLink", { link: formatWebsite(account.website) })}>
-                <Link href={externalHref(account.website)} target="_blank" rel="noopener noreferrer">
-                  <GlobeIcon />
-                </Link>
-              </Button>
-            ) : null}
-            {account.socialLinks.map((url) => {
-              const label = formatWebsite(url);
-              return (
-                <Button key={url} asChild variant="outline" size="icon" title={label} aria-label={heroT("openSocialLink", { link: label })}>
-                  <Link href={externalHref(url)} target="_blank" rel="noopener noreferrer">
-                    <SocialGlyph platform={classifySocial(url)} />
-                  </Link>
-                </Button>
-              );
-            })}
-          </div>
-        ) : (
-          <div className="mt-5 flex flex-wrap items-center gap-2">
-            <FollowButton targetDid={account.did} name={account.displayName} />
-            {account.kind === "organization" ? (
-              <Button asChild variant="outline">
-                <Link href={`/globe/${encodeURIComponent(account.urlIdentifier)}`}>
-                  <EarthIcon />
-                  {globeT("viewOnGlobe")}
-                </Link>
-              </Button>
-            ) : null}
-          </div>
-        )}
+            );
+          })}
+        </div>
       </div>
     </section>
     </FollowProvider>

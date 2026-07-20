@@ -10,9 +10,9 @@
  * overlay immediately and the indexer reconciles it on the next load.
  */
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useId, useMemo, useRef, useState, type ReactNode } from "react";
 import { useTranslations } from "next-intl";
-import { HeartIcon, ImageIcon, Loader2Icon, MessageCircleIcon, PencilIcon, ReplyIcon, SendHorizonalIcon, Trash2Icon, UserIcon } from "lucide-react";
+import { EyeOffIcon, HeartIcon, ImageIcon, Loader2Icon, MessageCircleIcon, PencilIcon, ReplyIcon, SendHorizonalIcon, Trash2Icon, UserIcon, XIcon } from "lucide-react";
 import {
   createFeedComment,
   createFeedLike,
@@ -33,11 +33,30 @@ import {
   type Liker,
 } from "@/app/_lib/feed-engagement";
 import { redirectToLogin } from "@/app/_lib/auth-client";
+import { buildMentionFacets, type MentionCandidate } from "@/app/_lib/mentions";
+import { AdminOnlyIndicator } from "@/app/_components/AdminOnlyIndicator";
+import { MentionText } from "@/app/_components/MentionText";
+import { MentionTextarea } from "@/app/_components/MentionTextarea";
+import {
+  crosspostToBluesky,
+  deleteBlueskyTwin,
+  ensureBlueskyProfile,
+  hasBlueskyProfile,
+  readBlueskyCrosspostPref,
+  saveBlueskyCrosspostPref,
+  updateBlueskyTwin,
+  type BlueskyCrosspostPref,
+} from "@/app/_lib/bluesky-crosspost";
+import { BlueskyConsentModal } from "@/app/_components/BlueskyConsentModal";
+import { BlueskyIcon } from "@/app/_components/BlueskyIcon";
 import { formatRelative } from "@/app/_lib/format";
 import { useAccountList, useActiveAccountContext } from "@/app/_lib/account-switcher";
 import { useAddObservations } from "@/app/_components/useAddObservations";
 import { cn } from "@/lib/utils";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { ModalPortal, useModal } from "@/components/ui/modal/context";
+import { ModalTitle } from "@/components/ui/modal/modal";
+import { AccountHoverCard } from "@/app/_components/AccountHoverCard";
 import { ResolvedAvatar } from "./ResolvedAvatar";
 
 /** Which account the viewer is currently acting as in the feed. When the
@@ -89,7 +108,15 @@ function useViewerCard(sessionDid: string | null): { name: string | null; avatar
   return { name: acting.card.name, avatarUrl: acting.card.avatarUrl, did: acting.actingDid };
 }
 
-export type LocalPost = { id: string; text: string; createdAt: string };
+export type LocalPost = {
+  id: string;
+  text: string;
+  createdAt: string;
+  /** Accounts @-mentioned in the text, for linkified rendering. */
+  mentions?: MentionCandidate[];
+  /** bsky.app URL of the Bluesky twin when this post was cross-posted. */
+  bskyUrl?: string | null;
+};
 
 type LikersState = { status: "idle" | "loading" | "ready"; likers: Liker[] };
 
@@ -108,16 +135,19 @@ export type FeedInteractions = {
   /** Comment on `uri`, or reply to it within a thread. Pass `rootUri` (the
    *  subject at the top of the thread) to make this a threaded reply; omit it
    *  for a top-level comment. The optimistic comment lands in the thread keyed
-   *  by the root so it nests under what it answers. */
-  addComment: (uri: string, text: string, rootUri?: string) => Promise<void>;
+   *  by the root so it nests under what it answers. `mentions` are the accounts
+   *  the author @-tagged (facets are computed from them at write time). */
+  addComment: (uri: string, text: string, rootUri?: string, mentions?: MentionCandidate[]) => Promise<void>;
   /** Edit one of the viewer's own comments under `subjectUri`. */
-  editComment: (subjectUri: string, commentUri: string, text: string) => Promise<void>;
+  editComment: (subjectUri: string, commentUri: string, text: string, mentions?: MentionCandidate[]) => Promise<void>;
   /** Delete one of the viewer's own comments under `subjectUri`. */
   deleteComment: (subjectUri: string, commentUri: string) => Promise<void>;
   localPosts: LocalPost[];
-  addPost: (text: string) => Promise<void>;
+  /** Publish a top-level post. `crosspost` additionally writes the
+   *  app.bsky.feed.post twin (personal repo only; ignored for group repos). */
+  addPost: (text: string, opts?: { crosspost?: boolean; mentions?: MentionCandidate[] }) => Promise<void>;
   /** Edit one of the viewer's own feed posts (optimistic local + persisted). */
-  editPost: (postUri: string, text: string) => Promise<void>;
+  editPost: (postUri: string, text: string, mentions?: MentionCandidate[]) => Promise<void>;
   /** Delete one of the viewer's own feed posts (optimistic local + persisted). */
   deletePost: (postUri: string) => Promise<void>;
   /** AT-URIs the viewer has just deleted, so the timeline can hide them until
@@ -310,12 +340,13 @@ export function useFeedInteractions(sessionDid: string | null): FeedInteractions
   }, []);
 
   const addComment = useCallback(
-    async (uri: string, text: string, rootUri?: string) => {
+    async (uri: string, text: string, rootUri?: string, mentions?: MentionCandidate[]) => {
       // A reply targets the comment (`uri`) as its parent but lives in the
       // thread keyed by the subject at the top (`rootUri`). A top-level comment
       // is its own root, so the thread key is just `uri`.
       const threadKey = rootUri ?? uri;
-      const result = await createFeedComment({ text, subjectUri: uri, rootUri }, repoOption);
+      const facets = buildMentionFacets(text.trim(), mentions ?? []);
+      const result = await createFeedComment({ text, subjectUri: uri, rootUri, facets }, repoOption);
       const optimistic: FeedComment = {
         uri: result.uri,
         did: actingDid ?? "",
@@ -324,6 +355,7 @@ export function useFeedInteractions(sessionDid: string | null): FeedInteractions
         authorName: null,
         authorAvatarRef: null,
         parentUri: uri,
+        mentions: mentions ?? [],
       };
       setComments((prev) => {
         const next = new Map(prev);
@@ -339,16 +371,17 @@ export function useFeedInteractions(sessionDid: string | null): FeedInteractions
   // Edit one of the viewer's own comments. Gating is the caller's job (only the
   // author sees the affordance), so the acting repo already matches the owner.
   const editComment = useCallback(
-    async (subjectUri: string, commentUri: string, text: string) => {
+    async (subjectUri: string, commentUri: string, text: string, mentions?: MentionCandidate[]) => {
       const trimmed = text.trim();
-      await updateFeedPost(rkeyOf(commentUri), trimmed, repoOption);
+      const facets = buildMentionFacets(trimmed, mentions ?? []);
+      await updateFeedPost(rkeyOf(commentUri), trimmed, { ...repoOption, facets });
       setComments((prev) => {
         const list = prev.get(subjectUri);
         if (!list) return prev;
         const next = new Map(prev);
         next.set(
           subjectUri,
-          list.map((c) => (c.uri === commentUri ? { ...c, text: trimmed } : c)),
+          list.map((c) => (c.uri === commentUri ? { ...c, text: trimmed, mentions: mentions ?? [] } : c)),
         );
         return next;
       });
@@ -357,20 +390,35 @@ export function useFeedInteractions(sessionDid: string | null): FeedInteractions
   );
 
   const addPost = useCallback(
-    async (text: string) => {
-      const result = await createFeedPost({ text }, repoOption);
-      setLocalPosts((prev) => [{ id: result.uri, text: text.trim(), createdAt: new Date().toISOString() }, ...prev]);
+    async (text: string, opts?: { crosspost?: boolean; mentions?: MentionCandidate[] }) => {
+      const facets = buildMentionFacets(text.trim(), opts?.mentions ?? []);
+      const result = await createFeedPost({ text, facets }, repoOption);
+      // Bluesky twin: opt-in, personal repo only, top-level posts only. The
+      // GainForest post is already live at this point, so a failed twin write
+      // just means no Bluesky link — never a failed post.
+      let bskyUrl: string | null = null;
+      if (opts?.crosspost && !repoOption && actingDid) {
+        bskyUrl = await crosspostToBluesky({ did: actingDid, rkey: result.rkey, text: text.trim() });
+      }
+      setLocalPosts((prev) => [
+        { id: result.uri, text: text.trim(), createdAt: new Date().toISOString(), mentions: opts?.mentions ?? [], bskyUrl },
+        ...prev,
+      ]);
     },
-    [repoOption],
+    [repoOption, actingDid],
   );
 
   // Edit one of the viewer's own posts. Updates the optimistic local copy if it
   // is still showing; the persisted edit reconciles on the next feed load.
   const editPost = useCallback(
-    async (postUri: string, text: string) => {
+    async (postUri: string, text: string, mentions?: MentionCandidate[]) => {
       const trimmed = text.trim();
-      await updateFeedPost(rkeyOf(postUri), trimmed, repoOption);
-      setLocalPosts((prev) => prev.map((p) => (p.id === postUri ? { ...p, text: trimmed } : p)));
+      const facets = buildMentionFacets(trimmed, mentions ?? []);
+      await updateFeedPost(rkeyOf(postUri), trimmed, { ...repoOption, facets });
+      // Keep an existing Bluesky twin's record in sync (best-effort, personal
+      // repo only; a no-op when the post was never cross-posted).
+      if (!repoOption) void updateBlueskyTwin(rkeyOf(postUri), trimmed);
+      setLocalPosts((prev) => prev.map((p) => (p.id === postUri ? { ...p, text: trimmed, mentions: mentions ?? [] } : p)));
     },
     [repoOption],
   );
@@ -382,6 +430,9 @@ export function useFeedInteractions(sessionDid: string | null): FeedInteractions
   const deletePost = useCallback(
     async (postUri: string) => {
       await deleteFeedPost(rkeyOf(postUri), repoOption);
+      // Deleting a post also deletes its Bluesky twin when one exists
+      // (best-effort, personal repo only) so nothing orphaned stays public.
+      if (!repoOption) void deleteBlueskyTwin(rkeyOf(postUri));
       setLocalPosts((prev) => prev.filter((p) => p.id !== postUri));
       setRemovedUris((prev) => new Set(prev).add(postUri));
     },
@@ -430,6 +481,24 @@ export function useFeedInteractions(sessionDid: string | null): FeedInteractions
 
 // ── The viewer's own just-published posts (optimistic, above the timeline) ───
 
+/** Small "view this post on Bluesky" link rendered under cross-posted feed
+ *  posts — both the optimistic just-posted rows and indexed timeline rows. */
+export function BlueskyPostLink({ href }: { href: string }) {
+  const tb = useTranslations("common.bluesky");
+  return (
+    <a
+      href={href}
+      target="_blank"
+      rel="noopener noreferrer"
+      onClick={(e) => e.stopPropagation()}
+      className="mt-1 inline-flex items-center gap-1 rounded-full text-xs font-medium text-[#1185fe] hover:underline"
+    >
+      <BlueskyIcon className="size-3" />
+      {tb("viewPost")}
+    </a>
+  );
+}
+
 export function LocalPostsList({
   posts,
   viewerDid,
@@ -438,7 +507,7 @@ export function LocalPostsList({
 }: {
   posts: LocalPost[];
   viewerDid: string | null;
-  onEditPost?: (postUri: string, text: string) => Promise<void>;
+  onEditPost?: (postUri: string, text: string, mentions?: MentionCandidate[]) => Promise<void>;
   onDeletePost?: (postUri: string) => Promise<void>;
 }) {
   const t = useTranslations("common.feed");
@@ -470,13 +539,17 @@ export function LocalPostsList({
               {editingId === post.id && onEditPost ? (
                 <InlineEditor
                   initial={post.text}
+                  initialMentions={post.mentions}
                   max={POST_MAX}
-                  onSave={(text) => onEditPost(post.id, text)}
+                  onSave={(text, mentions) => onEditPost(post.id, text, mentions)}
                   onCancel={() => setEditingId(null)}
                 />
               ) : (
                 <>
-                  <p className="mt-1 whitespace-pre-wrap text-[15px] leading-relaxed text-foreground">{post.text}</p>
+                  <p className="mt-1 whitespace-pre-wrap text-[15px] leading-relaxed text-foreground">
+                    <MentionText text={post.text} mentions={post.mentions} />
+                  </p>
+                  {post.bskyUrl ? <BlueskyPostLink href={post.bskyUrl} /> : null}
                   {onEditPost || onDeletePost ? (
                     <div className="mt-1 flex items-center gap-1">
                       {onEditPost ? (
@@ -503,20 +576,25 @@ export function LocalPostsList({
 }
 
 /** Inline text editor used to edit a post or comment in place. Saves the
- *  trimmed text when changed; Escape or Cancel discards. */
+ *  trimmed text when changed; Escape or Cancel discards. `initialMentions`
+ *  seeds the accounts already tagged in the text so an edit keeps existing
+ *  @-mentions linked; new ones can be added through the type-ahead. */
 export function InlineEditor({
   initial,
+  initialMentions,
   max,
   onSave,
   onCancel,
 }: {
   initial: string;
+  initialMentions?: MentionCandidate[];
   max: number;
-  onSave: (text: string) => Promise<void>;
+  onSave: (text: string, mentions: MentionCandidate[]) => Promise<void>;
   onCancel: () => void;
 }) {
   const t = useTranslations("common.feed");
   const [text, setText] = useState(initial);
+  const [mentions, setMentions] = useState<MentionCandidate[]>(initialMentions ?? []);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const trimmed = text.trim();
@@ -527,7 +605,7 @@ export function InlineEditor({
     setBusy(true);
     setError(null);
     try {
-      await onSave(trimmed);
+      await onSave(trimmed, mentions);
       onCancel();
     } catch {
       setError(t("actions.errorGeneric"));
@@ -538,17 +616,16 @@ export function InlineEditor({
 
   return (
     <div className="mt-1">
-      <textarea
+      <MentionTextarea
         value={text}
         autoFocus
-        onChange={(e) => setText(e.target.value)}
-        onKeyDown={(e) => {
-          if (e.key === "Escape") onCancel();
-        }}
+        onValueChange={setText}
+        onPickMention={(c) => setMentions((prev) => [...prev, c])}
+        onEscape={onCancel}
         rows={2}
         maxLength={max + 40}
-        aria-label={t("actions.edit")}
-        className="w-full resize-none rounded-lg border border-border/60 bg-background px-2.5 py-1.5 text-sm text-foreground outline-none focus:border-primary/50"
+        ariaLabel={t("actions.edit")}
+        className="resize-none rounded-lg border border-border/60 bg-background px-2.5 py-1.5 text-sm text-foreground outline-none focus:border-primary/50"
       />
       <div className="mt-1 flex items-center gap-2">
         <button
@@ -599,12 +676,13 @@ export function ReplyComposer({
   onCancel,
 }: {
   viewerDid: string | null;
-  onSubmit: (text: string) => Promise<void>;
+  onSubmit: (text: string, mentions: MentionCandidate[]) => Promise<void>;
   onCancel: () => void;
 }) {
   const t = useTranslations("common.feed");
   const viewer = useViewerCard(viewerDid);
   const [text, setText] = useState("");
+  const [mentions, setMentions] = useState<MentionCandidate[]>([]);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const canSend = text.trim().length > 0 && text.length <= COMMENT_MAX && !busy;
@@ -614,8 +692,9 @@ export function ReplyComposer({
     setBusy(true);
     setError(null);
     try {
-      await onSubmit(text.trim());
+      await onSubmit(text.trim(), mentions);
       setText("");
+      setMentions([]);
       onCancel();
     } catch {
       setError(t("actions.errorGeneric"));
@@ -635,18 +714,17 @@ export function ReplyComposer({
         sizes="24px"
       />
       <div className="min-w-0 flex-1">
-        <textarea
+        <MentionTextarea
           value={text}
           autoFocus
-          onChange={(e) => setText(e.target.value)}
-          onKeyDown={(e) => {
-            if (e.key === "Escape") onCancel();
-          }}
+          onValueChange={setText}
+          onPickMention={(c) => setMentions((prev) => [...prev, c])}
+          onEscape={onCancel}
           rows={1}
           maxLength={COMMENT_MAX + 40}
           placeholder={t("actions.replyPlaceholder")}
-          aria-label={t("actions.replyPlaceholder")}
-          className="min-h-8 w-full resize-none rounded-lg border border-border/60 bg-background px-2.5 py-1.5 text-sm text-foreground outline-none placeholder:text-muted-foreground/70 focus:border-primary/50"
+          ariaLabel={t("actions.replyPlaceholder")}
+          className="min-h-8 resize-none rounded-lg border border-border/60 bg-background px-2.5 py-1.5 text-sm text-foreground outline-none placeholder:text-muted-foreground/70 focus:border-primary/50"
         />
         <div className="mt-1 flex items-center gap-2">
           <button
@@ -734,23 +812,183 @@ export function DeleteButton({ onDelete }: { onDelete: () => Promise<void> }) {
   );
 }
 
+/** Steward-only control on a feed row: hide the underlying record from the
+ *  public feed and catalogs by flagging it as a test record. Two-step confirm
+ *  like DeleteButton; on success the row is removed via `onHidden`. */
+export function ModeratorHideButton({ subjectUri, onHidden }: { subjectUri: string; onHidden: () => void }) {
+  const t = useTranslations("common.testRecord");
+  const [confirming, setConfirming] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState(false);
+
+  async function run() {
+    if (busy) return;
+    setBusy(true);
+    setError(false);
+    try {
+      const response = await fetch("/api/internal/test-records", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ uri: subjectUri }),
+      });
+      const data = (await response.json().catch(() => null)) as { flagged?: boolean; error?: string } | null;
+      if (!response.ok || !data || data.error) throw new Error(data?.error || "flag failed");
+      onHidden();
+    } catch {
+      setError(true);
+      setBusy(false);
+      setConfirming(false);
+    }
+  }
+
+  if (confirming) {
+    return (
+      <span className="inline-flex items-center gap-1">
+        <button
+          type="button"
+          onClick={() => void run()}
+          disabled={busy}
+          className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-medium text-destructive transition-colors hover:bg-destructive/10 disabled:opacity-50"
+        >
+          {busy ? <Loader2Icon className="size-3 animate-spin" /> : <EyeOffIcon className="size-3" />}
+          {t("confirmHide")}
+          <AdminOnlyIndicator />
+        </button>
+        <button
+          type="button"
+          onClick={() => setConfirming(false)}
+          disabled={busy}
+          className="rounded-full px-2 py-0.5 text-[11px] font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground disabled:opacity-50"
+        >
+          {t("cancel")}
+        </button>
+      </span>
+    );
+  }
+
+  return (
+    <span className="inline-flex items-center gap-1">
+      <button
+        type="button"
+        onClick={() => setConfirming(true)}
+        title={t("hideHint")}
+        className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-medium text-muted-foreground/70 transition-colors hover:bg-amber-500/10 hover:text-amber-600 dark:hover:text-amber-400"
+      >
+        <EyeOffIcon className="size-3" />
+        {t("hideAction")}
+        <AdminOnlyIndicator />
+      </button>
+      {error ? <span className="text-[11px] text-destructive">{t("genericError")}</span> : null}
+    </span>
+  );
+}
+
 // ── Composer (publish a post) ────────────────────────────────────────────────
 
 export function FeedComposer({
   signedIn,
   viewerDid,
   onPost,
+  embedded = false,
+  autoFocus = false,
+  onAddPhoto,
+  draftText,
+  onDraftChange,
+  draftMentions,
+  onDraftMentionsChange,
 }: {
   signedIn: boolean;
   viewerDid: string | null;
-  onPost: (text: string) => Promise<void>;
+  onPost: (text: string, opts?: { crosspost?: boolean; mentions?: MentionCandidate[] }) => Promise<void>;
+  /** Drop the standalone card chrome (border/background/margin) so the composer
+   *  can sit inside another container, e.g. the phone composer modal. */
+  embedded?: boolean;
+  /** Focus the textarea on mount (used when opened in the modal). */
+  autoFocus?: boolean;
+  /** Override the photo button's action. When set, the composer does NOT own
+   *  the add-a-sighting modal itself (its own modal can't be nested inside the
+   *  phone composer modal — same global stack); the caller opens that flow at a
+   *  stable location instead. When omitted, the composer renders its own button. */
+  onAddPhoto?: () => void;
+  /** Lift the draft up so it survives the composer being remounted — the phone
+   *  composer modal is replaced when the sighting uploader opens, and this keeps
+   *  a half-written post intact when the user comes back. Controlled pair. */
+  draftText?: string;
+  onDraftChange?: (text: string) => void;
+  /** Controlled pair for the draft's picked @-mentions, lifted alongside the
+   *  draft text so tags survive the composer being remounted. */
+  draftMentions?: MentionCandidate[];
+  onDraftMentionsChange?: (mentions: MentionCandidate[]) => void;
 }) {
   const t = useTranslations("common.feed");
+  const tb = useTranslations("common.bluesky");
   const acting = useActingAccount(viewerDid);
-  const [text, setText] = useState("");
+  const [internalText, setInternalText] = useState("");
+  const [internalMentions, setInternalMentions] = useState<MentionCandidate[]>([]);
+  const text = draftText ?? internalText;
+  const setText = onDraftChange ?? setInternalText;
+  const mentions = draftMentions ?? internalMentions;
+  const setMentions = onDraftMentionsChange ?? setInternalMentions;
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [posted, setPosted] = useState(false);
+
+  // ── Bluesky cross-posting (opt-in, personal repo only) ──────────────────
+  // The preference is a singleton on the user's PDS; the first activation is
+  // gated by an explicit consent modal (see BlueskyConsentModal). Groups never
+  // cross-post — the chip is hidden while acting as an organization.
+  const personalDid = signedIn && !acting.isGroup ? acting.actingDid : null;
+  const [bskyPref, setBskyPref] = useState<BlueskyCrosspostPref | null>(null);
+  const [consentOpen, setConsentOpen] = useState(false);
+  // Whether the account already HAS an app.bsky.actor.profile (null = unknown);
+  // inverted into the modal's `needsProfile` prop below.
+  const [hasProfile, setHasProfile] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    setBskyPref(null);
+    if (!personalDid) return;
+    let cancelled = false;
+    void readBlueskyCrosspostPref(personalDid).then((pref) => {
+      if (!cancelled) setBskyPref(pref);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [personalDid]);
+
+  const crosspostOn = Boolean(personalDid && bskyPref?.enabled);
+
+  async function toggleBluesky() {
+    if (!signedIn) {
+      redirectToLogin();
+      return;
+    }
+    if (!personalDid || !bskyPref) return;
+    if (!bskyPref.enabled && !bskyPref.consented) {
+      // First activation: ask for consent before anything touches Bluesky.
+      setHasProfile(null);
+      void hasBlueskyProfile(personalDid).then(setHasProfile);
+      setConsentOpen(true);
+      return;
+    }
+    const previous = bskyPref;
+    const next = { enabled: !bskyPref.enabled, consented: true };
+    setBskyPref(next);
+    try {
+      await saveBlueskyCrosspostPref(personalDid, next.enabled);
+    } catch {
+      setBskyPref(previous);
+    }
+  }
+
+  async function confirmBlueskyConsent() {
+    if (!personalDid) return;
+    // Consent given: bootstrap the Bluesky profile from the certified profile
+    // when missing, then persist the opt-in.
+    await ensureBlueskyProfile(personalDid);
+    await saveBlueskyCrosspostPref(personalDid, true);
+    setBskyPref({ enabled: true, consented: true });
+  }
 
   const remaining = POST_MAX - text.length;
   const nearLimit = remaining <= 40;
@@ -765,8 +1003,9 @@ export function FeedComposer({
     setBusy(true);
     setError(null);
     try {
-      await onPost(text.trim());
+      await onPost(text.trim(), { crosspost: crosspostOn, mentions });
       setText("");
+      setMentions([]);
       setPosted(true);
       window.setTimeout(() => setPosted(false), 6000);
     } catch {
@@ -777,7 +1016,13 @@ export function FeedComposer({
   }
 
   return (
-    <div className="mb-3 rounded-2xl border border-border/60 bg-card/40 p-3 transition-colors focus-within:border-primary/40">
+    <div
+      className={cn(
+        embedded
+          ? "w-full"
+          : "mb-3 rounded-2xl border border-border/60 bg-card/40 p-3 transition-colors focus-within:border-primary/40",
+      )}
+    >
       <div className="flex gap-3">
         <ResolvedAvatar
           did={acting.actingDid}
@@ -787,25 +1032,61 @@ export function FeedComposer({
           className="mt-0.5 size-9"
           sizes="36px"
         />
-        <textarea
+        <MentionTextarea
+          autoFocus={autoFocus}
           value={text}
-          onChange={(e) => {
-            setText(e.target.value);
+          onValueChange={(next) => {
+            setText(next);
             setPosted(false);
           }}
+          onPickMention={(c) => setMentions([...mentions, c])}
           onFocus={() => {
             if (!signedIn) redirectToLogin();
           }}
           rows={2}
           maxLength={POST_MAX + 40}
           placeholder={signedIn ? t("composer.placeholder") : t("composer.signedOut")}
-          aria-label={t("composer.placeholder")}
-          className="min-h-[3rem] flex-1 resize-none bg-transparent pt-1.5 text-[15px] leading-relaxed text-foreground outline-none placeholder:text-muted-foreground/70"
+          ariaLabel={t("composer.placeholder")}
+          className={cn(
+            "resize-none bg-transparent pt-1.5 text-[15px] leading-relaxed text-foreground outline-none placeholder:text-muted-foreground/70",
+            embedded ? "min-h-[8rem]" : "min-h-[3rem]",
+          )}
         />
       </div>
       <div className="mt-1 flex items-center justify-between gap-2 pl-12">
         <div className="flex min-w-0 items-center gap-1">
-          {signedIn && viewerDid ? <ComposerObservationButton sessionDid={viewerDid} /> : null}
+          {signedIn && viewerDid ? (
+            onAddPhoto ? (
+              <button
+                type="button"
+                onClick={onAddPhoto}
+                aria-label={t("composer.addObservation")}
+                title={t("composer.addObservation")}
+                className="-ml-1.5 inline-flex size-9 shrink-0 items-center justify-center rounded-full text-primary transition-colors hover:bg-primary/10"
+              >
+                <ImageIcon className="size-5" />
+              </button>
+            ) : (
+              <ComposerObservationButton sessionDid={viewerDid} />
+            )
+          ) : null}
+          {personalDid && bskyPref ? (
+            <button
+              type="button"
+              onClick={() => void toggleBluesky()}
+              aria-pressed={crosspostOn}
+              aria-label={tb("toggle")}
+              title={crosspostOn ? tb("onHint") : tb("offHint")}
+              className={cn(
+                "-ml-1 inline-flex size-9 shrink-0 items-center justify-center rounded-full transition-colors",
+                crosspostOn
+                  ? "text-[#1185fe] hover:bg-[#1185fe]/10"
+                  : "text-muted-foreground/50 hover:bg-muted hover:text-muted-foreground",
+              )}
+            >
+              <BlueskyIcon className="size-[18px]" />
+            </button>
+          ) : null}
           <span className="truncate text-xs text-muted-foreground/70">
             {posted
               ? t("composer.postedNote")
@@ -813,7 +1094,9 @@ export function FeedComposer({
                 ? t("actions.signInToInteract")
                 : acting.isGroup && acting.card.name
                   ? t("composer.postingAs", { name: acting.card.name })
-                  : ""}
+                  : crosspostOn
+                    ? tb("composerHint")
+                    : ""}
           </span>
         </div>
         <div className="flex items-center gap-2.5">
@@ -839,6 +1122,170 @@ export function FeedComposer({
         </div>
       </div>
       {error ? <p className="mt-1 pl-12 text-xs text-destructive">{error}</p> : null}
+      <BlueskyConsentModal
+        open={consentOpen}
+        needsProfile={hasProfile === null ? null : !hasProfile}
+        onOpenChange={setConsentOpen}
+        onConfirm={confirmBlueskyConsent}
+      />
+    </div>
+  );
+}
+
+/**
+ * Phone-only floating composer bar (hidden from sm up). A slim one-liner pinned
+ * to the bottom of the viewport; tapping it opens the full FeedComposer in a
+ * fullscreen modal (the shared modal architecture) so the feed timeline can
+ * start at the top of the screen instead of below the inline composer card.
+ */
+export function MobileComposerBar({
+  signedIn,
+  viewerDid,
+  onPost,
+}: {
+  signedIn: boolean;
+  viewerDid: string | null;
+  onPost: (text: string, opts?: { crosspost?: boolean; mentions?: MentionCandidate[] }) => Promise<void>;
+}) {
+  const t = useTranslations("common.feed");
+  const acting = useActingAccount(viewerDid);
+  const modal = useModal();
+  const modalId = `feed-composer-${useId()}`;
+  // Held here (not in the composer) so a half-written post survives the round
+  // trip out to the sighting uploader and back.
+  const [draft, setDraft] = useState("");
+  const [draftMentions, setDraftMentions] = useState<MentionCandidate[]>([]);
+
+  // The bar is fixed to the viewport bottom, so it would otherwise sit on top of
+  // the page footer at the end of the feed. Watch the footer and slide the bar
+  // (and its scrim) out of the way as it approaches, then bring it back on the
+  // way up. rootMargin gives a head start so the slide finishes before overlap.
+  const [footerNear, setFooterNear] = useState(false);
+  useEffect(() => {
+    const footer = document.querySelector("footer");
+    if (!footer) return;
+    const observer = new IntersectionObserver(
+      (entries) => setFooterNear(entries[0]?.isIntersecting ?? false),
+      { rootMargin: "0px 0px 96px 0px" },
+    );
+    observer.observe(footer);
+    return () => observer.disconnect();
+  }, []);
+
+  // A drawer on phones (no fullscreenOnMobile → bottom sheet); a small centered
+  // dialog on the narrow tablet band. replaceAll keeps exactly one modal on the
+  // shared stack so its mode never fights the fullscreen sighting uploader.
+  const openComposer = () => {
+    if (!signedIn) {
+      redirectToLogin();
+      return;
+    }
+    modal.pushModal({ id: modalId, dialogWidth: "max-w-lg" }, true);
+    void modal.show();
+  };
+
+  // The add-a-sighting flow is owned HERE (a stable spot in the feed tree), not
+  // by the composer inside the modal: it's a fullscreen modal on the same single
+  // global stack, so it can't be nested inside the composer modal — it would
+  // unmount its own portal. Tapping the photo button swaps this composer out for
+  // it (replaceAll); its back arrow (onBack) swaps back to the composer.
+  const addObservations = useAddObservations(viewerDid ?? "", { onBack: openComposer });
+
+  const closeComposer = () => {
+    void modal.hide().then(() => modal.clear());
+  };
+
+  // Close the modal once the post lands; the optimistic row shows in the feed
+  // behind it immediately.
+  const handlePost = async (text: string, opts?: { crosspost?: boolean; mentions?: MentionCandidate[] }) => {
+    await onPost(text, opts);
+    closeComposer();
+  };
+
+  return (
+    // Fixed (not sticky): the app shell is `h-screen` (100vh) with the feed
+    // scrolling inside <main>, so on mobile <main>'s bottom sits below the
+    // visible fold — a `sticky bottom-0` bar pins there and disappears. Fixed
+    // pins to the visual viewport bottom, so it stays visible. `sm:hidden`
+    // keeps it phone-only; the section's pb clears the last rows.
+    <div className="sm:hidden">
+      {/* A plain gradient scrim so the feed fades out under the bar. We do NOT
+          use ProgressiveBlur here: stacked backdrop-filter layers over the
+          scrolling image feed re-composite every frame and tank mobile perf.
+          A gradient is essentially free and still separates the bar. */}
+      <div
+        className={cn(
+          "pointer-events-none fixed inset-x-0 bottom-0 z-10 h-32 transition-transform duration-300",
+          footerNear && "translate-y-full",
+        )}
+        style={{
+          background:
+            "linear-gradient(to top, var(--background) 0%, var(--background) 32%, transparent 100%)",
+          opacity: 0.96,
+        }}
+      />
+      {/* A detached floating island — side margins + a gap above the bottom edge
+          and a shadow. Slides down + fades out as the footer arrives so it never
+          overlaps it. */}
+      <button
+        type="button"
+        onClick={openComposer}
+        className={cn(
+          // z-20 keeps the island above the scrolling feed but *below* the
+          // sticky header (z-30) so its user menu / sign-out dropdown, which is
+          // trapped in the header's stacking context, stays clickable on phones.
+          "fixed inset-x-4 bottom-[max(1rem,env(safe-area-inset-bottom))] z-20 flex items-center gap-3 rounded-full border-2 border-primary bg-background/90 py-2 pl-2 pr-4 text-left shadow-lg backdrop-blur transition-[transform,opacity] duration-300 active:bg-muted supports-[backdrop-filter]:bg-background/80",
+          footerNear && "pointer-events-none translate-y-[calc(100%+2rem)] opacity-0",
+        )}
+      >
+        <ResolvedAvatar
+          did={acting.actingDid}
+          imageUrl={acting.card.avatarUrl}
+          name={acting.card.name}
+          fallbackIcon={<UserIcon className="size-4" />}
+          className="size-8 shrink-0"
+          sizes="32px"
+        />
+        <span className="min-w-0 flex-1 truncate text-sm text-muted-foreground/80">
+          {signedIn ? t("composer.placeholder") : t("composer.signedOut")}
+        </span>
+        <SendHorizonalIcon className="size-4 shrink-0 text-primary" />
+      </button>
+      <ModalPortal id={modalId}>
+        {/* Not ModalContent on purpose: its built-in DialogClose can't reach the
+            Radix Dialog context through the portal (content keeps the caller's
+            tree) and it would throw. A plain wrapper also leaves the modal
+            dismissible by default, so the drawer keeps its swipe-to-close. We
+            render our own close control wired to closeComposer. */}
+        <div className="space-y-3">
+          <div className="flex items-center justify-between gap-3">
+            <ModalTitle>{t("composer.title")}</ModalTitle>
+            <button
+              type="button"
+              onClick={closeComposer}
+              aria-label={t("composer.close")}
+              className="-mr-1 inline-flex size-8 shrink-0 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+            >
+              <XIcon className="size-4" />
+            </button>
+          </div>
+          <FeedComposer
+            signedIn={signedIn}
+            viewerDid={viewerDid}
+            onPost={handlePost}
+            embedded
+            autoFocus
+            draftText={draft}
+            onDraftChange={setDraft}
+            draftMentions={draftMentions}
+            onDraftMentionsChange={setDraftMentions}
+            onAddPhoto={signedIn && viewerDid ? addObservations.open : undefined}
+          />
+        </div>
+      </ModalPortal>
+      {/* Rendered at this stable level so it survives the composer modal being
+          replaced when the sighting uploader opens. */}
+      {addObservations.modal}
     </div>
   );
 }
@@ -988,10 +1435,13 @@ export function FeedActionBar({
   subjectUri,
   signedIn,
   interactions,
+  extraActions = null,
 }: {
   subjectUri: string;
   signedIn: boolean;
   interactions: FeedInteractions;
+  /** Extra controls appended to the like/comment row (e.g. steward actions). */
+  extraActions?: ReactNode;
 }) {
   const t = useTranslations("common.feed");
   const engagement = interactions.getEngagement(subjectUri);
@@ -1020,6 +1470,7 @@ export function FeedActionBar({
             {engagement.commentCount > 0 ? engagement.commentCount : t("actions.comment")}
           </span>
         </button>
+        {extraActions}
       </div>
 
       {open ? <CommentPanel subjectUri={subjectUri} signedIn={signedIn} interactions={interactions} /> : null}
@@ -1041,6 +1492,7 @@ function CommentPanel({
   const comments = getComments(subjectUri);
   const viewer = useViewerCard(sessionDid);
   const [text, setText] = useState("");
+  const [mentions, setMentions] = useState<MentionCandidate[]>([]);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(comments === undefined);
@@ -1078,8 +1530,9 @@ function CommentPanel({
     setBusy(true);
     setError(null);
     try {
-      await addComment(subjectUri, text.trim());
+      await addComment(subjectUri, text.trim(), undefined, mentions);
       setText("");
+      setMentions([]);
     } catch {
       setError(t("actions.errorGeneric"));
     } finally {
@@ -1122,14 +1575,15 @@ function CommentPanel({
           className="size-7"
           sizes="28px"
         />
-        <textarea
+        <MentionTextarea
           value={text}
-          onChange={(e) => setText(e.target.value)}
+          onValueChange={setText}
+          onPickMention={(c) => setMentions((prev) => [...prev, c])}
           rows={1}
           maxLength={COMMENT_MAX + 40}
           placeholder={t("actions.commentPlaceholder")}
-          aria-label={t("actions.commentPlaceholder")}
-          className="min-h-9 flex-1 resize-none rounded-lg border border-border/60 bg-background px-2.5 py-1.5 text-sm text-foreground outline-none placeholder:text-muted-foreground/70 focus:border-primary/50"
+          ariaLabel={t("actions.commentPlaceholder")}
+          className="min-h-9 resize-none rounded-lg border border-border/60 bg-background px-2.5 py-1.5 text-sm text-foreground outline-none placeholder:text-muted-foreground/70 focus:border-primary/50"
         />
         <button
           type="button"
@@ -1176,30 +1630,42 @@ function LightboxCommentNode({
 
   return (
     <li className="flex gap-2">
-      <ResolvedAvatar
+      <AccountHoverCard
         did={c.did}
-        avatarRef={isYou ? null : c.authorAvatarRef}
-        imageUrl={isYou ? viewer.avatarUrl : null}
-        name={isYou ? viewer.name ?? name : name}
-        fallbackIcon={<UserIcon className="size-3.5" />}
-        className="mt-0.5 size-7"
-        sizes="28px"
-      />
+        name={c.authorName}
+        avatarRef={c.authorAvatarRef}
+        triggerClassName="mt-0.5 shrink-0 self-start"
+      >
+        <ResolvedAvatar
+          did={c.did}
+          avatarRef={isYou ? null : c.authorAvatarRef}
+          imageUrl={isYou ? viewer.avatarUrl : null}
+          name={isYou ? viewer.name ?? name : name}
+          fallbackIcon={<UserIcon className="size-3.5" />}
+          className="size-7"
+          sizes="28px"
+        />
+      </AccountHoverCard>
       <div className="min-w-0 flex-1">
         <div className="text-sm">
-          <span className="font-medium text-foreground">{name}</span>{" "}
+          <AccountHoverCard did={c.did} name={c.authorName} avatarRef={c.authorAvatarRef}>
+            <span className="font-medium text-foreground hover:underline">{name}</span>
+          </AccountHoverCard>{" "}
           <span className="text-xs text-muted-foreground/70">
             {c.createdAt ? formatRelative(c.createdAt) : t("actions.postedJustNow")}
           </span>
           {editing ? (
             <InlineEditor
               initial={c.text}
+              initialMentions={c.mentions}
               max={COMMENT_MAX}
-              onSave={(value) => interactions.editComment(subjectUri, c.uri, value)}
+              onSave={(value, mentions) => interactions.editComment(subjectUri, c.uri, value, mentions)}
               onCancel={() => setEditingUri(null)}
             />
           ) : (
-            <p className="whitespace-pre-wrap break-words text-foreground/90">{c.text}</p>
+            <p className="whitespace-pre-wrap break-words text-foreground/90">
+              <MentionText text={c.text} mentions={c.mentions} />
+            </p>
           )}
         </div>
         {!editing ? (
@@ -1224,7 +1690,7 @@ function LightboxCommentNode({
         {replying ? (
           <ReplyComposer
             viewerDid={interactions.viewerDid}
-            onSubmit={(text) => interactions.addComment(c.uri, text, subjectUri)}
+            onSubmit={(text, mentions) => interactions.addComment(c.uri, text, subjectUri, mentions)}
             onCancel={() => setReplying(false)}
           />
         ) : null}

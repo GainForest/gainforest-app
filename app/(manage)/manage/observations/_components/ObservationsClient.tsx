@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { Suspense, useCallback, useEffect, useMemo, useRef, useState, type ChangeEvent, type ComponentProps, type DragEvent, type ReactNode } from "react";
+import { Suspense, useCallback, useEffect, useMemo, useRef, useState, type ChangeEvent, type ComponentProps, type DragEvent, type KeyboardEvent, type ReactNode } from "react";
 import { parseAsString, parseAsStringEnum, useQueryState } from "nuqs";
 import {
   AlertTriangleIcon,
@@ -14,6 +14,7 @@ import {
   ImagePlusIcon,
   Layers2Icon,
   Loader2Icon,
+  LeafIcon,
   MapPinIcon,
   PencilIcon,
   RotateCcwIcon,
@@ -40,8 +41,8 @@ import QuickTooltip from "@/components/ui/quick-tooltip";
 import { manageApiHref, type ManageTarget } from "@/lib/links";
 import { cn } from "@/lib/utils";
 import { ManageConfirmModal } from "../../_components/ManageConfirmModal";
-import { canCreateRecord, canDeleteRecord, canUpdateRecord } from "../../_lib/cgs-permissions";
-import { deleteOccurrenceCascade } from "../../_lib/mutations";
+import { canCreateRecord, canDeleteRecord } from "../../_lib/cgs-permissions";
+import { createMultimediaFromUrl, createRecord, deleteOccurrenceCascade, getRecord, putRecord } from "../../_lib/mutations";
 import {
   configureObservationMutationRepo,
   createObservationOccurrence,
@@ -52,9 +53,8 @@ import {
 } from "./observation-mutations";
 import { LocationPickerModal, LocationPickerModalId } from "./LocationPickerModal";
 import { AddObservationsModal } from "./AddObservationsModal";
-import { FolderTile, FolderTileSkeleton } from "@/app/_components/FolderTile";
+
 import { GroupObservationsDatasetModal, type ObservationDatasetGroup } from "./GroupObservationsDatasetModal";
-import { AttachDatasetToProjectModal } from "./AttachDatasetToProjectModal";
 import { deleteObservationDataset } from "./observation-dataset-mutations";
 import { takeAddDataHandoff } from "../../_lib/upload/add-data-handoff";
 import {
@@ -64,12 +64,24 @@ import {
 } from "./default-location";
 import { clearDraft, loadDraft, saveDraft } from "./observation-draft-store";
 import { cleanFileName, compressImageIfNeeded, dateFromFile, imageMetadata } from "./observation-image";
+import {
+  INATURALIST_OBSERVATION_SOURCE,
+  inaturalistOccurrenceIdKey,
+  type INaturalistObservationSummary,
+  type INaturalistProjectSummary,
+  type INaturalistSyncStatus,
+} from "@/app/_lib/inaturalist-shared";
 
 type InitialPage = NonNullable<ComponentProps<typeof RecordExplorer>["initialPage"]>;
 type ObservationProjectGroup = { projectUri: string; title: string; count: number; uris: string[] };
+type ObservationProjectContext = { projectUri: string; title: string };
 
 type Mode = "list" | "add";
 type ItemStatus = "analyzing" | "ready" | "error" | "uploading" | "uploaded" | "uploadError";
+
+function keepTextEntryKeysLocal(event: KeyboardEvent<HTMLInputElement | HTMLTextAreaElement>) {
+  event.stopPropagation();
+}
 
 type ObservationAnalysis = {
   scientificName: string;
@@ -144,6 +156,9 @@ const UNIDENTIFIED_NAME = "Unidentified organism";
 // layer so a flaky client network connection also recovers on its own.
 const ANALYZE_CLIENT_ATTEMPTS = 3;
 const sleep = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve, ms));
+const OCCURRENCE_COLLECTION = "app.gainforest.dwc.occurrence";
+const IMAGE_DEF_TYPE = "app.gainforest.common.defs#image";
+
 const EMPTY_ANALYSIS: ObservationAnalysis = {
   scientificName: "",
   vernacularName: "",
@@ -167,8 +182,11 @@ function mergeAnalysisWithDefaults(analysis: ObservationAnalysis, defaults: Part
   return {
     ...analysis,
     eventDate: analysis.eventDate || defaults.eventDate || "",
-    decimalLatitude: analysis.decimalLatitude || defaults.decimalLatitude || "",
-    decimalLongitude: analysis.decimalLongitude || defaults.decimalLongitude || "",
+    // Location is observer-controlled: keep the EXIF GPS coordinates seeded at
+    // file-add time, or the user's chosen fallback when the photo has no GPS.
+    // Do not let AI analysis replace those coordinates with a guess.
+    decimalLatitude: defaults.decimalLatitude || "",
+    decimalLongitude: defaults.decimalLongitude || "",
   };
 }
 
@@ -270,6 +288,69 @@ function refToCid(ref: unknown): string | null {
     return typeof link === "string" ? link : null;
   }
   return null;
+}
+
+function omitEmptyRecord<T extends Record<string, unknown>>(record: T): T {
+  for (const key of Object.keys(record)) {
+    const value = record[key];
+    if (value === undefined || value === null || value === "") delete record[key];
+  }
+  return record;
+}
+
+type INaturalistBlobRef = { $type: "blob"; ref: unknown; mimeType: string; size: number };
+
+function blobRefFromMultimediaRecord(record: Record<string, unknown> | undefined): INaturalistBlobRef | null {
+  const file = record?.file;
+  if (!file || typeof file !== "object") return null;
+  const candidate = file as Record<string, unknown>;
+  if (candidate.ref === undefined || candidate.ref === null) return null;
+  return {
+    $type: "blob",
+    ref: candidate.ref,
+    mimeType: typeof candidate.mimeType === "string" ? candidate.mimeType : "application/octet-stream",
+    size: typeof candidate.size === "number" ? candidate.size : 0,
+  };
+}
+
+function buildINaturalistOccurrenceRecord(input: {
+  observation: INaturalistObservationSummary;
+  project: INaturalistProjectSummary;
+  projectRef: string;
+}): Record<string, unknown> {
+  const { observation, project } = input;
+  const sourceUrl = observation.url || `https://www.inaturalist.org/observations/${observation.id}`;
+  const remarks = [observation.description, `Synced from iNaturalist: ${sourceUrl}`]
+    .filter((value): value is string => typeof value === "string" && value.trim().length > 0)
+    .join("\n\n");
+
+  return omitEmptyRecord({
+    $type: OCCURRENCE_COLLECTION,
+    scientificName: observation.scientificName ?? observation.commonName ?? "Unidentified organism",
+    vernacularName: observation.commonName ?? undefined,
+    kingdom: observation.kingdom ?? undefined,
+    basisOfRecord: "HumanObservation",
+    occurrenceID: inaturalistOccurrenceIdKey(observation.id),
+    occurrenceStatus: "present",
+    geodeticDatum: "EPSG:4326",
+    eventDate: observation.observedOn ?? new Date().toISOString(),
+    recordedBy: observation.recordedBy ?? undefined,
+    decimalLatitude: observation.latitude === null ? undefined : String(observation.latitude),
+    decimalLongitude: observation.longitude === null ? undefined : String(observation.longitude),
+    locality: observation.placeGuess ?? undefined,
+    occurrenceRemarks: remarks || undefined,
+    projectRef: input.projectRef,
+    dynamicProperties: JSON.stringify({
+      source: INATURALIST_OBSERVATION_SOURCE,
+      inaturalistProjectId: project.id,
+      inaturalistProjectSlug: project.slug,
+      inaturalistObservationId: observation.id,
+      inaturalistUrl: sourceUrl,
+      qualityGrade: observation.qualityGrade,
+      syncedAt: new Date().toISOString(),
+    }),
+    createdAt: new Date().toISOString(),
+  });
 }
 
 /**
@@ -432,14 +513,14 @@ export function ObservationsClient({
   const createPermission = canCreateRecord(target);
   const [projectFilter, setProjectFilter] = useQueryState("project", parseAsString.withOptions(QUERY_STATE_OPTIONS));
   const [projectGroups, setProjectGroups] = useState<ObservationProjectGroup[]>([]);
+  const [projectContexts, setProjectContexts] = useState<ObservationProjectContext[]>([]);
   const [datasetGroups, setDatasetGroups] = useState<ObservationDatasetGroup[]>([]);
   // False until the first dataset fetch settles, so the folder strip can show a
   // loading skeleton instead of briefly flashing the "no datasets yet" hint.
-  const [datasetsLoaded, setDatasetsLoaded] = useState(false);
+  const [, setDatasetsLoaded] = useState(false);
   const [datasetFilter, setDatasetFilter] = useQueryState("dataset", parseAsString.withOptions(QUERY_STATE_OPTIONS));
   const deletePermission = canDeleteRecord(target, { ownRecord: target.kind === "personal" });
   const deleteDisabledReason = deletePermission.allowed ? null : deletePermission.reason;
-  const updatePermission = canUpdateRecord(target);
   const selectedIds = useMemo(() => new Set(selectedRecords.keys()), [selectedRecords]);
 
   useEffect(() => {
@@ -449,21 +530,50 @@ export function ObservationsClient({
 
   // Group the steward's observations by the project they were collected for so
   // the list can be filtered per project (read straight from projectRef).
-  // Re-fetched after attaching a dataset to a project so the pills stay fresh.
-  const loadProjectGroups = useCallback(async () => {
-    try {
-      const response = await fetch(manageApiHref("/api/manage/observations/projects", target), { cache: "no-store" });
-      const data = (await response.json()) as { groups?: ObservationProjectGroup[] };
-      if (!response.ok || !Array.isArray(data?.groups)) return;
-      setProjectGroups(data.groups);
-    } catch {
-      // Filtering is an enhancement; ignore load failures.
-    }
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const response = await fetch(manageApiHref("/api/manage/observations/projects", target), { cache: "no-store" });
+        const data = (await response.json()) as { groups?: ObservationProjectGroup[] };
+        if (cancelled || !response.ok || !Array.isArray(data?.groups)) return;
+        setProjectGroups(data.groups);
+      } catch {
+        // Filtering is an enhancement; ignore load failures.
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
   }, [target]);
 
+  // The project filter can point at a project that has zero observations yet
+  // (for example when arriving from a project card). Load project titles too so
+  // project-scoped tools still know which project is active.
   useEffect(() => {
-    void loadProjectGroups();
-  }, [loadProjectGroups]);
+    let cancelled = false;
+    (async () => {
+      try {
+        const response = await fetch(manageApiHref("/api/manage/projects", target), { cache: "no-store" });
+        const data = (await response.json()) as Array<Record<string, unknown>> | { error?: string };
+        if (cancelled || !response.ok || !Array.isArray(data)) return;
+        setProjectContexts(
+          data
+            .map((raw) => {
+              const projectUri = typeof raw.atUri === "string" ? raw.atUri : null;
+              const title = typeof raw.title === "string" && raw.title.trim() ? raw.title : null;
+              return projectUri && title ? { projectUri, title } : null;
+            })
+            .filter((project): project is ObservationProjectContext => Boolean(project)),
+        );
+      } catch {
+        // Project context is an enhancement; ignore load failures.
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [target]);
 
   // Group observations by the dataset they were filed into so the steward can
   // see datasets as folders and filter the list down to one. Re-fetched after a
@@ -486,14 +596,24 @@ export function ObservationsClient({
   }, [loadDatasetGroups]);
 
   const activeGroup = projectGroups.find((group) => group.projectUri === projectFilter) ?? null;
+  const projectOptions = useMemo(() => {
+    const byUri = new Map<string, ObservationProjectContext & { count?: number }>();
+    for (const project of projectContexts) byUri.set(project.projectUri, project);
+    for (const group of projectGroups) byUri.set(group.projectUri, { projectUri: group.projectUri, title: group.title, count: group.count });
+    return Array.from(byUri.values()).sort((a, b) => a.title.localeCompare(b.title));
+  }, [projectContexts, projectGroups]);
+  const activeProject = activeGroup
+    ? { projectUri: activeGroup.projectUri, title: activeGroup.title }
+    : projectOptions.find((project) => project.projectUri === projectFilter) ?? null;
   const activeDataset = datasetGroups.find((group) => group.datasetUri === datasetFilter) ?? null;
   // A dataset filter takes precedence over a project filter; the folder row and
   // the project pills clear each other on click so only one is ever active.
   const filterUris = useMemo(() => {
     if (activeDataset) return new Set(activeDataset.uris);
     if (activeGroup) return new Set(activeGroup.uris);
+    if (projectFilter && activeProject) return new Set<string>();
     return null;
-  }, [activeDataset, activeGroup]);
+  }, [activeDataset, activeGroup, activeProject, projectFilter]);
 
   const handleVisibleRecordsChange = useCallback((records: OccurrenceRecord[]) => {
     setVisibleRecords(records);
@@ -572,11 +692,12 @@ export function ObservationsClient({
       {
         id: "add-observations",
         dialogWidth: "max-w-2xl w-[calc(100%-2rem)]",
-        forceDialog: true,
+        // Full page on phones; centered max-w-2xl dialog on >=32rem.
+        fullscreenOnMobile: true,
         content: (
           <AddObservationsModal
             target={target}
-            projectRef={activeGroup?.projectUri ?? null}
+            projectRef={activeProject?.projectUri ?? null}
             onClose={close}
             onViewObservations={() => {
               close();
@@ -588,7 +709,7 @@ export function ObservationsClient({
       true,
     );
     void modal.show();
-  }, [activeGroup?.projectUri, createPermission.reason, modal, router, target]);
+  }, [activeProject?.projectUri, createPermission.reason, modal, router, target]);
 
   // Group the currently-selected observations into a dataset (new or existing),
   // then refresh folder counts and the listing.
@@ -605,8 +726,8 @@ export function ObservationsClient({
             target={target}
             observations={records}
             datasets={datasetGroups}
-            projectUri={activeGroup?.projectUri ?? null}
-            projectName={activeGroup?.title ?? null}
+            projectUri={activeProject?.projectUri ?? null}
+            projectName={activeProject?.title ?? null}
             onDone={({ datasetUri, datasetName, result }) => {
               const movedIds = new Set(result.attached.map((rkey) => `${target.did}-${rkey}`));
               setSelectedRecords(new Map());
@@ -626,7 +747,7 @@ export function ObservationsClient({
       true,
     );
     void modal.show();
-  }, [activeGroup, createPermission.reason, datasetGroups, loadDatasetGroups, modal, router, selectedRecords, target]);
+  }, [activeProject, createPermission.reason, datasetGroups, loadDatasetGroups, modal, router, selectedRecords, target]);
 
   // Delete a dataset WITHOUT deleting its observations — the records are
   // ungrouped (datasetRef cleared) and survive.
@@ -679,36 +800,6 @@ export function ObservationsClient({
     [datasetFilter, deleteDisabledReason, loadDatasetGroups, modal, router, setDatasetFilter, t, target],
   );
 
-  // Attach an existing dataset (folder) to a project: nests the dataset
-  // collection under the chosen project's items[] (and unnests it from any
-  // previous project), then refreshes the folders + project pills.
-  const openAttachDatasetToProject = useCallback(
-    (dataset: ObservationDatasetGroup) => {
-      if (!updatePermission.allowed) return;
-      modal.pushModal(
-        {
-          id: "attach-dataset-project",
-          dialogWidth: "max-w-lg w-[calc(100%-2rem)]",
-          forceDialog: true,
-          content: (
-            <AttachDatasetToProjectModal
-              target={target}
-              dataset={dataset}
-              onDone={() => {
-                void loadDatasetGroups();
-                void loadProjectGroups();
-                router.refresh();
-              }}
-            />
-          ),
-        },
-        true,
-      );
-      void modal.show();
-    },
-    [loadDatasetGroups, loadProjectGroups, modal, router, target, updatePermission.allowed],
-  );
-
   if (mode === "add") {
     return (
       <ObservationBulkAddPanel
@@ -730,109 +821,9 @@ export function ObservationsClient({
 
   return (
     <div className="bg-background pb-4">
-      <div className="mx-auto max-w-6xl px-6 pt-4">
-        <header>
-          <h1 className="font-instrument text-2xl font-medium italic tracking-[-0.03em] text-foreground sm:text-3xl">
-            {t("title")}
-          </h1>
-          <p className="mt-2 text-sm leading-6 text-muted-foreground">{t("description")}</p>
-        </header>
-      </div>
-
       {!isEmpty ? (
-        <div className="mx-auto mt-6 max-w-6xl px-6">
-          <div className="mb-3 flex items-center justify-between gap-3">
-            <h2 className="text-sm font-medium text-foreground">{t("datasetsHeading")}</h2>
-            {datasetFilter ? (
-              <Button variant="ghost" size="sm" onClick={() => void setDatasetFilter(null)}>
-                {t("datasetClearFilter")}
-              </Button>
-            ) : null}
-          </div>
-          {datasetGroups.length > 0 ? (
-            <div className="grid grid-cols-2 gap-x-3 gap-y-3 sm:grid-cols-3 lg:grid-cols-4">
-              {datasetGroups.map((dataset, index) => {
-                const active = datasetFilter === dataset.datasetUri;
-                return (
-                  <FolderTile
-                    key={dataset.datasetUri}
-                    title={dataset.name}
-                    count={dataset.count}
-                    index={index}
-                    active={active}
-                    ariaPressed={active}
-                    ariaLabel={t("datasetFolderAria", { name: dataset.name, count: dataset.count })}
-                    art={<DatasetFolderArt />}
-                    onClick={() => {
-                      void setDatasetFilter(active ? null : dataset.datasetUri);
-                      if (!active) void setProjectFilter(null);
-                    }}
-                    action={
-                      updatePermission.allowed || deletePermission.allowed ? (
-                        <div className="flex items-center gap-1.5">
-                          {updatePermission.allowed ? (
-                            <button
-                              type="button"
-                              onClick={() => openAttachDatasetToProject(dataset)}
-                              aria-label={t("datasetAttachAria", { name: dataset.name })}
-                              title={dataset.projectName ? t("datasetChangeProject") : t("datasetAttachToProject")}
-                              className="grid size-7 place-items-center rounded-full bg-background/90 text-muted-foreground shadow-sm ring-1 ring-border transition-colors hover:text-primary hover:ring-primary/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
-                            >
-                              <FolderKanbanIcon className="size-3.5" />
-                            </button>
-                          ) : null}
-                          {deletePermission.allowed ? (
-                            <button
-                              type="button"
-                              onClick={() => openDeleteDataset(dataset)}
-                              disabled={isDeletingSelected}
-                              aria-label={t("datasetDeleteAria", { name: dataset.name })}
-                              title={t("datasetDeleteConfirm")}
-                              className="grid size-7 place-items-center rounded-full bg-background/90 text-muted-foreground shadow-sm ring-1 ring-border transition-colors hover:text-destructive hover:ring-destructive/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-destructive/40"
-                            >
-                              <Trash2Icon className="size-3.5" />
-                            </button>
-                          ) : null}
-                        </div>
-                      ) : undefined
-                    }
-                  />
-                );
-              })}
-            </div>
-          ) : !datasetsLoaded ? (
-            <div className="grid grid-cols-2 gap-x-3 gap-y-3 sm:grid-cols-3 lg:grid-cols-4" aria-busy="true">
-              {Array.from({ length: 4 }).map((_, index) => (
-                <FolderTileSkeleton key={index} index={index} art={<DatasetFolderArtSkeleton />} />
-              ))}
-            </div>
-          ) : (
-            <p className="rounded-2xl border border-dashed border-border/70 bg-muted/40 px-4 py-3 text-sm text-muted-foreground">
-              {t("datasetsEmptyHint")}
-            </p>
-          )}
-        </div>
-      ) : null}
-
-      {!isEmpty && projectGroups.length > 0 ? (
         <div className="mx-auto mt-5 max-w-6xl px-6">
-          <ObservationProjectFilter
-            groups={projectGroups}
-            value={projectFilter ?? null}
-            onChange={(next) => {
-              void setProjectFilter(next);
-              if (next) void setDatasetFilter(null);
-            }}
-            allLabel={t("filterAllProjects")}
-            ariaLabel={t("filterByProject")}
-          />
-        </div>
-      ) : null}
-
-      {!isEmpty ? (
-        <div className="mx-auto mt-8 max-w-6xl px-6">
-          <h2 className="text-sm font-medium text-foreground">{t("allObservationsHeading")}</h2>
-          <div className="mt-3 flex flex-wrap items-center justify-between gap-3 rounded-2xl bg-muted px-4 py-3">
+          <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl bg-muted px-4 py-3">
             <p className="text-sm text-muted-foreground">
               {selectedRecords.size > 0 ? t("selectedForDelete", { count: selectedRecords.size }) : t("selectToDeleteHint")}
             </p>
@@ -883,10 +874,29 @@ export function ObservationsClient({
           filterUris={filterUris}
           emptyFilteredTitle={activeDataset ? t("datasetEmptyTitle") : t("filterEmptyTitle")}
           emptyFilteredBody={activeDataset ? t("datasetEmptyBody") : t("filterEmptyBody")}
-          leadingCard={<AddObservationTile onAdd={openAddObservations} disabledReason={createPermission.reason} />}
+          leadingCard={<AddObservationTile onAdd={openAddObservations} disabledReason={createPermission.reason} wide />}
+          compactLeadingCard={<AddObservationTile onAdd={openAddObservations} disabledReason={createPermission.reason} compact wide />}
           emptyState={<ObservationEmptyState onAdd={openAddObservations} disabledReason={createPermission.reason} />}
           hideToolbarWhenEmpty
           hideOccurrenceFilters
+          toolbarAfterSearchRow={
+            <ObservationFilterChipRow
+              datasets={datasetGroups}
+              projects={projectOptions}
+              datasetValue={datasetFilter ?? null}
+              projectValue={projectFilter ?? null}
+              onDatasetChange={(next) => {
+                void setDatasetFilter(next);
+                if (next) void setProjectFilter(null);
+              }}
+              onProjectChange={(next) => {
+                void setProjectFilter(next);
+                if (next) void setDatasetFilter(null);
+              }}
+            />
+          }
+          enableCompactObservationCards
+          defaultCardDensity="compact"
           onEmptyStateChange={setIsEmpty}
           showStatsOverview={false}
           hiddenRecordIds={deletedRecordIds}
@@ -902,31 +912,351 @@ export function ObservationsClient({
   );
 }
 
-function DatasetFolderArt() {
+type INaturalistPreviewResponse = {
+  project?: INaturalistProjectSummary;
+  observations?: INaturalistObservationSummary[];
+  truncated?: boolean;
+  error?: string;
+};
+
+type LocalSyncState = {
+  status: INaturalistSyncStatus;
+  message?: string | null;
+};
+
+function INaturalistProjectSyncPanel({
+  target,
+  projects,
+  selectedProject,
+  disabledReason,
+  onSynced,
+}: {
+  target: ManageTarget;
+  projects: ObservationProjectContext[];
+  selectedProject: ObservationProjectContext | null;
+  disabledReason?: string | null;
+  onSynced: () => void;
+}) {
+  const t = useTranslations("upload.observations.inaturalist");
+  const [inputUrl, setInputUrl] = useState("");
+  const [sourceProject, setSourceProject] = useState<INaturalistProjectSummary | null>(null);
+  const [observations, setObservations] = useState<INaturalistObservationSummary[]>([]);
+  const [localStatuses, setLocalStatuses] = useState<Map<number, LocalSyncState>>(() => new Map());
+  const [loading, setLoading] = useState(false);
+  const [syncing, setSyncing] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [truncated, setTruncated] = useState(false);
+  const [localProjectUri, setLocalProjectUri] = useState<string | null | undefined>(undefined);
+  const repoOptions = target.kind === "group" ? { repo: target.did } : undefined;
+  const selectedProjectUri = localProjectUri === undefined ? selectedProject?.projectUri ?? null : localProjectUri;
+  const project = projects.find((option) => option.projectUri === selectedProjectUri) ?? selectedProject ?? null;
+  const projectRequired = !project;
+
+  const mergedObservations = useMemo(
+    () => observations.map((observation) => ({ ...observation, ...(localStatuses.get(observation.id) ?? {}) })),
+    [observations, localStatuses],
+  );
+  const pendingCount = mergedObservations.filter((observation) => (observation.status ?? observation.syncStatus) === "pending").length;
+  const syncableCount = mergedObservations.filter((observation) => {
+    const status = observation.status ?? observation.syncStatus;
+    return status === "pending" || status === "syncedElsewhere";
+  }).length;
+  const syncedCount = mergedObservations.filter((observation) => (observation.status ?? observation.syncStatus) === "synced").length;
+  const errorCount = mergedObservations.filter((observation) => (observation.status ?? observation.syncStatus) === "error").length;
+
+  const setObservationStatus = useCallback((id: number, status: INaturalistSyncStatus, message?: string | null) => {
+    setLocalStatuses((current) => {
+      const next = new Map(current);
+      next.set(id, { status, message });
+      return next;
+    });
+  }, []);
+
+  const preview = useCallback(async () => {
+    if (!project) {
+      setError(t("projectRequired"));
+      return;
+    }
+    const trimmed = inputUrl.trim();
+    if (!trimmed) {
+      setError(t("urlRequired"));
+      return;
+    }
+    setLoading(true);
+    setError(null);
+    setLocalStatuses(new Map());
+    try {
+      const response = await fetch(manageApiHref("/api/manage/observations/inaturalist", target, {
+        url: trimmed,
+        projectRef: project.projectUri,
+      }), { cache: "no-store" });
+      const data = (await response.json().catch(() => null)) as INaturalistPreviewResponse | null;
+      if (!response.ok || !data?.project || !Array.isArray(data.observations)) {
+        throw new Error(data?.error || t("loadFailed"));
+      }
+      setSourceProject(data.project);
+      setObservations(data.observations);
+      setTruncated(Boolean(data.truncated));
+    } catch (caught) {
+      setSourceProject(null);
+      setObservations([]);
+      setTruncated(false);
+      setError(caught instanceof Error ? caught.message : t("loadFailed"));
+    } finally {
+      setLoading(false);
+    }
+  }, [inputUrl, project, t, target]);
+
+  async function syncObservation(observation: INaturalistObservationSummary, inatProject: INaturalistProjectSummary) {
+    if (!project) throw new Error(t("projectRequired"));
+    setObservationStatus(observation.id, "syncing");
+
+    if (observation.syncStatus === "syncedElsewhere" && observation.existingUri) {
+      const rkey = observation.existingUri.split("/").pop() ?? "";
+      if (!rkey) throw new Error(t("syncFailed"));
+      const existing = await getRecord(OCCURRENCE_COLLECTION, rkey, repoOptions);
+      await putRecord(OCCURRENCE_COLLECTION, rkey, {
+        ...existing.record,
+        projectRef: project.projectUri,
+      }, {
+        ...repoOptions,
+        swapRecord: existing.cid,
+      });
+      setObservationStatus(observation.id, "synced");
+      return;
+    }
+
+    const occurrenceRecord = buildINaturalistOccurrenceRecord({ observation, project: inatProject, projectRef: project.projectUri });
+    const occurrence = await createRecord(OCCURRENCE_COLLECTION, occurrenceRecord, undefined, repoOptions);
+    const rkey = occurrence.uri.split("/").pop() ?? "";
+    let primaryBlobRef: INaturalistBlobRef | null = null;
+    let photoError: string | null = null;
+
+    for (const photo of observation.photos) {
+      try {
+        const photoResult = await createMultimediaFromUrl(
+          {
+            url: photo.url,
+            occurrenceRef: occurrence.uri,
+            subjectPart: "wholeOrganism",
+            caption: photo.attribution ?? observation.commonName ?? observation.scientificName ?? undefined,
+          },
+          repoOptions,
+        );
+        primaryBlobRef ??= blobRefFromMultimediaRecord(photoResult.record);
+      } catch (caught) {
+        photoError = caught instanceof Error ? caught.message : t("photoFailed");
+      }
+    }
+
+    if (primaryBlobRef && rkey) {
+      await putRecord(OCCURRENCE_COLLECTION, rkey, {
+        ...occurrenceRecord,
+        imageEvidence: { $type: IMAGE_DEF_TYPE, file: primaryBlobRef },
+      }, {
+        ...repoOptions,
+        swapRecord: occurrence.cid,
+      });
+    }
+
+    setObservationStatus(observation.id, "synced", photoError ? t("syncedPhotoWarning") : null);
+  }
+
+  const syncPending = async () => {
+    if (!project) {
+      setError(t("projectRequired"));
+      return;
+    }
+    if (!sourceProject || syncing || disabledReason) return;
+    setSyncing(true);
+    setError(null);
+    try {
+      for (const observation of mergedObservations) {
+        const status = observation.status ?? observation.syncStatus;
+        if (status !== "pending" && status !== "syncedElsewhere") continue;
+        try {
+          await syncObservation(observation, sourceProject);
+        } catch (caught) {
+          setObservationStatus(observation.id, "error", caught instanceof Error ? caught.message : t("syncFailed"));
+        }
+      }
+      onSynced();
+    } finally {
+      setSyncing(false);
+    }
+  };
+
   return (
-    <div className="flex h-[52px] w-11 flex-col items-center justify-center gap-1.5 rounded-lg border border-border/70 bg-background/85 shadow-md backdrop-blur-sm">
-      <div className="flex size-7 items-center justify-center rounded-full bg-primary/15 ring-2 ring-primary/20">
-        <Layers2Icon className="size-4 text-primary/80" />
+    <section className="rounded-2xl bg-muted px-4 py-3">
+      <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+        <div className="flex min-w-0 items-center gap-3">
+          <INaturalistMark />
+          <div className="min-w-0">
+            <h2 className="text-sm font-semibold leading-5 text-foreground">{t("title")}</h2>
+            <p className="truncate text-sm leading-5 text-muted-foreground">
+              {project ? t("pasteLinkDescription", { project: project.title }) : t("chooseProjectShort")}
+            </p>
+          </div>
+        </div>
+
+        <div className="flex min-w-0 flex-col gap-2 sm:flex-row md:ml-auto md:justify-end">
+          {projectRequired ? (
+            <Select
+              value="none"
+              onValueChange={(value) => {
+                setError(null);
+                setSourceProject(null);
+                setObservations([]);
+                setLocalStatuses(new Map());
+                setLocalProjectUri(value === "none" ? null : value);
+              }}
+              disabled={loading || syncing}
+            >
+              <SelectTrigger className="h-9 bg-background sm:w-72" aria-label={t("projectLabel")}>
+                <SelectValue placeholder={t("projectLabel")} />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="none">{t("noProject")}</SelectItem>
+                {projects.map((option) => (
+                  <SelectItem key={option.projectUri} value={option.projectUri}>
+                    {option.title}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          ) : (
+            <>
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={() => {
+                  setError(null);
+                  setSourceProject(null);
+                  setObservations([]);
+                  setLocalStatuses(new Map());
+                  setLocalProjectUri(null);
+                }}
+                disabled={loading || syncing}
+                className="shrink-0 text-muted-foreground hover:text-foreground"
+              >
+                <ChevronLeftIcon className="size-4" />
+                {t("back")}
+              </Button>
+              <Input
+                value={inputUrl}
+                onChange={(event) => setInputUrl(event.target.value)}
+                placeholder={t("placeholder")}
+                aria-label={t("urlLabel")}
+                disabled={loading || syncing}
+                className="h-9 min-w-0 bg-background sm:w-[28rem]"
+              />
+              <Button type="button" variant="outline" size="sm" onClick={() => void preview()} disabled={loading || syncing}>
+                {loading ? <Loader2Icon className="size-4 animate-spin" /> : <RotateCcwIcon className="size-4" />}
+                {loading ? t("loading") : sourceProject ? t("refresh") : t("preview")}
+              </Button>
+              {sourceProject ? (
+                <Button type="button" size="sm" onClick={() => void syncPending()} disabled={syncableCount === 0 || syncing || Boolean(disabledReason)} title={disabledReason ?? undefined}>
+                  {syncing ? <Loader2Icon className="size-4 animate-spin" /> : <UploadCloudIcon className="size-4" />}
+                  {syncing ? t("syncing") : t("syncPending", { count: syncableCount })}
+                </Button>
+              ) : null}
+            </>
+          )}
+        </div>
       </div>
-      <div className="h-1 w-7 rounded-full bg-muted" />
-    </div>
+
+      {sourceProject ? (
+        <div className="mt-3 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+          <span>{t("found", { count: observations.length, project: sourceProject.title })}</span>
+          <span aria-hidden>·</span>
+          <span>{t("summary", { synced: syncedCount, pending: pendingCount, errors: errorCount })}</span>
+        </div>
+      ) : null}
+      {error ? (
+        <p className="mt-3 flex items-center gap-1.5 rounded-xl bg-destructive/10 px-3 py-2 text-sm text-destructive">
+          <AlertTriangleIcon className="size-4" />
+          {error}
+        </p>
+      ) : null}
+      {disabledReason ? <p className="mt-3 text-xs text-muted-foreground">{disabledReason}</p> : null}
+      {truncated ? <p className="mt-3 text-xs text-muted-foreground">{t("truncated")}</p> : null}
+
+      {sourceProject ? (
+        <div className="mt-3 grid max-h-72 gap-2 overflow-y-auto pr-1 sm:grid-cols-2 lg:grid-cols-3">
+          {mergedObservations.map((observation) => {
+            const status = observation.status ?? observation.syncStatus;
+            const message = observation.message;
+            const imageUrl = observation.photos[0]?.url ?? null;
+            return (
+              <article key={observation.id} className="flex min-w-0 items-center gap-2 rounded-xl bg-background/65 p-2">
+                <div className="relative size-12 shrink-0 overflow-hidden rounded-lg bg-muted">
+                  {imageUrl ? (
+                    // iNaturalist image hosts are external and varied; use a plain image
+                    // so the preview works without adding every host to next.config.
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={imageUrl} alt="" className="h-full w-full object-cover" loading="lazy" />
+                  ) : (
+                    <div className="grid h-full place-items-center text-muted-foreground">
+                      <BinocularsIcon className="size-5" />
+                    </div>
+                  )}
+                </div>
+                <div className="min-w-0 flex-1">
+                  <div className="flex min-w-0 items-center gap-2">
+                    <p className="truncate text-sm font-medium text-foreground">
+                      {observation.commonName ?? observation.scientificName ?? t("unnamedObservation")}
+                    </p>
+                    <span className={cn(
+                      "shrink-0 rounded-full px-1.5 py-0.5 text-[10px] font-semibold",
+                      status === "synced" ? "bg-primary/15 text-primary" :
+                        status === "syncing" ? "bg-muted text-muted-foreground" :
+                        status === "error" ? "bg-destructive/10 text-destructive" :
+                        status === "syncedElsewhere" ? "bg-warn/30 text-foreground" :
+                        "bg-muted text-muted-foreground",
+                    )}>
+                      {status === "syncing" ? t("status.syncing") :
+                        status === "synced" ? t("status.synced") :
+                        status === "syncedElsewhere" ? t("status.syncedElsewhere") :
+                        status === "error" ? t("status.error") :
+                        t("status.pending")}
+                    </span>
+                  </div>
+                  <p className="truncate text-xs text-muted-foreground">
+                    {[observation.observedOn, observation.recordedBy].filter(Boolean).join(" · ") || observation.scientificName || t("unnamedObservation")}
+                  </p>
+                  {message ? <p className="truncate text-xs text-muted-foreground">{message}</p> : null}
+                </div>
+              </article>
+            );
+          })}
+        </div>
+      ) : null}
+    </section>
   );
 }
 
-// The dataset folder's peeking art, muted for the loading skeleton: same card
-// silhouette, but the layered badge and meta line are flat neutral fills.
-function DatasetFolderArtSkeleton() {
+function INaturalistMark() {
   return (
-    <div className="flex h-[52px] w-11 flex-col items-center justify-center gap-1.5 rounded-lg border border-border/70 bg-background/85 shadow-md backdrop-blur-sm">
-      <div className="size-7 rounded-full bg-muted" />
-      <div className="h-1 w-7 rounded-full bg-muted" />
-    </div>
+    <span aria-hidden className="grid size-10 shrink-0 place-items-center overflow-hidden rounded-xl bg-background ring-1 ring-border/60">
+      {/* Official iNaturalist favicon, stored locally so the sync panel does not depend on their asset CDN. */}
+      <img src="/assets/logos/inaturalist.png" alt="" className="size-8" />
+    </span>
   );
 }
 
-function AddObservationTile({ onAdd, disabledReason }: { onAdd: () => void; disabledReason?: string | null }) {
+function AddObservationTile({ onAdd, disabledReason, compact = false, wide = false }: { onAdd: () => void; disabledReason?: string | null; compact?: boolean; wide?: boolean }) {
   const t = useTranslations("upload.observations");
-  const content = (
+  const content = compact ? (
+    <>
+      <span className="grid size-8 place-items-center rounded-xl bg-primary/10 text-primary ring-1 ring-primary/15 transition-transform duration-300 group-hover/tile:scale-105">
+        <BinocularsIcon className="size-4" />
+      </span>
+      <span className="mt-2 block font-instrument text-[15px] font-medium italic leading-tight tracking-[-0.02em] text-foreground">
+        {t("addTileTitle")}
+      </span>
+    </>
+  ) : (
     <>
       <span className="grid size-12 place-items-center rounded-2xl bg-primary/10 text-primary ring-1 ring-primary/15 transition-transform duration-300 group-hover/tile:scale-105">
         <BinocularsIcon className="size-6" />
@@ -940,7 +1270,11 @@ function AddObservationTile({ onAdd, disabledReason }: { onAdd: () => void; disa
     </>
   );
 
-  const className = "group/tile flex aspect-square w-full flex-col items-center justify-center rounded-3xl border border-dashed border-primary/25 bg-gradient-to-b from-primary/[0.06] to-background p-4 text-center transition-colors hover:border-primary/45 hover:from-primary/[0.1]";
+  const className = cn(
+    "group/tile flex min-h-0 w-full flex-col items-center justify-center overflow-hidden rounded-3xl border border-dashed border-primary/25 bg-gradient-to-b from-primary/[0.06] to-background text-center transition-colors hover:border-primary/45 hover:from-primary/[0.1]",
+    wide ? "aspect-[2/1]" : "aspect-square",
+    compact ? "p-2" : "p-4",
+  );
   return (
     <button
       type="button"
@@ -968,32 +1302,59 @@ function ObservationEmptyState({ onAdd, disabledReason }: { onAdd: () => void; d
   );
 }
 
-function ObservationProjectFilter({
-  groups,
-  value,
-  onChange,
-  allLabel,
-  ariaLabel,
+function ObservationFilterChipRow({
+  datasets,
+  projects,
+  datasetValue,
+  projectValue,
+  onDatasetChange,
+  onProjectChange,
 }: {
-  groups: ObservationProjectGroup[];
-  value: string | null;
-  onChange: (next: string | null) => void;
-  allLabel: string;
-  ariaLabel: string;
+  datasets: ObservationDatasetGroup[];
+  projects: Array<ObservationProjectContext & { count?: number }>;
+  datasetValue: string | null;
+  projectValue: string | null;
+  onDatasetChange: (next: string | null) => void;
+  onProjectChange: (next: string | null) => void;
 }) {
+  const t = useTranslations("upload.observations");
+  if (datasets.length === 0 && projects.length === 0) return null;
+
   return (
-    <div role="group" aria-label={ariaLabel} className="scrollbar-hidden flex items-center gap-1.5 overflow-x-auto pb-1">
-      <ObservationFilterPill selected={!value} onClick={() => onChange(null)}>
-        {allLabel}
+    <div className="scrollbar-hidden flex items-center gap-1.5 overflow-x-auto pb-1" aria-label={t("filterChipsAria")}>
+      <ObservationFilterPill selected={!datasetValue && !projectValue} onClick={() => {
+        onDatasetChange(null);
+        onProjectChange(null);
+      }}>
+        {t("filterAllObservations")}
       </ObservationFilterPill>
-      {groups.map((group) => (
-        <ObservationFilterPill key={group.projectUri} selected={value === group.projectUri} onClick={() => onChange(group.projectUri)}>
-          <span className="max-w-[12rem] truncate">{group.title}</span>
-          <span className={cn("ml-1 rounded-full px-1.5 text-[11px] tabular-nums", value === group.projectUri ? "bg-primary-foreground/20" : "bg-foreground/10")}>
-            {group.count}
-          </span>
-        </ObservationFilterPill>
-      ))}
+      {datasets.map((dataset) => {
+        const selected = datasetValue === dataset.datasetUri;
+        return (
+          <ObservationFilterPill key={dataset.datasetUri} selected={selected} onClick={() => onDatasetChange(selected ? null : dataset.datasetUri)}>
+            <Layers2Icon className="size-3.5" aria-hidden />
+            <span className="max-w-[12rem] truncate">{dataset.name}</span>
+            <span className={cn("ml-0.5 rounded-full px-1.5 text-[11px] tabular-nums", selected ? "bg-primary-foreground/20" : "bg-foreground/10")}>
+              {dataset.count}
+            </span>
+
+          </ObservationFilterPill>
+        );
+      })}
+      {projects.map((project) => {
+        const selected = projectValue === project.projectUri;
+        return (
+          <ObservationFilterPill key={project.projectUri} selected={selected} onClick={() => onProjectChange(selected ? null : project.projectUri)}>
+            <LeafIcon className="size-3.5" aria-hidden />
+            <span className="max-w-[12rem] truncate">{project.title}</span>
+            {typeof project.count === "number" ? (
+              <span className={cn("ml-0.5 rounded-full px-1.5 text-[11px] tabular-nums", selected ? "bg-primary-foreground/20" : "bg-foreground/10")}>
+                {project.count}
+              </span>
+            ) : null}
+          </ObservationFilterPill>
+        );
+      })}
     </div>
   );
 }
@@ -1489,13 +1850,9 @@ function ObservationBulkAddPanel({
       return;
     }
     // Location is optional. Each photo prefers its own EXIF GPS; otherwise it
-    // inherits a chosen location, then the owner's default site centre. Photos
-    // with none simply upload without coordinates and can be placed later.
-    const location = isValidLocation(chosenLocationRef.current)
-      ? chosenLocationRef.current
-      : isValidLocation(defaultCenter)
-        ? defaultCenter
-        : null;
+    // inherits the location explicitly chosen by the user. Photos with neither
+    // simply upload without coordinates and can be placed later.
+    const location = isValidLocation(chosenLocationRef.current) ? chosenLocationRef.current : null;
     const imageFiles = Array.from(fileList ?? []).filter((file) => file.type.startsWith("image/"));
     if (imageFiles.length === 0) return;
 
@@ -2786,7 +3143,7 @@ function Field({ label, value, onChange, type = "text", disabled, required }: { 
         {label}
         {required ? <span className="text-destructive"> *</span> : null}
       </span>
-      <Input type={type} value={value} disabled={disabled} onChange={(event) => onChange(event.target.value)} />
+      <Input type={type} value={value} disabled={disabled} onChange={(event) => onChange(event.target.value)} onKeyDown={keepTextEntryKeysLocal} />
     </label>
   );
 }
@@ -2795,7 +3152,7 @@ function TextareaField({ label, value, onChange, disabled }: { label: string; va
   return (
     <label className="block space-y-1.5 text-sm">
       <span className="text-xs font-medium text-muted-foreground">{label}</span>
-      <Textarea value={value} disabled={disabled} rows={3} onChange={(event) => onChange(event.target.value)} />
+      <Textarea value={value} disabled={disabled} rows={3} onChange={(event) => onChange(event.target.value)} onKeyDown={keepTextEntryKeysLocal} />
     </label>
   );
 }

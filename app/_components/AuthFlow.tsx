@@ -43,6 +43,7 @@ import {
   accountSettingsPath,
 } from "@/app/account/_lib/account-route";
 import { GAINFOREST_MODERATION_REPO_DID } from "@/app/_lib/indexer";
+import { AdminOnlyIndicator } from "./AdminOnlyIndicator";
 import {
   findSwitcherGroupByIdentifier,
   switcherGroupIdentifier,
@@ -1064,7 +1065,8 @@ function AuthenticatedMenu({
                   className="flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-sm text-foreground transition-colors hover:bg-muted/60"
                 >
                   <WrenchIcon className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
-                  {sidebarT("profileRow.admin")}
+                  <span className="flex-1">{sidebarT("profileRow.admin")}</span>
+                  <AdminOnlyIndicator />
                 </Link>
               ) : null}
 

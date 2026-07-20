@@ -1,12 +1,13 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import type { AuthSession } from "../_lib/auth";
 import { BioblitzPromoBanner } from "./BioblitzPromoBanner";
 import { FloatingTainaGuide } from "./FloatingTainaGuide";
 import { ChromeErrorBoundary } from "./ChromeErrorBoundary";
 import { HeaderSlotsProvider } from "./HeaderSlots";
 import { MobileNavDrawer } from "./shell/MobileNavDrawer";
+import { MobileNavProvider } from "./shell/mobile-nav-context";
 import { FreshAccountOnboardingPrompt } from "./shell/OnboardingPrompt";
 import { ShellHeader } from "./shell/ShellHeader";
 import { SidebarCollapseToggle, UnifiedSidebar } from "./shell/UnifiedSidebar";
@@ -34,14 +35,23 @@ export function AppShell({
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const session = useShellSession(authSession);
+  const isGlobe = pathname.startsWith("/globe");
+  // Published to full-bleed routes (the Globe) that hide the ShellHeader but
+  // still need to open the nav drawer from their own header.
+  const mobileNav = useMemo(() => ({ open: () => setMobileNavOpen(true) }), []);
 
   useEffect(() => {
+    if (isGlobe) {
+      setSidebarCollapsed(true);
+      return;
+    }
+
     try {
       setSidebarCollapsed(window.localStorage.getItem(SIDEBAR_COLLAPSED_STORAGE_KEY) === "1");
     } catch {
       // Ignore storage access errors (private windows).
     }
-  }, []);
+  }, [isGlobe]);
 
   const toggleSidebarCollapsed = () => {
     setSidebarCollapsed((value) => {
@@ -57,8 +67,9 @@ export function AppShell({
 
   return (
     <HeaderSlotsProvider>
+      <MobileNavProvider value={mobileNav}>
       <div className="flex h-screen flex-col overflow-hidden">
-        {pathname !== "/bioblitz" ? (
+        {pathname !== "/bioblitz" && !isGlobe ? (
           <ChromeErrorBoundary name="bioblitz-banner">
             <BioblitzPromoBanner />
           </ChromeErrorBoundary>
@@ -76,12 +87,14 @@ export function AppShell({
             </ChromeErrorBoundary>
           </MobileNavDrawer>
           <main className="relative flex min-h-0 flex-1 flex-col overflow-y-auto">
-            <ShellHeader
-              authSession={session.authSession}
-              profileName={session.profileName}
-              manageAccountKind={session.manageAccountKind}
-              onOpenMobileNav={() => setMobileNavOpen(true)}
-            />
+            {!isGlobe ? (
+              <ShellHeader
+                authSession={session.authSession}
+                profileName={session.profileName}
+                manageAccountKind={session.manageAccountKind}
+                onOpenMobileNav={() => setMobileNavOpen(true)}
+              />
+            ) : null}
             <ChromeErrorBoundary name="onboarding-prompt">
               <FreshAccountOnboardingPrompt
                 authSession={session.authSession}
@@ -96,6 +109,7 @@ export function AppShell({
           <FloatingTainaGuide />
         </ChromeErrorBoundary>
       </div>
+      </MobileNavProvider>
     </HeaderSlotsProvider>
   );
 }

@@ -1,5 +1,6 @@
 import { verifyMessage, verifyTypedData } from "viem";
 import { INDEXER_URL } from "@/app/_lib/urls";
+import { fetchVerifiedVault } from "@/lib/splits-vault/server";
 
 const LINK_EVM_QUERY = `
   query LinkEvmByDid($did: String!, $first: Int) {
@@ -187,6 +188,13 @@ async function isValidLink(node: LinkNode): Promise<boolean> {
 }
 
 export async function fetchVerifiedRecipientAddress(did: string): Promise<string | null> {
+  // Preferred path: the organization's Splits smart-vault. The binding is
+  // verified by recomputing the CREATE2 prediction from the record's founding
+  // signer set — no signature required.
+  const vault = await fetchVerifiedVault(did).catch(() => null);
+  if (vault) return vault.address;
+
+  // Legacy path: app.gainforest.link.evm records with EIP-712 proofs.
   const data = await indexerQuery<{
     appGainforestLinkEvm?: { edges?: Array<{ node?: LinkNode | null } | null> | null } | null;
   }>(LINK_EVM_QUERY, { did, first: 20 });

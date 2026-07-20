@@ -1,12 +1,20 @@
 import type { Metadata } from "next";
+import { getTranslations } from "next-intl/server";
+import { localizedAlternates, socialPreviewMetadata } from "@/app/_lib/seo-metadata";
 import { DeviceMonitor } from "../_components/DeviceMonitor";
 
-export const metadata: Metadata = {
-  title: "Tainá devices",
-  description:
-    "Field updates from GainForest devices running Tainá, including whether each device is active and ready.",
-  alternates: { canonical: "/devices" },
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("common.devices.metadata");
+  const title = t("title");
+  const description = t("description");
+
+  return {
+    title,
+    description,
+    alternates: await localizedAlternates("/devices"),
+    ...socialPreviewMetadata("/devices", title, description),
+  };
+}
 
 export default function DevicesPage() {
   return <DeviceMonitor />;

@@ -10,7 +10,10 @@
       "menu": "Menu",
       "navigation": "Navigation",
       "close": "Close",
-      "theme": "Theme"
+      "theme": "Theme",
+      "projects": "Projects",
+      "observations": "Observations",
+      "bioblitz": "BioBlitz"
     },
     "hero": {
       "imageAlt": "Misty rainforest valley",
@@ -21,12 +24,12 @@
     },
     "paths": {
       "title": "Choose Your Path",
-      "description": "Whether you're here to fund impact or showcase your work, there's a place for you.",
+      "description": "Whether you're here to explore field evidence or showcase your work, there's a place for you.",
       "cards": {
         "funders": {
-          "label": "For Funders",
-          "title": "I want to support",
-          "emphasis": "a project",
+          "label": "For Explorers",
+          "title": "I want to explore",
+          "emphasis": "field evidence",
           "description": "Browse verified records of real environmental work — the exact moments of restoration, as they happened on the ground.",
           "cta": "Explore records",
           "alt": "River winding through rainforest"
@@ -35,7 +38,7 @@
           "label": "For Organizations",
           "title": "I am a nature",
           "emphasis": "steward",
-          "description": "Showcase your regenerative work and connect with funders who care.",
+          "description": "Showcase your regenerative work and the evidence behind it.",
           "cta": "Manage my Organization",
           "alt": "Waterfall in a tropical forest"
         }
@@ -44,10 +47,10 @@
     "explainer": {
       "eyebrow": "Watch the explainer",
       "titlePrefix": "A new way to",
-      "titleEmphasis": "fund nature",
-      "description": "In two minutes, see how Bumicerts turn real fieldwork into verifiable records — and send funding straight to the local stewards doing the work.",
+      "titleEmphasis": "document nature",
+      "description": "In two minutes, see how Bumicerts turn real fieldwork into verifiable records for local nature stewards.",
       "play": "Play video",
-      "videoTitle": "Bumicerts: a new and equitable nature finance mechanism for local nature stewards"
+      "videoTitle": "Bumicerts: verifiable nature records for local nature stewards"
     },
     "certificate": {
       "eyebrow": "The Certificate",
@@ -66,8 +69,8 @@
         },
         "communities": {
           "id": "3",
-          "question": "A direct line to communities",
-          "answer": "When you fund a Cert, your money reaches the exact people doing the restoration. No intermediaries skimming fees. No vague overhead."
+          "question": "A shared record with communities",
+          "answer": "Each Cert connects field evidence, project context, and the people or organizations doing the work, so the record is easy to review and share."
         },
         "story": {
           "id": "4",
@@ -83,7 +86,7 @@
       }
     },
     "footer": {
-      "tagline": "Connecting communities with funders.",
+      "tagline": "Connecting communities through trusted field evidence.",
       "infrastructure": "Open infrastructure. Built with GainForest.",
       "documentation": "Documentation",
       "copyright": "Open source, community-powered."
@@ -128,7 +131,7 @@
           "blurb": "Communities can use their verified evidence when applying for community-backed funding rounds."
         },
         "gainforest": {
-          "blurb": "GainForest helps nature stewards publish verified work, sites, trees, observations, and project stories."
+          "blurb": "GainForest helps communities and organizations publish field observations, biodiversity records, places, and project stories."
         },
         "hypercerts": {
           "blurb": "Open impact claims can connect with broader Hypercerts tooling and public-good funding ecosystems."

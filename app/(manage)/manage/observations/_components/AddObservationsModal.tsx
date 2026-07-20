@@ -2,10 +2,11 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { Fragment, useCallback, useEffect, useId, useRef, useState, type ChangeEvent, type DragEvent } from "react";
+import { Fragment, useCallback, useEffect, useId, useRef, useState, type ChangeEvent, type DragEvent, type KeyboardEvent } from "react";
 import { useTranslations } from "next-intl";
 import {
   ArchiveIcon,
+  ArrowLeftIcon,
   CameraIcon,
   CheckCircle2Icon,
   ChevronDownIcon,
@@ -51,13 +52,12 @@ import { ModalContent, ModalHeader, ModalTitle, ModalDescription } from "@/compo
 import { useModal } from "@/components/ui/modal/context";
 import { cn } from "@/lib/utils";
 import { manageApiHref, type ManageTarget } from "@/lib/links";
-import { PublishAsPicker } from "@/app/_components/PublishAsPicker";
 import { canCreateRecord } from "../../_lib/cgs-permissions";
 import {
   cleanFileName,
-  compressImageIfNeeded,
   dateFromFile,
   imageMetadata,
+  prepareObservationImage,
 } from "./observation-image";
 import {
   configureObservationMutationRepo,
@@ -80,7 +80,16 @@ import {
 } from "./fuzzy-location";
 
 // Keep one quick-add session light; the rich bulk panel handles big imports.
-const MAX_PHOTOS = 50;
+const MAX_PHOTOS = 100;
+// Client-side throttles so a 100-photo drop stays responsive: only a few
+// photos decode/compress at a time (doing them all at once froze the page),
+// identify requests go out in small waves instead of a 100-request burst, and
+// a handful of observations upload in parallel on submit.
+const PREPARE_CONCURRENCY = 3;
+const ANALYZE_CONCURRENCY = 4;
+const UPLOAD_CONCURRENCY = 3;
+// Stored as dwc.occurrence.fieldNotes on every observation in this upload.
+const BATCH_STORY_MAX = 10_000;
 const ANALYZE_ATTEMPTS = 2;
 // Safety net so a stalled connection can't leave a card spinning on
 // "Identifying…" forever. Sits above the analyze route's own worst-case runtime
@@ -113,6 +122,10 @@ type QuickItem = {
   // merges them.
   groupId: string;
   file: File;
+  /** Small JPEG stand-in used for the preview and AI identification, so big
+   *  batches never decode or upload full-resolution photos before submit.
+   *  Falls back to `file` when the browser can't produce a thumbnail. */
+  analysisFile: File;
   previewUrl: string;
   scientificName: string;
   vernacularName: string;
@@ -141,6 +154,30 @@ type AnalyzeResponse = {
 };
 
 const sleep = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve, ms));
+
+// Minimal promise-concurrency gate: at most `limit` tasks run at once, the
+// rest wait their turn in FIFO order.
+function createLimiter(limit: number) {
+  let active = 0;
+  const waiting: Array<() => void> = [];
+  return async function run<T>(task: () => Promise<T>): Promise<T> {
+    if (active >= limit) await new Promise<void>((resolve) => waiting.push(resolve));
+    active += 1;
+    try {
+      return await task();
+    } finally {
+      active -= 1;
+      waiting.shift()?.();
+    }
+  };
+}
+
+const prepareLimiter = createLimiter(PREPARE_CONCURRENCY);
+const analyzeLimiter = createLimiter(ANALYZE_CONCURRENCY);
+
+function keepTextEntryKeysLocal(event: KeyboardEvent<HTMLInputElement | HTMLTextAreaElement>) {
+  event.stopPropagation();
+}
 
 // Local "yyyy-MM-dd" for today — caps the date picker so observers can't select a
 // future sighting date (which the occurrence proxy rejects anyway).
@@ -241,27 +278,20 @@ function quickGroupStatus(items: QuickItem[]): ItemStatus {
 
 export function AddObservationsModal({
   target,
-  sessionDid,
-  onChangeTarget,
   projectRef,
   onViewObservations,
   onClose,
+  onBack,
 }: {
   target: ManageTarget;
-  /**
-   * Signed-in user's DID. Together with `onChangeTarget` it turns the
-   * "Publishing as" chip into an account switcher (global entry points);
-   * without them the chip is read-only (account-scoped manage pages, where
-   * the destination is fixed by the route).
-   */
-  sessionDid?: string | null;
-  /** Called when the user picks a different account to publish to. */
-  onChangeTarget?: (target: ManageTarget) => void;
   /** When set, each new observation is attached to this project (at-uri). */
   projectRef?: string | null;
   /** Navigate to the observations list (called after a successful add). */
   onViewObservations: () => void;
   onClose: () => void;
+  /** When set, a back arrow returns to whatever opened this flow (e.g. the feed
+   *  composer) instead of closing outright. */
+  onBack?: () => void;
 }) {
   const t = useTranslations("upload.observations.quickAdd");
   const modal = useModal();
@@ -269,6 +299,7 @@ export function AddObservationsModal({
   // reachable from the "More ways" menu.
   const [mode, setMode] = useState<"photos" | "csv">("photos");
   const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const batchStoryId = useId();
   // Separate input with `capture` so phones can jump straight into the camera
   // (surfaced by a touch-only "Take a photo" button).
   const cameraInputRef = useRef<HTMLInputElement | null>(null);
@@ -280,9 +311,17 @@ export function AddObservationsModal({
 
   const [items, setItems] = useState<QuickItem[]>([]);
   const [isDragging, setIsDragging] = useState(false);
-  const [isPreparing, setIsPreparing] = useState(false);
+  // Photo-preparation progress (decode + compress). Running counters live in a
+  // ref so overlapping addFiles calls share one total; null when idle.
+  const [prepareProgress, setPrepareProgress] = useState<{ done: number; total: number } | null>(null);
+  const prepareCountsRef = useRef({ done: 0, total: 0 });
+  const isPreparing = prepareProgress !== null;
+  // Photos whose pending identification was cancelled (skipped or removed).
+  // Queued identify calls for these are dropped and late results ignored.
+  const analysisCancelledRef = useRef(new Set<string>());
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [batchStory, setBatchStory] = useState("");
   const [addedCount, setAddedCount] = useState<number | null>(null);
   // Tracks how many observations have finished uploading during a submit run, so
   // the footer can show a progress bar instead of just a spinning button.
@@ -328,10 +367,6 @@ export function AddObservationsModal({
   useEffect(() => {
     if (projectRef) return;
     let cancelled = false;
-    // A project picked under the previous account doesn't exist in the newly
-    // selected account's repo — drop the selection alongside the reload.
-    setSelectedProjectUri("");
-    setProjects([]);
     (async () => {
       try {
         const response = await fetch(manageApiHref("/api/manage/projects", target), { cache: "no-store" });
@@ -434,7 +469,11 @@ export function AddObservationsModal({
   // the observer hasn't set, so it never clobbers manual edits.
   const analyzeItem = useCallback(
     async (id: string, file: File) => {
-      const a = await fetchAnalysis(file);
+      const cancelled = analysisCancelledRef.current;
+      // Identify in small waves — a big drop must not fire one request per
+      // photo at once. Cancelled items skip the network call entirely.
+      const a = await analyzeLimiter(async () => (cancelled.has(id) ? null : fetchAnalysis(file)));
+      if (cancelled.has(id)) return;
       if (!a) {
         // Identification is best-effort: leave the fields for the user.
         setItems((current) =>
@@ -445,10 +484,6 @@ export function AddObservationsModal({
       setItems((current) =>
         current.map((item) => {
           if (item.id !== id) return item;
-          const lat = Number.parseFloat(a.decimalLatitude ?? "");
-          const lng = Number.parseFloat(a.decimalLongitude ?? "");
-          const suggestedLocation =
-            !item.location && Number.isFinite(lat) && Number.isFinite(lng) ? { lat, lng } : item.location;
           return {
             ...item,
             status: "ready",
@@ -456,7 +491,9 @@ export function AddObservationsModal({
             vernacularName: item.vernacularName || a.vernacularName?.trim() || "",
             kingdom: a.kingdom?.trim() || item.kingdom,
             eventDate: item.eventDate || a.eventDate?.trim() || "",
-            location: suggestedLocation,
+            // Location comes from photo GPS metadata first, then the user's
+            // device/location choice. AI analysis must not replace it.
+            location: item.location,
             notes: item.notes || a.occurrenceRemarks?.trim() || "",
           };
         }),
@@ -474,10 +511,11 @@ export function AddObservationsModal({
       const sample = groupItems[0];
       if (!sample || groupItems.some((item) => item.status === "uploading" || item.status === "uploaded")) return;
       const ids = new Set(groupItems.map((item) => item.id));
+      for (const id of ids) analysisCancelledRef.current.delete(id);
       setItems((current) =>
         current.map((item) => (ids.has(item.id) ? { ...item, status: "identifying", error: null } : item)),
       );
-      const a = await fetchAnalysis(sample.file);
+      const a = await analyzeLimiter(() => fetchAnalysis(sample.analysisFile));
       setItems((current) =>
         current.map((item) => {
           if (!ids.has(item.id)) return item;
@@ -496,6 +534,18 @@ export function AddObservationsModal({
     [fetchAnalysis],
   );
 
+  // Stop waiting for AI suggestions mid-batch: photos still identifying flip
+  // straight to "ready" (fields left for the observer) and their queued
+  // identify calls are dropped, so a slow or stuck AI never blocks the upload.
+  const skipIdentification = useCallback(() => {
+    for (const item of itemsRef.current) {
+      if (item.status === "identifying") analysisCancelledRef.current.add(item.id);
+    }
+    setItems((current) =>
+      current.map((item) => (item.status === "identifying" ? { ...item, status: "ready" } : item)),
+    );
+  }, []);
+
   const addFiles = useCallback(
     async (fileList: FileList | File[] | null) => {
       if (disabledReason) {
@@ -506,69 +556,82 @@ export function AddObservationsModal({
       const imageFiles = Array.from(fileList ?? []).filter((file) => file.type.startsWith("image/"));
       if (imageFiles.length === 0) return;
 
-      const remaining = Math.max(0, MAX_PHOTOS - itemsRef.current.length);
+      const counts = prepareCountsRef.current;
+      const remaining = Math.max(0, MAX_PHOTOS - itemsRef.current.length - (counts.total - counts.done));
       const files = imageFiles.slice(0, remaining);
       if (files.length < imageFiles.length) setError(t("tooMany", { max: MAX_PHOTOS }));
       else setError(null);
       if (files.length === 0) return;
 
-      setIsPreparing(true);
-      try {
-        const prepared = await Promise.all(
-          files.map(async (source) => {
-            const id = `${source.name}-${source.size}-${source.lastModified}-${crypto.randomUUID()}`;
-            const meta = await imageMetadata(source);
-            const lat = Number.parseFloat(meta.decimalLatitude ?? "");
-            const lng = Number.parseFloat(meta.decimalLongitude ?? "");
-            let file = source;
+      counts.total += files.length;
+      setPrepareProgress({ done: counts.done, total: counts.total });
+      // A small pool prepares photos a few at a time and each card appears the
+      // moment its photo is ready — a 100-photo drop stays responsive and gives
+      // immediate feedback instead of freezing until the whole batch is done.
+      await Promise.all(
+        files.map((source) =>
+          prepareLimiter(async () => {
             try {
-              file = (await compressImageIfNeeded(source)).file;
-            } catch {
-              // Fall back to the original; the upload may still succeed.
-            }
-            const item: QuickItem = {
-              id,
-              groupId: id,
-              file,
-              previewUrl: URL.createObjectURL(file),
-              scientificName: "",
-              vernacularName: "",
-              kingdom: "Plantae",
-              eventDate: meta.eventDate || dateFromFile(source),
-              // Only seed from the photo's own GPS here. Photos without EXIF
-              // coordinates are auto-located from the device below (with the
-              // observer's permission) rather than dropped on a default pin.
-              location: Number.isFinite(lat) && Number.isFinite(lng) ? { lat, lng } : null,
-              notes: "",
-              tags: [],
-              measurements: [],
-              caption: cleanFileName(source.name),
-              status: "identifying",
-              error: null,
-            };
-            return item;
-          }),
-        );
-        setItems((current) => [...current, ...prepared]);
-        for (const item of prepared) void analyzeItem(item.id, item.file);
+              const id = `${source.name}-${source.size}-${source.lastModified}-${crypto.randomUUID()}`;
+              const meta = await imageMetadata(source);
+              const lat = Number.parseFloat(meta.decimalLatitude ?? "");
+              const lng = Number.parseFloat(meta.decimalLongitude ?? "");
+              // On failure fall back to the original; the upload may still succeed.
+              const prepared = await prepareObservationImage(source).catch(() => ({
+                file: source,
+                thumbnail: null,
+              }));
+              const item: QuickItem = {
+                id,
+                groupId: id,
+                file: prepared.file,
+                analysisFile: prepared.thumbnail ?? prepared.file,
+                previewUrl: URL.createObjectURL(prepared.thumbnail ?? prepared.file),
+                scientificName: "",
+                vernacularName: "",
+                kingdom: "Plantae",
+                eventDate: meta.eventDate || dateFromFile(source),
+                // Only seed from the photo's own GPS here. Photos without EXIF
+                // coordinates are auto-located from the device below (with the
+                // observer's permission) rather than dropped on a default pin.
+                location: Number.isFinite(lat) && Number.isFinite(lng) ? { lat, lng } : null,
+                notes: "",
+                tags: [],
+                measurements: [],
+                caption: cleanFileName(source.name),
+                status: "identifying",
+                error: null,
+              };
+              setItems((current) => [...current, item]);
+              void analyzeItem(item.id, item.analysisFile);
 
-        // Auto-fill the location for freshly added photos that have no GPS of
-        // their own. This asks for location access once; if the observer allows
-        // it we drop the current-location pin, and if they deny it we leave the
-        // field blank for them to set manually instead of guessing.
-        const needLocation = prepared.filter((item) => !item.location);
-        if (needLocation.length > 0) {
-          void requestDeviceLocation().then((coords) => {
-            if (!coords) return;
-            const ids = new Set(needLocation.map((item) => item.id));
-            setItems((current) =>
-              current.map((item) => (ids.has(item.id) && !item.location ? { ...item, location: coords } : item)),
-            );
-          });
-        }
-      } finally {
-        setIsPreparing(false);
-      }
+              // Auto-fill the location for photos without GPS of their own.
+              // This asks for location access once per session; if the observer
+              // allows it we drop the current-location pin, and if they deny it
+              // the field stays blank for them to set manually.
+              if (!item.location) {
+                void requestDeviceLocation().then((coords) => {
+                  if (!coords) return;
+                  setItems((current) =>
+                    current.map((candidate) =>
+                      candidate.id === item.id && !candidate.location ? { ...candidate, location: coords } : candidate,
+                    ),
+                  );
+                });
+              }
+            } finally {
+              counts.done += 1;
+              if (counts.done >= counts.total) {
+                counts.done = 0;
+                counts.total = 0;
+                setPrepareProgress(null);
+              } else {
+                setPrepareProgress({ done: counts.done, total: counts.total });
+              }
+            }
+          }),
+        ),
+      );
     },
     [analyzeItem, disabledReason, requestDeviceLocation, t],
   );
@@ -612,6 +675,10 @@ export function AddObservationsModal({
 
   // Remove a whole observation (all its photos) from the queue.
   function removeGroup(groupId: string) {
+    // Don't waste queued identify calls on photos that are gone.
+    for (const item of itemsRef.current) {
+      if (item.groupId === groupId) analysisCancelledRef.current.add(item.id);
+    }
     setItems((current) => {
       for (const item of current) {
         if (item.groupId === groupId) URL.revokeObjectURL(item.previewUrl);
@@ -714,7 +781,10 @@ export function AddObservationsModal({
 
   // Upload one observation: a single occurrence carrying every photo in the
   // group, with the first photo set as the primary image the explorer reads.
-  async function uploadGroup(group: QuickGroup): Promise<boolean> {
+  async function uploadGroup(
+    group: QuickGroup,
+    batchContext?: { eventID: string; fieldNotes: string },
+  ): Promise<boolean> {
     const { fields } = group;
     // Resolve the location into Darwin Core fields, swapping the precise pin for
     // a randomised circle when the observer opted to keep their location private.
@@ -739,6 +809,8 @@ export function AddObservationsModal({
       occurrenceRemarks: fields.notes.trim(),
       associatedMedia: group.items.map((item) => item.file.name).join(", "),
       ...locationFields,
+      ...(batchContext?.eventID ? { eventID: batchContext.eventID } : {}),
+      ...(batchContext?.fieldNotes ? { fieldNotes: batchContext.fieldNotes } : {}),
       ...(tags.length > 0 ? { tags } : {}),
       ...(effectiveProjectUri ? { projectRef: effectiveProjectUri } : {}),
       ...(effectiveSiteUri ? { siteRef: effectiveSiteUri } : {}),
@@ -787,31 +859,48 @@ export function AddObservationsModal({
       setError(t("nothingToSubmit"));
       return;
     }
+    const trimmedBatchStory = batchStory.trim().slice(0, BATCH_STORY_MAX);
+    const batchContext = trimmedBatchStory
+      ? { eventID: `gainforest-upload-${crypto.randomUUID()}`, fieldNotes: trimmedBatchStory }
+      : undefined;
     setIsSubmitting(true);
     setError(null);
     setUploadProgress({ done: 0, total: queue.length });
     let success = 0;
-    for (const group of queue) {
-      const ids = new Set(group.items.map((item) => item.id));
-      setItems((current) => current.map((item) => (ids.has(item.id) ? { ...item, status: "uploading", error: null } : item)));
-      try {
-        await uploadGroup(group);
-        success += 1;
-        setUploadProgress((progress) => (progress ? { ...progress, done: progress.done + 1 } : progress));
-        setItems((current) => {
-          for (const item of current) {
-            if (ids.has(item.id)) URL.revokeObjectURL(item.previewUrl);
+    // A few observations upload in parallel — each one is already a sequence
+    // of requests (occurrence + photos), so a small pool cuts total time for
+    // big batches without hammering the mutation proxy.
+    const uploadLimiter = createLimiter(UPLOAD_CONCURRENCY);
+    await Promise.all(
+      queue.map((group) =>
+        uploadLimiter(async () => {
+          const ids = new Set(group.items.map((item) => item.id));
+          setItems((current) =>
+            current.map((item) => (ids.has(item.id) ? { ...item, status: "uploading", error: null } : item)),
+          );
+          try {
+            await uploadGroup(group, batchContext);
+            success += 1;
+            setUploadProgress((progress) => (progress ? { ...progress, done: progress.done + 1 } : progress));
+            setItems((current) => {
+              for (const item of current) {
+                if (ids.has(item.id)) URL.revokeObjectURL(item.previewUrl);
+              }
+              return current.filter((item) => !ids.has(item.id));
+            });
+          } catch (uploadError) {
+            const message = formatObservationMutationError(uploadError, { photoTooLarge: t("photoTooLarge") });
+            setItems((current) =>
+              current.map((item) => (ids.has(item.id) ? { ...item, status: "error", error: message } : item)),
+            );
           }
-          return current.filter((item) => !ids.has(item.id));
-        });
-      } catch (uploadError) {
-        const message = formatObservationMutationError(uploadError, { photoTooLarge: t("photoTooLarge") });
-        setItems((current) => current.map((item) => (ids.has(item.id) ? { ...item, status: "error", error: message } : item)));
-      }
-    }
+        }),
+      ),
+    );
     setIsSubmitting(false);
     setUploadProgress(null);
     if (success > 0) {
+      if (success === queue.length) setBatchStory("");
       setAddedCount(success);
       setError(null);
     } else {
@@ -826,8 +915,6 @@ export function AddObservationsModal({
     return (
       <ObservationCsvUpload
         target={target}
-        sessionDid={sessionDid}
-        onChangeTarget={onChangeTarget}
         projectRef={projectRef}
         onBack={() => setMode("photos")}
         onClose={onClose}
@@ -845,9 +932,7 @@ export function AddObservationsModal({
           </span>
           <div>
             <ModalTitle>{t("doneTitle", { count: addedCount })}</ModalTitle>
-            <ModalDescription className="mt-1">
-              {target.kind === "group" ? t("doneBodyOrganization") : t("doneBody")}
-            </ModalDescription>
+            <ModalDescription className="mt-1">{t("doneBody")}</ModalDescription>
           </div>
         </div>
         <div className="flex flex-col gap-2 sm:flex-row sm:justify-center">
@@ -867,7 +952,22 @@ export function AddObservationsModal({
     <ModalContent className="space-y-4" dismissible={false}>
       <ModalHeader>
         <div className="flex items-start justify-between gap-3">
-          <ModalTitle>{t("title")}</ModalTitle>
+          <div className="flex min-w-0 items-center gap-2">
+            {onBack ? (
+              <Button
+                type="button"
+                variant="secondary"
+                size="icon-sm"
+                onClick={onBack}
+                aria-label={t("back")}
+                className="-ml-1 -mt-1 shrink-0 rounded-full"
+                disabled={isSubmitting}
+              >
+                <ArrowLeftIcon className="size-4" />
+              </Button>
+            ) : null}
+            <ModalTitle>{t("title")}</ModalTitle>
+          </div>
           <div className="flex shrink-0 items-center gap-1.5">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -912,17 +1012,25 @@ export function AddObservationsModal({
         <ModalDescription className="mt-1">{t("description")}</ModalDescription>
       </ModalHeader>
 
-      {/* Always spell out (and, from global entry points, let the user change)
-          which account these observations will be published to — the number
-          one source of "did this go to me or my organization?" confusion.
-          Locked once an upload has started so one batch never splits across
-          two accounts. */}
-      <PublishAsPicker
-        target={target}
-        sessionDid={sessionDid}
-        onChangeTarget={onChangeTarget}
-        disabled={isSubmitting || items.some((item) => item.status === "uploading" || item.status === "uploaded")}
-      />
+      {!showEmptyState ? (
+        <div className="rounded-2xl border border-border bg-muted/30 p-3">
+          <label htmlFor={batchStoryId} className="text-sm font-medium text-foreground">
+            {t("batchStoryLabel")}
+          </label>
+          <p className="mt-0.5 text-xs leading-5 text-muted-foreground">{t("batchStoryHint")}</p>
+          <Textarea
+            id={batchStoryId}
+            value={batchStory}
+            maxLength={BATCH_STORY_MAX}
+            rows={3}
+            placeholder={t("batchStoryPlaceholder")}
+            onChange={(event) => setBatchStory(event.currentTarget.value.slice(0, BATCH_STORY_MAX))}
+            onKeyDown={keepTextEntryKeysLocal}
+            disabled={isSubmitting}
+            className="mt-2 resize-y"
+          />
+        </div>
+      ) : null}
 
       <div
         onDragEnter={onDragEnter}
@@ -932,7 +1040,12 @@ export function AddObservationsModal({
         className={cn(
           "rounded-2xl border border-dashed transition-colors",
           isDragging ? "border-primary bg-primary/10" : "border-primary/30",
-          showEmptyState ? "px-6 py-10" : "p-3",
+          // Below the modal system's 32rem drawer breakpoint the dialog runs
+          // fullscreen (fullscreenOnMobile), so let the empty drop zone grow
+          // into the freed-up height instead of leaving a dead lower half.
+          showEmptyState
+            ? "px-6 py-10 max-[32rem]:grid max-[32rem]:min-h-[55dvh] max-[32rem]:place-items-center"
+            : "p-3",
         )}
       >
         {showEmptyState ? (
@@ -977,12 +1090,33 @@ export function AddObservationsModal({
           // touch gesture); larger screens keep the list in its own scroll area
           // so the footer stays put.
           <div className="space-y-3 sm:max-h-[52vh] sm:overflow-y-auto sm:pr-1">
-            {identifyingCount > 0 ? (
+            {prepareProgress ? (
               <QuickProgress
-                label={t("identifyingProgress", { done: items.length - identifyingCount, total: items.length })}
-                done={items.length - identifyingCount}
-                total={items.length}
+                label={t("preparingProgress", { done: prepareProgress.done, total: prepareProgress.total })}
+                done={prepareProgress.done}
+                total={prepareProgress.total}
               />
+            ) : null}
+            {identifyingCount > 0 ? (
+              <div className="flex items-end gap-2">
+                <div className="min-w-0 flex-1">
+                  <QuickProgress
+                    label={t("identifyingProgress", { done: items.length - identifyingCount, total: items.length })}
+                    done={items.length - identifyingCount}
+                    total={items.length}
+                  />
+                </div>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="xs"
+                  onClick={skipIdentification}
+                  disabled={isSubmitting}
+                  className="h-6 shrink-0 rounded-full px-2 text-[11px] font-normal text-muted-foreground hover:text-foreground"
+                >
+                  {t("skipIdentify")}
+                </Button>
+              </div>
             ) : null}
             {items.length > 1 ? (
               // Drag & drop needs a mouse — only pitch it on fine-pointer devices.
@@ -1420,6 +1554,7 @@ function ObservationGroupCard({
           <Input
             value={fields.scientificName}
             onChange={(event) => onChange({ scientificName: event.target.value })}
+            onKeyDown={keepTextEntryKeysLocal}
             placeholder={identifying ? t("identifying") : t("speciesPlaceholder")}
             disabled={disabled || uploading}
             aria-label={t("speciesLabel")}
@@ -1486,6 +1621,7 @@ function ObservationGroupCard({
         <Textarea
           value={fields.notes}
           onChange={(event) => onChange({ notes: event.target.value })}
+          onKeyDown={keepTextEntryKeysLocal}
           placeholder={t("notesPlaceholder")}
           disabled={disabled || uploading}
           aria-label={t("notesLabel")}
@@ -1626,6 +1762,7 @@ function QuickTagsEditor({
           value={draft}
           onChange={(event) => setDraft(event.target.value)}
           onKeyDown={(event) => {
+            keepTextEntryKeysLocal(event);
             if (event.key === "Enter" || event.key === ",") {
               event.preventDefault();
               commit(draft);
@@ -1699,6 +1836,7 @@ function QuickMeasurementsEditor({
             <Input
               value={entry.type}
               onChange={(event) => patchRow(entry.id, { type: event.target.value })}
+              onKeyDown={keepTextEntryKeysLocal}
               placeholder={t("measurementTypePlaceholder")}
               disabled={disabled}
               aria-label={t("measurementTypeLabel")}
@@ -1708,6 +1846,7 @@ function QuickMeasurementsEditor({
             <Input
               value={entry.value}
               onChange={(event) => patchRow(entry.id, { value: event.target.value })}
+              onKeyDown={keepTextEntryKeysLocal}
               placeholder={t("measurementValuePlaceholder")}
               disabled={disabled}
               aria-label={t("measurementValueLabel")}
@@ -1717,6 +1856,7 @@ function QuickMeasurementsEditor({
             <Input
               value={entry.unit}
               onChange={(event) => patchRow(entry.id, { unit: event.target.value })}
+              onKeyDown={keepTextEntryKeysLocal}
               placeholder={t("measurementUnitPlaceholder")}
               disabled={disabled}
               aria-label={t("measurementUnitLabel")}

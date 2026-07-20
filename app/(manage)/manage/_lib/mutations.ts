@@ -93,6 +93,8 @@ type MutationPayload = GroupScoped & (
   | { operation: "updateMultimedia"; rkey: string; data: UpdateMultimediaData; unset?: string[] }
   | { operation: "deleteOccurrenceCascade"; rkey: string }
   | { operation: "deleteTreeGroupCascade"; datasetRkey: string }
+  | { operation: "accountDataSummary" }
+  | { operation: "deleteAccountDataChunk" }
   | { operation: "detachOccurrenceFromDataset"; rkey: string }
   | { operation: "attachExistingOccurrences"; datasetRkey: string; occurrenceRkeys: string[] }
   | {
@@ -225,6 +227,35 @@ export async function putRecord(
 
 export async function deleteRecord(collection: string, rkey: string, options?: { repo?: string }): Promise<void> {
   await callProxy({ operation: "deleteRecord", collection, rkey, ...(options?.repo ? { repo: options.repo } : {}) });
+}
+
+// ── Account data deletion (settings → danger zone) ───────────────────────
+
+export type AccountDataSummary = {
+  collections: Array<{ collection: string; count: number }>;
+  total: number;
+  /** True when a very large repo made exact counting impractical. */
+  approximate: boolean;
+};
+
+export type AccountDataDeleteChunkResult = {
+  deleted: number;
+  failed: number;
+  done: boolean;
+};
+
+/** Count every GainForest-namespace record in the signed-in user's repo. */
+export async function fetchAccountDataSummary(): Promise<AccountDataSummary> {
+  return callProxy({ operation: "accountDataSummary" });
+}
+
+/**
+ * Delete one chunk of the signed-in user's GainForest records. Call in a
+ * loop until `done` — the server bounds each request so arbitrarily large
+ * repos never hit a single-request timeout.
+ */
+export async function deleteAccountDataChunk(): Promise<AccountDataDeleteChunkResult> {
+  return callProxy({ operation: "deleteAccountDataChunk" });
 }
 
 export async function getRecord(collection: string, rkey: string, options?: { repo?: string }): Promise<RecordReadResult> {
@@ -410,9 +441,11 @@ function rkeyOf(uri: string): string {
   return uri.split("/").pop() ?? "";
 }
 
-/** Publish a top-level narrative post to the feed (app.gainforest.feed.post). */
+/** Publish a top-level narrative post to the feed (app.gainforest.feed.post).
+ *  `facets` are app.bsky.richtext.facet annotations (e.g. @-mentions built by
+ *  app/_lib/mentions.ts). */
 export async function createFeedPost(
-  input: { text: string; langs?: string[]; tags?: string[] },
+  input: { text: string; langs?: string[]; tags?: string[]; facets?: unknown[] },
   options?: { repo?: string },
 ): Promise<FeedWriteResult> {
   const record: Record<string, unknown> = {
@@ -420,6 +453,7 @@ export async function createFeedPost(
     text: input.text.trim(),
     createdAt: new Date().toISOString(),
   };
+  if (input.facets?.length) record.facets = input.facets;
   if (input.langs?.length) record.langs = input.langs.slice(0, 3);
   if (input.tags?.length) record.tags = input.tags.slice(0, 8);
   const result = await createRecord(FEED_POST_COLLECTION, record, undefined, options);
@@ -432,14 +466,20 @@ export async function createFeedPost(
  * `reply` (so a comment stays a comment), `createdAt`, `langs`, `tags`, `embed` —
  * is preserved untouched. `swapRecord` guards against editing a stale version.
  * Caller must own the record (or manage the repo it lives in).
+ *
+ * Because facet byte offsets index into `text`, stale facets would misalign
+ * after an edit — pass `facets` (recomputed for the new text, possibly empty)
+ * to replace them. When the option is omitted the old facets are dropped.
  */
 export async function updateFeedPost(
   rkey: string,
   text: string,
-  options?: { repo?: string },
+  options?: { repo?: string; facets?: unknown[] },
 ): Promise<FeedWriteResult> {
   const existing = await getRecord(FEED_POST_COLLECTION, rkey, options);
   const record: Record<string, unknown> = { ...existing.record, text: text.trim() };
+  if (options?.facets?.length) record.facets = options.facets;
+  else delete record.facets;
   const result = await putRecord(FEED_POST_COLLECTION, rkey, record, {
     swapRecord: existing.cid,
     ...(options?.repo ? { repo: options.repo } : {}),
@@ -455,7 +495,7 @@ export async function updateFeedPost(
  * resolved to strongRefs (uri + cid).
  */
 export async function createFeedComment(
-  input: { text: string; subjectUri: string; rootUri?: string; langs?: string[] },
+  input: { text: string; subjectUri: string; rootUri?: string; langs?: string[]; facets?: unknown[] },
   options?: { repo?: string },
 ): Promise<FeedWriteResult> {
   const parent: StrongRef = await resolveStrongRef(input.subjectUri);
@@ -469,6 +509,7 @@ export async function createFeedComment(
     reply: { root, parent },
     createdAt: new Date().toISOString(),
   };
+  if (input.facets?.length) record.facets = input.facets;
   if (input.langs?.length) record.langs = input.langs.slice(0, 3);
   const result = await createRecord(FEED_POST_COLLECTION, record, undefined, options);
   return { ...result, rkey: rkeyOf(result.uri) };

@@ -5,6 +5,7 @@ import Image from "next/image";
 import { notFound, redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { ArrowLeftIcon, ArrowUpRightIcon, CalendarIcon, LeafIcon, MapPinIcon, RulerIcon } from "lucide-react";
+import { localizedAlternates } from "@/app/_lib/seo-metadata";
 import {
   fetchMeasurementsByOccurrence,
   fetchObservationMedia,
@@ -16,6 +17,7 @@ import {
 } from "../../../_lib/indexer";
 import { resolveBlobUrl, isPdsBlobUrl } from "../../../_lib/pds";
 import { countryFlag, formatDate } from "../../../_lib/format";
+import { getRequestOrigin } from "../../../_lib/request-origin";
 import { getAccountRouteData, readAccountRouteParams } from "../../../account/_lib/account-route";
 import { accountHref, localObservationHref } from "../../../_lib/urls";
 import { RecordLocationMap } from "../../../_components/RecordLocationMap";
@@ -26,6 +28,7 @@ import { ObservationDetailsSection } from "./_components/ObservationDetailsSecti
 export const revalidate = 60;
 
 type ObservationPageParams = Promise<{ did: string; rkey: string }>;
+type ObservationOwner = Awaited<ReturnType<typeof getAccountRouteData>> | null;
 
 const COLLECTION = "app.gainforest.dwc.occurrence";
 const AUDIO_EXT = /\.(?:mp3|m4a|wav|ogg|oga|flac|aac)(?:[?#]|$)/i;
@@ -48,15 +51,24 @@ export async function generateMetadata({ params }: { params: ObservationPagePara
   const t = await getTranslations("marketplace.observationPage");
   const name = observationName(record, t);
   const description = [record.scientificName, record.locality, record.country].filter(Boolean).join(" · ") || t("metaFallback");
+  const detailHref = localObservationHref(urlIdentifier, rkey);
+  const images = record.imageUrl ? [{ url: record.imageUrl, alt: name }] : undefined;
   return {
     title: t("metaTitle", { name }),
     description,
-    alternates: { canonical: localObservationHref(urlIdentifier, rkey) },
+    alternates: await localizedAlternates(localObservationHref(urlIdentifier, rkey)),
     openGraph: {
       title: name,
       description,
       type: "article",
-      images: record.imageUrl ? [{ url: record.imageUrl }] : undefined,
+      url: detailHref,
+      images,
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: name,
+      description,
+      images,
     },
   };
 }
@@ -66,11 +78,12 @@ export default async function ObservationDetailPage({ params }: { params: Observ
   const t = await getTranslations("marketplace.observationPage");
   const measurementsT = await getTranslations("marketplace.measurements");
 
-  const [owner, media, resolvedAudio, measurementRecords] = await Promise.all([
+  const [owner, media, resolvedAudio, measurementRecords, origin] = await Promise.all([
     getAccountRouteData(did, urlIdentifier).catch(() => null),
     fetchObservationMedia(record.did, record.atUri).catch(() => [] as ObservationMediaItem[]),
     record.audioUrl ? Promise.resolve(record.audioUrl) : record.audioRef ? resolveBlobUrl(record.did, record.audioRef).catch(() => null) : Promise.resolve(null),
     fetchMeasurementsByOccurrence(record.atUri).catch(() => []),
+    getRequestOrigin(),
   ]);
   const measurementFacts = summarizeObservationMeasurements(measurementRecords);
 
@@ -91,9 +104,23 @@ export default async function ObservationDetailPage({ params }: { params: Observ
   const name = observationName(record, t);
   const scientific = secondaryScientificName(record);
   const place = [record.locality, record.stateProvince, record.country].filter(Boolean).join(", ");
+  const detailHref = localObservationHref(owner?.urlIdentifier ?? urlIdentifier, rkey);
+  const observationJsonLd = buildObservationJsonLd(origin, detailHref, record, owner, name, place, images[0]?.url ?? record.imageUrl ?? null);
+  const breadcrumbJsonLd = buildObservationBreadcrumbJsonLd(origin, detailHref, t("back"), name);
 
   return (
-    <main className="min-h-screen bg-background pb-20">
+    <>
+      <script
+        id="observation-json-ld"
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(observationJsonLd) }}
+      />
+      <script
+        id="observation-breadcrumb-json-ld"
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
+      />
+      <main className="min-h-screen bg-background pb-20">
       <div className="mx-auto max-w-6xl px-6 py-8 lg:px-8">
         <Link
           href="/observations"
@@ -210,8 +237,101 @@ export default async function ObservationDetailPage({ params }: { params: Observ
           fallbackHref={accountHref(urlIdentifier)}
         />
       </div>
-    </main>
+      </main>
+    </>
   );
+}
+
+function compactJsonLd<T extends Record<string, unknown>>(value: T): T {
+  return Object.fromEntries(
+    Object.entries(value).filter(([, entry]) => entry !== null && entry !== undefined && !(Array.isArray(entry) && entry.length === 0)),
+  ) as T;
+}
+
+function buildObservationJsonLd(
+  origin: string,
+  detailHref: string,
+  record: OccurrenceRecord,
+  owner: ObservationOwner,
+  name: string,
+  place: string,
+  imageUrl: string | null,
+): Record<string, unknown> {
+  const url = new URL(detailHref, origin).toString();
+  const image = imageUrl ? new URL(imageUrl, origin).toString() : undefined;
+  const observerUrl = owner ? new URL(accountHref(owner.urlIdentifier), origin).toString() : undefined;
+  const spatialCoverage = record.lat !== null && record.lon !== null
+    ? compactJsonLd({
+        "@type": "Place",
+        name: place || record.locality || record.country || undefined,
+        geo: {
+          "@type": "GeoCoordinates",
+          latitude: record.lat,
+          longitude: record.lon,
+        },
+      })
+    : place
+      ? { "@type": "Place", name: place }
+      : undefined;
+
+  return compactJsonLd({
+    "@context": "https://schema.org",
+    "@type": "Observation",
+    name,
+    description: record.remarks || [record.scientificName, record.locality, record.country].filter(Boolean).join(" · ") || undefined,
+    url,
+    image,
+    datePublished: record.createdAt,
+    observationDate: record.eventDate ?? undefined,
+    spatialCoverage,
+    about: record.scientificName
+      ? compactJsonLd({
+          "@type": "Thing",
+          name: record.scientificName,
+          alternateName: record.vernacularName ?? undefined,
+        })
+      : undefined,
+    creator: owner
+      ? compactJsonLd({
+          "@type": owner.kind === "organization" ? "Organization" : "Person",
+          name: owner.displayName,
+          url: observerUrl,
+          image: owner.avatarUrl ? new URL(owner.avatarUrl, origin).toString() : undefined,
+        })
+      : undefined,
+  });
+}
+
+function buildObservationBreadcrumbJsonLd(
+  origin: string,
+  detailHref: string,
+  observationsLabel: string,
+  observationTitle: string,
+): Record<string, unknown> {
+  return {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      {
+        "@type": "ListItem",
+        position: 1,
+        name: "GainForest",
+        item: new URL("/", origin).toString(),
+      },
+      {
+        "@type": "ListItem",
+        position: 2,
+        name: observationsLabel,
+        item: new URL("/observations", origin).toString(),
+      },
+      {
+        "@type": "ListItem",
+        position: 3,
+        name: observationTitle,
+        item: new URL(detailHref, origin).toString(),
+      },
+    ],
+  };
 }
 
 function MetaRow({ icon, label, children }: { icon: ReactNode; label: string; children: ReactNode }) {

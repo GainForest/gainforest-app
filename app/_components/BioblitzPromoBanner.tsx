@@ -48,11 +48,16 @@ export function BioblitzPromoBanner() {
           mirrors the dismiss column so the message stays roughly centered. */}
       <Link
         href="/bioblitz"
-        className="flex min-w-0 flex-1 flex-wrap items-center justify-center gap-x-2.5 gap-y-1 py-2.5 pl-11 pr-3 text-center transition-colors hover:bg-primary-dark focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary-foreground/40 sm:gap-x-3 sm:pl-12"
+        className="flex min-w-0 flex-1 flex-nowrap items-center justify-start gap-x-2 py-2 pl-3 pr-2 transition-colors hover:bg-primary-dark focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary-foreground/40 sm:flex-wrap sm:justify-center sm:gap-x-3 sm:gap-y-1 sm:py-2.5 sm:pl-12 sm:pr-3 sm:text-center"
       >
-        <span className="inline-flex min-w-0 items-center gap-2">
+        <span className="inline-flex min-w-0 flex-1 items-center gap-2 sm:flex-none">
           <BinocularsIcon className="hidden size-4 shrink-0 sm:block" aria-hidden />
-          <span className="text-[13px] font-medium leading-snug sm:text-sm">{t("banner.message")}</span>
+          {/* On phones the message stays on one line (smaller text, no wrap,
+              ellipsis as a last resort); from sm up it returns to the centered,
+              wrappable strip. */}
+          <span className="truncate text-[11px] font-medium leading-snug sm:overflow-visible sm:whitespace-normal sm:text-sm">
+            {t("banner.message")}
+          </span>
         </span>
         <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-primary-foreground/15 px-2.5 py-0.5 text-[11px] font-semibold sm:px-3 sm:py-1 sm:text-xs">
           {t("banner.cta")}

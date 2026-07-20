@@ -25,11 +25,10 @@ import {
 import { TrustedByBadges } from "./TrustedByBadges";
 import { FollowButton, FollowProvider, FollowStats } from "./FollowButton";
 
-// A second, higher-stacked drawer that profiles an *account* (a did:plc) rather
-// than a single record. Opened by clicking any handle/owner chip. It sits at
-// z-[100] so it layers cleanly over the record drawer (z-[90]); Escape is
-// caught in the capture phase so it closes only this drawer, leaving any record
-// drawer underneath open.
+// Right-side drawer for an account profile, opened by clicking a handle/owner
+// chip. Chips inside record drawers close their containing sheet first so the
+// two drawer styles never overlap. Escape is caught in the capture phase so it
+// closes this drawer before any lower-level keyboard handler runs.
 
 type AccountDrawerCtx = { openAccount: (did: string) => void };
 
@@ -113,10 +112,10 @@ function AccountDrawer({ did, onClose }: { did: string | null; onClose: () => vo
       aria-label={displayName}
     >
       <div
-        className="drawer-scrim absolute inset-0 bg-foreground/30 backdrop-blur-[2px]"
+        className="drawer-scrim absolute inset-0 bg-foreground/25 backdrop-blur-[3px]"
         onClick={onClose}
       />
-      <div className="drawer-sheet thin-scroll relative flex h-full w-full max-w-[440px] flex-col overflow-y-auto bg-background shadow-[-24px_0_60px_-30px_rgba(20,30,15,0.5)]">
+      <div className="drawer-sheet thin-scroll relative flex h-full w-full max-w-[540px] flex-col overflow-y-auto overscroll-contain bg-background shadow-[-24px_0_60px_-30px_rgba(20,30,15,0.5)] sm:my-3 sm:h-[calc(100%_-_1.5rem)] sm:rounded-l-[28px] sm:border sm:border-r-0 sm:border-border-soft">
         {/* Header */}
         <div className="sticky top-0 z-10 flex items-center justify-between gap-3 border-b border-border-soft bg-background/95 px-5 py-4 backdrop-blur-xl">
           <span className="inline-flex items-center gap-1.5 rounded-full bg-foreground/[0.06] px-2.5 py-1 text-[11.5px] font-medium text-foreground/70">
@@ -132,7 +131,7 @@ function AccountDrawer({ did, onClose }: { did: string | null; onClose: () => vo
           </button>
         </div>
 
-        <div className="px-5 pb-10 pt-6">
+        <div className="px-7 pb-12 pt-7 sm:px-8">
           {/* Identity */}
           <div className="flex items-center gap-4">
             {avatar ? (
@@ -153,7 +152,7 @@ function AccountDrawer({ did, onClose }: { did: string | null; onClose: () => vo
               </span>
             )}
             <div className="min-w-0">
-              <h2 className="font-garamond text-[24px] font-normal leading-[1.1] tracking-[-0.01em] text-foreground">
+              <h2 className="font-instrument text-[34px] font-normal leading-[1.08] tracking-[-0.01em] text-foreground sm:text-[36px]">
                 {displayName}
               </h2>
               {handle && (
@@ -194,7 +193,7 @@ function AccountDrawer({ did, onClose }: { did: string | null; onClose: () => vo
 
           {/* Bio */}
           {summary?.bio && (
-            <p className="mt-4 whitespace-pre-line text-[14px] leading-[1.55] text-foreground/75">
+            <p className="mt-4 whitespace-pre-line text-[15px] leading-[1.65] text-foreground/75">
               {summary.bio}
             </p>
           )}
@@ -257,11 +256,11 @@ function StatTile({
   hint: string;
 }) {
   return (
-    <div className="rounded-xl border border-border-soft bg-surface px-4 py-3.5">
+    <div className="rounded-2xl border border-border-soft bg-foreground/[0.035] px-4 py-3.5">
       <div className="text-[11px] font-medium uppercase tracking-[0.1em] text-foreground/45">
         {label}
       </div>
-      <div className="mt-1 font-garamond text-[30px] font-normal leading-none tracking-[-0.01em] text-foreground">
+      <div className="mt-1 font-instrument text-[30px] font-normal leading-none tracking-[-0.01em] text-foreground">
         {value}
       </div>
       <div className="mt-1.5 text-[11px] text-foreground/50">{hint}</div>

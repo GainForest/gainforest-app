@@ -51,8 +51,20 @@ import {
   localObservationHref,
   localProjectHref,
 } from "../_lib/urls";
+import { DonateButton } from "../cert/[did]/[rkey]/_components/donate/DonateButton";
+import { ProjectFeaturedToggle } from "../projects/_components/ProjectFeaturedToggle";
 
 type RecordDrawerT = ReturnType<typeof useTranslations<"marketplace.recordDrawer">>;
+
+type DrawerProjectDonationSummary = {
+  gainforestDonation: {
+    organizationDid: string;
+    rkey: string;
+    minDonationInUSD: string | null;
+    maxDonationInUSD: string | null;
+  } | null;
+  maEarth: { donateUrl: string } | null;
+};
 
 // Right-side detail sheet for any explorer record. Slides in over a dimmed
 // scrim; Escape or a scrim click closes it. A full-bleed hero image fades into
@@ -107,6 +119,7 @@ export function RecordDrawer({
   // Whether this Bumicert is currently accepting donations — drives the Donate
   // button. `null` while we don't yet know (loading / non-bumicert).
   const [donatable, setDonatable] = useState<boolean | null>(null);
+  const [projectDonation, setProjectDonation] = useState<DrawerProjectDonationSummary | null>(null);
   const recordIdentity = record?.atUri ?? null;
   useEffect(() => {
     setImgError(false);
@@ -146,6 +159,32 @@ export function RecordDrawer({
       .catch(() => {});
     return () => ctrl.abort();
   }, [record]);
+
+  useEffect(() => {
+    setProjectDonation(null);
+    if (!record || record.kind !== "project") return;
+    const ctrl = new AbortController();
+    fetch("/api/projects/donation-summaries", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        items: [{
+          key: record.atUri,
+          did: record.did,
+          atUri: record.atUri,
+          bumicertUris: record.bumicertUris,
+        }],
+      }),
+      signal: ctrl.signal,
+    })
+      .then((response) => response.ok ? response.json() : null)
+      .then((data: { summaries?: Record<string, DrawerProjectDonationSummary> } | null) => {
+        if (!ctrl.signal.aborted) setProjectDonation(data?.summaries?.[record.atUri] ?? null);
+      })
+      .catch(() => {});
+    return () => ctrl.abort();
+  }, [record]);
+
   useEffect(() => {
     if (!record) return;
     const onKey = (e: KeyboardEvent) => {
@@ -359,6 +398,7 @@ export function RecordDrawer({
 
   if (!record) return null;
   const activeRecord = record;
+  const isProject = record.kind === "project";
 
   const title =
     record.kind === "occurrence"
@@ -522,11 +562,18 @@ export function RecordDrawer({
       aria-modal="true"
       aria-label={title}
     >
-      <div className="drawer-scrim absolute inset-0 bg-foreground/30 backdrop-blur-[2px]" onClick={onClose} />
-      <div className="drawer-sheet thin-scroll relative flex h-full w-full max-w-[480px] flex-col overflow-y-auto bg-background shadow-[-24px_0_60px_-30px_rgba(20,30,15,0.5)]">
+      <div className="drawer-scrim absolute inset-0 bg-foreground/25 backdrop-blur-[3px]" onClick={onClose} />
+      <div
+        className={cn(
+          "drawer-sheet thin-scroll relative flex h-full w-full flex-col overflow-y-auto bg-background shadow-[-24px_0_60px_-30px_rgba(20,30,15,0.5)]",
+          isProject
+            ? "max-w-[540px] overscroll-contain sm:my-3 sm:h-[calc(100%_-_1.5rem)] sm:rounded-l-[28px] sm:border sm:border-r-0 sm:border-border-soft"
+            : "max-w-[480px]",
+        )}
+      >
         {showHero ? (
-          <div className="relative">
-            <div className="relative aspect-[5/4] w-full overflow-hidden bg-surface-sunken">
+          <div className="relative shrink-0">
+            <div className={cn("relative w-full overflow-hidden bg-surface-sunken", isProject ? "aspect-[16/10]" : "aspect-[5/4]")}>
               {hasHeroImage ? (
                 <Image
                   src={heroUrl!}
@@ -548,7 +595,12 @@ export function RecordDrawer({
               {/* Top scrim keeps the floating controls legible; bottom fade
                   blends the image into the title that overlaps it. */}
               <div className="pointer-events-none absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-foreground/35 to-transparent" />
-              <div className="pointer-events-none absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-background via-background/40 to-transparent" />
+              <div
+                className={cn(
+                  "pointer-events-none absolute inset-x-0 bottom-0 bg-gradient-to-t from-background to-transparent",
+                  isProject ? "h-24 via-background/15" : "h-32 via-background/40",
+                )}
+              />
               {record.kind === "occurrence" && occurrenceImageCount > 1 ? (
                 <HeroCarouselControls
                   index={activeOccurrenceImage}
@@ -584,17 +636,36 @@ export function RecordDrawer({
           </div>
         )}
 
-        <div className={`px-6 pb-12 ${showHero ? "-mt-10" : "pt-5"}`}>
+        <div
+          className={cn(
+            "pb-12",
+            isProject
+              ? showHero
+                ? "relative -mt-10 rounded-t-[28px] bg-background px-7 pt-7 sm:px-8"
+                : "px-7 pt-6 sm:px-8"
+              : `px-6 ${showHero ? "-mt-10" : "pt-5"}`,
+          )}
+        >
           {record.kind === "site" ? <TrustedByBadges did={record.did} className="relative mb-3" variant="compact" /> : null}
-          <h2 className="relative font-instrument text-[30px] italic leading-[1.08] tracking-[-0.01em] text-foreground">
+          <h2
+            className={cn(
+              "relative font-instrument leading-[1.08] tracking-[-0.01em] text-foreground",
+              isProject ? "text-[34px] sm:text-[36px]" : "text-[30px] italic",
+            )}
+          >
             {title}
           </h2>
           {(record.kind === "bumicert" || record.kind === "project") && record.scopeTags && record.scopeTags.length > 0 && (
-            <div className="mt-3 flex flex-wrap gap-2">
+            <div className={cn("mt-3 flex flex-wrap", isProject ? "gap-1.5" : "gap-2")}>
               {record.scopeTags.map((tag, i) => (
                 <span
                   key={`${tag}-${i}`}
-                  className="inline-flex h-7 items-center rounded-full bg-muted px-3 text-[13px] font-medium text-muted-foreground"
+                  className={cn(
+                    "inline-flex items-center rounded-full font-medium text-muted-foreground",
+                    isProject
+                      ? "h-6 border border-border-soft bg-background px-2.5 text-[11.5px]"
+                      : "h-7 bg-muted px-3 text-[13px]",
+                  )}
                 >
                   {formatWorkScopeTag(tag, workScopeLabels)}
                 </span>
@@ -607,14 +678,44 @@ export function RecordDrawer({
 
           {/* Open the dedicated, iNaturalist-style observation page. */}
           {observationHref && <DetailLinkRow href={observationHref} label={t("actions.viewObservation")} />}
-          {/* Open the dedicated project page — kept at the top to match the
-              observation and cert actions. */}
-          {projectHref && <DetailLinkRow href={projectHref} label={t("actions.viewProject")} />}
           {shortLead && (
-            <p className="mt-2.5 text-[14.5px] leading-[1.55] text-foreground/72">
+            <p className={cn("text-foreground/72", isProject ? "mt-3 text-[15px] leading-[1.65]" : "mt-2.5 text-[14.5px] leading-[1.55]")}>
               {shortLead}
             </p>
           )}
+          {/* Project descriptions come before the action, so people can scan
+              what the project does before deciding to open the full page. */}
+          {projectHref && <DetailLinkRow href={projectHref} label={t("actions.viewProject")} featured />}
+          {record.kind === "project" ? <ProjectFeaturedToggle projectUri={record.atUri} variant="sidebar" className="mt-3" /> : null}
+
+          {record.kind === "project" && projectDonation?.gainforestDonation ? (
+            <div className="mt-3">
+              <DonateButton
+                bumicert={{
+                  organizationDid: projectDonation.gainforestDonation.organizationDid,
+                  rkey: projectDonation.gainforestDonation.rkey,
+                  title: record.title,
+                  organizationName: record.creatorName ?? record.title,
+                  image: record.imageUrl,
+                }}
+                fundingConfig={projectDonation.gainforestDonation}
+                disabled={false}
+                label={t("actions.donate")}
+                className="h-12 rounded-xl text-[14px] font-semibold shadow-sm shadow-primary/15"
+              />
+            </div>
+          ) : record.kind === "project" && projectDonation?.maEarth ? (
+            <a
+              href={projectDonation.maEarth.donateUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mt-3 inline-flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-primary px-5 text-[14px] font-semibold text-primary-foreground shadow-sm shadow-primary/15 transition-all hover:-translate-y-px hover:bg-primary/90 hover:shadow-md"
+            >
+              <HeartIcon className="size-5" aria-hidden />
+              {t("actions.donate")}
+              <ArrowUpRightIcon className="size-4" aria-hidden />
+            </a>
+          ) : null}
 
           {/* Primary actions — donate (only when accepting), open the full
               page, share */}
@@ -635,30 +736,44 @@ export function RecordDrawer({
           )}
 
           {/* Owner identity + created date */}
-          <div className="mt-5 rounded-2xl bg-foreground/[0.04] p-3.5">
-            <AuthorChip
-              did={record.did}
-              createdAt={record.createdAt}
-              avatarOverride={ownerAvatarOverride}
-              avatarRefOverride={ownerAvatarRefOverride}
-              nameOverride={ownerNameOverride}
-            />
-            {/* When the drawer record *is* an organization/person, opening
-                their profile is the primary action, so keep the full button.
-                For projects, observations and certs it is a secondary link —
-                rendered quietly so it is not mistaken for the "View project" /
-                "View observation" action above. */}
-            {record.kind === "site" ? (
-              <DetailLink href={ownerHref} label={t("actions.viewProfile")} className="mt-3 w-full" />
-            ) : (
-              <Link
-                href={ownerHref}
-                className="mt-2.5 inline-flex items-center gap-1 text-[13px] font-medium text-muted-foreground transition-colors hover:text-primary"
-              >
-                {t("actions.viewProfile")}
-                <ArrowUpRightIcon className="h-3.5 w-3.5" aria-hidden />
-              </Link>
+          <div
+            className={cn(
+              "mt-5",
+              isProject
+                ? "border-y border-border-soft py-3.5"
+                : "rounded-2xl bg-foreground/[0.04] p-3.5",
             )}
+          >
+            <div className={cn(isProject && "flex items-center gap-3")}>
+              <AuthorChip
+                did={record.did}
+                createdAt={record.createdAt}
+                avatarOverride={ownerAvatarOverride}
+                avatarRefOverride={ownerAvatarRefOverride}
+                nameOverride={ownerNameOverride}
+                className={cn(isProject && "flex-1")}
+                onOpenAccount={onClose}
+              />
+              {/* When the drawer record *is* an organization/person, opening
+                  their profile is the primary action, so keep the full button.
+                  For projects, observations and certs it is a secondary link —
+                  rendered quietly so it is not mistaken for the "View project" /
+                  "View observation" action above. */}
+              {record.kind === "site" ? (
+                <DetailLink href={ownerHref} label={t("actions.viewProfile")} className="mt-3 w-full" />
+              ) : (
+                <Link
+                  href={ownerHref}
+                  className={cn(
+                    "inline-flex shrink-0 items-center gap-1 text-[13px] font-medium text-muted-foreground transition-colors hover:text-primary",
+                    !isProject && "mt-2.5",
+                  )}
+                >
+                  {t("actions.viewProfile")}
+                  <ArrowUpRightIcon className="h-3.5 w-3.5" aria-hidden />
+                </Link>
+              )}
+            </div>
             {detail?.socials && detail.socials.length > 0 && (
               <div className="mt-3 flex flex-wrap items-center gap-2">
                 {detail.socials.map((s) => (
@@ -683,7 +798,7 @@ export function RecordDrawer({
               projects and organizations (each likes its own record URI, so the
               count matches the feed). */}
           {(record.kind === "occurrence" || record.kind === "project" || record.kind === "site") && (
-            <div className="mt-4 border-t border-border-soft pt-3">
+            <div className={cn(isProject ? "mt-1 px-0.5 py-2" : "mt-4 border-t border-border-soft pt-3")}>
               <RecordEngagement subjectUri={record.atUri} />
             </div>
           )}
@@ -1773,16 +1888,23 @@ function DetailLink({ href, label, className }: { href: string; label: string; c
   );
 }
 
-function DetailLinkRow({ href, label }: { href: string; label: string }) {
+function DetailLinkRow({ href, label, featured = false }: { href: string; label: string; featured?: boolean }) {
   return (
-    <div className="mt-5 flex items-center gap-2.5">
-      <DetailLink href={href} label={label} className="flex-1" />
-      <ShareIconButton path={href} />
+    <div className={cn("flex items-center", featured ? "mt-5 gap-2" : "mt-5 gap-2.5")}>
+      <DetailLink
+        href={href}
+        label={label}
+        className={cn(
+          "flex-1",
+          featured && "h-12 rounded-xl border-primary/20 bg-primary/[0.07] font-semibold text-primary hover:bg-primary/[0.11]",
+        )}
+      />
+      <ShareIconButton path={href} className={featured ? "h-12 w-12 rounded-xl" : undefined} />
     </div>
   );
 }
 
-function ShareIconButton({ path }: { path: string }) {
+function ShareIconButton({ path, className }: { path: string; className?: string }) {
   const [copied, setCopied] = useState(false);
   const t = useTranslations("marketplace.recordDrawer");
 
@@ -1800,7 +1922,10 @@ function ShareIconButton({ path }: { path: string }) {
       onClick={handleShare}
       aria-label={t("actions.copyLink")}
       title={copied ? t("actions.copied") : t("actions.copyLink")}
-      className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-border-soft bg-background text-foreground/60 transition-colors hover:border-primary/40 hover:text-primary"
+      className={cn(
+        "inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-border-soft bg-background text-foreground/60 transition-colors hover:border-primary/40 hover:bg-primary/[0.04] hover:text-primary",
+        className,
+      )}
     >
       {copied ? (
         <CheckIcon className="h-4 w-4 text-primary" />
@@ -2031,9 +2156,10 @@ function BumicertStatStrip({ record }: { record: Extract<ExplorerRecord, { kind:
   const t = useTranslations("marketplace.recordDrawer.bumicertStats");
   const period = useMemo(() => {
     if (!record.startDate && !record.endDate) return null;
-    const start = record.startDate ? formatDate(record.startDate) : "—";
-    const end = record.endDate ? formatDate(record.endDate) : "—";
-    return `${start} → ${end}`;
+    const start = record.startDate ? formatDate(record.startDate) : null;
+    const end = record.endDate ? formatDate(record.endDate) : null;
+    if (start && end) return `${start} → ${end}`;
+    return start ?? end;
   }, [record.startDate, record.endDate]);
 
   return (

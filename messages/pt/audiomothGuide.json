@@ -1,0 +1,166 @@
+{
+  "meta": {
+    "title": "Como instalar seu AudioMoth",
+    "description": "Um guia de campo interativo para preparar, configurar, instalar e recolher um gravador AudioMoth com o Arbimon."
+  },
+  "hero": {
+    "kicker": "Guia de campo · Monitoramento acústico",
+    "title": "Como instalar seu AudioMoth",
+    "lead": "Prepare o gravador, configure uma programação confiável, conecte a instalação ao Arbimon e leve as gravações de volta com segurança.",
+    "time": "Cerca de 30 minutos de preparação",
+    "deployment": "Planejado para uma instalação de duas semanas"
+  },
+  "chapters": {
+    "label": "Capítulos do guia",
+    "prepare": "Preparar",
+    "account": "Arbimon",
+    "configure": "Configurar",
+    "deploy": "Instalar",
+    "retrieve": "Recolher",
+    "upload": "Enviar"
+  },
+  "video": {
+    "title": "Assista ao passo a passo em campo",
+    "caption": "Veja todo o processo antes de levar o equipamento a campo.",
+    "frameTitle": "Vídeo: como instalar um AudioMoth"
+  },
+  "prepare": {
+    "heading": "Antes de começar",
+    "intro": "Use esta lista para não esquecer nada importante. Seu progresso fica salvo neste dispositivo e permanece após atualizar a página.",
+    "equipment": {
+      "computer": "Notebook ou computador",
+      "recorder": "AudioMoth e 3 pilhas AA",
+      "cable": "Cabo de dados Micro USB compatível com o computador",
+      "reader": "Leitor ou adaptador de cartão MicroSD",
+      "card": "Cartão MicroSD de até 32 GB",
+      "case": "Capa impermeável de celular ou saco hermético resistente"
+    },
+    "remaining": "{count, plural, =0 {Tudo pronto} one {Falta # item} other {Faltam # itens}}",
+    "reset": "Reiniciar lista"
+  },
+  "account": {
+    "heading": "Crie seu projeto no Arbimon",
+    "intro": "O projeto mantém gravações, locais e notas de campo juntos.",
+    "accountTitle": "1. Crie uma conta",
+    "accountText": "Acesse o Arbimon, escolha Sign up ou Start Analyzing, preencha o formulário e confirme seu e-mail.",
+    "projectTitle": "2. Crie um projeto",
+    "projectText": "Escolha Create a new project, digite um nome exclusivo e envie o formulário. O projeto aparecerá em My Projects.",
+    "tip": "Escolha um nome que toda a equipe reconheça, como a paisagem e o período da pesquisa."
+  },
+  "configure": {
+    "heading": "Configure o gravador",
+    "intro": "Conecte o AudioMoth ao computador e passe por estas quatro etapas. Selecione uma para ver os detalhes.",
+    "flashTab": "1 · Sistema interno",
+    "timeTab": "2 · Hora e ID",
+    "recordTab": "3 · Gravação",
+    "cardTab": "4 · Cartão SD",
+    "flashTitle": "Atualize o firmware",
+    "flashText": "Insira três pilhas AA, conecte o gravador com o cabo Micro USB e abra o Flash App. Baixe o firmware mais recente e escolha Flash AudioMoth.",
+    "timeTitle": "Ajuste o relógio e identifique o dispositivo",
+    "timeText": "Abra o Time App e escolha Set Time. Encontre o Device ID, anote os dois primeiros e os dois últimos caracteres e coloque esse ID curto no gravador.",
+    "idExample": "Exemplo: 242A2605648778E7 vira 24E7",
+    "recordTitle": "Aplique a programação de gravação da GainForest",
+    "recordText": "No Configuration App, informe as configurações abaixo. Elas gravam um minuto a cada cinco minutos e servem para duas semanas.",
+    "sampleRate": "Taxa de amostragem",
+    "sampleValue": "48 kHz",
+    "recordDuration": "Gravação",
+    "recordValue": "1 minuto",
+    "sleepDuration": "Pausa",
+    "sleepValue": "4 minutos",
+    "schedule": "Programação diária",
+    "scheduleValue": "00:00–24:00",
+    "chime": "Sinal acústico",
+    "chimeValue": "Sempre obrigatório ao mudar para CUSTOM",
+    "recordWarning": "Para outro objetivo ou duração, consulte a liderança de bioacústica antes de alterar estas configurações.",
+    "save": "Escolha Configure AudioMoth para salvar as configurações.",
+    "cardTitle": "Identifique e insira o cartão MicroSD",
+    "cardText": "Identifique o cartão com caneta branca ou etiqueta fina. Insira-o no AudioMoth até ouvir o clique.",
+    "formatNote": "Cartões de até 32 GB devem usar FAT32. Cartões maiores podem usar exFAT, mas recomendamos até 32 GB.",
+    "switchLabel": "Seletor do gravador",
+    "switchOff": "USB/OFF",
+    "switchCustom": "CUSTOM",
+    "switchDefault": "DEFAULT",
+    "offStatus": "Conectado para configurar",
+    "customStatus": "Aguardando a programação",
+    "defaultStatus": "Gravando imediatamente",
+    "greenLed": "Verde pisca durante a espera",
+    "redLed": "Vermelho pisca durante a gravação"
+  },
+  "test": {
+    "heading": "Teste antes de sair",
+    "intro": "Um teste de dois minutos pode evitar uma viagem de campo perdida.",
+    "s1": "Mova o seletor para DEFAULT e deixe o gravador funcionar por alguns minutos.",
+    "s2": "Volte o seletor para USB/OFF.",
+    "s3": "Retire o cartão MicroSD e coloque-o no computador.",
+    "s4": "Abra o cartão e escute um dos novos arquivos de áudio.",
+    "success": "Se os arquivos estiverem presentes e audíveis, o gravador está pronto para ser instalado."
+  },
+  "deploy": {
+    "heading": "Instale com o Companion App",
+    "intro": "Complete estas etapas no local. O aplicativo conecta o local, as coordenadas e as fotos corretas ao gravador.",
+    "offline": "Vai ficar sem internet? Entre no Companion App antes de perder a conexão. A instalação será sincronizada quando você se reconectar.",
+    "back": "Voltar",
+    "next": "Próximo",
+    "play": "Reproduzir passo a passo",
+    "pause": "Pausar passo a passo",
+    "stepLabel": "Etapa {n} de {total}",
+    "steps": {
+      "s1": {
+        "title": "Abra a lista de instalação",
+        "text": "Escolha seu projeto, toque no botão verde de mais e selecione AudioMoth."
+      },
+      "s2": {
+        "title": "Defina o local da instalação",
+        "text": "Escolha Set deployment site, marque a localização do gravador e confirme."
+      },
+      "s3": {
+        "title": "Sincronize o gravador",
+        "text": "Coloque o seletor em USB/OFF e escolha Begin Sync. Quando o sinal tocar, mude para CUSTOM, aproxime o celular e reduza o ruído. Confirme que a luz vermelha não está acesa continuamente."
+      },
+      "s4": {
+        "title": "Fotografe e instale",
+        "text": "Adicione até dez fotos, se desejar, e escolha DEPLOY. Um marcador aparecerá no mapa após salvar."
+      }
+    },
+    "whyHeading": "O que o aplicativo salva",
+    "whySite": "O projeto e o local corretos",
+    "whyLocation": "As coordenadas da instalação",
+    "whyPhotos": "Fotos de campo e estado da sincronização"
+  },
+  "tips": {
+    "heading": "Dicas de posicionamento",
+    "water": "Proteja o gravador em uma capa impermeável para atividades aquáticas ou em um saco resistente bem fechado.",
+    "camouflage": "Use uma capa camuflada quando possível e deixe-a fora da vista casual.",
+    "rope": "Prenda a capa a uma árvore com corda fina sem bloquear a abertura do microfone.",
+    "tide": "Em manguezais, coloque-o acima da maré mais alta prevista.",
+    "sound": "Mantenha o microfone longe de folhas roçando, tiras soltas e outras fontes de ruído."
+  },
+  "retrieve": {
+    "heading": "Recolha seu AudioMoth",
+    "intro": "Ao final da pesquisa, pare o gravador antes de abrir a capa.",
+    "off": "Mova o seletor de CUSTOM para USB/OFF.",
+    "remove": "Retire o cartão MicroSD e mantenha-o junto do ID curto do gravador.",
+    "check": "Insira o cartão em um computador e, se possível, escute algumas gravações antes de sair da área."
+  },
+  "upload": {
+    "heading": "Importe as gravações",
+    "intro": "A equipe da GainForest normalmente cuida desta etapa. Parceiros comunitários podem seguir este processo quando necessário.",
+    "s1": "Insira o cartão MicroSD no computador usando um leitor ou adaptador.",
+    "s2": "Abra o Arbimon Uploader e entre na sua conta.",
+    "s3": "Escolha Import Files e selecione o cartão ou a pasta. Você também pode arrastar a pasta para o programa.",
+    "s4": "Confirme se o projeto e o local exibidos correspondem à instalação.",
+    "s5": "Escolha Import e depois inicie o envio.",
+    "s6": "Mantenha o programa aberto até todos os arquivos terminarem de ser enviados.",
+    "slow": "Pesquisas grandes podem demorar. Você pode continuar outras tarefas enquanto o envio acontece.",
+    "checkHeading": "Confira o resultado",
+    "checkText": "Abra o painel do projeto no Arbimon e atualize a página. As novas gravações e visualizações sonoras devem aparecer.",
+    "admin": "Adicione tech@gainforest.net como administrador do projeto se quiser ajuda da GainForest para organizar os dados."
+  },
+  "finish": {
+    "heading": "Tudo pronto para o campo?",
+    "text": "Revise a lista de equipamentos, leve pilhas extras e mantenha o ID do gravador junto das notas de campo.",
+    "tool": "Abrir a ferramenta de configuração do AudioMoth",
+    "soundscape": "Gerenciar gravações do AudioMoth",
+    "arbimon": "Ir para o Arbimon"
+  }
+}

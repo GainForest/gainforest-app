@@ -1,0 +1,45 @@
+{
+  "metadata": {
+    "title": "Excluir sua conta",
+    "description": "Como excluir sua conta da GainForest, quais dados são removidos e o que fazer se precisar de ajuda."
+  },
+  "title": "Excluir sua conta",
+  "lastUpdated": "Última atualização: 14 de julho de 2026",
+  "intro": {
+    "p1": "Sua conta da GainForest é usada tanto em gainforest.app quanto no aplicativo móvel Taina Field. Você pode excluí-la a qualquer momento, diretamente no aplicativo web: a exclusão é imediata, permanente e não pode ser desfeita."
+  },
+  "sections": {
+    "howTo": {
+      "title": "Como excluir sua conta",
+      "steps": {
+        "s1": "Entre em gainforest.app.",
+        "s2": "Abra as configurações da sua conta em gainforest.app/settings.",
+        "s3": "Expanda a seção \"Advanced\" (avançado) no fim da página e localize a \"Danger zone\" (zona de perigo).",
+        "s4": "Clique em \"Delete account…\" (excluir conta). Você verá um resumo de tudo o que será removido.",
+        "s5": "Digite a frase de confirmação e confirme. Seus dados são excluídos imediatamente e sua sessão é encerrada."
+      },
+      "p1": "Não há período de carência nem janela de recuperação: depois de confirmada, a exclusão não pode ser revertida."
+    },
+    "whatIsDeleted": {
+      "title": "O que é excluído",
+      "paragraphs": {
+        "p1": "Todos os registros que a GainForest guardou no seu repositório pessoal de dados são removidos permanentemente: seu perfil da GainForest, projetos e locais, observações de biodiversidade, certs e coleções, publicações e curtidas do feed, selos e assinaturas, registros de áudio e multimídia, e os vínculos com suas carteiras."
+      }
+    },
+    "whatIsNotDeleted": {
+      "title": "O que não é excluído",
+      "paragraphs": {
+        "p1": "A GainForest é construída sobre o AT Protocol, no qual sua identidade e seu repositório de dados pertencem a você — não a nós. Excluir sua conta da GainForest remove tudo o que a GainForest escreveu no seu repositório, mas sua identidade no AT Protocol (seu handle e seu DID) e seu acesso permanecem, assim como os dados criados por outros aplicativos.",
+        "p2": "Se você for responsável por organizações na GainForest, elas ficarão sem proprietário; você precisará confirmar isso antes de a exclusão ser executada.",
+        "p3": "Os dados que o Taina Field guarda localmente no seu dispositivo permanecem lá até que você apague o aplicativo ou os dados dele.",
+        "p4": "Como o AT Protocol é uma rede aberta e federada, cópias de registros que você publicou podem existir em servidores de terceiros. A exclusão remove os registros na origem e sinaliza aos serviços que seguem o protocolo que removam suas cópias. Veja mais detalhes na nossa política de privacidade em gainforest.app/privacy."
+      }
+    },
+    "help": {
+      "title": "Não consegue entrar ou precisa de ajuda?",
+      "paragraphs": {
+        "p1": "Escreva para team@gainforest.net usando o e-mail associado à sua conta, com o assunto \"Excluir minha conta\". Talvez precisemos verificar sua identidade, e atenderemos sua solicitação dentro do prazo exigido pela lei aplicável. Você também pode usar esse endereço para qualquer outra solicitação sobre seus dados."
+      }
+    }
+  }
+}

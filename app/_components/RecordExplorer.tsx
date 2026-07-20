@@ -155,11 +155,13 @@ type Phase = "idle" | "loading" | "ready" | "error" | "more";
 type OccurrenceCategory = "all" | "plants" | "trees" | "birds" | "flowers";
 type SortMode = "newest" | "oldest" | "az" | "za";
 type ViewMode = "cards" | "list" | "map";
+type CardDensity = "comfortable" | "compact";
 
 const QUERY_STATE_OPTIONS = { history: "replace", scroll: false, shallow: true } as const;
 const SEARCH_QUERY_STATE_OPTIONS = { ...QUERY_STATE_OPTIONS, throttleMs: 200 } as const;
 const SORT_MODES: SortMode[] = ["newest", "oldest", "az", "za"];
 const VIEW_MODES: ViewMode[] = ["cards", "list", "map"];
+const CARD_DENSITIES: CardDensity[] = ["comfortable", "compact"];
 const OCCURRENCE_MEDIA_FILTERS: OccurrenceFilter[] = ["image", "audio", "all"];
 const OCCURRENCE_CATEGORIES: OccurrenceCategory[] = ["all", "plants", "trees", "birds", "flowers"];
 const BADGE_FILTER_KEYS: BumicertBadgeFilter[] = ["gainforest", "maearth"];
@@ -209,6 +211,7 @@ export function RecordExplorer({
   enableOwnerFilter = false,
   defaultOccurrenceMedia = DEFAULT_OCCURRENCE_MEDIA,
   leadingCard,
+  compactLeadingCard,
   emptyState,
   showStatsOverview = true,
   hiddenRecordIds,
@@ -219,6 +222,9 @@ export function RecordExplorer({
   emptyFilteredBody,
   hideToolbarWhenEmpty = false,
   hideOccurrenceFilters = false,
+  toolbarAfterSearchRow,
+  enableCompactObservationCards = false,
+  defaultCardDensity = "comfortable",
   onEmptyStateChange,
 }: {
   kind: RecordKind;
@@ -233,6 +239,8 @@ export function RecordExplorer({
   enableOwnerFilter?: boolean;
   defaultOccurrenceMedia?: OccurrenceFilter;
   leadingCard?: ReactNode;
+  /** Optional replacement for the leading card when observation cards are compact. */
+  compactLeadingCard?: ReactNode;
   emptyState?: ReactNode;
   showStatsOverview?: boolean;
   hiddenRecordIds?: ReadonlySet<string>;
@@ -254,6 +262,12 @@ export function RecordExplorer({
    *  and manage views, where a single person's small set of sightings doesn't
    *  warrant the global explore page's filters — keeps the surface minimal. */
   hideOccurrenceFilters?: boolean;
+  /** Extra controls rendered directly below the search/view row. */
+  toolbarAfterSearchRow?: ReactNode;
+  /** Enables a small cards-only density toggle for observation tiles. */
+  enableCompactObservationCards?: boolean;
+  /** Initial density for cards; pages can opt into compact without changing global defaults. */
+  defaultCardDensity?: CardDensity;
   /** Fires with true once the explorer has loaded and holds zero records (no
    *  data at all), false otherwise. Lets a parent collapse its own chrome. */
   onEmptyStateChange?: (isEmpty: boolean) => void;
@@ -305,6 +319,10 @@ export function RecordExplorer({
     values: VIEW_MODES,
     defaultValue: "cards",
   });
+  const [cardDensity, setCardDensity] = useQueryState(
+    "density",
+    parseAsStringEnum<CardDensity>(CARD_DENSITIES).withDefault(defaultCardDensity).withOptions(QUERY_STATE_OPTIONS),
+  );
   const [recordParamValue, setRecordParamValue] = useQueryState(
     "record",
     parseAsString.withOptions(QUERY_STATE_OPTIONS),
@@ -617,14 +635,20 @@ export function RecordExplorer({
 
   useEffect(() => {
     setCardLimit(INITIAL_CARD_LIMIT);
-  }, [deferredQuery, kind, occCategory, occMedia, siteSource, sort, badgeFilters, view]);
+  }, [deferredQuery, kind, occCategory, occMedia, siteSource, sort, badgeFilters, view, cardDensity]);
   // Embedded account/manage explorers keep compact loaded-record summaries.
   const stats = useMemo(
     () => shouldShowStatsOverview ? (kind === "occurrence" && !ownerDid && occurrenceStats ? computeOccurrenceTotalStats(occurrenceStats, records) : computeStats(records, kind)) : [],
     [kind, occurrenceStats, ownerDid, records, shouldShowStatsOverview],
   );
   const showStats = shouldShowStatsOverview && (kind === "occurrence" ? ownerDid ? records.length > 0 : Boolean(occurrenceStats) || (!occurrenceStatsLoading && records.length > 0) : records.length > 0);
-  const gridCls = kind === "occurrence" ? GALLERY_GRID_CLS : GRID_CLS;
+  const compactObservationCards = enableCompactObservationCards && kind === "occurrence" && view === "cards" && cardDensity === "compact";
+  const activeLeadingCard = compactObservationCards && compactLeadingCard ? compactLeadingCard : leadingCard;
+  const gridCls = kind === "occurrence"
+    ? compactObservationCards
+      ? "grid grid-cols-3 gap-1.5 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 2xl:grid-cols-10"
+      : GALLERY_GRID_CLS
+    : GRID_CLS;
   // While a project filter is active and the stream is still walking, keep the
   // skeleton up so a partial page does not briefly read as empty.
   const showSkeleton = ((phase === "idle" || phase === "loading") && records.length === 0) || Boolean(filterUris && filtered.length === 0 && (walking || hasMore));
@@ -719,7 +743,34 @@ export function RecordExplorer({
                 </button>
               ))}
             </div>
+
+            {enableCompactObservationCards && kind === "occurrence" && view === "cards" ? (
+              <div className="inline-flex h-10 shrink-0 items-center rounded-full border border-border bg-background/50 p-0.5 backdrop-blur" aria-label={observationsT("view.density")}> 
+                {([
+                  { id: "compact", label: observationsT("view.compact"), icon: <CompactCardsGlyph /> },
+                  { id: "comfortable", label: observationsT("view.comfortable"), icon: <CardsGlyph /> },
+                ] as const).map((option) => (
+                  <button
+                    key={option.id}
+                    type="button"
+                    onClick={() => void setCardDensity(option.id)}
+                    aria-pressed={cardDensity === option.id}
+                    aria-label={option.label}
+                    title={option.label}
+                    className={`grid h-9 w-9 shrink-0 place-items-center rounded-full transition-colors ${
+                      cardDensity === option.id
+                        ? "bg-primary text-primary-foreground"
+                        : "text-muted-foreground hover:text-foreground"
+                    }`}
+                  >
+                    {option.icon}
+                  </button>
+                ))}
+              </div>
+            ) : null}
           </div>
+
+          {toolbarAfterSearchRow ? <div className="animate-in" style={{ animationDelay: "100ms" }}>{toolbarAfterSearchRow}</div> : null}
 
           {ownerFilterActive && ownerDid ? (
             <OwnerFilterBanner ownerDid={ownerDid} onClear={() => setOwnerDid(null)} />
@@ -849,18 +900,20 @@ export function RecordExplorer({
               onOpen={setDrawer}
               onFilterOwner={ownerFilterActive ? setOwnerDid : undefined}
               className={gridCls}
-              leadingCard={leadingCard}
+              leadingCard={activeLeadingCard}
+              leadingCardClassName={enableCompactObservationCards ? "col-span-2" : undefined}
               selection={observationSelection}
+              compact={compactObservationCards}
             />
           ) : (
             <ul role="list" className={gridCls}>
-              {leadingCard ? (
+              {activeLeadingCard ? (
                 <li className="animate-in" style={{ animationDelay: "0ms" }}>
-                  {leadingCard}
+                  {activeLeadingCard}
                 </li>
               ) : null}
               {renderedRecords.map((r, i) => (
-                <li key={r.id} className="animate-in" style={{ animationDelay: `${Math.min(i + (leadingCard ? 1 : 0), 12) * 18}ms` }}>
+                <li key={r.id} className="animate-in" style={{ animationDelay: `${Math.min(i + (activeLeadingCard ? 1 : 0), 12) * 18}ms` }}>
                   <RecordCard record={r} onOpen={setDrawer} />
                 </li>
               ))}
@@ -1966,6 +2019,16 @@ function mediaLabel(kind: OccurrenceRecord["media"][number]): string {
 
 function CardsGlyph() {
   return <LayoutGridIcon width={16} height={16} aria-hidden />;
+}
+
+function CompactCardsGlyph() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden>
+      {[1, 6, 11].flatMap((x) => [1, 6, 11].map((y) => (
+        <rect key={`${x}-${y}`} x={x} y={y} width="3" height="3" rx="0.8" stroke="currentColor" strokeWidth="1.4" />
+      )))}
+    </svg>
+  );
 }
 
 function ListGlyph() {

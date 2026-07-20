@@ -10,7 +10,10 @@
       "menu": "Menu",
       "navigation": "Navegação",
       "close": "Fechar",
-      "theme": "Tema"
+      "theme": "Tema",
+      "projects": "Projetos",
+      "observations": "Observações",
+      "bioblitz": "BioBlitz"
     },
     "hero": {
       "imageAlt": "Vale de floresta tropical com neblina",
@@ -21,12 +24,12 @@
     },
     "paths": {
       "title": "Escolha seu caminho",
-      "description": "Se você veio financiar impacto ou mostrar seu trabalho, há um lugar para você.",
+      "description": "Se você veio explorar evidências de campo ou mostrar seu trabalho, há um lugar para você.",
       "cards": {
         "funders": {
-          "label": "Para financiadores",
-          "title": "Quero apoiar",
-          "emphasis": "um projeto",
+          "label": "Para exploradores",
+          "title": "Quero explorar",
+          "emphasis": "evidências de campo",
           "description": "Explore registros verificados de trabalho ambiental real — os momentos exatos da restauração, como aconteceram no campo.",
           "cta": "Explorar registros",
           "alt": "Rio serpenteando pela floresta tropical"
@@ -35,7 +38,7 @@
           "label": "Para organizações",
           "title": "Sou guardião",
           "emphasis": "da natureza",
-          "description": "Mostre seu trabalho regenerativo e conecte-se com financiadores que se importam.",
+          "description": "Mostre seu trabalho regenerativo e as evidências por trás dele.",
           "cta": "Gerenciar minha organização",
           "alt": "Cachoeira em uma floresta tropical"
         }
@@ -44,10 +47,10 @@
     "explainer": {
       "eyebrow": "Assista à explicação",
       "titlePrefix": "Uma nova forma de",
-      "titleEmphasis": "financiar a natureza",
-      "description": "Em dois minutos, veja como os Bumicerts transformam o trabalho de campo real em registros verificáveis e enviam financiamento diretamente aos guardiões locais que realizam o trabalho.",
+      "titleEmphasis": "documentar a natureza",
+      "description": "Em dois minutos, veja como os Bumicerts transformam o trabalho de campo real em registros verificáveis para guardiões locais da natureza.",
       "play": "Reproduzir vídeo",
-      "videoTitle": "Bumicerts: um mecanismo de financiamento da natureza novo e equitativo para guardiões locais"
+      "videoTitle": "Bumicerts: registros verificáveis da natureza para guardiões locais"
     },
     "certificate": {
       "eyebrow": "O certificado",
@@ -66,8 +69,8 @@
         },
         "communities": {
           "id": "3",
-          "question": "Uma linha direta com comunidades",
-          "answer": "Ao financiar um certificado, seu dinheiro chega às pessoas que fazem a restauração. Sem intermediários absorvendo taxas ou custos vagos."
+          "question": "Um registro compartilhado com comunidades",
+          "answer": "Cada certificado conecta evidências de campo, contexto do projeto e as pessoas ou organizações que fazem o trabalho, para que o registro seja fácil de revisar e compartilhar."
         },
         "story": {
           "id": "4",
@@ -83,7 +86,7 @@
       }
     },
     "footer": {
-      "tagline": "Conectando comunidades a financiadores.",
+      "tagline": "Conectando comunidades por meio de evidências de campo confiáveis.",
       "infrastructure": "Infraestrutura aberta. Criado com GainForest.",
       "documentation": "Documentação",
       "copyright": "Código aberto, movido pela comunidade."
@@ -128,7 +131,7 @@
           "blurb": "As comunidades podem usar suas evidências verificadas ao se candidatar a rodadas de financiamento apoiadas pela comunidade."
         },
         "gainforest": {
-          "blurb": "A GainForest ajuda guardiões da natureza a publicar trabalho verificado, locais, árvores, observações e histórias de projetos."
+          "blurb": "O GainForest ajuda comunidades e organizações a publicar observações de campo, registros de biodiversidade, lugares e histórias de projetos."
         },
         "hypercerts": {
           "blurb": "Declarações abertas de impacto podem se conectar a ferramentas Hypercerts e ecossistemas de financiamento de bens públicos."

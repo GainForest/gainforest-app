@@ -10,7 +10,9 @@ import { AutoRefresh } from "./_components/AutoRefresh";
 import { getAccountRouteData, readAccountRouteParams } from "../../../account/_lib/account-route";
 import { accountHref, localProjectHref } from "../../../_lib/urls";
 import { RecordEngagement } from "../../../_components/RecordEngagement";
+import { localizedAlternates } from "../../../_lib/seo-metadata";
 import { FollowButton } from "../../../_components/FollowButton";
+import { ProjectFeaturedToggle } from "../../_components/ProjectFeaturedToggle";
 import { getRequestOrigin } from "../../../_lib/request-origin";
 import {
   ProjectDetailView,
@@ -70,15 +72,25 @@ export async function generateMetadata({ params }: { params: ProjectPageParams }
     };
   }
   const description = record.shortDescription?.trim() || t("metaFallback");
+  const detailHref = localProjectHref(urlIdentifier, rkey);
+  const title = t("metaTitle", { name: record.title });
+  const previewImage = record.imageUrl ? [{ url: record.imageUrl, alt: record.title }] : undefined;
   return {
-    title: t("metaTitle", { name: record.title }),
+    title,
     description,
-    alternates: { canonical: localProjectHref(urlIdentifier, rkey) },
+    alternates: await localizedAlternates(localProjectHref(urlIdentifier, rkey)),
     openGraph: {
-      title: record.title,
+      title,
       description,
       type: "article",
-      images: record.imageUrl ? [{ url: record.imageUrl }] : undefined,
+      url: detailHref,
+      images: previewImage,
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      images: previewImage,
     },
   };
 }
@@ -100,6 +112,48 @@ function parseProjectDetailTab(value: string | undefined): ProjectDetailTab {
 
 function projectTabHref(basePath: string, tab: ProjectDetailTab): string {
   return tab === "overview" ? basePath : `${basePath}?${new URLSearchParams({ tab }).toString()}`;
+}
+
+function buildProjectBreadcrumbJsonLd(
+  origin: string,
+  projectHref: string,
+  projectsLabel: string,
+  projectTitle: string,
+): Record<string, unknown> {
+  return {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      {
+        "@type": "ListItem",
+        position: 1,
+        name: "GainForest",
+        item: new URL("/", origin).toString(),
+      },
+      {
+        "@type": "ListItem",
+        position: 2,
+        name: projectsLabel,
+        item: new URL("/projects", origin).toString(),
+      },
+      {
+        "@type": "ListItem",
+        position: 3,
+        name: projectTitle,
+        item: new URL(projectHref, origin).toString(),
+      },
+    ],
+  };
+}
+
+function ProjectBreadcrumbJsonLd({ jsonLd }: { jsonLd: Record<string, unknown> }) {
+  return (
+    <script
+      id="project-breadcrumb-json-ld"
+      type="application/ld+json"
+      dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+    />
+  );
 }
 
 export default async function ProjectDetailPage({
@@ -144,25 +198,29 @@ export default async function ProjectDetailPage({
         redirect(projectTabHref(projectHref, activeTab));
       }
       const t = await getTranslations("marketplace.projectPage");
+      const breadcrumbJsonLd = buildProjectBreadcrumbJsonLd(origin, projectHref, t("back"), record.title);
       return (
-        <ProjectDetailView
-          routeData={routeData}
-          basePath={projectHref}
-          activeTab={activeTab}
-          origin={origin}
-          backHref="/projects"
-          backLabel={t("back")}
-          editHref={`/account/${encodeURIComponent(canonicalIdentifier)}/projects?mode=edit&project=${encodeURIComponent(rkey)}`}
-          editLabel={t("edit")}
-          projectRkey={rkey}
-          // Match timeline evidence pinned to the Cert URI *or* the project
-          // (collection) URI — older projects attached their updates to the
-          // collection, which is where this project's timeline lives.
-          timelineMatchUris={[routeData.record.atUri, record.atUri]}
-          // Like + comment target the project (collection) record, so the count
-          // matches the activity feed (which folds Certs into their project).
-          engagementSubjectUri={record.atUri}
-        />
+        <>
+          <ProjectBreadcrumbJsonLd jsonLd={breadcrumbJsonLd} />
+          <ProjectDetailView
+            routeData={routeData}
+            basePath={projectHref}
+            activeTab={activeTab}
+            origin={origin}
+            backHref="/projects"
+            backLabel={t("back")}
+            editHref={`/account/${encodeURIComponent(canonicalIdentifier)}/projects?mode=edit&project=${encodeURIComponent(rkey)}`}
+            editLabel={t("edit")}
+            projectRkey={rkey}
+            // Match timeline evidence pinned to the Cert URI *or* the project
+            // (collection) URI — older projects attached their updates to the
+            // collection, which is where this project's timeline lives.
+            timelineMatchUris={[routeData.record.atUri, record.atUri]}
+            // Like + comment target the project (collection) record, so the count
+            // matches the activity feed (which folds Certs into their project).
+            engagementSubjectUri={record.atUri}
+          />
+        </>
       );
     }
   }
@@ -182,9 +240,10 @@ async function ProjectFallback({
   rkey: string;
   urlIdentifier: string;
 }) {
-  const [t, owner] = await Promise.all([
+  const [t, owner, origin] = await Promise.all([
     getTranslations("marketplace.projectPage"),
     getAccountRouteData(did, urlIdentifier).catch(() => null),
+    getRequestOrigin(),
   ]);
 
   if (owner && owner.urlIdentifier !== urlIdentifier) {
@@ -193,10 +252,14 @@ async function ProjectFallback({
 
   const ownerIdentifier = owner?.urlIdentifier ?? urlIdentifier;
   const ownerName = owner?.displayName ?? record.creatorName ?? "";
+  const projectHref = localProjectHref(ownerIdentifier, rkey);
+  const breadcrumbJsonLd = buildProjectBreadcrumbJsonLd(origin, projectHref, t("back"), record.title);
 
   return (
-    <main className="min-h-screen bg-background pb-20">
-      <div className="mx-auto max-w-6xl px-6 py-8 lg:px-8">
+    <>
+      <ProjectBreadcrumbJsonLd jsonLd={breadcrumbJsonLd} />
+      <main className="min-h-screen bg-background pb-20">
+        <div className="mx-auto max-w-6xl px-6 py-8 lg:px-8">
         <Link
           href="/projects"
           className="inline-flex items-center gap-1.5 text-[13px] font-medium text-muted-foreground transition-colors hover:text-foreground"
@@ -210,6 +273,7 @@ async function ProjectFallback({
             <FolderKanbanIcon className="h-3.5 w-3.5" aria-hidden />
             {t("kind")}
           </span>
+          <ProjectFeaturedToggle projectUri={record.atUri} />
         </div>
 
         <h1 className="mt-3 font-instrument text-4xl italic leading-tight tracking-[-0.01em] text-foreground md:text-5xl">
@@ -287,9 +351,10 @@ async function ProjectFallback({
               </div>
             </aside>
           ) : null}
+          </div>
         </div>
-      </div>
-    </main>
+      </main>
+    </>
   );
 }
 

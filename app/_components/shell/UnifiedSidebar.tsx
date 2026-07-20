@@ -2,12 +2,15 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { useEffect, useState } from "react";
 import { LayoutGroup, motion } from "framer-motion";
 import {
   BinocularsIcon,
   Building2Icon,
+  ChevronDownIcon,
   ChevronLeftIcon,
   LeafIcon,
+  LayoutGridIcon,
   PlusIcon,
   SparkleIcon,
   UserIcon,
@@ -25,6 +28,7 @@ import {
   useAccountList,
   useActiveAccountContext,
 } from "../../_lib/account-switcher";
+import { AdminOnlyIndicator } from "../AdminOnlyIndicator";
 import { SignInPrompt } from "../AuthFlow";
 import { NAV_ITEMS, isLeafActive, type NavLeaf } from "./nav-config";
 import { useCanonicalPathname } from "./paths";
@@ -182,8 +186,11 @@ function SidebarProfileRow({ did }: { did: string }) {
 function ExploreNav({ sessionDid }: { sessionDid: string | null }) {
   const pathname = useCanonicalPathname();
   const t = useTranslations("common.sidebar.items");
+  const sidebarT = useTranslations("common.sidebar");
   const sectionsT = useTranslations("common.sidebar.sections");
   const collapsed = useSidebarCollapsed();
+  const [moreOpen, setMoreOpen] = useState(false);
+
   // GainForest moderators (members of the admin group, any role) see the
   // admin-only entries. Same detection as the account menu's /admin link;
   // the routes themselves re-check access server-side.
@@ -191,39 +198,113 @@ function ExploreNav({ sessionDid }: { sessionDid: string | null }) {
   const isModerator = groups.some((group) => group.groupDid === GAINFOREST_MODERATION_REPO_DID);
   const sections = NAV_ITEMS.map((section) => ({
     ...section,
-    items: section.items.filter((item) => !item.adminOnly || isModerator),
+    // Organizations are already reached through profiles and the account
+    // switcher; repeating the directory here adds noise without helping the
+    // everyday Feed → Projects → Observations flow.
+    items: section.items.filter((item) => item.id !== "organizations" && (!item.adminOnly || isModerator)),
   })).filter((section) => section.items.length > 0);
+
+  // Keep the everyday path short for new visitors. Specialist destinations
+  // remain one click away and open automatically whenever one is active.
+  const primaryIds = new Set(["feed", "projects", "observations", "globe", "bioblitz", "donations", "grants"]);
+  const primarySections = sections
+    .map((section) => ({ ...section, items: section.items.filter((item) => primaryIds.has(item.id)) }))
+    .filter((section) => section.items.length > 0);
+  const secondarySections = sections
+    .map((section) => ({ ...section, items: section.items.filter((item) => !primaryIds.has(item.id)) }))
+    .filter((section) => section.items.length > 0);
+  const secondaryActive = secondarySections.some((section) =>
+    section.items.some((item) => isLeafActive(item.pathCheck, pathname)),
+  );
+
+  // A secondary route reveals its navigation, but the user can still dismiss
+  // it. Minimizing always closes the disclosure before the sidebar returns.
+  useEffect(() => {
+    if (collapsed) setMoreOpen(false);
+    else if (secondaryActive) setMoreOpen(true);
+  }, [collapsed, secondaryActive]);
+
+  const showMore = moreOpen;
   let leafIndex = 0;
 
+  const renderSections = (items: typeof sections, showSectionLabels: boolean) =>
+    items.map((section, sectionIndex) => (
+      <div key={section.id} className="flex flex-col gap-0.5">
+        {showSectionLabels && !collapsed ? (
+          <p className="px-2.5 pb-1 pt-1 text-[10px] font-medium uppercase tracking-[0.12em] text-muted-foreground">
+            {sectionsT(section.id)}
+          </p>
+        ) : collapsed && sectionIndex > 0 ? (
+          <div aria-hidden className="mx-auto my-1 h-px w-6 rounded-full bg-border" />
+        ) : null}
+        <ul className="flex flex-col gap-0.5">
+          {section.items.map((item) => {
+            leafIndex += 1;
+            return (
+              <NavLeafRow
+                key={item.id}
+                item={{ ...item, text: t(item.id) }}
+                isActive={isLeafActive(item.pathCheck, pathname)}
+                index={leafIndex}
+              />
+            );
+          })}
+        </ul>
+      </div>
+    ));
+
   return (
-    <div className="flex flex-col gap-3">
-      {sections.map((section, sectionIndex) => (
-        <div key={section.id} className="flex flex-col gap-0.5">
-          {collapsed ? (
-            sectionIndex > 0 ? <div aria-hidden className="mx-auto my-1 h-px w-6 rounded-full bg-border" /> : null
+    <div className="flex flex-col gap-1">
+      {renderSections(primarySections, true)}
+      {secondarySections.length > 0 ? (
+        <div className="mt-1 border-t border-border/70 pt-1">
+          {!showMore ? (
+            <SidebarTooltip label={sidebarT("more")}>
+              <button
+                type="button"
+                onClick={() => setMoreOpen(true)}
+                aria-expanded={false}
+                className={cn(
+                  buttonVariants({ variant: "ghost" }),
+                  "h-8 w-full text-muted-foreground hover:text-foreground",
+                  collapsed ? "justify-center px-0" : "justify-start gap-2.5 px-2.5",
+                )}
+              >
+                <span className="flex size-6 shrink-0 items-center justify-center">
+                  <LayoutGridIcon className="size-4" />
+                </span>
+                {collapsed ? null : (
+                  <>
+                    <span className="flex-1 text-left">{sidebarT("more")}</span>
+                    <ChevronDownIcon className="size-3.5" />
+                  </>
+                )}
+              </button>
+            </SidebarTooltip>
           ) : (
-            <p className="px-2.5 pb-1 text-[10px] font-medium uppercase tracking-[0.12em] text-muted-foreground">
-              {sectionsT(section.id)}
-            </p>
+            <>
+              <div className="flex flex-col gap-2">{renderSections(secondarySections, true)}</div>
+              <SidebarTooltip label={sidebarT("hideMore")}>
+                <button
+                  type="button"
+                  onClick={() => setMoreOpen(false)}
+                  aria-expanded={true}
+                  className={cn(
+                    buttonVariants({ variant: "ghost" }),
+                    "mt-1 h-8 w-full text-muted-foreground hover:text-foreground",
+                    collapsed ? "justify-center px-0" : "justify-start gap-2.5 px-2.5",
+                  )}
+                >
+                  <span className="flex size-6 shrink-0 items-center justify-center">
+                    <ChevronDownIcon className="size-4 rotate-180" />
+                  </span>
+                  {collapsed ? null : <span className="flex-1 text-left">{sidebarT("hideMore")}</span>}
+                </button>
+              </SidebarTooltip>
+            </>
           )}
-          <ul className="flex flex-col gap-0.5">
-            {section.items.map((item) => {
-              leafIndex += 1;
-              return (
-                <NavLeafRow
-                  key={item.id}
-                  item={{ ...item, text: t(item.id) }}
-                  isActive={isLeafActive(item.pathCheck, pathname)}
-                  index={leafIndex}
-                  // Certs are minted from a Project, so visually hang Certs
-                  // under Projects (which sits directly above it).
-                  paired={item.id === "bumicerts"}
-                />
-              );
-            })}
-          </ul>
         </div>
-      ))}
+      ) : null}
     </div>
   );
 }
@@ -316,6 +397,9 @@ function NavLeafRow({ item, isActive, index, paired = false }: { item: NavLeaf; 
               <item.Icon className="h-4 w-4 shrink-0" />
             </span>
             {collapsed ? null : <span className="flex-1 text-left">{item.text}</span>}
+            {item.adminOnly ? (
+              <AdminOnlyIndicator className={collapsed ? "absolute right-1 top-1" : undefined} />
+            ) : null}
           </motion.div>
         </Link>
       </SidebarTooltip>
@@ -353,41 +437,34 @@ function BumicertCreationCard({ sessionDid }: { sessionDid: string }) {
   return (
     <div className="group flex flex-col w-full h-20 border border-border bg-background rounded-2xl p-1">
       <div className="flex-1 relative">
-        {/*Left Big Sparkle*/}
         <SparkleIcon
           className="absolute bottom-2 left-4 size-6 rotate-30 opacity-50 group-hover:opacity-30 group-hover:scale-130 text-primary transition-all duration-300 animate-spin-slow"
           fill="currentcolor"
           strokeWidth={0}
         />
-        {/*Left Small Sparkle*/}
         <SparkleIcon
           className="absolute bottom-1 left-12 size-3 rotate-60 opacity-30 group-hover:opacity-50 group-hover:scale-130 text-primary transition-all duration-300 animate-spin-slow"
           fill="currentcolor"
           strokeWidth={0}
         />
-        {/*Right Big Sparkle*/}
         <SparkleIcon
           className="absolute bottom-2 right-2 size-6 rotate-60 opacity-50 group-hover:opacity-30 group-hover:scale-130 text-primary transition-all duration-300 animate-spin-slow"
           fill="currentcolor"
           strokeWidth={0}
         />
-        {/*Right Small Sparkle*/}
         <SparkleIcon
           className="absolute bottom-1 right-10 size-3 rotate-30 opacity-30 group-hover:opacity-50 group-hover:scale-130 text-primary transition-all duration-300 animate-spin-slow"
           fill="currentcolor"
           strokeWidth={0}
         />
-        {/*Hover Transitioning Bumicert Card*/}
         <div className="absolute z-1 -bottom-4 left-1/2 -translate-x-1/2 scale-100 group-hover:scale-120 -rotate-12 group-hover:-rotate-30 transition-transform bg-background/50 backdrop-blur-lg border border-border shadow-xl rounded-xl h-20 w-16 p-1 flex flex-col gap-1">
           <div className="w-full h-10 bg-primary/20 rounded-lg flex items-center justify-center">
             <LeafIcon className="text-primary size-6 opacity-80" />
           </div>
-          <div className="bg-muted h-2 rounded-lg w-8"></div>
-          <div className="bg-muted h-2 rounded-lg w-full"></div>
+          <div className="bg-muted h-2 rounded-lg w-8" />
+          <div className="bg-muted h-2 rounded-lg w-full" />
         </div>
       </div>
-
-      {/*CTA*/}
       <CreateProjectButton
         sessionDid={sessionDid}
         className={cn(
@@ -428,41 +505,34 @@ function AddObservationsCard({ sessionDid }: { sessionDid: string }) {
   return (
     <div className="group flex flex-col w-full h-20 border border-border bg-background rounded-2xl p-1">
       <div className="flex-1 relative">
-        {/*Left Big Sparkle*/}
         <SparkleIcon
           className="absolute bottom-2 left-4 size-6 rotate-30 opacity-50 group-hover:opacity-30 group-hover:scale-130 text-primary transition-all duration-300 animate-spin-slow"
           fill="currentcolor"
           strokeWidth={0}
         />
-        {/*Left Small Sparkle*/}
         <SparkleIcon
           className="absolute bottom-1 left-12 size-3 rotate-60 opacity-30 group-hover:opacity-50 group-hover:scale-130 text-primary transition-all duration-300 animate-spin-slow"
           fill="currentcolor"
           strokeWidth={0}
         />
-        {/*Right Big Sparkle*/}
         <SparkleIcon
           className="absolute bottom-2 right-2 size-6 rotate-60 opacity-50 group-hover:opacity-30 group-hover:scale-130 text-primary transition-all duration-300 animate-spin-slow"
           fill="currentcolor"
           strokeWidth={0}
         />
-        {/*Right Small Sparkle*/}
         <SparkleIcon
           className="absolute bottom-1 right-10 size-3 rotate-30 opacity-30 group-hover:opacity-50 group-hover:scale-130 text-primary transition-all duration-300 animate-spin-slow"
           fill="currentcolor"
           strokeWidth={0}
         />
-        {/*Hover Transitioning Observation Card*/}
         <div className="absolute z-1 -bottom-4 left-1/2 -translate-x-1/2 scale-100 group-hover:scale-120 -rotate-12 group-hover:-rotate-30 transition-transform bg-background/50 backdrop-blur-lg border border-border shadow-xl rounded-xl h-20 w-16 p-1 flex flex-col gap-1">
           <div className="w-full h-10 bg-primary/20 rounded-lg flex items-center justify-center">
             <BinocularsIcon className="text-primary size-6 opacity-80" />
           </div>
-          <div className="bg-muted h-2 rounded-lg w-8"></div>
-          <div className="bg-muted h-2 rounded-lg w-full"></div>
+          <div className="bg-muted h-2 rounded-lg w-8" />
+          <div className="bg-muted h-2 rounded-lg w-full" />
         </div>
       </div>
-
-      {/*CTA*/}
       <AddObservationsButton
         sessionDid={sessionDid}
         dataTaina="add-observations"

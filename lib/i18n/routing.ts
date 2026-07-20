@@ -32,6 +32,15 @@ export function withLocalePrefix(
     : `/${locale}${pathnameWithoutLocale}`;
 }
 
+export function getCanonicalPathname(
+  pathname: string,
+  locale: SupportedLanguageCode = DEFAULT_LANGUAGE,
+): string {
+  const pathnameWithoutLocale = stripLocaleFromPathname(pathname);
+  if (pathnameWithoutLocale === "/" && locale === DEFAULT_LANGUAGE) return "/";
+  return withLocalePrefix(pathnameWithoutLocale, locale);
+}
+
 export function localizeHref(
   href: string,
   locale: SupportedLanguageCode,
@@ -51,4 +60,14 @@ export function getLocalizedPathnames(pathname: string): Record<SupportedLanguag
   return Object.fromEntries(
     SUPPORTED_LOCALES.map((locale) => [locale, withLocalePrefix(pathname, locale)]),
   ) as Record<SupportedLanguageCode, string>;
+}
+
+export function getSeoLocalizedPathnames(pathname: string): Record<SupportedLanguageCode, string> {
+  const pathnames = getLocalizedPathnames(pathname);
+  if (stripLocaleFromPathname(pathname) !== "/") return pathnames;
+
+  return {
+    ...pathnames,
+    [DEFAULT_LANGUAGE]: "/",
+  };
 }

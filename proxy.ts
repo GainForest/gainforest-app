@@ -1,14 +1,16 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { getProxyBlockResult } from "@/lib/proxy-guards";
 import {
+  DEFAULT_LANGUAGE,
   LANGUAGE_COOKIE_NAME,
   resolvePreferredLanguageFromHeader,
   resolveSupportedLanguage,
 } from "@/lib/i18n/languages";
 import {
   LOCALE_REQUEST_HEADER_NAME,
-  getLocalizedPathnames,
+  getCanonicalPathname,
   getPathLocale,
+  getSeoLocalizedPathnames,
   stripLocaleFromPathname,
   withLocalePrefix,
 } from "@/lib/i18n/routing";
@@ -30,17 +32,21 @@ function getSeoLinkHeader(request: NextRequest, pathname: string): string {
   const host = request.headers.get("host") ?? request.nextUrl.host;
   const proto = request.headers.get("x-forwarded-proto") ?? request.nextUrl.protocol.replace(/:$/, "");
   const origin = `${proto}://${host}`;
-  const canonicalUrl = new URL(pathname, origin);
-  const alternateLinks = Object.entries(getLocalizedPathnames(pathname)).map(
+  const pathnameLocale = getPathLocale(pathname) ?? DEFAULT_LANGUAGE;
+  const canonicalUrl = new URL(getCanonicalPathname(pathname, pathnameLocale), origin);
+  const alternateLinks = Object.entries(getSeoLocalizedPathnames(pathname)).map(
     ([locale, localizedPathname]) => {
       const url = new URL(localizedPathname, origin);
       return `<${url.toString()}>; rel="alternate"; hreflang="${locale}"`;
     },
   );
+  const xDefaultUrl = new URL(stripLocaleFromPathname(pathname) === "/" ? "/" : stripLocaleFromPathname(pathname), origin);
 
-  return [`<${canonicalUrl.toString()}>; rel="canonical"`, ...alternateLinks].join(
-    ", ",
-  );
+  return [
+    `<${canonicalUrl.toString()}>; rel="canonical"`,
+    ...alternateLinks,
+    `<${xDefaultUrl.toString()}>; rel="alternate"; hreflang="x-default"`,
+  ].join(", ");
 }
 
 export function proxy(request: NextRequest) {
@@ -79,6 +85,33 @@ export function proxy(request: NextRequest) {
 
   if (!isLocaleRoutedPath(request.nextUrl.pathname)) {
     return NextResponse.next();
+  }
+
+  if (!pathnameLocale && request.nextUrl.pathname === "/" && resolvedLocale === DEFAULT_LANGUAGE) {
+    // Keep the canonical homepage fetchable at the domain root for search engines
+    // and site-name extraction. Non-default languages still use explicit locale
+    // paths such as /es so localized pages have stable URLs.
+    const requestHeaders = new Headers(request.headers);
+    requestHeaders.set(LOCALE_REQUEST_HEADER_NAME, DEFAULT_LANGUAGE);
+    requestHeaders.set(
+      "cookie",
+      appendRequestCookie(
+        request.headers.get("cookie"),
+        LANGUAGE_COOKIE_NAME,
+        DEFAULT_LANGUAGE,
+      ),
+    );
+    requestHeaders.set("x-pathname", "/");
+
+    const response = NextResponse.next({ request: { headers: requestHeaders } });
+    response.cookies.set(LANGUAGE_COOKIE_NAME, DEFAULT_LANGUAGE, {
+      path: "/",
+      maxAge: 60 * 60 * 24 * 365,
+      sameSite: "lax",
+      secure: request.nextUrl.protocol === "https:",
+    });
+    response.headers.set("Link", getSeoLinkHeader(request, "/"));
+    return response;
   }
 
   if (!pathnameLocale) {

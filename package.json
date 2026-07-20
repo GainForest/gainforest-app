@@ -16,7 +16,6 @@
     "test:e2e:publish-report": "pnpm test:e2e && pnpm publish:e2e-report"
   },
   "dependencies": {
-    "@human.tech/waap-sdk": "^2.0.0",
     "@radix-ui/react-dialog": "^1.1.15",
     "@rainbow-me/rainbowkit": "^2.2.11",
     "@tanstack/react-query": "^5.101.0",
@@ -35,6 +34,7 @@
     "next": "16.1.6",
     "next-intl": "^4.13.0",
     "nuqs": "^2.8.9",
+    "ox": "0.14.29",
     "papaparse": "^5.5.3",
     "radix-ui": "^1.4.3",
     "react": "19.2.3",

@@ -1,7 +1,7 @@
 {
   "seo": {
-    "title": "GainForest — Fund Regenerative Impact",
-    "description": "Certs connects funders with nature stewards doing on-ground regenerative work. Fund verified environmental impact directly."
+    "title": "GainForest — Biodiversity Observations & Nature Projects",
+    "description": "Explore field observations, biodiversity records, and nature projects from communities and organizations using GainForest."
   },
   "language": {
     "label": "Language",
@@ -130,7 +130,8 @@
       "taina": "Tainá",
       "globe": "Globe",
       "audiomoth": "AudioMoth",
-      "soundscape": "Soundscape"
+      "soundscape": "Soundscape",
+      "identifications": "Identifications"
     },
     "prompts": {
       "signInDescription": "Sign in to manage your account and content.",
@@ -170,7 +171,9 @@
       "submitData": "Submit field data",
       "personalAccount": "Personal account",
       "organizationAccount": "Organization account"
-    }
+    },
+    "more": "More",
+    "hideMore": "Hide"
   },
   "settings": {
     "handle": {
@@ -230,6 +233,56 @@
       "defaultKeyName": "AI agent",
       "tainaBadge": "Tainá",
       "tainaBadgeTitle": "This key is linked to your Tainá Telegram bot"
+    },
+    "inaturalist": {
+      "title": "iNaturalist",
+      "connectTitle": "Verify iNaturalist account",
+      "description": "Use a public profile proof so GainForest only imports observations from your own iNaturalist account.",
+      "connectedAs": "Verified as @{account}",
+      "disconnect": "Remove verification",
+      "proofLabel": "Your GainForest DID link",
+      "proofHint": "Add this exact text to your iNaturalist bio/about text. You can remove it after verification.",
+      "copy": "Copy",
+      "copied": "Copied",
+      "profileLabel": "iNaturalist handle or profile link",
+      "profilePlaceholder": "@handle or https://www.inaturalist.org/people/handle",
+      "verify": "Verify account",
+      "verifying": "Verifying…",
+      "verifyFailed": "Could not verify that iNaturalist account.",
+      "connectFirst": "Verify your iNaturalist account first.",
+      "chooseProject": "Choose a GainForest project first.",
+      "projectLabel": "GainForest project",
+      "inatProjectLabel": "iNaturalist project",
+      "projectsLoading": "Loading iNaturalist projects…",
+      "projectsLoadFailed": "Could not load your iNaturalist projects.",
+      "noINaturalistProjects": "No iNaturalist projects were found on your verified account.",
+      "chooseINaturalistProject": "Choose an iNaturalist project first.",
+      "steps": {
+        "openSettings": "1. Open iNaturalist → Account Settings → Profile.",
+        "editBio": "2. Find your bio/about field.",
+        "pasteCode": "3. Paste the GainForest DID link above into that bio and save.",
+        "returnVerify": "4. Return here, paste your iNaturalist handle or profile link, and verify."
+      },
+      "connect": "Connect",
+      "hideSetup": "Hide setup"
+    },
+    "groups": {
+      "account": {
+        "title": "Account",
+        "description": "Username and sign-in security"
+      },
+      "connections": {
+        "title": "Connections",
+        "description": "Social accounts and external services"
+      },
+      "agents": {
+        "title": "AI agents",
+        "description": "Keys for tools that act with your permission"
+      },
+      "advanced": {
+        "title": "Advanced",
+        "description": "Account data and deletion"
+      }
     }
   },
   "bumicertCard": {
@@ -243,7 +296,7 @@
   },
   "footer": {
     "brandAlt": "GainForest",
-    "tagline": "Connecting communities with funders.",
+    "tagline": "Connecting communities through trusted field evidence.",
     "builtWith": "Open infrastructure. Built with GainForest.",
     "dataCollectionsAria": "Data collections",
     "footerLinksAria": "Footer links",
@@ -266,12 +319,13 @@
       "greenGlobe": "Green Globe",
       "status": "Status",
       "lexicons": "Data schemas",
-      "privacyPolicy": "Privacy Policy"
+      "privacyPolicy": "Privacy Policy",
+      "deleteAccount": "Delete Account"
     }
   },
   "browseGrid": {
     "title": "Ways to Explore",
-    "description": "Ways into GainForest work, shaped for funders, stewards, and field teams.",
+    "description": "Ways into GainForest work, shaped for explorers, stewards, and field teams.",
     "loadingAria": "Explore links loading",
     "cards": {
       "projects": {
@@ -403,6 +457,10 @@
       "justNow": "just now",
       "minutesAgo": "{count, plural, one {# minute ago} other {# minutes ago}}",
       "hoursAgo": "{count, plural, one {# hour ago} other {# hours ago}}"
+    },
+    "metadata": {
+      "title": "Site health",
+      "description": "Live health of the services behind GainForest."
     }
   },
   "accountTabs": {
@@ -430,7 +488,9 @@
     "files": "Files",
     "taina": "Tainá",
     "endorsementsGiven": "Endorsements",
-    "equipment": "Equipment"
+    "equipment": "Equipment",
+    "wallet": "Wallet",
+    "more": "More"
   },
   "equipment": {
     "metadataTitle": "Equipment — {name}",
@@ -560,7 +620,9 @@
   },
   "accountDonations": {
     "emptyHeroDescription": "Support a project and your contributions show up here, each linked to the project you backed.",
-    "emptyHeroCta": "Explore projects"
+    "emptyHeroCta": "Explore projects",
+    "anonymousNote": "Anonymous donations appear here too, but only you can see them — they are never shown publicly under your name. Some older anonymous donations can’t be shown.",
+    "anonymousBadge": "Only visible to you"
   },
   "accountProjects": {
     "emptyEyebrow": "No projects",
@@ -616,7 +678,9 @@
       "errorTooLarge": "{name} is larger than 10 MB.",
       "errorGeneric": "We couldn't add these images. Please try again.",
       "recordTitleProject": "{projectTitle} gallery",
-      "recordTitleAccount": "{name} gallery"
+      "recordTitleAccount": "{name} gallery",
+      "open": "Add images",
+      "close": "Close"
     }
   },
   "projectManage": {
@@ -902,18 +966,19 @@
       "post": "post",
       "recording": "recording",
       "record": "record"
-    }
+    },
+    "mentionedYou": "mentioned you"
   },
   "feed": {
     "meta": {
       "title": "Activity Feed",
-      "description": "The latest projects, nature sightings, organizations, and donations across GainForest, in one live stream."
+      "description": "The latest projects, nature sightings, organizations, and community updates across GainForest, in one live stream."
     },
     "eyebrow": "Live activity",
     "hero": {
       "title": "What's happening on",
       "accent": "GainForest",
-      "description": "A live stream of the newest projects, nature sightings, organizations, and donations — all in one place."
+      "description": "A live stream of the newest projects, nature sightings, organizations, and community updates — all in one place."
     },
     "filters": {
       "all": "All",
@@ -1001,7 +1066,26 @@
       "posting": "Posting…",
       "postedTitle": "Posted",
       "postedNote": "Your update is live and will show up in the feed shortly.",
-      "postingAs": "Posting as {name}"
+      "postingAs": "Posting as {name}",
+      "title": "Share an update",
+      "close": "Close"
+    },
+    "quickLike": {
+      "like": "Like this photo",
+      "unlike": "Remove like"
+    },
+    "audio": {
+      "play": "Play sound",
+      "pause": "Pause sound",
+      "seek": "Play from here",
+      "playSection": "Replay the labelled sound",
+      "unavailable": "Sound unavailable",
+      "spectrogramAlt": "Spectrogram of the recording with the labelled sound highlighted"
+    },
+    "mentions": {
+      "suggestionsAria": "Account suggestions",
+      "searching": "Searching accounts…",
+      "noMatches": "No matching accounts"
     }
   },
   "testAccount": {
@@ -1028,7 +1112,7 @@
   "recognition": {
     "eyebrow": "GainForest steward",
     "title": "Award recognition badges",
-    "description": "Give {name} a badge for a grant or BioBlitz win. Awarded badges show on their public profile.",
+    "description": "Give {name} a badge for a grant. BioBlitz winner badges are awarded per round from the BioBlitz page.",
     "award": "Award",
     "remove": "Remove",
     "genericError": "Something went wrong. Please try again.",
@@ -1039,13 +1123,21 @@
         "description": "Received a Rewilding the Web grant."
       },
       "bioblitz-most-images": {
-        "label": "BioBlitz — most images",
-        "description": "Won a BioBlitz round for the most observations."
+        "label": "BioBlitz — most observations",
+        "description": "Won a BioBlitz round for the most observations.",
+        "labelWithRound": "BioBlitz {roundName} — most observations"
       },
       "bioblitz-best-picture": {
         "label": "BioBlitz — best picture",
-        "description": "Won a BioBlitz round for the best picture."
+        "description": "Won a BioBlitz round for the best picture.",
+        "labelWithRound": "BioBlitz {roundName} — best picture"
       }
+    },
+    "awardsLabel": "Awards",
+    "aria": "Awards: {names}",
+    "roundName": {
+      "pilot": "Pilot Round",
+      "numbered": "Round {round}"
     }
   },
   "steward": {
@@ -1186,11 +1278,28 @@
       "certified": "Identity primitives from the Hypercerts ecosystem — actor profiles, organizations, follows, badges, and locations.",
       "hypercerts": "Impact claims (activity, contribution, contributor, rights), collections, funding receipts, attachments, work scope, and shared types."
     },
-    "sectionsAria": "Schema sections"
+    "sectionsAria": "Schema sections",
+    "epdsLinkTitle": "How ePDS works",
+    "epdsLinkDesc": "An interactive tour of the login system and the servers behind these records.",
+    "cgsLinkTitle": "How group accounts work",
+    "cgsLinkDesc": "An interactive tour of the guard service that lets a whole team share one account.",
+    "atprotoLinkTitle": "How the AT Protocol works",
+    "atprotoLinkDesc": "An interactive tour of the open network everything here is built on.",
+    "walletServiceLinkTitle": "The GainForest wallet",
+    "walletServiceLinkDesc": "How every account gets a wallet that only its owner can spend from.",
+    "guides": {
+      "usageGuide": "Usage guide",
+      "audiomothTitle": "AudioMoth spectrogram labels as Darwin Core occurrences",
+      "audiomothDescription": "How each confirmed time and frequency box becomes a new occurrence linked to its source audio recording.",
+      "openGuide": "Read the implementation guide",
+      "breadcrumbAria": "Documentation breadcrumb",
+      "schemas": "Data schemas",
+      "guideIntro": "This guide defines the application-level conventions used with the occurrence schema. The schema remains generic Darwin Core; the guide explains how AudioMoth recordings, spectrogram boxes, and occurrence records connect."
+    }
   },
   "taina": {
     "meta": {
-      "title": "Tainá — GainForest",
+      "title": "Tainá field assistant",
       "description": "Connect your own Telegram bot and turn what you see in nature into verifiable biodiversity observations."
     },
     "hero": {
@@ -1432,7 +1541,7 @@
   },
   "audiomoth": {
     "meta": {
-      "title": "AudioMoth — GainForest",
+      "title": "AudioMoth recorder setup",
       "description": "Set the clock, configure recording schedules and update firmware on your AudioMoth acoustic recorder, straight from the browser."
     },
     "title": "AudioMoth",
@@ -1599,7 +1708,9 @@
     "mainTabs": {
       "setup": "Setup",
       "deployments": "Deployment",
-      "upload": "Upload"
+      "upload": "Upload",
+      "label": "Label",
+      "identifications": "Identifications"
     },
     "deployments": {
       "intro": "Deployments record where and when an AudioMoth was placed in the field. Each one plays an acoustic chime that sets the recorder's clock, location and deployment ID.",
@@ -1726,6 +1837,87 @@
       "prevDay": "Previous day with recordings",
       "nextDay": "Next day with recordings",
       "allHours": "All hours"
+    },
+    "label": {
+      "subtitle": "Review AudioMoth recordings, mark calls by time and frequency, and build a clean label set for your field data.",
+      "signInTitle": "Sign in to label recordings",
+      "signInBody": "Occurrences are saved to your account. Sign in, upload AudioMoth recordings, then mark the wildlife sounds you find.",
+      "loadingRecordings": "Loading your AudioMoth recordings…",
+      "loadFailed": "Your recordings could not be loaded. Please try again.",
+      "occurrencesLoadFailed": "Saved occurrences could not be loaded for this recording.",
+      "noRecordingsTitle": "Upload a recording first",
+      "noRecordingsBody": "The labelling workspace uses recordings already saved to your account so every box can become a linked biodiversity occurrence.",
+      "uploadFirst": "Upload AudioMoth recordings",
+      "refresh": "Refresh",
+      "savedAtproto": "Every saved box is a biodiversity occurrence in your account.",
+      "openToLoad": "Open to load labels",
+      "saved": "Saved",
+      "deleteConfirm": "Delete this occurrence? This removes it from your account and cannot be undone.",
+      "deleteFailed": "The occurrence could not be deleted. Please try again.",
+      "saveFailed": "The occurrence could not be saved. Your box is still here so you can try again.",
+      "recordedAtMissing": "This recording has no valid start time, so an occurrence time cannot be calculated.",
+      "audioUnavailable": "This recording has no playable original or preview. Upload it again with previews enabled.",
+      "commonName": "Common/local name (optional)",
+      "commonNamePlaceholder": "Tree frog",
+      "scientificName": "Scientific name (optional)",
+      "scientificNamePlaceholder": "Boana faber",
+      "scientificNameHint": "Leave blank to save the honest broad group, such as Anura for frogs.",
+      "saveOccurrence": "Save occurrence",
+      "saveAtprotoHint": "Creates a Darwin Core occurrence linked to this audio recording.",
+      "stepImport": "Choose recordings",
+      "stepDraw": "Draw a time and frequency box",
+      "stepDescribe": "Describe what you heard",
+      "emptyTitle": "Label wildlife sounds in your AudioMoth recordings",
+      "emptyBody": "Choose an SD card folder or a set of WAV files. Pick a recording, drag a box around a call, then identify it as a bird, frog, insect, another sound, or a note.",
+      "chooseFolder": "Choose SD card or folder",
+      "chooseFiles": "Choose WAV files",
+      "privacyNote": "Your recordings stay on this device while you label them.",
+      "workspaceSummary": "{files, plural, one {# uploaded recording} other {# uploaded recordings}} · {labels, plural, one {# occurrence here} other {# occurrences here}}",
+      "savedLocally": "Drafts are saved in this browser. Export them when you are ready.",
+      "addFiles": "Add recordings",
+      "export": "Export CSV",
+      "closeSet": "Close set",
+      "recordings": "Recordings",
+      "search": "Search files…",
+      "labelCount": "{count, plural, one {# label} other {# labels}}",
+      "notLabelled": "Not labelled",
+      "filePosition": "Recording {current} of {total}",
+      "previousFile": "Previous recording",
+      "nextFile": "Next recording",
+      "labelsTitle": "Labels ({count})",
+      "selectToEdit": "Select a label to edit it",
+      "labelsEmpty": "No labels yet. Drag a box over a sound in the spectrogram to begin.",
+      "deleteLabel": "Delete label",
+      "editLabel": "Edit label",
+      "newLabel": "New label",
+      "describeSelection": "What is in this box?",
+      "drawFirst": "Draw a box to begin",
+      "clearSelection": "Clear selection",
+      "drawHint": "Drag across the spectrogram to mark the sound you want to label. The box captures both when it happened and its frequency range.",
+      "timeRange": "Time",
+      "frequencyRange": "Frequency",
+      "whatIsIt": "What did you hear?",
+      "categories": {
+        "bird": "Bird",
+        "frog": "Frog",
+        "insect": "Insect",
+        "other": "Other",
+        "note": "Note"
+      },
+      "species": "Species (optional)",
+      "speciesPlaceholder": "Common or scientific name",
+      "speciesHint": "Leave blank if you only know the animal group.",
+      "noteRequired": "Note",
+      "noteOptional": "Note (optional)",
+      "notePlaceholder": "Call type, confidence, weather, or anything useful…",
+      "updateLabel": "Update label",
+      "saveLabel": "Save label",
+      "saveHint": "Saved in this browser until you export the label set.",
+      "drawInstruction": "Drag to draw · select a box to edit",
+      "spectrogramAria": "Interactive audio spectrogram",
+      "buildingSpectrogram": "Building spectrogram…",
+      "spectrogramFailed": "This recording could not be turned into a spectrogram.",
+      "audioUnsupported": "Your browser cannot play this recording."
     }
   },
   "soundscape": {
@@ -1765,6 +1957,909 @@
       "hoverHint": "Move your cursor over the clock to inspect values.",
       "datesTitle": "Days",
       "allDatesChip": "All days"
+    }
+  },
+  "adminOnly": {
+    "label": "Admin only"
+  },
+  "accountWallet": {
+    "title": "Wallet",
+    "intro": "Your personal donation wallet, secured by your passkeys. Donations to your projects arrive at this address.",
+    "loadError": "Could not load your wallet.",
+    "passkeyUnsupported": "This device does not support passkeys. Try a device with Face ID, fingerprint, or a security key.",
+    "passkeyLabel": "GainForest — {name}",
+    "passkeyLabelFallback": "GainForest wallet",
+    "createError": "Could not create the wallet. Please try again.",
+    "addSignerError": "Could not add the passkey. Please try again.",
+    "removeSignerError": "Could not remove this passkey. Please try again.",
+    "deleteError": "Could not remove the wallet. Please try again.",
+    "emptyTitle": "No wallet yet",
+    "emptyHint": "Create your donation wallet with a passkey (Face ID, fingerprint, or security key). No seed phrase, nothing to install.",
+    "creating": "Waiting for your passkey…",
+    "createButton": "Create wallet with passkey",
+    "defaultName": "My donation wallet",
+    "copyAddress": "Copy address",
+    "copied": "Copied",
+    "copy": "Copy",
+    "readyHint": "This address can receive donations right away. It belongs to you and only the passkeys below can ever spend from it.",
+    "activeHint": "This wallet is active on the blockchain. Its passkeys are now managed on-chain.",
+    "signersHeading": "Who can approve payments",
+    "signersLocked": "Locked",
+    "unnamedPasskey": "Passkey",
+    "removeSigner": "Remove passkey",
+    "addPasskey": "Add another passkey",
+    "signerLabelPlaceholder": "Name this passkey (e.g. My phone)",
+    "signersHint": "Add a passkey from another device or a person you trust — any of them can approve payments.",
+    "deleteButton": "Remove wallet",
+    "deleteConfirmTitle": "Remove this wallet?",
+    "deleteConfirmBody": "This can't be undone. If you create a new wallet later with a new passkey, it will have a different address.",
+    "deleteConfirmFunds": "This wallet already holds funds, so it can't be removed.",
+    "deleteConfirmCancel": "Cancel",
+    "deleteConfirmButton": "Yes, remove wallet",
+    "viewOnExplorer": "View this address on Etherscan",
+    "explorer": "Etherscan",
+    "balancesHeading": "Balance",
+    "balancesEmpty": "No funds yet. Donations sent to this address will show up here.",
+    "balancesError": "Balances are unavailable right now. Refresh to try again.",
+    "sendHeading": "Send funds",
+    "sendIntro": "Move money from this wallet to any other wallet address. You approve every transfer with your passkey.",
+    "sendToken": "Currency",
+    "sendRecipient": "Recipient address",
+    "sendRecipientPlaceholder": "Recipient address (0x…)",
+    "sendRecipientInvalid": "Enter a valid wallet address — it starts with 0x followed by 40 characters.",
+    "sendAmount": "Amount",
+    "sendAmountInvalid": "Enter a valid amount.",
+    "sendAmountTooHigh": "That is more than this wallet holds.",
+    "sendMax": "Max",
+    "sendButton": "Send with passkey",
+    "sendPreparing": "Preparing…",
+    "sendAwaitingPasskey": "Waiting for your passkey…",
+    "sendSubmitting": "Sending — this can take a minute…",
+    "sendSuccess": "Sent! The transfer is confirmed.",
+    "sendViewTx": "View the transaction",
+    "sendGasNote": "GainForest covers the network fee.",
+    "sendNoSigner": "Only someone with a passkey enrolled on this wallet can send from it.",
+    "sendErrorNotConfigured": "Sending is not enabled on this server yet.",
+    "sendErrorInsufficient": "This wallet does not hold enough for that transfer.",
+    "sendErrorBusy": "The network is busy right now. Please try again in a few minutes.",
+    "sendErrorSignature": "The passkey approval could not be verified. Please try again.",
+    "sendErrorGeneric": "The transfer could not be completed. Please try again.",
+    "thresholdHeading": "Approvals required",
+    "thresholdOption": "{count} of {total, plural, one {# passkey} other {# passkeys}}",
+    "thresholdHint": "How many passkeys must approve each transfer. Requiring more than one is safer — a single lost or stolen passkey can't move funds on its own. Changing this gives the wallet a new address, so it's only possible before the wallet holds funds.",
+    "thresholdUpdateError": "Could not change the approval requirement. Please try again.",
+    "thresholdLockedFunds": "The wallet already holds funds, so the approval requirement can no longer be changed.",
+    "thresholdSingleWarning": "Right now a single passkey can move funds. Consider requiring more approvals.",
+    "sendApprovalsNeeded": "This wallet needs {count} approvals with different passkeys. You give the first one; the rest can be given here or from another device.",
+    "sendApprovalOf": "Approval {current} of {total} — waiting for a passkey…",
+    "sendDuplicatePasskey": "Each approval needs a different passkey.",
+    "pendingHeading": "Transfer waiting for approvals",
+    "pendingProgress": "{current} of {total} approvals given",
+    "pendingRemoteHint": "Other passkey holders can approve from their own device — the transfer stays here until it has enough approvals. The last approval sends it.",
+    "pendingApprove": "Approve with passkey",
+    "pendingApproveAndSend": "Approve & send",
+    "pendingCancel": "Cancel transfer",
+    "pendingInvalid": "This waiting transfer is no longer valid — the wallet changed since it was started. Cancel it to start a new one.",
+    "pendingCancelForbidden": "Only the person who started this transfer or a wallet manager can cancel it.",
+    "sendStartButton": "Start transfer with passkey",
+    "sendErrorExpired": "This transfer is no longer valid — the wallet or network fees changed. Please start it again.",
+    "sendErrorPendingExists": "There is already a transfer waiting for approvals. Finish or cancel it first.",
+    "sendErrorApprovalInvalid": "This approval could not be verified. Please try again.",
+    "onchainManageHint": "This wallet is active on the blockchain, so passkey changes are recorded on-chain and need the usual approvals. GainForest covers the network fee.",
+    "thresholdOnchainHint": "How many passkeys must approve each transfer. Changing this is recorded on the blockchain — the wallet address stays the same.",
+    "manageForbidden": "Only the organization owner or an admin can make this change."
+  },
+  "accountSupport": {
+    "button": "Support",
+    "buttonAria": "Support {name} directly",
+    "modalTitle": "Support {name}",
+    "modalDescription": "Choose an amount to give directly to {name}.",
+    "directNote": "100% goes directly to {name} — no platform fee, and the network fee is covered for you.",
+    "cartLabel": "Direct account support"
+  },
+  "testRecord": {
+    "hideAction": "Hide as test",
+    "hideHint": "Hide this entry from the public feed and explore pages as test content",
+    "confirmHide": "Hide from everyone",
+    "cancel": "Cancel",
+    "genericError": "Something went wrong. Please try again."
+  },
+  "adminTestRecords": {
+    "title": "Hidden posts & observations",
+    "description": "These individual posts and observations are marked as test, so they are hidden from the public feed and explore pages. The rest of their owner's account stays visible.",
+    "empty": "No posts or observations are hidden right now.",
+    "remove": "Make visible",
+    "unnamed": "Unnamed account",
+    "error": "Something went wrong. Please try again.",
+    "itemLabel": "{kind} by {name}",
+    "hiddenAgo": "Hidden {time}",
+    "kinds": {
+      "post": "Post",
+      "observation": "Observation",
+      "project": "Project",
+      "organization": "Organization update",
+      "donation": "Donation",
+      "record": "Entry"
+    }
+  },
+  "devices": {
+    "metadata": {
+      "title": "Tainá devices",
+      "description": "Field updates from GainForest devices running Tainá, including whether each device is active and ready."
+    }
+  },
+  "bluesky": {
+    "toggle": "Cross-post to Bluesky",
+    "onHint": "This post will also be shared on Bluesky",
+    "offHint": "Also share this post on Bluesky",
+    "composerHint": "Also sharing on Bluesky",
+    "viewPost": "View on Bluesky",
+    "consent": {
+      "title": "Share your posts on Bluesky",
+      "body": "When you post an update here, we can also publish it to Bluesky, an open social network with millions of people.",
+      "discovery": "It's a great way to get discovered: your updates reach nature lovers, funders, and researchers far beyond GainForest.",
+      "profileNote": "You don't have a Bluesky profile yet, so we'll create one for you from your GainForest profile (your name, photo, and bio).",
+      "profileNoteMaybe": "If you don't have a Bluesky profile yet, we'll create one for you from your GainForest profile (your name, photo, and bio).",
+      "optOutNote": "Only new posts you publish after turning this on are shared. You can turn it off anytime in Settings.",
+      "confirm": "Turn on sharing",
+      "cancel": "Not now",
+      "error": "We couldn't turn on Bluesky sharing. Please try again."
+    },
+    "settings": {
+      "title": "Bluesky",
+      "toggleLabel": "Share new posts on Bluesky",
+      "toggleDescription": "Community updates you post are also published to your Bluesky account, so more people can discover your work.",
+      "viewProfile": "View your Bluesky profile",
+      "error": "We couldn't save that change. Please try again."
+    }
+  },
+  "epds": {
+    "metaTitle": "How ePDS works",
+    "metaDescription": "An interactive tour of ePDS, the extended Personal Data Server that lets anyone join the AT Protocol network with just their email.",
+    "kicker": "extended Personal Data Server",
+    "title": "How ePDS works",
+    "lead": "GainForest runs on the AT Protocol, the open network behind Bluesky. Joining that network normally takes a password and some technical setup. ePDS removes that wall: you type your email, you get a code, and you are in. This page shows how it works, step by step.",
+    "whatIs": {
+      "heading": "What is a PDS, and what does the e add?",
+      "p1": "On the AT Protocol, everyone keeps their data on a Personal Data Server, or PDS. Think of it as a personal home for your posts, observations, and projects. You own what is inside, and you can move to another server at any time without losing anything.",
+      "p2": "ePDS is a normal PDS with one extension: a friendly front door. Instead of asking for a password, it signs you in with a one-time email code or a social account, and it creates an account for you on your first visit. Behind that door everything stays standard AT Protocol, so every app on the network can talk to it."
+    },
+    "compare": {
+      "heading": "Two front doors",
+      "intro": "Same house, different door. Flip the switch and try both ways of signing in.",
+      "classicTab": "Classic PDS",
+      "epdsTab": "ePDS",
+      "handle": "Handle",
+      "password": "Password",
+      "inviteCode": "Invite code",
+      "email": "Email",
+      "sendCode": "Send me a code",
+      "signIn": "Sign in",
+      "codeLabel": "Type the code from your email",
+      "classicCaption": "A classic PDS asks for a password, and often for an invite code from the server admin. You also have to create the account first.",
+      "epdsCaption": "ePDS asks for your email and sends you a code. First visit? Your account is created for you on the spot.",
+      "done": "You are in!",
+      "reset": "Try again"
+    },
+    "journey": {
+      "heading": "The login journey",
+      "intro": "Press play, or step through it yourself. The moving dot is your login making its round trip.",
+      "play": "Play",
+      "pause": "Pause",
+      "back": "Back",
+      "next": "Next",
+      "stepLabel": "Step {n} of {total}",
+      "ariaLabel": "Login journey diagram",
+      "nodes": {
+        "app": "Your app",
+        "pds": "PDS core",
+        "auth": "Login service",
+        "inbox": "Your inbox"
+      },
+      "steps": {
+        "s1": {
+          "title": "You click Sign in",
+          "text": "It all starts in the app you are using, for example GainForest. You click Sign in and maybe type your email."
+        },
+        "s2": {
+          "title": "The app calls the PDS",
+          "text": "Your app quietly asks the PDS to start a login. This is a standard AT Protocol request, the same one any Bluesky app would make."
+        },
+        "s3": {
+          "title": "The PDS opens its front door",
+          "text": "Here is the ePDS trick. Instead of showing a password form, the PDS sends your browser to its friendly login service."
+        },
+        "s4": {
+          "title": "A code flies to your inbox",
+          "text": "The login service creates a one-time code and emails it to you. The code works once and expires after a few minutes."
+        },
+        "s5": {
+          "title": "You type the code",
+          "text": "You copy the code from the email into the login screen. That proves the inbox is yours. No password is ever involved."
+        },
+        "s6": {
+          "title": "New here? Pick a handle",
+          "text": "On your first visit, ePDS creates an account for you and asks you to pick a handle, your public name on the network."
+        },
+        "s7": {
+          "title": "The signed handshake",
+          "text": "The login service tells the PDS that you are verified. The message carries a cryptographic signature, so nobody can fake it."
+        },
+        "s8": {
+          "title": "Back to your app",
+          "text": "The PDS sends your browser back to your app with a short-lived code. Your app trades that code for an access token."
+        },
+        "s9": {
+          "title": "You are in",
+          "text": "Your app can now read and write your data on your behalf. To the rest of the network you look like any other AT Protocol user."
+        }
+      }
+    },
+    "map": {
+      "heading": "The moving parts",
+      "intro": "ePDS is a small team of services. Tap each one to see its job.",
+      "ariaLabel": "Map of ePDS services",
+      "nodes": {
+        "app": {
+          "name": "Your app",
+          "desc": "Any AT Protocol app, like GainForest or Bluesky. It never sees your email code or any keys. It only receives the final access token."
+        },
+        "pds": {
+          "name": "PDS core",
+          "desc": "A standard Personal Data Server. It stores your records, talks to the rest of the network, and issues tokens. ePDS wraps it without changing how it speaks to other apps."
+        },
+        "auth": {
+          "name": "Login service",
+          "desc": "The friendly front door. It shows the login screen, sends the email codes, handles social logins, and helps new users pick a handle."
+        },
+        "email": {
+          "name": "Email provider",
+          "desc": "Delivers the one-time codes to your inbox. Each code is short-lived and can be used exactly once."
+        },
+        "db": {
+          "name": "Shared database",
+          "desc": "A small database both services share. It keeps track of login sessions and codes, nothing more."
+        }
+      }
+    },
+    "more": {
+      "heading": "Keep exploring",
+      "lexiconsTitle": "Data schemas",
+      "lexiconsDesc": "The open record formats that live inside each PDS.",
+      "githubTitle": "ePDS on GitHub",
+      "githubDesc": "The full source code, open for anyone to read, run, and improve.",
+      "cgsTitle": "How group accounts work",
+      "cgsDesc": "The guard service that lets a whole team share one group account safely.",
+      "atprotoTitle": "How the AT Protocol works",
+      "atprotoDesc": "An interactive tour of the open network everything here is built on.",
+      "walletTitle": "The GainForest wallet",
+      "walletDesc": "How every account gets a wallet that only its owner can spend from.",
+      "routerTitle": "The ePDS router",
+      "routerDesc": "How apps find the right server for an email when a community runs several."
+    }
+  },
+  "epdsRouter": {
+    "metaTitle": "How the ePDS router works",
+    "metaDescription": "An interactive guide to the ePDS router: how an app finds the right account for an email login across many servers. Hosts share only one-way fingerprints, never credentials or addresses.",
+    "kicker": "email-to-account discovery",
+    "title": "One email, many servers",
+    "lead": "ePDS lets you sign in with just your email. When a community runs several servers, an app first needs to answer a small question: which accounts exist for this email? The router answers it in a single call. Nobody hands over an address or a password.",
+    "facts": {
+      "routing": {
+        "title": "One lookup, the right account",
+        "text": "An app asks once and learns which accounts exist for the email. Each answer is an identity the network can always locate, even after a server move."
+      },
+      "privacy": {
+        "title": "Emails are never stored",
+        "text": "Addresses are scrambled on their own server before anything leaves it. The router only ever sees fingerprints, and it scrambles them again before storing."
+      },
+      "zerochange": {
+        "title": "Hosts stay in control",
+        "text": "No credentials to hand over, nothing to install inside the PDS. Hosts run one small script next to their server, on their own schedule."
+      }
+    },
+    "problem": {
+      "heading": "Why discovery is needed",
+      "p1": "An app with email sign-in has to send the login to one specific server. That server emails the code and holds the account. With a single server the answer is fixed. With several servers the app needs a directory. Email addresses are exactly the kind of data you do not want to copy into one big list.",
+      "p2": "The router solves this with a small trick: it works only with fingerprints. Each server scrambles its addresses one-way at home and shares nothing else. Each lookup scrambles the incoming email the same way and compares fingerprints. Same answer, no address book, and nobody hands anyone their keys."
+    },
+    "demo": {
+      "heading": "Try a lookup",
+      "intro": "Three example servers, three example emails. Pick one and watch how the app finds the right account.",
+      "reset": "Reset",
+      "ariaLabel": "Email lookup and identity resolution diagram",
+      "nodes": {
+        "app": "Your app",
+        "router": "Router",
+        "directory": "Identity directory",
+        "forest": "Forest PDS",
+        "ocean": "Ocean PDS",
+        "river": "River PDS"
+      },
+      "steps": {
+        "idle": {
+          "title": "Pick an email above",
+          "text": "The app wants to start an email sign-in. It does not yet know which account this email belongs to."
+        },
+        "sent": {
+          "title": "The app asks the router",
+          "text": "It sends the email over a private, authenticated call. Lookups are never written to any log."
+        },
+        "fingerprint": {
+          "title": "The router checks fingerprints",
+          "text": "The email becomes a fingerprint on arrival. The router compares it against each server's set of fingerprints."
+        },
+        "answer": {
+          "title": "The router answers with identities",
+          "text": "The answer is not a server address. It is the account's permanent identity, called a DID. The router's job ends here."
+        },
+        "resolve": {
+          "title": "The network finds the home",
+          "text": "The app asks the identity directory where this identity lives today. This is standard AT Protocol resolution and it stays correct even after an account moves servers."
+        }
+      },
+      "outcomes": {
+        "one": {
+          "title": "One account found",
+          "text": "The directory points at the account's current home server. The sign-in starts there and the code lands in the right inbox."
+        },
+        "many": {
+          "title": "Two accounts found",
+          "text": "This email has two separate identities. The app shows a chooser, and each identity resolves to its own home server."
+        },
+        "none": {
+          "title": "No account yet",
+          "text": "No identity exists for this email, so the app offers to create a brand-new account on its default server."
+        }
+      }
+    },
+    "sync": {
+      "heading": "How the router stays current",
+      "intro": "Nothing to hand over: each host pushes its own snapshot, on a timer it chooses.",
+      "play": "Play",
+      "pause": "Pause",
+      "back": "Back",
+      "next": "Next",
+      "stepLabel": "Step {n} of {total}",
+      "ariaLabel": "Sync loop diagram",
+      "nodes": {
+        "pds": "Your ePDS",
+        "router": "Router",
+        "index": "fingerprint index"
+      },
+      "steps": {
+        "s1": {
+          "title": "Your server gathers its own list",
+          "text": "A small script runs next to your PDS, on a timer you choose. It reads the account emails locally. Your admin password never leaves your machine."
+        },
+        "s2": {
+          "title": "Fingerprints are made at home",
+          "text": "Each address is scrambled one-way on your own server. From this moment on, no plaintext email exists anywhere in the process."
+        },
+        "s3": {
+          "title": "The snapshot is pushed",
+          "text": "The script sends the complete fingerprint set to the router over an encrypted, token-protected call. It replaces the previous snapshot entirely."
+        },
+        "s4": {
+          "title": "The router swaps it in",
+          "text": "The router scrambles every fingerprint a second time with its own private key, then replaces your server's whole set in one atomic step. Deleted accounts vanish with your next push."
+        }
+      }
+    },
+    "register": {
+      "heading": "Join as an ePDS host",
+      "intro": "You never share your admin password and you never wait for anyone. One script enrolls you and starts pushing right away.",
+      "p1": "On its first run the script enrolls your server with the router, saves your submit token next to itself (keep that file), and pushes your first snapshot. Your server is discoverable within seconds.",
+      "enrollLabel": "1 · run the push script",
+      "pushLabel": "2 · put it on a timer",
+      "approveNote": "That is it. No approval queue, no waiting. Leaving is your choice alone: stop pushing, or ask the router operator to remove your entry. The operator can also remove abusive entries at any time."
+    },
+    "integrate": {
+      "heading": "Integrate lookups in your app",
+      "intro": "Client apps get their own token from the router operator. One call before showing the sign-in screen is enough.",
+      "lookupLabel": "look up an email",
+      "jsLabel": "handle the three outcomes",
+      "cacheTip": "The reply carries each account's permanent identity (its DID). The network can always resolve a DID to its current server, even after the account moves. Your app never depends on stored server addresses: one lookup, then standard AT Protocol resolution does the rest."
+    },
+    "api": {
+      "heading": "The API at a glance",
+      "intro": "Lookup and status use a client token. Hosts use their submit token. The operator token is only for moderation.",
+      "lookup": "Ask which accounts (DIDs) exist for an email.",
+      "status": "Sync state of every server: account counts, last sync, last error.",
+      "enroll": "Enroll your server. Open call, no credentials. Active immediately, returns a one-time submit token.",
+      "digests": "Push a full snapshot of fingerprint and identity pairs. Each push replaces the previous one.",
+      "script": "The ready-made push script for hosts. Python 3, standard library only.",
+      "unregister": "Remove an enrolled server (router operator only)."
+    },
+    "snippets": {
+      "copy": "Copy",
+      "copied": "Copied!"
+    },
+    "more": {
+      "heading": "Keep exploring",
+      "epdsTitle": "How ePDS works",
+      "epdsDesc": "The friendly front door itself: email-code login on the AT Protocol.",
+      "githubTitle": "ePDS router on GitHub",
+      "githubDesc": "The full source code of the router: one small Go service with no dependencies."
+    }
+  },
+  "cgs": {
+    "metaTitle": "How group accounts work",
+    "metaDescription": "An interactive tour of the Certified Group Service, the guard that lets a whole team share one AT Protocol account with roles, clear rules, and a full audit trail.",
+    "kicker": "Certified Group Service",
+    "title": "How group accounts work",
+    "lead": "On the AT Protocol, an account normally belongs to exactly one person. But forests are mapped by teams. The Certified Group Service, CGS for short, lets a whole team share one account safely, with roles, clear rules, and a memory of everything that happens. This page shows how it works, step by step.",
+    "whatIs": {
+      "heading": "What is a group account?",
+      "p1": "Every organization on GainForest lives in a normal AT Protocol account. A normal account has one password and one owner. That is fine for a person, but a team needs more: many people writing to the same place, without passing the account password around.",
+      "p2": "CGS is a small guard service that stands in front of the group's account. It keeps the account credentials in a sealed box, holds a member list with roles, and checks every request against the rules before letting it through. Team members never see the password. To the rest of the network the group looks like one ordinary account, so any app can read its records as usual."
+    },
+    "repo": {
+      "heading": "One account, many hands",
+      "intro": "Three teammates, one shared repo. Tap a teammate and they publish a record. Watch how every record remembers its author.",
+      "repoLabel": "The group's repo",
+      "empty": "Nothing here yet. Tap a teammate above.",
+      "stamp": "by {name}",
+      "roleOwner": "Owner",
+      "roleAdmin": "Admin",
+      "roleMember": "Member",
+      "clear": "Clear",
+      "caption": "All records land in the same repo, but the service writes down who created each one. That memory lets members edit their own work, while changing someone else's work takes an admin."
+    },
+    "journey": {
+      "heading": "The journey of a request",
+      "intro": "Press play, or step through it yourself. The moving dot is your request on its round trip.",
+      "play": "Play",
+      "pause": "Pause",
+      "back": "Back",
+      "next": "Next",
+      "stepLabel": "Step {n} of {total}",
+      "ariaLabel": "Request journey diagram",
+      "nodes": {
+        "app": "Your app",
+        "pds": "Your PDS",
+        "cgs": "Group service",
+        "gpds": "Group's PDS"
+      },
+      "steps": {
+        "s1": {
+          "title": "You press Publish",
+          "text": "It starts in the app. You are signed in as yourself, and you want to add a record to your group's account."
+        },
+        "s2": {
+          "title": "The app calls your own PDS",
+          "text": "The app sends the request to your personal data server with a forwarding note attached: please pass this on to the group's service."
+        },
+        "s3": {
+          "title": "Your PDS signs a pass",
+          "text": "Your PDS creates a short-lived pass signed with your own key. The pass names you, the service, and the exact action. It works once and dies after two minutes."
+        },
+        "s4": {
+          "title": "The guard checks the pass",
+          "text": "The group service checks the signature against your public identity and makes sure the pass is fresh and unused. A copied pass is useless."
+        },
+        "s5": {
+          "title": "Role check",
+          "text": "The service looks you up in the group's member list. Member, admin, or owner? Your role decides which actions are open to you."
+        },
+        "s6": {
+          "title": "Author check",
+          "text": "For edits and deletes there is one more question: who wrote this record? Members may change their own records. Touching someone else's work takes an admin."
+        },
+        "s7": {
+          "title": "Everything is written down",
+          "text": "Whatever the answer, the attempt goes into the group's audit log: who, what, when, and whether it was allowed or denied."
+        },
+        "s8": {
+          "title": "The service does the write",
+          "text": "If all checks pass, the service performs the action on the group's own PDS, using credentials that only it holds, and stamps you as the author."
+        },
+        "s9": {
+          "title": "Done",
+          "text": "The answer travels back to your app. The record now sits in the group's repo, visible to the whole network like any other AT Protocol record."
+        }
+      }
+    },
+    "roles": {
+      "heading": "Who can do what",
+      "intro": "Pick a hat, then try some actions. Every attempt, allowed or denied, lands in the audit log below.",
+      "youAre": "You are",
+      "tryAction": "Try an action",
+      "allowed": "Allowed",
+      "denied": "Denied",
+      "auditTitle": "Audit log",
+      "auditEmpty": "Nothing yet. Try an action above.",
+      "clearLog": "Clear log",
+      "auditPermitted": "permitted",
+      "auditDenied": "denied",
+      "role": {
+        "visitor": {
+          "name": "Visitor",
+          "desc": "Not on the member list at all."
+        },
+        "member": {
+          "name": "Member",
+          "desc": "Can create records and manage their own work."
+        },
+        "admin": {
+          "name": "Admin",
+          "desc": "Can manage members and edit any record."
+        },
+        "owner": {
+          "name": "Owner",
+          "desc": "One per group. Set when the group is created."
+        }
+      },
+      "action": {
+        "create": "Create a record",
+        "editOwn": "Edit your own record",
+        "editOther": "Edit someone else's record",
+        "addMember": "Add a member",
+        "setRole": "Change a role",
+        "viewAudit": "Read the audit log"
+      },
+      "ok": {
+        "create": "Any member can create records. The record is written to the group's repo with your name stamped on it as the author.",
+        "editOwn": "It is your record, so a member role is enough. The service checks the author stamp first.",
+        "editOther": "Admins can edit any record in the group, no matter who wrote it.",
+        "addMember": "Admins can add new people as member or admin. Nobody can be added as owner.",
+        "setRole": "Only the owner can change roles. Even the owner cannot create a second owner.",
+        "viewAudit": "Admins and the owner can read the group's full history."
+      },
+      "no": {
+        "visitor": "You are not on the member list, so the request stops at the door. The attempt is still written into the audit log.",
+        "editOther": "That record belongs to someone else. Members can only edit their own work. Editing another person's record takes an admin.",
+        "addMember": "Only admins and the owner can add new members.",
+        "setRole": "Changing roles is the owner's job alone. Admins cannot promote or demote anyone.",
+        "viewAudit": "The audit log is only open to admins and the owner."
+      }
+    },
+    "map": {
+      "heading": "The moving parts",
+      "intro": "CGS is a small team of parts. Tap each one to see its job.",
+      "ariaLabel": "Map of the group service parts",
+      "nodes": {
+        "pds": {
+          "name": "Your PDS",
+          "desc": "Your own data server. It signs the short pass that proves who you are and forwards your request. Your password never travels anywhere."
+        },
+        "cgs": {
+          "name": "Group service",
+          "desc": "The guard at the door. It checks passes, looks up roles, keeps the books, and is the only one that can act on the group's account."
+        },
+        "gpds": {
+          "name": "Group's PDS",
+          "desc": "A completely normal data server that holds the group's records. It knows nothing about roles or members. It simply trusts the service that holds its credentials."
+        },
+        "members": {
+          "name": "Member list",
+          "desc": "A small private database, one per group. It stores each member's identity and role, and remembers who authored every record."
+        },
+        "audit": {
+          "name": "Audit log",
+          "desc": "The group's memory. Every attempt is written down: who, what, when, and whether it was allowed or denied."
+        },
+        "vault": {
+          "name": "Sealed credentials",
+          "desc": "An app password for the group's account, stored encrypted. It is a limited spare key, not the account's main password: members and apps never see it, only the service can use it, and whoever holds the real account credentials can revoke it at any time."
+        }
+      }
+    },
+    "safety": {
+      "heading": "Built-in safety",
+      "intro": "Three habits keep a shared account safe.",
+      "pass": {
+        "title": "Passes die fast",
+        "text": "Every request carries a fresh signed pass. It works exactly once and expires after two minutes, so a stolen pass is close to worthless."
+      },
+      "vault": {
+        "title": "Credentials stay sealed",
+        "text": "The service holds only an app password — a spare key, not the account's main password. It is stored encrypted, and whoever keeps the real account credentials can revoke the service's access at any time. The reverse is impossible."
+      },
+      "log": {
+        "title": "Nothing happens unseen",
+        "text": "Allowed or denied, every action lands in the group's audit log with the who, the what, and the when."
+      }
+    },
+    "more": {
+      "heading": "Keep exploring",
+      "lexiconsTitle": "Data schemas",
+      "lexiconsDesc": "The open record formats that live inside each group's repo.",
+      "epdsTitle": "How ePDS works",
+      "epdsDesc": "The friendly front door that signs people in with just an email.",
+      "githubTitle": "CGS on GitHub",
+      "githubDesc": "The full source code of the group service, open for anyone to read, run, and improve.",
+      "atprotoTitle": "How the AT Protocol works",
+      "atprotoDesc": "An interactive tour of the open network everything here is built on."
+    }
+  },
+  "atproto": {
+    "metaTitle": "How the AT Protocol works",
+    "metaDescription": "A friendly interactive tour of the AT Protocol, the open network GainForest is built on. See how identities, records, and apps fit together.",
+    "kicker": "AT Protocol",
+    "title": "How the AT Protocol works",
+    "lead": "GainForest does not keep your data in a private database. Everything lives on the AT Protocol, an open network where people own their data and many apps share it. This page explains the big ideas in plain words, with small toys you can play with.",
+    "whatIs": {
+      "heading": "What is the AT Protocol?",
+      "p1": "The AT Protocol, atproto for short, is a recipe for social apps where data belongs to people instead of platforms. Every person and every organization has an account, and every account has a data server that stores its records. A post, a like, a follow, a biodiversity observation: each one is a small signed record.",
+      "p2": "Apps like GainForest or Bluesky read those records and turn them into feeds, maps, and profiles. The records stay open and portable, so no single company can lock you in. If one app shuts down, your name and your data survive."
+    },
+    "naming": {
+      "heading": "A name, not a place",
+      "intro": "On the classic web, a link points at a place: one server, somewhere. On atproto, a link points at a person. Try to break both.",
+      "linkChip": "link",
+      "web": {
+        "title": "A link to a place",
+        "serverLabel": "one server",
+        "action": "Shut the server down",
+        "undo": "Bring it back",
+        "okCaption": "This link only works while this one server stays online.",
+        "downCaption": "The server is gone, and the post died with it. Every copy of this link is now broken.",
+        "aria": "Diagram of a web link pointing at one server"
+      },
+      "id": {
+        "title": "A link to a person",
+        "hostA": "old home",
+        "hostB": "new home",
+        "action": "Move Maria to a new home",
+        "undo": "Move her back",
+        "okCaption": "The link names Maria, not a machine. The network looks up where her data lives right now.",
+        "movedCaption": "Maria moved, and the link did not change. Nothing to update, nothing broken.",
+        "aria": "Diagram of an atproto link pointing at a person who can change hosts"
+      }
+    },
+    "records": {
+      "heading": "Everything is a record",
+      "intro": "Each account keeps its data in a repository: a public folder of small signed records. Records can point at records in other accounts. Tap one to read it.",
+      "aria": "Diagram of two repositories with records linking across them",
+      "repoOfMaria": "Maria's repo",
+      "repoOfKai": "Kai's repo",
+      "nodes": {
+        "profile": "profile",
+        "post": "post: I saw a toucan",
+        "observation": "observation + photo",
+        "like": "like",
+        "follow": "follow"
+      },
+      "details": {
+        "mProfile": "Maria's profile record. Her name and bio live here, inside her own repository.",
+        "mPost": "A post by Maria. It points at her observation record as evidence, using that record's address.",
+        "mObs": "A biodiversity observation with a photo. GainForest reads records like this one to build maps and project pages.",
+        "kProfile": "Kai's profile record, inside his own repository.",
+        "kLike": "A like is a record too. It lives in Kai's repository and points at Maria's post by its address. No permission was needed to make that link.",
+        "kFollow": "Kai follows Maria. The follow points at Maria herself, so it keeps working wherever her data lives."
+      },
+      "caption": "Addresses start with at:// and name an account, a record type, and a key. Any app on the network can follow them."
+    },
+    "flow": {
+      "heading": "One record, every app",
+      "intro": "When someone publishes, their personal data server (the PDS) announces the new record. A relay collects announcements from the whole network into one big stream, and every app listens to it. Tap a person to publish.",
+      "aria": "Diagram of records flowing from personal data servers through a relay to apps",
+      "publishAs": "Publish as {name}",
+      "pdsLabel": "PDS",
+      "relayLabel": "relay",
+      "appForest": "Forest app",
+      "appFeed": "Feed app",
+      "received": "{count} received",
+      "caption": "Both apps receive the same record at the same moment. A new app can join the stream tomorrow and build something nobody imagined, without asking anyone."
+    },
+    "move": {
+      "heading": "You can always move out",
+      "intro": "Your name and your data are not glued to any company. If your host gets slow, greedy, or disappears, you pack up and go. Try it.",
+      "hostA": "The old host",
+      "hostB": "The new host",
+      "emptyHost": "empty",
+      "suitcaseRecords": "128 records",
+      "suitcaseFollowers": "42 followers",
+      "moveAction": "Move to the new host",
+      "moveBack": "Move back",
+      "checkName": "Same name",
+      "checkRecords": "All records kept",
+      "checkFollowers": "All followers kept",
+      "checkLinks": "All links still work",
+      "caption": "This is called credible exit. Hosts have to treat people well, because leaving is easy. Most people never move, but everyone benefits from the open door."
+    },
+    "roots": {
+      "heading": "Three old ideas, one network",
+      "intro": "Atproto did not appear out of nowhere. It mixes the best parts of three earlier waves of the internet.",
+      "web": {
+        "title": "From the web",
+        "text": "Anyone may join and publish without asking permission, and anything can link to anything else."
+      },
+      "p2p": {
+        "title": "From peer-to-peer",
+        "text": "Every record is signed by its author, so it stays trustworthy no matter which computer hands it to you."
+      },
+      "scale": {
+        "title": "From big platforms",
+        "text": "Fast feeds, search, and counts come from strong indexing services that read the shared stream."
+      }
+    },
+    "trust": {
+      "heading": "Lazy trust",
+      "intro": "Checking every signature on every page view would be slow. Atproto takes a relaxed middle path.",
+      "signed": {
+        "title": "Signed at the source",
+        "text": "Every record carries its author's signature, so anyone can verify it whenever it matters."
+      },
+      "views": {
+        "title": "Fast views",
+        "text": "Apps serve prepared views without rechecking each record. If an app ever lied, the signed originals would prove it."
+      },
+      "exit": {
+        "title": "The open door",
+        "text": "Data and identity can move at any time, so a service that misbehaves loses its users. That keeps everyone honest."
+      }
+    },
+    "lexicon": {
+      "heading": "Speaking the same language",
+      "p1": "For apps to share records, they must agree on what each record looks like. Atproto does this with schemas called lexicons. Every schema has a clear owner who can evolve it, and every app can check that a record follows the rules exactly. Structure is what makes the sharing work.",
+      "p2": "GainForest publishes its own open schemas for biodiversity observations, projects, certificates, and donations. Any other app can read our records or write compatible ones. You can browse them all in the data schemas guide below."
+    },
+    "more": {
+      "heading": "Keep exploring",
+      "lexiconsTitle": "Data schemas",
+      "lexiconsDesc": "Every record format GainForest publishes on the network.",
+      "cgsTitle": "How group accounts work",
+      "cgsDesc": "The guard service that lets a whole team share one account safely.",
+      "epdsTitle": "How ePDS works",
+      "epdsDesc": "The login system and the servers behind every GainForest account.",
+      "siteTitle": "atproto.com",
+      "siteDesc": "The official protocol site, with the full specs and guides for builders.",
+      "ethosNote": "Many ideas on this page come from the protocol team's essay on its design philosophy:",
+      "ethosLink": "The atproto ethos"
+    }
+  },
+  "identifications": {
+    "meta": {
+      "title": "Identifications",
+      "description": "Every AudioMoth sound label you've saved, gathered in one place."
+    },
+    "title": "Identifications",
+    "subtitle": "Every saved AudioMoth label across your recordings, in one place. Each one is a biodiversity occurrence in your account.",
+    "loading": "Loading identifications…",
+    "loadFailed": "We couldn't load your identifications. Please try again.",
+    "unknownRecording": "Unknown recording",
+    "summary": "{count, plural, one {# identification} other {# identifications}}",
+    "summaryHint": "Read-only roll-up of your labelling workspace.",
+    "openLabeller": "Open labeller",
+    "export": "Export CSV",
+    "refresh": "Refresh",
+    "searchPlaceholder": "Search name, recording or note…",
+    "filterAll": "All · {count}",
+    "emptyTitle": "No identifications yet",
+    "emptyBody": "Draw and save a box in the AudioMoth labeller and it'll show up here.",
+    "noMatches": "No identifications match your filters.",
+    "signInTitle": "Sign in to view identifications",
+    "signInBody": "Your saved AudioMoth labels live in your account. Sign in to see them.",
+    "categories": {
+      "bird": "Bird",
+      "frog": "Frog",
+      "insect": "Insect",
+      "other": "Other",
+      "note": "Note"
+    }
+  },
+  "walletExplainer": {
+    "metaTitle": "Anatomy of a donation wallet: an interactive essay",
+    "metaDescription": "Grow a real passkey-curve key in your browser, derive a real vault address with the factory's own math, and play through the life of a donation. An interactive essay on GainForest's donation wallets.",
+    "kicker": "An interactive essay",
+    "title": "Anatomy of a donation wallet",
+    "standfirst": "Every organization on GainForest can hold donations in a wallet with no password, no seed phrase, and no company keeping keys. This page does not just describe how that works. It lets you run the machinery yourself, right here in your browser.",
+    "intro": {
+      "p1": "When a supporter funds a mangrove restoration or a bird survey, the money lands in a small vault on Ethereum. The vault has no operator and no support desk. It obeys exactly one thing: cryptographic signatures from the phones and laptops of the people who run the project.",
+      "p2": "Three ideas make that possible. A key that grows inside your device and never leaves it. An address that can be computed before the wallet exists. And a contract that checks a fingerprint's signature with pure math. Let's build each one, live."
+    },
+    "part1": {
+      "label": "Live experiment",
+      "heading": "A key grows in your phone",
+      "p1": "Behind every Face ID prompt sits an old and beautiful piece of cryptography: an elliptic-curve key pair on a curve called P-256. Your device invents an enormous random number, locks it inside a secure chip, and hands out only the matching public point: two coordinates, x and y.",
+      "p2": "Your browser can do the same thing this second. Press the button below and it will grow a fresh key on that exact curve. The private half is created under a strict rule: it may sign, and it may never be exported. Not even this page can read it.",
+      "p3": "Those two coordinates are all a wallet ever learns about you. The contract stores them as a pair of 32-byte slots and, when money should move, demands a signature that only the locked-away half can produce. You just watched your browser pass that exact check."
+    },
+    "keyForge": {
+      "bench": "Experiment 1 · Grow a key",
+      "invite": "Your browser will create a real key pair on the passkey curve (P-256). It lives only on this page and disappears when you leave.",
+      "growButton": "Grow a key",
+      "unsupported": "Your browser does not support WebCrypto here. The rest of the essay works fine without it.",
+      "privateLabel": "Private key · secure chip",
+      "privateNote": "Marked non-exportable at birth. It can sign, and that is all it will ever do.",
+      "publicLabel": "Public key · what the chain stores",
+      "publicNote": "The x and y of your public point, exactly as the contract's Signer struct keeps them.",
+      "messageLabel": "A payment to approve",
+      "sampleMessage": "pay 20 USDC to Rio Claro",
+      "signButton": "Sign with your key",
+      "verified": "Signature checks out",
+      "failed": "Verification failed",
+      "verifyNote": "Your key signed the payment hash and your browser verified it against the public point. On Ethereum, the vault runs this same P-256 check.",
+      "privacyNote": "Nothing was saved and nothing was sent anywhere. Reload the page and this key is gone forever."
+    },
+    "part2": {
+      "label": "Live experiment",
+      "heading": "An address made of arithmetic",
+      "p1": "Here is the strangest property of the whole system: the wallet's address exists before the wallet does. No transaction, no deployment, no registration anywhere. The address is simply the answer to a calculation, and anyone who knows the ingredients gets the same answer.",
+      "p2": "The recipe has four ingredients: an owner slot that is permanently empty, the list of signer keys, the approval threshold, and a salt hashed out of the organization's identity. The factory contract mixes them with keccak256 and the CREATE2 rule. Try it below. Type a name and watch every digit of the address react.",
+      "p3": "This is why nobody has to trust GainForest about which address belongs to which organization. The organization publishes its ingredients as a public record in its own account. Doubt a label? Rerun the arithmetic, as you just did, and compare."
+    },
+    "addressForge": {
+      "bench": "Experiment 2 · The address forge",
+      "liveTag": "real factory math, computed as you type",
+      "stepAccount": "Ingredient: the account identity",
+      "nameAria": "Organization name",
+      "typeHint": "type anything",
+      "stepSigners": "Ingredient: the signer set",
+      "yourKey": "your key from experiment 1",
+      "sampleKey": "sample key",
+      "secondKey": "second device",
+      "addSecond": "add a second device",
+      "thresholdNote": "threshold 1 · any listed key may sign",
+      "stepSalt": "One hash over all ingredients",
+      "stepAddress": "The CREATE2 rule names the address",
+      "footnote": "The factory address and proxy code hash above are the real Ethereum mainnet values, and this derivation matches the factory's own getAddress function. Every hash on this bench is computed by your browser."
+    },
+    "part3": {
+      "label": "Reading the source",
+      "heading": "The contract, annotated",
+      "p1": "The vault is a Splits smart account: open source, audited, and built on designs by Coinbase and Daimo. You do not have to take this essay's word for anything. Here are the three passages that carry the weight, each with a note on what it means.",
+      "p2": "One more property falls out of the design. The factory deploys with CREATE2, so the same ingredients produce the same address on every chain where the factory exists. An organization's address is portable across the whole EVM world."
+    },
+    "contract": {
+      "signerNote": "A signer is just two 32-byte slots. For a passkey they hold the x and y you grew in experiment 1. The same struct also fits a classic Ethereum address, with the second slot left empty.",
+      "saltNote": "The whole identity of a wallet, hashed into one salt: who owns it (for GainForest wallets, nobody), which keys may sign, and how many must agree. Change any ingredient and the address moves.",
+      "webauthnNote": "How the chain checks a Face ID signature: it first tries a built-in verifier at address 0x100 and, where a chain lacks it, verifies the curve equation step by step in a library instead."
+    },
+    "part4": {
+      "label": "Playthrough",
+      "heading": "The life of a donation",
+      "p1": "Put the pieces together and a curious sequence appears. A supporter can send money to the address on day one, while the address is still nothing except the answer to experiment 2. The chain does not mind. Balances belong to addresses, and this address is as real as any other.",
+      "p2": "The final entry closes the loop. Before the deployment, the signer list may still change, and the record simply points to a freshly computed address. After it, the record freezes and the vault takes over: adding a device becomes an on-chain action, approved by a key that is already on the list."
+    },
+    "ledger": {
+      "bench": "Experiment 3 · A wallet's ledger",
+      "replay": "Replay",
+      "start": "Begin",
+      "next": "Advance",
+      "empty": "Six events, from a wallet that does not exist to one that pays for real work. Press Begin.",
+      "events": {
+        "record": {
+          "title": "A recipe is published",
+          "body": "The organization writes its wallet ingredients into its own account. Off-chain, free, and public."
+        },
+        "first": {
+          "title": "First donation arrives",
+          "body": "Sent to the computed address. There is no contract there. The money waits anyway."
+        },
+        "second": {
+          "title": "Another supporter gives",
+          "body": "The address keeps collecting. Still no code, still nothing to maintain."
+        },
+        "deploy": {
+          "title": "First payout: the wallet materializes",
+          "body": "The payment carries initCode, so the factory deploys the vault at the address the math promised. Then the payment executes."
+        },
+        "payout": {
+          "title": "The project gets paid",
+          "body": "A signer approved with a fingerprint. The vault verified the P-256 signature on-chain."
+        },
+        "freeze": {
+          "title": "The recipe freezes",
+          "body": "The address now has code, so the ingredient list can never quietly change again. From here on, the vault itself manages its signers."
+        }
+      },
+      "balanceLabel": "Held at the address",
+      "codeLabel": "Code at the address",
+      "codeNone": "none",
+      "codeDeployed": "ERC-1967 vault",
+      "meterNoteBefore": "Money can wait at an address with no code. The only contract that can ever appear there is the vault the ingredients describe.",
+      "meterNoteAfter": "The vault is live. Every outgoing payment is now checked against the signer list."
+    },
+    "epilogue": {
+      "heading": "Check the label yourself",
+      "p1": "Every claim on this page is checkable. The wallet recipe sits in the organization's own account as a public record. The factory sits at the same address on Ethereum. Fetch the record, run experiment 2 with its exact ingredients, and the address either matches or it does not. No signatures, no authority, and no trust in this website required.",
+      "p2": "The honest caveats: if every key on the list is lost, the money cannot move, so organizations should enroll a second device early. And until the first payout, changing the signer list changes the address, so the list should settle before donations are pointed at it.",
+      "contractLink": "Read the smart-vault contracts on GitHub",
+      "lexiconLink": "The wallet record's schema, and every other one",
+      "atprotoLink": "How the AT Protocol stores the record"
     }
   }
 }

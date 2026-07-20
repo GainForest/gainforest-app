@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import { ImagesIcon, LeafIcon } from "lucide-react";
 import { RecordDrawer } from "../_components/RecordDrawer";
+import { QuickLikeButton, QuickLikeProvider } from "../_components/QuickLike";
 import { isPdsBlobUrl, resolveBlobUrl } from "../_lib/pds";
 import { fetchRoundObservations, type BioblitzRound } from "../_lib/bioblitz";
 import type { ExplorerRecord, OccurrenceRecord } from "../_lib/indexer";
@@ -100,13 +101,17 @@ export function BioblitzGallery({ round }: { round: BioblitzRound }) {
               {t("empty")}
             </div>
           ) : view === "all" ? (
-            <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
-              {records.map((record) => (
-                <li key={record.id}>
-                  <GalleryCard record={record} onOpen={setDrawer} t={t} sizeClassName="aspect-square w-full" />
-                </li>
-              ))}
-            </ul>
+            /* Quick like: the static grid gets a heart on each thumbnail (the
+               auto-scrolling wall doesn't — moving targets invite misclicks). */
+            <QuickLikeProvider uris={records.map((record) => record.atUri)}>
+              <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
+                {records.map((record) => (
+                  <li key={record.id}>
+                    <GalleryCard record={record} onOpen={setDrawer} t={t} sizeClassName="aspect-square w-full" quickLike />
+                  </li>
+                ))}
+              </ul>
+            </QuickLikeProvider>
           ) : (
             <div className="bioblitz-marquee relative overflow-hidden">
               <MarqueeRow items={rowA} dir="left" animate={animate} onOpen={setDrawer} t={t} />
@@ -192,11 +197,13 @@ function GalleryCard({
   onOpen,
   t,
   sizeClassName = "aspect-square h-full shrink-0",
+  quickLike = false,
 }: {
   record: OccurrenceRecord;
   onOpen: (record: ExplorerRecord) => void;
   t: ReturnType<typeof useTranslations<"marketplace.bioblitz.gallery">>;
   sizeClassName?: string;
+  quickLike?: boolean;
 }) {
   const [url, setUrl] = useState<string | null>(record.imageUrl);
   const [imgError, setImgError] = useState(false);
@@ -219,12 +226,21 @@ function GalleryCard({
   const hasImage = Boolean(url) && !imgError;
 
   return (
-    <button
-      type="button"
+    // div+role rather than <button> so the quick-like heart (itself a button)
+    // can legally nest inside the clickable card.
+    <div
+      role="button"
+      tabIndex={0}
       onClick={() => onOpen(record)}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          onOpen(record);
+        }
+      }}
       title={name ?? undefined}
       aria-label={t("openPhoto", { name: name ?? t("unnamed") })}
-      className={`group relative block ${sizeClassName} overflow-hidden rounded-2xl bg-surface-sunken text-left outline-none transition duration-300 hover:z-10 hover:shadow-[0_18px_40px_-22px_rgba(20,30,15,0.55)] focus-visible:z-10 focus-visible:ring-2 focus-visible:ring-primary/60`}
+      className={`group relative block ${sizeClassName} cursor-pointer overflow-hidden rounded-2xl bg-surface-sunken text-left outline-none transition duration-300 hover:z-10 hover:shadow-[0_18px_40px_-22px_rgba(20,30,15,0.55)] focus-visible:z-10 focus-visible:ring-2 focus-visible:ring-primary/60`}
     >
       {hasImage ? (
         <Image
@@ -244,7 +260,9 @@ function GalleryCard({
 
       <div className="pointer-events-none absolute inset-x-0 bottom-0 h-3/4 bg-gradient-to-t from-black/80 via-black/25 to-transparent" />
 
-      <div className="absolute inset-x-0 bottom-0 p-2">
+      {quickLike ? <QuickLikeButton subjectUri={record.atUri} className="absolute bottom-2 right-2" /> : null}
+
+      <div className={`absolute inset-x-0 bottom-0 p-2 ${quickLike ? "pr-10" : ""}`}>
         {name ? (
           <p className="truncate font-instrument text-[13px] italic leading-tight text-white [text-shadow:0_1px_3px_rgba(0,0,0,0.6)]">
             {name}
@@ -252,7 +270,7 @@ function GalleryCard({
         ) : null}
         {place ? <p className="truncate text-[10px] leading-tight text-white/70">{place}</p> : null}
       </div>
-    </button>
+    </div>
   );
 }
 

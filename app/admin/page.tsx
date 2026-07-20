@@ -3,8 +3,10 @@ import { notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { ShieldCheckIcon } from "lucide-react";
 import Container from "@/components/ui/container";
+import { AdminOnlyIndicator } from "@/app/_components/AdminOnlyIndicator";
 import { getGainForestModeratorAccess, getInternalBadgeAccess } from "@/app/internal/badges/_lib/access";
 import { fetchFlaggedTestAccounts } from "@/app/internal/badges/_lib/test-accounts";
+import { fetchFlaggedTestRecords } from "@/app/internal/badges/_lib/test-records";
 import { fetchGrantApplicants } from "@/app/_lib/grants";
 import { fetchBioblitzRegistrants } from "@/app/_lib/bioblitz";
 import { fetchTainaAdminResidents } from "@/app/_lib/taina-agent";
@@ -115,9 +117,10 @@ export default async function AdminPage({
   }
 
   const t = await getTranslations("common.adminModeration");
-  const [{ tab }, testAccounts, grantApplicants, bioblitzRegistrants, taina, dataJobRows, endorsers, awardEndorsements, facilitatorStats] = await Promise.all([
+  const [{ tab }, testAccounts, testRecords, grantApplicants, bioblitzRegistrants, taina, dataJobRows, endorsers, awardEndorsements, facilitatorStats] = await Promise.all([
     searchParams,
     fetchFlaggedTestAccounts().catch(() => []),
+    moderator.repoDid ? fetchFlaggedTestRecords(moderator.repoDid).catch(() => []) : Promise.resolve([]),
     fetchGrantApplicants().catch(() => []),
     fetchBioblitzRegistrants().catch(() => []),
     loadTainaRows(),
@@ -135,12 +138,14 @@ export default async function AdminPage({
         <div className="flex items-center gap-2">
           <ShieldCheckIcon className="size-5 text-muted-foreground" />
           <h1 className="font-instrument text-3xl font-light italic tracking-[-0.04em]">{t("page.title")}</h1>
+          <AdminOnlyIndicator className="text-muted-foreground" />
         </div>
         <p className="mt-2 max-w-prose text-sm leading-6 text-muted-foreground">{t("page.subtitle")}</p>
       </header>
       <AdminModerationDashboard
         initialTab={initialTab}
         testAccounts={testAccounts}
+        testRecords={testRecords}
         grantApplicants={grantApplicants}
         bioblitzRegistrants={bioblitzRegistrants}
         tainaRows={taina?.rows ?? null}

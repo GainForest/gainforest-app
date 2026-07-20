@@ -14,8 +14,10 @@ import {
 } from "../_lib/indexer";
 import { formatDate } from "../_lib/format";
 import { isPdsBlobUrl, resolveBlobUrl } from "../_lib/pds";
+import { QuickLikeButton, QuickLikeProvider } from "./QuickLike";
 import { pauseOtherAudio, playExclusiveAudio, registerAudioElement } from "../_lib/audio-coordinator";
 import { resolveDidProfile, getCachedProfile } from "../_lib/did-profile";
+import { cn } from "@/lib/utils";
 
 type ObservationSelection = {
   selectedIds: ReadonlySet<string>;
@@ -29,22 +31,28 @@ export function ObservationGrid({
   onFilterOwner,
   className,
   leadingCard,
+  leadingCardClassName,
   selection,
+  compact = false,
 }: {
   records: OccurrenceRecord[];
   onOpen: (record: ExplorerRecord) => void;
   onFilterOwner?: (did: string) => void;
   className: string;
   leadingCard?: ReactNode;
+  leadingCardClassName?: string;
   selection?: ObservationSelection;
+  compact?: boolean;
 }) {
   const counts = useObservationMediaCounts(records);
   const measurements = useObservationMeasurements(records);
+  const subjectUris = useMemo(() => records.map((record) => record.atUri), [records]);
 
   return (
+    <QuickLikeProvider uris={subjectUris}>
     <ul role="list" className={className}>
       {leadingCard ? (
-        <li className="animate-in" style={{ animationDelay: "0ms" }}>
+        <li className={cn("animate-in", leadingCardClassName)} style={{ animationDelay: "0ms" }}>
           {leadingCard}
         </li>
       ) : null}
@@ -57,10 +65,12 @@ export function ObservationGrid({
             onOpen={onOpen}
             onFilterOwner={onFilterOwner}
             selection={selection}
+            compact={compact}
           />
         </li>
       ))}
     </ul>
+    </QuickLikeProvider>
   );
 }
 
@@ -132,6 +142,7 @@ const ObservationCard = memo(function ObservationCard({
   onOpen,
   onFilterOwner,
   selection,
+  compact = false,
 }: {
   record: OccurrenceRecord;
   mediaCount: number;
@@ -139,6 +150,7 @@ const ObservationCard = memo(function ObservationCard({
   onOpen: (record: ExplorerRecord) => void;
   onFilterOwner?: (did: string) => void;
   selection?: ObservationSelection;
+  compact?: boolean;
 }) {
   const t = useTranslations("marketplace.observationGrid");
   const measurementsT = useTranslations("marketplace.measurements");
@@ -248,7 +260,7 @@ const ObservationCard = memo(function ObservationCard({
           src={imageUrl!}
           alt={name}
           fill
-          sizes="(max-width:640px) 50vw, (max-width:1280px) 25vw, 240px"
+          sizes={compact ? "(max-width:640px) 33vw, (max-width:1024px) 16vw, 120px" : "(max-width:640px) 50vw, (max-width:1280px) 25vw, 240px"}
           unoptimized={!isPdsBlobUrl(imageUrl)}
           onError={() => setImgError(true)}
           className="scale-[1.05] object-cover transition-transform duration-[600ms] ease-out group-hover:scale-110"
@@ -292,7 +304,7 @@ const ObservationCard = memo(function ObservationCard({
         </button>
       ) : null}
 
-      {mediaCount > 1 ? (
+      {!compact && mediaCount > 1 ? (
         <span
           className="absolute right-2 top-2 z-20 inline-flex h-8 min-w-8 items-center justify-center gap-1 rounded-full bg-black/58 px-2 text-[12px] font-semibold text-white shadow-md ring-1 ring-white/25 backdrop-blur-md"
           aria-label={t("mediaCount", { count: mediaCount })}
@@ -326,8 +338,12 @@ const ObservationCard = memo(function ObservationCard({
 
       <div className="pointer-events-none absolute inset-x-0 bottom-0 h-3/4 bg-gradient-to-t from-black/85 via-black/35 to-transparent" />
 
-      <div className="absolute inset-x-0 bottom-0 z-10 p-2.5">
-        {creatorLabel ? (
+      {/* Quick like: one tap on the heart likes the sighting without opening it. */}
+      <QuickLikeButton subjectUri={record.atUri} className="absolute bottom-2 right-2" />
+
+      {/* pr keeps the caption clear of the quick-like heart in the corner. */}
+      <div className={cn("absolute inset-x-0 bottom-0 z-10", compact ? "p-1.5 pr-9" : "p-2.5 pr-10")}>
+        {!compact && creatorLabel ? (
           onFilterOwner && record.did ? (
             <button
               type="button"
@@ -348,17 +364,20 @@ const ObservationCard = memo(function ObservationCard({
           )
         ) : null}
         <h3
-          className="font-instrument text-[16px] italic leading-tight text-white [text-shadow:0_1px_3px_rgba(0,0,0,0.6)]"
-          style={clamp(2)}
+          className={cn(
+            "font-instrument leading-tight text-white [text-shadow:0_1px_3px_rgba(0,0,0,0.6)]",
+            compact ? "text-[12px] font-medium italic" : "text-[16px] italic",
+          )}
+          style={clamp(compact ? 1 : 2)}
         >
           {name}
         </h3>
 
-        {place ? (
+        {!compact && place ? (
           <p className="mt-0.5 truncate text-[11.5px] leading-snug text-white/80">{place}</p>
         ) : null}
 
-        {measurements.length > 0 ? (
+        {!compact && measurements.length > 0 ? (
           <div className="mt-1 flex flex-wrap items-center gap-1">
             {measurements.slice(0, 2).map((fact, index) => (
               <span
@@ -377,7 +396,7 @@ const ObservationCard = memo(function ObservationCard({
           </div>
         ) : null}
 
-        {subtitle || date ? (
+        {!compact && (subtitle || date) ? (
           <div className="grid grid-rows-[0fr] opacity-0 transition-all duration-300 ease-out group-hover:grid-rows-[1fr] group-hover:opacity-100 group-focus-visible:grid-rows-[1fr] group-focus-visible:opacity-100">
             <div className="overflow-hidden">
               {subtitle ? (

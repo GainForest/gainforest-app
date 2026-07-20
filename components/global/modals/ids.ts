@@ -3,10 +3,8 @@ export const MODAL_IDS = {
   // Funding config (owner donation settings)
   FUNDING_CONFIG: "funding/config",
 
-  // Wallet linking
-  WALLET_ADD: "wallet/add",
+  // Organization wallet
   WALLET_MANAGE: "wallet/manage",
-  WALLET_DELETE: "wallet/delete",
 
   // Tree upload
   UPLOAD_TREES_COMPLETE: "upload/trees/complete",

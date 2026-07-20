@@ -18,7 +18,10 @@ export type NavLeaf = {
   Icon: React.ComponentType<{ className?: string }>;
   href: string;
   pathCheck: { equals?: string; startsWith?: string };
+  /** Optional query-string tab that must be active for this item. */
   tabCheck?: string;
+  /** Optional query-string tab that makes this otherwise matching item inactive. */
+  tabExclude?: string;
   /** Only shown to GainForest admin-group members (any role). The route
    *  itself must re-check access server-side — hiding the item is cosmetic. */
   adminOnly?: boolean;

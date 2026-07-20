@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import { unstable_cache } from "next/cache";
+import { getTranslations } from "next-intl/server";
+import { localizedAlternates, socialPreviewMetadata } from "@/app/_lib/seo-metadata";
 import { redirect } from "next/navigation";
 import { Suspense } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -10,12 +12,19 @@ import { fetchKpis } from "./_lib/kpis";
 
 export const revalidate = 300;
 
-export const metadata: Metadata = {
-  title: "GainForest — Fund Regenerative Impact",
-  description:
-    "GainForest connects funders with nature stewards doing on-ground regenerative work. Support verified environmental impact directly.",
-  alternates: { canonical: "/" },
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("common.seo");
+
+  const title = t("title");
+  const description = t("description");
+
+  return {
+    title,
+    description,
+    alternates: await localizedAlternates("/"),
+    ...socialPreviewMetadata("/", title, description),
+  };
+}
 
 const fetchHomeKpis = unstable_cache(fetchKpis, ["home-page-kpis"], {
   revalidate: 60 * 15,

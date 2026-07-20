@@ -5,7 +5,7 @@
  * donation settings.
  */
 
-import { useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import { useModal } from "@/components/ui/modal/context";
 import {
@@ -25,21 +25,17 @@ import {
   AccordionContent,
 } from "@/components/ui/accordion";
 import {
-  useEvmLinks,
   upsertFundingConfig,
-  isWalletTrusted,
   type FundingConfigData,
-  type EvmLink,
 } from "@/app/_lib/funding";
-import { FACILITATOR_WALLET_ADDRESS } from "@/app/_lib/urls";
-import { AddWalletModal } from "@/components/global/modals/wallet/add";
-import { ManageWalletsModal } from "@/components/global/modals/wallet/manage";
+import { OrgWalletModal } from "@/components/global/modals/wallet/org-vault";
 import { MODAL_IDS } from "@/components/global/modals/ids";
+import type { SplitsVaultRecord } from "@/lib/splits-vault/shared";
 import {
   AlertTriangleIcon,
   ChevronDownIcon,
-  PlusIcon,
-  SparklesIcon,
+  FingerprintIcon,
+  Loader2Icon,
   WalletIcon,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -51,16 +47,11 @@ function formatAddress(address: string | null | undefined): string {
   return `${address.slice(0, 6)}…${address.slice(-4)}`;
 }
 
-function walletLabel(
-  link: EvmLink,
-  facilitatorAddress: string | undefined,
-): string {
-  const addr = formatAddress(link.record?.address);
-  const name = link.record?.name;
-  const trusted = isWalletTrusted(link, facilitatorAddress);
-  const warning = !trusted ? ` · Not verified` : "";
-  return name ? `${addr} (${name})${warning}` : `${addr}${warning}`;
-}
+type VaultPanelState =
+  | { status: "loading" }
+  | { status: "none"; viewerRole: "owner" | "admin" | "member" }
+  | { status: "ready"; viewerRole: "owner" | "admin" | "member"; uri: string; record: SplitsVaultRecord }
+  | { status: "unavailable" };
 
 // ── Styled select ─────────────────────────────────────────────────────────────
 
@@ -131,11 +122,42 @@ export function FundingConfigModal({
   onSaved,
 }: FundingConfigModalProps) {
   const t = useTranslations("modals.fundingConfig");
-  const createT = useTranslations("modals.walletCreate");
+  const walletT = useTranslations("modals.orgWallet");
   const { pushModal, popModal, stack, hide } = useModal();
-  const facilitatorAddress = FACILITATOR_WALLET_ADDRESS;
 
-  const { data: evmLinks = [], refetch: refetchLinks } = useEvmLinks(ownerDid);
+  // Donation wallets are organization-owned Splits smart accounts. Personal
+  // projects can no longer link wallets — only a previously saved wallet
+  // keeps working.
+  const orgDid = mutationRepo?.trim() || null;
+  const [vault, setVault] = useState<VaultPanelState>({ status: orgDid ? "loading" : "unavailable" });
+
+  const loadVault = useCallback(async () => {
+    if (!orgDid) return;
+    try {
+      const response = await fetch(`/api/org-wallet?repo=${encodeURIComponent(orgDid)}`);
+      if (!response.ok) {
+        setVault({ status: "unavailable" });
+        return;
+      }
+      const json = (await response.json()) as {
+        exists: boolean;
+        viewerRole: "owner" | "admin" | "member";
+        record?: SplitsVaultRecord;
+        uri?: string;
+      };
+      if (json.exists && json.record && json.uri) {
+        setVault({ status: "ready", viewerRole: json.viewerRole, uri: json.uri, record: json.record });
+      } else {
+        setVault({ status: "none", viewerRole: json.viewerRole });
+      }
+    } catch {
+      setVault({ status: "unavailable" });
+    }
+  }, [orgDid]);
+
+  useEffect(() => {
+    void loadVault();
+  }, [loadVault]);
 
   // ── Form state ─────────────────────────────────────────────────────────────
 
@@ -170,47 +192,26 @@ export function FundingConfigModal({
     }
   };
 
-  const invalidateLinks = () => {
-    refetchLinks();
-  };
+  // ── Organization wallet flow ─────────────────────────────────────────────
 
-  // ── Add wallet flow ────────────────────────────────────────────────────────
-
-  const handleAddWallet = () => {
-    pushModal({
-      id: MODAL_IDS.WALLET_ADD,
-      content: (
-        <AddWalletModal
-          did={ownerDid}
-          repo={mutationRepo}
-          onBack={() => popModal()}
-          onSuccess={(attestationUri) => {
-            invalidateLinks();
-            popModal();
-            if (!attestationUri) return;
-            setSelectedWalletUri(attestationUri);
-            // "One-click" setup: a wallet created/linked while no donation
-            // settings exist yet opens donations immediately with the new
-            // wallet, instead of asking for another Save press.
-            if (!existingConfig) void saveConfig(attestationUri);
-          }}
-        />
-      ),
-    });
-  };
-
-  // ── Manage wallets flow ────────────────────────────────────────────────────
-
-  const handleManageWallets = () => {
+  const handleOpenOrgWallet = () => {
+    if (!orgDid) return;
+    const hadVault = vault.status === "ready";
     pushModal({
       id: MODAL_IDS.WALLET_MANAGE,
       content: (
-        <ManageWalletsModal
-          ownerDid={ownerDid}
-          evmLinks={evmLinks}
-          repo={mutationRepo}
+        <OrgWalletModal
+          orgDid={orgDid}
           onBack={() => popModal()}
-          onChanged={invalidateLinks}
+          onChanged={(uri) => {
+            void loadVault();
+            if (!uri) return;
+            setSelectedWalletUri(uri);
+            // "One-click" setup: a wallet created while no donation settings
+            // exist yet opens donations immediately with the new wallet,
+            // instead of asking for another Save press.
+            if (!existingConfig && !hadVault) void saveConfig(uri);
+          }}
         />
       ),
     });
@@ -252,40 +253,11 @@ export function FundingConfigModal({
 
   // ── Render ─────────────────────────────────────────────────────────────────
 
-  const defaultSelectedWalletUri = existingConfig?.receivingWallet?.uri
-    ? ""
-    : (evmLinks.find(
-        (link) =>
-          link.specialMetadata?.valid &&
-          isWalletTrusted(link, facilitatorAddress),
-      )?.metadata?.uri ??
-      evmLinks[0]?.metadata?.uri ??
-      "");
   const savedWalletUri = existingConfig?.receivingWallet?.uri ?? "";
-  const savedWalletMissing =
-    savedWalletUri.length > 0 &&
-    !evmLinks.some((link) => link.metadata?.uri === savedWalletUri);
-  const hasExplicitSelection = evmLinks.some(
-    (link) => link.metadata?.uri === selectedWalletUri,
-  );
-  const effectiveSelectedWalletUri = hasExplicitSelection
-    ? selectedWalletUri
-    : savedWalletMissing
-      ? ""
-      : defaultSelectedWalletUri;
-
-  const selectedLink = evmLinks.find(
-    (l) => l.metadata?.uri === effectiveSelectedWalletUri,
-  );
-  const selectedLinkInvalid =
-    selectedLink &&
-    (!selectedLink.specialMetadata?.valid ||
-      !isWalletTrusted(selectedLink, facilitatorAddress));
-
-  const walletOptions = evmLinks.map((link) => ({
-    value: link.metadata?.uri ?? "",
-    label: walletLabel(link, facilitatorAddress),
-  }));
+  // The organization wallet is the only selectable wallet; a previously saved
+  // wallet keeps working until the organization wallet replaces it.
+  const effectiveSelectedWalletUri =
+    vault.status === "ready" ? vault.uri : selectedWalletUri || savedWalletUri;
 
   return (
     <ModalContent dismissible={false}>
@@ -301,10 +273,10 @@ export function FundingConfigModal({
               <WalletIcon className="size-3.5 text-muted-foreground" />
               {t("receivingWallet")}
             </Label>
-            {evmLinks.length > 0 && (
+            {vault.status === "ready" && (
               <button
                 type="button"
-                onClick={handleManageWallets}
+                onClick={handleOpenOrgWallet}
                 className="text-xs text-primary hover:underline"
               >
                 {t("manage")}
@@ -312,57 +284,38 @@ export function FundingConfigModal({
             )}
           </div>
 
-          {evmLinks.length === 0 ? (
+          {vault.status === "loading" ? (
+            <div className="flex items-center justify-center h-9 rounded-md border border-input">
+              <Loader2Icon className="size-4 animate-spin text-muted-foreground" />
+            </div>
+          ) : vault.status === "ready" ? (
+            <div className="flex items-center gap-2 rounded-md border border-input px-3 py-2">
+              <FingerprintIcon className="size-4 text-muted-foreground shrink-0" />
+              <div className="flex flex-col flex-1 min-w-0">
+                <span className="text-sm leading-snug truncate">{vault.record.name || walletT("defaultName")}</span>
+                <span className="text-xs text-muted-foreground font-mono leading-snug">{formatAddress(vault.record.address)}</span>
+              </div>
+            </div>
+          ) : vault.status === "none" ? (
             <div className="flex flex-col gap-2">
               <button
                 type="button"
-                onClick={() => handleAddWallet()}
+                onClick={handleOpenOrgWallet}
                 data-taina="add-donation-wallet"
                 className="flex items-center justify-center gap-1.5 h-9 w-full rounded-md bg-primary text-sm font-medium text-primary-foreground shadow-xs hover:opacity-90 transition-opacity"
               >
-                <SparklesIcon className="size-3.5" />
-                {createT("addWallet")}
+                <FingerprintIcon className="size-3.5" />
+                {vault.viewerRole !== "member" ? walletT("createButton") : walletT("title")}
               </button>
-              <p className="text-xs text-muted-foreground text-center">{createT("createHint")}</p>
-            </div>
-          ) : (
-            <div className="flex items-center gap-2">
-              <StyledSelect
-                value={effectiveSelectedWalletUri}
-                onChange={setSelectedWalletUri}
-                options={walletOptions}
-                placeholder={t("selectWallet")}
-                className="flex-1"
-              />
-              <button
-                type="button"
-                onClick={() => handleAddWallet()}
-                title={t("linkNewWallet")}
-                data-taina="add-donation-wallet"
-                className="flex items-center gap-1 h-9 shrink-0 rounded-md border border-input px-2.5 text-sm text-muted-foreground hover:text-foreground hover:border-foreground/40 transition-colors"
-              >
-                <PlusIcon className="size-3.5" />
-                {t("link")}
-              </button>
-            </div>
-          )}
-
-          {selectedLinkInvalid && (
-            <div className="flex items-start gap-2 rounded-md bg-destructive/10 border border-destructive/20 px-3 py-2">
-              <AlertTriangleIcon className="size-3.5 text-destructive mt-0.5 shrink-0" />
-              <p className="text-xs text-destructive leading-snug">
-                {!selectedLink.specialMetadata?.valid
-                  ? t("signatureUnverified")
-                  : t("notVerified")}
+              <p className="text-xs text-muted-foreground text-center">
+                {vault.viewerRole !== "member" ? walletT("emptyHint") : walletT("onlyOwnerCanCreate")}
               </p>
             </div>
-          )}
-
-          {savedWalletMissing && !hasExplicitSelection && (
-            <div className="flex items-start gap-2 rounded-md bg-destructive/10 border border-destructive/20 px-3 py-2">
-              <AlertTriangleIcon className="size-3.5 text-destructive mt-0.5 shrink-0" />
-              <p className="text-xs text-destructive leading-snug">
-                {t("savedWalletMissing")}
+          ) : (
+            <div className="flex items-start gap-2 rounded-md bg-muted px-3 py-2">
+              <AlertTriangleIcon className="size-3.5 text-muted-foreground mt-0.5 shrink-0" />
+              <p className="text-xs text-muted-foreground leading-snug">
+                {savedWalletUri ? t("orgOnlySavedWallet") : t("orgOnly")}
               </p>
             </div>
           )}

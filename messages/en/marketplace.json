@@ -17,8 +17,8 @@
   },
   "explore": {
     "metadata": {
-      "title": "Explore Certs — Verified Regenerative Impact Projects",
-      "description": "Browse verified environmental impact certificates from nature stewards around the world. Filter by country, organization, and impact area."
+      "title": "Explore Certs",
+      "description": "Browse environmental records from nature stewards around the world, with photos, places, and evidence behind each Cert."
     },
     "structuredData": {
       "name": "Explore Certs",
@@ -117,8 +117,8 @@
   },
   "organizations": {
     "metadata": {
-      "title": "Organizations — GainForest",
-      "description": "Browse nature steward organizations creating verified environmental impact with GainForest."
+      "title": "Organizations",
+      "description": "Browse nature steward organizations sharing field observations, projects, and evidence with GainForest."
     },
     "hero": {
       "imageAltLight": "Misty mountain forest at sunrise",
@@ -268,7 +268,7 @@
   },
   "bioblitz": {
     "metadata": {
-      "title": "Weekly BioBlitz Challenge — GainForest",
+      "title": "Weekly BioBlitz Challenge",
       "description": "Go outside, photograph living things, and add your sightings. Each week the top collector and the best photo win a prize."
     },
     "banner": {
@@ -402,7 +402,13 @@
       "pending": "To be announced",
       "compact": "Latest",
       "mostSubmitted": "Most submitted",
-      "mostLiked": "Most liked"
+      "mostLiked": "Most liked",
+      "award": {
+        "action": "Award winner badges",
+        "actionMissing": "Award missing badges",
+        "done": "Winner badges awarded",
+        "error": "Could not award the badges. Try again."
+      }
     },
     "map": {
       "title": "Observations of the week",
@@ -539,7 +545,7 @@
   },
   "grants": {
     "metadata": {
-      "title": "Grants — GainForest",
+      "title": "Grants",
       "description": "Apply for grant programs that fund data and decision sovereignty for nature-based communities."
     },
     "hero": {
@@ -570,6 +576,7 @@
         }
       },
       "apply": "One-Click Apply",
+      "details": "Read grant details",
       "appliedTitle": "Application sent",
       "appliedNote": "Your application for {project} is now posted to the feed.",
       "postText": "Applying to the Rewilding the Web grant with my project \"{project}\" — for data and decision sovereignty. 🌱"
@@ -891,8 +898,8 @@
   },
   "projects": {
     "metadata": {
-      "title": "Explore Projects — Verified Regenerative Impact Work",
-      "description": "Browse projects — each a focused piece of work with a clear goal, a timeline, and expected outcomes."
+      "title": "Nature projects — field evidence and impact records",
+      "description": "Browse community and organization projects with places, updates, observations, and evidence of regenerative work."
     },
     "hero": {
       "eyebrow": "Explore Projects",
@@ -903,7 +910,46 @@
     "search": {
       "ariaLabel": "Search projects",
       "placeholder": "Search projects by name or keyword",
-      "sortAriaLabel": "Sort projects"
+      "sortAriaLabel": "Sort projects",
+      "action": "Search"
+    },
+    "categories": {
+      "eyebrow": "Browse by interest",
+      "title": "Explore project categories",
+      "description": "Start with a theme, then discover the people and places bringing it to life.",
+      "items": {
+        "all": "All projects",
+        "forests": "Forests & trees",
+        "biodiversity": "Biodiversity",
+        "foodWater": "Food, water & soil",
+        "communities": "Communities",
+        "climate": "Climate resilience"
+      }
+    },
+    "featured": {
+      "eyebrow": "Featured projects",
+      "title": "Stories to start with",
+      "description": "A selection of richly documented projects from nature stewards around the world.",
+      "badge": "Featured",
+      "action": "Explore project",
+      "previous": "Previous featured projects",
+      "next": "Next featured projects",
+      "manage": {
+        "add": "Feature this project",
+        "remove": "Remove from featured projects",
+        "error": "Couldn’t update the featured projects. Please try again."
+      }
+    },
+    "support": {
+      "eyebrow": "Open for support",
+      "title": "Help good work grow",
+      "description": "Support projects that are actively welcoming contributions from their community."
+    },
+    "catalog": {
+      "eyebrow": "Explore projects",
+      "title": "Explore all projects",
+      "description": "Browse projects in this category.",
+      "count": "{count, plural, one {# project to explore} other {# projects to explore}}"
     },
     "view": {
       "cards": "Cards",
@@ -958,6 +1004,7 @@
       "showDetails": "Show details",
       "loading": "Loading projects",
       "donate": "Donate",
+      "gainforestBadge": "Donate on GainForest",
       "acceptsDonations": "Accepts donations",
       "openForSupport": "Open for support",
       "donationSummary": "{amount} from {donors, plural, one {# supporter} other {# supporters}}",
@@ -992,7 +1039,7 @@
   },
   "browseGrid": {
     "heading": "Ways to Explore",
-    "description": "Four ways into GainForest work, shaped for funders, stewards, and field teams.",
+    "description": "Ways into GainForest work, shaped for explorers, stewards, and field teams.",
     "cards": {
       "bumicerts": {
         "label": "Verified projects",
@@ -1552,6 +1599,15 @@
       "colSighting": "Sighting",
       "colObserver": "Observer",
       "colDate": "Date"
+    },
+    "metadata": {
+      "title": "Nature sightings",
+      "description": "Explore GainForest nature sightings with field photos, sound recordings, species names, and map locations from real fieldwork."
+    },
+    "view": {
+      "compact": "Compact",
+      "comfortable": "Comfortable",
+      "density": "Card density"
     }
   },
   "manageProjectCerts": {
@@ -1676,6 +1732,12 @@
     "title": "Globe",
     "subtitle": "Organizations and their project sites on a living 3D Earth.",
     "viewOnGlobe": "View on Globe",
+    "tabs": {
+      "details": "Organizations",
+      "layers": "Layers",
+      "popup": "Open as a floating popup",
+      "dock": "Dock to the side"
+    },
     "panel": {
       "searchPlaceholder": "Search organizations…",
       "treeFilter": "Tree data",
@@ -1730,6 +1792,7 @@
         "wetland": "Wetland",
         "mangroves": "Mangroves"
       },
+      "visibleDetails": "On the map",
       "visibleNow": "{count, plural, one {# layer on the map} other {# layers on the map}}",
       "flyTo": "Zoom to {name}",
       "hide": "Hide {name}"

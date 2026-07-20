@@ -66,8 +66,7 @@ export const TAINA_GUIDES: TainaGuide[] = [
       { id: "open", image: img("edit-my-projects") },
       { id: "enable", image: img("wallet-project-support") },
       { id: "addWallet", image: img("wallet-donation-settings") },
-      { id: "signIn", image: img("wallet-link-modal") },
-      { id: "settings", image: img("wallet-linked-wallets") },
+      { id: "passkeys", image: img("wallet-passkeys") },
     ],
     tour: [
       { id: "open", route: "/manage/projects", selector: '[data-taina="open-project"]', advanceOnClick: true },
@@ -156,7 +155,7 @@ export function getTainaGuide(id: string): TainaGuide | undefined {
 export function buildGuideKnowledge(): string {
   return [
     "### Receive donations (set up a wallet)",
-    "Donations are set up on a project, so the user needs at least one project first — if they don't have one yet, tell them to create a project before enabling donations. Then: My Projects → open your project → 'Enable Donations' in the Support card → 'Add a donation wallet' → continue with Bluesky or email (a secure wallet is created automatically; no crypto needed) or connect an existing crypto wallet. Wallets can also be managed under Settings → Linked Wallets.",
+    "Donations are set up on a project, so the user needs at least one project first — if they don't have one yet, tell them to create a project before enabling donations. Donation wallets belong to organizations: the organization owner (or an admin) creates the shared wallet with a passkey (Face ID, fingerprint, or security key — no crypto experience needed), and other members can add their own passkeys so they can approve payments too. Then: My Projects → open your project → 'Enable Donations' in the Support card → 'Create wallet with passkey' → confirm with your passkey. When no donation settings existed yet, creating the wallet saves and opens donations in the same step — no extra Save press. The wallet address can receive donations right away; only the passkeys on its list can ever spend from it. Personal projects cannot add new wallets — the project must belong to an organization.",
     "### Create a project",
     "Sidebar 'Create a Project' (or My Projects → 'Add project') → wizard: name + one-line summary → focus areas → dates (ongoing is fine) → story → people & groups + places → photo → review → Create project.",
     "### Edit a project",

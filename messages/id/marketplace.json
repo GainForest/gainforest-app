@@ -17,8 +17,8 @@
   },
   "explore": {
     "metadata": {
-      "title": "Jelajahi sertifikat — Proyek dampak regeneratif terverifikasi",
-      "description": "Jelajahi sertifikat dampak lingkungan terverifikasi dari penjaga alam di seluruh dunia. Filter berdasarkan negara, organisasi, dan area dampak."
+      "title": "Jelajahi sertifikat",
+      "description": "Jelajahi catatan lingkungan dari penjaga alam di seluruh dunia, dengan foto, tempat, dan bukti di balik setiap sertifikat."
     },
     "structuredData": {
       "name": "Jelajahi sertifikat",
@@ -117,8 +117,8 @@
   },
   "organizations": {
     "metadata": {
-      "title": "Organisasi — GainForest",
-      "description": "Jelajahi organisasi penjaga alam yang menciptakan dampak lingkungan terverifikasi bersama GainForest."
+      "title": "Organisasi",
+      "description": "Jelajahi organisasi penjaga alam yang membagikan observasi lapangan, proyek, dan bukti bersama GainForest."
     },
     "hero": {
       "imageAltLight": "Hutan pegunungan berkabut saat matahari terbit",
@@ -268,7 +268,7 @@
   },
   "bioblitz": {
     "metadata": {
-      "title": "Tantangan BioBlitz Mingguan — GainForest",
+      "title": "Tantangan BioBlitz mingguan",
       "description": "Keluar rumah, foto makhluk hidup, dan tambahkan pengamatanmu. Setiap minggu, pengumpul terbanyak dan foto terbaik memenangkan hadiah."
     },
     "banner": {
@@ -402,7 +402,13 @@
       "pending": "Akan diumumkan",
       "compact": "Terbaru",
       "mostSubmitted": "Kiriman terbanyak",
-      "mostLiked": "Paling disukai"
+      "mostLiked": "Paling disukai",
+      "award": {
+        "action": "Berikan lencana pemenang",
+        "actionMissing": "Berikan lencana yang tersisa",
+        "done": "Lencana pemenang telah diberikan",
+        "error": "Tidak dapat memberikan lencana. Coba lagi."
+      }
     },
     "map": {
       "title": "Observasi minggu ini",
@@ -539,7 +545,7 @@
   },
   "grants": {
     "metadata": {
-      "title": "Hibah — GainForest",
+      "title": "Hibah",
       "description": "Ajukan program hibah yang mendanai kedaulatan data dan keputusan untuk komunitas berbasis alam."
     },
     "hero": {
@@ -570,6 +576,7 @@
         }
       },
       "apply": "Ajukan dengan Satu Klik",
+      "details": "Baca detail hibah",
       "appliedTitle": "Pengajuan terkirim",
       "appliedNote": "Pengajuan Anda untuk {project} kini telah diposting ke feed.",
       "postText": "Mengajukan hibah Meliarkan Kembali Web dengan proyek saya \"{project}\" demi kedaulatan data dan keputusan. 🌱"
@@ -891,8 +898,8 @@
   },
   "projects": {
     "metadata": {
-      "title": "Jelajahi proyek — Karya dampak regeneratif terverifikasi",
-      "description": "Jelajahi proyek — masing-masing pekerjaan yang terfokus dengan tujuan yang jelas, jangka waktu, dan hasil yang diharapkan."
+      "title": "Proyek alam — bukti lapangan dan catatan dampak",
+      "description": "Jelajahi proyek komunitas dan organisasi dengan tempat, pembaruan, observasi, dan bukti kerja regeneratif."
     },
     "hero": {
       "eyebrow": "Jelajahi proyek",
@@ -903,7 +910,46 @@
     "search": {
       "ariaLabel": "Cari proyek",
       "placeholder": "Cari proyek berdasarkan nama atau kata kunci",
-      "sortAriaLabel": "Urutkan proyek"
+      "sortAriaLabel": "Urutkan proyek",
+      "action": "Cari"
+    },
+    "categories": {
+      "eyebrow": "Jelajahi berdasarkan minat",
+      "title": "Jelajahi kategori proyek",
+      "description": "Mulai dengan sebuah tema, lalu temukan orang dan tempat yang mewujudkannya.",
+      "items": {
+        "all": "Semua proyek",
+        "forests": "Hutan dan pepohonan",
+        "biodiversity": "Keanekaragaman hayati",
+        "foodWater": "Pangan, air, dan tanah",
+        "communities": "Komunitas",
+        "climate": "Ketahanan iklim"
+      }
+    },
+    "featured": {
+      "eyebrow": "Proyek unggulan",
+      "title": "Cerita untuk memulai",
+      "description": "Pilihan proyek yang terdokumentasi lengkap dari para penjaga alam di seluruh dunia.",
+      "badge": "Unggulan",
+      "action": "Jelajahi proyek",
+      "previous": "Proyek unggulan sebelumnya",
+      "next": "Proyek unggulan berikutnya",
+      "manage": {
+        "add": "Jadikan proyek unggulan",
+        "remove": "Hapus dari proyek unggulan",
+        "error": "Tidak dapat memperbarui proyek unggulan. Silakan coba lagi."
+      }
+    },
+    "support": {
+      "eyebrow": "Terbuka untuk dukungan",
+      "title": "Bantu karya baik berkembang",
+      "description": "Dukung proyek yang sedang menerima kontribusi dari komunitas mereka."
+    },
+    "catalog": {
+      "eyebrow": "Jelajahi proyek",
+      "title": "Jelajahi semua proyek",
+      "description": "Jelajahi proyek dalam kategori ini.",
+      "count": "{count, plural, other {# proyek untuk dijelajahi}}"
     },
     "view": {
       "cards": "Kartu",
@@ -958,6 +1004,7 @@
       "showDetails": "Tampilkan detail",
       "loading": "Memuat proyek",
       "donate": "Donasi",
+      "gainforestBadge": "Donasi di GainForest",
       "acceptsDonations": "Menerima donasi",
       "openForSupport": "Terbuka untuk dukungan",
       "donationSummary": "{amount} dari {donors, plural, other {# pendukung}}",
@@ -992,7 +1039,7 @@
   },
   "browseGrid": {
     "heading": "Cara menjelajah",
-    "description": "Empat jalan masuk ke karya GainForest, dibuat untuk pendana, penjaga alam, dan tim lapangan.",
+    "description": "Cara menjelajahi karya di GainForest, dirancang untuk penjelajah, penjaga, dan tim lapangan.",
     "cards": {
       "bumicerts": {
         "label": "Proyek terverifikasi",
@@ -1552,6 +1599,15 @@
       "colSighting": "Observasi",
       "colObserver": "Pengamat",
       "colDate": "Tanggal"
+    },
+    "metadata": {
+      "title": "Temuan alam",
+      "description": "Jelajahi temuan alam di GainForest dengan foto lapangan, rekaman suara, nama spesies, dan lokasi dari kerja lapangan nyata."
+    },
+    "view": {
+      "compact": "Ringkas",
+      "comfortable": "Nyaman",
+      "density": "Kepadatan kartu"
     }
   },
   "manageProjectCerts": {
@@ -1676,6 +1732,12 @@
     "title": "Bola Dunia",
     "subtitle": "Organisasi dan lokasi proyek mereka di Bumi 3D yang hidup.",
     "viewOnGlobe": "Lihat di Globe",
+    "tabs": {
+      "details": "Organisasi",
+      "layers": "Lapisan",
+      "popup": "Buka sebagai popup melayang",
+      "dock": "Sematkan ke sisi"
+    },
     "panel": {
       "searchPlaceholder": "Cari organisasi…",
       "treeFilter": "Data pohon",
@@ -1730,6 +1792,7 @@
         "wetland": "Lahan basah",
         "mangroves": "Bakau"
       },
+      "visibleDetails": "Di peta",
       "visibleNow": "{count, plural, other {# lapisan di peta}}",
       "flyTo": "Perbesar ke {name}",
       "hide": "Sembunyikan {name}"

@@ -1,7 +1,7 @@
 {
   "seo": {
-    "title": "GainForest — Financia impacto regenerativo",
-    "description": "certificados conecta financiadores con guardianes de la naturaleza que realizan trabajo regenerativo en el terreno. Financia impacto ambiental verificado directamente."
+    "title": "GainForest — Biodiversidad y proyectos de naturaleza",
+    "description": "Explora observaciones de campo, registros de biodiversidad y proyectos de naturaleza de comunidades y organizaciones que usan GainForest."
   },
   "language": {
     "label": "Idioma",
@@ -130,7 +130,8 @@
       "taina": "Tainá",
       "globe": "Globo",
       "audiomoth": "AudioMoth",
-      "soundscape": "Paisaje sonoro"
+      "soundscape": "Paisaje sonoro",
+      "identifications": "Identificaciones"
     },
     "prompts": {
       "signInDescription": "Inicia sesión para gestionar tu cuenta y contenido.",
@@ -170,7 +171,9 @@
       "submitData": "Enviar datos de campo",
       "personalAccount": "Cuenta personal",
       "organizationAccount": "Cuenta de organización"
-    }
+    },
+    "more": "Más",
+    "hideMore": "Ocultar"
   },
   "settings": {
     "handle": {
@@ -230,6 +233,56 @@
       "defaultKeyName": "Agente de IA",
       "tainaBadge": "Tainá",
       "tainaBadgeTitle": "Esta clave está vinculada a tu bot de Telegram de Tainá"
+    },
+    "inaturalist": {
+      "title": "iNaturalist",
+      "connectTitle": "Verificar cuenta de iNaturalist",
+      "description": "Usa una prueba pública de perfil para que GainForest solo importe observaciones de tu propia cuenta de iNaturalist.",
+      "connectedAs": "Verificado como @{account}",
+      "disconnect": "Quitar verificación",
+      "proofLabel": "Tu enlace DID de GainForest",
+      "proofHint": "Agrega este texto exacto a tu biografía o texto “acerca de” de iNaturalist. Puedes quitarlo después de verificar.",
+      "copy": "Copiar",
+      "copied": "Copiado",
+      "profileLabel": "Usuario o enlace de iNaturalist",
+      "profilePlaceholder": "@usuario o https://www.inaturalist.org/people/usuario",
+      "verify": "Verificar cuenta",
+      "verifying": "Verificando…",
+      "verifyFailed": "No se pudo verificar esa cuenta de iNaturalist.",
+      "connectFirst": "Verifica primero tu cuenta de iNaturalist.",
+      "chooseProject": "Elige primero un proyecto de GainForest.",
+      "projectLabel": "Proyecto de GainForest",
+      "inatProjectLabel": "Proyecto de iNaturalist",
+      "projectsLoading": "Cargando proyectos de iNaturalist…",
+      "projectsLoadFailed": "No se pudieron cargar tus proyectos de iNaturalist.",
+      "noINaturalistProjects": "No se encontraron proyectos de iNaturalist en tu cuenta verificada.",
+      "chooseINaturalistProject": "Elige primero un proyecto de iNaturalist.",
+      "steps": {
+        "openSettings": "1. Abre iNaturalist → Configuración de la cuenta → Perfil.",
+        "editBio": "2. Busca tu campo de biografía o acerca de.",
+        "pasteCode": "3. Pega ahí el enlace DID de GainForest de arriba y guarda.",
+        "returnVerify": "4. Vuelve aquí, pega tu usuario o enlace de perfil de iNaturalist y verifica."
+      },
+      "connect": "Conectar",
+      "hideSetup": "Ocultar configuración"
+    },
+    "groups": {
+      "account": {
+        "title": "Cuenta",
+        "description": "Nombre de usuario y seguridad de acceso"
+      },
+      "connections": {
+        "title": "Conexiones",
+        "description": "Cuentas sociales y servicios externos"
+      },
+      "agents": {
+        "title": "Agentes de IA",
+        "description": "Claves para herramientas que actúan con tu permiso"
+      },
+      "advanced": {
+        "title": "Opciones avanzadas",
+        "description": "Datos de la cuenta y eliminación"
+      }
     }
   },
   "bumicertCard": {
@@ -243,7 +296,7 @@
   },
   "footer": {
     "brandAlt": "GainForest",
-    "tagline": "Conectando comunidades con financiadores.",
+    "tagline": "Conectando comunidades mediante evidencia de campo confiable.",
     "builtWith": "Infraestructura abierta. Construido con GainForest.",
     "dataCollectionsAria": "Colecciones de datos",
     "footerLinksAria": "Enlaces del pie de página",
@@ -266,12 +319,13 @@
       "greenGlobe": "Green Globe",
       "status": "Estado",
       "lexicons": "Esquemas de datos",
-      "privacyPolicy": "Política de privacidad"
+      "privacyPolicy": "Política de privacidad",
+      "deleteAccount": "Eliminar cuenta"
     }
   },
   "browseGrid": {
     "title": "Formas de explorar",
-    "description": "Maneras de entrar al trabajo de GainForest, pensadas para financiadores, guardianes y equipos de campo.",
+    "description": "Formas de explorar el trabajo en GainForest, pensadas para exploradores, guardianes y equipos de campo.",
     "loadingAria": "Cargando enlaces de exploración",
     "cards": {
       "projects": {
@@ -403,6 +457,10 @@
       "justNow": "ahora mismo",
       "minutesAgo": "hace {count, plural, one {# minuto} other {# minutos}}",
       "hoursAgo": "hace {count, plural, one {# hora} other {# horas}}"
+    },
+    "metadata": {
+      "title": "Estado del sitio",
+      "description": "Estado en vivo de los servicios detrás de GainForest."
     }
   },
   "accountTabs": {
@@ -430,7 +488,9 @@
     "files": "Archivos",
     "taina": "Tainá",
     "endorsementsGiven": "Respaldos",
-    "equipment": "Equipos"
+    "equipment": "Equipos",
+    "wallet": "Billetera",
+    "more": "Más"
   },
   "equipment": {
     "metadataTitle": "Equipos — {name}",
@@ -560,7 +620,9 @@
   },
   "accountDonations": {
     "emptyHeroDescription": "Apoya un proyecto y tus contribuciones aparecerán aquí, cada una enlazada al proyecto que apoyaste.",
-    "emptyHeroCta": "Explorar proyectos"
+    "emptyHeroCta": "Explorar proyectos",
+    "anonymousNote": "Las donaciones anónimas también aparecen aquí, pero solo tú puedes verlas — nunca se muestran públicamente con tu nombre. Algunas donaciones anónimas antiguas no se pueden mostrar.",
+    "anonymousBadge": "Solo visible para ti"
   },
   "accountProjects": {
     "emptyEyebrow": "Sin proyectos",
@@ -616,7 +678,9 @@
       "errorTooLarge": "{name} supera los 10 MB.",
       "errorGeneric": "No pudimos añadir estas imágenes. Inténtalo de nuevo.",
       "recordTitleProject": "Galería de {projectTitle}",
-      "recordTitleAccount": "Galería de {name}"
+      "recordTitleAccount": "Galería de {name}",
+      "open": "Añadir imágenes",
+      "close": "Cerrar"
     }
   },
   "projectManage": {
@@ -902,18 +966,19 @@
       "post": "publicación",
       "recording": "grabación",
       "record": "registro"
-    }
+    },
+    "mentionedYou": "te mencionó"
   },
   "feed": {
     "meta": {
       "title": "Actividad reciente",
-      "description": "Los proyectos, avistamientos de naturaleza, organizaciones y donaciones más recientes en GainForest, en una sola transmisión en vivo."
+      "description": "Los proyectos, avistamientos de naturaleza, organizaciones y actualizaciones comunitarias más recientes de GainForest, en una transmisión en vivo."
     },
     "eyebrow": "Actividad en vivo",
     "hero": {
       "title": "Lo que está pasando en",
       "accent": "GainForest",
-      "description": "Una transmisión en vivo de los proyectos, avistamientos de naturaleza, organizaciones y donaciones más recientes, todo en un solo lugar."
+      "description": "Una transmisión en vivo de los proyectos, avistamientos de naturaleza, organizaciones y actualizaciones comunitarias más recientes, todo en un solo lugar."
     },
     "filters": {
       "all": "Todo",
@@ -1001,7 +1066,26 @@
       "posting": "Publicando…",
       "postedTitle": "Publicado",
       "postedNote": "Tu novedad está activa y aparecerá en el feed en breve.",
-      "postingAs": "Publicando como {name}"
+      "postingAs": "Publicando como {name}",
+      "title": "Comparte una novedad",
+      "close": "Cerrar"
+    },
+    "quickLike": {
+      "like": "Me gusta esta foto",
+      "unlike": "Quitar me gusta"
+    },
+    "audio": {
+      "play": "Reproducir sonido",
+      "pause": "Pausar sonido",
+      "seek": "Reproducir desde aquí",
+      "playSection": "Repetir el sonido etiquetado",
+      "unavailable": "Sonido no disponible",
+      "spectrogramAlt": "Espectrograma de la grabación con el sonido etiquetado resaltado"
+    },
+    "mentions": {
+      "suggestionsAria": "Sugerencias de cuentas",
+      "searching": "Buscando cuentas…",
+      "noMatches": "No hay cuentas que coincidan"
     }
   },
   "testAccount": {
@@ -1028,7 +1112,7 @@
   "recognition": {
     "eyebrow": "Administración de GainForest",
     "title": "Otorgar insignias de reconocimiento",
-    "description": "Dale a {name} una insignia por una subvención o una victoria en BioBlitz. Las insignias otorgadas aparecen en su perfil público.",
+    "description": "Dale a {name} una insignia por una subvención. Las insignias de ganadores de BioBlitz se otorgan por ronda desde la página de BioBlitz.",
     "award": "Otorgar",
     "remove": "Quitar",
     "genericError": "Algo salió mal. Inténtalo de nuevo.",
@@ -1039,13 +1123,21 @@
         "description": "Recibió una subvención de Resilvestrar la web."
       },
       "bioblitz-most-images": {
-        "label": "BioBlitz — más imágenes",
-        "description": "Ganó una ronda de BioBlitz por la mayor cantidad de observaciones."
+        "label": "BioBlitz — más observaciones",
+        "description": "Ganó una ronda de BioBlitz por la mayor cantidad de observaciones.",
+        "labelWithRound": "BioBlitz {roundName} — más observaciones"
       },
       "bioblitz-best-picture": {
         "label": "BioBlitz — mejor foto",
-        "description": "Ganó una ronda de BioBlitz por la mejor foto."
+        "description": "Ganó una ronda de BioBlitz por la mejor foto.",
+        "labelWithRound": "BioBlitz {roundName} — mejor foto"
       }
+    },
+    "awardsLabel": "Premios",
+    "aria": "Premios: {names}",
+    "roundName": {
+      "pilot": "Ronda piloto",
+      "numbered": "Ronda {round}"
     }
   },
   "steward": {
@@ -1186,11 +1278,28 @@
       "certified": "Primitivas de identidad del ecosistema Hypercerts: perfiles de actor, organizaciones, seguimientos, insignias y ubicaciones.",
       "hypercerts": "Declaraciones de impacto (actividad, contribución, contribuyente, derechos), colecciones, recibos de financiación, adjuntos, alcance del trabajo y tipos compartidos."
     },
-    "sectionsAria": "Secciones de esquemas"
+    "sectionsAria": "Secciones de esquemas",
+    "epdsLinkTitle": "Cómo funciona ePDS",
+    "epdsLinkDesc": "Un recorrido interactivo por el sistema de acceso y los servidores detrás de estos registros.",
+    "cgsLinkTitle": "Cómo funcionan las cuentas de grupo",
+    "cgsLinkDesc": "Un recorrido interactivo por el servicio guardián que permite a todo un equipo compartir una cuenta.",
+    "atprotoLinkTitle": "Cómo funciona el AT Protocol",
+    "atprotoLinkDesc": "Un recorrido interactivo por la red abierta sobre la que está construido todo esto.",
+    "walletServiceLinkTitle": "La billetera de GainForest",
+    "walletServiceLinkDesc": "Cómo cada cuenta recibe una billetera de la que solo su dueño puede gastar.",
+    "guides": {
+      "usageGuide": "Guía de uso",
+      "audiomothTitle": "Etiquetas de espectrogramas de AudioMoth como presencias de Darwin Core",
+      "audiomothDescription": "Cómo cada cuadro confirmado de tiempo y frecuencia se convierte en una nueva presencia vinculada a su grabación de audio de origen.",
+      "openGuide": "Leer la guía de implementación",
+      "breadcrumbAria": "Ruta de navegación de la documentación",
+      "schemas": "Esquemas de datos",
+      "guideIntro": "Esta guía define las convenciones de la aplicación utilizadas con el esquema de presencias. El esquema sigue siendo Darwin Core genérico; la guía explica cómo se conectan las grabaciones de AudioMoth, los cuadros del espectrograma y los registros de presencia."
+    }
   },
   "taina": {
     "meta": {
-      "title": "Tainá — GainForest",
+      "title": "Asistente de campo Tainá",
       "description": "Conecta tu propio bot de Telegram y convierte lo que ves en la naturaleza en observaciones de biodiversidad verificables."
     },
     "hero": {
@@ -1432,7 +1541,7 @@
   },
   "audiomoth": {
     "meta": {
-      "title": "AudioMoth — GainForest",
+      "title": "Configuración de grabadora AudioMoth",
       "description": "Ajusta el reloj, configura los horarios de grabación y actualiza el firmware de tu grabadora acústica AudioMoth, directamente desde el navegador."
     },
     "title": "AudioMoth",
@@ -1599,7 +1708,9 @@
     "mainTabs": {
       "setup": "Configuración",
       "deployments": "Despliegue",
-      "upload": "Subir"
+      "upload": "Subir",
+      "label": "Etiquetar",
+      "identifications": "Identificaciones"
     },
     "deployments": {
       "intro": "Los despliegues registran dónde y cuándo se colocó un AudioMoth en el campo. Cada uno reproduce un tono acústico que ajusta el reloj, la ubicación y el ID de despliegue del grabador.",
@@ -1726,6 +1837,87 @@
       "prevDay": "Día anterior con grabaciones",
       "nextDay": "Día siguiente con grabaciones",
       "allHours": "Todas las horas"
+    },
+    "label": {
+      "subtitle": "Revisa grabaciones de AudioMoth, marca llamadas por tiempo y frecuencia, y crea un conjunto de etiquetas claro para tus datos de campo.",
+      "signInTitle": "Inicia sesión para etiquetar grabaciones",
+      "signInBody": "Las ocurrencias se guardan en tu cuenta. Inicia sesión, sube grabaciones de AudioMoth y marca los sonidos de fauna que encuentres.",
+      "loadingRecordings": "Cargando tus grabaciones de AudioMoth…",
+      "loadFailed": "No se pudieron cargar tus grabaciones. Inténtalo de nuevo.",
+      "occurrencesLoadFailed": "No se pudieron cargar las ocurrencias guardadas de esta grabación.",
+      "noRecordingsTitle": "Primero sube una grabación",
+      "noRecordingsBody": "El espacio de etiquetado utiliza grabaciones guardadas en tu cuenta para que cada cuadro se convierta en una ocurrencia de biodiversidad vinculada.",
+      "uploadFirst": "Subir grabaciones de AudioMoth",
+      "refresh": "Actualizar",
+      "savedAtproto": "Cada cuadro guardado es una ocurrencia de biodiversidad en tu cuenta.",
+      "openToLoad": "Abrir para cargar etiquetas",
+      "saved": "Guardado",
+      "deleteConfirm": "¿Eliminar esta ocurrencia? Se borrará de tu cuenta y no se puede deshacer.",
+      "deleteFailed": "No se pudo eliminar la ocurrencia. Inténtalo de nuevo.",
+      "saveFailed": "No se pudo guardar la ocurrencia. El cuadro sigue aquí para que puedas intentarlo de nuevo.",
+      "recordedAtMissing": "Esta grabación no tiene una hora de inicio válida, por lo que no se puede calcular la hora de la ocurrencia.",
+      "audioUnavailable": "Esta grabación no tiene un original ni una vista previa reproducible. Vuelve a subirla con las vistas previas activadas.",
+      "commonName": "Nombre común/local (opcional)",
+      "commonNamePlaceholder": "Rana arborícola",
+      "scientificName": "Nombre científico (opcional)",
+      "scientificNamePlaceholder": "Boana faber",
+      "scientificNameHint": "Déjalo vacío para guardar el grupo amplio correcto, como Anura para las ranas.",
+      "saveOccurrence": "Guardar ocurrencia",
+      "saveAtprotoHint": "Crea una ocurrencia Darwin Core vinculada a esta grabación de audio.",
+      "stepImport": "Elige grabaciones",
+      "stepDraw": "Dibuja un cuadro de tiempo y frecuencia",
+      "stepDescribe": "Describe lo que escuchaste",
+      "emptyTitle": "Etiqueta sonidos de fauna en tus grabaciones de AudioMoth",
+      "emptyBody": "Elige una carpeta de la tarjeta SD o varios archivos WAV. Selecciona una grabación, dibuja un cuadro alrededor de una llamada e identifícala como ave, rana, insecto, otro sonido o una nota.",
+      "chooseFolder": "Elegir tarjeta SD o carpeta",
+      "chooseFiles": "Elegir archivos WAV",
+      "privacyNote": "Tus grabaciones permanecen en este dispositivo mientras las etiquetas.",
+      "workspaceSummary": "{files, plural, one {# grabación} other {# grabaciones}} · {labels, plural, one {# etiqueta} other {# etiquetas}}",
+      "savedLocally": "Los borradores se guardan en este navegador. Expórtalos cuando estén listos.",
+      "addFiles": "Añadir grabaciones",
+      "export": "Exportar CSV",
+      "closeSet": "Cerrar conjunto",
+      "recordings": "Grabaciones",
+      "search": "Buscar archivos…",
+      "labelCount": "{count, plural, one {# etiqueta} other {# etiquetas}}",
+      "notLabelled": "Sin etiquetar",
+      "filePosition": "Grabación {current} de {total}",
+      "previousFile": "Grabación anterior",
+      "nextFile": "Grabación siguiente",
+      "labelsTitle": "Etiquetas ({count})",
+      "selectToEdit": "Selecciona una etiqueta para editarla",
+      "labelsEmpty": "Aún no hay etiquetas. Dibuja un cuadro sobre un sonido del espectrograma para empezar.",
+      "deleteLabel": "Eliminar etiqueta",
+      "editLabel": "Editar etiqueta",
+      "newLabel": "Nueva etiqueta",
+      "describeSelection": "¿Qué hay en este cuadro?",
+      "drawFirst": "Dibuja un cuadro para empezar",
+      "clearSelection": "Borrar selección",
+      "drawHint": "Arrastra sobre el espectrograma para marcar el sonido que quieres etiquetar. El cuadro captura cuándo ocurrió y su rango de frecuencia.",
+      "timeRange": "Tiempo",
+      "frequencyRange": "Frecuencia",
+      "whatIsIt": "¿Qué escuchaste?",
+      "categories": {
+        "bird": "Ave",
+        "frog": "Rana",
+        "insect": "Insecto",
+        "other": "Otro",
+        "note": "Nota"
+      },
+      "species": "Especie (opcional)",
+      "speciesPlaceholder": "Nombre común o científico",
+      "speciesHint": "Déjalo vacío si solo conoces el grupo del animal.",
+      "noteRequired": "Nota",
+      "noteOptional": "Nota (opcional)",
+      "notePlaceholder": "Tipo de llamada, confianza, clima o cualquier detalle útil…",
+      "updateLabel": "Actualizar etiqueta",
+      "saveLabel": "Guardar etiqueta",
+      "saveHint": "Se guarda en este navegador hasta que exportes el conjunto.",
+      "drawInstruction": "Arrastra para dibujar · selecciona un cuadro para editar",
+      "spectrogramAria": "Espectrograma de audio interactivo",
+      "buildingSpectrogram": "Creando espectrograma…",
+      "spectrogramFailed": "No se pudo crear un espectrograma de esta grabación.",
+      "audioUnsupported": "Tu navegador no puede reproducir esta grabación."
     }
   },
   "soundscape": {
@@ -1765,6 +1957,909 @@
       "hoverHint": "Mueve el cursor sobre el reloj para ver los valores.",
       "datesTitle": "Días",
       "allDatesChip": "Todos los días"
+    }
+  },
+  "adminOnly": {
+    "label": "Solo administradores"
+  },
+  "accountWallet": {
+    "title": "Billetera",
+    "intro": "Tu billetera personal de donaciones, protegida por tus llaves de acceso. Las donaciones a tus proyectos llegan a esta dirección.",
+    "loadError": "No se pudo cargar tu billetera.",
+    "passkeyUnsupported": "Este dispositivo no admite llaves de acceso. Prueba con un dispositivo con Face ID, huella digital o una llave de seguridad.",
+    "passkeyLabel": "GainForest — {name}",
+    "passkeyLabelFallback": "Billetera de GainForest",
+    "createError": "No se pudo crear la billetera. Inténtalo de nuevo.",
+    "addSignerError": "No se pudo añadir la llave de acceso. Inténtalo de nuevo.",
+    "removeSignerError": "No se pudo quitar esta llave de acceso. Inténtalo de nuevo.",
+    "deleteError": "No se pudo eliminar la billetera. Inténtalo de nuevo.",
+    "emptyTitle": "Aún no hay billetera",
+    "emptyHint": "Crea tu billetera de donaciones con una llave de acceso (Face ID, huella digital o llave de seguridad). Sin frase semilla, sin nada que instalar.",
+    "creating": "Esperando tu llave de acceso…",
+    "createButton": "Crear billetera con llave de acceso",
+    "defaultName": "Mi billetera de donaciones",
+    "copyAddress": "Copiar dirección",
+    "copied": "Copiado",
+    "copy": "Copiar",
+    "readyHint": "Esta dirección puede recibir donaciones de inmediato. Te pertenece y solo las llaves de acceso de abajo pueden gastar desde ella.",
+    "activeHint": "Esta billetera está activa en la blockchain. Sus llaves de acceso ahora se gestionan en la cadena.",
+    "signersHeading": "Quién puede aprobar pagos",
+    "signersLocked": "Bloqueado",
+    "unnamedPasskey": "Llave de acceso",
+    "removeSigner": "Quitar llave de acceso",
+    "addPasskey": "Añadir otra llave de acceso",
+    "signerLabelPlaceholder": "Nombra esta llave (p. ej., Mi teléfono)",
+    "signersHint": "Añade una llave de acceso desde otro dispositivo o de una persona de confianza: cualquiera de ellas puede aprobar pagos.",
+    "deleteButton": "Eliminar billetera",
+    "deleteConfirmTitle": "¿Eliminar esta billetera?",
+    "deleteConfirmBody": "Esta acción no se puede deshacer. Si más adelante creas una nueva billetera con otra llave de acceso, tendrá una dirección diferente.",
+    "deleteConfirmFunds": "Esta billetera ya tiene fondos, así que no se puede eliminar.",
+    "deleteConfirmCancel": "Cancelar",
+    "deleteConfirmButton": "Sí, eliminar billetera",
+    "viewOnExplorer": "Ver esta dirección en Etherscan",
+    "explorer": "Etherscan",
+    "balancesHeading": "Saldo",
+    "balancesEmpty": "Aún no hay fondos. Las donaciones enviadas a esta dirección aparecerán aquí.",
+    "balancesError": "Los saldos no están disponibles en este momento. Actualiza para reintentar.",
+    "sendHeading": "Enviar fondos",
+    "sendIntro": "Mueve dinero de esta billetera a cualquier otra dirección de billetera. Apruebas cada transferencia con tu llave de acceso.",
+    "sendToken": "Moneda",
+    "sendRecipient": "Dirección de destino",
+    "sendRecipientPlaceholder": "Dirección de destino (0x…)",
+    "sendRecipientInvalid": "Introduce una dirección de billetera válida: empieza por 0x seguida de 40 caracteres.",
+    "sendAmount": "Cantidad",
+    "sendAmountInvalid": "Introduce una cantidad válida.",
+    "sendAmountTooHigh": "Es más de lo que contiene esta billetera.",
+    "sendMax": "Máx",
+    "sendButton": "Enviar con llave de acceso",
+    "sendPreparing": "Preparando…",
+    "sendAwaitingPasskey": "Esperando tu llave de acceso…",
+    "sendSubmitting": "Enviando: puede tardar un minuto…",
+    "sendSuccess": "¡Enviado! La transferencia está confirmada.",
+    "sendViewTx": "Ver la transacción",
+    "sendGasNote": "GainForest cubre la comisión de red.",
+    "sendNoSigner": "Solo alguien con una llave de acceso registrada en esta billetera puede enviar desde ella.",
+    "sendErrorNotConfigured": "El envío aún no está habilitado en este servidor.",
+    "sendErrorInsufficient": "Esta billetera no tiene fondos suficientes para esa transferencia.",
+    "sendErrorBusy": "La red está congestionada en este momento. Inténtalo de nuevo en unos minutos.",
+    "sendErrorSignature": "No se pudo verificar la aprobación con la llave de acceso. Inténtalo de nuevo.",
+    "sendErrorGeneric": "No se pudo completar la transferencia. Inténtalo de nuevo.",
+    "thresholdHeading": "Aprobaciones necesarias",
+    "thresholdOption": "{count} de {total, plural, one {# llave de acceso} other {# llaves de acceso}}",
+    "thresholdHint": "Cuántas llaves de acceso deben aprobar cada transferencia. Exigir más de una es más seguro: una sola llave perdida o robada no puede mover fondos por sí sola. Cambiar esto le da a la billetera una nueva dirección, así que solo es posible antes de que la billetera tenga fondos.",
+    "thresholdUpdateError": "No se pudo cambiar el requisito de aprobación. Inténtalo de nuevo.",
+    "thresholdLockedFunds": "La billetera ya tiene fondos, así que el requisito de aprobación ya no se puede cambiar.",
+    "thresholdSingleWarning": "Ahora mismo una sola llave de acceso puede mover fondos. Considera exigir más aprobaciones.",
+    "sendApprovalsNeeded": "Esta billetera necesita {count} aprobaciones con llaves de acceso diferentes. Tú das la primera; el resto puede darse aquí o desde otro dispositivo.",
+    "sendApprovalOf": "Aprobación {current} de {total}: esperando una llave de acceso…",
+    "sendDuplicatePasskey": "Cada aprobación necesita una llave de acceso diferente.",
+    "pendingHeading": "Transferencia a la espera de aprobaciones",
+    "pendingProgress": "{current} de {total} aprobaciones dadas",
+    "pendingRemoteHint": "Otras personas con llave de acceso pueden aprobar desde su propio dispositivo: la transferencia se queda aquí hasta reunir suficientes aprobaciones. La última aprobación la envía.",
+    "pendingApprove": "Aprobar con llave de acceso",
+    "pendingApproveAndSend": "Aprobar y enviar",
+    "pendingCancel": "Cancelar transferencia",
+    "pendingInvalid": "Esta transferencia en espera ya no es válida: la billetera cambió desde que se inició. Cancélala para iniciar una nueva.",
+    "pendingCancelForbidden": "Solo quien inició esta transferencia o un gestor de la billetera puede cancelarla.",
+    "sendStartButton": "Iniciar transferencia con llave de acceso",
+    "sendErrorExpired": "Esta transferencia ya no es válida: la billetera o las comisiones de red cambiaron. Iníciala de nuevo.",
+    "sendErrorPendingExists": "Ya hay una transferencia a la espera de aprobaciones. Termínala o cancélala primero.",
+    "sendErrorApprovalInvalid": "No se pudo verificar esta aprobación. Inténtalo de nuevo.",
+    "onchainManageHint": "Esta billetera está activa en la blockchain, así que los cambios de llaves de acceso se registran en la cadena y necesitan las aprobaciones habituales. GainForest cubre la comisión de red.",
+    "thresholdOnchainHint": "Cuántas llaves de acceso deben aprobar cada transferencia. Este cambio se registra en la blockchain: la dirección de la billetera no cambia.",
+    "manageForbidden": "Solo el propietario de la organización o un administrador puede hacer este cambio."
+  },
+  "accountSupport": {
+    "button": "Apoyar",
+    "buttonAria": "Apoyar directamente a {name}",
+    "modalTitle": "Apoyar a {name}",
+    "modalDescription": "Elige una cantidad para donar directamente a {name}.",
+    "directNote": "El 100 % va directamente a {name}, sin comisión de plataforma y con la comisión de red cubierta.",
+    "cartLabel": "Apoyo directo a la cuenta"
+  },
+  "testRecord": {
+    "hideAction": "Ocultar como prueba",
+    "hideHint": "Oculta esta entrada del feed público y de las páginas de exploración como contenido de prueba",
+    "confirmHide": "Ocultar para todos",
+    "cancel": "Cancelar",
+    "genericError": "Algo salió mal. Inténtalo de nuevo."
+  },
+  "adminTestRecords": {
+    "title": "Publicaciones y observaciones ocultas",
+    "description": "Estas publicaciones y observaciones están marcadas como de prueba, así que están ocultas del feed público y de las páginas de exploración. El resto de la cuenta de su propietario sigue visible.",
+    "empty": "Ninguna publicación ni observación está oculta por ahora.",
+    "remove": "Hacer visible",
+    "unnamed": "Cuenta sin nombre",
+    "error": "Algo salió mal. Inténtalo de nuevo.",
+    "itemLabel": "{kind} de {name}",
+    "hiddenAgo": "Oculto {time}",
+    "kinds": {
+      "post": "Publicación",
+      "observation": "Observación",
+      "project": "Proyecto",
+      "organization": "Actualización de organización",
+      "donation": "Donación",
+      "record": "Entrada"
+    }
+  },
+  "devices": {
+    "metadata": {
+      "title": "Dispositivos Tainá",
+      "description": "Actualizaciones de campo de dispositivos GainForest que ejecutan Tainá, incluido si cada dispositivo está activo y listo."
+    }
+  },
+  "bluesky": {
+    "toggle": "Publicar también en Bluesky",
+    "onHint": "Esta publicación también se compartirá en Bluesky",
+    "offHint": "Compartir también esta publicación en Bluesky",
+    "composerHint": "También se compartirá en Bluesky",
+    "viewPost": "Ver en Bluesky",
+    "consent": {
+      "title": "Comparte tus publicaciones en Bluesky",
+      "body": "Cuando publiques una actualización aquí, también podemos publicarla en Bluesky, una red social abierta con millones de personas.",
+      "discovery": "Es una gran forma de darte a conocer: tus actualizaciones llegan a amantes de la naturaleza, financiadores e investigadores mucho más allá de GainForest.",
+      "profileNote": "Aún no tienes un perfil de Bluesky, así que crearemos uno a partir de tu perfil de GainForest (tu nombre, foto y biografía).",
+      "profileNoteMaybe": "Si aún no tienes un perfil de Bluesky, crearemos uno a partir de tu perfil de GainForest (tu nombre, foto y biografía).",
+      "optOutNote": "Solo se comparten las publicaciones nuevas que hagas después de activarlo. Puedes desactivarlo cuando quieras en Ajustes.",
+      "confirm": "Activar el compartir",
+      "cancel": "Ahora no",
+      "error": "No pudimos activar el compartir en Bluesky. Inténtalo de nuevo."
+    },
+    "settings": {
+      "title": "Bluesky",
+      "toggleLabel": "Compartir nuevas publicaciones en Bluesky",
+      "toggleDescription": "Las actualizaciones que publiques también se publican en tu cuenta de Bluesky, para que más personas descubran tu trabajo.",
+      "viewProfile": "Ver tu perfil de Bluesky",
+      "error": "No pudimos guardar el cambio. Inténtalo de nuevo."
+    }
+  },
+  "epds": {
+    "metaTitle": "Cómo funciona ePDS",
+    "metaDescription": "Un recorrido interactivo por ePDS, el Personal Data Server extendido que permite a cualquiera unirse a la red AT Protocol solo con su correo.",
+    "kicker": "Personal Data Server extendido",
+    "title": "Cómo funciona ePDS",
+    "lead": "GainForest funciona sobre AT Protocol, la red abierta detrás de Bluesky. Unirse a esa red normalmente requiere una contraseña y algo de configuración técnica. ePDS elimina esa barrera: escribes tu correo, recibes un código y ya estás dentro. Esta página muestra cómo funciona, paso a paso.",
+    "whatIs": {
+      "heading": "¿Qué es un PDS y qué añade la e?",
+      "p1": "En AT Protocol, cada persona guarda sus datos en un Personal Data Server, o PDS. Piensa en él como un hogar personal para tus publicaciones, observaciones y proyectos. Lo que hay dentro es tuyo, y puedes mudarte a otro servidor cuando quieras sin perder nada.",
+      "p2": "ePDS es un PDS normal con una extensión: una puerta de entrada amable. En lugar de pedir una contraseña, te conecta con un código de un solo uso enviado por correo o con una cuenta social, y crea una cuenta para ti en tu primera visita. Detrás de esa puerta todo sigue siendo AT Protocol estándar, así que cualquier app de la red puede hablar con él."
+    },
+    "compare": {
+      "heading": "Dos puertas de entrada",
+      "intro": "La misma casa, distinta puerta. Mueve el interruptor y prueba las dos formas de iniciar sesión.",
+      "classicTab": "PDS clásico",
+      "epdsTab": "ePDS",
+      "handle": "Identificador",
+      "password": "Contraseña",
+      "inviteCode": "Código de invitación",
+      "email": "Correo electrónico",
+      "sendCode": "Envíame un código",
+      "signIn": "Iniciar sesión",
+      "codeLabel": "Escribe el código de tu correo",
+      "classicCaption": "Un PDS clásico pide una contraseña y, a menudo, un código de invitación del administrador del servidor. Además tienes que crear la cuenta primero.",
+      "epdsCaption": "ePDS te pide el correo y te envía un código. ¿Primera visita? Tu cuenta se crea al momento.",
+      "done": "¡Ya estás dentro!",
+      "reset": "Probar de nuevo"
+    },
+    "journey": {
+      "heading": "El viaje del inicio de sesión",
+      "intro": "Pulsa reproducir o avanza paso a paso. El punto en movimiento es tu inicio de sesión haciendo su viaje de ida y vuelta.",
+      "play": "Reproducir",
+      "pause": "Pausar",
+      "back": "Atrás",
+      "next": "Siguiente",
+      "stepLabel": "Paso {n} de {total}",
+      "ariaLabel": "Diagrama del viaje de inicio de sesión",
+      "nodes": {
+        "app": "Tu app",
+        "pds": "Núcleo PDS",
+        "auth": "Servicio de acceso",
+        "inbox": "Tu bandeja"
+      },
+      "steps": {
+        "s1": {
+          "title": "Haces clic en Iniciar sesión",
+          "text": "Todo empieza en la app que estás usando, por ejemplo GainForest. Haces clic en Iniciar sesión y quizá escribes tu correo."
+        },
+        "s2": {
+          "title": "La app llama al PDS",
+          "text": "Tu app le pide al PDS, en segundo plano, que inicie un acceso. Es una petición estándar de AT Protocol, la misma que haría cualquier app de Bluesky."
+        },
+        "s3": {
+          "title": "El PDS abre su puerta",
+          "text": "Aquí está el truco de ePDS. En lugar de mostrar un formulario de contraseña, el PDS envía tu navegador a su servicio de acceso."
+        },
+        "s4": {
+          "title": "Un código vuela a tu bandeja",
+          "text": "El servicio de acceso crea un código de un solo uso y te lo envía por correo. El código funciona una vez y caduca a los pocos minutos."
+        },
+        "s5": {
+          "title": "Escribes el código",
+          "text": "Copias el código del correo en la pantalla de acceso. Eso demuestra que la bandeja es tuya. Nunca hay una contraseña de por medio."
+        },
+        "s6": {
+          "title": "¿Primera vez? Elige un identificador",
+          "text": "En tu primera visita, ePDS crea una cuenta para ti y te pide elegir un identificador, tu nombre público en la red."
+        },
+        "s7": {
+          "title": "El saludo firmado",
+          "text": "El servicio de acceso le dice al PDS que estás verificado. El mensaje lleva una firma criptográfica, así que nadie puede falsificarlo."
+        },
+        "s8": {
+          "title": "De vuelta a tu app",
+          "text": "El PDS devuelve tu navegador a tu app con un código de corta duración. Tu app cambia ese código por un token de acceso."
+        },
+        "s9": {
+          "title": "Ya estás dentro",
+          "text": "Tu app ya puede leer y escribir tus datos en tu nombre. Para el resto de la red eres un usuario más de AT Protocol."
+        }
+      }
+    },
+    "map": {
+      "heading": "Las piezas del sistema",
+      "intro": "ePDS es un pequeño equipo de servicios. Toca cada uno para ver su función.",
+      "ariaLabel": "Mapa de los servicios de ePDS",
+      "nodes": {
+        "app": {
+          "name": "Tu app",
+          "desc": "Cualquier app de AT Protocol, como GainForest o Bluesky. Nunca ve tu código de correo ni ninguna clave. Solo recibe el token de acceso final."
+        },
+        "pds": {
+          "name": "Núcleo PDS",
+          "desc": "Un Personal Data Server estándar. Guarda tus registros, habla con el resto de la red y emite tokens. ePDS lo envuelve sin cambiar cómo se comunica con otras apps."
+        },
+        "auth": {
+          "name": "Servicio de acceso",
+          "desc": "La puerta de entrada amable. Muestra la pantalla de acceso, envía los códigos por correo, gestiona los accesos sociales y ayuda a los nuevos usuarios a elegir un identificador."
+        },
+        "email": {
+          "name": "Proveedor de correo",
+          "desc": "Entrega los códigos de un solo uso en tu bandeja. Cada código dura poco y solo puede usarse una vez."
+        },
+        "db": {
+          "name": "Base de datos compartida",
+          "desc": "Una pequeña base de datos que ambos servicios comparten. Registra sesiones y códigos de acceso, nada más."
+        }
+      }
+    },
+    "more": {
+      "heading": "Sigue explorando",
+      "lexiconsTitle": "Esquemas de datos",
+      "lexiconsDesc": "Los formatos abiertos de registro que viven dentro de cada PDS.",
+      "githubTitle": "ePDS en GitHub",
+      "githubDesc": "Todo el código fuente, abierto para que cualquiera lo lea, lo ejecute y lo mejore.",
+      "cgsTitle": "Cómo funcionan las cuentas de grupo",
+      "cgsDesc": "El servicio guardián que permite a todo un equipo compartir una cuenta de grupo de forma segura.",
+      "atprotoTitle": "Cómo funciona el AT Protocol",
+      "atprotoDesc": "Un recorrido interactivo por la red abierta sobre la que está construido todo esto.",
+      "walletTitle": "La billetera de GainForest",
+      "walletDesc": "Cómo cada cuenta recibe una billetera de la que solo su dueño puede gastar.",
+      "routerTitle": "El router de ePDS",
+      "routerDesc": "Cómo las apps encuentran el servidor correcto para un email cuando una comunidad tiene varios."
+    }
+  },
+  "epdsRouter": {
+    "metaTitle": "Cómo funciona el router de ePDS",
+    "metaDescription": "Una guía interactiva del router de ePDS: cómo una app encuentra la cuenta correcta para iniciar sesión con email entre varios servidores. Los anfitriones comparten solo huellas irreversibles, nunca credenciales ni direcciones.",
+    "kicker": "descubrimiento de email a cuenta",
+    "title": "Un email, muchos servidores",
+    "lead": "ePDS te permite iniciar sesión solo con tu email. Cuando una comunidad tiene varios servidores, la app primero necesita responder una pequeña pregunta: ¿qué cuentas existen para este email? El router la responde en una sola llamada. Nadie entrega una dirección ni una contraseña.",
+    "facts": {
+      "routing": {
+        "title": "Una consulta, la cuenta correcta",
+        "text": "La app pregunta una vez y sabe qué cuentas existen para el email. Cada respuesta es una identidad que la red siempre puede localizar, incluso tras un cambio de servidor."
+      },
+      "privacy": {
+        "title": "Los emails nunca se guardan",
+        "text": "Las direcciones se cifran en su propio servidor antes de que algo salga de él. El router solo ve huellas, y las vuelve a cifrar antes de guardarlas."
+      },
+      "zerochange": {
+        "title": "Los anfitriones mantienen el control",
+        "text": "Sin credenciales que entregar, nada que instalar dentro del PDS. Los anfitriones ejecutan un pequeño script junto a su servidor, con su propio calendario."
+      }
+    },
+    "problem": {
+      "heading": "Por qué hace falta el descubrimiento",
+      "p1": "Una app con inicio de sesión por email tiene que enviar el login a un servidor concreto. Ese servidor envía el código y guarda la cuenta. Con un solo servidor la respuesta es fija. Con varios servidores la app necesita un directorio. Las direcciones de email son justo el tipo de dato que no quieres copiar en una gran lista.",
+      "p2": "El router lo resuelve con un pequeño truco: solo trabaja con huellas. Cada servidor cifra sus direcciones de forma irreversible en casa y no comparte nada más. Cada consulta cifra el email entrante de la misma manera y compara huellas. La misma respuesta, sin agenda de direcciones, y nadie entrega sus llaves."
+    },
+    "demo": {
+      "heading": "Prueba una consulta",
+      "intro": "Tres servidores de ejemplo, tres emails de ejemplo. Elige uno y mira cómo la app encuentra la cuenta correcta.",
+      "reset": "Reiniciar",
+      "ariaLabel": "Diagrama de consulta de email y resolución de identidad",
+      "nodes": {
+        "app": "Tu app",
+        "router": "Router",
+        "directory": "Directorio de identidades",
+        "forest": "PDS Bosque",
+        "ocean": "PDS Océano",
+        "river": "PDS Río"
+      },
+      "steps": {
+        "idle": {
+          "title": "Elige un email arriba",
+          "text": "La app quiere iniciar una sesión por email. Todavía no sabe a qué cuenta pertenece este email."
+        },
+        "sent": {
+          "title": "La app pregunta al router",
+          "text": "Envía el email por una llamada privada y autenticada. Las consultas nunca se escriben en ningún registro."
+        },
+        "fingerprint": {
+          "title": "El router compara huellas",
+          "text": "El email se convierte en una huella al llegar. El router la compara con el conjunto de huellas de cada servidor."
+        },
+        "answer": {
+          "title": "El router responde con identidades",
+          "text": "La respuesta no es la dirección de un servidor. Es la identidad permanente de la cuenta, llamada DID. El trabajo del router termina aquí."
+        },
+        "resolve": {
+          "title": "La red encuentra el hogar",
+          "text": "La app pregunta al directorio de identidades dónde vive esta identidad hoy. Es la resolución estándar del AT Protocol y sigue siendo correcta incluso si la cuenta cambia de servidor."
+        }
+      },
+      "outcomes": {
+        "one": {
+          "title": "Una cuenta encontrada",
+          "text": "El directorio señala el servidor actual de la cuenta. La sesión se inicia allí y el código llega a la bandeja correcta."
+        },
+        "many": {
+          "title": "Dos cuentas encontradas",
+          "text": "Este email tiene dos identidades separadas. La app muestra un selector, y cada identidad se resuelve a su propio servidor."
+        },
+        "none": {
+          "title": "Aún sin cuenta",
+          "text": "No existe ninguna identidad para este email, así que la app ofrece crear una cuenta nueva en su servidor predeterminado."
+        }
+      }
+    },
+    "sync": {
+      "heading": "Cómo se mantiene al día el router",
+      "intro": "Nada que entregar: cada anfitrión envía su propia instantánea, con el temporizador que elija.",
+      "play": "Reproducir",
+      "pause": "Pausar",
+      "back": "Atrás",
+      "next": "Siguiente",
+      "stepLabel": "Paso {n} de {total}",
+      "ariaLabel": "Diagrama del ciclo de sincronización",
+      "nodes": {
+        "pds": "Tu ePDS",
+        "router": "Router",
+        "index": "índice de huellas"
+      },
+      "steps": {
+        "s1": {
+          "title": "Tu servidor reúne su propia lista",
+          "text": "Un pequeño script se ejecuta junto a tu PDS, con la frecuencia que tú eliges. Lee los emails de las cuentas localmente. Tu contraseña de administrador nunca sale de tu máquina."
+        },
+        "s2": {
+          "title": "Las huellas se hacen en casa",
+          "text": "Cada dirección se cifra de forma irreversible en tu propio servidor. Desde este momento, no existe ningún email en claro en todo el proceso."
+        },
+        "s3": {
+          "title": "Se envía la instantánea",
+          "text": "El script envía el conjunto completo de huellas al router por una llamada cifrada y protegida con token. Reemplaza por completo la instantánea anterior."
+        },
+        "s4": {
+          "title": "El router la intercambia",
+          "text": "El router vuelve a cifrar cada huella con su propia clave privada y reemplaza todo el conjunto de tu servidor en un solo paso atómico. Las cuentas borradas desaparecen con tu siguiente envío."
+        }
+      }
+    },
+    "register": {
+      "heading": "Únete como anfitrión de ePDS",
+      "intro": "Nunca compartes tu contraseña de administrador y nunca esperas a nadie. Un solo script te inscribe y empieza a enviar de inmediato.",
+      "p1": "En su primera ejecución, el script inscribe tu servidor en el router, guarda tu token de envío junto a sí mismo (conserva ese archivo) y envía tu primera instantánea. Tu servidor es localizable en segundos.",
+      "enrollLabel": "1 · ejecuta el script de envío",
+      "pushLabel": "2 · ponlo en un temporizador",
+      "approveNote": "Eso es todo. Sin cola de aprobación, sin esperas. Irte es solo decisión tuya: deja de enviar, o pide al operador del router que elimine tu entrada. El operador también puede eliminar entradas abusivas en cualquier momento."
+    },
+    "integrate": {
+      "heading": "Integra consultas en tu app",
+      "intro": "Las apps cliente reciben su propio token del operador del router. Basta una llamada antes de mostrar la pantalla de inicio de sesión.",
+      "lookupLabel": "consultar un email",
+      "jsLabel": "manejar los tres resultados",
+      "cacheTip": "La respuesta trae la identidad permanente de cada cuenta (su DID). La red siempre puede resolver un DID a su servidor actual, incluso después de una mudanza. Tu app nunca depende de direcciones de servidor guardadas: una consulta, y la resolución estándar del AT Protocol hace el resto."
+    },
+    "api": {
+      "heading": "La API de un vistazo",
+      "intro": "La consulta y el estado usan un token de cliente. Los anfitriones usan su token de envío. El token del operador es solo para moderación.",
+      "lookup": "Pregunta qué cuentas (DIDs) existen para un email.",
+      "status": "Estado de sincronización de cada servidor: número de cuentas, última sincronización, último error.",
+      "enroll": "Inscribe tu servidor. Llamada abierta, sin credenciales. Activo de inmediato, devuelve un token de envío de un solo uso.",
+      "digests": "Envía una instantánea completa de pares de huella e identidad. Cada envío reemplaza al anterior.",
+      "script": "El script de envío listo para usar. Python 3, solo biblioteca estándar.",
+      "unregister": "Elimina un servidor inscrito (solo el operador del router)."
+    },
+    "snippets": {
+      "copy": "Copiar",
+      "copied": "¡Copiado!"
+    },
+    "more": {
+      "heading": "Sigue explorando",
+      "epdsTitle": "Cómo funciona ePDS",
+      "epdsDesc": "La puerta de entrada amigable en sí: inicio de sesión con código por email en el AT Protocol.",
+      "githubTitle": "Router de ePDS en GitHub",
+      "githubDesc": "El código fuente completo del router: un pequeño servicio en Go sin dependencias."
+    }
+  },
+  "cgs": {
+    "metaTitle": "Cómo funcionan las cuentas de grupo",
+    "metaDescription": "Un recorrido interactivo por el Certified Group Service, el guardián que permite a todo un equipo compartir una cuenta de AT Protocol con roles, reglas claras y un registro completo de auditoría.",
+    "kicker": "Certified Group Service",
+    "title": "Cómo funcionan las cuentas de grupo",
+    "lead": "En AT Protocol, una cuenta normalmente pertenece a una sola persona. Pero los bosques se cartografían en equipo. El Certified Group Service, CGS para abreviar, permite que todo un equipo comparta una cuenta de forma segura, con roles, reglas claras y una memoria de todo lo que ocurre. Esta página muestra cómo funciona, paso a paso.",
+    "whatIs": {
+      "heading": "¿Qué es una cuenta de grupo?",
+      "p1": "Cada organización en GainForest vive en una cuenta normal de AT Protocol. Una cuenta normal tiene una contraseña y un dueño. Eso basta para una persona, pero un equipo necesita más: muchas personas escribiendo en el mismo lugar, sin pasarse la contraseña de mano en mano.",
+      "p2": "CGS es un pequeño servicio guardián que se coloca delante de la cuenta del grupo. Guarda las credenciales en una caja sellada, mantiene una lista de miembros con roles y revisa cada solicitud contra las reglas antes de dejarla pasar. Los miembros del equipo nunca ven la contraseña. Para el resto de la red, el grupo parece una cuenta común, así que cualquier app puede leer sus registros como siempre."
+    },
+    "repo": {
+      "heading": "Una cuenta, muchas manos",
+      "intro": "Tres compañeros, un repositorio compartido. Toca a un compañero y publicará un registro. Observa cómo cada registro recuerda a su autor.",
+      "repoLabel": "El repositorio del grupo",
+      "empty": "Aún no hay nada. Toca a un compañero arriba.",
+      "stamp": "de {name}",
+      "roleOwner": "Dueño",
+      "roleAdmin": "Admin",
+      "roleMember": "Miembro",
+      "clear": "Limpiar",
+      "caption": "Todos los registros caen en el mismo repositorio, pero el servicio anota quién creó cada uno. Esa memoria permite que los miembros editen su propio trabajo, mientras que cambiar el trabajo de otra persona requiere un admin."
+    },
+    "journey": {
+      "heading": "El viaje de una solicitud",
+      "intro": "Pulsa reproducir o avanza tú mismo. El punto en movimiento es tu solicitud en su viaje de ida y vuelta.",
+      "play": "Reproducir",
+      "pause": "Pausa",
+      "back": "Atrás",
+      "next": "Siguiente",
+      "stepLabel": "Paso {n} de {total}",
+      "ariaLabel": "Diagrama del viaje de una solicitud",
+      "nodes": {
+        "app": "Tu app",
+        "pds": "Tu PDS",
+        "cgs": "Servicio del grupo",
+        "gpds": "PDS del grupo"
+      },
+      "steps": {
+        "s1": {
+          "title": "Pulsas Publicar",
+          "text": "Todo empieza en la app. Has iniciado sesión como tú y quieres añadir un registro a la cuenta de tu grupo."
+        },
+        "s2": {
+          "title": "La app llama a tu propio PDS",
+          "text": "La app envía la solicitud a tu servidor de datos personal con una nota de reenvío: por favor, pásalo al servicio del grupo."
+        },
+        "s3": {
+          "title": "Tu PDS firma un pase",
+          "text": "Tu PDS crea un pase de corta duración firmado con tu propia clave. El pase te nombra a ti, al servicio y la acción exacta. Funciona una vez y muere a los dos minutos."
+        },
+        "s4": {
+          "title": "El guardián revisa el pase",
+          "text": "El servicio del grupo verifica la firma contra tu identidad pública y se asegura de que el pase sea fresco y no se haya usado. Un pase copiado no sirve de nada."
+        },
+        "s5": {
+          "title": "Revisión de rol",
+          "text": "El servicio te busca en la lista de miembros del grupo. ¿Miembro, admin o dueño? Tu rol decide qué acciones están abiertas para ti."
+        },
+        "s6": {
+          "title": "Revisión de autoría",
+          "text": "Para ediciones y borrados hay una pregunta más: ¿quién escribió este registro? Los miembros pueden cambiar sus propios registros. Tocar el trabajo de otra persona requiere un admin."
+        },
+        "s7": {
+          "title": "Todo queda anotado",
+          "text": "Sea cual sea la respuesta, el intento entra en el registro de auditoría del grupo: quién, qué, cuándo y si fue permitido o denegado."
+        },
+        "s8": {
+          "title": "El servicio hace la escritura",
+          "text": "Si todo está en orden, el servicio realiza la acción en el PDS del grupo, usando credenciales que solo él posee, y te marca como autor."
+        },
+        "s9": {
+          "title": "Listo",
+          "text": "La respuesta vuelve a tu app. El registro ahora vive en el repositorio del grupo, visible para toda la red como cualquier otro registro de AT Protocol."
+        }
+      }
+    },
+    "roles": {
+      "heading": "Quién puede hacer qué",
+      "intro": "Elige un sombrero y prueba algunas acciones. Cada intento, permitido o denegado, queda en el registro de auditoría de abajo.",
+      "youAre": "Tú eres",
+      "tryAction": "Prueba una acción",
+      "allowed": "Permitido",
+      "denied": "Denegado",
+      "auditTitle": "Registro de auditoría",
+      "auditEmpty": "Nada todavía. Prueba una acción arriba.",
+      "clearLog": "Borrar registro",
+      "auditPermitted": "permitido",
+      "auditDenied": "denegado",
+      "role": {
+        "visitor": {
+          "name": "Visitante",
+          "desc": "No está en la lista de miembros."
+        },
+        "member": {
+          "name": "Miembro",
+          "desc": "Puede crear registros y gestionar su propio trabajo."
+        },
+        "admin": {
+          "name": "Admin",
+          "desc": "Puede gestionar miembros y editar cualquier registro."
+        },
+        "owner": {
+          "name": "Dueño",
+          "desc": "Uno por grupo. Se define al crear el grupo."
+        }
+      },
+      "action": {
+        "create": "Crear un registro",
+        "editOwn": "Editar tu propio registro",
+        "editOther": "Editar el registro de otra persona",
+        "addMember": "Añadir un miembro",
+        "setRole": "Cambiar un rol",
+        "viewAudit": "Leer el registro de auditoría"
+      },
+      "ok": {
+        "create": "Cualquier miembro puede crear registros. El registro se escribe en el repositorio del grupo con tu nombre estampado como autor.",
+        "editOwn": "Es tu registro, así que basta con ser miembro. El servicio revisa primero el sello de autoría.",
+        "editOther": "Los admins pueden editar cualquier registro del grupo, sin importar quién lo escribió.",
+        "addMember": "Los admins pueden añadir personas como miembro o admin. Nadie puede ser añadido como dueño.",
+        "setRole": "Solo el dueño puede cambiar roles. Ni siquiera el dueño puede crear un segundo dueño.",
+        "viewAudit": "Los admins y el dueño pueden leer la historia completa del grupo."
+      },
+      "no": {
+        "visitor": "No estás en la lista de miembros, así que la solicitud se detiene en la puerta. El intento igualmente queda anotado en el registro de auditoría.",
+        "editOther": "Ese registro pertenece a otra persona. Los miembros solo pueden editar su propio trabajo. Editar el registro de otro requiere un admin.",
+        "addMember": "Solo los admins y el dueño pueden añadir nuevos miembros.",
+        "setRole": "Cambiar roles es tarea exclusiva del dueño. Los admins no pueden ascender ni degradar a nadie.",
+        "viewAudit": "El registro de auditoría solo está abierto a los admins y al dueño."
+      }
+    },
+    "map": {
+      "heading": "Las piezas en movimiento",
+      "intro": "CGS es un pequeño equipo de piezas. Toca cada una para ver su trabajo.",
+      "ariaLabel": "Mapa de las piezas del servicio de grupo",
+      "nodes": {
+        "pds": {
+          "name": "Tu PDS",
+          "desc": "Tu propio servidor de datos. Firma el pase corto que prueba quién eres y reenvía tu solicitud. Tu contraseña nunca viaja a ninguna parte."
+        },
+        "cgs": {
+          "name": "Servicio del grupo",
+          "desc": "El guardián de la puerta. Revisa pases, consulta roles, lleva los libros y es el único que puede actuar sobre la cuenta del grupo."
+        },
+        "gpds": {
+          "name": "PDS del grupo",
+          "desc": "Un servidor de datos completamente normal que guarda los registros del grupo. No sabe nada de roles ni miembros. Simplemente confía en el servicio que tiene sus credenciales."
+        },
+        "members": {
+          "name": "Lista de miembros",
+          "desc": "Una pequeña base de datos privada, una por grupo. Guarda la identidad y el rol de cada miembro, y recuerda quién es el autor de cada registro."
+        },
+        "audit": {
+          "name": "Registro de auditoría",
+          "desc": "La memoria del grupo. Cada intento queda anotado: quién, qué, cuándo y si fue permitido o denegado."
+        },
+        "vault": {
+          "name": "Credenciales selladas",
+          "desc": "Una contraseña de aplicación para la cuenta del grupo, guardada cifrada. Es una llave de repuesto limitada, no la contraseña principal de la cuenta: los miembros y las apps nunca la ven, solo el servicio puede usarla, y quien posee las credenciales reales de la cuenta puede revocarla en cualquier momento."
+        }
+      }
+    },
+    "safety": {
+      "heading": "Seguridad incorporada",
+      "intro": "Tres hábitos mantienen segura una cuenta compartida.",
+      "pass": {
+        "title": "Los pases mueren rápido",
+        "text": "Cada solicitud lleva un pase firmado y fresco. Funciona exactamente una vez y caduca a los dos minutos, así que un pase robado casi no vale nada."
+      },
+      "vault": {
+        "title": "Las credenciales quedan selladas",
+        "text": "El servicio solo guarda una contraseña de aplicación — una llave de repuesto, no la contraseña principal de la cuenta. Se guarda cifrada, y quien tiene las credenciales reales de la cuenta puede revocar el acceso del servicio en cualquier momento. Lo contrario es imposible."
+      },
+      "log": {
+        "title": "Nada pasa sin ser visto",
+        "text": "Permitida o denegada, cada acción queda en el registro de auditoría del grupo con el quién, el qué y el cuándo."
+      }
+    },
+    "more": {
+      "heading": "Sigue explorando",
+      "lexiconsTitle": "Esquemas de datos",
+      "lexiconsDesc": "Los formatos abiertos de registro que viven dentro del repositorio de cada grupo.",
+      "epdsTitle": "Cómo funciona ePDS",
+      "epdsDesc": "La puerta de entrada amigable que inicia sesión solo con un correo.",
+      "githubTitle": "CGS en GitHub",
+      "githubDesc": "El código fuente completo del servicio de grupos, abierto para leer, ejecutar y mejorar.",
+      "atprotoTitle": "Cómo funciona el AT Protocol",
+      "atprotoDesc": "Un recorrido interactivo por la red abierta sobre la que está construido todo esto."
+    }
+  },
+  "atproto": {
+    "metaTitle": "Cómo funciona el AT Protocol",
+    "metaDescription": "Un recorrido interactivo y amigable por el AT Protocol, la red abierta sobre la que está construido GainForest. Mira cómo encajan identidades, registros y apps.",
+    "kicker": "AT Protocol",
+    "title": "Cómo funciona el AT Protocol",
+    "lead": "GainForest no guarda tus datos en una base de datos privada. Todo vive en el AT Protocol, una red abierta donde las personas son dueñas de sus datos y muchas apps los comparten. Esta página explica las grandes ideas con palabras simples, con pequeños juguetes para experimentar.",
+    "whatIs": {
+      "heading": "¿Qué es el AT Protocol?",
+      "p1": "El AT Protocol, atproto para abreviar, es una receta para apps sociales donde los datos pertenecen a las personas y no a las plataformas. Cada persona y cada organización tiene una cuenta, y cada cuenta tiene un servidor de datos que guarda sus registros. Una publicación, un me gusta, un seguimiento, una observación de biodiversidad: cada uno es un pequeño registro firmado.",
+      "p2": "Apps como GainForest o Bluesky leen esos registros y los convierten en feeds, mapas y perfiles. Los registros quedan abiertos y portátiles, así que ninguna empresa puede encerrarte. Si una app cierra, tu nombre y tus datos sobreviven."
+    },
+    "naming": {
+      "heading": "Un nombre, no un lugar",
+      "intro": "En la web clásica, un enlace apunta a un lugar: un servidor en alguna parte. En atproto, un enlace apunta a una persona. Intenta romper los dos.",
+      "linkChip": "enlace",
+      "web": {
+        "title": "Un enlace a un lugar",
+        "serverLabel": "un servidor",
+        "action": "Apaga el servidor",
+        "undo": "Enciéndelo de nuevo",
+        "okCaption": "Este enlace solo funciona mientras ese único servidor siga en línea.",
+        "downCaption": "El servidor desapareció, y la publicación murió con él. Cada copia de este enlace ya está rota.",
+        "aria": "Diagrama de un enlace web que apunta a un solo servidor"
+      },
+      "id": {
+        "title": "Un enlace a una persona",
+        "hostA": "casa vieja",
+        "hostB": "casa nueva",
+        "action": "Muda a Maria a una casa nueva",
+        "undo": "Múdala de vuelta",
+        "okCaption": "El enlace nombra a Maria, no a una máquina. La red busca dónde viven sus datos en este momento.",
+        "movedCaption": "Maria se mudó y el enlace no cambió. Nada que actualizar, nada roto.",
+        "aria": "Diagrama de un enlace atproto que apunta a una persona que puede cambiar de servidor"
+      }
+    },
+    "records": {
+      "heading": "Todo es un registro",
+      "intro": "Cada cuenta guarda sus datos en un repositorio: una carpeta pública de pequeños registros firmados. Los registros pueden apuntar a registros de otras cuentas. Toca uno para leerlo.",
+      "aria": "Diagrama de dos repositorios con registros enlazados entre ellos",
+      "repoOfMaria": "Repo de Maria",
+      "repoOfKai": "Repo de Kai",
+      "nodes": {
+        "profile": "perfil",
+        "post": "publicación: un tucán",
+        "observation": "observación + foto",
+        "like": "me gusta",
+        "follow": "seguir"
+      },
+      "details": {
+        "mProfile": "El registro de perfil de Maria. Su nombre y su biografía viven aquí, dentro de su propio repositorio.",
+        "mPost": "Una publicación de Maria. Apunta a su registro de observación como evidencia, usando la dirección de ese registro.",
+        "mObs": "Una observación de biodiversidad con foto. GainForest lee registros como este para construir mapas y páginas de proyecto.",
+        "kProfile": "El registro de perfil de Kai, dentro de su propio repositorio.",
+        "kLike": "Un me gusta también es un registro. Vive en el repositorio de Kai y apunta a la publicación de Maria por su dirección. Nadie pidió permiso para crear ese enlace.",
+        "kFollow": "Kai sigue a Maria. El seguimiento apunta a Maria misma, así que sigue funcionando donde sea que vivan sus datos."
+      },
+      "caption": "Las direcciones empiezan con at:// y nombran una cuenta, un tipo de registro y una clave. Cualquier app de la red puede seguirlas."
+    },
+    "flow": {
+      "heading": "Un registro, todas las apps",
+      "intro": "Cuando alguien publica, su servidor personal de datos (el PDS) anuncia el nuevo registro. Un repetidor reúne los anuncios de toda la red en un gran flujo, y todas las apps lo escuchan. Toca a una persona para publicar.",
+      "aria": "Diagrama de registros que fluyen desde servidores personales a través de un repetidor hacia las apps",
+      "publishAs": "Publicar como {name}",
+      "pdsLabel": "PDS",
+      "relayLabel": "repetidor",
+      "appForest": "App de bosques",
+      "appFeed": "App social",
+      "received": "{count} recibidos",
+      "caption": "Las dos apps reciben el mismo registro en el mismo instante. Una app nueva puede unirse al flujo mañana y construir algo que nadie imaginó, sin pedir permiso."
+    },
+    "move": {
+      "heading": "Siempre puedes mudarte",
+      "intro": "Tu nombre y tus datos no están pegados a ninguna empresa. Si tu servidor se vuelve lento, codicioso o desaparece, empacas y te vas. Pruébalo.",
+      "hostA": "El servidor viejo",
+      "hostB": "El servidor nuevo",
+      "emptyHost": "vacío",
+      "suitcaseRecords": "128 registros",
+      "suitcaseFollowers": "42 seguidores",
+      "moveAction": "Mudarse al servidor nuevo",
+      "moveBack": "Volver",
+      "checkName": "El mismo nombre",
+      "checkRecords": "Todos los registros",
+      "checkFollowers": "Todos los seguidores",
+      "checkLinks": "Todos los enlaces funcionan",
+      "caption": "Esto se llama salida creíble. Los servidores deben tratar bien a la gente, porque irse es fácil. La mayoría nunca se muda, pero todos ganan con la puerta abierta."
+    },
+    "roots": {
+      "heading": "Tres ideas viejas, una red",
+      "intro": "Atproto no apareció de la nada. Mezcla lo mejor de tres olas anteriores de internet.",
+      "web": {
+        "title": "De la web",
+        "text": "Cualquiera puede unirse y publicar sin pedir permiso, y todo puede enlazar con todo lo demás."
+      },
+      "p2p": {
+        "title": "Del peer-to-peer",
+        "text": "Cada registro está firmado por su autor, así que sigue siendo confiable sin importar qué computadora te lo entregue."
+      },
+      "scale": {
+        "title": "De las grandes plataformas",
+        "text": "Los feeds rápidos, la búsqueda y los conteos vienen de servicios de indexación potentes que leen el flujo compartido."
+      }
+    },
+    "trust": {
+      "heading": "Confianza perezosa",
+      "intro": "Verificar cada firma en cada vista sería lento. Atproto toma un camino intermedio y relajado.",
+      "signed": {
+        "title": "Firmado en el origen",
+        "text": "Cada registro lleva la firma de su autor, así que cualquiera puede verificarlo cuando importa."
+      },
+      "views": {
+        "title": "Vistas rápidas",
+        "text": "Las apps sirven vistas preparadas sin volver a revisar cada registro. Si una app mintiera, los originales firmados lo probarían."
+      },
+      "exit": {
+        "title": "La puerta abierta",
+        "text": "Los datos y la identidad pueden mudarse en cualquier momento, así que un servicio que se porta mal pierde a sus usuarios. Eso mantiene honestos a todos."
+      }
+    },
+    "lexicon": {
+      "heading": "Hablar el mismo idioma",
+      "p1": "Para que las apps compartan registros, deben acordar cómo se ve cada registro. Atproto lo hace con esquemas llamados lexicons. Cada esquema tiene un dueño claro que puede evolucionarlo, y cada app puede comprobar que un registro sigue las reglas al pie de la letra. La estructura es lo que hace posible compartir.",
+      "p2": "GainForest publica sus propios esquemas abiertos para observaciones de biodiversidad, proyectos, certificados y donaciones. Cualquier otra app puede leer nuestros registros o escribir registros compatibles. Puedes explorarlos todos en la guía de esquemas de datos aquí abajo."
+    },
+    "more": {
+      "heading": "Sigue explorando",
+      "lexiconsTitle": "Esquemas de datos",
+      "lexiconsDesc": "Todos los formatos de registro que GainForest publica en la red.",
+      "cgsTitle": "Cómo funcionan las cuentas de grupo",
+      "cgsDesc": "El servicio guardián que permite a un equipo compartir una cuenta de forma segura.",
+      "epdsTitle": "Cómo funciona ePDS",
+      "epdsDesc": "El sistema de inicio de sesión y los servidores detrás de cada cuenta de GainForest.",
+      "siteTitle": "atproto.com",
+      "siteDesc": "El sitio oficial del protocolo, con las especificaciones completas y guías para desarrolladores.",
+      "ethosNote": "Muchas ideas de esta página vienen del ensayo del equipo del protocolo sobre su filosofía de diseño:",
+      "ethosLink": "El ethos de atproto"
+    }
+  },
+  "identifications": {
+    "meta": {
+      "title": "Identificaciones",
+      "description": "Cada etiqueta de sonido de AudioMoth que has guardado, reunida en un solo lugar."
+    },
+    "title": "Identificaciones",
+    "subtitle": "Todas las etiquetas de AudioMoth guardadas en tus grabaciones, en un solo lugar. Cada una es una ocurrencia de biodiversidad en tu cuenta.",
+    "loading": "Cargando identificaciones…",
+    "loadFailed": "No pudimos cargar tus identificaciones. Inténtalo de nuevo.",
+    "unknownRecording": "Grabación desconocida",
+    "summary": "{count, plural, one {# identificación} other {# identificaciones}}",
+    "summaryHint": "Resumen de solo lectura de tu espacio de etiquetado.",
+    "openLabeller": "Abrir etiquetador",
+    "export": "Exportar CSV",
+    "refresh": "Actualizar",
+    "searchPlaceholder": "Buscar nombre, grabación o nota…",
+    "filterAll": "Todas · {count}",
+    "emptyTitle": "Aún no hay identificaciones",
+    "emptyBody": "Dibuja y guarda una caja en el etiquetador de AudioMoth y aparecerá aquí.",
+    "noMatches": "Ninguna identificación coincide con tus filtros.",
+    "signInTitle": "Inicia sesión para ver las identificaciones",
+    "signInBody": "Tus etiquetas de AudioMoth guardadas están en tu cuenta. Inicia sesión para verlas.",
+    "categories": {
+      "bird": "Ave",
+      "frog": "Rana",
+      "insect": "Insecto",
+      "other": "Otro",
+      "note": "Nota"
+    }
+  },
+  "walletExplainer": {
+    "metaTitle": "Anatomía de una billetera de donaciones: un ensayo interactivo",
+    "metaDescription": "Cultiva una clave real de la curva de las llaves de acceso en tu navegador, deriva una dirección real con la matemática de la propia fábrica y recorre la vida de una donación. Un ensayo interactivo sobre las billeteras de GainForest.",
+    "kicker": "Un ensayo interactivo",
+    "title": "Anatomía de una billetera de donaciones",
+    "standfirst": "Cada organización en GainForest puede guardar donaciones en una billetera sin contraseña, sin frase semilla y sin empresas custodiando claves. Esta página no se limita a describir cómo funciona. Te deja accionar la maquinaria tú mismo, aquí en tu navegador.",
+    "intro": {
+      "p1": "Cuando alguien financia una restauración de manglares o un censo de aves, el dinero llega a una pequeña bóveda en Ethereum. La bóveda no tiene operador ni mesa de ayuda. Obedece exactamente una cosa: firmas criptográficas de los teléfonos y computadoras de las personas que llevan el proyecto.",
+      "p2": "Tres ideas lo hacen posible. Una clave que crece dentro de tu dispositivo y nunca sale de él. Una dirección que puede calcularse antes de que la billetera exista. Y un contrato que verifica la firma de una huella con pura matemática. Construyamos cada una, en vivo."
+    },
+    "part1": {
+      "label": "Experimento en vivo",
+      "heading": "Una clave crece en tu teléfono",
+      "p1": "Detrás de cada aviso de Face ID hay una pieza antigua y hermosa de criptografía: un par de claves de curva elíptica sobre una curva llamada P-256. Tu dispositivo inventa un número aleatorio enorme, lo encierra en un chip seguro y entrega solo el punto público correspondiente: dos coordenadas, x e y.",
+      "p2": "Tu navegador puede hacer lo mismo en este segundo. Pulsa el botón de abajo y cultivará una clave nueva sobre esa curva exacta. La mitad privada nace con una regla estricta: puede firmar, y nunca puede exportarse. Ni siquiera esta página puede leerla.",
+      "p3": "Esas dos coordenadas son todo lo que una billetera llega a saber de ti. El contrato las guarda como un par de casillas de 32 bytes y, cuando el dinero debe moverse, exige una firma que solo la mitad encerrada puede producir. Acabas de ver a tu navegador pasar exactamente esa verificación."
+    },
+    "keyForge": {
+      "bench": "Experimento 1 · Cultiva una clave",
+      "invite": "Tu navegador creará un par de claves real sobre la curva de las llaves de acceso (P-256). Vive solo en esta página y desaparece cuando te vas.",
+      "growButton": "Cultivar una clave",
+      "unsupported": "Tu navegador no soporta WebCrypto aquí. El resto del ensayo funciona igual sin esto.",
+      "privateLabel": "Clave privada · chip seguro",
+      "privateNote": "Marcada como no exportable al nacer. Puede firmar, y eso es todo lo que hará jamás.",
+      "publicLabel": "Clave pública · lo que guarda la cadena",
+      "publicNote": "La x y la y de tu punto público, exactamente como las conserva la estructura Signer del contrato.",
+      "messageLabel": "Un pago por aprobar",
+      "sampleMessage": "pagar 20 USDC a Rio Claro",
+      "signButton": "Firmar con tu clave",
+      "verified": "La firma es válida",
+      "failed": "La verificación falló",
+      "verifyNote": "Tu clave firmó el hash del pago y tu navegador lo verificó contra el punto público. En Ethereum, la bóveda ejecuta esta misma comprobación P-256.",
+      "privacyNote": "No se guardó nada y no se envió nada a ninguna parte. Recarga la página y esta clave desaparece para siempre."
+    },
+    "part2": {
+      "label": "Experimento en vivo",
+      "heading": "Una dirección hecha de aritmética",
+      "p1": "Aquí está la propiedad más extraña de todo el sistema: la dirección de la billetera existe antes que la billetera. Sin transacción, sin despliegue, sin registro en ninguna parte. La dirección es simplemente la respuesta a un cálculo, y cualquiera que conozca los ingredientes obtiene la misma respuesta.",
+      "p2": "La receta tiene cuatro ingredientes: una casilla de dueño permanentemente vacía, la lista de claves firmantes, el umbral de aprobación y una sal derivada de la identidad de la organización. El contrato fábrica los mezcla con keccak256 y la regla CREATE2. Pruébalo abajo. Escribe un nombre y mira cómo reacciona cada dígito de la dirección.",
+      "p3": "Por eso nadie tiene que confiar en GainForest sobre qué dirección pertenece a qué organización. La organización publica sus ingredientes como registro público en su propia cuenta. ¿Dudas de una etiqueta? Repite la aritmética, como acabas de hacer, y compara."
+    },
+    "addressForge": {
+      "bench": "Experimento 2 · La forja de direcciones",
+      "liveTag": "matemática real de la fábrica, calculada mientras escribes",
+      "stepAccount": "Ingrediente: la identidad de la cuenta",
+      "nameAria": "Nombre de la organización",
+      "typeHint": "escribe lo que quieras",
+      "stepSigners": "Ingrediente: el conjunto de firmantes",
+      "yourKey": "tu clave del experimento 1",
+      "sampleKey": "clave de ejemplo",
+      "secondKey": "segundo dispositivo",
+      "addSecond": "añadir un segundo dispositivo",
+      "thresholdNote": "umbral 1 · cualquier clave listada puede firmar",
+      "stepSalt": "Un hash sobre todos los ingredientes",
+      "stepAddress": "La regla CREATE2 nombra la dirección",
+      "footnote": "La dirección de la fábrica y el hash del código proxy de arriba son los valores reales de la red principal de Ethereum, y esta derivación coincide con la propia función getAddress de la fábrica. Cada hash de este banco lo calcula tu navegador."
+    },
+    "part3": {
+      "label": "Leyendo la fuente",
+      "heading": "El contrato, anotado",
+      "p1": "La bóveda es una cuenta inteligente de Splits: de código abierto, auditada y construida sobre diseños de Coinbase y Daimo. No tienes que creerle nada a este ensayo. Aquí están los tres pasajes que cargan el peso, cada uno con una nota sobre lo que significa.",
+      "p2": "Del diseño se desprende una propiedad más. La fábrica despliega con CREATE2, así que los mismos ingredientes producen la misma dirección en cada cadena donde la fábrica existe. La dirección de una organización es portátil por todo el mundo EVM."
+    },
+    "contract": {
+      "signerNote": "Un firmante es solo dos casillas de 32 bytes. Para una llave de acceso guardan la x y la y que cultivaste en el experimento 1. La misma estructura también admite una dirección clásica de Ethereum, con la segunda casilla vacía.",
+      "saltNote": "La identidad completa de una billetera, condensada en una sal: quién la posee (en las billeteras de GainForest, nadie), qué claves pueden firmar y cuántas deben acordar. Cambia cualquier ingrediente y la dirección se mueve.",
+      "webauthnNote": "Así verifica la cadena una firma de Face ID: primero intenta un verificador integrado en la dirección 0x100 y, donde una cadena no lo tiene, verifica la ecuación de la curva paso a paso en una biblioteca."
+    },
+    "part4": {
+      "label": "Recorrido",
+      "heading": "La vida de una donación",
+      "p1": "Junta las piezas y aparece una secuencia curiosa. Un donante puede enviar dinero a la dirección desde el primer día, cuando la dirección todavía no es nada salvo la respuesta del experimento 2. A la cadena no le importa. Los saldos pertenecen a las direcciones, y esta dirección es tan real como cualquier otra.",
+      "p2": "La última entrada cierra el círculo. Antes del despliegue, la lista de firmantes aún puede cambiar, y el registro simplemente apunta a una dirección recién calculada. Después, el registro se congela y la bóveda toma el mando: añadir un dispositivo se vuelve una acción en cadena, aprobada por una clave que ya está en la lista."
+    },
+    "ledger": {
+      "bench": "Experimento 3 · El libro mayor de una billetera",
+      "replay": "Repetir",
+      "start": "Empezar",
+      "next": "Avanzar",
+      "empty": "Seis eventos, desde una billetera que no existe hasta una que paga trabajo real. Pulsa Empezar.",
+      "events": {
+        "record": {
+          "title": "Se publica una receta",
+          "body": "La organización escribe los ingredientes de su billetera en su propia cuenta. Fuera de la cadena, gratis y público."
+        },
+        "first": {
+          "title": "Llega la primera donación",
+          "body": "Enviada a la dirección calculada. Allí no hay ningún contrato. El dinero espera de todos modos."
+        },
+        "second": {
+          "title": "Otra persona dona",
+          "body": "La dirección sigue acumulando. Aún sin código, aún sin nada que mantener."
+        },
+        "deploy": {
+          "title": "Primer pago: la billetera se materializa",
+          "body": "El pago lleva initCode, así que la fábrica despliega la bóveda en la dirección que la matemática prometió. Después se ejecuta el pago."
+        },
+        "payout": {
+          "title": "El proyecto cobra",
+          "body": "Un firmante aprobó con su huella. La bóveda verificó la firma P-256 en la cadena."
+        },
+        "freeze": {
+          "title": "La receta se congela",
+          "body": "La dirección ya tiene código, así que la lista de ingredientes no puede cambiar en silencio nunca más. Desde aquí, la propia bóveda gestiona sus firmantes."
+        }
+      },
+      "balanceLabel": "Guardado en la dirección",
+      "codeLabel": "Código en la dirección",
+      "codeNone": "ninguno",
+      "codeDeployed": "bóveda ERC-1967",
+      "meterNoteBefore": "El dinero puede esperar en una dirección sin código. El único contrato que puede aparecer allí es la bóveda que describen los ingredientes.",
+      "meterNoteAfter": "La bóveda está viva. Cada pago saliente se comprueba ahora contra la lista de firmantes."
+    },
+    "epilogue": {
+      "heading": "Comprueba la etiqueta tú mismo",
+      "p1": "Cada afirmación de esta página es comprobable. La receta de la billetera está en la propia cuenta de la organización como registro público. La fábrica está en la misma dirección en Ethereum. Descarga el registro, ejecuta el experimento 2 con sus ingredientes exactos, y la dirección coincide o no coincide. Sin firmas, sin autoridad y sin confiar en este sitio.",
+      "p2": "Las advertencias honestas: si se pierden todas las claves de la lista, el dinero no puede moverse, así que conviene inscribir un segundo dispositivo pronto. Y hasta el primer pago, cambiar la lista de firmantes cambia la dirección, así que la lista debería asentarse antes de apuntar donaciones hacia ella.",
+      "contractLink": "Lee los contratos de la bóveda inteligente en GitHub",
+      "lexiconLink": "El esquema del registro de la billetera, y todos los demás",
+      "atprotoLink": "Cómo guarda el registro el Protocolo AT"
     }
   }
 }
