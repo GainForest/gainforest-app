@@ -90,5 +90,35 @@
     "exploreMore": "Chunguza miradi zaidi",
     "emptyTitle": "Kikapu chako ni tupu",
     "singleApprovalNote": "Pochi yako itaomba idhini moja tu kwa jumla yote. Kisha GainForest hupeleka kila mchango kwa mpokeaji wake."
+  },
+  "testRegistry": {
+    "eyebrow": "Majaribio ya kiolesura",
+    "title": "Daftari la majaribio ya kiolesura",
+    "description": "Maonyesho salama yanayotumika tena ya hatua halisi za GainForest, kwa data ya majaribio na vitendo vya nje vilivyozuiwa.",
+    "availableTitle": "Majaribio yanayopatikana",
+    "availableDescription": "Chagua mtiririko ili kufungua onyesho lake salama na shirikishi kikamilifu.",
+    "parityTitle": "Ahadi ya ulinganifu",
+    "parityBody": "Wasanidi programu na mawakala wa AI: kila jaribio hapa lazima litumie sehemu halisi ya uzalishaji. Iga data na vitendo vya nje pekee; usinakili wala kutenganisha kiolesura. Kila mabadiliko ya UI au UX lazima yaathiri jaribio na uzoefu halisi kwa njia sawa.",
+    "indexingNote": "Njia hii ni ya umma lakini imeondolewa kwenye injini za utafutaji. Usiweke siri au data halisi ya watu hapa.",
+    "scenarioLabel": "Jaribio lililosajiliwa",
+    "experienceTitle": "Mtiririko wa mchango",
+    "experienceDescription": "Pitia uzoefu wa sasa wa mchango kwa data salama ya majaribio bila malipo halisi.",
+    "openExperience": "Fungua jaribio",
+    "backToRegistry": "Rudi kwenye daftari",
+    "mockBadge": "Hali ya majaribio · hakuna malipo",
+    "projectPrompt": "Jaribu safari kamili ya mchango",
+    "projectPromptBody": "Chagua kiasi, kagua kikapu, unganisha pochi ya majaribio, kisha kamilisha malipo salama ya majaribio.",
+    "mockProjectTitle": "Ukanda wa msitu wa mawingu",
+    "mockOrganization": "Jumuiya ya Canopy",
+    "mockObjectiveOne": "Urejeshaji wa misitu",
+    "mockObjectiveTwo": "Utunzaji wa jamii",
+    "mockProjectDescription": "Kurejesha ukanda hai kati ya misitu ya jamii na makazi yaliyohifadhiwa.",
+    "donate": "Changia",
+    "reset": "Anza upya",
+    "stage": {
+      "project": "Mradi",
+      "cart": "Kikapu",
+      "checkout": "Malipo"
+    }
   }
 }

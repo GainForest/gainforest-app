@@ -10,7 +10,7 @@ import "./globals.css";
 import { ChromeGate } from "./_components/ChromeGate";
 import { ClientErrorListener } from "./_components/ClientErrorListener";
 import { AccountDrawerProvider } from "./_components/AccountDrawer";
-import { CartProvider } from "./_components/cart/CartProvider";
+import { AppCartProvider } from "./_components/cart/AppCartProvider";
 import { LinkPrefetcher } from "./_components/LinkPrefetcher";
 import { RouteChangeIndicator } from "./_components/RouteChangeIndicator";
 import { ModalHost, ModalProvider } from "@/components/ui/modal/context";
@@ -226,13 +226,13 @@ export default async function RootLayout({ children }: { children: React.ReactNo
             <WagmiProvider>
               <ModalProvider>
                 <AccountDrawerProvider>
-                  <CartProvider>
+                  <AppCartProvider>
                     <ChromeGate authSession={authSession}>{children}</ChromeGate>
                     {/* The modal chrome mounts at the bottom of the provider
                         tree so inline modal content pushed via pushModal keeps
                         access to the app-level contexts above this line. */}
                     <ModalHost />
-                  </CartProvider>
+                  </AppCartProvider>
                 </AccountDrawerProvider>
               </ModalProvider>
             </WagmiProvider>

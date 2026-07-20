@@ -6,7 +6,7 @@
  * tip) happens on /checkout — see app/checkout and app/_components/cart.
  */
 
-import { useMemo, useState } from "react";
+import { useId, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { BadgeCheckIcon, EyeIcon, ShoppingCartIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
@@ -57,13 +57,17 @@ function parseBound(value: string | null | undefined): number | null {
 export function AmountModal({
   bumicert,
   fundingConfig,
+  onAddedToCart,
 }: {
   bumicert: DonationBumicert;
   fundingConfig: DonationFundingConfig;
+  /** Overrides route navigation while keeping the production amount UI intact. */
+  onAddedToCart?: () => void;
 }) {
   const t = useTranslations("cart.amountModal");
   const accountT = useTranslations("common.accountSupport");
   const router = useRouter();
+  const amountInputId = useId();
   const { hide, clear } = useModal();
   const { items, addItem } = useCart();
   const minDonation = parseBound(fundingConfig?.minDonationInUSD);
@@ -108,7 +112,11 @@ export function AmountModal({
     });
     await hide();
     clear();
-    router.push("/cart");
+    if (onAddedToCart) {
+      onAddedToCart();
+    } else {
+      router.push("/cart");
+    }
   };
 
   return (
@@ -128,10 +136,11 @@ export function AmountModal({
 
       <div className="space-y-4">
         <div className="space-y-2">
-          <label className="text-sm font-medium text-foreground">{t("amountLabel")}</label>
+          <label htmlFor={amountInputId} className="text-sm font-medium text-foreground">{t("amountLabel")}</label>
           <div className="grid grid-cols-[auto_minmax(0,1fr)] items-center gap-x-2 gap-y-1 rounded-2xl border border-border bg-background px-4 py-3 sm:grid-cols-[auto_minmax(0,1fr)_auto]">
             <span className="text-lg font-medium text-muted-foreground">$</span>
             <input
+              id={amountInputId}
               type="text"
               inputMode="decimal"
               value={customInput}

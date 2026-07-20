@@ -90,5 +90,35 @@
     "exploreMore": "Jelajahi proyek lainnya",
     "emptyTitle": "Keranjang Anda kosong",
     "singleApprovalNote": "Dompet Anda akan meminta satu persetujuan untuk seluruh total. GainForest kemudian meneruskan setiap donasi kepada penerimanya."
+  },
+  "testRegistry": {
+    "eyebrow": "Pengalaman UI",
+    "title": "Registri pengalaman UI",
+    "description": "Pratinjau aman dan dapat digunakan kembali dari alur GainForest yang nyata, dengan data simulasi dan efek eksternal yang diblokir.",
+    "availableTitle": "Pengalaman yang tersedia",
+    "availableDescription": "Pilih alur untuk membuka pratinjau yang aman dan sepenuhnya interaktif.",
+    "parityTitle": "Kontrak kesetaraan",
+    "parityBody": "Pengembang dan agen AI: setiap pengalaman di sini harus merender komponen produksi itu sendiri. Simulasikan hanya data dan efek eksternal; jangan menyalin atau memisahkan antarmuka. Setiap perubahan UI atau UX harus memengaruhi pengalaman simulasi dan nyata dengan cara yang sama.",
+    "indexingNote": "Rute ini bersifat publik tetapi dikecualikan dari mesin pencari. Jangan pernah menaruh rahasia atau data pribadi nyata di sini.",
+    "scenarioLabel": "Pengalaman terdaftar",
+    "experienceTitle": "Alur donasi",
+    "experienceDescription": "Ikuti pengalaman donasi produksi saat ini dengan data uji yang aman dan tanpa pembayaran nyata.",
+    "openExperience": "Buka pengalaman",
+    "backToRegistry": "Kembali ke registri",
+    "mockBadge": "Mode simulasi · tanpa pembayaran",
+    "projectPrompt": "Coba pengalaman donasi lengkap",
+    "projectPromptBody": "Pilih jumlah, tinjau keranjang, hubungkan dompet simulasi, lalu selesaikan pembayaran pratinjau yang aman.",
+    "mockProjectTitle": "Koridor hutan awan",
+    "mockOrganization": "Komunitas Canopy",
+    "mockObjectiveOne": "Restorasi hutan",
+    "mockObjectiveTwo": "Penjagaan komunitas",
+    "mockProjectDescription": "Memulihkan koridor hidup antara hutan komunitas dan habitat yang dilindungi.",
+    "donate": "Donasi",
+    "reset": "Atur ulang",
+    "stage": {
+      "project": "Proyek",
+      "cart": "Keranjang",
+      "checkout": "Pembayaran"
+    }
   }
 }

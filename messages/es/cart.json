@@ -90,5 +90,35 @@
     "exploreMore": "Explorar más proyectos",
     "emptyTitle": "Tu carrito está vacío",
     "singleApprovalNote": "Tu billetera pedirá una sola aprobación por el total. Después, GainForest envía cada donación a su destinatario."
+  },
+  "testRegistry": {
+    "eyebrow": "Experiencias de UI",
+    "title": "Registro de experiencias de UI",
+    "description": "Vistas previas seguras y reutilizables de flujos reales de GainForest, con datos simulados y efectos externos bloqueados.",
+    "availableTitle": "Experiencias disponibles",
+    "availableDescription": "Elige un flujo para abrir su vista previa segura y totalmente interactiva.",
+    "parityTitle": "Contrato de paridad",
+    "parityBody": "Desarrolladores y agentes de IA: cada experiencia debe renderizar el componente de producción. Simulen solo los datos y efectos externos; nunca copien ni separen la interfaz. Todo cambio de UI o UX debe afectar de la misma manera a la experiencia simulada y a la real.",
+    "indexingNote": "Esta ruta es pública, pero está excluida de los buscadores. Nunca incluyas secretos ni datos personales reales.",
+    "scenarioLabel": "Experiencia registrada",
+    "experienceTitle": "Flujo de donación",
+    "experienceDescription": "Recorre la experiencia actual de donación con datos de prueba seguros y sin pagos reales.",
+    "openExperience": "Abrir experiencia",
+    "backToRegistry": "Volver al registro",
+    "mockBadge": "Modo simulado · sin pagos",
+    "projectPrompt": "Prueba la experiencia de donación completa",
+    "projectPromptBody": "Elige un monto, revisa el carrito, conecta la billetera simulada y completa un pago de prueba seguro.",
+    "mockProjectTitle": "Corredor del bosque nuboso",
+    "mockOrganization": "Comunidad Canopy",
+    "mockObjectiveOne": "Restauración forestal",
+    "mockObjectiveTwo": "Cuidado comunitario",
+    "mockProjectDescription": "Restauración de un corredor vivo entre bosques comunitarios y hábitat protegido.",
+    "donate": "Donar",
+    "reset": "Reiniciar",
+    "stage": {
+      "project": "Proyecto",
+      "cart": "Carrito",
+      "checkout": "Pago"
+    }
   }
 }
