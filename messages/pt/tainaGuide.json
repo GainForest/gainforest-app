@@ -33,7 +33,8 @@
       "observations": "Você pode enviar até 50 fotos da natureza de uma vez — as espécies são identificadas automaticamente.",
       "bioblitz": "Há um desafio BioBlitz toda semana — fotografe qualquer ser vivo e ganhe prêmios!",
       "ask": "Você pode me perguntar qualquer coisa sobre a GainForest, no seu idioma — é só clicar em mim!"
-    }
+    },
+    "haveQuestion": "Tenho uma pergunta"
   },
   "guides": {
     "wallet": {
