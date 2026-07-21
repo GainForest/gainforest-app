@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { ArrowLeftIcon, FlaskConicalIcon, RefreshCcwIcon, ShieldCheckIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { CartProvider } from "@/app/_components/cart/CartProvider";
+import { CartProvider, useCart, type CartItem } from "@/app/_components/cart/CartProvider";
 import { CartView } from "@/app/cart/_components/CartView";
 import { CheckoutView } from "@/app/checkout/_components/CheckoutView";
 import { DonateButton } from "@/app/cert/[did]/[rkey]/_components/donate/DonateButton";
@@ -21,8 +21,37 @@ const MOCK_SESSION: AuthSession = {
   handle: "preview-donor.gainforest.app",
 };
 
+// Companion donations added alongside the hero project so the checkout settles
+// several lines — the reward deck then mints one card per project plus an
+// overall card, exercising the flick + collect flow end to end.
+const MOCK_COMPANIONS: CartItem[] = [
+  {
+    kind: "project",
+    orgDid: "mock:rainforest-trust",
+    rkey: "mock-andes-cloudforest",
+    title: "Andes Cloudforest Watch",
+    orgName: "Rainforest Trust",
+    image: null,
+    amountUsd: 40,
+    minUsd: 5,
+    maxUsd: 500,
+  },
+  {
+    kind: "project",
+    orgDid: "mock:ocean-guardians",
+    rkey: "mock-mangrove-belt",
+    title: "Mangrove Belt Restoration",
+    orgName: "Ocean Guardians",
+    image: null,
+    amountUsd: 120,
+    minUsd: 5,
+    maxUsd: 500,
+  },
+];
+
 function DonationExperience({ onReset }: { onReset: () => void }) {
   const t = useTranslations("cart.testRegistry");
+  const cart = useCart();
   const [stage, setStage] = useState<DonationStage>("project");
   const stageRegionRef = useRef<HTMLDivElement | null>(null);
   const firstRenderRef = useRef(true);
@@ -36,8 +65,7 @@ function DonationExperience({ onReset }: { onReset: () => void }) {
   }, [stage]);
 
   return (
-    <CartProvider persistence="memory">
-      <div className="border-t border-border-soft bg-background/60">
+    <div className="border-t border-border-soft bg-background/60">
         <div className="flex items-center justify-between gap-3 border-b border-border-soft px-4 py-3 sm:px-6">
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">
@@ -93,7 +121,11 @@ function DonationExperience({ onReset }: { onReset: () => void }) {
                   fundingConfig={{ minDonationInUSD: "5", maxDonationInUSD: "500" }}
                   disabled={false}
                   label={t("donate")}
-                  onAddedToCart={() => setStage("cart")}
+                  onAddedToCart={() => {
+                    // Round out the basket so the reward deck has several cards.
+                    for (const companion of MOCK_COMPANIONS) cart.addItem(companion);
+                    setStage("cart");
+                  }}
                 />
               </div>
             </div>
@@ -108,8 +140,7 @@ function DonationExperience({ onReset }: { onReset: () => void }) {
             />
           )}
         </div>
-      </div>
-    </CartProvider>
+    </div>
   );
 }
 
@@ -158,7 +189,9 @@ export function DonationFlowExperienceClient() {
         </aside>
 
         <section className="mt-8 overflow-hidden rounded-[2rem] border border-border-soft bg-surface shadow-sm">
-          <DonationExperience key={experienceKey} onReset={resetExperience} />
+          <CartProvider key={experienceKey} persistence="memory">
+            <DonationExperience onReset={resetExperience} />
+          </CartProvider>
         </section>
       </div>
     </main>

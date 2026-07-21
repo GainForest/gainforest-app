@@ -7,6 +7,35 @@ const FORBIDDEN_DONATION_PATHS = new Set([
   "/api/verify-recipient",
 ]);
 
+const GUEST_CARD = {
+  id: "project-0-1720000000000",
+  variant: "project",
+  title: "Cloud Forest Corridor",
+  orgName: "Forest Team",
+  totalUsd: 80,
+  image: null,
+  tier: "grove",
+  lines: [{
+    kind: "donation",
+    title: "Cloud Forest Corridor",
+    orgName: "Forest Team",
+    amountUsd: 80,
+    image: null,
+  }],
+  collectedAt: 1_720_000_000_000,
+};
+
+test("signed-out donors can reopen browser-saved cards in the real gallery", async ({ page }) => {
+  await page.addInitScript((card) => {
+    window.localStorage.setItem("gainforest.reward-cards.v1:guest", JSON.stringify([card]));
+  }, GUEST_CARD);
+
+  await page.goto("/cards");
+  await expect(page.getByRole("heading", { name: "My Cards", exact: true })).toBeVisible();
+  await expect(page.getByText("Cloud Forest Corridor", { exact: true })).toBeVisible();
+  await expect(page.getByText("1 card", { exact: true })).toBeVisible();
+});
+
 test("donation registry mirrors the production flow without live side effects", async ({ page }) => {
   const productionCartSnapshot = JSON.stringify({
     items: [{
@@ -70,11 +99,15 @@ test("donation registry mirrors the production flow without live side effects", 
 
   await expect(page.getByRole("heading", { name: "Checkout", exact: true })).toBeVisible();
   await page.getByRole("button", { name: "Connect wallet" }).click();
-  await expect(page.getByRole("button", { name: /Donate \$27\.50 now/ })).toBeEnabled();
-  await page.getByRole("button", { name: /Donate \$27\.50 now/ }).click();
+  await expect(page.getByRole("button", { name: /Donate \$203\.50 now/ })).toBeEnabled();
+  await page.getByRole("button", { name: /Donate \$203\.50 now/ }).click();
 
   await expect(page.getByText("Thank you", { exact: true })).toBeVisible({ timeout: 10_000 });
-  await expect(page.getByText("Your $27.50 in donations was completed successfully.")).toBeVisible();
+  await expect(page.getByText("Your $203.50 in donations was completed successfully.")).toBeVisible();
+  await expect(page.getByRole("button", { name: "Collect all (4)" })).toBeVisible();
+  await page.getByRole("button", { name: "Collect all (4)" }).click();
+  await expect(page.getByText("All collected!", { exact: true })).toBeVisible({ timeout: 10_000 });
+  await expect(page.getByRole("link", { name: "View My Cards" })).toHaveAttribute("href", "/_test/my-cards");
 
   const safetyState = await page.evaluate(() => ({
     cart: window.localStorage.getItem("gainforest.donation-cart.v1"),
@@ -83,6 +116,11 @@ test("donation registry mirrors the production flow without live side effects", 
   expect(safetyState.cart).toBe(productionCartSnapshot);
   expect(safetyState.walletCalls).toEqual([]);
   expect(forbiddenRequests).toEqual([]);
+
+  await page.getByRole("link", { name: "View My Cards" }).click();
+  await expect(page).toHaveURL(/\/_test\/my-cards$/);
+  await expect(page.getByRole("heading", { name: "My Cards", exact: true })).toBeVisible();
+  await expect(page.getByText("Cloud Forest Corridor", { exact: true }).first()).toBeVisible();
 
   const robotsResponse = await page.request.get("/robots.txt");
   const robotsText = await robotsResponse.text();

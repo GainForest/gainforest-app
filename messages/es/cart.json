@@ -119,7 +119,20 @@
           "name": "Bosque antiguo",
           "rarity": "Legendario"
         }
-      }
+      },
+      "overallEyebrow": "Contribución total",
+      "overallTitle": "Colección completa",
+      "overallSubtitle": "{count, plural, one {# proyecto apoyado} other {# proyectos apoyados}}",
+      "collect": "Coleccionar",
+      "collectAll": "Coleccionar todo ({count})",
+      "prevCard": "Carta anterior",
+      "nextCard": "Carta siguiente",
+      "deckHint": "Desliza para ver tus coleccionables",
+      "cardPosition": "Carta {current} de {total}",
+      "collectedTitle": "¡Todo coleccionado!",
+      "collectedBody": "Tus cartas están guardadas en Mis cartas.",
+      "collectedSessionBody": "Tus cartas están disponibles en Mis cartas durante esta sesión del navegador.",
+      "viewMyCards": "Ver Mis cartas"
     }
   },
   "testRegistry": {
@@ -150,6 +163,17 @@
       "project": "Proyecto",
       "cart": "Carrito",
       "checkout": "Pago"
-    }
+    },
+    "myCardsTitle": "Galería Mis cartas",
+    "myCardsDescription": "Previsualiza la galería de cartas coleccionadas con coleccionables de muestra."
+  },
+  "myCards": {
+    "eyebrow": "Coleccionables",
+    "title": "Mis cartas",
+    "description": "Los coleccionables holográficos que has ganado al apoyar proyectos.",
+    "count": "{count, plural, one {# carta} other {# cartas}}",
+    "emptyTitle": "Aún no hay cartas",
+    "emptyBody": "Apoya un proyecto para ganar tu primer coleccionable.",
+    "browseProjects": "Explorar proyectos"
   }
 }

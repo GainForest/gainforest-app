@@ -20,6 +20,7 @@ import {
   PlusIcon,
   SettingsIcon,
   ShieldCheckIcon,
+  SparklesIcon,
   UserIcon,
   Building2Icon,
   WrenchIcon,
@@ -44,6 +45,7 @@ import {
 } from "@/app/account/_lib/account-route";
 import { GAINFOREST_MODERATION_REPO_DID } from "@/app/_lib/indexer";
 import { AdminOnlyIndicator } from "./AdminOnlyIndicator";
+import { useCollectedCards } from "./rewards/collected-cards";
 import {
   findSwitcherGroupByIdentifier,
   switcherGroupIdentifier,
@@ -724,6 +726,9 @@ function AuthenticatedMenu({
   // list; the /admin route itself re-checks access server-side.
   const isModerator = groups.some((group) => group.groupDid === GAINFOREST_MODERATION_REPO_DID);
   const adminHref = isModerator ? "/admin" : null;
+  // The donor's collected reward cards — surfaced as a special menu entry.
+  const { cards: collectedCards } = useCollectedCards(session.did);
+  const collectedCount = collectedCards.length;
   const [invitations, setInvitations] = useState<MenuInvitation[]>([]);
   const [invitationsStatus, setInvitationsStatus] = useState<"idle" | "loading" | "ready" | "error">("idle");
   const invitationsStatusRef = useRef(invitationsStatus);
@@ -1038,6 +1043,36 @@ function AuthenticatedMenu({
               })}
 
               <div className="my-2 h-px bg-border/60" />
+
+              {/* My Cards — the collectibles earned from donations. Given a
+                  holographic treatment so it reads as something special. */}
+              <Link
+                href="/cards"
+                onClick={() => setOpen(false)}
+                className="group relative mb-1 flex items-center gap-2.5 overflow-hidden rounded-xl border border-primary/30 px-2.5 py-2.5 text-sm font-medium text-foreground shadow-[0_6px_20px_-10px_rgba(79,70,229,0.6)] transition-colors"
+              >
+                <span
+                  aria-hidden
+                  className="absolute inset-0 opacity-70"
+                  style={{
+                    backgroundImage:
+                      "linear-gradient(115deg, rgba(255,0,128,0.12), rgba(255,214,0,0.09), rgba(0,229,255,0.12), rgba(123,47,247,0.12))",
+                  }}
+                />
+                <span
+                  aria-hidden
+                  className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/25 to-transparent transition-transform duration-700 ease-out group-hover:translate-x-full"
+                />
+                <span className="relative grid size-6 shrink-0 place-items-center rounded-lg bg-primary/15 text-primary">
+                  <SparklesIcon className="h-3.5 w-3.5" />
+                </span>
+                <span className="relative flex-1">{sidebarT("profileRow.myCards")}</span>
+                {collectedCount > 0 ? (
+                  <span className="relative rounded-full bg-primary/15 px-2 py-0.5 text-[11px] font-semibold text-primary">
+                    {collectedCount}
+                  </span>
+                ) : null}
+              </Link>
 
               {/* General options — apply to the signed-in user */}
               <Link

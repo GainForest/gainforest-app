@@ -119,7 +119,20 @@
           "name": "Hutan Tua",
           "rarity": "Legendaris"
         }
-      }
+      },
+      "overallEyebrow": "Total kontribusi",
+      "overallTitle": "Koleksi lengkap",
+      "overallSubtitle": "{count, plural, one {# proyek didukung} other {# proyek didukung}}",
+      "collect": "Kumpulkan",
+      "collectAll": "Kumpulkan semua ({count})",
+      "prevCard": "Kartu sebelumnya",
+      "nextCard": "Kartu berikutnya",
+      "deckHint": "Geser untuk melihat koleksi Anda",
+      "cardPosition": "Kartu {current} dari {total}",
+      "collectedTitle": "Semua sudah dikumpulkan!",
+      "collectedBody": "Kartu Anda disimpan di Kartu Saya.",
+      "collectedSessionBody": "Kartu Anda tersedia di Kartu Saya selama sesi peramban ini.",
+      "viewMyCards": "Lihat Kartu Saya"
     }
   },
   "testRegistry": {
@@ -150,6 +163,17 @@
       "project": "Proyek",
       "cart": "Keranjang",
       "checkout": "Pembayaran"
-    }
+    },
+    "myCardsTitle": "Galeri Kartu Saya",
+    "myCardsDescription": "Pratinjau galeri kartu yang telah dikumpulkan dengan contoh koleksi."
+  },
+  "myCards": {
+    "eyebrow": "Koleksi",
+    "title": "Kartu Saya",
+    "description": "Koleksi holografik yang Anda peroleh dengan mendukung proyek.",
+    "count": "{count, plural, one {# kartu} other {# kartu}}",
+    "emptyTitle": "Belum ada kartu",
+    "emptyBody": "Dukung proyek untuk mendapatkan koleksi pertama Anda.",
+    "browseProjects": "Jelajahi proyek"
   }
 }

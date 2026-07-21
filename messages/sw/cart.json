@@ -119,7 +119,20 @@
           "name": "Msitu wa Kale",
           "rarity": "Hadithi"
         }
-      }
+      },
+      "overallEyebrow": "Jumla ya mchango",
+      "overallTitle": "Mkusanyiko kamili",
+      "overallSubtitle": "{count, plural, one {mradi # ulioungwa mkono} other {miradi # iliyoungwa mkono}}",
+      "collect": "Kusanya",
+      "collectAll": "Kusanya zote ({count})",
+      "prevCard": "Kadi iliyotangulia",
+      "nextCard": "Kadi inayofuata",
+      "deckHint": "Telezesha ili kuona kadi zako",
+      "cardPosition": "Kadi ya {current} kati ya {total}",
+      "collectedTitle": "Zote zimekusanywa!",
+      "collectedBody": "Kadi zako zimehifadhiwa kwenye Kadi Zangu.",
+      "collectedSessionBody": "Kadi zako zinapatikana kwenye Kadi Zangu kwa kipindi hiki cha kivinjari.",
+      "viewMyCards": "Tazama Kadi Zangu"
     }
   },
   "testRegistry": {
@@ -150,6 +163,17 @@
       "project": "Mradi",
       "cart": "Kikapu",
       "checkout": "Malipo"
-    }
+    },
+    "myCardsTitle": "Matunzio ya Kadi Zangu",
+    "myCardsDescription": "Hakiki matunzio ya kadi zilizokusanywa yenye mifano ya kadi."
+  },
+  "myCards": {
+    "eyebrow": "Kadi za kukusanya",
+    "title": "Kadi Zangu",
+    "description": "Kadi za hologramu ulizopata kwa kusaidia miradi.",
+    "count": "{count, plural, one {kadi #} other {kadi #}}",
+    "emptyTitle": "Bado hakuna kadi",
+    "emptyBody": "Saidia mradi ili kupata kadi yako ya kwanza.",
+    "browseProjects": "Vinjari miradi"
   }
 }

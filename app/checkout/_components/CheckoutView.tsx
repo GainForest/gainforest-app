@@ -40,7 +40,8 @@ import {
   type CartItem,
 } from "@/app/_components/cart/CartProvider";
 import { itemAmountValid } from "@/app/cart/_components/CartView";
-import { DonationRewardCard } from "./DonationRewardCard";
+import { RewardDeck } from "./RewardDeck";
+import { buildRewardCards } from "./reward-model";
 import {
   createNonce,
   createPaymentSignatureHeader,
@@ -662,7 +663,12 @@ export function CheckoutView({
     return (
       <div className="mx-auto w-full max-w-2xl px-4 py-10">
         <div className="flex flex-col items-center gap-4 text-center">
-          <DonationRewardCard lines={completed} totalUsd={donatedTotal} />
+          <RewardDeck
+            cards={buildRewardCards(completed)}
+            did={authSession.isLoggedIn ? authSession.did : null}
+            persistence={sideEffects === "mock" ? "memory" : "local"}
+            cardsHref={sideEffects === "mock" ? "/_test/my-cards" : "/cards"}
+          />
           <p className="mt-2 font-instrument text-4xl font-medium italic text-primary">{t("thankYou")}</p>
           <p className="text-pretty font-medium text-muted-foreground">
             {t("successSummary", { amount: `$${donatedTotal.toFixed(2)}` })}

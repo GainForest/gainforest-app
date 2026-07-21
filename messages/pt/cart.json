@@ -119,7 +119,20 @@
           "name": "Floresta Antiga",
           "rarity": "Lendário"
         }
-      }
+      },
+      "overallEyebrow": "Contribuição total",
+      "overallTitle": "Coleção completa",
+      "overallSubtitle": "{count, plural, one {# projeto apoiado} other {# projetos apoiados}}",
+      "collect": "Colecionar",
+      "collectAll": "Colecionar tudo ({count})",
+      "prevCard": "Carta anterior",
+      "nextCard": "Próxima carta",
+      "deckHint": "Deslize para ver seus colecionáveis",
+      "cardPosition": "Carta {current} de {total}",
+      "collectedTitle": "Tudo colecionado!",
+      "collectedBody": "Suas cartas estão salvas em Minhas cartas.",
+      "collectedSessionBody": "Suas cartas estão disponíveis em Minhas cartas durante esta sessão do navegador.",
+      "viewMyCards": "Ver Minhas cartas"
     }
   },
   "testRegistry": {
@@ -150,6 +163,17 @@
       "project": "Projeto",
       "cart": "Carrinho",
       "checkout": "Pagamento"
-    }
+    },
+    "myCardsTitle": "Galeria Minhas cartas",
+    "myCardsDescription": "Veja uma prévia da galeria de cartas colecionadas com exemplos."
+  },
+  "myCards": {
+    "eyebrow": "Colecionáveis",
+    "title": "Minhas cartas",
+    "description": "Os colecionáveis holográficos que você ganhou ao apoiar projetos.",
+    "count": "{count, plural, one {# carta} other {# cartas}}",
+    "emptyTitle": "Ainda não há cartas",
+    "emptyBody": "Apoie um projeto para ganhar seu primeiro colecionável.",
+    "browseProjects": "Explorar projetos"
   }
 }

@@ -170,7 +170,8 @@
       "admin": "Admin",
       "submitData": "Submit field data",
       "personalAccount": "Personal account",
-      "organizationAccount": "Organization account"
+      "organizationAccount": "Organization account",
+      "myCards": "My Cards"
     },
     "more": "More",
     "hideMore": "Hide"

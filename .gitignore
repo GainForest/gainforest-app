@@ -15,8 +15,9 @@
 *.tsbuildinfo
 next-env.d.ts.bak
 
-# Local Claude Code state
+# Local agent state
 .claude/
+.pi-subagents/
 
 # Raw landing video downloads (trimmed/encoded into the same folder)
 public/assets/media/video/_raw/

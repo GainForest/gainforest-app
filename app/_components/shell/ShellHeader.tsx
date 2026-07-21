@@ -1,8 +1,9 @@
 "use client";
 
+import { useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence, motion, useAnimationControls } from "framer-motion";
 import { BinocularsIcon, Building2Icon, FolderKanbanIcon, MenuIcon, UploadIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { Button, buttonVariants } from "@/components/ui/button";
@@ -16,6 +17,7 @@ import { ProgressiveBlur } from "../ProgressiveBlur";
 import { GlobalSearch } from "../GlobalSearch";
 import { useHeaderSlots } from "../HeaderSlots";
 import { NotificationBell } from "../NotificationBell";
+import { useCollectAnimation } from "../rewards/collect-animation";
 import { canonicalPathname } from "./paths";
 import { AddObservationsButton, ManageContextLink } from "./context-actions";
 import type { ManageAccountKind } from "./use-shell-session";
@@ -124,6 +126,23 @@ export function ShellHeader({
   // opaque header backdrop so the extra row stays readable.
   const hasSubHeader = Boolean(subHeaderContent);
   const routeActions = getRouteHeaderActions(pathname, authSession ?? { isLoggedIn: false });
+  // While the donor collects reward cards, the right-side widgets dissolve and
+  // the account button widens into a "pocket" the cards get vacuumed into.
+  const { phase: collectPhase, registerTarget, pulseKey } = useCollectAnimation();
+  const collecting = collectPhase === "collecting";
+  // A quick "gulp" heartbeat each time a card is swallowed into the pocket.
+  const pocketControls = useAnimationControls();
+  useEffect(() => {
+    if (pulseKey === 0) return;
+    // A soft two-stage heartbeat — swell, settle back with a little give.
+    void pocketControls.start(
+      {
+        scale: [1, 1.22, 0.95, 1.03, 1],
+        filter: ["blur(0px)", "blur(2.5px)", "blur(1px)", "blur(0px)", "blur(0px)"],
+      },
+      { duration: 0.6, ease: "easeOut", times: [0, 0.3, 0.6, 0.82, 1] },
+    );
+  }, [pulseKey, pocketControls]);
 
   return (
     <div className="sticky top-0 z-30" data-header>
@@ -173,36 +192,80 @@ export function ShellHeader({
 
           {/* Right slot */}
           <div className="flex items-center gap-3 shrink-0">
-            <AnimatePresence mode="wait">
-              {rightContent ?? routeActions ? (
+            {/* Everything but the account button dissolves during a collect. */}
+            <motion.div
+              className="flex items-center gap-3"
+              animate={collecting ? { opacity: 0, scale: 0.82, filter: "blur(8px)" } : { opacity: 1, scale: 1, filter: "blur(0px)" }}
+              transition={{ type: "spring", stiffness: 90, damping: 22, mass: 1 }}
+              style={{ pointerEvents: collecting ? "none" : "auto" }}
+              aria-hidden={collecting}
+            >
+              <AnimatePresence mode="wait">
+                {rightContent ?? routeActions ? (
+                  <motion.div
+                    key={rightContent ? "right-content" : `route-actions-${rawPathname}`}
+                    initial={{ opacity: 0, x: 4 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: 4 }}
+                    transition={{ duration: 0.2, ease: [0.25, 0.1, 0.25, 1] }}
+                  >
+                    <ChromeErrorBoundary name="header-right-slot">{rightContent ?? routeActions}</ChromeErrorBoundary>
+                  </motion.div>
+                ) : null}
+              </AnimatePresence>
+              <ChromeErrorBoundary name="global-search">
+                <GlobalSearch />
+              </ChromeErrorBoundary>
+              <ChromeErrorBoundary name="cart-button">
+                <CartHeaderButton />
+              </ChromeErrorBoundary>
+              <ChromeErrorBoundary name="notification-bell">
+                <NotificationBell session={authSession} />
+              </ChromeErrorBoundary>
+            </motion.div>
+
+            {/* Account button — morphs into a rounded "pocket" during a collect
+                and publishes its live position as the reward-card vacuum target.
+                The outer wrapper carries the gulp heartbeat and is what the deck
+                measures; the inner pill does the width morph. */}
+            <div className="relative flex items-center">
+              <motion.div
+                ref={registerTarget}
+                aria-hidden
+                className="pointer-events-none absolute right-0 top-1/2"
+                animate={pocketControls}
+                style={{ y: "-50%", transformOrigin: "center" }}
+              >
                 <motion.div
-                  key={rightContent ? "right-content" : `route-actions-${rawPathname}`}
-                  initial={{ opacity: 0, x: 4 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: 4 }}
-                  transition={{ duration: 0.2, ease: [0.25, 0.1, 0.25, 1] }}
+                  className="relative h-9 overflow-hidden rounded-full border border-primary/40 bg-primary/15 shadow-[0_10px_34px_-8px_rgba(79,70,229,0.5)] backdrop-blur-md"
+                  initial={false}
+                  animate={{ width: collecting ? 224 : 36, opacity: collecting ? 1 : 0 }}
+                  transition={{
+                    width: { type: "spring", stiffness: 120, damping: 16, mass: 1.1 },
+                    opacity: { duration: collecting ? 0.3 : 0.45, ease: "easeOut" },
+                  }}
                 >
-                  <ChromeErrorBoundary name="header-right-slot">{rightContent ?? routeActions}</ChromeErrorBoundary>
+                  <div
+                    aria-hidden
+                    className="absolute inset-0 opacity-70"
+                    style={{
+                      backgroundImage:
+                        "linear-gradient(115deg, rgba(255,0,128,0.18), rgba(255,214,0,0.14), rgba(0,229,255,0.18), rgba(123,47,247,0.18))",
+                    }}
+                  />
                 </motion.div>
-              ) : null}
-            </AnimatePresence>
-            <ChromeErrorBoundary name="global-search">
-              <GlobalSearch />
-            </ChromeErrorBoundary>
-            <ChromeErrorBoundary name="cart-button">
-              <CartHeaderButton />
-            </ChromeErrorBoundary>
-            <ChromeErrorBoundary name="notification-bell">
-              <NotificationBell session={authSession} />
-            </ChromeErrorBoundary>
-            <ChromeErrorBoundary name="auth-button">
-              <AuthButton
-                session={authSession}
-                profileName={profileName}
-                isProfileNameLoading={profileName === undefined}
-                manageAccountKind={manageAccountKind}
-              />
-            </ChromeErrorBoundary>
+              </motion.div>
+              <div className="relative z-10">
+                <ChromeErrorBoundary name="auth-button">
+                  <AuthButton
+                    session={authSession}
+                    profileName={profileName}
+                    isProfileNameLoading={profileName === undefined}
+                    manageAccountKind={manageAccountKind}
+                  />
+                </ChromeErrorBoundary>
+              </div>
+            </div>
           </div>
         </div>
 

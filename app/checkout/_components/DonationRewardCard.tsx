@@ -3,11 +3,16 @@
 /**
  * The collectible a donor "receives" the moment a donation settles.
  *
- * A bold, holographic trading card that deals itself onto the screen, tilts
- * toward the pointer, and catches two slanted glares plus a shifting
- * rainbow foil. Its colour identity scales with how much was given. Purely
- * presentational — it reads the settled lines the checkout already has, so it
- * renders identically for the real checkout and the `/_test` mock experience.
+ * A bold, holographic trading card that tilts toward the pointer and catches
+ * two slanted glares plus a shifting rainbow foil. Its colour identity scales
+ * with how much was given. Purely presentational — it reads the settled lines
+ * the checkout already has, so it renders identically for the real checkout,
+ * the reward deck, the "My Cards" gallery and the `/_test` mock experience.
+ *
+ * The card can deal itself in on its own (`animateEntrance`, the default when
+ * shown standalone) or let a parent orchestrate its entrance/exit — the reward
+ * deck disables the built-in entrance so it can revolve a whole hand of cards
+ * in together.
  */
 
 import { useEffect, useMemo, useRef } from "react";
@@ -19,53 +24,31 @@ import {
   useSpring,
 } from "framer-motion";
 import { useFormatter, useTranslations } from "next-intl";
+import { tierForAmount, type RewardLine } from "./reward-model";
 
-export type RewardLine = {
-  kind: "donation" | "tip";
-  title: string;
-  orgName: string;
-  amountUsd: number;
-  image?: string | null;
-};
-
-type TierKey = "seedling" | "sapling" | "grove" | "canopy" | "oldGrowth";
-
-type Tier = {
-  key: TierKey;
-  /** Minimum total contribution (USD) to reach this tier. */
-  min: number;
-  /** Bold foil gradient — the card's colour identity. */
-  foil: string;
-  /** Glow accent behind the card. */
-  glow: string;
-};
-
-/** Tiers climb with generosity; the top band stays a genuine rarity. */
-const TIERS: Tier[] = [
-  { key: "seedling", min: 0, foil: "#34d399, #059669", glow: "#10b981" },
-  { key: "sapling", min: 25, foil: "#2dd4bf, #0e7490", glow: "#14b8a6" },
-  { key: "grove", min: 75, foil: "#818cf8, #6366f1, #a855f7", glow: "#7c6cf0" },
-  { key: "canopy", min: 200, foil: "#fbbf24, #f97316, #ec4899", glow: "#f4813f" },
-  { key: "oldGrowth", min: 750, foil: "#fde047, #f472b6, #22d3ee, #4ade80, #fde047", glow: "#f0abfc" },
-];
-
-function tierForAmount(amountUsd: number): Tier {
-  let match = TIERS[0];
-  for (const tier of TIERS) if (amountUsd >= tier.min) match = tier;
-  return match;
-}
+export type { RewardLine } from "./reward-model";
 
 export function DonationRewardCard({
   lines,
   totalUsd,
+  animateEntrance = true,
+  overall = false,
+  interactive = true,
 }: {
   lines: RewardLine[];
   /** Total contributed across every settled line, in USD. */
   totalUsd: number;
+  /** Deal the card in on mount. Disable when a parent controls the entrance. */
+  animateEntrance?: boolean;
+  /** Render as the "overall" summary of a multi-project checkout. */
+  overall?: boolean;
+  /** Track the pointer for tilt + foil. Disable for background/stacked cards. */
+  interactive?: boolean;
 }) {
   const t = useTranslations("cart.checkoutPage.reward");
   const format = useFormatter();
   const reduceMotion = useReducedMotion();
+  const effectsOn = !reduceMotion && interactive;
 
   const donationLines = useMemo(() => lines.filter((line) => line.kind === "donation"), [lines]);
   const featured = donationLines[0] ?? lines[0] ?? null;
@@ -87,7 +70,7 @@ export function DonationRewardCard({
   const holoPos = useMotionTemplate`${gx}% ${gy}%`;
 
   useEffect(() => {
-    if (reduceMotion) return;
+    if (!effectsOn) return;
     const el = containerRef.current;
     if (!el) return;
     const move = (e: PointerEvent) => {
@@ -111,25 +94,30 @@ export function DonationRewardCard({
       el.removeEventListener("pointermove", move);
       el.removeEventListener("pointerleave", leave);
     };
-  }, [reduceMotion, rotateX, rotateY, gx, gy]);
+  }, [effectsOn, rotateX, rotateY, gx, gy]);
 
   if (!featured) return null;
 
   const tierName = t(`tiers.${tier.key}.name`);
   const amount = format.number(totalUsd, { style: "currency", currency: "USD" });
+  const eyebrow = overall ? t("overallEyebrow") : t("guardianOf");
+  const heroTitle = overall ? t("overallTitle") : featured.title;
+  const subtitle = overall
+    ? t("overallSubtitle", { count: donationLines.length })
+    : featured.orgName + (extraProjects > 0 ? ` · ${t("moreProjects", { count: extraProjects })}` : "");
 
   return (
     <div className="flex flex-col items-center">
       <div ref={containerRef} className="[perspective:1500px]">
         <motion.div
-          initial={reduceMotion ? false : { opacity: 0, scale: 0.7, rotateY: -45, y: 44 }}
+          initial={animateEntrance && !reduceMotion ? { opacity: 0, scale: 0.7, rotateY: -45, y: 44 } : false}
           animate={{ opacity: 1, scale: 1, rotateY: 0, y: 0 }}
-          transition={reduceMotion ? { duration: 0 } : { type: "spring", stiffness: 85, damping: 13, mass: 0.9 }}
+          transition={animateEntrance && !reduceMotion ? { type: "spring", stiffness: 85, damping: 13, mass: 0.9 } : { duration: 0 }}
           className="relative"
           style={{ transformStyle: "preserve-3d" }}
         >
           <motion.div
-            style={reduceMotion ? undefined : { rotateX, rotateY }}
+            style={effectsOn ? { rotateX, rotateY } : undefined}
             className="relative aspect-[63/88] w-[21rem] max-w-[84vw] rounded-[1.7rem] p-[3px] shadow-[0_40px_80px_-24px_rgba(0,0,0,0.7)]"
           >
             {/* Bold gradient rim. */}
@@ -165,7 +153,7 @@ export function DonationRewardCard({
               <div aria-hidden className="absolute inset-x-0 top-0 h-1/3 bg-gradient-to-b from-black/55 to-transparent" />
 
               {/* Rainbow holographic foil. */}
-              {!reduceMotion ? (
+              {effectsOn ? (
                 <motion.div
                   aria-hidden
                   className="pointer-events-none absolute inset-0 mix-blend-color-dodge"
@@ -180,7 +168,7 @@ export function DonationRewardCard({
               ) : null}
 
               {/* Two slanted white glares. */}
-              {!reduceMotion ? (
+              {effectsOn ? (
                 <motion.div
                   aria-hidden
                   className="pointer-events-none absolute inset-0 mix-blend-overlay"
@@ -188,8 +176,8 @@ export function DonationRewardCard({
                 />
               ) : null}
 
-              {/* One-time reveal sweep. */}
-              {!reduceMotion ? (
+              {/* One-time reveal sweep (only when the card deals itself in). */}
+              {animateEntrance && !reduceMotion ? (
                 <motion.div
                   aria-hidden
                   className="pointer-events-none absolute inset-0 -skew-x-12 bg-gradient-to-r from-transparent via-white/40 to-transparent"
@@ -212,14 +200,13 @@ export function DonationRewardCard({
                 {/* Hero, bottom. */}
                 <div>
                   <p className="text-[10px] font-semibold uppercase tracking-[0.32em] text-white/55">
-                    {t("guardianOf")}
+                    {eyebrow}
                   </p>
                   <h3 className="mt-1 font-instrument text-[2.1rem] italic leading-[1.05] text-white drop-shadow-[0_2px_12px_rgba(0,0,0,0.6)]">
-                    {featured.title}
+                    {heroTitle}
                   </h3>
                   <p className="mt-1.5 truncate text-xs font-medium text-white/70">
-                    {featured.orgName}
-                    {extraProjects > 0 ? ` · ${t("moreProjects", { count: extraProjects })}` : ""}
+                    {subtitle}
                   </p>
 
                   <div className="mt-4 h-px w-full bg-white/20" />

@@ -6,6 +6,7 @@ import { BioblitzPromoBanner } from "./BioblitzPromoBanner";
 import { FloatingTainaGuide } from "./FloatingTainaGuide";
 import { ChromeErrorBoundary } from "./ChromeErrorBoundary";
 import { HeaderSlotsProvider } from "./HeaderSlots";
+import { CollectAnimationProvider } from "./rewards/collect-animation";
 import { MobileNavDrawer } from "./shell/MobileNavDrawer";
 import { MobileNavProvider } from "./shell/mobile-nav-context";
 import { FreshAccountOnboardingPrompt } from "./shell/OnboardingPrompt";
@@ -68,7 +69,8 @@ export function AppShell({
   return (
     <HeaderSlotsProvider>
       <MobileNavProvider value={mobileNav}>
-      <div className="flex h-screen flex-col overflow-hidden">
+        <CollectAnimationProvider>
+          <div className="flex h-screen flex-col overflow-hidden">
         {pathname !== "/bioblitz" && !isGlobe ? (
           <ChromeErrorBoundary name="bioblitz-banner">
             <BioblitzPromoBanner />
@@ -108,7 +110,8 @@ export function AppShell({
         <ChromeErrorBoundary name="floating-taina">
           <FloatingTainaGuide />
         </ChromeErrorBoundary>
-      </div>
+          </div>
+        </CollectAnimationProvider>
       </MobileNavProvider>
     </HeaderSlotsProvider>
   );

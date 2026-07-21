@@ -119,7 +119,20 @@
           "name": "Old-Growth",
           "rarity": "Legendary"
         }
-      }
+      },
+      "overallEyebrow": "Total contribution",
+      "overallTitle": "Full collection",
+      "overallSubtitle": "{count, plural, one {# project backed} other {# projects backed}}",
+      "collect": "Collect",
+      "collectAll": "Collect all ({count})",
+      "prevCard": "Previous card",
+      "nextCard": "Next card",
+      "deckHint": "Flick through your collectibles",
+      "cardPosition": "Card {current} of {total}",
+      "collectedTitle": "All collected!",
+      "collectedBody": "Your cards are saved to My Cards.",
+      "collectedSessionBody": "Your cards are available in My Cards for this browser session.",
+      "viewMyCards": "View My Cards"
     }
   },
   "testRegistry": {
@@ -150,6 +163,17 @@
       "project": "Project",
       "cart": "Cart",
       "checkout": "Checkout"
-    }
+    },
+    "myCardsTitle": "My Cards gallery",
+    "myCardsDescription": "Preview the collected-cards gallery, populated with sample collectibles."
+  },
+  "myCards": {
+    "eyebrow": "Collectibles",
+    "title": "My Cards",
+    "description": "The holographic collectibles you've earned by supporting projects.",
+    "count": "{count, plural, one {# card} other {# cards}}",
+    "emptyTitle": "No cards yet",
+    "emptyBody": "Support a project to earn your first collectible.",
+    "browseProjects": "Browse projects"
   }
 }

@@ -170,7 +170,8 @@
       "admin": "Administración",
       "submitData": "Enviar datos de campo",
       "personalAccount": "Cuenta personal",
-      "organizationAccount": "Cuenta de organización"
+      "organizationAccount": "Cuenta de organización",
+      "myCards": "Mis cartas"
     },
     "more": "Más",
     "hideMore": "Ocultar"
