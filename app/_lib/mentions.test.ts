@@ -6,6 +6,7 @@ import {
   detectMentionQuery,
   mentionCandidatesFromFacets,
   mentionDidsOfFacets,
+  segmentTextWithLinks,
   segmentTextWithMentions,
   MENTION_FACET_TYPE,
 } from "./mentions";
@@ -134,5 +135,64 @@ describe("segmentTextWithMentions", () => {
   it("does not linkify glued tokens", () => {
     const segments = segmentTextWithMentions("mail@Bob.com", [BOB]);
     expect(segments).toEqual([{ text: "mail@Bob.com" }]);
+  });
+});
+
+describe("segmentTextWithLinks", () => {
+  it("returns the whole text when there is no URL", () => {
+    expect(segmentTextWithLinks("just words here")).toEqual([{ text: "just words here" }]);
+  });
+
+  it("detects explicit https URLs", () => {
+    expect(segmentTextWithLinks("see https://gainforest.earth/feed now")).toEqual([
+      { text: "see " },
+      { text: "https://gainforest.earth/feed", href: "https://gainforest.earth/feed" },
+      { text: " now" },
+    ]);
+  });
+
+  it("detects bare .com and .app domains and prefixes https", () => {
+    expect(segmentTextWithLinks("visit example.com and gainforest.app")).toEqual([
+      { text: "visit " },
+      { text: "example.com", href: "https://example.com" },
+      { text: " and " },
+      { text: "gainforest.app", href: "https://gainforest.app" },
+    ]);
+  });
+
+  it("keeps paths on bare domains", () => {
+    expect(segmentTextWithLinks("www.gainforest.app/feed rocks")).toEqual([
+      { text: "www.gainforest.app/feed", href: "https://www.gainforest.app/feed" },
+      { text: " rocks" },
+    ]);
+  });
+
+  it("strips trailing sentence punctuation", () => {
+    expect(segmentTextWithLinks("Apply at grants.gainforest.earth!")).toEqual([
+      { text: "Apply at " },
+      { text: "grants.gainforest.earth", href: "https://grants.gainforest.earth" },
+      { text: "!" },
+    ]);
+  });
+
+  it("does not linkify email addresses", () => {
+    expect(segmentTextWithLinks("write to team@gainforest.app please")).toEqual([
+      { text: "write to team@gainforest.app please" },
+    ]);
+  });
+
+  it("does not linkify unknown TLDs or plain abbreviations", () => {
+    expect(segmentTextWithLinks("e.g. this file.txt stays text")).toEqual([
+      { text: "e.g. this file.txt stays text" },
+    ]);
+  });
+
+  it("survives multi-line posts", () => {
+    const segments = segmentTextWithLinks("line one\nsee x.com\nbye");
+    expect(segments).toEqual([
+      { text: "line one\nsee " },
+      { text: "x.com", href: "https://x.com" },
+      { text: "\nbye" },
+    ]);
   });
 });

@@ -217,6 +217,49 @@ export function mentionCandidatesFromFacets(
 
 // ── Display segmentation ─────────────────────────────────────────────────────
 
+// ── Link segmentation ────────────────────────────────────────────────────────────────────────────
+
+export type LinkSegment = {
+  text: string;
+  /** Set when this segment is a detected URL; always an https?:// href. */
+  href?: string;
+};
+
+// Explicit scheme, or a bare/www domain on a small allowlist of common TLDs
+// (kept conservative so ordinary prose — "e.g.", file names — never links).
+const URL_PATTERN =
+  /(?:https?:\/\/[^\s<>]+|(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+(?:com|org|net|app|io|dev|ai|co|earth|eco|xyz|info)\b(?:\/[^\s<>]*)?)/gi;
+
+/** Punctuation a sentence leaves glued to a URL's tail ("see x.com!"). */
+const TRAILING_PUNCT = /[.,;:!?…)\]}'"’”]+$/;
+
+/**
+ * Split plain display text into text and URL segments. Detects explicit
+ * http(s) URLs plus bare domains like `gainforest.app` or `example.com`.
+ * Skips email addresses and tokens glued to other text, and strips trailing
+ * sentence punctuation from the link.
+ */
+export function segmentTextWithLinks(text: string): LinkSegment[] {
+  if (!text) return [{ text }];
+  const segments: LinkSegment[] = [];
+  let cursor = 0;
+  for (const match of text.matchAll(URL_PATTERN)) {
+    const start = match.index ?? 0;
+    if (start < cursor) continue;
+    // Not a link if glued to a preceding word / @ (emails, user@host).
+    const before = start > 0 ? text[start - 1] : "";
+    if (before && /[\w@.\/-]/.test(before)) continue;
+    const token = match[0].replace(TRAILING_PUNCT, "");
+    if (!token) continue;
+    if (start > cursor) segments.push({ text: text.slice(cursor, start) });
+    const href = /^https?:\/\//i.test(token) ? token : `https://${token}`;
+    segments.push({ text: token, href });
+    cursor = start + token.length;
+  }
+  if (cursor < text.length || segments.length === 0) segments.push({ text: text.slice(cursor) });
+  return segments;
+}
+
 export type MentionSegment = {
   text: string;
   /** Set when this segment is a mention token linking to an account. */
