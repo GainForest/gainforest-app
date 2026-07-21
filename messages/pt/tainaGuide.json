@@ -34,7 +34,10 @@
       "bioblitz": "Há um desafio BioBlitz toda semana — fotografe qualquer ser vivo e ganhe prêmios!",
       "ask": "Você pode me perguntar qualquer coisa sobre a GainForest, no seu idioma — é só clicar em mim!"
     },
-    "haveQuestion": "Tenho uma pergunta"
+    "haveQuestion": "Tenho uma pergunta",
+    "helpTitle": "Pode ajudar?",
+    "helpBody": "Alguém fotografou isto, mas ninguém sabe ainda que espécie é. Você reconhece?",
+    "helpCta": "Acho que sei!"
   },
   "guides": {
     "wallet": {

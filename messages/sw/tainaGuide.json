@@ -34,7 +34,10 @@
       "bioblitz": "Kuna changamoto ya BioBlitz kila wiki — piga picha ya kiumbe chochote hai na ushinde zawadi!",
       "ask": "Unaweza kuniuliza chochote kuhusu GainForest kwa lugha yako — nibofye tu!"
     },
-    "haveQuestion": "Nina swali"
+    "haveQuestion": "Nina swali",
+    "helpTitle": "Unaweza kusaidia?",
+    "helpBody": "Mtu alipiga picha hii, lakini bado hakuna anayejua ni spishi gani. Je, unaitambua?",
+    "helpCta": "Nadhani naijua!"
   },
   "guides": {
     "wallet": {

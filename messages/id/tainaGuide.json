@@ -34,7 +34,10 @@
       "bioblitz": "Ada tantangan BioBlitz setiap minggu — potret makhluk hidup apa pun dan menangkan hadiah!",
       "ask": "Kamu bisa bertanya apa saja tentang GainForest dalam bahasamu — cukup klik aku!"
     },
-    "haveQuestion": "Aku punya pertanyaan"
+    "haveQuestion": "Aku punya pertanyaan",
+    "helpTitle": "Bisa bantu?",
+    "helpBody": "Seseorang memotret ini, tapi belum ada yang tahu spesiesnya. Kamu mengenalinya?",
+    "helpCta": "Sepertinya aku tahu!"
   },
   "guides": {
     "wallet": {

@@ -2,7 +2,8 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useMemo, useState, type FormEvent } from "react";
+import { useSearchParams } from "next/navigation";
+import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 import { useTranslations } from "next-intl";
 import {
   ArrowUpRightIcon,
@@ -25,7 +26,8 @@ import {
   type OccurrenceRecord,
   type OccurrenceWalkResult,
 } from "@/app/_lib/indexer";
-import { isPdsBlobUrl, resolveBlobUrl } from "@/app/_lib/pds";
+import { getPdsRecord, isPdsBlobUrl, parseAtUri, resolveBlobUrl } from "@/app/_lib/pds";
+import { occurrenceFromPdsRecord } from "@/app/_lib/indexer";
 import { formatSpeciesSuggestion } from "@/app/_lib/species-suggestions";
 import { localObservationHref } from "@/app/_lib/urls";
 import { Button } from "@/components/ui/button";
@@ -34,15 +36,12 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useModal } from "@/components/ui/modal/context";
 import { cn } from "@/lib/utils";
-import { hasLabelEvidence } from "../_lib/evidence";
+import { hasLabelEvidence, isUnidentifiedRecord } from "../_lib/evidence";
 
 type QueueMode = "unidentified" | "recent";
 type MediaMode = "all" | "image" | "audio";
 
-function isUnidentified(record: OccurrenceRecord): boolean {
-  return !record.scientificName &&
-    (!record.vernacularName || record.vernacularName === "Nature sound recording");
-}
+const isUnidentified = isUnidentifiedRecord;
 
 function observationName(record: OccurrenceRecord, unidentified: string): string {
   return record.vernacularName === "Nature sound recording" && !record.scientificName
@@ -68,7 +67,15 @@ export function LabelerClient({
   const [country, setCountry] = useState("all");
   const [region, setRegion] = useState("all");
   const [query, setQuery] = useState("");
-  const [selectedUri, setSelectedUri] = useState(initialPage.records[0]?.atUri ?? null);
+  // Deep link: /labeler?uri=at://… preselects that exact observation (used by
+  // Tainá's "can you help identify this?" prompt). The record may not be in
+  // the initial page — it's then fetched straight from its owner's PDS below.
+  const searchParams = useSearchParams();
+  const requestedUri = searchParams.get("uri");
+  const [selectedUri, setSelectedUri] = useState(requestedUri ?? initialPage.records[0]?.atUri ?? null);
+  // While a deep-linked record is being fetched, the "selection fell out of
+  // the filtered list" reconciliation must not clobber the selection.
+  const pendingDeepLinkRef = useRef<string | null>(requestedUri);
   const [loadingMore, setLoadingMore] = useState(false);
 
   const reviewableRecords = useMemo(() => records.filter(hasLabelEvidence), [records]);
@@ -119,7 +126,43 @@ export function LabelerClient({
     });
   }, [reviewableRecords, mode, media, taxon, genus, country, region, query]);
 
+  // Resolve the deep-linked record when it isn't part of the loaded pages.
   useEffect(() => {
+    if (!requestedUri) return;
+    if (records.some((record) => record.atUri === requestedUri)) {
+      pendingDeepLinkRef.current = null;
+      return;
+    }
+    const parts = parseAtUri(requestedUri);
+    if (!parts) {
+      pendingDeepLinkRef.current = null;
+      return;
+    }
+    const controller = new AbortController();
+    (async () => {
+      try {
+        const pdsRecord = await getPdsRecord(parts.did, parts.collection, parts.rkey, controller.signal);
+        const record = pdsRecord ? occurrenceFromPdsRecord(pdsRecord) : null;
+        if (controller.signal.aborted) return;
+        if (record) {
+          setRecords((current) =>
+            current.some((existing) => existing.atUri === record.atUri) ? current : [record, ...current],
+          );
+          setSelectedUri(record.atUri);
+          // A deep-linked record that's already identified lives in the
+          // "recent" queue, not "unidentified" — switch so it stays visible.
+          if (!isUnidentified(record)) setMode("recent");
+        }
+      } finally {
+        if (!controller.signal.aborted) pendingDeepLinkRef.current = null;
+      }
+    })();
+    return () => controller.abort();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [requestedUri]);
+
+  useEffect(() => {
+    if (pendingDeepLinkRef.current) return;
     if (!filtered.some((record) => record.atUri === selectedUri)) {
       setSelectedUri(filtered[0]?.atUri ?? null);
     }

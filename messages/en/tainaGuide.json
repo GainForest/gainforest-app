@@ -34,7 +34,10 @@
       "bioblitz": "There's a BioBlitz challenge every week — photograph any living thing and win prizes!",
       "ask": "You can ask me anything about GainForest, in your own language — just click me!"
     },
-    "haveQuestion": "I have a question"
+    "haveQuestion": "I have a question",
+    "helpTitle": "Can you help?",
+    "helpBody": "Someone photographed this, but no one knows what species it is yet. Do you recognize it?",
+    "helpCta": "I think I know!"
   },
   "guides": {
     "wallet": {

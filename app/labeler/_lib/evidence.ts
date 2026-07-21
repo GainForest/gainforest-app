@@ -14,3 +14,16 @@ export function hasLabelEvidence(record: LabelEvidenceRecord): boolean {
   const hasAudioEvidence = Boolean(record.audioRef || record.audioUrl);
   return hasStoredVisualEvidence || hasAudioEvidence;
 }
+
+/**
+ * An observation nobody has named yet — the labeler's "unidentified" queue.
+ * ("Nature sound recording" is a placeholder name written by the sound
+ * importer, not a real identification.) Shared with Tainá's "can you help
+ * identify this?" prompt so both surfaces agree on what needs help.
+ */
+export function isUnidentifiedRecord(
+  record: Pick<OccurrenceRecord, "scientificName" | "vernacularName">,
+): boolean {
+  return !record.scientificName &&
+    (!record.vernacularName || record.vernacularName === "Nature sound recording");
+}
