@@ -1136,7 +1136,9 @@
       "cancelEdit": "Batal",
       "delete": "Hapus",
       "confirmDelete": "Konfirmasi hapus",
-      "cancelDelete": "Batal"
+      "cancelDelete": "Batal",
+      "showMore": "Selengkapnya",
+      "showLess": "Lebih sedikit"
     },
     "composer": {
       "title": "Bagikan pembaruan",

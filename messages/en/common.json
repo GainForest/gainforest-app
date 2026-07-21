@@ -1136,7 +1136,9 @@
       "cancelEdit": "Cancel",
       "delete": "Delete",
       "confirmDelete": "Confirm delete",
-      "cancelDelete": "Cancel"
+      "cancelDelete": "Cancel",
+      "showMore": "Show more",
+      "showLess": "Show less"
     },
     "composer": {
       "title": "Share an update",

@@ -684,12 +684,8 @@ function FeedRow({
             </p>
           ) : null}
 
-          {/* Body text */}
-          {bodyText ? (
-            <p className="mt-0.5 line-clamp-2 text-sm leading-relaxed text-muted-foreground">
-              <MentionText text={bodyText} mentions={bodyMentions} />
-            </p>
-          ) : null}
+          {/* Body text — expandable, so a long update can be read in place. */}
+          {bodyText ? <ExpandableBody text={bodyText} mentions={bodyMentions} /> : null}
 
           </Link>
 
@@ -860,6 +856,61 @@ function DonationRow({
         />
       </div>
     </li>
+  );
+}
+
+/** Feed-row body text clamped to two lines, with a "Show more" toggle that
+ *  appears only when the text actually overflows. Rendered inside the row's
+ *  link, so the toggle swallows the click instead of navigating. */
+function ExpandableBody({
+  text,
+  mentions,
+}: {
+  text: string;
+  mentions: MentionCandidate[] | null | undefined;
+}) {
+  const t = useTranslations("common.feed");
+  const [expanded, setExpanded] = useState(false);
+  const [clamped, setClamped] = useState(false);
+  const ref = useRef<HTMLParagraphElement | null>(null);
+
+  // Detect whether the clamped paragraph hides anything (re-checked on resize,
+  // since reflow can change how many lines the text needs).
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const check = () => setClamped(el.scrollHeight > el.clientHeight + 1);
+    check();
+    const observer = new ResizeObserver(check);
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [text, expanded]);
+
+  return (
+    <>
+      <p
+        ref={ref}
+        className={cn(
+          "mt-0.5 text-sm leading-relaxed text-muted-foreground",
+          expanded ? "whitespace-pre-wrap break-words" : "line-clamp-2",
+        )}
+      >
+        <MentionText text={text} mentions={mentions} />
+      </p>
+      {clamped || expanded ? (
+        <button
+          type="button"
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            setExpanded((v) => !v);
+          }}
+          className="mt-0.5 text-xs font-medium text-primary hover:underline"
+        >
+          {expanded ? t("actions.showLess") : t("actions.showMore")}
+        </button>
+      ) : null}
+    </>
   );
 }
 
