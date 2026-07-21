@@ -105,9 +105,41 @@ test("donation registry mirrors the production flow without live side effects", 
   await expect(page.getByText("Thank you", { exact: true })).toBeVisible({ timeout: 10_000 });
   await expect(page.getByText("Your $203.50 in donations was completed successfully.")).toBeVisible();
   await expect(page.getByRole("button", { name: "Collect all (4)" })).toBeVisible();
+
+  // Every flight must have its own painted mouth mask before its gulp begins.
+  // This catches the multi-card regression where only the final card clipped.
+  await page.evaluate(() => {
+    const audit: Array<{ cardId: string; overflow: string; height: number }> = [];
+    const seen = new Set<string>();
+    const observer = new MutationObserver((mutations) => {
+      for (const mutation of mutations) {
+        const target = mutation.target;
+        if (!(target instanceof HTMLElement) || target.dataset.phase !== "gulp") continue;
+        const cardId = target.dataset.cardId ?? "";
+        if (!cardId || seen.has(cardId)) continue;
+        seen.add(cardId);
+        audit.push({
+          cardId,
+          overflow: target.style.overflow,
+          height: Number.parseFloat(target.style.height),
+        });
+      }
+    });
+    observer.observe(document.body, { subtree: true, attributes: true, attributeFilter: ["data-phase"] });
+    Reflect.set(window, "__rewardMaskAudit", audit);
+    Reflect.set(window, "__rewardMaskObserver", observer);
+  });
+
   await page.getByRole("button", { name: "Collect all (4)" }).click();
   await expect(page.getByText("All collected!", { exact: true })).toBeVisible({ timeout: 10_000 });
   await expect(page.getByRole("link", { name: "View My Cards" })).toHaveAttribute("href", "/_test/my-cards");
+  const rewardMaskAudit = await page.evaluate(() => {
+    const observer = Reflect.get(window, "__rewardMaskObserver") as MutationObserver;
+    observer.disconnect();
+    return Reflect.get(window, "__rewardMaskAudit") as Array<{ cardId: string; overflow: string; height: number }>;
+  });
+  expect(rewardMaskAudit).toHaveLength(4);
+  expect(rewardMaskAudit.every((entry) => entry.overflow === "hidden" && entry.height > 0)).toBe(true);
 
   const safetyState = await page.evaluate(() => ({
     cart: window.localStorage.getItem("gainforest.donation-cart.v1"),

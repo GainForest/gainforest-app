@@ -46,9 +46,22 @@ const GULP_SCALE = 0.13;
 
 const SNAP = { type: "spring" as const, stiffness: 240, damping: 28 };
 const ENTRANCE = { type: "spring" as const, stiffness: 55, damping: 15, mass: 1 };
+const FLIGHT_DURATION = 0.92;
+// Leave enough space between cards that each gulp reads clearly instead of
+// being covered by the next card approaching the same mouth.
+const FLIGHT_STAGGER = 0.82;
 
 function easeInOut(u: number): number {
   return u < 0.5 ? 4 * u * u * u : 1 - Math.pow(-2 * u + 2, 3) / 2;
+}
+
+/** Wait until a DOM clipping change has survived a paint before moving the
+ * card through it. Two frames prevent Framer Motion from coalescing the mask
+ * change with the first gulp frame on busy multi-card sequences. */
+function afterNextPaint(): Promise<void> {
+  return new Promise((resolve) => {
+    window.requestAnimationFrame(() => window.requestAnimationFrame(() => resolve()));
+  });
 }
 
 /** Depth cues for a card `offset` slots from the front of the carousel. */
@@ -67,11 +80,11 @@ function depthFor(offset: number) {
  * animation controls) so nothing remounts mid-flight.
  *
  * The card flies up the U-arc, comes back *down* into the pocket from above,
- * and is gulped: it descends into the pocket while a genie warp shrinks it,
- * stretches it tall and tapers its bottom into a narrow neck that funnels into
- * the mouth. The wrapper only becomes an overflow-hidden box clipped at the
- * pocket's BOTTOM edge for the gulp (it can't clip during travel or it would
- * hide the card down in the deck), so the card is eaten at that bottom lip.
+ * and is gulped: it stops with its bottom edge exactly on the pocket lip, the
+ * overflow mask is committed and painted, then it descends while a genie warp
+ * shrinks it, stretches it tall and tapers its bottom into a narrow neck. The
+ * mask cannot be active during travel or it would hide the card down in the
+ * deck, so this paint boundary is what makes every card get eaten cleanly.
  * No opacity, no rotation.
  */
 function RewardFlight({
@@ -91,7 +104,7 @@ function RewardFlight({
 }) {
   const controls = useAnimationControls();
   const genie = useAnimationControls();
-  const [clip, setClip] = useState(false);
+  const maskRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -99,10 +112,12 @@ function RewardFlight({
     const startCx = rect.left + rect.width / 2;
     const startCy = rect.top + rect.height / 2;
     const pocketCx = pocket.left + pocket.width / 2;
-    const pocketCy = pocket.top + pocket.height / 2;
 
     const dxEnd = pocketCx - startCx;
-    const dyEnd = pocketCy - startCy; // arrive centred on the pocket
+    // Finish the travel with the card's bottom edge exactly touching the
+    // pocket's lower lip. It must not cross that edge before clipping is live.
+    const approachCy = pocket.bottom - rect.height * SCALE_END / 2;
+    const dyEnd = approachCy - startCy;
     // Quadratic bezier: apex a little above the menu, hugging the start x on the
     // way up, so it reads as "up, then over-and-down into the pocket".
     const apexDy = pocket.top - 60 - startCy;
@@ -112,41 +127,84 @@ function RewardFlight({
     const steps = 16;
     const xs: number[] = [];
     const ys: number[] = [];
+    const scales: number[] = [];
     const blurs: string[] = [];
     for (let k = 0; k <= steps; k++) {
       const u = k / steps;
       const t = easeInOut(u); // bake ease-in-out into the path samples
       const mt = 1 - t;
-      xs.push(2 * mt * t * cx + t * t * dxEnd);
-      ys.push(2 * mt * t * cy + t * t * dyEnd);
+      const x = 2 * mt * t * cx + t * t * dxEnd;
+      const rawY = 2 * mt * t * cy + t * t * dyEnd;
+      const scaleAtU = 1 + (SCALE_END - 1) * u;
+      // On the descending half, never let the card's bottom cross the pocket
+      // lip before its mask is active. It can still rise visibly from the deck,
+      // then settles against the mouth as it finishes shrinking.
+      const screenBottom = startCy + rawY + rect.height * scaleAtU / 2;
+      const y = u >= 0.5 && screenBottom > pocket.bottom
+        ? rawY - (screenBottom - pocket.bottom)
+        : rawY;
+      xs.push(x);
+      ys.push(y);
+      scales.push(scaleAtU);
       // `filter: blur()` is applied in the card's local space and then scaled
       // down by the transform, so a fixed px blur all but vanishes as the card
       // shrinks. Divide the desired *on-screen* blur by the current scale so it
       // stays visible. A sin bell means the blur eases in from 0 at the start,
       // peaks through the fast middle, and returns to 0 (crisp) at arrival.
-      const scaleAtU = 1 + (SCALE_END - 1) * u;
       const screenBlur = 6 * Math.sin(Math.PI * u);
       blurs.push(`blur(${(screenBlur / Math.max(scaleAtU, 0.08)).toFixed(1)}px)`);
     }
+    // Arm the mouth before the final quarter of the approach. The card is
+    // already above the lip here, so clipping can be painted before it matters.
+    const maskStep = Math.ceil(steps * 0.75);
 
     (async () => {
       if (delay > 0) await new Promise((resolve) => window.setTimeout(resolve, delay * 1000));
       if (cancelled) return;
 
       await controls.start(
-        { x: xs, y: ys, scale: SCALE_END, filter: blurs },
         {
-          duration: 0.92,
-          x: { duration: 0.92, ease: "linear" },
-          y: { duration: 0.92, ease: "linear" },
-          scale: { duration: 0.92, ease: "linear" },
-          filter: { duration: 0.92, ease: "linear" },
+          x: xs.slice(0, maskStep + 1),
+          y: ys.slice(0, maskStep + 1),
+          scale: scales.slice(0, maskStep + 1),
+          filter: blurs.slice(0, maskStep + 1),
         },
+        { duration: FLIGHT_DURATION * (maskStep / steps), ease: "linear" },
       );
       if (cancelled) return;
 
+      // Switch from the full-screen travel layer to the pocket-bottom mask
+      // imperatively, before the final approach. React state batching could
+      // otherwise apply overflow after the gulp has already started.
+      const mask = maskRef.current;
+      if (!mask) return;
+      mask.style.inset = "auto";
+      mask.style.left = "0";
+      mask.style.top = "0";
+      mask.style.width = "100%";
+      mask.style.height = `${Math.max(0, pocket.bottom)}px`;
+      mask.style.overflow = "hidden";
+      mask.style.contain = "paint";
+      mask.dataset.phase = "masked";
+      // Force layout, then allow one complete paint before the card crosses
+      // the lip. This makes the first card as clean as the last one.
+      void mask.getBoundingClientRect();
+      await afterNextPaint();
+      if (cancelled) return;
+
+      await controls.start(
+        {
+          x: xs.slice(maskStep),
+          y: ys.slice(maskStep),
+          scale: scales.slice(maskStep),
+          filter: blurs.slice(maskStep),
+        },
+        { duration: FLIGHT_DURATION * ((steps - maskStep) / steps), ease: "linear" },
+      );
+      if (cancelled) return;
+
+      mask.dataset.phase = "gulp";
       onPulse();
-      setClip(true); // now clip at the pocket's bottom lip so the card is eaten there
       // Genie gulp: descend into the pocket while shrinking, stretching tall and
       // tapering the *bottom* into a narrow neck that funnels into the mouth.
       // Upright throughout (no tilt); the neck never collapses to nothing.
@@ -174,18 +232,15 @@ function RewardFlight({
   }, []);
 
   return createPortal(
-    // During travel the wrapper is full-screen and unclipped so the card is
-    // visible all the way up from the deck. For the gulp it becomes a box
-    // clipped at the pocket's bottom edge, eating the card there as it descends.
-    // The inner <motion.div> nodes persist across the toggle (same JSX position),
-    // so the controls-driven animation continues without a remount.
+    // During travel the wrapper is full-screen and unclipped. At the lip it is
+    // synchronously resized into the painted overflow mask before gulp motion.
     <div
+      ref={maskRef}
+      data-reward-flight-mask
+      data-card-id={card.id}
+      data-phase="travel"
       className="pointer-events-none z-[9999]"
-      style={
-        clip
-          ? { position: "fixed", left: 0, top: 0, width: "100%", height: pocket.bottom, overflow: "hidden" }
-          : { position: "fixed", inset: 0, overflow: "visible" }
-      }
+      style={{ position: "fixed", inset: 0, overflow: "visible" }}
       aria-hidden
     >
       <motion.div
@@ -334,7 +389,7 @@ export function RewardDeck({
       completedRef.current = 0;
       setPocketRect(pocket);
       setCollectingIds(new Set(targets.map((card) => card.id)));
-      setFlights(targets.map((card, i) => ({ card, rect, delay: i * 0.14 })));
+      setFlights(targets.map((card, i) => ({ card, rect, delay: i * FLIGHT_STAGGER })));
     },
     [busy, reduceMotion, remaining, index, beginCollect, endCollect, collectImmediately],
   );
