@@ -627,6 +627,11 @@ function FeedRow({
     item.kind === "post" && Boolean(interactions.viewerDid && item.actorDid === interactions.viewerDid);
   const bodyText = overrideText ?? item.text;
   const bodyMentions = overrideMentions ?? item.mentions;
+  // Posts have no detail page of their own — their row link went to the
+  // author's profile, which read as a misclick. Instead, clicking a post's
+  // text toggles the same expand/collapse as "Show more".
+  const isPost = item.kind === "post";
+  const [postExpanded, setPostExpanded] = useState(false);
 
   if (isDonation) {
     return (
@@ -650,9 +655,14 @@ function FeedRow({
 
         {/* Content */}
         <div className="min-w-0 flex-1">
-          {/* Text opens the record detail; photo and quick-like remain separate
-              controls immediately below it. */}
-          <Link href={item.href} className="block">
+          {/* Text opens the record detail (or, for posts, expands the text in
+              place); photo and quick-like remain separate controls below. */}
+          <RowTextWrapper
+            isPost={isPost}
+            href={item.href}
+            expanded={postExpanded}
+            onToggle={() => setPostExpanded((v) => !v)}
+          >
           {/* Author line */}
           <div className="flex items-center gap-1.5 text-sm">
             <AccountHoverCard
@@ -685,9 +695,16 @@ function FeedRow({
           ) : null}
 
           {/* Body text — expandable, so a long update can be read in place. */}
-          {bodyText ? <ExpandableBody text={bodyText} mentions={bodyMentions} /> : null}
+          {bodyText ? (
+            <ExpandableBody
+              text={bodyText}
+              mentions={bodyMentions}
+              expanded={isPost ? postExpanded : undefined}
+              onToggle={isPost ? () => setPostExpanded((v) => !v) : undefined}
+            />
+          ) : null}
 
-          </Link>
+          </RowTextWrapper>
 
           {/* Cover image — the image itself opens the in-feed lightbox while
               the separate corner heart likes it immediately. Keeping them as
@@ -859,18 +876,68 @@ function DonationRow({
   );
 }
 
+/** The clickable wrapper around a feed row's text: a link to the record's
+ *  detail page for most kinds, but for posts (which have none — the old link
+ *  landed on the author's profile, confusingly) a button that expands or
+ *  collapses the post text in place, mirroring "Show more". */
+function RowTextWrapper({
+  isPost,
+  href,
+  expanded,
+  onToggle,
+  children,
+}: {
+  isPost: boolean;
+  href: string;
+  expanded: boolean;
+  onToggle: () => void;
+  children: React.ReactNode;
+}) {
+  if (!isPost) {
+    return (
+      <Link href={href} className="block">
+        {children}
+      </Link>
+    );
+  }
+  return (
+    <div
+      role="button"
+      tabIndex={0}
+      aria-expanded={expanded}
+      onClick={onToggle}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          onToggle();
+        }
+      }}
+      className="block cursor-pointer text-left"
+    >
+      {children}
+    </div>
+  );
+}
+
 /** Feed-row body text clamped to two lines, with a "Show more" toggle that
  *  appears only when the text actually overflows. Rendered inside the row's
- *  link, so the toggle swallows the click instead of navigating. */
+ *  link, so the toggle swallows the click instead of navigating. Pass
+ *  `expanded` + `onToggle` to control expansion from the row (posts, where
+ *  clicking anywhere on the text toggles it too). */
 function ExpandableBody({
   text,
   mentions,
+  expanded: expandedProp,
+  onToggle,
 }: {
   text: string;
   mentions: MentionCandidate[] | null | undefined;
+  expanded?: boolean;
+  onToggle?: () => void;
 }) {
   const t = useTranslations("common.feed");
-  const [expanded, setExpanded] = useState(false);
+  const [expandedState, setExpandedState] = useState(false);
+  const expanded = expandedProp ?? expandedState;
   const [clamped, setClamped] = useState(false);
   const ref = useRef<HTMLParagraphElement | null>(null);
 
@@ -905,7 +972,8 @@ function ExpandableBody({
           onClick={(e) => {
             e.preventDefault();
             e.stopPropagation();
-            setExpanded((v) => !v);
+            if (onToggle) onToggle();
+            else setExpandedState((v) => !v);
           }}
           className="mt-0.5 text-xs font-medium text-primary hover:underline"
         >
