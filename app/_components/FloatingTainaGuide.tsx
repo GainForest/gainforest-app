@@ -48,6 +48,12 @@ const VIEWPORT_PADDING = 12;
 const DRAG_THRESHOLD_PX = 4;
 const STORAGE_KEY = "gainforest.floatingTaina.position.v1";
 const MINIMIZED_STORAGE_KEY = "gainforest.floatingTaina.minimized.v1";
+// Bump this id whenever the curated What's New cards change. We only show a
+// quiet unread dot until the visitor deliberately opens the cards — the panel
+// never opens itself, and the seen state survives refreshes.
+const WHATS_NEW_RELEASE_ID = "2026-07-06";
+const WHATS_NEW_STORAGE_KEY = "gainforest.floatingTaina.whatsNewSeen.v1";
+const WHATS_NEW_ITEM_IDS = ["guidedHelp", "fieldData", "donations"] as const;
 // Active tour survives full page loads (locale redirects, hard navigations)
 // via sessionStorage — the widget rehydrates it on mount.
 const TOUR_STORAGE_KEY = "gainforest.floatingTaina.tour.v1";
@@ -134,6 +140,7 @@ interface Rect {
 }
 type PanelView =
   | { kind: "home" }
+  | { kind: "whatsNew" }
   | { kind: "guide"; guideId: string }
   // Tainá opening with a tip the visitor hasn't seen yet (sprite click).
   | { kind: "tip"; tipId: string };
@@ -290,6 +297,7 @@ export function FloatingTainaGuide() {
   const [input, setInput] = useState("");
   const [streaming, setStreaming] = useState(false);
   const [minimized, setMinimized] = useState(false);
+  const [hasUnreadWhatsNew, setHasUnreadWhatsNew] = useState(false);
   // Whether the signed-in user owns at least one project. `null` = unknown
   // (signed out, not yet checked, or the check failed) — in that case we
   // don't second-guess the user. Refreshed every time a project-dependent
@@ -335,6 +343,9 @@ export function FloatingTainaGuide() {
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const panelBodyRef = useRef<HTMLDivElement>(null);
+  const whatsNewTriggerRef = useRef<HTMLButtonElement>(null);
+  const whatsNewBackRef = useRef<HTMLButtonElement>(null);
+  const restoreButtonRef = useRef<HTMLButtonElement>(null);
   const savedPositionRef = useRef<Position | null>(null);
   const lastSpritePosRef = useRef<Position>({ x: 0, y: 0 });
   // Which tour step we've already auto-navigated for. Guards against redirect
@@ -377,8 +388,13 @@ export function FloatingTainaGuide() {
     setPosition(clampToViewport(saved ?? defaultPosition()));
     try {
       setMinimized(window.localStorage.getItem(MINIMIZED_STORAGE_KEY) === "1");
+      setHasUnreadWhatsNew(
+        window.localStorage.getItem(WHATS_NEW_STORAGE_KEY) !== WHATS_NEW_RELEASE_ID,
+      );
     } catch {
-      // ignore storage errors
+      // Storage can be unavailable in private browsing. Keep the entry usable,
+      // but never auto-open it.
+      setHasUnreadWhatsNew(true);
     }
     setMounted(true);
   }, []);
@@ -388,6 +404,18 @@ export function FloatingTainaGuide() {
     const onResize = () => setPosition((p) => clampToViewport(p));
     window.addEventListener("resize", onResize);
     return () => window.removeEventListener("resize", onResize);
+  }, [mounted]);
+
+  // Keep the unread dot in sync when the release is opened in another tab.
+  useEffect(() => {
+    if (!mounted) return;
+    const onStorage = (event: StorageEvent) => {
+      if (event.key === WHATS_NEW_STORAGE_KEY) {
+        setHasUnreadWhatsNew(event.newValue !== WHATS_NEW_RELEASE_ID);
+      }
+    };
+    window.addEventListener("storage", onStorage);
+    return () => window.removeEventListener("storage", onStorage);
   }, [mounted]);
 
   // Persist position (skip while a tour drives the sprite around).
@@ -425,14 +453,30 @@ export function FloatingTainaGuide() {
     panelBodyRef.current?.scrollTo({ top: 0 });
   }, [view, open]);
 
+  const closePanel = useCallback(() => {
+    const restoreWhatsNewFocus = view.kind === "whatsNew";
+    setOpen(false);
+    setView({ kind: "home" });
+    if (restoreWhatsNewFocus) {
+      window.requestAnimationFrame(() => whatsNewTriggerRef.current?.focus());
+    }
+  }, [view.kind]);
+
+  const minimizePanel = useCallback(() => {
+    setOpen(false);
+    setView({ kind: "home" });
+    setMinimized(true);
+    window.requestAnimationFrame(() => restoreButtonRef.current?.focus());
+  }, []);
+
   useEffect(() => {
     if (!open) return;
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setOpen(false);
+      if (e.key === "Escape") closePanel();
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [open]);
+  }, [open, closePanel]);
 
   // Persist the minimized preference.
   useEffect(() => {
@@ -449,11 +493,26 @@ export function FloatingTainaGuide() {
   useEffect(() => {
     const onOpen = () => {
       setMinimized(false);
+      setView({ kind: "home" });
       setOpen(true);
       setWaveActive(true);
     };
     window.addEventListener("taina:open", onOpen);
     return () => window.removeEventListener("taina:open", onOpen);
+  }, []);
+
+  const openWhatsNew = useCallback(() => {
+    setMinimized(false);
+    setView({ kind: "whatsNew" });
+    setOpen(true);
+    setWaveActive(true);
+    setHasUnreadWhatsNew(false);
+    try {
+      window.localStorage.setItem(WHATS_NEW_STORAGE_KEY, WHATS_NEW_RELEASE_ID);
+    } catch {
+      // The panel still works when storage is unavailable.
+    }
+    window.requestAnimationFrame(() => whatsNewBackRef.current?.focus());
   }, []);
 
   // Opening a guide checks the visitor's session (every tour needs one) and,
@@ -1075,6 +1134,7 @@ export function FloatingTainaGuide() {
   if (minimized && !tour) {
     return (
       <button
+        ref={restoreButtonRef}
         type="button"
         onClick={() => {
           setMinimized(false);
@@ -1174,17 +1234,25 @@ export function FloatingTainaGuide() {
       {open && !tour ? (
         <div
           role="dialog"
-          aria-label={`${TAINA_SIM.name} — ${t("role")}`}
+          aria-label={
+            view.kind === "whatsNew"
+              ? t("whatsNew.title")
+              : `${TAINA_SIM.name} — ${t("role")}`
+          }
           className="fixed z-[60] flex flex-col overflow-hidden rounded-2xl border border-border bg-background shadow-xl"
           style={{ left: panelPos.x, top: panelPos.y, width: PANEL_W, height: PANEL_H }}
           data-no-drag
         >
           {/* header */}
           <div className="flex items-center gap-3 border-b border-border px-3 py-2.5">
-            {view.kind === "guide" ? (
+            {view.kind !== "home" ? (
               <button
+                ref={view.kind === "whatsNew" ? whatsNewBackRef : undefined}
                 type="button"
-                onClick={() => setView({ kind: "home" })}
+                onClick={() => {
+                  setView({ kind: "home" });
+                  window.requestAnimationFrame(() => inputRef.current?.focus());
+                }}
                 className="grid h-7 w-7 shrink-0 place-items-center rounded-full text-foreground/60 hover:bg-foreground/5 hover:text-foreground"
                 aria-label={t("back")}
               >
@@ -1201,9 +1269,11 @@ export function FloatingTainaGuide() {
             )}
             <div className="min-w-0 flex-1">
               <div className="truncate text-[15px] font-medium text-foreground">
-                {view.kind === "guide" && guideView
-                  ? guidesT(`${guideView.id}.title`)
-                  : TAINA_SIM.name}
+                {view.kind === "whatsNew"
+                  ? t("whatsNew.title")
+                  : view.kind === "guide" && guideView
+                    ? guidesT(`${guideView.id}.title`)
+                    : TAINA_SIM.name}
               </div>
               {view.kind === "home" || view.kind === "tip" ? (
                 <div className="truncate text-[11px] text-foreground/55">{t("role")}</div>
@@ -1211,10 +1281,7 @@ export function FloatingTainaGuide() {
             </div>
             <button
               type="button"
-              onClick={() => {
-                setOpen(false);
-                setMinimized(true);
-              }}
+              onClick={minimizePanel}
               className="grid h-7 w-7 place-items-center rounded-full text-foreground/55 hover:bg-foreground/5 hover:text-foreground"
               aria-label={t("minimizeLabel")}
               title={t("minimizeLabel")}
@@ -1223,7 +1290,7 @@ export function FloatingTainaGuide() {
             </button>
             <button
               type="button"
-              onClick={() => setOpen(false)}
+              onClick={closePanel}
               className="grid h-7 w-7 place-items-center rounded-full text-foreground/55 hover:bg-foreground/5 hover:text-foreground"
               aria-label={t("close")}
             >
@@ -1307,6 +1374,67 @@ export function FloatingTainaGuide() {
                   </div>
                 </div>
               </>
+            ) : view.kind === "whatsNew" ? (
+              <section aria-labelledby="taina-whats-new-title">
+                <div className="relative overflow-hidden rounded-2xl border border-primary/20 bg-primary/[0.06] px-4 py-4">
+                  <div
+                    aria-hidden
+                    className="absolute -right-6 -top-7 size-24 rounded-full border border-primary/10"
+                  />
+                  <div
+                    aria-hidden
+                    className="absolute right-4 top-5 size-2 rounded-full bg-primary/25"
+                  />
+                  <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-primary">
+                    {t("whatsNew.eyebrow")}
+                  </p>
+                  <h2
+                    id="taina-whats-new-title"
+                    className="mt-1 text-lg font-semibold tracking-tight text-foreground"
+                  >
+                    {t("whatsNew.heading")}
+                  </h2>
+                  <p className="mt-1.5 max-w-[28ch] text-[12px] leading-relaxed text-foreground/65">
+                    {t("whatsNew.intro")}
+                  </p>
+                </div>
+
+                <ol className="relative mt-4 space-y-2.5 before:absolute before:bottom-5 before:left-[18px] before:top-5 before:w-px before:bg-border">
+                  {WHATS_NEW_ITEM_IDS.map((itemId, index) => (
+                    <li
+                      key={itemId}
+                      className="relative rounded-2xl border border-border bg-background px-3 py-3 pl-11 shadow-[0_1px_0_rgba(0,0,0,0.02)]"
+                    >
+                      <span
+                        aria-hidden
+                        className="absolute left-3 top-3.5 grid size-3 rounded-full border-[3px] border-background bg-primary ring-1 ring-primary/25"
+                      />
+                      <div className="flex items-start justify-between gap-3">
+                        <div>
+                          <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-primary/80">
+                            {t(`whatsNew.items.${itemId}.eyebrow`)}
+                          </p>
+                          <h3 className="mt-0.5 text-[13px] font-semibold leading-snug text-foreground">
+                            {t(`whatsNew.items.${itemId}.title`)}
+                          </h3>
+                        </div>
+                        {index === 0 ? (
+                          <span className="shrink-0 rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-semibold text-primary">
+                            {t("whatsNew.newBadge")}
+                          </span>
+                        ) : null}
+                      </div>
+                      <p className="mt-1 text-[12px] leading-relaxed text-foreground/60">
+                        {t(`whatsNew.items.${itemId}.body`)}
+                      </p>
+                    </li>
+                  ))}
+                </ol>
+
+                <p className="mt-4 px-1 text-center text-[11px] leading-relaxed text-muted-foreground">
+                  {t("whatsNew.footer")}
+                </p>
+              </section>
             ) : guideView ? (
               <>
                 <p className="text-foreground/70">{guidesT(`${guideView.id}.intro`)}</p>
@@ -1415,23 +1543,7 @@ export function FloatingTainaGuide() {
 
       {/* ── SPRITE ───────────────────────────────────────────────────── */}
       <div
-        role="button"
-        aria-label={t("spriteLabel")}
-        tabIndex={0}
-        onPointerDown={onPointerDown}
-        onPointerMove={onPointerMove}
-        onPointerUp={onPointerUp}
-        onPointerCancel={onPointerCancel}
-        onKeyDown={(e) => {
-          if ((e.target as HTMLElement).closest("[data-no-drag]")) return;
-          if ((e.key === "Enter" || e.key === " ") && !tour) {
-            e.preventDefault();
-            togglePanelFromSprite();
-          }
-        }}
-        className={`group fixed select-none ${tour ? "transition-all duration-500 ease-out" : ""} ${
-          dragging ? "cursor-grabbing" : tour ? "cursor-default" : "cursor-grab"
-        }`}
+        className={`group fixed select-none transition-opacity duration-150 ${tour ? "transition-all duration-500 ease-out" : ""}`}
         style={{
           zIndex: Z_SPRITE,
           left: position.x,
@@ -1439,48 +1551,64 @@ export function FloatingTainaGuide() {
           width: SPRITE_W,
           height: SPRITE_H,
           touchAction: "none",
+          opacity: open && view.kind === "whatsNew" ? 0 : 1,
+          pointerEvents: open && view.kind === "whatsNew" ? "none" : "auto",
         }}
       >
-        {/* Soft halo behind the sprite so page content underneath doesn't
-            visually collide with her (same treatment as data-soil). */}
         <div
-          aria-hidden
-          className="pointer-events-none absolute -inset-2 rounded-full"
-          style={{
-            background:
-              "radial-gradient(ellipse at 50% 56%, var(--background) 0%, var(--background) 52%, color-mix(in srgb, var(--background) 78%, transparent) 68%, transparent 92%)",
-            backdropFilter: "blur(6px)",
-            WebkitBackdropFilter: "blur(6px)",
+          role="button"
+          aria-label={t("spriteLabel")}
+          aria-hidden={open && view.kind === "whatsNew"}
+          tabIndex={open && view.kind === "whatsNew" ? -1 : 0}
+          onPointerDown={onPointerDown}
+          onPointerMove={onPointerMove}
+          onPointerUp={onPointerUp}
+          onPointerCancel={onPointerCancel}
+          onKeyDown={(e) => {
+            if ((e.key === "Enter" || e.key === " ") && !tour) {
+              e.preventDefault();
+              togglePanelFromSprite();
+            }
           }}
-        />
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src={TAINA_SIM.posterUrl}
-          alt=""
-          width={SPRITE_W}
-          height={SPRITE_H}
-          className="absolute inset-0 transition-opacity duration-200"
-          style={{ imageRendering: "pixelated", opacity: firstFramePainted ? 0 : 1 }}
-          draggable={false}
-        />
-        <canvas
-          ref={canvasRef}
-          width={192}
-          height={208}
-          style={{ width: SPRITE_W, height: SPRITE_H, imageRendering: "pixelated" }}
-          className="absolute inset-0"
-        />
+          className={`absolute inset-0 ${dragging ? "cursor-grabbing" : tour ? "cursor-default" : "cursor-grab"}`}
+        >
+          {/* Soft halo behind the sprite so page content underneath doesn't
+              visually collide with her (same treatment as data-soil). */}
+          <div
+            aria-hidden
+            className="pointer-events-none absolute -inset-2 rounded-full"
+            style={{
+              background:
+                "radial-gradient(ellipse at 50% 56%, var(--background) 0%, var(--background) 52%, color-mix(in srgb, var(--background) 78%, transparent) 68%, transparent 92%)",
+              backdropFilter: "blur(6px)",
+              WebkitBackdropFilter: "blur(6px)",
+            }}
+          />
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={TAINA_SIM.posterUrl}
+            alt=""
+            width={SPRITE_W}
+            height={SPRITE_H}
+            className="absolute inset-0 transition-opacity duration-200"
+            style={{ imageRendering: "pixelated", opacity: firstFramePainted ? 0 : 1 }}
+            draggable={false}
+          />
+          <canvas
+            ref={canvasRef}
+            width={192}
+            height={208}
+            style={{ width: SPRITE_W, height: SPRITE_H, imageRendering: "pixelated" }}
+            className="absolute inset-0"
+          />
+        </div>
         {/* Minimize — revealed on hover/focus (desktop); the panel header has
             the same control for touch users. */}
         {!tour && !dragging ? (
           <button
             type="button"
             data-no-drag
-            onClick={(e) => {
-              e.stopPropagation();
-              setOpen(false);
-              setMinimized(true);
-            }}
+            onClick={minimizePanel}
             aria-label={t("minimizeLabel")}
             title={t("minimizeLabel")}
             className="absolute -right-1 -top-1 z-10 hidden h-5 w-5 place-items-center rounded-full border border-border bg-background text-[12px] leading-none text-foreground/60 shadow-sm hover:text-foreground focus-visible:grid group-hover:grid"
@@ -1610,20 +1738,34 @@ export function FloatingTainaGuide() {
           </div>
         ) : null}
         {!open && !tour && activeTip === null && !helpObs ? (
-          <div
-            aria-hidden
+          <button
+            ref={whatsNewTriggerRef}
+            type="button"
+            data-no-drag
+            onClick={(event) => {
+              event.stopPropagation();
+              openWhatsNew();
+            }}
+            aria-label={t(
+              hasUnreadWhatsNew ? "whatsNew.openLabelUnread" : "whatsNew.openLabel",
+            )}
             className={
-              "pointer-events-none absolute left-1/2 top-full mt-1 " +
-              "-translate-x-1/2 whitespace-nowrap rounded-full " +
+              "absolute left-1/2 top-full mt-1 inline-flex " +
+              "-translate-x-1/2 items-center gap-1.5 whitespace-nowrap rounded-full " +
               "border border-border bg-background/95 " +
-              "px-2.5 py-[3px] text-[11px] text-primary " +
+              "px-2.5 py-[3px] text-[11px] font-medium text-primary " +
               "shadow-[0_2px_8px_-3px_rgba(40,50,30,0.22)] " +
-              "backdrop-blur-sm transition-opacity duration-150 " +
-              (dragging ? "opacity-0" : "opacity-100")
+              "backdrop-blur-sm transition-[opacity,transform,box-shadow] duration-150 " +
+              "hover:-translate-x-1/2 hover:-translate-y-0.5 hover:shadow-md " +
+              "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 " +
+              (dragging ? "pointer-events-none opacity-0" : "opacity-100")
             }
           >
-            {t("shield")}
-          </div>
+            {hasUnreadWhatsNew ? (
+              <span aria-hidden className="size-1.5 rounded-full bg-primary" />
+            ) : null}
+            {t("whatsNew.trigger")}
+          </button>
         ) : null}
       </div>
     </>

@@ -37,7 +37,35 @@
     "haveQuestion": "Nina swali",
     "helpTitle": "Unaweza kusaidia?",
     "helpBody": "Mtu alipiga picha hii, lakini bado hakuna anayejua ni spishi gani. Je, unaitambua?",
-    "helpCta": "Nadhani naijua!"
+    "helpCta": "Nadhani naijua!",
+    "whatsNew": {
+      "trigger": "Nini kipya?",
+      "openLabel": "Ona mambo mapya kwenye GainForest",
+      "openLabelUnread": "Ona masasisho mapya kwenye GainForest",
+      "title": "Mambo mapya",
+      "eyebrow": "Mapya kutoka GainForest",
+      "heading": "Mambo kadhaa yameboreshwa",
+      "intro": "Muhtasari mfupi na mtulivu wa mabadiliko ya hivi karibuni — wakati tu unapoutaka.",
+      "newBadge": "Mpya",
+      "items": {
+        "guidedHelp": {
+          "eyebrow": "Tainá",
+          "title": "Tainá anaweza kukuongoza kwenye skrini",
+          "body": "Fungua swali la kawaida na uchague “Nionyeshe” ili Tainá akuonyeshe sehemu sahihi kwenye skrini yako."
+        },
+        "fieldData": {
+          "eyebrow": "Data za nyanjani",
+          "title": "Tuma mafungu makubwa ya data za nyanjani",
+          "body": "Timu za nyanjani sasa zinaweza kutuma picha na faili za utafiti pamoja kwa ukaguzi, hata kama fungu ni kubwa sana."
+        },
+        "donations": {
+          "eyebrow": "Michango",
+          "title": "Kuweka michango sasa ni rahisi zaidi",
+          "body": "Mashirika yanaweza kuunda pochi ya pamoja ya michango kwa ufunguo wa siri, kisha kuruhusu wanachama wengine waongeze funguo zao."
+        }
+      },
+      "footer": "Ni hayo tu kwa sasa. Orodha hii haitajifungua yenyewe."
+    }
   },
   "guides": {
     "wallet": {

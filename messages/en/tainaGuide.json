@@ -37,7 +37,35 @@
     "haveQuestion": "I have a question",
     "helpTitle": "Can you help?",
     "helpBody": "Someone photographed this, but no one knows what species it is yet. Do you recognize it?",
-    "helpCta": "I think I know!"
+    "helpCta": "I think I know!",
+    "whatsNew": {
+      "trigger": "What's new?",
+      "openLabel": "See what's new in GainForest",
+      "openLabelUnread": "See new updates in GainForest",
+      "title": "What's new",
+      "eyebrow": "Fresh from GainForest",
+      "heading": "A few things just got better",
+      "intro": "A calm, quick look at the latest changes — only when you want it.",
+      "newBadge": "New",
+      "items": {
+        "guidedHelp": {
+          "eyebrow": "Tainá",
+          "title": "Tainá can show you around",
+          "body": "Open a common question and choose “Show me” to have Tainá point out the right places on your screen."
+        },
+        "fieldData": {
+          "eyebrow": "Field data",
+          "title": "Send large field data batches",
+          "body": "Field teams can now send photos and survey files together for review, even when the batch is very large."
+        },
+        "donations": {
+          "eyebrow": "Donations",
+          "title": "Donation setup is simpler",
+          "body": "Organizations can create a shared donation wallet with a passkey, then let other members add their own."
+        }
+      },
+      "footer": "That's all for now. This list won't pop open by itself."
+    }
   },
   "guides": {
     "wallet": {

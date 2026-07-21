@@ -37,7 +37,35 @@
     "haveQuestion": "Aku punya pertanyaan",
     "helpTitle": "Bisa bantu?",
     "helpBody": "Seseorang memotret ini, tapi belum ada yang tahu spesiesnya. Kamu mengenalinya?",
-    "helpCta": "Sepertinya aku tahu!"
+    "helpCta": "Sepertinya aku tahu!",
+    "whatsNew": {
+      "trigger": "Apa yang baru?",
+      "openLabel": "Lihat yang baru di GainForest",
+      "openLabelUnread": "Lihat pembaruan baru di GainForest",
+      "title": "Yang baru",
+      "eyebrow": "Terbaru dari GainForest",
+      "heading": "Beberapa hal baru saja menjadi lebih baik",
+      "intro": "Lihat perubahan terbaru secara singkat dan tenang — hanya saat Anda menginginkannya.",
+      "newBadge": "Baru",
+      "items": {
+        "guidedHelp": {
+          "eyebrow": "Tainá",
+          "title": "Tainá dapat memandu Anda di layar",
+          "body": "Buka pertanyaan umum dan pilih “Tunjukkan” agar Tainá menunjukkan tempat yang tepat di layar Anda."
+        },
+        "fieldData": {
+          "eyebrow": "Data lapangan",
+          "title": "Kirim kumpulan data lapangan berukuran besar",
+          "body": "Tim lapangan kini dapat mengirim foto dan berkas survei bersama untuk ditinjau, bahkan dalam kumpulan yang sangat besar."
+        },
+        "donations": {
+          "eyebrow": "Donasi",
+          "title": "Pengaturan donasi kini lebih mudah",
+          "body": "Organisasi dapat membuat dompet donasi bersama dengan kunci sandi, lalu mengizinkan anggota lain menambahkan milik mereka."
+        }
+      },
+      "footer": "Itu saja untuk saat ini. Daftar ini tidak akan terbuka sendiri."
+    }
   },
   "guides": {
     "wallet": {

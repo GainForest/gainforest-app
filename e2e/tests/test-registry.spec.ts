@@ -7,6 +7,9 @@ const FORBIDDEN_DONATION_PATHS = new Set([
   "/api/verify-recipient",
 ]);
 
+const WHATS_NEW_STORAGE_KEY = "gainforest.floatingTaina.whatsNewSeen.v1";
+const WHATS_NEW_RELEASE_ID = "2026-07-06";
+
 const GUEST_CARD = {
   id: "project-0-1720000000000",
   variant: "project",
@@ -24,6 +27,71 @@ const GUEST_CARD = {
   }],
   collectedAt: 1_720_000_000_000,
 };
+
+test("Tainá's What's New stays quiet across refreshes", async ({ page }) => {
+  await page.addInitScript((storageKey) => {
+    const setupKey = `${storageKey}.e2ePrepared`;
+    if (window.sessionStorage.getItem(setupKey)) return;
+    window.localStorage.removeItem(storageKey);
+    window.sessionStorage.setItem(setupKey, "1");
+  }, WHATS_NEW_STORAGE_KEY);
+
+  await page.goto("/_test");
+
+  const newUpdatesTrigger = page.getByRole("button", {
+    name: "See new updates in GainForest",
+    exact: true,
+  });
+  await expect(newUpdatesTrigger).toBeVisible();
+
+  const otherPage = await page.context().newPage();
+  await otherPage.goto("/_test");
+  await expect(otherPage.getByRole("button", {
+    name: "See new updates in GainForest",
+    exact: true,
+  })).toBeVisible();
+
+  await newUpdatesTrigger.click();
+
+  await expect(otherPage.getByRole("button", {
+    name: "See what's new in GainForest",
+    exact: true,
+  })).toBeVisible();
+  await otherPage.close();
+
+  await expect(page.getByRole("heading", { name: "A few things just got better" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Back", exact: true })).toBeFocused();
+  await expect.poll(() => page.evaluate((key) => window.localStorage.getItem(key), WHATS_NEW_STORAGE_KEY))
+    .toBe(WHATS_NEW_RELEASE_ID);
+
+  await page.getByRole("button", { name: "Close chat", exact: true }).click();
+  const seenUpdatesTrigger = page.getByRole("button", {
+    name: "See what's new in GainForest",
+    exact: true,
+  });
+  await expect(seenUpdatesTrigger).toBeFocused();
+
+  await page.reload();
+  await expect(page.getByRole("heading", { name: "A few things just got better" })).toHaveCount(0);
+  await expect(seenUpdatesTrigger).toBeVisible();
+
+  await seenUpdatesTrigger.click();
+  await page.getByRole("button", { name: "Back", exact: true }).click();
+  await expect(page.getByPlaceholder("Ask me anything…")).toBeFocused();
+  await page.getByRole("button", { name: "Close chat", exact: true }).click();
+
+  await seenUpdatesTrigger.click();
+  await page.getByRole("button", { name: "Minimize Tainá", exact: true }).click();
+  const restoreTaina = page.getByRole("button", { name: "Open Tainá", exact: true });
+  await expect(restoreTaina).toBeFocused();
+  await restoreTaina.click();
+
+  await page
+    .locator('[role="button"][aria-label="Tainá — click to chat, drag to move"]')
+    .click({ position: { x: 36, y: 32 } });
+  await expect(page.getByRole("dialog", { name: "Tainá — Your GainForest guide" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "A few things just got better" })).toHaveCount(0);
+});
 
 test("signed-out donors can reopen browser-saved cards in the real gallery", async ({ page }) => {
   await page.addInitScript((card) => {
