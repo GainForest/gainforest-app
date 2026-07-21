@@ -891,8 +891,10 @@ function ExpandableBody({
       <p
         ref={ref}
         className={cn(
-          "mt-0.5 text-sm leading-relaxed text-muted-foreground",
-          expanded ? "whitespace-pre-wrap break-words" : "line-clamp-2",
+          // pre-wrap keeps the author's line breaks even while clamped — the
+          // clamp then counts rendered lines, so a many-line post still folds.
+          "mt-0.5 whitespace-pre-wrap break-words text-sm leading-relaxed text-muted-foreground",
+          !expanded && "line-clamp-2",
         )}
       >
         <MentionText text={text} mentions={mentions} />
