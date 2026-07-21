@@ -30,7 +30,7 @@ import { collectedFromReward, useCollectedCards } from "@/app/_components/reward
 import { DonationRewardCard } from "./DonationRewardCard";
 import type { RewardCard } from "./reward-model";
 
-type Flight = { card: RewardCard; rect: DOMRect; delay: number };
+type Flight = { card: RewardCard; rect: DOMRect; delay: number; order: number };
 
 /** Horizontal fan distance and inward tilt for cards behind the active card.
  * Each card lives in its own flat stacking layer: unlike a shared 3D cylinder,
@@ -47,9 +47,10 @@ const GULP_SCALE = 0.13;
 const SNAP = { type: "spring" as const, stiffness: 240, damping: 28 };
 const ENTRANCE = { type: "spring" as const, stiffness: 55, damping: 15, mass: 1 };
 const FLIGHT_DURATION = 0.92;
-// Leave enough space between cards that each gulp reads clearly instead of
-// being covered by the next card approaching the same mouth.
-const FLIGHT_STAGGER = 0.82;
+// Keep the original tight stream: the whole stack follows the first card with
+// only a small delay. Earlier cards render above later ones, so every gulp is
+// still visible while the rest of the stack keeps flying behind it.
+const FLIGHT_STAGGER = 0.14;
 
 function easeInOut(u: number): number {
   return u < 0.5 ? 4 * u * u * u : 1 - Math.pow(-2 * u + 2, 3) / 2;
@@ -92,6 +93,7 @@ function RewardFlight({
   rect,
   pocket,
   delay,
+  order,
   onPulse,
   onDone,
 }: {
@@ -99,6 +101,7 @@ function RewardFlight({
   rect: DOMRect;
   pocket: DOMRect;
   delay: number;
+  order: number;
   onPulse: () => void;
   onDone: () => void;
 }) {
@@ -239,8 +242,8 @@ function RewardFlight({
       data-reward-flight-mask
       data-card-id={card.id}
       data-phase="travel"
-      className="pointer-events-none z-[9999]"
-      style={{ position: "fixed", inset: 0, overflow: "visible" }}
+      className="pointer-events-none"
+      style={{ position: "fixed", inset: 0, overflow: "visible", zIndex: 10_000 - order }}
       aria-hidden
     >
       <motion.div
@@ -389,7 +392,7 @@ export function RewardDeck({
       completedRef.current = 0;
       setPocketRect(pocket);
       setCollectingIds(new Set(targets.map((card) => card.id)));
-      setFlights(targets.map((card, i) => ({ card, rect, delay: i * FLIGHT_STAGGER })));
+      setFlights(targets.map((card, i) => ({ card, rect, delay: i * FLIGHT_STAGGER, order: i })));
     },
     [busy, reduceMotion, remaining, index, beginCollect, endCollect, collectImmediately],
   );
@@ -559,6 +562,7 @@ export function RewardDeck({
               rect={flight.rect}
               pocket={pocketRect}
               delay={flight.delay}
+              order={flight.order}
               onPulse={pulse}
               onDone={handleFlightDone}
             />
