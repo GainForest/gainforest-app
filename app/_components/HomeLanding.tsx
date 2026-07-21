@@ -13,6 +13,7 @@ import {
   NetworkIcon,
   PlayIcon,
   Share2Icon,
+  SmartphoneIcon,
 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
@@ -294,7 +295,7 @@ function LandingHero() {
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.55, delay: 0.56, ease: [0.25, 0.1, 0.25, 1] }}
-              className="mt-8"
+              className="mt-8 flex flex-wrap items-center justify-center gap-3 md:justify-start"
             >
               <Link
                 href="/projects"
@@ -309,6 +310,15 @@ function LandingHero() {
                   <ArrowUpRightIcon aria-hidden="true" className="size-4" />
                 </motion.span>
               </Link>
+              <a
+                href="https://play.google.com/store/apps/details?id=certs.android.app"
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex h-12 shrink-0 items-center justify-center gap-2 whitespace-nowrap rounded-full border border-foreground/20 bg-background/70 px-5 py-2 text-sm font-medium text-foreground shadow-sm backdrop-blur transition-colors hover:border-primary/40 hover:bg-background focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:outline-none"
+              >
+                <SmartphoneIcon aria-hidden="true" className="size-4" />
+                {t("androidCta")}
+              </a>
             </motion.div>
           </motion.div>
           <div aria-hidden="true" className="hidden md:block" />
