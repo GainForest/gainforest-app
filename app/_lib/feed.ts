@@ -232,6 +232,16 @@ function clampText(text: string | null | undefined, max = MAX_TEXT): string | nu
   return trimmed.length > max ? `${trimmed.slice(0, max)}…` : trimmed;
 }
 
+/** Post bodies are rendered pre-wrap, so unlike the one-line excerpts above
+ *  this keeps the author's line breaks — it only normalizes CRLFs, trims, and
+ *  caps runaway blank runs + length. */
+function clampPostText(text: string | null | undefined, max = 400): string | null {
+  if (!text) return null;
+  const trimmed = text.replace(/\r\n?/g, "\n").replace(/\n{3,}/g, "\n\n").trim();
+  if (!trimmed) return null;
+  return trimmed.length > max ? `${trimmed.slice(0, max)}…` : trimmed;
+}
+
 /** Parse `at://did/collection/rkey` into its did + rkey parts. */
 function parseAtUri(uri: string): { did: string; rkey: string } | null {
   const match = uri.match(/^at:\/\/([^/]+)\/[^/]+\/(.+)$/);
@@ -568,7 +578,7 @@ function mapPosts(nodes: RawPost[]): ActivityFeedItem[] {
     actorName: profileName(n.certifiedProfileData),
     actorAvatarRef: profileAvatarRef(n.certifiedProfileData),
     title: null,
-    text: clampText(n.text, 400),
+    text: clampPostText(n.text),
     mentions: mentionCandidatesFromFacets(n.text ?? "", n.facets),
     href: accountHref(n.did),
     imageUrl: null,
