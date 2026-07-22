@@ -45,7 +45,6 @@ import {
 } from "@/app/account/_lib/account-route";
 import { GAINFOREST_MODERATION_REPO_DID } from "@/app/_lib/indexer";
 import { AdminOnlyIndicator } from "./AdminOnlyIndicator";
-import { useCollectedCards } from "./rewards/collected-cards";
 import {
   findSwitcherGroupByIdentifier,
   switcherGroupIdentifier,
@@ -726,9 +725,6 @@ function AuthenticatedMenu({
   // list; the /admin route itself re-checks access server-side.
   const isModerator = groups.some((group) => group.groupDid === GAINFOREST_MODERATION_REPO_DID);
   const adminHref = isModerator ? "/admin" : null;
-  // The donor's collected reward cards — surfaced as a special menu entry.
-  const { cards: collectedCards } = useCollectedCards(session.did);
-  const collectedCount = collectedCards.length;
   const [invitations, setInvitations] = useState<MenuInvitation[]>([]);
   const [invitationsStatus, setInvitationsStatus] = useState<"idle" | "loading" | "ready" | "error">("idle");
   const invitationsStatusRef = useRef(invitationsStatus);
@@ -1067,11 +1063,6 @@ function AuthenticatedMenu({
                   <SparklesIcon className="h-3.5 w-3.5" />
                 </span>
                 <span className="relative flex-1">{sidebarT("profileRow.myCards")}</span>
-                {collectedCount > 0 ? (
-                  <span className="relative rounded-full bg-primary/15 px-2 py-0.5 text-[11px] font-semibold text-primary">
-                    {collectedCount}
-                  </span>
-                ) : null}
               </Link>
 
               {/* General options — apply to the signed-in user */}

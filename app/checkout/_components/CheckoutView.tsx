@@ -78,6 +78,10 @@ type CompletedLine = {
   orgName: string;
   amountUsd: number;
   txHash: string;
+  /** Public receipt written for this settled donation. */
+  receiptUri?: string | null;
+  /** Receipt has the ownership and project link required for a card. */
+  cardEligible?: boolean;
   /** Project cover art, surfaced on the reward card. */
   image?: string | null;
 };
@@ -91,6 +95,10 @@ const MOCK_TIP_ADDRESS = "0x3333333333333333333333333333333333333333";
 
 function mockTransactionHash(index: number): string {
   return `0x${(index + 1).toString(16).padStart(64, "0")}`;
+}
+
+function mockReceiptUri(index: number): string {
+  return `at://did:plc:testregistryfacilitator/org.hypercerts.funding.receipt/${(index + 1).toString(16).padStart(64, "0")}`;
 }
 
 function waitForMock(milliseconds: number): Promise<void> {
@@ -123,7 +131,7 @@ async function signAndSettle(params: {
   amountUsd: number;
   endpoint: string;
   body: Record<string, unknown>;
-}): Promise<{ txHash: string } | { errorRaw: unknown }> {
+}): Promise<{ txHash: string; receiptUri: string | null; cardEligible: boolean } | { errorRaw: unknown }> {
   const usdcAmount = toUsdcUnits(params.amountUsd);
   const nonce = createNonce();
   const validBefore = String(Math.floor(Date.now() / 1000) + 300);
@@ -173,9 +181,17 @@ async function signAndSettle(params: {
     // still have gone through, so surface the "check your wallet" message.
     return { errorRaw: SETTLEMENT_TIMEOUT_RAW };
   }
-  const raw = (await response.json().catch(() => null)) as { transactionHash?: string } | null;
+  const raw = (await response.json().catch(() => null)) as {
+    transactionHash?: string;
+    receiptUri?: string | null;
+    cardEligible?: boolean;
+  } | null;
   if (!response.ok || typeof raw?.transactionHash !== "string") return { errorRaw: raw };
-  return { txHash: raw.transactionHash };
+  return {
+    txHash: raw.transactionHash,
+    receiptUri: typeof raw.receiptUri === "string" ? raw.receiptUri : null,
+    cardEligible: raw.cardEligible === true,
+  };
 }
 
 type BatchLineResult = {
@@ -183,6 +199,8 @@ type BatchLineResult = {
   rkey?: string;
   amount: string;
   transactionHash?: string;
+  receiptUri?: string | null;
+  cardEligible?: boolean;
   error?: string;
 };
 
@@ -438,6 +456,8 @@ export function CheckoutView({
           orgName: item.orgName,
           amountUsd: item.amountUsd,
           txHash,
+          receiptUri: mockReceiptUri(index),
+          cardEligible: true,
           image: item.image,
         };
       });
@@ -499,7 +519,6 @@ export function CheckoutView({
             })),
             ...(includeTip ? { tipAmount: String(tipUsd) } : {}),
             anonymous: authSession.isLoggedIn ? anonymous : true,
-            donorDid: authSession.isLoggedIn && !anonymous ? authSession.did : undefined,
           },
         });
 
@@ -511,7 +530,16 @@ export function CheckoutView({
             );
             if (lineResult?.transactionHash) {
               setLine(key, { phase: "done", txHash: lineResult.transactionHash });
-              results.push({ kind: "donation", title: item.title, orgName: item.orgName, amountUsd: item.amountUsd, txHash: lineResult.transactionHash, image: item.image });
+              results.push({
+                kind: "donation",
+                title: item.title,
+                orgName: item.orgName,
+                amountUsd: item.amountUsd,
+                txHash: lineResult.transactionHash,
+                receiptUri: lineResult.receiptUri,
+                cardEligible: lineResult.cardEligible === true,
+                image: item.image,
+              });
               removeItem(item.orgDid, item.rkey);
             } else {
               anyFailed = true;
@@ -573,12 +601,20 @@ export function CheckoutView({
             amount: String(item.amountUsd),
             currency: "USDC",
             anonymous: authSession.isLoggedIn ? anonymous : true,
-            donorDid: authSession.isLoggedIn && !anonymous ? authSession.did : undefined,
           },
         });
         if ("txHash" in outcome) {
           setLine(key, { phase: "done", txHash: outcome.txHash });
-          results.push({ kind: "donation", title: item.title, orgName: item.orgName, amountUsd: item.amountUsd, txHash: outcome.txHash, image: item.image });
+          results.push({
+            kind: "donation",
+            title: item.title,
+            orgName: item.orgName,
+            amountUsd: item.amountUsd,
+            txHash: outcome.txHash,
+            receiptUri: outcome.receiptUri,
+            cardEligible: outcome.cardEligible,
+            image: item.image,
+          });
           removeItem(item.orgDid, item.rkey);
         } else {
           anyFailed = true;
@@ -609,7 +645,6 @@ export function CheckoutView({
           body: {
             amount: String(tipUsd),
             anonymous: authSession.isLoggedIn ? anonymous : true,
-            donorDid: authSession.isLoggedIn && !anonymous ? authSession.did : undefined,
           },
         });
         if ("txHash" in outcome) {
@@ -653,6 +688,14 @@ export function CheckoutView({
     { platform: "bluesky" as const, label: t("shareOnBluesky"), href: socialShareUrl("bluesky", shareText), className: "text-blue-600" },
     { platform: "telegram" as const, label: t("shareOnTelegram"), href: socialShareUrl("telegram", shareText), className: "text-blue-500" },
   ];
+  const completedDonations = completed.filter((line) => line.kind === "donation");
+  const allDonationsRecorded = completedDonations.length > 0 && completedDonations.every(
+    (line) => typeof line.receiptUri === "string" && line.receiptUri.length > 0,
+  );
+  const rewardCards = authSession.isLoggedIn && !anonymous ? buildRewardCards(completed) : [];
+  const recentReceiptQuery = new URLSearchParams();
+  for (const card of rewardCards) recentReceiptQuery.append("receipt", card.lines[0]?.receiptUri ?? "");
+  const cardsHref = recentReceiptQuery.size > 0 ? `/cards?${recentReceiptQuery.toString()}` : "/cards";
 
   if (!hydrated) {
     return <div className="mx-auto w-full max-w-3xl px-4 py-10" aria-busy="true" />;
@@ -663,18 +706,22 @@ export function CheckoutView({
     return (
       <div className="mx-auto w-full max-w-2xl px-4 py-10">
         <div className="flex flex-col items-center gap-4 text-center">
-          <RewardDeck
-            cards={buildRewardCards(completed)}
-            did={authSession.isLoggedIn ? authSession.did : null}
-            persistence={sideEffects === "mock" ? "memory" : "local"}
-            cardsHref={sideEffects === "mock" ? "/_test/my-cards" : "/cards"}
-          />
+          {rewardCards.length > 0 ? (
+            <RewardDeck
+              cards={rewardCards}
+              cardsHref={sideEffects === "mock" ? "/_test/my-cards" : cardsHref}
+            />
+          ) : null}
           <p className="mt-2 font-instrument text-4xl font-medium italic text-primary">{t("thankYou")}</p>
           <p className="text-pretty font-medium text-muted-foreground">
             {t("successSummary", { amount: `$${donatedTotal.toFixed(2)}` })}
           </p>
           <p className="text-xs text-muted-foreground">
-            {authSession.isLoggedIn && !anonymous ? t("recordedWithProfile") : t("recordedAnonymous")}
+            {!allDonationsRecorded
+              ? t("receiptIssue")
+              : authSession.isLoggedIn && !anonymous
+                ? t("recordedWithProfile")
+                : t("recordedAnonymous")}
           </p>
         </div>
 

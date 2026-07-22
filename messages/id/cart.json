@@ -39,8 +39,8 @@
     "encouragement": "Keren! Donasi Anda mendukung konservasi yang dipimpin komunitas.",
     "donorTitle": "Bagaimana donasi Anda ditampilkan",
     "anonymousLabel": "Donasi secara anonim",
-    "anonymousHint": "Donasi anonim tidak pernah muncul secara publik atas nama Anda — Anda tetap dapat melihatnya di profil Anda sendiri.",
-    "signedOutNote": "Anda belum masuk, jadi donasi Anda akan ditampilkan sebagai anonim.",
+    "anonymousHint": "Donasi anonim tidak pernah muncul secara publik atas nama Anda. Anda tetap dapat melihatnya di profil, tetapi donasi tersebut tidak menghasilkan kartu.",
+    "signedOutNote": "Anda belum masuk, jadi donasi Anda akan ditampilkan sebagai anonim dan tidak menghasilkan kartu.",
     "walletTitle": "Dompet pembayaran",
     "walletHint": "Donasi dibayar dalam USDC di Ethereum. Hubungkan dompet Anda untuk melanjutkan — biaya jaringan ditanggung untuk Anda.",
     "connectWallet": "Hubungkan dompet",
@@ -80,6 +80,7 @@
     "successSummary": "Donasi Anda sebesar {amount} berhasil diselesaikan.",
     "recordedWithProfile": "Dicatat dengan profil GainForest Anda.",
     "recordedAnonymous": "Dicatat sebagai anonim.",
+    "receiptIssue": "Pembayaran Anda selesai, tetapi satu atau beberapa catatan donasi publik tidak dapat dibuat. Donasi tersebut tidak akan muncul di Kartu Saya.",
     "paymentDetails": "Detail pembayaran",
     "shareTitle": "Bagikan kepada orang lain",
     "shareText": "Saya baru saja berdonasi {amount} untuk mendukung proyek alam di GainForest: {url}",
@@ -130,8 +131,7 @@
       "deckHint": "Geser untuk melihat koleksi Anda",
       "cardPosition": "Kartu {current} dari {total}",
       "collectedTitle": "Semua sudah dikumpulkan!",
-      "collectedBody": "Kartu Anda disimpan di Kartu Saya.",
-      "collectedSessionBody": "Kartu Anda tersedia di Kartu Saya selama sesi peramban ini.",
+      "collectedBody": "Kartu terverifikasi Anda siap di Kartu Saya.",
       "viewMyCards": "Lihat Kartu Saya"
     }
   },
@@ -170,10 +170,21 @@
   "myCards": {
     "eyebrow": "Koleksi",
     "title": "Kartu Saya",
-    "description": "Koleksi holografik yang Anda peroleh dengan mendukung proyek.",
+    "description": "Setiap kartu berasal dari tanda terima donasi proyek terverifikasi yang terhubung ke akun Anda.",
     "count": "{count, plural, one {# kartu} other {# kartu}}",
     "emptyTitle": "Belum ada kartu",
-    "emptyBody": "Dukung proyek untuk mendapatkan koleksi pertama Anda.",
-    "browseProjects": "Jelajahi proyek"
+    "emptyBody": "Berdonasilah ke proyek saat masuk dan menampilkan nama Anda untuk mendapatkan kartu pertama.",
+    "browseProjects": "Jelajahi proyek",
+    "signedOutTitle": "Masuk untuk melihat kartu Anda",
+    "signedOutBody": "Kartu terhubung ke akun Anda agar tetap tersedia di berbagai peramban dan perangkat.",
+    "unavailableTitle": "Kartu Anda tidak dapat dimuat",
+    "unavailableBody": "Catatan donasi Anda aman. Coba muat kartu Anda lagi.",
+    "tryAgain": "Coba lagi",
+    "partialBody": "Beberapa catatan donasi atau detail proyek tidak dapat dimuat. Kartu yang ditampilkan telah diverifikasi, tetapi koleksi Anda mungkin belum lengkap.",
+    "fallbackProject": "Proyek yang didukung",
+    "fallbackOrganization": "Tim proyek",
+    "verifiedDonation": "Donasi terverifikasi",
+    "viewProject": "Lihat proyek",
+    "viewPayment": "Lihat pembayaran"
   }
 }

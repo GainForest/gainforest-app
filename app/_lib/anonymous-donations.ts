@@ -47,7 +47,7 @@ async function fetchRawReceipts(): Promise<RawReceiptRecord[]> {
   return cachedAsync("facilitator-raw-receipts", RAW_RECEIPTS_CACHE_MS, async () => {
     const host = getFacilitatorPdsHost();
     if (!host) return [];
-    const repo = process.env.NEXT_PUBLIC_FACILITATOR_DID || FACILITATOR_DID;
+    const repo = FACILITATOR_DID;
     const all: RawReceiptRecord[] = [];
     let cursor: string | null = null;
     for (let page = 0; page < MAX_PAGES; page += 1) {

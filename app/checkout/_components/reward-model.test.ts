@@ -7,6 +7,8 @@ const projectA: RewardLine = {
   orgName: "Organization A",
   amountUsd: 25,
   image: "/forest-a.jpg",
+  receiptUri: "at://did:plc:facilitator/org.hypercerts.funding.receipt/receipt-a",
+  cardEligible: true,
 };
 
 const projectB: RewardLine = {
@@ -14,6 +16,8 @@ const projectB: RewardLine = {
   title: "Forest B",
   orgName: "Organization B",
   amountUsd: 80,
+  receiptUri: "at://did:plc:facilitator/org.hypercerts.funding.receipt/receipt-b",
+  cardEligible: true,
 };
 
 const tip: RewardLine = {
@@ -24,35 +28,26 @@ const tip: RewardLine = {
 };
 
 describe("buildRewardCards", () => {
-  it("returns no rewards when no project donation settled", () => {
-    expect(buildRewardCards([tip])).toEqual([]);
+  it("returns no rewards for tips or settled lines without receipts", () => {
+    const unrecorded = { ...projectA, receiptUri: null, cardEligible: false };
+    expect(buildRewardCards([tip, unrecorded])).toEqual([]);
   });
 
-  it("creates one non-duplicated card for a single project", () => {
-    expect(buildRewardCards([projectA, tip])).toEqual([
+  it("creates one deterministic card per project funding receipt", () => {
+    expect(buildRewardCards([projectA, projectB, tip])).toEqual([
       {
-        id: "project-0",
+        id: projectA.receiptUri,
         variant: "project",
         lines: [projectA],
         totalUsd: 25,
       },
+      {
+        id: projectB.receiptUri,
+        variant: "project",
+        lines: [projectB],
+        totalUsd: 80,
+      },
     ]);
-  });
-
-  it("creates per-project cards and an overall card including the tip total", () => {
-    const cards = buildRewardCards([projectA, projectB, tip]);
-
-    expect(cards).toHaveLength(3);
-    expect(cards.slice(0, 2)).toEqual([
-      { id: "project-0", variant: "project", lines: [projectA], totalUsd: 25 },
-      { id: "project-1", variant: "project", lines: [projectB], totalUsd: 80 },
-    ]);
-    expect(cards[2]).toEqual({
-      id: "overall",
-      variant: "total",
-      lines: [projectA, projectB],
-      totalUsd: 115.5,
-    });
   });
 });
 

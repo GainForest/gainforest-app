@@ -6,7 +6,6 @@ import {
   computeDonorHash,
   isDidIdentifier,
   writeFundingReceipt,
-  type DidIdentifier,
   type ReceiptSender,
   type ReceiptText,
 } from "@/lib/facilitator/receipts";
@@ -23,7 +22,6 @@ type SettlementBody = {
   orgDid?: unknown;
   amount?: unknown;
   currency?: unknown;
-  donorDid?: unknown;
   anonymous?: unknown;
 };
 
@@ -32,7 +30,6 @@ type ParsedSettlementBody = {
   orgDid: string;
   amount?: string;
   currency?: "USDC";
-  donorDid?: string;
   anonymous: boolean;
 };
 
@@ -60,7 +57,6 @@ function parseBody(raw: unknown): { ok: true; body: ParsedSettlementBody } | { o
     return { ok: false, error: "Invalid donation amount" };
   }
   if (body.currency !== undefined && body.currency !== "USDC") return { ok: false, error: "This donation currency is not supported" };
-  if (body.donorDid !== undefined && typeof body.donorDid !== "string") return { ok: false, error: "Invalid supporter profile" };
   return {
     ok: true,
     body: {
@@ -69,7 +65,6 @@ function parseBody(raw: unknown): { ok: true; body: ParsedSettlementBody } | { o
       activityUri: typeof body.activityUri === "string" ? body.activityUri : undefined,
       amount: typeof body.amount === "string" ? body.amount : undefined,
       currency: body.currency === "USDC" ? "USDC" : undefined,
-      donorDid: typeof body.donorDid === "string" ? body.donorDid : undefined,
     },
   };
 }
@@ -103,18 +98,16 @@ export async function POST(request: Request) {
   if (!parsed.ok) return Response.json({ error: parsed.error }, { status: 400 });
   const body = parsed.body;
 
-  let donorDid: DidIdentifier | undefined;
-  if (!body.anonymous) {
-    if (typeof body.donorDid !== "string" || !isDidIdentifier(body.donorDid)) {
-      return Response.json(
-        {
-          code: "NON_ANONYMOUS_DONATION_REQUIRES_DONOR_DID",
-          error: "We couldn’t link this donation to your profile. Please sign in again or donate anonymously.",
-        },
-        { status: 422 },
-      );
-    }
-    donorDid = body.donorDid;
+  const session = await fetchAuthSession();
+  const attributedDonorDid = session.isLoggedIn && isDidIdentifier(session.did) ? session.did : null;
+  if (!body.anonymous && !attributedDonorDid) {
+    return Response.json(
+      {
+        code: "NON_ANONYMOUS_DONATION_REQUIRES_DONOR_DID",
+        error: "We couldn’t link this donation to your profile. Please sign in again or donate anonymously.",
+      },
+      { status: 422 },
+    );
   }
 
   let payload: ReturnType<typeof parsePaymentSignature>;
@@ -162,16 +155,14 @@ export async function POST(request: Request) {
   // Anonymous donations stay unattributed in the public record, but carry an
   // opaque owner hash (derived from the SESSION, never the request body) so
   // the donor can still see them on their own donations page.
-  let donorHash: string | null = null;
-  if (body.anonymous) {
-    const session = await fetchAuthSession();
-    if (session.isLoggedIn) donorHash = computeDonorHash(session.did, transactionHash);
-  }
+  const donorHash = body.anonymous && session.isLoggedIn
+    ? computeDonorHash(session.did, transactionHash)
+    : null;
 
   const donorRecordedAs = body.anonymous ? "wallet" : "did";
   const receiptSender: ReceiptSender = body.anonymous
     ? { $type: "org.hypercerts.funding.receipt#text", value: authorization.from }
-    : { $type: "app.certified.defs#did", did: donorDid! };
+    : { $type: "app.certified.defs#did", did: attributedDonorDid! };
   const receiptRecipient: ReceiptText = { $type: "org.hypercerts.funding.receipt#text", value: recipientWallet };
 
   let receiptSubject: { uri: string; cid: string } | undefined;
@@ -196,5 +187,6 @@ export async function POST(request: Request) {
     console.error("[fund] Failed to write funding receipt:", error);
   }
 
-  return Response.json({ success: true, transactionHash, receiptUri, donorRecordedAs });
+  const cardEligible = Boolean(!body.anonymous && receiptSubject && receiptUri);
+  return Response.json({ success: true, transactionHash, receiptUri, donorRecordedAs, cardEligible });
 }

@@ -1,10 +1,9 @@
 "use client";
 
 /**
- * The hand of collectibles a donor receives the moment their checkout settles:
- * one card per project they backed, plus an overall card for multi-project
- * gifts. The cards fan into a layered 3D carousel, the donor flicks between
- * them, then "collects" — one card or all of them.
+ * The hand of collectibles a donor receives after receipt-backed project
+ * donations settle. The cards fan into a layered 3D carousel, the donor flicks
+ * between them, then "collects" — one card or all of them.
  *
  * Collecting flies each card on a smooth upward-U arc into the account button
  * in the header (which has morphed into a rounded pocket). The card stays
@@ -26,7 +25,6 @@ import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useCollectAnimation } from "@/app/_components/rewards/collect-animation";
-import { collectedFromReward, useCollectedCards } from "@/app/_components/rewards/collected-cards";
 import { DonationRewardCard } from "./DonationRewardCard";
 import type { RewardCard } from "./reward-model";
 
@@ -264,7 +262,6 @@ function RewardFlight({
             totalUsd={card.totalUsd}
             animateEntrance={false}
             interactive={false}
-            overall={card.variant === "total"}
           />
         </motion.div>
       </motion.div>
@@ -275,27 +272,20 @@ function RewardFlight({
 
 export function RewardDeck({
   cards,
-  did,
-  persistence = "local",
   cardsHref = "/cards",
 }: {
   cards: RewardCard[];
-  /** Account DID the collected cards are saved under (null = browser-only guest collection). */
-  did: string | null;
-  persistence?: "local" | "memory";
   /** Mock experiences can adapt navigation without replacing production UI. */
   cardsHref?: string;
 }) {
   const t = useTranslations("cart.checkoutPage.reward");
   const reduceMotion = useReducedMotion();
   const { beginCollect, endCollect, pulse } = useCollectAnimation();
-  const { addCards } = useCollectedCards(did, persistence);
 
   const [remaining, setRemaining] = useState<RewardCard[]>(cards);
   const [index, setIndex] = useState(0);
   const [entered, setEntered] = useState(reduceMotion === true);
   const [busy, setBusy] = useState(false);
-  const [storedDurably, setStoredDurably] = useState(true);
   const [collectingIds, setCollectingIds] = useState<Set<string>>(new Set());
   const [flights, setFlights] = useState<Flight[]>([]);
   const [pocketRect, setPocketRect] = useState<DOMRect | null>(null);
@@ -338,8 +328,6 @@ export function RewardDeck({
   const collectImmediately = useCallback(
     (targets: RewardCard[]) => {
       const ids = new Set(targets.map((card) => card.id));
-      const collectedAt = Date.now();
-      setStoredDurably(addCards(targets.map((card) => collectedFromReward(card, collectedAt))));
       const next = remaining.filter((card) => !ids.has(card.id));
       setRemaining(next);
       setIndex((current) => clampIndex(current, next.length));
@@ -348,7 +336,7 @@ export function RewardDeck({
       setFlights([]);
       setBusy(false);
     },
-    [addCards, clampIndex, remaining],
+    [clampIndex, remaining],
   );
 
   const finalize = useCallback(() => {
@@ -380,8 +368,8 @@ export function RewardDeck({
       }
 
       // Header widens its pocket first; then the cards get vacuumed in. If the
-      // header target is unavailable, save immediately rather than stranding
-      // the checkout in a permanent busy state.
+      // target is unavailable, finish immediately rather than stranding the
+      // checkout in a permanent busy state.
       const pocket = await beginCollect();
       if (!pocket) {
         endCollect();
@@ -417,9 +405,7 @@ export function RewardDeck({
           <SparklesIcon className="size-6" aria-hidden />
         </span>
         <p className="font-instrument text-2xl italic text-foreground">{t("collectedTitle")}</p>
-        <p className="max-w-xs text-sm text-muted-foreground">
-          {t(storedDurably ? "collectedBody" : "collectedSessionBody")}
-        </p>
+        <p className="max-w-xs text-sm text-muted-foreground">{t("collectedBody")}</p>
         <Button asChild variant="outline" className="mt-1 shadow-none">
           <Link href={cardsHref}>{t("viewMyCards")}</Link>
         </Button>
@@ -434,7 +420,7 @@ export function RewardDeck({
       <div className="relative isolate flex w-full justify-center" style={{ perspective: 1400 }}>
         <div className="invisible" aria-hidden>
           {activeCard ? (
-            <DonationRewardCard lines={activeCard.lines} totalUsd={activeCard.totalUsd} animateEntrance={false} interactive={false} overall={activeCard.variant === "total"} />
+            <DonationRewardCard lines={activeCard.lines} totalUsd={activeCard.totalUsd} animateEntrance={false} interactive={false} />
           ) : null}
         </div>
 
@@ -490,7 +476,6 @@ export function RewardDeck({
                     totalUsd={card.totalUsd}
                     animateEntrance={false}
                     interactive={isActive}
-                    overall={card.variant === "total"}
                   />
                 </motion.div>
               </div>

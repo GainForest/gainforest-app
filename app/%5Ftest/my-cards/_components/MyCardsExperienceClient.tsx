@@ -5,21 +5,23 @@ import { ArrowLeftIcon, FlaskConicalIcon, ShieldCheckIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { MyCardsView } from "@/app/cards/_components/MyCardsView";
 import { buildRewardCards, type RewardLine } from "@/app/checkout/_components/reward-model";
-import { collectedFromReward } from "@/app/_components/rewards/collected-cards";
+import type { EarnedCard } from "@/app/_components/rewards/earned-card";
 
-// A settled multi-project checkout, replayed as a collection so the gallery
-// shows real collectibles (one per project plus the overall summary card).
+// Receipt-backed fixture data: one verified project receipt earns one card.
 const MOCK_LINES: RewardLine[] = [
-  { kind: "donation", title: "Cloud Forest Corridor", orgName: "Test Registry Org", amountUsd: 60, image: "/assets/media/images/landing/supporter-river.jpg" },
-  { kind: "donation", title: "Andes Cloudforest Watch", orgName: "Rainforest Trust", amountUsd: 40, image: null },
-  { kind: "donation", title: "Mangrove Belt Restoration", orgName: "Ocean Guardians", amountUsd: 120, image: null },
+  { kind: "donation", title: "Cloud Forest Corridor", orgName: "Test Registry Org", amountUsd: 60, image: "/assets/media/images/landing/supporter-river.jpg", receiptUri: "at://did:plc:test/org.hypercerts.funding.receipt/1", cardEligible: true, txHash: `0x${"1".padStart(64, "0")}` },
+  { kind: "donation", title: "Andes Cloudforest Watch", orgName: "Rainforest Trust", amountUsd: 40, image: null, receiptUri: "at://did:plc:test/org.hypercerts.funding.receipt/2", cardEligible: true, txHash: `0x${"2".padStart(64, "0")}` },
+  { kind: "donation", title: "Mangrove Belt Restoration", orgName: "Ocean Guardians", amountUsd: 120, image: null, receiptUri: "at://did:plc:test/org.hypercerts.funding.receipt/3", cardEligible: true, txHash: `0x${"3".padStart(64, "0")}` },
   { kind: "tip", title: "GainForest tip", orgName: "GainForest", amountUsd: 12, image: null },
 ];
 
-// Static timestamps keep the fixture ids stable across renders.
-const MOCK_COLLECTED = buildRewardCards(MOCK_LINES).map((card, index) =>
-  collectedFromReward(card, 1_720_000_000_000 + index),
-);
+const MOCK_CARDS: EarnedCard[] = buildRewardCards(MOCK_LINES).map((card, index) => ({
+  ...card,
+  receiptUri: card.lines[0]!.receiptUri!,
+  earnedAt: new Date(Date.UTC(2024, 6, 4 + index)).toISOString(),
+  projectHref: "/projects",
+  paymentHref: null,
+}));
 
 export function MyCardsExperienceClient() {
   const t = useTranslations("cart.testRegistry");
@@ -58,7 +60,7 @@ export function MyCardsExperienceClient() {
         </aside>
 
         <section className="mt-8 overflow-hidden rounded-[2rem] border border-border-soft bg-surface shadow-sm">
-          <MyCardsView cards={MOCK_COLLECTED} />
+          <MyCardsView cards={MOCK_CARDS} />
         </section>
       </div>
     </main>

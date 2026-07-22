@@ -39,8 +39,8 @@
     "encouragement": "Nice! Your donation supports community-led conservation.",
     "donorTitle": "How your donation appears",
     "anonymousLabel": "Donate anonymously",
-    "anonymousHint": "Anonymous donations never appear publicly under your name — you can still see them on your own profile.",
-    "signedOutNote": "You are not signed in, so your donations will appear as anonymous.",
+    "anonymousHint": "Anonymous donations never appear publicly under your name. You can still see them on your profile, but they do not earn cards.",
+    "signedOutNote": "You are not signed in, so your donations will appear as anonymous and will not earn cards.",
     "walletTitle": "Payment wallet",
     "walletHint": "Donations are paid in USDC on Ethereum. Connect your wallet to continue — network fees are covered for you.",
     "connectWallet": "Connect wallet",
@@ -80,6 +80,7 @@
     "successSummary": "Your {amount} in donations was completed successfully.",
     "recordedWithProfile": "Recorded with your GainForest profile.",
     "recordedAnonymous": "Recorded as anonymous.",
+    "receiptIssue": "Your payment completed, but one or more public donation records could not be created. Those donations will not appear in My Cards.",
     "paymentDetails": "Payment details",
     "shareTitle": "Share this with others",
     "shareText": "I just donated {amount} to support nature projects on GainForest: {url}",
@@ -130,8 +131,7 @@
       "deckHint": "Flick through your collectibles",
       "cardPosition": "Card {current} of {total}",
       "collectedTitle": "All collected!",
-      "collectedBody": "Your cards are saved to My Cards.",
-      "collectedSessionBody": "Your cards are available in My Cards for this browser session.",
+      "collectedBody": "Your verified cards are ready in My Cards.",
       "viewMyCards": "View My Cards"
     }
   },
@@ -170,10 +170,21 @@
   "myCards": {
     "eyebrow": "Collectibles",
     "title": "My Cards",
-    "description": "The holographic collectibles you've earned by supporting projects.",
+    "description": "Every card comes from a verified project donation receipt linked to your account.",
     "count": "{count, plural, one {# card} other {# cards}}",
     "emptyTitle": "No cards yet",
-    "emptyBody": "Support a project to earn your first collectible.",
-    "browseProjects": "Browse projects"
+    "emptyBody": "Donate to a project while signed in and showing your name to earn your first card.",
+    "browseProjects": "Browse projects",
+    "signedOutTitle": "Sign in to see your cards",
+    "signedOutBody": "Cards are linked to your account so they stay available across browsers and devices.",
+    "unavailableTitle": "Your cards couldn't be loaded",
+    "unavailableBody": "Your donation records are safe. Please try loading your cards again.",
+    "tryAgain": "Try again",
+    "partialBody": "Some donation records or project details could not be loaded. The cards shown here are verified, but your collection may be incomplete.",
+    "fallbackProject": "Supported project",
+    "fallbackOrganization": "Project team",
+    "verifiedDonation": "Verified donation",
+    "viewProject": "View project",
+    "viewPayment": "View payment"
   }
 }

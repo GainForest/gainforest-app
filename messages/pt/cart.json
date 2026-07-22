@@ -39,8 +39,8 @@
     "encouragement": "Que bom! Sua doação apoia a conservação liderada pelas comunidades.",
     "donorTitle": "Como sua doação aparece",
     "anonymousLabel": "Doar anonimamente",
-    "anonymousHint": "Doações anônimas nunca aparecem publicamente com o seu nome — você ainda pode vê-las no seu próprio perfil.",
-    "signedOutNote": "Você não está conectado, então suas doações aparecerão como anônimas.",
+    "anonymousHint": "Doações anônimas nunca aparecem publicamente no seu nome. Você ainda pode vê-las no seu perfil, mas elas não geram cartas.",
+    "signedOutNote": "Você não está conectado, então suas doações aparecerão como anônimas e não gerarão cartas.",
     "walletTitle": "Carteira de pagamento",
     "walletHint": "As doações são pagas em USDC na Ethereum. Conecte sua carteira para continuar — as taxas de rede são cobertas para você.",
     "connectWallet": "Conectar carteira",
@@ -80,6 +80,7 @@
     "successSummary": "Suas doações de {amount} foram concluídas com sucesso.",
     "recordedWithProfile": "Registrado com seu perfil GainForest.",
     "recordedAnonymous": "Registrado como anônimo.",
+    "receiptIssue": "Seu pagamento foi concluído, mas um ou mais registros públicos de doação não puderam ser criados. Essas doações não aparecerão em Minhas cartas.",
     "paymentDetails": "Detalhes do pagamento",
     "shareTitle": "Compartilhe com outras pessoas",
     "shareText": "Acabei de doar {amount} para apoiar projetos de natureza na GainForest: {url}",
@@ -130,8 +131,7 @@
       "deckHint": "Deslize para ver seus colecionáveis",
       "cardPosition": "Carta {current} de {total}",
       "collectedTitle": "Tudo colecionado!",
-      "collectedBody": "Suas cartas estão salvas em Minhas cartas.",
-      "collectedSessionBody": "Suas cartas estão disponíveis em Minhas cartas durante esta sessão do navegador.",
+      "collectedBody": "Suas cartas verificadas estão prontas em Minhas cartas.",
       "viewMyCards": "Ver Minhas cartas"
     }
   },
@@ -170,10 +170,21 @@
   "myCards": {
     "eyebrow": "Colecionáveis",
     "title": "Minhas cartas",
-    "description": "Os colecionáveis holográficos que você ganhou ao apoiar projetos.",
+    "description": "Cada carta vem de um recibo verificado de doação a projeto vinculado à sua conta.",
     "count": "{count, plural, one {# carta} other {# cartas}}",
     "emptyTitle": "Ainda não há cartas",
-    "emptyBody": "Apoie um projeto para ganhar seu primeiro colecionável.",
-    "browseProjects": "Explorar projetos"
+    "emptyBody": "Doe para um projeto com a sessão iniciada e mostrando seu nome para ganhar sua primeira carta.",
+    "browseProjects": "Explorar projetos",
+    "signedOutTitle": "Entre para ver suas cartas",
+    "signedOutBody": "As cartas ficam vinculadas à sua conta para continuarem disponíveis em outros navegadores e dispositivos.",
+    "unavailableTitle": "Não foi possível carregar suas cartas",
+    "unavailableBody": "Seus registros de doação estão seguros. Tente carregar suas cartas novamente.",
+    "tryAgain": "Tentar novamente",
+    "partialBody": "Alguns registros de doação ou detalhes de projetos não puderam ser carregados. As cartas exibidas são verificadas, mas sua coleção pode estar incompleta.",
+    "fallbackProject": "Projeto apoiado",
+    "fallbackOrganization": "Equipe do projeto",
+    "verifiedDonation": "Doação verificada",
+    "viewProject": "Ver projeto",
+    "viewPayment": "Ver pagamento"
   }
 }

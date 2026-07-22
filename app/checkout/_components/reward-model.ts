@@ -1,11 +1,9 @@
 /**
  * Shared, framework-free model for donation reward cards.
  *
- * A single donation checkout mints several collectibles: one card per
- * org/project that received a donation, plus one "overall" card summarising
- * the whole contribution. This module derives that set from the settled lines
- * the checkout already has, so the reward deck (post-checkout), the header
- * collect animation, and the "My Cards" gallery all agree on the same shape.
+ * Cards are views of verified project-funding receipts: one receipt earns one
+ * card. This module keeps checkout presentation and the receipt-backed gallery
+ * on the same shape without treating a browser action as card issuance.
  */
 
 export type RewardLine = {
@@ -14,6 +12,14 @@ export type RewardLine = {
   orgName: string;
   amountUsd: number;
   image?: string | null;
+  /** Public funding receipt that proves this contribution. */
+  receiptUri?: string | null;
+  /** The receipt is publicly attributed and strongly linked to a project. */
+  cardEligible?: boolean;
+  /** Settled payment represented by the receipt. */
+  txHash?: string | null;
+  /** Receipt timestamp, when available. */
+  occurredAt?: string | null;
 };
 
 export type TierKey = "seedling" | "sapling" | "grove" | "canopy" | "oldGrowth";
@@ -45,10 +51,10 @@ export function tierForAmount(amountUsd: number): Tier {
 
 /** One collectible in a checkout's reward set. */
 export type RewardCard = {
-  /** Stable id within the set (also used as the persisted card id). */
+  /** Deterministic identity derived from the funding receipt/payment. */
   id: string;
-  /** Per-project collectible, or the overall summary of the whole checkout. */
-  variant: "project" | "total";
+  /** Kept explicit so the visual model cannot silently mix card types. */
+  variant: "project";
   /** Donation lines represented on this card (one for a project, all for the total). */
   lines: RewardLine[];
   /** Amount shown on the card, in USD. */
@@ -56,33 +62,23 @@ export type RewardCard = {
 };
 
 /**
- * Build the reward set for a completed checkout:
- * one card per settled donation line, plus a final "overall" card when more
- * than one project was supported. Tips fold into the overall total but never
- * mint their own card.
+ * Build the reward set for a completed checkout. A settled transfer alone is
+ * not enough: the line must carry a successfully written project funding
+ * receipt. Tips and unbacked summary cards never become collectibles.
  */
 export function buildRewardCards(lines: RewardLine[]): RewardCard[] {
-  const donationLines = lines.filter((line) => line.kind === "donation");
-  if (donationLines.length === 0) return [];
-
-  const cards: RewardCard[] = donationLines.map((line, index) => ({
-    id: `project-${index}`,
-    variant: "project",
-    lines: [line],
-    totalUsd: line.amountUsd,
-  }));
-
-  // The overall card only earns its place once several projects were backed;
-  // with a single project it would just duplicate the one project card.
-  if (donationLines.length > 1) {
-    const grandTotal = lines.reduce((total, line) => total + line.amountUsd, 0);
-    cards.push({
-      id: "overall",
-      variant: "total",
-      lines: donationLines,
-      totalUsd: Math.round(grandTotal * 100) / 100,
-    });
-  }
-
-  return cards;
+  return lines.flatMap((line) => {
+    if (
+      line.kind !== "donation" ||
+      line.cardEligible !== true ||
+      typeof line.receiptUri !== "string" ||
+      line.receiptUri.length === 0
+    ) return [];
+    return [{
+      id: line.receiptUri,
+      variant: "project" as const,
+      lines: [line],
+      totalUsd: line.amountUsd,
+    }];
+  });
 }

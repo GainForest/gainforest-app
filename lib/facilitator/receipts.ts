@@ -4,7 +4,7 @@
  * batched /api/checkout settlement.
  */
 
-import { createHmac } from "node:crypto";
+import { createHash, createHmac } from "node:crypto";
 import { FACILITATOR_DID } from "@/app/_lib/urls";
 import { PAYMENT_NETWORK, PAYMENT_RAIL } from "./usdc";
 
@@ -48,7 +48,7 @@ function getFacilitatorServiceHost(): string {
 
 async function createFacilitatorSession(): Promise<string> {
   const serviceHost = getFacilitatorServiceHost();
-  const identifier = process.env.NEXT_PUBLIC_FACILITATOR_DID || FACILITATOR_DID;
+  const identifier = FACILITATOR_DID;
   const password = process.env.FACILITATOR_PASSWORD;
   if (!password) throw new Error("FACILITATOR_PASSWORD env var is not set");
 
@@ -56,30 +56,69 @@ async function createFacilitatorSession(): Promise<string> {
     method: "POST",
     headers: { "content-type": "application/json" },
     body: JSON.stringify({ identifier, password }),
+    signal: AbortSignal.timeout(15_000),
   });
   const json = (await response.json().catch(() => null)) as { accessJwt?: string; message?: string } | null;
   if (!response.ok || !json?.accessJwt) throw new Error(json?.message || "Unable to prepare donation service");
   return json.accessJwt;
 }
 
-async function createReceiptRecord(record: Record<string, unknown>): Promise<string | null> {
+const RECEIPT_COLLECTION = "org.hypercerts.funding.receipt";
+const RECEIPT_RETRY_DELAYS_MS = [0, 200, 600] as const;
+
+const TID_FIRST_ALPHABET = "234567abcdefghij";
+const TID_ALPHABET = "234567abcdefghijklmnopqrstuvwxyz";
+
+/** A deterministic, lexicon-valid TID-shaped key derived from the payment. */
+export function receiptRkeyForTransaction(transactionHash: string): string {
+  const digest = createHash("sha256").update(transactionHash.toLowerCase()).digest();
+  let rkey = TID_FIRST_ALPHABET[digest[0] & 0x0f];
+  for (let index = 1; index < 13; index += 1) {
+    rkey += TID_ALPHABET[digest[index] & 0x1f];
+  }
+  return rkey;
+}
+
+async function putReceiptRecordOnce(
+  record: Record<string, unknown>,
+  transactionHash: string,
+): Promise<string> {
   const serviceHost = getFacilitatorServiceHost();
+  const repo = FACILITATOR_DID;
+  const rkey = receiptRkeyForTransaction(transactionHash);
   const token = await createFacilitatorSession();
-  const response = await fetch(`${serviceHost}/xrpc/com.atproto.repo.createRecord`, {
+  const response = await fetch(`${serviceHost}/xrpc/com.atproto.repo.putRecord`, {
     method: "POST",
     headers: {
       "content-type": "application/json",
       authorization: `Bearer ${token}`,
     },
-    body: JSON.stringify({
-      repo: process.env.NEXT_PUBLIC_FACILITATOR_DID || FACILITATOR_DID,
-      collection: "org.hypercerts.funding.receipt",
-      record,
-    }),
+    body: JSON.stringify({ repo, collection: RECEIPT_COLLECTION, rkey, record }),
+    signal: AbortSignal.timeout(15_000),
   });
   const json = (await response.json().catch(() => null)) as { uri?: string; message?: string } | null;
-  if (!response.ok) throw new Error(json?.message || "Unable to prepare public donation note");
-  return json?.uri ?? null;
+  const expectedUri = `at://${repo}/${RECEIPT_COLLECTION}/${rkey}`;
+  if (!response.ok || json?.uri !== expectedUri) {
+    throw new Error(json?.message || "Unable to prepare public donation note");
+  }
+  return expectedUri;
+}
+
+/** Idempotent across retries: a transaction always writes the same AT record. */
+async function putReceiptRecord(
+  record: Record<string, unknown>,
+  transactionHash: string,
+): Promise<string> {
+  let lastError: unknown;
+  for (const delay of RECEIPT_RETRY_DELAYS_MS) {
+    if (delay > 0) await new Promise((resolve) => setTimeout(resolve, delay));
+    try {
+      return await putReceiptRecordOnce(record, transactionHash);
+    } catch (error) {
+      lastError = error;
+    }
+  }
+  throw lastError instanceof Error ? lastError : new Error("Unable to prepare public donation note");
 }
 
 export async function writeFundingReceipt(params: {
@@ -93,7 +132,7 @@ export async function writeFundingReceipt(params: {
   donorHash?: string | null;
 }): Promise<string | null> {
   const now = new Date().toISOString();
-  return createReceiptRecord({
+  return putReceiptRecord({
     $type: "org.hypercerts.funding.receipt",
     from: params.from,
     to: params.to,
@@ -110,7 +149,7 @@ export async function writeFundingReceipt(params: {
     // dashboards, admin stats), making new donations look missing.
     createdAt: now,
     ...(params.donorHash ? { donorHash: params.donorHash } : {}),
-  });
+  }, params.transactionHash);
 }
 
 export async function writeTipReceipt(params: {
@@ -124,7 +163,7 @@ export async function writeTipReceipt(params: {
 }): Promise<string | null> {
   const fromLabel = params.from.$type === "app.certified.defs#did" ? params.from.did : params.from.value;
   const now = new Date().toISOString();
-  return createReceiptRecord({
+  return putReceiptRecord({
     $type: "org.hypercerts.funding.receipt",
     from: params.from,
     to: { $type: "org.hypercerts.funding.receipt#text", value: params.toWallet },
@@ -138,5 +177,5 @@ export async function writeTipReceipt(params: {
     // Required by the org.hypercerts.funding.receipt lexicon (see above).
     createdAt: now,
     ...(params.donorHash ? { donorHash: params.donorHash } : {}),
-  });
+  }, params.transactionHash);
 }

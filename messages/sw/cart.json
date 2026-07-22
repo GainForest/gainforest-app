@@ -39,8 +39,8 @@
     "encouragement": "Vizuri! Mchango wako unaunga mkono uhifadhi unaoongozwa na jamii.",
     "donorTitle": "Jinsi mchango wako unavyoonekana",
     "anonymousLabel": "Changia bila kutajwa jina",
-    "anonymousHint": "Michango isiyo na jina haionekani kamwe hadharani kwa jina lako — bado utaiona kwenye wasifu wako mwenyewe.",
-    "signedOutNote": "Hujaingia, kwa hivyo michango yako itaonekana kama isiyojulikana.",
+    "anonymousHint": "Michango isiyo na jina haionekani hadharani kwa jina lako. Bado unaweza kuiona kwenye wasifu wako, lakini haikupi kadi.",
+    "signedOutNote": "Hujaingia, kwa hivyo michango yako itaonekana bila jina na haitakupa kadi.",
     "walletTitle": "Pochi ya malipo",
     "walletHint": "Michango hulipwa kwa USDC kwenye Ethereum. Unganisha pochi yako ili kuendelea — ada za mtandao zinalipiwa kwa niaba yako.",
     "connectWallet": "Unganisha pochi",
@@ -80,6 +80,7 @@
     "successSummary": "Michango yako ya {amount} imekamilika kwa mafanikio.",
     "recordedWithProfile": "Imerekodiwa na wasifu wako wa GainForest.",
     "recordedAnonymous": "Imerekodiwa kama isiyojulikana.",
+    "receiptIssue": "Malipo yako yamekamilika, lakini rekodi moja au zaidi za umma za mchango hazikuweza kuundwa. Michango hiyo haitaonekana kwenye Kadi Zangu.",
     "paymentDetails": "Maelezo ya malipo",
     "shareTitle": "Shiriki hii na wengine",
     "shareText": "Nimetoa mchango wa {amount} kuunga mkono miradi ya asili kwenye GainForest: {url}",
@@ -130,8 +131,7 @@
       "deckHint": "Telezesha ili kuona kadi zako",
       "cardPosition": "Kadi ya {current} kati ya {total}",
       "collectedTitle": "Zote zimekusanywa!",
-      "collectedBody": "Kadi zako zimehifadhiwa kwenye Kadi Zangu.",
-      "collectedSessionBody": "Kadi zako zinapatikana kwenye Kadi Zangu kwa kipindi hiki cha kivinjari.",
+      "collectedBody": "Kadi zako zilizothibitishwa ziko tayari kwenye Kadi Zangu.",
       "viewMyCards": "Tazama Kadi Zangu"
     }
   },
@@ -170,10 +170,21 @@
   "myCards": {
     "eyebrow": "Kadi za kukusanya",
     "title": "Kadi Zangu",
-    "description": "Kadi za hologramu ulizopata kwa kusaidia miradi.",
+    "description": "Kila kadi hutokana na risiti ya mchango wa mradi iliyothibitishwa na kuunganishwa na akaunti yako.",
     "count": "{count, plural, one {kadi #} other {kadi #}}",
     "emptyTitle": "Bado hakuna kadi",
-    "emptyBody": "Saidia mradi ili kupata kadi yako ya kwanza.",
-    "browseProjects": "Vinjari miradi"
+    "emptyBody": "Changia mradi ukiwa umeingia na ukionyesha jina lako ili kupata kadi yako ya kwanza.",
+    "browseProjects": "Vinjari miradi",
+    "signedOutTitle": "Ingia ili kuona kadi zako",
+    "signedOutBody": "Kadi huunganishwa na akaunti yako ili zipatikane katika vivinjari na vifaa tofauti.",
+    "unavailableTitle": "Kadi zako hazikuweza kupakiwa",
+    "unavailableBody": "Rekodi zako za michango ziko salama. Tafadhali jaribu kupakia kadi zako tena.",
+    "tryAgain": "Jaribu tena",
+    "partialBody": "Baadhi ya rekodi za michango au maelezo ya miradi hayakuweza kupakiwa. Kadi zinazoonyeshwa zimethibitishwa, lakini mkusanyiko wako unaweza kutokamilika.",
+    "fallbackProject": "Mradi uliosaidiwa",
+    "fallbackOrganization": "Timu ya mradi",
+    "verifiedDonation": "Mchango uliothibitishwa",
+    "viewProject": "Tazama mradi",
+    "viewPayment": "Tazama malipo"
   }
 }

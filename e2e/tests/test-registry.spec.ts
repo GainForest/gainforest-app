@@ -10,24 +10,6 @@ const FORBIDDEN_DONATION_PATHS = new Set([
 const WHATS_NEW_STORAGE_KEY = "gainforest.floatingTaina.whatsNewSeen.v1";
 const WHATS_NEW_RELEASE_ID = "2026-07-06";
 
-const GUEST_CARD = {
-  id: "project-0-1720000000000",
-  variant: "project",
-  title: "Cloud Forest Corridor",
-  orgName: "Forest Team",
-  totalUsd: 80,
-  image: null,
-  tier: "grove",
-  lines: [{
-    kind: "donation",
-    title: "Cloud Forest Corridor",
-    orgName: "Forest Team",
-    amountUsd: 80,
-    image: null,
-  }],
-  collectedAt: 1_720_000_000_000,
-};
-
 test("Tainá's What's New stays quiet across refreshes", async ({ page }) => {
   await page.addInitScript((storageKey) => {
     const setupKey = `${storageKey}.e2ePrepared`;
@@ -93,15 +75,15 @@ test("Tainá's What's New stays quiet across refreshes", async ({ page }) => {
   await expect(page.getByRole("heading", { name: "A few things just got better" })).toHaveCount(0);
 });
 
-test("signed-out donors can reopen browser-saved cards in the real gallery", async ({ page }) => {
-  await page.addInitScript((card) => {
-    window.localStorage.setItem("gainforest.reward-cards.v1:guest", JSON.stringify([card]));
-  }, GUEST_CARD);
+test("signed-out card galleries ignore browser-injected collectibles", async ({ page }) => {
+  await page.addInitScript(() => {
+    window.localStorage.setItem("gainforest.reward-cards.v1:guest", JSON.stringify([{ title: "Fake card" }]));
+  });
 
   await page.goto("/cards");
   await expect(page.getByRole("heading", { name: "My Cards", exact: true })).toBeVisible();
-  await expect(page.getByText("Cloud Forest Corridor", { exact: true })).toBeVisible();
-  await expect(page.getByText("1 card", { exact: true })).toBeVisible();
+  await expect(page.getByText("Sign in to see your cards", { exact: true })).toBeVisible();
+  await expect(page.getByText("Fake card", { exact: true })).toHaveCount(0);
 });
 
 test("donation registry mirrors the production flow without live side effects", async ({ page }) => {
@@ -172,7 +154,7 @@ test("donation registry mirrors the production flow without live side effects", 
 
   await expect(page.getByText("Thank you", { exact: true })).toBeVisible({ timeout: 10_000 });
   await expect(page.getByText("Your $203.50 in donations was completed successfully.")).toBeVisible();
-  await expect(page.getByRole("button", { name: "Collect all (4)" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Collect all (3)" })).toBeVisible();
 
   // Every flight must have its own painted mouth mask before its gulp begins.
   // This catches the multi-card regression where only the final card clipped.
@@ -198,7 +180,7 @@ test("donation registry mirrors the production flow without live side effects", 
     Reflect.set(window, "__rewardMaskObserver", observer);
   });
 
-  await page.getByRole("button", { name: "Collect all (4)" }).click();
+  await page.getByRole("button", { name: "Collect all (3)" }).click();
   await expect(page.getByText("All collected!", { exact: true })).toBeVisible({ timeout: 10_000 });
   await expect(page.getByRole("link", { name: "View My Cards" })).toHaveAttribute("href", "/_test/my-cards");
   const rewardMaskAudit = await page.evaluate(() => {
@@ -206,7 +188,7 @@ test("donation registry mirrors the production flow without live side effects", 
     observer.disconnect();
     return Reflect.get(window, "__rewardMaskAudit") as Array<{ cardId: string; overflow: string; height: number }>;
   });
-  expect(rewardMaskAudit).toHaveLength(4);
+  expect(rewardMaskAudit).toHaveLength(3);
   expect(rewardMaskAudit.every((entry) => entry.overflow === "hidden" && entry.height > 0)).toBe(true);
 
   const safetyState = await page.evaluate(() => ({

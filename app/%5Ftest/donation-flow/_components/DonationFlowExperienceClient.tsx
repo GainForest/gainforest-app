@@ -22,8 +22,7 @@ const MOCK_SESSION: AuthSession = {
 };
 
 // Companion donations added alongside the hero project so the checkout settles
-// several lines — the reward deck then mints one card per project plus an
-// overall card, exercising the flick + collect flow end to end.
+// several receipt-backed lines and exercises the full card stack end to end.
 const MOCK_COMPANIONS: CartItem[] = [
   {
     kind: "project",
