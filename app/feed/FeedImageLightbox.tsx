@@ -143,7 +143,7 @@ export function FeedImageLightbox({
             <p className="text-[15px] font-medium leading-snug text-foreground">{item.title}</p>
           ) : null}
           {item.text ? (
-            <p className="mt-0.5 line-clamp-2 text-sm text-muted-foreground">
+            <p className="mt-0.5 line-clamp-2 whitespace-pre-wrap break-words text-sm text-muted-foreground">
               <MentionText text={item.text} mentions={item.mentions} />
             </p>
           ) : null}
