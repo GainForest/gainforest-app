@@ -92,7 +92,7 @@ export function StewardTools({ did, accountName, initialTestFlagged, initialAwar
   }
 
   return (
-    <section className="mb-4 overflow-hidden rounded-2xl bg-muted/25">
+    <section className="mb-4 overflow-hidden rounded-2xl bg-muted">
       <button
         type="button"
         onClick={() => setOpen((value) => !value)}
@@ -194,7 +194,7 @@ export function StewardTools({ did, accountName, initialTestFlagged, initialAwar
 
           {/* Recognition badges */}
           <div>
-            <h3 className="mb-2 text-sm font-medium text-foreground">{t("badges")}</h3>
+            <h3 className="mb-2 font-instrument text-lg font-light italic text-foreground">{t("badges")}</h3>
             <div className="flex flex-wrap gap-2">
               {MANUAL_RECOGNITION_BADGE_KEYS.map((key) => {
                 const Icon = recognitionBadgeIcon(key);

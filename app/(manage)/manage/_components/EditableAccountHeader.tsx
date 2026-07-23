@@ -368,7 +368,7 @@ function EditableHero({
   const sinceDate = formatSinceDate(editState.startDate);
 
   return (
-    <section className="overflow-hidden rounded-3xl border border-border/60 bg-card">
+    <section className="overflow-hidden rounded-3xl bg-muted">
       {/* Cover band — click anywhere to change; icon reveals on hover/focus */}
       <div className="relative h-32 sm:h-40 md:h-44">
         <button

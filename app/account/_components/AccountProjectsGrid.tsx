@@ -108,7 +108,7 @@ function ProjectCard({ project, onOpen }: { project: ProjectRecord; onOpen: () =
     <button
       type="button"
       onClick={onOpen}
-      className="group flex h-full w-full flex-col overflow-hidden rounded-2xl bg-muted/45 text-left transition-colors hover:bg-muted/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60"
+      className="group flex h-full w-full flex-col overflow-hidden rounded-2xl bg-muted/65 text-left transition-colors hover:bg-muted/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60"
     >
       <div className="relative aspect-[16/10] overflow-hidden bg-muted">
         {hasImage ? (

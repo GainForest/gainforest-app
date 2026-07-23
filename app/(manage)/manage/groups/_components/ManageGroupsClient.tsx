@@ -49,7 +49,7 @@ function OrgCard({ group }: { group: CgsGroupMembership }) {
   return (
     <Link
       href={groupHref(group)}
-      className="group relative flex flex-col overflow-hidden rounded-3xl border border-border/60 bg-card transition-all duration-300 hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-[0_18px_44px_-18px_oklch(0_0_0/0.28)] motion-reduce:transform-none motion-reduce:transition-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
+      className="group relative flex flex-col overflow-hidden rounded-3xl bg-muted transition-colors duration-300 hover:bg-muted/80 motion-reduce:transition-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
     >
       <div className="relative h-20 overflow-hidden">
         {group.avatarUrl ? (
@@ -101,7 +101,7 @@ function CreateOrgCard() {
   return (
     <Link
       href="/manage?mode=onboard-org"
-      className="group flex min-h-[220px] flex-col items-center justify-center gap-2.5 rounded-3xl border border-dashed border-border/70 bg-card/40 p-5 text-center transition-all duration-300 hover:-translate-y-0.5 hover:border-primary/50 hover:bg-primary/5 motion-reduce:transform-none motion-reduce:transition-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
+      className="group flex min-h-[220px] flex-col items-center justify-center gap-2.5 rounded-3xl border border-dashed border-border/70 bg-muted p-5 text-center transition-colors duration-300 hover:bg-muted/80 motion-reduce:transition-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
     >
       <span className="flex size-14 items-center justify-center rounded-2xl bg-primary/10 text-primary transition-colors group-hover:bg-primary group-hover:text-primary-foreground">
         <PlusIcon className="size-6" />
@@ -135,7 +135,7 @@ function EmptyChoiceCard({
 }) {
   return (
     <Link href={href} className="group block focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50">
-      <article className="relative h-[320px] overflow-hidden rounded-2xl border border-border bg-card shadow-lg shadow-foreground/5 transition-all duration-500 hover:-translate-y-1 hover:border-primary/20 hover:shadow-xl motion-reduce:transform-none motion-reduce:transition-none sm:h-[360px]">
+      <article className="relative h-[320px] overflow-hidden rounded-2xl bg-muted transition-colors duration-300 hover:bg-muted/80 motion-reduce:transition-none sm:h-[360px]">
         <Image
           src={image}
           alt={alt}

@@ -96,7 +96,7 @@ export function MintCertProjectGate({ target }: { target: ManageTarget }) {
           <Loader2Icon className="size-4 animate-spin" /> {t("loading")}
         </div>
       ) : error ? (
-        <div className="mt-8 flex flex-col items-center justify-center gap-4 rounded-3xl bg-muted/30 px-6 py-12 text-center">
+        <div className="mt-8 flex flex-col items-center justify-center gap-4 rounded-3xl bg-muted px-6 py-12 text-center">
           <TriangleAlertIcon className="size-8 text-muted-foreground opacity-70" />
           <p className="text-sm text-muted-foreground">{error}</p>
           <Button type="button" variant="outline" size="sm" onClick={() => void load()}>
@@ -104,7 +104,7 @@ export function MintCertProjectGate({ target }: { target: ManageTarget }) {
           </Button>
         </div>
       ) : projects.length === 0 ? (
-        <div className="mt-8 flex flex-col items-center justify-center rounded-[2rem] border border-dashed border-border bg-muted/20 px-6 py-12 text-center">
+        <div className="mt-8 flex flex-col items-center justify-center rounded-[2rem] border border-dashed border-border bg-muted px-6 py-12 text-center">
           <FolderKanbanIcon className="mb-4 size-10 text-primary" />
           <h2 className="font-instrument text-2xl font-light italic tracking-[-0.02em] text-foreground">{t("noProjectsTitle")}</h2>
           <p className="mt-2 max-w-md text-sm leading-6 text-muted-foreground">{t("noProjectsDescription")}</p>

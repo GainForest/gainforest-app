@@ -542,7 +542,7 @@ function DeleteGalleryImageModal({
   return (
     <ModalContent dismissible={!pending} className="space-y-4">
       <ModalHeader>
-        <ModalTitle>{t("upload.removeImage", { index: imageNumber })}</ModalTitle>
+        <ModalTitle className="font-instrument font-light italic">{t("upload.removeImage", { index: imageNumber })}</ModalTitle>
         <ModalDescription>{t("cleanup.body")} {projectTitle}</ModalDescription>
       </ModalHeader>
       {error ? (
@@ -644,7 +644,7 @@ function ErrorState({ message, onRetry }: { message: string; onRetry: () => void
   const t = useTranslations("common.projectGallery");
   const actionT = useTranslations("marketplace.manageProjectCerts.actions");
   return (
-    <div className="flex min-h-[18rem] flex-col items-center justify-center rounded-[2rem] bg-muted/30 px-6 text-center">
+    <div className="flex min-h-[18rem] flex-col items-center justify-center rounded-[2rem] bg-muted px-6 text-center">
       <TriangleAlertIcon className="mb-4 size-9 text-muted-foreground opacity-70" />
       <h2 className="font-instrument text-2xl font-medium italic tracking-[-0.02em]">{t("defaultTitle")}</h2>
       <p className="mt-2 max-w-sm text-sm leading-6 text-muted-foreground">{message}</p>

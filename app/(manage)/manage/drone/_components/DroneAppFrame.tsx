@@ -17,7 +17,7 @@ export function DroneAppFrame({ src, title, organizationName }: DroneAppFramePro
 
   return (
     <section className="flex min-h-[calc(100dvh-3.5rem)] flex-col gap-3 px-3 pb-3 pt-2 sm:px-4">
-      <div className="flex flex-col gap-3 rounded-3xl bg-muted/25 p-4 md:flex-row md:items-center md:justify-between">
+      <div className="flex flex-col gap-3 rounded-3xl bg-muted p-4 md:flex-row md:items-center md:justify-between">
         <div className="min-w-0">
           <h1 className="flex items-center gap-2 font-instrument text-3xl font-light italic leading-tight tracking-[-0.02em] text-foreground">
             <DroneIcon className="size-5" />

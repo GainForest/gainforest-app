@@ -137,7 +137,7 @@ function TainaRow({ row, allowanceUsd }: { row: AdminTainaRow; allowanceUsd: num
       </div>
 
       {composing ? (
-        <div className="mt-3 rounded-2xl bg-muted/30 p-3 sm:ml-13">
+        <div className="mt-3 rounded-2xl bg-muted p-3 sm:ml-13">
           <Textarea
             value={text}
             maxLength={4000}

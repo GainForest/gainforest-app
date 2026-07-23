@@ -93,7 +93,7 @@ export function AdminModerationDashboard({
     <section>
       <nav
         aria-label={t("ariaLabel")}
-        className="mb-5 flex gap-1.5 overflow-x-auto rounded-full bg-muted/40 p-1.5"
+        className="mb-5 flex gap-1.5 overflow-x-auto rounded-full bg-muted p-1.5"
       >
         {tabs.map((entry) => {
           const active = entry.id === tab;
@@ -239,7 +239,7 @@ function AdminPanel({
           <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-primary/[0.08] text-primary">
             <Icon className="size-4" />
           </span>
-          <h2 className="text-base font-semibold text-foreground">{title}</h2>
+          <h2 className="font-instrument text-xl font-light italic text-foreground">{title}</h2>
           <span className="rounded-full bg-muted px-2 py-0.5 text-xs font-medium tabular-nums text-muted-foreground">
             {count}
           </span>
@@ -255,7 +255,7 @@ function AdminPanel({
 }
 
 export function AdminEmptyState({ children }: { children: ReactNode }) {
-  return <div className="rounded-2xl bg-muted/40 p-8 text-center text-sm text-muted-foreground">{children}</div>;
+  return <div className="rounded-2xl bg-muted p-8 text-center text-sm text-muted-foreground">{children}</div>;
 }
 
 export function AdminAvatar({ url }: { url: string | null }) {

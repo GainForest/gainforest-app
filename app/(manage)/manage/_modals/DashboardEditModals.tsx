@@ -69,7 +69,7 @@ export function WebsiteEditorModal({
   return (
     <ModalContent>
       <ModalHeader backAction={stack.length > 1 ? handleClose : undefined}>
-        <ModalTitle>{t("website.title")}</ModalTitle>
+        <ModalTitle className="font-instrument font-light italic">{t("website.title")}</ModalTitle>
         <ModalDescription>{t("website.description")}</ModalDescription>
       </ModalHeader>
 
@@ -151,7 +151,7 @@ export function StartDateSelectorModal({
   return (
     <ModalContent>
       <ModalHeader backAction={stack.length > 1 ? handleClose : undefined}>
-        <ModalTitle>{t("startDate.title")}</ModalTitle>
+        <ModalTitle className="font-instrument font-light italic">{t("startDate.title")}</ModalTitle>
         <ModalDescription>{t("startDate.description")}</ModalDescription>
       </ModalHeader>
 
@@ -225,7 +225,7 @@ export function OrgTypeEditorModal({ current, onConfirm }: OrgTypeEditorModalPro
   return (
     <ModalContent>
       <ModalHeader backAction={stack.length > 1 ? handleClose : undefined}>
-        <ModalTitle>{t("orgType.title")}</ModalTitle>
+        <ModalTitle className="font-instrument font-light italic">{t("orgType.title")}</ModalTitle>
         <ModalDescription>{t("orgType.description")}</ModalDescription>
       </ModalHeader>
 
@@ -343,7 +343,7 @@ export function SocialLinksEditorModal({ current, onConfirm }: SocialLinksEditor
   return (
     <ModalContent>
       <ModalHeader backAction={stack.length > 1 ? handleClose : undefined}>
-        <ModalTitle>{t("socialLinks.title")}</ModalTitle>
+        <ModalTitle className="font-instrument font-light italic">{t("socialLinks.title")}</ModalTitle>
         <ModalDescription>{t("socialLinks.description")}</ModalDescription>
       </ModalHeader>
 
@@ -438,7 +438,7 @@ export function VisibilitySelectorModal({
   return (
     <ModalContent>
       <ModalHeader backAction={stack.length > 1 ? handleClose : undefined}>
-        <ModalTitle>{t("visibility.title")}</ModalTitle>
+        <ModalTitle className="font-instrument font-light italic">{t("visibility.title")}</ModalTitle>
         <ModalDescription>{t("visibility.description")}</ModalDescription>
       </ModalHeader>
 

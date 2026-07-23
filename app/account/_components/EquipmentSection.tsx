@@ -435,8 +435,8 @@ function LoadingRows() {
 
 function Notice({ title, body }: { title: string; body: string }) {
   return (
-    <div className="mt-4 rounded-2xl border border-dashed border-border bg-muted/30 px-6 py-10 text-center">
-      <h3 className="text-base font-medium text-foreground">{title}</h3>
+    <div className="mt-4 rounded-2xl border border-dashed border-border bg-muted px-6 py-10 text-center">
+      <h3 className="font-instrument text-xl font-light italic text-foreground">{title}</h3>
       <p className="mx-auto mt-1.5 max-w-[420px] text-sm text-muted-foreground">{body}</p>
     </div>
   );

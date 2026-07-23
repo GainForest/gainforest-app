@@ -186,7 +186,7 @@ function JobDetails({
   }
 
   return (
-    <div className="mt-3 space-y-4 rounded-2xl bg-muted/30 p-4 sm:ml-13">
+    <div className="mt-3 space-y-4 rounded-2xl bg-muted p-4 sm:ml-13">
       {/* status + download */}
       <div className="flex flex-wrap items-center gap-2">
         {DATA_JOB_ADMIN_STATUSES.map((status) => (

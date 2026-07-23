@@ -164,12 +164,12 @@ export function GroupObservationsDatasetModal({
     <ModalContent dismissible={!isPending}>
       <div className="space-y-4">
         <div className="space-y-1.5">
-          <ModalTitle>{t("title", { count: movable })}</ModalTitle>
+          <ModalTitle className="font-instrument font-light italic">{t("title", { count: movable })}</ModalTitle>
           <ModalDescription>{t("description")}</ModalDescription>
         </div>
 
         {canToggle ? (
-          <div role="tablist" aria-label={t("modeLabel")} className="grid grid-cols-2 gap-1 rounded-xl bg-muted p-1">
+          <div role="tablist" aria-label={t("modeLabel")} className="grid grid-cols-2 gap-1 rounded-2xl bg-muted p-1">
             <button
               type="button"
               role="tab"

@@ -1796,7 +1796,7 @@ function ReviewList({
     [t("review.photo"), hasCover ? t("review.added") : t("review.notAdded")],
   ];
   return (
-    <div className="overflow-hidden rounded-2xl border border-border bg-card/40">
+    <div className="overflow-hidden rounded-2xl bg-muted">
       {rows.map(([label, value], index) => (
         <div
           key={label}
@@ -1923,7 +1923,7 @@ function DeleteProjectModal({ projectTitle, onConfirm }: { projectTitle: string;
   return (
     <ModalContent dismissible={!pending} className="space-y-4">
       <ModalHeader>
-        <ModalTitle className="flex items-center gap-2 text-destructive">
+        <ModalTitle className="flex items-center gap-2 font-instrument font-light italic text-destructive">
           <TriangleAlertIcon className="size-5 shrink-0" />
           {t("title")}
         </ModalTitle>
@@ -2036,7 +2036,7 @@ function EmptyState({ hasQuery, onCreate }: { hasQuery: boolean; onCreate: () =>
       initial={reduceMotion ? false : { opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
       transition={reduceMotion ? { duration: 0 } : { duration: 0.35, ease: [0.25, 0.1, 0.25, 1] }}
-      className="flex min-h-[18rem] flex-col items-center justify-center rounded-[2rem] bg-muted/20 px-6 text-center"
+      className="flex min-h-[18rem] flex-col items-center justify-center rounded-[2rem] bg-muted px-6 text-center"
     >
       <FolderKanbanIcon className="mb-4 h-10 w-10 text-primary" />
       <h2 className="font-instrument text-2xl font-medium italic tracking-[-0.02em]">
@@ -2059,7 +2059,7 @@ function ErrorState({ message, onRetry }: { message: string; onRetry: () => void
   const t = useTranslations("marketplace.projects");
   const actionT = useTranslations("marketplace.manageProjectCerts.actions");
   return (
-    <div className="flex min-h-[18rem] flex-col items-center justify-center rounded-[2rem] bg-muted/30 px-6 text-center">
+    <div className="flex min-h-[18rem] flex-col items-center justify-center rounded-[2rem] bg-muted px-6 text-center">
       <TriangleAlertIcon className="mb-4 h-9 w-9 text-muted-foreground opacity-70" />
       <h2 className="font-instrument text-2xl font-medium italic tracking-[-0.02em]">{t("empty.title")}</h2>
       <p className="mt-2 max-w-sm text-sm leading-6 text-muted-foreground">{message}</p>

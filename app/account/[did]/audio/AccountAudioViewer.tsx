@@ -144,15 +144,15 @@ export function AccountAudioViewer({
           ))}
         </div>
       ) : loadError ? (
-        <p className="mt-6 rounded-2xl border border-border bg-card/90 px-5 py-8 text-center text-sm text-muted-foreground">
+        <p className="mt-6 rounded-2xl bg-muted px-5 py-8 text-center text-sm text-muted-foreground">
           {t("loadError")}
         </p>
       ) : total === 0 ? (
-        <div className="mt-6 rounded-3xl border border-dashed border-border bg-muted/30 px-6 py-14 text-center">
+        <div className="mt-6 rounded-3xl border border-dashed border-border bg-muted px-6 py-14 text-center">
           <span className="mx-auto grid h-12 w-12 place-items-center rounded-full bg-primary/10 text-primary">
             <AudioLinesIcon className="size-6" />
           </span>
-          <h2 className="mt-4 text-base font-medium text-foreground">{t("accountEmptyTitle")}</h2>
+          <h2 className="mt-4 font-instrument text-xl font-light italic text-foreground">{t("accountEmptyTitle")}</h2>
           <p className="mx-auto mt-1.5 max-w-[440px] text-sm text-muted-foreground">{t("accountEmptyBody")}</p>
           {showUploadCta ? (
             <Button asChild size="sm" className="mt-5">
@@ -166,14 +166,14 @@ export function AccountAudioViewer({
       ) : (
         <div className="mt-6 flex flex-col gap-4">
           {groups.map((group) => (
-            <section key={group.key || "other"} className="rounded-2xl border border-border bg-card/90 p-5 sm:p-6">
+            <section key={group.key || "other"} className="rounded-2xl bg-muted p-5 sm:p-6">
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <div className="flex min-w-0 items-center gap-2.5">
                   <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-primary/10 text-primary">
                     {group.key ? <MapPinIcon className="size-4" /> : <AudioLinesIcon className="size-4" />}
                   </span>
                   <div className="min-w-0">
-                    <h2 className="truncate text-sm font-medium text-foreground">
+                    <h2 className="truncate font-instrument text-lg font-light italic text-foreground">
                       {group.key ? group.name : t("otherGroup")}
                     </h2>
                     <p className="text-xs text-muted-foreground">

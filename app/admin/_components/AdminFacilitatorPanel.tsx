@@ -42,7 +42,7 @@ export function AdminFacilitatorPanel({ stats }: { stats: FacilitatorStats }) {
 
   return (
     <div className="space-y-4">
-      <div className="rounded-2xl bg-muted/30 p-4">
+      <div className="rounded-2xl bg-muted p-4">
         <p className="text-xs font-medium text-muted-foreground">{t("addressLabel")}</p>
         <div className="mt-1.5 flex flex-wrap items-center gap-2.5">
           <code className="break-all rounded-lg bg-background px-2.5 py-1.5 font-mono text-sm text-foreground">
@@ -103,7 +103,7 @@ export function AdminFacilitatorPanel({ stats }: { stats: FacilitatorStats }) {
 
 function StatTile({ label, value, hint }: { label: string; value: string | null; hint: string }) {
   return (
-    <div className="rounded-2xl bg-muted/30 p-4">
+    <div className="rounded-2xl bg-muted p-4">
       <dt className="text-xs font-medium text-muted-foreground">{label}</dt>
       <dd className="mt-1 text-2xl font-semibold tabular-nums text-foreground">{value ?? "—"}</dd>
       <dd className="mt-1 text-xs leading-5 text-muted-foreground">{hint}</dd>

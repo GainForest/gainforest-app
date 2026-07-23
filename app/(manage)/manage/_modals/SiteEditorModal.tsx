@@ -302,7 +302,7 @@ export function SiteEditorModal({ did, target, initialData, onSaved, requireBoun
   return (
     <ModalContent>
       <ModalHeader backAction={stack.length === 1 ? undefined : () => popModal()}>
-        <ModalTitle>{isEditMode ? "Edit site" : "Add site"}</ModalTitle>
+        <ModalTitle className="font-instrument font-light italic">{isEditMode ? "Edit site" : "Add site"}</ModalTitle>
         <ModalDescription>
           {isEditMode
             ? "Update the site name or replace its boundary."

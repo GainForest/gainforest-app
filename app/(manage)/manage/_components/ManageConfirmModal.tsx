@@ -50,7 +50,7 @@ function StackedConfirmModal({
   return (
     <ModalContent dismissible={!isPending} className="space-y-4">
       <ModalHeader>
-        <ModalTitle>{title}</ModalTitle>
+        <ModalTitle className="font-instrument font-light italic">{title}</ModalTitle>
         <ModalDescription>{description}</ModalDescription>
       </ModalHeader>
       <ModalFooter>
@@ -95,7 +95,7 @@ function ControlledConfirmModal({
     <Dialog open={open} onOpenChange={(nextOpen) => !isPending && onOpenChange(nextOpen)}>
       <DialogPlaceholder dialogWidth="max-w-md">
         <div className="space-y-2">
-          <DialogTitle>{title}</DialogTitle>
+          <DialogTitle className="font-instrument font-light italic">{title}</DialogTitle>
           {typeof description === "string" ? (
             <DialogDescription>{description}</DialogDescription>
           ) : (

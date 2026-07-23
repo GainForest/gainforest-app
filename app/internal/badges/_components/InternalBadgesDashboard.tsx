@@ -467,7 +467,7 @@ export function InternalBadgesDashboard({
                           {row.kind === "email" ? <MailIcon className="size-4" /> : row.kind === "record" || row.kind === "organization" ? <Building2Icon className="size-4" /> : <UserRoundIcon className="size-4" />}
                         </div>
                         <div className="min-w-0 flex-1">
-                          <h3 className="truncate font-medium">{row.label}</h3>
+                          <h3 className="truncate font-instrument text-lg font-light italic">{row.label}</h3>
                           {row.sublabel ? <p className="mt-0.5 text-xs text-muted-foreground">{row.sublabel}</p> : null}
                           <div className="mt-3 flex flex-wrap gap-2">
                             {row.awards.map((award) => (
@@ -515,7 +515,7 @@ export function InternalBadgesDashboard({
                         {definition.iconUrl ? <Image src={definition.iconUrl} alt="" width={56} height={56} unoptimized className="size-full object-cover" /> : <BadgeCheckIcon className="size-6 text-muted-foreground" />}
                       </div>
                       <div className="min-w-0 flex-1">
-                        <h3 className="font-medium group-hover:text-primary">{definition.title}</h3>
+                        <h3 className="font-instrument text-lg font-light italic group-hover:text-primary">{definition.title}</h3>
                         <p className="mt-1 text-xs text-muted-foreground">{badgeTypeLabel(definition.badgeType)}</p>
                         {definition.description ? <p className="mt-3 line-clamp-3 text-sm leading-6 text-muted-foreground">{definition.description}</p> : null}
                         <p className="mt-3 text-xs text-muted-foreground">{formatDate(locale, definition.createdAt)}</p>
@@ -629,7 +629,7 @@ function BadgeFormModal({
   return (
     <ModalContent dismissible={!busy}>
       <ModalHeader>
-        <ModalTitle>{form.editing ? t("badgeForm.editTitle") : t("badgeForm.createTitle")}</ModalTitle>
+        <ModalTitle className="font-instrument font-light italic">{form.editing ? t("badgeForm.editTitle") : t("badgeForm.createTitle")}</ModalTitle>
         <ModalDescription>{t("badgeForm.modalDescription")}</ModalDescription>
       </ModalHeader>
       <StatusNotice notice={error ? { tone: "error", text: error } : null} />
@@ -697,7 +697,7 @@ function ConfirmActionModal({
   return (
     <ModalContent dismissible={!busy}>
       <ModalHeader>
-        <ModalTitle>{title}</ModalTitle>
+        <ModalTitle className="font-instrument font-light italic">{title}</ModalTitle>
         <ModalDescription>{description}</ModalDescription>
       </ModalHeader>
       <StatusNotice notice={error ? { tone: "error", text: error } : null} />
@@ -730,7 +730,7 @@ function StatusNotice({ notice }: { notice: { tone: "success" | "error" | "loadi
 function Panel({ title, icon, children }: { title: string; icon: ReactNode; children: ReactNode }) {
   return (
     <section className="rounded-[1.5rem] bg-card p-5">
-      <div className="mb-4 flex items-center gap-2 text-lg font-medium">{icon}<h2>{title}</h2></div>
+      <div className="mb-4 flex items-center gap-2 text-lg">{icon}<h2 className="font-instrument font-light italic">{title}</h2></div>
       {children}
     </section>
   );

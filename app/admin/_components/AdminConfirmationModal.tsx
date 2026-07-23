@@ -44,7 +44,7 @@ export function AdminConfirmationModal({
   return (
     <ModalContent dismissible={!busy}>
       <ModalHeader>
-        <ModalTitle>{title}</ModalTitle>
+        <ModalTitle className="font-instrument font-light italic">{title}</ModalTitle>
         <ModalDescription>{description}</ModalDescription>
       </ModalHeader>
       {failed ? <p aria-live="polite" className="rounded-xl bg-destructive/10 px-3 py-2 text-sm text-destructive">{errorLabel}</p> : null}

@@ -197,7 +197,7 @@ export function AddDataClient({ target }: { target: ManageTarget }) {
       {/* Manual chooser — also the fallback for ambiguous drops and the way to
           start a flow with no file yet. */}
       <section className="space-y-3">
-        <h2 className="text-sm font-medium text-muted-foreground">{t("chooseTitle")}</h2>
+        <h2 className="font-instrument text-xl font-light italic text-muted-foreground">{t("chooseTitle")}</h2>
         <div className="grid gap-3 sm:grid-cols-2">
           {availableKinds.map((meta) => {
             const Icon = meta.Icon;
@@ -238,7 +238,7 @@ export function AddDataClient({ target }: { target: ManageTarget }) {
       </section>
 
       {/* The Telegram assistant, surfaced once instead of in every section. */}
-      <section className="flex flex-col gap-3 rounded-3xl border border-border bg-muted/40 p-5 sm:flex-row sm:items-center sm:justify-between">
+      <section className="flex flex-col gap-3 rounded-3xl bg-muted p-5 sm:flex-row sm:items-center sm:justify-between">
         <div className="min-w-0">
           <p className="font-instrument text-lg font-medium italic tracking-[-0.02em] text-foreground">
             {t("taina.title")}

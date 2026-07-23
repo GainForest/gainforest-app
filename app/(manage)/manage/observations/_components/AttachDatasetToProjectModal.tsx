@@ -140,12 +140,12 @@ export function AttachDatasetToProjectModal({
     <ModalContent dismissible={!isPending}>
       <div className="space-y-4">
         <div className="space-y-1.5">
-          <ModalTitle>{t("title", { name: dataset.name })}</ModalTitle>
+          <ModalTitle className="font-instrument font-light italic">{t("title", { name: dataset.name })}</ModalTitle>
           <ModalDescription>{t("description", { count: dataset.count })}</ModalDescription>
         </div>
 
         {currentProjectUri ? (
-          <p className="flex items-center gap-1.5 rounded-xl bg-muted px-3 py-2 text-xs text-muted-foreground">
+          <p className="flex items-center gap-1.5 rounded-2xl bg-muted px-3 py-2 text-xs text-muted-foreground">
             <FolderKanbanIcon className="size-3.5 shrink-0 text-primary" />
             {t("currentlyIn", { project: currentProjectName ?? t("untitledProject") })}
           </p>

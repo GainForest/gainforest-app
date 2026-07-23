@@ -25,7 +25,7 @@ function safeDecode(value: string): string {
 function GroupNotMemberMessage({ name }: { name: string }) {
   return (
     <Container className="flex min-h-[50vh] items-center justify-center py-12">
-      <section className="max-w-xl rounded-3xl bg-muted/30 p-6 text-center sm:p-8">
+      <section className="max-w-xl rounded-3xl bg-muted p-6 text-center sm:p-8">
         <h1 className="font-instrument text-3xl font-light italic tracking-[-0.02em] text-foreground">
           {name === "this organization" ? "You’re not a member of this organization" : `You’re not a member of ${name}`}
         </h1>

@@ -135,7 +135,7 @@ export function AccountHero({
 
   return (
     <FollowProvider key={account.did} targetDid={account.did}>
-      <section className="overflow-hidden rounded-3xl bg-muted/40">
+      <section className="overflow-hidden rounded-3xl bg-muted">
         <div className="relative h-32 sm:h-40 md:h-44">
           {account.coverUrl ? (
             <Image

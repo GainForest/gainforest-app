@@ -496,7 +496,7 @@ function LinkExistingSection({
 
 function ErrorState({ title, message, retryLabel, onRetry }: { title: string; message: string; retryLabel: string; onRetry: () => void }) {
   return (
-    <div className="flex min-h-[18rem] flex-col items-center justify-center rounded-[2rem] bg-muted/30 px-6 text-center">
+    <div className="flex min-h-[18rem] flex-col items-center justify-center rounded-[2rem] bg-muted px-6 text-center">
       <TriangleAlertIcon className="mb-4 size-9 text-muted-foreground opacity-70" />
       <h2 className="font-instrument text-2xl font-medium italic tracking-[-0.02em]">{title}</h2>
       <p className="mt-2 max-w-sm text-sm leading-6 text-muted-foreground">{message}</p>

@@ -172,7 +172,7 @@ export default function PreviewStep({ uploadId, parsedData, mappings, koboMediaZ
   return (
     <div className="space-y-5">
       <div>
-        <h2 className="text-lg font-semibold">{t("reviewVerifyTitle")}</h2>
+        <h2 className="font-instrument text-xl font-light italic">{t("reviewVerifyTitle")}</h2>
         <p className="text-sm text-muted-foreground mt-0.5">{t("reviewVerifyDescription")}</p>
       </div>
 
@@ -212,7 +212,7 @@ export default function PreviewStep({ uploadId, parsedData, mappings, koboMediaZ
       {/* Data preview table */}
       <div>
         <div className="flex items-center justify-between mb-2">
-          <h3 className="text-sm font-medium">{t("treeInformationPreview")}</h3>
+          <h3 className="font-instrument text-lg font-light italic">{t("treeInformationPreview")}</h3>
           {showingNote && <span className="text-xs text-muted-foreground">{t("showingFirstRows", { maxRows: MAX_PREVIEW_ROWS, totalRows })}</span>}
         </div>
         <div className="rounded-lg border overflow-x-auto">

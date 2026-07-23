@@ -941,7 +941,7 @@ export function AddObservationsModal({
             <CheckCircle2Icon className="size-7" />
           </span>
           <div>
-            <ModalTitle>{t("doneTitle", { count: addedCount })}</ModalTitle>
+            <ModalTitle className="font-instrument font-light italic">{t("doneTitle", { count: addedCount })}</ModalTitle>
             <ModalDescription className="mt-1">{t("doneBody")}</ModalDescription>
           </div>
         </div>
@@ -976,7 +976,7 @@ export function AddObservationsModal({
                 <ArrowLeftIcon className="size-4" />
               </Button>
             ) : null}
-            <ModalTitle>{t("title")}</ModalTitle>
+            <ModalTitle className="font-instrument font-light italic">{t("title")}</ModalTitle>
           </div>
           <div className="flex shrink-0 items-center gap-1.5">
             <DropdownMenu>
@@ -1023,7 +1023,7 @@ export function AddObservationsModal({
       </ModalHeader>
 
       {!showEmptyState ? (
-        <div className="rounded-2xl border border-border bg-muted/30 p-3">
+        <div className="rounded-2xl border border-border bg-muted p-3">
           <label htmlFor={batchStoryId} className="text-sm font-medium text-foreground">
             {t("batchStoryLabel")}
           </label>
@@ -1208,7 +1208,7 @@ export function AddObservationsModal({
       />
 
       {!showEmptyState && !projectRef && projects.length > 0 ? (
-        <div className="flex flex-col gap-2 rounded-2xl border border-border bg-muted/30 p-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex flex-col gap-2 rounded-2xl border border-border bg-muted p-3 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex min-w-0 items-start gap-3">
             <FolderOpenIcon className="mt-0.5 size-4 shrink-0 text-primary" />
             <div className="min-w-0">
@@ -1237,7 +1237,7 @@ export function AddObservationsModal({
       ) : null}
 
       {!showEmptyState ? (
-        <div className="rounded-2xl border border-border bg-muted/30 p-3">
+        <div className="rounded-2xl border border-border bg-muted p-3">
           <label className="flex cursor-pointer items-start gap-3">
             <Checkbox
               checked={obscureLocation}
@@ -1731,7 +1731,7 @@ function QuickTagsEditor({
   }
 
   return (
-    <div className="rounded-xl border border-border/70 bg-muted/20 p-2.5">
+    <div className="rounded-2xl border border-border/70 bg-muted p-2.5">
       <div className="flex items-center justify-between gap-2">
         <span className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
           <TagIcon className="size-3.5 text-primary" />
@@ -1816,7 +1816,7 @@ function QuickMeasurementsEditor({
   }
 
   return (
-    <div className="rounded-xl border border-border/70 bg-muted/20 p-2.5">
+    <div className="rounded-2xl border border-border/70 bg-muted p-2.5">
       <div className="flex items-center justify-between gap-2">
         <span className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
           <RulerIcon className="size-3.5 text-primary" />

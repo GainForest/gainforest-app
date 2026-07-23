@@ -1111,7 +1111,7 @@ function INaturalistProjectSyncPanel({
         <div className="flex min-w-0 items-center gap-3">
           <INaturalistMark />
           <div className="min-w-0">
-            <h2 className="text-sm font-semibold leading-5 text-foreground">{t("title")}</h2>
+            <h2 className="font-instrument text-lg font-light italic leading-5 text-foreground">{t("title")}</h2>
             <p className="truncate text-sm leading-5 text-muted-foreground">
               {project ? t("pasteLinkDescription", { project: project.title }) : t("chooseProjectShort")}
             </p>

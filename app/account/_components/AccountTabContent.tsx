@@ -376,7 +376,7 @@ export async function AccountOverviewTabContent({ account, did }: { account: Acc
 
       <SectionSurface variant="muted" className="p-4 sm:flex sm:items-center sm:justify-between sm:gap-4">
         <div className="min-w-0">
-          <h2 className="text-sm font-semibold text-foreground">{shareT("shareProfileTitle")}</h2>
+          <h2 className="font-instrument text-lg font-light italic text-foreground">{shareT("shareProfileTitle")}</h2>
           <p className="mt-0.5 text-sm leading-relaxed text-muted-foreground">{shareT("shareProfileBody")}</p>
         </div>
         <div className="mt-3 shrink-0 sm:mt-0">

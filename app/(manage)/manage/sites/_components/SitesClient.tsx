@@ -384,7 +384,7 @@ export function SitesClient({ did, target }: { did: string; target: ManageTarget
       )}
 
       {sites.length === 0 && !fetchError ? (
-        <div className="flex h-48 flex-col items-center justify-center gap-4 rounded-2xl bg-muted/30 px-6 text-center">
+        <div className="flex h-48 flex-col items-center justify-center gap-4 rounded-2xl bg-muted px-6 text-center">
           <h2 className="font-instrument text-xl font-semibold italic text-foreground">
             {t("emptyTitle")}
           </h2>

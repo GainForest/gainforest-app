@@ -100,7 +100,7 @@ export function TreeUploadCompleteModal({
   return (
     <ModalContent dismissible={false} className="space-y-5">
       <ModalHeader>
-        <ModalTitle>Tree upload complete</ModalTitle>
+        <ModalTitle className="font-instrument font-light italic">Tree upload complete</ModalTitle>
         <ModalDescription>
           Your upload has finished. Please share feedback so we can make this
           easier for the next person.

@@ -271,7 +271,7 @@ function DeleteBumicertModal({ title, onConfirm }: { title: string; onConfirm: (
   return (
     <ModalContent dismissible={!pending} className="space-y-4">
       <ModalHeader>
-        <ModalTitle>{t("title")}</ModalTitle>
+        <ModalTitle className="font-instrument font-light italic">{t("title")}</ModalTitle>
         <ModalDescription>{t("description", { title })}</ModalDescription>
       </ModalHeader>
       {error ? (
@@ -305,7 +305,7 @@ export function ManageBumicertsClient({ target, did, ownerIdentifier, bumicerts,
             initial={reduceMotion ? false : { opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
             transition={reduceMotion ? { duration: 0 } : { duration: 0.35, ease: [0.25, 0.1, 0.25, 1] }}
-            className="flex min-h-[18rem] flex-col items-center justify-center gap-4 rounded-[2rem] bg-muted/30 px-6 text-center"
+            className="flex min-h-[18rem] flex-col items-center justify-center gap-4 rounded-[2rem] bg-muted px-6 text-center"
           >
             <TriangleAlertIcon className="size-8 text-muted-foreground opacity-60" />
             <div className="space-y-1">

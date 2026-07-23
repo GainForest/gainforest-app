@@ -108,7 +108,7 @@ export function ListPanel(props: {
         </div>
       </div>
       {filtered.length === 0 ? (
-        <div className="rounded-2xl border border-dashed bg-muted/20 p-10 text-center text-sm text-muted-foreground">
+        <div className="rounded-2xl border border-dashed bg-muted p-10 text-center text-sm text-muted-foreground">
           <p className="font-medium text-foreground">
             {props.searchQuery
               ? t("list.noResults", {
@@ -430,7 +430,7 @@ export function DetailPanel(props: {
 function RelationshipPanel(props: { title: string; children: ReactNode }) {
   return (
     <aside className="space-y-3 rounded-2xl border p-4">
-      <h3 className="font-medium">{props.title}</h3>
+      <h3 className="font-instrument text-lg font-light italic">{props.title}</h3>
       <div className="space-y-2">{props.children}</div>
     </aside>
   );
@@ -438,7 +438,7 @@ function RelationshipPanel(props: { title: string; children: ReactNode }) {
 
 function EmptyRelation(props: { children: ReactNode }) {
   return (
-    <p className="rounded-xl border border-dashed bg-muted/20 p-3 text-sm text-muted-foreground">
+    <p className="rounded-2xl border border-dashed bg-muted p-3 text-sm text-muted-foreground">
       {props.children}
     </p>
   );
@@ -454,7 +454,7 @@ function MiniLink(props: {
     <button
       type="button"
       onClick={props.onClick}
-      className="w-full rounded-xl border p-3 text-left text-sm hover:bg-muted/40"
+      className="w-full rounded-2xl bg-muted p-3 text-left text-sm transition-colors hover:bg-muted/80 focus-visible:ring-2 focus-visible:ring-ring"
     >
       <p className="font-medium">{props.label ?? t("untitled")}</p>
       {props.detail && (

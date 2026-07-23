@@ -182,7 +182,7 @@ export function EquipmentEditor({
       <div aria-hidden className="absolute inset-0 bg-foreground/30 backdrop-blur-[2px]" onClick={() => !busy && onClose()} />
       <div className="relative flex h-full w-full max-w-[460px] flex-col overflow-y-auto bg-background shadow-2xl">
         <div className="sticky top-0 z-10 flex items-center justify-between gap-3 border-b border-border bg-background/95 px-5 py-4 backdrop-blur-xl">
-          <h2 id="equipment-editor-title" className="font-instrument text-lg font-semibold italic text-foreground">
+          <h2 id="equipment-editor-title" className="font-instrument text-xl font-medium italic text-foreground">
             {isEdit ? t("editEquipment") : t("addEquipment")}
           </h2>
           <Button

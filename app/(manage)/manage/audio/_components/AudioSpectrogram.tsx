@@ -147,7 +147,7 @@ export function AudioSpectrogram(props: { source: AudioSource | null; title?: st
 
   if (!props.source) {
     return (
-      <div className="rounded-2xl border border-dashed bg-muted/30 p-4 text-sm text-muted-foreground">
+      <div className="rounded-2xl border border-dashed bg-muted p-4 text-sm text-muted-foreground">
         <div className="flex items-center gap-2 font-medium text-foreground">
           <WavesIcon className="size-4" /> {t("title")}
         </div>

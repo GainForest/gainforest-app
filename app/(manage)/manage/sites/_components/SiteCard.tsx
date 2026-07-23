@@ -149,7 +149,7 @@ export function SiteCard({
         </div>
 
         <div className="flex w-full flex-1 flex-col items-start justify-between px-3 py-2.5">
-          <h3 className="line-clamp-3 text-base font-medium leading-snug">
+          <h3 className="line-clamp-3 font-instrument text-lg font-light italic leading-snug">
             {site.record.name ?? t("unnamed")}
           </h3>
 

@@ -482,7 +482,7 @@ export default function FileDropStep({
     <div className="space-y-5">
       {/* Drop zone */}
       <div>
-        <h2 className="text-lg font-semibold">{t("chooseFileTitle")}</h2>
+        <h2 className="font-instrument text-xl font-light italic">{t("chooseFileTitle")}</h2>
         <p className="text-sm text-muted-foreground mt-0.5">{t("chooseFileDescription")}</p>
       </div>
 
@@ -528,7 +528,7 @@ export default function FileDropStep({
       {error && <p className="text-sm text-destructive">{t("parseFileError")}</p>}
 
       {isParsed && !error && !fileError && (
-        <div className="rounded-md border border-border bg-muted/30 p-4 grid grid-cols-3 gap-2 text-xs text-muted-foreground">
+        <div className="rounded-2xl bg-muted p-4 grid grid-cols-3 gap-2 text-xs text-muted-foreground">
           <div><span className="block font-medium text-foreground text-sm">{rowCount.toLocaleString()}</span>{t("rows")}</div>
           <div><span className="block font-medium text-foreground text-sm">{headers.length}</span>{t("fileHeadings")}</div>
           <div><span className="block font-medium text-foreground text-sm">{detectKoboFormat(headers).isKobo ? t("fieldForm") : t("spreadsheet")}</span>{t("fileType")}</div>
@@ -536,9 +536,9 @@ export default function FileDropStep({
       )}
 
       {/* Kobo media ZIP */}
-      <div className="space-y-2 rounded-xl border border-border bg-muted/20 p-4">
+      <div className="space-y-2 rounded-2xl border border-border bg-muted p-4">
         <div>
-          <h3 className="text-sm font-medium">{t("photoFolderTitle")}</h3>
+          <h3 className="font-instrument text-lg font-light italic">{t("photoFolderTitle")}</h3>
           <p className="text-xs text-muted-foreground mt-0.5 leading-relaxed">{t("photoFolderDescription")}</p>
         </div>
         <div
@@ -584,7 +584,7 @@ export default function FileDropStep({
       </div>
 
       {/* Site selection (required) */}
-      <div className="space-y-3 rounded-xl border border-border bg-muted/20 p-4">
+      <div className="space-y-3 rounded-2xl border border-border bg-muted p-4">
         <div>
           <label htmlFor="site-select" className="text-sm font-medium">{t("siteBoundaryLabel")} <span className="text-destructive">*</span></label>
           <p className="text-xs text-muted-foreground mt-0.5">{t("siteBoundaryHelp")}</p>
@@ -734,7 +734,7 @@ export default function FileDropStep({
         </div>
 
         {datasetMode === "new" && (
-          <div className="space-y-3 rounded-xl border border-border bg-muted/20 p-4">
+          <div className="space-y-3 rounded-2xl border border-border bg-muted p-4">
             <div className="space-y-1.5">
               <label htmlFor="dataset-name" className="text-sm font-medium">{t("groupNameLabel")} <span className="text-destructive">*</span></label>
               <Input id="dataset-name" value={datasetName} onChange={(e) => setDatasetName(e.target.value)} placeholder={t("groupNamePlaceholder")} />
@@ -747,7 +747,7 @@ export default function FileDropStep({
         )}
 
         {datasetMode === "existing" && (
-          <div className="space-y-3 rounded-xl border border-border bg-muted/20 p-4">
+          <div className="space-y-3 rounded-2xl border border-border bg-muted p-4">
             <div>
               <label className="text-sm font-medium">{t("chooseGroupLabel")}</label>
               <p className="text-xs text-muted-foreground mt-0.5">{t("chooseGroupHelp")}</p>

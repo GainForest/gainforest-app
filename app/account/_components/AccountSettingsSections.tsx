@@ -155,10 +155,10 @@ function HandleSection({ did, handle: initialHandle }: { did: string; handle: st
     <div className="space-y-3">
       <div className="flex items-center gap-2">
         <AtSignIcon className="h-4 w-4 text-foreground/70" />
-        <h2 className="text-sm font-medium">{t("title")}</h2>
+        <h2 className="font-instrument text-lg font-light italic">{t("title")}</h2>
       </div>
 
-      <div className="bg-muted rounded-xl p-1 w-full">
+      <div className="bg-muted rounded-2xl p-1 w-full">
         <div className="flex flex-col gap-3 px-3 py-3">
           {mode === "display" ? (
             <div className="flex items-start justify-between gap-3">
@@ -372,10 +372,10 @@ function PasswordSection({ did }: { did: string }) {
     <div className="space-y-3">
       <div className="flex items-center gap-2">
         <KeyRoundIcon className="h-4 w-4 text-foreground/70" />
-        <h2 className="text-sm font-medium">{t("title")}</h2>
+        <h2 className="font-instrument text-lg font-light italic">{t("title")}</h2>
       </div>
 
-      <div className="bg-muted rounded-xl p-1 flex flex-col items-center w-full">
+      <div className="bg-muted rounded-2xl p-1 flex flex-col items-center w-full">
         {step === "idle" && (
           <div className="flex flex-col items-center gap-4 px-4 py-4 w-full">
             <p className="text-sm text-muted-foreground text-center">
@@ -586,10 +586,10 @@ export function AgentKeysSection() {
     <div className="space-y-3">
       <div className="flex items-center gap-2">
         <BotIcon className="h-4 w-4 text-foreground/70" />
-        <h2 className="text-sm font-medium">{t("title")}</h2>
+        <h2 className="font-instrument text-lg font-light italic">{t("title")}</h2>
       </div>
 
-      <div className="bg-muted rounded-xl p-1 w-full">
+      <div className="bg-muted rounded-2xl p-1 w-full">
         <div className="flex flex-col gap-3 px-3 py-3">
           <p className="text-xs text-muted-foreground">
             {t("description")}{" "}
@@ -773,10 +773,10 @@ function BlueskySection({ did }: { did: string }) {
     <div className="space-y-3">
       <div className="flex items-center gap-2">
         <BlueskyIcon className="h-4 w-4 text-[#1185fe]" />
-        <h2 className="text-sm font-medium">{t("title")}</h2>
+        <h2 className="font-instrument text-lg font-light italic">{t("title")}</h2>
       </div>
 
-      <div className="bg-muted rounded-xl p-4 space-y-3">
+      <div className="bg-muted rounded-2xl p-4 space-y-3">
         <div className="flex items-start justify-between gap-4">
           <div className="min-w-0">
             <p className="text-sm font-medium text-foreground">{t("toggleLabel")}</p>
@@ -840,10 +840,10 @@ function AccountSection({ did }: { did: string }) {
     <div className="space-y-3">
       <div className="flex items-center gap-2">
         <UserIcon className="h-4 w-4 text-foreground/70" />
-        <h2 className="text-sm font-medium">{t("title")}</h2>
+        <h2 className="font-instrument text-lg font-light italic">{t("title")}</h2>
       </div>
 
-      <div className="bg-muted rounded-xl p-1 flex flex-col items-center w-full">
+      <div className="bg-muted rounded-2xl p-1 flex flex-col items-center w-full">
         <div className="flex flex-col items-center gap-3 px-3 py-3 w-full">
           <div className="flex flex-col items-center gap-1 w-full">
             <p className="text-xs text-muted-foreground">{t("accountId")}</p>
@@ -976,7 +976,7 @@ function DeleteAccountModal({ handle, onBack }: { handle: string | null; onBack:
   return (
     <ModalContent dismissible={!busy}>
       <ModalHeader backAction={busy ? undefined : onBack}>
-        <ModalTitle>{t("title")}</ModalTitle>
+        <ModalTitle className="font-instrument font-light italic">{t("title")}</ModalTitle>
         <ModalDescription>{t("irreversible")}</ModalDescription>
       </ModalHeader>
 
@@ -1150,10 +1150,10 @@ function DangerZoneSection({ handle }: { handle: string | null }) {
     <div className="space-y-3">
       <div className="flex items-center gap-2">
         <AlertTriangleIcon className="h-4 w-4 text-destructive/80" />
-        <h2 className="text-sm font-medium text-destructive">{t("sectionTitle")}</h2>
+        <h2 className="font-instrument text-lg font-light italic text-destructive">{t("sectionTitle")}</h2>
       </div>
 
-      <div className="rounded-xl border border-destructive/30 bg-destructive/5 p-4">
+      <div className="rounded-2xl border border-destructive/30 bg-destructive/10 p-4">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div className="min-w-0 space-y-1">
             <p className="text-sm font-medium">{t("title")}</p>
@@ -1189,7 +1189,7 @@ function SettingsGroup({
     <AccordionItem value={value} className="border-0">
       <AccordionTrigger className="py-5 text-left hover:no-underline">
         <span className="flex min-w-0 flex-col pr-3">
-          <span className="text-sm font-medium text-foreground">{title}</span>
+          <span className="font-instrument text-lg font-light italic text-foreground">{title}</span>
           <span className="mt-0.5 text-xs font-normal leading-5 text-muted-foreground">{description}</span>
         </span>
       </AccordionTrigger>

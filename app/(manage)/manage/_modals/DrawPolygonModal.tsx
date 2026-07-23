@@ -80,7 +80,7 @@ export function DrawPolygonModal({ onSubmit }: DrawPolygonModalProps) {
     <ModalContent className="px-0 py-0" dismissible={false}>
       <div className="sr-only">
         <ModalHeader>
-          <ModalTitle>Draw site boundary</ModalTitle>
+          <ModalTitle className="font-instrument font-light italic">Draw site boundary</ModalTitle>
           <ModalDescription>
             Draw a map area to define your site boundary.
           </ModalDescription>

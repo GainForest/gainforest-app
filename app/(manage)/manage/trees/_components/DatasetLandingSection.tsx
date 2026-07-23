@@ -295,8 +295,8 @@ export function DatasetLandingSection({
         <article
           key={card.id}
           className={cn(
-            "group flex h-full flex-col rounded-2xl bg-muted/25 p-5 text-left transition-colors motion-reduce:transition-none",
-            "hover:bg-muted/40",
+            "group flex h-full flex-col rounded-2xl bg-muted/60 p-5 text-left transition-colors motion-reduce:transition-none",
+            "hover:bg-muted",
           )}
         >
           <div className="flex items-start justify-between gap-3">

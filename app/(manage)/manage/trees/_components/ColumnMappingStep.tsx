@@ -109,7 +109,7 @@ export default function ColumnMappingStep({ uploadId, headers, mappings, sampleD
   return (
     <div className="space-y-5">
       <div>
-        <h2 className="text-lg font-semibold">{t("matchHeadingsTitle")}</h2>
+        <h2 className="font-instrument text-xl font-light italic">{t("matchHeadingsTitle")}</h2>
         <p className="text-sm text-muted-foreground mt-0.5">
           {t("matchHeadingsDescription", { count: headers.length })}
         </p>
@@ -135,7 +135,7 @@ export default function ColumnMappingStep({ uploadId, headers, mappings, sampleD
       )}
 
       {expectedSkippedKoboCount > 0 && (
-        <div className="flex items-start gap-2 rounded-md border border-border bg-muted/30 p-3 text-sm text-muted-foreground">
+        <div className="flex items-start gap-2 rounded-2xl bg-muted p-3 text-sm text-muted-foreground">
           <CheckCircle2 className="h-4 w-4 mt-0.5 shrink-0" />
           <p>{t("fieldFormNotesSkipped", { count: expectedSkippedKoboCount })}</p>
         </div>

@@ -287,7 +287,7 @@ function RecordPreviewCard({ uri, preview: data }: { uri: string; preview: Recor
 
   if (data === undefined) {
     return (
-      <div className="rounded-xl bg-muted p-3">
+      <div className="rounded-2xl bg-muted p-3">
         <span className="skeleton block h-3.5 w-1/2 rounded" />
         <span className="skeleton mt-2 block h-3 w-2/3 rounded" />
       </div>
@@ -296,7 +296,7 @@ function RecordPreviewCard({ uri, preview: data }: { uri: string; preview: Recor
 
   if (data && (data.title || data.text)) {
     return (
-      <Link href={data.href} className="flex gap-3 rounded-xl bg-muted p-3 transition-colors hover:bg-muted/70 motion-reduce:transition-none">
+      <Link href={data.href} className="flex gap-3 rounded-2xl bg-muted p-3 transition-colors hover:bg-muted/70 motion-reduce:transition-none">
         <Thumb did={data.did} imageUrl={data.imageUrl} imageRef={data.imageRef} />
         <div className="min-w-0 flex-1">
           <div className="truncate text-xs text-muted-foreground">{data.ownerName ? `${data.ownerName} · ${kindLabel}` : kindLabel}</div>
@@ -308,7 +308,7 @@ function RecordPreviewCard({ uri, preview: data }: { uri: string; preview: Recor
   }
 
   return (
-    <div className="flex items-center justify-between gap-3 rounded-xl bg-muted p-3">
+    <div className="flex items-center justify-between gap-3 rounded-2xl bg-muted p-3">
       <div className="min-w-0 flex-1"><AuthorChip did={base.did} /></div>
       <Link href={base.href} className="shrink-0 text-xs font-medium text-primary hover:underline">{kindLabel}</Link>
     </div>

@@ -145,7 +145,7 @@ export async function AccountAttachmentsTabContent({ account, did }: { account: 
           <p className="mt-1 text-sm text-muted-foreground">{errorT("description")}</p>
         </div>
       ) : cards.length === 0 ? (
-        <div className="flex flex-col items-center gap-2 rounded-3xl bg-muted/25 px-6 py-12 text-center">
+        <div className="flex flex-col items-center gap-2 rounded-3xl bg-muted px-6 py-12 text-center">
           <span className="grid size-12 place-items-center rounded-2xl bg-primary/10 text-primary ring-1 ring-primary/15">
             <PaperclipIcon className="size-6" />
           </span>
@@ -160,7 +160,7 @@ export async function AccountAttachmentsTabContent({ account, did }: { account: 
             return (
               <li
                 key={card.key}
-                className="flex gap-3 rounded-2xl bg-muted/20 p-4 transition-colors hover:bg-muted/35 motion-reduce:transition-none"
+                className="flex gap-3 rounded-2xl bg-muted/60 p-4 transition-colors hover:bg-muted motion-reduce:transition-none"
               >
                 <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-primary/10 text-primary ring-1 ring-primary/15">
                   <Icon className="size-5" />

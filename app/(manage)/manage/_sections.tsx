@@ -310,7 +310,7 @@ export async function SettingsSection({ target }: { target: ManageTarget }) {
           <h1 className="font-instrument text-3xl font-light italic leading-tight tracking-[-0.02em] text-foreground">{t("organizationTitle")}</h1>
           <p className="mt-1 text-sm text-muted-foreground">{t("organizationDescription")}</p>
         </div>
-        <div className="mb-8 flex flex-col gap-3 rounded-2xl border border-border bg-background/70 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="mb-8 flex flex-col gap-3 rounded-2xl bg-muted px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex min-w-0 items-start gap-3">
             <UsersIcon className="mt-0.5 h-5 w-5 shrink-0 text-muted-foreground" />
             <p className="text-sm text-muted-foreground">{t("membersMoved")}</p>
@@ -336,7 +336,7 @@ export async function SettingsSection({ target }: { target: ManageTarget }) {
   return (
     <Container className="pt-4 pb-8">
       <div className="mb-6">
-        <h1 className="text-2xl font-medium">{t("personalTitle")}</h1>
+        <h1 className="font-instrument text-3xl font-light italic">{t("personalTitle")}</h1>
         <p className="mt-1 text-sm text-muted-foreground">{t("personalDescription")}</p>
       </div>
       <div className="mx-auto mt-8 mb-20 space-y-8">

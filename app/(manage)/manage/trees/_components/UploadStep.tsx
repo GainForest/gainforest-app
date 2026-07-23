@@ -1000,7 +1000,7 @@ export default function UploadStep({
   return (
     <div className="space-y-5">
       <div>
-        <h2 className="text-lg font-semibold">{t("savingTitle")}</h2>
+        <h2 className="font-instrument text-xl font-light italic">{t("savingTitle")}</h2>
         <p className="text-sm text-muted-foreground mt-0.5">
           {t("savingTrees", { count: uploadTotal })}
         </p>
@@ -1076,7 +1076,7 @@ export default function UploadStep({
         <div className="space-y-2 rounded-lg border border-border p-4">
           <div className="flex items-center gap-2">
             <ImageDown className="h-4 w-4 text-muted-foreground" />
-            <h3 className="text-sm font-medium">{photoFetchDone ? t("photosSaved") : t("savingPhotos")}</h3>
+            <h3 className="font-instrument text-lg font-light italic">{photoFetchDone ? t("photosSaved") : t("savingPhotos")}</h3>
           </div>
 
           {!photoFetchDone && (

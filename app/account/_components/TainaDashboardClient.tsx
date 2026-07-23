@@ -401,7 +401,7 @@ function ProfileCard({ savedProfile, onSaved }: { savedProfile: string; onSaved:
 
       <div className="mt-4 rounded-2xl bg-muted p-4">
         <div className="flex items-center justify-between gap-3">
-          <h3 className="text-sm font-medium text-foreground">
+          <h3 className="font-instrument text-lg font-light italic text-foreground">
             {t("profilePromptTitle")}
           </h3>
           <Button type="button" variant="outline" size="sm" onClick={() => void copyPrompt()}>

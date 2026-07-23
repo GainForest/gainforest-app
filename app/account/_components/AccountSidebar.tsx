@@ -83,7 +83,7 @@ function SidebarCard({
     <section
       id={id}
       className={cn(
-        "rounded-3xl border border-border bg-card/90 shadow-sm backdrop-blur-sm",
+        "rounded-3xl bg-muted",
         className,
       )}
     >
@@ -108,7 +108,7 @@ function StatsCard({ stats }: { stats: SidebarStat[] }) {
       <div className="grid grid-cols-2 divide-x divide-border/70">
         {stats.map((stat) => (
           <div key={stat.label} className="p-4 sm:p-5">
-            <div className="mb-3 flex size-8 items-center justify-center rounded-2xl border border-primary/15 bg-primary/[0.08] shadow-inner sm:size-9">
+            <div className="mb-3 flex size-8 items-center justify-center rounded-2xl bg-primary/10 sm:size-9">
               <StatIcon stat={stat} />
             </div>
             <p className="text-xs font-medium text-foreground sm:text-sm">{stat.label}</p>
@@ -133,7 +133,7 @@ function AchievementsCard({
     <SidebarCard id="account-achievements" className="p-5">
       <div className="mb-5 flex items-center gap-3">
         <AwardIcon className="size-5 text-foreground/70" />
-        <h2 className="text-lg font-semibold text-foreground">Achievements</h2>
+        <h2 className="font-instrument text-xl font-light italic text-foreground">Achievements</h2>
       </div>
 
       <div className="space-y-4">
@@ -142,7 +142,7 @@ function AchievementsCard({
 
           return (
             <div key={achievement.label} className="flex items-center gap-3">
-              <div className="flex size-11 shrink-0 items-center justify-center rounded-full border border-primary/10 bg-primary/10 shadow-inner">
+              <div className="flex size-11 shrink-0 items-center justify-center rounded-full bg-primary/10">
                 <Icon className="size-5 text-primary" />
               </div>
               <div className="min-w-0">
@@ -191,7 +191,7 @@ function ShareCard({ data }: { data: ShareCardData }) {
         <div className="space-y-3">
           <div className="flex items-center gap-3">
             <LeafIcon className="size-5 text-primary" />
-            <h2 className="text-lg font-semibold text-foreground">
+            <h2 className="font-instrument text-xl font-light italic text-foreground">
               {data.title}
             </h2>
           </div>

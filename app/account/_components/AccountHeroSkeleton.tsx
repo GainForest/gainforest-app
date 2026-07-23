@@ -3,7 +3,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 /** Loading placeholder matching the quiet account hero surface. */
 export function AccountHeroSkeleton() {
   return (
-    <section className="overflow-hidden rounded-3xl bg-muted/40" aria-hidden>
+    <section className="overflow-hidden rounded-3xl bg-muted" aria-hidden>
       <div className="relative h-32 sm:h-40 md:h-44">
         <Skeleton className="absolute inset-0 rounded-none" />
         <div className="absolute right-3 top-3 z-10"><Skeleton className="h-9 w-24 rounded-full" /></div>

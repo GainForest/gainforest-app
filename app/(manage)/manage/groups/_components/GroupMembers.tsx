@@ -704,7 +704,7 @@ export function GroupMembers({
   }
 
   return (
-    <section className="rounded-3xl border border-border/60 bg-card p-5 sm:p-6">
+    <section className="rounded-3xl bg-muted p-5 sm:p-6">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div className="flex items-start gap-3">
           <span className="flex size-10 shrink-0 items-center justify-center rounded-2xl bg-primary/10 text-primary">
@@ -712,7 +712,7 @@ export function GroupMembers({
           </span>
           <div>
             <div className="flex items-center gap-2">
-              <h2 className="text-lg font-medium text-foreground">{invitationsT("title")}</h2>
+              <h2 className="font-instrument text-xl font-light italic text-foreground">{invitationsT("title")}</h2>
               {loaded ? (
                 <span className="rounded-full bg-muted px-2 py-0.5 text-xs font-medium text-muted-foreground">{count}</span>
               ) : null}

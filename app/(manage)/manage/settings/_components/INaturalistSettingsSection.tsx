@@ -359,10 +359,10 @@ export function INaturalistSettingsSection({
     <div className="space-y-3">
       <div className="flex items-center gap-2">
         <Image src="/assets/logos/inaturalist.png" alt="" width={18} height={18} className="rounded bg-background" />
-        <h2 className="text-sm font-medium">{t("title")}</h2>
+        <h2 className="font-instrument text-lg font-light italic">{t("title")}</h2>
       </div>
 
-      <div className="rounded-xl bg-muted p-4">
+      <div className="rounded-2xl bg-muted p-4">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div className="min-w-0">
             <p className="text-sm font-medium text-foreground">

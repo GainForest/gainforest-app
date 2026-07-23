@@ -297,7 +297,7 @@ function DeleteTreeGroupConfirmModal({
   return (
     <ModalContent dismissible={false} className="space-y-4">
       <ModalHeader>
-        <ModalTitle>{t("title")}</ModalTitle>
+        <ModalTitle className="font-instrument font-light italic">{t("title")}</ModalTitle>
         <ModalDescription>{t("description", { name: treeGroupName })}</ModalDescription>
       </ModalHeader>
 
@@ -385,7 +385,7 @@ function Field({
 
 function DetailFact({ label, value }: { label: string; value: React.ReactNode }) {
   return (
-    <div className="rounded-xl bg-muted/30 px-3 py-2">
+    <div className="rounded-2xl bg-muted px-3 py-2">
       <p className="text-xs font-medium text-muted-foreground">{label}</p>
       <div className="mt-1 text-sm text-foreground break-words">{value}</div>
     </div>
@@ -1530,7 +1530,7 @@ export function TreesClient({ did, target, onUpload }: TreesClientProps) {
         </div>
       ) : showTreeGroupLanding ? (
         <div className="space-y-4">
-          <div className="flex flex-col gap-3 rounded-2xl border border-dashed border-border bg-muted/20 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex flex-col gap-3 rounded-2xl border border-dashed border-border bg-muted px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex items-start gap-3">
               <InfoIcon className="mt-0.5 size-4 shrink-0 text-muted-foreground" />
               <p className="text-sm text-muted-foreground">
@@ -1571,7 +1571,7 @@ export function TreesClient({ did, target, onUpload }: TreesClientProps) {
               </div>
 
               {datasetFilter === UNGROUPED_DATASET_FILTER ? (
-                <div className="flex flex-col gap-3 rounded-xl border border-border bg-muted/20 px-3 py-2 sm:flex-row sm:items-center sm:justify-between">
+                <div className="flex flex-col gap-3 rounded-2xl border border-border bg-muted px-3 py-2 sm:flex-row sm:items-center sm:justify-between">
                   <label className="flex items-center gap-2 text-xs text-muted-foreground">
                     <Checkbox
                       checked={selectAllUngroupedChecked}
@@ -1840,7 +1840,7 @@ export function TreesClient({ did, target, onUpload }: TreesClientProps) {
               </SectionCard>
 
               <SectionCard title={managerT("photosTitle")} description={managerT("photosDescription")}>
-                <div className="space-y-3 rounded-xl bg-muted/30 p-3">
+                <div className="space-y-3 rounded-2xl bg-muted p-3">
                   <div className="grid grid-cols-1 gap-3 md:grid-cols-[minmax(0,1fr)_auto] md:items-end">
                     <div className="space-y-1.5">
                       <Label htmlFor="new-photo-caption">{managerT("photoCaption")}</Label>

@@ -584,7 +584,7 @@ export function AudioForm(
             onFileChange={(file) => void handleFile(file ?? undefined)}
             className="min-h-[120px]"
           />
-          <div className="mt-3 flex items-start gap-2 rounded-xl bg-muted/50 p-3 text-xs text-muted-foreground">
+          <div className="mt-3 flex items-start gap-2 rounded-2xl bg-muted p-3 text-xs text-muted-foreground">
             <AudioLinesIcon className="mt-0.5 size-4 text-primary" />
             <p>{t("fileFormats", { maxSize: formatBytes(MAX_AUDIO_BYTES) })}</p>
           </div>
@@ -613,7 +613,7 @@ export function AudioForm(
         emptyLabel={t("noDeploymentSelected")}
       />
       {event && (
-        <p className="flex items-center gap-2 rounded-xl bg-muted/50 p-3 text-sm text-muted-foreground">
+        <p className="flex items-center gap-2 rounded-2xl bg-muted p-3 text-sm text-muted-foreground">
           <MapPinIcon className="size-4" /> {t("linkedEvent", { eventId: event.record.eventID ?? "—" })}
         </p>
       )}
@@ -649,7 +649,7 @@ export function AudioForm(
       {props.mode === "create" && (
         <div className="space-y-3 rounded-2xl border p-4">
           <div>
-            <h3 className="font-medium">{t("optionalSpecies")}</h3>
+            <h3 className="font-instrument text-lg font-light italic">{t("optionalSpecies")}</h3>
             <p className="text-sm text-muted-foreground">
               {t("optionalSpeciesHint")}
             </p>

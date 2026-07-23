@@ -698,7 +698,7 @@ export function WalletTabClient({ organization }: { organization?: OrganizationW
         <>
           <Card>
             <CardTitle Icon={WalletIcon}>{record.name || t("defaultName")}</CardTitle>
-            <div className="mt-4 flex items-center gap-3 rounded-xl bg-muted px-3 py-3">
+            <div className="mt-4 flex items-center gap-3 rounded-2xl bg-muted px-3 py-3">
               <Image src={blo(record.address)} alt="" width={40} height={40} className="shrink-0 rounded-full" />
               <span className="min-w-0 flex-1 truncate font-mono text-sm text-foreground">{shortAddress(record.address)}</span>
               <div className="flex shrink-0 items-center gap-1.5">
@@ -746,7 +746,7 @@ export function WalletTabClient({ organization }: { organization?: OrganizationW
                     </div>
                   </div>
                 ) : null}
-                <div className="mt-3 flex flex-col gap-0.5 rounded-xl bg-muted p-1">
+                <div className="mt-3 flex flex-col gap-0.5 rounded-2xl bg-muted p-1">
                   {balances.tokens.map((entry) => {
                     const token = getWalletToken(entry.symbol);
                     if (!token) return null;
@@ -784,7 +784,7 @@ export function WalletTabClient({ organization }: { organization?: OrganizationW
               <CardTitle Icon={SendIcon}>{t("pendingHeading")}</CardTitle>
               {pendingValid && pendingToken ? (
                 <>
-                  <div className="mt-4 flex items-center gap-3 rounded-xl bg-muted px-3 py-3">
+                  <div className="mt-4 flex items-center gap-3 rounded-2xl bg-muted px-3 py-3">
                     <TokenBadge symbol={pendingToken.symbol} className="size-9" />
                     <div className="min-w-0 flex-1">
                       <p className="text-sm font-semibold text-foreground">
@@ -961,7 +961,7 @@ export function WalletTabClient({ organization }: { organization?: OrganizationW
 
           <Card>
             <CardTitle Icon={FingerprintIcon}>{t("signersHeading")}</CardTitle>
-            <div className="mt-4 flex flex-col gap-0.5 rounded-xl bg-muted p-1">
+            <div className="mt-4 flex flex-col gap-0.5 rounded-2xl bg-muted p-1">
               {liveSigners.map((signer) => (
                 <div
                   key={signer.credentialId ?? `signer-${signer.index}`}
@@ -1072,7 +1072,7 @@ export function WalletTabClient({ organization }: { organization?: OrganizationW
             confirmingDelete ? (
               <Card className="rounded-2xl bg-destructive/5 px-4 sm:px-5">
                 <div className="space-y-3">
-                  <h2 className="text-sm font-semibold text-foreground">{t("deleteConfirmTitle")}</h2>
+                  <h2 className="font-instrument text-lg font-light italic text-foreground">{t("deleteConfirmTitle")}</h2>
                   <p className="text-sm text-muted-foreground">{t("deleteConfirmBody")}</p>
                   {state?.holdsFunds ? (
                     <p className="rounded-xl bg-destructive/10 px-3 py-2 text-sm text-destructive">

@@ -70,7 +70,7 @@ export function FlowChart() {
           <CalendarDaysIcon className="size-5" />
         </motion.div>
         <div className="flex flex-col items-start md:items-center">
-          <h2 className="text-left text-base font-semibold text-foreground md:text-center">
+          <h2 className="text-left font-instrument text-xl font-light italic text-foreground md:text-center">
             {t("sections.events")}
           </h2>
           <p className="text-left md:text-center text-pretty">
@@ -87,7 +87,7 @@ export function FlowChart() {
           <RadioTowerIcon className="size-5" />
         </motion.div>
         <div className="flex flex-col items-start md:items-center">
-          <h2 className="text-left text-base font-semibold text-foreground md:text-center">
+          <h2 className="text-left font-instrument text-xl font-light italic text-foreground md:text-center">
             {t("sections.deployments")}
           </h2>
           <p className="text-left md:text-center text-pretty">
@@ -105,7 +105,7 @@ export function FlowChart() {
           <HeadphonesIcon className="size-5" />
         </motion.div>
         <div className="flex flex-col items-start md:items-center">
-          <h2 className="text-left text-base font-semibold text-foreground md:text-center">
+          <h2 className="text-left font-instrument text-xl font-light italic text-foreground md:text-center">
             {t("sections.recordings")}
           </h2>
           <p className="text-left md:text-center text-pretty">
