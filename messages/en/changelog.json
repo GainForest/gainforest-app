@@ -1,17 +1,16 @@
 {
   "metadata": {
     "title": "Changelog",
-    "description": "Every change shipped to GainForest, visualized over time."
+    "description": "Recent GainForest improvements and fixes."
   },
-  "eyebrow": "What's new",
-  "heading": "GainForest v{version}",
-  "intro": "A living timeline of everything we've shipped — new features, refinements, and fixes, grouped by month and colour-coded by area.",
+  "heading": "What changed",
+  "intro": "See recent improvements and fixes, grouped by month.",
   "stats": {
-    "commits": "Changes",
-    "months": "Months",
-    "range": "Span"
+    "commits": "{count, plural, one {# update} other {# updates}}",
+    "months": "{count, plural, one {# month} other {# months}}",
+    "range": "{start} to {end}"
   },
-  "filterLabel": "Filter by area",
+  "filterLabel": "Filter changes",
   "all": "Everything",
   "shipped": "{count, plural, one {# change} other {# changes}}",
   "categories": {
@@ -26,5 +25,6 @@
     "ui": "Design & UI",
     "fix": "Fixes",
     "core": "Core platform"
-  }
+  },
+  "hiddenIdentifier": "account identifier"
 }

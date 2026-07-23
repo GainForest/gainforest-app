@@ -5,7 +5,7 @@ import ts from "typescript";
 const projectRoot = process.cwd();
 const locales = ["es", "id", "pt", "sw"];
 const allLocales = ["en", ...locales];
-const namespaces = ["root", "audiomothGuide", "bumicert", "cart", "common", "deleteAccount", "legacy", "marketplace", "modals", "privacy", "tainaGuide", "upload"];
+const namespaces = ["root", "audiomothGuide", "bumicert", "cart", "changelog", "common", "deleteAccount", "legacy", "marketplace", "modals", "privacy", "tainaGuide", "upload"];
 
 const allowedExactValues = new Set([
   "",
@@ -17,6 +17,18 @@ const allowedExactValues = new Set([
   "Bumicert",
   "Bumicerts",
   "Bumicerts — Bumicerts",
+  "iNaturalist",
+  "Bluesky",
+  "Instagram",
+  "Raspberry Pi",
+  "Sensor",
+  "Starlink",
+  "Laptop",
+  "Etherscan",
+  "AudioMoth #14",
+  "GainForest — {name}",
+  "GainForest — {org}",
+  "123456789:ABCdefGhIJKlmNoPQRstuVwxyz",
   "Cert",
   "Certs",
   "Certified",
@@ -70,16 +82,13 @@ const allowedExactValues = new Set([
   "Habitat",
   "Genus",
   "Media",
-  "Status",
   "Total",
   "Menu",
   "Tags",
   "Gain",
   "Valid",
-  "Error",
   "Handle",
   "Link",
-  "Admin",
   // "Personal" is the same word in Spanish (publishAs badge).
   "Personal",
   "Banner",
@@ -111,7 +120,72 @@ const allowedPathPatterns = [
   /^maEarthFundingRound\.hero\.logoAlt$/,
   /^account\.metadata\.bumicertsTitle$/,
   /^modals\.websitePlaceholder$/,
+  /^devices\.status\.(up|down)$/,
+  /^coreDashboard\.hero\.title$/,
+  /^detail\.recovery\.sidebar\.email$/,
+  /^(?:status|error)$/i,
+  /^groupInvitations\.members\.roleAdmin$/,
+  /^create\.draft\.hydration\.errorTitle$/,
+  /^(?:accountTabs|sidebar\.profileRow|accountOrganizations\.role)\.admin$/,
+  /^adminModeration\.page\.title$/,
+  /^cgs\.repo\.roleAdmin$/,
+  /^cgs\.roles\.role\.admin\.name$/,
+  /^footer\.links\.status$/,
+  /^equipment\.(?:table|form)\.status$/,
+  /^autoDiscovered\.auto104$/,
+  /^settings\.dataCouncil\.roles\.admin$/,
+  /^dashboardClient\.organizations\.roles\.admin$/,
+  /^(?:observations\.colStatus|trees\.preview\.status)$/,
+  /^manageTrees\.upload\.time\.minutes$/,
 ];
+
+// Dynamic translation calls cannot be proven from a single literal key. Each
+// identifier/empty-prefix expression below was reviewed against a closed typed
+// key set in its caller. New arbitrary t(keyName) calls must be added explicitly
+// after review; meaningful template prefixes are validated against every locale.
+const reviewedDynamicTranslationCalls = new Set([
+  "app/(manage)/manage/certs/new/_components/NewBumicertClient.tsx:common.workScopes:WORK_SCOPE_MESSAGE_KEYS.reforestation",
+  "app/(manage)/manage/certs/new/_components/NewBumicertClient.tsx:common.workScopes:WORK_SCOPE_MESSAGE_KEYS.forest_protection",
+  "app/(manage)/manage/certs/new/_components/NewBumicertClient.tsx:common.workScopes:WORK_SCOPE_MESSAGE_KEYS.biodiversity_monitoring",
+  "app/(manage)/manage/certs/new/_components/NewBumicertClient.tsx:common.workScopes:WORK_SCOPE_MESSAGE_KEYS.community_stewardship",
+  "app/(manage)/manage/certs/new/_components/NewBumicertClient.tsx:common.workScopes:WORK_SCOPE_MESSAGE_KEYS.carbon_removal",
+  "app/(manage)/manage/certs/new/_components/NewBumicertClient.tsx:common.workScopes:WORK_SCOPE_MESSAGE_KEYS.restoration_maintenance",
+  "app/(manage)/manage/observations/_components/LocationPickerModal.tsx:upload.observations.location:LAYER_OPTIONS.find((option) => option.id === activeLayer)?.labelKey ?? \"layerStreets\"",
+  "app/(manage)/manage/observations/_components/LocationPickerModal.tsx:upload.observations.location:option.labelKey",
+  "app/(manage)/manage/observations/_components/ObservationsClient.tsx:upload.observations.status:status",
+  "app/(manage)/manage/projects/_components/ManageProjectsClient.tsx:common.workScopes:WORK_SCOPE_MESSAGE_KEYS[key]",
+  "app/(manage)/manage/trees/_components/TreesClient.tsx:common.manageTrees.manager:key as never",
+  "app/_components/DonationsHub.tsx:marketplace.donationsHub.tabs:view",
+  "app/_components/DonationsHub.tsx:marketplace.dashboard.periods:item",
+  "app/_components/shell/ShellHeader.tsx:common.sidebar.headerActions:route.labelKey",
+  "app/_components/shell/UnifiedSidebar.tsx:common.sidebar.sections:section.id",
+  "app/_components/shell/UnifiedSidebar.tsx:common.sidebar.items:item.id",
+  "app/account/_components/AccountTabBar.tsx:common.accountTabs:tab.labelKey",
+  "app/account/_components/ObservationsSubNav.tsx:common.accountTabs:tab.labelKey",
+  "app/audiomoth/_components/AudioMothClient.tsx:common.audiomoth:detailKeys[progress.phase]",
+  "app/audiomoth/_components/AudioMothClient.tsx:common.audiomoth.configure:key",
+  "app/bioblitz/BioblitzClient.tsx:marketplace.bioblitz.status:status",
+  "app/bioblitz/BioblitzClient.tsx:marketplace.bioblitz.status:itemStatus",
+  "app/bioblitz/BioblitzClient.tsx:marketplace.bioblitz.board.scope:option",
+  "app/cert/[did]/[rkey]/_components/BumicertDetailHeader.tsx:bumicert.detail.headerTabs:TAB_LABEL_KEYS[tab]",
+  "app/cert/[did]/[rkey]/page.tsx:bumicert.detail.recovery.donations:rankBadge.labelKey",
+  "app/changelog/ChangelogView.tsx:changelog:path as never",
+  "app/feed/FeedAudioClip.tsx:common.audiomoth.label.categories:clip.category",
+  "app/globe/_components/GlobeExplorer.tsx:marketplace.globe:item.labelKey",
+  "app/globe/_components/GlobeExplorer.tsx:marketplace.globe:labelKey",
+  "app/leaderboard/LeaderboardClient.tsx:marketplace.leaderboard.sort:SORT_TRANSLATION_KEYS[value]",
+  "app/leaderboard/LeaderboardClient.tsx:marketplace.leaderboard.card:labelKey",
+  "app/_components/FloatingTainaGuide.tsx:tainaGuide.guides:`${tour.guideId}.title`",
+  "app/_components/FloatingTainaGuide.tsx:tainaGuide.guides:`${tour.guideId}.tour.${activeTourStep.id}`",
+  "app/_components/FloatingTainaGuide.tsx:tainaGuide.guides:`${guideView.id}.title`",
+  "app/_components/FloatingTainaGuide.tsx:tainaGuide.guides:`${guide.id}.question`",
+  "app/_components/FloatingTainaGuide.tsx:tainaGuide.guides:`${guideView.id}.intro`",
+  "app/_components/FloatingTainaGuide.tsx:tainaGuide.guides:`${guideView.id}.steps.${step.id}.title`",
+  "app/_components/FloatingTainaGuide.tsx:tainaGuide.guides:`${guideView.id}.steps.${step.id}.body`",
+  "app/_components/HomeLanding.tsx:landing.certificate.faqItems:`${item}.question`",
+  "app/_components/HomeLanding.tsx:landing.certificate.faqItems:`${item}.answer`",
+  "app/docs/wallet-service/_components/ContractReader.tsx:common.walletExplainer.contract:`${excerpt.id}Note`",
+]);
 
 const technicalValuePatterns = [
   /^https?:\/\//,
@@ -174,8 +248,38 @@ function walkSourceFiles(dir, out = []) {
   return out;
 }
 
+function unwrapExpression(node) {
+  let current = node;
+  while (current && (ts.isParenthesizedExpression(current) || ts.isAsExpression(current) || ts.isSatisfiesExpression(current))) {
+    current = current.expression;
+  }
+  return current;
+}
+
+function staticStringArguments(node) {
+  const expression = unwrapExpression(node);
+  if (!expression) return [];
+  if (ts.isStringLiteralLike(expression)) return [expression.text];
+  if (ts.isConditionalExpression(expression)) {
+    const whenTrue = staticStringArguments(expression.whenTrue);
+    const whenFalse = staticStringArguments(expression.whenFalse);
+    return whenTrue.length > 0 && whenFalse.length > 0 ? [...new Set([...whenTrue, ...whenFalse])] : [];
+  }
+  if (ts.isBinaryExpression(expression) && expression.operatorToken.kind === ts.SyntaxKind.PlusToken) {
+    const left = staticStringArguments(expression.left);
+    const right = staticStringArguments(expression.right);
+    return left.flatMap((leftValue) => right.map((rightValue) => `${leftValue}${rightValue}`));
+  }
+  return [];
+}
+
 function stringLiteralArgument(node) {
-  return node && ts.isStringLiteralLike(node) ? node.text : null;
+  return staticStringArguments(node)[0] ?? null;
+}
+
+function dynamicKeyPrefix(node) {
+  const expression = unwrapExpression(node);
+  return expression && ts.isTemplateExpression(expression) ? expression.head.text : null;
 }
 
 function collectStaticTranslationKeys() {
@@ -184,6 +288,7 @@ function collectStaticTranslationKeys() {
     ...walkSourceFiles(path.join(projectRoot, "components")),
   ];
   const used = new Map();
+  const dynamic = new Map();
 
   for (const file of files) {
     const source = ts.createSourceFile(
@@ -220,15 +325,31 @@ function collectStaticTranslationKeys() {
         }
       }
 
-      if (ts.isCallExpression(node) && ts.isIdentifier(node.expression)) {
-        const namespace = lookup(node.expression.text);
-        const key = stringLiteralArgument(node.arguments[0]);
-        if (namespace !== null && key !== null) {
-          const messageKey = namespace ? `${namespace}.${key}` : key;
-          used.set(`${path.relative(projectRoot, file)}:${messageKey}`, {
-            file: path.relative(projectRoot, file),
-            key: messageKey,
-          });
+      if (ts.isCallExpression(node)) {
+        const translator = ts.isIdentifier(node.expression)
+          ? node.expression.text
+          : ts.isPropertyAccessExpression(node.expression) && node.expression.name.text === "rich" && ts.isIdentifier(node.expression.expression)
+            ? node.expression.expression.text
+            : null;
+        if (translator) {
+          const namespace = lookup(translator);
+          const keys = staticStringArguments(node.arguments[0]);
+          if (namespace !== null && keys.length > 0) {
+            for (const key of keys) {
+              const messageKey = namespace ? `${namespace}.${key}` : key;
+              used.set(`${path.relative(projectRoot, file)}:${messageKey}`, {
+                file: path.relative(projectRoot, file),
+                key: messageKey,
+              });
+            }
+          } else if (namespace !== null && node.arguments[0]) {
+            const relativeFile = path.relative(projectRoot, file);
+            const prefix = dynamicKeyPrefix(node.arguments[0]);
+            const expression = node.arguments[0].getText(source);
+            const reviewKey = `${relativeFile}:${namespace}:${expression}`;
+            const messagePrefix = prefix ? (namespace ? `${namespace}.${prefix}` : prefix) : null;
+            dynamic.set(reviewKey, { file: relativeFile, namespace, expression, messagePrefix, reviewKey });
+          }
         }
       }
 
@@ -239,7 +360,7 @@ function collectStaticTranslationKeys() {
     visit(source);
   }
 
-  return [...used.values()];
+  return { staticKeys: [...used.values()], dynamicPrefixes: [...dynamic.values()] };
 }
 
 const messagesByLocale = Object.fromEntries(
@@ -302,10 +423,27 @@ for (const namespace of namespaces) {
   }
 }
 
-for (const { file, key } of collectStaticTranslationKeys()) {
+const { staticKeys, dynamicPrefixes } = collectStaticTranslationKeys();
+
+for (const { file, key } of staticKeys) {
   for (const locale of allLocales) {
     if (!hasMessageKey(messagesByLocale[locale], key)) {
       problems.push(`${file} uses missing ${locale} message: ${key}`);
+    }
+  }
+}
+
+for (const { file, expression, messagePrefix, reviewKey } of dynamicPrefixes) {
+  if (!messagePrefix) {
+    if (!reviewedDynamicTranslationCalls.has(reviewKey)) {
+      problems.push(`${file} uses unreviewed arbitrary dynamic message key ${expression} (${reviewKey}); add an explicit reviewed allowlist entry or use a static/meaningfully-prefixed key`);
+    }
+    continue;
+  }
+  for (const locale of allLocales) {
+    const keys = flattenStrings(messagesByLocale[locale]).map(([key]) => key);
+    if (!keys.some((key) => key.startsWith(messagePrefix))) {
+      problems.push(`${file} uses dynamic ${locale} message prefix with no matching messages: ${messagePrefix}`);
     }
   }
 }

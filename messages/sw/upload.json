@@ -1,7 +1,7 @@
 {
   "addData": {
     "title": "Ongeza data",
-    "description": "Dondosha faili zako hapa chini nasi tutazipeleka mahali pake — picha, orodha za miti, sauti au ramani za maeneo.",
+    "description": "Dondosha faili zako hapa chini nasi tutazipeleka mahali pake: picha, orodha za miti, sauti au ramani za maeneo.",
     "dropTitle": "Dondosha faili ili kuongeza data",
     "dropHint": "Picha · orodha za miti · sauti · ramani za maeneo",
     "browse": "Vinjari faili",
@@ -84,7 +84,22 @@
     "unnamed": "Eneo lisilo na jina",
     "invalid": "Si halali",
     "alreadyDefault": "Tayari ni chaguo-msingi",
-    "makeDefault": "Weka kuwa chaguo-msingi"
+    "makeDefault": "Weka kuwa chaguo-msingi",
+    "mapPreview": "Onyesho la awali la ramani ya eneo",
+    "previousSite": "Eneo lililotangulia",
+    "nextSite": "Eneo linalofuata",
+    "defaultLoadError": "Eneo chaguo-msingi halikuweza kupakiwa.",
+    "loadError": "Maeneo hayakuweza kupakiwa.",
+    "retry": "Jaribu tena",
+    "createDenied": "Jukumu lako haliruhusu kuongeza maeneo kwenye shirika hili.",
+    "editDenied": "Jukumu lako haliruhusu kuhariri eneo hili.",
+    "defaultDenied": "Jukumu lako haliruhusu kubadilisha eneo chaguo-msingi.",
+    "defaultError": "Eneo chaguo-msingi halikuweza kubadilishwa.",
+    "deleteDefaultBlocked": "Chagua eneo jingine kuwa chaguo-msingi kabla ya kufuta hili.",
+    "deleteDenied": "Jukumu lako haliruhusu kufuta eneo hili.",
+    "deleteError": "Eneo halikuweza kufutwa.",
+    "cardsView": "Kadi",
+    "listView": "Orodha"
   },
   "audio": {
     "title": "Rekodi za Sauti",
@@ -202,7 +217,19 @@
       "identificationRemarks": "Maelezo ya utambuzi",
       "speciesNotes": "Madokezo ya spishi",
       "savingUpload": "Inahifadhi upakiaji wako",
-      "recordedAtInvalid": "Tafadhali weka tarehe halali ya kurekodi."
+      "recordedAtInvalid": "Tafadhali weka tarehe halali ya kurekodi.",
+      "deploymentNamePlaceholder": "Eneo A Kaskazini, AudioMoth Machi 2024",
+      "channelCount": "Chaneli {count}",
+      "bitDepth": "biti {count}"
+    },
+    "spectrogram": {
+      "chooseFile": "Chagua faili la sauti kuona muundo wa masafa kabla ya kuhifadhi.",
+      "frequencyOverTime": "Masafa kwa muda",
+      "previewAria": "Onyesho la awali la spektrogramu ya sauti",
+      "low": "chini",
+      "high": "juu",
+      "title": "Onyesho la spectrogram",
+      "caption": "Mikanda yenye mwanga zaidi inaonyesha masafa yenye nguvu zaidi kwenye rekodi iliyochaguliwa."
     }
   },
   "dashboard": {
@@ -211,7 +238,7 @@
     "accountNotReady": "Data za akaunti bado haziko tayari kuhifadhiwa."
   },
   "profile": {
-    "aboutPlaceholder": "Eleza ulimwengu kuhusu shirika lako — dhamira yake, historia, na kazi mnayofanya…",
+    "aboutPlaceholder": "Eleza ulimwengu kuhusu shirika lako: dhamira yake, historia, na kazi mnayofanya…",
     "public": "Hadharani",
     "unlisted": "Haijaorodheshwa",
     "addCountry": "Ongeza nchi",
@@ -306,7 +333,11 @@
       "nearBoundary": "Karibu na mpaka: mti huu uko nje ya eneo lililochaguliwa na utarukwa.",
       "invalidBoundary": "Mpaka wa eneo uliochaguliwa si halali: mpaka haukuweza kutumika kwa uthibitishaji wa miti.",
       "invalidBoundaryFallback": "mpaka haukuweza kutumika kwa uthibitishaji wa miti.",
-      "outOfSite": "Nje ya eneo: mti huu uko nje ya mpaka wa eneo lililochaguliwa na utarukwa."
+      "outOfSite": "Nje ya eneo: mti huu uko nje ya mpaka wa eneo lililochaguliwa na utarukwa.",
+      "futureDate": "Tarehe ya tukio haiwezi kuwa ya baadaye.",
+      "canopyRange": "Kifuniko cha taji lazima kiwe kati ya 0 na 100.",
+      "boundaryOutside": "Mti huu uko {distance} nje ya eneo lililochaguliwa. Kagua viwianishi, chagua mpaka mwingine, au ondoa safu hii.",
+      "unknownDistance": "umbali usiojulikana"
     },
     "fileDrop": {
       "modes": {
@@ -371,7 +402,7 @@
       "continueToMapping": "Endelea kwenye Ulinganishaji wa Safu Wima",
       "selectSiteBeforeUpload": "Chagua eneo kabla ya kupakia data za miti.",
       "csvOnly": "Ni faili za .csv na .tsv pekee zinazoungwa mkono.",
-      "fileTooLarge": "Faili ni kubwa sana. Ukubwa wa juu ni 10 MB (umepata {size}).",
+      "fileTooLarge": "Faili ni kubwa sana ({size}). Ukubwa wa juu ni {maxSize}.",
       "zipOnly": "Ni faili za .zip za Kobo Media Attachments pekee zinazoungwa mkono.",
       "zipTooLarge": "Faili la ZIP ni kubwa sana. Ukubwa wa juu ni 200 MB (umepata {size}).",
       "zipNoImages": "Hakuna viambatisho vya picha vinavyoungwa mkono vilivyopatikana katika ZIP hii. Hakikisha umechagua mauzo ya Media Attachments ya KoboToolbox.",
@@ -401,8 +432,8 @@
       "addSiteBoundary": "Ongeza mpaka wa eneo",
       "selectSitePlaceholder": "Chagua eneo…",
       "defaultSuffix": " (chaguo-msingi)",
-      "preparingMapAreaSuffix": " — inaandaa eneo la ramani…",
-      "needsMapAreaSuffix": " — inahitaji eneo la ramani",
+      "preparingMapAreaSuffix": ": inaandaa eneo la ramani…",
+      "needsMapAreaSuffix": ": inahitaji eneo la ramani",
       "addMapAreaToSelected": "Ongeza eneo la ramani kwenye eneo lililochaguliwa",
       "selectedSiteCheckHelp": "Miti itakaguliwa dhidi ya eneo hili moja lililochorwa kwenye ramani.",
       "mapAreaPreparing": "Eneo hili lililochorwa kwenye ramani bado linaandaliwa. Jaribu tena baada ya muda mfupi.",
@@ -456,7 +487,16 @@
           "description": "Miti tayari ilikuwepo mlipoanza kurekodi. Ni bora kuwa mkweli kuliko kukisia."
         }
       },
-      "continueToMatch": "Endelea kulinganisha vichwa"
+      "continueToMatch": "Endelea kulinganisha vichwa",
+      "invalidPhotoFolder": "Chagua faili ya folda ya picha iliyopakuliwa kutoka programu yako ya fomu ya uwandani.",
+      "emptyPhotoFolder": "Folda hii ya picha haina picha zinazotumika.",
+      "unsupportedFile": "Faili za lahajedwali za CSV na TSV pekee ndizo zinatumika.",
+      "parseFileError": "Lahajedwali halikuweza kusomwa. Kagua faili na ujaribu tena.",
+      "photoFolderCounts": "Picha {images}, mawasilisho {submissions}",
+      "treeCount": "Miti {count}",
+      "siteCreateDenied": "Jukumu lako haliruhusu kuongeza mpaka wa eneo.",
+      "siteEditDenied": "Jukumu lako haliruhusu kuhariri mpaka huu wa eneo.",
+      "groupSelectDenied": "Jukumu lako haliruhusu kuongeza miti kwenye kikundi kilichopo."
     },
     "preview": {
       "siteBoundaryField": "Mpaka wa eneo",
@@ -473,7 +513,7 @@
       "partialValidBoundaryHint": "Rekebisha viwianishi vyovyote vya miti vilivyo nje ya poligoni iliyochaguliwa, rudi uchague/unde mpaka sahihi wa eneo ikiwa inahitajika, na rekebisha hitilafu nyingine zozote za ulinganishaji au sehemu zilizoorodheshwa.",
       "partialValidMappingHint": "Rekebisha hitilafu za ulinganishaji au sehemu zilizoorodheshwa ikiwa unataka kuzijumuisha.",
       "dataPreview": "Hakikisho la Data",
-      "showingRows": "Inaonyesha safu mlalo {maxRows} kati ya {totalRows} — safu mlalo zote halali zitapakiwa",
+      "showingRows": "Inaonyesha safu mlalo {maxRows} kati ya {totalRows}: safu mlalo zote halali zitapakiwa",
       "photos": "Picha",
       "status": "Hali",
       "valid": "Halali",
@@ -491,12 +531,13 @@
       "noSiteSelected": "Hakuna eneo lililochaguliwa. Rudi uchague au uunde mpaka wa eneo.",
       "checkingMapAreaFor": "Inakagua eneo lililochorwa kwenye ramani kwa {siteName}…",
       "boundaryCheckError": "Haikuweza kukagua eneo lililochaguliwa lililochorwa kwenye ramani ({error}). Rudi, chagua au unda mpaka wa eneo, kisha ujaribu tena.",
-      "allRowsReady": "Safu mlalo {count, plural, one {# iko} other {# ziko}} tayari — tayari kuhifadhiwa kwenye {siteName}.",
+      "allRowsReady": "{count, plural, one {Safu # iko tayari} other {Safu # ziko tayari}} kuhifadhiwa kwenye {siteName}.",
       "noValidRows": "Hakuna safu mlalo halali zilizopatikana. Rekebisha hitilafu na ujaribu tena.",
       "partialRowsReady": "{validCount} ziko tayari, {errorCount} zinahitaji kurekebishwa. Safu mlalo zenye matatizo zitarukwa.",
       "treeInformationPreview": "Hakikisho la taarifa za miti",
       "showingFirstRows": "Inaonyesha safu mlalo {maxRows} za kwanza kati ya {totalRows}",
-      "backToMatchedHeadings": "Rudi kwenye vichwa vilivyolinganishwa"
+      "backToMatchedHeadings": "Rudi kwenye vichwa vilivyolinganishwa",
+      "boundaryCheckFailed": "Eneo la ramani lililochaguliwa halikuweza kukaguliwa. Rudi, chagua au tengeneza mpaka wa eneo, kisha ujaribu tena."
     },
     "manager": {
       "backToUpload": "Rudi kwenye upakiaji",
@@ -587,18 +628,18 @@
       "optionalOccurrence": "Tukio la Hiari",
       "measurements": "Vipimo",
       "media": "Midia",
-      "duplicateAria": "Ulinganishaji unaorudiwa — safu wima ya kwanza ya chanzo pekee ndiyo itatumika",
+      "duplicateAria": "Ulinganishaji unaorudiwa: safu wima ya kwanza ya chanzo pekee ndiyo itatumika",
       "mappedAria": "Safu wima iliyolinganishwa",
       "expectedSkipAria": "Safu wima ya metadata ya Kobo iliyorukwa kimakusudi",
-      "skippedAria": "Safu wima iliyorukwa — kagua kabla ya kuendelea",
+      "skippedAria": "Safu wima iliyorukwa: kagua kabla ya kuendelea",
       "duplicate": "Nakala rudufu",
       "mapped": "Imelinganishwa",
       "autoSkipped": "Imerukwa kiotomatiki",
       "skipped": "Imerukwa",
       "back": "Rudi",
       "continue": "Endelea kwenye Hakikisho",
-      "duplicateWarning": "Safu wima nyingi za chanzo zimelinganishwa na sehemu ileile lengwa. Ulinganishaji wa kwanza pekee ndio utatumika; marudio yameangaziwa. (Safu wima za URL za Picha ni tofauti — safu wima nyingi zinaweza kulinganishwa na URL ya Picha kwa miti yenye picha nyingi.)",
-      "skippedNotUploaded": "Imerukwa — haijapakiwa",
+      "duplicateWarning": "Safu wima nyingi za chanzo zimelinganishwa na sehemu ileile lengwa. Ulinganishaji wa kwanza pekee ndio utatumika; marudio yameangaziwa. (Safu wima za URL za Picha ni tofauti: safu wima nyingi zinaweza kulinganishwa na URL ya Picha kwa miti yenye picha nyingi.)",
+      "skippedNotUploaded": "Imerukwa: haijapakiwa",
       "requiredField": "Sehemu inayohitajika",
       "matchHeadingsTitle": "Linganisha vichwa vya faili",
       "matchHeadingsDescription": "Linganisha vichwa vya faili yako na taarifa za miti zinazohitajika na GainForest. {count, plural, one {kichwa # kimegunduliwa.} other {vichwa # vimegunduliwa.}}",
@@ -616,7 +657,7 @@
       "photos": "Picha",
       "duplicateWarningShort": "Baadhi ya vichwa vinalingana na taarifa ileile. Ulinganishaji wa kwanza pekee ndio utatumika.",
       "matched": "Imelinganishwa",
-      "skippedWillNotSave": "Imerukwa — haitahifadhiwa",
+      "skippedWillNotSave": "Imerukwa: haitahifadhiwa",
       "duplicateTarget": "Lengwa rudufu",
       "continueToPreview": "Endelea kwenye hakikisho"
     },
@@ -670,9 +711,9 @@
       "obscureLabel": "Ficha eneo langu kamili",
       "obscureHint": "Huchapisha duara la makadirio kuzunguka eneo lisilo dhahiri badala ya mahali kamili, ili watu wasijue hasa picha ilipigwa wapi.",
       "obscureAreaLabel": "Eneo la makadirio",
-      "obscureArea_tight": "Finyu — takriban radius ya mita 300",
-      "obscureArea_balanced": "Wastani — takriban radius ya mita 500",
-      "obscureArea_wide": "Pana — takriban radius ya kilomita 1",
+      "obscureArea_tight": "Finyu: takriban radius ya mita 300",
+      "obscureArea_balanced": "Wastani: takriban radius ya mita 500",
+      "obscureArea_wide": "Pana: takriban radius ya kilomita 1",
       "notesLabel": "Madokezo",
       "notesPlaceholder": "Madokezo",
       "batchStoryLabel": "Hadithi ya upakiaji huu",
@@ -728,7 +769,7 @@
       "measurementSuggestion_count": "Idadi",
       "measurementSuggestion_weight": "Uzito",
       "projectLabel": "Ongeza kwenye mradi",
-      "projectHint": "Hiari — unganisha uchunguzi huu na mojawapo ya miradi yako.",
+      "projectHint": "Hiari: unganisha uchunguzi huu na mojawapo ya miradi yako.",
       "projectNone": "Bila mradi",
       "applyToAll": "Tumia tarehe na eneo hili kwa zote",
       "dropTitleTouch": "Ongeza picha zako",
@@ -753,7 +794,7 @@
       "replace": "Badilisha",
       "rowsFound": "{count, plural, one {Safu #} other {Safu #}}",
       "storedAsFile": "Tutahifadhi faili kama ulivyolituma, bila kubadilisha au kuligawanya.",
-      "missingRequired": "Halionekani kuwa na safu za spishi, tarehe na eneo — bado tutalihifadhi kama ulivyolituma.",
+      "missingRequired": "Halionekani kuwa na safu za spishi, tarehe na eneo: bado tutalihifadhi kama ulivyolituma.",
       "measurementsFound": "Vipimo:",
       "measureHeight": "Urefu",
       "measureDbh": "Upana wa shina",
@@ -853,7 +894,7 @@
     "addTileBody": "Pakia picha zaidi za uwanjani.",
     "emptyObservationsTitle": "Bado hakuna uchunguzi",
     "emptyObservationsBody": "Ongeza uchunguzi wako wa kwanza kutoka picha za uwanjani.",
-    "emptyHeroDescription": "Uchunguzi hunasa unachokutana nacho uwanjani — spishi, picha, maeneo, na tarehe — ukijenga ushahidi nyuma ya athari yako.",
+    "emptyHeroDescription": "Uchunguzi hurekodi spishi, picha, maeneo na tarehe unazopata uwandani. Hujenga ushahidi wa athari yako.",
     "selectAll": "Chagua zote",
     "deselectAll": "Ondoa chaguo zote",
     "removeSelected": "Ondoa zilizochaguliwa",
@@ -1130,7 +1171,8 @@
       "did": "DID",
       "wallet": "Pochi ya EVM",
       "copyDid": "Nakili DID",
-      "copyWallet": "Nakili anwani ya pochi"
+      "copyWallet": "Nakili anwani ya pochi",
+      "copyFailed": "Kiungo hakikuweza kunakiliwa"
     },
     "errors": {
       "nameRequired": "Ongeza jina kabla ya kuhifadhi.",

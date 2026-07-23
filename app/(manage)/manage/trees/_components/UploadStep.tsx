@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useCallback, useMemo, useRef, useState } from "react";
+import { useTranslations } from "next-intl";
 import {
   AlertTriangle,
   Camera,
@@ -47,11 +48,7 @@ import type {
   TreeUploadRowAttentionSummary,
   ValidatedRow,
 } from "../../_lib/upload/types";
-import {
-  createTreeUploadRowAttentionSummary,
-  getTreeUploadRowAttentionKindLabel,
-  getValidatedRowLabel,
-} from "../../_lib/upload/row-attention";
+import { createTreeUploadRowAttentionSummary } from "../../_lib/upload/row-attention";
 import { type UploadDatasetSelection } from "../../_lib/upload/upload-dataset-selection";
 import type { UploadSiteSelection } from "../../_lib/upload/site-selection";
 import {
@@ -152,48 +149,11 @@ function getOccurrenceRkey(status: RowStatus | undefined): string | null {
   return rkey && rkey.length > 0 ? rkey : null;
 }
 
-const EXISTING_TREE_GROUP_UNAVAILABLE_MESSAGE =
-  "The selected tree group disappeared during upload. Remaining rows were not added.";
-const UNCONFIRMED_TREE_GROUP_CHUNK_MESSAGE =
-  "This group of trees could not be confirmed. Some trees may already be saved; review your trees before retrying.";
-
 function isTreeGroupUnavailableMessage(message: string): boolean {
   return message.toLowerCase().includes("tree group") && (
     message.toLowerCase().includes("no longer available") ||
     message.toLowerCase().includes("disappeared")
   );
-}
-
-function plainSaveErrorMessage(error: unknown, fallback: string): string {
-  const message = error instanceof Error ? error.message.trim() : "";
-  if (!message) return fallback;
-  if (
-    message.includes("tree group") ||
-    message.includes("Tree group") ||
-    message.includes("Tree information") ||
-    message.includes("Measurement") ||
-    message.includes("could not be saved") ||
-    message.includes("could not be updated")
-  ) {
-    return message;
-  }
-  return fallback;
-}
-
-function photoErrorMessage(error: unknown): string {
-  const message = error instanceof Error ? error.message : "";
-  if (
-    message.startsWith("Photo ") ||
-    message.startsWith("This photo") ||
-    message.startsWith("Could not open this photo link") ||
-    message.startsWith("Photo link") ||
-    message.startsWith("The photo") ||
-    message.startsWith("The selected photo folder") ||
-    message.startsWith("The photo folder")
-  ) {
-    return message;
-  }
-  return "Photo could not be saved.";
 }
 
 function fileFromSerializablePhoto(photoFile: { name: string; type: string; arrayBuffer: ArrayBuffer }): File {
@@ -216,6 +176,7 @@ export default function UploadStep({
   onUploadMore,
   onDone,
 }: UploadStepProps) {
+  const t = useTranslations("common.manageTrees.upload");
   const { pushModal, show } = useModal();
   const writeOptions = useMemo(() => target.kind === "group" ? { repo: target.did } : undefined, [target.did, target.kind]);
   const [uploadStarted, setUploadStarted] = useState(false);
@@ -261,7 +222,7 @@ export default function UploadStep({
       if (!row) return [];
       return [createTreeUploadRowAttentionSummary({
         sourceRowIndex: row.index,
-        rowLabel: getValidatedRowLabel(row),
+        rowLabel: row.occurrence.scientificName || t("row", { number: row.index + 1 }),
         messages: [status.error],
         kind: status.state === "partial" ? "partial" : skippedUploadRowIndexSet.has(rowIndex) ? "skipped" : "failed",
       })];
@@ -318,7 +279,7 @@ export default function UploadStep({
         failureReason: "site_selection_missing",
         durationSeconds: Math.round((completedAtMs - uploadStartMs) / 1_000),
       });
-      setUploadFatalError("No site selected. Go back and choose or create a site boundary.");
+      setUploadFatalError(t("fatal.noSite"));
       setClockMs(completedAtMs);
       setUploadDone(true);
       return;
@@ -326,7 +287,17 @@ export default function UploadStep({
 
     try {
       const boundary = await fetchUploadSiteBoundary(siteSelection);
-      const siteBoundaryCheck = checkUploadRowsAgainstSelectedSite({ rows: validRows, siteSelection, boundary });
+      const siteBoundaryCheck = checkUploadRowsAgainstSelectedSite({
+        rows: validRows,
+        siteSelection,
+        boundary,
+        messages: {
+          differentSite: t("boundary.differentSite"),
+          invalidBoundary: t("boundary.invalid"),
+          outsideBoundary: (distance) => t("boundary.outside", { distance }),
+          unknownDistance: t("boundary.unknownDistance"),
+        },
+      });
       const skippedRowIndexes = siteBoundaryCheck.skippedRows.map((r) => r.rowIndex);
       const skippedRowIndexSet = new Set(skippedRowIndexes);
       const nextPhotoFetchQueue = siteBoundaryCheck.fatalError ? [] : buildPhotoFetchQueue(validRows, skippedRowIndexSet);
@@ -386,7 +357,7 @@ export default function UploadStep({
         failureReason: "site_boundary_validation_failed",
         durationSeconds: Math.round((completedAtMs - uploadStartMs) / 1_000),
       });
-      setUploadFatalError("Could not check the selected drawn map area. Go back, choose or create a site boundary, then try again.");
+      setUploadFatalError(t("fatal.siteBoundary"));
       setClockMs(completedAtMs);
       setUploadDone(true);
       return;
@@ -403,9 +374,7 @@ export default function UploadStep({
         failureReason: "missing_kobo_media_zip",
         durationSeconds: Math.round((completedAtMs - uploadStartMs) / 1_000),
       });
-      setUploadFatalError(
-        "This upload includes photos from a photo folder, but that folder cannot be restored after refreshing or signing in again. Start over and select both the tree file and matching photo folder.",
-      );
+      setUploadFatalError(t("fatal.photoFolder"));
       setClockMs(completedAtMs);
       setUploadDone(true);
       return;
@@ -439,7 +408,7 @@ export default function UploadStep({
           failureReason: "tree_group_create_failed",
           durationSeconds: Math.round((completedAtMs - uploadStartMs) / 1_000),
         });
-        setUploadFatalError("Could not create the tree group. Try again or continue without a group.");
+        setUploadFatalError(t("fatal.treeGroup"));
         setClockMs(completedAtMs);
         setUploadDone(true);
         return;
@@ -467,8 +436,8 @@ export default function UploadStep({
           const status = statuses[index];
           if (!status || (status.state !== "success" && status.state !== "partial")) continue;
 
-          const baseError = "The selected tree group disappeared during upload, so this tree was kept without that group. Review this tree before retrying.";
-          const fallbackError = "The selected tree group disappeared during upload and this tree could not be moved out of that group automatically. Review this tree before retrying.";
+          const baseError = t("errors.groupDetached");
+          const fallbackError = t("errors.groupDetachFailed");
           const nextBaseError = status.state === "partial" ? `${status.error} ${baseError}` : baseError;
           const nextFallbackError = status.state === "partial" ? `${status.error} ${fallbackError}` : fallbackError;
           const rkey = getOccurrenceRkey(status);
@@ -507,8 +476,8 @@ export default function UploadStep({
         );
         const chunkEnd = chunkStart + chunkRows.length;
         const chunkLabel = chunkEntries.length === 1
-          ? (chunkEntries[0]?.row.occurrence.scientificName || `Row ${(chunkEntries[0]?.rowIndex ?? chunkStart) + 1}`)
-          : `Rows ${chunkStart + 1}-${chunkEnd} of ${rowsToUpload.length}`;
+          ? (chunkEntries[0]?.row.occurrence.scientificName || t("row", { number: (chunkEntries[0]?.rowIndex ?? chunkStart) + 1 }))
+          : t("rowsRange", { start: chunkStart + 1, end: chunkEnd, total: rowsToUpload.length });
 
         for (const entry of chunkEntries) {
           nextStatuses[entry.rowIndex] = { state: "uploading" };
@@ -545,12 +514,14 @@ export default function UploadStep({
 
             if (result.state === "partial") {
               partials += 1;
-              nextStatuses[globalIndex] = { state: "partial", occurrenceUri: result.occurrenceUri, photoCount: result.photoCount, error: result.error };
+              if (result.error) console.error("Partial tree save", result.error);
+              nextStatuses[globalIndex] = { state: "partial", occurrenceUri: result.occurrenceUri, photoCount: result.photoCount, error: t("rowPartialError") };
               continue;
             }
 
             failures += 1;
-            nextStatuses[globalIndex] = { state: "error", error: result.error };
+            if (result.error) console.error("Tree save failed", result.error);
+            nextStatuses[globalIndex] = { state: "error", error: t("treeSaveError") };
           }
 
           for (const [chunkIndex] of chunkRows.entries()) {
@@ -558,7 +529,7 @@ export default function UploadStep({
             if (!entry || handledIndexes.has(chunkIndex)) continue;
 
             failures += 1;
-            nextStatuses[entry.rowIndex] = { state: "error", error: "Unexpected save response for this row." };
+            nextStatuses[entry.rowIndex] = { state: "error", error: t("treeSaveError") };
           }
 
           if (response.datasetBecameUnavailable) {
@@ -574,17 +545,18 @@ export default function UploadStep({
               const remainingEntry = rowsToUpload[remainingIndex];
               if (!remainingEntry) continue;
 
-              nextStatuses[remainingEntry.rowIndex] = { state: "error", error: EXISTING_TREE_GROUP_UNAVAILABLE_MESSAGE };
+              nextStatuses[remainingEntry.rowIndex] = { state: "error", error: t("errors.groupUnavailable") };
               failures += 1;
             }
             stopExistingTreeGroupUpload = true;
           }
         } catch (error) {
-          const baseMessage = plainSaveErrorMessage(error, "Trees could not be saved.");
-          const treeGroupUnavailable = isTreeGroupUnavailableMessage(baseMessage);
+          console.error("Tree chunk save failed", error);
+          const rawMessage = error instanceof Error ? error.message : "";
+          const treeGroupUnavailable = isTreeGroupUnavailableMessage(rawMessage);
           const chunkMessage = treeGroupUnavailable
-            ? EXISTING_TREE_GROUP_UNAVAILABLE_MESSAGE
-            : `${baseMessage} ${UNCONFIRMED_TREE_GROUP_CHUNK_MESSAGE}`;
+            ? t("errors.groupUnavailable")
+            : t("errors.chunkUnconfirmed");
 
           if (treeGroupUnavailable) {
             const demotedSuccesses = await detachUploadedRowsFromUnavailableTreeGroup(
@@ -652,7 +624,7 @@ export default function UploadStep({
       const entry = rowsToUpload[uploadIndex];
       if (!entry) continue;
       const { row, rowIndex } = entry;
-      const speciesName = row.occurrence.scientificName || `Row ${rowIndex + 1}`;
+      const speciesName = row.occurrence.scientificName || t("row", { number: rowIndex + 1 });
 
       setRowStatuses((prev) => { const next = [...prev]; next[rowIndex] = { state: "uploading" }; return next; });
       setProgress((prev) => ({ ...prev, current: Math.min(skippedRowsForUpload.length + uploadIndex + 1, validRows.length), currentRow: speciesName }));
@@ -693,7 +665,7 @@ export default function UploadStep({
                     state: "partial",
                     occurrenceUri: occResult.uri,
                     photoCount: 0,
-                    error: "The tree was saved, but its measurement could not be saved and automatic cleanup could not finish. Review this tree before retrying.",
+                    error: t("errors.measurementCleanupFailed"),
                   };
                   return next;
                 });
@@ -712,7 +684,8 @@ export default function UploadStep({
         failures += 1;
         setRowStatuses((prev) => {
           const next = [...prev];
-          next[rowIndex] = { state: "error", error: plainSaveErrorMessage(err, "Tree could not be saved.") };
+          console.error("Tree save failed", err);
+          next[rowIndex] = { state: "error", error: t("treeSaveError") };
           return next;
         });
       }
@@ -728,13 +701,13 @@ export default function UploadStep({
         await deleteRecord("app.gainforest.dwc.dataset", datasetRkey, writeOptions);
         setUploadedDatasetUri(null);
       } catch {
-        setDatasetUpdateWarning("The empty tree group could not be removed automatically.");
+        setDatasetUpdateWarning(t("datasetCleanupWarning"));
       }
     } else if (datasetSelection.mode === "new" && datasetRkey && persistedOccurrences > 0) {
       try {
         await incrementDatasetRecordCount(datasetRkey, persistedOccurrences, writeOptions);
       } catch {
-        setDatasetUpdateWarning("Tree group created, but its tree count could not be updated.");
+        setDatasetUpdateWarning(t("groupCountWarning"));
       }
     }
 
@@ -752,7 +725,7 @@ export default function UploadStep({
     });
     setClockMs(completedAtMs);
     setUploadDone(true);
-  }, [datasetSelection, establishmentMeans, koboMediaZipFile, mutationDisabledReason, photoFetchQueue.length, previewSkippedRows.length, siteSelection, uploadId, validRows, writeOptions]);
+  }, [datasetSelection, establishmentMeans, koboMediaZipFile, mutationDisabledReason, photoFetchQueue.length, previewSkippedRows.length, siteSelection, t, uploadId, validRows, writeOptions]);
 
   const runPhotoFetch = useCallback(async () => {
     if (photoFetchRef.current) return;
@@ -800,7 +773,7 @@ export default function UploadStep({
           [rowIndex]: {
             ...(prev[rowIndex] ?? getInitialPhotoFetchStatus()),
             failureCount: (prev[rowIndex]?.failureCount ?? 0) + 1,
-            lastError: "Tree could not be saved, so its photo was skipped.",
+            lastError: t("photoSkipped"),
           },
         }));
         setPhotoFetchProgress((prev) => ({ ...prev, current: photoIndex + 1, failures }));
@@ -827,7 +800,7 @@ export default function UploadStep({
           : await (async () => {
               const archivePromise = getKoboMediaArchive();
               if (!archivePromise) {
-                throw new Error("The photo folder is no longer available. Start over, select the matching photo folder, and try again.");
+                throw new Error("PHOTO_FOLDER_UNAVAILABLE");
               }
               const archive = await archivePromise;
               const photoFile = await readKoboMediaZipEntryAsSerializableFile({
@@ -841,7 +814,7 @@ export default function UploadStep({
                 occurrenceRef: occurrenceUri,
                 siteRef: siteSelection?.uri,
                 subjectPart: photo.subjectPart,
-                caption: `Imported from photo folder: ${photo.fileName}`,
+                caption: t("importedPhotoCaption", { fileName: photo.fileName }),
                 format: photoFile.type,
               }, writeOptions);
             })();
@@ -870,6 +843,7 @@ export default function UploadStep({
           return next;
         });
       } catch (error) {
+        console.error("Tree photo save failed", error);
         failures += 1;
         setPhotoFetchStatuses((prev) => ({
           ...prev,
@@ -877,7 +851,7 @@ export default function UploadStep({
             ...(prev[rowIndex] ?? getInitialPhotoFetchStatus()),
             inProgressCount: Math.max(0, (prev[rowIndex]?.inProgressCount ?? 0) - 1),
             failureCount: (prev[rowIndex]?.failureCount ?? 0) + 1,
-            lastError: photoErrorMessage(error),
+            lastError: t("photoSaveError"),
           },
         }));
       }
@@ -904,19 +878,21 @@ export default function UploadStep({
     });
     setClockMs(completedAtMs);
     setPhotoFetchDone(true);
-  }, [datasetSelection.mode, koboMediaZipFile, photoFetchQueue, rowStatuses, siteSelection?.uri, uploadId, validRows.length, writeOptions]);
+  }, [datasetSelection.mode, koboMediaZipFile, photoFetchQueue, rowStatuses, siteSelection?.uri, t, uploadId, validRows.length, writeOptions]);
 
   const { current, total: uploadTotal, successes, partials, failures, currentRow } = progress;
   const completedRows = successes + partials + failures;
   const progressPercent = uploadTotal > 0 ? Math.round((current / uploadTotal) * 100) : 0;
   const progressLabel = current > 0
-    ? `Saving row ${current} of ${uploadTotal}${currentRow ? ` — ${currentRow}` : ""}…`
-    : "Preparing to save…";
+    ? t("savingProgress", { current, total: uploadTotal, row: currentRow })
+    : t("preparing");
 
   const treeUploadTimeEstimate = getUploadTimeEstimate({
     startedAtMs: uploadStartedAtMs, nowMs: clockMs,
     completedUnits: completedRows, totalUnits: uploadTotal,
-    isComplete: uploadDone, unitLabel: "tree",
+    isComplete: uploadDone,
+    unitLabel: t("time.treeUnit", { count: completedRows }),
+    translate: (key, values) => t(`time.${key}` as never, values as never),
   });
 
   const totalFailureCount = failures + previewSkippedRows.length;
@@ -946,12 +922,13 @@ export default function UploadStep({
     completedUnits: completedPhotoFetches,
     totalUnits: photoFetchProgress.total,
     isComplete: photoFetchDone,
-    unitLabel: "photo",
+    unitLabel: t("time.photoUnit", { count: completedPhotoFetches }),
+    translate: (key, values) => t(`time.${key}` as never, values as never),
   });
 
   const sourceTotalCount = uploadTotal + previewSkippedRows.length;
   const treeManagerHref = links.manage.target.trees(target, { dataset: uploadedDatasetUri });
-  const treeManagerLabel = uploadedDatasetUri ? "View tree group" : "View trees";
+  const treeManagerLabel = uploadedDatasetUri ? t("viewTreeGroup") : t("viewTrees");
   const uploadDurationSeconds = uploadStartedAtMs
     ? Math.max(0, Math.round((clockMs - uploadStartedAtMs) / 1_000))
     : null;
@@ -1023,14 +1000,14 @@ export default function UploadStep({
   return (
     <div className="space-y-5">
       <div>
-        <h2 className="text-lg font-semibold">Saving your trees</h2>
+        <h2 className="text-lg font-semibold">{t("savingTitle")}</h2>
         <p className="text-sm text-muted-foreground mt-0.5">
-          Saving {uploadTotal} tree{uploadTotal !== 1 ? "s" : ""} to GainForest.
+          {t("savingTrees", { count: uploadTotal })}
         </p>
-        {siteSelection && <p className="text-xs text-muted-foreground mt-1">Assigning to {siteSelection.name}.</p>}
+        {siteSelection && <p className="text-xs text-muted-foreground mt-1">{t("assigningToSite", { name: siteSelection.name })}</p>}
         {selectedDatasetName && (
           <p className="text-xs text-muted-foreground mt-1">
-            {datasetSelection.mode === "existing" ? `Adding to ${selectedDatasetName}.` : `Creating group "${selectedDatasetName}".`}
+            {datasetSelection.mode === "existing" ? t("addingToGroup", { name: selectedDatasetName }) : t("creatingGroup", { name: selectedDatasetName })}
           </p>
         )}
         {mutationDisabledReason && !uploadDone ? <p className="mt-2 text-sm text-muted-foreground">{mutationDisabledReason}</p> : null}
@@ -1040,8 +1017,8 @@ export default function UploadStep({
         <div className="flex items-start gap-3 rounded-md border border-yellow-500/40 bg-yellow-500/10 p-3 text-sm text-yellow-700 dark:text-yellow-300">
           <AlertTriangle className="h-4 w-4 shrink-0 mt-0.5" />
           <div>
-            <p className="font-medium">Do not refresh or close this page</p>
-            <p>Keep this tab open until trees and photos finish saving.</p>
+            <p className="font-medium">{t("keepOpenTitle")}</p>
+            <p>{t("keepOpenBody")}</p>
           </div>
         </div>
       )}
@@ -1059,7 +1036,7 @@ export default function UploadStep({
             <div className="h-full rounded-full bg-primary transition-[width] duration-300 motion-reduce:transition-none" style={{ width: `${progressPercent}%` }} />
           </div>
           <div className="flex flex-col gap-1 text-xs text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
-            <p>{successes} succeeded{partials > 0 ? `, ${partials} need follow-up` : ""}{`, ${failures} failed`}</p>
+            <p>{t("progressSummary", { successes, partials, failures })}</p>
             <p>{treeUploadTimeEstimate.description}</p>
           </div>
         </div>
@@ -1075,18 +1052,16 @@ export default function UploadStep({
       {allSucceeded && (
         <div className="flex items-center gap-2 rounded-md border border-primary/40 bg-primary/10 p-3 text-sm text-primary">
           <CheckCircle2 className="h-4 w-4 shrink-0" />
-          <span>Successfully saved {successes} tree{successes !== 1 ? "s" : ""}{photoFetchProgress.total > 0 ? ` and ${photoFetchProgress.successes} photo${photoFetchProgress.successes !== 1 ? "s" : ""}` : ""}.</span>
+          <span>{photoFetchProgress.total > 0
+            ? t("successWithPhotos", { trees: successes, photos: photoFetchProgress.successes })
+            : t("successTrees", { trees: successes })}</span>
         </div>
       )}
 
       {someFailed && (
         <div className="flex items-center gap-2 rounded-md border border-yellow-500/40 bg-yellow-500/10 p-3 text-sm text-yellow-600 dark:text-yellow-400">
           <AlertTriangle className="h-4 w-4 shrink-0" />
-          <span>
-            {persistedCount} saved{partials > 0 ? `, ${partials} need follow-up` : ""}
-            {totalFailureCount > 0 ? `, ${totalFailureCount} skipped or failed` : ""}
-            {photoFailureCount > 0 ? `, ${photoFailureCount} photo${photoFailureCount !== 1 ? "s" : ""} could not be saved` : ""}.
-          </span>
+          <span>{t("completionWithIssues", { saved: persistedCount, followUp: partials, failed: totalFailureCount, photoFailed: photoFailureCount })}</span>
         </div>
       )}
 
@@ -1101,13 +1076,13 @@ export default function UploadStep({
         <div className="space-y-2 rounded-lg border border-border p-4">
           <div className="flex items-center gap-2">
             <ImageDown className="h-4 w-4 text-muted-foreground" />
-            <h3 className="text-sm font-medium">{photoFetchDone ? "Photos saved" : "Saving photos…"}</h3>
+            <h3 className="text-sm font-medium">{photoFetchDone ? t("photosSaved") : t("savingPhotos")}</h3>
           </div>
 
           {!photoFetchDone && (
             <>
               <div className="flex flex-col gap-1 text-sm sm:flex-row sm:items-center sm:justify-between">
-                <span className="text-muted-foreground">Photo {photoFetchProgress.current} of {photoFetchProgress.total}</span>
+                <span className="text-muted-foreground">{t("photoProgress", { current: photoFetchProgress.current, total: photoFetchProgress.total })}</span>
                 <span className="flex flex-wrap items-center gap-3 text-muted-foreground">
                   <span className="inline-flex items-center gap-1.5"><Clock className="h-3.5 w-3.5" />{photoFetchTimeEstimate.label}</span>
                   <span className="font-mono">{photoFetchPercent}%</span>
@@ -1120,13 +1095,13 @@ export default function UploadStep({
           )}
 
           <p className="text-xs text-muted-foreground">
-            {photoFetchProgress.successes} saved{photoFetchProgress.failures > 0 ? `, ${photoFetchProgress.failures} could not be saved` : ""} of {photoFetchProgress.total} photo{photoFetchProgress.total !== 1 ? "s" : ""}
+            {t("photoSummary", { saved: photoFetchProgress.successes, failed: photoFetchProgress.failures, total: photoFetchProgress.total })}
           </p>
           <p className="text-xs text-muted-foreground">{photoFetchTimeEstimate.description}</p>
 
           {photoFetchDone && photoFetchProgress.failures > 0 && (
             <p className="text-xs text-yellow-600 dark:text-yellow-400">
-              Some photos could not be saved. Your trees are still saved.
+              {t("photoFailures")}
             </p>
           )}
         </div>
@@ -1137,7 +1112,7 @@ export default function UploadStep({
           <div className="max-h-64 overflow-y-auto divide-y divide-border">
             {validRows.map((row, i) => {
               const status = rowStatuses[i];
-              const species = getValidatedRowLabel(row);
+              const species = row.occurrence.scientificName || t("row", { number: row.index + 1 });
               const rowPhotos = photoUris.get(i) ?? [];
               const photoStatus = photoFetchStatuses[i];
               const hasOccurrence = hasPersistedOccurrence(status);
@@ -1153,19 +1128,19 @@ export default function UploadStep({
                       </span>
                     )}
                     {(photoStatus?.inProgressCount ?? 0) > 0 && hasOccurrence && (
-                      <span className="flex items-center gap-1 text-xs text-muted-foreground" title="Saving photo">
+                      <span className="flex items-center gap-1 text-xs text-muted-foreground" title={t("savingPhoto")}>
                         <ImageDown className="h-3 w-3 animate-pulse" />
                       </span>
                     )}
                     {(photoStatus?.failureCount ?? 0) > 0 && (
-                      <span className="text-xs text-yellow-500" title={photoStatus?.lastError ?? "Photo could not be saved."}>
+                      <span className="text-xs text-yellow-500" title={t("photoSaveError")}>
                         <AlertTriangle className="h-3 w-3" />
                       </span>
                     )}
-                    {status?.state === "pending" && <span className="text-xs text-muted-foreground">Pending</span>}
+                    {status?.state === "pending" && <span className="text-xs text-muted-foreground">{t("pending")}</span>}
                     {status?.state === "uploading" && <Loader2 className="h-4 w-4 text-muted-foreground animate-spin" />}
                     {status?.state === "success" && <CheckCircle2 className="h-4 w-4 text-primary" />}
-                    {status?.state === "partial" && <span title={status.error}><AlertTriangle className="h-4 w-4 text-yellow-500" /></span>}
+                    {status?.state === "partial" && <span title={t("rowPartialError")}><AlertTriangle className="h-4 w-4 text-yellow-500" /></span>}
                     {status?.state === "error" && <XCircle className="h-4 w-4 text-destructive" />}
                   </span>
                 </div>
@@ -1184,7 +1159,7 @@ export default function UploadStep({
           >
             <span className="flex items-center gap-2 text-destructive">
               <XCircle className="h-4 w-4 shrink-0" />
-              {attentionCount} row{attentionCount !== 1 ? "s" : ""} need attention
+              {t("attentionCount", { count: attentionCount })}
             </span>
             {failedRowsOpen ? <ChevronDown className="h-4 w-4 text-muted-foreground" /> : <ChevronRight className="h-4 w-4 text-muted-foreground" />}
           </button>
@@ -1193,8 +1168,8 @@ export default function UploadStep({
               <ul className="space-y-2 max-h-48 overflow-y-auto">
                 {rowAttentionSummaries.map((summary) => (
                   <li key={`${summary.kind}-${summary.sourceRowIndex}`} className="text-xs border border-destructive/20 rounded-md p-2 space-y-1">
-                    <p className="font-medium">Row {summary.sourceRowIndex + 1} — {summary.rowLabel}</p>
-                    <p className="text-xs font-medium text-muted-foreground">{getTreeUploadRowAttentionKindLabel(summary.kind)}</p>
+                    <p className="font-medium">{t("rowSummary", { number: summary.sourceRowIndex + 1, label: summary.rowLabel })}</p>
+                    <p className="text-xs font-medium text-muted-foreground">{t(`attentionKind.${summary.kind}` as never)}</p>
                     <ul className="space-y-0.5">
                       {summary.messages.map((msg, idx) => <li key={idx} className="text-destructive">{msg}</li>)}
                     </ul>
@@ -1221,7 +1196,7 @@ export default function UploadStep({
                 onUploadMore();
               }}
             >
-              {uploadFatalError ? "Start over" : "Upload more trees"}
+              {uploadFatalError ? t("startOver") : t("uploadMore")}
             </Button>
             {!uploadFatalError && hasUploadedTrees ? (
               <Button asChild>
@@ -1234,7 +1209,7 @@ export default function UploadStep({
                 </Link>
               </Button>
             ) : !uploadFatalError ? (
-              <Button onClick={onDone}>Done</Button>
+              <Button onClick={onDone}>{t("done")}</Button>
             ) : null}
           </div>
         )}

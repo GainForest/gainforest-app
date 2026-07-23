@@ -2,7 +2,7 @@
   "widget": {
     "shield": "¿Necesitas ayuda?",
     "role": "Tu guía de GainForest",
-    "spriteLabel": "Tainá — haz clic para chatear, arrastra para mover",
+    "spriteLabel": "Tainá: haz clic para chatear, arrastra para mover",
     "greeting": "¡Hola, soy Tainá! Puedo guiarte por todo GainForest.",
     "greetingHint": "Elige una pregunta abajo o pregúntame lo que quieras.",
     "guidesTitle": "Preguntas frecuentes",
@@ -18,7 +18,7 @@
     "done": "Listo",
     "endTour": "Terminar recorrido",
     "openImage": "Ver captura a tamaño completo",
-    "cantFind": "Ahora mismo no encuentro eso en esta página, pero esto es lo que hay que hacer:",
+    "cantFind": "No encuentro eso en esta página. Esto es lo que puedes hacer:",
     "tourHint": "Señalaré tu pantalla. Haz clic en la zona resaltada para continuar.",
     "minimizeLabel": "Minimizar a Tainá",
     "restoreLabel": "Abrir Tainá",
@@ -29,10 +29,10 @@
     "dismissTip": "Cerrar consejo",
     "tips": {
       "wallet": "¡Puedes recibir donaciones y propinas! Crea tu billetera en la pestaña Billetera de tu cuenta.",
-      "createProject": "Puedes mostrar tu trabajo creando un proyecto — solo toma unos minutos.",
-      "observations": "Puedes subir hasta 50 fotos de naturaleza a la vez — las especies se identifican automáticamente.",
-      "bioblitz": "Hay un desafío BioBlitz cada semana — ¡fotografía cualquier ser vivo y gana premios!",
-      "ask": "Puedes preguntarme lo que quieras sobre GainForest, en tu idioma — ¡solo haz clic en mí!"
+      "createProject": "Puedes mostrar tu trabajo creando un proyecto: solo toma unos minutos.",
+      "observations": "Puedes subir hasta 50 fotos de naturaleza a la vez: las especies se identifican automáticamente.",
+      "bioblitz": "Hay un desafío BioBlitz cada semana: ¡fotografía cualquier ser vivo y gana premios!",
+      "ask": "Puedes preguntarme lo que quieras sobre GainForest, en tu idioma: ¡solo haz clic en mí!"
     },
     "haveQuestion": "Tengo una pregunta",
     "helpTitle": "¿Puedes ayudar?",
@@ -90,23 +90,23 @@
     "accountWallet": {
       "question": "¿Cómo recibo donaciones y propinas personalmente?",
       "title": "Crea tu billetera personal",
-      "intro": "Puedes recibir donaciones y propinas directamente — sin necesidad de un proyecto. Tu billetera vive en tu propio perfil y se crea en segundos con una llave de acceso (Face ID o huella). No necesitas experiencia con cripto.",
+      "intro": "Puedes recibir donaciones y propinas directamente: sin necesidad de un proyecto. Tu billetera vive en tu propio perfil y se crea en segundos con una llave de acceso (Face ID o huella). No necesitas experiencia con cripto.",
       "steps": {
         "open": {
           "title": "Abre tu página de Billetera",
-          "body": "Ve a www.gainforest.app/account/wallet — te lleva directo a la pestaña Billetera de tu propia cuenta."
+          "body": "Ve a www.gainforest.app/account/wallet: te lleva directo a la pestaña Billetera de tu propia cuenta."
         },
         "create": {
           "title": "Crea tu billetera",
-          "body": "Haz clic en Crear billetera y confirma con Face ID, huella o una llave de seguridad. Eso es todo — sin frases semilla que anotar."
+          "body": "Haz clic en Crear billetera y confirma con Face ID, huella o una llave de seguridad. Eso es todo: sin frases semilla que anotar."
         },
         "share": {
           "title": "Lista para recibir apoyo",
-          "body": "La dirección de tu billetera puede recibir donaciones y propinas de inmediato. Mientras la billetera es nueva puedes añadir más llaves de acceso — otro dispositivo o alguien de confianza."
+          "body": "La dirección de tu billetera puede recibir donaciones y propinas de inmediato. Mientras la billetera es nueva puedes añadir más llaves de acceso: otro dispositivo o alguien de confianza."
         }
       },
       "tour": {
-        "create": "Haz clic en Crear billetera y confirma con tu llave de acceso — ¡eso es todo! (Si ya creaste una, la verás aquí.)"
+        "create": "Haz clic en Crear billetera y confirma con tu llave de acceso: ¡eso es todo! (Si ya creaste una, la verás aquí.)"
       }
     },
     "createProject": {
@@ -145,7 +145,7 @@
       },
       "tour": {
         "start": "Haz clic en Añadir proyecto para abrir el asistente.",
-        "wizard": "Ahora sigue los pasos: nombre, áreas de trabajo, fechas, historia, personas y lugares, foto… y Crear proyecto."
+        "wizard": "Completa los pasos de nombre, áreas de trabajo, fechas, historia, personas y lugares, y foto. Después selecciona Crear proyecto."
       }
     },
     "editProject": {
@@ -174,11 +174,11 @@
     "deleteProject": {
       "question": "¿Cómo elimino un proyecto?",
       "title": "Eliminar un proyecto",
-      "intro": "Eliminar quita el proyecto de tu cuenta. No se puede deshacer, pero tus observaciones nunca se borran con él.",
+      "intro": "Eliminar quita el proyecto de tu cuenta y no se puede deshacer. Tus observaciones no se eliminan.",
       "steps": {
         "editor": {
           "title": "Abre el editor del proyecto",
-          "body": "Ve a Mis proyectos y haz clic en Editar proyecto, o abre la página del proyecto y busca la sección Gestionar."
+          "body": "Ve a Mis proyectos y selecciona Editar proyecto. También puedes abrir la página del proyecto y usar Gestionar."
         },
         "delete": {
           "title": "Haz clic en «Eliminar proyecto»",
@@ -210,7 +210,7 @@
         },
         "check": {
           "title": "Revisa y vincula",
-          "body": "Confirma la especie, la fecha y el lugar, y vincúlalas si quieres a uno de tus proyectos. También puedes ocultar tu ubicación exacta."
+          "body": "Confirma el nombre de la especie, la fecha y la ubicación. También puedes vincular la observación a un proyecto u ocultar su ubicación exacta."
         },
         "publish": {
           "title": "Añádelas",
@@ -246,7 +246,7 @@
         },
         "win": {
           "title": "Gana premios",
-          "body": "Más observaciones y mejor foto ganan premios en efectivo y una insignia permanente en tu perfil. Y cada observación sigue siendo tuya, reutilizable como evidencia para tus proyectos."
+          "body": "La mayor cantidad de observaciones y la mejor imagen ganan premios en efectivo y una insignia permanente. Cada observación sigue siendo tuya como evidencia del proyecto."
         }
       },
       "tour": {

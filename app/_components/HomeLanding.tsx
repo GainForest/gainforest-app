@@ -346,17 +346,6 @@ function HomeStats({ kpis }: { kpis: ExplorerKpis | null }) {
   return (
     <section className="px-6 pb-10 pt-0 sm:px-12 sm:pb-12 md:px-6 md:pb-12">
       <div className="mx-auto -mt-28 max-w-6xl rounded-[2rem] bg-background/80 p-3 shadow-xl shadow-foreground/10 ring-1 ring-foreground/10 backdrop-blur-2xl sm:p-4">
-        {/* "Live" eyebrow: these impact numbers stream from Hyperindex, so we
-            flag them as live (iNaturalist-style social proof). */}
-        <div className="mb-2 flex items-center gap-2 px-3 pt-1 sm:mb-3">
-          <span className="relative flex size-2" aria-hidden="true">
-            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-primary/60" />
-            <span className="relative inline-flex size-2 rounded-full bg-primary" />
-          </span>
-          <span className="text-[11px] font-semibold tracking-[0.18em] text-primary uppercase">
-            {t("liveLabel")}
-          </span>
-        </div>
         <StatsTileGrid items={stats} columns={2} />
       </div>
     </section>
@@ -622,11 +611,6 @@ function WhatIsBumicert() {
             viewport={{ once: true }}
             transition={{ duration: 0.55, ease: [0.25, 0.1, 0.25, 1] }}
           >
-            <div className="mb-4 flex items-center gap-2 text-primary">
-              <LeafIcon className="size-4" />
-              <span className="text-xs font-bold tracking-[0.15em] uppercase">{t("eyebrow")}</span>
-            </div>
-
             <h2 className="font-garamond mb-5 text-4xl leading-[1.04] font-light tracking-[-0.015em] text-foreground md:text-5xl">
               {t("titleLine1")}
               <br />

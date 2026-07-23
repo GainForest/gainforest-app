@@ -6,8 +6,8 @@
     "to": "Até",
     "shown": "{count} exibidos",
     "dragHint": "Arraste as alças para escolher um período",
-    "startAria": "Data inicial — {date}",
-    "endAria": "Data final — {date}",
+    "startAria": "Data inicial: {date}",
+    "endAria": "Data final: {date}",
     "unidentified": "Não identificado",
     "finding": "Localizando pontos no mapa…",
     "mappedItems": "{count} itens com localização no mapa",
@@ -112,7 +112,7 @@
       "raised": "{amount} arrecadados",
       "donations": "Doações",
       "acceptingDonations": "Aceitando doações",
-      "acceptingDonationsRaised": "Aceitando doações — {amount} arrecadados até agora"
+      "acceptingDonationsRaised": "Aceitando doações: {amount} arrecadados até agora"
     }
   },
   "organizations": {
@@ -147,7 +147,8 @@
     },
     "error": {
       "title": "Algo deu errado",
-      "description": "Não foi possível carregar as organizações. Tente atualizar a página."
+      "description": "Não foi possível carregar as organizações. Tente atualizar a página.",
+      "retry": "Tentar novamente"
     },
     "view": {
       "cards": "Cartões",
@@ -281,7 +282,7 @@
       "eyebrow": "Desafio BioBlitz Semanal",
       "titlePrefix": "Desafio",
       "titleEmphasis": "BioBlitz",
-      "description": "Uma corrida semanal e amistosa para registrar a natureza. Fotografe qualquer ser vivo — uma planta, ave, inseto ou fungo —, adicione ao GainForest e suba no ranking. Nova rodada e novos prêmios toda semana.",
+      "description": "Uma corrida semanal amistosa para registrar a natureza. Fotografe qualquer ser vivo, adicione à GainForest e suba no ranking.",
       "program": "Parte do programa Klarna AI for Climate Resilience, com a GainForest."
     },
     "rsvp": {
@@ -291,11 +292,11 @@
       "registered": "Você está inscrito",
       "registeredNote": "Vamos acompanhar suas entradas e enviar seu prêmio se você ganhar.",
       "error": "Não foi possível inscrever agora. Tente novamente.",
-      "postText": "Estou entrando no Desafio BioBlitz Semanal — {label}! Vou sair para fotografar a natureza pela biodiversidade. 🌿🔭 #BioBlitz",
-      "legalConsent": "Ao se inscrever, você concorda com os <terms>Termos do BioBlitz</terms> e reconhece o <privacy>Aviso de Privacidade</privacy>."
+      "postText": "Estou entrando no Desafio BioBlitz Semanal: {label}! Vou sair para fotografar a natureza pela biodiversidade. 🌿🔭 #BioBlitz",
+      "legalConsent": "Ao se inscrever, você concorda com os <terms>Termos do BioBlitz</terms> e reconhece o <privacy>Aviso de Privacidade</privacy>.",
+      "publicPostDisclosure": "Ao se inscrever, uma publicação pública do BioBlitz será criada na sua conta."
     },
     "legal": {
-      "programLabel": "Desafio BioBlitz",
       "back": "Voltar ao BioBlitz",
       "links": {
         "terms": "Termos do BioBlitz",
@@ -518,7 +519,7 @@
         },
         "upload": {
           "title": "Envie suas fotos",
-          "blurb": "Adicione-as na sua página Minhas observações, ou com a Tainá, também na GainForest."
+          "blurb": "Adicione-as em Minhas observações ou envie-as para a Tainá."
         },
         "review": {
           "title": "Confira o nome da espécie",
@@ -527,9 +528,9 @@
       },
       "proof": {
         "title": "Seus dados fazem mais do que ganhar prêmios",
-        "intro": "Cada observação que você envia é salva na sua conta, então você pode usá-la depois como prova para seus próprios projetos.",
-        "uses": "Você pode prestar contas a quem concede financiamento com um registro claro do seu trabalho. Também pode mostrar a parceiros e partes interessadas que o que você faz faz a diferença.",
-        "outro": "Sem trabalho extra: basta continuar observando. Com o tempo, isso constrói evidências reais que você pode usar quando precisar."
+        "intro": "Cada observação permanece na sua conta como registro do seu trabalho.",
+        "uses": "Compartilhe esse registro com financiadores, parceiros e comunidades.",
+        "outro": "Continue observando para reunir evidências ao longo do tempo."
       }
     },
     "board": {
@@ -616,7 +617,7 @@
     },
     "bestPicture": {
       "heading": "Favoritas a melhor foto",
-      "subtitle": "As fotos com mais curtidas nesta rodada — as que disputam o prêmio de melhor foto. Toque em qualquer foto para ver os detalhes.",
+      "subtitle": "Estas fotos têm mais curtidas e concorrem ao prêmio de melhor imagem. Abra uma foto para ver os detalhes.",
       "prize": "{amount} melhor foto",
       "leader": "Na frente",
       "likes": "{count, plural, one {# curtida} other {# curtidas}}",
@@ -757,11 +758,13 @@
           "description": "Kits de campo para reunir observações e evidências no terreno."
         }
       },
-      "apply": "Candidatar-se com um clique",
+      "apply": "Inscrever-se com um projeto",
       "details": "Ler detalhes do subsídio",
       "appliedTitle": "Candidatura enviada",
       "appliedNote": "Sua candidatura para {project} já foi publicada no feed.",
-      "postText": "Candidatando-me ao subsídio Resselvagem da web com o meu projeto \"{project}\": pela soberania de dados e de decisões. 🌱"
+      "postText": "Estou me candidatando ao subsídio Rewilding the Web com “{project}”. A inscrição publica esta postagem. 🌱",
+      "permissionLoading": "Verificando se esta conta pode se inscrever…",
+      "permissionDenied": "Esta conta não pode se inscrever neste subsídio."
     },
     "applyModal": {
       "title": "Escolha um projeto para se candidatar",
@@ -783,10 +786,9 @@
       "successClose": "Concluído"
     },
     "interoperable": {
-      "category": "Programa de subsídios interoperáveis",
       "grantName": "Ma Earth Rodada 3",
       "fundingType": "Financiamento quadrático",
-      "description": "A rodada de financiamento apoiada pela comunidade da Ma Earth usa financiamento quadrático: muitas doações menores são equiparadas e amplificadas mais do que algumas grandes. As candidaturas foram encerradas e a rodada já está em andamento — explore os projetos participantes e apoie-os.",
+      "description": "A rodada comunitária da Ma Earth usa financiamento quadrático, então muitas doações pequenas recebem mais recursos correspondentes do que poucas doações grandes. As inscrições encerraram. Conheça e apoie os projetos participantes.",
       "browseProjects": "Explore os projetos desta rodada",
       "logoAlt": "Ma Earth"
     }
@@ -893,7 +895,8 @@
       "shareUser": "Junte-se a mim no certificados e apoie o impacto regenerativo: {pageUrl}",
       "totalBumicerts": "Total de certificados",
       "donationsReceived": "Doações recebidas",
-      "totalDonations": "Total de doações"
+      "totalDonations": "Total de doações",
+      "profileLinkCopyFailed": "Não foi possível copiar o link"
     },
     "hero": {
       "coverImageAlt": "Imagem de capa de {displayName}",
@@ -1087,7 +1090,7 @@
       "eyebrow": "Explorar projetos",
       "title": "Explore",
       "accent": "Projetos",
-      "description": "Cada projeto é um trabalho focado — com um objetivo claro, um prazo e os resultados esperados."
+      "description": "Cada projeto é um trabalho específico com objetivo, cronograma e resultados esperados claros."
     },
     "search": {
       "ariaLabel": "Pesquisar projetos",
@@ -1096,7 +1099,6 @@
       "action": "Pesquisar"
     },
     "categories": {
-      "eyebrow": "Explore por interesse",
       "title": "Explore categorias de projetos",
       "description": "Comece por um tema e descubra as pessoas e os lugares que o tornam realidade.",
       "items": {
@@ -1109,7 +1111,6 @@
       }
     },
     "featured": {
-      "eyebrow": "Projetos em destaque",
       "title": "Histórias para começar",
       "description": "Uma seleção de projetos bem documentados de guardiões da natureza de todo o mundo.",
       "badge": "Destaque",
@@ -1123,12 +1124,10 @@
       }
     },
     "support": {
-      "eyebrow": "Abertos a apoio",
       "title": "Ajude bons trabalhos a crescer",
       "description": "Apoie projetos que estão recebendo contribuições ativamente de suas comunidades."
     },
     "catalog": {
-      "eyebrow": "Explorar projetos",
       "title": "Explore todos os projetos",
       "description": "Explore os projetos desta categoria.",
       "count": "{count, plural, one {# projeto para explorar} other {# projetos para explorar}}"
@@ -1169,7 +1168,6 @@
       "donationsMaearth": "Doações Ma Earth"
     },
     "empty": {
-      "eyebrow": "Sem resultados",
       "title": "Nenhum projeto encontrado",
       "description": "Tente ajustar sua pesquisa ou os filtros para encontrar mais coleções de projetos."
     },
@@ -1204,6 +1202,11 @@
       "sightings": "{count, plural, =0 {Sem avistamentos da natureza ainda} one {# avistamento da natureza} other {# avistamentos da natureza}}",
       "timeline": "{count, plural, =0 {Sem atualizações do projeto ainda} one {# atualização do projeto} other {# atualizações do projeto}}",
       "reviews": "{count, plural, =0 {Sem avaliações ainda} one {# avaliação} other {# avaliações}}"
+    },
+    "error": {
+      "title": "Não foi possível carregar os projetos",
+      "description": "Tente carregar novamente o catálogo de projetos.",
+      "retry": "Tentar novamente"
     }
   },
   "ownerFilter": {
@@ -1446,7 +1449,7 @@
       "showPhoto": "Mostrar foto",
       "reanalyze": "Analisar de novo",
       "reanalyzeHint": "Obtenha uma nova identificação por IA a partir da foto",
-      "reanalyzeApplied": "Atualizado com uma nova sugestão da IA — reveja e guarde.",
+      "reanalyzeApplied": "Atualizado com uma nova sugestão da IA: reveja e guarde.",
       "reanalyzeUnsure": "A IA não conseguiu identificar com confiança. Tente adicionar um nome você mesmo.",
       "reanalyzeError": "Não foi possível executar a IA agora. Tente novamente.",
       "reanalyzeNoImage": "Não há foto para analisar nesta observação.",
@@ -1543,11 +1546,10 @@
     "timelineTitle": "Linha do tempo",
     "publishingBadge": "Publicando",
     "publishingTitle": "Seu projeto está a caminho",
-    "publishingBody": "Estamos publicando seu projeto. Isso costuma levar um minuto — a página será atualizada sozinha."
+    "publishingBody": "Estamos publicando seu projeto. A página será atualizada quando estiver pronto."
   },
   "observationPage": {
     "back": "Todos os avistamentos",
-    "kind": "Avistamento de natureza",
     "sharedBy": "Compartilhado por",
     "viewProfile": "Ver perfil",
     "observed": "Observado",
@@ -1583,9 +1585,8 @@
       "title": "Identifique",
       "accent": "espécies"
     },
-    "eyebrow": "Revisão ecológica",
     "title": "Identificador de observações",
-    "description": "Explore avistamentos recentes e não identificados, examine os dados de campo e proponha um nome de espécie concreto.",
+    "description": "Revise avistamentos e sugira um nome de espécie ao observador.",
     "unidentified": "Não identificado",
     "filters": {
       "searchLabel": "Pesquisar observações",
@@ -1671,7 +1672,7 @@
       "hero": {
         "eyebrow": "Estúdio de histórias de impacto",
         "title": "Criar um projeto",
-        "subtitle": "Transforme o trabalho de campo, as evidências de restauração e a guarda comunitária em um projeto publicável, sem sair do GainForest."
+        "subtitle": "Transforme trabalho de campo, evidências de restauração e gestão comunitária em um projeto na GainForest."
       },
       "backToProjects": "Voltar para Meus projetos",
       "startOver": "Começar de novo",
@@ -1701,7 +1702,7 @@
         },
         "story": {
           "label": "História",
-          "hint": "opcional — o trabalho, os métodos e os resultados",
+          "hint": "opcional: o trabalho, os métodos e os resultados",
           "placeholder": "O que aconteceu? Como o impacto foi medido? Quem se beneficia e o que vem a seguir?"
         },
         "scope": {
@@ -1731,7 +1732,7 @@
         },
         "sites": {
           "label": "Lugares",
-          "hint": "opcional — anexe lugares da sua conta",
+          "hint": "opcional: anexe lugares da sua conta",
           "loading": "Carregando seus lugares…",
           "error": "Não foi possível carregar seus lugares.",
           "empty": "Ainda não há lugares. Desenhe um no mapa para adicioná-lo ao seu projeto.",
@@ -1821,7 +1822,7 @@
       }
     },
     "emptyHero": {
-      "description": "Os projetos reúnem o seu trabalho de impacto — pessoas, lugares, períodos de tempo e fotos ou notas de apoio — em uma página que apoiadores podem acompanhar e financiar.",
+      "description": "Os projetos reúnem pessoas, locais, períodos, fotos e notas em uma página que apoiadores podem acompanhar e financiar.",
       "cta": "Criar um projeto"
     },
     "publish": {
@@ -1879,7 +1880,7 @@
       "refresh": "Atualizar"
     },
     "hero": {
-      "description": "Certificados de impacto (Certs) que você emite a partir deste projeto. Cada um reúne provas — fotos, locais, datas e colaboradores — para que financiadores possam apoiar o trabalho."
+      "description": "Crie Certs a partir deste projeto. Cada Cert reúne fotos, locais, datas e colaboradores para que financiadores apoiem o trabalho."
     },
     "stats": {
       "linked": "{count, plural, one {# Cert vinculado} other {# Certs vinculados}}",
@@ -1917,7 +1918,7 @@
     },
     "empty": {
       "noCertsTitle": "Nenhum Cert emitido ainda",
-      "noCertsDescription": "Um certificado de impacto (Cert) transforma este projeto em uma história financiável — a prova de uma contribuição, com fotos, datas, locais e as pessoas envolvidas. Emita o primeiro para solicitar financiamento.",
+      "noCertsDescription": "Um certificado de impacto (Cert) transforma este projeto em uma história financiável: a prova de uma contribuição, com fotos, datas, locais e as pessoas envolvidas. Emita o primeiro para solicitar financiamento.",
       "noMatchingTitle": "Nenhum Cert encontrado",
       "noMatchingDescription": "Tente outro termo de busca ou limpe o campo de busca."
     },
@@ -2011,8 +2012,6 @@
       "dataBadge": "{count, plural, one {# camada de dados do mapa} other {# camadas de dados do mapa}}"
     },
     "focus": {
-      "organizationLabel": "Organização",
-      "projectLabel": "Projeto",
       "clear": "Voltar para todas as organizações",
       "viewProfile": "Ver perfil",
       "openGlobe": "Página do globo",
@@ -2058,7 +2057,7 @@
     },
     "timeline": {
       "seriesFlights": "{count, plural, one {# voo de drone} other {# voos de drone}} sobre a mesma área",
-      "seriesHint": "A mesma área foi sobrevoada em datas diferentes — ative a linha do tempo para ver como muda.",
+      "seriesHint": "Esta área foi sobrevoada em datas diferentes. Ative a linha do tempo para ver as mudanças.",
       "toggle": "Ver {name} ao longo do tempo",
       "title": "Mudança ao longo do tempo",
       "close": "Ocultar o controle de tempo",
@@ -2072,7 +2071,6 @@
     "tree": {
       "title": "Árvore",
       "close": "Fechar",
-      "species": "Espécie",
       "height": "Altura",
       "dbh": "DAP",
       "measured": "Medido:",
@@ -2084,6 +2082,14 @@
     "sheet": {
       "expand": "Mostrar detalhes",
       "collapse": "Ocultar detalhes"
+    },
+    "errors": {
+      "organizations": "Não foi possível carregar as organizações.",
+      "sites": "Não foi possível carregar os locais.",
+      "boundaries": "Não foi possível carregar os limites do projeto.",
+      "trees": "Não foi possível carregar os dados de árvores.",
+      "layers": "Não foi possível carregar as camadas do mapa.",
+      "retry": "Tentar novamente"
     }
   }
 }

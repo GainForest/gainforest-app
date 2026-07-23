@@ -2,7 +2,7 @@
   "widget": {
     "shield": "Precisa de ajuda?",
     "role": "Sua guia do GainForest",
-    "spriteLabel": "Tainá — clique para conversar, arraste para mover",
+    "spriteLabel": "Tainá: clique para conversar, arraste para mover",
     "greeting": "Oi, eu sou a Tainá! Posso te guiar por tudo no GainForest.",
     "greetingHint": "Escolha uma pergunta abaixo ou me pergunte qualquer coisa.",
     "guidesTitle": "Perguntas frequentes",
@@ -18,21 +18,21 @@
     "done": "Concluir",
     "endTour": "Encerrar tour",
     "openImage": "Ver captura em tamanho real",
-    "cantFind": "Não estou encontrando isso nesta página agora — mas é assim que se faz:",
+    "cantFind": "Não encontro isso nesta página. Veja o que fazer:",
     "tourHint": "Vou apontar na sua tela. Clique na área destacada para continuar.",
     "minimizeLabel": "Minimizar a Tainá",
     "restoreLabel": "Abrir a Tainá",
-    "signInFirst": "Para isso você precisa entrar na sua conta — use o botão Entrar no topo da página e depois volte aqui, que eu te mostro o caminho.",
-    "needProjectFirst": "As doações são configuradas em um projeto e você ainda não tem nenhum — crie seu primeiro projeto e depois volte aqui.",
+    "signInFirst": "Para isso você precisa entrar na sua conta: use o botão Entrar no topo da página e depois volte aqui, que eu te mostro o caminho.",
+    "needProjectFirst": "As doações são configuradas em um projeto e você ainda não tem nenhum: crie seu primeiro projeto e depois volte aqui.",
     "createProjectFirst": "Mostre-me como criar um projeto",
     "didYouKnow": "Você sabia?",
     "dismissTip": "Dispensar dica",
     "tips": {
       "wallet": "Você pode receber doações e gorjetas! Crie sua carteira na aba Carteira da sua conta.",
-      "createProject": "Você pode mostrar seu trabalho criando um projeto — leva só alguns minutos.",
-      "observations": "Você pode enviar até 50 fotos da natureza de uma vez — as espécies são identificadas automaticamente.",
-      "bioblitz": "Há um desafio BioBlitz toda semana — fotografe qualquer ser vivo e ganhe prêmios!",
-      "ask": "Você pode me perguntar qualquer coisa sobre a GainForest, no seu idioma — é só clicar em mim!"
+      "createProject": "Você pode mostrar seu trabalho criando um projeto: leva só alguns minutos.",
+      "observations": "Você pode enviar até 50 fotos da natureza de uma vez: as espécies são identificadas automaticamente.",
+      "bioblitz": "Há um desafio BioBlitz toda semana: fotografe qualquer ser vivo e ganhe prêmios!",
+      "ask": "Você pode me perguntar qualquer coisa sobre a GainForest, no seu idioma: é só clicar em mim!"
     },
     "haveQuestion": "Tenho uma pergunta",
     "helpTitle": "Pode ajudar?",
@@ -62,7 +62,7 @@
     "wallet": {
       "question": "Como recebo doações?",
       "title": "Configure a carteira de doações da sua organização",
-      "intro": "As doações vão para uma carteira compartilhada que pertence à sua organização. A pessoa proprietária a cria em segundos com uma chave de acesso (Face ID ou impressão digital) — sem precisar de experiência com cripto.",
+      "intro": "As doações vão para uma carteira compartilhada que pertence à sua organização. A pessoa proprietária a cria em segundos com uma chave de acesso (Face ID ou impressão digital): sem precisar de experiência com cripto.",
       "steps": {
         "open": {
           "title": "Abra seu projeto",
@@ -84,29 +84,29 @@
       "tour": {
         "open": "Abra o projeto que deve receber doações.",
         "enable": "Clique em Enable Donations no cartão de apoio.",
-        "addWallet": "Clique em Criar carteira com chave de acesso e confirme com sua chave de acesso — pronto!"
+        "addWallet": "Clique em Criar carteira com chave de acesso e confirme com sua chave de acesso: pronto!"
       }
     },
     "accountWallet": {
       "question": "Como recebo doações e gorjetas pessoalmente?",
       "title": "Crie sua carteira pessoal",
-      "intro": "Você pode receber doações e gorjetas diretamente — sem precisar de um projeto. Sua carteira fica no seu próprio perfil e é criada em segundos com uma chave de acesso (Face ID ou impressão digital). Não é preciso experiência com cripto.",
+      "intro": "Você pode receber doações e gorjetas diretamente: sem precisar de um projeto. Sua carteira fica no seu próprio perfil e é criada em segundos com uma chave de acesso (Face ID ou impressão digital). Não é preciso experiência com cripto.",
       "steps": {
         "open": {
           "title": "Abra sua página de Carteira",
-          "body": "Acesse www.gainforest.app/account/wallet — leva você direto à aba Carteira da sua própria conta."
+          "body": "Acesse www.gainforest.app/account/wallet: leva você direto à aba Carteira da sua própria conta."
         },
         "create": {
           "title": "Crie sua carteira",
-          "body": "Clique em Criar carteira e confirme com Face ID, impressão digital ou uma chave de segurança. É só isso — sem frases-semente para anotar."
+          "body": "Clique em Criar carteira e confirme com Face ID, impressão digital ou uma chave de segurança. É só isso: sem frases-semente para anotar."
         },
         "share": {
           "title": "Pronta para receber apoio",
-          "body": "O endereço da sua carteira pode receber doações e gorjetas imediatamente. Enquanto a carteira é nova, você pode adicionar mais chaves de acesso — outro dispositivo ou alguém de confiança."
+          "body": "O endereço da sua carteira pode receber doações e gorjetas imediatamente. Enquanto a carteira é nova, você pode adicionar mais chaves de acesso: outro dispositivo ou alguém de confiança."
         }
       },
       "tour": {
-        "create": "Clique em Criar carteira e confirme com sua chave de acesso — pronto! (Se já criou uma, você a verá aqui.)"
+        "create": "Clique em Criar carteira e confirme com sua chave de acesso: pronto! (Se já criou uma, você a verá aqui.)"
       }
     },
     "createProject": {
@@ -124,7 +124,7 @@
         },
         "focus": {
           "title": "Escolha as áreas de foco",
-          "body": "Selecione os tipos de trabalho que melhor descrevem o projeto — reflorestamento, monitoramento, guardiania…"
+          "body": "Selecione os tipos de trabalho que melhor descrevem o projeto: reflorestamento, monitoramento, guardiania…"
         },
         "story": {
           "title": "Adicione datas e história",
@@ -145,13 +145,13 @@
       },
       "tour": {
         "start": "Clique em Adicionar projeto para abrir o assistente.",
-        "wizard": "Agora siga os passos: nome, áreas de foco, datas, história, pessoas e lugares, foto — e Criar projeto."
+        "wizard": "Conclua as etapas de nome, áreas de foco, datas, história, pessoas e lugares e foto. Depois selecione Criar projeto."
       }
     },
     "editProject": {
       "question": "Como edito um projeto?",
       "title": "Editar um projeto",
-      "intro": "Você pode mudar tudo em um projeto depois de publicar — nome, história, foto, lugares.",
+      "intro": "Você pode mudar tudo em um projeto depois de publicar: nome, história, foto, lugares.",
       "steps": {
         "myProjects": {
           "title": "Vá em Meus projetos",
@@ -174,11 +174,11 @@
     "deleteProject": {
       "question": "Como excluo um projeto?",
       "title": "Excluir um projeto",
-      "intro": "Excluir remove o projeto da sua conta. Não dá para desfazer — mas suas observações nunca são apagadas junto.",
+      "intro": "Excluir remove o projeto da sua conta e não pode ser desfeito. Suas observações não são excluídas.",
       "steps": {
         "editor": {
           "title": "Abra o editor do projeto",
-          "body": "Vá em Meus projetos e clique em Editar projeto — ou abra a página do projeto e procure a seção Gerenciar."
+          "body": "Vá para Meus projetos e selecione Editar projeto. Você também pode abrir a página do projeto e usar Gerenciar."
         },
         "delete": {
           "title": "Clique em “Excluir projeto”",
@@ -198,7 +198,7 @@
     "observations": {
       "question": "Como envio e gerencio observações?",
       "title": "Enviar e gerenciar observações",
-      "intro": "Observações são fotos da natureza com espécie, data e lugar — a evidência por trás do seu trabalho.",
+      "intro": "Observações são fotos da natureza com espécie, data e lugar: a evidência por trás do seu trabalho.",
       "steps": {
         "add": {
           "title": "Clique em “Adicionar observações”",
@@ -206,11 +206,11 @@
         },
         "photos": {
           "title": "Solte suas fotos",
-          "body": "Envie até 50 fotos de uma vez — a IA analisa cada uma e sugere o que há nela."
+          "body": "Envie até 50 fotos de uma vez: a IA analisa cada uma e sugere o que há nela."
         },
         "check": {
           "title": "Confira e vincule",
-          "body": "Confirme a espécie, a data e o local — e vincule, se quiser, a um dos seus projetos. Também dá para esconder sua localização exata."
+          "body": "Confirme o nome da espécie, a data e o local. Você pode vincular a observação a um projeto ou ocultar sua localização exata."
         },
         "publish": {
           "title": "Adicione",
@@ -223,7 +223,7 @@
       },
       "tour": {
         "add": "Clique em Adicionar observações.",
-        "photos": "Solte as fotos — as sugestões de espécie chegam sozinhas. Confira os nomes, vincule um projeto se quiser e clique em Adicionar.",
+        "photos": "Solte as fotos: as sugestões de espécie chegam sozinhas. Confira os nomes, vincule um projeto se quiser e clique em Adicionar.",
         "manage": "E é aqui que vivem todas as suas observações: busque, agrupe em conjuntos de dados, ou selecione e exclua."
       }
     },
@@ -238,7 +238,7 @@
         },
         "register": {
           "title": "Registre-se para participar",
-          "body": "Um clique só — o registro permite à equipe contar suas entradas e enviar seu prêmio se você ganhar."
+          "body": "Um clique só: o registro permite à equipe contar suas entradas e enviar seu prêmio se você ganhar."
         },
         "upload": {
           "title": "Fotografe e envie",
@@ -246,12 +246,12 @@
         },
         "win": {
           "title": "Ganhe prêmios",
-          "body": "Mais observações e melhor foto ganham prêmios em dinheiro e um selo permanente no perfil — e cada observação continua sua, reutilizável como evidência nos seus projetos."
+          "body": "O maior número de observações e a melhor imagem ganham prêmios em dinheiro e um selo permanente. Cada observação continua sua como evidência do projeto."
         }
       },
       "tour": {
-        "register": "Clique em Registrar para participar — um clique e você está dentro.",
-        "upload": "Depois envie fotos de natureza por aqui durante a rodada — cada observação conta."
+        "register": "Clique em Registrar para participar: um clique e você está dentro.",
+        "upload": "Depois envie fotos de natureza por aqui durante a rodada: cada observação conta."
       }
     }
   }

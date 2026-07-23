@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import { useTranslations } from "next-intl";
 import { ActivityIcon, WavesIcon } from "lucide-react";
 
 declare global {
@@ -77,7 +78,7 @@ function colorForEnergy(value: number): string {
   return `hsl(${hue} 82% ${lightness}%)`;
 }
 
-function drawSpectrogram(canvas: HTMLCanvasElement, samples: Float32Array) {
+function drawSpectrogram(canvas: HTMLCanvasElement, samples: Float32Array, lowLabel: string, highLabel: string) {
   canvas.width = CANVAS_WIDTH;
   canvas.height = CANVAS_HEIGHT;
   const context = canvas.getContext("2d");
@@ -106,11 +107,12 @@ function drawSpectrogram(canvas: HTMLCanvasElement, samples: Float32Array) {
 
   context.fillStyle = "rgb(255 255 255 / 0.72)";
   context.font = "12px sans-serif";
-  context.fillText("low", 12, canvas.height - 12);
-  context.fillText("high", 12, 18);
+  context.fillText(lowLabel, 12, canvas.height - 12);
+  context.fillText(highLabel, 12, 18);
 }
 
 export function AudioSpectrogram(props: { source: AudioSource | null; title?: string }) {
+  const t = useTranslations("upload.audio.spectrogram");
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
   useEffect(() => {
@@ -129,7 +131,7 @@ export function AudioSpectrogram(props: { source: AudioSource | null; title?: st
         const buffer = await readSource(targetSource);
         const decoded = await context.decodeAudioData(buffer.slice(0));
         if (cancelled) return;
-        drawSpectrogram(targetCanvas, decoded.getChannelData(0));
+        drawSpectrogram(targetCanvas, decoded.getChannelData(0), t("low"), t("high"));
       } catch {
         if (!cancelled) clearCanvas(targetCanvas);
       } finally {
@@ -141,15 +143,15 @@ export function AudioSpectrogram(props: { source: AudioSource | null; title?: st
     return () => {
       cancelled = true;
     };
-  }, [props.source]);
+  }, [props.source, t]);
 
   if (!props.source) {
     return (
       <div className="rounded-2xl border border-dashed bg-muted/30 p-4 text-sm text-muted-foreground">
         <div className="flex items-center gap-2 font-medium text-foreground">
-          <WavesIcon className="size-4" /> Spectrogram preview
+          <WavesIcon className="size-4" /> {t("title")}
         </div>
-        <p className="mt-2">Choose an audio file to preview its frequency pattern before saving.</p>
+        <p className="mt-2">{t("chooseFile")}</p>
       </div>
     );
   }
@@ -159,19 +161,19 @@ export function AudioSpectrogram(props: { source: AudioSource | null; title?: st
       <div className="flex items-center justify-between border-b px-4 py-3 text-sm">
         <div className="flex items-center gap-2 font-medium">
           <ActivityIcon className="size-4 text-primary" />
-          {props.title ?? "Spectrogram preview"}
+          {props.title ?? t("title")}
         </div>
-        <span className="text-xs text-muted-foreground">frequency over time</span>
+        <span className="text-xs text-muted-foreground">{t("frequencyOverTime")}</span>
       </div>
       <canvas
         ref={canvasRef}
         width={CANVAS_WIDTH}
         height={CANVAS_HEIGHT}
         className="block h-[180px] w-full"
-        aria-label="Audio spectrogram preview"
+        aria-label={t("previewAria")}
       />
       <figcaption className="border-t px-4 py-2 text-xs text-muted-foreground">
-        Brighter bands indicate stronger frequencies in the selected recording.
+        {t("caption")}
       </figcaption>
     </figure>
   );

@@ -83,14 +83,16 @@ export function SitesClient({ did, target }: { did: string; target: ManageTarget
       const res = await fetch(manageApiHref("/api/manage/sites/default", target));
       const data = (await res.json()) as { siteUri: string | null } | { error: string };
       if (!res.ok || "error" in data) {
-        setDefaultError(("error" in data ? data.error : null) ?? "Could not load the default site.");
+        if ("error" in data) console.error("Default site load failed", data.error);
+        setDefaultError(t("defaultLoadError"));
       } else {
         setDefaultSiteUri(data.siteUri);
       }
-    } catch {
-      setDefaultError("Could not load the default site.");
+    } catch (error) {
+      console.error("Default site load failed", error);
+      setDefaultError(t("defaultLoadError"));
     }
-  }, [target]);
+  }, [t, target]);
 
   const loadSites = useCallback(async () => {
     setIsLoading(true);
@@ -100,17 +102,19 @@ export function SitesClient({ did, target }: { did: string; target: ManageTarget
       const res = await fetch(manageApiHref("/api/manage/sites", target));
       const data = (await res.json()) as ManagedLocation[] | { error: string };
       if (!res.ok || "error" in data) {
-        setFetchError(("error" in data ? data.error : null) ?? "Failed to load sites.");
+        if ("error" in data) console.error("Site list load failed", data.error);
+        setFetchError(t("loadError"));
       } else {
         setSites(data);
       }
       await loadDefaultSite();
-    } catch {
-      setFetchError("Could not reach the server.");
+    } catch (error) {
+      console.error("Site list load failed", error);
+      setFetchError(t("loadError"));
     } finally {
       setIsLoading(false);
     }
-  }, [loadDefaultSite, target]);
+  }, [loadDefaultSite, t, target]);
 
   useEffect(() => { void loadSites(); }, [loadSites]);
 
@@ -164,7 +168,7 @@ export function SitesClient({ did, target }: { did: string; target: ManageTarget
 
   const handleOpenAdd = useCallback((initialFile: File | null = null) => {
     if (!createPermission.allowed) {
-      setFetchError(createPermission.reason ?? "You cannot add sites for this organization.");
+      setFetchError(t("createDenied"));
       return;
     }
     modal.pushModal(
@@ -184,7 +188,7 @@ export function SitesClient({ did, target }: { did: string; target: ManageTarget
       true,
     );
     void modal.show();
-  }, [createPermission.allowed, createPermission.reason, did, loadSites, modal, target]);
+  }, [createPermission.allowed, did, loadSites, modal, t, target]);
 
   // Open the site editor when arriving from the unified "Add data" drop zone
   // (?add=1), preloading any handed-off GeoJSON boundary file. Runs once.
@@ -202,7 +206,7 @@ export function SitesClient({ did, target }: { did: string; target: ManageTarget
 
   const handleOpenEdit = (site: ManagedLocation) => {
     if (!updatePermission.allowed) {
-      if (site.metadata.rkey) setCardError(site.metadata.rkey, updatePermission.reason ?? "You cannot edit this site.");
+      if (site.metadata.rkey) setCardError(site.metadata.rkey, t("editDenied"));
       return;
     }
     const rkey = site.metadata.rkey;
@@ -244,7 +248,7 @@ export function SitesClient({ did, target }: { did: string; target: ManageTarget
     const siteUri = site.metadata.uri;
     if (!rkey || !siteUri) return;
     if (!updatePermission.allowed) {
-      setCardError(rkey, updatePermission.reason ?? "You cannot change the default site.");
+      setCardError(rkey, t("defaultDenied"));
       return;
     }
     setSettingDefaultRkey(rkey);
@@ -259,8 +263,9 @@ export function SitesClient({ did, target }: { did: string; target: ManageTarget
       }, target.kind === "group" ? { repo: target.did } : undefined);
       void loadDefaultSite();
     } catch (err) {
+      console.error("Default site update failed", err);
       setDefaultSiteUri(previousDefault);
-      setCardError(rkey, err instanceof Error ? err.message : "Failed to make this the default site.");
+      setCardError(rkey, t("defaultError"));
     } finally {
       setSettingDefaultRkey(null);
     }
@@ -270,11 +275,11 @@ export function SitesClient({ did, target }: { did: string; target: ManageTarget
     const rkey = site.metadata.rkey;
     if (!rkey) return;
     if (site.metadata.uri && site.metadata.uri === defaultSiteUri) {
-      setCardError(rkey, "Choose another default site before deleting this one.");
+      setCardError(rkey, t("deleteDefaultBlocked"));
       return;
     }
     if (!deletePermission.allowed) {
-      setCardError(rkey, deletePermission.reason ?? "You cannot delete this site.");
+      setCardError(rkey, t("deleteDenied"));
       return;
     }
 
@@ -289,7 +294,8 @@ export function SitesClient({ did, target }: { did: string; target: ManageTarget
         router.push(manageHref(target, "sites"), { scroll: false });
       }
     } catch (err) {
-      setCardError(rkey, err instanceof Error ? err.message : "Failed to delete site.");
+      console.error("Site deletion failed", err);
+      setCardError(rkey, t("deleteError"));
     } finally {
       setDeletingRkey(null);
     }
@@ -310,8 +316,8 @@ export function SitesClient({ did, target }: { did: string; target: ManageTarget
                 value={view}
                 onChange={setView}
                 options={[
-                  { id: "cards", label: "Cards", icon: LayoutGridIcon },
-                  { id: "list", label: "List", icon: ListIcon },
+                  { id: "cards", label: t("cardsView"), icon: LayoutGridIcon },
+                  { id: "list", label: t("listView"), icon: ListIcon },
                 ]}
               />
             ) : null}
@@ -322,7 +328,7 @@ export function SitesClient({ did, target }: { did: string; target: ManageTarget
           </>
         )}
       />
-      {!createPermission.allowed ? <p id="sites-create-permission" className="text-sm text-muted-foreground">{createPermission.reason}</p> : null}
+      {!createPermission.allowed ? <p id="sites-create-permission" className="text-sm text-muted-foreground">{t("createDenied")}</p> : null}
 
       {canShowPreview && (
         <div className="relative h-80 w-full overflow-hidden rounded-2xl border border-border">
@@ -330,7 +336,7 @@ export function SitesClient({ did, target }: { did: string; target: ManageTarget
             ref={iframeRef}
             className="h-full w-full"
             src={iframeUrl ?? undefined}
-            title="Site map preview"
+            title={t("mapPreview")}
           />
           <div className="pointer-events-none absolute inset-0 flex items-center justify-between p-4">
             <Button
@@ -343,7 +349,7 @@ export function SitesClient({ did, target }: { did: string; target: ManageTarget
                 const prevSite = sites.find((site) => site.metadata.rkey === prevRkey);
                 if (prevSite) handlePreviewSite(prevSite);
               }}
-              aria-label="Previous site"
+              aria-label={t("previousSite")}
             >
               <ChevronLeftIcon className="h-4 w-4" />
             </Button>
@@ -357,7 +363,7 @@ export function SitesClient({ did, target }: { did: string; target: ManageTarget
                 const nextSite = sites.find((site) => site.metadata.rkey === nextRkey);
                 if (nextSite) handlePreviewSite(nextSite);
               }}
-              aria-label="Next site"
+              aria-label={t("nextSite")}
             >
               <ChevronRightIcon className="h-4 w-4" />
             </Button>
@@ -369,7 +375,7 @@ export function SitesClient({ did, target }: { did: string; target: ManageTarget
         <div className="flex items-center justify-between gap-4 rounded-xl border border-destructive/20 bg-destructive/5 p-4 text-sm text-destructive">
           <span>{fetchError}</span>
           <Button variant="outline" size="sm" onClick={() => void loadSites()}>
-            Retry
+            {t("retry")}
           </Button>
         </div>
       )}
@@ -385,7 +391,7 @@ export function SitesClient({ did, target }: { did: string; target: ManageTarget
           <p className="max-w-sm text-sm text-muted-foreground">
             {t("emptyDescription")}
           </p>
-          <Button variant="outline" size="sm" onClick={() => handleOpenAdd()} disabled={!createPermission.allowed} title={createPermission.reason ?? undefined}>
+          <Button variant="outline" size="sm" onClick={() => handleOpenAdd()} disabled={!createPermission.allowed} title={!createPermission.allowed ? t("createDenied") : undefined}>
             <CirclePlusIcon />
             {t("addASite")}
           </Button>
@@ -408,8 +414,8 @@ export function SitesClient({ did, target }: { did: string; target: ManageTarget
                   isDeleting={deletingRkey === rkey}
                   error={cardErrors[rkey] ?? null}
                   variant={view === "list" ? "list" : "card"}
-                  updateDisabledReason={updatePermission.reason}
-                  deleteDisabledReason={deletePermission.reason}
+                  updateDisabledReason={!updatePermission.allowed ? t("editDenied") : null}
+                  deleteDisabledReason={!deletePermission.allowed ? t("deleteDenied") : null}
                 />
               );
               return view === "list" ? (

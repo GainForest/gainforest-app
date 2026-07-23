@@ -279,7 +279,7 @@ export function DeploymentForm(
         required
         value={name}
         onChange={setName}
-        placeholder="Site A North — AudioMoth March 2024"
+        placeholder={t("deploymentNamePlaceholder")}
       />
       <SelectField
         label={t("event")}
@@ -594,7 +594,7 @@ export function AudioForm(
               <span className="rounded-full bg-muted px-3 py-1">{metadata.duration}s</span>
               <span className="rounded-full bg-muted px-3 py-1">{metadata.sampleRate} Hz</span>
               <span className="rounded-full bg-muted px-3 py-1">
-                {metadata.channels} channel(s){metadata.bitDepth ? ` · ${metadata.bitDepth}-bit` : ""}
+                {t("channelCount", { count: metadata.channels })}{metadata.bitDepth ? ` · ${t("bitDepth", { count: metadata.bitDepth })}` : ""}
               </span>
             </div>
           )}

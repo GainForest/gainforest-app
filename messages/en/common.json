@@ -180,11 +180,11 @@
   "settings": {
     "handle": {
       "title": "Username",
-      "description": "Your username is your public name across the app — change it here and it updates everywhere.",
+      "description": "Your username is your public name across GainForest.",
       "edit": "Edit",
       "newLabel": "New username",
       "placeholder": "yourname",
-      "prefixHint": "3–18 characters. Letters, numbers, and hyphens only.",
+      "prefixHint": "Use 3 to 18 letters, numbers, or hyphens.",
       "save": "Save",
       "saving": "Saving…",
       "cancel": "Cancel",
@@ -200,23 +200,24 @@
         "full": "Enter a full username like alice.example.com.",
         "generic": "Could not update your username. Please try again.",
         "unavailable": "Changing your username isn’t available yet. Please try again later."
-      }
+      },
+      "customPlaceholder": "alice.example.com"
     },
     "agentKeys": {
       "title": "AI agent keys",
-      "description": "Give an AI agent its own key so it can add records on your behalf — without ever sharing your password.",
+      "description": "Give an AI agent a separate key to add records without sharing your password.",
       "learnMore": "See the agent guide",
       "newKeyLabel": "New key name",
       "namePlaceholder": "e.g. my field assistant",
       "generate": "Generate",
       "empty": "No keys yet.",
-      "hint": "Keys can add and edit your stewardship records, but can never change your account settings or manage other keys. Revoking a key cuts the agent off instantly.",
-      "freshTitle": "{name} — copy now, shown only once",
+      "hint": "Agent keys can add and edit stewardship records. They cannot change account settings or manage other keys. Revoking a key ends its access immediately.",
+      "freshTitle": "{name}. Copy this key now; it is shown once.",
       "copyKey": "Copy key",
       "copyPrompt": "Copy prompt",
       "copied": "Copied",
       "done": "Done",
-      "freshHint": "Your key is shown once and is already in the prompt above — paste it into your agent now. Manage or revoke keys below.",
+      "freshHint": "Paste the complete generated setup prompt into your agent now. It already includes the one-time key. You can manage or revoke the key below.",
       "createdLabel": "created {date}",
       "lastUsedLabel": "last used {date}",
       "neverUsed": "never used",
@@ -227,14 +228,15 @@
         "load": "Could not load your keys.",
         "create": "Could not create the key.",
         "revoke": "Could not revoke the key.",
-        "copy": "Copy failed — select the text manually.",
+        "copy": "Copy failed: select the text manually.",
         "nameRequired": "Name the key after the agent it's for."
       },
       "connectCaption": "Paste this into your AI agent (ChatGPT, Claude, a Telegram bot…) to connect it to GainForest.",
       "generateAndCopy": "Generate key & copy prompt",
       "defaultKeyName": "AI agent",
       "tainaBadge": "Tainá",
-      "tainaBadgeTitle": "This key is linked to your Tainá Telegram bot"
+      "tainaBadgeTitle": "This key is linked to your Tainá Telegram bot",
+      "firstPrompt": "Read {site}/skill.md and follow its setup. Use this GainForest API key: {token}. Store it as GAINFOREST_API_KEY and run the skill's whoami check. Remember the key and skill file. Then help me log a field observation or start a project, but do not create anything until I approve."
     },
     "inaturalist": {
       "title": "iNaturalist",
@@ -285,6 +287,75 @@
         "title": "Advanced",
         "description": "Account data and deletion"
       }
+    },
+    "metadata": {
+      "title": "Settings",
+      "description": "Manage your GainForest account settings."
+    },
+    "password": {
+      "title": "Password",
+      "description": "We’ll send a reset code to the email address on your account.",
+      "show": "Show password",
+      "hide": "Hide password",
+      "sendCode": "Send reset code",
+      "sending": "Sending…",
+      "codeSent": "We sent a reset code to {email}. Check your inbox.",
+      "codeLabel": "Reset code",
+      "codePlaceholder": "Enter the code from your email",
+      "newLabel": "New password",
+      "newPlaceholder": "At least 8 characters",
+      "confirmLabel": "Confirm password",
+      "confirmPlaceholder": "Repeat the new password",
+      "change": "Change password",
+      "saving": "Saving…",
+      "cancel": "Cancel",
+      "success": "Password changed.",
+      "errors": {
+        "request": "We couldn’t send the reset email. Please try again.",
+        "mismatch": "The passwords do not match.",
+        "length": "Use between 8 and 256 characters.",
+        "reset": "We couldn’t change the password. Check the code and try again."
+      }
+    },
+    "identity": {
+      "title": "Account identity",
+      "accountId": "Technical account ID"
+    },
+    "deleteAccount": {
+      "sectionTitle": "Danger zone",
+      "title": "Delete account",
+      "summary": "Permanently removes your GainForest projects, Certs, observations, and profile. Your sign-in identity and data from other apps stay intact. This cannot be undone.",
+      "openButton": "Delete account…",
+      "irreversible": "This cannot be undone",
+      "checking": "Checking what would be deleted…",
+      "recordCount": "{approximate, select, 1 {About } other {}}{count, plural, one {# record will} other {# records will}} be permanently deleted.",
+      "scope": "Everything you published on GainForest is removed from your personal data server. Your sign-in identity and data from other apps are not touched.",
+      "empty": "No GainForest records were found. There is nothing to delete.",
+      "groups": {
+        "biodiversity": "Biodiversity observations",
+        "media": "Audio and multimedia",
+        "organization": "Organization data",
+        "feed": "Feed posts and likes",
+        "certs": "Certs and collections",
+        "profile": "Profile, badges, and signatures",
+        "other": "Other GainForest records"
+      },
+      "ownedOrganizations": "You own {count, plural, one {# organization. Deleting your account leaves it} other {# organizations. Deleting your account leaves them}} without an owner:",
+      "transferOwnership": "Transfer ownership from each organization’s Members page first if you want them to keep an owner.",
+      "ownerlessAcknowledge": "I understand these organizations will be left without an owner.",
+      "confirmPhrase": "delete my account",
+      "confirmInstruction": "Type <phrase></phrase> to confirm:",
+      "confirmInstructionAccount": "Type <phrase></phrase> to confirm for <account></account>:",
+      "deleting": "Deleting records… {deleted} of {total}",
+      "keepOpen": "Keep this window open until deletion finishes.",
+      "done": "{deleted, plural, one {# record deleted.} other {# records deleted.}} {failed, plural, =0 {Signing you out…} one {# could not be removed. Signing you out…} other {# could not be removed. Signing you out…}}",
+      "confirmButton": "Permanently delete everything",
+      "retry": "Try again",
+      "cancel": "Cancel",
+      "errors": {
+        "read": "We couldn’t check your account data. Please try again.",
+        "delete": "Deletion failed. Please try again."
+      }
     }
   },
   "bumicertCard": {
@@ -333,7 +404,7 @@
       "projects": {
         "label": "Regenerative work",
         "title": "Projects",
-        "blurb": "Browse what communities are building — each project gathers its Certs, places, and field evidence in one story.",
+        "blurb": "Browse what communities are building: each project gathers its Certs, places, and field evidence in one story.",
         "statLabel": "projects"
       },
       "bumicerts": {
@@ -407,8 +478,8 @@
         "detail": "Discovery and indexing"
       },
       "storage": {
-        "name": "Personal data server",
-        "detail": "Record and media storage"
+        "name": "Account storage",
+        "detail": "Stores accounts and media"
       },
       "labels": {
         "name": "Labeling service",
@@ -419,8 +490,8 @@
         "detail": "Certs interface"
       },
       "api": {
-        "name": "API",
-        "detail": "Application backend"
+        "name": "App service",
+        "detail": "Runs app features"
       },
       "defaultName": "Service"
     },
@@ -431,10 +502,9 @@
     },
     "hero": {
       "imageAlt": "Forest canopy at sunrise",
-      "eyebrow": "Live status",
       "title": "GainForest",
       "accent": "system health",
-      "lede": "Current availability for Certs, data services, and supporting infrastructure."
+      "lede": "Current availability for the website, account storage, and search."
     },
     "unavailable": {
       "title": "Status is temporarily unavailable",
@@ -496,7 +566,7 @@
   },
   "equipment": {
     "metadataTitle": "Equipment — {name}",
-    "personalIntro": "Field equipment registered on this profile — each unit with its current holder, site and status.",
+    "personalIntro": "Field equipment registered on this profile: each unit with its current holder, site and status.",
     "orgIntro": "All field equipment registered by this organization's team members, in one place.",
     "membersUnavailable": "The full team list could not be loaded right now, so some members' equipment may be missing.",
     "addEquipment": "Add equipment",
@@ -508,7 +578,7 @@
     "unitCount": "{count, plural, one {# unit} other {# units}}",
     "showingFiltered": "Showing {shown} of {total}",
     "emptyTitleOwner": "No equipment yet",
-    "emptyBodyOwner": "Add your first unit — an AudioMoth, a field phone, a camera trap.",
+    "emptyBodyOwner": "Add your first unit: an AudioMoth, a field phone, a camera trap.",
     "emptyTitle": "No equipment",
     "emptyBodyPersonal": "This profile hasn't registered any equipment yet.",
     "emptyBodyOrg": "No team member has registered any equipment yet.",
@@ -623,12 +693,21 @@
   "accountDonations": {
     "emptyHeroDescription": "Support a project and your contributions show up here, each linked to the project you backed.",
     "emptyHeroCta": "Explore projects",
-    "anonymousNote": "Anonymous donations appear here too, but only you can see them — they are never shown publicly under your name. Some older anonymous donations can’t be shown.",
-    "anonymousBadge": "Only visible to you"
+    "anonymousNote": "Anonymous donations appear here too, but only you can see them: they are never shown publicly under your name. Some older anonymous donations can’t be shown.",
+    "anonymousBadge": "Only visible to you",
+    "historyTitle": "Donation history",
+    "totalDonated": "Total donated",
+    "donations": "Donations",
+    "viewProject": "View project",
+    "unknownProject": "Project unavailable",
+    "paymentDetails": "Payment details",
+    "unavailableTitle": "Donation history is unavailable",
+    "unavailableDescription": "We could not load these donation records. Try again.",
+    "retry": "Try again"
   },
   "accountProjects": {
-    "emptyEyebrow": "No projects",
-    "empty": "This account has not shared any projects yet."
+    "empty": "This account has not shared any projects yet.",
+    "emptyTitle": "No projects"
   },
   "projectGallery": {
     "accountTitle": "Gallery",
@@ -666,7 +745,7 @@
       "body": "Share photos on your profile. Drag and drop several at once, or choose files from your device.",
       "dropHint": "Drag and drop images here, or click to choose",
       "dropActive": "Drop your images to add them",
-      "fileHint": "JPG, PNG, GIF or WebP — up to 10 MB each",
+      "fileHint": "JPG, PNG, GIF or WebP: up to 10 MB each",
       "previewAlt": "Selected image {index, number}",
       "removeImage": "Remove image {index, number}",
       "linkLabel": "Link to a project (optional)",
@@ -683,7 +762,9 @@
       "recordTitleAccount": "{name} gallery",
       "open": "Add images",
       "close": "Close"
-    }
+    },
+    "loadError": "Couldn’t load these photos.",
+    "retry": "Try again"
   },
   "projectManage": {
     "backToProjects": "Projects",
@@ -745,6 +826,239 @@
         "partlyMeasured": "Partly measured",
         "noMeasurements": "No measurements yet"
       }
+    },
+    "manager": {
+      "loadErrorTitle": "Could not load trees",
+      "title": "My trees",
+      "emptyTitle": "No trees uploaded yet",
+      "noMatchesTitle": "No trees match your search",
+      "noMatchesBody": "Try another species, place, or person.",
+      "clearSearch": "Clear search",
+      "selectAllAria": "Select all filtered ungrouped trees",
+      "selectAll": "Select all filtered trees",
+      "reviewNeeded": "Review needed",
+      "measured": "Measured",
+      "loadingDetails": "Loading details",
+      "measurementReviewNeeded": "Measurement review needed",
+      "measurementsReady": "Measurements ready",
+      "noMeasurements": "No measurements yet",
+      "informationTitle": "Tree information",
+      "informationDescription": "Review and update the saved tree details.",
+      "notSpecified": "Not specified",
+      "measurementsTitle": "Measurements",
+      "measurementsDescription": "Track DBH, height, root collar diameter, and canopy cover.",
+      "rootCollarHint": "Useful for young trees whose trunk is too small for DBH.",
+      "measurementEmptyHint": "Add at least one value to save a measurement.",
+      "photosTitle": "Photos",
+      "photosDescription": "View and manage photos linked to this tree.",
+      "photoCaption": "Caption for new photo",
+      "photoCaptionPlaceholder": "Optional caption",
+      "photoLinkPlaceholder": "Or paste a photo link",
+      "photosEmpty": "No photos linked to this tree yet.",
+      "deletePhoto": "Delete photo",
+      "deleteTitle": "Delete tree",
+      "deleteDescription": "Delete this tree and its linked records.",
+      "deletePermanently": "Delete permanently",
+      "loadErrorBody": "Tree information could not be loaded.",
+      "retry": "Try again",
+      "description": "Review saved tree information, measurements, and photos in one place.",
+      "upload": "Upload tree data",
+      "backToGroups": "Back to tree groups",
+      "deleteGroup": "Delete tree group",
+      "emptyBody": "Upload your first tree file to start managing tree information, measurements, and photos.",
+      "groupHelp": "Open a tree group to review its trees. Open ungrouped trees to select them and add them to an existing tree group.",
+      "ungroupedTitle": "Ungrouped trees",
+      "savedTitle": "Saved trees",
+      "ungroupedDescription": "Select one or more trees to add them to a tree group.",
+      "savedDescription": "Select a tree to review details, photos, and measurements.",
+      "selectedCount": "{count} selected",
+      "addCountToGroup": "Add {count} to tree group",
+      "addToGroup": "Add to tree group",
+      "selectTree": "Select {name}",
+      "treeFallback": "tree",
+      "unnamedTree": "Unnamed tree",
+      "treeGroupLabel": "Tree group",
+      "noTreeGroup": "No tree group",
+      "projectPlaceLabel": "Project place",
+      "notLinked": "Not linked",
+      "establishmentLabel": "How the tree got here",
+      "notSet": "Not set",
+      "scientificName": "Scientific name",
+      "commonName": "Common name",
+      "eventDate": "Event date",
+      "recordedBy": "Recorded by",
+      "latitude": "Latitude",
+      "longitude": "Longitude",
+      "country": "Country",
+      "locality": "Locality",
+      "habitat": "Habitat",
+      "remarks": "Remarks",
+      "saveTree": "Save tree information",
+      "linkedMeasurements": "Linked measurements",
+      "height": "Height",
+      "rootCollarCm": "Root collar diameter (cm)",
+      "canopyCover": "Canopy cover",
+      "heightM": "Height (m)",
+      "canopyCoverPercent": "Canopy cover (%)",
+      "removeMeasurements": "Remove measurements",
+      "saveMeasurements": "Save measurements",
+      "addMeasurements": "Add measurements",
+      "choosePhoto": "Choose photo",
+      "addLinkedPhoto": "Add linked photo",
+      "saveCaption": "Save caption",
+      "cancel": "Cancel",
+      "noCaption": "No caption added.",
+      "editCaption": "Edit caption",
+      "addCaption": "Add caption",
+      "photoAdded": "Added {date}",
+      "deleteTree": "Delete tree",
+      "deleteTreeTitle": "Delete tree?",
+      "deletePhotoTitle": "Delete photo?",
+      "saveTreeError": "Tree information could not be saved.",
+      "saveMeasurementError": "The measurement could not be saved.",
+      "savePhotoError": "The photo could not be saved.",
+      "saveCaptionError": "The caption could not be saved.",
+      "editTreeDenied": "Your role cannot edit this tree.",
+      "noChanges": "No changes to save.",
+      "treeSaved": "Tree information saved.",
+      "measurementManualReview": "These measurements need manual review before they can be edited here.",
+      "measurementDenied": "Your role cannot change measurements for this tree.",
+      "measurementsSaved": "Measurements saved.",
+      "measurementsRemoved": "Shown measurements removed.",
+      "measurementRequired": "Add at least one measurement before saving.",
+      "measurementsAdded": "Measurements added.",
+      "photoAddDenied": "Your role cannot add photos to this tree.",
+      "photoAddedFeedback": "Photo added.",
+      "photoEditDenied": "Your role cannot edit this photo.",
+      "captionSaved": "Caption saved.",
+      "photoDeleteDenied": "Your role cannot delete this photo.",
+      "photoDeleted": "Photo deleted.",
+      "chooseTreeToDelete": "Choose a tree to delete.",
+      "treeDeleteDenied": "Your role cannot delete this tree.",
+      "groupCountDelayed": "The tree group count may update later.",
+      "treeDeletedWithNotes": "Tree deleted. {notes}",
+      "treeDeleted": "Tree deleted.",
+      "groupDeleteDenied": "Your role cannot delete this tree group.",
+      "treesAddedToGroup": "{count, plural, one {Added # tree} other {Added # trees}} to {name}.",
+      "noTreesAdded": "No trees were added to {name}.",
+      "chooseUngrouped": "Choose at least one ungrouped tree.",
+      "groupAttachDenied": "Your role cannot add existing trees to a tree group.",
+      "someTreesNotAdded": "Some trees could not be added.",
+      "createGroupFirst": "Create a tree group during upload before adding ungrouped trees to it.",
+      "duplicateMeasurements": "More than one editable measurement was found for this tree. Editing is paused to protect the recorded values.",
+      "deleteTreeLinkedBody": "Deleting also removes {photos, plural, one {# linked photo} other {# linked photos}} and {measurements, plural, one {# linked measurement} other {# linked measurements}}.",
+      "deleteTreeLoadingBody": "This tree cannot be deleted until its details finish loading.",
+      "deleteTreeConfirmCounts": "This deletes the tree, {photos, plural, one {# linked photo} other {# linked photos}}, and {measurements, plural, one {# linked measurement} other {# linked measurements}}. This cannot be undone.",
+      "deleteTreeConfirm": "This deletes the tree and any linked photos or measurements found at that time. This cannot be undone.",
+      "deletePhotoConfirm": "This deletes the photo from the selected tree. This cannot be undone.",
+      "uploadDenied": "Your role cannot upload tree data.",
+      "deletedGroupSuccess": "Deleted {name} and {count, plural, one {# tree} other {# trees}}.",
+      "deletedGroupPartial": "Deleted {name} and {count, plural, one {# tree} other {# trees}}, but some linked photos or measurements remain. Refresh before trying again.",
+      "deletedGroupTreesOnly": "{name} was not fully deleted. {count, plural, one {# tree was deleted} other {# trees were deleted}}, but the group was kept so you can retry.",
+      "deletedGroupFailed": "{name} could not be deleted. The group was kept so you can retry.",
+      "photoCount": "{count, plural, one {# photo} other {# photos}}",
+      "treePhoto": "Tree photo",
+      "photoAltNamed": "Tree photo of {name}",
+      "photoAlt": "Tree photo",
+      "establishmentOptions": {
+        "managed": "Your team planted it",
+        "native": "It grew here naturally",
+        "naturalised": "It regenerated naturally",
+        "uncertain": "Not sure"
+      },
+      "connectedPlace": "Connected project place",
+      "groupFallback": "Tree group",
+      "groupCheckError": "This tree group could not be checked. Refresh and try again."
+    },
+    "deleteGroup": {
+      "title": "Delete tree group?",
+      "description": "Deleting {name} removes the group and everything inside it. This cannot be undone.",
+      "willDelete": "This will delete:",
+      "group": "the tree group",
+      "trees": "{count, plural, one {# tree in this group} other {# trees in this group}}",
+      "measurements": "{count, plural, one {# linked measurement} other {# linked measurements}}",
+      "photos": "{count, plural, one {# linked photo} other {# linked photos}}",
+      "cancel": "Cancel",
+      "confirm": "Delete tree group",
+      "error": "Tree group could not be deleted."
+    },
+    "upload": {
+      "savingTitle": "Saving your trees",
+      "keepOpenTitle": "Do not refresh or close this page",
+      "keepOpenBody": "Keep this tab open until trees and photos finish saving.",
+      "savingPhoto": "Saving photo",
+      "pending": "Pending",
+      "done": "Done",
+      "row": "Row {number}",
+      "rowsRange": "Rows {start}-{end} of {total}",
+      "savingProgress": "Saving row {current} of {total}: {row}…",
+      "preparing": "Preparing to save…",
+      "rowSummary": "Row {number}: {label}",
+      "fatal": {
+        "siteBoundary": "The selected map area could not be checked. Go back, choose or create a site boundary, and try again.",
+        "photoFolder": "The photo folder is no longer available after the page was refreshed or you signed in again. Start over and select both the tree file and its photo folder.",
+        "treeGroup": "The tree group could not be created. Try again or continue without a group.",
+        "noSite": "No site selected. Go back and choose or create a site boundary."
+      },
+      "time": {
+        "fewSeconds": "a few seconds",
+        "seconds": "{count} sec",
+        "minutes": "{count} min",
+        "hours": "{count} hr",
+        "hoursMinutes": "{hours} hr {minutes} min",
+        "done": "Done",
+        "completedIn": "Completed in {duration}",
+        "completed": "Completed",
+        "estimating": "Estimating…",
+        "calculating": "Calculating time remaining",
+        "left": "~{duration} left",
+        "saved": "{completed} of {total} {unit} saved",
+        "treeUnit": "{count, plural, one {tree} other {trees}}",
+        "photoUnit": "{count, plural, one {photo} other {photos}}"
+      },
+      "viewTreeGroup": "View tree group",
+      "viewTrees": "View trees",
+      "datasetCleanupWarning": "The empty tree group could not be removed automatically.",
+      "addingToGroup": "Adding to {name}.",
+      "creatingGroup": "Creating group “{name}”.",
+      "photoFailures": "Some photos could not be saved. Your trees are still saved.",
+      "photoSaveError": "The photo could not be saved.",
+      "rowPartialError": "The tree was saved, but some linked information could not be saved.",
+      "treeSaveError": "The tree could not be saved.",
+      "photoSkipped": "The tree was not saved, so its photo was skipped.",
+      "errors": {
+        "groupDetached": "The tree group became unavailable, so this tree was kept without the group. Review it before retrying.",
+        "groupDetachFailed": "The tree group became unavailable and this tree could not be moved out of it automatically. Review it before retrying.",
+        "groupUnavailable": "The selected tree group became unavailable. Remaining rows were not added.",
+        "chunkUnconfirmed": "This set of trees could not be confirmed. Some may already be saved; review your trees before retrying.",
+        "measurementCleanupFailed": "The tree was saved, but its measurement was not, and automatic cleanup could not finish. Review the tree before retrying."
+      },
+      "groupCountWarning": "The tree group was created, but its tree count could not be updated.",
+      "importedPhotoCaption": "Imported from photo folder: {fileName}",
+      "progressSummary": "{successes, plural, one {# succeeded} other {# succeeded}}, {partials, plural, one {# needs follow-up} other {# need follow-up}}, {failures, plural, one {# failed} other {# failed}}",
+      "successWithPhotos": "Successfully saved {trees, plural, one {# tree} other {# trees}} and {photos, plural, one {# photo} other {# photos}}.",
+      "successTrees": "Successfully saved {trees, plural, one {# tree} other {# trees}}.",
+      "completionWithIssues": "{saved} saved, {followUp} need follow-up, {failed} skipped or failed, and {photoFailed} photos could not be saved.",
+      "photosSaved": "Photos saved",
+      "savingPhotos": "Saving photos…",
+      "photoProgress": "Photo {current} of {total}",
+      "photoSummary": "{saved} saved, {failed} not saved, of {total} photos",
+      "attentionCount": "{count, plural, one {# row needs attention} other {# rows need attention}}",
+      "attentionKind": {
+        "failed": "Failed",
+        "partial": "Needs follow-up",
+        "skipped": "Skipped"
+      },
+      "startOver": "Start over",
+      "uploadMore": "Upload more trees",
+      "savingTrees": "Saving {count, plural, one {# tree} other {# trees}} to GainForest.",
+      "assigningToSite": "Assigning to {name}.",
+      "boundary": {
+        "differentSite": "This row was prepared for a different site boundary. Go back and review the selected site boundary.",
+        "invalid": "The selected map area cannot be used. Go back and redraw it before saving trees.",
+        "outside": "This tree is {distance} outside the selected map area. Check the coordinates, choose a different site boundary, or remove this row.",
+        "unknownDistance": "an unknown distance"
+      }
     }
   },
   "workScopes": {
@@ -756,7 +1070,6 @@
     "restorationMaintenance": "Restoration maintenance"
   },
   "internalBadges": {
-    "eyebrow": "Internal team tools",
     "title": "Badge desk",
     "description": "Create badges, award them to accounts, and keep email assignments pending until a person claims an account.",
     "pendingEmail": "Pending email",
@@ -836,7 +1149,8 @@
       "awardCreated": "Badge assigned.",
       "pendingCreated": "Email assignment saved as pending.",
       "awardDeleted": "Badge assignment removed.",
-      "awardsCreated": "{count, plural, one {Badge assigned.} other {# badges assigned.}}"
+      "awardsCreated": "{count, plural, one {Badge assigned.} other {# badges assigned.}}",
+      "awardsPartial": "{succeeded} assigned; {failed} could not be assigned. Check the remaining recipients and try again."
     },
     "errors": {
       "generic": "Something went wrong.",
@@ -880,7 +1194,9 @@
     "title": "Endorsements given",
     "description": "Organizations {name} has publicly endorsed.",
     "empty": "This organization hasn’t endorsed anyone yet.",
-    "fallbackName": "Organization"
+    "fallbackName": "Organization",
+    "loadError": "Couldn’t load these endorsements.",
+    "retry": "Try again"
   },
   "trust": {
     "trustedBy": "Trusted by",
@@ -916,7 +1232,22 @@
       "addError": "We couldn’t add that member. Check the handle and try again.",
       "roleMember": "member",
       "roleAdmin": "admin",
-      "pendingStatus": "Invited as {role}. Waiting for them to accept."
+      "pendingStatus": "Invited as {role}. Waiting for them to accept.",
+      "memberFallback": "Team member",
+      "joined": "Joined {date}",
+      "loadingName": "Loading name…",
+      "organizationMember": "Organization member",
+      "memberRole": "Member role",
+      "newMemberRole": "Role for new member",
+      "roleOwner": "owner",
+      "removeMember": "Remove member",
+      "title": "Members",
+      "loading": "Loading members…",
+      "empty": "No members yet.",
+      "refresh": "Refresh",
+      "loadError": "Could not load members.",
+      "roleError": "Could not update the role.",
+      "removeError": "Could not remove the member."
     },
     "menu": {
       "title": "Invitations",
@@ -930,7 +1261,6 @@
       "role": "{role} invite"
     },
     "invitePage": {
-      "eyebrow": "Organization invitation",
       "organizationFallback": "this organization",
       "signedOutTitle": "Sign in to accept",
       "signedOutDescription": "Sign in with the invited email address to join {organization}.",
@@ -950,13 +1280,16 @@
       "canceledTitle": "Invitation canceled",
       "canceledDescription": "This invitation is no longer valid.",
       "alreadyAcceptedTitle": "Already accepted",
-      "alreadyAcceptedDescription": "This invitation has already been accepted."
+      "alreadyAcceptedDescription": "This invitation has already been accepted.",
+      "pendingTitle": "Join this organization?",
+      "pendingDescription": "Accept to join {organization}.",
+      "accept": "Accept invitation"
     }
   },
   "notifications": {
     "title": "Notifications",
     "ariaLabel": "Notifications",
-    "unreadAria": "Notifications — {count} unread",
+    "unreadAria": "Notifications: {count} unread",
     "empty": "No notifications yet",
     "emptyHint": "Likes, comments, and species suggestions on your records show up here.",
     "someone": "Someone",
@@ -981,7 +1314,7 @@
     "hero": {
       "title": "What's happening on",
       "accent": "GainForest",
-      "description": "A live stream of the newest projects, nature sightings, organizations, and community updates — all in one place."
+      "description": "The newest projects, nature sightings, organizations, and community updates in one live stream."
     },
     "filters": {
       "all": "All",
@@ -1017,7 +1350,8 @@
       "viewAll": "View all sightings",
       "likesAcross": "{count, plural, one {# like across these sightings} other {# likes across these sightings}}",
       "commentsHeading": "Comments on these sightings",
-      "commentOn": "on {species}"
+      "commentOn": "on {species}",
+      "moreComments": "{count, plural, one {Show # more comment} other {Show # more comments}}"
     },
     "profileCard": {
       "unnamed": "Unnamed account",
@@ -1099,7 +1433,7 @@
     "visibleDescription": "Hide {name} as a test account to keep its projects, observations and feed activity out of public view. You can undo this anytime.",
     "hideAction": "Hide as test account",
     "confirmHide": "Hide account",
-    "confirmDescription": "This removes everything from {name} — projects, observations and feed activity — from the public pages. You can make it visible again at any time.",
+    "confirmDescription": "This removes {name}, including projects, observations, and feed activity, from public pages. You can make it visible again at any time.",
     "cancel": "Cancel",
     "flaggedTitle": "Hidden as a test account",
     "flaggedDescription": "{name}'s projects, observations and feed activity are hidden from everyone. Only GainForest stewards can see this account here.",
@@ -1112,7 +1446,10 @@
     "empty": "No accounts are marked as test right now.",
     "remove": "Remove",
     "unnamed": "Unnamed account",
-    "error": "Something went wrong. Please try again."
+    "error": "Something went wrong. Please try again.",
+    "confirmTitle": "Make this account visible?",
+    "confirmDescription": "{name} and its activity will return to public pages.",
+    "cancel": "Cancel"
   },
   "recognition": {
     "eyebrow": "GainForest steward",
@@ -1128,14 +1465,14 @@
         "description": "Received a Rewilding the Web grant."
       },
       "bioblitz-most-images": {
-        "label": "BioBlitz — most observations",
+        "label": "BioBlitz: most observations",
         "description": "Won a BioBlitz round for the most observations.",
-        "labelWithRound": "BioBlitz {roundName} — most observations"
+        "labelWithRound": "BioBlitz {roundName}: most observations"
       },
       "bioblitz-best-picture": {
-        "label": "BioBlitz — best picture",
+        "label": "BioBlitz: best picture",
         "description": "Won a BioBlitz round for the best picture.",
-        "labelWithRound": "BioBlitz {roundName} — best picture"
+        "labelWithRound": "BioBlitz {roundName}: best picture"
       }
     },
     "awardsLabel": "Awards",
@@ -1183,7 +1520,7 @@
   },
   "adminTaina": {
     "title": "Tainá agents",
-    "description": "Everyone running a Tainá field assistant — their bot, when they last used it, and what it has spent. Messages you send are delivered by their Tainá, in its own voice.",
+    "description": "Tainá agents, owners, recent use, and credit spending.",
     "empty": "No one has connected a Tainá yet.",
     "unavailable": "The Tainá runtime is unreachable right now, so the roster can't be loaded. Try again in a moment.",
     "unnamed": "Unnamed account",
@@ -1195,7 +1532,7 @@
     "creditsAllowance": "Credit allowance: {allowance}",
     "message": "Message",
     "messagePlaceholder": "What should Tainá tell them?",
-    "messageHint": "Delivered through their bot in Tainá's voice — the recipient sees it as a message from their assistant.",
+    "messageHint": "Delivered by their Tainá as an assistant message.",
     "send": "Send",
     "sending": "Sending…",
     "sent": "Delivered to their chat.",
@@ -1233,7 +1570,10 @@
     "followersTab": "Followers",
     "followingTab": "Following",
     "emptyFollowers": "No followers yet.",
-    "emptyFollowing": "Not following anyone yet."
+    "emptyFollowing": "Not following anyone yet.",
+    "navigationLabel": "Profile connections",
+    "loadError": "Couldn’t load these connections.",
+    "retry": "Try again"
   },
   "activity": {
     "postsTab": "Posts",
@@ -1252,11 +1592,14 @@
       "account": "account",
       "record": "record"
     },
-    "inReplyTo": "In reply to"
+    "inReplyTo": "In reply to",
+    "navigationLabel": "Profile activity",
+    "loadError": "Couldn’t load this activity.",
+    "retry": "Try again"
   },
   "docs": {
     "metaTitle": "Data schemas",
-    "metaDescription": "The open AT Protocol record schemas behind GainForest — biodiversity observations, impact claims, funding, and identity.",
+    "metaDescription": "Open AT Protocol record schemas for GainForest biodiversity observations, impact claims, funding, and identity.",
     "title": "Data schemas",
     "lead": "The open record formats behind GainForest. Every observation, project, certificate, donation, and post is stored as a structured record using the schemas below.",
     "starSchemaCaption": "How biodiversity records link together",
@@ -1276,11 +1619,11 @@
       "audiovisualEvidence": "audiovisual evidence"
     },
     "sections": {
-      "feed": "Social primitives ported from Bluesky into the GainForest commons — posts (and reply comments) and likes, so the feed can be posted to, commented on, and liked.",
+      "feed": "Posts, replies, and likes adapted from Bluesky for the GainForest feed.",
       "dwc": "Biodiversity occurrence records aligned with the TDWG Simple Darwin Core standard. Occurrences reference a shared event; measurements reference an occurrence.",
       "ac": "Media and passive-acoustic-monitoring records aligned with TDWG Audiovisual Core. Audio and multimedia link to a Darwin Core occurrence as evidence.",
-      "organization": "Organization map-data records — published map layers (drone orthomosaics, GeoJSON overlays) and the named monitored areas that group repeat captures into change-over-time series.",
-      "certified": "Identity primitives from the Hypercerts ecosystem — actor profiles, organizations, follows, badges, and locations.",
+      "organization": "Organization map-data records: published map layers, including drone orthomosaics and GeoJSON overlays, plus monitored areas that group repeat captures into change-over-time series.",
+      "certified": "Identity primitives from the Hypercerts ecosystem: actor profiles, organizations, follows, badges, and locations.",
       "hypercerts": "Impact claims (activity, contribution, contributor, rights), collections, funding receipts, attachments, work scope, and shared types."
     },
     "sectionsAria": "Schema sections",
@@ -1308,10 +1651,9 @@
       "description": "Connect your own Telegram bot and turn what you see in nature into verifiable biodiversity observations."
     },
     "hero": {
-      "eyebrow": "AI field assistant",
       "title": "Meet",
       "accent": "Tainá",
-      "description": "Tainá is your Telegram field companion. Send her a photo or a note about a plant, animal, or fungus — she identifies the species and records the observation under your GainForest account.",
+      "description": "Send Tainá a Telegram photo or note to identify and record a sighting on your GainForest account.",
       "step1Title": "Connect your own bot",
       "step1Description": "Create a private Telegram bot with @BotFather and link it here. Only you can talk to it.",
       "step2Title": "Send photos or notes",
@@ -1327,18 +1669,19 @@
     },
     "setup": {
       "title": "Connect your Tainá bot",
-      "description": "Create a Telegram bot for Tainá and paste its token below. The bot is private — it works only for you.",
+      "description": "Create a private Telegram bot, then paste its token below.",
       "howTitle": "How to create your bot (about 2 minutes)",
       "howStep1": "Open <botfather>@BotFather</botfather> in Telegram.",
       "howStep2": "Send <code>/newbot</code> and follow the prompts.",
       "howStep3": "Copy the token it gives you (it looks like 123456789:ABC…).",
-      "howStep4": "Paste it below — this bot is used only by you.",
+      "howStep4": "Paste it below: this bot is used only by you.",
       "tokenLabel": "Bot token",
       "focusLabel": "What are you documenting?",
       "focusOptional": "optional",
       "focusPlaceholder": "e.g. birds & pollinators, Atlantic Forest",
       "submit": "Connect Tainá",
-      "submitting": "Connecting…"
+      "submitting": "Connecting…",
+      "tokenPlaceholder": "123456789:ABCdefGhIJKlmNoPQRstuVwxyz"
     },
     "errors": {
       "invalidToken": "That doesn't look like a bot token. Copy it from @BotFather (it looks like 123456789:ABC…).",
@@ -1349,7 +1692,7 @@
       "title": "Activate your bot",
       "description": "Your bot is connected but still private. Open it in Telegram and send this one-time code so only you can talk to it.",
       "open": "Open Tainá & activate",
-      "hint": "The button sends the code for you — or message the bot and type the code yourself."
+      "hint": "The button sends the code for you. You can also message the bot and type the code."
     },
     "linked": {
       "title": "Your Tainá bot",
@@ -1387,67 +1730,73 @@
       "revokeConfirm": "Revoke this key? Tainá will stop recording observations until you generate a new one.",
       "generate": "Generate a new key",
       "generating": "Generating…",
-      "keyActionFailed": "That didn't work — please try again.",
+      "keyActionFailed": "That did not work. Try again.",
       "chatTitle": "Observation chat",
       "chatActive": "Active",
       "chatWaiting": "Waiting",
-      "chatEmpty": "No messages yet. Open your bot in Telegram and describe or photograph something you saw — your conversation with Tainá shows up here live.",
+      "chatEmpty": "No messages yet. Open your bot in Telegram to start a conversation.",
       "restart": "Restart session",
       "restarting": "Restarting…",
-      "restartConfirm": "Start a fresh conversation with Tainá? She'll forget this chat's history — your recorded observations are not affected.",
-      "restartFailed": "The restart didn't work — please try again.",
+      "restartConfirm": "Start a new conversation with Tainá? This clears the current chat. Recorded observations stay intact.",
+      "restartFailed": "Could not restart the conversation. Try again.",
       "creditsTitle": "Credit usage",
       "creditsSummary": "{used} used · {left} left",
       "resetAgent": "Reset my agent",
       "resetting": "Resetting…",
-      "resetConfirm": "Reset your Tainá agent? This disconnects your bot, deletes its chat history and your profile here, and revokes its key. Your recorded observations are not affected. You can set Tainá up again anytime.",
-      "resetFailed": "The reset didn’t work — please try again.",
+      "resetConfirm": "Reset your Tainá agent? This disconnects the bot, clears its chat and profile, and revokes its key. Recorded observations stay intact. You can set it up again.",
+      "resetFailed": "Could not reset the agent. Try again.",
       "profileTitle": "Your profile",
       "profileDescription": "A short Markdown profile stored with your agent so Tainá knows who you are. It shapes how she talks with you and the connections she can suggest.",
       "profilePromptTitle": "Prepare your profile",
-      "profilePromptIntro": "Copy this prompt into ChatGPT or Claude to draft a USER.md profile, then send the Markdown it returns to your agent on Telegram — or paste it below.",
+      "profilePromptIntro": "Copy this prompt into ChatGPT or Claude to draft a USER.md profile. Send the returned Markdown to your agent on Telegram, or paste it below.",
       "profilePromptBody": "Create a two-page, non-sensitive connection profile that helps people or agents find good reasons to talk with me, collaborate, trade notes, invite me into something, or introduce me to someone unexpected.\n\nDon’t make it a resume, biography, personality type, or definitive account. Make it warm, specific, lightly imaginative, and useful for serendipity.\n\nDraw out my recurring curiosities, live questions, tastes, projects, values-in-practice, conversation surfaces, possible offers/asks, and the kinds of people, scenes, collaborations, or opportunities I might resonate with. Include work, but don’t make work the whole frame.\n\nStay grounded: distinguish evidence from hunches, and phrase uncertain things as possibilities or questions. Don’t infer sensitive or private facts. Include what not to assume, and where more context would help.",
       "profileLabel": "Your profile for USER.md",
       "profilePlaceholder": "Paste the Markdown profile here. Leave out secrets and anything you do not want stored with your agent.",
       "profileCounter": "This becomes USER.md in your agent’s workspace. {count}/{max} characters.",
       "profileSave": "Save profile",
       "profileSaving": "Saving…",
-      "profileSaved": "Saved — Tainá will use it from her next reply.",
+      "profileSaved": "Saved. Tainá will use it in the next reply.",
       "profileSaveFailed": "We couldn’t save your profile. Please try again."
     }
   },
   "adminEndorsers": {
     "title": "Endorsers",
     "description": "Organizations whose badges we listen to. Their endorsements show up across the app as “Trusted by” and surface the projects they back.",
-    "inputLabel": "Organization handle or account id",
-    "inputPlaceholder": "handle.certified.one or did:plc:…",
+    "inputLabel": "Organization username",
+    "inputPlaceholder": "organization.example.com",
     "addButton": "Add endorser",
     "addError": "Could not add the endorser.",
     "removeError": "Could not remove the endorser.",
     "removeLabel": "Remove {name}",
     "builtinChip": "Built-in",
-    "propagationHint": "New endorsers take a few minutes to appear across the app."
+    "propagationHint": "New endorsers take a few minutes to appear across the app.",
+    "confirmTitle": "Remove endorser?",
+    "confirmDescription": "Badges from {name} will no longer be used as endorsements.",
+    "cancel": "Cancel"
   },
   "adminAwardEndorsements": {
     "title": "Award endorsements",
-    "description": "Endorse other organizations on GainForest’s behalf — the same endorsements Ma Earth issues, so partner platforms see them too. Endorsed organizations show “Trusted by GainForest” across the app.",
+    "description": "Manage organizations endorsed by GainForest.",
     "notAllowed": "Awarding endorsements requires an admin of the GainForest organization. Ask a GainForest owner to add you as an admin.",
     "noBadges": "There is no endorsement badge yet. Create a badge with the “Endorsement” type first.",
     "manageBadges": "Manage badges",
     "badgeLabel": "Endorsement badge",
-    "inputLabel": "Organization handle or account id",
-    "inputPlaceholder": "handle.certified.one or did:plc:…",
+    "inputLabel": "Organization username",
+    "inputPlaceholder": "organization.example.com",
     "noteLabel": "Note (optional)",
     "notePlaceholder": "Add a note about this endorsement (optional)",
     "awardButton": "Award endorsement",
     "awardError": "Could not award the endorsement.",
     "removeError": "Could not remove the endorsement.",
     "removeLabel": "Remove endorsement for {name}",
-    "emailNotSupported": "Enter an organization handle or account id — endorsements can’t be sent to an email address.",
+    "emailNotSupported": "Enter an organization username. Email addresses are not supported.",
     "alreadyEndorsed": "This organization already has this endorsement.",
     "empty": "No endorsements have been awarded yet.",
     "unnamed": "Unnamed organization",
-    "propagationHint": "New endorsements take a few minutes to appear across the app."
+    "propagationHint": "New endorsements take a few minutes to appear across the app.",
+    "confirmTitle": "Remove endorsement?",
+    "confirmDescription": "GainForest’s endorsement of {name} will be removed.",
+    "cancel": "Cancel"
   },
   "dataJobs": {
     "meta": {
@@ -1455,11 +1804,10 @@
       "description": "Send large batches of field photos and survey exports to the GainForest team for review and publishing."
     },
     "hero": {
-      "kicker": "For field partners",
       "title": "Submit your field data in one big batch",
-      "description": "Pack your photos and survey exports (for example from KoboToolbox) into a single zip file and send it to us. Our team reviews every batch and publishes the observations to your account for you.",
+      "description": "Zip your photos and survey exports. We’ll review the batch and publish approved observations to your account.",
       "step1Title": "Pack everything into one zip",
-      "step1Description": "Photos, spreadsheets and survey exports — the format doesn't need to be perfect.",
+      "step1Description": "Photos, spreadsheets and survey exports: the format doesn't need to be perfect.",
       "step2Title": "Upload the batch",
       "step2Description": "Files up to 10GB upload straight from your browser. Keep the page open until it finishes.",
       "step3Title": "We review and publish for you",
@@ -1479,7 +1827,7 @@
       "projectLabel": "Project or site",
       "projectPlaceholder": "e.g. Mangrove restoration, north site",
       "notesLabel": "Notes for the review team",
-      "notesPlaceholder": "Anything that helps us read your data — column meanings, dates, species lists…",
+      "notesPlaceholder": "Anything that helps us read your data: column meanings, dates, species lists…",
       "consentLabel": "Allow the GainForest team to review this data and publish it to my account on my behalf.",
       "consentHint": "You can withdraw this permission at any time in Settings.",
       "consentGranted": "You've allowed the GainForest team to publish reviewed data to your account.",
@@ -1493,7 +1841,7 @@
     },
     "errors": {
       "zipOnly": "Please choose a single .zip file.",
-      "tooLarge": "That file is too large — the limit is {max}.",
+      "tooLarge": "That file is too large: the limit is {max}.",
       "uploadFailed": "The upload didn't complete. Check your connection and try again."
     },
     "done": {
@@ -1501,7 +1849,7 @@
     },
     "jobs": {
       "title": "Your batches",
-      "empty": "No batches yet — your submissions will show up here.",
+      "empty": "No batches yet: your submissions will show up here.",
       "submitted": "Submitted {when}",
       "publishedCount": "{count} observations published",
       "cancel": "Remove"
@@ -1516,7 +1864,7 @@
   },
   "adminDataJobs": {
     "title": "Data batches",
-    "description": "Large archives submitted by field partners — review each batch remotely, then publish the observations to the submitter's account with their permission.",
+    "description": "Review submitted archives and publish approved observations with the submitter’s permission.",
     "empty": "No batches have been submitted yet.",
     "unavailable": "Batch storage is not configured or unreachable right now, so the list can't be loaded.",
     "unnamed": "Unnamed account",
@@ -1535,7 +1883,7 @@
     "download": "Download link",
     "publishedCountLabel": "Observations published",
     "reviewNoteLabel": "Note to the submitter",
-    "reviewNotePlaceholder": "Shown on their submissions page — plain language.",
+    "reviewNotePlaceholder": "Plain-language note shown on the submissions page.",
     "saveNote": "Save note",
     "saved": "Saved",
     "saveFailed": "Couldn't save. Try again.",
@@ -1551,7 +1899,7 @@
       "description": "Set the clock, configure recording schedules and update firmware on your AudioMoth acoustic recorder, straight from the browser."
     },
     "title": "AudioMoth",
-    "subtitle": "Plug an AudioMoth into your computer with a USB cable and switch it to USB/OFF. You can set its clock, change its recording settings and update its firmware right here — no extra apps needed.",
+    "subtitle": "Connect an AudioMoth in USB/OFF mode to set its clock, recording schedule, or firmware.",
     "unsupportedBrowser": "This browser can't talk to USB devices. Please use a recent version of Chrome or Edge on a computer.",
     "tabs": {
       "device": "Clock & device",
@@ -1606,7 +1954,7 @@
       "periodEndLabel": "Period end",
       "removePeriod": "Remove",
       "addPeriod": "Add period",
-      "noPeriodsHint": "No recording periods — the device will not record.",
+      "noPeriodsHint": "No recording periods: the device will not record.",
       "firstRecordingDateLabel": "First recording date (optional)",
       "lastRecordingDateLabel": "Last recording date (optional)",
       "filterTitle": "Frequency filter",
@@ -1669,7 +2017,7 @@
       "serialPickPrompt": "The AudioMoth has switched to update mode and will reappear as a serial device. Press the button and pick it from the list.",
       "serialPickButton": "Choose device & continue",
       "serialUnsupported": "This browser can't finish the update over serial. Please use Chrome or Edge on a computer.",
-      "flashSuccess": "Firmware updated successfully (check code {crc}). The device is restarting — it may take a few seconds to reappear.",
+      "flashSuccess": "Firmware updated successfully (check code {crc}). The device is restarting: it may take a few seconds to reappear.",
       "phasePreparing": "Preparing…",
       "phaseTransferring": "Transferring firmware…",
       "phaseVerifying": "Verifying…",
@@ -1677,7 +2025,7 @@
       "phaseRestarting": "Restarting device…"
     },
     "autoSetup": {
-      "subtitle": "Sit back — updating firmware, setting the clock, applying field-ready recording settings and saving the device to your equipment list.",
+      "subtitle": "We’ll update firmware, set the clock, apply field settings, and save the device when you’re signed in.",
       "runningTitle": "Setting up your AudioMoth…",
       "doneTitle": "Your AudioMoth is ready",
       "errorTitle": "Setup didn't finish",
@@ -1691,7 +2039,7 @@
       "firmwareUpToDate": "Already on the newest firmware ({version})",
       "firmwareDownloading": "Downloading firmware {version}…",
       "firmwareUpdated": "Updated to firmware {version}",
-      "firmwareManualSkip": "This device needs a manual update — skipped. You can update it from the Firmware tab.",
+      "firmwareManualSkip": "This device needs a manual update: skipped. You can update it from the Firmware tab.",
       "firmwareFailed": "The firmware update didn't finish. Detach and reattach your AudioMoth, then try again.",
       "clockSetting": "Setting the clock from this computer…",
       "clockDone": "Clock synchronized with this computer",
@@ -1702,7 +2050,7 @@
       "equipmentChecking": "Checking your equipment list…",
       "equipmentExists": "Already in your equipment list as {name}",
       "equipmentSaved": "Saved to your equipment list as {name}",
-      "equipmentSignInSkip": "Sign in to save this device to your equipment list — skipped.",
+      "equipmentSignInSkip": "Sign in to save this device to your equipment list: skipped.",
       "equipmentFailed": "Couldn't save the device to your equipment list.",
       "notesDeviceId": "Device ID: {id}",
       "notesFirmware": "Firmware: {firmware}",
@@ -1746,13 +2094,13 @@
       "equipmentLabel": "AudioMoth (optional)",
       "equipmentNone": "No linked unit",
       "equipmentEmpty": "No AudioMoths are registered in your equipment or your organizations' yet.",
-      "equipmentHint": "Pick the registered AudioMoth you are deploying — including ones registered by your organizations — to link it to this event.",
+      "equipmentHint": "Choose the registered AudioMoth for this deployment. Devices registered by your organizations are also available.",
       "viewSelectedEquipment": "View this unit's equipment page",
       "invalidId": "The deployment ID must be 16 characters (0–9, a–f).",
       "invalidCoordinates": "Enter valid coordinates first.",
       "createFailed": "The deployment could not be saved. Please try again.",
       "playFailed": "The chime could not be played. Please try again.",
-      "playing": "Playing the chime — hold the speaker against the AudioMoth…",
+      "playing": "Playing the chime: hold the speaker against the AudioMoth…",
       "chimeHint": "Set the AudioMoth's switch to CUSTOM and hold this device's speaker against it while the chime plays.",
       "playAndSave": "Play chime & save",
       "doneTitle": "Deployment saved",
@@ -1783,7 +2131,7 @@
       "signInTitle": "Sign in to upload recordings",
       "signInBody": "Your recordings are saved to your account. Sign in to upload them.",
       "dropTitle": "Choose your SD card or drop it here",
-      "dropBody": "Pick the SD card drive (or any folder of AudioMoth recordings). Files are read on this device first — nothing is uploaded until you confirm.",
+      "dropBody": "Pick the SD card drive (or any folder of AudioMoth recordings). Files are read on this device first: nothing is uploaded until you confirm.",
       "chooseFolder": "Choose SD card or folder",
       "chooseFiles": "Choose files",
       "scanning": "Reading recordings…",
@@ -1819,7 +2167,7 @@
       "uploadFailed": "The upload could not be completed. Please try again.",
       "deploymentFallback": "Created automatically when uploading SD card recordings.",
       "discovering": "Looking for recordings… {count} files found",
-      "readFailed": "The SD card could not be read. Remove and re-insert it, then try again — or drag the folder onto this page instead."
+      "readFailed": "The SD card could not be read. Reinsert it and try again, or drag the folder onto this page."
     },
     "recordings": {
       "title": "Recordings",
@@ -1836,7 +2184,7 @@
       "viewDeployment": "View deployment",
       "accountEmptyTitle": "No recordings yet",
       "accountEmptyBody": "Recordings uploaded from an AudioMoth SD card will show up here, grouped by deployment.",
-      "explorerHint": "Recorders capture around the clock — pick a day on the calendar, then tap an hour bar to narrow down.",
+      "explorerHint": "Recorders capture around the clock: pick a day on the calendar, then tap an hour bar to narrow down.",
       "daySpan": "{count, plural, one {# day} other {# days}}",
       "prevMonth": "Previous month",
       "nextMonth": "Next month",
@@ -1932,14 +2280,13 @@
       "description": "Import AudioMoth recordings and build a 24-hour soundscape clock from their frequency content."
     },
     "hero": {
-      "eyebrow": "Acoustic monitoring",
       "title": "Turn AudioMoth recordings into a soundscape clock",
       "description": "Drop a day of AudioMoth WAV files below. Each recording is scanned for sound energy in five frequency bins, and the loudest moments are drawn around a 24-hour clock.",
-      "timeNote": "Recording times are read from the AudioMoth file names (for example 20240404_153000.WAV). AudioMoth devices usually name files in UTC unless configured otherwise. Your recordings never leave this device — everything is analyzed in your browser."
+      "timeNote": "Recording times are read from the AudioMoth file names (for example 20240404_153000.WAV). AudioMoth devices usually name files in UTC unless configured otherwise. Your recordings never leave this device: everything is analyzed in your browser."
     },
     "import": {
       "dropTitle": "Drop AudioMoth WAV files here",
-      "dropHint": "You can select many files at once — a whole day of recordings works best.",
+      "dropHint": "You can select many files at once: a whole day of recordings works best.",
       "browse": "Choose files",
       "fileCount": "{count, plural, one {# recording} other {# recordings}}",
       "clearAll": "Clear all",
@@ -1949,7 +2296,7 @@
       "statusError": "Couldn't read this file",
       "tooShort": "Recording is too short to analyze",
       "onlyWav": "Only WAV files are supported.",
-      "timeFromModified": "No timestamp in the file name — using the file's modified time instead"
+      "timeFromModified": "No timestamp in the file name: using the file's modified time instead"
     },
     "chart": {
       "title": "Power-Minus-Noise — {date}",
@@ -1960,9 +2307,10 @@
       "empty": "Analyzed recordings will appear here as a 24-hour soundscape clock.",
       "emptyHint": "Import AudioMoth recordings above to begin.",
       "downloadPng": "Download image",
-      "hoverHint": "Move your cursor over the clock to inspect values.",
+      "hoverHint": "Select the chart, then use the arrow keys or tap to inspect each time.",
       "datesTitle": "Days",
-      "allDatesChip": "All days"
+      "allDatesChip": "All days",
+      "exportFailed": "The chart could not be downloaded. Please try again."
     }
   },
   "adminOnly": {
@@ -1995,7 +2343,7 @@
     "removeSigner": "Remove passkey",
     "addPasskey": "Add another passkey",
     "signerLabelPlaceholder": "Name this passkey (e.g. My phone)",
-    "signersHint": "Add a passkey from another device or a person you trust — any of them can approve payments.",
+    "signersHint": "Add a passkey from another device or a person you trust: any of them can approve payments.",
     "deleteButton": "Remove wallet",
     "deleteConfirmTitle": "Remove this wallet?",
     "deleteConfirmBody": "This can't be undone. If you create a new wallet later with a new passkey, it will have a different address.",
@@ -2012,7 +2360,7 @@
     "sendToken": "Currency",
     "sendRecipient": "Recipient address",
     "sendRecipientPlaceholder": "Recipient address (0x…)",
-    "sendRecipientInvalid": "Enter a valid wallet address — it starts with 0x followed by 40 characters.",
+    "sendRecipientInvalid": "Enter a wallet address that starts with 0x and has 40 characters after it.",
     "sendAmount": "Amount",
     "sendAmountInvalid": "Enter a valid amount.",
     "sendAmountTooHigh": "That is more than this wallet holds.",
@@ -2020,7 +2368,7 @@
     "sendButton": "Send with passkey",
     "sendPreparing": "Preparing…",
     "sendAwaitingPasskey": "Waiting for your passkey…",
-    "sendSubmitting": "Sending — this can take a minute…",
+    "sendSubmitting": "Sending. This may take a minute…",
     "sendSuccess": "Sent! The transfer is confirmed.",
     "sendViewTx": "View the transaction",
     "sendGasNote": "GainForest covers the network fee.",
@@ -2032,27 +2380,27 @@
     "sendErrorGeneric": "The transfer could not be completed. Please try again.",
     "thresholdHeading": "Approvals required",
     "thresholdOption": "{count} of {total, plural, one {# passkey} other {# passkeys}}",
-    "thresholdHint": "How many passkeys must approve each transfer. Requiring more than one is safer — a single lost or stolen passkey can't move funds on its own. Changing this gives the wallet a new address, so it's only possible before the wallet holds funds.",
+    "thresholdHint": "Choose how many passkeys must approve each transfer. Requiring more than one means a single lost or stolen key cannot move funds. Before the wallet holds funds, changing this also changes its address.",
     "thresholdUpdateError": "Could not change the approval requirement. Please try again.",
     "thresholdLockedFunds": "The wallet already holds funds, so the approval requirement can no longer be changed.",
     "thresholdSingleWarning": "Right now a single passkey can move funds. Consider requiring more approvals.",
     "sendApprovalsNeeded": "This wallet needs {count} approvals with different passkeys. You give the first one; the rest can be given here or from another device.",
-    "sendApprovalOf": "Approval {current} of {total} — waiting for a passkey…",
+    "sendApprovalOf": "Approval {current} of {total}. Waiting for a passkey…",
     "sendDuplicatePasskey": "Each approval needs a different passkey.",
     "pendingHeading": "Transfer waiting for approvals",
     "pendingProgress": "{current} of {total} approvals given",
-    "pendingRemoteHint": "Other passkey holders can approve from their own device — the transfer stays here until it has enough approvals. The last approval sends it.",
+    "pendingRemoteHint": "Other passkey holders can approve on their devices. The final approval sends the transfer.",
     "pendingApprove": "Approve with passkey",
     "pendingApproveAndSend": "Approve & send",
     "pendingCancel": "Cancel transfer",
-    "pendingInvalid": "This waiting transfer is no longer valid — the wallet changed since it was started. Cancel it to start a new one.",
+    "pendingInvalid": "This pending transfer is no longer valid because the wallet changed. Cancel it and start again.",
     "pendingCancelForbidden": "Only the person who started this transfer or a wallet manager can cancel it.",
     "sendStartButton": "Start transfer with passkey",
-    "sendErrorExpired": "This transfer is no longer valid — the wallet or network fees changed. Please start it again.",
+    "sendErrorExpired": "The wallet or network fees changed. Start the transfer again.",
     "sendErrorPendingExists": "There is already a transfer waiting for approvals. Finish or cancel it first.",
     "sendErrorApprovalInvalid": "This approval could not be verified. Please try again.",
-    "onchainManageHint": "This wallet is active on the blockchain, so passkey changes are recorded on-chain and need the usual approvals. GainForest covers the network fee.",
-    "thresholdOnchainHint": "How many passkeys must approve each transfer. Changing this is recorded on the blockchain — the wallet address stays the same.",
+    "onchainManageHint": "These blockchain changes require the usual approvals. GainForest covers the network fee.",
+    "thresholdOnchainHint": "Choose how many passkeys must approve each transfer. This blockchain change keeps the same wallet address.",
     "manageForbidden": "Only the organization owner or an admin can make this change."
   },
   "accountSupport": {
@@ -2060,7 +2408,7 @@
     "buttonAria": "Support {name} directly",
     "modalTitle": "Support {name}",
     "modalDescription": "Choose an amount to give directly to {name}.",
-    "directNote": "100% goes directly to {name} — no platform fee, and the network fee is covered for you.",
+    "directNote": "100% goes directly to {name}: no platform fee, and the network fee is covered for you.",
     "cartLabel": "Direct account support"
   },
   "testRecord": {
@@ -2086,12 +2434,70 @@
       "organization": "Organization update",
       "donation": "Donation",
       "record": "Entry"
-    }
+    },
+    "confirmTitle": "Make this item visible?",
+    "confirmDescription": "This item from {name} will return to public pages.",
+    "cancel": "Cancel"
   },
   "devices": {
     "metadata": {
       "title": "Tainá devices",
       "description": "Field updates from GainForest devices running Tainá, including whether each device is active and ready."
+    },
+    "hero": {
+      "imageAlt": "Misty regenerative landscape with field equipment",
+      "title": "Tainá",
+      "accent": "field devices",
+      "lede": "See which field devices are active and ready."
+    },
+    "summary": {
+      "online": "{healthy} of {total} online",
+      "updated": "Updated {time}"
+    },
+    "error": {
+      "title": "Could not load field updates",
+      "body": "The devices may still be working. Try again later."
+    },
+    "empty": {
+      "title": "No field devices yet",
+      "body": "A device will appear after it sends its first update."
+    },
+    "loadingAria": "Loading field updates",
+    "status": {
+      "up": "Online",
+      "down": "Offline",
+      "grace": "Waiting",
+      "new": "New",
+      "paused": "Paused",
+      "started": "Starting"
+    },
+    "card": {
+      "lastReported": "Last reported",
+      "never": "Never",
+      "health": "Device health",
+      "temperature": "Temperature",
+      "memory": "Memory",
+      "storage": "Storage",
+      "processor": "Processor",
+      "uptime": "Uptime",
+      "slow": "Running slowly and may need attention"
+    },
+    "activity": {
+      "title": "Tainá activity",
+      "saved": "Saved observations",
+      "oldest": "Oldest {time}",
+      "withPhotos": "With photos",
+      "allowedUsers": "Allowed users"
+    },
+    "duration": {
+      "daysHours": "{days}d {hours}h",
+      "hoursMinutes": "{hours}h {minutes}m",
+      "minutes": "{minutes}m"
+    },
+    "notConfigured": {
+      "title": "Field updates are not connected",
+      "body": "Field updates are available in the separate Tainá monitor.",
+      "action": "Open Tainá monitor"
     }
   },
   "bluesky": {
@@ -2122,13 +2528,12 @@
   "epds": {
     "metaTitle": "How ePDS works",
     "metaDescription": "An interactive tour of ePDS, the extended Personal Data Server that lets anyone join the AT Protocol network with just their email.",
-    "kicker": "extended Personal Data Server",
     "title": "How ePDS works",
-    "lead": "GainForest runs on the AT Protocol, the open network behind Bluesky. Joining that network normally takes a password and some technical setup. ePDS removes that wall: you type your email, you get a code, and you are in. This page shows how it works, step by step.",
+    "lead": "GainForest uses the AT Protocol network. ePDS adds email-code and social login to a standard Personal Data Server, and creates an account on a user's first visit. The diagrams below show each step.",
     "whatIs": {
       "heading": "What is a PDS, and what does the e add?",
       "p1": "On the AT Protocol, everyone keeps their data on a Personal Data Server, or PDS. Think of it as a personal home for your posts, observations, and projects. You own what is inside, and you can move to another server at any time without losing anything.",
-      "p2": "ePDS is a normal PDS with one extension: a friendly front door. Instead of asking for a password, it signs you in with a one-time email code or a social account, and it creates an account for you on your first visit. Behind that door everything stays standard AT Protocol, so every app on the network can talk to it."
+      "p2": "ePDS is a standard PDS with email-code and social login. It can create an account on the first visit. Its AT Protocol interface remains standard, so other network apps can use it."
     },
     "compare": {
       "heading": "Two front doors",
@@ -2172,11 +2577,11 @@
           "text": "Your app quietly asks the PDS to start a login. This is a standard AT Protocol request, the same one any Bluesky app would make."
         },
         "s3": {
-          "title": "The PDS opens its front door",
-          "text": "Here is the ePDS trick. Instead of showing a password form, the PDS sends your browser to its friendly login service."
+          "title": "The PDS redirects to login",
+          "text": "The PDS redirects the browser to the ePDS login service instead of showing a password form."
         },
         "s4": {
-          "title": "A code flies to your inbox",
+          "title": "The service emails a code",
           "text": "The login service creates a one-time code and emails it to you. The code works once and expires after a few minutes."
         },
         "s5": {
@@ -2188,8 +2593,8 @@
           "text": "On your first visit, ePDS creates an account for you and asks you to pick a handle, your public name on the network."
         },
         "s7": {
-          "title": "The signed handshake",
-          "text": "The login service tells the PDS that you are verified. The message carries a cryptographic signature, so nobody can fake it."
+          "title": "The service signs the result",
+          "text": "The login service sends the verified result to the PDS with a cryptographic signature. The PDS rejects unsigned or invalid results."
         },
         "s8": {
           "title": "Back to your app",
@@ -2247,17 +2652,16 @@
   "epdsRouter": {
     "metaTitle": "How the ePDS router works",
     "metaDescription": "An interactive guide to the ePDS router: how an app finds the right account for an email login across many servers. Hosts share only one-way fingerprints, never credentials or addresses.",
-    "kicker": "email-to-account discovery",
     "title": "One email, many servers",
-    "lead": "ePDS lets you sign in with just your email. When a community runs several servers, an app first needs to answer a small question: which accounts exist for this email? The router answers it in a single call. Nobody hands over an address or a password.",
+    "lead": "When a community runs several ePDS servers, an app must find which accounts match an email before starting login. The router returns the matching permanent account identities in one authenticated request. It does not store email addresses or passwords.",
     "facts": {
       "routing": {
         "title": "One lookup, the right account",
         "text": "An app asks once and learns which accounts exist for the email. Each answer is an identity the network can always locate, even after a server move."
       },
       "privacy": {
-        "title": "Emails are never stored",
-        "text": "Addresses are scrambled on their own server before anything leaves it. The router only ever sees fingerprints, and it scrambles them again before storing."
+        "title": "Email addresses are not stored",
+        "text": "Each host converts its email addresses to one-way fingerprints before sending them. The router transforms those fingerprints again before storage."
       },
       "zerochange": {
         "title": "Hosts stay in control",
@@ -2267,7 +2671,7 @@
     "problem": {
       "heading": "Why discovery is needed",
       "p1": "An app with email sign-in has to send the login to one specific server. That server emails the code and holds the account. With a single server the answer is fixed. With several servers the app needs a directory. Email addresses are exactly the kind of data you do not want to copy into one big list.",
-      "p2": "The router solves this with a small trick: it works only with fingerprints. Each server scrambles its addresses one-way at home and shares nothing else. Each lookup scrambles the incoming email the same way and compares fingerprints. Same answer, no address book, and nobody hands anyone their keys."
+      "p2": "Each host creates one-way fingerprints from its email addresses and sends only those fingerprints to the router. A lookup applies the same process and compares the results. The router does not keep an address book or receive host credentials."
     },
     "demo": {
       "heading": "Try a lookup",
@@ -2321,7 +2725,7 @@
     },
     "sync": {
       "heading": "How the router stays current",
-      "intro": "Nothing to hand over: each host pushes its own snapshot, on a timer it chooses.",
+      "intro": "Each host sends its own complete snapshot on a schedule it controls. No host credential is sent to the router.",
       "play": "Play",
       "pause": "Pause",
       "back": "Back",
@@ -2392,13 +2796,12 @@
   "cgs": {
     "metaTitle": "How group accounts work",
     "metaDescription": "An interactive tour of the Certified Group Service, the guard that lets a whole team share one AT Protocol account with roles, clear rules, and a full audit trail.",
-    "kicker": "Certified Group Service",
     "title": "How group accounts work",
-    "lead": "On the AT Protocol, an account normally belongs to exactly one person. But forests are mapped by teams. The Certified Group Service, CGS for short, lets a whole team share one account safely, with roles, clear rules, and a memory of everything that happens. This page shows how it works, step by step.",
+    "lead": "AT Protocol accounts normally belong to one person. The Certified Group Service (CGS) lets a team share one account with member roles, permission checks, and an audit log.",
     "whatIs": {
       "heading": "What is a group account?",
       "p1": "Every organization on GainForest lives in a normal AT Protocol account. A normal account has one password and one owner. That is fine for a person, but a team needs more: many people writing to the same place, without passing the account password around.",
-      "p2": "CGS is a small guard service that stands in front of the group's account. It keeps the account credentials in a sealed box, holds a member list with roles, and checks every request against the rules before letting it through. Team members never see the password. To the rest of the network the group looks like one ordinary account, so any app can read its records as usual."
+      "p2": "CGS stores the group account credential, checks each member's role, and records every request before writing to the group's PDS. Members never receive the account password. Other network apps still read the group as a standard AT Protocol account."
     },
     "repo": {
       "heading": "One account, many hands",
@@ -2560,7 +2963,7 @@
       },
       "vault": {
         "title": "Credentials stay sealed",
-        "text": "The service holds only an app password — a spare key, not the account's main password. It is stored encrypted, and whoever keeps the real account credentials can revoke the service's access at any time. The reverse is impossible."
+        "text": "The service holds only an encrypted app password. The holder of the main account credentials can revoke it at any time; the service cannot revoke the main credentials."
       },
       "log": {
         "title": "Nothing happens unseen",
@@ -2582,9 +2985,8 @@
   "atproto": {
     "metaTitle": "How the AT Protocol works",
     "metaDescription": "A friendly interactive tour of the AT Protocol, the open network GainForest is built on. See how identities, records, and apps fit together.",
-    "kicker": "AT Protocol",
     "title": "How the AT Protocol works",
-    "lead": "GainForest does not keep your data in a private database. Everything lives on the AT Protocol, an open network where people own their data and many apps share it. This page explains the big ideas in plain words, with small toys you can play with.",
+    "lead": "GainForest stores records on the AT Protocol, an open network where people control their data and apps can share it. The diagrams below show how identities, records, and apps fit together.",
     "whatIs": {
       "heading": "What is the AT Protocol?",
       "p1": "The AT Protocol, atproto for short, is a recipe for social apps where data belongs to people instead of platforms. Every person and every organization has an account, and every account has a data server that stores its records. A post, a like, a follow, a biodiversity observation: each one is a small signed record.",
@@ -2651,7 +3053,7 @@
     },
     "move": {
       "heading": "You can always move out",
-      "intro": "Your name and your data are not glued to any company. If your host gets slow, greedy, or disappears, you pack up and go. Try it.",
+      "intro": "Your identity and records are not tied to one provider. If a host becomes unreliable or shuts down, you can move them to another host.",
       "hostA": "The old host",
       "hostB": "The new host",
       "emptyHost": "empty",
@@ -2749,17 +3151,15 @@
   "walletExplainer": {
     "metaTitle": "Anatomy of a donation wallet: an interactive essay",
     "metaDescription": "Grow a real passkey-curve key in your browser, derive a real vault address with the factory's own math, and play through the life of a donation. An interactive essay on GainForest's donation wallets.",
-    "kicker": "An interactive essay",
     "title": "Anatomy of a donation wallet",
-    "standfirst": "Every organization on GainForest can hold donations in a wallet with no password, no seed phrase, and no company keeping keys. This page does not just describe how that works. It lets you run the machinery yourself, right here in your browser.",
+    "standfirst": "Use the experiments below to create a P-256 key, derive a deterministic vault address, and verify how a GainForest donation wallet works.",
     "intro": {
       "p1": "When a supporter funds a mangrove restoration or a bird survey, the money lands in a small vault on Ethereum. The vault has no operator and no support desk. It obeys exactly one thing: cryptographic signatures from the phones and laptops of the people who run the project.",
-      "p2": "Three ideas make that possible. A key that grows inside your device and never leaves it. An address that can be computed before the wallet exists. And a contract that checks a fingerprint's signature with pure math. Let's build each one, live."
+      "p2": "The wallet uses three mechanisms: a device key that cannot be exported, an address derived before deployment, and a contract that verifies P-256 signatures. The experiments below demonstrate each mechanism."
     },
     "part1": {
-      "label": "Live experiment",
       "heading": "A key grows in your phone",
-      "p1": "Behind every Face ID prompt sits an old and beautiful piece of cryptography: an elliptic-curve key pair on a curve called P-256. Your device invents an enormous random number, locks it inside a secure chip, and hands out only the matching public point: two coordinates, x and y.",
+      "p1": "Passkeys use an elliptic-curve key pair on P-256. The device generates a random private value, keeps it in secure hardware, and exposes only the public point's x and y coordinates.",
       "p2": "Your browser can do the same thing this second. Press the button below and it will grow a fresh key on that exact curve. The private half is created under a strict rule: it may sign, and it may never be exported. Not even this page can read it.",
       "p3": "Those two coordinates are all a wallet ever learns about you. The contract stores them as a pair of 32-byte slots and, when money should move, demands a signature that only the locked-away half can produce. You just watched your browser pass that exact check."
     },
@@ -2781,9 +3181,8 @@
       "privacyNote": "Nothing was saved and nothing was sent anywhere. Reload the page and this key is gone forever."
     },
     "part2": {
-      "label": "Live experiment",
       "heading": "An address made of arithmetic",
-      "p1": "Here is the strangest property of the whole system: the wallet's address exists before the wallet does. No transaction, no deployment, no registration anywhere. The address is simply the answer to a calculation, and anyone who knows the ingredients gets the same answer.",
+      "p1": "A wallet address can be calculated before the wallet contract is deployed. The same inputs always produce the same address.",
       "p2": "The recipe has four ingredients: an owner slot that is permanently empty, the list of signer keys, the approval threshold, and a salt hashed out of the organization's identity. The factory contract mixes them with keccak256 and the CREATE2 rule. Try it below. Type a name and watch every digit of the address react.",
       "p3": "This is why nobody has to trust GainForest about which address belongs to which organization. The organization publishes its ingredients as a public record in its own account. Doubt a label? Rerun the arithmetic, as you just did, and compare."
     },
@@ -2804,9 +3203,8 @@
       "footnote": "The factory address and proxy code hash above are the real Ethereum mainnet values, and this derivation matches the factory's own getAddress function. Every hash on this bench is computed by your browser."
     },
     "part3": {
-      "label": "Reading the source",
       "heading": "The contract, annotated",
-      "p1": "The vault is a Splits smart account: open source, audited, and built on designs by Coinbase and Daimo. You do not have to take this essay's word for anything. Here are the three passages that carry the weight, each with a note on what it means.",
+      "p1": "The vault is a Splits smart account based on open-source, audited designs by Coinbase and Daimo. The excerpts below show the signer, salt, and P-256 verification logic.",
       "p2": "One more property falls out of the design. The factory deploys with CREATE2, so the same ingredients produce the same address on every chain where the factory exists. An organization's address is portable across the whole EVM world."
     },
     "contract": {
@@ -2815,9 +3213,8 @@
       "webauthnNote": "How the chain checks a Face ID signature: it first tries a built-in verifier at address 0x100 and, where a chain lacks it, verifies the curve equation step by step in a library instead."
     },
     "part4": {
-      "label": "Playthrough",
       "heading": "The life of a donation",
-      "p1": "Put the pieces together and a curious sequence appears. A supporter can send money to the address on day one, while the address is still nothing except the answer to experiment 2. The chain does not mind. Balances belong to addresses, and this address is as real as any other.",
+      "p1": "A supporter can send funds to the derived address before the vault contract is deployed. The balance remains at that address until the first payout deploys the contract.",
       "p2": "The final entry closes the loop. Before the deployment, the signer list may still change, and the record simply points to a freshly computed address. After it, the record freezes and the vault takes over: adding a device becomes an on-chain action, approved by a key that is already on the list."
     },
     "ledger": {
@@ -2862,10 +3259,53 @@
     "epilogue": {
       "heading": "Check the label yourself",
       "p1": "Every claim on this page is checkable. The wallet recipe sits in the organization's own account as a public record. The factory sits at the same address on Ethereum. Fetch the record, run experiment 2 with its exact ingredients, and the address either matches or it does not. No signatures, no authority, and no trust in this website required.",
-      "p2": "The honest caveats: if every key on the list is lost, the money cannot move, so organizations should enroll a second device early. And until the first payout, changing the signer list changes the address, so the list should settle before donations are pointed at it.",
+      "p2": "If every enrolled key is lost, the funds cannot move, so organizations should enroll a second device early. Before the first payout, changing the signer list also changes the address; settle the list before directing donations to it.",
       "contractLink": "Read the smart-vault contracts on GitHub",
       "lexiconLink": "The wallet record's schema, and every other one",
       "atprotoLink": "How the AT Protocol stores the record"
+    }
+  },
+  "coreDashboard": {
+    "metadata": {
+      "title": "Platform overview",
+      "description": "Current totals for GainForest projects, organizations, and observations."
+    },
+    "hero": {
+      "imageAlt": "Forest landscape representing GainForest activity",
+      "title": "Platform",
+      "accent": "overview",
+      "lede": "Current totals for projects, organizations, and observations."
+    },
+    "observations": {
+      "total": "Nature sightings shared",
+      "withPhotos": "Sightings with photos",
+      "recent": "Sightings in the last 30 days",
+      "mapped": "Sightings with locations"
+    },
+    "sections": {
+      "stories": {
+        "title": "Project stories",
+        "description": "Published project stories and their evidence."
+      },
+      "organizations": {
+        "title": "Organizations",
+        "description": "Public profiles, places, and activity."
+      },
+      "observations": {
+        "title": "Observations",
+        "description": "Shared sightings, photos, and locations."
+      },
+      "projects": {
+        "title": "Projects",
+        "description": "Project collections and their published stories."
+      }
+    },
+    "loadError": "We could not load these numbers. Try again later."
+  },
+  "authComplete": {
+    "metadata": {
+      "title": "Completing sign in",
+      "description": "Choose how to continue in GainForest."
     }
   }
 }

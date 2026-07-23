@@ -48,7 +48,7 @@ export function AccountProjectsGrid({ projects }: { projects: ProjectRecord[] })
     return (
       <div className="flex flex-col items-center justify-center py-16 text-center">
         <FolderKanbanIcon className="mb-4 size-9 text-primary" aria-hidden />
-        <h2 className="font-instrument text-2xl italic text-foreground">{t("emptyEyebrow")}</h2>
+        <h2 className="font-instrument text-2xl italic text-foreground">{t("emptyTitle")}</h2>
         <p className="mt-2 max-w-sm text-sm leading-6 text-muted-foreground">{t("empty")}</p>
       </div>
     );

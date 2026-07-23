@@ -43,6 +43,7 @@ function buildErrorSummary(errors: { index: number; issues: { path: string; mess
 
 export default function PreviewStep({ uploadId, parsedData, mappings, koboMediaZipIndex, siteSelection, onBack, onNext }: Props) {
   const t = useTranslations("upload.trees.preview");
+  const validationT = useTranslations("upload.trees.validation");
   const [expandedRows, setExpandedRows] = useState<Set<number>>(new Set());
   const [errorSectionOpen, setErrorSectionOpen] = useState(false);
   const [siteBoundary, setSiteBoundary] = useState<SiteBoundaryGeoJson | null>(null);
@@ -72,11 +73,12 @@ export default function PreviewStep({ uploadId, parsedData, mappings, koboMediaZ
       })
       .catch((err) => {
         if (cancelled) return;
-        setBoundaryError(err instanceof Error ? err.message : "Failed to load boundary.");
+        console.error("Site boundary load failed", err);
+        setBoundaryError(t("boundaryCheckFailed"));
         setBoundaryLoading(false);
       });
     return () => { cancelled = true; };
-  }, [siteSelection]);
+  }, [siteSelection, t]);
 
   const activeSiteBoundary = siteSelection && siteBoundarySiteUri === siteSelection.uri ? siteBoundary : null;
 
@@ -85,6 +87,19 @@ export default function PreviewStep({ uploadId, parsedData, mappings, koboMediaZ
     const result = parseAndValidateRows(mapped, parsedData, mappings, {
       koboMediaZipIndex,
       siteBoundary: siteSelection && activeSiteBoundary ? { geoJson: activeSiteBoundary, siteRef: siteSelection.uri } : null,
+      messages: {
+        scientificNameRequired: validationT("scientificNameRequired"),
+        eventDateRequired: validationT("eventDateRequired"),
+        dateInvalid: validationT("dateInvalid"),
+        futureDate: validationT("futureDate"),
+        latitudeInvalid: validationT("latitudeInvalid"),
+        longitudeInvalid: validationT("longitudeInvalid"),
+        measurementPositive: validationT("measurementPositive"),
+        canopyRange: validationT("canopyRange"),
+        boundaryOutside: (distance) => validationT("boundaryOutside", { distance }),
+        invalidBoundary: validationT("invalidBoundary"),
+        unknownDistance: validationT("unknownDistance"),
+      },
     });
     const headerSet = new Set<string>();
     for (const row of mapped) {
@@ -94,7 +109,7 @@ export default function PreviewStep({ uploadId, parsedData, mappings, koboMediaZ
     }
     const anyPhotos = result.valid.some((r) => r.photos && r.photos.length > 0);
     return { validationResult: result, mappedHeaders: Array.from(headerSet), mappedRows: mapped, hasAnyPhotos: anyPhotos };
-  }, [koboMediaZipIndex, parsedData, mappings, activeSiteBoundary, siteSelection]);
+  }, [koboMediaZipIndex, parsedData, mappings, activeSiteBoundary, siteSelection, validationT]);
 
   const { valid, errors } = validationResult;
   const totalRows = parsedData.length;

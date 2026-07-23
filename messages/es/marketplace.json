@@ -6,8 +6,8 @@
     "to": "Hasta",
     "shown": "{count} mostrados",
     "dragHint": "Arrastra los controles para elegir un periodo",
-    "startAria": "Fecha de inicio — {date}",
-    "endAria": "Fecha de fin — {date}",
+    "startAria": "Fecha de inicio: {date}",
+    "endAria": "Fecha de fin: {date}",
     "unidentified": "Sin identificar",
     "finding": "Buscando ubicaciones en el mapa…",
     "mappedItems": "{count} elementos con ubicación en el mapa",
@@ -112,7 +112,7 @@
       "raised": "Recaudado: {amount}",
       "donations": "Donaciones",
       "acceptingDonations": "Acepta donaciones",
-      "acceptingDonationsRaised": "Acepta donaciones — {amount} recaudado hasta ahora"
+      "acceptingDonationsRaised": "Acepta donaciones: {amount} recaudado hasta ahora"
     }
   },
   "organizations": {
@@ -147,7 +147,8 @@
     },
     "error": {
       "title": "Algo salió mal",
-      "description": "No pudimos cargar las organizaciones. Prueba actualizar la página."
+      "description": "No pudimos cargar las organizaciones. Prueba actualizar la página.",
+      "retry": "Intentar de nuevo"
     },
     "view": {
       "cards": "Tarjetas",
@@ -281,7 +282,7 @@
       "eyebrow": "Reto BioBlitz Semanal",
       "titlePrefix": "Reto",
       "titleEmphasis": "BioBlitz",
-      "description": "Una carrera semanal y amistosa para registrar la naturaleza. Fotografía cualquier ser vivo —una planta, ave, insecto u hongo—, añádelo a GainForest y sube en la tabla. Nueva ronda y nuevos premios cada semana.",
+      "description": "Una carrera semanal amistosa para registrar la naturaleza. Fotografía cualquier ser vivo, añádelo a GainForest y sube en la clasificación.",
       "program": "Parte del programa Klarna AI for Climate Resilience, con GainForest."
     },
     "rsvp": {
@@ -291,11 +292,11 @@
       "registered": "Ya estás registrado",
       "registeredNote": "Contaremos tus aportes y te enviaremos el premio si ganas.",
       "error": "No se pudo registrar ahora. Inténtalo de nuevo.",
-      "postText": "¡Me uno al Desafío BioBlitz Semanal — {label}! Voy a salir a fotografiar la naturaleza por la biodiversidad. 🌿🔭 #BioBlitz",
-      "legalConsent": "Al registrarte, aceptas los <terms>Términos de BioBlitz</terms> y reconoces el <privacy>Aviso de privacidad</privacy>."
+      "postText": "¡Me uno al Desafío BioBlitz Semanal: {label}! Voy a salir a fotografiar la naturaleza por la biodiversidad. 🌿🔭 #BioBlitz",
+      "legalConsent": "Al registrarte, aceptas los <terms>Términos de BioBlitz</terms> y reconoces el <privacy>Aviso de privacidad</privacy>.",
+      "publicPostDisclosure": "Al registrarte, se publica una entrada pública de BioBlitz en tu cuenta."
     },
     "legal": {
-      "programLabel": "Desafío BioBlitz",
       "back": "Volver a BioBlitz",
       "links": {
         "terms": "Términos de BioBlitz",
@@ -518,7 +519,7 @@
         },
         "upload": {
           "title": "Sube tus fotos",
-          "blurb": "Añádelas en tu página Mis observaciones, o con Tainá, también en GainForest."
+          "blurb": "Añádelas desde Mis observaciones o envíaselas a Tainá."
         },
         "review": {
           "title": "Revisa el nombre de la especie",
@@ -527,9 +528,9 @@
       },
       "proof": {
         "title": "Tus datos hacen más que ganar premios",
-        "intro": "Cada observación que envías se guarda en tu cuenta, así que puedes usarla más adelante como prueba para tus propios proyectos.",
-        "uses": "Puedes rendir cuentas a quienes otorgan financiamiento con un registro claro de tu trabajo. También puedes mostrar a socios y partes interesadas que lo que haces marca la diferencia.",
-        "outro": "Sin trabajo extra: solo sigue observando. Con el tiempo, esto construye evidencia real que puedes usar cuando la necesites."
+        "intro": "Cada observación permanece en tu cuenta como registro de tu trabajo.",
+        "uses": "Comparte ese registro con financiadores, socios y comunidades.",
+        "outro": "Sigue observando para reunir evidencia con el tiempo."
       }
     },
     "board": {
@@ -616,7 +617,7 @@
     },
     "bestPicture": {
       "heading": "Favoritas a mejor foto",
-      "subtitle": "Las fotos con más me gusta de esta ronda: las que compiten por el premio a la mejor foto. Toca cualquier foto para ver los detalles.",
+      "subtitle": "Estas fotos tienen más Me gusta y compiten por el premio a la mejor imagen. Abre una foto para ver los detalles.",
       "prize": "{amount} mejor foto",
       "leader": "En cabeza",
       "likes": "{count, plural, one {# me gusta} other {# me gusta}}",
@@ -757,11 +758,13 @@
           "description": "Kits de campo para reunir observaciones y evidencia sobre el terreno."
         }
       },
-      "apply": "Postular con un clic",
+      "apply": "Solicitar con un proyecto",
       "details": "Leer detalles de la subvención",
       "appliedTitle": "Solicitud enviada",
       "appliedNote": "Tu solicitud para {project} ya se publicó en el feed.",
-      "postText": "Postulando a la subvención Resilvestrar la web con mi proyecto \"{project}\": por la soberanía de datos y de decisiones. 🌱"
+      "postText": "Solicito la subvención Rewilding the Web con «{project}». La solicitud publica esta entrada públicamente. 🌱",
+      "permissionLoading": "Comprobando si esta cuenta puede solicitar…",
+      "permissionDenied": "Esta cuenta no puede solicitar esta subvención."
     },
     "applyModal": {
       "title": "Elige un proyecto para postular",
@@ -783,10 +786,9 @@
       "successClose": "Listo"
     },
     "interoperable": {
-      "category": "Programa de subvenciones interoperables",
       "grantName": "Ma Earth Ronda 3",
       "fundingType": "Financiación cuadrática",
-      "description": "La ronda de financiación respaldada por la comunidad de Ma Earth usa financiación cuadrática: muchas donaciones pequeñas se igualan y amplifican más que unas pocas grandes. Las postulaciones han cerrado y la ronda ya está en marcha: explora los proyectos que participan y apóyalos.",
+      "description": "La ronda comunitaria de Ma Earth usa financiación cuadrática, por lo que muchas donaciones pequeñas reciben más fondos equivalentes que unas pocas grandes. Las solicitudes han cerrado. Explora y apoya los proyectos participantes.",
       "browseProjects": "Explora los proyectos de esta ronda",
       "logoAlt": "Ma Earth"
     }
@@ -893,7 +895,8 @@
       "shareUser": "Únete a mí en certificados y apoya el impacto regenerativo: {pageUrl}",
       "totalBumicerts": "Total de certificados",
       "donationsReceived": "Donaciones recibidas",
-      "totalDonations": "Total de donaciones"
+      "totalDonations": "Total de donaciones",
+      "profileLinkCopyFailed": "No se pudo copiar el enlace"
     },
     "hero": {
       "coverImageAlt": "Imagen de portada de {displayName}",
@@ -1087,7 +1090,7 @@
       "eyebrow": "Explorar proyectos",
       "title": "Explora",
       "accent": "Proyectos",
-      "description": "Cada proyecto es un trabajo enfocado — con un objetivo claro, un plazo y los resultados esperados."
+      "description": "Cada proyecto es un trabajo específico con un objetivo, un cronograma y resultados previstos claros."
     },
     "search": {
       "ariaLabel": "Buscar proyectos",
@@ -1096,7 +1099,6 @@
       "action": "Buscar"
     },
     "categories": {
-      "eyebrow": "Explora por interés",
       "title": "Explora categorías de proyectos",
       "description": "Empieza con un tema y descubre a las personas y lugares que lo hacen realidad.",
       "items": {
@@ -1109,7 +1111,6 @@
       }
     },
     "featured": {
-      "eyebrow": "Proyectos destacados",
       "title": "Historias para comenzar",
       "description": "Una selección de proyectos bien documentados de guardianes de la naturaleza de todo el mundo.",
       "badge": "Destacado",
@@ -1123,12 +1124,10 @@
       }
     },
     "support": {
-      "eyebrow": "Abiertos a apoyo",
       "title": "Ayuda a que crezca un buen trabajo",
       "description": "Apoya proyectos que reciben activamente contribuciones de su comunidad."
     },
     "catalog": {
-      "eyebrow": "Explorar proyectos",
       "title": "Explora todos los proyectos",
       "description": "Explora los proyectos de esta categoría.",
       "count": "{count, plural, one {# proyecto para explorar} other {# proyectos para explorar}}"
@@ -1169,7 +1168,6 @@
       "donationsMaearth": "Donaciones Ma Earth"
     },
     "empty": {
-      "eyebrow": "Sin resultados",
       "title": "No se encontraron proyectos",
       "description": "Prueba ajustar tu búsqueda o filtros para encontrar más colecciones de proyectos."
     },
@@ -1204,6 +1202,11 @@
       "sightings": "{count, plural, =0 {Sin avistamientos de naturaleza aún} one {# avistamiento de naturaleza} other {# avistamientos de naturaleza}}",
       "timeline": "{count, plural, =0 {Sin actualizaciones del proyecto aún} one {# actualización del proyecto} other {# actualizaciones del proyecto}}",
       "reviews": "{count, plural, =0 {Sin evaluaciones aún} one {# evaluación} other {# evaluaciones}}"
+    },
+    "error": {
+      "title": "No se pudieron cargar los proyectos",
+      "description": "Intenta cargar de nuevo el catálogo de proyectos.",
+      "retry": "Intentar de nuevo"
     }
   },
   "ownerFilter": {
@@ -1543,11 +1546,10 @@
     "timelineTitle": "Cronología",
     "publishingBadge": "Publicando",
     "publishingTitle": "Tu proyecto está en camino",
-    "publishingBody": "Estamos publicando tu proyecto. Esto suele tardar un minuto; la página se actualizará sola."
+    "publishingBody": "Estamos publicando tu proyecto. La página se actualizará cuando esté listo."
   },
   "observationPage": {
     "back": "Todos los avistamientos",
-    "kind": "Avistamiento de naturaleza",
     "sharedBy": "Compartido por",
     "viewProfile": "Ver perfil",
     "observed": "Observado",
@@ -1583,9 +1585,8 @@
       "title": "Identifica",
       "accent": "especies"
     },
-    "eyebrow": "Revisión ecológica",
     "title": "Etiquetador de observaciones",
-    "description": "Explora avistamientos recientes y sin identificar, revisa sus datos de campo y propón un nombre de especie concreto.",
+    "description": "Revisa observaciones y sugiere un nombre de especie al observador.",
     "unidentified": "Sin identificar",
     "filters": {
       "searchLabel": "Buscar observaciones",
@@ -1671,7 +1672,7 @@
       "hero": {
         "eyebrow": "Estudio de historias de impacto",
         "title": "Crear un proyecto",
-        "subtitle": "Convierte el trabajo de campo, las pruebas de restauración y la custodia comunitaria en un proyecto publicable, sin salir de GainForest."
+        "subtitle": "Convierte el trabajo de campo, la evidencia de restauración y la gestión comunitaria en un proyecto de GainForest."
       },
       "backToProjects": "Volver a Mis proyectos",
       "startOver": "Empezar de nuevo",
@@ -1821,7 +1822,7 @@
       }
     },
     "emptyHero": {
-      "description": "Los proyectos reúnen tu trabajo de impacto —personas, lugares, periodos de tiempo y fotos o notas de apoyo— en una sola página que los financiadores pueden seguir y apoyar.",
+      "description": "Los proyectos reúnen personas, lugares, períodos, fotos y notas en una página que los colaboradores pueden seguir y financiar.",
       "cta": "Crear un proyecto"
     },
     "publish": {
@@ -1879,7 +1880,7 @@
       "refresh": "Actualizar"
     },
     "hero": {
-      "description": "Certificados de impacto (Certs) que emites a partir de este proyecto. Cada uno reúne pruebas (fotos, lugares, fechas y colaboradores) para que los financiadores puedan apoyar el trabajo."
+      "description": "Crea Certs a partir de este proyecto. Cada Cert reúne fotos, lugares, fechas y colaboradores para que los financiadores apoyen el trabajo."
     },
     "stats": {
       "linked": "{count, plural, one {# Cert vinculado} other {# Certs vinculados}}",
@@ -2011,8 +2012,6 @@
       "dataBadge": "{count, plural, one {# capa de datos del mapa} other {# capas de datos del mapa}}"
     },
     "focus": {
-      "organizationLabel": "Organización",
-      "projectLabel": "Proyecto",
       "clear": "Volver a todas las organizaciones",
       "viewProfile": "Ver perfil",
       "openGlobe": "Página del globo",
@@ -2058,7 +2057,7 @@
     },
     "timeline": {
       "seriesFlights": "{count, plural, one {# vuelo de dron} other {# vuelos de dron}} sobre la misma zona",
-      "seriesHint": "La misma zona se sobrevoló en fechas distintas: activa la línea de tiempo para ver cómo cambia.",
+      "seriesHint": "Esta zona se sobrevoló en fechas distintas. Activa la cronología para ver cómo cambió.",
       "toggle": "Ver {name} a lo largo del tiempo",
       "title": "Cambio a lo largo del tiempo",
       "close": "Ocultar el control de tiempo",
@@ -2072,7 +2071,6 @@
     "tree": {
       "title": "Árbol",
       "close": "Cerrar",
-      "species": "Especie",
       "height": "Altura",
       "dbh": "DAP",
       "measured": "Medido:",
@@ -2084,6 +2082,14 @@
     "sheet": {
       "expand": "Mostrar detalles",
       "collapse": "Ocultar detalles"
+    },
+    "errors": {
+      "organizations": "No se pudieron cargar las organizaciones.",
+      "sites": "No se pudieron cargar los sitios.",
+      "boundaries": "No se pudieron cargar los límites del proyecto.",
+      "trees": "No se pudieron cargar los datos de árboles.",
+      "layers": "No se pudieron cargar las capas del mapa.",
+      "retry": "Reintentar"
     }
   }
 }

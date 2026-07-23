@@ -53,7 +53,6 @@
       "videoTitle": "Bumicerts: rekodi za asili zinazothibitishwa kwa walezi wa kienyeji"
     },
     "certificate": {
-      "eyebrow": "Cheti",
       "titleLine1": "cheti ni nini",
       "titleLine2": "hasa?",
       "faqItems": {
@@ -110,7 +109,6 @@
       "alt": "Aikoni ya programu ya GainForest"
     },
     "stats": {
-      "liveLabel": "Athari za moja kwa moja",
       "bumicertsShared": "rekodi zilizoshirikiwa",
       "organizationProfiles": "wasifu wa mashirika",
       "natureSightingsShared": "matukio ya asili yaliyoshirikiwa",

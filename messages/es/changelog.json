@@ -1,17 +1,16 @@
 {
   "metadata": {
-    "title": "Novedades",
-    "description": "Cada cambio publicado en GainForest, visualizado a lo largo del tiempo."
+    "title": "Registro de cambios",
+    "description": "Mejoras y correcciones recientes de GainForest."
   },
-  "eyebrow": "Novedades",
-  "heading": "GainForest v{version}",
-  "intro": "Una línea de tiempo viva de todo lo que hemos publicado: nuevas funciones, mejoras y correcciones, agrupadas por mes y codificadas por color según el área.",
+  "heading": "Novedades",
+  "intro": "Consulta las mejoras y correcciones recientes, agrupadas por mes.",
   "stats": {
-    "commits": "Cambios",
-    "months": "Meses",
-    "range": "Periodo"
+    "commits": "{count, plural, one {# actualización} other {# actualizaciones}}",
+    "months": "{count, plural, one {# mes} other {# meses}}",
+    "range": "De {start} a {end}"
   },
-  "filterLabel": "Filtrar por área",
+  "filterLabel": "Filtrar cambios",
   "all": "Todo",
   "shipped": "{count, plural, one {# cambio} other {# cambios}}",
   "categories": {
@@ -26,5 +25,6 @@
     "ui": "Diseño e interfaz",
     "fix": "Correcciones",
     "core": "Plataforma base"
-  }
+  },
+  "hiddenIdentifier": "identificador de cuenta"
 }
