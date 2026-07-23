@@ -1001,6 +1001,7 @@
     },
     "to": "a",
     "anonymous": "Alguien",
+    "pinnedLabel": "Fijado",
     "filterHeading": "Filtros",
     "refresh": "Actualizar",
     "retry": "Reintentar",
@@ -1061,7 +1062,9 @@
       "confirmDelete": "Confirmar eliminación",
       "cancelDelete": "Cancelar",
       "showMore": "Ver más",
-      "showLess": "Ver menos"
+      "showLess": "Ver menos",
+      "pin": "Fijar arriba",
+      "unpin": "Dejar de fijar"
     },
     "composer": {
       "placeholder": "Comparte una novedad con la comunidad…",

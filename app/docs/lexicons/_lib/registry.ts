@@ -45,7 +45,7 @@ const SECTIONS: Section[] = [
     id: "feed",
     title: "Feed",
     prefix: "app.gainforest.feed",
-    ids: ["app.gainforest.feed.post", "app.gainforest.feed.like"],
+    ids: ["app.gainforest.feed.post", "app.gainforest.feed.like", "app.gainforest.feed.pin"],
   },
   {
     id: "dwc",

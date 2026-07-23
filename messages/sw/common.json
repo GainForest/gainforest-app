@@ -1001,6 +1001,7 @@
     },
     "to": "kwa",
     "anonymous": "Mtu fulani",
+    "pinnedLabel": "Imebandikwa",
     "filterHeading": "Vichujio",
     "refresh": "Onyesha upya",
     "retry": "Jaribu tena",
@@ -1061,7 +1062,9 @@
       "confirmDelete": "Thibitisha kufuta",
       "cancelDelete": "Ghairi",
       "showMore": "Onyesha zaidi",
-      "showLess": "Onyesha kidogo"
+      "showLess": "Onyesha kidogo",
+      "pin": "Bandika juu",
+      "unpin": "Ondoa kubandika"
     },
     "composer": {
       "placeholder": "Shiriki taarifa mpya na jamii…",
