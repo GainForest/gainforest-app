@@ -41,7 +41,7 @@ import {
 } from "@/app/_components/cart/CartProvider";
 import { itemAmountValid } from "@/app/cart/_components/CartView";
 import { RewardDeck } from "./RewardDeck";
-import { buildRewardCards } from "./reward-model";
+import { buildRewardCards, checkoutPhaseAfterSettlement, donationTotalUsd, pendingTipUsd } from "./reward-model";
 import {
   createNonce,
   createPaymentSignatureHeader,
@@ -371,7 +371,9 @@ export function CheckoutView({
 
   const subtotalUsd = Math.round(payableItems.reduce((total, item) => total + item.amountUsd, 0) * 100) / 100;
   const tipEnabled = tipConfig.status === "ready" && tipConfig.enabled && Boolean(tipConfig.address);
-  const tipUsd = tipEnabled ? tipAmountUsd(subtotalUsd, tipPercent) : 0;
+  const requestedTipUsd = tipEnabled ? tipAmountUsd(subtotalUsd, tipPercent) : 0;
+  const tipAlreadyCompleted = completed.some((line) => line.kind === "tip");
+  const tipUsd = pendingTipUsd(requestedTipUsd, completed);
   const totalUsd = Math.round((subtotalUsd + tipUsd) * 100) / 100;
   const hasEnoughBalance = wallet?.balance != null && wallet.balance >= toUsdcUnits(totalUsd);
 
@@ -574,11 +576,10 @@ export function CheckoutView({
 
       setCompleted((current) => [...current, ...results]);
       payingRef.current = false;
-      if (!anyFailed && results.length > 0) {
-        setPhase("done");
-      } else {
-        setPhase("review");
-      }
+      setPhase(checkoutPhaseAfterSettlement(
+        anyFailed,
+        results.filter((line) => line.kind === "donation").length,
+      ));
       return;
     }
 
@@ -664,13 +665,12 @@ export function CheckoutView({
     setCompleted((current) => [...current, ...results]);
     payingRef.current = false;
 
-    if (!anyFailed && results.length > 0) {
-      setPhase("done");
-    } else {
-      // Partial or complete failure: return to review with the per-line
-      // errors still visible so the visitor can retry what's left.
-      setPhase("review");
-    }
+    // Partial or complete failure returns to review with per-line errors, while
+    // a completed donation advances to the receipt-backed success benchmark.
+    setPhase(checkoutPhaseAfterSettlement(
+      anyFailed,
+      results.filter((line) => line.kind === "donation").length,
+    ));
   };
 
   const handleRetry = () => {
@@ -678,7 +678,8 @@ export function CheckoutView({
     setPhase("review");
   };
 
-  const donatedTotal = completed.reduce((total, line) => total + line.amountUsd, 0);
+  const completedDonations = completed.filter((line) => line.kind === "donation");
+  const donatedTotal = donationTotalUsd(completed);
   const shareText = t("shareText", {
     amount: `$${donatedTotal.toFixed(2)}`,
     url: typeof window !== "undefined" ? `${window.location.origin}/projects` : "https://www.gainforest.app/projects",
@@ -688,7 +689,6 @@ export function CheckoutView({
     { platform: "bluesky" as const, label: t("shareOnBluesky"), href: socialShareUrl("bluesky", shareText), className: "text-blue-600" },
     { platform: "telegram" as const, label: t("shareOnTelegram"), href: socialShareUrl("telegram", shareText), className: "text-blue-500" },
   ];
-  const completedDonations = completed.filter((line) => line.kind === "donation");
   const allDonationsRecorded = completedDonations.length > 0 && completedDonations.every(
     (line) => typeof line.receiptUri === "string" && line.receiptUri.length > 0,
   );
@@ -712,7 +712,7 @@ export function CheckoutView({
               cardsHref={sideEffects === "mock" ? "/_test/my-cards" : cardsHref}
             />
           ) : null}
-          <p className="mt-2 font-instrument text-4xl font-medium italic text-primary">{t("thankYou")}</p>
+          <h1 className="mt-2 font-instrument text-4xl font-medium italic text-primary">{t("thankYou")}</h1>
           <p className="text-pretty font-medium text-muted-foreground">
             {t("successSummary", { amount: `$${donatedTotal.toFixed(2)}` })}
           </p>
@@ -836,14 +836,14 @@ export function CheckoutView({
       )}
       <h1 className="mt-3 text-3xl font-semibold text-foreground">{t("title")}</h1>
 
-      <div className="mt-4 flex items-center gap-2.5 rounded-2xl border border-primary/20 bg-primary/5 px-4 py-3">
+      <div className="mt-4 flex items-center gap-2.5 rounded-2xl bg-primary/10 px-4 py-3">
         <LeafIcon className="size-4 shrink-0 text-primary" aria-hidden />
         <p className="text-sm font-medium text-foreground">{t("encouragement")}</p>
       </div>
 
       <div className="mt-6 flex flex-col gap-4">
         {/* ── Donor identity ──────────────────────────────────────────────── */}
-        <section className="rounded-3xl border border-border-soft bg-surface p-5">
+        <section className="rounded-2xl bg-muted/50 p-5">
           <h2 className="text-sm font-semibold text-foreground">{t("donorTitle")}</h2>
           {authSession.isLoggedIn ? (
             <label className="mt-3 flex min-w-0 cursor-pointer items-start gap-3">
@@ -859,7 +859,7 @@ export function CheckoutView({
         </section>
 
         {/* ── Wallet ──────────────────────────────────────────────────────── */}
-        <section className="rounded-3xl border border-border-soft bg-surface p-5">
+        <section className="rounded-2xl bg-muted/50 p-5">
           <h2 className="text-sm font-semibold text-foreground">{t("walletTitle")}</h2>
           {wallet ? (
             <div className="mt-3 flex items-center justify-between rounded-2xl border border-border bg-background px-4 py-3">
@@ -883,8 +883,8 @@ export function CheckoutView({
         </section>
 
         {/* ── Tip ─────────────────────────────────────────────────────────── */}
-        {tipEnabled ? (
-          <section className="rounded-3xl border border-border-soft bg-surface p-5">
+        {tipEnabled && !tipAlreadyCompleted ? (
+          <section className="rounded-2xl bg-muted/50 p-5">
             <h2 className="text-sm font-semibold text-foreground">{t("tipTitle")}</h2>
             <p className="mt-1 text-xs leading-5 text-muted-foreground">{t("tipDescription")}</p>
             <div className="relative mt-12">
@@ -946,7 +946,7 @@ export function CheckoutView({
         ) : null}
 
         {/* ── Summary + progress ──────────────────────────────────────────── */}
-        <section className="rounded-3xl border border-border-soft bg-surface p-5">
+        <section className="rounded-2xl bg-muted/50 p-5">
           <h2 className="text-sm font-semibold text-foreground">{t("summaryTitle")}</h2>
 
           <ul className="mt-3 space-y-2">
@@ -957,7 +957,7 @@ export function CheckoutView({
                 <li key={key} className="flex items-center justify-between gap-3 text-sm">
                   <span className="flex min-w-0 items-center gap-2">
                     {line?.phase === "signing" || line?.phase === "processing" ? (
-                      <Loader2Icon className="size-3.5 shrink-0 animate-spin text-primary" aria-hidden />
+                      <Loader2Icon className="size-3.5 shrink-0 animate-spin text-primary motion-reduce:animate-none" aria-hidden />
                     ) : line?.phase === "done" ? (
                       <CheckIcon className="size-3.5 shrink-0 text-primary" aria-hidden />
                     ) : line?.phase === "failed" ? (
@@ -973,7 +973,7 @@ export function CheckoutView({
               <li className="flex items-center justify-between gap-3 text-sm">
                 <span className="flex min-w-0 items-center gap-2">
                   {lineStates[TIP_LINE_KEY]?.phase === "signing" ? (
-                    <Loader2Icon className="size-3.5 shrink-0 animate-spin text-primary" aria-hidden />
+                    <Loader2Icon className="size-3.5 shrink-0 animate-spin text-primary motion-reduce:animate-none" aria-hidden />
                   ) : lineStates[TIP_LINE_KEY]?.phase === "done" ? (
                     <CheckIcon className="size-3.5 shrink-0 text-primary" aria-hidden />
                   ) : lineStates[TIP_LINE_KEY]?.phase === "failed" ? (
@@ -1052,7 +1052,7 @@ export function CheckoutView({
           >
             {paying ? (
               <>
-                <Loader2Icon className="size-4 animate-spin" /> {t("processing")}
+                <Loader2Icon className="size-4 animate-spin motion-reduce:animate-none" /> {t("processing")}
               </>
             ) : Object.values(lineStates).some((line) => line.phase === "failed") ? (
               t("tryAgain")

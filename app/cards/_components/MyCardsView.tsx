@@ -30,11 +30,7 @@ export function MyCardsView({
   return (
     <div className="min-h-full px-4 py-8 sm:px-6 sm:py-12">
       <div className="mx-auto max-w-6xl">
-        <div className="flex items-center gap-2 text-primary">
-          <SparklesIcon className="size-5" aria-hidden />
-          <span className="text-xs font-semibold uppercase tracking-[0.18em]">{t("eyebrow")}</span>
-        </div>
-        <div className="mt-3 flex flex-wrap items-end justify-between gap-3">
+        <div className="flex flex-wrap items-end justify-between gap-3">
           <div>
             <h1 className="text-3xl font-semibold tracking-tight text-foreground sm:text-5xl">{t("title")}</h1>
             <p className="mt-3 max-w-2xl text-sm leading-6 text-muted-foreground sm:text-base">{t("description")}</p>
@@ -54,31 +50,31 @@ export function MyCardsView({
         ) : null}
 
         {status === "signedOut" ? (
-          <div className="mt-12 flex flex-col items-center gap-4 rounded-[2rem] border border-dashed border-border-soft bg-surface/60 px-6 py-16 text-center">
+          <div className="mt-12 flex flex-col items-center gap-4 rounded-2xl bg-muted/50 px-6 py-16 text-center">
             <span className="grid size-14 place-items-center rounded-2xl bg-primary/10 text-primary">
               <SparklesIcon className="size-7" aria-hidden />
             </span>
-            <p className="font-instrument text-2xl italic text-foreground">{t("signedOutTitle")}</p>
+            <h2 className="font-instrument text-2xl italic text-foreground">{t("signedOutTitle")}</h2>
             <p className="max-w-md text-sm text-muted-foreground">{t("signedOutBody")}</p>
             <AuthButton session={{ isLoggedIn: false }} />
           </div>
         ) : status === "unavailable" ? (
-          <div className="mt-12 flex flex-col items-center gap-4 rounded-[2rem] border border-dashed border-border-soft bg-surface/60 px-6 py-16 text-center">
+          <div className="mt-12 flex flex-col items-center gap-4 rounded-2xl bg-muted/50 px-6 py-16 text-center">
             <span className="grid size-14 place-items-center rounded-2xl bg-amber-500/10 text-amber-600">
               <AlertTriangleIcon className="size-7" aria-hidden />
             </span>
-            <p className="font-instrument text-2xl italic text-foreground">{t("unavailableTitle")}</p>
+            <h2 className="font-instrument text-2xl italic text-foreground">{t("unavailableTitle")}</h2>
             <p className="max-w-md text-sm text-muted-foreground">{t("unavailableBody")}</p>
             <Button asChild variant="outline" className="mt-1 shadow-none">
               <Link href="/cards">{t("tryAgain")}</Link>
             </Button>
           </div>
         ) : cards.length === 0 ? (
-          <div className="mt-12 flex flex-col items-center gap-4 rounded-[2rem] border border-dashed border-border-soft bg-surface/60 px-6 py-16 text-center">
+          <div className="mt-12 flex flex-col items-center gap-4 rounded-2xl bg-muted/50 px-6 py-16 text-center">
             <span className="grid size-14 place-items-center rounded-2xl bg-primary/10 text-primary">
               <SparklesIcon className="size-7" aria-hidden />
             </span>
-            <p className="font-instrument text-2xl italic text-foreground">{t("emptyTitle")}</p>
+            <h2 className="font-instrument text-2xl italic text-foreground">{t("emptyTitle")}</h2>
             <p className="max-w-sm text-sm text-muted-foreground">{t("emptyBody")}</p>
             <Button asChild className="mt-1 shadow-none">
               <Link href="/projects">{t("browseProjects")}</Link>
@@ -106,7 +102,7 @@ export function MyCardsView({
                     totalUsd={card.totalUsd}
                     animateEntrance={false}
                   />
-                  <div className="mt-3 rounded-2xl border border-border-soft bg-surface/80 px-4 py-3 text-xs">
+                  <div className="mt-3 rounded-2xl bg-muted/50 px-4 py-3 text-xs">
                     <div className="flex items-center justify-between gap-3">
                       <span className="inline-flex items-center gap-1.5 font-semibold text-primary">
                         <BadgeCheckIcon className="size-4" aria-hidden />

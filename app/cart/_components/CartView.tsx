@@ -153,13 +153,13 @@ export function CartView({ onCheckout }: { onCheckout?: () => void } = {}) {
       </div>
 
       <div className="mt-6 grid gap-6 lg:grid-cols-[minmax(0,1fr)_320px] lg:items-start">
-        <ul className="divide-y divide-border-soft rounded-3xl border border-border-soft bg-surface p-5">
+        <ul className="divide-y divide-border-soft rounded-2xl bg-muted/50 p-5">
           {items.map((item) => (
             <CartItemRow key={cartItemKey(item)} item={item} />
           ))}
         </ul>
 
-        <aside className="rounded-3xl border border-border-soft bg-surface p-5">
+        <aside className="rounded-2xl bg-muted/50 p-5">
           <dl className="space-y-2 text-sm">
             <div className="flex items-center justify-between">
               <dt className="text-muted-foreground">{t("donations")}</dt>

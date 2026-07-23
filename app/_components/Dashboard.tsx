@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useTranslations } from "next-intl";
-import { motion } from "framer-motion";
+import { motion, useReducedMotion } from "framer-motion";
 import { useEffect, useMemo, useState } from "react";
 import { parseAsStringEnum, useQueryState } from "nuqs";
 import {
@@ -62,10 +62,9 @@ const DONOR_SORT_KEYS: Array<"rank" | "totalAmount" | "donationCount" | "lastDon
 const ORG_SORT_KEYS: Array<"totalRaised" | "bumicertCount" | "donorCount"> = ["totalRaised", "bumicertCount", "donorCount"];
 const QUERY_STATE_OPTIONS = { history: "replace", scroll: false, shallow: true } as const;
 
-// Shared surface treatment matching the app's modern pages (leaderboard, explorer):
-// soft card tint, primary-tinted shadow, hairline ring, and backdrop blur.
-const SURFACE =
-  "rounded-3xl bg-card/70 shadow-sm shadow-primary/5 ring-1 ring-foreground/5 backdrop-blur";
+// Financial data is grouped by spacing and muted fields; table dividers retain
+// the functional row boundaries needed for scanning.
+const SURFACE = "rounded-2xl bg-muted/40";
 const PILL_GROUP =
   "flex items-center gap-1 rounded-full bg-muted/55 p-1 shadow-sm shadow-primary/5 ring-1 ring-foreground/5 backdrop-blur";
 const DEFAULT_SECTION_LIMIT = 25;
@@ -97,6 +96,7 @@ const itemVariants = {
 // live in DonationsHub, so this renders just the KPI/chart/table content for the
 // period it's handed. Receipts and geo data are fetched here.
 export function DashboardBody({ period }: { period: Period }) {
+  const reduceMotion = useReducedMotion();
   const [granularity, setGranularity] = useQueryState(
     "granularity",
     parseAsStringEnum<TimeGranularity>(GRANULARITIES).withDefault("day").withOptions(QUERY_STATE_OPTIONS),
@@ -158,7 +158,7 @@ export function DashboardBody({ period }: { period: Period }) {
   return (
     <motion.div
       variants={containerVariants}
-      initial="hidden"
+      initial={reduceMotion ? false : "hidden"}
       animate="show"
       className="flex flex-col gap-10"
     >
@@ -239,9 +239,9 @@ function TopCountriesTable({ stats, loading }: { stats: GeoStats; loading: boole
     <div className={`overflow-hidden ${SURFACE}`}>
       <div className="flex items-center gap-2 px-5 pt-5 pb-3">
         <GlobeIcon className="h-4 w-4 text-primary" />
-        <span className="text-xs font-medium tracking-[0.15em] text-muted-foreground uppercase">
+        <h2 className="text-sm font-semibold text-foreground">
           {t("geo.topCountries")}
-        </span>
+        </h2>
       </div>
 
       {loading && stats.topCountries.length === 0 ? (
@@ -308,9 +308,9 @@ function DonationsVolumeChart({
         <div>
           <div className="flex items-center gap-2">
             <TrendingUpIcon className="h-4 w-4 text-primary" />
-            <span className="text-xs font-medium tracking-[0.15em] text-muted-foreground uppercase">
+            <h2 className="text-sm font-semibold text-foreground">
               {t("title")}
-            </span>
+            </h2>
           </div>
           <p className="mt-0.5 text-sm text-muted-foreground">{t("raisedPer", { granularity })}</p>
         </div>
@@ -428,7 +428,7 @@ function TopDonorsTable({ rows }: { rows: TopDonor[] }) {
     <div className={`overflow-hidden ${SURFACE}`}>
       <div className="flex items-center gap-2 px-5 pt-5 pb-3">
         <UsersIcon className="h-4 w-4 text-primary" />
-        <span className="text-xs font-medium tracking-[0.15em] text-muted-foreground uppercase">{t("topDonors")}</span>
+        <h2 className="text-sm font-semibold text-foreground">{t("topDonors")}</h2>
       </div>
 
       {rows.length === 0 ? (
@@ -440,7 +440,7 @@ function TopDonorsTable({ rows }: { rows: TopDonor[] }) {
               <thead>
                 <tr className="border-t border-border/60">
                   <SortableCol col="rank" sortKey={sortKey} sortDir={sortDir} onSort={sort}>#</SortableCol>
-                  <th className="px-3 py-2 text-left text-xs font-medium tracking-[0.12em] text-muted-foreground uppercase">{t("donor")}</th>
+                  <th className="px-3 py-2 text-left text-xs font-medium text-muted-foreground">{t("donor")}</th>
                   <SortableCol col="totalAmount" sortKey={sortKey} sortDir={sortDir} onSort={sort}>{t("totalDonated")}</SortableCol>
                   <SortableCol col="donationCount" sortKey={sortKey} sortDir={sortDir} onSort={sort}>{t("donations")}</SortableCol>
                   <SortableCol col="lastDonatedAt" sortKey={sortKey} sortDir={sortDir} onSort={sort}>{t("lastDonation")}</SortableCol>
@@ -506,7 +506,7 @@ function OrganizationsTable({ rows }: { rows: OrgRow[] }) {
     <div className={`overflow-hidden ${SURFACE}`}>
       <div className="flex items-center gap-2 px-5 pt-5 pb-3">
         <BuildingIcon className="h-4 w-4 text-primary" />
-        <span className="text-xs font-medium tracking-[0.15em] text-muted-foreground uppercase">{t("byOrganization")}</span>
+        <h2 className="text-sm font-semibold text-foreground">{t("byOrganization")}</h2>
       </div>
 
       {rows.length === 0 ? (
@@ -517,7 +517,7 @@ function OrganizationsTable({ rows }: { rows: OrgRow[] }) {
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-t border-border/60">
-                  <th className="px-3 py-2 text-left text-xs font-medium tracking-[0.12em] text-muted-foreground uppercase">{t("organization")}</th>
+                  <th className="px-3 py-2 text-left text-xs font-medium text-muted-foreground">{t("organization")}</th>
                   <SortableCol col="totalRaised" sortKey={sortKey} sortDir={sortDir} onSort={sort}>{t("totalRaised")}</SortableCol>
                   <SortableCol col="bumicertCount" sortKey={sortKey} sortDir={sortDir} onSort={sort}>{t("bumicerts")}</SortableCol>
                   <SortableCol col="donorCount" sortKey={sortKey} sortDir={sortDir} onSort={sort}>{t("donors")}</SortableCol>
@@ -568,7 +568,7 @@ function RecentTransactionsTable({ rows }: { rows: TxRow[] }) {
         <div>
           <div className="flex items-center gap-2">
             <ClockIcon className="h-4 w-4 text-primary" />
-            <span className="text-xs font-medium tracking-[0.15em] text-muted-foreground uppercase">{t("recentDonations")}</span>
+            <h2 className="text-sm font-semibold text-foreground">{t("recentDonations")}</h2>
           </div>
           <p className="mt-0.5 text-xs text-muted-foreground">
             {t("allTimeDonations", { count: rows.length })}
@@ -585,10 +585,10 @@ function RecentTransactionsTable({ rows }: { rows: TxRow[] }) {
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-t border-border/60">
-                  <th className="px-3 py-2 text-left text-xs font-medium tracking-[0.12em] text-muted-foreground uppercase">{t("date")}</th>
-                  <th className="px-3 py-2 text-left text-xs font-medium tracking-[0.12em] text-muted-foreground uppercase">{t("donor")}</th>
-                  <th className="px-3 py-2 text-left text-xs font-medium tracking-[0.12em] text-muted-foreground uppercase">{t("amount")}</th>
-                  <th className="px-3 py-2 text-left text-xs font-medium tracking-[0.12em] text-muted-foreground uppercase">{t("bumicert")}</th>
+                  <th className="px-3 py-2 text-left text-xs font-medium text-muted-foreground">{t("date")}</th>
+                  <th className="px-3 py-2 text-left text-xs font-medium text-muted-foreground">{t("donor")}</th>
+                  <th className="px-3 py-2 text-left text-xs font-medium text-muted-foreground">{t("amount")}</th>
+                  <th className="px-3 py-2 text-left text-xs font-medium text-muted-foreground">{t("bumicert")}</th>
                 </tr>
               </thead>
               <tbody>
@@ -650,7 +650,7 @@ function SortableCol<T extends string>({
 }) {
   return (
     <th
-      className="cursor-pointer px-3 py-2 text-left text-xs font-medium tracking-[0.12em] text-muted-foreground uppercase transition-colors select-none hover:text-foreground"
+      className="cursor-pointer px-3 py-2 text-left text-xs font-medium text-muted-foreground transition-colors select-none hover:text-foreground"
       onClick={() => onSort(col)}
     >
       <span className="inline-flex items-center gap-1">
@@ -781,16 +781,10 @@ function DashboardError() {
       <div className="flex size-16 items-center justify-center rounded-full bg-primary/10 text-primary">
         <BarChart3Icon className="size-8 opacity-60" />
       </div>
-      <p
-        className="text-3xl font-light text-foreground"
-        style={{ fontFamily: "var(--font-garamond-var)" }}
-      >
+      <h2 className="font-instrument text-3xl italic text-foreground">
         {t("title")}
-      </p>
-      <p
-        className="max-w-sm text-base text-foreground/70"
-        style={{ fontFamily: "var(--font-instrument-serif-var)", fontStyle: "italic" }}
-      >
+      </h2>
+      <p className="max-w-sm text-base text-foreground/70">
         {t("description")}
       </p>
       <Link

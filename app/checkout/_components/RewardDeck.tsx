@@ -404,7 +404,7 @@ export function RewardDeck({
         <span className="grid size-12 place-items-center rounded-2xl bg-primary/10 text-primary">
           <SparklesIcon className="size-6" aria-hidden />
         </span>
-        <p className="font-instrument text-2xl italic text-foreground">{t("collectedTitle")}</p>
+        <h2 className="font-instrument text-2xl italic text-foreground">{t("collectedTitle")}</h2>
         <p className="max-w-xs text-sm text-muted-foreground">{t("collectedBody")}</p>
         <Button asChild variant="outline" className="mt-1 shadow-none">
           <Link href={cardsHref}>{t("viewMyCards")}</Link>

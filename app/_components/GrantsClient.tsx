@@ -29,6 +29,7 @@ import {
 } from "../_lib/account-switcher";
 import { createFeedPost } from "../(manage)/manage/_lib/mutations";
 import { REWILDING_GRANT_TAG } from "../_lib/grants";
+import { grantApplicationPermission, type GrantApplicationPermission } from "../grants/application-permission";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { ModalContent, ModalDescription, ModalTitle } from "@/components/ui/modal/modal";
 import { useModal } from "@/components/ui/modal/context";
@@ -71,14 +72,21 @@ type ActingAccount = {
   apiTarget: { kind: "personal" | "group"; did: string } | null;
   /** Base manage route for "create a project" links. */
   projectsBasePath: string;
+  /** Up-front UI gate; publishing still enforces authorization server-side. */
+  applicationPermission: GrantApplicationPermission;
 };
 
 function useActingAccount(sessionDid: string | null): ActingAccount {
-  const { groups } = useAccountList(sessionDid);
+  const { groups, status } = useAccountList(sessionDid);
   const [activeContext] = useActiveAccountContext(sessionDid ?? "");
 
   if (!sessionDid) {
-    return { repo: undefined, apiTarget: null, projectsBasePath: "/manage" };
+    return {
+      repo: undefined,
+      apiTarget: null,
+      projectsBasePath: "/manage",
+      applicationPermission: grantApplicationPermission({ type: "signedOut" }),
+    };
   }
   if (activeContext.type === "group" && activeContext.did) {
     const group = groups.find((entry) => entry.groupDid === activeContext.did) ?? null;
@@ -89,12 +97,18 @@ function useActingAccount(sessionDid: string | null): ActingAccount {
       repo: activeContext.did,
       apiTarget: { kind: "group", did: activeContext.did },
       projectsBasePath: groupManageBasePath(identifier),
+      applicationPermission: grantApplicationPermission({
+        type: "group",
+        accountListStatus: status,
+        membershipRole: group?.role ?? null,
+      }),
     };
   }
   return {
     repo: undefined,
     apiTarget: { kind: "personal", did: sessionDid },
     projectsBasePath: "/manage",
+    applicationPermission: grantApplicationPermission({ type: "personal" }),
   };
 }
 
@@ -148,6 +162,7 @@ function RewildingSection({ viewerDid, signedIn }: { viewerDid: string | null; s
       redirectToLogin();
       return;
     }
+    if (acting.applicationPermission !== "allowed") return;
     modal.pushModal(
       {
         id: "rewilding-apply",
@@ -181,8 +196,8 @@ function RewildingSection({ viewerDid, signedIn }: { viewerDid: string | null; s
   ];
 
   return (
-    <article className="overflow-hidden rounded-3xl border border-border bg-card">
-      <div className="border-b border-border/60 bg-primary/5 px-6 py-5 sm:px-8">
+    <article className="overflow-hidden rounded-2xl bg-muted/40">
+      <div className="bg-primary/5 px-6 py-5 sm:px-8">
         <div className="flex flex-wrap items-center gap-3">
           <span className="inline-flex size-10 shrink-0 items-center justify-center rounded-2xl bg-primary/15 text-primary">
             <SproutIcon className="size-5" />
@@ -214,7 +229,7 @@ function RewildingSection({ viewerDid, signedIn }: { viewerDid: string | null; s
             </div>
 
             {appliedProjectTitle ? (
-              <div className="mt-6 flex items-start gap-3 rounded-2xl border border-primary/30 bg-primary/5 px-4 py-4">
+              <div className="mt-6 flex items-start gap-3 rounded-2xl bg-primary/10 px-4 py-4">
                 <CheckCircle2Icon className="mt-0.5 size-5 shrink-0 text-primary" />
                 <div className="min-w-0">
                   <p className="text-sm font-medium text-foreground">{t("appliedTitle")}</p>
@@ -227,7 +242,12 @@ function RewildingSection({ viewerDid, signedIn }: { viewerDid: string | null; s
 
             <div className="mt-6 flex flex-wrap gap-3">
               {appliedProjectTitle ? null : (
-                <Button type="button" size="lg" onClick={openApply}>
+                <Button
+                  type="button"
+                  size="lg"
+                  onClick={openApply}
+                  disabled={signedIn && acting.applicationPermission !== "allowed"}
+                >
                   <SproutIcon />
                   {t("apply")}
                 </Button>
@@ -239,6 +259,11 @@ function RewildingSection({ viewerDid, signedIn }: { viewerDid: string | null; s
                 </a>
               </Button>
             </div>
+            {signedIn && acting.applicationPermission !== "allowed" ? (
+              <p className="mt-3 text-sm text-muted-foreground" role="status">
+                {acting.applicationPermission === "loading" ? t("permissionLoading") : t("permissionDenied")}
+              </p>
+            ) : null}
           </div>
 
           <PdsVisual
@@ -252,7 +277,7 @@ function RewildingSection({ viewerDid, signedIn }: { viewerDid: string | null; s
 
         <div className="mt-8 grid gap-3 sm:grid-cols-2">
           {kits.map((kit) => (
-            <div key={kit.id} className="flex gap-3 rounded-2xl border border-border/70 bg-background/60 p-4">
+            <div key={kit.id} className="flex gap-3 rounded-2xl bg-background/70 p-4">
               <span className="inline-flex size-9 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
                 <kit.Icon className="size-5" />
               </span>
@@ -292,7 +317,7 @@ function RewildingApplyModal({
       const response = await fetch(manageApiHref("/api/manage/projects", acting.apiTarget), { cache: "no-store" });
       const data = (await response.json()) as ApiProject[] | { error?: string };
       if (!response.ok || !Array.isArray(data)) {
-        setError(!Array.isArray(data) && data.error ? data.error : t("errorTitle"));
+        setError(t("errorTitle"));
         setProjects([]);
         return;
       }
@@ -324,6 +349,10 @@ function RewildingApplyModal({
 
   const apply = useCallback(
     async (project: GrantProject) => {
+      if (acting.applicationPermission !== "allowed") {
+        setSubmitError(rewildingT("permissionDenied"));
+        return;
+      }
       setSubmittingRkey(project.rkey);
       setSubmitError(null);
       try {
@@ -340,7 +369,7 @@ function RewildingApplyModal({
         setSubmittingRkey(null);
       }
     },
-    [acting.repo, onApplied, rewildingT, t],
+    [acting.applicationPermission, acting.repo, onApplied, rewildingT, t],
   );
 
   return (
@@ -350,7 +379,7 @@ function RewildingApplyModal({
 
       {projects === null ? (
         <div className="mt-6 flex items-center gap-2 text-sm text-muted-foreground">
-          <Loader2Icon className="size-4 animate-spin" /> {t("loading")}
+          <Loader2Icon className="size-4 animate-spin motion-reduce:animate-none" /> {t("loading")}
         </div>
       ) : error ? (
         <div className="mt-6 flex flex-col items-center justify-center gap-4 rounded-2xl bg-muted/30 px-6 py-10 text-center">
@@ -403,7 +432,7 @@ function RewildingApplyModal({
                       onClick={() => void apply(project)}
                       disabled={disabled}
                       aria-label={t("applyWith", { project: project.title })}
-                      className="group flex w-full items-center gap-3 rounded-2xl border border-border bg-card px-3 py-3 text-left transition-colors hover:border-primary/40 hover:bg-surface-sunken focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/45 disabled:cursor-not-allowed disabled:opacity-60"
+                      className="group flex w-full items-center gap-3 rounded-2xl bg-muted/50 px-3 py-3 text-left transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/45 disabled:cursor-not-allowed disabled:opacity-60"
                     >
                       <span className="relative size-14 shrink-0 overflow-hidden rounded-xl bg-muted">
                         {project.imageUrl ? (
@@ -422,8 +451,8 @@ function RewildingApplyModal({
                           </span>
                         ) : null}
                       </span>
-                      <span className="grid size-6 shrink-0 place-items-center text-muted-foreground/60 transition-transform group-hover:translate-x-0.5 group-hover:text-primary">
-                        {submitting ? <Loader2Icon className="size-4 animate-spin" /> : <ChevronRightIcon className="size-5" />}
+                      <span className="grid size-6 shrink-0 place-items-center text-muted-foreground/60 transition-transform group-hover:translate-x-0.5 group-hover:text-primary motion-reduce:transform-none motion-reduce:transition-none">
+                        {submitting ? <Loader2Icon className="size-4 animate-spin motion-reduce:animate-none" /> : <ChevronRightIcon className="size-5" />}
                       </span>
                     </button>
                   </li>
@@ -473,17 +502,14 @@ function InteroperableSection() {
   const t = useTranslations("marketplace.grants.interoperable");
 
   return (
-    <article className="overflow-hidden rounded-3xl border border-border bg-card">
+    <article className="overflow-hidden rounded-2xl bg-muted/40">
       <div className="px-6 py-6 sm:px-8">
         <div className="flex items-start gap-4">
           <span className="relative size-14 shrink-0 overflow-hidden rounded-2xl border border-border">
             <Image src={MA_EARTH_LOGO_SRC} alt={t("logoAlt")} fill sizes="56px" className="object-cover" />
           </span>
           <div className="min-w-0">
-            <p className="text-[10px] font-medium uppercase tracking-[0.12em] text-muted-foreground">
-              {t("category")}
-            </p>
-            <div className="mt-1.5 flex flex-wrap items-center gap-3">
+            <div className="flex flex-wrap items-center gap-3">
               <h2 className="font-instrument text-2xl font-light italic tracking-[-0.02em] text-foreground sm:text-3xl">
                 {t("grantName")}
               </h2>

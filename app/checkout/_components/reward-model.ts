@@ -43,6 +43,17 @@ export const TIERS: Tier[] = [
   { key: "oldGrowth", min: 750, foil: "#fde047, #f472b6, #22d3ee, #4ade80, #fde047", glow: "#f0abfc" },
 ];
 
+export function rewardEffectsEnabled(reduceMotion: boolean | null, interactive: boolean): boolean {
+  return reduceMotion !== true && interactive;
+}
+
+export function checkoutPhaseAfterSettlement(
+  anyFailed: boolean,
+  completedDonationCount: number,
+): "done" | "review" {
+  return !anyFailed && completedDonationCount > 0 ? "done" : "review";
+}
+
 export function tierForAmount(amountUsd: number): Tier {
   let match = TIERS[0];
   for (const tier of TIERS) if (amountUsd >= tier.min) match = tier;
@@ -66,6 +77,20 @@ export type RewardCard = {
  * not enough: the line must carry a successfully written project funding
  * receipt. Tips and unbacked summary cards never become collectibles.
  */
+/** Amount that can accurately be described as project donations. */
+export function donationTotalUsd(lines: RewardLine[]): number {
+  return Math.round(
+    lines
+      .filter((line) => line.kind === "donation")
+      .reduce((total, line) => total + line.amountUsd, 0) * 100,
+  ) / 100;
+}
+
+/** A successful tip is never charged again while retrying a partial donation settlement. */
+export function pendingTipUsd(requestedTipUsd: number, completedLines: RewardLine[]): number {
+  return completedLines.some((line) => line.kind === "tip") ? 0 : requestedTipUsd;
+}
+
 export function buildRewardCards(lines: RewardLine[]): RewardCard[] {
   return lines.flatMap((line) => {
     if (
