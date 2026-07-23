@@ -309,9 +309,9 @@ export function FeedPageSkeleton() {
           </div>
         </div>
       </div>
-      <div className="space-y-4">
+      <div className="divide-y divide-border/50">
         {Array.from({ length: 5 }).map((_, index) => (
-          <article key={index} className="rounded-3xl border border-border/60 bg-card p-4 shadow-sm">
+          <article key={index} className="rounded-2xl px-3 py-3.5">
             <div className="flex gap-3">
               <Skeleton className="size-10 shrink-0 rounded-full" />
               <div className="min-w-0 flex-1 space-y-2">

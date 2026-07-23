@@ -57,13 +57,13 @@ export function SpeciesSuggestions({ subjectUri }: { subjectUri: string }) {
   if (!items?.length) return null;
 
   return (
-    <section className="mt-6 rounded-2xl border border-primary/20 bg-primary/[0.05] p-4 sm:p-5">
+    <section className="mt-6 rounded-2xl border border-primary/20 bg-primary/10 p-4 sm:p-5">
       <div className="flex items-start gap-3">
         <span className="grid size-9 shrink-0 place-items-center rounded-full bg-primary/10 text-primary">
           <MicroscopeIcon className="size-4" aria-hidden />
         </span>
         <div>
-          <h2 className="font-semibold text-foreground">{t("title")}</h2>
+          <h2 className="font-instrument text-base italic text-foreground">{t("title")}</h2>
           <p className="mt-0.5 text-sm leading-5 text-muted-foreground">{t("description")}</p>
         </div>
       </div>

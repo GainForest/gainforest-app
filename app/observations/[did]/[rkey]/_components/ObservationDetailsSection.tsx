@@ -198,7 +198,7 @@ export function ObservationDetailsSection({
   return (
     <section className="mt-10 border-t border-border-soft pt-8">
       <div className="mb-5 flex items-center justify-between gap-3">
-        <h2 className="text-base font-semibold text-foreground">{pageT("detailsTitle")}</h2>
+        <h2 className="font-instrument text-base italic text-foreground">{pageT("detailsTitle")}</h2>
         {canManage ? (
           <div className="flex items-center gap-2">
             <ToolbarButton onClick={() => void handleReanalyze()} disabled={isReanalyzing || isSaving} title={t("observation.reanalyzeHint")}>
@@ -254,7 +254,7 @@ export function ObservationDetailsSection({
           <div className="border-t border-border-soft pt-4">
             {deleteConfirmOpen ? (
               <div className="rounded-xl bg-destructive/10 p-3">
-                <p className="text-[13px] font-medium text-foreground">{t("observation.deleteTitle")}</p>
+                <h3 className="font-instrument text-[15px] italic text-foreground">{t("observation.deleteTitle")}</h3>
                 <p className="mt-1 text-[13px] leading-5 text-muted-foreground">{t("observation.deleteDescription")}</p>
                 <div className="mt-3 flex flex-wrap justify-end gap-2">
                   <button
@@ -302,7 +302,7 @@ export function ObservationDetailsSection({
           ) : null}
           {record.remarks ? (
             <div className="mt-8">
-              <h3 className="mb-3 text-base font-semibold text-foreground">{pageT("notesTitle")}</h3>
+              <h3 className="mb-3 font-instrument text-base italic text-foreground">{pageT("notesTitle")}</h3>
               <p className="max-w-3xl whitespace-pre-line text-[15px] leading-[1.65] text-foreground/80">{record.remarks}</p>
             </div>
           ) : null}

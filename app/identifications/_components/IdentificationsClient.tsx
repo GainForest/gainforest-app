@@ -154,9 +154,9 @@ export function IdentificationsClient({ sessionDid }: { sessionDid: string | nul
 
   if (!sessionDid) {
     return (
-      <div className="rounded-3xl border border-dashed border-border bg-muted/30 px-6 py-14 text-center">
+      <div className="rounded-3xl border border-border bg-muted px-6 py-14 text-center">
         <TagsIcon className="mx-auto size-8 text-primary" />
-        <h2 className="mt-4 text-lg font-medium text-foreground">{t("signInTitle")}</h2>
+        <h2 className="mt-4 font-instrument text-lg italic text-foreground">{t("signInTitle")}</h2>
         <p className="mx-auto mt-2 max-w-lg text-sm leading-6 text-muted-foreground">{t("signInBody")}</p>
       </div>
     );
@@ -225,16 +225,16 @@ export function IdentificationsClient({ sessionDid }: { sessionDid: string | nul
       ) : null}
 
       {total === 0 ? (
-        <div className="rounded-3xl border border-dashed border-border bg-muted/30 px-6 py-14 text-center">
+        <div className="rounded-3xl border border-border bg-muted px-6 py-14 text-center">
           <WavesIcon className="mx-auto size-8 text-primary" />
-          <h2 className="mt-4 text-lg font-medium text-foreground">{t("emptyTitle")}</h2>
+          <h2 className="mt-4 font-instrument text-lg italic text-foreground">{t("emptyTitle")}</h2>
           <p className="mx-auto mt-2 max-w-lg text-sm leading-6 text-muted-foreground">{t("emptyBody")}</p>
           <div className="mt-5 flex justify-center">
             <Button asChild><Link href="/audiomoth?tab=label"><TagsIcon className="size-4" />{t("openLabeller")}</Link></Button>
           </div>
         </div>
       ) : shown.length === 0 ? (
-        <div className="rounded-2xl border border-dashed border-border bg-muted/30 px-4 py-10 text-center text-sm text-muted-foreground">{t("noMatches")}</div>
+        <div className="rounded-2xl border border-border bg-muted px-4 py-10 text-center text-sm text-muted-foreground">{t("noMatches")}</div>
       ) : (
         <div className="overflow-hidden rounded-2xl border border-border bg-card/80">
           <ul className="divide-y divide-border">

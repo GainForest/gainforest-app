@@ -376,7 +376,7 @@ export function FeedClient({
         {loading ? (
           <FeedSkeleton />
         ) : error ? (
-          <div className="px-4 py-16 text-center">
+          <div className="rounded-2xl bg-muted px-4 py-16 text-center">
             <p className="text-sm text-muted-foreground">{t("error")}</p>
             <button
               type="button"
@@ -387,7 +387,7 @@ export function FeedClient({
             </button>
           </div>
         ) : items.length === 0 ? (
-          <div className="px-4 py-16 text-center">
+          <div className="rounded-2xl bg-muted px-4 py-16 text-center">
             <p className="text-sm text-muted-foreground">
               {filter === "following"
                 ? t("emptyFollowing")
@@ -1408,7 +1408,7 @@ function KindIcon({ kind, className }: { kind: ActivityFeedKind; className?: str
 
 function FeedSkeleton() {
   return (
-    <ol className="relative">
+    <ol className="relative divide-y divide-border/50">
       {Array.from({ length: 6 }).map((_, i) => (
         <li key={i} className="flex gap-3 rounded-2xl px-3 py-3.5">
           <Skeleton className="size-10 shrink-0 rounded-full" />

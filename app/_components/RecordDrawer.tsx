@@ -649,8 +649,8 @@ export function RecordDrawer({
           {record.kind === "site" ? <TrustedByBadges did={record.did} className="relative mb-3" variant="compact" /> : null}
           <h2
             className={cn(
-              "relative font-instrument leading-[1.08] tracking-[-0.01em] text-foreground",
-              isProject ? "text-[34px] sm:text-[36px]" : "text-[30px] italic",
+              "relative font-instrument italic leading-[1.08] tracking-[-0.01em] text-foreground",
+              isProject ? "text-[34px] sm:text-[36px]" : "text-[30px]",
             )}
           >
             {title}
@@ -1611,7 +1611,7 @@ export function ObservationLocationPickerModal({
       <div className="relative z-[1] flex w-full max-w-[440px] flex-col overflow-hidden rounded-3xl border border-border-soft bg-background shadow-2xl">
         <div className="flex items-start justify-between gap-3 px-5 py-4">
           <div>
-            <h3 className="text-[16px] font-medium text-foreground">{t("observation.chooseMapLocationTitle")}</h3>
+            <h3 className="font-instrument text-[16px] italic text-foreground">{t("observation.chooseMapLocationTitle")}</h3>
             <p className="mt-1 text-[13px] leading-5 text-muted-foreground">{t("observation.movePin")}</p>
           </div>
           <button
@@ -1973,7 +1973,7 @@ function ProjectCertSummary({
         <section className="mt-5 rounded-2xl border border-border-soft bg-foreground/[0.04] p-4">
           <div className="mb-3 flex items-center gap-2">
             <ClipboardCheckIcon className="h-4 w-4 text-primary" aria-hidden />
-            <h3 className="text-[13px] font-medium text-foreground">{t("projectEvidence.title")}</h3>
+            <h3 className="font-instrument text-[15px] italic text-foreground">{t("projectEvidence.title")}</h3>
           </div>
           <ProjectEvidence
             evidence={evidence}
@@ -2122,7 +2122,7 @@ function ProjectDrawerUpdates({ updates, projectHref }: { updates: TimelineAttac
   return (
     <section className="mt-5 space-y-2.5">
       <div className="flex items-center justify-between gap-2">
-        <h3 className="text-[13px] font-medium text-foreground">{t("projectUpdates.title")}</h3>
+        <h3 className="font-instrument text-[15px] italic text-foreground">{t("projectUpdates.title")}</h3>
         <Link
           href={`${projectHref}#updates`}
           className="text-[12.5px] font-medium text-primary transition-colors hover:underline"

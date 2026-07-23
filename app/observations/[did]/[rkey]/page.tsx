@@ -209,7 +209,7 @@ export default async function ObservationDetailPage({ params }: { params: Observ
 
         {measurementFacts.length > 0 ? (
           <section className="mt-10 border-t border-border-soft pt-8">
-            <h2 className="mb-5 flex items-center gap-2 text-base font-semibold text-foreground">
+            <h2 className="mb-5 flex items-center gap-2 font-instrument text-base italic text-foreground">
               <RulerIcon className="h-3.5 w-3.5" aria-hidden />
               {measurementsT("title")}
             </h2>

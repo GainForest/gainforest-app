@@ -1630,7 +1630,7 @@ function cardView(record: ExplorerRecord): CardView {
           }}
         >
           <span
-            className="font-garamond text-[15px] italic leading-tight text-foreground/45"
+            className="text-[15px] italic leading-tight text-foreground/45"
             style={clamp(3)}
           >
             {name}
@@ -1662,7 +1662,7 @@ function cardView(record: ExplorerRecord): CardView {
         </span>
       ),
       placeholder: (
-        <div className="flex h-full w-full items-center justify-center font-garamond text-[34px] text-foreground/15">
+        <div className="flex h-full w-full items-center justify-center text-[34px] text-foreground/15">
           {countryFlag(record.country) || "\u25F0"}
         </div>
       ),
@@ -1688,7 +1688,7 @@ function cardView(record: ExplorerRecord): CardView {
         </span>
       ),
       placeholder: (
-        <div className="flex h-full w-full items-center justify-center font-garamond text-[14px] italic text-foreground/30">
+        <div className="flex h-full w-full items-center justify-center text-[14px] italic text-foreground/30">
           No cover image
         </div>
       ),
@@ -1719,7 +1719,7 @@ function cardView(record: ExplorerRecord): CardView {
       </span>
     ),
     placeholder: (
-      <div className="flex h-full w-full items-center justify-center font-garamond text-[14px] italic text-foreground/30">
+      <div className="flex h-full w-full items-center justify-center text-[14px] italic text-foreground/30">
         No cover image
       </div>
     ),
@@ -2078,8 +2078,8 @@ function EmptyState({
   retryLabel?: string;
 }) {
   return (
-    <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-border px-6 py-16 text-center">
-      <div className="font-garamond text-[22px] text-foreground">{title}</div>
+    <div className="flex flex-col items-center justify-center rounded-2xl bg-muted px-6 py-16 text-center">
+      <h2 className="font-instrument text-2xl italic text-foreground">{title}</h2>
       <p className="mt-2 max-w-[420px] text-[14px] leading-[1.5] text-foreground/60">{body}</p>
       {onRetry && (
         <button
