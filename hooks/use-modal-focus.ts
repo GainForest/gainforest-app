@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, type RefObject } from "react";
+import { useEffect, useLayoutEffect, useRef, type RefObject } from "react";
 
 const FOCUSABLE_SELECTOR = [
   "a[href]",
@@ -97,8 +97,20 @@ export function useModalFocus({
   onEscape: () => void;
 }) {
   const tokenRef = useRef(Symbol("modal-focus"));
+  const restoreTargetRef = useRef<HTMLElement | null>(null);
   const onEscapeRef = useRef(onEscape);
   onEscapeRef.current = onEscape;
+
+  // Capture the invoking control before URL/state effects can move focus during
+  // the render that mounts the modal. Actual modal focus waits for useEffect so
+  // the complete dialog subtree (and forwarded close-button ref) is ready.
+  useLayoutEffect(() => {
+    if (!active) return;
+    const activeElement = document.activeElement;
+    if (activeElement instanceof HTMLElement && activeElement !== document.body) {
+      restoreTargetRef.current = activeElement;
+    }
+  }, [active]);
 
   useEffect(() => {
     if (!active) return;
@@ -106,10 +118,20 @@ export function useModalFocus({
     if (!container) return;
 
     const token = tokenRef.current;
-    const previouslyFocused = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    const previouslyFocused = restoreTargetRef.current ??
+      (document.activeElement instanceof HTMLElement ? document.activeElement : null);
     modalStack.push(token);
-    const target = initialFocusRef?.current ?? focusableElements(container)[0] ?? container;
-    target.focus();
+    const ensureInitialFocus = () => {
+      if (topModalToken(modalStack) !== token || !container.isConnected) return;
+      if (container.contains(document.activeElement)) return;
+      const target = initialFocusRef?.current ?? focusableElements(container)[0] ?? container;
+      if (target.isConnected) target.focus();
+    };
+    const focusFrame = window.requestAnimationFrame(ensureInitialFocus);
+    // A shallow URL update can move focus back to <body> after passive effects.
+    // Retry once after that navigation settles, without disturbing any focus
+    // the visitor has already moved inside the modal.
+    const focusTimer = window.setTimeout(ensureInitialFocus, 250);
     const restoreOutside = hideOutsideBranch(container);
     const unlockBodyScroll = lockBodyScroll();
 
@@ -138,6 +160,8 @@ export function useModalFocus({
 
     document.addEventListener("keydown", onKeyDown, true);
     return () => {
+      window.cancelAnimationFrame(focusFrame);
+      window.clearTimeout(focusTimer);
       document.removeEventListener("keydown", onKeyDown, true);
       const index = modalStack.lastIndexOf(token);
       if (index >= 0) modalStack.splice(index, 1);

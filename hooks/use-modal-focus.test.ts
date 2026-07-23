@@ -34,7 +34,13 @@ describe("modal focus containment", () => {
 
   it("moves initial focus, hides background branches, and restores the trigger", () => {
     const hook = read("hooks/use-modal-focus.ts");
+    expect(hook).toContain("useLayoutEffect(() => {");
+    expect(hook).toContain("restoreTargetRef.current = activeElement");
+    expect(hook).toContain("useEffect(() => {");
     expect(hook).toContain("initialFocusRef?.current");
+    expect(hook).toContain("window.requestAnimationFrame");
+    expect(hook).toContain("window.setTimeout(ensureInitialFocus, 250)");
+    expect(hook).toContain("container.contains(document.activeElement)");
     expect(hook).toContain("sibling.inert = true");
     expect(hook).toContain('sibling.setAttribute("aria-hidden", "true")');
     expect(hook).toContain("previouslyFocused?.isConnected");
