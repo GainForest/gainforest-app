@@ -15,12 +15,10 @@ import {
   Loader2Icon,
   MailIcon,
   PlusIcon,
-  ShieldCheckIcon,
   Trash2Icon,
   UserRoundIcon,
 } from "lucide-react";
 import { AdminOnlyIndicator } from "@/app/_components/AdminOnlyIndicator";
-import { formatCgsErrorMessage } from "@/app/_lib/cgs-errors";
 import { Button } from "@/components/ui/button";
 import { useModal } from "@/components/ui/modal/context";
 import { ModalContent, ModalDescription, ModalFooter, ModalHeader, ModalTitle } from "@/components/ui/modal/modal";
@@ -41,6 +39,7 @@ import type {
   PendingBadgeAwardRecord,
   StrongRef,
 } from "../_lib/badge-records";
+import { assignRecipients } from "./assignment-results";
 
 const BADGE_DEFINITION_COLLECTION = "app.certified.badge.definition";
 const BADGE_AWARD_COLLECTION = "app.certified.badge.award";
@@ -98,8 +97,7 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 }
 
 function toErrorMessage(value: unknown, fallback: string): string {
-  if (value instanceof Error && value.message) return formatCgsErrorMessage(value.message, fallback);
-  if (isRecord(value) && typeof value.message === "string") return formatCgsErrorMessage(value.message, fallback);
+  if (value instanceof Error && value.message) return value.message;
   return fallback;
 }
 
@@ -113,10 +111,10 @@ async function bytesToBase64(file: File): Promise<string> {
   return btoa(binary);
 }
 
-function toLexBlobRef(uploaded: UploadBlobResult, file: File) {
+function toLexBlobRef(uploaded: UploadBlobResult, file: File, fallback: string) {
   const raw = isRecord(uploaded.blob) ? uploaded.blob : uploaded;
   if (!("ref" in raw) || raw.ref === undefined || raw.ref === null) {
-    throw new Error("Could not save the badge icon.");
+    throw new Error(fallback);
   }
   return {
     $type: "blob" as const,
@@ -126,7 +124,7 @@ function toLexBlobRef(uploaded: UploadBlobResult, file: File) {
   };
 }
 
-async function callMutation<T>(payload: Record<string, unknown>): Promise<T> {
+async function callMutation<T>(payload: Record<string, unknown>, fallback: string): Promise<T> {
   const response = await fetch("/api/internal/badges/mutation", {
     method: "POST",
     headers: { "content-type": "application/json" },
@@ -134,24 +132,24 @@ async function callMutation<T>(payload: Record<string, unknown>): Promise<T> {
   });
   const data = (await response.json().catch(() => null)) as (T & { error?: string; message?: string }) | null;
   if (!response.ok || !data || data.error) {
-    throw new Error(formatCgsErrorMessage(data?.message ?? data?.error, "Request failed."));
+    throw new Error(fallback);
   }
   return data;
 }
 
-async function uploadIcon(file: File): Promise<UploadBlobResult> {
+async function uploadIcon(file: File, fallback: string): Promise<UploadBlobResult> {
   return callMutation<UploadBlobResult>({
     operation: "uploadBlob",
     blobData: await bytesToBase64(file),
     blobMimeType: file.type || "application/octet-stream",
-  });
+  }, fallback);
 }
 
-async function resolveRecipient(identifier: string): Promise<RecipientResult> {
+async function resolveRecipient(identifier: string, fallback: string): Promise<RecipientResult> {
   const params = new URLSearchParams({ identifier });
   const response = await fetch(`/api/internal/badges/recipient?${params.toString()}`, { cache: "no-store" });
   const data = (await response.json().catch(() => null)) as (RecipientResult & { error?: string; message?: string }) | null;
-  if (!response.ok || !data || data.error) throw new Error(data?.message ?? data?.error ?? "Recipient lookup failed.");
+  if (!response.ok || !data || data.error) throw new Error(fallback);
   return data;
 }
 
@@ -240,7 +238,7 @@ export function InternalBadgesDashboard({
     const includeAwards = selectedBadgeRkey ? "?includeAwards=1" : "";
     const response = await fetch(`/api/internal/badges${includeAwards}`, { cache: "no-store" });
     const payload = (await response.json().catch(() => null)) as (BadgeData & { error?: string }) | null;
-    if (!response.ok || !payload || payload.error) throw new Error(payload?.error ?? t("errors.refresh"));
+    if (!response.ok || !payload || payload.error) throw new Error(t("errors.refresh"));
     setData(payload);
     if (nextNotice) setNotice(nextNotice);
     return payload;
@@ -289,7 +287,7 @@ export function InternalBadgesDashboard({
       const title = form.title.trim();
       if (!title) throw new Error(t("errors.titleRequired"));
       let icon: unknown | null | undefined = form.editing ? undefined : null;
-      if (form.iconFile) icon = toLexBlobRef(await uploadIcon(form.iconFile), form.iconFile);
+      if (form.iconFile) icon = toLexBlobRef(await uploadIcon(form.iconFile, t("errors.generic")), form.iconFile, t("errors.generic"));
       const record: Record<string, unknown> = {
         $type: BADGE_DEFINITION_COLLECTION,
         title,
@@ -307,9 +305,9 @@ export function InternalBadgesDashboard({
           rkey: form.editing.rkey,
           record,
           swapRecord: form.editing.cid,
-        });
+        }, t("errors.generic"));
       } else {
-        await callMutation<MutationResult>({ operation: "createRecord", collection: BADGE_DEFINITION_COLLECTION, record });
+        await callMutation<MutationResult>({ operation: "createRecord", collection: BADGE_DEFINITION_COLLECTION, record }, t("errors.generic"));
       }
       await refresh({ tone: "success", text: t(editing ? "messages.badgeUpdated" : "messages.badgeCreated") });
     });
@@ -325,14 +323,14 @@ export function InternalBadgesDashboard({
 
   async function deleteBadge(definition: BadgeDefinitionRecord): Promise<ActionResult> {
     return run({ kind: "deleteBadge", rkey: definition.rkey }, t("status.deletingBadge"), async () => {
-      await callMutation({ operation: "deleteRecord", collection: BADGE_DEFINITION_COLLECTION, rkey: definition.rkey });
+      await callMutation({ operation: "deleteRecord", collection: BADGE_DEFINITION_COLLECTION, rkey: definition.rkey }, t("errors.generic"));
       await refresh({ tone: "success", text: t("messages.badgeDeleted") });
       if (selectedBadgeRkey === definition.rkey) router.push("/internal/badges");
     });
   }
 
   async function createAwardForRecipient(definition: BadgeDefinitionRecord, recipientText: string, note: string, url: string) {
-    const recipient = await resolveRecipient(recipientText);
+    const recipient = await resolveRecipient(recipientText, t("errors.generic"));
     if (recipient.kind === "email") {
       await callMutation<MutationResult>({
         operation: "createRecord",
@@ -344,7 +342,7 @@ export function InternalBadgesDashboard({
           note: note || undefined,
           createdAt: new Date().toISOString(),
         },
-      });
+      }, t("errors.generic"));
       return;
     }
 
@@ -359,7 +357,7 @@ export function InternalBadgesDashboard({
         url: url || undefined,
         createdAt: new Date().toISOString(),
       },
-    });
+    }, t("errors.generic"));
   }
 
   function assignBadge() {
@@ -370,11 +368,27 @@ export function InternalBadgesDashboard({
       if (recipients.length === 0) throw new Error(t("errors.recipientRequired"));
       const note = awardForm.note.trim();
       const url = awardForm.url.trim();
-      for (const recipient of recipients) {
-        await createAwardForRecipient(definition, recipient, note, url);
+      const result = await assignRecipients(recipients, (recipient) =>
+        createAwardForRecipient(definition, recipient, note, url),
+      );
+      // Assignment outcomes are authoritative even if the follow-up read is unavailable.
+      await refresh().catch(() => undefined);
+      if (result.failed.length > 0) {
+        setAwardForm((form) => ({
+          ...form,
+          recipients: result.failed.map(({ recipient }) => recipient).join("\n"),
+        }));
+        setNotice({
+          tone: "error",
+          text: t("messages.awardsPartial", {
+            succeeded: result.succeeded.length,
+            failed: result.failed.length,
+          }),
+        });
+        return;
       }
       setAwardForm(emptyAwardForm(definition.uri));
-      await refresh({
+      setNotice({
         tone: "success",
         text: recipients.length === 1 ? t("messages.awardCreated") : t("messages.awardsCreated", { count: recipients.length }),
       });
@@ -392,7 +406,7 @@ export function InternalBadgesDashboard({
   async function deleteAward(target: DeleteAwardTarget): Promise<ActionResult> {
     const id = `${target.collection}:${target.rkey}`;
     return run({ kind: "deleteAward", id }, t("status.removingAward"), async () => {
-      await callMutation({ operation: "deleteRecord", collection: target.collection, rkey: target.rkey });
+      await callMutation({ operation: "deleteRecord", collection: target.collection, rkey: target.rkey }, t("errors.generic"));
       await refresh({ tone: "success", text: t("messages.awardDeleted") });
     });
   }
@@ -438,7 +452,7 @@ export function InternalBadgesDashboard({
                 </div>
               </div>
               <Button type="button" onClick={assignBadge} disabled={isAwardFormBusy} className="mt-4 shadow-none">
-                {isAwardFormBusy ? <Loader2Icon className="size-4 animate-spin" /> : <AwardIcon className="size-4" />}
+                {isAwardFormBusy ? <Loader2Icon className="size-4 animate-spin motion-reduce:animate-none" /> : <AwardIcon className="size-4" />}
                 {t("awardForm.assign")}
               </Button>
             </Panel>
@@ -502,7 +516,7 @@ export function InternalBadgesDashboard({
                       </div>
                       <div className="min-w-0 flex-1">
                         <h3 className="font-medium group-hover:text-primary">{definition.title}</h3>
-                        <p className="mt-1 text-xs uppercase tracking-[0.18em] text-muted-foreground">{badgeTypeLabel(definition.badgeType)}</p>
+                        <p className="mt-1 text-xs text-muted-foreground">{badgeTypeLabel(definition.badgeType)}</p>
                         {definition.description ? <p className="mt-3 line-clamp-3 text-sm leading-6 text-muted-foreground">{definition.description}</p> : null}
                         <p className="mt-3 text-xs text-muted-foreground">{formatDate(locale, definition.createdAt)}</p>
                       </div>
@@ -525,12 +539,10 @@ function BadgesIndexHeader({ onCreate }: { onCreate: () => void }) {
     <section className="rounded-3xl bg-card p-5 md:p-6">
       <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
         <div>
-          <div className="inline-flex items-center gap-2 rounded-full bg-primary/10 px-3 py-1 text-xs font-medium text-primary">
-            <ShieldCheckIcon className="size-3.5" />
-            {t("eyebrow")}
-            <AdminOnlyIndicator />
+          <div className="flex items-center gap-2">
+            <h1 className="font-instrument text-4xl font-light italic tracking-[-0.04em] md:text-5xl">{t("title")}</h1>
+            <AdminOnlyIndicator className="text-muted-foreground" />
           </div>
-          <h1 className="mt-3 font-instrument text-4xl font-light italic tracking-[-0.04em] md:text-5xl">{t("title")}</h1>
           <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">{t("description")}</p>
         </div>
         <Button type="button" onClick={onCreate} className="self-start shadow-none">
@@ -569,16 +581,15 @@ function BadgeDetailHeader({
             {definition.iconUrl ? <Image src={definition.iconUrl} alt="" width={80} height={80} unoptimized className="size-full object-cover" /> : <BadgeCheckIcon className="size-8 text-muted-foreground" />}
           </div>
           <div className="min-w-0">
-            <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground">{badgeTypeLabel}</p>
-            <h1 className="mt-2 font-instrument text-4xl font-light italic tracking-[-0.04em] md:text-5xl">{definition.title}</h1>
+            <h1 className="font-instrument text-4xl font-light italic tracking-[-0.04em] md:text-5xl">{definition.title}</h1>
+            <p className="mt-2 text-xs text-muted-foreground">{badgeTypeLabel} · {createdAt}</p>
             {definition.description ? <p className="mt-3 max-w-3xl text-sm leading-6 text-muted-foreground">{definition.description}</p> : null}
-            <p className="mt-3 text-xs text-muted-foreground">{createdAt}</p>
           </div>
         </div>
         <div className="flex shrink-0 gap-2">
           <Button type="button" onClick={onEdit} variant="secondary" disabled={deleting} className="shadow-none"><Edit3Icon className="size-4" />{t("badges.edit")}</Button>
           <Button type="button" onClick={onDelete} variant="destructive" disabled={deleting} className="shadow-none">
-            {deleting ? <Loader2Icon className="size-4 animate-spin" /> : <Trash2Icon className="size-4" />}
+            {deleting ? <Loader2Icon className="size-4 animate-spin motion-reduce:animate-none" /> : <Trash2Icon className="size-4" />}
             {t("badges.delete")}
           </Button>
         </div>
@@ -643,7 +654,7 @@ function BadgeFormModal({
       </div>
       <ModalFooter>
         <Button type="button" onClick={() => void handleSave()} disabled={busy} className="w-full shadow-none">
-          {busy ? <Loader2Icon className="size-4 animate-spin" /> : <PlusIcon className="size-4" />}
+          {busy ? <Loader2Icon className="size-4 animate-spin motion-reduce:animate-none" /> : <PlusIcon className="size-4" />}
           {form.editing ? t("badgeForm.save") : t("badgeForm.create")}
         </Button>
         <Button type="button" variant="outline" onClick={onCancel} disabled={busy} className="w-full">{t("badgeForm.cancel")}</Button>
@@ -692,7 +703,7 @@ function ConfirmActionModal({
       <StatusNotice notice={error ? { tone: "error", text: error } : null} />
       <ModalFooter>
         <Button type="button" variant="destructive" onClick={() => void handleConfirm()} disabled={busy} className="w-full">
-          {busy ? <Loader2Icon className="size-4 animate-spin" /> : <Trash2Icon className="size-4" />}
+          {busy ? <Loader2Icon className="size-4 animate-spin motion-reduce:animate-none" /> : <Trash2Icon className="size-4" />}
           {actionLabel}
         </Button>
         <Button type="button" variant="outline" onClick={onCancel} disabled={busy} className="w-full">{t("confirm.cancel")}</Button>
@@ -710,7 +721,7 @@ function StatusNotice({ notice }: { notice: { tone: "success" | "error" | "loadi
       : "bg-muted text-muted-foreground";
   return (
     <div aria-live="polite" className={`flex items-center gap-2 rounded-2xl px-4 py-3 text-sm ${toneClass}`}>
-      {notice.tone === "loading" ? <Loader2Icon className="size-4 animate-spin" /> : null}
+      {notice.tone === "loading" ? <Loader2Icon className="size-4 animate-spin motion-reduce:animate-none" /> : null}
       {notice.text}
     </div>
   );
@@ -745,7 +756,7 @@ function AwardChip({ title, detail, onDelete, deleteLabel, deleting }: { title: 
       <span className="font-medium">{title}</span>
       <span className="text-muted-foreground">{detail}</span>
       <Button type="button" onClick={onDelete} variant="ghost" size="icon-xs" disabled={deleting} aria-label={deleteLabel}>
-        {deleting ? <Loader2Icon className="size-3 animate-spin text-destructive" /> : <Trash2Icon className="size-3 text-destructive" />}
+        {deleting ? <Loader2Icon className="size-3 animate-spin motion-reduce:animate-none text-destructive" /> : <Trash2Icon className="size-3 text-destructive" />}
       </Button>
     </span>
   );

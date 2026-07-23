@@ -1,7 +1,7 @@
 "use client";
 
 import type { ReactNode } from "react";
-import { motion } from "framer-motion";
+import { motion, useReducedMotion } from "framer-motion";
 import { monogram } from "@/app/_lib/did-profile";
 import { cn } from "@/lib/utils";
 
@@ -49,6 +49,7 @@ export function InviteScene({
   title,
   description,
   org = null,
+  roleLabel,
   children,
 }: {
   tone?: InviteTone;
@@ -56,9 +57,15 @@ export function InviteScene({
   title: string;
   description: string;
   org?: InviteOrg | null;
+  roleLabel?: string;
   children?: ReactNode;
 }) {
   const mono = org ? monogram(org.handle, org.did) : null;
+  const reducedMotion = useReducedMotion();
+  const sceneContainer = reducedMotion ? { hidden: {}, show: {} } : container;
+  const sceneItem = reducedMotion
+    ? { hidden: { opacity: 1 }, show: { opacity: 1 } }
+    : item;
 
   return (
     <main className="relative isolate flex min-h-[80vh] flex-col items-center justify-center overflow-hidden px-6 py-20">
@@ -72,19 +79,19 @@ export function InviteScene({
       />
 
       <motion.section
-        variants={container}
+        variants={sceneContainer}
         initial="hidden"
         animate="show"
         className="flex w-full max-w-xl flex-col items-center text-center"
       >
         <motion.div
-          variants={item}
+          variants={sceneItem}
           className="relative mb-9"
         >
           {mono ? (
             <span
               style={{ backgroundColor: mono.bg }}
-              className="font-instrument flex size-20 items-center justify-center rounded-full text-3xl italic text-white"
+              className="flex size-20 items-center justify-center rounded-full text-3xl font-medium text-white"
             >
               {mono.char}
             </span>
@@ -104,30 +111,34 @@ export function InviteScene({
         </motion.div>
 
         <motion.h1
-          variants={item}
+          variants={sceneItem}
           className="font-instrument text-4xl italic leading-[1.1] text-foreground sm:text-5xl"
         >
           {title}
         </motion.h1>
 
         {org ? (
-          <motion.span
-            variants={item}
-            className="mt-5 inline-flex items-center rounded-full bg-foreground/[0.06] px-4 py-1.5 text-sm font-medium text-foreground/80"
-          >
-            {org.name}
-          </motion.span>
+          <motion.div variants={sceneItem} className="mt-5 flex flex-wrap items-center justify-center gap-2">
+            <span className="inline-flex items-center rounded-full bg-foreground/[0.06] px-4 py-1.5 text-sm font-medium text-foreground/80">
+              {org.name}
+            </span>
+            {roleLabel ? (
+              <span className="inline-flex items-center rounded-full bg-muted px-3 py-1.5 text-sm text-muted-foreground">
+                {roleLabel}
+              </span>
+            ) : null}
+          </motion.div>
         ) : null}
 
         <motion.p
-          variants={item}
+          variants={sceneItem}
           className="mt-6 max-w-md text-base leading-7 text-muted-foreground"
         >
           {description}
         </motion.p>
 
         {children ? (
-          <motion.div variants={item} className="mt-9 flex justify-center">
+          <motion.div variants={sceneItem} className="mt-9 flex justify-center">
             {children}
           </motion.div>
         ) : null}

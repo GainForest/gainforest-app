@@ -1,13 +1,10 @@
 "use client";
 
-import { useState } from "react";
-import { useTranslations } from "next-intl";
+import { useMemo, useState } from "react";
+import { useLocale, useTranslations } from "next-intl";
 import { CheckIcon, CopyIcon, ExternalLinkIcon } from "lucide-react";
 import type { FacilitatorStats } from "../_lib/facilitator-stats";
 import { Button } from "@/components/ui/button";
-
-const usd = new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" });
-const int = new Intl.NumberFormat("en-US");
 
 /**
  * Admin view of the facilitator wallet — the platform wallet that settles
@@ -16,6 +13,9 @@ const int = new Intl.NumberFormat("en-US");
  */
 export function AdminFacilitatorPanel({ stats }: { stats: FacilitatorStats }) {
   const t = useTranslations("common.adminFacilitator");
+  const locale = useLocale();
+  const usd = useMemo(() => new Intl.NumberFormat(locale, { style: "currency", currency: "USD" }), [locale]);
+  const int = useMemo(() => new Intl.NumberFormat(locale), [locale]);
   const [copied, setCopied] = useState(false);
 
   if (!stats.address) {
@@ -42,8 +42,8 @@ export function AdminFacilitatorPanel({ stats }: { stats: FacilitatorStats }) {
 
   return (
     <div className="space-y-4">
-      <div className="rounded-2xl border border-border bg-muted/30 p-4">
-        <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">{t("addressLabel")}</p>
+      <div className="rounded-2xl bg-muted/30 p-4">
+        <p className="text-xs font-medium text-muted-foreground">{t("addressLabel")}</p>
         <div className="mt-1.5 flex flex-wrap items-center gap-2.5">
           <code className="break-all rounded-lg bg-background px-2.5 py-1.5 font-mono text-sm text-foreground">
             {stats.address}
@@ -103,8 +103,8 @@ export function AdminFacilitatorPanel({ stats }: { stats: FacilitatorStats }) {
 
 function StatTile({ label, value, hint }: { label: string; value: string | null; hint: string }) {
   return (
-    <div className="rounded-2xl border border-border bg-muted/30 p-4">
-      <dt className="text-xs font-medium uppercase tracking-wide text-muted-foreground">{label}</dt>
+    <div className="rounded-2xl bg-muted/30 p-4">
+      <dt className="text-xs font-medium text-muted-foreground">{label}</dt>
       <dd className="mt-1 text-2xl font-semibold tabular-nums text-foreground">{value ?? "—"}</dd>
       <dd className="mt-1 text-xs leading-5 text-muted-foreground">{hint}</dd>
     </div>

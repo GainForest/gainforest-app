@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 import { fetchAuthSession } from "@/app/_lib/auth-server";
 import { getGroupInvitation, type GroupInvitation } from "@/app/_lib/cgs-invitations";
@@ -6,12 +7,15 @@ import { InviteScene, type InviteOrg } from "./_components/InviteScene";
 import { ClockIcon, CheckIcon, XIcon } from "lucide-react";
 
 export const dynamic = "force-dynamic";
+export const metadata: Metadata = {
+  robots: { index: false, follow: false },
+};
 
 type InvitePageProps = { params: Promise<{ invitationId: string }> };
 
-function orgFromInvitation(invitation: GroupInvitation): InviteOrg {
+function orgFromInvitation(invitation: GroupInvitation, fallbackName: string): InviteOrg {
   return {
-    name: invitation.groupName || invitation.groupHandle || invitation.repo,
+    name: invitation.groupName || invitation.groupHandle || fallbackName,
     handle: invitation.groupHandle,
     did: invitation.repo,
   };
@@ -29,7 +33,7 @@ export default async function InvitePage({ params }: InvitePageProps) {
     return <InviteScene tone="danger" icon={<XIcon className="size-8" />} title={t("notFoundTitle")} description={t("notFoundDescription")} />;
   }
 
-  const org = orgFromInvitation(invitation);
+  const org = orgFromInvitation(invitation, t("organizationFallback"));
 
   if (invitation.status === "accepted") {
     return <InviteScene tone="success" icon={<CheckIcon className="size-7" />} title={t("alreadyAcceptedTitle")} description={t("alreadyAcceptedDescription")} org={org} />;

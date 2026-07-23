@@ -4,6 +4,7 @@ import { resolveIdentifierToDid } from "@/app/account/_lib/account-route";
 import { fetchUserCgsGroups } from "@/app/_lib/manage-server";
 import { GAINFOREST_MODERATION_REPO_DID } from "@/app/_lib/indexer";
 import type { AuthSession } from "@/app/_lib/auth";
+import { normalizeCgsRole } from "./access-role";
 
 export type InternalBadgeAccess = {
   isLoggedIn: boolean;
@@ -35,10 +36,6 @@ async function getSessionRoleForGainForestOrg(session: AuthSession, repo: string
   const result = await fetchCgsMembersForRequest(repo).catch(() => null);
   const member = result?.members.find((entry) => entry.did === session.did);
   return member?.role ?? null;
-}
-
-function normalizeCgsRole(value: string | null | undefined): CgsServerRole {
-  return value === "owner" || value === "admin" ? value : "member";
 }
 
 /**

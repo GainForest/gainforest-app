@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { ArrowRightIcon, CheckIcon, Loader2Icon, XIcon } from "lucide-react";
@@ -9,6 +9,7 @@ import { buildLoginUrl } from "@/app/_lib/auth-client";
 import type { AuthSession } from "@/app/_lib/auth";
 import type { GroupInvitation } from "@/app/_lib/cgs-invitations";
 import { InviteScene, type InviteOrg } from "./InviteScene";
+import { requestInvitationAcceptance } from "./invitation-acceptance";
 
 type AcceptStatus = "idle" | "accepting" | "accepted" | "error";
 
@@ -20,40 +21,29 @@ export function InvitationAcceptClient({
   session: AuthSession;
 }) {
   const t = useTranslations("common.groupInvitations.invitePage");
-  const [status, setStatus] = useState<AcceptStatus>(session.isLoggedIn ? "accepting" : "idle");
-  const [error, setError] = useState<string | null>(null);
+  const membersT = useTranslations("common.groupInvitations.members");
+  const menuT = useTranslations("common.groupInvitations.menu");
+  const [status, setStatus] = useState<AcceptStatus>("idle");
   const manageHref = useMemo(() => `/manage/groups/${encodeURIComponent(invitation.groupHandle || invitation.repo)}`, [invitation.groupHandle, invitation.repo]);
+  const organizationName = invitation.groupName || invitation.groupHandle || t("organizationFallback");
+  const invitedRole = membersT(invitation.role === "admin" ? "roleAdmin" : "roleMember");
+  const roleLabel = menuT("role", { role: invitedRole });
   const org: InviteOrg = {
-    name: invitation.groupName || invitation.groupHandle || invitation.repo,
+    name: organizationName,
     handle: invitation.groupHandle,
     did: invitation.repo,
   };
-  const organizationName = invitation.groupName || t("organizationFallback");
 
-  useEffect(() => {
-    if (!session.isLoggedIn || status !== "accepting") return;
-    let active = true;
-    async function accept() {
-      try {
-        const response = await fetch(`/api/cgs/invitations/${encodeURIComponent(invitation.id)}/accept`, {
-          method: "POST",
-          headers: { "content-type": "application/json" },
-          cache: "no-store",
-        });
-        const data = await response.json().catch(() => null) as { error?: string } | null;
-        if (!response.ok || data?.error) throw new Error(data?.error ?? t("acceptError"));
-        if (active) setStatus("accepted");
-      } catch (err) {
-        if (!active) return;
-        setError(err instanceof Error ? err.message : t("acceptError"));
-        setStatus("error");
-      }
+  async function accept() {
+    if (!session.isLoggedIn || status === "accepting") return;
+    setStatus("accepting");
+    try {
+      const result = await requestInvitationAcceptance(invitation.id);
+      setStatus(result.ok ? "accepted" : "error");
+    } catch {
+      setStatus("error");
     }
-    void accept();
-    return () => {
-      active = false;
-    };
-  }, [invitation.id, session.isLoggedIn, status, t]);
+  }
 
   const signIn = () => {
     window.location.href = buildLoginUrl({ email: invitation.email });
@@ -67,6 +57,7 @@ export function InvitationAcceptClient({
         title={t("signedOutTitle")}
         description={t("signedOutDescription", { organization: organizationName })}
         org={org}
+        roleLabel={roleLabel}
       >
         <Button type="button" onClick={signIn} className="w-full shadow-none sm:w-auto">
           {t("signIn")}
@@ -98,23 +89,43 @@ export function InvitationAcceptClient({
         tone="danger"
         icon={<XIcon className="size-7" />}
         title={t("errorTitle")}
-        description={error || t("acceptError")}
+        description={t("acceptError")}
         org={org}
+        roleLabel={roleLabel}
       >
-        <Button type="button" onClick={() => { setError(null); setStatus("accepting"); }} className="w-full shadow-none sm:w-auto">
+        <Button type="button" onClick={() => void accept()} className="w-full shadow-none sm:w-auto">
           {t("tryAgain")}
         </Button>
       </InviteScene>
     );
   }
 
+  if (status === "accepting") {
+    return (
+      <InviteScene
+        tone="neutral"
+        icon={<Loader2Icon className="size-7 animate-spin motion-reduce:animate-none" />}
+        title={t("acceptingTitle")}
+        description={t("acceptingDescription", { organization: organizationName })}
+        org={org}
+        roleLabel={roleLabel}
+      />
+    );
+  }
+
   return (
     <InviteScene
       tone="neutral"
-      icon={<Loader2Icon className="size-7 animate-spin" />}
-      title={t("acceptingTitle")}
-      description={t("acceptingDescription", { organization: organizationName })}
+      icon={<ArrowRightIcon className="size-7" />}
+      title={t("pendingTitle")}
+      description={t("pendingDescription", { organization: organizationName })}
       org={org}
-    />
+      roleLabel={roleLabel}
+    >
+      <Button type="button" onClick={() => void accept()} className="w-full shadow-none sm:w-auto">
+        {t("accept")}
+        <ArrowRightIcon />
+      </Button>
+    </InviteScene>
   );
 }

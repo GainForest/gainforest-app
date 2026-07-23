@@ -6,14 +6,17 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { Loader2Icon, UndoIcon, UserRoundIcon } from "lucide-react";
-import { formatCgsErrorMessage } from "@/app/_lib/cgs-errors";
 import { Button } from "@/components/ui/button";
+import { useModal } from "@/components/ui/modal/context";
 import { accountPath } from "@/app/account/_lib/account-route";
 import type { FlaggedTestAccount } from "@/app/internal/badges/_lib/test-accounts";
+import { AdminConfirmationModal } from "./AdminConfirmationModal";
+import { AdminEmptyState } from "./AdminModerationDashboard";
 
 export function AdminTestAccountsList({ accounts: initial }: { accounts: FlaggedTestAccount[] }) {
   const t = useTranslations("common.adminTestAccounts");
   const router = useRouter();
+  const modal = useModal();
   const [accounts, setAccounts] = useState(initial);
   const [busyDid, setBusyDid] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -28,14 +31,33 @@ export function AdminTestAccountsList({ accounts: initial }: { accounts: Flagged
         body: JSON.stringify({ did }),
       });
       const data = (await response.json().catch(() => null)) as { error?: string } | null;
-      if (!response.ok || data?.error) throw new Error(formatCgsErrorMessage(data?.error, t("error")));
+      if (!response.ok || data?.error) throw new Error(t("error"));
       setAccounts((current) => current.filter((account) => account.did !== did));
       router.refresh();
     } catch (caught) {
-      setError(caught instanceof Error ? caught.message : t("error"));
+      const message = caught instanceof Error ? caught.message : t("error");
+      setError(message);
+      throw caught;
     } finally {
       setBusyDid(null);
     }
+  }
+
+  function requestRemove(account: FlaggedTestAccount, name: string) {
+    modal.pushModal({
+      id: `admin-test-account-remove-${account.did}`,
+      content: (
+        <AdminConfirmationModal
+          title={t("confirmTitle")}
+          description={t("confirmDescription", { name })}
+          actionLabel={t("remove")}
+          cancelLabel={t("cancel")}
+          errorLabel={t("error")}
+          onConfirm={() => remove(account.did)}
+        />
+      ),
+    }, true);
+    void modal.show();
   }
 
   // Heading, count and description come from the AdminPanel shell that wraps
@@ -49,7 +71,7 @@ export function AdminTestAccountsList({ accounts: initial }: { accounts: Flagged
       ) : null}
 
       {accounts.length === 0 ? (
-        <div className="rounded-2xl bg-muted/40 p-8 text-center text-sm text-muted-foreground">{t("empty")}</div>
+        <AdminEmptyState>{t("empty")}</AdminEmptyState>
       ) : (
         <ul className="divide-y divide-border/70">
           {accounts.map((account) => {
@@ -74,11 +96,11 @@ export function AdminTestAccountsList({ accounts: initial }: { accounts: Flagged
                   type="button"
                   variant="secondary"
                   size="sm"
-                  onClick={() => void remove(account.did)}
+                  onClick={() => requestRemove(account, name)}
                   disabled={busy}
                   className="shrink-0 shadow-none"
                 >
-                  {busy ? <Loader2Icon className="size-4 animate-spin" /> : <UndoIcon className="size-4" />}
+                  {busy ? <Loader2Icon className="size-4 animate-spin motion-reduce:animate-none" /> : <UndoIcon className="size-4" />}
                   {t("remove")}
                 </Button>
               </li>
