@@ -355,10 +355,7 @@ function LoginModal() {
       </div>
 
       <div className="mb-6 text-center">
-        <h2
-          className="mb-2 text-3xl font-light tracking-[-0.02em] text-foreground"
-          style={{ fontFamily: "var(--font-garamond-var)" }}
-        >
+        <h2 className="mb-2 font-instrument text-3xl font-light italic tracking-[-0.02em] text-foreground">
           Get Started
         </h2>
         <p className="text-sm text-muted-foreground">Sign up or sign in to your account</p>

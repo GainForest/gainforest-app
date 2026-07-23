@@ -152,7 +152,7 @@ function AccountDrawer({ did, onClose }: { did: string | null; onClose: () => vo
               </span>
             )}
             <div className="min-w-0">
-              <h2 className="font-instrument text-[34px] font-normal leading-[1.08] tracking-[-0.01em] text-foreground sm:text-[36px]">
+              <h2 className="font-instrument text-[34px] font-normal italic leading-[1.08] tracking-[-0.01em] text-foreground sm:text-[36px]">
                 {displayName}
               </h2>
               {handle && (

@@ -49,13 +49,127 @@ const openingTags = (source, componentName) => {
 
   return tags;
 };
+const jsxAttributeValue = (tag, attributeName) => {
+  const match = new RegExp(`\\b${attributeName}\\s*=`).exec(tag);
+  if (!match) return null;
+  let index = match.index + match[0].length;
+  while (/\s/.test(tag[index] ?? "")) index += 1;
+  const opener = tag[index];
+
+  if (opener === '"' || opener === "'" || opener === "`") {
+    let escaped = false;
+    for (let end = index + 1; end < tag.length; end += 1) {
+      if (escaped) escaped = false;
+      else if (tag[end] === "\\") escaped = true;
+      else if (tag[end] === opener) return tag.slice(index, end + 1);
+    }
+    return null;
+  }
+
+  if (opener === "{") {
+    let depth = 1;
+    let quote = null;
+    let escaped = false;
+    for (let end = index + 1; end < tag.length; end += 1) {
+      const character = tag[end];
+      if (quote) {
+        if (escaped) escaped = false;
+        else if (character === "\\") escaped = true;
+        else if (character === quote) quote = null;
+        continue;
+      }
+      if (character === '"' || character === "'" || character === "`") quote = character;
+      else if (character === "{") depth += 1;
+      else if (character === "}") {
+        depth -= 1;
+        if (depth === 0) return tag.slice(index, end + 1);
+      }
+    }
+  }
+
+  return null;
+};
+const guaranteedClassTokens = (tag) => {
+  const className = jsxAttributeValue(tag, "className");
+  if (!className) return new Set();
+  if (className[0] !== "{") {
+    return new Set(className.slice(1, -1).split(/\s+/));
+  }
+
+  const tokens = new Set();
+  for (const literal of className.matchAll(/(["'`])([^"'`]*)\1/g)) {
+    const prefix = className.slice(0, literal.index).trimEnd();
+    if (prefix.endsWith("&&") || prefix.endsWith("?") || prefix.endsWith(":")) continue;
+    for (const token of literal[2].split(/\s+/)) tokens.add(token);
+  }
+  return tokens;
+};
+const headingUsesDisplayTypography = (tag, { allowLocalInstrument = false } = {}) => {
+  const classTokens = guaranteedClassTokens(tag);
+  const usesInstrument =
+    classTokens.has("font-instrument") ||
+    /fontFamily\s*:\s*["'][^"']*var\(--font-instrument-serif-var\)/.test(tag) ||
+    (allowLocalInstrument && /fontFamily\s*:\s*instrument\.style\.fontFamily/.test(tag));
+  const usesItalic =
+    classTokens.has("italic") ||
+    /fontStyle\s*:\s*["']italic["']/.test(tag);
+  return usesInstrument && usesItalic;
+};
+const lineNumber = (source, fragment) => source.slice(0, source.indexOf(fragment)).split("\n").length;
+const landingFiles = new Set([
+  "app/page.tsx",
+  "app/_components/HomeLanding.tsx",
+  "app/_components/BrowseGrid.tsx",
+]);
+const productionTsxFiles = [...sourceFiles("app"), ...sourceFiles("components")].filter(
+  (path) =>
+    !landingFiles.has(path) &&
+    !path.startsWith("app/%5Ftest/") &&
+    !path.startsWith("app/_test/"),
+);
+const garamondAllowedFiles = new Set([
+  ...landingFiles,
+  "app/layout.tsx",
+  "components/ui/typography.tsx",
+]);
 const failures = [];
 const assert = (condition, message) => {
   if (!condition) failures.push(message);
 };
 
+// Regression fixtures keep the source guard honest across multiline strings,
+// cn() expressions, inline emergency styles, and misleading `not-italic` text.
+assert(
+  headingUsesDisplayTypography(`<h2 className={cn(
+    "font-instrument",
+    "text-xl italic",
+    active && "text-primary",
+  )}>`),
+  "checker regression: multiline cn() headings must be recognized",
+);
+assert(
+  !headingUsesDisplayTypography('<h2 className={active && "font-instrument italic"}>'),
+  "checker regression: conditional typography must not produce a false green",
+);
+assert(
+  headingUsesDisplayTypography(`<h1 style={{
+    fontFamily: "var(--font-instrument-serif-var), Georgia, serif",
+    fontStyle: "italic",
+  }}>`),
+  "checker regression: inline Instrument headings must be recognized",
+);
+assert(
+  !headingUsesDisplayTypography('<h3 className="font-instrument not-italic">'),
+  "checker regression: not-italic must not satisfy the italic contract",
+);
+assert(
+  !headingUsesDisplayTypography('<h4 className="italic">'),
+  "checker regression: italic without Instrument must fail",
+);
+
 const globals = read("app/globals.css");
 const layout = read("app/layout.tsx");
+const globalError = read("app/global-error.tsx");
 const motionProvider = read("components/providers/MotionProvider.tsx");
 const button = read("components/ui/button.tsx");
 const pictureHero = read("app/_components/PictureHero.tsx");
@@ -75,6 +189,10 @@ assert(
 for (const token of ["geistSans.variable", "geistMono.variable", "cormorant.variable", "instrument.variable"]) {
   assert(layout.includes(token), `app/layout.tsx: body must mount the ${token} next/font token`);
 }
+assert(
+  /Instrument_Serif\s*\([\s\S]*?style:\s*"italic"/.test(globalError),
+  "app/global-error.tsx: the root fallback must load its own italic Instrument font",
+);
 assert(
   (globals.match(/@keyframes\s+shimmer\b/g) ?? []).length === 1,
   "app/globals.css: shimmer must have one canonical keyframe definition",
@@ -149,10 +267,33 @@ for (const path of sourceFiles("app")) {
   }
 }
 
+for (const path of productionTsxFiles) {
+  const source = read(path);
+
+  // DisplayHeading is allowed by construction; native semantic headings must
+  // state both sides of the visual contract in their complete opening tag.
+  for (let level = 1; level <= 6; level += 1) {
+    for (const heading of openingTags(source, `h${level}`)) {
+      assert(
+        headingUsesDisplayTypography(heading, { allowLocalInstrument: path === "app/global-error.tsx" }),
+        `${path}:${lineNumber(source, heading)}: h${level} must use italic Instrument Serif`,
+      );
+    }
+  }
+
+  if (!garamondAllowedFiles.has(path)) {
+    const forbidden = source.match(/font-(?:garamond|serif)\b|--font-garamond-var/);
+    assert(
+      !forbidden,
+      `${path}${forbidden ? `:${lineNumber(source, forbidden[0])}` : ""}: non-brand Garamond/serif usage is forbidden`,
+    );
+  }
+}
+
 if (failures.length > 0) {
   console.error(`UI contract check failed (${failures.length}):`);
   for (const failure of failures) console.error(`- ${failure}`);
   process.exit(1);
 }
 
-console.log("UI contract check passed (foundation APIs and direct callers).\nRoute-wave typography/copy cleanup remains intentionally outside this focused guard.");
+console.log("UI contract check passed (shared foundation, production heading typography, and direct callers).");
