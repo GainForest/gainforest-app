@@ -11,7 +11,7 @@
 
 import Link from "next/link";
 import { useTranslations } from "next-intl";
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import {
   ArrowRightIcon,
   CameraIcon,
@@ -55,6 +55,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { cn } from "@/lib/utils";
 import { manageApiHref, manageHref, type ManageTarget } from "@/lib/links";
 import { WORK_SCOPE_MESSAGE_KEYS, type KnownWorkScopeKey, type WorkScopeLabels } from "@/app/_lib/work-scope-labels";
+import { isReliablyOwnProjectRecord } from "../../../projects/_components/project-record-ownership";
 
 /* ── Types ──────────────────────────────────────────────────────────────── */
 
@@ -328,19 +329,14 @@ function Field({ label, hint, htmlFor, error, children }: { label: string; hint?
 /* ── Section header (editorial display type per section) ────────────────── */
 
 function SectionHeader({
-  eyebrow,
   title,
   subtitle,
 }: {
-  eyebrow: string;
   title: string;
   subtitle: string;
 }) {
   return (
     <div className="mb-8">
-      <div className="mb-2.5 flex flex-wrap items-center gap-2">
-        <p className="text-[11px] font-medium uppercase tracking-[0.18em] text-muted-foreground/65">{eyebrow}</p>
-      </div>
       <h2 className="font-instrument text-[2.5rem] italic leading-[1.05] tracking-[-0.01em] text-foreground">{title}</h2>
       <p className="mt-2 text-sm leading-6 text-muted-foreground">{subtitle}</p>
     </div>
@@ -466,6 +462,7 @@ function ContributorInput({
   const [focused, setFocused] = useState(false);
   const [highlight, setHighlight] = useState(0);
   const boxRef = useRef<HTMLDivElement>(null);
+  const reduceMotion = useReducedMotion();
 
   useEffect(() => {
     const query = value.trim();
@@ -582,10 +579,10 @@ function ContributorInput({
         <AnimatePresence>
           {open && !actor ? (
             <motion.div
-              initial={{ opacity: 0, y: 4 }}
+              initial={reduceMotion ? false : { opacity: 0, y: 4 }}
               animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: 4 }}
-              transition={{ duration: 0.14 }}
+              exit={reduceMotion ? { opacity: 0 } : { opacity: 0, y: 4 }}
+              transition={{ duration: reduceMotion ? 0 : 0.14 }}
               className="absolute z-[1000] mt-1.5 max-h-72 w-full overflow-y-auto rounded-xl border border-border bg-card p-1.5 shadow-xl"
             >
               {value.trim().length < 2 ? (
@@ -1102,11 +1099,12 @@ function DraftsSubheader({
   onLoadDraft: (draft: Draft) => void;
   onDeleteDraft: (id: string) => void;
 }) {
+  const t = useTranslations("bumicert.create.tabs");
   if (drafts.length === 0) return null;
   return (
     <div className="-mx-4 overflow-x-auto px-4 pb-2">
       <div className="flex min-w-max items-center gap-2 border-b border-border/70 pb-2">
-        <span className="mr-1 text-xs font-medium uppercase tracking-[0.14em] text-muted-foreground/80">Drafts</span>
+        <span className="mr-1 text-xs font-medium text-muted-foreground">{t("drafts")}</span>
         {drafts.slice(0, 5).map((draft) => (
           <span key={draft.id} className={cn("inline-flex items-center gap-2 rounded-full border px-3 py-1 text-xs transition-colors", draft.id === activeDraftId ? "border-primary bg-primary/12 text-primary" : "border-border bg-background hover:bg-muted/60")}>
             <button type="button" onClick={() => onLoadDraft(draft)} className="font-medium">
@@ -1127,22 +1125,22 @@ function DraftsSubheader({
 
 function PublishedView({ result, target, ownerIdentifier, linkedProject, onReset }: { result: PublishResult; target: ManageTarget; ownerIdentifier: string; linkedProject: LinkedProjectPrefill | null; onReset: () => void }) {
   const actionT = useTranslations("bumicert.create.draft.stepForms.submit");
+  const reduceMotion = useReducedMotion();
   const detailHref = localBumicertHref(ownerIdentifier, result.rkey);
   const projectHref = linkedProject
     ? manageHref(target, "projects", { mode: "edit", project: linkedProject.rkey })
     : manageHref(target, "projects");
   return (
-    <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, ease: [0.25, 0.1, 0.25, 1] }} className="mx-auto max-w-xl py-16 text-center">
+    <motion.div initial={reduceMotion ? false : { opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={reduceMotion ? { duration: 0 } : { duration: 0.4, ease: [0.25, 0.1, 0.25, 1] }} className="mx-auto max-w-xl py-16 text-center">
       <motion.div
-        initial={{ scale: 0.6 }}
+        initial={reduceMotion ? false : { scale: 0.6 }}
         animate={{ scale: 1 }}
-        transition={{ type: "spring", stiffness: 240, damping: 16 }}
+        transition={reduceMotion ? { duration: 0 } : { type: "spring", stiffness: 240, damping: 16 }}
         className="mx-auto flex size-16 items-center justify-center rounded-full bg-primary/12 text-primary"
       >
         <CheckIcon className="size-8" />
       </motion.div>
-      <p className="mt-6 text-xs font-medium uppercase tracking-[0.22em] text-primary/70">Published</p>
-      <h2 className="mt-2 font-instrument text-5xl italic tracking-[-0.01em] text-foreground">It’s live.</h2>
+      <h2 className="mt-6 font-instrument text-5xl italic tracking-[-0.01em] text-foreground">It’s live.</h2>
       <p className="mx-auto mt-3 max-w-md text-sm leading-6 text-muted-foreground">Your Cert is on your public profile now. It may take a moment to appear everywhere.</p>
       <div className="mt-7 flex flex-wrap justify-center gap-3">
         <Button asChild>
@@ -1174,6 +1172,8 @@ export function NewBumicertClient({
   linkedProject?: LinkedProjectPrefill | null;
 }) {
   const workScopeT = useTranslations("common.workScopes");
+  const previewT = useTranslations("bumicert.create.draft.stepForms.preview");
+  const reduceMotion = useReducedMotion();
   const workScopeLabels: WorkScopeLabels = {
     reforestation: workScopeT(WORK_SCOPE_MESSAGE_KEYS.reforestation),
     forest_protection: workScopeT(WORK_SCOPE_MESSAGE_KEYS.forest_protection),
@@ -1200,7 +1200,16 @@ export function NewBumicertClient({
   const [publishResult, setPublishResult] = useState<PublishResult | null>(null);
   const [mobileSheet, setMobileSheet] = useState<"preview" | null>(null);
   const publishPermission = canCreateRecord(target);
-  const linkedProjectUpdatePermission = canUpdateRecord(target);
+  const linkedProjectUpdatePermission = canUpdateRecord(target, {
+    ownRecord: linkedProject
+      ? isReliablyOwnProjectRecord({
+          kind: target.kind,
+          did: target.did,
+          currentUserDid: target.currentUserDid,
+          recordDid: linkedProject.did,
+        })
+      : false,
+  });
   const canLinkToProject = Boolean(linkedProject?.canLink && linkedProjectUpdatePermission.allowed);
   const autosaveTimer = useRef<number | null>(null);
 
@@ -1490,12 +1499,12 @@ export function NewBumicertClient({
             <form onSubmit={handlePublish} className="mt-2 grid gap-x-14 gap-y-12 xl:grid-cols-[minmax(0,1fr)_18rem]">
               <div className="min-w-0">
                 <section>
-                  <SectionHeader eyebrow="Basics" title={STEPS[0].title} subtitle={STEPS[0].subtitle} />
+                  <SectionHeader title={STEPS[0].title} subtitle={STEPS[0].subtitle} />
                   <BasicsStep values={values} setValues={setValues} issues={fieldIssues} onFieldChange={markFieldChanged} workScopeLabels={workScopeLabels} />
 
                   {/* Mobile: live preview shown inline */}
                   <div className="mt-10 xl:hidden">
-                    <p className="mb-3 text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground/70">Live preview</p>
+                    <p className="mb-3 text-xs font-medium text-muted-foreground">{previewT("title")}</p>
                     <div className="mx-auto max-w-[18rem]">
                       <PreviewContent {...previewProps} />
                     </div>
@@ -1503,12 +1512,12 @@ export function NewBumicertClient({
                 </section>
 
                 <section className="mt-14 border-t border-border/40 pt-14">
-                  <SectionHeader eyebrow="Story" title={STEPS[1].title} subtitle={STEPS[1].subtitle} />
+                  <SectionHeader title={STEPS[1].title} subtitle={STEPS[1].subtitle} />
                   <StoryStep values={values} setValues={setValues} issues={fieldIssues} onFieldChange={markFieldChanged} />
                 </section>
 
                 <section className="mt-14 border-t border-border/40 pt-14">
-                  <SectionHeader eyebrow="People & places" title={STEPS[2].title} subtitle={STEPS[2].subtitle} />
+                  <SectionHeader title={STEPS[2].title} subtitle={STEPS[2].subtitle} />
                   <PeopleStep
                     did={did}
                     target={target}
@@ -1528,10 +1537,13 @@ export function NewBumicertClient({
                 </section>
 
                 <section className="mt-14 border-t border-border/40 pt-14">
-                  <SectionHeader eyebrow="Publish" title="ready to publish?" subtitle="One last verification, then make it public." />
+                  <SectionHeader title={STEPS[3].title} subtitle={STEPS[3].subtitle} />
                   <ConfirmStep values={values} setValues={setValues} publishError={publishError} issues={visibleIssues} isComplete={formIssues.length === 0} onFieldChange={markFieldChanged} />
                 </section>
 
+                {linkedProject?.canLink && !linkedProjectUpdatePermission.allowed ? (
+                  <p className="mt-8 text-sm text-muted-foreground" role="status">{linkedProjectUpdatePermission.reason}</p>
+                ) : null}
                 <div className="mt-10 flex flex-wrap items-center justify-between gap-3">
                   <span className="hidden text-xs text-muted-foreground sm:block">{activeDraftId ? "Saved" : "Not saved yet"}</span>
                   <Button type="submit" size="lg" disabled={isPublishing || !publishPermission.allowed} title={publishPermission.reason ?? undefined}>
@@ -1546,7 +1558,7 @@ export function NewBumicertClient({
               <aside className="hidden xl:sticky xl:top-20 xl:block xl:self-start">
                 <div className="space-y-8">
                   <div>
-                    <p className="mb-3 text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground/70">Live preview</p>
+                    <p className="mb-3 text-xs font-medium text-muted-foreground">{previewT("title")}</p>
                     <PreviewContent {...previewProps} />
                   </div>
                   <TaináChatDock />
@@ -1574,17 +1586,18 @@ export function NewBumicertClient({
               <motion.div className="fixed inset-0 z-50 xl:hidden" initial={false}>
                 <motion.div
                   className="absolute inset-0 bg-foreground/40 backdrop-blur-sm"
-                  initial={{ opacity: 0 }}
+                  initial={reduceMotion ? false : { opacity: 0 }}
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
+                  transition={{ duration: reduceMotion ? 0 : 0.2 }}
                   onClick={() => setMobileSheet(null)}
                 />
                 <motion.div
                   className="absolute inset-x-0 bottom-0 max-h-[88vh] overflow-y-auto rounded-t-3xl bg-background px-5 pb-10 pt-3 shadow-2xl"
-                  initial={{ y: "100%" }}
+                  initial={reduceMotion ? false : { y: "100%" }}
                   animate={{ y: 0 }}
-                  exit={{ y: "100%" }}
-                  transition={{ type: "spring", stiffness: 320, damping: 34 }}
+                  exit={reduceMotion ? { opacity: 0 } : { y: "100%" }}
+                  transition={reduceMotion ? { duration: 0 } : { type: "spring", stiffness: 320, damping: 34 }}
                 >
                   <div className="mx-auto mb-4 h-1.5 w-10 rounded-full bg-muted-foreground/25" />
                   <div className="mb-5 flex items-center justify-between">

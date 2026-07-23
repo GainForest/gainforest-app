@@ -28,6 +28,8 @@ import {
   canUpdateRecord,
 } from "../../../../_lib/cgs-permissions";
 import { putRecord } from "../../../../_lib/mutations";
+import { isReliablyOwnProjectRecord } from "../../../_components/project-record-ownership";
+import { SectionSurface } from "@/components/ui/section-surface";
 
 const PROJECT_COLLECTION = "org.hypercerts.collection";
 
@@ -84,7 +86,15 @@ export function ProjectCertsManagerClient({ target, projectRkey }: { target: Man
   const [refreshing, setRefreshing] = useState(false);
   const [showLink, setShowLink] = useState(false);
   const createPermission = canCreateRecord(target);
-  const updatePermission = canUpdateRecord(target);
+  const ownProject = data?.project
+    ? isReliablyOwnProjectRecord({
+        kind: target.kind,
+        did: target.did,
+        currentUserDid: target.currentUserDid,
+        recordDid: data.project.did,
+      })
+    : false;
+  const updatePermission = canUpdateRecord(target, { ownRecord: ownProject });
   const repoOptions = target.kind === "group" ? { repo: target.did } : undefined;
 
   const loadCerts = useCallback(async (options?: { showLoading?: boolean }) => {
@@ -219,7 +229,7 @@ export function ProjectCertsManagerClient({ target, projectRkey }: { target: Man
           </div>
 
           {!createPermission.allowed || !updatePermission.allowed ? (
-            <div className="flex items-center gap-2 rounded-2xl border border-warn/25 bg-warn/10 px-4 py-3 text-sm text-foreground">
+            <div className="flex items-center gap-2 rounded-2xl bg-warn/10 px-4 py-3 text-sm text-foreground">
               <TriangleAlertIcon className="size-4 text-warn" />
               {(!createPermission.allowed
                 ? createPermission.reason
@@ -228,7 +238,7 @@ export function ProjectCertsManagerClient({ target, projectRkey }: { target: Man
           ) : null}
 
           {error ? (
-            <div className="flex items-center gap-2 rounded-2xl border border-warn/25 bg-warn/10 px-4 py-3 text-sm text-foreground">
+            <div className="flex items-center gap-2 rounded-2xl bg-warn/10 px-4 py-3 text-sm text-foreground">
               <TriangleAlertIcon className="size-4 text-warn" />
               {error}
             </div>
@@ -293,11 +303,11 @@ function CertTile({
   const details = certDetails(cert, t);
 
   return (
-    <li className={cn("group overflow-hidden rounded-3xl border bg-card shadow-sm transition", cert.linked ? "border-primary/25" : "border-border")}>
+    <li className={cn("group overflow-hidden rounded-2xl bg-muted/35 transition-colors hover:bg-muted/55", cert.linked && "ring-1 ring-primary/25")}>
       <div className="flex gap-3 p-3 sm:gap-4 sm:p-4">
         <div className="relative h-24 w-24 shrink-0 overflow-hidden rounded-2xl bg-muted sm:h-28 sm:w-32">
           {cert.imageUrl ? (
-            <Image src={cert.imageUrl} alt={cert.title} fill unoptimized sizes="128px" className="object-cover transition-transform duration-500 group-hover:scale-105" />
+            <Image src={cert.imageUrl} alt={cert.title} fill unoptimized sizes="128px" className="object-cover transition-transform duration-500 motion-reduce:transition-none group-hover:scale-105 motion-reduce:group-hover:scale-100" />
           ) : (
             <div className="grid h-full place-items-center text-primary/60">
               <LeafIcon className="size-8" />
@@ -358,7 +368,7 @@ function CertsSkeleton() {
       <Skeleton className="h-28 rounded-3xl" />
       <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3">
         {Array.from({ length: 9 }).map((_, index) => (
-          <div key={index} className="flex gap-4 rounded-3xl border border-border bg-card p-4">
+          <div key={index} className="flex gap-4 rounded-2xl bg-muted/35 p-4">
             <Skeleton className="h-28 w-32 shrink-0 rounded-2xl" />
             <div className="flex flex-1 flex-col justify-between py-1">
               <div className="space-y-3">
@@ -390,7 +400,7 @@ function EmptyState({
 }) {
   const t = useTranslations("marketplace.manageProjectCerts");
   return (
-    <div className="flex min-h-72 flex-col items-center justify-center rounded-[2rem] border border-dashed border-border bg-muted/20 px-6 text-center">
+    <SectionSurface variant="muted" className="flex min-h-72 flex-col items-center justify-center text-center">
       <LeafIcon className="mb-4 size-10 text-primary" />
       <h2 className="font-instrument text-2xl font-light italic tracking-[-0.02em] text-foreground">
         {hasQuery ? t("empty.noMatchingTitle") : t("empty.noCertsTitle")}
@@ -416,7 +426,7 @@ function EmptyState({
           ) : null}
         </div>
       ) : null}
-    </div>
+    </SectionSurface>
   );
 }
 
@@ -443,7 +453,7 @@ function LinkExistingSection({
 }) {
   const t = useTranslations("marketplace.manageProjectCerts");
   return (
-    <section className="overflow-hidden rounded-3xl border border-border/60 bg-card/40">
+    <section className="border-t border-border/60">
       <button
         type="button"
         onClick={onToggle}
@@ -455,10 +465,10 @@ function LinkExistingSection({
           <span className="font-instrument text-xl italic text-foreground">{t("linkExisting.title")}</span>
           <span className="rounded-full bg-muted px-2.5 py-0.5 text-xs text-muted-foreground">{t("stats.available", { count: availableCount })}</span>
         </span>
-        <ChevronDownIcon className={cn("size-5 shrink-0 text-muted-foreground transition-transform", open && "rotate-180")} />
+        <ChevronDownIcon className={cn("size-5 shrink-0 text-muted-foreground transition-transform motion-reduce:transition-none", open && "rotate-180")} />
       </button>
       {open ? (
-        <div className="border-t border-border/60 px-4 py-4 sm:px-5">
+        <div className="px-4 pb-4 sm:px-5">
           <p className="mb-4 max-w-2xl text-sm leading-6 text-muted-foreground">{t("linkExisting.description")}</p>
           {certs.length === 0 ? (
             <p className="rounded-2xl bg-muted/40 px-4 py-6 text-center text-sm text-muted-foreground">

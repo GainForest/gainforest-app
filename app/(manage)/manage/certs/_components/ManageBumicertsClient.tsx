@@ -3,12 +3,10 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import {
   CirclePlusIcon,
-  LayoutGridIcon,
   LeafIcon,
-  ListIcon,
   Loader2Icon,
   Trash2Icon,
   TriangleAlertIcon,
@@ -22,66 +20,30 @@ import type { BumicertRecord } from "@/app/_lib/indexer";
 import { localBumicertHref } from "@/app/_lib/urls";
 import { cn } from "@/lib/utils";
 import { manageHref, type ManageTarget } from "@/lib/links";
-import { canDeleteRecord } from "../../_lib/cgs-permissions";
+import { canCreateRecord, canDeleteRecord } from "../../_lib/cgs-permissions";
 import { deleteRecord } from "../../_lib/mutations";
+import { ManageCollectionHeader, ManageCollectionViewToggle } from "../../projects/_components/ManageCollectionPrimitives";
+import { SectionSurface } from "@/components/ui/section-surface";
 
 const BUMICERT_COLLECTION = "org.hypercerts.claim.activity";
 
 function CreateHeroCard({ target }: { target: ManageTarget }) {
+  const t = useTranslations("bumicert.create");
+  const createPermission = canCreateRecord(target);
   return (
-    <section className="relative overflow-visible rounded-[1.6rem] border border-border/80 bg-card shadow-sm">
-      <div className="relative min-h-[6rem] overflow-hidden rounded-[1.55rem]">
-        <Image
-          src="/assets/media/images/create-bumicert/hero-light@2x.webp"
-          alt=""
-          fill
-          priority
-          quality={95}
-          sizes="100vw"
-          className="object-cover object-center dark:hidden"
-        />
-        <Image
-          src="/assets/media/images/create-bumicert/hero-dark@2x.webp"
-          alt=""
-          fill
-          priority
-          quality={95}
-          sizes="100vw"
-          className="hidden object-cover object-center dark:block"
-        />
-        <div className="absolute inset-0 bg-linear-to-r from-background/95 via-background/72 to-background/5 dark:from-background/90 dark:via-background/58 dark:to-background/10" />
-        <div className="absolute -top-8 right-[7%] h-28 w-52 rounded-full bg-background/50 blur-2xl dark:bg-primary/10" />
-        <div className="absolute inset-x-0 bottom-0 h-16 bg-linear-to-t from-foreground/20 via-foreground/5 to-transparent dark:from-black/55" />
-
-        <div className="relative z-30 flex min-h-[6rem] flex-col gap-4 px-6 py-4 sm:flex-row sm:items-center sm:justify-between sm:gap-6 sm:px-8 lg:px-9">
-          <p className="w-full text-sm leading-5 text-muted-foreground sm:max-w-[30rem]">
-            Certs are impact certificates that connect a project to people, places, time periods, and supporting photos or notes. Use them to make field work easier to review and share, and to raise funds for your project through impact donations.
-          </p>
-          <Button size="sm" asChild className="shrink-0 self-start sm:self-auto">
-            <Link href={manageHref(target, "newBumicert")}>
-              <CirclePlusIcon />
-              Mint a Cert
-            </Link>
-          </Button>
-        </div>
-      </div>
-      <Image
-        src="/assets/media/images/create-bumicert/plant-light.png"
-        alt=""
-        width={1002}
-        height={1146}
-        priority
-        className="pointer-events-none absolute bottom-0 right-[4%] z-20 hidden h-[9rem] w-auto max-w-[50%] object-contain dark:hidden md:block"
-      />
-      <Image
-        src="/assets/media/images/create-bumicert/plant-dark.png"
-        alt=""
-        width={964}
-        height={1129}
-        priority
-        className="pointer-events-none absolute bottom-0 right-[4%] z-20 hidden h-[9rem] w-auto max-w-[50%] object-contain dark:md:block"
-      />
-    </section>
+    <SectionSurface variant="muted" className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+      <p className="max-w-2xl text-sm leading-6 text-muted-foreground">{t("landing.explainer.body1")}</p>
+      {createPermission.allowed ? (
+        <Button size="sm" asChild className="shrink-0 self-start sm:self-auto">
+          <Link href={manageHref(target, "newBumicert")}>
+            <CirclePlusIcon />
+            {t("actions.createBumicert")}
+          </Link>
+        </Button>
+      ) : (
+        <p className="max-w-sm text-sm text-muted-foreground" role="status">{createPermission.reason}</p>
+      )}
+    </SectionSurface>
   );
 }
 
@@ -90,7 +52,13 @@ type ViewMode = "cards" | "list";
 function RecentBumicerts({ target, bumicerts, did, ownerIdentifier }: { target: ManageTarget; bumicerts: BumicertRecord[]; did: string; ownerIdentifier: string }) {
   const [view, setView] = useState<ViewMode>("cards");
   const [items, setItems] = useState<BumicertRecord[]>(bumicerts);
+  const t = useTranslations("bumicert.create.recent");
+  const viewT = useTranslations("marketplace.projects.view");
+  const profileT = useTranslations("common.sidebar.profileRow");
+  const detailsT = useTranslations("marketplace.manageProjectCerts.details");
+  const reduceMotion = useReducedMotion();
   const modal = useModal();
+  const createPermission = canCreateRecord(target);
   const deletePermission = canDeleteRecord(target);
 
   useEffect(() => {
@@ -126,32 +94,31 @@ function RecentBumicerts({ target, bumicerts, did, ownerIdentifier }: { target: 
       {items.length === 0 ? (
         <motion.div
           key="empty"
-          initial={{ opacity: 0, y: 8 }}
+          initial={reduceMotion ? false : { opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.35, ease: [0.25, 0.1, 0.25, 1] }}
+          transition={reduceMotion ? { duration: 0 } : { duration: 0.35, ease: [0.25, 0.1, 0.25, 1] }}
           className="flex min-h-[18rem] flex-col items-center justify-center px-6 text-center"
         >
           <LeafIcon className="mb-4 size-10 text-primary" />
           <div className="space-y-2">
-            <p className="font-serif text-2xl font-medium leading-tight tracking-[-0.02em] text-foreground">
-              No Certs yet
-            </p>
-            <p className="text-sm leading-6 text-muted-foreground">
-              Your published Certs will appear here.
-              <br />Create your first one when you are ready.
-            </p>
+            <h2 className="font-instrument text-2xl italic leading-tight text-foreground">{t("emptyTitle")}</h2>
+            <p className="text-sm leading-6 text-muted-foreground">{t("emptyLine1")} {t("emptyLine2")}</p>
           </div>
-          <Button variant="outline" size="sm" asChild className="mt-5">
-            <Link href={manageHref(target, "newBumicert")}>
-              <CirclePlusIcon />
-              Mint your first Cert
-            </Link>
-          </Button>
+          {createPermission.allowed ? (
+            <Button variant="outline" size="sm" asChild className="mt-5">
+              <Link href={manageHref(target, "newBumicert")}>
+                <CirclePlusIcon />
+                {t("createFirst")}
+              </Link>
+            </Button>
+          ) : (
+            <p className="mt-4 max-w-sm text-sm text-muted-foreground" role="status">{createPermission.reason}</p>
+          )}
         </motion.div>
       ) : (
         <div key="content" className="space-y-4">
           <div className="flex justify-end">
-            <ViewToggle view={view} setView={setView} />
+            <ManageCollectionViewToggle value={view} onChange={setView} cardsLabel={viewT("cards")} listLabel={viewT("list")} compact />
           </div>
           {view === "list" ? (
             <div>
@@ -172,9 +139,9 @@ function RecentBumicerts({ target, bumicerts, did, ownerIdentifier }: { target: 
                 <motion.div
                   key={bumicert.id}
                   className="group relative h-full"
-                  initial={{ opacity: 0, y: 8 }}
+                  initial={reduceMotion ? false : { opacity: 0, y: 8 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.35, ease: [0.25, 0.1, 0.25, 1] }}
+                  transition={reduceMotion ? { duration: 0 } : { duration: 0.35, ease: [0.25, 0.1, 0.25, 1] }}
                 >
                   <Link href={localBumicertHref((bumicert.did || did) === did ? ownerIdentifier : bumicert.did || did, bumicert.rkey)} className="block h-full">
                     <BumicertCardVisual
@@ -183,8 +150,8 @@ function RecentBumicerts({ target, bumicerts, did, ownerIdentifier }: { target: 
                       logoRef={bumicert.creatorAvatarRef}
                       ownerDid={bumicert.did || did}
                       title={bumicert.title}
-                      organizationName={bumicert.creatorName ?? "Your profile"}
-                      objectives={bumicertObjectives(bumicert)}
+                      organizationName={bumicert.creatorName ?? profileT("fallbackName")}
+                      objectives={bumicertObjectives(bumicert, detailsT)}
                       description={bumicert.shortDescription ?? undefined}
                       className="h-full"
                     />
@@ -206,52 +173,30 @@ function RecentBumicerts({ target, bumicerts, did, ownerIdentifier }: { target: 
   );
 }
 
-function bumicertObjectives(bumicert: BumicertRecord): string[] {
+function bumicertObjectives(bumicert: BumicertRecord, t: ReturnType<typeof useTranslations>): string[] {
   return [
-    bumicert.locationCount > 0 ? `${bumicert.locationCount} ${bumicert.locationCount === 1 ? "site" : "sites"}` : "",
-    bumicert.contributorCount > 0 ? `${bumicert.contributorCount} ${bumicert.contributorCount === 1 ? "contributor" : "contributors"}` : "",
-    bumicert.startDate || bumicert.endDate ? "impact period" : "",
+    bumicert.locationCount > 0 ? t("sites", { count: bumicert.locationCount }) : "",
+    bumicert.contributorCount > 0 ? t("contributors", { count: bumicert.contributorCount }) : "",
+    bumicert.startDate || bumicert.endDate ? t("impactPeriod") : "",
   ].filter(Boolean);
 }
 
-function ViewToggle({ view, setView }: { view: ViewMode; setView: (view: ViewMode) => void }) {
-  return (
-    <div className="inline-flex h-10 shrink-0 items-center rounded-full border border-border bg-background/70 p-0.5 backdrop-blur">
-      {([
-        { id: "cards", label: "Cards", Icon: LayoutGridIcon },
-        { id: "list", label: "List", Icon: ListIcon },
-      ] as const).map(({ id, label, Icon }) => (
-        <button
-          key={id}
-          type="button"
-          onClick={() => setView(id)}
-          aria-pressed={view === id}
-          aria-label={label}
-          title={label}
-          className={`inline-flex h-9 items-center gap-1.5 rounded-full px-3 text-sm font-medium transition-colors ${
-            view === id ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"
-          }`}
-        >
-          <Icon className="h-4 w-4" />
-          <span>{label}</span>
-        </button>
-      ))}
-    </div>
-  );
-}
-
 function ManageBumicertListItem({ bumicert, did, ownerIdentifier, onDelete }: { bumicert: BumicertRecord; did: string; ownerIdentifier: string; onDelete?: () => void }) {
+  const cardT = useTranslations("marketplace.recordExplorer.card");
+  const profileT = useTranslations("common.sidebar.profileRow");
+  const detailsT = useTranslations("marketplace.manageProjectCerts.details");
+  const actionT = useTranslations("marketplace.recordDrawer.actions");
   const href = localBumicertHref((bumicert.did || did) === did ? ownerIdentifier : bumicert.did || did, bumicert.rkey);
-  const details = bumicertObjectives(bumicert);
+  const details = bumicertObjectives(bumicert, detailsT);
 
   return (
     <div className="group relative">
       <Link href={href} className="flex w-full gap-3 rounded-2xl px-1 py-3 text-left outline-none transition-colors duration-300 hover:bg-surface-sunken focus-visible:ring-2 focus-visible:ring-primary/60 sm:gap-4 sm:px-2 sm:py-4">
         <span className="relative h-24 w-24 shrink-0 overflow-hidden rounded-xl bg-muted sm:h-28 sm:w-36">
           {bumicert.imageUrl ? (
-            <Image src={bumicert.imageUrl} alt={bumicert.title} fill unoptimized sizes="144px" className="object-cover transition-transform duration-500 group-hover:scale-105" />
+            <Image src={bumicert.imageUrl} alt={bumicert.title} fill unoptimized sizes="144px" className="object-cover transition-transform duration-500 motion-reduce:transition-none group-hover:scale-105 motion-reduce:group-hover:scale-100" />
           ) : (
-            <span className="grid h-full place-items-center font-garamond text-sm italic text-muted-foreground">No cover image</span>
+            <span className="grid h-full place-items-center text-sm text-muted-foreground">{cardT("noCover")}</span>
           )}
         </span>
         <span className="flex min-w-0 flex-1 flex-col justify-between py-1">
@@ -260,8 +205,8 @@ function ManageBumicertListItem({ bumicert, did, ownerIdentifier, onDelete }: { 
             {bumicert.shortDescription ? <span className="mt-1 line-clamp-2 block text-sm leading-relaxed text-muted-foreground">{bumicert.shortDescription}</span> : null}
           </span>
           <span className="mt-3 flex flex-wrap items-center justify-between gap-2 border-t border-border/60 pt-2">
-            <span className="min-w-0 truncate text-xs text-muted-foreground">{details.length > 0 ? details.join(" · ") : bumicert.creatorName ?? "Your profile"}</span>
-            <span className="shrink-0 text-xs font-medium text-foreground transition-colors group-hover:text-primary">Open</span>
+            <span className="min-w-0 truncate text-xs text-muted-foreground">{details.length > 0 ? details.join(" · ") : bumicert.creatorName ?? profileT("fallbackName")}</span>
+            <span className="shrink-0 text-xs font-medium text-foreground transition-colors group-hover:text-primary">{actionT("view")}</span>
           </span>
         </span>
       </Link>
@@ -346,30 +291,25 @@ function DeleteBumicertModal({ title, onConfirm }: { title: string; onConfirm: (
 }
 
 export function ManageBumicertsClient({ target, did, ownerIdentifier, bumicerts, error }: { target: ManageTarget; did: string; ownerIdentifier: string; bumicerts: BumicertRecord[]; error?: string | null }) {
+  const tabT = useTranslations("common.accountTabs");
+  const createT = useTranslations("bumicert.create");
+  const recentT = useTranslations("bumicert.create.recent");
+  const reduceMotion = useReducedMotion();
   return (
     <div className="mx-auto w-full max-w-[1440px] px-4 py-4 sm:px-6 sm:py-6">
       <div className="space-y-4">
-        <section className="-mx-4 px-4 py-1 sm:-mx-6 sm:px-6">
-          <div className="max-w-2xl">
-            <h1 className="font-instrument text-2xl font-medium italic tracking-[-0.03em] text-foreground sm:text-3xl">
-              My Certs
-            </h1>
-            <p className="mt-2 max-w-xl text-sm leading-6 text-muted-foreground">
-              Create and manage the verified impact stories connected to your work.
-            </p>
-          </div>
-        </section>
+        <ManageCollectionHeader title={tabT("bumicerts")} description={createT("landing.hero.description")} />
         <CreateHeroCard target={target} />
         {error ? (
           <motion.div
-            initial={{ opacity: 0, y: 8 }}
+            initial={reduceMotion ? false : { opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.35, ease: [0.25, 0.1, 0.25, 1] }}
+            transition={reduceMotion ? { duration: 0 } : { duration: 0.35, ease: [0.25, 0.1, 0.25, 1] }}
             className="flex min-h-[18rem] flex-col items-center justify-center gap-4 rounded-[2rem] bg-muted/30 px-6 text-center"
           >
             <TriangleAlertIcon className="size-8 text-muted-foreground opacity-60" />
             <div className="space-y-1">
-              <p className="font-serif text-2xl font-medium text-foreground">Could not load recent Certs</p>
+              <h2 className="font-instrument text-2xl italic text-foreground">{recentT("errorTitle")}</h2>
               <p className="text-sm text-muted-foreground">{error}</p>
             </div>
           </motion.div>

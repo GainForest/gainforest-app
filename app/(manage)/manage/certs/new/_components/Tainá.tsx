@@ -1,6 +1,6 @@
 "use client";
 
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { XIcon } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { renderPetAnimated, type CodexPetState } from "@/app/_lib/codex-pet";
@@ -330,14 +330,7 @@ function TaináChatCard({
 
 // ─── Desktop: inline docked chat below the live preview ──────────────
 export function TaináChatDock() {
-  return (
-    <div>
-      <p className="mb-3 text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground/70">
-        Tips from Tainá
-      </p>
-      <TaináChatCard className="h-[26rem]" />
-    </div>
-  );
+  return <TaináChatCard className="h-[26rem]" />;
 }
 
 // ─── Mobile: fixed sprite trigger + bottom-sheet chat ────────────────
@@ -345,6 +338,7 @@ export function TaináChatDock() {
 // "Preview" button, so it sits exactly where the old "Tips" button did.
 export function TaináMobileTrigger() {
   const [open, setOpen] = useState(false);
+  const reduceMotion = useReducedMotion();
 
   // Lock body scroll while the sheet is open (matches the Preview sheet).
   useEffect(() => {
@@ -372,17 +366,18 @@ export function TaináMobileTrigger() {
           <motion.div className="fixed inset-0 z-50 xl:hidden" initial={false}>
             <motion.div
               className="absolute inset-0 bg-foreground/40 backdrop-blur-sm"
-              initial={{ opacity: 0 }}
+              initial={reduceMotion ? false : { opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
+              transition={{ duration: reduceMotion ? 0 : 0.2 }}
               onClick={() => setOpen(false)}
             />
             <motion.div
               className="absolute inset-x-0 bottom-0 rounded-t-3xl bg-background px-4 pb-6 pt-3 shadow-2xl"
-              initial={{ y: "100%" }}
+              initial={reduceMotion ? false : { y: "100%" }}
               animate={{ y: 0 }}
-              exit={{ y: "100%" }}
-              transition={{ type: "spring", stiffness: 320, damping: 34 }}
+              exit={reduceMotion ? { opacity: 0 } : { y: "100%" }}
+              transition={reduceMotion ? { duration: 0 } : { type: "spring", stiffness: 320, damping: 34 }}
             >
               <div className="mx-auto mb-3 h-1.5 w-10 rounded-full bg-muted-foreground/25" />
               <TaináChatCard className="h-[68vh] border-0" onClose={() => setOpen(false)} />
