@@ -82,8 +82,8 @@ export function DeploymentsTab({ sessionDid }: { sessionDid: string | null }) {
 
   if (!sessionDid) {
     return (
-      <div className="rounded-3xl border border-dashed border-border bg-muted/30 px-6 py-12 text-center">
-        <h2 className="text-base font-medium text-foreground">{t("signInTitle")}</h2>
+      <div className="rounded-3xl border border-dashed border-border bg-muted px-6 py-12 text-center">
+        <h2 className="font-instrument text-base font-light italic text-foreground">{t("signInTitle")}</h2>
         <p className="mx-auto mt-1.5 max-w-[420px] text-sm text-muted-foreground">{t("signInBody")}</p>
       </div>
     );
@@ -432,7 +432,7 @@ function CreateDeploymentDialog({
       <div className="absolute inset-0 bg-foreground/30 backdrop-blur-[2px]" onClick={() => !busy && onClose()} />
       <div className="relative flex max-h-full w-full max-w-md flex-col overflow-y-auto rounded-3xl border border-border bg-background shadow-2xl">
         <div className="sticky top-0 z-10 flex items-center justify-between gap-3 border-b border-border bg-background/95 px-5 py-4 backdrop-blur-xl">
-          <h2 className="text-lg font-semibold text-foreground">{t("createTitle")}</h2>
+          <h2 className="font-instrument text-lg font-light italic text-foreground">{t("createTitle")}</h2>
           <Button variant="ghost" size="icon-sm" onClick={() => !busy && onClose()} aria-label={t("close")}>
             <XIcon />
           </Button>
@@ -606,8 +606,8 @@ function LoadingRows() {
 
 function Notice({ title, body }: { title: string; body: string }) {
   return (
-    <div className="rounded-2xl border border-dashed border-border bg-muted/30 px-6 py-10 text-center">
-      <h3 className="text-base font-medium text-foreground">{title}</h3>
+    <div className="rounded-2xl border border-dashed border-border bg-muted px-6 py-10 text-center">
+      <h3 className="font-instrument text-base font-light italic text-foreground">{title}</h3>
       <p className="mx-auto mt-1.5 max-w-[420px] text-sm text-muted-foreground">{body}</p>
     </div>
   );

@@ -271,7 +271,7 @@ export function LabelerClient({
                 ))}
               </div>
             ) : (
-              <div className="grid min-h-72 place-items-center rounded-3xl border border-dashed border-border bg-muted/20 px-6 text-center">
+              <div className="grid min-h-72 place-items-center rounded-3xl border border-dashed border-border bg-muted px-6 text-center">
                 <div>
                   <LeafIcon className="mx-auto size-7 text-primary/60" aria-hidden />
                   <p className="mt-3 font-medium text-foreground">{t("empty.title")}</p>
@@ -451,7 +451,7 @@ function ObservationReviewPanel({ record, viewerDid }: { record: OccurrenceRecor
         <div className="flex items-start justify-between gap-4">
           <div className="min-w-0">
             <p className="text-xs font-medium text-primary">{t("review.currentIdentification")}</p>
-            <h2 className="mt-1 text-xl font-semibold text-foreground">{name}</h2>
+            <h2 className="mt-1 font-instrument text-xl font-light italic text-foreground">{name}</h2>
             {record.scientificName && record.vernacularName ? (
               <p className="mt-0.5 italic text-muted-foreground">{record.scientificName}</p>
             ) : null}
@@ -554,7 +554,7 @@ function IdentificationForm({ record, viewerDid }: { record: OccurrenceRecord; v
     <section className="mt-5 rounded-2xl bg-primary/[0.06] p-4">
       <div className="flex items-center gap-2">
         <MicroscopeIcon className="size-4 text-primary" aria-hidden />
-        <h3 className="font-semibold text-foreground">{t("title")}</h3>
+        <h3 className="font-instrument font-light italic text-foreground">{t("title")}</h3>
       </div>
       <p className="mt-1 text-xs leading-5 text-muted-foreground">{t("description")}</p>
 

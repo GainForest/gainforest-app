@@ -56,11 +56,11 @@ export function BioblitzObservationsMap({ round }: { round: BioblitzRound }) {
 
         <div className="mt-5">
           {phase === "error" ? (
-            <div className="flex flex-col items-center justify-center rounded-2xl bg-foreground/5 px-6 py-16 text-center">
+            <div className="flex flex-col items-center justify-center rounded-2xl bg-muted px-6 py-16 text-center">
               <h3 className="font-instrument text-2xl font-light italic text-foreground">{t("error")}</h3>
             </div>
           ) : phase === "ready" && !hasMappable ? (
-            <div className="rounded-2xl bg-foreground/5 px-6 py-14 text-center text-sm text-muted-foreground">
+            <div className="rounded-2xl bg-muted px-6 py-14 text-center text-sm text-muted-foreground">
               {t("empty")}
             </div>
           ) : phase === "loading" ? (

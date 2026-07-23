@@ -94,13 +94,13 @@ export function BioblitzGallery({ round }: { round: BioblitzRound }) {
 
         <div className="mt-5">
           {phase === "error" ? (
-            <div className="rounded-2xl bg-foreground/5 px-6 py-14 text-center text-sm text-muted-foreground">
+            <div className="rounded-2xl bg-muted px-6 py-14 text-center text-sm text-muted-foreground">
               {t("error")}
             </div>
           ) : phase === "loading" ? (
             <GallerySkeleton />
           ) : records.length === 0 ? (
-            <div className="rounded-2xl bg-foreground/5 px-6 py-14 text-center text-sm text-muted-foreground">
+            <div className="rounded-2xl bg-muted px-6 py-14 text-center text-sm text-muted-foreground">
               {t("empty")}
             </div>
           ) : view === "all" || shouldReduceMotion ? (
@@ -283,7 +283,7 @@ function GallerySkeleton() {
       {[0, 1].map((row) => (
         <div key={row} className="flex h-36 gap-3 overflow-hidden">
           {Array.from({ length: 10 }).map((_, index) => (
-            <div key={index} className="aspect-square h-full shrink-0 animate-pulse rounded-2xl bg-foreground/5 motion-reduce:animate-none" />
+            <div key={index} className="aspect-square h-full shrink-0 animate-pulse rounded-2xl bg-muted motion-reduce:animate-none" />
           ))}
         </div>
       ))}

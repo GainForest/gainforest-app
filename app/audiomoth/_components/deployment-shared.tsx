@@ -159,7 +159,7 @@ export function EditDeploymentDialog({
       <div className="absolute inset-0 bg-foreground/30 backdrop-blur-[2px]" onClick={() => !saving && onClose()} />
       <div className="relative flex max-h-full w-full max-w-md flex-col overflow-y-auto rounded-3xl border border-border bg-background shadow-2xl">
         <div className="sticky top-0 z-10 flex items-center justify-between gap-3 border-b border-border bg-background/95 px-5 py-4 backdrop-blur-xl">
-          <h2 className="font-instrument text-lg font-semibold italic text-foreground">{t("editTitle")}</h2>
+          <h2 className="font-instrument text-lg font-medium italic text-foreground">{t("editTitle")}</h2>
           <Button variant="ghost" size="icon-sm" onClick={() => !saving && onClose()} aria-label={t("close")}>
             <XIcon />
           </Button>

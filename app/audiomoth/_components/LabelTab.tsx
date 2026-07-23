@@ -336,8 +336,8 @@ export function LabelTab({ sessionDid }: { sessionDid: string | null }) {
 
   if (!sessionDid) {
     return (
-      <div className="rounded-3xl border border-dashed border-border bg-muted/30 px-6 py-14 text-center">
-        <h2 className="text-lg font-medium text-foreground">{t("signInTitle")}</h2>
+      <div className="rounded-3xl border border-dashed border-border bg-muted px-6 py-14 text-center">
+        <h2 className="font-instrument text-lg font-light italic text-foreground">{t("signInTitle")}</h2>
         <p className="mx-auto mt-2 max-w-lg text-sm leading-6 text-muted-foreground">{t("signInBody")}</p>
       </div>
     );
@@ -354,9 +354,9 @@ export function LabelTab({ sessionDid }: { sessionDid: string | null }) {
 
   if (recordings.length === 0) {
     return (
-      <div className="rounded-3xl border border-dashed border-border bg-muted/30 px-6 py-14 text-center">
+      <div className="rounded-3xl border border-dashed border-border bg-muted px-6 py-14 text-center">
         <WavesIcon className="mx-auto size-8 text-primary" />
-        <h2 className="mt-4 text-lg font-medium text-foreground">{t("noRecordingsTitle")}</h2>
+        <h2 className="mt-4 font-instrument text-lg font-light italic text-foreground">{t("noRecordingsTitle")}</h2>
         <p className="mx-auto mt-2 max-w-lg text-sm leading-6 text-muted-foreground">{workspaceError ?? t("noRecordingsBody")}</p>
         <div className="mt-5 flex flex-wrap justify-center gap-2">
           <Button asChild><Link href="/audiomoth?tab=upload"><UploadIcon className="size-4" />{t("uploadFirst")}</Link></Button>
@@ -437,11 +437,11 @@ export function LabelTab({ sessionDid }: { sessionDid: string | null }) {
 
               <div className="mt-5">
                 <div className="flex items-center justify-between gap-2">
-                  <h3 className="text-sm font-medium text-foreground">{t("labelsTitle", { count: occurrences.length })}</h3>
+                  <h3 className="font-instrument text-sm font-light italic text-foreground">{t("labelsTitle", { count: occurrences.length })}</h3>
                   {loadingOccurrences ? <Loader2Icon className="size-4 animate-spin text-primary" /> : occurrences.length > 0 ? <span className="text-xs text-muted-foreground">{t("selectToEdit")}</span> : null}
                 </div>
                 {occurrences.length === 0 && !loadingOccurrences ? (
-                  <div className="mt-2 rounded-2xl border border-dashed border-border bg-muted/30 px-4 py-6 text-center text-sm text-muted-foreground">{t("labelsEmpty")}</div>
+                  <div className="mt-2 rounded-2xl border border-dashed border-border bg-muted px-4 py-6 text-center text-sm text-muted-foreground">{t("labelsEmpty")}</div>
                 ) : (
                   <div className="mt-2 grid gap-2 sm:grid-cols-2">
                     {occurrences.map((item) => (
@@ -467,7 +467,7 @@ export function LabelTab({ sessionDid }: { sessionDid: string | null }) {
             <div className="flex items-center justify-between gap-2">
               <div>
                 <p className="text-xs font-medium text-muted-foreground">{editingItem ? t("editLabel") : t("newLabel")}</p>
-                <h3 className="mt-1 text-lg font-medium tracking-tight text-foreground">{draftBox ? t("describeSelection") : t("drawFirst")}</h3>
+                <h3 className="mt-1 font-instrument text-lg font-light italic tracking-tight text-foreground">{draftBox ? t("describeSelection") : t("drawFirst")}</h3>
               </div>
               {draftBox ? <button type="button" onClick={() => startFreshLabel(null)} className="grid size-8 place-items-center rounded-lg text-muted-foreground hover:bg-muted" aria-label={t("clearSelection")}><XIcon className="size-4" /></button> : null}
             </div>

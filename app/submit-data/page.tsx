@@ -55,7 +55,7 @@ export default async function SubmitDataPage() {
                   <step.Icon className="size-4" />
                 </span>
                 <div>
-                  <h2 className="text-sm font-semibold text-foreground">{step.title}</h2>
+                  <h2 className="font-instrument text-sm font-light italic text-foreground">{step.title}</h2>
                   <p className="mt-0.5 text-sm leading-6 text-muted-foreground">{step.description}</p>
                 </div>
               </li>

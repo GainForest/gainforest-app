@@ -81,13 +81,13 @@ export function BioblitzBestPicture({ round }: { round: BioblitzRound }) {
 
         <div className="mt-5">
           {phase === "error" ? (
-            <div className="rounded-2xl bg-foreground/5 px-6 py-14 text-center text-sm text-muted-foreground">
+            <div className="rounded-2xl bg-muted px-6 py-14 text-center text-sm text-muted-foreground">
               {t("error")}
             </div>
           ) : phase === "loading" ? (
             <BestPictureSkeleton />
           ) : entries.length === 0 ? (
-            <div className="rounded-2xl bg-foreground/5 px-6 py-14 text-center text-sm text-muted-foreground">
+            <div className="rounded-2xl bg-muted px-6 py-14 text-center text-sm text-muted-foreground">
               {t("empty")}
             </div>
           ) : (
@@ -213,10 +213,10 @@ function BestPictureSkeleton() {
     <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
       {Array.from({ length: TOP_LIMIT }).map((_, index) => (
         <li key={index} className="overflow-hidden rounded-2xl ring-1 ring-border/60">
-          <div className="aspect-[4/3] w-full animate-pulse bg-foreground/5 motion-reduce:animate-none" />
+          <div className="aspect-[4/3] w-full animate-pulse bg-muted motion-reduce:animate-none" />
           <div className="flex items-center justify-between px-3 py-2.5">
-            <div className="h-4 w-28 animate-pulse rounded bg-foreground/5 motion-reduce:animate-none" />
-            <div className="h-4 w-10 animate-pulse rounded bg-foreground/5 motion-reduce:animate-none" />
+            <div className="h-4 w-28 animate-pulse rounded bg-muted motion-reduce:animate-none" />
+            <div className="h-4 w-10 animate-pulse rounded bg-muted motion-reduce:animate-none" />
           </div>
         </li>
       ))}

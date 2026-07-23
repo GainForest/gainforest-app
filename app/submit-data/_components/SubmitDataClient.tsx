@@ -67,7 +67,7 @@ function SignInCard() {
       <div className="flex size-10 items-center justify-center rounded-full bg-primary/[0.08] text-primary">
         <LockIcon className="size-4.5" />
       </div>
-      <h2 className="mt-4 text-lg font-semibold text-foreground">{t("title")}</h2>
+      <h2 className="mt-4 font-instrument text-lg font-light italic text-foreground">{t("title")}</h2>
       <p className="mt-1.5 text-sm leading-6 text-muted-foreground">{t("description")}</p>
       <Button
         type="button"
@@ -259,7 +259,7 @@ function SubmitFlow() {
   return (
     <div className="flex flex-col gap-6">
       <Card>
-        <h2 className="text-lg font-semibold text-foreground">{t("form.title")}</h2>
+        <h2 className="font-instrument text-lg font-light italic text-foreground">{t("form.title")}</h2>
 
         {/* Drop zone */}
         <label
@@ -275,7 +275,7 @@ function SubmitFlow() {
           }}
           className={cn(
             "mt-4 flex cursor-pointer flex-col items-center justify-center gap-2 rounded-2xl border-2 border-dashed px-4 py-8 text-center transition-colors",
-            dragging ? "border-primary bg-primary/[0.06]" : "border-border bg-muted/30 hover:bg-muted/50",
+            dragging ? "border-primary bg-primary/10" : "border-border bg-muted hover:bg-muted/80",
             uploading && "pointer-events-none opacity-60",
           )}
         >
@@ -505,7 +505,7 @@ function JobsCard({ jobs, onChanged }: { jobs: DataJob[] | null; onChanged: () =
 
   return (
     <Card>
-      <h2 className="text-lg font-semibold text-foreground">{t("jobs.title")}</h2>
+      <h2 className="font-instrument text-lg font-light italic text-foreground">{t("jobs.title")}</h2>
       {jobs === null ? (
         <div className="mt-4 space-y-3">
           <Skeleton className="h-14 w-full rounded-xl" />

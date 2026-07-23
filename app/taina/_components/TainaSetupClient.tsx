@@ -90,7 +90,7 @@ function SignInCard() {
       <div className="flex size-10 items-center justify-center rounded-full bg-primary/[0.08] text-primary">
         <LockIcon className="size-4.5" />
       </div>
-      <h2 className="mt-4 text-lg font-semibold text-foreground">{t("title")}</h2>
+      <h2 className="mt-4 font-instrument text-lg font-light italic text-foreground">{t("title")}</h2>
       <p className="mt-1.5 text-sm leading-6 text-muted-foreground">{t("description")}</p>
       <Button type="button" size="lg" className="mt-5 w-full" onClick={handleSignIn}>
         {t("button")}
@@ -200,7 +200,7 @@ function ConnectFlow({ did, handle }: { did: string; handle: string | null }) {
     <SetupCard>
       <form onSubmit={onSubmit}>
         <div className="flex items-start justify-between gap-3">
-          <h2 className="text-lg font-semibold text-foreground">{t("setup.title")}</h2>
+          <h2 className="font-instrument text-lg font-light italic text-foreground">{t("setup.title")}</h2>
           <span className="mt-0.5 inline-flex size-8 shrink-0 items-center justify-center rounded-full bg-primary/[0.08] text-primary">
             <BotIcon className="size-4" />
           </span>
@@ -298,7 +298,7 @@ function ActivationCard({
   const dashboardT = useTranslations("common.taina.linked");
   return (
     <SetupCard className="animate-in">
-      <h2 className="text-lg font-semibold text-foreground">{t("title")}</h2>
+      <h2 className="font-instrument text-lg font-light italic text-foreground">{t("title")}</h2>
       <p className="mt-1.5 text-sm leading-6 text-muted-foreground">{t("description")}</p>
       <div className="my-5 flex items-center justify-center rounded-2xl border border-dashed border-primary/40 bg-primary/5 py-4">
         <span className="select-all font-mono text-2xl font-semibold tracking-[0.3em] text-primary">{code}</span>
@@ -344,7 +344,7 @@ function LinkedCard({
   return (
     <SetupCard className="animate-in">
       <div className="flex items-center justify-between gap-3">
-        <h2 className="text-lg font-semibold text-foreground">
+        <h2 className="font-instrument text-lg font-light italic text-foreground">
           {justLinked ? t("justLinkedTitle") : t("title")}
         </h2>
         <span className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-primary/20 bg-primary/[0.08] px-2.5 py-1 text-[11px] font-medium text-primary">

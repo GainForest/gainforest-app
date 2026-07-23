@@ -340,7 +340,7 @@ function FadeIn({
 }
 
 function Card({ children, className }: { children: ReactNode; className?: string }) {
-  return <div className={className}>{children}</div>;
+  return <div className={`rounded-2xl bg-muted p-4 sm:p-5 ${className ?? ""}`}>{children}</div>;
 }
 
 function Separator({
@@ -461,7 +461,7 @@ function RoundNavigator({
                 className={`flex min-w-[9rem] shrink-0 flex-col rounded-xl border px-3 py-2 text-left transition-colors ${
                   selected
                     ? "border-primary/50 bg-primary/10 text-foreground"
-                    : "border-transparent bg-foreground/5 text-muted-foreground hover:bg-foreground/10 hover:text-foreground"
+                    : "border-transparent bg-muted text-muted-foreground hover:bg-muted/80 hover:text-foreground"
                 }`}
               >
                 <span className="flex items-center justify-between gap-2 text-xs font-semibold">
@@ -532,7 +532,7 @@ function PrizeTile({
   return (
     <div
       className={`flex flex-col items-center gap-1 rounded-2xl px-3 py-3 text-center ${
-        featured ? "bg-gradient-to-b from-primary/[0.16] via-primary/[0.05] to-transparent" : "bg-foreground/5"
+        featured ? "bg-gradient-to-b from-primary/15 to-primary/5" : "bg-background"
       }`}
     >
       <span
@@ -569,13 +569,13 @@ function PastWinners({
       <Card>
         <div className="mb-2 flex items-center justify-between gap-2">
           <SectionTitle icon={<CrownIcon />} title={t("title")} />
-          <span className="rounded-full bg-foreground/5 px-2 py-1 text-[10px] font-medium text-muted-foreground">
+          <span className="rounded-full bg-background px-2 py-1 text-[10px] font-medium text-muted-foreground">
             {t("compact")}
           </span>
         </div>
         <ul className="space-y-1.5">
           {rows.map((summary) => (
-            <li key={summary.round.id} className="rounded-2xl bg-foreground/5 px-3 py-2">
+            <li key={summary.round.id} className="rounded-2xl bg-background px-3 py-2">
               <div className="flex items-center justify-between gap-2">
                 <span className="text-xs font-semibold text-foreground">{summary.round.label}</span>
                 <span className="text-[10px] tabular-nums text-muted-foreground">
@@ -625,7 +625,7 @@ function WinnerPill({
   pending: string;
 }) {
   return (
-    <div className="min-w-0 rounded-xl bg-background/70 px-2.5 py-2">
+    <div className="min-w-0 rounded-xl bg-background px-2.5 py-2">
       <div className="flex items-center gap-1.5 text-[10px] font-semibold text-muted-foreground [&_svg]:size-3">
         {icon}
         <span className="truncate">{label}</span>
@@ -681,7 +681,7 @@ function ProofNote() {
   return (
     <FadeIn delay={0.05}>
       <div className="rounded-2xl bg-primary/[0.07] p-4 sm:p-5">
-        <h2 className="text-base font-semibold text-foreground sm:text-lg">{t("title")}</h2>
+        <h2 className="font-instrument text-base font-light italic text-foreground sm:text-lg">{t("title")}</h2>
         <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{t("intro")}</p>
         <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{t("uses")}</p>
         <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{t("outro")}</p>
@@ -838,7 +838,7 @@ function Board({
             <div
               key={stat.label}
               className={`flex flex-col items-center gap-1 rounded-2xl px-3 py-3 text-center ${
-                stat.accent ? "bg-gradient-to-b from-primary/[0.16] via-primary/[0.05] to-transparent" : "bg-foreground/5"
+                stat.accent ? "bg-gradient-to-b from-primary/15 to-primary/5" : "bg-background"
               }`}
             >
               <span
@@ -980,7 +980,7 @@ function BoardSkeleton() {
   return (
     <ul className="flex flex-col gap-1.5">
       {Array.from({ length: 6 }).map((_, index) => (
-        <li key={index} className="flex items-center gap-3 rounded-2xl bg-foreground/5 px-3 py-2.5">
+        <li key={index} className="flex items-center gap-3 rounded-2xl bg-background px-3 py-2.5">
           <Skeleton className="size-7 shrink-0 rounded-full" />
           <div className="min-w-0 flex-1">
             <Skeleton className="h-4 w-36 max-w-full" />
@@ -1002,7 +1002,7 @@ function BoardMessage({
   description: string;
 }) {
   return (
-    <div className="flex h-full flex-col items-center justify-center gap-2 rounded-2xl bg-foreground/5 px-6 py-8 text-center">
+    <div className="flex h-full flex-col items-center justify-center gap-2 rounded-2xl bg-background px-6 py-8 text-center">
       <div className="flex size-12 items-center justify-center rounded-full bg-primary/10 text-primary [&_svg]:size-6 [&_svg]:opacity-60">
         {icon}
       </div>

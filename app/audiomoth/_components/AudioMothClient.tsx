@@ -1151,7 +1151,7 @@ function AutoSetupWizard({ wizard, onClose }: { wizard: WizardState; onClose: ()
           )}
         </motion.span>
         <div>
-          <h2 className="text-lg font-semibold">{headline}</h2>
+          <h2 className="font-instrument text-lg font-light italic">{headline}</h2>
           <p className="text-sm text-muted-foreground">{t("subtitle")}</p>
         </div>
       </div>
@@ -1235,7 +1235,7 @@ function StepStatusBadge({ status, Icon }: { status: WizardStepStatus; Icon: typ
     <span
       className={cn(
         "flex size-9 shrink-0 items-center justify-center rounded-full border transition-colors",
-        status === "pending" && "border-border bg-muted/40 text-muted-foreground/50",
+        status === "pending" && "border-border bg-muted text-muted-foreground",
         status === "active" && "border-primary/40 bg-primary/10 text-primary",
         status === "done" && "border-primary bg-primary text-primary-foreground",
         status === "skipped" && "border-border bg-muted text-muted-foreground",
@@ -1335,7 +1335,7 @@ function DeviceTab({
       </Card>
 
       <Card>
-        <h2 className="mb-2 flex items-center gap-2 text-sm font-semibold">
+        <h2 className="mb-2 flex items-center gap-2 font-instrument text-sm font-light italic">
           <FingerprintIcon className="size-4 text-muted-foreground" />
           {t("aboutTitle")}
         </h2>
@@ -1453,7 +1453,7 @@ function ConfigureTab({
   return (
     <div className="flex flex-col gap-4">
       <Card>
-        <h2 className="mb-4 text-sm font-semibold">{t("recordingTitle")}</h2>
+        <h2 className="mb-4 font-instrument text-sm font-light italic">{t("recordingTitle")}</h2>
         <div className="grid gap-4 sm:grid-cols-2">
           <div className="flex flex-col gap-1.5">
             <Label htmlFor="audiomoth-sample-rate">{t("sampleRateLabel")}</Label>
@@ -1531,7 +1531,7 @@ function ConfigureTab({
       </Card>
 
       <Card>
-        <h2 className="mb-1 text-sm font-semibold">{t("scheduleTitle")}</h2>
+        <h2 className="mb-1 font-instrument text-sm font-light italic">{t("scheduleTitle")}</h2>
         <p className="mb-4 text-sm text-muted-foreground">{t("scheduleBody")}</p>
 
         <div className="mb-4 flex flex-col gap-1.5">
@@ -1614,7 +1614,7 @@ function ConfigureTab({
       </Card>
 
       <Card>
-        <h2 className="mb-4 text-sm font-semibold">{t("filterTitle")}</h2>
+        <h2 className="mb-4 font-instrument text-sm font-light italic">{t("filterTitle")}</h2>
         <div className="grid gap-4 sm:grid-cols-3">
           <div className="flex flex-col gap-1.5">
             <Label htmlFor="audiomoth-filter-type">{t("filterTypeLabel")}</Label>
@@ -1664,7 +1664,7 @@ function ConfigureTab({
       </Card>
 
       <Card>
-        <h2 className="mb-4 text-sm font-semibold">{t("extrasTitle")}</h2>
+        <h2 className="mb-4 font-instrument text-sm font-light italic">{t("extrasTitle")}</h2>
         <div className="grid gap-3 sm:grid-cols-2">
           <label className="flex items-center gap-2 text-sm">
             <Checkbox checked={config.ledEnabled} onCheckedChange={(checked) => update({ ledEnabled: checked === true })} />
@@ -1734,7 +1734,7 @@ function ConfigureTab({
       </Card>
 
       <Card>
-        <h2 className="mb-1 text-sm font-semibold">{t("chimeTitle")}</h2>
+        <h2 className="mb-1 font-instrument text-sm font-light italic">{t("chimeTitle")}</h2>
         <p className="mb-4 text-sm text-muted-foreground">{t("chimeBody")}</p>
         <div className="flex flex-col gap-3">
           <label className="flex items-center gap-2 text-sm">
@@ -1792,7 +1792,7 @@ function ConfigureTab({
       </Card>
 
       <Card>
-        <h2 className="mb-1 text-sm font-semibold">{t("gpsTitle")}</h2>
+        <h2 className="mb-1 font-instrument text-sm font-light italic">{t("gpsTitle")}</h2>
         <p className="mb-4 text-sm text-muted-foreground">{t("gpsBody")}</p>
         <div className="flex flex-col gap-4">
           <label className="flex items-center gap-2 text-sm">
@@ -2005,7 +2005,7 @@ function FirmwareTab({
   return (
     <div className="flex flex-col gap-4">
       <Card>
-        <h2 className="mb-2 text-sm font-semibold">{t("currentTitle")}</h2>
+        <h2 className="mb-2 font-instrument text-sm font-light italic">{t("currentTitle")}</h2>
         <div className="divide-y divide-border/60">
           <InfoRow label={t("currentVersionLabel")} value={info ? info.firmwareVersion.join(".") : "—"} dimmed={!info} />
           <InfoRow label={t("currentDescriptionLabel")} value={info?.firmwareDescription ?? "—"} dimmed={!info} />
@@ -2018,7 +2018,7 @@ function FirmwareTab({
       </Card>
 
       <Card>
-        <h2 className="mb-4 text-sm font-semibold">{t("chooseTitle")}</h2>
+        <h2 className="mb-4 font-instrument text-sm font-light italic">{t("chooseTitle")}</h2>
 
         <div className="flex flex-col gap-4">
           <div className="flex flex-col gap-1.5">

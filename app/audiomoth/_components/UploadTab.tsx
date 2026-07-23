@@ -557,8 +557,8 @@ export function UploadTab({ sessionDid }: { sessionDid: string | null }) {
 
   if (!sessionDid) {
     return (
-      <div className="rounded-3xl border border-dashed border-border bg-muted/30 px-6 py-12 text-center">
-        <h2 className="text-base font-medium text-foreground">{t("signInTitle")}</h2>
+      <div className="rounded-3xl border border-dashed border-border bg-muted px-6 py-12 text-center">
+        <h2 className="font-instrument text-base font-light italic text-foreground">{t("signInTitle")}</h2>
         <p className="mx-auto mt-1.5 max-w-[420px] text-sm text-muted-foreground">{t("signInBody")}</p>
       </div>
     );
@@ -627,7 +627,7 @@ export function UploadTab({ sessionDid }: { sessionDid: string | null }) {
               onDrop={onDrop}
               className={cn(
                 "flex cursor-pointer flex-col items-center gap-4 rounded-3xl border-2 border-dashed px-6 py-14 text-center transition-colors",
-                dragging ? "border-primary bg-primary/[0.06]" : "border-border bg-card/60 hover:border-primary/50 hover:bg-primary/[0.03]",
+                dragging ? "border-primary bg-primary/10" : "border-border bg-muted hover:border-primary/50 hover:bg-muted/80",
               )}
             >
               <span className="grid h-14 w-14 place-items-center rounded-2xl bg-primary/10 text-primary">
@@ -705,8 +705,8 @@ export function UploadTab({ sessionDid }: { sessionDid: string | null }) {
             className="flex flex-col gap-4"
           >
             {stats.count === 0 ? (
-              <div className="rounded-3xl border border-dashed border-border bg-muted/30 px-6 py-12 text-center">
-                <h3 className="text-base font-medium text-foreground">{t("noWavTitle")}</h3>
+              <div className="rounded-3xl border border-dashed border-border bg-muted px-6 py-12 text-center">
+                <h3 className="font-instrument text-base font-light italic text-foreground">{t("noWavTitle")}</h3>
                 {globalError ? <p className="mx-auto mt-2 max-w-[420px] text-sm text-destructive">{globalError}</p> : null}
                 <p className="mx-auto mt-1.5 max-w-[420px] text-sm text-muted-foreground">{t("noWavBody")}</p>
                 <Button variant="outline" size="sm" className="mt-4" onClick={reset}>
@@ -811,7 +811,7 @@ export function UploadTab({ sessionDid }: { sessionDid: string | null }) {
                       <FileRow key={rec.id} rec={rec} t={t} />
                     ))}
                   {stats.count > LIST_RENDER_CAP && (
-                    <p className="border-t border-border/60 bg-muted/30 px-4 py-2.5 text-xs text-muted-foreground">
+                    <p className="border-t border-border/60 bg-muted px-4 py-2.5 text-xs text-muted-foreground">
                       {t("moreFiles", { count: stats.count - LIST_RENDER_CAP })}
                     </p>
                   )}

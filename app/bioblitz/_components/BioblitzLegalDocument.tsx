@@ -36,9 +36,9 @@ export function BioblitzLegalDocument({
           ← {backLabel}
         </Link>
 
-        <div className="mt-8">
+        <div className="mt-8 rounded-3xl bg-muted p-6 md:p-10">
           <header className="border-b border-border pb-8">
-            <h1 className="text-4xl font-semibold tracking-tight text-foreground md:text-5xl">
+            <h1 className="font-instrument text-4xl font-light italic tracking-tight text-foreground md:text-5xl">
               {title}
             </h1>
             <p className="mt-4 text-sm text-muted-foreground">{effectiveDate}</p>
@@ -53,7 +53,7 @@ export function BioblitzLegalDocument({
           <div className="mt-10 space-y-10">
             {sections.map((section) => (
               <section key={section.title} className="scroll-mt-24">
-                <h2 className="text-2xl font-semibold tracking-tight text-foreground">
+                <h2 className="font-instrument text-2xl font-light italic tracking-tight text-foreground">
                   {section.title}
                 </h2>
                 <div className="mt-4 space-y-4 text-[15px] leading-7 text-muted-foreground">

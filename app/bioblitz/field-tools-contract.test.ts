@@ -27,11 +27,29 @@ describe("field-tools UI contract", () => {
       const source = read(path);
       expect(source, path).not.toMatch(/\beyebrow=|hero\.kicker|programLabel|font-serif/);
 
-      for (const line of source.split("\n").filter((value) => value.includes("font-instrument"))) {
-        expect(line, `${path}: Instrument is reserved for semantic headings`).toMatch(/<h[1-6]\b/);
-        expect(line, `${path}: Instrument headings must be italic`).toContain("italic");
+      for (const line of source.split("\n")) {
+        if (/<h[1-6]\b/.test(line)) {
+          expect(line, `${path}: every semantic heading must use Instrument`).toContain("font-instrument");
+          expect(line, `${path}: Instrument headings must be italic`).toContain("italic");
+        }
+        if (line.includes("font-instrument")) {
+          expect(line, `${path}: Instrument is reserved for semantic headings`).toMatch(/<h[1-6]\b/);
+        }
       }
     }
+  });
+
+  it("keeps rounded, visibly contrasting hierarchy without faint grouping surfaces", () => {
+    for (const path of fieldToolDirectories.flatMap(sourceFiles)) {
+      expect(read(path), path).not.toMatch(/bg-muted\/(?:20|30|40)|bg-foreground\/5/);
+    }
+
+    expect(read("app/bioblitz/BioblitzClient.tsx")).toContain(
+      'rounded-2xl bg-muted p-4 sm:p-5 ${className ?? ""}',
+    );
+    expect(read("app/bioblitz/_components/BioblitzLegalDocument.tsx")).toContain(
+      "mt-8 rounded-3xl bg-muted p-6 md:p-10",
+    );
   });
 
   it("keeps data-job archive bytes in direct storage PUTs and owner cancel uploading-only", () => {
