@@ -50,5 +50,6 @@ describe("core visual hierarchy", () => {
     expect(guide).toContain("position.x + SPRITE_W / 2 > window.innerWidth / 2");
     expect(guide).toContain('className="min-w-0 truncate"');
     expect(guide).not.toContain("absolute left-1/2 top-full");
+    expect(guide).not.toContain("taina-whats-new-title");
   });
 });

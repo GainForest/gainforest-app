@@ -85,7 +85,7 @@ test("closing or minimizing What's New keeps it dismissed", async ({ page }) => 
   await page.reload();
   await expect(page.getByRole("status").filter({ hasText: "What's new" })).toBeVisible();
 
-  const sprite = page.locator('[role="button"][aria-label="Tainá — click to chat, drag to move"]');
+  const sprite = page.getByRole("button", { name: "Tainá: click to chat, drag to move", exact: true });
   await sprite.hover();
   await page.getByRole("button", { name: "Minimize Tainá", exact: true }).click();
   const restoreTaina = page.getByRole("button", { name: "Open Tainá", exact: true });
@@ -198,7 +198,8 @@ test("donation registry mirrors the production flow without live side effects", 
   await page.getByRole("button", { name: /Donate \$203\.50 now/ }).click();
 
   await expect(page.getByText("Thank you", { exact: true })).toBeVisible({ timeout: 10_000 });
-  await expect(page.getByText("Your $203.50 in donations was completed successfully.")).toBeVisible();
+  await expect(page.getByText("Your $185.00 in donations was completed successfully.")).toBeVisible();
+  await expect(page.getByText("Tip for GainForest", { exact: true })).toBeVisible();
   await expect(page.getByRole("button", { name: "Collect all (3)" })).toBeVisible();
 
   // Every flight must have its own painted mouth mask before its gulp begins.

@@ -1403,18 +1403,8 @@ export function FloatingTainaGuide() {
                 </div>
               </>
             ) : view.kind === "whatsNew" ? (
-              <section aria-labelledby="taina-whats-new-title">
-                <div className="flex items-center gap-2 px-1 py-1">
-                  <MegaphoneIcon aria-hidden className="size-4 text-primary" />
-                  <h2
-                    id="taina-whats-new-title"
-                    className="font-instrument text-lg italic text-foreground"
-                  >
-                    {t("whatsNew.title")}
-                  </h2>
-                </div>
-
-                <ul className="mt-3 space-y-2">
+              <section aria-labelledby="taina-panel-title">
+                <ul className="space-y-2">
                   {WHATS_NEW_ITEMS.map(({ id, Icon }) => (
                     <li
                       key={id}
