@@ -78,7 +78,7 @@ export function AddressForge() {
 
   return (
     <figure className="my-8 rounded-md border border-border bg-muted/20">
-      <figcaption className="flex items-center justify-between gap-2 border-b border-border px-4 py-2.5 font-mono text-[11px] uppercase tracking-[0.12em] text-muted-foreground">
+      <figcaption className="flex items-center justify-between gap-2 border-b border-border px-4 py-2.5 text-xs font-medium text-muted-foreground">
         <span>{t("bench")}</span>
         <span className="hidden text-muted-foreground/60 normal-case tracking-normal sm:inline">{t("liveTag")}</span>
       </figcaption>
@@ -188,7 +188,7 @@ function PipelineRow({
         {!last && <span className="w-px flex-1 bg-border" aria-hidden />}
       </div>
       <div className={`min-w-0 flex-1 ${last ? "" : "pb-5"}`}>
-        <div className="mb-1.5 font-mono text-[10px] uppercase tracking-[0.1em] text-muted-foreground">{label}</div>
+        <div className="mb-1.5 text-xs font-medium text-muted-foreground">{label}</div>
         {children}
       </div>
     </div>

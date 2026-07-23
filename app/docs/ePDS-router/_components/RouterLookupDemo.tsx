@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { RotateCcwIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -68,6 +68,7 @@ type Phase = "idle" | "sent" | "fingerprint" | "answer" | "resolve" | "outcome";
 // home server. A "none" run stops after the router's answer.
 export function RouterLookupDemo() {
   const t = useTranslations("common.epdsRouter.demo");
+  const shouldReduceMotion = useReducedMotion();
   const [scenario, setScenario] = useState<number | null>(null);
   const [step, setStep] = useState(0);
 
@@ -254,7 +255,7 @@ export function RouterLookupDemo() {
               cx: phase === "sent" ? appRouter.x2 : phase === "answer" ? appRouter.x1 : appDirectory.x2,
               cy: phase === "sent" ? appRouter.y2 : phase === "answer" ? appRouter.y1 : appDirectory.y2,
             }}
-            transition={{ duration: 1.0, ease: "easeInOut" }}
+            transition={{ duration: shouldReduceMotion ? 0 : 1.0, ease: "easeInOut" }}
           />
         )}
       </svg>
@@ -266,7 +267,7 @@ export function RouterLookupDemo() {
             initial={{ opacity: 0, y: 4 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -4 }}
-            transition={{ duration: 0.18 }}
+            transition={{ duration: shouldReduceMotion ? 0 : 0.18 }}
           >
             <div className="text-[13.5px] font-medium text-foreground">{caption.title}</div>
             <p className="m-0 mt-1 text-[12.5px] leading-relaxed text-muted-foreground">{caption.text}</p>

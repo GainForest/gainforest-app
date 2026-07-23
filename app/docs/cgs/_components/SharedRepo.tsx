@@ -79,16 +79,16 @@ export function SharedRepo() {
               {person.name[0]}
             </span>
             <span className="text-[13px] font-medium text-foreground">{person.name}</span>
-            <span className="font-mono text-[10px] uppercase tracking-[0.08em] text-muted-foreground/70">
+            <span className="text-xs text-muted-foreground/70">
               {roleLabels[person.id]}
             </span>
           </button>
         ))}
       </div>
 
-      <div className="mt-4 rounded-2xl border border-border/60 bg-muted/30 p-4">
+      <div className="mt-4 rounded-xl bg-muted/30 p-4">
         <div className="mb-3 flex items-center justify-between">
-          <span className="font-mono text-[10.5px] uppercase tracking-[0.1em] text-muted-foreground/70">
+          <span className="text-xs font-medium text-muted-foreground">
             {t("repoLabel")}
           </span>
           {records.length > 0 && (

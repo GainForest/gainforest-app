@@ -1,13 +1,12 @@
 # AudioMoth spectrogram labels as Darwin Core occurrences
 
-## Status
+## Persistence model
 
-This is the persistence decision for the AudioMoth spectrogram labelling UI in
+This document defines persistence for the AudioMoth spectrogram labelling UI in
 `app/audiomoth/_components/LabelTab.tsx`.
 
-The first UI prototype saved label drafts in browser `localStorage`. That is
-useful for crash recovery, but it is **not the source of truth**. The completed
-feature must save every confirmed time/frequency box as a new AT Protocol
+Browser `localStorage` can support crash recovery, but it is **not the source of
+truth**. Every confirmed time/frequency box must be saved as a new AT Protocol
 `app.gainforest.dwc.occurrence` record in the signed-in publisher's repository.
 
 Do not model these records as `app.gainforest.evaluator.evaluation`. A human
@@ -81,7 +80,7 @@ A filename alone is not globally unique.
 | Future model-created box | `basisOfRecord` | `MachineObservation` |
 | Sound evidence | `dcType` | `Sound` |
 | Species scientific name | `scientificName` | Use the accepted scientific name when known |
-| Common/local name | `vernacularName` | Optional — write **only** what the user typed; never synthesize it from the broad group |
+| Common/local name | `vernacularName` | Optional: write **only** what the user typed; never synthesize it from the broad group |
 | Broad animal choice | taxonomy fields, `tags`, `dynamicProperties.labelCategory` | Use the broad fallback mapping below |
 | Recording segment time | `eventDate` | Absolute ISO-8601 interval derived from recording start + box offsets |
 | Source audio record | `associatedMedia` | Exact `at://.../app.gainforest.ac.audio/...` URI |

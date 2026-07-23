@@ -39,7 +39,7 @@ export function SchemaGraph({
       {/* event */}
       <rect x="30" y="90" width="160" height="52" fill={bg} stroke={ink} strokeWidth="1" />
       <text x="110" y="116" fontSize="13" className="font-mono" fill={ink} textAnchor="middle">event</text>
-      <text x="110" y="132" fontSize="10" className="font-mono" fill={faint} textAnchor="middle">{labels.samplingContext}</text>
+      <text x="110" y="132" fontSize="10" className="font-sans" fill={faint} textAnchor="middle">{labels.samplingContext}</text>
 
       {/* occurrence (focus) */}
       <rect x="300" y="78" width="180" height="76" fill={primary} stroke={primary} />
@@ -50,12 +50,12 @@ export function SchemaGraph({
       {/* measurement */}
       <rect x="590" y="90" width="160" height="52" fill={bg} stroke={ink} strokeWidth="1" />
       <text x="670" y="116" fontSize="13" className="font-mono" fill={ink} textAnchor="middle">measurement</text>
-      <text x="670" y="132" fontSize="10" className="font-mono" fill={faint} textAnchor="middle">{labels.measurementOrFact}</text>
+      <text x="670" y="132" fontSize="10" className="font-sans" fill={faint} textAnchor="middle">{labels.measurementOrFact}</text>
 
       {/* ac media / audio */}
       <rect x="300" y="234" width="180" height="52" fill={bg} stroke={primary} strokeWidth="1" />
       <text x="390" y="260" fontSize="13" className="font-mono" fill={primary} textAnchor="middle">media · audio</text>
-      <text x="390" y="276" fontSize="10" className="font-mono" fill={faint} textAnchor="middle">{labels.audiovisualEvidence}</text>
+      <text x="390" y="276" fontSize="10" className="font-sans" fill={faint} textAnchor="middle">{labels.audiovisualEvidence}</text>
     </svg>
   );
 }

@@ -84,11 +84,11 @@ export function MarkdownDocument({ source }: { source: string }) {
       const level = heading[1]!.length;
       const content = inline(heading[2]!);
       if (level === 1) {
-        blocks.push(<h1 key={`h-${index}`} className="mb-4 mt-0 font-serif text-3xl font-semibold tracking-tight text-foreground">{content}</h1>);
+        blocks.push(<h1 key={`h-${index}`} className="mb-4 mt-0 text-3xl font-semibold tracking-tight text-foreground">{content}</h1>);
       } else if (level === 2) {
-        blocks.push(<h2 key={`h-${index}`} className="mb-3 mt-10 border-t border-border/60 pt-7 font-serif text-xl font-semibold tracking-tight text-foreground first:mt-0 first:border-0 first:pt-0">{content}</h2>);
+        blocks.push(<h2 key={`h-${index}`} className="mb-3 mt-10 border-t border-border/60 pt-7 text-xl font-semibold tracking-tight text-foreground first:mt-0 first:border-0 first:pt-0">{content}</h2>);
       } else {
-        blocks.push(<h3 key={`h-${index}`} className="mb-2 mt-7 font-serif text-base font-semibold text-foreground">{content}</h3>);
+        blocks.push(<h3 key={`h-${index}`} className="mb-2 mt-7 text-base font-semibold text-foreground">{content}</h3>);
       }
       index += 1;
       continue;
@@ -104,7 +104,7 @@ export function MarkdownDocument({ source }: { source: string }) {
       }
       index += 1;
       blocks.push(
-        <pre key={`code-${index}`} className="my-4 overflow-x-auto rounded-xl border border-border/60 bg-muted/50 p-4 font-mono text-[12px] leading-relaxed text-foreground">
+        <pre key={`code-${index}`} className="my-4 overflow-x-auto rounded-xl bg-muted/50 p-4 font-mono text-[12px] leading-relaxed text-foreground">
           <code data-language={language || undefined}>{code.join("\n")}</code>
         </pre>,
       );

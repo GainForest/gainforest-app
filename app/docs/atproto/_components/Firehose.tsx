@@ -2,7 +2,7 @@
 
 import { useRef, useState } from "react";
 import { useTranslations } from "next-intl";
-import { motion } from "framer-motion";
+import { motion, useReducedMotion } from "framer-motion";
 
 type PersonId = "maria" | "kai" | "ana";
 type AppId = "forest" | "feed";
@@ -36,6 +36,7 @@ type Packet = {
 // to the shared firehose. Both apps see the same record at the same time.
 export function Firehose() {
   const t = useTranslations("common.atproto.flow");
+  const shouldReduceMotion = useReducedMotion();
   const [packets, setPackets] = useState<Packet[]>([]);
   const [counts, setCounts] = useState<Record<AppId, number>>({ forest: 0, feed: 0 });
   const nextId = useRef(1);
@@ -145,7 +146,7 @@ export function Firehose() {
             fill={packet.color}
             initial={{ cx: packet.from.x, cy: packet.from.y, opacity: 0.4 }}
             animate={{ cx: packet.to.x, cy: packet.to.y, opacity: 1 }}
-            transition={{ duration: 0.8, ease: "easeInOut" }}
+            transition={{ duration: shouldReduceMotion ? 0 : 0.8, ease: "easeInOut" }}
             onAnimationComplete={() => packetDone(packet)}
           />
         ))}

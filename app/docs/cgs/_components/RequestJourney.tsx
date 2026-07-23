@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { ArrowLeftIcon, ArrowRightIcon, PauseIcon, PlayIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -42,6 +42,7 @@ const PLAY_INTERVAL_MS = 3400;
 // group service's checks, and finally onto the group's PDS.
 export function RequestJourney() {
   const t = useTranslations("common.cgs.journey");
+  const shouldReduceMotion = useReducedMotion();
   const [step, setStep] = useState(0);
   const [playing, setPlaying] = useState(false);
 
@@ -134,10 +135,10 @@ export function RequestJourney() {
         <motion.g
           initial={false}
           animate={{ x: packet.x, y: packet.y - 34 }}
-          transition={{ type: "spring", stiffness: 55, damping: 14 }}
+          transition={shouldReduceMotion ? { duration: 0 } : { type: "spring", stiffness: 55, damping: 14 }}
         >
           <circle r={12} fill="var(--primary)" opacity={0.18}>
-            <animate attributeName="r" values="9;14;9" dur="2s" repeatCount="indefinite" />
+            {!shouldReduceMotion && <animate attributeName="r" values="9;14;9" dur="2s" repeatCount="indefinite" />}
           </circle>
           <circle r={6} fill="var(--primary)" />
         </motion.g>
@@ -192,9 +193,9 @@ export function RequestJourney() {
               initial={{ opacity: 0, y: 6 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -6 }}
-              transition={{ duration: 0.18 }}
+              transition={{ duration: shouldReduceMotion ? 0 : 0.18 }}
             >
-              <div className="mb-1 font-mono text-[10.5px] uppercase tracking-[0.1em] text-muted-foreground/60">
+              <div className="mb-1 text-xs text-muted-foreground/70">
                 {t("stepLabel", { n: step + 1, total })}
               </div>
               <div className="text-[15px] font-medium text-foreground">{steps[step].title}</div>

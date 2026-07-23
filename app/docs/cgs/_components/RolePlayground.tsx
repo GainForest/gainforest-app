@@ -103,7 +103,7 @@ export function RolePlayground() {
 
   return (
     <div className="mx-auto max-w-xl">
-      <div className="font-mono text-[10.5px] uppercase tracking-[0.1em] text-muted-foreground/60">{t("youAre")}</div>
+      <div className="text-xs font-medium text-muted-foreground">{t("youAre")}</div>
       <div className="mt-2 flex flex-wrap gap-2">
         {ROLES.map((r) => (
           <button
@@ -124,7 +124,7 @@ export function RolePlayground() {
       </div>
       <p className="mt-2 min-h-[1.25rem] text-[12.5px] leading-relaxed text-muted-foreground">{roleDescs[role]}</p>
 
-      <div className="mt-5 font-mono text-[10.5px] uppercase tracking-[0.1em] text-muted-foreground/60">
+      <div className="mt-5 text-xs font-medium text-muted-foreground">
         {t("tryAction")}
       </div>
       <div className="mt-2 grid grid-cols-2 gap-2 sm:grid-cols-3">
@@ -178,9 +178,9 @@ export function RolePlayground() {
         </AnimatePresence>
       </div>
 
-      <div className="mt-4 rounded-2xl border border-border/60 bg-muted/30 p-4">
+      <div className="mt-4 rounded-xl bg-muted/30 p-4">
         <div className="mb-2.5 flex items-center justify-between">
-          <span className="font-mono text-[10.5px] uppercase tracking-[0.1em] text-muted-foreground/70">
+          <span className="text-xs font-medium text-muted-foreground">
             {t("auditTitle")}
           </span>
           {log.length > 0 && (

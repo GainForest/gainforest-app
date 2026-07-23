@@ -46,7 +46,7 @@ export function SideNav({
       <div className="space-y-5">
         {groups.map((g) => (
           <div key={g.id}>
-            <div className="mb-2 pl-3 font-mono text-[10px] uppercase tracking-[0.1em] text-muted-foreground/50">
+            <div className="mb-2 pl-3 text-xs font-medium text-muted-foreground/60">
               {g.title}
             </div>
             <ul className="m-0 list-none p-0">

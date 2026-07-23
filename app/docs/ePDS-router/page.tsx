@@ -85,10 +85,7 @@ export default async function EpdsRouterDocsPage() {
         <div className="mb-5 flex justify-center text-primary">
           <LogoMark className="h-7 w-7" title="GainForest" />
         </div>
-        <div className="mb-2 font-mono text-[11px] uppercase tracking-[0.14em] text-muted-foreground/70">
-          {t("kicker")}
-        </div>
-        <h1 className="m-0 font-serif text-4xl font-semibold tracking-tight text-foreground">{t("title")}</h1>
+        <h1 className="m-0 text-4xl font-semibold tracking-tight text-foreground">{t("title")}</h1>
         <p className="mx-auto mt-4 max-w-prose text-[15px] leading-relaxed text-muted-foreground">{t("lead")}</p>
       </header>
 
@@ -152,13 +149,13 @@ export default async function EpdsRouterDocsPage() {
       </Section>
 
       <section className="mt-16 border-t border-border/60 pt-10">
-        <h2 className="m-0 mb-5 font-serif text-xl font-semibold tracking-tight text-foreground">
+        <h2 className="m-0 mb-5 text-xl font-semibold tracking-tight text-foreground">
           {t("more.heading")}
         </h2>
         <div className="grid gap-3 sm:grid-cols-2">
           <Link
             href="/docs/ePDS"
-            className="group rounded-xl border border-border/60 px-5 py-4 no-underline transition-colors hover:border-primary/50"
+            className="group rounded-xl px-5 py-4 no-underline transition-colors hover:bg-muted/40"
           >
             <div className="flex items-center gap-1.5 text-[13.5px] font-medium text-foreground group-hover:text-primary">
               {t("more.epdsTitle")}
@@ -170,7 +167,7 @@ export default async function EpdsRouterDocsPage() {
             href={GITHUB_URL}
             target="_blank"
             rel="noreferrer"
-            className="group rounded-xl border border-border/60 px-5 py-4 no-underline transition-colors hover:border-primary/50"
+            className="group rounded-xl px-5 py-4 no-underline transition-colors hover:bg-muted/40"
           >
             <div className="flex items-center gap-1.5 text-[13.5px] font-medium text-foreground group-hover:text-primary">
               {t("more.githubTitle")}
@@ -195,7 +192,7 @@ function Section({
 }) {
   return (
     <section className="mt-16 first:mt-0">
-      <h2 className="m-0 font-serif text-xl font-semibold tracking-tight text-foreground">{heading}</h2>
+      <h2 className="m-0 text-xl font-semibold tracking-tight text-foreground">{heading}</h2>
       {intro && <p className="mt-2 mb-6 max-w-prose text-[14.5px] leading-relaxed text-muted-foreground">{intro}</p>}
       {!intro && <div className="mb-6" />}
       {children}
@@ -205,7 +202,7 @@ function Section({
 
 function FactCard({ icon, title, text }: { icon: React.ReactNode; title: string; text: string }) {
   return (
-    <div className="rounded-xl border border-border/60 px-4 py-3.5">
+    <div className="rounded-xl bg-muted/30 px-4 py-3.5">
       <div className="mb-1.5 flex items-center gap-2 text-primary">
         {icon}
         <span className="text-[13px] font-medium text-foreground">{title}</span>
