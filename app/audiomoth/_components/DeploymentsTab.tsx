@@ -29,8 +29,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Dialog, DialogPlaceholder, DialogTitle } from "@/components/ui/modal/dialog";
 import { cn } from "@/lib/utils";
-import { useModalFocus } from "@/hooks/use-modal-focus";
 import {
   generateChime,
   isValidDeploymentId,
@@ -287,18 +287,9 @@ function CreateDeploymentDialog({
   const [stage, setStage] = useState<CreateStage>("form");
   const [replaying, setReplaying] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const dialogRef = useRef<HTMLDivElement | null>(null);
   const closeButtonRef = useRef<HTMLButtonElement | null>(null);
 
   const busy = stage === "playing" || replaying;
-
-  useModalFocus({
-    containerRef: dialogRef,
-    initialFocusRef: closeButtonRef,
-    onEscape: () => {
-      if (!busy) onClose();
-    },
-  });
 
   const selectedEquipment = useMemo(
     () => equipment?.find((item) => item.uri === equipmentUri) ?? null,
@@ -426,18 +417,23 @@ function CreateDeploymentDialog({
   }, [deploymentId, lat, lon, t]);
 
   return (
-    <div
-      ref={dialogRef}
-      tabIndex={-1}
-      className="fixed inset-0 z-[110] flex items-center justify-center p-4"
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="create-deployment-title"
+    <Dialog
+      open
+      onOpenChange={(open) => {
+        if (!open && !busy) onClose();
+      }}
     >
-      <div aria-hidden className="absolute inset-0 bg-foreground/30 backdrop-blur-[2px]" onClick={() => !busy && onClose()} />
-      <div className="relative flex max-h-full w-full max-w-md flex-col overflow-y-auto rounded-3xl border border-border bg-background shadow-2xl">
+      <DialogPlaceholder
+        dialogWidth="max-w-md"
+        overlayClassName="z-[110] data-[state=open]:animate-none data-[state=closed]:animate-none data-[state=open]:bg-foreground/30 data-[state=open]:backdrop-blur-[2px]"
+        className="z-[110] flex w-[calc(100%-2rem)] flex-col gap-0 overflow-y-auto rounded-3xl border-border bg-background p-0 shadow-2xl"
+        onOpenAutoFocus={(event) => {
+          event.preventDefault();
+          closeButtonRef.current?.focus();
+        }}
+      >
         <div className="sticky top-0 z-10 flex items-center justify-between gap-3 border-b border-border bg-background/95 px-5 py-4 backdrop-blur-xl">
-          <h2 id="create-deployment-title" className="font-instrument text-lg font-light italic text-foreground">{t("createTitle")}</h2>
+          <DialogTitle className="font-instrument text-lg font-light italic text-foreground">{t("createTitle")}</DialogTitle>
           <Button ref={closeButtonRef} variant="ghost" size="icon-sm" onClick={() => !busy && onClose()} aria-label={t("close")}>
             <XIcon />
           </Button>
@@ -586,8 +582,8 @@ function CreateDeploymentDialog({
             </div>
           </>
         )}
-      </div>
-    </div>
+      </DialogPlaceholder>
+    </Dialog>
   );
 }
 

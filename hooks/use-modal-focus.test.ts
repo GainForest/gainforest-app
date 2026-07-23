@@ -8,8 +8,6 @@ const dialogSources = [
   "app/_components/AccountDrawer.tsx",
   "app/_components/ProjectGalleryViewer.tsx",
   "app/_components/RecordDrawer.tsx",
-  "app/audiomoth/_components/DeploymentsTab.tsx",
-  "app/audiomoth/_components/deployment-shared.tsx",
 ];
 
 describe("modal focus containment", () => {
@@ -61,15 +59,32 @@ describe("modal focus containment", () => {
     const account = read("app/_components/AccountDrawer.tsx");
     const record = read("app/_components/RecordDrawer.tsx");
     const gallery = read("app/_components/ProjectGalleryViewer.tsx");
-    const createDeployment = read("app/audiomoth/_components/DeploymentsTab.tsx");
-    const editDeployment = read("app/audiomoth/_components/deployment-shared.tsx");
 
-    for (const source of [account, record, gallery, createDeployment, editDeployment]) {
+    for (const source of [account, record, gallery]) {
       expect(source).toContain("initialFocusRef: closeButtonRef");
       expect(source).toContain("ref={closeButtonRef}");
     }
     expect(record).toContain('aria-label={t("observation.closeMapLocationChooser")}');
-    expect(createDeployment).toContain('aria-labelledby="create-deployment-title"');
-    expect(editDeployment).toContain('aria-labelledby="edit-deployment-title"');
+  });
+
+  it("uses Radix containment for AudioMoth dialogs with portaled selects", () => {
+    const createDeployment = read("app/audiomoth/_components/DeploymentsTab.tsx");
+    const editDeployment = read("app/audiomoth/_components/deployment-shared.tsx");
+    const dialogPrimitive = read("components/ui/modal/dialog.tsx");
+    const selectPrimitive = read("components/ui/select.tsx");
+
+    for (const source of [createDeployment, editDeployment]) {
+      expect(source).toContain("<Dialog");
+      expect(source).toContain("<DialogPlaceholder");
+      expect(source).toContain("<DialogTitle");
+      expect(source).toContain("<SelectContent>");
+      expect(source).toContain("onOpenAutoFocus={(event) => {");
+      expect(source).toContain("closeButtonRef.current?.focus()");
+      expect(source).not.toContain("useModalFocus");
+    }
+    expect(createDeployment).toContain("if (!open && !busy) onClose()");
+    expect(editDeployment).toContain("if (!open && !saving) onClose()");
+    expect(dialogPrimitive).toContain("<DialogOverlay className={overlayClassName} />");
+    expect(selectPrimitive).toContain("<SelectPrimitive.Portal>");
   });
 });

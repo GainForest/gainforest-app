@@ -43,12 +43,15 @@ function DialogPlaceholder({
   className,
   children,
   dialogWidth,
+  overlayClassName,
   fullscreen = false,
   ...props
 }: React.ComponentProps<typeof DialogPrimitive.Content> & {
   showCloseButton?: boolean;
   /** Tailwind max-width class for the dialog container (e.g. "max-w-2xl"). Defaults to "max-w-sm". */
   dialogWidth?: string;
+  /** Optional visual override for this dialog's shared overlay. */
+  overlayClassName?: string;
   /**
    * Take over the whole viewport (phone "full page" mode). Overrides the
    * centered floating card: edge-to-edge, full dynamic height, no radius.
@@ -57,7 +60,7 @@ function DialogPlaceholder({
 }) {
   return (
     <DialogPortal data-slot="dialog-portal">
-      <DialogOverlay />
+      <DialogOverlay className={overlayClassName} />
       <DialogPrimitive.Content
         data-slot="dialog-content"
         className={cn(

@@ -21,7 +21,7 @@ const headingSources = [
 describe("geo visual hierarchy", () => {
   it("keeps every route and dialog heading in italic Instrument", () => {
     for (const path of headingSources) {
-      const headings = read(path).match(/<h[1-6]\b[^>]*>/g) ?? [];
+      const headings = read(path).match(/<(?:h[1-6]|DialogTitle)\b[^>]*>/g) ?? [];
       expect(headings.length, `${path} should contain a heading`).toBeGreaterThan(0);
       for (const heading of headings) {
         expect(heading, `${path}: ${heading}`).toContain("font-instrument");

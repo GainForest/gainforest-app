@@ -28,12 +28,12 @@ describe("field-tools UI contract", () => {
       expect(source, path).not.toMatch(/\beyebrow=|hero\.kicker|programLabel|font-serif/);
 
       for (const line of source.split("\n")) {
-        if (/<h[1-6]\b/.test(line)) {
+        if (/<(?:h[1-6]|DialogTitle)\b/.test(line)) {
           expect(line, `${path}: every semantic heading must use Instrument`).toContain("font-instrument");
           expect(line, `${path}: Instrument headings must be italic`).toContain("italic");
         }
         if (line.includes("font-instrument")) {
-          expect(line, `${path}: Instrument is reserved for semantic headings`).toMatch(/<h[1-6]\b/);
+          expect(line, `${path}: Instrument is reserved for semantic headings`).toMatch(/<(?:h[1-6]|DialogTitle)\b/);
         }
       }
     }
