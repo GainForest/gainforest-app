@@ -69,7 +69,7 @@ export async function fetchFollowStats(
     viewerDid ? COUNTS_WITH_VIEWER_QUERY : COUNTS_QUERY,
     viewerDid ? { target: targetDid, viewer: viewerDid } : { target: targetDid },
     signal,
-  ).catch(() => null);
+  );
 
   return {
     followers: data?.followers?.totalCount ?? 0,
@@ -127,7 +127,7 @@ export async function fetchFollowConnections(
     isFollowers ? FOLLOWERS_LIST_QUERY : FOLLOWING_LIST_QUERY,
     { target: targetDid, first: options.limit ?? 30, after: options.cursor ?? null },
     signal,
-  ).catch(() => null);
+  );
 
   const conn = data?.appCertifiedGraphFollow;
   const items: FollowConnection[] = [];
@@ -177,10 +177,11 @@ export function useFollow(targetDid: string | null): UseFollow {
   // viewer to resolve so the very first fetch already knows whether the viewer
   // follows this account (no flash of the wrong button label).
   useEffect(() => {
+    setLoaded(false);
+    setStats({ followers: 0, following: 0, viewerFollowUri: null });
     if (!targetDid || viewer.status !== "ready") return;
     let active = true;
     const controller = new AbortController();
-    setLoaded(false);
     fetchFollowStats(targetDid, sessionDid, controller.signal)
       .then((next) => {
         if (!active) return;

@@ -237,6 +237,10 @@ function buildTabs(
   return appendExtras(tabs);
 }
 
+export function accountPathMatches(pathname: string, href: string): boolean {
+  return pathname === href || pathname.startsWith(`${href}/`);
+}
+
 interface OrgTabBarProps {
   did: string;
   accountKind?: AccountKind;
@@ -274,8 +278,8 @@ export function AccountTabBar({
       return currentTab ? currentTab === tabName : tab.href === tabs[0]?.href;
     }
 
-    if (tab.matchPaths?.some((path) => pathname === path || pathname.startsWith(`${path}/`))) return true;
-    return tab.exact ? pathname === tab.href : pathname.startsWith(tab.href);
+    if (tab.matchPaths?.some((path) => accountPathMatches(pathname, path))) return true;
+    return tab.exact ? pathname === tab.href : accountPathMatches(pathname, tab.href);
   }
 
   // Profiles can expose many specialist/private surfaces. Keep the three
@@ -297,6 +301,7 @@ export function AccountTabBar({
               <Link
                 key={tab.href}
                 href={tab.href}
+                aria-current={active ? "page" : undefined}
                 className={cn(
                   "relative flex items-center gap-1.5 whitespace-nowrap px-3 py-2.5 text-sm font-medium transition-colors duration-150 select-none",
                   active ? "text-foreground" : "text-muted-foreground hover:text-foreground",
@@ -331,7 +336,7 @@ export function AccountTabBar({
                   const Icon = tab.icon;
                   return (
                     <DropdownMenuItem key={tab.href} asChild>
-                      <Link href={tab.href} className={cn("flex items-center gap-2", active && "bg-accent font-medium text-accent-foreground")}>
+                      <Link href={tab.href} aria-current={active ? "page" : undefined} className={cn("flex items-center gap-2", active && "bg-accent font-medium text-accent-foreground")}>
                         <Icon className="size-4 text-muted-foreground" />
                         {t(tab.labelKey)}
                       </Link>

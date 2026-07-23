@@ -13,7 +13,8 @@ import {
 export async function generateMetadata({ params }: { params: Promise<{ did: string }> }): Promise<Metadata> {
   const routeParams = await readOptionalAccountRouteParams(params);
   if (!routeParams) {
-    return { title: "Profile not found", robots: { index: false, follow: false } };
+    const t = await getTranslations("legacy");
+    return { title: t("accountProfileMissing"), robots: { index: false, follow: false } };
   }
   const [account, t] = await Promise.all([
     getAccountRouteData(routeParams.did, routeParams.urlIdentifier),

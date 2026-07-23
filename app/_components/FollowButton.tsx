@@ -13,11 +13,10 @@
 
 import { createContext, useContext, type ReactNode } from "react";
 import Link from "next/link";
-import { useTranslations } from "next-intl";
+import { useFormatter, useTranslations } from "next-intl";
 import { Loader2Icon, UserCheckIcon, UserPlusIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { formatCompact } from "../_lib/format";
 import { accountFollowersPath, accountFollowingPath } from "../account/_lib/account-route";
 import { useFollow, type UseFollow } from "../_lib/follows";
 
@@ -93,7 +92,7 @@ export function FollowButton({
       className={className}
     >
       {follow.busy ? (
-        <Loader2Icon className="animate-spin" />
+        <Loader2Icon className="animate-spin motion-reduce:animate-none" />
       ) : follow.isFollowing ? (
         <UserCheckIcon />
       ) : (
@@ -117,6 +116,7 @@ export function FollowStats({
   className?: string;
 }) {
   const t = useTranslations("common.follow");
+  const format = useFormatter();
   const follow = useFollowState(targetDid);
   if (!targetDid) return null;
 
@@ -124,11 +124,11 @@ export function FollowStats({
   return (
     <span className={cn("inline-flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-muted-foreground", className)}>
       <Link href={accountFollowersPath(linkId)} className="rounded transition-colors hover:text-foreground hover:underline">
-        <b className="font-semibold tabular-nums text-foreground">{formatCompact(follow.followers)}</b>{" "}
+        <b className="font-semibold tabular-nums text-foreground">{format.number(follow.followers, { notation: "compact", maximumFractionDigits: 1 })}</b>{" "}
         {t("followersLabel")}
       </Link>
       <Link href={accountFollowingPath(linkId)} className="rounded transition-colors hover:text-foreground hover:underline">
-        <b className="font-semibold tabular-nums text-foreground">{formatCompact(follow.following)}</b>{" "}
+        <b className="font-semibold tabular-nums text-foreground">{format.number(follow.following, { notation: "compact", maximumFractionDigits: 1 })}</b>{" "}
         {t("followingLabel")}
       </Link>
     </span>

@@ -114,7 +114,7 @@ export async function fetchProfilePosts(
     replies ? REPLIES_QUERY : POSTS_QUERY,
     { did, first: options.limit ?? 24, after: options.cursor ?? null },
     signal,
-  ).catch(() => null);
+  );
 
   const conn = data?.appGainforestFeedPost;
   const items: ProfilePost[] = [];
@@ -139,7 +139,7 @@ export async function fetchProfileLikes(
 ): Promise<{ items: ProfileLike[]; nextCursor: string | null }> {
   const data = await indexerQuery<{
     appGainforestFeedLike?: { pageInfo?: PageInfo | null; edges?: Array<{ node?: LikeNode | null } | null> | null } | null;
-  }>(LIKES_QUERY, { did, first: options.limit ?? 24, after: options.cursor ?? null }, signal).catch(() => null);
+  }>(LIKES_QUERY, { did, first: options.limit ?? 24, after: options.cursor ?? null }, signal);
 
   const conn = data?.appGainforestFeedLike;
   const items: ProfileLike[] = [];

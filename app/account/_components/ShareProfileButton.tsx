@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { CheckIcon, LinkIcon } from "lucide-react";
+import { CheckIcon, LinkIcon, TriangleAlertIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 type ShareProfileButtonProps = {
@@ -9,10 +9,11 @@ type ShareProfileButtonProps = {
   profilePath: string;
   label: string;
   copiedLabel: string;
+  errorLabel?: string;
 };
 
-export function ShareProfileButton({ profilePath, label, copiedLabel }: ShareProfileButtonProps) {
-  const [copied, setCopied] = useState(false);
+export function ShareProfileButton({ profilePath, label, copiedLabel, errorLabel }: ShareProfileButtonProps) {
+  const [state, setState] = useState<"idle" | "copied" | "error">("idle");
 
   const handleCopy = async () => {
     const url =
@@ -22,10 +23,12 @@ export function ShareProfileButton({ profilePath, label, copiedLabel }: SharePro
     try {
       await navigator.clipboard.writeText(url);
     } catch {
+      setState("error");
+      window.setTimeout(() => setState("idle"), 2000);
       return;
     }
-    setCopied(true);
-    window.setTimeout(() => setCopied(false), 2000);
+    setState("copied");
+    window.setTimeout(() => setState("idle"), 2000);
   };
 
   return (
@@ -37,8 +40,8 @@ export function ShareProfileButton({ profilePath, label, copiedLabel }: SharePro
       onClick={handleCopy}
       aria-live="polite"
     >
-      {copied ? <CheckIcon /> : <LinkIcon />}
-      {copied ? copiedLabel : label}
+      {state === "copied" ? <CheckIcon /> : state === "error" ? <TriangleAlertIcon /> : <LinkIcon />}
+      {state === "copied" ? copiedLabel : state === "error" ? errorLabel ?? label : label}
     </Button>
   );
 }

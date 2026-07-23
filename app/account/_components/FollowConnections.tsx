@@ -1,25 +1,23 @@
 "use client";
 
-/**
- * The Followers / Following lists for an account. A segmented toggle switches
- * between the two (each is its own route, so the URL reflects the view), and the
- * active list pages through the indexer. Every row is an account chip (hover
- * card + opens the account drawer) with its own Follow button.
- */
-
 import { useCallback, useEffect, useRef, useState } from "react";
-import Link from "next/link";
-import { useTranslations } from "next-intl";
+import { useFormatter, useTranslations } from "next-intl";
+import { RotateCwIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { formatCompact } from "@/app/_lib/format";
 import { fetchFollowConnections, fetchFollowStats, type FollowConnection } from "@/app/_lib/follows";
 import { AuthorChip } from "@/app/_components/AuthorChip";
 import { FollowButton } from "@/app/_components/FollowButton";
 import { AutoLoadMoreButton } from "@/app/_components/AutoLoadMoreButton";
+import { Button } from "@/components/ui/button";
 import { accountFollowersPath, accountFollowingPath } from "../_lib/account-route";
+import {
+  ProfileRowsSkeleton,
+  ProfileSegmentedNavigation,
+  profileListIdentity,
+  takeFreshProfileItems,
+} from "./ProfileListSkeleton";
 
 type Direction = "followers" | "following";
-
 const PAGE = 24;
 
 export function FollowConnections({
@@ -32,65 +30,47 @@ export function FollowConnections({
   active: Direction;
 }) {
   const t = useTranslations("common.follow");
+  const format = useFormatter();
   const [counts, setCounts] = useState<{ followers: number; following: number } | null>(null);
 
   useEffect(() => {
     const controller = new AbortController();
+    setCounts(null);
     fetchFollowStats(did, null, controller.signal)
-      .then((s) => setCounts({ followers: s.followers, following: s.following }))
+      .then((stats) => setCounts({ followers: stats.followers, following: stats.following }))
       .catch(() => {});
     return () => controller.abort();
   }, [did]);
 
+  const count = (value: number | undefined, selected: boolean) =>
+    typeof value === "number" ? (
+      <span className={cn("tabular-nums", selected ? "text-foreground/65" : "text-muted-foreground/70")}>
+        {format.number(value, { notation: "compact", maximumFractionDigits: 1 })}
+      </span>
+    ) : undefined;
+
   return (
     <section className="py-6">
-      <div className="mb-5 inline-flex rounded-full border border-border bg-card p-1">
-        <ToggleLink
-          href={accountFollowersPath(identifier)}
-          active={active === "followers"}
-          label={t("followersTab")}
-          count={counts?.followers}
-        />
-        <ToggleLink
-          href={accountFollowingPath(identifier)}
-          active={active === "following"}
-          label={t("followingTab")}
-          count={counts?.following}
-        />
-      </div>
+      <ProfileSegmentedNavigation
+        ariaLabel={t("navigationLabel")}
+        segments={[
+          {
+            href: accountFollowersPath(identifier),
+            active: active === "followers",
+            label: t("followersTab"),
+            count: count(counts?.followers, active === "followers"),
+          },
+          {
+            href: accountFollowingPath(identifier),
+            active: active === "following",
+            label: t("followingTab"),
+            count: count(counts?.following, active === "following"),
+          },
+        ]}
+      />
 
-      <FollowList key={active} did={did} direction={active} />
+      <FollowList key={profileListIdentity(did, active)} did={did} direction={active} />
     </section>
-  );
-}
-
-function ToggleLink({
-  href,
-  active,
-  label,
-  count,
-}: {
-  href: string;
-  active: boolean;
-  label: string;
-  count?: number;
-}) {
-  return (
-    <Link
-      href={href}
-      aria-current={active ? "page" : undefined}
-      className={cn(
-        "inline-flex items-center gap-1.5 rounded-full px-4 py-1.5 text-sm font-medium transition-colors",
-        active ? "bg-foreground text-background" : "text-muted-foreground hover:text-foreground",
-      )}
-    >
-      {label}
-      {typeof count === "number" ? (
-        <span className={cn("tabular-nums", active ? "text-background/70" : "text-muted-foreground/70")}>
-          {formatCompact(count)}
-        </span>
-      ) : null}
-    </Link>
   );
 }
 
@@ -100,6 +80,7 @@ function FollowList({ did, direction }: { did: string; direction: Direction }) {
   const [hasMore, setHasMore] = useState(true);
   const [loading, setLoading] = useState(true);
   const [loaded, setLoaded] = useState(false);
+  const [error, setError] = useState(false);
   const cursorRef = useRef<string | null>(null);
   const seenRef = useRef<Set<string>>(new Set());
   const loadingRef = useRef(false);
@@ -108,24 +89,18 @@ function FollowList({ did, direction }: { did: string; direction: Direction }) {
     if (loadingRef.current || (loaded && !hasMore)) return;
     loadingRef.current = true;
     setLoading(true);
+    setError(false);
     try {
       const { items: page, nextCursor } = await fetchFollowConnections(did, direction, {
         cursor: cursorRef.current,
         limit: PAGE,
       });
       cursorRef.current = nextCursor;
-      setItems((prev) => {
-        const merged = prev.slice();
-        for (const item of page) {
-          if (seenRef.current.has(item.did)) continue;
-          seenRef.current.add(item.did);
-          merged.push(item);
-        }
-        return merged;
-      });
+      const fresh = takeFreshProfileItems(page, seenRef.current, (item) => item.did);
+      if (fresh.length > 0) setItems((previous) => [...previous, ...fresh]);
       setHasMore(Boolean(nextCursor));
     } catch {
-      setHasMore(false);
+      setError(true);
     } finally {
       loadingRef.current = false;
       setLoading(false);
@@ -133,19 +108,25 @@ function FollowList({ did, direction }: { did: string; direction: Direction }) {
     }
   }, [did, direction, hasMore, loaded]);
 
-  // Initial page on mount (the component is keyed by direction, so a fresh
-  // mount handles switching tabs).
   useEffect(() => {
     void loadMore();
+    // The parent key remounts this list when DID or direction changes.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  if (loaded && items.length === 0) {
-    return (
-      <p className="py-12 text-center text-sm text-muted-foreground">
-        {direction === "followers" ? t("emptyFollowers") : t("emptyFollowing")}
-      </p>
-    );
+  const loadError = (
+    <div role="alert" className="my-6 flex flex-col items-center gap-3 rounded-2xl bg-muted px-5 py-8 text-center">
+      <p className="text-sm text-muted-foreground">{t("loadError")}</p>
+      <Button type="button" variant="secondary" size="sm" onClick={() => void loadMore()}>
+        <RotateCwIcon aria-hidden />
+        {t("retry")}
+      </Button>
+    </div>
+  );
+
+  if (loaded && error && items.length === 0) return loadError;
+  if (loaded && !error && items.length === 0) {
+    return <p className="py-12 text-center text-sm text-muted-foreground">{direction === "followers" ? t("emptyFollowers") : t("emptyFollowing")}</p>;
   }
 
   return (
@@ -153,28 +134,20 @@ function FollowList({ did, direction }: { did: string; direction: Direction }) {
       <ul className="divide-y divide-border/60">
         {items.map((item) => (
           <li key={item.did} className="flex items-center gap-3 py-3">
-            <div className="min-w-0 flex-1">
-              <AuthorChip did={item.did} />
-            </div>
+            <div className="min-w-0 flex-1"><AuthorChip did={item.did} /></div>
             <FollowButton targetDid={item.did} />
           </li>
         ))}
-        {!loaded
-          ? Array.from({ length: 6 }).map((_, index) => (
-              <li key={`skeleton-${index}`} className="flex items-center gap-3 py-3">
-                <span className="skeleton size-7 rounded-full" />
-                <span className="skeleton h-4 w-40 rounded" />
-              </li>
-            ))
-          : null}
       </ul>
-      {loaded ? (
+      {!loaded ? <ProfileRowsSkeleton variant="people" /> : null}
+      {error && items.length > 0 ? loadError : null}
+      {loaded && !error ? (
         <AutoLoadMoreButton
           hasMore={hasMore}
           loading={loading}
           onLoadMore={() => void loadMore()}
           endLabel=""
-          className="mx-auto mt-4 block rounded-full px-4 py-1.5 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+          className="mx-auto mt-4 block rounded-full px-4 py-1.5 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground motion-reduce:transition-none"
         />
       ) : null}
     </div>
