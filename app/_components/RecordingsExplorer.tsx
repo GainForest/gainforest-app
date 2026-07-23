@@ -196,7 +196,7 @@ export function RecordingsExplorer({
 
           <div className="mt-2 grid grid-cols-7 gap-1">
             {weekdayLetters.map((letter, i) => (
-              <span key={i} className="grid h-6 place-items-center text-[10px] font-medium uppercase text-muted-foreground">
+              <span key={i} className="grid h-6 place-items-center text-[10px] font-medium text-muted-foreground">
                 {letter}
               </span>
             ))}

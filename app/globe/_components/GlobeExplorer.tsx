@@ -15,10 +15,18 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useCallback, useEffect, useMemo, useRef, useState, useTransition } from "react";
+import { useCallback, useEffect, useId, useMemo, useRef, useState, useTransition } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { parseAsString, useQueryState } from "nuqs";
-import { AnimatePresence, animate, motion, useDragControls, useMotionValue, useTransform } from "framer-motion";
+import {
+  AnimatePresence,
+  animate,
+  motion,
+  useDragControls,
+  useMotionValue,
+  useReducedMotion,
+  useTransform,
+} from "framer-motion";
 import {
   ArrowLeftIcon,
   ArrowUpRightIcon,
@@ -71,6 +79,13 @@ import {
 } from "../_lib/layers";
 import { buildDroneTimeSeries, type DroneTimeSeries } from "../_lib/time-series";
 import { fetchOrganizationTrees, type TreeDetail } from "../_lib/trees";
+import {
+  isSheetExpanded,
+  nextSheetButtonSnap,
+  treeListEntries,
+  type SheetSnap,
+  type TreeListEntry,
+} from "../_lib/accessibility";
 import type {
   GlobeLayer,
   GlobeLayerGroup,
@@ -124,11 +139,9 @@ type GlobeExplorerProps = {
 type GlobeMode = "global" | "organization" | "project";
 type PanelVariant = "floating" | "sheet";
 type OverlayTab = "details" | "layers";
-/** Mobile bottom-sheet drag snap points ("collapsed" clears the map controls). */
-type SheetSnap = "collapsed" | "peek" | "half" | "full";
 
 type SiteState = {
-  status: "idle" | "loading" | "ready";
+  status: "idle" | "loading" | "ready" | "error";
   sites: GlobeSite[];
   features: GeoJSON.Feature[];
   bounds: LngLatBounds | null;
@@ -142,22 +155,27 @@ function featureCollection(features: GeoJSON.Feature[]): GeoJSON.FeatureCollecti
 
 export function GlobeExplorer({ orgDid = null, orgName = null, orgIdentifier = null, project = null }: GlobeExplorerProps) {
   const t = useTranslations("marketplace.globe");
+  const shouldReduceMotion = useReducedMotion() ?? false;
   const mode: GlobeMode = project ? "project" : orgDid ? "organization" : "global";
 
   // ── Organization roster ──────────────────────────────────────────────────
   const [organizations, setOrganizations] = useState<GlobeOrganization[] | null>(null);
+  const [organizationsError, setOrganizationsError] = useState(false);
+  const [organizationsRetry, setOrganizationsRetry] = useState(0);
   useEffect(() => {
     const controller = new AbortController();
+    setOrganizations(null);
+    setOrganizationsError(false);
     fetchGlobeOrganizations(controller.signal)
       .then((orgs) => setOrganizations(orgs.sort((a, b) => a.name.localeCompare(b.name))))
       .catch((error) => {
         if ((error as Error).name !== "AbortError") {
           console.warn("[globe] organizations failed", error);
-          setOrganizations([]);
+          setOrganizationsError(true);
         }
       });
     return () => controller.abort();
-  }, []);
+  }, [organizationsRetry]);
 
   // ── Selection (global mode uses the URL; focused modes are fixed) ────────
   const [queryOrg, setQueryOrg] = useQueryState("org", parseAsString);
@@ -180,6 +198,7 @@ export function GlobeExplorer({ orgDid = null, orgName = null, orgIdentifier = n
   const [treesOnly, setTreesOnly] = useState(false);
   const [treeCounts, setTreeCounts] = useState<Map<string, number> | null>(null);
   const [treeCountsFailed, setTreeCountsFailed] = useState(false);
+  const [treeCountsRetry, setTreeCountsRetry] = useState(0);
   useEffect(() => {
     if (!treesOnly || treeCounts !== null || treeCountsFailed) return;
     const controller = new AbortController();
@@ -192,12 +211,14 @@ export function GlobeExplorer({ orgDid = null, orgName = null, orgIdentifier = n
         }
       });
     return () => controller.abort();
-  }, [treesOnly, treeCounts, treeCountsFailed]);
+  }, [treesOnly, treeCounts, treeCountsFailed, treeCountsRetry]);
 
   // ── Sites of the focused organization ────────────────────────────────────
   const [siteState, setSiteState] = useState<SiteState>(EMPTY_SITE_STATE);
   const [selectedSiteUri, setSelectedSiteUri] = useState<string | null>(null);
   const [boundsNonce, setBoundsNonce] = useState(0);
+  const [sitesRetry, setSitesRetry] = useState(0);
+  const [projectRetry, setProjectRetry] = useState(0);
   const bumpBounds = useCallback(() => setBoundsNonce((n) => n + 1), []);
 
   useEffect(() => {
@@ -212,6 +233,7 @@ export function GlobeExplorer({ orgDid = null, orgName = null, orgIdentifier = n
       const sites = await fetchOrganizationSites(focusDid, controller.signal);
       const features: GeoJSON.Feature[] = [];
       let bounds: LngLatBounds | null = null;
+      let unresolvedBoundaries = 0;
       await Promise.all(
         sites.map(async (site) => {
           if (site.geojsonUrl) {
@@ -221,6 +243,7 @@ export function GlobeExplorer({ orgDid = null, orgName = null, orgIdentifier = n
               bounds = mergeBounds(bounds, geojsonBounds(geojson));
               return;
             }
+            if (!site.point) unresolvedBoundaries += 1;
           }
           if (site.point) {
             features.push({
@@ -233,16 +256,19 @@ export function GlobeExplorer({ orgDid = null, orgName = null, orgIdentifier = n
         }),
       );
       if (controller.signal.aborted) return;
+      if (unresolvedBoundaries > 0 && features.length === 0) {
+        throw new Error("Site boundaries could not be loaded");
+      }
       setSiteState({ status: "ready", sites, features, bounds });
       bumpBounds();
     })().catch((error) => {
       if ((error as Error).name !== "AbortError") {
         console.warn("[globe] sites failed", error);
-        setSiteState({ status: "ready", sites: [], features: [], bounds: null });
+        setSiteState({ status: "error", sites: [], features: [], bounds: null });
       }
     });
     return () => controller.abort();
-  }, [focusDid, mode, bumpBounds]);
+  }, [focusDid, mode, bumpBounds, sitesRetry]);
 
   // ── The organization's own location (kept apart from the project sites) ──
   const [orgLocationUri, setOrgLocationUri] = useState<string | null>(null);
@@ -292,10 +318,12 @@ export function GlobeExplorer({ orgDid = null, orgName = null, orgIdentifier = n
     (async () => {
       const features: GeoJSON.Feature[] = [];
       let bounds: LngLatBounds | null = null;
+      let resolvedLocations = 0;
       await Promise.all(
         project.locationUris.map(async (uri) => {
           const resolved = await resolveCertifiedLocationCoords(uri, controller.signal).catch(() => null);
           if (!resolved) return;
+          resolvedLocations += 1;
           if (resolved.geojson) {
             features.push(...toFeatures(resolved.geojson, { siteUri: uri }));
             bounds = mergeBounds(bounds, geojsonBounds(resolved.geojson));
@@ -310,22 +338,26 @@ export function GlobeExplorer({ orgDid = null, orgName = null, orgIdentifier = n
         }),
       );
       if (controller.signal.aborted) return;
+      if (project.locationUris.length > 0 && resolvedLocations === 0) {
+        throw new Error("Project boundaries could not be loaded");
+      }
       setProjectState({ status: "ready", sites: [], features, bounds });
       bumpBounds();
     })().catch((error) => {
       if ((error as Error).name !== "AbortError") {
         console.warn("[globe] project boundaries failed", error);
-        setProjectState({ status: "ready", sites: [], features: [], bounds: null });
+        setProjectState({ status: "error", sites: [], features: [], bounds: null });
       }
     });
     return () => controller.abort();
-  }, [project, bumpBounds]);
+  }, [project, bumpBounds, projectRetry]);
 
   // ── Measured trees of the focused organization ─────────────────────────
   const [treesState, setTreesState] = useState<{
-    status: "idle" | "loading" | "ready";
+    status: "idle" | "loading" | "ready" | "error";
     data: GeoJSON.FeatureCollection | null;
   }>({ status: "idle", data: null });
+  const [treesRetry, setTreesRetry] = useState(0);
   const [treesVisible, setTreesVisible] = useState(true);
   const [selectedTree, setSelectedTree] = useState<TreeDetail | null>(null);
 
@@ -345,17 +377,21 @@ export function GlobeExplorer({ orgDid = null, orgName = null, orgIdentifier = n
       .catch((error) => {
         if ((error as Error).name !== "AbortError") {
           console.warn("[globe] trees failed", error);
-          setTreesState({ status: "ready", data: null });
+          setTreesState({ status: "error", data: null });
         }
       });
     return () => controller.abort();
-  }, [focusDid, mode]);
+  }, [focusDid, mode, treesRetry]);
 
   // ── Data layers ──────────────────────────────────────────────────────────
   const [globalLayers, setGlobalLayers] = useState<GlobeLayer[] | null>(null);
+  const [globalLayersError, setGlobalLayersError] = useState(false);
+  const [globalLayersRetry, setGlobalLayersRetry] = useState(0);
   const [orgLayers, setOrgLayers] = useState<GlobeLayer[]>([]);
   const [orgLayerGroups, setOrgLayerGroups] = useState<GlobeLayerGroup[]>([]);
   const [orgLayersLoading, setOrgLayersLoading] = useState(false);
+  const [orgLayersError, setOrgLayersError] = useState(false);
+  const [orgLayersRetry, setOrgLayersRetry] = useState(0);
   const [enabledLayerIds, setEnabledLayerIds] = useState<Set<string>>(new Set());
   const [landcoverVisible, setLandcoverVisible] = useState(false);
   const [activeOverlayTab, setActiveOverlayTab] = useState<OverlayTab>("details");
@@ -366,20 +402,23 @@ export function GlobeExplorer({ orgDid = null, orgName = null, orgIdentifier = n
 
   useEffect(() => {
     const controller = new AbortController();
+    setGlobalLayers(null);
+    setGlobalLayersError(false);
     fetchGlobalLayers(controller.signal)
       .then(setGlobalLayers)
       .catch((error) => {
         if ((error as Error).name !== "AbortError") {
           console.warn("[globe] global layers failed", error);
-          setGlobalLayers([]);
+          setGlobalLayersError(true);
         }
       });
     return () => controller.abort();
-  }, []);
+  }, [globalLayersRetry]);
 
   useEffect(() => {
     setOrgLayers([]);
     setOrgLayerGroups([]);
+    setOrgLayersError(false);
     setActiveSeriesId(null);
     setSeriesPlaying(false);
     if (!focusDid) return;
@@ -401,11 +440,14 @@ export function GlobeExplorer({ orgDid = null, orgName = null, orgIdentifier = n
         }
       })
       .catch((error) => {
-        if ((error as Error).name !== "AbortError") console.warn("[globe] org layers failed", error);
+        if ((error as Error).name !== "AbortError") {
+          console.warn("[globe] org layers failed", error);
+          setOrgLayersError(true);
+        }
       })
       .finally(() => setOrgLayersLoading(false));
     return () => controller.abort();
-  }, [focusDid]);
+  }, [focusDid, orgLayersRetry]);
 
   // ── Drone time series (repeat flights over the same area) ──────────────
   // Overlapping drone imagery is grouped into per-area series; enabling one
@@ -435,12 +477,12 @@ export function GlobeExplorer({ orgDid = null, orgName = null, orgIdentifier = n
 
   // Auto-advance while playing (loops).
   useEffect(() => {
-    if (!seriesPlaying || !activeSeries) return;
+    if (!seriesPlaying || !activeSeries || shouldReduceMotion) return;
     const timer = setInterval(() => {
       setSeriesStep((step) => (step + 1) % activeSeries.steps.length);
     }, 1800);
     return () => clearInterval(timer);
-  }, [seriesPlaying, activeSeries]);
+  }, [seriesPlaying, activeSeries, shouldReduceMotion]);
 
   const [mapBounds, setMapBounds] = useState<LngLatBounds | null>(null);
 
@@ -448,6 +490,8 @@ export function GlobeExplorer({ orgDid = null, orgName = null, orgIdentifier = n
   // camera flies straight to it, so it is always clear which toggle just
   // changed the map. The nonce re-triggers the flight on repeat requests.
   const [layerFlightNonce, setLayerFlightNonce] = useState(0);
+  const [failedLayerId, setFailedLayerId] = useState<string | null>(null);
+  const [layerRetryKey, setLayerRetryKey] = useState(0);
   const flyToLayer = useCallback((layer: GlobeLayer) => {
     if (!layer.bounds) return;
     setMapBounds(layer.bounds);
@@ -456,6 +500,7 @@ export function GlobeExplorer({ orgDid = null, orgName = null, orgIdentifier = n
 
   const toggleLayer = useCallback(
     (layer: GlobeLayer) => {
+      setFailedLayerId((current) => (current === layer.id ? null : current));
       const enabling = !enabledLayerIds.has(layer.id);
       setEnabledLayerIds((current) => {
         const next = new Set(current);
@@ -471,6 +516,7 @@ export function GlobeExplorer({ orgDid = null, orgName = null, orgIdentifier = n
   // "Zoom to layer": make sure the layer is visible, then fly to it.
   const locateLayer = useCallback(
     (layer: GlobeLayer) => {
+      setFailedLayerId((current) => (current === layer.id ? null : current));
       setEnabledLayerIds((current) =>
         current.has(layer.id) ? current : new Set([...current, layer.id]),
       );
@@ -546,6 +592,11 @@ export function GlobeExplorer({ orgDid = null, orgName = null, orgIdentifier = n
     () => (activeSeries ? [...looseLayers, ...activeSeries.layers] : looseLayers),
     [looseLayers, activeSeries],
   );
+  useEffect(() => {
+    if (failedLayerId && !activeLayers.some((layer) => layer.id === failedLayerId)) {
+      setFailedLayerId(null);
+    }
+  }, [activeLayers, failedLayerId]);
   // Only the current capture date is opaque; the rest stay mounted at 0 so
   // dragging the slider crossfades instead of refetching tiles.
   const layerOpacities = useMemo(() => {
@@ -589,6 +640,12 @@ export function GlobeExplorer({ orgDid = null, orgName = null, orgIdentifier = n
     if (projectState.status !== "ready") return null;
     return filterPointsWithinBoundaries(treesState.data, projectState.features);
   }, [treesState.data, mode, projectState]);
+  const visibleTreeEntries = useMemo(() => treeListEntries(visibleTrees), [visibleTrees]);
+  const selectTreeFromList = useCallback((entry: TreeListEntry) => {
+    setSelectedTree(entry.detail);
+    setMapBounds(pointBounds(entry.coordinates[1], entry.coordinates[0], 0.002));
+    setLayerFlightNonce((nonce) => nonce + 1);
+  }, []);
 
   const highlightFeatures = useMemo(() => {
     if (!selectedSiteUri) return [];
@@ -625,7 +682,13 @@ export function GlobeExplorer({ orgDid = null, orgName = null, orgIdentifier = n
     if (focusedState.status !== "ready") return;
     if (focusedState.bounds) {
       setMapBounds(focusedState.bounds);
-    } else if (selectedOrg && typeof selectedOrg.lat === "number" && typeof selectedOrg.lon === "number") {
+    } else if (
+      selectedOrg &&
+      typeof selectedOrg.lat === "number" &&
+      Number.isFinite(selectedOrg.lat) &&
+      typeof selectedOrg.lon === "number" &&
+      Number.isFinite(selectedOrg.lon)
+    ) {
       setMapBounds(pointBounds(selectedOrg.lat, selectedOrg.lon, 0.5));
     }
     // boundsNonce re-fits on repeat selections of the same org/site.
@@ -719,6 +782,13 @@ export function GlobeExplorer({ orgDid = null, orgName = null, orgIdentifier = n
     treeCounts,
     treeCountsLoading: treesOnly && treeCounts === null && !treeCountsFailed,
     treeCountsFailed,
+    organizationsError,
+    onRetryOrganizations: () => setOrganizationsRetry((value) => value + 1),
+    onRetryTreeCounts: () => {
+      setTreeCounts(null);
+      setTreeCountsFailed(false);
+      setTreeCountsRetry((value) => value + 1);
+    },
     onSelect: (did: string) => {
       selectOrganization(did);
       collapseSheet();
@@ -746,6 +816,10 @@ export function GlobeExplorer({ orgDid = null, orgName = null, orgIdentifier = n
           bumpBounds();
           collapseSheet();
         },
+        onRetry: () => {
+          if (mode === "project") setProjectRetry((value) => value + 1);
+          else setSitesRetry((value) => value + 1);
+        },
       }
     : null;
 
@@ -754,8 +828,12 @@ export function GlobeExplorer({ orgDid = null, orgName = null, orgIdentifier = n
     onToggleLandcover: () => setLandcoverVisible((value) => !value),
     categorizedGlobalLayers,
     globalLayersLoading: globalLayers === null,
+    globalLayersError,
+    onRetryGlobalLayers: () => setGlobalLayersRetry((value) => value + 1),
     orgLayers: nonSeriesOrgLayers,
     orgLayersLoading,
+    orgLayersError,
+    onRetryOrgLayers: () => setOrgLayersRetry((value) => value + 1),
     showOrgLayers: Boolean(focusDid),
     enabledLayerIds,
     onToggleLayer: toggleLayer,
@@ -768,10 +846,20 @@ export function GlobeExplorer({ orgDid = null, orgName = null, orgIdentifier = n
     onLocateSeries: flyToSeries,
     treesCount: visibleTrees?.features.length ?? 0,
     treesLoading: treesState.status === "loading",
+    treesError: treesState.status === "error",
+    onRetryTrees: () => setTreesRetry((value) => value + 1),
     treesVisible,
+    treeEntries: visibleTreeEntries,
+    selectedTreeId: selectedTree?.id ?? null,
+    onSelectTree: selectTreeFromList,
     onToggleTrees: () => setTreesVisible((value) => !value),
     visibleLayers: looseLayers,
     legendLayers: activeLegends,
+    activeLayerError: failedLayerId !== null,
+    onRetryActiveLayer: () => {
+      setFailedLayerId(null);
+      setLayerRetryKey((value) => value + 1);
+    },
   };
 
   // Header title (mobile). A null title means the roster is still loading
@@ -813,9 +901,12 @@ export function GlobeExplorer({ orgDid = null, orgName = null, orgIdentifier = n
             : { top: 36, bottom: 150, left: 36, right: 36 }
         }
         spin={mode === "global" && !focusDid}
+        reducedMotion={shouldReduceMotion}
         landcoverVisible={landcoverVisible}
         activeLayers={activeLayers}
         layerOpacities={layerOpacities}
+        layerRetryKey={layerRetryKey}
+        onLayerError={(layer) => setFailedLayerId(layer.id)}
         onLoaded={() => setMapReady(true)}
       />
 
@@ -825,12 +916,12 @@ export function GlobeExplorer({ orgDid = null, orgName = null, orgIdentifier = n
           <motion.div
             initial={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.7, ease: "easeOut" }}
+            transition={{ duration: shouldReduceMotion ? 0 : 0.7, ease: "easeOut" }}
             className="pointer-events-none absolute inset-0 z-30 grid place-items-center bg-[#0b0b19]"
           >
             <div className="flex flex-col items-center gap-3">
               <span className="relative grid size-14 place-items-center">
-                <span className="absolute inset-0 animate-ping rounded-full bg-primary/20" />
+                <span className="absolute inset-0 animate-ping rounded-full bg-primary/20 motion-reduce:animate-none" />
                 <EarthIcon className="size-7 text-primary" />
               </span>
               <p className="text-sm font-medium text-white/60">{t("loadingGlobe")}</p>
@@ -868,10 +959,10 @@ export function GlobeExplorer({ orgDid = null, orgName = null, orgIdentifier = n
           <motion.section
             key="globe-rail"
             data-testid="globe-desktop-panel"
-            initial={{ opacity: 0, x: -12 }}
+            initial={shouldReduceMotion ? false : { opacity: 0, x: -12 }}
             animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -12 }}
-            transition={{ duration: 0.26, ease: [0.25, 0.1, 0.25, 1] }}
+            exit={shouldReduceMotion ? undefined : { opacity: 0, x: -12 }}
+            transition={{ duration: shouldReduceMotion ? 0 : 0.26, ease: [0.25, 0.1, 0.25, 1] }}
             // `.globe-feathered-panel` forces position:relative (so its ::before
             // can anchor), which would beat Tailwind's `absolute` and collapse
             // the rail to its content height — pin it full-height inline instead.
@@ -882,10 +973,10 @@ export function GlobeExplorer({ orgDid = null, orgName = null, orgIdentifier = n
               <AnimatePresence mode="wait" initial={false}>
                 <motion.div
                   key={activeOverlayTab}
-                  initial={{ opacity: 0, y: 4 }}
+                  initial={shouldReduceMotion ? false : { opacity: 0, y: 4 }}
                   animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -4 }}
-                  transition={{ duration: 0.14, ease: [0.25, 0.1, 0.25, 1] }}
+                  exit={shouldReduceMotion ? undefined : { opacity: 0, y: -4 }}
+                  transition={{ duration: shouldReduceMotion ? 0 : 0.14, ease: [0.25, 0.1, 0.25, 1] }}
                   className="flex min-h-0 flex-1 flex-col overflow-hidden"
                 >
                   {renderPanel(activeOverlayTab, "floating")}
@@ -970,6 +1061,7 @@ function GlobeHeader({
 }) {
   const t = useTranslations("marketplace.globe");
   const nav = useTranslations("common.navigation");
+  const shouldReduceMotion = useReducedMotion() ?? false;
   const mobileNav = useMobileNav();
   const [hoveredTab, setHoveredTab] = useState<OverlayTab | null>(null);
   const [, startPreview] = useTransition();
@@ -1046,7 +1138,7 @@ function GlobeHeader({
             onClick={onCloseRail}
             aria-label={t("tree.close")}
             title={t("tree.close")}
-            className="grid size-9 shrink-0 place-items-center rounded-full text-muted-foreground transition-colors hover:bg-white/[0.12] hover:text-foreground"
+            className="grid size-11 shrink-0 place-items-center rounded-full text-muted-foreground transition-colors hover:bg-white/[0.12] hover:text-foreground"
           >
             <XIcon className="size-4" />
           </button>
@@ -1059,10 +1151,10 @@ function GlobeHeader({
           // unreliable in Chrome, so the popup gets its own blur root here.
           <motion.div
             key={previewTab}
-            initial={{ opacity: 0 }}
+            initial={shouldReduceMotion ? false : { opacity: 0 }}
             animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.14, ease: [0.25, 0.1, 0.25, 1] }}
+            exit={shouldReduceMotion ? undefined : { opacity: 0 }}
+            transition={{ duration: shouldReduceMotion ? 0 : 0.14, ease: [0.25, 0.1, 0.25, 1] }}
             onMouseEnter={cancelPreviewClose}
             onMouseLeave={schedulePreviewClose}
             className="pointer-events-auto absolute left-2.5 top-[3.75rem] z-40 hidden pt-2 md:block"
@@ -1102,7 +1194,7 @@ function HeaderNavItem({
         onClick={onSelect}
         aria-pressed={active}
         className={cn(
-          "inline-flex h-9 items-center gap-1.5 rounded-full px-3 text-xs font-semibold transition-colors",
+          "inline-flex h-11 items-center gap-1.5 rounded-full px-3 text-xs font-semibold transition-colors",
           active ? "bg-white/[0.12] text-foreground" : "text-muted-foreground hover:bg-white/[0.06] hover:text-foreground",
         )}
       >
@@ -1139,6 +1231,7 @@ function MobileSheet({
   renderPanel: (tab: OverlayTab, variant: PanelVariant) => React.ReactNode;
 }) {
   const t = useTranslations("marketplace.globe");
+  const shouldReduceMotion = useReducedMotion() ?? false;
   const dragControls = useDragControls();
   const y = useMotionValue(0);
   // Distinguishes a real drag from a plain tap on the grabber so the click
@@ -1178,9 +1271,13 @@ function MobileSheet({
       y.set(target);
       return;
     }
+    if (shouldReduceMotion) {
+      y.set(target);
+      return;
+    }
     const controls = animate(y, target, SHEET_SPRING);
     return () => controls.stop();
-  }, [snap, fullH, halfH, targetY, y]);
+  }, [snap, fullH, halfH, targetY, y, shouldReduceMotion]);
 
   const handleDragEnd = (_: unknown, info: { velocity: { y: number } }) => {
     const current = y.get();
@@ -1194,8 +1291,10 @@ function MobileSheet({
         Math.abs(targetY(s) - current) < Math.abs(targetY(best) - current) ? s : best,
       );
     }
-    if (next === snap) animate(y, targetY(snap), SHEET_SPRING);
-    else onSnapChange(next);
+    if (next === snap) {
+      if (shouldReduceMotion) y.set(targetY(snap));
+      else animate(y, targetY(snap), SHEET_SPRING);
+    } else onSnapChange(next);
   };
 
   // The options rail rides just above the sheet's top edge. Positioned via
@@ -1261,32 +1360,31 @@ function MobileSheet({
           OUTLINE_SURFACE,
         )}
       >
-        {/* Grabber — the only drag surface, so the list below scrolls freely.
-            Tapping it (no drag) steps the sheet through its snaps. */}
-        <div
+        {/* A native button keeps the sheet reachable without pointer dragging. */}
+        <button
+          type="button"
           onPointerDown={(event) => {
             dragged.current = false;
             dragControls.start(event);
           }}
           onClick={() => {
             if (dragged.current) return;
-            onSnapChange(snap === "full" ? "peek" : snap === "peek" ? "half" : "full");
+            onSnapChange(nextSheetButtonSnap(snap));
           }}
-          role="button"
-          tabIndex={0}
-          aria-label={t("sheet.expand")}
-          className="flex shrink-0 cursor-grab touch-none flex-col items-center pb-1 pt-2.5 active:cursor-grabbing"
+          aria-expanded={isSheetExpanded(snap)}
+          aria-label={t(snap === "full" ? "sheet.collapse" : "sheet.expand")}
+          className="flex min-h-11 shrink-0 cursor-grab touch-none flex-col items-center justify-center active:cursor-grabbing"
         >
           <span aria-hidden className="h-1 w-9 rounded-full bg-white/25" />
-        </div>
+        </button>
         <div className="flex min-h-0 flex-1 flex-col overflow-hidden pb-[env(safe-area-inset-bottom)]">
           <AnimatePresence mode="wait" initial={false}>
             <motion.div
               key={activeTab}
-              initial={{ opacity: 0, y: 4 }}
+              initial={shouldReduceMotion ? false : { opacity: 0, y: 4 }}
               animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -4 }}
-              transition={{ duration: 0.14, ease: [0.25, 0.1, 0.25, 1] }}
+              exit={shouldReduceMotion ? undefined : { opacity: 0, y: -4 }}
+              transition={{ duration: shouldReduceMotion ? 0 : 0.14, ease: [0.25, 0.1, 0.25, 1] }}
               className="flex min-h-0 flex-1 flex-col overflow-hidden"
             >
               {renderPanel(activeTab, "sheet")}
@@ -1314,6 +1412,9 @@ function GlobalPanel({
   treeCounts,
   treeCountsLoading,
   treeCountsFailed,
+  organizationsError,
+  onRetryOrganizations,
+  onRetryTreeCounts,
   onSelect,
 }: {
   variant: PanelVariant;
@@ -1331,6 +1432,9 @@ function GlobalPanel({
   treeCounts: Map<string, number> | null;
   treeCountsLoading: boolean;
   treeCountsFailed: boolean;
+  organizationsError: boolean;
+  onRetryOrganizations: () => void;
+  onRetryTreeCounts: () => void;
   onSelect: (did: string) => void;
 }) {
   const t = useTranslations("marketplace.globe");
@@ -1356,7 +1460,7 @@ function GlobalPanel({
             value={query}
             onChange={(event) => setQuery(event.target.value)}
             placeholder={t("panel.searchPlaceholder")}
-            className="h-9 w-full rounded-full bg-white/[0.06] pl-9 pr-3 text-sm text-foreground outline-none transition-colors placeholder:text-muted-foreground focus:bg-white/[0.12]"
+            className="h-11 w-full rounded-full bg-white/[0.06] pl-9 pr-3 text-sm text-foreground outline-none transition-colors placeholder:text-muted-foreground focus:bg-white/[0.12]"
           />
         </div>
         <div className="flex flex-wrap items-center gap-1.5">
@@ -1365,7 +1469,7 @@ function GlobalPanel({
             onClick={onToggleMaEarth}
             aria-pressed={maEarthOnly}
             className={cn(
-              "inline-flex h-7 shrink-0 items-center gap-1.5 rounded-full px-2.5 text-xs font-medium transition-colors",
+              "inline-flex h-11 shrink-0 items-center gap-1.5 rounded-full px-3 text-xs font-medium transition-colors",
               maEarthOnly
                 ? "bg-primary/10 text-primary"
                 : "bg-white/[0.06] text-muted-foreground hover:bg-white/[0.12] hover:text-primary",
@@ -1385,7 +1489,7 @@ function GlobalPanel({
             onClick={onToggleLayersOnly}
             aria-pressed={layersOnly}
             className={cn(
-              "inline-flex h-7 shrink-0 items-center gap-1.5 rounded-full px-2.5 text-xs font-medium transition-colors",
+              "inline-flex h-11 shrink-0 items-center gap-1.5 rounded-full px-3 text-xs font-medium transition-colors",
               layersOnly
                 ? "bg-primary/10 text-primary"
                 : "bg-white/[0.06] text-muted-foreground hover:bg-white/[0.12] hover:text-primary",
@@ -1399,7 +1503,7 @@ function GlobalPanel({
             onClick={onToggleTrees}
             aria-pressed={treesOnly}
             className={cn(
-              "inline-flex h-7 shrink-0 items-center gap-1.5 rounded-full px-2.5 text-xs font-medium transition-colors",
+              "inline-flex h-11 shrink-0 items-center gap-1.5 rounded-full px-3 text-xs font-medium transition-colors",
               treesOnly
                 ? "bg-primary/10 text-primary"
                 : "bg-white/[0.06] text-muted-foreground hover:bg-white/[0.12] hover:text-primary",
@@ -1412,22 +1516,28 @@ function GlobalPanel({
       </div>
 
       <div className="flex min-h-0 flex-1 flex-col border-t border-border">
-        {variant === "floating" ? (
-          <p className="px-4 pb-1 pt-2.5 text-[10px] font-medium uppercase tracking-[0.12em] text-muted-foreground">
+        {variant === "floating" && !organizationsError && !treeCountsFailed ? (
+          <p className="px-4 pb-1 pt-2.5 text-xs font-medium text-muted-foreground">
             {organizations === null || treeCountsLoading
               ? t("panel.loading")
               : t("panel.count", { count: filtered.length })}
           </p>
         ) : null}
         <ul className="min-h-0 flex-1 overflow-y-auto overscroll-contain pb-2">
-            {organizations === null || treeCountsLoading ? (
+            {organizationsError ? (
+              <li className="px-4 py-3">
+                <InlineResourceError message={t("errors.organizations")} onRetry={onRetryOrganizations} />
+              </li>
+            ) : organizations === null || treeCountsLoading ? (
               <li className="flex flex-col gap-2 px-4 py-2">
                 <Skeleton className="h-9 w-full rounded-lg" />
                 <Skeleton className="h-9 w-full rounded-lg" />
                 <Skeleton className="h-9 w-3/4 rounded-lg" />
               </li>
             ) : treesOnly && treeCountsFailed ? (
-              <li className="px-4 py-3 text-sm text-muted-foreground">{t("panel.treesFailed")}</li>
+              <li className="px-4 py-3">
+                <InlineResourceError message={t("panel.treesFailed")} onRetry={onRetryTreeCounts} />
+              </li>
             ) : filtered.length === 0 ? (
               <li className="px-4 py-3 text-sm text-muted-foreground">
                 {treesOnly && !query.trim() ? t("panel.treesEmpty") : t("panel.empty")}
@@ -1449,8 +1559,8 @@ function GlobalPanel({
                         {org.maEarth ? (
                           <Image
                             src="/assets/media/images/badges/ma-earth-logo.webp"
-                            alt="Ma Earth"
-                            title="Ma Earth"
+                            alt={t("panel.maEarth")}
+                            title={t("panel.maEarth")}
                             width={14}
                             height={14}
                             className="size-3.5 shrink-0 rounded-full"
@@ -1513,6 +1623,7 @@ function FocusPanel({
   onSelectSite,
   onClear,
   onRefit,
+  onRetry,
 }: {
   variant: PanelVariant;
   mode: GlobeMode;
@@ -1530,6 +1641,7 @@ function FocusPanel({
   onSelectSite: (uri: string | null) => void;
   onClear?: () => void;
   onRefit: () => void;
+  onRetry: () => void;
 }) {
   const t = useTranslations("marketplace.globe");
   const profileHref = `/account/${encodeURIComponent(orgIdentifier)}`;
@@ -1557,22 +1669,19 @@ function FocusPanel({
             aria-label={t("focus.clear")}
             title={t("focus.clear")}
             className={cn(
-              "grid size-9 shrink-0 place-items-center self-center rounded-full text-muted-foreground transition-colors hover:bg-white/[0.12] hover:text-primary",
+              "grid size-11 shrink-0 place-items-center self-center rounded-full text-muted-foreground transition-colors hover:bg-white/[0.12] hover:text-primary",
               ELEVATED,
             )}
           >
             <ChevronLeftIcon className="size-4" />
           </button>
         ) : null}
-        <span className="grid size-9 shrink-0 place-items-center rounded-full bg-primary/10 text-primary">
+        <span className="grid size-11 shrink-0 place-items-center rounded-full bg-primary/10 text-primary">
           {mode === "project" ? <FolderKanbanIcon className="size-4" /> : <Building2Icon className="size-4" />}
         </span>
         <div className="min-w-0 flex-1">
-          <p className="text-[10px] font-medium uppercase tracking-[0.12em] text-muted-foreground">
-            {mode === "project" ? t("focus.projectLabel") : t("focus.organizationLabel")}
-          </p>
           {(mode === "project" ? project?.title : focusName) ? (
-            <h2 className="truncate text-sm font-semibold text-foreground">
+            <h2 className="break-words text-sm font-semibold text-foreground">
               {mode === "project" ? project?.title : focusName}
             </h2>
           ) : (
@@ -1606,7 +1715,7 @@ function FocusPanel({
         {mode === "project" && project ? (
           <Link
             href={project.href}
-            className="inline-flex h-8 items-center gap-1.5 rounded-full bg-primary px-3 text-xs font-medium text-primary-foreground transition-colors hover:bg-primary-dark"
+            className="inline-flex h-11 items-center gap-1.5 rounded-full bg-primary px-4 text-xs font-medium text-primary-foreground transition-colors hover:bg-primary-dark"
           >
             <ArrowLeftIcon className="size-3.5" />
             {t("focus.viewProject")}
@@ -1614,7 +1723,7 @@ function FocusPanel({
         ) : (
           <Link
             href={profileHref}
-            className="inline-flex h-8 items-center gap-1.5 rounded-full bg-primary px-3 text-xs font-medium text-primary-foreground transition-colors hover:bg-primary-dark"
+            className="inline-flex h-11 items-center gap-1.5 rounded-full bg-primary px-4 text-xs font-medium text-primary-foreground transition-colors hover:bg-primary-dark"
           >
             {t("focus.viewProfile")}
             <ArrowUpRightIcon className="size-3.5" />
@@ -1624,7 +1733,7 @@ function FocusPanel({
           <Link
             href={orgGlobeHref}
             className={cn(
-              "inline-flex h-8 items-center gap-1.5 rounded-full px-3 text-xs font-medium text-foreground transition-colors hover:bg-white/[0.12] hover:text-primary",
+              "inline-flex h-11 items-center gap-1.5 rounded-full px-4 text-xs font-medium text-foreground transition-colors hover:bg-white/[0.12] hover:text-primary",
               ELEVATED,
             )}
           >
@@ -1636,7 +1745,7 @@ function FocusPanel({
           <Link
             href={orgGlobeHref}
             className={cn(
-              "inline-flex h-8 items-center gap-1.5 rounded-full px-3 text-xs font-medium text-foreground transition-colors hover:bg-white/[0.12] hover:text-primary",
+              "inline-flex h-11 items-center gap-1.5 rounded-full px-4 text-xs font-medium text-foreground transition-colors hover:bg-white/[0.12] hover:text-primary",
               ELEVATED,
             )}
           >
@@ -1650,7 +1759,7 @@ function FocusPanel({
           aria-label={t("focus.recenter")}
           title={t("focus.recenter")}
           className={cn(
-            "inline-flex size-8 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-white/[0.12] hover:text-primary",
+            "inline-flex size-11 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-white/[0.12] hover:text-primary",
             ELEVATED,
           )}
         >
@@ -1669,8 +1778,8 @@ function FocusPanel({
       )}
 
       <div className="flex min-h-0 flex-1 flex-col border-t border-border">
-        {variant === "floating" ? (
-          <p className="px-4 pb-1 pt-2.5 text-[10px] font-medium uppercase tracking-[0.12em] text-muted-foreground">
+        {variant === "floating" && state.status !== "error" ? (
+          <p className="px-4 pb-1 pt-2.5 text-xs font-medium text-muted-foreground">
             {state.status === "loading"
               ? t("panel.loading")
               : mode === "project"
@@ -1679,7 +1788,14 @@ function FocusPanel({
           </p>
         ) : null}
 
-        {state.status === "loading" ? (
+        {state.status === "error" ? (
+          <div className="px-4 py-3">
+            <InlineResourceError
+              message={t(mode === "project" ? "errors.boundaries" : "errors.sites")}
+              onRetry={onRetry}
+            />
+          </div>
+        ) : state.status === "loading" ? (
           <div className="flex flex-col gap-2 px-4 pb-3 pt-2">
             <Skeleton className="h-9 w-full rounded-lg" />
             <Skeleton className="h-9 w-2/3 rounded-lg" />
@@ -1747,7 +1863,7 @@ function FocusPanel({
  *  colored dot echoes the paint color of those features on the map. */
 function SiteGroupHeading({ color, children }: { color: string; children: React.ReactNode }) {
   return (
-    <p className="flex items-center gap-1.5 px-4 pb-0.5 pt-2.5 text-[10px] font-medium uppercase tracking-[0.12em] text-muted-foreground">
+    <p className="flex items-center gap-1.5 px-4 pb-0.5 pt-2.5 text-xs font-medium text-muted-foreground">
       <span
         aria-hidden
         className="size-1.5 shrink-0 rounded-full ring-1 ring-black/10"
@@ -1849,8 +1965,12 @@ function LayersPanel({
   onToggleLandcover,
   categorizedGlobalLayers,
   globalLayersLoading,
+  globalLayersError,
+  onRetryGlobalLayers,
   orgLayers,
   orgLayersLoading,
+  orgLayersError,
+  onRetryOrgLayers,
   showOrgLayers,
   enabledLayerIds,
   onToggleLayer,
@@ -1863,17 +1983,28 @@ function LayersPanel({
   onLocateSeries,
   treesCount,
   treesLoading,
+  treesError,
+  onRetryTrees,
   treesVisible,
+  treeEntries,
+  selectedTreeId,
+  onSelectTree,
   onToggleTrees,
   visibleLayers,
   legendLayers,
+  activeLayerError,
+  onRetryActiveLayer,
 }: {
   landcoverVisible: boolean;
   onToggleLandcover: () => void;
   categorizedGlobalLayers: Array<[string, GlobeLayer[]]>;
   globalLayersLoading: boolean;
+  globalLayersError: boolean;
+  onRetryGlobalLayers: () => void;
   orgLayers: GlobeLayer[];
   orgLayersLoading: boolean;
+  orgLayersError: boolean;
+  onRetryOrgLayers: () => void;
   showOrgLayers: boolean;
   enabledLayerIds: Set<string>;
   onToggleLayer: (layer: GlobeLayer) => void;
@@ -1886,13 +2017,20 @@ function LayersPanel({
   onLocateSeries: (series: DroneTimeSeries) => void;
   treesCount: number;
   treesLoading: boolean;
+  treesError: boolean;
+  onRetryTrees: () => void;
   treesVisible: boolean;
+  treeEntries: TreeListEntry[];
+  selectedTreeId: string | number | null;
+  onSelectTree: (entry: TreeListEntry) => void;
   onToggleTrees: () => void;
   visibleLayers: GlobeLayer[];
   legendLayers: GlobeLayer[];
+  activeLayerError: boolean;
+  onRetryActiveLayer: () => void;
 }) {
   const t = useTranslations("marketplace.globe");
-  const hasTreesRow = showOrgLayers && (treesLoading || treesCount > 0);
+  const hasTreesRow = showOrgLayers && (treesLoading || treesError || treesCount > 0);
   const hasVisibleLayerDetails = visibleLayers.length > 0 || landcoverVisible || legendLayers.length > 0;
 
   return (
@@ -1901,6 +2039,12 @@ function LayersPanel({
         <LayersIcon className="size-4 text-primary" />
         {t("layers.title")}
       </h2>
+
+      {activeLayerError ? (
+        <div className="mt-3 rounded-xl bg-destructive/10 p-3">
+          <InlineResourceError message={t("errors.layers")} onRetry={onRetryActiveLayer} />
+        </div>
+      ) : null}
 
       {/* Land cover (static raster) */}
       <div className="mt-3 overflow-hidden rounded-2xl bg-white/[0.06] shadow-[inset_0_1px_0_rgb(255_255_255/0.04)]">
@@ -1919,7 +2063,11 @@ function LayersPanel({
           </h3>
           {hasTreesRow ? (
             <div className="mb-2 overflow-hidden rounded-2xl bg-white/[0.06] shadow-[inset_0_1px_0_rgb(255_255_255/0.04)]">
-              {treesLoading ? (
+              {treesError ? (
+                <div className="p-3">
+                  <InlineResourceError message={t("errors.trees")} onRetry={onRetryTrees} />
+                </div>
+              ) : treesLoading ? (
                 <div className="p-2">
                   <Skeleton className="h-8 w-full rounded-lg" />
                 </div>
@@ -1933,7 +2081,16 @@ function LayersPanel({
               )}
             </div>
           ) : null}
-          {orgLayersLoading ? (
+          {treesVisible && treeEntries.length > 0 ? (
+            <TreeKeyboardList
+              entries={treeEntries}
+              selectedTreeId={selectedTreeId}
+              onSelect={onSelectTree}
+            />
+          ) : null}
+          {orgLayersError ? (
+            <InlineResourceError message={t("errors.layers")} onRetry={onRetryOrgLayers} />
+          ) : orgLayersLoading ? (
             <div className="flex flex-col gap-2">
               <Skeleton className="h-10 w-full rounded-xl" />
               <Skeleton className="h-10 w-full rounded-xl" />
@@ -1972,7 +2129,11 @@ function LayersPanel({
         </div>
       ) : null}
 
-      {globalLayersLoading ? (
+      {globalLayersError ? (
+        <div className="mt-4">
+          <InlineResourceError message={t("errors.layers")} onRetry={onRetryGlobalLayers} />
+        </div>
+      ) : globalLayersLoading ? (
         <div className="mt-4 flex flex-col gap-2">
           <Skeleton className="h-10 w-full rounded-xl" />
           <Skeleton className="h-10 w-full rounded-xl" />
@@ -2029,47 +2190,128 @@ function LayerToggleRow({
   onLocate?: () => void;
 }) {
   const t = useTranslations("marketplace.globe");
+  const descriptionId = useId();
   return (
-    <label className="flex cursor-pointer items-center justify-between gap-3 px-3.5 py-3 transition-colors hover:bg-white/[0.04]">
+    <div className="flex items-center justify-between gap-3 px-3.5 py-2 transition-colors hover:bg-white/[0.04]">
       <span className="min-w-0 flex-1">
         <span className="block truncate text-sm font-medium text-foreground">{label}</span>
         {description ? (
-          <span className="mt-0.5 block truncate text-[11px] text-muted-foreground">{description}</span>
+          <span id={descriptionId} className="mt-0.5 block truncate text-[11px] text-muted-foreground">{description}</span>
         ) : null}
       </span>
       {onLocate ? (
         <button
           type="button"
-          onClick={(event) => {
-            event.preventDefault();
-            onLocate();
-          }}
+          onClick={onLocate}
           aria-label={t("layers.flyTo", { name: label })}
           title={t("layers.flyTo", { name: label })}
-          className="grid size-7 shrink-0 place-items-center rounded-full bg-white/[0.06] text-muted-foreground transition-colors hover:bg-white/[0.12] hover:text-primary"
+          className="grid size-11 shrink-0 place-items-center rounded-full bg-white/[0.06] text-muted-foreground transition-colors hover:bg-white/[0.12] hover:text-primary"
         >
           <LocateFixedIcon className="size-3.5" />
         </button>
       ) : null}
-      <button
-        type="button"
-        role="switch"
-        aria-checked={checked}
-        aria-label={label}
-        onClick={onToggle}
+      <GlobeSwitch
+        checked={checked}
+        label={label}
+        descriptionId={description ? descriptionId : undefined}
+        onToggle={onToggle}
+      />
+    </div>
+  );
+}
+
+function GlobeSwitch({
+  checked,
+  label,
+  descriptionId,
+  onToggle,
+}: {
+  checked: boolean;
+  label: string;
+  descriptionId?: string;
+  onToggle: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      role="switch"
+      aria-checked={checked}
+      aria-label={label}
+      aria-describedby={descriptionId}
+      onClick={onToggle}
+      className="grid size-11 shrink-0 place-items-center rounded-full"
+    >
+      <span
+        aria-hidden
         className={cn(
-          "relative h-6 w-11 shrink-0 rounded-full transition-colors shadow-[inset_0_0_0_1px_rgb(255_255_255/0.08)]",
+          "relative h-6 w-11 rounded-full shadow-[inset_0_0_0_1px_rgb(255_255_255/0.08)] transition-colors",
           checked ? "bg-primary/90" : "bg-white/20 hover:bg-white/30",
         )}
       >
         <span
           className={cn(
-            "absolute top-1/2 size-4 -translate-y-1/2 rounded-full shadow transition-[left,background-color]",
-            checked ? "left-[calc(100%-1.25rem)] bg-white" : "left-1 bg-white",
+            "absolute top-1/2 size-4 -translate-y-1/2 rounded-full bg-white shadow transition-[left] motion-reduce:transition-none",
+            checked ? "left-[calc(100%-1.25rem)]" : "left-1",
           )}
         />
+      </span>
+    </button>
+  );
+}
+
+function TreeKeyboardList({
+  entries,
+  selectedTreeId,
+  onSelect,
+}: {
+  entries: TreeListEntry[];
+  selectedTreeId: string | number | null;
+  onSelect: (entry: TreeListEntry) => void;
+}) {
+  const t = useTranslations("marketplace.globe");
+  return (
+    <div className="mb-3 bg-white/[0.04] px-2 py-2">
+      <h3 className="px-2 pb-1 text-xs font-medium text-muted-foreground">{t("layers.measuredTrees")}</h3>
+      <ul className="max-h-48 overflow-y-auto overscroll-contain">
+        {entries.map((entry) => {
+          const selected = entry.detail.id === selectedTreeId;
+          const name = entry.detail.species ?? t("tree.unknownSpecies");
+          return (
+            <li key={String(entry.detail.id)}>
+              <button
+                type="button"
+                aria-pressed={selected}
+                onClick={() => onSelect(entry)}
+                className={cn(
+                  "flex min-h-11 w-full items-center gap-2 rounded-lg px-2 text-left text-sm transition-colors",
+                  selected ? "bg-primary/10 text-primary" : "text-foreground hover:bg-white/[0.06]",
+                )}
+              >
+                <TreePineIcon className="size-4 shrink-0" aria-hidden />
+                <span className="min-w-0 flex-1 truncate">{name}</span>
+                {entry.detail.height ? <span className="text-xs text-muted-foreground">{entry.detail.height}</span> : null}
+              </button>
+            </li>
+          );
+        })}
+      </ul>
+    </div>
+  );
+}
+
+function InlineResourceError({ message, onRetry }: { message: string; onRetry: () => void }) {
+  const t = useTranslations("marketplace.globe");
+  return (
+    <div role="alert" className="flex items-center justify-between gap-3 text-sm text-muted-foreground">
+      <span>{message}</span>
+      <button
+        type="button"
+        onClick={onRetry}
+        className="min-h-11 shrink-0 rounded-full bg-white/[0.08] px-4 text-xs font-medium text-foreground hover:bg-white/[0.14]"
+      >
+        {t("errors.retry")}
       </button>
-    </label>
+    </div>
   );
 }
 
@@ -2120,28 +2362,15 @@ function TimeSeriesCard({
           onClick={onLocate}
           aria-label={t("layers.flyTo", { name: series.name })}
           title={t("layers.flyTo", { name: series.name })}
-          className="grid size-7 shrink-0 place-items-center rounded-full bg-white/[0.06] text-muted-foreground transition-colors hover:bg-white/[0.12] hover:text-primary"
+          className="grid size-11 shrink-0 place-items-center rounded-full bg-white/[0.06] text-muted-foreground transition-colors hover:bg-white/[0.12] hover:text-primary"
         >
           <LocateFixedIcon className="size-3.5" />
         </button>
-        <button
-          type="button"
-          role="switch"
-          aria-checked={active}
-          aria-label={t("timeline.toggle", { name: series.name })}
-          onClick={onToggle}
-          className={cn(
-            "relative h-6 w-11 shrink-0 rounded-full transition-colors shadow-[inset_0_0_0_1px_rgb(255_255_255/0.08)]",
-            active ? "bg-primary/90" : "bg-white/20 hover:bg-white/30",
-          )}
-        >
-          <span
-            className={cn(
-              "absolute top-1/2 size-4 -translate-y-1/2 rounded-full shadow transition-[left,background-color]",
-              active ? "left-[calc(100%-1.25rem)] bg-white" : "left-1 bg-white",
-            )}
-          />
-        </button>
+        <GlobeSwitch
+          checked={active}
+          label={t("timeline.toggle", { name: series.name })}
+          onToggle={onToggle}
+        />
       </div>
       <p className="px-3.5 pt-1 text-[11px] leading-4 text-muted-foreground">
         {t("timeline.seriesHint")}
@@ -2154,7 +2383,7 @@ function TimeSeriesCard({
             onClick={() => onSelectStep(index)}
             aria-pressed={active && index === activeStep}
             className={cn(
-              "rounded-full px-2 py-0.5 text-[11px] font-medium transition-colors",
+              "min-h-11 rounded-full px-3 text-[11px] font-medium transition-colors",
               active && index === activeStep
                 ? "bg-primary/10 text-primary"
                 : "bg-white/[0.06] text-muted-foreground hover:bg-white/[0.12] hover:text-primary",
@@ -2188,6 +2417,7 @@ function TimeSliderCard({
   onClose: () => void;
 }) {
   const t = useTranslations("marketplace.globe");
+  const shouldReduceMotion = useReducedMotion() ?? false;
   const formatDay = useDayFormatter();
   const lastStep = series.steps.length - 1;
   const current = series.steps[Math.min(step, lastStep)]!;
@@ -2195,10 +2425,10 @@ function TimeSliderCard({
   return (
     <div className="pointer-events-none absolute inset-x-3 bottom-[6.75rem] z-20 flex justify-center md:bottom-8">
       <motion.section
-        initial={{ opacity: 0, y: 14 }}
+        initial={shouldReduceMotion ? false : { opacity: 0, y: 14 }}
         animate={{ opacity: 1, y: 0 }}
-        exit={{ opacity: 0, y: 14 }}
-        transition={{ duration: 0.22, ease: [0.25, 0.1, 0.25, 1] }}
+        exit={shouldReduceMotion ? undefined : { opacity: 0, y: 14 }}
+        transition={{ duration: shouldReduceMotion ? 0 : 0.22, ease: [0.25, 0.1, 0.25, 1] }}
         aria-label={t("timeline.title")}
         data-testid="globe-time-slider"
         className={cn("pointer-events-auto w-full max-w-[460px] rounded-2xl p-3.5 shadow-xl", OUTLINE_SURFACE)}
@@ -2216,7 +2446,7 @@ function TimeSliderCard({
             onClick={onLocate}
             aria-label={t("layers.flyTo", { name: series.name })}
             title={t("layers.flyTo", { name: series.name })}
-            className="grid size-7 shrink-0 place-items-center rounded-full border border-border text-muted-foreground transition-colors hover:border-primary/40 hover:text-primary"
+            className="grid size-11 shrink-0 place-items-center rounded-full border border-border text-muted-foreground transition-colors hover:border-primary/40 hover:text-primary"
           >
             <LocateFixedIcon className="size-3.5" />
           </button>
@@ -2225,7 +2455,7 @@ function TimeSliderCard({
             onClick={onClose}
             aria-label={t("timeline.close")}
             title={t("timeline.close")}
-            className="grid size-7 shrink-0 place-items-center rounded-full border border-border text-muted-foreground transition-colors hover:border-primary/40 hover:text-primary"
+            className="grid size-11 shrink-0 place-items-center rounded-full border border-border text-muted-foreground transition-colors hover:border-primary/40 hover:text-primary"
           >
             <XIcon className="size-3.5" />
           </button>
@@ -2235,9 +2465,10 @@ function TimeSliderCard({
           <button
             type="button"
             onClick={onTogglePlay}
+            disabled={shouldReduceMotion}
             aria-label={playing ? t("timeline.pause") : t("timeline.play")}
             title={playing ? t("timeline.pause") : t("timeline.play")}
-            className="grid size-8 shrink-0 place-items-center rounded-full bg-primary text-primary-foreground transition-colors hover:bg-primary-dark"
+            className="grid size-11 shrink-0 place-items-center rounded-full bg-primary text-primary-foreground transition-colors hover:bg-primary-dark disabled:opacity-40"
           >
             {playing ? <PauseIcon className="size-3.5" /> : <PlayIcon className="size-3.5" />}
           </button>
@@ -2247,7 +2478,7 @@ function TimeSliderCard({
             disabled={step <= 0}
             aria-label={t("timeline.previous")}
             title={t("timeline.previous")}
-            className="grid size-7 shrink-0 place-items-center rounded-full border border-border text-muted-foreground transition-colors hover:border-primary/40 hover:text-primary disabled:pointer-events-none disabled:opacity-40"
+            className="grid size-11 shrink-0 place-items-center rounded-full border border-border text-muted-foreground transition-colors hover:border-primary/40 hover:text-primary disabled:pointer-events-none disabled:opacity-40"
           >
             <ChevronLeftIcon className="size-4" />
           </button>
@@ -2268,7 +2499,7 @@ function TimeSliderCard({
             disabled={step >= lastStep}
             aria-label={t("timeline.next")}
             title={t("timeline.next")}
-            className="grid size-7 shrink-0 place-items-center rounded-full border border-border text-muted-foreground transition-colors hover:border-primary/40 hover:text-primary disabled:pointer-events-none disabled:opacity-40"
+            className="grid size-11 shrink-0 place-items-center rounded-full border border-border text-muted-foreground transition-colors hover:border-primary/40 hover:text-primary disabled:pointer-events-none disabled:opacity-40"
           >
             <ChevronRightIcon className="size-4" />
           </button>
@@ -2288,19 +2519,21 @@ function TimeSliderCard({
 
 function TreeDetailPanel({ tree, onClose }: { tree: TreeDetail; onClose: () => void }) {
   const t = useTranslations("marketplace.globe");
+  const shouldReduceMotion = useReducedMotion() ?? false;
   const [activePhoto, setActivePhoto] = useState(0);
   const [failed, setFailed] = useState<Set<number>>(new Set());
 
-  const photos = tree.photos.filter((_, index) => !failed.has(index));
-  const heroSrc = tree.photos[activePhoto] && !failed.has(activePhoto) ? tree.photos[activePhoto] : null;
+  const validPhotoIndexes = tree.photos.flatMap((_, index) => (failed.has(index) ? [] : [index]));
+  const activePhotoIndex = failed.has(activePhoto) ? validPhotoIndexes[0] : activePhoto;
+  const heroSrc = activePhotoIndex === undefined ? null : tree.photos[activePhotoIndex] ?? null;
   const species = tree.species ?? t("tree.unknownSpecies");
 
   return (
     <motion.aside
-      initial={{ opacity: 0, x: 12, filter: "blur(6px)" }}
+      initial={shouldReduceMotion ? false : { opacity: 0, x: 12, filter: "blur(6px)" }}
       animate={{ opacity: 1, x: 0, filter: "blur(0px)" }}
-      exit={{ opacity: 0, x: 12, filter: "blur(6px)" }}
-      transition={{ duration: 0.22, ease: [0.25, 0.1, 0.25, 1] }}
+      exit={shouldReduceMotion ? undefined : { opacity: 0, x: 12, filter: "blur(6px)" }}
+      transition={{ duration: shouldReduceMotion ? 0 : 0.22, ease: [0.25, 0.1, 0.25, 1] }}
       aria-label={t("tree.title")}
       data-testid="globe-tree-detail"
       className={cn(
@@ -2309,15 +2542,15 @@ function TreeDetailPanel({ tree, onClose }: { tree: TreeDetail; onClose: () => v
       )}
     >
       <div className="flex items-center justify-between gap-2 border-b border-border px-4 py-2.5">
-        <span className="flex items-center gap-1.5 text-[10px] font-medium uppercase tracking-[0.12em] text-muted-foreground">
-          <LeafIcon className="size-3.5 text-primary" />
+        <h2 className="flex items-center gap-1.5 text-sm font-semibold text-foreground">
+          <LeafIcon className="size-4 text-primary" />
           {t("tree.title")}
-        </span>
+        </h2>
         <button
           type="button"
           onClick={onClose}
           aria-label={t("tree.close")}
-          className="grid size-7 shrink-0 place-items-center rounded-full border border-border text-muted-foreground transition-colors hover:border-primary/40 hover:text-primary"
+          className="grid size-11 shrink-0 place-items-center rounded-full border border-border text-muted-foreground transition-colors hover:border-primary/40 hover:text-primary"
         >
           <XIcon className="size-3.5" />
         </button>
@@ -2331,7 +2564,11 @@ function TreeDetailPanel({ tree, onClose }: { tree: TreeDetail; onClose: () => v
               src={heroSrc}
               alt={species}
               loading="lazy"
-              onError={() => setFailed((prev) => new Set(prev).add(activePhoto))}
+              onError={() => {
+                if (activePhotoIndex !== undefined) {
+                  setFailed((prev) => new Set(prev).add(activePhotoIndex));
+                }
+              }}
               className="h-full w-full object-cover"
             />
           ) : (
@@ -2341,7 +2578,7 @@ function TreeDetailPanel({ tree, onClose }: { tree: TreeDetail; onClose: () => v
           )}
         </div>
 
-        {photos.length > 1 ? (
+        {validPhotoIndexes.length > 1 ? (
           <div className="flex gap-1.5 px-3 pt-3">
             {tree.photos.map((photo, index) =>
               failed.has(index) ? null : (
@@ -2352,7 +2589,7 @@ function TreeDetailPanel({ tree, onClose }: { tree: TreeDetail; onClose: () => v
                   aria-label={t("tree.photo", { index: index + 1 })}
                   className={cn(
                     "size-11 shrink-0 overflow-hidden rounded-lg border transition-colors",
-                    index === activePhoto ? "border-primary" : "border-border hover:border-primary/40",
+                    index === activePhotoIndex ? "border-primary" : "border-border hover:border-primary/40",
                   )}
                 >
                   {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -2370,14 +2607,9 @@ function TreeDetailPanel({ tree, onClose }: { tree: TreeDetail; onClose: () => v
         ) : null}
 
         <div className="flex flex-col gap-3 p-4">
-          <div>
-            <p className="text-[10px] font-medium uppercase tracking-[0.12em] text-muted-foreground">
-              {t("tree.species")}
-            </p>
-            <h2 className={cn("text-lg font-bold leading-tight text-foreground", tree.species && "italic")}>
-              {species}
-            </h2>
-          </div>
+          <h3 className="font-instrument text-lg font-medium italic leading-tight text-foreground">
+            {species}
+          </h3>
 
           <div className="flex items-stretch gap-2">
             <div className="flex flex-1 flex-col gap-0.5 rounded-xl bg-muted p-2.5">
@@ -2439,13 +2671,14 @@ function ActiveLayersCard({
                 type="button"
                 onClick={() => onLocate(layer)}
                 title={t("layers.flyTo", { name: layer.name })}
-                className="flex h-6 min-w-0 flex-1 items-center gap-1.5 rounded text-left text-[11px] text-muted-foreground transition-colors hover:text-primary"
+                aria-label={t("layers.flyTo", { name: layer.name })}
+                className="flex min-h-11 min-w-0 flex-1 items-center gap-1.5 rounded text-left text-xs text-muted-foreground transition-colors hover:text-primary"
               >
                 <LocateFixedIcon className="size-3 shrink-0" />
                 <span className="truncate">{layer.name}</span>
               </button>
             ) : (
-              <span className="flex h-6 min-w-0 flex-1 items-center gap-1.5 text-[11px] text-muted-foreground">
+              <span className="flex min-h-11 min-w-0 flex-1 items-center gap-1.5 text-xs text-muted-foreground">
                 <span aria-hidden className="size-3 shrink-0" />
                 <span className="truncate">{layer.name}</span>
               </span>
@@ -2455,7 +2688,7 @@ function ActiveLayersCard({
               onClick={() => onHide(layer)}
               aria-label={t("layers.hide", { name: layer.name })}
               title={t("layers.hide", { name: layer.name })}
-              className="grid size-5 shrink-0 place-items-center rounded-full text-muted-foreground transition-colors hover:bg-white/[0.06] hover:text-foreground"
+              className="grid size-11 shrink-0 place-items-center rounded-full text-muted-foreground transition-colors hover:bg-white/[0.06] hover:text-foreground"
             >
               <XIcon className="size-3" />
             </button>

@@ -34,6 +34,7 @@ import {
   globeMapStyle,
 } from "../_lib/config";
 import { resolveLayerUrl } from "../_lib/layers";
+import { globeMotionSettings } from "../_lib/accessibility";
 import { treeDbh, treeDetail, treeHeight, treeSpeciesName, type TreeDetail } from "../_lib/trees";
 import {
   DEFAULT_BADGE_ID,
@@ -92,12 +93,18 @@ type GlobeMapProps = {
   boundsPadding?: Partial<GlobeMapPadding>;
   /** Idle rotation — enabled on the global view, off when focused. */
   spin?: boolean;
+  /** Suppresses idle movement, camera flights, and layer crossfades. */
+  reducedMotion?: boolean;
   landcoverVisible?: boolean;
   /** Currently visible data layers (global + project-specific). */
   activeLayers?: GlobeLayer[];
   /** Per-layer opacity override (0–1) — drives the drone time slider by
    *  crossfading between overlapping captures without re-adding layers. */
   layerOpacities?: Record<string, number>;
+  /** Re-attempt failed active layer loads when this value changes. */
+  layerRetryKey?: number;
+  /** Reports a requested layer whose data could not be added to the map. */
+  onLayerError?: (layer: GlobeLayer) => void;
   /** Fired once the base style + runtime layers are ready. */
   onLoaded?: () => void;
   className?: string;
@@ -274,10 +281,15 @@ const OPACITY_PROPS: Record<string, string[]> = {
 };
 
 /** Apply an opacity override (with a short crossfade) to a dynamic layer. */
-function applyLayerOpacity(map: maplibregl.Map, layerId: string, opacity: number): void {
+function applyLayerOpacity(
+  map: maplibregl.Map,
+  layerId: string,
+  opacity: number,
+  transitionDuration: number,
+): void {
   const type = map.getLayer(layerId)?.type;
   for (const prop of (type && OPACITY_PROPS[type]) ?? []) {
-    map.setPaintProperty(layerId, `${prop}-transition`, { duration: 250 });
+    map.setPaintProperty(layerId, `${prop}-transition`, { duration: transitionDuration });
     map.setPaintProperty(layerId, prop, opacity);
   }
 }
@@ -286,6 +298,8 @@ async function addDynamicLayer(
   map: maplibregl.Map,
   layer: GlobeLayer,
   initialOpacity?: number,
+  transitionDuration = 250,
+  signal?: AbortSignal,
 ): Promise<void> {
   if (map.getLayer(layer.id)) return;
 
@@ -306,15 +320,12 @@ async function addDynamicLayer(
         scheme: "tms",
       });
     } else {
-      // GeoJSON-backed layers: fetch the data first so a failed request never
-      // leaves a dangling empty source.
-      let data: GeoJSON.GeoJSON = EMPTY_FEATURE_COLLECTION;
-      try {
-        const res = await fetch(resolveLayerUrl(layer.endpoint));
-        if (res.ok) data = (await res.json()) as GeoJSON.GeoJSON;
-      } catch (error) {
-        console.warn("[globe] data layer fetch failed", layer.name, error);
-      }
+      // GeoJSON-backed layers: propagate failures so the panel can distinguish
+      // unavailable data from a genuinely empty layer and offer a retry.
+      const res = await fetch(resolveLayerUrl(layer.endpoint), { signal });
+      if (!res.ok) throw new Error(`Layer request failed (${res.status})`);
+      const data = (await res.json()) as GeoJSON.GeoJSON;
+      signal?.throwIfAborted();
       if (map.getSource(layer.id)) return;
       map.addSource(layer.id, { type: "geojson", data });
     }
@@ -325,7 +336,9 @@ async function addDynamicLayer(
     // Keep site boundaries + markers above data layers.
     const beforeId = map.getLayer(SITES_FILL_LAYER) ? SITES_FILL_LAYER : undefined;
     map.addLayer(spec, beforeId);
-    if (typeof initialOpacity === "number") applyLayerOpacity(map, layer.id, initialOpacity);
+    if (typeof initialOpacity === "number") {
+      applyLayerOpacity(map, layer.id, initialOpacity, transitionDuration);
+    }
   }
 }
 
@@ -348,9 +361,12 @@ export function GlobeMap({
   boundsKey,
   boundsPadding,
   spin = false,
+  reducedMotion = false,
   landcoverVisible = false,
   activeLayers = [],
   layerOpacities,
+  layerRetryKey = 0,
+  onLayerError,
   onLoaded,
   className,
 }: GlobeMapProps) {
@@ -359,11 +375,16 @@ export function GlobeMap({
   const [mapLoaded, setMapLoaded] = useState(false);
 
   const spinRef = useRef(spin);
+  const reducedMotionRef = useRef(reducedMotion);
+  reducedMotionRef.current = reducedMotion;
   const selectRef = useRef(onSelectOrganization);
   const selectTreeRef = useRef(onSelectTree);
   selectTreeRef.current = onSelectTree;
+  const layerErrorRef = useRef(onLayerError);
+  layerErrorRef.current = onLayerError;
   const loadedRef = useRef(onLoaded);
   const addedLayerIdsRef = useRef(new Set<string>());
+  const layerRequestsRef = useRef(new Map<string, AbortController>());
   // Latest per-layer opacity overrides — read when async layer adds resolve.
   const layerOpacitiesRef = useRef<Record<string, number> | undefined>(layerOpacities);
   layerOpacitiesRef.current = layerOpacities;
@@ -395,7 +416,13 @@ export function GlobeMap({
     source.setData({
       type: "FeatureCollection",
       features: organizationsRef.current
-        .filter((org) => typeof org.lat === "number" && typeof org.lon === "number")
+        .filter(
+          (org) =>
+            typeof org.lat === "number" &&
+            Number.isFinite(org.lat) &&
+            typeof org.lon === "number" &&
+            Number.isFinite(org.lon),
+        )
         .map((org) => {
           const hasLogo = logoStatusRef.current.get(org.did) === "loaded";
           const iconId = hasLogo
@@ -516,7 +543,10 @@ export function GlobeMap({
     // restarts the spin's easeTo, which cancels the in-flight scroll-zoom
     // animation and locks the camera in a fight that feels like a freeze.
     let interacted = false;
-    const continueSpin = () => spinGlobe(map, spinRef.current && !interacted);
+    const continueSpin = () => {
+      const motion = globeMotionSettings(reducedMotionRef.current, spinRef.current);
+      spinGlobe(map, motion.idleSpin && !interacted);
+    };
     const stopSpin = () => {
       interacted = true;
     };
@@ -742,7 +772,13 @@ export function GlobeMap({
         const center = feature.geometry.coordinates.slice(0, 2) as [number, number];
         source
           .getClusterExpansionZoom(clusterId)
-          .then((zoom) => map.easeTo({ center, zoom }))
+          .then((zoom) =>
+            map.easeTo({
+              center,
+              zoom,
+              duration: globeMotionSettings(reducedMotionRef.current, spinRef.current).cameraDuration,
+            }),
+          )
           .catch(() => undefined);
       });
 
@@ -825,6 +861,8 @@ export function GlobeMap({
       map.remove();
       mapRef.current = null;
       addedLayerIdsRef.current.clear();
+      for (const controller of layerRequestsRef.current.values()) controller.abort();
+      layerRequestsRef.current.clear();
       logoStatusRef.current.clear();
       setMapLoaded(false);
     };
@@ -834,9 +872,12 @@ export function GlobeMap({
   // Keep the spin flag fresh and nudge the rotation when (re-)enabled.
   useEffect(() => {
     spinRef.current = spin;
+    reducedMotionRef.current = reducedMotion;
     const map = mapRef.current;
-    if (spin && map && mapLoaded) spinGlobe(map, true);
-  }, [spin, mapLoaded]);
+    const motion = globeMotionSettings(reducedMotion, spin);
+    if (motion.idleSpin && map && mapLoaded) spinGlobe(map, true);
+    else if (reducedMotion && map) map.stop();
+  }, [spin, reducedMotion, mapLoaded]);
 
   // Organization markers: refresh the source, then lazily fetch + crop each
   // org's own logo into a badge (re-refreshing the source as each resolves).
@@ -845,7 +886,12 @@ export function GlobeMap({
     if (!map || !mapLoaded) return;
     setMarkerData();
     for (const org of organizations) {
-      if (typeof org.lat === "number" && typeof org.lon === "number") {
+      if (
+        typeof org.lat === "number" &&
+        Number.isFinite(org.lat) &&
+        typeof org.lon === "number" &&
+        Number.isFinite(org.lon)
+      ) {
         ensureOrgLogo(org.did);
       }
     }
@@ -896,6 +942,7 @@ export function GlobeMap({
   useEffect(() => {
     const map = mapRef.current;
     if (!map || !mapLoaded || !bounds) return;
+    const motion = globeMotionSettings(reducedMotion, spin);
     map.fitBounds(bounds, {
       padding: {
         top: boundsPadding?.top ?? 96,
@@ -904,11 +951,11 @@ export function GlobeMap({
         right: boundsPadding?.right ?? 64,
       },
       maxZoom: 16,
-      duration: 2200,
+      duration: motion.cameraDuration,
     });
     // boundsKey deliberately re-triggers the flight for repeat selections.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [bounds, boundsKey, mapLoaded]);
+  }, [bounds, boundsKey, mapLoaded, reducedMotion, spin]);
 
   // Land cover visibility.
   useEffect(() => {
@@ -927,6 +974,8 @@ export function GlobeMap({
 
     for (const layerId of [...added]) {
       if (!wanted.has(layerId)) {
+        layerRequestsRef.current.get(layerId)?.abort();
+        layerRequestsRef.current.delete(layerId);
         removeDynamicLayer(map, layerId);
         added.delete(layerId);
       }
@@ -935,29 +984,47 @@ export function GlobeMap({
     for (const layer of wanted.values()) {
       if (!added.has(layer.id)) {
         added.add(layer.id);
-        void addDynamicLayer(map, layer, layerOpacitiesRef.current?.[layer.id]).catch((error) => {
-          console.warn("[globe] failed to add data layer", layer.name, error);
-          added.delete(layer.id);
-        });
+        const motion = globeMotionSettings(reducedMotion, spin);
+        const controller = new AbortController();
+        layerRequestsRef.current.set(layer.id, controller);
+        void addDynamicLayer(
+          map,
+          layer,
+          layerOpacitiesRef.current?.[layer.id],
+          motion.layerFadeDuration,
+          controller.signal,
+        )
+          .catch((error) => {
+            added.delete(layer.id);
+            if ((error as Error).name === "AbortError") return;
+            console.warn("[globe] failed to add data layer", layer.name, error);
+            layerErrorRef.current?.(layer);
+          })
+          .finally(() => {
+            if (layerRequestsRef.current.get(layer.id) === controller) {
+              layerRequestsRef.current.delete(layer.id);
+            }
+          });
       }
     }
-  }, [activeLayers, mapLoaded]);
+  }, [activeLayers, mapLoaded, reducedMotion, spin, layerRetryKey]);
 
   // Per-layer opacity overrides (drone time slider crossfade).
   useEffect(() => {
     const map = mapRef.current;
     if (!map || !mapLoaded || !layerOpacities) return;
+    const motion = globeMotionSettings(reducedMotion, spin);
     for (const [layerId, opacity] of Object.entries(layerOpacities)) {
-      applyLayerOpacity(map, layerId, opacity);
+      applyLayerOpacity(map, layerId, opacity, motion.layerFadeDuration);
     }
-  }, [layerOpacities, mapLoaded]);
+  }, [layerOpacities, mapLoaded, reducedMotion, spin]);
 
   return (
     <div
       ref={containerRef}
       data-testid="globe-map"
       className={cn(
-        "h-full w-full bg-[#0b0b19] transition-opacity duration-700",
+        "h-full w-full bg-[#0b0b19] transition-opacity duration-700 motion-reduce:transition-none",
         mapLoaded ? "opacity-100" : "opacity-0",
         className,
       )}

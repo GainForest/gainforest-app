@@ -195,7 +195,9 @@ function isPointFeature(feature: unknown): feature is GeoJSON.Feature<GeoJSON.Po
     geometry.type === "Point" &&
     Array.isArray((geometry as GeoJSON.Point).coordinates) &&
     typeof (geometry as GeoJSON.Point).coordinates[0] === "number" &&
-    typeof (geometry as GeoJSON.Point).coordinates[1] === "number"
+    Number.isFinite((geometry as GeoJSON.Point).coordinates[0]) &&
+    typeof (geometry as GeoJSON.Point).coordinates[1] === "number" &&
+    Number.isFinite((geometry as GeoJSON.Point).coordinates[1])
   );
 }
 
@@ -223,14 +225,13 @@ function normalizeTrees(raw: unknown): GeoJSON.FeatureCollection | null {
 // ── Fetchers ────────────────────────────────────────────────────────────────
 
 async function fetchJson(url: string, signal?: AbortSignal): Promise<unknown | null> {
-  try {
-    const res = await fetch(url, { signal });
-    if (!res.ok) return null;
-    return (await res.json()) as unknown;
-  } catch (error) {
-    if ((error as Error).name === "AbortError") throw error;
-    return null;
-  }
+  const res = await fetch(url, { signal });
+  // A missing optional blob/legacy file means the organization has no data at
+  // that location. Other failures must propagate so the UI can offer retry
+  // instead of misreporting a network failure as an empty tree dataset.
+  if (res.status === 404) return null;
+  if (!res.ok) throw new Error(`Tree resource request failed (${res.status})`);
+  return (await res.json()) as unknown;
 }
 
 /** Unique `trees` blob CIDs across the org's site records. */

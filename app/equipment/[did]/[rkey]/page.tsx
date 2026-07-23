@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import type { ReactNode } from "react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
@@ -14,12 +13,13 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { fetchAuthSession } from "@/app/_lib/auth-server";
-import { formatDate, shortDid } from "@/app/_lib/format";
+import { formatDate } from "@/app/_lib/format";
 import { STATUS_TONES, categoryIcon, getEquipment, type EquipmentStatusTone } from "@/app/_lib/equipment";
 import { getCertifiedProfileCard } from "@/app/account/_lib/account-route";
 import { RecordEngagement } from "@/app/_components/RecordEngagement";
 import { accountEquipmentPath, accountPath } from "@/app/account/_lib/account-route";
 import { EquipmentDetailActions } from "./EquipmentDetailActions";
+import { AssetAttribution, AssetMetaRow } from "./AssetDetailPrimitives";
 
 export const dynamic = "force-dynamic";
 
@@ -70,7 +70,7 @@ export default async function EquipmentDetailPage({ params }: { params: Equipmen
   ]);
   const viewerDid = session.isLoggedIn ? session.did : null;
   const isOwner = viewerDid === item.did;
-  const ownerName = ownerProfile?.displayName?.trim() || shortDid(item.did);
+  const ownerName = ownerProfile?.displayName?.trim() || tProfile("unnamed");
 
   const mapUrl = item.geo
     ? `https://www.openstreetmap.org/?mlat=${item.geo.lat}&mlon=${item.geo.lon}#map=15/${item.geo.lat}/${item.geo.lon}`
@@ -95,7 +95,7 @@ export default async function EquipmentDetailPage({ params }: { params: Equipmen
             {categoryIcon(item.category)}
           </span>
           <div className="min-w-0">
-            <h1 className="truncate text-2xl font-semibold tracking-tight text-foreground">{item.name}</h1>
+            <h1 className="break-words text-2xl font-semibold tracking-tight text-foreground">{item.name}</h1>
             <p className="mt-0.5 flex flex-wrap items-center gap-2">
               <span className="font-mono text-xs text-muted-foreground">{item.assetId || t("table.noId")}</span>
               <span
@@ -112,18 +112,18 @@ export default async function EquipmentDetailPage({ params }: { params: Equipmen
         {isOwner ? <EquipmentDetailActions item={item} ownerDid={item.did} /> : null}
       </header>
 
-      <section className="mt-8 rounded-2xl border border-border bg-card/90 p-5 sm:p-6">
+      <section className="mt-8 rounded-2xl bg-muted/40 p-5 sm:p-6">
         <dl className="grid gap-x-8 gap-y-5 sm:grid-cols-2">
-          <MetaRow icon={<TagIcon className="h-4 w-4" aria-hidden />} label={t("table.type")}>
+          <AssetMetaRow icon={<TagIcon className="h-4 w-4" aria-hidden />} label={t("table.type")}>
             {t(`categories.${item.category}`)}
-          </MetaRow>
-          <MetaRow icon={<UserIcon className="h-4 w-4" aria-hidden />} label={t("table.holder")}>
+          </AssetMetaRow>
+          <AssetMetaRow icon={<UserIcon className="h-4 w-4" aria-hidden />} label={t("table.holder")}>
             {item.currentOwner ?? "—"}
-          </MetaRow>
-          <MetaRow icon={<MapPinIcon className="h-4 w-4" aria-hidden />} label={t("table.site")}>
+          </AssetMetaRow>
+          <AssetMetaRow icon={<MapPinIcon className="h-4 w-4" aria-hidden />} label={t("table.site")}>
             {item.projectSite ?? "—"}
-          </MetaRow>
-          <MetaRow icon={<MapPinIcon className="h-4 w-4" aria-hidden />} label={t("detail.coordinates")}>
+          </AssetMetaRow>
+          <AssetMetaRow icon={<MapPinIcon className="h-4 w-4" aria-hidden />} label={t("detail.coordinates")}>
             {item.geo && mapUrl ? (
               <a
                 href={mapUrl}
@@ -137,18 +137,18 @@ export default async function EquipmentDetailPage({ params }: { params: Equipmen
             ) : (
               "—"
             )}
-          </MetaRow>
-          <MetaRow icon={<CalendarIcon className="h-4 w-4" aria-hidden />} label={t("detail.acquired")}>
+          </AssetMetaRow>
+          <AssetMetaRow icon={<CalendarIcon className="h-4 w-4" aria-hidden />} label={t("detail.acquired")}>
             {item.acquiredAt ? formatDate(item.acquiredAt) : "—"}
-          </MetaRow>
-          <MetaRow icon={<CalendarIcon className="h-4 w-4" aria-hidden />} label={t("table.updated")}>
+          </AssetMetaRow>
+          <AssetMetaRow icon={<CalendarIcon className="h-4 w-4" aria-hidden />} label={t("table.updated")}>
             {formatDate(item.updatedAt)}
-          </MetaRow>
+          </AssetMetaRow>
         </dl>
       </section>
 
       {item.notes ? (
-        <section className="mt-4 rounded-2xl border border-border bg-card/90 p-5 sm:p-6">
+        <section className="mt-8 border-t border-border-soft pt-6">
           <h2 className="mb-2 flex items-center gap-2 text-sm font-semibold text-foreground">
             <NotebookPenIcon className="h-4 w-4 text-muted-foreground" aria-hidden />
             {t("form.notes")}
@@ -157,54 +157,18 @@ export default async function EquipmentDetailPage({ params }: { params: Equipmen
         </section>
       ) : null}
 
-      <section className="mt-4 rounded-2xl border border-border bg-card/90 p-5 sm:p-6">
-        <p className="text-[11px] font-medium uppercase tracking-[0.12em] text-muted-foreground">
-          {t("detail.registeredBy")}
-        </p>
-        {/* Visitors go to the owner's public profile; the owner-only registry
-            list is linked only when the viewer is the owner. */}
-        <Link
-          href={isOwner ? accountEquipmentPath(item.did) : accountPath(item.did)}
-          className="group mt-3 flex items-center gap-3"
-        >
-          <span className="relative h-10 w-10 shrink-0 overflow-hidden rounded-full border border-border bg-muted">
-            {ownerProfile?.avatarUrl ? (
-              // eslint-disable-next-line @next/next/no-img-element -- arbitrary PDS/CDN hosts
-              <img src={ownerProfile.avatarUrl} alt="" className="h-full w-full object-cover" />
-            ) : (
-              <span className="grid h-full w-full place-items-center text-sm font-semibold text-muted-foreground">
-                {ownerName.charAt(0).toUpperCase()}
-              </span>
-            )}
-          </span>
-          <span className="min-w-0 flex-1">
-            <span className="block truncate text-sm font-medium text-foreground transition-colors group-hover:text-primary">
-              {ownerName}
-            </span>
-            <span className="mt-0.5 inline-flex items-center gap-1 text-xs text-muted-foreground">
-              {isOwner ? t("detail.viewAllEquipment") : tProfile("viewProfile")}
-              <ArrowUpRightIcon className="h-3 w-3" aria-hidden />
-            </span>
-          </span>
-        </Link>
-      </section>
+      <AssetAttribution
+        heading={t("detail.registeredBy")}
+        href={isOwner ? accountEquipmentPath(item.did) : accountPath(item.did)}
+        ownerName={ownerName}
+        avatarUrl={ownerProfile?.avatarUrl}
+        actionLabel={isOwner ? t("detail.viewAllEquipment") : tProfile("viewProfile")}
+      />
 
       {/* Like + comment this equipment — same records + counts as the feed. */}
       <div className="mt-6 border-t border-border-soft pt-4">
         <RecordEngagement subjectUri={item.uri} />
       </div>
     </main>
-  );
-}
-
-function MetaRow({ icon, label, children }: { icon: ReactNode; label: string; children: ReactNode }) {
-  return (
-    <div className="flex items-start gap-3">
-      <span className="mt-0.5 text-primary">{icon}</span>
-      <div className="min-w-0 flex-1">
-        <dt className="text-[11px] font-medium uppercase tracking-[0.08em] text-foreground/45">{label}</dt>
-        <dd className="mt-0.5 text-sm leading-snug text-foreground">{children}</dd>
-      </div>
-    </div>
   );
 }
