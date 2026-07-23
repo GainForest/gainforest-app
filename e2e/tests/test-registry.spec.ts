@@ -10,9 +10,9 @@ const FORBIDDEN_DONATION_PATHS = new Set([
 const WHATS_NEW_STORAGE_KEY = "gainforest.floatingTaina.whatsNewSeen.v1";
 const WHATS_NEW_RELEASE_ID = "2026-07-06";
 
-test("Tainá's What's New stays quiet across refreshes", async ({ page }) => {
+test("Tainá's What's New is prominent once and stays available", async ({ page }) => {
   await page.addInitScript((storageKey) => {
-    const setupKey = `${storageKey}.e2ePrepared`;
+    const setupKey = `${storageKey}.prominentE2ePrepared`;
     if (window.sessionStorage.getItem(setupKey)) return;
     window.localStorage.removeItem(storageKey);
     window.sessionStorage.setItem(setupKey, "1");
@@ -24,24 +24,25 @@ test("Tainá's What's New stays quiet across refreshes", async ({ page }) => {
     name: "See new updates in GainForest",
     exact: true,
   });
+  await expect(page.getByRole("status").filter({ hasText: "What's new" })).toBeVisible();
   await expect(newUpdatesTrigger).toBeVisible();
 
   const otherPage = await page.context().newPage();
   await otherPage.goto("/_test");
-  await expect(otherPage.getByRole("button", {
-    name: "See new updates in GainForest",
-    exact: true,
-  })).toBeVisible();
+  await expect(otherPage.getByRole("status").filter({ hasText: "What's new" })).toBeVisible();
 
   await newUpdatesTrigger.click();
 
+  await expect(otherPage.getByRole("status").filter({ hasText: "What's new" })).toHaveCount(0);
   await expect(otherPage.getByRole("button", {
     name: "See what's new in GainForest",
     exact: true,
   })).toBeVisible();
   await otherPage.close();
 
-  await expect(page.getByRole("heading", { name: "A few things just got better" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "What's new", exact: true })).toBeVisible();
+  await expect(page.getByText("Choose a common question and Tainá can point to the right places on your screen.", { exact: true })).toBeVisible();
+  await expect(page.getByText("A few things just got better", { exact: true })).toHaveCount(0);
   await expect(page.getByRole("button", { name: "Back", exact: true })).toBeFocused();
   await expect.poll(() => page.evaluate((key) => window.localStorage.getItem(key), WHATS_NEW_STORAGE_KEY))
     .toBe(WHATS_NEW_RELEASE_ID);
@@ -54,25 +55,69 @@ test("Tainá's What's New stays quiet across refreshes", async ({ page }) => {
   await expect(seenUpdatesTrigger).toBeFocused();
 
   await page.reload();
-  await expect(page.getByRole("heading", { name: "A few things just got better" })).toHaveCount(0);
+  await expect(page.getByRole("status").filter({ hasText: "What's new" })).toHaveCount(0);
   await expect(seenUpdatesTrigger).toBeVisible();
 
   await seenUpdatesTrigger.click();
   await page.getByRole("button", { name: "Back", exact: true }).click();
   await expect(page.getByPlaceholder("Ask me anything…")).toBeFocused();
   await page.getByRole("button", { name: "Close chat", exact: true }).click();
+});
 
-  await seenUpdatesTrigger.click();
+test("closing or minimizing What's New keeps it dismissed", async ({ page }) => {
+  await page.addInitScript((storageKey) => {
+    const setupKey = `${storageKey}.dismissE2ePrepared`;
+    if (window.sessionStorage.getItem(setupKey)) return;
+    window.localStorage.removeItem(storageKey);
+    window.sessionStorage.setItem(setupKey, "1");
+  }, WHATS_NEW_STORAGE_KEY);
+
+  await page.goto("/_test");
+  await page.getByRole("button", { name: "Dismiss What's new", exact: true }).click();
+  await expect.poll(() => page.evaluate((key) => window.localStorage.getItem(key), WHATS_NEW_STORAGE_KEY))
+    .toBe(WHATS_NEW_RELEASE_ID);
+  await expect(page.getByRole("status").filter({ hasText: "What's new" })).toHaveCount(0);
+
+  await page.reload();
+  await expect(page.getByRole("status").filter({ hasText: "What's new" })).toHaveCount(0);
+
+  await page.evaluate((key) => window.localStorage.removeItem(key), WHATS_NEW_STORAGE_KEY);
+  await page.reload();
+  await expect(page.getByRole("status").filter({ hasText: "What's new" })).toBeVisible();
+
+  const sprite = page.locator('[role="button"][aria-label="Tainá — click to chat, drag to move"]');
+  await sprite.hover();
   await page.getByRole("button", { name: "Minimize Tainá", exact: true }).click();
   const restoreTaina = page.getByRole("button", { name: "Open Tainá", exact: true });
   await expect(restoreTaina).toBeFocused();
   await restoreTaina.click();
+  await expect(page.getByRole("status").filter({ hasText: "What's new" })).toHaveCount(0);
 
-  await page
-    .locator('[role="button"][aria-label="Tainá — click to chat, drag to move"]')
-    .click({ position: { x: 36, y: 32 } });
-  await expect(page.getByRole("dialog", { name: "Tainá — Your GainForest guide" })).toBeVisible();
-  await expect(page.getByRole("heading", { name: "A few things just got better" })).toHaveCount(0);
+  await page.reload();
+  await expect(page.getByRole("status").filter({ hasText: "What's new" })).toHaveCount(0);
+});
+
+test("What's New and Did you know remain separate", async ({ page }) => {
+  await page.addInitScript(({ whatsNewKey }) => {
+    window.localStorage.removeItem(whatsNewKey);
+    window.localStorage.removeItem("gainforest.floatingTaina.tipLastShown.v1");
+    window.localStorage.removeItem("gainforest.floatingTaina.tipSnoozeUntil.v1");
+    window.sessionStorage.removeItem("gainforest.floatingTaina.tipSessionCount.v1");
+    Math.random = () => 0.9;
+  }, { whatsNewKey: WHATS_NEW_STORAGE_KEY });
+
+  await page.goto("/_test");
+  const whatsNew = page.getByRole("status").filter({ hasText: "What's new" });
+  await expect(whatsNew).toBeVisible();
+
+  const didYouKnow = page.getByRole("status").filter({ hasText: "Did you know?" });
+  await expect(didYouKnow).toBeVisible({ timeout: 25_000 });
+  await expect(whatsNew).toBeVisible();
+  await expect(page.getByRole("status")).toHaveCount(2);
+
+  await page.getByRole("button", { name: "Dismiss tip", exact: true }).click();
+  await expect(whatsNew).toBeVisible();
+  await expect(didYouKnow).toHaveCount(0);
 });
 
 test("signed-out card galleries ignore browser-injected collectibles", async ({ page }) => {
