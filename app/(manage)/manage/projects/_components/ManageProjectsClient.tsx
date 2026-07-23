@@ -515,7 +515,7 @@ function ProjectCard({
       aria-label={t("viewProjectFor", { title: project.title })}
       data-taina="open-project"
       className={cn(
-        "group flex cursor-pointer gap-3 rounded-2xl bg-card/45 px-1 py-3 transition-colors duration-300 hover:bg-surface-sunken focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/45 sm:gap-4 sm:px-2 sm:py-4",
+        "group flex cursor-pointer gap-3 rounded-2xl bg-muted px-1 py-3 transition-colors duration-300 hover:bg-muted/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/45 sm:gap-4 sm:px-2 sm:py-4",
       )}
     >
       <div className="relative h-28 w-28 shrink-0 overflow-hidden rounded-xl bg-muted sm:h-36 sm:w-52">

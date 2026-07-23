@@ -137,7 +137,7 @@ export function MintCertProjectGate({ target }: { target: ManageTarget }) {
               {createPermission.reason}
             </SectionSurface>
           ) : filtered.length === 0 ? (
-            <p className="mt-6 rounded-2xl bg-muted/40 px-4 py-8 text-center text-sm text-muted-foreground">{t("noMatch")}</p>
+            <p className="mt-6 rounded-2xl bg-muted px-4 py-8 text-center text-sm text-muted-foreground">{t("noMatch")}</p>
           ) : (
             <ul className="mt-4 space-y-2" role="list">
               {filtered.map((project) => (

@@ -171,7 +171,7 @@ export function TimelineOptionalNote({ note }: { note: unknown }) {
   if (blocks.length === 0) return null;
 
   return (
-    <div className="space-y-3 rounded-xl bg-muted/20 px-3 py-2 text-sm leading-6 text-foreground/80">
+    <div className="space-y-3 rounded-xl bg-background px-3 py-2 text-sm leading-6 text-foreground/80">
       {blocks.map((block, index) => (
         <Block key={index} block={block} />
       ))}

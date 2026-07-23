@@ -1020,7 +1020,7 @@ export function FeedComposer({
       className={cn(
         embedded
           ? "w-full"
-          : "mb-3 rounded-2xl border border-border/60 bg-card/40 p-3 transition-colors focus-within:border-primary/40",
+          : "mb-3 rounded-2xl border border-border/60 bg-muted p-3 transition-colors focus-within:border-primary/40",
       )}
     >
       <div className="flex gap-3">

@@ -303,7 +303,7 @@ function CertTile({
   const details = certDetails(cert, t);
 
   return (
-    <li className={cn("group overflow-hidden rounded-2xl bg-muted/35 transition-colors hover:bg-muted/55", cert.linked && "ring-1 ring-primary/25")}>
+    <li className={cn("group overflow-hidden rounded-2xl bg-muted transition-colors hover:bg-muted/80", cert.linked && "ring-1 ring-primary/25")}>
       <div className="flex gap-3 p-3 sm:gap-4 sm:p-4">
         <div className="relative h-24 w-24 shrink-0 overflow-hidden rounded-2xl bg-muted sm:h-28 sm:w-32">
           {cert.imageUrl ? (
@@ -368,7 +368,7 @@ function CertsSkeleton() {
       <Skeleton className="h-28 rounded-3xl" />
       <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3">
         {Array.from({ length: 9 }).map((_, index) => (
-          <div key={index} className="flex gap-4 rounded-2xl bg-muted/35 p-4">
+          <div key={index} className="flex gap-4 rounded-2xl bg-muted p-4">
             <Skeleton className="h-28 w-32 shrink-0 rounded-2xl" />
             <div className="flex flex-1 flex-col justify-between py-1">
               <div className="space-y-3">

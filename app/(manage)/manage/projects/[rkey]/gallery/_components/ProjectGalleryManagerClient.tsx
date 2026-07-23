@@ -359,7 +359,7 @@ export function ProjectGalleryManagerClient({ target, projectRkey }: { target: M
           {uploadProgress ? <UploadProgressBar progress={uploadProgress} /> : null}
 
           {existingImagePermissionReason ? (
-            <p className="rounded-2xl bg-muted/35 px-4 py-3 text-sm text-muted-foreground" role="status">
+            <p className="rounded-2xl bg-muted px-4 py-3 text-sm text-muted-foreground" role="status">
               {existingImagePermissionReason}
             </p>
           ) : null}

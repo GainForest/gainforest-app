@@ -199,9 +199,9 @@ function DocumentToolbar({
     "inline-flex cursor-not-allowed items-center gap-1.5 rounded-lg border border-border/40 bg-background/60 px-3 py-2 text-xs font-medium text-muted-foreground";
 
   return (
-    <div className="flex flex-col gap-3 rounded-xl border border-border/40 bg-muted/20 px-3 py-3 sm:flex-row sm:items-center sm:justify-between">
+    <div className="flex flex-col gap-3 rounded-xl border border-border/40 bg-background px-3 py-3 sm:flex-row sm:items-center sm:justify-between">
       <div className="flex min-w-0 items-center gap-3">
-        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-background text-primary shadow-xs">
+        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-muted text-primary shadow-xs">
           <FileTextIcon className="h-5 w-5" />
         </span>
         <div className="min-w-0">

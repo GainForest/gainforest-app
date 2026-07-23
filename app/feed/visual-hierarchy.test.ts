@@ -4,6 +4,7 @@ import { describe, expect, it } from "vitest";
 const read = (relative: string) => readFileSync(new URL(relative, import.meta.url), "utf8");
 
 const feed = read("./FeedClient.tsx");
+const feedActions = read("./FeedActions.tsx");
 const loading = read("../_components/PageLoadingSkeletons.tsx");
 const explorer = read("../_components/RecordExplorer.tsx");
 const drawer = read("../_components/RecordDrawer.tsx");
@@ -82,5 +83,16 @@ describe("Feed wave visual hierarchy", () => {
     expect(leaderboard).toContain('className="grid w-full grid-cols-3 rounded-full');
     expect(leaderboard).not.toContain('className="grid h-10 w-full grid-cols-3 rounded-full');
     expect(observationsLoading).toContain('className="aspect-square rounded-lg"');
+  });
+
+  it("keeps persistent composer and drawer groups visibly filled", () => {
+    expect(feedActions).toContain(
+      "rounded-2xl border border-border/60 bg-muted p-3 transition-colors",
+    );
+    expect(drawer).toContain('"rounded-2xl bg-muted p-3.5"');
+    expect(drawer).toContain(
+      'className="mt-5 rounded-2xl border border-border-soft bg-muted p-4"',
+    );
+    expect(drawer).not.toContain("bg-foreground/[0.04]");
   });
 });

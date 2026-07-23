@@ -33,6 +33,30 @@ const bumicertsCardSource = readFileSync(
   new URL("../../components/bumicert/BumicertsBumicertCard.tsx", import.meta.url),
   "utf8",
 );
+const natureEvidenceSource = readFileSync(
+  new URL("../cert/[did]/[rkey]/_components/timeline/EvidenceAdder/NatureEvidencePicker.tsx", import.meta.url),
+  "utf8",
+);
+const evidenceListSource = readFileSync(
+  new URL("../cert/[did]/[rkey]/_components/timeline/EvidenceAdder/ListHelpers.tsx", import.meta.url),
+  "utf8",
+);
+const fileEvidenceSource = readFileSync(
+  new URL("../cert/[did]/[rkey]/_components/timeline/EvidenceAdder/FileEvidencePicker.tsx", import.meta.url),
+  "utf8",
+);
+const timelineNoteSource = readFileSync(
+  new URL("../cert/[did]/[rkey]/_components/timeline/viewers/shared/TimelineOptionalNote.tsx", import.meta.url),
+  "utf8",
+);
+const textPreviewSource = readFileSync(
+  new URL("../cert/[did]/[rkey]/_components/timeline/viewers/renderers/previews/TextPreviewRenderer.tsx", import.meta.url),
+  "utf8",
+);
+const documentPreviewSource = readFileSync(
+  new URL("../cert/[did]/[rkey]/_components/timeline/viewers/renderers/previews/DocumentPreviewRenderer.tsx", import.meta.url),
+  "utf8",
+);
 
 describe("projects visual hierarchy source contract", () => {
   it("uses italic Instrument for every visible projects heading", () => {
@@ -146,5 +170,21 @@ describe("projects visual hierarchy source contract", () => {
     expect(certPageSource).toContain(
       'className="group relative block overflow-hidden rounded-2xl border border-border"',
     );
+  });
+
+  it("gives nested Cert evidence and preview states clear inner contrast", () => {
+    expect(natureEvidenceSource.match(/rounded-xl bg-background px-3 py-4/g)).toHaveLength(2);
+    expect(evidenceListSource).toContain("rounded-xl bg-background p-5 text-center");
+    expect(fileEvidenceSource).toContain(
+      "rounded-xl bg-background px-3 py-2 text-center text-xs",
+    );
+    expect(timelineNoteSource).toContain("rounded-xl bg-background px-3 py-2");
+    expect(textPreviewSource).toContain(
+      "rounded-xl border border-border/60 bg-background p-4",
+    );
+    expect(documentPreviewSource).toContain(
+      "rounded-xl border border-border/40 bg-background px-3 py-3",
+    );
+    expect(documentPreviewSource).toContain("rounded-lg bg-muted text-primary shadow-xs");
   });
 });

@@ -256,7 +256,7 @@ function StatTile({
   hint: string;
 }) {
   return (
-    <div className="rounded-2xl border border-border-soft bg-foreground/[0.035] px-4 py-3.5">
+    <div className="rounded-2xl border border-border-soft bg-muted px-4 py-3.5">
       <div className="text-[11px] font-medium uppercase tracking-[0.1em] text-foreground/45">
         {label}
       </div>

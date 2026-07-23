@@ -350,7 +350,7 @@ export function NatureEvidencePicker({
             </Button>
           </div>
           {displayedRows.length === 0 ? (
-            <p className="rounded-lg bg-muted/40 px-3 py-4 text-center text-sm text-muted-foreground">
+            <p className="rounded-xl bg-background px-3 py-4 text-center text-sm text-muted-foreground">
               {natureT("noDataMatches")}
             </p>
           ) : (
@@ -411,7 +411,7 @@ export function NatureEvidencePicker({
             {natureT("groupsDescription")}
           </p>
           {displayedDatasets.length === 0 ? (
-            <p className="rounded-lg bg-muted/40 px-3 py-4 text-center text-sm text-muted-foreground">
+            <p className="rounded-xl bg-background px-3 py-4 text-center text-sm text-muted-foreground">
               {natureT("noGroupsMatch")}
             </p>
           ) : (

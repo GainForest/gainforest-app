@@ -239,7 +239,7 @@ export function FileEvidencePicker({
             ))}
           </div>
         ) : (
-          <div className="rounded-xl bg-muted/40 px-3 py-2 text-center text-xs text-muted-foreground">
+          <div className="rounded-xl bg-background px-3 py-2 text-center text-xs text-muted-foreground">
             {evidenceT("noFilesSelected")}
           </div>
         )}

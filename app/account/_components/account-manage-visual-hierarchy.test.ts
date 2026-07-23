@@ -71,4 +71,29 @@ describe("account and management visual hierarchy", () => {
       'className="flex items-start gap-2 rounded-2xl bg-muted p-3',
     );
   });
+
+  it("keeps persistent account and management states visibly separated", () => {
+    expect(read("app/_components/AccountDrawer.tsx")).toContain(
+      "rounded-2xl border border-border-soft bg-muted",
+    );
+    expect(read("app/(manage)/manage/certs/new/_components/MintCertProjectGate.tsx")).toContain(
+      "rounded-2xl bg-muted px-4 py-8 text-center",
+    );
+    expect(read("app/(manage)/manage/observations/_components/ObservationsClient.tsx")).toContain(
+      "space-y-4 rounded-2xl bg-muted p-4 sm:p-5",
+    );
+
+    const projectCerts = read(
+      "app/(manage)/manage/projects/[rkey]/certs/_components/ProjectCertsManagerClient.tsx",
+    );
+    expect(projectCerts).toContain("rounded-2xl bg-muted transition-colors hover:bg-muted/80");
+    expect(projectCerts).toContain("flex gap-4 rounded-2xl bg-muted p-4");
+
+    expect(read("app/(manage)/manage/projects/[rkey]/gallery/_components/ProjectGalleryManagerClient.tsx")).toContain(
+      "rounded-2xl bg-muted px-4 py-3 text-sm text-muted-foreground",
+    );
+    expect(read("app/(manage)/manage/projects/_components/ManageProjectsClient.tsx")).toContain(
+      "rounded-2xl bg-muted px-1 py-3 transition-colors duration-300 hover:bg-muted/80",
+    );
+  });
 });

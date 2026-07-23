@@ -741,7 +741,7 @@ export function RecordDrawer({
               "mt-5",
               isProject
                 ? "border-y border-border-soft py-3.5"
-                : "rounded-2xl bg-foreground/[0.04] p-3.5",
+                : "rounded-2xl bg-muted p-3.5",
             )}
           >
             <div className={cn(isProject && "flex items-center gap-3")}>
@@ -1970,7 +1970,7 @@ function ProjectCertSummary({
       ) : null}
 
       {hasEvidence ? (
-        <section className="mt-5 rounded-2xl border border-border-soft bg-foreground/[0.04] p-4">
+        <section className="mt-5 rounded-2xl border border-border-soft bg-muted p-4">
           <div className="mb-3 flex items-center gap-2">
             <ClipboardCheckIcon className="h-4 w-4 text-primary" aria-hidden />
             <h3 className="font-instrument text-[15px] italic text-foreground">{t("projectEvidence.title")}</h3>
