@@ -65,6 +65,7 @@
     "upload": "Unggah",
     "uploading": "Mengunggah…",
     "confirm": "Konfirmasi",
+    "failed": "Tindakan itu tidak dapat diselesaikan. Silakan coba lagi.",
     "add": "Tambah",
     "cancel": "Batal",
     "registerOrganization": "Buat Organisasi",

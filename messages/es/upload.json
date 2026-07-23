@@ -65,6 +65,7 @@
     "upload": "Subir",
     "uploading": "Subiendo…",
     "confirm": "Confirmar",
+    "failed": "No se pudo completar esa acción. Inténtalo de nuevo.",
     "add": "Agregar",
     "cancel": "Cancelar",
     "registerOrganization": "Crear una organización",

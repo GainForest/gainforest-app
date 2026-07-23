@@ -1,6 +1,7 @@
 "use client";
 
 import { createRecord, deleteRecord, getRecord, putRecord } from "../../_lib/mutations";
+import { debug } from "@/lib/logger";
 
 // Observation datasets are first-class Darwin Core dataset records. Observations
 // point up to them via `datasetRef`; the dataset itself stores the steward-facing
@@ -33,7 +34,7 @@ export async function createObservationDataset(
   options?: RepoOptions,
 ): Promise<CreatedObservationDataset> {
   const name = input.name.trim().slice(0, NAME_MAX);
-  if (!name) throw new Error("Name your dataset first.");
+  if (!name) throw new Error("dataset_name_required");
   const description = input.description?.trim().slice(0, DESCRIPTION_MAX);
   const record: Record<string, unknown> = {
     $type: DATASET_COLLECTION,
@@ -71,7 +72,7 @@ export type AttachInputOccurrence = { rkey: string; datasetRef: string | null };
 export type AttachObservationsResult = {
   attached: string[];
   skipped: Array<{ rkey: string; reason: "already" }>;
-  errors: Array<{ rkey: string; error: string }>;
+  errors: Array<{ rkey: string }>;
 };
 
 /**
@@ -92,7 +93,7 @@ export async function attachObservationsToDataset(
 ): Promise<AttachObservationsResult> {
   const attached: string[] = [];
   const skipped: Array<{ rkey: string; reason: "already" }> = [];
-  const errors: Array<{ rkey: string; error: string }> = [];
+  const errors: Array<{ rkey: string }> = [];
 
   for (const occurrence of input.occurrences) {
     if (occurrence.datasetRef) {
@@ -113,10 +114,8 @@ export async function attachObservationsToDataset(
       });
       attached.push(occurrence.rkey);
     } catch (error) {
-      errors.push({
-        rkey: occurrence.rkey,
-        error: error instanceof Error ? error.message : "This observation could not be added to the dataset.",
-      });
+      debug.error("Observation dataset attachment failed", { rkey: occurrence.rkey, error });
+      errors.push({ rkey: occurrence.rkey });
     }
   }
 
@@ -134,11 +133,11 @@ export async function attachObservationsToDataset(
 
 export type DeleteObservationDatasetResult = {
   detached: string[];
-  detachErrors: Array<{ rkey: string; error: string }>;
+  detachErrors: Array<{ rkey: string }>;
   unnestedFrom: string[];
-  unnestErrors: Array<{ rkey: string; error: string }>;
+  unnestErrors: Array<{ rkey: string }>;
   collectionDeleted: boolean;
-  collectionError: string | null;
+  collectionError: boolean;
 };
 
 /**
@@ -154,7 +153,7 @@ export async function deleteObservationDataset(
   options?: RepoOptions,
 ): Promise<DeleteObservationDatasetResult> {
   const detached: string[] = [];
-  const detachErrors: Array<{ rkey: string; error: string }> = [];
+  const detachErrors: Array<{ rkey: string }> = [];
 
   for (const rkey of input.occurrenceRkeys) {
     try {
@@ -171,17 +170,15 @@ export async function deleteObservationDataset(
       });
       detached.push(rkey);
     } catch (error) {
-      detachErrors.push({
-        rkey,
-        error: error instanceof Error ? error.message : "This observation could not be ungrouped.",
-      });
+      debug.error("Observation dataset detachment failed", { rkey, error });
+      detachErrors.push({ rkey });
     }
   }
 
   // Unnest the dataset from any project collection that lists it in items[], so
   // no dangling reference is left behind.
   const unnestedFrom: string[] = [];
-  const unnestErrors: Array<{ rkey: string; error: string }> = [];
+  const unnestErrors: Array<{ rkey: string }> = [];
   for (const rkey of input.parentRkeys) {
     try {
       const current = await getRecord(COLLECTION_COLLECTION, rkey, options);
@@ -199,20 +196,19 @@ export async function deleteObservationDataset(
       });
       unnestedFrom.push(rkey);
     } catch (error) {
-      unnestErrors.push({
-        rkey,
-        error: error instanceof Error ? error.message : "A parent collection could not be updated.",
-      });
+      debug.error("Observation dataset parent update failed", { rkey, error });
+      unnestErrors.push({ rkey });
     }
   }
 
   let collectionDeleted = false;
-  let collectionError: string | null = null;
+  let collectionError = false;
   try {
     await deleteRecord(DATASET_COLLECTION, input.datasetRkey, options);
     collectionDeleted = true;
   } catch (error) {
-    collectionError = error instanceof Error ? error.message : "The dataset could not be deleted.";
+    debug.error("Observation dataset deletion failed", error);
+    collectionError = true;
   }
 
   return { detached, detachErrors, unnestedFrom, unnestErrors, collectionDeleted, collectionError };
@@ -229,7 +225,7 @@ export async function nestDatasetUnderProject(
   options?: RepoOptions,
 ): Promise<void> {
   const projectRkey = input.projectUri.split("/").pop();
-  if (!projectRkey) throw new Error("Could not resolve the project to nest under.");
+  if (!projectRkey) throw new Error("project_reference_invalid");
 
   const current = await getRecord(COLLECTION_COLLECTION, projectRkey, options);
   const items = Array.isArray(current.record.items) ? [...current.record.items] : [];
@@ -281,9 +277,9 @@ export type SetDatasetProjectResult = {
   nested: boolean;
   /** Parent-collection rkeys the dataset was removed from (when moving/detaching). */
   unnestedFrom: string[];
-  unnestErrors: Array<{ rkey: string; error: string }>;
+  unnestErrors: Array<{ rkey: string }>;
   /** Set when nesting under the target project failed (the move was aborted). */
-  nestError: string | null;
+  nestError: boolean;
 };
 
 /**
@@ -312,7 +308,7 @@ export async function setDatasetProject(
   // Nest under the new project first, so a failure here leaves the previous
   // attachment untouched rather than detaching with nowhere to land.
   let nested = false;
-  let nestError: string | null = null;
+  let nestError = false;
   if (targetUri) {
     try {
       await nestDatasetUnderProject(
@@ -321,7 +317,8 @@ export async function setDatasetProject(
       );
       nested = true;
     } catch (error) {
-      nestError = error instanceof Error ? error.message : "The dataset could not be added to the project.";
+      debug.error("Observation dataset project attachment failed", error);
+      nestError = true;
       return { nested, unnestedFrom: [], unnestErrors: [], nestError };
     }
   }
@@ -329,16 +326,14 @@ export async function setDatasetProject(
   // Remove the dataset from any other project it was nested under (the target is
   // skipped — nestDatasetUnderProject already made it a member, idempotently).
   const unnestedFrom: string[] = [];
-  const unnestErrors: Array<{ rkey: string; error: string }> = [];
+  const unnestErrors: Array<{ rkey: string }> = [];
   for (const rkey of input.currentParentRkeys) {
     if (rkey === targetRkey) continue;
     try {
       if (await unnestDatasetFromParent(rkey, input.datasetUri, options)) unnestedFrom.push(rkey);
     } catch (error) {
-      unnestErrors.push({
-        rkey,
-        error: error instanceof Error ? error.message : "A previous project could not be updated.",
-      });
+      debug.error("Previous observation dataset project update failed", { rkey, error });
+      unnestErrors.push({ rkey });
     }
   }
 

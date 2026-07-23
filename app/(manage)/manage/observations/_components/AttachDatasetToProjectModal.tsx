@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input";
 import { ModalContent, ModalDescription, ModalFooter, ModalTitle } from "@/components/ui/modal/modal";
 import { useModal } from "@/components/ui/modal/context";
 import { cn } from "@/lib/utils";
+import { debug } from "@/lib/logger";
 import { manageApiHref, type ManageTarget } from "@/lib/links";
 import { setDatasetProject, type SetDatasetProjectResult } from "./observation-dataset-mutations";
 import type { ObservationDatasetGroup } from "./GroupObservationsDatasetModal";
@@ -110,7 +111,7 @@ export function AttachDatasetToProjectModal({
         repoOptions,
       );
       if (projectUri && !result.nested) {
-        setError(result.nestError ?? t("attachFailed"));
+        setError(t("attachFailed"));
         setIsPending(false);
         return;
       }
@@ -119,7 +120,8 @@ export function AttachDatasetToProjectModal({
       onDone({ projectUri, projectName, result });
       await closeModal();
     } catch (caught) {
-      setError(caught instanceof Error ? caught.message : t("attachFailed"));
+      debug.error("Observation dataset project update failed", caught);
+      setError(t("attachFailed"));
       setIsPending(false);
     }
   };

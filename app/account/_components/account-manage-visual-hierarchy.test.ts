@@ -96,4 +96,24 @@ describe("account and management visual hierarchy", () => {
       "rounded-2xl bg-muted px-1 py-3 transition-colors duration-300 hover:bg-muted/80",
     );
   });
+
+  it("localizes confirmation failures and keeps raw mutation errors out of dialogs", () => {
+    const confirm = read("app/(manage)/manage/_components/ManageConfirmModal.tsx");
+    expect(confirm).toContain('useTranslations("upload.actions")');
+    expect(confirm).toContain('setError(actionsT("failed"))');
+    expect(confirm).not.toMatch(/confirmLabel = "Confirm"|cancelLabel = "Cancel"|caught\.message/);
+
+    const group = read(
+      "app/(manage)/manage/observations/_components/GroupObservationsDatasetModal.tsx",
+    );
+    const attach = read(
+      "app/(manage)/manage/observations/_components/AttachDatasetToProjectModal.tsx",
+    );
+    const mutations = read(
+      "app/(manage)/manage/observations/_components/observation-dataset-mutations.ts",
+    );
+    expect(group).not.toMatch(/errors\[0\].*\.error|caught\.message/);
+    expect(attach).not.toMatch(/nestError \?\?|caught\.message/);
+    expect(mutations).not.toContain("error.message");
+  });
 });
