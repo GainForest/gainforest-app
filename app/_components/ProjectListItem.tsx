@@ -96,7 +96,7 @@ export function ProjectListItem({
       type="button"
       onClick={() => onOpen(record)}
       aria-label={t("open", { title: record.title })}
-      className={`group grid w-full items-center gap-3 px-2 py-2 text-left outline-none transition-colors hover:bg-surface-sunken focus-visible:bg-surface-sunken focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary/50 sm:gap-4 sm:px-3 ${LIST_GRID}`}
+      className={`group grid w-full items-center gap-3 px-3 py-3 text-left outline-none transition-colors hover:bg-background/70 focus-visible:bg-background/70 focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary/50 sm:gap-4 ${LIST_GRID}`}
     >
       {/* Thumbnail */}
       <span className="relative h-10 w-10 shrink-0 overflow-hidden rounded-md bg-muted">

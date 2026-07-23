@@ -345,7 +345,7 @@ async function ProjectFallback({
 
           <div className="mt-8 grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1fr)_360px]">
             <div className="min-w-0">
-              <div className="relative aspect-[16/10] w-full overflow-hidden rounded-2xl border border-border-soft bg-muted">
+              <div className="relative aspect-[16/10] w-full overflow-hidden rounded-2xl bg-muted">
                 {record.imageUrl ? (
                   <Image
                     src={record.imageUrl}
@@ -381,7 +381,7 @@ async function ProjectFallback({
 
             {owner ? (
               <aside className="min-w-0">
-                <div className="rounded-2xl border border-border-soft bg-surface/60 p-4">
+                <div className="rounded-2xl bg-muted p-4">
                   <div className="flex items-center justify-between gap-2">
                     <p className="text-sm font-medium text-muted-foreground">
                       {t("ledBy")}

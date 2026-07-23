@@ -96,7 +96,7 @@ export function BumicertDeleteAction(props: BumicertDeleteActionProps) {
 
   return (
     <div className="space-y-2">
-      <h3 className="text-sm font-medium text-muted-foreground">
+      <h3 className="font-instrument text-base italic text-foreground">
         {labels.manage}
       </h3>
       <Button

@@ -34,7 +34,7 @@ export function ExploreGridPageSkeleton({ cards = 6 }: { cards?: number }) {
     <PageShell>
       <PictureHeroSkeleton />
       <section className="relative z-10 mx-auto -mt-8 max-w-6xl px-6 lg:px-8">
-        <div className="rounded-3xl border border-border/60 bg-card/90 p-4 shadow-sm backdrop-blur">
+        <div className="rounded-3xl bg-muted p-4 backdrop-blur">
           <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
             <Skeleton className="h-11 w-full rounded-full md:max-w-sm" />
             <div className="flex flex-wrap gap-2">
@@ -46,7 +46,7 @@ export function ExploreGridPageSkeleton({ cards = 6 }: { cards?: number }) {
         </div>
         <div className="mt-5 grid grid-cols-[repeat(auto-fill,minmax(260px,1fr))] items-stretch gap-6 lg:gap-8">
           {Array.from({ length: cards }).map((_, index) => (
-            <article key={index} className="overflow-hidden rounded-3xl border border-border bg-card shadow-sm">
+            <article key={index} className="overflow-hidden rounded-2xl bg-muted">
               <Skeleton className="aspect-[16/10] rounded-none" />
               <div className="space-y-3 p-5">
                 <Skeleton className="h-6 w-3/4 rounded-full" />
@@ -203,7 +203,7 @@ export function ProjectDetailSkeleton() {
           </div>
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
             {Array.from({ length: 4 }).map((_, index) => (
-              <div key={index} className="rounded-2xl border border-border/60 bg-card/70 p-4">
+              <div key={index} className="rounded-2xl bg-muted p-4">
                 <Skeleton className="h-4 w-20 rounded-full" />
                 <Skeleton className="mt-3 h-8 w-16 rounded-full" />
               </div>
@@ -223,7 +223,7 @@ export function ProjectDetailSkeleton() {
           ))}
         </div>
         <aside className="min-w-0">
-          <div className="space-y-4 rounded-3xl border border-border/60 bg-card p-4 lg:sticky lg:top-24">
+          <div className="space-y-4 rounded-3xl bg-muted p-4 lg:sticky lg:top-24">
             <Skeleton className="aspect-[4/3] w-full rounded-2xl" />
             <Skeleton className="h-6 w-3/4" />
             <Skeleton className="h-4 w-full rounded-full" />

@@ -1082,7 +1082,7 @@ export async function ProjectDetailView({
                 {/* Cover media sits inside the content column so the donation
                     sidebar aligns next to it instead of below a full-width banner. */}
                 {record.imageUrl ? (
-                  <div className="relative aspect-[16/10] w-full overflow-hidden rounded-2xl border border-border bg-muted">
+                  <div className="relative aspect-[16/10] w-full overflow-hidden rounded-2xl bg-muted">
                     <Image
                       src={record.imageUrl}
                       alt={record.title}
@@ -1223,7 +1223,7 @@ export async function ProjectDetailView({
                     title={supportT("donations")}
                     count={formatNumber(donationEntries.length)}
                   >
-                    <div className="overflow-hidden bg-muted/35 divide-y divide-border/60">
+                    <div className="overflow-hidden rounded-2xl bg-muted divide-y divide-background">
                       {donationEntries.map((entry) => (
                         <DonationLeaderboardRow key={entry.key} entry={entry} />
                       ))}
@@ -1395,7 +1395,7 @@ function ProjectSidebarExtras({
         <>
           {lead()}
           <div className="space-y-3">
-            <h3 className="text-sm font-semibold text-foreground">
+            <h3 className="font-instrument text-base italic text-foreground">
               {copy.atAGlance}
             </h3>
             {facts.length > 0 ? (
@@ -1436,7 +1436,7 @@ function ProjectSidebarExtras({
           {lead()}
           <div className="space-y-2.5">
             <div className="flex items-center justify-between gap-2">
-              <h3 className="text-sm font-semibold text-foreground">
+              <h3 className="font-instrument text-base italic text-foreground">
                 {copy.map}
               </h3>
               <Link
@@ -1471,7 +1471,7 @@ function ProjectSidebarExtras({
           {lead()}
           <div className="space-y-2.5">
             <div className="flex items-center justify-between gap-2">
-              <h3 className="text-sm font-semibold text-foreground">
+              <h3 className="font-instrument text-base italic text-foreground">
                 {copy.latestUpdates}
               </h3>
               <Link
@@ -1488,7 +1488,7 @@ function ProjectSidebarExtras({
                   <li key={entry.metadata.uri ?? entry.metadata.rkey}>
                     <Link
                       href={updatesHref}
-                      className="group block bg-muted/35 p-3 transition-colors hover:bg-muted/60 motion-reduce:transition-none"
+                      className="group block rounded-xl bg-muted p-3 transition-colors hover:bg-muted/80 motion-reduce:transition-none"
                     >
                       <p className="line-clamp-2 text-[13px] font-medium leading-snug text-foreground transition-colors group-hover:text-primary">
                         {entry.record.title?.trim() ||
@@ -1828,7 +1828,7 @@ async function OverviewSidebar({
       ) : null}
 
       {!hideImage ? (
-        <div className="relative aspect-[4/3] w-full max-w-full overflow-hidden rounded-3xl border border-border bg-muted">
+        <div className="relative aspect-[4/3] w-full max-w-full overflow-hidden rounded-3xl bg-muted">
           {record.imageUrl ? (
             <Image
               src={record.imageUrl}
@@ -1920,7 +1920,7 @@ function AboutOrganizationSection({
 
   return (
     <div className="space-y-3">
-      <h3 className="text-sm font-semibold text-foreground">
+      <h3 className="font-instrument text-base italic text-foreground">
         {copy.heading}
       </h3>
       {owner.description ? (
@@ -2032,7 +2032,7 @@ async function SupportCard({
   ) {
     return (
       <div className={["space-y-2", className].filter(Boolean).join(" ")}>
-        <h3 className="text-sm font-medium text-muted-foreground">
+        <h3 className="font-instrument text-base italic text-foreground">
           {t("title")}
         </h3>
         <p className="text-sm leading-6 text-muted-foreground">
@@ -2043,7 +2043,7 @@ async function SupportCard({
   }
 
   return (
-    <div className={["bg-muted/45 p-5", className].filter(Boolean).join(" ")}>
+    <div className={["rounded-3xl bg-muted p-5", className].filter(Boolean).join(" ")}>
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
           {combinedUsd > 0 ? (
@@ -2610,7 +2610,7 @@ async function ReviewsPanel({
           {t("evaluations", { count: evaluations.length })}
         </h2>
         {evaluations.length === 0 ? (
-          <p className="bg-muted/45 p-4 text-sm leading-6 text-muted-foreground">
+          <p className="rounded-2xl bg-muted p-4 text-sm leading-6 text-muted-foreground">
             {t("evaluationsEmpty")}
           </p>
         ) : (
@@ -2678,7 +2678,7 @@ async function ReviewsPanel({
           {t("comments", { count: commentCount })}
         </h2>
         {comments.length === 0 ? (
-          <p className="bg-muted/45 p-4 text-sm leading-6 text-muted-foreground">
+          <p className="rounded-2xl bg-muted p-4 text-sm leading-6 text-muted-foreground">
             {t("commentsEmpty")}
           </p>
         ) : (
@@ -2708,7 +2708,7 @@ function ReviewCommentCard({
   return (
     <div
       className={
-        nested ? "border-l-2 border-border-soft pl-4" : "bg-muted/35 p-4"
+        nested ? "border-l-2 border-border-soft pl-4" : "rounded-2xl bg-muted p-4"
       }
     >
       <div className="flex flex-wrap items-center justify-between gap-3">
@@ -2774,7 +2774,7 @@ async function SiteBoundariesPanel({
               </Link>
             </div>
           ) : null}
-          <div className="overflow-hidden rounded-2xl bg-muted/30">
+          <div className="overflow-hidden rounded-2xl bg-muted">
             <iframe
               src={polygonsViewHref(firstLocationUri)}
               className="h-[420px] w-full border-0"
@@ -2790,7 +2790,7 @@ async function SiteBoundariesPanel({
                 href={polygonsViewHref(uri)}
                 target="_blank"
                 rel="noreferrer"
-                className="group flex items-center justify-between bg-muted/35 px-4 py-3 text-sm font-medium text-foreground transition-colors hover:bg-muted/60 motion-reduce:transition-none"
+                className="group flex items-center justify-between rounded-xl bg-muted px-4 py-3 text-sm font-medium text-foreground transition-colors hover:bg-muted/80 motion-reduce:transition-none"
               >
                 <span>{t("boundary", { number: index + 1 })}</span>
                 <ExternalLinkIcon className="h-3.5 w-3.5 text-foreground/35 transition-colors group-hover:text-primary" />
@@ -2870,7 +2870,7 @@ async function DonationsPanel({
   return (
     <article className="space-y-5 py-1">
       {showSupportCard ? (
-        <div className="bg-muted/45 p-5 sm:p-6">
+        <div className="rounded-3xl bg-muted p-5 sm:p-6">
           <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
             <div className="min-w-0">
               <h2 className="font-instrument text-3xl font-light italic leading-tight tracking-[-0.025em] text-foreground sm:text-4xl">
@@ -2929,13 +2929,13 @@ async function DonationsPanel({
           <StatsTileGrid items={stats} columns={2} />
 
           {donationEntries.length > 0 ? (
-            <div className="overflow-hidden bg-muted/35 divide-y divide-border/60">
+            <div className="overflow-hidden rounded-2xl bg-muted divide-y divide-background">
               {donationEntries.map((entry) => (
                 <DonationLeaderboardRow key={entry.key} entry={entry} />
               ))}
             </div>
           ) : maEarth ? (
-            <div className="bg-muted/35 p-5">
+            <div className="rounded-2xl bg-muted p-5">
               <p className="text-sm font-semibold text-foreground">
                 {t("maEarthTitle")}
               </p>
@@ -3001,7 +3001,7 @@ function TimelinePanel({
         {events.map((event) => (
           <div key={event.title} className="relative flex gap-4">
             <span className="mt-1 h-6 w-6 shrink-0 rounded-full border border-primary/30 bg-primary/10 ring-4 ring-card" />
-            <div className="min-w-0 bg-muted/35 p-4">
+            <div className="min-w-0 rounded-2xl bg-muted p-4">
               <p className="text-sm font-medium text-foreground">
                 {event.title}
               </p>
@@ -3049,7 +3049,7 @@ async function MoreBumicertsSection({
       <Separator className="my-2" />
       <div className="mb-4 flex items-center justify-between gap-3 pt-4">
         <div className="min-w-0">
-          <h2 className="text-sm font-medium text-foreground">
+          <h2 className="font-instrument text-xl italic text-foreground">
             {t("title")}
           </h2>
           <p className="mt-1 truncate text-xs text-muted-foreground">
@@ -3324,11 +3324,11 @@ function EmptyState({
 }) {
   if (variant === "leaderboard") {
     return (
-      <div className="flex flex-col items-center gap-3 bg-muted/40 px-6 py-16 text-center text-muted-foreground">
+      <div className="flex flex-col items-center gap-3 rounded-3xl bg-muted px-6 py-16 text-center text-muted-foreground">
         <div className="flex size-16 items-center justify-center rounded-full bg-primary/10 text-primary">
           {icon}
         </div>
-        <h2 className="text-2xl font-medium text-foreground">{title}</h2>
+        <h2 className="font-instrument text-2xl italic text-foreground">{title}</h2>
         <p className="max-w-sm text-base text-muted-foreground">{body}</p>
       </div>
     );
@@ -3337,7 +3337,7 @@ function EmptyState({
   return (
     <div className="grid place-items-center rounded-2xl border border-dashed border-border-soft bg-surface/50 px-6 py-12 text-center">
       <div className="text-muted-foreground/50">{icon}</div>
-      <h2 className="mt-4 text-lg font-medium text-foreground">{title}</h2>
+      <h2 className="font-instrument mt-4 text-xl italic text-foreground">{title}</h2>
       <p className="mt-2 max-w-md text-sm leading-6 text-muted-foreground">
         {body}
       </p>

@@ -758,9 +758,9 @@ function OrganizationsErrorState({ onRetry }: { onRetry: () => void }) {
   return (
     <div
       role="alert"
-      className="flex flex-col items-center bg-muted/35 px-6 py-16 text-center"
+      className="flex flex-col items-center rounded-3xl bg-muted px-6 py-16 text-center"
     >
-      <h3 className="text-xl font-medium text-foreground">
+      <h3 className="font-instrument text-2xl italic text-foreground">
         {t("error.title")}
       </h3>
       <p className="mt-2 max-w-md text-sm leading-6 text-muted-foreground">
@@ -897,7 +897,7 @@ function OrganizationsGridSkeleton() {
       {Array.from({ length: 12 }).map((_, index) => (
         <div
           key={index}
-          className="flex h-full flex-col overflow-hidden rounded-2xl border border-border bg-card"
+          className="flex h-full flex-col overflow-hidden rounded-2xl bg-muted"
         >
           {/* Cover */}
           <Skeleton className="h-28 shrink-0 rounded-none" />
@@ -964,12 +964,9 @@ const OrganizationList = memo(function OrganizationList({
   return (
     <div>
       <OrganizationListHeader />
-      <ul role="list" className="border-t border-border">
+      <ul role="list" className="overflow-hidden rounded-2xl bg-muted divide-y divide-background">
         {records.map((record) => (
-          <li
-            key={record.id}
-            className="relative after:absolute after:inset-x-2 after:bottom-0 after:h-px after:bg-border last:after:hidden sm:after:inset-x-3"
-          >
+          <li key={record.id}>
             <OrganizationListItem record={record} onOpen={onOpen} />
           </li>
         ))}
@@ -999,7 +996,7 @@ const OrganizationListItem = memo(function OrganizationListItem({
     <button
       type="button"
       onClick={() => onOpen(record)}
-      className={`group grid w-full items-center gap-3 px-2 py-2 text-left outline-none transition-colors hover:bg-surface-sunken focus-visible:bg-surface-sunken focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary/50 sm:gap-4 sm:px-3 ${ORG_LIST_GRID}`}
+      className={`group grid w-full items-center gap-3 px-3 py-3 text-left outline-none transition-colors hover:bg-background/70 focus-visible:bg-background/70 focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary/50 sm:gap-4 ${ORG_LIST_GRID}`}
     >
       {/* Logo */}
       <span
@@ -1094,7 +1091,7 @@ const OrganizationCard = memo(function OrganizationCard({
       className="group h-full w-full text-left"
     >
       <article
-        className="flex h-full cursor-pointer flex-col overflow-hidden bg-muted/30 transition-colors hover:bg-muted/50 motion-reduce:transition-none"
+        className="flex h-full cursor-pointer flex-col overflow-hidden rounded-2xl bg-muted transition-colors hover:bg-muted/80 motion-reduce:transition-none"
         style={{
           viewTransitionName: `org-${record.did.replace(/[^a-z0-9]/gi, "-")}`,
         }}
@@ -1215,9 +1212,9 @@ function EmptyState({
 }) {
   const t = useTranslations("marketplace.organizations");
   return (
-    <div className="flex flex-col items-center justify-center bg-muted/30 px-6 py-20 text-center">
+    <div className="flex flex-col items-center justify-center rounded-3xl bg-muted px-6 py-20 text-center">
       <LeafIcon className="mb-4 size-7 text-primary" aria-hidden />
-      <h3 className="mb-3 text-2xl font-medium text-foreground md:text-3xl">
+      <h3 className="font-instrument mb-3 text-2xl italic text-foreground md:text-3xl">
         {t("empty.title")}
       </h3>
       <p className="max-w-md text-base leading-relaxed text-muted-foreground">

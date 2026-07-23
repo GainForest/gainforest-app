@@ -848,7 +848,7 @@ export function ProjectsExploreClient({
                     className="quick-popover-in absolute right-0 top-full z-[1000] mt-2 w-[min(18rem,calc(100vw-2rem))] rounded-2xl border border-primary/20 bg-popover p-4 shadow-[0_18px_45px_color-mix(in_oklab,var(--primary)_16%,transparent)]"
                   >
                     <div className="mb-3">
-                      <h2 className="text-base font-medium text-foreground">
+                      <h2 className="font-instrument text-lg italic text-foreground">
                         {t("filters.allFilters")}
                       </h2>
                       <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
@@ -928,13 +928,13 @@ export function ProjectsExploreClient({
 
           <section
             aria-labelledby="project-categories-heading"
-            className="mt-8 bg-muted/45 px-4 py-5 sm:px-6"
+            className="mt-8 rounded-3xl bg-muted px-4 py-5 sm:px-6"
           >
             <div className="flex flex-col justify-between gap-2 sm:flex-row sm:items-end">
               <div>
                 <h2
                   id="project-categories-heading"
-                  className="text-2xl font-semibold tracking-tight text-foreground"
+                  className="font-instrument text-2xl italic tracking-tight text-foreground"
                 >
                   {t("categories.title")}
                 </h2>
@@ -953,10 +953,10 @@ export function ProjectsExploreClient({
                     aria-pressed={selected}
                     onClick={() => void setCategory(key)}
                     className={cn(
-                      "group flex min-h-20 flex-col items-start justify-between p-3 text-left transition-colors motion-reduce:transition-none",
+                      "group flex min-h-20 flex-col items-start justify-between rounded-2xl p-3 text-left transition-colors motion-reduce:transition-none",
                       selected
                         ? "bg-primary text-primary-foreground"
-                        : "bg-background/70 text-foreground hover:bg-background",
+                        : "bg-background text-foreground hover:bg-background/80",
                     )}
                   >
                     <span
@@ -1003,7 +1003,7 @@ export function ProjectsExploreClient({
             <div className="border-b border-border/70 pb-5">
               <h2
                 id="project-catalog-heading"
-                className="text-3xl font-semibold tracking-tight text-foreground sm:text-4xl"
+                className="font-instrument text-3xl italic tracking-tight text-foreground sm:text-4xl"
               >
                 {category === "all"
                   ? t("catalog.title")
@@ -1101,9 +1101,9 @@ function ExplorerErrorState({ onRetry }: { onRetry: () => void }) {
   return (
     <div
       role="alert"
-      className="flex flex-col items-center bg-muted/35 px-6 py-16 text-center"
+      className="flex flex-col items-center rounded-3xl bg-muted px-6 py-16 text-center"
     >
-      <h3 className="text-xl font-medium text-foreground">{t("title")}</h3>
+      <h3 className="font-instrument text-2xl italic text-foreground">{t("title")}</h3>
       <p className="mt-2 max-w-md text-sm leading-6 text-muted-foreground">
         {t("description")}
       </p>
@@ -1182,7 +1182,7 @@ function FeaturedProjects({
         <div>
           <h2
             id="featured-projects-heading"
-            className="text-3xl font-semibold tracking-tight text-foreground sm:text-4xl"
+            className="font-instrument text-3xl italic tracking-tight text-foreground sm:text-4xl"
           >
             {t("title")}
           </h2>
@@ -1260,7 +1260,7 @@ function FeaturedProjectCard({
   return (
     <article
       className={cn(
-        "group relative h-full min-w-0 overflow-hidden bg-muted/35",
+        "group relative h-full min-w-0 overflow-hidden rounded-2xl bg-muted",
         className,
       )}
     >
@@ -1348,13 +1348,13 @@ function SupportShelf({
   return (
     <section
       aria-labelledby="support-projects-heading"
-      className="mt-14 border-y border-border/60 bg-muted/35 px-4 py-7 sm:mt-16 sm:px-7 sm:py-9"
+      className="mt-14 rounded-3xl bg-muted px-4 py-7 sm:mt-16 sm:px-7 sm:py-9"
     >
       <div className="mb-6 flex flex-col justify-between gap-2 sm:flex-row sm:items-end">
         <div>
           <h2
             id="support-projects-heading"
-            className="flex items-center gap-2 text-3xl font-semibold tracking-tight text-foreground"
+            className="font-instrument flex items-center gap-2 text-3xl italic tracking-tight text-foreground"
           >
             <HeartHandshakeIcon className="h-5 w-5 text-primary" aria-hidden />
             {t("title")}
@@ -1392,7 +1392,7 @@ function SupportProjectCard({
   const place = countryName(record.country);
 
   return (
-    <article className="group min-h-44 overflow-hidden bg-background/70">
+    <article className="group min-h-44 overflow-hidden rounded-2xl bg-background">
       <Link
         href={localProjectHref(record.did, record.rkey)}
         aria-label={t("open", { title: record.title })}
@@ -1487,9 +1487,9 @@ const ProjectGrid = memo(function ProjectGrid({
 
   if (records.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center bg-muted/30 px-6 py-20 text-center animate-in">
+      <div className="flex flex-col items-center justify-center rounded-3xl bg-muted px-6 py-20 text-center animate-in">
         <SearchIcon className="mb-4 h-6 w-6 text-primary" aria-hidden />
-        <h3 className="mb-3 text-2xl font-medium text-foreground md:text-3xl">
+        <h3 className="font-instrument mb-3 text-2xl italic text-foreground md:text-3xl">
           {t("empty.title")}
         </h3>
         <p className="max-w-md text-base leading-relaxed text-muted-foreground">
@@ -1544,11 +1544,11 @@ const ProjectList = memo(function ProjectList({
   return (
     <div className="mt-4">
       <ProjectListHeader />
-      <ul role="list" className="border-t border-border">
+      <ul role="list" className="overflow-hidden rounded-2xl bg-muted divide-y divide-background">
         {records.map((record, index) => (
           <li
             key={record.id}
-            className="relative animate-in after:absolute after:inset-x-2 after:bottom-0 after:h-px after:bg-border last:after:hidden sm:after:inset-x-3"
+            className="animate-in"
             style={{ animationDelay: `${Math.min(index, 10) * 35}ms` }}
           >
             <ProjectListItem
@@ -1574,7 +1574,7 @@ function ProjectGridSkeleton() {
       {Array.from({ length: 12 }).map((_, index) => (
         <div
           key={index}
-          className="overflow-hidden rounded-3xl border border-border bg-card"
+          className="overflow-hidden rounded-2xl bg-muted"
         >
           <Skeleton className="aspect-[16/10] rounded-none" />
           <div className="space-y-3 p-4">
@@ -1628,7 +1628,7 @@ function ProjectCard({
 
   return (
     <article
-      className="group relative h-full overflow-hidden bg-muted/30 animate-in"
+      className="group relative h-full overflow-hidden rounded-2xl bg-muted animate-in"
       style={{ animationDelay: `${Math.min(index, 10) * 35}ms` }}
     >
       <Link

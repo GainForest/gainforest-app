@@ -58,7 +58,7 @@ export function BumicertsBumicertCard({
   return (
     <div
       className={cn(
-        "group relative flex h-full w-full flex-col overflow-hidden bg-muted/30 transition-colors motion-reduce:transition-none",
+        "group relative flex h-full w-full flex-col overflow-hidden rounded-2xl bg-background shadow-sm transition-colors motion-reduce:transition-none",
         className,
       )}
     >
