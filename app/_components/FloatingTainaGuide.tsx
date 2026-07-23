@@ -1787,21 +1787,26 @@ export function FloatingTainaGuide() {
               hasUnreadWhatsNew ? "whatsNew.openLabelUnread" : "whatsNew.openLabel",
             )}
             className={
-              "absolute left-1/2 top-full mt-1 inline-flex " +
-              "-translate-x-1/2 items-center gap-1.5 whitespace-nowrap rounded-full " +
+              "absolute top-full mt-1 inline-flex max-w-[calc(100vw-1rem)] " +
+              "items-center gap-1.5 whitespace-nowrap rounded-full " +
               "border border-border bg-background/95 " +
               "px-2.5 py-[3px] text-[11px] font-medium text-primary " +
               "shadow-[0_2px_8px_-3px_rgba(40,50,30,0.22)] " +
               "backdrop-blur-sm transition-[opacity,transform,box-shadow] duration-150 " +
-              "hover:-translate-x-1/2 hover:-translate-y-0.5 hover:shadow-md " +
+              "hover:-translate-y-0.5 hover:shadow-md " +
               "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 " +
               (dragging ? "pointer-events-none opacity-0" : "opacity-100")
             }
+            style={
+              typeof window !== "undefined" && position.x + SPRITE_W / 2 > window.innerWidth / 2
+                ? { right: 0 }
+                : { left: 0 }
+            }
           >
             {hasUnreadWhatsNew ? (
-              <span aria-hidden className="size-1.5 rounded-full bg-primary" />
+              <span aria-hidden className="size-1.5 shrink-0 rounded-full bg-primary" />
             ) : null}
-            {t("whatsNew.trigger")}
+            <span className="min-w-0 truncate">{t("whatsNew.trigger")}</span>
           </button>
         ) : null}
       </div>

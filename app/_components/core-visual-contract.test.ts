@@ -43,4 +43,12 @@ describe("core visual hierarchy", () => {
     expect(authComplete).toContain("gap-3 bg-background px-4");
     expect(authComplete).toContain('<DisplayHeading as="h2"');
   });
+
+  it("keeps the localized Tainá launcher label inside narrow viewports", () => {
+    const guide = read("app/_components/FloatingTainaGuide.tsx");
+    expect(guide).toContain("max-w-[calc(100vw-1rem)]");
+    expect(guide).toContain("position.x + SPRITE_W / 2 > window.innerWidth / 2");
+    expect(guide).toContain('className="min-w-0 truncate"');
+    expect(guide).not.toContain("absolute left-1/2 top-full");
+  });
 });
