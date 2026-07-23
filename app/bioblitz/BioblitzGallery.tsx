@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
+import { useReducedMotion } from "framer-motion";
 import { ImagesIcon, LeafIcon } from "lucide-react";
 import { RecordDrawer } from "../_components/RecordDrawer";
 import { QuickLikeButton, QuickLikeProvider } from "../_components/QuickLike";
@@ -38,6 +39,7 @@ export function BioblitzGallery({ round }: { round: BioblitzRound }) {
   const [phase, setPhase] = useState<Phase>("loading");
   const [view, setView] = useState<View>("wall");
   const [drawer, setDrawer] = useState<ExplorerRecord | null>(null);
+  const shouldReduceMotion = useReducedMotion();
 
   useEffect(() => {
     const controller = new AbortController();
@@ -58,9 +60,10 @@ export function BioblitzGallery({ round }: { round: BioblitzRound }) {
 
   // The scrolling wall shows the newest slice; the grid shows everything.
   const wallRecords = records.slice(0, WALL_LIMIT);
+  const staticRecords = view === "all" ? records : wallRecords;
   const rowA = wallRecords.filter((_, index) => index % 2 === 0);
   const rowB = wallRecords.filter((_, index) => index % 2 === 1);
-  const animate = wallRecords.length >= MARQUEE_MIN;
+  const animate = !shouldReduceMotion && wallRecords.length >= MARQUEE_MIN;
   const hasRecords = phase === "ready" && records.length > 0;
 
   return (
@@ -100,12 +103,12 @@ export function BioblitzGallery({ round }: { round: BioblitzRound }) {
             <div className="rounded-2xl bg-foreground/5 px-6 py-14 text-center text-sm text-muted-foreground">
               {t("empty")}
             </div>
-          ) : view === "all" ? (
+          ) : view === "all" || shouldReduceMotion ? (
             /* Quick like: the static grid gets a heart on each thumbnail (the
                auto-scrolling wall doesn't — moving targets invite misclicks). */
-            <QuickLikeProvider uris={records.map((record) => record.atUri)}>
+            <QuickLikeProvider uris={staticRecords.map((record) => record.atUri)}>
               <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
-                {records.map((record) => (
+                {staticRecords.map((record) => (
                   <li key={record.id}>
                     <GalleryCard record={record} onOpen={setDrawer} t={t} sizeClassName="aspect-square w-full" quickLike />
                   </li>
@@ -250,7 +253,7 @@ function GalleryCard({
           sizes="160px"
           unoptimized={!isPdsBlobUrl(url)}
           onError={() => setImgError(true)}
-          className="object-cover transition-transform duration-500 ease-out group-hover:scale-105"
+          className="object-cover transition-transform duration-500 ease-out group-hover:scale-105 motion-reduce:transform-none motion-reduce:transition-none"
         />
       ) : (
         <div className="absolute inset-0 grid place-items-center text-primary/25">
@@ -264,7 +267,7 @@ function GalleryCard({
 
       <div className={`absolute inset-x-0 bottom-0 p-2 ${quickLike ? "pr-10" : ""}`}>
         {name ? (
-          <p className="truncate font-instrument text-[13px] italic leading-tight text-white [text-shadow:0_1px_3px_rgba(0,0,0,0.6)]">
+          <p className="truncate text-[13px] font-medium leading-tight text-white [text-shadow:0_1px_3px_rgba(0,0,0,0.6)]">
             {name}
           </p>
         ) : null}
@@ -280,7 +283,7 @@ function GallerySkeleton() {
       {[0, 1].map((row) => (
         <div key={row} className="flex h-36 gap-3 overflow-hidden">
           {Array.from({ length: 10 }).map((_, index) => (
-            <div key={index} className="aspect-square h-full shrink-0 animate-pulse rounded-2xl bg-foreground/5" />
+            <div key={index} className="aspect-square h-full shrink-0 animate-pulse rounded-2xl bg-foreground/5 motion-reduce:animate-none" />
           ))}
         </div>
       ))}

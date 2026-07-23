@@ -12,7 +12,6 @@ type LegalLink = {
 };
 
 export function BioblitzLegalDocument({
-  eyebrow,
   title,
   effectiveDate,
   intro,
@@ -20,7 +19,6 @@ export function BioblitzLegalDocument({
   backLabel,
   relatedLinks,
 }: {
-  eyebrow: string;
   title: string;
   effectiveDate: string;
   intro: ReactNode[];
@@ -38,10 +36,9 @@ export function BioblitzLegalDocument({
           ← {backLabel}
         </Link>
 
-        <div className="mt-5 rounded-[2rem] border border-border bg-card/70 p-6 shadow-sm md:p-10">
+        <div className="mt-8">
           <header className="border-b border-border pb-8">
-            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-primary">{eyebrow}</p>
-            <h1 className="mt-3 font-serif text-4xl font-semibold tracking-tight text-foreground md:text-5xl">
+            <h1 className="text-4xl font-semibold tracking-tight text-foreground md:text-5xl">
               {title}
             </h1>
             <p className="mt-4 text-sm text-muted-foreground">{effectiveDate}</p>
@@ -56,7 +53,7 @@ export function BioblitzLegalDocument({
           <div className="mt-10 space-y-10">
             {sections.map((section) => (
               <section key={section.title} className="scroll-mt-24">
-                <h2 className="font-serif text-2xl font-semibold tracking-tight text-foreground">
+                <h2 className="text-2xl font-semibold tracking-tight text-foreground">
                   {section.title}
                 </h2>
                 <div className="mt-4 space-y-4 text-[15px] leading-7 text-muted-foreground">

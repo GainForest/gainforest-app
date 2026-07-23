@@ -166,7 +166,7 @@ function BestPictureCard({
               sizes="(min-width: 1024px) 360px, (min-width: 640px) 50vw, 100vw"
               unoptimized={!isPdsBlobUrl(url)}
               onError={() => setImgError(true)}
-              className="object-cover transition-transform duration-500 ease-out group-hover:scale-105"
+              className="object-cover transition-transform duration-500 ease-out group-hover:scale-105 motion-reduce:transform-none motion-reduce:transition-none"
             />
           ) : (
             <div className="absolute inset-0 grid place-items-center text-primary/25">
@@ -191,7 +191,7 @@ function BestPictureCard({
 
           <div className="pointer-events-none absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-black/70 via-black/15 to-transparent" />
           {name ? (
-            <p className="absolute inset-x-0 bottom-0 truncate p-3 font-instrument text-lg italic leading-tight text-white [text-shadow:0_1px_4px_rgba(0,0,0,0.6)]">
+            <p className="absolute inset-x-0 bottom-0 truncate p-3 text-lg font-medium leading-tight text-white [text-shadow:0_1px_4px_rgba(0,0,0,0.6)]">
               {name}
             </p>
           ) : null}
@@ -213,10 +213,10 @@ function BestPictureSkeleton() {
     <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
       {Array.from({ length: TOP_LIMIT }).map((_, index) => (
         <li key={index} className="overflow-hidden rounded-2xl ring-1 ring-border/60">
-          <div className="aspect-[4/3] w-full animate-pulse bg-foreground/5" />
+          <div className="aspect-[4/3] w-full animate-pulse bg-foreground/5 motion-reduce:animate-none" />
           <div className="flex items-center justify-between px-3 py-2.5">
-            <div className="h-4 w-28 animate-pulse rounded bg-foreground/5" />
-            <div className="h-4 w-10 animate-pulse rounded bg-foreground/5" />
+            <div className="h-4 w-28 animate-pulse rounded bg-foreground/5 motion-reduce:animate-none" />
+            <div className="h-4 w-10 animate-pulse rounded bg-foreground/5 motion-reduce:animate-none" />
           </div>
         </li>
       ))}

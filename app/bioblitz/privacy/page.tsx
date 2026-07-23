@@ -31,7 +31,6 @@ export default async function BioblitzPrivacyPage() {
 
   return (
     <BioblitzLegalDocument
-      eyebrow={t("programLabel")}
       title={t("privacy.title")}
       effectiveDate={t("privacy.effectiveDate")}
       intro={[t("privacy.intro.p1"), t("privacy.intro.p2")]}

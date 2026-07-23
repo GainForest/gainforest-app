@@ -76,9 +76,9 @@ async function TainaContent() {
           <ol className="mt-8 space-y-5">
             {steps.map((step, index) => (
               <li key={step.title} className="flex items-start gap-4">
-                <span className="relative mt-0.5 flex size-11 shrink-0 items-center justify-center rounded-full border border-primary/10 bg-primary/10 text-primary shadow-inner">
+                <span className="relative mt-0.5 flex size-11 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
                   <step.Icon className="size-5" />
-                  <span className="absolute -right-1 -top-1 flex size-5 items-center justify-center rounded-full bg-primary font-instrument text-[11px] text-primary-foreground">
+                  <span className="absolute -right-1 -top-1 flex size-5 items-center justify-center rounded-full bg-primary text-[11px] font-medium text-primary-foreground">
                     {index + 1}
                   </span>
                 </span>

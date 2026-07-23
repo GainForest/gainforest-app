@@ -345,7 +345,7 @@ export function LabelTab({ sessionDid }: { sessionDid: string | null }) {
 
   if (recordings === null) {
     return (
-      <div className="flex items-center justify-center gap-3 rounded-3xl border border-border bg-card/70 px-6 py-16 text-sm text-muted-foreground">
+      <div className="flex items-center justify-center gap-3 rounded-3xl bg-muted px-6 py-16 text-sm text-muted-foreground">
         <Loader2Icon className="size-5 animate-spin text-primary" />
         {t("loadingRecordings")}
       </div>
@@ -368,7 +368,7 @@ export function LabelTab({ sessionDid }: { sessionDid: string | null }) {
 
   return (
     <section className="flex flex-col gap-4">
-      <div className="flex flex-col gap-3 rounded-2xl border border-border bg-card/80 p-3 sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex flex-col gap-3 rounded-2xl bg-muted p-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex min-w-0 items-center gap-3">
           <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-primary/10 text-primary"><WavesIcon className="size-4.5" /></span>
           <div className="min-w-0">
@@ -386,7 +386,7 @@ export function LabelTab({ sessionDid }: { sessionDid: string | null }) {
       <div className="grid min-h-[680px] overflow-hidden rounded-3xl border border-border bg-card/80 xl:grid-cols-[230px_minmax(0,1fr)_310px]">
         <aside className="flex max-h-[760px] min-h-0 flex-col border-b border-border xl:border-b-0 xl:border-r">
           <div className="border-b border-border p-3">
-            <p className="mb-2 px-1 text-xs font-medium uppercase tracking-[0.12em] text-muted-foreground">{t("recordings")}</p>
+            <p className="mb-2 px-1 text-xs font-medium text-muted-foreground">{t("recordings")}</p>
             <div className="relative">
               <SearchIcon className="pointer-events-none absolute left-2.5 top-1/2 size-3.5 -translate-y-1/2 text-muted-foreground" />
               <Input value={query} onChange={(event) => setQuery(event.target.value)} placeholder={t("search")} className="h-8 pl-8 text-xs" />
@@ -466,7 +466,7 @@ export function LabelTab({ sessionDid }: { sessionDid: string | null }) {
           <div className="sticky top-4">
             <div className="flex items-center justify-between gap-2">
               <div>
-                <p className="text-xs font-medium uppercase tracking-[0.12em] text-muted-foreground">{editingItem ? t("editLabel") : t("newLabel")}</p>
+                <p className="text-xs font-medium text-muted-foreground">{editingItem ? t("editLabel") : t("newLabel")}</p>
                 <h3 className="mt-1 text-lg font-medium tracking-tight text-foreground">{draftBox ? t("describeSelection") : t("drawFirst")}</h3>
               </div>
               {draftBox ? <button type="button" onClick={() => startFreshLabel(null)} className="grid size-8 place-items-center rounded-lg text-muted-foreground hover:bg-muted" aria-label={t("clearSelection")}><XIcon className="size-4" /></button> : null}
@@ -478,8 +478,8 @@ export function LabelTab({ sessionDid }: { sessionDid: string | null }) {
               <div className="mt-4 space-y-4">
                 {draftBounds ? (
                   <div className="grid grid-cols-2 gap-2">
-                    <div className="rounded-xl bg-muted/70 p-2.5"><p className="text-[10px] uppercase tracking-[0.1em] text-muted-foreground">{t("timeRange")}</p><p className="mt-1 font-mono text-xs text-foreground">{formatTime(draftBounds.startTimeSeconds)} – {formatTime(draftBounds.endTimeSeconds)}</p></div>
-                    <div className="rounded-xl bg-muted/70 p-2.5"><p className="text-[10px] uppercase tracking-[0.1em] text-muted-foreground">{t("frequencyRange")}</p><p className="mt-1 font-mono text-xs text-foreground">{formatFrequency(draftBounds.minFrequencyHz)} – {formatFrequency(draftBounds.maxFrequencyHz)}</p></div>
+                    <div className="rounded-xl bg-muted/70 p-2.5"><p className="text-xs text-muted-foreground">{t("timeRange")}</p><p className="mt-1 font-mono text-xs text-foreground">{formatTime(draftBounds.startTimeSeconds)} – {formatTime(draftBounds.endTimeSeconds)}</p></div>
+                    <div className="rounded-xl bg-muted/70 p-2.5"><p className="text-xs text-muted-foreground">{t("frequencyRange")}</p><p className="mt-1 font-mono text-xs text-foreground">{formatFrequency(draftBounds.minFrequencyHz)} – {formatFrequency(draftBounds.maxFrequencyHz)}</p></div>
                   </div>
                 ) : null}
 

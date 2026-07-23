@@ -156,6 +156,7 @@ export function RegisterButton({ round, status }: { round: BioblitzRound; status
         className="max-w-xs space-y-1 text-[11px] leading-snug text-muted-foreground md:text-right"
       >
         <p>{error ? <span className="text-destructive">{t("error")}</span> : t("note")}</p>
+        <p>{t("publicPostDisclosure")}</p>
         <p>
           {t.rich("legalConsent", {
             terms: (chunks) => (

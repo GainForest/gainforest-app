@@ -4,7 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { useLocale, useTranslations } from "next-intl";
-import { motion } from "framer-motion";
+import { motion, useReducedMotion } from "framer-motion";
 import {
   BadgeCheckIcon,
   BinocularsIcon,
@@ -326,12 +326,13 @@ function FadeIn({
   delay?: number;
   className?: string;
 }) {
+  const shouldReduceMotion = useReducedMotion();
   return (
     <motion.div
       className={className}
-      initial={{ opacity: 0, y: 10 }}
+      initial={shouldReduceMotion ? false : { opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5, delay, ease: EASE }}
+      transition={{ duration: shouldReduceMotion ? 0 : 0.5, delay: shouldReduceMotion ? 0 : delay, ease: EASE }}
     >
       {children}
     </motion.div>
@@ -393,7 +394,7 @@ function HeroBand({
 
       <div className="flex shrink-0 flex-col items-start gap-3 md:items-end">
         <div className="flex flex-wrap items-center gap-2">
-          <span className="font-instrument text-lg italic leading-none text-foreground">{round.label}</span>
+          <span className="text-lg font-semibold leading-none text-foreground">{round.label}</span>
         </div>
         <span className="text-[11px] tabular-nums text-muted-foreground">{dates}</span>
         <RegisterButton round={round} status={status} />
@@ -413,7 +414,7 @@ function StatusChip({ status }: { status: RoundStatus }) {
     <span className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold ${styles[status]}`}>
       {status === "live" ? (
         <span aria-hidden className="relative flex size-2">
-          <span className="absolute inline-flex size-2 animate-ping rounded-full bg-current opacity-60" />
+          <span className="absolute inline-flex size-2 animate-ping rounded-full motion-reduce:animate-none bg-current opacity-60" />
           <span className="relative inline-flex size-2 rounded-full bg-current" />
         </span>
       ) : null}
@@ -443,7 +444,7 @@ function RoundNavigator({
   return (
     <FadeIn delay={0.03} className="-mt-2">
       <div className="flex items-center gap-3 overflow-hidden rounded-2xl border border-border/60 bg-background/70 p-2 backdrop-blur">
-        <div className="hidden shrink-0 pl-2 text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground sm:block">
+        <div className="hidden shrink-0 pl-2 text-xs font-semibold text-muted-foreground sm:block">
           {t("title")}
         </div>
         <div className="flex min-w-0 flex-1 gap-2 overflow-x-auto pb-0.5">
@@ -474,7 +475,7 @@ function RoundNavigator({
                 <span className="mt-1 truncate text-[11px] tabular-nums opacity-80">
                   {formatDateRange(item.start, item.end, locale)}
                 </span>
-                <span className="mt-1 text-[10px] font-medium uppercase tracking-[0.12em] opacity-70">
+                <span className="mt-1 text-[10px] font-medium opacity-70">
                   {statusT(itemStatus)}
                 </span>
               </button>
@@ -541,7 +542,7 @@ function PrizeTile({
       >
         {icon}
       </span>
-      <span className="font-instrument text-3xl italic leading-none text-primary">{amount}</span>
+      <span className="text-3xl font-semibold leading-none text-primary">{amount}</span>
       <span className="text-xs font-semibold text-foreground">{title}</span>
     </div>
   );
@@ -625,7 +626,7 @@ function WinnerPill({
 }) {
   return (
     <div className="min-w-0 rounded-xl bg-background/70 px-2.5 py-2">
-      <div className="flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-[0.1em] text-muted-foreground [&_svg]:size-3">
+      <div className="flex items-center gap-1.5 text-[10px] font-semibold text-muted-foreground [&_svg]:size-3">
         {icon}
         <span className="truncate">{label}</span>
       </div>
@@ -679,7 +680,7 @@ function ProofNote() {
   const t = useTranslations("marketplace.bioblitz.how.proof");
   return (
     <FadeIn delay={0.05}>
-      <div className="rounded-2xl border border-primary/15 bg-primary/5 p-4 sm:p-5">
+      <div className="rounded-2xl bg-primary/[0.07] p-4 sm:p-5">
         <h2 className="text-base font-semibold text-foreground sm:text-lg">{t("title")}</h2>
         <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{t("intro")}</p>
         <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{t("uses")}</p>
@@ -701,7 +702,7 @@ function CtaBlock() {
         className="group inline-flex items-center justify-center gap-2 rounded-full bg-primary px-5 py-2 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary-dark"
       >
         {t("board.cta")}
-        <ChevronRightIcon className="size-4 transition-transform duration-200 group-hover:translate-x-0.5" aria-hidden />
+        <ChevronRightIcon className="size-4 transition-transform duration-200 group-hover:translate-x-0.5 motion-reduce:transform-none motion-reduce:transition-none" aria-hidden />
       </Link>
       <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted-foreground">
         <a
@@ -847,7 +848,7 @@ function Board({
               >
                 {stat.icon}
               </span>
-              <div className="font-instrument text-2xl italic leading-none tabular-nums text-primary">{stat.value}</div>
+              <div className="text-2xl font-semibold leading-none tabular-nums text-primary">{stat.value}</div>
               <div className="text-[10px] font-semibold leading-tight text-foreground">{stat.label}</div>
             </div>
           ))}
@@ -945,12 +946,12 @@ function CollectorRow({
         </div>
 
         <span className="shrink-0 text-right">
-          <span className="font-instrument block text-sm italic leading-none tabular-nums text-primary">{formatNumber(count)}</span>
+          <span className="block text-sm font-semibold leading-none tabular-nums text-primary">{formatNumber(count)}</span>
         </span>
 
         <ChevronRightIcon
           aria-hidden
-          className="size-4 shrink-0 text-muted-foreground/40 transition-transform duration-200 group-hover:translate-x-0.5 group-hover:text-primary"
+          className="size-4 shrink-0 text-muted-foreground/40 transition-transform duration-200 group-hover:translate-x-0.5 motion-reduce:transform-none motion-reduce:transition-none group-hover:text-primary"
         />
       </PreferredAccountLink>
     </li>
@@ -1005,7 +1006,7 @@ function BoardMessage({
       <div className="flex size-12 items-center justify-center rounded-full bg-primary/10 text-primary [&_svg]:size-6 [&_svg]:opacity-60">
         {icon}
       </div>
-      <p className="font-instrument text-2xl font-light italic text-foreground">{title}</p>
+      <h3 className="font-instrument text-2xl font-light italic text-foreground">{title}</h3>
       <p className="max-w-xs text-sm text-muted-foreground">{description}</p>
     </div>
   );

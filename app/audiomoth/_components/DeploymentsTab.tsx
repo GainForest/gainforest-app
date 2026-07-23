@@ -192,7 +192,7 @@ function DeploymentRow({
   }, [event, onDeleted, t]);
 
   return (
-    <li className="rounded-2xl border border-border bg-card/90 px-4 py-3.5">
+    <li className="rounded-2xl bg-muted px-4 py-3.5">
       <div className="flex items-start gap-3">
         <span className="mt-0.5 grid h-9 w-9 shrink-0 place-items-center rounded-full bg-primary/10 text-primary">
           <MapPinIcon className="size-4.5" />

@@ -16,7 +16,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import {
   AudioLinesIcon,
   CheckIcon,
@@ -162,6 +162,7 @@ async function collectDroppedFiles(items: DataTransferItemList, onProgress?: (co
 
 export function UploadTab({ sessionDid }: { sessionDid: string | null }) {
   const t = useTranslations("common.audiomoth.upload");
+  const shouldReduceMotion = useReducedMotion();
 
   const [stage, setStage] = useState<Stage>("pick");
   const [recordings, setRecordings] = useState<ScannedRecording[]>([]);
@@ -606,10 +607,10 @@ export function UploadTab({ sessionDid }: { sessionDid: string | null }) {
         {stage === "pick" && (
           <motion.div
             key="pick"
-            initial={{ opacity: 0, y: 8 }}
+            initial={shouldReduceMotion ? false : { opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -8 }}
-            transition={{ duration: 0.18 }}
+            exit={shouldReduceMotion ? undefined : { opacity: 0, y: -8 }}
+            transition={{ duration: shouldReduceMotion ? 0 : 0.18 }}
           >
             <div
               role="button"
@@ -669,10 +670,10 @@ export function UploadTab({ sessionDid }: { sessionDid: string | null }) {
         {stage === "scanning" && (
           <motion.div
             key="scanning"
-            initial={{ opacity: 0 }}
+            initial={shouldReduceMotion ? false : { opacity: 0 }}
             animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="flex flex-col items-center gap-4 rounded-3xl border border-border bg-card/60 px-6 py-14 text-center"
+            exit={shouldReduceMotion ? undefined : { opacity: 0 }}
+            className="flex flex-col items-center gap-4 rounded-3xl bg-muted px-6 py-14 text-center"
           >
             <Loader2Icon className="size-7 animate-spin text-primary" />
             <div>
@@ -686,7 +687,7 @@ export function UploadTab({ sessionDid }: { sessionDid: string | null }) {
             {discovered === null ? (
               <div className="h-1.5 w-full max-w-xs overflow-hidden rounded-full bg-muted">
                 <div
-                  className="h-full rounded-full bg-primary transition-[width]"
+                  className="h-full rounded-full bg-primary transition-[width] motion-reduce:transition-none"
                   style={{ width: `${scanProgress.total ? (scanProgress.done / scanProgress.total) * 100 : 0}%` }}
                 />
               </div>
@@ -697,10 +698,10 @@ export function UploadTab({ sessionDid }: { sessionDid: string | null }) {
         {(stage === "review" || stage === "uploading" || stage === "done") && (
           <motion.div
             key="review"
-            initial={{ opacity: 0, y: 8 }}
+            initial={shouldReduceMotion ? false : { opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.18 }}
+            exit={shouldReduceMotion ? undefined : { opacity: 0 }}
+            transition={{ duration: shouldReduceMotion ? 0 : 0.18 }}
             className="flex flex-col gap-4"
           >
             {stats.count === 0 ? (
@@ -740,7 +741,7 @@ export function UploadTab({ sessionDid }: { sessionDid: string | null }) {
                     return (
                       <div
                         key={deploymentId || "unassigned"}
-                        className="flex flex-col gap-2 rounded-2xl border border-border bg-card/90 px-4 py-3.5 sm:flex-row sm:items-center sm:justify-between"
+                        className="flex flex-col gap-2 rounded-2xl bg-muted px-4 py-3.5 sm:flex-row sm:items-center sm:justify-between"
                       >
                         <div className="flex items-start gap-3">
                           <span
@@ -822,7 +823,7 @@ export function UploadTab({ sessionDid }: { sessionDid: string | null }) {
 
                 {/* Footer actions */}
                 {stage === "review" && (
-                  <div className="flex flex-col gap-3 rounded-2xl border border-border bg-card/90 px-4 py-3.5 sm:flex-row sm:items-center sm:justify-between">
+                  <div className="flex flex-col gap-3 rounded-2xl bg-muted px-4 py-3.5 sm:flex-row sm:items-center sm:justify-between">
                     <label className="flex cursor-pointer items-center gap-2.5">
                       <Checkbox checked={makePreviews} onCheckedChange={(v) => setMakePreviews(v === true)} />
                       <span className="text-sm text-foreground">
@@ -856,7 +857,7 @@ export function UploadTab({ sessionDid }: { sessionDid: string | null }) {
                       </div>
                       <div className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-muted">
                         <div
-                          className="h-full rounded-full bg-primary transition-[width]"
+                          className="h-full rounded-full bg-primary transition-[width] motion-reduce:transition-none"
                           style={{ width: `${overallProgress * 100}%` }}
                         />
                       </div>
@@ -868,7 +869,7 @@ export function UploadTab({ sessionDid }: { sessionDid: string | null }) {
                 )}
 
                 {stage === "done" && (
-                  <div className="flex flex-col items-center gap-3 rounded-2xl border border-border bg-card/90 px-5 py-8 text-center">
+                  <div className="flex flex-col items-center gap-3 rounded-2xl bg-muted px-5 py-8 text-center">
                     <span
                       className={cn(
                         "grid h-12 w-12 place-items-center rounded-full",
@@ -907,7 +908,7 @@ export function UploadTab({ sessionDid }: { sessionDid: string | null }) {
 
 function SummaryTile({ label, value, mono }: { label: string; value: string; mono?: boolean }) {
   return (
-    <div className="rounded-2xl border border-border bg-card/90 px-4 py-3">
+    <div className="rounded-2xl bg-muted px-4 py-3">
       <p className="text-xs text-muted-foreground">{label}</p>
       <p className={cn("mt-0.5 truncate text-sm font-medium text-foreground", mono && "font-mono text-xs leading-5")}>
         {value}

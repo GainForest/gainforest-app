@@ -203,8 +203,8 @@ export function EditDeploymentDialog({
           </div>
 
           {/* Fixed to the chime that was played — shown for reference only. */}
-          <div className="rounded-2xl border border-border bg-muted/30 px-4 py-3">
-            <p className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">{t("fixedTitle")}</p>
+          <div className="rounded-2xl bg-muted px-4 py-3">
+            <p className="text-xs font-medium text-muted-foreground">{t("fixedTitle")}</p>
             <dl className="mt-2 flex flex-col gap-1.5 text-xs">
               <div className="flex items-center justify-between gap-3">
                 <dt className="text-muted-foreground">{t("deploymentIdLabel")}</dt>

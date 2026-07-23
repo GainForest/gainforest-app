@@ -31,7 +31,6 @@ export default async function BioblitzTermsPage() {
 
   return (
     <BioblitzLegalDocument
-      eyebrow={t("programLabel")}
       title={t("terms.title")}
       effectiveDate={t("terms.effectiveDate")}
       intro={[t("terms.intro.p1"), t("terms.intro.p2")]}
