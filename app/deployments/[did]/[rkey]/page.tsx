@@ -95,7 +95,7 @@ export default async function DeploymentDetailPage({ params }: { params: Deploym
             <MapPinIcon className="size-7" />
           </span>
           <div className="min-w-0">
-            <h1 className="break-words text-2xl font-semibold tracking-tight text-foreground">{name}</h1>
+            <h1 className="break-words font-instrument text-2xl font-semibold italic tracking-tight text-foreground">{name}</h1>
             <p className="mt-0.5 font-mono text-xs text-muted-foreground">{item.eventID}</p>
           </div>
         </div>
@@ -108,7 +108,7 @@ export default async function DeploymentDetailPage({ params }: { params: Deploym
         </div>
       ) : null}
 
-      <section className="mt-8 rounded-2xl bg-muted/40 p-5 sm:p-6">
+      <section className="mt-8 rounded-2xl bg-muted/60 p-5 sm:p-6">
         <dl className="grid gap-x-8 gap-y-5 sm:grid-cols-2">
           <AssetMetaRow icon={<FingerprintIcon className="h-4 w-4" aria-hidden />} label={t("deploymentIdLabel")}>
             <span className="font-mono">{item.eventID}</span>

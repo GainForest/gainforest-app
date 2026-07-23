@@ -63,7 +63,7 @@ export function DeploymentRecordings({
   return (
     <section className="mt-8 border-t border-border-soft pt-6">
       <div className="flex items-center justify-between gap-3">
-        <h2 className="text-sm font-semibold text-foreground">
+        <h2 className="font-instrument text-lg font-semibold italic text-foreground">
           {t("title")}
           {items && items.length > 0 ? (
             <span className="ml-2 rounded-full bg-primary/10 px-2 py-0.5 font-mono text-[11px] font-medium text-primary">
@@ -89,7 +89,9 @@ export function DeploymentRecordings({
           ))}
         </div>
       ) : loadError ? (
-        <p className="mt-4 text-sm text-muted-foreground">{t("loadError")}</p>
+        <p role="alert" className="mt-4 rounded-xl bg-destructive/10 p-3 text-sm text-destructive">
+          {t("loadError")}
+        </p>
       ) : items.length === 0 ? (
         <p className="mt-4 text-sm text-muted-foreground">{t("empty")}</p>
       ) : (

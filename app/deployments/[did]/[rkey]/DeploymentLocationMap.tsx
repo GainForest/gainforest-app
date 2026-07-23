@@ -83,11 +83,11 @@ export function DeploymentLocationMap({ lat, lon, label }: { lat: number; lon: n
   }, []);
 
   return (
-    <section className="overflow-hidden rounded-2xl border border-border bg-foreground/[0.04]">
-      <div className="flex items-center gap-2 px-4 py-3 text-[13px] font-medium text-foreground/75">
+    <section className="overflow-hidden rounded-2xl border border-border bg-muted/60">
+      <h2 className="flex items-center gap-2 px-4 py-3 font-instrument text-lg font-semibold italic text-foreground">
         <MapPinIcon className="h-4 w-4 text-primary" aria-hidden />
         {t("mapTitle")}
-      </div>
+      </h2>
       <div
         ref={elRef}
         className="h-64 w-full border-t border-border bg-muted/40"

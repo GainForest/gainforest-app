@@ -95,7 +95,7 @@ export default async function EquipmentDetailPage({ params }: { params: Equipmen
             {categoryIcon(item.category)}
           </span>
           <div className="min-w-0">
-            <h1 className="break-words text-2xl font-semibold tracking-tight text-foreground">{item.name}</h1>
+            <h1 className="break-words font-instrument text-2xl font-semibold italic tracking-tight text-foreground">{item.name}</h1>
             <p className="mt-0.5 flex flex-wrap items-center gap-2">
               <span className="font-mono text-xs text-muted-foreground">{item.assetId || t("table.noId")}</span>
               <span
@@ -112,7 +112,7 @@ export default async function EquipmentDetailPage({ params }: { params: Equipmen
         {isOwner ? <EquipmentDetailActions item={item} ownerDid={item.did} /> : null}
       </header>
 
-      <section className="mt-8 rounded-2xl bg-muted/40 p-5 sm:p-6">
+      <section className="mt-8 rounded-2xl bg-muted/60 p-5 sm:p-6">
         <dl className="grid gap-x-8 gap-y-5 sm:grid-cols-2">
           <AssetMetaRow icon={<TagIcon className="h-4 w-4" aria-hidden />} label={t("table.type")}>
             {t(`categories.${item.category}`)}
@@ -149,7 +149,7 @@ export default async function EquipmentDetailPage({ params }: { params: Equipmen
 
       {item.notes ? (
         <section className="mt-8 border-t border-border-soft pt-6">
-          <h2 className="mb-2 flex items-center gap-2 text-sm font-semibold text-foreground">
+          <h2 className="mb-2 flex items-center gap-2 font-instrument text-lg font-semibold italic text-foreground">
             <NotebookPenIcon className="h-4 w-4 text-muted-foreground" aria-hidden />
             {t("form.notes")}
           </h2>

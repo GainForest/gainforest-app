@@ -242,7 +242,7 @@ export function RecordingsExplorer({
         <div className="min-w-0 flex-1">
           <div className="flex items-center justify-between gap-2">
             <div className="min-w-0">
-              <h3 className="truncate text-sm font-medium text-foreground">{dayFormat.format(parseDayKey(selectedDay))}</h3>
+              <h3 className="truncate font-instrument text-base font-medium italic text-foreground">{dayFormat.format(parseDayKey(selectedDay))}</h3>
               <p className="text-xs text-muted-foreground">
                 {t("groupCount", { count: selectedHour === null ? dayItems.length : shownItems.length })}
                 {selectedHour !== null ? ` · ${formatHour(selectedHour)}` : null}

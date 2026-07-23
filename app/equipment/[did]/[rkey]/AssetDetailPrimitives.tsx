@@ -37,7 +37,7 @@ export function AssetAttribution({
 }) {
   return (
     <section className="mt-8 border-t border-border-soft pt-6">
-      <h2 className="text-sm font-semibold text-foreground">{heading}</h2>
+      <h2 className="font-instrument text-lg font-semibold italic text-foreground">{heading}</h2>
       <Link href={href} className="group mt-3 flex min-h-11 items-center gap-3">
         <span className="relative size-10 shrink-0 overflow-hidden rounded-full bg-muted">
           {avatarUrl ? (

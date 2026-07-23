@@ -884,6 +884,7 @@ export function GlobeExplorer({ orgDid = null, orgName = null, orgIdentifier = n
   // ── Render ───────────────────────────────────────────────────────────────
   return (
     <div className="dark globe-glass absolute inset-0 overflow-hidden bg-[#0b0b19]" data-testid="globe-explorer">
+      <h1 className="sr-only font-instrument italic">{t("title")}</h1>
       <GlobeMap
         className="absolute inset-0"
         organizations={visibleOrganizations}
@@ -1539,7 +1540,7 @@ function GlobalPanel({
                 <InlineResourceError message={t("panel.treesFailed")} onRetry={onRetryTreeCounts} />
               </li>
             ) : filtered.length === 0 ? (
-              <li className="px-4 py-3 text-sm text-muted-foreground">
+              <li className="mx-4 my-3 rounded-xl bg-white/10 p-3 text-sm text-muted-foreground">
                 {treesOnly && !query.trim() ? t("panel.treesEmpty") : t("panel.empty")}
               </li>
             ) : (
@@ -1681,7 +1682,7 @@ function FocusPanel({
         </span>
         <div className="min-w-0 flex-1">
           {(mode === "project" ? project?.title : focusName) ? (
-            <h2 className="break-words text-sm font-semibold text-foreground">
+            <h2 className="break-words font-instrument text-base font-semibold italic text-foreground">
               {mode === "project" ? project?.title : focusName}
             </h2>
           ) : (
@@ -1802,12 +1803,12 @@ function FocusPanel({
           </div>
         ) : mode === "project" ? (
           boundaryCount === 0 ? (
-            <p className="px-4 py-3 text-sm text-muted-foreground">{t("focus.noBoundaries")}</p>
+            <p className="mx-4 my-3 rounded-xl bg-white/10 p-3 text-sm text-muted-foreground">{t("focus.noBoundaries")}</p>
           ) : (
             <p className="px-4 py-3 text-xs leading-5 text-muted-foreground">{t("focus.projectHint")}</p>
           )
         ) : state.sites.length === 0 ? (
-          <p className="px-4 py-3 text-sm text-muted-foreground">{t("focus.noSites")}</p>
+          <p className="mx-4 my-3 rounded-xl bg-white/10 p-3 text-sm text-muted-foreground">{t("focus.noSites")}</p>
         ) : (
           <ul className="min-h-0 flex-1 overflow-y-auto overscroll-contain py-1">
             <li>
@@ -2035,13 +2036,13 @@ function LayersPanel({
 
   return (
     <div className="flex min-h-0 flex-1 flex-col overflow-y-auto overscroll-contain p-4">
-      <h2 className="flex items-center gap-2 text-sm font-semibold text-foreground">
+      <h2 className="flex items-center gap-2 font-instrument text-base font-semibold italic text-foreground">
         <LayersIcon className="size-4 text-primary" />
         {t("layers.title")}
       </h2>
 
       {activeLayerError ? (
-        <div className="mt-3 rounded-xl bg-destructive/10 p-3">
+        <div className="mt-3">
           <InlineResourceError message={t("errors.layers")} onRetry={onRetryActiveLayer} />
         </div>
       ) : null}
@@ -2058,7 +2059,7 @@ function LayersPanel({
 
       {showOrgLayers ? (
         <div className="mt-4">
-          <h3 className="mb-1 text-xs font-semibold capitalize text-muted-foreground">
+          <h3 className="mb-1 font-instrument text-sm font-semibold italic capitalize text-muted-foreground">
             {t("layers.projectCategory")}
           </h3>
           {hasTreesRow ? (
@@ -2096,7 +2097,7 @@ function LayersPanel({
               <Skeleton className="h-10 w-full rounded-xl" />
             </div>
           ) : orgLayers.length === 0 && droneSeries.length === 0 && !hasTreesRow ? (
-            <p className="text-xs text-muted-foreground">{t("layers.noProjectLayers")}</p>
+            <p className="rounded-xl bg-white/10 p-3 text-sm text-muted-foreground">{t("layers.noProjectLayers")}</p>
           ) : (
             <>
               {droneSeries.map((series) => (
@@ -2142,7 +2143,7 @@ function LayersPanel({
       ) : (
         categorizedGlobalLayers.map(([category, layers]) => (
           <div className="mt-4" key={category}>
-            <h3 className="mb-1 text-xs font-semibold capitalize text-muted-foreground">{category}</h3>
+            <h3 className="mb-1 font-instrument text-sm font-semibold italic capitalize text-muted-foreground">{category}</h3>
             <div className="flex flex-col divide-y divide-white/10 overflow-hidden rounded-2xl bg-white/[0.06] shadow-[inset_0_1px_0_rgb(255_255_255/0.04)]">
               {layers.map((layer) => (
                 <LayerToggleRow
@@ -2161,7 +2162,7 @@ function LayersPanel({
 
       {hasVisibleLayerDetails ? (
         <div className="mt-5 space-y-2 border-t border-white/10 pt-4">
-          <h3 className="text-xs font-semibold capitalize text-muted-foreground">{t("layers.visibleDetails")}</h3>
+          <h3 className="font-instrument text-sm font-semibold italic capitalize text-muted-foreground">{t("layers.visibleDetails")}</h3>
           {visibleLayers.length > 0 ? (
             <ActiveLayersCard layers={visibleLayers} onLocate={onLocateLayer} onHide={onToggleLayer} />
           ) : null}
@@ -2270,8 +2271,8 @@ function TreeKeyboardList({
 }) {
   const t = useTranslations("marketplace.globe");
   return (
-    <div className="mb-3 bg-white/[0.04] px-2 py-2">
-      <h3 className="px-2 pb-1 text-xs font-medium text-muted-foreground">{t("layers.measuredTrees")}</h3>
+    <div className="mb-3 overflow-hidden rounded-xl bg-white/10 px-2 py-2">
+      <h3 className="px-2 pb-1 font-instrument text-sm font-medium italic text-muted-foreground">{t("layers.measuredTrees")}</h3>
       <ul className="max-h-48 overflow-y-auto overscroll-contain">
         {entries.map((entry) => {
           const selected = entry.detail.id === selectedTreeId;
@@ -2302,12 +2303,12 @@ function TreeKeyboardList({
 function InlineResourceError({ message, onRetry }: { message: string; onRetry: () => void }) {
   const t = useTranslations("marketplace.globe");
   return (
-    <div role="alert" className="flex items-center justify-between gap-3 text-sm text-muted-foreground">
+    <div role="alert" className="flex items-center justify-between gap-3 rounded-xl bg-destructive/10 p-3 text-sm text-destructive">
       <span>{message}</span>
       <button
         type="button"
         onClick={onRetry}
-        className="min-h-11 shrink-0 rounded-full bg-white/[0.08] px-4 text-xs font-medium text-foreground hover:bg-white/[0.14]"
+        className="min-h-11 shrink-0 rounded-full bg-destructive px-4 text-xs font-medium text-destructive-foreground transition-colors hover:bg-destructive/90"
       >
         {t("errors.retry")}
       </button>
@@ -2542,7 +2543,7 @@ function TreeDetailPanel({ tree, onClose }: { tree: TreeDetail; onClose: () => v
       )}
     >
       <div className="flex items-center justify-between gap-2 border-b border-border px-4 py-2.5">
-        <h2 className="flex items-center gap-1.5 text-sm font-semibold text-foreground">
+        <h2 className="flex items-center gap-1.5 font-instrument text-base font-semibold italic text-foreground">
           <LeafIcon className="size-4 text-primary" />
           {t("tree.title")}
         </h2>
@@ -2658,11 +2659,11 @@ function ActiveLayersCard({
 }) {
   const t = useTranslations("marketplace.globe");
   return (
-    <div data-testid="globe-active-layers" className="pointer-events-auto rounded-xl bg-white/[0.06] p-3 shadow-lg">
-      <p className="flex items-center gap-1.5 text-xs font-semibold text-foreground">
+    <div data-testid="globe-active-layers" className="pointer-events-auto rounded-xl bg-white/10 p-3 shadow-lg">
+      <h4 className="flex items-center gap-1.5 font-instrument text-sm font-semibold italic text-foreground">
         <LayersIcon className="size-3.5 text-primary" />
         {t("layers.visibleNow", { count: layers.length })}
-      </p>
+      </h4>
       <ul className="mt-2 flex max-h-36 flex-col gap-0.5 overflow-y-auto overscroll-contain">
         {layers.map((layer) => (
           <li key={layer.id} className="flex items-center gap-1">
@@ -2702,8 +2703,8 @@ function ActiveLayersCard({
 function LandcoverLegend() {
   const t = useTranslations("marketplace.globe");
   return (
-    <div className="pointer-events-auto rounded-xl bg-white/[0.06] p-3 shadow-lg">
-      <p className="text-xs font-semibold text-foreground">{t("layers.landcover")}</p>
+    <div className="pointer-events-auto rounded-xl bg-white/10 p-3 shadow-lg">
+      <h4 className="font-instrument text-sm font-semibold italic text-foreground">{t("layers.landcover")}</h4>
       <div className="mt-2 grid grid-cols-2 gap-x-3 gap-y-1">
         {LANDCOVER_LEGEND.map((entry) => (
           <span key={entry.labelKey} className="flex items-center gap-2 text-[11px] text-muted-foreground">
@@ -2718,8 +2719,8 @@ function LandcoverLegend() {
 
 function LayerLegendCard({ layer }: { layer: GlobeLayer }) {
   return (
-    <div className="pointer-events-auto rounded-xl bg-white/[0.06] p-3 shadow-lg">
-      <p className="text-xs font-semibold text-foreground">{layer.name}</p>
+    <div className="pointer-events-auto rounded-xl bg-white/10 p-3 shadow-lg">
+      <h4 className="font-instrument text-sm font-semibold italic text-foreground">{layer.name}</h4>
       <div className="mt-2 flex flex-col gap-1">
         {layer.legend?.map((entry) => (
           <span key={`${layer.id}-${entry.label}`} className="flex items-center gap-2 text-[11px] text-muted-foreground">
