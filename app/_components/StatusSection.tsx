@@ -4,7 +4,9 @@ import { useEffect, useState, type ReactNode } from "react";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { ArrowUpRightIcon } from "lucide-react";
+import { SectionSurface } from "@/components/ui/section-surface";
 import { Skeleton } from "@/components/ui/skeleton";
+import { DisplayHeading } from "@/components/ui/typography";
 import { STATUS_URL } from "../_lib/urls";
 import { formatDuration, formatRelative } from "../_lib/format";
 import {
@@ -87,6 +89,7 @@ export function StatusSection({ initial }: { initial?: StatusSnapshot }) {
     async function poll() {
       try {
         const res = await fetch("/api/status", { signal: controller.signal });
+        if (!res.ok) throw new Error(`Status lookup failed (${res.status})`);
         const next = (await res.json()) as StatusSnapshot;
         if (cancelled) return;
         if (!next.degraded) {
@@ -118,7 +121,7 @@ export function StatusSection({ initial }: { initial?: StatusSnapshot }) {
 
   const statusAction = (
     <div className="flex flex-col items-start gap-2 lg:items-end">
-      <div className="inline-flex items-center gap-2.5 rounded-full border border-border bg-background/65 px-4 py-2 shadow-sm shadow-primary/5 backdrop-blur-xl">
+      <div className="inline-flex items-center gap-2.5 rounded-full bg-background/80 px-4 py-2 backdrop-blur-xl">
         <span className={`relative inline-flex h-2.5 w-2.5 ${TONE_DOT[tone]}`}>
           <span className="pulse-dot inline-block h-2.5 w-2.5 rounded-full bg-current" />
         </span>
@@ -186,18 +189,18 @@ export function StatusSection({ initial }: { initial?: StatusSnapshot }) {
         {/* Incident history */}
         {snapshot.components.length > 0 && (
           <div className="mt-14">
-            <div className="flex items-baseline justify-between gap-4 border-b border-border-soft pb-3">
-              <h2 className="font-garamond text-[24px] font-normal text-foreground">{t("incidents.title")}</h2>
-              <span className="text-[12px] text-muted-foreground">
+            <div className="flex items-baseline justify-between gap-4 pb-3">
+              <DisplayHeading as="h2" className="text-2xl font-normal text-foreground">{t("incidents.title")}</DisplayHeading>
+              <span className="text-xs text-muted-foreground">
                 {incidents.length > 0 ? t("incidents.last", { count: incidents.length }) : t("incidents.window")}
               </span>
             </div>
             {incidents.length === 0 ? (
-              <p className="py-10 text-center text-[14px] italic text-muted-foreground">
+              <p className="py-10 text-center text-sm text-muted-foreground">
                 {t("incidents.empty")}
               </p>
             ) : (
-              <ol role="list" className="mt-5 space-y-3">
+              <ol role="list" className="mt-5 divide-y divide-border/50 rounded-2xl bg-muted/50 px-4">
                 {incidents.map((inc) => (
                   <IncidentRow key={inc.id} incident={inc} />
                 ))}
@@ -211,10 +214,10 @@ export function StatusSection({ initial }: { initial?: StatusSnapshot }) {
             href={STATUS_URL}
             target="_blank"
             rel="noreferrer"
-            className="group inline-flex items-center gap-1.5 rounded-full border border-border-soft bg-surface px-4 py-2 text-[13.5px] font-medium text-muted-foreground transition-colors hover:border-foreground/25 hover:text-primary"
+            className="group inline-flex min-h-10 items-center gap-1.5 rounded-full bg-muted px-4 py-2 text-sm font-medium text-muted-foreground transition-colors hover:text-primary motion-reduce:transition-none"
           >
             {t("incidents.viewFull")}
-            <ArrowUpRightIcon className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+            <ArrowUpRightIcon className="size-3.5 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5 motion-reduce:transform-none motion-reduce:transition-none" />
           </Link>
         </div>
       </div>
@@ -236,7 +239,7 @@ function ServiceCard({
   const t = useTranslations("common.status");
   const tone = componentTone(status);
   return (
-    <article className="flex h-full flex-col gap-4 rounded-2xl border border-border-soft bg-surface p-5 shadow-[0_8px_26px_-20px_rgba(20,30,15,0.3)]">
+    <article className="flex h-full flex-col gap-4 rounded-2xl bg-muted/60 p-5">
       <header className="flex items-start justify-between gap-3">
         <div className="min-w-0">
           <h2 className="truncate text-[15px] font-semibold text-foreground">{service.name}</h2>
@@ -245,7 +248,7 @@ function ServiceCard({
           )}
         </div>
         <span
-          className={`inline-flex shrink-0 items-center gap-1.5 rounded-full border border-border-soft bg-background px-2.5 py-1 text-[12px] font-medium ${TONE_TEXT[tone]}`}
+          className={`inline-flex shrink-0 items-center gap-1.5 rounded-full bg-background/80 px-2.5 py-1 text-xs font-medium ${TONE_TEXT[tone]}`}
         >
           <span className={`relative inline-flex h-2 w-2 ${TONE_DOT[tone]}`}>
             <span className={`inline-block h-2 w-2 rounded-full bg-current ${tone === "ok" ? "pulse-dot" : ""}`} />
@@ -257,10 +260,10 @@ function ServiceCard({
       {uptime != null && (
         <div className="mt-auto">
           <div className="flex items-baseline justify-between gap-2">
-            <span className="text-[11px] font-medium uppercase tracking-[0.08em] text-foreground/45">
+            <span className="text-xs font-medium text-muted-foreground">
               {t("serviceCard.health90Day")}
             </span>
-            <span className="font-mono text-[12.5px] font-semibold tabular-nums text-foreground/70">
+            <span className="text-xs font-semibold tabular-nums text-foreground/70">
               {uptime.toFixed(2)}%
             </span>
           </div>
@@ -285,7 +288,7 @@ function StatusSkeleton() {
       aria-label={t("loadingAria")}
     >
       {Array.from({ length: 6 }).map((_, index) => (
-        <li key={index} className="rounded-2xl border border-border-soft bg-surface p-5">
+        <li key={index} className="rounded-2xl bg-muted/60 p-5">
           <div className="flex items-start justify-between gap-3">
             <div className="space-y-2">
               <Skeleton className="h-4 w-32 rounded-full" />
@@ -305,10 +308,10 @@ function StatusSkeleton() {
 
 function Notice({ title, body }: { title: string; body: ReactNode }) {
   return (
-    <div className="mt-8 flex flex-col items-center justify-center rounded-2xl border border-dashed border-border px-6 py-16 text-center">
-      <div className="font-garamond text-[22px] text-foreground">{title}</div>
-      <p className="mt-2 max-w-[460px] text-[14px] leading-[1.5] text-muted-foreground">{body}</p>
-    </div>
+    <SectionSurface variant="muted" className="mt-8 flex flex-col items-center justify-center py-16 text-center" role="status">
+      <DisplayHeading as="h2" className="text-2xl text-foreground">{title}</DisplayHeading>
+      <p className="mt-2 max-w-md text-sm leading-6 text-muted-foreground">{body}</p>
+    </SectionSurface>
   );
 }
 
@@ -327,17 +330,17 @@ function IncidentRow({ incident }: { incident: Incident }) {
   const when = incident.started ? formatRelative(incident.started) : "";
   const dur = incident.durationMs != null ? formatDuration(incident.durationMs) : null;
   return (
-    <li className="flex items-start gap-3 rounded-2xl border border-border-soft bg-surface px-4 py-3.5 shadow-[0_8px_26px_-20px_rgba(20,30,15,0.3)]">
+    <li className="flex items-start gap-3 py-4">
       <span className={`mt-1.5 inline-flex h-2 w-2 shrink-0 rounded-full ${TONE_BAR[t]}`} />
       <div className="min-w-0 flex-1">
         <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
-          <span className="font-mono text-[13px] text-foreground">{title}</span>
+          <span className="text-sm font-medium text-foreground">{title}</span>
           {incident.ongoing ? (
-            <span className="rounded-full bg-down/15 px-2 py-0.5 text-[10.5px] font-medium uppercase tracking-[0.06em] text-down">
+            <span className="rounded-full bg-down/15 px-2 py-0.5 text-xs font-medium text-down">
               {tr("incidents.happeningNow")}
             </span>
           ) : (
-            <span className="rounded-full bg-ok/15 px-2 py-0.5 text-[10.5px] font-medium uppercase tracking-[0.06em] text-ok">
+            <span className="rounded-full bg-ok/15 px-2 py-0.5 text-xs font-medium text-ok">
               {tr("incidents.fixed")}
             </span>
           )}

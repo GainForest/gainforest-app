@@ -53,7 +53,7 @@ export function StatsTile({ label, value, icon, accent = false, href, className:
       <div className="absolute inset-x-6 top-0 h-px bg-gradient-to-r from-transparent via-primary/25 to-transparent" />
       <div className="min-w-0">
         <div className="flex min-w-0 items-center gap-2 sm:gap-3">
-          <span className="flex shrink-0 items-center justify-center text-primary transition-transform duration-300 group-hover:scale-105 [&_svg]:size-4 sm:[&_svg]:size-5">
+          <span className="flex shrink-0 items-center justify-center text-primary transition-transform duration-300 group-hover:scale-105 motion-reduce:transform-none motion-reduce:transition-none [&_svg]:size-4 sm:[&_svg]:size-5">
             {icon}
           </span>
           <div
@@ -65,13 +65,13 @@ export function StatsTile({ label, value, icon, accent = false, href, className:
             {value}
           </div>
         </div>
-        <p className="mt-1 text-xs leading-snug text-muted-foreground first-letter:uppercase sm:text-sm sm:leading-normal">{label}</p>
+        <p className="mt-1 text-xs leading-snug text-muted-foreground sm:text-sm sm:leading-normal">{label}</p>
       </div>
     </>
   );
 
   const className = [
-    "group relative overflow-hidden rounded-2xl bg-foreground/5 p-4 text-left backdrop-blur transition-all duration-300 hover:-translate-y-0.5 hover:bg-foreground/[0.07] sm:rounded-3xl sm:p-6",
+    "group relative overflow-hidden rounded-2xl bg-muted/60 p-4 text-left transition-colors duration-300 hover:bg-muted motion-reduce:transform-none motion-reduce:transition-none sm:rounded-3xl sm:p-6",
     extraClassName,
   ]
     .filter(Boolean)

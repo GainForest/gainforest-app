@@ -1,21 +1,33 @@
 import type { Metadata } from "next";
+import { getTranslations } from "next-intl/server";
 import { GracefulNotFound } from "../_components/GracefulNotFound";
 
-export const metadata: Metadata = {
-  title: "Profile not found",
-  description: "A gentle message for a public profile GainForest cannot find.",
-  robots: { index: false, follow: false },
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const [legacyT, notFoundT] = await Promise.all([
+    getTranslations("legacy"),
+    getTranslations("common.notFound"),
+  ]);
+  return {
+    title: legacyT("accountProfileMissing"),
+    description: notFoundT("description"),
+    robots: { index: false, follow: false },
+  };
+}
 
-export default function AccountNotFound() {
+export default async function AccountNotFound() {
+  const [legacyT, notFoundT, navigationT] = await Promise.all([
+    getTranslations("legacy"),
+    getTranslations("common.notFound"),
+    getTranslations("common.sidebar.items"),
+  ]);
   return (
     <GracefulNotFound
-      title="We couldn’t find that profile."
-      message="Check the profile name, or browse public profiles already listed on GainForest."
+      title={legacyT("accountProfileMissing")}
+      message={notFoundT("description")}
       primaryHref="/organizations"
-      primaryLabel="Browse organizations"
+      primaryLabel={navigationT("organizations")}
       secondaryHref="/projects"
-      secondaryLabel="Explore projects"
+      secondaryLabel={navigationT("projects")}
     />
   );
 }

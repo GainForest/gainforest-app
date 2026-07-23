@@ -1,5 +1,5 @@
-import { DashboardStatsPageSkeleton } from "../_components/PageLoadingSkeletons";
+import { DashboardLoadingView } from "./DashboardLoadingView";
 
 export default function DashboardLoading() {
-  return <DashboardStatsPageSkeleton />;
+  return <DashboardLoadingView />;
 }

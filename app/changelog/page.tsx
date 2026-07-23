@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { getLocale, getTranslations } from "next-intl/server";
+import { DisplayHeading } from "@/components/ui/typography";
 import { ChangelogView, type ChangelogData } from "./ChangelogView";
 import data from "./changelog-data.json";
 
@@ -28,23 +29,22 @@ export default async function ChangelogPage() {
   return (
     <div className="mx-auto w-full max-w-3xl px-4 py-10 sm:px-6 sm:py-14">
       <header className="mb-10">
-        <p className="text-xs font-semibold uppercase tracking-widest text-primary">{t("eyebrow")}</p>
-        <h1 className="mt-2 text-3xl font-bold tracking-tight sm:text-4xl">
+        <DisplayHeading as="h1" className="text-3xl font-medium tracking-tight sm:text-4xl">
           {t("heading", { version: changelog.version })}
-        </h1>
+        </DisplayHeading>
         <p className="mt-3 max-w-prose text-muted-foreground">{t("intro")}</p>
         <dl className="mt-6 flex flex-wrap gap-x-8 gap-y-3">
           <div>
-            <dt className="text-xs uppercase tracking-wide text-muted-foreground">{t("stats.commits")}</dt>
+            <dt className="text-sm text-muted-foreground">{t("stats.commits")}</dt>
             <dd className="text-2xl font-semibold tabular-nums">{changelog.total.toLocaleString(locale)}</dd>
           </div>
           <div>
-            <dt className="text-xs uppercase tracking-wide text-muted-foreground">{t("stats.months")}</dt>
+            <dt className="text-sm text-muted-foreground">{t("stats.months")}</dt>
             <dd className="text-2xl font-semibold tabular-nums">{changelog.months.length}</dd>
           </div>
           {range ? (
             <div>
-              <dt className="text-xs uppercase tracking-wide text-muted-foreground">{t("stats.range")}</dt>
+              <dt className="text-sm text-muted-foreground">{t("stats.range")}</dt>
               <dd className="text-2xl font-semibold">{range}</dd>
             </div>
           ) : null}

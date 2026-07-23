@@ -3,6 +3,8 @@ import Link from "next/link";
 import { Fragment, type ReactNode } from "react";
 import { getTranslations } from "next-intl/server";
 import { localizedAlternates } from "@/app/_lib/seo-metadata";
+import { SectionSurface } from "@/components/ui/section-surface";
+import { DisplayHeading } from "@/components/ui/typography";
 
 const STEP_KEYS = ["s1", "s2", "s3", "s4", "s5"] as const;
 
@@ -70,50 +72,46 @@ export default async function DeleteAccountPage() {
   return (
     <main className="px-6 py-12 md:py-16">
       <article className="mx-auto max-w-3xl">
-        <div className="rounded-[2rem] border border-border bg-card/70 p-6 shadow-sm md:p-10">
-          <header className="border-b border-border pb-8">
-            <h1 className="font-serif text-4xl font-semibold tracking-tight text-foreground md:text-5xl">
-              {t("title")}
-            </h1>
-            <div className="mt-5 text-sm text-muted-foreground">
-              <span>{t("lastUpdated")}</span>
-            </div>
-          </header>
+        <header>
+          <DisplayHeading as="h1" className="text-4xl font-medium tracking-tight text-foreground md:text-5xl">
+            {t("title")}
+          </DisplayHeading>
+          <p className="mt-5 text-sm text-muted-foreground">{t("lastUpdated")}</p>
+        </header>
 
-          <div className="mt-8 space-y-5 text-[15px] leading-7 text-muted-foreground">
-            <p>{renderText(t("intro.p1"))}</p>
-          </div>
+        <p className="mt-10 text-[15px] leading-7 text-muted-foreground">
+          {renderText(t("intro.p1"))}
+        </p>
 
-          <div className="mt-10 space-y-10">
-            <section className="scroll-mt-24">
-              <h2 className="font-serif text-2xl font-semibold tracking-tight text-foreground">
-                {t("sections.howTo.title")}
-              </h2>
-              <ol className="mt-4 list-decimal space-y-3 pl-5 text-[15px] leading-7 text-muted-foreground">
-                {STEP_KEYS.map((stepKey) => (
-                  <li key={stepKey}>{renderText(t(`sections.howTo.steps.${stepKey}`))}</li>
+        <div className="mt-12 space-y-12">
+          <SectionSurface variant="muted" className="scroll-mt-24">
+            <DisplayHeading as="h2" className="text-2xl font-medium tracking-tight text-foreground">
+              {t("sections.howTo.title")}
+            </DisplayHeading>
+            <ol className="mt-4 list-decimal space-y-3 pl-5 text-[15px] leading-7 text-muted-foreground">
+              {STEP_KEYS.map((stepKey) => (
+                <li key={stepKey}>{renderText(t(`sections.howTo.steps.${stepKey}`))}</li>
+              ))}
+            </ol>
+            <p className="mt-4 text-[15px] leading-7 text-muted-foreground">
+              {renderText(t("sections.howTo.p1"))}
+            </p>
+          </SectionSurface>
+
+          {INFO_SECTIONS.map((section) => (
+            <section key={section.key} className="scroll-mt-24">
+              <DisplayHeading as="h2" className="text-2xl font-medium tracking-tight text-foreground">
+                {t(`sections.${section.key}.title`)}
+              </DisplayHeading>
+              <div className="mt-4 space-y-4 text-[15px] leading-7 text-muted-foreground">
+                {section.paragraphs.map((paragraphKey) => (
+                  <p key={paragraphKey}>
+                    {renderText(t(`sections.${section.key}.paragraphs.${paragraphKey}`))}
+                  </p>
                 ))}
-              </ol>
-              <p className="mt-4 text-[15px] leading-7 text-muted-foreground">
-                {renderText(t("sections.howTo.p1"))}
-              </p>
+              </div>
             </section>
-
-            {INFO_SECTIONS.map((section) => (
-              <section key={section.key} className="scroll-mt-24">
-                <h2 className="font-serif text-2xl font-semibold tracking-tight text-foreground">
-                  {t(`sections.${section.key}.title`)}
-                </h2>
-                <div className="mt-4 space-y-4 text-[15px] leading-7 text-muted-foreground">
-                  {section.paragraphs.map((paragraphKey) => (
-                    <p key={paragraphKey}>
-                      {renderText(t(`sections.${section.key}.paragraphs.${paragraphKey}`))}
-                    </p>
-                  ))}
-                </div>
-              </section>
-            ))}
-          </div>
+          ))}
         </div>
       </article>
     </main>
