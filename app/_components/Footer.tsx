@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { ExternalLinkIcon, FileTextIcon, GlobeIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
+import { BrandWord } from "@/components/ui/typography";
 import { GAINFOREST_URL, STATUS_URL } from "../_lib/urls";
 
 const PRIMARY_LINKS = [
@@ -41,7 +42,7 @@ export function Footer() {
                 height={28}
                 className="drop-shadow-md"
               />
-              <span className="font-serif text-xl font-bold tracking-tight">GainForest</span>
+              <BrandWord className="text-xl font-bold tracking-tight" />
             </div>
             <p
               className="text-sm text-muted-foreground"

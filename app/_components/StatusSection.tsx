@@ -3,7 +3,7 @@
 import { useEffect, useState, type ReactNode } from "react";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
-import { ActivityIcon, ArrowUpRightIcon } from "lucide-react";
+import { ArrowUpRightIcon } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { STATUS_URL } from "../_lib/urls";
 import { formatDuration, formatRelative } from "../_lib/format";
@@ -142,8 +142,6 @@ export function StatusSection({ initial }: { initial?: StatusSnapshot }) {
         lightSrc="/assets/media/images/status/status-hero-light@2x.webp"
         darkSrc="/assets/media/images/status/status-hero-dark@2x.webp"
         imageAlt={t("hero.imageAlt")}
-        eyebrow={t("hero.eyebrow")}
-        icon={<ActivityIcon aria-hidden />}
         title={t("hero.title")}
         accent={t("hero.accent")}
         lede={t("hero.lede")}

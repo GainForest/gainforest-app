@@ -14,6 +14,7 @@ import { AppCartProvider } from "./_components/cart/AppCartProvider";
 import { LinkPrefetcher } from "./_components/LinkPrefetcher";
 import { RouteChangeIndicator } from "./_components/RouteChangeIndicator";
 import { ModalHost, ModalProvider } from "@/components/ui/modal/context";
+import { MotionProvider } from "@/components/providers/MotionProvider";
 import { WagmiProvider } from "@/components/providers/WagmiProvider";
 import { resolveSupportedLanguage } from "@/lib/i18n/languages";
 import { getCanonicalPathname, getSeoLocalizedPathnames, withLocalePrefix } from "@/lib/i18n/routing";
@@ -216,27 +217,29 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
         />
         <NextIntlClientProvider locale={locale} messages={messages}>
-          <ClientErrorListener />
-          <DomTranslationFallback />
-          <Suspense fallback={null}>
-            <RouteChangeIndicator />
-            <LinkPrefetcher />
-          </Suspense>
-          <NuqsAdapter>
-            <WagmiProvider>
-              <ModalProvider>
-                <AccountDrawerProvider>
-                  <AppCartProvider>
-                    <ChromeGate authSession={authSession}>{children}</ChromeGate>
-                    {/* The modal chrome mounts at the bottom of the provider
-                        tree so inline modal content pushed via pushModal keeps
-                        access to the app-level contexts above this line. */}
-                    <ModalHost />
-                  </AppCartProvider>
-                </AccountDrawerProvider>
-              </ModalProvider>
-            </WagmiProvider>
-          </NuqsAdapter>
+          <MotionProvider>
+            <ClientErrorListener />
+            <DomTranslationFallback />
+            <Suspense fallback={null}>
+              <RouteChangeIndicator />
+              <LinkPrefetcher />
+            </Suspense>
+            <NuqsAdapter>
+              <WagmiProvider>
+                <ModalProvider>
+                  <AccountDrawerProvider>
+                    <AppCartProvider>
+                      <ChromeGate authSession={authSession}>{children}</ChromeGate>
+                      {/* The modal chrome mounts at the bottom of the provider
+                          tree so inline modal content pushed via pushModal keeps
+                          access to the app-level contexts above this line. */}
+                      <ModalHost />
+                    </AppCartProvider>
+                  </AccountDrawerProvider>
+                </ModalProvider>
+              </WagmiProvider>
+            </NuqsAdapter>
+          </MotionProvider>
         </NextIntlClientProvider>
         <Analytics />
       </body>

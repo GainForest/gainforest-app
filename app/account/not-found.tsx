@@ -10,7 +10,6 @@ export const metadata: Metadata = {
 export default function AccountNotFound() {
   return (
     <GracefulNotFound
-      eyebrow="Profile not found"
       title="We couldn’t find that profile."
       message="Check the profile name, or browse public profiles already listed on GainForest."
       primaryHref="/organizations"

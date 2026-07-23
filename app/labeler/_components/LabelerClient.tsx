@@ -198,7 +198,7 @@ export function LabelerClient({
         compact
         lightSrc="/images/explore/explore-hero-light@2x.webp"
         darkSrc="/images/explore/explore-hero-dark@2x.webp"
-        eyebrow={t("eyebrow")}
+        imageAlt=""
         title={t("hero.title")}
         accent={t("hero.accent")}
         lede={t("description")}

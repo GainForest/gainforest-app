@@ -18,6 +18,7 @@ import {
 import { useTranslations } from "next-intl";
 import packageJson from "@/package.json";
 import { Button, buttonVariants } from "@/components/ui/button";
+import { BrandWord } from "@/components/ui/typography";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 import { LanguageSelector } from "@/components/i18n/LanguageSelector";
@@ -344,9 +345,9 @@ function SidebarHeader() {
               delay: 0.15,
               ease: [0.25, 0.1, 0.25, 1],
             }}
-            className="font-serif text-xl font-bold tracking-tight text-foreground"
+            className="text-xl font-bold tracking-tight text-foreground"
           >
-            GainForest
+            <BrandWord />
           </motion.span>
         )}
       </Link>

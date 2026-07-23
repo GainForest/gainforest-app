@@ -46,8 +46,6 @@ export function DonationsHub() {
         lightSrc="/assets/media/images/donations/donations-hero-light@2x.webp"
         darkSrc="/assets/media/images/donations/donations-hero-dark@2x.webp"
         imageAlt={heroT("imageAlt")}
-        eyebrow={heroT("eyebrow")}
-        icon={<BarChart3Icon />}
         title={heroT("title")}
         accent={tabsT(view)}
         lede={isLeaderboard ? leaderboardT("description") : heroT("lede")}

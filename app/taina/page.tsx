@@ -61,7 +61,7 @@ async function TainaContent() {
         compact
         lightSrc="/images/explore/explore-hero-light@2x.webp"
         darkSrc="/images/explore/explore-hero-dark@2x.webp"
-        eyebrow={t("hero.eyebrow")}
+        imageAlt=""
         title={t("hero.title")}
         accent={t("hero.accent")}
         lede={t("hero.description")}

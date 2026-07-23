@@ -3,7 +3,7 @@
 import * as React from "react";
 import { cva, type VariantProps } from "class-variance-authority";
 import { Slot } from "radix-ui";
-import { motion, type HTMLMotionProps } from "framer-motion";
+import { motion, useReducedMotion, type HTMLMotionProps } from "framer-motion";
 import { cn } from "@/lib/utils";
 
 const buttonVariants = cva(
@@ -88,6 +88,8 @@ function Button({
   layout,
   ...props
 }: ButtonProps) {
+  const shouldReduceMotion = useReducedMotion();
+
   if (asChild) {
     return (
       <Slot.Root
@@ -102,7 +104,7 @@ function Button({
     <motion.button
       ref={ref}
       data-slot="button"
-      whileTap={whileTap ?? { scale: 0.97 }}
+      whileTap={shouldReduceMotion ? undefined : (whileTap ?? { scale: 0.97 })}
       transition={transition ?? { type: "spring", stiffness: 400, damping: 25 }}
       initial={initial}
       animate={animate}

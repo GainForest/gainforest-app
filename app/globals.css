@@ -151,7 +151,9 @@
 
   --font-sans: var(--font-geist-sans), system-ui, sans-serif;
   --font-mono: var(--font-geist-mono), ui-monospace, monospace;
-  --font-serif: var(--font-garamond-var), Georgia, serif;
+  /* Keep the generic serif utility on the UI/body family. Garamond remains
+     available during migration only for landing and the fixed BrandWord API. */
+  --font-serif: var(--font-geist-sans), system-ui, sans-serif;
   --font-garamond: var(--font-garamond-var), Georgia, serif;
   --font-instrument: var(--font-instrument-serif-var), Georgia, serif;
 
@@ -181,6 +183,10 @@ body {
     color 0.3s ease;
 }
 
+.font-brand-word {
+  font-family: var(--font-garamond-var), Georgia, serif;
+}
+
 /* Radix Dialog sets pointer-events: none on <body> while an app modal is open.
    RainbowKit renders its wallet modal in a separate portal, so force it to
    remain clickable when opened from donation and wallet-linking modals. */
@@ -208,6 +214,10 @@ body {
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;
+  }
+
+  body {
+    transition: none;
   }
 }
 
@@ -374,7 +384,8 @@ body {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .skeleton {
+  .skeleton,
+  .animate-shimmer {
     animation: none;
   }
 }
@@ -488,10 +499,6 @@ body {
   mask-image: linear-gradient(to right, #000 calc(100% - 2rem), transparent);
 }
 
-@keyframes shimmer {
-  0% { background-position: -200% 0; }
-  100% { background-position: 200% 0; }
-}
 .animate-shimmer {
   animation: shimmer 2s linear infinite;
 }

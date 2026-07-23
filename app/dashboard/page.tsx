@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
-import { LayoutDashboardIcon } from "lucide-react";
 import { PictureHero } from "../_components/PictureHero";
 import { DashboardStatsPageSkeleton } from "../_components/PageLoadingSkeletons";
 import { StatsDashboardClient } from "./StatsDashboardClient";
@@ -27,8 +26,7 @@ export default function DashboardPage() {
       <PictureHero
         lightSrc="/images/explore/explore-hero-light@2x.webp"
         darkSrc="/images/explore/explore-hero-dark@2x.webp"
-        eyebrow="Dashboard"
-        icon={<LayoutDashboardIcon />}
+        imageAlt=""
         title="Platform"
         accent="overview"
         lede="A single place for the totals from project stories, organizations, observations, and projects."

@@ -8,6 +8,7 @@
     "dev:proxy": "caddy run --config Caddyfile --watch",
     "build": "next build",
     "check:i18n": "node scripts/check-i18n-untranslated.mjs",
+    "check:ui-contract": "node scripts/check-ui-contract.mjs",
     "test:unit": "vitest run",
     "start": "next start --port 3040",
     "test:e2e": "playwright test",

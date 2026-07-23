@@ -60,10 +60,8 @@ import { useStableQueryView } from "../_lib/use-stable-query-view";
 // the tab strip was replaced by top-nav routes so each stream is its own page.
 
 type KindMeta = {
-  eyebrow: string;
-  /** Plain (Cormorant) lead word; empty renders the accent alone. */
   title: string;
-  /** Instrument-Serif italic accent word, matching the donations header. */
+  /** Optional continuation of the semantic display heading. */
   accent: string;
   lede: string;
   search: string;
@@ -73,7 +71,6 @@ type KindMeta = {
 
 const KIND_META: Record<RecordKind, KindMeta> = {
   occurrence: {
-    eyebrow: "Nature sightings",
     title: "Browse",
     accent: "nature sightings",
     lede: "Explore plants, animals, photos, and field sound recordings shared from project places.",
@@ -82,7 +79,6 @@ const KIND_META: Record<RecordKind, KindMeta> = {
     heroDark: "/assets/media/images/observations/observations-hero-dark@2x.webp",
   },
   site: {
-    eyebrow: "Project Sites",
     title: "Project",
     accent: "sites",
     lede: "Explore nature stewardship groups, where they work, and the stories they share.",
@@ -91,7 +87,6 @@ const KIND_META: Record<RecordKind, KindMeta> = {
     heroDark: "/assets/organizations/organizations-hero-dark@2x.webp",
   },
   bumicert: {
-    eyebrow: "Explore Projects",
     title: "Discover",
     accent: "Regenerative Impact",
     lede: "Browse projects from communities and organizations restoring ecosystems, strengthening livelihoods, and building a more resilient future.",
@@ -100,7 +95,6 @@ const KIND_META: Record<RecordKind, KindMeta> = {
     heroDark: "/images/explore/explore-hero-dark@2x.webp",
   },
   project: {
-    eyebrow: "Projects",
     title: "Browse",
     accent: "project collections",
     lede: "Explore project collections and the Certs they group together.",
@@ -667,12 +661,10 @@ export function RecordExplorer({
         <PictureHero
           lightSrc={meta.heroLight}
           darkSrc={meta.heroDark}
-          eyebrow={meta.eyebrow}
-          icon={<LeafGlyph />}
+          imageAlt=""
           title={meta.title}
           accent={meta.accent}
           lede={meta.lede}
-          imageAlt={`${meta.eyebrow} nature landscape`}
           compact
         />
       )}
@@ -1993,10 +1985,6 @@ function StatBand({ stats }: { stats: Stat[] }) {
 }
 
 // ── Bits ───────────────────────────────────────────────────────────────────
-
-function LeafGlyph() {
-  return <LeafIcon width={16} height={16} aria-hidden />;
-}
 
 function MediaIcon({ kind }: { kind: OccurrenceRecord["media"][number] }) {
   if (kind === "audio" || kind === "spectrogram") {

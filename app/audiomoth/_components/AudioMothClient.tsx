@@ -831,6 +831,7 @@ export function AudioMothClient({
         compact
         lightSrc="/images/explore/explore-hero-light@2x.webp"
         darkSrc="/images/explore/explore-hero-dark@2x.webp"
+        imageAlt=""
         title={t("title")}
         lede={mainTab === "label" ? t("label.subtitle") : mainTab === "identifications" ? identificationsT("subtitle") : t("subtitle")}
       />

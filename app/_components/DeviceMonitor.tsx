@@ -91,8 +91,6 @@ export function DeviceMonitor({ initial }: { initial?: DevicesSnapshot }) {
         lightSrc="/assets/media/images/devices/devices-hero-light@2x.webp"
         darkSrc="/assets/media/images/devices/devices-hero-dark@2x.webp"
         imageAlt="Misty regenerative landscape for GainForest field devices"
-        eyebrow="Field updates"
-        icon={<LeafGlyph />}
         title="Tainá"
         accent="field devices"
         lede="Field devices running Tainá send regular updates so teams can see which tools are active and ready."

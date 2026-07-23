@@ -1,12 +1,12 @@
 import Image from "next/image";
 import type { ReactNode } from "react";
+import { DisplayHeading } from "@/components/ui/typography";
 
 type PictureHeroProps = {
   lightSrc: string;
   darkSrc: string;
-  imageAlt?: string;
-  eyebrow?: string;
-  icon?: ReactNode;
+  /** Localized description of the artwork, or an empty string when decorative. */
+  imageAlt: string;
   title: string;
   accent?: string;
   lede: string;
@@ -18,8 +18,7 @@ type PictureHeroProps = {
 export function PictureHero({
   lightSrc,
   darkSrc,
-  imageAlt = "",
-  eyebrow,
+  imageAlt,
   title,
   accent,
   lede,
@@ -29,10 +28,15 @@ export function PictureHero({
 }: PictureHeroProps) {
   return (
     <div className={compact ? "relative isolate min-h-[240px] overflow-hidden bg-card" : "relative isolate min-h-[330px] overflow-hidden bg-card"}>
-      <div className="absolute inset-0" aria-hidden={!imageAlt}>
+      <div
+        className="absolute inset-0"
+        role={imageAlt ? "img" : undefined}
+        aria-label={imageAlt || undefined}
+        aria-hidden={imageAlt ? undefined : true}
+      >
         <Image
           src={lightSrc}
-          alt={imageAlt}
+          alt=""
           fill
           priority={priority}
           quality={95}
@@ -41,7 +45,7 @@ export function PictureHero({
         />
         <Image
           src={darkSrc}
-          alt={imageAlt}
+          alt=""
           fill
           priority={priority}
           quality={95}
@@ -57,20 +61,12 @@ export function PictureHero({
       <div className={compact ? "relative z-10 mx-auto flex max-w-6xl flex-col px-8 pt-[64px] pb-8 sm:px-10 lg:px-9" : "relative z-10 mx-auto flex max-w-6xl flex-col px-8 pt-[86px] pb-14 sm:px-10 lg:px-9"}>
         <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
           <div className="max-w-4xl">
-            <h1
+            <DisplayHeading
+              as="h1"
               className={compact ? "max-w-4xl text-4xl leading-[0.98] font-light tracking-[-0.035em] text-foreground drop-shadow-sm dark:text-white sm:text-5xl md:text-5xl lg:text-6xl" : "max-w-4xl text-4xl leading-[0.98] font-light tracking-[-0.035em] text-foreground drop-shadow-sm dark:text-white sm:text-5xl md:text-6xl lg:text-7xl"}
-              style={{ fontFamily: "var(--font-garamond-var)" }}
             >
-              {title}{" "}
-              {accent ? (
-                <span
-                  className="text-foreground/90 dark:text-white/90"
-                  style={{ fontFamily: "var(--font-instrument-serif-var)", fontStyle: "italic" }}
-                >
-                  {accent}
-                </span>
-              ) : null}
-            </h1>
+              {title}{accent ? <> <span className="text-foreground/90 dark:text-white/90">{accent}</span></> : null}
+            </DisplayHeading>
             <p className={compact ? "mt-4 max-w-2xl text-base leading-7 text-muted-foreground dark:text-white/70 md:text-base" : "mt-7 max-w-2xl text-base leading-8 text-muted-foreground dark:text-white/70 md:text-lg"}>
               {lede}
             </p>
