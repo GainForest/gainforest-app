@@ -21,7 +21,7 @@ import {
 } from "@/app/_lib/equipment";
 import { EquipmentEditor, NativeSelect, type EquipmentEditorState } from "./EquipmentEditor";
 import { monogram, resolveDidProfile, type DidProfile } from "@/app/_lib/did-profile";
-import { formatRelative, shortDid } from "@/app/_lib/format";
+import { formatRelative } from "@/app/_lib/format";
 import { accountEquipmentPath } from "../_lib/account-route";
 
 const TONE_BADGE: Record<EquipmentStatusTone, string> = {
@@ -94,7 +94,7 @@ export function EquipmentSection({
     const counts = new Map<string, number>();
     for (const it of items ?? []) counts.set(it.did, (counts.get(it.did) ?? 0) + 1);
     return [...counts.entries()]
-      .map(([did, count]) => ({ did, count, label: ownerLabel(did, profiles[did]) }))
+      .map(([did, count]) => ({ did, count, label: ownerLabel(profiles[did], t("table.member")) }))
       .sort((a, b) => a.label.localeCompare(b.label));
   }, [items, profiles, isOrg]);
 
@@ -111,7 +111,7 @@ export function EquipmentSection({
         it.assetId.toLowerCase().includes(q) ||
         (it.currentOwner ?? "").toLowerCase().includes(q) ||
         (it.projectSite ?? "").toLowerCase().includes(q) ||
-        (isOrg && ownerLabel(it.did, profiles[it.did]).toLowerCase().includes(q))
+        (isOrg && ownerLabel(profiles[it.did], t("table.member")).toLowerCase().includes(q))
       );
     });
   }, [items, query, categoryFilter, statusFilter, memberFilter, profiles, isOrg]);
@@ -246,8 +246,8 @@ function useDidProfiles(items: EquipmentItem[] | null, enabled: boolean): Record
   return profiles;
 }
 
-function ownerLabel(did: string, profile?: DidProfile): string {
-  return profile?.displayName || profile?.handle || shortDid(did);
+function ownerLabel(profile: DidProfile | undefined, fallback: string): string {
+  return profile?.displayName || profile?.handle || fallback;
 }
 
 // ── Table ────────────────────────────────────────────────────────────────────
@@ -272,7 +272,7 @@ function EquipmentTable({
     <div className="mt-4 overflow-x-auto rounded-2xl border border-border bg-background">
       <table className="w-full min-w-[720px] border-collapse text-left">
         <thead>
-          <tr className="border-b border-border bg-muted/40 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+          <tr className="border-b border-border bg-muted/40 text-xs font-semibold text-muted-foreground">
             <th className="px-3 py-2.5">{t("table.equipment")}</th>
             <th className="px-3 py-2.5">{t("table.type")}</th>
             <th className="px-3 py-2.5">{t("table.status")}</th>
@@ -360,6 +360,7 @@ function MemberBadge({
   mine: boolean;
   youLabel: string;
 }) {
+  const t = useTranslations("common.equipment");
   const [avatarFailed, setAvatarFailed] = useState(false);
   const m = monogram(profile?.handle ?? null, did);
   const avatar = (!avatarFailed && profile?.avatar) || null;
@@ -383,10 +384,10 @@ function MemberBadge({
         </span>
       )}
       <span className="truncate text-xs text-foreground/80 group-hover:underline">
-        {ownerLabel(did, profile)}
+        {ownerLabel(profile, t("table.member"))}
       </span>
       {mine ? (
-        <span className="shrink-0 rounded-full bg-primary/10 px-1.5 py-px text-[9px] font-semibold uppercase tracking-wide text-primary">
+        <span className="shrink-0 rounded-full bg-primary/10 px-1.5 py-px text-[10px] font-semibold text-primary">
           {youLabel}
         </span>
       ) : null}

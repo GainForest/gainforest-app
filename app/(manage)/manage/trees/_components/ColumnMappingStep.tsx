@@ -142,7 +142,7 @@ export default function ColumnMappingStep({ uploadId, headers, mappings, sampleD
       )}
 
       <div className="rounded-lg border overflow-hidden">
-        <div className="grid grid-cols-[1fr_1fr_1fr] gap-0 bg-muted/50 px-4 py-2 text-xs font-medium text-muted-foreground uppercase tracking-wide">
+        <div className="grid grid-cols-[1fr_1fr_1fr] gap-0 bg-muted/50 px-4 py-2 text-xs font-medium text-muted-foreground">
           <span>{t("fileHeading")}</span>
           <span>{t("sampleValue")}</span>
           <span>{t("mapTo")}</span>

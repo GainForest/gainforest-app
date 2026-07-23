@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useState } from "react";
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { ArrowLeftIcon, CheckIcon, Loader2Icon, PencilIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -176,6 +176,7 @@ function loadCurrentSiteRecord(initialData: NonNullable<SiteEditorModalProps["in
 }
 
 export function SiteEditorModal({ did, target, initialData, onSaved, requireBoundary = false, initialFile = null }: SiteEditorModalProps) {
+  const shouldReduceMotion = useReducedMotion() ?? false;
   const isEditMode = Boolean(initialData?.rkey);
   const previewUrl =
     isEditMode && initialData?.hasShapeLocation
@@ -314,7 +315,7 @@ export function SiteEditorModal({ did, target, initialData, onSaved, requireBoun
           <motion.section
             key="form"
             className="w-full"
-            exit={{ opacity: 0, filter: "blur(10px)", scale: 0.5 }}
+            exit={shouldReduceMotion ? undefined : { opacity: 0, filter: "blur(10px)", scale: 0.5 }}
           >
             <div className="mt-4 flex w-full flex-col">
               <div className="flex flex-col gap-0.5">
@@ -363,7 +364,7 @@ export function SiteEditorModal({ did, target, initialData, onSaved, requireBoun
                   </Button>
                 )}
                 <div className="mt-2 flex flex-col gap-3">
-                  <label className="flex min-h-28 cursor-pointer flex-col items-center justify-center rounded-2xl border border-dashed border-border bg-muted/35 px-5 py-4 text-center transition-colors hover:border-primary/40 hover:bg-primary/5">
+                  <label className="flex min-h-28 cursor-pointer flex-col items-center justify-center rounded-2xl border border-dashed border-border bg-muted/35 px-5 py-4 text-center transition-colors hover:border-primary/40 hover:bg-primary/5 motion-reduce:transition-none">
                     <input
                       type="file"
                       accept=".geojson,.json,application/geo+json,application/json"
@@ -402,8 +403,9 @@ export function SiteEditorModal({ did, target, initialData, onSaved, requireBoun
           <motion.section
             key="completed"
             className="flex h-40 w-full flex-col items-center justify-center rounded-lg border border-border p-4"
-            initial={{ opacity: 0, filter: "blur(10px)", scale: 0.5 }}
+            initial={shouldReduceMotion ? false : { opacity: 0, filter: "blur(10px)", scale: 0.5 }}
             animate={{ opacity: 1, filter: "blur(0px)", scale: 1 }}
+            transition={{ duration: shouldReduceMotion ? 0 : 0.2 }}
           >
             <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary">
               <CheckIcon className="size-6 text-white" />

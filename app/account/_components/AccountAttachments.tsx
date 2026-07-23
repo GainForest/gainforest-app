@@ -124,9 +124,14 @@ function toCardModel(item: TimelineAttachmentItem, fallbackTitle: string): Attac
 }
 
 export async function AccountAttachmentsTabContent({ account, did }: { account: AccountRouteData; did: string }) {
-  const t = await getTranslations("common.accountAttachments");
-  const attachments = await fetchTimelineAttachmentsByDid(did).catch(() => [] as TimelineAttachmentItem[]);
-  const cards = attachments
+  const [t, errorT] = await Promise.all([
+    getTranslations("common.accountAttachments"),
+    getTranslations("common.errorPage"),
+  ]);
+  const result = await fetchTimelineAttachmentsByDid(did)
+    .then((attachments) => ({ attachments, failed: false as const }))
+    .catch(() => ({ attachments: [] as TimelineAttachmentItem[], failed: true as const }));
+  const cards = result.attachments
     .filter((item) => !HIDDEN_CONTENT_TYPES.has((item.record.contentType ?? "").toLowerCase()))
     .map((item) => toCardModel(item, t("untitled")));
 
@@ -134,8 +139,13 @@ export async function AccountAttachmentsTabContent({ account, did }: { account: 
 
   return (
     <section className="py-4">
-      {cards.length === 0 ? (
-        <div className="flex flex-col items-center gap-2 rounded-3xl border border-dashed border-border/70 bg-muted/20 px-6 py-12 text-center">
+      {result.failed ? (
+        <div role="alert" className="rounded-2xl bg-destructive/5 px-6 py-8 text-center">
+          <p className="font-medium text-foreground">{errorT("title")}</p>
+          <p className="mt-1 text-sm text-muted-foreground">{errorT("description")}</p>
+        </div>
+      ) : cards.length === 0 ? (
+        <div className="flex flex-col items-center gap-2 rounded-3xl bg-muted/25 px-6 py-12 text-center">
           <span className="grid size-12 place-items-center rounded-2xl bg-primary/10 text-primary ring-1 ring-primary/15">
             <PaperclipIcon className="size-6" />
           </span>
@@ -150,7 +160,7 @@ export async function AccountAttachmentsTabContent({ account, did }: { account: 
             return (
               <li
                 key={card.key}
-                className="flex gap-3 rounded-2xl border border-border/70 bg-card p-4 transition-colors hover:border-primary/40"
+                className="flex gap-3 rounded-2xl bg-muted/20 p-4 transition-colors hover:bg-muted/35 motion-reduce:transition-none"
               >
                 <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-primary/10 text-primary ring-1 ring-primary/15">
                   <Icon className="size-5" />

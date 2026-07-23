@@ -1056,7 +1056,7 @@ export default function UploadStep({
             </span>
           </div>
           <div className="h-2 w-full rounded-full bg-muted overflow-hidden">
-            <div className="h-full rounded-full bg-primary transition-all duration-300" style={{ width: `${progressPercent}%` }} />
+            <div className="h-full rounded-full bg-primary transition-[width] duration-300 motion-reduce:transition-none" style={{ width: `${progressPercent}%` }} />
           </div>
           <div className="flex flex-col gap-1 text-xs text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
             <p>{successes} succeeded{partials > 0 ? `, ${partials} need follow-up` : ""}{`, ${failures} failed`}</p>
@@ -1114,7 +1114,7 @@ export default function UploadStep({
                 </span>
               </div>
               <div className="h-2 w-full rounded-full bg-muted overflow-hidden">
-                <div className="h-full rounded-full bg-primary transition-all duration-300" style={{ width: `${photoFetchPercent}%` }} />
+                <div className="h-full rounded-full bg-primary transition-[width] duration-300 motion-reduce:transition-none" style={{ width: `${photoFetchPercent}%` }} />
               </div>
             </>
           )}
@@ -1194,7 +1194,7 @@ export default function UploadStep({
                 {rowAttentionSummaries.map((summary) => (
                   <li key={`${summary.kind}-${summary.sourceRowIndex}`} className="text-xs border border-destructive/20 rounded-md p-2 space-y-1">
                     <p className="font-medium">Row {summary.sourceRowIndex + 1} — {summary.rowLabel}</p>
-                    <p className="text-[0.6875rem] font-medium uppercase tracking-wide text-muted-foreground">{getTreeUploadRowAttentionKindLabel(summary.kind)}</p>
+                    <p className="text-xs font-medium text-muted-foreground">{getTreeUploadRowAttentionKindLabel(summary.kind)}</p>
                     <ul className="space-y-0.5">
                       {summary.messages.map((msg, idx) => <li key={idx} className="text-destructive">{msg}</li>)}
                     </ul>

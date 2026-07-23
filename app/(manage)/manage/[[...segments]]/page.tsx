@@ -38,8 +38,10 @@ export default async function LegacyManageRedirect({ params, searchParams }: Pag
 
   const query = new URLSearchParams();
   for (const [key, value] of Object.entries(sp)) {
-    const raw = Array.isArray(value) ? value[0] : value;
-    if (typeof raw === "string" && raw.length > 0) query.set(key, raw);
+    const values = Array.isArray(value) ? value : [value];
+    for (const raw of values) {
+      if (typeof raw === "string" && raw.length > 0) query.append(key, raw);
+    }
   }
   const queryString = query.toString();
   const withQuery = (path: string) => (queryString ? `${path}?${queryString}` : path);

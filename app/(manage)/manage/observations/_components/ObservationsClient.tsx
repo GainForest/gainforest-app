@@ -23,7 +23,7 @@ import {
   UploadCloudIcon,
   XIcon,
 } from "lucide-react";
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { useTranslations } from "next-intl";
 import { InlineCardGridSkeleton } from "@/app/_components/PageLoadingSkeletons";
 import { RecordExplorer } from "@/app/_components/RecordExplorer";
@@ -41,7 +41,7 @@ import QuickTooltip from "@/components/ui/quick-tooltip";
 import { manageApiHref, type ManageTarget } from "@/lib/links";
 import { cn } from "@/lib/utils";
 import { ManageConfirmModal } from "../../_components/ManageConfirmModal";
-import { canCreateRecord, canDeleteRecord } from "../../_lib/cgs-permissions";
+import { canCreateRecord, canDeleteRecord, canUpdateRecord } from "../../_lib/cgs-permissions";
 import { createMultimediaFromUrl, createRecord, deleteOccurrenceCascade, getRecord, putRecord } from "../../_lib/mutations";
 import {
   configureObservationMutationRepo,
@@ -524,6 +524,18 @@ export function ObservationsClient({
   const deletePermission = canDeleteRecord(target, { ownRecord: target.kind === "personal" });
   const deleteDisabledReason = deletePermission.allowed ? null : deletePermission.reason;
   const selectedIds = useMemo(() => new Set(selectedRecords.keys()), [selectedRecords]);
+  // Filing into a dataset updates each existing occurrence. Check every selected
+  // record instead of borrowing the more permissive create rule. Group-repo
+  // records fail closed until ownership can be proved from their author DID.
+  const datasetUpdatePermission = useMemo(() => {
+    for (const record of selectedRecords.values()) {
+      const permission = canUpdateRecord(target, {
+        ownRecord: target.kind === "personal" || Boolean(target.currentUserDid && record.did === target.currentUserDid),
+      });
+      if (!permission.allowed) return permission;
+    }
+    return { allowed: true, reason: null };
+  }, [selectedRecords, target]);
 
   useEffect(() => {
     configureObservationMutationRepo(target.kind === "group" ? target.did : null);
@@ -717,7 +729,7 @@ export function ObservationsClient({
   // then refresh folder counts and the listing.
   const openGroupIntoDataset = useCallback(() => {
     const records = Array.from(selectedRecords.values());
-    if (records.length === 0 || createPermission.reason) return;
+    if (records.length === 0 || !datasetUpdatePermission.allowed) return;
     modal.pushModal(
       {
         id: "group-observations-dataset",
@@ -749,7 +761,7 @@ export function ObservationsClient({
       true,
     );
     void modal.show();
-  }, [activeProject, createPermission.reason, datasetGroups, loadDatasetGroups, modal, router, selectedRecords, target]);
+  }, [activeProject, datasetGroups, datasetUpdatePermission.allowed, loadDatasetGroups, modal, router, selectedRecords, target]);
 
   // Delete a dataset WITHOUT deleting its observations — the records are
   // ungrouped (datasetRef cleared) and survive.
@@ -843,8 +855,8 @@ export function ObservationsClient({
                 variant="ghost"
                 size="sm"
                 onClick={openGroupIntoDataset}
-                disabled={selectedRecords.size === 0 || Boolean(createPermission.reason) || isDeletingSelected}
-                title={createPermission.reason ?? undefined}
+                disabled={selectedRecords.size === 0 || !datasetUpdatePermission.allowed || isDeletingSelected}
+                aria-describedby={!datasetUpdatePermission.allowed ? "observation-dataset-permission" : undefined}
                 className="text-muted-foreground hover:text-foreground"
               >
                 <FolderPlusIcon className="size-4" />
@@ -862,6 +874,11 @@ export function ObservationsClient({
               </Button>
             </div>
           </div>
+          {!datasetUpdatePermission.allowed && selectedRecords.size > 0 ? (
+            <p id="observation-dataset-permission" className="mt-2 text-sm text-muted-foreground">
+              {datasetUpdatePermission.reason}
+            </p>
+          ) : null}
         </div>
       ) : null}
 
@@ -1251,7 +1268,7 @@ function AddObservationTile({ onAdd, disabledReason, compact = false, wide = fal
   const t = useTranslations("upload.observations");
   const content = compact ? (
     <>
-      <span className="grid size-8 place-items-center rounded-xl bg-primary/10 text-primary ring-1 ring-primary/15 transition-transform duration-300 group-hover/tile:scale-105">
+      <span className="grid size-8 place-items-center rounded-xl bg-primary/10 text-primary ring-1 ring-primary/15 transition-transform duration-300 group-hover/tile:scale-105 motion-reduce:transform-none motion-reduce:transition-none">
         <BinocularsIcon className="size-4" />
       </span>
       <span className="mt-2 block font-instrument text-[15px] font-medium italic leading-tight tracking-[-0.02em] text-foreground">
@@ -1260,7 +1277,7 @@ function AddObservationTile({ onAdd, disabledReason, compact = false, wide = fal
     </>
   ) : (
     <>
-      <span className="grid size-12 place-items-center rounded-2xl bg-primary/10 text-primary ring-1 ring-primary/15 transition-transform duration-300 group-hover/tile:scale-105">
+      <span className="grid size-12 place-items-center rounded-2xl bg-primary/10 text-primary ring-1 ring-primary/15 transition-transform duration-300 group-hover/tile:scale-105 motion-reduce:transform-none motion-reduce:transition-none">
         <BinocularsIcon className="size-6" />
       </span>
       <span className="mt-3 block font-instrument text-xl font-medium italic tracking-[-0.02em] text-foreground">
@@ -1396,6 +1413,7 @@ function ObservationBulkAddPanel({
 }) {
   const t = useTranslations("upload.observations");
   const modal = useModal();
+  const shouldReduceMotion = useReducedMotion() ?? false;
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const [items, setItems] = useState<ObservationUploadItem[]>([]);
   const [bulkError, setBulkError] = useState<string | null>(null);
@@ -2280,7 +2298,7 @@ function ObservationBulkAddPanel({
             onClick={() => fileInputRef.current?.click()}
             className={`group flex min-h-[340px] w-full flex-col items-center justify-center rounded-3xl border border-dashed p-8 text-center transition-colors ${isDragging ? "border-primary/60 bg-primary/[0.08]" : "border-primary/25 bg-gradient-to-b from-primary/[0.04] to-transparent hover:border-primary/40 hover:from-primary/[0.07]"}`}
           >
-            <span className="mb-5 grid size-16 place-items-center rounded-2xl bg-primary/10 text-primary ring-1 ring-primary/15 transition-transform duration-300 group-hover:scale-105">
+            <span className="mb-5 grid size-16 place-items-center rounded-2xl bg-primary/10 text-primary ring-1 ring-primary/15 transition-transform duration-300 group-hover:scale-105 motion-reduce:transform-none motion-reduce:transition-none">
               <ImagePlusIcon className="size-7" />
             </span>
             <span className="font-instrument text-2xl font-medium italic tracking-[-0.02em]">{t("emptyUploadTitle")}</span>
@@ -2390,10 +2408,10 @@ function ObservationBulkAddPanel({
       <AnimatePresence>
         {isDragging ? (
           <motion.div
-            initial={{ opacity: 0 }}
+            initial={shouldReduceMotion ? false : { opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.15 }}
+            transition={{ duration: shouldReduceMotion ? 0 : 0.15 }}
             className="pointer-events-none absolute inset-0 z-20 flex items-center justify-center bg-background/70 backdrop-blur-sm"
           >
             <div className="flex flex-col items-center gap-3 rounded-3xl border-2 border-dashed border-primary/50 bg-card/80 px-10 py-8 text-center">
@@ -2542,7 +2560,7 @@ function ObservationListHeader({
 }) {
   const t = useTranslations("upload.observations");
   return (
-    <div className={`${ROW_GRID} border-b bg-muted/40 px-3 py-2.5 text-[0.65rem] font-semibold uppercase tracking-[0.12em] text-muted-foreground/80`}>
+    <div className={`${ROW_GRID} border-b bg-muted/40 px-3 py-2.5 text-xs font-semibold text-muted-foreground/80`}>
       <Checkbox
         checked={checked}
         disabled={disabled}
@@ -2596,6 +2614,7 @@ function ObservationListItem({
   onChangeLocation: (id: string) => void;
 }) {
   const t = useTranslations("upload.observations");
+  const shouldReduceMotion = useReducedMotion() ?? false;
   const [isDropTarget, setIsDropTarget] = useState(false);
   const [item] = group.items;
   const analysis = occurrenceAnalysisForUpload(group.items);
@@ -2637,9 +2656,9 @@ function ObservationListItem({
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 6 }}
-      animate={{ opacity: 1, y: 0, transition: { duration: 0.25, ease: [0.25, 0.1, 0.25, 1], delay: Math.min(index * 0.03, 0.18) } }}
-      exit={{ opacity: 0, height: 0, transition: { duration: ROW_EXIT_MS / 1000, ease: [0.25, 0.1, 0.25, 1] } }}
+      initial={shouldReduceMotion ? false : { opacity: 0, y: 6 }}
+      animate={{ opacity: 1, y: 0, transition: { duration: shouldReduceMotion ? 0 : 0.25, ease: [0.25, 0.1, 0.25, 1], delay: shouldReduceMotion ? 0 : Math.min(index * 0.03, 0.18) } }}
+      exit={{ opacity: 0, height: 0, transition: { duration: shouldReduceMotion ? 0 : ROW_EXIT_MS / 1000, ease: [0.25, 0.1, 0.25, 1] } }}
       onDragOver={(event) => {
         if (!rowDragKind(event)) return;
         event.preventDefault();
@@ -2668,9 +2687,9 @@ function ObservationListItem({
     >
       {isUploaded ? (
         <motion.div
-          initial={{ opacity: 0 }}
+          initial={shouldReduceMotion ? false : { opacity: 0 }}
           animate={{ opacity: 1 }}
-          transition={{ duration: 0.25, ease: "easeOut" }}
+          transition={{ duration: shouldReduceMotion ? 0 : 0.25, ease: "easeOut" }}
           className="flex items-center gap-3 px-3 py-3.5"
         >
           <span className="grid size-9 shrink-0 place-items-center rounded-full bg-primary-foreground/15">
@@ -2776,10 +2795,10 @@ function ObservationListItem({
         {expanded && showAnalysis ? (
           <motion.div
             key="details"
-            initial={{ height: 0, opacity: 0 }}
+            initial={shouldReduceMotion ? false : { height: 0, opacity: 0 }}
             animate={{ height: "auto", opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.25, ease: [0.25, 0.1, 0.25, 1] }}
+            transition={{ duration: shouldReduceMotion ? 0 : 0.25, ease: [0.25, 0.1, 0.25, 1] }}
             className="overflow-hidden"
           >
             <div className="border-t border-primary/10 bg-muted/30 p-4 sm:p-5">
@@ -2981,7 +3000,7 @@ function GroupMediaEditor({
                     setShowChooser(false);
                   }}
                   aria-label={t("addToObservation")}
-                  className="group/add relative size-20 overflow-hidden rounded-2xl bg-muted ring-1 ring-border transition-transform hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-primary/40"
+                  className="group/add relative size-20 overflow-hidden rounded-2xl bg-muted ring-1 ring-border transition-transform hover:-translate-y-0.5 motion-reduce:transform-none motion-reduce:transition-none focus:outline-none focus:ring-2 focus:ring-primary/40"
                 >
                   <img src={item.previewUrl} alt={item.file.name} className="h-full w-full object-cover" />
                   <span className="absolute inset-0 grid place-items-center bg-background/0 transition-colors group-hover/add:bg-background/45 group-focus:bg-background/45">
@@ -3179,8 +3198,8 @@ function ProgressBar({ value, errorValue = 0, label, className }: { value: numbe
   return (
     <div className={className} aria-label={label} role="progressbar" aria-valuemin={0} aria-valuemax={100} aria-valuenow={bounded}>
       <div className="flex h-2 overflow-hidden rounded-full bg-muted">
-        <div className="h-full bg-primary transition-all" style={{ width: `${bounded}%` }} />
-        <div className="h-full bg-destructive transition-all" style={{ width: `${failed}%` }} />
+        <div className="h-full bg-primary transition-[width] motion-reduce:transition-none" style={{ width: `${bounded}%` }} />
+        <div className="h-full bg-destructive transition-[width] motion-reduce:transition-none" style={{ width: `${failed}%` }} />
       </div>
       <p className="mt-1 text-xs text-muted-foreground">{label}</p>
     </div>

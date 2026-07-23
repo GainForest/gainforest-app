@@ -6,7 +6,7 @@
  * through the manage proxy.
  */
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import { Loader2Icon, XIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -76,10 +76,35 @@ export function EquipmentEditor({
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const busy = saving || deleting;
+  const busyRef = useRef(busy);
+  const dialogRef = useRef<HTMLDivElement | null>(null);
+  const closeButtonRef = useRef<HTMLButtonElement | null>(null);
+  busyRef.current = busy;
 
   useEffect(() => {
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape" && !busy) onClose();
+    const previouslyFocused = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    closeButtonRef.current?.focus();
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === "Escape" && !busyRef.current) {
+        onClose();
+        return;
+      }
+      if (event.key !== "Tab") return;
+      const focusable = Array.from(
+        dialogRef.current?.querySelectorAll<HTMLElement>(
+          'button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), a[href], [tabindex]:not([tabindex="-1"])',
+        ) ?? [],
+      ).filter((element) => !element.hasAttribute("hidden"));
+      const first = focusable[0];
+      const last = focusable.at(-1);
+      if (!first || !last) return;
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
     };
     document.addEventListener("keydown", onKey);
     const original = document.body.style.overflow;
@@ -87,8 +112,9 @@ export function EquipmentEditor({
     return () => {
       document.removeEventListener("keydown", onKey);
       document.body.style.overflow = original;
+      previouslyFocused?.focus();
     };
-  }, [onClose, busy]);
+  }, [onClose]);
 
   const patch = (p: Partial<EquipmentDraft>) => setDraft((d) => ({ ...d, ...p }));
 
@@ -146,14 +172,21 @@ export function EquipmentEditor({
   }
 
   return (
-    <div className="fixed inset-0 z-[110] flex justify-end" role="dialog" aria-modal="true">
-      <div className="absolute inset-0 bg-foreground/30 backdrop-blur-[2px]" onClick={() => !busy && onClose()} />
+    <div
+      ref={dialogRef}
+      className="fixed inset-0 z-[110] flex justify-end"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="equipment-editor-title"
+    >
+      <div aria-hidden className="absolute inset-0 bg-foreground/30 backdrop-blur-[2px]" onClick={() => !busy && onClose()} />
       <div className="relative flex h-full w-full max-w-[460px] flex-col overflow-y-auto bg-background shadow-2xl">
         <div className="sticky top-0 z-10 flex items-center justify-between gap-3 border-b border-border bg-background/95 px-5 py-4 backdrop-blur-xl">
-          <h2 className="text-lg font-semibold text-foreground">
+          <h2 id="equipment-editor-title" className="text-lg font-semibold text-foreground">
             {isEdit ? t("editEquipment") : t("addEquipment")}
           </h2>
           <Button
+            ref={closeButtonRef}
             variant="ghost"
             size="icon-sm"
             onClick={() => !busy && onClose()}

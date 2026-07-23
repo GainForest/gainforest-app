@@ -136,13 +136,10 @@ export function AudioClient({ did, target }: AudioClientProps) {
     <Container className="pt-4 pb-10 space-y-6">
       <header className="space-y-3">
         <div className="max-w-xl">
-          <h1 className="font-instrument text-2xl font-medium italic tracking-[-0.03em] text-foreground sm:text-3xl">My Audio</h1>
+          <h1 className="font-instrument text-2xl font-medium italic tracking-[-0.03em] text-foreground sm:text-3xl">{t("title")}</h1>
           <p className="mt-2 text-sm leading-6 text-muted-foreground">{t("intro")}</p>
         </div>
         <div className="rounded-2xl bg-muted p-1 text-sm text-muted-foreground">
-          <p className="px-3 pt-1 pb-2 text-center text-[0.7rem] font-medium uppercase tracking-[0.12em] text-muted-foreground/70">
-            {t("howDoesThisWork")}
-          </p>
           <FlowChart />
           <p className="px-3 mt-1 text-center">{t("fileSizeNote")}</p>
         </div>

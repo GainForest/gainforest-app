@@ -63,7 +63,7 @@ export default function TreeDataGuide() {
             ))}
           </div>
           <div className="overflow-hidden rounded-lg border">
-            <div className="grid grid-cols-[1fr_1.5fr_0.6fr] gap-0 bg-muted/50 px-4 py-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">
+            <div className="grid grid-cols-[1fr_1.5fr_0.6fr] gap-0 bg-muted/50 px-4 py-2 text-xs font-medium text-muted-foreground">
               <span>Heading</span><span>Description</span><span>Format</span>
             </div>
             <div className="divide-y divide-border">

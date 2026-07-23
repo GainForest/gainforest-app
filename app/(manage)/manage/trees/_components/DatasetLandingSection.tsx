@@ -295,18 +295,18 @@ export function DatasetLandingSection({
         <article
           key={card.id}
           className={cn(
-            "group flex h-full flex-col rounded-2xl border border-border bg-background p-5 text-left transition-all",
-            "hover:-translate-y-0.5 hover:border-foreground/15 hover:shadow-sm",
+            "group flex h-full flex-col rounded-2xl bg-muted/25 p-5 text-left transition-colors motion-reduce:transition-none",
+            "hover:bg-muted/40",
           )}
         >
           <div className="flex items-start justify-between gap-3">
             <div className="min-w-0 space-y-1">
-              <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
-                {card.isUngrouped ? t("needsTreeGroup") : t("treeGroup")}
-              </p>
-              <h2 className="truncate text-2xl leading-none text-foreground font-garamond">
+              <h2 className="font-instrument truncate text-2xl italic leading-none text-foreground">
                 {card.name}
               </h2>
+              <p className="text-xs text-muted-foreground">
+                {card.isUngrouped ? t("needsTreeGroup") : t("treeGroup")}
+              </p>
             </div>
             <StatusBadge tone={card.statusTone}>{card.statusLabel}</StatusBadge>
           </div>
@@ -336,7 +336,7 @@ export function DatasetLandingSection({
             <Button type="button" variant="ghost" size="sm" className="-ml-2" onClick={() => onOpen(card.id)}>
               <DatabaseIcon className="size-4 text-muted-foreground" />
               {t("openTreeGroup")}
-              <ChevronRightIcon className="size-4 text-muted-foreground transition-transform group-hover:translate-x-0.5" />
+              <ChevronRightIcon className="size-4 text-muted-foreground" />
             </Button>
             {card.canDelete && onDelete ? (
               <Button

@@ -7,10 +7,12 @@ import { TreeUploadContentsquareProvider } from "./TreeUploadContentsquareProvid
 import { TreesManageSkeleton } from "./TreesManageSkeleton";
 import { useTreesMode } from "../_hooks/useTreesMode";
 import type { ManageTarget } from "@/lib/links";
+import { canCreateRecord } from "../../_lib/cgs-permissions";
 
 function TreesPageInner({ did, target }: { did: string; target: ManageTarget }) {
   const [mode, setMode] = useTreesMode();
-  return mode === "upload" ? (
+  const createPermission = canCreateRecord(target);
+  return mode === "upload" && createPermission.allowed ? (
     <TreeUploadWizard did={did} target={target} onDone={() => setMode(null)} />
   ) : (
     <TreesClient did={did} target={target} onUpload={() => setMode("upload")} />

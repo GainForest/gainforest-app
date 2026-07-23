@@ -2,7 +2,6 @@
 
 import Image from "next/image";
 import { useCallback, useEffect, useMemo, useState, type FormEvent } from "react";
-import { motion } from "framer-motion";
 import { useTranslations } from "next-intl";
 import { CheckIcon, Loader2Icon, LockIcon, MailIcon, RefreshCwIcon, Trash2Icon, UsersIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -51,8 +50,6 @@ type DataCouncilRowState = {
   removeAria: string;
   onToggle: (did: string, selected: boolean) => void;
 };
-
-const SECTION_EASE = [0.25, 0.1, 0.25, 1] as const;
 
 function roleBadge(role: string) {
   return role === "owner"
@@ -678,11 +675,7 @@ export function GroupMembers({
 
   if (variant === "section") {
     return (
-      <motion.section
-        initial={{ opacity: 0, y: 8 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4, delay: 0.15, ease: SECTION_EASE }}
-      >
+      <section>
         <div className="flex items-center justify-between gap-3">
           <div className="flex items-baseline gap-2">
             <h2 className="font-instrument text-2xl italic leading-none text-foreground">Members</h2>
@@ -700,7 +693,7 @@ export function GroupMembers({
           {errorBanner}
           {list}
         </div>
-      </motion.section>
+      </section>
     );
   }
 

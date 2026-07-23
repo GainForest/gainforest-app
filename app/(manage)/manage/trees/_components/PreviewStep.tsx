@@ -204,14 +204,14 @@ export default function PreviewStep({ uploadId, parsedData, mappings, koboMediaZ
           <table className="w-full text-xs">
             <thead>
               <tr className="bg-muted/50 border-b border-border">
-                <th className="px-3 py-2 text-left font-medium text-muted-foreground uppercase tracking-wide w-8">#</th>
+                <th className="w-8 px-3 py-2 text-left font-medium text-muted-foreground">#</th>
                 {mappedHeaders.map((h) => (
-                  <th key={h} className="px-3 py-2 text-left font-medium text-muted-foreground uppercase tracking-wide whitespace-nowrap">
+                  <th key={h} className="whitespace-nowrap px-3 py-2 text-left font-medium text-muted-foreground">
                     {h === "siteBoundary" ? t("siteBoundaryField") : getTargetFieldLabel(h)}
                   </th>
                 ))}
-                {hasAnyPhotos && <th className="px-3 py-2 text-left font-medium text-muted-foreground uppercase tracking-wide whitespace-nowrap">{t("photos")}</th>}
-                <th className="px-3 py-2 text-left font-medium text-muted-foreground uppercase tracking-wide w-16">{t("status")}</th>
+                {hasAnyPhotos && <th className="whitespace-nowrap px-3 py-2 text-left font-medium text-muted-foreground">{t("photos")}</th>}
+                <th className="w-16 px-3 py-2 text-left font-medium text-muted-foreground">{t("status")}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
@@ -290,7 +290,7 @@ export default function PreviewStep({ uploadId, parsedData, mappings, koboMediaZ
           {errorSectionOpen && (
             <div className="border-t border-destructive/20 px-4 py-3 space-y-4">
               <div>
-                <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-2">{t("commonIssues")}</p>
+                <p className="mb-2 text-xs font-medium text-muted-foreground">{t("commonIssues")}</p>
                 <ul className="space-y-1">
                   {errorSummary.map((item) => (
                     <li key={item.path} className="text-sm flex items-start gap-2">
@@ -301,7 +301,7 @@ export default function PreviewStep({ uploadId, parsedData, mappings, koboMediaZ
                 </ul>
               </div>
               <div>
-                <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-2">{t("errorRows")}</p>
+                <p className="mb-2 text-xs font-medium text-muted-foreground">{t("errorRows")}</p>
                 <ul className="space-y-2 max-h-48 overflow-y-auto">
                   {errors.map((err) => (
                     <li key={err.index} className="text-xs border border-destructive/20 rounded-md p-2 space-y-0.5">

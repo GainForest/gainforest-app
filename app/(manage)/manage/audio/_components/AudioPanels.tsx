@@ -4,6 +4,7 @@ import { useMemo, useState, type ReactNode } from "react";
 import { CirclePlusIcon, LayoutGridIcon, ListIcon, SearchIcon } from "lucide-react";
 import { useTranslations } from "./audio-copy";
 import { Button } from "@/components/ui/button";
+import { ManageViewToggle } from "../../_components/ManageViewToggle";
 import { Input } from "@/components/ui/input";
 import type { AudioRecordingItem } from "@/app/_lib/indexer";
 import type { AudioDeploymentItem } from "@/app/_lib/indexer";
@@ -92,7 +93,15 @@ export function ListPanel(props: {
           />
         </div>
         <div className="flex shrink-0 items-center gap-2">
-          <ViewToggle view={view} setView={setView} />
+          <ManageViewToggle
+            value={view}
+            onChange={setView}
+            compactLabels
+            options={[
+              { id: "cards", label: "Cards", icon: LayoutGridIcon },
+              { id: "list", label: "List", icon: ListIcon },
+            ]}
+          />
           <Button onClick={props.onNew} className="rounded-full" disabled={Boolean(props.createDisabledReason)} title={props.createDisabledReason ?? undefined}>
             <CirclePlusIcon className="size-4" /> {t("list.new")}
           </Button>
@@ -185,32 +194,6 @@ export function ListPanel(props: {
         </div>
       )}
     </section>
-  );
-}
-
-function ViewToggle({ view, setView }: { view: ViewMode; setView: (view: ViewMode) => void }) {
-  return (
-    <div className="inline-flex h-10 shrink-0 items-center rounded-full border border-border bg-background/70 p-0.5 backdrop-blur">
-      {([
-        { id: "cards", label: "Cards", Icon: LayoutGridIcon },
-        { id: "list", label: "List", Icon: ListIcon },
-      ] as const).map(({ id, label, Icon }) => (
-        <button
-          key={id}
-          type="button"
-          onClick={() => setView(id)}
-          aria-pressed={view === id}
-          aria-label={label}
-          title={label}
-          className={`inline-flex h-9 items-center gap-1.5 rounded-full px-3 text-sm font-medium transition-colors ${
-            view === id ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"
-          }`}
-        >
-          <Icon className="h-4 w-4" />
-          <span className="hidden sm:inline">{label}</span>
-        </button>
-      ))}
-    </div>
   );
 }
 

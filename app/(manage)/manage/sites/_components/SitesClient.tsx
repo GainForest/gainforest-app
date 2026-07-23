@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { AnimatePresence, motion } from "framer-motion";
+import { useTranslations } from "next-intl";
 import {
   ChevronLeftIcon,
   ChevronRightIcon,
@@ -24,6 +24,8 @@ import {
   SiteEditorModalId,
 } from "../../_modals/SiteEditorModal";
 import { takeAddDataHandoff } from "../../_lib/upload/add-data-handoff";
+import { ManageViewToggle } from "../../_components/ManageViewToggle";
+import { ManageSectionHeader } from "../../_components/ManageSectionHeader";
 
 const PREVIEW_APP_BASE_URL = "https://polygons-gainforest.vercel.app";
 const DEFAULT_SITE_COLLECTION = "app.gainforest.organization.defaultSite";
@@ -53,33 +55,8 @@ function canPreviewSite(site: ManagedLocation): boolean {
   return site.record.location?.kind === "uri";
 }
 
-function ViewToggle({ view, setView }: { view: ViewMode; setView: (view: ViewMode) => void }) {
-  return (
-    <div className="inline-flex h-10 shrink-0 items-center rounded-full border border-border bg-background/70 p-0.5 backdrop-blur">
-      {([
-        { id: "cards", label: "Cards", Icon: LayoutGridIcon },
-        { id: "list", label: "List", Icon: ListIcon },
-      ] as const).map(({ id, label, Icon }) => (
-        <button
-          key={id}
-          type="button"
-          onClick={() => setView(id)}
-          aria-pressed={view === id}
-          aria-label={label}
-          title={label}
-          className={`inline-flex h-9 items-center gap-1.5 rounded-full px-3 text-sm font-medium transition-colors ${
-            view === id ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"
-          }`}
-        >
-          <Icon className="h-4 w-4" />
-          <span>{label}</span>
-        </button>
-      ))}
-    </div>
-  );
-}
-
 export function SitesClient({ did, target }: { did: string; target: ManageTarget }) {
+  const t = useTranslations("upload.sites");
   const router = useRouter();
   const searchParams = useSearchParams();
   const modal = useModal();
@@ -324,21 +301,28 @@ export function SitesClient({ did, target }: { did: string; target: ManageTarget
 
   return (
     <Container className="space-y-6 pb-8 pt-4">
-      <div className="flex items-center justify-between gap-3">
-        <div>
-          <h1 className="font-instrument text-2xl font-medium italic tracking-[-0.03em] text-foreground sm:text-3xl">My Sites</h1>
-          <p className="mt-0.5 text-sm text-muted-foreground">
-            Manage your field locations and mapped project areas.
-          </p>
-        </div>
-        <div className="flex shrink-0 items-center gap-2">
-          {sites.length > 0 ? <ViewToggle view={view} setView={setView} /> : null}
-          <Button size="sm" className="rounded-full" onClick={() => handleOpenAdd()} disabled={!createPermission.allowed} title={createPermission.reason ?? undefined}>
-            <CirclePlusIcon />
-            Add site
-          </Button>
-        </div>
-      </div>
+      <ManageSectionHeader
+        title={t("title")}
+        actions={(
+          <>
+            {sites.length > 0 ? (
+              <ManageViewToggle
+                value={view}
+                onChange={setView}
+                options={[
+                  { id: "cards", label: "Cards", icon: LayoutGridIcon },
+                  { id: "list", label: "List", icon: ListIcon },
+                ]}
+              />
+            ) : null}
+            <Button size="sm" className="rounded-full" onClick={() => handleOpenAdd()} disabled={!createPermission.allowed} aria-describedby={!createPermission.allowed ? "sites-create-permission" : undefined}>
+              <CirclePlusIcon />
+              {t("addSite")}
+            </Button>
+          </>
+        )}
+      />
+      {!createPermission.allowed ? <p id="sites-create-permission" className="text-sm text-muted-foreground">{createPermission.reason}</p> : null}
 
       {canShowPreview && (
         <div className="relative h-80 w-full overflow-hidden rounded-2xl border border-border">
@@ -394,26 +378,20 @@ export function SitesClient({ did, target }: { did: string; target: ManageTarget
       )}
 
       {sites.length === 0 && !fetchError ? (
-        <motion.div
-          initial={{ opacity: 0, y: 8 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.35, ease: [0.25, 0.1, 0.25, 1] }}
-          className="flex h-48 flex-col items-center justify-center gap-4 rounded-xl border border-dashed border-border text-center"
-        >
-          <p className="font-garamond text-xl font-semibold text-muted-foreground">
-            No sites yet
-          </p>
+        <div className="flex h-48 flex-col items-center justify-center gap-4 rounded-2xl bg-muted/30 px-6 text-center">
+          <h2 className="font-instrument text-xl font-semibold italic text-foreground">
+            {t("emptyTitle")}
+          </h2>
           <p className="max-w-sm text-sm text-muted-foreground">
-            Add your first field location to get started.
+            {t("emptyDescription")}
           </p>
           <Button variant="outline" size="sm" onClick={() => handleOpenAdd()} disabled={!createPermission.allowed} title={createPermission.reason ?? undefined}>
             <CirclePlusIcon />
-            Add a site
+            {t("addASite")}
           </Button>
-        </motion.div>
+        </div>
       ) : (
-        <AnimatePresence>
-          <div className={view === "list" ? "" : "grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3"}>
+        <div className={view === "list" ? "" : "grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3"}>
             {sites.map((site) => {
               const rkey = site.metadata.rkey;
               if (!rkey) return null;
@@ -442,8 +420,7 @@ export function SitesClient({ did, target }: { did: string; target: ManageTarget
                 <div key={site.metadata.uri ?? rkey}>{card}</div>
               );
             })}
-          </div>
-        </AnimatePresence>
+        </div>
       )}
     </Container>
   );

@@ -3,7 +3,6 @@
 import { useEffect } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { motion } from "framer-motion";
 import { stripLocaleFromPathname } from "@/lib/i18n/routing";
 import type { AccountRouteData } from "@/app/account/_lib/account-route";
 import { ManageAccountSetup } from "./ManageAccountSetup";
@@ -19,8 +18,6 @@ import { GroupMembers } from "../groups/_components/GroupMembers";
 import { ManageGroupsClient } from "../groups/_components/ManageGroupsClient";
 import type { CgsRole } from "../_lib/cgs";
 
-const SECTION_EASE = [0.25, 0.1, 0.25, 1] as const;
-
 function decodePath(value: string): string {
   try {
     return decodeURIComponent(value);
@@ -35,15 +32,10 @@ function publicAccountHref(identifier: string): string {
 
 function DashboardSection({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <motion.section
-      initial={{ opacity: 0, y: 8 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.4, delay: 0.1, ease: SECTION_EASE }}
-      className="space-y-4"
-    >
+    <section className="space-y-4">
       <h2 className="font-instrument text-2xl italic leading-none text-foreground">{title}</h2>
       {children}
-    </motion.section>
+    </section>
   );
 }
 

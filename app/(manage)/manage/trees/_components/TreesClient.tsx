@@ -42,8 +42,9 @@ import type {
   UploadTreeDatasetRecord,
 } from "@/app/_lib/indexer";
 import { TreesManageSkeleton } from "./TreesManageSkeleton";
+import { ManageSectionHeader } from "../../_components/ManageSectionHeader";
 import { TreeListPagination } from "./TreeListPagination";
-import { ManageConfirmModal } from "./ManageConfirmModal";
+import { ManageConfirmModal } from "../../_components/ManageConfirmModal";
 import GreenGlobeTreePreviewCard from "./GreenGlobeTreePreviewCard";
 import AddToTreeGroupModal from "./AddToTreeGroupModal";
 import {
@@ -368,9 +369,9 @@ function SectionCard({
   className?: string;
 }) {
   return (
-    <section className={cn("rounded-2xl border border-border bg-background p-4 md:p-5 space-y-4", className)}>
+    <section className={cn("space-y-4 border-t border-border/70 pt-6 first:border-t-0 first:pt-0", className)}>
       <div className="space-y-1">
-        <h3 className="text-lg font-semibold font-garamond">{title}</h3>
+        <h3 className="font-instrument text-lg font-semibold italic">{title}</h3>
         <p className="text-sm text-muted-foreground">{description}</p>
       </div>
       {children}
@@ -400,8 +401,8 @@ function Field({
 
 function DetailFact({ label, value }: { label: string; value: React.ReactNode }) {
   return (
-    <div className="rounded-xl border border-border bg-muted/20 px-3 py-2">
-      <p className="text-[11px] uppercase tracking-[0.16em] text-muted-foreground">{label}</p>
+    <div className="rounded-xl bg-muted/30 px-3 py-2">
+      <p className="text-xs font-medium text-muted-foreground">{label}</p>
       <div className="mt-1 text-sm text-foreground break-words">{value}</div>
     </div>
   );
@@ -1418,20 +1419,17 @@ export function TreesClient({ did, target, onUpload }: TreesClientProps) {
 
   return (
     <Container className="pt-4 pb-8 space-y-6">
-      <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
-        <div className="space-y-1">
-          <h1 className="font-instrument text-2xl font-medium italic tracking-[-0.03em] text-foreground sm:text-3xl">My Trees</h1>
-          <p className="text-sm text-muted-foreground max-w-2xl">
-            Review saved tree information, measurements, and photos in one place.
-          </p>
-        </div>
-        {onUpload ? (
-          <Button variant="outline" onClick={onUpload}>
+      <ManageSectionHeader
+        title="My Trees"
+        description="Review saved tree information, measurements, and photos in one place."
+        actions={onUpload ? (
+          <Button variant="outline" onClick={onUpload} disabled={!createPermission.allowed} aria-describedby={!createPermission.allowed ? "tree-upload-permission" : undefined}>
             <CloudUploadIcon />
             Upload tree data
           </Button>
         ) : null}
-      </div>
+      />
+      {!createPermission.allowed ? <p id="tree-upload-permission" className="text-sm text-muted-foreground">{createPermission.reason}</p> : null}
 
       {!showTreeGroupLanding && treeGroupCards.length > 0 ? (
         <Button variant="ghost" className="-ml-2 w-fit" onClick={handleReturnToTreeGroups}>
@@ -1533,7 +1531,7 @@ export function TreesClient({ did, target, onUpload }: TreesClientProps) {
 
       {treeGroupCards.length === 0 && treeItems.length === 0 ? (
         <div className="flex flex-col items-center justify-center h-64 gap-4 rounded-2xl border border-dashed border-border text-center px-6">
-          <p className="text-2xl text-muted-foreground font-garamond">No trees uploaded yet</p>
+          <h2 className="font-instrument text-2xl italic text-foreground">No trees uploaded yet</h2>
           <p className="text-sm text-muted-foreground max-w-md">
             Upload your first tree file to start managing tree information, measurements, and photos.
           </p>
@@ -1557,7 +1555,7 @@ export function TreesClient({ did, target, onUpload }: TreesClientProps) {
 
           {filteredTreeGroupCards.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-56 gap-3 rounded-2xl border border-dashed border-border text-center px-6">
-              <p className="text-2xl text-muted-foreground font-garamond">{treeFilterT("noTreeGroupsTitle")}</p>
+              <h2 className="font-instrument text-2xl italic text-foreground">{treeFilterT("noTreeGroupsTitle")}</h2>
               <p className="text-sm text-muted-foreground">{treeFilterT("noTreeGroupsDescription")}</p>
               <Button variant="outline" onClick={() => { setTreeGroupSearchQuery(""); setTreeGroupRecordedByFilter(""); }}>{treeFilterT("clearFilters")}</Button>
             </div>
@@ -1567,7 +1565,7 @@ export function TreesClient({ did, target, onUpload }: TreesClientProps) {
         </div>
       ) : filteredTrees.length === 0 ? (
         <div className="flex flex-col items-center justify-center h-56 gap-3 rounded-2xl border border-dashed border-border text-center px-6">
-          <p className="text-2xl text-muted-foreground font-garamond">No trees match your search</p>
+          <h2 className="font-instrument text-2xl italic text-foreground">No trees match your search</h2>
           <p className="text-sm text-muted-foreground">Try a different species, place, or person.</p>
           <Button variant="outline" onClick={() => handleTreeSearchChange("")}>Clear search</Button>
         </div>
@@ -1644,7 +1642,7 @@ export function TreesClient({ did, target, onUpload }: TreesClientProps) {
                     >
                       <div className="flex items-start justify-between gap-3">
                         <div className="min-w-0 space-y-1">
-                          <p className="truncate text-lg leading-none font-garamond">{tree.scientificName ?? "Unnamed tree"}</p>
+                          <p className="truncate text-lg font-medium leading-none">{tree.scientificName ?? "Unnamed tree"}</p>
                           {tree.vernacularName ? <p className="truncate text-xs italic text-muted-foreground">{tree.vernacularName}</p> : null}
                           <p className="flex items-center gap-1 truncate text-xs text-muted-foreground">
                             <MapPinIcon className="size-3" />
@@ -1677,8 +1675,7 @@ export function TreesClient({ did, target, onUpload }: TreesClientProps) {
               <section className="rounded-2xl border border-border bg-background p-4 md:p-5 space-y-4">
                 <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
                   <div className="min-w-0 space-y-2">
-                    <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">Selected tree</p>
-                    <h2 className="truncate text-3xl leading-none font-garamond">{selectedTree.occurrence.scientificName ?? "Unnamed tree"}</h2>
+                    <h2 className="font-instrument truncate text-3xl italic leading-none">{selectedTree.occurrence.scientificName ?? "Unnamed tree"}</h2>
                     {selectedTree.occurrence.vernacularName ? (
                       <p className="text-sm italic text-muted-foreground">{selectedTree.occurrence.vernacularName}</p>
                     ) : null}
@@ -1723,7 +1720,8 @@ export function TreesClient({ did, target, onUpload }: TreesClientProps) {
               </section>
 
               <SectionCard title="Tree information" description="Review and update the details saved for this tree.">
-                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                {!updatePermission.allowed ? <p className="text-sm text-muted-foreground">{updatePermission.reason}</p> : null}
+                <fieldset disabled={!updatePermission.allowed} className="grid grid-cols-1 gap-4 disabled:opacity-70 md:grid-cols-2">
                   <Field label="Scientific name" required>
                     <Input value={occurrenceDraft.scientificName} onChange={(event) => handleOccurrenceFieldChange("scientificName", event.target.value)} />
                   </Field>
@@ -1767,7 +1765,7 @@ export function TreesClient({ did, target, onUpload }: TreesClientProps) {
                   <Field label="Remarks">
                     <Textarea value={occurrenceDraft.occurrenceRemarks} onChange={(event) => handleOccurrenceFieldChange("occurrenceRemarks", event.target.value)} rows={3} />
                   </Field>
-                </div>
+                </fieldset>
 
                 <div className="flex flex-col gap-3 border-t border-border pt-4 sm:flex-row sm:items-center sm:justify-between">
                   <div className="min-h-5 text-sm">
@@ -1801,7 +1799,13 @@ export function TreesClient({ did, target, onUpload }: TreesClientProps) {
                   </div>
                 ) : (
                   <>
-                    <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                    {!((selectedTree.preferredMeasurement ? updatePermission : createPermission).allowed) ? (
+                      <p className="text-sm text-muted-foreground">{(selectedTree.preferredMeasurement ? updatePermission : createPermission).reason}</p>
+                    ) : null}
+                    <fieldset
+                      disabled={!(selectedTree.preferredMeasurement ? updatePermission : createPermission).allowed}
+                      className="grid grid-cols-1 gap-4 disabled:opacity-70 md:grid-cols-2"
+                    >
                       <Field label="DBH (cm)">
                         <Input value={measurementDraft.dbh} inputMode="decimal" onChange={(event) => handleMeasurementFieldChange("dbh", event.target.value)} />
                       </Field>
@@ -1815,7 +1819,7 @@ export function TreesClient({ did, target, onUpload }: TreesClientProps) {
                       <Field label="Canopy cover (%)">
                         <Input type="number" min={0} max={CANOPY_COVER_PERCENT_MAX} step="any" value={measurementDraft.canopyCoverPercent} onChange={(event) => handleMeasurementFieldChange("canopyCoverPercent", event.target.value)} />
                       </Field>
-                    </div>
+                    </fieldset>
                     <div className="flex flex-col gap-3 border-t border-border pt-4 sm:flex-row sm:items-center sm:justify-between">
                       <div className="min-h-5 text-sm">
                         {measurementError || measurementValidationError ? (
@@ -1850,7 +1854,7 @@ export function TreesClient({ did, target, onUpload }: TreesClientProps) {
               </SectionCard>
 
               <SectionCard title="Photos" description="See and manage photos linked to this tree.">
-                <div className="rounded-xl border border-border bg-muted/20 p-3 space-y-3">
+                <div className="space-y-3 rounded-xl bg-muted/30 p-3">
                   <div className="grid grid-cols-1 gap-3 md:grid-cols-[minmax(0,1fr)_auto] md:items-end">
                     <div className="space-y-1.5">
                       <Label htmlFor="new-photo-caption">Caption for new photo</Label>
@@ -1943,8 +1947,8 @@ export function TreesClient({ did, target, onUpload }: TreesClientProps) {
                 )}
               </SectionCard>
 
-              <SectionCard title="Delete tree" description="Delete this tree and anything linked to it." className="border-destructive/20">
-                <div className="flex flex-col gap-3 rounded-xl border border-destructive/20 bg-destructive/5 p-4 sm:flex-row sm:items-center sm:justify-between">
+              <SectionCard title="Delete tree" description="Delete this tree and anything linked to it.">
+                <div className="flex flex-col gap-3 rounded-xl bg-destructive/5 p-4 sm:flex-row sm:items-center sm:justify-between">
                   <div className="space-y-1">
                     <p className="text-sm font-medium text-foreground">Delete this tree permanently</p>
                     <p className="text-sm text-muted-foreground">
