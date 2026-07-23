@@ -42,29 +42,20 @@
       "trigger": "O que há de novo?",
       "openLabel": "Ver as novidades do GainForest",
       "openLabelUnread": "Ver novas atualizações do GainForest",
+      "dismissLabel": "Fechar novidades",
       "title": "Novidades",
-      "eyebrow": "Novidades do GainForest",
-      "heading": "Algumas coisas ficaram ainda melhores",
-      "intro": "Um resumo breve e tranquilo das últimas mudanças — só quando você quiser.",
-      "newBadge": "Novo",
+      "popupBody": "Tenho algumas novidades do GainForest para mostrar a você.",
       "items": {
         "guidedHelp": {
-          "eyebrow": "Tainá",
-          "title": "A Tainá pode guiar você pela tela",
-          "body": "Abra uma pergunta frequente e escolha “Me mostre” para a Tainá apontar os lugares certos na sua tela."
+          "body": "Escolha uma pergunta frequente e a Tainá poderá apontar os lugares certos na sua tela."
         },
         "fieldData": {
-          "eyebrow": "Dados de campo",
-          "title": "Envie grandes lotes de dados de campo",
           "body": "Equipes de campo agora podem enviar fotos e arquivos de pesquisa juntos para revisão, mesmo em lotes muito grandes."
         },
         "donations": {
-          "eyebrow": "Doações",
-          "title": "Configurar doações ficou mais simples",
           "body": "Organizações podem criar uma carteira compartilhada com uma chave de acesso e permitir que outros membros adicionem a própria chave."
         }
-      },
-      "footer": "É só por enquanto. Esta lista não vai abrir sozinha."
+      }
     }
   },
   "guides": {

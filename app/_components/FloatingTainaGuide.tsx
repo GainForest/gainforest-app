@@ -11,6 +11,12 @@ import {
   useState,
 } from "react";
 import { useLocale, useTranslations } from "next-intl";
+import {
+  DatabaseIcon,
+  HeartHandshakeIcon,
+  MegaphoneIcon,
+  SparklesIcon,
+} from "lucide-react";
 import { stripLocaleFromPathname } from "@/lib/i18n/routing";
 import { ACTIVE_MANAGE_CONTEXT_KEY, accountManageBasePath } from "@/lib/links";
 import { hasLabelEvidence, isUnidentifiedRecord } from "@/app/labeler/_lib/evidence";
@@ -48,12 +54,16 @@ const VIEWPORT_PADDING = 12;
 const DRAG_THRESHOLD_PX = 4;
 const STORAGE_KEY = "gainforest.floatingTaina.position.v1";
 const MINIMIZED_STORAGE_KEY = "gainforest.floatingTaina.minimized.v1";
-// Bump this id whenever the curated What's New cards change. We only show a
-// quiet unread dot until the visitor deliberately opens the cards — the panel
-// never opens itself, and the seen state survives refreshes.
+// Bump this id whenever the curated What's New items change. An unread release
+// appears beside Tainá once. Opening, closing, or minimizing it acknowledges
+// that release across refreshes and tabs.
 const WHATS_NEW_RELEASE_ID = "2026-07-06";
 const WHATS_NEW_STORAGE_KEY = "gainforest.floatingTaina.whatsNewSeen.v1";
-const WHATS_NEW_ITEM_IDS = ["guidedHelp", "fieldData", "donations"] as const;
+const WHATS_NEW_ITEMS = [
+  { id: "guidedHelp", Icon: SparklesIcon },
+  { id: "fieldData", Icon: DatabaseIcon },
+  { id: "donations", Icon: HeartHandshakeIcon },
+] as const;
 // Active tour survives full page loads (locale redirects, hard navigations)
 // via sessionStorage — the widget rehydrates it on mount.
 const TOUR_STORAGE_KEY = "gainforest.floatingTaina.tour.v1";
@@ -453,21 +463,32 @@ export function FloatingTainaGuide() {
     panelBodyRef.current?.scrollTo({ top: 0 });
   }, [view, open]);
 
+  const acknowledgeWhatsNew = useCallback(() => {
+    setHasUnreadWhatsNew(false);
+    try {
+      window.localStorage.setItem(WHATS_NEW_STORAGE_KEY, WHATS_NEW_RELEASE_ID);
+    } catch {
+      // The widget still works when storage is unavailable.
+    }
+  }, []);
+
   const closePanel = useCallback(() => {
     const restoreWhatsNewFocus = view.kind === "whatsNew";
+    if (restoreWhatsNewFocus) acknowledgeWhatsNew();
     setOpen(false);
     setView({ kind: "home" });
     if (restoreWhatsNewFocus) {
       window.requestAnimationFrame(() => whatsNewTriggerRef.current?.focus());
     }
-  }, [view.kind]);
+  }, [acknowledgeWhatsNew, view.kind]);
 
   const minimizePanel = useCallback(() => {
+    if (hasUnreadWhatsNew) acknowledgeWhatsNew();
     setOpen(false);
     setView({ kind: "home" });
     setMinimized(true);
     window.requestAnimationFrame(() => restoreButtonRef.current?.focus());
-  }, []);
+  }, [acknowledgeWhatsNew, hasUnreadWhatsNew]);
 
   useEffect(() => {
     if (!open) return;
@@ -502,18 +523,13 @@ export function FloatingTainaGuide() {
   }, []);
 
   const openWhatsNew = useCallback(() => {
+    acknowledgeWhatsNew();
     setMinimized(false);
     setView({ kind: "whatsNew" });
     setOpen(true);
     setWaveActive(true);
-    setHasUnreadWhatsNew(false);
-    try {
-      window.localStorage.setItem(WHATS_NEW_STORAGE_KEY, WHATS_NEW_RELEASE_ID);
-    } catch {
-      // The panel still works when storage is unavailable.
-    }
     window.requestAnimationFrame(() => whatsNewBackRef.current?.focus());
-  }, []);
+  }, [acknowledgeWhatsNew]);
 
   // Opening a guide checks the visitor's session (every tour needs one) and,
   // for project-dependent guides (donation setup), whether the user actually
@@ -815,9 +831,20 @@ export function FloatingTainaGuide() {
     }
     if (streaming) return "review";
     if (tour) return spotRect ? "waving" : "waiting";
-    if (waveActive || activeTip !== null || helpObs) return "waving";
+    if (waveActive || hasUnreadWhatsNew || activeTip !== null || helpObs) return "waving";
     return "idle";
-  }, [dragging, dragDirection, streaming, waveActive, tour, spotRect, tourMoving, activeTip, helpObs]);
+  }, [
+    dragging,
+    dragDirection,
+    streaming,
+    waveActive,
+    hasUnreadWhatsNew,
+    tour,
+    spotRect,
+    tourMoving,
+    activeTip,
+    helpObs,
+  ]);
 
   const markFirstFrame = useCallback(() => setFirstFramePainted(true), []);
 
@@ -1376,64 +1403,29 @@ export function FloatingTainaGuide() {
               </>
             ) : view.kind === "whatsNew" ? (
               <section aria-labelledby="taina-whats-new-title">
-                <div className="relative overflow-hidden rounded-2xl border border-primary/20 bg-primary/[0.06] px-4 py-4">
-                  <div
-                    aria-hidden
-                    className="absolute -right-6 -top-7 size-24 rounded-full border border-primary/10"
-                  />
-                  <div
-                    aria-hidden
-                    className="absolute right-4 top-5 size-2 rounded-full bg-primary/25"
-                  />
-                  <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-primary">
-                    {t("whatsNew.eyebrow")}
-                  </p>
+                <div className="flex items-center gap-2 px-1 py-1">
+                  <MegaphoneIcon aria-hidden className="size-4 text-primary" />
                   <h2
                     id="taina-whats-new-title"
-                    className="mt-1 text-lg font-semibold tracking-tight text-foreground"
+                    className="text-sm font-medium text-foreground"
                   >
-                    {t("whatsNew.heading")}
+                    {t("whatsNew.title")}
                   </h2>
-                  <p className="mt-1.5 max-w-[28ch] text-[12px] leading-relaxed text-foreground/65">
-                    {t("whatsNew.intro")}
-                  </p>
                 </div>
 
-                <ol className="relative mt-4 space-y-2.5 before:absolute before:bottom-5 before:left-[18px] before:top-5 before:w-px before:bg-border">
-                  {WHATS_NEW_ITEM_IDS.map((itemId, index) => (
+                <ul className="mt-3 space-y-2">
+                  {WHATS_NEW_ITEMS.map(({ id, Icon }) => (
                     <li
-                      key={itemId}
-                      className="relative rounded-2xl border border-border bg-background px-3 py-3 pl-11 shadow-[0_1px_0_rgba(0,0,0,0.02)]"
+                      key={id}
+                      className="flex items-start gap-3 rounded-2xl bg-muted px-3 py-3"
                     >
-                      <span
-                        aria-hidden
-                        className="absolute left-3 top-3.5 grid size-3 rounded-full border-[3px] border-background bg-primary ring-1 ring-primary/25"
-                      />
-                      <div className="flex items-start justify-between gap-3">
-                        <div>
-                          <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-primary/80">
-                            {t(`whatsNew.items.${itemId}.eyebrow`)}
-                          </p>
-                          <h3 className="mt-0.5 text-[13px] font-semibold leading-snug text-foreground">
-                            {t(`whatsNew.items.${itemId}.title`)}
-                          </h3>
-                        </div>
-                        {index === 0 ? (
-                          <span className="shrink-0 rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-semibold text-primary">
-                            {t("whatsNew.newBadge")}
-                          </span>
-                        ) : null}
-                      </div>
-                      <p className="mt-1 text-[12px] leading-relaxed text-foreground/60">
-                        {t(`whatsNew.items.${itemId}.body`)}
+                      <Icon aria-hidden className="mt-0.5 size-4 shrink-0 text-primary" />
+                      <p className="text-[12px] leading-relaxed text-muted-foreground">
+                        {t(`whatsNew.items.${id}.body`)}
                       </p>
                     </li>
                   ))}
-                </ol>
-
-                <p className="mt-4 px-1 text-center text-[11px] leading-relaxed text-muted-foreground">
-                  {t("whatsNew.footer")}
-                </p>
+                </ul>
               </section>
             ) : guideView ? (
               <>
@@ -1616,15 +1608,17 @@ export function FloatingTainaGuide() {
             –
           </button>
         ) : null}
-        {/* "Can you help?" — an occasional speech bubble asking for help with
-            an unidentified observation. "I think I know!" jumps to the labeler
-            with exactly that observation preselected. */}
-        {!open && !tour && !dragging && helpObs ? (
+        {/* What's New and Did you know remain independent. When both are
+            visible, their separate bubbles stack instead of replacing each
+            other or sharing content. */}
+        {!open &&
+        !tour &&
+        !dragging &&
+        (hasUnreadWhatsNew || helpObs || (activeTip !== null && TAINA_TIPS[activeTip])) ? (
           <div
             data-no-drag
-            role="status"
-            className={`absolute z-10 rounded-2xl border border-border bg-background/95 p-3 shadow-[0_4px_16px_-4px_rgba(40,50,30,0.3)] backdrop-blur-sm ${
-              position.y < 300 ? "top-full mt-2" : "bottom-full mb-2"
+            className={`absolute z-10 flex gap-2 ${
+              position.y < 300 ? "top-full mt-2 flex-col" : "bottom-full mb-2 flex-col-reverse"
             }`}
             style={{
               width: TIP_BUBBLE_W,
@@ -1632,6 +1626,54 @@ export function FloatingTainaGuide() {
                 ? { right: 0 }
                 : { left: 0 }),
             }}
+          >
+        {/* Unread announcements get their own prominent speech bubble. Any
+            explicit dismissal acknowledges only the current release. */}
+        {hasUnreadWhatsNew ? (
+          <div
+            data-no-drag
+            role="status"
+            className="rounded-2xl border border-border bg-background/95 p-3 shadow-[0_4px_16px_-4px_rgba(40,50,30,0.3)] backdrop-blur-sm"
+          >
+            <div className="flex items-start justify-between gap-2">
+              <div className="flex items-center gap-1.5 text-[11px] font-medium uppercase tracking-wide text-primary">
+                <MegaphoneIcon aria-hidden className="size-3.5" />
+                {t("whatsNew.title")}
+              </div>
+              <button
+                type="button"
+                onClick={(event) => {
+                  event.stopPropagation();
+                  acknowledgeWhatsNew();
+                }}
+                aria-label={t("whatsNew.dismissLabel")}
+                title={t("whatsNew.dismissLabel")}
+                className="-mr-1 -mt-1 grid h-5 w-5 shrink-0 place-items-center rounded-full text-[12px] leading-none text-foreground/50 hover:bg-foreground/5 hover:text-foreground"
+              >
+                ×
+              </button>
+            </div>
+            <button
+              type="button"
+              onClick={(event) => {
+                event.stopPropagation();
+                openWhatsNew();
+              }}
+              aria-label={t("whatsNew.openLabelUnread")}
+              className="mt-1 block w-full text-left text-[12px] leading-relaxed text-foreground hover:text-primary"
+            >
+              {t("whatsNew.popupBody")}
+            </button>
+          </div>
+        ) : null}
+        {/* "Can you help?" — an occasional speech bubble asking for help with
+            an unidentified observation. "I think I know!" jumps to the labeler
+            with exactly that observation preselected. */}
+        {helpObs ? (
+          <div
+            data-no-drag
+            role="status"
+            className="rounded-2xl border border-border bg-background/95 p-3 shadow-[0_4px_16px_-4px_rgba(40,50,30,0.3)] backdrop-blur-sm"
           >
             <div className="flex items-start justify-between gap-2">
               <div className="text-[11px] font-medium uppercase tracking-wide text-primary">
@@ -1677,19 +1719,11 @@ export function FloatingTainaGuide() {
         {/* "Did you know?" tip — an occasional speech bubble with a feature
             discovery. Clicking it opens the chat (on the linked guide when the
             tip has one). */}
-        {!open && !tour && !dragging && !helpObs && activeTip !== null && TAINA_TIPS[activeTip] ? (
+        {!helpObs && activeTip !== null && TAINA_TIPS[activeTip] ? (
           <div
             data-no-drag
             role="status"
-            className={`absolute z-10 rounded-2xl border border-border bg-background/95 p-3 shadow-[0_4px_16px_-4px_rgba(40,50,30,0.3)] backdrop-blur-sm ${
-              position.y < 220 ? "top-full mt-2" : "bottom-full mb-2"
-            }`}
-            style={{
-              width: TIP_BUBBLE_W,
-              ...(typeof window !== "undefined" && position.x + SPRITE_W / 2 > window.innerWidth / 2
-                ? { right: 0 }
-                : { left: 0 }),
-            }}
+            className="rounded-2xl border border-border bg-background/95 p-3 shadow-[0_4px_16px_-4px_rgba(40,50,30,0.3)] backdrop-blur-sm"
           >
             <div className="flex items-start justify-between gap-2">
               <div className="text-[11px] font-medium uppercase tracking-wide text-primary">
@@ -1737,7 +1771,9 @@ export function FloatingTainaGuide() {
             })()}
           </div>
         ) : null}
-        {!open && !tour && activeTip === null && !helpObs ? (
+          </div>
+        ) : null}
+        {!open && !tour && !hasUnreadWhatsNew && activeTip === null && !helpObs ? (
           <button
             ref={whatsNewTriggerRef}
             type="button"
