@@ -61,7 +61,7 @@ export function DonationLedger() {
   }, [step]);
 
   return (
-    <figure className="my-8 rounded-md border border-border bg-muted/20">
+    <figure className="my-8 rounded-xl border border-border bg-muted">
       <figcaption className="flex items-center justify-between border-b border-border px-4 py-2.5">
         <span className="text-xs font-medium text-muted-foreground">{t("bench")}</span>
         <div className="flex gap-1.5">

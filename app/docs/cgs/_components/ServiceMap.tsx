@@ -110,7 +110,7 @@ export function ServiceMap() {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -6 }}
             transition={{ duration: 0.18 }}
-            className="min-h-[6rem] rounded-xl border border-border/60 bg-muted/40 px-5 py-4 text-center"
+            className="min-h-[6rem] rounded-xl border border-border/60 bg-muted px-5 py-4 text-center"
           >
             <div className="mb-1 font-mono text-[12.5px] text-primary">
               {selected === "pds" && t("nodes.pds.name")}

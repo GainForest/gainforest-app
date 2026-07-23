@@ -36,7 +36,7 @@ export default async function WalletServiceDocsPage() {
         <div className="mb-6 text-primary">
           <LogoMark className="h-5 w-5" title="GainForest" />
         </div>
-        <h1 className="m-0 text-[2.6rem] font-semibold leading-[1.1] tracking-tight text-foreground">
+        <h1 className="m-0 font-instrument text-[2.6rem] font-light italic leading-[1.1] tracking-tight text-foreground">
           {t("title")}
         </h1>
         <p className="mt-5 text-[17px] leading-relaxed text-muted-foreground">{t("standfirst")}</p>
@@ -75,7 +75,7 @@ export default async function WalletServiceDocsPage() {
 
       {/* ── Epilogue ─────────────────────────────────────────────────── */}
       <div className="mt-14 border-t border-border pt-10">
-        <h2 className="m-0 text-2xl font-semibold tracking-tight text-foreground">
+        <h2 className="m-0 font-instrument text-2xl font-light italic tracking-tight text-foreground">
           {t("epilogue.heading")}
         </h2>
         <Prose>{t("epilogue.p1")}</Prose>
@@ -102,7 +102,7 @@ function PartHeading({ index, heading }: { index: string; heading: string }) {
         <span className="text-sm font-medium text-primary">{index}</span>
         <span className="h-px flex-1 bg-border" />
       </div>
-      <h2 className="m-0 text-[1.65rem] font-semibold leading-snug tracking-tight text-foreground">
+      <h2 className="m-0 font-instrument text-[1.65rem] font-light italic leading-snug tracking-tight text-foreground">
         {heading}
       </h2>
     </div>

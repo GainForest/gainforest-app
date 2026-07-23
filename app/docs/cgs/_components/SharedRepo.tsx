@@ -68,7 +68,7 @@ export function SharedRepo() {
             key={person.id}
             type="button"
             onClick={() => publish(person.id)}
-            className="group flex w-24 flex-col items-center gap-1.5 rounded-xl border border-transparent px-2 py-3 transition-colors hover:border-border/60 hover:bg-muted/40"
+            className="group flex w-24 flex-col items-center gap-1.5 rounded-xl border border-transparent bg-muted px-2 py-3 transition-colors hover:border-border/60 hover:bg-muted/80"
           >
             <span
               className={cn(
@@ -86,7 +86,7 @@ export function SharedRepo() {
         ))}
       </div>
 
-      <div className="mt-4 rounded-xl bg-muted/30 p-4">
+      <div className="mt-4 rounded-xl bg-muted p-4">
         <div className="mb-3 flex items-center justify-between">
           <span className="text-xs font-medium text-muted-foreground">
             {t("repoLabel")}

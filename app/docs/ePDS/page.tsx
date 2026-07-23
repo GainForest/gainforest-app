@@ -32,7 +32,7 @@ export default async function EpdsDocsPage() {
         <div className="mb-5 flex justify-center text-primary">
           <LogoMark className="h-7 w-7" title="GainForest" />
         </div>
-        <h1 className="m-0 text-4xl font-semibold tracking-tight text-foreground">{t("title")}</h1>
+        <h1 className="m-0 font-instrument text-4xl font-light italic tracking-tight text-foreground">{t("title")}</h1>
         <p className="mx-auto mt-4 max-w-prose text-[15px] leading-relaxed text-muted-foreground">{t("lead")}</p>
       </header>
 
@@ -54,13 +54,13 @@ export default async function EpdsDocsPage() {
       </Section>
 
       <section className="mt-16 border-t border-border/60 pt-10">
-        <h2 className="m-0 mb-5 text-xl font-semibold tracking-tight text-foreground">
+        <h2 className="m-0 mb-5 font-instrument text-xl font-light italic tracking-tight text-foreground">
           {t("more.heading")}
         </h2>
         <div className="grid gap-3 sm:grid-cols-2">
           <Link
             href="/docs/atproto"
-            className="group rounded-xl px-5 py-4 no-underline transition-colors hover:bg-muted/40"
+            className="group rounded-xl bg-muted px-5 py-4 no-underline transition-colors hover:bg-muted/80"
           >
             <div className="flex items-center gap-1.5 text-[13.5px] font-medium text-foreground group-hover:text-primary">
               {t("more.atprotoTitle")}
@@ -70,7 +70,7 @@ export default async function EpdsDocsPage() {
           </Link>
           <Link
             href="/docs/cgs"
-            className="group rounded-xl px-5 py-4 no-underline transition-colors hover:bg-muted/40"
+            className="group rounded-xl bg-muted px-5 py-4 no-underline transition-colors hover:bg-muted/80"
           >
             <div className="flex items-center gap-1.5 text-[13.5px] font-medium text-foreground group-hover:text-primary">
               {t("more.cgsTitle")}
@@ -80,7 +80,7 @@ export default async function EpdsDocsPage() {
           </Link>
           <Link
             href="/docs/lexicons"
-            className="group rounded-xl px-5 py-4 no-underline transition-colors hover:bg-muted/40"
+            className="group rounded-xl bg-muted px-5 py-4 no-underline transition-colors hover:bg-muted/80"
           >
             <div className="flex items-center gap-1.5 text-[13.5px] font-medium text-foreground group-hover:text-primary">
               {t("more.lexiconsTitle")}
@@ -90,7 +90,7 @@ export default async function EpdsDocsPage() {
           </Link>
           <Link
             href="/docs/ePDS-router"
-            className="group rounded-xl px-5 py-4 no-underline transition-colors hover:bg-muted/40"
+            className="group rounded-xl bg-muted px-5 py-4 no-underline transition-colors hover:bg-muted/80"
           >
             <div className="flex items-center gap-1.5 text-[13.5px] font-medium text-foreground group-hover:text-primary">
               {t("more.routerTitle")}
@@ -100,7 +100,7 @@ export default async function EpdsDocsPage() {
           </Link>
           <Link
             href="/docs/wallet-service"
-            className="group rounded-xl px-5 py-4 no-underline transition-colors hover:bg-muted/40"
+            className="group rounded-xl bg-muted px-5 py-4 no-underline transition-colors hover:bg-muted/80"
           >
             <div className="flex items-center gap-1.5 text-[13.5px] font-medium text-foreground group-hover:text-primary">
               {t("more.walletTitle")}
@@ -112,7 +112,7 @@ export default async function EpdsDocsPage() {
             href={GITHUB_URL}
             target="_blank"
             rel="noreferrer"
-            className="group rounded-xl px-5 py-4 no-underline transition-colors hover:bg-muted/40"
+            className="group rounded-xl bg-muted px-5 py-4 no-underline transition-colors hover:bg-muted/80"
           >
             <div className="flex items-center gap-1.5 text-[13.5px] font-medium text-foreground group-hover:text-primary">
               {t("more.githubTitle")}
@@ -137,7 +137,7 @@ function Section({
 }) {
   return (
     <section className="mt-16 first:mt-0">
-      <h2 className="m-0 text-xl font-semibold tracking-tight text-foreground">{heading}</h2>
+      <h2 className="m-0 font-instrument text-xl font-light italic tracking-tight text-foreground">{heading}</h2>
       {intro && <p className="mt-2 mb-6 max-w-prose text-[14.5px] leading-relaxed text-muted-foreground">{intro}</p>}
       {!intro && <div className="mb-6" />}
       {children}

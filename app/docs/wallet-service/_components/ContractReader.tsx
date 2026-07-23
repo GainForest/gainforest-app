@@ -51,7 +51,7 @@ export function ContractReader() {
     <div className="my-8 flex flex-col gap-6">
       {EXCERPTS.map((excerpt) => (
         <figure key={excerpt.id} className="m-0 grid gap-3 lg:grid-cols-[1fr_16rem] lg:gap-5">
-          <div className="min-w-0 overflow-hidden rounded-md bg-muted/40">
+          <div className="min-w-0 overflow-hidden rounded-md bg-muted/60">
             <div className="flex items-center justify-between border-b border-border px-3.5 py-2">
               <span className="truncate font-mono text-[10.5px] text-muted-foreground">{excerpt.file}</span>
               <span className="rounded bg-background px-1.5 py-0.5 text-[10px] text-muted-foreground/70">

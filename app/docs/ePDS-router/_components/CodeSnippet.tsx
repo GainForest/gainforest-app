@@ -21,7 +21,7 @@ export function CodeSnippet({ code, label }: { code: string; label?: string }) {
   };
 
   return (
-    <div className="overflow-hidden rounded-xl border border-border/60 bg-muted/30">
+    <div className="overflow-hidden rounded-xl border border-border/60 bg-muted">
       <div className="flex items-center justify-between border-b border-border/60 px-4 py-2">
         <span className="text-xs font-medium text-muted-foreground">{label}</span>
         <button

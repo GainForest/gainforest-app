@@ -82,9 +82,9 @@ export default async function LexiconPage({ params }: { params: Promise<Params> 
         )}
       </div>
 
-      <h1 className="m-0 mb-2 text-3xl font-semibold tracking-tight text-foreground [overflow-wrap:anywhere]">
-        <span className="font-mono text-base font-normal text-muted-foreground/50">{nsidPrefix}</span>
-        <span className="font-mono">{nsidName}</span>
+      <h1 className="m-0 mb-2 font-instrument text-3xl font-light italic tracking-tight text-foreground [overflow-wrap:anywhere]">
+        <span className="font-mono text-base font-normal not-italic text-muted-foreground/50">{nsidPrefix}</span>
+        <span className="font-mono not-italic">{nsidName}</span>
       </h1>
 
       <p className="m-0 mb-10 max-w-prose text-[14.5px] leading-relaxed text-muted-foreground">
@@ -92,13 +92,13 @@ export default async function LexiconPage({ params }: { params: Promise<Params> 
       </p>
 
       {lexId === "app.gainforest.dwc.occurrence" && (
-        <section className="mb-10 border-l-2 border-primary/30 bg-muted/30 px-5 py-4" aria-labelledby="audiomoth-occurrence-guide">
+        <section className="mb-10 rounded-xl border-l-2 border-primary/30 bg-muted px-5 py-4" aria-labelledby="audiomoth-occurrence-guide">
           <div className="flex items-start gap-3">
             <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-primary/10 text-primary">
               <BookOpenIcon className="size-4.5" />
             </span>
             <div className="min-w-0 flex-1">
-              <h2 id="audiomoth-occurrence-guide" className="mb-1 text-lg font-semibold tracking-tight text-foreground">
+              <h2 id="audiomoth-occurrence-guide" className="mb-1 font-instrument text-lg font-light italic tracking-tight text-foreground">
                 {t("guides.audiomothTitle")}
               </h2>
               <p className="m-0 max-w-[680px] text-[13.5px] leading-6 text-muted-foreground">{t("guides.audiomothDescription")}</p>
@@ -117,7 +117,7 @@ export default async function LexiconPage({ params }: { params: Promise<Params> 
       <DefBlock name={mainName} def={doc.defs[mainName]} lexiconId={lexId} known={KNOWN_IDS} labels={labels} primary />
 
       {otherDefs.length > 0 && (
-        <h2 className="mb-4 mt-2 border-t border-border/60 pt-6 text-base font-semibold text-muted-foreground">
+        <h2 className="mb-4 mt-2 border-t border-border/60 pt-6 font-instrument text-base font-light italic text-muted-foreground">
           {t("definitions")}
         </h2>
       )}
@@ -139,7 +139,7 @@ export default async function LexiconPage({ params }: { params: Promise<Params> 
           {prev ? (
             <Link
               href={lexiconHref(prev.id)}
-              className="group p-3 no-underline transition-colors hover:bg-muted/40"
+              className="group rounded-xl bg-muted p-3 no-underline transition-colors hover:bg-muted/80"
             >
               <div className="text-[11px] text-muted-foreground/60">← {t("previous")}</div>
               <div className="mt-0.5 font-mono text-[13px] text-primary group-hover:underline">{shortName(prev.id)}</div>
@@ -150,7 +150,7 @@ export default async function LexiconPage({ params }: { params: Promise<Params> 
           {next ? (
             <Link
               href={lexiconHref(next.id)}
-              className="group p-3 text-right no-underline transition-colors hover:bg-muted/40"
+              className="group rounded-xl bg-muted p-3 text-right no-underline transition-colors hover:bg-muted/80"
             >
               <div className="text-[11px] text-muted-foreground/60">{t("next")} →</div>
               <div className="mt-0.5 font-mono text-[13px] text-primary group-hover:underline">{shortName(next.id)}</div>

@@ -121,7 +121,7 @@ export function SyncJourney() {
         )}
       </svg>
 
-      <div className="mx-auto mt-2 min-h-[84px] max-w-xl rounded-xl border border-border/60 bg-muted/30 px-5 py-4 text-center">
+      <div className="mx-auto mt-2 min-h-[84px] max-w-xl rounded-xl border border-border/60 bg-muted px-5 py-4 text-center">
         <AnimatePresence mode="wait">
           <motion.div
             key={step}

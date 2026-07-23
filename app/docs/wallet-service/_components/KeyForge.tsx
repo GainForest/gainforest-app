@@ -72,7 +72,7 @@ export function KeyForge() {
   };
 
   return (
-    <figure className="my-8 rounded-md border border-border bg-muted/20">
+    <figure className="my-8 rounded-xl border border-border bg-muted">
       <figcaption className="flex items-center gap-2 border-b border-border px-4 py-2.5 text-xs font-medium text-muted-foreground">
         <SparklesIcon className="h-3.5 w-3.5 text-primary" />
         {t("bench")}

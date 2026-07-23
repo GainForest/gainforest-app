@@ -133,7 +133,7 @@ export function RolePlayground() {
             key={action}
             type="button"
             onClick={() => attempt(action)}
-            className="rounded-xl border border-border/60 px-3 py-2.5 text-left text-[12.5px] leading-snug text-foreground transition-colors hover:border-primary/50 hover:bg-muted/40 active:scale-[0.98]"
+            className="rounded-xl border border-border/60 bg-background px-3 py-2.5 text-left text-[12.5px] leading-snug text-foreground transition-colors hover:border-primary/50 hover:bg-muted/80 active:scale-[0.98]"
           >
             {actionLabels[action]}
           </button>
@@ -178,7 +178,7 @@ export function RolePlayground() {
         </AnimatePresence>
       </div>
 
-      <div className="mt-4 rounded-xl bg-muted/30 p-4">
+      <div className="mt-4 rounded-xl bg-muted p-4">
         <div className="mb-2.5 flex items-center justify-between">
           <span className="text-xs font-medium text-muted-foreground">
             {t("auditTitle")}

@@ -84,11 +84,11 @@ export function MarkdownDocument({ source }: { source: string }) {
       const level = heading[1]!.length;
       const content = inline(heading[2]!);
       if (level === 1) {
-        blocks.push(<h1 key={`h-${index}`} className="mb-4 mt-0 text-3xl font-semibold tracking-tight text-foreground">{content}</h1>);
+        blocks.push(<h1 key={`h-${index}`} className="mb-4 mt-0 font-instrument text-3xl font-light italic tracking-tight text-foreground">{content}</h1>);
       } else if (level === 2) {
-        blocks.push(<h2 key={`h-${index}`} className="mb-3 mt-10 border-t border-border/60 pt-7 text-xl font-semibold tracking-tight text-foreground first:mt-0 first:border-0 first:pt-0">{content}</h2>);
+        blocks.push(<h2 key={`h-${index}`} className="mb-3 mt-10 border-t border-border/60 pt-7 font-instrument text-xl font-light italic tracking-tight text-foreground first:mt-0 first:border-0 first:pt-0">{content}</h2>);
       } else {
-        blocks.push(<h3 key={`h-${index}`} className="mb-2 mt-7 text-base font-semibold text-foreground">{content}</h3>);
+        blocks.push(<h3 key={`h-${index}`} className="mb-2 mt-7 font-instrument text-base font-light italic text-foreground">{content}</h3>);
       }
       index += 1;
       continue;

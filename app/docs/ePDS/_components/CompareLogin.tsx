@@ -84,7 +84,7 @@ export function CompareLogin() {
       </div>
 
       <div className="mx-auto max-w-sm">
-        <div className="bg-muted/20 p-6">
+        <div className="rounded-2xl bg-muted p-6">
           <AnimatePresence mode="wait" initial={false}>
             {mode === "classic" ? (
               <motion.div

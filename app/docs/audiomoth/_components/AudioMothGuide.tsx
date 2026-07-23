@@ -53,7 +53,7 @@ export function AudioMothGuide() {
         <div className="mx-auto mb-5 flex h-12 w-12 items-center justify-center rounded-2xl border border-primary/20 bg-primary/10 text-primary">
           <WavesIcon className="h-6 w-6" aria-hidden="true" />
         </div>
-        <h1 className="mx-auto mt-2 max-w-2xl text-4xl font-semibold tracking-tight text-foreground sm:text-5xl">
+        <h1 className="mx-auto mt-2 max-w-2xl font-instrument text-4xl font-light italic tracking-tight text-foreground sm:text-5xl">
           {t("hero.title")}
         </h1>
         <p className="mx-auto mt-4 max-w-2xl text-[15px] leading-relaxed text-muted-foreground sm:text-base">
@@ -67,7 +67,7 @@ export function AudioMothGuide() {
 
       <ChapterNav />
 
-      <section className="mt-10 overflow-hidden border-y border-border/60 bg-muted/25">
+      <section className="mt-10 overflow-hidden rounded-2xl border border-border/60 bg-muted">
         <div className="aspect-video bg-foreground/5">
           <iframe
             className="h-full w-full"
@@ -81,7 +81,7 @@ export function AudioMothGuide() {
         <div className="flex items-start gap-3 p-4 sm:p-5">
           <PlayIcon className="mt-0.5 h-4 w-4 shrink-0 text-primary" aria-hidden="true" />
           <div>
-            <h2 className="text-sm font-medium text-foreground">{t("video.title")}</h2>
+            <h2 className="font-instrument text-sm font-light italic text-foreground">{t("video.title")}</h2>
             <p className="mt-1 text-[13px] leading-relaxed text-muted-foreground">{t("video.caption")}</p>
           </div>
         </div>
@@ -109,7 +109,7 @@ export function AudioMothGuide() {
         <div className="flex items-start gap-3">
           <CircleCheckIcon className="mt-0.5 h-5 w-5 shrink-0 text-primary" />
           <div>
-            <h2 className="text-xl font-semibold text-foreground">{t("test.heading")}</h2>
+            <h2 className="font-instrument text-xl font-light italic text-foreground">{t("test.heading")}</h2>
             <p className="mt-1 text-sm leading-relaxed text-muted-foreground">{t("test.intro")}</p>
           </div>
         </div>
@@ -145,13 +145,13 @@ export function AudioMothGuide() {
         </div>
       </GuideSection>
 
-      <section className="mt-16 overflow-hidden border-y border-border/60">
+      <section className="mt-16 overflow-hidden rounded-2xl border border-border/60">
         <div className="relative min-h-44 overflow-hidden bg-[radial-gradient(circle_at_25%_20%,color-mix(in_oklab,var(--primary)_25%,transparent),transparent_38%),linear-gradient(145deg,color-mix(in_oklab,var(--primary)_14%,var(--background)),var(--background))] p-6 sm:p-8">
           <div className="absolute right-5 bottom-0 text-primary/15 sm:right-10">
             <TreePineIcon className="h-36 w-36" strokeWidth={1} />
           </div>
           <ShieldCheckIcon className="h-5 w-5 text-primary" />
-          <h2 className="relative mt-4 text-2xl font-semibold text-foreground">{t("tips.heading")}</h2>
+          <h2 className="relative mt-4 font-instrument text-2xl font-light italic text-foreground">{t("tips.heading")}</h2>
           <div className="relative mt-5 grid gap-3 sm:grid-cols-2">
             {[t("tips.water"), t("tips.camouflage"), t("tips.rope"), t("tips.tide"), t("tips.sound")].map(
               (tip) => (
@@ -190,7 +190,7 @@ export function AudioMothGuide() {
           {t("upload.slow")}
         </Callout>
         <div className="mt-5 border-t border-border/60 pt-5">
-          <h3 className="text-sm font-medium text-foreground">{t("upload.checkHeading")}</h3>
+          <h3 className="font-instrument text-sm font-light italic text-foreground">{t("upload.checkHeading")}</h3>
           <p className="mt-1.5 text-[13px] leading-relaxed text-muted-foreground">{t("upload.checkText")}</p>
           <p className="mt-3 border-t border-border/60 pt-3 text-[12.5px] leading-relaxed text-muted-foreground">
             {t("upload.admin")}
@@ -202,7 +202,7 @@ export function AudioMothGuide() {
         <div className="mx-auto flex h-11 w-11 items-center justify-center rounded-full bg-primary/10 text-primary">
           <CheckIcon className="h-5 w-5" />
         </div>
-        <h2 className="mt-4 text-2xl font-semibold text-foreground">{t("finish.heading")}</h2>
+        <h2 className="mt-4 font-instrument text-2xl font-light italic text-foreground">{t("finish.heading")}</h2>
         <p className="mx-auto mt-2 max-w-lg text-sm leading-relaxed text-muted-foreground">{t("finish.text")}</p>
         <div className="mt-6 grid gap-3 sm:grid-cols-3">
           <FinishLink href={APP_URL} text={t("finish.tool")} external />
@@ -226,7 +226,7 @@ function ChapterNav() {
   ];
 
   return (
-    <nav aria-label={t("label")} className="mt-9 overflow-x-auto border-y border-border/60 py-3">
+    <nav aria-label={t("label")} className="mt-9 overflow-x-auto rounded-xl bg-muted p-1">
       <div className="flex min-w-max items-center justify-center gap-1">
         {chapters.map(([id, label], index) => (
           <div key={id} className="flex items-center">
@@ -305,7 +305,7 @@ function PreparationChecklist() {
   }
 
   return (
-    <div className="overflow-hidden border-y border-border/60">
+    <div className="overflow-hidden rounded-2xl bg-muted">
       <div className="p-4 sm:p-5">
         <AnimatePresence mode="wait" initial={false}>
           <motion.div
@@ -426,9 +426,9 @@ function ConfigurationStudio() {
   ];
 
   return (
-    <div className="overflow-hidden border-y border-border/60">
+    <div className="overflow-hidden rounded-2xl bg-muted">
       <div className="grid sm:grid-cols-[180px_1fr]">
-        <div className="flex overflow-x-auto border-b border-border/60 bg-muted/25 p-2 sm:flex-col sm:border-r sm:border-b-0">
+        <div className="flex overflow-x-auto border-b border-border/60 bg-muted/60 p-2 sm:flex-col sm:border-r sm:border-b-0">
           {tabs.map(({ id, label, Icon }) => (
             <button
               key={id}
@@ -456,7 +456,7 @@ function ConfigurationStudio() {
             >
               {tab === "flash" && (
                 <ConfigCopy icon={<UsbIcon className="h-5 w-5" />} title={t("flashTitle")} text={t("flashText")}>
-                  <div className="mt-5 flex items-center gap-3 rounded-xl border border-border/60 bg-muted/25 p-4">
+                  <div className="mt-5 flex items-center gap-3 rounded-xl border border-border/60 bg-muted/60 p-4">
                     <BatteryMediumIcon className="h-5 w-5 text-primary" />
                     <CableIcon className="h-5 w-5 text-primary" />
                     <div className="h-px flex-1 border-t border-dashed border-primary/40" />
@@ -466,7 +466,7 @@ function ConfigurationStudio() {
               )}
               {tab === "time" && (
                 <ConfigCopy icon={<Clock3Icon className="h-5 w-5" />} title={t("timeTitle")} text={t("timeText")}>
-                  <div className="mt-5 rounded-xl border border-primary/20 bg-primary/[0.045] px-4 py-3 font-mono text-[12px] text-primary">
+                  <div className="mt-5 rounded-xl border border-primary/20 bg-primary/10 px-4 py-3 font-mono text-[12px] text-primary">
                     {t("idExample")}
                   </div>
                 </ConfigCopy>
@@ -488,7 +488,7 @@ function ConfigurationStudio() {
               )}
               {tab === "card" && (
                 <ConfigCopy icon={<MemoryStickIcon className="h-5 w-5" />} title={t("cardTitle")} text={t("cardText")}>
-                  <div className="mt-5 flex items-center justify-center gap-5 rounded-xl border border-border/60 bg-muted/25 p-5">
+                  <div className="mt-5 flex items-center justify-center gap-5 rounded-xl border border-border/60 bg-muted/60 p-5">
                     <div className="rounded-md bg-foreground px-3 py-4 font-mono text-[10px] text-background">24E7</div>
                     <ArrowRightIcon className="h-4 w-4 text-muted-foreground" />
                     <RecorderMini />
@@ -501,7 +501,7 @@ function ConfigurationStudio() {
         </div>
       </div>
 
-      <div className="border-t border-border/60 bg-muted/15 p-5 sm:p-6">
+      <div className="border-t border-border/60 bg-muted/60 p-5 sm:p-6">
         <div className="flex flex-col gap-5 sm:flex-row sm:items-center">
           <AudioMothBoard mode={switchMode} />
           <div className="min-w-0 flex-1">
@@ -566,7 +566,7 @@ function FieldWalkthrough() {
   const ActiveIcon = steps[step].Icon;
 
   return (
-    <div className="border-y border-border/60 py-5 sm:py-6">
+    <div className="rounded-2xl bg-muted px-4 py-5 sm:px-6 sm:py-6">
       <div className="relative mx-auto flex max-w-lg items-center justify-between px-3 py-7">
         <div className="absolute right-10 left-10 top-1/2 h-px -translate-y-1/2 bg-border" />
         <motion.div
@@ -606,7 +606,7 @@ function FieldWalkthrough() {
             <div className="mt-3 text-xs text-muted-foreground/70">
               {t("stepLabel", { n: step + 1, total: steps.length })}
             </div>
-            <h3 className="mt-1.5 text-[15px] font-medium text-foreground">{steps[step].title}</h3>
+            <h3 className="mt-1.5 font-instrument text-[15px] font-light italic text-foreground">{steps[step].title}</h3>
             <p className="mx-auto mt-2 max-w-md text-[13px] leading-relaxed text-muted-foreground">{steps[step].text}</p>
           </motion.div>
         </AnimatePresence>
@@ -678,7 +678,7 @@ function ConfigCopy({ icon, title, text, children }: { icon: React.ReactNode; ti
   return (
     <div>
       <div className="text-primary">{icon}</div>
-      <h3 className="mt-3 text-[15px] font-medium text-foreground">{title}</h3>
+      <h3 className="mt-3 font-instrument text-[15px] font-light italic text-foreground">{title}</h3>
       <p className="mt-2 text-[13px] leading-relaxed text-muted-foreground">{text}</p>
       {children}
     </div>
@@ -687,7 +687,7 @@ function ConfigCopy({ icon, title, text, children }: { icon: React.ReactNode; ti
 
 function Setting({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-xl border border-border/60 bg-muted/20 px-3 py-2.5">
+    <div className="rounded-xl border border-border/60 bg-muted/60 px-3 py-2.5">
       <div className="text-[10.5px] text-muted-foreground">{label}</div>
       <div className="mt-0.5 font-mono text-[12px] font-medium text-foreground">{value}</div>
     </div>
@@ -697,7 +697,7 @@ function Setting({ label, value }: { label: string; value: string }) {
 function GuideSection({ id, heading, intro, children }: { id: string; heading: string; intro: string; children: React.ReactNode }) {
   return (
     <section id={id} className="mt-16 scroll-mt-24">
-      <h2 className="text-2xl font-semibold tracking-tight text-foreground">{heading}</h2>
+      <h2 className="font-instrument text-2xl font-light italic tracking-tight text-foreground">{heading}</h2>
       <p className="mt-2 mb-6 max-w-2xl text-[14px] leading-relaxed text-muted-foreground">{intro}</p>
       {children}
     </section>
@@ -705,14 +705,14 @@ function GuideSection({ id, heading, intro, children }: { id: string; heading: s
 }
 
 function InfoPill({ icon, text }: { icon: React.ReactNode; text: string }) {
-  return <span className="flex items-center gap-1.5 rounded-full border border-border/60 bg-muted/20 px-3 py-1.5 text-[11.5px] text-muted-foreground">{icon}{text}</span>;
+  return <span className="flex items-center gap-1.5 rounded-full border border-border/60 bg-muted/60 px-3 py-1.5 text-[11.5px] text-muted-foreground">{icon}{text}</span>;
 }
 
 function NumberCard({ number, title, text }: { number: string; title: string; text: string }) {
   return (
-    <div className="rounded-xl border border-border/60 p-5">
+    <div className="rounded-xl border border-border/60 bg-muted p-5">
       <div className="text-xs font-medium text-primary">{number}</div>
-      <h3 className="mt-3 text-sm font-medium text-foreground">{title}</h3>
+      <h3 className="mt-3 font-instrument text-sm font-light italic text-foreground">{title}</h3>
       <p className="mt-2 text-[12.5px] leading-relaxed text-muted-foreground">{text}</p>
     </div>
   );
@@ -720,7 +720,7 @@ function NumberCard({ number, title, text }: { number: string; title: string; te
 
 function Callout({ icon, children, className }: { icon: React.ReactNode; children: React.ReactNode; className?: string }) {
   return (
-    <div className={cn("flex items-start gap-3 rounded-xl border border-primary/20 bg-primary/[0.045] px-4 py-3.5", className)}>
+    <div className={cn("flex items-start gap-3 rounded-xl border border-primary/20 bg-primary/10 px-4 py-3.5", className)}>
       <span className="mt-0.5 shrink-0 text-primary">{icon}</span>
       <p className="text-[12.5px] leading-relaxed text-muted-foreground">{children}</p>
     </div>
