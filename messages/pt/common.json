@@ -1078,6 +1078,7 @@
     },
     "to": "para",
     "anonymous": "Alguém",
+    "pinnedLabel": "Fixado",
     "filterHeading": "Filtros",
     "refresh": "Atualizar",
     "retry": "Tentar novamente",
@@ -1138,7 +1139,9 @@
       "confirmDelete": "Confirmar exclusão",
       "cancelDelete": "Cancelar",
       "showMore": "Ver mais",
-      "showLess": "Ver menos"
+      "showLess": "Ver menos",
+      "pin": "Fixar no topo",
+      "unpin": "Desafixar"
     },
     "composer": {
       "title": "Compartilhe uma novidade",

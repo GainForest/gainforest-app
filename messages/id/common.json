@@ -1078,6 +1078,7 @@
     },
     "to": "untuk",
     "anonymous": "Seseorang",
+    "pinnedLabel": "Disematkan",
     "filterHeading": "Filter",
     "refresh": "Segarkan",
     "retry": "Coba lagi",
@@ -1138,7 +1139,9 @@
       "confirmDelete": "Konfirmasi hapus",
       "cancelDelete": "Batal",
       "showMore": "Selengkapnya",
-      "showLess": "Lebih sedikit"
+      "showLess": "Lebih sedikit",
+      "pin": "Sematkan ke atas",
+      "unpin": "Lepas sematan"
     },
     "composer": {
       "title": "Bagikan pembaruan",

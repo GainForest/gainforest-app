@@ -28,6 +28,7 @@ import type { AudioLabelCategory } from "./audiomoth/labels";
 import { LEGACY_BROAD_VERNACULARS, parseAudioSegmentDynamicProperties } from "./audiomoth/occurrences";
 import { getAddress } from "viem";
 import { getTipWalletAddress } from "@/lib/facilitator/tip";
+import { fetchPinnedPostUris } from "./feed-pins";
 import { fetchHiddenAccountDids, fetchHiddenRecordUris, indexerQuery } from "./indexer";
 import { mentionCandidatesFromFacets, type MentionCandidate, type RawIndexedFacet } from "./mentions";
 import { normaliseRef } from "./pds";
@@ -109,6 +110,9 @@ export interface ActivityFeedItem {
    *  client adds those, so the summary card's headline is the full burst.
    *  Absent on fully loaded runs, where the row count itself is exact. */
   burstCount?: number;
+  /** True when a GainForest steward pinned this post to the top of the feed.
+   *  Only set on the first page of the global "all"/"post" feeds. */
+  pinned?: boolean;
 }
 
 /** Which kinds the feed should include: a single kind, or the unified merge. */
@@ -859,6 +863,74 @@ async function enrichDonations(
   }
 }
 
+// ── Pinned post (steward-managed, moderation repo) ───────────────────────────
+
+/** Fetch the steward-pinned post(s) by AT-URI and map them to feed rows.
+ *  Reads the pin subjects from the moderation repo, then hydrates each post
+ *  from the indexer (for author profile data + mention facets). Deleted /
+ *  reply / unknown subjects drop out; failure is soft (no pinned row). */
+const PINNED_POSTS_QUERY = `
+  query PinnedFeedPosts($uris: [String!]!) {
+    appGainforestFeedPost(
+      first: 10
+      where: { uri: { in: $uris }, reply: { isNull: true } }
+    ) {
+      edges { node {
+        did uri createdAt text
+        facets {
+          index { byteStart byteEnd }
+          features { __typename ... on AppBskyRichtextFacetMention { did } }
+        }
+        ${CERTIFIED_PROFILE_DATA_FIELDS}
+      } }
+    }
+  }
+`;
+
+async function fetchPinnedFeedItems(): Promise<ActivityFeedItem[]> {
+  const uris = await fetchPinnedPostUris().catch(() => [] as string[]);
+  if (uris.length === 0) return [];
+  const data = await indexerQuery<{
+    appGainforestFeedPost?: { edges?: Array<{ node?: RawPost | null } | null> | null } | null;
+  }>(PINNED_POSTS_QUERY, { uris }).catch(() => null);
+  const nodes = (data?.appGainforestFeedPost?.edges ?? [])
+    .map((e) => e?.node)
+    .filter((n): n is RawPost => Boolean(n?.did));
+  const byUri = new Map(mapPosts(nodes).map((item) => [item.id, item]));
+  // Preserve pin order (newest pin first) rather than indexer return order.
+  return uris
+    .map((uri) => byUri.get(uri))
+    .filter((item): item is ActivityFeedItem => Boolean(item))
+    .map((item) => ({ ...item, pinned: true }));
+}
+
+/** Prepend the steward-pinned post to a first page of the global feed. The
+ *  pinned row sits above the chronological merge and is de-duped out of it;
+ *  pagination cursors are untouched (they walk the chronological order). */
+async function applyPinnedPost(
+  page: ActivityFeedPage,
+  cursor: FeedCursor | null,
+  filter: ActivityFeedFilter,
+  following: FollowingScope | null,
+): Promise<ActivityFeedPage> {
+  const wantsPins = cursor == null && following == null && (filter === "all" || filter === "post");
+  if (!wantsPins) return page;
+  const [pinnedItems, hidden, hiddenRecords] = await Promise.all([
+    fetchPinnedFeedItems(),
+    fetchHiddenAccountDids().catch(() => new Set<string>()),
+    fetchHiddenRecordUris().catch(() => new Set<string>()),
+  ]);
+  const visible = pinnedItems.filter(
+    (item) => !hidden.has(item.actorDid) && !hiddenRecords.has(item.id),
+  );
+  if (visible.length === 0) return page;
+  const pinnedIds = new Set(visible.map((item) => item.id));
+  return {
+    ...page,
+    items: [...visible, ...page.items.filter((item) => !pinnedIds.has(item.id))],
+  };
+}
+
 // ── Following scope (viewer's follow graph) ───────────────────────────
 
 const VIEWER_FOLLOWING_QUERY = `
@@ -1190,5 +1262,8 @@ export async function buildActivityFeed(
   const cursor = decodeCursor(rawCursor);
   const scopeKey = following ? `follow:${following.viewerDid}` : "global";
   const key = `activity-feed:v2:${filter}:${scopeKey}:${rawCursor ?? "start"}`;
-  return cachedAsync(key, FEED_CACHE_MS, () => buildFeedPageUncached(cursor, filter, following ?? null));
+  return cachedAsync(key, FEED_CACHE_MS, async () => {
+    const page = await buildFeedPageUncached(cursor, filter, following ?? null);
+    return applyPinnedPost(page, cursor, filter, following ?? null);
+  });
 }

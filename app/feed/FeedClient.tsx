@@ -16,6 +16,8 @@ import {
   MessageCircleIcon,
   NewspaperIcon,
   PencilIcon,
+  PinIcon,
+  PinOffIcon,
   RefreshCwIcon,
   UserIcon,
   UsersRoundIcon,
@@ -175,6 +177,35 @@ export function FeedClient({
   const [moderatedUris, setModeratedUris] = useState<Set<string>>(() => new Set());
   const onModerated = useCallback((uri: string) => {
     setModeratedUris((prev) => new Set(prev).add(uri));
+  }, []);
+
+  // Pin / unpin a post to the top of the feed (admin-group members only).
+  // The server write goes through the moderation repo; the local list is
+  // updated optimistically since feed caches lag by up to a minute.
+  const togglePin = useCallback(async (item: ActivityFeedItem) => {
+    const pinning = !item.pinned;
+    const res = await fetch("/api/admin/feed-pin", {
+      method: pinning ? "POST" : "DELETE",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ uri: item.id }),
+    });
+    if (!res.ok) {
+      const data = (await res.json().catch(() => null)) as { error?: string } | null;
+      throw new Error(data?.error ?? "Could not update the pinned post.");
+    }
+    setItems((prev) => {
+      if (pinning) {
+        // Only one post is pinned at a time: clear any prior pin, move this row up.
+        const rest = prev
+          .filter((row) => row.id !== item.id)
+          .map((row) => (row.pinned ? { ...row, pinned: false } : row));
+        return [{ ...item, pinned: true }, ...rest];
+      }
+      // Unpin: drop the flag and restore pure newest-first order.
+      return prev
+        .map((row) => (row.id === item.id ? { ...row, pinned: false } : row))
+        .sort(compareByCreatedAtDesc);
+    });
   }, []);
 
   // Bumped on every first-page request (filter switch / refresh) so an in-flight
@@ -424,6 +455,7 @@ export function FeedClient({
                     bskyUrl={blueskyLinks.get(entry.item.id) ?? null}
                     isAdmin={isAdmin}
                     onModerated={onModerated}
+                    onTogglePin={togglePin}
                   />
                 ),
               )}
@@ -596,6 +628,15 @@ function FeedFilterRail({
   );
 }
 
+/** Newest-first by createdAt (id as tiebreak) — mirrors the server's feed
+ *  ordering, used to restore chronology after an unpin. */
+function compareByCreatedAtDesc(a: ActivityFeedItem, b: ActivityFeedItem): number {
+  const ta = Date.parse(a.createdAt) || 0;
+  const tb = Date.parse(b.createdAt) || 0;
+  if (ta !== tb) return tb - ta;
+  return a.id < b.id ? 1 : a.id > b.id ? -1 : 0;
+}
+
 function FeedRow({
   item,
   signedIn,
@@ -604,6 +645,7 @@ function FeedRow({
   bskyUrl = null,
   isAdmin = false,
   onModerated,
+  onTogglePin,
 }: {
   item: ActivityFeedItem;
   signedIn: boolean;
@@ -611,9 +653,10 @@ function FeedRow({
   onOpenImage: (item: ActivityFeedItem) => void;
   /** bsky.app URL of this post's confirmed Bluesky twin, when cross-posted. */
   bskyUrl?: string | null;
-  /** GainForest steward affordances (hide a row as a test record). */
+  /** GainForest steward affordances (hide a row as a test record, pin a post). */
   isAdmin?: boolean;
   onModerated?: (uri: string) => void;
+  onTogglePin?: (item: ActivityFeedItem) => Promise<void>;
 }) {
   const t = useTranslations("common.feed");
   const verb = t(`verbs.${item.kind}`);
@@ -655,6 +698,14 @@ function FeedRow({
 
         {/* Content */}
         <div className="min-w-0 flex-1">
+          {/* Pinned chip — a steward pinned this post to the top of the feed. */}
+          {item.pinned ? (
+            <p className="mb-1 flex items-center gap-1 text-[11px] font-medium uppercase tracking-wide text-primary">
+              <PinIcon className="size-3" />
+              {t("pinnedLabel")}
+            </p>
+          ) : null}
+
           {/* Text opens the record detail (or, for posts, expands the text in
               place); photo and quick-like remain separate controls below. */}
           <RowTextWrapper
@@ -779,8 +830,56 @@ function FeedRow({
             </div>
           )
         ) : null}
+        {/* Admin-only: pin / unpin this post to the top of the feed. */}
+        {isAdmin && onTogglePin && item.kind === "post" ? (
+          <div className="mt-1">
+            <PinToggleButton pinned={Boolean(item.pinned)} onToggle={() => onTogglePin(item)} />
+          </div>
+        ) : null}
       </div>
     </li>
+  );
+}
+
+/** Small pin/unpin control for admin-group members. Mirrors the edit/delete
+ *  chip styling; errors surface inline and clear on the next attempt. */
+function PinToggleButton({ pinned, onToggle }: { pinned: boolean; onToggle: () => Promise<void> }) {
+  const t = useTranslations("common.feed");
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState(false);
+
+  async function run() {
+    if (busy) return;
+    setBusy(true);
+    setError(false);
+    try {
+      await onToggle();
+    } catch {
+      setError(true);
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <span className="inline-flex items-center gap-1.5">
+      <button
+        type="button"
+        onClick={() => void run()}
+        disabled={busy}
+        className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground disabled:opacity-50"
+      >
+        {busy ? (
+          <Loader2Icon className="size-3 animate-spin" />
+        ) : pinned ? (
+          <PinOffIcon className="size-3" />
+        ) : (
+          <PinIcon className="size-3" />
+        )}
+        {pinned ? t("actions.unpin") : t("actions.pin")}
+      </button>
+      {error ? <span className="text-[11px] text-destructive">{t("actions.errorGeneric")}</span> : null}
+    </span>
   );
 }
 
