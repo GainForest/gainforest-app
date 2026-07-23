@@ -56,7 +56,7 @@ export function AccountWalletSupport({
     <Button
       type="button"
       variant="outline"
-      className={cn("rounded-full border-primary/15 bg-primary/[0.07] px-4 font-semibold text-primary shadow-none hover:border-primary/25 hover:bg-primary/[0.12] hover:text-primary", className)}
+      className={cn("rounded-full border-primary/15 bg-primary/[0.07] px-4 font-medium text-primary shadow-none hover:border-primary/25 hover:bg-primary/[0.12] hover:text-primary motion-reduce:transition-none", className)}
       aria-label={t("buttonAria", { name })}
       title={t("buttonAria", { name })}
       onClick={async () => {

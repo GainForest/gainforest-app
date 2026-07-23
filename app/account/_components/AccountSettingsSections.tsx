@@ -1,7 +1,6 @@
 "use client";
 
-import Image from "next/image";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
 import {
   AlertTriangleIcon,
@@ -54,11 +53,12 @@ import { BlueskyIcon } from "@/app/_components/BlueskyIcon";
 import { INDEXER_URL } from "@/app/_lib/urls";
 import { isTainaAgentKeyName } from "@/app/_lib/taina-shared";
 import { cn } from "@/lib/utils";
+import { fetchOwnedGroupsForDeletion, type OwnedGroup } from "./account-deletion-safety";
 
 async function resolvePdsUrl(did: string): Promise<string> {
   const response = await fetch(`/api/atproto/resolve-pds?did=${encodeURIComponent(did)}`);
-  const data = (await response.json().catch(() => null)) as { pdsUrl?: string; error?: string } | null;
-  if (!response.ok || !data?.pdsUrl) throw new Error(data?.error ?? "Failed to resolve account server");
+  const data = (await response.json().catch(() => null)) as { pdsUrl?: string } | null;
+  if (!response.ok || !data?.pdsUrl) throw new Error("pds_resolution_failed");
   return data.pdsUrl;
 }
 
@@ -117,7 +117,7 @@ function HandleSection({ did, handle: initialHandle }: { did: string; handle: st
       });
       const data = (await response.json().catch(() => null)) as { error?: string; code?: string } | null;
       if (data?.code === "handle_unavailable") throw new Error(t("errors.unavailable"));
-      if (!response.ok || data?.error) throw new Error(data?.error ?? t("errors.generic"));
+      if (!response.ok || data?.error) throw new Error(t("errors.generic"));
       setHandle(newHandle);
       setMode("display");
       setJustSaved(true);
@@ -196,7 +196,7 @@ function HandleSection({ did, handle: initialHandle }: { did: string; handle: st
               {error ? <p className="text-xs text-destructive">{error}</p> : null}
               <div className="flex items-center gap-2 pt-1">
                 <Button size="sm" onClick={savePrefix} disabled={saving}>
-                  {saving ? <Loader2Icon className="h-3.5 w-3.5 animate-spin" /> : null}
+                  {saving ? <Loader2Icon className="h-3.5 w-3.5 animate-spin motion-reduce:animate-none" /> : null}
                   {saving ? t("saving") : t("save")}
                 </Button>
                 <Button size="sm" variant="ghost" onClick={cancel} disabled={saving}>
@@ -227,7 +227,7 @@ function HandleSection({ did, handle: initialHandle }: { did: string; handle: st
                 autoFocus
                 disabled={saving}
                 onChange={(e) => setCustomHandle(e.target.value.replace(/[^a-zA-Z0-9.-]/g, ""))}
-                placeholder="alice.example.com"
+                placeholder={t("customPlaceholder")}
                 className="bg-background"
               />
               <p className="text-xs text-muted-foreground">{t("customHint")}</p>
@@ -237,7 +237,7 @@ function HandleSection({ did, handle: initialHandle }: { did: string; handle: st
               {error ? <p className="text-xs text-destructive">{error}</p> : null}
               <div className="flex items-center gap-2 pt-1">
                 <Button size="sm" onClick={saveCustom} disabled={saving}>
-                  {saving ? <Loader2Icon className="h-3.5 w-3.5 animate-spin" /> : null}
+                  {saving ? <Loader2Icon className="h-3.5 w-3.5 animate-spin motion-reduce:animate-none" /> : null}
                   {saving ? t("saving") : t("save")}
                 </Button>
                 <Button size="sm" variant="ghost" onClick={cancel} disabled={saving}>
@@ -277,6 +277,7 @@ function PasswordInput({
   placeholder?: string;
   autoComplete?: string;
 }) {
+  const t = useTranslations("common.settings.password");
   const [visible, setVisible] = useState(false);
   return (
     <InputGroup className="bg-background">
@@ -293,7 +294,7 @@ function PasswordInput({
           size="icon-sm"
           onClick={() => setVisible((v) => !v)}
           tabIndex={-1}
-          aria-label={visible ? "Hide password" : "Show password"}
+          aria-label={visible ? t("hide") : t("show")}
         >
           {visible ? <EyeOffIcon className="size-3.5" /> : <EyeIcon className="size-3.5" />}
         </InputGroupButton>
@@ -303,6 +304,7 @@ function PasswordInput({
 }
 
 function PasswordSection({ did }: { did: string }) {
+  const t = useTranslations("common.settings.password");
   const [step, setStep] = useState<"idle" | "form" | "success">("idle");
   const [sentToEmail, setSentToEmail] = useState("");
   const [token, setToken] = useState("");
@@ -323,11 +325,11 @@ function PasswordSection({ did }: { did: string }) {
     try {
       const response = await fetch("/api/atproto/request-password-reset", { method: "POST" });
       const data = (await response.json().catch(() => null)) as { email?: string; error?: string } | null;
-      if (!response.ok) throw new Error(data?.error ?? "Failed to send reset email. Please try again.");
+      if (!response.ok) throw new Error(t("errors.request"));
       setSentToEmail(data?.email ?? "");
       setStep("form");
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to send reset email. Please try again.");
+      setError(err instanceof Error ? err.message : t("errors.request"));
     } finally {
       setIsLoading(false);
     }
@@ -336,11 +338,11 @@ function PasswordSection({ did }: { did: string }) {
   async function handleResetPassword() {
     if (!token.trim() || !newPassword.trim()) return;
     if (newPassword !== confirmPassword) {
-      setError("Passwords do not match.");
+      setError(t("errors.mismatch"));
       return;
     }
     if (newPassword.length < 8 || newPassword.length > 256) {
-      setError("Password must be between 8 and 256 characters.");
+      setError(t("errors.length"));
       return;
     }
 
@@ -353,17 +355,14 @@ function PasswordSection({ did }: { did: string }) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ token: token.trim(), password: newPassword }),
       });
-      if (!response.ok) {
-        const data = (await response.json().catch(() => null)) as { message?: string; error?: string } | null;
-        throw new Error(data?.message ?? data?.error ?? "Failed to reset password. Check the code and try again.");
-      }
+      if (!response.ok) throw new Error(t("errors.reset"));
       setStep("success");
       setSentToEmail("");
       setToken("");
       setNewPassword("");
       setConfirmPassword("");
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to reset password. Check the code and try again.");
+    } catch {
+      setError(t("errors.reset"));
     } finally {
       setIsLoading(false);
     }
@@ -373,19 +372,19 @@ function PasswordSection({ did }: { did: string }) {
     <div className="space-y-3">
       <div className="flex items-center gap-2">
         <KeyRoundIcon className="h-4 w-4 text-foreground/70" />
-        <h2 className="text-sm font-medium">Password</h2>
+        <h2 className="text-sm font-medium">{t("title")}</h2>
       </div>
 
       <div className="bg-muted rounded-xl p-1 flex flex-col items-center w-full">
         {step === "idle" && (
           <div className="flex flex-col items-center gap-4 px-4 py-4 w-full">
             <p className="text-sm text-muted-foreground text-center">
-              We&apos;ll send a reset code to the email address on your account.
+              {t("description")}
             </p>
             {error ? <p className="text-sm text-destructive text-center">{error}</p> : null}
             <Button onClick={() => void handleRequestReset()} disabled={isLoading} size="sm">
-              {isLoading ? <Loader2Icon className="h-3.5 w-3.5 animate-spin" /> : null}
-              {isLoading ? "Sending..." : "Send Reset Code"}
+              {isLoading ? <Loader2Icon className="h-3.5 w-3.5 animate-spin motion-reduce:animate-none" /> : null}
+              {isLoading ? t("sending") : t("sendCode")}
             </Button>
           </div>
         )}
@@ -394,36 +393,36 @@ function PasswordSection({ did }: { did: string }) {
           <div className="flex flex-col items-center gap-4 px-4 py-4 w-full">
             {sentToEmail ? (
               <p className="text-sm text-muted-foreground text-center">
-                A reset code was sent to {sentToEmail}. Check your inbox.
+                {t("codeSent", { email: sentToEmail })}
               </p>
             ) : null}
             <div className="space-y-2 w-full">
-              <Label htmlFor="reset-token">Reset Code</Label>
+              <Label htmlFor="reset-token">{t("codeLabel")}</Label>
               <Input
                 id="reset-token"
                 type="text"
                 value={token}
                 onChange={(e) => setToken(e.target.value)}
-                placeholder="Enter the code from your email"
+                placeholder={t("codePlaceholder")}
                 autoComplete="one-time-code"
                 className="bg-background"
               />
             </div>
             <div className="space-y-2 w-full">
-              <Label htmlFor="new-password">New Password</Label>
-              <PasswordInput id="new-password" value={newPassword} onChange={setNewPassword} placeholder="Min. 8 characters" autoComplete="new-password" />
+              <Label htmlFor="new-password">{t("newLabel")}</Label>
+              <PasswordInput id="new-password" value={newPassword} onChange={setNewPassword} placeholder={t("newPlaceholder")} autoComplete="new-password" />
             </div>
             <div className="space-y-2 w-full">
-              <Label htmlFor="confirm-password">Confirm Password</Label>
-              <PasswordInput id="confirm-password" value={confirmPassword} onChange={setConfirmPassword} placeholder="Repeat new password" autoComplete="new-password" />
+              <Label htmlFor="confirm-password">{t("confirmLabel")}</Label>
+              <PasswordInput id="confirm-password" value={confirmPassword} onChange={setConfirmPassword} placeholder={t("confirmPlaceholder")} autoComplete="new-password" />
             </div>
             {error ? <p className="text-sm text-destructive text-center w-full">{error}</p> : null}
             <div className="flex items-center gap-2">
               <Button onClick={() => void handleResetPassword()} disabled={isLoading || !token.trim() || !newPassword.trim() || !confirmPassword.trim()} size="sm">
-                {isLoading ? <Loader2Icon className="h-3.5 w-3.5 animate-spin" /> : null}
-                {isLoading ? "Saving..." : "Change Password"}
+                {isLoading ? <Loader2Icon className="h-3.5 w-3.5 animate-spin motion-reduce:animate-none" /> : null}
+                {isLoading ? t("saving") : t("change")}
               </Button>
-              <Button variant="ghost" size="sm" onClick={() => { setStep("idle"); setError(null); }}>Cancel</Button>
+              <Button variant="ghost" size="sm" onClick={() => { setStep("idle"); setError(null); }}>{t("cancel")}</Button>
             </div>
           </div>
         )}
@@ -431,7 +430,7 @@ function PasswordSection({ did }: { did: string }) {
         {step === "success" && (
           <div className="flex items-center gap-2 px-4 py-4 text-sm text-green-700 dark:text-green-400">
             <CheckIcon className="h-4 w-4 shrink-0" />
-            Password changed successfully.
+            {t("success")}
           </div>
         )}
       </div>
@@ -460,9 +459,15 @@ const FIRST_PROMPT_PLACEHOLDER = "gf_pat_PASTE_YOUR_KEY_HERE";
  * suggests a first GainForest task — without acting until the user approves.
  * `token` is a freshly minted key, or FIRST_PROMPT_PLACEHOLDER for the preview.
  */
-function buildAgentFirstPrompt(origin: string, token: string): string {
-  const site = origin || "https://www.gainforest.app";
-  return `Read ${site}/skill.md and follow its setup. My GainForest API key: ${token} — store it as GAINFOREST_API_KEY and run the skill's whoami check to verify it. Remember where the key and the skill file live so you can help me whenever a GainForest task comes up. Then help me log a field observation (a species sighting, ideally with a photo), or start a project with its certificate and an evidence timeline — but don't create anything on GainForest until I approve it.`;
+function buildAgentFirstPrompt(
+  origin: string,
+  token: string,
+  formatPrompt: (values: { site: string; token: string }) => string,
+): string {
+  return formatPrompt({
+    site: origin || "https://www.gainforest.app",
+    token,
+  });
 }
 
 function formatKeyDate(iso: string): string {
@@ -486,7 +491,7 @@ export function AgentKeysSection() {
   const [copied, setCopied] = useState<"key" | "prompt" | null>(null);
   const [origin, setOrigin] = useState("");
 
-  const promptText = buildAgentFirstPrompt(origin, freshToken?.token ?? FIRST_PROMPT_PLACEHOLDER);
+  const promptText = buildAgentFirstPrompt(origin, freshToken?.token ?? FIRST_PROMPT_PLACEHOLDER, (values) => t("firstPrompt", values));
 
   function flashCopied(kind: "key" | "prompt") {
     setCopied(kind);
@@ -499,7 +504,7 @@ export function AgentKeysSection() {
     try {
       const res = await fetch("/api/account/tokens", { cache: "no-store" });
       const data = (await res.json().catch(() => ({}))) as { tokens?: AgentKey[]; error?: string };
-      if (!res.ok) throw new Error(data.error ?? t("errors.load"));
+      if (!res.ok) throw new Error(t("errors.load"));
       setKeys(data.tokens ?? []);
     } catch (err) {
       setLoadError(err instanceof Error ? err.message : t("errors.load"));
@@ -527,12 +532,12 @@ export function AgentKeysSection() {
         body: JSON.stringify({ name }),
       });
       const data = (await res.json().catch(() => ({}))) as { token?: string; error?: string };
-      if (!res.ok || !data.token) throw new Error(data.error ?? t("errors.create"));
+      if (!res.ok || !data.token) throw new Error(t("errors.create"));
       setFreshToken({ name, token: data.token });
       setDraftName("");
       await loadKeys();
       try {
-        await navigator.clipboard.writeText(buildAgentFirstPrompt(window.location.origin, data.token));
+        await navigator.clipboard.writeText(buildAgentFirstPrompt(window.location.origin, data.token, (values) => t("firstPrompt", values)));
         flashCopied("prompt");
       } catch {
         // Clipboard may be unavailable; the copy buttons below still work.
@@ -553,10 +558,7 @@ export function AgentKeysSection() {
         headers: { "content-type": "application/json" },
         body: JSON.stringify({ id: entry.id }),
       });
-      if (!res.ok) {
-        const data = (await res.json().catch(() => ({}))) as { error?: string };
-        throw new Error(data.error ?? t("errors.revoke"));
-      }
+      if (!res.ok) throw new Error(t("errors.revoke"));
       if (freshToken && entry.name === freshToken.name) setFreshToken(null);
       await loadKeys();
     } catch (err) {
@@ -571,7 +573,7 @@ export function AgentKeysSection() {
     const text =
       kind === "key"
         ? freshToken.token
-        : buildAgentFirstPrompt(window.location.origin, freshToken.token);
+        : buildAgentFirstPrompt(window.location.origin, freshToken.token, (values) => t("firstPrompt", values));
     try {
       await navigator.clipboard.writeText(text);
       flashCopied(kind);
@@ -620,7 +622,7 @@ export function AgentKeysSection() {
               ) : (
                 <>
                   <Button size="sm" onClick={() => void handleGenerate()} disabled={creating}>
-                    {creating ? <Loader2Icon className="h-3.5 w-3.5 animate-spin" /> : <CopyIcon className="h-3.5 w-3.5" />}
+                    {creating ? <Loader2Icon className="h-3.5 w-3.5 animate-spin motion-reduce:animate-none" /> : <CopyIcon className="h-3.5 w-3.5" />}
                     {t("generateAndCopy")}
                   </Button>
                   <Input
@@ -688,7 +690,7 @@ export function AgentKeysSection() {
                     aria-label={t("revokeAria", { name: entry.name })}
                   >
                     {revokingId === entry.id ? (
-                      <Loader2Icon className="h-3.5 w-3.5 animate-spin" />
+                      <Loader2Icon className="h-3.5 w-3.5 animate-spin motion-reduce:animate-none" />
                     ) : (
                       <Trash2Icon className="h-3.5 w-3.5" />
                     )}
@@ -833,17 +835,18 @@ const VIEWERS = [
 ] as const;
 
 function AccountSection({ did }: { did: string }) {
+  const t = useTranslations("common.settings.identity");
   return (
     <div className="space-y-3">
       <div className="flex items-center gap-2">
         <UserIcon className="h-4 w-4 text-foreground/70" />
-        <h2 className="text-sm font-medium">Account</h2>
+        <h2 className="text-sm font-medium">{t("title")}</h2>
       </div>
 
       <div className="bg-muted rounded-xl p-1 flex flex-col items-center w-full">
         <div className="flex flex-col items-center gap-3 px-3 py-3 w-full">
           <div className="flex flex-col items-center gap-1 w-full">
-            <p className="text-xs text-muted-foreground">Decentralized Identifier (DID)</p>
+            <p className="text-xs text-muted-foreground">{t("accountId")}</p>
             <p className="text-xs font-mono break-all text-foreground/70 text-center">{did ?? "—"}</p>
           </div>
           {did && (
@@ -874,22 +877,25 @@ function AccountSection({ did }: { did: string }) {
 // buried inside the collapsed "Advanced" accordion and gated behind a
 // typed confirmation — this is a destructive, irreversible bulk delete.
 
-const DELETE_CONFIRM_PHRASE = "delete my account";
+type DeleteGroupKey = "biodiversity" | "media" | "organization" | "feed" | "certs" | "profile" | "other";
 
-function lexiconGroupLabel(collection: string): string {
-  if (collection.startsWith("app.gainforest.dwc.")) return "Biodiversity observations";
-  if (collection.startsWith("app.gainforest.ac.")) return "Audio & multimedia";
-  if (collection.startsWith("app.gainforest.organization.")) return "Organization data";
-  if (collection.startsWith("app.gainforest.feed")) return "Feed posts & likes";
-  if (collection.startsWith("org.hypercerts.")) return "Certs & collections";
-  if (collection.startsWith("app.certified.")) return "Profile, badges & signatures";
-  return "Other GainForest records";
+function lexiconGroupKey(collection: string): DeleteGroupKey {
+  if (collection.startsWith("app.gainforest.dwc.")) return "biodiversity";
+  if (collection.startsWith("app.gainforest.ac.")) return "media";
+  if (collection.startsWith("app.gainforest.organization.")) return "organization";
+  if (collection.startsWith("app.gainforest.feed")) return "feed";
+  if (collection.startsWith("org.hypercerts.")) return "certs";
+  if (collection.startsWith("app.certified.")) return "profile";
+  return "other";
 }
 
-function summarizeByGroup(summary: AccountDataSummary): Array<{ label: string; count: number }> {
+function summarizeByGroup(
+  summary: AccountDataSummary,
+  labelFor: (key: DeleteGroupKey) => string,
+): Array<{ label: string; count: number }> {
   const groups = new Map<string, number>();
   for (const { collection, count } of summary.collections) {
-    const label = lexiconGroupLabel(collection);
+    const label = labelFor(lexiconGroupKey(collection));
     groups.set(label, (groups.get(label) ?? 0) + count);
   }
   return [...groups.entries()]
@@ -899,39 +905,8 @@ function summarizeByGroup(summary: AccountDataSummary): Array<{ label: string; c
 
 type DeleteAccountPhase = "loading" | "confirm" | "deleting" | "done" | "error";
 
-type OwnedGroup = {
-  did: string;
-  displayName: string | null;
-  handle: string | null;
-};
-
-// Organizations where the signed-in user holds the `owner` role. Deleting
-// the account leaves those orgs without an owner, so the modal makes the
-// visitor acknowledge that explicitly before the confirm button unlocks.
-async function fetchOwnedGroups(): Promise<OwnedGroup[]> {
-  try {
-    const res = await fetch("/api/cgs/groups", { cache: "no-store" });
-    if (!res.ok) return [];
-    const payload = (await res.json().catch(() => null)) as {
-      groups?: Array<{ groupDid?: unknown; role?: unknown; displayName?: unknown; handle?: unknown }>;
-    } | null;
-    if (!Array.isArray(payload?.groups)) return [];
-    return payload.groups
-      .filter((group) => typeof group?.role === "string" && group.role.toLowerCase() === "owner")
-      .map((group) => ({
-        did: typeof group.groupDid === "string" ? group.groupDid : "",
-        displayName: typeof group.displayName === "string" && group.displayName.trim() ? group.displayName.trim() : null,
-        handle: typeof group.handle === "string" && group.handle.trim() ? group.handle.trim() : null,
-      }))
-      .filter((group) => group.did.startsWith("did:"));
-  } catch {
-    // If the membership lookup fails we still warn generically below rather
-    // than blocking deletion on an unrelated outage.
-    return [];
-  }
-}
-
 function DeleteAccountModal({ handle, onBack }: { handle: string | null; onBack: () => void }) {
+  const t = useTranslations("common.settings.deleteAccount");
   const [phase, setPhase] = useState<DeleteAccountPhase>("loading");
   const [summary, setSummary] = useState<AccountDataSummary | null>(null);
   const [ownedGroups, setOwnedGroups] = useState<OwnedGroup[]>([]);
@@ -941,29 +916,36 @@ function DeleteAccountModal({ handle, onBack }: { handle: string | null; onBack:
   const [failedCount, setFailedCount] = useState(0);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    let cancelled = false;
-    Promise.all([fetchAccountDataSummary(), fetchOwnedGroups()])
-      .then(([result, owned]) => {
-        if (cancelled) return;
-        setSummary(result);
-        setOwnedGroups(owned);
-        setPhase("confirm");
-      })
-      .catch((err) => {
-        if (cancelled) return;
-        setError(err instanceof Error ? err.message : "Could not read your account data.");
-        setPhase("error");
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, []);
+  const loadDeletionContext = useCallback(async () => {
+    setPhase("loading");
+    setError(null);
+    setSummary(null);
+    setOwnedGroups([]);
+    setOrphanAcknowledged(false);
+    setConfirmText("");
+    try {
+      const [result, owned] = await Promise.all([
+        fetchAccountDataSummary(),
+        fetchOwnedGroupsForDeletion(),
+      ]);
+      setSummary(result);
+      setOwnedGroups(owned);
+      setPhase("confirm");
+    } catch {
+      setError(t("errors.read"));
+      setPhase("error");
+    }
+  }, [t]);
 
-  const confirmMatches = confirmText.trim().toLowerCase() === DELETE_CONFIRM_PHRASE;
+  useEffect(() => {
+    void loadDeletionContext();
+  }, [loadDeletionContext]);
+
+  const confirmPhrase = t("confirmPhrase");
+  const confirmMatches = confirmText.trim().toLocaleLowerCase() === confirmPhrase.toLocaleLowerCase();
   const orphanGateOpen = ownedGroups.length === 0 || orphanAcknowledged;
   const busy = phase === "deleting";
-  const groups = summary ? summarizeByGroup(summary) : [];
+  const groups = summary ? summarizeByGroup(summary, (key) => t(`groups.${key}`)) : [];
 
   async function runDeletion() {
     setPhase("deleting");
@@ -985,8 +967,8 @@ function DeleteAccountModal({ handle, onBack }: { handle: string | null; onBack:
       // The account's GainForest data is gone — end the session too so the
       // app doesn't keep rendering a ghost profile from stale caches.
       window.setTimeout(() => redirectToLogout(), 2500);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Deletion failed. Please try again.");
+    } catch {
+      setError(t("errors.delete"));
       setPhase("error");
     }
   }
@@ -994,14 +976,14 @@ function DeleteAccountModal({ handle, onBack }: { handle: string | null; onBack:
   return (
     <ModalContent dismissible={!busy}>
       <ModalHeader backAction={busy ? undefined : onBack}>
-        <ModalTitle>Delete account</ModalTitle>
-        <ModalDescription>This cannot be undone</ModalDescription>
+        <ModalTitle>{t("title")}</ModalTitle>
+        <ModalDescription>{t("irreversible")}</ModalDescription>
       </ModalHeader>
 
       {phase === "loading" ? (
         <div className="mt-6 flex items-center justify-center gap-2 text-sm text-muted-foreground">
-          <Loader2Icon className="size-4 animate-spin" />
-          Checking what would be deleted…
+          <Loader2Icon className="size-4 animate-spin motion-reduce:animate-none" />
+          {t("checking")}
         </div>
       ) : null}
 
@@ -1012,13 +994,10 @@ function DeleteAccountModal({ handle, onBack }: { handle: string | null; onBack:
               <AlertTriangleIcon className="mt-0.5 size-5 shrink-0 text-destructive" />
               <div className="space-y-1 text-sm">
                 <p className="font-medium text-destructive">
-                  This permanently deletes {summary.approximate ? "about " : ""}
-                  {summary.total} record{summary.total === 1 ? "" : "s"} from your account.
+                  {t("recordCount", { count: summary.total, approximate: summary.approximate ? 1 : 0 })}
                 </p>
                 <p className="text-muted-foreground">
-                  Everything you published on GainForest is removed from your personal data
-                  server. Your ATProto identity (DID and handle) and data from other apps are
-                  not touched.
+                  {t("scope")}
                 </p>
               </div>
             </div>
@@ -1035,7 +1014,7 @@ function DeleteAccountModal({ handle, onBack }: { handle: string | null; onBack:
             </ul>
           ) : (
             <p className="mt-4 text-center text-sm text-muted-foreground">
-              No GainForest records found — there is nothing to delete.
+              {t("empty")}
             </p>
           )}
 
@@ -1045,8 +1024,7 @@ function DeleteAccountModal({ handle, onBack }: { handle: string | null; onBack:
                 <AlertTriangleIcon className="mt-0.5 size-5 shrink-0 text-destructive" />
                 <div className="min-w-0 space-y-2 text-sm">
                   <p className="font-medium text-destructive">
-                    You are the owner of {ownedGroups.length} organization{ownedGroups.length === 1 ? "" : "s"}.
-                    Deleting your account leaves {ownedGroups.length === 1 ? "it" : "them"} without an owner:
+                    {t("ownedOrganizations", { count: ownedGroups.length })}
                   </p>
                   <ul className="space-y-1">
                     {ownedGroups.map((group) => (
@@ -1059,7 +1037,7 @@ function DeleteAccountModal({ handle, onBack }: { handle: string | null; onBack:
                     ))}
                   </ul>
                   <p className="text-muted-foreground">
-                    Consider transferring ownership from each organization&apos;s Members page first.
+                    {t("transferOwnership")}
                   </p>
                   <label className="flex cursor-pointer items-start gap-2 pt-1 text-foreground">
                     <input
@@ -1068,7 +1046,7 @@ function DeleteAccountModal({ handle, onBack }: { handle: string | null; onBack:
                       checked={orphanAcknowledged}
                       onChange={(event) => setOrphanAcknowledged(event.target.checked)}
                     />
-                    <span>I understand these organizations will be left ownerless.</span>
+                    <span>{t("ownerlessAcknowledge")}</span>
                   </label>
                 </div>
               </div>
@@ -1078,19 +1056,20 @@ function DeleteAccountModal({ handle, onBack }: { handle: string | null; onBack:
           {summary.total > 0 ? (
             <div className="mt-4 space-y-2">
               <Label htmlFor="delete-account-confirm" className="text-sm text-muted-foreground">
-                Type <span className="font-mono font-medium text-foreground">{DELETE_CONFIRM_PHRASE}</span> to confirm
-                {handle ? (
-                  <>
-                    {" "}for <span className="font-medium text-foreground">@{handle}</span>
-                  </>
-                ) : null}
-                :
+                {handle
+                  ? t.rich("confirmInstructionAccount", {
+                      phrase: () => <span className="font-mono font-medium text-foreground">{confirmPhrase}</span>,
+                      account: () => <span className="font-medium text-foreground">@{handle}</span>,
+                    })
+                  : t.rich("confirmInstruction", {
+                      phrase: () => <span className="font-mono font-medium text-foreground">{confirmPhrase}</span>,
+                    })}
               </Label>
               <Input
                 id="delete-account-confirm"
                 value={confirmText}
                 onChange={(event) => setConfirmText(event.target.value)}
-                placeholder={DELETE_CONFIRM_PHRASE}
+                placeholder={confirmPhrase}
                 autoComplete="off"
                 spellCheck={false}
               />
@@ -1101,12 +1080,11 @@ function DeleteAccountModal({ handle, onBack }: { handle: string | null; onBack:
 
       {phase === "deleting" ? (
         <div className="mt-6 flex flex-col items-center gap-3 text-sm">
-          <Loader2Icon className="size-6 animate-spin text-destructive" />
+          <Loader2Icon className="size-6 animate-spin text-destructive motion-reduce:animate-none" />
           <p className="text-muted-foreground" aria-live="polite">
-            Deleting your records… {deletedCount}
-            {summary && summary.total > 0 ? ` of ${summary.approximate ? "~" : ""}${summary.total}` : ""}
+            {t("deleting", { deleted: deletedCount, total: summary?.total ?? 0 })}
           </p>
-          <p className="text-xs text-muted-foreground">Keep this window open until it finishes.</p>
+          <p className="text-xs text-muted-foreground">{t("keepOpen")}</p>
         </div>
       ) : null}
 
@@ -1114,8 +1092,7 @@ function DeleteAccountModal({ handle, onBack }: { handle: string | null; onBack:
         <div className="mt-6 flex flex-col items-center gap-3 text-sm">
           <CheckCircle2Icon className="size-6 text-primary" />
           <p className="text-center text-muted-foreground">
-            Deleted {deletedCount} record{deletedCount === 1 ? "" : "s"}
-            {failedCount > 0 ? ` (${failedCount} could not be removed)` : ""}. Signing you out…
+            {t("done", { deleted: deletedCount, failed: failedCount })}
           </p>
         </div>
       ) : null}
@@ -1135,17 +1112,17 @@ function DeleteAccountModal({ handle, onBack }: { handle: string | null; onBack:
             onClick={() => void runDeletion()}
           >
             <Trash2Icon className="size-3.5" />
-            Permanently delete everything
+            {t("confirmButton")}
           </Button>
         ) : null}
         {phase === "error" ? (
-          <Button variant="destructive" className="w-full" onClick={() => void runDeletion()}>
-            Try again
+          <Button variant="secondary" className="w-full" onClick={() => void loadDeletionContext()}>
+            {t("retry")}
           </Button>
         ) : null}
         {!busy && phase !== "done" ? (
           <Button variant="outline" className="w-full" onClick={onBack}>
-            Cancel
+            {t("cancel")}
           </Button>
         ) : null}
       </ModalFooter>
@@ -1154,6 +1131,7 @@ function DeleteAccountModal({ handle, onBack }: { handle: string | null; onBack:
 }
 
 function DangerZoneSection({ handle }: { handle: string | null }) {
+  const t = useTranslations("common.settings.deleteAccount");
   const modal = useModal();
 
   function closeModal() {
@@ -1172,18 +1150,14 @@ function DangerZoneSection({ handle }: { handle: string | null }) {
     <div className="space-y-3">
       <div className="flex items-center gap-2">
         <AlertTriangleIcon className="h-4 w-4 text-destructive/80" />
-        <h2 className="text-sm font-medium text-destructive">Danger zone</h2>
+        <h2 className="text-sm font-medium text-destructive">{t("sectionTitle")}</h2>
       </div>
 
       <div className="rounded-xl border border-destructive/30 bg-destructive/5 p-4">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div className="min-w-0 space-y-1">
-            <p className="text-sm font-medium">Delete account</p>
-            <p className="text-xs text-muted-foreground">
-              Permanently removes every record you published on GainForest (projects, certs,
-              observations, profile, …) from your personal data server. Your ATProto identity
-              and other apps&apos; data stay intact. This cannot be undone.
-            </p>
+            <p className="text-sm font-medium">{t("title")}</p>
+            <p className="text-xs text-muted-foreground">{t("summary")}</p>
           </div>
           <Button
             variant="outline"
@@ -1192,7 +1166,7 @@ function DangerZoneSection({ handle }: { handle: string | null }) {
             onClick={openDeleteAccount}
           >
             <Trash2Icon className="size-3.5" />
-            Delete account…
+            {t("openButton")}
           </Button>
         </div>
       </div>
@@ -1212,14 +1186,14 @@ function SettingsGroup({
   children: React.ReactNode;
 }) {
   return (
-    <AccordionItem value={value} className="overflow-hidden rounded-xl border border-border bg-background px-4">
-      <AccordionTrigger className="py-4 text-left hover:no-underline">
+    <AccordionItem value={value} className="border-0">
+      <AccordionTrigger className="py-5 text-left hover:no-underline">
         <span className="flex min-w-0 flex-col pr-3">
           <span className="text-sm font-medium text-foreground">{title}</span>
           <span className="mt-0.5 text-xs font-normal leading-5 text-muted-foreground">{description}</span>
         </span>
       </AccordionTrigger>
-      <AccordionContent className="space-y-8 border-t border-border/60 pb-4 pt-4">
+      <AccordionContent className="space-y-8 pb-8 pt-1">
         {children}
       </AccordionContent>
     </AccordionItem>
@@ -1238,7 +1212,7 @@ export function AccountSettingsSections({
 }) {
   const t = useTranslations("common.settings.groups");
   return (
-    <Accordion type="multiple" defaultValue={["account"]} className="space-y-3">
+    <Accordion type="multiple" defaultValue={["account"]} className="space-y-1">
       <SettingsGroup value="account" title={t("account.title")} description={t("account.description")}>
         {handle ? <HandleSection did={did} handle={handle} /> : null}
         <PasswordSection did={did} />
@@ -1270,7 +1244,7 @@ export function OrganizationSettingsSections({
 }) {
   const t = useTranslations("common.settings.groups");
   return (
-    <Accordion type="multiple" className="space-y-3">
+    <Accordion type="multiple" className="space-y-1">
       <SettingsGroup value="agents" title={t("agents.title")} description={t("agents.description")}>
         <div className="space-y-3">
           <p className="text-sm text-muted-foreground">{agentKeysHint}</p>

@@ -34,6 +34,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
+import { SectionSurface } from "@/components/ui/section-surface";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { createVaultPasskey, isPasskeySupported, signVaultUserOp } from "@/lib/splits-vault/passkey";
 import type {
@@ -52,6 +53,7 @@ import {
 } from "@/lib/splits-vault/tokens";
 import type { AuthSession } from "@/app/_lib/auth";
 import { cn } from "@/lib/utils";
+import { eligiblePendingSignerCredentialIds } from "./wallet-pending-approval";
 
 type WalletState = {
   exists: boolean;
@@ -120,26 +122,25 @@ function shortAddress(address: string): string {
   return `${address.slice(0, 6)}…${address.slice(-4)}`;
 }
 
-async function readError(response: Response, fallback: string): Promise<string> {
-  const json = (await response.json().catch(() => null)) as { error?: string } | null;
-  return json?.error || fallback;
+function readError(_response: Response, fallback: string): string {
+  return fallback;
 }
 
 function Card({ children, className }: { children: ReactNode; className?: string }) {
   return (
-    <section className={cn("rounded-3xl border border-border bg-card/90 p-5 shadow-sm backdrop-blur-sm sm:p-6", className)}>
+    <SectionSurface className={cn("py-6 first:pt-0 last:pb-0", className)}>
       {children}
-    </section>
+    </SectionSurface>
   );
 }
 
 function CardTitle({ Icon, children }: { Icon: React.ComponentType<{ className?: string }>; children: ReactNode }) {
   return (
     <div className="flex items-center gap-2.5">
-      <span className="flex size-8 items-center justify-center rounded-full border border-primary/15 bg-primary/[0.08] text-primary">
+      <span className="flex size-8 items-center justify-center rounded-full bg-primary/[0.08] text-primary">
         <Icon className="size-4" />
       </span>
-      <h2 className="text-base font-semibold text-foreground">{children}</h2>
+      <h2 className="font-instrument text-2xl italic leading-none text-foreground">{children}</h2>
     </div>
   );
 }
@@ -426,10 +427,11 @@ export function WalletTabClient({ organization }: { organization?: OrganizationW
       return;
     }
     // Any enrolled passkey that has not approved yet may sign.
-    const used = new Set(pending.approvals.map((approval) => approval.credentialId));
-    const pool = liveSigners
-      .filter((signer) => signer.credentialId && !used.has(signer.credentialId))
-      .map((signer) => signer.credentialId as string);
+    const pool = eligiblePendingSignerCredentialIds(
+      liveSigners,
+      pending.approvals.map((approval) => approval.credentialId),
+      viewer.did,
+    );
     if (pool.length === 0) return;
 
     setPendingBusy(final ? "finalize" : "approve");
@@ -634,15 +636,24 @@ export function WalletTabClient({ organization }: { organization?: OrganizationW
     pendingSend.userOp.sender.toLowerCase() === record.address.toLowerCase() &&
     pendingSend.threshold === liveThreshold;
   const pendingReadyToSend = !!pendingSend && pendingSend.approvals.length >= pendingSend.threshold - 1;
+  const eligiblePendingSignerIds = pendingSend
+    ? eligiblePendingSignerCredentialIds(
+        liveSigners,
+        pendingSend.approvals.map((approval) => approval.credentialId),
+        viewer.did,
+      )
+    : [];
+  const canApprovePending = eligiblePendingSignerIds.length > 0;
   const canCancelPending = !!pendingSend && (!organization || canManageWallet || pendingSend.createdBy === viewer.did);
 
   return (
-    <div className="mx-auto w-full max-w-2xl space-y-4 py-6">
-      <header className="space-y-1 px-1">
-        <h1 className="text-xl font-semibold text-foreground">{t("title")}</h1>
-        <p className="text-sm text-muted-foreground">{t("intro")}</p>
+    <div className="mx-auto w-full max-w-2xl py-6">
+      <header className="space-y-2 px-1">
+        <h1 className="font-instrument text-3xl italic leading-none text-foreground">{t("title")}</h1>
+        <p className="max-w-xl text-sm leading-6 text-muted-foreground">{t("intro")}</p>
       </header>
 
+      <div className="mt-6 divide-y divide-border/60">
       {!state && !loadError ? (
         <Card>
           <div className="space-y-3">
@@ -674,7 +685,7 @@ export function WalletTabClient({ organization }: { organization?: OrganizationW
             {actionError ? <p className="text-sm text-destructive">{actionError}</p> : null}
             {canManageWallet ? (
               <Button className="w-full sm:w-auto" data-taina="create-wallet" onClick={() => void handleCreate()} disabled={isBusy}>
-                {isBusy ? <Loader2Icon className="size-3.5 animate-spin" /> : <FingerprintIcon className="size-3.5" />}
+                {isBusy ? <Loader2Icon className="size-3.5 animate-spin motion-reduce:animate-none" /> : <FingerprintIcon className="size-3.5" />}
                 {isBusy ? t("creating") : t("createButton")}
               </Button>
             ) : (
@@ -712,7 +723,7 @@ export function WalletTabClient({ organization }: { organization?: OrganizationW
                 </a>
               </div>
             </div>
-            <div className="mt-3 flex items-start gap-2 rounded-md border border-primary/20 bg-primary/5 px-3 py-2">
+            <div className="mt-3 flex items-start gap-2 rounded-xl bg-primary/5 px-3 py-2">
               <ShieldCheckIcon className="mt-0.5 size-4 shrink-0 text-primary" />
               <p className="text-xs text-muted-foreground">{deployed ? t("activeHint") : t("readyHint")}</p>
             </div>
@@ -724,7 +735,7 @@ export function WalletTabClient({ organization }: { organization?: OrganizationW
             {balances ? (
               <>
                 {totalUsd !== null ? (
-                  <div className="mt-4 flex items-center justify-between gap-3 rounded-2xl border border-primary/10 bg-gradient-to-br from-primary/15 via-primary/5 to-transparent px-4 py-4">
+                  <div className="mt-4 flex items-center justify-between gap-3 rounded-2xl bg-primary/10 px-4 py-4">
                     <p className="text-3xl font-semibold tracking-tight text-foreground">
                       {format.number(totalUsd, { style: "currency", currency: "USD" })}
                     </p>
@@ -787,24 +798,29 @@ export function WalletTabClient({ organization }: { organization?: OrganizationW
                   </p>
                   <p className="mt-1 text-xs text-muted-foreground">{t("pendingRemoteHint")}</p>
                   {sendError ? <p className="mt-3 text-sm text-destructive">{sendError}</p> : null}
+                  {!canApprovePending ? (
+                    <p className="mt-3 text-xs text-muted-foreground">{t("sendNoSigner")}</p>
+                  ) : null}
                   <div className="mt-4 flex flex-col gap-2 sm:flex-row">
-                    <Button
-                      onClick={() => void handlePendingApproval(pendingReadyToSend)}
-                      disabled={pendingBusy !== null || isBusy || sendBusy}
-                    >
-                      {pendingBusy === "approve" || pendingBusy === "finalize" ? (
-                        <Loader2Icon className="size-3.5 animate-spin" />
-                      ) : (
-                        <FingerprintIcon className="size-3.5" />
-                      )}
-                      {pendingBusy === "approve"
-                        ? t("sendAwaitingPasskey")
-                        : pendingBusy === "finalize"
-                          ? t("sendSubmitting")
-                          : pendingReadyToSend
-                            ? t("pendingApproveAndSend")
-                            : t("pendingApprove")}
-                    </Button>
+                    {canApprovePending ? (
+                      <Button
+                        onClick={() => void handlePendingApproval(pendingReadyToSend)}
+                        disabled={pendingBusy !== null || isBusy || sendBusy}
+                      >
+                        {pendingBusy === "approve" || pendingBusy === "finalize" ? (
+                          <Loader2Icon className="size-3.5 animate-spin motion-reduce:animate-none" />
+                        ) : (
+                          <FingerprintIcon className="size-3.5" />
+                        )}
+                        {pendingBusy === "approve"
+                          ? t("sendAwaitingPasskey")
+                          : pendingBusy === "finalize"
+                            ? t("sendSubmitting")
+                            : pendingReadyToSend
+                              ? t("pendingApproveAndSend")
+                              : t("pendingApprove")}
+                      </Button>
+                    ) : null}
                     {canCancelPending ? (
                       <Button
                         variant="outline"
@@ -813,7 +829,7 @@ export function WalletTabClient({ organization }: { organization?: OrganizationW
                         className="text-muted-foreground hover:text-destructive"
                       >
                         {pendingBusy === "cancel" ? (
-                          <Loader2Icon className="size-3.5 animate-spin" />
+                          <Loader2Icon className="size-3.5 animate-spin motion-reduce:animate-none" />
                         ) : (
                           <Trash2Icon className="size-3.5" />
                         )}
@@ -834,7 +850,7 @@ export function WalletTabClient({ organization }: { organization?: OrganizationW
                       disabled={pendingBusy !== null || isBusy || sendBusy}
                     >
                       {pendingBusy === "cancel" ? (
-                        <Loader2Icon className="size-3.5 animate-spin" />
+                        <Loader2Icon className="size-3.5 animate-spin motion-reduce:animate-none" />
                       ) : (
                         <Trash2Icon className="size-3.5" />
                       )}
@@ -904,7 +920,7 @@ export function WalletTabClient({ organization }: { organization?: OrganizationW
                 />
                 {sendError ? <p className="text-sm text-destructive">{sendError}</p> : null}
                 {sentTxHash ? (
-                  <div className="flex items-start gap-2 rounded-md border border-primary/20 bg-primary/5 px-3 py-2">
+                  <div className="flex items-start gap-2 rounded-xl bg-primary/5 px-3 py-2">
                     <CheckCircle2Icon className="mt-0.5 size-4 shrink-0 text-primary" />
                     <p className="text-xs text-muted-foreground">
                       {t("sendSuccess")}{" "}
@@ -925,7 +941,7 @@ export function WalletTabClient({ organization }: { organization?: OrganizationW
                     onClick={() => void handleSend()}
                     disabled={sendBusy || isBusy || !sendTo.trim() || !sendAmount.trim()}
                   >
-                    {sendBusy ? <Loader2Icon className="size-3.5 animate-spin" /> : <FingerprintIcon className="size-3.5" />}
+                    {sendBusy ? <Loader2Icon className="size-3.5 animate-spin motion-reduce:animate-none" /> : <FingerprintIcon className="size-3.5" />}
                     {sendPhase === "preparing"
                       ? t("sendPreparing")
                       : sendPhase === "signing"
@@ -1036,7 +1052,7 @@ export function WalletTabClient({ organization }: { organization?: OrganizationW
                   disabled={isBusy || manageBusy}
                 >
                   {isBusy || manageBusy ? (
-                    <Loader2Icon className="size-3.5 animate-spin" />
+                    <Loader2Icon className="size-3.5 animate-spin motion-reduce:animate-none" />
                   ) : (
                     <FingerprintIcon className="size-3.5" />
                   )}
@@ -1054,7 +1070,7 @@ export function WalletTabClient({ organization }: { organization?: OrganizationW
 
           {!deployed && canManageWallet ? (
             confirmingDelete ? (
-              <Card className="border-destructive/40">
+              <Card className="rounded-2xl bg-destructive/5 px-4 sm:px-5">
                 <div className="space-y-3">
                   <h2 className="text-sm font-semibold text-foreground">{t("deleteConfirmTitle")}</h2>
                   <p className="text-sm text-muted-foreground">{t("deleteConfirmBody")}</p>
@@ -1072,7 +1088,7 @@ export function WalletTabClient({ organization }: { organization?: OrganizationW
                       onClick={() => void handleDelete()}
                       disabled={isBusy || state?.holdsFunds === true}
                     >
-                      {isBusy ? <Loader2Icon className="size-3.5 animate-spin" /> : <Trash2Icon className="size-3.5" />}
+                      {isBusy ? <Loader2Icon className="size-3.5 animate-spin motion-reduce:animate-none" /> : <Trash2Icon className="size-3.5" />}
                       {t("deleteConfirmButton")}
                     </Button>
                   </div>
@@ -1092,6 +1108,7 @@ export function WalletTabClient({ organization }: { organization?: OrganizationW
           ) : null}
         </>
       )}
+      </div>
     </div>
   );
 }

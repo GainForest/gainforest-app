@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
-import { useTranslations } from "next-intl";
+import { useFormatter, useTranslations } from "next-intl";
 import {
   BotIcon,
   CheckIcon,
@@ -22,6 +22,7 @@ import {
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Textarea } from "@/components/ui/textarea";
+import { SectionSurface } from "@/components/ui/section-surface";
 import { TAINA_PROFILE_MAX_CHARS } from "@/app/_lib/taina-shared";
 import { cn } from "@/lib/utils";
 
@@ -43,28 +44,21 @@ type DashData = {
   credits?: { usedUsd: number; allowanceUsd: number } | null;
 };
 
-const usd = new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" });
-
 function DashCard({ children, className }: { children: ReactNode; className?: string }) {
   return (
-    <section
-      className={cn(
-        "rounded-3xl border border-border bg-card/90 p-5 shadow-sm backdrop-blur-sm sm:p-6",
-        className,
-      )}
-    >
+    <SectionSurface className={cn("py-6 first:pt-0 last:pb-0", className)}>
       {children}
-    </section>
+    </SectionSurface>
   );
 }
 
 function CardTitle({ Icon, children }: { Icon: React.ComponentType<{ className?: string }>; children: ReactNode }) {
   return (
     <div className="flex items-center gap-2.5">
-      <span className="flex size-8 items-center justify-center rounded-full border border-primary/15 bg-primary/[0.08] text-primary">
+      <span className="flex size-8 items-center justify-center rounded-full bg-primary/[0.08] text-primary">
         <Icon className="size-4" />
       </span>
-      <h2 className="text-base font-semibold text-foreground">{children}</h2>
+      <h2 className="font-instrument text-2xl italic leading-none text-foreground">{children}</h2>
     </div>
   );
 }
@@ -76,6 +70,7 @@ function CardTitle({ Icon, children }: { Icon: React.ComponentType<{ className?:
  */
 export function TainaDashboardClient() {
   const t = useTranslations("common.taina.dashboard");
+  const format = useFormatter();
   const [data, setData] = useState<DashData | null>(null);
   const [error, setError] = useState<boolean>(false);
   const [loading, setLoading] = useState(true);
@@ -146,7 +141,7 @@ export function TainaDashboardClient() {
 
   if (loading && !data) {
     return (
-      <div className="max-w-3xl space-y-4 py-6">
+      <div className="max-w-3xl divide-y divide-border/60 py-6">
         <DashCard>
           <Skeleton className="h-6 w-44" />
           <Skeleton className="mt-4 h-4 w-full" />
@@ -163,9 +158,9 @@ export function TainaDashboardClient() {
   if (error && !data) {
     return (
       <div className="max-w-3xl py-6">
-        <div className="rounded-2xl border border-destructive/25 bg-destructive/5 px-4 py-3 text-sm text-destructive">
+        <SectionSurface variant="danger" className="text-sm text-destructive">
           {t("loadError")}
-        </div>
+        </SectionSurface>
       </div>
     );
   }
@@ -189,12 +184,12 @@ export function TainaDashboardClient() {
   const needsActivation = data.activated === false;
 
   return (
-    <div className="max-w-3xl space-y-4 py-6">
+    <div className="max-w-3xl divide-y divide-border/60 py-6">
       {needsActivation && data.activationCode ? (
-        <DashCard className="border-primary/30 bg-primary/5">
+        <DashCard className="rounded-2xl bg-primary/5 px-4 sm:px-5">
           <div className="flex items-center gap-2">
-            <span className="pulse-dot size-1.5 rounded-full bg-primary" />
-            <h2 className="text-base font-semibold text-foreground">{t("activationTitle")}</h2>
+            <span className="pulse-dot size-1.5 rounded-full bg-primary motion-reduce:animate-none" />
+            <h2 className="font-instrument text-2xl italic leading-none text-foreground">{t("activationTitle")}</h2>
           </div>
           <p className="mt-1.5 text-sm leading-6 text-muted-foreground">
             {t.rich("activationDescription", {
@@ -217,7 +212,7 @@ export function TainaDashboardClient() {
         </DashCard>
       ) : null}
 
-      <DashCard className="animate-in">
+      <DashCard className="animate-in motion-reduce:animate-none">
         <div className="flex items-center justify-between gap-3">
           <CardTitle Icon={BotIcon}>{t("botCardTitle")}</CardTitle>
           {data.bot ? (
@@ -234,7 +229,7 @@ export function TainaDashboardClient() {
             </>
           ) : null}
           {data.provisionedAt
-            ? t("connectedOn", { date: new Date(data.provisionedAt).toLocaleDateString() })
+            ? t("connectedOn", { date: format.dateTime(new Date(data.provisionedAt), { dateStyle: "medium" }) })
             : null}
         </p>
         <div className="mt-4 flex flex-wrap items-center gap-2.5">
@@ -250,26 +245,26 @@ export function TainaDashboardClient() {
             disabled={restarting}
             onClick={() => void restartSession()}
           >
-            <RotateCcwIcon className={cn(restarting && "animate-spin")} />
+            <RotateCcwIcon className={cn(restarting && "animate-spin motion-reduce:animate-none")} />
             {restarting ? t("restarting") : t("restart")}
           </Button>
         </div>
         {restartFailed ? (
-          <p className="mt-3 rounded-2xl border border-destructive/25 bg-destructive/5 px-3.5 py-2.5 text-sm text-destructive">
+          <p className="mt-3 rounded-2xl bg-destructive/10 px-3.5 py-2.5 text-sm text-destructive">
             {t("restartFailed")}
           </p>
         ) : null}
 
         {data.credits ? (
-          <div className="mt-4 rounded-2xl border border-border bg-muted/40 px-4 py-3">
-            <div className="flex items-center gap-2 text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
+          <div className="mt-4 rounded-2xl bg-muted px-4 py-3">
+            <div className="flex items-center gap-2 text-xs font-medium text-muted-foreground">
               <WalletIcon className="size-3.5" />
               {t("creditsTitle")}
             </div>
             <p className="mt-1 text-sm text-foreground">
               {t("creditsSummary", {
-                used: usd.format(data.credits.usedUsd),
-                left: usd.format(Math.max(0, data.credits.allowanceUsd - data.credits.usedUsd)),
+                used: format.number(data.credits.usedUsd, { style: "currency", currency: "USD" }),
+                left: format.number(Math.max(0, data.credits.allowanceUsd - data.credits.usedUsd), { style: "currency", currency: "USD" }),
               })}
             </p>
           </div>
@@ -286,7 +281,7 @@ export function TainaDashboardClient() {
             {resetting ? t("resetting") : t("resetAgent")}
           </button>
           {resetFailed ? (
-            <p className="mt-3 rounded-2xl border border-destructive/25 bg-destructive/5 px-3.5 py-2.5 text-sm text-destructive">
+            <p className="mt-3 rounded-2xl bg-destructive/10 px-3.5 py-2.5 text-sm text-destructive">
               {t("resetFailed")}
             </p>
           ) : null}
@@ -302,14 +297,14 @@ export function TainaDashboardClient() {
           <CardTitle Icon={MessageCircleIcon}>{t("chatTitle")}</CardTitle>
           <span
             className={cn(
-              "inline-flex shrink-0 items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-medium uppercase tracking-wide",
+              "inline-flex shrink-0 items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium",
               data.hasChat ? "text-primary" : "text-muted-foreground",
             )}
           >
             <span
               className={cn(
                 "size-1.5 rounded-full",
-                data.hasChat ? "pulse-dot bg-primary" : "bg-muted-foreground/50",
+                data.hasChat ? "pulse-dot bg-primary motion-reduce:animate-none" : "bg-muted-foreground/50",
               )}
             />
             {data.hasChat ? t("chatActive") : t("chatWaiting")}
@@ -326,7 +321,7 @@ export function TainaDashboardClient() {
                   "max-w-[85%] rounded-2xl px-3.5 py-2 text-sm leading-relaxed",
                   message.role === "user"
                     ? "self-end bg-primary text-primary-foreground"
-                    : "self-start border border-border bg-secondary text-secondary-foreground",
+                    : "self-start bg-secondary text-secondary-foreground",
                 )}
               >
                 <div className="whitespace-pre-wrap break-words">{message.text}</div>
@@ -336,7 +331,7 @@ export function TainaDashboardClient() {
                     message.role === "user" ? "text-primary-foreground/60" : "text-muted-foreground",
                   )}
                 >
-                  {new Date(message.ts).toLocaleTimeString()}
+                  {format.dateTime(new Date(message.ts), { timeStyle: "short" })}
                 </time>
               </div>
             ))}
@@ -354,6 +349,7 @@ export function TainaDashboardClient() {
  */
 function ProfileCard({ savedProfile, onSaved }: { savedProfile: string; onSaved: () => void }) {
   const t = useTranslations("common.taina.dashboard");
+  const format = useFormatter();
   const [draft, setDraft] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [saveState, setSaveState] = useState<null | "saved" | "failed">(null);
@@ -403,9 +399,9 @@ function ProfileCard({ savedProfile, onSaved }: { savedProfile: string; onSaved:
       <CardTitle Icon={UserRoundIcon}>{t("profileTitle")}</CardTitle>
       <p className="mt-3 text-sm leading-6 text-muted-foreground">{t("profileDescription")}</p>
 
-      <div className="mt-4 rounded-2xl border border-border bg-muted/40 p-4">
+      <div className="mt-4 rounded-2xl bg-muted p-4">
         <div className="flex items-center justify-between gap-3">
-          <h3 className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
+          <h3 className="text-sm font-medium text-foreground">
             {t("profilePromptTitle")}
           </h3>
           <Button type="button" variant="outline" size="sm" onClick={() => void copyPrompt()}>
@@ -414,7 +410,7 @@ function ProfileCard({ savedProfile, onSaved }: { savedProfile: string; onSaved:
           </Button>
         </div>
         <p className="mt-2 text-sm leading-6 text-muted-foreground">{t("profilePromptIntro")}</p>
-        <div className="mt-3 max-h-40 overflow-y-auto rounded-xl border border-border bg-background px-3.5 py-3">
+        <div className="mt-3 max-h-40 overflow-y-auto rounded-xl bg-background/70 px-3.5 py-3">
           <p className="whitespace-pre-wrap font-mono text-xs leading-5 text-muted-foreground">
             {t("profilePromptBody")}
           </p>
@@ -423,7 +419,7 @@ function ProfileCard({ savedProfile, onSaved }: { savedProfile: string; onSaved:
 
       <label
         htmlFor="taina-user-profile"
-        className="mt-5 block text-[11px] font-medium uppercase tracking-wide text-muted-foreground"
+        className="mt-5 block text-sm font-medium text-foreground"
       >
         {t("profileLabel")}
       </label>
@@ -440,8 +436,8 @@ function ProfileCard({ savedProfile, onSaved }: { savedProfile: string; onSaved:
       />
       <p className="mt-2 text-xs text-muted-foreground">
         {t("profileCounter", {
-          count: value.length.toLocaleString(),
-          max: TAINA_PROFILE_MAX_CHARS.toLocaleString(),
+          count: format.number(value.length),
+          max: format.number(TAINA_PROFILE_MAX_CHARS),
         })}
       </p>
       <div className="mt-3 flex flex-wrap items-center gap-3">
@@ -456,7 +452,7 @@ function ProfileCard({ savedProfile, onSaved }: { savedProfile: string; onSaved:
         ) : null}
       </div>
       {saveState === "failed" ? (
-        <p className="mt-3 rounded-2xl border border-destructive/25 bg-destructive/5 px-3.5 py-2.5 text-sm text-destructive">
+        <p className="mt-3 rounded-2xl bg-destructive/10 px-3.5 py-2.5 text-sm text-destructive">
           {t("profileSaveFailed")}
         </p>
       ) : null}
@@ -504,7 +500,7 @@ function ApiKeyCard({ apiKey, onChanged }: { apiKey: string | null; onChanged: (
     <DashCard>
       <div className="flex items-center justify-between gap-3">
         <CardTitle Icon={KeyRoundIcon}>{t("apiKeyTitle")}</CardTitle>
-        <span className="shrink-0 text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
+        <span className="shrink-0 text-xs font-medium text-muted-foreground">
           {apiKey ? t("active") : t("revoked")}
         </span>
       </div>
@@ -565,7 +561,7 @@ function ApiKeyCard({ apiKey, onChanged }: { apiKey: string | null; onChanged: (
         </Button>
       )}
       {actionFailed ? (
-        <p className="mt-3 rounded-2xl border border-destructive/25 bg-destructive/5 px-3.5 py-2.5 text-sm text-destructive">
+        <p className="mt-3 rounded-2xl bg-destructive/10 px-3.5 py-2.5 text-sm text-destructive">
           {t("keyActionFailed")}
         </p>
       ) : null}

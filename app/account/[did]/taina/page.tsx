@@ -1,13 +1,17 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import { getTranslations } from "next-intl/server";
 import { fetchAuthSession } from "@/app/_lib/auth-server";
 import { TainaDashboardClient } from "../../_components/TainaDashboardClient";
 import { getAccountRouteData, readAccountRouteParams } from "../../_lib/account-route";
 
-export const metadata: Metadata = {
-  title: "Tainá — GainForest",
-  robots: { index: false, follow: false },
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("common.accountTabs");
+  return {
+    title: `${t("taina")} — GainForest`,
+    robots: { index: false, follow: false },
+  };
+}
 
 export default async function AccountTainaPage({ params }: { params: Promise<{ did: string }> }) {
   const { did, urlIdentifier } = await readAccountRouteParams(params);

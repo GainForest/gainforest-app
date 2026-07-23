@@ -1,13 +1,17 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import { getTranslations } from "next-intl/server";
 import { resolveAccountManageAccess } from "@/app/_lib/manage-server";
 import { SettingsSection } from "@/app/(manage)/manage/_sections";
 import { readAccountRouteParams } from "../../_lib/account-route";
 
-export const metadata: Metadata = {
-  title: "Settings — GainForest",
-  robots: { index: false, follow: false },
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("common.accountTabs");
+  return {
+    title: `${t("settings")} — GainForest`,
+    robots: { index: false, follow: false },
+  };
+}
 
 export default async function AccountSettingsPage({ params }: { params: Promise<{ did: string }> }) {
   const { urlIdentifier } = await readAccountRouteParams(params);
