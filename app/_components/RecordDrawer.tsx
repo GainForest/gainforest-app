@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
+import { forwardRef, useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 import type { Map as LeafletMap, Marker, TileLayer } from "leaflet";
 import Image from "next/image";
 import Link from "next/link";
@@ -41,6 +41,7 @@ import { isPdsBlobUrl, resolveBlobUrl } from "../_lib/pds";
 import { pauseOtherAudio } from "../_lib/audio-coordinator";
 import { formatWorkScopeTag, type WorkScopeLabels } from "../_lib/work-scope-labels";
 import { cn } from "@/lib/utils";
+import { useModalFocus } from "@/hooks/use-modal-focus";
 import type { AuthSession } from "../_lib/auth";
 import { fetchCgsGroups, type CgsGroupMembership } from "@/app/(manage)/manage/_lib/cgs";
 import { deleteOccurrenceCascade, updateOccurrence } from "@/app/(manage)/manage/_lib/mutations";
@@ -105,6 +106,8 @@ export function RecordDrawer({
   const [projectBumicerts, setProjectBumicerts] = useState<BumicertRecord[] | null>(null);
   const [projectUpdates, setProjectUpdates] = useState<TimelineAttachmentItem[] | null>(null);
   const [projectGalleries, setProjectGalleries] = useState<ProjectImageGallery[] | null>(null);
+  const dialogRef = useRef<HTMLDivElement | null>(null);
+  const closeButtonRef = useRef<HTMLButtonElement | null>(null);
   const t = useTranslations("marketplace.recordDrawer");
   const workScopeT = useTranslations("common.workScopes");
   const aboutT = useTranslations("common.accountAbout");
@@ -185,24 +188,12 @@ export function RecordDrawer({
     return () => ctrl.abort();
   }, [record]);
 
-  useEffect(() => {
-    if (!record) return;
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key !== "Escape") return;
-      if (locationPickerOpen) {
-        setLocationPickerOpen(false);
-        return;
-      }
-      onClose();
-    };
-    document.addEventListener("keydown", onKey);
-    const original = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    return () => {
-      document.removeEventListener("keydown", onKey);
-      document.body.style.overflow = original;
-    };
-  }, [record, onClose, locationPickerOpen]);
+  useModalFocus({
+    active: Boolean(record),
+    containerRef: dialogRef,
+    initialFocusRef: closeButtonRef,
+    onEscape: onClose,
+  });
 
   // Fetch the full, drawer-ready detail for the opened record. The list query
   // stays lean (1000 records); the deep field set is pulled per record here.
@@ -378,7 +369,7 @@ export function RecordDrawer({
   // Arrow keys flip the occurrence hero between photos (outside the editor /
   // form fields), mirroring the full observation page.
   useEffect(() => {
-    if (occurrenceImageCount <= 1) return;
+    if (occurrenceImageCount <= 1 || locationPickerOpen) return;
     const onKey = (event: KeyboardEvent) => {
       const target = event.target as HTMLElement | null;
       if (target && (target.tagName === "INPUT" || target.tagName === "TEXTAREA" || target.tagName === "SELECT" || target.isContentEditable)) return;
@@ -394,7 +385,7 @@ export function RecordDrawer({
     };
     document.addEventListener("keydown", onKey);
     return () => document.removeEventListener("keydown", onKey);
-  }, [occurrenceImageCount]);
+  }, [locationPickerOpen, occurrenceImageCount]);
 
   if (!record) return null;
   const activeRecord = record;
@@ -557,6 +548,8 @@ export function RecordDrawer({
 
   return (
     <div
+      ref={dialogRef}
+      tabIndex={-1}
       className="fixed inset-0 z-[90] flex justify-end"
       role="dialog"
       aria-modal="true"
@@ -622,7 +615,7 @@ export function RecordDrawer({
               </div>
               <div className="pointer-events-auto flex items-center gap-2">
                 {(observationHref ?? projectHref) ? <MaximizeButton href={(observationHref ?? projectHref)!} /> : null}
-                <CloseButton onClose={onClose} floating />
+                <CloseButton ref={closeButtonRef} onClose={onClose} floating />
               </div>
             </div>
           </div>
@@ -631,7 +624,7 @@ export function RecordDrawer({
             <KindBadge record={record} />
             <div className="flex items-center gap-2">
               {(observationHref ?? projectHref) ? <MaximizeButton href={(observationHref ?? projectHref)!} /> : null}
-              <CloseButton onClose={onClose} />
+              <CloseButton ref={closeButtonRef} onClose={onClose} />
             </div>
           </div>
         )}
@@ -1520,6 +1513,8 @@ export function ObservationLocationPickerModal({
   onSelect: (lat: number, lon: number) => void;
 }) {
   const t = useTranslations("marketplace.recordDrawer");
+  const dialogRef = useRef<HTMLDivElement | null>(null);
+  const closeButtonRef = useRef<HTMLButtonElement | null>(null);
   const elRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<LeafletMap | null>(null);
   const markerRef = useRef<Marker | null>(null);
@@ -1529,6 +1524,12 @@ export function ObservationLocationPickerModal({
   );
   const [selected, setSelected] = useState<{ lat: number; lon: number } | null>(selectedRef.current);
   const [isDark, setIsDark] = useState(false);
+
+  useModalFocus({
+    containerRef: dialogRef,
+    initialFocusRef: closeButtonRef,
+    onEscape: onClose,
+  });
 
   useEffect(() => {
     selectedRef.current = selected;
@@ -1601,7 +1602,14 @@ export function ObservationLocationPickerModal({
   }, []);
 
   return (
-    <div className="fixed inset-0 z-[110] grid place-items-center px-4 py-6" role="dialog" aria-modal="true" aria-label={t("observation.chooseMapLocationTitle")}>
+    <div
+      ref={dialogRef}
+      tabIndex={-1}
+      className="fixed inset-0 z-[110] grid place-items-center px-4 py-6"
+      role="dialog"
+      aria-modal="true"
+      aria-label={t("observation.chooseMapLocationTitle")}
+    >
       <button
         type="button"
         aria-label={t("observation.closeMapLocationChooser")}
@@ -1615,8 +1623,10 @@ export function ObservationLocationPickerModal({
             <p className="mt-1 text-[13px] leading-5 text-muted-foreground">{t("observation.movePin")}</p>
           </div>
           <button
+            ref={closeButtonRef}
             type="button"
             onClick={onClose}
+            aria-label={t("observation.closeMapLocationChooser")}
             className="grid h-8 w-8 shrink-0 place-items-center rounded-full border border-border-soft text-foreground/70 transition-colors hover:text-foreground"
           >
             <XIcon className="h-4 w-4" />
@@ -1850,11 +1860,15 @@ function MaximizeButton({ href }: { href: string }) {
   );
 }
 
-function CloseButton({ onClose, floating = false }: { onClose: () => void; floating?: boolean }) {
+const CloseButton = forwardRef<HTMLButtonElement, { onClose: () => void; floating?: boolean }>(function CloseButton(
+  { onClose, floating = false },
+  ref,
+) {
   const t = useTranslations("marketplace.recordDrawer");
 
   return (
     <button
+      ref={ref}
       type="button"
       onClick={onClose}
       aria-label={t("actions.close")}
@@ -1867,7 +1881,7 @@ function CloseButton({ onClose, floating = false }: { onClose: () => void; float
       <XIcon className="h-[15px] w-[15px]" aria-hidden />
     </button>
   );
-}
+});
 
 // A single, consistent "open the dedicated detail page" link shared by the
 // project, observation, cert, and owner-profile actions so they all look the
@@ -1992,9 +2006,18 @@ function ProjectDrawerGallery({ images, projectTitle }: { images: ProjectGallery
   const t = useTranslations("marketplace.recordDrawer");
   const galleryT = useTranslations("common.projectGallery");
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
+  const dialogRef = useRef<HTMLDivElement | null>(null);
+  const closeButtonRef = useRef<HTMLButtonElement | null>(null);
   const MAX_THUMBS = 6;
   const thumbs = images.slice(0, MAX_THUMBS);
   const overflow = images.length - thumbs.length;
+
+  useModalFocus({
+    active: activeIndex !== null,
+    containerRef: dialogRef,
+    initialFocusRef: closeButtonRef,
+    onEscape: () => setActiveIndex(null),
+  });
 
   useEffect(() => {
     if (activeIndex === null) return;
@@ -2005,9 +2028,6 @@ function ProjectDrawerGallery({ images, projectTitle }: { images: ProjectGallery
       } else if (event.key === "ArrowRight") {
         event.stopPropagation();
         setActiveIndex((index) => (index === null ? index : (index + 1) % images.length));
-      } else if (event.key === "Escape") {
-        event.stopPropagation();
-        setActiveIndex(null);
       }
     };
     document.addEventListener("keydown", onKey, true);
@@ -2057,12 +2077,16 @@ function ProjectDrawerGallery({ images, projectTitle }: { images: ProjectGallery
 
       {active ? (
         <div
+          ref={dialogRef}
+          tabIndex={-1}
           role="dialog"
           aria-modal="true"
+          aria-label={galleryT("imageAlt", { projectTitle, index: (activeIndex ?? 0) + 1 })}
           className="fixed inset-0 z-[120] flex items-center justify-center bg-black/88 p-4"
           onClick={() => setActiveIndex(null)}
         >
           <button
+            ref={closeButtonRef}
             type="button"
             onClick={() => setActiveIndex(null)}
             aria-label={galleryT("closeImage")}

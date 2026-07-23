@@ -7,6 +7,7 @@ import {
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
 } from "react";
 import { fetchAccountSummary, type AccountSummary } from "../_lib/indexer";
@@ -24,6 +25,7 @@ import {
 } from "../_lib/format";
 import { TrustedByBadges } from "./TrustedByBadges";
 import { FollowButton, FollowProvider, FollowStats } from "./FollowButton";
+import { useModalFocus } from "@/hooks/use-modal-focus";
 
 // Right-side drawer for an account profile, opened by clicking a handle/owner
 // chip. Chips inside record drawers close their containing sheet first so the
@@ -57,24 +59,15 @@ function AccountDrawer({ did, onClose }: { did: string | null; onClose: () => vo
   const [summary, setSummary] = useState<AccountSummary | null>(null);
   const [profile, setProfile] = useState<DidProfile | null>(null);
   const [avatarFailed, setAvatarFailed] = useState(false);
+  const dialogRef = useRef<HTMLDivElement | null>(null);
+  const closeButtonRef = useRef<HTMLButtonElement | null>(null);
 
-  // Escape (capture phase) + body scroll lock while open.
-  useEffect(() => {
-    if (!did) return;
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") {
-        e.stopImmediatePropagation();
-        onClose();
-      }
-    };
-    document.addEventListener("keydown", onKey, true);
-    const original = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    return () => {
-      document.removeEventListener("keydown", onKey, true);
-      document.body.style.overflow = original;
-    };
-  }, [did, onClose]);
+  useModalFocus({
+    active: Boolean(did),
+    containerRef: dialogRef,
+    initialFocusRef: closeButtonRef,
+    onEscape: onClose,
+  });
 
   // Fetch the summary + resolve the Bluesky identity (handle/avatar fallback).
   useEffect(() => {
@@ -106,6 +99,8 @@ function AccountDrawer({ did, onClose }: { did: string | null; onClose: () => vo
   return (
     <FollowProvider targetDid={did}>
     <div
+      ref={dialogRef}
+      tabIndex={-1}
       className="fixed inset-0 z-[100] flex justify-end"
       role="dialog"
       aria-modal="true"
@@ -122,6 +117,7 @@ function AccountDrawer({ did, onClose }: { did: string | null; onClose: () => vo
             Account
           </span>
           <button
+            ref={closeButtonRef}
             type="button"
             onClick={onClose}
             aria-label="Close"

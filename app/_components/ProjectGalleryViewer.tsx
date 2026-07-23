@@ -1,11 +1,12 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
 import { ChevronLeftIcon, ChevronRightIcon, XIcon } from "lucide-react";
 import type { ProjectGalleryImage, ProjectImageGallery } from "../_lib/indexer";
 import { isPdsBlobUrl } from "../_lib/pds";
+import { useModalFocus } from "@/hooks/use-modal-focus";
 
 type GalleryImageView = ProjectGalleryImage & {
   galleryTitle: string | null;
@@ -64,6 +65,15 @@ export function ProjectGalleryViewer({
     null,
   );
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
+  const dialogRef = useRef<HTMLDivElement | null>(null);
+  const closeButtonRef = useRef<HTMLButtonElement | null>(null);
+
+  useModalFocus({
+    active: activeIndex !== null,
+    containerRef: dialogRef,
+    initialFocusRef: closeButtonRef,
+    onEscape: () => setActiveIndex(null),
+  });
 
   const visibleGalleries = useMemo(
     () =>
@@ -185,12 +195,16 @@ export function ProjectGalleryViewer({
 
       {activeImage ? (
         <div
+          ref={dialogRef}
+          tabIndex={-1}
           role="dialog"
           aria-modal="true"
+          aria-label={t("imageAlt", { projectTitle: activeImage.projectTitle, index: (activeIndex ?? 0) + 1 })}
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/88 p-4"
           onClick={closeLightbox}
         >
           <button
+            ref={closeButtonRef}
             type="button"
             onClick={closeLightbox}
             className="absolute right-4 top-4 z-10 grid h-10 w-10 place-items-center rounded-full bg-white/10 text-white ring-1 ring-white/20 backdrop-blur-md transition hover:bg-white/20"

@@ -8,7 +8,7 @@ export default defineConfig({
     },
   },
   test: {
-    include: ["app/**/*.test.ts", "components/**/*.test.ts", "lib/**/*.test.ts", "scripts/**/*.test.ts"],
+    include: ["app/**/*.test.ts", "components/**/*.test.ts", "hooks/**/*.test.ts", "lib/**/*.test.ts", "scripts/**/*.test.ts"],
     exclude: ["e2e/**", "node_modules/**"],
   },
 });

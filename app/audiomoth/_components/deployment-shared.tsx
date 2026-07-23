@@ -6,7 +6,7 @@
  * itself (used by the Deployment tab list and the deployment detail page).
  */
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import { Loader2Icon, XIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -23,6 +23,7 @@ import {
 import { type EquipmentItem } from "@/app/_lib/equipment";
 import { resolveDidProfile, type DidProfile } from "@/app/_lib/did-profile";
 import { formatRelative, shortDid } from "@/app/_lib/format";
+import { useModalFocus } from "@/hooks/use-modal-focus";
 
 /** Your AudioMoths, aggregated across every organization you belong to. */
 export async function fetchMyAudioMoths(signal?: AbortSignal): Promise<EquipmentItem[]> {
@@ -107,19 +108,16 @@ export function EditDeploymentDialog({
   const [equipmentUri, setEquipmentUri] = useState<string>(currentUri ?? "none");
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const dialogRef = useRef<HTMLDivElement | null>(null);
+  const closeButtonRef = useRef<HTMLButtonElement | null>(null);
 
-  useEffect(() => {
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape" && !saving) onClose();
-    };
-    document.addEventListener("keydown", onKey);
-    const original = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    return () => {
-      document.removeEventListener("keydown", onKey);
-      document.body.style.overflow = original;
-    };
-  }, [onClose, saving]);
+  useModalFocus({
+    containerRef: dialogRef,
+    initialFocusRef: closeButtonRef,
+    onEscape: () => {
+      if (!saving) onClose();
+    },
+  });
 
   // The linked unit may live in a teammate's repo we can't currently read; keep
   // it selectable so saving doesn't silently drop the existing link.
@@ -155,12 +153,19 @@ export function EditDeploymentDialog({
   }, [currentUri, equipment, equipmentUri, event, onUpdated, siteName, t]);
 
   return (
-    <div className="fixed inset-0 z-[110] flex items-center justify-center p-4" role="dialog" aria-modal="true">
-      <div className="absolute inset-0 bg-foreground/30 backdrop-blur-[2px]" onClick={() => !saving && onClose()} />
+    <div
+      ref={dialogRef}
+      tabIndex={-1}
+      className="fixed inset-0 z-[110] flex items-center justify-center p-4"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="edit-deployment-title"
+    >
+      <div aria-hidden className="absolute inset-0 bg-foreground/30 backdrop-blur-[2px]" onClick={() => !saving && onClose()} />
       <div className="relative flex max-h-full w-full max-w-md flex-col overflow-y-auto rounded-3xl border border-border bg-background shadow-2xl">
         <div className="sticky top-0 z-10 flex items-center justify-between gap-3 border-b border-border bg-background/95 px-5 py-4 backdrop-blur-xl">
-          <h2 className="font-instrument text-lg font-medium italic text-foreground">{t("editTitle")}</h2>
-          <Button variant="ghost" size="icon-sm" onClick={() => !saving && onClose()} aria-label={t("close")}>
+          <h2 id="edit-deployment-title" className="font-instrument text-lg font-medium italic text-foreground">{t("editTitle")}</h2>
+          <Button ref={closeButtonRef} variant="ghost" size="icon-sm" onClick={() => !saving && onClose()} aria-label={t("close")}>
             <XIcon />
           </Button>
         </div>

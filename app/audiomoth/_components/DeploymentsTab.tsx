@@ -9,7 +9,7 @@
  * user's equipment list.
  */
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
 import {
@@ -30,6 +30,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
+import { useModalFocus } from "@/hooks/use-modal-focus";
 import {
   generateChime,
   isValidDeploymentId,
@@ -286,21 +287,18 @@ function CreateDeploymentDialog({
   const [stage, setStage] = useState<CreateStage>("form");
   const [replaying, setReplaying] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const dialogRef = useRef<HTMLDivElement | null>(null);
+  const closeButtonRef = useRef<HTMLButtonElement | null>(null);
 
   const busy = stage === "playing" || replaying;
 
-  useEffect(() => {
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape" && !busy) onClose();
-    };
-    document.addEventListener("keydown", onKey);
-    const original = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    return () => {
-      document.removeEventListener("keydown", onKey);
-      document.body.style.overflow = original;
-    };
-  }, [busy, onClose]);
+  useModalFocus({
+    containerRef: dialogRef,
+    initialFocusRef: closeButtonRef,
+    onEscape: () => {
+      if (!busy) onClose();
+    },
+  });
 
   const selectedEquipment = useMemo(
     () => equipment?.find((item) => item.uri === equipmentUri) ?? null,
@@ -428,12 +426,19 @@ function CreateDeploymentDialog({
   }, [deploymentId, lat, lon, t]);
 
   return (
-    <div className="fixed inset-0 z-[110] flex items-center justify-center p-4" role="dialog" aria-modal="true">
-      <div className="absolute inset-0 bg-foreground/30 backdrop-blur-[2px]" onClick={() => !busy && onClose()} />
+    <div
+      ref={dialogRef}
+      tabIndex={-1}
+      className="fixed inset-0 z-[110] flex items-center justify-center p-4"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="create-deployment-title"
+    >
+      <div aria-hidden className="absolute inset-0 bg-foreground/30 backdrop-blur-[2px]" onClick={() => !busy && onClose()} />
       <div className="relative flex max-h-full w-full max-w-md flex-col overflow-y-auto rounded-3xl border border-border bg-background shadow-2xl">
         <div className="sticky top-0 z-10 flex items-center justify-between gap-3 border-b border-border bg-background/95 px-5 py-4 backdrop-blur-xl">
-          <h2 className="font-instrument text-lg font-light italic text-foreground">{t("createTitle")}</h2>
-          <Button variant="ghost" size="icon-sm" onClick={() => !busy && onClose()} aria-label={t("close")}>
+          <h2 id="create-deployment-title" className="font-instrument text-lg font-light italic text-foreground">{t("createTitle")}</h2>
+          <Button ref={closeButtonRef} variant="ghost" size="icon-sm" onClick={() => !busy && onClose()} aria-label={t("close")}>
             <XIcon />
           </Button>
         </div>
