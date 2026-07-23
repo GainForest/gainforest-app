@@ -5,10 +5,19 @@ import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { Loader2Icon, Trash2Icon, TriangleAlertIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { ModalContent, ModalDescription, ModalFooter, ModalHeader, ModalTitle } from "@/components/ui/modal/modal";
+import {
+  ModalContent,
+  ModalDescription,
+  ModalFooter,
+  ModalHeader,
+  ModalTitle,
+} from "@/components/ui/modal/modal";
 import { useModal } from "@/components/ui/modal/context";
 import { deleteRecord } from "@/app/(manage)/manage/_lib/mutations";
-import { CERT_COLLECTION, PROJECT_COLLECTION } from "@/app/(manage)/manage/_lib/project-cert";
+import {
+  CERT_COLLECTION,
+  PROJECT_COLLECTION,
+} from "@/app/(manage)/manage/_lib/project-cert";
 
 type BumicertDeleteActionProps = {
   /** Cert (claim activity) rkey. */
@@ -33,7 +42,9 @@ type BumicertDeleteActionProps = {
  */
 function useDeleteLabels(isProject: boolean) {
   const certT = useTranslations("bumicert.detail.actions");
-  const projectT = useTranslations("marketplace.manageProjects.editor.deleteModal");
+  const projectT = useTranslations(
+    "marketplace.manageProjects.editor.deleteModal",
+  );
   if (isProject) {
     return {
       manage: projectT("manageHeading"),
@@ -54,7 +65,8 @@ function useDeleteLabels(isProject: boolean) {
     button: certT("deleteBumicert"),
     hint: certT("deleteHint"),
     confirmTitle: certT("deleteConfirmTitle"),
-    confirmDescription: (title: string) => certT("deleteConfirmDescription", { title }),
+    confirmDescription: (title: string) =>
+      certT("deleteConfirmDescription", { title }),
     prompt: certT("deleteConfirmPrompt"),
     inputAria: certT("deleteConfirmInputAria"),
     mismatch: certT("deleteConfirmMismatch"),
@@ -84,7 +96,9 @@ export function BumicertDeleteAction(props: BumicertDeleteActionProps) {
 
   return (
     <div className="space-y-2">
-      <h3 className="text-xs font-medium uppercase tracking-[0.16em] text-muted-foreground">{labels.manage}</h3>
+      <h3 className="text-sm font-medium text-muted-foreground">
+        {labels.manage}
+      </h3>
       <Button
         type="button"
         variant="outline"
@@ -100,7 +114,13 @@ export function BumicertDeleteAction(props: BumicertDeleteActionProps) {
   );
 }
 
-function DeleteConfirm({ rkey, title, mutationRepo, redirectHref, projectRkey }: BumicertDeleteActionProps) {
+function DeleteConfirm({
+  rkey,
+  title,
+  mutationRepo,
+  redirectHref,
+  projectRkey,
+}: BumicertDeleteActionProps) {
   const isProject = Boolean(projectRkey);
   const labels = useDeleteLabels(isProject);
   const modal = useModal();
@@ -135,7 +155,9 @@ function DeleteConfirm({ rkey, title, mutationRepo, redirectHref, projectRkey }:
       router.push(redirectHref);
       router.refresh();
     } catch (deleteError) {
-      setError(deleteError instanceof Error ? deleteError.message : labels.error);
+      setError(
+        deleteError instanceof Error ? deleteError.message : labels.error,
+      );
       setPending(false);
     }
   };
@@ -150,7 +172,10 @@ function DeleteConfirm({ rkey, title, mutationRepo, redirectHref, projectRkey }:
         <ModalDescription>{labels.confirmDescription(title)}</ModalDescription>
       </ModalHeader>
       <div className="space-y-2">
-        <label htmlFor={inputId} className="block text-sm font-medium text-foreground">
+        <label
+          htmlFor={inputId}
+          className="block text-sm font-medium text-foreground"
+        >
           {labels.prompt}
         </label>
         <div className="select-all rounded-lg border border-border bg-muted/60 px-3 py-2 text-sm font-medium text-foreground">
@@ -186,11 +211,25 @@ function DeleteConfirm({ rkey, title, mutationRepo, redirectHref, projectRkey }:
         </p>
       ) : null}
       <ModalFooter>
-        <Button type="button" variant="outline" disabled={pending} onClick={() => void close()}>
+        <Button
+          type="button"
+          variant="outline"
+          disabled={pending}
+          onClick={() => void close()}
+        >
           {labels.cancel}
         </Button>
-        <Button type="button" variant="destructive" disabled={pending || !nameMatches} onClick={() => void confirm()}>
-          {pending ? <Loader2Icon className="size-4 animate-spin" /> : <Trash2Icon className="size-4" />}
+        <Button
+          type="button"
+          variant="destructive"
+          disabled={pending || !nameMatches}
+          onClick={() => void confirm()}
+        >
+          {pending ? (
+            <Loader2Icon className="size-4 animate-spin" />
+          ) : (
+            <Trash2Icon className="size-4" />
+          )}
           {labels.confirm}
         </Button>
       </ModalFooter>

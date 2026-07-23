@@ -23,11 +23,19 @@ function Spans({ spans }: { spans: TimelineOptionalNoteSpan[] }) {
       {spans.map((span, index) => {
         let node: ReactNode = span.text;
         if (span.code) {
-          node = <code className="rounded bg-foreground/[0.07] px-1 py-0.5 font-mono text-[0.9em]">{node}</code>;
+          node = (
+            <code className="rounded bg-foreground/[0.07] px-1 py-0.5 font-mono text-[0.9em]">
+              {node}
+            </code>
+          );
         }
-        if (span.bold) node = <strong className="font-semibold text-foreground">{node}</strong>;
+        if (span.bold)
+          node = (
+            <strong className="font-semibold text-foreground">{node}</strong>
+          );
         if (span.italic) node = <em>{node}</em>;
-        if (span.underline) node = <span className="underline underline-offset-2">{node}</span>;
+        if (span.underline)
+          node = <span className="underline underline-offset-2">{node}</span>;
         if (span.strike) node = <span className="line-through">{node}</span>;
         if (span.href) {
           node = (
@@ -47,7 +55,11 @@ function Spans({ spans }: { spans: TimelineOptionalNoteSpan[] }) {
   );
 }
 
-function NoteLink({ block }: { block: Extract<TimelineOptionalNoteBlock, { type: "link" }> }) {
+function NoteLink({
+  block,
+}: {
+  block: Extract<TimelineOptionalNoteBlock, { type: "link" }>;
+}) {
   const t = useTranslations("bumicert.detail.timelineEntry");
   return (
     <Link
@@ -57,9 +69,13 @@ function NoteLink({ block }: { block: Extract<TimelineOptionalNoteBlock, { type:
       className="inline-flex max-w-full items-center gap-2 rounded-lg border border-border/50 bg-background px-3 py-2 text-sm text-foreground hover:bg-muted/30"
     >
       <span className="min-w-0">
-        <span className="block truncate font-medium">{block.title ?? t("open")}</span>
+        <span className="block truncate font-medium">
+          {block.title ?? t("open")}
+        </span>
         {block.description ? (
-          <span className="mt-0.5 line-clamp-2 text-xs text-muted-foreground">{block.description}</span>
+          <span className="mt-0.5 line-clamp-2 text-xs text-muted-foreground">
+            {block.description}
+          </span>
         ) : null}
       </span>
       <ExternalLinkIcon className="h-4 w-4 shrink-0" />
@@ -71,11 +87,12 @@ function Block({ block }: { block: TimelineOptionalNoteBlock }) {
   switch (block.type) {
     case "heading": {
       const level = Math.min(Math.max(block.level, 1), 3);
-      const className = level === 1
-        ? "text-base font-medium text-foreground"
-        : level === 2
-          ? "text-sm font-medium text-foreground"
-          : "text-xs font-semibold uppercase tracking-[0.08em] text-muted-foreground";
+      const className =
+        level === 1
+          ? "text-base font-medium text-foreground"
+          : level === 2
+            ? "text-sm font-medium text-foreground"
+            : "text-xs font-semibold text-muted-foreground";
       return (
         <p className={cn(className, alignmentClassName(block.align))}>
           <Spans spans={block.spans} />
@@ -90,7 +107,12 @@ function Block({ block }: { block: TimelineOptionalNoteBlock }) {
       );
     case "blockquote":
       return (
-        <blockquote className={cn("border-l-2 border-primary/40 pl-3 italic text-foreground/70", alignmentClassName(block.align))}>
+        <blockquote
+          className={cn(
+            "border-l-2 border-primary/40 pl-3 italic text-foreground/70",
+            alignmentClassName(block.align),
+          )}
+        >
           <Spans spans={block.spans} />
         </blockquote>
       );
@@ -104,13 +126,17 @@ function Block({ block }: { block: TimelineOptionalNoteBlock }) {
       return block.ordered ? (
         <ol className="list-decimal space-y-1 pl-5 marker:text-muted-foreground">
           {block.items.map((item, index) => (
-            <li key={index}><Spans spans={item} /></li>
+            <li key={index}>
+              <Spans spans={item} />
+            </li>
           ))}
         </ol>
       ) : (
         <ul className="list-disc space-y-1 pl-5 marker:text-muted-foreground">
           {block.items.map((item, index) => (
-            <li key={index}><Spans spans={item} /></li>
+            <li key={index}>
+              <Spans spans={item} />
+            </li>
           ))}
         </ul>
       );
@@ -118,8 +144,17 @@ function Block({ block }: { block: TimelineOptionalNoteBlock }) {
       return (
         <figure className="overflow-hidden rounded-xl border border-border/50 bg-background">
           {/* eslint-disable-next-line @next/next/no-img-element -- note images may be from many safe hosts. */}
-          <img src={block.src} alt={block.alt ?? ""} className="max-h-[320px] w-full object-contain" loading="lazy" />
-          {block.alt ? <figcaption className="px-3 py-2 text-xs text-muted-foreground">{block.alt}</figcaption> : null}
+          <img
+            src={block.src}
+            alt={block.alt ?? ""}
+            className="max-h-[320px] w-full object-contain"
+            loading="lazy"
+          />
+          {block.alt ? (
+            <figcaption className="px-3 py-2 text-xs text-muted-foreground">
+              {block.alt}
+            </figcaption>
+          ) : null}
         </figure>
       );
     case "link":

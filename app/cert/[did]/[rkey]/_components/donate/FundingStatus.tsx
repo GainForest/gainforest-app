@@ -15,7 +15,11 @@ import { useModal } from "@/components/ui/modal/context";
 import { Button } from "@/components/ui/button";
 import { FundingConfigModal } from "@/components/global/modals/funding/config";
 import { MODAL_IDS } from "@/components/global/modals/ids";
-import { useEvmLinks, computeWalletFlags, type FundingConfigData } from "@/app/_lib/funding";
+import {
+  useEvmLinks,
+  computeWalletFlags,
+  type FundingConfigData,
+} from "@/app/_lib/funding";
 import {
   AlertTriangleIcon,
   CircleDotIcon,
@@ -25,6 +29,7 @@ import {
   SettingsIcon,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useTranslations } from "next-intl";
 
 const DONATION_SETTINGS_UPDATED_EVENT = "bumicert:donation-settings-updated";
 
@@ -32,7 +37,10 @@ const DONATION_SETTINGS_UPDATED_EVENT = "bumicert:donation-settings-updated";
 
 type DerivedStatus =
   | { kind: "no-config" }
-  | { kind: "invalid"; reason: string }
+  | {
+      kind: "invalid";
+      reasonKey: "missingWallet" | "invalidWallet" | "untrustedWallet";
+    }
   | { kind: "coming-soon" }
   | { kind: "paused" }
   | { kind: "closed" }
@@ -46,21 +54,15 @@ function deriveStatus(
   if (!config) return { kind: "no-config" };
 
   if (!config.receivingWallet?.uri) {
-    return { kind: "invalid", reason: "No receiving wallet configured." };
+    return { kind: "invalid", reasonKey: "missingWallet" };
   }
 
   if (!receivingWalletValid) {
-    return {
-      kind: "invalid",
-      reason: "Wallet signature invalid — re-link your wallet.",
-    };
+    return { kind: "invalid", reasonKey: "invalidWallet" };
   }
 
   if (!receivingWalletTrusted) {
-    return {
-      kind: "invalid",
-      reason: "Wallet not verified by GainForest — re-link through the platform.",
-    };
+    return { kind: "invalid", reasonKey: "untrustedWallet" };
   }
 
   const s = config.status ?? "open";
@@ -80,55 +82,66 @@ type StatusUiConfig = {
   buttonVariant: "default" | "outline";
 };
 
-function getStatusUi(derived: DerivedStatus): StatusUiConfig {
+function getStatusUi(
+  derived: DerivedStatus,
+  t: ReturnType<typeof useTranslations>,
+): StatusUiConfig {
   const iconClass = "size-3.5 shrink-0";
   switch (derived.kind) {
     case "no-config":
       return {
-        label: "Donations not set up",
-        icon: <CircleOffIcon className={cn(iconClass, "text-muted-foreground")} />,
+        label: t("notSetUp"),
+        icon: (
+          <CircleOffIcon className={cn(iconClass, "text-muted-foreground")} />
+        ),
         labelClass: "text-muted-foreground",
-        buttonLabel: "Enable Donations",
+        buttonLabel: t("enable"),
         buttonVariant: "default",
       };
     case "invalid":
       return {
-        label: derived.reason,
-        icon: <AlertTriangleIcon className={cn(iconClass, "text-destructive")} />,
+        label: t(derived.reasonKey),
+        icon: (
+          <AlertTriangleIcon className={cn(iconClass, "text-destructive")} />
+        ),
         labelClass: "text-destructive",
-        buttonLabel: "Update Settings",
+        buttonLabel: t("update"),
         buttonVariant: "default",
       };
     case "coming-soon":
       return {
-        label: "Coming Soon",
+        label: t("comingSoon"),
         icon: <ClockIcon className={cn(iconClass, "text-muted-foreground")} />,
         labelClass: "text-muted-foreground",
-        buttonLabel: "Manage Donations",
+        buttonLabel: t("manage"),
         buttonVariant: "outline",
       };
     case "paused":
       return {
-        label: "Donations paused",
-        icon: <CircleMinusIcon className={cn(iconClass, "text-muted-foreground")} />,
+        label: t("paused"),
+        icon: (
+          <CircleMinusIcon className={cn(iconClass, "text-muted-foreground")} />
+        ),
         labelClass: "text-muted-foreground",
-        buttonLabel: "Manage Donations",
+        buttonLabel: t("manage"),
         buttonVariant: "outline",
       };
     case "closed":
       return {
-        label: "Donations closed",
-        icon: <CircleOffIcon className={cn(iconClass, "text-muted-foreground")} />,
+        label: t("closed"),
+        icon: (
+          <CircleOffIcon className={cn(iconClass, "text-muted-foreground")} />
+        ),
         labelClass: "text-muted-foreground",
-        buttonLabel: "Manage Donations",
+        buttonLabel: t("manage"),
         buttonVariant: "outline",
       };
     case "open":
       return {
-        label: "Accepting donations",
+        label: t("open"),
         icon: <CircleDotIcon className={cn(iconClass, "text-primary")} />,
         labelClass: "text-primary",
-        buttonLabel: "Manage Donations",
+        buttonLabel: t("manage"),
         buttonVariant: "outline",
       };
   }
@@ -141,7 +154,10 @@ function configTime(config: FundingConfigData | null): number {
   return Number.isFinite(time) ? time : 0;
 }
 
-function freshestConfig(current: FundingConfigData | null, incoming: FundingConfigData | null): FundingConfigData | null {
+function freshestConfig(
+  current: FundingConfigData | null,
+  incoming: FundingConfigData | null,
+): FundingConfigData | null {
   if (!incoming) return current;
   if (!current) return incoming;
   return configTime(incoming) >= configTime(current) ? incoming : current;
@@ -165,10 +181,16 @@ export function FundingStatus({
   mutationRepo,
 }: FundingStatusProps) {
   const router = useRouter();
+  const t = useTranslations("bumicert.detail.recovery.fundingStatus");
   const { pushModal, show } = useModal();
-  const [currentConfig, setCurrentConfig] = useState<FundingConfigData | null>(fundingConfig);
+  const [currentConfig, setCurrentConfig] = useState<FundingConfigData | null>(
+    fundingConfig,
+  );
   const { data: evmLinks } = useEvmLinks(ownerDid);
-  const settingsKey = useMemo(() => `${ownerDid}/${bumicertRkey}`, [ownerDid, bumicertRkey]);
+  const settingsKey = useMemo(
+    () => `${ownerDid}/${bumicertRkey}`,
+    [ownerDid, bumicertRkey],
+  );
 
   useEffect(() => {
     setCurrentConfig((current) => freshestConfig(current, fundingConfig));
@@ -176,23 +198,38 @@ export function FundingStatus({
 
   useEffect(() => {
     const handleUpdated = (event: Event) => {
-      const detail = (event as CustomEvent<{ key?: string; config?: FundingConfigData }>).detail;
+      const detail = (
+        event as CustomEvent<{ key?: string; config?: FundingConfigData }>
+      ).detail;
       if (detail?.key !== settingsKey || !detail.config) return;
-      setCurrentConfig((current) => freshestConfig(current, detail.config ?? null));
+      setCurrentConfig((current) =>
+        freshestConfig(current, detail.config ?? null),
+      );
     };
     window.addEventListener(DONATION_SETTINGS_UPDATED_EVENT, handleUpdated);
-    return () => window.removeEventListener(DONATION_SETTINGS_UPDATED_EVENT, handleUpdated);
+    return () =>
+      window.removeEventListener(
+        DONATION_SETTINGS_UPDATED_EVENT,
+        handleUpdated,
+      );
   }, [settingsKey]);
 
   const { valid, trusted } = computeWalletFlags(currentConfig, evmLinks);
   const derived = deriveStatus(currentConfig, valid, trusted);
-  const ui = getStatusUi(derived);
+  const ui = getStatusUi(derived, t);
 
-  const handleConfigSaved = useCallback((config: FundingConfigData) => {
-    setCurrentConfig(config);
-    window.dispatchEvent(new CustomEvent(DONATION_SETTINGS_UPDATED_EVENT, { detail: { key: settingsKey, config } }));
-    router.refresh();
-  }, [router, settingsKey]);
+  const handleConfigSaved = useCallback(
+    (config: FundingConfigData) => {
+      setCurrentConfig(config);
+      window.dispatchEvent(
+        new CustomEvent(DONATION_SETTINGS_UPDATED_EVENT, {
+          detail: { key: settingsKey, config },
+        }),
+      );
+      router.refresh();
+    },
+    [router, settingsKey],
+  );
 
   const handleOpenModal = useCallback(() => {
     pushModal(
@@ -211,13 +248,26 @@ export function FundingStatus({
       true,
     );
     show();
-  }, [ownerDid, bumicertRkey, currentConfig, mutationRepo, handleConfigSaved, pushModal, show]);
+  }, [
+    ownerDid,
+    bumicertRkey,
+    currentConfig,
+    mutationRepo,
+    handleConfigSaved,
+    pushModal,
+    show,
+  ]);
 
   // Mirrors the visitor's donate area: flex flex-col gap-1 w-full
   //   small status line, then a full-width Button.
   return (
     <div className="flex flex-col gap-1 w-full">
-      <div className={cn("flex items-center gap-1.5 justify-center text-sm", ui.labelClass)}>
+      <div
+        className={cn(
+          "flex items-center gap-1.5 justify-center text-sm",
+          ui.labelClass,
+        )}
+      >
         {ui.icon}
         <span>{ui.label}</span>
       </div>

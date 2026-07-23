@@ -23,7 +23,10 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 import { manageApiHref, manageHref, profileBasePath, type ManageTarget } from "@/lib/links";
 import { localBumicertHref } from "@/app/_lib/urls";
-import { canUpdateRecord } from "../../../../_lib/cgs-permissions";
+import {
+  canCreateRecord,
+  canUpdateRecord,
+} from "../../../../_lib/cgs-permissions";
 import { putRecord } from "../../../../_lib/mutations";
 
 const PROJECT_COLLECTION = "org.hypercerts.collection";
@@ -80,6 +83,7 @@ export function ProjectCertsManagerClient({ target, projectRkey }: { target: Man
   const [pending, setPending] = useState<PendingAction>(null);
   const [refreshing, setRefreshing] = useState(false);
   const [showLink, setShowLink] = useState(false);
+  const createPermission = canCreateRecord(target);
   const updatePermission = canUpdateRecord(target);
   const repoOptions = target.kind === "group" ? { repo: target.did } : undefined;
 
@@ -203,19 +207,23 @@ export function ProjectCertsManagerClient({ target, projectRkey }: { target: Man
                   className="min-w-0 flex-1 truncate border-0 bg-transparent px-3 py-2 text-sm text-foreground outline-none placeholder:text-muted-foreground"
                 />
               </div>
-              <Button asChild>
-                <Link href={newCertHref}>
-                  <CirclePlusIcon className="size-4" />
-                  {t("actions.mint")}
-                </Link>
-              </Button>
+              {createPermission.allowed ? (
+                <Button asChild>
+                  <Link href={newCertHref}>
+                    <CirclePlusIcon className="size-4" />
+                    {t("actions.mint")}
+                  </Link>
+                </Button>
+              ) : null}
             </div>
           </div>
 
-          {!updatePermission.allowed ? (
+          {!createPermission.allowed || !updatePermission.allowed ? (
             <div className="flex items-center gap-2 rounded-2xl border border-warn/25 bg-warn/10 px-4 py-3 text-sm text-foreground">
               <TriangleAlertIcon className="size-4 text-warn" />
-              {updatePermission.reason ?? t("errors.noPermission")}
+              {(!createPermission.allowed
+                ? createPermission.reason
+                : updatePermission.reason) ?? t("errors.noPermission")}
             </div>
           ) : null}
 
@@ -230,6 +238,7 @@ export function ProjectCertsManagerClient({ target, projectRkey }: { target: Man
             <EmptyState
               hasQuery={hasQuery}
               createHref={newCertHref}
+              canCreate={createPermission.allowed}
               canLink={updatePermission.allowed && linkableAll.length > 0}
               onLink={() => setShowLink(true)}
             />
@@ -369,11 +378,13 @@ function CertsSkeleton() {
 function EmptyState({
   hasQuery,
   createHref,
+  canCreate,
   canLink,
   onLink,
 }: {
   hasQuery: boolean;
   createHref: string;
+  canCreate: boolean;
   canLink: boolean;
   onLink: () => void;
 }) {
@@ -387,14 +398,16 @@ function EmptyState({
       <p className="mt-2 max-w-md text-sm leading-6 text-muted-foreground">
         {hasQuery ? t("empty.noMatchingDescription") : t("empty.noCertsDescription")}
       </p>
-      {!hasQuery ? (
+      {!hasQuery && (canCreate || canLink) ? (
         <div className="mt-5 flex flex-col items-center gap-2">
-          <Button asChild size="sm">
-            <Link href={createHref}>
-              <CirclePlusIcon className="size-4" />
-              {t("actions.mintFirst")}
-            </Link>
-          </Button>
+          {canCreate ? (
+            <Button asChild size="sm">
+              <Link href={createHref}>
+                <CirclePlusIcon className="size-4" />
+                {t("actions.mintFirst")}
+              </Link>
+            </Button>
+          ) : null}
           {canLink ? (
             <Button type="button" variant="ghost" size="sm" onClick={onLink} className="text-muted-foreground">
               <Link2Icon className="size-4" />

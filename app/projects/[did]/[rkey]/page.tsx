@@ -3,11 +3,18 @@ import Link from "next/link";
 import Image from "next/image";
 import { notFound, redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
-import { ArrowLeftIcon, ArrowUpRightIcon, FolderKanbanIcon } from "lucide-react";
+import {
+  ArrowLeftIcon,
+  ArrowUpRightIcon,
+  FolderKanbanIcon,
+} from "lucide-react";
 import { fetchRecordByUri } from "../../../_lib/indexer";
 import { getPdsRecord, isPdsBlobUrl } from "../../../_lib/pds";
 import { AutoRefresh } from "./_components/AutoRefresh";
-import { getAccountRouteData, readAccountRouteParams } from "../../../account/_lib/account-route";
+import {
+  getAccountRouteData,
+  readAccountRouteParams,
+} from "../../../account/_lib/account-route";
 import { accountHref, localProjectHref } from "../../../_lib/urls";
 import { RecordEngagement } from "../../../_components/RecordEngagement";
 import { localizedAlternates } from "../../../_lib/seo-metadata";
@@ -51,22 +58,40 @@ async function loadProject(params: ProjectPageParams): Promise<LoadedProject> {
     // The indexer lags fresh writes. When the record exists on the owner's
     // PDS, this is a just-created project that's still being published — show
     // a friendly holding page instead of a 404.
-    const pdsRecord = await getPdsRecord(did, COLLECTION, rkey).catch(() => null);
+    const pdsRecord = await getPdsRecord(did, COLLECTION, rkey).catch(
+      () => null,
+    );
     if (pdsRecord) {
-      const title = typeof pdsRecord.value.title === "string" ? pdsRecord.value.title : null;
-      return { record: null, pendingTitle: title ?? "", did, rkey, urlIdentifier };
+      const title =
+        typeof pdsRecord.value.title === "string"
+          ? pdsRecord.value.title
+          : null;
+      return {
+        record: null,
+        pendingTitle: title ?? "",
+        did,
+        rkey,
+        urlIdentifier,
+      };
     }
     notFound();
   }
   return { record, pendingTitle: null, did, rkey, urlIdentifier };
 }
 
-export async function generateMetadata({ params }: { params: ProjectPageParams }): Promise<Metadata> {
-  const { record, pendingTitle, urlIdentifier, rkey } = await loadProject(params);
+export async function generateMetadata({
+  params,
+}: {
+  params: ProjectPageParams;
+}): Promise<Metadata> {
+  const { record, pendingTitle, urlIdentifier, rkey } =
+    await loadProject(params);
   const t = await getTranslations("marketplace.projectPage");
   if (!record) {
     return {
-      title: pendingTitle ? t("metaTitle", { name: pendingTitle }) : t("publishingTitle"),
+      title: pendingTitle
+        ? t("metaTitle", { name: pendingTitle })
+        : t("publishingTitle"),
       description: t("metaFallback"),
       robots: { index: false },
     };
@@ -74,11 +99,15 @@ export async function generateMetadata({ params }: { params: ProjectPageParams }
   const description = record.shortDescription?.trim() || t("metaFallback");
   const detailHref = localProjectHref(urlIdentifier, rkey);
   const title = t("metaTitle", { name: record.title });
-  const previewImage = record.imageUrl ? [{ url: record.imageUrl, alt: record.title }] : undefined;
+  const previewImage = record.imageUrl
+    ? [{ url: record.imageUrl, alt: record.title }]
+    : undefined;
   return {
     title,
     description,
-    alternates: await localizedAlternates(localProjectHref(urlIdentifier, rkey)),
+    alternates: await localizedAlternates(
+      localProjectHref(urlIdentifier, rkey),
+    ),
     openGraph: {
       title,
       description,
@@ -95,7 +124,12 @@ export async function generateMetadata({ params }: { params: ProjectPageParams }
   };
 }
 
-const PROJECT_DETAIL_TABS = ["overview", "places", "updates", "reviews"] as const;
+const PROJECT_DETAIL_TABS = [
+  "overview",
+  "places",
+  "updates",
+  "reviews",
+] as const;
 type ProjectDetailTab = (typeof PROJECT_DETAIL_TABS)[number];
 
 const LEGACY_PROJECT_TABS: Record<string, ProjectDetailTab> = {
@@ -107,11 +141,15 @@ const LEGACY_PROJECT_TABS: Record<string, ProjectDetailTab> = {
 function parseProjectDetailTab(value: string | undefined): ProjectDetailTab {
   if (!value) return "overview";
   const mapped = LEGACY_PROJECT_TABS[value] ?? value;
-  return PROJECT_DETAIL_TABS.some((tab) => tab === mapped) ? (mapped as ProjectDetailTab) : "overview";
+  return PROJECT_DETAIL_TABS.some((tab) => tab === mapped)
+    ? (mapped as ProjectDetailTab)
+    : "overview";
 }
 
 function projectTabHref(basePath: string, tab: ProjectDetailTab): string {
-  return tab === "overview" ? basePath : `${basePath}?${new URLSearchParams({ tab }).toString()}`;
+  return tab === "overview"
+    ? basePath
+    : `${basePath}?${new URLSearchParams({ tab }).toString()}`;
 }
 
 function buildProjectBreadcrumbJsonLd(
@@ -146,7 +184,11 @@ function buildProjectBreadcrumbJsonLd(
   };
 }
 
-function ProjectBreadcrumbJsonLd({ jsonLd }: { jsonLd: Record<string, unknown> }) {
+function ProjectBreadcrumbJsonLd({
+  jsonLd,
+}: {
+  jsonLd: Record<string, unknown>;
+}) {
   return (
     <script
       id="project-breadcrumb-json-ld"
@@ -163,14 +205,20 @@ export default async function ProjectDetailPage({
   params: ProjectPageParams;
   searchParams: Promise<{ tab?: string | string[] }>;
 }) {
-  const [{ record, pendingTitle, did, rkey, urlIdentifier }, search] = await Promise.all([loadProject(params), searchParams]);
+  const [{ record, pendingTitle, did, rkey, urlIdentifier }, search] =
+    await Promise.all([loadProject(params), searchParams]);
 
   if (!record) {
     return <ProjectPublishing title={pendingTitle} />;
   }
 
   const projectBaseHref = localProjectHref(urlIdentifier, rkey);
-  const requestedTab = typeof search.tab === "string" ? search.tab : Array.isArray(search.tab) ? search.tab[0] : undefined;
+  const requestedTab =
+    typeof search.tab === "string"
+      ? search.tab
+      : Array.isArray(search.tab)
+        ? search.tab[0]
+        : undefined;
   if (requestedTab === "donations") {
     redirect(`${projectBaseHref}#support`);
   }
@@ -187,7 +235,9 @@ export default async function ProjectDetailPage({
   if (certUri) {
     const certRkey = rkeyFromUri(certUri);
     const [routeData, origin] = await Promise.all([
-      certRkey ? loadBumicertRouteData(did, certRkey, urlIdentifier) : Promise.resolve(null),
+      certRkey
+        ? loadBumicertRouteData(did, certRkey, urlIdentifier)
+        : Promise.resolve(null),
       getRequestOrigin(),
     ]);
 
@@ -198,7 +248,12 @@ export default async function ProjectDetailPage({
         redirect(projectTabHref(projectHref, activeTab));
       }
       const t = await getTranslations("marketplace.projectPage");
-      const breadcrumbJsonLd = buildProjectBreadcrumbJsonLd(origin, projectHref, t("back"), record.title);
+      const breadcrumbJsonLd = buildProjectBreadcrumbJsonLd(
+        origin,
+        projectHref,
+        t("back"),
+        record.title,
+      );
       return (
         <>
           <ProjectBreadcrumbJsonLd jsonLd={breadcrumbJsonLd} />
@@ -226,7 +281,14 @@ export default async function ProjectDetailPage({
   }
 
   // Fallback: a project without a resolvable Cert (legacy or mid-creation).
-  return <ProjectFallback record={record} did={did} rkey={rkey} urlIdentifier={urlIdentifier} />;
+  return (
+    <ProjectFallback
+      record={record}
+      did={did}
+      rkey={rkey}
+      urlIdentifier={urlIdentifier}
+    />
+  );
 }
 
 async function ProjectFallback({
@@ -253,104 +315,112 @@ async function ProjectFallback({
   const ownerIdentifier = owner?.urlIdentifier ?? urlIdentifier;
   const ownerName = owner?.displayName ?? record.creatorName ?? "";
   const projectHref = localProjectHref(ownerIdentifier, rkey);
-  const breadcrumbJsonLd = buildProjectBreadcrumbJsonLd(origin, projectHref, t("back"), record.title);
+  const breadcrumbJsonLd = buildProjectBreadcrumbJsonLd(
+    origin,
+    projectHref,
+    t("back"),
+    record.title,
+  );
 
   return (
     <>
       <ProjectBreadcrumbJsonLd jsonLd={breadcrumbJsonLd} />
       <main className="min-h-screen bg-background pb-20">
         <div className="mx-auto max-w-6xl px-6 py-8 lg:px-8">
-        <Link
-          href="/projects"
-          className="inline-flex items-center gap-1.5 text-[13px] font-medium text-muted-foreground transition-colors hover:text-foreground"
-        >
-          <ArrowLeftIcon className="h-3.5 w-3.5" aria-hidden />
-          {t("back")}
-        </Link>
+          <Link
+            href="/projects"
+            className="inline-flex items-center gap-1.5 text-[13px] font-medium text-muted-foreground transition-colors hover:text-foreground"
+          >
+            <ArrowLeftIcon className="h-3.5 w-3.5" aria-hidden />
+            {t("back")}
+          </Link>
 
-        <div className="mt-4 flex flex-wrap items-center gap-3">
-          <span className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-3 py-1 text-[12px] font-medium text-primary-dark">
-            <FolderKanbanIcon className="h-3.5 w-3.5" aria-hidden />
-            {t("kind")}
-          </span>
-          <ProjectFeaturedToggle projectUri={record.atUri} />
-        </div>
-
-        <h1 className="mt-3 font-instrument text-4xl italic leading-tight tracking-[-0.01em] text-foreground md:text-5xl">
-          {record.title}
-        </h1>
-
-        <div className="mt-8 grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1fr)_360px]">
-          <div className="min-w-0">
-            <div className="relative aspect-[16/10] w-full overflow-hidden rounded-2xl border border-border-soft bg-muted">
-              {record.imageUrl ? (
-                <Image
-                  src={record.imageUrl}
-                  alt={record.title}
-                  fill
-                  sizes="(max-width: 1024px) 100vw, 640px"
-                  unoptimized={!isPdsBlobUrl(record.imageUrl)}
-                  className="object-cover"
-                  priority
-                />
-              ) : (
-                <div className="grid h-full w-full place-items-center bg-primary/[0.06] text-primary/45">
-                  <FolderKanbanIcon className="h-16 w-16" aria-hidden />
-                </div>
-              )}
-            </div>
-
-            {record.shortDescription ? (
-              <p className="mt-6 max-w-3xl whitespace-pre-line text-base leading-7 text-foreground/80 md:text-lg md:leading-8">
-                {record.shortDescription}
-              </p>
-            ) : (
-              <p className="mt-6 max-w-2xl text-[15px] leading-[1.6] text-foreground/60">{t("noCerts")}</p>
-            )}
-
-            {/* Like + comment this project — same records + counts as the feed. */}
-            <div className="mt-6 border-t border-border-soft pt-4">
-              <RecordEngagement subjectUri={record.atUri} />
-            </div>
+          <div className="mt-4 flex flex-wrap items-center gap-3">
+            <ProjectFeaturedToggle projectUri={record.atUri} />
           </div>
 
-          {owner ? (
-            <aside className="min-w-0">
-              <div className="rounded-2xl border border-border-soft bg-surface/60 p-4">
-                <div className="flex items-center justify-between gap-2">
-                  <p className="text-[11px] font-medium uppercase tracking-[0.12em] text-foreground/45">{t("ledBy")}</p>
-                  <FollowButton targetDid={did} name={ownerName} />
-                </div>
-                <Link href={accountHref(ownerIdentifier)} className="group mt-3 flex items-center gap-3">
-                  <span className="relative h-11 w-11 shrink-0 overflow-hidden rounded-full border border-border bg-muted">
-                    {owner.avatarUrl ? (
-                      <Image
-                        src={owner.avatarUrl}
-                        alt=""
-                        fill
-                        sizes="44px"
-                        unoptimized={!isPdsBlobUrl(owner.avatarUrl)}
-                        className="object-cover"
-                      />
-                    ) : (
-                      <span className="grid h-full w-full place-items-center text-sm font-semibold text-muted-foreground">
-                        {ownerName.charAt(0).toUpperCase()}
-                      </span>
-                    )}
-                  </span>
-                  <span className="min-w-0 flex-1">
-                    <span className="block truncate text-[15px] font-medium text-foreground transition-colors group-hover:text-primary">
-                      {ownerName}
-                    </span>
-                    <span className="mt-0.5 inline-flex items-center gap-1 text-[12.5px] text-muted-foreground">
-                      {t("viewProfile")}
-                      <ArrowUpRightIcon className="h-3 w-3" aria-hidden />
-                    </span>
-                  </span>
-                </Link>
+          <h1 className="mt-3 font-instrument text-4xl italic leading-tight tracking-[-0.01em] text-foreground md:text-5xl">
+            {record.title}
+          </h1>
+
+          <div className="mt-8 grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1fr)_360px]">
+            <div className="min-w-0">
+              <div className="relative aspect-[16/10] w-full overflow-hidden rounded-2xl border border-border-soft bg-muted">
+                {record.imageUrl ? (
+                  <Image
+                    src={record.imageUrl}
+                    alt={record.title}
+                    fill
+                    sizes="(max-width: 1024px) 100vw, 640px"
+                    unoptimized={!isPdsBlobUrl(record.imageUrl)}
+                    className="object-cover"
+                    priority
+                  />
+                ) : (
+                  <div className="grid h-full w-full place-items-center bg-primary/[0.06] text-primary/45">
+                    <FolderKanbanIcon className="h-16 w-16" aria-hidden />
+                  </div>
+                )}
               </div>
-            </aside>
-          ) : null}
+
+              {record.shortDescription ? (
+                <p className="mt-6 max-w-3xl whitespace-pre-line text-base leading-7 text-foreground/80 md:text-lg md:leading-8">
+                  {record.shortDescription}
+                </p>
+              ) : (
+                <p className="mt-6 max-w-2xl text-[15px] leading-[1.6] text-foreground/60">
+                  {t("noCerts")}
+                </p>
+              )}
+
+              {/* Like + comment this project — same records + counts as the feed. */}
+              <div className="mt-6 border-t border-border-soft pt-4">
+                <RecordEngagement subjectUri={record.atUri} />
+              </div>
+            </div>
+
+            {owner ? (
+              <aside className="min-w-0">
+                <div className="rounded-2xl border border-border-soft bg-surface/60 p-4">
+                  <div className="flex items-center justify-between gap-2">
+                    <p className="text-sm font-medium text-muted-foreground">
+                      {t("ledBy")}
+                    </p>
+                    <FollowButton targetDid={did} name={ownerName} />
+                  </div>
+                  <Link
+                    href={accountHref(ownerIdentifier)}
+                    className="group mt-3 flex items-center gap-3"
+                  >
+                    <span className="relative h-11 w-11 shrink-0 overflow-hidden rounded-full border border-border bg-muted">
+                      {owner.avatarUrl ? (
+                        <Image
+                          src={owner.avatarUrl}
+                          alt=""
+                          fill
+                          sizes="44px"
+                          unoptimized={!isPdsBlobUrl(owner.avatarUrl)}
+                          className="object-cover"
+                        />
+                      ) : (
+                        <span className="grid h-full w-full place-items-center text-sm font-semibold text-muted-foreground">
+                          {ownerName.charAt(0).toUpperCase()}
+                        </span>
+                      )}
+                    </span>
+                    <span className="min-w-0 flex-1">
+                      <span className="block truncate text-[15px] font-medium text-foreground transition-colors group-hover:text-primary">
+                        {ownerName}
+                      </span>
+                      <span className="mt-0.5 inline-flex items-center gap-1 text-[12.5px] text-muted-foreground">
+                        {t("viewProfile")}
+                        <ArrowUpRightIcon className="h-3 w-3" aria-hidden />
+                      </span>
+                    </span>
+                  </Link>
+                </div>
+              </aside>
+            ) : null}
           </div>
         </div>
       </main>
@@ -368,7 +438,7 @@ async function ProjectPublishing({ title }: { title: string | null }) {
       <div className="mx-auto flex min-h-[70vh] max-w-2xl flex-col items-center justify-center px-6 text-center">
         <span className="inline-flex items-center gap-2 rounded-full bg-primary/10 px-3 py-1 text-[12px] font-medium text-primary-dark">
           <span className="relative flex h-2 w-2">
-            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-primary opacity-60" />
+            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-primary opacity-60 motion-reduce:animate-none" />
             <span className="relative inline-flex h-2 w-2 rounded-full bg-primary" />
           </span>
           {t("publishingBadge")}
@@ -376,7 +446,9 @@ async function ProjectPublishing({ title }: { title: string | null }) {
         <h1 className="mt-4 font-instrument text-4xl italic leading-tight tracking-[-0.01em] text-foreground md:text-5xl">
           {title?.trim() || t("publishingTitle")}
         </h1>
-        <p className="mt-4 max-w-md text-[15px] leading-[1.6] text-muted-foreground">{t("publishingBody")}</p>
+        <p className="mt-4 max-w-md text-[15px] leading-[1.6] text-muted-foreground">
+          {t("publishingBody")}
+        </p>
       </div>
     </main>
   );

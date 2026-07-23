@@ -1,13 +1,17 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
+import { getTranslations } from "next-intl/server";
 import { resolvePersonalManageTarget } from "@/app/_lib/manage-server";
 import { accountProjectsPath } from "@/app/account/_lib/account-route";
 
-export const metadata: Metadata = {
-  title: "Create project",
-  description: "Create and publish a project on GainForest.",
-  robots: { index: false, follow: false },
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("bumicert.createAlias.metadata");
+  return {
+    title: t("title"),
+    description: t("description"),
+    robots: { index: false, follow: false },
+  };
+}
 
 // Creating a project now also creates its impact certificate automatically, so
 // the standalone Cert studio redirects into the project create flow.

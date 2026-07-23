@@ -29,12 +29,41 @@ import { RichText } from "../../../_components/RichText";
 import { RecordEngagement } from "../../../_components/RecordEngagement";
 import { FollowButton } from "../../../_components/FollowButton";
 import { SocialGlyph } from "../../../_components/SocialIcon";
-import { StatsTileGrid, type StatsTileItem } from "../../../_components/StatsTile";
-import { fetchReceipts, type DonorRef, type FundingReceipt } from "../../../_lib/dashboard";
-import { formatCompact, formatCompactUsd, formatCountry, formatDate, formatDateTime, formatNumber, formatRelative } from "../../../_lib/format";
-import { fetchMaEarthDonationSummary, maEarthDonationUrl } from "../../../_lib/maearth-donations";
-import { formatWorkScopeTag, type WorkScopeLabels } from "../../../_lib/work-scope-labels";
-import { fetchReviewCounts, fetchReviewCountsForSubjects, fetchReviewsForSubject, fetchReviewsForSubjects, type BumicertReviews, type ReviewComment, type ReviewCounts } from "../../../_lib/reviews";
+import {
+  StatsTileGrid,
+  type StatsTileItem,
+} from "../../../_components/StatsTile";
+import {
+  fetchReceipts,
+  type DonorRef,
+  type FundingReceipt,
+} from "../../../_lib/dashboard";
+import {
+  formatCompact,
+  formatCompactUsd,
+  formatCountry,
+  formatDate,
+  formatDateTime,
+  formatNumber,
+  formatRelative,
+} from "../../../_lib/format";
+import {
+  fetchMaEarthDonationSummary,
+  maEarthDonationUrl,
+} from "../../../_lib/maearth-donations";
+import {
+  formatWorkScopeTag,
+  type WorkScopeLabels,
+} from "../../../_lib/work-scope-labels";
+import {
+  fetchReviewCounts,
+  fetchReviewCountsForSubjects,
+  fetchReviewsForSubject,
+  fetchReviewsForSubjects,
+  type BumicertReviews,
+  type ReviewComment,
+  type ReviewCounts,
+} from "../../../_lib/reviews";
 import {
   attachProjectTitlesToGalleries,
   fetchAccountMaEarthRounds,
@@ -54,12 +83,21 @@ import {
   type TimelineAttachmentItem,
 } from "../../../_lib/indexer";
 import { isPdsBlobUrl } from "../../../_lib/pds";
-import { blockExplorerUrl, INDEXER_URL, localBumicertHref, localProjectHref } from "../../../_lib/urls";
+import {
+  blockExplorerUrl,
+  INDEXER_URL,
+  localBumicertHref,
+  localProjectHref,
+} from "../../../_lib/urls";
 import { getRequestOrigin } from "../../../_lib/request-origin";
 import { fetchAuthSession } from "../../../_lib/auth-server";
 import type { AuthSession } from "../../../_lib/auth";
 import { fetchUserCgsGroups } from "../../../_lib/manage-server";
-import { getAccountRouteData, readAccountRouteParams, type AccountKind } from "../../../account/_lib/account-route";
+import {
+  getAccountRouteData,
+  readAccountRouteParams,
+  type AccountKind,
+} from "../../../account/_lib/account-route";
 import { Separator } from "@/components/ui/separator";
 import { BumicertDetailHeader } from "./_components/BumicertDetailHeader";
 import { BumicertShareButton } from "./_components/BumicertShareButton";
@@ -71,8 +109,17 @@ import { BumicertTimeline } from "./_components/timeline/BumicertTimeline";
 import { getEntriesForActivities } from "./_components/timeline/attachmentSubjects";
 import { resolveTimelineReferences } from "./_components/timeline/timelineReferenceResolver";
 import type { TimelineReference } from "./_components/timeline/timelineReferences";
-import { canCreateRecord, canDeleteRecord, canUpdateRecord } from "@/app/(manage)/manage/_lib/cgs-permissions";
+import {
+  canCreateRecord,
+  canDeleteRecord,
+  canUpdateRecord,
+} from "@/app/(manage)/manage/_lib/cgs-permissions";
 import { ProjectFeaturedToggle } from "@/app/projects/_components/ProjectFeaturedToggle";
+import {
+  parentProjectHref,
+  validatedCertTab,
+  type CertDetailTab,
+} from "../../route-compat";
 
 export const revalidate = 60;
 
@@ -128,7 +175,12 @@ const TIMELINE_DENIED: TimelineAccess = {
   deletePermission: { allowed: false, reason: null },
 };
 
-async function resolveTimelineAccess(recordDid: string, ownerKind: AccountKind, authSession: AuthSession, copy: TimelinePermissionCopy): Promise<TimelineAccess> {
+async function resolveTimelineAccess(
+  recordDid: string,
+  ownerKind: AccountKind,
+  authSession: AuthSession,
+  copy: TimelinePermissionCopy,
+): Promise<TimelineAccess> {
   if (!authSession.isLoggedIn) {
     return {
       ...TIMELINE_DENIED,
@@ -161,8 +213,14 @@ async function resolveTimelineAccess(recordDid: string, ownerKind: AccountKind, 
     const remove = canDeleteRecord(target);
     return {
       canManageEvidence: true,
-      createPermission: { allowed: create.allowed, reason: create.allowed ? null : copy.createDenied },
-      deletePermission: { allowed: remove.allowed, reason: remove.allowed ? null : copy.deleteDenied },
+      createPermission: {
+        allowed: create.allowed,
+        reason: create.allowed ? null : copy.createDenied,
+      },
+      deletePermission: {
+        allowed: remove.allowed,
+        reason: remove.allowed ? null : copy.deleteDenied,
+      },
       mutationRepo: recordDid,
     };
   }
@@ -170,8 +228,14 @@ async function resolveTimelineAccess(recordDid: string, ownerKind: AccountKind, 
   const ownsPersonalRecord = authSession.did === recordDid;
   return {
     canManageEvidence: ownsPersonalRecord,
-    createPermission: { allowed: ownsPersonalRecord, reason: ownsPersonalRecord ? null : copy.signIn },
-    deletePermission: { allowed: ownsPersonalRecord, reason: ownsPersonalRecord ? null : copy.signIn },
+    createPermission: {
+      allowed: ownsPersonalRecord,
+      reason: ownsPersonalRecord ? null : copy.signIn,
+    },
+    deletePermission: {
+      allowed: ownsPersonalRecord,
+      reason: ownsPersonalRecord ? null : copy.signIn,
+    },
   };
 }
 
@@ -186,9 +250,15 @@ type CertManageAccess = {
  * Whether the signed-in viewer may manage this Cert. Personal owners always can;
  * for organization-owned Certs we check CGS membership/role.
  */
-async function resolveCertManageAccess(recordDid: string, ownerKind: AccountKind, authSession: AuthSession): Promise<CertManageAccess> {
-  if (!authSession.isLoggedIn) return { canDelete: false, canManageDonations: false };
-  if (authSession.did === recordDid) return { canDelete: true, canManageDonations: true };
+async function resolveCertManageAccess(
+  recordDid: string,
+  ownerKind: AccountKind,
+  authSession: AuthSession,
+): Promise<CertManageAccess> {
+  if (!authSession.isLoggedIn)
+    return { canDelete: false, canManageDonations: false };
+  if (authSession.did === recordDid)
+    return { canDelete: true, canManageDonations: true };
   if (ownerKind === "organization") {
     const groups = await fetchUserCgsGroups();
     const membership = groups.find((group) => group.groupDid === recordDid);
@@ -196,7 +266,11 @@ async function resolveCertManageAccess(recordDid: string, ownerKind: AccountKind
     const target = { kind: "group" as const, role: membership.role };
     const remove = canDeleteRecord(target);
     const updateFunding = canUpdateRecord(target);
-    return { canDelete: remove.allowed, canManageDonations: updateFunding.allowed, mutationRepo: recordDid };
+    return {
+      canDelete: remove.allowed,
+      canManageDonations: updateFunding.allowed,
+      mutationRepo: recordDid,
+    };
   }
   return { canDelete: false, canManageDonations: false };
 }
@@ -208,15 +282,22 @@ const BADGE_TONE: Record<DetailBadge["tone"], string> = {
   info: "bg-foreground/[0.06] text-foreground/70",
 };
 
-const BUMICERT_DETAIL_TABS = ["overview", "site-boundaries", "reviews", "donations", "timeline"] as const;
-type BumicertDetailTab = (typeof BUMICERT_DETAIL_TABS)[number];
+type BumicertDetailTab = CertDetailTab;
 type ProjectDetailTab = "overview" | "places" | "updates" | "reviews";
 
-export async function generateMetadata({ params }: { params: BumicertPageParams }): Promise<Metadata> {
-  const { record, owner, urlIdentifier } = await readRouteData(params);
-  const description = record.shortDescription ?? `Cert published by ${owner.displayName}.`;
+export async function generateMetadata({
+  params,
+}: {
+  params: BumicertPageParams;
+}): Promise<Metadata> {
+  const [{ record, owner, urlIdentifier }, t] = await Promise.all([
+    readRouteData(params),
+    getTranslations("bumicert.detail.recovery.metadata"),
+  ]);
+  const description =
+    record.shortDescription ?? t("description", { name: owner.displayName });
   return {
-    title: `${record.title} — Cert`,
+    title: t("title", { title: record.title }),
     description,
     alternates: { canonical: localBumicertHref(urlIdentifier, record.rkey) },
     openGraph: {
@@ -246,17 +327,35 @@ export default async function BumicertDetailPage({
   // fully-featured page. Redirect there when a parent project exists; legacy
   // standalone Certs (no parent collection) keep rendering here so old deep
   // links still resolve.
-  const parentProject = await findProjectForCert(routeData.record.did, routeData.record.atUri);
+  const parentProject = await findProjectForCert(
+    routeData.record.did,
+    routeData.record.atUri,
+  );
   if (parentProject) {
-    const projectHref = localProjectHref(routeData.urlIdentifier, parentProject.rkey);
-    redirect(activeTab === "overview" ? projectHref : `${projectHref}?tab=${activeTab}`);
+    const projectHref = localProjectHref(
+      routeData.urlIdentifier,
+      parentProject.rkey,
+    );
+    redirect(parentProjectHref(projectHref, activeTab));
   }
 
-  const detailHref = localBumicertHref(routeData.urlIdentifier, routeData.record.rkey);
+  const detailHref = localBumicertHref(
+    routeData.urlIdentifier,
+    routeData.record.rkey,
+  );
   if (routeData.routeIdentifier !== routeData.urlIdentifier) {
-    redirect(activeTab === "overview" ? detailHref : `${detailHref}?tab=${activeTab}`);
+    redirect(
+      activeTab === "overview" ? detailHref : `${detailHref}?tab=${activeTab}`,
+    );
   }
-  return <BumicertDetailBody routeData={routeData} activeTab={activeTab} basePath={detailHref} origin={origin} />;
+  return (
+    <BumicertDetailBody
+      routeData={routeData}
+      activeTab={activeTab}
+      basePath={detailHref}
+      origin={origin}
+    />
+  );
 }
 
 /** Find the project (collection) in this repo whose items[] include the Cert. */
@@ -264,7 +363,9 @@ async function findProjectForCert(did: string, certUri: string) {
   const projects = await fetchProjectsByDid(did, 1000)
     .then((page) => page.records)
     .catch(() => []);
-  return projects.find((project) => project.bumicertUris.includes(certUri)) ?? null;
+  return (
+    projects.find((project) => project.bumicertUris.includes(certUri)) ?? null
+  );
 }
 
 /**
@@ -301,9 +402,15 @@ export async function BumicertDetailBody({
   timelineMatchUris?: string[];
 }) {
   const { record, detail, owner, fundingConfig, authSession } = routeData;
-  const matchUris = timelineMatchUris && timelineMatchUris.length > 0 ? timelineMatchUris : [record.atUri];
-  const globeT = await getTranslations("marketplace.globe");
-  const workScopeT = await getTranslations("common.workScopes");
+  const matchUris =
+    timelineMatchUris && timelineMatchUris.length > 0
+      ? timelineMatchUris
+      : [record.atUri];
+  const [globeT, workScopeT, recoveryT] = await Promise.all([
+    getTranslations("marketplace.globe"),
+    getTranslations("common.workScopes"),
+    getTranslations("bumicert.detail.recovery"),
+  ]);
   const workScopeLabels: WorkScopeLabels = {
     reforestation: workScopeT("reforestation"),
     forest_protection: workScopeT("forestProtection"),
@@ -314,18 +421,25 @@ export async function BumicertDetailBody({
   };
   const detailHref = basePath;
   const donationsHref = `${detailHref}?tab=donations`;
-  const period = record.startDate || record.endDate
-    ? `${record.startDate ? formatDate(record.startDate) : "—"} → ${record.endDate ? formatDate(record.endDate) : "—"}`
-    : "Not specified";
+  const period =
+    record.startDate || record.endDate
+      ? `${record.startDate ? formatDate(record.startDate) : "—"} → ${record.endDate ? formatDate(record.endDate) : "—"}`
+      : recoveryT("notSpecified");
   const description = detail?.blurb ?? record.shortDescription;
-  const certManageAccess = await resolveCertManageAccess(record.did, owner.kind, authSession);
+  const certManageAccess = await resolveCertManageAccess(
+    record.did,
+    owner.kind,
+    authSession,
+  );
   const ownerProfileHref = `/account/${encodeURIComponent(owner.urlIdentifier)}`;
 
   let donationReceipts: FundingReceipt[] = [];
   let donationsUnavailable = false;
   if (activeTab === "overview" || activeTab === "donations") {
     try {
-      donationReceipts = (await fetchReceipts()).filter((receipt) => receipt.bumicertUri === record.atUri);
+      donationReceipts = (await fetchReceipts()).filter(
+        (receipt) => receipt.bumicertUri === record.atUri,
+      );
     } catch (error) {
       console.warn("Unable to load Cert donations", record.atUri, error);
       donationsUnavailable = true;
@@ -334,10 +448,19 @@ export async function BumicertDetailBody({
 
   const isOverviewTab = activeTab === "overview";
   const showsDetailSidebar = activeTab !== "timeline";
-  const [moreBumicerts, observations, observationSummary, linkedTimelineCount, reviewCounts, projectGalleries] = isOverviewTab
+  const [
+    moreBumicerts,
+    observations,
+    observationSummary,
+    linkedTimelineCount,
+    reviewCounts,
+    projectGalleries,
+  ] = isOverviewTab
     ? await Promise.all([
         fetchBumicertsByDid(record.did, 6)
-          .then((page) => page.records.filter((item) => item.id !== record.id).slice(0, 5))
+          .then((page) =>
+            page.records.filter((item) => item.id !== record.id).slice(0, 5),
+          )
           .catch(() => []),
         fetchImageOccurrencesByDid(record.did, 24).catch(() => []),
         fetchObservationSummaryByDid(record.did).catch(() => null),
@@ -345,23 +468,48 @@ export async function BumicertDetailBody({
           .then((items) => getEntriesForActivities(items, matchUris).length)
           .catch(() => null),
         fetchReviewCounts(record.atUri).catch(() => null),
-        fetchGalleriesForBumicertProject(record.did, record.atUri).catch(() => []),
+        fetchGalleriesForBumicertProject(record.did, record.atUri).catch(
+          () => [],
+        ),
       ])
-    : [[], [] as OccurrenceRecord[], null, null, null, [] as ProjectImageGallery[]];
+    : [
+        [],
+        [] as OccurrenceRecord[],
+        null,
+        null,
+        null,
+        [] as ProjectImageGallery[],
+      ];
 
-  const reviews = activeTab === "reviews"
-    ? await fetchReviewsForSubject(record.atUri).catch(() => ({ evaluations: [], comments: [] }))
-    : null;
+  const reviews =
+    activeTab === "reviews"
+      ? await fetchReviewsForSubject(record.atUri).catch(() => ({
+          evaluations: [],
+          comments: [],
+        }))
+      : null;
 
   let timelineAttachments: TimelineAttachmentItem[] = [];
   let timelineReferences: TimelineReference[] = [];
   let timelineAttachmentsUnavailable = false;
-  const emptyTimelineSources = { audio: [], occurrences: [], occurrencesIncomplete: false, treeGroups: [], places: [] };
+  const emptyTimelineSources = {
+    audio: [],
+    occurrences: [],
+    occurrencesIncomplete: false,
+    treeGroups: [],
+    places: [],
+  };
 
   let timelineAccess = TIMELINE_DENIED;
 
   if (activeTab === "timeline") {
-    const [attachmentsResult, permissionT, timelineT, timelineEntryT, referenceT] = await Promise.all([
+    const [
+      attachmentsResult,
+      permissionT,
+      timelineT,
+      timelineEntryT,
+      referenceT,
+    ] = await Promise.all([
       fetchTimelineAttachmentsByDid(record.did).then(
         (items) => ({ ok: true as const, items }),
         () => ({ ok: false as const, items: [] as TimelineAttachmentItem[] }),
@@ -374,7 +522,10 @@ export async function BumicertDetailBody({
     timelineAttachments = attachmentsResult.items;
     timelineAttachmentsUnavailable = !attachmentsResult.ok;
 
-    const timelineEntries = getEntriesForActivities(timelineAttachments, matchUris);
+    const timelineEntries = getEntriesForActivities(
+      timelineAttachments,
+      matchUris,
+    );
     const referencePromise = resolveTimelineReferences({
       entries: timelineEntries,
       copy: {
@@ -387,23 +538,38 @@ export async function BumicertDetailBody({
         siteEvidence: referenceT("siteEvidence"),
         linkedNatureData: timelineT("fallbacks.linkedNatureData"),
         treeCount: (count: number) => timelineEntryT("treeCount", { count }),
-        speciesCount: (count: number) => timelineEntryT("speciesCount", { count }),
-        observationCount: (count: number) => timelineEntryT("observationCount", { count }),
-        individualCount: (count: number) => referenceT("individualCount", { count }),
+        speciesCount: (count: number) =>
+          timelineEntryT("speciesCount", { count }),
+        observationCount: (count: number) =>
+          timelineEntryT("observationCount", { count }),
+        individualCount: (count: number) =>
+          referenceT("individualCount", { count }),
       },
     }).catch(() => []);
 
-    timelineAccess = await resolveTimelineAccess(record.did, owner.kind, authSession, {
-      signIn: permissionT("signIn"),
-      notMember: permissionT("notMember"),
-      createDenied: permissionT("createDenied"),
-      deleteDenied: permissionT("deleteDenied"),
-    });
+    timelineAccess = await resolveTimelineAccess(
+      record.did,
+      owner.kind,
+      authSession,
+      {
+        signIn: permissionT("signIn"),
+        notMember: permissionT("notMember"),
+        createDenied: permissionT("createDenied"),
+        deleteDenied: permissionT("deleteDenied"),
+      },
+    );
 
     timelineReferences = await referencePromise;
   }
 
-  const jsonLd = buildBumicertJsonLd(record, owner, fundingConfig, detailHref, description ?? null, origin);
+  const jsonLd = buildBumicertJsonLd(
+    record,
+    owner,
+    fundingConfig,
+    detailHref,
+    description ?? null,
+    origin,
+  );
 
   return (
     <>
@@ -439,13 +605,17 @@ export async function BumicertDetailBody({
               className="inline-flex items-center gap-1.5 text-[13px] font-medium text-muted-foreground transition-colors hover:text-foreground"
             >
               <ArrowLeftIcon className="h-3.5 w-3.5" aria-hidden />
-              {backLabel ?? "Back"}
+              {backLabel ?? recoveryT("back")}
             </Link>
           </div>
         ) : null}
-        <section className={`mx-auto max-w-6xl gap-8 px-6 py-8 lg:px-8 ${showsDetailSidebar ? "grid grid-cols-1 lg:grid-cols-[320px_minmax(0,1fr)]" : ""}`}>
+        <section
+          className={`mx-auto max-w-6xl gap-8 px-6 py-8 lg:px-8 ${showsDetailSidebar ? "grid grid-cols-1 lg:grid-cols-[320px_minmax(0,1fr)]" : ""}`}
+        >
           {showsDetailSidebar && (
-            <aside className={`min-w-0 ${isOverviewTab ? "" : "hidden lg:block"}`}>
+            <aside
+              className={`min-w-0 ${isOverviewTab ? "" : "hidden lg:block"}`}
+            >
               <div className="lg:sticky lg:top-28">
                 <OverviewSidebar
                   record={record}
@@ -490,7 +660,9 @@ export async function BumicertDetailBody({
                 globeLabel={globeT("viewOnGlobe")}
               />
             )}
-            {activeTab === "reviews" && reviews && <ReviewsPanel record={record} reviews={reviews} />}
+            {activeTab === "reviews" && reviews && (
+              <ReviewsPanel record={record} reviews={reviews} />
+            )}
             {activeTab === "donations" && (
               <DonationsPanel
                 record={record}
@@ -523,10 +695,7 @@ export async function BumicertDetailBody({
           </div>
 
           {showMore && isOverviewTab && moreBumicerts.length > 0 ? (
-            <MoreBumicertsSection
-              bumicerts={moreBumicerts}
-              owner={owner}
-            />
+            <MoreBumicertsSection bumicerts={moreBumicerts} owner={owner} />
           ) : null}
         </section>
       </main>
@@ -571,10 +740,25 @@ export async function ProjectDetailView({
   engagementSubjectUri?: string;
 }) {
   const { record, detail, owner, fundingConfig, authSession } = routeData;
-  const matchUris = timelineMatchUris && timelineMatchUris.length > 0 ? timelineMatchUris : [record.atUri];
+  const matchUris =
+    timelineMatchUris && timelineMatchUris.length > 0
+      ? timelineMatchUris
+      : [record.atUri];
 
   const maEarthDonateUrl = maEarthDonationUrl(record.did);
-  const [workScopeT, permissionT, timelineT, timelineEntryT, referenceT, globeT, projectNavT, supportT, maEarthDonationSummary, maEarthRounds] = await Promise.all([
+  const [
+    workScopeT,
+    permissionT,
+    timelineT,
+    timelineEntryT,
+    referenceT,
+    globeT,
+    projectNavT,
+    supportT,
+    recoveryT,
+    maEarthDonationSummary,
+    maEarthRounds,
+  ] = await Promise.all([
     getTranslations("common.workScopes"),
     getTranslations("bumicert.detail.evidenceAdder.permissions"),
     getTranslations("bumicert.detail.timeline"),
@@ -583,8 +767,13 @@ export async function ProjectDetailView({
     getTranslations("marketplace.globe"),
     getTranslations("bumicert.detail.projectNav"),
     getTranslations("bumicert.detail.support"),
-    maEarthDonateUrl ? fetchMaEarthDonationSummary(maEarthDonateUrl) : Promise.resolve(null),
-    maEarthDonateUrl ? fetchAccountMaEarthRounds(record.did).catch(() => [] as number[]) : Promise.resolve([] as number[]),
+    getTranslations("bumicert.detail.recovery"),
+    maEarthDonateUrl
+      ? fetchMaEarthDonationSummary(maEarthDonateUrl)
+      : Promise.resolve(null),
+    maEarthDonateUrl
+      ? fetchAccountMaEarthRounds(record.did).catch(() => [] as number[])
+      : Promise.resolve([] as number[]),
   ]);
   const workScopeLabels: WorkScopeLabels = {
     reforestation: workScopeT("reforestation"),
@@ -606,19 +795,44 @@ export async function ProjectDetailView({
   // Reviews live on the Cert URI, but the project page's like + comment bar
   // writes against the project (collection) URI — aggregate both so comments
   // posted anywhere on the project show up under Reviews.
-  const reviewSubjectUris = [...new Set([record.atUri, ...(engagementSubjectUri ? [engagementSubjectUri] : [])])];
+  const reviewSubjectUris = [
+    ...new Set([
+      record.atUri,
+      ...(engagementSubjectUri ? [engagementSubjectUri] : []),
+    ]),
+  ];
 
-  const [certManageAccess, receiptsResult, observations, observationSummary, reviewCounts, projectGalleries, reviews, attachmentsResult, timelineAccess] = await Promise.all([
+  const [
+    certManageAccess,
+    receiptsResult,
+    observations,
+    observationSummary,
+    reviewCounts,
+    projectGalleries,
+    reviews,
+    attachmentsResult,
+    timelineAccess,
+  ] = await Promise.all([
     resolveCertManageAccess(record.did, owner.kind, authSession),
     fetchReceipts().then(
-      (all) => ({ ok: true as const, receipts: all.filter((receipt) => receipt.bumicertUri === record.atUri) }),
+      (all) => ({
+        ok: true as const,
+        receipts: all.filter((receipt) => receipt.bumicertUri === record.atUri),
+      }),
       () => ({ ok: false as const, receipts: [] as FundingReceipt[] }),
     ),
-    fetchImageOccurrencesByDid(record.did, 24).catch(() => [] as OccurrenceRecord[]),
+    fetchImageOccurrencesByDid(record.did, 24).catch(
+      () => [] as OccurrenceRecord[],
+    ),
     fetchObservationSummaryByDid(record.did).catch(() => null),
     fetchReviewCountsForSubjects(reviewSubjectUris).catch(() => null),
-    fetchGalleriesForBumicertProject(record.did, record.atUri).catch(() => [] as ProjectImageGallery[]),
-    fetchReviewsForSubjects(reviewSubjectUris).catch(() => ({ evaluations: [], comments: [] })),
+    fetchGalleriesForBumicertProject(record.did, record.atUri).catch(
+      () => [] as ProjectImageGallery[],
+    ),
+    fetchReviewsForSubjects(reviewSubjectUris).catch(() => ({
+      evaluations: [],
+      comments: [],
+    })),
     fetchTimelineAttachmentsByDid(record.did).then(
       (items) => ({ ok: true as const, items }),
       () => ({ ok: false as const, items: [] as TimelineAttachmentItem[] }),
@@ -635,7 +849,10 @@ export async function ProjectDetailView({
   const donationsUnavailable = !receiptsResult.ok;
   const timelineAttachments = attachmentsResult.items;
   const timelineAttachmentsUnavailable = !attachmentsResult.ok;
-  const timelineEntries = getEntriesForActivities(timelineAttachments, matchUris);
+  const timelineEntries = getEntriesForActivities(
+    timelineAttachments,
+    matchUris,
+  );
   const timelineReferences = timelineEntries.length
     ? await resolveTimelineReferences({
         entries: timelineEntries,
@@ -649,35 +866,59 @@ export async function ProjectDetailView({
           siteEvidence: referenceT("siteEvidence"),
           linkedNatureData: timelineT("fallbacks.linkedNatureData"),
           treeCount: (count: number) => timelineEntryT("treeCount", { count }),
-          speciesCount: (count: number) => timelineEntryT("speciesCount", { count }),
-          observationCount: (count: number) => timelineEntryT("observationCount", { count }),
-          individualCount: (count: number) => referenceT("individualCount", { count }),
+          speciesCount: (count: number) =>
+            timelineEntryT("speciesCount", { count }),
+          observationCount: (count: number) =>
+            timelineEntryT("observationCount", { count }),
+          individualCount: (count: number) =>
+            referenceT("individualCount", { count }),
         },
       }).catch(() => [])
     : [];
-  const emptyTimelineSources = { audio: [], occurrences: [], occurrencesIncomplete: false, treeGroups: [], places: [] };
+  const emptyTimelineSources = {
+    audio: [],
+    occurrences: [],
+    occurrencesIncomplete: false,
+    treeGroups: [],
+    places: [],
+  };
 
   const canManageDonations = certManageAccess.canManageDonations;
   const maEarthOption: MaEarthDonationOption | null = maEarthDonateUrl
-    ? { donateUrl: maEarthDonateUrl, summary: maEarthDonationSummary, rounds: maEarthRounds }
+    ? {
+        donateUrl: maEarthDonateUrl,
+        summary: maEarthDonationSummary,
+        rounds: maEarthRounds,
+      }
     : null;
   const hasObservations = observations.length > 0;
   const hasPlaces = record.locationUris.length > 0;
   // Stewards always see Updates so they can add evidence; visitors only when
   // there is something to show.
-  const showUpdates = timelineEntries.length > 0 || timelineAccess.canManageEvidence;
-  const showSupport = Boolean(fundingConfig?.receivingWallet?.uri) || donationReceipts.length > 0 || canManageDonations || Boolean(maEarthOption);
+  const showUpdates =
+    timelineEntries.length > 0 || timelineAccess.canManageEvidence;
+  const showSupport =
+    Boolean(fundingConfig?.receivingWallet?.uri) ||
+    donationReceipts.length > 0 ||
+    canManageDonations ||
+    Boolean(maEarthOption);
   const donationsHref = showSupport ? `${detailHref}#support` : detailHref;
   const donationEntries = buildDonationLeaderboard(
-    donationReceipts.filter((receipt) => ["USD", "USDC"].includes(receipt.currency.toUpperCase())),
+    donationReceipts.filter((receipt) =>
+      ["USD", "USDC"].includes(receipt.currency.toUpperCase()),
+    ),
   );
-  const reviewCount = (reviewCounts?.evaluations ?? 0) + (reviewCounts?.comments ?? 0);
-  const period = record.startDate || record.endDate
-    ? `${record.startDate ? formatDate(record.startDate) : "\u2014"} \u2192 ${record.endDate ? formatDate(record.endDate) : "\u2014"}`
-    : null;
+  const reviewCount =
+    (reviewCounts?.evaluations ?? 0) + (reviewCounts?.comments ?? 0);
+  const period =
+    record.startDate || record.endDate
+      ? `${record.startDate ? formatDate(record.startDate) : "\u2014"} \u2192 ${record.endDate ? formatDate(record.endDate) : "\u2014"}`
+      : null;
   const recentUpdates = [...timelineEntries]
     .sort((a, b) =>
-      (b.record.createdAt ?? b.metadata.createdAt ?? "").localeCompare(a.record.createdAt ?? a.metadata.createdAt ?? ""),
+      (b.record.createdAt ?? b.metadata.createdAt ?? "").localeCompare(
+        a.record.createdAt ?? a.metadata.createdAt ?? "",
+      ),
     )
     .slice(0, 3);
 
@@ -689,12 +930,21 @@ export async function ProjectDetailView({
   // fall back so zero-state chips are not dead ends.
   const anchors = {
     boundaries: hasPlaces ? placesHref : detailHref,
-    sightings: hasObservations ? `${detailHref}#observations` : ownerProfileHref,
+    sightings: hasObservations
+      ? `${detailHref}#observations`
+      : ownerProfileHref,
     timeline: showUpdates ? updatesHref : detailHref,
     reviews: reviewsHref,
   };
 
-  const jsonLd = buildBumicertJsonLd(record, owner, fundingConfig, detailHref, description ?? null, origin);
+  const jsonLd = buildBumicertJsonLd(
+    record,
+    owner,
+    fundingConfig,
+    detailHref,
+    description ?? null,
+    origin,
+  );
 
   const anchorNav = [
     { id: "overview", href: detailHref, label: projectNavT("overview") },
@@ -735,70 +985,97 @@ export async function ProjectDetailView({
       />
       <main className="min-h-screen bg-background pb-20">
         {showProjectHero ? (
-        <header className="mx-auto max-w-6xl px-6 pt-6 lg:px-8">
-          {backHref ? (
-            <Link
-              href={backHref}
-              className="inline-flex items-center gap-1.5 text-[13px] font-medium text-muted-foreground transition-colors hover:text-foreground"
+          <header className="mx-auto max-w-6xl px-6 pt-6 lg:px-8">
+            {backHref ? (
+              <Link
+                href={backHref}
+                className="inline-flex items-center gap-1.5 text-[13px] font-medium text-muted-foreground transition-colors hover:text-foreground"
+              >
+                <ArrowLeftIcon className="h-3.5 w-3.5" aria-hidden />
+                {backLabel ?? recoveryT("back")}
+              </Link>
+            ) : null}
+            {detail?.badges?.length ? (
+              <div className="mt-4 flex flex-wrap items-center gap-2.5">
+                {detail.badges.map((badge, index) => (
+                  <Badge
+                    key={`${badge.label}-${index}`}
+                    badge={badge}
+                    workScopeLabels={workScopeLabels}
+                  />
+                ))}
+              </div>
+            ) : null}
+            <h1
+              className="mt-3 max-w-3xl text-4xl font-light italic leading-tight tracking-[-0.035em] text-foreground md:text-5xl"
+              style={{ fontFamily: "var(--font-instrument-serif-var)" }}
             >
-              <ArrowLeftIcon className="h-3.5 w-3.5" aria-hidden />
-              {backLabel ?? "Back"}
-            </Link>
-          ) : null}
-          <div className="mt-4 flex flex-wrap items-center gap-2.5">
-            <span className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-3 py-1 text-[12px] font-medium text-primary-dark">
-              <SproutIcon className="h-3.5 w-3.5" aria-hidden />
-              Project
-            </span>
-            {detail?.badges?.map((badge, index) => (
-              <Badge key={`${badge.label}-${index}`} badge={badge} workScopeLabels={workScopeLabels} />
-            ))}
-          </div>
-          <h1
-            className="mt-3 max-w-3xl text-4xl font-light italic leading-tight tracking-[-0.035em] text-foreground md:text-5xl"
-            style={{ fontFamily: "var(--font-instrument-serif-var)" }}
-          >
-            {record.title}
-          </h1>
-          <div className="mt-4 flex flex-wrap items-center gap-3">
-            <Link href={ownerProfileHref} className="group inline-flex min-w-0 items-center gap-2.5">
-              <span className="relative h-9 w-9 shrink-0 overflow-hidden rounded-full border border-border bg-muted">
-                {owner.avatarUrl ? (
-                  <Image src={owner.avatarUrl} alt="" fill sizes="36px" unoptimized={!isPdsBlobUrl(owner.avatarUrl)} className="object-cover" />
-                ) : (
-                  <span className="grid h-full w-full place-items-center text-xs font-semibold text-muted-foreground">{owner.displayName.charAt(0).toUpperCase()}</span>
-                )}
+              {record.title}
+            </h1>
+            <div className="mt-4 flex flex-wrap items-center gap-3">
+              <Link
+                href={ownerProfileHref}
+                className="group inline-flex min-w-0 items-center gap-2.5"
+              >
+                <span className="relative h-9 w-9 shrink-0 overflow-hidden rounded-full border border-border bg-muted">
+                  {owner.avatarUrl ? (
+                    <Image
+                      src={owner.avatarUrl}
+                      alt=""
+                      fill
+                      sizes="36px"
+                      unoptimized={!isPdsBlobUrl(owner.avatarUrl)}
+                      className="object-cover"
+                    />
+                  ) : (
+                    <span className="grid h-full w-full place-items-center text-xs font-semibold text-muted-foreground">
+                      {owner.displayName.charAt(0).toUpperCase()}
+                    </span>
+                  )}
+                </span>
+                <span className="min-w-0">
+                  <span className="block truncate text-sm font-medium text-foreground transition-colors group-hover:text-primary">
+                    {owner.displayName}
+                  </span>
+                  <span className="block text-xs text-muted-foreground">
+                    {formatRelative(record.createdAt)}
+                  </span>
+                </span>
+              </Link>
+              <span className="ml-auto flex items-center gap-2">
+                <FollowButton
+                  targetDid={record.did}
+                  name={owner.displayName}
+                  size="default"
+                />
+                {engagementSubjectUri ? (
+                  <ProjectFeaturedToggle projectUri={engagementSubjectUri} />
+                ) : null}
+                {editHref && editLabel && canManageDonations ? (
+                  <Link
+                    href={editHref}
+                    className="inline-flex h-9 items-center gap-1.5 rounded-full border border-border-soft bg-background px-3 text-sm font-medium text-foreground transition-colors hover:border-primary/40 hover:bg-muted/60 hover:text-primary"
+                  >
+                    <PencilIcon className="h-3.5 w-3.5" aria-hidden />
+                    {editLabel}
+                  </Link>
+                ) : null}
+                <BumicertShareButton />
               </span>
-              <span className="min-w-0">
-                <span className="block truncate text-sm font-medium text-foreground transition-colors group-hover:text-primary">{owner.displayName}</span>
-                <span className="block text-xs text-muted-foreground">{formatRelative(record.createdAt)}</span>
-              </span>
-            </Link>
-            <span className="ml-auto flex items-center gap-2">
-              <FollowButton targetDid={record.did} name={owner.displayName} size="default" />
-              {engagementSubjectUri ? <ProjectFeaturedToggle projectUri={engagementSubjectUri} /> : null}
-              {editHref && editLabel && canManageDonations ? (
-                <Link
-                  href={editHref}
-                  className="inline-flex h-9 items-center gap-1.5 rounded-full border border-border-soft bg-background px-3 text-sm font-medium text-foreground transition-colors hover:border-primary/40 hover:bg-muted/60 hover:text-primary"
-                >
-                  <PencilIcon className="h-3.5 w-3.5" aria-hidden />
-                  {editLabel}
-                </Link>
-              ) : null}
-              <BumicertShareButton />
-            </span>
-          </div>
-          {/* Like + comment this project — same records + counts as the feed.
-              On overview the bar lives under the media in the content column. */}
-          {engagementSubjectUri && activeTab !== "overview" ? (
-            <div className="mt-5 border-t border-border-soft pt-3">
-              <RecordEngagement subjectUri={engagementSubjectUri} />
             </div>
-          ) : null}
-        </header>
+            {/* Like + comment this project — same records + counts as the feed.
+              On overview the bar lives under the media in the content column. */}
+            {engagementSubjectUri && activeTab !== "overview" ? (
+              <div className="mt-5 border-t border-border-soft pt-3">
+                <RecordEngagement subjectUri={engagementSubjectUri} />
+              </div>
+            ) : null}
+          </header>
         ) : null}
-        <section id="support" className={`mx-auto grid max-w-6xl scroll-mt-24 grid-cols-1 gap-x-10 gap-y-8 px-6 pb-8 lg:px-8 ${activeTab === "updates" ? "pt-3" : activeTab === "overview" ? "pt-6" : "pt-8"} ${showOverviewSidebar ? "lg:grid-cols-[minmax(0,1fr)_320px]" : ""}`}>
+        <section
+          id="support"
+          className={`mx-auto grid max-w-6xl scroll-mt-24 grid-cols-1 gap-x-10 gap-y-8 px-6 pb-8 lg:px-8 ${activeTab === "updates" ? "pt-3" : activeTab === "overview" ? "pt-6" : "pt-8"} ${showOverviewSidebar ? "lg:grid-cols-[minmax(0,1fr)_320px]" : ""}`}
+        >
           <div className="min-w-0">
             {activeTab === "overview" ? (
               <>
@@ -840,22 +1117,41 @@ export async function ProjectDetailView({
                   </div>
                 ) : null}
                 {detail?.richBody && detail.richBody.length > 0 ? (
-                  <div className="mt-7"><RichText blocks={detail.richBody} className="text-base leading-7 md:text-lg md:leading-8" /></div>
+                  <div className="mt-7">
+                    <RichText
+                      blocks={detail.richBody}
+                      className="text-base leading-7 md:text-lg md:leading-8"
+                    />
+                  </div>
                 ) : description ? (
-                  <p className="mt-7 whitespace-pre-line text-base leading-7 text-foreground/76 md:text-lg md:leading-8">{description}</p>
+                  <p className="mt-7 whitespace-pre-line text-base leading-7 text-foreground/76 md:text-lg md:leading-8">
+                    {description}
+                  </p>
                 ) : null}
 
                 {detail?.sections?.map((section, index) =>
                   section.fields.length === 0 ? null : (
-                    <div key={section.title ?? index} className="mt-8 border-t border-border-soft pt-6">
+                    <div
+                      key={section.title ?? index}
+                      className="mt-8 border-t border-border-soft pt-6"
+                    >
                       {section.title && (
-                        <h2 className="mb-4 text-xs font-medium uppercase tracking-[0.16em] text-muted-foreground">{section.title}</h2>
+                        <h2 className="mb-4 font-instrument text-2xl italic text-foreground">
+                          {section.title}
+                        </h2>
                       )}
                       <dl className="grid gap-4 sm:grid-cols-2">
                         {section.fields.map((field) => (
-                          <div key={field.label} className={field.wide ? "sm:col-span-2" : undefined}>
-                            <dt className="text-[11px] font-medium uppercase tracking-[0.1em] text-foreground/45">{field.label}</dt>
-                            <dd className="mt-1 text-sm leading-6 text-foreground">{field.value}</dd>
+                          <div
+                            key={field.label}
+                            className={field.wide ? "sm:col-span-2" : undefined}
+                          >
+                            <dt className="text-xs font-medium text-muted-foreground">
+                              {field.label}
+                            </dt>
+                            <dd className="mt-1 text-sm leading-6 text-foreground">
+                              {field.value}
+                            </dd>
                           </div>
                         ))}
                       </dl>
@@ -875,7 +1171,13 @@ export async function ProjectDetailView({
                   }}
                 />
 
-                <ProjectGalleryViewer galleries={projectGalleries} variant="bumicert" showProjectFilter={false} hideWhenEmpty compact />
+                <ProjectGalleryViewer
+                  galleries={projectGalleries}
+                  variant="bumicert"
+                  showProjectFilter={false}
+                  hideWhenEmpty
+                  compact
+                />
                 {hasObservations ? (
                   <div id="observations" className="scroll-mt-24">
                     <BumicertObservationsGallery observations={observations} />
@@ -883,7 +1185,16 @@ export async function ProjectDetailView({
                 ) : null}
 
                 {showUpdates ? (
-                  <ProjectDetailSection id="updates" icon={<PaperclipIcon className="h-4 w-4" aria-hidden />} title={projectNavT("updates")} count={timelineEntries.length > 0 ? formatNumber(timelineEntries.length) : undefined}>
+                  <ProjectDetailSection
+                    id="updates"
+                    icon={<PaperclipIcon className="h-4 w-4" aria-hidden />}
+                    title={projectNavT("updates")}
+                    count={
+                      timelineEntries.length > 0
+                        ? formatNumber(timelineEntries.length)
+                        : undefined
+                    }
+                  >
                     <BumicertTimeline
                       organizationDid={record.did}
                       activityUri={record.atUri}
@@ -906,8 +1217,13 @@ export async function ProjectDetailView({
                 ) : null}
 
                 {donationEntries.length > 0 ? (
-                  <ProjectDetailSection id="donations" icon={<HeartIcon className="h-4 w-4" aria-hidden />} title={supportT("donations")} count={formatNumber(donationEntries.length)}>
-                    <div className="overflow-hidden rounded-3xl bg-card/70 shadow-sm shadow-primary/5 ring-1 ring-foreground/5 backdrop-blur divide-y divide-border/60">
+                  <ProjectDetailSection
+                    id="donations"
+                    icon={<HeartIcon className="h-4 w-4" aria-hidden />}
+                    title={supportT("donations")}
+                    count={formatNumber(donationEntries.length)}
+                  >
+                    <div className="overflow-hidden bg-muted/35 divide-y divide-border/60">
                       {donationEntries.map((entry) => (
                         <DonationLeaderboardRow key={entry.key} entry={entry} />
                       ))}
@@ -918,7 +1234,12 @@ export async function ProjectDetailView({
             ) : null}
 
             {activeTab === "places" ? (
-              <ProjectDetailSection id="places" icon={<MapPinnedIcon className="h-4 w-4" aria-hidden />} title="Places" count={formatNumber(record.locationUris.length)}>
+              <ProjectDetailSection
+                id="places"
+                icon={<MapPinnedIcon className="h-4 w-4" aria-hidden />}
+                title={projectNavT("places")}
+                count={formatNumber(record.locationUris.length)}
+              >
                 <SiteBoundariesPanel
                   record={record}
                   globeHref={projectGlobeHref}
@@ -946,7 +1267,12 @@ export async function ProjectDetailView({
             ) : null}
 
             {activeTab === "reviews" ? (
-              <ProjectDetailSection id="reviews" icon={<ClipboardCheckIcon className="h-4 w-4" aria-hidden />} title="Reviews" count={reviewCount > 0 ? formatNumber(reviewCount) : undefined}>
+              <ProjectDetailSection
+                id="reviews"
+                icon={<ClipboardCheckIcon className="h-4 w-4" aria-hidden />}
+                title={projectNavT("reviews")}
+                count={reviewCount > 0 ? formatNumber(reviewCount) : undefined}
+              >
                 <ReviewsPanel record={record} reviews={reviews} />
               </ProjectDetailSection>
             ) : null}
@@ -982,6 +1308,18 @@ export async function ProjectDetailView({
                       recentUpdates={recentUpdates}
                       placesHref={placesHref}
                       updatesHref={updatesHref}
+                      copy={{
+                        active: recoveryT("sidebar.active"),
+                        places: projectNavT("places"),
+                        contributors: recoveryT("sidebar.contributors"),
+                        atAGlance: recoveryT("sidebar.atAGlance"),
+                        map: recoveryT("sidebar.map"),
+                        viewPlaces: recoveryT("sidebar.viewPlaces"),
+                        mapTitle: recoveryT("sidebar.mapTitle"),
+                        latestUpdates: recoveryT("sidebar.latestUpdates"),
+                        seeAll: recoveryT("sidebar.seeAll"),
+                        update: recoveryT("sidebar.update"),
+                      }}
                     />
                   }
                 />
@@ -1006,6 +1344,7 @@ function ProjectSidebarExtras({
   recentUpdates,
   placesHref,
   updatesHref,
+  copy,
 }: {
   record: BumicertRecord;
   detail: RouteData["detail"];
@@ -1015,11 +1354,31 @@ function ProjectSidebarExtras({
   recentUpdates: TimelineAttachmentItem[];
   placesHref: string;
   updatesHref: string;
+  copy: {
+    active: string;
+    places: string;
+    contributors: string;
+    atAGlance: string;
+    map: string;
+    viewPlaces: string;
+    mapTitle: string;
+    latestUpdates: string;
+    seeAll: string;
+    update: string;
+  };
 }) {
   const facts: Array<{ label: string; value: string }> = [];
-  if (period) facts.push({ label: "Active", value: period });
-  if (record.locationUris.length > 0) facts.push({ label: "Places", value: formatNumber(record.locationUris.length) });
-  if (record.contributorCount > 0) facts.push({ label: "Contributors", value: formatNumber(record.contributorCount) });
+  if (period) facts.push({ label: copy.active, value: period });
+  if (record.locationUris.length > 0)
+    facts.push({
+      label: copy.places,
+      value: formatNumber(record.locationUris.length),
+    });
+  if (record.contributorCount > 0)
+    facts.push({
+      label: copy.contributors,
+      value: formatNumber(record.contributorCount),
+    });
   const badges = detail?.badges ?? [];
   // Tracks whether a divider is needed before the next block. The first block
   // omits its leading separator since this is the top of the sidebar.
@@ -1036,13 +1395,22 @@ function ProjectSidebarExtras({
         <>
           {lead()}
           <div className="space-y-3">
-            <h3 className="text-xs font-semibold uppercase tracking-[0.14em] text-foreground">At a glance</h3>
+            <h3 className="text-sm font-semibold text-foreground">
+              {copy.atAGlance}
+            </h3>
             {facts.length > 0 ? (
               <dl className="space-y-2">
                 {facts.map((fact) => (
-                  <div key={fact.label} className="flex items-baseline justify-between gap-3">
-                    <dt className="shrink-0 text-xs text-muted-foreground">{fact.label}</dt>
-                    <dd className="min-w-0 truncate text-right text-sm font-medium text-foreground">{fact.value}</dd>
+                  <div
+                    key={fact.label}
+                    className="flex items-baseline justify-between gap-3"
+                  >
+                    <dt className="shrink-0 text-xs text-muted-foreground">
+                      {fact.label}
+                    </dt>
+                    <dd className="min-w-0 truncate text-right text-sm font-medium text-foreground">
+                      {fact.value}
+                    </dd>
                   </div>
                 ))}
               </dl>
@@ -1068,17 +1436,31 @@ function ProjectSidebarExtras({
           {lead()}
           <div className="space-y-2.5">
             <div className="flex items-center justify-between gap-2">
-              <h3 className="text-xs font-semibold uppercase tracking-[0.14em] text-foreground">Map</h3>
-              <Link href={placesHref} className="text-xs font-medium text-primary transition-colors hover:underline">View places</Link>
+              <h3 className="text-sm font-semibold text-foreground">
+                {copy.map}
+              </h3>
+              <Link
+                href={placesHref}
+                className="text-xs font-medium text-primary transition-colors hover:underline"
+              >
+                {copy.viewPlaces}
+              </Link>
             </div>
-            <Link href={placesHref} className="group relative block overflow-hidden rounded-2xl border border-border" aria-label="View places">
+            <Link
+              href={placesHref}
+              className="group relative block overflow-hidden rounded-2xl border border-border"
+              aria-label={copy.viewPlaces}
+            >
               <iframe
                 src={polygonsViewHref(mapLocationUri)}
                 className="pointer-events-none h-44 w-full border-0"
                 loading="lazy"
-                title="Site boundary map"
+                title={copy.mapTitle}
               />
-              <span aria-hidden className="absolute inset-0 transition-colors group-hover:bg-primary/[0.06]" />
+              <span
+                aria-hidden
+                className="absolute inset-0 transition-colors group-hover:bg-primary/[0.06]"
+              />
             </Link>
           </div>
         </>
@@ -1089,8 +1471,15 @@ function ProjectSidebarExtras({
           {lead()}
           <div className="space-y-2.5">
             <div className="flex items-center justify-between gap-2">
-              <h3 className="text-xs font-semibold uppercase tracking-[0.14em] text-foreground">Latest updates</h3>
-              <Link href={updatesHref} className="text-xs font-medium text-primary transition-colors hover:underline">See all</Link>
+              <h3 className="text-sm font-semibold text-foreground">
+                {copy.latestUpdates}
+              </h3>
+              <Link
+                href={updatesHref}
+                className="text-xs font-medium text-primary transition-colors hover:underline"
+              >
+                {copy.seeAll}
+              </Link>
             </div>
             <ul className="space-y-2">
               {recentUpdates.map((entry) => {
@@ -1099,12 +1488,18 @@ function ProjectSidebarExtras({
                   <li key={entry.metadata.uri ?? entry.metadata.rkey}>
                     <Link
                       href={updatesHref}
-                      className="group block rounded-xl border border-border-soft bg-surface p-3 transition-colors hover:border-primary/40 hover:bg-surface-sunken"
+                      className="group block bg-muted/35 p-3 transition-colors hover:bg-muted/60 motion-reduce:transition-none"
                     >
                       <p className="line-clamp-2 text-[13px] font-medium leading-snug text-foreground transition-colors group-hover:text-primary">
-                        {entry.record.title?.trim() || entry.record.shortDescription?.trim() || "Update"}
+                        {entry.record.title?.trim() ||
+                          entry.record.shortDescription?.trim() ||
+                          copy.update}
                       </p>
-                      {date ? <p className="mt-1 text-[11px] text-muted-foreground">{formatRelative(date)}</p> : null}
+                      {date ? (
+                        <p className="mt-1 text-[11px] text-muted-foreground">
+                          {formatRelative(date)}
+                        </p>
+                      ) : null}
                     </Link>
                   </li>
                 );
@@ -1131,11 +1526,20 @@ function ProjectDetailSection({
   children: ReactNode;
 }) {
   return (
-    <section id={id} className="mt-10 scroll-mt-24 border-t border-border-soft pt-7">
+    <section
+      id={id}
+      className="mt-10 scroll-mt-24 border-t border-border-soft pt-7"
+    >
       <div className="mb-5 flex items-center gap-2.5">
-        <span className="flex size-8 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">{icon}</span>
-        <h2 className="font-instrument text-2xl italic leading-none tracking-[-0.02em] text-foreground sm:text-[1.75rem]">{title}</h2>
-        {count != null ? <span className="text-sm text-muted-foreground">{count}</span> : null}
+        <span className="flex size-8 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
+          {icon}
+        </span>
+        <h2 className="font-instrument text-2xl italic leading-none tracking-[-0.02em] text-foreground sm:text-[1.75rem]">
+          {title}
+        </h2>
+        {count != null ? (
+          <span className="text-sm text-muted-foreground">{count}</span>
+        ) : null}
       </div>
       {children}
     </section>
@@ -1150,7 +1554,9 @@ async function fetchGalleriesForBumicertProject(
     fetchProjectsByDid(did, 1000).then((page) => page.records),
     fetchProjectImageGalleriesByDid(did),
   ]);
-  const project = projects.find((item) => item.bumicertUris.includes(bumicertUri));
+  const project = projects.find((item) =>
+    item.bumicertUris.includes(bumicertUri),
+  );
   if (!project) return [];
   return attachProjectTitlesToGalleries(
     galleries.filter((gallery) => gallery.projectUri === project.atUri),
@@ -1166,7 +1572,9 @@ function buildBumicertJsonLd(
   description: string | null,
   origin: string,
 ): Record<string, unknown> {
-  const accepting = Boolean(fundingConfig?.receivingWallet?.uri) && (fundingConfig?.status ?? "open") === "open";
+  const accepting =
+    Boolean(fundingConfig?.receivingWallet?.uri) &&
+    (fundingConfig?.status ?? "open") === "open";
   const url = `${origin}${detailHref}`;
   return {
     "@context": "https://schema.org",
@@ -1215,19 +1623,32 @@ export async function loadBumicertRouteData(
   requestedIdentifier: string,
 ): Promise<RouteData | null> {
   const atUri = `at://${did}/org.hypercerts.claim.activity/${rkey}`;
-  const [record, detail, owner, fundingConfig, authSession] = await Promise.all([
-    fetchRecordByUri(atUri),
-    fetchRecordDetail(atUri).catch(() => null),
-    getAccountRouteData(did, requestedIdentifier),
-    fetchBumicertFundingConfig(did, rkey).catch(() => null),
-    fetchAuthSession(),
-  ]);
+  const [record, detail, owner, fundingConfig, authSession] = await Promise.all(
+    [
+      fetchRecordByUri(atUri),
+      fetchRecordDetail(atUri).catch(() => null),
+      getAccountRouteData(did, requestedIdentifier),
+      fetchBumicertFundingConfig(did, rkey).catch(() => null),
+      fetchAuthSession(),
+    ],
+  );
 
   if (!record || record.kind !== "bumicert") return null;
-  return { record, detail, owner, fundingConfig, authSession, routeIdentifier: requestedIdentifier, urlIdentifier: owner.urlIdentifier };
+  return {
+    record,
+    detail,
+    owner,
+    fundingConfig,
+    authSession,
+    routeIdentifier: requestedIdentifier,
+    urlIdentifier: owner.urlIdentifier,
+  };
 }
 
-async function fetchBumicertFundingConfig(did: string, rkey: string): Promise<BumicertFundingConfig> {
+async function fetchBumicertFundingConfig(
+  did: string,
+  rkey: string,
+): Promise<BumicertFundingConfig> {
   const uri = `at://${did}/app.gainforest.funding.config/${rkey}`;
   const response = await fetch(INDEXER_URL, {
     method: "POST",
@@ -1273,7 +1694,9 @@ async function fetchBumicertFundingConfig(did: string, rkey: string): Promise<Bu
   if (!node) return null;
 
   return {
-    receivingWallet: node.receivingWallet?.uri ? { uri: node.receivingWallet.uri } : null,
+    receivingWallet: node.receivingWallet?.uri
+      ? { uri: node.receivingWallet.uri }
+      : null,
     status: normalizeFundingStatus(node.status),
     goalInUSD: node.goalInUSD ?? null,
     minDonationInUSD: node.minDonationInUSD ?? null,
@@ -1284,8 +1707,11 @@ async function fetchBumicertFundingConfig(did: string, rkey: string): Promise<Bu
   };
 }
 
-function normalizeFundingStatus(status: string | null | undefined): FundingConfigStatus {
-  if (status === "coming-soon" || status === "paused" || status === "closed") return status;
+function normalizeFundingStatus(
+  status: string | null | undefined,
+): FundingConfigStatus {
+  if (status === "coming-soon" || status === "paused" || status === "closed")
+    return status;
   if (status === "open" || status == null) return "open";
   return null;
 }
@@ -1298,9 +1724,10 @@ function safeDecode(value: string): string {
   }
 }
 
-export function parseDetailTab(value: string | string[] | undefined): BumicertDetailTab {
-  const raw = Array.isArray(value) ? value[0] : value;
-  return BUMICERT_DETAIL_TABS.includes(raw as BumicertDetailTab) ? (raw as BumicertDetailTab) : "overview";
+export function parseDetailTab(
+  value: string | string[] | undefined,
+): BumicertDetailTab {
+  return validatedCertTab(value) ?? "overview";
 }
 
 function polygonsViewHref(locationUri: string): string {
@@ -1309,7 +1736,7 @@ function polygonsViewHref(locationUri: string): string {
   }).toString()}`;
 }
 
-function OverviewSidebar({
+async function OverviewSidebar({
   record,
   detail,
   owner,
@@ -1352,13 +1779,24 @@ function OverviewSidebar({
   /** Hide the cover image — the project page shows it as a hero. */
   hideImage?: boolean;
 }) {
-  const orgLinks = buildOrganizationLinks(owner, detail);
+  const [overviewT, recoveryT] = await Promise.all([
+    getTranslations("bumicert.detail.overview"),
+    getTranslations("bumicert.detail.recovery.sidebar"),
+  ]);
+  const orgLinks = buildOrganizationLinks(owner, detail, {
+    website: recoveryT("website"),
+    email: recoveryT("email"),
+    link: recoveryT("link"),
+  });
 
   return (
     <div className="space-y-4">
       {!hideOwner ? (
         <div className="flex items-center gap-3">
-          <Link href={`/account/${encodeURIComponent(owner.urlIdentifier)}`} className="relative h-9 w-9 shrink-0 overflow-hidden rounded-full border border-border bg-muted">
+          <Link
+            href={`/account/${encodeURIComponent(owner.urlIdentifier)}`}
+            className="relative h-9 w-9 shrink-0 overflow-hidden rounded-full border border-border bg-muted"
+          >
             {owner.avatarUrl ? (
               <Image
                 src={owner.avatarUrl}
@@ -1374,11 +1812,16 @@ function OverviewSidebar({
               </div>
             )}
           </Link>
-          <Link href={`/account/${encodeURIComponent(owner.urlIdentifier)}`} className="group flex min-w-0 flex-1 flex-col">
+          <Link
+            href={`/account/${encodeURIComponent(owner.urlIdentifier)}`}
+            className="group flex min-w-0 flex-1 flex-col"
+          >
             <span className="truncate text-sm font-medium leading-tight text-foreground transition-colors group-hover:text-primary">
               {owner.displayName}
             </span>
-            <span className="text-xs leading-tight text-muted-foreground">{formatRelative(record.createdAt)}</span>
+            <span className="text-xs leading-tight text-muted-foreground">
+              {formatRelative(record.createdAt)}
+            </span>
           </Link>
           <BumicertShareButton />
         </div>
@@ -1422,7 +1865,16 @@ function OverviewSidebar({
 
       <Separator />
 
-      <AboutOrganizationSection owner={owner} links={orgLinks} />
+      <AboutOrganizationSection
+        owner={owner}
+        links={orgLinks}
+        copy={{
+          heading: overviewT("aboutOrganization"),
+          noDescription: overviewT("noDescription"),
+          profile: overviewT("profile"),
+          country: recoveryT("country"),
+        }}
+      />
 
       {canDelete ? (
         <>
@@ -1443,9 +1895,16 @@ function OverviewSidebar({
 function AboutOrganizationSection({
   owner,
   links,
+  copy,
 }: {
   owner: RouteData["owner"];
   links: OrganizationLinkItem[];
+  copy: {
+    heading: string;
+    noDescription: string;
+    profile: string;
+    country: string;
+  };
 }) {
   const accountHref = `/account/${encodeURIComponent(owner.urlIdentifier)}`;
   const allLinks: OrganizationLinkItem[] = [
@@ -1453,8 +1912,7 @@ function AboutOrganizationSection({
     {
       href: accountHref,
       platform: "link",
-      label: "Learn More",
-      description: `View ${owner.displayName}'s full profile.`,
+      label: copy.profile,
       external: false,
     },
   ];
@@ -1462,21 +1920,25 @@ function AboutOrganizationSection({
 
   return (
     <div className="space-y-3">
-      <h3 className="text-sm font-semibold uppercase tracking-[0.14em] text-foreground">
-        About {owner.displayName}
+      <h3 className="text-sm font-semibold text-foreground">
+        {copy.heading}
       </h3>
       {owner.description ? (
-        <p className="line-clamp-5 text-sm leading-6 text-foreground/70">{owner.description}</p>
+        <p className="line-clamp-5 text-sm leading-6 text-foreground/70">
+          {owner.description}
+        </p>
       ) : (
         <p className="text-sm leading-6 text-muted-foreground">
-          {owner.displayName} is the organization behind this Cert.
+          {copy.noDescription}
         </p>
       )}
       {owner.country ? (
         <dl className="text-sm">
           <div className="flex justify-between gap-3">
-            <dt className="text-muted-foreground">Country</dt>
-            <dd className="truncate text-foreground">{formatCountry(owner.country)}</dd>
+            <dt className="text-muted-foreground">{copy.country}</dt>
+            <dd className="truncate text-foreground">
+              {formatCountry(owner.country)}
+            </dd>
           </div>
         </dl>
       ) : null}
@@ -1533,11 +1995,22 @@ async function SupportCard({
   maEarthOption?: MaEarthDonationOption | null;
   className?: string;
 }) {
-  const t = await getTranslations("bumicert.detail.support");
+  const [t, recoveryT] = await Promise.all([
+    getTranslations("bumicert.detail.support"),
+    getTranslations("bumicert.detail.recovery.donations"),
+  ]);
   const maEarth = maEarthOption ?? null;
-  const usdReceipts = receipts.filter((receipt) => ["USD", "USDC"].includes(receipt.currency.toUpperCase()));
-  const totalUsd = usdReceipts.reduce((sum, receipt) => sum + receipt.amount, 0);
-  const gainforestDonors = new Set(usdReceipts.map((receipt) => donorKey(receipt.from)).filter(Boolean)).size || (usdReceipts.length > 0 ? 1 : 0);
+  const usdReceipts = receipts.filter((receipt) =>
+    ["USD", "USDC"].includes(receipt.currency.toUpperCase()),
+  );
+  const totalUsd = usdReceipts.reduce(
+    (sum, receipt) => sum + receipt.amount,
+    0,
+  );
+  const gainforestDonors =
+    new Set(
+      usdReceipts.map((receipt) => donorKey(receipt.from)).filter(Boolean),
+    ).size || (usdReceipts.length > 0 ? 1 : 0);
   const maEarthTotalUsd = maEarth?.summary?.totalUsd ?? 0;
   const maEarthDonorCount = maEarth?.summary?.donorCount ?? 0;
   const combinedUsd = totalUsd + maEarthTotalUsd;
@@ -1545,32 +2018,51 @@ async function SupportCard({
   const donationStatus = getDonationStatus(fundingConfig, unavailable);
   const gainForestOpen = donationStatus.kind === "open";
   const goalUsd = parseGoalUsd(fundingConfig);
-  const latestRound = maEarth && maEarth.rounds.length > 0 ? maEarth.rounds.at(-1) : null;
+  const latestRound =
+    maEarth && maEarth.rounds.length > 0 ? maEarth.rounds.at(-1) : null;
 
   // No donation channel, no history, and no permission to configure one:
   // skip the dead commerce UI — a short note is more honest.
-  if (!canManageDonations && !gainForestOpen && !maEarth && receipts.length === 0 && donationStatus.kind === "not-applicable") {
+  if (
+    !canManageDonations &&
+    !gainForestOpen &&
+    !maEarth &&
+    receipts.length === 0 &&
+    donationStatus.kind === "not-applicable"
+  ) {
     return (
       <div className={["space-y-2", className].filter(Boolean).join(" ")}>
-        <h3 className="text-xs font-medium uppercase tracking-[0.16em] text-muted-foreground">{t("title")}</h3>
-        <p className="text-sm leading-6 text-muted-foreground">{t("notAccepting", { name: owner.displayName })}</p>
+        <h3 className="text-sm font-medium text-muted-foreground">
+          {t("title")}
+        </h3>
+        <p className="text-sm leading-6 text-muted-foreground">
+          {t("notAccepting", { name: owner.displayName })}
+        </p>
       </div>
     );
   }
 
   return (
-    <div className={["rounded-3xl border border-border bg-card p-5 shadow-sm shadow-primary/5", className].filter(Boolean).join(" ")}>
+    <div className={["bg-muted/45 p-5", className].filter(Boolean).join(" ")}>
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
           {combinedUsd > 0 ? (
             <>
-              <p className="text-3xl font-semibold leading-none tracking-tight text-foreground">{formatCompactUsd(combinedUsd)}</p>
-              <p className="mt-1.5 text-sm text-muted-foreground">{t("fromSupporters", { count: supporterCount })}</p>
+              <p className="text-3xl font-semibold leading-none tracking-tight text-foreground">
+                {formatCompactUsd(combinedUsd)}
+              </p>
+              <p className="mt-1.5 text-sm text-muted-foreground">
+                {t("fromSupporters", { count: supporterCount })}
+              </p>
             </>
           ) : (
             <>
-              <p className="text-lg font-semibold leading-tight text-foreground">{t("title")}</p>
-              <p className="mt-1 text-sm leading-5 text-muted-foreground">{t("noDonationsYet")}</p>
+              <p className="text-lg font-semibold leading-tight text-foreground">
+                {t("title")}
+              </p>
+              <p className="mt-1 text-sm leading-5 text-muted-foreground">
+                {t("noDonationsYet")}
+              </p>
             </>
           )}
         </div>
@@ -1587,7 +2079,12 @@ async function SupportCard({
       ) : null}
       <div className="mt-4 space-y-2">
         {canManageDonations ? (
-          <FundingStatus ownerDid={record.did} bumicertRkey={record.rkey} fundingConfig={fundingConfig} mutationRepo={mutationRepo} />
+          <FundingStatus
+            ownerDid={record.did}
+            bumicertRkey={record.rkey}
+            fundingConfig={fundingConfig}
+            mutationRepo={mutationRepo}
+          />
         ) : gainForestOpen ? (
           <DonateButton
             bumicert={{
@@ -1601,8 +2098,11 @@ async function SupportCard({
             disabled={false}
             label={receipts.length > 0 ? t("donateAgain") : t("donate")}
           />
-        ) : donationStatus.kind === "inactive" || donationStatus.kind === "unavailable" ? (
-          <p className="rounded-2xl bg-muted px-3 py-2 text-center text-xs text-muted-foreground">{donationStatus.label}</p>
+        ) : donationStatus.kind === "inactive" ||
+          donationStatus.kind === "unavailable" ? (
+          <p className="rounded-2xl bg-muted px-3 py-2 text-center text-xs text-muted-foreground">
+            {recoveryT(`status.${donationStatus.labelKey}`)}
+          </p>
         ) : null}
         {maEarth ? (
           <a
@@ -1621,15 +2121,19 @@ async function SupportCard({
         ) : null}
       </div>
       {maEarth && maEarthTotalUsd > 0 && totalUsd > 0 ? (
-        <p className="mt-3 text-xs leading-5 text-muted-foreground">{t("includesMaEarth")}</p>
+        <p className="mt-3 text-xs leading-5 text-muted-foreground">
+          {t("includesMaEarth")}
+        </p>
       ) : maEarth && maEarthTotalUsd > 0 && totalUsd === 0 ? (
-        <p className="mt-3 text-xs leading-5 text-muted-foreground">{t("viaMaEarth")}</p>
+        <p className="mt-3 text-xs leading-5 text-muted-foreground">
+          {t("viaMaEarth")}
+        </p>
       ) : null}
     </div>
   );
 }
 
-function DonationActionOptions({
+async function DonationActionOptions({
   record,
   owner,
   fundingConfig,
@@ -1648,11 +2152,20 @@ function DonationActionOptions({
   hasReceipts: boolean;
   maEarthOption: MaEarthDonationOption | null;
 }) {
+  const [supportT, recoveryT] = await Promise.all([
+    getTranslations("bumicert.detail.support"),
+    getTranslations("bumicert.detail.recovery.donations"),
+  ]);
   const gainForestOpen = donationStatus.kind === "open";
   return (
     <div className="space-y-2">
       {canManageDonations ? (
-        <FundingStatus ownerDid={record.did} bumicertRkey={record.rkey} fundingConfig={fundingConfig} mutationRepo={mutationRepo} />
+        <FundingStatus
+          ownerDid={record.did}
+          bumicertRkey={record.rkey}
+          fundingConfig={fundingConfig}
+          mutationRepo={mutationRepo}
+        />
       ) : gainForestOpen ? (
         <DonateButton
           bumicert={{
@@ -1664,10 +2177,12 @@ function DonationActionOptions({
           }}
           fundingConfig={fundingConfig}
           disabled={false}
-          label={hasReceipts ? "Donate again" : "Donate"}
+          label={hasReceipts ? supportT("donateAgain") : supportT("donate")}
         />
       ) : donationStatus.kind !== "not-applicable" ? (
-        <p className="rounded-2xl bg-muted px-3 py-2 text-center text-xs text-muted-foreground">{donationStatus.label}</p>
+        <p className="rounded-2xl bg-muted px-3 py-2 text-center text-xs text-muted-foreground">
+          {recoveryT(`status.${donationStatus.labelKey}`)}
+        </p>
       ) : null}
       {maEarthOption ? (
         <a
@@ -1681,7 +2196,7 @@ function DonationActionOptions({
           }
         >
           <ExternalLinkIcon className="size-3.5" aria-hidden />
-          Donate on Ma Earth
+          {supportT("donateOnMaEarth")}
         </a>
       ) : null}
     </div>
@@ -1695,9 +2210,17 @@ function parseGoalUsd(fundingConfig: BumicertFundingConfig): number | null {
   return Number.isFinite(parsed) && parsed > 0 ? parsed : null;
 }
 
-function FundingProgress({ raisedUsd, goalUsd }: { raisedUsd: number; goalUsd: number }) {
+async function FundingProgress({
+  raisedUsd,
+  goalUsd,
+}: {
+  raisedUsd: number;
+  goalUsd: number;
+}) {
+  const t = await getTranslations("bumicert.detail.recovery.donations");
   const ratio = Math.max(0, Math.min(1, raisedUsd / goalUsd));
   const percent = Math.round(ratio * 100);
+  const formattedGoal = formatCompactUsd(goalUsd);
   return (
     <div className="space-y-1.5">
       <div
@@ -1705,13 +2228,16 @@ function FundingProgress({ raisedUsd, goalUsd }: { raisedUsd: number; goalUsd: n
         aria-valuemin={0}
         aria-valuemax={100}
         aria-valuenow={percent}
-        aria-label={`Funding progress: ${percent}% of ${formatCompactUsd(goalUsd)} goal`}
+        aria-label={t("goalProgressAria", { percent, goal: formattedGoal })}
         className="h-2 w-full overflow-hidden rounded-full bg-muted"
       >
-        <div className="h-full rounded-full bg-primary transition-[width]" style={{ width: `${Math.max(percent, 2)}%` }} />
+        <div
+          className="h-full rounded-full bg-primary transition-[width]"
+          style={{ width: `${Math.max(percent, 2)}%` }}
+        />
       </div>
       <p className="text-xs text-muted-foreground">
-        <span className="font-medium text-foreground">{percent}%</span> of {formatCompactUsd(goalUsd)} goal
+        {t("goalProgress", { percent, goal: formattedGoal })}
       </p>
     </div>
   );
@@ -1720,30 +2246,45 @@ function FundingProgress({ raisedUsd, goalUsd }: { raisedUsd: number; goalUsd: n
 function getDonationStatus(
   fundingConfig: BumicertFundingConfig,
   unavailable: boolean,
-): { kind: "open" | "unavailable" | "not-applicable" | "inactive"; label: string } {
-  if (unavailable) return { kind: "unavailable", label: "Donation status unavailable" };
-  if (!fundingConfig || !fundingConfig.receivingWallet?.uri) {
-    return { kind: "not-applicable", label: "Donations are not applicable" };
-  }
+): {
+  kind: "open" | "unavailable" | "not-applicable" | "inactive";
+  labelKey:
+    | "unavailable"
+    | "notApplicable"
+    | "open"
+    | "comingSoon"
+    | "paused"
+    | "closed";
+} {
+  if (unavailable) return { kind: "unavailable", labelKey: "unavailable" };
+  if (!fundingConfig || !fundingConfig.receivingWallet?.uri)
+    return { kind: "not-applicable", labelKey: "notApplicable" };
   const status = fundingConfig.status ?? "open";
-  if (status === "open") return { kind: "open", label: "Accepting donations" };
-  if (status === "coming-soon") return { kind: "inactive", label: "Donations coming soon" };
-  if (status === "paused") return { kind: "inactive", label: "Donations paused" };
-  if (status === "closed") return { kind: "inactive", label: "Donations closed" };
-  return { kind: "unavailable", label: "Donation status unavailable" };
+  if (status === "open") return { kind: "open", labelKey: "open" };
+  if (status === "coming-soon")
+    return { kind: "inactive", labelKey: "comingSoon" };
+  if (status === "paused") return { kind: "inactive", labelKey: "paused" };
+  if (status === "closed") return { kind: "inactive", labelKey: "closed" };
+  return { kind: "unavailable", labelKey: "unavailable" };
 }
 
 type OrganizationLinkItem = {
   href: string;
   platform: string;
   label: string;
-  description: string;
   external?: boolean;
+};
+
+type OrganizationLinkLabels = {
+  website: string;
+  email: string;
+  link: string;
 };
 
 function buildOrganizationLinks(
   owner: RouteData["owner"],
   detail: RouteData["detail"],
+  labels: OrganizationLinkLabels,
 ): OrganizationLinkItem[] {
   const links: OrganizationLinkItem[] = [];
   const seen = new Set<string>();
@@ -1753,7 +2294,12 @@ function buildOrganizationLinks(
     if (seen.has(item.href)) return;
     // One button per platform — orgs sometimes list e.g. two YouTube URLs,
     // which rendered as confusing duplicate icons in the sidebar.
-    if (item.platform !== "link" && item.platform !== "website" && seenPlatforms.has(item.platform)) return;
+    if (
+      item.platform !== "link" &&
+      item.platform !== "website" &&
+      seenPlatforms.has(item.platform)
+    )
+      return;
     seen.add(item.href);
     seenPlatforms.add(item.platform);
     links.push(item);
@@ -1763,8 +2309,7 @@ function buildOrganizationLinks(
     add({
       href: owner.website,
       platform: "website",
-      label: "Website",
-      description: `Visit ${owner.displayName}'s main website at ${externalHost(owner.website)}.`,
+      label: labels.website,
     });
   }
 
@@ -1772,37 +2317,24 @@ function buildOrganizationLinks(
     add({
       href: social.href,
       platform: social.platform,
-      label: socialPlatformLabel(social.platform),
-      description: socialPlatformDescription(social.platform, owner.displayName, social.href),
+      label: socialPlatformLabel(social.platform, labels),
     });
   }
 
   return links;
 }
 
-function socialPlatformDescription(platform: string, organizationName: string, href: string): string {
-  const host = href.startsWith("mailto:") ? "email" : externalHost(href);
-  const descriptions: Record<string, string> = {
-    facebook: `Follow ${organizationName} on Facebook for public updates.`,
-    instagram: `See field photos and updates from ${organizationName} on Instagram.`,
-    youtube: `Watch videos and project stories from ${organizationName}.`,
-    linkedin: `View ${organizationName}'s professional updates on LinkedIn.`,
-    x: `Follow short updates from ${organizationName} on X.`,
-    telegram: `Open ${organizationName}'s Telegram channel or community.`,
-    tiktok: `Watch short-form updates from ${organizationName}.`,
-    github: `See public project updates from ${organizationName}.`,
-    bluesky: `Follow ${organizationName} on Bluesky.`,
-    discord: `Join ${organizationName}'s Discord community.`,
-    email: `Contact ${organizationName} by email.`,
-    website: `Open ${organizationName}'s website at ${host}.`,
-    link: `Open this external resource from ${organizationName}.`,
-  };
-  return descriptions[platform] ?? `Open ${host} for more from ${organizationName}.`;
-}
-
-function Badge({ badge, workScopeLabels }: { badge: DetailBadge; workScopeLabels: WorkScopeLabels }) {
+function Badge({
+  badge,
+  workScopeLabels,
+}: {
+  badge: DetailBadge;
+  workScopeLabels: WorkScopeLabels;
+}) {
   return (
-    <span className={`inline-flex items-center rounded-full px-3.5 py-1.5 text-sm font-medium ${BADGE_TONE[badge.tone]}`}>
+    <span
+      className={`inline-flex items-center rounded-full px-3.5 py-1.5 text-sm font-medium ${BADGE_TONE[badge.tone]}`}
+    >
       {formatWorkScopeTag(badge.label, workScopeLabels)}
     </span>
   );
@@ -1819,7 +2351,12 @@ type EvidenceInfo = {
    * In-page anchor hrefs for the integrated layout. When set, the evidence
    * chips scroll to inline sections instead of switching tabs.
    */
-  anchors?: { boundaries: string; sightings: string; timeline: string; reviews: string };
+  anchors?: {
+    boundaries: string;
+    sightings: string;
+    timeline: string;
+    reviews: string;
+  };
 };
 
 function OverviewPanel({
@@ -1851,15 +2388,24 @@ function OverviewPanel({
       {detail?.badges && detail.badges.length > 0 && (
         <div className="mb-6 mt-6 flex flex-wrap gap-2.5">
           {detail.badges.map((badge, index) => (
-            <Badge key={`${badge.label}-${index}`} badge={badge} workScopeLabels={workScopeLabels} />
+            <Badge
+              key={`${badge.label}-${index}`}
+              badge={badge}
+              workScopeLabels={workScopeLabels}
+            />
           ))}
         </div>
       )}
 
       {detail?.richBody && detail.richBody.length > 0 ? (
-        <RichText blocks={detail.richBody} className="text-base leading-7 md:text-lg md:leading-8" />
+        <RichText
+          blocks={detail.richBody}
+          className="text-base leading-7 md:text-lg md:leading-8"
+        />
       ) : description ? (
-        <p className="mt-6 whitespace-pre-line text-base leading-7 text-foreground/76 md:text-lg md:leading-8">{description}</p>
+        <p className="mt-6 whitespace-pre-line text-base leading-7 text-foreground/76 md:text-lg md:leading-8">
+          {description}
+        </p>
       ) : (
         <p className="text-[15px] leading-8 text-muted-foreground">
           No long-form description has been published for this Cert yet.
@@ -1868,19 +2414,27 @@ function OverviewPanel({
 
       {detail?.sections?.map((section, index) =>
         section.fields.length === 0 ? null : (
-          <div key={section.title ?? index} className="mt-8 border-t border-border-soft pt-6">
+          <div
+            key={section.title ?? index}
+            className="mt-8 border-t border-border-soft pt-6"
+          >
             {section.title && (
-              <h2 className="mb-4 text-xs font-medium uppercase tracking-[0.16em] text-muted-foreground">
+              <h2 className="mb-4 font-instrument text-2xl italic text-foreground">
                 {section.title}
               </h2>
             )}
             <dl className="grid gap-4 sm:grid-cols-2">
               {section.fields.map((field) => (
-                <div key={field.label} className={field.wide ? "sm:col-span-2" : undefined}>
-                  <dt className="text-[11px] font-medium uppercase tracking-[0.1em] text-foreground/45">
+                <div
+                  key={field.label}
+                  className={field.wide ? "sm:col-span-2" : undefined}
+                >
+                  <dt className="text-xs font-medium text-muted-foreground">
                     {field.label}
                   </dt>
-                  <dd className="mt-1 text-sm leading-6 text-foreground">{field.value}</dd>
+                  <dd className="mt-1 text-sm leading-6 text-foreground">
+                    {field.value}
+                  </dd>
                 </div>
               ))}
             </dl>
@@ -1908,90 +2462,121 @@ function OverviewPanel({
  * links to where the evidence lives, and zero-states stay visible (muted) so
  * evidence-rich and evidence-light Bumicerts are distinguishable at a glance.
  */
-function EvidenceSection({ evidence }: { evidence: EvidenceInfo }) {
-  const { boundaries, observationSummary, timelineCount, reviews, detailHref, ownerHref } = evidence;
-
+async function EvidenceSection({ evidence }: { evidence: EvidenceInfo }) {
+  const t = await getTranslations("bumicert.detail.recovery.evidence");
+  const {
+    boundaries,
+    observationSummary,
+    timelineCount,
+    reviews,
+    detailHref,
+    ownerHref,
+  } = evidence;
   const reviewVoices = reviews ? reviews.evaluations + reviews.comments : 0;
-  const reviewLabel = !reviews || reviewVoices === 0
-    ? "No reviews yet"
-    : [
-        reviews.evaluations > 0 ? `${formatNumber(reviews.evaluations)} evaluation${reviews.evaluations === 1 ? "" : "s"}` : null,
-        reviews.comments > 0 ? `${formatNumber(reviews.comments)} comment${reviews.comments === 1 ? "" : "s"}` : null,
-      ].filter(Boolean).join(" · ");
-
+  const reviewLabel =
+    !reviews || reviewVoices === 0
+      ? t("reviewsNone")
+      : [
+          reviews.evaluations > 0
+            ? t("evaluations", { count: reviews.evaluations })
+            : null,
+          reviews.comments > 0
+            ? t("comments", { count: reviews.comments })
+            : null,
+        ]
+          .filter(Boolean)
+          .join(" · ");
   const anchors = evidence.anchors;
-  const chips: Array<{ key: string; href: string; icon: ReactNode; label: string; present: boolean }> = [
+  const chips: Array<{
+    key: string;
+    href: string;
+    icon: ReactNode;
+    label: string;
+    present: boolean;
+  }> = [
     {
       key: "boundaries",
       href: anchors?.boundaries ?? `${detailHref}?tab=site-boundaries`,
       icon: <MapPinnedIcon className="h-3.5 w-3.5" aria-hidden />,
-      label: boundaries > 0
-        ? `${formatNumber(boundaries)} site ${boundaries === 1 ? "boundary" : "boundaries"} mapped`
-        : "No site boundaries yet",
+      label:
+        boundaries > 0
+          ? t("boundaries", { count: boundaries })
+          : t("boundariesNone"),
       present: boundaries > 0,
     },
     ...(observationSummary
-      ? [{
-          key: "sightings",
-          href: anchors?.sightings ?? ownerHref,
-          icon: <LeafIcon className="h-3.5 w-3.5" aria-hidden />,
-          label: observationSummary.count > 0
-            ? `${formatCompact(observationSummary.count)} nature sighting${observationSummary.count === 1 ? "" : "s"}${
-                observationSummary.latestAt ? ` · latest ${formatRelative(observationSummary.latestAt)}` : ""
-              }`
-            : "No nature sightings yet",
-          present: observationSummary.count > 0,
-        }]
+      ? [
+          {
+            key: "sightings",
+            href: anchors?.sightings ?? ownerHref,
+            icon: <LeafIcon className="h-3.5 w-3.5" aria-hidden />,
+            label:
+              observationSummary.count > 0
+                ? observationSummary.latestAt
+                  ? t("sightingsWithLatest", {
+                      count: observationSummary.count,
+                      latest: formatRelative(observationSummary.latestAt),
+                    })
+                  : t("sightings", { count: observationSummary.count })
+                : t("sightingsNone"),
+            present: observationSummary.count > 0,
+          },
+        ]
       : []),
     ...(timelineCount !== null
-      ? [{
-          key: "timeline",
-          href: anchors?.timeline ?? `${detailHref}?tab=timeline`,
-          icon: <PaperclipIcon className="h-3.5 w-3.5" aria-hidden />,
-          label: timelineCount > 0
-            ? `${formatNumber(timelineCount)} timeline item${timelineCount === 1 ? "" : "s"}`
-            : "No timeline evidence yet",
-          present: timelineCount > 0,
-        }]
+      ? [
+          {
+            key: "timeline",
+            href: anchors?.timeline ?? `${detailHref}?tab=timeline`,
+            icon: <PaperclipIcon className="h-3.5 w-3.5" aria-hidden />,
+            label:
+              timelineCount > 0
+                ? t("timeline", { count: timelineCount })
+                : t("timelineNone"),
+            present: timelineCount > 0,
+          },
+        ]
       : []),
     ...(reviews
-      ? [{
-          key: "reviews",
-          href: anchors?.reviews ?? `${detailHref}?tab=reviews`,
-          icon: <ClipboardCheckIcon className="h-3.5 w-3.5" aria-hidden />,
-          label: reviewLabel,
-          present: reviewVoices > 0,
-        }]
+      ? [
+          {
+            key: "reviews",
+            href: anchors?.reviews ?? `${detailHref}?tab=reviews`,
+            icon: <ClipboardCheckIcon className="h-3.5 w-3.5" aria-hidden />,
+            label: reviewLabel,
+            present: reviewVoices > 0,
+          },
+        ]
       : []),
   ];
-
   if (chips.length === 0) return null;
-
   return (
-    <div className="mt-8 border-t border-border-soft pt-6">
-      <h2 className="mb-4 text-xs font-medium uppercase tracking-[0.16em] text-muted-foreground">
-        Evidence
+    <section className="mt-8 border-t border-border-soft pt-6">
+      <h2 className="mb-4 font-instrument text-2xl italic text-foreground">
+        {t("title")}
       </h2>
       <div className="flex flex-wrap gap-2">
         {chips.map((chip) => (
           <Link
             key={chip.key}
             href={chip.href}
-            className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-sm transition-colors ${
-              chip.present
-                ? "border-primary/25 bg-primary/[0.07] text-foreground hover:border-primary/50 hover:text-primary"
-                : "border-border-soft bg-surface text-muted-foreground hover:border-border hover:text-foreground"
-            }`}
+            className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm transition-colors motion-reduce:transition-none ${chip.present ? "bg-primary/[0.07] text-foreground hover:text-primary" : "bg-muted/50 text-muted-foreground hover:text-foreground"}`}
           >
-            <span className={chip.present ? "text-primary" : "text-muted-foreground/70"}>{chip.icon}</span>
+            <span
+              className={
+                chip.present ? "text-primary" : "text-muted-foreground/70"
+              }
+            >
+              {chip.icon}
+            </span>
             {chip.label}
           </Link>
         ))}
       </div>
       <p className="mt-3 text-xs leading-5 text-muted-foreground">
-        Evidence and reviews live on the open ATProto network and can be inspected by anyone.
+        {t("description")}
       </p>
-    </div>
+    </section>
   );
 }
 
@@ -2001,52 +2586,67 @@ function EvidenceSection({ evidence }: { evidence: EvidenceInfo }) {
  * threaded comment discussion (`app.gainforest.feed.post` reply-posts, the
  * same records the like + comment bar writes).
  */
-function ReviewsPanel({ record, reviews }: { record: BumicertRecord; reviews: BumicertReviews }) {
+async function ReviewsPanel({
+  record,
+  reviews,
+}: {
+  record: BumicertRecord;
+  reviews: BumicertReviews;
+}) {
+  const t = await getTranslations("bumicert.detail.recovery.reviews");
   const { evaluations, comments } = reviews;
+  const commentCount = comments.reduce(
+    (sum, comment) => sum + 1 + comment.replies.length,
+    0,
+  );
   const isEmpty = evaluations.length === 0 && comments.length === 0;
-
   return (
     <article className="py-1">
       <p className="max-w-2xl text-sm leading-6 text-muted-foreground">
-        Independent evaluations and public comments attached to this Cert on the open ATProto
-        network. Anyone — auditors, community members, or AI agents — can publish a review; nothing
-        here is written or curated by {record.creatorName ?? "the project"} itself.
+        {t("description", { name: record.creatorName ?? t("projectFallback") })}
       </p>
-
-      <div className="mt-8">
-        <h2 className="mb-4 text-xs font-medium uppercase tracking-[0.16em] text-muted-foreground">
-          Evaluations{evaluations.length > 0 ? ` · ${evaluations.length}` : ""}
+      <section className="mt-8">
+        <h2 className="mb-4 font-instrument text-2xl italic text-foreground">
+          {t("evaluations", { count: evaluations.length })}
         </h2>
         {evaluations.length === 0 ? (
-          <p className="rounded-2xl border border-border-soft bg-surface p-4 text-sm leading-6 text-muted-foreground">
-            No formal evaluations yet. An evaluation is an{" "}
-            <code className="rounded bg-muted px-1 py-0.5 text-[11px]">org.hypercerts.context.evaluation</code>{" "}
-            record — a signed summary, optional score, and supporting reports published against this claim.
+          <p className="bg-muted/45 p-4 text-sm leading-6 text-muted-foreground">
+            {t("evaluationsEmpty")}
           </p>
         ) : (
-          <div className="grid gap-3">
+          <div className="divide-y divide-border/60">
             {evaluations.map((evaluation) => (
-              <div key={evaluation.uri} className="rounded-2xl border border-border-soft bg-surface p-4">
+              <div key={evaluation.uri} className="py-4">
                 <div className="flex flex-wrap items-center justify-between gap-3">
                   <AuthorInline did={evaluation.did} />
                   <div className="flex items-center gap-2">
                     {evaluation.score ? (
                       <span
-                        className="inline-flex items-baseline gap-0.5 rounded-full border border-primary/25 bg-primary/[0.08] px-2.5 py-1 text-sm font-semibold text-primary"
-                        aria-label={`Score: ${evaluation.score.value} out of ${evaluation.score.max}`}
+                        className="inline-flex items-baseline gap-0.5 rounded-full bg-primary/[0.08] px-2.5 py-1 text-sm font-semibold text-primary"
+                        aria-label={t("score", {
+                          value: evaluation.score.value,
+                          max: evaluation.score.max,
+                        })}
                       >
                         {evaluation.score.value}
-                        <span className="text-[11px] font-medium text-primary/70">/{evaluation.score.max}</span>
+                        <span className="text-[11px] font-medium text-primary/70">
+                          /{evaluation.score.max}
+                        </span>
                       </span>
                     ) : null}
                     {evaluation.createdAt ? (
-                      <span className="text-xs text-muted-foreground" title={formatDateTime(evaluation.createdAt)}>
+                      <span
+                        className="text-xs text-muted-foreground"
+                        title={formatDateTime(evaluation.createdAt)}
+                      >
                         {formatRelative(evaluation.createdAt)}
                       </span>
                     ) : null}
                   </div>
                 </div>
-                <p className="mt-3 whitespace-pre-line text-sm leading-6 text-foreground">{evaluation.summary}</p>
+                <p className="mt-3 whitespace-pre-line text-sm leading-6 text-foreground">
+                  {evaluation.summary}
+                </p>
                 {evaluation.contentUris.length > 0 ? (
                   <div className="mt-3 flex flex-wrap gap-2">
                     {evaluation.contentUris.map((uri) => (
@@ -2055,10 +2655,15 @@ function ReviewsPanel({ record, reviews }: { record: BumicertRecord; reviews: Bu
                         href={uri}
                         target="_blank"
                         rel="noreferrer"
-                        className="inline-flex max-w-full items-center gap-1.5 rounded-full border border-border-soft bg-background px-3 py-1 text-xs text-muted-foreground transition-colors hover:border-primary/40 hover:text-primary"
+                        className="inline-flex max-w-full items-center gap-1.5 rounded-full bg-muted px-3 py-1 text-xs text-muted-foreground transition-colors hover:text-primary motion-reduce:transition-none"
                       >
-                        <ExternalLinkIcon className="h-3 w-3 shrink-0" aria-hidden />
-                        <span className="truncate">{formatReportLabel(uri)}</span>
+                        <ExternalLinkIcon
+                          className="h-3 w-3 shrink-0"
+                          aria-hidden
+                        />
+                        <span className="truncate">
+                          {formatReportLabel(uri)}
+                        </span>
                       </a>
                     ))}
                   </div>
@@ -2067,47 +2672,59 @@ function ReviewsPanel({ record, reviews }: { record: BumicertRecord; reviews: Bu
             ))}
           </div>
         )}
-      </div>
-
-      <div className="mt-8">
-        <h2 className="mb-4 text-xs font-medium uppercase tracking-[0.16em] text-muted-foreground">
-          Comments{comments.length > 0 ? ` · ${comments.reduce((sum, c) => sum + 1 + c.replies.length, 0)}` : ""}
+      </section>
+      <section className="mt-8">
+        <h2 className="mb-4 font-instrument text-2xl italic text-foreground">
+          {t("comments", { count: commentCount })}
         </h2>
         {comments.length === 0 ? (
-          <p className="rounded-2xl border border-border-soft bg-surface p-4 text-sm leading-6 text-muted-foreground">
-            No public comments yet. Comments posted on this claim from the wider network will
-            appear here.
+          <p className="bg-muted/45 p-4 text-sm leading-6 text-muted-foreground">
+            {t("commentsEmpty")}
           </p>
         ) : (
-          <div className="grid gap-3">
+          <div className="divide-y divide-border/60">
             {comments.map((comment) => (
               <ReviewCommentCard key={comment.uri} comment={comment} />
             ))}
           </div>
         )}
-      </div>
-
+      </section>
       {isEmpty ? null : (
         <p className="mt-6 text-xs leading-5 text-muted-foreground">
-          Reviews are independent records on their authors’ accounts; they are shown here unedited.
+          {t("independent")}
         </p>
       )}
     </article>
   );
 }
 
-function ReviewCommentCard({ comment, nested = false }: { comment: ReviewComment; nested?: boolean }) {
+function ReviewCommentCard({
+  comment,
+  nested = false,
+}: {
+  comment: ReviewComment;
+  nested?: boolean;
+}) {
   return (
-    <div className={nested ? "border-l-2 border-border-soft pl-4" : "rounded-2xl border border-border-soft bg-surface p-4"}>
+    <div
+      className={
+        nested ? "border-l-2 border-border-soft pl-4" : "bg-muted/35 p-4"
+      }
+    >
       <div className="flex flex-wrap items-center justify-between gap-3">
         <AuthorInline did={comment.did} />
         {comment.createdAt ? (
-          <span className="text-xs text-muted-foreground" title={formatDateTime(comment.createdAt)}>
+          <span
+            className="text-xs text-muted-foreground"
+            title={formatDateTime(comment.createdAt)}
+          >
             {formatRelative(comment.createdAt)}
           </span>
         ) : null}
       </div>
-      <p className="mt-2 whitespace-pre-line text-sm leading-6 text-foreground">{comment.text}</p>
+      <p className="mt-2 whitespace-pre-line text-sm leading-6 text-foreground">
+        {comment.text}
+      </p>
       {comment.replies.length > 0 ? (
         <div className="mt-4 grid gap-4">
           {comment.replies.map((reply) => (
@@ -2129,7 +2746,7 @@ function formatReportLabel(uri: string): string {
   }
 }
 
-function SiteBoundariesPanel({
+async function SiteBoundariesPanel({
   record,
   globeHref,
   globeLabel,
@@ -2139,6 +2756,7 @@ function SiteBoundariesPanel({
   globeHref?: string;
   globeLabel?: string;
 }) {
+  const t = await getTranslations("bumicert.detail.recovery.places");
   const firstLocationUri = record.locationUris[0] ?? null;
 
   return (
@@ -2160,7 +2778,7 @@ function SiteBoundariesPanel({
             <iframe
               src={polygonsViewHref(firstLocationUri)}
               className="h-[420px] w-full border-0"
-              title="Site boundaries map"
+              title={t("mapTitle")}
               loading="lazy"
             />
           </div>
@@ -2172,9 +2790,9 @@ function SiteBoundariesPanel({
                 href={polygonsViewHref(uri)}
                 target="_blank"
                 rel="noreferrer"
-                className="group flex items-center justify-between rounded-xl border border-border-soft bg-surface px-4 py-3 text-sm font-medium text-foreground transition-colors hover:border-primary/40 hover:bg-surface-sunken"
+                className="group flex items-center justify-between bg-muted/35 px-4 py-3 text-sm font-medium text-foreground transition-colors hover:bg-muted/60 motion-reduce:transition-none"
               >
-                <span>Site boundary {index + 1}</span>
+                <span>{t("boundary", { number: index + 1 })}</span>
                 <ExternalLinkIcon className="h-3.5 w-3.5 text-foreground/35 transition-colors group-hover:text-primary" />
               </Link>
             ))}
@@ -2183,15 +2801,15 @@ function SiteBoundariesPanel({
       ) : (
         <EmptyState
           icon={<MapPinnedIcon className="h-8 w-8" />}
-          title="No site boundaries linked"
-          body="This Cert does not currently include mapped site boundaries."
+          title={t("emptyTitle")}
+          body={t("emptyBody")}
         />
       )}
     </article>
   );
 }
 
-function DonationsPanel({
+async function DonationsPanel({
   record,
   owner,
   fundingConfig,
@@ -2212,8 +2830,14 @@ function DonationsPanel({
   mutationRepo?: string;
   maEarthOption?: MaEarthDonationOption | null;
 }) {
-  const usdReceipts = receipts.filter((receipt) => ["USD", "USDC"].includes(receipt.currency.toUpperCase()));
-  const totalUsd = usdReceipts.reduce((sum, receipt) => sum + receipt.amount, 0);
+  const t = await getTranslations("bumicert.detail.recovery.donations");
+  const usdReceipts = receipts.filter((receipt) =>
+    ["USD", "USDC"].includes(receipt.currency.toUpperCase()),
+  );
+  const totalUsd = usdReceipts.reduce(
+    (sum, receipt) => sum + receipt.amount,
+    0,
+  );
   const donationEntries = buildDonationLeaderboard(usdReceipts);
   const donorCount = donationEntries.length;
   const donationStatus = getDonationStatus(fundingConfig, unavailable);
@@ -2223,16 +2847,20 @@ function DonationsPanel({
   const maEarthDonorCount = maEarth?.summary?.donorCount ?? 0;
   const combinedTotalUsd = totalUsd + maEarthTotalUsd;
   const combinedDonorCount = donorCount + maEarthDonorCount;
-  const showSupportCard = !unavailable && (canManageDonations || donationStatus.kind !== "not-applicable" || Boolean(maEarth));
+  const showSupportCard =
+    !unavailable &&
+    (canManageDonations ||
+      donationStatus.kind !== "not-applicable" ||
+      Boolean(maEarth));
   const stats: StatsTileItem[] = [
     {
-      label: "raised",
+      label: t("raised"),
       value: formatCompactUsd(combinedTotalUsd),
       icon: <LeafIcon />,
       accent: true,
     },
     {
-      label: "supporters",
+      label: t("supporters"),
       value: formatCompact(combinedDonorCount),
       icon: <UsersRoundIcon />,
       accent: true,
@@ -2242,14 +2870,15 @@ function DonationsPanel({
   return (
     <article className="space-y-5 py-1">
       {showSupportCard ? (
-        <div className="overflow-hidden rounded-3xl bg-card/75 p-5 shadow-sm shadow-primary/5 ring-1 ring-foreground/5 backdrop-blur sm:p-6">
+        <div className="bg-muted/45 p-5 sm:p-6">
           <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
             <div className="min-w-0">
               <h2 className="font-instrument text-3xl font-light italic leading-tight tracking-[-0.025em] text-foreground sm:text-4xl">
-                Support this project
+                {t("supportTitle")}
               </h2>
               <p className="mt-3 max-w-xl text-sm leading-6 text-muted-foreground">
-                Your donation supports {owner.displayName}. Use GainForest when available, or the linked Ma Earth campaign.
+                Your donation supports {owner.displayName}. Use GainForest when
+                available, or the linked Ma Earth campaign.
               </p>
               {goalUsd !== null && donationStatus.kind === "open" ? (
                 <div className="mt-4 max-w-xl">
@@ -2276,18 +2905,22 @@ function DonationsPanel({
       {unavailable ? (
         <EmptyState
           icon={<HeartIcon className="h-8 w-8" />}
-          title="Donation information is unavailable"
-          body="We could not load donations for this project. Try again later on this page."
+          title={t("unavailableTitle")}
+          body={t("unavailableBody")}
           variant="leaderboard"
         />
       ) : receipts.length === 0 && !maEarth ? (
         <EmptyState
           icon={<HeartIcon className="h-8 w-8" />}
-          title={donationStatus.kind === "not-applicable" && !canManageDonations ? "Not accepting donations yet" : "No donations yet"}
+          title={
+            donationStatus.kind === "not-applicable" && !canManageDonations
+              ? t("notAcceptingTitle")
+              : t("emptyTitle")
+          }
           body={
             donationStatus.kind === "not-applicable" && !canManageDonations
-              ? `${owner.displayName} has not enabled donations for this project. Check the story and evidence tabs in the meantime.`
-              : "Be the first to support this project story."
+              ? t("notAcceptingBody", { name: owner.displayName })
+              : t("emptyBody")
           }
           variant="leaderboard"
         />
@@ -2296,25 +2929,27 @@ function DonationsPanel({
           <StatsTileGrid items={stats} columns={2} />
 
           {donationEntries.length > 0 ? (
-            <div className="overflow-hidden rounded-3xl bg-card/70 shadow-sm shadow-primary/5 ring-1 ring-foreground/5 backdrop-blur divide-y divide-border/60">
+            <div className="overflow-hidden bg-muted/35 divide-y divide-border/60">
               {donationEntries.map((entry) => (
                 <DonationLeaderboardRow key={entry.key} entry={entry} />
               ))}
             </div>
           ) : maEarth ? (
-            <div className="rounded-3xl bg-card/70 p-5 shadow-sm shadow-primary/5 ring-1 ring-foreground/5 backdrop-blur">
-              <p className="text-sm font-semibold text-foreground">Ma Earth activity</p>
+            <div className="bg-muted/35 p-5">
+              <p className="text-sm font-semibold text-foreground">
+                {t("maEarthTitle")}
+              </p>
               <p className="mt-2 text-sm leading-6 text-muted-foreground">
                 {maEarth.summary && maEarth.summary.totalUsd > 0
                   ? `${formatCompactUsd(maEarth.summary.totalUsd)} raised from ${maEarth.summary.donorCount} ${maEarth.summary.donorCount === 1 ? "supporter" : "supporters"}. Open Ma Earth for the full activity feed.`
-                  : "Open Ma Earth for campaign activity and supporter updates."}
+                  : t("maEarthBody")}
               </p>
             </div>
           ) : (
             <EmptyState
               icon={<HeartIcon className="h-8 w-8" />}
-              title="No donation totals yet"
-              body="Completed donations for this Cert will appear here."
+              title={t("totalsEmptyTitle")}
+              body={t("totalsEmptyBody")}
               variant="leaderboard"
             />
           )}
@@ -2355,7 +2990,10 @@ function TimelinePanel({
           meta: "Project timeline",
         }
       : null,
-  ].filter((event): event is { title: string; body: string; meta: string } => event !== null);
+  ].filter(
+    (event): event is { title: string; body: string; meta: string } =>
+      event !== null,
+  );
 
   return (
     <article className="py-1">
@@ -2363,9 +3001,13 @@ function TimelinePanel({
         {events.map((event) => (
           <div key={event.title} className="relative flex gap-4">
             <span className="mt-1 h-6 w-6 shrink-0 rounded-full border border-primary/30 bg-primary/10 ring-4 ring-card" />
-            <div className="min-w-0 rounded-2xl border border-border-soft bg-surface p-4">
-              <p className="text-sm font-medium text-foreground">{event.title}</p>
-              <p className="mt-1 text-sm leading-6 text-muted-foreground">{event.body}</p>
+            <div className="min-w-0 bg-muted/35 p-4">
+              <p className="text-sm font-medium text-foreground">
+                {event.title}
+              </p>
+              <p className="mt-1 text-sm leading-6 text-muted-foreground">
+                {event.body}
+              </p>
               <p className="mt-2 text-xs text-foreground/45">{event.meta}</p>
             </div>
           </div>
@@ -2374,12 +3016,16 @@ function TimelinePanel({
 
       {detail?.badges?.length ? (
         <div className="mt-6 border-t border-border-soft pt-5">
-          <p className="mb-3 text-xs font-medium uppercase tracking-[0.16em] text-muted-foreground">
+          <p className="mb-3 text-sm font-medium text-muted-foreground">
             What this covers
           </p>
           <div className="flex flex-wrap gap-2">
             {detail.badges.map((badge, index) => (
-              <Badge key={`${badge.label}-${index}`} badge={badge} workScopeLabels={workScopeLabels} />
+              <Badge
+                key={`${badge.label}-${index}`}
+                badge={badge}
+                workScopeLabels={workScopeLabels}
+              />
             ))}
           </div>
         </div>
@@ -2388,13 +3034,14 @@ function TimelinePanel({
   );
 }
 
-function MoreBumicertsSection({
+async function MoreBumicertsSection({
   bumicerts,
   owner,
 }: {
   bumicerts: BumicertRecord[];
   owner: RouteData["owner"];
 }) {
+  const t = await getTranslations("bumicert.detail.recovery.more");
   const viewAllHref = `/account/${encodeURIComponent(owner.urlIdentifier)}/certs`;
 
   return (
@@ -2402,39 +3049,41 @@ function MoreBumicertsSection({
       <Separator className="my-2" />
       <div className="mb-4 flex items-center justify-between gap-3 pt-4">
         <div className="min-w-0">
-          <h2 className="text-sm font-medium text-foreground">More Certs from this Organization</h2>
-          <p className="mt-1 truncate text-xs text-muted-foreground">{owner.displayName}</p>
+          <h2 className="text-sm font-medium text-foreground">
+            {t("title")}
+          </h2>
+          <p className="mt-1 truncate text-xs text-muted-foreground">
+            {owner.displayName}
+          </p>
         </div>
         <Link
           href={viewAllHref}
           className="shrink-0 rounded-full border border-border-soft px-3 py-1.5 text-xs font-medium text-foreground/70 transition-colors hover:border-primary/40 hover:text-primary"
         >
-          See all
+          {t("seeAll")}
         </Link>
       </div>
       <div
         className="flex gap-4 overflow-x-auto pb-2"
         style={{
-          WebkitMaskImage: "linear-gradient(to right, black 0%, black calc(100% - 56px), transparent 100%)",
-          maskImage: "linear-gradient(to right, black 0%, black calc(100% - 56px), transparent 100%)",
+          WebkitMaskImage:
+            "linear-gradient(to right, black 0%, black calc(100% - 56px), transparent 100%)",
+          maskImage:
+            "linear-gradient(to right, black 0%, black calc(100% - 56px), transparent 100%)",
         }}
       >
         {bumicerts.map((item) => (
-          <Link key={item.id} href={localBumicertHref(owner.urlIdentifier, item.rkey)} className="block w-[260px] shrink-0">
+          <Link
+            key={item.id}
+            href={localBumicertHref(owner.urlIdentifier, item.rkey)}
+            className="block w-[260px] shrink-0"
+          >
             <BumicertsBumicertCard record={item} />
           </Link>
         ))}
       </div>
     </section>
   );
-}
-
-function externalHost(value: string): string {
-  try {
-    return new URL(value).hostname.replace(/^www\./, "");
-  } catch {
-    return value;
-  }
 }
 
 type DonationLeaderboardEntry = {
@@ -2453,17 +3102,27 @@ const DONATION_RANK_TIERS: Record<number, string> = {
   3: "bg-gradient-to-br from-orange-300/35 to-orange-500/10 text-orange-700 ring-orange-500/25 dark:text-orange-300",
 };
 
-const DONATION_RANK_BADGES: Record<number, { Icon: typeof CrownIcon; label: string }> = {
-  1: { Icon: CrownIcon, label: "Top supporter" },
-  2: { Icon: SparklesIcon, label: "Steady giver" },
-  3: { Icon: SproutIcon, label: "Growing impact" },
+const DONATION_RANK_BADGES: Record<
+  number,
+  {
+    Icon: typeof CrownIcon;
+    labelKey: "topSupporter" | "steadyGiver" | "growingImpact";
+  }
+> = {
+  1: { Icon: CrownIcon, labelKey: "topSupporter" },
+  2: { Icon: SparklesIcon, labelKey: "steadyGiver" },
+  3: { Icon: SproutIcon, labelKey: "growingImpact" },
 };
 
-function buildDonationLeaderboard(receipts: FundingReceipt[]): DonationLeaderboardEntry[] {
+function buildDonationLeaderboard(
+  receipts: FundingReceipt[],
+): DonationLeaderboardEntry[] {
   const entries = new Map<string, Omit<DonationLeaderboardEntry, "rank">>();
 
   for (const receipt of receipts) {
-    const key = receipt.from ? `${receipt.from.type}:${receipt.from.id}` : `anonymous:${receipt.uri}`;
+    const key = receipt.from
+      ? `${receipt.from.type}:${receipt.from.id}`
+      : `anonymous:${receipt.uri}`;
     const existing = entries.get(key);
     const receiptDate = receipt.occurredAt ?? receipt.createdAt;
 
@@ -2487,17 +3146,29 @@ function buildDonationLeaderboard(receipts: FundingReceipt[]): DonationLeaderboa
   }
 
   return Array.from(entries.values())
-    .sort((a, b) => (b.totalAmount - a.totalAmount) || (b.donationCount - a.donationCount) || (dateTimeValue(b.lastDonatedAt) - dateTimeValue(a.lastDonatedAt)))
+    .sort(
+      (a, b) =>
+        b.totalAmount - a.totalAmount ||
+        b.donationCount - a.donationCount ||
+        dateTimeValue(b.lastDonatedAt) - dateTimeValue(a.lastDonatedAt),
+    )
     .map((entry, index) => ({ ...entry, rank: index + 1 }));
 }
 
-function DonationRankBadge({ rank }: { rank: number }) {
+function DonationRankBadge({
+  rank,
+  ariaLabel,
+}: {
+  rank: number;
+  ariaLabel: string;
+}) {
   return (
     <span
-      aria-label={`Rank ${rank}`}
+      aria-label={ariaLabel}
       className={[
         "flex size-9 shrink-0 items-center justify-center rounded-full text-sm font-bold tabular-nums ring-1",
-        DONATION_RANK_TIERS[rank] ?? "bg-muted/50 text-muted-foreground ring-foreground/5",
+        DONATION_RANK_TIERS[rank] ??
+          "bg-muted/50 text-muted-foreground ring-foreground/5",
       ].join(" ")}
     >
       {rank}
@@ -2505,10 +3176,16 @@ function DonationRankBadge({ rank }: { rank: number }) {
   );
 }
 
-function DonationSupporterBadge({ rank }: { rank: number }) {
+function DonationSupporterBadge({
+  rank,
+  label,
+}: {
+  rank: number;
+  label: string | null;
+}) {
   const badge = DONATION_RANK_BADGES[rank];
-  if (!badge) return null;
-  const { Icon, label } = badge;
+  if (!badge || !label) return null;
+  const { Icon } = badge;
   return (
     <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-primary/10 px-2 py-0.5 text-[11px] font-medium leading-none text-primary">
       <Icon className="size-3" />
@@ -2517,11 +3194,21 @@ function DonationSupporterBadge({ rank }: { rank: number }) {
   );
 }
 
-function DonationLeaderboardRow({ entry }: { entry: DonationLeaderboardEntry }) {
+async function DonationLeaderboardRow({
+  entry,
+}: {
+  entry: DonationLeaderboardEntry;
+}) {
+  const t = await getTranslations("bumicert.detail.recovery.donations");
   const actionHref = donationEntryHref(entry);
+  const rankBadge = DONATION_RANK_BADGES[entry.rank];
+  const supporterLabel = rankBadge ? t(rankBadge.labelKey) : null;
   const content = (
     <>
-      <DonationRankBadge rank={entry.rank} />
+      <DonationRankBadge
+        rank={entry.rank}
+        ariaLabel={t("rank", { rank: entry.rank })}
+      />
 
       <div className="min-w-0 flex-1 space-y-1.5">
         <p className="flex min-w-0 items-center gap-1.5 text-[15px] font-semibold text-foreground">
@@ -2531,14 +3218,24 @@ function DonationLeaderboardRow({ entry }: { entry: DonationLeaderboardEntry }) 
             </span>
           ) : (
             <>
-              <WalletIcon className="size-4 shrink-0 text-muted-foreground" aria-hidden="true" />
-              <span className="min-w-0 truncate">Anonymous supporter</span>
+              <WalletIcon
+                className="size-4 shrink-0 text-muted-foreground"
+                aria-hidden="true"
+              />
+              <span className="min-w-0 truncate">
+                {t("anonymousSupporter")}
+              </span>
             </>
           )}
         </p>
         <div className="flex min-w-0 flex-col items-start gap-1 text-[13px] leading-snug text-muted-foreground">
-          <DonationSupporterBadge rank={entry.rank} />
-          <span className="w-full min-w-0 whitespace-normal break-words">{donationEntrySummary(entry)}</span>
+          <DonationSupporterBadge rank={entry.rank} label={supporterLabel} />
+          <span className="w-full min-w-0 whitespace-normal break-words">
+            {donationEntrySummary(entry, {
+              donationCount: (count) => t("donationCount", { count }),
+              lastDonation: (date) => t("lastDonation", { date }),
+            })}
+          </span>
         </div>
       </div>
 
@@ -2554,13 +3251,14 @@ function DonationLeaderboardRow({ entry }: { entry: DonationLeaderboardEntry }) 
       ) : null}
     </>
   );
-  const className = "group flex items-start gap-3.5 px-4 py-[18px] transition-colors duration-200 hover:bg-primary/[0.04] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring sm:gap-4 sm:px-5 sm:py-5";
+  const className =
+    "group flex items-start gap-3.5 px-4 py-[18px] transition-colors duration-200 hover:bg-primary/[0.04] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring sm:gap-4 sm:px-5 sm:py-5";
 
   if (entry.donor?.type === "did") {
     return (
       <PreferredAccountLink
         did={entry.donor.id}
-        aria-label="Open supporter profile"
+        aria-label={t("openSupporterProfile")}
         className={className}
       >
         {content}
@@ -2574,7 +3272,7 @@ function DonationLeaderboardRow({ entry }: { entry: DonationLeaderboardEntry }) 
         href={actionHref}
         target="_blank"
         rel="noreferrer"
-        aria-label="Open payment details"
+        aria-label={t("openPaymentDetails")}
         className={className}
       >
         {content}
@@ -2587,12 +3285,23 @@ function DonationLeaderboardRow({ entry }: { entry: DonationLeaderboardEntry }) 
 
 function donationEntryHref(entry: DonationLeaderboardEntry): string | null {
   if (entry.donor?.type === "did") return null;
-  return blockExplorerUrl(entry.latestReceipt.txHash, entry.latestReceipt.paymentNetwork);
+  return blockExplorerUrl(
+    entry.latestReceipt.txHash,
+    entry.latestReceipt.paymentNetwork,
+  );
 }
 
-function donationEntrySummary(entry: DonationLeaderboardEntry): string {
-  const donationCount = `${formatNumber(entry.donationCount)} ${entry.donationCount === 1 ? "donation" : "donations"}`;
-  const lastGift = entry.lastDonatedAt ? `Last donation ${formatRelative(entry.lastDonatedAt)}` : null;
+function donationEntrySummary(
+  entry: DonationLeaderboardEntry,
+  copy: {
+    donationCount: (count: number) => string;
+    lastDonation: (date: string) => string;
+  },
+): string {
+  const donationCount = copy.donationCount(entry.donationCount);
+  const lastGift = entry.lastDonatedAt
+    ? copy.lastDonation(formatRelative(entry.lastDonatedAt))
+    : null;
   return lastGift ? `${donationCount} · ${lastGift}` : donationCount;
 }
 
@@ -2602,13 +3311,25 @@ function dateTimeValue(date: string | null): number {
   return Number.isNaN(time) ? 0 : time;
 }
 
-function EmptyState({ icon, title, body, variant = "default" }: { icon: ReactNode; title: string; body: string; variant?: "default" | "leaderboard" }) {
+function EmptyState({
+  icon,
+  title,
+  body,
+  variant = "default",
+}: {
+  icon: ReactNode;
+  title: string;
+  body: string;
+  variant?: "default" | "leaderboard";
+}) {
   if (variant === "leaderboard") {
     return (
-      <div className="flex flex-col items-center gap-3 rounded-3xl bg-card/75 py-16 text-center text-muted-foreground shadow-sm shadow-primary/5 ring-1 ring-foreground/5 backdrop-blur">
-        <div className="flex size-16 items-center justify-center rounded-full bg-primary/10 text-primary">{icon}</div>
-        <p className="font-garamond text-3xl font-light text-foreground">{title}</p>
-        <p className="font-instrument max-w-sm text-base italic text-foreground/70">{body}</p>
+      <div className="flex flex-col items-center gap-3 bg-muted/40 px-6 py-16 text-center text-muted-foreground">
+        <div className="flex size-16 items-center justify-center rounded-full bg-primary/10 text-primary">
+          {icon}
+        </div>
+        <h2 className="text-2xl font-medium text-foreground">{title}</h2>
+        <p className="max-w-sm text-base text-muted-foreground">{body}</p>
       </div>
     );
   }
@@ -2617,12 +3338,17 @@ function EmptyState({ icon, title, body, variant = "default" }: { icon: ReactNod
     <div className="grid place-items-center rounded-2xl border border-dashed border-border-soft bg-surface/50 px-6 py-12 text-center">
       <div className="text-muted-foreground/50">{icon}</div>
       <h2 className="mt-4 text-lg font-medium text-foreground">{title}</h2>
-      <p className="mt-2 max-w-md text-sm leading-6 text-muted-foreground">{body}</p>
+      <p className="mt-2 max-w-md text-sm leading-6 text-muted-foreground">
+        {body}
+      </p>
     </div>
   );
 }
 
-function socialPlatformLabel(platform: string): string {
+function socialPlatformLabel(
+  platform: string,
+  fallback: OrganizationLinkLabels,
+): string {
   const labels: Record<string, string> = {
     facebook: "Facebook",
     instagram: "Instagram",
@@ -2634,10 +3360,9 @@ function socialPlatformLabel(platform: string): string {
     github: "GitHub",
     bluesky: "Bluesky",
     discord: "Discord",
-    email: "Email",
-    website: "Website",
-    link: "Link",
+    email: fallback.email,
+    website: fallback.website,
+    link: fallback.link,
   };
-  return labels[platform] ?? "Link";
+  return labels[platform] ?? fallback.link;
 }
-

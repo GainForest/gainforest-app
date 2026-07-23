@@ -1,52 +1,23 @@
 "use client";
 
 import Image from "next/image";
-import { motion } from "framer-motion";
 import { useEffect, useRef, useState } from "react";
+import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
 import { BumicertOwnerAvatar } from "./BumicertOwnerAvatar";
 
-function resolveImageSrc(coverImage: File | string): string {
-  return typeof coverImage === "string" ? coverImage : URL.createObjectURL(coverImage);
-}
-
+// Retained for account-grid callers; global MotionConfig removes the opacity
+// transition when the user requests reduced motion.
 export const cardVariants = {
-  hidden: {
-    opacity: 0,
-    y: 20,
-    filter: "blur(4px)",
-  },
-  visible: {
-    opacity: 1,
-    y: 0,
-    filter: "blur(0px)",
-    transition: {
-      duration: 0.6,
-      ease: [0.25, 0.1, 0.25, 1] as [number, number, number, number],
-    },
-  },
+  hidden: { opacity: 0 },
+  visible: { opacity: 1, transition: { duration: 0.2 } },
 };
 
-const orgLabelTextVariants = {
-  initial: {
-    opacity: 0,
-    maxWidth: 0,
-    marginLeft: "-0.25rem",
-    marginRight: "0rem",
-    pointerEvents: "none",
-    x: -2,
-    filter: "blur(4px)",
-  },
-  cardHover: {
-    opacity: 1,
-    maxWidth: 200,
-    marginLeft: "0rem",
-    marginRight: "0.5rem",
-    pointerEvents: "auto",
-    x: 0,
-    filter: "blur(0px)",
-  },
-};
+function resolveImageSrc(coverImage: File | string): string {
+  return typeof coverImage === "string"
+    ? coverImage
+    : URL.createObjectURL(coverImage);
+}
 
 export interface BumicertCardVisualProps {
   coverImage: File | string | null;
@@ -71,6 +42,7 @@ export function BumicertCardVisual({
   description,
   className,
 }: BumicertCardVisualProps) {
+  const t = useTranslations("bumicert.detail.recovery.card");
   const imageSrc = coverImage ? resolveImageSrc(coverImage) : null;
   const normalizedObjectives = objectives.filter(
     (objective): objective is string =>
@@ -78,13 +50,11 @@ export function BumicertCardVisual({
   );
 
   return (
-    <motion.div
+    <div
       className={cn(
-        "group relative rounded-2xl border border-border bg-card hover:shadow-lg overflow-hidden w-full flex flex-col transition-all duration-300",
+        "group relative flex w-full flex-col overflow-hidden bg-muted/30 transition-colors motion-reduce:transition-none",
         className,
       )}
-      initial="initial"
-      whileHover="cardHover"
     >
       <div className="relative aspect-4/3 overflow-hidden z-0">
         {imageSrc ? (
@@ -93,10 +63,13 @@ export function BumicertCardVisual({
             alt={title}
             fill
             unoptimized
-            className="object-cover scale-110 group-hover:scale-100 transition-all duration-300"
+            className="object-cover transition-transform duration-300 group-hover:scale-[1.02] motion-reduce:transition-none motion-reduce:group-hover:scale-100"
           />
         ) : (
-          <div className="absolute inset-0 bg-muted" aria-label="Missing image" />
+          <div
+            className="absolute inset-0 bg-muted"
+            aria-label={t("missingImage")}
+          />
         )}
       </div>
       <div className="relative px-4 py-3 -mt-6 z-1 flex-1 flex flex-col justify-between">
@@ -111,7 +84,9 @@ export function BumicertCardVisual({
             </p>
           )}
         </div>
-        {normalizedObjectives.length > 0 && <OneLineTextPillRow items={normalizedObjectives} />}
+        {normalizedObjectives.length > 0 && (
+          <OneLineTextPillRow items={normalizedObjectives} />
+        )}
       </div>
 
       <div className="absolute top-2 left-2 bg-background/70 rounded-full p-1 backdrop-blur-lg shadow-lg flex items-center gap-1 min-w-0">
@@ -122,22 +97,20 @@ export function BumicertCardVisual({
           label={organizationName}
           className="h-6 w-6 shrink-0 scale-120 shadow-sm transition-all duration-300 group-hover:scale-100"
         />
-        <motion.span
-          variants={orgLabelTextVariants}
-          className="text-xs font-medium text-foreground text-shadow-md whitespace-nowrap overflow-hidden"
-        >
+        <span className="text-xs font-medium text-foreground text-shadow-md whitespace-nowrap overflow-hidden">
           {organizationName.length > 22
             ? organizationName.slice(0, 20) + "..."
             : organizationName}
-        </motion.span>
+        </span>
       </div>
-    </motion.div>
+    </div>
   );
 }
 
 const PILL_GAP_PX = 8;
 
 function OneLineTextPillRow({ items }: { items: string[] }) {
+  const t = useTranslations("bumicert.detail.recovery.card");
   const containerRef = useRef<HTMLDivElement | null>(null);
   const itemRefs = useRef<Array<HTMLSpanElement | null>>([]);
   const moreRefs = useRef<Array<HTMLSpanElement | null>>([]);
@@ -149,11 +122,18 @@ function OneLineTextPillRow({ items }: { items: string[] }) {
 
     const measure = () => {
       const width = container.getBoundingClientRect().width;
-      const itemWidths = items.map((_, index) => itemRefs.current[index]?.getBoundingClientRect().width ?? 0);
-      const allItemsWidth = itemWidths.reduce((sum, itemWidth) => sum + itemWidth, 0) + PILL_GAP_PX * Math.max(0, items.length - 1);
+      const itemWidths = items.map(
+        (_, index) =>
+          itemRefs.current[index]?.getBoundingClientRect().width ?? 0,
+      );
+      const allItemsWidth =
+        itemWidths.reduce((sum, itemWidth) => sum + itemWidth, 0) +
+        PILL_GAP_PX * Math.max(0, items.length - 1);
 
       if (allItemsWidth <= width) {
-        setVisibleCount((current) => (current === items.length ? current : items.length));
+        setVisibleCount((current) =>
+          current === items.length ? current : items.length,
+        );
         return;
       }
 
@@ -161,13 +141,17 @@ function OneLineTextPillRow({ items }: { items: string[] }) {
       let visibleWidth = 0;
       for (let count = 0; count < items.length; count += 1) {
         const hiddenCount = items.length - count;
-        const moreWidth = moreRefs.current[hiddenCount]?.getBoundingClientRect().width ?? 0;
-        const totalWidth = visibleWidth + moreWidth + (count > 0 ? PILL_GAP_PX * count : 0);
+        const moreWidth =
+          moreRefs.current[hiddenCount]?.getBoundingClientRect().width ?? 0;
+        const totalWidth =
+          visibleWidth + moreWidth + (count > 0 ? PILL_GAP_PX * count : 0);
         if (totalWidth <= width) nextVisibleCount = count;
         visibleWidth += itemWidths[count] ?? 0;
       }
 
-      setVisibleCount((current) => (current === nextVisibleCount ? current : nextVisibleCount));
+      setVisibleCount((current) =>
+        current === nextVisibleCount ? current : nextVisibleCount,
+      );
     };
 
     measure();
@@ -184,10 +168,19 @@ function OneLineTextPillRow({ items }: { items: string[] }) {
         {items.slice(0, visibleCount).map((item, index) => (
           <TextPill key={`${item}-${index}`} text={item} />
         ))}
-        {hiddenCount > 0 && <TextPill text={`+${hiddenCount}`} emphasis ariaLabel={`${hiddenCount} more objective${hiddenCount === 1 ? "" : "s"}`} />}
+        {hiddenCount > 0 && (
+          <TextPill
+            text={`+${hiddenCount}`}
+            emphasis
+            ariaLabel={t("moreObjectives", { count: hiddenCount })}
+          />
+        )}
       </div>
 
-      <div aria-hidden className="invisible pointer-events-none absolute left-0 top-0 flex flex-nowrap items-center gap-2">
+      <div
+        aria-hidden
+        className="invisible pointer-events-none absolute left-0 top-0 flex flex-nowrap items-center gap-2"
+      >
         {items.map((item, index) => (
           <TextPill
             key={`measure-${item}-${index}`}
@@ -239,4 +232,3 @@ function TextPill({
     </span>
   );
 }
-
