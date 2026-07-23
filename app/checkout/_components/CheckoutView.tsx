@@ -29,6 +29,8 @@ import {
 import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Skeleton } from "@/components/ui/skeleton";
+import { DisplayHeading } from "@/components/ui/typography";
 import type { AuthSession } from "@/app/_lib/auth";
 import { SocialGlyph } from "@/app/_components/SocialIcon";
 import { blockExplorerUrl } from "@/app/_lib/urls";
@@ -698,7 +700,18 @@ export function CheckoutView({
   const cardsHref = recentReceiptQuery.size > 0 ? `/cards?${recentReceiptQuery.toString()}` : "/cards";
 
   if (!hydrated) {
-    return <div className="mx-auto w-full max-w-3xl px-4 py-10" aria-busy="true" />;
+    return (
+      <div className="mx-auto w-full max-w-3xl px-4 py-10" aria-busy="true">
+        <div className="rounded-3xl bg-muted p-6">
+          <Skeleton className="h-10 w-56 rounded-full" />
+          <div className="mt-6 space-y-4">
+            <Skeleton className="h-28 rounded-2xl bg-background" />
+            <Skeleton className="h-36 rounded-2xl bg-background" />
+            <Skeleton className="h-48 rounded-2xl bg-background" />
+          </div>
+        </div>
+      </div>
+    );
   }
 
   // ── Success ───────────────────────────────────────────────────────────────
@@ -797,11 +810,11 @@ export function CheckoutView({
   // ── Empty cart ────────────────────────────────────────────────────────────
   if (items.length === 0) {
     return (
-      <div className="mx-auto flex w-full max-w-3xl flex-col items-center gap-4 px-4 py-20 text-center">
-        <div className="grid size-16 place-items-center rounded-full bg-muted text-muted-foreground">
+      <div className="mx-auto mt-10 flex w-[calc(100%_-_2rem)] max-w-3xl flex-col items-center gap-4 rounded-3xl bg-muted px-6 py-20 text-center">
+        <div className="grid size-16 place-items-center rounded-full bg-background text-muted-foreground">
           <ShoppingCartIcon className="size-7" aria-hidden />
         </div>
-        <h1 className="text-2xl font-semibold text-foreground">{t("emptyTitle")}</h1>
+        <DisplayHeading as="h1" className="text-3xl text-foreground">{t("emptyTitle")}</DisplayHeading>
         {onExploreMore ? (
           <Button className="mt-2" onClick={onExploreMore}>
             <CompassIcon className="size-4" /> {t("exploreMore")}
@@ -834,7 +847,7 @@ export function CheckoutView({
           <ArrowLeftIcon className="size-4" aria-hidden /> {t("backToCart")}
         </Link>
       )}
-      <h1 className="mt-3 text-3xl font-semibold text-foreground">{t("title")}</h1>
+      <DisplayHeading as="h1" className="mt-3 text-4xl text-foreground">{t("title")}</DisplayHeading>
 
       <div className="mt-4 flex items-center gap-2.5 rounded-2xl bg-primary/10 px-4 py-3">
         <LeafIcon className="size-4 shrink-0 text-primary" aria-hidden />
@@ -843,8 +856,8 @@ export function CheckoutView({
 
       <div className="mt-6 flex flex-col gap-4">
         {/* ── Donor identity ──────────────────────────────────────────────── */}
-        <section className="rounded-2xl bg-muted/50 p-5">
-          <h2 className="text-sm font-semibold text-foreground">{t("donorTitle")}</h2>
+        <section className="rounded-2xl bg-muted p-5">
+          <DisplayHeading as="h2" className="text-xl leading-tight text-foreground">{t("donorTitle")}</DisplayHeading>
           {authSession.isLoggedIn ? (
             <label className="mt-3 flex min-w-0 cursor-pointer items-start gap-3">
               <Checkbox checked={anonymous} onCheckedChange={(checked) => setAnonymous(checked === true)} className="mt-1" disabled={paying} />
@@ -859,8 +872,8 @@ export function CheckoutView({
         </section>
 
         {/* ── Wallet ──────────────────────────────────────────────────────── */}
-        <section className="rounded-2xl bg-muted/50 p-5">
-          <h2 className="text-sm font-semibold text-foreground">{t("walletTitle")}</h2>
+        <section className="rounded-2xl bg-muted p-5">
+          <DisplayHeading as="h2" className="text-xl leading-tight text-foreground">{t("walletTitle")}</DisplayHeading>
           {wallet ? (
             <div className="mt-3 flex items-center justify-between rounded-2xl border border-border bg-background px-4 py-3">
               <div>
@@ -884,8 +897,8 @@ export function CheckoutView({
 
         {/* ── Tip ─────────────────────────────────────────────────────────── */}
         {tipEnabled && !tipAlreadyCompleted ? (
-          <section className="rounded-2xl bg-muted/50 p-5">
-            <h2 className="text-sm font-semibold text-foreground">{t("tipTitle")}</h2>
+          <section className="rounded-2xl bg-muted p-5">
+            <DisplayHeading as="h2" className="text-xl leading-tight text-foreground">{t("tipTitle")}</DisplayHeading>
             <p className="mt-1 text-xs leading-5 text-muted-foreground">{t("tipDescription")}</p>
             <div className="relative mt-12">
               {/* Value bubble tracks the slider thumb, MaEarth-style. */}
@@ -920,8 +933,8 @@ export function CheckoutView({
 
             {/* Gentle nudge when the slider sits at zero — never blocking. */}
             {tipPercent === 0 ? (
-              <div className="mt-4 rounded-2xl bg-muted px-4 py-5 text-center">
-                <p className="text-sm font-semibold text-foreground">{t("tipNudgeTitle")}</p>
+              <div className="mt-4 rounded-2xl bg-background px-4 py-5 text-center">
+                <h3 className="font-instrument text-lg italic text-foreground">{t("tipNudgeTitle")}</h3>
                 <p className="mt-1 text-xs leading-5 text-muted-foreground">{t("tipNudgeBody")}</p>
                 <div className="mt-3 flex flex-wrap items-center justify-center gap-2">
                   {[5, 10, 15].map((percent) => (
@@ -946,8 +959,8 @@ export function CheckoutView({
         ) : null}
 
         {/* ── Summary + progress ──────────────────────────────────────────── */}
-        <section className="rounded-2xl bg-muted/50 p-5">
-          <h2 className="text-sm font-semibold text-foreground">{t("summaryTitle")}</h2>
+        <section className="rounded-2xl bg-muted p-5">
+          <DisplayHeading as="h2" className="text-xl leading-tight text-foreground">{t("summaryTitle")}</DisplayHeading>
 
           <ul className="mt-3 space-y-2">
             {payableItems.map((item) => {

@@ -62,7 +62,7 @@ function DonationRow({ item, anonymousBadge }: { item: FundingReceipt; anonymous
         <div className="flex items-center gap-2">
           {relativeTime ? <p className="text-xs text-muted-foreground">{relativeTime}</p> : null}
           {item.isAnonymous ? (
-            <span className="inline-flex items-center gap-1 rounded-full bg-background/70 px-2 py-0.5 text-[10px] font-medium text-muted-foreground">
+            <span className="inline-flex items-center gap-1 rounded-full bg-background px-2 py-0.5 text-[10px] font-medium text-muted-foreground">
               <EyeOffIcon className="size-2.5" aria-hidden />
               {anonymousBadge}
             </span>
@@ -88,7 +88,7 @@ function DonationRow({ item, anonymousBadge }: { item: FundingReceipt; anonymous
 function AnonymousNote() {
   const t = useTranslations("common.accountDonations");
   return (
-    <p className="rounded-2xl bg-muted/50 px-4 py-3 text-xs leading-5 text-muted-foreground">
+    <p className="rounded-2xl bg-muted px-4 py-3 text-xs leading-5 text-muted-foreground">
       {t("anonymousNote")}
     </p>
   );
@@ -101,7 +101,7 @@ export function DonationHistory({ receipts, status = "ready", showAnonymousNote 
 
   if (status === "unavailable") {
     return (
-      <div className="flex w-full flex-col items-center gap-3 rounded-2xl bg-muted/50 px-6 py-12 text-center">
+      <div className="flex w-full flex-col items-center gap-3 rounded-2xl bg-muted px-6 py-12 text-center">
         <TriangleAlertIcon className="size-8 text-muted-foreground" aria-hidden />
         <h2 className="font-instrument text-2xl italic text-foreground">{t("unavailableTitle")}</h2>
         <p className="max-w-md text-sm text-muted-foreground">{t("unavailableDescription")}</p>
@@ -116,6 +116,7 @@ export function DonationHistory({ receipts, status = "ready", showAnonymousNote 
     return (
       <div className="w-full space-y-4">
         <EmptyHeroBanner
+          title={t("historyTitle")}
           description={t("emptyHeroDescription")}
           ctaLabel={t("emptyHeroCta")}
           ctaHref="/projects"
@@ -132,19 +133,19 @@ export function DonationHistory({ receipts, status = "ready", showAnonymousNote 
         <h2 className="font-instrument text-2xl italic text-foreground">{t("historyTitle")}</h2>
 
         <dl className="mt-4 grid grid-cols-2 gap-3">
-          <div className="rounded-2xl bg-muted/50 p-4">
+          <div className="rounded-2xl bg-muted p-4">
             <dt className="text-xs text-muted-foreground">{t("totalDonated")}</dt>
             <dd className="mt-1 text-xl font-semibold text-foreground">
               {format.number(totalDonated, { style: "currency", currency: "USD" })}
             </dd>
           </div>
-          <div className="rounded-2xl bg-muted/50 p-4">
+          <div className="rounded-2xl bg-muted p-4">
             <dt className="text-xs text-muted-foreground">{t("donations")}</dt>
             <dd className="mt-1 text-xl font-semibold text-foreground">{format.number(receipts.length)}</dd>
           </div>
         </dl>
 
-        <ul className="mt-4 divide-y divide-border-soft rounded-2xl bg-muted/30 p-4">
+        <ul className="mt-4 divide-y divide-border-soft rounded-2xl bg-muted p-4">
           {receipts.map((item, index) => (
             <DonationRow key={item.uri ?? index} item={item} anonymousBadge={t("anonymousBadge")} />
           ))}

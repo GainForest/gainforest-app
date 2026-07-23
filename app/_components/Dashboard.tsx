@@ -51,6 +51,7 @@ import {
   type TxRow,
 } from "../_lib/dashboard";
 import { Skeleton } from "@/components/ui/skeleton";
+import { DisplayHeading } from "@/components/ui/typography";
 import { formatCompact, formatCompactUsd, formatNumber, formatUsd } from "../_lib/format";
 import { AuthorInline } from "./AuthorChip";
 import { PreferredAccountLink, PreferredBumicertLink } from "./PreferredLinks";
@@ -64,9 +65,9 @@ const QUERY_STATE_OPTIONS = { history: "replace", scroll: false, shallow: true }
 
 // Financial data is grouped by spacing and muted fields; table dividers retain
 // the functional row boundaries needed for scanning.
-const SURFACE = "rounded-2xl bg-muted/40";
+const SURFACE = "rounded-2xl bg-muted";
 const PILL_GROUP =
-  "flex items-center gap-1 rounded-full bg-muted/55 p-1 shadow-sm shadow-primary/5 ring-1 ring-foreground/5 backdrop-blur";
+  "flex items-center gap-1 rounded-full bg-muted p-1";
 const DEFAULT_SECTION_LIMIT = 25;
 
 function pillButton(active: boolean) {
@@ -239,9 +240,9 @@ function TopCountriesTable({ stats, loading }: { stats: GeoStats; loading: boole
     <div className={`overflow-hidden ${SURFACE}`}>
       <div className="flex items-center gap-2 px-5 pt-5 pb-3">
         <GlobeIcon className="h-4 w-4 text-primary" />
-        <h2 className="text-sm font-semibold text-foreground">
+        <DisplayHeading as="h2" className="text-xl leading-tight text-foreground">
           {t("geo.topCountries")}
-        </h2>
+        </DisplayHeading>
       </div>
 
       {loading && stats.topCountries.length === 0 ? (
@@ -308,9 +309,9 @@ function DonationsVolumeChart({
         <div>
           <div className="flex items-center gap-2">
             <TrendingUpIcon className="h-4 w-4 text-primary" />
-            <h2 className="text-sm font-semibold text-foreground">
+            <DisplayHeading as="h2" className="text-xl leading-tight text-foreground">
               {t("title")}
-            </h2>
+            </DisplayHeading>
           </div>
           <p className="mt-0.5 text-sm text-muted-foreground">{t("raisedPer", { granularity })}</p>
         </div>
@@ -428,7 +429,7 @@ function TopDonorsTable({ rows }: { rows: TopDonor[] }) {
     <div className={`overflow-hidden ${SURFACE}`}>
       <div className="flex items-center gap-2 px-5 pt-5 pb-3">
         <UsersIcon className="h-4 w-4 text-primary" />
-        <h2 className="text-sm font-semibold text-foreground">{t("topDonors")}</h2>
+        <DisplayHeading as="h2" className="text-xl leading-tight text-foreground">{t("topDonors")}</DisplayHeading>
       </div>
 
       {rows.length === 0 ? (
@@ -506,7 +507,7 @@ function OrganizationsTable({ rows }: { rows: OrgRow[] }) {
     <div className={`overflow-hidden ${SURFACE}`}>
       <div className="flex items-center gap-2 px-5 pt-5 pb-3">
         <BuildingIcon className="h-4 w-4 text-primary" />
-        <h2 className="text-sm font-semibold text-foreground">{t("byOrganization")}</h2>
+        <DisplayHeading as="h2" className="text-xl leading-tight text-foreground">{t("byOrganization")}</DisplayHeading>
       </div>
 
       {rows.length === 0 ? (
@@ -568,7 +569,7 @@ function RecentTransactionsTable({ rows }: { rows: TxRow[] }) {
         <div>
           <div className="flex items-center gap-2">
             <ClockIcon className="h-4 w-4 text-primary" />
-            <h2 className="text-sm font-semibold text-foreground">{t("recentDonations")}</h2>
+            <DisplayHeading as="h2" className="text-xl leading-tight text-foreground">{t("recentDonations")}</DisplayHeading>
           </div>
           <p className="mt-0.5 text-xs text-muted-foreground">
             {t("allTimeDonations", { count: rows.length })}
@@ -740,7 +741,7 @@ function DashboardSkeleton() {
       {/* KPI tiles — mirror StatsTile: icon chip + value on one row, label below. */}
       <div className="grid grid-cols-2 gap-3 md:grid-cols-3 md:gap-4">
         {Array.from({ length: 6 }).map((_, index) => (
-          <div key={index} className="relative overflow-hidden rounded-2xl bg-foreground/5 p-4 sm:rounded-3xl sm:p-6">
+          <div key={index} className="relative overflow-hidden rounded-2xl bg-muted p-4 sm:rounded-3xl sm:p-6">
             <div className="flex items-center gap-2 sm:gap-3">
               <Skeleton className="size-4 shrink-0 rounded-sm sm:size-5" />
               <Skeleton className="h-7 w-24 sm:h-8" />

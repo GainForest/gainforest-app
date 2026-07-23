@@ -146,7 +146,7 @@ function DonorTypeTabs({
 }) {
   const t = useTranslations("marketplace.leaderboard");
   return (
-    <div className="grid h-10 w-full grid-cols-3 rounded-full bg-muted/55 p-1 shadow-sm shadow-primary/5 ring-1 ring-foreground/5 backdrop-blur">
+    <div className="grid h-10 w-full grid-cols-3 rounded-full bg-muted p-1">
       {DONOR_FILTER_VALUES.map((value) => {
         const Icon = DONOR_FILTER_ICONS[value];
         const label = t(`donorFilters.${value}`);
@@ -179,7 +179,7 @@ function SortControl({ sortBy, onSortChange }: { sortBy: SortMode; onSortChange:
   const t = useTranslations("marketplace.leaderboard.sort");
   const sortOptions = SORT_VALUES.map((value) => ({ value, label: t(SORT_TRANSLATION_KEYS[value]) }));
   return (
-    <div className="flex h-10 items-center justify-between gap-2 rounded-full bg-muted/55 py-1 pr-1 pl-3.5 shadow-sm shadow-primary/5 ring-1 ring-foreground/5 backdrop-blur">
+    <div className="flex h-10 items-center justify-between gap-2 rounded-full bg-muted py-1 pr-1 pl-3.5">
       <span
         id="leaderboard-sort-label"
         className="inline-flex shrink-0 items-center gap-1.5 whitespace-nowrap text-[13px] font-medium text-muted-foreground"
@@ -195,7 +195,7 @@ function SortControl({ sortBy, onSortChange }: { sortBy: SortMode; onSortChange:
       >
         <SelectTrigger
           aria-labelledby="leaderboard-sort-label"
-          className="h-8 min-w-[9.5rem] rounded-full border-0 bg-background/70 px-3 text-[13px] font-medium text-foreground shadow-none ring-1 ring-foreground/5 focus:ring-1 focus:ring-ring"
+          className="h-8 min-w-[9.5rem] rounded-full border-0 bg-background px-3 text-[13px] font-medium text-foreground shadow-none ring-1 ring-foreground/5 focus:ring-1 focus:ring-ring"
         >
           <SelectValue />
         </SelectTrigger>
@@ -235,13 +235,10 @@ function StatsSummary({
     { label: t("donationCount"), value: formatCompactNumber(totalDonationCount, locale), Icon: GiftIcon },
   ];
 
-  // Slim hairline-separated strip instead of four oversized tiles — the same
-  // gap-px band the home hero uses, so the numbers read at a glance and the
-  // controls + leaderboard stay above the fold.
   return (
-    <div className="grid grid-cols-2 gap-px overflow-hidden rounded-2xl bg-border/60 shadow-sm shadow-primary/5 ring-1 ring-foreground/5 sm:grid-cols-4">
+    <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
       {stats.map(({ label, value, Icon, accent }) => (
-        <div key={label} className="flex items-center gap-2.5 bg-card/80 px-4 py-3">
+        <div key={label} className="flex items-center gap-2.5 rounded-2xl bg-muted px-4 py-3">
           <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary [&_svg]:size-4">
             <Icon />
           </span>
@@ -266,7 +263,7 @@ function LeaderboardGrid({ entries }: { entries: LeaderboardEntry[] }) {
   const t = useTranslations("marketplace.leaderboard.empty");
   if (entries.length === 0) {
     return (
-      <div className="flex flex-col items-center gap-3 rounded-2xl bg-card/75 py-16 text-center text-muted-foreground shadow-sm shadow-primary/5 ring-1 ring-foreground/5 backdrop-blur">
+      <div className="flex flex-col items-center gap-3 rounded-2xl bg-muted py-16 text-center text-muted-foreground">
         <div className="flex size-16 items-center justify-center rounded-full bg-primary/10 text-primary">
           <TrophyIcon className="size-8 opacity-60" />
         </div>
@@ -277,7 +274,7 @@ function LeaderboardGrid({ entries }: { entries: LeaderboardEntry[] }) {
   }
 
   return (
-    <div className="divide-y divide-border/50 overflow-hidden rounded-2xl bg-card/70 shadow-sm shadow-primary/5 ring-1 ring-foreground/5 backdrop-blur">
+    <div className="divide-y divide-border-soft overflow-hidden rounded-2xl">
       {entries.map((entry) => (
         <DonorCard key={entry.donorId} entry={entry} />
       ))}
@@ -287,7 +284,7 @@ function LeaderboardGrid({ entries }: { entries: LeaderboardEntry[] }) {
 
 function LeaderboardSkeleton() {
   return (
-    <div className="divide-y divide-border/50 overflow-hidden rounded-2xl bg-card/70 shadow-sm shadow-primary/5 ring-1 ring-foreground/5 backdrop-blur">
+    <div className="divide-y divide-border-soft overflow-hidden rounded-2xl">
       {Array.from({ length: 9 }).map((_, index) => (
         <div key={index} className="flex items-center gap-3 px-4 py-3 sm:px-5 sm:py-3.5">
           <Skeleton className="size-8 shrink-0 rounded-full" />
@@ -306,7 +303,7 @@ function LeaderboardSkeleton() {
 function LeaderboardError() {
   const t = useTranslations("marketplace.leaderboard.error");
   return (
-    <div className="flex flex-col items-center gap-3 rounded-2xl bg-card/75 py-16 text-center text-muted-foreground shadow-sm shadow-primary/5 ring-1 ring-foreground/5 backdrop-blur">
+    <div className="flex flex-col items-center gap-3 rounded-2xl bg-muted py-16 text-center text-muted-foreground">
       <div className="flex size-16 items-center justify-center rounded-full bg-primary/10 text-primary">
         <TrophyIcon className="size-8 opacity-60" />
       </div>

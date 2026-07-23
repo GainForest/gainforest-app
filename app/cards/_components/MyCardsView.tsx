@@ -11,6 +11,7 @@ import { AuthButton } from "@/app/_components/AuthFlow";
 import type { EarnedCard } from "@/app/_components/rewards/earned-card";
 import { DonationRewardCard } from "@/app/checkout/_components/DonationRewardCard";
 import { Button } from "@/components/ui/button";
+import { DisplayHeading } from "@/components/ui/typography";
 
 type CardsStatus = "ready" | "signedOut" | "unavailable";
 
@@ -32,7 +33,7 @@ export function MyCardsView({
       <div className="mx-auto max-w-6xl">
         <div className="flex flex-wrap items-end justify-between gap-3">
           <div>
-            <h1 className="text-3xl font-semibold tracking-tight text-foreground sm:text-5xl">{t("title")}</h1>
+            <DisplayHeading as="h1" className="text-4xl text-foreground sm:text-6xl">{t("title")}</DisplayHeading>
             <p className="mt-3 max-w-2xl text-sm leading-6 text-muted-foreground sm:text-base">{t("description")}</p>
           </div>
           {cards.length > 0 ? (
@@ -50,7 +51,7 @@ export function MyCardsView({
         ) : null}
 
         {status === "signedOut" ? (
-          <div className="mt-12 flex flex-col items-center gap-4 rounded-2xl bg-muted/50 px-6 py-16 text-center">
+          <div className="mt-12 flex flex-col items-center gap-4 rounded-3xl bg-muted px-6 py-16 text-center">
             <span className="grid size-14 place-items-center rounded-2xl bg-primary/10 text-primary">
               <SparklesIcon className="size-7" aria-hidden />
             </span>
@@ -59,7 +60,7 @@ export function MyCardsView({
             <AuthButton session={{ isLoggedIn: false }} />
           </div>
         ) : status === "unavailable" ? (
-          <div className="mt-12 flex flex-col items-center gap-4 rounded-2xl bg-muted/50 px-6 py-16 text-center">
+          <div className="mt-12 flex flex-col items-center gap-4 rounded-3xl bg-muted px-6 py-16 text-center">
             <span className="grid size-14 place-items-center rounded-2xl bg-amber-500/10 text-amber-600">
               <AlertTriangleIcon className="size-7" aria-hidden />
             </span>
@@ -70,7 +71,7 @@ export function MyCardsView({
             </Button>
           </div>
         ) : cards.length === 0 ? (
-          <div className="mt-12 flex flex-col items-center gap-4 rounded-2xl bg-muted/50 px-6 py-16 text-center">
+          <div className="mt-12 flex flex-col items-center gap-4 rounded-3xl bg-muted px-6 py-16 text-center">
             <span className="grid size-14 place-items-center rounded-2xl bg-primary/10 text-primary">
               <SparklesIcon className="size-7" aria-hidden />
             </span>
@@ -102,7 +103,7 @@ export function MyCardsView({
                     totalUsd={card.totalUsd}
                     animateEntrance={false}
                   />
-                  <div className="mt-3 rounded-2xl bg-muted/50 px-4 py-3 text-xs">
+                  <div className="mt-3 rounded-2xl bg-muted px-4 py-3 text-xs">
                     <div className="flex items-center justify-between gap-3">
                       <span className="inline-flex items-center gap-1.5 font-semibold text-primary">
                         <BadgeCheckIcon className="size-4" aria-hidden />

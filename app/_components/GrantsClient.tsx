@@ -196,8 +196,8 @@ function RewildingSection({ viewerDid, signedIn }: { viewerDid: string | null; s
   ];
 
   return (
-    <article className="overflow-hidden rounded-2xl bg-muted/40">
-      <div className="bg-primary/5 px-6 py-5 sm:px-8">
+    <article className="overflow-hidden rounded-2xl bg-muted">
+      <div className="bg-primary/10 px-6 py-5 sm:px-8">
         <div className="flex flex-wrap items-center gap-3">
           <span className="inline-flex size-10 shrink-0 items-center justify-center rounded-2xl bg-primary/15 text-primary">
             <SproutIcon className="size-5" />
@@ -223,7 +223,7 @@ function RewildingSection({ viewerDid, signedIn }: { viewerDid: string | null; s
           <div className="min-w-0">
             <p className="max-w-2xl text-sm leading-7 text-muted-foreground">{t("description")}</p>
 
-            <div className="mt-5 flex items-start gap-2.5 rounded-2xl bg-muted/40 px-4 py-3">
+            <div className="mt-5 flex items-start gap-2.5 rounded-2xl bg-background px-4 py-3">
               <DatabaseIcon className="mt-0.5 size-4 shrink-0 text-primary" />
               <p className="text-sm leading-6 text-muted-foreground">{t("support")}</p>
             </div>
@@ -232,7 +232,7 @@ function RewildingSection({ viewerDid, signedIn }: { viewerDid: string | null; s
               <div className="mt-6 flex items-start gap-3 rounded-2xl bg-primary/10 px-4 py-4">
                 <CheckCircle2Icon className="mt-0.5 size-5 shrink-0 text-primary" />
                 <div className="min-w-0">
-                  <p className="text-sm font-medium text-foreground">{t("appliedTitle")}</p>
+                  <h3 className="font-instrument text-lg italic text-foreground">{t("appliedTitle")}</h3>
                   <p className="mt-0.5 text-sm leading-6 text-muted-foreground">
                     {t("appliedNote", { project: appliedProjectTitle })}
                   </p>
@@ -277,12 +277,12 @@ function RewildingSection({ viewerDid, signedIn }: { viewerDid: string | null; s
 
         <div className="mt-8 grid gap-3 sm:grid-cols-2">
           {kits.map((kit) => (
-            <div key={kit.id} className="flex gap-3 rounded-2xl bg-background/70 p-4">
+            <div key={kit.id} className="flex gap-3 rounded-2xl bg-background p-4">
               <span className="inline-flex size-9 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
                 <kit.Icon className="size-5" />
               </span>
               <div className="min-w-0">
-                <p className="text-sm font-medium text-foreground">{t(`kits.${kit.id}.title`)}</p>
+                <h3 className="font-instrument text-lg italic text-foreground">{t(`kits.${kit.id}.title`)}</h3>
                 <p className="mt-0.5 text-sm leading-6 text-muted-foreground">{t(`kits.${kit.id}.description`)}</p>
               </div>
             </div>
@@ -382,15 +382,15 @@ function RewildingApplyModal({
           <Loader2Icon className="size-4 animate-spin motion-reduce:animate-none" /> {t("loading")}
         </div>
       ) : error ? (
-        <div className="mt-6 flex flex-col items-center justify-center gap-4 rounded-2xl bg-muted/30 px-6 py-10 text-center">
+        <div className="mt-6 flex flex-col items-center justify-center gap-4 rounded-2xl bg-muted px-6 py-10 text-center">
           <TriangleAlertIcon className="size-8 text-muted-foreground opacity-70" />
-          <p className="text-sm text-muted-foreground">{error}</p>
+          <h3 className="font-instrument text-xl italic text-foreground">{error}</h3>
           <Button type="button" variant="outline" size="sm" onClick={() => void load()}>
             {t("retry")}
           </Button>
         </div>
       ) : projects.length === 0 ? (
-        <div className="mt-6 flex flex-col items-center justify-center rounded-2xl border border-dashed border-border bg-muted/20 px-6 py-10 text-center">
+        <div className="mt-6 flex flex-col items-center justify-center rounded-2xl bg-muted px-6 py-10 text-center">
           <FolderKanbanIcon className="mb-3 size-9 text-primary" />
           <h3 className="font-instrument text-xl font-light italic tracking-[-0.02em] text-foreground">
             {t("noProjectsTitle")}
@@ -417,7 +417,7 @@ function RewildingApplyModal({
           </div>
 
           {filtered.length === 0 ? (
-            <p className="mt-5 rounded-2xl bg-muted/40 px-4 py-8 text-center text-sm text-muted-foreground">
+            <p className="mt-5 rounded-2xl bg-muted px-4 py-8 text-center text-sm text-muted-foreground">
               {t("noMatch")}
             </p>
           ) : (
@@ -432,9 +432,9 @@ function RewildingApplyModal({
                       onClick={() => void apply(project)}
                       disabled={disabled}
                       aria-label={t("applyWith", { project: project.title })}
-                      className="group flex w-full items-center gap-3 rounded-2xl bg-muted/50 px-3 py-3 text-left transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/45 disabled:cursor-not-allowed disabled:opacity-60"
+                      className="group flex w-full items-center gap-3 rounded-2xl bg-muted px-3 py-3 text-left transition-colors hover:bg-muted/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/45 disabled:cursor-not-allowed disabled:opacity-60"
                     >
-                      <span className="relative size-14 shrink-0 overflow-hidden rounded-xl bg-muted">
+                      <span className="relative size-14 shrink-0 overflow-hidden rounded-xl bg-background">
                         {project.imageUrl ? (
                           <Image src={project.imageUrl} alt="" fill unoptimized sizes="56px" className="object-cover" />
                         ) : (
@@ -502,7 +502,7 @@ function InteroperableSection() {
   const t = useTranslations("marketplace.grants.interoperable");
 
   return (
-    <article className="overflow-hidden rounded-2xl bg-muted/40">
+    <article className="overflow-hidden rounded-2xl bg-muted">
       <div className="px-6 py-6 sm:px-8">
         <div className="flex items-start gap-4">
           <span className="relative size-14 shrink-0 overflow-hidden rounded-2xl border border-border">

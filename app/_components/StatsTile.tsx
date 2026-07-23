@@ -71,7 +71,7 @@ export function StatsTile({ label, value, icon, accent = false, href, className:
   );
 
   const className = [
-    "group relative overflow-hidden rounded-2xl bg-muted/60 p-4 text-left transition-colors duration-300 hover:bg-muted motion-reduce:transform-none motion-reduce:transition-none sm:rounded-3xl sm:p-6",
+    "group relative overflow-hidden rounded-2xl bg-muted p-4 text-left transition-colors duration-300 hover:bg-muted motion-reduce:transform-none motion-reduce:transition-none sm:rounded-3xl sm:p-6",
     extraClassName,
   ]
     .filter(Boolean)

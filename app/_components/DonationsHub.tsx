@@ -17,7 +17,7 @@ const PERIODS: Period[] = ["all", "month", "week"];
 const QUERY_STATE_OPTIONS = { history: "replace", scroll: false, shallow: true } as const;
 
 const PILL_GROUP =
-  "flex items-center gap-1 rounded-full bg-muted/55 p-1 shadow-sm shadow-primary/5 ring-1 ring-foreground/5 backdrop-blur";
+  "flex items-center gap-1 rounded-full bg-muted p-1";
 
 // Single donations surface: one hero shared by both views, with the view
 // switcher and period filter sitting in the hero's action slot (the same place

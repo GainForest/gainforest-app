@@ -12,6 +12,8 @@ import { useRouter } from "next/navigation";
 import { CompassIcon, ImageIcon, ShoppingCartIcon, WalletIcon, XIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
+import { DisplayHeading } from "@/components/ui/typography";
 import { PreferredBumicertLink } from "@/app/_components/PreferredLinks";
 import { cartItemKey, useCart, type CartItem } from "@/app/_components/cart/CartProvider";
 
@@ -125,16 +127,26 @@ export function CartView({ onCheckout }: { onCheckout?: () => void } = {}) {
   const canCheckout = hydrated && count > 0 && allValid;
 
   if (!hydrated) {
-    return <div className="mx-auto w-full max-w-5xl px-4 py-10" aria-busy="true" />;
+    return (
+      <div className="mx-auto w-full max-w-5xl px-4 py-10" aria-busy="true">
+        <div className="rounded-3xl bg-muted p-6">
+          <Skeleton className="h-10 w-48 rounded-full" />
+          <div className="mt-6 grid gap-6 lg:grid-cols-[minmax(0,1fr)_320px]">
+            <Skeleton className="h-64 rounded-2xl bg-background" />
+            <Skeleton className="h-56 rounded-2xl bg-background" />
+          </div>
+        </div>
+      </div>
+    );
   }
 
   if (count === 0) {
     return (
-      <div className="mx-auto flex w-full max-w-5xl flex-col items-center gap-4 px-4 py-20 text-center">
-        <div className="grid size-16 place-items-center rounded-full bg-muted text-muted-foreground">
+      <div className="mx-auto mt-10 flex w-[calc(100%_-_2rem)] max-w-5xl flex-col items-center gap-4 rounded-3xl bg-muted px-6 py-20 text-center">
+        <div className="grid size-16 place-items-center rounded-full bg-background text-muted-foreground">
           <ShoppingCartIcon className="size-7" aria-hidden />
         </div>
-        <h1 className="text-2xl font-semibold text-foreground">{t("emptyTitle")}</h1>
+        <DisplayHeading as="h1" className="text-3xl text-foreground">{t("emptyTitle")}</DisplayHeading>
         <p className="max-w-md text-sm leading-6 text-muted-foreground">{t("emptyDescription")}</p>
         <Button asChild className="mt-2">
           <Link href="/projects">
@@ -148,18 +160,18 @@ export function CartView({ onCheckout }: { onCheckout?: () => void } = {}) {
   return (
     <div className="mx-auto w-full max-w-5xl px-4 py-8">
       <div className="flex items-baseline gap-3">
-        <h1 className="text-3xl font-semibold text-foreground">{t("title")}</h1>
+        <DisplayHeading as="h1" className="text-4xl text-foreground">{t("title")}</DisplayHeading>
         <span className="text-sm text-muted-foreground">{t("projectCount", { count })}</span>
       </div>
 
       <div className="mt-6 grid gap-6 lg:grid-cols-[minmax(0,1fr)_320px] lg:items-start">
-        <ul className="divide-y divide-border-soft rounded-2xl bg-muted/50 p-5">
+        <ul className="divide-y divide-border-soft rounded-2xl bg-muted p-5">
           {items.map((item) => (
             <CartItemRow key={cartItemKey(item)} item={item} />
           ))}
         </ul>
 
-        <aside className="rounded-2xl bg-muted/50 p-5">
+        <aside className="rounded-2xl bg-muted p-5">
           <dl className="space-y-2 text-sm">
             <div className="flex items-center justify-between">
               <dt className="text-muted-foreground">{t("donations")}</dt>
