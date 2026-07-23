@@ -6,31 +6,23 @@ import { AnimatePresence, motion, useMotionTemplate, useMotionValue, useSpring }
 import {
   ArrowLeftRightIcon,
   ArrowUpRightIcon,
-  BinocularsIcon,
-  Building2Icon,
   KeyRoundIcon,
   LeafIcon,
   NetworkIcon,
   PlayIcon,
   Share2Icon,
+  SmartphoneIcon,
 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
-import type { ExplorerKpis } from "../_lib/kpis";
 import { fetchBumicerts, type BumicertRecord } from "../_lib/indexer";
 import { localBumicertHref } from "../_lib/urls";
 import { isPdsBlobUrl } from "../_lib/pds";
-import { formatCompact } from "../_lib/format";
-import { StatsTileGrid, type StatsTileItem } from "./StatsTile";
 import { ThemeToggle } from "./ThemeToggle";
 import { AuthModal } from "./AuthFlow";
 import { GlobalSearch } from "./GlobalSearch";
 import { LanguageSelector } from "@/components/i18n/LanguageSelector";
 import { useModal } from "@/components/ui/modal/context";
-
-type HomeLandingProps = {
-  kpis?: ExplorerKpis | null;
-};
 
 const LANDING_NAV_LINKS = [
   { key: "projects", href: "/projects" },
@@ -87,13 +79,12 @@ const NETWORK_POINTS = [
 
 type FaqKey = (typeof FAQ_ITEMS)[number];
 
-export function HomeLanding({ kpis = null }: HomeLandingProps) {
+export function HomeLanding() {
   return (
     <div className="min-h-screen bg-background">
       <LandingTopNavbar />
       <main className="w-full">
         <LandingHero />
-        <HomeStats kpis={kpis} />
         <UserOptionCards />
         <ExplainerVideo />
         <WhatIsBumicert />
@@ -294,7 +285,7 @@ function LandingHero() {
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.55, delay: 0.56, ease: [0.25, 0.1, 0.25, 1] }}
-              className="mt-8"
+              className="mt-8 flex flex-wrap items-center justify-center gap-3 md:justify-start"
             >
               <Link
                 href="/projects"
@@ -309,55 +300,19 @@ function LandingHero() {
                   <ArrowUpRightIcon aria-hidden="true" className="size-4" />
                 </motion.span>
               </Link>
+              <a
+                href="https://play.google.com/store/apps/details?id=certs.android.app"
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex h-12 shrink-0 items-center justify-center gap-2 whitespace-nowrap rounded-full border border-foreground/20 bg-background/70 px-5 py-2 text-sm font-medium text-foreground shadow-sm backdrop-blur transition-colors hover:border-primary/40 hover:bg-background focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:outline-none"
+              >
+                <SmartphoneIcon aria-hidden="true" className="size-4" />
+                {t("androidCta")}
+              </a>
             </motion.div>
           </motion.div>
           <div aria-hidden="true" className="hidden md:block" />
         </div>
-      </div>
-    </section>
-  );
-}
-
-function HomeStats({ kpis }: { kpis: ExplorerKpis | null }) {
-  const t = useTranslations("landing.stats");
-  if (!kpis) return null;
-
-  const stats: StatsTileItem[] = [];
-
-  if (kpis.sites != null) {
-    stats.push({
-      value: formatCompact(kpis.sites),
-      label: t("organizationProfiles"),
-      href: "/organizations",
-      icon: <Building2Icon />,
-    });
-  }
-  if (kpis.occurrences != null) {
-    stats.push({
-      value: formatCompact(kpis.occurrences),
-      label: t("natureSightingsShared"),
-      href: "/observations",
-      icon: <BinocularsIcon />,
-    });
-  }
-
-  if (stats.length === 0) return null;
-
-  return (
-    <section className="px-6 pb-10 pt-0 sm:px-12 sm:pb-12 md:px-6 md:pb-12">
-      <div className="mx-auto -mt-28 max-w-6xl rounded-[2rem] bg-background/80 p-3 shadow-xl shadow-foreground/10 ring-1 ring-foreground/10 backdrop-blur-2xl sm:p-4">
-        {/* "Live" eyebrow: these impact numbers stream from Hyperindex, so we
-            flag them as live (iNaturalist-style social proof). */}
-        <div className="mb-2 flex items-center gap-2 px-3 pt-1 sm:mb-3">
-          <span className="relative flex size-2" aria-hidden="true">
-            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-primary/60" />
-            <span className="relative inline-flex size-2 rounded-full bg-primary" />
-          </span>
-          <span className="text-[11px] font-semibold tracking-[0.18em] text-primary uppercase">
-            {t("liveLabel")}
-          </span>
-        </div>
-        <StatsTileGrid items={stats} columns={2} />
       </div>
     </section>
   );
