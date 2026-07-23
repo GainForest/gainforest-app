@@ -242,7 +242,7 @@ function ServiceCard({
     <article className="flex h-full flex-col gap-4 rounded-2xl bg-muted/60 p-5">
       <header className="flex items-start justify-between gap-3">
         <div className="min-w-0">
-          <h2 className="truncate text-[15px] font-semibold text-foreground">{service.name}</h2>
+          <DisplayHeading as="h2" className="truncate text-lg text-foreground">{service.name}</DisplayHeading>
           {service.detail && (
             <p className="mt-0.5 truncate text-[12.5px] text-muted-foreground">{service.detail}</p>
           )}

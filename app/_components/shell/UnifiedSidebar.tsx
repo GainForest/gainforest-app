@@ -50,7 +50,7 @@ export function UnifiedSidebar({
     <SidebarCollapsedProvider value={collapsed}>
     <nav
       className={cn(
-        "relative isolate z-30 flex h-full flex-col border-r border-border bg-foreground/3 transition-[width,padding] duration-300 ease-[cubic-bezier(0.25,0.1,0.25,1)] motion-reduce:transition-none",
+        "relative isolate z-30 flex h-full flex-col border-r border-border bg-muted transition-[width,padding] duration-300 ease-[cubic-bezier(0.25,0.1,0.25,1)] motion-reduce:transition-none",
         collapsed ? "w-[76px] overflow-visible p-3" : "w-[256px] overflow-hidden p-4",
       )}
     >
@@ -232,9 +232,9 @@ function ExploreNav({ sessionDid }: { sessionDid: string | null }) {
     items.map((section, sectionIndex) => (
       <div key={section.id} className="flex flex-col gap-0.5">
         {showSectionLabels && !collapsed ? (
-          <p className="px-2.5 pb-1 pt-1 text-[10px] font-medium uppercase tracking-[0.12em] text-muted-foreground">
+          <h2 className="px-2.5 pb-1 pt-1 font-instrument text-sm italic text-muted-foreground">
             {sectionsT(section.id)}
-          </p>
+          </h2>
         ) : collapsed && sectionIndex > 0 ? (
           <div aria-hidden className="mx-auto my-1 h-px w-6 rounded-full bg-border" />
         ) : null}

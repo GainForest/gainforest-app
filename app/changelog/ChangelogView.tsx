@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
+import { DisplayHeading } from "@/components/ui/typography";
 import { cn } from "@/lib/utils";
 import { plainChangelogSubject } from "./changelog-presenter";
 
@@ -120,7 +121,7 @@ export function ChangelogView({ data, locale }: { data: ChangelogData; locale: s
           <li key={month.month} className="relative">
             <span className="absolute -left-[31px] top-1.5 size-3 rounded-full border-2 border-background bg-primary" aria-hidden />
             <div className="mb-3 flex flex-wrap items-baseline gap-x-3 gap-y-1">
-              <h2 className="text-lg font-semibold tracking-tight">{formatMonth(month.month, locale)}</h2>
+              <DisplayHeading as="h2" className="text-xl tracking-tight">{formatMonth(month.month, locale)}</DisplayHeading>
               <span className="text-sm text-muted-foreground">{t("shipped", { count: month.commits.length })}</span>
             </div>
 

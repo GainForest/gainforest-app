@@ -96,7 +96,7 @@ export default async function PrivacyPage() {
           </div>
         </header>
 
-        <div className="mt-10 space-y-5 rounded-2xl bg-muted/40 p-5 text-[15px] leading-7 text-muted-foreground sm:p-6">
+        <div className="mt-10 space-y-5 rounded-2xl bg-muted p-5 text-[15px] leading-7 text-muted-foreground sm:p-6">
           {INTRO_PARAGRAPH_KEYS.map((key) => (
             <p key={key}>{renderPolicyText(t(`intro.${key}`))}</p>
           ))}

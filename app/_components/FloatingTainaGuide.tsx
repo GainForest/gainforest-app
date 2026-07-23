@@ -1208,7 +1208,7 @@ export function FloatingTainaGuide() {
           ) : null}
           <div
             role="dialog"
-            aria-label={guidesT(`${tour.guideId}.title`)}
+            aria-labelledby="taina-tour-title"
             className="fixed rounded-2xl border border-border bg-background p-3 shadow-xl transition-all duration-300"
             style={{
               zIndex: Z_BUBBLE,
@@ -1219,8 +1219,13 @@ export function FloatingTainaGuide() {
               bottom: bubblePos ? undefined : 16 + SPRITE_H + BADGE_RESERVE,
             }}
           >
-            <div className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
-              {guidesT(`${tour.guideId}.title`)} · {t("stepOf", { current: tour.index + 1, total: activeGuide.tour.length })}
+            <div className="flex flex-wrap items-baseline gap-x-1.5">
+              <h2 id="taina-tour-title" className="font-instrument text-base italic text-foreground">
+                {guidesT(`${tour.guideId}.title`)}
+              </h2>
+              <span className="text-[11px] text-muted-foreground">
+                {t("stepOf", { current: tour.index + 1, total: activeGuide.tour.length })}
+              </span>
             </div>
             <p className="mt-1.5 text-[13px] leading-relaxed text-foreground">
               {spotMissing ? `${t("cantFind")} ` : null}
@@ -1261,11 +1266,7 @@ export function FloatingTainaGuide() {
       {open && !tour ? (
         <div
           role="dialog"
-          aria-label={
-            view.kind === "whatsNew"
-              ? t("whatsNew.title")
-              : `${TAINA_SIM.name} — ${t("role")}`
-          }
+          aria-labelledby="taina-panel-title"
           className="fixed z-[60] flex flex-col overflow-hidden rounded-2xl border border-border bg-background shadow-xl"
           style={{ left: panelPos.x, top: panelPos.y, width: PANEL_W, height: PANEL_H }}
           data-no-drag
@@ -1295,13 +1296,13 @@ export function FloatingTainaGuide() {
               />
             )}
             <div className="min-w-0 flex-1">
-              <div className="truncate text-[15px] font-medium text-foreground">
+              <h2 id="taina-panel-title" className="truncate font-instrument text-lg italic text-foreground">
                 {view.kind === "whatsNew"
                   ? t("whatsNew.title")
                   : view.kind === "guide" && guideView
                     ? guidesT(`${guideView.id}.title`)
                     : TAINA_SIM.name}
-              </div>
+              </h2>
               {view.kind === "home" || view.kind === "tip" ? (
                 <div className="truncate text-[11px] text-foreground/55">{t("role")}</div>
               ) : null}
@@ -1334,10 +1335,10 @@ export function FloatingTainaGuide() {
                 if (!tip) return null;
                 return (
                   <>
-                    <div className="rounded-2xl bg-foreground/5 px-3 py-2.5">
-                      <div className="text-[11px] font-medium uppercase tracking-wide text-primary">
+                    <div className="rounded-2xl bg-muted px-3 py-2.5">
+                      <h3 className="font-instrument text-base italic text-primary">
                         💡 {t("didYouKnow")}
-                      </div>
+                      </h3>
                       <p className="mt-1.5 text-foreground">{t(`tips.${tip.id}`)}</p>
                     </div>
                     {tipGuide && tipGuide.tour.length > 0 ? (
@@ -1362,7 +1363,7 @@ export function FloatingTainaGuide() {
             ) : view.kind === "home" ? (
               <>
                 {messages.length === 0 ? (
-                  <div className="rounded-2xl bg-foreground/5 px-3 py-2 text-foreground/70">
+                  <div className="rounded-2xl bg-muted px-3 py-2 text-foreground/70">
                     <p>
                       <span aria-hidden>🌿</span> {t("greeting")}
                     </p>
@@ -1375,7 +1376,7 @@ export function FloatingTainaGuide() {
                     className={
                       m.role === "user"
                         ? "ml-8 whitespace-pre-wrap rounded-2xl bg-primary px-3 py-2 text-primary-foreground"
-                        : "mr-8 whitespace-pre-wrap rounded-2xl bg-foreground/5 px-3 py-2 text-foreground"
+                        : "mr-8 whitespace-pre-wrap rounded-2xl bg-muted px-3 py-2 text-foreground"
                     }
                   >
                     {m.content || <span className="text-foreground/40">…</span>}
@@ -1384,9 +1385,9 @@ export function FloatingTainaGuide() {
                 <div ref={messagesEndRef} />
                 {/* FAQ quick questions */}
                 <div>
-                  <div className="mb-1.5 text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
+                  <h3 className="mb-1.5 font-instrument text-base italic text-foreground">
                     {t("guidesTitle")}
-                  </div>
+                  </h3>
                   <div className="flex flex-col gap-1.5">
                     {TAINA_GUIDES.map((guide) => (
                       <button
@@ -1407,7 +1408,7 @@ export function FloatingTainaGuide() {
                   <MegaphoneIcon aria-hidden className="size-4 text-primary" />
                   <h2
                     id="taina-whats-new-title"
-                    className="text-sm font-medium text-foreground"
+                    className="font-instrument text-lg italic text-foreground"
                   >
                     {t("whatsNew.title")}
                   </h2>
@@ -1463,9 +1464,9 @@ export function FloatingTainaGuide() {
                         <span className="grid h-5 w-5 shrink-0 translate-y-0.5 place-items-center rounded-full bg-primary/10 text-[11px] font-semibold text-primary">
                           {index + 1}
                         </span>
-                        <span className="font-medium text-foreground">
+                        <h3 className="font-instrument text-base italic text-foreground">
                           {guidesT(`${guideView.id}.steps.${step.id}.title`)}
-                        </span>
+                        </h3>
                       </div>
                       <p className="pl-7 text-foreground/70">
                         {guidesT(`${guideView.id}.steps.${step.id}.body`)}
@@ -1636,10 +1637,10 @@ export function FloatingTainaGuide() {
             className="rounded-2xl border border-border bg-background/95 p-3 shadow-[0_4px_16px_-4px_rgba(40,50,30,0.3)] backdrop-blur-sm"
           >
             <div className="flex items-start justify-between gap-2">
-              <div className="flex items-center gap-1.5 text-[11px] font-medium uppercase tracking-wide text-primary">
+              <h2 className="flex items-center gap-1.5 font-instrument text-base italic text-primary">
                 <MegaphoneIcon aria-hidden className="size-3.5" />
                 {t("whatsNew.title")}
-              </div>
+              </h2>
               <button
                 type="button"
                 onClick={(event) => {
@@ -1676,9 +1677,9 @@ export function FloatingTainaGuide() {
             className="rounded-2xl border border-border bg-background/95 p-3 shadow-[0_4px_16px_-4px_rgba(40,50,30,0.3)] backdrop-blur-sm"
           >
             <div className="flex items-start justify-between gap-2">
-              <div className="text-[11px] font-medium uppercase tracking-wide text-primary">
+              <h2 className="font-instrument text-base italic text-primary">
                 🔍 {t("helpTitle")}
-              </div>
+              </h2>
               <button
                 type="button"
                 onClick={(e) => {
@@ -1726,9 +1727,9 @@ export function FloatingTainaGuide() {
             className="rounded-2xl border border-border bg-background/95 p-3 shadow-[0_4px_16px_-4px_rgba(40,50,30,0.3)] backdrop-blur-sm"
           >
             <div className="flex items-start justify-between gap-2">
-              <div className="text-[11px] font-medium uppercase tracking-wide text-primary">
+              <h2 className="font-instrument text-base italic text-primary">
                 💡 {t("didYouKnow")}
-              </div>
+              </h2>
               <button
                 type="button"
                 onClick={(e) => {

@@ -188,7 +188,7 @@ function DeviceCard({ device }: { device: Device }) {
   return (
     <article className="flex h-full flex-col gap-5 rounded-2xl bg-muted/60 p-5">
       <header className="flex items-start justify-between gap-3">
-        <h2 className="truncate text-sm font-semibold text-foreground">{device.name}</h2>
+        <DisplayHeading as="h2" className="truncate text-lg text-foreground">{device.name}</DisplayHeading>
         <span className={`inline-flex shrink-0 items-center gap-1.5 rounded-full bg-background/80 px-2.5 py-1 text-xs font-medium ${TONE_TEXT[tone]}`}>
           <span className={`relative inline-flex size-2 ${TONE_DOT[tone]}`}>
             <span className={`inline-block size-2 rounded-full bg-current ${tone === "ok" ? "pulse-dot" : ""}`} />
@@ -252,7 +252,7 @@ function DeviceCard({ device }: { device: Device }) {
 function CardSection({ title, children }: { title: string; children: ReactNode }) {
   return (
     <section>
-      <h3 className="mb-2.5 text-sm font-semibold text-foreground">{title}</h3>
+      <DisplayHeading as="h3" className="mb-2.5 text-lg text-foreground">{title}</DisplayHeading>
       {children}
     </section>
   );

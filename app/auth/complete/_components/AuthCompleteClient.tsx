@@ -168,7 +168,7 @@ function OptionCard({
       variant="secondary"
       onClick={onClick}
       className={cn(
-        "group relative flex h-16 w-full items-center justify-start gap-3 px-4 shadow-none hover:bg-primary/10",
+        "group relative flex h-16 w-full items-center justify-start gap-3 bg-background px-4 shadow-none hover:bg-primary/10",
         rounded,
       )}
     >
@@ -267,8 +267,8 @@ function GroupChoiceView({
 
       <div className="mt-6 w-full space-y-5">
         <section>
-          <p className="mb-1.5 px-1 text-xs font-medium text-muted-foreground">{labels.yourAccount}</p>
-          <div className="flex flex-col gap-1.5">
+          <DisplayHeading as="h2" className="mb-1.5 px-1 text-lg font-normal text-foreground">{labels.yourAccount}</DisplayHeading>
+          <div className="flex flex-col gap-1.5 rounded-[32px] bg-muted p-1.5">
             <OptionCard
               did={session.did}
               name={personalName}
@@ -282,8 +282,8 @@ function GroupChoiceView({
 
         {groups.length > 0 ? (
           <section>
-            <p className="mb-1.5 px-1 text-xs font-medium text-muted-foreground">{labels.yourOrganizations}</p>
-            <div className="flex flex-col gap-1.5">
+            <DisplayHeading as="h2" className="mb-1.5 px-1 text-lg font-normal text-foreground">{labels.yourOrganizations}</DisplayHeading>
+            <div className="flex flex-col gap-1.5 rounded-[32px] bg-muted p-1.5">
               {groups.map((group, index) => (
                 <OptionCard
                   key={group.groupDid}

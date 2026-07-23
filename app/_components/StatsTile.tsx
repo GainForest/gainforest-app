@@ -96,7 +96,7 @@ export function RecordDrawerStatsTile({
   valueClassName = "text-2xl font-semibold tabular-nums",
 }: RecordDrawerStatsTileItem) {
   return (
-    <div className={`relative overflow-hidden rounded-2xl bg-foreground/5 px-4 py-3 ${className}`}>
+    <div className={`relative overflow-hidden rounded-2xl bg-muted px-4 py-3 ${className}`}>
       <div className="absolute inset-x-5 top-0 h-px bg-gradient-to-r from-transparent via-primary/25 to-transparent" />
       <span className="flex items-center text-primary [&_svg]:size-4">{icon}</span>
       <div className={`mt-1.5 tracking-[-0.02em] text-foreground ${valueClassName}`}>{value}</div>

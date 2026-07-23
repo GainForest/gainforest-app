@@ -216,7 +216,7 @@ function StatsSkeleton() {
   return (
     <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4" aria-hidden="true">
       {Array.from({ length: 4 }).map((_, index) => (
-        <div key={index} className="rounded-2xl bg-foreground/5 p-4 sm:rounded-3xl sm:p-6">
+        <div key={index} className="rounded-2xl bg-muted/60 p-4 sm:rounded-3xl sm:p-6">
           <div className="flex items-center gap-3">
             <Skeleton className="size-5 rounded-full" />
             <Skeleton className="h-8 w-20 rounded-full" />
