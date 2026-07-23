@@ -146,7 +146,7 @@ function DonorTypeTabs({
 }) {
   const t = useTranslations("marketplace.leaderboard");
   return (
-    <div className="grid h-10 w-full grid-cols-3 rounded-full bg-muted p-1">
+    <div className="grid w-full grid-cols-3 rounded-full bg-muted p-1">
       {DONOR_FILTER_VALUES.map((value) => {
         const Icon = DONOR_FILTER_ICONS[value];
         const label = t(`donorFilters.${value}`);
