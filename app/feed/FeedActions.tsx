@@ -532,7 +532,7 @@ export function LocalPostsList({
                 <span className="truncate font-medium text-foreground">{t("actions.you")}</span>
                 <span className="text-muted-foreground/60">·</span>
                 <span className="shrink-0 text-xs text-muted-foreground/80">{t("actions.postedJustNow")}</span>
-                <span className="ml-1 inline-flex items-center rounded-full bg-primary/10 px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wide text-primary">
+                <span className="ml-1 inline-flex items-center rounded-full bg-primary/10 px-1.5 py-0.5 text-xs font-medium text-primary">
                   {t("composer.postedTitle")}
                 </span>
               </div>
@@ -634,7 +634,7 @@ export function InlineEditor({
           disabled={!canSave}
           className="inline-flex items-center gap-1 rounded-full bg-primary px-3 py-1 text-xs font-medium text-primary-foreground transition-opacity hover:opacity-90 disabled:opacity-50"
         >
-          {busy ? <Loader2Icon className="size-3.5 animate-spin" /> : null}
+          {busy ? <Loader2Icon className="size-3.5 animate-spin motion-reduce:animate-none" /> : null}
           {t("actions.saveEdit")}
         </button>
         <button
@@ -733,7 +733,7 @@ export function ReplyComposer({
             disabled={!canSend}
             className="inline-flex items-center gap-1 rounded-full bg-primary px-3 py-1 text-xs font-medium text-primary-foreground transition-opacity hover:opacity-90 disabled:opacity-50"
           >
-            {busy ? <Loader2Icon className="size-3.5 animate-spin" /> : null}
+            {busy ? <Loader2Icon className="size-3.5 animate-spin motion-reduce:animate-none" /> : null}
             {t("actions.reply")}
           </button>
           <button
@@ -782,7 +782,7 @@ export function DeleteButton({ onDelete }: { onDelete: () => Promise<void> }) {
           disabled={busy}
           className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-medium text-destructive transition-colors hover:bg-destructive/10 disabled:opacity-50"
         >
-          {busy ? <Loader2Icon className="size-3 animate-spin" /> : <Trash2Icon className="size-3" />}
+          {busy ? <Loader2Icon className="size-3 animate-spin motion-reduce:animate-none" /> : <Trash2Icon className="size-3" />}
           {t("actions.confirmDelete")}
         </button>
         <button
@@ -850,7 +850,7 @@ export function ModeratorHideButton({ subjectUri, onHidden }: { subjectUri: stri
           disabled={busy}
           className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-medium text-destructive transition-colors hover:bg-destructive/10 disabled:opacity-50"
         >
-          {busy ? <Loader2Icon className="size-3 animate-spin" /> : <EyeOffIcon className="size-3" />}
+          {busy ? <Loader2Icon className="size-3 animate-spin motion-reduce:animate-none" /> : <EyeOffIcon className="size-3" />}
           {t("confirmHide")}
           <AdminOnlyIndicator />
         </button>
@@ -1116,7 +1116,7 @@ export function FeedComposer({
             disabled={signedIn ? !canPost : false}
             className="inline-flex items-center gap-1.5 rounded-full bg-primary px-4 py-1.5 text-sm font-medium text-primary-foreground transition-opacity hover:opacity-90 disabled:opacity-50"
           >
-            {busy ? <Loader2Icon className="size-4 animate-spin" /> : null}
+            {busy ? <Loader2Icon className="size-4 animate-spin motion-reduce:animate-none" /> : null}
             {busy ? t("composer.posting") : t("composer.post")}
           </button>
         </div>
@@ -1215,7 +1215,7 @@ export function MobileComposerBar({
           A gradient is essentially free and still separates the bar. */}
       <div
         className={cn(
-          "pointer-events-none fixed inset-x-0 bottom-0 z-10 h-32 transition-transform duration-300",
+          "pointer-events-none fixed inset-x-0 bottom-0 z-10 h-32 transition-transform duration-300 motion-reduce:transition-none",
           footerNear && "translate-y-full",
         )}
         style={{
@@ -1234,7 +1234,7 @@ export function MobileComposerBar({
           // z-20 keeps the island above the scrolling feed but *below* the
           // sticky header (z-30) so its user menu / sign-out dropdown, which is
           // trapped in the header's stacking context, stays clickable on phones.
-          "fixed inset-x-4 bottom-[max(1rem,env(safe-area-inset-bottom))] z-20 flex items-center gap-3 rounded-full border-2 border-primary bg-background/90 py-2 pl-2 pr-4 text-left shadow-lg backdrop-blur transition-[transform,opacity] duration-300 active:bg-muted supports-[backdrop-filter]:bg-background/80",
+          "fixed inset-x-4 bottom-[max(1rem,env(safe-area-inset-bottom))] z-20 flex items-center gap-3 rounded-full border-2 border-primary bg-background/90 py-2 pl-2 pr-4 text-left shadow-lg backdrop-blur transition-[transform,opacity] duration-300 active:bg-muted motion-reduce:transition-none supports-[backdrop-filter]:bg-background/80",
           footerNear && "pointer-events-none translate-y-[calc(100%+2rem)] opacity-0",
         )}
       >
@@ -1592,7 +1592,7 @@ function CommentPanel({
           aria-label={t("actions.send")}
           className="inline-flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary text-primary-foreground transition-opacity hover:opacity-90 disabled:opacity-50"
         >
-          {busy ? <Loader2Icon className="size-4 animate-spin" /> : <SendHorizonalIcon className="size-4" />}
+          {busy ? <Loader2Icon className="size-4 animate-spin motion-reduce:animate-none" /> : <SendHorizonalIcon className="size-4" />}
         </button>
       </div>
       {error ? <p className="mt-1 text-xs text-destructive">{error}</p> : null}

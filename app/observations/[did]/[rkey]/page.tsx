@@ -4,7 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { notFound, redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
-import { ArrowLeftIcon, ArrowUpRightIcon, CalendarIcon, LeafIcon, MapPinIcon, RulerIcon } from "lucide-react";
+import { ArrowLeftIcon, ArrowUpRightIcon, CalendarIcon, MapPinIcon, RulerIcon } from "lucide-react";
 import { localizedAlternates } from "@/app/_lib/seo-metadata";
 import {
   fetchMeasurementsByOccurrence,
@@ -131,17 +131,10 @@ export default async function ObservationDetailPage({ params }: { params: Observ
           {t("back")}
         </Link>
 
-        <div className="mt-4 flex flex-wrap items-center gap-3">
-          <span className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-3 py-1 text-[12px] font-medium text-primary-dark">
-            <LeafIcon className="h-3.5 w-3.5" aria-hidden />
-            {t("kind")}
-          </span>
-        </div>
-
-        <h1 className="mt-3 font-instrument text-4xl italic leading-tight tracking-[-0.01em] text-foreground md:text-5xl">
+        <h1 className="mt-4 font-instrument text-4xl italic leading-tight tracking-[-0.01em] text-foreground md:text-5xl">
           {name}
           {scientific ? (
-            <span className="ml-2 align-middle text-2xl not-italic text-foreground/55 md:text-3xl">
+            <span className="ml-2 align-middle text-2xl text-foreground/55 md:text-3xl">
               {scientific}
             </span>
           ) : null}
@@ -161,7 +154,7 @@ export default async function ObservationDetailPage({ params }: { params: Observ
           <aside className="min-w-0 space-y-5">
             {owner ? (
               <div className="rounded-2xl border border-border-soft bg-surface/60 p-4">
-                <p className="text-[11px] font-medium uppercase tracking-[0.12em] text-foreground/45">
+                <p className="text-sm font-medium text-muted-foreground">
                   {t("sharedBy")}
                 </p>
                 <Link href={accountHref(owner.urlIdentifier)} className="group mt-3 flex items-center gap-3">
@@ -216,14 +209,14 @@ export default async function ObservationDetailPage({ params }: { params: Observ
 
         {measurementFacts.length > 0 ? (
           <section className="mt-10 border-t border-border-soft pt-8">
-            <h2 className="mb-5 flex items-center gap-2 text-xs font-medium uppercase tracking-[0.16em] text-muted-foreground">
+            <h2 className="mb-5 flex items-center gap-2 text-base font-semibold text-foreground">
               <RulerIcon className="h-3.5 w-3.5" aria-hidden />
               {measurementsT("title")}
             </h2>
             <dl className="grid gap-x-6 gap-y-5 sm:grid-cols-2 lg:grid-cols-3">
               {measurementFacts.map((fact, index) => (
                 <div key={`${fact.key ?? fact.label ?? "m"}-${index}`}>
-                  <dt className="text-[11px] font-medium uppercase tracking-[0.08em] text-foreground/45">
+                  <dt className="text-xs font-medium text-muted-foreground">
                     {fact.key ? measurementsT(`fields.${fact.key}`) : fact.label ?? ""}
                   </dt>
                   <dd className="mt-1 text-[14.5px] leading-[1.5] text-foreground">{fact.value}</dd>
@@ -341,7 +334,7 @@ function MetaRow({ icon, label, children }: { icon: ReactNode; label: string; ch
     <div className="flex items-start gap-3">
       <span className="mt-0.5 text-primary">{icon}</span>
       <div className="min-w-0 flex-1">
-        <dt className="text-[11px] font-medium uppercase tracking-[0.08em] text-foreground/45">{label}</dt>
+        <dt className="text-xs font-medium text-muted-foreground">{label}</dt>
         <dd className="mt-0.5 text-[14px] leading-snug text-foreground">{children}</dd>
       </div>
     </div>

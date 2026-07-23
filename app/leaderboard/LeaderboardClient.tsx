@@ -159,7 +159,7 @@ function DonorTypeTabs({
             aria-pressed={isSelected}
             onClick={() => onDonorFilterChange(value)}
             className={cn(
-              "inline-flex h-8 items-center justify-center gap-1.5 whitespace-nowrap rounded-full px-2 text-[13px] font-medium transition-all duration-200 sm:px-3",
+              "inline-flex min-h-11 items-center justify-center gap-1.5 whitespace-nowrap rounded-full px-3 text-[13px] font-medium transition-all duration-200 motion-reduce:transition-none",
               isSelected
                 ? "bg-primary text-primary-foreground shadow-sm shadow-primary/20"
                 : "text-muted-foreground hover:bg-muted/50 hover:text-foreground",
@@ -270,8 +270,8 @@ function LeaderboardGrid({ entries }: { entries: LeaderboardEntry[] }) {
         <div className="flex size-16 items-center justify-center rounded-full bg-primary/10 text-primary">
           <TrophyIcon className="size-8 opacity-60" />
         </div>
-        <p className="font-garamond text-3xl font-light text-foreground">{t("title")}</p>
-        <p className="font-instrument max-w-sm text-base italic text-foreground/70">{t("description")}</p>
+        <h2 className="font-instrument text-3xl italic text-foreground">{t("title")}</h2>
+        <p className="max-w-sm text-base text-foreground/70">{t("description")}</p>
       </div>
     );
   }
@@ -310,8 +310,8 @@ function LeaderboardError() {
       <div className="flex size-16 items-center justify-center rounded-full bg-primary/10 text-primary">
         <TrophyIcon className="size-8 opacity-60" />
       </div>
-      <p className="font-garamond text-3xl font-light text-foreground">{t("title")}</p>
-      <p className="font-instrument max-w-sm text-base italic text-foreground/70">{t("description")}</p>
+      <h2 className="font-instrument text-3xl italic text-foreground">{t("title")}</h2>
+      <p className="max-w-sm text-base text-foreground/70">{t("description")}</p>
     </div>
   );
 }
@@ -362,7 +362,7 @@ function DonorCard({ entry }: { entry: LeaderboardEntry }) {
   const isWallet = entry.donorType === "wallet";
   const relativeTime = entry.lastDonatedAt ? formatRelativeTimeFromNow(new Date(entry.lastDonatedAt), locale) : null;
   const className = cn(
-    "group flex items-center gap-3 px-4 py-3 transition-colors duration-200 hover:bg-primary/[0.05] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring sm:px-5 sm:py-3.5",
+    "group flex items-center gap-3 px-4 py-3 transition-colors duration-200 hover:bg-primary/[0.05] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring motion-reduce:transition-none sm:px-5 sm:py-3.5",
     entry.rank === 1 && "bg-primary/[0.035]",
   );
   const content = (
@@ -390,7 +390,7 @@ function DonorCard({ entry }: { entry: LeaderboardEntry }) {
 
       <ChevronRightIcon
         aria-hidden="true"
-        className="size-4 shrink-0 text-muted-foreground/40 transition-transform duration-200 group-hover:translate-x-0.5 group-hover:text-primary"
+        className="size-4 shrink-0 text-muted-foreground/40 transition-transform duration-200 group-hover:translate-x-0.5 group-hover:text-primary motion-reduce:transform-none motion-reduce:transition-none"
       />
     </>
   );

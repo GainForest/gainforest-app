@@ -4,6 +4,7 @@ import { getTranslations } from "next-intl/server";
 import { fetchAuthSession } from "../_lib/auth-server";
 import { isAudioMothLabellingFlagEnabled } from "@/app/_lib/audiomoth/feature-flags";
 import { getGainForestModeratorAccess } from "@/app/internal/badges/_lib/access";
+import { canViewIdentificationsRoute } from "./_components/route-access";
 
 export const dynamic = "force-dynamic";
 
@@ -21,7 +22,10 @@ export default async function IdentificationsPage() {
   const moderator = session.isLoggedIn
     ? await getGainForestModeratorAccess().catch(() => null)
     : null;
-  const canView = isAudioMothLabellingFlagEnabled() && Boolean(moderator?.isModerator);
+  const canView = canViewIdentificationsRoute(
+    isAudioMothLabellingFlagEnabled(),
+    Boolean(moderator?.isModerator),
+  );
 
   // Admin-only route: hide its existence from everyone else (the sidebar entry
   // is also gated, but the route must re-check server-side).

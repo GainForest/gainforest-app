@@ -20,8 +20,9 @@ const INNER_RADIUS = 34;
 /** Break a band's line when neighbouring points are further apart than this. */
 const GAP_MINUTES = 90;
 
-type HoverState = {
+type ActivePointState = {
   point: SoundscapePoint;
+  index: number;
   x: number;
   y: number;
 };
@@ -42,6 +43,19 @@ function niceCeil(value: number): number {
   const normalized = value / magnitude;
   const step = normalized <= 1 ? 1 : normalized <= 2 ? 2 : normalized <= 5 ? 5 : 10;
   return step * magnitude;
+}
+
+export function isSoundscapeNavigationKey(key: string): boolean {
+  return ["ArrowRight", "ArrowDown", "ArrowLeft", "ArrowUp", "Home", "End"].includes(key);
+}
+
+export function nextSoundscapePointIndex(current: number, key: string, length: number): number {
+  if (length <= 0) return -1;
+  if (key === "Home") return 0;
+  if (key === "End") return length - 1;
+  if (key === "ArrowRight" || key === "ArrowDown") return (current + 1 + length) % length;
+  if (key === "ArrowLeft" || key === "ArrowUp") return (current - 1 + length) % length;
+  return current;
 }
 
 function formatValue(value: number): string {
@@ -105,7 +119,7 @@ type SoundscapeClockProps = {
 export function SoundscapeClock(props: SoundscapeClockProps) {
   const { points, visibleBands } = props;
   const svgRef = useRef<SVGSVGElement | null>(null);
-  const [hover, setHover] = useState<HoverState | null>(null);
+  const [activePoint, setActivePoint] = useState<ActivePointState | null>(null);
 
   const maxValue = useMemo(() => {
     let max = 0;
@@ -137,25 +151,43 @@ export function SoundscapeClock(props: SoundscapeClockProps) {
     const dy = y - CENTER;
     const distance = Math.hypot(dx, dy);
     if (distance < INNER_RADIUS || distance > OUTER_RADIUS + 30) {
-      setHover(null);
+      setActivePoint(null);
       return;
     }
     const minute = ((Math.atan2(dy, dx) / (2 * Math.PI)) * 1440 + 1440) % 1440;
-    let best: SoundscapePoint | null = null;
+    let bestIndex = -1;
     let bestGap = Infinity;
-    for (const point of points) {
+    for (let index = 0; index < points.length; index += 1) {
+      const point = points[index];
       const gap = Math.min(Math.abs(point.minuteOfDay - minute), 1440 - Math.abs(point.minuteOfDay - minute));
       if (gap < bestGap) {
         bestGap = gap;
-        best = point;
+        bestIndex = index;
       }
     }
+    const best = points[bestIndex];
     if (!best || bestGap > 45) {
-      setHover(null);
+      setActivePoint(null);
       return;
     }
     const marker = polar(best.minuteOfDay, OUTER_RADIUS);
-    setHover({ point: best, x: (marker.x / VIEW_SIZE) * rect.width, y: (marker.y / VIEW_SIZE) * rect.height });
+    setActivePoint({ point: best, index: bestIndex, x: (marker.x / VIEW_SIZE) * rect.width, y: (marker.y / VIEW_SIZE) * rect.height });
+  };
+
+  const selectPoint = (index: number) => {
+    const svg = svgRef.current;
+    const point = points[index];
+    if (!svg || !point) return;
+    const rect = svg.getBoundingClientRect();
+    const marker = polar(point.minuteOfDay, OUTER_RADIUS);
+    setActivePoint({ point, index, x: (marker.x / VIEW_SIZE) * rect.width, y: (marker.y / VIEW_SIZE) * rect.height });
+  };
+
+  const handleKeyDown = (event: React.KeyboardEvent<SVGSVGElement>) => {
+    if (!isSoundscapeNavigationKey(event.key) || points.length === 0) return;
+    event.preventDefault();
+    const current = activePoint?.index ?? 0;
+    selectPoint(nextSoundscapePointIndex(current, event.key, points.length));
   };
 
   return (
@@ -163,11 +195,20 @@ export function SoundscapeClock(props: SoundscapeClockProps) {
       <svg
         ref={svgRef}
         viewBox={`0 0 ${VIEW_SIZE} ${VIEW_SIZE}`}
-        className="block h-auto w-full select-none"
+        className="block h-auto w-full select-none rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
         role="img"
+        tabIndex={0}
         aria-label={props.title}
+        aria-describedby="soundscape-clock-values"
+        onFocus={() => {
+          if (!activePoint && points.length > 0) selectPoint(0);
+        }}
+        onKeyDown={handleKeyDown}
         onPointerMove={handlePointerMove}
-        onPointerLeave={() => setHover(null)}
+        onPointerDown={handlePointerMove}
+        onPointerLeave={() => {
+          if (document.activeElement !== svgRef.current) setActivePoint(null);
+        }}
         data-soundscape-clock
       >
         {/* Title */}
@@ -268,13 +309,13 @@ export function SoundscapeClock(props: SoundscapeClockProps) {
           ) : null,
         )}
 
-        {/* Hover spoke */}
-        {hover ? (
+        {/* Selected time spoke */}
+        {activePoint ? (
           <line
-            x1={polar(hover.point.minuteOfDay, INNER_RADIUS).x}
-            y1={polar(hover.point.minuteOfDay, INNER_RADIUS).y}
-            x2={polar(hover.point.minuteOfDay, OUTER_RADIUS).x}
-            y2={polar(hover.point.minuteOfDay, OUTER_RADIUS).y}
+            x1={polar(activePoint.point.minuteOfDay, INNER_RADIUS).x}
+            y1={polar(activePoint.point.minuteOfDay, INNER_RADIUS).y}
+            x2={polar(activePoint.point.minuteOfDay, OUTER_RADIUS).x}
+            y2={polar(activePoint.point.minuteOfDay, OUTER_RADIUS).y}
             stroke="currentColor"
             strokeOpacity={0.55}
             strokeDasharray="3 3"
@@ -292,14 +333,23 @@ export function SoundscapeClock(props: SoundscapeClockProps) {
         />
       </svg>
 
-      {hover ? (
+      <p id="soundscape-clock-values" className="sr-only" aria-live="polite">
+        {activePoint
+          ? `${formatMinuteOfDay(activePoint.point.minuteOfDay)}. ${activePoint.point.pmn
+              .map((value, band) => (visibleBands[band] ? `${props.bandLabels[band]}: ${formatValue(value)}` : null))
+              .filter(Boolean)
+              .join(". ")}`
+          : props.title}
+      </p>
+
+      {activePoint ? (
         <div
           className="pointer-events-none absolute z-10 min-w-40 -translate-x-1/2 rounded-lg border bg-popover px-3 py-2 text-xs shadow-md"
-          style={{ left: hover.x, top: Math.max(0, hover.y - 8), transform: "translate(-50%, -100%)" }}
+          style={{ left: activePoint.x, top: Math.max(0, activePoint.y - 8), transform: "translate(-50%, -100%)" }}
         >
-          <p className="font-semibold text-foreground">{formatMinuteOfDay(hover.point.minuteOfDay)}</p>
+          <p className="font-semibold text-foreground">{formatMinuteOfDay(activePoint.point.minuteOfDay)}</p>
           <ul className="mt-1 space-y-0.5">
-            {hover.point.pmn.map((value, band) =>
+            {activePoint.point.pmn.map((value, band) =>
               visibleBands[band] ? (
                 <li key={band} className="flex items-center gap-1.5 text-muted-foreground">
                   <span aria-hidden className="inline-block size-2 rounded-full" style={{ backgroundColor: BAND_COLORS[band] }} />

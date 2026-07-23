@@ -165,8 +165,20 @@ export function IdentificationsClient({ sessionDid }: { sessionDid: string | nul
   if (occurrences === null) {
     return (
       <div className="flex items-center justify-center gap-3 rounded-3xl border border-border bg-card/70 px-6 py-16 text-sm text-muted-foreground">
-        <Loader2Icon className="size-5 animate-spin text-primary" />
+        <Loader2Icon className="size-5 animate-spin text-primary motion-reduce:animate-none" />
         {t("loading")}
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="rounded-2xl bg-destructive/10 px-6 py-10 text-center">
+        <p role="alert" className="text-sm text-destructive">{error}</p>
+        <Button variant="outline" size="sm" className="mt-4" onClick={() => void load()}>
+          <RefreshCwIcon className="size-4" />
+          {t("refresh")}
+        </Button>
       </div>
     );
   }
@@ -197,13 +209,13 @@ export function IdentificationsClient({ sessionDid }: { sessionDid: string | nul
             <Input value={query} onChange={(event) => setQuery(event.target.value)} placeholder={t("searchPlaceholder")} className="h-8 pl-8 text-xs" />
           </div>
           <div className="flex flex-wrap gap-1.5">
-            <button type="button" aria-pressed={activeCategory === "all"} onClick={() => setActiveCategory("all")} className={cn("rounded-full border px-2.5 py-1 text-[11px] font-medium transition-colors", activeCategory === "all" ? "border-primary bg-primary/10 text-primary" : "border-border text-muted-foreground hover:bg-muted")}>{t("filterAll", { count: total })}</button>
+            <button type="button" aria-pressed={activeCategory === "all"} onClick={() => setActiveCategory("all")} className={cn("min-h-11 rounded-full border px-3 text-xs font-medium transition-colors", activeCategory === "all" ? "border-primary bg-primary/10 text-primary" : "border-border text-muted-foreground hover:bg-muted")}>{t("filterAll", { count: total })}</button>
             {AUDIO_LABEL_CATEGORIES.map((category) => {
               const count = counts[category];
               if (count === 0) return null;
               const { Icon } = CATEGORY_META[category];
               return (
-                <button key={category} type="button" aria-pressed={activeCategory === category} onClick={() => setActiveCategory(category)} className={cn("inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-[11px] font-medium transition-colors", activeCategory === category ? "border-primary bg-primary/10 text-primary" : "border-border text-muted-foreground hover:bg-muted")}>
+                <button key={category} type="button" aria-pressed={activeCategory === category} onClick={() => setActiveCategory(category)} className={cn("inline-flex min-h-11 items-center gap-1 rounded-full border px-3 text-xs font-medium transition-colors", activeCategory === category ? "border-primary bg-primary/10 text-primary" : "border-border text-muted-foreground hover:bg-muted")}>
                   <Icon className="size-3" />{t(`categories.${category}`)} · {count}
                 </button>
               );
@@ -211,8 +223,6 @@ export function IdentificationsClient({ sessionDid }: { sessionDid: string | nul
           </div>
         </div>
       ) : null}
-
-      {error ? <p className="rounded-xl bg-destructive/10 px-3 py-2 text-xs text-destructive">{error}</p> : null}
 
       {total === 0 ? (
         <div className="rounded-3xl border border-dashed border-border bg-muted/30 px-6 py-14 text-center">

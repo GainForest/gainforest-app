@@ -96,7 +96,7 @@ export function SpeciesSuggestions({ subjectUri }: { subjectUri: string }) {
                 {suggestion.note ? (
                   <p className="mt-2 text-sm leading-6 text-foreground/75">{suggestion.note}</p>
                 ) : null}
-                <span className="mt-3 inline-flex rounded-full bg-amber-500/10 px-2.5 py-1 text-[10px] font-medium uppercase tracking-[0.08em] text-amber-700 dark:text-amber-300">
+                <span className="mt-3 inline-flex rounded-full bg-amber-500/10 px-2.5 py-1 text-xs font-medium text-amber-700 dark:text-amber-300">
                   {t("status")}
                 </span>
               </div>

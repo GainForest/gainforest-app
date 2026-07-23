@@ -50,6 +50,7 @@ import { AccountHoverCard } from "@/app/_components/AccountHoverCard";
 import { QuickLikeButton } from "@/app/_components/QuickLike";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
+import { isFeedFilterVisible } from "./feed-visibility";
 
 type Filter = "all" | "following" | ActivityFeedKind;
 
@@ -120,13 +121,6 @@ const FILTERS: { key: Filter; Icon: typeof NewspaperIcon; authOnly?: boolean; ad
   { key: "organization", Icon: Building2Icon },
   { key: "donation", Icon: HeartHandshakeIcon, adminOnly: true },
 ];
-
-// Whether a filter tab is visible to the current viewer.
-function visibleTab(f: { authOnly?: boolean; adminOnly?: boolean }, signedIn: boolean, isAdmin: boolean): boolean {
-  if (f.authOnly && !signedIn) return false;
-  if (f.adminOnly && !isAdmin) return false;
-  return true;
-}
 
 function sharedObservationBatchNote(items: ActivityFeedItem[]): string | null {
   const eventIds = items.map((item) => item.observationEventId?.trim()).filter((value): value is string => Boolean(value));
@@ -332,7 +326,7 @@ export function FeedClient({
       {/* Hero */}
       <div className="relative isolate overflow-hidden">
         <div className="absolute inset-0 -z-10 bg-linear-to-b from-primary/8 via-primary/2 to-transparent" />
-        <div className="mx-auto flex max-w-3xl flex-col px-6 pb-4 pt-16 sm:px-8 sm:pb-6 sm:pt-[76px] animate-in lg:max-w-4xl">
+        <div className="mx-auto flex max-w-3xl animate-in flex-col px-6 pb-4 pt-16 motion-reduce:animate-none sm:px-8 sm:pb-6 sm:pt-[76px] lg:max-w-4xl">
           <h1
             className="text-3xl italic leading-[1.03] tracking-[-0.02em] text-foreground sm:text-4xl sm:leading-[0.98] lg:text-5xl"
             style={{ fontFamily: "var(--font-instrument-serif-var)", fontStyle: "italic" }}
@@ -442,7 +436,7 @@ export function FeedClient({
                       disabled={loadingMore}
                       className="inline-flex items-center gap-2 rounded-full border border-border bg-background px-5 py-2 text-sm font-medium text-foreground transition-colors hover:bg-muted disabled:opacity-60"
                     >
-                      {loadingMore ? <Loader2Icon className="size-4 animate-spin" /> : null}
+                      {loadingMore ? <Loader2Icon className="size-4 animate-spin motion-reduce:animate-none" /> : null}
                       {loadingMore ? t("loadingMore") : t("loadMore")}
                     </button>
                   </div>
@@ -502,7 +496,7 @@ function FeedFilterTabs({
   onSelect: (next: Filter) => void;
 }) {
   const t = useTranslations("common.feed");
-  const tabs = FILTERS.filter((f) => visibleTab(f, signedIn, isAdmin));
+  const tabs = FILTERS.filter((f) => isFeedFilterVisible(f, signedIn, isAdmin));
   return (
     <div className="no-scrollbar flex min-w-0 items-center gap-1 overflow-x-auto">
       {tabs.map(({ key, Icon, adminOnly }) => {
@@ -515,7 +509,7 @@ function FeedFilterTabs({
             onClick={() => onSelect(key)}
             aria-pressed={active}
             className={cn(
-              "inline-flex shrink-0 items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium transition-colors",
+              "inline-flex min-h-11 shrink-0 items-center gap-1.5 rounded-full px-3 text-xs font-medium transition-colors",
               active
                 ? "bg-primary text-primary-foreground"
                 : "text-muted-foreground hover:bg-muted hover:text-foreground",
@@ -551,7 +545,7 @@ function FeedFilterRail({
   loading: boolean;
 }) {
   const t = useTranslations("common.feed");
-  const tabs = FILTERS.filter((f) => visibleTab(f, signedIn, isAdmin));
+  const tabs = FILTERS.filter((f) => isFeedFilterVisible(f, signedIn, isAdmin));
   return (
     <div className="flex flex-col gap-1">
       <nav aria-label={t("filterHeading")} className="flex flex-col gap-0.5">
@@ -589,7 +583,7 @@ function FeedFilterRail({
         disabled={refreshing || loading}
         className="inline-flex w-fit items-center gap-1.5 rounded-full px-3 py-1 text-xs text-muted-foreground/60 transition-colors hover:text-foreground disabled:opacity-50"
       >
-        <RefreshCwIcon className={cn("size-3.5", refreshing && "animate-spin")} />
+        <RefreshCwIcon className={cn("size-3.5", refreshing && "animate-spin motion-reduce:animate-none")} />
         {t("refresh")}
       </button>
     </div>
@@ -655,14 +649,6 @@ function FeedRow({
 
         {/* Content */}
         <div className="min-w-0 flex-1">
-          {/* Text opens the record detail (or, for posts, expands the text in
-              place); photo and quick-like remain separate controls below. */}
-          <RowTextWrapper
-            isPost={isPost}
-            href={item.href}
-            expanded={postExpanded}
-            onToggle={() => setPostExpanded((v) => !v)}
-          >
           {/* Author line */}
           <div className="flex items-center gap-1.5 text-sm">
             <AccountHoverCard
@@ -672,7 +658,7 @@ function FeedRow({
               triggerClassName="min-w-0"
             >
               <span className="block truncate font-medium text-foreground hover:underline">
-                {item.actorName || item.actorDid ? item.actorName ?? shortDid(item.actorDid) : t("anonymous")}
+                {item.actorName?.trim() || t("anonymous")}
               </span>
             </AccountHoverCard>
             <span className="text-muted-foreground/60">·</span>
@@ -689,9 +675,15 @@ function FeedRow({
 
           {/* Headline */}
           {item.title ? (
-            <p className="mt-1.5 line-clamp-2 text-[15px] font-medium leading-snug text-foreground">
-              {item.title}
-            </p>
+            isPost ? (
+              <p className="mt-1.5 line-clamp-2 text-[15px] font-medium leading-snug text-foreground">
+                {item.title}
+              </p>
+            ) : (
+              <Link href={item.href} className="mt-1.5 block line-clamp-2 text-[15px] font-medium leading-snug text-foreground hover:underline">
+                {item.title}
+              </Link>
+            )
           ) : null}
 
           {/* Body text — expandable, so a long update can be read in place. */}
@@ -704,7 +696,11 @@ function FeedRow({
             />
           ) : null}
 
-          </RowTextWrapper>
+          {!isPost ? (
+            <Link href={item.href} className="mt-1 inline-flex min-h-11 items-center text-xs font-medium text-primary hover:underline">
+              {t("actions.viewDetails")}
+            </Link>
+          ) : null}
 
           {/* Cover image — the image itself opens the in-feed lightbox while
               the separate corner heart likes it immediately. Keeping them as
@@ -802,7 +798,7 @@ function DonationRow({
   onModerated?: (uri: string) => void;
 }) {
   const t = useTranslations("common.feed");
-  const donorLabel = item.actorName?.trim() || (item.actorDid ? shortDid(item.actorDid) : t("anonymous"));
+  const donorLabel = item.actorName?.trim() || t("anonymous");
   const amountLabel =
     item.amount != null
       ? item.currency === "USD"
@@ -876,54 +872,8 @@ function DonationRow({
   );
 }
 
-/** The clickable wrapper around a feed row's text: a link to the record's
- *  detail page for most kinds, but for posts (which have none — the old link
- *  landed on the author's profile, confusingly) a button that expands or
- *  collapses the post text in place, mirroring "Show more". */
-function RowTextWrapper({
-  isPost,
-  href,
-  expanded,
-  onToggle,
-  children,
-}: {
-  isPost: boolean;
-  href: string;
-  expanded: boolean;
-  onToggle: () => void;
-  children: React.ReactNode;
-}) {
-  if (!isPost) {
-    return (
-      <Link href={href} className="block">
-        {children}
-      </Link>
-    );
-  }
-  return (
-    <div
-      role="button"
-      tabIndex={0}
-      aria-expanded={expanded}
-      onClick={onToggle}
-      onKeyDown={(e) => {
-        if (e.key === "Enter" || e.key === " ") {
-          e.preventDefault();
-          onToggle();
-        }
-      }}
-      className="block cursor-pointer text-left"
-    >
-      {children}
-    </div>
-  );
-}
-
-/** Feed-row body text clamped to two lines, with a "Show more" toggle that
- *  appears only when the text actually overflows. Rendered inside the row's
- *  link, so the toggle swallows the click instead of navigating. Pass
- *  `expanded` + `onToggle` to control expansion from the row (posts, where
- *  clicking anywhere on the text toggles it too). */
+/** Feed-row body text clamped to two lines, with an independent “Show more”
+ *  button that appears only when text actually overflows. */
 function ExpandableBody({
   text,
   mentions,
@@ -999,7 +949,7 @@ function ObservationBatchCard({
 }) {
   const t = useTranslations("common.feed");
   const head = items[0]; // newest in the run
-  const actorName = head.actorName || (head.actorDid ? shortDid(head.actorDid) : t("anonymous"));
+  const actorName = head.actorName?.trim() || t("anonymous");
 
   // Read-only engagement total summed across the loaded run only (the sightings
   // shown here), NOT the org's full history — likes/comments live on each real
@@ -1143,7 +1093,7 @@ function ObservationBatchCard({
               className="group/all inline-flex items-center gap-1 font-medium text-primary hover:underline"
             >
               {t("batch.viewAll")}
-              <ArrowUpRightIcon className="size-3 transition-transform group-hover/all:translate-x-0.5 group-hover/all:-translate-y-0.5" />
+              <ArrowUpRightIcon className="size-3 transition-transform group-hover/all:translate-x-0.5 group-hover/all:-translate-y-0.5 motion-reduce:transform-none motion-reduce:transition-none" />
             </Link>
           </div>
 
@@ -1183,6 +1133,7 @@ function BatchComments({
 }) {
   const t = useTranslations("common.feed");
   const { getEngagement, getComments, loadComments } = interactions;
+  const [showAll, setShowAll] = useState(false);
 
   // Only sightings the indexer says already have comments are worth fetching.
   const commented = items.filter((it) => getEngagement(it.id).commentCount > 0);
@@ -1200,7 +1151,8 @@ function BatchComments({
     .flatMap((it) => buildCommentTree(getComments(it.id) ?? [], it.id).map((node) => ({ node, item: it })))
     .sort((a, b) => (b.node.comment.createdAt ?? "").localeCompare(a.node.comment.createdAt ?? ""));
   if (roots.length === 0) return null;
-  const shown = roots.slice(0, MAX_BATCH_COMMENTS);
+  const hiddenCount = Math.max(0, roots.length - MAX_BATCH_COMMENTS);
+  const shown = showAll ? roots : roots.slice(0, MAX_BATCH_COMMENTS);
 
   return (
     <div className="mt-3 border-t border-border/40 pt-2.5">
@@ -1221,6 +1173,16 @@ function BatchComments({
           />
         ))}
       </ul>
+      {hiddenCount > 0 || showAll ? (
+        <button
+          type="button"
+          onClick={() => setShowAll((current) => !current)}
+          aria-expanded={showAll}
+          className="mt-2 inline-flex min-h-11 items-center text-xs font-medium text-primary hover:underline"
+        >
+          {showAll ? t("actions.showLess") : t("batch.moreComments", { count: hiddenCount })}
+        </button>
+      ) : null}
     </div>
   );
 }
@@ -1462,10 +1424,6 @@ function FeedSkeleton() {
   );
 }
 
-function shortDid(did: string): string {
-  if (!did) return "";
-  return did.length > 18 ? `${did.slice(0, 10)}…${did.slice(-4)}` : did;
-}
 
 function fullDate(iso: string): string {
   if (!iso) return "";
