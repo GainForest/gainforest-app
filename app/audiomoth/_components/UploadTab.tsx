@@ -63,9 +63,13 @@ import {
 } from "@/app/_lib/ac-deployment";
 import {
   createAcAudioRecord,
+  legacyRecordingKey,
+  listUploadedRecordingKeys,
   listUploadedRecordingNames,
   uploadPreviewBlob,
+  type UploadedRecordingKeys,
 } from "@/app/_lib/ac-audio";
+import { computeFileCid } from "@/app/_lib/audiomoth/content-cid";
 
 /* ------------------------------------------------------------------ */
 /* Types                                                               */
@@ -79,6 +83,8 @@ interface ScannedRecording {
   id: string;
   file: File;
   info: AudioMothRecordingInfo | null;
+  /** Content CID, once computed by the already-uploaded check. */
+  cid?: string | null;
   status: FileStatus;
   /** 0–1 for the storage PUT. */
   progress: number;
@@ -189,10 +195,14 @@ export function UploadTab({ sessionDid }: { sessionDid: string | null }) {
   const [activeUploadIds, setActiveUploadIds] = useState<string[]>([]);
   /** User-editable group name for recordings without a matched deployment. */
   const [uploadName, setUploadName] = useState("");
+  /** Pre-upload check: which of the scanned files are already in the account. */
+  const [dedup, setDedup] = useState<{ state: "checking" | "done"; skipped: number } | null>(null);
 
   const folderInputRef = useRef<HTMLInputElement | null>(null);
   const filesInputRef = useRef<HTMLInputElement | null>(null);
   const cancelRef = useRef(false);
+  /** Bumped on every new scan/reset so stale dedup checks stop writing state. */
+  const scanTokenRef = useRef(0);
   const activeXhrsRef = useRef(new Set<XMLHttpRequest>());
   const retryAbortRef = useRef<AbortController | null>(null);
   const acDeploymentsRef = useRef<AcDeploymentItem[] | null>(null);
@@ -212,7 +222,58 @@ export function UploadTab({ sessionDid }: { sessionDid: string | null }) {
 
   /* ---------------- scanning ---------------- */
 
+  const setRecording = useCallback((id: string, patch: Partial<ScannedRecording>) => {
+    setRecordings((current) => current.map((r) => (r.id === id ? { ...r, ...patch } : r)));
+  }, []);
+
+  /**
+   * After scanning, hash each file and compare it against the recordings
+   * already in the account — by content CID, with a name+size fallback for
+   * records created before CIDs were stored. Matches are marked skipped
+   * before anything is uploaded.
+   */
+  const checkAlreadyUploaded = useCallback(
+    async (scanned: ScannedRecording[], token: number) => {
+      if (!sessionDid) return;
+      const readable = scanned.filter((r) => r.info);
+      if (readable.length === 0) return;
+      setDedup({ state: "checking", skipped: 0 });
+
+      let keys: UploadedRecordingKeys;
+      try {
+        keys = await listUploadedRecordingKeys(sessionDid);
+      } catch {
+        // The account couldn't be checked — proceed as a normal upload.
+        if (scanTokenRef.current === token) setDedup(null);
+        return;
+      }
+      if (scanTokenRef.current !== token) return;
+
+      let skipped = 0;
+      const BATCH = 4;
+      for (let i = 0; i < readable.length; i += BATCH) {
+        const batch = readable.slice(i, i + BATCH);
+        await Promise.all(
+          batch.map(async (rec) => {
+            const cid = await computeFileCid(rec.file);
+            if (scanTokenRef.current !== token) return;
+            const already =
+              (cid !== null && keys.cids.has(cid)) ||
+              keys.legacy.has(legacyRecordingKey(rec.file.name, rec.file.size));
+            if (already) skipped += 1;
+            setRecording(rec.id, already ? { cid, status: "skipped" } : { cid });
+          }),
+        );
+        if (scanTokenRef.current !== token) return;
+        setDedup({ state: "checking", skipped });
+      }
+      setDedup({ state: "done", skipped });
+    },
+    [sessionDid, setRecording],
+  );
+
   const scanFiles = useCallback(async (files: File[], folderName = "") => {
+    const token = ++scanTokenRef.current;
     const wavs = files.filter((f) => isWavName(f.name)).sort((a, b) => a.name.localeCompare(b.name));
     setDiscovered(null);
     setGlobalError(null);
@@ -220,6 +281,7 @@ export function UploadTab({ sessionDid }: { sessionDid: string | null }) {
     setUploadedBytes(0);
     setUploadName(folderName.trim());
     namedDeploymentRef.current = null;
+    setDedup(null);
     if (wavs.length === 0) {
       setStage("review");
       return;
@@ -246,7 +308,8 @@ export function UploadTab({ sessionDid }: { sessionDid: string | null }) {
 
     setRecordings(scanned);
     setStage("review");
-  }, []);
+    void checkAlreadyUploaded(scanned, token);
+  }, [checkAlreadyUploaded]);
 
   const pickFolder = useCallback(async () => {
     const picker = (window as unknown as { showDirectoryPicker?: () => Promise<unknown> }).showDirectoryPicker;
@@ -388,10 +451,6 @@ export function UploadTab({ sessionDid }: { sessionDid: string | null }) {
   }, [recordings]);
 
   /* ---------------- upload pipeline ---------------- */
-
-  const setRecording = useCallback((id: string, patch: Partial<ScannedRecording>) => {
-    setRecordings((current) => current.map((r) => (r.id === id ? { ...r, ...patch } : r)));
-  }, []);
 
   /** Find or create the ac.deployment for a matched chime event. */
   const resolveAcDeployment = useCallback(
@@ -535,6 +594,7 @@ export function UploadTab({ sessionDid }: { sessionDid: string | null }) {
 
         const pending = groupFiles.filter((rec) => {
           if (!targetIds.has(rec.id)) return false;
+          if (rec.status === "skipped") return false; // already in the account (content match)
           if (existingNames.has(rec.file.name)) {
             setRecording(rec.id, { status: "skipped" });
             return false;
@@ -639,8 +699,10 @@ export function UploadTab({ sessionDid }: { sessionDid: string | null }) {
           }
 
           const info = rec.info!;
+          const originalCid = rec.cid ?? (await computeFileCid(rec.file)) ?? undefined;
           await createAcAudioRecord({
             name: rec.file.name,
+            originalCid,
             metadata: {
               codec: "PCM",
               channels: info.channels,
@@ -700,12 +762,14 @@ export function UploadTab({ sessionDid }: { sessionDid: string | null }) {
   }, []);
 
   const reset = useCallback(() => {
+    scanTokenRef.current += 1;
     setRecordings([]);
     setStage("pick");
     setManualEventUri("none");
     setGlobalError(null);
     setUploadName("");
     namedDeploymentRef.current = null;
+    setDedup(null);
   }, []);
 
   /* ---------------- render ---------------- */
@@ -726,6 +790,7 @@ export function UploadTab({ sessionDid }: { sessionDid: string | null }) {
   const activeUploadFiles = recordings.filter((r) => activeUploadIdSet.has(r.id) && r.status !== "skipped");
   const activeDoneCount = activeUploadFiles.filter((r) => r.status === "done").length;
   const uploadableBytes = activeUploadFiles.reduce((sum, r) => sum + r.file.size, 0);
+  const uploadableCount = stats.count - skippedCount;
   const overallProgress = uploadableBytes > 0 ? Math.min(1, uploadedBytes / uploadableBytes) : 0;
 
   return (
@@ -959,6 +1024,20 @@ export function UploadTab({ sessionDid }: { sessionDid: string | null }) {
                   )}
                 </div>
 
+                {/* Already-uploaded check */}
+                {dedup && (dedup.state === "checking" || dedup.skipped > 0) && (
+                  <div className="flex items-center gap-2.5 rounded-xl bg-muted/50 px-3.5 py-2.5 text-sm text-muted-foreground">
+                    {dedup.state === "checking" ? (
+                      <Loader2Icon className="size-4 shrink-0 animate-spin text-primary" />
+                    ) : (
+                      <SkipForwardIcon className="size-4 shrink-0" />
+                    )}
+                    <span>
+                      {dedup.state === "checking" ? t("dedupChecking") : t("dedupSkipped", { count: dedup.skipped })}
+                    </span>
+                  </div>
+                )}
+
                 {/* File list */}
                 <div className="overflow-hidden rounded-2xl border border-border">
                   {recordings
@@ -1013,12 +1092,14 @@ export function UploadTab({ sessionDid }: { sessionDid: string | null }) {
                       </Button>
                       <Button
                         size="sm"
-                        disabled={needsName && !uploadName.trim()}
+                        disabled={(needsName && !uploadName.trim()) || dedup?.state === "checking" || uploadableCount === 0}
                         title={needsName && !uploadName.trim() ? t("groupNameRequired") : undefined}
                         onClick={() => void startUpload()}
                       >
                         <UploadIcon className="size-4" />
-                        {t("uploadButton", { count: stats.count })}
+                        {uploadableCount === 0 && dedup?.state === "done"
+                          ? t("allUploaded")
+                          : t("uploadButton", { count: uploadableCount })}
                       </Button>
                     </div>
                   </div>
@@ -1115,7 +1196,12 @@ function FileRow({
   const time = rec.info?.recordedAt ? rec.info.recordedAt.toLocaleString() : null;
 
   return (
-    <div className="flex items-center gap-3 border-b border-border/60 px-4 py-2.5 last:border-0">
+    <div
+      className={cn(
+        "flex items-center gap-3 border-b border-border/60 px-4 py-2.5 last:border-0",
+        rec.status === "skipped" && "opacity-60",
+      )}
+    >
       <span className="shrink-0 text-muted-foreground">
         <StatusIcon status={rec.status} />
       </span>

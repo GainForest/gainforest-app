@@ -42,6 +42,13 @@ export type AcAudioDraft = {
   spectrogramBlob?: UploadedBlobRef | null;
   /** URL of the archival original (object storage redirect). */
   accessUri?: string;
+  /**
+   * Content CID (CIDv1 raw sha-256) of the archival *original* — the
+   * full-resolution file behind `accessUri`, as opposed to the compressed
+   * preview variant stored as the PDS blob. Lets re-scans of the same SD
+   * card recognise byte-identical recordings and skip them.
+   */
+  originalCid?: string;
   deploymentRef?: string;
   recordedBy?: string;
   tags?: string[];
@@ -112,6 +119,7 @@ export function buildAcAudioRecord(draft: AcAudioDraft): Record<string, unknown>
     record.spectrogram = { file: draft.spectrogramBlob };
   }
   if (draft.accessUri) record.accessUri = draft.accessUri;
+  if (draft.originalCid) record.originalCid = draft.originalCid;
   if (draft.deploymentRef) record.deploymentRef = draft.deploymentRef;
   if (draft.recordedBy) record.recordedBy = draft.recordedBy;
   if (draft.tags?.length) record.tags = draft.tags;
@@ -247,6 +255,62 @@ export async function listRecordingsForDeployment(
   return listAcAudioItems(did, (value) => value.deploymentRef === deploymentUri, signal);
 }
 
+
+/* ── Already-uploaded detection ───────────────────────────────────────────── */
+
+/** Identity keys of every recording already in a repo, for pre-upload dedup. */
+export type UploadedRecordingKeys = {
+  /** Content CIDs (`originalCid`) of the archival originals. */
+  cids: Set<string>;
+  /** `name + file size` keys for records created before CIDs were stored. */
+  legacy: Set<string>;
+};
+
+/** Fallback identity for records that predate `originalCid`. */
+export function legacyRecordingKey(name: string, fileSizeBytes: number): string {
+  return `${name}\u0000${fileSizeBytes}`;
+}
+
+/**
+ * Every recording identity in a repo — content CIDs where stored, plus a
+ * name+size fallback for older records — so the uploader can skip files
+ * whose content is already in the account before uploading anything.
+ * Throws when the repo cannot be listed (callers then skip dedup).
+ */
+export async function listUploadedRecordingKeys(did: string, signal?: AbortSignal): Promise<UploadedRecordingKeys> {
+  const host = await resolvePdsHost(did, signal);
+  if (!host) throw new Error(`Could not resolve the data host for ${did}.`);
+
+  const keys: UploadedRecordingKeys = { cids: new Set(), legacy: new Set() };
+  let cursor: string | undefined;
+  do {
+    const params = new URLSearchParams({ repo: did, collection: AC_AUDIO_COLLECTION, limit: "100" });
+    if (cursor) params.set("cursor", cursor);
+    const res = await fetch(`https://${host}/xrpc/com.atproto.repo.listRecords?${params.toString()}`, {
+      signal,
+      cache: "no-store",
+    });
+    if (!res.ok) {
+      if (res.status === 400 && keys.cids.size === 0 && keys.legacy.size === 0) return keys; // no collection yet
+      throw new Error(`Could not load recordings (${res.status}).`);
+    }
+    const data = (await res.json()) as {
+      records?: Array<{ value?: unknown }>;
+      cursor?: unknown;
+    };
+    for (const r of data.records ?? []) {
+      if (!isRecord(r.value)) continue;
+      if (typeof r.value.originalCid === "string") keys.cids.add(r.value.originalCid);
+      const metadata = isRecord(r.value.metadata) ? r.value.metadata : null;
+      if (typeof r.value.name === "string" && typeof metadata?.fileSizeBytes === "number") {
+        keys.legacy.add(legacyRecordingKey(r.value.name, metadata.fileSizeBytes));
+      }
+    }
+    cursor = typeof data.cursor === "string" ? data.cursor : undefined;
+  } while (cursor);
+
+  return keys;
+}
 
 /**
  * The names (filenames) of all ac.audio records already linked to a
