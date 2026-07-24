@@ -153,7 +153,9 @@
       "createBumicert": "Buat sertifikat",
       "createProject": "Buat proyek",
       "addObservations": "Tambah observasi",
-      "addData": "Tambah data"
+      "addData": "Tambah data",
+      "project": "Proyek",
+      "observation": "Observasi"
     },
     "tabs": {
       "explore": "Jelajahi",

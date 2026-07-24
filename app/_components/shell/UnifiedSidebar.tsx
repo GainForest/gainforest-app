@@ -11,7 +11,6 @@ import {
   ChevronLeftIcon,
   LeafIcon,
   LayoutGridIcon,
-  PlusIcon,
   SparkleIcon,
   UserIcon,
 } from "lucide-react";
@@ -75,10 +74,7 @@ export function UnifiedSidebar({
 
         <div className="mt-auto flex flex-col gap-3 pt-4">
           {authSession?.isLoggedIn ? (
-            <>
-              <BumicertCreationCard sessionDid={authSession.did} />
-              <AddObservationsCard sessionDid={authSession.did} />
-            </>
+            <CreationHubCard sessionDid={authSession.did} />
           ) : (
             <SignInPrompt collapsed={collapsed} />
           )}
@@ -228,33 +224,56 @@ function ExploreNav({ sessionDid }: { sessionDid: string | null }) {
   const showMore = moreOpen;
   let leafIndex = 0;
 
-  const renderSections = (items: typeof sections, showSectionLabels: boolean) =>
-    items.map((section) => (
-      <div key={section.id} className="flex flex-col gap-0.5">
-        {showSectionLabels && !collapsed ? (
-          <div className="px-2.5 py-1 text-xs font-medium text-muted-foreground">
-            {sectionsT(section.id)}
-          </div>
-        ) : null}
-        <ul className="flex flex-col gap-0.5">
-          {section.items.map((item) => {
-            leafIndex += 1;
-            return (
-              <NavLeafRow
-                key={item.id}
-                item={{ ...item, text: t(item.id) }}
-                isActive={isLeafActive(item.pathCheck, pathname)}
-                index={leafIndex}
-              />
-            );
-          })}
-        </ul>
-      </div>
-    ));
+  const renderSections = (items: typeof sections, showSectionLabels: boolean, allowGrid = false) =>
+    items.map((section) => {
+      // The Explore group is the everyday entry point (Feed · Projects ·
+      // Observations · Globe); a 2×2 grid of icon tiles reads as a launcher
+      // rather than a plain list. Collapsed rail and the "More" overflow keep
+      // the compact row layout.
+      const asGrid = allowGrid && section.id === "explore" && !collapsed;
+      return (
+        <div key={section.id} className="flex flex-col gap-0.5">
+          {showSectionLabels && !collapsed ? (
+            <div className="px-2.5 py-1 text-xs font-medium text-muted-foreground">
+              {sectionsT(section.id)}
+            </div>
+          ) : null}
+          {asGrid ? (
+            <ul className="grid grid-cols-2 gap-2 px-0.5 pb-0.5 pt-0.5">
+              {section.items.map((item) => {
+                leafIndex += 1;
+                return (
+                  <NavLeafTile
+                    key={item.id}
+                    item={{ ...item, text: t(item.id) }}
+                    isActive={isLeafActive(item.pathCheck, pathname)}
+                    index={leafIndex}
+                  />
+                );
+              })}
+            </ul>
+          ) : (
+            <ul className="flex flex-col gap-0.5">
+              {section.items.map((item) => {
+                leafIndex += 1;
+                return (
+                  <NavLeafRow
+                    key={item.id}
+                    item={{ ...item, text: t(item.id) }}
+                    isActive={isLeafActive(item.pathCheck, pathname)}
+                    index={leafIndex}
+                  />
+                );
+              })}
+            </ul>
+          )}
+        </div>
+      );
+    });
 
   return (
     <div className="flex flex-col gap-1">
-      {renderSections(primarySections, true)}
+      {renderSections(primarySections, true, true)}
       {secondarySections.length > 0 ? (
         <div className="mt-1 border-t border-border/70 pt-1">
           {!showMore ? (
@@ -406,142 +425,194 @@ function NavLeafRow({ item, isActive, index, paired = false }: { item: NavLeaf; 
   );
 }
 
-function BumicertCreationCard({ sessionDid }: { sessionDid: string }) {
-  const t = useTranslations("common.sidebar.creationCard");
-  const collapsed = useSidebarCollapsed();
-  const hasProjects = useActiveContextHasProjects(sessionDid);
-
-  // Hide the create-project CTA once this account already has a project.
-  if (hasProjects) return null;
-
-  if (collapsed) {
-    return (
-      <SidebarTooltip label={t("createProject")}>
-        <span className="mx-auto flex w-fit">
-          <CreateProjectButton
-            sessionDid={sessionDid}
-            className={cn(
-              buttonVariants({ variant: "outline", size: "icon" }),
-              "bg-background hover:bg-primary hover:text-primary-foreground",
-            )}
-          >
-            <PlusIcon />
-            <span className="sr-only">{t("createProject")}</span>
-          </CreateProjectButton>
-        </span>
-      </SidebarTooltip>
-    );
-  }
-
+/** Grid tile used for the Explore launcher (expanded sidebar only): a stacked
+ *  icon-over-label affordance laid out as a 2×2 launcher instead of a column.
+ *  Tiles are raised `bg-background` insets against the muted sidebar (a quiet
+ *  contrast surface, not a per-sibling border — design.md §7); only the active
+ *  tile takes the filled primary treatment, matching the list rows. */
+function NavLeafTile({ item, isActive, index }: { item: NavLeaf; isActive: boolean; index: number }) {
   return (
-    <div className="group flex h-20 w-full flex-col rounded-2xl border border-border bg-background p-1">
-      <div className="relative flex-1">
-        <SparkleIcon
-          className="absolute bottom-2 left-4 size-6 rotate-30 animate-spin-slow text-primary opacity-50 transition-all duration-300 group-hover:scale-130 group-hover:opacity-30 motion-reduce:animate-none motion-reduce:transition-none"
-          fill="currentcolor"
-          strokeWidth={0}
-        />
-        <SparkleIcon
-          className="absolute bottom-1 left-12 size-3 rotate-60 animate-spin-slow text-primary opacity-30 transition-all duration-300 group-hover:scale-130 group-hover:opacity-50 motion-reduce:animate-none motion-reduce:transition-none"
-          fill="currentcolor"
-          strokeWidth={0}
-        />
-        <SparkleIcon
-          className="absolute bottom-2 right-2 size-6 rotate-60 animate-spin-slow text-primary opacity-50 transition-all duration-300 group-hover:scale-130 group-hover:opacity-30 motion-reduce:animate-none motion-reduce:transition-none"
-          fill="currentcolor"
-          strokeWidth={0}
-        />
-        <SparkleIcon
-          className="absolute bottom-1 right-10 size-3 rotate-30 animate-spin-slow text-primary opacity-30 transition-all duration-300 group-hover:scale-130 group-hover:opacity-50 motion-reduce:animate-none motion-reduce:transition-none"
-          fill="currentcolor"
-          strokeWidth={0}
-        />
-        <div className="absolute -bottom-4 left-1/2 z-1 flex h-20 w-16 -translate-x-1/2 -rotate-12 scale-100 flex-col gap-1 rounded-xl border border-border bg-background/50 p-1 shadow-xl backdrop-blur-lg transition-transform group-hover:-rotate-30 group-hover:scale-120 motion-reduce:transform-none motion-reduce:transition-none">
-          <div className="flex h-10 w-full items-center justify-center rounded-lg bg-primary/20">
-            <LeafIcon className="size-6 text-primary opacity-80" />
-          </div>
-          <div className="h-2 w-8 rounded-lg bg-muted" />
-          <div className="h-2 w-full rounded-lg bg-muted" />
-        </div>
-      </div>
-      <CreateProjectButton
-        sessionDid={sessionDid}
-        className={cn(
-          buttonVariants({ variant: "outline", size: "sm" }),
-          "relative z-2 w-full bg-background hover:bg-primary hover:text-primary-foreground",
-        )}
+    <motion.li
+      initial={{ opacity: 0, y: 6 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.3, delay: 0.04 * index, ease: [0.25, 0.1, 0.25, 1] }}
+    >
+      <Link
+        href={item.href}
+        aria-current={isActive ? "page" : undefined}
+        className="group block rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
       >
-        <PlusIcon /> {t("createProject")}
-      </CreateProjectButton>
+        <motion.div
+          whileHover={{ y: -2 }}
+          whileTap={{ scale: 0.97 }}
+          transition={{ type: "spring", stiffness: 400, damping: 28 }}
+          className={cn(
+            "relative flex h-full flex-col items-center gap-1.5 rounded-xl px-2 py-2.5 text-center transition-colors motion-reduce:transition-none",
+            isActive
+              ? "bg-primary text-primary-foreground"
+              : "bg-background text-muted-foreground hover:text-primary",
+          )}
+        >
+          <item.Icon className="size-5 shrink-0" />
+          <span className="text-xs font-medium leading-tight">{item.text}</span>
+          {item.adminOnly ? <AdminOnlyIndicator className="absolute right-1.5 top-1.5" /> : null}
+        </motion.div>
+      </Link>
+    </motion.li>
+  );
+}
+
+/** Always-on spinning sparkles scattered across the pop-out band above the
+ *  card. Uses the card's `group/card` hover and honors reduced motion. */
+function CreationSparkles() {
+  const sparkle =
+    "absolute animate-spin-slow text-primary transition-all duration-300 motion-reduce:animate-none motion-reduce:transition-none";
+  return (
+    <div aria-hidden className="pointer-events-none absolute inset-x-0 -top-7 h-16">
+      <SparkleIcon className={cn(sparkle, "left-2 top-7 size-6 rotate-30 opacity-50 group-hover/card:scale-125 group-hover/card:opacity-40")} fill="currentcolor" strokeWidth={0} />
+      <SparkleIcon className={cn(sparkle, "left-11 top-2 size-3 rotate-45 opacity-40 group-hover/card:scale-125 group-hover/card:opacity-60")} fill="currentcolor" strokeWidth={0} />
+      <SparkleIcon className={cn(sparkle, "right-2 top-7 size-6 rotate-45 opacity-50 group-hover/card:scale-125 group-hover/card:opacity-40")} fill="currentcolor" strokeWidth={0} />
+      <SparkleIcon className={cn(sparkle, "right-11 top-2 size-3 rotate-30 opacity-40 group-hover/card:scale-125 group-hover/card:opacity-60")} fill="currentcolor" strokeWidth={0} />
     </div>
   );
 }
 
-function AddObservationsCard({ sessionDid }: { sessionDid: string }) {
+// The bold 3D "record" tile — the hero of the creation card. It reads as a
+// nature record being minted (tinted icon plate over two skeleton lines) and is
+// positioned to break out over the card's top edge, tilted with a soft shadow.
+// The parent card animates its transform on hover; the tile only declares the
+// look. Position/rotation come from `className`.
+function CreationTile({
+  Icon,
+  className,
+}: {
+  Icon: React.ComponentType<{ className?: string }>;
+  className?: string;
+}) {
+  return (
+    <div
+      className={cn(
+        "absolute left-1/2 flex h-[72px] w-[60px] flex-col gap-1.5 rounded-2xl border border-border bg-background p-2 shadow-xl transition-transform duration-300 ease-out motion-reduce:transform-none motion-reduce:transition-none",
+        className,
+      )}
+    >
+      <div className="flex flex-1 items-center justify-center rounded-xl bg-primary/15">
+        <Icon className="size-6 text-primary" />
+      </div>
+      <div className="h-1 w-2/3 rounded-full bg-muted" />
+      <div className="h-1 w-full rounded-full bg-muted" />
+    </div>
+  );
+}
+
+// One expressive creation region instead of two near-identical cards. It always
+// carries "Add observations" (the everyday path); "Create a project" joins it
+// only while the active account still has no project. Whatever the state, the
+// card keeps the same playful language — spinning sparkles and a bold 3D record
+// tile that breaks out over the top edge, plus CTAs that fill on hover — so the
+// three variants feel like one family while the tile art + icons say at a glance
+// what each opens. See [[project_site_modal_architecture]] for what each opens.
+function CreationHubCard({ sessionDid }: { sessionDid: string }) {
   const t = useTranslations("common.sidebar.creationCard");
   const collapsed = useSidebarCollapsed();
+  const hasProjects = useActiveContextHasProjects(sessionDid);
+  // The create-project affordance retires once the account owns a project; the
+  // Projects nav item and in-page "Add" cover further creation.
+  const showProject = !hasProjects;
+  const variant: "observation" | "both" = showProject ? "both" : "observation";
+
+  // Shared CTA recipe: a recessed slot that fills primary on hover — the
+  // original card's playful "press to plant" feel, kept for every variant.
+  const ctaSlot =
+    "flex items-center justify-center gap-2 rounded-xl bg-muted font-medium text-foreground transition-colors hover:bg-primary hover:text-primary-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50 motion-reduce:transition-none";
 
   if (collapsed) {
     return (
-      <SidebarTooltip label={t("addObservations")}>
-        <span className="mx-auto flex w-fit">
-          <AddObservationsButton
-            sessionDid={sessionDid}
-            dataTaina="add-observations"
-            className={cn(
-              buttonVariants({ variant: "outline", size: "icon" }),
-              "bg-background hover:bg-primary hover:text-primary-foreground",
-            )}
-          >
-            <BinocularsIcon />
-            <span className="sr-only">{t("addObservations")}</span>
-          </AddObservationsButton>
-        </span>
-      </SidebarTooltip>
+      <div className="flex flex-col items-center gap-1.5">
+        <SidebarTooltip label={t("addObservations")}>
+          <span className="flex w-fit">
+            <AddObservationsButton
+              sessionDid={sessionDid}
+              dataTaina="add-observations"
+              className={cn(buttonVariants({ variant: "outline", size: "icon" }), "bg-background hover:bg-primary hover:text-primary-foreground")}
+            >
+              <BinocularsIcon />
+              <span className="sr-only">{t("addObservations")}</span>
+            </AddObservationsButton>
+          </span>
+        </SidebarTooltip>
+        {showProject ? (
+          <SidebarTooltip label={t("createProject")}>
+            <span className="flex w-fit">
+              <CreateProjectButton
+                sessionDid={sessionDid}
+                className={cn(buttonVariants({ variant: "outline", size: "icon" }), "bg-background hover:bg-primary hover:text-primary-foreground")}
+              >
+                <LeafIcon />
+                <span className="sr-only">{t("createProject")}</span>
+              </CreateProjectButton>
+            </span>
+          </SidebarTooltip>
+        ) : null}
+      </div>
     );
   }
 
   return (
-    <div className="group flex h-20 w-full flex-col rounded-2xl border border-border bg-background p-1">
-      <div className="relative flex-1">
-        <SparkleIcon
-          className="absolute bottom-2 left-4 size-6 rotate-30 animate-spin-slow text-primary opacity-50 transition-all duration-300 group-hover:scale-130 group-hover:opacity-30 motion-reduce:animate-none motion-reduce:transition-none"
-          fill="currentcolor"
-          strokeWidth={0}
+    // `mt-9` reserves the pop-out band above the card so the tile can breach the
+    // top edge without colliding with the nav; `overflow-visible` lets it, and
+    // `pt-9` keeps the CTAs clear of the tile's lower half.
+    <div className="group/card relative isolate mt-9 flex w-full flex-col gap-1.5 overflow-visible rounded-2xl border border-border bg-background px-2 pb-2 pt-9">
+      {/* Soft primary glow behind the popped tile (hidden where the opaque card
+          body overlaps it; visible in the pop-out band above the top edge). */}
+      <div aria-hidden className="pointer-events-none absolute left-1/2 top-0 -z-10 size-24 -translate-x-1/2 -translate-y-1/2 rounded-full bg-primary/15 blur-2xl" />
+      <CreationSparkles />
+      {/* The 3D record tile(s) straddle the top edge (-top-9) and lift on hover. */}
+      {variant === "both" ? (
+        <>
+          <CreationTile
+            Icon={LeafIcon}
+            className="-top-9 -translate-x-[82%] -rotate-[14deg] group-hover/card:-translate-x-[112%] group-hover/card:-translate-y-1 group-hover/card:-rotate-[24deg]"
+          />
+          <CreationTile
+            Icon={BinocularsIcon}
+            className="-top-10 z-1 -translate-x-[18%] rotate-[10deg] group-hover/card:-translate-x-[2%] group-hover/card:-translate-y-1.5 group-hover/card:rotate-[22deg]"
+          />
+        </>
+      ) : (
+        <CreationTile
+          Icon={variant === "project" ? LeafIcon : BinocularsIcon}
+          className="-top-9 -translate-x-1/2 -rotate-6 group-hover/card:-translate-y-1.5 group-hover/card:-rotate-12"
         />
-        <SparkleIcon
-          className="absolute bottom-1 left-12 size-3 rotate-60 animate-spin-slow text-primary opacity-30 transition-all duration-300 group-hover:scale-130 group-hover:opacity-50 motion-reduce:animate-none motion-reduce:transition-none"
-          fill="currentcolor"
-          strokeWidth={0}
-        />
-        <SparkleIcon
-          className="absolute bottom-2 right-2 size-6 rotate-60 animate-spin-slow text-primary opacity-50 transition-all duration-300 group-hover:scale-130 group-hover:opacity-30 motion-reduce:animate-none motion-reduce:transition-none"
-          fill="currentcolor"
-          strokeWidth={0}
-        />
-        <SparkleIcon
-          className="absolute bottom-1 right-10 size-3 rotate-30 animate-spin-slow text-primary opacity-30 transition-all duration-300 group-hover:scale-130 group-hover:opacity-50 motion-reduce:animate-none motion-reduce:transition-none"
-          fill="currentcolor"
-          strokeWidth={0}
-        />
-        <div className="absolute -bottom-4 left-1/2 z-1 flex h-20 w-16 -translate-x-1/2 -rotate-12 scale-100 flex-col gap-1 rounded-xl border border-border bg-background/50 p-1 shadow-xl backdrop-blur-lg transition-transform group-hover:-rotate-30 group-hover:scale-120 motion-reduce:transform-none motion-reduce:transition-none">
-          <div className="flex h-10 w-full items-center justify-center rounded-lg bg-primary/20">
-            <BinocularsIcon className="size-6 text-primary opacity-80" />
-          </div>
-          <div className="h-2 w-8 rounded-lg bg-muted" />
-          <div className="h-2 w-full rounded-lg bg-muted" />
+      )}
+
+      {variant === "both" ? (
+        <div className="grid grid-cols-2 gap-1.5">
+          <AddObservationsButton
+            sessionDid={sessionDid}
+            dataTaina="add-observations"
+            className={cn(ctaSlot, "h-auto flex-col gap-1 px-2 py-2 text-xs")}
+          >
+            <BinocularsIcon className="size-4" />
+            <span className="leading-tight">{t("observation")}</span>
+          </AddObservationsButton>
+          <CreateProjectButton
+            sessionDid={sessionDid}
+            className={cn(ctaSlot, "h-auto flex-col gap-1 px-2 py-2 text-xs")}
+          >
+            <LeafIcon className="size-4" />
+            <span className="leading-tight">{t("project")}</span>
+          </CreateProjectButton>
         </div>
-      </div>
-      <AddObservationsButton
-        sessionDid={sessionDid}
-        dataTaina="add-observations"
-        className={cn(
-          buttonVariants({ variant: "outline", size: "sm" }),
-          "relative z-2 w-full bg-background hover:bg-primary hover:text-primary-foreground",
-        )}
-      >
-        <BinocularsIcon /> {t("addObservations")}
-      </AddObservationsButton>
+      ) : (
+        <AddObservationsButton
+          sessionDid={sessionDid}
+          dataTaina="add-observations"
+          className={cn(ctaSlot, "h-9 w-full px-3 text-sm")}
+        >
+          <BinocularsIcon className="size-4" /> {t("addObservations")}
+        </AddObservationsButton>
+      )}
     </div>
   );
 }

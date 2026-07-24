@@ -153,7 +153,9 @@
       "createBumicert": "Crear un certificado",
       "createProject": "Crear un proyecto",
       "addObservations": "Agregar observaciones",
-      "addData": "Agregar datos"
+      "addData": "Agregar datos",
+      "project": "Proyecto",
+      "observation": "Observación"
     },
     "tabs": {
       "explore": "Explorar",
