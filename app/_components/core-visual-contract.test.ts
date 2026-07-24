@@ -29,6 +29,27 @@ describe("core visual hierarchy", () => {
     expect(sidebar).toContain('"relative h-8 w-full"');
   });
 
+  it("keeps the revised sidebar hierarchy and motion contracts", () => {
+    const sidebar = read("app/_components/shell/UnifiedSidebar.tsx");
+
+    expect(sidebar).toContain("grid grid-cols-2");
+    expect(sidebar).toContain('aria-expanded={showMore}');
+    expect(sidebar).toContain('layoutId="sidebar-nav-active"');
+    expect(sidebar).toContain('<MotionConfig reducedMotion="user">');
+    expect(sidebar).toContain('t("observation")');
+    expect(sidebar).toContain('t("project")');
+  });
+
+  it("keeps notifications persistently available on phones and in the sidebar", () => {
+    const header = read("app/_components/shell/ShellHeader.tsx");
+    const sidebar = read("app/_components/shell/UnifiedSidebar.tsx");
+
+    expect(header).toContain('name="notification-bell-mobile"');
+    expect(header).toContain('className="md:hidden"');
+    expect(header).toContain("<NotificationBell session={authSession} />");
+    expect(sidebar).toContain('<NotificationBell session={authSession} variant="sidebar" />');
+  });
+
   it("does not use imperceptible persistent fills on audited core surfaces", () => {
     for (const path of surfaceFiles) {
       const persistentWeakFills = read(path)
