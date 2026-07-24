@@ -432,7 +432,7 @@ export function FeedClient({
           </div>
         ) : (
           <>
-            <ol className="relative divide-y divide-border/50">
+            <ol className="relative divide-y divide-border/80">
               {entries.map((entry) =>
                 entry.type === "batch" ? (
                   <ObservationBatchCard
@@ -1037,7 +1037,7 @@ function RowTextWrapper({
   );
 }
 
-/** Feed-row body text clamped to two lines, with a "Show more" toggle that
+/** Feed-row body text clamped to four lines, with a "Show more" toggle that
  *  appears only when the text actually overflows. Rendered inside the row's
  *  link, so the toggle swallows the click instead of navigating. Pass
  *  `expanded` + `onToggle` to control expansion from the row (posts, where
@@ -1078,8 +1078,8 @@ function ExpandableBody({
         className={cn(
           // pre-wrap keeps the author's line breaks even while clamped — the
           // clamp then counts rendered lines, so a many-line post still folds.
-          "mt-0.5 whitespace-pre-wrap break-words text-sm leading-relaxed text-muted-foreground",
-          !expanded && "line-clamp-2",
+          "mt-0.5 whitespace-pre-wrap break-words text-sm leading-relaxed text-foreground/80",
+          !expanded && "line-clamp-4",
         )}
       >
         <MentionText text={text} mentions={mentions} />
