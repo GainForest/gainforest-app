@@ -25,6 +25,7 @@ import {
   HardDriveIcon,
   Loader2Icon,
   MapPinIcon,
+  RotateCcwIcon,
   SkipForwardIcon,
   UploadIcon,
   XIcon,
@@ -42,6 +43,12 @@ import {
   type AudioMothRecordingInfo,
 } from "@/app/_lib/audiomoth/wav-metadata";
 import { renderSpectrogramPng } from "@/app/_lib/audiomoth/spectrogram";
+import {
+  AUDIO_UPLOAD_MAX_ATTEMPTS,
+  isRetryableStorageError,
+  isUploadAbortError,
+  withUploadRetries,
+} from "@/app/_lib/audiomoth/upload-retry";
 import {
   listDeploymentEvents,
   type DeploymentEventItem,
@@ -63,7 +70,7 @@ import {
 
 type Stage = "pick" | "scanning" | "review" | "uploading" | "done";
 
-type FileStatus = "queued" | "skipped" | "uploading" | "saving" | "done" | "error";
+type FileStatus = "queued" | "skipped" | "uploading" | "retrying" | "saving" | "done" | "error";
 
 interface ScannedRecording {
   id: string;
@@ -72,6 +79,8 @@ interface ScannedRecording {
   status: FileStatus;
   /** 0–1 for the storage PUT. */
   progress: number;
+  retryAttempt?: number;
+  retryMax?: number;
   error?: string;
 }
 
@@ -174,11 +183,13 @@ export function UploadTab({ sessionDid }: { sessionDid: string | null }) {
   const [globalError, setGlobalError] = useState<string | null>(null);
   const [dragging, setDragging] = useState(false);
   const [uploadedBytes, setUploadedBytes] = useState(0);
+  const [activeUploadIds, setActiveUploadIds] = useState<string[]>([]);
 
   const folderInputRef = useRef<HTMLInputElement | null>(null);
   const filesInputRef = useRef<HTMLInputElement | null>(null);
   const cancelRef = useRef(false);
   const activeXhrsRef = useRef(new Set<XMLHttpRequest>());
+  const retryAbortRef = useRef<AbortController | null>(null);
   const acDeploymentsRef = useRef<AcDeploymentItem[] | null>(null);
 
   /* ---------------- deployments for matching ---------------- */
@@ -410,6 +421,23 @@ export function UploadTab({ sessionDid }: { sessionDid: string | null }) {
 
   const startUpload = useCallback(async () => {
     if (!sessionDid) return;
+    const candidates = [...groups.values()]
+      .flat()
+      .filter((rec) => rec.status === "queued" || rec.status === "error");
+    if (candidates.length === 0) return;
+
+    const targetIds = new Set(candidates.map((rec) => rec.id));
+    const retryController = new AbortController();
+    retryAbortRef.current?.abort();
+    retryAbortRef.current = retryController;
+    setActiveUploadIds([...targetIds]);
+    setRecordings((current) =>
+      current.map((rec) =>
+        targetIds.has(rec.id)
+          ? { ...rec, status: "queued", progress: 0, retryAttempt: undefined, retryMax: undefined, error: undefined }
+          : rec,
+      ),
+    );
     setGlobalError(null);
     setStage("uploading");
     cancelRef.current = false;
@@ -424,13 +452,15 @@ export function UploadTab({ sessionDid }: { sessionDid: string | null }) {
         const event = deploymentId ? matchFor(deploymentId) : manualEvent;
         const deploymentRef = event ? await resolveAcDeployment(event) : null;
 
-        // Skip files already uploaded for this deployment (re-inserted card).
+        // Skip files already uploaded for this deployment (re-inserted card or
+        // a save whose response was lost before a manual retry).
         let existingNames = new Set<string>();
         if (deploymentRef) {
           existingNames = await listUploadedRecordingNames(sessionDid, deploymentRef).catch(() => new Set<string>());
         }
 
         const pending = groupFiles.filter((rec) => {
+          if (!targetIds.has(rec.id)) return false;
           if (existingNames.has(rec.file.name)) {
             setRecording(rec.id, { status: "skipped" });
             return false;
@@ -448,6 +478,7 @@ export function UploadTab({ sessionDid }: { sessionDid: string | null }) {
               deploymentId: deploymentId || undefined,
               files: chunk.map((rec) => ({ name: rec.file.name, sizeBytes: rec.file.size })),
             }),
+            signal: retryController.signal,
           });
           const json = (await res.json().catch(() => null)) as {
             error?: string;
@@ -467,8 +498,11 @@ export function UploadTab({ sessionDid }: { sessionDid: string | null }) {
         }
       }
     } catch (err) {
-      setGlobalError(err instanceof Error && err.message === "not_configured" ? t("notConfigured") : t("uploadFailed"));
+      if (!isUploadAbortError(err)) {
+        setGlobalError(err instanceof Error && err.message === "not_configured" ? t("notConfigured") : t("uploadFailed"));
+      }
       setStage("review");
+      if (retryAbortRef.current === retryController) retryAbortRef.current = null;
       return;
     }
 
@@ -480,9 +514,32 @@ export function UploadTab({ sessionDid }: { sessionDid: string | null }) {
         if (!job) return;
         const { rec, key, url, deploymentRef } = job;
         try {
-          setRecording(rec.id, { status: "uploading", progress: 0 });
-          await putToStorage(rec, url);
-          setRecording(rec.id, { status: "saving", progress: 1 });
+          await withUploadRetries(
+            async (attempt) => {
+              if (cancelRef.current) throw new Error("aborted");
+              setRecording(rec.id, {
+                status: "uploading",
+                progress: 0,
+                retryAttempt: attempt,
+                retryMax: AUDIO_UPLOAD_MAX_ATTEMPTS,
+                error: undefined,
+              });
+              await putToStorage(rec, url);
+            },
+            {
+              shouldRetry: isRetryableStorageError,
+              signal: retryController.signal,
+              onRetry: ({ nextAttempt, maxAttempts }) => {
+                setRecording(rec.id, {
+                  status: "retrying",
+                  progress: 0,
+                  retryAttempt: nextAttempt,
+                  retryMax: maxAttempts,
+                });
+              },
+            },
+          );
+          setRecording(rec.id, { status: "saving", progress: 1, retryAttempt: undefined, retryMax: undefined });
 
           let previewBlob = null;
           let spectrogramBlob = null;
@@ -519,27 +576,42 @@ export function UploadTab({ sessionDid }: { sessionDid: string | null }) {
             tags: ["audiomoth", "passive-acoustic-monitoring"],
           });
 
-          setRecording(rec.id, { status: "done" });
+          setRecording(rec.id, {
+            status: "done",
+            retryAttempt: undefined,
+            retryMax: undefined,
+            error: undefined,
+          });
           setUploadedBytes((current) => current + rec.file.size);
         } catch (err) {
-          if (err instanceof Error && err.message === "aborted") {
-            setRecording(rec.id, { status: "queued", progress: 0 });
+          if (isUploadAbortError(err)) {
+            setRecording(rec.id, {
+              status: "queued",
+              progress: 0,
+              retryAttempt: undefined,
+              retryMax: undefined,
+            });
             return;
           }
           setRecording(rec.id, {
             status: "error",
-            error: err instanceof Error && err.message ? err.message : t("uploadFailed"),
+            retryAttempt: undefined,
+            retryMax: undefined,
+            error: t("uploadFailed"),
           });
         }
       }
     };
 
     await Promise.all(Array.from({ length: CONCURRENCY }, worker));
+    if (retryAbortRef.current === retryController) retryAbortRef.current = null;
     if (!cancelRef.current) setStage("done");
   }, [groups, makePreviews, manualEvent, matchFor, putToStorage, resolveAcDeployment, sessionDid, setRecording, t]);
 
   const cancelUpload = useCallback(() => {
     cancelRef.current = true;
+    retryAbortRef.current?.abort();
+    retryAbortRef.current = null;
     for (const xhr of activeXhrsRef.current) xhr.abort();
     activeXhrsRef.current.clear();
     setStage("review");
@@ -566,9 +638,10 @@ export function UploadTab({ sessionDid }: { sessionDid: string | null }) {
   const doneCount = recordings.filter((r) => r.status === "done").length;
   const errorCount = recordings.filter((r) => r.status === "error").length;
   const skippedCount = recordings.filter((r) => r.status === "skipped").length;
-  const uploadableBytes = recordings
-    .filter((r) => r.info && r.status !== "skipped")
-    .reduce((sum, r) => sum + r.file.size, 0);
+  const activeUploadIdSet = new Set(activeUploadIds);
+  const activeUploadFiles = recordings.filter((r) => activeUploadIdSet.has(r.id) && r.status !== "skipped");
+  const activeDoneCount = activeUploadFiles.filter((r) => r.status === "done").length;
+  const uploadableBytes = activeUploadFiles.reduce((sum, r) => sum + r.file.size, 0);
   const overallProgress = uploadableBytes > 0 ? Math.min(1, uploadedBytes / uploadableBytes) : 0;
 
   return (
@@ -848,7 +921,7 @@ export function UploadTab({ sessionDid }: { sessionDid: string | null }) {
                     <div className="min-w-0 flex-1">
                       <div className="flex items-baseline justify-between gap-3">
                         <p className="truncate text-sm font-medium text-foreground">
-                          {t("uploadingButton", { done: doneCount, total: stats.count - skippedCount })}
+                          {t("uploadingButton", { done: activeDoneCount, total: activeUploadFiles.length })}
                         </p>
                         <p className="shrink-0 text-xs text-muted-foreground">
                           {formatBytes(uploadedBytes)} / {formatBytes(uploadableBytes)}
@@ -885,7 +958,13 @@ export function UploadTab({ sessionDid }: { sessionDid: string | null }) {
                         {t("doneBody", { count: doneCount, skipped: skippedCount })}
                       </p>
                     </div>
-                    <div className="flex items-center gap-2">
+                    <div className="flex flex-wrap items-center justify-center gap-2">
+                      {errorCount > 0 ? (
+                        <Button size="sm" onClick={() => void startUpload()}>
+                          <RotateCcwIcon className="size-4" />
+                          {t("retryFailed", { count: errorCount })}
+                        </Button>
+                      ) : null}
                       <Button variant="outline" size="sm" onClick={reset}>
                         {t("uploadMore")}
                       </Button>
@@ -951,6 +1030,11 @@ function FileRow({
       </div>
       <span className="relative shrink-0 text-xs text-muted-foreground">
         {rec.status === "skipped" && t("statusSkipped")}
+        {rec.status === "retrying" &&
+          t("statusRetrying", {
+            attempt: rec.retryAttempt ?? 2,
+            max: rec.retryMax ?? AUDIO_UPLOAD_MAX_ATTEMPTS,
+          })}
         {rec.status === "saving" && t("statusSaving")}
       </span>
     </div>
@@ -966,6 +1050,7 @@ function StatusIcon({ status }: { status: FileStatus }) {
     case "skipped":
       return <SkipForwardIcon className="size-4" />;
     case "uploading":
+    case "retrying":
     case "saving":
       return <Loader2Icon className="size-4 animate-spin text-primary" />;
     default:
