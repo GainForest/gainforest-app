@@ -17,7 +17,13 @@
 
 import { INDEXER_URL } from "./urls";
 import { normaliseRef, resolveBlobUrl } from "./pds";
-import { fetchHiddenAccountDids, indexerQuery, walkOccurrences, type OccurrenceRecord } from "./indexer";
+import {
+  fetchHiddenAccountDids,
+  fetchHiddenRecordUris,
+  indexerQuery,
+  walkOccurrences,
+  type OccurrenceRecord,
+} from "./indexer";
 import { fetchEngagement } from "./feed-engagement";
 
 /** Cash prizes awarded each round, in USD. */
@@ -236,7 +242,9 @@ export type RoundBoard = {
 
 type RawNode = {
   did?: string | null;
+  uri?: string | null;
   createdAt?: string | null;
+  imageEvidence?: { file?: { ref?: string | null } | null } | null;
   certifiedProfileData?: {
     displayName?: string | null;
     avatar?: { image?: { ref?: string | null } | null } | null;
@@ -256,7 +264,9 @@ const ROUND_COLLECTORS_QUERY = `
       edges {
         node {
           did
+          uri
           createdAt
+          imageEvidence { file { ref } }
           certifiedProfileData {
             displayName
             avatar { __typename ... on OrgHypercertsDefsSmallImage { image { ref } } }
@@ -296,9 +306,13 @@ export async function fetchRoundCollectors(
       ? { imageEvidence: { isNull: false } }
       : { imageEvidence: { isNull: false }, createdAt: { gte: round.start, lte: round.end } };
 
-  // Accounts a steward flagged as "test" are excluded from the challenge — they
-  // don't count toward the leaderboard, totals or prize eligibility.
-  const hidden = await fetchHiddenAccountDids(signal).catch(() => new Set<string>());
+  // Accounts and individual observations a steward hid are excluded from the
+  // challenge. The explicit file-ref check below is also important: a non-null
+  // imageEvidence wrapper alone is not proof that an image blob was uploaded.
+  const [hidden, hiddenRecords] = await Promise.all([
+    fetchHiddenAccountDids(signal).catch(() => new Set<string>()),
+    fetchHiddenRecordUris(signal).catch(() => new Set<string>()),
+  ]);
 
   const tally = new Map<string, RoundCollector>();
   let total = 0;
@@ -334,7 +348,9 @@ export async function fetchRoundCollectors(
 
     for (const n of nodes) {
       const did = n.did!;
-      if (hidden.has(did)) continue;
+      const uri = n.uri?.trim();
+      const imageRef = normaliseRef(n.imageEvidence?.file?.ref);
+      if (hidden.has(did) || (uri && hiddenRecords.has(uri)) || !imageRef) continue;
       const t = Date.parse(n.createdAt ?? "");
       if (!Number.isFinite(t) || t < startMs || t > endMs) continue;
       total += 1;

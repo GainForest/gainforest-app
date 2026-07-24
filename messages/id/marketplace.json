@@ -269,7 +269,7 @@
   "bioblitz": {
     "metadata": {
       "title": "Tantangan BioBlitz mingguan",
-      "description": "Keluar rumah, foto makhluk hidup, dan tambahkan pengamatanmu. Setiap minggu, pengumpul terbanyak dan foto terbaik memenangkan hadiah."
+      "description": "Pergilah ke luar dan foto keanekaragaman hayati liar. Setiap pengamatan yang valid harus memiliki foto unggahan; orang dan tanaman dalam pot tidak dihitung."
     },
     "banner": {
       "message": "Tantangan BioBlitz Mingguan sedang berlangsung. Foto alam dan menangkan hadiah.",
@@ -281,7 +281,7 @@
       "eyebrow": "Tantangan BioBlitz Mingguan",
       "titlePrefix": "Tantangan",
       "titleEmphasis": "BioBlitz",
-      "description": "Lomba mingguan yang menyenangkan untuk mencatat alam. Foto makhluk hidup apa pun — tumbuhan, burung, serangga, atau jamur —, tambahkan ke GainForest, dan naik di papan peringkat. Ronde baru, hadiah baru, setiap minggu.",
+      "description": "Lomba mingguan yang menyenangkan untuk mencatat keanekaragaman hayati di luar ruangan. Tambahkan pengamatan dengan foto yang kamu unggah sendiri. Orang dan tanaman dalam pot tidak dihitung.",
       "program": "Bagian dari program Klarna AI for Climate Resilience, bersama GainForest."
     },
     "rsvp": {
@@ -325,7 +325,7 @@
           "participation": {
             "title": "2. Cara berpartisipasi",
             "paragraphs": {
-              "p1": "Kamu memerlukan akun GainForest dan harus mendaftar untuk setiap ronde. Pengamatan yang memenuhi syarat harus ditambahkan selama tanggal yang ditampilkan untuk ronde tersebut dan menyertakan bukti asli tentang organisme hidup.",
+              "p1": "Kamu memerlukan akun GainForest dan harus mendaftar untuk setiap ronde. Pengamatan yang valid harus ditambahkan pada tanggal yang ditampilkan, menunjukkan keanekaragaman hayati di luar ruangan, dan memiliki foto yang diunggah langsung bersama pengamatan. Orang dan tanaman dalam pot tidak dihitung.",
               "p2": "Setiap orang hanya boleh menggunakan satu akun. Kiriman otomatis, duplikat, dimanipulasi, diberi tanggal mundur, menyesatkan, atau curang dapat dihapus dari tantangan."
             }
           },
@@ -514,11 +514,11 @@
       "steps": {
         "outside": {
           "title": "Keluarlah",
-          "blurb": "Hutan, ladang, atau halaman rumahmu — semua makhluk hidup dihitung."
+          "blurb": "Catat keanekaragaman hayati di luar ruangan. Orang dan tanaman dalam pot tidak dihitung."
         },
         "upload": {
           "title": "Unggah foto kamu",
-          "blurb": "Tambahkan di halaman Observasi saya, atau lewat Tainá — juga ada di GainForest."
+          "blurb": "Setiap pengamatan memerlukan foto unggahannya sendiri. Tambahkan di Observasi saya atau lewat Tainá."
         },
         "review": {
           "title": "Periksa nama spesies",
@@ -535,10 +535,10 @@
     "board": {
       "title": "Papan ronde ini",
       "live": "Langsung",
-      "subtitleLive": "Siapa yang memimpin hadiah pengamatan terbanyak saat ini.",
+      "subtitleLive": "Siapa yang memimpin dengan pengamatan foto yang valid saat ini.",
       "subtitleEnded": "Klasemen akhir ronde ini.",
       "subtitleUpcoming": "Jadilah yang pertama di papan saat ronde dibuka.",
-      "subtitleAll": "Pengumpul paling aktif sepanjang tantangan.",
+      "subtitleAll": "Pengamatan foto valid terbanyak sepanjang tantangan.",
       "scope": {
         "round": "Ronde ini",
         "all": "Sepanjang waktu"

@@ -31,7 +31,7 @@
       "wallet": "¡Puedes recibir donaciones y propinas! Crea tu billetera en la pestaña Billetera de tu cuenta.",
       "createProject": "Puedes mostrar tu trabajo creando un proyecto — solo toma unos minutos.",
       "observations": "Puedes subir hasta 50 fotos de naturaleza a la vez — las especies se identifican automáticamente.",
-      "bioblitz": "Hay un desafío BioBlitz cada semana — ¡fotografía cualquier ser vivo y gana premios!",
+      "bioblitz": "Hay un desafío BioBlitz cada semana: ¡fotografía biodiversidad al aire libre y gana premios!",
       "ask": "Puedes preguntarme lo que quieras sobre GainForest, en tu idioma — ¡solo haz clic en mí!"
     },
     "haveQuestion": "Tengo una pregunta",
@@ -211,7 +211,7 @@
     "bioblitz": {
       "question": "¿Cómo participo en el BioBlitz y gano?",
       "title": "Únete al reto BioBlitz",
-      "intro": "El BioBlitz es una carrera semanal y amistosa por registrar la naturaleza. Fotografía cualquier ser vivo, súbelo y sube en la tabla.",
+      "intro": "El BioBlitz es una carrera semanal y amistosa por registrar biodiversidad al aire libre. Cada entrada necesita una foto subida; las personas y las plantas en maceta no cuentan.",
       "steps": {
         "open": {
           "title": "Abre BioBlitz",
@@ -223,7 +223,7 @@
         },
         "upload": {
           "title": "Fotografía y sube",
-          "body": "Sal afuera, fotografía cualquier ser vivo y añádelo como observaciones durante la ronda."
+          "body": "Sal al aire libre, fotografía biodiversidad silvestre y sube una foto con cada observación durante la ronda."
         },
         "win": {
           "title": "Gana premios",
@@ -232,7 +232,7 @@
       },
       "tour": {
         "register": "Haz clic en Registrarte para participar: un clic y ya estás dentro.",
-        "upload": "Luego sube aquí fotos de naturaleza durante la ronda: cada observación cuenta."
+        "upload": "Luego sube aquí fotos de biodiversidad al aire libre durante la ronda: las personas y las plantas en maceta no cuentan."
       }
     }
   }

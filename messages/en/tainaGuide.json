@@ -31,7 +31,7 @@
       "wallet": "You can receive donations and tips! Create your wallet on the Wallet tab of your account.",
       "createProject": "You can showcase your work by creating a project — it only takes a few minutes.",
       "observations": "You can upload up to 50 nature photos at once — the species get identified automatically.",
-      "bioblitz": "There's a BioBlitz challenge every week — photograph any living thing and win prizes!",
+      "bioblitz": "There's a BioBlitz challenge every week — photograph outdoor biodiversity and win prizes!",
       "ask": "You can ask me anything about GainForest, in your own language — just click me!"
     },
     "haveQuestion": "I have a question",
@@ -211,7 +211,7 @@
     "bioblitz": {
       "question": "How do I join the BioBlitz and win?",
       "title": "Join the BioBlitz challenge",
-      "intro": "The BioBlitz is a friendly weekly race to record nature. Photograph any living thing, upload it, and climb the board.",
+      "intro": "The BioBlitz is a friendly weekly race to record outdoor biodiversity. Every entry needs an uploaded photo; people and potted plants do not count.",
       "steps": {
         "open": {
           "title": "Open BioBlitz",
@@ -223,7 +223,7 @@
         },
         "upload": {
           "title": "Photograph and upload",
-          "body": "Head outside, photograph any living thing, and add it as observations during the round."
+          "body": "Head outside, photograph wild biodiversity, and upload a photo with each observation during the round."
         },
         "win": {
           "title": "Win prizes",
@@ -232,7 +232,7 @@
       },
       "tour": {
         "register": "Click Register to take part — one click and you're in.",
-        "upload": "Then upload nature photos here during the round — every observation counts."
+        "upload": "Then upload outdoor biodiversity photos here during the round — people and potted plants do not count."
       }
     }
   }

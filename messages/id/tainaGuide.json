@@ -31,7 +31,7 @@
       "wallet": "Kamu bisa menerima donasi dan tip! Buat dompetmu di tab Dompet pada akunmu.",
       "createProject": "Kamu bisa memamerkan karyamu dengan membuat proyek — hanya butuh beberapa menit.",
       "observations": "Kamu bisa mengunggah hingga 50 foto alam sekaligus — spesiesnya dikenali secara otomatis.",
-      "bioblitz": "Ada tantangan BioBlitz setiap minggu — potret makhluk hidup apa pun dan menangkan hadiah!",
+      "bioblitz": "Ada tantangan BioBlitz setiap minggu — foto keanekaragaman hayati di luar ruangan dan menangkan hadiah!",
       "ask": "Kamu bisa bertanya apa saja tentang GainForest dalam bahasamu — cukup klik aku!"
     },
     "haveQuestion": "Aku punya pertanyaan",
@@ -211,7 +211,7 @@
     "bioblitz": {
       "question": "Bagaimana cara ikut BioBlitz dan menang?",
       "title": "Ikut tantangan BioBlitz",
-      "intro": "BioBlitz adalah lomba mingguan yang seru untuk merekam alam. Foto makhluk hidup apa pun, unggah, dan naiki papan peringkat.",
+      "intro": "BioBlitz adalah lomba mingguan yang seru untuk mencatat keanekaragaman hayati di luar ruangan. Setiap entri memerlukan foto unggahan; orang dan tanaman dalam pot tidak dihitung.",
       "steps": {
         "open": {
           "title": "Buka BioBlitz",
@@ -223,7 +223,7 @@
         },
         "upload": {
           "title": "Foto dan unggah",
-          "body": "Keluarlah, foto makhluk hidup apa pun, dan tambahkan sebagai observasi selama ronde berlangsung."
+          "body": "Pergilah ke luar, foto keanekaragaman hayati liar, dan unggah foto bersama setiap pengamatan selama ronde."
         },
         "win": {
           "title": "Menangkan hadiah",
@@ -232,7 +232,7 @@
       },
       "tour": {
         "register": "Klik Daftar untuk ikut — satu klik dan Anda terdaftar.",
-        "upload": "Lalu unggah foto alam di sini selama ronde — setiap observasi dihitung."
+        "upload": "Lalu unggah foto keanekaragaman hayati di luar ruangan selama ronde — orang dan tanaman dalam pot tidak dihitung."
       }
     }
   }

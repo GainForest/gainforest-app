@@ -269,7 +269,7 @@
   "bioblitz": {
     "metadata": {
       "title": "Desafio BioBlitz semanal",
-      "description": "Saia, fotografe seres vivos e adicione seus registros. A cada semana, quem mais registrar e a melhor foto ganham um prêmio."
+      "description": "Saia e fotografe a biodiversidade silvestre. Cada observação válida deve incluir uma foto enviada; pessoas e plantas em vasos não contam."
     },
     "banner": {
       "message": "O Desafio BioBlitz Semanal está no ar. Fotografe a natureza e ganhe prêmios.",
@@ -281,7 +281,7 @@
       "eyebrow": "Desafio BioBlitz Semanal",
       "titlePrefix": "Desafio",
       "titleEmphasis": "BioBlitz",
-      "description": "Uma corrida semanal e amistosa para registrar a natureza. Fotografe qualquer ser vivo — uma planta, ave, inseto ou fungo —, adicione ao GainForest e suba no ranking. Nova rodada e novos prêmios toda semana.",
+      "description": "Uma corrida semanal e amistosa para registrar a biodiversidade ao ar livre. Adicione observações com suas próprias fotos enviadas. Pessoas e plantas em vasos não contam.",
       "program": "Parte do programa Klarna AI for Climate Resilience, com a GainForest."
     },
     "rsvp": {
@@ -325,7 +325,7 @@
           "participation": {
             "title": "2. Como participar",
             "paragraphs": {
-              "p1": "Você precisa de uma conta GainForest e deve se inscrever em cada rodada. As observações elegíveis devem ser adicionadas durante as datas exibidas para a rodada e incluir evidência genuína de um organismo vivo.",
+              "p1": "Você precisa de uma conta GainForest e deve se inscrever em cada rodada. Uma observação válida deve ser adicionada nas datas exibidas, mostrar biodiversidade ao ar livre e incluir uma foto enviada diretamente com a observação. Pessoas e plantas em vasos não contam.",
               "p2": "Cada pessoa pode usar uma conta. Inscrições automatizadas, duplicadas, manipuladas, retroativas, enganosas ou fraudulentas podem ser removidas do desafio."
             }
           },
@@ -514,11 +514,11 @@
       "steps": {
         "outside": {
           "title": "Vá para fora",
-          "blurb": "Floresta, campo ou seu quintal: qualquer ser vivo conta."
+          "blurb": "Registre biodiversidade ao ar livre. Pessoas e plantas em vasos não contam."
         },
         "upload": {
           "title": "Envie suas fotos",
-          "blurb": "Adicione-as na sua página Minhas observações, ou com a Tainá, também na GainForest."
+          "blurb": "Cada observação precisa de sua própria foto enviada. Adicione-a em Minhas observações ou com a Tainá."
         },
         "review": {
           "title": "Confira o nome da espécie",
@@ -535,10 +535,10 @@
     "board": {
       "title": "Ranking desta rodada",
       "live": "Ao vivo",
-      "subtitleLive": "Quem está liderando o prêmio de mais observações agora.",
+      "subtitleLive": "Quem está liderando agora com observações fotográficas válidas.",
       "subtitleEnded": "Classificação final desta rodada.",
       "subtitleUpcoming": "Seja o primeiro no ranking quando a rodada abrir.",
-      "subtitleAll": "Quem mais registra em todo o desafio.",
+      "subtitleAll": "Quem tem mais observações fotográficas válidas em todo o desafio.",
       "scope": {
         "round": "Esta rodada",
         "all": "Histórico"
