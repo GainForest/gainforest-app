@@ -304,10 +304,8 @@ function InfoRow({ label, value, dimmed }: { label: string; value: string; dimme
 
 export function AudioMothClient({
   sessionDid,
-  canUseLabelling,
 }: {
   sessionDid: string | null;
-  canUseLabelling: boolean;
 }) {
   const t = useTranslations("common.audiomoth");
   const identificationsT = useTranslations("common.identifications");
@@ -320,7 +318,7 @@ export function AudioMothClient({
   const searchParams = useSearchParams();
   const [mainTab, setMainTab] = useState<MainTabId>(() => {
     const tab = searchParams.get("tab");
-    if (tab === "label" || tab === "identifications") return canUseLabelling ? tab : "setup";
+    if (tab === "label" || tab === "identifications") return tab;
     return tab === "deployments" || tab === "upload" ? tab : "setup";
   });
   const selectMainTab = useCallback((id: MainTabId) => {
@@ -815,12 +813,8 @@ export function AudioMothClient({
     { id: "setup", label: t("mainTabs.setup"), Icon: WrenchIcon },
     { id: "deployments", label: t("mainTabs.deployments"), Icon: MapPinIcon },
     { id: "upload", label: t("mainTabs.upload"), Icon: HardDriveUploadIcon },
-    ...(canUseLabelling
-      ? [
-          { id: "label" as const, label: t("mainTabs.label"), Icon: TagsIcon },
-          { id: "identifications" as const, label: t("mainTabs.identifications"), Icon: ListChecksIcon },
-        ]
-      : []),
+    { id: "label", label: t("mainTabs.label"), Icon: TagsIcon },
+    { id: "identifications", label: t("mainTabs.identifications"), Icon: ListChecksIcon },
   ];
 
   return (
@@ -856,9 +850,9 @@ export function AudioMothClient({
 
       {mainTab === "upload" && <UploadTab sessionDid={sessionDid} />}
 
-      {canUseLabelling && mainTab === "label" && <LabelTab sessionDid={sessionDid} />}
+      {mainTab === "label" && <LabelTab sessionDid={sessionDid} />}
 
-      {canUseLabelling && mainTab === "identifications" && <IdentificationsClient sessionDid={sessionDid} />}
+      {mainTab === "identifications" && <IdentificationsClient sessionDid={sessionDid} />}
 
       {mainTab === "setup" && supported === false && (
         <Card>
