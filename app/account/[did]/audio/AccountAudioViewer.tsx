@@ -12,7 +12,7 @@
  * `?section=…`/`?mode=…` deep links (see ./page.tsx).
  */
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
 import {
@@ -109,21 +109,16 @@ export function AccountAudioViewer({
 
   /* ── Drive-style selection + delete ───────────────────────────────────────
    * No separate "select mode": clicking a recording toggles its selection
-   * (like Google Drive), and a toolbar with the count + Delete replaces the
-   * header actions while anything is selected. Escape or ✕ clears it. */
+   * (like Google Drive), shift-click selects the whole range since the last
+   * plain click, and a toolbar with the count + Delete replaces the header
+   * actions while anything is selected. Escape or ✕ clears it. */
   const [selectedUris, setSelectedUris] = useState<ReadonlySet<string>>(new Set());
   const [deleteError, setDeleteError] = useState<string | null>(null);
-
-  const toggleSelect = useCallback((item: AcAudioListItem) => {
-    setSelectedUris((current) => {
-      const next = new Set(current);
-      if (next.has(item.uri)) next.delete(item.uri);
-      else next.add(item.uri);
-      return next;
-    });
-  }, []);
+  /** Last plain-clicked row — the fixed end of a shift-click range. */
+  const anchorUriRef = useRef<string | null>(null);
 
   const clearSelection = useCallback(() => {
+    anchorUriRef.current = null;
     setSelectedUris(new Set());
   }, []);
 
@@ -225,6 +220,38 @@ export function AccountAudioViewer({
   const groups = useMemo(
     () => (deployments && recordings ? groupRecordings(deployments, recordings) : []),
     [deployments, recordings],
+  );
+
+  /** Every recording's URI in on-screen order, for shift-click ranges. */
+  const displayOrder = useMemo(() => groups.flatMap((group) => group.items.map((item) => item.uri)), [groups]);
+
+  const toggleSelect = useCallback(
+    (item: AcAudioListItem, shiftKey = false) => {
+      const anchor = anchorUriRef.current;
+      if (shiftKey && anchor && anchor !== item.uri) {
+        const from = displayOrder.indexOf(anchor);
+        const to = displayOrder.indexOf(item.uri);
+        if (from !== -1 && to !== -1) {
+          // Select everything between the anchor and the shift-clicked row,
+          // inclusive. The anchor stays put so another shift-click just
+          // resizes the range, like Drive/Finder.
+          setSelectedUris((current) => {
+            const next = new Set(current);
+            for (let i = Math.min(from, to); i <= Math.max(from, to); i += 1) next.add(displayOrder[i]);
+            return next;
+          });
+          return;
+        }
+      }
+      anchorUriRef.current = item.uri;
+      setSelectedUris((current) => {
+        const next = new Set(current);
+        if (next.has(item.uri)) next.delete(item.uri);
+        else next.add(item.uri);
+        return next;
+      });
+    },
+    [displayOrder],
   );
 
   const loading = recordings === null;

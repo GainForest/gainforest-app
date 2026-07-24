@@ -37,11 +37,12 @@ export function RecordingsPlayerList({
   /**
    * Drive-style selection: when true, clicking anywhere on a row (outside
    * the play/seek/download controls) toggles its selection; a checkbox
-   * appears on hover and stays visible while selected.
+   * appears on hover and stays visible while selected. Shift-clicks are
+   * forwarded so the parent can select whole ranges.
    */
   selectable?: boolean;
   selectedUris?: ReadonlySet<string>;
-  onToggleSelect?: (item: AcAudioListItem) => void;
+  onToggleSelect?: (item: AcAudioListItem, shiftKey?: boolean) => void;
 }) {
   const t = useTranslations("common.audiomoth.recordings");
 
@@ -117,7 +118,7 @@ export function RecordingsPlayerList({
           return (
             <li
               key={item.uri}
-              onClick={selectable ? () => onToggleSelect?.(item) : undefined}
+              onClick={selectable ? (e) => onToggleSelect?.(item, e.shiftKey) : undefined}
               aria-selected={selectable ? selected : undefined}
               className={cn(
                 "group rounded-xl border px-3 py-2.5 transition-colors",
@@ -135,8 +136,10 @@ export function RecordingsPlayerList({
                 {selectable ? (
                   <Checkbox
                     checked={selected}
-                    onClick={(e) => e.stopPropagation()}
-                    onCheckedChange={() => onToggleSelect?.(item)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onToggleSelect?.(item, e.shiftKey);
+                    }}
                     aria-label={t("selectAria", { name: item.name })}
                     className={cn(
                       "shrink-0 transition-opacity",

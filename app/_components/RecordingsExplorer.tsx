@@ -77,7 +77,7 @@ export function RecordingsExplorer({
   /** When true, player rows show checkboxes so recordings can be selected. */
   selectable?: boolean;
   selectedUris?: ReadonlySet<string>;
-  onToggleSelect?: (item: AcAudioListItem) => void;
+  onToggleSelect?: (item: AcAudioListItem, shiftKey?: boolean) => void;
 }) {
   const t = useTranslations("common.audiomoth.recordings");
   const locale = useLocale();
