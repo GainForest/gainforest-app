@@ -2047,9 +2047,6 @@
       "prevDay": "Previous day with recordings",
       "nextDay": "Next day with recordings",
       "allHours": "All hours",
-      "selectCta": "Select",
-      "selectCancel": "Cancel",
-      "selectHint": "Tick the recordings you want to remove. Deleting is permanent and cannot be undone.",
       "selectedCount": "{count, plural, one {# selected} other {# selected}}",
       "deleteSelected": "Delete",
       "selectAria": "Select {name}",
@@ -2058,7 +2055,8 @@
       "deleteConfirmCancel": "Cancel",
       "deleteConfirmAction": "Delete {count, plural, one {# recording} other {# recordings}}",
       "deleteProgress": "Deleting… {done} of {total}",
-      "deleteFailed": "{count, plural, one {# recording} other {# recordings}} could not be deleted. Please try again."
+      "deleteFailed": "{count, plural, one {# recording} other {# recordings}} could not be deleted. Please try again.",
+      "clearSelection": "Clear selection"
     }
   },
   "devices": {

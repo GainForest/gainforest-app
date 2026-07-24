@@ -2047,9 +2047,6 @@
       "prevDay": "Dia anterior com gravações",
       "nextDay": "Próximo dia com gravações",
       "allHours": "Todas as horas",
-      "selectCta": "Selecionar",
-      "selectCancel": "Cancelar",
-      "selectHint": "Marque as gravações que deseja remover. A exclusão é permanente e não pode ser desfeita.",
       "selectedCount": "{count, plural, one {# selecionada} other {# selecionadas}}",
       "deleteSelected": "Excluir",
       "selectAria": "Selecionar {name}",
@@ -2058,7 +2055,8 @@
       "deleteConfirmCancel": "Cancelar",
       "deleteConfirmAction": "Excluir {count, plural, one {# gravação} other {# gravações}}",
       "deleteProgress": "Excluindo… {done} de {total}",
-      "deleteFailed": "{count, plural, one {# gravação não pôde ser excluída} other {# gravações não puderam ser excluídas}}. Tente novamente."
+      "deleteFailed": "{count, plural, one {# gravação não pôde ser excluída} other {# gravações não puderam ser excluídas}}. Tente novamente.",
+      "clearSelection": "Limpar seleção"
     }
   },
   "devices": {

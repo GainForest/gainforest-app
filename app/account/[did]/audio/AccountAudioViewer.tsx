@@ -18,7 +18,6 @@ import Link from "next/link";
 import {
   ArrowUpRightIcon,
   AudioLinesIcon,
-  ListChecksIcon,
   Loader2Icon,
   MapPinIcon,
   Trash2Icon,
@@ -108,8 +107,10 @@ export function AccountAudioViewer({
   const [recordings, setRecordings] = useState<AcAudioListItem[] | null>(null);
   const [loadError, setLoadError] = useState(false);
 
-  /* ── Multi-select + delete ─────────────────────────────────────────────── */
-  const [selectMode, setSelectMode] = useState(false);
+  /* ── Drive-style selection + delete ───────────────────────────────────────
+   * No separate "select mode": clicking a recording toggles its selection
+   * (like Google Drive), and a toolbar with the count + Delete replaces the
+   * header actions while anything is selected. Escape or ✕ clears it. */
   const [selectedUris, setSelectedUris] = useState<ReadonlySet<string>>(new Set());
   const [deleteError, setDeleteError] = useState<string | null>(null);
 
@@ -122,10 +123,18 @@ export function AccountAudioViewer({
     });
   }, []);
 
-  const exitSelectMode = useCallback(() => {
-    setSelectMode(false);
+  const clearSelection = useCallback(() => {
     setSelectedUris(new Set());
   }, []);
+
+  useEffect(() => {
+    if (selectedUris.size === 0) return;
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") clearSelection();
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [selectedUris.size, clearSelection]);
 
   const performDelete = useCallback(
     async (onProgress: (done: number, total: number) => void) => {
@@ -171,9 +180,9 @@ export function AccountAudioViewer({
         throw new Error(t("deleteFailed", { count: failed.size }));
       }
       setDeleteError(null);
-      exitSelectMode();
+      clearSelection();
     },
-    [recordings, selectedUris, mutationRepo, exitSelectMode, t],
+    [recordings, selectedUris, mutationRepo, clearSelection, t],
   );
 
   const confirmDelete = useCallback(() => {
@@ -235,44 +244,34 @@ export function AccountAudioViewer({
             ) : null}
           </h1>
         </div>
-        <div className="flex flex-wrap items-center gap-2">
-          {canDelete && total > 0 && !selectMode ? (
-            <Button variant="outline" size="sm" onClick={() => setSelectMode(true)}>
-              <ListChecksIcon className="size-4" />
-              {t("selectCta")}
+        {selectedCount > 0 ? (
+          /* Drive-style selection toolbar — replaces the header actions. */
+          <div className="flex items-center gap-1.5 rounded-full border border-border bg-card py-1 pl-1.5 pr-1.5 shadow-sm">
+            <button
+              type="button"
+              onClick={clearSelection}
+              aria-label={t("clearSelection")}
+              className="grid h-7 w-7 place-items-center rounded-full text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+            >
+              <XIcon className="size-4" />
+            </button>
+            <span className="px-0.5 text-sm font-medium tabular-nums text-foreground">
+              {t("selectedCount", { count: selectedCount })}
+            </span>
+            <Button variant="destructive" size="sm" onClick={confirmDelete}>
+              <Trash2Icon className="size-4" />
+              {t("deleteSelected")}
             </Button>
-          ) : null}
-          {selectMode ? (
-            <>
-              <span className="text-sm tabular-nums text-muted-foreground">
-                {t("selectedCount", { count: selectedCount })}
-              </span>
-              <Button variant="destructive" size="sm" disabled={selectedCount === 0} onClick={confirmDelete}>
-                <Trash2Icon className="size-4" />
-                {t("deleteSelected")}
-              </Button>
-              <Button variant="outline" size="sm" onClick={exitSelectMode}>
-                <XIcon className="size-4" />
-                {t("selectCancel")}
-              </Button>
-            </>
-          ) : showUploadCta ? (
-            <Button asChild size="sm">
-              <Link href="/audiomoth?tab=upload">
-                <UploadIcon className="size-4" />
-                {t("uploadCta")}
-              </Link>
-            </Button>
-          ) : null}
-        </div>
+          </div>
+        ) : showUploadCta ? (
+          <Button asChild size="sm">
+            <Link href="/audiomoth?tab=upload">
+              <UploadIcon className="size-4" />
+              {t("uploadCta")}
+            </Link>
+          </Button>
+        ) : null}
       </div>
-
-      {selectMode ? (
-        <p className="mt-3 flex items-center gap-1.5 rounded-lg bg-muted px-3 py-2 text-xs text-muted-foreground">
-          <TriangleAlertIcon className="size-3.5 shrink-0 text-warn" />
-          {t("selectHint")}
-        </p>
-      ) : null}
 
       {deleteError ? (
         <p className="mt-3 flex items-center gap-1.5 rounded-lg bg-warn/10 px-3 py-2 text-xs font-medium text-foreground/75">
@@ -342,7 +341,7 @@ export function AccountAudioViewer({
                   did={did}
                   host={host}
                   items={group.items}
-                  selectable={selectMode}
+                  selectable={canDelete}
                   selectedUris={selectedUris}
                   onToggleSelect={toggleSelect}
                 />

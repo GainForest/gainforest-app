@@ -34,7 +34,11 @@ export function RecordingsPlayerList({
   did: string;
   host: string | null;
   items: AcAudioListItem[];
-  /** When true, each row shows a checkbox so recordings can be selected. */
+  /**
+   * Drive-style selection: when true, clicking anywhere on a row (outside
+   * the play/seek/download controls) toggles its selection; a checkbox
+   * appears on hover and stays visible while selected.
+   */
   selectable?: boolean;
   selectedUris?: ReadonlySet<string>;
   onToggleSelect?: (item: AcAudioListItem) => void;
@@ -113,22 +117,31 @@ export function RecordingsPlayerList({
           return (
             <li
               key={item.uri}
+              onClick={selectable ? () => onToggleSelect?.(item) : undefined}
+              aria-selected={selectable ? selected : undefined}
               className={cn(
-                "rounded-xl border px-3 py-2.5 transition-colors",
+                "group rounded-xl border px-3 py-2.5 transition-colors",
+                selectable && "cursor-pointer select-none",
                 selected
-                  ? "border-destructive/40 bg-destructive/[0.04]"
+                  ? "border-primary/50 bg-primary/[0.07]"
                   : playing
                     ? "border-primary/40 bg-primary/[0.04]"
-                    : "border-border/70",
+                    : selectable
+                      ? "border-border/70 hover:bg-muted/50"
+                      : "border-border/70",
               )}
             >
               <div className="flex items-center gap-3">
                 {selectable ? (
                   <Checkbox
                     checked={selected}
+                    onClick={(e) => e.stopPropagation()}
                     onCheckedChange={() => onToggleSelect?.(item)}
                     aria-label={t("selectAria", { name: item.name })}
-                    className="shrink-0"
+                    className={cn(
+                      "shrink-0 transition-opacity",
+                      selected ? "opacity-100" : "opacity-40 sm:opacity-0 sm:group-hover:opacity-100",
+                    )}
                   />
                 ) : null}
                 <Button
@@ -136,7 +149,10 @@ export function RecordingsPlayerList({
                   size="icon-sm"
                   className="shrink-0 rounded-full"
                   disabled={!item.previewCid || !host}
-                  onClick={() => togglePlay(item)}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    togglePlay(item);
+                  }}
                   aria-label={playing ? t("pauseAria", { name: item.name }) : t("playAria", { name: item.name })}
                   title={!item.previewCid ? t("previewUnavailable") : undefined}
                 >
@@ -155,8 +171,13 @@ export function RecordingsPlayerList({
                     <div
                       className="relative h-12 cursor-pointer overflow-hidden rounded-md bg-[#000004]"
                       onClick={(e) => {
-                        const rect = e.currentTarget.getBoundingClientRect();
-                        seek(item, (e.clientX - rect.left) / rect.width);
+                        // Seek only while this row is playing; otherwise let the
+                        // click bubble up and toggle the row's selection.
+                        if (playing) {
+                          e.stopPropagation();
+                          const rect = e.currentTarget.getBoundingClientRect();
+                          seek(item, (e.clientX - rect.left) / rect.width);
+                        }
                       }}
                     >
                       {/* eslint-disable-next-line @next/next/no-img-element -- arbitrary PDS hosts */}
@@ -177,6 +198,7 @@ export function RecordingsPlayerList({
                     <div
                       className="h-1.5 cursor-pointer overflow-hidden rounded-full bg-muted"
                       onClick={(e) => {
+                        e.stopPropagation();
                         const rect = e.currentTarget.getBoundingClientRect();
                         seek(item, (e.clientX - rect.left) / rect.width);
                       }}
@@ -209,6 +231,7 @@ export function RecordingsPlayerList({
                     href={item.accessUri}
                     target="_blank"
                     rel="noreferrer"
+                    onClick={(e) => e.stopPropagation()}
                     className="shrink-0 rounded-md p-1.5 text-muted-foreground transition-colors hover:text-foreground"
                     aria-label={t("downloadAria", { name: item.name })}
                   >
