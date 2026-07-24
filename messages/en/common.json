@@ -2014,6 +2014,11 @@
       "errorSaveFailed": "The file was uploaded, but it could not be saved to your account. Please retry.",
       "errorOffline": "No internet connection. Check your Wi-Fi and try again.",
       "deploymentFallback": "Created automatically when uploading SD card recordings.",
+      "groupNameLabel": "Name this upload",
+      "groupNameHelp": "These recordings will be grouped under this name on your profile, so you can find them later.",
+      "groupNamePlaceholder": "e.g. Forest edge — April 2024",
+      "groupNameRequired": "Give this upload a name first.",
+      "groupRemarks": "Created when uploading a folder of recordings.",
       "discovering": "Looking for recordings… {count} files found",
       "readFailed": "The SD card could not be read. Remove and re-insert it, then try again — or drag the folder onto this page instead."
     },

@@ -32,6 +32,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
@@ -186,6 +187,8 @@ export function UploadTab({ sessionDid }: { sessionDid: string | null }) {
   const [dragging, setDragging] = useState(false);
   const [uploadedBytes, setUploadedBytes] = useState(0);
   const [activeUploadIds, setActiveUploadIds] = useState<string[]>([]);
+  /** User-editable group name for recordings without a matched deployment. */
+  const [uploadName, setUploadName] = useState("");
 
   const folderInputRef = useRef<HTMLInputElement | null>(null);
   const filesInputRef = useRef<HTMLInputElement | null>(null);
@@ -193,6 +196,8 @@ export function UploadTab({ sessionDid }: { sessionDid: string | null }) {
   const activeXhrsRef = useRef(new Set<XMLHttpRequest>());
   const retryAbortRef = useRef<AbortController | null>(null);
   const acDeploymentsRef = useRef<AcDeploymentItem[] | null>(null);
+  /** ac.deployment created for this named upload — reused across retries. */
+  const namedDeploymentRef = useRef<string | null>(null);
 
   /* ---------------- deployments for matching ---------------- */
 
@@ -207,12 +212,14 @@ export function UploadTab({ sessionDid }: { sessionDid: string | null }) {
 
   /* ---------------- scanning ---------------- */
 
-  const scanFiles = useCallback(async (files: File[]) => {
+  const scanFiles = useCallback(async (files: File[], folderName = "") => {
     const wavs = files.filter((f) => isWavName(f.name)).sort((a, b) => a.name.localeCompare(b.name));
     setDiscovered(null);
     setGlobalError(null);
     setRecordings([]);
     setUploadedBytes(0);
+    setUploadName(folderName.trim());
+    namedDeploymentRef.current = null;
     if (wavs.length === 0) {
       setStage("review");
       return;
@@ -284,7 +291,7 @@ export function UploadTab({ sessionDid }: { sessionDid: string | null }) {
       };
       await walk(dir);
       setDiscovered(files.length);
-      await scanFiles(files);
+      await scanFiles(files, (dir as { name?: string })?.name ?? "");
     } catch (err) {
       console.error("[audiomoth-upload] reading the folder failed", err);
       setGlobalError(t("readFailed"));
@@ -299,13 +306,22 @@ export function UploadTab({ sessionDid }: { sessionDid: string | null }) {
       setDragging(false);
       const items = event.dataTransfer.items;
       const plainFiles = Array.from(event.dataTransfer.files);
+      // Folder name must be read synchronously, before the drop event settles.
+      let folderName = "";
+      for (let i = 0; i < (items?.length ?? 0); i += 1) {
+        const entry = (items[i] as unknown as { webkitGetAsEntry?: () => { isDirectory?: boolean; name?: string } | null }).webkitGetAsEntry?.();
+        if (entry?.isDirectory && entry.name && !isHiddenName(entry.name)) {
+          folderName = entry.name;
+          break;
+        }
+      }
       setGlobalError(null);
       setStage("scanning");
       setDiscovered(0);
       try {
         const dropped = items?.length ? await collectDroppedFiles(items, setDiscovered) : plainFiles;
         if (dropped.length > 0) {
-          await scanFiles(dropped);
+          await scanFiles(dropped, folderName);
         } else {
           setDiscovered(null);
           setStage("pick");
@@ -345,6 +361,16 @@ export function UploadTab({ sessionDid }: { sessionDid: string | null }) {
   const manualEvent = useMemo(
     () => events?.find((e) => e.uri === manualEventUri) ?? null,
     [events, manualEventUri],
+  );
+
+  /**
+   * True when at least one group of recordings would otherwise land in
+   * "Other recordings": no chime match and no manually linked deployment.
+   * Those files get grouped under a new named deployment instead.
+   */
+  const needsName = useMemo(
+    () => [...groups.keys()].some((deploymentId) => (deploymentId ? !matchFor(deploymentId) : !manualEvent)),
+    [groups, manualEvent, matchFor],
   );
 
   const stats = useMemo(() => {
@@ -393,6 +419,33 @@ export function UploadTab({ sessionDid }: { sessionDid: string | null }) {
     },
     [sessionDid, t],
   );
+
+  /**
+   * The named group for this upload: one ac.deployment carrying the
+   * user-chosen name, created on first use and reused for every file (and
+   * across retries), so the profile's audio page groups them together.
+   */
+  const resolveNamedDeployment = useCallback(async (): Promise<string | null> => {
+    if (namedDeploymentRef.current) return namedDeploymentRef.current;
+    const name = uploadName.trim();
+    if (!name) return null;
+    try {
+      const readable = recordings.filter((r) => r.info);
+      const earliest = readable.length
+        ? new Date(Math.min(...readable.map((r) => recordingTime(r).getTime())))
+        : new Date();
+      const created = await createAcDeployment({
+        name,
+        deployedAt: earliest,
+        remarks: t("groupRemarks"),
+      });
+      namedDeploymentRef.current = created.uri;
+      acDeploymentsRef.current = null; // refresh next time
+      return created.uri;
+    } catch {
+      return null;
+    }
+  }, [recordings, t, uploadName]);
 
   /**
    * Plain-language error per failure point: the storage transfer (connection
@@ -471,7 +524,7 @@ export function UploadTab({ sessionDid }: { sessionDid: string | null }) {
       for (const [deploymentId, groupFiles] of groups) {
         if (cancelRef.current) break;
         const event = deploymentId ? matchFor(deploymentId) : manualEvent;
-        const deploymentRef = event ? await resolveAcDeployment(event) : null;
+        const deploymentRef = event ? await resolveAcDeployment(event) : await resolveNamedDeployment();
 
         // Skip files already uploaded for this deployment (re-inserted card or
         // a save whose response was lost before a manual retry).
@@ -635,7 +688,7 @@ export function UploadTab({ sessionDid }: { sessionDid: string | null }) {
     await Promise.all(Array.from({ length: CONCURRENCY }, worker));
     if (retryAbortRef.current === retryController) retryAbortRef.current = null;
     if (!cancelRef.current) setStage("done");
-  }, [describeUploadError, groups, makePreviews, manualEvent, matchFor, putToStorage, resolveAcDeployment, sessionDid, setRecording, t]);
+  }, [describeUploadError, groups, makePreviews, manualEvent, matchFor, putToStorage, resolveAcDeployment, resolveNamedDeployment, sessionDid, setRecording, t]);
 
   const cancelUpload = useCallback(() => {
     cancelRef.current = true;
@@ -651,6 +704,8 @@ export function UploadTab({ sessionDid }: { sessionDid: string | null }) {
     setStage("pick");
     setManualEventUri("none");
     setGlobalError(null);
+    setUploadName("");
+    namedDeploymentRef.current = null;
   }, []);
 
   /* ---------------- render ---------------- */
@@ -688,7 +743,8 @@ export function UploadTab({ sessionDid }: { sessionDid: string | null }) {
         onChange={(e) => {
           const files = Array.from(e.target.files ?? []);
           e.target.value = "";
-          if (files.length) void scanFiles(files);
+          const relative = (files[0] as { webkitRelativePath?: string } | undefined)?.webkitRelativePath;
+          if (files.length) void scanFiles(files, relative?.split("/")[0] ?? "");
         }}
       />
       <input
@@ -922,6 +978,25 @@ export function UploadTab({ sessionDid }: { sessionDid: string | null }) {
                   <p className="rounded-xl bg-destructive/10 px-3.5 py-2.5 text-sm text-destructive">{globalError}</p>
                 ) : null}
 
+                {/* Name prompt — recordings that would otherwise be scattered
+                    under "Other recordings" get grouped under this name. */}
+                {stage === "review" && needsName && (
+                  <div className="flex flex-col gap-1.5 rounded-2xl border border-border bg-card/90 px-4 py-3.5">
+                    <Label htmlFor="upload-group-name" className="text-sm font-medium text-foreground">
+                      {t("groupNameLabel")}
+                    </Label>
+                    <p className="text-xs text-muted-foreground">{t("groupNameHelp")}</p>
+                    <Input
+                      id="upload-group-name"
+                      value={uploadName}
+                      onChange={(e) => setUploadName(e.target.value)}
+                      placeholder={t("groupNamePlaceholder")}
+                      maxLength={120}
+                      className="mt-1 sm:max-w-sm"
+                    />
+                  </div>
+                )}
+
                 {/* Footer actions */}
                 {stage === "review" && (
                   <div className="flex flex-col gap-3 rounded-2xl border border-border bg-card/90 px-4 py-3.5 sm:flex-row sm:items-center sm:justify-between">
@@ -936,7 +1011,12 @@ export function UploadTab({ sessionDid }: { sessionDid: string | null }) {
                       <Button variant="outline" size="sm" onClick={reset}>
                         {t("back")}
                       </Button>
-                      <Button size="sm" onClick={() => void startUpload()}>
+                      <Button
+                        size="sm"
+                        disabled={needsName && !uploadName.trim()}
+                        title={needsName && !uploadName.trim() ? t("groupNameRequired") : undefined}
+                        onClick={() => void startUpload()}
+                      >
                         <UploadIcon className="size-4" />
                         {t("uploadButton", { count: stats.count })}
                       </Button>

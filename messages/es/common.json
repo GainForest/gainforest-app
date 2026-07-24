@@ -2014,6 +2014,11 @@
       "errorSaveFailed": "El archivo se subió, pero no se pudo guardar en tu cuenta. Inténtalo de nuevo.",
       "errorOffline": "Sin conexión a internet. Revisa tu Wi-Fi e inténtalo de nuevo.",
       "deploymentFallback": "Creado automáticamente al subir grabaciones de la tarjeta SD.",
+      "groupNameLabel": "Ponle nombre a esta subida",
+      "groupNameHelp": "Estas grabaciones se agruparán con este nombre en tu perfil, para que puedas encontrarlas después.",
+      "groupNamePlaceholder": "p. ej. Borde del bosque — abril 2024",
+      "groupNameRequired": "Primero ponle un nombre a esta subida.",
+      "groupRemarks": "Creado al subir una carpeta de grabaciones.",
       "discovering": "Buscando grabaciones… {count} archivos encontrados",
       "readFailed": "No se pudo leer la tarjeta SD. Retírala y vuelve a insertarla, luego inténtalo de nuevo, o arrastra la carpeta a esta página."
     },

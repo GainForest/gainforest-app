@@ -2014,6 +2014,11 @@
       "errorSaveFailed": "Faili ilipakiwa, lakini haikuweza kuhifadhiwa kwenye akaunti yako. Tafadhali jaribu tena.",
       "errorOffline": "Hakuna muunganisho wa intaneti. Kagua Wi-Fi yako kisha ujaribu tena.",
       "deploymentFallback": "Imeundwa kiotomatiki wakati wa kupakia rekodi za kadi ya SD.",
+      "groupNameLabel": "Ipe jina upakiaji huu",
+      "groupNameHelp": "Rekodi hizi zitawekwa pamoja chini ya jina hili kwenye wasifu wako, ili uzipate baadaye.",
+      "groupNamePlaceholder": "mfano: Ukingo wa msitu — Aprili 2024",
+      "groupNameRequired": "Ipe jina upakiaji huu kwanza.",
+      "groupRemarks": "Iliundwa wakati wa kupakia folda ya rekodi.",
       "discovering": "Inatafuta rekodi… faili {count} zimepatikana",
       "readFailed": "Kadi ya SD haikuweza kusomwa. Iondoe na uiingize tena, kisha jaribu tena — au buruta folda kwenye ukurasa huu."
     },
