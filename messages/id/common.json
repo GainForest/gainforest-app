@@ -1111,6 +1111,10 @@
     "actions": {
       "like": "Suka",
       "liked": "Disukai",
+      "reshare": "Bagikan ulang",
+      "reshared": "Dibagikan ulang",
+      "undoReshare": "Batalkan bagikan ulang",
+      "reshareHint": "Bagikan ini kepada pengikut Anda",
       "comment": "Komentar",
       "comments": "{count, plural, other {# komentar}}",
       "signInToInteract": "Masuk untuk memposting, menyukai, dan berkomentar",

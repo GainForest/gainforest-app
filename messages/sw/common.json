@@ -1111,6 +1111,10 @@
     "actions": {
       "like": "Penda",
       "liked": "Umependa",
+      "reshare": "Shiriki tena",
+      "reshared": "Umeshiriki tena",
+      "undoReshare": "Ondoa kushiriki tena",
+      "reshareHint": "Shiriki hii na wafuasi wako",
       "comment": "Toa maoni",
       "comments": "{count, plural, one {maoni #} other {maoni #}}",
       "signInToInteract": "Ingia ili kuchapisha, kupenda na kutoa maoni",

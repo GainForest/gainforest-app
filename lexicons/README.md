@@ -18,6 +18,7 @@ re-forking them.
 |----------------------------|-----------------------|---------|
 | `app.gainforest.feed.post` | `app.bsky.feed.post`  | A feed post. A **comment is a reply-post** — a post carrying a `reply: { root, parent }`. |
 | `app.gainforest.feed.like` | `app.bsky.feed.like`  | A like of any record/post/comment. Unlike = delete the record. |
+| `app.gainforest.feed.repost` | `app.bsky.feed.repost` | A reshare of any record/post/comment. Undo = delete the record. |
 
 There is **no separate comment lexicon** — that's the Bluesky model: a comment is
 a `post` whose `reply.parent` points at the thing being commented on.
@@ -53,8 +54,12 @@ they ship with `@atproto/api` and are loaded into the proxy agent already:
 - `com.atproto.label.defs#selfLabels` — `post.labels`.
 
 `entities` / `textSlice` from the Bluesky source were dropped — they're marked
-deprecated there in favour of `facets`. `app.gainforest.feed.repost` (a verbatim
-port of `app.bsky.feed.repost`) is a trivial add if reposts are wanted later.
+deprecated there in favour of `facets`. `app.gainforest.feed.repost` is a
+verbatim port of `app.bsky.feed.repost`; the reshare button writes/deletes it
+and counts are read from the hyperindex (`appGainforestFeedRepost`). Surfacing
+reshared records as timeline rows ("X reshared …", Bluesky's `reasonRepost`)
+still needs feed-merge wiring in `app/_lib/feed.ts` once the indexer ingests
+the collection.
 
 ## Bluesky cross-posting (`app.gainforest.actor.preferences`)
 

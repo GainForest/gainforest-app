@@ -1111,6 +1111,10 @@
     "actions": {
       "like": "Like",
       "liked": "Liked",
+      "reshare": "Reshare",
+      "reshared": "Reshared",
+      "undoReshare": "Undo reshare",
+      "reshareHint": "Share this with your followers",
       "comment": "Comment",
       "comments": "{count, plural, one {# comment} other {# comments}}",
       "signInToInteract": "Sign in to post, like, and comment",

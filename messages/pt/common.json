@@ -1111,6 +1111,10 @@
     "actions": {
       "like": "Curtir",
       "liked": "Curtido",
+      "reshare": "Compartilhar",
+      "reshared": "Compartilhado",
+      "undoReshare": "Desfazer compartilhamento",
+      "reshareHint": "Compartilhe com seus seguidores",
       "comment": "Comentar",
       "comments": "{count, plural, one {# comentário} other {# comentários}}",
       "signInToInteract": "Entre para publicar, curtir e comentar",
