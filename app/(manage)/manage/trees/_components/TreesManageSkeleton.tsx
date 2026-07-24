@@ -22,7 +22,7 @@ export function TreesManageSkeleton() {
       {/* Tree-group card grid — mirrors DatasetLandingSection */}
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
         {Array.from({ length: 6 }).map((_, index) => (
-          <article key={index} className="flex h-full flex-col rounded-2xl border border-border bg-background p-5">
+          <article key={index} className="flex h-full flex-col rounded-2xl bg-muted p-5">
             <div className="flex items-start justify-between gap-3">
               <div className="min-w-0 space-y-2">
                 <Skeleton className="h-3 w-24" />

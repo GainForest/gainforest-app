@@ -30,7 +30,7 @@ export default async function LegacyManageRedirect({ params, searchParams }: Pag
   const session = await fetchAuthSession();
   if (!session.isLoggedIn) {
     return (
-      <section className="mx-auto flex min-h-[calc(100vh-12rem)] w-full max-w-sm items-center px-3 py-12">
+      <section className="mx-auto flex min-h-[calc(100dvh-12rem)] w-full max-w-sm items-center px-3 py-12">
         <SignInPrompt />
       </section>
     );
@@ -38,8 +38,10 @@ export default async function LegacyManageRedirect({ params, searchParams }: Pag
 
   const query = new URLSearchParams();
   for (const [key, value] of Object.entries(sp)) {
-    const raw = Array.isArray(value) ? value[0] : value;
-    if (typeof raw === "string" && raw.length > 0) query.set(key, raw);
+    const values = Array.isArray(value) ? value : [value];
+    for (const raw of values) {
+      if (typeof raw === "string" && raw.length > 0) query.append(key, raw);
+    }
   }
   const queryString = query.toString();
   const withQuery = (path: string) => (queryString ? `${path}?${queryString}` : path);

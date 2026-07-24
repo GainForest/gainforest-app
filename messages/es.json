@@ -54,7 +54,6 @@
       "videoTitle": "Bumicerts: registros verificables de naturaleza para guardianes locales"
     },
     "certificate": {
-      "eyebrow": "El certificado",
       "titleLine1": "¿Qué es exactamente",
       "titleLine2": "un certificado?",
       "faqItems": {
@@ -111,7 +110,6 @@
       "alt": "Ícono de la app GainForest"
     },
     "stats": {
-      "liveLabel": "Impacto en vivo",
       "bumicertsShared": "registros compartidos",
       "organizationProfiles": "perfiles de organizaciones",
       "natureSightingsShared": "avistamientos de naturaleza compartidos",

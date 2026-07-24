@@ -3,6 +3,7 @@ import Link from "next/link";
 import { Fragment, type ReactNode } from "react";
 import { getTranslations } from "next-intl/server";
 import { localizedAlternates } from "@/app/_lib/seo-metadata";
+import { DisplayHeading } from "@/components/ui/typography";
 
 const INTRO_PARAGRAPH_KEYS = ["p1", "p2"] as const;
 
@@ -83,43 +84,39 @@ export default async function PrivacyPage() {
   const t = await getTranslations("privacy");
 
   return (
-    <main className="px-6 py-12 md:py-16">
-      <article className="mx-auto max-w-3xl">
-        <div className="rounded-[2rem] border border-border bg-card/70 p-6 shadow-sm md:p-10">
-          <header className="border-b border-border pb-8">
-            <h1 className="font-serif text-4xl font-semibold tracking-tight text-foreground md:text-5xl">
-              {t("title")}
-            </h1>
-            <div className="mt-5 flex flex-col gap-2 text-sm text-muted-foreground sm:flex-row sm:gap-5">
-              <span>{t("effectiveDate")}</span>
-              <span>{t("lastUpdated")}</span>
-            </div>
-          </header>
-
-          <div className="mt-8 space-y-5 text-[15px] leading-7 text-muted-foreground">
-            {INTRO_PARAGRAPH_KEYS.map((key) => (
-              <p key={key}>{renderPolicyText(t(`intro.${key}`))}</p>
-            ))}
+    <main className="mx-auto max-w-3xl px-3 py-4 sm:px-5 lg:px-8 lg:py-6">
+        <header>
+          <DisplayHeading as="h1" className="text-4xl font-medium tracking-tight text-foreground md:text-5xl">
+            {t("title")}
+          </DisplayHeading>
+          <div className="mt-2 flex flex-col gap-2 text-sm text-muted-foreground sm:flex-row sm:gap-5">
+            <span>{t("effectiveDate")}</span>
+            <span>{t("lastUpdated")}</span>
           </div>
+        </header>
 
-          <div className="mt-10 space-y-10">
-            {POLICY_SECTIONS.map((section) => (
-              <section key={section.key} className="scroll-mt-24">
-                <h2 className="font-serif text-2xl font-semibold tracking-tight text-foreground">
-                  {t(`sections.${section.key}.title`)}
-                </h2>
-                <div className="mt-4 space-y-4 text-[15px] leading-7 text-muted-foreground">
-                  {section.paragraphs.map((paragraphKey) => (
-                    <p key={paragraphKey}>
-                      {renderPolicyText(t(`sections.${section.key}.paragraphs.${paragraphKey}`))}
-                    </p>
-                  ))}
-                </div>
-              </section>
-            ))}
-          </div>
+        <div className="mt-6 space-y-5 rounded-2xl bg-muted p-4 text-[15px] leading-7 text-muted-foreground sm:mt-8 sm:p-5">
+          {INTRO_PARAGRAPH_KEYS.map((key) => (
+            <p key={key}>{renderPolicyText(t(`intro.${key}`))}</p>
+          ))}
         </div>
-      </article>
+
+        <div className="mt-12 space-y-12">
+          {POLICY_SECTIONS.map((section) => (
+            <section key={section.key} className="scroll-mt-24">
+              <DisplayHeading as="h2" className="text-2xl font-medium tracking-tight text-foreground">
+                {t(`sections.${section.key}.title`)}
+              </DisplayHeading>
+              <div className="mt-4 space-y-4 text-[15px] leading-7 text-muted-foreground">
+                {section.paragraphs.map((paragraphKey) => (
+                  <p key={paragraphKey}>
+                    {renderPolicyText(t(`sections.${section.key}.paragraphs.${paragraphKey}`))}
+                  </p>
+                ))}
+              </div>
+            </section>
+          ))}
+        </div>
     </main>
   );
 }

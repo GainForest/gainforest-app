@@ -32,6 +32,9 @@ export function DeploymentRecordings({
 
   useEffect(() => {
     const ctrl = new AbortController();
+    setItems(null);
+    setHost(null);
+    setLoadError(false);
     (async () => {
       try {
         const [pdsHost, deployments] = await Promise.all([
@@ -58,20 +61,20 @@ export function DeploymentRecordings({
   }, [did, eventUri]);
 
   return (
-    <section className="mt-4 rounded-2xl border border-border bg-card/90 p-5 sm:p-6">
+    <section className="mt-8 border-t border-border-soft pt-6">
       <div className="flex items-center justify-between gap-3">
-        <p className="text-[11px] font-medium uppercase tracking-[0.12em] text-muted-foreground">
+        <h2 className="font-instrument text-lg font-semibold italic text-foreground">
           {t("title")}
           {items && items.length > 0 ? (
-            <span className="ml-2 rounded-full bg-primary/10 px-2 py-0.5 font-mono text-[11px] normal-case tracking-normal text-primary">
+            <span className="ml-2 rounded-full bg-primary/10 px-2 py-0.5 font-mono text-[11px] font-medium text-primary">
               {items.length}
             </span>
           ) : null}
-        </p>
+        </h2>
         {isOwner ? (
           <Link
             href="/audiomoth?tab=upload"
-            className="inline-flex items-center gap-1.5 text-xs font-medium text-primary underline-offset-2 hover:underline"
+            className="inline-flex min-h-11 items-center gap-1.5 px-2 text-xs font-medium text-primary underline-offset-2 hover:underline"
           >
             <UploadIcon className="h-3.5 w-3.5" aria-hidden />
             {t("uploadCta")}
@@ -82,11 +85,13 @@ export function DeploymentRecordings({
       {items === null ? (
         <div className="mt-4 flex flex-col gap-2">
           {Array.from({ length: 3 }).map((_, i) => (
-            <div key={i} className="h-14 animate-pulse rounded-xl bg-muted" />
+            <div key={i} className="h-14 animate-pulse rounded-xl bg-muted motion-reduce:animate-none" />
           ))}
         </div>
       ) : loadError ? (
-        <p className="mt-4 text-sm text-muted-foreground">{t("loadError")}</p>
+        <p role="alert" className="mt-4 rounded-xl bg-destructive/10 p-3 text-sm text-destructive">
+          {t("loadError")}
+        </p>
       ) : items.length === 0 ? (
         <p className="mt-4 text-sm text-muted-foreground">{t("empty")}</p>
       ) : (

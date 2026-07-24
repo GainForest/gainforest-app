@@ -11,11 +11,23 @@ import {
   MapIcon,
   SearchIcon,
 } from "lucide-react";
-import { memo, useCallback, useDeferredValue, useEffect, useMemo, useRef, useState } from "react";
+import {
+  memo,
+  useCallback,
+  useDeferredValue,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { parseAsString, parseAsStringEnum, useQueryState } from "nuqs";
 import { Skeleton } from "@/components/ui/skeleton";
 import { AutoLoadMoreButton } from "../_components/AutoLoadMoreButton";
-import { AllFiltersPopover, SortSection, SourceFilterChips } from "../_components/AllFiltersPopover";
+import {
+  AllFiltersPopover,
+  SortSection,
+  SourceFilterChips,
+} from "../_components/AllFiltersPopover";
 import { RecordDrawer } from "../_components/RecordDrawer";
 import { RecordMap } from "../_components/RecordMap";
 import { TrustedByBadges } from "../_components/TrustedByBadges";
@@ -32,19 +44,36 @@ import { useStableQueryView } from "../_lib/use-stable-query-view";
 
 type SortMode = "newest" | "oldest" | "az" | "za";
 type ViewMode = "cards" | "list" | "map";
-type QuickFilter = "observations" | "donations" | "donations-gainforest" | "donations-maearth";
+type QuickFilter =
+  "observations" | "donations" | "donations-gainforest" | "donations-maearth";
 
 const SORT_MODES: SortMode[] = ["newest", "oldest", "az", "za"];
 const VIEW_MODES: ViewMode[] = ["cards", "list", "map"];
 // "donations" stays parseable so old shared links keep working (it means
 // "either donation source"), but the UI only offers the two source chips.
-const QUICK_FILTERS: QuickFilter[] = ["observations", "donations", "donations-gainforest", "donations-maearth"];
+const QUICK_FILTERS: QuickFilter[] = [
+  "observations",
+  "donations",
+  "donations-gainforest",
+  "donations-maearth",
+];
 const BADGE_FILTER_KEYS: BumicertBadgeFilter[] = ["gainforest", "maearth"];
-const QUERY_STATE_OPTIONS = { history: "replace", scroll: false, shallow: true } as const;
-const SEARCH_QUERY_STATE_OPTIONS = { ...QUERY_STATE_OPTIONS, throttleMs: 200 } as const;
+const QUERY_STATE_OPTIONS = {
+  history: "replace",
+  scroll: false,
+  shallow: true,
+} as const;
+const SEARCH_QUERY_STATE_OPTIONS = {
+  ...QUERY_STATE_OPTIONS,
+  throttleMs: 200,
+} as const;
 
 const SORT_OPTION_VALUES: SortMode[] = ["newest", "oldest", "az", "za"];
-const QUICK_CHIP_VALUES: QuickFilter[] = ["observations", "donations-gainforest", "donations-maearth"];
+const QUICK_CHIP_VALUES: QuickFilter[] = [
+  "observations",
+  "donations-gainforest",
+  "donations-maearth",
+];
 const QUICK_CHIP_LABEL_KEYS: Record<QuickFilter, string> = {
   observations: "observations",
   donations: "donations",
@@ -78,12 +107,23 @@ export function OrganizationsClient({
   const t = useTranslations("marketplace.organizations");
   const exploreT = useTranslations("marketplace.explore");
   const locale = useLocale();
-  const initialRecords = useMemo(() => initialPage?.records ?? initialRecordsProp ?? [], [initialPage, initialRecordsProp]);
+  const initialRecords = useMemo(
+    () => initialPage?.records ?? initialRecordsProp ?? [],
+    [initialPage, initialRecordsProp],
+  );
   const [records, setRecords] = useState<SiteRecord[]>(initialRecords);
-  const [cursor, setCursor] = useState<string | null>(initialPage?.cursor ?? null);
-  const [hasMore, setHasMore] = useState(initialPage?.hasMore ?? initialRecords.length === 0);
-  const [loading, setLoading] = useState(!initialPage && initialRecords.length === 0);
+  const [cursor, setCursor] = useState<string | null>(
+    initialPage?.cursor ?? null,
+  );
+  const [hasMore, setHasMore] = useState(
+    initialPage?.hasMore ?? initialRecords.length === 0,
+  );
+  const [loading, setLoading] = useState(
+    !initialPage && initialRecords.length === 0,
+  );
   const [loadingMore, setLoadingMore] = useState(false);
+  const [fetchError, setFetchError] = useState(false);
+  const [retryNonce, setRetryNonce] = useState(0);
   const [totalCount, setTotalCount] = useState<number | null>(null);
   const [query, setQuery] = useQueryState(
     "q",
@@ -91,7 +131,9 @@ export function OrganizationsClient({
   );
   const [sort, setSort] = useQueryState(
     "sort",
-    parseAsStringEnum<SortMode>(SORT_MODES).withDefault("newest").withOptions(QUERY_STATE_OPTIONS),
+    parseAsStringEnum<SortMode>(SORT_MODES)
+      .withDefault("newest")
+      .withOptions(QUERY_STATE_OPTIONS),
   );
   const [countryFilter, setCountryFilter] = useQueryState(
     "country",
@@ -105,15 +147,23 @@ export function OrganizationsClient({
     "quick",
     parseAsString.withOptions(QUERY_STATE_OPTIONS),
   );
-  const quickFilters = useMemo(() => parseQuickFiltersParam(quickFiltersParam), [quickFiltersParam]);
+  const quickFilters = useMemo(
+    () => parseQuickFiltersParam(quickFiltersParam),
+    [quickFiltersParam],
+  );
   const [badgesParam, setBadgesParam] = useQueryState(
     "badges",
     parseAsString.withOptions(QUERY_STATE_OPTIONS),
   );
-  const badgeFilters = useMemo(() => parseBadgeFilterParam(badgesParam), [badgesParam]);
+  const badgeFilters = useMemo(
+    () => parseBadgeFilterParam(badgesParam),
+    [badgesParam],
+  );
   const [queryView, setQueryView] = useQueryState(
     "view",
-    parseAsStringEnum<ViewMode>(VIEW_MODES).withDefault("cards").withOptions(QUERY_STATE_OPTIONS),
+    parseAsStringEnum<ViewMode>(VIEW_MODES)
+      .withDefault("cards")
+      .withOptions(QUERY_STATE_OPTIONS),
   );
   const [view, setView] = useStableQueryView({
     queryValue: queryView,
@@ -128,18 +178,34 @@ export function OrganizationsClient({
   const requestSeqRef = useRef(0);
   const countSeqRef = useRef(0);
   const countryHydrationKeyRef = useRef("");
-  const badgeFilterOptions = useMemo<BadgeFilterOption[]>(() => [
-    { key: "gainforest", label: exploreT("filters.badges.gainforest"), logoSrc: "/assets/media/images/gainforest-logo.svg" },
-    { key: "maearth", label: exploreT("filters.badges.maearth"), logoSrc: "/assets/media/images/badges/ma-earth-logo.webp" },
-  ], [exploreT]);
-  const sortOptions = useMemo(() => SORT_OPTION_VALUES.map((value) => ({ value, label: t(`sort.${value}`) })), [t]);
-  const shouldUseInitialRecords = initialRecords.length > 0
-    && !deferredQuery.trim()
-    && !countryFilter
-    && !typeFilter
-    && quickFilters.length === 0
-    && badgeFilters.length === 0
-    && sort === "newest";
+  const badgeFilterOptions = useMemo<BadgeFilterOption[]>(
+    () => [
+      {
+        key: "gainforest",
+        label: exploreT("filters.badges.gainforest"),
+        logoSrc: "/assets/media/images/gainforest-logo.svg",
+      },
+      {
+        key: "maearth",
+        label: exploreT("filters.badges.maearth"),
+        logoSrc: "/assets/media/images/badges/ma-earth-logo.webp",
+      },
+    ],
+    [exploreT],
+  );
+  const sortOptions = useMemo(
+    () =>
+      SORT_OPTION_VALUES.map((value) => ({ value, label: t(`sort.${value}`) })),
+    [t],
+  );
+  const shouldUseInitialRecords =
+    initialRecords.length > 0 &&
+    !deferredQuery.trim() &&
+    !countryFilter &&
+    !typeFilter &&
+    quickFilters.length === 0 &&
+    badgeFilters.length === 0 &&
+    sort === "newest";
 
   useEffect(() => {
     if (shouldUseInitialRecords) {
@@ -148,18 +214,36 @@ export function OrganizationsClient({
       setHasMore(initialPage?.hasMore ?? initialRecords.length === 0);
       setLoading(false);
       setLoadingMore(false);
+      setFetchError(false);
       return;
     }
     const controller = new AbortController();
     const requestSeq = ++requestSeqRef.current;
-    const isCurrent = () => requestSeqRef.current === requestSeq && !controller.signal.aborted;
-    const options = { query: deferredQuery, country: countryFilter, orgType: typeFilter, quickFilters, sort, featuredBadgesOnly: true, badgeFilters };
+    const isCurrent = () =>
+      requestSeqRef.current === requestSeq && !controller.signal.aborted;
+    const options = {
+      query: deferredQuery,
+      country: countryFilter,
+      orgType: typeFilter,
+      quickFilters,
+      sort,
+      featuredBadgesOnly: true,
+      badgeFilters,
+    };
     setLoading(true);
     setLoadingMore(false);
+    setFetchError(false);
     setRecords([]);
     setCursor(null);
     setHasMore(true);
-    fetchSites(ORGANIZATIONS_PAGE_SIZE, null, controller.signal, undefined, "both", options)
+    fetchSites(
+      ORGANIZATIONS_PAGE_SIZE,
+      null,
+      controller.signal,
+      undefined,
+      "both",
+      options,
+    )
       .then((page) => {
         if (!isCurrent()) return;
         setRecords(page.records);
@@ -167,28 +251,60 @@ export function OrganizationsClient({
         setHasMore(page.hasMore);
       })
       .catch((error) => {
-        if ((error as Error).name !== "AbortError") console.warn("[organizations] fetch failed", error);
+        if ((error as Error).name !== "AbortError") {
+          console.warn("[organizations] fetch failed", error);
+          if (isCurrent()) setFetchError(true);
+        }
       })
       .finally(() => {
         if (isCurrent()) setLoading(false);
       });
     return () => controller.abort();
-  }, [shouldUseInitialRecords, initialRecords, initialPage?.cursor, initialPage?.hasMore, countryFilter, deferredQuery, quickFilters, sort, typeFilter, badgeFilters]);
+  }, [
+    shouldUseInitialRecords,
+    initialRecords,
+    initialPage?.cursor,
+    initialPage?.hasMore,
+    countryFilter,
+    deferredQuery,
+    quickFilters,
+    sort,
+    typeFilter,
+    badgeFilters,
+    retryNonce,
+  ]);
 
   useEffect(() => {
     const controller = new AbortController();
     const requestSeq = ++countSeqRef.current;
-    const isCurrent = () => countSeqRef.current === requestSeq && !controller.signal.aborted;
+    const isCurrent = () =>
+      countSeqRef.current === requestSeq && !controller.signal.aborted;
     setTotalCount(null);
-    fetchSiteTotalCount(controller.signal, { query: deferredQuery, country: countryFilter, orgType: typeFilter, quickFilters, sort, featuredBadgesOnly: true, badgeFilters })
+    fetchSiteTotalCount(controller.signal, {
+      query: deferredQuery,
+      country: countryFilter,
+      orgType: typeFilter,
+      quickFilters,
+      sort,
+      featuredBadgesOnly: true,
+      badgeFilters,
+    })
       .then((count) => {
         if (isCurrent()) setTotalCount(count);
       })
       .catch((error) => {
-        if ((error as Error).name !== "AbortError") console.warn("[organizations] count failed", error);
+        if ((error as Error).name !== "AbortError")
+          console.warn("[organizations] count failed", error);
       });
     return () => controller.abort();
-  }, [countryFilter, deferredQuery, quickFilters, sort, typeFilter, badgeFilters]);
+  }, [
+    countryFilter,
+    deferredQuery,
+    quickFilters,
+    sort,
+    typeFilter,
+    badgeFilters,
+  ]);
 
   useEffect(() => {
     const missing = records
@@ -204,14 +320,17 @@ export function OrganizationsClient({
     fetchCertifiedLocationCountriesByUri(missing, controller.signal)
       .then((countries) => {
         if (countries.size === 0) return;
-        setRecords((current) => current.map((record) => {
-          if (record.country || !record.locationUri) return record;
-          const country = countries.get(record.locationUri);
-          return country ? { ...record, country } : record;
-        }));
+        setRecords((current) =>
+          current.map((record) => {
+            if (record.country || !record.locationUri) return record;
+            const country = countries.get(record.locationUri);
+            return country ? { ...record, country } : record;
+          }),
+        );
       })
       .catch((error) => {
-        if ((error as Error).name !== "AbortError") console.warn("[organizations] country fetch failed", error);
+        if ((error as Error).name !== "AbortError")
+          console.warn("[organizations] country fetch failed", error);
       });
     return () => controller.abort();
   }, [records]);
@@ -221,31 +340,68 @@ export function OrganizationsClient({
       .map((record) => normalizeCountry(record.country))
       .filter((code): code is string => Boolean(code));
     return Array.from(new Set(loadedCodes))
-      .map((code) => ({ code, name: countryName(code, locale), emoji: countryFlag(code) }))
-      .sort((a, b) => Number(b.code === countryFilter) - Number(a.code === countryFilter) || a.name.localeCompare(b.name));
+      .map((code) => ({
+        code,
+        name: countryName(code, locale),
+        emoji: countryFlag(code),
+      }))
+      .sort(
+        (a, b) =>
+          Number(b.code === countryFilter) - Number(a.code === countryFilter) ||
+          a.name.localeCompare(b.name),
+      );
   }, [records, countryFilter, locale]);
 
   const typeChips = useMemo(() => {
     const counts = new Map<string, number>();
     for (const record of records) {
-      for (const type of orgTypes(record)) counts.set(type, (counts.get(type) ?? 0) + 1);
+      for (const type of orgTypes(record))
+        counts.set(type, (counts.get(type) ?? 0) + 1);
     }
     return [...counts.entries()]
       .map(([value, count]) => ({ value, label: titleCase(value), count }))
-      .sort((a, b) => Number(b.value === typeFilter) - Number(a.value === typeFilter) || b.count - a.count || a.label.localeCompare(b.label));
+      .sort(
+        (a, b) =>
+          Number(b.value === typeFilter) - Number(a.value === typeFilter) ||
+          b.count - a.count ||
+          a.label.localeCompare(b.label),
+      );
   }, [records, typeFilter]);
 
   const visibleRecords = useMemo(() => {
     const normalizedQuery = deferredQuery.trim().toLowerCase();
     const filtered = records.filter((record) => {
-      if (countryFilter && normalizeCountry(record.country) !== countryFilter) return false;
+      if (countryFilter && normalizeCountry(record.country) !== countryFilter)
+        return false;
       if (typeFilter && !orgTypes(record).includes(typeFilter)) return false;
-      if (quickFilters.includes("observations") && (record.observationCount ?? 0) <= 0) return false;
-      if (quickFilters.includes("donations") && record.acceptsDonations !== true) return false;
-      if (quickFilters.includes("donations-gainforest") && record.donationSources?.gainforest !== true) return false;
-      if (quickFilters.includes("donations-maearth") && record.donationSources?.maearth !== true) return false;
+      if (
+        quickFilters.includes("observations") &&
+        (record.observationCount ?? 0) <= 0
+      )
+        return false;
+      if (
+        quickFilters.includes("donations") &&
+        record.acceptsDonations !== true
+      )
+        return false;
+      if (
+        quickFilters.includes("donations-gainforest") &&
+        record.donationSources?.gainforest !== true
+      )
+        return false;
+      if (
+        quickFilters.includes("donations-maearth") &&
+        record.donationSources?.maearth !== true
+      )
+        return false;
       if (!normalizedQuery) return true;
-      const haystack = [record.name, record.country, countryNameOrEmpty(record.country, locale), record.orgType, record.source]
+      const haystack = [
+        record.name,
+        record.country,
+        countryNameOrEmpty(record.country, locale),
+        record.orgType,
+        record.source,
+      ]
         .filter(Boolean)
         .join(" ")
         .toLowerCase();
@@ -257,22 +413,36 @@ export function OrganizationsClient({
         case "oldest":
           return siteTime(a.createdAt) - siteTime(b.createdAt);
         case "az":
-          return a.name.localeCompare(b.name, undefined, { sensitivity: "base" });
+          return a.name.localeCompare(b.name, undefined, {
+            sensitivity: "base",
+          });
         case "za":
-          return b.name.localeCompare(a.name, undefined, { sensitivity: "base" });
+          return b.name.localeCompare(a.name, undefined, {
+            sensitivity: "base",
+          });
         case "newest":
         default:
           return siteTime(b.createdAt) - siteTime(a.createdAt);
       }
     });
-  }, [countryFilter, deferredQuery, locale, quickFilters, records, sort, typeFilter]);
+  }, [
+    countryFilter,
+    deferredQuery,
+    locale,
+    quickFilters,
+    records,
+    sort,
+    typeFilter,
+  ]);
 
   const renderedRecords = useMemo(
-    () => (view === "map" ? visibleRecords : visibleRecords.slice(0, cardLimit)),
+    () =>
+      view === "map" ? visibleRecords : visibleRecords.slice(0, cardLimit),
     [cardLimit, view, visibleRecords],
   );
 
-  const hasMoreCardsToShow = view !== "map" && renderedRecords.length < visibleRecords.length;
+  const hasMoreCardsToShow =
+    view !== "map" && renderedRecords.length < visibleRecords.length;
 
   const activeFilterCount =
     (countryFilter ? 1 : 0) +
@@ -284,14 +454,26 @@ export function OrganizationsClient({
 
   useEffect(() => {
     setCardLimit(INITIAL_CARD_LIMIT);
-  }, [deferredQuery, sort, countryFilter, typeFilter, quickFilters, badgeFilters, view]);
+  }, [
+    deferredQuery,
+    sort,
+    countryFilter,
+    typeFilter,
+    quickFilters,
+    badgeFilters,
+    view,
+  ]);
 
   const updateQuickFilters = (nextFilters: QuickFilter[]) => {
     void setQuickFiltersParam(serializeQuickFiltersParam(nextFilters));
   };
 
   const toggleQuickFilter = (filter: QuickFilter) => {
-    updateQuickFilters(quickFilters.includes(filter) ? quickFilters.filter((value) => value !== filter) : [...quickFilters, filter]);
+    updateQuickFilters(
+      quickFilters.includes(filter)
+        ? quickFilters.filter((value) => value !== filter)
+        : [...quickFilters, filter],
+    );
   };
 
   const updateBadgeFilters = (nextFilters: BumicertBadgeFilter[]) => {
@@ -299,7 +481,11 @@ export function OrganizationsClient({
   };
 
   const toggleBadgeFilter = (filter: BumicertBadgeFilter) => {
-    updateBadgeFilters(badgeFilters.includes(filter) ? badgeFilters.filter((value) => value !== filter) : [...badgeFilters, filter]);
+    updateBadgeFilters(
+      badgeFilters.includes(filter)
+        ? badgeFilters.filter((value) => value !== filter)
+        : [...badgeFilters, filter],
+    );
   };
 
   const clearFilterControls = () => {
@@ -319,10 +505,26 @@ export function OrganizationsClient({
 
     const controller = new AbortController();
     const requestSeq = ++requestSeqRef.current;
-    const isCurrent = () => requestSeqRef.current === requestSeq && !controller.signal.aborted;
+    const isCurrent = () =>
+      requestSeqRef.current === requestSeq && !controller.signal.aborted;
     const base = records;
     setLoadingMore(true);
-    fetchSites(ORGANIZATIONS_PAGE_SIZE, cursor, controller.signal, undefined, "both", { query: deferredQuery, country: countryFilter, orgType: typeFilter, quickFilters, sort, featuredBadgesOnly: true, badgeFilters })
+    fetchSites(
+      ORGANIZATIONS_PAGE_SIZE,
+      cursor,
+      controller.signal,
+      undefined,
+      "both",
+      {
+        query: deferredQuery,
+        country: countryFilter,
+        orgType: typeFilter,
+        quickFilters,
+        sort,
+        featuredBadgesOnly: true,
+        badgeFilters,
+      },
+    )
       .then((page) => {
         if (!isCurrent()) return;
         setRecords(mergeSiteRecords(base, page.records));
@@ -330,12 +532,25 @@ export function OrganizationsClient({
         setHasMore(page.hasMore);
       })
       .catch((error) => {
-        if ((error as Error).name !== "AbortError") console.warn("[organizations] load more failed", error);
+        if ((error as Error).name !== "AbortError")
+          console.warn("[organizations] load more failed", error);
       })
       .finally(() => {
         if (isCurrent()) setLoadingMore(false);
       });
-  }, [countryFilter, cursor, deferredQuery, hasMore, loading, loadingMore, quickFilters, badgeFilters, records, sort, typeFilter]);
+  }, [
+    countryFilter,
+    cursor,
+    deferredQuery,
+    hasMore,
+    loading,
+    loadingMore,
+    quickFilters,
+    badgeFilters,
+    records,
+    sort,
+    typeFilter,
+  ]);
 
   const openMapRecord = (record: ExplorerRecord) => {
     if (record.kind === "site") setDrawer(record);
@@ -343,13 +558,16 @@ export function OrganizationsClient({
 
   return (
     <>
-      <section className="-mt-14 pb-20 md:pb-28">
+      <section className="-mt-14 pb-6 md:pb-8">
         <OrganizationsHero />
 
-        <div className="mx-auto max-w-6xl px-6">
-          <div className="relative z-20 mt-5 mb-0 space-y-2.5">
-            <div className="relative z-30 flex items-center gap-2 animate-in" style={{ animationDelay: "80ms" }}>
-              <div className="group/input-group border-input relative flex h-10 min-w-0 flex-1 items-center rounded-full border bg-background/50 shadow-xs backdrop-blur transition-[color,box-shadow] outline-none focus-within:border-ring focus-within:ring-[3px] focus-within:ring-ring/50">
+        <div className="mx-auto max-w-[90rem] px-3 sm:px-5 lg:px-8">
+          <div className="relative z-20 mt-5 space-y-3">
+            <div
+              className="relative z-30 flex items-center gap-2 animate-in"
+              style={{ animationDelay: "80ms" }}
+            >
+              <div className="group/input-group border-input relative flex h-11 min-w-0 flex-1 items-center rounded-full border bg-background/50 shadow-xs backdrop-blur transition-[color,box-shadow] outline-none focus-within:border-ring focus-within:ring-[3px] focus-within:ring-ring/50 sm:h-10">
                 <div className="flex h-auto cursor-text items-center justify-center gap-2 py-1.5 pl-3.5 text-sm font-medium text-muted-foreground select-none">
                   <SearchIcon className="h-4 w-4" />
                 </div>
@@ -362,7 +580,10 @@ export function OrganizationsClient({
                 />
               </div>
 
-              <ViewToggle view={view} setView={(nextView) => void setView(nextView)} />
+              <ViewToggle
+                view={view}
+                setView={(nextView) => void setView(nextView)}
+              />
             </div>
 
             <div
@@ -401,16 +622,24 @@ export function OrganizationsClient({
 
                 {typeChips.length > 0 && (
                   <div className="mt-3 border-t border-border/60 pt-3">
-                    <p className="mb-2 text-xs font-medium uppercase tracking-[0.08em] text-muted-foreground">{t("facets.category")}</p>
+                    <p className="mb-2 text-xs font-medium text-muted-foreground">
+                      {t("facets.category")}
+                    </p>
                     <div className="flex max-h-40 flex-wrap gap-1.5 overflow-y-auto">
                       {typeChips.map((type) => (
                         <FilterChip
                           key={type.value}
                           selected={typeFilter === type.value}
-                          onClick={() => void setTypeFilter(typeFilter === type.value ? null : type.value)}
+                          onClick={() =>
+                            void setTypeFilter(
+                              typeFilter === type.value ? null : type.value,
+                            )
+                          }
                         >
                           {type.label}
-                          <span className="text-[11px] tabular-nums opacity-60">{type.count}</span>
+                          <span className="text-[11px] tabular-nums opacity-60">
+                            {type.count}
+                          </span>
                         </FilterChip>
                       ))}
                     </div>
@@ -419,13 +648,21 @@ export function OrganizationsClient({
 
                 {countryChips.length > 0 && (
                   <div className="mt-3 border-t border-border/60 pt-3">
-                    <p className="mb-2 text-xs font-medium uppercase tracking-[0.08em] text-muted-foreground">{t("facets.country")}</p>
+                    <p className="mb-2 text-xs font-medium text-muted-foreground">
+                      {t("facets.country")}
+                    </p>
                     <div className="flex max-h-40 flex-wrap gap-1.5 overflow-y-auto">
                       {countryChips.map((country) => (
                         <FilterChip
                           key={country.code}
                           selected={countryFilter === country.code}
-                          onClick={() => void setCountryFilter(countryFilter === country.code ? null : country.code)}
+                          onClick={() =>
+                            void setCountryFilter(
+                              countryFilter === country.code
+                                ? null
+                                : country.code,
+                            )
+                          }
                         >
                           <span aria-hidden>{country.emoji}</span>
                           {country.name}
@@ -439,34 +676,55 @@ export function OrganizationsClient({
           </div>
 
           <div className="mt-6">
-            {view === "map" ? (
-              <RecordMap records={visibleRecords} kind="site" onOpen={openMapRecord} />
+            {fetchError ? (
+              <OrganizationsErrorState
+                onRetry={() => setRetryNonce((value) => value + 1)}
+              />
+            ) : view === "map" ? (
+              <RecordMap
+                records={visibleRecords}
+                kind="site"
+                onOpen={openMapRecord}
+              />
             ) : loading && visibleRecords.length === 0 ? (
               <OrganizationsGridSkeleton />
             ) : visibleRecords.length === 0 ? (
-              <EmptyState onClear={clearAll} hasActiveFilters={hasActiveFilters} />
+              <EmptyState
+                onClear={clearAll}
+                hasActiveFilters={hasActiveFilters}
+              />
             ) : view === "list" ? (
               <OrganizationList records={renderedRecords} onOpen={setDrawer} />
             ) : (
-              <div className="grid grid-cols-[repeat(auto-fill,minmax(300px,1fr))] gap-2 lg:gap-4">
+              <div className="grid grid-cols-1 gap-2 sm:grid-cols-[repeat(auto-fill,minmax(300px,1fr))] lg:gap-4">
                 {renderedRecords.map((record) => (
-                  <OrganizationCard key={record.id} record={record} onOpen={setDrawer} />
+                  <OrganizationCard
+                    key={record.id}
+                    record={record}
+                    onOpen={setDrawer}
+                  />
                 ))}
               </div>
             )}
           </div>
 
-          {(records.length > 0 || (!loading && hasMore && hasActiveFilters)) && (
+          {(records.length > 0 ||
+            (!loading && hasMore && hasActiveFilters)) && (
             <div className="mt-10 flex flex-col items-center gap-3">
               {totalCount !== null && (
                 <p className="text-sm text-muted-foreground">
-                  {t("footer.showing", { shown: visibleRecords.length, total: totalCount })}
+                  {t("footer.showing", {
+                    shown: visibleRecords.length,
+                    total: totalCount,
+                  })}
                 </p>
               )}
               {hasMoreCardsToShow ? (
                 <button
                   type="button"
-                  onClick={() => setCardLimit((current) => current + CARD_BATCH_SIZE)}
+                  onClick={() =>
+                    setCardLimit((current) => current + CARD_BATCH_SIZE)
+                  }
                   className="inline-flex items-center justify-center rounded-full border border-border bg-background px-6 py-3 text-sm font-medium text-foreground transition-colors hover:bg-muted"
                 >
                   {t("actions.showMore")}
@@ -481,7 +739,9 @@ export function OrganizationsClient({
                   className="inline-flex items-center justify-center rounded-full border border-border bg-background px-6 py-3 text-sm font-medium text-foreground transition-colors hover:bg-muted disabled:opacity-60"
                 />
               ) : (
-                <span className="text-sm italic text-muted-foreground">{t("footer.end")}</span>
+                <span className="text-sm italic text-muted-foreground">
+                  {t("footer.end")}
+                </span>
               )}
             </div>
           )}
@@ -490,6 +750,30 @@ export function OrganizationsClient({
 
       <RecordDrawer record={drawer} onClose={() => setDrawer(null)} />
     </>
+  );
+}
+
+function OrganizationsErrorState({ onRetry }: { onRetry: () => void }) {
+  const t = useTranslations("marketplace.organizations");
+  return (
+    <div
+      role="alert"
+      className="flex flex-col items-center rounded-2xl bg-muted px-4 py-12 text-center sm:px-5"
+    >
+      <h3 className="font-instrument text-2xl italic text-foreground">
+        {t("error.title")}
+      </h3>
+      <p className="mt-2 max-w-md text-sm leading-6 text-muted-foreground">
+        {t("error.description")}
+      </p>
+      <button
+        type="button"
+        onClick={onRetry}
+        className="mt-5 rounded-full border border-border bg-background px-4 py-2 text-sm font-medium hover:bg-muted"
+      >
+        {t("error.retry")}
+      </button>
+    </div>
   );
 }
 
@@ -522,20 +806,14 @@ function OrganizationsHero() {
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_76%_36%,color-mix(in_oklab,var(--primary)_16%,transparent)_0%,transparent_28%),linear-gradient(90deg,color-mix(in_oklab,var(--background)_58%,transparent)_0%,color-mix(in_oklab,var(--background)_42%,transparent)_26%,transparent_58%),linear-gradient(180deg,color-mix(in_oklab,var(--background)_46%,transparent)_0%,transparent_42%,var(--background)_100%)]" />
       <div className="absolute inset-x-0 bottom-0 h-28 bg-gradient-to-t from-background via-background/70 to-transparent" />
 
-      <div className="relative z-10 mx-auto flex max-w-6xl flex-col px-8 pt-[64px] pb-8 sm:px-10 lg:px-9">
+      <div className="relative z-10 mx-auto flex max-w-[90rem] flex-col px-3 pb-8 pt-16 sm:px-5 lg:px-8">
         <h1
           aria-label={t("titleAriaLabel")}
-          className="max-w-4xl text-4xl leading-[0.98] font-light tracking-[-0.035em] text-foreground sm:text-5xl md:text-5xl lg:text-6xl"
-          style={{ fontFamily: "var(--font-garamond-var)" }}
+          className="font-instrument max-w-4xl text-4xl font-light italic leading-[0.98] tracking-[-0.035em] text-foreground sm:text-5xl lg:text-6xl"
         >
           <span aria-hidden="true">
             {t("titleFirst")}{" "}
-            <span
-              className="text-foreground/90"
-              style={{ fontFamily: "var(--font-instrument-serif-var)", fontStyle: "italic" }}
-            >
-              {t("titleSecond")}
-            </span>
+            <span className="text-foreground/90">{t("titleSecond")}</span>
           </span>
         </h1>
         <p className="mt-4 max-w-2xl text-base leading-7 text-muted-foreground md:text-base">
@@ -546,15 +824,23 @@ function OrganizationsHero() {
   );
 }
 
-function ViewToggle({ view, setView }: { view: ViewMode; setView: (view: ViewMode) => void }) {
+function ViewToggle({
+  view,
+  setView,
+}: {
+  view: ViewMode;
+  setView: (view: ViewMode) => void;
+}) {
   const t = useTranslations("marketplace.organizations.view");
   return (
-    <div className="inline-flex h-10 shrink-0 items-center rounded-full border border-border bg-background/70 p-0.5 backdrop-blur">
-      {([
-        { id: "cards", label: t("cards"), Icon: LayoutGridIcon },
-        { id: "list", label: t("list"), Icon: ListIcon },
-        { id: "map", label: t("map"), Icon: MapIcon },
-      ] as const).map(({ id, label, Icon }) => (
+    <div className="inline-flex h-11 shrink-0 items-center rounded-full border border-border bg-background/70 p-0.5 backdrop-blur sm:h-10">
+      {(
+        [
+          { id: "cards", label: t("cards"), Icon: LayoutGridIcon },
+          { id: "list", label: t("list"), Icon: ListIcon },
+          { id: "map", label: t("map"), Icon: MapIcon },
+        ] as const
+      ).map(({ id, label, Icon }) => (
         <button
           key={id}
           type="button"
@@ -562,8 +848,10 @@ function ViewToggle({ view, setView }: { view: ViewMode; setView: (view: ViewMod
           aria-pressed={view === id}
           aria-label={label}
           title={label}
-          className={`inline-flex h-9 w-9 items-center justify-center rounded-full p-0 text-sm font-medium transition-colors sm:w-auto sm:gap-1.5 sm:px-3 ${
-            view === id ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"
+          className={`inline-flex size-10 items-center justify-center rounded-full p-0 text-sm font-medium transition-colors sm:h-9 sm:w-auto sm:gap-1.5 sm:px-3 ${
+            view === id
+              ? "bg-primary text-primary-foreground"
+              : "text-muted-foreground hover:text-foreground"
           }`}
         >
           <Icon className="h-4 w-4" aria-hidden />
@@ -588,7 +876,7 @@ function FilterChip({
       type="button"
       onClick={onClick}
       aria-pressed={selected}
-      className={`inline-flex h-9 shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full border px-3.5 text-sm font-medium transition-colors ${
+      className={`inline-flex min-h-11 shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full border px-3 text-sm font-medium transition-colors sm:min-h-9 ${
         selected
           ? "border-primary bg-primary text-primary-foreground"
           : "border-border bg-background text-muted-foreground hover:border-primary/30 hover:text-foreground"
@@ -602,16 +890,22 @@ function FilterChip({
 function OrganizationsGridSkeleton() {
   const t = useTranslations("marketplace.organizations");
   return (
-    <div className="grid grid-cols-[repeat(auto-fill,minmax(300px,1fr))] gap-2 lg:gap-4" aria-label={t("loading")}>
+    <div
+      className="grid grid-cols-1 gap-2 sm:grid-cols-[repeat(auto-fill,minmax(300px,1fr))] lg:gap-4"
+      aria-label={t("loading")}
+    >
       {Array.from({ length: 12 }).map((_, index) => (
-        <div key={index} className="flex h-full flex-col overflow-hidden rounded-2xl border border-border bg-card">
+        <div
+          key={index}
+          className="flex h-full flex-col overflow-hidden rounded-2xl bg-muted"
+        >
           {/* Cover */}
           <Skeleton className="h-28 shrink-0 rounded-none" />
 
           {/* Body */}
-          <div className="flex flex-1 flex-col px-5 pb-5">
+          <div className="flex flex-1 flex-col px-4 pb-4 sm:px-5 sm:pb-5">
             <div className="-mt-8 mb-3 flex items-end justify-between gap-2">
-              <Skeleton className="size-16 shrink-0 rounded-full ring-4 ring-card" />
+              <Skeleton className="size-16 shrink-0 rounded-full ring-4 ring-muted" />
               <Skeleton className="mb-1 h-6 w-20 rounded-full" />
             </div>
 
@@ -647,7 +941,9 @@ const ORG_LIST_GRID =
 function OrganizationListHeader() {
   const t = useTranslations("marketplace.organizations.list");
   return (
-    <div className={`hidden items-center gap-3 px-2 pb-2 text-[11px] font-medium uppercase tracking-[0.08em] text-muted-foreground sm:grid sm:gap-4 sm:px-3 ${ORG_LIST_GRID}`}>
+    <div
+      className={`hidden items-center gap-3 px-2 pb-2 text-[11px] font-medium text-muted-foreground sm:grid sm:gap-4 sm:px-3 ${ORG_LIST_GRID}`}
+    >
       <span aria-hidden />
       <span>{t("colOrganization")}</span>
       <span>{t("colType")}</span>
@@ -658,13 +954,19 @@ function OrganizationListHeader() {
   );
 }
 
-const OrganizationList = memo(function OrganizationList({ records, onOpen }: { records: SiteRecord[]; onOpen: (record: SiteRecord) => void }) {
+const OrganizationList = memo(function OrganizationList({
+  records,
+  onOpen,
+}: {
+  records: SiteRecord[];
+  onOpen: (record: SiteRecord) => void;
+}) {
   return (
     <div>
       <OrganizationListHeader />
-      <ul role="list" className="border-t border-border">
+      <ul role="list" className="overflow-hidden rounded-2xl bg-muted divide-y divide-background">
         {records.map((record) => (
-          <li key={record.id} className="relative after:absolute after:inset-x-2 after:bottom-0 after:h-px after:bg-border last:after:hidden sm:after:inset-x-3">
+          <li key={record.id}>
             <OrganizationListItem record={record} onOpen={onOpen} />
           </li>
         ))}
@@ -673,7 +975,13 @@ const OrganizationList = memo(function OrganizationList({ records, onOpen }: { r
   );
 });
 
-const OrganizationListItem = memo(function OrganizationListItem({ record, onOpen }: { record: SiteRecord; onOpen: (record: SiteRecord) => void }) {
+const OrganizationListItem = memo(function OrganizationListItem({
+  record,
+  onOpen,
+}: {
+  record: SiteRecord;
+  onOpen: (record: SiteRecord) => void;
+}) {
   const t = useTranslations("marketplace.organizations.card");
   const locale = useLocale();
   const country = normalizeCountry(record.country);
@@ -688,13 +996,21 @@ const OrganizationListItem = memo(function OrganizationListItem({ record, onOpen
     <button
       type="button"
       onClick={() => onOpen(record)}
-      className={`group grid w-full items-center gap-3 px-2 py-2 text-left outline-none transition-colors hover:bg-surface-sunken focus-visible:bg-surface-sunken focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary/50 sm:gap-4 sm:px-3 ${ORG_LIST_GRID}`}
+      className={`group grid w-full items-center gap-3 px-3 py-3 text-left outline-none transition-colors hover:bg-background/70 focus-visible:bg-background/70 focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary/50 sm:gap-4 ${ORG_LIST_GRID}`}
     >
       {/* Logo */}
-      <span aria-hidden className="grid size-10 shrink-0 place-items-center overflow-hidden rounded-full bg-primary/15 text-xs font-semibold text-primary">
+      <span
+        aria-hidden
+        className="grid size-10 shrink-0 place-items-center overflow-hidden rounded-full bg-primary/15 text-xs font-semibold text-primary"
+      >
         {avatarUrl ? (
           // eslint-disable-next-line @next/next/no-img-element
-          <img src={avatarUrl} alt="" loading="lazy" className="h-full w-full object-cover" />
+          <img
+            src={avatarUrl}
+            alt=""
+            loading="lazy"
+            className="h-full w-full object-cover"
+          />
         ) : (
           initials(record.name)
         )}
@@ -702,12 +1018,21 @@ const OrganizationListItem = memo(function OrganizationListItem({ record, onOpen
 
       {/* Organisation: name + secondary meta */}
       <span className="flex min-w-0 flex-col">
-        <span className="truncate text-sm font-medium leading-snug text-foreground group-hover:underline">{record.name}</span>
+        <span className="truncate text-sm font-medium leading-snug text-foreground group-hover:underline">
+          {record.name}
+        </span>
         {/* Mobile: type · place. Desktop: description. */}
         <span className="mt-0.5 truncate text-xs leading-snug text-muted-foreground sm:hidden">
-          {[primaryType, countryLabel ? `${countryFlag(country)} ${countryLabel}` : null].filter(Boolean).join(" \u00b7 ") || description}
+          {[
+            primaryType,
+            countryLabel ? `${countryFlag(country)} ${countryLabel}` : null,
+          ]
+            .filter(Boolean)
+            .join(" \u00b7 ") || description}
         </span>
-        <span className="mt-0.5 hidden truncate text-xs leading-snug text-muted-foreground sm:block">{description}</span>
+        <span className="mt-0.5 hidden truncate text-xs leading-snug text-muted-foreground sm:block">
+          {description}
+        </span>
       </span>
 
       {/* Type */}
@@ -733,12 +1058,21 @@ const OrganizationListItem = memo(function OrganizationListItem({ record, onOpen
       </span>
 
       {/* Affordance */}
-      <ChevronRightIcon className="h-4 w-4 shrink-0 justify-self-end text-muted-foreground/50 transition-colors group-hover:text-foreground" aria-hidden />
+      <ChevronRightIcon
+        className="h-4 w-4 shrink-0 justify-self-end text-muted-foreground/50 transition-colors group-hover:text-foreground"
+        aria-hidden
+      />
     </button>
   );
 });
 
-const OrganizationCard = memo(function OrganizationCard({ record, onOpen }: { record: SiteRecord; onOpen: (record: SiteRecord) => void }) {
+const OrganizationCard = memo(function OrganizationCard({
+  record,
+  onOpen,
+}: {
+  record: SiteRecord;
+  onOpen: (record: SiteRecord) => void;
+}) {
   const t = useTranslations("marketplace.organizations.card");
   const locale = useLocale();
   const country = normalizeCountry(record.country);
@@ -751,10 +1085,16 @@ const OrganizationCard = memo(function OrganizationCard({ record, onOpen }: { re
   const avatarUrl = organizationAvatarUrl(record);
 
   return (
-    <button type="button" onClick={() => onOpen(record)} className="group h-full w-full text-left">
+    <button
+      type="button"
+      onClick={() => onOpen(record)}
+      className="group h-full w-full text-left"
+    >
       <article
-        className="flex h-full cursor-pointer flex-col overflow-hidden rounded-2xl border border-border bg-card transition-all duration-300 hover:-translate-y-0.5 hover:border-primary/20 hover:shadow-lg"
-        style={{ viewTransitionName: `org-${record.did.replace(/[^a-z0-9]/gi, "-")}` }}
+        className="flex h-full cursor-pointer flex-col overflow-hidden rounded-2xl bg-muted transition-colors hover:bg-muted/80 motion-reduce:transition-none"
+        style={{
+          viewTransitionName: `org-${record.did.replace(/[^a-z0-9]/gi, "-")}`,
+        }}
       >
         {/* Cover */}
         <div className="relative h-28 shrink-0 overflow-hidden">
@@ -767,13 +1107,21 @@ const OrganizationCard = memo(function OrganizationCard({ record, onOpen }: { re
               className="h-full w-full object-cover transition-transform duration-500 ease-out group-hover:scale-105"
             />
           ) : (
-            <div className="absolute inset-0 grid place-items-center bg-[radial-gradient(circle_at_30%_20%,color-mix(in_oklab,var(--primary)_22%,transparent),transparent_70%),linear-gradient(135deg,var(--muted),var(--card))]">
-              <LeafIcon className="size-10 text-primary/40" aria-hidden="true" strokeWidth={1.25} />
+            <div className="absolute inset-0 grid place-items-center bg-[radial-gradient(circle_at_30%_20%,color-mix(in_oklab,var(--primary)_22%,transparent),transparent_70%),linear-gradient(135deg,var(--muted),color-mix(in_oklab,var(--primary)_8%,var(--muted)))]">
+              <LeafIcon
+                className="size-10 text-primary/40"
+                aria-hidden="true"
+                strokeWidth={1.25}
+              />
             </div>
           )}
-          <div className="absolute inset-0 bg-linear-to-t from-card via-card/40 to-transparent" />
+          <div className="absolute inset-0 bg-linear-to-t from-muted via-muted/40 to-transparent" />
 
-          <TrustedByBadges did={record.did} className="absolute left-2.5 top-2.5 z-10 max-w-[70%]" variant="compact" />
+          <TrustedByBadges
+            did={record.did}
+            className="absolute left-2.5 top-2.5 z-10 max-w-[70%]"
+            variant="compact"
+          />
 
           {countryLabel && (
             <span className="absolute top-2.5 right-2.5 flex items-center gap-1 rounded-full bg-background/70 px-2 py-0.5 text-xs text-foreground/80 backdrop-blur-sm">
@@ -784,15 +1132,20 @@ const OrganizationCard = memo(function OrganizationCard({ record, onOpen }: { re
         </div>
 
         {/* Body */}
-        <div className="relative flex flex-1 flex-col px-5 pb-5">
+        <div className="relative flex flex-1 flex-col px-4 pb-4 sm:px-5 sm:pb-5">
           <div className="-mt-8 mb-3 flex items-end justify-between gap-2">
             <span
               aria-hidden
-              className="grid size-16 shrink-0 place-items-center overflow-hidden rounded-full bg-[linear-gradient(135deg,color-mix(in_oklab,var(--primary)_85%,var(--card)),color-mix(in_oklab,var(--primary)_45%,var(--card)))] text-lg font-semibold text-primary-foreground shadow-sm ring-4 ring-card"
+              className="grid size-16 shrink-0 place-items-center overflow-hidden rounded-full bg-[linear-gradient(135deg,color-mix(in_oklab,var(--primary)_85%,var(--muted)),color-mix(in_oklab,var(--primary)_45%,var(--muted)))] text-lg font-semibold text-primary-foreground shadow-sm ring-4 ring-muted"
             >
               {avatarUrl ? (
                 // eslint-disable-next-line @next/next/no-img-element
-                <img src={avatarUrl} alt="" loading="lazy" className="h-full w-full object-cover" />
+                <img
+                  src={avatarUrl}
+                  alt=""
+                  loading="lazy"
+                  className="h-full w-full object-cover"
+                />
               ) : (
                 initials(record.name)
               )}
@@ -804,18 +1157,26 @@ const OrganizationCard = memo(function OrganizationCard({ record, onOpen }: { re
             )}
           </div>
 
-          <h3 className="line-clamp-1 font-instrument text-2xl italic leading-tight text-foreground">
+          <h3 className="min-w-0 break-words font-instrument text-2xl italic leading-tight text-foreground">
             {record.name}
           </h3>
-          <p className="mt-1.5 line-clamp-2 text-sm leading-relaxed text-muted-foreground">{description}</p>
+          <p className="mt-1.5 line-clamp-2 text-sm leading-relaxed text-muted-foreground">
+            {description}
+          </p>
 
           <div className="min-h-5 flex-1" />
           <div className="flex items-center justify-between gap-3 border-t border-border/60 pt-2.5">
             <div className="flex min-w-0 items-center gap-2 text-xs text-muted-foreground">
-              {joinedYear && <span className="shrink-0">{t("joined", { year: joinedYear })}</span>}
+              {joinedYear && (
+                <span className="shrink-0">
+                  {t("joined", { year: joinedYear })}
+                </span>
+              )}
             </div>
             <span className="flex shrink-0 items-center gap-1.5 text-xs font-medium text-foreground">
-              <span className="transition-colors group-hover:text-primary">{t("showDetails")}</span>
+              <span className="transition-colors group-hover:text-primary">
+                {t("showDetails")}
+              </span>
               <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary transition-all duration-300 group-hover:bg-primary group-hover:text-primary-foreground">
                 <ArrowUpRightIcon className="size-4 transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
               </span>
@@ -834,31 +1195,29 @@ function orgDescription(
 ): string {
   const where = countryLabel ? t("where", { country: countryLabel }) : "";
   if (types.length) {
-    return t("descriptionWithType", { types: types.join(" & ").toLowerCase(), where });
+    return t("descriptionWithType", {
+      types: types.join(" & ").toLowerCase(),
+      where,
+    });
   }
   return t("descriptionDefault", { where });
 }
 
-function EmptyState({ onClear, hasActiveFilters }: { onClear: () => void; hasActiveFilters: boolean }) {
+function EmptyState({
+  onClear,
+  hasActiveFilters,
+}: {
+  onClear: () => void;
+  hasActiveFilters: boolean;
+}) {
   const t = useTranslations("marketplace.organizations");
   return (
-    <div className="flex flex-col items-center justify-center py-28 text-center">
-      <span
-        className="mb-4 text-7xl font-light tracking-tight text-primary/[0.15] md:text-8xl"
-        style={{ fontFamily: "var(--font-garamond-var)" }}
-      >
-        0
-      </span>
-      <h3
-        className="mb-3 text-2xl font-light text-foreground md:text-3xl"
-        style={{ fontFamily: "var(--font-garamond-var)" }}
-      >
+    <div className="flex flex-col items-center justify-center rounded-2xl bg-muted px-4 py-12 text-center sm:px-5">
+      <LeafIcon className="mb-4 size-7 text-primary" aria-hidden />
+      <h3 className="font-instrument mb-3 text-2xl italic text-foreground md:text-3xl">
         {t("empty.title")}
       </h3>
-      <p
-        className="max-w-md text-base leading-relaxed text-foreground/80"
-        style={{ fontFamily: "var(--font-instrument-serif-var)", fontStyle: "italic" }}
-      >
+      <p className="max-w-md text-base leading-relaxed text-muted-foreground">
         {t("empty.description")}
       </p>
       {hasActiveFilters && (
@@ -888,7 +1247,10 @@ function countryName(code: string, locale: string): string {
   }
 }
 
-function countryNameOrEmpty(country: string | null | undefined, locale: string): string {
+function countryNameOrEmpty(
+  country: string | null | undefined,
+  locale: string,
+): string {
   const code = normalizeCountry(country);
   return code ? countryName(code, locale) : "";
 }
@@ -918,26 +1280,38 @@ function organizationBannerUrl(record: SiteRecord): string | null {
 }
 
 function organizationAvatarUrl(record: SiteRecord): string | null {
-  return record.avatarUrl ?? (!record.coverRef && record.logoRef ? record.imageUrl : null);
+  return (
+    record.avatarUrl ??
+    (!record.coverRef && record.logoRef ? record.imageUrl : null)
+  );
 }
 
-function mergeSiteRecords(base: SiteRecord[], incoming: SiteRecord[]): SiteRecord[] {
+function mergeSiteRecords(
+  base: SiteRecord[],
+  incoming: SiteRecord[],
+): SiteRecord[] {
   const seen = new Set(base.map((record) => record.id));
   return [...base, ...incoming.filter((record) => !seen.has(record.id))];
 }
 
 function initials(name: string): string {
-  return name
-    .split(/\s+/)
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((part) => part[0]?.toUpperCase() ?? "")
-    .join("") || "•";
+  return (
+    name
+      .split(/\s+/)
+      .filter(Boolean)
+      .slice(0, 2)
+      .map((part) => part[0]?.toUpperCase() ?? "")
+      .join("") || "•"
+  );
 }
 
 function parseQuickFiltersParam(value: string | null): QuickFilter[] {
   if (!value) return [];
-  const parsed = value.split(",").filter((item): item is QuickFilter => QUICK_FILTERS.includes(item as QuickFilter));
+  const parsed = value
+    .split(",")
+    .filter((item): item is QuickFilter =>
+      QUICK_FILTERS.includes(item as QuickFilter),
+    );
   return [...new Set(parsed)];
 }
 
@@ -947,11 +1321,17 @@ function serializeQuickFiltersParam(filters: QuickFilter[]): string | null {
 
 function parseBadgeFilterParam(value: string | null): BumicertBadgeFilter[] {
   if (!value) return [];
-  const parsed = value.split(",").filter((item): item is BumicertBadgeFilter => BADGE_FILTER_KEYS.includes(item as BumicertBadgeFilter));
+  const parsed = value
+    .split(",")
+    .filter((item): item is BumicertBadgeFilter =>
+      BADGE_FILTER_KEYS.includes(item as BumicertBadgeFilter),
+    );
   return [...new Set(parsed)];
 }
 
-function serializeBadgeFilterParam(filters: BumicertBadgeFilter[]): string | null {
+function serializeBadgeFilterParam(
+  filters: BumicertBadgeFilter[],
+): string | null {
   return filters.length > 0 ? filters.join(",") : null;
 }
 

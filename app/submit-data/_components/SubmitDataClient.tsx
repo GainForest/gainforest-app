@@ -18,6 +18,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Skeleton } from "@/components/ui/skeleton";
+import { SectionSurface } from "@/components/ui/section-surface";
 import { useModal } from "@/components/ui/modal/context";
 import { cn } from "@/lib/utils";
 import { AuthModal } from "@/app/_components/AuthFlow";
@@ -35,14 +36,9 @@ const PART_RETRIES = 3;
 
 function Card({ children, className }: { children: ReactNode; className?: string }) {
   return (
-    <section
-      className={cn(
-        "rounded-3xl border border-border bg-card/90 p-6 shadow-sm backdrop-blur-sm",
-        className,
-      )}
-    >
+    <SectionSurface variant="muted" className={className}>
       {children}
-    </section>
+    </SectionSurface>
   );
 }
 
@@ -68,10 +64,10 @@ function SignInCard() {
 
   return (
     <Card className="self-start">
-      <div className="flex size-10 items-center justify-center rounded-full border border-primary/15 bg-primary/[0.08] text-primary">
+      <div className="flex size-10 items-center justify-center rounded-full bg-primary/[0.08] text-primary">
         <LockIcon className="size-4.5" />
       </div>
-      <h2 className="mt-4 text-lg font-semibold text-foreground">{t("title")}</h2>
+      <h2 className="mt-4 font-instrument text-lg font-light italic text-foreground">{t("title")}</h2>
       <p className="mt-1.5 text-sm leading-6 text-muted-foreground">{t("description")}</p>
       <Button
         type="button"
@@ -263,7 +259,7 @@ function SubmitFlow() {
   return (
     <div className="flex flex-col gap-6">
       <Card>
-        <h2 className="text-lg font-semibold text-foreground">{t("form.title")}</h2>
+        <h2 className="font-instrument text-lg font-light italic text-foreground">{t("form.title")}</h2>
 
         {/* Drop zone */}
         <label
@@ -279,7 +275,7 @@ function SubmitFlow() {
           }}
           className={cn(
             "mt-4 flex cursor-pointer flex-col items-center justify-center gap-2 rounded-2xl border-2 border-dashed px-4 py-8 text-center transition-colors",
-            dragging ? "border-primary bg-primary/[0.06]" : "border-border bg-muted/30 hover:bg-muted/50",
+            dragging ? "border-primary bg-primary/10" : "border-border bg-muted hover:bg-muted/80",
             uploading && "pointer-events-none opacity-60",
           )}
         >
@@ -291,7 +287,7 @@ function SubmitFlow() {
             disabled={uploading}
             onChange={(event) => acceptFile(event.target.files?.[0])}
           />
-          <span className="flex size-10 items-center justify-center rounded-full border border-primary/15 bg-primary/[0.08] text-primary">
+          <span className="flex size-10 items-center justify-center rounded-full bg-primary/[0.08] text-primary">
             {file ? <ArchiveIcon className="size-4.5" /> : <CloudUploadIcon className="size-4.5" />}
           </span>
           {file ? (
@@ -339,7 +335,7 @@ function SubmitFlow() {
           </div>
 
           {hasAgentKey ? (
-            <p className="flex items-start gap-2 rounded-xl border border-primary/20 bg-primary/[0.06] px-3 py-2.5 text-sm leading-6 text-foreground">
+            <p className="flex items-start gap-2 rounded-xl bg-primary/[0.08] px-3 py-2.5 text-sm leading-6 text-foreground">
               <ShieldCheckIcon className="mt-1 size-4 shrink-0 text-primary" />
               <span>
                 {t("form.consentGranted")}{" "}
@@ -413,7 +409,7 @@ function SubmitFlow() {
         )}
 
         {phase.kind === "done" ? (
-          <p className="mt-4 flex items-start gap-2 rounded-xl border border-primary/20 bg-primary/[0.06] px-3 py-2.5 text-sm leading-6 text-foreground">
+          <p className="mt-4 flex items-start gap-2 rounded-xl bg-primary/[0.08] px-3 py-2.5 text-sm leading-6 text-foreground">
             <CheckIcon className="mt-1 size-4 shrink-0 text-primary" />
             {t("done.description")}
           </p>
@@ -509,7 +505,7 @@ function JobsCard({ jobs, onChanged }: { jobs: DataJob[] | null; onChanged: () =
 
   return (
     <Card>
-      <h2 className="text-lg font-semibold text-foreground">{t("jobs.title")}</h2>
+      <h2 className="font-instrument text-lg font-light italic text-foreground">{t("jobs.title")}</h2>
       {jobs === null ? (
         <div className="mt-4 space-y-3">
           <Skeleton className="h-14 w-full rounded-xl" />
@@ -571,7 +567,7 @@ function JobRow({ job, onChanged }: { job: DataJob; onChanged: () => void }) {
         ) : null}
       </div>
       {job.reviewNote ? (
-        <p className="mt-2 rounded-xl border border-border bg-muted/40 px-3 py-2 text-xs leading-5 text-foreground">
+        <p className="mt-2 rounded-xl bg-background/70 px-3 py-2 text-xs leading-5 text-foreground">
           {job.reviewNote}
         </p>
       ) : null}

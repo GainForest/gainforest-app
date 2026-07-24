@@ -39,8 +39,8 @@ export function DefBlock({
   return (
     <div id={name} className="mb-8 scroll-mt-20">
       {!primary && (
-        <h4 className="m-0 mb-1 flex items-baseline gap-2 font-mono text-[13px] font-medium text-muted-foreground">
-          #{name}
+        <h4 className="m-0 mb-1 flex items-baseline gap-2 font-instrument text-[13px] font-light italic text-muted-foreground">
+          <code className="font-mono not-italic">#{name}</code>
           <span className="text-[11px] text-muted-foreground/60">{kind}</span>
         </h4>
       )}

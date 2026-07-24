@@ -382,7 +382,7 @@ export function FeedAudioClip({ clip }: { clip: FeedBioacousticsClip }) {
         )}
         {source === undefined || computingFallback ? (
           <div className="absolute inset-0 grid place-items-center text-white/60">
-            <Loader2Icon className="size-4 animate-spin" aria-hidden />
+            <Loader2Icon className="size-4 animate-spin motion-reduce:animate-none" aria-hidden />
           </div>
         ) : null}
         {/* Click anywhere on the spectrogram to play from that moment. */}
@@ -440,10 +440,10 @@ export function FeedAudioClip({ clip }: { clip: FeedBioacousticsClip }) {
           }}
           disabled={!canPlay}
           aria-label={playing ? t("pause") : t("play")}
-          className="grid size-8 shrink-0 place-items-center rounded-full bg-primary text-primary-foreground transition-opacity hover:opacity-90 disabled:opacity-40"
+          className="grid size-11 shrink-0 place-items-center rounded-full bg-primary text-primary-foreground transition-opacity hover:opacity-90 disabled:opacity-40"
         >
           {preparingAudio ? (
-            <Loader2Icon className="size-3.5 animate-spin" />
+            <Loader2Icon className="size-3.5 animate-spin motion-reduce:animate-none" />
           ) : playing ? (
             <PauseIcon className="size-3.5" />
           ) : (

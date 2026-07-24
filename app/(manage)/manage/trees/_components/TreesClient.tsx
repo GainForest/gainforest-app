@@ -42,8 +42,9 @@ import type {
   UploadTreeDatasetRecord,
 } from "@/app/_lib/indexer";
 import { TreesManageSkeleton } from "./TreesManageSkeleton";
+import { ManageSectionHeader } from "../../_components/ManageSectionHeader";
 import { TreeListPagination } from "./TreeListPagination";
-import { ManageConfirmModal } from "./ManageConfirmModal";
+import { ManageConfirmModal } from "../../_components/ManageConfirmModal";
 import GreenGlobeTreePreviewCard from "./GreenGlobeTreePreviewCard";
 import AddToTreeGroupModal from "./AddToTreeGroupModal";
 import {
@@ -189,7 +190,8 @@ async function fetchJson<T>(url: string, signal?: AbortSignal): Promise<T> {
   const response = await fetch(url, { signal });
   const payload = (await response.json().catch(() => null)) as T | { error: string } | null;
   if (!response.ok || !payload || isErrorPayload(payload)) {
-    throw new Error(isErrorPayload(payload) ? payload.error : "Could not load trees.");
+    if (isErrorPayload(payload)) console.error("Tree data request failed", payload.error);
+    throw new Error("TREE_DATA_LOAD_FAILED");
   }
   return payload as T;
 }
@@ -198,28 +200,20 @@ function normalizeDraftValue(value: string): string {
   return value.trim();
 }
 
-function shortCount(count: number, singular: string, plural: string): string {
-  return `${count} ${count === 1 ? singular : plural}`;
-}
-
-function formatSubjectPart(value: string | null): string {
-  if (!value) return "Tree photo";
+function formatSubjectPart(value: string | null, treePhotoLabel: string): string {
+  if (!value || value === "wholeTree") return treePhotoLabel;
   return value
     .replace(/([A-Z])/g, " $1")
     .trim()
     .replace(/^./, (char) => char.toUpperCase());
 }
 
-function getPhotoAltText(treeName: string | null | undefined, subjectPart: string | null, caption: string | null): string {
-  if (caption) return caption;
-  const part = subjectPart ? formatSubjectPart(subjectPart).toLowerCase() : "tree";
-  return treeName ? `${part} photo of ${treeName}` : `${part} photo`;
-}
 
-function establishmentMeansLabel(value: string | null | undefined): string {
+function establishmentMeansLabel(value: string | null | undefined, fallback: string, translate: (value: string) => string): string {
   const trimmed = value?.trim();
-  if (!trimmed) return "Not set";
-  return PARTNER_ESTABLISHMENT_MEANS_OPTIONS.find((option) => option.value === trimmed)?.label ?? trimmed;
+  if (!trimmed) return fallback;
+  const knownOption = PARTNER_ESTABLISHMENT_MEANS_OPTIONS.find((option) => option.value === trimmed);
+  return knownOption ? translate(knownOption.value) : trimmed;
 }
 
 function getUniqueTreeSiteRef(items: TreeManagerItem[]): string | null {
@@ -238,35 +232,26 @@ function getTreeGroupDeletionTarget(treeGroup: UploadTreeDatasetRecord, items: T
   };
 }
 
-function buildTreeGroupDeleteFeedback(result: DeleteTreeGroupCascadeResult, treeGroupName: string): DeletionFeedback {
+function buildTreeGroupDeleteFeedback(
+  result: DeleteTreeGroupCascadeResult,
+  treeGroupName: string,
+  translate: (key: string, values: Record<string, string | number>) => string,
+): DeletionFeedback {
   const deletedTrees = result.deletedTreeRkeys.length;
-  const deletedTreeLabel = shortCount(deletedTrees, "tree", "trees");
 
   if (result.treeGroupDeleted && result.errors.length === 0) {
-    return {
-      tone: "success",
-      message: `Deleted ${treeGroupName} and ${deletedTreeLabel}.`,
-    };
+    return { tone: "success", message: translate("deletedGroupSuccess", { name: treeGroupName, count: deletedTrees }) };
   }
 
   if (result.treeGroupDeleted) {
-    return {
-      tone: "warn",
-      message: `Deleted ${treeGroupName} and ${deletedTreeLabel}, but some linked photos or measurements could not be removed. Refresh before trying again.`,
-    };
+    return { tone: "warn", message: translate("deletedGroupPartial", { name: treeGroupName, count: deletedTrees }) };
   }
 
   if (deletedTrees > 0) {
-    return {
-      tone: "warn",
-      message: `${treeGroupName} was not fully deleted. ${deletedTreeLabel} ${deletedTrees === 1 ? "was" : "were"} deleted, but the tree group was kept so you can retry.`,
-    };
+    return { tone: "warn", message: translate("deletedGroupTreesOnly", { name: treeGroupName, count: deletedTrees }) };
   }
 
-  return {
-    tone: "warn",
-    message: `${treeGroupName} could not be deleted. The tree group was kept so you can retry.`,
-  };
+  return { tone: "warn", message: translate("deletedGroupFailed", { name: treeGroupName, count: deletedTrees }) };
 }
 
 function DeleteTreeGroupConfirmModal({
@@ -276,6 +261,7 @@ function DeleteTreeGroupConfirmModal({
   target: TreeGroupDeletionTarget;
   onConfirm: () => Promise<void> | void;
 }) {
+  const t = useTranslations("common.manageTrees.deleteGroup");
   const { hide, popModal, stack } = useModal();
   const [isPending, setIsPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -297,7 +283,8 @@ function DeleteTreeGroupConfirmModal({
     try {
       await onConfirm();
     } catch (caught) {
-      setError(caught instanceof Error ? caught.message : "Tree group could not be deleted.");
+      console.error("Tree group deletion failed", caught);
+      setError(t("error"));
       setIsPending(false);
       return;
     }
@@ -310,19 +297,17 @@ function DeleteTreeGroupConfirmModal({
   return (
     <ModalContent dismissible={false} className="space-y-4">
       <ModalHeader>
-        <ModalTitle>Delete tree group?</ModalTitle>
-        <ModalDescription>
-          Deleting {treeGroupName} deletes the tree group and everything inside it. This cannot be undone.
-        </ModalDescription>
+        <ModalTitle className="font-instrument font-light italic">{t("title")}</ModalTitle>
+        <ModalDescription>{t("description", { name: treeGroupName })}</ModalDescription>
       </ModalHeader>
 
       <div className="space-y-2 text-sm text-muted-foreground">
-        <p className="font-medium text-foreground">This will delete:</p>
+        <p className="font-medium text-foreground">{t("willDelete")}</p>
         <ul className="list-disc space-y-1 pl-5">
-          <li>the tree group</li>
-          <li>{shortCount(target.treeCount, "tree", "trees")} in this tree group</li>
-          <li>{shortCount(target.measurementCount, "measurement", "measurements")} linked to those trees</li>
-          <li>{shortCount(target.photoCount, "photo", "photos")} linked to those trees</li>
+          <li>{t("group")}</li>
+          <li>{t("trees", { count: target.treeCount })}</li>
+          <li>{t("measurements", { count: target.measurementCount })}</li>
+          <li>{t("photos", { count: target.photoCount })}</li>
         </ul>
       </div>
 
@@ -330,11 +315,11 @@ function DeleteTreeGroupConfirmModal({
 
       <ModalFooter className="sm:flex-row sm:justify-end">
         <Button type="button" variant="outline" onClick={() => void close()} disabled={isPending}>
-          Cancel
+          {t("cancel")}
         </Button>
         <Button type="button" variant="destructive" onClick={() => void handleConfirm()} disabled={isPending}>
           {isPending ? <Loader2Icon className="h-3.5 w-3.5 animate-spin" /> : null}
-          Delete tree group
+          {t("confirm")}
         </Button>
       </ModalFooter>
     </ModalContent>
@@ -368,9 +353,9 @@ function SectionCard({
   className?: string;
 }) {
   return (
-    <section className={cn("rounded-2xl border border-border bg-background p-4 md:p-5 space-y-4", className)}>
+    <section className={cn("space-y-4 border-t border-border/70 pt-6 first:border-t-0 first:pt-0", className)}>
       <div className="space-y-1">
-        <h3 className="text-lg font-semibold font-garamond">{title}</h3>
+        <h3 className="font-instrument text-lg font-semibold italic">{title}</h3>
         <p className="text-sm text-muted-foreground">{description}</p>
       </div>
       {children}
@@ -400,8 +385,8 @@ function Field({
 
 function DetailFact({ label, value }: { label: string; value: React.ReactNode }) {
   return (
-    <div className="rounded-xl border border-border bg-muted/20 px-3 py-2">
-      <p className="text-[11px] uppercase tracking-[0.16em] text-muted-foreground">{label}</p>
+    <div className="rounded-2xl bg-muted px-3 py-2">
+      <p className="text-xs font-medium text-muted-foreground">{label}</p>
       <div className="mt-1 text-sm text-foreground break-words">{value}</div>
     </div>
   );
@@ -493,6 +478,7 @@ export function TreesClient({ did, target, onUpload }: TreesClientProps) {
   const locale = useLocale();
   const treeFilterT = useTranslations("common.manageTrees.filters");
   const datasetLandingT = useTranslations("common.manageTrees.datasetLanding");
+  const managerT = useTranslations("common.manageTrees.manager");
   const {
     searchQuery,
     selectedTreeRkey,
@@ -562,11 +548,12 @@ export function TreesClient({ did, target, onUpload }: TreesClientProps) {
       setSites(siteData);
     } catch (error) {
       if ((error as Error).name === "AbortError") return;
-      setFetchError(error instanceof Error ? error.message : "Could not load trees.");
+      console.error("Tree manager load failed", error);
+      setFetchError(managerT("loadErrorBody"));
     } finally {
       setIsLoading(false);
     }
-  }, [target]);
+  }, [managerT, target]);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -846,7 +833,7 @@ export function TreesClient({ did, target, onUpload }: TreesClientProps) {
     ? datasetLookup.get(selectedTree.occurrence.datasetRef)?.name ?? selectedTree.occurrence.datasetName
     : null;
   const activeSiteName = selectedTree?.occurrence.siteRef
-    ? siteLookup.get(selectedTree.occurrence.siteRef)?.record.name ?? "Connected project place"
+    ? siteLookup.get(selectedTree.occurrence.siteRef)?.record.name ?? managerT("connectedPlace")
     : null;
   const selectedTreeGroup = datasetFilter ? datasetLookup.get(datasetFilter) ?? null : null;
   const selectedTreeGroupPreviewTree = datasetFilter && selectedTree?.occurrence.datasetRef === datasetFilter ? selectedTree : null;
@@ -907,7 +894,7 @@ export function TreesClient({ did, target, onUpload }: TreesClientProps) {
     const tree = selectedTree?.occurrence;
     if (!tree) return;
     if (!updatePermission.allowed) {
-      setOccurrenceError(updatePermission.reason ?? "You cannot edit this tree.");
+      setOccurrenceError(managerT("editTreeDenied"));
       return;
     }
     const validationError = validateOccurrenceDraft(occurrenceDraft);
@@ -944,7 +931,7 @@ export function TreesClient({ did, target, onUpload }: TreesClientProps) {
     }
 
     if (Object.keys(data).length === 0 && unset.length === 0) {
-      setOccurrenceFeedback("No changes to save.");
+      setOccurrenceFeedback(managerT("noChanges"));
       return;
     }
 
@@ -967,10 +954,11 @@ export function TreesClient({ did, target, onUpload }: TreesClientProps) {
       } : item));
       setInitialOccurrenceDraft(normalizedCurrent);
       setOccurrenceDraft(normalizedCurrent);
-      setOccurrenceFeedback("Tree information saved.");
+      setOccurrenceFeedback(managerT("treeSaved"));
       setOccurrenceError(null);
     } catch (error) {
-      setOccurrenceError(error instanceof Error ? error.message : "Tree could not be saved.");
+      console.error("Tree save failed", error);
+      setOccurrenceError(managerT("saveTreeError"));
     } finally {
       setSavingOccurrence(false);
     }
@@ -983,13 +971,13 @@ export function TreesClient({ did, target, onUpload }: TreesClientProps) {
     const measurementRkey = tree.preferredMeasurement?.metadata.rkey ?? null;
 
     if (measurementEditingBlocked) {
-      setMeasurementError("These measurements need manual review before editing here.");
+      setMeasurementError(managerT("measurementManualReview"));
       return;
     }
 
     const mutationPermission = measurementRkey ? updatePermission : createPermission;
     if (!mutationPermission.allowed) {
-      setMeasurementError(mutationPermission.reason ?? "You cannot save measurements for this tree.");
+      setMeasurementError(managerT("measurementDenied"));
       return;
     }
 
@@ -1004,7 +992,7 @@ export function TreesClient({ did, target, onUpload }: TreesClientProps) {
     ) as TreeMeasurementDraft;
 
     if (isDraftEqual(normalizedCurrent, initialMeasurementDraft)) {
-      setMeasurementFeedback("No changes to save.");
+      setMeasurementFeedback(managerT("noChanges"));
       return;
     }
 
@@ -1020,10 +1008,10 @@ export function TreesClient({ did, target, onUpload }: TreesClientProps) {
         }, writeOptions);
         const nextItem = measurementItemFromResult(did, occurrenceUri, result);
         setMeasurements((current) => current.map((item) => item.metadata.rkey === measurementRkey ? nextItem : item));
-        setMeasurementFeedback(floraPayload ? "Measurements saved." : "Shown measurements removed.");
+        setMeasurementFeedback(floraPayload ? managerT("measurementsSaved") : managerT("measurementsRemoved"));
       } else {
         if (!floraPayload) {
-          setMeasurementError("Add at least one measurement before saving.");
+          setMeasurementError(managerT("measurementRequired"));
           return;
         }
         const result = await createMeasurement({
@@ -1036,13 +1024,14 @@ export function TreesClient({ did, target, onUpload }: TreesClientProps) {
           },
         }, writeOptions);
         setMeasurements((current) => [measurementItemFromResult(did, occurrenceUri, result), ...current]);
-        setMeasurementFeedback("Measurements added.");
+        setMeasurementFeedback(managerT("measurementsAdded"));
       }
       setInitialMeasurementDraft(normalizedCurrent);
       setMeasurementDraft(normalizedCurrent);
       setMeasurementError(null);
     } catch (error) {
-      setMeasurementError(error instanceof Error ? error.message : "Measurement could not be saved.");
+      console.error("Tree measurement save failed", error);
+      setMeasurementError(managerT("saveMeasurementError"));
     } finally {
       setSavingMeasurement(false);
     }
@@ -1052,7 +1041,7 @@ export function TreesClient({ did, target, onUpload }: TreesClientProps) {
     const tree = selectedTree;
     if (!tree || !file) return;
     if (!createPermission.allowed) {
-      setPhotoError(createPermission.reason ?? "You cannot add photos to this tree.");
+      setPhotoError(managerT("photoAddDenied"));
       return;
     }
     setSavingPhoto(true);
@@ -1069,10 +1058,11 @@ export function TreesClient({ did, target, onUpload }: TreesClientProps) {
       }, writeOptions);
       setPhotos((current) => [photoItemFromResult(did, tree.occurrence.atUri, result, previewUrl), ...current]);
       setNewPhotoCaption("");
-      setPhotoFeedback("Photo added.");
+      setPhotoFeedback(managerT("photoAddedFeedback"));
     } catch (error) {
       URL.revokeObjectURL(previewUrl);
-      setPhotoError(error instanceof Error ? error.message : "Photo could not be saved.");
+      console.error("Tree photo save failed", error);
+      setPhotoError(managerT("savePhotoError"));
     } finally {
       setSavingPhoto(false);
       if (fileInputRef.current) fileInputRef.current.value = "";
@@ -1084,7 +1074,7 @@ export function TreesClient({ did, target, onUpload }: TreesClientProps) {
     const url = newPhotoUrl.trim();
     if (!tree || !url) return;
     if (!createPermission.allowed) {
-      setPhotoError(createPermission.reason ?? "You cannot add photos to this tree.");
+      setPhotoError(managerT("photoAddDenied"));
       return;
     }
     setSavingPhoto(true);
@@ -1101,9 +1091,10 @@ export function TreesClient({ did, target, onUpload }: TreesClientProps) {
       setPhotos((current) => [photoItemFromResult(did, tree.occurrence.atUri, result, url), ...current]);
       setNewPhotoUrl("");
       setNewPhotoCaption("");
-      setPhotoFeedback("Photo added.");
+      setPhotoFeedback(managerT("photoAddedFeedback"));
     } catch (error) {
-      setPhotoError(error instanceof Error ? error.message : "Photo could not be saved.");
+      console.error("Linked tree photo save failed", error);
+      setPhotoError(managerT("savePhotoError"));
     } finally {
       setSavingPhoto(false);
     }
@@ -1119,7 +1110,7 @@ export function TreesClient({ did, target, onUpload }: TreesClientProps) {
       return;
     }
     if (!updatePermission.allowed) {
-      setPhotoCaptionError(updatePermission.reason ?? "You cannot edit this photo.");
+      setPhotoCaptionError(managerT("photoEditDenied"));
       return;
     }
     setSavingPhotoCaptionRkey(rkey);
@@ -1136,29 +1127,30 @@ export function TreesClient({ did, target, onUpload }: TreesClientProps) {
       } : item));
       setEditingPhotoRkey(null);
       setPhotoCaptionDraft("");
-      setPhotoFeedback("Caption saved.");
+      setPhotoFeedback(managerT("captionSaved"));
     } catch (error) {
-      setPhotoCaptionError(error instanceof Error ? error.message : "Caption could not be saved.");
+      console.error("Tree photo caption save failed", error);
+      setPhotoCaptionError(managerT("saveCaptionError"));
     } finally {
       setSavingPhotoCaptionRkey(null);
     }
   };
 
   const handleConfirmDeletePhoto = async (photo: TreeMultimediaRecord) => {
-    if (!deletePermission.allowed) throw new Error(deletePermission.reason ?? "You cannot delete this photo.");
+    if (!deletePermission.allowed) throw new Error(managerT("photoDeleteDenied"));
     await deleteMultimedia(photo.metadata.rkey, writeOptions);
     setPhotos((current) => current.filter((item) => item.metadata.rkey !== photo.metadata.rkey));
     if (editingPhotoRkey === photo.metadata.rkey) {
       setEditingPhotoRkey(null);
       setPhotoCaptionDraft("");
     }
-    setPhotoFeedback("Photo deleted.");
+    setPhotoFeedback(managerT("photoDeleted"));
   };
 
   const handleConfirmDeleteTree = async (item: TreeManagerItem) => {
     const target = getTreeDeletionTarget(item);
-    if (!target) throw new Error("Choose a tree to delete.");
-    if (!deletePermission.allowed) throw new Error(deletePermission.reason ?? "You cannot delete this tree.");
+    if (!target) throw new Error(managerT("chooseTreeToDelete"));
+    if (!deletePermission.allowed) throw new Error(managerT("treeDeleteDenied"));
     const result = await deleteOccurrenceCascade(target.occurrenceRkey, writeOptions);
     const deletedMeasurementRkeys = new Set(result.deletedMeasurementRkeys);
     const deletedPhotoRkeys = new Set(result.deletedMultimediaRkeys);
@@ -1172,22 +1164,22 @@ export function TreesClient({ did, target, onUpload }: TreesClientProps) {
     setQueryValues({ tree: null });
     const deleteNotes = [
       result.cleanupError,
-      result.treeGroupCountUpdated === false ? "The tree group count may update later." : null,
+      result.treeGroupCountUpdated === false ? managerT("groupCountDelayed") : null,
     ].filter((note): note is string => Boolean(note));
     setDeletedFeedback({
       tone: deleteNotes.length > 0 ? "warn" : "success",
-      message: deleteNotes.length > 0 ? `Tree deleted. ${deleteNotes.join(" ")}` : "Tree deleted.",
+      message: deleteNotes.length > 0 ? managerT("treeDeletedWithNotes", { notes: deleteNotes.join(" ") }) : managerT("treeDeleted"),
     });
   };
 
   const handleConfirmDeleteTreeGroup = async (target: TreeGroupDeletionTarget) => {
-    if (!deletePermission.allowed) throw new Error(deletePermission.reason ?? "You cannot delete this tree group.");
+    if (!deletePermission.allowed) throw new Error(managerT("groupDeleteDenied"));
     const result = await deleteTreeGroupCascade(target.treeGroup.rkey, writeOptions);
     const deletedTreeRkeys = new Set(result.deletedTreeRkeys);
     const deletedTreeUris = new Set(result.deletedTreeUris);
     const deletedMeasurementRkeys = new Set(result.deletedMeasurementRkeys);
     const deletedPhotoRkeys = new Set(result.deletedMultimediaRkeys);
-    const treeGroupName = target.treeGroup.name || "Tree group";
+    const treeGroupName = target.treeGroup.name || managerT("groupFallback");
 
     if (deletedTreeRkeys.size > 0) {
       setTrees((current) => current.filter((tree) => !deletedTreeRkeys.has(tree.rkey)));
@@ -1215,7 +1207,7 @@ export function TreesClient({ did, target, onUpload }: TreesClientProps) {
       }
     }
 
-    setDeletedFeedback(buildTreeGroupDeleteFeedback(result, treeGroupName));
+    setDeletedFeedback(buildTreeGroupDeleteFeedback(result, treeGroupName, (key, values) => managerT(key as never, values as never)));
   };
 
   const applyAttachResult = (result: AttachExistingOccurrencesResult, treeGroup: UploadTreeDatasetRecord) => {
@@ -1242,9 +1234,9 @@ export function TreesClient({ did, target, onUpload }: TreesClientProps) {
 
     const feedbackParts: string[] = [];
     if (result.attachedCount > 0) {
-      feedbackParts.push(`Added ${result.attachedCount} tree${result.attachedCount === 1 ? "" : "s"} to ${treeGroupName}.`);
+      feedbackParts.push(managerT("treesAddedToGroup", { count: result.attachedCount, name: treeGroupName }));
     } else {
-      feedbackParts.push(`No trees were added to ${treeGroupName}.`);
+      feedbackParts.push(managerT("noTreesAdded", { name: treeGroupName }));
     }
     if (result.skippedCount > 0) {
       feedbackParts.push(`${result.skippedCount} tree${result.skippedCount === 1 ? " was" : "s were"} already in a tree group and skipped.`);
@@ -1253,15 +1245,15 @@ export function TreesClient({ did, target, onUpload }: TreesClientProps) {
       feedbackParts.push(`${result.errorCount} tree${result.errorCount === 1 ? "" : "s"} could not be added.`);
     }
     if (!result.datasetCountUpdated) {
-      feedbackParts.push(result.datasetCountError ?? "The tree group count may update later.");
+      feedbackParts.push(managerT("groupCountDelayed"));
     }
     setTreeGroupAttachFeedback(feedbackParts.join(" "));
   };
 
   const handleAttachTreesToTreeGroup = async (occurrenceRkeys: string[], treeGroup: UploadTreeDatasetRecord) => {
     const uniqueRkeys = Array.from(new Set(occurrenceRkeys.filter(Boolean)));
-    if (uniqueRkeys.length === 0) throw new Error("Choose at least one ungrouped tree.");
-    if (!updatePermission.allowed) throw new Error(updatePermission.reason ?? "You cannot add existing trees to a tree group.");
+    if (uniqueRkeys.length === 0) throw new Error(managerT("chooseUngrouped"));
+    if (!updatePermission.allowed) throw new Error(managerT("groupAttachDenied"));
 
     setTreeGroupAttachPending(true);
     try {
@@ -1294,7 +1286,8 @@ export function TreesClient({ did, target, onUpload }: TreesClientProps) {
         } catch (error) {
           const remaining = chunks.slice(chunkIndex).reduce((count, nextChunk) => count + nextChunk.length, 0);
           aggregate.errorCount += remaining;
-          fatalChunkError = error instanceof Error ? error.message : "Some trees could not be added.";
+          console.error("Tree group attachment failed", error);
+          fatalChunkError = managerT("someTreesNotAdded");
           break;
         }
       }
@@ -1314,17 +1307,17 @@ export function TreesClient({ did, target, onUpload }: TreesClientProps) {
 
   const openAddToTreeGroupModal = (items: TreeManagerItem[]) => {
     if (!updatePermission.allowed) {
-      setTreeGroupAttachFeedback(updatePermission.reason ?? "You cannot add existing trees to a tree group.");
+      setTreeGroupAttachFeedback(managerT("groupAttachDenied"));
       return;
     }
     if (datasets.length === 0) {
-      setTreeGroupAttachFeedback("Create a tree group during tree upload before adding ungrouped trees to it.");
+      setTreeGroupAttachFeedback(managerT("createGroupFirst"));
       return;
     }
 
     const occurrenceRkeys = items.flatMap((item) => isUngroupedTree(item) && item.occurrence.rkey ? [item.occurrence.rkey] : []);
     if (occurrenceRkeys.length === 0) {
-      setTreeGroupAttachFeedback("Choose at least one ungrouped tree.");
+      setTreeGroupAttachFeedback(managerT("chooseUngrouped"));
       return;
     }
 
@@ -1349,13 +1342,13 @@ export function TreesClient({ did, target, onUpload }: TreesClientProps) {
 
   const openDeleteTreeGroupConfirm = (treeGroupId: string) => {
     if (!deletePermission.allowed) {
-      setDeletedFeedback({ tone: "warn", message: deletePermission.reason ?? "You cannot delete this tree group." });
+      setDeletedFeedback({ tone: "warn", message: managerT("groupDeleteDenied") });
       return;
     }
     if (treeGroupId === UNGROUPED_DATASET_FILTER) return;
     const treeGroup = datasetLookup.get(treeGroupId);
     if (!treeGroup) {
-      setDeletedFeedback({ tone: "warn", message: "This tree group could not be checked. Refresh and try again." });
+      setDeletedFeedback({ tone: "warn", message: managerT("groupCheckError") });
       return;
     }
 
@@ -1379,19 +1372,13 @@ export function TreesClient({ did, target, onUpload }: TreesClientProps) {
   const activeDeletionTarget = selectedTree ? getTreeDeletionTarget(selectedTree) : null;
   const confirmDescription = (() => {
     if (confirmTarget?.type === "tree") {
-      const target = getTreeDeletionTarget(confirmTarget.item);
-      const linked = target
-        ? [
-            target.photoCount > 0 ? shortCount(target.photoCount, "photo", "photos") : null,
-            target.measurementCount > 0 ? shortCount(target.measurementCount, "measurement", "measurements") : null,
-          ].filter(Boolean).join(" and ")
-        : "";
-      return linked
-        ? `This will delete the tree and its linked ${linked}. This cannot be undone.`
-        : "This will delete the tree and any linked photos or measurements found at that time. This cannot be undone.";
+      const deletionTarget = getTreeDeletionTarget(confirmTarget.item);
+      return deletionTarget
+        ? managerT("deleteTreeConfirmCounts", { photos: deletionTarget.photoCount, measurements: deletionTarget.measurementCount })
+        : managerT("deleteTreeConfirm");
     }
 
-    return "This will delete this photo from the selected tree. This cannot be undone.";
+    return managerT("deletePhotoConfirm");
   })();
 
   if (isLoading) return <TreesManageSkeleton />;
@@ -1404,12 +1391,12 @@ export function TreesClient({ did, target, onUpload }: TreesClientProps) {
             <AlertTriangleIcon className="size-5 text-destructive" />
           </div>
           <div className="space-y-1">
-            <h1 className="font-instrument text-2xl font-medium italic tracking-[-0.03em] text-foreground sm:text-3xl">Could not load trees</h1>
+            <h1 className="font-instrument text-2xl font-medium italic tracking-[-0.03em] text-foreground sm:text-3xl">{managerT("loadErrorTitle")}</h1>
             <p className="text-sm text-muted-foreground">{fetchError}</p>
           </div>
           <Button variant="outline" onClick={() => void loadAll()}>
             <RefreshCcwIcon />
-            Try again
+            {managerT("retry")}
           </Button>
         </div>
       </Container>
@@ -1418,25 +1405,22 @@ export function TreesClient({ did, target, onUpload }: TreesClientProps) {
 
   return (
     <Container className="pt-4 pb-8 space-y-6">
-      <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
-        <div className="space-y-1">
-          <h1 className="font-instrument text-2xl font-medium italic tracking-[-0.03em] text-foreground sm:text-3xl">My Trees</h1>
-          <p className="text-sm text-muted-foreground max-w-2xl">
-            Review saved tree information, measurements, and photos in one place.
-          </p>
-        </div>
-        {onUpload ? (
-          <Button variant="outline" onClick={onUpload}>
+      <ManageSectionHeader
+        title={managerT("title")}
+        description={managerT("description")}
+        actions={onUpload ? (
+          <Button variant="outline" onClick={onUpload} disabled={!createPermission.allowed} aria-describedby={!createPermission.allowed ? "tree-upload-permission" : undefined}>
             <CloudUploadIcon />
-            Upload tree data
+            {managerT("upload")}
           </Button>
         ) : null}
-      </div>
+      />
+      {!createPermission.allowed ? <p id="tree-upload-permission" className="text-sm text-muted-foreground">{managerT("uploadDenied")}</p> : null}
 
       {!showTreeGroupLanding && treeGroupCards.length > 0 ? (
         <Button variant="ghost" className="-ml-2 w-fit" onClick={handleReturnToTreeGroups}>
           <ChevronLeftIcon />
-          Back to tree groups
+          {managerT("backToGroups")}
         </Button>
       ) : null}
 
@@ -1523,9 +1507,9 @@ export function TreesClient({ did, target, onUpload }: TreesClientProps) {
             focusedSiteRef={selectedTreeGroupPreviewFocusedSiteRef}
           />
           <div className="flex justify-end">
-            <Button variant="destructive" size="sm" onClick={() => openDeleteTreeGroupConfirm(selectedTreeGroup.uri)} disabled={!deletePermission.allowed} title={deletePermission.reason ?? undefined}>
+            <Button variant="destructive" size="sm" onClick={() => openDeleteTreeGroupConfirm(selectedTreeGroup.uri)} disabled={!deletePermission.allowed} title={!deletePermission.allowed ? managerT("groupDeleteDenied") : undefined}>
               <Trash2Icon />
-              Delete tree group
+              {managerT("deleteGroup")}
             </Button>
           </div>
         </div>
@@ -1533,43 +1517,43 @@ export function TreesClient({ did, target, onUpload }: TreesClientProps) {
 
       {treeGroupCards.length === 0 && treeItems.length === 0 ? (
         <div className="flex flex-col items-center justify-center h-64 gap-4 rounded-2xl border border-dashed border-border text-center px-6">
-          <p className="text-2xl text-muted-foreground font-garamond">No trees uploaded yet</p>
+          <h2 className="font-instrument text-2xl italic text-foreground">{managerT("emptyTitle")}</h2>
           <p className="text-sm text-muted-foreground max-w-md">
-            Upload your first tree file to start managing tree information, measurements, and photos.
+            {managerT("emptyBody")}
           </p>
           {onUpload ? (
             <Button onClick={onUpload}>
               <CloudUploadIcon />
-              Upload tree data
+              {managerT("upload")}
             </Button>
           ) : null}
         </div>
       ) : showTreeGroupLanding ? (
         <div className="space-y-4">
-          <div className="flex flex-col gap-3 rounded-2xl border border-dashed border-border bg-muted/20 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex flex-col gap-3 rounded-2xl border border-dashed border-border bg-muted px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex items-start gap-3">
               <InfoIcon className="mt-0.5 size-4 shrink-0 text-muted-foreground" />
               <p className="text-sm text-muted-foreground">
-                Open a tree group to review its trees. Open ungrouped trees to select them and add them to an existing tree group.
+                {managerT("groupHelp")}
               </p>
             </div>
           </div>
 
           {filteredTreeGroupCards.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-56 gap-3 rounded-2xl border border-dashed border-border text-center px-6">
-              <p className="text-2xl text-muted-foreground font-garamond">{treeFilterT("noTreeGroupsTitle")}</p>
+              <h2 className="font-instrument text-2xl italic text-foreground">{treeFilterT("noTreeGroupsTitle")}</h2>
               <p className="text-sm text-muted-foreground">{treeFilterT("noTreeGroupsDescription")}</p>
               <Button variant="outline" onClick={() => { setTreeGroupSearchQuery(""); setTreeGroupRecordedByFilter(""); }}>{treeFilterT("clearFilters")}</Button>
             </div>
           ) : (
-            <DatasetLandingSection datasetCards={filteredTreeGroupCards} onOpen={handleDatasetChange} onDelete={openDeleteTreeGroupConfirm} deleteDisabledReason={deletePermission.reason} />
+            <DatasetLandingSection datasetCards={filteredTreeGroupCards} onOpen={handleDatasetChange} onDelete={openDeleteTreeGroupConfirm} deleteDisabledReason={!deletePermission.allowed ? managerT("groupDeleteDenied") : null} />
           )}
         </div>
       ) : filteredTrees.length === 0 ? (
         <div className="flex flex-col items-center justify-center h-56 gap-3 rounded-2xl border border-dashed border-border text-center px-6">
-          <p className="text-2xl text-muted-foreground font-garamond">No trees match your search</p>
-          <p className="text-sm text-muted-foreground">Try a different species, place, or person.</p>
-          <Button variant="outline" onClick={() => handleTreeSearchChange("")}>Clear search</Button>
+          <h2 className="font-instrument text-2xl italic text-foreground">{managerT("noMatchesTitle")}</h2>
+          <p className="text-sm text-muted-foreground">{managerT("noMatchesBody")}</p>
+          <Button variant="outline" onClick={() => handleTreeSearchChange("")}>{managerT("clearSearch")}</Button>
         </div>
       ) : (
         <div className="grid grid-cols-1 gap-6 xl:grid-cols-[minmax(0,22rem)_minmax(0,1fr)]">
@@ -1577,27 +1561,27 @@ export function TreesClient({ did, target, onUpload }: TreesClientProps) {
             <div className="border-b border-border px-4 py-3 space-y-3">
               <div>
                 <p className="text-sm font-medium text-foreground">
-                  {datasetFilter === UNGROUPED_DATASET_FILTER ? "Ungrouped trees" : "Saved trees"}
+                  {datasetFilter === UNGROUPED_DATASET_FILTER ? managerT("ungroupedTitle") : managerT("savedTitle")}
                 </p>
                 <p className="mt-0.5 text-xs text-muted-foreground">
                   {datasetFilter === UNGROUPED_DATASET_FILTER
-                    ? "Select one or more trees to add them to a tree group."
-                    : "Select a tree to review details, photos, and measurements."}
+                    ? managerT("ungroupedDescription")
+                    : managerT("savedDescription")}
                 </p>
               </div>
 
               {datasetFilter === UNGROUPED_DATASET_FILTER ? (
-                <div className="flex flex-col gap-3 rounded-xl border border-border bg-muted/20 px-3 py-2 sm:flex-row sm:items-center sm:justify-between">
+                <div className="flex flex-col gap-3 rounded-2xl border border-border bg-muted px-3 py-2 sm:flex-row sm:items-center sm:justify-between">
                   <label className="flex items-center gap-2 text-xs text-muted-foreground">
                     <Checkbox
                       checked={selectAllUngroupedChecked}
                       onCheckedChange={handleToggleAllFilteredUngroupedTrees}
                       disabled={filteredUngroupedTreeRkeys.length === 0}
-                      aria-label="Select all filtered ungrouped trees"
+                      aria-label={managerT("selectAllAria")}
                     />
-                    <span>Select all filtered trees</span>
+                    <span>{managerT("selectAll")}</span>
                     {selectedUngroupedTreeCount > 0 ? (
-                      <span className="font-medium text-foreground">{selectedUngroupedTreeCount} selected</span>
+                      <span className="font-medium text-foreground">{managerT("selectedCount", { count: selectedUngroupedTreeCount })}</span>
                     ) : null}
                   </label>
                   <Button
@@ -1605,11 +1589,11 @@ export function TreesClient({ did, target, onUpload }: TreesClientProps) {
                     size="sm"
                     onClick={() => openAddToTreeGroupModal(selectedUngroupedTrees)}
                     disabled={selectedUngroupedTreeCount === 0 || datasets.length === 0 || treeGroupAttachPending || !updatePermission.allowed}
-                    title={updatePermission.reason ?? undefined}
+                    title={!updatePermission.allowed ? managerT("groupAttachDenied") : undefined}
                     className="w-full sm:w-auto"
                   >
                     {treeGroupAttachPending ? <Loader2Icon className="animate-spin" /> : <DatabaseIcon />}
-                    {selectedUngroupedTreeCount > 1 ? `Add ${selectedUngroupedTreeCount} to tree group` : "Add to tree group"}
+                    {selectedUngroupedTreeCount > 1 ? managerT("addCountToGroup", { count: selectedUngroupedTreeCount }) : managerT("addToGroup")}
                   </Button>
                 </div>
               ) : null}
@@ -1633,7 +1617,7 @@ export function TreesClient({ did, target, onUpload }: TreesClientProps) {
                       <Checkbox
                         checked={isUngroupedTreeSelected}
                         onCheckedChange={() => handleToggleUngroupedTreeSelection(tree.rkey)}
-                        aria-label={`Select ${tree.scientificName ?? "tree"}`}
+                        aria-label={managerT("selectTree", { name: tree.scientificName ?? managerT("treeFallback") })}
                         className="mt-0.5"
                       />
                     ) : null}
@@ -1644,7 +1628,7 @@ export function TreesClient({ did, target, onUpload }: TreesClientProps) {
                     >
                       <div className="flex items-start justify-between gap-3">
                         <div className="min-w-0 space-y-1">
-                          <p className="truncate text-lg leading-none font-garamond">{tree.scientificName ?? "Unnamed tree"}</p>
+                          <p className="truncate text-lg font-medium leading-none">{tree.scientificName ?? managerT("unnamedTree")}</p>
                           {tree.vernacularName ? <p className="truncate text-xs italic text-muted-foreground">{tree.vernacularName}</p> : null}
                           <p className="flex items-center gap-1 truncate text-xs text-muted-foreground">
                             <MapPinIcon className="size-3" />
@@ -1655,7 +1639,7 @@ export function TreesClient({ did, target, onUpload }: TreesClientProps) {
                         <div className="flex shrink-0 flex-col items-end gap-1">
                           {groupName ? <Badge><DatabaseIcon className="size-3" />{groupName}</Badge> : null}
                           {item.photos.length > 0 ? <Badge><ImageIcon className="size-3" />{item.photos.length}</Badge> : null}
-                          {item.hasDuplicateBundledMeasurements ? <Badge tone="warn">Review needed</Badge> : hasAnyMeasurementValue(getTreeMeasurementDraft(item.floraMeasurement)) ? <Badge tone="good">Measured</Badge> : null}
+                          {item.hasDuplicateBundledMeasurements ? <Badge tone="warn">{managerT("reviewNeeded")}</Badge> : hasAnyMeasurementValue(getTreeMeasurementDraft(item.floraMeasurement)) ? <Badge tone="good">{managerT("measured")}</Badge> : null}
                         </div>
                       </div>
                     </button>
@@ -1677,8 +1661,7 @@ export function TreesClient({ did, target, onUpload }: TreesClientProps) {
               <section className="rounded-2xl border border-border bg-background p-4 md:p-5 space-y-4">
                 <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
                   <div className="min-w-0 space-y-2">
-                    <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">Selected tree</p>
-                    <h2 className="truncate text-3xl leading-none font-garamond">{selectedTree.occurrence.scientificName ?? "Unnamed tree"}</h2>
+                    <h2 className="font-instrument truncate text-3xl italic leading-none">{selectedTree.occurrence.scientificName ?? managerT("unnamedTree")}</h2>
                     {selectedTree.occurrence.vernacularName ? (
                       <p className="text-sm italic text-muted-foreground">{selectedTree.occurrence.vernacularName}</p>
                     ) : null}
@@ -1686,7 +1669,7 @@ export function TreesClient({ did, target, onUpload }: TreesClientProps) {
                       <Badge><MapPinIcon className="size-3" />{formatTreeSubtitle(selectedTree)}</Badge>
                       <Badge><CalendarIcon className="size-3" />{formatEventDate(selectedTree.occurrence.eventDate)}</Badge>
                       {activeDatasetName ? <Badge><DatabaseIcon className="size-3" />{activeDatasetName}</Badge> : null}
-                      {detailLoadingRkey === selectedTree.occurrence.rkey ? <Badge><Loader2Icon className="size-3 animate-spin" />Loading details</Badge> : null}
+                      {detailLoadingRkey === selectedTree.occurrence.rkey ? <Badge><Loader2Icon className="size-3 animate-spin" />{managerT("loadingDetails")}</Badge> : null}
                     </div>
                   </div>
                   <div className="flex flex-wrap gap-2">
@@ -1696,78 +1679,79 @@ export function TreesClient({ did, target, onUpload }: TreesClientProps) {
                         size="sm"
                         onClick={() => openAddToTreeGroupModal([selectedTree])}
                         disabled={datasets.length === 0 || treeGroupAttachPending || !updatePermission.allowed}
-                        title={updatePermission.reason ?? undefined}
+                        title={!updatePermission.allowed ? managerT("groupAttachDenied") : undefined}
                       >
                         {treeGroupAttachPending ? <Loader2Icon className="animate-spin" /> : <DatabaseIcon />}
-                        Add to tree group
+                        {managerT("addToGroup")}
                       </Button>
                     ) : null}
-                    <Badge>{shortCount(selectedTree.photos.length, "photo", "photos")}</Badge>
+                    <Badge>{managerT("photoCount", { count: selectedTree.photos.length })}</Badge>
                     {selectedTree.hasDuplicateBundledMeasurements ? (
-                      <Badge tone="warn">Measurement review needed</Badge>
+                      <Badge tone="warn">{managerT("measurementReviewNeeded")}</Badge>
                     ) : selectedTreeHasShownMeasurement ? (
-                      <Badge tone="good">Measurements ready</Badge>
+                      <Badge tone="good">{managerT("measurementsReady")}</Badge>
                     ) : selectedTree.hasLegacyMeasurements || selectedTree.hasUnsupportedMeasurements ? (
-                      <Badge tone="warn">Measurement review needed</Badge>
+                      <Badge tone="warn">{managerT("measurementReviewNeeded")}</Badge>
                     ) : (
-                      <Badge>No measurements yet</Badge>
+                      <Badge>{managerT("noMeasurements")}</Badge>
                     )}
                   </div>
                 </div>
 
                 <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
-                  <DetailFact label="Tree group" value={activeDatasetName ?? "No tree group"} />
-                  <DetailFact label="Project place" value={activeSiteName ?? "Not linked"} />
-                  <DetailFact label="How it got here" value={establishmentMeansLabel(selectedTree.occurrence.establishmentMeans)} />
+                  <DetailFact label={managerT("treeGroupLabel")} value={activeDatasetName ?? managerT("noTreeGroup")} />
+                  <DetailFact label={managerT("projectPlaceLabel")} value={activeSiteName ?? managerT("notLinked")} />
+                  <DetailFact label={managerT("establishmentLabel")} value={establishmentMeansLabel(selectedTree.occurrence.establishmentMeans, managerT("notSet"), (value) => managerT(`establishmentOptions.${value}` as never))} />
                 </div>
               </section>
 
-              <SectionCard title="Tree information" description="Review and update the details saved for this tree.">
-                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                  <Field label="Scientific name" required>
+              <SectionCard title={managerT("informationTitle")} description={managerT("informationDescription")}>
+                {!updatePermission.allowed ? <p className="text-sm text-muted-foreground">{managerT("editTreeDenied")}</p> : null}
+                <fieldset disabled={!updatePermission.allowed} className="grid grid-cols-1 gap-4 disabled:opacity-70 md:grid-cols-2">
+                  <Field label={managerT("scientificName")} required>
                     <Input value={occurrenceDraft.scientificName} onChange={(event) => handleOccurrenceFieldChange("scientificName", event.target.value)} />
                   </Field>
-                  <Field label="Common name">
+                  <Field label={managerT("commonName")}>
                     <Input value={occurrenceDraft.vernacularName} onChange={(event) => handleOccurrenceFieldChange("vernacularName", event.target.value)} />
                   </Field>
-                  <Field label="Event date" required>
+                  <Field label={managerT("eventDate")} required>
                     <Input value={occurrenceDraft.eventDate} onChange={(event) => handleOccurrenceFieldChange("eventDate", event.target.value)} placeholder="YYYY-MM-DD" />
                   </Field>
-                  <Field label="Recorded by">
+                  <Field label={managerT("recordedBy")}>
                     <Input value={occurrenceDraft.recordedBy} onChange={(event) => handleOccurrenceFieldChange("recordedBy", event.target.value)} />
                   </Field>
-                  <Field label="Latitude" required>
+                  <Field label={managerT("latitude")} required>
                     <Input inputMode="decimal" value={occurrenceDraft.decimalLatitude} onChange={(event) => handleOccurrenceFieldChange("decimalLatitude", event.target.value)} />
                   </Field>
-                  <Field label="Longitude" required>
+                  <Field label={managerT("longitude")} required>
                     <Input inputMode="decimal" value={occurrenceDraft.decimalLongitude} onChange={(event) => handleOccurrenceFieldChange("decimalLongitude", event.target.value)} />
                   </Field>
-                  <Field label="Country">
+                  <Field label={managerT("country")}>
                     <Input value={occurrenceDraft.country} onChange={(event) => handleOccurrenceFieldChange("country", event.target.value)} />
                   </Field>
-                  <Field label="Locality">
+                  <Field label={managerT("locality")}>
                     <Input value={occurrenceDraft.locality} onChange={(event) => handleOccurrenceFieldChange("locality", event.target.value)} />
                   </Field>
-                  <Field label="How the tree got here">
+                  <Field label={managerT("establishmentLabel")}>
                     <select
                       value={occurrenceDraft.establishmentMeans}
                       onChange={(event) => handleOccurrenceFieldChange("establishmentMeans", event.target.value)}
                       className="border-input bg-background ring-offset-background focus-visible:ring-ring h-9 rounded-md border px-3 py-1 text-sm shadow-xs transition-colors focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50"
                     >
-                      <option value="">Not specified</option>
+                      <option value="">{managerT("notSpecified")}</option>
                       {PARTNER_ESTABLISHMENT_MEANS_OPTIONS.map((option) => (
-                        <option key={option.value} value={option.value}>{option.label}</option>
+                        <option key={option.value} value={option.value}>{managerT(`establishmentOptions.${option.value}` as never)}</option>
                       ))}
                     </select>
                   </Field>
                   <div className="hidden md:block" />
-                  <Field label="Habitat">
+                  <Field label={managerT("habitat")}>
                     <Textarea value={occurrenceDraft.habitat} onChange={(event) => handleOccurrenceFieldChange("habitat", event.target.value)} rows={3} />
                   </Field>
-                  <Field label="Remarks">
+                  <Field label={managerT("remarks")}>
                     <Textarea value={occurrenceDraft.occurrenceRemarks} onChange={(event) => handleOccurrenceFieldChange("occurrenceRemarks", event.target.value)} rows={3} />
                   </Field>
-                </div>
+                </fieldset>
 
                 <div className="flex flex-col gap-3 border-t border-border pt-4 sm:flex-row sm:items-center sm:justify-between">
                   <div className="min-h-5 text-sm">
@@ -1777,45 +1761,51 @@ export function TreesClient({ did, target, onUpload }: TreesClientProps) {
                       <span className="text-muted-foreground">{occurrenceFeedback}</span>
                     ) : null}
                   </div>
-                  <Button onClick={() => void handleSaveOccurrence()} disabled={!occurrenceHasChanges || Boolean(occurrenceValidationError) || savingOccurrence || !updatePermission.allowed} title={updatePermission.reason ?? undefined}>
+                  <Button onClick={() => void handleSaveOccurrence()} disabled={!occurrenceHasChanges || Boolean(occurrenceValidationError) || savingOccurrence || !updatePermission.allowed} title={!updatePermission.allowed ? managerT("editTreeDenied") : undefined}>
                     {savingOccurrence ? <Loader2Icon className="animate-spin" /> : <CheckIcon />}
-                    Save tree information
+                    {managerT("saveTree")}
                   </Button>
                 </div>
               </SectionCard>
 
-              <SectionCard title="Measurements" description="Track DBH, height, root collar diameter, and canopy cover values.">
+              <SectionCard title={managerT("measurementsTitle")} description={managerT("measurementsDescription")}>
                 <div className="grid grid-cols-1 gap-3 md:grid-cols-5">
-                  <DetailFact label="Linked measurements" value={selectedTree.measurements.length} />
-                  <DetailFact label="DBH" value={selectedTree.floraMeasurement?.dbh ? `${selectedTree.floraMeasurement.dbh} cm` : "Not set"} />
-                  <DetailFact label="Height" value={selectedTree.floraMeasurement?.totalHeight ? `${selectedTree.floraMeasurement.totalHeight} m` : "Not set"} />
-                  <DetailFact label="Root collar diameter (cm)" value={selectedTree.floraMeasurement?.basalDiameter ?? "Not set"} />
-                  <DetailFact label="Canopy cover" value={selectedTree.floraMeasurement?.canopyCoverPercent ? `${selectedTree.floraMeasurement.canopyCoverPercent}%` : "Not set"} />
+                  <DetailFact label={managerT("linkedMeasurements")} value={selectedTree.measurements.length} />
+                  <DetailFact label="DBH" value={selectedTree.floraMeasurement?.dbh ? `${selectedTree.floraMeasurement.dbh} cm` : managerT("notSet")} />
+                  <DetailFact label={managerT("height")} value={selectedTree.floraMeasurement?.totalHeight ? `${selectedTree.floraMeasurement.totalHeight} m` : managerT("notSet")} />
+                  <DetailFact label={managerT("rootCollarCm")} value={selectedTree.floraMeasurement?.basalDiameter ?? managerT("notSet")} />
+                  <DetailFact label={managerT("canopyCover")} value={selectedTree.floraMeasurement?.canopyCoverPercent ? `${selectedTree.floraMeasurement.canopyCoverPercent}%` : managerT("notSet")} />
                 </div>
 
                 {measurementEditingBlocked ? (
                   <div className="rounded-xl border border-yellow-500/30 bg-yellow-500/10 px-4 py-3 text-sm text-yellow-700 dark:text-yellow-300">
                     {selectedTree.hasDuplicateBundledMeasurements
-                      ? "More than one editable measurement was found for this tree. Editing is paused so the wrong value is not changed."
-                      : "These measurements need manual review before editing here."}
+                      ? managerT("duplicateMeasurements")
+                      : managerT("measurementManualReview")}
                   </div>
                 ) : (
                   <>
-                    <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                    {!((selectedTree.preferredMeasurement ? updatePermission : createPermission).allowed) ? (
+                      <p className="text-sm text-muted-foreground">{managerT("measurementDenied")}</p>
+                    ) : null}
+                    <fieldset
+                      disabled={!(selectedTree.preferredMeasurement ? updatePermission : createPermission).allowed}
+                      className="grid grid-cols-1 gap-4 disabled:opacity-70 md:grid-cols-2"
+                    >
                       <Field label="DBH (cm)">
                         <Input value={measurementDraft.dbh} inputMode="decimal" onChange={(event) => handleMeasurementFieldChange("dbh", event.target.value)} />
                       </Field>
-                      <Field label="Height (m)">
+                      <Field label={managerT("heightM")}>
                         <Input value={measurementDraft.totalHeight} inputMode="decimal" onChange={(event) => handleMeasurementFieldChange("totalHeight", event.target.value)} />
                       </Field>
-                      <Field label="Root collar diameter (cm)">
+                      <Field label={managerT("rootCollarCm")}>
                         <Input value={measurementDraft.diameter} inputMode="decimal" onChange={(event) => handleMeasurementFieldChange("diameter", event.target.value)} />
-                        <p className="text-xs leading-relaxed text-muted-foreground">Useful for planted or young trees where trunk diameter is not yet meaningful.</p>
+                        <p className="text-xs leading-relaxed text-muted-foreground">{managerT("rootCollarHint")}</p>
                       </Field>
-                      <Field label="Canopy cover (%)">
+                      <Field label={managerT("canopyCoverPercent")}>
                         <Input type="number" min={0} max={CANOPY_COVER_PERCENT_MAX} step="any" value={measurementDraft.canopyCoverPercent} onChange={(event) => handleMeasurementFieldChange("canopyCoverPercent", event.target.value)} />
                       </Field>
-                    </div>
+                    </fieldset>
                     <div className="flex flex-col gap-3 border-t border-border pt-4 sm:flex-row sm:items-center sm:justify-between">
                       <div className="min-h-5 text-sm">
                         {measurementError || measurementValidationError ? (
@@ -1823,7 +1813,7 @@ export function TreesClient({ did, target, onUpload }: TreesClientProps) {
                         ) : measurementFeedback ? (
                           <span className="text-muted-foreground">{measurementFeedback}</span>
                         ) : !selectedTree.preferredMeasurement ? (
-                          <span className="text-muted-foreground">Add one or more values to save a measurement.</span>
+                          <span className="text-muted-foreground">{managerT("measurementEmptyHint")}</span>
                         ) : null}
                       </div>
                       <Button
@@ -1835,26 +1825,26 @@ export function TreesClient({ did, target, onUpload }: TreesClientProps) {
                           (!selectedTree.preferredMeasurement && !hasAnyMeasurementValue(measurementDraft)) ||
                           !(selectedTree.preferredMeasurement ? updatePermission.allowed : createPermission.allowed)
                         }
-                        title={(selectedTree.preferredMeasurement ? updatePermission.reason : createPermission.reason) ?? undefined}
+                        title={!(selectedTree.preferredMeasurement ? updatePermission : createPermission).allowed ? managerT("measurementDenied") : undefined}
                       >
                         {savingMeasurement ? <Loader2Icon className="animate-spin" /> : <CheckIcon />}
                         {selectedTree.preferredMeasurement && !hasAnyMeasurementValue(measurementDraft)
-                          ? "Remove measurements"
+                          ? managerT("removeMeasurements")
                           : selectedTree.preferredMeasurement
-                            ? "Save measurements"
-                            : "Add measurements"}
+                            ? managerT("saveMeasurements")
+                            : managerT("addMeasurements")}
                       </Button>
                     </div>
                   </>
                 )}
               </SectionCard>
 
-              <SectionCard title="Photos" description="See and manage photos linked to this tree.">
-                <div className="rounded-xl border border-border bg-muted/20 p-3 space-y-3">
+              <SectionCard title={managerT("photosTitle")} description={managerT("photosDescription")}>
+                <div className="space-y-3 rounded-2xl bg-muted p-3">
                   <div className="grid grid-cols-1 gap-3 md:grid-cols-[minmax(0,1fr)_auto] md:items-end">
                     <div className="space-y-1.5">
-                      <Label htmlFor="new-photo-caption">Caption for new photo</Label>
-                      <Input id="new-photo-caption" value={newPhotoCaption} onChange={(event) => setNewPhotoCaption(event.target.value)} placeholder="Optional caption" />
+                      <Label htmlFor="new-photo-caption">{managerT("photoCaption")}</Label>
+                      <Input id="new-photo-caption" value={newPhotoCaption} onChange={(event) => setNewPhotoCaption(event.target.value)} placeholder={managerT("photoCaptionPlaceholder")} />
                     </div>
                     <div className="flex flex-wrap gap-2">
                       <input
@@ -1864,16 +1854,16 @@ export function TreesClient({ did, target, onUpload }: TreesClientProps) {
                         className="hidden"
                         onChange={(event) => void handleAddPhotoFile(event.currentTarget.files?.[0] ?? null)}
                       />
-                      <Button type="button" onClick={() => fileInputRef.current?.click()} disabled={savingPhoto || !createPermission.allowed} title={createPermission.reason ?? undefined}>
+                      <Button type="button" onClick={() => fileInputRef.current?.click()} disabled={savingPhoto || !createPermission.allowed} title={!createPermission.allowed ? managerT("photoAddDenied") : undefined}>
                         {savingPhoto ? <Loader2Icon className="animate-spin" /> : <CameraIcon />}
-                        Choose photo
+                        {managerT("choosePhoto")}
                       </Button>
                     </div>
                   </div>
                   <div className="flex flex-col gap-2 md:flex-row">
-                    <Input value={newPhotoUrl} onChange={(event) => setNewPhotoUrl(event.target.value)} placeholder="Or paste a photo link" />
-                    <Button type="button" variant="outline" onClick={() => void handleAddPhotoUrl()} disabled={savingPhoto || !newPhotoUrl.trim() || !createPermission.allowed} title={createPermission.reason ?? undefined}>
-                      Add linked photo
+                    <Input value={newPhotoUrl} onChange={(event) => setNewPhotoUrl(event.target.value)} placeholder={managerT("photoLinkPlaceholder")} />
+                    <Button type="button" variant="outline" onClick={() => void handleAddPhotoUrl()} disabled={savingPhoto || !newPhotoUrl.trim() || !createPermission.allowed} title={!createPermission.allowed ? managerT("photoAddDenied") : undefined}>
+                      {managerT("addLinkedPhoto")}
                     </Button>
                   </div>
                   {photoError ? <p className="text-sm text-destructive">{photoError}</p> : null}
@@ -1883,7 +1873,7 @@ export function TreesClient({ did, target, onUpload }: TreesClientProps) {
                 {selectedTree.photos.length === 0 ? (
                   <div className="flex flex-col items-center justify-center gap-3 rounded-xl border border-dashed border-border px-6 py-10 text-center">
                     <CameraIcon className="size-8 text-muted-foreground" />
-                    <p className="text-muted-foreground">No photos linked to this tree yet.</p>
+                    <p className="text-muted-foreground">{managerT("photosEmpty")}</p>
                   </div>
                 ) : (
                   <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
@@ -1896,7 +1886,7 @@ export function TreesClient({ did, target, onUpload }: TreesClientProps) {
                           <div className="flex h-48 w-full items-center justify-center overflow-hidden bg-muted">
                             {photoUrl ? (
                               // eslint-disable-next-line @next/next/no-img-element
-                              <img src={photoUrl} alt={getPhotoAltText(selectedTree.occurrence.scientificName, photo.record.subjectPart, photo.record.caption)} className="h-full w-full object-cover" />
+                              <img src={photoUrl} alt={photo.record.caption ?? managerT(selectedTree.occurrence.scientificName ? "photoAltNamed" : "photoAlt", { name: selectedTree.occurrence.scientificName ?? "" })} className="h-full w-full object-cover" />
                             ) : (
                               <CameraIcon className="size-8 text-muted-foreground" />
                             )}
@@ -1904,37 +1894,37 @@ export function TreesClient({ did, target, onUpload }: TreesClientProps) {
                           <div className="space-y-3 p-3">
                             <div className="flex items-start justify-between gap-3">
                               <div className="min-w-0 flex-1 space-y-2">
-                                <Badge>{formatSubjectPart(photo.record.subjectPart)}</Badge>
+                                <Badge>{formatSubjectPart(photo.record.subjectPart, managerT("treePhoto"))}</Badge>
                                 {isEditing ? (
                                   <div className="space-y-2">
                                     <Textarea value={photoCaptionDraft} onChange={(event) => { setPhotoCaptionDraft(event.target.value); setPhotoCaptionError(null); }} rows={3} className="resize-none text-sm" />
                                     {photoCaptionError ? <p className="text-xs text-destructive">{photoCaptionError}</p> : null}
                                     <div className="flex flex-wrap gap-2">
-                                      <Button size="sm" onClick={() => void handleSavePhotoCaption(photo)} disabled={isSavingCaption || !updatePermission.allowed} title={updatePermission.reason ?? undefined}>
+                                      <Button size="sm" onClick={() => void handleSavePhotoCaption(photo)} disabled={isSavingCaption || !updatePermission.allowed} title={!updatePermission.allowed ? managerT("photoEditDenied") : undefined}>
                                         {isSavingCaption ? <Loader2Icon className="animate-spin" /> : <CheckIcon />}
-                                        Save caption
+                                        {managerT("saveCaption")}
                                       </Button>
                                       <Button size="sm" variant="outline" onClick={() => { setEditingPhotoRkey(null); setPhotoCaptionDraft(""); setPhotoCaptionError(null); }} disabled={isSavingCaption}>
                                         <XIcon />
-                                        Cancel
+                                        {managerT("cancel")}
                                       </Button>
                                     </div>
                                   </div>
                                 ) : (
                                   <div className="space-y-2">
-                                    <p className={cn("text-sm break-words", !photo.record.caption && "text-muted-foreground")}>{photo.record.caption ?? "No caption added."}</p>
-                                    <Button type="button" variant="outline" size="sm" onClick={() => { setEditingPhotoRkey(photo.metadata.rkey); setPhotoCaptionDraft(photo.record.caption ?? ""); setPhotoCaptionError(null); }} disabled={savingPhotoCaptionRkey !== null || !updatePermission.allowed} title={updatePermission.reason ?? undefined}>
+                                    <p className={cn("text-sm break-words", !photo.record.caption && "text-muted-foreground")}>{photo.record.caption ?? managerT("noCaption")}</p>
+                                    <Button type="button" variant="outline" size="sm" onClick={() => { setEditingPhotoRkey(photo.metadata.rkey); setPhotoCaptionDraft(photo.record.caption ?? ""); setPhotoCaptionError(null); }} disabled={savingPhotoCaptionRkey !== null || !updatePermission.allowed} title={!updatePermission.allowed ? managerT("photoEditDenied") : undefined}>
                                       <PencilIcon />
-                                      {photo.record.caption ? "Edit caption" : "Add caption"}
+                                      {photo.record.caption ? managerT("editCaption") : managerT("addCaption")}
                                     </Button>
                                   </div>
                                 )}
                               </div>
-                              <Button variant="ghost" size="icon-sm" className="text-muted-foreground hover:text-destructive" aria-label="Delete photo" onClick={() => setConfirmTarget({ type: "photo", photo })} disabled={!deletePermission.allowed} title={deletePermission.reason ?? undefined}>
+                              <Button variant="ghost" size="icon-sm" className="text-muted-foreground hover:text-destructive" aria-label={managerT("deletePhoto")} onClick={() => setConfirmTarget({ type: "photo", photo })} disabled={!deletePermission.allowed} title={!deletePermission.allowed ? managerT("photoDeleteDenied") : undefined}>
                                 <Trash2Icon />
                               </Button>
                             </div>
-                            <p className="text-xs text-muted-foreground">Added {formatEventDate(photo.metadata.createdAt)}</p>
+                            <p className="text-xs text-muted-foreground">{managerT("photoAdded", { date: formatEventDate(photo.metadata.createdAt) })}</p>
                           </div>
                         </article>
                       );
@@ -1943,19 +1933,19 @@ export function TreesClient({ did, target, onUpload }: TreesClientProps) {
                 )}
               </SectionCard>
 
-              <SectionCard title="Delete tree" description="Delete this tree and anything linked to it." className="border-destructive/20">
-                <div className="flex flex-col gap-3 rounded-xl border border-destructive/20 bg-destructive/5 p-4 sm:flex-row sm:items-center sm:justify-between">
+              <SectionCard title={managerT("deleteTitle")} description={managerT("deleteDescription")}>
+                <div className="flex flex-col gap-3 rounded-xl bg-destructive/5 p-4 sm:flex-row sm:items-center sm:justify-between">
                   <div className="space-y-1">
-                    <p className="text-sm font-medium text-foreground">Delete this tree permanently</p>
+                    <p className="text-sm font-medium text-foreground">{managerT("deletePermanently")}</p>
                     <p className="text-sm text-muted-foreground">
                       {activeDeletionTarget
-                        ? `This will also remove ${shortCount(activeDeletionTarget.photoCount, "photo", "photos")} and ${shortCount(activeDeletionTarget.measurementCount, "measurement", "measurements")} linked to this tree.`
-                        : "This tree cannot be deleted until its details finish loading."}
+                        ? managerT("deleteTreeLinkedBody", { photos: activeDeletionTarget.photoCount, measurements: activeDeletionTarget.measurementCount })
+                        : managerT("deleteTreeLoadingBody")}
                     </p>
                   </div>
-                  <Button variant="destructive" disabled={!activeDeletionTarget || !deletePermission.allowed} title={deletePermission.reason ?? undefined} onClick={() => setConfirmTarget({ type: "tree", item: selectedTree })}>
+                  <Button variant="destructive" disabled={!activeDeletionTarget || !deletePermission.allowed} title={!deletePermission.allowed ? managerT("treeDeleteDenied") : undefined} onClick={() => setConfirmTarget({ type: "tree", item: selectedTree })}>
                     <Trash2Icon />
-                    Delete tree
+                    {managerT("deleteTree")}
                   </Button>
                 </div>
               </SectionCard>
@@ -1966,9 +1956,9 @@ export function TreesClient({ did, target, onUpload }: TreesClientProps) {
 
       <ManageConfirmModal
         open={confirmTarget !== null}
-        title={confirmTarget?.type === "tree" ? "Delete tree?" : "Delete photo?"}
+        title={confirmTarget?.type === "tree" ? managerT("deleteTreeTitle") : managerT("deletePhotoTitle")}
         description={confirmDescription}
-        confirmLabel={confirmTarget?.type === "tree" ? "Delete tree" : "Delete photo"}
+        confirmLabel={confirmTarget?.type === "tree" ? managerT("deleteTree") : managerT("deletePhoto")}
         onOpenChange={(open) => { if (!open) setConfirmTarget(null); }}
         onConfirm={async () => {
           if (!confirmTarget) return;

@@ -2,13 +2,11 @@
 
 import Image from "next/image";
 import { useCallback, useEffect, useMemo, useState, type FormEvent } from "react";
-import { motion } from "framer-motion";
 import { useTranslations } from "next-intl";
 import { CheckIcon, Loader2Icon, LockIcon, MailIcon, RefreshCwIcon, Trash2Icon, UsersIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
-import { formatCgsErrorMessage } from "@/app/_lib/cgs-errors";
 import { monogram, resolveDidProfile, type DidProfile } from "@/app/_lib/did-profile";
 import {
   addCgsMember,
@@ -52,8 +50,6 @@ type DataCouncilRowState = {
   onToggle: (did: string, selected: boolean) => void;
 };
 
-const SECTION_EASE = [0.25, 0.1, 0.25, 1] as const;
-
 function roleBadge(role: string) {
   return role === "owner"
     ? "bg-amber-500/10 text-amber-700 dark:text-amber-400"
@@ -67,10 +63,6 @@ function formatDate(value?: string | null) {
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return null;
   return date.toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" });
-}
-
-function memberErrorMessage(error: unknown, fallback: string): string {
-  return formatCgsErrorMessage(error, fallback);
 }
 
 function isLikelyEmail(value: string): boolean {
@@ -194,20 +186,21 @@ function MemberRow({
   onRoleChange: (did: string, role: RoleInput) => void;
   onRemove: (did: string) => void;
 }) {
+  const t = useTranslations("common.groupInvitations.members");
   const locked = member.role === "owner";
   const roleEditable = canSetRoles && !locked;
   const removable = canRemove && !locked;
   const name = profile?.displayName?.trim();
-  const primary = name || "Team member";
+  const primary = name || t("memberFallback");
   const joined = formatDate(member.addedAt);
   // ePDS members are labelled by email (member-gated, provided by the server);
   // Bluesky / other atproto members by their public handle.
   const handle = profile?.handle?.trim();
   const identifier = email?.trim() || (handle ? `@${handle.replace(/^@+/, "")}` : null);
-  const joinedText = joined ? `Joined ${joined}` : null;
+  const joinedText = joined ? t("joined", { date: joined }) : null;
   const secondary = !profile && !identifier
-    ? "Loading name…"
-    : [identifier, joinedText].filter(Boolean).join(" · ") || "Organization member";
+    ? t("loadingName")
+    : [identifier, joinedText].filter(Boolean).join(" · ") || t("organizationMember");
 
   return (
     <div className="flex items-center gap-3 rounded-xl px-3 py-3 transition-colors hover:bg-muted/40">
@@ -223,14 +216,14 @@ function MemberRow({
           value={member.role === "admin" ? "admin" : "member"}
           onChange={(event) => onRoleChange(member.did, event.target.value as RoleInput)}
           disabled={isPending}
-          aria-label="Member role"
+          aria-label={t("memberRole")}
         >
-          <option value="member">Member</option>
-          <option value="admin">Admin</option>
+          <option value="member">{t("roleMember")}</option>
+          <option value="admin">{t("roleAdmin")}</option>
         </select>
       ) : (
         <span className={cn("rounded-full px-2.5 py-1 text-xs font-medium capitalize", roleBadge(member.role))}>
-          {member.role}
+          {member.role === "owner" ? t("roleOwner") : member.role === "admin" ? t("roleAdmin") : t("roleMember")}
         </span>
       )}
 
@@ -256,8 +249,8 @@ function MemberRow({
           size="icon-sm"
           disabled={isPending}
           onClick={() => onRemove(member.did)}
-          title="Remove member"
-          aria-label="Remove member"
+          title={t("removeMember")}
+          aria-label={t("removeMember")}
           className="text-muted-foreground hover:text-destructive"
         >
           <Trash2Icon />
@@ -339,7 +332,10 @@ export function GroupMembers({
         setDataCouncilCanWrite(false);
         setDataCouncilLoaded(true);
       }
-      if (data.dataCouncilError) setError(memberErrorMessage(data.dataCouncilError, dataCouncilLoadError));
+      if (data.dataCouncilError) {
+        console.error("Data council load failed", data.dataCouncilError);
+        setError(dataCouncilLoadError);
+      }
     }
   }, [applyDataCouncilState, canUseDataCouncil, dataCouncilLoadError, groupDid]);
 
@@ -349,13 +345,14 @@ export function GroupMembers({
       try {
         await loadGroupSettings();
       } catch (err) {
-        setError(memberErrorMessage(err, "Could not load members."));
+        console.error("Member load failed", err);
+        setError(invitationsT("loadError"));
         if (canUseDataCouncil) setDataCouncilLoaded(true);
       } finally {
         setLoaded(true);
       }
     });
-  }, [canUseDataCouncil, loadGroupSettings, runPending]);
+  }, [canUseDataCouncil, invitationsT, loadGroupSettings, runPending]);
 
   useEffect(() => {
     setMembers(initialMembers ?? []);
@@ -412,7 +409,8 @@ export function GroupMembers({
           setMemberIdentifier("");
           setSuccess(invitationsT("sent", { email: value }));
         } catch (err) {
-          setError(memberErrorMessage(err, invitationsT("sendError")));
+          console.error("Invitation send failed", err);
+          setError(invitationsT("sendError"));
         }
       });
       return;
@@ -454,8 +452,9 @@ export function GroupMembers({
         await addCgsMember(groupDid, identity.did, nextRole);
         setSuccess(invitationsT("added", { name: identity.displayName?.trim() || identity.handle?.trim() || value }));
       } catch (err) {
+        console.error("Member add failed", err);
         setMembers(previousMembers);
-        setError(memberErrorMessage(err, invitationsT("addError")));
+        setError(invitationsT("addError"));
       }
     });
   };
@@ -472,7 +471,8 @@ export function GroupMembers({
         if (previousRole) {
           setMembers((current) => current.map((member) => (member.did === did ? { ...member, role: previousRole } : member)));
         }
-        setError(memberErrorMessage(err, "Could not update role."));
+        console.error("Member role update failed", err);
+        setError(invitationsT("roleError"));
       }
     });
   };
@@ -494,8 +494,9 @@ export function GroupMembers({
         await removeCgsMember(groupDid, did);
       } catch (err) {
         setMembers(previousMembers);
+        console.error("Member removal failed", err);
         setDataCouncilSelected(previousCouncil);
-        setError(memberErrorMessage(err, "Could not remove member."));
+        setError(invitationsT("removeError"));
       }
     });
   };
@@ -516,8 +517,9 @@ export function GroupMembers({
         await cancelCgsInvitation(invitation.id);
         setSuccess(invitationsT("canceled", { email: invitation.email }));
       } catch (err) {
+        console.error("Invitation cancellation failed", err);
         setPendingInvitations(previousInvitations);
-        setError(memberErrorMessage(err, invitationsT("cancelError")));
+        setError(invitationsT("cancelError"));
       }
     });
   };
@@ -544,8 +546,9 @@ export function GroupMembers({
         setDataCouncilSelected(new Set(data.awardedDids ?? []));
         setDataCouncilCanWrite(data.canWriteBadges);
       } catch (err) {
+        console.error("Data council update failed", err);
         setDataCouncilSelected(previousCouncil);
-        setError(memberErrorMessage(err, dataCouncilSaveError));
+        setError(dataCouncilSaveError);
       } finally {
         setDataCouncilSavingDid(null);
       }
@@ -581,10 +584,10 @@ export function GroupMembers({
             value={role}
             onChange={(event) => setRole(event.target.value as RoleInput)}
             disabled={isPending}
-            aria-label="Role for new member"
+            aria-label={invitationsT("newMemberRole")}
           >
-            <option value="member">Member</option>
-            <option value="admin">Admin</option>
+            <option value="member">{invitationsT("roleMember")}</option>
+            <option value="admin">{invitationsT("roleAdmin")}</option>
           </select>
         ) : null}
         <Button type="submit" disabled={isPending || !memberIdentifier.trim()}>
@@ -623,17 +626,17 @@ export function GroupMembers({
         <p className="flex items-center gap-2 px-4 py-6 text-sm text-muted-foreground">
           {isPending || !loaded ? (
             <>
-              <Loader2Icon className="size-4 animate-spin" /> Loading members…
+              <Loader2Icon className="size-4 animate-spin" /> {invitationsT("loading")}
             </>
           ) : (
-            "No members yet."
+            invitationsT("empty")
           )}
         </p>
       ) : (
         <>
           {sortedMembers.map((member) => {
             const profile = profiles[member.did];
-            const displayName = profile?.displayName?.trim() || "Team member";
+            const displayName = profile?.displayName?.trim() || invitationsT("memberFallback");
             const councilChecked = dataCouncilSelected.has(member.did);
             return (
               <MemberRow
@@ -678,19 +681,15 @@ export function GroupMembers({
 
   if (variant === "section") {
     return (
-      <motion.section
-        initial={{ opacity: 0, y: 8 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4, delay: 0.15, ease: SECTION_EASE }}
-      >
+      <section>
         <div className="flex items-center justify-between gap-3">
           <div className="flex items-baseline gap-2">
-            <h2 className="font-instrument text-2xl italic leading-none text-foreground">Members</h2>
+            <h2 className="font-instrument text-2xl italic leading-none text-foreground">{invitationsT("title")}</h2>
             {loaded ? <span className="text-sm text-muted-foreground">{count}</span> : null}
           </div>
           <Button type="button" variant="ghost" size="sm" onClick={refresh} disabled={isPending}>
             {isPending ? <Loader2Icon className="animate-spin" /> : <RefreshCwIcon />}
-            Refresh
+            {invitationsT("refresh")}
           </Button>
         </div>
         <div className="mt-4 space-y-3">
@@ -700,12 +699,12 @@ export function GroupMembers({
           {errorBanner}
           {list}
         </div>
-      </motion.section>
+      </section>
     );
   }
 
   return (
-    <section className="rounded-3xl border border-border/60 bg-card p-5 sm:p-6">
+    <section className="rounded-3xl bg-muted p-5 sm:p-6">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div className="flex items-start gap-3">
           <span className="flex size-10 shrink-0 items-center justify-center rounded-2xl bg-primary/10 text-primary">
@@ -713,7 +712,7 @@ export function GroupMembers({
           </span>
           <div>
             <div className="flex items-center gap-2">
-              <h2 className="text-lg font-medium text-foreground">Members</h2>
+              <h2 className="font-instrument text-xl font-light italic text-foreground">{invitationsT("title")}</h2>
               {loaded ? (
                 <span className="rounded-full bg-muted px-2 py-0.5 text-xs font-medium text-muted-foreground">{count}</span>
               ) : null}
@@ -729,7 +728,7 @@ export function GroupMembers({
         </div>
         <Button type="button" variant="secondary" size="sm" onClick={refresh} disabled={isPending}>
           {isPending ? <Loader2Icon className="animate-spin" /> : <RefreshCwIcon />}
-          Refresh
+          {invitationsT("refresh")}
         </Button>
       </div>
       <div className="mt-5 space-y-3">

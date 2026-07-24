@@ -7,11 +7,13 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import { ChevronRight, Loader2Icon } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { DisplayHeading } from "@/components/ui/typography";
 import { stripLocaleFromPathname } from "@/lib/i18n/routing";
 import { groupIdentifierFromManagePath } from "@/lib/links";
 import { cn } from "@/lib/utils";
 import { monogram } from "@/app/_lib/did-profile";
 import type { CgsGroupMembership } from "@/app/(manage)/manage/_lib/cgs";
+import { normalizeAuthRedirect } from "../redirects";
 
 const ACTIVE_CONTEXT_KEY = "gainforest-active-account-context";
 const REDIRECT_DELAY_MS = 1300;
@@ -30,17 +32,6 @@ type GroupOption = CgsGroupMembership & ProfileCard;
 type ActiveContext =
   | { type: "personal"; did: string; selectedAt: string }
   | { type: "group"; did: string; identifier?: string; role: CgsGroupMembership["role"]; selectedAt: string };
-
-function sanitizeRedirect(value: string): string {
-  if (!value) return "/manage";
-  try {
-    const url = new URL(value, window.location.origin);
-    if (url.origin !== window.location.origin) return "/manage";
-    return `${url.pathname}${url.search}${url.hash}` || "/manage";
-  } catch {
-    return value.startsWith("/") && !value.startsWith("//") ? value : "/manage";
-  }
-}
 
 function rememberContext(context: ActiveContext) {
   try {
@@ -110,20 +101,15 @@ function groupMatchesIdentifier(group: GroupOption, identifier: string): boolean
   return Boolean(group.handle && group.handle.toLowerCase() === normalizedIdentifier.toLowerCase());
 }
 
-function AppMark({ showAnimations = false }: { showAnimations?: boolean }) {
+function AppMark() {
   return (
     <motion.div
       className="relative h-20 w-20"
-      layoutId="gainforest-icon"
-      transition={{ duration: 0.75, type: "spring" }}
-      {...(showAnimations
-        ? {
-            initial: { scale: 0.2, filter: "blur(20px)", opacity: 0 },
-            animate: { scale: 1, filter: "blur(0px)", opacity: 1 },
-          }
-        : {})}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.2 }}
     >
-      <Image className="drop-shadow-2xl" src="/assets/media/images/app-icon.png" fill alt="GainForest" />
+      <Image className="drop-shadow-lg" src="/assets/media/images/app-icon.png" fill alt="GainForest" />
     </motion.div>
   );
 }
@@ -182,21 +168,18 @@ function OptionCard({
       variant="secondary"
       onClick={onClick}
       className={cn(
-        "group relative flex h-16 w-full items-center justify-start gap-3 px-4 shadow-none hover:bg-primary/10",
+        "group relative flex h-16 w-full items-center justify-start gap-3 bg-background px-4 shadow-none hover:bg-primary/10",
         rounded,
       )}
     >
       <OptionAvatar name={name} avatarUrl={avatarUrl} did={did} />
       <span className="flex min-w-0 flex-col items-start">
-        <span
-          className="truncate text-xl italic leading-tight"
-          style={{ fontFamily: "var(--font-instrument-serif-var)", fontStyle: "italic" }}
-        >
+        <span className="truncate text-lg font-medium leading-tight text-foreground">
           {name}
         </span>
         <span className="text-xs text-muted-foreground">{sublabel}</span>
       </span>
-      <span className="absolute right-3 top-1/2 -translate-y-1/2 -translate-x-2 text-primary opacity-0 transition-all group-hover:translate-x-0 group-hover:opacity-100">
+      <span className="absolute right-3 top-1/2 -translate-x-2 -translate-y-1/2 text-primary opacity-0 transition-all group-hover:translate-x-0 group-hover:opacity-100 motion-reduce:transform-none motion-reduce:transition-none">
         <ChevronRight className="size-5" />
       </span>
     </Button>
@@ -212,28 +195,27 @@ function SigningInView({
   signingInLabel: string;
   redirectHelpLabel: string;
 }) {
+  const [showHelp, setShowHelp] = useState(false);
+
+  useEffect(() => {
+    const timer = window.setTimeout(() => setShowHelp(true), 10_000);
+    return () => window.clearTimeout(timer);
+  }, []);
+
   return (
     <div className="flex flex-col items-center">
-      <AppMark showAnimations />
-      <motion.div
-        initial={{ scale: 0.2, filter: "blur(20px)", opacity: 0.5 }}
-        animate={{ scale: 1, filter: "blur(0px)", opacity: 1 }}
-        transition={{ delay: 0.5, duration: 0.5 }}
-        className="mt-12 flex flex-col items-center gap-1 font-medium"
-      >
-        <Loader2Icon className="size-6 animate-spin text-primary" />
+      <AppMark />
+      <div className="mt-12 flex flex-col items-center gap-1 font-medium" role="status">
+        <Loader2Icon className="size-6 animate-spin text-primary motion-reduce:animate-none" aria-hidden />
         {signingInLabel}
-        <motion.div
-          initial={{ opacity: 0, y: -4 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 10, duration: 0.25 }}
-          className="mt-2"
-        >
-          <Button size="sm" variant="link" asChild>
-            <Link href={redirectTo}>{redirectHelpLabel}</Link>
-          </Button>
-        </motion.div>
-      </motion.div>
+        {showHelp ? (
+          <div className="mt-2">
+            <Button size="sm" variant="link" asChild>
+              <Link href={redirectTo}>{redirectHelpLabel}</Link>
+            </Button>
+          </div>
+        ) : null}
+      </div>
     </div>
   );
 }
@@ -274,19 +256,19 @@ function GroupChoiceView({
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 12 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.4 }}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.2 }}
       className="flex w-full flex-col items-center pt-8"
     >
-      <AppMark showAnimations />
-      <h1 className="mt-4 text-center text-xl font-medium">{labels.continueAs}</h1>
-      <p className="text-center text-sm text-muted-foreground">{labels.chooseAccount}</p>
+      <AppMark />
+      <DisplayHeading as="h1" className="mt-4 text-center text-2xl font-medium">{labels.continueAs}</DisplayHeading>
+      <p className="mt-2 text-center text-sm text-muted-foreground">{labels.chooseAccount}</p>
 
-      <div className="mt-6 w-full space-y-5">
+      <div className="mt-6 w-full space-y-6">
         <section>
-          <p className="mb-1.5 px-1 text-xs font-medium text-muted-foreground">{labels.yourAccount}</p>
-          <div className="flex flex-col gap-1.5">
+          <div className="mb-2 px-1 text-sm font-medium text-foreground">{labels.yourAccount}</div>
+          <div className="flex flex-col gap-2 rounded-2xl bg-muted p-2">
             <OptionCard
               did={session.did}
               name={personalName}
@@ -300,8 +282,8 @@ function GroupChoiceView({
 
         {groups.length > 0 ? (
           <section>
-            <p className="mb-1.5 px-1 text-xs font-medium text-muted-foreground">{labels.yourOrganizations}</p>
-            <div className="flex flex-col gap-1.5">
+            <div className="mb-2 px-1 text-sm font-medium text-foreground">{labels.yourOrganizations}</div>
+            <div className="flex flex-col gap-2 rounded-2xl bg-muted p-2">
               {groups.map((group, index) => (
                 <OptionCard
                   key={group.groupDid}
@@ -330,8 +312,8 @@ function ErrorView({
 }) {
   return (
     <div className="flex flex-col items-center text-center">
-      <AppMark showAnimations />
-      <h1 className="mt-6 text-xl font-medium">{labels.title}</h1>
+      <AppMark />
+      <DisplayHeading as="h1" className="mt-6 text-2xl font-medium">{labels.title}</DisplayHeading>
       <p className="mt-1 max-w-xs text-sm text-muted-foreground">{labels.description}</p>
       <div className="mt-6 flex justify-center gap-2">
         <Button asChild variant="secondary" size="sm"><Link href={redirectTo}>{labels.goBack}</Link></Button>
@@ -342,21 +324,19 @@ function ErrorView({
 }
 
 function GroupLookupErrorView({
-  message,
   redirectTo,
   onRetry,
   labels,
 }: {
-  message: string | null;
   redirectTo: string;
   onRetry: () => void;
   labels: { title: string; description: string; retry: string; continue: string };
 }) {
   return (
     <div className="flex flex-col items-center text-center">
-      <AppMark showAnimations />
-      <h1 className="mt-6 text-xl font-medium">{labels.title}</h1>
-      <p className="mt-1 max-w-xs text-sm text-muted-foreground">{message || labels.description}</p>
+      <AppMark />
+      <DisplayHeading as="h1" className="mt-6 text-2xl font-medium">{labels.title}</DisplayHeading>
+      <p className="mt-1 max-w-xs text-sm text-muted-foreground">{labels.description}</p>
       <div className="mt-6 flex justify-center gap-2">
         <Button type="button" variant="secondary" size="sm" onClick={onRetry}>{labels.retry}</Button>
         <Button type="button" size="sm" onClick={() => window.location.assign(redirectTo)}>{labels.continue}</Button>
@@ -380,11 +360,10 @@ export function AuthCompleteClient({
   const tOnboardingPrompt = useTranslations("common.onboardingPrompt");
   const tRoles = useTranslations("upload.settings.dataCouncil.roles");
   const [groups, setGroups] = useState<GroupOption[]>([]);
-  const [groupError, setGroupError] = useState<string | null>(null);
   const [choiceRedirect, setChoiceRedirect] = useState<string | null>(null);
   const [retryNonce, setRetryNonce] = useState(0);
   const [status, setStatus] = useState<"loading" | "success" | "choices" | "error" | "group-error">(session ? "loading" : "error");
-  const safeRedirect = useMemo(() => sanitizeRedirect(redirectTo), [redirectTo]);
+  const safeRedirect = useMemo(() => normalizeAuthRedirect(redirectTo), [redirectTo]);
 
   useEffect(() => {
     if (!session) return;
@@ -430,16 +409,12 @@ export function AuthCompleteClient({
 
     async function loadGroups() {
       setStatus("loading");
-      setGroupError(null);
       setChoiceRedirect(null);
       try {
         const response = await fetch("/api/cgs/groups", { cache: "no-store" });
-        const data = (await response.json().catch(() => ({}))) as { groups?: CgsGroupMembership[]; error?: string; message?: string };
-        if (!response.ok) {
-          throw new Error(data.message ?? data.error ?? `Organization lookup failed (${response.status}).`);
-        }
-        if (!Array.isArray(data.groups)) {
-          throw new Error("We couldn’t load your organizations.");
+        const data = (await response.json().catch(() => ({}))) as { groups?: CgsGroupMembership[] };
+        if (!response.ok || !Array.isArray(data.groups)) {
+          throw new Error(`Group lookup failed (${response.status})`);
         }
         const loadedGroups = data.groups;
         const targetIdentifier = redirectGroupIdentifier(safeRedirect);
@@ -479,9 +454,9 @@ export function AuthCompleteClient({
         if (targetIdentifier) setChoiceRedirect("/manage");
         setGroups(enriched);
         setStatus("choices");
-      } catch (err) {
+      } catch (error) {
         if (cancelled) return;
-        setGroupError(err instanceof Error ? err.message : "We couldn’t load your organizations.");
+        console.warn("[auth-complete] organization lookup failed", error);
         setStatus("group-error");
       }
     }
@@ -494,7 +469,7 @@ export function AuthCompleteClient({
   }, [retryNonce, safeRedirect, session]);
 
   return (
-    <main data-no-dom-translate className="mx-auto flex min-h-screen w-full max-w-md flex-col items-center justify-center px-6 py-12">
+    <main data-no-dom-translate className="mx-auto flex min-h-dvh w-full max-w-md flex-col items-center justify-center px-3 py-12 sm:px-4">
       {status === "loading" || status === "success" ? (
         <SigningInView
           redirectTo={safeRedirect}
@@ -532,7 +507,6 @@ export function AuthCompleteClient({
       ) : null}
       {status === "group-error" ? (
         <GroupLookupErrorView
-          message={groupError}
           redirectTo={safeRedirect}
           onRetry={() => setRetryNonce((value) => value + 1)}
           labels={{

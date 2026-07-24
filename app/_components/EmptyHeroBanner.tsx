@@ -2,15 +2,17 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import type { ReactNode } from "react";
-import { motion } from "framer-motion";
+import { useId, type ReactNode } from "react";
 import { Button } from "@/components/ui/button";
+import { SectionSurface } from "@/components/ui/section-surface";
+import { DisplayHeading } from "@/components/ui/typography";
 import { cn } from "@/lib/utils";
 
 // Shared "nothing here yet" banner — the same seedling hero the projects view
 // uses for its empty state. Presentational only: callers pass already-translated
 // copy and an optional call-to-action so it can be reused across tabs.
 export function EmptyHeroBanner({
+  title,
   description,
   ctaLabel,
   ctaHref,
@@ -20,6 +22,7 @@ export function EmptyHeroBanner({
   ctaDisabledReason,
   className,
 }: {
+  title?: string;
   description: string;
   ctaLabel?: string;
   ctaHref?: string;
@@ -31,13 +34,12 @@ export function EmptyHeroBanner({
   className?: string;
 }) {
   const showCta = Boolean(ctaLabel) && (ctaDisabled || Boolean(ctaHref) || Boolean(onCtaClick));
+  const disabledReasonId = useId();
 
   return (
-    <motion.section
-      initial={{ opacity: 0, y: 8 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.35, ease: [0.25, 0.1, 0.25, 1] }}
-      className={cn("relative isolate overflow-visible rounded-[1.6rem] border border-border/80 bg-card shadow-sm", className)}
+    <SectionSurface
+      variant="muted"
+      className={cn("animate-in relative isolate overflow-visible rounded-[1.6rem] p-0 motion-reduce:animate-none", className)}
     >
       <div className="relative min-h-[6rem] overflow-hidden rounded-[1.55rem]">
         <Image
@@ -61,10 +63,22 @@ export function EmptyHeroBanner({
         <div className="absolute inset-x-0 bottom-0 h-16 bg-linear-to-t from-foreground/20 via-foreground/5 to-transparent dark:from-black/55" />
 
         <div className="relative z-30 flex min-h-[6rem] flex-col gap-4 px-6 py-4 sm:flex-row sm:items-center sm:justify-between sm:gap-6 sm:px-8 lg:px-9">
-          <p className="w-full text-sm leading-5 text-muted-foreground sm:max-w-[30rem]">{description}</p>
+          <div className="w-full sm:max-w-[30rem]">
+            {title ? (
+              <DisplayHeading as="h2" className="text-2xl leading-tight text-foreground">
+                {title}
+              </DisplayHeading>
+            ) : null}
+            <p className={cn("text-sm leading-5 text-muted-foreground", title && "mt-1.5")}>{description}</p>
+            {ctaDisabled && ctaDisabledReason ? (
+              <p id={disabledReasonId} className="mt-2 text-xs leading-5 text-muted-foreground">
+                {ctaDisabledReason}
+              </p>
+            ) : null}
+          </div>
           {showCta ? (
             ctaDisabled ? (
-              <Button type="button" size="sm" disabled title={ctaDisabledReason ?? undefined} className="shrink-0 self-start sm:self-auto">
+              <Button type="button" size="sm" disabled aria-describedby={ctaDisabledReason ? disabledReasonId : undefined} className="shrink-0 self-start sm:self-auto">
                 {ctaIcon}
                 {ctaLabel}
               </Button>
@@ -98,6 +112,6 @@ export function EmptyHeroBanner({
         height={1129}
         className="pointer-events-none absolute bottom-0 right-[4%] z-20 hidden h-[9rem] w-auto max-w-[50%] object-contain dark:md:block"
       />
-    </motion.section>
+    </SectionSurface>
   );
 }

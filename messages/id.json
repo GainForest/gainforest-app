@@ -54,7 +54,6 @@
       "videoTitle": "Bumicerts: catatan alam terverifikasi untuk penjaga alam setempat"
     },
     "certificate": {
-      "eyebrow": "Sertifikat",
       "titleLine1": "Apa sebenarnya",
       "titleLine2": "sertifikat itu?",
       "faqItems": {
@@ -111,7 +110,6 @@
       "alt": "Ikon aplikasi GainForest"
     },
     "stats": {
-      "liveLabel": "Dampak langsung",
       "bumicertsShared": "catatan dibagikan",
       "organizationProfiles": "profil organisasi",
       "natureSightingsShared": "temuan alam dibagikan",

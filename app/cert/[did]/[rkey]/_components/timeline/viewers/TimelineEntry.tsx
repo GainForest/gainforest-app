@@ -242,7 +242,7 @@ export function TimelineEntry({
 
   return (
     <motion.article
-      className="rounded-2xl border border-border/60 bg-background shadow-sm"
+      className="rounded-2xl bg-muted"
       initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{
@@ -270,7 +270,7 @@ export function TimelineEntry({
               </span>
             ))}
           </div>
-          <h3 className="mt-1 text-base text-foreground">{title}</h3>
+          <h3 className="font-instrument mt-1 text-lg italic text-foreground">{title}</h3>
           <div className="mt-1.5 flex flex-wrap gap-x-3 gap-y-0.5 text-xs text-muted-foreground">
             <span>{recordedDate}</span>
             <span>{entryT("linked", { date: linkedDate })}</span>
@@ -325,7 +325,7 @@ export function TimelineEntry({
             </p>
           ) : null}
           {entry.kind === "nature" && natureRefs.length > 0 ? (
-            <div className="rounded-xl bg-muted/20 p-3">
+            <div className="rounded-xl bg-background p-3">
               <p className="text-xs text-muted-foreground">
                 {entryT("displayedBiodiversityData")}
               </p>

@@ -19,8 +19,14 @@ export default async function AccountTreesPage({
 }) {
   const { did, urlIdentifier } = await readAccountRouteParams(params);
   const account = await getAccountRouteData(did, urlIdentifier);
-  const mode = (await searchParams).mode;
-  const isUpload = (Array.isArray(mode) ? mode[0] : mode) === "upload";
-  const base = `${accountObservationsPath(account.urlIdentifier)}?layer=measurements`;
-  redirect(isUpload ? `${base}&mode=upload` : base);
+  const values = await searchParams;
+  const query = new URLSearchParams();
+  for (const [key, value] of Object.entries(values)) {
+    const entries = Array.isArray(value) ? value : [value];
+    for (const entry of entries) {
+      if (typeof entry === "string" && entry.length > 0) query.append(key, entry);
+    }
+  }
+  query.set("layer", "measurements");
+  redirect(`${accountObservationsPath(account.urlIdentifier)}?${query.toString()}`);
 }

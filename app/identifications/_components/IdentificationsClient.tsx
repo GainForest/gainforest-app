@@ -154,9 +154,9 @@ export function IdentificationsClient({ sessionDid }: { sessionDid: string | nul
 
   if (!sessionDid) {
     return (
-      <div className="rounded-3xl border border-dashed border-border bg-muted/30 px-6 py-14 text-center">
+      <div className="rounded-2xl bg-muted px-4 py-12 text-center sm:px-6">
         <TagsIcon className="mx-auto size-8 text-primary" />
-        <h2 className="mt-4 text-lg font-medium text-foreground">{t("signInTitle")}</h2>
+        <h2 className="mt-4 font-instrument text-lg italic text-foreground">{t("signInTitle")}</h2>
         <p className="mx-auto mt-2 max-w-lg text-sm leading-6 text-muted-foreground">{t("signInBody")}</p>
       </div>
     );
@@ -164,9 +164,21 @@ export function IdentificationsClient({ sessionDid }: { sessionDid: string | nul
 
   if (occurrences === null) {
     return (
-      <div className="flex items-center justify-center gap-3 rounded-3xl border border-border bg-card/70 px-6 py-16 text-sm text-muted-foreground">
-        <Loader2Icon className="size-5 animate-spin text-primary" />
+      <div className="flex items-center justify-center gap-3 rounded-2xl bg-muted px-4 py-12 text-sm text-muted-foreground sm:px-6">
+        <Loader2Icon className="size-5 animate-spin text-primary motion-reduce:animate-none" />
         {t("loading")}
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="rounded-2xl bg-destructive/10 px-4 py-10 text-center sm:px-6">
+        <p role="alert" className="text-sm text-destructive">{error}</p>
+        <Button variant="outline" size="sm" className="mt-4" onClick={() => void load()}>
+          <RefreshCwIcon className="size-4" />
+          {t("refresh")}
+        </Button>
       </div>
     );
   }
@@ -175,7 +187,8 @@ export function IdentificationsClient({ sessionDid }: { sessionDid: string | nul
 
   return (
     <section className="flex flex-col gap-4">
-      <div className="flex flex-col gap-3 rounded-2xl border border-border bg-card/80 p-3 sm:flex-row sm:items-center sm:justify-between">
+      <div className="rounded-2xl bg-muted p-4">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex min-w-0 items-center gap-3">
           <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-primary/10 text-primary"><TagsIcon className="size-4.5" /></span>
           <div className="min-w-0">
@@ -184,26 +197,26 @@ export function IdentificationsClient({ sessionDid }: { sessionDid: string | nul
           </div>
         </div>
         <div className="flex flex-wrap items-center gap-2">
-          <Button asChild variant="outline" size="sm"><Link href="/audiomoth?tab=label"><TagsIcon className="size-4" />{t("openLabeller")}</Link></Button>
-          <Button variant="outline" size="sm" disabled={total === 0} onClick={exportAll}><DownloadIcon className="size-4" />{t("export")}</Button>
-          <Button variant="ghost" size="sm" onClick={() => void load()}><RefreshCwIcon className="size-4" />{t("refresh")}</Button>
+          <Button asChild variant="outline" size="sm" className="h-10"><Link href="/audiomoth?tab=label"><TagsIcon className="size-4" />{t("openLabeller")}</Link></Button>
+          <Button variant="outline" size="sm" className="h-10" disabled={total === 0} onClick={exportAll}><DownloadIcon className="size-4" />{t("export")}</Button>
+          <Button variant="ghost" size="sm" className="h-10" onClick={() => void load()}><RefreshCwIcon className="size-4" />{t("refresh")}</Button>
         </div>
       </div>
 
       {total > 0 ? (
-        <div className="flex flex-col gap-3 rounded-2xl border border-border bg-card/60 p-3 sm:flex-row sm:items-center">
+        <div className="mt-4 flex flex-col gap-3 border-t border-background pt-4 sm:flex-row sm:items-center">
           <div className="relative sm:w-64">
             <SearchIcon className="pointer-events-none absolute left-2.5 top-1/2 size-3.5 -translate-y-1/2 text-muted-foreground" />
-            <Input value={query} onChange={(event) => setQuery(event.target.value)} placeholder={t("searchPlaceholder")} className="h-8 pl-8 text-xs" />
+            <Input value={query} onChange={(event) => setQuery(event.target.value)} placeholder={t("searchPlaceholder")} className="h-11 pl-8 text-xs sm:h-10" />
           </div>
           <div className="flex flex-wrap gap-1.5">
-            <button type="button" aria-pressed={activeCategory === "all"} onClick={() => setActiveCategory("all")} className={cn("rounded-full border px-2.5 py-1 text-[11px] font-medium transition-colors", activeCategory === "all" ? "border-primary bg-primary/10 text-primary" : "border-border text-muted-foreground hover:bg-muted")}>{t("filterAll", { count: total })}</button>
+            <button type="button" aria-pressed={activeCategory === "all"} onClick={() => setActiveCategory("all")} className={cn("min-h-11 rounded-full border px-3 text-xs font-medium transition-colors", activeCategory === "all" ? "border-primary bg-primary/10 text-primary" : "border-border text-muted-foreground hover:bg-muted")}>{t("filterAll", { count: total })}</button>
             {AUDIO_LABEL_CATEGORIES.map((category) => {
               const count = counts[category];
               if (count === 0) return null;
               const { Icon } = CATEGORY_META[category];
               return (
-                <button key={category} type="button" aria-pressed={activeCategory === category} onClick={() => setActiveCategory(category)} className={cn("inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-[11px] font-medium transition-colors", activeCategory === category ? "border-primary bg-primary/10 text-primary" : "border-border text-muted-foreground hover:bg-muted")}>
+                <button key={category} type="button" aria-pressed={activeCategory === category} onClick={() => setActiveCategory(category)} className={cn("inline-flex min-h-11 items-center gap-1 rounded-full border px-3 text-xs font-medium transition-colors", activeCategory === category ? "border-primary bg-primary/10 text-primary" : "border-border text-muted-foreground hover:bg-muted")}>
                   <Icon className="size-3" />{t(`categories.${category}`)} · {count}
                 </button>
               );
@@ -211,22 +224,21 @@ export function IdentificationsClient({ sessionDid }: { sessionDid: string | nul
           </div>
         </div>
       ) : null}
-
-      {error ? <p className="rounded-xl bg-destructive/10 px-3 py-2 text-xs text-destructive">{error}</p> : null}
+      </div>
 
       {total === 0 ? (
-        <div className="rounded-3xl border border-dashed border-border bg-muted/30 px-6 py-14 text-center">
+        <div className="rounded-2xl bg-muted px-4 py-12 text-center sm:px-6">
           <WavesIcon className="mx-auto size-8 text-primary" />
-          <h2 className="mt-4 text-lg font-medium text-foreground">{t("emptyTitle")}</h2>
+          <h2 className="mt-4 font-instrument text-lg italic text-foreground">{t("emptyTitle")}</h2>
           <p className="mx-auto mt-2 max-w-lg text-sm leading-6 text-muted-foreground">{t("emptyBody")}</p>
           <div className="mt-5 flex justify-center">
             <Button asChild><Link href="/audiomoth?tab=label"><TagsIcon className="size-4" />{t("openLabeller")}</Link></Button>
           </div>
         </div>
       ) : shown.length === 0 ? (
-        <div className="rounded-2xl border border-dashed border-border bg-muted/30 px-4 py-10 text-center text-sm text-muted-foreground">{t("noMatches")}</div>
+        <div className="rounded-2xl bg-muted px-4 py-10 text-center text-sm text-muted-foreground">{t("noMatches")}</div>
       ) : (
-        <div className="overflow-hidden rounded-2xl border border-border bg-card/80">
+        <div className="overflow-hidden rounded-2xl bg-muted">
           <ul className="divide-y divide-border">
             {shown.map((item) => {
               const { chip, Icon } = CATEGORY_META[item.category];

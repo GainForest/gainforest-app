@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { CheckIcon, KeyRoundIcon, LockIcon, MailIcon, RotateCcwIcon, TicketIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -16,6 +16,7 @@ const CODE = "48291736";
 // done with a small auto-typing animation.
 export function CompareLogin() {
   const t = useTranslations("common.epds.compare");
+  const shouldReduceMotion = useReducedMotion();
   const [mode, setMode] = useState<Mode>("epds");
   const [stage, setStage] = useState<EpdsStage>("email");
   const [typed, setTyped] = useState(0);
@@ -26,6 +27,11 @@ export function CompareLogin() {
 
   function sendCode() {
     setStage("code");
+    if (shouldReduceMotion) {
+      setTyped(CODE.length);
+      timers.current.push(setTimeout(() => setStage("done"), 650));
+      return;
+    }
     setTyped(0);
     CODE.split("").forEach((_, i) => {
       timers.current.push(setTimeout(() => setTyped(i + 1), 350 + i * 130));
@@ -78,7 +84,7 @@ export function CompareLogin() {
       </div>
 
       <div className="mx-auto max-w-sm">
-        <div className="rounded-2xl border border-border/70 bg-background p-6 shadow-sm">
+        <div className="rounded-2xl bg-muted p-6">
           <AnimatePresence mode="wait" initial={false}>
             {mode === "classic" ? (
               <motion.div
@@ -192,8 +198,8 @@ export function CompareLogin() {
 
 function FakeField({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) {
   return (
-    <div className="rounded-lg border border-border/70 px-3 py-2">
-      <div className="mb-0.5 flex items-center gap-1.5 text-[10.5px] uppercase tracking-[0.08em] text-muted-foreground/70">
+    <div className="rounded-lg bg-background px-3 py-2">
+      <div className="mb-0.5 flex items-center gap-1.5 text-xs text-muted-foreground/70">
         {icon}
         {label}
       </div>

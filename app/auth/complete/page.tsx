@@ -1,36 +1,27 @@
 import type { Metadata } from "next";
+import { getTranslations } from "next-intl/server";
 import { fetchAuthSession } from "@/app/_lib/auth-server";
 import { getAccountRouteData } from "@/app/account/_lib/account-route";
 import { AuthCompleteClient } from "./_components/AuthCompleteClient";
+import { normalizeAuthRedirect } from "./redirects";
 
-export const metadata: Metadata = {
-  title: "Completing sign in — GainForest",
-  description: "Choose how you want to continue in GainForest.",
-  robots: { index: false, follow: false },
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("common.authComplete.metadata");
+  return {
+    title: t("title"),
+    description: t("description"),
+    robots: { index: false, follow: false },
+  };
+}
 
 type PageProps = {
   searchParams: Promise<{ redirect?: string | string[] }>;
 };
 
-function normalizeRedirect(value: string | string[] | undefined): string {
-  const raw = Array.isArray(value) ? value[0] : value;
-  if (!raw) return "/manage";
-
-  try {
-    const decoded = decodeURIComponent(raw);
-    if (decoded.startsWith("/") && !decoded.startsWith("//")) return decoded;
-    const url = new URL(decoded);
-    return `${url.pathname}${url.search}${url.hash}` || "/manage";
-  } catch {
-    return raw.startsWith("/") && !raw.startsWith("//") ? raw : "/manage";
-  }
-}
-
 export default async function AuthCompletePage({ searchParams }: PageProps) {
   const [{ redirect }] = await Promise.all([searchParams]);
   const session = await fetchAuthSession();
-  const destination = normalizeRedirect(redirect);
+  const destination = normalizeAuthRedirect(redirect);
 
   if (!session.isLoggedIn) {
     return <AuthCompleteClient session={null} account={null} redirectTo={destination} />;

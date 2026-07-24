@@ -43,7 +43,7 @@ export function BioblitzObservationsMap({ round }: { round: BioblitzRound }) {
   return (
     <section>
       <div aria-hidden className="mx-auto h-px w-full max-w-6xl bg-border/60" />
-      <div className="mx-auto w-full max-w-6xl px-4 py-10 sm:px-6">
+      <div className="mx-auto w-full max-w-6xl px-3 py-6 sm:px-5 md:py-8 lg:px-8">
         <div className="flex items-start gap-2">
           <span className="mt-1 flex size-5 items-center justify-center text-primary [&_svg]:size-4">
             <MapPinnedIcon aria-hidden />
@@ -56,11 +56,11 @@ export function BioblitzObservationsMap({ round }: { round: BioblitzRound }) {
 
         <div className="mt-5">
           {phase === "error" ? (
-            <div className="flex flex-col items-center justify-center rounded-2xl bg-foreground/5 px-6 py-16 text-center">
-              <p className="font-instrument text-2xl font-light italic text-foreground">{t("error")}</p>
+            <div className="flex flex-col items-center justify-center rounded-2xl bg-muted px-4 py-12 text-center sm:px-5">
+              <h3 className="font-instrument text-2xl font-light italic text-foreground">{t("error")}</h3>
             </div>
           ) : phase === "ready" && !hasMappable ? (
-            <div className="rounded-2xl bg-foreground/5 px-6 py-14 text-center text-sm text-muted-foreground">
+            <div className="rounded-2xl bg-muted px-4 py-12 text-center text-sm text-muted-foreground sm:px-5">
               {t("empty")}
             </div>
           ) : phase === "loading" ? (

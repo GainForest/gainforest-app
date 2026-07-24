@@ -1,7 +1,7 @@
 {
   "addData": {
     "title": "Tambah data",
-    "description": "Jatuhkan berkas Anda di bawah dan kami akan mengirimkannya ke tempat yang tepat — foto, daftar pohon, audio, atau peta lokasi.",
+    "description": "Jatuhkan berkas Anda di bawah dan kami akan mengirimkannya ke tempat yang tepat: foto, daftar pohon, audio, atau peta lokasi.",
     "dropTitle": "Jatuhkan berkas untuk menambah data",
     "dropHint": "Foto · daftar pohon · audio · peta lokasi",
     "browse": "Telusuri berkas",
@@ -65,6 +65,7 @@
     "upload": "Unggah",
     "uploading": "Mengunggah…",
     "confirm": "Konfirmasi",
+    "failed": "Tindakan itu tidak dapat diselesaikan. Silakan coba lagi.",
     "add": "Tambah",
     "cancel": "Batal",
     "registerOrganization": "Buat Organisasi",
@@ -84,7 +85,22 @@
     "unnamed": "Lokasi tanpa nama",
     "invalid": "Tidak valid",
     "alreadyDefault": "Sudah menjadi default",
-    "makeDefault": "Jadikan default"
+    "makeDefault": "Jadikan default",
+    "mapPreview": "Pratinjau peta situs",
+    "previousSite": "Situs sebelumnya",
+    "nextSite": "Situs berikutnya",
+    "defaultLoadError": "Situs utama tidak dapat dimuat.",
+    "loadError": "Situs tidak dapat dimuat.",
+    "retry": "Coba lagi",
+    "createDenied": "Peran Anda tidak dapat menambahkan situs ke organisasi ini.",
+    "editDenied": "Peran Anda tidak dapat mengedit situs ini.",
+    "defaultDenied": "Peran Anda tidak dapat mengubah situs utama.",
+    "defaultError": "Situs utama tidak dapat diubah.",
+    "deleteDefaultBlocked": "Pilih situs utama lain sebelum menghapus situs ini.",
+    "deleteDenied": "Peran Anda tidak dapat menghapus situs ini.",
+    "deleteError": "Situs tidak dapat dihapus.",
+    "cardsView": "Kartu",
+    "listView": "Daftar"
   },
   "audio": {
     "title": "Rekaman Audio",
@@ -202,7 +218,19 @@
       "identificationRemarks": "Catatan identifikasi",
       "speciesNotes": "Catatan spesies",
       "savingUpload": "Menyimpan unggahan Anda",
-      "recordedAtInvalid": "Masukkan tanggal perekaman yang valid."
+      "recordedAtInvalid": "Masukkan tanggal perekaman yang valid.",
+      "deploymentNamePlaceholder": "Situs A Utara, AudioMoth Maret 2024",
+      "channelCount": "{count} saluran",
+      "bitDepth": "{count} bit"
+    },
+    "spectrogram": {
+      "chooseFile": "Pilih file audio untuk melihat pola frekuensinya sebelum menyimpan.",
+      "frequencyOverTime": "Frekuensi sepanjang waktu",
+      "previewAria": "Pratinjau spektrogram audio",
+      "low": "rendah",
+      "high": "tinggi",
+      "title": "Pratinjau spektrogram",
+      "caption": "Pita yang lebih terang menunjukkan frekuensi yang lebih kuat dalam rekaman terpilih."
     }
   },
   "dashboard": {
@@ -211,7 +239,7 @@
     "accountNotReady": "Data akun belum siap untuk disimpan."
   },
   "profile": {
-    "aboutPlaceholder": "Ceritakan kepada dunia tentang organisasi Anda — misi, sejarah, dan pekerjaan yang Anda lakukan…",
+    "aboutPlaceholder": "Ceritakan kepada dunia tentang organisasi Anda: misi, sejarah, dan pekerjaan yang Anda lakukan…",
     "public": "Publik",
     "unlisted": "Tidak terdaftar",
     "addCountry": "Tambah negara",
@@ -306,7 +334,11 @@
       "nearBoundary": "Dekat batas: pohon ini berada di luar lokasi yang dipilih dan akan dilewati.",
       "invalidBoundary": "Batas lokasi yang dipilih tidak valid: batas tidak dapat digunakan untuk validasi pohon.",
       "invalidBoundaryFallback": "batas tidak dapat digunakan untuk validasi pohon.",
-      "outOfSite": "Di luar lokasi: pohon ini berada di luar batas lokasi yang dipilih dan akan dilewati."
+      "outOfSite": "Di luar lokasi: pohon ini berada di luar batas lokasi yang dipilih dan akan dilewati.",
+      "futureDate": "Tanggal kejadian tidak boleh di masa depan.",
+      "canopyRange": "Tutupan tajuk harus antara 0 dan 100.",
+      "boundaryOutside": "Pohon ini berada {distance} di luar area terpilih. Periksa koordinat, pilih batas lain, atau hapus baris ini.",
+      "unknownDistance": "pada jarak yang tidak diketahui"
     },
     "fileDrop": {
       "modes": {
@@ -371,7 +403,7 @@
       "continueToMapping": "Lanjutkan ke Pemetaan Kolom",
       "selectSiteBeforeUpload": "Pilih lokasi sebelum mengunggah data pohon.",
       "csvOnly": "Hanya file .csv dan .tsv yang didukung.",
-      "fileTooLarge": "File terlalu besar. Ukuran maksimum adalah 10 MB (diterima {size}).",
+      "fileTooLarge": "File terlalu besar ({size}). Ukuran maksimum adalah {maxSize}.",
       "zipOnly": "Hanya file .zip Kobo Media Attachments yang didukung.",
       "zipTooLarge": "File ZIP terlalu besar. Ukuran maksimum adalah 200 MB (diterima {size}).",
       "zipNoImages": "Tidak ada lampiran gambar yang didukung ditemukan dalam ZIP ini. Pastikan Anda memilih ekspor Media Attachments dari KoboToolbox.",
@@ -401,8 +433,8 @@
       "addSiteBoundary": "Tambah batas lokasi",
       "selectSitePlaceholder": "Pilih lokasi…",
       "defaultSuffix": " (bawaan)",
-      "preparingMapAreaSuffix": " — menyiapkan area peta…",
-      "needsMapAreaSuffix": " — memerlukan area peta",
+      "preparingMapAreaSuffix": ": menyiapkan area peta…",
+      "needsMapAreaSuffix": ": memerlukan area peta",
       "addMapAreaToSelected": "Tambahkan area peta ke lokasi terpilih",
       "selectedSiteCheckHelp": "Pohon akan diperiksa terhadap satu area peta yang digambar ini.",
       "mapAreaPreparing": "Area peta yang digambar ini masih disiapkan. Coba lagi sebentar lagi.",
@@ -456,7 +488,16 @@
           "description": "Pohon sudah ada di sini saat Anda mulai mencatat. Lebih baik jujur daripada menebak."
         }
       },
-      "continueToMatch": "Lanjutkan untuk mencocokkan tajuk"
+      "continueToMatch": "Lanjutkan untuk mencocokkan tajuk",
+      "invalidPhotoFolder": "Pilih file folder foto yang diunduh dari aplikasi formulir lapangan Anda.",
+      "emptyPhotoFolder": "Folder foto ini tidak berisi gambar yang didukung.",
+      "unsupportedFile": "Hanya ekspor spreadsheet CSV dan TSV yang didukung.",
+      "parseFileError": "Spreadsheet tidak dapat dibaca. Periksa file lalu coba lagi.",
+      "photoFolderCounts": "{images} gambar, {submissions} kiriman",
+      "treeCount": "{count} pohon",
+      "siteCreateDenied": "Peran Anda tidak dapat menambahkan batas situs.",
+      "siteEditDenied": "Peran Anda tidak dapat mengedit batas situs ini.",
+      "groupSelectDenied": "Peran Anda tidak dapat menambahkan pohon ke grup yang ada."
     },
     "preview": {
       "siteBoundaryField": "Batas lokasi",
@@ -473,7 +514,7 @@
       "partialValidBoundaryHint": "Perbaiki koordinat pohon yang berada di luar poligon yang dipilih, kembali dan pilih/buat batas lokasi yang benar jika diperlukan, serta perbaiki pemetaan atau kesalahan kolom lain yang tercantum.",
       "partialValidMappingHint": "Perbaiki pemetaan atau kesalahan kolom yang tercantum jika Anda ingin menyertakannya.",
       "dataPreview": "Pratinjau Data",
-      "showingRows": "Menampilkan {maxRows} dari {totalRows} baris — semua baris valid akan diunggah",
+      "showingRows": "Menampilkan {maxRows} dari {totalRows} baris: semua baris valid akan diunggah",
       "photos": "Foto",
       "status": "Status",
       "valid": "Valid",
@@ -491,12 +532,13 @@
       "noSiteSelected": "Tidak ada lokasi yang dipilih. Kembali dan pilih atau buat batas lokasi.",
       "checkingMapAreaFor": "Memeriksa area peta yang digambar untuk {siteName}…",
       "boundaryCheckError": "Tidak dapat memeriksa area peta yang digambar ({error}). Kembali, pilih atau buat batas lokasi, lalu coba lagi.",
-      "allRowsReady": "Semua {count, plural, one {# baris siap} other {# baris siap}} — siap disimpan ke {siteName}.",
+      "allRowsReady": "Semua {count, plural, one {# baris} other {# baris}} siap disimpan ke {siteName}.",
       "noValidRows": "Tidak ada baris valid ditemukan. Perbaiki kesalahan dan coba lagi.",
       "partialRowsReady": "{validCount} siap, {errorCount} perlu diperbaiki. Baris bermasalah akan dilewati.",
       "treeInformationPreview": "Pratinjau informasi pohon",
       "showingFirstRows": "Menampilkan {maxRows} dari {totalRows} baris pertama",
-      "backToMatchedHeadings": "Kembali ke tajuk yang cocok"
+      "backToMatchedHeadings": "Kembali ke tajuk yang cocok",
+      "boundaryCheckFailed": "Area peta terpilih tidak dapat diperiksa. Kembali, pilih atau buat batas situs, lalu coba lagi."
     },
     "manager": {
       "backToUpload": "Kembali ke unggahan",
@@ -587,18 +629,18 @@
       "optionalOccurrence": "Occurrence Opsional",
       "measurements": "Pengukuran",
       "media": "Media",
-      "duplicateAria": "Pemetaan duplikat — hanya kolom sumber pertama yang akan digunakan",
+      "duplicateAria": "Pemetaan duplikat: hanya kolom sumber pertama yang akan digunakan",
       "mappedAria": "Kolom dipetakan",
       "expectedSkipAria": "Kolom metadata Kobo sengaja dilewati",
-      "skippedAria": "Kolom dilewati — tinjau sebelum melanjutkan",
+      "skippedAria": "Kolom dilewati: tinjau sebelum melanjutkan",
       "duplicate": "Duplikat",
       "mapped": "Dipetakan",
       "autoSkipped": "Dilewati otomatis",
       "skipped": "Dilewati",
       "back": "Kembali",
       "continue": "Lanjutkan ke Pratinjau",
-      "duplicateWarning": "Beberapa kolom sumber dipetakan ke kolom target yang sama. Hanya pemetaan pertama yang akan digunakan; duplikat disorot. (Kolom URL Foto adalah pengecualian — beberapa kolom dapat dipetakan ke URL Foto untuk pohon dengan banyak foto.)",
-      "skippedNotUploaded": "Dilewati — tidak diunggah",
+      "duplicateWarning": "Beberapa kolom sumber dipetakan ke kolom target yang sama. Hanya pemetaan pertama yang akan digunakan; duplikat disorot. (Kolom URL Foto adalah pengecualian: beberapa kolom dapat dipetakan ke URL Foto untuk pohon dengan banyak foto.)",
+      "skippedNotUploaded": "Dilewati: tidak diunggah",
       "requiredField": "Kolom wajib",
       "matchHeadingsTitle": "Cocokkan tajuk file",
       "matchHeadingsDescription": "Cocokkan tajuk file Anda dengan informasi pohon yang dibutuhkan GainForest. {count, plural, one {# tajuk terdeteksi.} other {# tajuk terdeteksi.}}",
@@ -616,7 +658,7 @@
       "photos": "Foto",
       "duplicateWarningShort": "Beberapa tajuk cocok dengan informasi yang sama. Hanya kecocokan pertama yang akan digunakan.",
       "matched": "Cocok",
-      "skippedWillNotSave": "Dilewati — tidak akan disimpan",
+      "skippedWillNotSave": "Dilewati: tidak akan disimpan",
       "duplicateTarget": "Target duplikat",
       "continueToPreview": "Lanjutkan ke pratinjau"
     },
@@ -670,9 +712,9 @@
       "obscureLabel": "Sembunyikan lokasi persis saya",
       "obscureHint": "Menerbitkan lingkaran perkiraan di sekitar titik acak, bukan lokasi persisnya, sehingga orang tidak tahu di mana tepatnya foto diambil.",
       "obscureAreaLabel": "Area perkiraan",
-      "obscureArea_tight": "Sempit — radius sekitar 300 m",
-      "obscureArea_balanced": "Seimbang — radius sekitar 500 m",
-      "obscureArea_wide": "Luas — radius sekitar 1 km",
+      "obscureArea_tight": "Sempit: radius sekitar 300 m",
+      "obscureArea_balanced": "Seimbang: radius sekitar 500 m",
+      "obscureArea_wide": "Luas: radius sekitar 1 km",
       "notesLabel": "Catatan",
       "notesPlaceholder": "Catatan",
       "batchStoryLabel": "Cerita untuk unggahan ini",
@@ -728,7 +770,7 @@
       "measurementSuggestion_count": "Jumlah",
       "measurementSuggestion_weight": "Berat",
       "projectLabel": "Tambahkan ke proyek",
-      "projectHint": "Opsional — hubungkan observasi ini dengan salah satu proyek Anda.",
+      "projectHint": "Opsional: hubungkan observasi ini dengan salah satu proyek Anda.",
       "projectNone": "Tanpa proyek",
       "applyToAll": "Gunakan tanggal & lokasi ini untuk semua",
       "dropTitleTouch": "Tambahkan foto Anda",
@@ -753,7 +795,7 @@
       "replace": "Ganti",
       "rowsFound": "{count, plural, other {# baris}}",
       "storedAsFile": "Kami akan menyimpan berkas persis seperti yang Anda kirim, tanpa mengubah atau memecahnya.",
-      "missingRequired": "Ini sepertinya tidak memiliki kolom spesies, tanggal, dan lokasi — kami tetap menyimpannya seperti yang Anda kirim.",
+      "missingRequired": "Ini sepertinya tidak memiliki kolom spesies, tanggal, dan lokasi: kami tetap menyimpannya seperti yang Anda kirim.",
       "measurementsFound": "Pengukuran:",
       "measureHeight": "Tinggi",
       "measureDbh": "Lebar batang",
@@ -853,7 +895,7 @@
     "addTileBody": "Unggah lebih banyak gambar lapangan.",
     "emptyObservationsTitle": "Belum ada observasi",
     "emptyObservationsBody": "Tambahkan observasi pertama Anda dari gambar lapangan.",
-    "emptyHeroDescription": "Observasi merekam apa yang Anda temukan di lapangan — spesies, foto, tempat, dan tanggal — membangun bukti di balik dampak Anda.",
+    "emptyHeroDescription": "Observasi mencatat spesies, foto, tempat, dan tanggal yang Anda temukan di lapangan. Catatan ini membangun bukti dampak Anda.",
     "selectAll": "Pilih semua",
     "deselectAll": "Batalkan pilihan",
     "removeSelected": "Hapus yang dipilih",
@@ -1130,7 +1172,8 @@
       "did": "DID",
       "wallet": "Dompet EVM",
       "copyDid": "Salin DID",
-      "copyWallet": "Salin alamat dompet"
+      "copyWallet": "Salin alamat dompet",
+      "copyFailed": "Tautan tidak dapat disalin"
     },
     "errors": {
       "nameRequired": "Tambahkan nama sebelum menyimpan.",

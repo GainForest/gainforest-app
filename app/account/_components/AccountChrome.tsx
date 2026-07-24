@@ -9,6 +9,15 @@ function isManageRoute(pathname: string): boolean {
   return /^\/account\/[^/?#]+\/manage(?:[/?#]|$)/.test(stripLocaleFromPathname(pathname));
 }
 
+function isDetachedWorkspaceRoute(pathname: string): boolean {
+  const path = stripLocaleFromPathname(pathname);
+  return (
+    /^\/account\/[^/?#]+\/drone(?:[/?#]|$)/.test(path) ||
+    /^\/account\/[^/?#]+\/projects\/[^/?#]+\/(?:certs|gallery|sites|timeline)(?:[/?#]|$)/.test(path) ||
+    /^\/account\/[^/?#]+\/(?:add|certs\/new)(?:[/?#]|$)/.test(path)
+  );
+}
+
 /**
  * Wraps the public account profile chrome (hero + tabs). The same /account/[id]
  * subtree now also hosts the management surface at /account/[id]/manage, which
@@ -20,6 +29,15 @@ export function AccountChrome({ hero, children }: { hero: ReactNode; children: R
 
   if (isManageRoute(pathname)) {
     return <>{children}</>;
+  }
+
+  if (isDetachedWorkspaceRoute(pathname)) {
+    return (
+      <>
+        <Container className="pt-4 pb-0">{hero}</Container>
+        <div className="w-full">{children}</div>
+      </>
+    );
   }
 
   return (

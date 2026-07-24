@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { ArrowLeftIcon, ArrowRightIcon, PauseIcon, PlayIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -26,6 +26,7 @@ const PLAY_INTERVAL_MS = 3400;
 // router swaps it in atomically (after a second scrambling of its own).
 export function SyncJourney() {
   const t = useTranslations("common.epdsRouter.sync");
+  const shouldReduceMotion = useReducedMotion();
   const [step, setStep] = useState(0);
   const [playing, setPlaying] = useState(false);
 
@@ -115,19 +116,19 @@ export function SyncJourney() {
             fill="var(--primary)"
             initial={{ cx: flow.from.x + (flow.from.x < flow.to.x ? 70 : -70), cy: flow.from.y }}
             animate={{ cx: flow.to.x + (flow.from.x < flow.to.x ? -70 : 70), cy: flow.to.y }}
-            transition={{ duration: 1.0, ease: "easeInOut" }}
+            transition={{ duration: shouldReduceMotion ? 0 : 1.0, ease: "easeInOut" }}
           />
         )}
       </svg>
 
-      <div className="mx-auto mt-2 min-h-[84px] max-w-xl rounded-xl border border-border/60 bg-muted/30 px-5 py-4 text-center">
+      <div className="mx-auto mt-2 min-h-[84px] max-w-xl rounded-xl border border-border/60 bg-muted px-5 py-4 text-center">
         <AnimatePresence mode="wait">
           <motion.div
             key={step}
             initial={{ opacity: 0, y: 4 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -4 }}
-            transition={{ duration: 0.18 }}
+            transition={{ duration: shouldReduceMotion ? 0 : 0.18 }}
           >
             <div className="text-[13.5px] font-medium text-foreground">{steps[step].title}</div>
             <p className="m-0 mt-1 text-[12.5px] leading-relaxed text-muted-foreground">{steps[step].text}</p>
@@ -153,7 +154,7 @@ export function SyncJourney() {
         >
           <ArrowLeftIcon className="h-3.5 w-3.5" />
         </button>
-        <span className="font-mono text-[11px] text-muted-foreground/70">{t("stepLabel", { n: step + 1, total })}</span>
+        <span className="text-xs text-muted-foreground/70">{t("stepLabel", { n: step + 1, total })}</span>
         <button
           type="button"
           onClick={() => setStep((s) => Math.min(total - 1, s + 1))}

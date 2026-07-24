@@ -2,7 +2,7 @@
   "widget": {
     "shield": "Unahitaji msaada?",
     "role": "Mwongozo wako wa GainForest",
-    "spriteLabel": "Tainá — bofya kuzungumza, buruta kusogeza",
+    "spriteLabel": "Tainá: bofya kuzungumza, buruta kusogeza",
     "greeting": "Habari, mimi ni Tainá! Naweza kukuongoza katika kila kitu kwenye GainForest.",
     "greetingHint": "Chagua swali hapa chini, au niulize chochote.",
     "guidesTitle": "Maswali ya kawaida",
@@ -18,21 +18,21 @@
     "done": "Maliza",
     "endTour": "Maliza ziara",
     "openImage": "Ona picha kwa ukubwa kamili",
-    "cantFind": "Siwezi kuipata kwenye ukurasa huu sasa hivi — lakini hivi ndivyo unavyofanya:",
+    "cantFind": "Siwezi kupata hilo kwenye ukurasa huu. Hivi ndivyo ufanye:",
     "tourHint": "Nitaonyesha kwenye skrini yako. Bofya sehemu iliyoangaziwa ili kuendelea.",
     "minimizeLabel": "Punguza Tainá",
     "restoreLabel": "Fungua Tainá",
-    "signInFirst": "Kwa hili unahitaji kuingia kwenye akaunti yako — tumia kitufe cha Ingia juu ya ukurasa, kisha urudi hapa nikuongoze hatua kwa hatua.",
-    "needProjectFirst": "Michango huwekwa kwenye mradi, na bado huna mradi — anza kwa kuunda mradi wako wa kwanza, kisha urudi hapa.",
+    "signInFirst": "Kwa hili unahitaji kuingia kwenye akaunti yako: tumia kitufe cha Ingia juu ya ukurasa, kisha urudi hapa nikuongoze hatua kwa hatua.",
+    "needProjectFirst": "Michango huwekwa kwenye mradi, na bado huna mradi: anza kwa kuunda mradi wako wa kwanza, kisha urudi hapa.",
     "createProjectFirst": "Nionyeshe jinsi ya kuunda mradi",
     "didYouKnow": "Je, unajua?",
     "dismissTip": "Funga kidokezo",
     "tips": {
       "wallet": "Unaweza kupokea michango na zawadi! Tengeneza pochi yako kwenye kichupo cha Pochi katika akaunti yako.",
-      "createProject": "Unaweza kuonyesha kazi yako kwa kuunda mradi — inachukua dakika chache tu.",
-      "observations": "Unaweza kupakia hadi picha 50 za asili kwa mara moja — spishi zinatambuliwa kiotomatiki.",
-      "bioblitz": "Kuna changamoto ya BioBlitz kila wiki — piga picha ya kiumbe chochote hai na ushinde zawadi!",
-      "ask": "Unaweza kuniuliza chochote kuhusu GainForest kwa lugha yako — nibofye tu!"
+      "createProject": "Unaweza kuonyesha kazi yako kwa kuunda mradi: inachukua dakika chache tu.",
+      "observations": "Unaweza kupakia hadi picha 50 za asili kwa mara moja: spishi zinatambuliwa kiotomatiki.",
+      "bioblitz": "Kuna changamoto ya BioBlitz kila wiki: piga picha ya kiumbe chochote hai na ushinde zawadi!",
+      "ask": "Unaweza kuniuliza chochote kuhusu GainForest kwa lugha yako: nibofye tu!"
     },
     "haveQuestion": "Nina swali",
     "helpTitle": "Unaweza kusaidia?",
@@ -62,7 +62,7 @@
     "wallet": {
       "question": "Ninapokeaje michango?",
       "title": "Sanidi pochi ya michango ya shirika lako",
-      "intro": "Michango huenda kwenye pochi ya pamoja inayomilikiwa na shirika lako. Mmiliki wa shirika huiunda kwa sekunde chache kwa ufunguo wa siri (Face ID au alama ya kidole) — bila uzoefu wa sarafu za kidijitali.",
+      "intro": "Michango huenda kwenye pochi ya pamoja inayomilikiwa na shirika lako. Mmiliki wa shirika huiunda kwa sekunde chache kwa ufunguo wa siri (Face ID au alama ya kidole): bila uzoefu wa sarafu za kidijitali.",
       "steps": {
         "open": {
           "title": "Fungua mradi wako",
@@ -84,29 +84,29 @@
       "tour": {
         "open": "Fungua mradi unaotaka upokee michango.",
         "enable": "Bofya Enable Donations kwenye kadi ya msaada.",
-        "addWallet": "Bofya Unda pochi kwa ufunguo wa siri kisha uthibitishe kwa ufunguo wako wa siri — ndivyo hivyo!"
+        "addWallet": "Bofya Unda pochi kwa ufunguo wa siri kisha uthibitishe kwa ufunguo wako wa siri: ndivyo hivyo!"
       }
     },
     "accountWallet": {
       "question": "Ninawezaje kupokea michango na zawadi binafsi?",
       "title": "Tengeneza pochi yako binafsi",
-      "intro": "Unaweza kupokea michango na zawadi moja kwa moja — bila kuhitaji mradi. Pochi yako iko kwenye wasifu wako mwenyewe na inatengenezwa kwa sekunde chache kwa kutumia ufunguo wa kuingia (Face ID au alama ya kidole). Huhitaji uzoefu wa sarafu za kidijitali.",
+      "intro": "Unaweza kupokea michango na zawadi moja kwa moja: bila kuhitaji mradi. Pochi yako iko kwenye wasifu wako mwenyewe na inatengenezwa kwa sekunde chache kwa kutumia ufunguo wa kuingia (Face ID au alama ya kidole). Huhitaji uzoefu wa sarafu za kidijitali.",
       "steps": {
         "open": {
           "title": "Fungua ukurasa wako wa Pochi",
-          "body": "Nenda www.gainforest.app/account/wallet — inakupeleka moja kwa moja kwenye kichupo cha Pochi cha akaunti yako."
+          "body": "Nenda www.gainforest.app/account/wallet: inakupeleka moja kwa moja kwenye kichupo cha Pochi cha akaunti yako."
         },
         "create": {
           "title": "Tengeneza pochi yako",
-          "body": "Bofya Tengeneza pochi na uthibitishe kwa Face ID, alama ya kidole, au ufunguo wa usalama. Ndivyo tu — hakuna maneno ya siri ya kuandika."
+          "body": "Bofya Tengeneza pochi na uthibitishe kwa Face ID, alama ya kidole, au ufunguo wa usalama. Ndivyo tu: hakuna maneno ya siri ya kuandika."
         },
         "share": {
           "title": "Tayari kupokea msaada",
-          "body": "Anwani ya pochi yako inaweza kupokea michango na zawadi mara moja. Pochi ikiwa bado mpya, unaweza kuongeza funguo zaidi za kuingia — kifaa kingine au mtu unayemwamini."
+          "body": "Anwani ya pochi yako inaweza kupokea michango na zawadi mara moja. Pochi ikiwa bado mpya, unaweza kuongeza funguo zaidi za kuingia: kifaa kingine au mtu unayemwamini."
         }
       },
       "tour": {
-        "create": "Bofya Tengeneza pochi na uthibitishe kwa ufunguo wako wa kuingia — ndivyo tu! (Kama tayari umeitengeneza, utaiona hapa.)"
+        "create": "Bofya Tengeneza pochi na uthibitishe kwa ufunguo wako wa kuingia: ndivyo tu! (Kama tayari umeitengeneza, utaiona hapa.)"
       }
     },
     "createProject": {
@@ -124,7 +124,7 @@
         },
         "focus": {
           "title": "Chagua maeneo ya kazi",
-          "body": "Chagua aina za kazi zinazoelezea mradi vizuri zaidi — upandaji miti, ufuatiliaji, ulinzi…"
+          "body": "Chagua aina za kazi zinazoelezea mradi vizuri zaidi: upandaji miti, ufuatiliaji, ulinzi…"
         },
         "story": {
           "title": "Ongeza tarehe na hadithi",
@@ -145,13 +145,13 @@
       },
       "tour": {
         "start": "Bofya Ongeza mradi kufungua mchakato.",
-        "wizard": "Sasa fuata hatua: jina, maeneo ya kazi, tarehe, hadithi, watu na maeneo, picha — kisha Unda mradi."
+        "wizard": "Kamilisha hatua za jina, maeneo ya kazi, tarehe, hadithi, watu na maeneo, na picha. Kisha uchague Unda mradi."
       }
     },
     "editProject": {
       "question": "Ninaharirije mradi?",
       "title": "Hariri mradi",
-      "intro": "Unaweza kubadilisha kila kitu cha mradi baada ya kuchapisha — jina, hadithi, picha, maeneo.",
+      "intro": "Unaweza kubadilisha kila kitu cha mradi baada ya kuchapisha: jina, hadithi, picha, maeneo.",
       "steps": {
         "myProjects": {
           "title": "Nenda kwenye Miradi Yangu",
@@ -174,11 +174,11 @@
     "deleteProject": {
       "question": "Ninafutaje mradi?",
       "title": "Futa mradi",
-      "intro": "Kufuta huondoa mradi kwenye akaunti yako. Haiwezi kutenduliwa — lakini uchunguzi wako haufutwi kamwe pamoja nao.",
+      "intro": "Kufuta huondoa mradi kwenye akaunti yako na hakuwezi kutenduliwa. Uchunguzi wako haufutwi.",
       "steps": {
         "editor": {
           "title": "Fungua kihariri cha mradi",
-          "body": "Nenda kwenye Miradi Yangu na ubofye Hariri mradi — au fungua ukurasa wa mradi na utafute sehemu ya Simamia."
+          "body": "Nenda Miradi Yangu na uchague Hariri mradi. Unaweza pia kufungua ukurasa wa mradi na kutumia Dhibiti."
         },
         "delete": {
           "title": "Bofya “Futa mradi”",
@@ -198,7 +198,7 @@
     "observations": {
       "question": "Ninapakiaje na kusimamia uchunguzi?",
       "title": "Pakia na usimamie uchunguzi",
-      "intro": "Uchunguzi ni picha za asili zenye spishi, tarehe, na mahali — ushahidi wa kazi yako.",
+      "intro": "Uchunguzi ni picha za asili zenye spishi, tarehe, na mahali: ushahidi wa kazi yako.",
       "steps": {
         "add": {
           "title": "Bofya “Ongeza uchunguzi”",
@@ -206,11 +206,11 @@
         },
         "photos": {
           "title": "Weka picha zako",
-          "body": "Pakia hadi picha 50 kwa mara moja — AI husoma kila picha na kupendekeza kilichomo."
+          "body": "Pakia hadi picha 50 kwa mara moja: AI husoma kila picha na kupendekeza kilichomo."
         },
         "check": {
           "title": "Kagua na uunganishe",
-          "body": "Thibitisha jina la spishi, tarehe, na mahali — na uunganishe na mmoja wa miradi yako ukipenda. Unaweza pia kuficha mahali pako halisi."
+          "body": "Thibitisha jina la spishi, tarehe na eneo. Unaweza kuunganisha uchunguzi na mradi au kuficha eneo lake kamili."
         },
         "publish": {
           "title": "Ziongeze",
@@ -223,7 +223,7 @@
       },
       "tour": {
         "add": "Bofya Ongeza uchunguzi.",
-        "photos": "Weka picha zako — mapendekezo ya spishi huja yenyewe. Kagua majina, unganisha mradi ukipenda, kisha bofya Ongeza.",
+        "photos": "Weka picha zako: mapendekezo ya spishi huja yenyewe. Kagua majina, unganisha mradi ukipenda, kisha bofya Ongeza.",
         "manage": "Na hapa ndipo uchunguzi wako wote unapoishi: tafuta, panga kwenye seti za data, au chagua na ufute."
       }
     },
@@ -238,7 +238,7 @@
         },
         "register": {
           "title": "Jisajili kushiriki",
-          "body": "Bofya mara moja tu — kujisajili huruhusu timu kufuatilia maingizo yako na kukutumia zawadi ukishinda."
+          "body": "Bofya mara moja tu: kujisajili huruhusu timu kufuatilia maingizo yako na kukutumia zawadi ukishinda."
         },
         "upload": {
           "title": "Piga picha na upakie",
@@ -246,12 +246,12 @@
         },
         "win": {
           "title": "Shinda zawadi",
-          "body": "Uchunguzi mwingi zaidi na picha bora hushinda zawadi za pesa na beji ya kudumu kwenye wasifu — na kila uchunguzi unabaki wako, unaweza kutumika tena kama ushahidi wa miradi yako."
+          "body": "Uchunguzi mwingi zaidi na picha bora hushinda zawadi ya pesa na beji ya kudumu. Kila uchunguzi hubaki wako kama ushahidi wa mradi."
         }
       },
       "tour": {
-        "register": "Bofya Jisajili kushiriki — bofya mara moja na umeingia.",
-        "upload": "Kisha pakia picha za asili hapa wakati wa raundi — kila uchunguzi unahesabika."
+        "register": "Bofya Jisajili kushiriki: bofya mara moja na umeingia.",
+        "upload": "Kisha pakia picha za asili hapa wakati wa raundi: kila uchunguzi unahesabika."
       }
     }
   }

@@ -49,7 +49,7 @@ function OrgCard({ group }: { group: CgsGroupMembership }) {
   return (
     <Link
       href={groupHref(group)}
-      className="group relative flex flex-col overflow-hidden rounded-3xl border border-border/60 bg-card transition-all duration-300 hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-[0_18px_44px_-18px_oklch(0_0_0/0.28)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
+      className="group relative flex flex-col overflow-hidden rounded-3xl bg-muted transition-colors duration-300 hover:bg-muted/80 motion-reduce:transition-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
     >
       <div className="relative h-20 overflow-hidden">
         {group.avatarUrl ? (
@@ -89,7 +89,7 @@ function OrgCard({ group }: { group: CgsGroupMembership }) {
 
         <span className="mt-4 inline-flex items-center gap-1 text-sm font-medium text-primary">
           {t("open")}
-          <ArrowRightIcon className="size-3.5 transition-transform group-hover:translate-x-0.5" />
+          <ArrowRightIcon className="size-3.5 transition-transform group-hover:translate-x-0.5 motion-reduce:transform-none motion-reduce:transition-none" />
         </span>
       </div>
     </Link>
@@ -101,7 +101,7 @@ function CreateOrgCard() {
   return (
     <Link
       href="/manage?mode=onboard-org"
-      className="group flex min-h-[220px] flex-col items-center justify-center gap-2.5 rounded-3xl border border-dashed border-border/70 bg-card/40 p-5 text-center transition-all duration-300 hover:-translate-y-0.5 hover:border-primary/50 hover:bg-primary/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
+      className="group flex min-h-[220px] flex-col items-center justify-center gap-2.5 rounded-3xl border border-dashed border-border/70 bg-muted p-5 text-center transition-colors duration-300 hover:bg-muted/80 motion-reduce:transition-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
     >
       <span className="flex size-14 items-center justify-center rounded-2xl bg-primary/10 text-primary transition-colors group-hover:bg-primary group-hover:text-primary-foreground">
         <PlusIcon className="size-6" />
@@ -135,24 +135,24 @@ function EmptyChoiceCard({
 }) {
   return (
     <Link href={href} className="group block focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50">
-      <article className="relative h-[320px] overflow-hidden rounded-2xl border border-border bg-card shadow-lg shadow-foreground/5 transition-all duration-500 hover:-translate-y-1 hover:border-primary/20 hover:shadow-xl sm:h-[360px]">
+      <article className="relative h-[320px] overflow-hidden rounded-2xl bg-muted transition-colors duration-300 hover:bg-muted/80 motion-reduce:transition-none sm:h-[360px]">
         <Image
           src={image}
           alt={alt}
           fill
           sizes="(min-width: 640px) 50vw, calc(100vw - 3rem)"
-          className="object-cover transition-transform duration-700 group-hover:scale-105"
+          className="object-cover transition-transform duration-700 group-hover:scale-105 motion-reduce:transform-none motion-reduce:transition-none"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-card via-card/88 to-card/0" />
         <div className="absolute inset-x-0 bottom-0 p-6 md:p-8">
           <span
             className={highlighted
-              ? "inline-flex rounded-full bg-primary px-4 py-1.5 text-xs font-bold tracking-[0.12em] text-primary-foreground uppercase shadow-lg shadow-primary/25 ring-1 ring-primary/30 backdrop-blur"
-              : "inline-flex rounded-full bg-background/75 px-3 py-1 text-xs font-bold tracking-[0.12em] text-foreground/70 uppercase shadow-sm backdrop-blur"}
+              ? "inline-flex rounded-full bg-primary px-4 py-1.5 text-xs font-semibold text-primary-foreground shadow-lg shadow-primary/25 ring-1 ring-primary/30 backdrop-blur"
+              : "inline-flex rounded-full bg-background/75 px-3 py-1 text-xs font-semibold text-foreground/70 shadow-sm backdrop-blur"}
           >
             {label}
           </span>
-          <h2 className="font-garamond mt-4 text-4xl leading-[1.05] font-light tracking-[-0.015em] text-foreground">
+          <h2 className="mt-4 font-instrument text-4xl font-light italic leading-[1.05] tracking-[-0.015em] text-foreground">
             {title}
             <br />
             <span className="font-instrument text-primary italic">{emphasis}</span>
@@ -160,7 +160,7 @@ function EmptyChoiceCard({
           <p className="mt-4 max-w-sm text-base leading-relaxed text-muted-foreground dark:text-foreground/75">{description}</p>
           <span className="mt-5 flex items-center gap-2 text-sm font-semibold text-foreground transition-colors group-hover:text-primary">
             {cta}
-            <ArrowUpRightIcon className="size-3.5 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+            <ArrowUpRightIcon className="size-3.5 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5 motion-reduce:transform-none motion-reduce:transition-none" />
           </span>
         </div>
       </article>

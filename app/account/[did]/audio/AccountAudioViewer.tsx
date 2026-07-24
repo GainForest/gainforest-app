@@ -17,7 +17,6 @@ import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { ArrowUpRightIcon, AudioLinesIcon, MapPinIcon, UploadIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import Container from "@/components/ui/container";
 import { resolvePdsHost } from "@/app/_lib/pds";
 import { listAcDeployments, type AcDeploymentItem } from "@/app/_lib/ac-deployment";
 import { listAllRecordings, type AcAudioListItem } from "@/app/_lib/ac-audio";
@@ -115,7 +114,7 @@ export function AccountAudioViewer({
   const total = recordings?.length ?? 0;
 
   return (
-    <Container className="pt-4 pb-10">
+    <section className="pt-4 pb-10">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <h1 className="font-instrument text-2xl font-medium italic tracking-[-0.03em] text-foreground sm:text-3xl">
@@ -144,15 +143,15 @@ export function AccountAudioViewer({
           ))}
         </div>
       ) : loadError ? (
-        <p className="mt-6 rounded-2xl border border-border bg-card/90 px-5 py-8 text-center text-sm text-muted-foreground">
+        <p className="mt-6 rounded-2xl bg-muted px-4 py-8 text-center text-sm text-muted-foreground sm:px-5">
           {t("loadError")}
         </p>
       ) : total === 0 ? (
-        <div className="mt-6 rounded-3xl border border-dashed border-border bg-muted/30 px-6 py-14 text-center">
+        <div className="mt-6 rounded-2xl bg-muted px-4 py-12 text-center sm:px-5">
           <span className="mx-auto grid h-12 w-12 place-items-center rounded-full bg-primary/10 text-primary">
             <AudioLinesIcon className="size-6" />
           </span>
-          <h2 className="mt-4 text-base font-medium text-foreground">{t("accountEmptyTitle")}</h2>
+          <h2 className="mt-4 font-instrument text-xl font-light italic text-foreground">{t("accountEmptyTitle")}</h2>
           <p className="mx-auto mt-1.5 max-w-[440px] text-sm text-muted-foreground">{t("accountEmptyBody")}</p>
           {showUploadCta ? (
             <Button asChild size="sm" className="mt-5">
@@ -166,14 +165,14 @@ export function AccountAudioViewer({
       ) : (
         <div className="mt-6 flex flex-col gap-4">
           {groups.map((group) => (
-            <section key={group.key || "other"} className="rounded-2xl border border-border bg-card/90 p-5 sm:p-6">
+            <section key={group.key || "other"} className="rounded-2xl bg-muted p-4 sm:p-5">
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <div className="flex min-w-0 items-center gap-2.5">
                   <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-primary/10 text-primary">
                     {group.key ? <MapPinIcon className="size-4" /> : <AudioLinesIcon className="size-4" />}
                   </span>
                   <div className="min-w-0">
-                    <h2 className="truncate text-sm font-medium text-foreground">
+                    <h2 className="break-words font-instrument text-lg font-light italic text-foreground">
                       {group.key ? group.name : t("otherGroup")}
                     </h2>
                     <p className="text-xs text-muted-foreground">
@@ -200,6 +199,6 @@ export function AccountAudioViewer({
           ))}
         </div>
       )}
-    </Container>
+    </section>
   );
 }

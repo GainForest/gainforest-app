@@ -577,11 +577,6 @@ function WhatIsBumicert() {
             viewport={{ once: true }}
             transition={{ duration: 0.55, ease: [0.25, 0.1, 0.25, 1] }}
           >
-            <div className="mb-4 flex items-center gap-2 text-primary">
-              <LeafIcon className="size-4" />
-              <span className="text-xs font-bold tracking-[0.15em] uppercase">{t("eyebrow")}</span>
-            </div>
-
             <h2 className="font-garamond mb-5 text-4xl leading-[1.04] font-light tracking-[-0.015em] text-foreground md:text-5xl">
               {t("titleLine1")}
               <br />

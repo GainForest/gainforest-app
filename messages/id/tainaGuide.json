@@ -2,7 +2,7 @@
   "widget": {
     "shield": "Butuh bantuan?",
     "role": "Pemandu GainForest Anda",
-    "spriteLabel": "Tainá — klik untuk mengobrol, seret untuk memindahkan",
+    "spriteLabel": "Tainá: klik untuk mengobrol, seret untuk memindahkan",
     "greeting": "Hai, saya Tainá! Saya bisa memandu Anda menjelajahi GainForest.",
     "greetingHint": "Pilih pertanyaan di bawah, atau tanyakan apa saja.",
     "guidesTitle": "Pertanyaan umum",
@@ -18,21 +18,21 @@
     "done": "Selesai",
     "endTour": "Akhiri tur",
     "openImage": "Lihat tangkapan layar ukuran penuh",
-    "cantFind": "Saya tidak menemukannya di halaman ini sekarang — tapi begini caranya:",
+    "cantFind": "Saya tidak dapat menemukannya di halaman ini. Berikut yang dapat dilakukan:",
     "tourHint": "Saya akan menunjuk di layar Anda. Klik bagian yang disorot untuk melanjutkan.",
     "minimizeLabel": "Perkecil Tainá",
     "restoreLabel": "Buka Tainá",
-    "signInFirst": "Untuk yang ini kamu perlu masuk dulu — gunakan tombol Masuk di bagian atas halaman, lalu kembali ke sini dan aku akan memandumu.",
-    "needProjectFirst": "Donasi diatur pada sebuah proyek, dan kamu belum punya proyek — buat proyek pertamamu dulu, lalu kembali ke sini.",
+    "signInFirst": "Untuk yang ini kamu perlu masuk dulu: gunakan tombol Masuk di bagian atas halaman, lalu kembali ke sini dan aku akan memandumu.",
+    "needProjectFirst": "Donasi diatur pada sebuah proyek, dan kamu belum punya proyek: buat proyek pertamamu dulu, lalu kembali ke sini.",
     "createProjectFirst": "Tunjukkan cara membuat proyek",
     "didYouKnow": "Tahukah kamu?",
     "dismissTip": "Tutup tips",
     "tips": {
       "wallet": "Kamu bisa menerima donasi dan tip! Buat dompetmu di tab Dompet pada akunmu.",
-      "createProject": "Kamu bisa memamerkan karyamu dengan membuat proyek — hanya butuh beberapa menit.",
-      "observations": "Kamu bisa mengunggah hingga 50 foto alam sekaligus — spesiesnya dikenali secara otomatis.",
-      "bioblitz": "Ada tantangan BioBlitz setiap minggu — potret makhluk hidup apa pun dan menangkan hadiah!",
-      "ask": "Kamu bisa bertanya apa saja tentang GainForest dalam bahasamu — cukup klik aku!"
+      "createProject": "Kamu bisa memamerkan karyamu dengan membuat proyek: hanya butuh beberapa menit.",
+      "observations": "Kamu bisa mengunggah hingga 50 foto alam sekaligus: spesiesnya dikenali secara otomatis.",
+      "bioblitz": "Ada tantangan BioBlitz setiap minggu: potret makhluk hidup apa pun dan menangkan hadiah!",
+      "ask": "Kamu bisa bertanya apa saja tentang GainForest dalam bahasamu: cukup klik aku!"
     },
     "haveQuestion": "Aku punya pertanyaan",
     "helpTitle": "Bisa bantu?",
@@ -62,7 +62,7 @@
     "wallet": {
       "question": "Bagaimana cara menerima donasi?",
       "title": "Siapkan dompet donasi organisasi Anda",
-      "intro": "Donasi masuk ke dompet bersama milik organisasi Anda. Pemilik organisasi membuatnya dalam hitungan detik dengan kunci sandi (Face ID atau sidik jari) — tanpa perlu pengalaman kripto.",
+      "intro": "Donasi masuk ke dompet bersama milik organisasi Anda. Pemilik organisasi membuatnya dalam hitungan detik dengan kunci sandi (Face ID atau sidik jari): tanpa perlu pengalaman kripto.",
       "steps": {
         "open": {
           "title": "Buka proyek Anda",
@@ -84,29 +84,29 @@
       "tour": {
         "open": "Buka proyek yang ingin menerima donasi.",
         "enable": "Klik Enable Donations di kartu dukungan.",
-        "addWallet": "Klik Buat dompet dengan kunci sandi lalu konfirmasi dengan kunci sandi Anda — selesai!"
+        "addWallet": "Klik Buat dompet dengan kunci sandi lalu konfirmasi dengan kunci sandi Anda: selesai!"
       }
     },
     "accountWallet": {
       "question": "Bagaimana cara menerima donasi dan tip secara pribadi?",
       "title": "Buat dompet pribadimu",
-      "intro": "Kamu bisa menerima donasi dan tip secara langsung — tanpa perlu proyek. Dompetmu ada di profilmu sendiri dan dibuat dalam hitungan detik dengan passkey (Face ID atau sidik jari). Tidak perlu pengalaman kripto.",
+      "intro": "Kamu bisa menerima donasi dan tip secara langsung: tanpa perlu proyek. Dompetmu ada di profilmu sendiri dan dibuat dalam hitungan detik dengan passkey (Face ID atau sidik jari). Tidak perlu pengalaman kripto.",
       "steps": {
         "open": {
           "title": "Buka halaman Dompetmu",
-          "body": "Buka www.gainforest.app/account/wallet — langsung membawamu ke tab Dompet akunmu sendiri."
+          "body": "Buka www.gainforest.app/account/wallet: langsung membawamu ke tab Dompet akunmu sendiri."
         },
         "create": {
           "title": "Buat dompetmu",
-          "body": "Klik Buat dompet dan konfirmasi dengan Face ID, sidik jari, atau kunci keamanan. Itu saja — tanpa seed phrase yang harus dicatat."
+          "body": "Klik Buat dompet dan konfirmasi dengan Face ID, sidik jari, atau kunci keamanan. Itu saja: tanpa seed phrase yang harus dicatat."
         },
         "share": {
           "title": "Siap menerima dukungan",
-          "body": "Alamat dompetmu bisa langsung menerima donasi dan tip. Selagi dompet masih baru, kamu bisa menambahkan passkey lain — perangkat lain atau orang yang kamu percaya."
+          "body": "Alamat dompetmu bisa langsung menerima donasi dan tip. Selagi dompet masih baru, kamu bisa menambahkan passkey lain: perangkat lain atau orang yang kamu percaya."
         }
       },
       "tour": {
-        "create": "Klik Buat dompet dan konfirmasi dengan passkey-mu — selesai! (Kalau sudah pernah membuatnya, kamu akan melihatnya di sini.)"
+        "create": "Klik Buat dompet dan konfirmasi dengan passkey-mu: selesai! (Kalau sudah pernah membuatnya, kamu akan melihatnya di sini.)"
       }
     },
     "createProject": {
@@ -124,7 +124,7 @@
         },
         "focus": {
           "title": "Pilih area fokus",
-          "body": "Pilih jenis kerja yang paling menggambarkan proyek — reboisasi, pemantauan, penjagaan…"
+          "body": "Pilih jenis kerja yang paling menggambarkan proyek: reboisasi, pemantauan, penjagaan…"
         },
         "story": {
           "title": "Tambahkan waktu dan cerita",
@@ -145,13 +145,13 @@
       },
       "tour": {
         "start": "Klik Tambah proyek untuk membuka panduan.",
-        "wizard": "Sekarang ikuti langkahnya: nama, area fokus, tanggal, cerita, orang & tempat, foto — lalu Buat proyek."
+        "wizard": "Selesaikan langkah nama, area fokus, tanggal, cerita, orang dan tempat, serta foto. Lalu pilih Buat proyek."
       }
     },
     "editProject": {
       "question": "Bagaimana cara mengedit proyek?",
       "title": "Edit proyek",
-      "intro": "Anda bisa mengubah semua hal pada proyek setelah terbit — nama, cerita, foto, tempat.",
+      "intro": "Anda bisa mengubah semua hal pada proyek setelah terbit: nama, cerita, foto, tempat.",
       "steps": {
         "myProjects": {
           "title": "Buka Proyek Saya",
@@ -174,11 +174,11 @@
     "deleteProject": {
       "question": "Bagaimana cara menghapus proyek?",
       "title": "Hapus proyek",
-      "intro": "Menghapus akan mengeluarkan proyek dari akun Anda. Tidak bisa dibatalkan — tetapi observasi Anda tidak pernah ikut terhapus.",
+      "intro": "Menghapus akan menghilangkan proyek dari akun dan tidak dapat dibatalkan. Observasi Anda tidak dihapus.",
       "steps": {
         "editor": {
           "title": "Buka editor proyek",
-          "body": "Buka Proyek Saya dan klik Edit proyek — atau buka halaman proyek dan cari bagian Kelola."
+          "body": "Buka Proyek Saya dan pilih Edit proyek. Anda juga dapat membuka halaman proyek dan menggunakan Kelola."
         },
         "delete": {
           "title": "Klik “Hapus proyek”",
@@ -198,7 +198,7 @@
     "observations": {
       "question": "Bagaimana cara mengunggah dan mengelola observasi?",
       "title": "Unggah dan kelola observasi",
-      "intro": "Observasi adalah foto alam dengan spesies, tanggal, dan tempat — bukti di balik kerja Anda.",
+      "intro": "Observasi adalah foto alam dengan spesies, tanggal, dan tempat: bukti di balik kerja Anda.",
       "steps": {
         "add": {
           "title": "Klik “Tambah observasi”",
@@ -206,11 +206,11 @@
         },
         "photos": {
           "title": "Taruh foto Anda",
-          "body": "Unggah hingga 50 foto sekaligus — AI membaca setiap foto dan menyarankan isinya."
+          "body": "Unggah hingga 50 foto sekaligus: AI membaca setiap foto dan menyarankan isinya."
         },
         "check": {
           "title": "Periksa dan tautkan",
-          "body": "Pastikan nama spesies, tanggal, dan lokasi — dan tautkan ke salah satu proyek Anda jika mau. Anda juga bisa menyembunyikan lokasi persis Anda."
+          "body": "Konfirmasi nama spesies, tanggal, dan lokasi. Anda dapat menautkan observasi ke proyek atau menyembunyikan lokasi persisnya."
         },
         "publish": {
           "title": "Tambahkan",
@@ -223,7 +223,7 @@
       },
       "tour": {
         "add": "Klik Tambah observasi.",
-        "photos": "Taruh foto Anda — saran spesies berjalan otomatis. Periksa namanya, tautkan proyek jika mau, lalu klik Tambah.",
+        "photos": "Taruh foto Anda: saran spesies berjalan otomatis. Periksa namanya, tautkan proyek jika mau, lalu klik Tambah.",
         "manage": "Dan di sinilah semua observasi Anda: cari, kelompokkan ke dataset, atau pilih dan hapus."
       }
     },
@@ -238,7 +238,7 @@
         },
         "register": {
           "title": "Daftar untuk ikut",
-          "body": "Satu klik — mendaftar membuat tim bisa melacak entri Anda dan mengirim hadiah jika Anda menang."
+          "body": "Satu klik: mendaftar membuat tim bisa melacak entri Anda dan mengirim hadiah jika Anda menang."
         },
         "upload": {
           "title": "Foto dan unggah",
@@ -246,12 +246,12 @@
         },
         "win": {
           "title": "Menangkan hadiah",
-          "body": "Observasi terbanyak dan foto terbaik memenangkan hadiah uang dan lencana permanen di profil — dan setiap observasi tetap milik Anda, bisa dipakai ulang sebagai bukti untuk proyek Anda."
+          "body": "Observasi terbanyak dan foto terbaik memenangkan hadiah uang dan lencana profil permanen. Setiap observasi tetap milik Anda sebagai bukti proyek."
         }
       },
       "tour": {
-        "register": "Klik Daftar untuk ikut — satu klik dan Anda terdaftar.",
-        "upload": "Lalu unggah foto alam di sini selama ronde — setiap observasi dihitung."
+        "register": "Klik Daftar untuk ikut: satu klik dan Anda terdaftar.",
+        "upload": "Lalu unggah foto alam di sini selama ronde: setiap observasi dihitung."
       }
     }
   }

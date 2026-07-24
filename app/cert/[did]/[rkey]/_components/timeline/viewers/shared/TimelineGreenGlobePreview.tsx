@@ -147,7 +147,7 @@ export function TimelineGreenGlobePreview({
     >
       <div className="flex flex-col gap-3 border-b border-border/50 p-4 md:flex-row md:items-center md:justify-between">
         <div className="min-w-0">
-          <h3 className="flex items-center gap-2 text-base font-medium text-foreground">
+          <h3 className="font-instrument flex items-center gap-2 text-lg italic text-foreground">
             <Globe2Icon className="size-4 text-primary" />
             {t("greenGlobeMapTitle")}
           </h3>

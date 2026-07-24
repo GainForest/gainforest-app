@@ -54,7 +54,6 @@
       "videoTitle": "Bumicerts: verifiable nature records for local nature stewards"
     },
     "certificate": {
-      "eyebrow": "The Certificate",
       "titleLine1": "What exactly is",
       "titleLine2": "a Cert?",
       "faqItems": {
@@ -111,7 +110,6 @@
       "alt": "GainForest app icon"
     },
     "stats": {
-      "liveLabel": "Live impact",
       "bumicertsShared": "Records shared",
       "organizationProfiles": "organization profiles",
       "natureSightingsShared": "nature sightings shared",

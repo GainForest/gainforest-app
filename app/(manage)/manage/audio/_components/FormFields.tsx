@@ -21,7 +21,7 @@ export function ProgressState(props: { step: OperationStep }) {
         <span>{Math.round(percent)}%</span>
       </div>
       <div className="h-2 overflow-hidden rounded-full bg-muted">
-        <div className="h-full rounded-full bg-primary transition-all" style={{ width: `${percent}%` }} />
+        <div className="h-full rounded-full bg-primary transition-[width] motion-reduce:transition-none" style={{ width: `${percent}%` }} />
       </div>
     </div>
   );

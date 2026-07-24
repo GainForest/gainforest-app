@@ -5,17 +5,19 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { ArrowUpRightIcon, Loader2Icon, UndoIcon } from "lucide-react";
-import { formatCgsErrorMessage } from "@/app/_lib/cgs-errors";
 import { formatRelative } from "@/app/_lib/format";
 import { Button } from "@/components/ui/button";
+import { useModal } from "@/components/ui/modal/context";
 import type { FlaggedTestRecord } from "@/app/internal/badges/_lib/test-records";
 import { AdminAvatar, AdminEmptyState } from "./AdminModerationDashboard";
+import { AdminConfirmationModal } from "./AdminConfirmationModal";
 
 /** The individual posts / observations / other records admins hid from the
  *  public feed and catalogs, with a one-click way to make them visible again. */
 export function AdminTestRecordsList({ records: initial }: { records: FlaggedTestRecord[] }) {
   const t = useTranslations("common.adminTestRecords");
   const router = useRouter();
+  const modal = useModal();
   const [records, setRecords] = useState(initial);
   const [busyUri, setBusyUri] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -30,14 +32,32 @@ export function AdminTestRecordsList({ records: initial }: { records: FlaggedTes
         body: JSON.stringify({ uri }),
       });
       const data = (await response.json().catch(() => null)) as { error?: string } | null;
-      if (!response.ok || data?.error) throw new Error(formatCgsErrorMessage(data?.error, t("error")));
+      if (!response.ok || data?.error) throw new Error(t("error"));
       setRecords((current) => current.filter((record) => record.uri !== uri));
       router.refresh();
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : t("error"));
+      throw caught;
     } finally {
       setBusyUri(null);
     }
+  }
+
+  function requestRemove(record: FlaggedTestRecord, ownerName: string) {
+    modal.pushModal({
+      id: `admin-test-record-remove-${encodeURIComponent(record.uri)}`,
+      content: (
+        <AdminConfirmationModal
+          title={t("confirmTitle")}
+          description={t("confirmDescription", { name: ownerName })}
+          actionLabel={t("remove")}
+          cancelLabel={t("cancel")}
+          errorLabel={t("error")}
+          onConfirm={() => remove(record.uri)}
+        />
+      ),
+    }, true);
+    void modal.show();
   }
 
   return (
@@ -80,11 +100,11 @@ export function AdminTestRecordsList({ records: initial }: { records: FlaggedTes
                   type="button"
                   variant="secondary"
                   size="sm"
-                  onClick={() => void remove(record.uri)}
+                  onClick={() => requestRemove(record, ownerName)}
                   disabled={busy}
                   className="shrink-0 shadow-none"
                 >
-                  {busy ? <Loader2Icon className="size-4 animate-spin" /> : <UndoIcon className="size-4" />}
+                  {busy ? <Loader2Icon className="size-4 animate-spin motion-reduce:animate-none" /> : <UndoIcon className="size-4" />}
                   {t("remove")}
                 </Button>
               </li>

@@ -57,20 +57,20 @@ export function SpeciesSuggestions({ subjectUri }: { subjectUri: string }) {
   if (!items?.length) return null;
 
   return (
-    <section className="mt-6 rounded-2xl border border-primary/20 bg-primary/[0.05] p-4 sm:p-5">
+    <section className="mt-6 rounded-2xl bg-primary/10 p-4 sm:p-5">
       <div className="flex items-start gap-3">
         <span className="grid size-9 shrink-0 place-items-center rounded-full bg-primary/10 text-primary">
           <MicroscopeIcon className="size-4" aria-hidden />
         </span>
         <div>
-          <h2 className="font-semibold text-foreground">{t("title")}</h2>
+          <h2 className="font-instrument text-base italic text-foreground">{t("title")}</h2>
           <p className="mt-0.5 text-sm leading-5 text-muted-foreground">{t("description")}</p>
         </div>
       </div>
 
-      <ul className="mt-4 space-y-3">
+      <ul className="mt-4 divide-y divide-primary/15">
         {items.map(({ comment, suggestion }) => (
-          <li key={comment.uri} className="rounded-xl border border-border-soft bg-background/90 p-4">
+          <li key={comment.uri} className="py-4">
             <div className="flex items-start gap-3">
               <ResolvedAvatar
                 did={comment.did}
@@ -96,7 +96,7 @@ export function SpeciesSuggestions({ subjectUri }: { subjectUri: string }) {
                 {suggestion.note ? (
                   <p className="mt-2 text-sm leading-6 text-foreground/75">{suggestion.note}</p>
                 ) : null}
-                <span className="mt-3 inline-flex rounded-full bg-amber-500/10 px-2.5 py-1 text-[10px] font-medium uppercase tracking-[0.08em] text-amber-700 dark:text-amber-300">
+                <span className="mt-3 inline-flex rounded-full bg-amber-500/10 px-2.5 py-1 text-xs font-medium text-amber-700 dark:text-amber-300">
                   {t("status")}
                 </span>
               </div>

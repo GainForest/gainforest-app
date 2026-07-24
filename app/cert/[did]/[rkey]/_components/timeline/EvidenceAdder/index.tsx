@@ -343,7 +343,7 @@ export function EvidenceAdder({
 
   return (
     <div className="flex flex-col gap-3">
-      <h2 id="link-evidence-heading" className="sr-only">
+      <h2 id="link-evidence-heading" className="sr-only font-instrument italic">
         {evidenceT("title")}
       </h2>
       {!createPermission.allowed ? (

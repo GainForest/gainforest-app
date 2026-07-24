@@ -1,5 +1,5 @@
-import { DonationsHubSkeleton } from "../_components/PageLoadingSkeletons";
+import { DonationsLoadingView } from "./DonationsLoadingView";
 
 export default function DonationsLoading() {
-  return <DonationsHubSkeleton />;
+  return <DonationsLoadingView />;
 }

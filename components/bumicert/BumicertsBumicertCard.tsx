@@ -1,14 +1,16 @@
 "use client";
 
 import Image from "next/image";
-import { useTranslations } from "next-intl";
-import { motion } from "framer-motion";
+import { useLocale, useTranslations } from "next-intl";
 import { CalendarDaysIcon, MapPinIcon, UsersIcon } from "lucide-react";
 import { isPdsBlobUrl } from "@/app/_lib/pds";
 import { cn } from "@/lib/utils";
 import { BumicertOwnerAvatar } from "./BumicertOwnerAvatar";
 import { BumicertPillRows, type BumicertCardPill } from "./BumicertPillRows";
-import { formatWorkScopeTag, type WorkScopeLabels } from "@/app/_lib/work-scope-labels";
+import {
+  formatWorkScopeTag,
+  type WorkScopeLabels,
+} from "@/app/_lib/work-scope-labels";
 
 export type BumicertsBumicertCardRecord = {
   did: string;
@@ -24,27 +26,6 @@ export type BumicertsBumicertCardRecord = {
   creatorAvatarRef?: string | null;
 };
 
-const orgLabelTextVariants = {
-  initial: {
-    opacity: 0,
-    maxWidth: 0,
-    marginLeft: "-0.25rem",
-    marginRight: "0rem",
-    pointerEvents: "none" as const,
-    x: -2,
-    filter: "blur(4px)",
-  },
-  cardHover: {
-    opacity: 1,
-    maxWidth: 200,
-    marginLeft: "0rem",
-    marginRight: "0.5rem",
-    pointerEvents: "auto" as const,
-    x: 0,
-    filter: "blur(0px)",
-  },
-};
-
 export function BumicertsBumicertCard({
   record,
   priority = false,
@@ -55,6 +36,8 @@ export function BumicertsBumicertCard({
   className?: string;
 }) {
   const workScopeT = useTranslations("common.workScopes");
+  const t = useTranslations("bumicert.detail.recovery.card");
+  const locale = useLocale();
   const workScopeLabels: WorkScopeLabels = {
     reforestation: workScopeT("reforestation"),
     forest_protection: workScopeT("forestProtection"),
@@ -63,18 +46,21 @@ export function BumicertsBumicertCard({
     carbon_removal: workScopeT("carbonRemoval"),
     restoration_maintenance: workScopeT("restorationMaintenance"),
   };
-  const { scopeItems, iconItems } = buildPillRows(record, workScopeLabels);
-  const organizationName = record.creatorName ?? "Project steward";
+  const { scopeItems, iconItems } = buildPillRows(
+    record,
+    workScopeLabels,
+    t,
+    locale,
+  );
+  const organizationName = record.creatorName ?? t("projectSteward");
   const hasImage = Boolean(record.imageUrl);
 
   return (
-    <motion.div
+    <div
       className={cn(
-        "group relative flex h-full w-full flex-col overflow-hidden rounded-2xl border border-border bg-card transition-all duration-300 hover:shadow-lg",
+        "group relative flex h-full w-full flex-col overflow-hidden rounded-2xl bg-background shadow-sm transition-colors motion-reduce:transition-none",
         className,
       )}
-      initial="initial"
-      whileHover="cardHover"
     >
       <div className="relative z-0 aspect-[4/3] overflow-hidden bg-muted">
         {hasImage ? (
@@ -86,10 +72,13 @@ export function BumicertsBumicertCard({
             priority={priority}
             fetchPriority={priority ? "high" : "auto"}
             unoptimized={!isPdsBlobUrl(record.imageUrl)}
-            className="scale-110 object-cover transition-all duration-300 group-hover:scale-100"
+            className="object-cover transition-transform duration-300 group-hover:scale-[1.02] motion-reduce:transition-none motion-reduce:group-hover:scale-100"
           />
         ) : (
-          <div className="absolute inset-0 bg-muted" aria-label="Missing image" />
+          <div
+            className="absolute inset-0 bg-muted"
+            aria-label={t("missingImage")}
+          />
         )}
       </div>
 
@@ -116,25 +105,29 @@ export function BumicertsBumicertCard({
           label={organizationName}
           className="h-6 w-6 shrink-0 scale-120 shadow-sm transition-all duration-300 group-hover:scale-100"
         />
-        <motion.span
-          variants={orgLabelTextVariants}
-          className="min-w-0 overflow-hidden text-ellipsis whitespace-nowrap text-xs font-medium text-foreground text-shadow-md"
-        >
+        <span className="min-w-0 overflow-hidden text-ellipsis whitespace-nowrap pr-2 text-xs font-medium text-foreground">
           {organizationName}
-        </motion.span>
+        </span>
       </div>
-    </motion.div>
+    </div>
   );
 }
 
-function buildPillRows(record: BumicertsBumicertCardRecord, workScopeLabels: WorkScopeLabels): {
+function buildPillRows(
+  record: BumicertsBumicertCardRecord,
+  workScopeLabels: WorkScopeLabels,
+  t: ReturnType<typeof useTranslations>,
+  locale: string,
+): {
   scopeItems: BumicertCardPill[];
   iconItems: BumicertCardPill[];
 } {
-  const scopeItems: BumicertCardPill[] = (record.scopeTags ?? []).map((tag, index) => ({
-    key: `scope-${index}-${tag}`,
-    content: <span>{formatWorkScopeTag(tag, workScopeLabels)}</span>,
-  }));
+  const scopeItems: BumicertCardPill[] = (record.scopeTags ?? []).map(
+    (tag, index) => ({
+      key: `scope-${index}-${tag}`,
+      content: <span>{formatWorkScopeTag(tag, workScopeLabels)}</span>,
+    }),
+  );
 
   const iconItems: BumicertCardPill[] = [];
 
@@ -144,10 +137,10 @@ function buildPillRows(record: BumicertsBumicertCardRecord, workScopeLabels: Wor
       content: (
         <>
           <MapPinIcon className="h-3.5 w-3.5" aria-hidden />
-          <span>{formatCompactCount(record.locationCount)}</span>
+          <span>{formatCompactCount(record.locationCount, locale)}</span>
         </>
       ),
-      ariaLabel: `${record.locationCount} project place${record.locationCount === 1 ? "" : "s"}`,
+      ariaLabel: t("places", { count: record.locationCount }),
     });
   }
 
@@ -157,10 +150,10 @@ function buildPillRows(record: BumicertsBumicertCardRecord, workScopeLabels: Wor
       content: (
         <>
           <UsersIcon className="h-3.5 w-3.5" aria-hidden />
-          <span>{formatCompactCount(record.contributorCount)}</span>
+          <span>{formatCompactCount(record.contributorCount, locale)}</span>
         </>
       ),
-      ariaLabel: `${record.contributorCount} ${record.contributorCount === 1 ? "person" : "people"} named`,
+      ariaLabel: t("contributors", { count: record.contributorCount }),
     });
   }
 
@@ -168,13 +161,15 @@ function buildPillRows(record: BumicertsBumicertCardRecord, workScopeLabels: Wor
     iconItems.push({
       key: "dates",
       content: <CalendarDaysIcon className="h-3.5 w-3.5" aria-hidden />,
-      ariaLabel: "Project dates added",
+      ariaLabel: t("dates"),
     });
   }
 
   return { scopeItems, iconItems };
 }
 
-function formatCompactCount(value: number): string {
-  return new Intl.NumberFormat("en", { notation: value >= 10000 ? "compact" : "standard" }).format(value);
+function formatCompactCount(value: number, locale: string): string {
+  return new Intl.NumberFormat(locale, {
+    notation: value >= 10000 ? "compact" : "standard",
+  }).format(value);
 }

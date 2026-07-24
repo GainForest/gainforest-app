@@ -186,7 +186,7 @@ function JobDetails({
   }
 
   return (
-    <div className="mt-3 space-y-4 rounded-2xl border border-border bg-muted/30 p-4 sm:ml-13">
+    <div className="mt-3 space-y-4 rounded-2xl bg-muted p-4 sm:ml-13">
       {/* status + download */}
       <div className="flex flex-wrap items-center gap-2">
         {DATA_JOB_ADMIN_STATUSES.map((status) => (
@@ -205,12 +205,12 @@ function JobDetails({
               )
             }
           >
-            {saving === status ? <Loader2Icon className="animate-spin" /> : null}
+            {saving === status ? <Loader2Icon className="animate-spin motion-reduce:animate-none" /> : null}
             {t(`status.${status}`)}
           </Button>
         ))}
         <Button type="button" variant="outline" size="sm" disabled={downloading} onClick={() => void openDownload()}>
-          {downloading ? <Loader2Icon className="animate-spin" /> : <DownloadIcon />}
+          {downloading ? <Loader2Icon className="animate-spin motion-reduce:animate-none" /> : <DownloadIcon />}
           {t("download")}
         </Button>
       </div>
@@ -253,7 +253,7 @@ function JobDetails({
             disabled={saving !== null}
             onClick={() => void patch({ reviewNote }, "note")}
           >
-            {saving === "note" ? <Loader2Icon className="animate-spin" /> : null}
+            {saving === "note" ? <Loader2Icon className="animate-spin motion-reduce:animate-none" /> : null}
             {t("saveNote")}
           </Button>
           {saveState === "saved" ? (
@@ -276,7 +276,7 @@ function JobDetails({
             disabled={contentsState === "loading" || job.status === "uploading"}
             onClick={() => void loadContents()}
           >
-            {contentsState === "loading" ? <Loader2Icon className="animate-spin" /> : <FolderSearchIcon />}
+            {contentsState === "loading" ? <Loader2Icon className="animate-spin motion-reduce:animate-none" /> : <FolderSearchIcon />}
             {t("inspect")}
           </Button>
         ) : (
@@ -352,7 +352,7 @@ function ContentsView({ jobId, contents }: { jobId: string; contents: ZipContent
 
       {previewState === "loading" ? (
         <p className="inline-flex items-center gap-2 text-xs text-muted-foreground">
-          <Loader2Icon className="size-3.5 animate-spin" />
+          <Loader2Icon className="size-3.5 animate-spin motion-reduce:animate-none" />
           {t("previewLoading")}
         </p>
       ) : null}

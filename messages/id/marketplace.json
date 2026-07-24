@@ -6,8 +6,8 @@
     "to": "Sampai",
     "shown": "{count} ditampilkan",
     "dragHint": "Seret pegangan untuk memilih rentang waktu",
-    "startAria": "Tanggal mulai — {date}",
-    "endAria": "Tanggal akhir — {date}",
+    "startAria": "Tanggal mulai: {date}",
+    "endAria": "Tanggal akhir: {date}",
     "unidentified": "Tak teridentifikasi",
     "finding": "Menemukan lokasi peta…",
     "mappedItems": "{count} item dengan lokasi peta",
@@ -112,7 +112,7 @@
       "raised": "{amount} terkumpul",
       "donations": "Donasi",
       "acceptingDonations": "Menerima donasi",
-      "acceptingDonationsRaised": "Menerima donasi — {amount} terkumpul sejauh ini"
+      "acceptingDonationsRaised": "Menerima donasi: {amount} terkumpul sejauh ini"
     }
   },
   "organizations": {
@@ -147,7 +147,8 @@
     },
     "error": {
       "title": "Terjadi kesalahan",
-      "description": "Kami tidak dapat memuat organisasi. Coba segarkan halaman."
+      "description": "Kami tidak dapat memuat organisasi. Coba segarkan halaman.",
+      "retry": "Coba lagi"
     },
     "view": {
       "cards": "Kartu",
@@ -281,7 +282,7 @@
       "eyebrow": "Tantangan BioBlitz Mingguan",
       "titlePrefix": "Tantangan",
       "titleEmphasis": "BioBlitz",
-      "description": "Lomba mingguan yang menyenangkan untuk mencatat alam. Foto makhluk hidup apa pun — tumbuhan, burung, serangga, atau jamur —, tambahkan ke GainForest, dan naik di papan peringkat. Ronde baru, hadiah baru, setiap minggu.",
+      "description": "Lomba mingguan yang ramah untuk mencatat alam. Foto makhluk hidup apa pun, tambahkan ke GainForest, dan naik di papan peringkat.",
       "program": "Bagian dari program Klarna AI for Climate Resilience, bersama GainForest."
     },
     "rsvp": {
@@ -291,11 +292,11 @@
       "registered": "Kamu sudah terdaftar",
       "registeredNote": "Kami akan mencatat kontribusimu dan mengirim hadiah jika kamu menang.",
       "error": "Gagal mendaftar sekarang. Silakan coba lagi.",
-      "postText": "Aku ikut Tantangan BioBlitz Mingguan — {label}! Aku akan keluar memotret alam demi keanekaragaman hayati. 🌿🔭 #BioBlitz",
-      "legalConsent": "Dengan mendaftar, kamu menyetujui <terms>Ketentuan BioBlitz</terms> dan memahami <privacy>Pemberitahuan Privasi</privacy>."
+      "postText": "Aku ikut Tantangan BioBlitz Mingguan: {label}! Aku akan keluar memotret alam demi keanekaragaman hayati. 🌿🔭 #BioBlitz",
+      "legalConsent": "Dengan mendaftar, kamu menyetujui <terms>Ketentuan BioBlitz</terms> dan memahami <privacy>Pemberitahuan Privasi</privacy>.",
+      "publicPostDisclosure": "Mendaftar akan menerbitkan postingan BioBlitz publik di akun Anda."
     },
     "legal": {
-      "programLabel": "Tantangan BioBlitz",
       "back": "Kembali ke BioBlitz",
       "links": {
         "terms": "Ketentuan BioBlitz",
@@ -514,22 +515,22 @@
       "steps": {
         "outside": {
           "title": "Keluarlah",
-          "blurb": "Hutan, ladang, atau halaman rumahmu — semua makhluk hidup dihitung."
+          "blurb": "Hutan, ladang, atau halaman rumahmu: semua makhluk hidup dihitung."
         },
         "upload": {
           "title": "Unggah foto kamu",
-          "blurb": "Tambahkan di halaman Observasi saya, atau lewat Tainá — juga ada di GainForest."
+          "blurb": "Tambahkan dari Observasi saya atau kirimkan ke Tainá."
         },
         "review": {
           "title": "Periksa nama spesies",
-          "blurb": "Konfirmasi atau perbaiki nama yang disarankan — pengetahuanmu penting."
+          "blurb": "Konfirmasi atau perbaiki nama yang disarankan: pengetahuanmu penting."
         }
       },
       "proof": {
         "title": "Datamu bukan cuma untuk menang hadiah",
-        "intro": "Setiap observasi yang kamu kirim tersimpan di akunmu, jadi kamu bisa memakainya nanti sebagai bukti untuk proyekmu sendiri.",
-        "uses": "Kamu bisa melapor kembali kepada pemberi dana dengan catatan kerja yang jelas. Kamu juga bisa menunjukkan kepada mitra dan pemangku kepentingan bahwa apa yang kamu lakukan membawa perubahan.",
-        "outro": "Tanpa kerja tambahan — cukup terus mengamati. Seiring waktu, ini membangun bukti nyata yang bisa kamu pakai kapan pun kamu perlukan."
+        "intro": "Setiap observasi tetap di akun Anda sebagai catatan pekerjaan Anda.",
+        "uses": "Bagikan catatan itu dengan penyandang dana, mitra, dan komunitas.",
+        "outro": "Terus lakukan observasi untuk membangun bukti dari waktu ke waktu."
       }
     },
     "board": {
@@ -616,7 +617,7 @@
     },
     "bestPicture": {
       "heading": "Unggulan foto terbaik",
-      "subtitle": "Foto dengan suka terbanyak ronde ini — yang bersaing untuk hadiah foto terbaik. Ketuk foto mana pun untuk melihat detailnya.",
+      "subtitle": "Foto-foto ini mendapat suka terbanyak dan bersaing untuk hadiah foto terbaik. Buka foto untuk melihat detail.",
       "prize": "{amount} foto terbaik",
       "leader": "Memimpin",
       "likes": "{count, plural, one {# suka} other {# suka}}",
@@ -757,11 +758,13 @@
           "description": "Perangkat lapangan untuk mengumpulkan observasi dan bukti di lapangan."
         }
       },
-      "apply": "Ajukan dengan Satu Klik",
+      "apply": "Daftar dengan proyek",
       "details": "Baca detail hibah",
       "appliedTitle": "Pengajuan terkirim",
       "appliedNote": "Pengajuan Anda untuk {project} kini telah diposting ke feed.",
-      "postText": "Mengajukan hibah Meliarkan Kembali Web dengan proyek saya \"{project}\" demi kedaulatan data dan keputusan. 🌱"
+      "postText": "Saya mendaftar hibah Rewilding the Web dengan “{project}”. Pendaftaran menerbitkan postingan publik ini. 🌱",
+      "permissionLoading": "Memeriksa apakah akun ini dapat mendaftar…",
+      "permissionDenied": "Akun ini tidak dapat mendaftar hibah ini."
     },
     "applyModal": {
       "title": "Pilih proyek untuk diajukan",
@@ -783,10 +786,9 @@
       "successClose": "Selesai"
     },
     "interoperable": {
-      "category": "Program Hibah Interoperabel",
       "grantName": "Ma Earth Putaran 3",
       "fundingType": "Pendanaan kuadratik",
-      "description": "Putaran pendanaan Ma Earth yang didukung komunitas menggunakan pendanaan kuadratik: banyak donasi kecil disepadankan dan diperkuat lebih dari sedikit donasi besar. Pendaftaran telah ditutup dan putaran kini sedang berlangsung — jelajahi proyek yang ikut serta dan dukung mereka.",
+      "description": "Putaran pendanaan komunitas Ma Earth menggunakan pendanaan kuadratik, sehingga banyak donasi kecil menerima dana pendamping lebih besar daripada beberapa donasi besar. Pendaftaran telah ditutup. Jelajahi dan dukung proyek peserta.",
       "browseProjects": "Jelajahi proyek di putaran ini",
       "logoAlt": "Ma Earth"
     }
@@ -893,7 +895,8 @@
       "shareUser": "Bergabunglah dengan saya di sertifikat dan dukung dampak regeneratif: {pageUrl}",
       "totalBumicerts": "Jumlah sertifikat",
       "donationsReceived": "Donasi diterima",
-      "totalDonations": "Total donasi"
+      "totalDonations": "Total donasi",
+      "profileLinkCopyFailed": "Tautan tidak dapat disalin"
     },
     "hero": {
       "coverImageAlt": "Gambar sampul {displayName}",
@@ -1087,7 +1090,7 @@
       "eyebrow": "Jelajahi proyek",
       "title": "Jelajahi",
       "accent": "Proyek",
-      "description": "Setiap proyek adalah pekerjaan yang terfokus — dengan tujuan yang jelas, jangka waktu, dan hasil yang diharapkan."
+      "description": "Setiap proyek adalah pekerjaan terfokus dengan tujuan, jadwal, dan hasil yang diharapkan secara jelas."
     },
     "search": {
       "ariaLabel": "Cari proyek",
@@ -1096,7 +1099,6 @@
       "action": "Cari"
     },
     "categories": {
-      "eyebrow": "Jelajahi berdasarkan minat",
       "title": "Jelajahi kategori proyek",
       "description": "Mulai dengan sebuah tema, lalu temukan orang dan tempat yang mewujudkannya.",
       "items": {
@@ -1109,7 +1111,6 @@
       }
     },
     "featured": {
-      "eyebrow": "Proyek unggulan",
       "title": "Cerita untuk memulai",
       "description": "Pilihan proyek yang terdokumentasi lengkap dari para penjaga alam di seluruh dunia.",
       "badge": "Unggulan",
@@ -1123,12 +1124,10 @@
       }
     },
     "support": {
-      "eyebrow": "Terbuka untuk dukungan",
       "title": "Bantu karya baik berkembang",
       "description": "Dukung proyek yang sedang menerima kontribusi dari komunitas mereka."
     },
     "catalog": {
-      "eyebrow": "Jelajahi proyek",
       "title": "Jelajahi semua proyek",
       "description": "Jelajahi proyek dalam kategori ini.",
       "count": "{count, plural, other {# proyek untuk dijelajahi}}"
@@ -1169,7 +1168,6 @@
       "donationsMaearth": "Donasi Ma Earth"
     },
     "empty": {
-      "eyebrow": "Tidak ada hasil",
       "title": "Tidak ada proyek ditemukan",
       "description": "Coba sesuaikan pencarian atau filter untuk menemukan lebih banyak koleksi proyek."
     },
@@ -1204,6 +1202,11 @@
       "sightings": "{count, plural, =0 {Belum ada pengamatan alam} other {# pengamatan alam}}",
       "timeline": "{count, plural, =0 {Belum ada pembaruan proyek} other {# pembaruan proyek}}",
       "reviews": "{count, plural, =0 {Belum ada ulasan} other {# ulasan}}"
+    },
+    "error": {
+      "title": "Proyek tidak dapat dimuat",
+      "description": "Coba muat kembali katalog proyek.",
+      "retry": "Coba lagi"
     }
   },
   "ownerFilter": {
@@ -1446,7 +1449,7 @@
       "showPhoto": "Tampilkan foto",
       "reanalyze": "Analisis ulang",
       "reanalyzeHint": "Dapatkan identifikasi AI baru dari foto",
-      "reanalyzeApplied": "Diperbarui dengan saran AI baru — tinjau dan simpan.",
+      "reanalyzeApplied": "Diperbarui dengan saran AI baru: tinjau dan simpan.",
       "reanalyzeUnsure": "AI tidak dapat mengidentifikasinya dengan yakin. Coba tambahkan nama sendiri.",
       "reanalyzeError": "Kami tidak dapat menjalankan ulang AI saat ini. Silakan coba lagi.",
       "reanalyzeNoImage": "Tidak ada foto untuk dianalisis pada pengamatan ini.",
@@ -1543,11 +1546,10 @@
     "timelineTitle": "Lini Masa",
     "publishingBadge": "Memublikasikan",
     "publishingTitle": "Proyek Anda sedang diproses",
-    "publishingBody": "Kami sedang memublikasikan proyek Anda. Ini biasanya memakan waktu sekitar satu menit — halaman akan diperbarui secara otomatis."
+    "publishingBody": "Kami sedang menerbitkan proyek Anda. Halaman akan dimuat ulang saat siap."
   },
   "observationPage": {
     "back": "Semua pengamatan",
-    "kind": "Pengamatan alam",
     "sharedBy": "Dibagikan oleh",
     "viewProfile": "Lihat profil",
     "observed": "Diamati",
@@ -1583,9 +1585,8 @@
       "title": "Identifikasi",
       "accent": "spesies"
     },
-    "eyebrow": "Tinjauan ekologi",
     "title": "Pelabel pengamatan",
-    "description": "Jelajahi pengamatan terbaru dan yang belum teridentifikasi, periksa data lapangannya, lalu usulkan nama spesies yang konkret.",
+    "description": "Tinjau penampakan dan sarankan nama spesies kepada pengamat.",
     "unidentified": "Belum teridentifikasi",
     "filters": {
       "searchLabel": "Cari pengamatan",
@@ -1671,7 +1672,7 @@
       "hero": {
         "eyebrow": "Studio kisah dampak",
         "title": "Buat proyek",
-        "subtitle": "Ubah kerja lapangan, bukti restorasi, dan penjagaan komunitas menjadi proyek yang dapat dipublikasikan — tanpa meninggalkan GainForest."
+        "subtitle": "Ubah pekerjaan lapangan, bukti restorasi, dan pengelolaan komunitas menjadi proyek di GainForest."
       },
       "backToProjects": "Kembali ke Proyek Saya",
       "startOver": "Mulai ulang",
@@ -1701,7 +1702,7 @@
         },
         "story": {
           "label": "Kisah",
-          "hint": "opsional — pekerjaan, metode, dan hasilnya",
+          "hint": "opsional: pekerjaan, metode, dan hasilnya",
           "placeholder": "Apa yang terjadi? Bagaimana dampak diukur? Siapa yang diuntungkan dan apa langkah berikutnya?"
         },
         "scope": {
@@ -1731,7 +1732,7 @@
         },
         "sites": {
           "label": "Tempat",
-          "hint": "opsional — lampirkan tempat dari akun Anda",
+          "hint": "opsional: lampirkan tempat dari akun Anda",
           "loading": "Memuat tempat Anda…",
           "error": "Tidak dapat memuat tempat Anda.",
           "empty": "Belum ada tempat. Gambar satu di peta untuk menambahkannya ke proyek Anda.",
@@ -1821,7 +1822,7 @@
       }
     },
     "emptyHero": {
-      "description": "Proyek menyatukan kerja dampak Anda — orang, tempat, periode waktu, serta foto atau catatan pendukung — dalam satu halaman yang dapat diikuti dan didanai oleh pendukung.",
+      "description": "Proyek menyatukan orang, tempat, periode waktu, foto, dan catatan dalam satu halaman yang dapat diikuti dan didanai pendukung.",
       "cta": "Buat proyek"
     },
     "publish": {
@@ -1879,7 +1880,7 @@
       "refresh": "Muat ulang"
     },
     "hero": {
-      "description": "Sertifikat dampak (Cert) yang Anda terbitkan dari proyek ini. Masing-masing menggabungkan bukti — foto, lokasi, tanggal, dan kontributor — agar pendana dapat mendukung pekerjaan ini."
+      "description": "Cetak Cert dari proyek ini. Setiap Cert menggabungkan foto, tempat, tanggal, dan kontributor agar penyandang dana dapat mendukung pekerjaan."
     },
     "stats": {
       "linked": "{count, plural, one {# Cert tertaut} other {# Cert tertaut}}",
@@ -1917,7 +1918,7 @@
     },
     "empty": {
       "noCertsTitle": "Belum ada Cert yang diterbitkan",
-      "noCertsDescription": "Sertifikat dampak (Cert) mengubah proyek ini menjadi kisah yang dapat didanai — bukti satu kontribusi, dengan foto, tanggal, lokasi, dan orang-orang yang terlibat. Terbitkan yang pertama untuk mengajukan pendanaan.",
+      "noCertsDescription": "Sertifikat dampak (Cert) mengubah proyek ini menjadi kisah yang dapat didanai: bukti satu kontribusi, dengan foto, tanggal, lokasi, dan orang-orang yang terlibat. Terbitkan yang pertama untuk mengajukan pendanaan.",
       "noMatchingTitle": "Tidak ada Cert yang cocok",
       "noMatchingDescription": "Coba kata pencarian lain atau kosongkan kolom pencarian."
     },
@@ -2011,8 +2012,6 @@
       "dataBadge": "{count, plural, other {# lapisan data peta}}"
     },
     "focus": {
-      "organizationLabel": "Organisasi",
-      "projectLabel": "Proyek",
       "clear": "Kembali ke semua organisasi",
       "viewProfile": "Lihat profil",
       "openGlobe": "Halaman globe",
@@ -2058,7 +2057,7 @@
     },
     "timeline": {
       "seriesFlights": "{count, plural, other {# penerbangan drone}} di area yang sama",
-      "seriesHint": "Area yang sama dipotret pada tanggal berbeda — aktifkan garis waktu untuk melihat perubahannya.",
+      "seriesHint": "Area ini diterbangkan pada tanggal berbeda. Aktifkan linimasa untuk melihat perubahannya.",
       "toggle": "Lihat {name} dari waktu ke waktu",
       "title": "Perubahan dari waktu ke waktu",
       "close": "Sembunyikan penggeser waktu",
@@ -2072,7 +2071,6 @@
     "tree": {
       "title": "Pohon",
       "close": "Tutup",
-      "species": "Spesies",
       "height": "Tinggi",
       "dbh": "DBH",
       "measured": "Diukur:",
@@ -2084,6 +2082,14 @@
     "sheet": {
       "expand": "Tampilkan detail",
       "collapse": "Sembunyikan detail"
+    },
+    "errors": {
+      "organizations": "Organisasi tidak dapat dimuat.",
+      "sites": "Situs tidak dapat dimuat.",
+      "boundaries": "Batas proyek tidak dapat dimuat.",
+      "trees": "Data pohon tidak dapat dimuat.",
+      "layers": "Lapisan peta tidak dapat dimuat.",
+      "retry": "Coba lagi"
     }
   }
 }

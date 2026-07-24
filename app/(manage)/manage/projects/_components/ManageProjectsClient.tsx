@@ -4,7 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { parseAsString, parseAsStringEnum, useQueryStates } from "nuqs";
 import {
   BadgeCheckIcon,
@@ -33,6 +33,7 @@ import { Button } from "@/components/ui/button";
 import { ModalContent, ModalDescription, ModalFooter, ModalHeader, ModalTitle } from "@/components/ui/modal/modal";
 import { useModal } from "@/components/ui/modal/context";
 import { Skeleton } from "@/components/ui/skeleton";
+import { SectionSurface } from "@/components/ui/section-surface";
 import { cn } from "@/lib/utils";
 import { manageApiHref, manageHref, profileBasePath, type ManageTarget } from "@/lib/links";
 import { localProjectHref } from "@/app/_lib/urls";
@@ -43,6 +44,8 @@ import { compressImageIfNeeded } from "../../observations/_components/observatio
 import { canCreateRecord, canDeleteRecord, canUpdateRecord } from "../../_lib/cgs-permissions";
 import { createRecord, deleteRecord, getRecord, putRecord, uploadBlob } from "../../_lib/mutations";
 import { SiteEditorModal, SiteEditorModalId } from "../../_modals/SiteEditorModal";
+import { ManageCollectionHeader } from "./ManageCollectionPrimitives";
+import { isReliablyOwnProjectRecord } from "./project-record-ownership";
 import {
   CERT_COLLECTION,
   PROJECT_COLLECTION,
@@ -121,7 +124,13 @@ type EditorState =
 /** The cert (org.hypercerts.claim.activity) bound 1:1 to a project. */
 type LinkedCert = { rkey: string; cid: string | null; record: Record<string, unknown> } | null;
 
-export function ManageProjectsClient({ target }: { target: ManageTarget }) {
+export function ManageProjectsClient({
+  target,
+  embedded = false,
+}: {
+  target: ManageTarget;
+  embedded?: boolean;
+}) {
   const [projects, setProjects] = useState<ManagedProject[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -134,7 +143,10 @@ export function ManageProjectsClient({ target }: { target: ManageTarget }) {
   );
   const [query, setQuery] = useState("");
   const createPermission = canCreateRecord(target);
-  const updatePermission = canUpdateRecord(target);
+  const t = useTranslations("marketplace.manageProjects");
+  const projectT = useTranslations("marketplace.projects");
+  const certT = useTranslations("marketplace.manageProjectCerts");
+  const reduceMotion = useReducedMotion();
   const modal = useModal();
 
   const loadProjects = useCallback(async () => {
@@ -144,7 +156,7 @@ export function ManageProjectsClient({ target }: { target: ManageTarget }) {
       const response = await fetch(manageApiHref("/api/manage/projects", target), { cache: "no-store" });
       const data = (await response.json()) as ManagedProject[] | { error: string };
       if (!response.ok || !Array.isArray(data)) {
-        setError(!Array.isArray(data) ? data.error : "Failed to load projects.");
+        setError(!Array.isArray(data) ? data.error : projectT("empty.description"));
         setProjects([]);
         return;
       }
@@ -152,12 +164,12 @@ export function ManageProjectsClient({ target }: { target: ManageTarget }) {
       // Keep the sidebar's "Create a project" card in sync after creates/deletes.
       notifyProjectsChanged();
     } catch {
-      setError("Could not reach the server.");
+      setError(certT("errors.network"));
       setProjects([]);
     } finally {
       setLoading(false);
     }
-  }, [target]);
+  }, [certT, projectT, target]);
 
   useEffect(() => {
     void loadProjects();
@@ -174,7 +186,7 @@ export function ManageProjectsClient({ target }: { target: ManageTarget }) {
       {
         id: "create-project",
         // Inset the width so the forced dialog isn't edge-to-edge on phones.
-        dialogWidth: "max-w-3xl w-[calc(100%-2rem)]",
+        dialogWidth: "max-w-3xl",
         forceDialog: true,
         content: (
           <CreateProjectModal
@@ -212,18 +224,36 @@ export function ManageProjectsClient({ target }: { target: ManageTarget }) {
     () => projects.find((project) => project.rkey === projectParam || project.atUri === projectParam) ?? null,
     [projectParam, projects],
   );
+  const selectedProjectUpdatePermission = selectedProject
+    ? canUpdateRecord(target, {
+        ownRecord: isReliablyOwnProjectRecord({
+          kind: target.kind,
+          did: target.did,
+          currentUserDid: target.currentUserDid,
+          recordDid: selectedProject.did,
+        }),
+      })
+    : null;
 
   const openNew = () => {
     if (!createPermission.allowed) {
-      setError(createPermission.reason ?? "You cannot create projects for this organization.");
+      setError(createPermission.reason ?? t("editor.errors.cannotSave"));
       return;
     }
     openCreateModal();
   };
 
   const openEdit = (project: ManagedProject) => {
-    if (!updatePermission.allowed) {
-      setError(updatePermission.reason ?? "You cannot edit this project.");
+    const permission = canUpdateRecord(target, {
+      ownRecord: isReliablyOwnProjectRecord({
+        kind: target.kind,
+        did: target.did,
+        currentUserDid: target.currentUserDid,
+        recordDid: project.did,
+      }),
+    });
+    if (!permission.allowed) {
+      setError(permission.reason ?? t("editor.errors.cannotSave"));
       return;
     }
     void setProjectState({ mode: "edit", project: project.rkey });
@@ -234,14 +264,21 @@ export function ManageProjectsClient({ target }: { target: ManageTarget }) {
   };
 
   return (
-    <div className="mx-auto w-full max-w-[1440px] px-4 py-4 sm:px-6 sm:py-6">
+    <div
+      className={cn(
+        "w-full py-4 sm:py-6",
+        embedded
+          ? "min-w-0"
+          : "mx-auto max-w-[90rem] px-3 sm:px-5 lg:px-8",
+      )}
+    >
       <div className="space-y-5">
         {mode !== "edit" ? <ProjectHero /> : null}
 
         {mode === "edit" ? (
           loading ? (
             <ProjectsSkeleton />
-          ) : selectedProject ? (
+          ) : selectedProject && selectedProjectUpdatePermission?.allowed ? (
             <ProjectEditor
               key={selectedProject.atUri}
               state={{ mode: "edit", project: selectedProject }}
@@ -256,8 +293,10 @@ export function ManageProjectsClient({ target }: { target: ManageTarget }) {
                 void loadProjects();
               }}
             />
+          ) : selectedProject && selectedProjectUpdatePermission ? (
+            <ErrorState message={selectedProjectUpdatePermission.reason ?? t("editor.errors.cannotSave")} onRetry={backToList} />
           ) : (
-            <ErrorState message="Choose a project to edit from your project list." onRetry={backToList} />
+            <ErrorState message={projectT("empty.description")} onRetry={backToList} />
           )
         ) : (
           <>
@@ -273,16 +312,19 @@ export function ManageProjectsClient({ target }: { target: ManageTarget }) {
                   <input
                     value={query}
                     onChange={(event) => setQuery(event.target.value)}
-                    aria-label="Search projects"
-                    placeholder="Search projects"
+                    aria-label={projectT("search.ariaLabel")}
+                    placeholder={projectT("search.placeholder")}
                     className="min-w-0 flex-1 truncate border-0 bg-transparent px-3 py-2 text-sm text-foreground outline-none placeholder:text-muted-foreground"
                   />
                 </div>
                 <Button type="button" onClick={openNew} disabled={!createPermission.allowed} title={createPermission.reason ?? undefined} className="shrink-0" data-taina="add-project">
                   <CirclePlusIcon />
-                  Add project
+                  {t("editor.wizard.create")}
                 </Button>
               </div>
+            ) : null}
+            {projects.length > 0 && !createPermission.allowed ? (
+              <p className="text-sm text-muted-foreground" role="status">{createPermission.reason}</p>
             ) : null}
 
             {projects.length > 0 && !loading ? <PublishCard target={target} /> : null}
@@ -304,19 +346,30 @@ export function ManageProjectsClient({ target }: { target: ManageTarget }) {
             ) : (
               <div className="space-y-2">
                 <AnimatePresence>
-                  {filteredProjects.map((project, index) => (
-                    <ProjectCard
-                      key={project.atUri}
-                      project={project}
-                      index={index}
-                      galleryHref={`${profileBasePath(target)}/projects/${encodeURIComponent(project.rkey)}/gallery`}
-                      observationsHref={manageHref(target, "observations", { project: project.atUri })}
-                      sitesHref={`${profileBasePath(target)}/projects/${encodeURIComponent(project.rkey)}/sites`}
-                      timelineHref={`${profileBasePath(target)}/projects/${encodeURIComponent(project.rkey)}/timeline`}
-                      onEdit={() => openEdit(project)}
-                      disabledReason={updatePermission.reason}
-                    />
-                  ))}
+                  {filteredProjects.map((project, index) => {
+                    const permission = canUpdateRecord(target, {
+                      ownRecord: isReliablyOwnProjectRecord({
+                        kind: target.kind,
+                        did: target.did,
+                        currentUserDid: target.currentUserDid,
+                        recordDid: project.did,
+                      }),
+                    });
+                    return (
+                      <ProjectCard
+                        key={project.atUri}
+                        project={project}
+                        index={index}
+                        reduceMotion={reduceMotion}
+                        galleryHref={`${profileBasePath(target)}/projects/${encodeURIComponent(project.rkey)}/gallery`}
+                        observationsHref={manageHref(target, "observations", { project: project.atUri })}
+                        sitesHref={`${profileBasePath(target)}/projects/${encodeURIComponent(project.rkey)}/sites`}
+                        timelineHref={`${profileBasePath(target)}/projects/${encodeURIComponent(project.rkey)}/timeline`}
+                        onEdit={() => openEdit(project)}
+                        disabledReason={permission.allowed ? null : permission.reason}
+                      />
+                    );
+                  })}
                 </AnimatePresence>
               </div>
             )}
@@ -423,24 +476,13 @@ function PublishCard({ target }: { target: ManageTarget }) {
 
 function ProjectHero() {
   const t = useTranslations("marketplace.manageProjects.hero");
-
-  return (
-    <section className="-mx-4 px-4 py-1 sm:-mx-6 sm:px-6">
-      <div className="max-w-2xl">
-        <h1 className="font-instrument text-2xl font-medium italic tracking-[-0.03em] text-foreground sm:text-3xl">
-          {t("title")}
-        </h1>
-        <p className="mt-2 max-w-xl text-sm leading-6 text-muted-foreground">
-          {t("description")}
-        </p>
-      </div>
-    </section>
-  );
+  return <ManageCollectionHeader title={t("title")} description={t("description")} />;
 }
 
 function ProjectCard({
   project,
   index,
+  reduceMotion,
   galleryHref,
   observationsHref,
   sitesHref,
@@ -450,6 +492,7 @@ function ProjectCard({
 }: {
   project: ManagedProject;
   index: number;
+  reduceMotion: boolean | null;
   galleryHref: string;
   observationsHref: string;
   sitesHref: string;
@@ -458,6 +501,7 @@ function ProjectCard({
   disabledReason?: string | null;
 }) {
   const t = useTranslations("marketplace.manageProjects.actions");
+  const cardT = useTranslations("marketplace.manageProjectCerts.card");
   const router = useRouter();
   const hasImage = Boolean(project.imageUrl);
   const disabled = Boolean(disabledReason);
@@ -477,14 +521,14 @@ function ProjectCard({
           router.push(projectHref);
         }
       }}
-      initial={{ opacity: 0, y: 10 }}
+      initial={reduceMotion ? false : { opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, scale: 0.98 }}
-      transition={{ duration: 0.35, delay: Math.min(index, 10) * 0.025, ease: [0.25, 0.1, 0.25, 1] }}
+      exit={reduceMotion ? { opacity: 0 } : { opacity: 0, scale: 0.98 }}
+      transition={reduceMotion ? { duration: 0 } : { duration: 0.35, delay: Math.min(index, 10) * 0.025, ease: [0.25, 0.1, 0.25, 1] }}
       aria-label={t("viewProjectFor", { title: project.title })}
       data-taina="open-project"
       className={cn(
-        "group flex cursor-pointer gap-3 rounded-2xl bg-card/45 px-1 py-3 transition-colors duration-300 hover:bg-surface-sunken focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/45 sm:gap-4 sm:px-2 sm:py-4",
+        "group flex cursor-pointer gap-3 rounded-2xl bg-muted px-1 py-3 transition-colors duration-300 hover:bg-muted/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/45 sm:gap-4 sm:px-2 sm:py-4",
       )}
     >
       <div className="relative h-28 w-28 shrink-0 overflow-hidden rounded-xl bg-muted sm:h-36 sm:w-52">
@@ -495,7 +539,7 @@ function ProjectCard({
             fill
             sizes="208px"
             unoptimized
-            className="object-cover transition-transform duration-500 group-hover:scale-105"
+            className="object-cover transition-transform duration-500 motion-reduce:transition-none group-hover:scale-105 motion-reduce:group-hover:scale-100"
           />
         ) : (
           <div className="grid h-full place-items-center bg-primary/8 text-primary/45">
@@ -515,7 +559,7 @@ function ProjectCard({
           {project.shortDescription ? (
             <p className="mt-2 line-clamp-3 text-sm leading-relaxed text-muted-foreground">{project.shortDescription}</p>
           ) : (
-            <p className="mt-2 text-sm italic text-muted-foreground">No summary yet.</p>
+            <p className="mt-2 text-sm text-muted-foreground">{cardT("noSummary")}</p>
           )}
         </div>
 
@@ -655,11 +699,20 @@ function ProjectEditor({
   }, [target.did]);
 
   const modal = useModal();
+  const reduceMotion = useReducedMotion();
   const isEdit = state.mode === "edit";
-  const savePermission = isEdit ? canUpdateRecord(target) : canCreateRecord(target);
-  const deletePermission = canDeleteRecord(target);
+  const ownRecord = isEdit
+    ? isReliablyOwnProjectRecord({
+        kind: target.kind,
+        did: target.did,
+        currentUserDid: target.currentUserDid,
+        recordDid: state.project.did,
+      })
+    : false;
+  const savePermission = isEdit ? canUpdateRecord(target, { ownRecord }) : canCreateRecord(target);
+  const deletePermission = canDeleteRecord(target, { ownRecord });
   const repoOptions = target.kind === "group" ? { repo: target.did } : undefined;
-  const issues = getProjectIssues(draft);
+  const issues = getProjectIssues(draft, t("steps.basics.subtitle"));
   const visibleIssues = saveAttempted ? issues : issues.filter((issue) => changedFields.has(issue.field));
   const issuesByName = issuesByProjectField(visibleIssues);
   const coverUrl = coverRemoved ? null : (coverPreview ?? state.project?.imageUrl ?? null);
@@ -813,7 +866,7 @@ function ProjectEditor({
   const handleDeleteProject = async () => {
     if (!isEdit) return;
     if (!deletePermission.allowed) {
-      setError(deletePermission.reason ?? "You cannot delete this project.");
+      setError(deletePermission.reason ?? t("deleteModal.error"));
       return;
     }
     const project = state.project;
@@ -966,7 +1019,7 @@ function ProjectEditor({
             className="h-full rounded-full bg-primary"
             initial={false}
             animate={{ width: `${progress}%` }}
-            transition={{ duration: 0.4, ease: [0.25, 0.1, 0.25, 1] }}
+            transition={reduceMotion ? { duration: 0 } : { duration: 0.4, ease: [0.25, 0.1, 0.25, 1] }}
           />
         </div>
 
@@ -974,10 +1027,10 @@ function ProjectEditor({
           <AnimatePresence mode="wait">
             <motion.div
               key={stepId}
-              initial={{ opacity: 0, y: 12 }}
+              initial={reduceMotion ? false : { opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              transition={{ duration: 0.22, ease: [0.25, 0.1, 0.25, 1] }}
+              exit={reduceMotion ? { opacity: 0 } : { opacity: 0, y: -10 }}
+              transition={reduceMotion ? { duration: 0 } : { duration: 0.22, ease: [0.25, 0.1, 0.25, 1] }}
             >
               {stepId === "basics" ? (
                 <div className="mx-auto max-w-2xl">
@@ -1051,9 +1104,9 @@ function ProjectEditor({
   // ── EDIT: single-page form ──
   return (
     <motion.form
-      initial={{ opacity: 0, y: 8 }}
+      initial={reduceMotion ? false : { opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.25, ease: [0.25, 0.1, 0.25, 1] }}
+      transition={reduceMotion ? { duration: 0 } : { duration: 0.25, ease: [0.25, 0.1, 0.25, 1] }}
       onSubmit={handleSubmit}
       className="relative w-full"
     >
@@ -1271,6 +1324,7 @@ function ContributorInput({
   const [focused, setFocused] = useState(false);
   const [highlight, setHighlight] = useState(0);
   const boxRef = useRef<HTMLDivElement>(null);
+  const reduceMotion = useReducedMotion();
   const selectedProfileFallback = t("fields.people.selectedProfile");
 
   useEffect(() => {
@@ -1389,10 +1443,10 @@ function ContributorInput({
         <AnimatePresence>
           {open && !actor ? (
             <motion.div
-              initial={{ opacity: 0, y: 4 }}
+              initial={reduceMotion ? false : { opacity: 0, y: 4 }}
               animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: 4 }}
-              transition={{ duration: 0.14 }}
+              exit={reduceMotion ? { opacity: 0 } : { opacity: 0, y: 4 }}
+              transition={{ duration: reduceMotion ? 0 : 0.14 }}
               className="absolute z-[1000] mt-1.5 max-h-72 w-full overflow-y-auto rounded-xl border border-border bg-card p-1.5 shadow-xl"
             >
               {value.trim().length < 2 ? (
@@ -1588,12 +1642,13 @@ function ProjectSuccessPanel({
   const t = useTranslations("marketplace.manageProjects.editor.success");
   const projectHref = projectHrefFromUri(projectUri);
   const modal = useModal();
+  const reduceMotion = useReducedMotion();
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 18, scale: 0.98 }}
+      initial={reduceMotion ? false : { opacity: 0, y: 18, scale: 0.98 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
-      transition={{ duration: 0.32, ease: [0.25, 0.1, 0.25, 1] }}
+      transition={reduceMotion ? { duration: 0 } : { duration: 0.32, ease: [0.25, 0.1, 0.25, 1] }}
       className="relative w-full"
       role="status"
       aria-live="polite"
@@ -1605,35 +1660,35 @@ function ProjectSuccessPanel({
         </Button>
         <div className="relative z-10 m-auto flex max-w-2xl flex-col items-center text-center">
           <motion.div
-            initial={{ scale: 0.72, opacity: 0 }}
+            initial={reduceMotion ? false : { scale: 0.72, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
-            transition={{ type: "spring", stiffness: 420, damping: 24, delay: 0.08 }}
+            transition={reduceMotion ? { duration: 0 } : { type: "spring", stiffness: 420, damping: 24, delay: 0.08 }}
             className="relative grid size-20 place-items-center text-primary"
           >
-            <div aria-hidden className="absolute inset-1 rounded-full bg-primary/25 blur-2xl animate-pulse" />
+            <div aria-hidden className="absolute inset-1 rounded-full bg-primary/25 blur-2xl" />
             <BadgeCheckIcon className="relative z-10 size-14" />
           </motion.div>
           <motion.h3
-            initial={{ opacity: 0, y: 10 }}
+            initial={reduceMotion ? false : { opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.25, delay: 0.16 }}
+            transition={reduceMotion ? { duration: 0 } : { duration: 0.25, delay: 0.16 }}
             className="mt-3 font-instrument text-4xl font-medium italic leading-tight tracking-[-0.04em] text-foreground sm:text-5xl"
           >
             {isEdit ? t("titleEdit") : t("titleCreate")}
           </motion.h3>
           <motion.p
-            initial={{ opacity: 0, y: 10 }}
+            initial={reduceMotion ? false : { opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.25, delay: 0.22 }}
+            transition={reduceMotion ? { duration: 0 } : { duration: 0.25, delay: 0.22 }}
             className="mt-4 max-w-sm text-sm leading-6 text-muted-foreground"
           >
             {projectTitle ? t("descriptionNamed", { title: projectTitle }) : t("description")}
           </motion.p>
 
           <motion.div
-            initial={{ opacity: 0, y: 12 }}
+            initial={reduceMotion ? false : { opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.28, delay: 0.3 }}
+            transition={reduceMotion ? { duration: 0 } : { duration: 0.28, delay: 0.3 }}
             className="mt-8 flex flex-wrap items-center justify-center gap-3"
           >
             {projectHref ? (
@@ -1754,7 +1809,7 @@ function ReviewList({
     [t("review.photo"), hasCover ? t("review.added") : t("review.notAdded")],
   ];
   return (
-    <div className="overflow-hidden rounded-2xl border border-border bg-card/40">
+    <div className="overflow-hidden rounded-2xl bg-muted">
       {rows.map(([label, value], index) => (
         <div
           key={label}
@@ -1763,7 +1818,7 @@ function ReviewList({
             index !== rows.length - 1 && "border-b border-border/60",
           )}
         >
-          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">{label}</p>
+          <p className="text-xs font-medium text-muted-foreground">{label}</p>
           <p className="text-sm leading-6 text-foreground">{value}</p>
         </div>
       ))}
@@ -1881,7 +1936,7 @@ function DeleteProjectModal({ projectTitle, onConfirm }: { projectTitle: string;
   return (
     <ModalContent dismissible={!pending} className="space-y-4">
       <ModalHeader>
-        <ModalTitle className="flex items-center gap-2 text-destructive">
+        <ModalTitle className="flex items-center gap-2 font-instrument font-light italic text-destructive">
           <TriangleAlertIcon className="size-5 shrink-0" />
           {t("title")}
         </ModalTitle>
@@ -1968,91 +2023,45 @@ function ProjectCreateHeroCard({
 }) {
   const t = useTranslations("marketplace.manageProjects.emptyHero");
   return (
-    <motion.section
-      initial={{ opacity: 0, y: 8 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.35, ease: [0.25, 0.1, 0.25, 1] }}
-      className="relative overflow-visible rounded-[1.6rem] border border-border/80 bg-card shadow-sm"
-    >
-      <div className="relative min-h-[6rem] overflow-hidden rounded-[1.55rem]">
-        <Image
-          src="/assets/media/images/create-bumicert/hero-light@2x.webp"
-          alt=""
-          fill
-          priority
-          quality={95}
-          sizes="100vw"
-          className="object-cover object-center dark:hidden"
-        />
-        <Image
-          src="/assets/media/images/create-bumicert/hero-dark@2x.webp"
-          alt=""
-          fill
-          priority
-          quality={95}
-          sizes="100vw"
-          className="hidden object-cover object-center dark:block"
-        />
-        <div className="absolute inset-0 bg-linear-to-r from-background/95 via-background/72 to-background/5 dark:from-background/90 dark:via-background/58 dark:to-background/10" />
-        <div className="absolute -top-8 right-[7%] h-28 w-52 rounded-full bg-background/50 blur-2xl dark:bg-primary/10" />
-        <div className="absolute inset-x-0 bottom-0 h-16 bg-linear-to-t from-foreground/20 via-foreground/5 to-transparent dark:from-black/55" />
-
-        <div className="relative z-30 flex min-h-[6rem] flex-col gap-4 px-6 py-4 sm:flex-row sm:items-center sm:justify-between sm:gap-6 sm:px-8 lg:px-9">
-          <p className="w-full text-sm leading-5 text-muted-foreground sm:max-w-[30rem]">
-            {t("description")}
-          </p>
-          <Button
-            type="button"
-            size="sm"
-            onClick={onCreate}
-            disabled={disabled}
-            title={disabledReason ?? undefined}
-            className="shrink-0 self-start sm:self-auto"
-          >
-            <CirclePlusIcon />
-            {t("cta")}
-          </Button>
-        </div>
-      </div>
-      <Image
-        src="/assets/media/images/create-bumicert/plant-light.png"
-        alt=""
-        width={1002}
-        height={1146}
-        priority
-        className="pointer-events-none absolute bottom-0 right-[4%] z-20 hidden h-[9rem] w-auto max-w-[50%] object-contain dark:hidden md:block"
-      />
-      <Image
-        src="/assets/media/images/create-bumicert/plant-dark.png"
-        alt=""
-        width={964}
-        height={1129}
-        priority
-        className="pointer-events-none absolute bottom-0 right-[4%] z-20 hidden h-[9rem] w-auto max-w-[50%] object-contain dark:md:block"
-      />
-    </motion.section>
+    <SectionSurface variant="muted" className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+      <p className="max-w-2xl text-sm leading-6 text-muted-foreground">{t("description")}</p>
+      <Button
+        type="button"
+        size="sm"
+        onClick={onCreate}
+        disabled={disabled}
+        title={disabledReason ?? undefined}
+        className="shrink-0 self-start sm:self-auto"
+      >
+        <CirclePlusIcon />
+        {t("cta")}
+      </Button>
+    </SectionSurface>
   );
 }
 
 function EmptyState({ hasQuery, onCreate }: { hasQuery: boolean; onCreate: () => void }) {
+  const t = useTranslations("marketplace.projects");
+  const manageT = useTranslations("marketplace.manageProjects");
+  const reduceMotion = useReducedMotion();
   return (
     <motion.div
-      initial={{ opacity: 0, y: 8 }}
+      initial={reduceMotion ? false : { opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.35, ease: [0.25, 0.1, 0.25, 1] }}
-      className="flex min-h-[18rem] flex-col items-center justify-center rounded-[2rem] bg-muted/20 px-6 text-center"
+      transition={reduceMotion ? { duration: 0 } : { duration: 0.35, ease: [0.25, 0.1, 0.25, 1] }}
+      className="flex min-h-[18rem] flex-col items-center justify-center rounded-[2rem] bg-muted px-6 text-center"
     >
       <FolderKanbanIcon className="mb-4 h-10 w-10 text-primary" />
       <h2 className="font-instrument text-2xl font-medium italic tracking-[-0.02em]">
-        {hasQuery ? "No matching projects" : "No projects yet"}
+        {hasQuery ? t("empty.title") : manageT("hero.title")}
       </h2>
       <p className="mt-2 max-w-sm text-sm leading-6 text-muted-foreground">
-        {hasQuery ? "Try another search term or clear the search field." : "Create your first project page with a name, summary, story, and optional photo."}
+        {hasQuery ? t("empty.description") : manageT("emptyHero.description")}
       </p>
       {!hasQuery ? (
         <Button type="button" variant="outline" size="sm" onClick={onCreate} className="mt-5" data-taina="add-project">
           <CirclePlusIcon />
-          Add project
+          {manageT("editor.wizard.create")}
         </Button>
       ) : null}
     </motion.div>
@@ -2060,21 +2069,23 @@ function EmptyState({ hasQuery, onCreate }: { hasQuery: boolean; onCreate: () =>
 }
 
 function ErrorState({ message, onRetry }: { message: string; onRetry: () => void }) {
+  const t = useTranslations("marketplace.projects");
+  const actionT = useTranslations("marketplace.manageProjectCerts.actions");
   return (
-    <div className="flex min-h-[18rem] flex-col items-center justify-center rounded-[2rem] bg-muted/30 px-6 text-center">
+    <div className="flex min-h-[18rem] flex-col items-center justify-center rounded-[2rem] bg-muted px-6 text-center">
       <TriangleAlertIcon className="mb-4 h-9 w-9 text-muted-foreground opacity-70" />
-      <h2 className="font-instrument text-2xl font-medium italic tracking-[-0.02em]">Could not load projects</h2>
+      <h2 className="font-instrument text-2xl font-medium italic tracking-[-0.02em]">{t("empty.title")}</h2>
       <p className="mt-2 max-w-sm text-sm leading-6 text-muted-foreground">{message}</p>
       <Button type="button" variant="outline" size="sm" onClick={onRetry} className="mt-5">
-        Retry
+        {actionT("retry")}
       </Button>
     </div>
   );
 }
 
-function getProjectIssues(draft: ProjectCertDraft): ProjectIssue[] {
+function getProjectIssues(draft: ProjectCertDraft, titleMessage: string): ProjectIssue[] {
   const issues: ProjectIssue[] = [];
-  if (draft.title.trim().length < 3) issues.push({ field: "title", message: "Add a project name with at least 3 characters." });
+  if (draft.title.trim().length < 3) issues.push({ field: "title", message: titleMessage });
   return issues;
 }
 

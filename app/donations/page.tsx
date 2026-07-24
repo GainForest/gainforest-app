@@ -3,8 +3,8 @@ import { notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { Suspense } from "react";
 import { getGainForestModeratorAccess } from "@/app/internal/badges/_lib/access";
-import { DonationsHubSkeleton } from "../_components/PageLoadingSkeletons";
 import { DonationsHub } from "../_components/DonationsHub";
+import { DonationsLoadingView } from "./DonationsLoadingView";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations("marketplace.dashboard.metadata");
@@ -25,7 +25,7 @@ export default async function DonationsPage() {
   }
 
   return (
-    <Suspense fallback={<DonationsHubSkeleton />}>
+    <Suspense fallback={<DonationsLoadingView />}>
       <DonationsHub />
     </Suspense>
   );

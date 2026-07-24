@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import Link from "next/link";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { CheckIcon, ExternalLinkIcon, Loader2Icon, SendIcon } from "lucide-react";
 import type { TainaAdminResident } from "@/app/_lib/taina-agent";
 import { formatRelative } from "@/app/_lib/format";
@@ -17,8 +17,6 @@ export type AdminTainaRow = TainaAdminResident & {
   displayName: string | null;
   avatarUrl: string | null;
 };
-
-const usd = new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" });
 
 /**
  * Admin roster of every Tainá agent: who runs it, its Telegram bot, when it
@@ -54,6 +52,8 @@ export function AdminTainaPanel({
 
 function TainaRow({ row, allowanceUsd }: { row: AdminTainaRow; allowanceUsd: number }) {
   const t = useTranslations("common.adminTaina");
+  const locale = useLocale();
+  const usd = useMemo(() => new Intl.NumberFormat(locale, { style: "currency", currency: "USD" }), [locale]);
   const [composing, setComposing] = useState(false);
   const [text, setText] = useState("");
   const [sending, setSending] = useState(false);
@@ -137,7 +137,7 @@ function TainaRow({ row, allowanceUsd }: { row: AdminTainaRow; allowanceUsd: num
       </div>
 
       {composing ? (
-        <div className="mt-3 rounded-2xl border border-border bg-muted/30 p-3 sm:ml-13">
+        <div className="mt-3 rounded-2xl bg-muted p-3 sm:ml-13">
           <Textarea
             value={text}
             maxLength={4000}
@@ -153,7 +153,7 @@ function TainaRow({ row, allowanceUsd }: { row: AdminTainaRow; allowanceUsd: num
           <p className="mt-2 text-xs text-muted-foreground">{t("messageHint")}</p>
           <div className="mt-2.5 flex flex-wrap items-center gap-2.5">
             <Button type="button" size="sm" disabled={sending || !text.trim()} onClick={() => void send()}>
-              {sending ? <Loader2Icon className="animate-spin" /> : <SendIcon />}
+              {sending ? <Loader2Icon className="animate-spin motion-reduce:animate-none" /> : <SendIcon />}
               {sending ? t("sending") : t("send")}
             </Button>
             <Button

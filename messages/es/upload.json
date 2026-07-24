@@ -65,6 +65,7 @@
     "upload": "Subir",
     "uploading": "Subiendo…",
     "confirm": "Confirmar",
+    "failed": "No se pudo completar esa acción. Inténtalo de nuevo.",
     "add": "Agregar",
     "cancel": "Cancelar",
     "registerOrganization": "Crear una organización",
@@ -84,7 +85,22 @@
     "unnamed": "Sitio sin nombre",
     "invalid": "No válido",
     "alreadyDefault": "Ya es predeterminado",
-    "makeDefault": "Hacer predeterminado"
+    "makeDefault": "Hacer predeterminado",
+    "mapPreview": "Vista previa del mapa del sitio",
+    "previousSite": "Sitio anterior",
+    "nextSite": "Sitio siguiente",
+    "defaultLoadError": "No se pudo cargar el sitio predeterminado.",
+    "loadError": "No se pudieron cargar los sitios.",
+    "retry": "Intentar de nuevo",
+    "createDenied": "Tu rol no permite añadir sitios a esta organización.",
+    "editDenied": "Tu rol no permite editar este sitio.",
+    "defaultDenied": "Tu rol no permite cambiar el sitio predeterminado.",
+    "defaultError": "No se pudo cambiar el sitio predeterminado.",
+    "deleteDefaultBlocked": "Elige otro sitio predeterminado antes de eliminar este.",
+    "deleteDenied": "Tu rol no permite eliminar este sitio.",
+    "deleteError": "No se pudo eliminar el sitio.",
+    "cardsView": "Tarjetas",
+    "listView": "Lista"
   },
   "audio": {
     "title": "Grabaciones de audio",
@@ -202,7 +218,19 @@
       "identificationRemarks": "Observaciones de identificación",
       "speciesNotes": "Notas sobre especies",
       "savingUpload": "Guardando tu subida",
-      "recordedAtInvalid": "Ingresa una fecha de grabación válida."
+      "recordedAtInvalid": "Ingresa una fecha de grabación válida.",
+      "deploymentNamePlaceholder": "Sitio A Norte, AudioMoth marzo de 2024",
+      "channelCount": "{count, plural, one {# canal} other {# canales}}",
+      "bitDepth": "{count} bits"
+    },
+    "spectrogram": {
+      "chooseFile": "Elige un archivo de audio para ver su patrón de frecuencias antes de guardar.",
+      "frequencyOverTime": "Frecuencia a lo largo del tiempo",
+      "previewAria": "Vista previa del espectrograma de audio",
+      "low": "baja",
+      "high": "alta",
+      "title": "Vista previa del espectrograma",
+      "caption": "Las bandas más brillantes indican frecuencias más intensas en la grabación seleccionada."
     }
   },
   "dashboard": {
@@ -306,7 +334,11 @@
       "nearBoundary": "Cerca del límite: este árbol está fuera del sitio seleccionado y se omitirá.",
       "invalidBoundary": "Límite del sitio seleccionado no válido: el límite no pudo usarse para validar árboles.",
       "invalidBoundaryFallback": "el límite no pudo usarse para validar árboles.",
-      "outOfSite": "Fuera del sitio: este árbol está fuera del límite del sitio seleccionado y se omitirá."
+      "outOfSite": "Fuera del sitio: este árbol está fuera del límite del sitio seleccionado y se omitirá.",
+      "futureDate": "La fecha del evento no puede estar en el futuro.",
+      "canopyRange": "La cobertura de copa debe estar entre 0 y 100.",
+      "boundaryOutside": "Este árbol está a {distance} fuera de la zona seleccionada. Comprueba las coordenadas, elige otro límite o elimina la fila.",
+      "unknownDistance": "una distancia desconocida"
     },
     "fileDrop": {
       "modes": {
@@ -371,7 +403,7 @@
       "continueToMapping": "Continuar al mapeo de columnas",
       "selectSiteBeforeUpload": "Selecciona un sitio antes de subir datos de árboles.",
       "csvOnly": "Solo se admiten archivos .csv y .tsv.",
-      "fileTooLarge": "El archivo es demasiado grande. El tamaño máximo es 10 MB (recibido {size}).",
+      "fileTooLarge": "El archivo es demasiado grande ({size}). El tamaño máximo es {maxSize}.",
       "zipOnly": "Solo se admiten archivos .zip de archivos multimedia adjuntos de Kobo.",
       "zipTooLarge": "El archivo ZIP es demasiado grande. El tamaño máximo es 200 MB (recibido {size}).",
       "zipNoImages": "No se encontraron imágenes adjuntas compatibles en este ZIP. Asegúrate de haber seleccionado la exportación de archivos multimedia adjuntos de KoboToolbox.",
@@ -401,8 +433,8 @@
       "addSiteBoundary": "Agregar límite de sitio",
       "selectSitePlaceholder": "Selecciona un sitio…",
       "defaultSuffix": " (predeterminado)",
-      "preparingMapAreaSuffix": " — preparando área del mapa…",
-      "needsMapAreaSuffix": " — necesita área del mapa",
+      "preparingMapAreaSuffix": ": preparando área del mapa…",
+      "needsMapAreaSuffix": ": necesita área del mapa",
       "addMapAreaToSelected": "Agregar área del mapa al sitio seleccionado",
       "selectedSiteCheckHelp": "Los árboles se comprobarán contra esta única área dibujada en el mapa.",
       "mapAreaPreparing": "Esta área dibujada en el mapa aún se está preparando. Inténtalo de nuevo en un momento.",
@@ -456,7 +488,16 @@
           "description": "Los árboles ya estaban aquí cuando empezaste a registrarlos. Es mejor ser honesto que adivinar."
         }
       },
-      "continueToMatch": "Continuar para emparejar encabezados"
+      "continueToMatch": "Continuar para emparejar encabezados",
+      "invalidPhotoFolder": "Elige el archivo de la carpeta de fotos descargado de tu aplicación de formularios de campo.",
+      "emptyPhotoFolder": "Esta carpeta de fotos no contiene imágenes compatibles.",
+      "unsupportedFile": "Solo se admiten exportaciones CSV y TSV.",
+      "parseFileError": "No se pudo leer la hoja de cálculo. Comprueba el archivo e inténtalo de nuevo.",
+      "photoFolderCounts": "{images, plural, one {# imagen} other {# imágenes}}, {submissions, plural, one {# envío} other {# envíos}}",
+      "treeCount": "{count, plural, one {# árbol} other {# árboles}}",
+      "siteCreateDenied": "Tu rol no permite añadir un límite de sitio.",
+      "siteEditDenied": "Tu rol no permite editar este límite de sitio.",
+      "groupSelectDenied": "Tu rol no permite añadir árboles a un grupo existente."
     },
     "preview": {
       "siteBoundaryField": "Límite del sitio",
@@ -473,7 +514,7 @@
       "partialValidBoundaryHint": "Corrige las coordenadas de árboles que estén fuera del polígono seleccionado, vuelve y elige/crea el límite de sitio correcto si es necesario, y corrige cualquier otro error de mapeo o campo indicado.",
       "partialValidMappingHint": "Corrige los errores de mapeo o de campos indicados si quieres incluirlos.",
       "dataPreview": "Vista previa de datos",
-      "showingRows": "Mostrando {maxRows} de {totalRows} filas — todas las filas válidas se subirán",
+      "showingRows": "Mostrando {maxRows} de {totalRows} filas: todas las filas válidas se subirán",
       "photos": "Fotos",
       "status": "Estado",
       "valid": "Válida",
@@ -491,12 +532,13 @@
       "noSiteSelected": "No hay ningún sitio seleccionado. Vuelve y elige o crea un límite de sitio.",
       "checkingMapAreaFor": "Comprobando área dibujada en el mapa para {siteName}…",
       "boundaryCheckError": "No se pudo comprobar el área dibujada seleccionada ({error}). Vuelve, elige o crea un límite de sitio e inténtalo de nuevo.",
-      "allRowsReady": "{count, plural, one {# fila está lista} other {# filas están listas}} — listas para guardar en {siteName}.",
+      "allRowsReady": "{count, plural, one {La fila está lista} other {Las # filas están listas}} para guardarse en {siteName}.",
       "noValidRows": "No se encontraron filas válidas. Corrige los errores e inténtalo de nuevo.",
       "partialRowsReady": "{validCount} listas, {errorCount} necesitan correcciones. Las filas con problemas se omitirán.",
       "treeInformationPreview": "Vista previa de información de árboles",
       "showingFirstRows": "Mostrando las primeras {maxRows} de {totalRows} filas",
-      "backToMatchedHeadings": "Volver a encabezados emparejados"
+      "backToMatchedHeadings": "Volver a encabezados emparejados",
+      "boundaryCheckFailed": "No se pudo comprobar la zona seleccionada. Vuelve atrás, elige o crea un límite e inténtalo de nuevo."
     },
     "manager": {
       "backToUpload": "Volver a subir",
@@ -587,10 +629,10 @@
       "optionalOccurrence": "Ocurrencia opcional",
       "measurements": "Mediciones",
       "media": "Medios",
-      "duplicateAria": "Mapeo duplicado — solo se usará la primera columna de origen",
+      "duplicateAria": "Mapeo duplicado: solo se usará la primera columna de origen",
       "mappedAria": "Columna mapeada",
       "expectedSkipAria": "Columna de metadatos de Kobo omitida intencionalmente",
-      "skippedAria": "Columna omitida — revisar antes de continuar",
+      "skippedAria": "Columna omitida: revisar antes de continuar",
       "duplicate": "Duplicada",
       "mapped": "Mapeada",
       "autoSkipped": "Omitida automáticamente",
@@ -598,7 +640,7 @@
       "back": "Atrás",
       "continue": "Continuar a la vista previa",
       "duplicateWarning": "Varias columnas de origen están mapeadas al mismo campo de destino. Solo se usará el primer mapeo; los duplicados están resaltados. (Las columnas de URL de foto son una excepción: varias columnas pueden mapearse a URL de foto para árboles con varias fotos.)",
-      "skippedNotUploaded": "Omitida — no se subirá",
+      "skippedNotUploaded": "Omitida: no se subirá",
       "requiredField": "Campo obligatorio",
       "matchHeadingsTitle": "Emparejar encabezados del archivo",
       "matchHeadingsDescription": "Empareja los encabezados de tu archivo con la información de árboles que GainForest necesita. {count, plural, one {# encabezado detectado.} other {# encabezados detectados.}}",
@@ -616,7 +658,7 @@
       "photos": "Fotos",
       "duplicateWarningShort": "Algunos encabezados coinciden con la misma información. Solo se usará la primera coincidencia.",
       "matched": "Emparejado",
-      "skippedWillNotSave": "Omitido — no se guardará",
+      "skippedWillNotSave": "Omitido: no se guardará",
       "duplicateTarget": "Destino duplicado",
       "continueToPreview": "Continuar a vista previa"
     },
@@ -670,9 +712,9 @@
       "obscureLabel": "Ocultar mi ubicación exacta",
       "obscureHint": "Publica un círculo aproximado alrededor de un punto aleatorio en lugar del lugar exacto, para que nadie sepa dónde se tomó la foto.",
       "obscureAreaLabel": "Área aproximada",
-      "obscureArea_tight": "Estrecha — radio de unos 300 m",
-      "obscureArea_balanced": "Equilibrada — radio de unos 500 m",
-      "obscureArea_wide": "Amplia — radio de aproximadamente 1 km",
+      "obscureArea_tight": "Estrecha: radio de unos 300 m",
+      "obscureArea_balanced": "Equilibrada: radio de unos 500 m",
+      "obscureArea_wide": "Amplia: radio de aproximadamente 1 km",
       "notesLabel": "Notas",
       "notesPlaceholder": "Notas",
       "batchStoryLabel": "Historia de esta subida",
@@ -853,7 +895,7 @@
     "addTileBody": "Sube más imágenes de campo.",
     "emptyObservationsTitle": "Aún no hay observaciones",
     "emptyObservationsBody": "Agrega tu primera observación desde imágenes de campo.",
-    "emptyHeroDescription": "Las observaciones capturan lo que encuentras en el campo — especies, fotos, lugares y fechas — y construyen la evidencia detrás de tu impacto.",
+    "emptyHeroDescription": "Las observaciones registran las especies, fotos, lugares y fechas que encuentras en el campo. Así reúnen evidencia de tu impacto.",
     "selectAll": "Seleccionar todo",
     "deselectAll": "Deseleccionar todo",
     "removeSelected": "Eliminar seleccionadas",
@@ -1130,7 +1172,8 @@
       "did": "DID",
       "wallet": "Billetera EVM",
       "copyDid": "Copiar DID",
-      "copyWallet": "Copiar dirección de la billetera"
+      "copyWallet": "Copiar dirección de la billetera",
+      "copyFailed": "No se pudo copiar el enlace"
     },
     "errors": {
       "nameRequired": "Añade un nombre antes de guardar.",

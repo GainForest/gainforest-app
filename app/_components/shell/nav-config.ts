@@ -41,7 +41,7 @@ export const NAV_ITEMS: NavSection[] = [
   {
     kind: "section",
     id: "explore",
-    text: "EXPLORE",
+    text: "Explore",
     items: [
       {
         kind: "leaf",
@@ -96,7 +96,7 @@ export const NAV_ITEMS: NavSection[] = [
   {
     kind: "section",
     id: "funding",
-    text: "FUNDING",
+    text: "Funding",
     items: [
       {
         kind: "leaf",

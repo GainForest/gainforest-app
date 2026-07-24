@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import {
   ArrowLeftIcon,
   ImagePlusIcon,
@@ -21,6 +22,8 @@ import { cn } from "@/lib/utils";
 import { manageApiHref, profileBasePath, type ManageTarget } from "@/lib/links";
 import { canCreateRecord, canDeleteRecord, canUpdateRecord } from "../../../../_lib/cgs-permissions";
 import { createRecord, deleteRecord, putRecord, uploadBlob } from "../../../../_lib/mutations";
+import { isReliablyOwnProjectRecord } from "../../../_components/project-record-ownership";
+import { SectionSurface } from "@/components/ui/section-surface";
 
 const ATTACHMENT_COLLECTION = "org.hypercerts.context.attachment";
 const MAX_IMAGE_BYTES = 10 * 1024 * 1024;
@@ -106,9 +109,20 @@ export function ProjectGalleryManagerClient({ target, projectRkey }: { target: M
   const [uploadProgress, setUploadProgress] = useState<UploadProgress>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const modal = useModal();
+  const t = useTranslations("common.projectGallery");
+  const manageT = useTranslations("common.projectManage");
+  const actionT = useTranslations("marketplace.manageProjectCerts.actions");
   const createPermission = canCreateRecord(target);
-  const updatePermission = canUpdateRecord(target);
-  const deletePermission = canDeleteRecord(target);
+  const ownProject = data?.project
+    ? isReliablyOwnProjectRecord({
+        kind: target.kind,
+        did: target.did,
+        currentUserDid: target.currentUserDid,
+        recordDid: data.project.did,
+      })
+    : false;
+  const updatePermission = canUpdateRecord(target, { ownRecord: ownProject });
+  const deletePermission = canDeleteRecord(target, { ownRecord: ownProject });
   const repoOptions = target.kind === "group" ? { repo: target.did } : undefined;
 
   const loadGallery = useCallback(async () => {
@@ -119,18 +133,18 @@ export function ProjectGalleryManagerClient({ target, projectRkey }: { target: M
       const result = (await response.json()) as GalleryResponse | { error?: string };
       if (!response.ok || !("project" in result)) {
         const message = "error" in result ? result.error : null;
-        setError(message ?? "Failed to load project gallery.");
+        setError(message ?? t("upload.errorGeneric"));
         setData(null);
         return;
       }
       setData(result);
     } catch {
-      setError("Could not reach the server.");
+      setError(t("upload.errorGeneric"));
       setData(null);
     } finally {
       setLoading(false);
     }
-  }, [projectRkey, target]);
+  }, [projectRkey, t, target]);
 
   useEffect(() => {
     void loadGallery();
@@ -144,10 +158,13 @@ export function ProjectGalleryManagerClient({ target, projectRkey }: { target: M
   const canAppendToExisting = updatePermission.allowed;
   const canCreateNewGallery = createPermission.allowed;
   const uploadDisabledReason = !data?.project.cid
-    ? "We couldn't prepare this gallery yet. Refresh the page and try again."
+    ? t("upload.errorGeneric")
     : canAppendToExisting || canCreateNewGallery
       ? null
-      : createPermission.reason ?? updatePermission.reason ?? "You cannot add gallery images.";
+      : createPermission.reason ?? updatePermission.reason ?? t("upload.permissionDenied");
+  const existingImagePermissionReason = images.length > 0 && (!updatePermission.allowed || !deletePermission.allowed)
+    ? updatePermission.reason ?? deletePermission.reason ?? t("upload.permissionDenied")
+    : null;
 
   function onFilesChanged(event: ChangeEvent<HTMLInputElement>) {
     const files = Array.from(event.target.files ?? []);
@@ -169,19 +186,19 @@ export function ProjectGalleryManagerClient({ target, projectRkey }: { target: M
       setUploadProgress({ current: 0, total: files.length });
       setError(null);
 
-      for (const file of files) validateImageFile(file);
+      for (const file of files) validateImageFile(file, t("upload.errorNotImage", { name: file.name }), t("upload.errorTooLarge", { name: file.name }));
 
       const content: GalleryContent[] = [];
       for (const [index, file] of files.entries()) {
         setUploadProgress({ current: index + 1, total: files.length });
         const uploaded = await uploadBlob(file, repoOptions);
-        content.push(toBlobContent(uploaded, file));
+        content.push(toBlobContent(uploaded, file, t("upload.errorGeneric")));
       }
 
       await appendImages(data.project, data.galleries, content);
       await loadGallery();
     } catch (uploadError) {
-      setError(uploadError instanceof Error ? uploadError.message : "Failed to add gallery images.");
+      setError(uploadError instanceof Error ? uploadError.message : t("upload.errorGeneric"));
     } finally {
       setPending(null);
       setUploadProgress(null);
@@ -191,7 +208,7 @@ export function ProjectGalleryManagerClient({ target, projectRkey }: { target: M
   async function appendImages(project: ManagedProject, galleries: ManagedGallery[], content: GalleryContent[]) {
     const existingGallery = galleries.find((gallery) => gallery.images.length > 0) ?? galleries[0] ?? null;
     if (existingGallery && canAppendToExisting) {
-      const record = normalizeGalleryRecord(existingGallery.rawRecord, project);
+      const record = normalizeGalleryRecord(existingGallery.rawRecord, project, t("upload.recordTitleProject", { projectTitle: project.title }));
       record.content = [...recordContent(record), ...content];
       await putRecord(ATTACHMENT_COLLECTION, existingGallery.rkey, record, {
         ...(existingGallery.cid ? { swapRecord: existingGallery.cid } : {}),
@@ -201,23 +218,28 @@ export function ProjectGalleryManagerClient({ target, projectRkey }: { target: M
     }
 
     if (!canCreateNewGallery) {
-      throw new Error(createPermission.reason ?? "You cannot create a gallery for this project.");
+      throw new Error(createPermission.reason ?? t("upload.permissionDenied"));
     }
-    if (!project.cid) throw new Error("We couldn't prepare this gallery yet. Refresh the page and try again.");
+    if (!project.cid) throw new Error(t("upload.errorGeneric"));
 
-    await createRecord(ATTACHMENT_COLLECTION, buildNewGalleryRecord(project, content), undefined, repoOptions);
+    await createRecord(
+      ATTACHMENT_COLLECTION,
+      buildNewGalleryRecord(project, content, t("upload.recordTitleProject", { projectTitle: project.title }), t("upload.errorGeneric")),
+      undefined,
+      repoOptions,
+    );
   }
 
   async function performDeleteImage(gallery: ManagedGallery, image: GalleryContentItem) {
     if (!deletePermission.allowed) {
-      throw new Error(deletePermission.reason ?? "You cannot delete this gallery image.");
+      throw new Error(deletePermission.reason ?? t("upload.permissionDenied"));
     }
-    if (!data) throw new Error("Gallery could not be loaded. Refresh the page and try again.");
+    if (!data) throw new Error(t("upload.errorGeneric"));
 
     try {
       setPending({ type: "delete", id: image.id });
       setError(null);
-      const record = normalizeGalleryRecord(gallery.rawRecord, data.project);
+      const record = normalizeGalleryRecord(gallery.rawRecord, data.project, t("upload.recordTitleProject", { projectTitle: data.project.title }));
       const nextContent = recordContent(record).filter((_, index) => index !== image.index);
       if (nextContent.length === 0) {
         await deleteRecord(ATTACHMENT_COLLECTION, gallery.rkey, repoOptions);
@@ -230,7 +252,7 @@ export function ProjectGalleryManagerClient({ target, projectRkey }: { target: M
       }
       await loadGallery();
     } catch (deleteError) {
-      const message = deleteError instanceof Error ? deleteError.message : "Failed to delete gallery image.";
+      const message = deleteError instanceof Error ? deleteError.message : t("cleanup.error");
       setError(message);
       throw new Error(message);
     } finally {
@@ -240,7 +262,7 @@ export function ProjectGalleryManagerClient({ target, projectRkey }: { target: M
 
   function confirmDeleteImage(gallery: ManagedGallery, image: GalleryContentItem, imageNumber: number) {
     if (!deletePermission.allowed) {
-      setError(deletePermission.reason ?? "You cannot delete this gallery image.");
+      setError(deletePermission.reason ?? t("upload.permissionDenied"));
       return;
     }
 
@@ -250,7 +272,7 @@ export function ProjectGalleryManagerClient({ target, projectRkey }: { target: M
         content: (
           <DeleteGalleryImageModal
             imageNumber={imageNumber}
-            projectTitle={data?.project.title ?? "this project"}
+            projectTitle={data?.project.title ?? t("defaultProjectTitle")}
             onConfirm={() => performDeleteImage(gallery, image)}
           />
         ),
@@ -263,7 +285,7 @@ export function ProjectGalleryManagerClient({ target, projectRkey }: { target: M
   async function replaceImage(gallery: ManagedGallery, image: GalleryContentItem, file: File | null) {
     if (!file) return;
     if (!updatePermission.allowed) {
-      setError(updatePermission.reason ?? "You cannot update this gallery image.");
+      setError(updatePermission.reason ?? t("upload.permissionDenied"));
       return;
     }
     if (!data) return;
@@ -271,10 +293,10 @@ export function ProjectGalleryManagerClient({ target, projectRkey }: { target: M
     try {
       setPending({ type: "replace", id: image.id });
       setError(null);
-      validateImageFile(file);
+      validateImageFile(file, t("upload.errorNotImage", { name: file.name }), t("upload.errorTooLarge", { name: file.name }));
       const uploaded = await uploadBlob(file, repoOptions);
-      const record = normalizeGalleryRecord(gallery.rawRecord, data.project);
-      const nextContent = recordContent(record).map((item, index) => index === image.index ? toBlobContent(uploaded, file) : item);
+      const record = normalizeGalleryRecord(gallery.rawRecord, data.project, t("upload.recordTitleProject", { projectTitle: data.project.title }));
+      const nextContent = recordContent(record).map((item, index) => index === image.index ? toBlobContent(uploaded, file, t("upload.errorGeneric")) : item);
       record.content = nextContent;
       await putRecord(ATTACHMENT_COLLECTION, gallery.rkey, record, {
         ...(gallery.cid ? { swapRecord: gallery.cid } : {}),
@@ -282,7 +304,7 @@ export function ProjectGalleryManagerClient({ target, projectRkey }: { target: M
       });
       await loadGallery();
     } catch (replaceError) {
-      setError(replaceError instanceof Error ? replaceError.message : "Failed to replace gallery image.");
+      setError(replaceError instanceof Error ? replaceError.message : t("upload.errorGeneric"));
     } finally {
       setPending(null);
     }
@@ -291,17 +313,17 @@ export function ProjectGalleryManagerClient({ target, projectRkey }: { target: M
   const project = data?.project ?? null;
 
   return (
-    <div className="mx-auto w-full max-w-[1440px] px-4 py-4 sm:px-6 sm:py-6">
+    <div className="mx-auto w-full max-w-[90rem] px-3 py-4 sm:px-5 sm:py-6 lg:px-8">
       <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
         <Button asChild variant="outline" size="sm">
           <Link href={`${profileBasePath(target)}/projects`}>
             <ArrowLeftIcon className="size-4" />
-            Projects
+            {manageT("backToProjects")}
           </Link>
         </Button>
         <Button type="button" variant="ghost" size="sm" onClick={() => void loadGallery()} disabled={loading || pending !== null}>
           <RefreshCcwIcon className={cn("size-4", loading && "animate-spin")} />
-          Refresh
+          {manageT("refresh")}
         </Button>
       </div>
 
@@ -317,7 +339,7 @@ export function ProjectGalleryManagerClient({ target, projectRkey }: { target: M
                 {project.title}
               </h1>
               <p className="mt-2 text-sm leading-6 text-muted-foreground">
-                This is the image gallery for this project. Add, replace, or remove photos that should appear on the organization gallery.
+                {t("defaultDescription")}
               </p>
             </div>
             <div className="shrink-0">
@@ -329,12 +351,18 @@ export function ProjectGalleryManagerClient({ target, projectRkey }: { target: M
                 title={uploadDisabledReason ?? undefined}
               >
                 {pending?.type === "upload" ? <Loader2Icon className="size-4 animate-spin" /> : <ImagePlusIcon className="size-4" />}
-                Add images
+                {t("upload.open")}
               </Button>
             </div>
           </div>
 
           {uploadProgress ? <UploadProgressBar progress={uploadProgress} /> : null}
+
+          {existingImagePermissionReason ? (
+            <p className="rounded-2xl bg-muted px-4 py-3 text-sm text-muted-foreground" role="status">
+              {existingImagePermissionReason}
+            </p>
+          ) : null}
 
           {error ? (
             <div className="flex items-center gap-2 rounded-2xl border border-warn/25 bg-warn/10 px-4 py-3 text-sm text-foreground">
@@ -397,6 +425,7 @@ function GalleryImageTile({
   onDelete: () => void;
 }) {
   void gallery;
+  const t = useTranslations("common.projectGallery");
   const [actionLabel, setActionLabel] = useState<string | null>(null);
   const replacing = pending?.type === "replace" && pending.id === image.id;
   const deleting = pending?.type === "delete" && pending.id === image.id;
@@ -406,11 +435,11 @@ function GalleryImageTile({
     <li className="group relative aspect-square overflow-hidden rounded-lg bg-muted">
       <Image
         src={image.url}
-        alt={`${projectTitle} gallery image ${index + 1}`}
+        alt={t("imageAlt", { projectTitle, index: index + 1 })}
         fill
         sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 180px"
         unoptimized
-        className="object-cover transition duration-500 group-hover:scale-105 group-hover:brightness-[0.55]"
+        className="object-cover transition duration-500 motion-reduce:transition-none group-hover:scale-105 motion-reduce:group-hover:scale-100 group-hover:brightness-[0.55]"
       />
       <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-black/0 opacity-0 transition-opacity group-hover:opacity-100 group-focus-within:opacity-100">
         <div className="flex items-center gap-2">
@@ -419,14 +448,14 @@ function GalleryImageTile({
               "grid size-10 cursor-pointer place-items-center rounded-full bg-white/92 text-foreground shadow-lg backdrop-blur transition hover:bg-white focus-within:ring-2 focus-within:ring-primary/60",
               (!canUpdate || disabled) && "pointer-events-none opacity-50",
             )}
-            title={updateDisabledReason ?? "Replace image"}
-            onMouseEnter={() => setActionLabel("Replace image")}
+            title={updateDisabledReason ?? t("cleanup.remove")}
+            onMouseEnter={() => setActionLabel(t("cleanup.remove"))}
             onMouseLeave={() => setActionLabel(null)}
-            onFocus={() => setActionLabel("Replace image")}
+            onFocus={() => setActionLabel(t("cleanup.remove"))}
             onBlur={() => setActionLabel(null)}
           >
             {replacing ? <Loader2Icon className="size-4 animate-spin" /> : <ReplaceIcon className="size-4" />}
-            <span className="sr-only">Replace image</span>
+            <span className="sr-only">{t("cleanup.remove")}</span>
             <input
               type="file"
               accept="image/*"
@@ -442,20 +471,20 @@ function GalleryImageTile({
           <button
             type="button"
             disabled={!canDelete || disabled}
-            title={deleteDisabledReason ?? "Delete image"}
-            onMouseEnter={() => setActionLabel("Delete image")}
+            title={deleteDisabledReason ?? t("cleanup.remove")}
+            onMouseEnter={() => setActionLabel(t("cleanup.remove"))}
             onMouseLeave={() => setActionLabel(null)}
-            onFocus={() => setActionLabel("Delete image")}
+            onFocus={() => setActionLabel(t("cleanup.remove"))}
             onBlur={() => setActionLabel(null)}
             onClick={onDelete}
             className="grid size-10 place-items-center rounded-full bg-white/92 text-destructive shadow-lg backdrop-blur transition hover:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-destructive/40 disabled:pointer-events-none disabled:opacity-50"
           >
             {deleting ? <Loader2Icon className="size-4 animate-spin" /> : <Trash2Icon className="size-4" />}
-            <span className="sr-only">Delete image</span>
+            <span className="sr-only">{t("cleanup.remove")}</span>
           </button>
         </div>
         <div className="min-h-6 rounded-full bg-black/55 px-3 py-1 text-xs font-medium text-white shadow-sm backdrop-blur">
-          {actionLabel ?? `Image ${index + 1}`}
+          {actionLabel ?? t("projectImageCount", { count: index + 1 })}
         </div>
       </div>
     </li>
@@ -463,16 +492,17 @@ function GalleryImageTile({
 }
 
 function UploadProgressBar({ progress }: { progress: NonNullable<UploadProgress> }) {
+  const t = useTranslations("common.projectGallery.upload");
   const percentage = progress.total > 0 ? Math.round((progress.current / progress.total) * 100) : 0;
 
   return (
-    <div className="rounded-2xl border border-border bg-card px-4 py-3 shadow-sm" role="status" aria-live="polite">
+    <div className="rounded-2xl bg-muted px-4 py-3" role="status" aria-live="polite">
       <div className="mb-2 flex items-center justify-between gap-3 text-sm">
-        <span className="font-medium text-foreground">Uploading {progress.current} of {progress.total}</span>
+        <span className="font-medium text-foreground">{t("progress", { current: progress.current, total: progress.total })}</span>
         <span className="text-xs text-muted-foreground">{percentage}%</span>
       </div>
       <div className="h-2 overflow-hidden rounded-full bg-muted">
-        <div className="h-full rounded-full bg-primary transition-all duration-300" style={{ width: `${percentage}%` }} />
+        <div className="h-full rounded-full bg-primary transition-[width] duration-300 motion-reduce:transition-none" style={{ width: `${percentage}%` }} />
       </div>
     </div>
   );
@@ -488,6 +518,7 @@ function DeleteGalleryImageModal({
   onConfirm: () => Promise<void>;
 }) {
   const modal = useModal();
+  const t = useTranslations("common.projectGallery");
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -503,7 +534,7 @@ function DeleteGalleryImageModal({
       await onConfirm();
       await close();
     } catch (deleteImageError) {
-      setError(deleteImageError instanceof Error ? deleteImageError.message : "Image could not be deleted.");
+      setError(deleteImageError instanceof Error ? deleteImageError.message : t("cleanup.error"));
       setPending(false);
     }
   };
@@ -511,10 +542,8 @@ function DeleteGalleryImageModal({
   return (
     <ModalContent dismissible={!pending} className="space-y-4">
       <ModalHeader>
-        <ModalTitle>Delete image?</ModalTitle>
-        <ModalDescription>
-          This will remove image {imageNumber} from the gallery for “{projectTitle}”. This action cannot be undone.
-        </ModalDescription>
+        <ModalTitle className="font-instrument font-light italic">{t("upload.removeImage", { index: imageNumber })}</ModalTitle>
+        <ModalDescription>{t("cleanup.body")} {projectTitle}</ModalDescription>
       </ModalHeader>
       {error ? (
         <p className={ERROR_MESSAGE}>
@@ -522,28 +551,28 @@ function DeleteGalleryImageModal({
         </p>
       ) : null}
       <ModalFooter>
-        <Button type="button" variant="outline" disabled={pending} onClick={() => void close()}>Cancel</Button>
+        <Button type="button" variant="outline" disabled={pending} onClick={() => void close()}>{t("cleanup.cancel")}</Button>
         <Button type="button" variant="destructive" disabled={pending} onClick={() => void confirm()}>
           {pending ? <Loader2Icon className="size-4 animate-spin" /> : <Trash2Icon className="size-4" />}
-          Delete image
+          {t("cleanup.confirmRemove")}
         </Button>
       </ModalFooter>
     </ModalContent>
   );
 }
 
-function validateImageFile(file: File) {
-  if (!file.type.toLowerCase().startsWith("image/")) throw new Error(`${file.name} is not an image.`);
-  if (file.size > MAX_IMAGE_BYTES) throw new Error(`${file.name} is larger than 10 MB.`);
+function validateImageFile(file: File, notImageMessage: string, tooLargeMessage: string) {
+  if (!file.type.toLowerCase().startsWith("image/")) throw new Error(notImageMessage);
+  if (file.size > MAX_IMAGE_BYTES) throw new Error(tooLargeMessage);
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null;
 }
 
-function toBlobContent(uploaded: UploadBlobResult, file: File): SmallBlobContent {
+function toBlobContent(uploaded: UploadBlobResult, file: File, errorMessage: string): SmallBlobContent {
   const raw = isRecord(uploaded.blob) ? uploaded.blob : uploaded;
-  if (!("ref" in raw) || raw.ref === undefined || raw.ref === null) throw new Error("We could not upload this image. Please try again.");
+  if (!("ref" in raw) || raw.ref === undefined || raw.ref === null) throw new Error(errorMessage);
   return {
     $type: "org.hypercerts.defs#smallBlob",
     blob: {
@@ -555,11 +584,11 @@ function toBlobContent(uploaded: UploadBlobResult, file: File): SmallBlobContent
   };
 }
 
-function buildNewGalleryRecord(project: ManagedProject, content: GalleryContent[]): Record<string, unknown> {
-  if (!project.cid) throw new Error("We couldn't prepare this gallery yet. Refresh the page and try again.");
+function buildNewGalleryRecord(project: ManagedProject, content: GalleryContent[], title: string, errorMessage: string): Record<string, unknown> {
+  if (!project.cid) throw new Error(errorMessage);
   return {
     $type: ATTACHMENT_COLLECTION,
-    title: `${project.title} gallery`,
+    title,
     contentType: "gallery",
     subjects: [{ $type: "com.atproto.repo.strongRef", uri: project.atUri, cid: project.cid }],
     content,
@@ -567,10 +596,10 @@ function buildNewGalleryRecord(project: ManagedProject, content: GalleryContent[
   };
 }
 
-function normalizeGalleryRecord(record: Record<string, unknown>, project: ManagedProject): Record<string, unknown> {
+function normalizeGalleryRecord(record: Record<string, unknown>, project: ManagedProject, fallbackTitle: string): Record<string, unknown> {
   const normalized = { ...record };
   normalized.$type = ATTACHMENT_COLLECTION;
-  normalized.title = typeof normalized.title === "string" && normalized.title.trim() ? normalized.title : `${project.title} gallery`;
+  normalized.title = typeof normalized.title === "string" && normalized.title.trim() ? normalized.title : fallbackTitle;
   normalized.contentType = "gallery";
   normalized.createdAt = typeof normalized.createdAt === "string" ? normalized.createdAt : new Date().toISOString();
   if (!Array.isArray(normalized.subjects) && project.cid) {
@@ -601,25 +630,26 @@ function GallerySkeleton() {
 }
 
 function EmptyGallery() {
+  const t = useTranslations("common.projectGallery");
   return (
-    <div className="flex min-h-72 flex-col items-center justify-center rounded-[2rem] border border-dashed border-border bg-muted/20 px-6 text-center">
+    <SectionSurface variant="muted" className="flex min-h-72 flex-col items-center justify-center text-center">
       <ImagePlusIcon className="mb-4 size-10 text-primary" />
-      <h2 className="font-instrument text-2xl font-light italic tracking-[-0.02em] text-foreground">No gallery images yet</h2>
-      <p className="mt-2 max-w-md text-sm leading-6 text-muted-foreground">
-        Add the first image to start showing this project in the organization gallery.
-      </p>
-    </div>
+      <h2 className="font-instrument text-2xl font-light italic tracking-[-0.02em] text-foreground">{t("emptyTitle")}</h2>
+      <p className="mt-2 max-w-md text-sm leading-6 text-muted-foreground">{t("emptyBody")}</p>
+    </SectionSurface>
   );
 }
 
 function ErrorState({ message, onRetry }: { message: string; onRetry: () => void }) {
+  const t = useTranslations("common.projectGallery");
+  const actionT = useTranslations("marketplace.manageProjectCerts.actions");
   return (
-    <div className="flex min-h-[18rem] flex-col items-center justify-center rounded-[2rem] bg-muted/30 px-6 text-center">
+    <div className="flex min-h-[18rem] flex-col items-center justify-center rounded-[2rem] bg-muted px-6 text-center">
       <TriangleAlertIcon className="mb-4 size-9 text-muted-foreground opacity-70" />
-      <h2 className="font-instrument text-2xl font-medium italic tracking-[-0.02em]">Could not load gallery</h2>
+      <h2 className="font-instrument text-2xl font-medium italic tracking-[-0.02em]">{t("defaultTitle")}</h2>
       <p className="mt-2 max-w-sm text-sm leading-6 text-muted-foreground">{message}</p>
       <Button type="button" variant="outline" size="sm" onClick={onRetry} className="mt-5">
-        Retry
+        {actionT("retry")}
       </Button>
     </div>
   );

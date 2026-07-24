@@ -32,7 +32,7 @@ export default function RouteError({
       <div className="flex size-14 items-center justify-center rounded-full bg-destructive/10 text-destructive">
         <RefreshCwIcon className="size-6" aria-hidden />
       </div>
-      <h1 className="text-xl font-semibold text-foreground">{t("title")}</h1>
+      <h1 className="font-instrument text-xl font-semibold italic text-foreground">{t("title")}</h1>
       <p className="max-w-md text-sm text-muted-foreground">{t("description")}</p>
       <div className="mt-2 flex flex-wrap items-center justify-center gap-2">
         <Button type="button" onClick={reset}>

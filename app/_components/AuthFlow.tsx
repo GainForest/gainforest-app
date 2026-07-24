@@ -60,6 +60,7 @@ import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { ModalContent, ModalDescription, ModalTitle } from "@/components/ui/modal/modal";
 import { useModal } from "@/components/ui/modal/context";
+import { shellHeaderControl } from "./shell/control-recipes";
 
 const AUTH_ERROR_PARAMS = new Set([
   "auth_failed",
@@ -355,10 +356,7 @@ function LoginModal() {
       </div>
 
       <div className="mb-6 text-center">
-        <h2
-          className="mb-2 text-3xl font-light tracking-[-0.02em] text-foreground"
-          style={{ fontFamily: "var(--font-garamond-var)" }}
-        >
+        <h2 className="mb-2 font-instrument text-3xl font-light italic tracking-[-0.02em] text-foreground">
           Get Started
         </h2>
         <p className="text-sm text-muted-foreground">Sign up or sign in to your account</p>
@@ -485,8 +483,8 @@ export function SignInPrompt({ collapsed = false }: { collapsed?: boolean }) {
 function AuthSkeleton() {
   // Mirrors the resolved AuthenticatedMenu trigger: a single round avatar.
   return (
-    <div className="flex items-center p-1">
-      <div className="skeleton h-8 w-8 rounded-full" />
+    <div className="flex items-center">
+      <div className={cn("skeleton rounded-full", shellHeaderControl.icon)} />
     </div>
   );
 }
@@ -507,7 +505,7 @@ function UnauthenticatedButtons() {
   };
 
   return (
-    <Button size="sm" onClick={openAuth}>
+    <Button size="sm" className={shellHeaderControl.pill} onClick={openAuth}>
       {t("getStarted")}
     </Button>
   );
@@ -931,7 +929,7 @@ function AuthenticatedMenu({
         aria-label={displayLabel}
         aria-expanded={open}
         aria-haspopup="menu"
-        className="rounded-full p-0.5 ring-1 ring-border transition-shadow hover:ring-primary/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
+        className={cn("rounded-full p-0.5 ring-1 ring-border transition-shadow hover:ring-primary/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50", shellHeaderControl.icon)}
       >
         <AccountDot avatarUrl={triggerAvatarUrl} label={displayLabel} icon={triggerIcon} className="h-8 w-8" imageSizes="32px" />
       </button>

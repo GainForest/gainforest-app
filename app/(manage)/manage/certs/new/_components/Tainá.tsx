@@ -1,8 +1,9 @@
 "use client";
 
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { XIcon } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { useTranslations } from "next-intl";
 import { renderPetAnimated, type CodexPetState } from "@/app/_lib/codex-pet";
 import { TAINA_SIM } from "@/app/_lib/taina-sim";
 import { cn } from "@/lib/utils";
@@ -20,17 +21,6 @@ import { cn } from "@/lib/utils";
 //
 // Chat streams from `/api/sim-chat`, which builds the system prompt from
 // Tainá's constitution + style records on her owner's PDS.
-
-// English copy (ported from gainforest-app's i18n `taina.*` keys, retuned
-// from "welcome a landing visitor" to "help write a Bumicert").
-const COPY = {
-  role: "Your Cert writing companion",
-  greetingHello: "Hi; I'm Tainá. Writing a Cert? I can help you make it land.",
-  greetingHint:
-    "Ask me how to title it, what to lead the summary with, or what evidence funders look for — or paste a draft and I'll react.",
-  placeholder: "Ask me for tips…",
-  thinking: "Tainá is thinking…",
-} as const;
 
 interface ChatMessage {
   role: "user" | "assistant";
@@ -118,6 +108,7 @@ function TaináChatCard({
   className?: string;
   onClose?: () => void;
 }) {
+  const t = useTranslations("bumicert.create.draft.taina");
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState("");
   const [streaming, setStreaming] = useState(false);
@@ -147,14 +138,12 @@ function TaináChatCard({
         body: JSON.stringify({ messages: next }),
       });
       if (!res.ok) {
-        const err = await res.json().catch(() => ({}));
-        const reason = err.error || "Something went wrong.";
         const friendly =
           res.status === 503
-            ? "I'm not wired up yet; Tainá's chat is not set up on this server."
+            ? t("errors.notConfigured")
             : res.status === 502
-              ? "Tainá's chat is briefly unreachable. Try again in a moment."
-              : reason;
+              ? t("errors.unreachable")
+              : t("errors.generic");
         setMessages((prev) => [
           ...prev,
           { role: "assistant", content: `⚠️ ${friendly}` },
@@ -165,7 +154,7 @@ function TaináChatCard({
       if (!reader) {
         setMessages((prev) => [
           ...prev,
-          { role: "assistant", content: "⚠️ I couldn't start a reply." },
+          { role: "assistant", content: `⚠️ ${t("errors.startReply")}` },
         ]);
         return;
       }
@@ -208,7 +197,7 @@ function TaináChatCard({
           const updated = [...prev];
           updated[updated.length - 1] = {
             role: "assistant",
-            content: "⚠️ No response received.",
+            content: `⚠️ ${t("errors.noResponse")}`,
           };
           return updated;
         });
@@ -219,8 +208,7 @@ function TaináChatCard({
         ...prev,
         {
           role: "assistant",
-          content:
-            "⚠️ Could not reach Tainá's chat; check your connection and try again.",
+          content: `⚠️ ${t("errors.unreachable")}`,
         },
       ]);
     } finally {
@@ -241,9 +229,9 @@ function TaináChatCard({
         {messages.length === 0 && (
           <div className="rounded-2xl bg-foreground/5 px-3 py-2 text-foreground/70">
             <p>
-              <span aria-hidden>🌿</span> {COPY.greetingHello}
+              <span aria-hidden>🌿</span> {t("greetingHello")}
             </p>
-            <p className="mt-1 text-foreground/55">{COPY.greetingHint}</p>
+            <p className="mt-1 text-foreground/55">{t("greetingHint")}</p>
           </div>
         )}
         {messages.map((m, i) => (
@@ -275,14 +263,14 @@ function TaináChatCard({
           <div className="text-[15px] font-medium text-foreground">
             {TAINA_SIM.name}
           </div>
-          <div className="truncate text-[11px] text-foreground/55">{COPY.role}</div>
+          <div className="truncate text-[11px] text-foreground/55">{t("role")}</div>
         </div>
         {onClose ? (
           <button
             type="button"
             onClick={onClose}
             className="grid h-7 w-7 place-items-center rounded-full text-foreground/55 hover:bg-foreground/5 hover:text-foreground"
-            aria-label="Close chat"
+            aria-label={t("close")}
           >
             <XIcon className="size-4" />
           </button>
@@ -297,7 +285,7 @@ function TaináChatCard({
       />
       <div
         role="form"
-        aria-label="Ask Tainá"
+        aria-label={t("ask")}
         className="absolute inset-x-0 bottom-0 z-20 flex items-end gap-2 px-3 pt-2 pb-3"
       >
         <textarea
@@ -310,7 +298,7 @@ function TaináChatCard({
               void sendMessage();
             }
           }}
-          placeholder={streaming ? COPY.thinking : COPY.placeholder}
+          placeholder={streaming ? t("thinking") : t("placeholder")}
           rows={1}
           className="max-h-24 min-h-[36px] flex-1 resize-none rounded-2xl border border-border-soft bg-background/70 px-3.5 py-2 text-[13px] outline-none focus:border-primary/60"
         />
@@ -319,7 +307,7 @@ function TaináChatCard({
           onClick={() => void sendMessage()}
           disabled={streaming || !input.trim()}
           className="grid size-9 shrink-0 place-items-center rounded-full bg-primary text-primary-foreground transition-colors hover:bg-primary-dark disabled:cursor-not-allowed disabled:opacity-40"
-          aria-label="Send"
+          aria-label={t("send")}
         >
           ↑
         </button>
@@ -330,21 +318,16 @@ function TaináChatCard({
 
 // ─── Desktop: inline docked chat below the live preview ──────────────
 export function TaináChatDock() {
-  return (
-    <div>
-      <p className="mb-3 text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground/70">
-        Tips from Tainá
-      </p>
-      <TaináChatCard className="h-[26rem]" />
-    </div>
-  );
+  return <TaináChatCard className="h-[26rem]" />;
 }
 
 // ─── Mobile: fixed sprite trigger + bottom-sheet chat ────────────────
 // Render this inside the page's fixed bottom-right button stack, above the
 // "Preview" button, so it sits exactly where the old "Tips" button did.
 export function TaináMobileTrigger() {
+  const t = useTranslations("bumicert.create.draft.taina");
   const [open, setOpen] = useState(false);
+  const reduceMotion = useReducedMotion();
 
   // Lock body scroll while the sheet is open (matches the Preview sheet).
   useEffect(() => {
@@ -361,7 +344,7 @@ export function TaináMobileTrigger() {
       <button
         type="button"
         onClick={() => setOpen(true)}
-        aria-label="Ask Tainá for tips"
+        aria-label={t("open")}
         className="grid size-14 place-items-center rounded-full border border-border-soft bg-background shadow-lg"
       >
         <TaináSprite size={44} />
@@ -372,17 +355,18 @@ export function TaináMobileTrigger() {
           <motion.div className="fixed inset-0 z-50 xl:hidden" initial={false}>
             <motion.div
               className="absolute inset-0 bg-foreground/40 backdrop-blur-sm"
-              initial={{ opacity: 0 }}
+              initial={reduceMotion ? false : { opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
+              transition={{ duration: reduceMotion ? 0 : 0.2 }}
               onClick={() => setOpen(false)}
             />
             <motion.div
               className="absolute inset-x-0 bottom-0 rounded-t-3xl bg-background px-4 pb-6 pt-3 shadow-2xl"
-              initial={{ y: "100%" }}
+              initial={reduceMotion ? false : { y: "100%" }}
               animate={{ y: 0 }}
-              exit={{ y: "100%" }}
-              transition={{ type: "spring", stiffness: 320, damping: 34 }}
+              exit={reduceMotion ? { opacity: 0 } : { y: "100%" }}
+              transition={reduceMotion ? { duration: 0 } : { type: "spring", stiffness: 320, damping: 34 }}
             >
               <div className="mx-auto mb-3 h-1.5 w-10 rounded-full bg-muted-foreground/25" />
               <TaináChatCard className="h-[68vh] border-0" onClose={() => setOpen(false)} />

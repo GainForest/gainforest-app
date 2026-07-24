@@ -1,29 +1,20 @@
 "use client";
 
-import { useEffect, useState, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
+import { useLocale, useTranslations } from "next-intl";
 import Link from "next/link";
-import { LeafIcon } from "lucide-react";
+import { ArrowUpRightIcon } from "lucide-react";
+import { SectionSurface } from "@/components/ui/section-surface";
 import { Skeleton } from "@/components/ui/skeleton";
+import { DisplayHeading } from "@/components/ui/typography";
 import {
-  deviceLabel,
   deviceTone,
   devicesSummary,
-  formatUptime,
   type Device,
   type DevicesSnapshot,
 } from "../_lib/devices";
 import { TONE_DOT, TONE_TEXT } from "./StatusPill";
-import { formatRelative, formatNumber } from "../_lib/format";
 import { PictureHero } from "./PictureHero";
-
-// Field-Pi liveness board — a port of GainForest/pi-taina-monitor re-skinned
-// in the gainforest.earth editorial system. Seeds from the server snapshot
-// (instant paint), then re-polls /api/devices every 60s (the Pi heartbeat
-// cadence) so "is Pi X up?" stays current without a reload.
-//
-// The signal we lead with is liveness: a status dot + "last seen Xm ago",
-// then the system vitals the agent embeds (CPU temp, RAM, disk, load, uptime)
-// and the local Tainá draft queue.
 
 const POLL_MS = 60_000;
 const MONITOR_URL = "https://github.com/GainForest/pi-taina-monitor";
@@ -35,11 +26,14 @@ const EMPTY_SNAPSHOT: DevicesSnapshot = {
 };
 
 export function DeviceMonitor({ initial }: { initial?: DevicesSnapshot }) {
+  const locale = useLocale();
+  const t = useTranslations("common.devices");
   const [snapshot, setSnapshot] = useState<DevicesSnapshot>(initial ?? EMPTY_SNAPSHOT);
   const [loading, setLoading] = useState(!initial);
+  const hasSuccessfulSnapshot = useRef(Boolean(initial));
 
   useEffect(() => {
-    if (initial && !initial.configured) return; // nothing to poll
+    if (initial && !initial.configured) return;
     const controller = new AbortController();
     let timer: ReturnType<typeof setTimeout> | undefined;
     let cancelled = false;
@@ -49,9 +43,17 @@ export function DeviceMonitor({ initial }: { initial?: DevicesSnapshot }) {
         const res = await fetch("/api/devices", { signal: controller.signal });
         if (!res.ok) throw new Error(String(res.status));
         const next = (await res.json()) as DevicesSnapshot;
-        if (!cancelled && next.configured) setSnapshot(next);
+        if (!cancelled) {
+          // A valid unconfigured response is also authoritative. Without
+          // storing it, the route mistakes "not connected" for a true empty
+          // device list because /devices mounts without a server snapshot.
+          hasSuccessfulSnapshot.current = true;
+          setSnapshot(next);
+        }
       } catch {
-        /* keep last good snapshot */
+        if (!cancelled && !hasSuccessfulSnapshot.current) {
+          setSnapshot((current) => ({ ...current, error: "unavailable" }));
+        }
       } finally {
         if (!cancelled) {
           setLoading(false);
@@ -71,120 +73,90 @@ export function DeviceMonitor({ initial }: { initial?: DevicesSnapshot }) {
 
   const statusAction = snapshot.configured && total > 0 ? (
     <div className="flex flex-col items-start gap-2 lg:items-end">
-      <div className="inline-flex items-center gap-2.5 rounded-full border border-border bg-background/65 px-4 py-2 shadow-sm shadow-primary/5 backdrop-blur-xl">
-        <span className={`relative inline-flex h-2.5 w-2.5 ${healthy === total ? "text-ok" : healthy === 0 ? "text-down" : "text-warn"}`}>
-          <span className="pulse-dot inline-block h-2.5 w-2.5 rounded-full bg-current" />
+      <div className="inline-flex items-center gap-2.5 rounded-full bg-background/80 px-4 py-2 backdrop-blur-xl">
+        <span className={`relative inline-flex size-2.5 ${healthy === total ? "text-ok" : healthy === 0 ? "text-down" : "text-warn"}`}>
+          <span className="pulse-dot inline-block size-2.5 rounded-full bg-current" />
         </span>
-        <span className="text-[14px] font-medium text-foreground">
-          {healthy} of {total} online
+        <span className="text-sm font-medium text-foreground">
+          {t("summary.online", { healthy, total })}
         </span>
       </div>
-      <span className="text-[12.5px] text-muted-foreground">
-        updated {timeAgo(snapshot.fetchedAt)}
+      <span className="text-xs text-muted-foreground">
+        {t("summary.updated", { time: relativeTime(snapshot.fetchedAt, locale) })}
       </span>
     </div>
   ) : null;
 
   return (
-    <section className="-mt-14 bg-background pb-20 md:pb-28">
+    <section className="-mt-14 bg-background pb-6 md:pb-8">
       <PictureHero
         lightSrc="/assets/media/images/devices/devices-hero-light@2x.webp"
         darkSrc="/assets/media/images/devices/devices-hero-dark@2x.webp"
-        imageAlt="Misty regenerative landscape for GainForest field devices"
-        eyebrow="Field updates"
-        icon={<LeafGlyph />}
-        title="Tainá"
-        accent="field devices"
-        lede="Field devices running Tainá send regular updates so teams can see which tools are active and ready."
+        imageAlt={t("hero.imageAlt")}
+        title={t("hero.title")}
+        accent={t("hero.accent")}
+        lede={t("hero.lede")}
         actions={statusAction}
       />
 
-      <div className="relative z-10 mx-auto max-w-6xl px-6 pt-6">
+      <div className="relative z-10 mx-auto max-w-6xl px-3 pt-6 sm:px-5 lg:px-8">
         {!snapshot.configured ? (
           <NotConfigured />
         ) : snapshot.error && snapshot.devices.length === 0 ? (
-          <Notice
-            title="Could not load field updates"
-            body="The devices may still be working; this page just cannot read them right now."
-          />
+          <Notice tone="error" title={t("error.title")} body={t("error.body")} />
         ) : loading ? (
           <DeviceCardsSkeleton />
         ) : snapshot.devices.length === 0 ? (
-          <Notice
-            title="No field devices yet"
-            body="Once a field device sends its first update, it will appear here."
-          />
+          <Notice tone="empty" title={t("empty.title")} body={t("empty.body")} />
         ) : (
-          <ul role="list" className="mt-8 grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
-            {snapshot.devices.map((d) => (
-              <li key={d.id}>
-                <DeviceCard device={d} />
+          <ul role="list" className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
+            {snapshot.devices.map((device) => (
+              <li key={device.id}>
+                <DeviceCard device={device} />
               </li>
             ))}
           </ul>
         )}
-
       </div>
     </section>
   );
 }
 
-// ── Card ───────────────────────────────────────────────────────────────────
-
 function DeviceCardsSkeleton() {
-  // Mirrors the real DeviceCard: header (name + handle + status pill), a
-  // "Last reported" baseline row, a "Device health" section (uppercase label +
-  // multi-column readings), a "Tainá activity" section (label + 3 stat boxes),
-  // and a tags footer separated by a top border.
+  const t = useTranslations("common.devices");
   return (
-    <ul role="list" className="mt-8 grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3" aria-label="Loading field updates">
+    <ul role="list" className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3" aria-label={t("loadingAria")}>
       {Array.from({ length: 6 }).map((_, index) => (
-        <li key={index} className="flex h-full flex-col gap-5 rounded-2xl border border-border-soft bg-surface p-5">
-          {/* Header */}
+        <li key={index} className="flex h-full flex-col gap-4 rounded-2xl bg-muted/60 p-4 sm:p-5">
           <div className="flex items-start justify-between gap-3">
-            <div className="min-w-0 space-y-1.5">
-              <Skeleton className="h-4 w-32 rounded-full" />
-              <Skeleton className="h-3 w-24 rounded-full" />
-            </div>
+            <Skeleton className="h-4 w-32 rounded-full" />
             <Skeleton className="h-6 w-20 shrink-0 rounded-full" />
           </div>
-
-          {/* Last reported */}
           <div className="flex items-baseline justify-between gap-2">
             <Skeleton className="h-3 w-24 rounded-full" />
             <Skeleton className="h-3 w-16 rounded-full" />
           </div>
-
-          {/* Device health */}
           <div>
-            <Skeleton className="mb-2.5 h-2.5 w-24 rounded-full" />
+            <Skeleton className="mb-2.5 h-3 w-24 rounded-full" />
             <div className="grid grid-cols-2 gap-x-5 gap-y-3.5 sm:grid-cols-3">
-              {Array.from({ length: 3 }).map((_, i) => (
-                <div key={i} className="space-y-1.5">
+              {Array.from({ length: 3 }).map((__, readingIndex) => (
+                <div key={readingIndex} className="space-y-1.5">
                   <Skeleton className="h-2.5 w-12 rounded-full" />
                   <Skeleton className="h-3.5 w-14 rounded-full" />
                 </div>
               ))}
             </div>
           </div>
-
-          {/* Tainá activity */}
           <div>
-            <Skeleton className="mb-2.5 h-2.5 w-24 rounded-full" />
+            <Skeleton className="mb-2.5 h-3 w-24 rounded-full" />
             <div className="grid grid-cols-3 gap-2">
-              {Array.from({ length: 3 }).map((_, i) => (
-                <div key={i} className="space-y-1.5 rounded-lg bg-surface-sunken/60 px-2.5 py-2">
+              {Array.from({ length: 3 }).map((__, statIndex) => (
+                <div key={statIndex} className="space-y-1.5 rounded-lg bg-background/70 px-2.5 py-2">
                   <Skeleton className="h-2.5 w-full rounded-full" />
                   <Skeleton className="h-4 w-8 rounded-full" />
                 </div>
               ))}
             </div>
-          </div>
-
-          {/* Tags footer */}
-          <div className="mt-auto flex flex-wrap gap-1.5 border-t border-border-soft pt-4">
-            <Skeleton className="h-5 w-14 rounded-md" />
-            <Skeleton className="h-5 w-16 rounded-md" />
           </div>
         </li>
       ))}
@@ -193,6 +165,8 @@ function DeviceCardsSkeleton() {
 }
 
 function DeviceCard({ device }: { device: Device }) {
+  const locale = useLocale();
+  const t = useTranslations("common.devices");
   const tone = deviceTone(device.status);
   const sys = device.system;
   const taina = device.taina;
@@ -202,121 +176,107 @@ function DeviceCard({ device }: { device: Device }) {
     (sys.tempC != null || sys.memUsedPct != null || sys.diskUsedPct != null || cpuPct != null || sys.uptimeS != null);
   const hasActivity = taina != null && (taina.drafts != null || taina.draftsWithImages != null || taina.whitelist != null);
 
+  const uptime = (seconds: number) => {
+    const minutes = Math.max(1, Math.round(seconds / 60));
+    const hours = Math.floor(minutes / 60);
+    const days = Math.floor(hours / 24);
+    if (days > 0) return t("duration.daysHours", { days, hours: hours % 24 });
+    if (hours > 0) return t("duration.hoursMinutes", { hours, minutes: minutes % 60 });
+    return t("duration.minutes", { minutes });
+  };
+
   return (
-    <article className="flex h-full flex-col gap-5 rounded-2xl border border-border-soft bg-surface p-5 shadow-[0_8px_26px_-20px_rgba(20,30,15,0.3)]">
+    <article className="flex h-full flex-col gap-4 rounded-2xl bg-muted/60 p-4 sm:p-5">
       <header className="flex items-start justify-between gap-3">
-        <div className="min-w-0">
-          <h2 className="truncate font-mono text-[15px] font-semibold text-foreground">
-            {device.name}
-          </h2>
-          {taina?.handle && (
-            <Link
-              href={`https://bsky.app/profile/${taina.handle}`}
-              target="_blank"
-              rel="noreferrer"
-              className="mt-0.5 inline-flex max-w-full items-center gap-1 truncate text-[12px] text-foreground/55 underline-offset-2 hover:text-primary hover:underline"
-            >
-              <LeafGlyph /> {taina.handle}
-            </Link>
-          )}
-        </div>
-        <span
-          className={`inline-flex shrink-0 items-center gap-1.5 rounded-full border border-border-soft bg-background px-2.5 py-1 text-[12px] font-medium ${TONE_TEXT[tone]}`}
-        >
-          <span className={`relative inline-flex h-2 w-2 ${TONE_DOT[tone]}`}>
-            <span className={`inline-block h-2 w-2 rounded-full bg-current ${tone === "ok" ? "pulse-dot" : ""}`} />
+        <DisplayHeading as="h2" className="truncate text-lg text-foreground">{device.name}</DisplayHeading>
+        <span className={`inline-flex shrink-0 items-center gap-1.5 rounded-full bg-background/80 px-2.5 py-1 text-xs font-medium ${TONE_TEXT[tone]}`}>
+          <span className={`relative inline-flex size-2 ${TONE_DOT[tone]}`}>
+            <span className={`inline-block size-2 rounded-full bg-current ${tone === "ok" ? "pulse-dot" : ""}`} />
           </span>
-          {deviceLabel(device.status)}
+          {t(`status.${device.status}` as never)}
         </span>
       </header>
 
-      {/* Liveness — the single signal users care about most */}
-      <div className="flex items-baseline justify-between gap-2 text-[13px]">
-        <span className="text-foreground/55">Last reported</span>
+      <div className="flex items-baseline justify-between gap-2 text-sm">
+        <span className="text-muted-foreground">{t("card.lastReported")}</span>
         <span className="font-medium text-foreground">
-          {device.lastPing ? formatRelative(device.lastPing) : "never"}
+          {device.lastPing ? relativeTime(device.lastPing, locale) : t("card.never")}
         </span>
       </div>
 
-      {/* Device health */}
-      {hasHealth && sys && (
-        <Section title="Device health">
+      {hasHealth && sys ? (
+        <CardSection title={t("card.health")}>
           <div className="grid grid-cols-2 gap-x-5 gap-y-3.5 sm:grid-cols-3">
-            {sys.tempC != null && (
-              <Reading label="Temperature" value={`${sys.tempC.toFixed(1)}°C`} tone={tempTone(sys.tempC)} />
-            )}
-            {sys.memUsedPct != null && <Gauge label="Memory" pct={sys.memUsedPct} />}
-            {sys.diskUsedPct != null && <Gauge label="Storage" pct={sys.diskUsedPct} />}
-            {cpuPct != null && <Gauge label="Processor" pct={cpuPct} />}
-            {sys.uptimeS != null && <Reading label="Uptime" value={formatUptime(sys.uptimeS)} />}
+            {sys.tempC != null ? <Reading label={t("card.temperature")} value={`${sys.tempC.toFixed(1)}°C`} tone={tempTone(sys.tempC)} /> : null}
+            {sys.memUsedPct != null ? <Gauge label={t("card.memory")} pct={sys.memUsedPct} /> : null}
+            {sys.diskUsedPct != null ? <Gauge label={t("card.storage")} pct={sys.diskUsedPct} /> : null}
+            {cpuPct != null ? <Gauge label={t("card.processor")} pct={cpuPct} /> : null}
+            {sys.uptimeS != null ? <Reading label={t("card.uptime")} value={uptime(sys.uptimeS)} /> : null}
           </div>
-          {sys.throttled && (
-            <p className="mt-3 inline-flex items-center gap-1.5 rounded-md bg-down/10 px-2 py-1 text-[11.5px] font-medium text-down">
-              <span aria-hidden className="inline-block h-1.5 w-1.5 rounded-full bg-current" />
-              Running slow — may need attention
+          {sys.throttled ? (
+            <p className="mt-3 inline-flex items-center gap-1.5 rounded-md bg-down/10 px-2 py-1 text-xs font-medium text-down">
+              <span aria-hidden className="inline-block size-1.5 rounded-full bg-current" />
+              {t("card.slow")}
             </p>
-          )}
-        </Section>
-      )}
+          ) : null}
+        </CardSection>
+      ) : null}
 
-      {/* Tainá activity */}
-      {hasActivity && taina && (
-        <Section title="Tainá activity">
+      {hasActivity && taina ? (
+        <CardSection title={t("activity.title")}>
           <div className="grid grid-cols-3 gap-2">
             <Stat
-              label="Saved observations"
+              label={t("activity.saved")}
               value={taina.drafts}
-              sub={taina.oldestDraftIso ? `oldest ${formatRelative(taina.oldestDraftIso)}` : undefined}
+              sub={taina.oldestDraftIso ? t("activity.oldest", { time: relativeTime(taina.oldestDraftIso, locale) }) : undefined}
             />
-            <Stat label="With photos" value={taina.draftsWithImages} />
-            <Stat label="Allowed users" value={taina.whitelist} />
+            <Stat label={t("activity.withPhotos")} value={taina.draftsWithImages} />
+            <Stat label={t("activity.allowedUsers")} value={taina.whitelist} />
           </div>
-        </Section>
-      )}
+        </CardSection>
+      ) : null}
 
-      {device.tags.length > 0 && (
-        <footer className="mt-auto flex flex-wrap gap-1.5 border-t border-border-soft pt-4">
-          {device.tags.map((t) => (
-            <span key={t} className="rounded-md bg-surface-sunken px-2 py-0.5 text-[11px] font-medium text-foreground/55">
-              {t}
+      {device.tags.length > 0 ? (
+        <footer className="mt-auto flex flex-wrap gap-1.5 pt-1">
+          {device.tags.map((tag) => (
+            <span key={tag} className="rounded-md bg-background/70 px-2 py-0.5 text-xs font-medium text-muted-foreground">
+              {tag}
             </span>
           ))}
         </footer>
-      )}
+      ) : null}
     </article>
   );
 }
 
-function Section({ title, children }: { title: string; children: ReactNode }) {
+function CardSection({ title, children }: { title: string; children: ReactNode }) {
   return (
-    <div>
-      <h3 className="mb-2.5 text-[10.5px] font-semibold uppercase tracking-[0.1em] text-foreground/40">{title}</h3>
+    <section>
+      <DisplayHeading as="h3" className="mb-2.5 text-lg text-foreground">{title}</DisplayHeading>
       {children}
-    </div>
+    </section>
   );
 }
 
-/** A labelled reading whose value is text (temperature, uptime). */
 function Reading({ label, value, tone }: { label: string; value: string; tone?: string }) {
   return (
     <div>
-      <div className="text-[11px] font-medium text-foreground/50">{label}</div>
-      <div className={`mt-1 font-mono text-[14px] font-semibold tabular-nums ${tone ?? "text-foreground"}`}>{value}</div>
+      <div className="text-xs font-medium text-muted-foreground">{label}</div>
+      <div className={`mt-1 text-sm font-semibold tabular-nums ${tone ?? "text-foreground"}`}>{value}</div>
     </div>
   );
 }
 
-/** A labelled percentage with a usage bar — makes "42%" mean "42% used". */
 function Gauge({ label, pct }: { label: string; pct: number }) {
   const clamped = Math.max(0, Math.min(100, pct));
   const bar = clamped >= 90 ? "bg-down" : clamped >= 75 ? "bg-warn" : "bg-primary/60";
   return (
     <div>
       <div className="flex items-baseline justify-between gap-2">
-        <span className="text-[11px] font-medium text-foreground/50">{label}</span>
-        <span className="font-mono text-[12.5px] font-semibold tabular-nums text-foreground/70">{clamped}%</span>
+        <span className="text-xs font-medium text-muted-foreground">{label}</span>
+        <span className="text-xs font-semibold tabular-nums text-foreground/70">{clamped}%</span>
       </div>
-      <div className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-surface-sunken">
+      <div className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-background/80">
         <div className={`h-full rounded-full ${bar}`} style={{ width: `${Math.max(3, clamped)}%` }} />
       </div>
     </div>
@@ -324,70 +284,73 @@ function Gauge({ label, pct }: { label: string; pct: number }) {
 }
 
 function Stat({ label, value, sub }: { label: string; value: number | null; sub?: string }) {
+  const locale = useLocale();
   return (
-    <div className="rounded-lg bg-surface-sunken/60 px-2.5 py-2">
-      <div className="text-[10.5px] font-medium leading-tight text-foreground/45">{label}</div>
-      <div className="mt-1 font-mono text-[15px] font-semibold text-foreground">
-        {value == null ? "—" : formatNumber(value)}
+    <div className="rounded-lg bg-background/70 px-2.5 py-2">
+      <div className="text-xs font-medium leading-tight text-muted-foreground">{label}</div>
+      <div className="mt-1 text-sm font-semibold tabular-nums text-foreground">
+        {value == null ? "—" : new Intl.NumberFormat(locale).format(value)}
       </div>
-      {sub && <div className="text-[9.5px] text-foreground/45">{sub}</div>}
+      {sub ? <div className="text-[10px] text-muted-foreground">{sub}</div> : null}
     </div>
   );
 }
 
-// ── States ─────────────────────────────────────────────────────────────────
-
 function NotConfigured() {
+  const t = useTranslations("common.devices");
   return (
-    <div className="mt-8 flex flex-col items-center justify-center rounded-2xl border border-dashed border-border px-6 py-16 text-center">
-      <div className="font-garamond text-[24px] text-foreground">Field updates are not connected here</div>
-      <p className="mt-3 max-w-[520px] text-[14.5px] leading-[1.55] text-foreground/65">
-        Field updates are available in the standalone Tainá monitor.
-      </p>
+    <SectionSurface variant="muted" className="flex flex-col items-center justify-center py-10 text-center md:py-12">
+      <DisplayHeading as="h2" className="text-2xl text-foreground">{t("notConfigured.title")}</DisplayHeading>
+      <p className="mt-3 max-w-lg text-sm leading-6 text-muted-foreground">{t("notConfigured.body")}</p>
       <Link
         href={MONITOR_URL}
         target="_blank"
         rel="noreferrer"
-        className="mt-5 inline-flex items-center gap-1.5 rounded-full bg-primary px-5 py-2.5 text-[13.5px] font-medium text-primary-foreground transition-colors hover:bg-primary-dark"
+        className="mt-5 inline-flex min-h-10 items-center gap-1.5 rounded-full bg-primary px-5 py-2.5 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary-dark motion-reduce:transition-none"
       >
-        Open Tainá monitor ↗
+        {t("notConfigured.action")}
+        <ArrowUpRightIcon className="size-4" aria-hidden />
       </Link>
-    </div>
+    </SectionSurface>
   );
 }
 
-function Notice({ title, body }: { title: string; body: string }) {
+function Notice({ title, body, tone }: { title: string; body: string; tone: "error" | "empty" }) {
   return (
-    <div className="mt-8 flex flex-col items-center justify-center rounded-2xl border border-dashed border-border px-6 py-16 text-center">
-      <div className="font-garamond text-[22px] text-foreground">{title}</div>
-      <p className="mt-2 max-w-[460px] text-[14px] leading-[1.5] text-foreground/60">{body}</p>
-    </div>
+    <SectionSurface
+      variant={tone === "error" ? "danger" : "muted"}
+      className="flex flex-col items-center justify-center py-10 text-center md:py-12"
+      role={tone === "error" ? "alert" : "status"}
+    >
+      <DisplayHeading as="h2" className="text-2xl text-foreground">{title}</DisplayHeading>
+      <p className="mt-2 max-w-md text-sm leading-6 text-muted-foreground">{body}</p>
+    </SectionSurface>
   );
 }
 
-function LeafGlyph() {
-  return <LeafIcon width={11} height={11} aria-hidden />;
-}
-
-function tempTone(c: number): string {
-  if (c >= 75) return "text-down";
-  if (c >= 65) return "text-warn";
+function tempTone(celsius: number): string {
+  if (celsius >= 75) return "text-down";
+  if (celsius >= 65) return "text-warn";
   return "text-ok";
 }
 
-/** Load average is jargon; expressed against core count it becomes a CPU
- *  usage % a non-technical reader can parse. Returns null when we can't. */
 function cpuPercent(sys: Device["system"]): number | null {
   if (!sys || sys.load1m == null || !sys.cpus || sys.cpus <= 0) return null;
   return Math.min(100, Math.round((sys.load1m / sys.cpus) * 100));
 }
 
-function timeAgo(iso: string): string {
-  const d = new Date(iso);
-  if (Number.isNaN(d.getTime())) return "just now";
-  const sec = Math.round((Date.now() - d.getTime()) / 1000);
-  if (sec < 45) return "just now";
-  const min = Math.round(sec / 60);
-  if (min < 60) return `${min}m ago`;
-  return `${Math.round(min / 60)}h ago`;
+function relativeTime(iso: string, locale: string): string {
+  const date = new Date(iso);
+  if (Number.isNaN(date.getTime())) return new Intl.RelativeTimeFormat(locale, { numeric: "auto" }).format(0, "second");
+  const seconds = Math.round((date.getTime() - Date.now()) / 1000);
+  const absoluteSeconds = Math.abs(seconds);
+  const formatter = new Intl.RelativeTimeFormat(locale, { numeric: "auto", style: "long" });
+  if (absoluteSeconds < 60) return formatter.format(seconds, "second");
+  const minutes = Math.round(seconds / 60);
+  if (Math.abs(minutes) < 60) return formatter.format(minutes, "minute");
+  const hours = Math.round(minutes / 60);
+  if (Math.abs(hours) < 24) return formatter.format(hours, "hour");
+  const days = Math.round(hours / 24);
+  if (Math.abs(days) < 30) return formatter.format(days, "day");
+  return new Intl.DateTimeFormat(locale, { dateStyle: "medium" }).format(date);
 }

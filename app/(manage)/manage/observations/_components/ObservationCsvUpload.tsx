@@ -237,7 +237,7 @@ export function ObservationCsvUpload({
             <CheckCircle2Icon className="size-7" />
           </span>
           <div>
-            <ModalTitle>{t("doneTitle")}</ModalTitle>
+            <ModalTitle className="font-instrument font-light italic">{t("doneTitle")}</ModalTitle>
             <ModalDescription className="mt-1">{t("doneBody")}</ModalDescription>
           </div>
         </div>
@@ -271,7 +271,7 @@ export function ObservationCsvUpload({
               <ArrowLeftIcon className="size-4" />
             </Button>
             <div>
-              <ModalTitle>{t("title")}</ModalTitle>
+              <ModalTitle className="font-instrument font-light italic">{t("title")}</ModalTitle>
               <ModalDescription className="mt-1">{t("description")}</ModalDescription>
             </div>
           </div>
@@ -344,7 +344,7 @@ export function ObservationCsvUpload({
 
       {summary && file && (phase === "review" || uploading) ? (
         <div className="space-y-3">
-          <div className="flex items-center gap-2 rounded-xl border border-border bg-muted/30 px-3 py-2 text-sm">
+          <div className="flex items-center gap-2 rounded-2xl border border-border bg-muted px-3 py-2 text-sm">
             <FileSpreadsheetIcon className="size-4 shrink-0 text-primary" />
             <span className="min-w-0 flex-1 truncate font-medium text-foreground">{file.name}</span>
             {phase === "review" ? (

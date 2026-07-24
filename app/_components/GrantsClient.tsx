@@ -29,6 +29,7 @@ import {
 } from "../_lib/account-switcher";
 import { createFeedPost } from "../(manage)/manage/_lib/mutations";
 import { REWILDING_GRANT_TAG } from "../_lib/grants";
+import { grantApplicationPermission, type GrantApplicationPermission } from "../grants/application-permission";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { ModalContent, ModalDescription, ModalTitle } from "@/components/ui/modal/modal";
 import { useModal } from "@/components/ui/modal/context";
@@ -71,14 +72,21 @@ type ActingAccount = {
   apiTarget: { kind: "personal" | "group"; did: string } | null;
   /** Base manage route for "create a project" links. */
   projectsBasePath: string;
+  /** Up-front UI gate; publishing still enforces authorization server-side. */
+  applicationPermission: GrantApplicationPermission;
 };
 
 function useActingAccount(sessionDid: string | null): ActingAccount {
-  const { groups } = useAccountList(sessionDid);
+  const { groups, status } = useAccountList(sessionDid);
   const [activeContext] = useActiveAccountContext(sessionDid ?? "");
 
   if (!sessionDid) {
-    return { repo: undefined, apiTarget: null, projectsBasePath: "/manage" };
+    return {
+      repo: undefined,
+      apiTarget: null,
+      projectsBasePath: "/manage",
+      applicationPermission: grantApplicationPermission({ type: "signedOut" }),
+    };
   }
   if (activeContext.type === "group" && activeContext.did) {
     const group = groups.find((entry) => entry.groupDid === activeContext.did) ?? null;
@@ -89,12 +97,18 @@ function useActingAccount(sessionDid: string | null): ActingAccount {
       repo: activeContext.did,
       apiTarget: { kind: "group", did: activeContext.did },
       projectsBasePath: groupManageBasePath(identifier),
+      applicationPermission: grantApplicationPermission({
+        type: "group",
+        accountListStatus: status,
+        membershipRole: group?.role ?? null,
+      }),
     };
   }
   return {
     repo: undefined,
     apiTarget: { kind: "personal", did: sessionDid },
     projectsBasePath: "/manage",
+    applicationPermission: grantApplicationPermission({ type: "personal" }),
   };
 }
 
@@ -113,19 +127,17 @@ export function GrantsClient({ viewerDid, signedIn }: { viewerDid: string | null
   const heroT = useTranslations("marketplace.grants.hero");
 
   return (
-    <section className="-mt-14 bg-background pb-20 md:pb-28">
+    <section className="-mt-14 bg-background pb-6 md:pb-8">
       <PictureHero
         lightSrc="/assets/media/images/donations/donations-hero-light@2x.webp"
         darkSrc="/assets/media/images/donations/donations-hero-dark@2x.webp"
         imageAlt={heroT("imageAlt")}
-        eyebrow={heroT("eyebrow")}
-        icon={<SproutIcon />}
         title={heroT("title")}
         accent={heroT("accent")}
         lede={heroT("lede")}
       />
 
-      <div className="relative z-10 mx-auto max-w-5xl space-y-8 px-6 pt-10">
+      <div className="relative z-10 mx-auto max-w-6xl space-y-8 px-3 pt-6 sm:px-5 lg:px-8">
         <RewildingSection viewerDid={viewerDid} signedIn={signedIn} />
         <InteroperableSection />
       </div>
@@ -150,10 +162,11 @@ function RewildingSection({ viewerDid, signedIn }: { viewerDid: string | null; s
       redirectToLogin();
       return;
     }
+    if (acting.applicationPermission !== "allowed") return;
     modal.pushModal(
       {
         id: "rewilding-apply",
-        dialogWidth: "max-w-lg w-[calc(100%-2rem)]",
+        dialogWidth: "max-w-lg",
         content: (
           <RewildingApplyModal
             acting={acting}
@@ -163,7 +176,7 @@ function RewildingSection({ viewerDid, signedIn }: { viewerDid: string | null; s
               modal.pushModal(
                 {
                   id: "rewilding-applied",
-                  dialogWidth: "max-w-md w-[calc(100%-2rem)]",
+                  dialogWidth: "max-w-md",
                   content: <RewildingSuccessModal projectTitle={title} onClose={closeModal} />,
                 },
                 true,
@@ -183,8 +196,8 @@ function RewildingSection({ viewerDid, signedIn }: { viewerDid: string | null; s
   ];
 
   return (
-    <article className="overflow-hidden rounded-3xl border border-border bg-card">
-      <div className="border-b border-border/60 bg-primary/5 px-6 py-5 sm:px-8">
+    <article className="overflow-hidden rounded-2xl bg-muted">
+      <div className="bg-primary/10 p-4 sm:p-5">
         <div className="flex flex-wrap items-center gap-3">
           <span className="inline-flex size-10 shrink-0 items-center justify-center rounded-2xl bg-primary/15 text-primary">
             <SproutIcon className="size-5" />
@@ -205,21 +218,21 @@ function RewildingSection({ viewerDid, signedIn }: { viewerDid: string | null; s
         </div>
       </div>
 
-      <div className="px-6 py-6 sm:px-8">
+      <div className="p-4 sm:p-5">
         <div className="grid gap-8 lg:grid-cols-[1.05fr_1fr] lg:items-center">
           <div className="min-w-0">
             <p className="max-w-2xl text-sm leading-7 text-muted-foreground">{t("description")}</p>
 
-            <div className="mt-5 flex items-start gap-2.5 rounded-2xl bg-muted/40 px-4 py-3">
+            <div className="mt-5 flex items-start gap-2.5 rounded-2xl bg-background px-4 py-3">
               <DatabaseIcon className="mt-0.5 size-4 shrink-0 text-primary" />
               <p className="text-sm leading-6 text-muted-foreground">{t("support")}</p>
             </div>
 
             {appliedProjectTitle ? (
-              <div className="mt-6 flex items-start gap-3 rounded-2xl border border-primary/30 bg-primary/5 px-4 py-4">
+              <div className="mt-6 flex items-start gap-3 rounded-2xl bg-primary/10 px-4 py-4">
                 <CheckCircle2Icon className="mt-0.5 size-5 shrink-0 text-primary" />
                 <div className="min-w-0">
-                  <p className="text-sm font-medium text-foreground">{t("appliedTitle")}</p>
+                  <h3 className="font-instrument text-lg italic text-foreground">{t("appliedTitle")}</h3>
                   <p className="mt-0.5 text-sm leading-6 text-muted-foreground">
                     {t("appliedNote", { project: appliedProjectTitle })}
                   </p>
@@ -229,7 +242,12 @@ function RewildingSection({ viewerDid, signedIn }: { viewerDid: string | null; s
 
             <div className="mt-6 flex flex-wrap gap-3">
               {appliedProjectTitle ? null : (
-                <Button type="button" size="lg" onClick={openApply}>
+                <Button
+                  type="button"
+                  size="lg"
+                  onClick={openApply}
+                  disabled={signedIn && acting.applicationPermission !== "allowed"}
+                >
                   <SproutIcon />
                   {t("apply")}
                 </Button>
@@ -241,6 +259,11 @@ function RewildingSection({ viewerDid, signedIn }: { viewerDid: string | null; s
                 </a>
               </Button>
             </div>
+            {signedIn && acting.applicationPermission !== "allowed" ? (
+              <p className="mt-3 text-sm text-muted-foreground" role="status">
+                {acting.applicationPermission === "loading" ? t("permissionLoading") : t("permissionDenied")}
+              </p>
+            ) : null}
           </div>
 
           <PdsVisual
@@ -254,12 +277,12 @@ function RewildingSection({ viewerDid, signedIn }: { viewerDid: string | null; s
 
         <div className="mt-8 grid gap-3 sm:grid-cols-2">
           {kits.map((kit) => (
-            <div key={kit.id} className="flex gap-3 rounded-2xl border border-border/70 bg-background/60 p-4">
+            <div key={kit.id} className="flex gap-3 rounded-2xl bg-background p-4">
               <span className="inline-flex size-9 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
                 <kit.Icon className="size-5" />
               </span>
               <div className="min-w-0">
-                <p className="text-sm font-medium text-foreground">{t(`kits.${kit.id}.title`)}</p>
+                <h3 className="font-instrument text-lg italic text-foreground">{t(`kits.${kit.id}.title`)}</h3>
                 <p className="mt-0.5 text-sm leading-6 text-muted-foreground">{t(`kits.${kit.id}.description`)}</p>
               </div>
             </div>
@@ -294,7 +317,7 @@ function RewildingApplyModal({
       const response = await fetch(manageApiHref("/api/manage/projects", acting.apiTarget), { cache: "no-store" });
       const data = (await response.json()) as ApiProject[] | { error?: string };
       if (!response.ok || !Array.isArray(data)) {
-        setError(!Array.isArray(data) && data.error ? data.error : t("errorTitle"));
+        setError(t("errorTitle"));
         setProjects([]);
         return;
       }
@@ -326,6 +349,10 @@ function RewildingApplyModal({
 
   const apply = useCallback(
     async (project: GrantProject) => {
+      if (acting.applicationPermission !== "allowed") {
+        setSubmitError(rewildingT("permissionDenied"));
+        return;
+      }
       setSubmittingRkey(project.rkey);
       setSubmitError(null);
       try {
@@ -342,7 +369,7 @@ function RewildingApplyModal({
         setSubmittingRkey(null);
       }
     },
-    [acting.repo, onApplied, rewildingT, t],
+    [acting.applicationPermission, acting.repo, onApplied, rewildingT, t],
   );
 
   return (
@@ -351,19 +378,19 @@ function RewildingApplyModal({
       <ModalDescription className="mt-1">{t("subtitle")}</ModalDescription>
 
       {projects === null ? (
-        <div className="mt-6 flex items-center gap-2 text-sm text-muted-foreground">
-          <Loader2Icon className="size-4 animate-spin" /> {t("loading")}
+        <div className="mt-6 flex min-h-48 items-center justify-center gap-2 rounded-2xl bg-muted p-4 text-sm text-muted-foreground sm:p-6">
+          <Loader2Icon className="size-4 animate-spin motion-reduce:animate-none" /> {t("loading")}
         </div>
       ) : error ? (
-        <div className="mt-6 flex flex-col items-center justify-center gap-4 rounded-2xl bg-muted/30 px-6 py-10 text-center">
+        <div className="mt-6 flex min-h-48 flex-col items-center justify-center gap-4 rounded-2xl bg-muted p-4 text-center sm:p-6">
           <TriangleAlertIcon className="size-8 text-muted-foreground opacity-70" />
-          <p className="text-sm text-muted-foreground">{error}</p>
+          <h3 className="font-instrument text-xl italic text-foreground">{error}</h3>
           <Button type="button" variant="outline" size="sm" onClick={() => void load()}>
             {t("retry")}
           </Button>
         </div>
       ) : projects.length === 0 ? (
-        <div className="mt-6 flex flex-col items-center justify-center rounded-2xl border border-dashed border-border bg-muted/20 px-6 py-10 text-center">
+        <div className="mt-6 flex min-h-48 flex-col items-center justify-center rounded-2xl bg-muted p-4 text-center sm:p-6">
           <FolderKanbanIcon className="mb-3 size-9 text-primary" />
           <h3 className="font-instrument text-xl font-light italic tracking-[-0.02em] text-foreground">
             {t("noProjectsTitle")}
@@ -378,7 +405,7 @@ function RewildingApplyModal({
         </div>
       ) : (
         <>
-          <div className="group/input-group border-input mt-5 flex h-10 items-center rounded-full border bg-background/70 shadow-xs backdrop-blur transition-[color,box-shadow] focus-within:border-ring focus-within:ring-[3px] focus-within:ring-ring/50">
+          <div className="group/input-group border-input mt-5 flex h-11 items-center rounded-full border bg-background/70 shadow-xs backdrop-blur transition-[color,box-shadow] focus-within:border-ring focus-within:ring-[3px] focus-within:ring-ring/50 sm:h-10">
             <SearchIcon className="ml-3 h-4 w-4 text-muted-foreground" />
             <input
               value={query}
@@ -390,11 +417,11 @@ function RewildingApplyModal({
           </div>
 
           {filtered.length === 0 ? (
-            <p className="mt-5 rounded-2xl bg-muted/40 px-4 py-8 text-center text-sm text-muted-foreground">
+            <p className="mt-5 rounded-2xl bg-muted px-4 py-8 text-center text-sm text-muted-foreground">
               {t("noMatch")}
             </p>
           ) : (
-            <ul className="mt-3 max-h-[46vh] space-y-2 overflow-y-auto pr-1" role="list">
+            <ul className="mt-3 max-h-[46vh] overflow-y-auto rounded-2xl bg-muted divide-y divide-background" role="list">
               {filtered.map((project) => {
                 const submitting = submittingRkey === project.rkey;
                 const disabled = submittingRkey !== null;
@@ -405,9 +432,9 @@ function RewildingApplyModal({
                       onClick={() => void apply(project)}
                       disabled={disabled}
                       aria-label={t("applyWith", { project: project.title })}
-                      className="group flex w-full items-center gap-3 rounded-2xl border border-border bg-card px-3 py-3 text-left transition-colors hover:border-primary/40 hover:bg-surface-sunken focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/45 disabled:cursor-not-allowed disabled:opacity-60"
+                      className="group flex w-full items-center gap-3 px-3 py-3 text-left transition-colors hover:bg-background/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary/45 disabled:cursor-not-allowed disabled:opacity-60"
                     >
-                      <span className="relative size-14 shrink-0 overflow-hidden rounded-xl bg-muted">
+                      <span className="relative size-14 shrink-0 overflow-hidden rounded-xl bg-background">
                         {project.imageUrl ? (
                           <Image src={project.imageUrl} alt="" fill unoptimized sizes="56px" className="object-cover" />
                         ) : (
@@ -424,8 +451,8 @@ function RewildingApplyModal({
                           </span>
                         ) : null}
                       </span>
-                      <span className="grid size-6 shrink-0 place-items-center text-muted-foreground/60 transition-transform group-hover:translate-x-0.5 group-hover:text-primary">
-                        {submitting ? <Loader2Icon className="size-4 animate-spin" /> : <ChevronRightIcon className="size-5" />}
+                      <span className="grid size-6 shrink-0 place-items-center text-muted-foreground/60 transition-transform group-hover:translate-x-0.5 group-hover:text-primary motion-reduce:transform-none motion-reduce:transition-none">
+                        {submitting ? <Loader2Icon className="size-4 animate-spin motion-reduce:animate-none" /> : <ChevronRightIcon className="size-5" />}
                       </span>
                     </button>
                   </li>
@@ -475,17 +502,14 @@ function InteroperableSection() {
   const t = useTranslations("marketplace.grants.interoperable");
 
   return (
-    <article className="overflow-hidden rounded-3xl border border-border bg-card">
-      <div className="px-6 py-6 sm:px-8">
+    <article className="overflow-hidden rounded-2xl bg-muted">
+      <div className="p-4 sm:p-5">
         <div className="flex items-start gap-4">
           <span className="relative size-14 shrink-0 overflow-hidden rounded-2xl border border-border">
             <Image src={MA_EARTH_LOGO_SRC} alt={t("logoAlt")} fill sizes="56px" className="object-cover" />
           </span>
           <div className="min-w-0">
-            <p className="text-[10px] font-medium uppercase tracking-[0.12em] text-muted-foreground">
-              {t("category")}
-            </p>
-            <div className="mt-1.5 flex flex-wrap items-center gap-3">
+            <div className="flex flex-wrap items-center gap-3">
               <h2 className="font-instrument text-2xl font-light italic tracking-[-0.02em] text-foreground sm:text-3xl">
                 {t("grantName")}
               </h2>

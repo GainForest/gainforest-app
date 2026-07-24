@@ -24,17 +24,18 @@ export function RichText({ blocks, className }: { blocks: RichBlock[]; className
 function Block({ block: b }: { block: RichBlock }) {
   switch (b.type) {
     case "heading": {
-      const lvl = Math.min(Math.max(b.level, 1), 3);
-      const cls =
-        lvl <= 1
-          ? "mt-6 font-garamond text-[20px] font-normal tracking-[-0.01em] text-foreground"
-          : lvl === 2
-            ? "mt-5 font-garamond text-[17.5px] font-normal text-foreground"
-            : "mt-4 text-[12px] font-semibold uppercase tracking-[0.1em] text-foreground/55";
+      const level = Math.min(Math.max(b.level, 1), 3);
+      const Heading = level <= 1 ? "h2" : level === 2 ? "h3" : "h4";
+      const className =
+        level <= 1
+          ? "mt-6 text-[20px] tracking-[-0.01em]"
+          : level === 2
+            ? "mt-5 text-[17.5px]"
+            : "mt-4 text-[15px]";
       return (
-        <p className={`${cls} leading-[1.25]`}>
+        <Heading className={`${className} font-instrument italic leading-[1.25] text-foreground`}>
           <Spans spans={b.spans} />
-        </p>
+        </Heading>
       );
     }
     case "paragraph":

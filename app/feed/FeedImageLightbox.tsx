@@ -1,16 +1,13 @@
 "use client";
 
 /**
- * In-feed photo lightbox. Clicking an image in the feed (a row's cover photo or
- * a sighting thumbnail in a summary card) opens this overlay instead of
- * navigating away, so the viewer can look at the photo and like / comment it
- * right there. It reuses the feed's shared FeedInteractions instance, so a like
- * made here is the same record and the same count the row's action bar shows.
+ * In-feed photo dialog. It shares the feed interaction state so likes and
+ * comments stay in sync with the timeline row.
  */
 
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import { ArrowUpRightIcon, UserIcon, XIcon } from "lucide-react";
 import type { ActivityFeedItem } from "../_lib/feed";
@@ -20,6 +17,13 @@ import { formatRelative } from "../_lib/format";
 import { FeedActionBar, type FeedInteractions } from "./FeedActions";
 import { AccountHoverCard } from "@/app/_components/AccountHoverCard";
 import { ResolvedAvatar } from "./ResolvedAvatar";
+import {
+  Dialog,
+  DialogClose,
+  DialogDescription,
+  DialogPlaceholder,
+  DialogTitle,
+} from "@/components/ui/modal/dialog";
 
 export function FeedImageLightbox({
   item,
@@ -34,9 +38,9 @@ export function FeedImageLightbox({
 }) {
   const t = useTranslations("common.feed");
   const [resolved, setResolved] = useState<string | null>(null);
+  const closeButtonRef = useRef<HTMLButtonElement | null>(null);
+  const returnFocusRef = useRef<HTMLElement | null>(null);
 
-  // Resolve the image (an external URL, or a PDS blob ref) each time a new
-  // item opens.
   useEffect(() => {
     setResolved(null);
     if (!item || item.imageUrl || !item.actorDid || !item.imageRef) return;
@@ -49,40 +53,44 @@ export function FeedImageLightbox({
     return () => controller.abort();
   }, [item]);
 
-  // Escape closes; lock body scroll while open.
   useEffect(() => {
-    if (!item) return;
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
-    };
-    document.addEventListener("keydown", onKey);
-    const original = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    return () => {
-      document.removeEventListener("keydown", onKey);
-      document.body.style.overflow = original;
-    };
-  }, [item, onClose]);
+    if (item && document.activeElement instanceof HTMLElement) {
+      returnFocusRef.current = document.activeElement;
+    }
+  }, [item]);
 
   if (!item) return null;
   const src = item.imageUrl ?? resolved;
   const name = item.actorName?.trim() || t("anonymous");
 
+  const closeAndRestoreFocus = () => {
+    const target = returnFocusRef.current;
+    onClose();
+    requestAnimationFrame(() => target?.focus());
+  };
+
   return (
-    <div
-      className="fixed inset-0 z-[95] flex items-center justify-center p-4 sm:p-6"
-      role="dialog"
-      aria-modal="true"
-      aria-label={item.title ?? name}
+    <Dialog
+      open
+      onOpenChange={(open) => {
+        if (!open) closeAndRestoreFocus();
+      }}
     >
-      <button
-        type="button"
-        aria-label={t("actions.closeImage")}
-        onClick={onClose}
-        className="absolute inset-0 bg-foreground/60 backdrop-blur-sm"
-      />
-      <div className="relative z-[1] flex max-h-full w-full max-w-2xl flex-col overflow-hidden rounded-2xl border border-border/60 bg-background shadow-2xl">
-        {/* Header: who shared it + close */}
+      <DialogPlaceholder
+        dialogWidth="max-w-2xl"
+        className="max-h-[calc(100dvh-2rem)] gap-0 overflow-hidden rounded-2xl border-border/60 p-0 shadow-2xl"
+        onOpenAutoFocus={(event) => {
+          event.preventDefault();
+          closeButtonRef.current?.focus();
+        }}
+        onCloseAutoFocus={(event) => {
+          event.preventDefault();
+          returnFocusRef.current?.focus();
+        }}
+      >
+        <DialogTitle className="sr-only">{item.title ?? name}</DialogTitle>
+        <DialogDescription className="sr-only">{formatRelative(item.createdAt)}</DialogDescription>
+
         <div className="flex items-center gap-2.5 border-b border-border/50 px-4 py-3">
           <AccountHoverCard
             did={item.actorDid}
@@ -110,17 +118,18 @@ export function FeedImageLightbox({
             </AccountHoverCard>
             <p className="truncate text-xs text-muted-foreground">{formatRelative(item.createdAt)}</p>
           </div>
-          <button
-            type="button"
-            onClick={onClose}
-            aria-label={t("actions.closeImage")}
-            className="grid size-8 shrink-0 place-items-center rounded-full text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-          >
-            <XIcon className="size-4" />
-          </button>
+          <DialogClose asChild>
+            <button
+              ref={closeButtonRef}
+              type="button"
+              aria-label={t("actions.closeImage")}
+              className="grid size-11 shrink-0 place-items-center rounded-full text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+            >
+              <XIcon className="size-4" />
+            </button>
+          </DialogClose>
         </div>
 
-        {/* Photo */}
         <div className="grid w-full place-items-center bg-muted">
           {src ? (
             <Image
@@ -133,11 +142,10 @@ export function FeedImageLightbox({
               className="h-auto max-h-[60vh] w-full object-contain"
             />
           ) : (
-            <div className="aspect-[4/3] w-full animate-pulse bg-muted" />
+            <div className="aspect-[4/3] w-full animate-pulse bg-muted motion-reduce:animate-none" />
           )}
         </div>
 
-        {/* Caption + like / comment + a way through to the full record */}
         <div className="overflow-y-auto border-t border-border/50 px-4 py-3">
           {item.title ? (
             <p className="text-[15px] font-medium leading-snug text-foreground">{item.title}</p>
@@ -150,13 +158,13 @@ export function FeedImageLightbox({
           <FeedActionBar subjectUri={item.id} signedIn={signedIn} interactions={interactions} />
           <Link
             href={item.href}
-            className="mt-1 inline-flex items-center gap-1 text-xs font-medium text-primary hover:underline"
+            className="mt-1 inline-flex min-h-11 items-center gap-1 text-xs font-medium text-primary hover:underline"
           >
             {t("actions.viewDetails")}
             <ArrowUpRightIcon className="size-3" />
           </Link>
         </div>
-      </div>
-    </div>
+      </DialogPlaceholder>
+    </Dialog>
   );
 }

@@ -67,12 +67,6 @@ function isAcceptedMediaZipFile(file: File): boolean {
     (file.type !== "" && ACCEPTED_MEDIA_ZIP_MIME_TYPES.includes(file.type));
 }
 
-function plainPhotoFolderReadError(error: unknown): string {
-  const message = error instanceof Error ? error.message.trim() : "";
-  if (message.startsWith("This photo folder") || message.startsWith("The selected photo folder")) return message;
-  return "Could not read this photo folder. Make sure you selected the photo folder downloaded from your field form app.";
-}
-
 function toExistingDatasetSelection(dataset: UploadTreeDatasetItem): ExistingUploadDatasetSelection {
   return {
     uri: dataset.uri,
@@ -176,21 +170,23 @@ export default function FileDropStep({
       const response = await fetch(manageApiHref("/api/manage/sites", target));
       const payload = (await response.json()) as ManagedLocation[] | { error?: string };
       if (!response.ok || !Array.isArray(payload)) {
+        if (!Array.isArray(payload) && payload.error) console.error("Tree upload site load failed", payload.error);
         setSites([]);
-        setSitesError(!Array.isArray(payload) && payload.error ? payload.error : "Failed to load sites.");
+        setSitesError(t("sitesLoadError"));
         return;
       }
       setSites(payload);
       if (siteUriToSelect && payload.some((site) => site.metadata.uri === siteUriToSelect)) {
         setSelectedSiteUri(siteUriToSelect);
       }
-    } catch {
+    } catch (error) {
+      console.error("Tree upload site load failed", error);
       setSites([]);
-      setSitesError("Could not load sites. Try again.");
+      setSitesError(t("sitesLoadError"));
     } finally {
       setSitesLoading(false);
     }
-  }, [target]);
+  }, [t, target]);
 
   // Load sites on mount
   useEffect(() => {
@@ -204,8 +200,12 @@ export default function FileDropStep({
     setDatasetsLoading(true);
     fetchUploadTreeDatasets(target)
       .then((data) => { setExistingDatasets(data); setDatasetsLoading(false); })
-      .catch(() => { setDatasetsError("Failed to load tree groups."); setDatasetsLoading(false); });
-  }, [datasetMode, target]);
+      .catch((error) => {
+        console.error("Tree group load failed", error);
+        setDatasetsError(t("datasetsLoadError"));
+        setDatasetsLoading(false);
+      });
+  }, [datasetMode, t, target]);
 
   const uploadSites = useMemo(() => sites.flatMap((s) => { const u = toUploadSiteSelection(s); return u ? [u] : []; }), [sites]);
   const sitesWithBoundary = useMemo(() => getBoundaryCapableUploadSites(uploadSites), [uploadSites]);
@@ -336,7 +336,7 @@ export default function FileDropStep({
         fileSizeBucket: getFileSizeBucket(file.size),
         failureReason: "unsupported_file_type",
       });
-      setFileError("Only spreadsheet export files are supported.");
+      setFileError(t("unsupportedFile"));
       return;
     }
     if (file.size > MAX_FILE_SIZE_BYTES) {
@@ -346,7 +346,7 @@ export default function FileDropStep({
         fileSizeBucket: getFileSizeBucket(file.size),
         failureReason: "file_too_large",
       });
-      setFileError(`File too large (${formatBytes(file.size)}). Max 10 MB.`);
+      setFileError(t("fileTooLarge", { size: formatBytes(file.size), maxSize: formatBytes(MAX_FILE_SIZE_BYTES) }));
       return;
     }
     trackTreeUploadEvent(TREE_UPLOAD_EVENTS.FILE_ACCEPTED, {
@@ -358,7 +358,7 @@ export default function FileDropStep({
     reset();
     setSelectedFile(file);
     parseFile(file);
-  }, [parseFile, reset, uploadId]);
+  }, [parseFile, reset, t, uploadId]);
 
   // Ingest a spreadsheet handed off from the unified "Add data" drop zone, once,
   // so dropping a CSV there lands here already parsing instead of on a blank step.
@@ -383,7 +383,7 @@ export default function FileDropStep({
         mediaZipSizeBucket: getFileSizeBucket(file.size),
         failureReason: "unsupported_media_zip_type",
       });
-      setMediaZipError("Choose the photo folder file downloaded from your field form app.");
+      setMediaZipError(t("invalidPhotoFolder"));
       return;
     }
     setIsMediaZipParsing(true);
@@ -399,7 +399,7 @@ export default function FileDropStep({
           mediaZipSubmissionCount: index.submissionCount,
           failureReason: "media_zip_no_supported_images",
         });
-        setMediaZipError("This photo folder contains no supported images.");
+        setMediaZipError(t("emptyPhotoFolder"));
         return;
       }
       trackTreeUploadEvent(TREE_UPLOAD_EVENTS.MEDIA_ZIP_ACCEPTED, {
@@ -419,15 +419,17 @@ export default function FileDropStep({
         mediaZipSizeBucket: getFileSizeBucket(file.size),
         failureReason: "media_zip_read_failed",
       });
-      setMediaZipError(plainPhotoFolderReadError(zipReadError));
+      console.error("Photo folder read failed", zipReadError);
+      setMediaZipError(t("zipReadError"));
     } finally {
       if (mediaZipParseRequestRef.current === requestId) setIsMediaZipParsing(false);
     }
-  }, [uploadId]);
+  }, [t, uploadId]);
 
   useEffect(() => {
     if (!error || lastTrackedParseErrorRef.current === error) return;
     lastTrackedParseErrorRef.current = error;
+    console.error("Tree spreadsheet parse failed", error);
     trackTreeUploadEvent(TREE_UPLOAD_EVENTS.FILE_REJECTED, {
       uploadId,
       fileExtension: selectedFile ? getFileExtension(selectedFile.name) : undefined,
@@ -480,7 +482,7 @@ export default function FileDropStep({
     <div className="space-y-5">
       {/* Drop zone */}
       <div>
-        <h2 className="text-lg font-semibold">{t("chooseFileTitle")}</h2>
+        <h2 className="font-instrument text-xl font-light italic">{t("chooseFileTitle")}</h2>
         <p className="text-sm text-muted-foreground mt-0.5">{t("chooseFileDescription")}</p>
       </div>
 
@@ -523,10 +525,10 @@ export default function FileDropStep({
       <input ref={inputRef} type="file" accept=".csv,.tsv,text/csv,text/tab-separated-values" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) handleFile(f); e.target.value = ""; }} />
 
       {fileError && <p className="text-sm text-destructive">{fileError}</p>}
-      {error && <p className="text-sm text-destructive">{t("readFileError", { error })}</p>}
+      {error && <p className="text-sm text-destructive">{t("parseFileError")}</p>}
 
       {isParsed && !error && !fileError && (
-        <div className="rounded-md border border-border bg-muted/30 p-4 grid grid-cols-3 gap-2 text-xs text-muted-foreground">
+        <div className="rounded-2xl bg-muted p-4 grid grid-cols-3 gap-2 text-xs text-muted-foreground">
           <div><span className="block font-medium text-foreground text-sm">{rowCount.toLocaleString()}</span>{t("rows")}</div>
           <div><span className="block font-medium text-foreground text-sm">{headers.length}</span>{t("fileHeadings")}</div>
           <div><span className="block font-medium text-foreground text-sm">{detectKoboFormat(headers).isKobo ? t("fieldForm") : t("spreadsheet")}</span>{t("fileType")}</div>
@@ -534,9 +536,9 @@ export default function FileDropStep({
       )}
 
       {/* Kobo media ZIP */}
-      <div className="space-y-2 rounded-xl border border-border bg-muted/20 p-4">
+      <div className="space-y-2 rounded-2xl border border-border bg-muted p-4">
         <div>
-          <h3 className="text-sm font-medium">{t("photoFolderTitle")}</h3>
+          <h3 className="font-instrument text-lg font-light italic">{t("photoFolderTitle")}</h3>
           <p className="text-xs text-muted-foreground mt-0.5 leading-relaxed">{t("photoFolderDescription")}</p>
         </div>
         <div
@@ -557,7 +559,7 @@ export default function FileDropStep({
                 <Archive className="h-5 w-5 shrink-0 text-primary" />
                 <div className="min-w-0">
                   <p className="truncate text-sm font-medium">{selectedMediaZipFile.name}</p>
-                  <p className="text-xs text-muted-foreground">{mediaZipIndex.entries.length} images, {mediaZipIndex.submissionCount} submissions</p>
+                  <p className="text-xs text-muted-foreground">{t("photoFolderCounts", { images: mediaZipIndex.entries.length, submissions: mediaZipIndex.submissionCount })}</p>
                 </div>
               </div>
             ) : (
@@ -582,7 +584,7 @@ export default function FileDropStep({
       </div>
 
       {/* Site selection (required) */}
-      <div className="space-y-3 rounded-xl border border-border bg-muted/20 p-4">
+      <div className="space-y-3 rounded-2xl border border-border bg-muted p-4">
         <div>
           <label htmlFor="site-select" className="text-sm font-medium">{t("siteBoundaryLabel")} <span className="text-destructive">*</span></label>
           <p className="text-xs text-muted-foreground mt-0.5">{t("siteBoundaryHelp")}</p>
@@ -596,7 +598,7 @@ export default function FileDropStep({
               <Button type="button" variant="outline" size="sm" onClick={() => void loadSites()}>
                 {t("retry")}
               </Button>
-              <Button type="button" variant="outline" size="sm" onClick={() => openSiteBoundaryModal()} disabled={Boolean(createDisabledReason)} title={createDisabledReason ?? undefined}>
+              <Button type="button" variant="outline" size="sm" onClick={() => openSiteBoundaryModal()} disabled={Boolean(createDisabledReason)} title={createDisabledReason ? t("siteCreateDenied") : undefined}>
                 <CirclePlus className="h-4 w-4" />
                 {t("addSiteBoundary")}
               </Button>
@@ -605,7 +607,7 @@ export default function FileDropStep({
         ) : uploadSites.length === 0 ? (
           <div className="space-y-2">
             <p className="text-sm text-muted-foreground">{t("noSites")}</p>
-            <Button type="button" variant="outline" size="sm" onClick={() => openSiteBoundaryModal()} disabled={Boolean(createDisabledReason)} title={createDisabledReason ?? undefined}>
+            <Button type="button" variant="outline" size="sm" onClick={() => openSiteBoundaryModal()} disabled={Boolean(createDisabledReason)} title={createDisabledReason ? t("siteCreateDenied") : undefined}>
               <CirclePlus className="h-4 w-4" />
               {t("addSiteBoundary")}
             </Button>
@@ -632,12 +634,12 @@ export default function FileDropStep({
               </SelectContent>
             </Select>
             <div className="flex flex-wrap gap-2">
-              <Button type="button" variant="outline" size="sm" onClick={() => openSiteBoundaryModal()} disabled={Boolean(createDisabledReason)} title={createDisabledReason ?? undefined}>
+              <Button type="button" variant="outline" size="sm" onClick={() => openSiteBoundaryModal()} disabled={Boolean(createDisabledReason)} title={createDisabledReason ? t("siteCreateDenied") : undefined}>
                 <CirclePlus className="h-4 w-4" />
                 {t("addSiteBoundary")}
               </Button>
               {selectedManagedSite && (!selectedSiteHasBoundary || selectedSiteBoundaryFailed) && (
-                <Button type="button" variant="outline" size="sm" onClick={() => openSiteBoundaryModal(selectedManagedSite)} disabled={Boolean(updateDisabledReason)} title={updateDisabledReason ?? undefined}>
+                <Button type="button" variant="outline" size="sm" onClick={() => openSiteBoundaryModal(selectedManagedSite)} disabled={Boolean(updateDisabledReason)} title={updateDisabledReason ? t("siteEditDenied") : undefined}>
                   {t("addMapAreaToSelected")}
                 </Button>
               )}
@@ -682,12 +684,12 @@ export default function FileDropStep({
                   </p>
                 </div>
                 <div className="flex flex-wrap gap-2">
-                  <Button type="button" variant="outline" size="sm" onClick={() => openSiteBoundaryModal()} disabled={Boolean(createDisabledReason)} title={createDisabledReason ?? undefined}>
+                  <Button type="button" variant="outline" size="sm" onClick={() => openSiteBoundaryModal()} disabled={Boolean(createDisabledReason)} title={createDisabledReason ? t("siteCreateDenied") : undefined}>
                     <CirclePlus className="h-4 w-4" />
                     {t("addSiteBoundary")}
                   </Button>
                   {selectedManagedSite && (allBoundaryCandidatesFailed || !selectedSiteHasBoundary || selectedSiteBoundaryFailed) && (
-                    <Button type="button" variant="outline" size="sm" onClick={() => openSiteBoundaryModal(selectedManagedSite)} disabled={Boolean(updateDisabledReason)} title={updateDisabledReason ?? undefined}>
+                    <Button type="button" variant="outline" size="sm" onClick={() => openSiteBoundaryModal(selectedManagedSite)} disabled={Boolean(updateDisabledReason)} title={updateDisabledReason ? t("siteEditDenied") : undefined}>
                       {t("replaceSelectedMapArea")}
                     </Button>
                   )}
@@ -718,21 +720,21 @@ export default function FileDropStep({
                 type="button"
                 onClick={() => { if (!disabled) setDatasetMode(option.mode); }}
                 disabled={disabled}
-                title={disabledReason ?? undefined}
+                title={disabled ? t("groupSelectDenied") : undefined}
                 className={cn(
                   "rounded-xl border p-4 text-left transition-colors disabled:cursor-not-allowed disabled:opacity-60",
                   datasetMode === option.mode ? "border-primary bg-primary/5" : "border-border bg-background hover:bg-muted/30",
                 )}
               >
                 <p className="text-sm font-medium">{option.title}</p>
-                <p className="mt-1 text-xs text-muted-foreground leading-relaxed">{disabledReason ?? option.description}</p>
+                <p className="mt-1 text-xs text-muted-foreground leading-relaxed">{disabled ? t("groupSelectDenied") : option.description}</p>
               </button>
             );
           })}
         </div>
 
         {datasetMode === "new" && (
-          <div className="space-y-3 rounded-xl border border-border bg-muted/20 p-4">
+          <div className="space-y-3 rounded-2xl border border-border bg-muted p-4">
             <div className="space-y-1.5">
               <label htmlFor="dataset-name" className="text-sm font-medium">{t("groupNameLabel")} <span className="text-destructive">*</span></label>
               <Input id="dataset-name" value={datasetName} onChange={(e) => setDatasetName(e.target.value)} placeholder={t("groupNamePlaceholder")} />
@@ -745,7 +747,7 @@ export default function FileDropStep({
         )}
 
         {datasetMode === "existing" && (
-          <div className="space-y-3 rounded-xl border border-border bg-muted/20 p-4">
+          <div className="space-y-3 rounded-2xl border border-border bg-muted p-4">
             <div>
               <label className="text-sm font-medium">{t("chooseGroupLabel")}</label>
               <p className="text-xs text-muted-foreground mt-0.5">{t("chooseGroupHelp")}</p>
@@ -765,7 +767,7 @@ export default function FileDropStep({
                   <SelectContent>
                     {existingDatasets.map((d) => (
                       <SelectItem key={d.uri} value={d.uri}>
-                        {d.name} ({d.recordCount ?? 0} trees)
+                        {d.name} ({t("treeCount", { count: d.recordCount ?? 0 })})
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -816,7 +818,7 @@ export default function FileDropStep({
       </div>
 
       <div className="flex items-center justify-end pt-2 border-t border-border">
-        <Button onClick={handleContinue} disabled={!canContinue} title={createDisabledReason ?? (datasetMode === "existing" ? updateDisabledReason ?? undefined : undefined)}>
+        <Button onClick={handleContinue} disabled={!canContinue} title={createDisabledReason ? t("siteCreateDenied") : datasetMode === "existing" && updateDisabledReason ? t("groupSelectDenied") : undefined}>
           {t("continueToMatch")}
         </Button>
       </div>

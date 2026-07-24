@@ -55,7 +55,7 @@ export function AllFiltersPopover({
         className="max-h-[min(70vh,32rem)] w-[min(20rem,calc(100vw-2rem))] overflow-y-auto rounded-2xl border-primary/20 p-4 shadow-[0_18px_45px_color-mix(in_oklab,var(--primary)_16%,transparent)]"
       >
         <div className="mb-3">
-          <h2 className="text-base font-medium text-foreground">{t("filters.allTitle")}</h2>
+          <h2 className="font-instrument text-base font-medium italic text-foreground">{t("filters.allTitle")}</h2>
           {description ? (
             <p className="mt-1 text-xs leading-relaxed text-muted-foreground">{description}</p>
           ) : null}

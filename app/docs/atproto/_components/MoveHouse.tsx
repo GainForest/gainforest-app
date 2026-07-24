@@ -54,7 +54,7 @@ export function MoveHouse() {
                   <motion.div
                     layoutId="suitcase"
                     transition={{ type: "spring", stiffness: 90, damping: 16 }}
-                    className="w-full rounded-lg border border-primary/40 bg-primary/5 px-3 py-2.5"
+                    className="w-full rounded-lg border border-primary/40 bg-primary/10 px-3 py-2.5"
                   >
                     <div className="flex items-center gap-1.5 text-[12px] text-foreground">
                       <FolderIcon className="h-3.5 w-3.5 shrink-0 text-primary" />

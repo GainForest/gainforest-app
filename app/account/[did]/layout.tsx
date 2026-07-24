@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { getTranslations } from "next-intl/server";
 import { fetchAuthSession } from "@/app/_lib/auth-server";
 import { resolveAccountManageAccess } from "@/app/_lib/manage-server";
 import { canEditGroupProfile } from "@/app/(manage)/manage/_lib/cgs-permissions";
@@ -77,17 +78,24 @@ function AccountProfileJsonLd({ jsonLd }: { jsonLd: Record<string, unknown> }) {
 export async function generateMetadata({ params }: { params: Promise<{ did: string }> }): Promise<Metadata> {
   const routeParams = await readOptionalAccountRouteParams(params);
   if (!routeParams) {
+    const [legacyT, notFoundT] = await Promise.all([
+      getTranslations("legacy"),
+      getTranslations("common.notFound"),
+    ]);
     return {
-      title: "Profile not found",
-      description: "A gentle message for a public profile GainForest cannot find.",
+      title: legacyT("accountProfileMissing"),
+      description: notFoundT("description"),
       robots: { index: false, follow: false },
     };
   }
 
-  const account = await getAccountRouteData(routeParams.did, routeParams.urlIdentifier);
+  const [account, metadataT] = await Promise.all([
+    getAccountRouteData(routeParams.did, routeParams.urlIdentifier),
+    getTranslations("marketplace.account.metadata"),
+  ]);
   const accountHref = `/account/${encodeURIComponent(account.urlIdentifier)}`;
-  const title = `${account.displayName} — Account`;
-  const description = account.description ?? `Public GainForest profile for ${account.displayName}.`;
+  const title = `${account.displayName} — ${metadataT("accountFallback")}`;
+  const description = account.description ?? metadataT("profileDescription", { displayName: account.displayName });
   const previewImage = account.avatarUrl ? [{ url: account.avatarUrl, alt: account.displayName }] : undefined;
 
   return {

@@ -184,7 +184,7 @@ export function ProjectSitesManagerClient({ target, projectRkey }: { target: Man
   );
 
   return (
-    <div className="mx-auto w-full max-w-[1100px] px-4 py-4 sm:px-6 sm:py-6">
+    <div className="mx-auto w-full max-w-6xl px-3 py-4 sm:px-5 sm:py-6 lg:px-8">
       <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
         {backLink}
         <Button type="button" variant="ghost" size="sm" onClick={() => void load()} disabled={loading || savingUri !== null}>
@@ -214,8 +214,8 @@ export function ProjectSitesManagerClient({ target, projectRkey }: { target: Man
         </div>
       ) : (
         <div className="space-y-6">
-          <section className="rounded-3xl border border-border bg-card p-5">
-            <h2 className="text-sm font-semibold text-foreground">{t("currentSiteLabel")}</h2>
+          <section className="rounded-3xl bg-muted p-5">
+            <h2 className="font-instrument text-lg font-light italic text-foreground">{t("currentSiteLabel")}</h2>
             {currentSite ? (
               <div className="mt-3 flex flex-wrap items-center justify-between gap-3">
                 <div className="flex min-w-0 items-center gap-3">
@@ -250,9 +250,9 @@ export function ProjectSitesManagerClient({ target, projectRkey }: { target: Man
             )}
           </section>
 
-          <section className="rounded-3xl border border-border bg-card p-5">
+          <section className="rounded-3xl bg-muted p-5">
             <div className="flex flex-wrap items-center justify-between gap-3">
-              <h2 className="text-sm font-semibold text-foreground">{t("chooseSite")}</h2>
+              <h2 className="font-instrument text-lg font-light italic text-foreground">{t("chooseSite")}</h2>
               <Button
                 type="button"
                 size="sm"

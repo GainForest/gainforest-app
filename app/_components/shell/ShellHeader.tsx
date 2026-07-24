@@ -20,6 +20,7 @@ import { NotificationBell } from "../NotificationBell";
 import { useCollectAnimation } from "../rewards/collect-animation";
 import { canonicalPathname } from "./paths";
 import { AddObservationsButton, ManageContextLink } from "./context-actions";
+import { shellHeaderControl } from "./control-recipes";
 import type { ManageAccountKind } from "./use-shell-session";
 
 // The header action on each explore list page is a "My <records>" button
@@ -67,7 +68,7 @@ function getRouteHeaderActions(pathname: string, authSession: AuthSession) {
 function FeedUploadHeaderButton({ sessionDid }: { sessionDid: string }) {
   const t = useTranslations("common.sidebar.headerActions");
   return (
-    <AddObservationsButton sessionDid={sessionDid} className={cn(buttonVariants({ variant: "default", size: "sm" }))}>
+    <AddObservationsButton sessionDid={sessionDid} className={cn(buttonVariants({ variant: "default", size: "sm" }), shellHeaderControl.pill)}>
       <UploadIcon />
       <span className="hidden sm:inline">{t("upload")}</span>
     </AddObservationsButton>
@@ -77,7 +78,7 @@ function FeedUploadHeaderButton({ sessionDid }: { sessionDid: string }) {
 function MyRecordsHeaderButton({ route, sessionDid }: { route: MyRecordsRoute; sessionDid: string }) {
   const t = useTranslations("common.sidebar.headerActions");
   const { Icon } = route;
-  const className = cn(buttonVariants({ variant: "default", size: "sm" }));
+  const className = cn(buttonVariants({ variant: "default", size: "sm" }), shellHeaderControl.pill);
   const content = (
     <>
       <Icon />
@@ -159,14 +160,14 @@ export function ShellHeader({
       </div>
 
       <div className="relative z-10 flex flex-col">
-        <div className="h-14 flex items-center justify-between px-4 gap-3">
+        <div className="flex h-14 items-center justify-between gap-3 px-3 sm:px-4">
           {/* Hamburger — mobile only, extreme left */}
           <Button
             type="button"
             onClick={onOpenMobileNav}
             variant="ghost"
             size="icon"
-            className="md:hidden"
+            className={cn(shellHeaderControl.icon, "md:hidden")}
             aria-label={navT("openNavigation")}
           >
             <MenuIcon />
@@ -219,8 +220,10 @@ export function ShellHeader({
               <ChromeErrorBoundary name="cart-button">
                 <CartHeaderButton />
               </ChromeErrorBoundary>
-              <ChromeErrorBoundary name="notification-bell">
-                <NotificationBell session={authSession} />
+              <ChromeErrorBoundary name="notification-bell-mobile">
+                <div className="md:hidden">
+                  <NotificationBell session={authSession} />
+                </div>
               </ChromeErrorBoundary>
             </motion.div>
 

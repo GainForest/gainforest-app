@@ -70,7 +70,7 @@ export function AppShell({
     <HeaderSlotsProvider>
       <MobileNavProvider value={mobileNav}>
         <CollectAnimationProvider>
-          <div className="flex h-screen flex-col overflow-hidden">
+          <div className="flex h-dvh flex-col overflow-hidden">
         {pathname !== "/bioblitz" && !isGlobe ? (
           <ChromeErrorBoundary name="bioblitz-banner">
             <BioblitzPromoBanner />

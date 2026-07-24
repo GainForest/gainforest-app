@@ -11,6 +11,7 @@ import { AuthButton } from "@/app/_components/AuthFlow";
 import type { EarnedCard } from "@/app/_components/rewards/earned-card";
 import { DonationRewardCard } from "@/app/checkout/_components/DonationRewardCard";
 import { Button } from "@/components/ui/button";
+import { DisplayHeading } from "@/components/ui/typography";
 
 type CardsStatus = "ready" | "signedOut" | "unavailable";
 
@@ -28,15 +29,11 @@ export function MyCardsView({
   const reduceMotion = useReducedMotion();
 
   return (
-    <div className="min-h-full px-4 py-8 sm:px-6 sm:py-12">
+    <div className="min-h-full px-3 py-4 sm:px-5 lg:px-8 lg:py-6">
       <div className="mx-auto max-w-6xl">
-        <div className="flex items-center gap-2 text-primary">
-          <SparklesIcon className="size-5" aria-hidden />
-          <span className="text-xs font-semibold uppercase tracking-[0.18em]">{t("eyebrow")}</span>
-        </div>
-        <div className="mt-3 flex flex-wrap items-end justify-between gap-3">
+        <div className="flex flex-wrap items-end justify-between gap-3">
           <div>
-            <h1 className="text-3xl font-semibold tracking-tight text-foreground sm:text-5xl">{t("title")}</h1>
+            <DisplayHeading as="h1" className="text-4xl text-foreground sm:text-6xl">{t("title")}</DisplayHeading>
             <p className="mt-3 max-w-2xl text-sm leading-6 text-muted-foreground sm:text-base">{t("description")}</p>
           </div>
           {cards.length > 0 ? (
@@ -54,38 +51,38 @@ export function MyCardsView({
         ) : null}
 
         {status === "signedOut" ? (
-          <div className="mt-12 flex flex-col items-center gap-4 rounded-[2rem] border border-dashed border-border-soft bg-surface/60 px-6 py-16 text-center">
+          <div className="mt-6 flex flex-col items-center gap-4 rounded-2xl bg-muted px-4 py-12 text-center sm:mt-8 sm:px-6">
             <span className="grid size-14 place-items-center rounded-2xl bg-primary/10 text-primary">
               <SparklesIcon className="size-7" aria-hidden />
             </span>
-            <p className="font-instrument text-2xl italic text-foreground">{t("signedOutTitle")}</p>
+            <h2 className="font-instrument text-2xl italic text-foreground">{t("signedOutTitle")}</h2>
             <p className="max-w-md text-sm text-muted-foreground">{t("signedOutBody")}</p>
             <AuthButton session={{ isLoggedIn: false }} />
           </div>
         ) : status === "unavailable" ? (
-          <div className="mt-12 flex flex-col items-center gap-4 rounded-[2rem] border border-dashed border-border-soft bg-surface/60 px-6 py-16 text-center">
+          <div className="mt-6 flex flex-col items-center gap-4 rounded-2xl bg-muted px-4 py-12 text-center sm:mt-8 sm:px-6">
             <span className="grid size-14 place-items-center rounded-2xl bg-amber-500/10 text-amber-600">
               <AlertTriangleIcon className="size-7" aria-hidden />
             </span>
-            <p className="font-instrument text-2xl italic text-foreground">{t("unavailableTitle")}</p>
+            <h2 className="font-instrument text-2xl italic text-foreground">{t("unavailableTitle")}</h2>
             <p className="max-w-md text-sm text-muted-foreground">{t("unavailableBody")}</p>
             <Button asChild variant="outline" className="mt-1 shadow-none">
               <Link href="/cards">{t("tryAgain")}</Link>
             </Button>
           </div>
         ) : cards.length === 0 ? (
-          <div className="mt-12 flex flex-col items-center gap-4 rounded-[2rem] border border-dashed border-border-soft bg-surface/60 px-6 py-16 text-center">
+          <div className="mt-6 flex flex-col items-center gap-4 rounded-2xl bg-muted px-4 py-12 text-center sm:mt-8 sm:px-6">
             <span className="grid size-14 place-items-center rounded-2xl bg-primary/10 text-primary">
               <SparklesIcon className="size-7" aria-hidden />
             </span>
-            <p className="font-instrument text-2xl italic text-foreground">{t("emptyTitle")}</p>
+            <h2 className="font-instrument text-2xl italic text-foreground">{t("emptyTitle")}</h2>
             <p className="max-w-sm text-sm text-muted-foreground">{t("emptyBody")}</p>
             <Button asChild className="mt-1 shadow-none">
               <Link href="/projects">{t("browseProjects")}</Link>
             </Button>
           </div>
         ) : (
-          <div className="mt-10 grid justify-items-center gap-x-8 gap-y-12 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="mt-8 grid items-stretch justify-items-center gap-x-8 gap-y-12 sm:grid-cols-2 lg:grid-cols-3">
             {cards.map((card, i) => {
               const earnedAt = card.earnedAt ? new Date(card.earnedAt) : null;
               const earnedLabel = earnedAt && !Number.isNaN(earnedAt.getTime())
@@ -99,14 +96,14 @@ export function MyCardsView({
                   viewport={{ once: true, margin: "-40px" }}
                   transition={reduceMotion ? { duration: 0 } : { type: "spring", stiffness: 90, damping: 15, delay: Math.min(i, 5) * 0.08 }}
                   style={{ transformStyle: "preserve-3d" }}
-                  className="w-[21rem] max-w-full"
+                  className="flex h-full w-[21rem] max-w-full flex-col"
                 >
                   <DonationRewardCard
                     lines={card.lines}
                     totalUsd={card.totalUsd}
                     animateEntrance={false}
                   />
-                  <div className="mt-3 rounded-2xl border border-border-soft bg-surface/80 px-4 py-3 text-xs">
+                  <div className="mt-3 flex flex-1 flex-col rounded-2xl bg-muted px-4 py-3 text-xs">
                     <div className="flex items-center justify-between gap-3">
                       <span className="inline-flex items-center gap-1.5 font-semibold text-primary">
                         <BadgeCheckIcon className="size-4" aria-hidden />
@@ -115,7 +112,7 @@ export function MyCardsView({
                       {earnedLabel ? <span className="text-muted-foreground">{earnedLabel}</span> : null}
                     </div>
                     {card.projectHref || card.paymentHref ? (
-                      <div className="mt-2 flex flex-wrap gap-x-4 gap-y-2 border-t border-border-soft pt-2">
+                      <div className="mt-auto flex flex-wrap gap-x-4 gap-y-2 border-t border-border-soft pt-2">
                         {card.projectHref ? (
                           <Link href={card.projectHref} className="font-medium text-foreground hover:text-primary">
                             {t("viewProject")}

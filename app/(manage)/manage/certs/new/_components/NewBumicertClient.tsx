@@ -11,7 +11,7 @@
 
 import Link from "next/link";
 import { useTranslations } from "next-intl";
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import {
   ArrowRightIcon,
   CameraIcon,
@@ -55,6 +55,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { cn } from "@/lib/utils";
 import { manageApiHref, manageHref, type ManageTarget } from "@/lib/links";
 import { WORK_SCOPE_MESSAGE_KEYS, type KnownWorkScopeKey, type WorkScopeLabels } from "@/app/_lib/work-scope-labels";
+import { isReliablyOwnProjectRecord } from "../../../projects/_components/project-record-ownership";
 
 /* ── Types ──────────────────────────────────────────────────────────────── */
 
@@ -99,6 +100,7 @@ type StepId = "basics" | "story" | "people" | "review";
 type SitesStatus = "idle" | "loading" | "ready" | "error";
 type FormField = "title" | "scopes" | "dates" | "shortDescription" | "description" | "contributors" | "confirmedRights" | "acceptedTerms";
 type FormIssue = { field: FormField; step: StepId; message: string };
+type FormIssueMessageKey = "title" | "scopes" | "startDate" | "endDate" | "dateOrder" | "shortDescription" | "description" | "contributors" | "rights" | "terms";
 
 /* ── Constants ──────────────────────────────────────────────────────────── */
 
@@ -131,13 +133,6 @@ const WORK_SCOPE_KEYS: KnownWorkScopeKey[] = [
   "community_stewardship",
   "carbon_removal",
   "restoration_maintenance",
-];
-
-const STEPS: Array<{ id: StepId; label: string; title: string; subtitle: string }> = [
-  { id: "basics", label: "Basics", title: "the basics", subtitle: "Name the work and set the dates. Add a cover photo on the card." },
-  { id: "story", label: "Story", title: "tell the story", subtitle: "A short summary for cards, then the full description." },
-  { id: "people", label: "People & places", title: "people & places", subtitle: "Credit who did the work and link the sites involved." },
-  { id: "review", label: "Review", title: "review & publish", subtitle: "Verify it all reads well, then make it public." },
 ];
 
 const FIELD =
@@ -228,14 +223,14 @@ function loadDrafts(): Draft[] {
 function saveDrafts(drafts: Draft[]) {
   window.localStorage.setItem(DRAFT_STORAGE_KEY, JSON.stringify(drafts.slice(0, 12)));
 }
-function titleFromDraft(draft: Draft) {
-  return draft.values.title.trim() || "Untitled Cert";
+function titleFromDraft(draft: Draft, untitledLabel: string) {
+  return draft.values.title.trim() || untitledLabel;
 }
-function formatDraftDate(value: string) {
+function formatDraftDate(value: string, recentLabel: string) {
   try {
     return new Intl.DateTimeFormat(undefined, { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" }).format(new Date(value));
   } catch {
-    return "Recently";
+    return recentLabel;
   }
 }
 function clampDescription(value: string) {
@@ -277,39 +272,26 @@ function selectedLocationRefs(values: FormValues, sites: ManagedLocation[], link
   }
   return refs;
 }
-function siteSubtitle(site: ManagedLocation) {
-  return site.record.description || (site.record.locationType ? "Map area" : "Project place");
+function siteSubtitle(site: ManagedLocation, mapAreaLabel: string, projectPlaceLabel: string) {
+  return site.record.description || (site.record.locationType ? mapAreaLabel : projectPlaceLabel);
 }
-function getFormIssues(values: FormValues): FormIssue[] {
+function getFormIssues(values: FormValues, messageFor: (key: FormIssueMessageKey) => string): FormIssue[] {
   const issues: FormIssue[] = [];
-  if (values.title.trim().length < 4) issues.push({ field: "title", step: "basics", message: "Add a title with at least 4 characters." });
-  if (scopeKeys(values).length === 0) issues.push({ field: "scopes", step: "basics", message: "Pick at least one type of work." });
-  if (!values.startDate) issues.push({ field: "dates", step: "basics", message: "Add when the work started." });
-  else if (!values.ongoing && !values.endDate) issues.push({ field: "dates", step: "basics", message: "Add an end date, or mark the work as ongoing." });
-  else if (!values.ongoing && values.endDate < values.startDate) issues.push({ field: "dates", step: "basics", message: "The end date can’t be before the start date." });
-  if (clampDescription(values.shortDescription).length < 30) issues.push({ field: "shortDescription", step: "story", message: "Write at least 30 characters for the summary." });
-  if (values.description.trim().length < 80) issues.push({ field: "description", step: "story", message: "Write at least 80 characters for the full description." });
-  if (contributorList(values).length === 0) issues.push({ field: "contributors", step: "people", message: "Add at least one person or group." });
-  if (!values.confirmedRights) issues.push({ field: "confirmedRights", step: "review", message: "Confirm you have permission to publish this work." });
-  if (!values.acceptedTerms) issues.push({ field: "acceptedTerms", step: "review", message: "Agree to the terms before publishing." });
+  if (values.title.trim().length < 4) issues.push({ field: "title", step: "basics", message: messageFor("title") });
+  if (scopeKeys(values).length === 0) issues.push({ field: "scopes", step: "basics", message: messageFor("scopes") });
+  if (!values.startDate) issues.push({ field: "dates", step: "basics", message: messageFor("startDate") });
+  else if (!values.ongoing && !values.endDate) issues.push({ field: "dates", step: "basics", message: messageFor("endDate") });
+  else if (!values.ongoing && values.endDate < values.startDate) issues.push({ field: "dates", step: "basics", message: messageFor("dateOrder") });
+  if (clampDescription(values.shortDescription).length < 30) issues.push({ field: "shortDescription", step: "story", message: messageFor("shortDescription") });
+  if (values.description.trim().length < 80) issues.push({ field: "description", step: "story", message: messageFor("description") });
+  if (contributorList(values).length === 0) issues.push({ field: "contributors", step: "people", message: messageFor("contributors") });
+  if (!values.confirmedRights) issues.push({ field: "confirmedRights", step: "review", message: messageFor("rights") });
+  if (!values.acceptedTerms) issues.push({ field: "acceptedTerms", step: "review", message: messageFor("terms") });
   return issues;
 }
 function issuesByField(issues: FormIssue[]): Partial<Record<FormField, FormIssue>> {
   return Object.fromEntries(issues.map((issue) => [issue.field, issue])) as Partial<Record<FormField, FormIssue>>;
 }
-function firstStepIssue(issues: FormIssue[], step: StepId): FormIssue | undefined {
-  return issues.find((issue) => issue.step === step);
-}
-function stepIssueCount(issues: FormIssue[], step: StepId): number {
-  return issues.filter((issue) => issue.step === step).length;
-}
-function validateStep(step: StepId, values: FormValues): string | null {
-  return firstStepIssue(getFormIssues(values), step)?.message ?? null;
-}
-function validateAll(values: FormValues): string | null {
-  return getFormIssues(values)[0]?.message ?? null;
-}
-
 /* ── Field wrapper ──────────────────────────────────────────────────────── */
 
 function Field({ label, hint, htmlFor, error, children }: { label: string; hint?: string; htmlFor?: string; error?: string; children: ReactNode }) {
@@ -328,19 +310,14 @@ function Field({ label, hint, htmlFor, error, children }: { label: string; hint?
 /* ── Section header (editorial display type per section) ────────────────── */
 
 function SectionHeader({
-  eyebrow,
   title,
   subtitle,
 }: {
-  eyebrow: string;
   title: string;
   subtitle: string;
 }) {
   return (
     <div className="mb-8">
-      <div className="mb-2.5 flex flex-wrap items-center gap-2">
-        <p className="text-[11px] font-medium uppercase tracking-[0.18em] text-muted-foreground/65">{eyebrow}</p>
-      </div>
       <h2 className="font-instrument text-[2.5rem] italic leading-[1.05] tracking-[-0.01em] text-foreground">{title}</h2>
       <p className="mt-2 text-sm leading-6 text-muted-foreground">{subtitle}</p>
     </div>
@@ -392,6 +369,7 @@ function DateRangePicker({
   error?: string;
   onChange: (next: { startDate: string; endDate: string }) => void;
 }) {
+  const editorT = useTranslations("bumicert.create.draft.editor");
   const start = dateFromValue(startDate) ?? new Date();
   const end = dateFromValue(endDate) ?? new Date();
 
@@ -404,7 +382,7 @@ function DateRangePicker({
           className={cn("group flex w-full cursor-pointer items-center justify-center rounded-md border border-transparent bg-foreground/2 p-2 text-center transition-all duration-300", error && "border-2 border-destructive ring-2 ring-destructive/25")}
         >
           <span className="text-2xl font-medium text-foreground group-hover:text-primary">
-            {format(start, "LLL dd, y")} → {ongoing || !endDate ? "Ongoing" : format(end, "LLL dd, y")}
+            {format(start, "LLL dd, y")} → {ongoing || !endDate ? editorT("ongoing") : format(end, "LLL dd, y")}
           </span>
         </button>
       </PopoverTrigger>
@@ -426,17 +404,18 @@ function DateRangePicker({
 
 /* ── Contributor input with actor autocomplete ──────────────────────────── */
 
-function actorLabel(actor: ActorResult) {
-  return actor.displayName ?? actor.handle ?? "Selected profile";
+function actorLabel(actor: ActorResult, fallback: string) {
+  return actor.displayName ?? actor.handle ?? fallback;
 }
 
 function ActorAvatar({ actor, size = "size-8" }: { actor: ActorResult; size?: string }) {
+  const editorT = useTranslations("bumicert.create.draft.editor");
   return actor.avatar ? (
     // eslint-disable-next-line @next/next/no-img-element
     <img src={actor.avatar} alt="" className={cn(size, "shrink-0 rounded-full object-cover")} />
   ) : (
     <span className={cn(size, "flex shrink-0 items-center justify-center rounded-full bg-primary/10 text-xs font-medium text-primary")}>
-      {actorLabel(actor).charAt(0).toUpperCase()}
+      {actorLabel(actor, editorT("selectedProfile")).charAt(0).toUpperCase()}
     </span>
   );
 }
@@ -466,6 +445,8 @@ function ContributorInput({
   const [focused, setFocused] = useState(false);
   const [highlight, setHighlight] = useState(0);
   const boxRef = useRef<HTMLDivElement>(null);
+  const reduceMotion = useReducedMotion();
+  const editorT = useTranslations("bumicert.create.draft.editor");
 
   useEffect(() => {
     const query = value.trim();
@@ -531,7 +512,7 @@ function ContributorInput({
           <div className={cn("flex min-h-11 items-center gap-3 rounded-xl border bg-background px-3 py-2", error ? "border-2 border-destructive ring-2 ring-destructive/25" : "border-border")}>
             <ActorAvatar actor={actor} />
             <span className="min-w-0 flex-1">
-              <span className="block truncate text-sm font-medium text-foreground">{actorLabel(actor)}</span>
+              <span className="block truncate text-sm font-medium text-foreground">{actorLabel(actor, editorT("selectedProfile"))}</span>
               {actor.handle ? <span className="block truncate text-xs text-muted-foreground">@{actor.handle}</span> : null}
             </span>
             <button
@@ -541,7 +522,7 @@ function ContributorInput({
                 onChange("");
               }}
               className="rounded-full p-1 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-              aria-label="Change person or group"
+              aria-label={editorT("changeContributor")}
             >
               <XIcon className="size-4" />
             </button>
@@ -582,18 +563,18 @@ function ContributorInput({
         <AnimatePresence>
           {open && !actor ? (
             <motion.div
-              initial={{ opacity: 0, y: 4 }}
+              initial={reduceMotion ? false : { opacity: 0, y: 4 }}
               animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: 4 }}
-              transition={{ duration: 0.14 }}
+              exit={reduceMotion ? { opacity: 0 } : { opacity: 0, y: 4 }}
+              transition={{ duration: reduceMotion ? 0 : 0.14 }}
               className="absolute z-[1000] mt-1.5 max-h-72 w-full overflow-y-auto rounded-xl border border-border bg-card p-1.5 shadow-xl"
             >
               {value.trim().length < 2 ? (
-                <p className="px-3 py-2 text-sm text-muted-foreground">Start typing to get suggestions.</p>
+                <p className="px-3 py-2 text-sm text-muted-foreground">{editorT("startTyping")}</p>
               ) : loading ? (
-                <p className="flex items-center gap-2 px-3 py-2 text-sm text-muted-foreground"><Loader2Icon className="size-4 animate-spin" /> Loading suggestions…</p>
+                <p className="flex items-center gap-2 px-3 py-2 text-sm text-muted-foreground"><Loader2Icon className="size-4 animate-spin" /> {editorT("loadingSuggestions")}</p>
               ) : results.length === 0 ? (
-                <p className="px-3 py-2 text-sm text-muted-foreground">No matches yet. You can keep typing a name.</p>
+                <p className="px-3 py-2 text-sm text-muted-foreground">{editorT("noMatches")}</p>
               ) : (
                 <ul>
                   {results.map((nextActor, i) => (
@@ -607,7 +588,7 @@ function ContributorInput({
                       >
                         <ActorAvatar actor={nextActor} size="size-7" />
                         <span className="min-w-0">
-                          <span className="block truncate text-sm font-medium text-foreground">{actorLabel(nextActor)}</span>
+                          <span className="block truncate text-sm font-medium text-foreground">{actorLabel(nextActor, editorT("selectedProfile"))}</span>
                           {nextActor.handle ? <span className="block truncate text-xs text-muted-foreground">@{nextActor.handle}</span> : null}
                         </span>
                       </button>
@@ -620,7 +601,7 @@ function ContributorInput({
         </AnimatePresence>
       </div>
 
-      <Button type="button" variant="ghost" size="icon-sm" disabled={!canRemove} onClick={onRemove} aria-label="Remove person or group" className="shrink-0 text-muted-foreground hover:text-destructive">
+      <Button type="button" variant="ghost" size="icon-sm" disabled={!canRemove} onClick={onRemove} aria-label={editorT("removeContributor")} className="shrink-0 text-muted-foreground hover:text-destructive">
         <Trash2Icon className="size-4" />
       </Button>
     </div>
@@ -642,6 +623,7 @@ function BasicsStep({
   onFieldChange: (field: FormField) => void;
   workScopeLabels: WorkScopeLabels;
 }) {
+  const coverT = useTranslations("bumicert.create.draft.stepForms.cover");
   const toggleScope = (scopeKey: string) => {
     onFieldChange("scopes");
     setValues((c) => ({ ...c, scopes: c.scopes.includes(scopeKey) ? c.scopes.filter((s) => s !== scopeKey) : [...c.scopes, scopeKey] }));
@@ -649,7 +631,7 @@ function BasicsStep({
 
   return (
     <div className="space-y-8">
-      <Field label="Title" hint="what people will recognise" htmlFor="cert-title" error={issues.title?.message}>
+      <Field label={coverT("title.label")} hint={coverT("title.info")} htmlFor="cert-title" error={issues.title?.message}>
         <input
           id="cert-title"
           value={values.title}
@@ -658,13 +640,13 @@ function BasicsStep({
             onFieldChange("title");
             setValues((c) => ({ ...c, title: e.target.value }));
           }}
-          placeholder="Mangrove restoration in the Rufiji Delta"
+          placeholder={coverT("title.placeholder")}
           className={cn(FIELD, "px-4 py-3 font-instrument text-2xl italic tracking-[-0.01em]", issues.title && FIELD_ERROR)}
         />
         <div className="mt-1.5 text-right text-xs text-muted-foreground">{values.title.length} / {TITLE_MAX}</div>
       </Field>
 
-      <Field label="Type of work" hint="pick everything this covers" error={issues.scopes?.message}>
+      <Field label={coverT("workType.label")} hint={coverT("workType.info")} error={issues.scopes?.message}>
         <div className={cn("flex flex-wrap gap-2 rounded-2xl transition-colors", issues.scopes && "border-2 border-destructive p-3 ring-2 ring-destructive/20")}>
           {WORK_SCOPE_KEYS.map((scope) => (
             <ScopeTag key={scope} label={workScopeLabels[scope]} active={values.scopes.includes(scope)} onClick={() => toggleScope(scope)} />
@@ -672,7 +654,7 @@ function BasicsStep({
         </div>
       </Field>
 
-      <Field label="Time period" error={issues.dates?.message}>
+      <Field label={coverT("dateRange.label")} error={issues.dates?.message}>
         <div className="mt-1 flex flex-col gap-2">
           <DateRangePicker
             startDate={values.startDate}
@@ -698,7 +680,7 @@ function BasicsStep({
               }}
             />
             <label htmlFor="is-ongoing" className="cursor-pointer select-none text-sm text-muted-foreground">
-              This work is ongoing
+              {coverT("dateRange.ongoingCheckbox")}
             </label>
           </div>
         </div>
@@ -720,9 +702,11 @@ function StoryStep({
   onFieldChange: (field: FormField) => void;
 }) {
   const shortCount = clampDescription(values.shortDescription).length;
+  const impactT = useTranslations("bumicert.create.draft.stepForms.impact");
+  const editorT = useTranslations("bumicert.create.draft.editor");
   return (
     <div className="space-y-8">
-      <Field label="Summary" hint="shown on cards — lead with the outcome" htmlFor="summary" error={issues.shortDescription?.message}>
+      <Field label={impactT("shortDescription.label")} hint={impactT("shortDescription.info")} htmlFor="summary" error={issues.shortDescription?.message}>
         <textarea
           id="summary"
           value={values.shortDescription}
@@ -730,16 +714,16 @@ function StoryStep({
             onFieldChange("shortDescription");
             setValues((c) => ({ ...c, shortDescription: e.target.value.slice(0, 300) }));
           }}
-          placeholder="Local stewards restored degraded mangrove plots, tracked survival rates, and documented biodiversity return across community-managed land."
+          placeholder={impactT("shortDescription.placeholder")}
           className={cn(FIELD, "min-h-24 resize-none px-4 py-3 text-[15px] leading-7", issues.shortDescription && FIELD_ERROR)}
         />
         <div className="mt-1.5 flex justify-between text-xs text-muted-foreground">
-          <span>{shortCount < 30 ? "At least 30 characters" : "Looks good"}</span>
+          <span>{shortCount < 30 ? editorT("minimumCharacters") : editorT("looksGood")}</span>
           <span>{shortCount} / 300</span>
         </div>
       </Field>
 
-      <Field label="Full description" hint="what happened, the evidence, the outcome" htmlFor="description" error={issues.description?.message}>
+      <Field label={impactT("story.label")} hint={impactT("story.info")} htmlFor="description" error={issues.description?.message}>
         <textarea
           id="description"
           value={values.description}
@@ -747,7 +731,7 @@ function StoryStep({
             onFieldChange("description");
             setValues((c) => ({ ...c, description: e.target.value }));
           }}
-          placeholder={"What happened on the ground?\n\nHow was impact measured?\n\nWhat evidence should a funder look at?\n\nWho benefits, and what comes next?"}
+          placeholder={impactT("story.placeholder")}
           className={cn(FIELD, "min-h-64 resize-y px-4 py-3.5 text-[15px] leading-7", issues.description && FIELD_ERROR)}
         />
       </Field>
@@ -789,6 +773,8 @@ function PeopleStep({
 }) {
   const [showAllSites, setShowAllSites] = useState(false);
   const { pushModal, show } = useModal();
+  const siteT = useTranslations("bumicert.create.draft.stepForms.site");
+  const editorT = useTranslations("bumicert.create.draft.editor");
   const updateContributor = (index: number, value: string) => {
     onFieldChange("contributors");
     setValues((c) => ({ ...c, contributors: c.contributors.map((v, i) => (i === index ? value : v)) }));
@@ -809,7 +795,7 @@ function PeopleStep({
 
   return (
     <div className="space-y-8">
-      <Field label="People named" hint="search a name or @handle" error={issues.contributors?.message}>
+      <Field label={siteT("contributors.label")} hint={siteT("contributors.info")} error={issues.contributors?.message}>
         <div className="space-y-2.5">
           {values.contributors.map((contributor, index) => (
             <ContributorInput
@@ -820,7 +806,7 @@ function PeopleStep({
               onActorChange={(actor) => setContributorProfile(contributor, actor)}
               onRemove={() => removeContributor(index)}
               canRemove={values.contributors.length > 1}
-              placeholder={index === 0 ? "Search e.g. “Rufiji Stewards” or @handle" : "Name or @handle"}
+              placeholder={index === 0 ? editorT("contributorPlaceholder") : editorT("contributorShortPlaceholder")}
               error={issues.contributors?.message}
             />
           ))}
@@ -835,11 +821,11 @@ function PeopleStep({
           }}
           className="mt-2 -ml-2 text-primary hover:text-primary"
         >
-          <PlusIcon className="size-4" /> Add person or group
+          <PlusIcon className="size-4" /> {editorT("addContributor")}
         </Button>
       </Field>
 
-      <Field label="Sites" hint="optional — but it makes the work easier to verify">
+      <Field label={siteT("boundaries.label")} hint={siteT("boundaries.info")}>
         <div className="mb-3 flex flex-wrap gap-2">
           <Button
             type="button"
@@ -891,27 +877,28 @@ function PeopleStep({
               void show();
             }}
           >
-            <PlusIcon className="size-4" /> Add a site
+            <PlusIcon className="size-4" /> {siteT("boundaries.addSite")}
           </Button>
           {sites.length > 6 ? (
             <Button type="button" variant="ghost" size="sm" onClick={() => setShowAllSites((current) => !current)}>
-              {showAllSites ? "Show fewer sites" : `Show all ${sites.length} sites`}
+              {showAllSites ? editorT("showFewerSites") : editorT("showAllSites", { count: sites.length })}
             </Button>
           ) : null}
         </div>
         {sitesStatus === "loading" ? (
           <div className="flex items-center gap-2.5 py-2 text-[13px] text-muted-foreground">
-            <Loader2Icon className="size-4 animate-spin" /> Loading your sites…
+            <Loader2Icon className="size-4 animate-spin" /> {siteT("boundaries.loading")}
           </div>
         ) : sitesStatus === "error" ? (
           <div className="space-y-2 py-2 text-[13px] text-muted-foreground">
-            <p>{sitesError ?? "Could not load sites."}</p>
-            <Button type="button" variant="secondary" size="sm" onClick={refreshSites}>Retry</Button>
+            <p>{sitesError ?? siteT("boundaries.loadError")}</p>
+            <Button type="button" variant="secondary" size="sm" onClick={refreshSites}>{editorT("retry")}</Button>
           </div>
         ) : sites.length === 0 ? (
           <p className="rounded-2xl bg-muted/50 px-4 py-3.5 text-[13px] leading-6 text-muted-foreground">
-            You don’t have any sites yet. You can publish without one, add one here, or add project places under{" "}
-            <Link href={manageHref(target, "sites")} className="text-primary underline-offset-2 hover:underline">Manage → Sites</Link> and come back.
+            {editorT.rich("noSites", {
+              link: (chunks) => <Link href={manageHref(target, "sites")} className="text-primary underline-offset-2 hover:underline">{chunks}</Link>,
+            })}
           </p>
         ) : (
           <div className="grid gap-2 sm:grid-cols-2">
@@ -931,8 +918,8 @@ function PeopleStep({
                     {active ? <CheckIcon className="size-3.5" /> : <MapPinIcon className="size-3.5" />}
                   </span>
                   <span className="min-w-0">
-                    <span className={cn("block truncate text-sm font-medium", active ? "text-primary" : "text-foreground")}>{site.record.name || "Unnamed site"}</span>
-                    <span className="mt-0.5 line-clamp-2 text-xs leading-5 text-muted-foreground">{siteSubtitle(site)}</span>
+                    <span className={cn("block truncate text-sm font-medium", active ? "text-primary" : "text-foreground")}>{site.record.name || siteT("boundaries.unnamedSite")}</span>
+                    <span className="mt-0.5 line-clamp-2 text-xs leading-5 text-muted-foreground">{siteSubtitle(site, editorT("mapArea"), editorT("projectPlace"))}</span>
                   </span>
                 </button>
               );
@@ -959,9 +946,12 @@ function ConfirmStep({
   isComplete: boolean;
   onFieldChange: (field: FormField) => void;
 }) {
+  const submitT = useTranslations("bumicert.create.draft.stepForms.submit");
+  const siteT = useTranslations("bumicert.create.draft.stepForms.site");
+  const editorT = useTranslations("bumicert.create.draft.editor");
   const validation = issues[0]?.message ?? null;
   const fieldIssues = issuesByField(issues);
-  const statusLabel = validation ?? (isComplete ? "Ready to publish" : "Complete the required details");
+  const statusLabel = validation ?? (isComplete ? submitT("readyTitle") : editorT("completeRequired"));
 
   return (
     <div className="space-y-5">
@@ -980,7 +970,7 @@ function ConfirmStep({
           className="mt-0.5"
         />
         <span className="text-[13px] leading-6 text-foreground">
-          I confirm I have permission to create this Cert for the work and sites above, and that the details are accurate.
+          {siteT("permissions.confirm")}
           {fieldIssues.confirmedRights ? <span className="mt-2 inline-flex items-center gap-1.5 rounded-lg bg-warn/10 px-2.5 py-1.5 text-xs font-medium text-foreground/75"><TriangleAlertIcon className="size-3.5 text-warn" /> {fieldIssues.confirmedRights.message}</span> : null}
         </span>
       </label>
@@ -995,13 +985,15 @@ function ConfirmStep({
           className="mt-0.5"
         />
         <span className="text-[13px] leading-6 text-foreground">
-          I agree to the <a href={TERMS_URL} target="_blank" rel="noreferrer" className="text-primary underline-offset-2 hover:underline">terms and conditions</a>.
+          {editorT.rich("termsAgreement", {
+            link: (chunks) => <a href={TERMS_URL} target="_blank" rel="noreferrer" className="text-primary underline-offset-2 hover:underline">{chunks}</a>,
+          })}
           {fieldIssues.acceptedTerms ? <span className="mt-2 inline-flex items-center gap-1.5 rounded-lg bg-warn/10 px-2.5 py-1.5 text-xs font-medium text-foreground/75"><TriangleAlertIcon className="size-3.5 text-warn" /> {fieldIssues.acceptedTerms.message}</span> : null}
         </span>
       </label>
 
       <p className="text-[13px] leading-6 text-muted-foreground">
-        Publishing adds this Cert to your public profile — it becomes visible to everyone.
+        {editorT("publicDisclosure")}
       </p>
 
       {publishError ? <div className="rounded-2xl bg-destructive/10 px-5 py-3.5 text-[13px] leading-6 text-destructive">{publishError}</div> : null}
@@ -1035,6 +1027,7 @@ function PreviewContent({
   workScopeLabels: WorkScopeLabels;
 }) {
   const [dragging, setDragging] = useState(false);
+  const editorT = useTranslations("bumicert.create.draft.editor");
   void sites;
   return (
     <div className="space-y-2.5">
@@ -1055,7 +1048,7 @@ function PreviewContent({
           coverImage={coverPreview}
           logoUrl={profile.avatarUrl}
           ownerDid={did}
-          title={values.title.trim() || "Your Cert title"}
+          title={values.title.trim() || editorT("previewTitleFallback")}
           organizationName={profile.name}
           objectives={scopeList(values, workScopeLabels)}
           description={clampDescription(values.shortDescription) || undefined}
@@ -1071,7 +1064,7 @@ function PreviewContent({
             )}
           >
             <CameraIcon className="size-3.5" />
-            {coverPreview ? "Change cover" : "Add cover photo"}
+            {coverPreview ? editorT("changeCover") : editorT("addCover")}
           </span>
         </label>
 
@@ -1079,7 +1072,7 @@ function PreviewContent({
           <button
             type="button"
             onClick={onCoverClear}
-            aria-label="Remove cover photo"
+            aria-label={editorT("removeCover")}
             className="absolute right-2 top-2 z-20 rounded-full bg-background/90 p-1.5 text-muted-foreground shadow-md transition-colors hover:text-destructive"
           >
             <XIcon className="size-3.5" />
@@ -1102,18 +1095,21 @@ function DraftsSubheader({
   onLoadDraft: (draft: Draft) => void;
   onDeleteDraft: (id: string) => void;
 }) {
+  const t = useTranslations("bumicert.create.tabs");
+  const draftsT = useTranslations("bumicert.create.drafts");
+  const editorT = useTranslations("bumicert.create.draft.editor");
   if (drafts.length === 0) return null;
   return (
     <div className="-mx-4 overflow-x-auto px-4 pb-2">
       <div className="flex min-w-max items-center gap-2 border-b border-border/70 pb-2">
-        <span className="mr-1 text-xs font-medium uppercase tracking-[0.14em] text-muted-foreground/80">Drafts</span>
+        <span className="mr-1 text-xs font-medium text-muted-foreground">{t("drafts")}</span>
         {drafts.slice(0, 5).map((draft) => (
           <span key={draft.id} className={cn("inline-flex items-center gap-2 rounded-full border px-3 py-1 text-xs transition-colors", draft.id === activeDraftId ? "border-primary bg-primary/12 text-primary" : "border-border bg-background hover:bg-muted/60")}>
             <button type="button" onClick={() => onLoadDraft(draft)} className="font-medium">
-              {titleFromDraft(draft)}
-              <span className="ml-1.5 font-normal text-muted-foreground">· {formatDraftDate(draft.updatedAt)}</span>
+              {titleFromDraft(draft, draftsT("untitledDraft"))}
+              <span className="ml-1.5 font-normal text-muted-foreground">· {formatDraftDate(draft.updatedAt, editorT("recently"))}</span>
             </button>
-            <button type="button" onClick={() => onDeleteDraft(draft.id)} aria-label="Delete draft" className="text-muted-foreground transition-colors hover:text-destructive">
+            <button type="button" onClick={() => onDeleteDraft(draft.id)} aria-label={draftsT("deleteAria", { title: titleFromDraft(draft, draftsT("untitledDraft")) })} className="text-muted-foreground transition-colors hover:text-destructive">
               <XIcon className="size-3" />
             </button>
           </span>
@@ -1127,31 +1123,31 @@ function DraftsSubheader({
 
 function PublishedView({ result, target, ownerIdentifier, linkedProject, onReset }: { result: PublishResult; target: ManageTarget; ownerIdentifier: string; linkedProject: LinkedProjectPrefill | null; onReset: () => void }) {
   const actionT = useTranslations("bumicert.create.draft.stepForms.submit");
+  const reduceMotion = useReducedMotion();
   const detailHref = localBumicertHref(ownerIdentifier, result.rkey);
   const projectHref = linkedProject
     ? manageHref(target, "projects", { mode: "edit", project: linkedProject.rkey })
     : manageHref(target, "projects");
   return (
-    <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, ease: [0.25, 0.1, 0.25, 1] }} className="mx-auto max-w-xl py-16 text-center">
+    <motion.div initial={reduceMotion ? false : { opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={reduceMotion ? { duration: 0 } : { duration: 0.4, ease: [0.25, 0.1, 0.25, 1] }} className="mx-auto max-w-xl py-16 text-center">
       <motion.div
-        initial={{ scale: 0.6 }}
+        initial={reduceMotion ? false : { scale: 0.6 }}
         animate={{ scale: 1 }}
-        transition={{ type: "spring", stiffness: 240, damping: 16 }}
+        transition={reduceMotion ? { duration: 0 } : { type: "spring", stiffness: 240, damping: 16 }}
         className="mx-auto flex size-16 items-center justify-center rounded-full bg-primary/12 text-primary"
       >
         <CheckIcon className="size-8" />
       </motion.div>
-      <p className="mt-6 text-xs font-medium uppercase tracking-[0.22em] text-primary/70">Published</p>
-      <h2 className="mt-2 font-instrument text-5xl italic tracking-[-0.01em] text-foreground">It’s live.</h2>
-      <p className="mx-auto mt-3 max-w-md text-sm leading-6 text-muted-foreground">Your Cert is on your public profile now. It may take a moment to appear everywhere.</p>
+      <h2 className="mt-6 font-instrument text-5xl italic tracking-[-0.01em] text-foreground">{actionT("successTitle")}</h2>
+      <p className="mx-auto mt-3 max-w-md text-sm leading-6 text-muted-foreground">{actionT("successDescription")}</p>
       <div className="mt-7 flex flex-wrap justify-center gap-3">
         <Button asChild>
-          <Link href={detailHref}>Open Cert <ArrowRightIcon className="size-4" /></Link>
+          <Link href={detailHref}>{actionT("viewBumicert")} <ArrowRightIcon className="size-4" /></Link>
         </Button>
         <Button asChild variant="secondary">
           <Link href={projectHref}>{linkedProject ? actionT("viewProject") : actionT("viewProjects")}</Link>
         </Button>
-        <Button variant="ghost" onClick={onReset}>Create another</Button>
+        <Button variant="ghost" onClick={onReset}>{actionT("createAnother")}</Button>
       </div>
 
     </motion.div>
@@ -1174,6 +1170,15 @@ export function NewBumicertClient({
   linkedProject?: LinkedProjectPrefill | null;
 }) {
   const workScopeT = useTranslations("common.workScopes");
+  const previewT = useTranslations("bumicert.create.draft.stepForms.preview");
+  const editorT = useTranslations("bumicert.create.draft.editor");
+  const steps = {
+    basics: { title: editorT("steps.basics.title"), subtitle: editorT("steps.basics.subtitle") },
+    story: { title: editorT("steps.story.title"), subtitle: editorT("steps.story.subtitle") },
+    people: { title: editorT("steps.people.title"), subtitle: editorT("steps.people.subtitle") },
+    review: { title: editorT("steps.review.title"), subtitle: editorT("steps.review.subtitle") },
+  };
+  const reduceMotion = useReducedMotion();
   const workScopeLabels: WorkScopeLabels = {
     reforestation: workScopeT(WORK_SCOPE_MESSAGE_KEYS.reforestation),
     forest_protection: workScopeT(WORK_SCOPE_MESSAGE_KEYS.forest_protection),
@@ -1200,7 +1205,16 @@ export function NewBumicertClient({
   const [publishResult, setPublishResult] = useState<PublishResult | null>(null);
   const [mobileSheet, setMobileSheet] = useState<"preview" | null>(null);
   const publishPermission = canCreateRecord(target);
-  const linkedProjectUpdatePermission = canUpdateRecord(target);
+  const linkedProjectUpdatePermission = canUpdateRecord(target, {
+    ownRecord: linkedProject
+      ? isReliablyOwnProjectRecord({
+          kind: target.kind,
+          did: target.did,
+          currentUserDid: target.currentUserDid,
+          recordDid: linkedProject.did,
+        })
+      : false,
+  });
   const canLinkToProject = Boolean(linkedProject?.canLink && linkedProjectUpdatePermission.allowed);
   const autosaveTimer = useRef<number | null>(null);
 
@@ -1224,17 +1238,21 @@ export function NewBumicertClient({
     fetch(manageApiHref("/api/manage/sites", target), { signal: controller.signal })
       .then(async (res) => {
         const json = await res.json();
-        if (!res.ok) throw new Error(json?.error ?? "Failed to load sites");
+        if (!res.ok) {
+          console.error("Cert site load failed", json?.error);
+          throw new Error("CERT_SITE_LOAD_FAILED");
+        }
         setSites(Array.isArray(json) ? json : []);
         setSitesStatus("ready");
       })
       .catch((error) => {
         if (error instanceof DOMException && error.name === "AbortError") return;
+        console.error("Cert site load failed", error);
         setSitesStatus("error");
-        setSitesError(error instanceof Error ? error.message : "Failed to load sites");
+        setSitesError(editorT("sitesLoadError"));
       });
     return () => controller.abort();
-  }, [target]);
+  }, [editorT, target]);
 
   useEffect(() => {
     if (sitesStatus === "idle") refreshSites();
@@ -1273,7 +1291,7 @@ export function NewBumicertClient({
     };
   }, [activeDraftId, publishResult, values]);
 
-  const formIssues = getFormIssues(values);
+  const formIssues = getFormIssues(values, (key) => editorT(`validation.${key}` as never));
   const visibleIssues = formIssues.filter((issue) => publishAttempted || touchedFields[issue.field]);
   const fieldIssues = issuesByField(visibleIssues);
 
@@ -1286,11 +1304,11 @@ export function NewBumicertClient({
       setCoverError(null);
       if (!file) return;
       if (!/^image\/(png|jpe?g|webp)$/i.test(file.type)) {
-        setCoverError("Use a PNG, JPEG, or WebP image.");
+        setCoverError(editorT("coverTypeError"));
         return;
       }
       if (file.size > MAX_IMAGE_BYTES) {
-        setCoverError("The image must be 5 MB or smaller.");
+        setCoverError(editorT("coverSizeError"));
         return;
       }
       setCoverFile(file);
@@ -1300,7 +1318,7 @@ export function NewBumicertClient({
         return URL.createObjectURL(file);
       });
     },
-    [],
+    [editorT],
   );
 
   const handleCoverChange = (event: ChangeEvent<HTMLInputElement>) => {
@@ -1398,14 +1416,14 @@ export function NewBumicertClient({
 
   const handlePublish = async (event: FormEvent) => {
     event.preventDefault();
-    const validation = validateAll(values);
+    const validation = formIssues[0]?.message ?? null;
     if (validation) {
       setPublishAttempted(true);
       setPublishError(validation);
       return;
     }
     if (!publishPermission.allowed) {
-      setPublishError(publishPermission.reason ?? "You cannot publish for this organization.");
+      setPublishError(editorT("publishDenied"));
       return;
     }
     setIsPublishing(true);
@@ -1442,7 +1460,8 @@ export function NewBumicertClient({
       setPublishResult({ uri: result.uri, cid: result.cid, rkey: extractRkey(result.uri) });
       if (activeDraftId) handleDeleteDraft(activeDraftId);
     } catch (error) {
-      setPublishError(error instanceof Error ? error.message : "Could not publish the Cert.");
+      console.error("Cert publishing failed", error);
+      setPublishError(editorT("publishError"));
     } finally {
       setIsPublishing(false);
     }
@@ -1471,7 +1490,7 @@ export function NewBumicertClient({
         right={
           !publishResult ? (
             <Button type="button" variant="ghost" size="sm" onClick={resetForm}>
-              <RotateCcwIcon /> <span className="hidden sm:inline">Start over</span>
+              <RotateCcwIcon /> <span className="hidden sm:inline">{editorT("startOver")}</span>
             </Button>
           ) : null
         }
@@ -1482,7 +1501,7 @@ export function NewBumicertClient({
         }
       />
 
-      <div className="mx-auto w-full max-w-5xl px-4 py-7 sm:px-6 sm:py-9">
+      <div className="mx-auto w-full max-w-6xl px-3 py-4 sm:px-5 sm:py-6 lg:px-8">
         {publishResult ? (
           <PublishedView result={publishResult} target={target} ownerIdentifier={ownerIdentifier} linkedProject={canLinkToProject ? linkedProject : null} onReset={resetForm} />
         ) : (
@@ -1490,12 +1509,12 @@ export function NewBumicertClient({
             <form onSubmit={handlePublish} className="mt-2 grid gap-x-14 gap-y-12 xl:grid-cols-[minmax(0,1fr)_18rem]">
               <div className="min-w-0">
                 <section>
-                  <SectionHeader eyebrow="Basics" title={STEPS[0].title} subtitle={STEPS[0].subtitle} />
+                  <SectionHeader title={steps.basics.title} subtitle={steps.basics.subtitle} />
                   <BasicsStep values={values} setValues={setValues} issues={fieldIssues} onFieldChange={markFieldChanged} workScopeLabels={workScopeLabels} />
 
                   {/* Mobile: live preview shown inline */}
                   <div className="mt-10 xl:hidden">
-                    <p className="mb-3 text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground/70">Live preview</p>
+                    <p className="mb-3 text-xs font-medium text-muted-foreground">{previewT("title")}</p>
                     <div className="mx-auto max-w-[18rem]">
                       <PreviewContent {...previewProps} />
                     </div>
@@ -1503,12 +1522,12 @@ export function NewBumicertClient({
                 </section>
 
                 <section className="mt-14 border-t border-border/40 pt-14">
-                  <SectionHeader eyebrow="Story" title={STEPS[1].title} subtitle={STEPS[1].subtitle} />
+                  <SectionHeader title={steps.story.title} subtitle={steps.story.subtitle} />
                   <StoryStep values={values} setValues={setValues} issues={fieldIssues} onFieldChange={markFieldChanged} />
                 </section>
 
                 <section className="mt-14 border-t border-border/40 pt-14">
-                  <SectionHeader eyebrow="People & places" title={STEPS[2].title} subtitle={STEPS[2].subtitle} />
+                  <SectionHeader title={steps.people.title} subtitle={steps.people.subtitle} />
                   <PeopleStep
                     did={did}
                     target={target}
@@ -1521,22 +1540,25 @@ export function NewBumicertClient({
                     contributorProfiles={contributorProfiles}
                     setContributorProfile={setContributorProfile}
                     onSiteCreated={handleSiteCreated}
-                    createPermissionReason={publishPermission.reason}
+                    createPermissionReason={!publishPermission.allowed ? editorT("publishDenied") : null}
                     issues={fieldIssues}
                     onFieldChange={markFieldChanged}
                   />
                 </section>
 
                 <section className="mt-14 border-t border-border/40 pt-14">
-                  <SectionHeader eyebrow="Publish" title="ready to publish?" subtitle="One last verification, then make it public." />
+                  <SectionHeader title={steps.review.title} subtitle={steps.review.subtitle} />
                   <ConfirmStep values={values} setValues={setValues} publishError={publishError} issues={visibleIssues} isComplete={formIssues.length === 0} onFieldChange={markFieldChanged} />
                 </section>
 
+                {linkedProject?.canLink && !linkedProjectUpdatePermission.allowed ? (
+                  <p className="mt-8 text-sm text-muted-foreground" role="status">{editorT("projectLinkDenied")}</p>
+                ) : null}
                 <div className="mt-10 flex flex-wrap items-center justify-between gap-3">
-                  <span className="hidden text-xs text-muted-foreground sm:block">{activeDraftId ? "Saved" : "Not saved yet"}</span>
-                  <Button type="submit" size="lg" disabled={isPublishing || !publishPermission.allowed} title={publishPermission.reason ?? undefined}>
+                  <span className="hidden text-xs text-muted-foreground sm:block">{activeDraftId ? editorT("saved") : editorT("notSaved")}</span>
+                  <Button type="submit" size="lg" disabled={isPublishing || !publishPermission.allowed} title={!publishPermission.allowed ? editorT("publishDenied") : undefined}>
                     {isPublishing ? <Loader2Icon className="size-4 animate-spin" /> : <LeafIcon className="size-4" />}
-                    {isPublishing ? "Publishing…" : canLinkToProject ? "Publish to the project" : "Publish"}
+                    {isPublishing ? editorT("publishing") : canLinkToProject ? editorT("publishToProject") : editorT("publish")}
                   </Button>
                 </div>
               </div>
@@ -1546,7 +1568,7 @@ export function NewBumicertClient({
               <aside className="hidden xl:sticky xl:top-20 xl:block xl:self-start">
                 <div className="space-y-8">
                   <div>
-                    <p className="mb-3 text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground/70">Live preview</p>
+                    <p className="mb-3 text-xs font-medium text-muted-foreground">{previewT("title")}</p>
                     <PreviewContent {...previewProps} />
                   </div>
                   <TaináChatDock />
@@ -1565,7 +1587,7 @@ export function NewBumicertClient({
                 "Tips" button used to be. Tapping opens her chat in a sheet. */}
             <TaináMobileTrigger />
             <Button type="button" variant="outline" size="sm" onClick={() => setMobileSheet("preview")} className="shadow-lg">
-              <EyeIcon className="size-4" /> Preview
+              <EyeIcon className="size-4" /> {previewT("title")}
             </Button>
           </div>
 
@@ -1574,22 +1596,23 @@ export function NewBumicertClient({
               <motion.div className="fixed inset-0 z-50 xl:hidden" initial={false}>
                 <motion.div
                   className="absolute inset-0 bg-foreground/40 backdrop-blur-sm"
-                  initial={{ opacity: 0 }}
+                  initial={reduceMotion ? false : { opacity: 0 }}
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
+                  transition={{ duration: reduceMotion ? 0 : 0.2 }}
                   onClick={() => setMobileSheet(null)}
                 />
                 <motion.div
                   className="absolute inset-x-0 bottom-0 max-h-[88vh] overflow-y-auto rounded-t-3xl bg-background px-5 pb-10 pt-3 shadow-2xl"
-                  initial={{ y: "100%" }}
+                  initial={reduceMotion ? false : { y: "100%" }}
                   animate={{ y: 0 }}
-                  exit={{ y: "100%" }}
-                  transition={{ type: "spring", stiffness: 320, damping: 34 }}
+                  exit={reduceMotion ? { opacity: 0 } : { y: "100%" }}
+                  transition={reduceMotion ? { duration: 0 } : { type: "spring", stiffness: 320, damping: 34 }}
                 >
                   <div className="mx-auto mb-4 h-1.5 w-10 rounded-full bg-muted-foreground/25" />
                   <div className="mb-5 flex items-center justify-between">
-                    <span className="font-instrument text-2xl italic text-foreground">Preview</span>
-                    <button type="button" onClick={() => setMobileSheet(null)} aria-label="Close" className="rounded-full p-1.5 text-muted-foreground transition-colors hover:bg-muted">
+                    <span className="font-instrument text-2xl italic text-foreground">{previewT("title")}</span>
+                    <button type="button" onClick={() => setMobileSheet(null)} aria-label={editorT("close")} className="rounded-full p-1.5 text-muted-foreground transition-colors hover:bg-muted">
                       <XIcon className="size-5" />
                     </button>
                   </div>

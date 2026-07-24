@@ -10,7 +10,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import {
   ArchiveIcon,
   AudioLinesIcon,
@@ -34,6 +34,7 @@ import {
   WrenchIcon,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { SectionSurface } from "@/components/ui/section-surface";
 import { AdminOnlyIndicator } from "@/app/_components/AdminOnlyIndicator";
 import { PictureHero } from "@/app/_components/PictureHero";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -284,9 +285,9 @@ function parseVersionString(value: string): [number, number, number] | null {
 
 function Card({ children, className }: { children: ReactNode; className?: string }) {
   return (
-    <section className={cn("rounded-3xl border border-border bg-card/90 p-5 shadow-sm backdrop-blur-sm sm:p-6", className)}>
+    <SectionSurface variant="muted" className={className}>
       {children}
-    </section>
+    </SectionSurface>
   );
 }
 
@@ -312,6 +313,7 @@ export function AudioMothClient({
 }) {
   const t = useTranslations("common.audiomoth");
   const identificationsT = useTranslations("common.identifications");
+  const shouldReduceMotion = useReducedMotion();
 
   const [supported, setSupported] = useState<boolean | null>(null);
   const [device, setDevice] = useState<AudioMothDevice | null>(null);
@@ -831,19 +833,20 @@ export function AudioMothClient({
         compact
         lightSrc="/images/explore/explore-hero-light@2x.webp"
         darkSrc="/images/explore/explore-hero-dark@2x.webp"
+        imageAlt=""
         title={t("title")}
         lede={mainTab === "label" ? t("label.subtitle") : mainTab === "identifications" ? identificationsT("subtitle") : t("subtitle")}
       />
-      <div className="mx-auto flex w-full max-w-7xl flex-col gap-6 px-4 sm:px-6">
+      <div className="mx-auto flex w-full max-w-[90rem] flex-col gap-6 px-3 sm:px-5 lg:px-8">
       {/* Setup (this device over USB) vs Deployment (field events) */}
-      <nav className="flex w-full gap-1 self-start rounded-full border border-border bg-card/70 p-1 sm:w-auto" aria-label={t("title")}>
+      <nav className="flex w-full gap-1 self-start overflow-x-auto rounded-full bg-muted p-1 sm:w-auto" aria-label={t("title")}>
         {mainTabs.map(({ id, label, Icon, adminOnly }) => (
           <button
             key={id}
             type="button"
             onClick={() => selectMainTab(id)}
             className={cn(
-              "flex min-w-0 flex-1 items-center justify-center gap-1 rounded-full px-2 py-2 text-xs font-medium transition-colors sm:flex-none sm:gap-2 sm:px-4 sm:text-sm",
+              "flex min-h-11 flex-none items-center justify-center gap-2 whitespace-nowrap rounded-full px-4 py-2 text-sm font-medium transition-colors",
               mainTab === id ? "bg-primary text-primary-foreground shadow-sm" : "text-muted-foreground hover:text-foreground",
             )}
             aria-current={mainTab === id ? "page" : undefined}
@@ -892,20 +895,20 @@ export function AudioMothClient({
             ) : (
               <motion.div
                 key="tabs"
-                initial={{ opacity: 0, y: 8 }}
+                initial={shouldReduceMotion ? false : { opacity: 0, y: 8 }}
                 animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -8 }}
-                transition={{ duration: 0.2 }}
+                exit={shouldReduceMotion ? undefined : { opacity: 0, y: -8 }}
+                transition={{ duration: shouldReduceMotion ? 0 : 0.2 }}
                 className="flex flex-col gap-6"
               >
-                <nav className="flex gap-1 rounded-full border border-border bg-card/70 p-1" aria-label={t("title")}>
+                <nav className="flex gap-1 rounded-full bg-muted p-1" aria-label={t("title")}>
                   {tabs.map(({ id, label, Icon }) => (
                     <button
                       key={id}
                       type="button"
                       onClick={() => setTab(id)}
                       className={cn(
-                        "flex flex-1 items-center justify-center gap-2 rounded-full px-3 py-2 text-sm font-medium transition-colors",
+                        "flex min-h-11 flex-1 items-center justify-center gap-2 rounded-full px-3 py-2 text-sm font-medium transition-colors",
                         tab === id ? "bg-primary text-primary-foreground shadow-sm" : "text-muted-foreground hover:text-foreground",
                       )}
                       aria-current={tab === id ? "page" : undefined}
@@ -1068,6 +1071,7 @@ function ConnectionCard({
 /** Subtle chip showing whether the device matches the one-click GainForest setup. */
 function SetupBadge({ setupCheck }: { setupCheck: SetupCheck | null }) {
   const t = useTranslations("common.audiomoth.connection");
+  const shouldReduceMotion = useReducedMotion();
 
   if (!setupCheck || setupCheck.status === "unknown") return null;
 
@@ -1083,7 +1087,7 @@ function SetupBadge({ setupCheck }: { setupCheck: SetupCheck | null }) {
   if (setupCheck.status === "ready") {
     return (
       <motion.span
-        initial={{ opacity: 0, scale: 0.9 }}
+        initial={shouldReduceMotion ? false : { opacity: 0, scale: 0.9 }}
         animate={{ opacity: 1, scale: 1 }}
         className="inline-flex items-center gap-1 rounded-full border border-primary/30 bg-primary/10 px-2 py-0.5 text-[11px] font-medium text-primary"
       >
@@ -1095,7 +1099,7 @@ function SetupBadge({ setupCheck }: { setupCheck: SetupCheck | null }) {
 
   return (
     <motion.span
-      initial={{ opacity: 0, scale: 0.9 }}
+      initial={shouldReduceMotion ? false : { opacity: 0, scale: 0.9 }}
       animate={{ opacity: 1, scale: 1 }}
       className="inline-flex items-center gap-1 rounded-full border border-amber-500/40 bg-amber-500/10 px-2 py-0.5 text-[11px] font-medium text-amber-600 dark:text-amber-400"
     >
@@ -1111,6 +1115,7 @@ function SetupBadge({ setupCheck }: { setupCheck: SetupCheck | null }) {
 
 function AutoSetupWizard({ wizard, onClose }: { wizard: WizardState; onClose: () => void }) {
   const t = useTranslations("common.audiomoth.autoSetup");
+  const shouldReduceMotion = useReducedMotion();
 
   const stepMeta: Record<WizardStepId, { Icon: typeof ClockIcon; title: string }> = {
     firmware: { Icon: CpuIcon, title: t("stepFirmware") },
@@ -1124,18 +1129,18 @@ function AutoSetupWizard({ wizard, onClose }: { wizard: WizardState; onClose: ()
   return (
     <motion.section
       key="auto-setup"
-      initial={{ opacity: 0, y: 12, scale: 0.98 }}
+      initial={shouldReduceMotion ? false : { opacity: 0, y: 12, scale: 0.98 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
-      exit={{ opacity: 0, y: -8, scale: 0.98 }}
-      transition={{ duration: 0.25 }}
-      className="rounded-3xl border border-primary/25 bg-card/95 p-6 shadow-md backdrop-blur-sm sm:p-8"
+      exit={shouldReduceMotion ? undefined : { opacity: 0, y: -8, scale: 0.98 }}
+      transition={{ duration: shouldReduceMotion ? 0 : 0.25 }}
+      className="rounded-3xl bg-muted p-4 sm:p-5"
       aria-live="polite"
     >
       <div className="mb-6 flex flex-col items-center gap-3 text-center">
         <motion.span
           className="flex size-14 items-center justify-center rounded-full border border-primary/20 bg-primary/10 text-primary"
-          animate={wizard.running ? { scale: [1, 1.08, 1] } : { scale: 1 }}
-          transition={wizard.running ? { duration: 1.6, repeat: Infinity, ease: "easeInOut" } : undefined}
+          animate={wizard.running && !shouldReduceMotion ? { scale: [1, 1.08, 1] } : { scale: 1 }}
+          transition={wizard.running && !shouldReduceMotion ? { duration: 1.6, repeat: Infinity, ease: "easeInOut" } : { duration: 0 }}
         >
           {wizard.running ? (
             <AudioLinesIcon className="size-6" />
@@ -1146,7 +1151,7 @@ function AutoSetupWizard({ wizard, onClose }: { wizard: WizardState; onClose: ()
           )}
         </motion.span>
         <div>
-          <h2 className="text-lg font-semibold">{headline}</h2>
+          <h2 className="font-instrument text-lg font-light italic">{headline}</h2>
           <p className="text-sm text-muted-foreground">{t("subtitle")}</p>
         </div>
       </div>
@@ -1158,9 +1163,9 @@ function AutoSetupWizard({ wizard, onClose }: { wizard: WizardState; onClose: ()
           return (
             <motion.li
               key={id}
-              initial={{ opacity: 0, x: -12 }}
+              initial={shouldReduceMotion ? false : { opacity: 0, x: -12 }}
               animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: index * 0.08, duration: 0.25 }}
+              transition={{ delay: shouldReduceMotion ? 0 : index * 0.08, duration: shouldReduceMotion ? 0 : 0.25 }}
               className="flex gap-3"
             >
               <div className="flex flex-col items-center">
@@ -1187,7 +1192,7 @@ function AutoSetupWizard({ wizard, onClose }: { wizard: WizardState; onClose: ()
                 {step.detail && (
                   <motion.p
                     key={step.detail}
-                    initial={{ opacity: 0 }}
+                    initial={shouldReduceMotion ? false : { opacity: 0 }}
                     animate={{ opacity: 1 }}
                     className={cn("text-sm", step.status === "error" ? "text-destructive" : "text-muted-foreground")}
                   >
@@ -1199,7 +1204,7 @@ function AutoSetupWizard({ wizard, onClose }: { wizard: WizardState; onClose: ()
                     <motion.div
                       className="h-full rounded-full bg-primary"
                       animate={{ width: `${Math.round(step.progress * 100)}%` }}
-                      transition={{ ease: "easeOut", duration: 0.2 }}
+                      transition={{ ease: "easeOut", duration: shouldReduceMotion ? 0 : 0.2 }}
                     />
                   </div>
                 )}
@@ -1211,7 +1216,7 @@ function AutoSetupWizard({ wizard, onClose }: { wizard: WizardState; onClose: ()
 
       {!wizard.running && (
         <motion.div
-          initial={{ opacity: 0, y: 6 }}
+          initial={shouldReduceMotion ? false : { opacity: 0, y: 6 }}
           animate={{ opacity: 1, y: 0 }}
           className="mt-2 flex justify-center"
         >
@@ -1225,11 +1230,12 @@ function AutoSetupWizard({ wizard, onClose }: { wizard: WizardState; onClose: ()
 }
 
 function StepStatusBadge({ status, Icon }: { status: WizardStepStatus; Icon: typeof ClockIcon }) {
+  const shouldReduceMotion = useReducedMotion();
   return (
     <span
       className={cn(
         "flex size-9 shrink-0 items-center justify-center rounded-full border transition-colors",
-        status === "pending" && "border-border bg-muted/40 text-muted-foreground/50",
+        status === "pending" && "border-border bg-muted text-muted-foreground",
         status === "active" && "border-primary/40 bg-primary/10 text-primary",
         status === "done" && "border-primary bg-primary text-primary-foreground",
         status === "skipped" && "border-border bg-muted text-muted-foreground",
@@ -1239,7 +1245,7 @@ function StepStatusBadge({ status, Icon }: { status: WizardStepStatus; Icon: typ
       {status === "active" ? (
         <Loader2Icon className="size-4 animate-spin" />
       ) : status === "done" ? (
-        <motion.span initial={{ scale: 0.4, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ type: "spring", stiffness: 400, damping: 18 }}>
+        <motion.span initial={shouldReduceMotion ? false : { scale: 0.4, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={shouldReduceMotion ? { duration: 0 } : { type: "spring", stiffness: 400, damping: 18 }}>
           <CheckIcon className="size-4" />
         </motion.span>
       ) : status === "skipped" ? (
@@ -1329,7 +1335,7 @@ function DeviceTab({
       </Card>
 
       <Card>
-        <h2 className="mb-2 flex items-center gap-2 text-sm font-semibold">
+        <h2 className="mb-2 flex items-center gap-2 font-instrument text-sm font-light italic">
           <FingerprintIcon className="size-4 text-muted-foreground" />
           {t("aboutTitle")}
         </h2>
@@ -1447,7 +1453,7 @@ function ConfigureTab({
   return (
     <div className="flex flex-col gap-4">
       <Card>
-        <h2 className="mb-4 text-sm font-semibold">{t("recordingTitle")}</h2>
+        <h2 className="mb-4 font-instrument text-sm font-light italic">{t("recordingTitle")}</h2>
         <div className="grid gap-4 sm:grid-cols-2">
           <div className="flex flex-col gap-1.5">
             <Label htmlFor="audiomoth-sample-rate">{t("sampleRateLabel")}</Label>
@@ -1525,7 +1531,7 @@ function ConfigureTab({
       </Card>
 
       <Card>
-        <h2 className="mb-1 text-sm font-semibold">{t("scheduleTitle")}</h2>
+        <h2 className="mb-1 font-instrument text-sm font-light italic">{t("scheduleTitle")}</h2>
         <p className="mb-4 text-sm text-muted-foreground">{t("scheduleBody")}</p>
 
         <div className="mb-4 flex flex-col gap-1.5">
@@ -1608,7 +1614,7 @@ function ConfigureTab({
       </Card>
 
       <Card>
-        <h2 className="mb-4 text-sm font-semibold">{t("filterTitle")}</h2>
+        <h2 className="mb-4 font-instrument text-sm font-light italic">{t("filterTitle")}</h2>
         <div className="grid gap-4 sm:grid-cols-3">
           <div className="flex flex-col gap-1.5">
             <Label htmlFor="audiomoth-filter-type">{t("filterTypeLabel")}</Label>
@@ -1658,7 +1664,7 @@ function ConfigureTab({
       </Card>
 
       <Card>
-        <h2 className="mb-4 text-sm font-semibold">{t("extrasTitle")}</h2>
+        <h2 className="mb-4 font-instrument text-sm font-light italic">{t("extrasTitle")}</h2>
         <div className="grid gap-3 sm:grid-cols-2">
           <label className="flex items-center gap-2 text-sm">
             <Checkbox checked={config.ledEnabled} onCheckedChange={(checked) => update({ ledEnabled: checked === true })} />
@@ -1728,7 +1734,7 @@ function ConfigureTab({
       </Card>
 
       <Card>
-        <h2 className="mb-1 text-sm font-semibold">{t("chimeTitle")}</h2>
+        <h2 className="mb-1 font-instrument text-sm font-light italic">{t("chimeTitle")}</h2>
         <p className="mb-4 text-sm text-muted-foreground">{t("chimeBody")}</p>
         <div className="flex flex-col gap-3">
           <label className="flex items-center gap-2 text-sm">
@@ -1786,7 +1792,7 @@ function ConfigureTab({
       </Card>
 
       <Card>
-        <h2 className="mb-1 text-sm font-semibold">{t("gpsTitle")}</h2>
+        <h2 className="mb-1 font-instrument text-sm font-light italic">{t("gpsTitle")}</h2>
         <p className="mb-4 text-sm text-muted-foreground">{t("gpsBody")}</p>
         <div className="flex flex-col gap-4">
           <label className="flex items-center gap-2 text-sm">
@@ -1999,7 +2005,7 @@ function FirmwareTab({
   return (
     <div className="flex flex-col gap-4">
       <Card>
-        <h2 className="mb-2 text-sm font-semibold">{t("currentTitle")}</h2>
+        <h2 className="mb-2 font-instrument text-sm font-light italic">{t("currentTitle")}</h2>
         <div className="divide-y divide-border/60">
           <InfoRow label={t("currentVersionLabel")} value={info ? info.firmwareVersion.join(".") : "—"} dimmed={!info} />
           <InfoRow label={t("currentDescriptionLabel")} value={info?.firmwareDescription ?? "—"} dimmed={!info} />
@@ -2012,7 +2018,7 @@ function FirmwareTab({
       </Card>
 
       <Card>
-        <h2 className="mb-4 text-sm font-semibold">{t("chooseTitle")}</h2>
+        <h2 className="mb-4 font-instrument text-sm font-light italic">{t("chooseTitle")}</h2>
 
         <div className="flex flex-col gap-4">
           <div className="flex flex-col gap-1.5">
@@ -2072,7 +2078,7 @@ function FirmwareTab({
         )}
 
         {flashState.stage === "awaiting-serial" && (
-          <div className="flex flex-col items-start gap-2 rounded-2xl border border-border bg-card/90 p-4">
+          <div className="flex flex-col items-start gap-2 rounded-2xl bg-muted p-4">
             <p className="text-sm">{serialSupported ? t("serialPickPrompt") : t("serialUnsupported")}</p>
             {serialSupported && (
               <Button onClick={continueSerialFlash}>

@@ -14,7 +14,9 @@ import {
   MapPinIcon,
   UsersIcon,
 } from "lucide-react";
+import { SectionSurface } from "@/components/ui/section-surface";
 import { Skeleton } from "@/components/ui/skeleton";
+import { DisplayHeading } from "@/components/ui/typography";
 import { StatsTileGrid, type StatsTileItem } from "../_components/StatsTile";
 import {
   fetchBumicertStats,
@@ -49,6 +51,7 @@ const INITIAL_STATS: DashboardStats = {
 export function StatsDashboardClient() {
   const stats = useDashboardStats();
   const locale = useLocale();
+  const t = useTranslations("common.coreDashboard");
   const explore = useTranslations("marketplace.explore");
   const organizations = useTranslations("marketplace.organizations");
   const projects = useTranslations("marketplace.projects");
@@ -79,12 +82,12 @@ export function StatsDashboardClient() {
     const data = stats.observations.data;
     if (!data) return [];
     return [
-      tile("Nature sightings shared", data.totalSightings, locale, <LeafIcon />, true, "/observations"),
-      tile("Sightings with photos", data.photoSightings, locale, <ImageIcon />, false, "/observations"),
-      tile("Sightings in last 30 days", data.recentSightings, locale, <CalendarDaysIcon />, true, "/observations"),
-      tile("Locations across sightings", data.mappedSightings, locale, <MapIcon />, false, "/observations"),
+      tile(t("observations.total"), data.totalSightings, locale, <LeafIcon />, true, "/observations"),
+      tile(t("observations.withPhotos"), data.photoSightings, locale, <ImageIcon />, false, "/observations"),
+      tile(t("observations.recent"), data.recentSightings, locale, <CalendarDaysIcon />, true, "/observations"),
+      tile(t("observations.mapped"), data.mappedSightings, locale, <MapIcon />, false, "/observations"),
     ];
-  }, [locale, stats.observations.data]);
+  }, [locale, stats.observations.data, t]);
 
   const projectItems = useMemo<StatsTileItem[]>(() => {
     const data = stats.projects.data;
@@ -98,28 +101,32 @@ export function StatsDashboardClient() {
   }, [locale, projects, stats.projects.data]);
 
   return (
-    <div className="mx-auto max-w-6xl space-y-10 px-6 pb-20 md:pb-28">
+    <div className="mx-auto max-w-6xl space-y-6 px-3 pb-6 sm:px-5 md:space-y-8 md:pb-8 lg:px-8">
       <DashboardStatsSection
-        title="Project stories"
-        description="Published project stories and the evidence attached to them."
+        title={t("sections.stories.title")}
+        description={t("sections.stories.description")}
+        errorMessage={t("loadError")}
         state={stats.bumicerts}
         items={bumicertItems}
       />
       <DashboardStatsSection
-        title="Organizations"
-        description="Public nature steward profiles, places, and linked activity."
+        title={t("sections.organizations.title")}
+        description={t("sections.organizations.description")}
+        errorMessage={t("loadError")}
         state={stats.organizations}
         items={organizationItems}
       />
       <DashboardStatsSection
-        title="Observations"
-        description="Nature sightings, photos, recent records, and mapped locations."
+        title={t("sections.observations.title")}
+        description={t("sections.observations.description")}
+        errorMessage={t("loadError")}
         state={stats.observations}
         items={observationItems}
       />
       <DashboardStatsSection
-        title="Projects"
-        description="Project collections and the stories grouped inside them."
+        title={t("sections.projects.title")}
+        description={t("sections.projects.description")}
+        errorMessage={t("loadError")}
         state={stats.projects}
         items={projectItems}
       />
@@ -173,36 +180,31 @@ function useDashboardStats(): DashboardStats {
 function DashboardStatsSection<T>({
   title,
   description,
+  errorMessage,
   state,
   items,
 }: {
   title: string;
   description: string;
+  errorMessage: string;
   state: LoadState<T>;
   items: StatsTileItem[];
 }) {
   return (
     <section className="animate-in">
-      <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
-        <div>
-          <h2
-            className="font-garamond text-3xl font-light tracking-[-0.03em] text-foreground sm:text-4xl"
-          >
-            {title}
-          </h2>
-          <p className="mt-1 max-w-2xl text-sm leading-6 text-muted-foreground">{description}</p>
-        </div>
-        {state.status === "ready" ? (
-          <span className="text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">Updated now</span>
-        ) : null}
+      <div className="mb-4">
+        <DisplayHeading as="h2" className="text-3xl font-light tracking-[-0.03em] text-foreground sm:text-4xl">
+          {title}
+        </DisplayHeading>
+        <p className="mt-1 max-w-2xl text-sm leading-6 text-muted-foreground">{description}</p>
       </div>
 
       {state.status === "loading" ? (
         <StatsSkeleton />
       ) : state.status === "error" ? (
-        <div className="rounded-3xl border border-border bg-foreground/5 p-6 text-sm text-muted-foreground">
-          We could not load these numbers right now.
-        </div>
+        <SectionSurface variant="muted" className="text-sm text-muted-foreground" role="status">
+          {errorMessage}
+        </SectionSurface>
       ) : (
         <StatsTileGrid columns={4} items={items} />
       )}
@@ -214,7 +216,7 @@ function StatsSkeleton() {
   return (
     <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4" aria-hidden="true">
       {Array.from({ length: 4 }).map((_, index) => (
-        <div key={index} className="rounded-2xl bg-foreground/5 p-4 sm:rounded-3xl sm:p-6">
+        <div key={index} className="rounded-2xl bg-muted/60 p-4 sm:p-5">
           <div className="flex items-center gap-3">
             <Skeleton className="size-5 rounded-full" />
             <Skeleton className="h-8 w-20 rounded-full" />

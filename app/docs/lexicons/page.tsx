@@ -26,13 +26,13 @@ export default async function LexiconsOverviewPage() {
         <div className="mb-5 text-primary">
           <LogoMark className="h-7 w-7" title="GainForest" />
         </div>
-        <h1 className="m-0 font-serif text-4xl font-semibold tracking-tight text-foreground">
+        <h1 className="m-0 font-instrument text-4xl font-light italic tracking-tight text-foreground">
           {t("title")}
         </h1>
         <p className="mt-3 max-w-prose text-[15px] leading-relaxed text-muted-foreground">{t("lead")}</p>
       </header>
 
-      <nav className="mb-12 flex flex-wrap gap-x-5 gap-y-2 border-y border-border/60 py-3 text-[13px] lg:hidden">
+      <nav className="mb-12 flex flex-wrap gap-x-5 gap-y-2 rounded-xl bg-muted p-2 text-[13px] lg:hidden">
         {GROUPS.map((g) => (
           <a
             key={g.id}
@@ -52,7 +52,7 @@ export default async function LexiconsOverviewPage() {
             audiovisualEvidence: t("graph.audiovisualEvidence"),
           }}
         />
-        <figcaption className="mt-4 text-center font-mono text-[10.5px] uppercase tracking-[0.08em] text-muted-foreground/60">
+        <figcaption className="mt-4 text-center text-xs text-muted-foreground/70">
           {t("starSchemaCaption")}
         </figcaption>
       </figure>
@@ -60,7 +60,7 @@ export default async function LexiconsOverviewPage() {
       <div className="space-y-12">
         {GROUPS.map((g) => (
           <section key={g.id} id={g.id} className="scroll-mt-24">
-            <h2 className="m-0 font-serif text-xl font-semibold tracking-tight text-foreground">{g.title}</h2>
+            <h2 className="m-0 font-instrument text-xl font-light italic tracking-tight text-foreground">{g.title}</h2>
             <p className="mt-1 mb-4 max-w-prose text-sm leading-relaxed text-muted-foreground">
               {t(`sections.${g.id}`)}
             </p>
@@ -89,7 +89,7 @@ export default async function LexiconsOverviewPage() {
       <div className="mt-14 grid gap-3 sm:grid-cols-2">
         <Link
           href="/docs/atproto"
-          className="group rounded-xl border border-border/60 px-5 py-4 no-underline transition-colors hover:border-primary/50"
+          className="group rounded-xl bg-muted px-5 py-4 no-underline transition-colors hover:bg-muted/80"
         >
           <div className="flex items-center gap-1.5 text-[13.5px] font-medium text-foreground group-hover:text-primary">
             {t("atprotoLinkTitle")}
@@ -99,7 +99,7 @@ export default async function LexiconsOverviewPage() {
         </Link>
         <Link
           href="/docs/cgs"
-          className="group rounded-xl border border-border/60 px-5 py-4 no-underline transition-colors hover:border-primary/50"
+          className="group rounded-xl bg-muted px-5 py-4 no-underline transition-colors hover:bg-muted/80"
         >
           <div className="flex items-center gap-1.5 text-[13.5px] font-medium text-foreground group-hover:text-primary">
             {t("cgsLinkTitle")}
@@ -109,7 +109,7 @@ export default async function LexiconsOverviewPage() {
         </Link>
         <Link
           href="/docs/ePDS"
-          className="group rounded-xl border border-border/60 px-5 py-4 no-underline transition-colors hover:border-primary/50"
+          className="group rounded-xl bg-muted px-5 py-4 no-underline transition-colors hover:bg-muted/80"
         >
           <div className="flex items-center gap-1.5 text-[13.5px] font-medium text-foreground group-hover:text-primary">
             {t("epdsLinkTitle")}
@@ -119,7 +119,7 @@ export default async function LexiconsOverviewPage() {
         </Link>
         <Link
           href="/docs/wallet-service"
-          className="group rounded-xl border border-border/60 px-5 py-4 no-underline transition-colors hover:border-primary/50"
+          className="group rounded-xl bg-muted px-5 py-4 no-underline transition-colors hover:bg-muted/80"
         >
           <div className="flex items-center gap-1.5 text-[13.5px] font-medium text-foreground group-hover:text-primary">
             {t("walletServiceLinkTitle")}

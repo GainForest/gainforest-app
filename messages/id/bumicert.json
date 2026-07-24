@@ -292,7 +292,7 @@
         "cancel": "Batalkan"
       },
       "activeHiddenLayerSummary": "{activeCount} ditampilkan · {hiddenCount} disembunyikan",
-      "activeHiddenLayerSummaryWithHint": "{activeCount} ditampilkan · {hiddenCount} disembunyikan — gunakan Tampilkan lapisan pada kartu pohon untuk melihat lapisan di sini.",
+      "activeHiddenLayerSummaryWithHint": "{activeCount} ditampilkan · {hiddenCount} disembunyikan: gunakan Tampilkan lapisan pada kartu pohon untuk melihat lapisan di sini.",
       "showLayerHint": "Gunakan Tampilkan lapisan pada kartu pohon untuk melihat lapisan di sini.",
       "activeLayerBadge": "{count} ditampilkan",
       "hiddenLayerBadge": "{count} disembunyikan",
@@ -400,6 +400,119 @@
       "includesMaEarth": "Total mencakup donasi GainForest dan Ma Earth.",
       "viaMaEarth": "Terkumpul melalui kampanye Ma Earth.",
       "notAccepting": "Proyek ini belum menerima donasi. Ikuti {name} untuk kabar terbaru."
+    },
+    "recovery": {
+      "back": "Kembali",
+      "notSpecified": "Tidak ditentukan",
+      "metadata": {
+        "title": "{title}: Cert",
+        "description": "Cert diterbitkan oleh {name}."
+      },
+      "sidebar": {
+        "active": "Aktif",
+        "contributors": "Kontributor",
+        "atAGlance": "Sekilas",
+        "map": "Peta",
+        "viewPlaces": "Lihat tempat",
+        "mapTitle": "Peta batas situs",
+        "latestUpdates": "Pembaruan terbaru",
+        "seeAll": "Lihat semua",
+        "update": "Pembaruan",
+        "country": "Negara",
+        "website": "Situs web",
+        "email": "Email",
+        "link": "Tautan"
+      },
+      "evidence": {
+        "title": "Bukti",
+        "description": "Bukti dan ulasan dapat diperiksa siapa saja.",
+        "reviewsNone": "Belum ada ulasan",
+        "evaluations": "{count, plural, one {# evaluasi} other {# evaluasi}}",
+        "comments": "{count, plural, one {# komentar} other {# komentar}}",
+        "boundaries": "{count, plural, one {# batas situs dipetakan} other {# batas situs dipetakan}}",
+        "boundariesNone": "Belum ada batas situs",
+        "sightings": "{count, plural, one {# penampakan alam} other {# penampakan alam}}",
+        "sightingsWithLatest": "{count, plural, one {# penampakan alam} other {# penampakan alam}} · terbaru {latest}",
+        "sightingsNone": "Belum ada penampakan alam",
+        "timeline": "{count, plural, one {# item linimasa} other {# item linimasa}}",
+        "timelineNone": "Belum ada bukti linimasa"
+      },
+      "reviews": {
+        "description": "Evaluasi independen dan komentar publik tentang Cert ini. Ulasan diterbitkan pihak lain dan tidak dikurasi oleh {name}.",
+        "projectFallback": "proyek",
+        "evaluations": "{count, plural, =0 {Evaluasi} other {Evaluasi · #}}",
+        "evaluationsEmpty": "Belum ada evaluasi formal.",
+        "score": "Skor: {value} dari {max}",
+        "comments": "{count, plural, =0 {Komentar} other {Komentar · #}}",
+        "commentsEmpty": "Belum ada komentar publik.",
+        "independent": "Ulasan ditampilkan sebagaimana diterbitkan oleh penulisnya."
+      },
+      "places": {
+        "mapTitle": "Peta batas situs",
+        "boundary": "Batas situs {number}",
+        "emptyTitle": "Tidak ada batas situs yang ditautkan",
+        "emptyBody": "Cert ini tidak menyertakan batas situs yang dipetakan."
+      },
+      "donations": {
+        "raised": "Terkumpul",
+        "supporters": "Pendukung",
+        "supportTitle": "Dukung proyek ini",
+        "supportDescription": "Donasi Anda mendukung {name}. Pilih opsi donasi yang tersedia.",
+        "unavailableTitle": "Informasi donasi tidak tersedia",
+        "unavailableBody": "Donasi tidak dapat dimuat. Coba lagi nanti.",
+        "notAcceptingTitle": "Belum menerima donasi",
+        "notAcceptingBody": "{name} belum mengaktifkan donasi untuk proyek ini.",
+        "emptyTitle": "Belum ada donasi",
+        "emptyBody": "Jadilah yang pertama mendukung proyek ini.",
+        "maEarthTitle": "Aktivitas Ma Earth",
+        "maEarthBody": "Buka Ma Earth untuk melihat aktivitas kampanye dan pembaruan pendukung.",
+        "totalsEmptyTitle": "Belum ada total donasi",
+        "totalsEmptyBody": "Donasi yang selesai untuk Cert ini akan muncul di sini.",
+        "status": {
+          "unavailable": "Status donasi tidak tersedia",
+          "notApplicable": "Donasi tidak berlaku",
+          "open": "Menerima donasi",
+          "comingSoon": "Donasi segera hadir",
+          "paused": "Donasi dijeda",
+          "closed": "Donasi ditutup"
+        },
+        "goalProgress": "{percent}% dari target {goal}",
+        "goalProgressAria": "Kemajuan pendanaan: {percent}% dari target {goal}",
+        "rank": "Peringkat {rank}",
+        "topSupporter": "Pendukung utama",
+        "steadyGiver": "Donatur tetap",
+        "growingImpact": "Dampak berkembang",
+        "anonymousSupporter": "Pendukung anonim",
+        "openSupporterProfile": "Buka profil pendukung",
+        "openPaymentDetails": "Buka detail pembayaran",
+        "donationCount": "{count, plural, one {# donasi} other {# donasi}}",
+        "lastDonation": "Donasi terakhir {date}"
+      },
+      "more": {
+        "title": "Cert lain dari organisasi ini",
+        "seeAll": "Lihat semua"
+      },
+      "card": {
+        "projectSteward": "Pengelola proyek",
+        "missingImage": "Gambar tidak tersedia",
+        "places": "{count, plural, one {# tempat proyek} other {# tempat proyek}}",
+        "contributors": "{count, plural, one {# orang disebut} other {# orang disebut}}",
+        "dates": "Tanggal proyek ditambahkan",
+        "moreObjectives": "{count, plural, one {# tujuan lainnya} other {# tujuan lainnya}}"
+      },
+      "fundingStatus": {
+        "notSetUp": "Donasi belum disiapkan",
+        "enable": "Aktifkan donasi",
+        "missingWallet": "Belum ada dompet penerima yang dikonfigurasi.",
+        "invalidWallet": "Tanda tangan dompet tidak valid. Tautkan kembali dompet.",
+        "untrustedWallet": "Dompet belum diverifikasi oleh GainForest. Tautkan melalui platform.",
+        "update": "Perbarui pengaturan",
+        "comingSoon": "Segera hadir",
+        "manage": "Kelola donasi",
+        "paused": "Donasi dijeda",
+        "closed": "Donasi ditutup",
+        "open": "Menerima donasi"
+      }
     }
   },
   "create": {
@@ -482,10 +595,10 @@
           "tips": {
             "pre": "Saat menulis cerita berdampak Anda, gunakan kerangka kerja STAR ini:",
             "bullets": [
-              "Situasi — Apa yang terjadi dan siapa atau apa yang terkena dampaknya?",
-              "Tugas — Apa peran organisasi, kelompok, atau komunitas Anda? Siapa lagi yang terlibat?",
-              "Tindakan — Jelaskan apa yang dilakukan organisasi atau komunitas Anda.",
-              "Hasil — Apa yang terjadi sebagai hasilnya? Cantumkan angka-angka jika ada, dan sebutkan hasil yang nyata dan tidak nyata. Hal ini akan didukung dengan data dampak yang Anda berikan nantinya."
+              "Situasi: Apa yang terjadi dan siapa atau apa yang terkena dampaknya?",
+              "Tugas: Apa peran organisasi, kelompok, atau komunitas Anda? Siapa lagi yang terlibat?",
+              "Tindakan: Jelaskan apa yang dilakukan organisasi atau komunitas Anda.",
+              "Hasil: Apa yang terjadi sebagai hasilnya? Cantumkan angka-angka jika ada, dan sebutkan hasil yang nyata dan tidak nyata. Hal ini akan didukung dengan data dampak yang Anda berikan nantinya."
             ],
             "post": "Menulis dengan bebas. Cerita yang lebih panjang dipersilakan."
           }
@@ -561,7 +674,7 @@
           "heading": "Bagikan kisah dampak Anda.",
           "story": {
             "label": "Kisah Dampak Anda",
-            "description": "Ceritakan kepada kami dampak yang Anda berikan — apa yang berubah, siapa saja yang terlibat, dan bagaimana hal ini membantu. Tidak usah buru-buru. Kisah Anda membantu menginspirasi orang lain dan memverifikasi pekerjaan Anda.",
+            "description": "Ceritakan kepada kami dampak yang Anda berikan: apa yang berubah, siapa saja yang terlibat, dan bagaimana hal ini membantu. Tidak usah buru-buru. Kisah Anda membantu menginspirasi orang lain dan memverifikasi pekerjaan Anda.",
             "info": "Beritahu kami apa yang Anda lakukan dan apa yang terjadi sebagai hasilnya",
             "placeholder": "Jelaskan kisah dampak Anda..."
           },
@@ -578,7 +691,7 @@
           "heading": "Bagikan kontributor dan situs Anda.",
           "contributors": {
             "label": "Daftar Kontributor",
-            "description": "Tambahkan semua orang yang terlibat dalam sertifikat ini — termasuk komunitas atau organisasi Anda sendiri dan kolaborator mana pun. Tip: Mulailah dengan menambahkan grup Anda sendiri terlebih dahulu sebelum mencantumkan mitra atau pendukung Anda.",
+            "description": "Tambahkan komunitas atau organisasi Anda dan kolaborator yang terlibat dalam Cert ini. Mulai dengan grup Anda, lalu tambahkan mitra atau pendukung.",
             "info": "Cantumkan setiap individu atau organisasi yang berkontribusi pada pekerjaan ini."
           },
           "boundaries": {
@@ -621,7 +734,11 @@
           "viewProjects": "Lihat Proyek",
           "setUpDonations": "Siapkan Donasi",
           "shareFeedback": "Bagikan Masukan",
-          "createAnother": "Ciptakan sertifikat lain"
+          "createAnother": "Ciptakan sertifikat lain",
+          "successDescription": "Cert Anda sekarang ada di profil publik. Mungkin perlu beberapa saat untuk muncul di semua tempat."
+        },
+        "preview": {
+          "title": "Pratinjau"
         }
       },
       "modals": {
@@ -691,6 +808,95 @@
         "coverImageTitle": "Gambar sampul tidak dapat dimuat",
         "coverImageDescription": "Data draf Anda berhasil dipulihkan, tetapi gambar sampul tidak dapat diambil. Unggah ulang gambar sampul untuk melanjutkan.",
         "gotIt": "Mengerti"
+      },
+      "editor": {
+        "changeContributor": "Ubah orang atau grup",
+        "startTyping": "Mulai mengetik untuk melihat saran.",
+        "loadingSuggestions": "Memuat saran…",
+        "noMatches": "Belum ada kecocokan. Lanjutkan mengetik nama.",
+        "removeContributor": "Hapus orang atau grup",
+        "minimumCharacters": "Setidaknya 30 karakter",
+        "looksGood": "Sudah baik",
+        "contributorPlaceholder": "Cari orang atau grup",
+        "contributorShortPlaceholder": "Nama atau nama pengguna",
+        "addContributor": "Tambahkan orang atau grup",
+        "showFewerSites": "Tampilkan lebih sedikit situs",
+        "showAllSites": "Tampilkan semua {count} situs",
+        "retry": "Coba lagi",
+        "noSites": "Anda belum memiliki situs. Anda dapat menerbitkan tanpa situs, menambahkannya di sini, atau menambahkan tempat di <link>Kelola situs</link>.",
+        "completeRequired": "Lengkapi detail wajib",
+        "termsAgreement": "Saya menyetujui <link>syarat dan ketentuan</link>.",
+        "publicDisclosure": "Penerbitan menambahkan Cert ini ke profil publik Anda. Semua orang dapat melihatnya.",
+        "previewTitleFallback": "Judul Cert Anda",
+        "changeCover": "Ubah sampul",
+        "addCover": "Tambahkan foto sampul",
+        "removeCover": "Hapus foto sampul",
+        "startOver": "Mulai lagi",
+        "close": "Tutup",
+        "steps": {
+          "basics": {
+            "title": "hal-hal dasar",
+            "subtitle": "Beri nama pekerjaan dan tentukan tanggalnya. Tambahkan foto sampul pada kartu."
+          },
+          "story": {
+            "title": "ceritakan kisahnya",
+            "subtitle": "Tambahkan ringkasan pendek untuk kartu, lalu deskripsi lengkap."
+          },
+          "people": {
+            "title": "orang dan tempat",
+            "subtitle": "Cantumkan pihak yang mengerjakan dan tautkan situs terkait."
+          },
+          "review": {
+            "title": "tinjau dan terbitkan",
+            "subtitle": "Pastikan semuanya terbaca dengan baik, lalu jadikan publik."
+          }
+        },
+        "validation": {
+          "title": "Tambahkan judul minimal 4 karakter.",
+          "scopes": "Pilih setidaknya satu jenis pekerjaan.",
+          "startDate": "Tambahkan waktu pekerjaan dimulai.",
+          "endDate": "Tambahkan tanggal selesai atau tandai pekerjaan sebagai berkelanjutan.",
+          "dateOrder": "Tanggal selesai tidak boleh sebelum tanggal mulai.",
+          "shortDescription": "Tulis minimal 30 karakter untuk ringkasan.",
+          "description": "Tulis minimal 80 karakter untuk deskripsi lengkap.",
+          "contributors": "Tambahkan setidaknya satu orang atau grup.",
+          "rights": "Konfirmasikan bahwa Anda memiliki izin untuk menerbitkan pekerjaan ini.",
+          "terms": "Setujui ketentuan sebelum menerbitkan."
+        },
+        "ongoing": "Berkelanjutan",
+        "selectedProfile": "Profil terpilih",
+        "mapArea": "Area peta",
+        "projectPlace": "Tempat proyek",
+        "recently": "Baru-baru ini",
+        "sitesLoadError": "Situs tidak dapat dimuat.",
+        "coverTypeError": "Gunakan gambar PNG, JPEG, atau WebP.",
+        "coverSizeError": "Ukuran gambar harus 5 MB atau kurang.",
+        "publishDenied": "Peran Anda tidak dapat menerbitkan Cert untuk organisasi ini.",
+        "publishError": "Cert tidak dapat diterbitkan.",
+        "projectLinkDenied": "Peran Anda tidak dapat menautkan Cert ini ke proyek.",
+        "saved": "Tersimpan",
+        "notSaved": "Belum tersimpan",
+        "publishing": "Menerbitkan…",
+        "publishToProject": "Terbitkan ke proyek",
+        "publish": "Terbitkan"
+      },
+      "taina": {
+        "role": "Pendamping menulis Cert Anda",
+        "greetingHello": "Hai, saya Tainá. Saya dapat membantu Anda menulis Cert ini.",
+        "greetingHint": "Tanyakan tentang judul, ringkasan, atau bukti, atau tempel draf untuk mendapat masukan.",
+        "placeholder": "Minta saran…",
+        "thinking": "Tainá sedang berpikir…",
+        "close": "Tutup obrolan",
+        "ask": "Tanya Tainá",
+        "send": "Kirim",
+        "open": "Minta saran Tainá",
+        "errors": {
+          "generic": "Terjadi kesalahan.",
+          "startReply": "Saya tidak dapat memulai balasan.",
+          "noResponse": "Tidak ada respons.",
+          "unreachable": "Tidak dapat menghubungi Tainá. Periksa koneksi dan coba lagi.",
+          "notConfigured": "Obrolan Tainá belum disiapkan di server ini."
+        }
       }
     },
     "auth": {
@@ -702,6 +908,12 @@
       "accountSetupDescription": "Silakan lengkapi informasi akun Anda untuk membuat sertifikat.",
       "manageAccount": "Kelola akun saya",
       "pleaseWait": "Mohon tunggu..."
+    }
+  },
+  "createAlias": {
+    "metadata": {
+      "title": "Buat proyek",
+      "description": "Buat dan terbitkan proyek di GainForest."
     }
   }
 }

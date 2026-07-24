@@ -96,9 +96,9 @@
   "sidebar": {
     "changelogLink": "Lihat yang baru",
     "sections": {
-      "explore": "JELAJAHI",
-      "funding": "PENDANAAN",
-      "manage": "KELOLA",
+      "explore": "Jelajahi",
+      "funding": "Pendanaan",
+      "manage": "Kelola",
       "ai": "AI"
     },
     "items": {
@@ -153,7 +153,9 @@
       "createBumicert": "Buat sertifikat",
       "createProject": "Buat proyek",
       "addObservations": "Tambah observasi",
-      "addData": "Tambah data"
+      "addData": "Tambah data",
+      "project": "Proyek",
+      "observation": "Observasi"
     },
     "tabs": {
       "explore": "Jelajahi",
@@ -180,11 +182,11 @@
   "settings": {
     "handle": {
       "title": "Nama pengguna",
-      "description": "Nama pengguna adalah nama publik Anda di seluruh aplikasi — ubah di sini dan akan diperbarui di mana saja.",
+      "description": "Nama pengguna adalah nama publik Anda di GainForest.",
       "edit": "Sunting",
       "newLabel": "Nama pengguna baru",
       "placeholder": "namaanda",
-      "prefixHint": "3–18 karakter. Hanya huruf, angka, dan tanda hubung.",
+      "prefixHint": "Gunakan 3 hingga 18 huruf, angka, atau tanda hubung.",
       "save": "Simpan",
       "saving": "Menyimpan…",
       "cancel": "Batal",
@@ -200,23 +202,24 @@
         "full": "Masukkan nama pengguna lengkap seperti alice.example.com.",
         "generic": "Tidak dapat memperbarui nama pengguna Anda. Silakan coba lagi.",
         "unavailable": "Mengubah nama pengguna Anda belum tersedia. Silakan coba lagi nanti."
-      }
+      },
+      "customPlaceholder": "ayu.contoh.id"
     },
     "agentKeys": {
       "title": "Kunci agen AI",
-      "description": "Beri agen AI kuncinya sendiri agar bisa menambahkan catatan atas nama Anda — tanpa pernah membagikan kata sandi Anda.",
+      "description": "Berikan kunci terpisah kepada agen AI untuk menambahkan catatan tanpa membagikan kata sandi.",
       "learnMore": "Lihat panduan agen",
       "newKeyLabel": "Nama kunci baru",
       "namePlaceholder": "mis. asisten lapangan saya",
       "generate": "Buat",
       "empty": "Belum ada kunci.",
-      "hint": "Kunci dapat menambah dan mengedit catatan Anda, tetapi tidak akan pernah bisa mengubah pengaturan akun atau mengelola kunci lain. Mencabut kunci langsung memutus akses agen.",
-      "freshTitle": "{name} — salin sekarang, hanya ditampilkan sekali",
+      "hint": "Kunci agen dapat menambah dan mengedit catatan pengelolaan. Kunci tidak dapat mengubah pengaturan akun atau mengelola kunci lain. Mencabut kunci segera mengakhiri aksesnya.",
+      "freshTitle": "{name}. Salin kunci ini sekarang; kunci hanya ditampilkan sekali.",
       "copyKey": "Salin kunci",
       "copyPrompt": "Salin pesan",
       "copied": "Tersalin",
       "done": "Selesai",
-      "freshHint": "Kunci Anda ditampilkan sekali dan sudah ada di pesan di atas — tempel ke agen Anda sekarang. Kelola atau cabut kunci di bawah.",
+      "freshHint": "Tempel seluruh perintah penyiapan yang dibuat ke agen Anda sekarang. Perintah itu sudah menyertakan kunci sekali pakai. Anda dapat mengelola atau mencabut kunci di bawah.",
       "createdLabel": "dibuat {date}",
       "lastUsedLabel": "terakhir dipakai {date}",
       "neverUsed": "belum pernah dipakai",
@@ -227,14 +230,15 @@
         "load": "Tidak dapat memuat kunci Anda.",
         "create": "Tidak dapat membuat kunci.",
         "revoke": "Tidak dapat mencabut kunci.",
-        "copy": "Gagal menyalin — pilih teks secara manual.",
+        "copy": "Gagal menyalin: pilih teks secara manual.",
         "nameRequired": "Beri nama kunci sesuai agen yang dituju."
       },
       "connectCaption": "Tempel ini ke agen AI Anda (ChatGPT, Claude, bot Telegram…) untuk menghubungkannya ke GainForest.",
       "generateAndCopy": "Buat kunci & salin pesan",
       "defaultKeyName": "Agen AI",
       "tainaBadge": "Tainá",
-      "tainaBadgeTitle": "Kunci ini tertaut ke bot Telegram Tainá Anda"
+      "tainaBadgeTitle": "Kunci ini tertaut ke bot Telegram Tainá Anda",
+      "firstPrompt": "Baca {site}/skill.md dan ikuti penyiapannya. Gunakan kunci API GainForest ini: {token}. Simpan sebagai GAINFOREST_API_KEY dan jalankan pemeriksaan whoami pada skill. Ingat kunci dan file skill. Lalu bantu saya mencatat observasi lapangan atau memulai proyek, tetapi jangan buat apa pun sebelum saya menyetujuinya."
     },
     "inaturalist": {
       "title": "iNaturalist",
@@ -285,6 +289,75 @@
         "title": "Lanjutan",
         "description": "Data akun dan penghapusan"
       }
+    },
+    "metadata": {
+      "title": "Pengaturan",
+      "description": "Kelola pengaturan akun GainForest Anda."
+    },
+    "password": {
+      "title": "Kata sandi",
+      "description": "Kami akan mengirim kode reset ke alamat email akun Anda.",
+      "show": "Tampilkan kata sandi",
+      "hide": "Sembunyikan kata sandi",
+      "sendCode": "Kirim kode reset",
+      "sending": "Mengirim…",
+      "codeSent": "Kami mengirim kode reset ke {email}. Periksa kotak masuk Anda.",
+      "codeLabel": "Kode reset",
+      "codePlaceholder": "Masukkan kode dari email",
+      "newLabel": "Kata sandi baru",
+      "newPlaceholder": "Setidaknya 8 karakter",
+      "confirmLabel": "Konfirmasi kata sandi",
+      "confirmPlaceholder": "Ulangi kata sandi baru",
+      "change": "Ubah kata sandi",
+      "saving": "Menyimpan…",
+      "cancel": "Batal",
+      "success": "Kata sandi diubah.",
+      "errors": {
+        "request": "Kami tidak dapat mengirim email reset. Coba lagi.",
+        "mismatch": "Kata sandi tidak cocok.",
+        "length": "Gunakan antara 8 dan 256 karakter.",
+        "reset": "Kami tidak dapat mengubah kata sandi. Periksa kode dan coba lagi."
+      }
+    },
+    "identity": {
+      "title": "Identitas akun",
+      "accountId": "ID akun teknis"
+    },
+    "deleteAccount": {
+      "sectionTitle": "Zona berbahaya",
+      "title": "Hapus akun",
+      "summary": "Menghapus proyek GainForest, Cert, observasi, dan profil Anda secara permanen. Identitas masuk dan data dari aplikasi lain tetap utuh. Tindakan ini tidak dapat dibatalkan.",
+      "openButton": "Hapus akun…",
+      "irreversible": "Tindakan ini tidak dapat dibatalkan",
+      "checking": "Memeriksa apa yang akan dihapus…",
+      "recordCount": "{approximate, select, 1 {Sekitar } other {}}{count, plural, one {# catatan akan} other {# catatan akan}} dihapus permanen.",
+      "scope": "Semua yang Anda terbitkan di GainForest dihapus dari server data pribadi Anda. Identitas masuk dan data dari aplikasi lain tidak disentuh.",
+      "empty": "Tidak ada catatan GainForest. Tidak ada yang perlu dihapus.",
+      "groups": {
+        "biodiversity": "Observasi keanekaragaman hayati",
+        "media": "Audio dan multimedia",
+        "organization": "Data organisasi",
+        "feed": "Postingan dan suka di feed",
+        "certs": "Cert dan koleksi",
+        "profile": "Profil, lencana, dan tanda tangan",
+        "other": "Catatan GainForest lainnya"
+      },
+      "ownedOrganizations": "Anda memiliki {count, plural, one {# organisasi. Menghapus akun akan membuatnya} other {# organisasi. Menghapus akun akan membuatnya}} tanpa pemilik:",
+      "transferOwnership": "Alihkan kepemilikan dari halaman Anggota setiap organisasi jika Anda ingin organisasi tetap memiliki pemilik.",
+      "ownerlessAcknowledge": "Saya memahami organisasi ini akan dibiarkan tanpa pemilik.",
+      "confirmPhrase": "hapus akun saya",
+      "confirmInstruction": "Ketik <phrase></phrase> untuk mengonfirmasi:",
+      "confirmInstructionAccount": "Ketik <phrase></phrase> untuk mengonfirmasi bagi <account></account>:",
+      "deleting": "Menghapus catatan… {deleted} dari {total}",
+      "keepOpen": "Biarkan jendela ini terbuka hingga penghapusan selesai.",
+      "done": "{deleted, plural, one {# catatan dihapus.} other {# catatan dihapus.}} {failed, plural, =0 {Mengeluarkan Anda…} one {# gagal dihapus. Mengeluarkan Anda…} other {# gagal dihapus. Mengeluarkan Anda…}}",
+      "confirmButton": "Hapus semua secara permanen",
+      "retry": "Coba lagi",
+      "cancel": "Batal",
+      "errors": {
+        "read": "Kami tidak dapat memeriksa data akun Anda. Coba lagi.",
+        "delete": "Penghapusan gagal. Coba lagi."
+      }
     }
   },
   "bumicertCard": {
@@ -333,7 +406,7 @@
       "projects": {
         "label": "Kerja regeneratif",
         "title": "Proyek",
-        "blurb": "Jelajahi yang sedang dibangun komunitas — setiap proyek mengumpulkan Cert, lokasi, dan bukti lapangannya.",
+        "blurb": "Jelajahi yang sedang dibangun komunitas: setiap proyek mengumpulkan Cert, lokasi, dan bukti lapangannya.",
         "statLabel": "proyek"
       },
       "bumicerts": {
@@ -407,8 +480,8 @@
         "detail": "Penemuan dan pengindeksan"
       },
       "storage": {
-        "name": "Server data pribadi",
-        "detail": "Penyimpanan catatan dan media"
+        "name": "Penyimpanan akun",
+        "detail": "Menyimpan akun dan media"
       },
       "labels": {
         "name": "Layanan label",
@@ -419,8 +492,8 @@
         "detail": "Antarmuka sertifikat"
       },
       "api": {
-        "name": "API aplikasi",
-        "detail": "Backend aplikasi"
+        "name": "Layanan aplikasi",
+        "detail": "Menjalankan fitur aplikasi"
       },
       "defaultName": "Layanan"
     },
@@ -431,10 +504,9 @@
     },
     "hero": {
       "imageAlt": "Kanopi hutan saat matahari terbit",
-      "eyebrow": "Status langsung",
       "title": "GainForest",
       "accent": "kesehatan sistem",
-      "lede": "Ketersediaan terkini untuk sertifikat, layanan data, dan infrastruktur pendukung."
+      "lede": "Ketersediaan terkini untuk situs web, penyimpanan akun, dan pencarian."
     },
     "unavailable": {
       "title": "Status sementara tidak tersedia",
@@ -496,7 +568,7 @@
   },
   "equipment": {
     "metadataTitle": "Peralatan — {name}",
-    "personalIntro": "Peralatan lapangan yang terdaftar di profil ini — setiap unit dengan pemegang, lokasi, dan statusnya saat ini.",
+    "personalIntro": "Peralatan lapangan yang terdaftar di profil ini: setiap unit dengan pemegang, lokasi, dan statusnya saat ini.",
     "orgIntro": "Semua peralatan lapangan yang didaftarkan oleh anggota tim organisasi ini, di satu tempat.",
     "membersUnavailable": "Daftar lengkap tim tidak dapat dimuat saat ini, jadi peralatan beberapa anggota mungkin tidak tampil.",
     "addEquipment": "Tambah peralatan",
@@ -508,7 +580,7 @@
     "unitCount": "{count, plural, other {# unit}}",
     "showingFiltered": "Menampilkan {shown} dari {total}",
     "emptyTitleOwner": "Belum ada peralatan",
-    "emptyBodyOwner": "Tambahkan unit pertama Anda — AudioMoth, ponsel lapangan, kamera jebak.",
+    "emptyBodyOwner": "Tambahkan unit pertama Anda: AudioMoth, ponsel lapangan, kamera jebak.",
     "emptyTitle": "Tidak ada peralatan",
     "emptyBodyPersonal": "Profil ini belum mendaftarkan peralatan apa pun.",
     "emptyBodyOrg": "Belum ada anggota tim yang mendaftarkan peralatan.",
@@ -623,12 +695,21 @@
   "accountDonations": {
     "emptyHeroDescription": "Dukung sebuah proyek dan kontribusi Anda akan muncul di sini, masing-masing tertaut ke proyek yang Anda dukung.",
     "emptyHeroCta": "Jelajahi proyek",
-    "anonymousNote": "Donasi anonim juga muncul di sini, tetapi hanya Anda yang dapat melihatnya — donasi itu tidak pernah ditampilkan secara publik atas nama Anda. Beberapa donasi anonim lama tidak dapat ditampilkan.",
-    "anonymousBadge": "Hanya terlihat oleh Anda"
+    "anonymousNote": "Donasi anonim juga muncul di sini, tetapi hanya Anda yang dapat melihatnya: donasi itu tidak pernah ditampilkan secara publik atas nama Anda. Beberapa donasi anonim lama tidak dapat ditampilkan.",
+    "anonymousBadge": "Hanya terlihat oleh Anda",
+    "historyTitle": "Riwayat donasi",
+    "totalDonated": "Total donasi",
+    "donations": "Donasi",
+    "viewProject": "Lihat proyek",
+    "unknownProject": "Proyek tidak tersedia",
+    "paymentDetails": "Detail pembayaran",
+    "unavailableTitle": "Riwayat donasi tidak tersedia",
+    "unavailableDescription": "Kami tidak dapat memuat catatan donasi ini. Coba lagi.",
+    "retry": "Coba lagi"
   },
   "accountProjects": {
-    "emptyEyebrow": "Belum ada proyek",
-    "empty": "Akun ini belum membagikan proyek apa pun."
+    "empty": "Akun ini belum membagikan proyek apa pun.",
+    "emptyTitle": "Belum ada proyek"
   },
   "projectGallery": {
     "accountTitle": "Galeri",
@@ -666,7 +747,7 @@
       "body": "Bagikan foto di profil Anda. Seret dan lepas beberapa sekaligus, atau pilih berkas dari perangkat Anda.",
       "dropHint": "Seret dan lepas gambar di sini, atau klik untuk memilih",
       "dropActive": "Lepaskan gambar Anda untuk menambahkannya",
-      "fileHint": "JPG, PNG, GIF atau WebP — maksimal 10 MB per berkas",
+      "fileHint": "JPG, PNG, GIF atau WebP: maksimal 10 MB per berkas",
       "previewAlt": "Gambar terpilih {index, number}",
       "removeImage": "Hapus gambar {index, number}",
       "linkLabel": "Tautkan ke proyek (opsional)",
@@ -683,7 +764,9 @@
       "recordTitleAccount": "Galeri {name}",
       "open": "Tambah gambar",
       "close": "Tutup"
-    }
+    },
+    "loadError": "Foto ini tidak dapat dimuat.",
+    "retry": "Coba lagi"
   },
   "projectManage": {
     "backToProjects": "Proyek",
@@ -745,6 +828,239 @@
         "partlyMeasured": "Sebagian terukur",
         "noMeasurements": "Belum ada pengukuran"
       }
+    },
+    "manager": {
+      "loadErrorTitle": "Pohon tidak dapat dimuat",
+      "title": "Pohon saya",
+      "emptyTitle": "Belum ada pohon yang diunggah",
+      "noMatchesTitle": "Tidak ada pohon yang cocok dengan pencarian",
+      "noMatchesBody": "Coba spesies, tempat, atau orang lain.",
+      "clearSearch": "Hapus pencarian",
+      "selectAllAria": "Pilih semua pohon tanpa grup yang difilter",
+      "selectAll": "Pilih semua pohon yang difilter",
+      "reviewNeeded": "Perlu ditinjau",
+      "measured": "Diukur",
+      "loadingDetails": "Memuat detail",
+      "measurementReviewNeeded": "Pengukuran perlu ditinjau",
+      "measurementsReady": "Pengukuran siap",
+      "noMeasurements": "Belum ada pengukuran",
+      "informationTitle": "Informasi pohon",
+      "informationDescription": "Tinjau dan perbarui detail pohon yang tersimpan.",
+      "notSpecified": "Tidak ditentukan",
+      "measurementsTitle": "Pengukuran",
+      "measurementsDescription": "Catat DBH, tinggi, diameter leher akar, dan tutupan tajuk.",
+      "rootCollarHint": "Berguna untuk pohon muda yang batangnya terlalu kecil untuk DBH.",
+      "measurementEmptyHint": "Tambahkan setidaknya satu nilai untuk menyimpan pengukuran.",
+      "photosTitle": "Foto",
+      "photosDescription": "Lihat dan kelola foto yang ditautkan ke pohon ini.",
+      "photoCaption": "Keterangan foto baru",
+      "photoCaptionPlaceholder": "Keterangan opsional",
+      "photoLinkPlaceholder": "Atau tempel tautan foto",
+      "photosEmpty": "Belum ada foto yang ditautkan ke pohon ini.",
+      "deletePhoto": "Hapus foto",
+      "deleteTitle": "Hapus pohon",
+      "deleteDescription": "Hapus pohon ini dan catatan tertautnya.",
+      "deletePermanently": "Hapus permanen",
+      "establishmentOptions": {
+        "managed": "Tim Anda menanamnya",
+        "native": "Tumbuh alami di sini",
+        "naturalised": "Beregenerasi secara alami",
+        "uncertain": "Tidak yakin"
+      },
+      "loadErrorBody": "Informasi pohon tidak dapat dimuat.",
+      "retry": "Coba lagi",
+      "description": "Tinjau informasi, pengukuran, dan foto pohon tersimpan di satu tempat.",
+      "upload": "Unggah data pohon",
+      "backToGroups": "Kembali ke grup pohon",
+      "deleteGroup": "Hapus grup pohon",
+      "emptyBody": "Unggah file pohon pertama untuk mulai mengelola informasi, pengukuran, dan foto.",
+      "groupHelp": "Buka grup untuk meninjau pohonnya. Buka pohon tanpa grup untuk memilih dan menambahkannya ke grup yang ada.",
+      "ungroupedTitle": "Pohon tanpa grup",
+      "savedTitle": "Pohon tersimpan",
+      "ungroupedDescription": "Pilih satu atau beberapa pohon untuk ditambahkan ke grup.",
+      "savedDescription": "Pilih pohon untuk meninjau detail, foto, dan pengukuran.",
+      "selectedCount": "{count} dipilih",
+      "addCountToGroup": "Tambahkan {count} ke grup",
+      "addToGroup": "Tambahkan ke grup",
+      "selectTree": "Pilih {name}",
+      "treeFallback": "pohon",
+      "unnamedTree": "Pohon tanpa nama",
+      "treeGroupLabel": "Grup pohon",
+      "noTreeGroup": "Tanpa grup pohon",
+      "projectPlaceLabel": "Tempat proyek",
+      "notLinked": "Belum ditautkan",
+      "establishmentLabel": "Cara pohon tumbuh di sini",
+      "notSet": "Belum diatur",
+      "scientificName": "Nama ilmiah",
+      "commonName": "Nama umum",
+      "eventDate": "Tanggal kejadian",
+      "recordedBy": "Dicatat oleh",
+      "latitude": "Lintang",
+      "longitude": "Bujur",
+      "country": "Negara",
+      "locality": "Lokalitas",
+      "habitat": "Habitat",
+      "remarks": "Catatan",
+      "saveTree": "Simpan informasi pohon",
+      "linkedMeasurements": "Pengukuran tertaut",
+      "height": "Tinggi",
+      "rootCollarCm": "Diameter pangkal akar (cm)",
+      "canopyCover": "Tutupan tajuk",
+      "heightM": "Tinggi (m)",
+      "canopyCoverPercent": "Tutupan tajuk (%)",
+      "removeMeasurements": "Hapus pengukuran",
+      "saveMeasurements": "Simpan pengukuran",
+      "addMeasurements": "Tambah pengukuran",
+      "choosePhoto": "Pilih foto",
+      "addLinkedPhoto": "Tambah foto tertaut",
+      "saveCaption": "Simpan keterangan",
+      "cancel": "Batal",
+      "noCaption": "Belum ada keterangan.",
+      "editCaption": "Edit keterangan",
+      "addCaption": "Tambah keterangan",
+      "photoAdded": "Ditambahkan {date}",
+      "deleteTree": "Hapus pohon",
+      "deleteTreeTitle": "Hapus pohon?",
+      "deletePhotoTitle": "Hapus foto?",
+      "saveTreeError": "Informasi pohon tidak dapat disimpan.",
+      "saveMeasurementError": "Pengukuran tidak dapat disimpan.",
+      "savePhotoError": "Foto tidak dapat disimpan.",
+      "saveCaptionError": "Keterangan tidak dapat disimpan.",
+      "editTreeDenied": "Peran Anda tidak dapat mengedit pohon ini.",
+      "noChanges": "Tidak ada perubahan untuk disimpan.",
+      "treeSaved": "Informasi pohon disimpan.",
+      "measurementManualReview": "Pengukuran ini perlu ditinjau manual sebelum dapat diedit di sini.",
+      "measurementDenied": "Peran Anda tidak dapat mengubah pengukuran pohon ini.",
+      "measurementsSaved": "Pengukuran disimpan.",
+      "measurementsRemoved": "Pengukuran yang ditampilkan dihapus.",
+      "measurementRequired": "Tambahkan setidaknya satu pengukuran sebelum menyimpan.",
+      "measurementsAdded": "Pengukuran ditambahkan.",
+      "photoAddDenied": "Peran Anda tidak dapat menambahkan foto.",
+      "photoAddedFeedback": "Foto ditambahkan.",
+      "photoEditDenied": "Peran Anda tidak dapat mengedit foto ini.",
+      "captionSaved": "Keterangan disimpan.",
+      "photoDeleteDenied": "Peran Anda tidak dapat menghapus foto ini.",
+      "photoDeleted": "Foto dihapus.",
+      "chooseTreeToDelete": "Pilih pohon yang akan dihapus.",
+      "treeDeleteDenied": "Peran Anda tidak dapat menghapus pohon ini.",
+      "groupCountDelayed": "Jumlah grup mungkin diperbarui nanti.",
+      "treeDeletedWithNotes": "Pohon dihapus. {notes}",
+      "treeDeleted": "Pohon dihapus.",
+      "groupDeleteDenied": "Peran Anda tidak dapat menghapus grup ini.",
+      "treesAddedToGroup": "{count, plural, one {# pohon ditambahkan} other {# pohon ditambahkan}} ke {name}.",
+      "noTreesAdded": "Tidak ada pohon yang ditambahkan ke {name}.",
+      "chooseUngrouped": "Pilih setidaknya satu pohon tanpa grup.",
+      "groupAttachDenied": "Peran Anda tidak dapat menambahkan pohon yang ada ke grup.",
+      "someTreesNotAdded": "Beberapa pohon tidak dapat ditambahkan.",
+      "createGroupFirst": "Buat grup saat mengunggah sebelum menambahkan pohon tanpa grup.",
+      "duplicateMeasurements": "Ada lebih dari satu pengukuran yang dapat diedit. Pengeditan dijeda untuk melindungi nilai tercatat.",
+      "deleteTreeLinkedBody": "Menghapus juga menghilangkan {photos, plural, one {# foto tertaut} other {# foto tertaut}} dan {measurements, plural, one {# pengukuran tertaut} other {# pengukuran tertaut}}.",
+      "deleteTreeLoadingBody": "Pohon tidak dapat dihapus sebelum detailnya selesai dimuat.",
+      "deleteTreeConfirmCounts": "Ini menghapus pohon, {photos, plural, one {# foto tertaut} other {# foto tertaut}}, dan {measurements, plural, one {# pengukuran tertaut} other {# pengukuran tertaut}}. Tindakan ini tidak dapat dibatalkan.",
+      "deleteTreeConfirm": "Ini menghapus pohon dan foto atau pengukuran tertaut. Tindakan ini tidak dapat dibatalkan.",
+      "deletePhotoConfirm": "Ini menghapus foto dari pohon terpilih. Tindakan ini tidak dapat dibatalkan.",
+      "uploadDenied": "Peran Anda tidak dapat mengunggah data pohon.",
+      "deletedGroupSuccess": "{name} dan {count, plural, one {# pohon} other {# pohon}} dihapus.",
+      "deletedGroupPartial": "{name} dan {count, plural, one {# pohon} other {# pohon}} dihapus, tetapi sebagian foto atau pengukuran tertaut tersisa. Muat ulang sebelum mencoba lagi.",
+      "deletedGroupTreesOnly": "{name} tidak terhapus sepenuhnya. {count, plural, one {# pohon dihapus} other {# pohon dihapus}}, tetapi grup dipertahankan agar Anda dapat mencoba lagi.",
+      "deletedGroupFailed": "{name} tidak dapat dihapus. Grup dipertahankan agar Anda dapat mencoba lagi.",
+      "photoCount": "{count, plural, one {# foto} other {# foto}}",
+      "treePhoto": "Foto pohon",
+      "photoAltNamed": "Foto pohon {name}",
+      "photoAlt": "Foto pohon",
+      "connectedPlace": "Tempat proyek tertaut",
+      "groupFallback": "Grup pohon",
+      "groupCheckError": "Grup pohon tidak dapat diperiksa. Muat ulang dan coba lagi."
+    },
+    "deleteGroup": {
+      "title": "Hapus grup pohon?",
+      "description": "Menghapus {name} akan menghapus grup dan semua isinya. Tindakan ini tidak dapat dibatalkan.",
+      "willDelete": "Ini akan menghapus:",
+      "group": "grup pohon",
+      "trees": "{count, plural, one {# pohon dalam grup ini} other {# pohon dalam grup ini}}",
+      "measurements": "{count, plural, one {# pengukuran tertaut} other {# pengukuran tertaut}}",
+      "photos": "{count, plural, one {# foto tertaut} other {# foto tertaut}}",
+      "cancel": "Batal",
+      "confirm": "Hapus grup pohon",
+      "error": "Grup pohon tidak dapat dihapus."
+    },
+    "upload": {
+      "savingTitle": "Menyimpan pohon Anda",
+      "keepOpenTitle": "Jangan muat ulang atau tutup halaman ini",
+      "keepOpenBody": "Biarkan tab ini terbuka hingga pohon dan foto selesai disimpan.",
+      "savingPhoto": "Menyimpan foto",
+      "pending": "Menunggu",
+      "done": "Selesai",
+      "row": "Baris {number}",
+      "rowsRange": "Baris {start}-{end} dari {total}",
+      "savingProgress": "Menyimpan baris {current} dari {total}: {row}…",
+      "preparing": "Bersiap menyimpan…",
+      "rowSummary": "Baris {number}: {label}",
+      "fatal": {
+        "siteBoundary": "Area peta terpilih tidak dapat diperiksa. Kembali, pilih atau buat batas situs, lalu coba lagi.",
+        "photoFolder": "Folder foto tidak lagi tersedia setelah halaman dimuat ulang atau Anda masuk lagi. Mulai ulang dan pilih file pohon beserta folder fotonya.",
+        "treeGroup": "Grup pohon tidak dapat dibuat. Coba lagi atau lanjutkan tanpa grup.",
+        "noSite": "Belum ada situs yang dipilih. Kembali dan pilih atau buat batas situs."
+      },
+      "time": {
+        "fewSeconds": "beberapa detik",
+        "seconds": "{count} dtk",
+        "minutes": "{count} mnt",
+        "hours": "{count} jam",
+        "hoursMinutes": "{hours} jam {minutes} mnt",
+        "done": "Selesai",
+        "completedIn": "Selesai dalam {duration}",
+        "completed": "Selesai",
+        "estimating": "Memperkirakan…",
+        "calculating": "Menghitung waktu tersisa",
+        "left": "tersisa ~{duration}",
+        "saved": "{completed} dari {total} {unit} disimpan",
+        "treeUnit": "{count, plural, one {pohon} other {pohon}}",
+        "photoUnit": "{count, plural, one {foto} other {foto}}"
+      },
+      "viewTreeGroup": "Lihat grup pohon",
+      "viewTrees": "Lihat pohon",
+      "datasetCleanupWarning": "Grup pohon kosong tidak dapat dihapus otomatis.",
+      "addingToGroup": "Menambahkan ke {name}.",
+      "creatingGroup": "Membuat grup “{name}”.",
+      "photoFailures": "Beberapa foto tidak dapat disimpan. Pohon Anda tetap tersimpan.",
+      "photoSaveError": "Foto tidak dapat disimpan.",
+      "rowPartialError": "Pohon disimpan, tetapi sebagian informasi tertaut tidak dapat disimpan.",
+      "treeSaveError": "Pohon tidak dapat disimpan.",
+      "photoSkipped": "Pohon tidak disimpan, jadi fotonya dilewati.",
+      "errors": {
+        "groupDetached": "Grup pohon tidak lagi tersedia, jadi pohon ini disimpan tanpa grup. Tinjau sebelum mencoba lagi.",
+        "groupDetachFailed": "Grup pohon tidak lagi tersedia dan pohon ini tidak dapat dipindahkan keluar secara otomatis. Tinjau sebelum mencoba lagi.",
+        "groupUnavailable": "Grup pohon terpilih tidak lagi tersedia. Baris tersisa tidak ditambahkan.",
+        "chunkUnconfirmed": "Kumpulan pohon ini tidak dapat dikonfirmasi. Sebagian mungkin sudah tersimpan; tinjau pohon Anda sebelum mencoba lagi.",
+        "measurementCleanupFailed": "Pohon disimpan, tetapi pengukurannya tidak, dan pembersihan otomatis tidak selesai. Tinjau pohon sebelum mencoba lagi."
+      },
+      "groupCountWarning": "Grup pohon dibuat, tetapi jumlah pohonnya tidak dapat diperbarui.",
+      "importedPhotoCaption": "Diimpor dari folder foto: {fileName}",
+      "progressSummary": "{successes} berhasil, {partials} perlu ditindaklanjuti, {failures} gagal",
+      "successWithPhotos": "Berhasil menyimpan {trees} pohon dan {photos} foto.",
+      "successTrees": "Berhasil menyimpan {trees} pohon.",
+      "completionWithIssues": "{saved} disimpan, {followUp} perlu ditindaklanjuti, {failed} dilewati atau gagal, dan {photoFailed} foto tidak dapat disimpan.",
+      "photosSaved": "Foto disimpan",
+      "savingPhotos": "Menyimpan foto…",
+      "photoProgress": "Foto {current} dari {total}",
+      "photoSummary": "{saved} disimpan dan {failed} tidak disimpan, dari {total} foto",
+      "attentionCount": "{count} baris perlu diperiksa",
+      "attentionKind": {
+        "failed": "Gagal",
+        "partial": "Perlu ditindaklanjuti",
+        "skipped": "Dilewati"
+      },
+      "startOver": "Mulai ulang",
+      "uploadMore": "Unggah lebih banyak pohon",
+      "savingTrees": "Menyimpan {count} pohon ke GainForest.",
+      "assigningToSite": "Menetapkan ke {name}.",
+      "boundary": {
+        "differentSite": "Baris ini disiapkan untuk batas situs lain. Kembali dan tinjau batas situs terpilih.",
+        "invalid": "Area peta terpilih tidak dapat digunakan. Kembali dan gambar ulang sebelum menyimpan pohon.",
+        "outside": "Pohon ini berada {distance} di luar area peta terpilih. Periksa koordinat, pilih batas lain, atau hapus baris ini.",
+        "unknownDistance": "pada jarak yang tidak diketahui"
+      }
     }
   },
   "workScopes": {
@@ -756,7 +1072,6 @@
     "restorationMaintenance": "Pemeliharaan restorasi"
   },
   "internalBadges": {
-    "eyebrow": "Alat tim internal",
     "title": "Meja lencana",
     "description": "Buat lencana, tetapkan ke akun, dan simpan penetapan email sebagai tertunda sampai orang tersebut mengklaim akun.",
     "pendingEmail": "Email tertunda",
@@ -836,7 +1151,8 @@
       "awardCreated": "Lencana ditetapkan.",
       "pendingCreated": "Penetapan email disimpan sebagai tertunda.",
       "awardDeleted": "Penetapan dihapus.",
-      "awardsCreated": "{count, plural, one {Lencana ditetapkan.} other {# lencana ditetapkan.}}"
+      "awardsCreated": "{count, plural, one {Lencana ditetapkan.} other {# lencana ditetapkan.}}",
+      "awardsPartial": "{succeeded} berhasil diberikan; {failed} gagal diberikan. Periksa penerima yang tersisa dan coba lagi."
     },
     "errors": {
       "generic": "Terjadi kesalahan.",
@@ -880,7 +1196,9 @@
     "title": "Dukungan diberikan",
     "description": "Organisasi yang telah didukung {name} secara publik.",
     "empty": "Organisasi ini belum mendukung siapa pun.",
-    "fallbackName": "Organisasi"
+    "fallbackName": "Organisasi",
+    "loadError": "Dukungan ini tidak dapat dimuat.",
+    "retry": "Coba lagi"
   },
   "trust": {
     "trustedBy": "Dipercaya oleh",
@@ -916,7 +1234,22 @@
       "addError": "Kami tidak dapat menambahkan anggota itu. Periksa handle dan coba lagi.",
       "roleMember": "anggota",
       "roleAdmin": "administrator",
-      "pendingStatus": "Diundang sebagai {role}. Menunggu mereka menerima."
+      "pendingStatus": "Diundang sebagai {role}. Menunggu mereka menerima.",
+      "memberFallback": "Anggota tim",
+      "joined": "Bergabung {date}",
+      "loadingName": "Memuat nama…",
+      "organizationMember": "Anggota organisasi",
+      "memberRole": "Peran anggota",
+      "newMemberRole": "Peran anggota baru",
+      "roleOwner": "pemilik",
+      "removeMember": "Hapus anggota",
+      "title": "Anggota",
+      "loading": "Memuat anggota…",
+      "empty": "Belum ada anggota.",
+      "refresh": "Muat ulang",
+      "loadError": "Anggota tidak dapat dimuat.",
+      "roleError": "Peran tidak dapat diperbarui.",
+      "removeError": "Anggota tidak dapat dihapus."
     },
     "menu": {
       "title": "Undangan",
@@ -930,7 +1263,6 @@
       "role": "Undangan {role}"
     },
     "invitePage": {
-      "eyebrow": "Undangan organisasi",
       "organizationFallback": "organisasi ini",
       "signedOutTitle": "Masuk untuk menerima",
       "signedOutDescription": "Masuk dengan email yang diundang untuk bergabung dengan {organization}.",
@@ -950,13 +1282,16 @@
       "canceledTitle": "Undangan dibatalkan",
       "canceledDescription": "Undangan ini tidak berlaku lagi.",
       "alreadyAcceptedTitle": "Sudah diterima",
-      "alreadyAcceptedDescription": "Undangan ini sudah diterima."
+      "alreadyAcceptedDescription": "Undangan ini sudah diterima.",
+      "pendingTitle": "Bergabung dengan organisasi ini?",
+      "pendingDescription": "Terima untuk bergabung dengan {organization}.",
+      "accept": "Terima undangan"
     }
   },
   "notifications": {
     "title": "Notifikasi",
     "ariaLabel": "Notifikasi",
-    "unreadAria": "Notifikasi — {count} belum dibaca",
+    "unreadAria": "Notifikasi: {count} belum dibaca",
     "empty": "Belum ada notifikasi",
     "emptyHint": "Suka, komentar, dan saran spesies pada catatan Anda akan muncul di sini.",
     "someone": "Seseorang",
@@ -981,7 +1316,7 @@
     "hero": {
       "title": "Apa yang terjadi di",
       "accent": "GainForest",
-      "description": "Aliran langsung proyek terbaru, temuan alam, organisasi, dan pembaruan komunitas — semuanya di satu tempat."
+      "description": "Proyek, penampakan alam, organisasi, dan pembaruan komunitas terbaru dalam satu aliran langsung."
     },
     "filters": {
       "all": "Semua",
@@ -1018,7 +1353,8 @@
       "viewAll": "Lihat semua pengamatan",
       "likesAcross": "{count, plural, other {# suka pada pengamatan ini}}",
       "commentsHeading": "Komentar pada pengamatan ini",
-      "commentOn": "pada {species}"
+      "commentOn": "pada {species}",
+      "moreComments": "{count, plural, one {Tampilkan # komentar lagi} other {Tampilkan # komentar lagi}}"
     },
     "profileCard": {
       "unnamed": "Akun tanpa nama",
@@ -1102,7 +1438,7 @@
     "visibleDescription": "Sembunyikan {name} sebagai akun uji coba agar proyek, pengamatan, dan aktivitas feed-nya tidak tampil untuk publik. Anda bisa membatalkannya kapan saja.",
     "hideAction": "Sembunyikan sebagai akun uji coba",
     "confirmHide": "Sembunyikan akun",
-    "confirmDescription": "Tindakan ini menghapus semua milik {name} — proyek, pengamatan, dan aktivitas feed — dari halaman publik. Anda bisa menampilkannya lagi kapan saja.",
+    "confirmDescription": "Ini menghapus {name}, termasuk proyek, observasi, dan aktivitas feed, dari halaman publik. Anda dapat menampilkannya lagi kapan saja.",
     "cancel": "Batal",
     "flaggedTitle": "Disembunyikan sebagai akun uji coba",
     "flaggedDescription": "Proyek, pengamatan, dan aktivitas feed milik {name} disembunyikan dari semua orang. Hanya pengelola GainForest yang bisa melihat akun ini di sini.",
@@ -1115,7 +1451,10 @@
     "empty": "Belum ada akun yang ditandai sebagai uji coba.",
     "remove": "Hapus",
     "unnamed": "Akun tanpa nama",
-    "error": "Terjadi kesalahan. Silakan coba lagi."
+    "error": "Terjadi kesalahan. Silakan coba lagi.",
+    "confirmTitle": "Tampilkan akun ini?",
+    "confirmDescription": "{name} dan aktivitasnya akan kembali ke halaman publik.",
+    "cancel": "Batal"
   },
   "recognition": {
     "eyebrow": "Pengelola GainForest",
@@ -1131,14 +1470,14 @@
         "description": "Menerima hibah Meliarkan Kembali Web."
       },
       "bioblitz-most-images": {
-        "label": "BioBlitz — observasi terbanyak",
+        "label": "BioBlitz: observasi terbanyak",
         "description": "Memenangkan ronde BioBlitz untuk observasi terbanyak.",
-        "labelWithRound": "BioBlitz {roundName} — observasi terbanyak"
+        "labelWithRound": "BioBlitz {roundName}: observasi terbanyak"
       },
       "bioblitz-best-picture": {
-        "label": "BioBlitz — foto terbaik",
+        "label": "BioBlitz: foto terbaik",
         "description": "Memenangkan ronde BioBlitz untuk foto terbaik.",
-        "labelWithRound": "BioBlitz {roundName} — foto terbaik"
+        "labelWithRound": "BioBlitz {roundName}: foto terbaik"
       }
     },
     "awardsLabel": "Penghargaan",
@@ -1186,7 +1525,7 @@
   },
   "adminTaina": {
     "title": "Agen Tainá",
-    "description": "Semua orang yang menjalankan asisten lapangan Tainá — bot mereka, kapan terakhir dipakai, dan berapa yang sudah dihabiskan. Pesan yang Anda kirim disampaikan oleh Tainá mereka, dengan suaranya sendiri.",
+    "description": "Agen Tainá, pemilik, penggunaan terbaru, dan belanja kredit.",
     "empty": "Belum ada yang menghubungkan Tainá.",
     "unavailable": "Runtime Tainá tidak dapat dijangkau saat ini, jadi daftarnya tidak bisa dimuat. Coba lagi sebentar lagi.",
     "unnamed": "Akun tanpa nama",
@@ -1198,7 +1537,7 @@
     "creditsAllowance": "Jatah kredit: {allowance}",
     "message": "Pesan",
     "messagePlaceholder": "Apa yang harus Tainá sampaikan kepada mereka?",
-    "messageHint": "Disampaikan lewat bot mereka dengan suara Tainá — penerima melihatnya sebagai pesan dari asistennya sendiri.",
+    "messageHint": "Dikirim oleh Tainá mereka sebagai pesan asisten.",
     "send": "Kirim",
     "sending": "Mengirim…",
     "sent": "Terkirim ke obrolan mereka.",
@@ -1236,7 +1575,10 @@
     "followersTab": "Pengikut",
     "followingTab": "Mengikuti",
     "emptyFollowers": "Belum ada pengikut.",
-    "emptyFollowing": "Belum mengikuti siapa pun."
+    "emptyFollowing": "Belum mengikuti siapa pun.",
+    "navigationLabel": "Koneksi profil",
+    "loadError": "Koneksi ini tidak dapat dimuat.",
+    "retry": "Coba lagi"
   },
   "activity": {
     "postsTab": "Postingan",
@@ -1255,11 +1597,14 @@
       "account": "akun",
       "record": "catatan"
     },
-    "inReplyTo": "Membalas"
+    "inReplyTo": "Membalas",
+    "navigationLabel": "Aktivitas profil",
+    "loadError": "Aktivitas ini tidak dapat dimuat.",
+    "retry": "Coba lagi"
   },
   "docs": {
     "metaTitle": "Skema data",
-    "metaDescription": "Skema rekaman AT Protocol yang terbuka di balik GainForest — observasi keanekaragaman hayati, klaim dampak, pendanaan, dan identitas.",
+    "metaDescription": "Skema catatan AT Protocol terbuka untuk observasi keanekaragaman hayati, klaim dampak, pendanaan, dan identitas GainForest.",
     "title": "Skema data",
     "lead": "Format rekaman terbuka di balik GainForest. Setiap observasi, proyek, sertifikat, donasi, dan kiriman disimpan sebagai rekaman terstruktur menggunakan skema di bawah ini.",
     "starSchemaCaption": "Bagaimana rekaman keanekaragaman hayati saling terhubung",
@@ -1279,11 +1624,11 @@
       "audiovisualEvidence": "bukti audiovisual"
     },
     "sections": {
-      "feed": "Primitif sosial yang diadaptasi dari Bluesky ke ranah bersama GainForest — kiriman (dan komentar balasan) serta suka, sehingga umpan dapat diposting, dikomentari, dan disukai.",
+      "feed": "Postingan, balasan, dan suka yang diadaptasi dari Bluesky untuk feed GainForest.",
       "dwc": "Rekaman kemunculan keanekaragaman hayati yang selaras dengan standar Simple Darwin Core dari TDWG. Kemunculan merujuk pada satu peristiwa bersama; pengukuran merujuk pada satu kemunculan.",
       "ac": "Rekaman media dan pemantauan akustik pasif yang selaras dengan Audiovisual Core dari TDWG. Audio dan multimedia tertaut ke kemunculan Darwin Core sebagai bukti.",
-      "organization": "Rekaman data peta organisasi — lapisan peta yang dipublikasikan (ortomosaik drone, lapisan GeoJSON) dan area pantauan bernama yang mengelompokkan pengambilan berulang menjadi seri perubahan dari waktu ke waktu.",
-      "certified": "Primitif identitas dari ekosistem Hypercerts — profil aktor, organisasi, pengikut, lencana, dan lokasi.",
+      "organization": "Catatan data peta organisasi: lapisan peta terbit, termasuk ortomosaik drone dan overlay GeoJSON, serta area pantauan yang mengelompokkan pengambilan berulang menjadi seri perubahan waktu.",
+      "certified": "Primitif identitas dari ekosistem Hypercerts: profil aktor, organisasi, ikuti, lencana, dan lokasi.",
       "hypercerts": "Klaim dampak (aktivitas, kontribusi, kontributor, hak), koleksi, tanda terima pendanaan, lampiran, cakupan kerja, dan tipe bersama."
     },
     "sectionsAria": "Bagian skema",
@@ -1311,10 +1656,9 @@
       "description": "Hubungkan bot Telegram milik Anda dan ubah apa yang Anda lihat di alam menjadi observasi keanekaragaman hayati yang dapat diverifikasi."
     },
     "hero": {
-      "eyebrow": "Asisten lapangan AI",
       "title": "Kenali",
       "accent": "Tainá",
-      "description": "Tainá adalah teman lapangan Anda di Telegram. Kirim foto atau catatan tentang tumbuhan, hewan, atau jamur — Tainá mengenali spesiesnya dan mencatat observasi di akun GainForest Anda.",
+      "description": "Kirim foto atau catatan Telegram ke Tainá untuk mengidentifikasi dan merekam penampakan di akun GainForest Anda.",
       "step1Title": "Hubungkan bot Anda sendiri",
       "step1Description": "Buat bot Telegram pribadi dengan @BotFather lalu tautkan di sini. Hanya Anda yang bisa berbicara dengannya.",
       "step2Title": "Kirim foto atau catatan",
@@ -1330,18 +1674,19 @@
     },
     "setup": {
       "title": "Hubungkan bot Tainá Anda",
-      "description": "Buat bot Telegram untuk Tainá dan tempel tokennya di bawah. Bot ini pribadi — hanya bekerja untuk Anda.",
+      "description": "Buat bot Telegram pribadi, lalu tempel tokennya di bawah.",
       "howTitle": "Cara membuat bot Anda (sekitar 2 menit)",
       "howStep1": "Buka <botfather>@BotFather</botfather> di Telegram.",
       "howStep2": "Kirim <code>/newbot</code> dan ikuti petunjuknya.",
       "howStep3": "Salin token yang diberikan (bentuknya seperti 123456789:ABC…).",
-      "howStep4": "Tempel di bawah — bot ini hanya digunakan oleh Anda.",
+      "howStep4": "Tempel di bawah: bot ini hanya digunakan oleh Anda.",
       "tokenLabel": "Token bot",
       "focusLabel": "Apa yang sedang Anda dokumentasikan?",
       "focusOptional": "opsional",
       "focusPlaceholder": "mis. burung & penyerbuk, Hutan Atlantik",
       "submit": "Hubungkan Tainá",
-      "submitting": "Menghubungkan…"
+      "submitting": "Menghubungkan…",
+      "tokenPlaceholder": "123456789:ABCdefGhIJKlmNoPQRstuVwxyz"
     },
     "errors": {
       "invalidToken": "Itu tidak tampak seperti token bot. Salin dari @BotFather (bentuknya seperti 123456789:ABC…).",
@@ -1352,7 +1697,7 @@
       "title": "Aktifkan bot Anda",
       "description": "Bot Anda sudah terhubung tetapi masih privat. Buka di Telegram dan kirim kode sekali pakai ini agar hanya Anda yang bisa berbicara dengannya.",
       "open": "Buka Tainá & aktifkan",
-      "hint": "Tombol ini mengirimkan kodenya untuk Anda — atau kirim kodenya langsung ke bot."
+      "hint": "Tombol akan mengirim kode untuk Anda. Anda juga dapat mengirim pesan ke bot dan mengetik kodenya."
     },
     "linked": {
       "title": "Bot Tainá Anda",
@@ -1390,67 +1735,73 @@
       "revokeConfirm": "Cabut kunci ini? Tainá akan berhenti mencatat observasi sampai Anda membuat kunci baru.",
       "generate": "Buat kunci baru",
       "generating": "Membuat…",
-      "keyActionFailed": "Gagal — silakan coba lagi.",
+      "keyActionFailed": "Tindakan gagal. Coba lagi.",
       "chatTitle": "Obrolan observasi",
       "chatActive": "Aktif",
       "chatWaiting": "Menunggu",
-      "chatEmpty": "Belum ada pesan. Buka bot Anda di Telegram lalu jelaskan atau foto sesuatu yang Anda lihat — percakapan Anda dengan Tainá tampil di sini secara langsung.",
+      "chatEmpty": "Belum ada pesan. Buka bot Anda di Telegram untuk memulai percakapan.",
       "restart": "Mulai ulang sesi",
       "restarting": "Memulai ulang…",
-      "restartConfirm": "Mulai percakapan baru dengan Tainá? Ia akan melupakan riwayat obrolan ini — observasi yang sudah tercatat tidak terpengaruh.",
-      "restartFailed": "Mulai ulang gagal — silakan coba lagi.",
+      "restartConfirm": "Mulai percakapan baru dengan Tainá? Ini menghapus obrolan saat ini. Observasi yang direkam tetap utuh.",
+      "restartFailed": "Percakapan tidak dapat dimulai ulang. Coba lagi.",
       "creditsTitle": "Pemakaian kredit",
       "creditsSummary": "{used} terpakai · {left} tersisa",
       "resetAgent": "Atur ulang agen saya",
       "resetting": "Mengatur ulang…",
-      "resetConfirm": "Atur ulang agen Tainá Anda? Ini memutuskan bot Anda, menghapus riwayat obrolan dan profil Anda di sini, serta mencabut kuncinya. Observasi yang sudah tercatat tidak terpengaruh. Anda bisa menyiapkan Tainá lagi kapan saja.",
-      "resetFailed": "Pengaturan ulang gagal — silakan coba lagi.",
+      "resetConfirm": "Reset agen Tainá Anda? Ini memutuskan bot, menghapus obrolan dan profilnya, serta mencabut kuncinya. Observasi yang direkam tetap utuh. Anda dapat menyiapkannya lagi.",
+      "resetFailed": "Agen tidak dapat direset. Coba lagi.",
       "profileTitle": "Profil Anda",
       "profileDescription": "Profil Markdown singkat yang disimpan bersama agen Anda agar Tainá tahu siapa Anda. Profil ini memengaruhi cara ia berbicara dengan Anda dan koneksi yang bisa ia sarankan.",
       "profilePromptTitle": "Siapkan profil Anda",
-      "profilePromptIntro": "Salin prompt ini ke ChatGPT atau Claude untuk menyusun profil USER.md, lalu kirim Markdown hasilnya ke agen Anda di Telegram — atau tempel di bawah.",
+      "profilePromptIntro": "Salin perintah ini ke ChatGPT atau Claude untuk membuat draf profil USER.md. Kirim Markdown hasilnya ke agen Anda di Telegram atau tempel di bawah.",
       "profilePromptBody": "Buat profil koneksi dua halaman yang tidak memuat hal sensitif, yang membantu orang atau agen menemukan alasan baik untuk berbicara dengan saya, berkolaborasi, bertukar catatan, mengajak saya ke suatu kegiatan, atau memperkenalkan saya kepada seseorang yang tak terduga.\n\nJangan jadikan ini resume, biografi, tipe kepribadian, atau catatan definitif. Buat hangat, spesifik, sedikit imajinatif, dan berguna untuk serendipitas.\n\nGali rasa ingin tahu saya yang berulang, pertanyaan yang sedang hidup, selera, proyek, nilai-nilai dalam praktik, topik percakapan, kemungkinan tawaran/permintaan, serta jenis orang, komunitas, kolaborasi, atau peluang yang mungkin cocok dengan saya. Sertakan pekerjaan, tetapi jangan jadikan pekerjaan satu-satunya bingkai.\n\nTetap membumi: bedakan bukti dari dugaan, dan ungkapkan hal yang belum pasti sebagai kemungkinan atau pertanyaan. Jangan menyimpulkan fakta sensitif atau pribadi. Sertakan apa yang tidak boleh diasumsikan, dan di mana konteks tambahan akan membantu.",
       "profileLabel": "Profil Anda untuk USER.md",
       "profilePlaceholder": "Tempel profil Markdown di sini. Jangan sertakan rahasia atau apa pun yang tidak ingin Anda simpan bersama agen Anda.",
       "profileCounter": "Ini menjadi USER.md di ruang kerja agen Anda. {count}/{max} karakter.",
       "profileSave": "Simpan profil",
       "profileSaving": "Menyimpan…",
-      "profileSaved": "Tersimpan — Tainá akan memakainya mulai balasan berikutnya.",
+      "profileSaved": "Tersimpan. Tainá akan menggunakannya pada balasan berikutnya.",
       "profileSaveFailed": "Kami tidak dapat menyimpan profil Anda. Silakan coba lagi."
     }
   },
   "adminEndorsers": {
     "title": "Pendukung",
     "description": "Organisasi yang lencananya kami dengarkan. Dukungan mereka muncul di seluruh aplikasi sebagai “Dipercaya oleh” dan menampilkan proyek yang mereka dukung.",
-    "inputLabel": "Handle organisasi atau id akun",
-    "inputPlaceholder": "handle.certified.one atau did:plc:…",
+    "inputLabel": "Nama pengguna organisasi",
+    "inputPlaceholder": "organisasi.contoh.id",
     "addButton": "Tambah pendukung",
     "addError": "Tidak dapat menambahkan pendukung.",
     "removeError": "Tidak dapat menghapus pendukung.",
     "removeLabel": "Hapus {name}",
     "builtinChip": "Bawaan",
-    "propagationHint": "Pendukung baru perlu beberapa menit untuk muncul di seluruh aplikasi."
+    "propagationHint": "Pendukung baru perlu beberapa menit untuk muncul di seluruh aplikasi.",
+    "confirmTitle": "Hapus pemberi dukungan?",
+    "confirmDescription": "Lencana dari {name} tidak akan lagi digunakan sebagai dukungan.",
+    "cancel": "Batal"
   },
   "adminAwardEndorsements": {
     "title": "Berikan dukungan",
-    "description": "Dukung organisasi lain atas nama GainForest — dukungan yang sama seperti yang diterbitkan Ma Earth, sehingga platform mitra juga melihatnya. Organisasi yang didukung menampilkan “Dipercaya oleh GainForest” di seluruh aplikasi.",
+    "description": "Kelola organisasi yang didukung GainForest.",
     "notAllowed": "Memberikan dukungan memerlukan admin organisasi GainForest. Minta pemilik GainForest untuk menambahkan Anda sebagai admin.",
     "noBadges": "Belum ada lencana dukungan. Buat dulu lencana dengan tipe “Dukungan”.",
     "manageBadges": "Kelola lencana",
     "badgeLabel": "Lencana dukungan",
-    "inputLabel": "Handle organisasi atau id akun",
-    "inputPlaceholder": "handle.certified.one atau did:plc:…",
+    "inputLabel": "Nama pengguna organisasi",
+    "inputPlaceholder": "organisasi.contoh.id",
     "noteLabel": "Catatan (opsional)",
     "notePlaceholder": "Tambahkan catatan tentang dukungan ini (opsional)",
     "awardButton": "Berikan dukungan",
     "awardError": "Tidak dapat memberikan dukungan.",
     "removeError": "Tidak dapat menghapus dukungan.",
     "removeLabel": "Hapus dukungan untuk {name}",
-    "emailNotSupported": "Masukkan handle organisasi atau id akun — dukungan tidak dapat dikirim ke alamat email.",
+    "emailNotSupported": "Masukkan nama pengguna organisasi. Alamat email tidak didukung.",
     "alreadyEndorsed": "Organisasi ini sudah memiliki dukungan ini.",
     "empty": "Belum ada dukungan yang diberikan.",
     "unnamed": "Organisasi tanpa nama",
-    "propagationHint": "Dukungan baru perlu beberapa menit untuk muncul di seluruh aplikasi."
+    "propagationHint": "Dukungan baru perlu beberapa menit untuk muncul di seluruh aplikasi.",
+    "confirmTitle": "Hapus dukungan?",
+    "confirmDescription": "Dukungan GainForest untuk {name} akan dihapus.",
+    "cancel": "Batal"
   },
   "dataJobs": {
     "meta": {
@@ -1458,11 +1809,10 @@
       "description": "Kirim batch besar berisi foto lapangan dan ekspor survei ke tim GainForest untuk ditinjau dan dipublikasikan."
     },
     "hero": {
-      "kicker": "Untuk mitra lapangan",
       "title": "Kirim data lapangan Anda dalam satu batch besar",
-      "description": "Kemas foto dan ekspor survei Anda (misalnya dari KoboToolbox) ke dalam satu file zip dan kirimkan kepada kami. Tim kami meninjau setiap batch dan mempublikasikan observasi ke akun Anda.",
+      "description": "Zip foto dan ekspor survei Anda. Kami akan meninjau batch dan menerbitkan observasi yang disetujui ke akun Anda.",
       "step1Title": "Kemas semuanya dalam satu zip",
-      "step1Description": "Foto, spreadsheet, dan ekspor survei — formatnya tidak harus sempurna.",
+      "step1Description": "Foto, spreadsheet, dan ekspor survei: formatnya tidak harus sempurna.",
       "step2Title": "Unggah batch",
       "step2Description": "File hingga 10GB diunggah langsung dari browser Anda. Biarkan halaman tetap terbuka sampai selesai.",
       "step3Title": "Kami meninjau dan mempublikasikan untuk Anda",
@@ -1482,7 +1832,7 @@
       "projectLabel": "Proyek atau lokasi",
       "projectPlaceholder": "mis. Restorasi mangrove, lokasi utara",
       "notesLabel": "Catatan untuk tim peninjau",
-      "notesPlaceholder": "Apa pun yang membantu kami memahami data Anda — arti kolom, tanggal, daftar spesies…",
+      "notesPlaceholder": "Apa pun yang membantu kami memahami data Anda: arti kolom, tanggal, daftar spesies…",
       "consentLabel": "Izinkan tim GainForest meninjau data ini dan mempublikasikannya ke akun saya atas nama saya.",
       "consentHint": "Anda dapat mencabut izin ini kapan saja di Pengaturan.",
       "consentGranted": "Anda telah mengizinkan tim GainForest mempublikasikan data yang sudah ditinjau ke akun Anda.",
@@ -1496,7 +1846,7 @@
     },
     "errors": {
       "zipOnly": "Pilih satu file .zip saja.",
-      "tooLarge": "File itu terlalu besar — batasnya {max}.",
+      "tooLarge": "File itu terlalu besar: batasnya {max}.",
       "uploadFailed": "Unggahan tidak selesai. Periksa koneksi Anda dan coba lagi."
     },
     "done": {
@@ -1504,7 +1854,7 @@
     },
     "jobs": {
       "title": "Batch Anda",
-      "empty": "Belum ada batch — kiriman Anda akan muncul di sini.",
+      "empty": "Belum ada batch: kiriman Anda akan muncul di sini.",
       "submitted": "Dikirim {when}",
       "publishedCount": "{count} observasi dipublikasikan",
       "cancel": "Hapus"
@@ -1519,7 +1869,7 @@
   },
   "adminDataJobs": {
     "title": "Batch data",
-    "description": "Arsip besar yang dikirim mitra lapangan — tinjau setiap batch dari jarak jauh, lalu publikasikan observasi ke akun pengirim dengan izin mereka.",
+    "description": "Tinjau arsip yang dikirim dan terbitkan observasi yang disetujui dengan izin pengirim.",
     "empty": "Belum ada batch yang dikirim.",
     "unavailable": "Penyimpanan batch belum dikonfigurasi atau sedang tidak dapat diakses, jadi daftarnya tidak bisa dimuat.",
     "unnamed": "Akun tanpa nama",
@@ -1538,7 +1888,7 @@
     "download": "Tautan unduhan",
     "publishedCountLabel": "Observasi dipublikasikan",
     "reviewNoteLabel": "Catatan untuk pengirim",
-    "reviewNotePlaceholder": "Ditampilkan di halaman kiriman mereka — gunakan bahasa sederhana.",
+    "reviewNotePlaceholder": "Catatan bahasa sederhana yang ditampilkan di halaman pengiriman.",
     "saveNote": "Simpan catatan",
     "saved": "Tersimpan",
     "saveFailed": "Tidak bisa menyimpan. Coba lagi.",
@@ -1554,7 +1904,7 @@
       "description": "Atur jam, konfigurasikan jadwal perekaman, dan perbarui firmware perekam akustik AudioMoth Anda, langsung dari peramban."
     },
     "title": "AudioMoth",
-    "subtitle": "Hubungkan AudioMoth ke komputer Anda dengan kabel USB dan geser sakelarnya ke USB/OFF. Di sini Anda dapat mengatur jamnya, mengubah pengaturan perekaman, dan memperbarui firmware — tanpa aplikasi tambahan.",
+    "subtitle": "Hubungkan AudioMoth dalam mode USB/OFF untuk mengatur jam, jadwal rekaman, atau firmware.",
     "unsupportedBrowser": "Peramban ini tidak dapat berkomunikasi dengan perangkat USB. Gunakan versi terbaru Chrome atau Edge di komputer.",
     "tabs": {
       "device": "Jam & perangkat",
@@ -1609,7 +1959,7 @@
       "periodEndLabel": "Akhir periode",
       "removePeriod": "Hapus",
       "addPeriod": "Tambah periode",
-      "noPeriodsHint": "Tidak ada periode perekaman — perangkat tidak akan merekam.",
+      "noPeriodsHint": "Tidak ada periode perekaman: perangkat tidak akan merekam.",
       "firstRecordingDateLabel": "Tanggal perekaman pertama (opsional)",
       "lastRecordingDateLabel": "Tanggal perekaman terakhir (opsional)",
       "filterTitle": "Filter frekuensi",
@@ -1672,7 +2022,7 @@
       "serialPickPrompt": "AudioMoth telah beralih ke mode pembaruan dan akan muncul kembali sebagai perangkat serial. Tekan tombol dan pilih dari daftar.",
       "serialPickButton": "Pilih perangkat & lanjutkan",
       "serialUnsupported": "Peramban ini tidak dapat menyelesaikan pembaruan lewat serial. Gunakan Chrome atau Edge di komputer.",
-      "flashSuccess": "Firmware berhasil diperbarui (kode verifikasi {crc}). Perangkat sedang dinyalakan ulang — mungkin perlu beberapa detik untuk muncul kembali.",
+      "flashSuccess": "Firmware berhasil diperbarui (kode verifikasi {crc}). Perangkat sedang dinyalakan ulang: mungkin perlu beberapa detik untuk muncul kembali.",
       "phasePreparing": "Menyiapkan…",
       "phaseTransferring": "Mentransfer firmware…",
       "phaseVerifying": "Memverifikasi…",
@@ -1680,7 +2030,7 @@
       "phaseRestarting": "Menyalakan ulang perangkat…"
     },
     "autoSetup": {
-      "subtitle": "Santai saja — kami memperbarui firmware, mengatur jam, menerapkan pengaturan perekaman siap lapangan, dan menyimpan perangkat ke daftar peralatan Anda.",
+      "subtitle": "Kami akan memperbarui firmware, mengatur jam, menerapkan pengaturan lapangan, dan menyimpan perangkat saat Anda masuk.",
       "runningTitle": "Menyiapkan AudioMoth Anda…",
       "doneTitle": "AudioMoth Anda siap",
       "errorTitle": "Penyiapan tidak selesai",
@@ -1694,7 +2044,7 @@
       "firmwareUpToDate": "Sudah menggunakan firmware terbaru ({version})",
       "firmwareDownloading": "Mengunduh firmware {version}…",
       "firmwareUpdated": "Diperbarui ke firmware {version}",
-      "firmwareManualSkip": "Perangkat ini memerlukan pembaruan manual — dilewati. Anda dapat memperbaruinya dari tab Firmware.",
+      "firmwareManualSkip": "Perangkat ini memerlukan pembaruan manual: dilewati. Anda dapat memperbaruinya dari tab Firmware.",
       "firmwareFailed": "Pembaruan firmware tidak selesai. Cabut dan pasang kembali AudioMoth Anda, lalu coba lagi.",
       "clockSetting": "Mengatur jam dari komputer ini…",
       "clockDone": "Jam disinkronkan dengan komputer ini",
@@ -1705,7 +2055,7 @@
       "equipmentChecking": "Memeriksa daftar peralatan Anda…",
       "equipmentExists": "Sudah ada di daftar peralatan Anda sebagai {name}",
       "equipmentSaved": "Disimpan ke daftar peralatan Anda sebagai {name}",
-      "equipmentSignInSkip": "Masuk untuk menyimpan perangkat ini ke daftar peralatan Anda — dilewati.",
+      "equipmentSignInSkip": "Masuk untuk menyimpan perangkat ini ke daftar peralatan Anda: dilewati.",
       "equipmentFailed": "Tidak dapat menyimpan perangkat ke daftar peralatan Anda.",
       "notesDeviceId": "ID perangkat: {id}",
       "notesFirmware": "Firmware: {firmware}",
@@ -1749,13 +2099,13 @@
       "equipmentLabel": "AudioMoth (opsional)",
       "equipmentNone": "Tidak ada unit tertaut",
       "equipmentEmpty": "Belum ada AudioMoth yang terdaftar di peralatan Anda maupun organisasi Anda.",
-      "equipmentHint": "Pilih AudioMoth terdaftar yang sedang Anda tempatkan — termasuk yang terdaftar oleh organisasi Anda — untuk menautkannya ke peristiwa ini.",
+      "equipmentHint": "Pilih AudioMoth terdaftar untuk penerapan ini. Perangkat yang didaftarkan oleh organisasi Anda juga tersedia.",
       "viewSelectedEquipment": "Lihat halaman unit ini",
       "invalidId": "ID penempatan harus 16 karakter (0–9, a–f).",
       "invalidCoordinates": "Masukkan koordinat yang valid terlebih dahulu.",
       "createFailed": "Penempatan tidak dapat disimpan. Silakan coba lagi.",
       "playFailed": "Nada tidak dapat diputar. Silakan coba lagi.",
-      "playing": "Memutar nada — tempelkan speaker ke AudioMoth…",
+      "playing": "Memutar nada: tempelkan speaker ke AudioMoth…",
       "chimeHint": "Atur sakelar AudioMoth ke CUSTOM dan tempelkan speaker perangkat ini padanya selama nada diputar.",
       "playAndSave": "Putar nada & simpan",
       "doneTitle": "Penempatan tersimpan",
@@ -1786,7 +2136,7 @@
       "signInTitle": "Masuk untuk mengunggah rekaman",
       "signInBody": "Rekaman Anda disimpan ke akun Anda. Masuk untuk mengunggahnya.",
       "dropTitle": "Pilih kartu SD Anda atau letakkan di sini",
-      "dropBody": "Pilih drive kartu SD (atau folder mana pun berisi rekaman AudioMoth). Berkas dibaca di perangkat ini terlebih dahulu — tidak ada yang diunggah sampai Anda konfirmasi.",
+      "dropBody": "Pilih drive kartu SD (atau folder mana pun berisi rekaman AudioMoth). Berkas dibaca di perangkat ini terlebih dahulu: tidak ada yang diunggah sampai Anda konfirmasi.",
       "chooseFolder": "Pilih kartu SD atau folder",
       "chooseFiles": "Pilih berkas",
       "scanning": "Membaca rekaman…",
@@ -1822,7 +2172,7 @@
       "uploadFailed": "Unggahan tidak dapat diselesaikan. Silakan coba lagi.",
       "deploymentFallback": "Dibuat otomatis saat mengunggah rekaman kartu SD.",
       "discovering": "Mencari rekaman… {count} berkas ditemukan",
-      "readFailed": "Kartu SD tidak dapat dibaca. Cabut dan masukkan kembali, lalu coba lagi — atau seret folder ke halaman ini."
+      "readFailed": "Kartu SD tidak dapat dibaca. Pasang kembali dan coba lagi, atau seret folder ke halaman ini."
     },
     "recordings": {
       "title": "Rekaman",
@@ -1839,7 +2189,7 @@
       "viewDeployment": "Lihat penempatan",
       "accountEmptyTitle": "Belum ada rekaman",
       "accountEmptyBody": "Rekaman yang diunggah dari kartu SD AudioMoth akan muncul di sini, dikelompokkan per penempatan.",
-      "explorerHint": "Perekam menangkap suara sepanjang hari — pilih tanggal di kalender, lalu ketuk batang jam untuk mempersempit.",
+      "explorerHint": "Perekam menangkap suara sepanjang hari: pilih tanggal di kalender, lalu ketuk batang jam untuk mempersempit.",
       "daySpan": "{count, plural, other {# hari}}",
       "prevMonth": "Bulan sebelumnya",
       "nextMonth": "Bulan berikutnya",
@@ -1935,14 +2285,13 @@
       "description": "Impor rekaman AudioMoth dan buat jam lanskap suara 24 jam dari kandungan frekuensinya."
     },
     "hero": {
-      "eyebrow": "Pemantauan akustik",
       "title": "Ubah rekaman AudioMoth menjadi jam lanskap suara",
       "description": "Letakkan file WAV AudioMoth selama satu hari di bawah ini. Setiap rekaman dipindai dalam lima pita frekuensi, dan momen paling nyaring digambar mengelilingi jam 24 jam.",
-      "timeNote": "Waktu rekaman dibaca dari nama file AudioMoth (misalnya 20240404_153000.WAV). Perangkat AudioMoth biasanya memakai UTC kecuali diatur berbeda. Rekaman Anda tidak pernah meninggalkan perangkat ini — semuanya dianalisis di browser Anda."
+      "timeNote": "Waktu rekaman dibaca dari nama file AudioMoth (misalnya 20240404_153000.WAV). Perangkat AudioMoth biasanya memakai UTC kecuali diatur berbeda. Rekaman Anda tidak pernah meninggalkan perangkat ini: semuanya dianalisis di browser Anda."
     },
     "import": {
       "dropTitle": "Letakkan file WAV AudioMoth di sini",
-      "dropHint": "Anda dapat memilih banyak file sekaligus — rekaman satu hari penuh paling baik.",
+      "dropHint": "Anda dapat memilih banyak file sekaligus: rekaman satu hari penuh paling baik.",
       "browse": "Pilih file",
       "fileCount": "{count, plural, other {# rekaman}}",
       "clearAll": "Hapus semua",
@@ -1952,7 +2301,7 @@
       "statusError": "File ini tidak dapat dibaca",
       "tooShort": "Rekaman terlalu pendek untuk dianalisis",
       "onlyWav": "Hanya file WAV yang didukung.",
-      "timeFromModified": "Nama file tidak memuat stempel waktu — memakai waktu modifikasi file"
+      "timeFromModified": "Nama file tidak memuat stempel waktu: memakai waktu modifikasi file"
     },
     "chart": {
       "title": "Daya dikurangi derau — {date}",
@@ -1963,9 +2312,10 @@
       "empty": "Rekaman yang dianalisis akan muncul di sini sebagai jam lanskap suara 24 jam.",
       "emptyHint": "Impor rekaman AudioMoth di atas untuk memulai.",
       "downloadPng": "Unduh gambar",
-      "hoverHint": "Gerakkan kursor di atas jam untuk melihat nilai.",
+      "hoverHint": "Pilih grafik, lalu gunakan tombol panah atau ketuk untuk memeriksa setiap waktu.",
       "datesTitle": "Hari",
-      "allDatesChip": "Semua hari"
+      "allDatesChip": "Semua hari",
+      "exportFailed": "Grafik tidak dapat diunduh. Coba lagi."
     }
   },
   "adminOnly": {
@@ -1998,7 +2348,7 @@
     "removeSigner": "Hapus kunci sandi",
     "addPasskey": "Tambahkan kunci sandi lain",
     "signerLabelPlaceholder": "Beri nama kunci ini (mis. Ponsel saya)",
-    "signersHint": "Tambahkan kunci sandi dari perangkat lain atau orang yang Anda percaya — semuanya dapat menyetujui pembayaran.",
+    "signersHint": "Tambahkan kunci sandi dari perangkat lain atau orang yang Anda percaya: semuanya dapat menyetujui pembayaran.",
     "deleteButton": "Hapus dompet",
     "deleteConfirmTitle": "Hapus dompet ini?",
     "deleteConfirmBody": "Tindakan ini tidak dapat dibatalkan. Jika nanti Anda membuat dompet baru dengan kunci sandi baru, alamatnya akan berbeda.",
@@ -2015,7 +2365,7 @@
     "sendToken": "Mata uang",
     "sendRecipient": "Alamat penerima",
     "sendRecipientPlaceholder": "Alamat penerima (0x…)",
-    "sendRecipientInvalid": "Masukkan alamat dompet yang valid — dimulai dengan 0x diikuti 40 karakter.",
+    "sendRecipientInvalid": "Masukkan alamat dompet yang diawali 0x dan memiliki 40 karakter setelahnya.",
     "sendAmount": "Jumlah",
     "sendAmountInvalid": "Masukkan jumlah yang valid.",
     "sendAmountTooHigh": "Itu lebih dari yang dimiliki dompet ini.",
@@ -2023,7 +2373,7 @@
     "sendButton": "Kirim dengan kunci sandi",
     "sendPreparing": "Menyiapkan…",
     "sendAwaitingPasskey": "Menunggu kunci sandi Anda…",
-    "sendSubmitting": "Mengirim — ini bisa memakan waktu satu menit…",
+    "sendSubmitting": "Mengirim. Ini mungkin memerlukan waktu satu menit…",
     "sendSuccess": "Terkirim! Transfer telah dikonfirmasi.",
     "sendViewTx": "Lihat transaksi",
     "sendGasNote": "GainForest menanggung biaya jaringan.",
@@ -2035,27 +2385,27 @@
     "sendErrorGeneric": "Transfer tidak dapat diselesaikan. Silakan coba lagi.",
     "thresholdHeading": "Persetujuan yang diperlukan",
     "thresholdOption": "{count} dari {total, plural, other {# kunci sandi}}",
-    "thresholdHint": "Berapa banyak kunci sandi yang harus menyetujui setiap transfer. Mewajibkan lebih dari satu lebih aman — satu kunci sandi yang hilang atau dicuri tidak bisa memindahkan dana sendirian. Mengubah ini memberi dompet alamat baru, jadi hanya bisa dilakukan sebelum dompet berisi dana.",
+    "thresholdHint": "Pilih berapa passkey yang harus menyetujui setiap transfer. Lebih dari satu mencegah satu kunci yang hilang atau dicuri memindahkan dana. Sebelum dompet menyimpan dana, perubahan ini juga mengubah alamatnya.",
     "thresholdUpdateError": "Tidak dapat mengubah persyaratan persetujuan. Silakan coba lagi.",
     "thresholdLockedFunds": "Dompet sudah berisi dana, jadi persyaratan persetujuan tidak dapat diubah lagi.",
     "thresholdSingleWarning": "Saat ini satu kunci sandi saja dapat memindahkan dana. Pertimbangkan untuk mewajibkan lebih banyak persetujuan.",
     "sendApprovalsNeeded": "Dompet ini membutuhkan {count} persetujuan dengan kunci sandi yang berbeda. Anda memberikan yang pertama; sisanya dapat diberikan di sini atau dari perangkat lain.",
-    "sendApprovalOf": "Persetujuan {current} dari {total} — menunggu kunci sandi…",
+    "sendApprovalOf": "Persetujuan {current} dari {total}. Menunggu passkey…",
     "sendDuplicatePasskey": "Setiap persetujuan membutuhkan kunci sandi yang berbeda.",
     "pendingHeading": "Transfer menunggu persetujuan",
     "pendingProgress": "{current} dari {total} persetujuan diberikan",
-    "pendingRemoteHint": "Pemegang kunci sandi lain dapat menyetujui dari perangkat mereka sendiri — transfer tetap di sini sampai persetujuannya cukup. Persetujuan terakhir mengirimkannya.",
+    "pendingRemoteHint": "Pemegang passkey lain dapat menyetujui di perangkat mereka. Persetujuan terakhir mengirim transfer.",
     "pendingApprove": "Setujui dengan kunci sandi",
     "pendingApproveAndSend": "Setujui & kirim",
     "pendingCancel": "Batalkan transfer",
-    "pendingInvalid": "Transfer yang menunggu ini tidak lagi valid — dompet berubah sejak dimulai. Batalkan untuk memulai yang baru.",
+    "pendingInvalid": "Transfer tertunda ini tidak lagi valid karena dompet berubah. Batalkan dan mulai lagi.",
     "pendingCancelForbidden": "Hanya orang yang memulai transfer ini atau pengelola dompet yang dapat membatalkannya.",
     "sendStartButton": "Mulai transfer dengan kunci sandi",
-    "sendErrorExpired": "Transfer ini tidak lagi valid — dompet atau biaya jaringan berubah. Silakan mulai lagi.",
+    "sendErrorExpired": "Dompet atau biaya jaringan berubah. Mulai transfer lagi.",
     "sendErrorPendingExists": "Sudah ada transfer yang menunggu persetujuan. Selesaikan atau batalkan dulu.",
     "sendErrorApprovalInvalid": "Persetujuan ini tidak dapat diverifikasi. Silakan coba lagi.",
-    "onchainManageHint": "Dompet ini aktif di blockchain, jadi perubahan kunci sandi dicatat di rantai dan membutuhkan persetujuan seperti biasa. GainForest menanggung biaya jaringan.",
-    "thresholdOnchainHint": "Berapa banyak kunci sandi yang harus menyetujui setiap transfer. Perubahan ini dicatat di blockchain — alamat dompet tetap sama.",
+    "onchainManageHint": "Perubahan blockchain ini memerlukan persetujuan seperti biasa. GainForest menanggung biaya jaringan.",
+    "thresholdOnchainHint": "Pilih berapa passkey yang harus menyetujui setiap transfer. Perubahan blockchain ini mempertahankan alamat dompet yang sama.",
     "manageForbidden": "Hanya pemilik organisasi atau admin yang dapat melakukan perubahan ini."
   },
   "accountSupport": {
@@ -2089,12 +2439,70 @@
       "organization": "Pembaruan organisasi",
       "donation": "Donasi",
       "record": "Entri"
-    }
+    },
+    "confirmTitle": "Tampilkan item ini?",
+    "confirmDescription": "Item dari {name} ini akan kembali ke halaman publik.",
+    "cancel": "Batal"
   },
   "devices": {
     "metadata": {
       "title": "Perangkat Tainá",
       "description": "Pembaruan lapangan dari perangkat GainForest yang menjalankan Tainá, termasuk apakah tiap perangkat aktif dan siap."
+    },
+    "hero": {
+      "imageAlt": "Lanskap regeneratif berkabut dengan peralatan lapangan",
+      "title": "Tainá",
+      "accent": "perangkat lapangan",
+      "lede": "Lihat perangkat lapangan yang aktif dan siap."
+    },
+    "summary": {
+      "online": "{healthy} dari {total} online",
+      "updated": "Diperbarui {time}"
+    },
+    "error": {
+      "title": "Tidak dapat memuat pembaruan lapangan",
+      "body": "Perangkat mungkin masih berfungsi. Coba lagi nanti."
+    },
+    "empty": {
+      "title": "Belum ada perangkat lapangan",
+      "body": "Perangkat akan muncul setelah mengirim pembaruan pertamanya."
+    },
+    "loadingAria": "Memuat pembaruan lapangan",
+    "status": {
+      "up": "Online",
+      "down": "Offline",
+      "grace": "Menunggu",
+      "new": "Baru",
+      "paused": "Dijeda",
+      "started": "Memulai"
+    },
+    "card": {
+      "lastReported": "Laporan terakhir",
+      "never": "Belum pernah",
+      "health": "Kondisi perangkat",
+      "temperature": "Suhu",
+      "memory": "Memori",
+      "storage": "Penyimpanan",
+      "processor": "Prosesor",
+      "uptime": "Waktu aktif",
+      "slow": "Berjalan lambat dan mungkin perlu diperiksa"
+    },
+    "activity": {
+      "title": "Aktivitas Tainá",
+      "saved": "Observasi tersimpan",
+      "oldest": "Terlama {time}",
+      "withPhotos": "Dengan foto",
+      "allowedUsers": "Pengguna yang diizinkan"
+    },
+    "duration": {
+      "daysHours": "{days} h {hours} j",
+      "hoursMinutes": "{hours} j {minutes} mnt",
+      "minutes": "{minutes} mnt"
+    },
+    "notConfigured": {
+      "title": "Pembaruan lapangan belum terhubung",
+      "body": "Pembaruan lapangan tersedia di monitor Tainá terpisah.",
+      "action": "Buka monitor Tainá"
     }
   },
   "bluesky": {
@@ -2125,13 +2533,12 @@
   "epds": {
     "metaTitle": "Cara kerja ePDS",
     "metaDescription": "Tur interaktif tentang ePDS, Personal Data Server yang diperluas sehingga siapa pun bisa bergabung ke jaringan AT Protocol hanya dengan email.",
-    "kicker": "Personal Data Server yang diperluas",
     "title": "Cara kerja ePDS",
-    "lead": "GainForest berjalan di atas AT Protocol, jaringan terbuka di balik Bluesky. Bergabung ke jaringan itu biasanya butuh kata sandi dan pengaturan teknis. ePDS menghapus penghalang itu: Anda mengetik email, menerima kode, dan langsung masuk. Halaman ini menunjukkan cara kerjanya, langkah demi langkah.",
+    "lead": "GainForest menggunakan jaringan AT Protocol. ePDS menambahkan login kode email dan sosial ke Personal Data Server standar, lalu membuat akun pada kunjungan pertama pengguna. Diagram berikut menunjukkan setiap langkah.",
     "whatIs": {
       "heading": "Apa itu PDS, dan apa arti huruf e?",
       "p1": "Di AT Protocol, setiap orang menyimpan datanya di Personal Data Server, atau PDS. Anggap saja rumah pribadi untuk postingan, observasi, dan proyek Anda. Isinya milik Anda, dan Anda bisa pindah ke server lain kapan saja tanpa kehilangan apa pun.",
-      "p2": "ePDS adalah PDS biasa dengan satu tambahan: pintu depan yang ramah. Alih-alih meminta kata sandi, ia memasukkan Anda dengan kode email sekali pakai atau akun sosial, dan membuatkan akun saat kunjungan pertama. Di balik pintu itu semuanya tetap AT Protocol standar, jadi semua aplikasi di jaringan bisa berkomunikasi dengannya."
+      "p2": "ePDS adalah PDS standar dengan login kode email dan sosial. Sistem dapat membuat akun pada kunjungan pertama. Antarmuka AT Protocol tetap standar sehingga aplikasi lain dapat menggunakannya."
     },
     "compare": {
       "heading": "Dua pintu depan",
@@ -2175,11 +2582,11 @@
           "text": "Aplikasi Anda diam-diam meminta PDS memulai proses masuk. Ini permintaan AT Protocol standar, sama seperti yang dilakukan aplikasi Bluesky mana pun."
         },
         "s3": {
-          "title": "PDS membuka pintu depannya",
-          "text": "Inilah trik ePDS. Alih-alih menampilkan formulir kata sandi, PDS mengarahkan peramban Anda ke layanan masuk yang ramah."
+          "title": "PDS mengalihkan ke login",
+          "text": "PDS mengalihkan browser ke layanan login ePDS alih-alih menampilkan formulir kata sandi."
         },
         "s4": {
-          "title": "Kode terbang ke kotak masuk Anda",
+          "title": "Layanan mengirim kode melalui email",
           "text": "Layanan masuk membuat kode sekali pakai dan mengirimkannya lewat email. Kode hanya berlaku sekali dan kedaluwarsa dalam beberapa menit."
         },
         "s5": {
@@ -2191,8 +2598,8 @@
           "text": "Pada kunjungan pertama, ePDS membuatkan akun dan meminta Anda memilih handle, nama publik Anda di jaringan."
         },
         "s7": {
-          "title": "Jabat tangan bertanda tangan",
-          "text": "Layanan masuk memberi tahu PDS bahwa Anda sudah terverifikasi. Pesan itu membawa tanda tangan kriptografis, jadi tidak ada yang bisa memalsukannya."
+          "title": "Layanan menandatangani hasil",
+          "text": "Layanan login mengirim hasil terverifikasi ke PDS dengan tanda tangan kriptografis. PDS menolak hasil tanpa tanda tangan atau tidak valid."
         },
         "s8": {
           "title": "Kembali ke aplikasi Anda",
@@ -2250,17 +2657,16 @@
   "epdsRouter": {
     "metaTitle": "Cara kerja router ePDS",
     "metaDescription": "Panduan interaktif router ePDS: bagaimana aplikasi menemukan akun yang tepat untuk masuk dengan email di antara banyak server. Tuan rumah hanya membagikan sidik jari satu arah, tidak pernah kredensial atau alamat.",
-    "kicker": "penemuan email ke akun",
     "title": "Satu email, banyak server",
-    "lead": "ePDS memungkinkan Anda masuk hanya dengan email. Ketika sebuah komunitas menjalankan beberapa server, aplikasi perlu lebih dulu menjawab pertanyaan kecil: akun mana yang ada untuk email ini? Router menjawabnya dalam satu panggilan. Tidak ada yang menyerahkan alamat atau kata sandi.",
+    "lead": "Saat komunitas menjalankan beberapa server ePDS, aplikasi harus menemukan akun yang cocok dengan email sebelum login. Router mengembalikan identitas akun permanen yang cocok dalam satu permintaan terautentikasi. Router tidak menyimpan alamat email atau kata sandi.",
     "facts": {
       "routing": {
         "title": "Satu pencarian, akun yang tepat",
         "text": "Aplikasi bertanya sekali dan tahu akun mana yang ada untuk email itu. Setiap jawaban adalah identitas yang selalu bisa ditemukan jaringan, bahkan setelah pindah server."
       },
       "privacy": {
-        "title": "Email tidak pernah disimpan",
-        "text": "Alamat diacak di servernya sendiri sebelum apa pun keluar dari sana. Router hanya melihat sidik jari, dan mengacaknya lagi sebelum menyimpan."
+        "title": "Alamat email tidak disimpan",
+        "text": "Setiap host mengubah alamat email menjadi sidik satu arah sebelum mengirimkannya. Router mengubah sidik itu lagi sebelum penyimpanan."
       },
       "zerochange": {
         "title": "Tuan rumah tetap memegang kendali",
@@ -2270,7 +2676,7 @@
     "problem": {
       "heading": "Mengapa penemuan diperlukan",
       "p1": "Aplikasi dengan masuk lewat email harus mengirim login ke satu server tertentu. Server itu mengirim kode dan menyimpan akun. Dengan satu server jawabannya tetap. Dengan beberapa server aplikasi butuh direktori. Alamat email adalah jenis data yang tidak ingin Anda salin ke satu daftar besar.",
-      "p2": "Router menyelesaikannya dengan trik kecil: ia hanya bekerja dengan sidik jari. Setiap server mengacak alamatnya satu arah di rumah dan tidak membagikan apa pun lagi. Setiap pencarian mengacak email yang masuk dengan cara yang sama lalu membandingkan sidik jarinya. Jawaban sama, tanpa buku alamat, dan tidak ada yang menyerahkan kuncinya."
+      "p2": "Setiap host membuat sidik satu arah dari alamat email dan hanya mengirim sidik itu ke router. Pencarian menerapkan proses yang sama dan membandingkan hasil. Router tidak menyimpan buku alamat atau menerima kredensial host."
     },
     "demo": {
       "heading": "Coba sebuah pencarian",
@@ -2324,7 +2730,7 @@
     },
     "sync": {
       "heading": "Bagaimana router tetap mutakhir",
-      "intro": "Tidak ada yang diserahkan: tiap tuan rumah mendorong potretnya sendiri, dengan pewaktu pilihannya.",
+      "intro": "Setiap host mengirim snapshot lengkapnya sesuai jadwal yang dikendalikan sendiri. Tidak ada kredensial host yang dikirim ke router.",
       "play": "Putar",
       "pause": "Jeda",
       "back": "Kembali",
@@ -2395,13 +2801,12 @@
   "cgs": {
     "metaTitle": "Cara kerja akun grup",
     "metaDescription": "Tur interaktif tentang Certified Group Service, penjaga yang memungkinkan satu tim berbagi satu akun AT Protocol dengan peran, aturan yang jelas, dan jejak audit lengkap.",
-    "kicker": "Certified Group Service",
     "title": "Cara kerja akun grup",
-    "lead": "Di AT Protocol, sebuah akun biasanya milik satu orang saja. Tapi hutan dipetakan oleh tim. Certified Group Service, disingkat CGS, memungkinkan satu tim berbagi satu akun dengan aman, dengan peran, aturan yang jelas, dan ingatan atas semua yang terjadi. Halaman ini menunjukkan cara kerjanya, langkah demi langkah.",
+    "lead": "Akun AT Protocol biasanya dimiliki satu orang. Certified Group Service (CGS) memungkinkan tim berbagi satu akun dengan peran anggota, pemeriksaan izin, dan log audit.",
     "whatIs": {
       "heading": "Apa itu akun grup?",
       "p1": "Setiap organisasi di GainForest tinggal di akun AT Protocol biasa. Akun biasa punya satu kata sandi dan satu pemilik. Itu cukup untuk satu orang, tapi tim butuh lebih: banyak orang menulis ke tempat yang sama, tanpa saling mengoper kata sandi akun.",
-      "p2": "CGS adalah layanan penjaga kecil yang berdiri di depan akun grup. Ia menyimpan kredensial akun dalam kotak tersegel, memegang daftar anggota dengan peran, dan memeriksa setiap permintaan terhadap aturan sebelum meloloskannya. Anggota tim tidak pernah melihat kata sandi. Bagi jaringan lainnya, grup terlihat seperti satu akun biasa, jadi aplikasi mana pun bisa membaca datanya seperti biasa."
+      "p2": "CGS menyimpan kredensial akun grup, memeriksa peran setiap anggota, dan mencatat setiap permintaan sebelum menulis ke PDS grup. Anggota tidak pernah menerima kata sandi akun. Aplikasi jaringan lain tetap membaca grup sebagai akun AT Protocol standar."
     },
     "repo": {
       "heading": "Satu akun, banyak tangan",
@@ -2563,7 +2968,7 @@
       },
       "vault": {
         "title": "Kredensial tetap tersegel",
-        "text": "Layanan hanya menyimpan kata sandi aplikasi — kunci cadangan, bukan kata sandi utama akun. Ia disimpan terenkripsi, dan siapa pun yang memegang kredensial asli akun bisa mencabut akses layanan kapan saja. Sebaliknya tidak mungkin."
+        "text": "Layanan hanya menyimpan kata sandi aplikasi terenkripsi. Pemegang kredensial utama dapat mencabutnya kapan saja; layanan tidak dapat mencabut kredensial utama."
       },
       "log": {
         "title": "Tidak ada yang luput",
@@ -2585,9 +2990,8 @@
   "atproto": {
     "metaTitle": "Cara kerja AT Protocol",
     "metaDescription": "Tur interaktif yang ramah tentang AT Protocol, jaringan terbuka tempat GainForest dibangun. Lihat bagaimana identitas, rekaman, dan aplikasi saling terhubung.",
-    "kicker": "AT Protocol",
     "title": "Cara kerja AT Protocol",
-    "lead": "GainForest tidak menyimpan datamu di basis data tertutup. Semuanya hidup di AT Protocol, jaringan terbuka tempat orang memiliki datanya sendiri dan banyak aplikasi berbagi data itu. Halaman ini menjelaskan ide-ide besarnya dengan bahasa sederhana, lengkap dengan mainan kecil untuk dicoba.",
+    "lead": "GainForest menyimpan catatan di AT Protocol, jaringan terbuka tempat pengguna mengendalikan data dan aplikasi dapat membagikannya. Diagram berikut menunjukkan hubungan identitas, catatan, dan aplikasi.",
     "whatIs": {
       "heading": "Apa itu AT Protocol?",
       "p1": "AT Protocol, disingkat atproto, adalah resep untuk membangun aplikasi sosial di mana data milik orang, bukan milik platform. Setiap orang dan setiap organisasi punya akun, dan setiap akun punya server data yang menyimpan rekamannya. Kiriman, suka, ikuti, observasi keanekaragaman hayati: masing-masing adalah rekaman kecil yang ditandatangani.",
@@ -2654,7 +3058,7 @@
     },
     "move": {
       "heading": "Kamu selalu bisa pindah",
-      "intro": "Nama dan datamu tidak menempel di perusahaan mana pun. Kalau servermu jadi lambat, serakah, atau hilang, kamu tinggal berkemas dan pergi. Coba saja.",
+      "intro": "Identitas dan catatan Anda tidak terikat pada satu penyedia. Jika host tidak dapat diandalkan atau berhenti, Anda dapat memindahkannya ke host lain.",
       "hostA": "Server lama",
       "hostB": "Server baru",
       "emptyHost": "kosong",
@@ -2752,17 +3156,15 @@
   "walletExplainer": {
     "metaTitle": "Anatomi dompet donasi: esai interaktif",
     "metaDescription": "Tumbuhkan kunci nyata pada kurva kunci sandi di browser Anda, turunkan alamat brankas sungguhan dengan matematika pabriknya sendiri, dan mainkan perjalanan hidup sebuah donasi. Esai interaktif tentang dompet donasi GainForest.",
-    "kicker": "Esai interaktif",
     "title": "Anatomi dompet donasi",
-    "standfirst": "Setiap organisasi di GainForest dapat menyimpan donasi di dompet tanpa kata sandi, tanpa frasa benih, dan tanpa perusahaan yang memegang kunci. Halaman ini tidak sekadar menjelaskan cara kerjanya. Halaman ini membiarkan Anda menjalankan mesinnya sendiri, langsung di browser Anda.",
+    "standfirst": "Gunakan eksperimen berikut untuk membuat kunci P-256, memperoleh alamat vault deterministik, dan memverifikasi cara kerja dompet donasi GainForest.",
     "intro": {
       "p1": "Saat seorang pendukung mendanai restorasi bakau atau survei burung, uangnya mendarat di brankas kecil di Ethereum. Brankas itu tidak punya operator dan tidak punya meja bantuan. Ia patuh pada tepat satu hal: tanda tangan kriptografis dari ponsel dan laptop orang-orang yang menjalankan proyek.",
-      "p2": "Tiga gagasan membuatnya mungkin. Kunci yang tumbuh di dalam perangkat Anda dan tidak pernah keluar darinya. Alamat yang bisa dihitung sebelum dompetnya ada. Dan kontrak yang memeriksa tanda tangan sidik jari dengan matematika murni. Mari kita bangun satu per satu, secara langsung."
+      "p2": "Dompet menggunakan tiga mekanisme: kunci perangkat yang tidak dapat diekspor, alamat yang diturunkan sebelum penerapan, dan kontrak yang memverifikasi tanda tangan P-256. Eksperimen berikut menunjukkan setiap mekanisme."
     },
     "part1": {
-      "label": "Eksperimen langsung",
       "heading": "Sebuah kunci tumbuh di ponsel Anda",
-      "p1": "Di balik setiap permintaan Face ID ada kriptografi tua yang indah: sepasang kunci kurva eliptik pada kurva bernama P-256. Perangkat Anda mengarang bilangan acak yang sangat besar, menguncinya di dalam chip aman, dan hanya menyerahkan titik publik pasangannya: dua koordinat, x dan y.",
+      "p1": "Passkey menggunakan pasangan kunci kurva eliptik P-256. Perangkat menghasilkan nilai privat acak, menyimpannya di perangkat keras aman, dan hanya menampilkan koordinat x dan y titik publik.",
       "p2": "Browser Anda bisa melakukan hal yang sama detik ini juga. Tekan tombol di bawah dan ia akan menumbuhkan kunci baru pada kurva yang persis sama. Bagian privatnya lahir dengan aturan ketat: boleh menandatangani, dan tidak boleh diekspor. Halaman ini pun tidak bisa membacanya.",
       "p3": "Dua koordinat itu adalah semua yang pernah diketahui dompet tentang Anda. Kontrak menyimpannya sebagai sepasang slot 32 byte dan, saat uang harus bergerak, menuntut tanda tangan yang hanya bisa dibuat oleh bagian yang terkunci. Anda baru saja melihat browser Anda lolos pemeriksaan yang persis sama."
     },
@@ -2784,9 +3186,8 @@
       "privacyNote": "Tidak ada yang disimpan dan tidak ada yang dikirim ke mana pun. Muat ulang halaman dan kunci ini hilang selamanya."
     },
     "part2": {
-      "label": "Eksperimen langsung",
       "heading": "Alamat yang terbuat dari aritmetika",
-      "p1": "Inilah sifat paling aneh dari seluruh sistem: alamat dompet ada sebelum dompetnya ada. Tanpa transaksi, tanpa pemasangan, tanpa pendaftaran di mana pun. Alamat hanyalah jawaban dari sebuah perhitungan, dan siapa pun yang tahu bahan-bahannya mendapat jawaban yang sama.",
+      "p1": "Alamat dompet dapat dihitung sebelum kontrak dompet diterapkan. Input yang sama selalu menghasilkan alamat yang sama.",
       "p2": "Resepnya punya empat bahan: slot pemilik yang selamanya kosong, daftar kunci penandatangan, ambang persetujuan, dan garam yang di-hash dari identitas organisasi. Kontrak pabrik mengaduknya dengan keccak256 dan aturan CREATE2. Coba di bawah. Ketik sebuah nama dan lihat setiap digit alamat bereaksi.",
       "p3": "Karena itulah tidak ada yang harus memercayai GainForest soal alamat mana milik organisasi mana. Organisasi menerbitkan bahan-bahannya sebagai catatan publik di akunnya sendiri. Ragu pada sebuah label? Ulangi aritmetikanya, seperti yang baru Anda lakukan, lalu bandingkan."
     },
@@ -2807,9 +3208,8 @@
       "footnote": "Alamat pabrik dan hash kode proxy di atas adalah nilai asli jaringan utama Ethereum, dan turunan ini cocok dengan fungsi getAddress milik pabrik itu sendiri. Setiap hash di bangku ini dihitung oleh browser Anda."
     },
     "part3": {
-      "label": "Membaca sumbernya",
       "heading": "Kontraknya, beranotasi",
-      "p1": "Brankas ini adalah akun pintar Splits: sumber terbuka, teraudit, dan dibangun di atas rancangan Coinbase dan Daimo. Anda tidak perlu memercayai kata-kata esai ini. Berikut tiga bagian yang memikul bebannya, masing-masing dengan catatan tentang artinya.",
+      "p1": "Vault adalah akun pintar Splits berdasarkan desain sumber terbuka yang diaudit oleh Coinbase dan Daimo. Cuplikan berikut menunjukkan logika penanda tangan, salt, dan verifikasi P-256.",
       "p2": "Satu sifat lagi lahir dari rancangan ini. Pabrik memasang dengan CREATE2, jadi bahan yang sama menghasilkan alamat yang sama di setiap rantai tempat pabrik itu ada. Alamat sebuah organisasi portabel di seluruh dunia EVM."
     },
     "contract": {
@@ -2818,9 +3218,8 @@
       "webauthnNote": "Begini rantai memeriksa tanda tangan Face ID: ia mencoba dulu pemverifikasi bawaan di alamat 0x100 dan, di rantai yang tidak memilikinya, memverifikasi persamaan kurva langkah demi langkah lewat pustaka."
     },
     "part4": {
-      "label": "Alur main",
       "heading": "Perjalanan hidup sebuah donasi",
-      "p1": "Satukan kepingannya dan muncul urutan yang menarik. Seorang pendukung bisa mengirim uang ke alamat itu sejak hari pertama, saat alamat itu masih bukan apa-apa kecuali jawaban eksperimen 2. Rantai tidak keberatan. Saldo milik alamat, dan alamat ini sama nyatanya dengan alamat mana pun.",
+      "p1": "Pendukung dapat mengirim dana ke alamat turunan sebelum kontrak vault diterapkan. Saldo tetap di alamat itu hingga pembayaran pertama menerapkan kontrak.",
       "p2": "Entri terakhir menutup lingkarannya. Sebelum pemasangan, daftar penandatangan masih bisa berubah, dan catatan tinggal menunjuk ke alamat yang baru dihitung. Sesudahnya catatan membeku dan brankas mengambil alih: menambah perangkat menjadi aksi di rantai, disetujui oleh kunci yang sudah ada di daftar."
     },
     "ledger": {
@@ -2865,10 +3264,53 @@
     "epilogue": {
       "heading": "Periksa labelnya sendiri",
       "p1": "Setiap klaim di halaman ini bisa diperiksa. Resep dompet ada di akun organisasi sendiri sebagai catatan publik. Pabriknya ada di alamat yang sama di Ethereum. Ambil catatannya, jalankan eksperimen 2 dengan bahan persisnya, dan alamatnya cocok atau tidak cocok. Tanpa tanda tangan, tanpa otoritas, dan tanpa perlu memercayai situs ini.",
-      "p2": "Catatan jujurnya: jika semua kunci di daftar hilang, uangnya tidak bisa bergerak, jadi organisasi sebaiknya mendaftarkan perangkat kedua sejak awal. Dan sampai pembayaran pertama, mengubah daftar penandatangan mengubah alamat, jadi daftar itu sebaiknya mantap dulu sebelum donasi diarahkan ke sana.",
+      "p2": "Jika semua kunci terdaftar hilang, dana tidak dapat dipindahkan, jadi organisasi sebaiknya mendaftarkan perangkat kedua sejak awal. Sebelum pembayaran pertama, mengubah daftar penanda tangan juga mengubah alamat; tetapkan daftar sebelum mengarahkan donasi.",
       "contractLink": "Baca kontrak brankas pintar di GitHub",
       "lexiconLink": "Skema catatan dompet, dan semua skema lainnya",
       "atprotoLink": "Cara AT Protocol menyimpan catatannya"
+    }
+  },
+  "coreDashboard": {
+    "metadata": {
+      "title": "Ikhtisar platform",
+      "description": "Total terkini untuk proyek, organisasi, dan observasi GainForest."
+    },
+    "hero": {
+      "imageAlt": "Lanskap hutan yang mewakili aktivitas GainForest",
+      "title": "Platform",
+      "accent": "secara ringkas",
+      "lede": "Total terkini untuk proyek, organisasi, dan observasi."
+    },
+    "observations": {
+      "total": "Penampakan alam yang dibagikan",
+      "withPhotos": "Penampakan dengan foto",
+      "recent": "Penampakan dalam 30 hari terakhir",
+      "mapped": "Penampakan dengan lokasi"
+    },
+    "sections": {
+      "stories": {
+        "title": "Cerita proyek",
+        "description": "Cerita proyek yang diterbitkan dan buktinya."
+      },
+      "organizations": {
+        "title": "Organisasi",
+        "description": "Profil publik, tempat, dan aktivitas."
+      },
+      "observations": {
+        "title": "Observasi",
+        "description": "Penampakan, foto, dan lokasi yang dibagikan."
+      },
+      "projects": {
+        "title": "Proyek",
+        "description": "Koleksi proyek dan cerita yang diterbitkan."
+      }
+    },
+    "loadError": "Kami tidak dapat memuat angka ini. Coba lagi nanti."
+  },
+  "authComplete": {
+    "metadata": {
+      "title": "Menyelesaikan proses masuk",
+      "description": "Pilih cara melanjutkan di GainForest."
     }
   }
 }

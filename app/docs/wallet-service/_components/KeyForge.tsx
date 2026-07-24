@@ -72,8 +72,8 @@ export function KeyForge() {
   };
 
   return (
-    <figure className="my-8 rounded-md border border-border bg-muted/20">
-      <figcaption className="flex items-center gap-2 border-b border-border px-4 py-2.5 font-mono text-[11px] uppercase tracking-[0.12em] text-muted-foreground">
+    <figure className="my-8 rounded-xl border border-border bg-muted">
+      <figcaption className="flex items-center gap-2 border-b border-border px-4 py-2.5 text-xs font-medium text-muted-foreground">
         <SparklesIcon className="h-3.5 w-3.5 text-primary" />
         {t("bench")}
       </figcaption>
@@ -96,8 +96,8 @@ export function KeyForge() {
           <div className="flex flex-col gap-3">
             {/* The secure-chip side: the half that never leaves. */}
             <div className="grid gap-3 sm:grid-cols-2">
-              <div className="rounded-md border border-dashed border-border bg-background px-4 py-3">
-                <div className="mb-1.5 flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-[0.1em] text-muted-foreground">
+              <div className="rounded-md bg-muted/50 px-4 py-3">
+                <div className="mb-1.5 flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
                   <LockKeyholeIcon className="h-3 w-3" />
                   {t("privateLabel")}
                 </div>
@@ -107,8 +107,8 @@ export function KeyForge() {
                 <p className="m-0 mt-1.5 text-[11.5px] leading-snug text-muted-foreground">{t("privateNote")}</p>
               </div>
 
-              <div className="rounded-md border border-primary/40 bg-primary/5 px-4 py-3">
-                <div className="mb-1.5 flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-[0.1em] text-primary">
+              <div className="rounded-md bg-primary/10 px-4 py-3">
+                <div className="mb-1.5 flex items-center gap-1.5 text-xs font-medium text-primary">
                   <CpuIcon className="h-3 w-3" />
                   {t("publicLabel")}
                 </div>
@@ -119,10 +119,10 @@ export function KeyForge() {
             </div>
 
             {/* Sign + verify a sample payment, like an approval would. */}
-            <div className="rounded-md border border-border bg-background px-4 py-3">
+            <div className="rounded-md bg-background px-4 py-3">
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <div className="min-w-0">
-                  <div className="font-mono text-[10px] uppercase tracking-[0.1em] text-muted-foreground">
+                  <div className="text-xs font-medium text-muted-foreground">
                     {t("messageLabel")}
                   </div>
                   <div className="mt-0.5 font-mono text-[12.5px] text-foreground">“{sampleMessage}”</div>
@@ -154,7 +154,7 @@ export function KeyForge() {
                       <SlotRow name="r" value={signature.r} />
                       <SlotRow name="s" value={signature.s} />
                       <div
-                        className={`mt-1.5 inline-flex items-center gap-1.5 font-mono text-[11px] uppercase tracking-[0.08em] ${signature.valid ? "text-primary" : "text-destructive"}`}
+                        className={`mt-1.5 inline-flex items-center gap-1.5 text-xs font-medium ${signature.valid ? "text-primary" : "text-destructive"}`}
                       >
                         <CheckCircle2Icon className="h-3.5 w-3.5" />
                         {signature.valid ? t("verified") : t("failed")}

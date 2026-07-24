@@ -17,7 +17,7 @@ const PERIODS: Period[] = ["all", "month", "week"];
 const QUERY_STATE_OPTIONS = { history: "replace", scroll: false, shallow: true } as const;
 
 const PILL_GROUP =
-  "flex items-center gap-1 rounded-full bg-muted/55 p-1 shadow-sm shadow-primary/5 ring-1 ring-foreground/5 backdrop-blur";
+  "flex items-center gap-1 rounded-full bg-muted p-1";
 
 // Single donations surface: one hero shared by both views, with the view
 // switcher and period filter sitting in the hero's action slot (the same place
@@ -41,25 +41,23 @@ export function DonationsHub() {
   const isLeaderboard = view === "leaderboard";
 
   return (
-    <section className="-mt-14 bg-background pb-20 md:pb-28">
+    <section className="-mt-14 bg-background pb-6 md:pb-8">
       <PictureHero
         lightSrc="/assets/media/images/donations/donations-hero-light@2x.webp"
         darkSrc="/assets/media/images/donations/donations-hero-dark@2x.webp"
         imageAlt={heroT("imageAlt")}
-        eyebrow={heroT("eyebrow")}
-        icon={<BarChart3Icon />}
         title={heroT("title")}
         accent={tabsT(view)}
         lede={isLeaderboard ? leaderboardT("description") : heroT("lede")}
         actions={
-          <div className="flex flex-col gap-2.5 sm:flex-row sm:items-center lg:flex-col lg:items-end">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center lg:flex-col lg:items-end">
             <DonationsViewToggle view={view} onChange={(next) => void setView(next)} />
             <PeriodFilter period={period} onChange={(next) => void setPeriod(next)} />
           </div>
         }
       />
 
-      <div className="relative z-10 mx-auto max-w-6xl px-6 pt-6">
+      <div className="relative z-10 mx-auto max-w-6xl px-3 pt-6 sm:px-5 lg:px-8">
         {isLeaderboard ? <LeaderboardBody period={period} /> : <DashboardBody period={period} />}
       </div>
     </section>
@@ -85,7 +83,7 @@ function DonationsViewToggle({ view, onChange }: { view: DonationsView; onChange
             aria-selected={active}
             onClick={() => onChange(tab.id)}
             className={cn(
-              "inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-sm font-medium transition-all duration-200",
+              "inline-flex min-h-11 items-center gap-2 rounded-full px-4 py-2 text-sm font-medium transition-all duration-200 sm:min-h-10",
               active
                 ? "bg-primary text-primary-foreground shadow-sm shadow-primary/20"
                 : "text-muted-foreground hover:bg-muted/50 hover:text-foreground",
@@ -114,7 +112,7 @@ function PeriodFilter({ period, onChange }: { period: Period; onChange: (period:
             aria-pressed={active}
             onClick={() => onChange(item)}
             className={cn(
-              "rounded-full px-3.5 py-1.5 text-sm font-medium transition-all duration-200",
+              "min-h-11 rounded-full px-3 py-2 text-sm font-medium transition-all duration-200 sm:min-h-10",
               active
                 ? "bg-primary text-primary-foreground shadow-sm shadow-primary/20"
                 : "text-muted-foreground hover:bg-muted/50 hover:text-foreground",

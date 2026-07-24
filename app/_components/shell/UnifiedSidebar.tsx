@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { LayoutGroup, motion } from "framer-motion";
+import { AnimatePresence, LayoutGroup, MotionConfig, motion } from "framer-motion";
 import {
   BinocularsIcon,
   Building2Icon,
@@ -11,13 +11,13 @@ import {
   ChevronLeftIcon,
   LeafIcon,
   LayoutGridIcon,
-  PlusIcon,
   SparkleIcon,
   UserIcon,
 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import packageJson from "@/package.json";
 import { Button, buttonVariants } from "@/components/ui/button";
+import { BrandWord } from "@/components/ui/typography";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 import { LanguageSelector } from "@/components/i18n/LanguageSelector";
@@ -30,6 +30,7 @@ import {
 } from "../../_lib/account-switcher";
 import { AdminOnlyIndicator } from "../AdminOnlyIndicator";
 import { SignInPrompt } from "../AuthFlow";
+import { NotificationBell } from "../NotificationBell";
 import { NAV_ITEMS, isLeafActive, type NavLeaf } from "./nav-config";
 import { useCanonicalPathname } from "./paths";
 import { SidebarCollapsedProvider, SidebarTooltip, useSidebarCollapsed } from "./sidebar-context";
@@ -47,9 +48,10 @@ export function UnifiedSidebar({
 }) {
   return (
     <SidebarCollapsedProvider value={collapsed}>
+    <MotionConfig reducedMotion="user">
     <nav
       className={cn(
-        "relative isolate z-30 flex h-full flex-col border-r border-border bg-foreground/3 transition-[width,padding] duration-300 ease-[cubic-bezier(0.25,0.1,0.25,1)] motion-reduce:transition-none",
+        "relative isolate z-30 flex h-full flex-col border-r border-border bg-muted transition-[width,padding] duration-300 ease-[cubic-bezier(0.25,0.1,0.25,1)] motion-reduce:transition-none",
         collapsed ? "w-[76px] overflow-visible p-3" : "w-[256px] overflow-hidden p-4",
       )}
     >
@@ -57,29 +59,34 @@ export function UnifiedSidebar({
         aria-hidden="true"
         className="pointer-events-none absolute inset-x-0 bottom-0 -z-10 h-108 overflow-hidden"
       >
-        {/* Ambient glow */}
         <div className="absolute -bottom-24 left-1/2 h-56 w-[160%] -translate-x-1/2 rounded-[50%] bg-primary/20 blur-3xl" />
         <div className="absolute bottom-0 left-1/3 h-32 w-32 -translate-x-1/2 rounded-full bg-primary/[0.12] blur-2xl" />
-        {/* Climbing-vine line art that bleeds off the bottom edge */}
         <ExploreArt />
       </div>
 
       <SidebarHeader />
 
-      <div className="mt-3 border-t border-border" />
+      {/* Single spacing owner around the hairline: equal 16px above and below,
+          so the brand header, the divider, and the profile row read evenly. */}
+      <div className="my-4 border-t border-border" />
 
-      <div className={cn("flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto pt-3", collapsed ? "overflow-x-hidden" : "pr-1")}>
-        {authSession?.isLoggedIn ? <SidebarProfileRow did={authSession.did} /> : null}
+      <div className={cn("flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto [scrollbar-width:thin]", collapsed ? "overflow-x-hidden" : "pr-1")}>
+        {authSession?.isLoggedIn ? (
+          // Account zone: who you're posting as, with the notification bell at
+          // the row's end so it reads as one "you" region. The collapsed rail
+          // has no room for a side-by-side bell, so it stacks below the avatar.
+          <div className={cn("flex", collapsed ? "flex-col items-center gap-1" : "items-center gap-1")}>
+            <SidebarProfileRow did={authSession.did} />
+            <NotificationBell session={authSession} variant="sidebar" />
+          </div>
+        ) : null}
         <LayoutGroup id="unified-sidebar-nav">
           <ExploreNav sessionDid={authSession?.isLoggedIn ? authSession.did : null} />
         </LayoutGroup>
 
         <div className="mt-auto flex flex-col gap-3 pt-4">
           {authSession?.isLoggedIn ? (
-            <>
-              <BumicertCreationCard sessionDid={authSession.did} />
-              <AddObservationsCard sessionDid={authSession.did} />
-            </>
+            <CreationHubCard sessionDid={authSession.did} />
           ) : (
             <SignInPrompt collapsed={collapsed} />
           )}
@@ -90,6 +97,7 @@ export function UnifiedSidebar({
         <SocialFooter />
       </div>
     </nav>
+    </MotionConfig>
     </SidebarCollapsedProvider>
   );
 }
@@ -109,7 +117,9 @@ export function SidebarCollapseToggle({ collapsed, onToggle }: { collapsed: bool
             aria-expanded={!collapsed}
             className="absolute -right-3 top-7 z-40 grid size-6 place-items-center rounded-full border border-border bg-background text-muted-foreground shadow-sm transition-colors hover:border-primary/40 hover:text-primary hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
           >
-            <ChevronLeftIcon className={cn("size-3.5 transition-transform duration-300 motion-reduce:transition-none", collapsed && "rotate-180")} />
+            <span className="grid place-items-center">
+              <ChevronLeftIcon className={cn("size-3.5 transition-transform duration-300 motion-reduce:transition-none", collapsed && "rotate-180")} />
+            </span>
           </button>
         </TooltipTrigger>
         <TooltipContent side="right" sideOffset={8}>
@@ -147,8 +157,10 @@ function SidebarProfileRow({ did }: { did: string }) {
         aria-label={collapsed ? name : t("viewProfile")}
         className={cn(
           buttonVariants({ variant: "ghost" }),
-          "group w-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50",
-          collapsed ? "h-auto justify-center px-0 py-1.5" : "h-auto justify-start gap-2.5 px-2 py-1.5",
+          "group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50",
+          // Expanded: take the row's free space so the notification bell can sit
+          // at the end. Collapsed: full width to center the avatar in the rail.
+          collapsed ? "h-auto w-full justify-center px-0 py-1.5" : "h-auto min-w-0 flex-1 justify-start gap-2.5 px-2 py-1.5",
         )}
       >
         <span
@@ -227,82 +239,99 @@ function ExploreNav({ sessionDid }: { sessionDid: string | null }) {
   const showMore = moreOpen;
   let leafIndex = 0;
 
-  const renderSections = (items: typeof sections, showSectionLabels: boolean) =>
-    items.map((section, sectionIndex) => (
-      <div key={section.id} className="flex flex-col gap-0.5">
-        {showSectionLabels && !collapsed ? (
-          <p className="px-2.5 pb-1 pt-1 text-[10px] font-medium uppercase tracking-[0.12em] text-muted-foreground">
-            {sectionsT(section.id)}
-          </p>
-        ) : collapsed && sectionIndex > 0 ? (
-          <div aria-hidden className="mx-auto my-1 h-px w-6 rounded-full bg-border" />
-        ) : null}
-        <ul className="flex flex-col gap-0.5">
-          {section.items.map((item) => {
-            leafIndex += 1;
-            return (
-              <NavLeafRow
-                key={item.id}
-                item={{ ...item, text: t(item.id) }}
-                isActive={isLeafActive(item.pathCheck, pathname)}
-                index={leafIndex}
-              />
-            );
-          })}
-        </ul>
-      </div>
-    ));
+  const renderSections = (items: typeof sections, showSectionLabels: boolean, allowGrid = false, animateItems = true) =>
+    items.map((section) => {
+      // The Explore group is the everyday entry point (Feed · Projects ·
+      // Observations · Globe); a 2×2 grid of icon tiles reads as a launcher
+      // rather than a plain list. Collapsed rail and the "More" overflow keep
+      // the compact row layout.
+      const asGrid = allowGrid && section.id === "explore" && !collapsed;
+      return (
+        <div key={section.id} className="flex flex-col gap-0.5">
+          {showSectionLabels && !collapsed ? (
+            <div className="px-2.5 py-1 text-xs font-medium text-muted-foreground">
+              {sectionsT(section.id)}
+            </div>
+          ) : null}
+          {asGrid ? (
+            <ul className="grid grid-cols-2 gap-2 px-0.5 pb-0.5 pt-0.5">
+              {section.items.map((item) => {
+                leafIndex += 1;
+                return (
+                  <NavLeafTile
+                    key={item.id}
+                    item={{ ...item, text: t(item.id) }}
+                    isActive={isLeafActive(item.pathCheck, pathname)}
+                    index={leafIndex}
+                    animate={animateItems}
+                  />
+                );
+              })}
+            </ul>
+          ) : (
+            <ul className="flex flex-col gap-1">
+              {section.items.map((item) => {
+                leafIndex += 1;
+                return (
+                  <NavLeafRow
+                    key={item.id}
+                    item={{ ...item, text: t(item.id) }}
+                    isActive={isLeafActive(item.pathCheck, pathname)}
+                    index={leafIndex}
+                    animate={animateItems}
+                  />
+                );
+              })}
+            </ul>
+          )}
+        </div>
+      );
+    });
 
   return (
-    <div className="flex flex-col gap-1">
-      {renderSections(primarySections, true)}
+    // 16px between nav groups (Explore ↔ Funding ↔ More); design.md §3.A group gap.
+    <div className="flex flex-col gap-4">
+      {renderSections(primarySections, true, true)}
       {secondarySections.length > 0 ? (
-        <div className="mt-1 border-t border-border/70 pt-1">
-          {!showMore ? (
-            <SidebarTooltip label={sidebarT("more")}>
-              <button
-                type="button"
-                onClick={() => setMoreOpen(true)}
-                aria-expanded={false}
-                className={cn(
-                  buttonVariants({ variant: "ghost" }),
-                  "h-8 w-full text-muted-foreground hover:text-foreground",
-                  collapsed ? "justify-center px-0" : "justify-start gap-2.5 px-2.5",
-                )}
+        <div className="border-t border-border/70 pt-2">
+          {/* Single toggle whose chevron rotates; the extra destinations reveal
+              with a smooth height/opacity animation instead of snapping in. */}
+          <SidebarTooltip label={showMore ? sidebarT("hideMore") : sidebarT("more")}>
+            <button
+              type="button"
+              onClick={() => setMoreOpen((open) => !open)}
+              aria-expanded={showMore}
+              className={cn(
+                buttonVariants({ variant: "ghost" }),
+                "h-8 w-full text-muted-foreground hover:text-foreground",
+                collapsed ? "justify-center px-0" : "justify-start gap-2.5 px-2.5",
+              )}
+            >
+              <span className="flex size-6 shrink-0 items-center justify-center">
+                <LayoutGridIcon className="size-4" />
+              </span>
+              {collapsed ? null : (
+                <>
+                  <span className="flex-1 text-left">{showMore ? sidebarT("hideMore") : sidebarT("more")}</span>
+                  <ChevronDownIcon className={cn("size-3.5 transition-transform duration-300 motion-reduce:transition-none", showMore && "rotate-180")} />
+                </>
+              )}
+            </button>
+          </SidebarTooltip>
+          <AnimatePresence initial={false}>
+            {showMore && !collapsed ? (
+              <motion.div
+                key="more-content"
+                initial={{ height: 0, opacity: 0 }}
+                animate={{ height: "auto", opacity: 1 }}
+                exit={{ height: 0, opacity: 0 }}
+                transition={{ duration: 0.25, ease: [0.25, 0.1, 0.25, 1] }}
+                className="overflow-hidden"
               >
-                <span className="flex size-6 shrink-0 items-center justify-center">
-                  <LayoutGridIcon className="size-4" />
-                </span>
-                {collapsed ? null : (
-                  <>
-                    <span className="flex-1 text-left">{sidebarT("more")}</span>
-                    <ChevronDownIcon className="size-3.5" />
-                  </>
-                )}
-              </button>
-            </SidebarTooltip>
-          ) : (
-            <>
-              <div className="flex flex-col gap-2">{renderSections(secondarySections, true)}</div>
-              <SidebarTooltip label={sidebarT("hideMore")}>
-                <button
-                  type="button"
-                  onClick={() => setMoreOpen(false)}
-                  aria-expanded={true}
-                  className={cn(
-                    buttonVariants({ variant: "ghost" }),
-                    "mt-1 h-8 w-full text-muted-foreground hover:text-foreground",
-                    collapsed ? "justify-center px-0" : "justify-start gap-2.5 px-2.5",
-                  )}
-                >
-                  <span className="flex size-6 shrink-0 items-center justify-center">
-                    <ChevronDownIcon className="size-4 rotate-180" />
-                  </span>
-                  {collapsed ? null : <span className="flex-1 text-left">{sidebarT("hideMore")}</span>}
-                </button>
-              </SidebarTooltip>
-            </>
-          )}
+                <div className="flex flex-col gap-4 pt-2">{renderSections(secondarySections, true, false, false)}</div>
+              </motion.div>
+            ) : null}
+          </AnimatePresence>
         </div>
       ) : null}
     </div>
@@ -312,7 +341,7 @@ function ExploreNav({ sessionDid }: { sessionDid: string | null }) {
 function SidebarHeader() {
   const collapsed = useSidebarCollapsed();
   return (
-    <div className={cn("mb-4 flex w-full flex-col gap-2", collapsed && "items-center")}>
+    <div className={cn("flex w-full flex-col gap-2", collapsed && "items-center")}>
       <Link className={cn("flex items-center rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50", collapsed ? "justify-center" : "gap-2.5")} href="/feed" aria-label="GainForest home">
         <motion.div
           initial={{ scale: 0.8, opacity: 0 }}
@@ -344,9 +373,9 @@ function SidebarHeader() {
               delay: 0.15,
               ease: [0.25, 0.1, 0.25, 1],
             }}
-            className="font-serif text-xl font-bold tracking-tight text-foreground"
+            className="text-xl font-bold tracking-tight text-foreground"
           >
-            GainForest
+            <BrandWord />
           </motion.span>
         )}
       </Link>
@@ -354,16 +383,19 @@ function SidebarHeader() {
   );
 }
 
-function NavLeafRow({ item, isActive, index, paired = false }: { item: NavLeaf; isActive: boolean; index: number; paired?: boolean }) {
+function NavLeafRow({ item, isActive, index, paired = false, animate = true }: { item: NavLeaf; isActive: boolean; index: number; paired?: boolean; animate?: boolean }) {
   const collapsed = useSidebarCollapsed();
   const showConnector = paired && !collapsed;
   return (
     <motion.li
-      initial={{ opacity: 0, x: -8 }}
+      // `animate=false` (the "More" reveal) skips the per-item entrance so the
+      // group fades in as one with its container instead of trickling in behind
+      // the instantly-shown labels.
+      initial={animate ? { opacity: 0, x: -8 } : false}
       animate={{ opacity: 1, x: 0 }}
       transition={{
         duration: 0.3,
-        delay: 0.05 * index,
+        delay: animate ? 0.05 * index : 0,
         ease: [0.25, 0.1, 0.25, 1],
       }}
       className={cn("relative", showConnector && "ml-3.5")}
@@ -385,20 +417,31 @@ function NavLeafRow({ item, isActive, index, paired = false }: { item: NavLeaf; 
             whileHover={collapsed ? undefined : { x: 2 }}
             transition={{ type: "spring", stiffness: 400, damping: 30 }}
             className={cn(
-              buttonVariants({ variant: isActive ? "default" : "ghost" }),
-              // Lighter, denser rows: only the active row keeps the filled pill;
-              // inactive rows are a plain icon + label with no chip background.
+              buttonVariants({ variant: "ghost" }),
+              // Lighter, denser rows: only the active row keeps the filled pill.
+              // The pill is a shared layout element so it glides between nav
+              // items (grid tiles included) as the route changes; inactive rows
+              // are a plain icon + label with no chip background.
               "relative h-8 w-full",
               collapsed ? "justify-center px-0" : "justify-start gap-2.5 px-2.5",
-              !isActive && "text-muted-foreground group-hover:text-primary hover:text-primary",
+              isActive
+                ? "text-primary-foreground hover:text-primary-foreground"
+                : "text-muted-foreground group-hover:text-primary hover:text-primary",
             )}
           >
-            <span className="flex size-6 shrink-0 items-center justify-center">
+            {isActive ? (
+              <motion.span
+                layoutId="sidebar-nav-active"
+                transition={{ type: "spring", stiffness: 500, damping: 40 }}
+                className="absolute inset-0 rounded-full bg-primary"
+              />
+            ) : null}
+            <span className="relative z-10 flex size-6 shrink-0 items-center justify-center">
               <item.Icon className="h-4 w-4 shrink-0" />
             </span>
-            {collapsed ? null : <span className="flex-1 text-left">{item.text}</span>}
+            {collapsed ? null : <span className="relative z-10 flex-1 text-left">{item.text}</span>}
             {item.adminOnly ? (
-              <AdminOnlyIndicator className={collapsed ? "absolute right-1 top-1" : undefined} />
+              <AdminOnlyIndicator className={cn("relative z-10", collapsed && "absolute right-1 top-1")} />
             ) : null}
           </motion.div>
         </Link>
@@ -407,142 +450,201 @@ function NavLeafRow({ item, isActive, index, paired = false }: { item: NavLeaf; 
   );
 }
 
-function BumicertCreationCard({ sessionDid }: { sessionDid: string }) {
-  const t = useTranslations("common.sidebar.creationCard");
-  const collapsed = useSidebarCollapsed();
-  const hasProjects = useActiveContextHasProjects(sessionDid);
-
-  // Hide the create-project CTA once this account already has a project.
-  if (hasProjects) return null;
-
-  if (collapsed) {
-    return (
-      <SidebarTooltip label={t("createProject")}>
-        <span className="mx-auto flex w-fit">
-          <CreateProjectButton
-            sessionDid={sessionDid}
-            className={cn(
-              buttonVariants({ variant: "outline", size: "icon" }),
-              "bg-background hover:bg-primary hover:text-primary-foreground",
-            )}
-          >
-            <PlusIcon />
-            <span className="sr-only">{t("createProject")}</span>
-          </CreateProjectButton>
-        </span>
-      </SidebarTooltip>
-    );
-  }
-
+/** Grid tile used for the Explore launcher (expanded sidebar only): a stacked
+ *  icon-over-label affordance laid out as a 2×2 launcher instead of a column.
+ *  Tiles are raised `bg-background` insets against the muted sidebar (a quiet
+ *  contrast surface, not a per-sibling border — design.md §7); only the active
+ *  tile takes the filled primary treatment, matching the list rows. */
+function NavLeafTile({ item, isActive, index, animate = true }: { item: NavLeaf; isActive: boolean; index: number; animate?: boolean }) {
   return (
-    <div className="group flex flex-col w-full h-20 border border-border bg-background rounded-2xl p-1">
-      <div className="flex-1 relative">
-        <SparkleIcon
-          className="absolute bottom-2 left-4 size-6 rotate-30 opacity-50 group-hover:opacity-30 group-hover:scale-130 text-primary transition-all duration-300 animate-spin-slow"
-          fill="currentcolor"
-          strokeWidth={0}
-        />
-        <SparkleIcon
-          className="absolute bottom-1 left-12 size-3 rotate-60 opacity-30 group-hover:opacity-50 group-hover:scale-130 text-primary transition-all duration-300 animate-spin-slow"
-          fill="currentcolor"
-          strokeWidth={0}
-        />
-        <SparkleIcon
-          className="absolute bottom-2 right-2 size-6 rotate-60 opacity-50 group-hover:opacity-30 group-hover:scale-130 text-primary transition-all duration-300 animate-spin-slow"
-          fill="currentcolor"
-          strokeWidth={0}
-        />
-        <SparkleIcon
-          className="absolute bottom-1 right-10 size-3 rotate-30 opacity-30 group-hover:opacity-50 group-hover:scale-130 text-primary transition-all duration-300 animate-spin-slow"
-          fill="currentcolor"
-          strokeWidth={0}
-        />
-        <div className="absolute z-1 -bottom-4 left-1/2 -translate-x-1/2 scale-100 group-hover:scale-120 -rotate-12 group-hover:-rotate-30 transition-transform bg-background/50 backdrop-blur-lg border border-border shadow-xl rounded-xl h-20 w-16 p-1 flex flex-col gap-1">
-          <div className="w-full h-10 bg-primary/20 rounded-lg flex items-center justify-center">
-            <LeafIcon className="text-primary size-6 opacity-80" />
-          </div>
-          <div className="bg-muted h-2 rounded-lg w-8" />
-          <div className="bg-muted h-2 rounded-lg w-full" />
-        </div>
-      </div>
-      <CreateProjectButton
-        sessionDid={sessionDid}
-        className={cn(
-          buttonVariants({ variant: "outline", size: "sm" }),
-          "relative z-2 w-full bg-background hover:bg-primary hover:text-primary-foreground",
-        )}
+    <motion.li
+      initial={animate ? { opacity: 0, y: 6 } : false}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.3, delay: animate ? 0.04 * index : 0, ease: [0.25, 0.1, 0.25, 1] }}
+    >
+      <Link
+        href={item.href}
+        aria-current={isActive ? "page" : undefined}
+        className="group block rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
       >
-        <PlusIcon /> {t("createProject")}
-      </CreateProjectButton>
+        <motion.div
+          whileHover={{ y: -2 }}
+          whileTap={{ scale: 0.97 }}
+          transition={{ type: "spring", stiffness: 400, damping: 28 }}
+          className={cn(
+            "relative flex h-full flex-col items-center gap-1.5 rounded-xl px-2 py-2.5 text-center transition-colors motion-reduce:transition-none",
+            isActive
+              ? "text-primary-foreground"
+              : "bg-background text-muted-foreground hover:text-primary",
+          )}
+        >
+          {isActive ? (
+            <motion.span
+              layoutId="sidebar-nav-active"
+              transition={{ type: "spring", stiffness: 500, damping: 40 }}
+              className="absolute inset-0 rounded-xl bg-primary"
+            />
+          ) : null}
+          <item.Icon className="relative z-10 size-5 shrink-0" />
+          <span className="relative z-10 text-xs font-medium leading-tight">{item.text}</span>
+          {item.adminOnly ? <AdminOnlyIndicator className="absolute right-1.5 top-1.5 z-10" /> : null}
+        </motion.div>
+      </Link>
+    </motion.li>
+  );
+}
+
+/** Always-on spinning sparkles scattered across the pop-out band above the
+ *  card. Uses the card's `group/card` hover and honors reduced motion. */
+function CreationSparkles() {
+  const sparkle =
+    "absolute animate-spin-slow text-primary transition-all duration-300 motion-reduce:animate-none motion-reduce:transition-none";
+  return (
+    <div aria-hidden className="pointer-events-none absolute inset-x-0 -top-7 h-16">
+      <SparkleIcon className={cn(sparkle, "left-2 top-7 size-6 rotate-30 opacity-50 group-hover/card:scale-125 group-hover/card:opacity-40")} fill="currentcolor" strokeWidth={0} />
+      <SparkleIcon className={cn(sparkle, "left-11 top-2 size-3 rotate-45 opacity-40 group-hover/card:scale-125 group-hover/card:opacity-60")} fill="currentcolor" strokeWidth={0} />
+      <SparkleIcon className={cn(sparkle, "right-2 top-7 size-6 rotate-45 opacity-50 group-hover/card:scale-125 group-hover/card:opacity-40")} fill="currentcolor" strokeWidth={0} />
+      <SparkleIcon className={cn(sparkle, "right-11 top-2 size-3 rotate-30 opacity-40 group-hover/card:scale-125 group-hover/card:opacity-60")} fill="currentcolor" strokeWidth={0} />
     </div>
   );
 }
 
-function AddObservationsCard({ sessionDid }: { sessionDid: string }) {
+// The bold 3D "record" tile — the hero of the creation card. It reads as a
+// nature record being minted (tinted icon plate over two skeleton lines) and is
+// positioned to break out over the card's top edge, tilted with a soft shadow.
+// The parent card animates its transform on hover; the tile only declares the
+// look. Position/rotation come from `className`.
+function CreationTile({
+  Icon,
+  className,
+}: {
+  Icon: React.ComponentType<{ className?: string }>;
+  className?: string;
+}) {
+  return (
+    <div
+      className={cn(
+        "absolute left-1/2 flex h-[72px] w-[60px] flex-col gap-1.5 rounded-2xl border border-border bg-background p-2 shadow-xl transition-transform duration-300 ease-out motion-reduce:transform-none motion-reduce:transition-none",
+        className,
+      )}
+    >
+      <div className="flex flex-1 items-center justify-center rounded-xl bg-primary/15">
+        <Icon className="size-6 text-primary" />
+      </div>
+      <div className="h-1 w-2/3 rounded-full bg-muted" />
+      <div className="h-1 w-full rounded-full bg-muted" />
+    </div>
+  );
+}
+
+// One expressive creation region instead of two near-identical cards. It always
+// carries "Add observations" (the everyday path); "Create a project" joins it
+// only while the active account still has no project. Whatever the state, the
+// card keeps the same playful language — spinning sparkles and a bold 3D record
+// tile that breaks out over the top edge, plus CTAs that fill on hover — so the
+// three variants feel like one family while the tile art + icons say at a glance
+// what each opens. See [[project_site_modal_architecture]] for what each opens.
+function CreationHubCard({ sessionDid }: { sessionDid: string }) {
   const t = useTranslations("common.sidebar.creationCard");
   const collapsed = useSidebarCollapsed();
+  const hasProjects = useActiveContextHasProjects(sessionDid);
+  // The create-project affordance retires once the account owns a project; the
+  // Projects nav item and in-page "Add" cover further creation.
+  const showProject = !hasProjects;
+  const variant: "observation" | "both" = showProject ? "both" : "observation";
+
+  // Shared CTA recipe: a recessed slot that fills primary on hover — the
+  // original card's playful "press to plant" feel, kept for every variant.
+  const ctaSlot =
+    "flex items-center justify-center gap-2 rounded-xl bg-muted font-medium text-foreground transition-colors hover:bg-primary hover:text-primary-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50 motion-reduce:transition-none";
 
   if (collapsed) {
     return (
-      <SidebarTooltip label={t("addObservations")}>
-        <span className="mx-auto flex w-fit">
-          <AddObservationsButton
-            sessionDid={sessionDid}
-            dataTaina="add-observations"
-            className={cn(
-              buttonVariants({ variant: "outline", size: "icon" }),
-              "bg-background hover:bg-primary hover:text-primary-foreground",
-            )}
-          >
-            <BinocularsIcon />
-            <span className="sr-only">{t("addObservations")}</span>
-          </AddObservationsButton>
-        </span>
-      </SidebarTooltip>
+      <div className="flex flex-col items-center gap-1.5">
+        <SidebarTooltip label={t("addObservations")}>
+          <span className="flex w-fit">
+            <AddObservationsButton
+              sessionDid={sessionDid}
+              dataTaina="add-observations"
+              className={cn(buttonVariants({ variant: "outline", size: "icon" }), "bg-background hover:bg-primary hover:text-primary-foreground")}
+            >
+              <BinocularsIcon />
+              <span className="sr-only">{t("addObservations")}</span>
+            </AddObservationsButton>
+          </span>
+        </SidebarTooltip>
+        {showProject ? (
+          <SidebarTooltip label={t("createProject")}>
+            <span className="flex w-fit">
+              <CreateProjectButton
+                sessionDid={sessionDid}
+                className={cn(buttonVariants({ variant: "outline", size: "icon" }), "bg-background hover:bg-primary hover:text-primary-foreground")}
+              >
+                <LeafIcon />
+                <span className="sr-only">{t("createProject")}</span>
+              </CreateProjectButton>
+            </span>
+          </SidebarTooltip>
+        ) : null}
+      </div>
     );
   }
 
   return (
-    <div className="group flex flex-col w-full h-20 border border-border bg-background rounded-2xl p-1">
-      <div className="flex-1 relative">
-        <SparkleIcon
-          className="absolute bottom-2 left-4 size-6 rotate-30 opacity-50 group-hover:opacity-30 group-hover:scale-130 text-primary transition-all duration-300 animate-spin-slow"
-          fill="currentcolor"
-          strokeWidth={0}
+    // `mt-9` reserves the pop-out band above the card so the tile can breach the
+    // top edge without colliding with the nav; `overflow-visible` lets it, and
+    // `pt-9` keeps the CTAs clear of the tile's lower half.
+    <div className="group/card relative isolate mt-9 flex w-full flex-col gap-1.5 overflow-visible rounded-2xl border border-border bg-background px-2 pb-2 pt-9">
+      {/* Soft primary glow behind the popped tile (hidden where the opaque card
+          body overlaps it; visible in the pop-out band above the top edge). */}
+      <div aria-hidden className="pointer-events-none absolute left-1/2 top-0 -z-10 size-24 -translate-x-1/2 -translate-y-1/2 rounded-full bg-primary/15 blur-2xl" />
+      <CreationSparkles />
+      {/* The 3D record tile(s) straddle the top edge (-top-9) and lift on hover. */}
+      {variant === "both" ? (
+        <>
+          <CreationTile
+            Icon={LeafIcon}
+            className="-top-9 -translate-x-[82%] -rotate-[14deg] group-hover/card:-translate-x-[112%] group-hover/card:-translate-y-1 group-hover/card:-rotate-[24deg]"
+          />
+          <CreationTile
+            Icon={BinocularsIcon}
+            className="-top-10 z-1 -translate-x-[18%] rotate-[10deg] group-hover/card:-translate-x-[2%] group-hover/card:-translate-y-1.5 group-hover/card:rotate-[22deg]"
+          />
+        </>
+      ) : (
+        <CreationTile
+          Icon={BinocularsIcon}
+          className="-top-9 -translate-x-1/2 -rotate-6 group-hover/card:-translate-y-1.5 group-hover/card:-rotate-12"
         />
-        <SparkleIcon
-          className="absolute bottom-1 left-12 size-3 rotate-60 opacity-30 group-hover:opacity-50 group-hover:scale-130 text-primary transition-all duration-300 animate-spin-slow"
-          fill="currentcolor"
-          strokeWidth={0}
-        />
-        <SparkleIcon
-          className="absolute bottom-2 right-2 size-6 rotate-60 opacity-50 group-hover:opacity-30 group-hover:scale-130 text-primary transition-all duration-300 animate-spin-slow"
-          fill="currentcolor"
-          strokeWidth={0}
-        />
-        <SparkleIcon
-          className="absolute bottom-1 right-10 size-3 rotate-30 opacity-30 group-hover:opacity-50 group-hover:scale-130 text-primary transition-all duration-300 animate-spin-slow"
-          fill="currentcolor"
-          strokeWidth={0}
-        />
-        <div className="absolute z-1 -bottom-4 left-1/2 -translate-x-1/2 scale-100 group-hover:scale-120 -rotate-12 group-hover:-rotate-30 transition-transform bg-background/50 backdrop-blur-lg border border-border shadow-xl rounded-xl h-20 w-16 p-1 flex flex-col gap-1">
-          <div className="w-full h-10 bg-primary/20 rounded-lg flex items-center justify-center">
-            <BinocularsIcon className="text-primary size-6 opacity-80" />
-          </div>
-          <div className="bg-muted h-2 rounded-lg w-8" />
-          <div className="bg-muted h-2 rounded-lg w-full" />
+      )}
+
+      {variant === "both" ? (
+        <div className="grid grid-cols-2 gap-1.5">
+          <AddObservationsButton
+            sessionDid={sessionDid}
+            dataTaina="add-observations"
+            className={cn(ctaSlot, "h-auto flex-col gap-1 px-2 py-2 text-xs")}
+          >
+            <BinocularsIcon className="size-4" />
+            <span className="leading-tight">{t("observation")}</span>
+          </AddObservationsButton>
+          <CreateProjectButton
+            sessionDid={sessionDid}
+            className={cn(ctaSlot, "h-auto flex-col gap-1 px-2 py-2 text-xs")}
+          >
+            <LeafIcon className="size-4" />
+            <span className="leading-tight">{t("project")}</span>
+          </CreateProjectButton>
         </div>
-      </div>
-      <AddObservationsButton
-        sessionDid={sessionDid}
-        dataTaina="add-observations"
-        className={cn(
-          buttonVariants({ variant: "outline", size: "sm" }),
-          "relative z-2 w-full bg-background hover:bg-primary hover:text-primary-foreground",
-        )}
-      >
-        <BinocularsIcon /> {t("addObservations")}
-      </AddObservationsButton>
+      ) : (
+        <AddObservationsButton
+          sessionDid={sessionDid}
+          dataTaina="add-observations"
+          className={cn(ctaSlot, "h-9 w-full px-3 text-sm")}
+        >
+          <BinocularsIcon className="size-4" /> {t("addObservations")}
+        </AddObservationsButton>
+      )}
     </div>
   );
 }
@@ -572,8 +674,6 @@ function SocialFooter() {
 }
 
 function ExploreArt() {
-  // Two climbing vines hugging either edge — growth creeping up the sides of
-  // the sidebar.
   return (
     <>
       <Vine side="left" className="bottom-0 left-0 h-26 w-5" />
@@ -583,8 +683,6 @@ function ExploreArt() {
 }
 
 function Vine({ side, className }: { side: "left" | "right"; className?: string }) {
-  // Drawn once for the left edge; the right edge mirrors it horizontally so
-  // the leaves always curl inward toward the sidebar.
   return (
     <svg
       viewBox="0 0 60 240"
@@ -592,7 +690,6 @@ function Vine({ side, className }: { side: "left" | "right"; className?: string 
       preserveAspectRatio="xMidYMax meet"
       className={cn("absolute text-primary", side === "right" && "-scale-x-100", className)}
     >
-      {/* Winding stem climbing from the bottom edge */}
       <path
         d="M16 240 C 9 206 24 188 16 158 C 9 130 26 110 16 80 C 10 56 22 36 16 8"
         className="stroke-primary/30"
@@ -600,7 +697,6 @@ function Vine({ side, className }: { side: "left" | "right"; className?: string 
         strokeLinecap="round"
         fill="none"
       />
-      {/* Leaves branching off, alternating sides of the stem */}
       <g className="fill-primary/20">
         <path d="M16 198 C 32 194 39 178 36 168 C 25 171 16 183 16 198 Z" />
         <path d="M16 150 C 2 147 -4 133 -1 124 C 11 127 16 138 16 150 Z" />

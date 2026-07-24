@@ -3,6 +3,8 @@ import Link from "next/link";
 import { Suspense } from "react";
 import { notFound } from "next/navigation";
 import { BadgeCheckIcon, ChevronRightIcon } from "lucide-react";
+import { SectionSurface } from "@/components/ui/section-surface";
+import { DisplayHeading } from "@/components/ui/typography";
 import { getLocale, getTranslations } from "next-intl/server";
 import { AccountGalleryClient } from "./AccountGalleryClient";
 import type { GalleryProjectOption } from "./AccountGalleryUploader";
@@ -27,12 +29,32 @@ import { fetchAuthSession } from "../../_lib/auth-server";
 import { fetchUserCgsGroups, resolveAccountManageAccess } from "../../_lib/manage-server";
 import { BumicertsSection, ObservationsSection, ProjectsSection } from "../../(manage)/manage/_sections";
 import { monogram } from "../../_lib/did-profile";
-import { attachProjectTitlesToGalleries, fetchAccountMaEarthRounds, fetchBumicertsByDid, fetchIndexedCertifiedProfileCards, fetchObservationSummaryByDid, fetchProjectImageGalleriesByDid, fetchProjectsByDid, fetchTimelineAttachmentsByDid, type TimelineAttachmentItem } from "../../_lib/indexer";
+import { attachProjectTitlesToGalleries, fetchAccountMaEarthRounds, fetchBumicertsByDid, fetchIndexedCertifiedProfileCards, fetchObservationSummaryByDid, fetchProjectImageGalleriesByDid, fetchProjectsByDid, fetchTimelineAttachmentsByDid } from "../../_lib/indexer";
 import { getEntriesForActivities } from "@/app/cert/[did]/[rkey]/_components/timeline/attachmentSubjects";
 import { resolveTimelineReferences } from "@/app/cert/[did]/[rkey]/_components/timeline/timelineReferenceResolver";
 import { ProjectTimelineReadonly } from "@/app/projects/[did]/[rkey]/_components/ProjectTimelineReadonly";
 import type { AccountRouteData } from "../_lib/account-route";
 import { accountDonationsPath, accountObservationsPath, accountPath, accountProjectsPath } from "../_lib/account-route";
+
+type LoadResult<T> = { status: "ready"; data: T } | { status: "error" };
+
+async function readResult<T>(read: Promise<T>): Promise<LoadResult<T>> {
+  try {
+    return { status: "ready", data: await read };
+  } catch {
+    return { status: "error" };
+  }
+}
+
+async function AccountDataLoadError({ className = "" }: { className?: string }) {
+  const t = await getTranslations("marketplace.account.errors");
+  return (
+    <SectionSurface variant="muted" role="status" className={className}>
+      <p className="text-sm font-medium text-foreground">{t("loadAccountTitle")}</p>
+      <p className="mt-1 text-sm text-muted-foreground">{t("loadAccountDescription")}</p>
+    </SectionSurface>
+  );
+}
 
 type ManageAction = {
   href: string;
@@ -46,7 +68,7 @@ function ManageActionRow({ action }: { action?: ManageAction | null }) {
   return (
     <Link
       href={action.href}
-      className="mt-6 flex items-center justify-between gap-4 rounded-2xl border border-border/70 bg-muted/50 px-4 py-3 text-sm transition-colors hover:bg-muted"
+      className="mt-6 flex items-center justify-between gap-4 rounded-2xl bg-muted px-4 py-3 text-sm transition-colors hover:bg-muted/80 motion-reduce:transition-none"
     >
       <span className="min-w-0">
         <span className="block font-medium text-foreground">{action.label}</span>
@@ -57,8 +79,8 @@ function ManageActionRow({ action }: { action?: ManageAction | null }) {
   );
 }
 
-function DataCouncilAvatar({ member }: { member: PublicDataCouncilMember }) {
-  const mono = monogram(member.displayName?.trim() || "Member", member.did);
+function DataCouncilAvatar({ member, fallbackName }: { member: PublicDataCouncilMember; fallbackName: string }) {
+  const mono = monogram(member.displayName?.trim() || fallbackName, member.did);
   return (
     <div className="relative flex size-10 shrink-0 items-center justify-center overflow-hidden rounded-full text-sm font-semibold text-white">
       {member.avatarUrl ? (
@@ -76,17 +98,19 @@ function DataCouncilAvatar({ member }: { member: PublicDataCouncilMember }) {
 // surface the *specific* rounds an account was part of — an explicit, per-round
 // statement of record, rather than the generic "Trusted by Ma Earth" emblem.
 async function AccountMaEarthRoundsSection({ did, className = "" }: { did: string; className?: string }) {
-  const [t, rounds] = await Promise.all([
+  const [t, roundsResult] = await Promise.all([
     getTranslations("common.maEarthRounds"),
-    fetchAccountMaEarthRounds(did).catch(() => [] as number[]),
+    readResult(fetchAccountMaEarthRounds(did)),
   ]);
 
+  if (roundsResult.status === "error") return <AccountDataLoadError className={className} />;
+  const rounds = roundsResult.data;
   if (rounds.length === 0) return null;
 
   return (
-    <section className={`rounded-3xl border border-border/60 bg-card p-5 org-animate org-fade-in-up org-delay-2 sm:p-6 ${className}`.trim()}>
+    <SectionSurface variant="muted" className={className}>
       <div className="flex items-center gap-3">
-        <span className="grid size-11 shrink-0 place-items-center overflow-hidden rounded-full bg-background shadow-sm ring-1 ring-border/70">
+        <span className="grid size-11 shrink-0 place-items-center overflow-hidden rounded-full bg-background">
           <Image
             src="/assets/media/images/badges/ma-earth-logo.webp"
             width={44}
@@ -95,42 +119,45 @@ async function AccountMaEarthRoundsSection({ did, className = "" }: { did: strin
             className="h-full w-full object-contain"
           />
         </span>
-        <h2 className="font-instrument text-2xl italic leading-none text-foreground">{t("title")}</h2>
+        <DisplayHeading as="h2" className="text-2xl leading-none text-foreground">{t("title")}</DisplayHeading>
       </div>
       <p className="mt-3 max-w-2xl text-sm leading-6 text-muted-foreground">{t("description")}</p>
       <ul className="mt-4 flex flex-wrap gap-2">
         {rounds.map((round) => (
           <li
             key={round}
-            className="inline-flex items-center gap-2 rounded-full border border-border/60 bg-background/60 px-3.5 py-2 text-sm font-medium text-foreground"
+            className="inline-flex items-center gap-2 rounded-full bg-background/70 px-3.5 py-2 text-sm font-medium text-foreground"
           >
             <BadgeCheckIcon className="size-4 shrink-0 text-primary" aria-hidden />
             {t("round", { round })}
           </li>
         ))}
       </ul>
-    </section>
+    </SectionSurface>
   );
 }
 
 async function AccountDataCouncilSection({ did }: { did: string }) {
-  const [t, members] = await Promise.all([
+  const [t, membersResult] = await Promise.all([
     getTranslations("common.accountDataCouncil"),
-    fetchPublicDataCouncilMembers(did).catch(() => []),
+    readResult(fetchPublicDataCouncilMembers(did)),
   ]);
 
+  if (membersResult.status === "error") return <AccountDataLoadError className="mt-8" />;
+  const members = membersResult.data;
+
   return (
-    <section className="mt-8 rounded-3xl border border-border/60 bg-card p-5 org-animate org-fade-in-up org-delay-2 sm:p-6">
+    <section className="mt-8 py-2">
       <div className="flex items-baseline gap-2">
-        <h2 className="font-instrument text-2xl italic leading-none text-foreground">{t("title")}</h2>
+        <DisplayHeading as="h2" className="text-2xl leading-none text-foreground">{t("title")}</DisplayHeading>
         {members.length > 0 ? <span className="text-sm text-muted-foreground">{members.length}</span> : null}
       </div>
       <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">{t("description")}</p>
       {members.length > 0 ? (
         <div className="mt-4 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
           {members.map((member) => (
-            <div key={member.did} className="flex items-center gap-3 rounded-2xl border border-border/60 bg-background/60 px-3 py-3">
-              <DataCouncilAvatar member={member} />
+            <div key={member.did} className="flex items-center gap-3 rounded-2xl bg-muted/65 px-3 py-3">
+              <DataCouncilAvatar member={member} fallbackName={t("memberFallback")} />
               <p className="min-w-0 truncate text-sm font-medium text-foreground">
                 {member.displayName?.trim() || t("memberFallback")}
               </p>
@@ -155,17 +182,21 @@ async function AccountProjectUpdatesSection({ did }: { did: string }) {
     getTranslations("bumicert.detail.reference"),
     getTranslations("bumicert.detail.timeline"),
     getTranslations("bumicert.detail.timelineEntry"),
-    fetchProjectsByDid(did, 1000).then((page) => page.records).catch(() => []),
-    fetchTimelineAttachmentsByDid(did).catch(() => [] as TimelineAttachmentItem[]),
+    readResult(fetchProjectsByDid(did, 1000).then((page) => page.records)),
+    readResult(fetchTimelineAttachmentsByDid(did)),
   ]);
 
+  if (projects.status === "error" || allEntries.status === "error") {
+    return <AccountDataLoadError className="mt-8" />;
+  }
+
   const matchUris = new Set<string>();
-  for (const project of projects) {
+  for (const project of projects.data) {
     matchUris.add(project.atUri);
     for (const certUri of project.bumicertUris) matchUris.add(certUri);
   }
 
-  const entries = getEntriesForActivities(allEntries, Array.from(matchUris));
+  const entries = getEntriesForActivities(allEntries.data, Array.from(matchUris));
   if (entries.length === 0) return null;
 
   const references = await resolveTimelineReferences({
@@ -187,7 +218,7 @@ async function AccountProjectUpdatesSection({ did }: { did: string }) {
   }).catch(() => []);
 
   return (
-    <section className="mt-8 org-animate org-fade-in-up org-delay-2">
+    <section className="mt-8">
       <ProjectTimelineReadonly
         organizationDid={did}
         entries={entries}
@@ -202,25 +233,26 @@ async function AccountProjectUpdatesSection({ did }: { did: string }) {
 // Shared loader for an account's photo galleries — used both by the standalone
 // Files & photos tab (personal profiles) and the org Overview's inline gallery.
 async function loadAccountGalleryData(account: AccountRouteData, did: string) {
-  const [rawGalleries, projectsResult, access] = await Promise.all([
-    fetchProjectImageGalleriesByDid(did).catch(() => []),
-    fetchProjectsByDid(did, 1000)
-      .then((page) => ({ loaded: true, records: page.records }))
-      .catch(() => ({ loaded: false, records: [] as Awaited<ReturnType<typeof fetchProjectsByDid>>["records"] })),
-    resolveAccountManageAccess(account.urlIdentifier).catch(() => null),
+  const [galleriesResult, projectsResult, accessResult] = await Promise.all([
+    readResult(fetchProjectImageGalleriesByDid(did)),
+    readResult(fetchProjectsByDid(did, 1000).then((page) => page.records)),
+    readResult(resolveAccountManageAccess(account.urlIdentifier)),
   ]);
-  const projects = projectsResult.records;
+  const loadError = galleriesResult.status === "error" || projectsResult.status === "error" || accessResult.status === "error";
+  const projects = projectsResult.status === "ready" ? projectsResult.data : [];
+  const rawGalleries = galleriesResult.status === "ready" ? galleriesResult.data : [];
   const galleries = attachProjectTitlesToGalleries(rawGalleries, projects);
 
   // A manager target lets the client offer uploads (create) and orphan cleanup
   // (delete); it checks each permission before showing the matching controls.
+  const access = accessResult.status === "ready" ? accessResult.data : null;
   const target = access?.status === "allowed" ? access.target : null;
 
   // Galleries still pinned to a project that no longer exists are orphaned: the
   // project was deleted but its photos stayed behind. We only flag them once the
   // project list has actually loaded, so a failed fetch never hides live ones.
   const projectUris = new Set(projects.map((project) => project.atUri));
-  const orphanedGalleries = projectsResult.loaded
+  const orphanedGalleries = projectsResult.status === "ready"
     ? galleries.filter((gallery) => gallery.projectUri !== null && !projectUris.has(gallery.projectUri))
     : [];
   const orphanedIds = new Set(orphanedGalleries.map((gallery) => gallery.id));
@@ -230,7 +262,7 @@ async function loadAccountGalleryData(account: AccountRouteData, did: string) {
     .filter((project) => Boolean(project.cid))
     .map((project) => ({ uri: project.atUri, cid: project.cid, title: project.title }));
 
-  return { liveGalleries, orphanedGalleries, projectOptions, target };
+  return { liveGalleries, orphanedGalleries, projectOptions, target, loadError };
 }
 
 // Organizations no longer get a standalone Files & photos tab; instead the photo
@@ -244,18 +276,20 @@ async function AccountOverviewGallerySection({ account, did }: { account: Accoun
   ]);
 
   const canUpload = gallery.target ? canCreateRecord(gallery.target).allowed : false;
-  if (gallery.liveGalleries.length === 0 && !canUpload) return null;
+  if (!gallery.loadError && gallery.liveGalleries.length === 0 && !canUpload) return null;
 
   return (
-    <section className="mt-8 org-animate org-fade-in-up org-delay-2">
-      <h2 className="font-instrument text-2xl italic leading-none text-foreground">{tabsT("gallery")}</h2>
+    <section className="mt-8">
+      <DisplayHeading as="h2" className="text-2xl leading-none text-foreground">{tabsT("gallery")}</DisplayHeading>
       <div className="mt-4">
         <AccountGalleryClient
+          key={did}
           initialGalleries={gallery.liveGalleries}
           orphanedGalleries={gallery.orphanedGalleries}
           projects={gallery.projectOptions}
           target={gallery.target}
           accountName={account.displayName}
+          loadError={gallery.loadError}
         />
       </div>
     </section>
@@ -272,8 +306,8 @@ export async function AccountHomeTabContent({ account }: { account: AccountRoute
   return (
     <>
       {hasAbout ? (
-        <section className="mt-8 org-animate org-fade-in-up org-delay-1">
-          <h2 className="font-instrument text-2xl italic leading-none text-foreground">{aboutT("title")}</h2>
+        <section className="mt-8">
+          <DisplayHeading as="h2" className="text-2xl leading-none text-foreground">{aboutT("title")}</DisplayHeading>
           {account.kind === "organization" ? (
             <p className="mt-4 max-w-3xl whitespace-pre-line text-base leading-7 text-foreground/85 md:text-lg md:leading-8">
               {organizationAbout}
@@ -305,23 +339,25 @@ export async function AccountOverviewTabContent({ account, did }: { account: Acc
     getTranslations("common.accountTabs"),
     getTranslations("marketplace.account.sidebar"),
     getLocale(),
-    fetchProjectsByDid(did, 1000).then((page) => page.records).catch(() => []),
-    fetchReceipts().catch(() => []),
-    fetchObservationSummaryByDid(did).catch(() => null),
+    readResult(fetchProjectsByDid(did, 1000).then((page) => page.records)),
+    readResult(fetchReceipts()),
+    readResult(fetchObservationSummaryByDid(did)),
   ]);
-  const donationCount = receipts.filter((receipt) => receipt.from?.type === "did" && receipt.from.id === did).length;
+  const donationCount = receipts.status === "ready"
+    ? receipts.data.filter((receipt) => receipt.from?.type === "did" && receipt.from.id === did).length
+    : null;
   const hasAbout = Boolean(account.detail?.richBody?.length || account.detail?.blurb);
 
   const folderTiles: OverviewFolderTile[] = [
-    { id: "projects", title: tabsT("projects"), href: accountProjectsPath(account.urlIdentifier), count: projects.length },
-    { id: "observations", title: tabsT("observations"), href: accountObservationsPath(account.urlIdentifier), count: observationSummary?.count ?? 0 },
+    { id: "projects", title: tabsT("projects"), href: accountProjectsPath(account.urlIdentifier), count: projects.status === "ready" ? projects.data.length : null },
+    { id: "observations", title: tabsT("observations"), href: accountObservationsPath(account.urlIdentifier), count: observationSummary.status === "ready" ? observationSummary.data?.count ?? 0 : null },
     { id: "donations", title: tabsT("donations"), href: accountDonationsPath(account.urlIdentifier), count: donationCount },
   ];
 
   return (
     <div className="space-y-5 py-2">
       {hasAbout ? (
-        <section className="org-animate org-fade-in-up org-delay-1">
+        <section>
           {account.detail?.richBody?.length ? (
             <RichText blocks={account.detail.richBody} />
           ) : (
@@ -330,15 +366,17 @@ export async function AccountOverviewTabContent({ account, did }: { account: Acc
         </section>
       ) : null}
 
-      <section className="org-animate org-fade-in-up org-delay-1">
+      <section>
         <OverviewFolders tiles={folderTiles} />
       </section>
 
+      {projects.status === "error" || receipts.status === "error" || observationSummary.status === "error" ? <AccountDataLoadError /> : null}
+
       <AccountMaEarthRoundsSection did={did} />
 
-      <section className="rounded-2xl border border-border bg-card/80 p-4 sm:flex sm:items-center sm:justify-between sm:gap-4">
+      <SectionSurface variant="muted" className="p-4 sm:flex sm:items-center sm:justify-between sm:gap-4">
         <div className="min-w-0">
-          <h2 className="text-sm font-semibold text-foreground">{shareT("shareProfileTitle")}</h2>
+          <h2 className="font-instrument text-lg font-light italic text-foreground">{shareT("shareProfileTitle")}</h2>
           <p className="mt-0.5 text-sm leading-relaxed text-muted-foreground">{shareT("shareProfileBody")}</p>
         </div>
         <div className="mt-3 shrink-0 sm:mt-0">
@@ -346,9 +384,10 @@ export async function AccountOverviewTabContent({ account, did }: { account: Acc
             profilePath={`/${locale}${accountPath(account.urlIdentifier)}`}
             label={shareT("copyProfileLink")}
             copiedLabel={shareT("profileLinkCopied")}
+            errorLabel={shareT("profileLinkCopyFailed")}
           />
         </div>
-      </section>
+      </SectionSurface>
     </div>
   );
 }
@@ -366,7 +405,7 @@ export async function AccountBumicertsTabContent({
   // old /manage URL used); everyone else sees the read-only public grid.
   const access = await resolveAccountManageAccess(account.urlIdentifier).catch(() => null);
   if (access?.status === "allowed") {
-    return <BumicertsSection target={access.target} />;
+    return <BumicertsSection target={access.target} embedded />;
   }
 
   const bumicerts = await fetchBumicertsByDid(did, 1000).then((page) => page.records).catch(() => []);
@@ -430,7 +469,7 @@ export async function AccountDonationsTabContent({ account, did }: { account: Ac
 export async function AccountObservationsTabContent({ account, did }: { account: AccountRouteData; did: string }) {
   const access = await resolveAccountManageAccess(account.urlIdentifier).catch(() => null);
   if (access?.status === "allowed") {
-    return <ObservationsSection target={access.target} />;
+    return <ObservationsSection target={access.target} embedded />;
   }
 
   return (
@@ -443,7 +482,7 @@ export async function AccountObservationsTabContent({ account, did }: { account:
 export async function AccountProjectsTabContent({ account, did }: { account: AccountRouteData; did: string }) {
   const access = await resolveAccountManageAccess(account.urlIdentifier).catch(() => null);
   if (access?.status === "allowed") {
-    return <ProjectsSection target={access.target} />;
+    return <ProjectsSection target={access.target} embedded />;
   }
 
   const projects = await fetchProjectsByDid(did, 1000, null, undefined, undefined, { withScopeTags: true })
@@ -461,23 +500,24 @@ export async function AccountEndorsementsGivenTabContent({ account, did }: { acc
     notFound();
   }
 
-  const [t, organizations] = await Promise.all([
+  const [t, organizationsResult] = await Promise.all([
     getTranslations("common.accountEndorsementsGiven"),
-    fetchEndorsementsGiven(did).catch(() => []),
+    readResult(fetchEndorsementsGiven(did)),
   ]);
+  const organizations = organizationsResult.status === "ready" ? organizationsResult.data : [];
 
   return (
-    <section className="py-6 org-animate org-fade-in-up org-delay-1">
+    <section className="py-6">
       <div className="mb-5">
         <div className="flex items-baseline gap-2">
-          <h2 className="font-instrument text-2xl italic leading-none text-foreground">{t("title")}</h2>
+          <DisplayHeading as="h2" className="text-2xl leading-none text-foreground">{t("title")}</DisplayHeading>
           {organizations.length > 0 ? <span className="text-sm text-muted-foreground">{organizations.length}</span> : null}
         </div>
         <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">
           {t("description", { name: account.displayName })}
         </p>
       </div>
-      <EndorsementsGivenGrid organizations={organizations} />
+      <EndorsementsGivenGrid organizations={organizations} loadError={organizationsResult.status === "error"} />
     </section>
   );
 }
@@ -517,15 +557,17 @@ export async function loadAccountMemberships(
 }
 
 export async function AccountGalleryTabContent({ account, did }: { account: AccountRouteData; did: string }) {
-  const { liveGalleries, orphanedGalleries, projectOptions, target } = await loadAccountGalleryData(account, did);
+  const { liveGalleries, orphanedGalleries, projectOptions, target, loadError } = await loadAccountGalleryData(account, did);
 
   return (
     <AccountGalleryClient
+      key={did}
       initialGalleries={liveGalleries}
       orphanedGalleries={orphanedGalleries}
       projects={projectOptions}
       target={target}
       accountName={account.displayName}
+      loadError={loadError}
     />
   );
 }

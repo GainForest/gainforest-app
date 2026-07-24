@@ -38,7 +38,7 @@ export function TreeUploadFeedbackModal({
     >
       <ModalHeader backAction={handleClose}>
         <div>
-          <ModalTitle>Share tree upload feedback</ModalTitle>
+          <ModalTitle className="font-instrument font-light italic">Share tree upload feedback</ModalTitle>
           <ModalDescription>
             This short form helps us improve tree uploads and fix anything that
             was confusing.
@@ -46,7 +46,7 @@ export function TreeUploadFeedbackModal({
         </div>
       </ModalHeader>
 
-      <div className="rounded-2xl border border-border bg-muted/20 p-5">
+      <div className="rounded-2xl border border-border bg-muted p-5">
         <div className="space-y-2 text-sm text-muted-foreground">
           <p>
             The feedback form opens in a new tab and should take less than two

@@ -97,7 +97,7 @@ export function RecordingsPlayerList({
 
   return (
     <>
-      <ul className="flex flex-col gap-1.5">
+      <ul className="overflow-hidden rounded-2xl bg-background divide-y divide-border/60">
         {shown.map((item) => {
           const playing = playingUri === item.uri;
           const progress = playing && trackDuration > 0 ? position / trackDuration : 0;
@@ -105,15 +105,15 @@ export function RecordingsPlayerList({
             <li
               key={item.uri}
               className={cn(
-                "rounded-xl border px-3 py-2.5 transition-colors",
-                playing ? "border-primary/40 bg-primary/[0.04]" : "border-border/70",
+                "px-3 py-3 transition-colors",
+                playing && "bg-primary/10 ring-1 ring-inset ring-primary/40",
               )}
             >
               <div className="flex items-center gap-3">
                 <Button
                   variant={playing ? "default" : "outline"}
                   size="icon-sm"
-                  className="shrink-0 rounded-full"
+                  className="size-10 shrink-0 rounded-full"
                   disabled={!item.previewCid || !host}
                   onClick={() => togglePlay(item)}
                   aria-label={playing ? t("pauseAria", { name: item.name }) : t("playAria", { name: item.name })}
@@ -188,13 +188,13 @@ export function RecordingsPlayerList({
                     href={item.accessUri}
                     target="_blank"
                     rel="noreferrer"
-                    className="shrink-0 rounded-md p-1.5 text-muted-foreground transition-colors hover:text-foreground"
+                    className="grid size-10 shrink-0 place-items-center rounded-full text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
                     aria-label={t("downloadAria", { name: item.name })}
                   >
                     <DownloadIcon className="size-4" />
                   </a>
                 ) : (
-                  <span className="shrink-0 p-1.5 text-muted-foreground/30">
+                  <span className="grid size-10 shrink-0 place-items-center text-muted-foreground/30">
                     <AudioLinesIcon className="size-4" />
                   </span>
                 )}

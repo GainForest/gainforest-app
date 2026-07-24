@@ -1,7 +1,7 @@
 {
   "addData": {
     "title": "Add data",
-    "description": "Drop your files below and we'll send them to the right place — photos, tree lists, audio or site maps.",
+    "description": "Drop your files below and we'll send them to the right place: photos, tree lists, audio or site maps.",
     "dropTitle": "Drop files to add data",
     "dropHint": "Photos · tree lists · audio · site maps",
     "browse": "Browse files",
@@ -65,6 +65,7 @@
     "upload": "Upload",
     "uploading": "Uploading…",
     "confirm": "Confirm",
+    "failed": "That action could not be completed. Please try again.",
     "add": "Add",
     "cancel": "Cancel",
     "registerOrganization": "Create an Organization",
@@ -84,7 +85,22 @@
     "unnamed": "Unnamed site",
     "invalid": "Invalid",
     "alreadyDefault": "Already default",
-    "makeDefault": "Make default"
+    "makeDefault": "Make default",
+    "mapPreview": "Site map preview",
+    "previousSite": "Previous site",
+    "nextSite": "Next site",
+    "defaultLoadError": "Could not load the default site.",
+    "loadError": "Could not load sites.",
+    "retry": "Try again",
+    "createDenied": "Your role cannot add sites to this organization.",
+    "editDenied": "Your role cannot edit this site.",
+    "defaultDenied": "Your role cannot change the default site.",
+    "defaultError": "The default site could not be changed.",
+    "deleteDefaultBlocked": "Choose another default site before deleting this one.",
+    "deleteDenied": "Your role cannot delete this site.",
+    "deleteError": "The site could not be deleted.",
+    "cardsView": "Cards",
+    "listView": "List"
   },
   "audio": {
     "title": "Audio Recordings",
@@ -202,7 +218,19 @@
       "identificationRemarks": "Identification remarks",
       "speciesNotes": "Species notes",
       "savingUpload": "Saving your upload",
-      "recordedAtInvalid": "Please enter a valid recorded at date."
+      "recordedAtInvalid": "Please enter a valid recorded at date.",
+      "deploymentNamePlaceholder": "Site A North, AudioMoth March 2024",
+      "channelCount": "{count, plural, one {# channel} other {# channels}}",
+      "bitDepth": "{count}-bit"
+    },
+    "spectrogram": {
+      "chooseFile": "Choose an audio file to preview its frequency pattern before saving.",
+      "frequencyOverTime": "Frequency over time",
+      "previewAria": "Audio spectrogram preview",
+      "low": "low",
+      "high": "high",
+      "title": "Spectrogram preview",
+      "caption": "Brighter bands indicate stronger frequencies in the selected recording."
     }
   },
   "dashboard": {
@@ -211,7 +239,7 @@
     "accountNotReady": "Account data is not ready to save yet."
   },
   "profile": {
-    "aboutPlaceholder": "Tell the world about your organization — its mission, history, and the work you do…",
+    "aboutPlaceholder": "Tell the world about your organization: its mission, history, and the work you do…",
     "public": "Public",
     "unlisted": "Unlisted",
     "addCountry": "Add country",
@@ -306,7 +334,11 @@
       "nearBoundary": "Near boundary: this tree is outside the selected site and will be skipped.",
       "invalidBoundary": "Invalid selected site boundary: the boundary could not be used for tree validation.",
       "invalidBoundaryFallback": "the boundary could not be used for tree validation.",
-      "outOfSite": "Out of site: this tree is outside the selected site boundary and will be skipped."
+      "outOfSite": "Out of site: this tree is outside the selected site boundary and will be skipped.",
+      "futureDate": "Event date cannot be in the future.",
+      "canopyRange": "Canopy cover must be between 0 and 100.",
+      "boundaryOutside": "This tree is {distance} outside the selected map area. Check the coordinates, choose a different site boundary, or remove this row.",
+      "unknownDistance": "an unknown distance"
     },
     "fileDrop": {
       "modes": {
@@ -371,7 +403,7 @@
       "continueToMapping": "Continue to Column Mapping",
       "selectSiteBeforeUpload": "Select a site before uploading tree data.",
       "csvOnly": "Only .csv and .tsv files are supported.",
-      "fileTooLarge": "File is too large. Maximum size is 10 MB (got {size}).",
+      "fileTooLarge": "The file is too large ({size}). The maximum size is {maxSize}.",
       "zipOnly": "Only Kobo Media Attachments .zip files are supported.",
       "zipTooLarge": "ZIP file is too large. Maximum size is 200 MB (got {size}).",
       "zipNoImages": "No supported image attachments were found in this ZIP. Make sure you selected KoboToolbox’s Media Attachments export.",
@@ -401,8 +433,8 @@
       "addSiteBoundary": "Add site boundary",
       "selectSitePlaceholder": "Select a site…",
       "defaultSuffix": " (default)",
-      "preparingMapAreaSuffix": " — preparing map area…",
-      "needsMapAreaSuffix": " — needs map area",
+      "preparingMapAreaSuffix": ": preparing map area…",
+      "needsMapAreaSuffix": ": needs map area",
       "addMapAreaToSelected": "Add map area to selected site",
       "selectedSiteCheckHelp": "Trees will be checked against this one drawn map area.",
       "mapAreaPreparing": "This drawn map area is still being prepared. Try again in a moment.",
@@ -456,7 +488,16 @@
           "description": "Trees were already here when you started recording. Better to be honest than guess."
         }
       },
-      "continueToMatch": "Continue to match headings"
+      "continueToMatch": "Continue to match headings",
+      "invalidPhotoFolder": "Choose the photo folder file downloaded from your field form app.",
+      "emptyPhotoFolder": "This photo folder contains no supported images.",
+      "unsupportedFile": "Only CSV and TSV spreadsheet exports are supported.",
+      "parseFileError": "The spreadsheet could not be read. Check the file and try again.",
+      "photoFolderCounts": "{images, plural, one {# image} other {# images}}, {submissions, plural, one {# submission} other {# submissions}}",
+      "treeCount": "{count, plural, one {# tree} other {# trees}}",
+      "siteCreateDenied": "Your role cannot add a site boundary.",
+      "siteEditDenied": "Your role cannot edit this site boundary.",
+      "groupSelectDenied": "Your role cannot add trees to an existing tree group."
     },
     "preview": {
       "siteBoundaryField": "Site boundary",
@@ -473,7 +514,7 @@
       "partialValidBoundaryHint": "Fix any tree coordinates outside the selected polygon, go back and choose/create the correct site boundary if needed, and fix any other listed mapping or field errors.",
       "partialValidMappingHint": "Fix the listed mapping or field errors if you want to include them.",
       "dataPreview": "Data Preview",
-      "showingRows": "Showing {maxRows} of {totalRows} rows — all valid rows will be uploaded",
+      "showingRows": "Showing {maxRows} of {totalRows} rows: all valid rows will be uploaded",
       "photos": "Photos",
       "status": "Status",
       "valid": "Valid",
@@ -491,12 +532,13 @@
       "noSiteSelected": "No site selected. Go back and choose or create a site boundary.",
       "checkingMapAreaFor": "Checking drawn map area for {siteName}…",
       "boundaryCheckError": "Could not check the selected drawn map area ({error}). Go back, choose or create a site boundary, then try again.",
-      "allRowsReady": "All {count, plural, one {# row is} other {# rows are}} ready — ready to save to {siteName}.",
+      "allRowsReady": "All {count, plural, one {# row is} other {# rows are}} ready to save to {siteName}.",
       "noValidRows": "No valid rows found. Fix errors and try again.",
       "partialRowsReady": "{validCount} ready, {errorCount} need fixes. Rows with problems will be skipped.",
       "treeInformationPreview": "Tree information preview",
       "showingFirstRows": "Showing first {maxRows} of {totalRows} rows",
-      "backToMatchedHeadings": "Back to matched headings"
+      "backToMatchedHeadings": "Back to matched headings",
+      "boundaryCheckFailed": "The selected map area could not be checked. Go back, choose or create a site boundary, and try again."
     },
     "manager": {
       "backToUpload": "Back to upload",
@@ -587,18 +629,18 @@
       "optionalOccurrence": "Optional Occurrence",
       "measurements": "Measurements",
       "media": "Media",
-      "duplicateAria": "Duplicate mapping — only the first source column will be used",
+      "duplicateAria": "Duplicate mapping: only the first source column will be used",
       "mappedAria": "Mapped column",
       "expectedSkipAria": "Intentionally skipped Kobo metadata column",
-      "skippedAria": "Skipped column — review before continuing",
+      "skippedAria": "Skipped column: review before continuing",
       "duplicate": "Duplicate",
       "mapped": "Mapped",
       "autoSkipped": "Auto-skipped",
       "skipped": "Skipped",
       "back": "Back",
       "continue": "Continue to Preview",
-      "duplicateWarning": "Multiple source columns are mapped to the same target field. Only the first mapping will be used; duplicates are highlighted. (Photo URL columns are an exception — multiple columns can map to Photo URL for multi-photo trees.)",
-      "skippedNotUploaded": "Skipped — not uploaded",
+      "duplicateWarning": "Multiple source columns are mapped to the same target field. Only the first mapping will be used; duplicates are highlighted. (Photo URL columns are an exception: multiple columns can map to Photo URL for multi-photo trees.)",
+      "skippedNotUploaded": "Skipped: not uploaded",
       "requiredField": "Required field",
       "matchHeadingsTitle": "Match File Headings",
       "matchHeadingsDescription": "Match your file headings to the tree information GainForest needs. {count, plural, one {# heading detected.} other {# headings detected.}}",
@@ -616,7 +658,7 @@
       "photos": "Photos",
       "duplicateWarningShort": "Some headings match the same information. Only the first match will be used.",
       "matched": "Matched",
-      "skippedWillNotSave": "Skipped — will not be saved",
+      "skippedWillNotSave": "Skipped: will not be saved",
       "duplicateTarget": "Duplicate target",
       "continueToPreview": "Continue to preview"
     },
@@ -670,13 +712,13 @@
       "obscureLabel": "Hide my exact location",
       "obscureHint": "Publishes an approximate circle around a randomised point instead of the exact spot, so people can't tell exactly where the photo was taken.",
       "obscureAreaLabel": "Approximate area",
-      "obscureArea_tight": "Tight — about a 300 m radius",
-      "obscureArea_balanced": "Balanced — about a 500 m radius",
-      "obscureArea_wide": "Wide — about a 1 km radius",
+      "obscureArea_tight": "Tight: about a 300 m radius",
+      "obscureArea_balanced": "Balanced: about a 500 m radius",
+      "obscureArea_wide": "Wide: about a 1 km radius",
       "notesLabel": "Notes",
       "notesPlaceholder": "Notes",
       "batchStoryLabel": "Story for this upload",
-      "batchStoryHint": "Optional — add one note that applies to all observations in this upload.",
+      "batchStoryHint": "Optional: add one note that applies to all observations in this upload.",
       "batchStoryPlaceholder": "What was happening around these sightings?",
       "remove": "Remove photo",
       "readyCount": "{count, plural, =0 {Nothing ready to add yet} one {# photo ready} other {# photos ready}}",
@@ -728,7 +770,7 @@
       "measurementSuggestion_count": "Count",
       "measurementSuggestion_weight": "Weight",
       "projectLabel": "Add to a project",
-      "projectHint": "Optional — link these observations to one of your projects.",
+      "projectHint": "Optional: link these observations to one of your projects.",
       "projectNone": "No project",
       "applyToAll": "Use this date & location for all",
       "dropTitleTouch": "Add your photos",
@@ -753,7 +795,7 @@
       "replace": "Replace",
       "rowsFound": "{count, plural, one {# row} other {# rows}}",
       "storedAsFile": "We'll keep the file exactly as you sent it, so nothing is changed or split up.",
-      "missingRequired": "This doesn't look like it has species, date and location columns — we'll still store it as you sent it.",
+      "missingRequired": "This doesn't look like it has species, date and location columns: we'll still store it as you sent it.",
       "measurementsFound": "Measurements:",
       "measureHeight": "Height",
       "measureDbh": "Trunk width",
@@ -853,7 +895,7 @@
     "addTileBody": "Upload more field images.",
     "emptyObservationsTitle": "No observations yet",
     "emptyObservationsBody": "Add your first observation from field images.",
-    "emptyHeroDescription": "Observations capture what you find in the field — species, photos, places, and dates — building the evidence behind your impact.",
+    "emptyHeroDescription": "Observations record the species, photos, places, and dates you find in the field. They build evidence for your impact.",
     "selectAll": "Select all",
     "deselectAll": "Deselect all",
     "removeSelected": "Remove selected",
@@ -1130,7 +1172,8 @@
       "did": "DID",
       "wallet": "EVM wallet",
       "copyDid": "Copy DID",
-      "copyWallet": "Copy wallet address"
+      "copyWallet": "Copy wallet address",
+      "copyFailed": "Couldn’t copy link"
     },
     "errors": {
       "nameRequired": "Add a name before saving.",

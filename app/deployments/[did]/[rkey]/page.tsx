@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import type { ReactNode } from "react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
@@ -13,7 +12,7 @@ import {
   RouteIcon,
 } from "lucide-react";
 import { fetchAuthSession } from "@/app/_lib/auth-server";
-import { formatDate, shortDid } from "@/app/_lib/format";
+import { formatDate } from "@/app/_lib/format";
 import { getDeploymentEvent, linkedEquipmentUri, parseAtUri } from "@/app/_lib/deployment-events";
 import { equipmentDetailPath } from "@/app/_lib/equipment";
 import { getCertifiedProfileCard } from "@/app/account/_lib/account-route";
@@ -21,6 +20,7 @@ import { accountEquipmentPath, accountPath } from "@/app/account/_lib/account-ro
 import { DeploymentLocationMap } from "./DeploymentLocationMap";
 import { DeploymentDetailActions } from "./DeploymentDetailActions";
 import { DeploymentRecordings } from "./DeploymentRecordings";
+import { AssetAttribution, AssetMetaRow } from "@/app/equipment/[did]/[rkey]/AssetDetailPrimitives";
 
 export const dynamic = "force-dynamic";
 
@@ -65,18 +65,22 @@ export default async function DeploymentDetailPage({ params }: { params: Deploym
   ]);
   const viewerDid = session.isLoggedIn ? session.did : null;
   const isOwner = viewerDid === item.did;
-  const ownerName = ownerProfile?.displayName?.trim() || shortDid(item.did);
+  const ownerName = ownerProfile?.displayName?.trim() || tProfile("unnamed");
   const name = item.locality ?? t("untitled");
 
-  const lat = item.decimalLatitude ? Number(item.decimalLatitude) : NaN;
-  const lon = item.decimalLongitude ? Number(item.decimalLongitude) : NaN;
+  const lat = item.decimalLatitude !== null && item.decimalLatitude !== undefined
+    ? Number(item.decimalLatitude)
+    : NaN;
+  const lon = item.decimalLongitude !== null && item.decimalLongitude !== undefined
+    ? Number(item.decimalLongitude)
+    : NaN;
   const hasCoords = Number.isFinite(lat) && Number.isFinite(lon);
 
   const linkedUri = linkedEquipmentUri(item.eventRemarks);
   const linkedParts = linkedUri ? parseAtUri(linkedUri) : null;
 
   return (
-    <main className="mx-auto w-full max-w-3xl px-6 pb-20 pt-8 md:pt-12">
+    <main className="mx-auto w-full max-w-6xl px-3 pb-8 pt-4 sm:px-5 sm:pt-6 lg:px-8">
       <Link
         href="/audiomoth?tab=deployments"
         className="inline-flex items-center gap-1.5 text-[13px] font-medium text-muted-foreground transition-colors hover:text-foreground"
@@ -91,7 +95,7 @@ export default async function DeploymentDetailPage({ params }: { params: Deploym
             <MapPinIcon className="size-7" />
           </span>
           <div className="min-w-0">
-            <h1 className="truncate text-2xl font-semibold tracking-tight text-foreground">{name}</h1>
+            <h1 className="break-words font-instrument text-2xl font-semibold italic tracking-tight text-foreground">{name}</h1>
             <p className="mt-0.5 font-mono text-xs text-muted-foreground">{item.eventID}</p>
           </div>
         </div>
@@ -104,15 +108,15 @@ export default async function DeploymentDetailPage({ params }: { params: Deploym
         </div>
       ) : null}
 
-      <section className="mt-4 rounded-2xl border border-border bg-card/90 p-5 sm:p-6">
+      <section className="mt-8 rounded-2xl bg-muted/60 p-4 sm:p-5">
         <dl className="grid gap-x-8 gap-y-5 sm:grid-cols-2">
-          <MetaRow icon={<FingerprintIcon className="h-4 w-4" aria-hidden />} label={t("deploymentIdLabel")}>
+          <AssetMetaRow icon={<FingerprintIcon className="h-4 w-4" aria-hidden />} label={t("deploymentIdLabel")}>
             <span className="font-mono">{item.eventID}</span>
-          </MetaRow>
-          <MetaRow icon={<CalendarIcon className="h-4 w-4" aria-hidden />} label={t("deployedLabel")}>
+          </AssetMetaRow>
+          <AssetMetaRow icon={<CalendarIcon className="h-4 w-4" aria-hidden />} label={t("deployedLabel")}>
             {formatDate(item.eventDate)}
-          </MetaRow>
-          <MetaRow icon={<MapPinIcon className="h-4 w-4" aria-hidden />} label={t("coordinatesLabel")}>
+          </AssetMetaRow>
+          <AssetMetaRow icon={<MapPinIcon className="h-4 w-4" aria-hidden />} label={t("coordinatesLabel")}>
             {hasCoords ? (
               <a
                 href={`https://www.openstreetmap.org/?mlat=${lat}&mlon=${lon}#map=15/${lat}/${lon}`}
@@ -126,8 +130,8 @@ export default async function DeploymentDetailPage({ params }: { params: Deploym
             ) : (
               "—"
             )}
-          </MetaRow>
-          <MetaRow icon={<RadioIcon className="h-4 w-4" aria-hidden />} label={t("equipmentUsedLabel")}>
+          </AssetMetaRow>
+          <AssetMetaRow icon={<RadioIcon className="h-4 w-4" aria-hidden />} label={t("equipmentUsedLabel")}>
             {linkedParts ? (
               <Link
                 href={equipmentDetailPath(linkedParts.did, linkedParts.rkey)}
@@ -139,60 +143,24 @@ export default async function DeploymentDetailPage({ params }: { params: Deploym
             ) : (
               item.equipmentUsed ?? "—"
             )}
-          </MetaRow>
+          </AssetMetaRow>
           {item.samplingProtocol ? (
-            <MetaRow icon={<RouteIcon className="h-4 w-4" aria-hidden />} label={t("protocolLabel")}>
+            <AssetMetaRow icon={<RouteIcon className="h-4 w-4" aria-hidden />} label={t("protocolLabel")}>
               {item.samplingProtocol}
-            </MetaRow>
+            </AssetMetaRow>
           ) : null}
         </dl>
       </section>
 
       <DeploymentRecordings did={item.did} eventUri={item.uri} isOwner={isOwner} />
 
-      <section className="mt-4 rounded-2xl border border-border bg-card/90 p-5 sm:p-6">
-        <p className="text-[11px] font-medium uppercase tracking-[0.12em] text-muted-foreground">
-          {t("recordedByLabel")}
-        </p>
-        {/* Visitors go to the recorder owner's public profile; the owner-only
-            equipment registry is linked only when the viewer is the owner. */}
-        <Link
-          href={isOwner ? accountEquipmentPath(item.did) : accountPath(item.did)}
-          className="group mt-3 flex items-center gap-3"
-        >
-          <span className="relative h-10 w-10 shrink-0 overflow-hidden rounded-full border border-border bg-muted">
-            {ownerProfile?.avatarUrl ? (
-              // eslint-disable-next-line @next/next/no-img-element -- arbitrary PDS/CDN hosts
-              <img src={ownerProfile.avatarUrl} alt="" className="h-full w-full object-cover" />
-            ) : (
-              <span className="grid h-full w-full place-items-center text-sm font-semibold text-muted-foreground">
-                {ownerName.charAt(0).toUpperCase()}
-              </span>
-            )}
-          </span>
-          <span className="min-w-0 flex-1">
-            <span className="block truncate text-sm font-medium text-foreground transition-colors group-hover:text-primary">
-              {ownerName}
-            </span>
-            <span className="mt-0.5 inline-flex items-center gap-1 text-xs text-muted-foreground">
-              {isOwner ? t("viewEquipment") : tProfile("viewProfile")}
-              <ArrowUpRightIcon className="h-3 w-3" aria-hidden />
-            </span>
-          </span>
-        </Link>
-      </section>
+      <AssetAttribution
+        heading={t("recordedByLabel")}
+        href={isOwner ? accountEquipmentPath(item.did) : accountPath(item.did)}
+        ownerName={ownerName}
+        avatarUrl={ownerProfile?.avatarUrl}
+        actionLabel={isOwner ? t("viewEquipment") : tProfile("viewProfile")}
+      />
     </main>
-  );
-}
-
-function MetaRow({ icon, label, children }: { icon: ReactNode; label: string; children: ReactNode }) {
-  return (
-    <div className="flex items-start gap-3">
-      <span className="mt-0.5 text-primary">{icon}</span>
-      <div className="min-w-0 flex-1">
-        <dt className="text-[11px] font-medium uppercase tracking-[0.08em] text-foreground/45">{label}</dt>
-        <dd className="mt-0.5 text-sm leading-snug text-foreground">{children}</dd>
-      </div>
-    </div>
   );
 }

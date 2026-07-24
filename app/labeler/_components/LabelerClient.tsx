@@ -153,6 +153,8 @@ export function LabelerClient({
           // "recent" queue, not "unidentified" — switch so it stays visible.
           if (!isUnidentified(record)) setMode("recent");
         }
+      } catch {
+        // Keep the loaded queue usable when a deep-linked record is unavailable.
       } finally {
         if (!controller.signal.aborted) pendingDeepLinkRef.current = null;
       }
@@ -198,14 +200,14 @@ export function LabelerClient({
         compact
         lightSrc="/images/explore/explore-hero-light@2x.webp"
         darkSrc="/images/explore/explore-hero-dark@2x.webp"
-        eyebrow={t("eyebrow")}
+        imageAlt=""
         title={t("hero.title")}
         accent={t("hero.accent")}
         lede={t("description")}
       />
       <section className="border-b border-border-soft">
-        <div className="mx-auto max-w-[1480px] px-5 pb-8 sm:px-7 lg:px-10">
-          <div className="grid gap-3 rounded-2xl border border-border-soft bg-background/80 p-3 shadow-sm backdrop-blur md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-[minmax(220px,1fr)_repeat(5,150px)]">
+        <div className="mx-auto max-w-[90rem] px-3 pb-8 sm:px-5 lg:px-8">
+          <div className="grid gap-3 rounded-2xl bg-muted p-3 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-[minmax(220px,1fr)_repeat(5,150px)]">
             <label className="relative">
               <span className="sr-only">{t("filters.searchLabel")}</span>
               <SearchIcon className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" aria-hidden />
@@ -241,7 +243,7 @@ export function LabelerClient({
         </div>
       </section>
 
-      <div className="mx-auto max-w-[1480px] px-5 py-6 sm:px-7 lg:px-10">
+      <div className="mx-auto max-w-[90rem] px-3 py-6 sm:px-5 lg:px-8">
         <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
           <div className="inline-flex rounded-full border border-border bg-muted/50 p-1">
             <QueueButton active={mode === "unidentified"} onClick={() => setMode("unidentified")}>
@@ -269,7 +271,7 @@ export function LabelerClient({
                 ))}
               </div>
             ) : (
-              <div className="grid min-h-72 place-items-center rounded-3xl border border-dashed border-border bg-muted/20 px-6 text-center">
+              <div className="grid min-h-72 place-items-center rounded-2xl bg-muted px-4 text-center sm:px-5">
                 <div>
                   <LeafIcon className="mx-auto size-7 text-primary/60" aria-hidden />
                   <p className="mt-3 font-medium text-foreground">{t("empty.title")}</p>
@@ -289,7 +291,7 @@ export function LabelerClient({
             {selected ? (
               <ObservationReviewPanel record={selected} viewerDid={viewerDid} />
             ) : (
-              <div className="rounded-3xl border border-border-soft bg-card p-8 text-center text-sm text-muted-foreground">
+              <div className="rounded-2xl bg-muted p-4 py-8 text-center text-sm text-muted-foreground sm:p-5 sm:py-8">
                 {t("review.selectPrompt")}
               </div>
             )}
@@ -387,7 +389,7 @@ function ObservationQueueCard({
       onClick={onSelect}
       aria-pressed={selected}
       className={cn(
-        "group overflow-hidden rounded-2xl border bg-card text-left transition-all hover:-translate-y-0.5 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50",
+        "group overflow-hidden rounded-2xl border bg-card text-left transition-colors motion-reduce:transform-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50",
         selected ? "border-primary shadow-[0_0_0_2px_color-mix(in_srgb,var(--primary)_18%,transparent)]" : "border-border-soft",
       )}
     >
@@ -448,8 +450,8 @@ function ObservationReviewPanel({ record, viewerDid }: { record: OccurrenceRecor
       <div className="p-5">
         <div className="flex items-start justify-between gap-4">
           <div className="min-w-0">
-            <p className="text-xs font-medium uppercase tracking-[0.12em] text-primary">{t("review.currentIdentification")}</p>
-            <h2 className="mt-1 text-xl font-semibold text-foreground">{name}</h2>
+            <p className="text-xs font-medium text-primary">{t("review.currentIdentification")}</p>
+            <h2 className="mt-1 font-instrument text-xl font-light italic text-foreground">{name}</h2>
             {record.scientificName && record.vernacularName ? (
               <p className="mt-0.5 italic text-muted-foreground">{record.scientificName}</p>
             ) : null}
@@ -490,7 +492,7 @@ function ObservationReviewPanel({ record, viewerDid }: { record: OccurrenceRecor
 function Fact({ label, value }: { label: string; value: string | null }) {
   return (
     <div className="min-w-0">
-      <dt className="text-[10px] font-medium uppercase tracking-[0.1em] text-foreground/45">{label}</dt>
+      <dt className="text-xs font-medium text-muted-foreground">{label}</dt>
       <dd className="mt-0.5 truncate text-foreground">{value || "—"}</dd>
     </div>
   );
@@ -552,7 +554,7 @@ function IdentificationForm({ record, viewerDid }: { record: OccurrenceRecord; v
     <section className="mt-5 rounded-2xl bg-primary/[0.06] p-4">
       <div className="flex items-center gap-2">
         <MicroscopeIcon className="size-4 text-primary" aria-hidden />
-        <h3 className="font-semibold text-foreground">{t("title")}</h3>
+        <h3 className="font-instrument font-light italic text-foreground">{t("title")}</h3>
       </div>
       <p className="mt-1 text-xs leading-5 text-muted-foreground">{t("description")}</p>
 

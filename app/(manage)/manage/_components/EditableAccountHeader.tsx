@@ -368,7 +368,7 @@ function EditableHero({
   const sinceDate = formatSinceDate(editState.startDate);
 
   return (
-    <section className="overflow-hidden rounded-3xl border border-border/60 bg-card">
+    <section className="overflow-hidden rounded-3xl bg-card">
       {/* Cover band — click anywhere to change; icon reveals on hover/focus */}
       <div className="relative h-32 sm:h-40 md:h-44">
         <button
@@ -384,8 +384,8 @@ function EditableHero({
           ) : (
             <div className="absolute inset-0 bg-muted" style={{ backgroundImage: "radial-gradient(circle at 22% 40%, oklch(0.5 0.07 157 / 0.14) 0%, transparent 55%), radial-gradient(circle at 82% 18%, oklch(0.5 0.07 157 / 0.08) 0%, transparent 50%)" }} />
           )}
-          {/* gentle fade into the card at the bottom */}
-          <div className="pointer-events-none absolute inset-x-0 bottom-0 h-14 bg-linear-to-t from-card to-transparent" />
+          {/* Blend the cover into the exact identity surface below. */}
+          <div className="pointer-events-none absolute inset-x-0 bottom-0 h-24 bg-linear-to-t from-card via-card/60 to-transparent" />
           {/* hover/focus affordance */}
           {canEditCover ? (
             <div
@@ -420,7 +420,7 @@ function EditableHero({
       </div>
 
       {/* Identity */}
-      <div className="relative z-10 px-5 pb-5 sm:px-6 sm:pb-6">
+      <div className="relative z-10 px-4 pb-4 sm:px-5 sm:pb-5">
         <div className="-mt-12 flex flex-col gap-4 md:flex-row md:items-end md:gap-5">
         <button
           type="button"

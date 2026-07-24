@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { ContextHeading } from "@/components/ui/typography";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { INATURALIST_OBSERVATION_SOURCE, inaturalistOccurrenceIdKey, type INaturalistObservationSummary, type INaturalistProjectSummary, type INaturalistSyncStatus } from "@/app/_lib/inaturalist-shared";
 import { createMultimediaFromUrl, createRecord, getRecord, putRecord } from "../../_lib/mutations";
@@ -359,10 +360,10 @@ export function INaturalistSettingsSection({
     <div className="space-y-3">
       <div className="flex items-center gap-2">
         <Image src="/assets/logos/inaturalist.png" alt="" width={18} height={18} className="rounded bg-background" />
-        <h2 className="text-sm font-medium">{t("title")}</h2>
+        <ContextHeading as="h2" className="text-sm">{t("title")}</ContextHeading>
       </div>
 
-      <div className="rounded-xl bg-muted p-4">
+      <div className="rounded-2xl bg-muted p-4">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div className="min-w-0">
             <p className="text-sm font-medium text-foreground">
@@ -371,16 +372,17 @@ export function INaturalistSettingsSection({
             <p className="mt-1 text-xs leading-5 text-muted-foreground">{t("description")}</p>
           </div>
           {connected ? (
-            <Button type="button" variant="outline" size="sm" onClick={() => void disconnect()}>
+            <Button type="button" variant="outline" size="sm" onClick={() => void disconnect()} disabled={Boolean(disabledReason)} title={disabledReason ?? undefined}>
               <LogOutIcon className="size-3.5" />
               {t("disconnect")}
             </Button>
           ) : (
-            <Button type="button" variant={setupOpen ? "outline" : "default"} size="sm" onClick={() => setSetupOpen((open) => !open)}>
+            <Button type="button" variant={setupOpen ? "outline" : "default"} size="sm" onClick={() => setSetupOpen((open) => !open)} disabled={Boolean(disabledReason)} title={disabledReason ?? undefined}>
               {setupOpen ? t("hideSetup") : t("connect")}
             </Button>
           )}
         </div>
+        {disabledReason ? <p className="mt-3 text-xs text-muted-foreground">{disabledReason}</p> : null}
 
         {!connected && setupOpen ? (
           <div className="mt-4 space-y-3 border-t border-border/60 pt-4">
@@ -411,7 +413,7 @@ export function INaturalistSettingsSection({
                 className="h-9 bg-background"
               />
               <Button type="button" size="sm" onClick={() => void verifyProfile()} disabled={verifying || status === null || !profileInput.trim()}>
-                {verifying ? <Loader2Icon className="size-3.5 animate-spin" /> : null}
+                {verifying ? <Loader2Icon className="size-3.5 animate-spin motion-reduce:animate-none" /> : null}
                 {verifying ? t("verifying") : t("verify")}
               </Button>
             </div>
@@ -452,7 +454,7 @@ export function INaturalistSettingsSection({
                 </SelectContent>
               </Select>
               <Button type="button" variant="outline" size="sm" onClick={() => void preview()} disabled={loading || syncing || loadingProjects || projects.length === 0 || !selectedINaturalistProjectId}>
-                {loading ? <Loader2Icon className="size-4 animate-spin" /> : <RotateCcwIcon className="size-4" />}
+                {loading ? <Loader2Icon className="size-4 animate-spin motion-reduce:animate-none" /> : <RotateCcwIcon className="size-4" />}
                 {loading ? uploadT("loading") : sourceProject ? uploadT("refresh") : uploadT("preview")}
               </Button>
             </div>
@@ -465,7 +467,7 @@ export function INaturalistSettingsSection({
                 <span>{uploadT("found", { count: observations.length, project: sourceProject.title })}</span>
                 <span>{uploadT("summary", { synced: syncedCount, pending: pendingCount, errors: errorCount })}</span>
                 <Button type="button" size="sm" onClick={() => void syncPending()} disabled={syncableCount === 0 || syncing || Boolean(disabledReason)} title={disabledReason ?? undefined}>
-                  {syncing ? <Loader2Icon className="size-3.5 animate-spin" /> : <UploadCloudIcon className="size-3.5" />}
+                  {syncing ? <Loader2Icon className="size-3.5 animate-spin motion-reduce:animate-none" /> : <UploadCloudIcon className="size-3.5" />}
                   {syncing ? uploadT("syncing") : uploadT("syncPending", { count: syncableCount })}
                 </Button>
               </div>
@@ -477,7 +479,6 @@ export function INaturalistSettingsSection({
                 {error}
               </p>
             ) : null}
-            {disabledReason ? <p className="text-xs text-muted-foreground">{disabledReason}</p> : null}
             {truncated ? <p className="text-xs text-muted-foreground">{uploadT("truncated")}</p> : null}
 
             {sourceProject ? (

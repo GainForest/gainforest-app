@@ -6,7 +6,7 @@
   "title": "Futa akaunti yako",
   "lastUpdated": "Ilisasishwa mwisho: Julai 14, 2026",
   "intro": {
-    "p1": "Akaunti yako ya GainForest inatumika kwenye gainforest.app na kwenye programu ya simu ya Taina Field. Unaweza kuifuta wakati wowote, moja kwa moja kupitia programu ya wavuti: ufutaji unafanyika mara moja, ni wa kudumu na hauwezi kutenduliwa."
+    "p1": "Akaunti yako ya GainForest inatumika kwenye gainforest.app na programu ya simu ya Taina Field. Unaweza kuifuta wakati wowote kupitia programu ya wavuti. Ufutaji unafanyika mara moja, ni wa kudumu na hauwezi kutenduliwa."
   },
   "sections": {
     "howTo": {
@@ -14,8 +14,8 @@
       "steps": {
         "s1": "Ingia kwenye gainforest.app.",
         "s2": "Fungua mipangilio ya akaunti yako kwenye gainforest.app/settings.",
-        "s3": "Panua sehemu ya \"Advanced\" (ya kina) mwishoni mwa ukurasa na utafute \"Danger zone\" (eneo la hatari).",
-        "s4": "Bofya \"Delete account…\" (futa akaunti). Utaona muhtasari wa kila kitu kitakachofutwa.",
+        "s3": "Panua “Mipangilio ya juu” mwishoni mwa ukurasa na utafute “Eneo la hatari”.",
+        "s4": "Chagua “Futa akaunti…”. Utaona muhtasari wa kitakachofutwa.",
         "s5": "Andika sentensi ya uthibitisho kisha uthibitishe. Data yako inafutwa mara moja na unaondolewa kwenye akaunti."
       },
       "p1": "Hakuna muda wa nyongeza wala njia ya kurejesha: baada ya kuthibitisha, data iliyofutwa haiwezi kurudishwa."
@@ -29,7 +29,7 @@
     "whatIsNotDeleted": {
       "title": "Kisichofutwa",
       "paragraphs": {
-        "p1": "GainForest imejengwa juu ya AT Protocol, ambapo utambulisho wako na hazina yako ya data ni mali yako — si yetu. Kufuta akaunti yako ya GainForest kunaondoa kila kitu ambacho GainForest iliandika kwenye hazina yako, lakini utambulisho wako wa AT Protocol (jina lako la mtumiaji na DID yako) pamoja na uwezo wako wa kuingia vinabaki, vilevile data iliyotengenezwa na programu nyingine.",
+        "p1": "GainForest imejengwa juu ya AT Protocol, ambapo utambulisho wako na hazina yako ya data ni mali yako, si yetu. Kufuta akaunti huondoa kila kitu ambacho GainForest iliandika kwenye hazina. Utambulisho wako wa AT Protocol (jina la mtumiaji na DID), uwezo wa kuingia na data za programu nyingine hubaki.",
         "p2": "Ikiwa unamiliki mashirika kwenye GainForest, yatabaki bila mmiliki; utaombwa kukubali hili kabla ya ufutaji kuanza.",
         "p3": "Data ambayo Taina Field huhifadhi ndani ya kifaa chako hubaki hapo hadi ufute programu au data yake.",
         "p4": "Kwa kuwa AT Protocol ni mtandao wazi na uliosambazwa, nakala za rekodi ulizochapisha zinaweza kuwepo kwenye seva za watu wengine. Ufutaji huondoa rekodi kwenye chanzo na kuashiria huduma zinazofuata itifaki ziondoe nakala zao. Soma zaidi kwenye sera yetu ya faragha kwenye gainforest.app/privacy."

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { motion } from "framer-motion";
+import { useTranslations } from "next-intl";
 import {
   BadgeCheckIcon,
   CrosshairIcon,
@@ -20,8 +20,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
 import type { ManagedLocation } from "@/app/_lib/indexer";
-
-export type SiteMetrics = { area: number; lat: number; lon: number } | "Invalid" | null;
+import { computeSiteMetrics, type SiteMetrics } from "./site-metrics";
 
 type SiteCardProps = {
   site: ManagedLocation;
@@ -54,6 +53,7 @@ export function SiteCard({
   updateDisabledReason = null,
   deleteDisabledReason = null,
 }: SiteCardProps) {
+  const t = useTranslations("upload.sites");
   const locationUrl = useMemo(() => getSiteLocationUrl(site), [site]);
   const inlineCoord = useMemo(() => getInlineSiteCoordinate(site), [site]);
   const isPreviewable = hasMapPreview(site);
@@ -83,7 +83,7 @@ export function SiteCard({
         if (!res.ok) throw new Error("Map details unavailable");
         return (await res.json()) as GeoJSON.GeoJSON;
       })
-      .then((geoJson) => setMetrics(computeSimpleMetrics(geoJson)))
+      .then((geoJson) => setMetrics(computeSiteMetrics(geoJson)))
       .catch((err) => {
         if (err instanceof DOMException && err.name === "AbortError") return;
         setMetrics("Invalid");
@@ -110,12 +110,9 @@ export function SiteCard({
   };
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 8 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.35, ease: [0.25, 0.1, 0.25, 1] }}
+    <div
       className={cn(
-        "relative overflow-hidden bg-background transition-all duration-300",
+        "relative overflow-hidden bg-background transition-colors motion-reduce:transition-none",
         variant === "card" ? "rounded-xl border" : "rounded-2xl border-0",
         isPreviewable && variant === "card" &&
           "hover:border-primary/30 hover:shadow-md focus-within:border-ring focus-within:ring-ring/50 focus-within:ring-[3px]",
@@ -135,31 +132,31 @@ export function SiteCard({
         <div className="flex h-10 items-center justify-between gap-2 border-b border-border px-3 pr-11">
           {isPreviewing ? (
             <span className="inline-flex items-center gap-1 rounded-full bg-primary px-2 py-0.5 text-[10px] font-medium text-primary-foreground">
-              Viewing
+              {t("previewing")}
             </span>
           ) : isPreviewable ? (
-            <span className="text-xs text-muted-foreground">Click to view map</span>
+            <span className="text-xs text-muted-foreground">{t("clickToPreview")}</span>
           ) : (
-            <span className="text-xs text-muted-foreground">No map preview</span>
+            <span className="text-xs text-muted-foreground">{t("noPreview")}</span>
           )}
 
           {isDefault && (
             <span className="inline-flex items-center gap-1 rounded-full bg-primary px-2 py-0.5 text-[10px] font-medium text-primary-foreground">
               <BadgeCheckIcon className="h-3 w-3" />
-              Default
+              {t("default")}
             </span>
           )}
         </div>
 
         <div className="flex w-full flex-1 flex-col items-start justify-between px-3 py-2.5">
-          <h3 className="line-clamp-3 text-base font-medium leading-snug">
-            {site.record.name ?? "Unnamed site"}
+          <h3 className="line-clamp-3 font-instrument text-lg font-light italic leading-snug">
+            {site.record.name ?? t("unnamed")}
           </h3>
 
           {isLoadingMetrics ? (
             <Loader2Icon className="mt-1 h-3.5 w-3.5 animate-spin text-muted-foreground" />
           ) : metrics === "Invalid" ? (
-            <p className="mt-1 text-xs text-destructive">Map details unavailable</p>
+            <p className="mt-1 text-xs text-destructive">{t("invalid")}</p>
           ) : metrics ? (
             <div className="mt-1.5 flex w-full items-center justify-between gap-2">
               <span className="flex min-w-0 items-center gap-1 text-xs text-muted-foreground">
@@ -216,7 +213,7 @@ export function SiteCard({
               title={updateDisabledReason ?? undefined}
             >
               <BadgeCheckIcon className="mr-2 h-3.5 w-3.5" />
-              {isDefault ? "Already default" : "Make default"}
+              {isDefault ? t("alreadyDefault") : t("makeDefault")}
             </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem
@@ -231,7 +228,7 @@ export function SiteCard({
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
-    </motion.div>
+    </div>
   );
 }
 
@@ -250,64 +247,4 @@ function getInlineSiteCoordinate(site: ManagedLocation): { lat: number; lon: num
   const location = site.record.location;
   if (location?.kind === "point") return { lat: location.lat, lon: location.lon };
   return null;
-}
-
-function computeSimpleMetrics(
-  geoJson: GeoJSON.GeoJSON,
-): { area: number; lat: number; lon: number } | "Invalid" | null {
-  try {
-    const features: GeoJSON.Feature[] = (() => {
-      if (geoJson.type === "FeatureCollection") return geoJson.features;
-      if (geoJson.type === "Feature") return [geoJson];
-      return [{ type: "Feature", geometry: geoJson as GeoJSON.Geometry, properties: {} }];
-    })();
-
-    let totalArea = 0;
-    let sumLat = 0;
-    let sumLon = 0;
-    let count = 0;
-
-    const processRings = (coords: number[][][]) => {
-      for (const ring of coords) {
-        let area = 0;
-        for (let i = 0; i < ring.length - 1; i++) {
-          const a = ring[i];
-          const b = ring[i + 1];
-          if (a && b) area += (a[0] ?? 0) * (b[1] ?? 0) - (b[0] ?? 0) * (a[1] ?? 0);
-        }
-        totalArea += Math.abs(area / 2) * 111320 * 111320 * 0.0001;
-
-        for (const pt of ring) {
-          sumLon += pt[0] ?? 0;
-          sumLat += pt[1] ?? 0;
-          count++;
-        }
-      }
-    };
-
-    for (const feature of features) {
-      const geom = feature.geometry;
-      if (!geom) continue;
-      if (geom.type === "Polygon") {
-        processRings(geom.coordinates);
-      } else if (geom.type === "MultiPolygon") {
-        for (const poly of geom.coordinates) processRings(poly);
-      } else if (geom.type === "Point") {
-        sumLon += geom.coordinates[0] ?? 0;
-        sumLat += geom.coordinates[1] ?? 0;
-        count++;
-      } else if (geom.type === "MultiPoint") {
-        for (const pt of geom.coordinates) {
-          sumLon += pt[0] ?? 0;
-          sumLat += pt[1] ?? 0;
-          count++;
-        }
-      }
-    }
-
-    if (count === 0) return "Invalid";
-    return { area: totalArea, lat: sumLat / count, lon: sumLon / count };
-  } catch {
-    return "Invalid";
-  }
 }

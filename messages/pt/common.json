@@ -96,9 +96,9 @@
   "sidebar": {
     "changelogLink": "Ver novidades",
     "sections": {
-      "explore": "EXPLORAR",
-      "funding": "FINANCIAMENTO",
-      "manage": "GERENCIAR",
+      "explore": "Explorar",
+      "funding": "Financiamento",
+      "manage": "Gerenciar",
       "ai": "AI"
     },
     "items": {
@@ -153,7 +153,9 @@
       "createBumicert": "Criar um certificado",
       "createProject": "Criar um projeto",
       "addObservations": "Adicionar observações",
-      "addData": "Adicionar dados"
+      "addData": "Adicionar dados",
+      "project": "Projeto",
+      "observation": "Observação"
     },
     "tabs": {
       "explore": "Explorar",
@@ -180,11 +182,11 @@
   "settings": {
     "handle": {
       "title": "Nome de usuário",
-      "description": "Seu nome de usuário é seu nome público em todo o app — altere-o aqui e ele é atualizado em todos os lugares.",
+      "description": "Seu nome de usuário é seu nome público na GainForest.",
       "edit": "Editar",
       "newLabel": "Novo nome de usuário",
       "placeholder": "seunome",
-      "prefixHint": "De 3 a 18 caracteres. Apenas letras, números e hifens.",
+      "prefixHint": "Use de 3 a 18 letras, números ou hifens.",
       "save": "Salvar",
       "saving": "Salvando…",
       "cancel": "Cancelar",
@@ -200,23 +202,24 @@
         "full": "Digite um nome de usuário completo como alice.example.com.",
         "generic": "Não foi possível atualizar seu nome de usuário. Tente novamente.",
         "unavailable": "Alterar seu nome de usuário ainda não está disponível. Tente novamente mais tarde."
-      }
+      },
+      "customPlaceholder": "ana.exemplo.com"
     },
     "agentKeys": {
       "title": "Chaves para agentes de IA",
-      "description": "Dê a um agente de IA a própria chave para que ele adicione registros em seu nome — sem nunca compartilhar sua senha.",
+      "description": "Dê a um agente de IA uma chave separada para adicionar registros sem compartilhar sua senha.",
       "learnMore": "Ver o guia para agentes",
       "newKeyLabel": "Nome da nova chave",
       "namePlaceholder": "ex.: meu assistente de campo",
       "generate": "Gerar",
       "empty": "Ainda não há chaves.",
-      "hint": "As chaves podem adicionar e editar seus registros, mas nunca podem alterar as configurações da sua conta nem gerenciar outras chaves. Revogar uma chave corta o acesso do agente na hora.",
-      "freshTitle": "{name} — copie agora, mostrado apenas uma vez",
+      "hint": "As chaves de agente podem adicionar e editar registros de gestão. Elas não podem alterar configurações da conta nem gerenciar outras chaves. Revogar uma chave encerra o acesso imediatamente.",
+      "freshTitle": "{name}. Copie esta chave agora; ela aparece uma vez.",
       "copyKey": "Copiar chave",
       "copyPrompt": "Copiar mensagem",
       "copied": "Copiado",
       "done": "Concluído",
-      "freshHint": "Sua chave é mostrada apenas uma vez e já está na mensagem acima — cole-a no seu agente agora. Gerencie ou revogue chaves abaixo.",
+      "freshHint": "Cole agora no seu agente a mensagem de configuração completa que foi gerada. Ela já inclui a chave de uso único. Você pode gerenciar ou revogar a chave abaixo.",
       "createdLabel": "criada em {date}",
       "lastUsedLabel": "último uso {date}",
       "neverUsed": "nunca usada",
@@ -227,14 +230,15 @@
         "load": "Não foi possível carregar suas chaves.",
         "create": "Não foi possível criar a chave.",
         "revoke": "Não foi possível revogar a chave.",
-        "copy": "Falha ao copiar — selecione o texto manualmente.",
+        "copy": "Falha ao copiar: selecione o texto manualmente.",
         "nameRequired": "Dê à chave o nome do agente a que ela pertence."
       },
       "connectCaption": "Cole isto no seu agente de IA (ChatGPT, Claude, um bot do Telegram…) para conectá-lo ao GainForest.",
       "generateAndCopy": "Gerar chave e copiar mensagem",
       "defaultKeyName": "Agente de IA",
       "tainaBadge": "Tainá",
-      "tainaBadgeTitle": "Esta chave está vinculada ao seu bot de Telegram da Tainá"
+      "tainaBadgeTitle": "Esta chave está vinculada ao seu bot de Telegram da Tainá",
+      "firstPrompt": "Leia {site}/skill.md e siga a configuração. Use esta chave da API GainForest: {token}. Salve-a como GAINFOREST_API_KEY e execute a verificação whoami da habilidade. Lembre-se da chave e do arquivo da habilidade. Depois, ajude-me a registrar uma observação de campo ou iniciar um projeto, mas não crie nada antes da minha aprovação."
     },
     "inaturalist": {
       "title": "iNaturalist",
@@ -285,6 +289,75 @@
         "title": "Avançado",
         "description": "Dados da conta e exclusão"
       }
+    },
+    "metadata": {
+      "title": "Configurações",
+      "description": "Gerencie as configurações da sua conta GainForest."
+    },
+    "password": {
+      "title": "Senha",
+      "description": "Enviaremos um código de redefinição para o e-mail da sua conta.",
+      "show": "Mostrar senha",
+      "hide": "Ocultar senha",
+      "sendCode": "Enviar código",
+      "sending": "Enviando…",
+      "codeSent": "Enviamos um código de redefinição para {email}. Verifique sua caixa de entrada.",
+      "codeLabel": "Código de redefinição",
+      "codePlaceholder": "Digite o código do e-mail",
+      "newLabel": "Nova senha",
+      "newPlaceholder": "Pelo menos 8 caracteres",
+      "confirmLabel": "Confirmar senha",
+      "confirmPlaceholder": "Repita a nova senha",
+      "change": "Alterar senha",
+      "saving": "Salvando…",
+      "cancel": "Cancelar",
+      "success": "Senha alterada.",
+      "errors": {
+        "request": "Não foi possível enviar o e-mail de redefinição. Tente novamente.",
+        "mismatch": "As senhas não coincidem.",
+        "length": "Use entre 8 e 256 caracteres.",
+        "reset": "Não foi possível alterar a senha. Verifique o código e tente novamente."
+      }
+    },
+    "identity": {
+      "title": "Identidade da conta",
+      "accountId": "ID técnico da conta"
+    },
+    "deleteAccount": {
+      "sectionTitle": "Zona de perigo",
+      "title": "Excluir conta",
+      "summary": "Remove permanentemente seus projetos, Certs, observações e perfil da GainForest. Sua identidade de acesso e os dados de outros aplicativos permanecem. Isso não pode ser desfeito.",
+      "openButton": "Excluir conta…",
+      "irreversible": "Isso não pode ser desfeito",
+      "checking": "Verificando o que será excluído…",
+      "recordCount": "{approximate, select, 1 {Cerca de } other {}}{count, plural, one {# registro será} other {# registros serão}} excluídos permanentemente.",
+      "scope": "Tudo o que você publicou na GainForest é removido do seu servidor de dados pessoal. Sua identidade de acesso e os dados de outros aplicativos não são alterados.",
+      "empty": "Nenhum registro da GainForest foi encontrado. Não há nada para excluir.",
+      "groups": {
+        "biodiversity": "Observações de biodiversidade",
+        "media": "Áudio e multimídia",
+        "organization": "Dados de organizações",
+        "feed": "Publicações e curtidas do feed",
+        "certs": "Certs e coleções",
+        "profile": "Perfil, selos e assinaturas",
+        "other": "Outros registros da GainForest"
+      },
+      "ownedOrganizations": "Você é responsável por {count, plural, one {# organização. Excluir sua conta a deixará} other {# organizações. Excluir sua conta as deixará}} sem responsável:",
+      "transferOwnership": "Transfira primeiro a propriedade na página Membros de cada organização se quiser que elas mantenham um responsável.",
+      "ownerlessAcknowledge": "Entendo que essas organizações ficarão sem responsável.",
+      "confirmPhrase": "excluir minha conta",
+      "confirmInstruction": "Digite <phrase></phrase> para confirmar:",
+      "confirmInstructionAccount": "Digite <phrase></phrase> para confirmar para <account></account>:",
+      "deleting": "Excluindo registros… {deleted} de {total}",
+      "keepOpen": "Mantenha esta janela aberta até a exclusão terminar.",
+      "done": "{deleted, plural, one {# registro excluído.} other {# registros excluídos.}} {failed, plural, =0 {Saindo…} one {Não foi possível remover #. Saindo…} other {Não foi possível remover #. Saindo…}}",
+      "confirmButton": "Excluir tudo permanentemente",
+      "retry": "Tentar novamente",
+      "cancel": "Cancelar",
+      "errors": {
+        "read": "Não foi possível verificar os dados da sua conta. Tente novamente.",
+        "delete": "A exclusão falhou. Tente novamente."
+      }
     }
   },
   "bumicertCard": {
@@ -333,7 +406,7 @@
       "projects": {
         "label": "Trabalho regenerativo",
         "title": "Projetos",
-        "blurb": "Explore o que as comunidades estão construindo — cada projeto reúne seus Certs, locais e evidências de campo.",
+        "blurb": "Explore o que as comunidades estão construindo: cada projeto reúne seus Certs, locais e evidências de campo.",
         "statLabel": "projetos"
       },
       "bumicerts": {
@@ -407,8 +480,8 @@
         "detail": "Descoberta e indexação"
       },
       "storage": {
-        "name": "Servidor de dados pessoais",
-        "detail": "Armazenamento de registros e mídia"
+        "name": "Armazenamento de contas",
+        "detail": "Armazena contas e mídia"
       },
       "labels": {
         "name": "Serviço de rótulos",
@@ -419,8 +492,8 @@
         "detail": "Interface do certificados"
       },
       "api": {
-        "name": "API da aplicação",
-        "detail": "Backend da aplicação"
+        "name": "Serviço do aplicativo",
+        "detail": "Executa os recursos do aplicativo"
       },
       "defaultName": "Serviço"
     },
@@ -431,10 +504,9 @@
     },
     "hero": {
       "imageAlt": "Copa da floresta ao nascer do sol",
-      "eyebrow": "Status ao vivo",
       "title": "GainForest",
       "accent": "saúde do sistema",
-      "lede": "Disponibilidade atual de certificados, serviços de dados e infraestrutura de apoio."
+      "lede": "Disponibilidade atual do site, armazenamento de contas e busca."
     },
     "unavailable": {
       "title": "Status temporariamente indisponível",
@@ -496,7 +568,7 @@
   },
   "equipment": {
     "metadataTitle": "Equipamentos — {name}",
-    "personalIntro": "Equipamentos de campo registrados neste perfil — cada unidade com seu portador atual, local e estado.",
+    "personalIntro": "Equipamentos de campo registrados neste perfil: cada unidade com seu portador atual, local e estado.",
     "orgIntro": "Todos os equipamentos de campo registrados pelos membros da equipe desta organização, em um só lugar.",
     "membersUnavailable": "Não foi possível carregar a lista completa da equipe agora, então equipamentos de alguns membros podem estar faltando.",
     "addEquipment": "Adicionar equipamento",
@@ -508,7 +580,7 @@
     "unitCount": "{count, plural, one {# unidade} other {# unidades}}",
     "showingFiltered": "Mostrando {shown} de {total}",
     "emptyTitleOwner": "Ainda não há equipamentos",
-    "emptyBodyOwner": "Adicione sua primeira unidade — um AudioMoth, um celular de campo, uma armadilha fotográfica.",
+    "emptyBodyOwner": "Adicione sua primeira unidade: um AudioMoth, um celular de campo, uma armadilha fotográfica.",
     "emptyTitle": "Sem equipamentos",
     "emptyBodyPersonal": "Este perfil ainda não registrou nenhum equipamento.",
     "emptyBodyOrg": "Nenhum membro da equipe registrou equipamentos ainda.",
@@ -623,12 +695,21 @@
   "accountDonations": {
     "emptyHeroDescription": "Apoie um projeto e suas contribuições aparecerão aqui, cada uma vinculada ao projeto que você apoiou.",
     "emptyHeroCta": "Explorar projetos",
-    "anonymousNote": "Doações anônimas também aparecem aqui, mas só você pode vê-las — elas nunca são exibidas publicamente com o seu nome. Algumas doações anônimas antigas não podem ser exibidas.",
-    "anonymousBadge": "Visível só para você"
+    "anonymousNote": "Doações anônimas também aparecem aqui, mas só você pode vê-las: elas nunca são exibidas publicamente com o seu nome. Algumas doações anônimas antigas não podem ser exibidas.",
+    "anonymousBadge": "Visível só para você",
+    "historyTitle": "Histórico de doações",
+    "totalDonated": "Total doado",
+    "donations": "Doações",
+    "viewProject": "Ver projeto",
+    "unknownProject": "Projeto indisponível",
+    "paymentDetails": "Detalhes do pagamento",
+    "unavailableTitle": "O histórico de doações não está disponível",
+    "unavailableDescription": "Não foi possível carregar estes registros de doações. Tente novamente.",
+    "retry": "Tentar novamente"
   },
   "accountProjects": {
-    "emptyEyebrow": "Sem projetos",
-    "empty": "Esta conta ainda não compartilhou projetos."
+    "empty": "Esta conta ainda não compartilhou projetos.",
+    "emptyTitle": "Sem projetos"
   },
   "projectGallery": {
     "accountTitle": "Galeria",
@@ -666,7 +747,7 @@
       "body": "Compartilhe fotos no seu perfil. Arraste e solte várias de uma vez ou escolha arquivos do seu dispositivo.",
       "dropHint": "Arraste e solte imagens aqui, ou clique para escolher",
       "dropActive": "Solte suas imagens para adicioná-las",
-      "fileHint": "JPG, PNG, GIF ou WebP — até 10 MB cada",
+      "fileHint": "JPG, PNG, GIF ou WebP: até 10 MB cada",
       "previewAlt": "Imagem selecionada {index, number}",
       "removeImage": "Remover imagem {index, number}",
       "linkLabel": "Vincular a um projeto (opcional)",
@@ -683,7 +764,9 @@
       "recordTitleAccount": "Galeria de {name}",
       "open": "Adicionar imagens",
       "close": "Fechar"
-    }
+    },
+    "loadError": "Não foi possível carregar estas fotos.",
+    "retry": "Tentar novamente"
   },
   "projectManage": {
     "backToProjects": "Projetos",
@@ -745,6 +828,239 @@
         "partlyMeasured": "Parcialmente medido",
         "noMeasurements": "Ainda não há medições"
       }
+    },
+    "manager": {
+      "loadErrorTitle": "Não foi possível carregar as árvores",
+      "title": "Minhas árvores",
+      "emptyTitle": "Ainda não há árvores enviadas",
+      "noMatchesTitle": "Nenhuma árvore corresponde à busca",
+      "noMatchesBody": "Tente outra espécie, local ou pessoa.",
+      "clearSearch": "Limpar busca",
+      "selectAllAria": "Selecionar todas as árvores filtradas sem grupo",
+      "selectAll": "Selecionar todas as árvores filtradas",
+      "reviewNeeded": "Revisão necessária",
+      "measured": "Medida",
+      "loadingDetails": "Carregando detalhes",
+      "measurementReviewNeeded": "As medições precisam de revisão",
+      "measurementsReady": "Medições prontas",
+      "noMeasurements": "Ainda não há medições",
+      "informationTitle": "Informações da árvore",
+      "informationDescription": "Revise e atualize os dados salvos da árvore.",
+      "notSpecified": "Não informado",
+      "measurementsTitle": "Medições",
+      "measurementsDescription": "Registre DAP, altura, diâmetro do colo da raiz e cobertura da copa.",
+      "rootCollarHint": "Útil para árvores jovens cujo tronco é pequeno demais para DAP.",
+      "measurementEmptyHint": "Adicione pelo menos um valor para salvar uma medição.",
+      "photosTitle": "Fotos",
+      "photosDescription": "Veja e gerencie as fotos vinculadas a esta árvore.",
+      "photoCaption": "Legenda da nova foto",
+      "photoCaptionPlaceholder": "Legenda opcional",
+      "photoLinkPlaceholder": "Ou cole um link de foto",
+      "photosEmpty": "Ainda não há fotos vinculadas a esta árvore.",
+      "deletePhoto": "Excluir foto",
+      "deleteTitle": "Excluir árvore",
+      "deleteDescription": "Exclua esta árvore e seus registros vinculados.",
+      "deletePermanently": "Excluir permanentemente",
+      "loadErrorBody": "Não foi possível carregar as informações das árvores.",
+      "retry": "Tentar novamente",
+      "description": "Revise informações, medições e fotos salvas das árvores em um só lugar.",
+      "upload": "Enviar dados de árvores",
+      "backToGroups": "Voltar aos grupos de árvores",
+      "deleteGroup": "Excluir grupo de árvores",
+      "emptyBody": "Envie seu primeiro arquivo para começar a gerenciar informações, medições e fotos.",
+      "groupHelp": "Abra um grupo para revisar suas árvores. Abra as árvores sem grupo para selecioná-las e adicioná-las a um grupo existente.",
+      "ungroupedTitle": "Árvores sem grupo",
+      "savedTitle": "Árvores salvas",
+      "ungroupedDescription": "Selecione uma ou mais árvores para adicioná-las a um grupo.",
+      "savedDescription": "Selecione uma árvore para revisar detalhes, fotos e medições.",
+      "selectedCount": "{count} selecionadas",
+      "addCountToGroup": "Adicionar {count} ao grupo",
+      "addToGroup": "Adicionar ao grupo",
+      "selectTree": "Selecionar {name}",
+      "treeFallback": "árvore",
+      "unnamedTree": "Árvore sem nome",
+      "treeGroupLabel": "Grupo de árvores",
+      "noTreeGroup": "Sem grupo de árvores",
+      "projectPlaceLabel": "Local do projeto",
+      "notLinked": "Não vinculado",
+      "establishmentLabel": "Como a árvore chegou aqui",
+      "notSet": "Não definido",
+      "scientificName": "Nome científico",
+      "commonName": "Nome comum",
+      "eventDate": "Data do evento",
+      "recordedBy": "Registrado por",
+      "latitude": "Latitude",
+      "longitude": "Longitude",
+      "country": "País",
+      "locality": "Localidade",
+      "habitat": "Habitat",
+      "remarks": "Observações",
+      "saveTree": "Salvar informações da árvore",
+      "linkedMeasurements": "Medições vinculadas",
+      "height": "Altura",
+      "rootCollarCm": "Diâmetro do colo da raiz (cm)",
+      "canopyCover": "Cobertura da copa",
+      "heightM": "Altura (m)",
+      "canopyCoverPercent": "Cobertura da copa (%)",
+      "removeMeasurements": "Remover medições",
+      "saveMeasurements": "Salvar medições",
+      "addMeasurements": "Adicionar medições",
+      "choosePhoto": "Escolher foto",
+      "addLinkedPhoto": "Adicionar foto vinculada",
+      "saveCaption": "Salvar legenda",
+      "cancel": "Cancelar",
+      "noCaption": "Sem legenda.",
+      "editCaption": "Editar legenda",
+      "addCaption": "Adicionar legenda",
+      "photoAdded": "Adicionada em {date}",
+      "deleteTree": "Excluir árvore",
+      "deleteTreeTitle": "Excluir árvore?",
+      "deletePhotoTitle": "Excluir foto?",
+      "saveTreeError": "Não foi possível salvar as informações da árvore.",
+      "saveMeasurementError": "Não foi possível salvar a medição.",
+      "savePhotoError": "Não foi possível salvar a foto.",
+      "saveCaptionError": "Não foi possível salvar a legenda.",
+      "editTreeDenied": "Sua função não permite editar esta árvore.",
+      "noChanges": "Não há alterações para salvar.",
+      "treeSaved": "Informações da árvore salvas.",
+      "measurementManualReview": "Estas medições precisam de revisão manual antes da edição.",
+      "measurementDenied": "Sua função não permite alterar as medições desta árvore.",
+      "measurementsSaved": "Medições salvas.",
+      "measurementsRemoved": "As medições exibidas foram removidas.",
+      "measurementRequired": "Adicione pelo menos uma medição antes de salvar.",
+      "measurementsAdded": "Medições adicionadas.",
+      "photoAddDenied": "Sua função não permite adicionar fotos.",
+      "photoAddedFeedback": "Foto adicionada.",
+      "photoEditDenied": "Sua função não permite editar esta foto.",
+      "captionSaved": "Legenda salva.",
+      "photoDeleteDenied": "Sua função não permite excluir esta foto.",
+      "photoDeleted": "Foto excluída.",
+      "chooseTreeToDelete": "Escolha uma árvore para excluir.",
+      "treeDeleteDenied": "Sua função não permite excluir esta árvore.",
+      "groupCountDelayed": "A contagem do grupo pode ser atualizada depois.",
+      "treeDeletedWithNotes": "Árvore excluída. {notes}",
+      "treeDeleted": "Árvore excluída.",
+      "groupDeleteDenied": "Sua função não permite excluir este grupo.",
+      "treesAddedToGroup": "{count, plural, one {# árvore adicionada} other {# árvores adicionadas}} a {name}.",
+      "noTreesAdded": "Nenhuma árvore foi adicionada a {name}.",
+      "chooseUngrouped": "Escolha pelo menos uma árvore sem grupo.",
+      "groupAttachDenied": "Sua função não permite adicionar árvores existentes a um grupo.",
+      "someTreesNotAdded": "Não foi possível adicionar algumas árvores.",
+      "createGroupFirst": "Crie um grupo durante o envio antes de adicionar árvores sem grupo.",
+      "duplicateMeasurements": "Foi encontrada mais de uma medição editável. A edição foi pausada para proteger os valores registrados.",
+      "deleteTreeLinkedBody": "A exclusão também remove {photos, plural, one {# foto vinculada} other {# fotos vinculadas}} e {measurements, plural, one {# medição vinculada} other {# medições vinculadas}}.",
+      "deleteTreeLoadingBody": "A árvore não pode ser excluída até que seus detalhes terminem de carregar.",
+      "deleteTreeConfirmCounts": "Isso exclui a árvore, {photos, plural, one {# foto vinculada} other {# fotos vinculadas}} e {measurements, plural, one {# medição vinculada} other {# medições vinculadas}}. Não pode ser desfeito.",
+      "deleteTreeConfirm": "Isso exclui a árvore e fotos ou medições vinculadas. Não pode ser desfeito.",
+      "deletePhotoConfirm": "Isso exclui a foto da árvore selecionada. Não pode ser desfeito.",
+      "uploadDenied": "Sua função não permite enviar dados de árvores.",
+      "deletedGroupSuccess": "{name} e {count, plural, one {# árvore} other {# árvores}} foram excluídos.",
+      "deletedGroupPartial": "{name} e {count, plural, one {# árvore} other {# árvores}} foram excluídos, mas algumas fotos ou medições vinculadas permanecem. Atualize antes de tentar novamente.",
+      "deletedGroupTreesOnly": "{name} não foi excluído por completo. {count, plural, one {# árvore foi excluída} other {# árvores foram excluídas}}, mas o grupo foi mantido para nova tentativa.",
+      "deletedGroupFailed": "Não foi possível excluir {name}. O grupo foi mantido para nova tentativa.",
+      "photoCount": "{count, plural, one {# foto} other {# fotos}}",
+      "treePhoto": "Foto da árvore",
+      "photoAltNamed": "Foto da árvore {name}",
+      "photoAlt": "Foto da árvore",
+      "establishmentOptions": {
+        "managed": "Sua equipe plantou",
+        "native": "Cresceu aqui naturalmente",
+        "naturalised": "Regenerou-se naturalmente",
+        "uncertain": "Não tenho certeza"
+      },
+      "connectedPlace": "Local do projeto vinculado",
+      "groupFallback": "Grupo de árvores",
+      "groupCheckError": "Não foi possível verificar o grupo. Atualize e tente novamente."
+    },
+    "deleteGroup": {
+      "title": "Excluir grupo de árvores?",
+      "description": "Excluir {name} remove o grupo e tudo dentro dele. Isso não pode ser desfeito.",
+      "willDelete": "Isto excluirá:",
+      "group": "o grupo de árvores",
+      "trees": "{count, plural, one {# árvore deste grupo} other {# árvores deste grupo}}",
+      "measurements": "{count, plural, one {# medição vinculada} other {# medições vinculadas}}",
+      "photos": "{count, plural, one {# foto vinculada} other {# fotos vinculadas}}",
+      "cancel": "Cancelar",
+      "confirm": "Excluir grupo de árvores",
+      "error": "Não foi possível excluir o grupo de árvores."
+    },
+    "upload": {
+      "savingTitle": "Salvando suas árvores",
+      "keepOpenTitle": "Não atualize nem feche esta página",
+      "keepOpenBody": "Mantenha esta aba aberta até que árvores e fotos terminem de salvar.",
+      "savingPhoto": "Salvando foto",
+      "pending": "Pendente",
+      "done": "Concluído",
+      "row": "Linha {number}",
+      "rowsRange": "Linhas {start}-{end} de {total}",
+      "savingProgress": "Salvando linha {current} de {total}: {row}…",
+      "preparing": "Preparando para salvar…",
+      "rowSummary": "Linha {number}: {label}",
+      "fatal": {
+        "siteBoundary": "Não foi possível verificar a área selecionada. Volte, escolha ou crie um limite e tente novamente.",
+        "photoFolder": "A pasta de fotos não está mais disponível após atualizar a página ou entrar novamente. Recomece e selecione o arquivo de árvores e sua pasta de fotos.",
+        "treeGroup": "Não foi possível criar o grupo de árvores. Tente novamente ou continue sem um grupo.",
+        "noSite": "Nenhum local foi selecionado. Volte e escolha ou crie um limite."
+      },
+      "time": {
+        "fewSeconds": "alguns segundos",
+        "seconds": "{count} s",
+        "minutes": "{count} min",
+        "hours": "{count} h",
+        "hoursMinutes": "{hours} h {minutes} min",
+        "done": "Concluído",
+        "completedIn": "Concluído em {duration}",
+        "completed": "Concluído",
+        "estimating": "Calculando…",
+        "calculating": "Calculando o tempo restante",
+        "left": "Restam ~{duration}",
+        "saved": "{completed} de {total} {unit} salvos",
+        "treeUnit": "{count, plural, one {árvore} other {árvores}}",
+        "photoUnit": "{count, plural, one {foto} other {fotos}}"
+      },
+      "viewTreeGroup": "Ver grupo de árvores",
+      "viewTrees": "Ver árvores",
+      "datasetCleanupWarning": "Não foi possível remover automaticamente o grupo vazio.",
+      "addingToGroup": "Adicionando a {name}.",
+      "creatingGroup": "Criando o grupo “{name}”.",
+      "photoFailures": "Não foi possível salvar algumas fotos. Suas árvores continuam salvas.",
+      "photoSaveError": "Não foi possível salvar a foto.",
+      "rowPartialError": "A árvore foi salva, mas parte das informações vinculadas não pôde ser salva.",
+      "treeSaveError": "Não foi possível salvar a árvore.",
+      "photoSkipped": "A árvore não foi salva, então sua foto foi ignorada.",
+      "errors": {
+        "groupDetached": "O grupo deixou de estar disponível, então a árvore foi mantida sem o grupo. Revise-a antes de tentar novamente.",
+        "groupDetachFailed": "O grupo deixou de estar disponível e a árvore não pôde ser removida dele automaticamente. Revise-a antes de tentar novamente.",
+        "groupUnavailable": "O grupo selecionado deixou de estar disponível. As linhas restantes não foram adicionadas.",
+        "chunkUnconfirmed": "Não foi possível confirmar este conjunto de árvores. Algumas podem já estar salvas; revise suas árvores antes de tentar novamente.",
+        "measurementCleanupFailed": "A árvore foi salva, mas sua medição não, e a limpeza automática não terminou. Revise a árvore antes de tentar novamente."
+      },
+      "groupCountWarning": "O grupo foi criado, mas não foi possível atualizar o número de árvores.",
+      "importedPhotoCaption": "Importada da pasta de fotos: {fileName}",
+      "progressSummary": "{successes, plural, one {# concluída} other {# concluídas}}, {partials, plural, one {# precisa de acompanhamento} other {# precisam de acompanhamento}}, {failures, plural, one {# falhou} other {# falharam}}",
+      "successWithPhotos": "Foram salvas {trees, plural, one {# árvore} other {# árvores}} e {photos, plural, one {# foto} other {# fotos}}.",
+      "successTrees": "Foram salvas {trees, plural, one {# árvore} other {# árvores}}.",
+      "completionWithIssues": "{saved} salvas, {followUp} precisam de acompanhamento, {failed} ignoradas ou com falha e {photoFailed} fotos não puderam ser salvas.",
+      "photosSaved": "Fotos salvas",
+      "savingPhotos": "Salvando fotos…",
+      "photoProgress": "Foto {current} de {total}",
+      "photoSummary": "{saved} salvas e {failed} não salvas, de {total} fotos",
+      "attentionCount": "{count, plural, one {# linha precisa de atenção} other {# linhas precisam de atenção}}",
+      "attentionKind": {
+        "failed": "Falhou",
+        "partial": "Precisa de acompanhamento",
+        "skipped": "Ignorada"
+      },
+      "startOver": "Recomeçar",
+      "uploadMore": "Enviar mais árvores",
+      "savingTrees": "Salvando {count, plural, one {# árvore} other {# árvores}} na GainForest.",
+      "assigningToSite": "Atribuindo a {name}.",
+      "boundary": {
+        "differentSite": "Esta linha foi preparada para outro limite de local. Volte e revise o limite selecionado.",
+        "invalid": "A área selecionada não pode ser usada. Volte e desenhe-a novamente antes de salvar as árvores.",
+        "outside": "Esta árvore está {distance} fora da área selecionada. Verifique as coordenadas, escolha outro limite ou remova a linha.",
+        "unknownDistance": "a uma distância desconhecida"
+      }
     }
   },
   "workScopes": {
@@ -756,7 +1072,6 @@
     "restorationMaintenance": "Manutenção da restauração"
   },
   "internalBadges": {
-    "eyebrow": "Ferramentas internas",
     "title": "Mesa de badges",
     "description": "Crie badges, atribua-os a contas e mantenha atribuições por email pendentes até a pessoa reivindicar uma conta.",
     "pendingEmail": "Email pendente",
@@ -836,7 +1151,8 @@
       "awardCreated": "Badge atribuído.",
       "pendingCreated": "Atribuição por email salva como pendente.",
       "awardDeleted": "Atribuição removida.",
-      "awardsCreated": "{count, plural, one {Badge atribuído.} other {# badges atribuídos.}}"
+      "awardsCreated": "{count, plural, one {Badge atribuído.} other {# badges atribuídos.}}",
+      "awardsPartial": "{succeeded} atribuídos; {failed} não puderam ser atribuídos. Verifique os destinatários restantes e tente novamente."
     },
     "errors": {
       "generic": "Algo deu errado.",
@@ -880,7 +1196,9 @@
     "title": "Endossos concedidos",
     "description": "Organizações que {name} endossou publicamente.",
     "empty": "Esta organização ainda não endossou ninguém.",
-    "fallbackName": "Organização"
+    "fallbackName": "Organização",
+    "loadError": "Não foi possível carregar estes endossos.",
+    "retry": "Tentar novamente"
   },
   "trust": {
     "trustedBy": "Com a confiança de",
@@ -916,7 +1234,22 @@
       "addError": "Não conseguimos adicionar esse membro. Verifique o usuário e tente novamente.",
       "roleMember": "membro",
       "roleAdmin": "administrador",
-      "pendingStatus": "Convidado como {role}. Aguardando aceite."
+      "pendingStatus": "Convidado como {role}. Aguardando aceite.",
+      "memberFallback": "Membro da equipe",
+      "joined": "Entrou em {date}",
+      "loadingName": "Carregando nome…",
+      "organizationMember": "Membro da organização",
+      "memberRole": "Função do membro",
+      "newMemberRole": "Função do novo membro",
+      "roleOwner": "responsável",
+      "removeMember": "Remover membro",
+      "title": "Membros",
+      "loading": "Carregando membros…",
+      "empty": "Ainda não há membros.",
+      "refresh": "Atualizar",
+      "loadError": "Não foi possível carregar os membros.",
+      "roleError": "Não foi possível atualizar a função.",
+      "removeError": "Não foi possível remover o membro."
     },
     "menu": {
       "title": "Convites",
@@ -930,7 +1263,6 @@
       "role": "Convite de {role}"
     },
     "invitePage": {
-      "eyebrow": "Convite de organização",
       "organizationFallback": "esta organização",
       "signedOutTitle": "Entre para aceitar",
       "signedOutDescription": "Entre com o email convidado para participar de {organization}.",
@@ -950,13 +1282,16 @@
       "canceledTitle": "Convite cancelado",
       "canceledDescription": "Este convite não é mais válido.",
       "alreadyAcceptedTitle": "Já aceito",
-      "alreadyAcceptedDescription": "Este convite já foi aceito."
+      "alreadyAcceptedDescription": "Este convite já foi aceito.",
+      "pendingTitle": "Entrar nesta organização?",
+      "pendingDescription": "Aceite para entrar em {organization}.",
+      "accept": "Aceitar convite"
     }
   },
   "notifications": {
     "title": "Notificações",
     "ariaLabel": "Notificações",
-    "unreadAria": "Notificações — {count} não lidas",
+    "unreadAria": "Notificações: {count} não lidas",
     "empty": "Ainda não há notificações",
     "emptyHint": "Curtidas, comentários e sugestões de espécies nos seus registros aparecem aqui.",
     "someone": "Alguém",
@@ -981,7 +1316,7 @@
     "hero": {
       "title": "O que está acontecendo no",
       "accent": "GainForest",
-      "description": "Uma transmissão ao vivo dos projetos, avistamentos de natureza, organizações e atualizações comunitárias mais recentes — tudo em um só lugar."
+      "description": "Os projetos, avistamentos, organizações e novidades da comunidade mais recentes em um único fluxo ao vivo."
     },
     "filters": {
       "all": "Tudo",
@@ -1018,7 +1353,8 @@
       "viewAll": "Ver todos os avistamentos",
       "likesAcross": "{count, plural, one {# curtida nestes avistamentos} other {# curtidas nestes avistamentos}}",
       "commentsHeading": "Comentários sobre estes avistamentos",
-      "commentOn": "em {species}"
+      "commentOn": "em {species}",
+      "moreComments": "{count, plural, one {Mostrar mais # comentário} other {Mostrar mais # comentários}}"
     },
     "profileCard": {
       "unnamed": "Conta sem nome",
@@ -1102,7 +1438,7 @@
     "visibleDescription": "Oculte {name} como conta de teste para manter seus projetos, observações e atividade do feed fora da visão pública. Você pode desfazer a qualquer momento.",
     "hideAction": "Ocultar como conta de teste",
     "confirmHide": "Ocultar conta",
-    "confirmDescription": "Isso remove tudo de {name} — projetos, observações e atividade do feed — das páginas públicas. Você pode torná-la visível novamente quando quiser.",
+    "confirmDescription": "Isso remove {name}, incluindo projetos, observações e atividades do feed, das páginas públicas. Você pode torná-lo visível novamente a qualquer momento.",
     "cancel": "Cancelar",
     "flaggedTitle": "Oculta como conta de teste",
     "flaggedDescription": "Os projetos, as observações e a atividade do feed de {name} estão ocultos para todos. Só a equipe da GainForest pode ver esta conta aqui.",
@@ -1115,7 +1451,10 @@
     "empty": "Nenhuma conta está marcada como teste no momento.",
     "remove": "Remover",
     "unnamed": "Conta sem nome",
-    "error": "Algo deu errado. Tente novamente."
+    "error": "Algo deu errado. Tente novamente.",
+    "confirmTitle": "Tornar esta conta visível?",
+    "confirmDescription": "{name} e suas atividades voltarão às páginas públicas.",
+    "cancel": "Cancelar"
   },
   "recognition": {
     "eyebrow": "Equipe da GainForest",
@@ -1131,14 +1470,14 @@
         "description": "Recebeu um subsídio de Resselvagem da web."
       },
       "bioblitz-most-images": {
-        "label": "BioBlitz — mais observações",
+        "label": "BioBlitz: mais observações",
         "description": "Venceu uma rodada do BioBlitz por mais observações.",
-        "labelWithRound": "BioBlitz {roundName} — mais observações"
+        "labelWithRound": "BioBlitz {roundName}: mais observações"
       },
       "bioblitz-best-picture": {
-        "label": "BioBlitz — melhor foto",
+        "label": "BioBlitz: melhor foto",
         "description": "Venceu uma rodada do BioBlitz pela melhor foto.",
-        "labelWithRound": "BioBlitz {roundName} — melhor foto"
+        "labelWithRound": "BioBlitz {roundName}: melhor foto"
       }
     },
     "awardsLabel": "Prêmios",
@@ -1186,7 +1525,7 @@
   },
   "adminTaina": {
     "title": "Agentes Tainá",
-    "description": "Todas as pessoas com uma assistente de campo Tainá: o bot, quando o usaram pela última vez e quanto ele já gastou. As mensagens que você enviar são entregues pela Tainá delas, com a própria voz.",
+    "description": "Agentes Tainá, responsáveis, uso recente e gastos de créditos.",
     "empty": "Ninguém conectou uma Tainá ainda.",
     "unavailable": "O runtime da Tainá está inacessível agora, então a lista não pode ser carregada. Tente novamente em instantes.",
     "unnamed": "Conta sem nome",
@@ -1198,7 +1537,7 @@
     "creditsAllowance": "Crédito disponível: {allowance}",
     "message": "Mensagem",
     "messagePlaceholder": "O que a Tainá deve dizer a essa pessoa?",
-    "messageHint": "Entregue pelo bot da pessoa com a voz da Tainá — ela vê como uma mensagem da própria assistente.",
+    "messageHint": "Entregue pela Tainá da pessoa como mensagem da assistente.",
     "send": "Enviar",
     "sending": "Enviando…",
     "sent": "Entregue no chat.",
@@ -1236,7 +1575,10 @@
     "followersTab": "Seguidores",
     "followingTab": "Seguindo",
     "emptyFollowers": "Ainda não tem seguidores.",
-    "emptyFollowing": "Ainda não segue ninguém."
+    "emptyFollowing": "Ainda não segue ninguém.",
+    "navigationLabel": "Conexões do perfil",
+    "loadError": "Não foi possível carregar estas conexões.",
+    "retry": "Tentar novamente"
   },
   "activity": {
     "postsTab": "Publicações",
@@ -1255,11 +1597,14 @@
       "account": "conta",
       "record": "registro"
     },
-    "inReplyTo": "Em resposta a"
+    "inReplyTo": "Em resposta a",
+    "navigationLabel": "Atividade do perfil",
+    "loadError": "Não foi possível carregar esta atividade.",
+    "retry": "Tentar novamente"
   },
   "docs": {
     "metaTitle": "Esquemas de dados",
-    "metaDescription": "Os esquemas abertos de registros do AT Protocol por trás do GainForest: observações de biodiversidade, declarações de impacto, financiamento e identidade.",
+    "metaDescription": "Esquemas abertos de registros AT Protocol para observações de biodiversidade, declarações de impacto, financiamento e identidade da GainForest.",
     "title": "Esquemas de dados",
     "lead": "Os formatos abertos de registro por trás do GainForest. Cada observação, projeto, certificado, doação e publicação é armazenada como um registro estruturado usando os esquemas abaixo.",
     "starSchemaCaption": "Como os registros de biodiversidade se conectam",
@@ -1279,11 +1624,11 @@
       "audiovisualEvidence": "evidência audiovisual"
     },
     "sections": {
-      "feed": "Primitivas sociais adaptadas do Bluesky para o comum do GainForest: publicações (e comentários de resposta) e curtidas, para que o feed permita publicar, comentar e reagir.",
+      "feed": "Publicações, respostas e curtidas adaptadas do Bluesky para o feed da GainForest.",
       "dwc": "Registros de ocorrência de biodiversidade alinhados ao padrão Simple Darwin Core da TDWG. As ocorrências referenciam um evento compartilhado; as medições referenciam uma ocorrência.",
       "ac": "Registros de mídia e de monitoramento acústico passivo alinhados ao Audiovisual Core da TDWG. Áudio e mídia ligam-se a uma ocorrência de Darwin Core como evidência.",
-      "organization": "Registros de dados de mapa de organizações — camadas publicadas (ortomosaicos de drone, sobreposições GeoJSON) e as áreas monitoradas nomeadas que agrupam capturas repetidas em séries de mudança ao longo do tempo.",
-      "certified": "Primitivas de identidade do ecossistema Hypercerts: perfis de ator, organizações, seguidores, selos e localizações.",
+      "organization": "Registros de mapas de organizações: camadas publicadas, incluindo ortomosaicos de drone e sobreposições GeoJSON, além de áreas monitoradas que agrupam capturas repetidas em séries temporais.",
+      "certified": "Primitivas de identidade do ecossistema Hypercerts: perfis, organizações, seguidores, selos e locais.",
       "hypercerts": "Declarações de impacto (atividade, contribuição, contribuinte, direitos), coleções, recibos de financiamento, anexos, escopo de trabalho e tipos compartilhados."
     },
     "sectionsAria": "Seções de esquemas",
@@ -1311,10 +1656,9 @@
       "description": "Conecte o seu próprio bot do Telegram e transforme o que você vê na natureza em observações de biodiversidade verificáveis."
     },
     "hero": {
-      "eyebrow": "Assistente de campo com IA",
       "title": "Conheça a",
       "accent": "Tainá",
-      "description": "A Tainá é a sua companheira de campo no Telegram. Envie uma foto ou uma nota sobre uma planta, um animal ou um fungo — ela identifica a espécie e registra a observação na sua conta GainForest.",
+      "description": "Envie à Tainá uma foto ou nota pelo Telegram para identificar e registrar um avistamento na sua conta GainForest.",
       "step1Title": "Conecte o seu próprio bot",
       "step1Description": "Crie um bot privado do Telegram com o @BotFather e vincule-o aqui. Só você pode falar com ele.",
       "step2Title": "Envie fotos ou notas",
@@ -1330,18 +1674,19 @@
     },
     "setup": {
       "title": "Conecte o seu bot da Tainá",
-      "description": "Crie um bot do Telegram para a Tainá e cole o token abaixo. O bot é privado — funciona só para você.",
+      "description": "Crie um bot privado no Telegram e cole o token abaixo.",
       "howTitle": "Como criar o seu bot (cerca de 2 minutos)",
       "howStep1": "Abra o <botfather>@BotFather</botfather> no Telegram.",
       "howStep2": "Envie <code>/newbot</code> e siga as instruções.",
       "howStep3": "Copie o token que ele fornece (algo como 123456789:ABC…).",
-      "howStep4": "Cole abaixo — este bot é usado só por você.",
+      "howStep4": "Cole abaixo: este bot é usado só por você.",
       "tokenLabel": "Token do bot",
       "focusLabel": "O que você está documentando?",
       "focusOptional": "opcional",
       "focusPlaceholder": "ex.: aves e polinizadores, Mata Atlântica",
       "submit": "Conectar Tainá",
-      "submitting": "Conectando…"
+      "submitting": "Conectando…",
+      "tokenPlaceholder": "123456789:ABCdefGhIJKlmNoPQRstuVwxyz"
     },
     "errors": {
       "invalidToken": "Isso não parece um token de bot. Copie-o do @BotFather (algo como 123456789:ABC…).",
@@ -1352,7 +1697,7 @@
       "title": "Ative o seu bot",
       "description": "O seu bot está conectado, mas ainda é privado. Abra-o no Telegram e envie este código de uso único para que só você possa falar com ele.",
       "open": "Abrir a Tainá e ativar",
-      "hint": "O botão envia o código por você — ou mande o código diretamente para o bot."
+      "hint": "O botão envia o código para você. Você também pode mandar uma mensagem ao bot e digitar o código."
     },
     "linked": {
       "title": "O seu bot da Tainá",
@@ -1390,67 +1735,73 @@
       "revokeConfirm": "Revogar esta chave? A Tainá deixará de registrar observações até você gerar uma nova.",
       "generate": "Gerar uma nova chave",
       "generating": "Gerando…",
-      "keyActionFailed": "Não deu certo — tente novamente.",
+      "keyActionFailed": "Não funcionou. Tente novamente.",
       "chatTitle": "Chat de observações",
       "chatActive": "Ativo",
       "chatWaiting": "Aguardando",
-      "chatEmpty": "Ainda não há mensagens. Abra o seu bot no Telegram e descreva ou fotografe algo que você viu — a sua conversa com a Tainá aparece aqui ao vivo.",
+      "chatEmpty": "Ainda não há mensagens. Abra seu bot no Telegram para iniciar uma conversa.",
       "restart": "Reiniciar sessão",
       "restarting": "Reiniciando…",
-      "restartConfirm": "Começar uma conversa nova com a Tainá? Ela esquecerá o histórico deste chat; as suas observações registradas não são afetadas.",
-      "restartFailed": "O reinício não funcionou — tente novamente.",
+      "restartConfirm": "Iniciar uma nova conversa com a Tainá? Isso limpa a conversa atual. As observações registradas permanecem.",
+      "restartFailed": "Não foi possível reiniciar a conversa. Tente novamente.",
       "creditsTitle": "Uso de créditos",
       "creditsSummary": "{used} usados · {left} restantes",
       "resetAgent": "Redefinir meu agente",
       "resetting": "Redefinindo…",
-      "resetConfirm": "Redefinir seu agente Tainá? Isso desconecta seu bot, apaga aqui o histórico de conversa e o seu perfil, e revoga a chave dele. Suas observações registradas não são afetadas. Você pode configurar a Tainá novamente quando quiser.",
-      "resetFailed": "A redefinição não funcionou — tente novamente.",
+      "resetConfirm": "Redefinir sua agente Tainá? Isso desconecta o bot, limpa a conversa e o perfil e revoga a chave. As observações registradas permanecem. Você pode configurá-la novamente.",
+      "resetFailed": "Não foi possível redefinir a agente. Tente novamente.",
       "profileTitle": "Seu perfil",
       "profileDescription": "Um perfil curto em Markdown guardado com seu agente para que a Tainá saiba quem você é. Ele molda como ela conversa com você e as conexões que pode sugerir.",
       "profilePromptTitle": "Prepare seu perfil",
-      "profilePromptIntro": "Copie este prompt no ChatGPT ou Claude para rascunhar um perfil USER.md e depois envie o Markdown gerado ao seu agente no Telegram — ou cole-o abaixo.",
+      "profilePromptIntro": "Copie este texto no ChatGPT ou Claude para criar um perfil USER.md. Envie o Markdown gerado ao seu agente no Telegram ou cole abaixo.",
       "profilePromptBody": "Crie um perfil de conexão de duas páginas, sem dados sensíveis, que ajude pessoas ou agentes a encontrar bons motivos para conversar comigo, colaborar, trocar ideias, me convidar para algo ou me apresentar a alguém inesperado.\n\nNão faça um currículo, biografia, tipo de personalidade nem um relato definitivo. Faça algo caloroso, específico, levemente imaginativo e útil para a serendipidade.\n\nTraga à tona minhas curiosidades recorrentes, perguntas vivas, gostos, projetos, valores na prática, assuntos de conversa, possíveis ofertas e pedidos, e os tipos de pessoas, cenas, colaborações ou oportunidades com que eu poderia ressoar. Inclua o trabalho, mas sem fazer dele o quadro inteiro.\n\nMantenha os pés no chão: distinga evidências de palpites e formule o incerto como possibilidades ou perguntas. Não infira fatos sensíveis ou privados. Inclua o que não se deve presumir e onde mais contexto ajudaria.",
       "profileLabel": "Seu perfil para USER.md",
       "profilePlaceholder": "Cole aqui o perfil em Markdown. Deixe de fora segredos e qualquer coisa que você não queira guardar com seu agente.",
       "profileCounter": "Isso vira o USER.md no espaço de trabalho do seu agente. {count}/{max} caracteres.",
       "profileSave": "Salvar perfil",
       "profileSaving": "Salvando…",
-      "profileSaved": "Salvo — a Tainá vai usá-lo a partir da próxima resposta.",
+      "profileSaved": "Salvo. A Tainá usará na próxima resposta.",
       "profileSaveFailed": "Não foi possível salvar seu perfil. Tente novamente."
     }
   },
   "adminEndorsers": {
     "title": "Apoiadores",
     "description": "Organizações cujos selos ouvimos. Os seus endossos aparecem em toda a app como “Chancelado por” e mostram os projetos que apoiam.",
-    "inputLabel": "Identificador da organização ou id da conta",
-    "inputPlaceholder": "handle.certified.one ou did:plc:…",
+    "inputLabel": "Nome de usuário da organização",
+    "inputPlaceholder": "organizacao.exemplo.com",
     "addButton": "Adicionar apoiador",
     "addError": "Não foi possível adicionar o apoiador.",
     "removeError": "Não foi possível remover o apoiador.",
     "removeLabel": "Remover {name}",
     "builtinChip": "Integrado",
-    "propagationHint": "Novos apoiadores levam alguns minutos para aparecer na app."
+    "propagationHint": "Novos apoiadores levam alguns minutos para aparecer na app.",
+    "confirmTitle": "Remover endossante?",
+    "confirmDescription": "Os selos de {name} não serão mais usados como endossos.",
+    "cancel": "Cancelar"
   },
   "adminAwardEndorsements": {
     "title": "Conceder endossos",
-    "description": "Endosse outras organizações em nome da GainForest — os mesmos endossos que a Ma Earth emite, para que plataformas parceiras também os vejam. As organizações endossadas mostram “Com a confiança de GainForest” em toda a app.",
+    "description": "Gerencie as organizações endossadas pela GainForest.",
     "notAllowed": "Conceder endossos exige ser administrador da organização GainForest. Peça a um proprietário da GainForest para adicionar você como administrador.",
     "noBadges": "Ainda não existe um selo de endosso. Primeiro crie um selo do tipo “Endosso”.",
     "manageBadges": "Gerir selos",
     "badgeLabel": "Selo de endosso",
-    "inputLabel": "Identificador da organização ou id da conta",
-    "inputPlaceholder": "handle.certified.one ou did:plc:…",
+    "inputLabel": "Nome de usuário da organização",
+    "inputPlaceholder": "organizacao.exemplo.com",
     "noteLabel": "Nota (opcional)",
     "notePlaceholder": "Adicione uma nota sobre este endosso (opcional)",
     "awardButton": "Conceder endosso",
     "awardError": "Não foi possível conceder o endosso.",
     "removeError": "Não foi possível remover o endosso.",
     "removeLabel": "Remover o endosso de {name}",
-    "emailNotSupported": "Insira o identificador ou id da conta de uma organização; endossos não podem ser enviados para um e-mail.",
+    "emailNotSupported": "Digite o nome de usuário de uma organização. E-mails não são aceitos.",
     "alreadyEndorsed": "Esta organização já tem este endosso.",
     "empty": "Ainda não foram concedidos endossos.",
     "unnamed": "Organização sem nome",
-    "propagationHint": "Novos endossos levam alguns minutos para aparecer na app."
+    "propagationHint": "Novos endossos levam alguns minutos para aparecer na app.",
+    "confirmTitle": "Remover endosso?",
+    "confirmDescription": "O endosso da GainForest a {name} será removido.",
+    "cancel": "Cancelar"
   },
   "dataJobs": {
     "meta": {
@@ -1458,11 +1809,10 @@
       "description": "Envie grandes lotes de fotos de campo e exportações de questionários para a equipe do GainForest revisar e publicar."
     },
     "hero": {
-      "kicker": "Para parceiros de campo",
       "title": "Envie seus dados de campo em um único lote",
-      "description": "Reúna suas fotos e exportações de questionários (por exemplo do KoboToolbox) em um único arquivo zip e envie para nós. Nossa equipe revisa cada lote e publica as observações na sua conta por você.",
+      "description": "Compacte suas fotos e exportações de pesquisas. Analisaremos o lote e publicaremos as observações aprovadas na sua conta.",
       "step1Title": "Reúna tudo em um zip",
-      "step1Description": "Fotos, planilhas e exportações de questionários — o formato não precisa ser perfeito.",
+      "step1Description": "Fotos, planilhas e exportações de questionários: o formato não precisa ser perfeito.",
       "step2Title": "Envie o lote",
       "step2Description": "Arquivos de até 10GB são enviados direto do seu navegador. Mantenha a página aberta até terminar.",
       "step3Title": "Nós revisamos e publicamos por você",
@@ -1482,7 +1832,7 @@
       "projectLabel": "Projeto ou área",
       "projectPlaceholder": "ex.: Restauração de mangue, área norte",
       "notesLabel": "Notas para a equipe de revisão",
-      "notesPlaceholder": "Qualquer coisa que nos ajude a entender seus dados — significado das colunas, datas, listas de espécies…",
+      "notesPlaceholder": "Qualquer coisa que nos ajude a entender seus dados: significado das colunas, datas, listas de espécies…",
       "consentLabel": "Permito que a equipe do GainForest revise estes dados e os publique na minha conta em meu nome.",
       "consentHint": "Você pode retirar essa permissão a qualquer momento em Configurações.",
       "consentGranted": "Você permitiu que a equipe do GainForest publique dados revisados na sua conta.",
@@ -1496,7 +1846,7 @@
     },
     "errors": {
       "zipOnly": "Escolha um único arquivo .zip.",
-      "tooLarge": "Esse arquivo é grande demais — o limite é {max}.",
+      "tooLarge": "Esse arquivo é grande demais: o limite é {max}.",
       "uploadFailed": "O envio não foi concluído. Verifique sua conexão e tente novamente."
     },
     "done": {
@@ -1504,7 +1854,7 @@
     },
     "jobs": {
       "title": "Seus lotes",
-      "empty": "Nenhum lote ainda — seus envios aparecerão aqui.",
+      "empty": "Nenhum lote ainda: seus envios aparecerão aqui.",
       "submitted": "Enviado {when}",
       "publishedCount": "{count} observações publicadas",
       "cancel": "Remover"
@@ -1519,7 +1869,7 @@
   },
   "adminDataJobs": {
     "title": "Lotes de dados",
-    "description": "Arquivos grandes enviados por parceiros de campo — revise cada lote remotamente e publique as observações na conta de quem enviou, com a permissão da pessoa.",
+    "description": "Revise os arquivos enviados e publique observações aprovadas com a permissão de quem enviou.",
     "empty": "Nenhum lote foi enviado ainda.",
     "unavailable": "O armazenamento de lotes não está configurado ou está inacessível no momento, então a lista não pode ser carregada.",
     "unnamed": "Conta sem nome",
@@ -1538,7 +1888,7 @@
     "download": "Link de download",
     "publishedCountLabel": "Observações publicadas",
     "reviewNoteLabel": "Nota para quem enviou",
-    "reviewNotePlaceholder": "Aparece na página de envios da pessoa — linguagem simples.",
+    "reviewNotePlaceholder": "Nota em linguagem simples exibida na página de envios.",
     "saveNote": "Salvar nota",
     "saved": "Salvo",
     "saveFailed": "Não foi possível salvar. Tente novamente.",
@@ -1554,7 +1904,7 @@
       "description": "Acerte o relógio, configure os horários de gravação e atualize o firmware do seu gravador acústico AudioMoth, direto do navegador."
     },
     "title": "AudioMoth",
-    "subtitle": "Conecte um AudioMoth ao seu computador com um cabo USB e coloque-o em USB/OFF. Aqui você pode acertar o relógio, mudar as configurações de gravação e atualizar o firmware — sem aplicativos extras.",
+    "subtitle": "Conecte um AudioMoth no modo USB/OFF para ajustar o relógio, a programação de gravação ou o firmware.",
     "unsupportedBrowser": "Este navegador não consegue se comunicar com dispositivos USB. Use uma versão recente do Chrome ou Edge em um computador.",
     "tabs": {
       "device": "Relógio e dispositivo",
@@ -1609,7 +1959,7 @@
       "periodEndLabel": "Fim do período",
       "removePeriod": "Remover",
       "addPeriod": "Adicionar período",
-      "noPeriodsHint": "Sem períodos de gravação — o dispositivo não vai gravar.",
+      "noPeriodsHint": "Sem períodos de gravação: o dispositivo não vai gravar.",
       "firstRecordingDateLabel": "Primeira data de gravação (opcional)",
       "lastRecordingDateLabel": "Última data de gravação (opcional)",
       "filterTitle": "Filtro de frequência",
@@ -1672,7 +2022,7 @@
       "serialPickPrompt": "O AudioMoth entrou no modo de atualização e vai reaparecer como um dispositivo serial. Pressione o botão e escolha-o na lista.",
       "serialPickButton": "Escolher dispositivo e continuar",
       "serialUnsupported": "Este navegador não consegue concluir a atualização via serial. Use Chrome ou Edge em um computador.",
-      "flashSuccess": "Firmware atualizado com sucesso (código de verificação {crc}). O dispositivo está reiniciando — pode levar alguns segundos para reaparecer.",
+      "flashSuccess": "Firmware atualizado com sucesso (código de verificação {crc}). O dispositivo está reiniciando: pode levar alguns segundos para reaparecer.",
       "phasePreparing": "Preparando…",
       "phaseTransferring": "Transferindo firmware…",
       "phaseVerifying": "Verificando…",
@@ -1680,7 +2030,7 @@
       "phaseRestarting": "Reiniciando dispositivo…"
     },
     "autoSetup": {
-      "subtitle": "Relaxe — atualizamos o firmware, acertamos o relógio, aplicamos configurações de gravação prontas para o campo e salvamos o dispositivo na sua lista de equipamentos.",
+      "subtitle": "Atualizaremos o firmware, ajustaremos o relógio, aplicaremos as configurações de campo e salvaremos o dispositivo quando você entrar.",
       "runningTitle": "Configurando seu AudioMoth…",
       "doneTitle": "Seu AudioMoth está pronto",
       "errorTitle": "A configuração não foi concluída",
@@ -1694,7 +2044,7 @@
       "firmwareUpToDate": "Já está no firmware mais recente ({version})",
       "firmwareDownloading": "Baixando firmware {version}…",
       "firmwareUpdated": "Atualizado para o firmware {version}",
-      "firmwareManualSkip": "Este dispositivo precisa de uma atualização manual — etapa pulada. Você pode atualizá-lo na aba Firmware.",
+      "firmwareManualSkip": "Este dispositivo precisa de uma atualização manual: etapa pulada. Você pode atualizá-lo na aba Firmware.",
       "firmwareFailed": "A atualização de firmware não foi concluída. Desconecte e reconecte seu AudioMoth e tente novamente.",
       "clockSetting": "Acertando o relógio a partir deste computador…",
       "clockDone": "Relógio sincronizado com este computador",
@@ -1705,7 +2055,7 @@
       "equipmentChecking": "Verificando sua lista de equipamentos…",
       "equipmentExists": "Já está na sua lista de equipamentos como {name}",
       "equipmentSaved": "Salvo na sua lista de equipamentos como {name}",
-      "equipmentSignInSkip": "Entre na sua conta para salvar este dispositivo na sua lista de equipamentos — etapa pulada.",
+      "equipmentSignInSkip": "Entre na sua conta para salvar este dispositivo na sua lista de equipamentos: etapa pulada.",
       "equipmentFailed": "Não foi possível salvar o dispositivo na sua lista de equipamentos.",
       "notesDeviceId": "ID do dispositivo: {id}",
       "notesFirmware": "Firmware: {firmware}",
@@ -1749,13 +2099,13 @@
       "equipmentLabel": "AudioMoth (opcional)",
       "equipmentNone": "Nenhuma unidade vinculada",
       "equipmentEmpty": "Ainda não há AudioMoths registrados nos seus equipamentos nem nos das suas organizações.",
-      "equipmentHint": "Escolha o AudioMoth registrado que você está implantando — incluindo os registrados pelas suas organizações — para vinculá-lo a este evento.",
+      "equipmentHint": "Escolha o AudioMoth registrado para esta implantação. Dispositivos registrados pelas suas organizações também estão disponíveis.",
       "viewSelectedEquipment": "Ver a página desta unidade",
       "invalidId": "O ID de implantação deve ter 16 caracteres (0–9, a–f).",
       "invalidCoordinates": "Informe coordenadas válidas primeiro.",
       "createFailed": "Não foi possível salvar a implantação. Tente novamente.",
       "playFailed": "Não foi possível reproduzir o sinal. Tente novamente.",
-      "playing": "Reproduzindo o sinal — mantenha o alto-falante encostado no AudioMoth…",
+      "playing": "Reproduzindo o sinal: mantenha o alto-falante encostado no AudioMoth…",
       "chimeHint": "Coloque a chave do AudioMoth em CUSTOM e mantenha o alto-falante deste dispositivo encostado nele enquanto o sinal toca.",
       "playAndSave": "Reproduzir sinal e salvar",
       "doneTitle": "Implantação salva",
@@ -1786,7 +2136,7 @@
       "signInTitle": "Entre para enviar gravações",
       "signInBody": "Suas gravações são salvas na sua conta. Entre para enviá-las.",
       "dropTitle": "Escolha seu cartão SD ou solte-o aqui",
-      "dropBody": "Selecione a unidade do cartão SD (ou qualquer pasta com gravações do AudioMoth). Os arquivos são lidos neste dispositivo primeiro — nada é enviado até você confirmar.",
+      "dropBody": "Selecione a unidade do cartão SD (ou qualquer pasta com gravações do AudioMoth). Os arquivos são lidos neste dispositivo primeiro: nada é enviado até você confirmar.",
       "chooseFolder": "Escolher cartão SD ou pasta",
       "chooseFiles": "Escolher arquivos",
       "scanning": "Lendo gravações…",
@@ -1822,7 +2172,7 @@
       "uploadFailed": "O envio não pôde ser concluído. Tente novamente.",
       "deploymentFallback": "Criado automaticamente ao enviar gravações do cartão SD.",
       "discovering": "Procurando gravações… {count} arquivos encontrados",
-      "readFailed": "O cartão SD não pôde ser lido. Remova e insira novamente, depois tente de novo — ou arraste a pasta para esta página."
+      "readFailed": "Não foi possível ler o cartão SD. Reinsira-o e tente novamente ou arraste a pasta para esta página."
     },
     "recordings": {
       "title": "Gravações",
@@ -1839,7 +2189,7 @@
       "viewDeployment": "Ver implantação",
       "accountEmptyTitle": "Ainda não há gravações",
       "accountEmptyBody": "As gravações enviadas de um cartão SD do AudioMoth aparecerão aqui, agrupadas por implantação.",
-      "explorerHint": "Os gravadores capturam o dia todo — escolha um dia no calendário e toque numa barra de hora para refinar.",
+      "explorerHint": "Os gravadores capturam o dia todo: escolha um dia no calendário e toque numa barra de hora para refinar.",
       "daySpan": "{count, plural, one {# dia} other {# dias}}",
       "prevMonth": "Mês anterior",
       "nextMonth": "Próximo mês",
@@ -1935,14 +2285,13 @@
       "description": "Importe gravações do AudioMoth e crie um relógio de paisagem sonora de 24 horas a partir das frequências."
     },
     "hero": {
-      "eyebrow": "Monitoramento acústico",
       "title": "Transforme gravações do AudioMoth em um relógio de paisagem sonora",
       "description": "Solte abaixo um dia de arquivos WAV do AudioMoth. Cada gravação é analisada em cinco faixas de frequência e os momentos mais sonoros são desenhados ao redor de um relógio de 24 horas.",
-      "timeNote": "Os horários das gravações são lidos dos nomes dos arquivos do AudioMoth (por exemplo 20240404_153000.WAV). Os dispositivos AudioMoth normalmente usam UTC, salvo configuração diferente. Suas gravações nunca saem deste dispositivo — tudo é analisado no seu navegador."
+      "timeNote": "Os horários das gravações são lidos dos nomes dos arquivos do AudioMoth (por exemplo 20240404_153000.WAV). Os dispositivos AudioMoth normalmente usam UTC, salvo configuração diferente. Suas gravações nunca saem deste dispositivo: tudo é analisado no seu navegador."
     },
     "import": {
       "dropTitle": "Solte os arquivos WAV do AudioMoth aqui",
-      "dropHint": "Você pode selecionar vários arquivos de uma vez — um dia inteiro de gravações funciona melhor.",
+      "dropHint": "Você pode selecionar vários arquivos de uma vez: um dia inteiro de gravações funciona melhor.",
       "browse": "Escolher arquivos",
       "fileCount": "{count, plural, one {# gravação} other {# gravações}}",
       "clearAll": "Limpar tudo",
@@ -1952,7 +2301,7 @@
       "statusError": "Não foi possível ler este arquivo",
       "tooShort": "A gravação é curta demais para ser analisada",
       "onlyWav": "Apenas arquivos WAV são aceitos.",
-      "timeFromModified": "O nome do arquivo não tem data e hora — usando a data de modificação"
+      "timeFromModified": "O nome do arquivo não tem data e hora: usando a data de modificação"
     },
     "chart": {
       "title": "Potência menos ruído — {date}",
@@ -1963,9 +2312,10 @@
       "empty": "As gravações analisadas aparecerão aqui como um relógio de paisagem sonora de 24 horas.",
       "emptyHint": "Importe gravações do AudioMoth acima para começar.",
       "downloadPng": "Baixar imagem",
-      "hoverHint": "Passe o cursor sobre o relógio para ver os valores.",
+      "hoverHint": "Selecione o gráfico e use as setas ou toque para consultar cada momento.",
       "datesTitle": "Dias",
-      "allDatesChip": "Todos os dias"
+      "allDatesChip": "Todos os dias",
+      "exportFailed": "Não foi possível baixar o gráfico. Tente novamente."
     }
   },
   "adminOnly": {
@@ -1998,7 +2348,7 @@
     "removeSigner": "Remover chave de acesso",
     "addPasskey": "Adicionar outra chave de acesso",
     "signerLabelPlaceholder": "Dê um nome a esta chave (ex.: Meu celular)",
-    "signersHint": "Adicione uma chave de acesso de outro dispositivo ou de uma pessoa de confiança — qualquer uma delas pode aprovar pagamentos.",
+    "signersHint": "Adicione uma chave de acesso de outro dispositivo ou de uma pessoa de confiança: qualquer uma delas pode aprovar pagamentos.",
     "deleteButton": "Remover carteira",
     "deleteConfirmTitle": "Remover esta carteira?",
     "deleteConfirmBody": "Esta ação não pode ser desfeita. Se você criar uma nova carteira mais tarde com outra chave de acesso, ela terá um endereço diferente.",
@@ -2015,7 +2365,7 @@
     "sendToken": "Moeda",
     "sendRecipient": "Endereço de destino",
     "sendRecipientPlaceholder": "Endereço de destino (0x…)",
-    "sendRecipientInvalid": "Insira um endereço de carteira válido — começa com 0x seguido de 40 caracteres.",
+    "sendRecipientInvalid": "Digite um endereço que comece com 0x e tenha 40 caracteres depois.",
     "sendAmount": "Valor",
     "sendAmountInvalid": "Insira um valor válido.",
     "sendAmountTooHigh": "É mais do que esta carteira possui.",
@@ -2023,7 +2373,7 @@
     "sendButton": "Enviar com chave de acesso",
     "sendPreparing": "Preparando…",
     "sendAwaitingPasskey": "Aguardando sua chave de acesso…",
-    "sendSubmitting": "Enviando — pode levar um minuto…",
+    "sendSubmitting": "Enviando. Isso pode levar um minuto…",
     "sendSuccess": "Enviado! A transferência está confirmada.",
     "sendViewTx": "Ver a transação",
     "sendGasNote": "A GainForest cobre a taxa de rede.",
@@ -2035,27 +2385,27 @@
     "sendErrorGeneric": "Não foi possível concluir a transferência. Tente novamente.",
     "thresholdHeading": "Aprovações necessárias",
     "thresholdOption": "{count} de {total, plural, one {# chave de acesso} other {# chaves de acesso}}",
-    "thresholdHint": "Quantas chaves de acesso devem aprovar cada transferência. Exigir mais de uma é mais seguro — uma única chave perdida ou roubada não pode mover fundos sozinha. Alterar isso dá um novo endereço à carteira, então só é possível antes de a carteira ter fundos.",
+    "thresholdHint": "Escolha quantas chaves de acesso devem aprovar cada transferência. Exigir mais de uma impede que uma única chave perdida ou roubada mova fundos. Antes de a carteira ter fundos, alterar isso também muda o endereço.",
     "thresholdUpdateError": "Não foi possível alterar o requisito de aprovação. Tente novamente.",
     "thresholdLockedFunds": "A carteira já possui fundos, então o requisito de aprovação não pode mais ser alterado.",
     "thresholdSingleWarning": "No momento, uma única chave de acesso pode mover fundos. Considere exigir mais aprovações.",
     "sendApprovalsNeeded": "Esta carteira precisa de {count} aprovações com chaves de acesso diferentes. Você dá a primeira; as demais podem ser dadas aqui ou de outro dispositivo.",
-    "sendApprovalOf": "Aprovação {current} de {total} — aguardando uma chave de acesso…",
+    "sendApprovalOf": "Aprovação {current} de {total}. Aguardando uma chave de acesso…",
     "sendDuplicatePasskey": "Cada aprovação precisa de uma chave de acesso diferente.",
     "pendingHeading": "Transferência aguardando aprovações",
     "pendingProgress": "{current} de {total} aprovações dadas",
-    "pendingRemoteHint": "Outras pessoas com chave de acesso podem aprovar do próprio dispositivo — a transferência fica aqui até reunir aprovações suficientes. A última aprovação a envia.",
+    "pendingRemoteHint": "Outros titulares de chaves de acesso podem aprovar em seus dispositivos. A aprovação final envia a transferência.",
     "pendingApprove": "Aprovar com chave de acesso",
     "pendingApproveAndSend": "Aprovar e enviar",
     "pendingCancel": "Cancelar transferência",
-    "pendingInvalid": "Esta transferência em espera não é mais válida — a carteira mudou desde que foi iniciada. Cancele-a para iniciar uma nova.",
+    "pendingInvalid": "Esta transferência pendente não é mais válida porque a carteira mudou. Cancele e comece novamente.",
     "pendingCancelForbidden": "Somente quem iniciou esta transferência ou um gestor da carteira pode cancelá-la.",
     "sendStartButton": "Iniciar transferência com chave de acesso",
-    "sendErrorExpired": "Esta transferência não é mais válida — a carteira ou as taxas de rede mudaram. Inicie-a novamente.",
+    "sendErrorExpired": "A carteira ou as taxas de rede mudaram. Inicie a transferência novamente.",
     "sendErrorPendingExists": "Já existe uma transferência aguardando aprovações. Conclua-a ou cancele-a primeiro.",
     "sendErrorApprovalInvalid": "Não foi possível verificar esta aprovação. Tente novamente.",
-    "onchainManageHint": "Esta carteira está ativa na blockchain, então as mudanças de chaves de acesso são registradas na cadeia e precisam das aprovações habituais. A GainForest cobre a taxa de rede.",
-    "thresholdOnchainHint": "Quantas chaves de acesso devem aprovar cada transferência. Essa mudança é registrada na blockchain — o endereço da carteira não muda.",
+    "onchainManageHint": "Essas alterações na blockchain exigem as aprovações habituais. A GainForest cobre a taxa de rede.",
+    "thresholdOnchainHint": "Escolha quantas chaves de acesso devem aprovar cada transferência. Essa alteração na blockchain mantém o mesmo endereço.",
     "manageForbidden": "Somente o proprietário da organização ou um administrador pode fazer essa mudança."
   },
   "accountSupport": {
@@ -2089,12 +2439,70 @@
       "organization": "Atualização de organização",
       "donation": "Doação",
       "record": "Item"
-    }
+    },
+    "confirmTitle": "Tornar este item visível?",
+    "confirmDescription": "Este item de {name} voltará às páginas públicas.",
+    "cancel": "Cancelar"
   },
   "devices": {
     "metadata": {
       "title": "Dispositivos Tainá",
       "description": "Atualizações de campo de dispositivos GainForest que executam Tainá, incluindo se cada dispositivo está ativo e pronto."
+    },
+    "hero": {
+      "imageAlt": "Paisagem regenerativa com névoa e equipamentos de campo",
+      "title": "Tainá",
+      "accent": "dispositivos de campo",
+      "lede": "Veja quais dispositivos de campo estão ativos e prontos."
+    },
+    "summary": {
+      "online": "{healthy} de {total} online",
+      "updated": "Atualizado {time}"
+    },
+    "error": {
+      "title": "Não foi possível carregar as atualizações de campo",
+      "body": "Os dispositivos podem continuar funcionando. Tente novamente mais tarde."
+    },
+    "empty": {
+      "title": "Ainda não há dispositivos de campo",
+      "body": "Um dispositivo aparecerá depois de enviar sua primeira atualização."
+    },
+    "loadingAria": "Carregando atualizações de campo",
+    "status": {
+      "up": "Online",
+      "down": "Offline",
+      "grace": "Aguardando",
+      "new": "Novo",
+      "paused": "Pausado",
+      "started": "Iniciando"
+    },
+    "card": {
+      "lastReported": "Último relatório",
+      "never": "Nunca",
+      "health": "Estado do dispositivo",
+      "temperature": "Temperatura",
+      "memory": "Memória",
+      "storage": "Armazenamento",
+      "processor": "Processador",
+      "uptime": "Tempo ativo",
+      "slow": "Está lento e pode precisar de atenção"
+    },
+    "activity": {
+      "title": "Atividade da Tainá",
+      "saved": "Observações salvas",
+      "oldest": "Mais antiga {time}",
+      "withPhotos": "Com fotos",
+      "allowedUsers": "Usuários permitidos"
+    },
+    "duration": {
+      "daysHours": "{days} d {hours} h",
+      "hoursMinutes": "{hours} h {minutes} min",
+      "minutes": "{minutes} min"
+    },
+    "notConfigured": {
+      "title": "As atualizações de campo não estão conectadas",
+      "body": "As atualizações de campo estão disponíveis no monitor separado da Tainá.",
+      "action": "Abrir monitor da Tainá"
     }
   },
   "bluesky": {
@@ -2125,13 +2533,12 @@
   "epds": {
     "metaTitle": "Como o ePDS funciona",
     "metaDescription": "Um tour interativo pelo ePDS, o Personal Data Server estendido que permite a qualquer pessoa entrar na rede AT Protocol apenas com o email.",
-    "kicker": "Personal Data Server estendido",
     "title": "Como o ePDS funciona",
-    "lead": "O GainForest funciona sobre o AT Protocol, a rede aberta por trás do Bluesky. Entrar nessa rede normalmente exige uma senha e alguma configuração técnica. O ePDS remove essa barreira: você digita seu email, recebe um código e pronto, está dentro. Esta página mostra como isso funciona, passo a passo.",
+    "lead": "A GainForest usa a rede AT Protocol. O ePDS adiciona login por código de e-mail e redes sociais a um Personal Data Server padrão e cria uma conta na primeira visita. Os diagramas mostram cada etapa.",
     "whatIs": {
       "heading": "O que é um PDS, e o que o e acrescenta?",
       "p1": "No AT Protocol, cada pessoa guarda seus dados em um Personal Data Server, ou PDS. Pense nele como uma casa pessoal para suas publicações, observações e projetos. O que está dentro é seu, e você pode se mudar para outro servidor a qualquer momento sem perder nada.",
-      "p2": "O ePDS é um PDS normal com uma extensão: uma porta de entrada amigável. Em vez de pedir uma senha, ele conecta você com um código de uso único enviado por email ou com uma conta social, e cria uma conta para você na primeira visita. Atrás dessa porta tudo continua sendo AT Protocol padrão, então qualquer app da rede consegue conversar com ele."
+      "p2": "O ePDS é um PDS padrão com login por código de e-mail e redes sociais. Ele pode criar uma conta na primeira visita. Sua interface AT Protocol continua padrão para outros aplicativos."
     },
     "compare": {
       "heading": "Duas portas de entrada",
@@ -2175,11 +2582,11 @@
           "text": "Seu app pede ao PDS, em segundo plano, para iniciar um login. É uma requisição padrão do AT Protocol, a mesma que qualquer app do Bluesky faria."
         },
         "s3": {
-          "title": "O PDS abre sua porta",
-          "text": "Aqui está o truque do ePDS. Em vez de mostrar um formulário de senha, o PDS envia seu navegador para o serviço de login amigável."
+          "title": "O PDS redireciona para o login",
+          "text": "O PDS redireciona o navegador ao serviço de login ePDS em vez de mostrar um formulário de senha."
         },
         "s4": {
-          "title": "Um código voa para sua caixa de entrada",
+          "title": "O serviço envia um código por e-mail",
           "text": "O serviço de login cria um código de uso único e envia por email. O código funciona uma vez e expira em poucos minutos."
         },
         "s5": {
@@ -2191,8 +2598,8 @@
           "text": "Na primeira visita, o ePDS cria uma conta para você e pede que escolha um identificador, seu nome público na rede."
         },
         "s7": {
-          "title": "O aperto de mão assinado",
-          "text": "O serviço de login avisa ao PDS que você foi verificado. A mensagem carrega uma assinatura criptográfica, então ninguém consegue falsificá-la."
+          "title": "O serviço assina o resultado",
+          "text": "O serviço de login envia o resultado verificado ao PDS com uma assinatura criptográfica. O PDS rejeita resultados sem assinatura ou inválidos."
         },
         "s8": {
           "title": "De volta ao seu app",
@@ -2250,17 +2657,16 @@
   "epdsRouter": {
     "metaTitle": "Como funciona o roteador do ePDS",
     "metaDescription": "Um guia interativo do roteador do ePDS: como um app encontra a conta certa para login por email entre vários servidores. Os anfitriões compartilham apenas impressões digitais irreversíveis, nunca credenciais ou endereços.",
-    "kicker": "descoberta de email para conta",
     "title": "Um email, muitos servidores",
-    "lead": "O ePDS permite entrar só com o seu email. Quando uma comunidade tem vários servidores, o app primeiro precisa responder a uma pequena pergunta: quais contas existem para este email? O roteador responde em uma única chamada. Ninguém entrega um endereço ou uma senha.",
+    "lead": "Quando uma comunidade opera vários servidores ePDS, um aplicativo precisa encontrar as contas associadas a um e-mail antes do login. O roteador retorna as identidades permanentes correspondentes em uma solicitação autenticada. Ele não armazena e-mails nem senhas.",
     "facts": {
       "routing": {
         "title": "Uma consulta, a conta certa",
         "text": "O app pergunta uma vez e descobre quais contas existem para o email. Cada resposta é uma identidade que a rede sempre consegue localizar, mesmo após uma mudança de servidor."
       },
       "privacy": {
-        "title": "Emails nunca são guardados",
-        "text": "Os endereços são embaralhados no próprio servidor antes de qualquer coisa sair dele. O roteador só vê impressões digitais, e as embaralha de novo antes de guardar."
+        "title": "Endereços de e-mail não são armazenados",
+        "text": "Cada host converte os e-mails em impressões unidirecionais antes de enviá-los. O roteador transforma essas impressões novamente antes do armazenamento."
       },
       "zerochange": {
         "title": "Anfitriões mantêm o controle",
@@ -2270,7 +2676,7 @@
     "problem": {
       "heading": "Por que a descoberta é necessária",
       "p1": "Um app com login por email precisa enviar o login para um servidor específico. Esse servidor envia o código e guarda a conta. Com um único servidor a resposta é fixa. Com vários servidores o app precisa de um diretório. Endereços de email são exatamente o tipo de dado que você não quer copiar para uma grande lista.",
-      "p2": "O roteador resolve isso com um pequeno truque: trabalha apenas com impressões digitais. Cada servidor embaralha seus endereços de forma irreversível em casa e não compartilha mais nada. Cada consulta embaralha o email recebido da mesma forma e compara impressões. A mesma resposta, sem agenda de endereços, e ninguém entrega suas chaves."
+      "p2": "Cada host cria impressões unidirecionais dos e-mails e envia apenas essas impressões ao roteador. Uma consulta aplica o mesmo processo e compara os resultados. O roteador não mantém uma agenda nem recebe credenciais do host."
     },
     "demo": {
       "heading": "Experimente uma consulta",
@@ -2324,7 +2730,7 @@
     },
     "sync": {
       "heading": "Como o roteador se mantém atualizado",
-      "intro": "Nada a entregar: cada anfitrião envia seu próprio retrato, no ritmo que escolher.",
+      "intro": "Cada host envia seu próprio snapshot completo na programação que controla. Nenhuma credencial é enviada ao roteador.",
       "play": "Reproduzir",
       "pause": "Pausar",
       "back": "Voltar",
@@ -2395,13 +2801,12 @@
   "cgs": {
     "metaTitle": "Como funcionam as contas de grupo",
     "metaDescription": "Um passeio interativo pelo Certified Group Service, o guardião que permite que uma equipe inteira compartilhe uma conta do AT Protocol com papéis, regras claras e uma trilha de auditoria completa.",
-    "kicker": "Certified Group Service",
     "title": "Como funcionam as contas de grupo",
-    "lead": "No AT Protocol, uma conta normalmente pertence a uma única pessoa. Mas florestas são mapeadas por equipes. O Certified Group Service, CGS para abreviar, permite que uma equipe inteira compartilhe uma conta com segurança, com papéis, regras claras e uma memória de tudo o que acontece. Esta página mostra como funciona, passo a passo.",
+    "lead": "As contas do AT Protocol normalmente pertencem a uma pessoa. O Certified Group Service (CGS) permite que uma equipe compartilhe uma conta com funções, verificações de permissão e registro de auditoria.",
     "whatIs": {
       "heading": "O que é uma conta de grupo?",
       "p1": "Cada organização no GainForest vive em uma conta normal do AT Protocol. Uma conta normal tem uma senha e um dono. Isso basta para uma pessoa, mas uma equipe precisa de mais: várias pessoas escrevendo no mesmo lugar, sem passar a senha da conta de mão em mão.",
-      "p2": "O CGS é um pequeno serviço guardião que fica na frente da conta do grupo. Ele guarda as credenciais da conta em uma caixa lacrada, mantém uma lista de membros com papéis e confere cada pedido contra as regras antes de deixá-lo passar. Os membros da equipe nunca veem a senha. Para o resto da rede, o grupo parece uma conta comum, então qualquer app pode ler seus registros normalmente."
+      "p2": "O CGS armazena a credencial da conta do grupo, verifica a função de cada membro e registra cada solicitação antes de gravar no PDS do grupo. Os membros nunca recebem a senha. Outros aplicativos ainda leem o grupo como uma conta AT Protocol padrão."
     },
     "repo": {
       "heading": "Uma conta, muitas mãos",
@@ -2563,7 +2968,7 @@
       },
       "vault": {
         "title": "Credenciais ficam lacradas",
-        "text": "O serviço guarda apenas uma senha de aplicativo — uma chave reserva, não a senha principal da conta. Ela fica criptografada, e quem tem as credenciais reais da conta pode revogar o acesso do serviço a qualquer momento. O contrário é impossível."
+        "text": "O serviço mantém apenas uma senha de aplicativo criptografada. Quem possui as credenciais principais pode revogá-la a qualquer momento; o serviço não pode revogar as credenciais principais."
       },
       "log": {
         "title": "Nada acontece sem ser visto",
@@ -2585,9 +2990,8 @@
   "atproto": {
     "metaTitle": "Como funciona o AT Protocol",
     "metaDescription": "Um passeio interativo e amigável pelo AT Protocol, a rede aberta sobre a qual o GainForest é construído. Veja como identidades, registros e apps se encaixam.",
-    "kicker": "AT Protocol",
     "title": "Como funciona o AT Protocol",
-    "lead": "O GainForest não guarda seus dados em um banco de dados privado. Tudo vive no AT Protocol, uma rede aberta onde as pessoas são donas dos seus dados e muitos apps os compartilham. Esta página explica as grandes ideias em palavras simples, com pequenos brinquedos para você experimentar.",
+    "lead": "A GainForest armazena registros no AT Protocol, uma rede aberta em que as pessoas controlam seus dados e os aplicativos podem compartilhá-los. Os diagramas mostram como identidades, registros e aplicativos se relacionam.",
     "whatIs": {
       "heading": "O que é o AT Protocol?",
       "p1": "O AT Protocol, atproto para encurtar, é uma receita para apps sociais em que os dados pertencem às pessoas, não às plataformas. Cada pessoa e cada organização tem uma conta, e cada conta tem um servidor de dados que guarda seus registros. Um post, uma curtida, um seguir, uma observação de biodiversidade: cada um é um pequeno registro assinado.",
@@ -2654,7 +3058,7 @@
     },
     "move": {
       "heading": "Você sempre pode se mudar",
-      "intro": "Seu nome e seus dados não estão colados em nenhuma empresa. Se o seu servidor ficar lento, ganancioso ou sumir, você faz as malas e vai embora. Experimente.",
+      "intro": "Sua identidade e seus registros não ficam presos a um provedor. Se um host se tornar instável ou encerrar, você pode transferi-los para outro.",
       "hostA": "O servidor antigo",
       "hostB": "O servidor novo",
       "emptyHost": "vazio",
@@ -2752,17 +3156,15 @@
   "walletExplainer": {
     "metaTitle": "Anatomia de uma carteira de doações: um ensaio interativo",
     "metaDescription": "Cultive uma chave real da curva das chaves de acesso no seu navegador, derive um endereço real com a matemática da própria fábrica e acompanhe a vida de uma doação. Um ensaio interativo sobre as carteiras da GainForest.",
-    "kicker": "Um ensaio interativo",
     "title": "Anatomia de uma carteira de doações",
-    "standfirst": "Cada organização na GainForest pode guardar doações em uma carteira sem senha, sem frase-semente e sem empresas segurando chaves. Esta página não se limita a descrever como isso funciona. Ela deixa você operar a maquinaria, aqui mesmo no seu navegador.",
+    "standfirst": "Use os experimentos para criar uma chave P-256, derivar um endereço determinístico e verificar como funciona uma carteira de doações da GainForest.",
     "intro": {
       "p1": "Quando alguém financia uma restauração de mangue ou um censo de aves, o dinheiro chega a um pequeno cofre na Ethereum. O cofre não tem operador nem central de suporte. Ele obedece a exatamente uma coisa: assinaturas criptográficas dos celulares e computadores das pessoas que tocam o projeto.",
-      "p2": "Três ideias tornam isso possível. Uma chave que cresce dentro do seu aparelho e nunca sai dele. Um endereço que pode ser calculado antes de a carteira existir. E um contrato que confere a assinatura de uma digital com pura matemática. Vamos construir cada uma, ao vivo."
+      "p2": "A carteira usa três mecanismos: uma chave de dispositivo não exportável, um endereço derivado antes da implantação e um contrato que verifica assinaturas P-256. Os experimentos demonstram cada mecanismo."
     },
     "part1": {
-      "label": "Experimento ao vivo",
       "heading": "Uma chave cresce no seu celular",
-      "p1": "Atrás de cada aviso do Face ID existe uma peça antiga e bonita de criptografia: um par de chaves de curva elíptica sobre uma curva chamada P-256. Seu aparelho inventa um número aleatório enorme, tranca esse número em um chip seguro e entrega apenas o ponto público correspondente: duas coordenadas, x e y.",
+      "p1": "As chaves de acesso usam um par de chaves de curva elíptica P-256. O dispositivo gera um valor privado aleatório, guarda-o em hardware seguro e expõe apenas as coordenadas x e y do ponto público.",
       "p2": "Seu navegador pode fazer o mesmo neste segundo. Aperte o botão abaixo e ele cultivará uma chave nova nessa curva exata. A metade privada nasce sob uma regra rígida: pode assinar, e nunca pode ser exportada. Nem esta página consegue lê-la.",
       "p3": "Essas duas coordenadas são tudo o que uma carteira chega a saber sobre você. O contrato as guarda como um par de campos de 32 bytes e, quando o dinheiro deve se mover, exige uma assinatura que só a metade trancada consegue produzir. Você acabou de ver seu navegador passar exatamente nessa checagem."
     },
@@ -2784,9 +3186,8 @@
       "privacyNote": "Nada foi salvo e nada foi enviado a lugar nenhum. Recarregue a página e esta chave desaparece para sempre."
     },
     "part2": {
-      "label": "Experimento ao vivo",
       "heading": "Um endereço feito de aritmética",
-      "p1": "Eis a propriedade mais estranha de todo o sistema: o endereço da carteira existe antes da carteira. Sem transação, sem implantação, sem cadastro em lugar algum. O endereço é simplesmente a resposta de um cálculo, e qualquer pessoa que conheça os ingredientes obtém a mesma resposta.",
+      "p1": "O endereço de uma carteira pode ser calculado antes da implantação do contrato. As mesmas entradas sempre produzem o mesmo endereço.",
       "p2": "A receita tem quatro ingredientes: um campo de dono permanentemente vazio, a lista de chaves signatárias, o limiar de aprovação e um sal derivado da identidade da organização. O contrato-fábrica os mistura com keccak256 e a regra CREATE2. Experimente abaixo. Digite um nome e veja cada dígito do endereço reagir.",
       "p3": "É por isso que ninguém precisa confiar na GainForest sobre qual endereço pertence a qual organização. A organização publica seus ingredientes como registro público na própria conta. Duvida de um rótulo? Refaça a aritmética, como você acabou de fazer, e compare."
     },
@@ -2807,9 +3208,8 @@
       "footnote": "O endereço da fábrica e o hash do código do proxy acima são os valores reais da rede principal da Ethereum, e esta derivação bate com a própria função getAddress da fábrica. Cada hash desta bancada é calculado pelo seu navegador."
     },
     "part3": {
-      "label": "Lendo a fonte",
       "heading": "O contrato, anotado",
-      "p1": "O cofre é uma conta inteligente da Splits: código aberto, auditada e construída sobre desenhos da Coinbase e da Daimo. Você não precisa acreditar em nada deste ensaio. Aqui estão os três trechos que carregam o peso, cada um com uma nota sobre o que significa.",
+      "p1": "O cofre é uma conta inteligente Splits baseada em projetos abertos e auditados da Coinbase e Daimo. Os trechos mostram a lógica de signatário, salt e verificação P-256.",
       "p2": "Mais uma propriedade nasce do desenho. A fábrica implanta com CREATE2, então os mesmos ingredientes produzem o mesmo endereço em cada cadeia onde a fábrica existe. O endereço de uma organização é portátil por todo o mundo EVM."
     },
     "contract": {
@@ -2818,9 +3218,8 @@
       "webauthnNote": "Assim a cadeia confere uma assinatura de Face ID: primeiro tenta um verificador embutido no endereço 0x100 e, onde a cadeia não o tem, verifica a equação da curva passo a passo em uma biblioteca."
     },
     "part4": {
-      "label": "Percurso",
       "heading": "A vida de uma doação",
-      "p1": "Junte as peças e uma sequência curiosa aparece. Um apoiador pode mandar dinheiro para o endereço no primeiro dia, quando o endereço ainda não é nada além da resposta do experimento 2. A cadeia não se importa. Saldos pertencem a endereços, e este endereço é tão real quanto qualquer outro.",
+      "p1": "Um apoiador pode enviar fundos ao endereço derivado antes da implantação do contrato. O saldo permanece nesse endereço até que o primeiro pagamento implante o contrato.",
       "p2": "A última entrada fecha o ciclo. Antes da implantação, a lista de signatários ainda pode mudar, e o registro simplesmente aponta para um endereço recém-calculado. Depois, o registro congela e o cofre assume: adicionar um aparelho vira uma ação na cadeia, aprovada por uma chave que já está na lista."
     },
     "ledger": {
@@ -2865,10 +3264,53 @@
     "epilogue": {
       "heading": "Confira o rótulo você mesmo",
       "p1": "Cada afirmação desta página é conferível. A receita da carteira está na própria conta da organização como registro público. A fábrica está no mesmo endereço na Ethereum. Busque o registro, rode o experimento 2 com os ingredientes exatos, e o endereço bate ou não bate. Sem assinaturas, sem autoridade e sem confiar neste site.",
-      "p2": "As ressalvas honestas: se todas as chaves da lista se perderem, o dinheiro não pode se mover, então vale inscrever um segundo aparelho cedo. E até o primeiro pagamento, mudar a lista de signatários muda o endereço, então a lista deve se assentar antes de apontar doações para ela.",
+      "p2": "Se todas as chaves cadastradas forem perdidas, os fundos não poderão ser movidos; as organizações devem cadastrar um segundo dispositivo cedo. Antes do primeiro pagamento, alterar a lista de signatários também muda o endereço; defina a lista antes de direcionar doações.",
       "contractLink": "Leia os contratos do cofre inteligente no GitHub",
       "lexiconLink": "O esquema do registro da carteira, e todos os outros",
       "atprotoLink": "Como o AT Protocol guarda o registro"
+    }
+  },
+  "coreDashboard": {
+    "metadata": {
+      "title": "Visão geral da plataforma",
+      "description": "Totais atuais de projetos, organizações e observações da GainForest."
+    },
+    "hero": {
+      "imageAlt": "Paisagem florestal que representa a atividade da GainForest",
+      "title": "Plataforma",
+      "accent": "em resumo",
+      "lede": "Totais atuais de projetos, organizações e observações."
+    },
+    "observations": {
+      "total": "Avistamentos da natureza compartilhados",
+      "withPhotos": "Avistamentos com fotos",
+      "recent": "Avistamentos nos últimos 30 dias",
+      "mapped": "Avistamentos com localização"
+    },
+    "sections": {
+      "stories": {
+        "title": "Histórias de projetos",
+        "description": "Histórias de projetos publicadas e suas evidências."
+      },
+      "organizations": {
+        "title": "Organizações",
+        "description": "Perfis públicos, locais e atividades."
+      },
+      "observations": {
+        "title": "Observações",
+        "description": "Avistamentos, fotos e locais compartilhados."
+      },
+      "projects": {
+        "title": "Projetos",
+        "description": "Coleções de projetos e suas histórias publicadas."
+      }
+    },
+    "loadError": "Não foi possível carregar estes números. Tente novamente mais tarde."
+  },
+  "authComplete": {
+    "metadata": {
+      "title": "Concluindo o login",
+      "description": "Escolha como continuar na GainForest."
     }
   }
 }

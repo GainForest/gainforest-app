@@ -52,12 +52,12 @@ export function ObservationGrid({
     <QuickLikeProvider uris={subjectUris}>
     <ul role="list" className={className}>
       {leadingCard ? (
-        <li className={cn("animate-in", leadingCardClassName)} style={{ animationDelay: "0ms" }}>
+        <li className={cn("animate-in motion-reduce:animate-none", leadingCardClassName)} style={{ animationDelay: "0ms" }}>
           {leadingCard}
         </li>
       ) : null}
       {records.map((record, index) => (
-        <li key={record.id} className="animate-in" style={{ animationDelay: `${Math.min(index + (leadingCard ? 1 : 0), 12) * 18}ms` }}>
+        <li key={record.id} className="animate-in motion-reduce:animate-none" style={{ animationDelay: `${Math.min(index + (leadingCard ? 1 : 0), 12) * 18}ms` }}>
           <ObservationCard
             record={record}
             mediaCount={Math.max(counts.get(record.atUri) ?? 0, record.media.length)}
@@ -242,19 +242,13 @@ const ObservationCard = memo(function ObservationCard({
   }
 
   return (
-    <div
-      role="button"
-      tabIndex={0}
-      onClick={open}
-      onKeyDown={(e) => {
-        if (e.key === "Enter" || e.key === " ") {
-          e.preventDefault();
-          open();
-        }
-      }}
-      aria-label={t("openDetails", { name })}
-      className="group relative block aspect-square w-full cursor-pointer overflow-hidden rounded-lg bg-surface-sunken text-left outline-none transition-all duration-300 hover:z-10 hover:shadow-[0_18px_40px_-22px_rgba(20,30,15,0.55)] focus-visible:z-10 focus-visible:ring-2 focus-visible:ring-primary/60"
-    >
+    <div className="group relative block aspect-square w-full overflow-hidden rounded-lg bg-surface-sunken text-left transition-shadow duration-300 hover:z-10 hover:shadow-[0_18px_40px_-22px_rgba(20,30,15,0.55)] motion-reduce:transition-none">
+      <button
+        type="button"
+        onClick={open}
+        aria-label={t("openDetails", { name })}
+        className="absolute inset-0 z-10 cursor-pointer rounded-lg outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary/60"
+      />
       {hasImage ? (
         <Image
           src={imageUrl!}
@@ -263,7 +257,7 @@ const ObservationCard = memo(function ObservationCard({
           sizes={compact ? "(max-width:640px) 33vw, (max-width:1024px) 16vw, 120px" : "(max-width:640px) 50vw, (max-width:1280px) 25vw, 240px"}
           unoptimized={!isPdsBlobUrl(imageUrl)}
           onError={() => setImgError(true)}
-          className="scale-[1.05] object-cover transition-transform duration-[600ms] ease-out group-hover:scale-110"
+          className="scale-[1.05] object-cover transition-transform duration-[600ms] ease-out group-hover:scale-110 motion-reduce:scale-100 motion-reduce:transition-none motion-reduce:group-hover:scale-100"
         />
       ) : (
         <div
@@ -294,7 +288,7 @@ const ObservationCard = memo(function ObservationCard({
             event.stopPropagation();
             if (!selectionDisabled) selection.onToggle(record, !selected);
           }}
-          className={`absolute left-2 top-2 z-30 grid h-8 w-8 cursor-pointer place-items-center rounded-full border shadow-md backdrop-blur-md transition ${
+          className={`absolute left-2 top-2 z-30 grid size-11 cursor-pointer place-items-center rounded-full border shadow-md backdrop-blur-md transition ${
             selected
               ? "border-primary bg-primary text-primary-foreground"
               : "border-white/55 bg-black/45 text-white hover:bg-black/60"
@@ -322,12 +316,12 @@ const ObservationCard = memo(function ObservationCard({
           aria-label={audioState === "playing" ? t("pauseSound") : t("playSound")}
           className={
             hasImage
-              ? "absolute left-2 top-12 z-20 grid h-9 w-9 place-items-center rounded-full bg-black/55 text-white shadow-md ring-1 ring-white/25 backdrop-blur-md transition hover:bg-black/70"
+              ? "absolute left-2 top-14 z-20 grid size-11 place-items-center rounded-full bg-black/55 text-white shadow-md ring-1 ring-white/25 backdrop-blur-md transition hover:bg-black/70"
               : "absolute left-1/2 top-[38%] z-20 grid h-14 w-14 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full bg-white text-[#0b2015] shadow-[0_8px_24px_-6px_rgba(0,0,0,0.5)] transition hover:scale-105"
           }
         >
           {audioState === "loading" ? (
-            <Loader2Icon className="h-5 w-5 animate-spin" aria-hidden />
+            <Loader2Icon className="h-5 w-5 animate-spin motion-reduce:animate-none" aria-hidden />
           ) : audioState === "playing" ? (
             <PauseIcon className="h-5 w-5" aria-hidden />
           ) : (
@@ -353,20 +347,20 @@ const ObservationCard = memo(function ObservationCard({
               }}
               aria-label={ownerFilterT("filterByThis")}
               title={ownerFilterT("filterByThis")}
-              className="block max-w-full cursor-pointer truncate text-left text-[10.5px] font-medium uppercase tracking-[0.06em] text-white/85 underline-offset-2 transition-colors hover:text-white hover:underline focus-visible:underline focus-visible:outline-none"
+              className="pointer-events-auto relative z-20 block max-w-full cursor-pointer truncate text-left text-xs font-medium text-white/85 underline-offset-2 transition-colors hover:text-white hover:underline focus-visible:underline focus-visible:outline-none"
             >
               {creatorLabel}
             </button>
           ) : (
-            <p className="truncate text-[10.5px] font-medium uppercase tracking-[0.06em] text-white/85">
+            <p className="truncate text-xs font-medium text-white/85">
               {creatorLabel}
             </p>
           )
         ) : null}
         <h3
           className={cn(
-            "font-instrument leading-tight text-white [text-shadow:0_1px_3px_rgba(0,0,0,0.6)]",
-            compact ? "text-[12px] font-medium italic" : "text-[16px] italic",
+            "font-instrument italic leading-tight text-white [text-shadow:0_1px_3px_rgba(0,0,0,0.6)]",
+            compact ? "text-[12px] font-medium" : "text-[16px]",
           )}
           style={clamp(compact ? 1 : 2)}
         >
@@ -397,7 +391,7 @@ const ObservationCard = memo(function ObservationCard({
         ) : null}
 
         {!compact && (subtitle || date) ? (
-          <div className="grid grid-rows-[0fr] opacity-0 transition-all duration-300 ease-out group-hover:grid-rows-[1fr] group-hover:opacity-100 group-focus-visible:grid-rows-[1fr] group-focus-visible:opacity-100">
+          <div className="grid grid-rows-[0fr] opacity-0 transition-all duration-300 ease-out group-hover:grid-rows-[1fr] group-hover:opacity-100 group-focus-within:grid-rows-[1fr] group-focus-within:opacity-100 motion-reduce:transition-none">
             <div className="overflow-hidden">
               {subtitle ? (
                 <p className="mt-0.5 truncate text-[12px] italic leading-snug text-white/78">{subtitle}</p>

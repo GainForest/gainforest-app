@@ -6,7 +6,7 @@
   "title": "Delete your account",
   "lastUpdated": "Last updated: July 14, 2026",
   "intro": {
-    "p1": "Your GainForest account is used across gainforest.app and the Taina Field mobile app. You can delete it yourself at any time, directly from the web app — deletion is immediate, permanent, and cannot be undone."
+    "p1": "Your GainForest account is used across gainforest.app and the Taina Field mobile app. You can delete it yourself at any time from the web app. Deletion is immediate, permanent, and cannot be undone."
   },
   "sections": {
     "howTo": {
@@ -14,8 +14,8 @@
       "steps": {
         "s1": "Sign in at gainforest.app.",
         "s2": "Open your account settings at gainforest.app/settings.",
-        "s3": "Expand the \"Advanced\" section at the bottom of the page and find the \"Danger zone\".",
-        "s4": "Click \"Delete account…\". You'll see a summary of everything that will be removed.",
+        "s3": "Expand the “Advanced” section at the bottom of the page and find “Danger zone”.",
+        "s4": "Select “Delete account…”. You will see a summary of what will be removed.",
         "s5": "Type the confirmation phrase and confirm. Your data is deleted immediately and you are signed out."
       },
       "p1": "There is no grace period or recovery window: once confirmed, deleted data cannot be restored."
@@ -29,8 +29,8 @@
     "whatIsNotDeleted": {
       "title": "What is not deleted",
       "paragraphs": {
-        "p1": "GainForest is built on the AT Protocol, where your identity and data repository belong to you — not to us. Deleting your GainForest account removes everything GainForest wrote to your repository, but your underlying AT Protocol identity (your handle and DID) and your login remain, as does data created by other apps.",
-        "p2": "If you own organizations on GainForest, they are left without an owner — you'll be asked to acknowledge this before deletion runs.",
+        "p1": "GainForest is built on the AT Protocol, where your identity and data repository belong to you, not to us. Deleting your GainForest account removes everything GainForest wrote to your repository. Your underlying AT Protocol identity (your handle and DID), login, and data created by other apps remain.",
+        "p2": "If you own organizations on GainForest, they are left without an owner: you'll be asked to acknowledge this before deletion runs.",
         "p3": "Data that Taina Field stores locally on your device stays on your device until you delete the app or its data.",
         "p4": "Because the AT Protocol is an open, federated network, copies of records you previously published may exist on servers operated by third parties. Deletion removes the records at the source and signals compliant services to remove their copies. See our privacy policy at gainforest.app/privacy for details."
       }

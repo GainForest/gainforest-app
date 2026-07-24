@@ -182,12 +182,12 @@ export function AccountGalleryUploader({
   return (
     <section className="py-4">
       <div className="mx-auto max-w-2xl">
-        <div className="flex items-center gap-3 rounded-xl border border-border bg-background px-3 py-3">
+        <div className="flex items-center gap-3 rounded-2xl border border-border bg-background px-3 py-3">
           <span className="grid size-9 shrink-0 place-items-center rounded-lg bg-primary/10 text-primary">
             <ImagePlusIcon className="size-4" aria-hidden />
           </span>
           <div className="min-w-0 flex-1">
-            <h2 className="text-sm font-medium text-foreground">{t("title")}</h2>
+            <h2 className="font-instrument text-lg font-light italic text-foreground">{t("title")}</h2>
             <p className="mt-0.5 line-clamp-2 text-xs leading-5 text-muted-foreground">{t("body")}</p>
           </div>
           {canUpload ? (

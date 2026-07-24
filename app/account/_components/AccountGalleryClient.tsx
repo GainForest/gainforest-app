@@ -3,6 +3,8 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
+import { RotateCwIcon } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import type { ManageTarget } from "@/lib/links";
 import type { ProjectImageGallery } from "../../_lib/indexer";
 import { canCreateRecord, canDeleteRecord } from "../../(manage)/manage/_lib/cgs-permissions";
@@ -17,6 +19,7 @@ export function AccountGalleryClient({
   projects,
   target,
   accountName,
+  loadError = false,
 }: {
   initialGalleries: ProjectImageGallery[];
   // Galleries pinned to a project that no longer exists; only managers who can
@@ -26,6 +29,7 @@ export function AccountGalleryClient({
   // null when the viewer has no rights to manage this account (read-only).
   target: ManageTarget | null;
   accountName: string;
+  loadError?: boolean;
 }) {
   const router = useRouter();
   const t = useTranslations("common.projectGallery");
@@ -34,6 +38,18 @@ export function AccountGalleryClient({
 
   const canUpload = target ? canCreateRecord(target).allowed : false;
   const canDelete = target ? canDeleteRecord(target).allowed : false;
+
+  if (loadError) {
+    return (
+      <div role="alert" className="my-4 flex flex-col items-start gap-3 rounded-2xl bg-muted px-5 py-6">
+        <p className="text-sm text-muted-foreground">{t("loadError")}</p>
+        <Button type="button" variant="secondary" size="sm" onClick={() => router.refresh()}>
+          <RotateCwIcon aria-hidden />
+          {t("retry")}
+        </Button>
+      </div>
+    );
+  }
 
   // Orphaned photos are surfaced only to a manager who can actually delete the
   // leftover records; everyone else simply never sees deleted-project images.

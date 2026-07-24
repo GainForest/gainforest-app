@@ -292,7 +292,7 @@
         "cancel": "Ghairi"
       },
       "activeHiddenLayerSummary": "{activeCount} zinaonyeshwa · {hiddenCount} zimefichwa",
-      "activeHiddenLayerSummaryWithHint": "{activeCount} zinaonyeshwa · {hiddenCount} zimefichwa — tumia Onyesha tabaka kwenye kadi za miti kuona tabaka hapa.",
+      "activeHiddenLayerSummaryWithHint": "{activeCount} zinaonyeshwa · {hiddenCount} zimefichwa: tumia Onyesha tabaka kwenye kadi za miti kuona tabaka hapa.",
       "showLayerHint": "Tumia Onyesha tabaka kwenye kadi za miti kuona tabaka hapa.",
       "activeLayerBadge": "{count} zinaonyeshwa",
       "hiddenLayerBadge": "{count} zimefichwa",
@@ -400,6 +400,119 @@
       "includesMaEarth": "Jumla inajumuisha michango ya GainForest na Ma Earth.",
       "viaMaEarth": "Imekusanywa kupitia kampeni ya Ma Earth.",
       "notAccepting": "Mradi huu bado haupokei michango. Fuata {name} kupata habari mpya."
+    },
+    "recovery": {
+      "back": "Rudi",
+      "notSpecified": "Haijabainishwa",
+      "metadata": {
+        "title": "{title}: Cert",
+        "description": "Cert iliyochapishwa na {name}."
+      },
+      "sidebar": {
+        "active": "Inatumika",
+        "contributors": "Wachangiaji",
+        "atAGlance": "Kwa muhtasari",
+        "map": "Ramani",
+        "viewPlaces": "Tazama maeneo",
+        "mapTitle": "Ramani ya mpaka wa eneo",
+        "latestUpdates": "Masasisho ya hivi karibuni",
+        "seeAll": "Tazama zote",
+        "update": "Sasisho",
+        "country": "Nchi",
+        "website": "Tovuti",
+        "email": "Barua pepe",
+        "link": "Kiungo"
+      },
+      "evidence": {
+        "title": "Ushahidi",
+        "description": "Mtu yeyote anaweza kukagua ushahidi na tathmini.",
+        "reviewsNone": "Bado hakuna tathmini",
+        "evaluations": "{count, plural, one {tathmini #} other {tathmini #}}",
+        "comments": "{count, plural, one {maoni #} other {maoni #}}",
+        "boundaries": "{count, plural, one {mpaka # wa eneo kwenye ramani} other {mipaka # ya maeneo kwenye ramani}}",
+        "boundariesNone": "Bado hakuna mipaka ya maeneo",
+        "sightings": "{count, plural, one {mwonekano # wa asili} other {mionekano # ya asili}}",
+        "sightingsWithLatest": "{count, plural, one {mwonekano # wa asili} other {mionekano # ya asili}} · wa karibuni {latest}",
+        "sightingsNone": "Bado hakuna mionekano ya asili",
+        "timeline": "{count, plural, one {kipengee # cha ratiba} other {vipengee # vya ratiba}}",
+        "timelineNone": "Bado hakuna ushahidi wa ratiba"
+      },
+      "reviews": {
+        "description": "Tathmini huru na maoni ya umma kuhusu Cert hii. Tathmini huchapishwa na wengine na hazichaguliwi na {name}.",
+        "projectFallback": "mradi",
+        "evaluations": "{count, plural, =0 {Tathmini} other {Tathmini · #}}",
+        "evaluationsEmpty": "Bado hakuna tathmini rasmi.",
+        "score": "Alama: {value} kati ya {max}",
+        "comments": "{count, plural, =0 {Maoni} other {Maoni · #}}",
+        "commentsEmpty": "Bado hakuna maoni ya umma.",
+        "independent": "Tathmini zinaonyeshwa kama zilivyochapishwa na waandishi wake."
+      },
+      "places": {
+        "mapTitle": "Ramani ya mipaka ya maeneo",
+        "boundary": "Mpaka wa eneo {number}",
+        "emptyTitle": "Hakuna mipaka ya maeneo iliyounganishwa",
+        "emptyBody": "Cert hii haina mipaka ya maeneo kwenye ramani."
+      },
+      "donations": {
+        "raised": "Imekusanywa",
+        "supporters": "Wafadhili",
+        "supportTitle": "Uunge mkono mradi huu",
+        "supportDescription": "Mchango wako unasaidia {name}. Chagua njia ya mchango inayopatikana.",
+        "unavailableTitle": "Taarifa za michango hazipatikani",
+        "unavailableBody": "Michango haikuweza kupakiwa. Jaribu tena baadaye.",
+        "notAcceptingTitle": "Bado haipokei michango",
+        "notAcceptingBody": "{name} hajawasha michango kwa mradi huu.",
+        "emptyTitle": "Bado hakuna michango",
+        "emptyBody": "Kuwa wa kwanza kuunga mkono mradi huu.",
+        "maEarthTitle": "Shughuli za Ma Earth",
+        "maEarthBody": "Fungua Ma Earth kuona shughuli za kampeni na masasisho ya wafadhili.",
+        "totalsEmptyTitle": "Bado hakuna jumla ya michango",
+        "totalsEmptyBody": "Michango iliyokamilika kwa Cert hii itaonekana hapa.",
+        "status": {
+          "unavailable": "Hali ya michango haipatikani",
+          "notApplicable": "Michango haitumiki",
+          "open": "Inapokea michango",
+          "comingSoon": "Michango inakuja hivi karibuni",
+          "paused": "Michango imesimamishwa",
+          "closed": "Michango imefungwa"
+        },
+        "goalProgress": "{percent}% ya lengo la {goal}",
+        "goalProgressAria": "Maendeleo ya ufadhili: {percent}% ya lengo la {goal}",
+        "rank": "Nafasi {rank}",
+        "topSupporter": "Mfadhili mkuu",
+        "steadyGiver": "Mchangiaji wa kudumu",
+        "growingImpact": "Athari inayokua",
+        "anonymousSupporter": "Mfadhili asiyejulikana",
+        "openSupporterProfile": "Fungua wasifu wa mfadhili",
+        "openPaymentDetails": "Fungua maelezo ya malipo",
+        "donationCount": "{count, plural, one {mchango #} other {michango #}}",
+        "lastDonation": "Mchango wa mwisho {date}"
+      },
+      "more": {
+        "title": "Cert zaidi kutoka shirika hili",
+        "seeAll": "Tazama zote"
+      },
+      "card": {
+        "projectSteward": "Msimamizi wa mradi",
+        "missingImage": "Picha haipatikani",
+        "places": "{count, plural, one {eneo # la mradi} other {maeneo # ya mradi}}",
+        "contributors": "{count, plural, one {mtu # ametajwa} other {watu # wametajwa}}",
+        "dates": "Tarehe za mradi zimeongezwa",
+        "moreObjectives": "{count, plural, one {lengo # zaidi} other {malengo # zaidi}}"
+      },
+      "fundingStatus": {
+        "notSetUp": "Michango haijawekwa",
+        "enable": "Washa michango",
+        "missingWallet": "Hakuna pochi ya kupokea iliyowekwa.",
+        "invalidWallet": "Sahihi ya pochi si halali. Unganisha pochi tena.",
+        "untrustedWallet": "Pochi haijathibitishwa na GainForest. Iunganishe kupitia jukwaa.",
+        "update": "Sasisha mipangilio",
+        "comingSoon": "Inakuja hivi karibuni",
+        "manage": "Dhibiti michango",
+        "paused": "Michango imesimamishwa",
+        "closed": "Michango imefungwa",
+        "open": "Inapokea michango"
+      }
     }
   },
   "create": {
@@ -578,7 +691,7 @@
           "heading": "Shiriki wachangiaji na tovuti zako.",
           "contributors": {
             "label": "Orodha ya Wachangiaji",
-            "description": "Ongeza kila mtu anayehusika katika cheti hii - ikijumuisha jumuiya au shirika lako na washirika wowote. Kidokezo: Anza kwa kuongeza kikundi chako kwanza kabla ya kuorodhesha washirika au wafuasi wako.",
+            "description": "Ongeza jamii au shirika lako na washirika walioshiriki kwenye Cert hii. Anza na kikundi chako, kisha ongeza washirika au wafadhili.",
             "info": "Orodhesha watu binafsi au mashirika yoyote yaliyochangia kazi hii."
           },
           "boundaries": {
@@ -621,7 +734,11 @@
           "viewProjects": "Tazama Miradi",
           "setUpDonations": "Weka Michango",
           "shareFeedback": "Shiriki Maoni",
-          "createAnother": "Unda cheti nyingine"
+          "createAnother": "Unda cheti nyingine",
+          "successDescription": "Cert yako sasa iko kwenye wasifu wa umma. Inaweza kuchukua muda mfupi kuonekana kila mahali."
+        },
+        "preview": {
+          "title": "Onyesho la awali"
         }
       },
       "modals": {
@@ -691,6 +808,95 @@
         "coverImageTitle": "Picha ya jalada haikuweza kupakiwa",
         "coverImageDescription": "Data ya rasimu yako imerejeshwa kwa mafanikio, lakini picha ya jalada haikuweza kupatikana. Tafadhali pakia tena picha ya jalada ili kuendelea.",
         "gotIt": "Nimeelewa"
+      },
+      "editor": {
+        "changeContributor": "Badilisha mtu au kikundi",
+        "startTyping": "Anza kuandika kuona mapendekezo.",
+        "loadingSuggestions": "Inapakia mapendekezo…",
+        "noMatches": "Bado hakuna inayolingana. Endelea kuandika jina.",
+        "removeContributor": "Ondoa mtu au kikundi",
+        "minimumCharacters": "Angalau herufi 30",
+        "looksGood": "Inaonekana vizuri",
+        "contributorPlaceholder": "Tafuta mtu au kikundi",
+        "contributorShortPlaceholder": "Jina au jina la mtumiaji",
+        "addContributor": "Ongeza mtu au kikundi",
+        "showFewerSites": "Onyesha maeneo machache",
+        "showAllSites": "Onyesha maeneo yote {count}",
+        "retry": "Jaribu tena",
+        "noSites": "Bado huna maeneo. Unaweza kuchapisha bila eneo, kuongeza hapa au kuongeza sehemu kwenye <link>Dhibiti maeneo</link>.",
+        "completeRequired": "Kamilisha maelezo yanayohitajika",
+        "termsAgreement": "Ninakubali <link>sheria na masharti</link>.",
+        "publicDisclosure": "Kuchapisha huongeza Cert hii kwenye wasifu wako wa umma. Kila mtu anaweza kuiona.",
+        "previewTitleFallback": "Kichwa cha Cert yako",
+        "changeCover": "Badilisha jalada",
+        "addCover": "Ongeza picha ya jalada",
+        "removeCover": "Ondoa picha ya jalada",
+        "startOver": "Anza upya",
+        "close": "Funga",
+        "steps": {
+          "basics": {
+            "title": "mambo ya msingi",
+            "subtitle": "Ipe kazi jina na uweke tarehe. Ongeza picha ya jalada kwenye kadi."
+          },
+          "story": {
+            "title": "simulia hadithi",
+            "subtitle": "Ongeza muhtasari mfupi kwa kadi, kisha maelezo kamili."
+          },
+          "people": {
+            "title": "watu na maeneo",
+            "subtitle": "Taja waliofanya kazi na uunganishe maeneo yaliyohusika."
+          },
+          "review": {
+            "title": "kagua na uchapishe",
+            "subtitle": "Hakikisha kila kitu kinasomeka vizuri, kisha kiweke hadharani."
+          }
+        },
+        "validation": {
+          "title": "Ongeza kichwa chenye angalau herufi 4.",
+          "scopes": "Chagua angalau aina moja ya kazi.",
+          "startDate": "Ongeza tarehe ambayo kazi ilianza.",
+          "endDate": "Ongeza tarehe ya mwisho au weka kazi kuwa inaendelea.",
+          "dateOrder": "Tarehe ya mwisho haiwezi kuwa kabla ya tarehe ya kuanza.",
+          "shortDescription": "Andika angalau herufi 30 kwa muhtasari.",
+          "description": "Andika angalau herufi 80 kwa maelezo kamili.",
+          "contributors": "Ongeza angalau mtu mmoja au kikundi.",
+          "rights": "Thibitisha kuwa una ruhusa ya kuchapisha kazi hii.",
+          "terms": "Kubali masharti kabla ya kuchapisha."
+        },
+        "ongoing": "Inaendelea",
+        "selectedProfile": "Wasifu uliochaguliwa",
+        "mapArea": "Eneo la ramani",
+        "projectPlace": "Eneo la mradi",
+        "recently": "Hivi karibuni",
+        "sitesLoadError": "Maeneo hayakuweza kupakiwa.",
+        "coverTypeError": "Tumia picha ya PNG, JPEG au WebP.",
+        "coverSizeError": "Picha lazima iwe MB 5 au chini.",
+        "publishDenied": "Jukumu lako haliruhusu kuchapisha Cert kwa shirika hili.",
+        "publishError": "Cert haikuweza kuchapishwa.",
+        "projectLinkDenied": "Jukumu lako haliruhusu kuunganisha Cert hii na mradi.",
+        "saved": "Imehifadhiwa",
+        "notSaved": "Bado haijahifadhiwa",
+        "publishing": "Inachapisha…",
+        "publishToProject": "Chapisha kwenye mradi",
+        "publish": "Chapisha"
+      },
+      "taina": {
+        "role": "Msaidizi wako wa kuandika Cert",
+        "greetingHello": "Habari, mimi ni Tainá. Ninaweza kukusaidia kuandika Cert hii.",
+        "greetingHint": "Uliza kuhusu kichwa, muhtasari au ushahidi, au bandika rasimu upate maoni.",
+        "placeholder": "Niombe ushauri…",
+        "thinking": "Tainá anafikiria…",
+        "close": "Funga gumzo",
+        "ask": "Muulize Tainá",
+        "send": "Tuma",
+        "open": "Muombe Tainá ushauri",
+        "errors": {
+          "generic": "Kuna tatizo.",
+          "startReply": "Sikuweza kuanza jibu.",
+          "noResponse": "Hakuna jibu lililopokelewa.",
+          "unreachable": "Tainá hakuweza kufikiwa. Kagua muunganisho wako na ujaribu tena.",
+          "notConfigured": "Gumzo la Tainá halijawekwa kwenye seva hii."
+        }
       }
     },
     "auth": {
@@ -702,6 +908,12 @@
       "accountSetupDescription": "Tafadhali kamilisha maelezo ya akaunti yako ili kuunda cheti.",
       "manageAccount": "Dhibiti akaunti yangu",
       "pleaseWait": "Tafadhali subiri..."
+    }
+  },
+  "createAlias": {
+    "metadata": {
+      "title": "Unda mradi",
+      "description": "Unda na uchapishe mradi kwenye GainForest."
     }
   }
 }

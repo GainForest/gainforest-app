@@ -61,9 +61,9 @@ export function DonationLedger() {
   }, [step]);
 
   return (
-    <figure className="my-8 rounded-md border border-border bg-muted/20">
+    <figure className="my-8 rounded-xl border border-border bg-muted">
       <figcaption className="flex items-center justify-between border-b border-border px-4 py-2.5">
-        <span className="font-mono text-[11px] uppercase tracking-[0.12em] text-muted-foreground">{t("bench")}</span>
+        <span className="text-xs font-medium text-muted-foreground">{t("bench")}</span>
         <div className="flex gap-1.5">
           {done ? (
             <button
@@ -100,10 +100,8 @@ export function DonationLedger() {
                 key={event.id}
                 initial={{ opacity: 0, y: 8 }}
                 animate={{ opacity: 1, y: 0 }}
-                className={`flex items-start gap-2.5 rounded-md border px-3 py-2 ${
-                  event.kind === "deploy"
-                    ? "border-primary/50 bg-primary/5"
-                    : "border-border bg-background"
+                className={`flex items-start gap-2.5 rounded-md px-3 py-2 ${
+                  event.kind === "deploy" ? "bg-primary/10" : "bg-background"
                 }`}
               >
                 <span
@@ -134,7 +132,7 @@ export function DonationLedger() {
         {/* What exists at the address. */}
         <div className="flex flex-col justify-center gap-4 border-t border-border bg-background/60 p-4 sm:border-t-0 sm:border-l sm:p-5">
           <div>
-            <div className="font-mono text-[10px] uppercase tracking-[0.1em] text-muted-foreground">{t("balanceLabel")}</div>
+            <div className="text-xs font-medium text-muted-foreground">{t("balanceLabel")}</div>
             <motion.div
               key={balance}
               initial={{ opacity: 0.4 }}
@@ -146,7 +144,7 @@ export function DonationLedger() {
             </motion.div>
           </div>
           <div>
-            <div className="font-mono text-[10px] uppercase tracking-[0.1em] text-muted-foreground">{t("codeLabel")}</div>
+            <div className="text-xs font-medium text-muted-foreground">{t("codeLabel")}</div>
             <div className={`mt-1 font-mono text-[12.5px] ${deployed ? "text-primary" : "text-muted-foreground"}`}>
               {deployed ? t("codeDeployed") : t("codeNone")}
             </div>

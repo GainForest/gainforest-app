@@ -292,7 +292,7 @@
         "cancel": "Cancelar"
       },
       "activeHiddenLayerSummary": "{activeCount, plural, =1 {1 visible} other {# visibles}} · {hiddenCount, plural, =1 {1 oculta} other {# ocultas}}",
-      "activeHiddenLayerSummaryWithHint": "{activeCount, plural, =1 {1 visible} other {# visibles}} · {hiddenCount, plural, =1 {1 oculta} other {# ocultas}} — usa Mostrar capa en las tarjetas de árboles para ver las capas aquí.",
+      "activeHiddenLayerSummaryWithHint": "{activeCount, plural, =1 {1 visible} other {# visibles}} · {hiddenCount, plural, =1 {1 oculta} other {# ocultas}}: usa Mostrar capa en las tarjetas de árboles para ver las capas aquí.",
       "showLayerHint": "Usa Mostrar capa en las tarjetas de árboles para ver las capas aquí.",
       "activeLayerBadge": "{count, plural, =1 {1 visible} other {# visibles}}",
       "hiddenLayerBadge": "{count, plural, =1 {1 oculta} other {# ocultas}}",
@@ -400,6 +400,119 @@
       "includesMaEarth": "El total incluye donaciones de GainForest y Ma Earth.",
       "viaMaEarth": "Recaudado a través de la campaña de Ma Earth.",
       "notAccepting": "Este proyecto aún no acepta donaciones. Sigue a {name} para recibir novedades."
+    },
+    "recovery": {
+      "back": "Atrás",
+      "notSpecified": "No especificado",
+      "metadata": {
+        "title": "{title}: Cert",
+        "description": "Cert publicado por {name}."
+      },
+      "sidebar": {
+        "active": "Activo",
+        "contributors": "Colaboradores",
+        "atAGlance": "Resumen",
+        "map": "Mapa",
+        "viewPlaces": "Ver lugares",
+        "mapTitle": "Mapa de límites del sitio",
+        "latestUpdates": "Últimas actualizaciones",
+        "seeAll": "Ver todo",
+        "update": "Actualización",
+        "country": "País",
+        "website": "Sitio web",
+        "email": "Correo electrónico",
+        "link": "Enlace"
+      },
+      "evidence": {
+        "title": "Evidencia",
+        "description": "Cualquiera puede consultar la evidencia y las evaluaciones.",
+        "reviewsNone": "Aún no hay evaluaciones",
+        "evaluations": "{count, plural, one {# evaluación} other {# evaluaciones}}",
+        "comments": "{count, plural, one {# comentario} other {# comentarios}}",
+        "boundaries": "{count, plural, one {# límite de sitio mapeado} other {# límites de sitios mapeados}}",
+        "boundariesNone": "Aún no hay límites de sitios",
+        "sightings": "{count, plural, one {# observación de naturaleza} other {# observaciones de naturaleza}}",
+        "sightingsWithLatest": "{count, plural, one {# observación de naturaleza} other {# observaciones de naturaleza}} · última {latest}",
+        "sightingsNone": "Aún no hay observaciones de naturaleza",
+        "timeline": "{count, plural, one {# elemento cronológico} other {# elementos cronológicos}}",
+        "timelineNone": "Aún no hay evidencia cronológica"
+      },
+      "reviews": {
+        "description": "Evaluaciones independientes y comentarios públicos sobre este Cert. Otras personas publican las evaluaciones y {name} no las selecciona.",
+        "projectFallback": "el proyecto",
+        "evaluations": "{count, plural, =0 {Evaluaciones} other {Evaluaciones · #}}",
+        "evaluationsEmpty": "Aún no hay evaluaciones formales.",
+        "score": "Puntuación: {value} de {max}",
+        "comments": "{count, plural, =0 {Comentarios} other {Comentarios · #}}",
+        "commentsEmpty": "Aún no hay comentarios públicos.",
+        "independent": "Las evaluaciones se muestran tal como las publicaron sus autores."
+      },
+      "places": {
+        "mapTitle": "Mapa de límites de sitios",
+        "boundary": "Límite del sitio {number}",
+        "emptyTitle": "No hay límites de sitios vinculados",
+        "emptyBody": "Este Cert no incluye límites de sitios mapeados."
+      },
+      "donations": {
+        "raised": "Recaudado",
+        "supporters": "Colaboradores",
+        "supportTitle": "Apoya este proyecto",
+        "supportDescription": "Tu donación apoya a {name}. Elige una opción de donación disponible.",
+        "unavailableTitle": "La información de donaciones no está disponible",
+        "unavailableBody": "No se pudieron cargar las donaciones. Inténtalo de nuevo más tarde.",
+        "notAcceptingTitle": "Aún no acepta donaciones",
+        "notAcceptingBody": "{name} no ha habilitado donaciones para este proyecto.",
+        "emptyTitle": "Aún no hay donaciones",
+        "emptyBody": "Sé la primera persona en apoyar este proyecto.",
+        "maEarthTitle": "Actividad en Ma Earth",
+        "maEarthBody": "Abre Ma Earth para ver la actividad de la campaña y las novedades de colaboradores.",
+        "totalsEmptyTitle": "Aún no hay totales de donaciones",
+        "totalsEmptyBody": "Las donaciones completadas para este Cert aparecerán aquí.",
+        "status": {
+          "unavailable": "Estado de donaciones no disponible",
+          "notApplicable": "Las donaciones no corresponden",
+          "open": "Acepta donaciones",
+          "comingSoon": "Donaciones próximamente",
+          "paused": "Donaciones pausadas",
+          "closed": "Donaciones cerradas"
+        },
+        "goalProgress": "{percent}% de la meta de {goal}",
+        "goalProgressAria": "Progreso de financiación: {percent}% de la meta de {goal}",
+        "rank": "Puesto {rank}",
+        "topSupporter": "Mayor colaborador",
+        "steadyGiver": "Donante constante",
+        "growingImpact": "Impacto creciente",
+        "anonymousSupporter": "Colaborador anónimo",
+        "openSupporterProfile": "Abrir perfil del colaborador",
+        "openPaymentDetails": "Abrir detalles del pago",
+        "donationCount": "{count, plural, one {# donación} other {# donaciones}}",
+        "lastDonation": "Última donación {date}"
+      },
+      "more": {
+        "title": "Más Certs de esta organización",
+        "seeAll": "Ver todo"
+      },
+      "card": {
+        "projectSteward": "Responsable del proyecto",
+        "missingImage": "Imagen no disponible",
+        "places": "{count, plural, one {# lugar del proyecto} other {# lugares del proyecto}}",
+        "contributors": "{count, plural, one {# persona mencionada} other {# personas mencionadas}}",
+        "dates": "Fechas del proyecto añadidas",
+        "moreObjectives": "{count, plural, one {# objetivo más} other {# objetivos más}}"
+      },
+      "fundingStatus": {
+        "notSetUp": "Donaciones no configuradas",
+        "enable": "Activar donaciones",
+        "missingWallet": "No hay una billetera receptora configurada.",
+        "invalidWallet": "La firma de la billetera no es válida. Vuelve a vincularla.",
+        "untrustedWallet": "La billetera no está verificada por GainForest. Vincúlala desde la plataforma.",
+        "update": "Actualizar configuración",
+        "comingSoon": "Próximamente",
+        "manage": "Gestionar donaciones",
+        "paused": "Donaciones pausadas",
+        "closed": "Donaciones cerradas",
+        "open": "Acepta donaciones"
+      }
     }
   },
   "create": {
@@ -483,7 +596,7 @@
             "pre": "Al escribir su historia de impacto, utilice este marco STAR:",
             "bullets": [
               "Situación: ¿Qué estaba sucediendo y quién o qué se vio afectado?",
-              "Tarea — ¿Cuál fue el papel de su organización, grupo o comunidad? ¿Quién más estuvo involucrado?",
+              "Tarea: ¿Cuál fue el papel de su organización, grupo o comunidad? ¿Quién más estuvo involucrado?",
               "Acción: describa lo que hizo su organización o comunidad.",
               "Resultado: ¿Qué sucedió como resultado? Incluya cifras si están disponibles y mencione resultados tangibles y no tangibles. Esto estará respaldado por los datos de impacto que proporcione más adelante."
             ],
@@ -578,7 +691,7 @@
           "heading": "Comparta sus colaboradores y sitios.",
           "contributors": {
             "label": "Lista de colaboradores",
-            "description": "Agregar a todos los involucrados en este certificado, incluida su propia comunidad u organización y sus colaboradores. Consejo: comience agregando su propio grupo antes de incluir a sus socios o seguidores.",
+            "description": "Añade tu comunidad u organización y a las personas colaboradoras de este Cert. Empieza por tu grupo y después añade socios o colaboradores.",
             "info": "Enumere las personas u organizaciones que contribuyeron a este trabajo."
           },
           "boundaries": {
@@ -621,7 +734,11 @@
           "viewProjects": "Ver proyectos",
           "setUpDonations": "Configurar donaciones",
           "shareFeedback": "Compartir comentarios",
-          "createAnother": "Crear otro certificado"
+          "createAnother": "Crear otro certificado",
+          "successDescription": "Tu Cert ya está en tu perfil público. Puede tardar un momento en aparecer en todas partes."
+        },
+        "preview": {
+          "title": "Vista previa"
         }
       },
       "modals": {
@@ -691,6 +808,95 @@
         "coverImageTitle": "No se pudo cargar la imagen de portada",
         "coverImageDescription": "Los datos de tu borrador se restauraron correctamente, pero no se pudo obtener la imagen de portada. Vuelve a subir la imagen de portada para continuar.",
         "gotIt": "Entendido"
+      },
+      "editor": {
+        "changeContributor": "Cambiar persona o grupo",
+        "startTyping": "Empieza a escribir para ver sugerencias.",
+        "loadingSuggestions": "Cargando sugerencias…",
+        "noMatches": "Aún no hay coincidencias. Sigue escribiendo un nombre.",
+        "removeContributor": "Eliminar persona o grupo",
+        "minimumCharacters": "Al menos 30 caracteres",
+        "looksGood": "Está bien",
+        "contributorPlaceholder": "Busca una persona o grupo",
+        "contributorShortPlaceholder": "Nombre o usuario",
+        "addContributor": "Añadir persona o grupo",
+        "showFewerSites": "Mostrar menos sitios",
+        "showAllSites": "Mostrar los {count} sitios",
+        "retry": "Intentar de nuevo",
+        "noSites": "Aún no tienes sitios. Puedes publicar sin uno, añadirlo aquí o agregar lugares en <link>Gestionar sitios</link>.",
+        "completeRequired": "Completa los datos obligatorios",
+        "termsAgreement": "Acepto los <link>términos y condiciones</link>.",
+        "publicDisclosure": "Al publicar, este Cert se añade a tu perfil público. Cualquiera puede verlo.",
+        "previewTitleFallback": "Título de tu Cert",
+        "changeCover": "Cambiar portada",
+        "addCover": "Añadir foto de portada",
+        "removeCover": "Eliminar foto de portada",
+        "startOver": "Empezar de nuevo",
+        "close": "Cerrar",
+        "steps": {
+          "basics": {
+            "title": "lo esencial",
+            "subtitle": "Ponle nombre al trabajo y define las fechas. Añade una foto de portada en la tarjeta."
+          },
+          "story": {
+            "title": "cuenta la historia",
+            "subtitle": "Añade un resumen breve para las tarjetas y después la descripción completa."
+          },
+          "people": {
+            "title": "personas y lugares",
+            "subtitle": "Reconoce a quienes hicieron el trabajo y vincula los sitios implicados."
+          },
+          "review": {
+            "title": "revisa y publica",
+            "subtitle": "Comprueba que todo se lea bien y hazlo público."
+          }
+        },
+        "validation": {
+          "title": "Añade un título de al menos 4 caracteres.",
+          "scopes": "Elige al menos un tipo de trabajo.",
+          "startDate": "Indica cuándo empezó el trabajo.",
+          "endDate": "Añade una fecha de fin o marca el trabajo como continuo.",
+          "dateOrder": "La fecha de fin no puede ser anterior a la de inicio.",
+          "shortDescription": "Escribe al menos 30 caracteres para el resumen.",
+          "description": "Escribe al menos 80 caracteres para la descripción completa.",
+          "contributors": "Añade al menos una persona o grupo.",
+          "rights": "Confirma que tienes permiso para publicar este trabajo.",
+          "terms": "Acepta los términos antes de publicar."
+        },
+        "ongoing": "En curso",
+        "selectedProfile": "Perfil seleccionado",
+        "mapArea": "Zona del mapa",
+        "projectPlace": "Lugar del proyecto",
+        "recently": "Recientemente",
+        "sitesLoadError": "No se pudieron cargar los sitios.",
+        "coverTypeError": "Usa una imagen PNG, JPEG o WebP.",
+        "coverSizeError": "La imagen debe tener 5 MB o menos.",
+        "publishDenied": "Tu rol no permite publicar un Cert para esta organización.",
+        "publishError": "No se pudo publicar el Cert.",
+        "projectLinkDenied": "Tu rol no permite vincular este Cert al proyecto.",
+        "saved": "Guardado",
+        "notSaved": "Aún no está guardado",
+        "publishing": "Publicando…",
+        "publishToProject": "Publicar en el proyecto",
+        "publish": "Publicar"
+      },
+      "taina": {
+        "role": "Tu asistente para escribir Certs",
+        "greetingHello": "Hola, soy Tainá. Puedo ayudarte a escribir este Cert.",
+        "greetingHint": "Pregunta por el título, el resumen o la evidencia, o pega un borrador para recibir comentarios.",
+        "placeholder": "Pídeme consejos…",
+        "thinking": "Tainá está pensando…",
+        "close": "Cerrar chat",
+        "ask": "Preguntar a Tainá",
+        "send": "Enviar",
+        "open": "Pedir consejos a Tainá",
+        "errors": {
+          "generic": "Algo salió mal.",
+          "startReply": "No pude iniciar una respuesta.",
+          "noResponse": "No se recibió respuesta.",
+          "unreachable": "No se pudo contactar con Tainá. Comprueba tu conexión e inténtalo de nuevo.",
+          "notConfigured": "El chat de Tainá no está configurado en este servidor."
+        }
       }
     },
     "auth": {
@@ -702,6 +908,12 @@
       "accountSetupDescription": "Complete la información de su cuenta para crear un certificado.",
       "manageAccount": "Administrar mi cuenta",
       "pleaseWait": "Por favor espere..."
+    }
+  },
+  "createAlias": {
+    "metadata": {
+      "title": "Crear proyecto",
+      "description": "Crea y publica un proyecto en GainForest."
     }
   }
 }

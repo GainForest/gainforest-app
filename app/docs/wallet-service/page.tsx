@@ -31,15 +31,12 @@ export default async function WalletServiceDocsPage() {
   const t = await getTranslations("common.walletExplainer");
 
   return (
-    <article className="mx-auto w-full max-w-2xl px-5 py-12 sm:px-8 sm:py-16">
+    <article className="mx-auto w-full max-w-3xl px-3 py-4 sm:px-5 lg:px-8 lg:py-6">
       <header className="mb-10">
-        <div className="mb-6 flex items-center gap-2.5 text-primary">
+        <div className="mb-6 text-primary">
           <LogoMark className="h-5 w-5" title="GainForest" />
-          <span className="font-mono text-[11px] uppercase tracking-[0.14em] text-muted-foreground/70">
-            {t("kicker")}
-          </span>
         </div>
-        <h1 className="m-0 font-serif text-[2.6rem] font-semibold leading-[1.1] tracking-tight text-foreground">
+        <h1 className="m-0 font-instrument text-[2.6rem] font-light italic leading-[1.1] tracking-tight text-foreground">
           {t("title")}
         </h1>
         <p className="mt-5 text-[17px] leading-relaxed text-muted-foreground">{t("standfirst")}</p>
@@ -50,14 +47,14 @@ export default async function WalletServiceDocsPage() {
         <Prose>{t("intro.p2")}</Prose>
 
         {/* ── Part I ─────────────────────────────────────────────────── */}
-        <PartHeading index="I" label={t("part1.label")} heading={t("part1.heading")} />
+        <PartHeading index="I" heading={t("part1.heading")} />
         <Prose>{t("part1.p1")}</Prose>
         <Prose>{t("part1.p2")}</Prose>
         <KeyForge />
         <Prose>{t("part1.p3")}</Prose>
 
         {/* ── Part II ────────────────────────────────────────────────── */}
-        <PartHeading index="II" label={t("part2.label")} heading={t("part2.heading")} />
+        <PartHeading index="II" heading={t("part2.heading")} />
         <Prose>{t("part2.p1")}</Prose>
         <Prose>{t("part2.p2")}</Prose>
         <AddressForge />
@@ -65,20 +62,20 @@ export default async function WalletServiceDocsPage() {
       </WalletLabProvider>
 
       {/* ── Part III ─────────────────────────────────────────────────── */}
-      <PartHeading index="III" label={t("part3.label")} heading={t("part3.heading")} />
+      <PartHeading index="III" heading={t("part3.heading")} />
       <Prose>{t("part3.p1")}</Prose>
       <ContractReader />
       <Prose>{t("part3.p2")}</Prose>
 
       {/* ── Part IV ──────────────────────────────────────────────────── */}
-      <PartHeading index="IV" label={t("part4.label")} heading={t("part4.heading")} />
+      <PartHeading index="IV" heading={t("part4.heading")} />
       <Prose>{t("part4.p1")}</Prose>
       <DonationLedger />
       <Prose>{t("part4.p2")}</Prose>
 
       {/* ── Epilogue ─────────────────────────────────────────────────── */}
       <div className="mt-14 border-t border-border pt-10">
-        <h2 className="m-0 font-serif text-2xl font-semibold tracking-tight text-foreground">
+        <h2 className="m-0 font-instrument text-2xl font-light italic tracking-tight text-foreground">
           {t("epilogue.heading")}
         </h2>
         <Prose>{t("epilogue.p1")}</Prose>
@@ -98,15 +95,14 @@ function Prose({ children }: { children: React.ReactNode }) {
   return <p className="my-5 text-[15px] leading-[1.75] text-foreground/85">{children}</p>;
 }
 
-function PartHeading({ index, label, heading }: { index: string; label: string; heading: string }) {
+function PartHeading({ index, heading }: { index: string; heading: string }) {
   return (
     <div className="mt-14 mb-6">
-      <div className="mb-2 flex items-center gap-3">
-        <span className="font-serif text-lg italic text-primary">{index}</span>
-        <span className="h-px flex-1 bg-border" aria-hidden />
-        <span className="font-mono text-[10.5px] uppercase tracking-[0.14em] text-muted-foreground/70">{label}</span>
+      <div className="mb-3 flex items-center gap-3" aria-hidden>
+        <span className="text-sm font-medium text-primary">{index}</span>
+        <span className="h-px flex-1 bg-border" />
       </div>
-      <h2 className="m-0 font-serif text-[1.65rem] font-semibold leading-snug tracking-tight text-foreground">
+      <h2 className="m-0 font-instrument text-[1.65rem] font-light italic leading-snug tracking-tight text-foreground">
         {heading}
       </h2>
     </div>

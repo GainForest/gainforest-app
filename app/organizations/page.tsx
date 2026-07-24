@@ -95,7 +95,7 @@ export default async function OrganizationsPage() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(itemListJsonLd) }}
       />
-      <Suspense fallback={<ExploreGridPageSkeleton />}>
+      <Suspense fallback={<ExploreGridPageSkeleton variant="organizations" />}>
         <OrganizationsClient initialPage={initialPage} />
       </Suspense>
     </>

@@ -2,7 +2,12 @@
 
 import Image from "next/image";
 import { useState } from "react";
-import { ChevronRightIcon, FolderKanbanIcon, HeartIcon, MapPinIcon } from "lucide-react";
+import {
+  ChevronRightIcon,
+  FolderKanbanIcon,
+  HeartIcon,
+  MapPinIcon,
+} from "lucide-react";
 import { useTranslations } from "next-intl";
 import { ProjectScopeTags } from "./ProjectScopeTags";
 import { isPdsBlobUrl } from "../_lib/pds";
@@ -34,7 +39,7 @@ export function ProjectListHeader() {
   const t = useTranslations("marketplace.projects.list");
   return (
     <div
-      className={`hidden items-center gap-3 px-2 pb-2 text-[11px] font-medium uppercase tracking-[0.08em] text-muted-foreground sm:grid sm:gap-4 sm:px-3 ${LIST_GRID}`}
+      className={`hidden items-center gap-3 px-2 pb-2 text-[11px] font-medium text-muted-foreground sm:grid sm:gap-4 sm:px-3 ${LIST_GRID}`}
     >
       <span aria-hidden />
       <span>{t("colProject")}</span>
@@ -73,12 +78,17 @@ export function ProjectListItem({
   const hasImage = Boolean(record.imageUrl) && !imgError;
   const place = countryName(record.country);
   const steward = record.creatorName ?? t("projectSteward");
-  const acceptsDonations = donationSummary?.acceptsDonations || record.acceptsDonations === true;
-  const donationLabel = donationSummary && donationSummary.totalUsd > 0
-    ? t("donationSummaryShort", { amount: formatCompactUsd(donationSummary.totalUsd), donors: donationSummary.donorCount })
-    : acceptsDonations
-      ? t("acceptsDonations")
-      : null;
+  const acceptsDonations =
+    donationSummary?.acceptsDonations || record.acceptsDonations === true;
+  const donationLabel =
+    donationSummary && donationSummary.totalUsd > 0
+      ? t("donationSummaryShort", {
+          amount: formatCompactUsd(donationSummary.totalUsd),
+          donors: donationSummary.donorCount,
+        })
+      : acceptsDonations
+        ? t("acceptsDonations")
+        : null;
   const round = donationSummary?.maEarth?.rounds.at(-1);
 
   return (
@@ -86,7 +96,7 @@ export function ProjectListItem({
       type="button"
       onClick={() => onOpen(record)}
       aria-label={t("open", { title: record.title })}
-      className={`group grid w-full items-center gap-3 px-2 py-2 text-left outline-none transition-colors hover:bg-surface-sunken focus-visible:bg-surface-sunken focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary/50 sm:gap-4 sm:px-3 ${LIST_GRID}`}
+      className={`group grid w-full items-center gap-3 px-3 py-3 text-left outline-none transition-colors hover:bg-background/70 focus-visible:bg-background/70 focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary/50 sm:gap-4 ${LIST_GRID}`}
     >
       {/* Thumbnail */}
       <span className="relative h-10 w-10 shrink-0 overflow-hidden rounded-md bg-muted">
@@ -127,19 +137,28 @@ export function ProjectListItem({
           <span className="mt-1 hidden items-center gap-1.5 truncate text-xs font-medium text-primary sm:flex">
             <HeartIcon className="h-3 w-3 shrink-0" aria-hidden />
             <span className="truncate">{donationLabel}</span>
-            {round ? <span className="rounded-full bg-foreground px-1.5 py-0.5 text-[10px] text-background">{t("round", { round })}</span> : null}
+            {round ? (
+              <span className="rounded-full bg-foreground px-1.5 py-0.5 text-[10px] text-background">
+                {t("round", { round })}
+              </span>
+            ) : null}
           </span>
         ) : null}
       </span>
 
       {/* Steward */}
-      <span className="hidden min-w-0 truncate text-xs text-muted-foreground sm:block">{steward}</span>
+      <span className="hidden min-w-0 truncate text-xs text-muted-foreground sm:block">
+        {steward}
+      </span>
 
       {/* Place */}
       <span className="hidden min-w-0 items-center gap-1 text-xs text-muted-foreground sm:flex">
         {place ? (
           <>
-            <MapPinIcon className="h-3 w-3 shrink-0 text-muted-foreground/70" aria-hidden />
+            <MapPinIcon
+              className="h-3 w-3 shrink-0 text-muted-foreground/70"
+              aria-hidden
+            />
             <span className="truncate">{place}</span>
           </>
         ) : (
@@ -150,7 +169,11 @@ export function ProjectListItem({
       {/* Focus tags */}
       <span className="hidden min-w-0 flex-wrap items-center gap-x-2 gap-y-0.5 overflow-hidden text-xs text-muted-foreground lg:flex">
         {(record.scopeTags?.length ?? 0) > 0 ? (
-          <ProjectScopeTags tags={record.scopeTags ?? []} variant="text" max={2} />
+          <ProjectScopeTags
+            tags={record.scopeTags ?? []}
+            variant="text"
+            max={2}
+          />
         ) : (
           <span className="text-muted-foreground/45">—</span>
         )}

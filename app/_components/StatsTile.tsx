@@ -50,10 +50,9 @@ export function StatsTile({ label, value, icon, accent = false, href, className:
 
   const content = (
     <>
-      <div className="absolute inset-x-6 top-0 h-px bg-gradient-to-r from-transparent via-primary/25 to-transparent" />
       <div className="min-w-0">
         <div className="flex min-w-0 items-center gap-2 sm:gap-3">
-          <span className="flex shrink-0 items-center justify-center text-primary transition-transform duration-300 group-hover:scale-105 [&_svg]:size-4 sm:[&_svg]:size-5">
+          <span className="flex shrink-0 items-center justify-center text-primary transition-transform duration-300 group-hover:scale-105 motion-reduce:transform-none motion-reduce:transition-none [&_svg]:size-4 sm:[&_svg]:size-5">
             {icon}
           </span>
           <div
@@ -65,13 +64,13 @@ export function StatsTile({ label, value, icon, accent = false, href, className:
             {value}
           </div>
         </div>
-        <p className="mt-1 text-xs leading-snug text-muted-foreground first-letter:uppercase sm:text-sm sm:leading-normal">{label}</p>
+        <p className="mt-1 text-xs leading-snug text-muted-foreground sm:text-sm sm:leading-normal">{label}</p>
       </div>
     </>
   );
 
   const className = [
-    "group relative overflow-hidden rounded-2xl bg-foreground/5 p-4 text-left backdrop-blur transition-all duration-300 hover:-translate-y-0.5 hover:bg-foreground/[0.07] sm:rounded-3xl sm:p-6",
+    "group relative overflow-hidden rounded-2xl bg-muted p-4 text-left transition-colors duration-300 hover:bg-muted motion-reduce:transform-none motion-reduce:transition-none sm:p-5",
     extraClassName,
   ]
     .filter(Boolean)
@@ -96,8 +95,7 @@ export function RecordDrawerStatsTile({
   valueClassName = "text-2xl font-semibold tabular-nums",
 }: RecordDrawerStatsTileItem) {
   return (
-    <div className={`relative overflow-hidden rounded-2xl bg-foreground/5 px-4 py-3 ${className}`}>
-      <div className="absolute inset-x-5 top-0 h-px bg-gradient-to-r from-transparent via-primary/25 to-transparent" />
+    <div className={`relative overflow-hidden rounded-2xl bg-muted px-4 py-3 ${className}`}>
       <span className="flex items-center text-primary [&_svg]:size-4">{icon}</span>
       <div className={`mt-1.5 tracking-[-0.02em] text-foreground ${valueClassName}`}>{value}</div>
       <p className="mt-0.5 text-[11px] text-muted-foreground">{label}</p>

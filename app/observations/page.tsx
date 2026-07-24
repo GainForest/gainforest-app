@@ -96,7 +96,7 @@ export default async function ObservationsPage() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(itemListJsonLd) }}
       />
-      <Suspense fallback={<ExploreGridPageSkeleton />}>
+      <Suspense fallback={<ExploreGridPageSkeleton variant="observations" />}>
         <RecordExplorer kind="occurrence" enableOwnerFilter initialPage={initialPage} />
       </Suspense>
     </>

@@ -9,6 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { ModalContent, ModalDescription, ModalFooter, ModalTitle } from "@/components/ui/modal/modal";
 import { useModal } from "@/components/ui/modal/context";
 import { cn } from "@/lib/utils";
+import { debug } from "@/lib/logger";
 import type { ManageTarget } from "@/lib/links";
 import type { OccurrenceRecord } from "@/app/_lib/indexer";
 import {
@@ -133,7 +134,7 @@ export function GroupObservationsDatasetModal({
       );
 
       if (result.attached.length === 0 && result.errors.length > 0) {
-        setError(result.errors[0]?.error ?? t("attachFailed"));
+        setError(t("attachFailed"));
         setIsPending(false);
         return;
       }
@@ -153,7 +154,8 @@ export function GroupObservationsDatasetModal({
       onDone({ datasetUri: dataset.uri, datasetName: dataset.name, result });
       await closeModal();
     } catch (caught) {
-      setError(caught instanceof Error ? caught.message : t("attachFailed"));
+      debug.error("Observation grouping failed", caught);
+      setError(t("attachFailed"));
       setIsPending(false);
     }
   };
@@ -164,12 +166,12 @@ export function GroupObservationsDatasetModal({
     <ModalContent dismissible={!isPending}>
       <div className="space-y-4">
         <div className="space-y-1.5">
-          <ModalTitle>{t("title", { count: movable })}</ModalTitle>
+          <ModalTitle className="font-instrument font-light italic">{t("title", { count: movable })}</ModalTitle>
           <ModalDescription>{t("description")}</ModalDescription>
         </div>
 
         {canToggle ? (
-          <div role="tablist" aria-label={t("modeLabel")} className="grid grid-cols-2 gap-1 rounded-xl bg-muted p-1">
+          <div role="tablist" aria-label={t("modeLabel")} className="grid grid-cols-2 gap-1 rounded-2xl bg-muted p-1">
             <button
               type="button"
               role="tab"

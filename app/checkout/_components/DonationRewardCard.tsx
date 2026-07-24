@@ -24,7 +24,7 @@ import {
   useSpring,
 } from "framer-motion";
 import { useFormatter, useTranslations } from "next-intl";
-import { tierForAmount, type RewardLine } from "./reward-model";
+import { rewardEffectsEnabled, tierForAmount, type RewardLine } from "./reward-model";
 
 export type { RewardLine } from "./reward-model";
 
@@ -48,7 +48,7 @@ export function DonationRewardCard({
   const t = useTranslations("cart.checkoutPage.reward");
   const format = useFormatter();
   const reduceMotion = useReducedMotion();
-  const effectsOn = !reduceMotion && interactive;
+  const effectsOn = rewardEffectsEnabled(reduceMotion, interactive);
 
   const donationLines = useMemo(() => lines.filter((line) => line.kind === "donation"), [lines]);
   const featured = donationLines[0] ?? lines[0] ?? null;
@@ -100,7 +100,6 @@ export function DonationRewardCard({
 
   const tierName = t(`tiers.${tier.key}.name`);
   const amount = format.number(totalUsd, { style: "currency", currency: "USD" });
-  const eyebrow = overall ? t("overallEyebrow") : t("guardianOf");
   const heroTitle = overall ? t("overallTitle") : featured.title;
   const subtitle = overall
     ? t("overallSubtitle", { count: donationLines.length })
@@ -189,20 +188,11 @@ export function DonationRewardCard({
 
               {/* ── Content ─────────────────────────────────────────────── */}
               <div className="absolute inset-0 flex flex-col justify-between p-5">
-                {/* Tier identity, top. */}
-                <div className="flex items-center gap-2">
-                  <span className="size-2 rounded-full bg-white shadow-[0_0_12px_rgba(255,255,255,0.9)]" aria-hidden />
-                  <span className="text-[11px] font-bold uppercase tracking-[0.38em] text-white/90">
-                    {tierName}
-                  </span>
-                </div>
+                <div />
 
                 {/* Hero, bottom. */}
                 <div>
-                  <p className="text-[10px] font-semibold uppercase tracking-[0.32em] text-white/55">
-                    {eyebrow}
-                  </p>
-                  <h3 className="mt-1 font-instrument text-[2.1rem] italic leading-[1.05] text-white drop-shadow-[0_2px_12px_rgba(0,0,0,0.6)]">
+                  <h3 className="font-instrument text-[2.1rem] italic leading-[1.05] text-white drop-shadow-[0_2px_12px_rgba(0,0,0,0.6)]">
                     {heroTitle}
                   </h3>
                   <p className="mt-1.5 truncate text-xs font-medium text-white/70">
@@ -211,12 +201,12 @@ export function DonationRewardCard({
 
                   <div className="mt-4 h-px w-full bg-white/20" />
 
-                  <p className="mt-3 text-[10px] font-semibold uppercase tracking-[0.32em] text-white/55">
-                    {t("contributed")}
-                  </p>
-                  <p className="font-instrument text-[3.6rem] italic leading-[0.95] text-white drop-shadow-[0_3px_18px_rgba(0,0,0,0.7)]">
-                    {amount}
-                  </p>
+                  <div className="mt-3 flex items-end justify-between gap-3">
+                    <span className="text-xs font-medium text-white/65">{tierName}</span>
+                    <p className="text-[3.6rem] font-semibold leading-[0.95] tracking-tight text-white drop-shadow-[0_3px_18px_rgba(0,0,0,0.7)]">
+                      {amount}
+                    </p>
+                  </div>
                 </div>
               </div>
             </div>

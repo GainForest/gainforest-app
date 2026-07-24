@@ -23,8 +23,13 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 import { manageApiHref, manageHref, profileBasePath, type ManageTarget } from "@/lib/links";
 import { localBumicertHref } from "@/app/_lib/urls";
-import { canUpdateRecord } from "../../../../_lib/cgs-permissions";
+import {
+  canCreateRecord,
+  canUpdateRecord,
+} from "../../../../_lib/cgs-permissions";
 import { putRecord } from "../../../../_lib/mutations";
+import { isReliablyOwnProjectRecord } from "../../../_components/project-record-ownership";
+import { SectionSurface } from "@/components/ui/section-surface";
 
 const PROJECT_COLLECTION = "org.hypercerts.collection";
 
@@ -80,7 +85,16 @@ export function ProjectCertsManagerClient({ target, projectRkey }: { target: Man
   const [pending, setPending] = useState<PendingAction>(null);
   const [refreshing, setRefreshing] = useState(false);
   const [showLink, setShowLink] = useState(false);
-  const updatePermission = canUpdateRecord(target);
+  const createPermission = canCreateRecord(target);
+  const ownProject = data?.project
+    ? isReliablyOwnProjectRecord({
+        kind: target.kind,
+        did: target.did,
+        currentUserDid: target.currentUserDid,
+        recordDid: data.project.did,
+      })
+    : false;
+  const updatePermission = canUpdateRecord(target, { ownRecord: ownProject });
   const repoOptions = target.kind === "group" ? { repo: target.did } : undefined;
 
   const loadCerts = useCallback(async (options?: { showLoading?: boolean }) => {
@@ -160,7 +174,7 @@ export function ProjectCertsManagerClient({ target, projectRkey }: { target: Man
   }
 
   return (
-    <div className="mx-auto w-full max-w-[1440px] px-4 py-4 sm:px-6 sm:py-6">
+    <div className="mx-auto w-full max-w-[90rem] px-3 py-4 sm:px-5 sm:py-6 lg:px-8">
       <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
         <Button asChild variant="outline" size="sm">
           <Link href={`${profileBasePath(target)}/projects`}>
@@ -203,24 +217,28 @@ export function ProjectCertsManagerClient({ target, projectRkey }: { target: Man
                   className="min-w-0 flex-1 truncate border-0 bg-transparent px-3 py-2 text-sm text-foreground outline-none placeholder:text-muted-foreground"
                 />
               </div>
-              <Button asChild>
-                <Link href={newCertHref}>
-                  <CirclePlusIcon className="size-4" />
-                  {t("actions.mint")}
-                </Link>
-              </Button>
+              {createPermission.allowed ? (
+                <Button asChild>
+                  <Link href={newCertHref}>
+                    <CirclePlusIcon className="size-4" />
+                    {t("actions.mint")}
+                  </Link>
+                </Button>
+              ) : null}
             </div>
           </div>
 
-          {!updatePermission.allowed ? (
-            <div className="flex items-center gap-2 rounded-2xl border border-warn/25 bg-warn/10 px-4 py-3 text-sm text-foreground">
+          {!createPermission.allowed || !updatePermission.allowed ? (
+            <div className="flex items-center gap-2 rounded-2xl bg-warn/10 px-4 py-3 text-sm text-foreground">
               <TriangleAlertIcon className="size-4 text-warn" />
-              {updatePermission.reason ?? t("errors.noPermission")}
+              {(!createPermission.allowed
+                ? createPermission.reason
+                : updatePermission.reason) ?? t("errors.noPermission")}
             </div>
           ) : null}
 
           {error ? (
-            <div className="flex items-center gap-2 rounded-2xl border border-warn/25 bg-warn/10 px-4 py-3 text-sm text-foreground">
+            <div className="flex items-center gap-2 rounded-2xl bg-warn/10 px-4 py-3 text-sm text-foreground">
               <TriangleAlertIcon className="size-4 text-warn" />
               {error}
             </div>
@@ -230,6 +248,7 @@ export function ProjectCertsManagerClient({ target, projectRkey }: { target: Man
             <EmptyState
               hasQuery={hasQuery}
               createHref={newCertHref}
+              canCreate={createPermission.allowed}
               canLink={updatePermission.allowed && linkableAll.length > 0}
               onLink={() => setShowLink(true)}
             />
@@ -284,11 +303,11 @@ function CertTile({
   const details = certDetails(cert, t);
 
   return (
-    <li className={cn("group overflow-hidden rounded-3xl border bg-card shadow-sm transition", cert.linked ? "border-primary/25" : "border-border")}>
-      <div className="flex gap-3 p-3 sm:gap-4 sm:p-4">
+    <li className={cn("group h-full overflow-hidden rounded-2xl bg-muted transition-colors hover:bg-muted/80", cert.linked && "ring-1 ring-primary/25")}>
+      <div className="flex h-full gap-3 p-3 sm:gap-4 sm:p-4">
         <div className="relative h-24 w-24 shrink-0 overflow-hidden rounded-2xl bg-muted sm:h-28 sm:w-32">
           {cert.imageUrl ? (
-            <Image src={cert.imageUrl} alt={cert.title} fill unoptimized sizes="128px" className="object-cover transition-transform duration-500 group-hover:scale-105" />
+            <Image src={cert.imageUrl} alt={cert.title} fill unoptimized sizes="128px" className="object-cover transition-transform duration-500 motion-reduce:transition-none group-hover:scale-105 motion-reduce:group-hover:scale-100" />
           ) : (
             <div className="grid h-full place-items-center text-primary/60">
               <LeafIcon className="size-8" />
@@ -298,7 +317,7 @@ function CertTile({
         <div className="flex min-w-0 flex-1 flex-col justify-between py-0.5">
           <div className="min-w-0">
             <div className="mb-1.5 flex items-start justify-between gap-2">
-              <h2 className="line-clamp-2 font-instrument text-2xl italic leading-tight tracking-[-0.02em] text-foreground">{cert.title}</h2>
+              <h2 className="min-w-0 break-words font-instrument text-2xl italic leading-tight tracking-[-0.02em] text-foreground">{cert.title}</h2>
               {cert.linked ? (
                 <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-primary/12 px-2.5 py-1 text-xs font-medium text-primary">
                   <CheckIcon className="size-3.5" />
@@ -317,7 +336,7 @@ function CertTile({
               {details.map((detail) => <span key={detail}>{detail}</span>)}
             </div>
             <div className="flex shrink-0 flex-wrap justify-end gap-2">
-              <Button asChild type="button" variant="outline" size="sm" className="h-8">
+              <Button asChild type="button" variant="outline" size="sm" className="h-10">
                 <Link href={localBumicertHref(cert.did, cert.rkey)}>
                   <EyeIcon className="size-3.5" />
                   {t("actions.view")}
@@ -330,7 +349,7 @@ function CertTile({
                 disabled={disabled}
                 title={disabledReason ?? undefined}
                 onClick={onToggle}
-                className="h-8"
+                className="h-10"
               >
                 {pending ? <Loader2Icon className="size-3.5 animate-spin" /> : cert.linked ? <XIcon className="size-3.5" /> : <Link2Icon className="size-3.5" />}
                 {pending ? t("actions.saving") : cert.linked ? t("actions.unlink") : t("actions.link")}
@@ -349,7 +368,7 @@ function CertsSkeleton() {
       <Skeleton className="h-28 rounded-3xl" />
       <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3">
         {Array.from({ length: 9 }).map((_, index) => (
-          <div key={index} className="flex gap-4 rounded-3xl border border-border bg-card p-4">
+          <div key={index} className="flex h-full gap-4 rounded-2xl bg-muted p-4">
             <Skeleton className="h-28 w-32 shrink-0 rounded-2xl" />
             <div className="flex flex-1 flex-col justify-between py-1">
               <div className="space-y-3">
@@ -357,7 +376,7 @@ function CertsSkeleton() {
                 <Skeleton className="h-4 w-full rounded-full" />
                 <Skeleton className="h-4 w-2/3 rounded-full" />
               </div>
-              <Skeleton className="h-8 w-24 self-end rounded-full" />
+              <Skeleton className="h-10 w-24 self-end rounded-full" />
             </div>
           </div>
         ))}
@@ -369,17 +388,19 @@ function CertsSkeleton() {
 function EmptyState({
   hasQuery,
   createHref,
+  canCreate,
   canLink,
   onLink,
 }: {
   hasQuery: boolean;
   createHref: string;
+  canCreate: boolean;
   canLink: boolean;
   onLink: () => void;
 }) {
   const t = useTranslations("marketplace.manageProjectCerts");
   return (
-    <div className="flex min-h-72 flex-col items-center justify-center rounded-[2rem] border border-dashed border-border bg-muted/20 px-6 text-center">
+    <SectionSurface variant="muted" className="flex min-h-72 flex-col items-center justify-center text-center">
       <LeafIcon className="mb-4 size-10 text-primary" />
       <h2 className="font-instrument text-2xl font-light italic tracking-[-0.02em] text-foreground">
         {hasQuery ? t("empty.noMatchingTitle") : t("empty.noCertsTitle")}
@@ -387,14 +408,16 @@ function EmptyState({
       <p className="mt-2 max-w-md text-sm leading-6 text-muted-foreground">
         {hasQuery ? t("empty.noMatchingDescription") : t("empty.noCertsDescription")}
       </p>
-      {!hasQuery ? (
+      {!hasQuery && (canCreate || canLink) ? (
         <div className="mt-5 flex flex-col items-center gap-2">
-          <Button asChild size="sm">
-            <Link href={createHref}>
-              <CirclePlusIcon className="size-4" />
-              {t("actions.mintFirst")}
-            </Link>
-          </Button>
+          {canCreate ? (
+            <Button asChild size="sm">
+              <Link href={createHref}>
+                <CirclePlusIcon className="size-4" />
+                {t("actions.mintFirst")}
+              </Link>
+            </Button>
+          ) : null}
           {canLink ? (
             <Button type="button" variant="ghost" size="sm" onClick={onLink} className="text-muted-foreground">
               <Link2Icon className="size-4" />
@@ -403,7 +426,7 @@ function EmptyState({
           ) : null}
         </div>
       ) : null}
-    </div>
+    </SectionSurface>
   );
 }
 
@@ -430,7 +453,7 @@ function LinkExistingSection({
 }) {
   const t = useTranslations("marketplace.manageProjectCerts");
   return (
-    <section className="overflow-hidden rounded-3xl border border-border/60 bg-card/40">
+    <section className="border-t border-border/60">
       <button
         type="button"
         onClick={onToggle}
@@ -442,10 +465,10 @@ function LinkExistingSection({
           <span className="font-instrument text-xl italic text-foreground">{t("linkExisting.title")}</span>
           <span className="rounded-full bg-muted px-2.5 py-0.5 text-xs text-muted-foreground">{t("stats.available", { count: availableCount })}</span>
         </span>
-        <ChevronDownIcon className={cn("size-5 shrink-0 text-muted-foreground transition-transform", open && "rotate-180")} />
+        <ChevronDownIcon className={cn("size-5 shrink-0 text-muted-foreground transition-transform motion-reduce:transition-none", open && "rotate-180")} />
       </button>
       {open ? (
-        <div className="border-t border-border/60 px-4 py-4 sm:px-5">
+        <div className="px-4 pb-4 sm:px-5">
           <p className="mb-4 max-w-2xl text-sm leading-6 text-muted-foreground">{t("linkExisting.description")}</p>
           {certs.length === 0 ? (
             <p className="rounded-2xl bg-muted/40 px-4 py-6 text-center text-sm text-muted-foreground">
@@ -473,7 +496,7 @@ function LinkExistingSection({
 
 function ErrorState({ title, message, retryLabel, onRetry }: { title: string; message: string; retryLabel: string; onRetry: () => void }) {
   return (
-    <div className="flex min-h-[18rem] flex-col items-center justify-center rounded-[2rem] bg-muted/30 px-6 text-center">
+    <div className="flex min-h-[18rem] flex-col items-center justify-center rounded-[2rem] bg-muted px-6 text-center">
       <TriangleAlertIcon className="mb-4 size-9 text-muted-foreground opacity-70" />
       <h2 className="font-instrument text-2xl font-medium italic tracking-[-0.02em]">{title}</h2>
       <p className="mt-2 max-w-sm text-sm leading-6 text-muted-foreground">{message}</p>

@@ -2,44 +2,46 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { motion } from "framer-motion";
+import { RotateCwIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
+import { Button } from "@/components/ui/button";
 import type { EndorsedOrganization } from "../../_lib/endorsements-given";
 import { accountPath } from "../_lib/account-route";
 
-const containerVariants = {
-  hidden: {},
-  visible: { transition: { staggerChildren: 0.06 } },
-};
-
-const cardVariants = {
-  hidden: { opacity: 0, y: 12 },
-  visible: { opacity: 1, y: 0 },
-};
-
-export function EndorsementsGivenGrid({ organizations }: { organizations: EndorsedOrganization[] }) {
+export function EndorsementsGivenGrid({
+  organizations,
+  loadError = false,
+}: {
+  organizations: EndorsedOrganization[];
+  loadError?: boolean;
+}) {
   const t = useTranslations("common.accountEndorsementsGiven");
+  const router = useRouter();
 
-  if (organizations.length === 0) {
+  if (loadError) {
     return (
-      <p className="mt-4 rounded-2xl bg-muted/50 px-3.5 py-2.5 text-sm text-muted-foreground">{t("empty")}</p>
+      <div role="alert" className="mt-5 flex flex-col items-start gap-3 rounded-2xl bg-muted px-5 py-6">
+        <p className="text-sm text-muted-foreground">{t("loadError")}</p>
+        <Button type="button" variant="secondary" size="sm" onClick={() => router.refresh()}>
+          <RotateCwIcon aria-hidden />
+          {t("retry")}
+        </Button>
+      </div>
     );
   }
 
+  if (organizations.length === 0) {
+    return <p className="mt-4 rounded-2xl bg-muted px-4 py-3 text-sm text-muted-foreground">{t("empty")}</p>;
+  }
+
   return (
-    <motion.div
-      variants={containerVariants}
-      initial="hidden"
-      animate="visible"
-      className="grid grid-cols-[repeat(auto-fill,minmax(260px,1fr))] items-stretch gap-4"
-    >
+    <div className="grid grid-cols-[repeat(auto-fill,minmax(260px,1fr))] gap-2">
       {organizations.map((organization) => (
-        <motion.div key={organization.did} variants={cardVariants} className="h-full">
-          <EndorsedCard organization={organization} fallbackName={t("fallbackName")} />
-        </motion.div>
+        <EndorsedCard key={organization.did} organization={organization} fallbackName={t("fallbackName")} />
       ))}
-    </motion.div>
+    </div>
   );
 }
 
@@ -58,29 +60,16 @@ function EndorsedCard({
   return (
     <Link
       href={accountPath(organization.did)}
-      className="group flex h-full w-full items-center gap-3.5 rounded-2xl border border-border bg-card p-4 text-left shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/55"
+      className="group flex min-h-20 items-center gap-3.5 rounded-2xl bg-muted/65 p-4 text-left transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring motion-reduce:transition-none"
     >
-      <span className="relative size-12 shrink-0 overflow-hidden rounded-full border border-border/60 bg-muted">
+      <span className="relative size-12 shrink-0 overflow-hidden rounded-full bg-background">
         {hasImage ? (
-          <Image
-            src={organization.avatarUrl!}
-            alt=""
-            fill
-            unoptimized
-            onError={() => setImgError(true)}
-            className="object-cover"
-          />
+          <Image src={organization.avatarUrl!} alt="" fill unoptimized onError={() => setImgError(true)} className="object-cover" />
         ) : (
-          <span className="flex size-full items-center justify-center text-base font-bold text-muted-foreground">
-            {initial}
-          </span>
+          <span className="flex size-full items-center justify-center text-base font-bold text-muted-foreground">{initial}</span>
         )}
       </span>
-      <span className="min-w-0 flex-1">
-        <span className="block truncate font-instrument text-xl italic leading-tight text-foreground">
-          {name}
-        </span>
-      </span>
+      <span className="min-w-0 flex-1 truncate text-base font-medium text-foreground group-hover:underline">{name}</span>
     </Link>
   );
 }

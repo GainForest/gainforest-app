@@ -31,7 +31,7 @@ function DialogOverlay({
     <DialogPrimitive.Overlay
       data-slot="dialog-overlay"
       className={cn(
-        "data-[state=open]:animate-in data-[state=closed]:animate-out duration-300 data-[state=closed]:backdrop-blur-none data-[state=open]:backdrop-blur-lg data-[state=closed]:bg-black/0 data-[state=open]:bg-black/20 fixed inset-0 z-[130]",
+        "data-[state=open]:animate-in data-[state=closed]:animate-out duration-300 data-[state=closed]:backdrop-blur-none data-[state=open]:backdrop-blur-lg data-[state=closed]:bg-black/0 data-[state=open]:bg-black/20 fixed inset-0 z-[130] motion-reduce:animate-none motion-reduce:transition-none",
         className,
       )}
       {...props}
@@ -43,12 +43,15 @@ function DialogPlaceholder({
   className,
   children,
   dialogWidth,
+  overlayClassName,
   fullscreen = false,
   ...props
 }: React.ComponentProps<typeof DialogPrimitive.Content> & {
   showCloseButton?: boolean;
   /** Tailwind max-width class for the dialog container (e.g. "max-w-2xl"). Defaults to "max-w-sm". */
   dialogWidth?: string;
+  /** Optional visual override for this dialog's shared overlay. */
+  overlayClassName?: string;
   /**
    * Take over the whole viewport (phone "full page" mode). Overrides the
    * centered floating card: edge-to-edge, full dynamic height, no radius.
@@ -57,16 +60,14 @@ function DialogPlaceholder({
 }) {
   return (
     <DialogPortal data-slot="dialog-portal">
-      <DialogOverlay />
+      <DialogOverlay className={overlayClassName} />
       <DialogPrimitive.Content
         data-slot="dialog-content"
         className={cn(
-          "bg-background data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 fixed top-[50%] left-[50%] z-[130] grid w-full translate-x-[-50%] translate-y-[-50%] gap-4 rounded-4xl border p-6 shadow-lg duration-200 transition-[max-width]",
-          // Never let a centered dialog grow past the viewport — cap it to the
-          // (dynamic) screen height and scroll its own content. Without this a
-          // tall dialog (e.g. a forceDialog modal on a phone) overflows above and
-          // below the screen and the title/footer become unreachable.
-          "max-h-[calc(100dvh-2rem)] overflow-x-hidden overflow-y-auto overscroll-contain",
+          "bg-background data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 fixed top-[50%] left-[50%] z-[130] grid w-[calc(100%-1.5rem)] translate-x-[-50%] translate-y-[-50%] gap-4 rounded-4xl border p-4 shadow-lg duration-200 transition-[max-width] motion-reduce:animate-none motion-reduce:transition-none sm:w-full sm:p-5",
+          // Keep the centered shell inside the dynamic viewport with the same
+          // 12px phone overlay gutter used by drawers and floating controls.
+          "max-h-[calc(100dvh-1.5rem)] overflow-x-hidden overflow-y-auto overscroll-contain sm:max-h-[calc(100dvh-2rem)]",
           dialogWidth ?? "max-w-sm",
           // Fullscreen mode (opt-in per modal, small screens only): the dialog
           // becomes the page. Listed after dialogWidth so tailwind-merge lets
@@ -97,7 +98,7 @@ function DialogFooter({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
       data-slot="dialog-footer"
-      className={cn("mt-4 flex flex-col gap-1", className)}
+      className={cn("mt-4 flex flex-col gap-2", className)}
       {...props}
     />
   );

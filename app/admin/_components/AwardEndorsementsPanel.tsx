@@ -4,10 +4,11 @@ import { useState, type FormEvent } from "react";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { AwardIcon, Loader2Icon, Trash2Icon } from "lucide-react";
-import { formatCgsErrorMessage } from "@/app/_lib/cgs-errors";
 import { formatRelative } from "@/app/_lib/format";
 import { accountPath } from "@/app/account/_lib/account-route";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { useModal } from "@/components/ui/modal/context";
 import {
   Select,
   SelectContent,
@@ -17,6 +18,7 @@ import {
 } from "@/components/ui/select";
 import type { AwardEndorsementsData, EndorsementAwardRow } from "../_lib/award-endorsements";
 import { AdminAvatar, AdminEmptyState } from "./AdminModerationDashboard";
+import { AdminConfirmationModal } from "./AdminConfirmationModal";
 
 const BADGE_AWARD_COLLECTION = "app.certified.badge.award";
 
@@ -33,6 +35,7 @@ type RecipientResult =
  */
 export function AwardEndorsementsPanel({ data }: { data: AwardEndorsementsData }) {
   const t = useTranslations("common.adminAwardEndorsements");
+  const modal = useModal();
   const [awards, setAwards] = useState<EndorsementAwardRow[]>(data.awards);
   const [identifier, setIdentifier] = useState("");
   const [note, setNote] = useState("");
@@ -72,7 +75,7 @@ export function AwardEndorsementsPanel({ data }: { data: AwardEndorsementsData }
         | (RecipientResult & { error?: string; message?: string })
         | null;
       if (!lookup.ok || !recipient || recipient.error) {
-        throw new Error(recipient?.message ?? recipient?.error ?? t("awardError"));
+        throw new Error(t("awardError"));
       }
       if (recipient.kind !== "did") throw new Error(t("emailNotSupported"));
       if (awards.some((entry) => entry.subjectDid === recipient.did && entry.badgeUri === selectedBadge.uri)) {
@@ -99,7 +102,7 @@ export function AwardEndorsementsPanel({ data }: { data: AwardEndorsementsData }
         | { uri?: string; error?: string; message?: string }
         | null;
       if (!response.ok || !created?.uri || created.error) {
-        throw new Error(formatCgsErrorMessage(created?.message ?? created?.error, t("awardError")));
+        throw new Error(t("awardError"));
       }
 
       const row: EndorsementAwardRow = {
@@ -135,14 +138,33 @@ export function AwardEndorsementsPanel({ data }: { data: AwardEndorsementsData }
       });
       const result = (await response.json().catch(() => null)) as { error?: string; message?: string } | null;
       if (!response.ok || result?.error) {
-        throw new Error(formatCgsErrorMessage(result?.message ?? result?.error, t("removeError")));
+        throw new Error(t("removeError"));
       }
       setAwards((previous) => previous.filter((entry) => entry.rkey !== rkey));
     } catch (caught) {
       setError((caught as Error).message || t("removeError"));
+      throw caught;
     } finally {
       setRemovingRkey(null);
     }
+  };
+
+  const requestRemove = (entry: EndorsementAwardRow) => {
+    const name = entry.displayName || t("unnamed");
+    modal.pushModal({
+      id: `admin-endorsement-remove-${entry.rkey}`,
+      content: (
+        <AdminConfirmationModal
+          title={t("confirmTitle")}
+          description={t("confirmDescription", { name })}
+          actionLabel={t("removeLabel", { name })}
+          cancelLabel={t("cancel")}
+          errorLabel={t("removeError")}
+          onConfirm={() => remove(entry.rkey)}
+        />
+      ),
+    }, true);
+    void modal.show();
   };
 
   return (
@@ -163,24 +185,24 @@ export function AwardEndorsementsPanel({ data }: { data: AwardEndorsementsData }
           </Select>
         ) : null}
         <div className="flex flex-col gap-2 sm:flex-row">
-          <input
+          <Input
             value={identifier}
             onChange={(event) => setIdentifier(event.target.value)}
             placeholder={t("inputPlaceholder")}
             aria-label={t("inputLabel")}
-            className="min-w-0 flex-1 rounded-xl border border-border bg-background px-3.5 py-2 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
+            className="min-w-0 flex-1"
           />
           <Button type="submit" disabled={awarding || !identifier.trim()} className="shrink-0 gap-1.5">
-            {awarding ? <Loader2Icon className="size-4 animate-spin" /> : <AwardIcon className="size-4" />}
+            {awarding ? <Loader2Icon className="size-4 animate-spin motion-reduce:animate-none" /> : <AwardIcon className="size-4" />}
             {t("awardButton")}
           </Button>
         </div>
-        <input
+        <Input
           value={note}
           onChange={(event) => setNote(event.target.value)}
           placeholder={t("notePlaceholder")}
           aria-label={t("noteLabel")}
-          className="min-w-0 rounded-xl border border-border bg-background px-3.5 py-2 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
+          className="min-w-0"
         />
       </form>
 
@@ -214,19 +236,21 @@ export function AwardEndorsementsPanel({ data }: { data: AwardEndorsementsData }
                   <span className="mt-0.5 line-clamp-1 text-sm leading-relaxed text-muted-foreground">{entry.note}</span>
                 ) : null}
               </span>
-              <button
+              <Button
                 type="button"
-                onClick={() => remove(entry.rkey)}
+                variant="ghost"
+                size="icon-xs"
+                onClick={() => requestRemove(entry)}
                 disabled={Boolean(removingRkey)}
                 aria-label={t("removeLabel", { name: entry.displayName || t("unnamed") })}
-                className="inline-flex size-8 shrink-0 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive disabled:opacity-50"
+                className="shrink-0 text-muted-foreground hover:text-destructive"
               >
                 {removingRkey === entry.rkey ? (
-                  <Loader2Icon className="size-4 animate-spin" />
+                  <Loader2Icon className="size-4 animate-spin motion-reduce:animate-none" />
                 ) : (
                   <Trash2Icon className="size-4" />
                 )}
-              </button>
+              </Button>
             </li>
           ))}
         </ul>

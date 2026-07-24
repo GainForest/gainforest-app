@@ -60,10 +60,8 @@ import { useStableQueryView } from "../_lib/use-stable-query-view";
 // the tab strip was replaced by top-nav routes so each stream is its own page.
 
 type KindMeta = {
-  eyebrow: string;
-  /** Plain (Cormorant) lead word; empty renders the accent alone. */
   title: string;
-  /** Instrument-Serif italic accent word, matching the donations header. */
+  /** Optional continuation of the semantic display heading. */
   accent: string;
   lede: string;
   search: string;
@@ -73,7 +71,6 @@ type KindMeta = {
 
 const KIND_META: Record<RecordKind, KindMeta> = {
   occurrence: {
-    eyebrow: "Nature sightings",
     title: "Browse",
     accent: "nature sightings",
     lede: "Explore plants, animals, photos, and field sound recordings shared from project places.",
@@ -82,7 +79,6 @@ const KIND_META: Record<RecordKind, KindMeta> = {
     heroDark: "/assets/media/images/observations/observations-hero-dark@2x.webp",
   },
   site: {
-    eyebrow: "Project Sites",
     title: "Project",
     accent: "sites",
     lede: "Explore nature stewardship groups, where they work, and the stories they share.",
@@ -91,7 +87,6 @@ const KIND_META: Record<RecordKind, KindMeta> = {
     heroDark: "/assets/organizations/organizations-hero-dark@2x.webp",
   },
   bumicert: {
-    eyebrow: "Explore Projects",
     title: "Discover",
     accent: "Regenerative Impact",
     lede: "Browse projects from communities and organizations restoring ecosystems, strengthening livelihoods, and building a more resilient future.",
@@ -100,7 +95,6 @@ const KIND_META: Record<RecordKind, KindMeta> = {
     heroDark: "/images/explore/explore-hero-dark@2x.webp",
   },
   project: {
-    eyebrow: "Projects",
     title: "Browse",
     accent: "project collections",
     lede: "Explore project collections and the Certs they group together.",
@@ -118,7 +112,7 @@ const GRID_CLS =
 // Observations read as a photo gallery: square tiles packed tight, more per
 // row, minimal seams between them. The other streams keep the airier card grid.
 const GALLERY_GRID_CLS =
-  "grid grid-cols-2 gap-1.5 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 2xl:grid-cols-6";
+  "grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 2xl:grid-cols-6";
 
 // AT-URI collection per page kind, so a shareable `?record=did/rkey` value can
 // be expanded back into a full at:// URI (the collection is implied by route).
@@ -662,22 +656,30 @@ export function RecordExplorer({
   }, [noData, onEmptyStateChange]);
 
   return (
-    <section className={`${showHero ? "-mt-14 " : ""}bg-background pb-20 md:pb-28`}>
+    <section
+      className={
+        showHero ? "-mt-14 bg-background pb-6 md:pb-8" : "min-w-0 bg-transparent"
+      }
+    >
       {showHero && (
         <PictureHero
           lightSrc={meta.heroLight}
           darkSrc={meta.heroDark}
-          eyebrow={meta.eyebrow}
-          icon={<LeafGlyph />}
+          imageAlt=""
           title={meta.title}
           accent={meta.accent}
           lede={meta.lede}
-          imageAlt={`${meta.eyebrow} nature landscape`}
           compact
         />
       )}
 
-      <div className="relative z-10 mx-auto max-w-6xl px-6">
+      <div
+        className={
+          showHero
+            ? "relative z-10 mx-auto max-w-[90rem] px-3 sm:px-5 lg:px-8"
+            : "relative z-10 min-w-0"
+        }
+      >
         {/* Stats overview — only embedded account/manage views show summaries here. */}
         {showStats && (
           <div className={`relative z-20 ${showHero ? "-mt-10" : "mt-6"}`}>
@@ -688,13 +690,13 @@ export function RecordExplorer({
         {/* Toolbar — hidden when there is no data and the caller opted in, so a
             standalone empty state can carry the view on its own. */}
         {hideToolbarWhenEmpty && noData ? null : (
-        <div className="relative z-20 mt-5 space-y-2.5">
+        <div className="relative z-20 mt-5 space-y-3">
           {/* z-30 keeps the sort popover above the filter-pill row below it: both
               rows freeze a `transform` once `animate-in` settles, so each becomes
               its own stacking context. Without this the filter row's z-20 would
               paint over the popover regardless of its own high z-index. */}
-          <div className="relative z-30 flex items-center gap-2 animate-in" style={{ animationDelay: "80ms" }}>
-            <div className="group/input-group relative flex h-10 min-w-0 flex-1 items-center rounded-full border border-border-soft bg-surface shadow-xs backdrop-blur transition-colors focus-within:border-primary/40">
+          <div className="relative z-30 flex flex-wrap items-center gap-3 animate-in" style={{ animationDelay: "80ms" }}>
+            <div className="group/input-group relative flex h-11 min-w-0 basis-full items-center rounded-full border border-border-soft bg-surface shadow-xs backdrop-blur transition-colors focus-within:border-primary/40 sm:h-10 sm:basis-auto sm:flex-1">
               <SearchIcon
                 aria-hidden
                 className="ml-3.5 h-[15px] w-[15px] shrink-0 text-foreground/40"
@@ -717,7 +719,7 @@ export function RecordExplorer({
             )}
 
             {/* Cards / List / Map view toggle */}
-            <div className="inline-flex h-10 shrink-0 items-center rounded-full border border-border bg-background/50 p-0.5 backdrop-blur">
+            <div className="inline-flex h-11 shrink-0 items-center rounded-full border border-border bg-background/50 p-0.5 backdrop-blur sm:h-10">
               {(
                 [
                   { id: "cards", label: "Cards" },
@@ -732,7 +734,7 @@ export function RecordExplorer({
                   aria-pressed={view === o.id}
                   aria-label={o.label}
                   title={o.label}
-                  className={`inline-flex h-9 w-9 shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-full p-0 text-sm font-medium transition-colors sm:w-auto sm:px-3 ${
+                  className={`inline-flex size-10 shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-full p-0 text-sm font-medium transition-colors sm:h-9 sm:w-auto sm:px-3 ${
                     view === o.id
                       ? "bg-primary text-primary-foreground"
                       : "text-muted-foreground hover:text-foreground"
@@ -745,7 +747,7 @@ export function RecordExplorer({
             </div>
 
             {enableCompactObservationCards && kind === "occurrence" && view === "cards" ? (
-              <div className="inline-flex h-10 shrink-0 items-center rounded-full border border-border bg-background/50 p-0.5 backdrop-blur" aria-label={observationsT("view.density")}> 
+              <div className="inline-flex h-11 shrink-0 items-center rounded-full border border-border bg-background/50 p-0.5 backdrop-blur sm:h-10" aria-label={observationsT("view.density")}>
                 {([
                   { id: "compact", label: observationsT("view.compact"), icon: <CompactCardsGlyph /> },
                   { id: "comfortable", label: observationsT("view.comfortable"), icon: <CardsGlyph /> },
@@ -757,7 +759,7 @@ export function RecordExplorer({
                     aria-pressed={cardDensity === option.id}
                     aria-label={option.label}
                     title={option.label}
-                    className={`grid h-9 w-9 shrink-0 place-items-center rounded-full transition-colors ${
+                    className={`grid size-10 shrink-0 place-items-center rounded-full transition-colors sm:size-9 ${
                       cardDensity === option.id
                         ? "bg-primary text-primary-foreground"
                         : "text-muted-foreground hover:text-foreground"
@@ -1174,9 +1176,9 @@ const OccurrenceCard = memo(function OccurrenceCard({
           media, and always present (not hover-gated). */}
       <div className="pointer-events-none absolute inset-x-0 bottom-0 h-3/4 bg-gradient-to-t from-black/85 via-black/35 to-transparent" />
 
-      <div className="absolute inset-x-0 bottom-0 z-10 p-2.5">
+      <div className="absolute inset-x-0 bottom-0 z-10 p-3">
         {creatorLabel ? (
-          <p className="truncate text-[10.5px] font-medium uppercase tracking-[0.06em] text-white/85">
+          <p className="truncate text-xs font-medium text-white/85">
             {creatorLabel}
           </p>
         ) : null}
@@ -1288,7 +1290,7 @@ const RECORD_LIST_GRID =
 function RecordListHeader() {
   const t = useTranslations("marketplace.observations.list");
   return (
-    <div className={`hidden items-center gap-3 px-2 pb-2 text-[11px] font-medium uppercase tracking-[0.08em] text-foreground/45 sm:grid sm:gap-4 sm:px-3 ${RECORD_LIST_GRID}`}>
+    <div className={`hidden items-center gap-3 px-2 pb-2 text-xs font-medium text-muted-foreground sm:grid sm:gap-4 sm:px-3 ${RECORD_LIST_GRID}`}>
       <span aria-hidden />
       <span>{t("colSighting")}</span>
       <span>{t("colObserver")}</span>
@@ -1302,9 +1304,9 @@ const RecordList = memo(function RecordList({ records, onOpen }: { records: Expl
   return (
     <div>
       <RecordListHeader />
-      <ul role="list" className="border-t border-border-soft">
+      <ul role="list" className="divide-y divide-border-soft border-t border-border-soft">
         {records.map((record, index) => (
-          <li key={record.id} className="relative animate-in after:absolute after:inset-x-2 after:bottom-0 after:h-px after:bg-border-soft last:after:hidden sm:after:inset-x-3" style={{ animationDelay: `${Math.min(index, 12) * 18}ms` }}>
+          <li key={record.id} className="relative animate-in" style={{ animationDelay: `${Math.min(index, 12) * 18}ms` }}>
             <RecordListItem record={record} onOpen={onOpen} />
           </li>
         ))}
@@ -1638,7 +1640,7 @@ function cardView(record: ExplorerRecord): CardView {
           }}
         >
           <span
-            className="font-garamond text-[15px] italic leading-tight text-foreground/45"
+            className="text-[15px] italic leading-tight text-foreground/45"
             style={clamp(3)}
           >
             {name}
@@ -1665,12 +1667,12 @@ function cardView(record: ExplorerRecord): CardView {
           </>
         ) : undefined,
       badge: (
-        <span className="inline-flex items-center rounded-full bg-background/85 px-2 py-0.5 text-[9.5px] font-medium uppercase tracking-[0.1em] text-foreground/70 backdrop-blur-md">
+        <span className="inline-flex items-center rounded-full bg-background/85 px-2 py-0.5 text-[10px] font-medium text-foreground/70 backdrop-blur-md">
           {certified ? "Verified" : "GainForest"}
         </span>
       ),
       placeholder: (
-        <div className="flex h-full w-full items-center justify-center font-garamond text-[34px] text-foreground/15">
+        <div className="flex h-full w-full items-center justify-center text-[34px] text-foreground/15">
           {countryFlag(record.country) || "\u25F0"}
         </div>
       ),
@@ -1691,12 +1693,12 @@ function cardView(record: ExplorerRecord): CardView {
         </>
       ),
       badge: (
-        <span className="inline-flex items-center gap-1 rounded-full bg-background/85 px-2 py-0.5 text-[9.5px] font-medium uppercase tracking-[0.1em] text-primary backdrop-blur-md">
+        <span className="inline-flex items-center gap-1 rounded-full bg-background/85 px-2 py-0.5 text-[10px] font-medium text-primary backdrop-blur-md">
           Project
         </span>
       ),
       placeholder: (
-        <div className="flex h-full w-full items-center justify-center font-garamond text-[14px] italic text-foreground/30">
+        <div className="flex h-full w-full items-center justify-center text-[14px] italic text-foreground/30">
           No cover image
         </div>
       ),
@@ -1721,13 +1723,13 @@ function cardView(record: ExplorerRecord): CardView {
       </>
     ),
     badge: (
-      <span className="inline-flex items-center gap-1 rounded-full bg-background/85 px-2 py-0.5 text-[9.5px] font-medium uppercase tracking-[0.1em] text-brand-dark backdrop-blur-md">
+      <span className="inline-flex items-center gap-1 rounded-full bg-background/85 px-2 py-0.5 text-[10px] font-medium text-brand-dark backdrop-blur-md">
         <span aria-hidden className="pulse-dot inline-block h-1.5 w-1.5 rounded-full bg-brand text-brand" />
         Cert
       </span>
     ),
     placeholder: (
-      <div className="flex h-full w-full items-center justify-center font-garamond text-[14px] italic text-foreground/30">
+      <div className="flex h-full w-full items-center justify-center text-[14px] italic text-foreground/30">
         No cover image
       </div>
     ),
@@ -1994,10 +1996,6 @@ function StatBand({ stats }: { stats: Stat[] }) {
 
 // ── Bits ───────────────────────────────────────────────────────────────────
 
-function LeafGlyph() {
-  return <LeafIcon width={16} height={16} aria-hidden />;
-}
-
 function MediaIcon({ kind }: { kind: OccurrenceRecord["media"][number] }) {
   if (kind === "audio" || kind === "spectrogram") {
     return <AudioLinesIcon width={11} height={11} aria-hidden />;
@@ -2090,8 +2088,8 @@ function EmptyState({
   retryLabel?: string;
 }) {
   return (
-    <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-border px-6 py-16 text-center">
-      <div className="font-garamond text-[22px] text-foreground">{title}</div>
+    <div className="flex flex-col items-center justify-center rounded-2xl bg-muted px-6 py-16 text-center">
+      <h2 className="font-instrument text-2xl italic text-foreground">{title}</h2>
       <p className="mt-2 max-w-[420px] text-[14px] leading-[1.5] text-foreground/60">{body}</p>
       {onRetry && (
         <button

@@ -294,7 +294,7 @@ export function OrgWalletModal({ orgDid, orgName, onBack, onChanged }: OrgWallet
             {/* Signers */}
             <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <h3 className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{t("signersHeading")}</h3>
+                <h3 className="font-instrument text-xs font-medium italic text-muted-foreground uppercase tracking-wide">{t("signersHeading")}</h3>
                 {deployed ? (
                   <span className="inline-flex items-center gap-1 text-xs text-muted-foreground">
                     <LockIcon className="size-3" aria-hidden />

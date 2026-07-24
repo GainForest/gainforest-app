@@ -43,6 +43,7 @@ function buildErrorSummary(errors: { index: number; issues: { path: string; mess
 
 export default function PreviewStep({ uploadId, parsedData, mappings, koboMediaZipIndex, siteSelection, onBack, onNext }: Props) {
   const t = useTranslations("upload.trees.preview");
+  const validationT = useTranslations("upload.trees.validation");
   const [expandedRows, setExpandedRows] = useState<Set<number>>(new Set());
   const [errorSectionOpen, setErrorSectionOpen] = useState(false);
   const [siteBoundary, setSiteBoundary] = useState<SiteBoundaryGeoJson | null>(null);
@@ -72,11 +73,12 @@ export default function PreviewStep({ uploadId, parsedData, mappings, koboMediaZ
       })
       .catch((err) => {
         if (cancelled) return;
-        setBoundaryError(err instanceof Error ? err.message : "Failed to load boundary.");
+        console.error("Site boundary load failed", err);
+        setBoundaryError(t("boundaryCheckFailed"));
         setBoundaryLoading(false);
       });
     return () => { cancelled = true; };
-  }, [siteSelection]);
+  }, [siteSelection, t]);
 
   const activeSiteBoundary = siteSelection && siteBoundarySiteUri === siteSelection.uri ? siteBoundary : null;
 
@@ -85,6 +87,19 @@ export default function PreviewStep({ uploadId, parsedData, mappings, koboMediaZ
     const result = parseAndValidateRows(mapped, parsedData, mappings, {
       koboMediaZipIndex,
       siteBoundary: siteSelection && activeSiteBoundary ? { geoJson: activeSiteBoundary, siteRef: siteSelection.uri } : null,
+      messages: {
+        scientificNameRequired: validationT("scientificNameRequired"),
+        eventDateRequired: validationT("eventDateRequired"),
+        dateInvalid: validationT("dateInvalid"),
+        futureDate: validationT("futureDate"),
+        latitudeInvalid: validationT("latitudeInvalid"),
+        longitudeInvalid: validationT("longitudeInvalid"),
+        measurementPositive: validationT("measurementPositive"),
+        canopyRange: validationT("canopyRange"),
+        boundaryOutside: (distance) => validationT("boundaryOutside", { distance }),
+        invalidBoundary: validationT("invalidBoundary"),
+        unknownDistance: validationT("unknownDistance"),
+      },
     });
     const headerSet = new Set<string>();
     for (const row of mapped) {
@@ -94,7 +109,7 @@ export default function PreviewStep({ uploadId, parsedData, mappings, koboMediaZ
     }
     const anyPhotos = result.valid.some((r) => r.photos && r.photos.length > 0);
     return { validationResult: result, mappedHeaders: Array.from(headerSet), mappedRows: mapped, hasAnyPhotos: anyPhotos };
-  }, [koboMediaZipIndex, parsedData, mappings, activeSiteBoundary, siteSelection]);
+  }, [koboMediaZipIndex, parsedData, mappings, activeSiteBoundary, siteSelection, validationT]);
 
   const { valid, errors } = validationResult;
   const totalRows = parsedData.length;
@@ -157,7 +172,7 @@ export default function PreviewStep({ uploadId, parsedData, mappings, koboMediaZ
   return (
     <div className="space-y-5">
       <div>
-        <h2 className="text-lg font-semibold">{t("reviewVerifyTitle")}</h2>
+        <h2 className="font-instrument text-xl font-light italic">{t("reviewVerifyTitle")}</h2>
         <p className="text-sm text-muted-foreground mt-0.5">{t("reviewVerifyDescription")}</p>
       </div>
 
@@ -197,21 +212,21 @@ export default function PreviewStep({ uploadId, parsedData, mappings, koboMediaZ
       {/* Data preview table */}
       <div>
         <div className="flex items-center justify-between mb-2">
-          <h3 className="text-sm font-medium">{t("treeInformationPreview")}</h3>
+          <h3 className="font-instrument text-lg font-light italic">{t("treeInformationPreview")}</h3>
           {showingNote && <span className="text-xs text-muted-foreground">{t("showingFirstRows", { maxRows: MAX_PREVIEW_ROWS, totalRows })}</span>}
         </div>
         <div className="rounded-lg border overflow-x-auto">
           <table className="w-full text-xs">
             <thead>
               <tr className="bg-muted/50 border-b border-border">
-                <th className="px-3 py-2 text-left font-medium text-muted-foreground uppercase tracking-wide w-8">#</th>
+                <th className="w-8 px-3 py-2 text-left font-medium text-muted-foreground">#</th>
                 {mappedHeaders.map((h) => (
-                  <th key={h} className="px-3 py-2 text-left font-medium text-muted-foreground uppercase tracking-wide whitespace-nowrap">
+                  <th key={h} className="whitespace-nowrap px-3 py-2 text-left font-medium text-muted-foreground">
                     {h === "siteBoundary" ? t("siteBoundaryField") : getTargetFieldLabel(h)}
                   </th>
                 ))}
-                {hasAnyPhotos && <th className="px-3 py-2 text-left font-medium text-muted-foreground uppercase tracking-wide whitespace-nowrap">{t("photos")}</th>}
-                <th className="px-3 py-2 text-left font-medium text-muted-foreground uppercase tracking-wide w-16">{t("status")}</th>
+                {hasAnyPhotos && <th className="whitespace-nowrap px-3 py-2 text-left font-medium text-muted-foreground">{t("photos")}</th>}
+                <th className="w-16 px-3 py-2 text-left font-medium text-muted-foreground">{t("status")}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
@@ -290,7 +305,7 @@ export default function PreviewStep({ uploadId, parsedData, mappings, koboMediaZ
           {errorSectionOpen && (
             <div className="border-t border-destructive/20 px-4 py-3 space-y-4">
               <div>
-                <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-2">{t("commonIssues")}</p>
+                <p className="mb-2 text-xs font-medium text-muted-foreground">{t("commonIssues")}</p>
                 <ul className="space-y-1">
                   {errorSummary.map((item) => (
                     <li key={item.path} className="text-sm flex items-start gap-2">
@@ -301,7 +316,7 @@ export default function PreviewStep({ uploadId, parsedData, mappings, koboMediaZ
                 </ul>
               </div>
               <div>
-                <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-2">{t("errorRows")}</p>
+                <p className="mb-2 text-xs font-medium text-muted-foreground">{t("errorRows")}</p>
                 <ul className="space-y-2 max-h-48 overflow-y-auto">
                   {errors.map((err) => (
                     <li key={err.index} className="text-xs border border-destructive/20 rounded-md p-2 space-y-0.5">

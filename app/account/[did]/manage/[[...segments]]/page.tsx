@@ -49,6 +49,26 @@ function firstParam(value: string | string[] | undefined): string | null {
   return typeof raw === "string" && raw.trim().length > 0 ? raw.trim() : null;
 }
 
+function withSearchParams(
+  path: string,
+  values: { [key: string]: string | string[] | undefined },
+  overrides?: Record<string, string | null>,
+): string {
+  const query = new URLSearchParams();
+  for (const [key, value] of Object.entries(values)) {
+    const entries = Array.isArray(value) ? value : [value];
+    for (const entry of entries) {
+      if (typeof entry === "string" && entry.length > 0) query.append(key, entry);
+    }
+  }
+  for (const [key, value] of Object.entries(overrides ?? {})) {
+    query.delete(key);
+    if (value !== null) query.set(key, value);
+  }
+  const serialized = query.toString();
+  return serialized ? `${path}?${serialized}` : path;
+}
+
 /**
  * Management now lives on the account profile (/account/<id> and its tabs). This
  * route keeps two things alive:
@@ -67,12 +87,13 @@ export default async function AccountManagePage({ params, searchParams }: PagePr
   if (access.status !== "allowed") return null;
   const target = access.target;
   const id = target.identifier;
+  const sp = await searchParams;
+  const withQuery = (path: string, overrides?: Record<string, string | null>) => withSearchParams(path, sp, overrides);
 
   const [first, second, third, ...rest] = segments;
   if (rest.length > 0) notFound();
 
   if (!first) {
-    const sp = await searchParams;
     const mode = firstParam(sp.mode);
     const isOnboardingMode = mode === "onboard-user" || mode === "onboard-org";
     const hasCompletedSetup = access.account.summary.hasCertifiedProfile || access.account.summary.hasCertifiedOrg;
@@ -82,44 +103,35 @@ export default async function AccountManagePage({ params, searchParams }: PagePr
     if (isOnboardingMode || !hasCompletedSetup) {
       return <ManageHomeSection target={target} wrapDashboard={false} />;
     }
-    redirect(accountPath(id));
+    redirect(withQuery(accountPath(id), { mode: null }));
   }
 
   // Deep editing tools now live directly on the profile; forward the legacy
   // /manage URLs (and preserve the cert wizard's query string).
-  if (first === "add" && !second) redirect(accountAddDataPath(id));
-  if (first === "projects" && second && third === "gallery") redirect(accountProjectGalleryPath(id, decodeURIComponent(second)));
-  if (first === "projects" && second && third === "certs") redirect(accountProjectCertsPath(id, decodeURIComponent(second)));
-  if (first === "projects" && second && third === "sites") redirect(accountProjectSitesPath(id, decodeURIComponent(second)));
-  if (first === "projects" && second && third === "timeline") redirect(accountProjectTimelinePath(id, decodeURIComponent(second)));
-  if (first === "certs" && second === "new") {
-    const sp = await searchParams;
-    const query = new URLSearchParams();
-    for (const [key, value] of Object.entries(sp)) {
-      const raw = Array.isArray(value) ? value[0] : value;
-      if (typeof raw === "string" && raw.length > 0) query.set(key, raw);
-    }
-    const queryString = query.toString();
-    redirect(queryString ? `${accountNewCertPath(id)}?${queryString}` : accountNewCertPath(id));
-  }
+  if (first === "add" && !second) redirect(withQuery(accountAddDataPath(id)));
+  if (first === "projects" && second && third === "gallery") redirect(withQuery(accountProjectGalleryPath(id, decodeURIComponent(second))));
+  if (first === "projects" && second && third === "certs") redirect(withQuery(accountProjectCertsPath(id, decodeURIComponent(second))));
+  if (first === "projects" && second && third === "sites") redirect(withQuery(accountProjectSitesPath(id, decodeURIComponent(second))));
+  if (first === "projects" && second && third === "timeline") redirect(withQuery(accountProjectTimelinePath(id, decodeURIComponent(second))));
+  if (first === "certs" && second === "new") redirect(withQuery(accountNewCertPath(id)));
 
   // Top-level sections → their profile tab.
-  if (first === "projects" && !second) redirect(accountProjectsPath(id));
-  if (first === "sites" && !second) redirect(accountSitesPath(id));
-  if (first === "trees" && !second) redirect(`${accountObservationsPath(id)}?layer=measurements`);
-  if (first === "audio" && !second) redirect(accountAudioPath(id));
-  if (first === "drone" && !second) redirect(accountDronePath(id));
-  if (first === "certs" && !second) redirect(accountBumicertsPath(id));
-  if (first === "bumicerts" && !second) redirect(accountBumicertsPath(id));
-  if (first === "observations" && !second) redirect(accountObservationsPath(id));
-  if (first === "settings" && !second) redirect(accountSettingsPath(id));
+  if (first === "projects" && !second) redirect(withQuery(accountProjectsPath(id)));
+  if (first === "sites" && !second) redirect(withQuery(accountSitesPath(id)));
+  if (first === "trees" && !second) redirect(withQuery(accountObservationsPath(id), { layer: "measurements" }));
+  if (first === "audio" && !second) redirect(withQuery(accountAudioPath(id)));
+  if (first === "drone" && !second) redirect(withQuery(accountDronePath(id)));
+  if (first === "certs" && !second) redirect(withQuery(accountBumicertsPath(id)));
+  if (first === "bumicerts" && !second) redirect(withQuery(accountBumicertsPath(id)));
+  if (first === "observations" && !second) redirect(withQuery(accountObservationsPath(id)));
+  if (first === "settings" && !second) redirect(withQuery(accountSettingsPath(id)));
   // Timeline now lives on each project, not the profile — send legacy links to
   // the projects list.
-  if (first === "timeline" && !second) redirect(accountProjectsPath(id));
-  if (first === "groups" && !second) redirect(accountOrganizationsPath(id));
+  if (first === "timeline" && !second) redirect(withQuery(accountProjectsPath(id)));
+  if (first === "groups" && !second) redirect(withQuery(accountOrganizationsPath(id)));
   if (first === "organizations" && !second) {
     if (target.kind !== "personal") notFound();
-    redirect(accountOrganizationsPath(id));
+    redirect(withQuery(accountOrganizationsPath(id)));
   }
 
   notFound();

@@ -1,11 +1,19 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { Instrument_Serif } from "next/font/google";
 import { reportClientError } from "./_lib/client-error-report";
 
-// Last-resort boundary: it replaces the root layout entirely, so no providers
-// (i18n, theme, fonts, Tailwind styles) are available here. Copy is inlined
-// for every supported language and styling is plain CSS on purpose.
+const instrument = Instrument_Serif({
+  subsets: ["latin"],
+  weight: "400",
+  style: "italic",
+  display: "swap",
+});
+
+// Last-resort boundary: it replaces the root layout entirely, so no providers,
+// theme, or layout font variables are available here. Copy is inlined for every
+// supported language, and styling plus the display font are loaded locally.
 const COPY: Record<string, { title: string; body: string; retry: string; home: string }> = {
   en: {
     title: "Something went wrong",
@@ -67,7 +75,7 @@ export default function GlobalError({
       <body
         style={{
           margin: 0,
-          minHeight: "100vh",
+          minHeight: "100dvh",
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
@@ -80,7 +88,17 @@ export default function GlobalError({
         }}
       >
         <div style={{ maxWidth: "26rem" }}>
-          <h1 style={{ fontSize: "1.25rem", fontWeight: 600, marginBottom: "0.75rem" }}>{copy.title}</h1>
+          <h1
+            style={{
+              fontFamily: instrument.style.fontFamily,
+              fontSize: "1.25rem",
+              fontStyle: "italic",
+              fontWeight: 600,
+              marginBottom: "0.75rem",
+            }}
+          >
+            {copy.title}
+          </h1>
           <p style={{ fontSize: "0.9rem", lineHeight: 1.6, opacity: 0.75, marginBottom: "1.5rem" }}>{copy.body}</p>
           <div style={{ display: "flex", gap: "0.5rem", justifyContent: "center", flexWrap: "wrap" }}>
             <button

@@ -33,6 +33,20 @@ export type UploadRowsSiteBoundaryCheck = {
   fatalError: string | null;
 };
 
+export type UploadBoundaryMessages = {
+  differentSite: string;
+  invalidBoundary: string;
+  outsideBoundary: (distance: string) => string;
+  unknownDistance: string;
+};
+
+const DEFAULT_UPLOAD_BOUNDARY_MESSAGES: UploadBoundaryMessages = {
+  differentSite: "This row was prepared for a different site boundary. Go back and review the selected site boundary.",
+  invalidBoundary: "The selected drawn map area cannot be used. Go back and redraw it before saving trees.",
+  outsideBoundary: (distance) => `This tree is ${distance} outside the selected drawn map area. Check the coordinates, choose a different site boundary, or remove this row.`,
+  unknownDistance: "unknown distance",
+};
+
 function assertUsableSiteBoundary(boundary: SiteBoundaryGeoJson): SiteBoundaryGeoJson {
   const classification = classifyPointAgainstGeoJsonBoundary({
     geoJson: boundary,
@@ -121,7 +135,9 @@ export function checkUploadRowsAgainstSelectedSite(options: {
   rows: ValidatedRow[];
   siteSelection: UploadSiteSelection;
   boundary: SiteBoundaryGeoJson;
+  messages?: UploadBoundaryMessages;
 }): UploadRowsSiteBoundaryCheck {
+  const messages = options.messages ?? DEFAULT_UPLOAD_BOUNDARY_MESSAGES;
   const rowsToUpload: UploadableBoundaryRow[] = [];
   const skippedRows: SkippedBoundaryRow[] = [];
 
@@ -130,7 +146,7 @@ export function checkUploadRowsAgainstSelectedSite(options: {
     if (!row) continue;
 
     if (row.occurrence.siteRef !== options.siteSelection.uri) {
-      skippedRows.push({ row, rowIndex, message: "This row was prepared for a different site boundary. Go back and review the selected site boundary." });
+      skippedRows.push({ row, rowIndex, message: messages.differentSite });
       continue;
     }
 
@@ -154,22 +170,22 @@ export function checkUploadRowsAgainstSelectedSite(options: {
       return {
         rowsToUpload: [],
         skippedRows: [],
-        fatalError: "The selected drawn map area cannot be used. Go back and redraw it before saving trees.",
+        fatalError: messages.invalidBoundary,
       };
     }
 
     skippedRows.push({
       row,
       rowIndex,
-      message: `This tree is ${formatBoundaryDistance(failure.distanceMeters)} outside the selected drawn map area. Check the coordinates, choose a different site boundary, or remove this row.`,
+      message: messages.outsideBoundary(formatBoundaryDistance(failure.distanceMeters, messages.unknownDistance)),
     });
   }
 
   return { rowsToUpload, skippedRows, fatalError: null };
 }
 
-export function formatBoundaryDistance(distanceMeters: number): string {
-  if (!Number.isFinite(distanceMeters)) return "unknown distance";
+export function formatBoundaryDistance(distanceMeters: number, unknownDistance = "unknown distance"): string {
+  if (!Number.isFinite(distanceMeters)) return unknownDistance;
   if (distanceMeters < 1) return `${Math.round(distanceMeters * 100)} cm`;
   return `${distanceMeters.toFixed(1)} m`;
 }

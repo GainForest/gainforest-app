@@ -1,2 +1,1 @@
-export { metadata } from "../not-found";
-export { default } from "../not-found";
+export { generateMetadata, default } from "../not-found";

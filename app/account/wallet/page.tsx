@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
+import { getTranslations } from "next-intl/server";
 import { resolvePersonalManageTarget } from "@/app/_lib/manage-server";
 import { accountWalletPath } from "../_lib/account-route";
 
@@ -7,10 +8,13 @@ import { accountWalletPath } from "../_lib/account-route";
 // (/account/<identifier>/wallet). Used by Tainá's wallet tour so it can
 // navigate there without knowing the visitor's handle.
 
-export const metadata: Metadata = {
-  title: "Wallet — GainForest",
-  robots: { index: false, follow: false },
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("common.accountTabs");
+  return {
+    title: `${t("wallet")} — GainForest`,
+    robots: { index: false, follow: false },
+  };
+}
 
 export default async function AccountWalletShortcutPage() {
   const target = await resolvePersonalManageTarget();

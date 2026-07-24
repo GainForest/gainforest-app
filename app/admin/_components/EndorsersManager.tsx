@@ -5,8 +5,11 @@ import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { Building2Icon, Loader2Icon, LockIcon, PlusIcon, Trash2Icon } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { useModal } from "@/components/ui/modal/context";
 import { accountPath } from "@/app/account/_lib/account-route";
 import type { BuiltinEndorser, EndorserRecord } from "@/app/_lib/endorsers";
+import { AdminConfirmationModal } from "./AdminConfirmationModal";
 
 export function EndorsersManager({
   builtins,
@@ -16,6 +19,7 @@ export function EndorsersManager({
   initial: EndorserRecord[];
 }) {
   const t = useTranslations("common.adminEndorsers");
+  const modal = useModal();
   const [endorsers, setEndorsers] = useState<EndorserRecord[]>(initial);
   const [identifier, setIdentifier] = useState("");
   const [adding, setAdding] = useState(false);
@@ -36,7 +40,7 @@ export function EndorsersManager({
         cache: "no-store",
       });
       const data = (await response.json().catch(() => null)) as { endorser?: EndorserRecord; error?: string } | null;
-      if (!response.ok || data?.error || !data?.endorser) throw new Error(data?.error ?? t("addError"));
+      if (!response.ok || data?.error || !data?.endorser) throw new Error(t("addError"));
       const endorser = data.endorser;
       setEndorsers((previous) =>
         previous.some((entry) => entry.subjectDid === endorser.subjectDid) ? previous : [endorser, ...previous],
@@ -59,27 +63,45 @@ export function EndorsersManager({
         cache: "no-store",
       });
       const data = (await response.json().catch(() => null)) as { error?: string } | null;
-      if (!response.ok || data?.error) throw new Error(data?.error ?? t("removeError"));
+      if (!response.ok || data?.error) throw new Error(t("removeError"));
       setEndorsers((previous) => previous.filter((entry) => entry.rkey !== rkey));
     } catch (caught) {
       setError((caught as Error).message);
+      throw caught;
     } finally {
       setRemovingRkey(null);
     }
   };
 
+  const requestRemove = (endorser: EndorserRecord) => {
+    modal.pushModal({
+      id: `admin-endorser-remove-${endorser.rkey}`,
+      content: (
+        <AdminConfirmationModal
+          title={t("confirmTitle")}
+          description={t("confirmDescription", { name: endorser.label })}
+          actionLabel={t("removeLabel", { name: endorser.label })}
+          cancelLabel={t("cancel")}
+          errorLabel={t("removeError")}
+          onConfirm={() => remove(endorser.rkey)}
+        />
+      ),
+    }, true);
+    void modal.show();
+  };
+
   return (
     <>
       <form onSubmit={add} className="mb-4 flex flex-col gap-2 sm:flex-row">
-        <input
+        <Input
           value={identifier}
           onChange={(event) => setIdentifier(event.target.value)}
           placeholder={t("inputPlaceholder")}
           aria-label={t("inputLabel")}
-          className="min-w-0 flex-1 rounded-xl border border-border bg-background px-3.5 py-2 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
+          className="min-w-0 flex-1"
         />
         <Button type="submit" disabled={adding || !identifier.trim()} className="shrink-0 gap-1.5">
-          {adding ? <Loader2Icon className="size-4 animate-spin" /> : <PlusIcon className="size-4" />}
+          {adding ? <Loader2Icon className="size-4 animate-spin motion-reduce:animate-none" /> : <PlusIcon className="size-4" />}
           {t("addButton")}
         </Button>
       </form>
@@ -119,21 +141,23 @@ export function EndorsersManager({
               >
                 {endorser.label}
               </Link>
-              <span className="truncate text-xs text-muted-foreground">{endorser.handle ?? endorser.subjectDid}</span>
+              {endorser.handle ? <span className="truncate text-xs text-muted-foreground">{endorser.handle}</span> : null}
             </span>
-            <button
+            <Button
               type="button"
-              onClick={() => remove(endorser.rkey)}
+              variant="ghost"
+              size="icon-xs"
+              onClick={() => requestRemove(endorser)}
               disabled={Boolean(removingRkey)}
               aria-label={t("removeLabel", { name: endorser.label })}
-              className="inline-flex size-8 shrink-0 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive disabled:opacity-50"
+              className="shrink-0 text-muted-foreground hover:text-destructive"
             >
               {removingRkey === endorser.rkey ? (
-                <Loader2Icon className="size-4 animate-spin" />
+                <Loader2Icon className="size-4 animate-spin motion-reduce:animate-none" />
               ) : (
                 <Trash2Icon className="size-4" />
               )}
-            </button>
+            </Button>
           </li>
         ))}
       </ul>

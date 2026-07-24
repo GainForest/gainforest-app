@@ -4,7 +4,6 @@
     "description": "An interactive field guide to preparing, configuring, deploying and retrieving an AudioMoth recorder with Arbimon."
   },
   "hero": {
-    "kicker": "Field guide · Acoustic monitoring",
     "title": "How to deploy your AudioMoth",
     "lead": "Prepare the recorder, configure a reliable schedule, connect the deployment to Arbimon and bring the recordings safely home.",
     "time": "About 30 minutes to prepare",

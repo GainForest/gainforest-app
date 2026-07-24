@@ -129,7 +129,7 @@ function DrawerOverlay({
     <DrawerPrimitive.Overlay
       data-slot="drawer-overlay"
       className={cn(
-        "data-[state=open]:animate-in data-[state=closed]:animate-out duration-300 data-[state=closed]:backdrop-blur-none data-[state=open]:backdrop-blur-lg data-[state=closed]:bg-black/0 data-[state=open]:bg-black/20 fixed inset-0 z-[130]",
+        "data-[state=open]:animate-in data-[state=closed]:animate-out duration-300 data-[state=closed]:backdrop-blur-none data-[state=open]:backdrop-blur-lg data-[state=closed]:bg-black/0 data-[state=open]:bg-black/20 fixed inset-0 z-[130] motion-reduce:animate-none motion-reduce:transition-none",
         className,
       )}
       {...props}
@@ -156,7 +156,7 @@ function DrawerPlaceholder({
         ref={contentRef}
         data-slot="drawer-content"
         className={cn(
-          "group/drawer-content bg-background fixed z-[130] flex h-auto min-h-0 min-w-0 flex-col overflow-hidden",
+          "group/drawer-content bg-background fixed z-[130] flex h-auto min-h-0 min-w-0 flex-col overflow-hidden motion-reduce:animate-none motion-reduce:transition-none",
           "data-[vaul-drawer-direction=top]:inset-x-0 data-[vaul-drawer-direction=top]:top-0 data-[vaul-drawer-direction=top]:mb-24 data-[vaul-drawer-direction=top]:max-h-[80dvh] data-[vaul-drawer-direction=top]:rounded-b-3xl data-[vaul-drawer-direction=top]:border-b",
           "data-[vaul-drawer-direction=bottom]:inset-x-0 data-[vaul-drawer-direction=bottom]:bottom-0 data-[vaul-drawer-direction=bottom] data-[vaul-drawer-direction=bottom]:max-h-[80dvh] data-[vaul-drawer-direction=bottom]:rounded-t-3xl data-[vaul-drawer-direction=bottom]:border-t",
           "data-[vaul-drawer-direction=right]:inset-y-0 data-[vaul-drawer-direction=right]:right-0 data-[vaul-drawer-direction=right]:w-3/4 data-[vaul-drawer-direction=right]:border-l data-[vaul-drawer-direction=right]:sm:max-w-sm",
@@ -170,7 +170,7 @@ function DrawerPlaceholder({
           data-slot="drawer-scroll-body"
           data-vaul-no-drag=""
           className={cn(
-            "relative flex min-h-0 min-w-0 flex-1 flex-col overflow-x-hidden overflow-y-auto overscroll-contain p-4",
+            "relative flex min-h-0 min-w-0 flex-1 flex-col overflow-x-hidden overflow-y-auto overscroll-contain p-4 pb-[max(1rem,env(safe-area-inset-bottom))] md:p-5 md:pb-[max(1.25rem,env(safe-area-inset-bottom))]",
             innerClassName,
           )}
         >

@@ -25,9 +25,8 @@ function safeDecode(value: string): string {
 function GroupNotMemberMessage({ name }: { name: string }) {
   return (
     <Container className="flex min-h-[50vh] items-center justify-center py-12">
-      <section className="max-w-xl rounded-3xl border border-border bg-card p-6 text-center shadow-sm sm:p-8">
-        <p className="text-xs font-medium uppercase tracking-[0.16em] text-muted-foreground">Organization access</p>
-        <h1 className="mt-3 font-instrument text-3xl font-light italic tracking-[-0.02em] text-foreground">
+      <section className="max-w-xl rounded-3xl bg-muted p-6 text-center sm:p-8">
+        <h1 className="font-instrument text-3xl font-light italic tracking-[-0.02em] text-foreground">
           {name === "this organization" ? "You’re not a member of this organization" : `You’re not a member of ${name}`}
         </h1>
         <p className="mt-3 text-sm leading-6 text-muted-foreground">
@@ -55,7 +54,7 @@ export default async function AccountManageLayout({
 
   if (access.status === "signed-out") {
     return (
-      <section className="mx-auto flex min-h-[calc(100vh-12rem)] w-full max-w-sm items-center px-3 py-12">
+      <section className="mx-auto flex min-h-[calc(100dvh-12rem)] w-full max-w-sm items-center px-3 py-12">
         <SignInPrompt />
       </section>
     );

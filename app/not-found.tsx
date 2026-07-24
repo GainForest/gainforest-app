@@ -10,7 +10,6 @@ export const metadata: Metadata = {
 export default function NotFound() {
   return (
     <GracefulNotFound
-      eyebrow="Page not found"
       title="We couldn’t find that page."
       message="The link may be old, or the page may have moved."
       primaryHref="/projects"

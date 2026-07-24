@@ -134,7 +134,7 @@ export function QuickLikeButton({
   }
 
   function onKeyDown(event: ReactKeyboardEvent) {
-    // Keep Enter/Space from also triggering the card's role="button" handler.
+    // Keep Enter/Space from also triggering a surrounding card action.
     if (event.key === "Enter" || event.key === " ") event.stopPropagation();
   }
 
@@ -147,7 +147,7 @@ export function QuickLikeButton({
       aria-label={liked ? t("unlike") : t("like")}
       title={liked ? t("unlike") : t("like")}
       className={cn(
-        "z-20 inline-flex cursor-pointer items-center justify-center gap-1 rounded-full bg-black/45 font-semibold text-white shadow-md ring-1 ring-white/25 backdrop-blur-md transition hover:bg-black/60 active:scale-90",
+        "relative z-20 inline-flex cursor-pointer items-center justify-center gap-1 rounded-full bg-black/45 font-semibold text-white shadow-md ring-1 ring-white/25 backdrop-blur-md transition before:absolute before:-inset-2 before:content-[''] hover:bg-black/60 active:scale-90 motion-reduce:transition-none motion-reduce:active:scale-100",
         size === "sm" ? "h-7 min-w-7 px-1.5 text-[11px]" : "h-8 min-w-8 px-2 text-[12px]",
         className,
       )}
@@ -159,7 +159,7 @@ export function QuickLikeButton({
           size === "sm" ? "h-3.5 w-3.5" : "h-4 w-4",
           "transition-colors",
           liked ? "fill-rose-500 text-rose-500" : "text-white",
-          pop && "animate-quick-like-pop",
+          pop && "animate-quick-like-pop motion-reduce:animate-none",
         )}
       />
       {count > 0 ? <span className="tabular-nums">{COMPACT.format(count)}</span> : null}

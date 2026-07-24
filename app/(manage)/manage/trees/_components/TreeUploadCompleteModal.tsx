@@ -100,7 +100,7 @@ export function TreeUploadCompleteModal({
   return (
     <ModalContent dismissible={false} className="space-y-5">
       <ModalHeader>
-        <ModalTitle>Tree upload complete</ModalTitle>
+        <ModalTitle className="font-instrument font-light italic">Tree upload complete</ModalTitle>
         <ModalDescription>
           Your upload has finished. Please share feedback so we can make this
           easier for the next person.
@@ -164,7 +164,7 @@ export function TreeUploadCompleteModal({
                           <p className="font-medium text-foreground">
                             Row {summary.sourceRowIndex + 1} — {summary.rowLabel}
                           </p>
-                          <p className="text-[0.6875rem] font-medium uppercase tracking-wide text-muted-foreground">
+                          <p className="text-xs font-medium text-muted-foreground">
                             {getTreeUploadRowAttentionKindLabel(summary.kind)}
                           </p>
                           <ul className="mt-1 space-y-0.5 text-muted-foreground">

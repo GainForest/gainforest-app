@@ -43,9 +43,9 @@ export default async function AudioMothSpectrogramOccurrenceGuidePage() {
         <span className="text-muted-foreground">{t("usageGuide")}</span>
       </nav>
 
-      <div className="mb-8 rounded-2xl border border-primary/20 bg-primary/[0.04] p-5">
-        <p className="m-0 text-[13.5px] leading-6 text-muted-foreground">{t("guideIntro")}</p>
-      </div>
+      <p className="mb-8 border-l-2 border-primary/30 pl-4 text-[13.5px] leading-6 text-muted-foreground">
+        {t("guideIntro")}
+      </p>
 
       <MarkdownDocument source={source} />
     </>

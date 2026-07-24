@@ -4,6 +4,7 @@ import { useMemo, useState, type ReactNode } from "react";
 import { CirclePlusIcon, LayoutGridIcon, ListIcon, SearchIcon } from "lucide-react";
 import { useTranslations } from "./audio-copy";
 import { Button } from "@/components/ui/button";
+import { ManageViewToggle } from "../../_components/ManageViewToggle";
 import { Input } from "@/components/ui/input";
 import type { AudioRecordingItem } from "@/app/_lib/indexer";
 import type { AudioDeploymentItem } from "@/app/_lib/indexer";
@@ -92,14 +93,22 @@ export function ListPanel(props: {
           />
         </div>
         <div className="flex shrink-0 items-center gap-2">
-          <ViewToggle view={view} setView={setView} />
+          <ManageViewToggle
+            value={view}
+            onChange={setView}
+            compactLabels
+            options={[
+              { id: "cards", label: "Cards", icon: LayoutGridIcon },
+              { id: "list", label: "List", icon: ListIcon },
+            ]}
+          />
           <Button onClick={props.onNew} className="rounded-full" disabled={Boolean(props.createDisabledReason)} title={props.createDisabledReason ?? undefined}>
             <CirclePlusIcon className="size-4" /> {t("list.new")}
           </Button>
         </div>
       </div>
       {filtered.length === 0 ? (
-        <div className="rounded-2xl border border-dashed bg-muted/20 p-10 text-center text-sm text-muted-foreground">
+        <div className="rounded-2xl border border-dashed bg-muted p-10 text-center text-sm text-muted-foreground">
           <p className="font-medium text-foreground">
             {props.searchQuery
               ? t("list.noResults", {
@@ -185,32 +194,6 @@ export function ListPanel(props: {
         </div>
       )}
     </section>
-  );
-}
-
-function ViewToggle({ view, setView }: { view: ViewMode; setView: (view: ViewMode) => void }) {
-  return (
-    <div className="inline-flex h-10 shrink-0 items-center rounded-full border border-border bg-background/70 p-0.5 backdrop-blur">
-      {([
-        { id: "cards", label: "Cards", Icon: LayoutGridIcon },
-        { id: "list", label: "List", Icon: ListIcon },
-      ] as const).map(({ id, label, Icon }) => (
-        <button
-          key={id}
-          type="button"
-          onClick={() => setView(id)}
-          aria-pressed={view === id}
-          aria-label={label}
-          title={label}
-          className={`inline-flex h-9 items-center gap-1.5 rounded-full px-3 text-sm font-medium transition-colors ${
-            view === id ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"
-          }`}
-        >
-          <Icon className="h-4 w-4" />
-          <span className="hidden sm:inline">{label}</span>
-        </button>
-      ))}
-    </div>
   );
 }
 
@@ -447,7 +430,7 @@ export function DetailPanel(props: {
 function RelationshipPanel(props: { title: string; children: ReactNode }) {
   return (
     <aside className="space-y-3 rounded-2xl border p-4">
-      <h3 className="font-medium">{props.title}</h3>
+      <h3 className="font-instrument text-lg font-light italic">{props.title}</h3>
       <div className="space-y-2">{props.children}</div>
     </aside>
   );
@@ -455,7 +438,7 @@ function RelationshipPanel(props: { title: string; children: ReactNode }) {
 
 function EmptyRelation(props: { children: ReactNode }) {
   return (
-    <p className="rounded-xl border border-dashed bg-muted/20 p-3 text-sm text-muted-foreground">
+    <p className="rounded-2xl border border-dashed bg-muted p-3 text-sm text-muted-foreground">
       {props.children}
     </p>
   );
@@ -471,7 +454,7 @@ function MiniLink(props: {
     <button
       type="button"
       onClick={props.onClick}
-      className="w-full rounded-xl border p-3 text-left text-sm hover:bg-muted/40"
+      className="w-full rounded-2xl bg-muted p-3 text-left text-sm transition-colors hover:bg-muted/80 focus-visible:ring-2 focus-visible:ring-ring"
     >
       <p className="font-medium">{props.label ?? t("untitled")}</p>
       {props.detail && (

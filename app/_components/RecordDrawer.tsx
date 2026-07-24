@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
+import { forwardRef, useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 import type { Map as LeafletMap, Marker, TileLayer } from "leaflet";
 import Image from "next/image";
 import Link from "next/link";
@@ -41,6 +41,7 @@ import { isPdsBlobUrl, resolveBlobUrl } from "../_lib/pds";
 import { pauseOtherAudio } from "../_lib/audio-coordinator";
 import { formatWorkScopeTag, type WorkScopeLabels } from "../_lib/work-scope-labels";
 import { cn } from "@/lib/utils";
+import { useModalFocus } from "@/hooks/use-modal-focus";
 import type { AuthSession } from "../_lib/auth";
 import { fetchCgsGroups, type CgsGroupMembership } from "@/app/(manage)/manage/_lib/cgs";
 import { deleteOccurrenceCascade, updateOccurrence } from "@/app/(manage)/manage/_lib/mutations";
@@ -105,6 +106,8 @@ export function RecordDrawer({
   const [projectBumicerts, setProjectBumicerts] = useState<BumicertRecord[] | null>(null);
   const [projectUpdates, setProjectUpdates] = useState<TimelineAttachmentItem[] | null>(null);
   const [projectGalleries, setProjectGalleries] = useState<ProjectImageGallery[] | null>(null);
+  const dialogRef = useRef<HTMLDivElement | null>(null);
+  const closeButtonRef = useRef<HTMLButtonElement | null>(null);
   const t = useTranslations("marketplace.recordDrawer");
   const workScopeT = useTranslations("common.workScopes");
   const aboutT = useTranslations("common.accountAbout");
@@ -185,24 +188,12 @@ export function RecordDrawer({
     return () => ctrl.abort();
   }, [record]);
 
-  useEffect(() => {
-    if (!record) return;
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key !== "Escape") return;
-      if (locationPickerOpen) {
-        setLocationPickerOpen(false);
-        return;
-      }
-      onClose();
-    };
-    document.addEventListener("keydown", onKey);
-    const original = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    return () => {
-      document.removeEventListener("keydown", onKey);
-      document.body.style.overflow = original;
-    };
-  }, [record, onClose, locationPickerOpen]);
+  useModalFocus({
+    active: Boolean(record),
+    containerRef: dialogRef,
+    initialFocusRef: closeButtonRef,
+    onEscape: onClose,
+  });
 
   // Fetch the full, drawer-ready detail for the opened record. The list query
   // stays lean (1000 records); the deep field set is pulled per record here.
@@ -378,7 +369,7 @@ export function RecordDrawer({
   // Arrow keys flip the occurrence hero between photos (outside the editor /
   // form fields), mirroring the full observation page.
   useEffect(() => {
-    if (occurrenceImageCount <= 1) return;
+    if (occurrenceImageCount <= 1 || locationPickerOpen) return;
     const onKey = (event: KeyboardEvent) => {
       const target = event.target as HTMLElement | null;
       if (target && (target.tagName === "INPUT" || target.tagName === "TEXTAREA" || target.tagName === "SELECT" || target.isContentEditable)) return;
@@ -394,7 +385,7 @@ export function RecordDrawer({
     };
     document.addEventListener("keydown", onKey);
     return () => document.removeEventListener("keydown", onKey);
-  }, [occurrenceImageCount]);
+  }, [locationPickerOpen, occurrenceImageCount]);
 
   if (!record) return null;
   const activeRecord = record;
@@ -557,7 +548,9 @@ export function RecordDrawer({
 
   return (
     <div
-      className="fixed inset-0 z-[90] flex justify-end"
+      ref={dialogRef}
+      tabIndex={-1}
+      className="fixed inset-0 z-[90] flex justify-end p-3 sm:p-4"
       role="dialog"
       aria-modal="true"
       aria-label={title}
@@ -565,9 +558,9 @@ export function RecordDrawer({
       <div className="drawer-scrim absolute inset-0 bg-foreground/25 backdrop-blur-[3px]" onClick={onClose} />
       <div
         className={cn(
-          "drawer-sheet thin-scroll relative flex h-full w-full flex-col overflow-y-auto bg-background shadow-[-24px_0_60px_-30px_rgba(20,30,15,0.5)]",
+          "drawer-sheet thin-scroll relative flex h-full max-h-full w-full flex-col overflow-y-auto rounded-3xl border border-border-soft bg-background shadow-[-24px_0_60px_-30px_rgba(20,30,15,0.5)]",
           isProject
-            ? "max-w-[540px] overscroll-contain sm:my-3 sm:h-[calc(100%_-_1.5rem)] sm:rounded-l-[28px] sm:border sm:border-r-0 sm:border-border-soft"
+            ? "max-w-[540px] overscroll-contain"
             : "max-w-[480px]",
         )}
       >
@@ -622,16 +615,16 @@ export function RecordDrawer({
               </div>
               <div className="pointer-events-auto flex items-center gap-2">
                 {(observationHref ?? projectHref) ? <MaximizeButton href={(observationHref ?? projectHref)!} /> : null}
-                <CloseButton onClose={onClose} floating />
+                <CloseButton ref={closeButtonRef} onClose={onClose} floating />
               </div>
             </div>
           </div>
         ) : (
-          <div className="sticky top-0 z-10 flex items-center justify-between gap-3 border-b border-border-soft bg-background/90 px-5 py-4 backdrop-blur-xl">
+          <div className="sticky top-0 z-10 flex items-center justify-between gap-3 border-b border-border-soft bg-background/90 px-4 py-4 backdrop-blur-xl sm:px-6">
             <KindBadge record={record} />
             <div className="flex items-center gap-2">
               {(observationHref ?? projectHref) ? <MaximizeButton href={(observationHref ?? projectHref)!} /> : null}
-              <CloseButton onClose={onClose} />
+              <CloseButton ref={closeButtonRef} onClose={onClose} />
             </div>
           </div>
         )}
@@ -641,16 +634,16 @@ export function RecordDrawer({
             "pb-12",
             isProject
               ? showHero
-                ? "relative -mt-10 rounded-t-[28px] bg-background px-7 pt-7 sm:px-8"
-                : "px-7 pt-6 sm:px-8"
-              : `px-6 ${showHero ? "-mt-10" : "pt-5"}`,
+                ? "relative -mt-10 rounded-t-[28px] bg-background px-4 pt-6 sm:px-6"
+                : "px-4 pt-4 sm:px-6"
+              : `px-4 sm:px-6 ${showHero ? "-mt-10" : "pt-5"}`,
           )}
         >
           {record.kind === "site" ? <TrustedByBadges did={record.did} className="relative mb-3" variant="compact" /> : null}
           <h2
             className={cn(
-              "relative font-instrument leading-[1.08] tracking-[-0.01em] text-foreground",
-              isProject ? "text-[34px] sm:text-[36px]" : "text-[30px] italic",
+              "relative font-instrument italic leading-[1.08] tracking-[-0.01em] text-foreground",
+              isProject ? "text-[34px] sm:text-[36px]" : "text-[30px]",
             )}
           >
             {title}
@@ -741,7 +734,7 @@ export function RecordDrawer({
               "mt-5",
               isProject
                 ? "border-y border-border-soft py-3.5"
-                : "rounded-2xl bg-foreground/[0.04] p-3.5",
+                : "rounded-2xl bg-muted p-3.5",
             )}
           >
             <div className={cn(isProject && "flex items-center gap-3")}>
@@ -942,15 +935,15 @@ export function RecordDrawer({
           {sections.map((s, i) =>
             s.fields.length === 0 ? null : (
               <div key={s.title ?? i} className="mt-6 border-t border-border-soft pt-5">
-                {s.title && (
-                  <div className="mb-3 text-[11px] font-medium uppercase tracking-[0.14em] text-foreground/45">
+                {s.title ? (
+                  <h3 className="mb-3 font-instrument text-lg italic text-foreground">
                     {s.title}
-                  </div>
-                )}
+                  </h3>
+                ) : null}
                 <dl className="grid grid-cols-2 gap-x-4 gap-y-4">
                   {s.fields.map((f) => (
                     <div key={f.label} className={f.wide ? "col-span-2" : ""}>
-                      <dt className="text-[11px] font-medium uppercase tracking-[0.08em] text-foreground/45">
+                      <dt className="text-xs font-medium text-muted-foreground">
                         {f.label}
                       </dt>
                       <dd className="mt-1 text-[14px] leading-[1.45] text-foreground">{f.value}</dd>
@@ -1104,7 +1097,7 @@ function ObservationMeasurementsPanel({ facts }: { facts: ObservationMeasurement
       <dl className="grid grid-cols-2 gap-x-4 gap-y-3">
         {facts.map((fact, index) => (
           <div key={`${fact.key ?? fact.label ?? "m"}-${index}`}>
-            <dt className="text-[11px] font-medium uppercase tracking-[0.08em] text-foreground/45">
+            <dt className="text-xs font-medium text-muted-foreground">
               {fact.key ? t(`fields.${fact.key}`) : fact.label ?? ""}
             </dt>
             <dd className="mt-1 text-[14px] leading-[1.45] text-foreground">{fact.value}</dd>
@@ -1196,7 +1189,7 @@ const OPTIONAL_OBSERVATION_FIELDS: Array<keyof ObservationDraft> = [
 
 const INPUT_CLASS = "mt-1.5 h-10 w-full rounded-xl border border-border-soft bg-background px-3 text-[14px] text-foreground outline-none transition-colors placeholder:text-muted-foreground/60 focus:border-primary/50 focus:ring-2 focus:ring-primary/10";
 const TEXTAREA_CLASS = "mt-1.5 min-h-20 w-full rounded-xl border border-border-soft bg-background px-3 py-2 text-[14px] leading-5 text-foreground outline-none transition-colors placeholder:text-muted-foreground/60 focus:border-primary/50 focus:ring-2 focus:ring-primary/10";
-const LABEL_CLASS = "text-[11px] font-medium uppercase tracking-[0.08em] text-foreground/45";
+const LABEL_CLASS = "text-xs font-medium text-muted-foreground";
 const OBSERVATION_KIND_OPTIONS = ["Plantae", "Animalia"] as const;
 const BASIS_OF_RECORD_OPTIONS = ["HumanObservation", "MachineObservation", "PreservedSpecimen", "MaterialSample", "LivingSpecimen"] as const;
 
@@ -1520,6 +1513,8 @@ export function ObservationLocationPickerModal({
   onSelect: (lat: number, lon: number) => void;
 }) {
   const t = useTranslations("marketplace.recordDrawer");
+  const dialogRef = useRef<HTMLDivElement | null>(null);
+  const closeButtonRef = useRef<HTMLButtonElement | null>(null);
   const elRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<LeafletMap | null>(null);
   const markerRef = useRef<Marker | null>(null);
@@ -1529,6 +1524,12 @@ export function ObservationLocationPickerModal({
   );
   const [selected, setSelected] = useState<{ lat: number; lon: number } | null>(selectedRef.current);
   const [isDark, setIsDark] = useState(false);
+
+  useModalFocus({
+    containerRef: dialogRef,
+    initialFocusRef: closeButtonRef,
+    onEscape: onClose,
+  });
 
   useEffect(() => {
     selectedRef.current = selected;
@@ -1601,7 +1602,14 @@ export function ObservationLocationPickerModal({
   }, []);
 
   return (
-    <div className="fixed inset-0 z-[110] grid place-items-center px-4 py-6" role="dialog" aria-modal="true" aria-label={t("observation.chooseMapLocationTitle")}>
+    <div
+      ref={dialogRef}
+      tabIndex={-1}
+      className="fixed inset-0 z-[110] grid place-items-center p-3 sm:p-4"
+      role="dialog"
+      aria-modal="true"
+      aria-label={t("observation.chooseMapLocationTitle")}
+    >
       <button
         type="button"
         aria-label={t("observation.closeMapLocationChooser")}
@@ -1609,21 +1617,23 @@ export function ObservationLocationPickerModal({
         onClick={onClose}
       />
       <div className="relative z-[1] flex w-full max-w-[440px] flex-col overflow-hidden rounded-3xl border border-border-soft bg-background shadow-2xl">
-        <div className="flex items-start justify-between gap-3 px-5 py-4">
+        <div className="flex items-start justify-between gap-3 p-4 sm:px-6">
           <div>
-            <h3 className="text-[16px] font-medium text-foreground">{t("observation.chooseMapLocationTitle")}</h3>
+            <h3 className="font-instrument text-[16px] italic text-foreground">{t("observation.chooseMapLocationTitle")}</h3>
             <p className="mt-1 text-[13px] leading-5 text-muted-foreground">{t("observation.movePin")}</p>
           </div>
           <button
+            ref={closeButtonRef}
             type="button"
             onClick={onClose}
-            className="grid h-8 w-8 shrink-0 place-items-center rounded-full border border-border-soft text-foreground/70 transition-colors hover:text-foreground"
+            aria-label={t("observation.closeMapLocationChooser")}
+            className="grid size-11 shrink-0 place-items-center rounded-full border border-border-soft text-foreground/70 transition-colors hover:text-foreground"
           >
             <XIcon className="h-4 w-4" />
           </button>
         </div>
         <div ref={elRef} className="h-80 w-full border-y border-border-soft bg-surface-sunken" />
-        <div className="flex flex-col gap-3 px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between sm:px-6">
           <p className="text-[13px] text-muted-foreground">
             {selected ? `${formatCoordinateInput(selected.lat)}, ${formatCoordinateInput(selected.lon)}` : t("observation.noMapLocation")}
           </p>
@@ -1631,7 +1641,7 @@ export function ObservationLocationPickerModal({
             <button
               type="button"
               onClick={onClose}
-              className="inline-flex h-10 items-center rounded-full border border-border-soft bg-background px-4 text-[13px] font-medium text-foreground/80 transition-colors hover:border-foreground/30"
+              className="inline-flex h-11 items-center rounded-full border border-border-soft bg-background px-4 text-[13px] font-medium text-foreground/80 transition-colors hover:border-foreground/30"
             >
               {t("actions.cancel")}
             </button>
@@ -1639,7 +1649,7 @@ export function ObservationLocationPickerModal({
               type="button"
               disabled={!selected}
               onClick={() => selected && onSelect(selected.lat, selected.lon)}
-              className="inline-flex h-10 items-center gap-2 rounded-full bg-primary px-4 text-[13px] font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-60"
+              className="inline-flex h-11 items-center gap-2 rounded-full bg-primary px-4 text-[13px] font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-60"
             >
               <CheckIcon className="h-3.5 w-3.5" />
               {t("observation.useLocation")}
@@ -1850,11 +1860,15 @@ function MaximizeButton({ href }: { href: string }) {
   );
 }
 
-function CloseButton({ onClose, floating = false }: { onClose: () => void; floating?: boolean }) {
+const CloseButton = forwardRef<HTMLButtonElement, { onClose: () => void; floating?: boolean }>(function CloseButton(
+  { onClose, floating = false },
+  ref,
+) {
   const t = useTranslations("marketplace.recordDrawer");
 
   return (
     <button
+      ref={ref}
       type="button"
       onClick={onClose}
       aria-label={t("actions.close")}
@@ -1867,7 +1881,7 @@ function CloseButton({ onClose, floating = false }: { onClose: () => void; float
       <XIcon className="h-[15px] w-[15px]" aria-hidden />
     </button>
   );
-}
+});
 
 // A single, consistent "open the dedicated detail page" link shared by the
 // project, observation, cert, and owner-profile actions so they all look the
@@ -1970,10 +1984,10 @@ function ProjectCertSummary({
       ) : null}
 
       {hasEvidence ? (
-        <section className="mt-5 rounded-2xl border border-border-soft bg-foreground/[0.04] p-4">
+        <section className="mt-5 rounded-2xl border border-border-soft bg-muted p-4">
           <div className="mb-3 flex items-center gap-2">
             <ClipboardCheckIcon className="h-4 w-4 text-primary" aria-hidden />
-            <h3 className="text-[13px] font-medium text-foreground">{t("projectEvidence.title")}</h3>
+            <h3 className="font-instrument text-[15px] italic text-foreground">{t("projectEvidence.title")}</h3>
           </div>
           <ProjectEvidence
             evidence={evidence}
@@ -1992,9 +2006,18 @@ function ProjectDrawerGallery({ images, projectTitle }: { images: ProjectGallery
   const t = useTranslations("marketplace.recordDrawer");
   const galleryT = useTranslations("common.projectGallery");
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
+  const dialogRef = useRef<HTMLDivElement | null>(null);
+  const closeButtonRef = useRef<HTMLButtonElement | null>(null);
   const MAX_THUMBS = 6;
   const thumbs = images.slice(0, MAX_THUMBS);
   const overflow = images.length - thumbs.length;
+
+  useModalFocus({
+    active: activeIndex !== null,
+    containerRef: dialogRef,
+    initialFocusRef: closeButtonRef,
+    onEscape: () => setActiveIndex(null),
+  });
 
   useEffect(() => {
     if (activeIndex === null) return;
@@ -2005,9 +2028,6 @@ function ProjectDrawerGallery({ images, projectTitle }: { images: ProjectGallery
       } else if (event.key === "ArrowRight") {
         event.stopPropagation();
         setActiveIndex((index) => (index === null ? index : (index + 1) % images.length));
-      } else if (event.key === "Escape") {
-        event.stopPropagation();
-        setActiveIndex(null);
       }
     };
     document.addEventListener("keydown", onKey, true);
@@ -2057,12 +2077,16 @@ function ProjectDrawerGallery({ images, projectTitle }: { images: ProjectGallery
 
       {active ? (
         <div
+          ref={dialogRef}
+          tabIndex={-1}
           role="dialog"
           aria-modal="true"
+          aria-label={galleryT("imageAlt", { projectTitle, index: (activeIndex ?? 0) + 1 })}
           className="fixed inset-0 z-[120] flex items-center justify-center bg-black/88 p-4"
           onClick={() => setActiveIndex(null)}
         >
           <button
+            ref={closeButtonRef}
             type="button"
             onClick={() => setActiveIndex(null)}
             aria-label={galleryT("closeImage")}
@@ -2122,7 +2146,7 @@ function ProjectDrawerUpdates({ updates, projectHref }: { updates: TimelineAttac
   return (
     <section className="mt-5 space-y-2.5">
       <div className="flex items-center justify-between gap-2">
-        <h3 className="text-[13px] font-medium text-foreground">{t("projectUpdates.title")}</h3>
+        <h3 className="font-instrument text-[15px] italic text-foreground">{t("projectUpdates.title")}</h3>
         <Link
           href={`${projectHref}#updates`}
           className="text-[12.5px] font-medium text-primary transition-colors hover:underline"

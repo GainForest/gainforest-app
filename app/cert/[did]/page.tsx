@@ -1,6 +1,7 @@
 import { notFound, redirect } from "next/navigation";
 import { localBumicertHref } from "../../_lib/urls";
 import { getAccountRouteData } from "../../account/_lib/account-route";
+import { canonicalCertAliasHref, type RouteSearchParams } from "../route-compat";
 
 export const revalidate = 60;
 
@@ -23,10 +24,16 @@ function safeDecode(value: string): string {
   }
 }
 
-export default async function LegacyBumicertPage({ params }: { params: Promise<{ did: string }> }) {
-  const { did } = await params;
+export default async function LegacyBumicertPage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ did: string }>;
+  searchParams: Promise<RouteSearchParams>;
+}) {
+  const [{ did }, search] = await Promise.all([params, searchParams]);
   const parsed = parseLegacyBumicertId(did);
   if (!parsed) notFound();
   const account = await getAccountRouteData(parsed.did, parsed.did).catch(() => null);
-  redirect(localBumicertHref(account?.urlIdentifier ?? parsed.did, parsed.rkey));
+  redirect(canonicalCertAliasHref(localBumicertHref(account?.urlIdentifier ?? parsed.did, parsed.rkey), search));
 }

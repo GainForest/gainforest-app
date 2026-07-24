@@ -8,13 +8,12 @@ import { fetchInternalBadgeData } from "../_lib/badge-records";
 
 type Props = { params: Promise<{ badgeId: string }> };
 
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const { badgeId } = await params;
+export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations("common.internalBadges.meta");
   return {
     title: t("detailTitle"),
     description: t("description"),
-    alternates: { canonical: `/internal/badges/${encodeURIComponent(badgeId)}` },
+    robots: { index: false, follow: false },
   };
 }
 

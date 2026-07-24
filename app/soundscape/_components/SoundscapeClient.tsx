@@ -26,6 +26,12 @@ import { buildSoundscapePoints, formatBandLabel, FREQUENCY_BANDS } from "@/lib/s
 import { computeRecordingPmn, RecordingTooShortError } from "@/lib/soundscape/pmn";
 import { cn } from "@/lib/utils";
 import { BAND_COLORS, SoundscapeClock } from "./SoundscapeClock";
+import {
+  beginAnalysis,
+  createAnalysisGeneration,
+  invalidateAnalyses,
+  shouldApplyAnalysis,
+} from "./analysis-run";
 
 type FileStatus = "pending" | "analyzing" | "done" | "error";
 
@@ -67,8 +73,10 @@ export function SoundscapeClient() {
   const [visibleBands, setVisibleBands] = useState<boolean[]>(FREQUENCY_BANDS.map(() => true));
   const [isDragOver, setIsDragOver] = useState(false);
   const [rejectedNonWav, setRejectedNonWav] = useState(false);
+  const [exportFailed, setExportFailed] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const processingRef = useRef(false);
+  const analysisGenerationRef = useRef(createAnalysisGeneration());
   const chartRef = useRef<HTMLDivElement>(null);
 
   const addFiles = useCallback((incoming: FileList | File[]) => {
@@ -103,6 +111,7 @@ export function SoundscapeClient() {
     const next = recordings.find((entry) => entry.status === "pending");
     if (!next) return;
     processingRef.current = true;
+    const startedAt = beginAnalysis(analysisGenerationRef.current);
     setRecordings((current) =>
       current.map((entry) => (entry.id === next.id ? { ...entry, status: "analyzing" as const } : entry)),
     );
@@ -119,6 +128,7 @@ export function SoundscapeClient() {
           errorKind: error instanceof RecordingTooShortError ? "tooShort" : "decode",
         };
       }
+      if (!shouldApplyAnalysis(analysisGenerationRef.current, startedAt)) return;
       processingRef.current = false;
       setRecordings((current) => current.map((entry) => (entry.id === next.id ? { ...entry, ...update } : entry)));
     })();
@@ -129,7 +139,9 @@ export function SoundscapeClient() {
   };
 
   const clearAll = () => {
-    setRecordings((current) => current.filter((entry) => entry.status === "analyzing"));
+    invalidateAnalyses(analysisGenerationRef.current);
+    processingRef.current = false;
+    setRecordings([]);
     setSelectedDate(ALL_DATES);
   };
 
@@ -175,8 +187,12 @@ export function SoundscapeClient() {
   const bandLabels = useMemo(() => FREQUENCY_BANDS.map(formatBandLabel), []);
 
   const downloadPng = useCallback(async () => {
+    setExportFailed(false);
     const svg = chartRef.current?.querySelector<SVGSVGElement>("svg[data-soundscape-clock]");
-    if (!svg) return;
+    if (!svg) {
+      setExportFailed(true);
+      return;
+    }
     const clone = svg.cloneNode(true) as SVGSVGElement;
     clone.setAttribute("width", "1440");
     clone.setAttribute("height", "1440");
@@ -197,7 +213,7 @@ export function SoundscapeClient() {
       canvas.width = 1440;
       canvas.height = 1440;
       const context = canvas.getContext("2d");
-      if (!context) return;
+      if (!context) throw new Error("canvas unavailable");
       context.fillStyle = "#ffffff";
       context.fillRect(0, 0, canvas.width, canvas.height);
       context.drawImage(image, 0, 0, canvas.width, canvas.height);
@@ -206,7 +222,7 @@ export function SoundscapeClient() {
       anchor.download = `soundscape-${chartDateLabel || "clock"}.png`;
       anchor.click();
     } catch {
-      // Best effort — the on-screen chart is unaffected.
+      setExportFailed(true);
     } finally {
       URL.revokeObjectURL(url);
     }
@@ -217,8 +233,8 @@ export function SoundscapeClient() {
       {/* Import area */}
       <section
         className={cn(
-          "rounded-2xl border border-dashed bg-muted/30 p-6 transition-colors",
-          isDragOver && "border-primary bg-primary/5",
+          "rounded-2xl border border-dashed bg-muted/60 p-4 transition-colors sm:p-5",
+          isDragOver && "border-primary bg-primary/10",
         )}
         onDragOver={(event) => {
           event.preventDefault();
@@ -247,7 +263,7 @@ export function SoundscapeClient() {
             <UploadIcon className="size-5" />
           </span>
           <div>
-            <p className="font-medium text-foreground">{t("import.dropTitle")}</p>
+            <h2 className="font-instrument text-lg italic text-foreground">{t("import.dropTitle")}</h2>
             <p className="mt-1 text-sm text-muted-foreground">{t("import.dropHint")}</p>
           </div>
           <Button type="button" variant="outline" onClick={() => fileInputRef.current?.click()}>
@@ -255,7 +271,7 @@ export function SoundscapeClient() {
             {t("import.browse")}
           </Button>
           {rejectedNonWav ? (
-            <p className="flex items-center gap-1.5 text-sm text-destructive">
+            <p role="alert" className="flex items-center gap-1.5 text-sm text-destructive">
               <AlertTriangleIcon className="size-4" />
               {t("import.onlyWav")}
             </p>
@@ -265,7 +281,7 @@ export function SoundscapeClient() {
 
       {/* File list + progress */}
       {recordings.length > 0 ? (
-        <section className="rounded-2xl border bg-background shadow-sm">
+        <section className="rounded-2xl border bg-background">
           <div className="flex flex-wrap items-center justify-between gap-3 border-b px-4 py-3">
             <p className="text-sm font-medium text-foreground">
               {t("import.fileCount", { count: recordings.length })}
@@ -273,7 +289,7 @@ export function SoundscapeClient() {
             <div className="flex items-center gap-3">
               {busy ? (
                 <span className="flex items-center gap-2 text-xs text-muted-foreground">
-                  <Loader2Icon className="size-3.5 animate-spin" />
+                  <Loader2Icon className="size-3.5 animate-spin motion-reduce:animate-none" />
                   {analyzing
                     ? t("import.analyzing", { name: analyzing.name })
                     : t("import.progress", { done: settledCount, total: recordings.length })}
@@ -288,7 +304,7 @@ export function SoundscapeClient() {
           {busy ? (
             <div className="h-1 w-full overflow-hidden bg-muted" role="progressbar" aria-valuemin={0} aria-valuemax={recordings.length} aria-valuenow={settledCount} aria-label={t("import.progress", { done: settledCount, total: recordings.length })}>
               <div
-                className="h-full bg-primary transition-[width]"
+                className="h-full bg-primary transition-[width] motion-reduce:transition-none"
                 style={{ width: `${(settledCount / Math.max(1, recordings.length)) * 100}%` }}
               />
             </div>
@@ -324,7 +340,7 @@ export function SoundscapeClient() {
                   type="button"
                   onClick={() => removeRecording(entry.id)}
                   aria-label={t("import.removeFile", { name: entry.name })}
-                  className="flex size-6 shrink-0 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive"
+                  className="flex size-11 shrink-0 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive"
                 >
                   <XIcon className="size-3.5" />
                 </button>
@@ -338,13 +354,16 @@ export function SoundscapeClient() {
       ) : null}
 
       {/* Chart */}
-      <section className="rounded-2xl border bg-background p-4 shadow-sm sm:p-6">
+      <section className="rounded-2xl border bg-background p-4 sm:p-5">
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div>
-            <h2 className="font-medium text-foreground">
+            <h2 className="font-instrument text-lg italic text-foreground">
               {chartDateLabel ? t("chart.title", { date: chartDateLabel }) : t("chart.title", { date: t("chart.allDates") })}
             </h2>
             <p className="mt-0.5 text-xs text-muted-foreground">{t("chart.hoverHint")}</p>
+            {exportFailed ? (
+              <p role="alert" className="mt-2 text-sm text-destructive">{t("chart.exportFailed")}</p>
+            ) : null}
           </div>
           {points.length > 0 ? (
             <Button type="button" variant="outline" size="sm" onClick={() => void downloadPng()}>
@@ -381,7 +400,7 @@ export function SoundscapeClient() {
               />
             </div>
             <aside>
-              <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+              <p className="text-sm font-medium text-muted-foreground">
                 {t("chart.legendTitle")}
               </p>
               <ul className="mt-2 space-y-1">
@@ -411,9 +430,9 @@ export function SoundscapeClient() {
             </aside>
           </div>
         ) : (
-          <div className="mt-4 flex min-h-64 flex-col items-center justify-center gap-2 rounded-xl bg-muted/30 p-8 text-center">
+          <div className="mt-4 flex min-h-64 flex-col items-center justify-center gap-2 rounded-xl bg-muted p-3 text-center">
             <FileAudioIcon className="size-8 text-muted-foreground/60" />
-            <p className="text-sm font-medium text-foreground">{t("chart.empty")}</p>
+            <h3 className="font-instrument text-base italic text-foreground">{t("chart.empty")}</h3>
             <p className="text-sm text-muted-foreground">{t("chart.emptyHint")}</p>
           </div>
         )}
@@ -425,7 +444,7 @@ export function SoundscapeClient() {
 function StatusIcon(props: { status: FileStatus }) {
   switch (props.status) {
     case "analyzing":
-      return <Loader2Icon className="size-4 shrink-0 animate-spin text-primary" />;
+      return <Loader2Icon className="size-4 shrink-0 animate-spin text-primary motion-reduce:animate-none" />;
     case "done":
       return <CheckIcon className="size-4 shrink-0 text-primary" />;
     case "error":
@@ -442,7 +461,7 @@ function DateChip(props: { active: boolean; onClick: () => void; children: React
       onClick={props.onClick}
       aria-pressed={props.active}
       className={cn(
-        "rounded-full border px-3 py-1 text-xs font-medium transition-colors",
+        "min-h-11 rounded-full border px-3 text-xs font-medium transition-colors",
         props.active
           ? "border-primary bg-primary/10 text-primary"
           : "border-border text-muted-foreground hover:bg-muted",

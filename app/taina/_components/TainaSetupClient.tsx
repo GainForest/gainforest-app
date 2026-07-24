@@ -15,6 +15,7 @@ import { Button, buttonVariants } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
+import { SectionSurface } from "@/components/ui/section-surface";
 import { useModal } from "@/components/ui/modal/context";
 import { cn } from "@/lib/utils";
 import { AuthModal } from "@/app/_components/AuthFlow";
@@ -41,8 +42,7 @@ type DashStatus = {
 
 const BOT_TOKEN_RE = /^\d{6,}:[A-Za-z0-9_-]{30,}$/;
 
-// Error codes the /api/taina routes return; anything else is a message from
-// the agent runtime and is shown as-is.
+// Only known, localized error categories are safe to show. Runtime details stay private.
 const ERROR_KEYS: Record<string, "invalidToken" | "genericError" | "runtimeUnreachable"> = {
   invalid_token: "invalidToken",
   invalid_body: "genericError",
@@ -53,14 +53,9 @@ const ERROR_KEYS: Record<string, "invalidToken" | "genericError" | "runtimeUnrea
 
 function SetupCard({ children, className }: { children: ReactNode; className?: string }) {
   return (
-    <section
-      className={cn(
-        "rounded-3xl border border-border bg-card/90 p-5 shadow-sm backdrop-blur-sm sm:p-6",
-        className,
-      )}
-    >
+    <SectionSurface variant="muted" className={className}>
       {children}
-    </section>
+    </SectionSurface>
   );
 }
 
@@ -92,10 +87,10 @@ function SignInCard() {
 
   return (
     <SetupCard>
-      <div className="flex size-10 items-center justify-center rounded-full border border-primary/15 bg-primary/[0.08] text-primary">
+      <div className="flex size-10 items-center justify-center rounded-full bg-primary/[0.08] text-primary">
         <LockIcon className="size-4.5" />
       </div>
-      <h2 className="mt-4 text-lg font-semibold text-foreground">{t("title")}</h2>
+      <h2 className="mt-4 font-instrument text-lg font-light italic text-foreground">{t("title")}</h2>
       <p className="mt-1.5 text-sm leading-6 text-muted-foreground">{t("description")}</p>
       <Button type="button" size="lg" className="mt-5 w-full" onClick={handleSignIn}>
         {t("button")}
@@ -154,12 +149,13 @@ function ConnectFlow({ did, handle }: { did: string; handle: string | null }) {
       const data = await response.json().catch(() => ({}));
       if (!response.ok) {
         const code = typeof data.error === "string" ? data.error : "";
-        const key = ERROR_KEYS[code];
-        throw new Error(key ? t(`errors.${key}`) : code || t("errors.genericError"));
+        const key = ERROR_KEYS[code] ?? "genericError";
+        setError(t(`errors.${key}`));
+        return;
       }
       setResult(data as Provisioned);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : t("errors.genericError"));
+    } catch {
+      setError(t("errors.genericError"));
     } finally {
       setBusy(false);
     }
@@ -204,8 +200,8 @@ function ConnectFlow({ did, handle }: { did: string; handle: string | null }) {
     <SetupCard>
       <form onSubmit={onSubmit}>
         <div className="flex items-start justify-between gap-3">
-          <h2 className="text-lg font-semibold text-foreground">{t("setup.title")}</h2>
-          <span className="mt-0.5 inline-flex size-8 shrink-0 items-center justify-center rounded-full border border-primary/15 bg-primary/[0.08] text-primary">
+          <h2 className="font-instrument text-lg font-light italic text-foreground">{t("setup.title")}</h2>
+          <span className="mt-0.5 inline-flex size-8 shrink-0 items-center justify-center rounded-full bg-primary/[0.08] text-primary">
             <BotIcon className="size-4" />
           </span>
         </div>
@@ -249,7 +245,7 @@ function ConnectFlow({ did, handle }: { did: string; handle: string | null }) {
             autoCapitalize="none"
             autoCorrect="off"
             spellCheck={false}
-            placeholder="123456789:ABCdefGhIJKlmNoPQRstuVwxyz"
+            placeholder={t("setup.tokenPlaceholder")}
             value={botToken}
             onChange={(event) => setBotToken(event.target.value)}
             required
@@ -302,7 +298,7 @@ function ActivationCard({
   const dashboardT = useTranslations("common.taina.linked");
   return (
     <SetupCard className="animate-in">
-      <h2 className="text-lg font-semibold text-foreground">{t("title")}</h2>
+      <h2 className="font-instrument text-lg font-light italic text-foreground">{t("title")}</h2>
       <p className="mt-1.5 text-sm leading-6 text-muted-foreground">{t("description")}</p>
       <div className="my-5 flex items-center justify-center rounded-2xl border border-dashed border-primary/40 bg-primary/5 py-4">
         <span className="select-all font-mono text-2xl font-semibold tracking-[0.3em] text-primary">{code}</span>
@@ -348,16 +344,16 @@ function LinkedCard({
   return (
     <SetupCard className="animate-in">
       <div className="flex items-center justify-between gap-3">
-        <h2 className="text-lg font-semibold text-foreground">
+        <h2 className="font-instrument text-lg font-light italic text-foreground">
           {justLinked ? t("justLinkedTitle") : t("title")}
         </h2>
-        <span className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-primary/20 bg-primary/[0.08] px-2.5 py-1 text-[11px] font-medium uppercase tracking-wide text-primary">
+        <span className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-primary/20 bg-primary/[0.08] px-2.5 py-1 text-[11px] font-medium text-primary">
           <span className="pulse-dot size-1.5 rounded-full bg-primary" />
           {t("badge")}
         </span>
       </div>
       {justLinked ? (
-        <div className="mt-3 flex items-center gap-2 rounded-2xl border border-primary/15 bg-primary/5 px-3.5 py-2.5 text-sm text-foreground">
+        <div className="mt-3 flex items-center gap-2 rounded-2xl bg-primary/[0.08] px-3.5 py-2.5 text-sm text-foreground">
           <CheckIcon className="size-4 shrink-0 text-primary" />
           {t("justLinkedNote")}
         </div>

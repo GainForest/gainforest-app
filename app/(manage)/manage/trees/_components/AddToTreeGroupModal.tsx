@@ -108,7 +108,7 @@ function AddToTreeGroupModal({
     <ModalContent dismissible={!isPending}>
       <div className="space-y-4">
         <div className="space-y-1.5">
-          <ModalTitle>
+          <ModalTitle className="font-instrument font-light italic">
             {treeCount === 1 ? "Add 1 tree to a tree group" : `Add ${treeCount} trees to a tree group`}
           </ModalTitle>
           <ModalDescription>

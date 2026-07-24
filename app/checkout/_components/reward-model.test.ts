@@ -1,5 +1,13 @@
 import { describe, expect, it } from "vitest";
-import { buildRewardCards, tierForAmount, type RewardLine } from "./reward-model";
+import {
+  buildRewardCards,
+  checkoutPhaseAfterSettlement,
+  donationTotalUsd,
+  pendingTipUsd,
+  rewardEffectsEnabled,
+  tierForAmount,
+  type RewardLine,
+} from "./reward-model";
 
 const projectA: RewardLine = {
   kind: "donation",
@@ -26,6 +34,41 @@ const tip: RewardLine = {
   orgName: "GainForest",
   amountUsd: 10.5,
 };
+
+describe("checkout settlement presentation", () => {
+  it("returns partial settlement to review while completed donations remain recorded", () => {
+    expect(checkoutPhaseAfterSettlement(true, 1)).toBe("review");
+    expect(checkoutPhaseAfterSettlement(false, 1)).toBe("done");
+    expect(checkoutPhaseAfterSettlement(false, 0)).toBe("review");
+  });
+
+  it("keeps reward effects purposeful while honoring reduced motion", () => {
+    expect(rewardEffectsEnabled(false, true)).toBe(true);
+    expect(rewardEffectsEnabled(null, true)).toBe(true);
+    expect(rewardEffectsEnabled(true, true)).toBe(false);
+    expect(rewardEffectsEnabled(false, false)).toBe(false);
+  });
+});
+
+describe("donationTotalUsd", () => {
+  it("excludes a GainForest tip from the amount described as project donations", () => {
+    expect(donationTotalUsd([projectA, tip])).toBe(25);
+  });
+
+  it("totals completed project donations when no tip is present", () => {
+    expect(donationTotalUsd([projectA, projectB])).toBe(105);
+  });
+});
+
+describe("pendingTipUsd", () => {
+  it("does not charge a settled tip again when partial donations are retried", () => {
+    expect(pendingTipUsd(10.5, [projectA, tip])).toBe(0);
+  });
+
+  it("keeps the requested tip before it settles", () => {
+    expect(pendingTipUsd(10.5, [projectA])).toBe(10.5);
+  });
+});
 
 describe("buildRewardCards", () => {
   it("returns no rewards for tips or settled lines without receipts", () => {

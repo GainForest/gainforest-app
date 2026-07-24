@@ -14,6 +14,8 @@ import {
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { manageApiHref, manageHref, type ManageTarget } from "@/lib/links";
+import { canCreateRecord } from "../../../_lib/cgs-permissions";
+import { SectionSurface } from "@/components/ui/section-surface";
 
 type GateProject = {
   rkey: string;
@@ -36,7 +38,7 @@ function toGateProject(raw: ApiProject): GateProject | null {
   return {
     rkey: raw.rkey,
     did: raw.did,
-    title: typeof raw.title === "string" && raw.title.trim() ? raw.title : "Untitled project",
+    title: typeof raw.title === "string" ? raw.title.trim() : "",
     shortDescription: typeof raw.shortDescription === "string" ? raw.shortDescription : null,
     imageUrl: typeof raw.imageUrl === "string" ? raw.imageUrl : null,
   };
@@ -44,6 +46,8 @@ function toGateProject(raw: ApiProject): GateProject | null {
 
 export function MintCertProjectGate({ target }: { target: ManageTarget }) {
   const t = useTranslations("marketplace.newCert.gate");
+  const projectT = useTranslations("marketplace.grants.applyModal");
+  const createPermission = canCreateRecord(target);
   const [projects, setProjects] = useState<GateProject[] | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [query, setQuery] = useState("");
@@ -81,7 +85,7 @@ export function MintCertProjectGate({ target }: { target: ManageTarget }) {
   }, [projects, query]);
 
   return (
-    <div className="mx-auto w-full max-w-3xl px-4 py-8 sm:px-6 sm:py-12">
+    <div className="mx-auto w-full max-w-6xl px-3 py-4 sm:px-5 sm:py-6 lg:px-8">
       <div className="max-w-2xl">
         <h1 className="font-instrument text-3xl font-light italic tracking-[-0.02em] text-foreground sm:text-4xl">{t("title")}</h1>
         <p className="mt-3 text-sm leading-6 text-muted-foreground">{t("subtitle")}</p>
@@ -92,7 +96,7 @@ export function MintCertProjectGate({ target }: { target: ManageTarget }) {
           <Loader2Icon className="size-4 animate-spin" /> {t("loading")}
         </div>
       ) : error ? (
-        <div className="mt-8 flex flex-col items-center justify-center gap-4 rounded-3xl bg-muted/30 px-6 py-12 text-center">
+        <div className="mt-8 flex flex-col items-center justify-center gap-4 rounded-3xl bg-muted px-6 py-12 text-center">
           <TriangleAlertIcon className="size-8 text-muted-foreground opacity-70" />
           <p className="text-sm text-muted-foreground">{error}</p>
           <Button type="button" variant="outline" size="sm" onClick={() => void load()}>
@@ -100,16 +104,20 @@ export function MintCertProjectGate({ target }: { target: ManageTarget }) {
           </Button>
         </div>
       ) : projects.length === 0 ? (
-        <div className="mt-8 flex flex-col items-center justify-center rounded-[2rem] border border-dashed border-border bg-muted/20 px-6 py-12 text-center">
+        <div className="mt-8 flex flex-col items-center justify-center rounded-[2rem] border border-dashed border-border bg-muted px-6 py-12 text-center">
           <FolderKanbanIcon className="mb-4 size-10 text-primary" />
           <h2 className="font-instrument text-2xl font-light italic tracking-[-0.02em] text-foreground">{t("noProjectsTitle")}</h2>
           <p className="mt-2 max-w-md text-sm leading-6 text-muted-foreground">{t("noProjectsDescription")}</p>
-          <Button asChild size="sm" className="mt-5">
-            <Link href={createProjectHref}>
-              <CirclePlusIcon className="size-4" />
-              {t("createProject")}
-            </Link>
-          </Button>
+          {createPermission.allowed ? (
+            <Button asChild size="sm" className="mt-5">
+              <Link href={createProjectHref}>
+                <CirclePlusIcon className="size-4" />
+                {t("createProject")}
+              </Link>
+            </Button>
+          ) : (
+            <p className="mt-4 text-sm text-muted-foreground" role="status">{createPermission.reason}</p>
+          )}
         </div>
       ) : (
         <>
@@ -124,8 +132,12 @@ export function MintCertProjectGate({ target }: { target: ManageTarget }) {
             />
           </div>
 
-          {filtered.length === 0 ? (
-            <p className="mt-6 rounded-2xl bg-muted/40 px-4 py-8 text-center text-sm text-muted-foreground">{t("noMatch")}</p>
+          {!createPermission.allowed ? (
+            <SectionSurface variant="muted" className="mt-6 text-sm text-muted-foreground" role="status">
+              {createPermission.reason}
+            </SectionSurface>
+          ) : filtered.length === 0 ? (
+            <p className="mt-6 rounded-2xl bg-muted px-4 py-8 text-center text-sm text-muted-foreground">{t("noMatch")}</p>
           ) : (
             <ul className="mt-4 space-y-2" role="list">
               {filtered.map((project) => (
@@ -137,7 +149,7 @@ export function MintCertProjectGate({ target }: { target: ManageTarget }) {
                   >
                     <span className="relative h-16 w-16 shrink-0 overflow-hidden rounded-xl bg-muted sm:h-20 sm:w-20">
                       {project.imageUrl ? (
-                        <Image src={project.imageUrl} alt={project.title} fill unoptimized sizes="80px" className="object-cover" />
+                        <Image src={project.imageUrl} alt={project.title || projectT("untitledProject")} fill unoptimized sizes="80px" className="object-cover" />
                       ) : (
                         <span className="grid h-full place-items-center text-primary/45">
                           <FolderKanbanIcon className="size-7" />
@@ -145,7 +157,7 @@ export function MintCertProjectGate({ target }: { target: ManageTarget }) {
                       )}
                     </span>
                     <span className="flex min-w-0 flex-1 flex-col">
-                      <span className="line-clamp-1 font-instrument text-xl italic leading-tight text-foreground sm:text-2xl">{project.title}</span>
+                      <span className="line-clamp-1 font-instrument text-xl italic leading-tight text-foreground sm:text-2xl">{project.title || projectT("untitledProject")}</span>
                       {project.shortDescription ? (
                         <span className="mt-1 line-clamp-2 text-sm leading-relaxed text-muted-foreground">{project.shortDescription}</span>
                       ) : null}
@@ -159,11 +171,13 @@ export function MintCertProjectGate({ target }: { target: ManageTarget }) {
         </>
       )}
 
-      <div className="mt-8 border-t border-border/60 pt-4">
-        <Button asChild variant="ghost" size="sm" className="text-muted-foreground">
-          <Link href={skipHref}>{t("skip")}</Link>
-        </Button>
-      </div>
+      {createPermission.allowed ? (
+        <div className="mt-8 border-t border-border/60 pt-4">
+          <Button asChild variant="ghost" size="sm" className="text-muted-foreground">
+            <Link href={skipHref}>{t("skip")}</Link>
+          </Button>
+        </div>
+      ) : null}
     </div>
   );
 }

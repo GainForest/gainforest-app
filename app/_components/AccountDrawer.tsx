@@ -7,6 +7,7 @@ import {
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
 } from "react";
 import { fetchAccountSummary, type AccountSummary } from "../_lib/indexer";
@@ -24,6 +25,7 @@ import {
 } from "../_lib/format";
 import { TrustedByBadges } from "./TrustedByBadges";
 import { FollowButton, FollowProvider, FollowStats } from "./FollowButton";
+import { useModalFocus } from "@/hooks/use-modal-focus";
 
 // Right-side drawer for an account profile, opened by clicking a handle/owner
 // chip. Chips inside record drawers close their containing sheet first so the
@@ -57,24 +59,15 @@ function AccountDrawer({ did, onClose }: { did: string | null; onClose: () => vo
   const [summary, setSummary] = useState<AccountSummary | null>(null);
   const [profile, setProfile] = useState<DidProfile | null>(null);
   const [avatarFailed, setAvatarFailed] = useState(false);
+  const dialogRef = useRef<HTMLDivElement | null>(null);
+  const closeButtonRef = useRef<HTMLButtonElement | null>(null);
 
-  // Escape (capture phase) + body scroll lock while open.
-  useEffect(() => {
-    if (!did) return;
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") {
-        e.stopImmediatePropagation();
-        onClose();
-      }
-    };
-    document.addEventListener("keydown", onKey, true);
-    const original = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    return () => {
-      document.removeEventListener("keydown", onKey, true);
-      document.body.style.overflow = original;
-    };
-  }, [did, onClose]);
+  useModalFocus({
+    active: Boolean(did),
+    containerRef: dialogRef,
+    initialFocusRef: closeButtonRef,
+    onEscape: onClose,
+  });
 
   // Fetch the summary + resolve the Bluesky identity (handle/avatar fallback).
   useEffect(() => {
@@ -106,6 +99,8 @@ function AccountDrawer({ did, onClose }: { did: string | null; onClose: () => vo
   return (
     <FollowProvider targetDid={did}>
     <div
+      ref={dialogRef}
+      tabIndex={-1}
       className="fixed inset-0 z-[100] flex justify-end"
       role="dialog"
       aria-modal="true"
@@ -117,21 +112,22 @@ function AccountDrawer({ did, onClose }: { did: string | null; onClose: () => vo
       />
       <div className="drawer-sheet thin-scroll relative flex h-full w-full max-w-[540px] flex-col overflow-y-auto overscroll-contain bg-background shadow-[-24px_0_60px_-30px_rgba(20,30,15,0.5)] sm:my-3 sm:h-[calc(100%_-_1.5rem)] sm:rounded-l-[28px] sm:border sm:border-r-0 sm:border-border-soft">
         {/* Header */}
-        <div className="sticky top-0 z-10 flex items-center justify-between gap-3 border-b border-border-soft bg-background/95 px-5 py-4 backdrop-blur-xl">
+        <div className="sticky top-0 z-10 flex items-center justify-between gap-3 border-b border-border-soft bg-background/95 p-4 backdrop-blur-xl sm:px-5">
           <span className="inline-flex items-center gap-1.5 rounded-full bg-foreground/[0.06] px-2.5 py-1 text-[11.5px] font-medium text-foreground/70">
             Account
           </span>
           <button
+            ref={closeButtonRef}
             type="button"
             onClick={onClose}
             aria-label="Close"
-            className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-border-soft text-foreground/60 transition-colors hover:border-foreground/30 hover:text-foreground"
+            className="inline-flex size-10 items-center justify-center rounded-full border border-border-soft text-foreground/60 transition-colors hover:border-foreground/30 hover:text-foreground"
           >
             <XIcon className="h-[15px] w-[15px]" aria-hidden />
           </button>
         </div>
 
-        <div className="px-7 pb-12 pt-7 sm:px-8">
+        <div className="px-4 pb-[max(2rem,env(safe-area-inset-bottom))] pt-5 sm:px-6 sm:pt-6">
           {/* Identity */}
           <div className="flex items-center gap-4">
             {avatar ? (
@@ -152,7 +148,7 @@ function AccountDrawer({ did, onClose }: { did: string | null; onClose: () => vo
               </span>
             )}
             <div className="min-w-0">
-              <h2 className="font-instrument text-[34px] font-normal leading-[1.08] tracking-[-0.01em] text-foreground sm:text-[36px]">
+              <h2 className="font-instrument text-[34px] font-normal italic leading-[1.08] tracking-[-0.01em] text-foreground sm:text-[36px]">
                 {displayName}
               </h2>
               {handle && (
@@ -256,11 +252,11 @@ function StatTile({
   hint: string;
 }) {
   return (
-    <div className="rounded-2xl border border-border-soft bg-foreground/[0.035] px-4 py-3.5">
-      <div className="text-[11px] font-medium uppercase tracking-[0.1em] text-foreground/45">
+    <div className="rounded-2xl bg-muted p-4">
+      <div className="text-xs font-medium text-muted-foreground">
         {label}
       </div>
-      <div className="mt-1 font-instrument text-[30px] font-normal leading-none tracking-[-0.01em] text-foreground">
+      <div className="mt-1 text-2xl font-semibold tabular-nums text-foreground">
         {value}
       </div>
       <div className="mt-1.5 text-[11px] text-foreground/50">{hint}</div>
@@ -271,7 +267,7 @@ function StatTile({
 function Meta({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div>
-      <dt className="text-[11px] font-medium uppercase tracking-[0.08em] text-foreground/45">
+      <dt className="text-xs font-medium text-muted-foreground">
         {label}
       </dt>
       <dd className="mt-0.5 text-[14px] leading-[1.45] text-foreground">{children}</dd>

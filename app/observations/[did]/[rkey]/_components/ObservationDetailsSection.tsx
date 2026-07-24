@@ -198,11 +198,11 @@ export function ObservationDetailsSection({
   return (
     <section className="mt-10 border-t border-border-soft pt-8">
       <div className="mb-5 flex items-center justify-between gap-3">
-        <h2 className="text-xs font-medium uppercase tracking-[0.16em] text-muted-foreground">{pageT("detailsTitle")}</h2>
+        <h2 className="font-instrument text-base italic text-foreground">{pageT("detailsTitle")}</h2>
         {canManage ? (
           <div className="flex items-center gap-2">
             <ToolbarButton onClick={() => void handleReanalyze()} disabled={isReanalyzing || isSaving} title={t("observation.reanalyzeHint")}>
-              {isReanalyzing ? <Loader2Icon className="h-3.5 w-3.5 animate-spin" /> : <SparklesIcon className="h-3.5 w-3.5" />}
+              {isReanalyzing ? <Loader2Icon className="h-3.5 w-3.5 animate-spin motion-reduce:animate-none" /> : <SparklesIcon className="h-3.5 w-3.5" />}
               {t("observation.reanalyze")}
             </ToolbarButton>
             {!isEditing ? (
@@ -238,30 +238,30 @@ export function ObservationDetailsSection({
                 setIsEditing(false);
               }}
               disabled={isSaving}
-              className="inline-flex h-10 items-center rounded-full border border-border-soft bg-background px-4 text-[13px] font-medium text-foreground/80 transition-colors hover:border-foreground/30 disabled:opacity-60"
+              className="inline-flex h-11 items-center rounded-full border border-border-soft bg-background px-4 text-[13px] font-medium text-foreground/80 transition-colors hover:border-foreground/30 disabled:opacity-60"
             >
               {t("actions.cancel")}
             </button>
             <button
               type="submit"
               disabled={isSaving || !hasChanges || Boolean(validationError)}
-              className="inline-flex h-10 items-center gap-2 rounded-full bg-primary px-4 text-[13px] font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-60"
+              className="inline-flex h-11 items-center gap-2 rounded-full bg-primary px-4 text-[13px] font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-60"
             >
-              {isSaving ? <Loader2Icon className="h-3.5 w-3.5 animate-spin" /> : <CheckIcon className="h-3.5 w-3.5" />}
+              {isSaving ? <Loader2Icon className="h-3.5 w-3.5 animate-spin motion-reduce:animate-none" /> : <CheckIcon className="h-3.5 w-3.5" />}
               {t("actions.saveChanges")}
             </button>
           </div>
           <div className="border-t border-border-soft pt-4">
             {deleteConfirmOpen ? (
               <div className="rounded-xl bg-destructive/10 p-3">
-                <p className="text-[13px] font-medium text-foreground">{t("observation.deleteTitle")}</p>
+                <h3 className="font-instrument text-[15px] italic text-foreground">{t("observation.deleteTitle")}</h3>
                 <p className="mt-1 text-[13px] leading-5 text-muted-foreground">{t("observation.deleteDescription")}</p>
                 <div className="mt-3 flex flex-wrap justify-end gap-2">
                   <button
                     type="button"
                     onClick={() => setDeleteConfirmOpen(false)}
                     disabled={isDeleting}
-                    className="inline-flex h-9 items-center rounded-full border border-border-soft bg-background px-3 text-[13px] font-medium text-foreground/80 transition-colors hover:border-foreground/30 disabled:opacity-60"
+                    className="inline-flex h-11 items-center rounded-full border border-border-soft bg-background px-3 text-[13px] font-medium text-foreground/80 transition-colors hover:border-foreground/30 disabled:opacity-60"
                   >
                     {t("observation.keep")}
                   </button>
@@ -269,9 +269,9 @@ export function ObservationDetailsSection({
                     type="button"
                     onClick={() => void handleDelete()}
                     disabled={isDeleting}
-                    className="inline-flex h-9 items-center gap-2 rounded-full bg-destructive px-3 text-[13px] font-medium text-destructive-foreground transition-colors hover:bg-destructive/90 disabled:opacity-60"
+                    className="inline-flex h-11 items-center gap-2 rounded-full bg-destructive px-3 text-[13px] font-medium text-destructive-foreground transition-colors hover:bg-destructive/90 disabled:opacity-60"
                   >
-                    {isDeleting ? <Loader2Icon className="h-3.5 w-3.5 animate-spin" /> : <Trash2Icon className="h-3.5 w-3.5" />}
+                    {isDeleting ? <Loader2Icon className="h-3.5 w-3.5 animate-spin motion-reduce:animate-none" /> : <Trash2Icon className="h-3.5 w-3.5" />}
                     {t("observation.delete")}
                   </button>
                 </div>
@@ -280,7 +280,7 @@ export function ObservationDetailsSection({
               <button
                 type="button"
                 onClick={() => setDeleteConfirmOpen(true)}
-                className="inline-flex h-9 items-center gap-1.5 rounded-full border border-destructive/25 bg-background px-3 text-[13px] font-medium text-destructive transition-colors hover:bg-destructive/10"
+                className="inline-flex h-11 items-center gap-1.5 rounded-full border border-destructive/25 bg-background px-3 text-[13px] font-medium text-destructive transition-colors hover:bg-destructive/10"
               >
                 <Trash2Icon className="h-3.5 w-3.5" />
                 {t("observation.delete")}
@@ -294,7 +294,7 @@ export function ObservationDetailsSection({
             <dl className="grid gap-x-6 gap-y-5 sm:grid-cols-2 lg:grid-cols-3">
               {readFields.map((field) => (
                 <div key={field.label} className={field.wide ? "sm:col-span-2 lg:col-span-3" : undefined}>
-                  <dt className="text-[11px] font-medium uppercase tracking-[0.08em] text-foreground/45">{field.label}</dt>
+                  <dt className="text-xs font-medium text-muted-foreground">{field.label}</dt>
                   <dd className="mt-1 text-[14.5px] leading-[1.5] text-foreground">{field.value}</dd>
                 </div>
               ))}
@@ -302,7 +302,7 @@ export function ObservationDetailsSection({
           ) : null}
           {record.remarks ? (
             <div className="mt-8">
-              <h3 className="mb-3 text-xs font-medium uppercase tracking-[0.16em] text-muted-foreground">{pageT("notesTitle")}</h3>
+              <h3 className="mb-3 font-instrument text-base italic text-foreground">{pageT("notesTitle")}</h3>
               <p className="max-w-3xl whitespace-pre-line text-[15px] leading-[1.65] text-foreground/80">{record.remarks}</p>
             </div>
           ) : null}
@@ -347,7 +347,7 @@ function ToolbarButton({
       onClick={onClick}
       disabled={disabled}
       title={title}
-      className="inline-flex h-9 items-center gap-1.5 rounded-full border border-border-soft bg-background px-3 text-[13px] font-medium text-foreground transition-colors hover:border-primary/40 hover:text-primary disabled:opacity-60"
+      className="inline-flex h-11 items-center gap-1.5 rounded-full border border-border-soft bg-background px-3 text-[13px] font-medium text-foreground transition-colors hover:border-primary/40 hover:text-primary disabled:opacity-60"
     >
       {children}
     </button>

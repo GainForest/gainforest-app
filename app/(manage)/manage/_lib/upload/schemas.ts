@@ -65,6 +65,34 @@ const MeasurementFields = {
 const TreeRowSchema = OccurrenceRowSchema.merge(z.object(MeasurementFields));
 type TreeRowOutput = z.output<typeof TreeRowSchema>;
 
+export type TreeRowValidationMessages = {
+  scientificNameRequired: string;
+  eventDateRequired: string;
+  dateInvalid: string;
+  futureDate: string;
+  latitudeInvalid: string;
+  longitudeInvalid: string;
+  measurementPositive: string;
+  canopyRange: string;
+  boundaryOutside: (distance: string) => string;
+  invalidBoundary: string;
+  unknownDistance: string;
+};
+
+const DEFAULT_VALIDATION_MESSAGES: TreeRowValidationMessages = {
+  scientificNameRequired: "Scientific name is required.",
+  eventDateRequired: "Event date is required.",
+  dateInvalid: "Date must be in ISO 8601 or common format (YYYY-MM-DD, MM/DD/YYYY, YYYY).",
+  futureDate: TREE_FUTURE_DATE_ERROR,
+  latitudeInvalid: "Latitude must be a number between -90 and 90.",
+  longitudeInvalid: "Longitude must be a number between -180 and 180.",
+  measurementPositive: "Measurement values must be positive.",
+  canopyRange: "Canopy cover must be between 0 and 100.",
+  boundaryOutside: (distance) => `This tree is ${distance} outside the selected drawn map area. Check the coordinates, choose a different site boundary, or remove this row.`,
+  invalidBoundary: "The selected drawn map area cannot be used. Choose or draw another site boundary.",
+  unknownDistance: "unknown distance",
+};
+
 function extractFloraMeasurement(row: TreeRowOutput): FloraMeasurementBundle | null {
   const bundle: FloraMeasurementBundle = {};
   const totalHeight = row.height ?? row.totalHeight;
@@ -99,20 +127,35 @@ function extractOccurrence(row: TreeRowOutput, siteRef?: string): OccurrenceInpu
   };
 }
 
-function getBoundaryIssue(row: TreeRowOutput, index: number, boundary: SiteBoundaryGeoJson) {
+function getBoundaryIssue(row: TreeRowOutput, index: number, boundary: SiteBoundaryGeoJson, messages: TreeRowValidationMessages) {
   const failure = getTreeBoundaryFailure({
     tree: { index, scientificName: row.scientificName, decimalLatitude: row.decimalLatitude, decimalLongitude: row.decimalLongitude },
     boundary,
     nearBoundaryMeters: TREE_SITE_NEAR_BOUNDARY_METERS,
   });
   if (!failure) return null;
-  if (failure.kind === "near-boundary") {
-    return { path: "siteBoundary", message: `This tree is ${formatBoundaryDistance(failure.distanceMeters)} outside the selected drawn map area. Check the coordinates, choose a different site boundary, or remove this row.` };
-  }
   if (failure.kind === "invalid-boundary") {
-    return { path: "siteBoundary", message: `The selected drawn map area cannot be used. ${failure.reason ?? "Choose or draw another site boundary."}` };
+    if (failure.reason) console.error("Tree boundary validation failed", failure.reason);
+    return { path: "siteBoundary", message: messages.invalidBoundary };
   }
-  return { path: "siteBoundary", message: `This tree is ${formatBoundaryDistance(failure.distanceMeters)} outside the selected drawn map area. Check the coordinates, choose a different site boundary, or remove this row.` };
+  return {
+    path: "siteBoundary",
+    message: messages.boundaryOutside(formatBoundaryDistance(failure.distanceMeters, messages.unknownDistance)),
+  };
+}
+
+function localizedSchemaIssue(path: string, message: string, messages: TreeRowValidationMessages): string {
+  if (path === "scientificName") return messages.scientificNameRequired;
+  if (path === "eventDate") {
+    if (message === TREE_FUTURE_DATE_ERROR) return messages.futureDate;
+    if (/required/i.test(message)) return messages.eventDateRequired;
+    return messages.dateInvalid;
+  }
+  if (path === "decimalLatitude") return messages.latitudeInvalid;
+  if (path === "decimalLongitude") return messages.longitudeInvalid;
+  if (path === "canopyCoverPercent" || path === "canopyCover") return messages.canopyRange;
+  if (path in MeasurementFields) return messages.measurementPositive;
+  return message;
 }
 
 function splitPhotoUrls(value: string): string[] {
@@ -180,8 +223,10 @@ export function parseAndValidateRows(
   options?: {
     koboMediaZipIndex?: KoboMediaZipIndex | null;
     siteBoundary?: { geoJson: SiteBoundaryGeoJson; siteRef: string } | null;
+    messages?: TreeRowValidationMessages;
   },
 ): ValidationResult {
+  const messages = options?.messages ?? DEFAULT_VALIDATION_MESSAGES;
   const valid: ValidatedRow[] = [];
   const errors: RowError[] = [];
 
@@ -194,7 +239,7 @@ export function parseAndValidateRows(
     const result = TreeRowSchema.safeParse(row);
     if (result.success) {
       const boundaryIssue = options?.siteBoundary
-        ? getBoundaryIssue(result.data, index, options.siteBoundary.geoJson)
+        ? getBoundaryIssue(result.data, index, options.siteBoundary.geoJson, messages)
         : null;
       if (boundaryIssue) {
         errors.push({ index, issues: [boundaryIssue] });
@@ -212,7 +257,10 @@ export function parseAndValidateRows(
       }
       valid.push(validatedRow);
     } else {
-      const issues = result.error.issues.map((issue) => ({ path: issue.path.join(".") || "root", message: issue.message }));
+      const issues = result.error.issues.map((issue) => {
+        const path = issue.path.join(".") || "root";
+        return { path, message: localizedSchemaIssue(path, issue.message, messages) };
+      });
       errors.push({ index, issues });
     }
   }

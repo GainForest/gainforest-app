@@ -6,13 +6,14 @@
  * itself (used by the Deployment tab list and the deployment detail page).
  */
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import { Loader2Icon, XIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Dialog, DialogPlaceholder, DialogTitle } from "@/components/ui/modal/dialog";
 import {
   applyDeploymentEdit,
   linkedEquipmentUri,
@@ -107,19 +108,7 @@ export function EditDeploymentDialog({
   const [equipmentUri, setEquipmentUri] = useState<string>(currentUri ?? "none");
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape" && !saving) onClose();
-    };
-    document.addEventListener("keydown", onKey);
-    const original = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    return () => {
-      document.removeEventListener("keydown", onKey);
-      document.body.style.overflow = original;
-    };
-  }, [onClose, saving]);
+  const closeButtonRef = useRef<HTMLButtonElement | null>(null);
 
   // The linked unit may live in a teammate's repo we can't currently read; keep
   // it selectable so saving doesn't silently drop the existing link.
@@ -155,17 +144,29 @@ export function EditDeploymentDialog({
   }, [currentUri, equipment, equipmentUri, event, onUpdated, siteName, t]);
 
   return (
-    <div className="fixed inset-0 z-[110] flex items-center justify-center p-4" role="dialog" aria-modal="true">
-      <div className="absolute inset-0 bg-foreground/30 backdrop-blur-[2px]" onClick={() => !saving && onClose()} />
-      <div className="relative flex max-h-full w-full max-w-md flex-col overflow-y-auto rounded-3xl border border-border bg-background shadow-2xl">
-        <div className="sticky top-0 z-10 flex items-center justify-between gap-3 border-b border-border bg-background/95 px-5 py-4 backdrop-blur-xl">
-          <h2 className="text-lg font-semibold text-foreground">{t("editTitle")}</h2>
-          <Button variant="ghost" size="icon-sm" onClick={() => !saving && onClose()} aria-label={t("close")}>
+    <Dialog
+      open
+      onOpenChange={(open) => {
+        if (!open && !saving) onClose();
+      }}
+    >
+      <DialogPlaceholder
+        dialogWidth="max-w-md"
+        overlayClassName="z-[110] data-[state=open]:animate-none data-[state=closed]:animate-none data-[state=open]:bg-foreground/30 data-[state=open]:backdrop-blur-[2px]"
+        className="z-[110] flex flex-col gap-0 overflow-y-auto rounded-3xl border-border bg-background p-0 shadow-2xl"
+        onOpenAutoFocus={(event) => {
+          event.preventDefault();
+          closeButtonRef.current?.focus();
+        }}
+      >
+        <div className="sticky top-0 z-10 flex items-center justify-between gap-3 border-b border-border bg-background/95 p-4 backdrop-blur-xl sm:px-6">
+          <DialogTitle className="font-instrument text-lg font-medium italic text-foreground">{t("editTitle")}</DialogTitle>
+          <Button ref={closeButtonRef} variant="ghost" size="icon-sm" onClick={() => !saving && onClose()} aria-label={t("close")}>
             <XIcon />
           </Button>
         </div>
 
-        <div className="flex flex-col gap-4 px-5 py-5">
+        <div className="flex flex-col gap-4 p-4 sm:px-6">
           <p className="text-sm text-muted-foreground">{t("editIntro")}</p>
 
           <div className="flex flex-col gap-1.5">
@@ -203,8 +204,8 @@ export function EditDeploymentDialog({
           </div>
 
           {/* Fixed to the chime that was played — shown for reference only. */}
-          <div className="rounded-2xl border border-border bg-muted/30 px-4 py-3">
-            <p className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">{t("fixedTitle")}</p>
+          <div className="rounded-2xl bg-muted px-4 py-3">
+            <p className="text-xs font-medium text-muted-foreground">{t("fixedTitle")}</p>
             <dl className="mt-2 flex flex-col gap-1.5 text-xs">
               <div className="flex items-center justify-between gap-3">
                 <dt className="text-muted-foreground">{t("deploymentIdLabel")}</dt>
@@ -226,7 +227,7 @@ export function EditDeploymentDialog({
           ) : null}
         </div>
 
-        <div className="sticky bottom-0 mt-auto flex items-center justify-end gap-2 border-t border-border bg-background/95 px-5 py-4 backdrop-blur-xl">
+        <div className="sticky bottom-0 mt-auto flex items-center justify-end gap-2 border-t border-border bg-background/95 p-4 backdrop-blur-xl sm:px-6">
           <Button variant="outline" size="sm" onClick={() => !saving && onClose()} disabled={saving}>
             {t("cancel")}
           </Button>
@@ -235,7 +236,7 @@ export function EditDeploymentDialog({
             {saving ? t("saving") : t("save")}
           </Button>
         </div>
-      </div>
-    </div>
+      </DialogPlaceholder>
+    </Dialog>
   );
 }

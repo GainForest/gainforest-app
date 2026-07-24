@@ -24,7 +24,7 @@ export function PickerEmpty({
   const evidenceT = useTranslations("bumicert.detail.evidenceAdder");
 
   return (
-    <div className="rounded-xl bg-muted/40 p-5 text-center">
+    <div className="rounded-xl bg-background p-5 text-center">
       <p className="text-sm font-medium text-foreground">
         {evidenceT("emptyUploaded", { type: label })}
       </p>

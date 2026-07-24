@@ -92,7 +92,7 @@ export function StewardTools({ did, accountName, initialTestFlagged, initialAwar
   }
 
   return (
-    <section className="mb-4 overflow-hidden rounded-2xl border border-border bg-card/60">
+    <section className="mb-4 overflow-hidden rounded-2xl bg-muted">
       <button
         type="button"
         onClick={() => setOpen((value) => !value)}
@@ -130,7 +130,7 @@ export function StewardTools({ did, accountName, initialTestFlagged, initialAwar
           })}
         </span>
 
-        <ChevronDownIcon className={cn("size-4 shrink-0 text-muted-foreground transition-transform", open && "rotate-180")} />
+        <ChevronDownIcon className={cn("size-4 shrink-0 text-muted-foreground transition-transform motion-reduce:transition-none", open && "rotate-180")} />
       </button>
 
       {open ? (
@@ -194,7 +194,7 @@ export function StewardTools({ did, accountName, initialTestFlagged, initialAwar
 
           {/* Recognition badges */}
           <div>
-            <p className="mb-2 text-[0.7rem] font-medium uppercase tracking-[0.12em] text-muted-foreground">{t("badges")}</p>
+            <h3 className="mb-2 font-instrument text-lg font-light italic text-foreground">{t("badges")}</h3>
             <div className="flex flex-wrap gap-2">
               {MANUAL_RECOGNITION_BADGE_KEYS.map((key) => {
                 const Icon = recognitionBadgeIcon(key);

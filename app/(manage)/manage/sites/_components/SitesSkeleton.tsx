@@ -18,7 +18,7 @@ export function SitesSkeleton() {
         {Array.from({ length: 6 }).map((_, index) => (
           <div
             key={index}
-            className="rounded-xl border border-border overflow-hidden bg-background"
+            className="rounded-2xl overflow-hidden bg-muted"
           >
             {/* Card header */}
             <div className="flex items-center justify-between gap-2 px-3 h-10 border-b border-border">

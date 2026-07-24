@@ -110,13 +110,13 @@ export function LeaderboardBody({ period }: { period: Period }) {
   const loading = receipts === null && !error;
 
   return (
-    <>
-      <div className="mb-4 grid gap-2.5 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center">
+    <div className="space-y-4">
+      <div className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center">
         <DonorTypeTabs donorFilter={donorFilter} onDonorFilterChange={(nextDonorFilter) => void setDonorFilter(nextDonorFilter)} />
         <SortControl sortBy={sortBy} onSortChange={(nextSort) => void setSortBy(nextSort)} />
       </div>
 
-      <div className="mb-4">
+      <div>
         <StatsSummary
           totalDonors={defaultTotals?.totalDonorsCount ?? 0}
           totalRaised={defaultTotals?.totalAmountSum ?? 0}
@@ -133,7 +133,7 @@ export function LeaderboardBody({ period }: { period: Period }) {
       ) : (
         <LeaderboardGrid entries={leaderboard?.entries ?? []} />
       )}
-    </>
+    </div>
   );
 }
 
@@ -146,7 +146,7 @@ function DonorTypeTabs({
 }) {
   const t = useTranslations("marketplace.leaderboard");
   return (
-    <div className="grid h-10 w-full grid-cols-3 rounded-full bg-muted/55 p-1 shadow-sm shadow-primary/5 ring-1 ring-foreground/5 backdrop-blur">
+    <div className="grid w-full grid-cols-3 rounded-full bg-muted p-1">
       {DONOR_FILTER_VALUES.map((value) => {
         const Icon = DONOR_FILTER_ICONS[value];
         const label = t(`donorFilters.${value}`);
@@ -159,7 +159,7 @@ function DonorTypeTabs({
             aria-pressed={isSelected}
             onClick={() => onDonorFilterChange(value)}
             className={cn(
-              "inline-flex h-8 items-center justify-center gap-1.5 whitespace-nowrap rounded-full px-2 text-[13px] font-medium transition-all duration-200 sm:px-3",
+              "inline-flex min-h-11 items-center justify-center gap-1.5 whitespace-nowrap rounded-full px-3 text-[13px] font-medium transition-all duration-200 motion-reduce:transition-none",
               isSelected
                 ? "bg-primary text-primary-foreground shadow-sm shadow-primary/20"
                 : "text-muted-foreground hover:bg-muted/50 hover:text-foreground",
@@ -179,7 +179,7 @@ function SortControl({ sortBy, onSortChange }: { sortBy: SortMode; onSortChange:
   const t = useTranslations("marketplace.leaderboard.sort");
   const sortOptions = SORT_VALUES.map((value) => ({ value, label: t(SORT_TRANSLATION_KEYS[value]) }));
   return (
-    <div className="flex h-10 items-center justify-between gap-2 rounded-full bg-muted/55 py-1 pr-1 pl-3.5 shadow-sm shadow-primary/5 ring-1 ring-foreground/5 backdrop-blur">
+    <div className="flex min-h-11 items-center justify-between gap-2 rounded-full bg-muted p-1 pl-3">
       <span
         id="leaderboard-sort-label"
         className="inline-flex shrink-0 items-center gap-1.5 whitespace-nowrap text-[13px] font-medium text-muted-foreground"
@@ -195,7 +195,7 @@ function SortControl({ sortBy, onSortChange }: { sortBy: SortMode; onSortChange:
       >
         <SelectTrigger
           aria-labelledby="leaderboard-sort-label"
-          className="h-8 min-w-[9.5rem] rounded-full border-0 bg-background/70 px-3 text-[13px] font-medium text-foreground shadow-none ring-1 ring-foreground/5 focus:ring-1 focus:ring-ring"
+          className="h-11 min-w-[9.5rem] rounded-full border-0 bg-background px-3 text-[13px] font-medium text-foreground shadow-none ring-1 ring-foreground/5 focus:ring-1 focus:ring-ring"
         >
           <SelectValue />
         </SelectTrigger>
@@ -226,7 +226,21 @@ function StatsSummary({
 }) {
   const t = useTranslations("marketplace.leaderboard.stats");
   const locale = useLocale();
-  if (loading) return null;
+  if (loading) {
+    return (
+      <div className="grid grid-cols-2 items-stretch gap-3 sm:grid-cols-4" aria-hidden>
+        {Array.from({ length: 4 }).map((_, index) => (
+          <div key={index} className="flex h-full items-start gap-3 rounded-2xl bg-muted px-4 py-3">
+            <Skeleton className="size-8 shrink-0 rounded-full" />
+            <div className="min-w-0 flex-1 space-y-2">
+              <Skeleton className="h-5 w-16 rounded-full" />
+              <Skeleton className="h-3 w-full rounded-full" />
+            </div>
+          </div>
+        ))}
+      </div>
+    );
+  }
 
   const stats: { label: string; value: string; Icon: typeof LeafIcon; accent?: boolean }[] = [
     { label: t("totalRaised"), value: formatCompactUsd(totalRaised), Icon: LeafIcon, accent: true },
@@ -235,17 +249,14 @@ function StatsSummary({
     { label: t("donationCount"), value: formatCompactNumber(totalDonationCount, locale), Icon: GiftIcon },
   ];
 
-  // Slim hairline-separated strip instead of four oversized tiles — the same
-  // gap-px band the home hero uses, so the numbers read at a glance and the
-  // controls + leaderboard stay above the fold.
   return (
-    <div className="grid grid-cols-2 gap-px overflow-hidden rounded-2xl bg-border/60 shadow-sm shadow-primary/5 ring-1 ring-foreground/5 sm:grid-cols-4">
+    <div className="grid grid-cols-2 items-stretch gap-3 sm:grid-cols-4">
       {stats.map(({ label, value, Icon, accent }) => (
-        <div key={label} className="flex items-center gap-2.5 bg-card/80 px-4 py-3">
+        <div key={label} className="flex h-full items-start gap-3 rounded-2xl bg-muted px-4 py-3">
           <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary [&_svg]:size-4">
             <Icon />
           </span>
-          <div className="min-w-0">
+          <div className="min-w-0 flex-1">
             <div
               className={cn(
                 "truncate text-lg font-semibold tracking-[-0.02em] tabular-nums sm:text-xl",
@@ -254,7 +265,7 @@ function StatsSummary({
             >
               {value}
             </div>
-            <p className="truncate text-[11px] leading-tight text-muted-foreground first-letter:uppercase">{label}</p>
+            <p className="text-[11px] leading-tight text-muted-foreground">{label}</p>
           </div>
         </div>
       ))}
@@ -266,18 +277,18 @@ function LeaderboardGrid({ entries }: { entries: LeaderboardEntry[] }) {
   const t = useTranslations("marketplace.leaderboard.empty");
   if (entries.length === 0) {
     return (
-      <div className="flex flex-col items-center gap-3 rounded-2xl bg-card/75 py-16 text-center text-muted-foreground shadow-sm shadow-primary/5 ring-1 ring-foreground/5 backdrop-blur">
+      <div className="flex flex-col items-center gap-3 rounded-2xl bg-muted px-4 py-12 text-center text-muted-foreground sm:px-6">
         <div className="flex size-16 items-center justify-center rounded-full bg-primary/10 text-primary">
           <TrophyIcon className="size-8 opacity-60" />
         </div>
-        <p className="font-garamond text-3xl font-light text-foreground">{t("title")}</p>
-        <p className="font-instrument max-w-sm text-base italic text-foreground/70">{t("description")}</p>
+        <h2 className="font-instrument text-3xl italic text-foreground">{t("title")}</h2>
+        <p className="max-w-sm text-base text-foreground/70">{t("description")}</p>
       </div>
     );
   }
 
   return (
-    <div className="divide-y divide-border/50 overflow-hidden rounded-2xl bg-card/70 shadow-sm shadow-primary/5 ring-1 ring-foreground/5 backdrop-blur">
+    <div className="divide-y divide-border-soft overflow-hidden rounded-2xl">
       {entries.map((entry) => (
         <DonorCard key={entry.donorId} entry={entry} />
       ))}
@@ -287,9 +298,9 @@ function LeaderboardGrid({ entries }: { entries: LeaderboardEntry[] }) {
 
 function LeaderboardSkeleton() {
   return (
-    <div className="divide-y divide-border/50 overflow-hidden rounded-2xl bg-card/70 shadow-sm shadow-primary/5 ring-1 ring-foreground/5 backdrop-blur">
+    <div className="divide-y divide-border-soft overflow-hidden rounded-2xl">
       {Array.from({ length: 9 }).map((_, index) => (
-        <div key={index} className="flex items-center gap-3 px-4 py-3 sm:px-5 sm:py-3.5">
+        <div key={index} className="flex items-center gap-3 px-4 py-3 sm:px-5">
           <Skeleton className="size-8 shrink-0 rounded-full" />
           <div className="min-w-0 flex-1 space-y-1.5">
             <Skeleton className="h-[15px] w-36 max-w-full" />
@@ -306,12 +317,12 @@ function LeaderboardSkeleton() {
 function LeaderboardError() {
   const t = useTranslations("marketplace.leaderboard.error");
   return (
-    <div className="flex flex-col items-center gap-3 rounded-2xl bg-card/75 py-16 text-center text-muted-foreground shadow-sm shadow-primary/5 ring-1 ring-foreground/5 backdrop-blur">
+    <div className="flex flex-col items-center gap-3 rounded-2xl bg-muted px-4 py-12 text-center text-muted-foreground sm:px-6">
       <div className="flex size-16 items-center justify-center rounded-full bg-primary/10 text-primary">
         <TrophyIcon className="size-8 opacity-60" />
       </div>
-      <p className="font-garamond text-3xl font-light text-foreground">{t("title")}</p>
-      <p className="font-instrument max-w-sm text-base italic text-foreground/70">{t("description")}</p>
+      <h2 className="font-instrument text-3xl italic text-foreground">{t("title")}</h2>
+      <p className="max-w-sm text-base text-foreground/70">{t("description")}</p>
     </div>
   );
 }
@@ -362,7 +373,7 @@ function DonorCard({ entry }: { entry: LeaderboardEntry }) {
   const isWallet = entry.donorType === "wallet";
   const relativeTime = entry.lastDonatedAt ? formatRelativeTimeFromNow(new Date(entry.lastDonatedAt), locale) : null;
   const className = cn(
-    "group flex items-center gap-3 px-4 py-3 transition-colors duration-200 hover:bg-primary/[0.05] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring sm:px-5 sm:py-3.5",
+    "group flex items-center gap-3 px-4 py-3 transition-colors duration-200 hover:bg-primary/[0.05] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring motion-reduce:transition-none sm:px-5 sm:py-3.5",
     entry.rank === 1 && "bg-primary/[0.035]",
   );
   const content = (
@@ -390,7 +401,7 @@ function DonorCard({ entry }: { entry: LeaderboardEntry }) {
 
       <ChevronRightIcon
         aria-hidden="true"
-        className="size-4 shrink-0 text-muted-foreground/40 transition-transform duration-200 group-hover:translate-x-0.5 group-hover:text-primary"
+        className="size-4 shrink-0 text-muted-foreground/40 transition-transform duration-200 group-hover:translate-x-0.5 group-hover:text-primary motion-reduce:transform-none motion-reduce:transition-none"
       />
     </>
   );

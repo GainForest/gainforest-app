@@ -56,7 +56,7 @@ export function ObservationsSubNav({ identifier, showPrivate }: { identifier: st
               key={tab.labelKey}
               href={tab.href}
               className={cn(
-                "flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm font-medium transition-colors duration-150 whitespace-nowrap select-none",
+                "flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm font-medium transition-colors duration-150 motion-reduce:transition-none whitespace-nowrap select-none",
                 active
                   ? "bg-foreground text-background"
                   : "bg-muted text-muted-foreground hover:text-foreground",

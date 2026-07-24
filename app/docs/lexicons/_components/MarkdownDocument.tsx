@@ -64,6 +64,31 @@ function isBlockStart(lines: string[], index: number): boolean {
   );
 }
 
+function collectListItems(
+  lines: string[],
+  start: number,
+  marker: RegExp,
+  stripMarker: RegExp,
+): { items: string[]; nextIndex: number } {
+  const items: string[] = [];
+  let index = start;
+
+  while (index < lines.length && marker.test(lines[index]!)) {
+    const parts = [lines[index]!.replace(stripMarker, "").trim()];
+    index += 1;
+    // Ordinary Markdown wraps list copy onto indented continuation lines.
+    // Keep those lines inside the current item instead of emitting root-level
+    // paragraphs with unrelated margins and indentation.
+    while (index < lines.length && /^\s{2,}\S/.test(lines[index]!)) {
+      parts.push(lines[index]!.trim());
+      index += 1;
+    }
+    items.push(parts.join(" "));
+  }
+
+  return { items, nextIndex: index };
+}
+
 /**
  * Small, dependency-free Markdown renderer for trusted repository documentation.
  * It intentionally supports only the constructs used by the schema usage guides.
@@ -84,11 +109,11 @@ export function MarkdownDocument({ source }: { source: string }) {
       const level = heading[1]!.length;
       const content = inline(heading[2]!);
       if (level === 1) {
-        blocks.push(<h1 key={`h-${index}`} className="mb-4 mt-0 font-serif text-3xl font-semibold tracking-tight text-foreground">{content}</h1>);
+        blocks.push(<h1 key={`h-${index}`} className="mb-4 mt-0 font-instrument text-3xl font-light italic tracking-tight text-foreground">{content}</h1>);
       } else if (level === 2) {
-        blocks.push(<h2 key={`h-${index}`} className="mb-3 mt-10 border-t border-border/60 pt-7 font-serif text-xl font-semibold tracking-tight text-foreground first:mt-0 first:border-0 first:pt-0">{content}</h2>);
+        blocks.push(<h2 key={`h-${index}`} className="mb-3 mt-10 border-t border-border/60 pt-7 font-instrument text-xl font-light italic tracking-tight text-foreground first:mt-0 first:border-0 first:pt-0">{content}</h2>);
       } else {
-        blocks.push(<h3 key={`h-${index}`} className="mb-2 mt-7 font-serif text-base font-semibold text-foreground">{content}</h3>);
+        blocks.push(<h3 key={`h-${index}`} className="mb-2 mt-7 font-instrument text-base font-light italic text-foreground">{content}</h3>);
       }
       index += 1;
       continue;
@@ -104,7 +129,7 @@ export function MarkdownDocument({ source }: { source: string }) {
       }
       index += 1;
       blocks.push(
-        <pre key={`code-${index}`} className="my-4 overflow-x-auto rounded-xl border border-border/60 bg-muted/50 p-4 font-mono text-[12px] leading-relaxed text-foreground">
+        <pre key={`code-${index}`} className="my-4 overflow-x-auto rounded-xl bg-muted/50 p-4 font-mono text-[12px] leading-relaxed text-foreground">
           <code data-language={language || undefined}>{code.join("\n")}</code>
         </pre>,
       );
@@ -139,28 +164,22 @@ export function MarkdownDocument({ source }: { source: string }) {
     }
 
     if (/^-\s/.test(line)) {
-      const items: string[] = [];
-      while (index < lines.length && /^-\s/.test(lines[index]!)) {
-        items.push(lines[index]!.replace(/^-\s+/, ""));
-        index += 1;
-      }
+      const list = collectListItems(lines, index, /^-\s/, /^-\s+/);
+      index = list.nextIndex;
       blocks.push(
-        <ul key={`ul-${index}`} className="my-3 list-disc space-y-1.5 pl-6 text-[14px] leading-relaxed text-muted-foreground">
-          {items.map((item, itemIndex) => <li key={itemIndex}>{inline(item)}</li>)}
+        <ul key={`ul-${index}`} className="my-3 list-disc space-y-2 pl-6 text-[14px] leading-relaxed text-muted-foreground">
+          {list.items.map((item, itemIndex) => <li key={itemIndex}>{inline(item)}</li>)}
         </ul>,
       );
       continue;
     }
 
     if (/^\d+\.\s/.test(line)) {
-      const items: string[] = [];
-      while (index < lines.length && /^\d+\.\s/.test(lines[index]!)) {
-        items.push(lines[index]!.replace(/^\d+\.\s+/, ""));
-        index += 1;
-      }
+      const list = collectListItems(lines, index, /^\d+\.\s/, /^\d+\.\s+/);
+      index = list.nextIndex;
       blocks.push(
-        <ol key={`ol-${index}`} className="my-3 list-decimal space-y-1.5 pl-6 text-[14px] leading-relaxed text-muted-foreground">
-          {items.map((item, itemIndex) => <li key={itemIndex}>{inline(item)}</li>)}
+        <ol key={`ol-${index}`} className="my-3 list-decimal space-y-2 pl-6 text-[14px] leading-relaxed text-muted-foreground">
+          {list.items.map((item, itemIndex) => <li key={itemIndex}>{inline(item)}</li>)}
         </ol>,
       );
       continue;
