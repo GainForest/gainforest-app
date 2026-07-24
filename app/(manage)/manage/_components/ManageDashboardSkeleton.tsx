@@ -1,5 +1,6 @@
 import Container from "@/components/ui/container";
 import { AccountHeroSkeleton, OverviewFoldersSkeleton } from "@/app/account/_components/AccountHeroSkeleton";
+import { MANAGE_OVERVIEW_FOLDER_IDS } from "@/app/account/_components/OverviewFolderArt";
 
 /**
  * Loading placeholder for the manage dashboard. The dashboard now renders the
@@ -11,7 +12,7 @@ export function ManageDashboardSkeleton() {
   return (
     <Container className="space-y-6 pt-4 pb-12">
       <AccountHeroSkeleton />
-      <OverviewFoldersSkeleton count={5} />
+      <OverviewFoldersSkeleton ids={MANAGE_OVERVIEW_FOLDER_IDS} />
     </Container>
   );
 }

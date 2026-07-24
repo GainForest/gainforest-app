@@ -312,6 +312,8 @@ export async function AccountOverviewTabContent({ account, did }: { account: Acc
   const donationCount = receipts.filter((receipt) => receipt.from?.type === "did" && receipt.from.id === did).length;
   const hasAbout = Boolean(account.detail?.richBody?.length || account.detail?.blurb);
 
+  // Keep in step with ACCOUNT_OVERVIEW_FOLDER_IDS — the loading placeholder
+  // renders one folder per id, in this order.
   const folderTiles: OverviewFolderTile[] = [
     { id: "projects", title: tabsT("projects"), href: accountProjectsPath(account.urlIdentifier), count: projects.length },
     { id: "observations", title: tabsT("observations"), href: accountObservationsPath(account.urlIdentifier), count: observationSummary?.count ?? 0 },
