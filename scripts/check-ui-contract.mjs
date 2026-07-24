@@ -356,15 +356,22 @@ assert(
   "AccountChrome must detach full workspaces instead of nesting page frames",
 );
 assert(!/<Container\b/.test(accountAudio), "Embedded account audio must not create a second page frame");
-assert(
-  (manageSections.match(/className="max-w-3xl pt-4 pb-8"/g) ?? []).length === 2 &&
-    !manageSections.includes("mr-auto ml-0 max-w-3xl"),
-  "Single-column personal and organization settings must remain centered",
+const settingsSection = manageSections.slice(
+  manageSections.indexOf("function SettingsFrame"),
+  manageSections.indexOf("export async function ObservationsSection"),
 );
 assert(
-  (accountSettings.match(/className="divide-y divide-border"/g) ?? []).length === 2 &&
-    !/<Accordion[^>]*className="space-y-1"/.test(accountSettings),
-  "Settings categories must share one separator-led accordion root",
+  settingsSection.includes('return <div className="w-full py-4 sm:py-6">{children}</div>') &&
+    settingsSection.includes('<Container family="standard" className="py-4 sm:py-6">') &&
+    !settingsSection.includes("max-w-3xl") &&
+    !settingsSection.includes("gutter={!embedded}"),
+  "Settings must inherit the same width and padding frame as peer account/manage tabs",
+);
+assert(
+  (accountSettings.match(/data-slot="settings-accordion-group"/g) ?? []).length === 2 &&
+    (accountSettings.match(/<Separator \/>/g) ?? []).length === 4 &&
+    !/<Accordion[^>]*className="(?:space-y-1|divide-y)/.test(accountSettings),
+  "Every settings category must sit in one grouped div with explicit separators",
 );
 const featuredProjects = projectsExplore.slice(
   projectsExplore.indexOf("function FeaturedProjects"),

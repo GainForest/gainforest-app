@@ -1,4 +1,4 @@
-import { Suspense } from "react";
+import { Suspense, type ReactNode } from "react";
 import Link from "next/link";
 import { ArrowLeftIcon } from "lucide-react";
 import { getTranslations } from "next-intl/server";
@@ -306,6 +306,18 @@ export async function NewBumicertSection({ target, searchParams }: { target: Man
   );
 }
 
+function SettingsFrame({ embedded, children }: { embedded: boolean; children: ReactNode }) {
+  if (embedded) {
+    return <div className="w-full py-4 sm:py-6">{children}</div>;
+  }
+
+  return (
+    <Container family="standard" className="py-4 sm:py-6">
+      {children}
+    </Container>
+  );
+}
+
 export async function SettingsSection({
   target,
   embedded = false,
@@ -323,11 +335,7 @@ export async function SettingsSection({
     // carry the org-level tools instead — starting with AI agent keys — and
     // link to Members for governance.
     return (
-      <Container
-        family={embedded ? "full" : "standard"}
-        gutter={!embedded}
-        className="max-w-3xl pt-4 pb-8"
-      >
+      <SettingsFrame embedded={embedded}>
         <div className="mb-6">
           <h1 className="font-instrument text-3xl font-light italic leading-tight tracking-[-0.02em] text-foreground">{t("organizationTitle")}</h1>
           <p className="mt-1 text-sm text-muted-foreground">{t("organizationDescription")}</p>
@@ -345,7 +353,7 @@ export async function SettingsSection({
           agentKeysHint={t("orgAgentKeysHint")}
           integrations={<INaturalistSettingsSection target={target} projects={inaturalistProjects} disabledReason={createPermission.reason} />}
         />
-      </Container>
+      </SettingsFrame>
     );
   }
 
@@ -356,11 +364,7 @@ export async function SettingsSection({
   const currentHandle = personalSession.isLoggedIn ? personalSession.handle : null;
 
   return (
-    <Container
-      family={embedded ? "full" : "standard"}
-      gutter={!embedded}
-      className="max-w-3xl pt-4 pb-8"
-    >
+    <SettingsFrame embedded={embedded}>
       <div className="mb-6">
         <h1 className="font-instrument text-3xl font-light italic">{t("personalTitle")}</h1>
         <p className="mt-1 text-sm text-muted-foreground">{t("personalDescription")}</p>
@@ -372,7 +376,7 @@ export async function SettingsSection({
           integrations={<INaturalistSettingsSection target={target} projects={inaturalistProjects} disabledReason={createPermission.reason} />}
         />
       </div>
-    </Container>
+    </SettingsFrame>
   );
 }
 

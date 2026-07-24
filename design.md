@@ -399,10 +399,10 @@ A loading page is part of the same family; it must not introduce a different max
 
 ### Settings
 
-- A single settings column is centered within the available page region. Do not pin it to the left edge of an otherwise empty wide frame.
-- Settings categories belong to one accordion root, not a stack of detached accordion containers.
-- Keep accordion items borderless at the perimeter and separate peer items with one parent-owned `divide-y`, `border-t`, or shared Separator.
-- Expanded content may use one strong muted inner grouping layer; do not wrap the entire accordion and each expanded panel in competing cards.
+- A settings tab inherits the exact width, outer padding, and vertical frame used by its peer tabs. Never add a nested page container or route-specific max-width inside the tab.
+- Put every settings category inside one explicit grouped `div` and one accordion root, not a stack of detached accordion containers.
+- Keep accordion items borderless at the perimeter and place a shared Separator between every pair of peer items.
+- The grouped `div` may use one quiet muted surface. Expanded content may use one stronger inner grouping layer; do not wrap each accordion item in another competing card.
 
 ### Lists
 
@@ -495,7 +495,8 @@ Before merging UI work, verify:
 - [ ] Shell/navigation labels use compact body typography
 - [ ] Every control in a header or toolbar peer cluster has one intentional shared outer size
 - [ ] A lone narrow content column is centered unless a real sibling alignment requires otherwise
-- [ ] Settings use one separator-led accordion root with one muted inner grouping level
+- [ ] A settings tab uses the same outer frame as peer tabs, with no nested max-width or duplicate padding
+- [ ] Every settings category sits in one explicit grouped div and accordion root, with shared Separators between peers
 - [ ] Grid and carousel peers stretch to equal structural height; no percentage-height item defeats flex stretching
 - [ ] Hero/media gradients that protect contrast are preserved
 - [ ] Phone content remains usable after all nested padding

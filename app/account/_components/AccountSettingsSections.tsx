@@ -25,6 +25,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { Separator } from "@/components/ui/separator";
 import {
   InputGroup,
   InputGroupAddon,
@@ -1212,24 +1213,29 @@ export function AccountSettingsSections({
 }) {
   const t = useTranslations("common.settings.groups");
   return (
-    <Accordion type="multiple" defaultValue={["account"]} className="divide-y divide-border">
-      <SettingsGroup value="account" title={t("account.title")} description={t("account.description")}>
-        {handle ? <HandleSection did={did} handle={handle} /> : null}
-        <PasswordSection did={did} />
-      </SettingsGroup>
-      <SettingsGroup value="connections" title={t("connections.title")} description={t("connections.description")}>
-        <BlueskySection did={did} />
-        {integrations}
-      </SettingsGroup>
-      <SettingsGroup value="agents" title={t("agents.title")} description={t("agents.description")}>
-        <AgentKeysSection />
-      </SettingsGroup>
-      <SettingsGroup value="advanced" title={t("advanced.title")} description={t("advanced.description")}>
-        <AccountSection did={did} />
-        {/* Destructive account deletion stays behind Advanced disclosure. */}
-        <DangerZoneSection handle={handle ?? null} />
-      </SettingsGroup>
-    </Accordion>
+    <div data-slot="settings-accordion-group" className="overflow-hidden rounded-2xl bg-muted/50 px-4 sm:px-5">
+      <Accordion type="multiple" defaultValue={["account"]}>
+        <SettingsGroup value="account" title={t("account.title")} description={t("account.description")}>
+          {handle ? <HandleSection did={did} handle={handle} /> : null}
+          <PasswordSection did={did} />
+        </SettingsGroup>
+        <Separator />
+        <SettingsGroup value="connections" title={t("connections.title")} description={t("connections.description")}>
+          <BlueskySection did={did} />
+          {integrations}
+        </SettingsGroup>
+        <Separator />
+        <SettingsGroup value="agents" title={t("agents.title")} description={t("agents.description")}>
+          <AgentKeysSection />
+        </SettingsGroup>
+        <Separator />
+        <SettingsGroup value="advanced" title={t("advanced.title")} description={t("advanced.description")}>
+          <AccountSection did={did} />
+          {/* Destructive account deletion stays behind Advanced disclosure. */}
+          <DangerZoneSection handle={handle ?? null} />
+        </SettingsGroup>
+      </Accordion>
+    </div>
   );
 }
 
@@ -1244,16 +1250,19 @@ export function OrganizationSettingsSections({
 }) {
   const t = useTranslations("common.settings.groups");
   return (
-    <Accordion type="multiple" className="divide-y divide-border">
-      <SettingsGroup value="agents" title={t("agents.title")} description={t("agents.description")}>
-        <div className="space-y-3">
-          <p className="text-sm text-muted-foreground">{agentKeysHint}</p>
-          <AgentKeysSection />
-        </div>
-      </SettingsGroup>
-      <SettingsGroup value="connections" title={t("connections.title")} description={t("connections.description")}>
-        {integrations}
-      </SettingsGroup>
-    </Accordion>
+    <div data-slot="settings-accordion-group" className="overflow-hidden rounded-2xl bg-muted/50 px-4 sm:px-5">
+      <Accordion type="multiple">
+        <SettingsGroup value="agents" title={t("agents.title")} description={t("agents.description")}>
+          <div className="space-y-3">
+            <p className="text-sm text-muted-foreground">{agentKeysHint}</p>
+            <AgentKeysSection />
+          </div>
+        </SettingsGroup>
+        <Separator />
+        <SettingsGroup value="connections" title={t("connections.title")} description={t("connections.description")}>
+          {integrations}
+        </SettingsGroup>
+      </Accordion>
+    </div>
   );
 }

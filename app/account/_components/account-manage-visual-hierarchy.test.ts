@@ -72,14 +72,21 @@ describe("account and management visual hierarchy", () => {
     );
   });
 
-  it("centers single-column settings and separates one accordion group", () => {
+  it("keeps Settings on the peer tab frame and groups every accordion item", () => {
     const sections = read("app/(manage)/manage/_sections.tsx");
+    const settingsSection = sections.slice(
+      sections.indexOf("function SettingsFrame"),
+      sections.indexOf("export async function ObservationsSection"),
+    );
     const settings = read("app/account/_components/AccountSettingsSections.tsx");
 
-    expect(sections.match(/className="max-w-3xl pt-4 pb-8"/g)).toHaveLength(2);
-    expect(sections).not.toContain('className="mr-auto ml-0 max-w-3xl');
-    expect(settings.match(/className="divide-y divide-border"/g)).toHaveLength(2);
-    expect(settings).not.toMatch(/<Accordion[^>]*className="space-y-1"/);
+    expect(settingsSection).toContain('return <div className="w-full py-4 sm:py-6">{children}</div>');
+    expect(settingsSection).toContain('<Container family="standard" className="py-4 sm:py-6">');
+    expect(settingsSection).not.toContain("max-w-3xl");
+    expect(settingsSection).not.toContain("gutter={!embedded}");
+    expect(settings.match(/data-slot="settings-accordion-group"/g)).toHaveLength(2);
+    expect(settings.match(/<Separator \/>/g)).toHaveLength(4);
+    expect(settings).not.toMatch(/<Accordion[^>]*className="(?:space-y-1|divide-y)/);
   });
 
   it("keeps persistent account and management states visibly separated", () => {
