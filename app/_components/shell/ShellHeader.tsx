@@ -16,7 +16,6 @@ import { ChromeErrorBoundary } from "../ChromeErrorBoundary";
 import { ProgressiveBlur } from "../ProgressiveBlur";
 import { GlobalSearch } from "../GlobalSearch";
 import { useHeaderSlots } from "../HeaderSlots";
-import { NotificationBell } from "../NotificationBell";
 import { useCollectAnimation } from "../rewards/collect-animation";
 import { canonicalPathname } from "./paths";
 import { AddObservationsButton, ManageContextLink } from "./context-actions";
@@ -219,9 +218,6 @@ export function ShellHeader({
               </ChromeErrorBoundary>
               <ChromeErrorBoundary name="cart-button">
                 <CartHeaderButton />
-              </ChromeErrorBoundary>
-              <ChromeErrorBoundary name="notification-bell">
-                <NotificationBell session={authSession} />
               </ChromeErrorBoundary>
             </motion.div>
 

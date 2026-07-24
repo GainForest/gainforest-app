@@ -23,11 +23,21 @@ import { useNotifications } from "@/hooks/useNotifications";
 import { putRecord } from "@/app/(manage)/manage/_lib/mutations";
 import { formatRelative } from "../_lib/format";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { buttonVariants } from "@/components/ui/button";
 import { ResolvedAvatar } from "@/app/feed/ResolvedAvatar";
 import { cn } from "@/lib/utils";
 import { shellHeaderControl } from "./shell/control-recipes";
 
-export function NotificationBell({ session }: { session: AuthSession | null }) {
+export function NotificationBell({
+  session,
+  variant = "header",
+}: {
+  session: AuthSession | null;
+  /** `header` = round icon control in the top bar; `sidebar` = a compact icon
+   *  button (sits at the end of the profile row) that opens the panel to the
+   *  right. */
+  variant?: "header" | "sidebar";
+}) {
   const t = useTranslations("common.notifications");
   const enabled = session?.isLoggedIn === true;
   const { data } = useNotifications(enabled);
@@ -70,26 +80,53 @@ export function NotificationBell({ session }: { session: AuthSession | null }) {
   const badgeLabel = unreadCount > 9 ? "9+" : String(unreadCount);
   const ariaLabel = unreadCount > 0 ? t("unreadAria", { count: unreadCount }) : t("ariaLabel");
 
+  const trigger =
+    variant === "sidebar" ? (
+      <button
+        type="button"
+        aria-label={ariaLabel}
+        className={cn(
+          buttonVariants({ variant: "ghost", size: "icon" }),
+          "relative size-8 shrink-0 rounded-full text-muted-foreground hover:text-primary",
+        )}
+      >
+        <BellIcon className="size-4" aria-hidden />
+        {unreadCount > 0 ? (
+          <span
+            className="absolute -right-0.5 -top-0.5 inline-flex h-4 min-w-4 items-center justify-center rounded-full bg-primary px-1 text-[10px] font-semibold leading-none text-primary-foreground"
+            aria-hidden
+          >
+            {badgeLabel}
+          </span>
+        ) : null}
+      </button>
+    ) : (
+      <button
+        type="button"
+        aria-label={ariaLabel}
+        className={cn("relative inline-flex items-center justify-center rounded-full text-muted-foreground ring-1 ring-border transition-colors hover:text-foreground hover:ring-primary/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50", shellHeaderControl.icon)}
+      >
+        <BellIcon className="size-4" aria-hidden />
+        {unreadCount > 0 ? (
+          <span
+            className="absolute -right-0.5 -top-0.5 inline-flex h-4 min-w-4 items-center justify-center rounded-full bg-primary px-1 text-[10px] font-semibold leading-none text-primary-foreground"
+            aria-hidden
+          >
+            {badgeLabel}
+          </span>
+        ) : null}
+      </button>
+    );
+
   return (
     <Popover open={open} onOpenChange={onOpenChange}>
-      <PopoverTrigger asChild>
-        <button
-          type="button"
-          aria-label={ariaLabel}
-          className={cn("relative inline-flex items-center justify-center rounded-full text-muted-foreground ring-1 ring-border transition-colors hover:text-foreground hover:ring-primary/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50", shellHeaderControl.icon)}
-        >
-          <BellIcon className="size-4" aria-hidden />
-          {unreadCount > 0 ? (
-            <span
-              className="absolute -right-0.5 -top-0.5 inline-flex h-4 min-w-4 items-center justify-center rounded-full bg-primary px-1 text-[10px] font-semibold leading-none text-primary-foreground"
-              aria-hidden
-            >
-              {badgeLabel}
-            </span>
-          ) : null}
-        </button>
-      </PopoverTrigger>
-      <PopoverContent align="end" sideOffset={8} className="w-[min(22rem,calc(100vw-1.5rem))] p-0">
+      <PopoverTrigger asChild>{trigger}</PopoverTrigger>
+      <PopoverContent
+        align={variant === "sidebar" ? "start" : "end"}
+        side={variant === "sidebar" ? "right" : "bottom"}
+        sideOffset={variant === "sidebar" ? 12 : 8}
+        className="w-[min(22rem,calc(100vw-1.5rem))] p-0"
+      >
         <div className="flex items-center justify-between border-b border-border px-4 py-2.5">
           <span className="text-sm font-semibold text-foreground">{t("title")}</span>
         </div>

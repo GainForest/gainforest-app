@@ -30,6 +30,7 @@ import {
 } from "../../_lib/account-switcher";
 import { AdminOnlyIndicator } from "../AdminOnlyIndicator";
 import { SignInPrompt } from "../AuthFlow";
+import { NotificationBell } from "../NotificationBell";
 import { NAV_ITEMS, isLeafActive, type NavLeaf } from "./nav-config";
 import { useCanonicalPathname } from "./paths";
 import { SidebarCollapsedProvider, SidebarTooltip, useSidebarCollapsed } from "./sidebar-context";
@@ -70,7 +71,15 @@ export function UnifiedSidebar({
       <div className="my-4 border-t border-border" />
 
       <div className={cn("flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto [scrollbar-width:thin]", collapsed ? "overflow-x-hidden" : "pr-1")}>
-        {authSession?.isLoggedIn ? <SidebarProfileRow did={authSession.did} /> : null}
+        {authSession?.isLoggedIn ? (
+          // Account zone: who you're posting as, with the notification bell at
+          // the row's end so it reads as one "you" region. The collapsed rail
+          // has no room for a side-by-side bell, so it stacks below the avatar.
+          <div className={cn("flex", collapsed ? "flex-col items-center gap-1" : "items-center gap-1")}>
+            <SidebarProfileRow did={authSession.did} />
+            <NotificationBell session={authSession} variant="sidebar" />
+          </div>
+        ) : null}
         <LayoutGroup id="unified-sidebar-nav">
           <ExploreNav sessionDid={authSession?.isLoggedIn ? authSession.did : null} />
         </LayoutGroup>
@@ -148,8 +157,10 @@ function SidebarProfileRow({ did }: { did: string }) {
         aria-label={collapsed ? name : t("viewProfile")}
         className={cn(
           buttonVariants({ variant: "ghost" }),
-          "group w-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50",
-          collapsed ? "h-auto justify-center px-0 py-1.5" : "h-auto justify-start gap-2.5 px-2 py-1.5",
+          "group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50",
+          // Expanded: take the row's free space so the notification bell can sit
+          // at the end. Collapsed: full width to center the avatar in the rail.
+          collapsed ? "h-auto w-full justify-center px-0 py-1.5" : "h-auto min-w-0 flex-1 justify-start gap-2.5 px-2 py-1.5",
         )}
       >
         <span
@@ -228,7 +239,7 @@ function ExploreNav({ sessionDid }: { sessionDid: string | null }) {
   const showMore = moreOpen;
   let leafIndex = 0;
 
-  const renderSections = (items: typeof sections, showSectionLabels: boolean, allowGrid = false) =>
+  const renderSections = (items: typeof sections, showSectionLabels: boolean, allowGrid = false, animateItems = true) =>
     items.map((section) => {
       // The Explore group is the everyday entry point (Feed · Projects ·
       // Observations · Globe); a 2×2 grid of icon tiles reads as a launcher
@@ -252,6 +263,7 @@ function ExploreNav({ sessionDid }: { sessionDid: string | null }) {
                     item={{ ...item, text: t(item.id) }}
                     isActive={isLeafActive(item.pathCheck, pathname)}
                     index={leafIndex}
+                    animate={animateItems}
                   />
                 );
               })}
@@ -266,6 +278,7 @@ function ExploreNav({ sessionDid }: { sessionDid: string | null }) {
                     item={{ ...item, text: t(item.id) }}
                     isActive={isLeafActive(item.pathCheck, pathname)}
                     index={leafIndex}
+                    animate={animateItems}
                   />
                 );
               })}
@@ -315,7 +328,7 @@ function ExploreNav({ sessionDid }: { sessionDid: string | null }) {
                 transition={{ duration: 0.25, ease: [0.25, 0.1, 0.25, 1] }}
                 className="overflow-hidden"
               >
-                <div className="flex flex-col gap-4 pt-2">{renderSections(secondarySections, true)}</div>
+                <div className="flex flex-col gap-4 pt-2">{renderSections(secondarySections, true, false, false)}</div>
               </motion.div>
             ) : null}
           </AnimatePresence>
@@ -370,16 +383,19 @@ function SidebarHeader() {
   );
 }
 
-function NavLeafRow({ item, isActive, index, paired = false }: { item: NavLeaf; isActive: boolean; index: number; paired?: boolean }) {
+function NavLeafRow({ item, isActive, index, paired = false, animate = true }: { item: NavLeaf; isActive: boolean; index: number; paired?: boolean; animate?: boolean }) {
   const collapsed = useSidebarCollapsed();
   const showConnector = paired && !collapsed;
   return (
     <motion.li
-      initial={{ opacity: 0, x: -8 }}
+      // `animate=false` (the "More" reveal) skips the per-item entrance so the
+      // group fades in as one with its container instead of trickling in behind
+      // the instantly-shown labels.
+      initial={animate ? { opacity: 0, x: -8 } : false}
       animate={{ opacity: 1, x: 0 }}
       transition={{
         duration: 0.3,
-        delay: 0.05 * index,
+        delay: animate ? 0.05 * index : 0,
         ease: [0.25, 0.1, 0.25, 1],
       }}
       className={cn("relative", showConnector && "ml-3.5")}
@@ -439,12 +455,12 @@ function NavLeafRow({ item, isActive, index, paired = false }: { item: NavLeaf; 
  *  Tiles are raised `bg-background` insets against the muted sidebar (a quiet
  *  contrast surface, not a per-sibling border — design.md §7); only the active
  *  tile takes the filled primary treatment, matching the list rows. */
-function NavLeafTile({ item, isActive, index }: { item: NavLeaf; isActive: boolean; index: number }) {
+function NavLeafTile({ item, isActive, index, animate = true }: { item: NavLeaf; isActive: boolean; index: number; animate?: boolean }) {
   return (
     <motion.li
-      initial={{ opacity: 0, y: 6 }}
+      initial={animate ? { opacity: 0, y: 6 } : false}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.3, delay: 0.04 * index, ease: [0.25, 0.1, 0.25, 1] }}
+      transition={{ duration: 0.3, delay: animate ? 0.04 * index : 0, ease: [0.25, 0.1, 0.25, 1] }}
     >
       <Link
         href={item.href}
