@@ -1336,6 +1336,7 @@
     },
     "to": "to",
     "anonymous": "Someone",
+    "pinnedLabel": "Pinned",
     "filterHeading": "Filters",
     "refresh": "Refresh feed",
     "retry": "Try again",
@@ -1397,7 +1398,9 @@
       "confirmDelete": "Confirm delete",
       "cancelDelete": "Cancel",
       "showMore": "Show more",
-      "showLess": "Show less"
+      "showLess": "Show less",
+      "pin": "Pin to top",
+      "unpin": "Unpin"
     },
     "composer": {
       "placeholder": "Share an update with the community…",

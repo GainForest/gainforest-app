@@ -20,7 +20,8 @@
       "headingUnderlined": "Certified",
       "headingRest": "impact for nature stewards",
       "description": "Upload observations from the field and certify the work you've done. Your photos, species, and locations become permanent, verifiable records of real environmental impact.",
-      "cta": "Explore Projects"
+      "cta": "Explore Projects",
+      "androidCta": "Get the Android app"
     },
     "paths": {
       "title": "Choose Your Path",

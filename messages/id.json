@@ -20,7 +20,8 @@
       "headingUnderlined": "Bersertifikat",
       "headingRest": "dampak untuk pelindung alam",
       "description": "Unggah observasi dari lapangan dan sertifikasi kerja yang telah kamu lakukan. Foto, spesies, dan lokasimu menjadi catatan permanen dan terverifikasi atas dampak lingkungan nyata.",
-      "cta": "Jelajahi proyek"
+      "cta": "Jelajahi proyek",
+      "androidCta": "Unduh aplikasi Android"
     },
     "paths": {
       "title": "Pilih jalan Anda",

@@ -20,7 +20,8 @@
       "headingUnderlined": "Iliyoidhinishwa",
       "headingRest": "athari kwa walezi wa asili",
       "description": "Pakia uchunguzi kutoka uwandani na uthibitishe kazi uliyoifanya. Picha, spishi, na maeneo yako huwa rekodi za kudumu na zinazoweza kuthibitishwa za athari halisi ya mazingira.",
-      "cta": "Gundua miradi"
+      "cta": "Gundua miradi",
+      "androidCta": "Pakua programu ya Android"
     },
     "paths": {
       "title": "Chagua njia yako",

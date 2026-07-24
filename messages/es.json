@@ -20,7 +20,8 @@
       "headingUnderlined": "Certificado",
       "headingRest": "impacto para guardianes de la naturaleza",
       "description": "Sube observaciones desde el terreno y certifica el trabajo que has hecho. Tus fotos, especies y ubicaciones se convierten en registros permanentes y verificables de impacto ambiental real.",
-      "cta": "Explorar proyectos"
+      "cta": "Explorar proyectos",
+      "androidCta": "Descargar la app para Android"
     },
     "paths": {
       "title": "Elige tu camino",

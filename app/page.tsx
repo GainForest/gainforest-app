@@ -55,7 +55,7 @@ async function HomeContent() {
 
   return (
     <>
-      <HomeLanding kpis={kpis} />
+      <HomeLanding />
       <BrowseGrid kpis={kpis} />
     </>
   );
