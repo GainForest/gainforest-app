@@ -1,11 +1,27 @@
 import { describe, expect, it, vi } from "vitest";
 import {
   AUDIO_UPLOAD_MAX_ATTEMPTS,
+  isNetworkFetchError,
   isRetryableStorageError,
+  storageStatusFromError,
   withUploadRetries,
 } from "./upload-retry";
 
 describe("AudioMoth upload retries", () => {
+  it("recognises offline fetch failures across browsers", () => {
+    expect(isNetworkFetchError(new TypeError("Failed to fetch"))).toBe(true);
+    expect(isNetworkFetchError(new TypeError("Load failed"))).toBe(true);
+    expect(isNetworkFetchError(new TypeError("NetworkError when attempting to fetch a resource."))).toBe(true);
+    expect(isNetworkFetchError(new TypeError("x is not a function"))).toBe(false);
+    expect(isNetworkFetchError(new Error("Failed to fetch"))).toBe(false);
+  });
+
+  it("extracts the HTTP status from storage PUT failures", () => {
+    expect(storageStatusFromError(new Error("storage_503"))).toBe(503);
+    expect(storageStatusFromError(new Error("storage_network"))).toBeNull();
+    expect(storageStatusFromError(new Error("other"))).toBeNull();
+  });
+
   it("recognises temporary connection and storage failures", () => {
     expect(isRetryableStorageError(new Error("storage_network"))).toBe(true);
     expect(isRetryableStorageError(new Error("storage_429"))).toBe(true);

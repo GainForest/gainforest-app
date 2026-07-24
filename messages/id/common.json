@@ -2008,6 +2008,11 @@
       "statusSaving": "Menyimpan…",
       "notConfigured": "Penyimpanan rekaman belum disiapkan. Silakan hubungi tim.",
       "uploadFailed": "Unggahan tidak dapat diselesaikan. Silakan coba lagi.",
+      "errorConnection": "Koneksi Anda terputus saat file ini diunggah. Periksa internet Anda, lalu gunakan “Coba lagi file yang gagal”.",
+      "errorStorageRejected": "Kami tidak dapat menerima file ini. Silakan coba lagi.",
+      "errorSaveConnection": "File sudah terkirim, tetapi internet terputus sebelum kami selesai. Ketuk “Coba lagi file yang gagal”.",
+      "errorSaveFailed": "File sudah terunggah, tetapi tidak dapat disimpan ke akun Anda. Silakan coba lagi.",
+      "errorOffline": "Tidak ada koneksi internet. Periksa Wi-Fi Anda dan coba lagi.",
       "deploymentFallback": "Dibuat otomatis saat mengunggah rekaman kartu SD.",
       "discovering": "Mencari rekaman… {count} berkas ditemukan",
       "readFailed": "Kartu SD tidak dapat dibaca. Cabut dan masukkan kembali, lalu coba lagi — atau seret folder ke halaman ini."

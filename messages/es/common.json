@@ -2008,6 +2008,11 @@
       "statusSaving": "Guardando…",
       "notConfigured": "El almacenamiento de grabaciones aún no está configurado. Contacta con el equipo.",
       "uploadFailed": "La subida no se pudo completar. Inténtalo de nuevo.",
+      "errorConnection": "Tu conexión se cortó mientras se subía este archivo. Revisa tu internet y usa “Reintentar archivos fallidos”.",
+      "errorStorageRejected": "No pudimos recibir este archivo. Inténtalo de nuevo.",
+      "errorSaveConnection": "El archivo se envió, pero el internet se cortó antes de terminar. Toca “Reintentar archivos fallidos”.",
+      "errorSaveFailed": "El archivo se subió, pero no se pudo guardar en tu cuenta. Inténtalo de nuevo.",
+      "errorOffline": "Sin conexión a internet. Revisa tu Wi-Fi e inténtalo de nuevo.",
       "deploymentFallback": "Creado automáticamente al subir grabaciones de la tarjeta SD.",
       "discovering": "Buscando grabaciones… {count} archivos encontrados",
       "readFailed": "No se pudo leer la tarjeta SD. Retírala y vuelve a insertarla, luego inténtalo de nuevo, o arrastra la carpeta a esta página."

@@ -12,6 +12,27 @@ export function isRetryableStorageError(error: unknown): boolean {
   return match ? RETRYABLE_STORAGE_STATUSES.has(Number(match[1])) : false;
 }
 
+/**
+ * A browser fetch() that never reached the server — the user is offline or
+ * the connection dropped. Chrome says "Failed to fetch", Safari "Load
+ * failed", Firefox "NetworkError when attempting to fetch a resource.";
+ * all are TypeErrors.
+ */
+export function isNetworkFetchError(error: unknown): boolean {
+  return (
+    error instanceof Error &&
+    error.name === "TypeError" &&
+    /fetch|network|load failed|connection/i.test(error.message)
+  );
+}
+
+/** HTTP status from a `storage_<status>` PUT failure, or null. */
+export function storageStatusFromError(error: unknown): number | null {
+  if (!(error instanceof Error)) return null;
+  const match = error.message.match(/^storage_(\d{3})$/);
+  return match ? Number(match[1]) : null;
+}
+
 export function isUploadAbortError(error: unknown): boolean {
   return (
     (error instanceof Error && error.message === "aborted") ||

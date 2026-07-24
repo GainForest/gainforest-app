@@ -2008,6 +2008,11 @@
       "statusSaving": "Inahifadhi…",
       "notConfigured": "Hifadhi ya rekodi bado haijasanidiwa. Tafadhali wasiliana na timu.",
       "uploadFailed": "Upakiaji haukuweza kukamilika. Tafadhali jaribu tena.",
+      "errorConnection": "Muunganisho wako ulikatika wakati faili hii ilipokuwa ikipakiwa. Kagua intaneti yako, kisha utumie “Jaribu tena faili zilizoshindwa”.",
+      "errorStorageRejected": "Hatukuweza kupokea faili hii. Tafadhali jaribu tena.",
+      "errorSaveConnection": "Faili ilitumwa, lakini intaneti ilikatika kabla hatujamaliza. Gusa “Jaribu tena faili zilizoshindwa”.",
+      "errorSaveFailed": "Faili ilipakiwa, lakini haikuweza kuhifadhiwa kwenye akaunti yako. Tafadhali jaribu tena.",
+      "errorOffline": "Hakuna muunganisho wa intaneti. Kagua Wi-Fi yako kisha ujaribu tena.",
       "deploymentFallback": "Imeundwa kiotomatiki wakati wa kupakia rekodi za kadi ya SD.",
       "discovering": "Inatafuta rekodi… faili {count} zimepatikana",
       "readFailed": "Kadi ya SD haikuweza kusomwa. Iondoe na uiingize tena, kisha jaribu tena — au buruta folda kwenye ukurasa huu."

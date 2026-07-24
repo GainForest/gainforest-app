@@ -2008,6 +2008,11 @@
       "statusSaving": "Saving…",
       "notConfigured": "Recording storage is not set up yet. Please contact the team.",
       "uploadFailed": "The upload could not be completed. Please try again.",
+      "errorConnection": "Your connection dropped while this file was uploading. Check your internet, then use “Retry failed files”.",
+      "errorStorageRejected": "We couldn't take this file right now. Please try again.",
+      "errorSaveConnection": "The file was sent, but the internet stopped before we could finish. Tap “Retry failed files”.",
+      "errorSaveFailed": "The file was uploaded, but it could not be saved to your account. Please retry.",
+      "errorOffline": "No internet connection. Check your Wi-Fi and try again.",
       "deploymentFallback": "Created automatically when uploading SD card recordings.",
       "discovering": "Looking for recordings… {count} files found",
       "readFailed": "The SD card could not be read. Remove and re-insert it, then try again — or drag the folder onto this page instead."

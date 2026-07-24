@@ -2008,6 +2008,11 @@
       "statusSaving": "Salvando…",
       "notConfigured": "O armazenamento de gravações ainda não está configurado. Fale com a equipe.",
       "uploadFailed": "O envio não pôde ser concluído. Tente novamente.",
+      "errorConnection": "Sua conexão caiu enquanto este arquivo era enviado. Verifique sua internet e use “Tentar novamente os arquivos com falha”.",
+      "errorStorageRejected": "Não conseguimos receber este arquivo. Tente novamente.",
+      "errorSaveConnection": "O arquivo foi enviado, mas a internet caiu antes de terminarmos. Toque em “Tentar novamente os arquivos com falha”.",
+      "errorSaveFailed": "O arquivo foi enviado, mas não pôde ser salvo na sua conta. Tente novamente.",
+      "errorOffline": "Sem conexão com a internet. Verifique seu Wi-Fi e tente novamente.",
       "deploymentFallback": "Criado automaticamente ao enviar gravações do cartão SD.",
       "discovering": "Procurando gravações… {count} arquivos encontrados",
       "readFailed": "O cartão SD não pôde ser lido. Remova e insira novamente, depois tente de novo — ou arraste a pasta para esta página."

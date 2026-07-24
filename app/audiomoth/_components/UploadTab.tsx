@@ -45,8 +45,10 @@ import {
 import { renderSpectrogramPng } from "@/app/_lib/audiomoth/spectrogram";
 import {
   AUDIO_UPLOAD_MAX_ATTEMPTS,
+  isNetworkFetchError,
   isRetryableStorageError,
   isUploadAbortError,
+  storageStatusFromError,
   withUploadRetries,
 } from "@/app/_lib/audiomoth/upload-retry";
 import {
@@ -392,6 +394,25 @@ export function UploadTab({ sessionDid }: { sessionDid: string | null }) {
     [sessionDid, t],
   );
 
+  /**
+   * Plain-language error per failure point: the storage transfer (connection
+   * dropped vs. storage refused) or the account save after a successful
+   * transfer (connection dropped vs. server error).
+   */
+  const describeUploadError = useCallback(
+    (err: unknown, phase: "transfer" | "saving"): string => {
+      if (phase === "saving") {
+        return isNetworkFetchError(err) ? t("errorSaveConnection") : t("errorSaveFailed");
+      }
+      if (storageStatusFromError(err) !== null) return t("errorStorageRejected");
+      if ((err instanceof Error && err.message === "storage_network") || isNetworkFetchError(err)) {
+        return t("errorConnection");
+      }
+      return t("uploadFailed");
+    },
+    [t],
+  );
+
   const putToStorage = useCallback(
     (rec: ScannedRecording, url: string): Promise<void> =>
       new Promise((resolve, reject) => {
@@ -499,7 +520,13 @@ export function UploadTab({ sessionDid }: { sessionDid: string | null }) {
       }
     } catch (err) {
       if (!isUploadAbortError(err)) {
-        setGlobalError(err instanceof Error && err.message === "not_configured" ? t("notConfigured") : t("uploadFailed"));
+        setGlobalError(
+          err instanceof Error && err.message === "not_configured"
+            ? t("notConfigured")
+            : isNetworkFetchError(err)
+              ? t("errorOffline")
+              : t("uploadFailed"),
+        );
       }
       setStage("review");
       if (retryAbortRef.current === retryController) retryAbortRef.current = null;
@@ -513,6 +540,7 @@ export function UploadTab({ sessionDid }: { sessionDid: string | null }) {
         const job = queue.shift();
         if (!job) return;
         const { rec, key, url, deploymentRef } = job;
+        let phase: "transfer" | "saving" = "transfer";
         try {
           await withUploadRetries(
             async (attempt) => {
@@ -539,6 +567,7 @@ export function UploadTab({ sessionDid }: { sessionDid: string | null }) {
               },
             },
           );
+          phase = "saving";
           setRecording(rec.id, { status: "saving", progress: 1, retryAttempt: undefined, retryMax: undefined });
 
           let previewBlob = null;
@@ -597,7 +626,7 @@ export function UploadTab({ sessionDid }: { sessionDid: string | null }) {
             status: "error",
             retryAttempt: undefined,
             retryMax: undefined,
-            error: t("uploadFailed"),
+            error: describeUploadError(err, phase),
           });
         }
       }
@@ -606,7 +635,7 @@ export function UploadTab({ sessionDid }: { sessionDid: string | null }) {
     await Promise.all(Array.from({ length: CONCURRENCY }, worker));
     if (retryAbortRef.current === retryController) retryAbortRef.current = null;
     if (!cancelRef.current) setStage("done");
-  }, [groups, makePreviews, manualEvent, matchFor, putToStorage, resolveAcDeployment, sessionDid, setRecording, t]);
+  }, [describeUploadError, groups, makePreviews, manualEvent, matchFor, putToStorage, resolveAcDeployment, sessionDid, setRecording, t]);
 
   const cancelUpload = useCallback(() => {
     cancelRef.current = true;
