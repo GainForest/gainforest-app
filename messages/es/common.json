@@ -1115,6 +1115,7 @@
       "reshared": "Compartido",
       "undoReshare": "Deshacer compartido",
       "reshareHint": "Compártelo con tus seguidores",
+      "resharedBy": "{name} compartió",
       "comment": "Comentar",
       "comments": "{count, plural, one {# comentario} other {# comentarios}}",
       "signInToInteract": "Inicia sesión para publicar, dar me gusta y comentar",

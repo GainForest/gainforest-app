@@ -113,6 +113,17 @@ export interface ActivityFeedItem {
   /** True when a GainForest steward pinned this post to the top of the feed.
    *  Only set on the first page of the global "all"/"post" feeds. */
   pinned?: boolean;
+  /** Set when this row surfaces a record somebody reshared (Bluesky's
+   *  `reasonRepost`): the row's content/actor describe the ORIGINAL record, the
+   *  row is ordered by the reshare's createdAt, `id` is the repost record's
+   *  AT-URI (unique per reshare), and this carries the resharer's identity plus
+   *  the original subject's AT-URI — the target for likes/comments/reshares. */
+  reshare?: {
+    did: string;
+    name: string | null;
+    avatarRef: string | null;
+    subjectUri: string;
+  };
 }
 
 /** Which kinds the feed should include: a single kind, or the unified merge. */
@@ -266,11 +277,13 @@ const FEED_QUERY = `
     $orgFirst: Int!
     $receiptFirst: Int!
     $postFirst: Int!
+    $repostFirst: Int!
     $projectWhere: OrgHypercertsCollectionWhereInput
     $occurrenceWhere: AppGainforestDwcOccurrenceWhereInput
     $orgWhere: AppCertifiedActorOrganizationWhereInput
     $donationWhere: OrgHypercertsFundingReceiptWhereInput
     $postWhere: AppGainforestFeedPostWhereInput
+    $repostWhere: AppGainforestFeedRepostWhereInput
   ) {
     projects: orgHypercertsCollection(
       first: $projectFirst
@@ -358,6 +371,19 @@ const FEED_QUERY = `
         ${CERTIFIED_PROFILE_DATA_FIELDS}
       } }
     }
+
+    reposts: appGainforestFeedRepost(
+      first: $repostFirst
+      where: $repostWhere
+      sortBy: createdAt
+      sortDirection: DESC
+    ) {
+      edges { node {
+        did uri createdAt
+        subject { uri }
+        ${CERTIFIED_PROFILE_DATA_FIELDS}
+      } }
+    }
   }
 `;
 
@@ -439,12 +465,21 @@ type RawReceipt = {
   for?: { uri?: string | null } | null;
 };
 
+type RawRepost = {
+  did: string;
+  uri?: string | null;
+  createdAt: string;
+  subject?: { uri?: string | null } | null;
+  certifiedProfileData?: CertifiedProfileData;
+};
+
 type RawFeed = {
   projects?: { edges?: Array<{ node?: RawProject | null } | null> | null } | null;
   occurrences?: { edges?: Array<{ node?: RawOccurrence | null } | null> | null } | null;
   organizations?: { edges?: Array<{ node?: RawOrg | null } | null> | null } | null;
   donations?: { edges?: Array<{ node?: RawReceipt | null } | null> | null } | null;
   posts?: { edges?: Array<{ node?: RawPost | null } | null> | null } | null;
+  reposts?: { edges?: Array<{ node?: RawRepost | null } | null> | null } | null;
 };
 
 function imageMeta(image: RawImage): { url: string | null; ref: string | null } {
@@ -592,6 +627,210 @@ function mapPosts(nodes: RawPost[]): ActivityFeedItem[] {
     amount: null,
     currency: null,
   }));
+}
+
+// ── Reshares (app.gainforest.feed.repost → Bluesky's `reasonRepost` rows) ────
+//
+// A reshare surfaces the ORIGINAL record as a fresh feed row at the reshare's
+// timestamp, headed by a "X reshared" attribution. The merge phase only needs
+// the repost's (createdAt, uri) and the resharer's identity, so reposts enter
+// the pool as lightweight placeholders; the subject content is hydrated after
+// the page is sliced (like donations), so only surfaced reshares cost lookups.
+// Supported subject kinds: posts, sightings, and projects — a reshare of
+// anything else (or of a record that has since been deleted) drops out.
+
+/** Parse `at://did/collection/rkey` keeping the collection segment. */
+function parseAtUriFull(uri: string): { did: string; collection: string; rkey: string } | null {
+  const match = uri.match(/^at:\/\/([^/]+)\/([^/]+)\/(.+)$/);
+  if (!match) return null;
+  return { did: match[1], collection: match[2], rkey: match[3] };
+}
+
+const RESHARE_KIND_BY_COLLECTION: Record<string, ActivityFeedKind> = {
+  "app.gainforest.feed.post": "post",
+  "app.gainforest.dwc.occurrence": "observation",
+  "org.hypercerts.collection": "project",
+};
+
+/** Map repost records to placeholder rows: ordered by the reshare's createdAt,
+ *  id'd by the repost record's URI, owned (for hidden-account checks and the
+ *  following scope) by the RESHARER. Content fields stay empty until
+ *  `resolveReshares` swaps in the subject record after the page slice. */
+function mapReposts(nodes: RawRepost[]): ActivityFeedItem[] {
+  const items: ActivityFeedItem[] = [];
+  for (const n of nodes) {
+    const subjectUri = n.subject?.uri;
+    if (!n.uri || !subjectUri) continue;
+    const subject = parseAtUriFull(subjectUri);
+    const kind = subject ? RESHARE_KIND_BY_COLLECTION[subject.collection] : undefined;
+    if (!kind) continue; // unsupported subject kind — not a feed row
+    // Self-reshares are noise (the original row already carries the author).
+    if (subject && subject.did === n.did) continue;
+    items.push({
+      id: n.uri,
+      kind,
+      createdAt: n.createdAt,
+      actorDid: n.did,
+      actorName: null,
+      actorAvatarRef: null,
+      title: null,
+      text: null,
+      href: accountHref(n.did),
+      imageUrl: null,
+      imageRef: null,
+      targetTitle: null,
+      targetHref: null,
+      amount: null,
+      currency: null,
+      reshare: {
+        did: n.did,
+        name: profileName(n.certifiedProfileData),
+        avatarRef: profileAvatarRef(n.certifiedProfileData),
+        subjectUri,
+      },
+    });
+  }
+  return items;
+}
+
+// Subject hydration — one query per subject collection, only when needed.
+const RESHARE_POST_SUBJECTS_QUERY = `
+  query ResharePostSubjects($uris: [String!]!) {
+    appGainforestFeedPost(first: ${PAGE_SIZE}, where: { uri: { in: $uris } }) {
+      edges { node {
+        did uri createdAt text
+        facets {
+          index { byteStart byteEnd }
+          features { __typename ... on AppBskyRichtextFacetMention { did } }
+        }
+        ${CERTIFIED_PROFILE_DATA_FIELDS}
+      } }
+    }
+  }
+`;
+
+const RESHARE_OCCURRENCE_SUBJECTS_QUERY = `
+  query ReshareOccurrenceSubjects($uris: [String!]!) {
+    appGainforestDwcOccurrence(first: ${PAGE_SIZE}, where: { uri: { in: $uris } }) {
+      edges { node {
+        did rkey uri createdAt eventDate eventID fieldNotes
+        scientificName vernacularName kingdom family country countryCode locality habitat
+        thumbnailUrl speciesImageUrl dynamicProperties associatedMedia
+        ${CERTIFIED_PROFILE_DATA_FIELDS}
+        imageEvidence { file { ref } }
+      } }
+    }
+  }
+`;
+
+const RESHARE_PROJECT_SUBJECTS_QUERY = `
+  query ReshareProjectSubjects($uris: [String!]!) {
+    orgHypercertsCollection(first: ${PAGE_SIZE}, where: { uri: { in: $uris } }) {
+      edges { node {
+        did rkey uri createdAt title shortDescription
+        ${CERTIFIED_PROFILE_DATA_FIELDS}
+        banner {
+          __typename
+          ... on OrgHypercertsDefsUri { uri }
+          ... on OrgHypercertsDefsLargeImage { image { ref } }
+        }
+        avatar {
+          __typename
+          ... on OrgHypercertsDefsUri { uri }
+          ... on OrgHypercertsDefsSmallImage { image { ref } }
+        }
+      } }
+    }
+  }
+`;
+
+/**
+ * Hydrate the reshare placeholders that made it onto the page: fetch each
+ * subject record, and rebuild the row as the subject's content wearing the
+ * reshare's (id, createdAt, attribution). Rows whose subject is gone, hidden,
+ * or authored by a hidden account drop out — a reshare never resurfaces
+ * something moderation removed. Non-reshare rows pass through untouched.
+ */
+async function resolveReshares(
+  pageItems: ActivityFeedItem[],
+  hidden: Set<string>,
+  hiddenRecords: Set<string>,
+): Promise<ActivityFeedItem[]> {
+  const pending = pageItems.filter((it) => it.reshare);
+  if (pending.length === 0) return pageItems;
+
+  const urisByKind = new Map<ActivityFeedKind, Set<string>>();
+  for (const it of pending) {
+    const set = urisByKind.get(it.kind) ?? new Set<string>();
+    set.add(it.reshare!.subjectUri);
+    urisByKind.set(it.kind, set);
+  }
+
+  const subjects = new Map<string, ActivityFeedItem>();
+  const collect = (mapped: ActivityFeedItem[]) => {
+    for (const item of mapped) subjects.set(item.id, item);
+  };
+  await Promise.all([
+    (async () => {
+      const uris = [...(urisByKind.get("post") ?? [])];
+      if (uris.length === 0) return;
+      const data = await indexerQuery<{
+        appGainforestFeedPost?: { edges?: Array<{ node?: RawPost | null } | null> | null } | null;
+      }>(RESHARE_POST_SUBJECTS_QUERY, { uris }).catch(() => null);
+      collect(
+        mapPosts(
+          (data?.appGainforestFeedPost?.edges ?? [])
+            .map((e) => e?.node)
+            .filter((n): n is RawPost => Boolean(n?.did)),
+        ),
+      );
+    })(),
+    (async () => {
+      const uris = [...(urisByKind.get("observation") ?? [])];
+      if (uris.length === 0) return;
+      const data = await indexerQuery<{
+        appGainforestDwcOccurrence?: { edges?: Array<{ node?: RawOccurrence | null } | null> | null } | null;
+      }>(RESHARE_OCCURRENCE_SUBJECTS_QUERY, { uris }).catch(() => null);
+      collect(
+        mapOccurrences(
+          (data?.appGainforestDwcOccurrence?.edges ?? [])
+            .map((e) => e?.node)
+            .filter((n): n is RawOccurrence => Boolean(n?.did)),
+        ),
+      );
+    })(),
+    (async () => {
+      const uris = [...(urisByKind.get("project") ?? [])];
+      if (uris.length === 0) return;
+      const data = await indexerQuery<{
+        orgHypercertsCollection?: { edges?: Array<{ node?: RawProject | null } | null> | null } | null;
+      }>(RESHARE_PROJECT_SUBJECTS_QUERY, { uris }).catch(() => null);
+      collect(
+        mapProjects(
+          (data?.orgHypercertsCollection?.edges ?? [])
+            .map((e) => e?.node)
+            .filter((n): n is RawProject => Boolean(n?.did)),
+        ),
+      );
+    })(),
+  ]);
+
+  const out: ActivityFeedItem[] = [];
+  for (const it of pageItems) {
+    if (!it.reshare) {
+      out.push(it);
+      continue;
+    }
+    const subject = subjects.get(it.reshare.subjectUri);
+    if (!subject || hidden.has(subject.actorDid) || hiddenRecords.has(it.reshare.subjectUri)) continue;
+    out.push({
+      ...subject,
+      id: it.id,
+      createdAt: it.createdAt,
+      reshare: it.reshare,
+    });
+  }
+  return out;
 }
 
 function safeAmount(raw: string | null | undefined): number {
@@ -1118,6 +1357,9 @@ async function buildFeedPageUncached(
     ? chunkDids(following.dids, FOLLOW_IN_LIMIT)
     : [null];
   const wantDonation = wants("donation") && !isFollowing;
+  // Reshares only join the unified merge (and the following feed, scoped to
+  // the RESHARER); single-kind tabs stay records-only.
+  const wantsReshare = filter === "all";
   const nonEmpty = (where: Record<string, unknown>): Record<string, unknown> | null =>
     Object.keys(where).length > 0 ? where : null;
 
@@ -1135,11 +1377,13 @@ async function buildFeedPageUncached(
         orgFirst: wants("organization") ? STREAM_BATCH : 1,
         receiptFirst: wantDonation ? STREAM_BATCH : 1,
         postFirst: wants("post") ? STREAM_BATCH : 1,
+        repostFirst: wantsReshare ? STREAM_BATCH : 1,
         projectWhere: { type: { in: ["project", "Project"] }, ...didIn, ...ltBound },
         occurrenceWhere: nonEmpty({ ...didIn, ...ltBound }),
         orgWhere: nonEmpty({ ...didIn, ...ltBound }),
         donationWhere: { did: { eq: FACILITATOR_DID }, ...ltBound },
         postWhere: { reply: { isNull: true }, ...didIn, ...ltBound },
+        repostWhere: nonEmpty({ ...didIn, ...ltBound }),
       });
     }),
   );
@@ -1153,6 +1397,7 @@ async function buildFeedPageUncached(
   const orgNodes: RawOrg[] = [];
   const receiptNodes: RawReceipt[] = [];
   const postNodes: RawPost[] = [];
+  const repostNodes: RawRepost[] = [];
   let fetchedFull = false;
   for (const data of results) {
     const p = (data?.projects?.edges ?? []).map((e) => e?.node).filter((n): n is RawProject => Boolean(n?.did));
@@ -1160,12 +1405,14 @@ async function buildFeedPageUncached(
     const g = (data?.organizations?.edges ?? []).map((e) => e?.node).filter((n): n is RawOrg => Boolean(n?.did));
     const r = (data?.donations?.edges ?? []).map((e) => e?.node).filter((n): n is RawReceipt => Boolean(n?.uri));
     const s = (data?.posts?.edges ?? []).map((e) => e?.node).filter((n): n is RawPost => Boolean(n?.did));
+    const q = (data?.reposts?.edges ?? []).map((e) => e?.node).filter((n): n is RawRepost => Boolean(n?.did));
     if (
       p.length >= STREAM_BATCH ||
       o.length >= STREAM_BATCH ||
       g.length >= STREAM_BATCH ||
       r.length >= STREAM_BATCH ||
-      s.length >= STREAM_BATCH
+      s.length >= STREAM_BATCH ||
+      q.length >= STREAM_BATCH
     ) {
       fetchedFull = true;
     }
@@ -1174,6 +1421,7 @@ async function buildFeedPageUncached(
     orgNodes.push(...g);
     receiptNodes.push(...r);
     postNodes.push(...s);
+    repostNodes.push(...q);
   }
 
   const { items: donationItems, certUriById, recipientById } = mapDonations(receiptNodes);
@@ -1196,6 +1444,7 @@ async function buildFeedPageUncached(
     ...mapOrganizations(orgNodes),
     ...mapPosts(postNodes),
     ...donationItems,
+    ...(wantsReshare ? mapReposts(repostNodes) : []),
   ].filter(
     (item) =>
       item.createdAt &&
@@ -1219,25 +1468,28 @@ async function buildFeedPageUncached(
     (filter === "all" || filter === "observation") &&
     occurrenceNodes.length >= STREAM_BATCH
   ) {
-    const firstObsIdx = ordered.findIndex((it) => it.kind === "observation");
+    const firstObsIdx = ordered.findIndex((it) => it.kind === "observation" && !it.reshare);
     const burstActor = firstObsIdx >= 0 && firstObsIdx < PAGE_SIZE ? ordered[firstObsIdx].actorDid : null;
     if (burstActor && occurrenceNodes.every((n) => n.did === burstActor)) {
       const skipPage = await buildBurstSkipPage(ordered, firstObsIdx, burstActor, cursor);
       if (skipPage) {
+        skipPage.items = await resolveReshares(skipPage.items, hidden, hiddenRecords);
         await enrichDonations(skipPage.items, certUriById, recipientById);
         return skipPage;
       }
     }
   }
 
-  const pageItems = ordered.slice(0, PAGE_SIZE);
+  const sliced = ordered.slice(0, PAGE_SIZE);
+  // The cursor walks the pre-hydration order: a reshare whose subject turns out
+  // gone/hidden is consumed (dropped from the page) without stalling paging.
+  const last = sliced[sliced.length - 1];
+  const pageItems = await resolveReshares(sliced, hidden, hiddenRecords);
   await enrichDonations(pageItems, certUriById, recipientById);
-
-  const last = pageItems[pageItems.length - 1];
   // A stream that returned a full batch may still have older rows we haven't
   // reached (tracked as `fetchedFull` during the per-chunk union above);
   // combined with leftover eligible overflow, that's "more to load".
-  const hasMore = pageItems.length > 0 && (ordered.length > PAGE_SIZE || fetchedFull);
+  const hasMore = sliced.length > 0 && (ordered.length > PAGE_SIZE || fetchedFull);
 
   return {
     items: pageItems,

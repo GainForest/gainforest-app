@@ -1115,6 +1115,7 @@
       "reshared": "Umeshiriki tena",
       "undoReshare": "Ondoa kushiriki tena",
       "reshareHint": "Shiriki hii na wafuasi wako",
+      "resharedBy": "{name} ameshiriki tena",
       "comment": "Toa maoni",
       "comments": "{count, plural, one {maoni #} other {maoni #}}",
       "signInToInteract": "Ingia ili kuchapisha, kupenda na kutoa maoni",

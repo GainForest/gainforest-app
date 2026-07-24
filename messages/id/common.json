@@ -1115,6 +1115,7 @@
       "reshared": "Dibagikan ulang",
       "undoReshare": "Batalkan bagikan ulang",
       "reshareHint": "Bagikan ini kepada pengikut Anda",
+      "resharedBy": "{name} membagikan ulang",
       "comment": "Komentar",
       "comments": "{count, plural, other {# komentar}}",
       "signInToInteract": "Masuk untuk memposting, menyukai, dan berkomentar",
