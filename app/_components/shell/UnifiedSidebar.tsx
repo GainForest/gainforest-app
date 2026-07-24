@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { LayoutGroup, motion } from "framer-motion";
+import { AnimatePresence, LayoutGroup, MotionConfig, motion } from "framer-motion";
 import {
   BinocularsIcon,
   Building2Icon,
@@ -47,6 +47,7 @@ export function UnifiedSidebar({
 }) {
   return (
     <SidebarCollapsedProvider value={collapsed}>
+    <MotionConfig reducedMotion="user">
     <nav
       className={cn(
         "relative isolate z-30 flex h-full flex-col border-r border-border bg-muted transition-[width,padding] duration-300 ease-[cubic-bezier(0.25,0.1,0.25,1)] motion-reduce:transition-none",
@@ -66,7 +67,7 @@ export function UnifiedSidebar({
 
       <div className="mt-3 border-t border-border" />
 
-      <div className={cn("flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto pt-3", collapsed ? "overflow-x-hidden" : "pr-1")}>
+      <div className={cn("flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto pt-3 [scrollbar-width:thin]", collapsed ? "overflow-x-hidden" : "pr-1")}>
         {authSession?.isLoggedIn ? <SidebarProfileRow did={authSession.did} /> : null}
         <LayoutGroup id="unified-sidebar-nav">
           <ExploreNav sessionDid={authSession?.isLoggedIn ? authSession.did : null} />
@@ -85,6 +86,7 @@ export function UnifiedSidebar({
         <SocialFooter />
       </div>
     </nav>
+    </MotionConfig>
     </SidebarCollapsedProvider>
   );
 }
@@ -276,51 +278,44 @@ function ExploreNav({ sessionDid }: { sessionDid: string | null }) {
       {renderSections(primarySections, true, true)}
       {secondarySections.length > 0 ? (
         <div className="mt-1 border-t border-border/70 pt-1">
-          {!showMore ? (
-            <SidebarTooltip label={sidebarT("more")}>
-              <button
-                type="button"
-                onClick={() => setMoreOpen(true)}
-                aria-expanded={false}
-                className={cn(
-                  buttonVariants({ variant: "ghost" }),
-                  "h-8 w-full text-muted-foreground hover:text-foreground",
-                  collapsed ? "justify-center px-0" : "justify-start gap-2.5 px-2.5",
-                )}
+          {/* Single toggle whose chevron rotates; the extra destinations reveal
+              with a smooth height/opacity animation instead of snapping in. */}
+          <SidebarTooltip label={showMore ? sidebarT("hideMore") : sidebarT("more")}>
+            <button
+              type="button"
+              onClick={() => setMoreOpen((open) => !open)}
+              aria-expanded={showMore}
+              className={cn(
+                buttonVariants({ variant: "ghost" }),
+                "h-8 w-full text-muted-foreground hover:text-foreground",
+                collapsed ? "justify-center px-0" : "justify-start gap-2.5 px-2.5",
+              )}
+            >
+              <span className="flex size-6 shrink-0 items-center justify-center">
+                <LayoutGridIcon className="size-4" />
+              </span>
+              {collapsed ? null : (
+                <>
+                  <span className="flex-1 text-left">{showMore ? sidebarT("hideMore") : sidebarT("more")}</span>
+                  <ChevronDownIcon className={cn("size-3.5 transition-transform duration-300 motion-reduce:transition-none", showMore && "rotate-180")} />
+                </>
+              )}
+            </button>
+          </SidebarTooltip>
+          <AnimatePresence initial={false}>
+            {showMore && !collapsed ? (
+              <motion.div
+                key="more-content"
+                initial={{ height: 0, opacity: 0 }}
+                animate={{ height: "auto", opacity: 1 }}
+                exit={{ height: 0, opacity: 0 }}
+                transition={{ duration: 0.25, ease: [0.25, 0.1, 0.25, 1] }}
+                className="overflow-hidden"
               >
-                <span className="flex size-6 shrink-0 items-center justify-center">
-                  <LayoutGridIcon className="size-4" />
-                </span>
-                {collapsed ? null : (
-                  <>
-                    <span className="flex-1 text-left">{sidebarT("more")}</span>
-                    <ChevronDownIcon className="size-3.5" />
-                  </>
-                )}
-              </button>
-            </SidebarTooltip>
-          ) : (
-            <>
-              <div className="flex flex-col gap-2">{renderSections(secondarySections, true)}</div>
-              <SidebarTooltip label={sidebarT("hideMore")}>
-                <button
-                  type="button"
-                  onClick={() => setMoreOpen(false)}
-                  aria-expanded={true}
-                  className={cn(
-                    buttonVariants({ variant: "ghost" }),
-                    "mt-1 h-8 w-full text-muted-foreground hover:text-foreground",
-                    collapsed ? "justify-center px-0" : "justify-start gap-2.5 px-2.5",
-                  )}
-                >
-                  <span className="flex size-6 shrink-0 items-center justify-center">
-                    <ChevronDownIcon className="size-4 rotate-180" />
-                  </span>
-                  {collapsed ? null : <span className="flex-1 text-left">{sidebarT("hideMore")}</span>}
-                </button>
-              </SidebarTooltip>
-            </>
-          )}
+                <div className="flex flex-col gap-2 pt-1">{renderSections(secondarySections, true)}</div>
+              </motion.div>
+            ) : null}
+          </AnimatePresence>
         </div>
       ) : null}
     </div>
@@ -403,20 +398,31 @@ function NavLeafRow({ item, isActive, index, paired = false }: { item: NavLeaf; 
             whileHover={collapsed ? undefined : { x: 2 }}
             transition={{ type: "spring", stiffness: 400, damping: 30 }}
             className={cn(
-              buttonVariants({ variant: isActive ? "default" : "ghost" }),
-              // Lighter, denser rows: only the active row keeps the filled pill;
-              // inactive rows are a plain icon + label with no chip background.
+              buttonVariants({ variant: "ghost" }),
+              // Lighter, denser rows: only the active row keeps the filled pill.
+              // The pill is a shared layout element so it glides between nav
+              // items (grid tiles included) as the route changes; inactive rows
+              // are a plain icon + label with no chip background.
               "relative h-8 w-full",
               collapsed ? "justify-center px-0" : "justify-start gap-2.5 px-2.5",
-              !isActive && "text-muted-foreground group-hover:text-primary hover:text-primary",
+              isActive
+                ? "text-primary-foreground hover:text-primary-foreground"
+                : "text-muted-foreground group-hover:text-primary hover:text-primary",
             )}
           >
-            <span className="flex size-6 shrink-0 items-center justify-center">
+            {isActive ? (
+              <motion.span
+                layoutId="sidebar-nav-active"
+                transition={{ type: "spring", stiffness: 500, damping: 40 }}
+                className="absolute inset-0 rounded-full bg-primary"
+              />
+            ) : null}
+            <span className="relative z-10 flex size-6 shrink-0 items-center justify-center">
               <item.Icon className="h-4 w-4 shrink-0" />
             </span>
-            {collapsed ? null : <span className="flex-1 text-left">{item.text}</span>}
+            {collapsed ? null : <span className="relative z-10 flex-1 text-left">{item.text}</span>}
             {item.adminOnly ? (
-              <AdminOnlyIndicator className={collapsed ? "absolute right-1 top-1" : undefined} />
+              <AdminOnlyIndicator className={cn("relative z-10", collapsed && "absolute right-1 top-1")} />
             ) : null}
           </motion.div>
         </Link>
@@ -449,13 +455,20 @@ function NavLeafTile({ item, isActive, index }: { item: NavLeaf; isActive: boole
           className={cn(
             "relative flex h-full flex-col items-center gap-1.5 rounded-xl px-2 py-2.5 text-center transition-colors motion-reduce:transition-none",
             isActive
-              ? "bg-primary text-primary-foreground"
+              ? "text-primary-foreground"
               : "bg-background text-muted-foreground hover:text-primary",
           )}
         >
-          <item.Icon className="size-5 shrink-0" />
-          <span className="text-xs font-medium leading-tight">{item.text}</span>
-          {item.adminOnly ? <AdminOnlyIndicator className="absolute right-1.5 top-1.5" /> : null}
+          {isActive ? (
+            <motion.span
+              layoutId="sidebar-nav-active"
+              transition={{ type: "spring", stiffness: 500, damping: 40 }}
+              className="absolute inset-0 rounded-xl bg-primary"
+            />
+          ) : null}
+          <item.Icon className="relative z-10 size-5 shrink-0" />
+          <span className="relative z-10 text-xs font-medium leading-tight">{item.text}</span>
+          {item.adminOnly ? <AdminOnlyIndicator className="absolute right-1.5 top-1.5 z-10" /> : null}
         </motion.div>
       </Link>
     </motion.li>
@@ -581,7 +594,7 @@ function CreationHubCard({ sessionDid }: { sessionDid: string }) {
         </>
       ) : (
         <CreationTile
-          Icon={variant === "project" ? LeafIcon : BinocularsIcon}
+          Icon={BinocularsIcon}
           className="-top-9 -translate-x-1/2 -rotate-6 group-hover/card:-translate-y-1.5 group-hover/card:-rotate-12"
         />
       )}
