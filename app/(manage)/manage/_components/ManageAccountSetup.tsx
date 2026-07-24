@@ -850,7 +850,7 @@ function AccountSetupForm({
       />
 
       <motion.form
-        className="mx-auto flex min-h-[calc(100vh-10rem)] w-full flex-col justify-center gap-5 py-8"
+        className="mx-auto flex min-h-[calc(100dvh-10rem)] w-full flex-col justify-center gap-5 py-8"
         initial={{ opacity: 0, y: 18, filter: "blur(10px)" }}
         animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
         transition={{ duration: 0.35, ease: [0.25, 0.1, 0.25, 1] }}

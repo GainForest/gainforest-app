@@ -1006,6 +1006,7 @@ export function GlobeExplorer({ orgDid = null, orgName = null, orgIdentifier = n
           <TimeSliderCard
             key={activeSeries.id}
             series={activeSeries}
+            mobileHidden={sheetSnap === "half" || sheetSnap === "full"}
             step={seriesStep}
             playing={seriesPlaying}
             onStepChange={(step) => {
@@ -1081,7 +1082,7 @@ function GlobeHeader({
   const previewTab = hoveredTab && !(railOpen && activeTab === hoveredTab) ? hoveredTab : null;
 
   return (
-    <div className="pointer-events-none absolute inset-x-0 top-0 z-30 flex items-start justify-between gap-2 p-2.5">
+    <div className="pointer-events-none absolute inset-x-0 top-0 z-30 flex items-start justify-between gap-2 p-3">
       {/* Mobile controls float as separate glass elements so they stay legible
           above the map and don't merge visually with the bottom sheet. */}
       <div className="pointer-events-auto flex items-center gap-2 md:hidden">
@@ -1158,7 +1159,7 @@ function GlobeHeader({
             transition={{ duration: shouldReduceMotion ? 0 : 0.14, ease: [0.25, 0.1, 0.25, 1] }}
             onMouseEnter={cancelPreviewClose}
             onMouseLeave={schedulePreviewClose}
-            className="pointer-events-auto absolute left-2.5 top-[3.75rem] z-40 hidden pt-2 md:block"
+            className="pointer-events-auto absolute left-3 top-[3.75rem] z-40 hidden pt-2 md:block"
           >
             <div className={cn("flex h-[min(66vh,600px)] w-[360px] max-w-[calc(100vw-2rem)] flex-col overflow-hidden rounded-2xl border border-white/10 bg-black/70 shadow-xl backdrop-blur-2xl")}>
               {renderPanel(previewTab, "floating")}
@@ -2059,9 +2060,9 @@ function LayersPanel({
 
       {showOrgLayers ? (
         <div className="mt-4">
-          <h3 className="mb-1 font-instrument text-sm font-semibold italic capitalize text-muted-foreground">
+          <div className="mb-2 text-xs font-medium text-muted-foreground">
             {t("layers.projectCategory")}
-          </h3>
+          </div>
           {hasTreesRow ? (
             <div className="mb-2 overflow-hidden rounded-2xl bg-white/[0.06] shadow-[inset_0_1px_0_rgb(255_255_255/0.04)]">
               {treesError ? (
@@ -2143,7 +2144,7 @@ function LayersPanel({
       ) : (
         categorizedGlobalLayers.map(([category, layers]) => (
           <div className="mt-4" key={category}>
-            <h3 className="mb-1 font-instrument text-sm font-semibold italic capitalize text-muted-foreground">{category}</h3>
+            <div className="mb-2 text-xs font-medium text-muted-foreground">{category}</div>
             <div className="flex flex-col divide-y divide-white/10 overflow-hidden rounded-2xl bg-white/[0.06] shadow-[inset_0_1px_0_rgb(255_255_255/0.04)]">
               {layers.map((layer) => (
                 <LayerToggleRow
@@ -2402,6 +2403,7 @@ function TimeSeriesCard({
  *  scrub, step, or auto-play through the captures of the same area. */
 function TimeSliderCard({
   series,
+  mobileHidden,
   step,
   playing,
   onStepChange,
@@ -2410,6 +2412,7 @@ function TimeSliderCard({
   onClose,
 }: {
   series: DroneTimeSeries;
+  mobileHidden: boolean;
   step: number;
   playing: boolean;
   onStepChange: (step: number) => void;
@@ -2424,7 +2427,12 @@ function TimeSliderCard({
   const current = series.steps[Math.min(step, lastStep)]!;
 
   return (
-    <div className="pointer-events-none absolute inset-x-3 bottom-[6.75rem] z-20 flex justify-center md:bottom-8">
+    <div
+      className={cn(
+        "pointer-events-none absolute inset-x-3 bottom-[6.75rem] z-20 flex justify-center md:bottom-8",
+        mobileHidden && "hidden md:flex",
+      )}
+    >
       <motion.section
         initial={shouldReduceMotion ? false : { opacity: 0, y: 14 }}
         animate={{ opacity: 1, y: 0 }}
@@ -2432,7 +2440,7 @@ function TimeSliderCard({
         transition={{ duration: shouldReduceMotion ? 0 : 0.22, ease: [0.25, 0.1, 0.25, 1] }}
         aria-label={t("timeline.title")}
         data-testid="globe-time-slider"
-        className={cn("pointer-events-auto w-full max-w-[460px] rounded-2xl p-3.5 shadow-xl", OUTLINE_SURFACE)}
+        className={cn("pointer-events-auto w-full max-w-[460px] rounded-2xl p-3 shadow-xl", OUTLINE_SURFACE)}
       >
         <div className="flex items-center gap-2">
           <span className="flex min-w-0 flex-1 items-center gap-1.5">
@@ -2506,10 +2514,12 @@ function TimeSliderCard({
           </button>
         </div>
 
-        <div className="mt-1.5 flex items-center justify-between pl-[4.75rem] pr-9 text-[10px] text-muted-foreground">
-          <span>{formatDay(series.steps[0]!.date)}</span>
-          <span>{t("timeline.step", { current: Math.min(step, lastStep) + 1, total: series.steps.length })}</span>
-          <span>{formatDay(series.steps[lastStep]!.date)}</span>
+        <div className="mt-2 grid grid-cols-2 gap-2 text-[10px] text-muted-foreground sm:grid-cols-3">
+          <span className="min-w-0 break-words">{formatDay(series.steps[0]!.date)}</span>
+          <span className="order-last col-span-2 text-center sm:order-none sm:col-span-1">
+            {t("timeline.step", { current: Math.min(step, lastStep) + 1, total: series.steps.length })}
+          </span>
+          <span className="min-w-0 break-words text-right">{formatDay(series.steps[lastStep]!.date)}</span>
         </div>
       </motion.section>
     </div>
@@ -2538,7 +2548,7 @@ function TreeDetailPanel({ tree, onClose }: { tree: TreeDetail; onClose: () => v
       aria-label={t("tree.title")}
       data-testid="globe-tree-detail"
       className={cn(
-        "pointer-events-auto absolute right-3 top-4 z-30 flex max-h-[calc(100%-2rem)] w-[300px] max-w-[calc(100vw-1.5rem)] flex-col overflow-hidden rounded-2xl shadow-xl md:right-4",
+        "pointer-events-auto absolute right-3 top-16 z-30 flex max-h-[calc(100%-5rem)] w-[300px] max-w-[calc(100vw-1.5rem)] flex-col overflow-hidden rounded-2xl shadow-xl md:right-4 md:top-4 md:max-h-[calc(100%-2rem)]",
         OUTLINE_SURFACE,
       )}
     >

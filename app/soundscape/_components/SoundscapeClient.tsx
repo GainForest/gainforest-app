@@ -233,7 +233,7 @@ export function SoundscapeClient() {
       {/* Import area */}
       <section
         className={cn(
-          "rounded-2xl border border-dashed bg-muted/60 p-6 transition-colors",
+          "rounded-2xl border border-dashed bg-muted/60 p-4 transition-colors sm:p-5",
           isDragOver && "border-primary bg-primary/10",
         )}
         onDragOver={(event) => {
@@ -281,7 +281,7 @@ export function SoundscapeClient() {
 
       {/* File list + progress */}
       {recordings.length > 0 ? (
-        <section className="rounded-2xl border bg-background shadow-sm">
+        <section className="rounded-2xl border bg-background">
           <div className="flex flex-wrap items-center justify-between gap-3 border-b px-4 py-3">
             <p className="text-sm font-medium text-foreground">
               {t("import.fileCount", { count: recordings.length })}
@@ -354,7 +354,7 @@ export function SoundscapeClient() {
       ) : null}
 
       {/* Chart */}
-      <section className="rounded-2xl border bg-background p-4 shadow-sm sm:p-6">
+      <section className="rounded-2xl border bg-background p-4 sm:p-5">
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div>
             <h2 className="font-instrument text-lg italic text-foreground">
@@ -430,7 +430,7 @@ export function SoundscapeClient() {
             </aside>
           </div>
         ) : (
-          <div className="mt-4 flex min-h-64 flex-col items-center justify-center gap-2 rounded-xl bg-muted p-8 text-center">
+          <div className="mt-4 flex min-h-64 flex-col items-center justify-center gap-2 rounded-xl bg-muted p-3 text-center">
             <FileAudioIcon className="size-8 text-muted-foreground/60" />
             <h3 className="font-instrument text-base italic text-foreground">{t("chart.empty")}</h3>
             <p className="text-sm text-muted-foreground">{t("chart.emptyHint")}</p>

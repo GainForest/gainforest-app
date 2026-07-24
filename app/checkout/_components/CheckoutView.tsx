@@ -701,14 +701,13 @@ export function CheckoutView({
 
   if (!hydrated) {
     return (
-      <div className="mx-auto w-full max-w-3xl px-4 py-10" aria-busy="true">
-        <div className="rounded-3xl bg-muted p-6">
-          <Skeleton className="h-10 w-56 rounded-full" />
-          <div className="mt-6 space-y-4">
-            <Skeleton className="h-28 rounded-2xl bg-background" />
-            <Skeleton className="h-36 rounded-2xl bg-background" />
-            <Skeleton className="h-48 rounded-2xl bg-background" />
-          </div>
+      <div className="mx-auto w-full max-w-3xl px-3 py-4 sm:px-5 lg:px-8 lg:py-6" aria-busy="true">
+        <Skeleton className="h-10 w-56 rounded-full" />
+        <div className="mt-6 space-y-4">
+          <Skeleton className="h-28 rounded-2xl bg-muted" />
+          <Skeleton className="h-36 rounded-2xl bg-muted" />
+          <Skeleton className="h-48 rounded-2xl bg-muted" />
+          <Skeleton className="h-32 rounded-2xl bg-muted" />
         </div>
       </div>
     );
@@ -717,7 +716,7 @@ export function CheckoutView({
   // ── Success ───────────────────────────────────────────────────────────────
   if (phase === "done") {
     return (
-      <div className="mx-auto w-full max-w-2xl px-4 py-10">
+      <div className="mx-auto w-full max-w-3xl px-3 py-4 sm:px-5 lg:px-8 lg:py-6">
         <div className="flex flex-col items-center gap-4 text-center">
           {rewardCards.length > 0 ? (
             <RewardDeck
@@ -770,7 +769,7 @@ export function CheckoutView({
           </div>
           <div className="grid grid-cols-4 gap-1">
             {shareLinks.map((item) => (
-              <Button key={item.platform} variant="outline" className="shadow-none" asChild>
+              <Button key={item.platform} variant="outline" className="min-h-11 shadow-none" asChild>
                 <Link href={item.href} target="_blank" rel="noreferrer" aria-label={item.label}>
                   <span className={item.className}>
                     <SocialGlyph platform={item.platform} />
@@ -780,7 +779,7 @@ export function CheckoutView({
             ))}
             <Button
               variant="outline"
-              className="shadow-none"
+              className="min-h-11 shadow-none"
               onClick={async () => {
                 await navigator.clipboard?.writeText(shareText);
                 setCopied(true);
@@ -810,22 +809,24 @@ export function CheckoutView({
   // ── Empty cart ────────────────────────────────────────────────────────────
   if (items.length === 0) {
     return (
-      <div className="mx-auto mt-10 flex w-[calc(100%_-_2rem)] max-w-3xl flex-col items-center gap-4 rounded-3xl bg-muted px-6 py-20 text-center">
-        <div className="grid size-16 place-items-center rounded-full bg-background text-muted-foreground">
-          <ShoppingCartIcon className="size-7" aria-hidden />
-        </div>
-        <DisplayHeading as="h1" className="text-3xl text-foreground">{t("emptyTitle")}</DisplayHeading>
-        {onExploreMore ? (
-          <Button className="mt-2" onClick={onExploreMore}>
-            <CompassIcon className="size-4" /> {t("exploreMore")}
-          </Button>
-        ) : (
-          <Button asChild className="mt-2">
-            <Link href="/projects">
+      <div className="mx-auto w-full max-w-3xl px-3 py-4 sm:px-5 lg:px-8 lg:py-6">
+        <div className="flex flex-col items-center gap-4 rounded-2xl bg-muted px-4 py-12 text-center sm:px-6">
+          <div className="grid size-16 place-items-center rounded-full bg-background text-muted-foreground">
+            <ShoppingCartIcon className="size-7" aria-hidden />
+          </div>
+          <DisplayHeading as="h1" className="text-3xl text-foreground">{t("emptyTitle")}</DisplayHeading>
+          {onExploreMore ? (
+            <Button className="mt-2" onClick={onExploreMore}>
               <CompassIcon className="size-4" /> {t("exploreMore")}
-            </Link>
-          </Button>
-        )}
+            </Button>
+          ) : (
+            <Button asChild className="mt-2">
+              <Link href="/projects">
+                <CompassIcon className="size-4" /> {t("exploreMore")}
+              </Link>
+            </Button>
+          )}
+        </div>
       </div>
     );
   }
@@ -833,7 +834,7 @@ export function CheckoutView({
   const paying = phase === "paying";
 
   return (
-    <div className="mx-auto w-full max-w-3xl px-4 py-8">
+    <div className="mx-auto w-full max-w-3xl px-3 py-4 sm:px-5 lg:px-8 lg:py-6">
       {onBackToCart ? (
         <button
           type="button"
@@ -856,7 +857,7 @@ export function CheckoutView({
 
       <div className="mt-6 flex flex-col gap-4">
         {/* ── Donor identity ──────────────────────────────────────────────── */}
-        <section className="rounded-2xl bg-muted p-5">
+        <section className="rounded-2xl bg-muted p-4 sm:p-5">
           <DisplayHeading as="h2" className="text-xl leading-tight text-foreground">{t("donorTitle")}</DisplayHeading>
           {authSession.isLoggedIn ? (
             <label className="mt-3 flex min-w-0 cursor-pointer items-start gap-3">
@@ -872,10 +873,10 @@ export function CheckoutView({
         </section>
 
         {/* ── Wallet ──────────────────────────────────────────────────────── */}
-        <section className="rounded-2xl bg-muted p-5">
+        <section className="rounded-2xl bg-muted p-4 sm:p-5">
           <DisplayHeading as="h2" className="text-xl leading-tight text-foreground">{t("walletTitle")}</DisplayHeading>
           {wallet ? (
-            <div className="mt-3 flex items-center justify-between rounded-2xl border border-border bg-background px-4 py-3">
+            <div className="mt-3 flex items-center justify-between rounded-2xl border border-border bg-background p-3 sm:px-4">
               <div>
                 <p className="font-mono text-sm font-medium text-foreground">{shortWallet(wallet.address)}</p>
                 <p className="mt-0.5 text-xs text-muted-foreground">
@@ -897,7 +898,7 @@ export function CheckoutView({
 
         {/* ── Tip ─────────────────────────────────────────────────────────── */}
         {tipEnabled && !tipAlreadyCompleted ? (
-          <section className="rounded-2xl bg-muted p-5">
+          <section className="rounded-2xl bg-muted p-4 sm:p-5">
             <DisplayHeading as="h2" className="text-xl leading-tight text-foreground">{t("tipTitle")}</DisplayHeading>
             <p className="mt-1 text-xs leading-5 text-muted-foreground">{t("tipDescription")}</p>
             <div className="relative mt-12">
@@ -933,7 +934,7 @@ export function CheckoutView({
 
             {/* Gentle nudge when the slider sits at zero — never blocking. */}
             {tipPercent === 0 ? (
-              <div className="mt-4 rounded-2xl bg-background px-4 py-5 text-center">
+              <div className="mt-4 rounded-2xl bg-background p-3 text-center sm:p-4">
                 <h3 className="font-instrument text-lg italic text-foreground">{t("tipNudgeTitle")}</h3>
                 <p className="mt-1 text-xs leading-5 text-muted-foreground">{t("tipNudgeBody")}</p>
                 <div className="mt-3 flex flex-wrap items-center justify-center gap-2">
@@ -959,7 +960,7 @@ export function CheckoutView({
         ) : null}
 
         {/* ── Summary + progress ──────────────────────────────────────────── */}
-        <section className="rounded-2xl bg-muted p-5">
+        <section className="rounded-2xl bg-muted p-4 sm:p-5">
           <DisplayHeading as="h2" className="text-xl leading-tight text-foreground">{t("summaryTitle")}</DisplayHeading>
 
           <ul className="mt-3 space-y-2">

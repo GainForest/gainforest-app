@@ -837,16 +837,16 @@ export function AudioMothClient({
         title={t("title")}
         lede={mainTab === "label" ? t("label.subtitle") : mainTab === "identifications" ? identificationsT("subtitle") : t("subtitle")}
       />
-      <div className="mx-auto flex w-full max-w-7xl flex-col gap-6 px-4 sm:px-6">
+      <div className="mx-auto flex w-full max-w-[90rem] flex-col gap-6 px-3 sm:px-5 lg:px-8">
       {/* Setup (this device over USB) vs Deployment (field events) */}
-      <nav className="flex w-full gap-1 self-start rounded-full bg-muted p-1 sm:w-auto" aria-label={t("title")}>
+      <nav className="flex w-full gap-1 self-start overflow-x-auto rounded-full bg-muted p-1 sm:w-auto" aria-label={t("title")}>
         {mainTabs.map(({ id, label, Icon, adminOnly }) => (
           <button
             key={id}
             type="button"
             onClick={() => selectMainTab(id)}
             className={cn(
-              "flex min-w-0 flex-1 items-center justify-center gap-1 rounded-full px-2 py-2 text-xs font-medium transition-colors sm:flex-none sm:gap-2 sm:px-4 sm:text-sm",
+              "flex min-h-11 flex-none items-center justify-center gap-2 whitespace-nowrap rounded-full px-4 py-2 text-sm font-medium transition-colors",
               mainTab === id ? "bg-primary text-primary-foreground shadow-sm" : "text-muted-foreground hover:text-foreground",
             )}
             aria-current={mainTab === id ? "page" : undefined}
@@ -908,7 +908,7 @@ export function AudioMothClient({
                       type="button"
                       onClick={() => setTab(id)}
                       className={cn(
-                        "flex flex-1 items-center justify-center gap-2 rounded-full px-3 py-2 text-sm font-medium transition-colors",
+                        "flex min-h-11 flex-1 items-center justify-center gap-2 rounded-full px-3 py-2 text-sm font-medium transition-colors",
                         tab === id ? "bg-primary text-primary-foreground shadow-sm" : "text-muted-foreground hover:text-foreground",
                       )}
                       aria-current={tab === id ? "page" : undefined}
@@ -1133,7 +1133,7 @@ function AutoSetupWizard({ wizard, onClose }: { wizard: WizardState; onClose: ()
       animate={{ opacity: 1, y: 0, scale: 1 }}
       exit={shouldReduceMotion ? undefined : { opacity: 0, y: -8, scale: 0.98 }}
       transition={{ duration: shouldReduceMotion ? 0 : 0.25 }}
-      className="rounded-3xl bg-muted p-6 sm:p-8"
+      className="rounded-3xl bg-muted p-4 sm:p-5"
       aria-live="polite"
     >
       <div className="mb-6 flex flex-col items-center gap-3 text-center">

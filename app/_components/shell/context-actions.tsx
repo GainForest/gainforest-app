@@ -122,7 +122,7 @@ function AuthenticatedCreateProjectButton({
       target,
       projectsHref: manageHref({ basePath: groupManageBasePath(target.identifier) }, "projects"),
     });
-    modal.pushModal({ id: modalId, dialogWidth: "max-w-3xl w-[calc(100%-2rem)]", forceDialog: true }, true);
+    modal.pushModal({ id: modalId, dialogWidth: "max-w-3xl", forceDialog: true }, true);
     void modal.show();
   };
 

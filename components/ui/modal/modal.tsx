@@ -30,7 +30,7 @@ export const ModalHeader = ({
           <Button
             variant={"secondary"}
             size={"icon"}
-            className="p-0 h-6 w-6"
+            className="size-10 p-0"
             type="button"
             aria-label="Go back"
             onClick={() => {
@@ -91,7 +91,7 @@ export const ModalContent = ({
   return (
     <>
       {dismissible && (
-        <DialogClose className="ring-offset-background focus:ring-ring bg-secondary data-[state=open]:text-muted-foreground absolute top-0 right-0 rounded-full p-1 opacity-100 transition-all hover:brightness-95 dark:hover:brightness-105 focus:ring-2 focus:ring-offset-2 focus:outline-hidden disabled:pointer-events-none [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4">
+        <DialogClose className="ring-offset-background focus:ring-ring bg-secondary data-[state=open]:text-muted-foreground absolute top-0 right-0 grid size-10 place-items-center rounded-full opacity-100 transition-all hover:brightness-95 dark:hover:brightness-105 focus:ring-2 focus:ring-offset-2 focus:outline-hidden disabled:pointer-events-none [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4">
           <XIcon />
           <span className="sr-only">Close</span>
         </DialogClose>

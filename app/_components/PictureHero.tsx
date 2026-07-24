@@ -58,7 +58,7 @@ export function PictureHero({
       <div className="absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-background/80 to-transparent" />
       <div className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-background via-background/70 to-transparent" />
 
-      <div className={compact ? "relative z-10 mx-auto flex max-w-6xl flex-col px-8 pt-[64px] pb-8 sm:px-10 lg:px-9" : "relative z-10 mx-auto flex max-w-6xl flex-col px-8 pt-[86px] pb-14 sm:px-10 lg:px-9"}>
+      <div className={compact ? "relative z-10 mx-auto flex max-w-6xl flex-col px-3 pb-8 pt-16 sm:px-5 lg:px-8" : "relative z-10 mx-auto flex max-w-6xl flex-col px-3 pb-12 pt-20 sm:px-5 lg:px-8"}>
         <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
           <div className="max-w-4xl">
             <DisplayHeading
@@ -67,7 +67,7 @@ export function PictureHero({
             >
               {title}{accent ? <> <span className="text-foreground/90 dark:text-white/90">{accent}</span></> : null}
             </DisplayHeading>
-            <p className={compact ? "mt-4 max-w-2xl text-base leading-7 text-muted-foreground dark:text-white/70 md:text-base" : "mt-7 max-w-2xl text-base leading-8 text-muted-foreground dark:text-white/70 md:text-lg"}>
+            <p className={compact ? "mt-4 max-w-2xl text-base leading-7 text-muted-foreground dark:text-white/70 md:text-base" : "mt-6 max-w-2xl text-base leading-8 text-muted-foreground dark:text-white/70 md:text-lg"}>
               {lede}
             </p>
           </div>

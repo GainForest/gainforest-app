@@ -96,9 +96,9 @@
   "sidebar": {
     "changelogLink": "Lihat yang baru",
     "sections": {
-      "explore": "JELAJAHI",
-      "funding": "PENDANAAN",
-      "manage": "KELOLA",
+      "explore": "Jelajahi",
+      "funding": "Pendanaan",
+      "manage": "Kelola",
       "ai": "AI"
     },
     "items": {

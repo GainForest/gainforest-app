@@ -27,8 +27,8 @@ export default async function ChangelogPage() {
       : "";
 
   return (
-    <div className="mx-auto w-full max-w-3xl px-4 py-10 sm:px-6 sm:py-14">
-      <header className="mb-10">
+    <div className="mx-auto w-full max-w-3xl px-3 py-4 sm:px-5 lg:px-8 lg:py-6">
+      <header className="mb-6 md:mb-8">
         <DisplayHeading as="h1" className="text-3xl font-medium tracking-tight sm:text-4xl">
           {t("heading", { version: changelog.version })}
         </DisplayHeading>

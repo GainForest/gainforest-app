@@ -322,11 +322,11 @@ export function FeedClient({
   }, [visibleItems]);
 
   return (
-    <section className="-mt-14 pb-24 md:pb-32">
+    <section className="-mt-14 pb-24 sm:pb-8">
       {/* Hero */}
       <div className="relative isolate overflow-hidden">
         <div className="absolute inset-0 -z-10 bg-linear-to-b from-primary/8 via-primary/2 to-transparent" />
-        <div className="mx-auto flex max-w-3xl animate-in flex-col px-6 pb-4 pt-16 motion-reduce:animate-none sm:px-8 sm:pb-6 sm:pt-[76px] lg:max-w-4xl">
+        <div className="mx-auto flex max-w-3xl animate-in flex-col px-3 pb-4 pt-16 motion-reduce:animate-none sm:px-5 sm:pb-6 sm:pt-20 lg:max-w-4xl lg:px-8">
           <h1
             className="text-3xl italic leading-[1.03] tracking-[-0.02em] text-foreground sm:text-4xl sm:leading-[0.98] lg:text-5xl"
             style={{ fontFamily: "var(--font-instrument-serif-var)", fontStyle: "italic" }}
@@ -342,12 +342,12 @@ export function FeedClient({
         </div>
       </div>
 
-      <div className="mx-auto flex w-full max-w-3xl gap-10 px-4 sm:px-6 lg:max-w-4xl">
+      <div className="mx-auto flex w-full max-w-3xl gap-10 px-3 sm:px-5 lg:max-w-4xl lg:px-8">
         <div className="min-w-0 flex-1">
           {/* Below lg the right rail is hidden, so keep a horizontal selector
               pinned at the top of the feed there. */}
-          <div className="sticky top-14 z-20 -mx-4 mb-3 border-b border-border/60 bg-background/90 backdrop-blur supports-[backdrop-filter]:bg-background/70 sm:-mx-6 lg:hidden">
-            <div className="px-4 py-2 sm:px-6">
+          <div className="sticky top-14 z-20 -mx-3 mb-3 border-b border-border/60 bg-background/90 backdrop-blur supports-[backdrop-filter]:bg-background/70 sm:-mx-5 lg:hidden">
+            <div className="px-3 py-2 sm:px-5">
               <FeedFilterTabs
                 filter={filter}
                 signedIn={signedIn}

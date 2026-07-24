@@ -101,7 +101,7 @@ export function StatsDashboardClient() {
   }, [locale, projects, stats.projects.data]);
 
   return (
-    <div className="mx-auto max-w-6xl space-y-10 px-6 pb-20 md:pb-28">
+    <div className="mx-auto max-w-6xl space-y-6 px-3 pb-6 sm:px-5 md:space-y-8 md:pb-8 lg:px-8">
       <DashboardStatsSection
         title={t("sections.stories.title")}
         description={t("sections.stories.description")}
@@ -216,7 +216,7 @@ function StatsSkeleton() {
   return (
     <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4" aria-hidden="true">
       {Array.from({ length: 4 }).map((_, index) => (
-        <div key={index} className="rounded-2xl bg-muted/60 p-4 sm:rounded-3xl sm:p-6">
+        <div key={index} className="rounded-2xl bg-muted/60 p-4 sm:p-5">
           <div className="flex items-center gap-3">
             <Skeleton className="size-5 rounded-full" />
             <Skeleton className="h-8 w-20 rounded-full" />

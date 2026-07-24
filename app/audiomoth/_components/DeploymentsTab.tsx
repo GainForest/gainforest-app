@@ -83,7 +83,7 @@ export function DeploymentsTab({ sessionDid }: { sessionDid: string | null }) {
 
   if (!sessionDid) {
     return (
-      <div className="rounded-3xl border border-dashed border-border bg-muted px-6 py-12 text-center">
+      <div className="rounded-2xl bg-muted px-4 py-10 text-center sm:px-5">
         <h2 className="font-instrument text-base font-light italic text-foreground">{t("signInTitle")}</h2>
         <p className="mx-auto mt-1.5 max-w-[420px] text-sm text-muted-foreground">{t("signInBody")}</p>
       </div>
@@ -107,7 +107,7 @@ export function DeploymentsTab({ sessionDid }: { sessionDid: string | null }) {
       ) : events.length === 0 ? (
         <Notice title={t("emptyTitle")} body={t("emptyBody")} />
       ) : (
-        <ul className="flex flex-col gap-2">
+        <ul className="overflow-hidden rounded-2xl bg-muted divide-y divide-background">
           {events.map((event) => (
             <DeploymentRow
               key={event.uri}
@@ -193,7 +193,7 @@ function DeploymentRow({
   }, [event, onDeleted, t]);
 
   return (
-    <li className="rounded-2xl bg-muted px-4 py-3.5">
+    <li className="px-4 py-3">
       <div className="flex items-start gap-3">
         <span className="mt-0.5 grid h-9 w-9 shrink-0 place-items-center rounded-full bg-primary/10 text-primary">
           <MapPinIcon className="size-4.5" />
@@ -201,7 +201,7 @@ function DeploymentRow({
         <div className="min-w-0 flex-1">
           <Link
             href={deploymentDetailPath(event.did, event.rkey)}
-            className="block truncate text-sm font-medium text-foreground hover:underline"
+            className="block break-words text-sm font-medium text-foreground hover:underline"
           >
             {event.locality ?? t("untitled")}
           </Link>
@@ -221,41 +221,40 @@ function DeploymentRow({
           </p>
           {error ? <p className="mt-1 text-xs text-destructive">{error}</p> : null}
         </div>
-        <div className="flex shrink-0 items-center gap-1.5">
-          {confirming ? (
-            <>
-              <Button variant="destructive" size="xs" onClick={remove} disabled={deleting}>
-                {deleting ? <Loader2Icon className="size-3.5 animate-spin" /> : null}
-                {t("confirmDelete")}
-              </Button>
-              <Button variant="ghost" size="xs" onClick={() => setConfirming(false)} disabled={deleting}>
-                {t("cancel")}
-              </Button>
-            </>
-          ) : (
-            <>
-              <Button
-                variant="ghost"
-                size="icon-sm"
-                className="text-muted-foreground hover:text-foreground"
-                onClick={onEdit}
-                aria-label={t("edit")}
-              >
-                <PencilIcon className="size-4" />
-              </Button>
-              <Button
-                variant="ghost"
-                size="icon-sm"
-                className="text-muted-foreground hover:text-destructive"
-                onClick={() => setConfirming(true)}
-                aria-label={t("delete")}
-              >
-                <Trash2Icon className="size-4" />
-              </Button>
-            </>
-          )}
-        </div>
+        {!confirming ? (
+          <div className="flex shrink-0 items-center gap-1">
+            <Button
+              variant="ghost"
+              size="icon-sm"
+              className="size-10 text-muted-foreground hover:text-foreground"
+              onClick={onEdit}
+              aria-label={t("edit")}
+            >
+              <PencilIcon className="size-4" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon-sm"
+              className="size-10 text-muted-foreground hover:text-destructive"
+              onClick={() => setConfirming(true)}
+              aria-label={t("delete")}
+            >
+              <Trash2Icon className="size-4" />
+            </Button>
+          </div>
+        ) : null}
       </div>
+      {confirming ? (
+        <div className="mt-3 flex flex-col gap-2 border-t border-background pt-3 sm:flex-row sm:justify-end">
+          <Button variant="destructive" onClick={remove} disabled={deleting}>
+            {deleting ? <Loader2Icon className="size-4 animate-spin" /> : null}
+            {t("confirmDelete")}
+          </Button>
+          <Button variant="ghost" onClick={() => setConfirming(false)} disabled={deleting}>
+            {t("cancel")}
+          </Button>
+        </div>
+      ) : null}
     </li>
   );
 }
@@ -426,13 +425,13 @@ function CreateDeploymentDialog({
       <DialogPlaceholder
         dialogWidth="max-w-md"
         overlayClassName="z-[110] data-[state=open]:animate-none data-[state=closed]:animate-none data-[state=open]:bg-foreground/30 data-[state=open]:backdrop-blur-[2px]"
-        className="z-[110] flex w-[calc(100%-2rem)] flex-col gap-0 overflow-y-auto rounded-3xl border-border bg-background p-0 shadow-2xl"
+        className="z-[110] flex flex-col gap-0 overflow-y-auto rounded-3xl border-border bg-background p-0 shadow-2xl"
         onOpenAutoFocus={(event) => {
           event.preventDefault();
           closeButtonRef.current?.focus();
         }}
       >
-        <div className="sticky top-0 z-10 flex items-center justify-between gap-3 border-b border-border bg-background/95 px-5 py-4 backdrop-blur-xl">
+        <div className="sticky top-0 z-10 flex items-center justify-between gap-3 border-b border-border bg-background/95 p-4 backdrop-blur-xl sm:px-6">
           <DialogTitle className="font-instrument text-lg font-light italic text-foreground">{t("createTitle")}</DialogTitle>
           <Button ref={closeButtonRef} variant="ghost" size="icon-sm" onClick={() => !busy && onClose()} aria-label={t("close")}>
             <XIcon />
@@ -440,7 +439,7 @@ function CreateDeploymentDialog({
         </div>
 
         {stage === "done" ? (
-          <div className="flex flex-col items-center gap-4 px-5 py-10 text-center">
+          <div className="flex flex-col items-center gap-4 p-4 py-10 text-center sm:px-6">
             <span className="grid h-12 w-12 place-items-center rounded-full bg-primary/10 text-primary">
               <CheckIcon className="size-6" />
             </span>
@@ -461,7 +460,7 @@ function CreateDeploymentDialog({
           </div>
         ) : (
           <>
-            <div className="flex flex-col gap-4 px-5 py-5">
+            <div className="flex flex-col gap-4 p-4 sm:px-6">
               <p className="text-sm text-muted-foreground">{t("createIntro")}</p>
 
               <div className="flex flex-col gap-1.5">
@@ -567,7 +566,7 @@ function CreateDeploymentDialog({
               </p>
             </div>
 
-            <div className="sticky bottom-0 mt-auto flex items-center justify-end gap-2 border-t border-border bg-background/95 px-5 py-4 backdrop-blur-xl">
+            <div className="sticky bottom-0 mt-auto flex items-center justify-end gap-2 border-t border-border bg-background/95 p-4 backdrop-blur-xl sm:px-6">
               <Button variant="outline" size="sm" onClick={() => !busy && onClose()} disabled={busy}>
                 {t("cancel")}
               </Button>
@@ -593,9 +592,9 @@ function CreateDeploymentDialog({
 
 function LoadingRows() {
   return (
-    <div className="overflow-hidden rounded-2xl border border-border">
+    <div className="overflow-hidden rounded-2xl bg-muted divide-y divide-background">
       {Array.from({ length: 4 }).map((_, i) => (
-        <div key={i} className="flex items-center gap-3 border-b border-border/60 px-4 py-3.5 last:border-0">
+        <div key={i} className="flex items-center gap-3 px-4 py-3">
           <div className="h-9 w-9 shrink-0 animate-pulse rounded-full bg-muted" />
           <div className="h-3.5 flex-1 animate-pulse rounded bg-muted" />
           <div className="h-3.5 w-24 animate-pulse rounded bg-muted" />
@@ -607,7 +606,7 @@ function LoadingRows() {
 
 function Notice({ title, body }: { title: string; body: string }) {
   return (
-    <div className="rounded-2xl border border-dashed border-border bg-muted px-6 py-10 text-center">
+    <div className="rounded-2xl bg-muted px-4 py-10 text-center sm:px-5">
       <h3 className="font-instrument text-base font-light italic text-foreground">{title}</h3>
       <p className="mx-auto mt-1.5 max-w-[420px] text-sm text-muted-foreground">{body}</p>
     </div>

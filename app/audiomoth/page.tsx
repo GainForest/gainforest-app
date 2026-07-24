@@ -25,7 +25,7 @@ export default async function AudioMothPage() {
   const canUseLabelling = isAudioMothLabellingFlagEnabled() && Boolean(moderator?.isModerator);
 
   return (
-    <main className="-mt-14 bg-background pb-20">
+    <main className="-mt-14 bg-background pb-8">
       <AudioMothClient
         sessionDid={session.isLoggedIn ? session.did : null}
         canUseLabelling={canUseLabelling}

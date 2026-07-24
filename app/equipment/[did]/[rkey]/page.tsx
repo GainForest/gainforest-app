@@ -77,7 +77,7 @@ export default async function EquipmentDetailPage({ params }: { params: Equipmen
     : null;
 
   return (
-    <main className="mx-auto w-full max-w-3xl px-6 pb-20 pt-8 md:pt-12">
+    <main className="mx-auto w-full max-w-6xl px-3 pb-8 pt-4 sm:px-5 sm:pt-6 lg:px-8">
       {/* The registry list is owner-only, so only the owner gets a back link to it. */}
       {isOwner ? (
         <Link
@@ -112,7 +112,7 @@ export default async function EquipmentDetailPage({ params }: { params: Equipmen
         {isOwner ? <EquipmentDetailActions item={item} ownerDid={item.did} /> : null}
       </header>
 
-      <section className="mt-8 rounded-2xl bg-muted/60 p-5 sm:p-6">
+      <section className="mt-8 rounded-2xl bg-muted/60 p-4 sm:p-5">
         <dl className="grid gap-x-8 gap-y-5 sm:grid-cols-2">
           <AssetMetaRow icon={<TagIcon className="h-4 w-4" aria-hidden />} label={t("table.type")}>
             {t(`categories.${item.category}`)}

@@ -112,7 +112,7 @@ function AccountDrawer({ did, onClose }: { did: string | null; onClose: () => vo
       />
       <div className="drawer-sheet thin-scroll relative flex h-full w-full max-w-[540px] flex-col overflow-y-auto overscroll-contain bg-background shadow-[-24px_0_60px_-30px_rgba(20,30,15,0.5)] sm:my-3 sm:h-[calc(100%_-_1.5rem)] sm:rounded-l-[28px] sm:border sm:border-r-0 sm:border-border-soft">
         {/* Header */}
-        <div className="sticky top-0 z-10 flex items-center justify-between gap-3 border-b border-border-soft bg-background/95 px-5 py-4 backdrop-blur-xl">
+        <div className="sticky top-0 z-10 flex items-center justify-between gap-3 border-b border-border-soft bg-background/95 p-4 backdrop-blur-xl sm:px-5">
           <span className="inline-flex items-center gap-1.5 rounded-full bg-foreground/[0.06] px-2.5 py-1 text-[11.5px] font-medium text-foreground/70">
             Account
           </span>
@@ -121,13 +121,13 @@ function AccountDrawer({ did, onClose }: { did: string | null; onClose: () => vo
             type="button"
             onClick={onClose}
             aria-label="Close"
-            className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-border-soft text-foreground/60 transition-colors hover:border-foreground/30 hover:text-foreground"
+            className="inline-flex size-10 items-center justify-center rounded-full border border-border-soft text-foreground/60 transition-colors hover:border-foreground/30 hover:text-foreground"
           >
             <XIcon className="h-[15px] w-[15px]" aria-hidden />
           </button>
         </div>
 
-        <div className="px-7 pb-12 pt-7 sm:px-8">
+        <div className="px-4 pb-[max(2rem,env(safe-area-inset-bottom))] pt-5 sm:px-6 sm:pt-6">
           {/* Identity */}
           <div className="flex items-center gap-4">
             {avatar ? (
@@ -252,11 +252,11 @@ function StatTile({
   hint: string;
 }) {
   return (
-    <div className="rounded-2xl border border-border-soft bg-muted px-4 py-3.5">
-      <div className="text-[11px] font-medium uppercase tracking-[0.1em] text-foreground/45">
+    <div className="rounded-2xl bg-muted p-4">
+      <div className="text-xs font-medium text-muted-foreground">
         {label}
       </div>
-      <div className="mt-1 font-instrument text-[30px] font-normal leading-none tracking-[-0.01em] text-foreground">
+      <div className="mt-1 text-2xl font-semibold tabular-nums text-foreground">
         {value}
       </div>
       <div className="mt-1.5 text-[11px] text-foreground/50">{hint}</div>
@@ -267,7 +267,7 @@ function StatTile({
 function Meta({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div>
-      <dt className="text-[11px] font-medium uppercase tracking-[0.08em] text-foreground/45">
+      <dt className="text-xs font-medium text-muted-foreground">
         {label}
       </dt>
       <dd className="mt-0.5 text-[14px] leading-[1.45] text-foreground">{children}</dd>

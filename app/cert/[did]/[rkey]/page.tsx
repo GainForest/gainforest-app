@@ -597,9 +597,9 @@ export async function BumicertDetailBody({
           },
         }}
       />
-      <main className="min-h-screen bg-background pb-20">
+      <main className="min-h-dvh bg-background pb-20">
         {backHref ? (
-          <div className="mx-auto max-w-6xl px-6 pt-6 lg:px-8">
+          <div className="mx-auto max-w-6xl px-3 pt-6 sm:px-5 lg:px-8">
             <Link
               href={backHref}
               className="inline-flex items-center gap-1.5 text-[13px] font-medium text-muted-foreground transition-colors hover:text-foreground"
@@ -610,7 +610,7 @@ export async function BumicertDetailBody({
           </div>
         ) : null}
         <section
-          className={`mx-auto max-w-6xl gap-8 px-6 py-8 lg:px-8 ${showsDetailSidebar ? "grid grid-cols-1 lg:grid-cols-[320px_minmax(0,1fr)]" : ""}`}
+          className={`mx-auto max-w-6xl gap-8 px-3 py-4 sm:px-5 sm:py-6 lg:px-8 ${showsDetailSidebar ? "grid grid-cols-1 lg:grid-cols-[320px_minmax(0,1fr)]" : ""}`}
         >
           {showsDetailSidebar && (
             <aside
@@ -983,9 +983,9 @@ export async function ProjectDetailView({
           },
         }}
       />
-      <main className="min-h-screen bg-background pb-20">
+      <main className="min-h-dvh bg-background pb-20">
         {showProjectHero ? (
-          <header className="mx-auto max-w-6xl px-6 pt-6 lg:px-8">
+          <header className="mx-auto max-w-6xl px-3 pt-6 sm:px-5 lg:px-8">
             {backHref ? (
               <Link
                 href={backHref}
@@ -1074,7 +1074,7 @@ export async function ProjectDetailView({
         ) : null}
         <section
           id="support"
-          className={`mx-auto grid max-w-6xl scroll-mt-24 grid-cols-1 gap-x-10 gap-y-8 px-6 pb-8 lg:px-8 ${activeTab === "updates" ? "pt-3" : activeTab === "overview" ? "pt-6" : "pt-8"} ${showOverviewSidebar ? "lg:grid-cols-[minmax(0,1fr)_320px]" : ""}`}
+          className={`mx-auto grid max-w-6xl scroll-mt-24 grid-cols-1 gap-x-10 gap-y-8 px-3 pb-8 sm:px-5 lg:px-8 ${activeTab === "updates" ? "pt-3" : activeTab === "overview" ? "pt-6" : "pt-8"} ${showOverviewSidebar ? "lg:grid-cols-[minmax(0,1fr)_320px]" : ""}`}
         >
           <div className="min-w-0">
             {activeTab === "overview" ? (
@@ -1117,14 +1117,14 @@ export async function ProjectDetailView({
                   </div>
                 ) : null}
                 {detail?.richBody && detail.richBody.length > 0 ? (
-                  <div className="mt-7">
+                  <div className="mt-6">
                     <RichText
                       blocks={detail.richBody}
                       className="text-base leading-7 md:text-lg md:leading-8"
                     />
                   </div>
                 ) : description ? (
-                  <p className="mt-7 whitespace-pre-line text-base leading-7 text-foreground/76 md:text-lg md:leading-8">
+                  <p className="mt-6 whitespace-pre-line text-base leading-7 text-foreground/76 md:text-lg md:leading-8">
                     {description}
                   </p>
                 ) : null}
@@ -1528,7 +1528,7 @@ function ProjectDetailSection({
   return (
     <section
       id={id}
-      className="mt-10 scroll-mt-24 border-t border-border-soft pt-7"
+      className="mt-10 scroll-mt-24 border-t border-border-soft pt-6"
     >
       <div className="mb-5 flex items-center gap-2.5">
         <span className="flex size-8 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
@@ -2043,7 +2043,7 @@ async function SupportCard({
   }
 
   return (
-    <div className={["rounded-3xl bg-muted p-5", className].filter(Boolean).join(" ")}>
+    <div className={["rounded-3xl bg-muted p-4 sm:p-5", className].filter(Boolean).join(" ")}>
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
           {combinedUsd > 0 ? (
@@ -2870,7 +2870,7 @@ async function DonationsPanel({
   return (
     <article className="space-y-5 py-1">
       {showSupportCard ? (
-        <div className="rounded-3xl bg-muted p-5 sm:p-6">
+        <div className="rounded-3xl bg-muted p-4 sm:p-5">
           <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
             <div className="min-w-0">
               <h2 className="font-instrument text-3xl font-light italic leading-tight tracking-[-0.025em] text-foreground sm:text-4xl">
@@ -2935,7 +2935,7 @@ async function DonationsPanel({
               ))}
             </div>
           ) : maEarth ? (
-            <div className="rounded-2xl bg-muted p-5">
+            <div className="rounded-2xl bg-muted p-4 sm:p-5">
               <p className="text-sm font-semibold text-foreground">
                 {t("maEarthTitle")}
               </p>
@@ -3252,7 +3252,7 @@ async function DonationLeaderboardRow({
     </>
   );
   const className =
-    "group flex items-start gap-3.5 px-4 py-[18px] transition-colors duration-200 hover:bg-primary/[0.04] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring sm:gap-4 sm:px-5 sm:py-5";
+    "group flex items-start gap-3 px-3 py-3 transition-colors duration-200 hover:bg-primary/[0.04] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring sm:gap-4 sm:px-4 sm:py-4";
 
   if (entry.donor?.type === "did") {
     return (
@@ -3324,7 +3324,7 @@ function EmptyState({
 }) {
   if (variant === "leaderboard") {
     return (
-      <div className="flex flex-col items-center gap-3 rounded-3xl bg-muted px-6 py-16 text-center text-muted-foreground">
+      <div className="flex flex-col items-center gap-3 rounded-2xl bg-muted px-4 py-12 text-center text-muted-foreground sm:px-5">
         <div className="flex size-16 items-center justify-center rounded-full bg-primary/10 text-primary">
           {icon}
         </div>

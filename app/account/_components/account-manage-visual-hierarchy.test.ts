@@ -72,10 +72,20 @@ describe("account and management visual hierarchy", () => {
     );
   });
 
+  it("centers single-column settings and separates one accordion group", () => {
+    const sections = read("app/(manage)/manage/_sections.tsx");
+    const settings = read("app/account/_components/AccountSettingsSections.tsx");
+
+    expect(sections.match(/className="max-w-3xl pt-4 pb-8"/g)).toHaveLength(2);
+    expect(sections).not.toContain('className="mr-auto ml-0 max-w-3xl');
+    expect(settings.match(/className="divide-y divide-border"/g)).toHaveLength(2);
+    expect(settings).not.toMatch(/<Accordion[^>]*className="space-y-1"/);
+  });
+
   it("keeps persistent account and management states visibly separated", () => {
-    expect(read("app/_components/AccountDrawer.tsx")).toContain(
-      "rounded-2xl border border-border-soft bg-muted",
-    );
+    const accountDrawer = read("app/_components/AccountDrawer.tsx");
+    expect(accountDrawer).toContain("rounded-2xl bg-muted p-4");
+    expect(accountDrawer).not.toContain("rounded-2xl border border-border-soft bg-muted");
     expect(read("app/(manage)/manage/certs/new/_components/MintCertProjectGate.tsx")).toContain(
       "rounded-2xl bg-muted px-4 py-8 text-center",
     );
@@ -86,8 +96,8 @@ describe("account and management visual hierarchy", () => {
     const projectCerts = read(
       "app/(manage)/manage/projects/[rkey]/certs/_components/ProjectCertsManagerClient.tsx",
     );
-    expect(projectCerts).toContain("rounded-2xl bg-muted transition-colors hover:bg-muted/80");
-    expect(projectCerts).toContain("flex gap-4 rounded-2xl bg-muted p-4");
+    expect(projectCerts).toContain("h-full overflow-hidden rounded-2xl bg-muted transition-colors hover:bg-muted/80");
+    expect(projectCerts).toContain("flex h-full gap-4 rounded-2xl bg-muted p-4");
 
     expect(read("app/(manage)/manage/projects/[rkey]/gallery/_components/ProjectGalleryManagerClient.tsx")).toContain(
       "rounded-2xl bg-muted px-4 py-3 text-sm text-muted-foreground",

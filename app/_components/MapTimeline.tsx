@@ -84,44 +84,33 @@ export function MapTimeline({
 
   return (
     <div className="pointer-events-none absolute inset-x-0 bottom-0 z-[5] p-3">
-      <div className="pointer-events-auto mx-auto flex max-w-[820px] flex-col gap-2.5 rounded-2xl border border-border-soft bg-background/92 px-3.5 py-3 shadow-sm backdrop-blur">
-        {/* Top row: play + the From / playhead / To readout */}
+      <div className="pointer-events-auto mx-auto flex max-w-[820px] flex-col gap-2 rounded-2xl border border-border-soft bg-background/92 p-3 shadow-sm backdrop-blur">
+        {/* Phone-safe controls: transport/current time first, range endpoints below. */}
         <div className="flex items-center gap-3">
           <button
             type="button"
             onClick={onTogglePlay}
             disabled={disabled}
             aria-label={playing ? labels.pause : labels.play}
-            className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground transition-colors hover:bg-primary-dark disabled:opacity-50"
+            className="inline-flex size-11 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground transition-colors hover:bg-primary-dark disabled:opacity-50"
           >
             {playing ? <PauseIcon /> : <PlayIcon />}
           </button>
-          <div className="flex min-w-0 flex-1 items-center justify-between gap-2 text-[11.5px]">
-            <span className="inline-flex items-baseline gap-1.5 whitespace-nowrap">
-              <span className="text-foreground/45">{labels.from}</span>
-              <span className="font-medium tabular-nums text-foreground/80">{startLabel}</span>
+          <span className="inline-flex min-w-0 flex-1 items-baseline justify-center gap-2 whitespace-nowrap text-center text-[11.5px]">
+            <span ref={headDateRef} className="truncate font-medium tabular-nums text-primary">
+              {endLabel}
             </span>
-            <span className="inline-flex items-baseline gap-1.5 whitespace-nowrap text-center">
-              <span ref={headDateRef} className="font-medium tabular-nums text-primary">
-                {endLabel}
-              </span>
-              <span ref={headCountRef} className="hidden tabular-nums text-foreground/40 sm:inline">
-                {defaultHeadCount}
-              </span>
+            <span ref={headCountRef} className="hidden tabular-nums text-foreground/40 sm:inline">
+              {defaultHeadCount}
             </span>
-            <span className="inline-flex items-baseline gap-1.5 whitespace-nowrap">
-              <span className="text-foreground/45">{labels.to}</span>
-              <span className="font-medium tabular-nums text-foreground/80">{endLabel}</span>
-            </span>
-          </div>
+          </span>
 
-          {/* Playback-speed selector (YouTube-style) */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <button
                 type="button"
                 aria-label={labels.speed}
-                className="inline-flex h-8 shrink-0 items-center justify-center rounded-full border border-border-soft bg-surface px-2.5 text-[11.5px] font-medium tabular-nums text-foreground/75 transition-colors hover:border-primary/40 hover:text-foreground"
+                className="inline-flex size-11 shrink-0 items-center justify-center rounded-full border border-border-soft bg-surface px-2 text-[11.5px] font-medium tabular-nums text-foreground/75 transition-colors hover:border-primary/40 hover:text-foreground"
               >
                 {formatSpeed(speed)}
               </button>
@@ -139,6 +128,16 @@ export function MapTimeline({
               </DropdownMenuRadioGroup>
             </DropdownMenuContent>
           </DropdownMenu>
+        </div>
+        <div className="flex items-baseline justify-between gap-3 text-[11.5px]">
+          <span className="min-w-0">
+            <span className="text-foreground/45">{labels.from} </span>
+            <span className="font-medium tabular-nums text-foreground/80">{startLabel}</span>
+          </span>
+          <span className="min-w-0 text-right">
+            <span className="text-foreground/45">{labels.to} </span>
+            <span className="font-medium tabular-nums text-foreground/80">{endLabel}</span>
+          </span>
         </div>
 
         {/* The dual-handle range track with density histogram behind it */}

@@ -96,9 +96,9 @@
   "sidebar": {
     "changelogLink": "View changelog",
     "sections": {
-      "explore": "EXPLORE",
-      "funding": "FUNDING",
-      "manage": "MANAGE",
+      "explore": "Explore",
+      "funding": "Funding",
+      "manage": "Manage",
       "ai": "AI"
     },
     "items": {

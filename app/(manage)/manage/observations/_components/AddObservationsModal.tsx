@@ -1054,7 +1054,7 @@ export function AddObservationsModal({
           // fullscreen (fullscreenOnMobile), so let the empty drop zone grow
           // into the freed-up height instead of leaving a dead lower half.
           showEmptyState
-            ? "px-6 py-10 max-[32rem]:grid max-[32rem]:min-h-[55dvh] max-[32rem]:place-items-center"
+            ? "px-3 py-10 sm:px-6 max-[32rem]:grid max-[32rem]:min-h-[55dvh] max-[32rem]:place-items-center"
             : "p-3",
         )}
       >
@@ -1287,7 +1287,7 @@ export function AddObservationsModal({
         // bottom edge (full-bleed over the dialog's p-6) — the primary action
         // stays reachable however long the card list grows. From sm up the list
         // scrolls internally instead and the footer sits statically below it.
-        <div className="sticky bottom-0 z-10 -mx-6 -mb-6 space-y-3 border-t border-border bg-background px-6 pb-5 pt-3 sm:static sm:mx-0 sm:mb-0 sm:bg-transparent sm:px-0 sm:pb-0">
+        <div className="sticky bottom-0 z-10 -mx-4 -mb-4 space-y-3 border-t border-border bg-background px-4 pb-[max(1rem,env(safe-area-inset-bottom))] pt-3 sm:static sm:mx-0 sm:mb-0 sm:bg-transparent sm:px-0 sm:pb-0">
           {isSubmitting && uploadProgress ? (
             <QuickProgress
               label={t("uploadingProgress", { done: uploadProgress.done, total: uploadProgress.total })}

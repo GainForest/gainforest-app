@@ -124,7 +124,13 @@ type EditorState =
 /** The cert (org.hypercerts.claim.activity) bound 1:1 to a project. */
 type LinkedCert = { rkey: string; cid: string | null; record: Record<string, unknown> } | null;
 
-export function ManageProjectsClient({ target }: { target: ManageTarget }) {
+export function ManageProjectsClient({
+  target,
+  embedded = false,
+}: {
+  target: ManageTarget;
+  embedded?: boolean;
+}) {
   const [projects, setProjects] = useState<ManagedProject[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -180,7 +186,7 @@ export function ManageProjectsClient({ target }: { target: ManageTarget }) {
       {
         id: "create-project",
         // Inset the width so the forced dialog isn't edge-to-edge on phones.
-        dialogWidth: "max-w-3xl w-[calc(100%-2rem)]",
+        dialogWidth: "max-w-3xl",
         forceDialog: true,
         content: (
           <CreateProjectModal
@@ -258,7 +264,14 @@ export function ManageProjectsClient({ target }: { target: ManageTarget }) {
   };
 
   return (
-    <div className="mx-auto w-full max-w-[1440px] px-4 py-4 sm:px-6 sm:py-6">
+    <div
+      className={cn(
+        "w-full py-4 sm:py-6",
+        embedded
+          ? "min-w-0"
+          : "mx-auto max-w-[90rem] px-3 sm:px-5 lg:px-8",
+      )}
+    >
       <div className="space-y-5">
         {mode !== "edit" ? <ProjectHero /> : null}
 

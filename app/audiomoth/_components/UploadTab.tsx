@@ -557,7 +557,7 @@ export function UploadTab({ sessionDid }: { sessionDid: string | null }) {
 
   if (!sessionDid) {
     return (
-      <div className="rounded-3xl border border-dashed border-border bg-muted px-6 py-12 text-center">
+      <div className="rounded-2xl bg-muted px-4 py-10 text-center sm:px-5">
         <h2 className="font-instrument text-base font-light italic text-foreground">{t("signInTitle")}</h2>
         <p className="mx-auto mt-1.5 max-w-[420px] text-sm text-muted-foreground">{t("signInBody")}</p>
       </div>
@@ -626,7 +626,7 @@ export function UploadTab({ sessionDid }: { sessionDid: string | null }) {
               onDragLeave={() => setDragging(false)}
               onDrop={onDrop}
               className={cn(
-                "flex cursor-pointer flex-col items-center gap-4 rounded-3xl border-2 border-dashed px-6 py-14 text-center transition-colors",
+                "flex cursor-pointer flex-col items-center gap-4 rounded-3xl border-2 border-dashed px-4 py-12 text-center transition-colors sm:px-5",
                 dragging ? "border-primary bg-primary/10" : "border-border bg-muted hover:border-primary/50 hover:bg-muted/80",
               )}
             >
@@ -673,7 +673,7 @@ export function UploadTab({ sessionDid }: { sessionDid: string | null }) {
             initial={shouldReduceMotion ? false : { opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={shouldReduceMotion ? undefined : { opacity: 0 }}
-            className="flex flex-col items-center gap-4 rounded-3xl bg-muted px-6 py-14 text-center"
+            className="flex flex-col items-center gap-4 rounded-2xl bg-muted px-4 py-12 text-center sm:px-5"
           >
             <Loader2Icon className="size-7 animate-spin text-primary" />
             <div>
@@ -705,7 +705,7 @@ export function UploadTab({ sessionDid }: { sessionDid: string | null }) {
             className="flex flex-col gap-4"
           >
             {stats.count === 0 ? (
-              <div className="rounded-3xl border border-dashed border-border bg-muted px-6 py-12 text-center">
+              <div className="rounded-2xl bg-muted px-4 py-10 text-center sm:px-5">
                 <h3 className="font-instrument text-base font-light italic text-foreground">{t("noWavTitle")}</h3>
                 {globalError ? <p className="mx-auto mt-2 max-w-[420px] text-sm text-destructive">{globalError}</p> : null}
                 <p className="mx-auto mt-1.5 max-w-[420px] text-sm text-muted-foreground">{t("noWavBody")}</p>
@@ -716,7 +716,7 @@ export function UploadTab({ sessionDid }: { sessionDid: string | null }) {
             ) : (
               <>
                 {/* Summary */}
-                <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
                   <SummaryTile label={t("summaryRecordings")} value={String(stats.count)} />
                   <SummaryTile label={t("summarySize")} value={formatBytes(stats.totalBytes)} />
                   <SummaryTile
@@ -910,7 +910,7 @@ function SummaryTile({ label, value, mono }: { label: string; value: string; mon
   return (
     <div className="rounded-2xl bg-muted px-4 py-3">
       <p className="text-xs text-muted-foreground">{label}</p>
-      <p className={cn("mt-0.5 truncate text-sm font-medium text-foreground", mono && "font-mono text-xs leading-5")}>
+      <p className={cn("mt-1 break-words text-sm font-medium text-foreground", mono && "font-mono text-xs leading-5")}>
         {value}
       </p>
     </div>

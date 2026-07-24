@@ -102,7 +102,7 @@ export function useAddObservations(
     // pickers and a date picker — a floating card at calc(100%-2rem) was too
     // cramped. On >=32rem it stays a centered max-w-2xl dialog.
     modal.pushModal(
-      { id: modalId, dialogWidth: "max-w-2xl w-[calc(100%-2rem)]", fullscreenOnMobile: true },
+      { id: modalId, dialogWidth: "max-w-2xl", fullscreenOnMobile: true },
       true,
     );
     void modal.show();

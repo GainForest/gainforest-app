@@ -121,8 +121,8 @@ export default async function ObservationDetailPage({ params }: { params: Observ
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
       />
-      <main className="min-h-screen bg-background pb-20">
-      <div className="mx-auto max-w-6xl px-6 py-8 lg:px-8">
+      <main className="min-h-dvh bg-background pb-8">
+      <div className="mx-auto max-w-6xl px-3 py-4 sm:px-5 sm:py-6 lg:px-8">
         <Link
           href="/observations"
           className="inline-flex items-center gap-1.5 text-[13px] font-medium text-muted-foreground transition-colors hover:text-foreground"
@@ -152,55 +152,57 @@ export default async function ObservationDetailPage({ params }: { params: Observ
           </div>
 
           <aside className="min-w-0 space-y-5">
-            {owner ? (
-              <div className="rounded-2xl border border-border-soft bg-surface/60 p-4">
-                <p className="text-sm font-medium text-muted-foreground">
-                  {t("sharedBy")}
-                </p>
-                <Link href={accountHref(owner.urlIdentifier)} className="group mt-3 flex items-center gap-3">
-                  <span className="relative h-11 w-11 shrink-0 overflow-hidden rounded-full border border-border bg-muted">
-                    {owner.avatarUrl ? (
-                      <Image
-                        src={owner.avatarUrl}
-                        alt=""
-                        fill
-                        sizes="44px"
-                        unoptimized={!isPdsBlobUrl(owner.avatarUrl)}
-                        className="object-cover"
-                      />
-                    ) : (
-                      <span className="grid h-full w-full place-items-center text-sm font-semibold text-muted-foreground">
-                        {owner.displayName.charAt(0).toUpperCase()}
+            <div className="overflow-hidden rounded-2xl bg-muted divide-y divide-background">
+              {owner ? (
+                <div className="p-4">
+                  <p className="text-sm font-medium text-muted-foreground">
+                    {t("sharedBy")}
+                  </p>
+                  <Link href={accountHref(owner.urlIdentifier)} className="group mt-3 flex items-center gap-3">
+                    <span className="relative h-11 w-11 shrink-0 overflow-hidden rounded-full border border-border bg-background">
+                      {owner.avatarUrl ? (
+                        <Image
+                          src={owner.avatarUrl}
+                          alt=""
+                          fill
+                          sizes="44px"
+                          unoptimized={!isPdsBlobUrl(owner.avatarUrl)}
+                          className="object-cover"
+                        />
+                      ) : (
+                        <span className="grid h-full w-full place-items-center text-sm font-semibold text-muted-foreground">
+                          {owner.displayName.charAt(0).toUpperCase()}
+                        </span>
+                      )}
+                    </span>
+                    <span className="min-w-0 flex-1">
+                      <span className="block truncate text-[15px] font-medium text-foreground transition-colors group-hover:text-primary">
+                        {owner.displayName}
                       </span>
-                    )}
-                  </span>
-                  <span className="min-w-0 flex-1">
-                    <span className="block truncate text-[15px] font-medium text-foreground transition-colors group-hover:text-primary">
-                      {owner.displayName}
+                      <span className="mt-0.5 inline-flex items-center gap-1 text-[12.5px] text-muted-foreground">
+                        {t("viewProfile")}
+                        <ArrowUpRightIcon className="h-3 w-3" aria-hidden />
+                      </span>
                     </span>
-                    <span className="mt-0.5 inline-flex items-center gap-1 text-[12.5px] text-muted-foreground">
-                      {t("viewProfile")}
-                      <ArrowUpRightIcon className="h-3 w-3" aria-hidden />
-                    </span>
-                  </span>
-                </Link>
-              </div>
-            ) : null}
+                  </Link>
+                </div>
+              ) : null}
 
-            <div className="rounded-2xl border border-border-soft bg-surface/60 p-4">
-              <dl className="space-y-3.5">
-                <MetaRow icon={<CalendarIcon className="h-4 w-4" aria-hidden />} label={t("observed")}>
-                  {record.eventDate ? formatDate(record.eventDate) : t("notRecorded")}
-                </MetaRow>
-                <MetaRow icon={<CalendarIcon className="h-4 w-4" aria-hidden />} label={t("shared")}>
-                  {formatDate(record.createdAt)}
-                </MetaRow>
-                {place ? (
-                  <MetaRow icon={<MapPinIcon className="h-4 w-4" aria-hidden />} label={t("place")}>
-                    {`${countryFlag(record.countryCode)} ${place}`.trim()}
+              <div className="p-4">
+                <dl className="space-y-4">
+                  <MetaRow icon={<CalendarIcon className="h-4 w-4" aria-hidden />} label={t("observed")}>
+                    {record.eventDate ? formatDate(record.eventDate) : t("notRecorded")}
                   </MetaRow>
-                ) : null}
-              </dl>
+                  <MetaRow icon={<CalendarIcon className="h-4 w-4" aria-hidden />} label={t("shared")}>
+                    {formatDate(record.createdAt)}
+                  </MetaRow>
+                  {place ? (
+                    <MetaRow icon={<MapPinIcon className="h-4 w-4" aria-hidden />} label={t("place")}>
+                      {`${countryFlag(record.countryCode)} ${place}`.trim()}
+                    </MetaRow>
+                  ) : null}
+                </dl>
+              </div>
             </div>
 
             <RecordLocationMap record={record} />

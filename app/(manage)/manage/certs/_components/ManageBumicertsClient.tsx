@@ -290,13 +290,34 @@ function DeleteBumicertModal({ title, onConfirm }: { title: string; onConfirm: (
   );
 }
 
-export function ManageBumicertsClient({ target, did, ownerIdentifier, bumicerts, error }: { target: ManageTarget; did: string; ownerIdentifier: string; bumicerts: BumicertRecord[]; error?: string | null }) {
+export function ManageBumicertsClient({
+  target,
+  did,
+  ownerIdentifier,
+  bumicerts,
+  error,
+  embedded = false,
+}: {
+  target: ManageTarget;
+  did: string;
+  ownerIdentifier: string;
+  bumicerts: BumicertRecord[];
+  error?: string | null;
+  embedded?: boolean;
+}) {
   const tabT = useTranslations("common.accountTabs");
   const createT = useTranslations("bumicert.create");
   const recentT = useTranslations("bumicert.create.recent");
   const reduceMotion = useReducedMotion();
   return (
-    <div className="mx-auto w-full max-w-[1440px] px-4 py-4 sm:px-6 sm:py-6">
+    <div
+      className={cn(
+        "w-full py-4 sm:py-6",
+        embedded
+          ? "min-w-0"
+          : "mx-auto max-w-[90rem] px-3 sm:px-5 lg:px-8",
+      )}
+    >
       <div className="space-y-4">
         <ManageCollectionHeader title={tabT("bumicerts")} description={createT("landing.hero.description")} />
         <CreateHeroCard target={target} />

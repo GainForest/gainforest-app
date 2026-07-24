@@ -174,7 +174,7 @@ export function ProjectCertsManagerClient({ target, projectRkey }: { target: Man
   }
 
   return (
-    <div className="mx-auto w-full max-w-[1440px] px-4 py-4 sm:px-6 sm:py-6">
+    <div className="mx-auto w-full max-w-[90rem] px-3 py-4 sm:px-5 sm:py-6 lg:px-8">
       <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
         <Button asChild variant="outline" size="sm">
           <Link href={`${profileBasePath(target)}/projects`}>
@@ -303,8 +303,8 @@ function CertTile({
   const details = certDetails(cert, t);
 
   return (
-    <li className={cn("group overflow-hidden rounded-2xl bg-muted transition-colors hover:bg-muted/80", cert.linked && "ring-1 ring-primary/25")}>
-      <div className="flex gap-3 p-3 sm:gap-4 sm:p-4">
+    <li className={cn("group h-full overflow-hidden rounded-2xl bg-muted transition-colors hover:bg-muted/80", cert.linked && "ring-1 ring-primary/25")}>
+      <div className="flex h-full gap-3 p-3 sm:gap-4 sm:p-4">
         <div className="relative h-24 w-24 shrink-0 overflow-hidden rounded-2xl bg-muted sm:h-28 sm:w-32">
           {cert.imageUrl ? (
             <Image src={cert.imageUrl} alt={cert.title} fill unoptimized sizes="128px" className="object-cover transition-transform duration-500 motion-reduce:transition-none group-hover:scale-105 motion-reduce:group-hover:scale-100" />
@@ -317,7 +317,7 @@ function CertTile({
         <div className="flex min-w-0 flex-1 flex-col justify-between py-0.5">
           <div className="min-w-0">
             <div className="mb-1.5 flex items-start justify-between gap-2">
-              <h2 className="line-clamp-2 font-instrument text-2xl italic leading-tight tracking-[-0.02em] text-foreground">{cert.title}</h2>
+              <h2 className="min-w-0 break-words font-instrument text-2xl italic leading-tight tracking-[-0.02em] text-foreground">{cert.title}</h2>
               {cert.linked ? (
                 <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-primary/12 px-2.5 py-1 text-xs font-medium text-primary">
                   <CheckIcon className="size-3.5" />
@@ -336,7 +336,7 @@ function CertTile({
               {details.map((detail) => <span key={detail}>{detail}</span>)}
             </div>
             <div className="flex shrink-0 flex-wrap justify-end gap-2">
-              <Button asChild type="button" variant="outline" size="sm" className="h-8">
+              <Button asChild type="button" variant="outline" size="sm" className="h-10">
                 <Link href={localBumicertHref(cert.did, cert.rkey)}>
                   <EyeIcon className="size-3.5" />
                   {t("actions.view")}
@@ -349,7 +349,7 @@ function CertTile({
                 disabled={disabled}
                 title={disabledReason ?? undefined}
                 onClick={onToggle}
-                className="h-8"
+                className="h-10"
               >
                 {pending ? <Loader2Icon className="size-3.5 animate-spin" /> : cert.linked ? <XIcon className="size-3.5" /> : <Link2Icon className="size-3.5" />}
                 {pending ? t("actions.saving") : cert.linked ? t("actions.unlink") : t("actions.link")}
@@ -368,7 +368,7 @@ function CertsSkeleton() {
       <Skeleton className="h-28 rounded-3xl" />
       <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3">
         {Array.from({ length: 9 }).map((_, index) => (
-          <div key={index} className="flex gap-4 rounded-2xl bg-muted p-4">
+          <div key={index} className="flex h-full gap-4 rounded-2xl bg-muted p-4">
             <Skeleton className="h-28 w-32 shrink-0 rounded-2xl" />
             <div className="flex flex-1 flex-col justify-between py-1">
               <div className="space-y-3">
@@ -376,7 +376,7 @@ function CertsSkeleton() {
                 <Skeleton className="h-4 w-full rounded-full" />
                 <Skeleton className="h-4 w-2/3 rounded-full" />
               </div>
-              <Skeleton className="h-8 w-24 self-end rounded-full" />
+              <Skeleton className="h-10 w-24 self-end rounded-full" />
             </div>
           </div>
         ))}

@@ -313,7 +313,7 @@ export function ProjectGalleryManagerClient({ target, projectRkey }: { target: M
   const project = data?.project ?? null;
 
   return (
-    <div className="mx-auto w-full max-w-[1440px] px-4 py-4 sm:px-6 sm:py-6">
+    <div className="mx-auto w-full max-w-[90rem] px-3 py-4 sm:px-5 sm:py-6 lg:px-8">
       <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
         <Button asChild variant="outline" size="sm">
           <Link href={`${profileBasePath(target)}/projects`}>

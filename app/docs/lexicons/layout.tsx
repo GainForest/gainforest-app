@@ -15,8 +15,8 @@ export default async function LexiconsLayout({ children }: { children: React.Rea
   }));
 
   return (
-    <div className="mx-auto flex w-full max-w-5xl items-start gap-10 px-5 py-10 sm:px-8 sm:py-14 lg:gap-14">
-      <aside className="sticky top-20 hidden max-h-[calc(100vh-6rem)] w-44 shrink-0 overflow-y-auto pb-10 lg:block">
+    <div className="mx-auto flex w-full max-w-5xl items-start gap-10 px-3 py-4 sm:px-5 lg:gap-12 lg:px-8 lg:py-6">
+      <aside className="sticky top-20 hidden max-h-[calc(100dvh-6rem)] w-44 shrink-0 overflow-y-auto pb-10 lg:block">
         <SideNav groups={navGroups} overviewLabel={t("overview")} ariaLabel={t("sectionsAria")} />
       </aside>
 

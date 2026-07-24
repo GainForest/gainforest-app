@@ -69,7 +69,7 @@ export function BioblitzGallery({ round }: { round: BioblitzRound }) {
   return (
     <section>
       <div aria-hidden className="mx-auto h-px w-full max-w-6xl bg-border/60" />
-      <div className="mx-auto w-full max-w-6xl px-4 py-10 sm:px-6">
+      <div className="mx-auto w-full max-w-6xl px-3 py-6 sm:px-5 md:py-8 lg:px-8">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div className="min-w-0">
             <div className="flex flex-wrap items-center gap-2">
@@ -94,13 +94,13 @@ export function BioblitzGallery({ round }: { round: BioblitzRound }) {
 
         <div className="mt-5">
           {phase === "error" ? (
-            <div className="rounded-2xl bg-muted px-6 py-14 text-center text-sm text-muted-foreground">
+            <div className="rounded-2xl bg-muted px-4 py-12 text-center text-sm text-muted-foreground sm:px-5">
               {t("error")}
             </div>
           ) : phase === "loading" ? (
             <GallerySkeleton />
           ) : records.length === 0 ? (
-            <div className="rounded-2xl bg-muted px-6 py-14 text-center text-sm text-muted-foreground">
+            <div className="rounded-2xl bg-muted px-4 py-12 text-center text-sm text-muted-foreground sm:px-5">
               {t("empty")}
             </div>
           ) : view === "all" || shouldReduceMotion ? (

@@ -170,7 +170,7 @@ function DrawerPlaceholder({
           data-slot="drawer-scroll-body"
           data-vaul-no-drag=""
           className={cn(
-            "relative flex min-h-0 min-w-0 flex-1 flex-col overflow-x-hidden overflow-y-auto overscroll-contain p-4",
+            "relative flex min-h-0 min-w-0 flex-1 flex-col overflow-x-hidden overflow-y-auto overscroll-contain p-4 pb-[max(1rem,env(safe-area-inset-bottom))] md:p-5 md:pb-[max(1.25rem,env(safe-area-inset-bottom))]",
             innerClassName,
           )}
         >

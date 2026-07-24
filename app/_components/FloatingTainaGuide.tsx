@@ -138,6 +138,10 @@ interface Position {
   x: number;
   y: number;
 }
+interface FloatingGeometry extends Position {
+  width: number;
+  height: number;
+}
 interface ChatMessage {
   role: "user" | "assistant";
   content: string;
@@ -244,26 +248,37 @@ function defaultPosition(): Position {
   };
 }
 
-function computePanelPosition(spritePos: Position): Position {
-  if (typeof window === "undefined") return { x: 0, y: 0 };
+function viewportBoundedSize(preferred: number, viewportSize: number): number {
+  return Math.min(
+    preferred,
+    Math.max(0, viewportSize - VIEWPORT_PADDING * 2),
+  );
+}
+
+function computePanelGeometry(spritePos: Position): FloatingGeometry {
+  if (typeof window === "undefined") {
+    return { x: 0, y: 0, width: PANEL_W, height: PANEL_H };
+  }
   const vw = window.innerWidth;
   const vh = window.innerHeight;
-  let x = spritePos.x + SPRITE_W - PANEL_W;
-  let y = spritePos.y - PANEL_H - PANEL_GAP;
+  const width = viewportBoundedSize(PANEL_W, vw);
+  const height = viewportBoundedSize(PANEL_H, vh);
+  let x = spritePos.x + SPRITE_W - width;
+  let y = spritePos.y - height - PANEL_GAP;
   if (y < VIEWPORT_PADDING) y = spritePos.y + SPRITE_H + PANEL_GAP;
   if (x < VIEWPORT_PADDING) x = spritePos.x;
-  x = clamp(x, VIEWPORT_PADDING, vw - PANEL_W - VIEWPORT_PADDING);
-  y = clamp(y, VIEWPORT_PADDING, vh - PANEL_H - VIEWPORT_PADDING);
-  return { x, y };
+  x = clamp(x, VIEWPORT_PADDING, vw - width - VIEWPORT_PADDING);
+  y = clamp(y, VIEWPORT_PADDING, vh - height - VIEWPORT_PADDING);
+  return { x, y, width, height };
 }
 
 // Where the speech bubble goes relative to a spotlighted element.
-function computeBubblePosition(rect: Rect): Position {
+function computeBubblePosition(rect: Rect, width: number): Position {
   const vw = window.innerWidth;
   const vh = window.innerHeight;
   const below = rect.y + rect.h + 14;
   const above = rect.y - 14;
-  let x = clamp(rect.x, VIEWPORT_PADDING, vw - TOUR_BUBBLE_W - VIEWPORT_PADDING);
+  const x = clamp(rect.x, VIEWPORT_PADDING, vw - width - VIEWPORT_PADDING);
   // Prefer below the element; flip above when there's no room.
   let y = below;
   if (below + 170 > vh && above - 170 > 0) y = above - 170;
@@ -1145,8 +1160,17 @@ export function FloatingTainaGuide() {
   // The Cert creation page ships its own docked Tainá writing companion.
   if (pathname.includes("/certs/new")) return null;
 
-  const panelPos = open ? computePanelPosition(position) : { x: 0, y: 0 };
-  const bubblePos = tour && spotRect ? computeBubblePosition(spotRect) : null;
+  const panelGeometry = open
+    ? computePanelGeometry(position)
+    : { x: 0, y: 0, width: PANEL_W, height: PANEL_H };
+  const tourBubbleWidth = viewportBoundedSize(
+    TOUR_BUBBLE_W,
+    window.innerWidth,
+  );
+  const bubblePos =
+    tour && spotRect
+      ? computeBubblePosition(spotRect, tourBubbleWidth)
+      : null;
   const guideView = view.kind === "guide" ? getTainaGuide(view.guideId) : undefined;
   // Confirmed signed out → every tour would dead-end on a sign-in wall, so
   // ask the visitor to sign in first instead of offering the tour.
@@ -1156,23 +1180,26 @@ export function FloatingTainaGuide() {
   const guideNeedsProject =
     !guideNeedsSignIn && Boolean(guideView?.requiresProject) && hasProjects === false;
 
-  // A running tour always takes precedence over the minimized state (it can
-  // be rehydrated from sessionStorage after a hard navigation).
-  if (minimized && !tour) {
+  // Full-canvas routes need their controls and map unobstructed. Keep Tainá as
+  // a compact edge launcher there; the full panel appears only after an
+  // explicit click. A running tour still takes precedence after navigation.
+  const usesCompactCanvasLauncher =
+    !open && (pathname === "/globe" || pathname.startsWith("/globe/"));
+  if ((minimized || usesCompactCanvasLauncher) && !tour) {
     return (
       <button
         ref={restoreButtonRef}
         type="button"
         onClick={() => {
           setMinimized(false);
-          setWaveActive(true);
+          if (usesCompactCanvasLauncher) setOpen(true);
+          else setWaveActive(true);
         }}
         aria-label={t("restoreLabel")}
         title={t("restoreLabel")}
-        // On /feed the phone composer bar sits at the bottom, so lift the tab
-        // above it there (mobile only — the bar is sm:hidden); elsewhere and on
-        // larger screens it keeps its usual bottom-6 spot.
-        className={`fixed right-0 z-[70] flex items-center rounded-l-full border border-r-0 border-border bg-background/95 py-1 pl-2 pr-1.5 shadow-[0_2px_10px_-3px_rgba(40,50,30,0.3)] backdrop-blur-sm transition-transform hover:-translate-x-0.5 ${pathname === "/feed" ? "bottom-24 sm:bottom-6" : "bottom-6"}`}
+        // On /feed the phone composer bar sits at the bottom, while full-canvas
+        // routes keep the launcher near the quiet upper-right edge.
+        className={`fixed right-0 z-[70] flex min-h-11 items-center rounded-l-full border border-r-0 border-border bg-background/95 py-1 pl-3 pr-2 shadow-[0_2px_10px_-3px_rgba(40,50,30,0.3)] backdrop-blur-sm transition-transform hover:-translate-x-0.5 ${usesCompactCanvasLauncher ? "top-20" : pathname === "/feed" ? "bottom-24 sm:bottom-6" : "bottom-6"}`}
       >
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
@@ -1212,11 +1239,13 @@ export function FloatingTainaGuide() {
             className="fixed rounded-2xl border border-border bg-background p-3 shadow-xl transition-all duration-300"
             style={{
               zIndex: Z_BUBBLE,
-              width: TOUR_BUBBLE_W,
+              width: tourBubbleWidth,
               left: bubblePos ? bubblePos.x : undefined,
               top: bubblePos ? bubblePos.y : undefined,
-              right: bubblePos ? undefined : 16,
-              bottom: bubblePos ? undefined : 16 + SPRITE_H + BADGE_RESERVE,
+              right: bubblePos ? undefined : VIEWPORT_PADDING,
+              bottom: bubblePos
+                ? undefined
+                : VIEWPORT_PADDING + SPRITE_H + BADGE_RESERVE,
             }}
           >
             <div className="flex flex-wrap items-baseline gap-x-1.5">
@@ -1235,7 +1264,7 @@ export function FloatingTainaGuide() {
               <button
                 type="button"
                 onClick={endTour}
-                className="rounded-full px-2.5 py-1 text-[12px] text-muted-foreground hover:bg-foreground/5 hover:text-foreground"
+                className="min-h-10 rounded-full px-3 py-2 text-[12px] text-muted-foreground hover:bg-foreground/5 hover:text-foreground"
               >
                 {t("endTour")}
               </button>
@@ -1244,7 +1273,7 @@ export function FloatingTainaGuide() {
                   <button
                     type="button"
                     onClick={() => advanceTour(-1)}
-                    className="rounded-full border border-border px-3 py-1 text-[12px] text-foreground hover:bg-foreground/5"
+                    className="min-h-10 rounded-full border border-border px-3 py-2 text-[12px] text-foreground hover:bg-foreground/5"
                   >
                     {t("previous")}
                   </button>
@@ -1252,7 +1281,7 @@ export function FloatingTainaGuide() {
                 <button
                   type="button"
                   onClick={() => advanceTour(1)}
-                  className="rounded-full bg-primary px-3 py-1 text-[12px] font-medium text-primary-foreground hover:opacity-90"
+                  className="min-h-10 rounded-full bg-primary px-3 py-2 text-[12px] font-medium text-primary-foreground hover:opacity-90"
                 >
                   {tour.index + 1 >= activeGuide.tour.length ? t("done") : t("next")}
                 </button>
@@ -1268,7 +1297,12 @@ export function FloatingTainaGuide() {
           role="dialog"
           aria-labelledby="taina-panel-title"
           className="fixed z-[60] flex flex-col overflow-hidden rounded-2xl border border-border bg-background shadow-xl"
-          style={{ left: panelPos.x, top: panelPos.y, width: PANEL_W, height: PANEL_H }}
+          style={{
+            left: panelGeometry.x,
+            top: panelGeometry.y,
+            width: panelGeometry.width,
+            height: panelGeometry.height,
+          }}
           data-no-drag
         >
           {/* header */}
@@ -1281,7 +1315,7 @@ export function FloatingTainaGuide() {
                   setView({ kind: "home" });
                   window.requestAnimationFrame(() => inputRef.current?.focus());
                 }}
-                className="grid h-7 w-7 shrink-0 place-items-center rounded-full text-foreground/60 hover:bg-foreground/5 hover:text-foreground"
+                className="grid size-10 shrink-0 place-items-center rounded-full text-foreground/60 hover:bg-foreground/5 hover:text-foreground"
                 aria-label={t("back")}
               >
                 ←
@@ -1310,7 +1344,7 @@ export function FloatingTainaGuide() {
             <button
               type="button"
               onClick={minimizePanel}
-              className="grid h-7 w-7 place-items-center rounded-full text-foreground/55 hover:bg-foreground/5 hover:text-foreground"
+              className="grid size-10 place-items-center rounded-full text-foreground/55 hover:bg-foreground/5 hover:text-foreground"
               aria-label={t("minimizeLabel")}
               title={t("minimizeLabel")}
             >
@@ -1319,7 +1353,7 @@ export function FloatingTainaGuide() {
             <button
               type="button"
               onClick={closePanel}
-              className="grid h-7 w-7 place-items-center rounded-full text-foreground/55 hover:bg-foreground/5 hover:text-foreground"
+              className="grid size-10 place-items-center rounded-full text-foreground/55 hover:bg-foreground/5 hover:text-foreground"
               aria-label={t("close")}
             >
               ×
@@ -1404,12 +1438,9 @@ export function FloatingTainaGuide() {
               </>
             ) : view.kind === "whatsNew" ? (
               <section aria-labelledby="taina-panel-title">
-                <ul className="space-y-2">
+                <ul className="divide-y divide-border/50">
                   {WHATS_NEW_ITEMS.map(({ id, Icon }) => (
-                    <li
-                      key={id}
-                      className="flex items-start gap-3 rounded-2xl bg-muted px-3 py-3"
-                    >
+                    <li key={id} className="flex items-start gap-3 py-3">
                       <Icon aria-hidden className="mt-0.5 size-4 shrink-0 text-primary" />
                       <p className="text-[12px] leading-relaxed text-muted-foreground">
                         {t(`whatsNew.items.${id}.body`)}
@@ -1777,10 +1808,10 @@ export function FloatingTainaGuide() {
               hasUnreadWhatsNew ? "whatsNew.openLabelUnread" : "whatsNew.openLabel",
             )}
             className={
-              "absolute top-full mt-1 inline-flex max-w-[calc(100vw-1rem)] " +
+              "absolute top-full mt-1 inline-flex min-h-10 max-w-[calc(100vw-1.5rem)] " +
               "items-center gap-1.5 whitespace-nowrap rounded-full " +
               "border border-border bg-background/95 " +
-              "px-2.5 py-[3px] text-[11px] font-medium text-primary " +
+              "px-3 py-2 text-[11px] font-medium text-primary " +
               "shadow-[0_2px_8px_-3px_rgba(40,50,30,0.22)] " +
               "backdrop-blur-sm transition-[opacity,transform,box-shadow] duration-150 " +
               "hover:-translate-y-0.5 hover:shadow-md " +

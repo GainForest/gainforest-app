@@ -127,7 +127,7 @@ export function GrantsClient({ viewerDid, signedIn }: { viewerDid: string | null
   const heroT = useTranslations("marketplace.grants.hero");
 
   return (
-    <section className="-mt-14 bg-background pb-20 md:pb-28">
+    <section className="-mt-14 bg-background pb-6 md:pb-8">
       <PictureHero
         lightSrc="/assets/media/images/donations/donations-hero-light@2x.webp"
         darkSrc="/assets/media/images/donations/donations-hero-dark@2x.webp"
@@ -137,7 +137,7 @@ export function GrantsClient({ viewerDid, signedIn }: { viewerDid: string | null
         lede={heroT("lede")}
       />
 
-      <div className="relative z-10 mx-auto max-w-5xl space-y-8 px-6 pt-10">
+      <div className="relative z-10 mx-auto max-w-6xl space-y-8 px-3 pt-6 sm:px-5 lg:px-8">
         <RewildingSection viewerDid={viewerDid} signedIn={signedIn} />
         <InteroperableSection />
       </div>
@@ -166,7 +166,7 @@ function RewildingSection({ viewerDid, signedIn }: { viewerDid: string | null; s
     modal.pushModal(
       {
         id: "rewilding-apply",
-        dialogWidth: "max-w-lg w-[calc(100%-2rem)]",
+        dialogWidth: "max-w-lg",
         content: (
           <RewildingApplyModal
             acting={acting}
@@ -176,7 +176,7 @@ function RewildingSection({ viewerDid, signedIn }: { viewerDid: string | null; s
               modal.pushModal(
                 {
                   id: "rewilding-applied",
-                  dialogWidth: "max-w-md w-[calc(100%-2rem)]",
+                  dialogWidth: "max-w-md",
                   content: <RewildingSuccessModal projectTitle={title} onClose={closeModal} />,
                 },
                 true,
@@ -197,7 +197,7 @@ function RewildingSection({ viewerDid, signedIn }: { viewerDid: string | null; s
 
   return (
     <article className="overflow-hidden rounded-2xl bg-muted">
-      <div className="bg-primary/10 px-6 py-5 sm:px-8">
+      <div className="bg-primary/10 p-4 sm:p-5">
         <div className="flex flex-wrap items-center gap-3">
           <span className="inline-flex size-10 shrink-0 items-center justify-center rounded-2xl bg-primary/15 text-primary">
             <SproutIcon className="size-5" />
@@ -218,7 +218,7 @@ function RewildingSection({ viewerDid, signedIn }: { viewerDid: string | null; s
         </div>
       </div>
 
-      <div className="px-6 py-6 sm:px-8">
+      <div className="p-4 sm:p-5">
         <div className="grid gap-8 lg:grid-cols-[1.05fr_1fr] lg:items-center">
           <div className="min-w-0">
             <p className="max-w-2xl text-sm leading-7 text-muted-foreground">{t("description")}</p>
@@ -378,11 +378,11 @@ function RewildingApplyModal({
       <ModalDescription className="mt-1">{t("subtitle")}</ModalDescription>
 
       {projects === null ? (
-        <div className="mt-6 flex items-center gap-2 text-sm text-muted-foreground">
+        <div className="mt-6 flex min-h-48 items-center justify-center gap-2 rounded-2xl bg-muted p-4 text-sm text-muted-foreground sm:p-6">
           <Loader2Icon className="size-4 animate-spin motion-reduce:animate-none" /> {t("loading")}
         </div>
       ) : error ? (
-        <div className="mt-6 flex flex-col items-center justify-center gap-4 rounded-2xl bg-muted px-6 py-10 text-center">
+        <div className="mt-6 flex min-h-48 flex-col items-center justify-center gap-4 rounded-2xl bg-muted p-4 text-center sm:p-6">
           <TriangleAlertIcon className="size-8 text-muted-foreground opacity-70" />
           <h3 className="font-instrument text-xl italic text-foreground">{error}</h3>
           <Button type="button" variant="outline" size="sm" onClick={() => void load()}>
@@ -390,7 +390,7 @@ function RewildingApplyModal({
           </Button>
         </div>
       ) : projects.length === 0 ? (
-        <div className="mt-6 flex flex-col items-center justify-center rounded-2xl bg-muted px-6 py-10 text-center">
+        <div className="mt-6 flex min-h-48 flex-col items-center justify-center rounded-2xl bg-muted p-4 text-center sm:p-6">
           <FolderKanbanIcon className="mb-3 size-9 text-primary" />
           <h3 className="font-instrument text-xl font-light italic tracking-[-0.02em] text-foreground">
             {t("noProjectsTitle")}
@@ -405,7 +405,7 @@ function RewildingApplyModal({
         </div>
       ) : (
         <>
-          <div className="group/input-group border-input mt-5 flex h-10 items-center rounded-full border bg-background/70 shadow-xs backdrop-blur transition-[color,box-shadow] focus-within:border-ring focus-within:ring-[3px] focus-within:ring-ring/50">
+          <div className="group/input-group border-input mt-5 flex h-11 items-center rounded-full border bg-background/70 shadow-xs backdrop-blur transition-[color,box-shadow] focus-within:border-ring focus-within:ring-[3px] focus-within:ring-ring/50 sm:h-10">
             <SearchIcon className="ml-3 h-4 w-4 text-muted-foreground" />
             <input
               value={query}
@@ -421,7 +421,7 @@ function RewildingApplyModal({
               {t("noMatch")}
             </p>
           ) : (
-            <ul className="mt-3 max-h-[46vh] space-y-2 overflow-y-auto pr-1" role="list">
+            <ul className="mt-3 max-h-[46vh] overflow-y-auto rounded-2xl bg-muted divide-y divide-background" role="list">
               {filtered.map((project) => {
                 const submitting = submittingRkey === project.rkey;
                 const disabled = submittingRkey !== null;
@@ -432,7 +432,7 @@ function RewildingApplyModal({
                       onClick={() => void apply(project)}
                       disabled={disabled}
                       aria-label={t("applyWith", { project: project.title })}
-                      className="group flex w-full items-center gap-3 rounded-2xl bg-muted px-3 py-3 text-left transition-colors hover:bg-muted/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/45 disabled:cursor-not-allowed disabled:opacity-60"
+                      className="group flex w-full items-center gap-3 px-3 py-3 text-left transition-colors hover:bg-background/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary/45 disabled:cursor-not-allowed disabled:opacity-60"
                     >
                       <span className="relative size-14 shrink-0 overflow-hidden rounded-xl bg-background">
                         {project.imageUrl ? (
@@ -503,7 +503,7 @@ function InteroperableSection() {
 
   return (
     <article className="overflow-hidden rounded-2xl bg-muted">
-      <div className="px-6 py-6 sm:px-8">
+      <div className="p-4 sm:p-5">
         <div className="flex items-start gap-4">
           <span className="relative size-14 shrink-0 overflow-hidden rounded-2xl border border-border">
             <Image src={MA_EARTH_LOGO_SRC} alt={t("logoAlt")} fill sizes="56px" className="object-cover" />

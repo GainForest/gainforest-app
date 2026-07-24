@@ -40,8 +40,8 @@ export default async function SubmitDataPage() {
   ];
 
   return (
-    <main className="mx-auto w-full max-w-6xl px-6 pb-20 pt-8 md:pt-12">
-      <div className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,28rem)] lg:gap-14">
+    <main className="mx-auto w-full max-w-6xl px-3 pb-8 pt-4 sm:px-5 sm:pt-6 lg:px-8">
+      <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,28rem)] lg:gap-12">
         <section className="max-w-xl">
           <h1 className="font-instrument text-4xl font-light italic tracking-[-0.04em] text-foreground">
             {t("hero.title")}

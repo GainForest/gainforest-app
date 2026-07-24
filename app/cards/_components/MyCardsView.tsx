@@ -29,7 +29,7 @@ export function MyCardsView({
   const reduceMotion = useReducedMotion();
 
   return (
-    <div className="min-h-full px-4 py-8 sm:px-6 sm:py-12">
+    <div className="min-h-full px-3 py-4 sm:px-5 lg:px-8 lg:py-6">
       <div className="mx-auto max-w-6xl">
         <div className="flex flex-wrap items-end justify-between gap-3">
           <div>
@@ -51,7 +51,7 @@ export function MyCardsView({
         ) : null}
 
         {status === "signedOut" ? (
-          <div className="mt-12 flex flex-col items-center gap-4 rounded-3xl bg-muted px-6 py-16 text-center">
+          <div className="mt-6 flex flex-col items-center gap-4 rounded-2xl bg-muted px-4 py-12 text-center sm:mt-8 sm:px-6">
             <span className="grid size-14 place-items-center rounded-2xl bg-primary/10 text-primary">
               <SparklesIcon className="size-7" aria-hidden />
             </span>
@@ -60,7 +60,7 @@ export function MyCardsView({
             <AuthButton session={{ isLoggedIn: false }} />
           </div>
         ) : status === "unavailable" ? (
-          <div className="mt-12 flex flex-col items-center gap-4 rounded-3xl bg-muted px-6 py-16 text-center">
+          <div className="mt-6 flex flex-col items-center gap-4 rounded-2xl bg-muted px-4 py-12 text-center sm:mt-8 sm:px-6">
             <span className="grid size-14 place-items-center rounded-2xl bg-amber-500/10 text-amber-600">
               <AlertTriangleIcon className="size-7" aria-hidden />
             </span>
@@ -71,7 +71,7 @@ export function MyCardsView({
             </Button>
           </div>
         ) : cards.length === 0 ? (
-          <div className="mt-12 flex flex-col items-center gap-4 rounded-3xl bg-muted px-6 py-16 text-center">
+          <div className="mt-6 flex flex-col items-center gap-4 rounded-2xl bg-muted px-4 py-12 text-center sm:mt-8 sm:px-6">
             <span className="grid size-14 place-items-center rounded-2xl bg-primary/10 text-primary">
               <SparklesIcon className="size-7" aria-hidden />
             </span>
@@ -82,7 +82,7 @@ export function MyCardsView({
             </Button>
           </div>
         ) : (
-          <div className="mt-10 grid justify-items-center gap-x-8 gap-y-12 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="mt-8 grid items-stretch justify-items-center gap-x-8 gap-y-12 sm:grid-cols-2 lg:grid-cols-3">
             {cards.map((card, i) => {
               const earnedAt = card.earnedAt ? new Date(card.earnedAt) : null;
               const earnedLabel = earnedAt && !Number.isNaN(earnedAt.getTime())
@@ -96,14 +96,14 @@ export function MyCardsView({
                   viewport={{ once: true, margin: "-40px" }}
                   transition={reduceMotion ? { duration: 0 } : { type: "spring", stiffness: 90, damping: 15, delay: Math.min(i, 5) * 0.08 }}
                   style={{ transformStyle: "preserve-3d" }}
-                  className="w-[21rem] max-w-full"
+                  className="flex h-full w-[21rem] max-w-full flex-col"
                 >
                   <DonationRewardCard
                     lines={card.lines}
                     totalUsd={card.totalUsd}
                     animateEntrance={false}
                   />
-                  <div className="mt-3 rounded-2xl bg-muted px-4 py-3 text-xs">
+                  <div className="mt-3 flex flex-1 flex-col rounded-2xl bg-muted px-4 py-3 text-xs">
                     <div className="flex items-center justify-between gap-3">
                       <span className="inline-flex items-center gap-1.5 font-semibold text-primary">
                         <BadgeCheckIcon className="size-4" aria-hidden />
@@ -112,7 +112,7 @@ export function MyCardsView({
                       {earnedLabel ? <span className="text-muted-foreground">{earnedLabel}</span> : null}
                     </div>
                     {card.projectHref || card.paymentHref ? (
-                      <div className="mt-2 flex flex-wrap gap-x-4 gap-y-2 border-t border-border-soft pt-2">
+                      <div className="mt-auto flex flex-wrap gap-x-4 gap-y-2 border-t border-border-soft pt-2">
                         {card.projectHref ? (
                           <Link href={card.projectHref} className="font-medium text-foreground hover:text-primary">
                             {t("viewProject")}

@@ -412,8 +412,8 @@ export function InternalBadgesDashboard({
   }
 
   return (
-    <main className="min-h-screen bg-background px-4 py-6 text-foreground sm:px-6 lg:px-8" aria-busy={isBusy}>
-      <div className="mx-auto flex max-w-7xl flex-col gap-5">
+    <main className="min-h-dvh bg-background px-3 py-4 text-foreground sm:px-5 lg:px-8 lg:py-6" aria-busy={isBusy}>
+      <div className="mx-auto flex max-w-[90rem] flex-col gap-5">
         {isDetailPage && selectedDefinition ? (
           <BadgeDetailHeader
             definition={selectedDefinition}

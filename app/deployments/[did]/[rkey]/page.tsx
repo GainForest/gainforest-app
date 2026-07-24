@@ -80,7 +80,7 @@ export default async function DeploymentDetailPage({ params }: { params: Deploym
   const linkedParts = linkedUri ? parseAtUri(linkedUri) : null;
 
   return (
-    <main className="mx-auto w-full max-w-3xl px-6 pb-20 pt-8 md:pt-12">
+    <main className="mx-auto w-full max-w-6xl px-3 pb-8 pt-4 sm:px-5 sm:pt-6 lg:px-8">
       <Link
         href="/audiomoth?tab=deployments"
         className="inline-flex items-center gap-1.5 text-[13px] font-medium text-muted-foreground transition-colors hover:text-foreground"
@@ -108,7 +108,7 @@ export default async function DeploymentDetailPage({ params }: { params: Deploym
         </div>
       ) : null}
 
-      <section className="mt-8 rounded-2xl bg-muted/60 p-5 sm:p-6">
+      <section className="mt-8 rounded-2xl bg-muted/60 p-4 sm:p-5">
         <dl className="grid gap-x-8 gap-y-5 sm:grid-cols-2">
           <AssetMetaRow icon={<FingerprintIcon className="h-4 w-4" aria-hidden />} label={t("deploymentIdLabel")}>
             <span className="font-mono">{item.eventID}</span>

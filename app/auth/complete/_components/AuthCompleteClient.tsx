@@ -263,12 +263,12 @@ function GroupChoiceView({
     >
       <AppMark />
       <DisplayHeading as="h1" className="mt-4 text-center text-2xl font-medium">{labels.continueAs}</DisplayHeading>
-      <p className="text-center text-sm text-muted-foreground">{labels.chooseAccount}</p>
+      <p className="mt-2 text-center text-sm text-muted-foreground">{labels.chooseAccount}</p>
 
-      <div className="mt-6 w-full space-y-5">
+      <div className="mt-6 w-full space-y-6">
         <section>
-          <DisplayHeading as="h2" className="mb-1.5 px-1 text-lg font-normal text-foreground">{labels.yourAccount}</DisplayHeading>
-          <div className="flex flex-col gap-1.5 rounded-[32px] bg-muted p-1.5">
+          <div className="mb-2 px-1 text-sm font-medium text-foreground">{labels.yourAccount}</div>
+          <div className="flex flex-col gap-2 rounded-2xl bg-muted p-2">
             <OptionCard
               did={session.did}
               name={personalName}
@@ -282,8 +282,8 @@ function GroupChoiceView({
 
         {groups.length > 0 ? (
           <section>
-            <DisplayHeading as="h2" className="mb-1.5 px-1 text-lg font-normal text-foreground">{labels.yourOrganizations}</DisplayHeading>
-            <div className="flex flex-col gap-1.5 rounded-[32px] bg-muted p-1.5">
+            <div className="mb-2 px-1 text-sm font-medium text-foreground">{labels.yourOrganizations}</div>
+            <div className="flex flex-col gap-2 rounded-2xl bg-muted p-2">
               {groups.map((group, index) => (
                 <OptionCard
                   key={group.groupDid}
@@ -469,7 +469,7 @@ export function AuthCompleteClient({
   }, [retryNonce, safeRedirect, session]);
 
   return (
-    <main data-no-dom-translate className="mx-auto flex min-h-screen w-full max-w-md flex-col items-center justify-center px-6 py-12">
+    <main data-no-dom-translate className="mx-auto flex min-h-dvh w-full max-w-md flex-col items-center justify-center px-3 py-12 sm:px-4">
       {status === "loading" || status === "success" ? (
         <SigningInView
           redirectTo={safeRedirect}

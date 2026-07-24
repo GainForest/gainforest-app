@@ -127,6 +127,9 @@ const productionTsxFiles = [...sourceFiles("app"), ...sourceFiles("components")]
     !path.startsWith("app/%5Ftest/") &&
     !path.startsWith("app/_test/"),
 );
+const productionRuntimeTsxFiles = productionTsxFiles.filter(
+  (path) => !path.endsWith(".test.tsx"),
+);
 const garamondAllowedFiles = new Set([
   ...landingFiles,
   "app/layout.tsx",
@@ -177,6 +180,26 @@ const emptyHeroBanner = read("app/_components/EmptyHeroBanner.tsx");
 const gracefulNotFound = read("app/_components/GracefulNotFound.tsx");
 const sectionSurface = read("components/ui/section-surface.tsx");
 const typography = read("components/ui/typography.tsx");
+const container = read("components/ui/container.tsx");
+const dialog = read("components/ui/modal/dialog.tsx");
+const drawer = read("components/ui/modal/drawer.tsx");
+const modal = read("components/ui/modal/modal.tsx");
+const sidebar = read("app/_components/shell/UnifiedSidebar.tsx");
+const shellHeader = read("app/_components/shell/ShellHeader.tsx");
+const shellHeaderControl = read("app/_components/shell/control-recipes.ts");
+const globalSearch = read("app/_components/GlobalSearch.tsx");
+const notificationBell = read("app/_components/NotificationBell.tsx");
+const cartHeaderButton = read("app/_components/cart/CartHeaderButton.tsx");
+const authFlow = read("app/_components/AuthFlow.tsx");
+const floatingTaina = read("app/_components/FloatingTainaGuide.tsx");
+const accountChrome = read("app/account/_components/AccountChrome.tsx");
+const accountAudio = read("app/account/[did]/audio/AccountAudioViewer.tsx");
+const projectsExplore = read("app/projects/ProjectsExploreClient.tsx");
+const organizationsExplore = read("app/organizations/OrganizationsClient.tsx");
+const recordExplorer = read("app/_components/RecordExplorer.tsx");
+const pageLoadingSkeletons = read("app/_components/PageLoadingSkeletons.tsx");
+const accountSettings = read("app/account/_components/AccountSettingsSections.tsx");
+const manageSections = read("app/(manage)/manage/_sections.tsx");
 
 assert(
   /--font-serif:\s*var\(--font-geist-sans\)/.test(globals),
@@ -244,6 +267,162 @@ for (const variant of ["plain", "muted", "danger", "elevated"]) {
   assert(new RegExp(`\\b${variant}:`).test(sectionSurface), `SectionSurface must expose the ${variant} variant`);
 }
 assert(!/\b(?:default|card|outlined|glass):/.test(sectionSurface), "SectionSurface must keep its variant API narrow");
+assert(
+  /muted:\s*"rounded-2xl bg-muted p-4 sm:p-5"/.test(sectionSurface),
+  "SectionSurface muted regions must use the compact surface-padding recipe",
+);
+
+// Shared layout recipes own width, responsive page gutters, and ordinary
+// surface geometry. These exact primitives prevent route-by-route drift.
+for (const [family, className] of [
+  ["reading", "max-w-3xl"],
+  ["standard", "max-w-6xl"],
+  ["wide", "max-w-[90rem]"],
+  ["full", "max-w-none"],
+]) {
+  assert(
+    container.includes(`${family}: "${className}"`),
+    `Container must expose the ${family} width family`,
+  );
+}
+assert(
+  /true:\s*"px-3 sm:px-5 lg:px-8"/.test(container),
+  "Container must own the 12/20/32px responsive page gutter",
+);
+assert(
+  /family:\s*"standard"[\s\S]*?gutter:\s*true[\s\S]*?rhythm:\s*"standard"/.test(container),
+  "Container defaults must use the standard family, gutter, and rhythm",
+);
+assert(
+  pictureHero.includes("px-3 pb-8 pt-16 sm:px-5 lg:px-8") &&
+    !pictureHero.includes("px-8 sm:px-10 lg:px-9"),
+  "PictureHero must share the responsive page gutter recipe",
+);
+assert(
+  dialog.includes("w-[calc(100%-1.5rem)]") &&
+    dialog.includes("max-h-[calc(100dvh-1.5rem)]") &&
+    dialog.includes("p-4") &&
+    dialog.includes("sm:p-5"),
+  "Dialog must remain viewport-bounded with 12px phone gutters and compact padding",
+);
+assert(
+  drawer.includes("max-h-[80dvh]") &&
+    drawer.includes("p-4 pb-[max(1rem,env(safe-area-inset-bottom))] md:p-5"),
+  "Drawer must use dynamic viewport bounds and safe-area-aware compact padding",
+);
+assert(
+  /DialogClose className="[^"]*size-10/.test(modal),
+  "Shared dialog close controls must keep a 40px target",
+);
+
+// Shell labels are functional navigation, never display typography or faux
+// eyebrow copy. Locale values must stay sentence case in every supported locale.
+assert(!/font-instrument|\bitalic\b|\buppercase\b|tracking-\[/.test(sidebar), "Sidebar labels must use plain Geist styling");
+assert(sidebar.includes('"relative h-8 w-full"'), "Persistent sidebar navigation must keep its compact 32px row recipe");
+assert(
+  sidebar.includes("<ExploreArt />") &&
+    sidebar.includes("animate-spin-slow") &&
+    sidebar.includes("motion-reduce:animate-none"),
+  "Sidebar creation actions must retain their purposeful art and reduced-motion-safe animation",
+);
+assert(
+  /pill:\s*"h-9"/.test(shellHeaderControl) && /icon:\s*"size-9"/.test(shellHeaderControl),
+  "Header controls must share one compact 36px peer recipe",
+);
+for (const [path, source] of [
+  ["app/_components/shell/ShellHeader.tsx", shellHeader],
+  ["app/_components/GlobalSearch.tsx", globalSearch],
+  ["app/_components/NotificationBell.tsx", notificationBell],
+  ["app/_components/cart/CartHeaderButton.tsx", cartHeaderButton],
+  ["app/_components/AuthFlow.tsx", authFlow],
+]) {
+  assert(source.includes("shellHeaderControl"), `${path}: header peers must consume the shared compact size recipe`);
+}
+for (const locale of ["en", "es", "id", "pt", "sw"]) {
+  const sections = JSON.parse(read(`messages/${locale}/common.json`)).sidebar.sections;
+  for (const key of ["explore", "funding", "manage"]) {
+    assert(
+      sections[key] !== sections[key].toLocaleUpperCase(locale),
+      `messages/${locale}/common.json: sidebar.${key} must remain sentence case`,
+    );
+  }
+}
+
+// High-risk composition and responsive regressions get direct guards until all
+// routes have migrated to shared frame primitives.
+assert(
+  accountChrome.includes("isDetachedWorkspaceRoute") &&
+    accountChrome.includes("projects\\/[^/?#]+\\/(?:certs|gallery|sites|timeline)"),
+  "AccountChrome must detach full workspaces instead of nesting page frames",
+);
+assert(!/<Container\b/.test(accountAudio), "Embedded account audio must not create a second page frame");
+assert(
+  (manageSections.match(/className="max-w-3xl pt-4 pb-8"/g) ?? []).length === 2 &&
+    !manageSections.includes("mr-auto ml-0 max-w-3xl"),
+  "Single-column personal and organization settings must remain centered",
+);
+assert(
+  (accountSettings.match(/className="divide-y divide-border"/g) ?? []).length === 2 &&
+    !/<Accordion[^>]*className="space-y-1"/.test(accountSettings),
+  "Settings categories must share one separator-led accordion root",
+);
+const featuredProjects = projectsExplore.slice(
+  projectsExplore.indexOf("function FeaturedProjects"),
+  projectsExplore.indexOf("function FeaturedProjectCard"),
+);
+assert(
+  projectsExplore.includes("max-w-[90rem] px-3") &&
+    featuredProjects.includes("items-stretch") &&
+    projectsExplore.includes("self-stretch"),
+  "Projects browse must use the wide frame and stretched peer grid/carousel",
+);
+assert(
+  !featuredProjects.includes('t("description")'),
+  "Featured projects must not restore redundant section description copy",
+);
+assert(
+  organizationsExplore.includes("grid grid-cols-1") &&
+    !organizationsExplore.includes('className="grid grid-cols-[repeat(auto-fill,minmax(300px,1fr))]'),
+  "Organizations grids must collapse before applying 300px card tracks",
+);
+assert(
+  recordExplorer.includes("divide-y divide-border-soft border-t") &&
+    !recordExplorer.includes("font-medium uppercase tracking-[0.08em]"),
+  "Record lists must use real separators and functional labels",
+);
+assert(
+  floatingTaina.includes("viewportBoundedSize") && floatingTaina.includes("VIEWPORT_PADDING * 2"),
+  "Floating Tainá panels and tour bubbles must remain viewport bounded",
+);
+assert(
+  floatingTaina.includes("usesCompactCanvasLauncher") && floatingTaina.includes('pathname === "/globe"'),
+  "Floating Tainá must yield to full-canvas Globe controls until explicitly opened",
+);
+for (const [path, variant] of [
+  ["app/projects/loading.tsx", "projects"],
+  ["app/organizations/loading.tsx", "organizations"],
+  ["app/observations/loading.tsx", "observations"],
+]) {
+  assert(
+    read(path).includes(`variant="${variant}"`),
+    `${path}: loading anatomy must select its resolved route variant`,
+  );
+}
+assert(
+  pageLoadingSkeletons.includes("lg:grid-cols-[minmax(0,5fr)_1px_minmax(0,7fr)]"),
+  "BioBlitz loading must mirror the resolved split workspace",
+);
+for (const path of productionRuntimeTsxFiles) {
+  const source = read(path);
+  assert(
+    !/(?:100vh|\b(?:min-h|h|max-h)-screen\b)/.test(source),
+    `${path}: production viewport geometry must use dynamic viewport units`,
+  );
+  assert(
+    !source.includes("w-[calc(100%-2rem)]"),
+    `${path}: overlay geometry must preserve the 12px phone viewport gutter`,
+  );
+}
 
 assert(/Omit<ComponentPropsWithoutRef<"span">, "children">/.test(typography), "BrandWord must not accept arbitrary children");
 assert(/>\s*GainForest\s*<\/span>/.test(typography), "BrandWord must render the exact visible text GainForest");

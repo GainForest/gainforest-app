@@ -80,7 +80,7 @@ export default async function EpdsRouterDocsPage() {
   const t = await getTranslations("common.epdsRouter");
 
   return (
-    <div className="mx-auto w-full max-w-3xl px-5 py-10 sm:px-8 sm:py-14">
+    <div className="mx-auto w-full max-w-3xl px-3 py-4 sm:px-5 lg:px-8 lg:py-6">
       <header className="mb-12 text-center">
         <div className="mb-5 flex justify-center text-primary">
           <LogoMark className="h-7 w-7" title="GainForest" />
@@ -134,8 +134,8 @@ export default async function EpdsRouterDocsPage() {
       </Section>
 
       <Section heading={t("api.heading")} intro={t("api.intro")}>
-        <div className="overflow-hidden rounded-xl border border-border/60">
-          <table className="w-full border-collapse text-left">
+        <div className="overflow-x-auto rounded-xl border border-border/60">
+          <table className="w-full min-w-[640px] border-collapse text-left">
             <tbody>
               <ApiRow method="POST" path="/v1/lookup" text={t("api.lookup")} />
               <ApiRow method="GET" path="/v1/status" text={t("api.status")} />

@@ -6,11 +6,11 @@ const sectionSurfaceVariants = cva("min-w-0", {
   variants: {
     variant: {
       plain: "",
-      muted: "rounded-2xl bg-muted p-5 sm:p-6",
+      muted: "rounded-2xl bg-muted p-4 sm:p-5",
       danger:
-        "rounded-2xl border border-destructive/30 bg-destructive/10 p-5 text-foreground sm:p-6",
+        "rounded-2xl border border-destructive/30 bg-destructive/10 p-4 text-foreground sm:p-5",
       elevated:
-        "rounded-2xl border border-border bg-popover p-5 text-popover-foreground shadow-lg sm:p-6",
+        "rounded-2xl border border-border bg-popover p-4 text-popover-foreground shadow-lg sm:p-5",
     },
   },
   defaultVariants: {

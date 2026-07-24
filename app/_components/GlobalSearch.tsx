@@ -15,6 +15,7 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { shellHeaderControl } from "./shell/control-recipes";
 import { BumicertOwnerAvatar } from "@/components/bumicert/BumicertOwnerAvatar";
 import {
   searchEverything,
@@ -179,7 +180,7 @@ export function GlobalSearch() {
           <Dialog.Content
             aria-describedby={undefined}
             className={cn(
-              "fixed left-1/2 top-[12%] z-[100] w-[calc(100%-2rem)] max-w-xl -translate-x-1/2",
+              "fixed left-1/2 top-[12%] z-[100] w-[calc(100%-1.5rem)] max-w-xl -translate-x-1/2",
               "overflow-hidden rounded-2xl border border-border bg-background shadow-2xl",
               "data-[state=open]:animate-in data-[state=closed]:animate-out",
               "data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0",
@@ -226,7 +227,7 @@ export function GlobalSearch() {
                     setActiveIndex(0);
                     inputRef.current?.focus();
                   }}
-                  className="rounded-md p-1 text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/40"
+                  className="grid size-10 place-items-center rounded-md text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/40"
                   aria-label={t("clear")}
                 >
                   <XIcon className="h-3.5 w-3.5" />
@@ -334,7 +335,7 @@ function SearchTrigger({
         type="button"
         onClick={onOpen}
         aria-label={ariaLabel}
-        className="hidden h-9 items-center gap-2 rounded-full border border-border-soft bg-background/70 pl-3 pr-2 text-[13px] text-muted-foreground transition-colors hover:border-border hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/40 lg:inline-flex"
+        className={cn("hidden items-center gap-2 rounded-full border border-border-soft bg-background/70 pl-3 pr-2 text-[13px] text-muted-foreground transition-colors hover:border-border hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/40 lg:inline-flex", shellHeaderControl.pill)}
       >
         <SearchIcon className="h-4 w-4 shrink-0" aria-hidden />
         <span className="min-w-[5.5rem] text-left">{label}</span>
@@ -348,7 +349,7 @@ function SearchTrigger({
         type="button"
         onClick={onOpen}
         aria-label={ariaLabel}
-        className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-border bg-background text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/40 lg:hidden"
+        className={cn("inline-flex items-center justify-center rounded-full border border-border bg-background text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/40 lg:hidden", shellHeaderControl.icon)}
       >
         <SearchIcon className="h-4 w-4" aria-hidden />
       </button>
@@ -359,7 +360,7 @@ function SearchTrigger({
 function SectionHeader({ label, kind }: { label: string; kind: GlobalSearchKind }) {
   const Icon = KIND_ICON[kind];
   return (
-    <div className="flex items-center gap-1.5 px-4 pb-1 pt-2.5 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+    <div className="flex items-center gap-1.5 px-4 pb-1 pt-2.5 text-xs font-medium text-muted-foreground">
       <Icon className="h-3 w-3" aria-hidden />
       {label}
     </div>
@@ -383,7 +384,7 @@ function ResultRow({
       onMouseEnter={onMouseEnter}
       onClick={onClick}
       className={cn(
-        "flex w-full items-center gap-3 px-4 py-2 text-left transition-colors",
+        "flex min-h-11 w-full items-center gap-3 px-4 py-2 text-left transition-colors",
         active ? "bg-muted" : "hover:bg-muted/60",
       )}
     >

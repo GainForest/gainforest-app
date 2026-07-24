@@ -405,7 +405,7 @@ export async function AccountBumicertsTabContent({
   // old /manage URL used); everyone else sees the read-only public grid.
   const access = await resolveAccountManageAccess(account.urlIdentifier).catch(() => null);
   if (access?.status === "allowed") {
-    return <BumicertsSection target={access.target} />;
+    return <BumicertsSection target={access.target} embedded />;
   }
 
   const bumicerts = await fetchBumicertsByDid(did, 1000).then((page) => page.records).catch(() => []);
@@ -469,7 +469,7 @@ export async function AccountDonationsTabContent({ account, did }: { account: Ac
 export async function AccountObservationsTabContent({ account, did }: { account: AccountRouteData; did: string }) {
   const access = await resolveAccountManageAccess(account.urlIdentifier).catch(() => null);
   if (access?.status === "allowed") {
-    return <ObservationsSection target={access.target} />;
+    return <ObservationsSection target={access.target} embedded />;
   }
 
   return (
@@ -482,7 +482,7 @@ export async function AccountObservationsTabContent({ account, did }: { account:
 export async function AccountProjectsTabContent({ account, did }: { account: AccountRouteData; did: string }) {
   const access = await resolveAccountManageAccess(account.urlIdentifier).catch(() => null);
   if (access?.status === "allowed") {
-    return <ProjectsSection target={access.target} />;
+    return <ProjectsSection target={access.target} embedded />;
   }
 
   const projects = await fetchProjectsByDid(did, 1000, null, undefined, undefined, { withScopeTags: true })

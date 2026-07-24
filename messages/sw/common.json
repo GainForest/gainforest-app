@@ -96,9 +96,9 @@
   "sidebar": {
     "changelogLink": "Tazama mabadiliko",
     "sections": {
-      "explore": "GUNDUA",
-      "funding": "UFADHILI",
-      "manage": "SIMAMIA",
+      "explore": "Gundua",
+      "funding": "Ufadhili",
+      "manage": "Simamia",
       "ai": "AI"
     },
     "items": {

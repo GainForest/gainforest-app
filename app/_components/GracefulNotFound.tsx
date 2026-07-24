@@ -21,7 +21,7 @@ export function GracefulNotFound({
   secondaryLabel,
 }: GracefulNotFoundProps) {
   return (
-    <main className="flex min-h-[calc(100vh-3.5rem)] items-center justify-center px-4 py-16">
+    <main className="flex min-h-[calc(100dvh-3.5rem)] items-center justify-center px-3 py-16 sm:px-5">
       <section className="mx-auto flex w-full max-w-xl flex-col items-center text-center">
         <DisplayHeading as="h1" className="text-4xl leading-tight tracking-tight text-foreground sm:text-5xl">
           {title}

@@ -336,7 +336,7 @@ export function LabelTab({ sessionDid }: { sessionDid: string | null }) {
 
   if (!sessionDid) {
     return (
-      <div className="rounded-3xl border border-dashed border-border bg-muted px-6 py-14 text-center">
+      <div className="rounded-2xl bg-muted px-4 py-12 text-center sm:px-6">
         <h2 className="font-instrument text-lg font-light italic text-foreground">{t("signInTitle")}</h2>
         <p className="mx-auto mt-2 max-w-lg text-sm leading-6 text-muted-foreground">{t("signInBody")}</p>
       </div>
@@ -345,7 +345,7 @@ export function LabelTab({ sessionDid }: { sessionDid: string | null }) {
 
   if (recordings === null) {
     return (
-      <div className="flex items-center justify-center gap-3 rounded-3xl bg-muted px-6 py-16 text-sm text-muted-foreground">
+      <div className="flex items-center justify-center gap-3 rounded-2xl bg-muted px-4 py-12 text-sm text-muted-foreground sm:px-6">
         <Loader2Icon className="size-5 animate-spin text-primary" />
         {t("loadingRecordings")}
       </div>
@@ -354,7 +354,7 @@ export function LabelTab({ sessionDid }: { sessionDid: string | null }) {
 
   if (recordings.length === 0) {
     return (
-      <div className="rounded-3xl border border-dashed border-border bg-muted px-6 py-14 text-center">
+      <div className="rounded-2xl bg-muted px-4 py-12 text-center sm:px-6">
         <WavesIcon className="mx-auto size-8 text-primary" />
         <h2 className="mt-4 font-instrument text-lg font-light italic text-foreground">{t("noRecordingsTitle")}</h2>
         <p className="mx-auto mt-2 max-w-lg text-sm leading-6 text-muted-foreground">{workspaceError ?? t("noRecordingsBody")}</p>
@@ -368,7 +368,7 @@ export function LabelTab({ sessionDid }: { sessionDid: string | null }) {
 
   return (
     <section className="flex flex-col gap-4">
-      <div className="flex flex-col gap-3 rounded-2xl bg-muted p-3 sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex flex-col gap-3 rounded-2xl bg-muted p-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex min-w-0 items-center gap-3">
           <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-primary/10 text-primary"><WavesIcon className="size-4.5" /></span>
           <div className="min-w-0">
@@ -377,9 +377,9 @@ export function LabelTab({ sessionDid }: { sessionDid: string | null }) {
           </div>
         </div>
         <div className="flex flex-wrap items-center gap-2">
-          <Button asChild variant="outline" size="sm"><Link href="/audiomoth?tab=upload"><UploadIcon className="size-4" />{t("addFiles")}</Link></Button>
-          <Button variant="outline" size="sm" disabled={occurrences.length === 0} onClick={exportLabels}><DownloadIcon className="size-4" />{t("export")}</Button>
-          <Button variant="ghost" size="sm" onClick={() => void loadWorkspace()}><RefreshCwIcon className="size-4" />{t("refresh")}</Button>
+          <Button asChild variant="outline" size="sm" className="h-10"><Link href="/audiomoth?tab=upload"><UploadIcon className="size-4" />{t("addFiles")}</Link></Button>
+          <Button variant="outline" size="sm" className="h-10" disabled={occurrences.length === 0} onClick={exportLabels}><DownloadIcon className="size-4" />{t("export")}</Button>
+          <Button variant="ghost" size="sm" className="h-10" onClick={() => void loadWorkspace()}><RefreshCwIcon className="size-4" />{t("refresh")}</Button>
         </div>
       </div>
 
@@ -389,7 +389,7 @@ export function LabelTab({ sessionDid }: { sessionDid: string | null }) {
             <p className="mb-2 px-1 text-xs font-medium text-muted-foreground">{t("recordings")}</p>
             <div className="relative">
               <SearchIcon className="pointer-events-none absolute left-2.5 top-1/2 size-3.5 -translate-y-1/2 text-muted-foreground" />
-              <Input value={query} onChange={(event) => setQuery(event.target.value)} placeholder={t("search")} className="h-8 pl-8 text-xs" />
+              <Input value={query} onChange={(event) => setQuery(event.target.value)} placeholder={t("search")} className="h-11 pl-8 text-xs sm:h-10" />
             </div>
           </div>
           <div className="min-h-0 flex-1 overflow-y-auto p-2">
@@ -397,7 +397,7 @@ export function LabelTab({ sessionDid }: { sessionDid: string | null }) {
               const count = occurrenceCounts[recording.uri];
               const active = recording.uri === selectedRecording?.uri;
               return (
-                <button key={recording.uri} type="button" onClick={() => setSelectedUri(recording.uri)} className={cn("mb-1 flex w-full items-center gap-2 rounded-xl px-2.5 py-2 text-left transition-colors", active ? "bg-primary/10 text-foreground" : "text-muted-foreground hover:bg-muted hover:text-foreground") }>
+                <button key={recording.uri} type="button" onClick={() => setSelectedUri(recording.uri)} className={cn("mb-1 flex min-h-11 w-full items-center gap-2 rounded-xl px-2.5 py-2 text-left transition-colors", active ? "bg-primary/10 text-foreground" : "text-muted-foreground hover:bg-muted hover:text-foreground") }>
                   <span className={cn("grid size-6 shrink-0 place-items-center rounded-full", count && count > 0 ? "bg-primary text-primary-foreground" : "bg-muted") }>
                     {count && count > 0 ? <CheckIcon className="size-3.5" /> : <WavesIcon className="size-3 opacity-60" />}
                   </span>
@@ -420,8 +420,8 @@ export function LabelTab({ sessionDid }: { sessionDid: string | null }) {
                   <p className="mt-0.5 text-xs text-muted-foreground">{t("filePosition", { current: selectedIndex + 1, total: recordings.length })}</p>
                 </div>
                 <div className="flex shrink-0 items-center gap-1">
-                  <button type="button" onClick={() => moveSelection(-1)} disabled={selectedIndex <= 0} className="grid size-8 place-items-center rounded-lg border border-border text-muted-foreground hover:bg-muted disabled:opacity-30" aria-label={t("previousFile")}><ChevronLeftIcon className="size-4" /></button>
-                  <button type="button" onClick={() => moveSelection(1)} disabled={selectedIndex >= recordings.length - 1} className="grid size-8 place-items-center rounded-lg border border-border text-muted-foreground hover:bg-muted disabled:opacity-30" aria-label={t("nextFile")}><ChevronRightIcon className="size-4" /></button>
+                  <button type="button" onClick={() => moveSelection(-1)} disabled={selectedIndex <= 0} className="grid size-10 place-items-center rounded-lg border border-border text-muted-foreground hover:bg-muted disabled:opacity-30" aria-label={t("previousFile")}><ChevronLeftIcon className="size-4" /></button>
+                  <button type="button" onClick={() => moveSelection(1)} disabled={selectedIndex >= recordings.length - 1} className="grid size-10 place-items-center rounded-lg border border-border text-muted-foreground hover:bg-muted disabled:opacity-30" aria-label={t("nextFile")}><ChevronRightIcon className="size-4" /></button>
                 </div>
               </div>
 
@@ -452,7 +452,7 @@ export function LabelTab({ sessionDid }: { sessionDid: string | null }) {
                           <p className="mt-0.5 text-[10px] text-muted-foreground">{formatTime(item.bounds.startTimeSeconds)}–{formatTime(item.bounds.endTimeSeconds)} · {formatFrequency(item.bounds.minFrequencyHz)}–{formatFrequency(item.bounds.maxFrequencyHz)}</p>
                         </button>
                         <span className="text-[10px] font-medium text-primary">{t("saved")}</span>
-                        <button type="button" disabled={mutationPending} onClick={() => void removeLabel(item)} className="grid size-7 shrink-0 place-items-center rounded-lg text-muted-foreground hover:bg-destructive/10 hover:text-destructive disabled:opacity-40" aria-label={t("deleteLabel")}><Trash2Icon className="size-3.5" /></button>
+                        <button type="button" disabled={mutationPending} onClick={() => void removeLabel(item)} className="grid size-10 shrink-0 place-items-center rounded-lg text-muted-foreground hover:bg-destructive/10 hover:text-destructive disabled:opacity-40" aria-label={t("deleteLabel")}><Trash2Icon className="size-3.5" /></button>
                       </div>
                     ))}
                   </div>
@@ -469,7 +469,7 @@ export function LabelTab({ sessionDid }: { sessionDid: string | null }) {
                 <p className="text-xs font-medium text-muted-foreground">{editingItem ? t("editLabel") : t("newLabel")}</p>
                 <h3 className="mt-1 font-instrument text-lg font-light italic tracking-tight text-foreground">{draftBox ? t("describeSelection") : t("drawFirst")}</h3>
               </div>
-              {draftBox ? <button type="button" onClick={() => startFreshLabel(null)} className="grid size-8 place-items-center rounded-lg text-muted-foreground hover:bg-muted" aria-label={t("clearSelection")}><XIcon className="size-4" /></button> : null}
+              {draftBox ? <button type="button" onClick={() => startFreshLabel(null)} className="grid size-10 place-items-center rounded-lg text-muted-foreground hover:bg-muted" aria-label={t("clearSelection")}><XIcon className="size-4" /></button> : null}
             </div>
 
             {!draftBox ? (

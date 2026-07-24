@@ -206,7 +206,7 @@ export function LabelerClient({
         lede={t("description")}
       />
       <section className="border-b border-border-soft">
-        <div className="mx-auto max-w-[1480px] px-5 pb-8 sm:px-7 lg:px-10">
+        <div className="mx-auto max-w-[90rem] px-3 pb-8 sm:px-5 lg:px-8">
           <div className="grid gap-3 rounded-2xl bg-muted p-3 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-[minmax(220px,1fr)_repeat(5,150px)]">
             <label className="relative">
               <span className="sr-only">{t("filters.searchLabel")}</span>
@@ -243,7 +243,7 @@ export function LabelerClient({
         </div>
       </section>
 
-      <div className="mx-auto max-w-[1480px] px-5 py-6 sm:px-7 lg:px-10">
+      <div className="mx-auto max-w-[90rem] px-3 py-6 sm:px-5 lg:px-8">
         <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
           <div className="inline-flex rounded-full border border-border bg-muted/50 p-1">
             <QueueButton active={mode === "unidentified"} onClick={() => setMode("unidentified")}>
@@ -271,7 +271,7 @@ export function LabelerClient({
                 ))}
               </div>
             ) : (
-              <div className="grid min-h-72 place-items-center rounded-3xl border border-dashed border-border bg-muted px-6 text-center">
+              <div className="grid min-h-72 place-items-center rounded-2xl bg-muted px-4 text-center sm:px-5">
                 <div>
                   <LeafIcon className="mx-auto size-7 text-primary/60" aria-hidden />
                   <p className="mt-3 font-medium text-foreground">{t("empty.title")}</p>
@@ -291,7 +291,7 @@ export function LabelerClient({
             {selected ? (
               <ObservationReviewPanel record={selected} viewerDid={viewerDid} />
             ) : (
-              <div className="rounded-2xl bg-muted p-8 text-center text-sm text-muted-foreground">
+              <div className="rounded-2xl bg-muted p-4 py-8 text-center text-sm text-muted-foreground sm:p-5 sm:py-8">
                 {t("review.selectPrompt")}
               </div>
             )}

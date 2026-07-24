@@ -51,7 +51,7 @@ export function ChromeGate({
   // The landing page brings its own navigation and full-bleed layout.
   if (pathname === "/") {
     return showFooter ? (
-      <div className="flex min-h-screen w-full flex-col [&>*]:shrink-0">
+      <div className="flex min-h-dvh w-full flex-col [&>*]:shrink-0">
         {children}
         {footer}
       </div>

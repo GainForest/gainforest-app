@@ -85,7 +85,7 @@ export function MintCertProjectGate({ target }: { target: ManageTarget }) {
   }, [projects, query]);
 
   return (
-    <div className="mx-auto w-full max-w-3xl px-4 py-8 sm:px-6 sm:py-12">
+    <div className="mx-auto w-full max-w-6xl px-3 py-4 sm:px-5 sm:py-6 lg:px-8">
       <div className="max-w-2xl">
         <h1 className="font-instrument text-3xl font-light italic tracking-[-0.02em] text-foreground sm:text-4xl">{t("title")}</h1>
         <p className="mt-3 text-sm leading-6 text-muted-foreground">{t("subtitle")}</p>

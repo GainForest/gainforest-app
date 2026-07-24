@@ -25,6 +25,7 @@ import { formatRelative } from "../_lib/format";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { ResolvedAvatar } from "@/app/feed/ResolvedAvatar";
 import { cn } from "@/lib/utils";
+import { shellHeaderControl } from "./shell/control-recipes";
 
 export function NotificationBell({ session }: { session: AuthSession | null }) {
   const t = useTranslations("common.notifications");
@@ -75,7 +76,7 @@ export function NotificationBell({ session }: { session: AuthSession | null }) {
         <button
           type="button"
           aria-label={ariaLabel}
-          className="relative inline-flex size-8 items-center justify-center rounded-full text-muted-foreground ring-1 ring-border transition-colors hover:text-foreground hover:ring-primary/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
+          className={cn("relative inline-flex items-center justify-center rounded-full text-muted-foreground ring-1 ring-border transition-colors hover:text-foreground hover:ring-primary/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50", shellHeaderControl.icon)}
         >
           <BellIcon className="size-4" aria-hidden />
           {unreadCount > 0 ? (

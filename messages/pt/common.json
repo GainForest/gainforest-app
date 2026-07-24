@@ -96,9 +96,9 @@
   "sidebar": {
     "changelogLink": "Ver novidades",
     "sections": {
-      "explore": "EXPLORAR",
-      "funding": "FINANCIAMENTO",
-      "manage": "GERENCIAR",
+      "explore": "Explorar",
+      "funding": "Financiamento",
+      "manage": "Gerenciar",
       "ai": "AI"
     },
     "items": {

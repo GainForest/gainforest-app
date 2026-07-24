@@ -27,7 +27,7 @@ export default async function EpdsDocsPage() {
   const t = await getTranslations("common.epds");
 
   return (
-    <div className="mx-auto w-full max-w-3xl px-5 py-10 sm:px-8 sm:py-14">
+    <div className="mx-auto w-full max-w-3xl px-3 py-4 sm:px-5 lg:px-8 lg:py-6">
       <header className="mb-12 text-center">
         <div className="mb-5 flex justify-center text-primary">
           <LogoMark className="h-7 w-7" title="GainForest" />

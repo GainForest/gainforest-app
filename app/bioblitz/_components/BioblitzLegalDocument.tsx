@@ -27,8 +27,7 @@ export function BioblitzLegalDocument({
   relatedLinks: LegalLink[];
 }) {
   return (
-    <main className="px-4 py-10 sm:px-6 md:py-16">
-      <article className="mx-auto max-w-3xl">
+    <main className="mx-auto max-w-3xl px-3 py-4 sm:px-5 lg:px-8 lg:py-6">
         <Link
           href="/bioblitz"
           className="text-sm font-medium text-primary underline-offset-4 hover:underline"
@@ -36,7 +35,7 @@ export function BioblitzLegalDocument({
           ← {backLabel}
         </Link>
 
-        <div className="mt-8 rounded-3xl bg-muted p-6 md:p-10">
+        <div className="mt-8 rounded-3xl bg-muted p-4 sm:p-5 md:p-8">
           <header className="border-b border-border pb-8">
             <h1 className="font-instrument text-4xl font-light italic tracking-tight text-foreground md:text-5xl">
               {title}
@@ -77,7 +76,6 @@ export function BioblitzLegalDocument({
             ))}
           </nav>
         </div>
-      </article>
     </main>
   );
 }

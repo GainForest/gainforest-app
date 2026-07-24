@@ -46,7 +46,7 @@ describe("Feed wave visual hierarchy", () => {
 
     expect(feedSkeleton).toContain('className="divide-y divide-border/50"');
     expect(rowTags).toHaveLength(1);
-    expect(rowTags[0]).toContain('className="rounded-2xl px-3 py-3.5"');
+    expect(rowTags[0]).toContain('className="px-3 py-3"');
     expect(rowTags[0]).not.toMatch(/\b(?:border|bg-card|shadow)/);
   });
 
@@ -67,7 +67,8 @@ describe("Feed wave visual hierarchy", () => {
   });
 
   it("strengthens identification empty surfaces without changing destructive errors", () => {
-    expect(identifications).toContain("rounded-3xl border border-border bg-muted");
+    expect(identifications).toContain("rounded-2xl bg-muted px-4 py-12 text-center");
+    expect(identifications).not.toContain("rounded-3xl border border-border bg-muted");
     expect(identifications).toContain("font-instrument text-lg italic");
     expect(identifications).toContain("rounded-2xl bg-destructive/10");
     expect(identifications).not.toContain("border-dashed border-border bg-muted/30");
@@ -76,13 +77,14 @@ describe("Feed wave visual hierarchy", () => {
   it("uses semantic display headings and visible muted surfaces in Soundscape", () => {
     expect(soundscape).toContain("font-instrument text-lg italic");
     expect(soundscape).toContain("rounded-2xl border border-dashed bg-muted/60");
-    expect(soundscape).toContain("rounded-xl bg-muted p-8");
+    expect(soundscape).toContain("rounded-xl bg-muted p-3");
   });
 
   it("lets leaderboard tabs size to their controls and matches observation loading to square tiles", () => {
     expect(leaderboard).toContain('className="grid w-full grid-cols-3 rounded-full');
     expect(leaderboard).not.toContain('className="grid h-10 w-full grid-cols-3 rounded-full');
-    expect(observationsLoading).toContain('className="aspect-square rounded-lg"');
+    expect(observationsLoading).toContain('variant="observations"');
+    expect(loading).toContain('className="aspect-square rounded-lg"');
   });
 
   it("keeps persistent composer and drawer groups visibly filled", () => {

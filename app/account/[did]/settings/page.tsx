@@ -20,5 +20,5 @@ export default async function AccountSettingsPage({ params }: { params: Promise<
   const access = await resolveAccountManageAccess(urlIdentifier);
   if (access.status !== "allowed") notFound();
 
-  return <SettingsSection target={access.target} />;
+  return <SettingsSection target={access.target} embedded />;
 }

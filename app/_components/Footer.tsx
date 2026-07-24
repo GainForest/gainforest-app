@@ -30,7 +30,7 @@ export function Footer() {
   const year = new Date().getFullYear();
 
   return (
-    <footer className="mx-auto mt-auto w-full max-w-6xl border-t border-border px-6 py-16">
+    <footer className="mx-auto mt-auto w-full max-w-6xl border-t border-border px-3 py-8 sm:px-5 md:py-12 lg:px-8">
       <div className="flex flex-col items-start justify-between gap-8 md:flex-row md:items-start">
         <div className="max-w-xl">
           <div className="flex flex-col gap-2">
@@ -44,10 +44,7 @@ export function Footer() {
               />
               <BrandWord className="text-xl font-bold tracking-tight" />
             </div>
-            <p
-              className="text-sm text-muted-foreground"
-              style={{ fontFamily: "var(--font-instrument-serif-var)", fontStyle: "italic" }}
-            >
+            <p className="text-sm text-muted-foreground">
               {t("tagline")}
             </p>
             <p className="mt-1 text-xs text-muted-foreground/60">

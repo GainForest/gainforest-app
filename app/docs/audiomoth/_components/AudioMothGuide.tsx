@@ -48,7 +48,7 @@ export function AudioMothGuide() {
   const t = useTranslations("audiomothGuide");
 
   return (
-    <main className="mx-auto w-full max-w-3xl px-5 py-10 sm:px-8 sm:py-14">
+    <main className="mx-auto w-full max-w-3xl px-3 py-4 sm:px-5 lg:px-8 lg:py-6">
       <header className="text-center">
         <div className="mx-auto mb-5 flex h-12 w-12 items-center justify-center rounded-2xl border border-primary/20 bg-primary/10 text-primary">
           <WavesIcon className="h-6 w-6" aria-hidden="true" />

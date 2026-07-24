@@ -2,8 +2,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 export default function BumicertDetailLoading() {
   return (
-    <main className="min-h-screen bg-background pb-20">
-      <section className="mx-auto grid max-w-6xl grid-cols-1 gap-8 px-6 py-8 lg:grid-cols-[320px_minmax(0,1fr)] lg:px-8">
+    <main className="min-h-dvh bg-background pb-20">
+      <section className="mx-auto grid max-w-6xl grid-cols-1 gap-8 px-3 py-4 sm:px-5 sm:py-6 lg:grid-cols-[320px_minmax(0,1fr)] lg:px-8">
         {/* Overview sidebar */}
         <aside className="min-w-0">
           <div className="space-y-4 lg:sticky lg:top-28">

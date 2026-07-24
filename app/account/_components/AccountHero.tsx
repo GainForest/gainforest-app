@@ -135,7 +135,7 @@ export function AccountHero({
 
   return (
     <FollowProvider key={account.did} targetDid={account.did}>
-      <section className="overflow-hidden rounded-3xl bg-muted">
+      <section className="overflow-hidden rounded-3xl bg-background">
         <div className="relative h-32 sm:h-40 md:h-44">
           {account.coverUrl ? (
             <Image
@@ -156,24 +156,24 @@ export function AccountHero({
               }}
             />
           )}
-          <div className="pointer-events-none absolute inset-x-0 bottom-0 h-14 bg-linear-to-t from-background/75 to-transparent" />
+          <div className="pointer-events-none absolute inset-x-0 bottom-0 h-24 bg-linear-to-t from-background via-background/60 to-transparent" />
 
           <div className="absolute right-3 top-3 z-20 flex items-center gap-2">
-            <Button type="button" variant="secondary" size="sm" onClick={() => void handleShare()} aria-label={heroT("copyProfileLink")} aria-live="polite">
+            <Button type="button" variant="secondary" size="sm" className="h-10" onClick={() => void handleShare()} aria-label={heroT("copyProfileLink")} aria-live="polite">
               {shareState === "copied" ? <CheckIcon aria-hidden /> : shareState === "error" ? <TriangleAlertIcon aria-hidden /> : <Share2Icon aria-hidden />}
               <span className="hidden sm:inline">
                 {shareState === "copied" ? heroT("copied") : shareState === "error" ? heroT("copyFailed") : heroT("share")}
               </span>
             </Button>
             {editHref ? (
-              <Button asChild size="sm">
+              <Button asChild size="sm" className="h-10">
                 <Link href={editHref}><PencilIcon aria-hidden />{actionsT("edit")}</Link>
               </Button>
             ) : null}
           </div>
         </div>
 
-        <div className="relative z-10 px-5 pb-5 sm:px-6 sm:pb-6">
+        <div className="relative z-10 px-4 pb-4 sm:px-5 sm:pb-5">
           <div className="-mt-12 flex flex-col gap-4 md:flex-row md:items-end md:gap-5">
             <div className="relative size-24 shrink-0 overflow-hidden rounded-full bg-muted ring-4 ring-background">
               {account.avatarUrl ? (

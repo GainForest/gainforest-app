@@ -5,6 +5,7 @@ import { ShoppingCartIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { useCart } from "./CartProvider";
+import { shellHeaderControl } from "../shell/control-recipes";
 
 /** Header shortcut to the donation cart, with a live item-count badge. */
 export function CartHeaderButton() {
@@ -13,7 +14,7 @@ export function CartHeaderButton() {
   const showBadge = hydrated && count > 0;
 
   return (
-    <Button asChild variant="ghost" size="icon" className="relative" aria-label={t("openCart", { count })}>
+    <Button asChild variant="ghost" size="icon" className={`${shellHeaderControl.icon} relative`} aria-label={t("openCart", { count })}>
       <Link href="/cart">
         <ShoppingCartIcon />
         {showBadge ? (

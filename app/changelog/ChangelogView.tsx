@@ -79,7 +79,7 @@ export function ChangelogView({ data, locale }: { data: ChangelogData; locale: s
   }, [active, data.months]);
 
   return (
-    <div className="space-y-10">
+    <div className="space-y-6 md:space-y-8">
       {/* Category filter legend with live counts */}
       <div className="flex flex-wrap gap-2" role="group" aria-label={t("filterLabel")}>
         <Button
@@ -88,7 +88,7 @@ export function ChangelogView({ data, locale }: { data: ChangelogData; locale: s
           variant={active === null ? "default" : "secondary"}
           onClick={() => setActive(null)}
           aria-pressed={active === null}
-          className="h-8 px-3 text-xs"
+          className="min-h-11 px-3 text-xs sm:min-h-10"
         >
           {t("all")} · {data.total}
         </Button>
@@ -105,7 +105,7 @@ export function ChangelogView({ data, locale }: { data: ChangelogData; locale: s
               variant={isActive ? "default" : "secondary"}
               onClick={() => setActive(isActive ? null : cat.key)}
               aria-pressed={isActive}
-              className="h-8 gap-1.5 px-3 text-xs"
+              className="min-h-11 gap-2 px-3 text-xs sm:min-h-10"
             >
               <span className={cn("size-2 rounded-full", st.dot)} aria-hidden />
               {label(cat.key, cat.label)}
@@ -143,11 +143,11 @@ export function ChangelogView({ data, locale }: { data: ChangelogData; locale: s
               </div>
             ) : null}
 
-            <ul className="space-y-2">
+            <ul className="divide-y divide-border/50">
               {month.commits.map((commit) => {
                 const st = styleFor(commit.category);
                 return (
-                  <li key={commit.hash} className="flex items-start gap-3 rounded-lg px-2 py-1.5 hover:bg-muted/60">
+                  <li key={commit.hash} className="flex items-start gap-3 py-3">
                     <span className="mt-1.5 w-12 shrink-0 text-xs tabular-nums text-muted-foreground">
                       {formatDay(commit.date, locale)}
                     </span>

@@ -48,7 +48,7 @@ describe("field-tools UI contract", () => {
       'rounded-2xl bg-muted p-4 sm:p-5 ${className ?? ""}',
     );
     expect(read("app/bioblitz/_components/BioblitzLegalDocument.tsx")).toContain(
-      "mt-8 rounded-3xl bg-muted p-6 md:p-10",
+      "mt-8 rounded-3xl bg-muted p-4 sm:p-5 md:p-8",
     );
   });
 

@@ -54,7 +54,7 @@ export default async function AccountManageLayout({
 
   if (access.status === "signed-out") {
     return (
-      <section className="mx-auto flex min-h-[calc(100vh-12rem)] w-full max-w-sm items-center px-3 py-12">
+      <section className="mx-auto flex min-h-[calc(100dvh-12rem)] w-full max-w-sm items-center px-3 py-12">
         <SignInPrompt />
       </section>
     );

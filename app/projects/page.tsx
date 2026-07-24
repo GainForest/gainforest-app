@@ -109,7 +109,7 @@ export default async function ProjectsPage() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(itemListJsonLd) }}
       />
-      <Suspense fallback={<ExploreGridPageSkeleton />}>
+      <Suspense fallback={<ExploreGridPageSkeleton variant="projects" />}>
         <ProjectsExploreClient
           initialPage={initialPage ? { ...initialPage, records: mergedInitialRecords } : undefined}
           initialFeaturedUris={initialFeaturedUris}

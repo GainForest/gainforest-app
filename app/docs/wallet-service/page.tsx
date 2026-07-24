@@ -31,7 +31,7 @@ export default async function WalletServiceDocsPage() {
   const t = await getTranslations("common.walletExplainer");
 
   return (
-    <article className="mx-auto w-full max-w-2xl px-5 py-12 sm:px-8 sm:py-16">
+    <article className="mx-auto w-full max-w-3xl px-3 py-4 sm:px-5 lg:px-8 lg:py-6">
       <header className="mb-10">
         <div className="mb-6 text-primary">
           <LogoMark className="h-5 w-5" title="GainForest" />

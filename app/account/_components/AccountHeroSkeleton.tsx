@@ -3,12 +3,13 @@ import { Skeleton } from "@/components/ui/skeleton";
 /** Loading placeholder matching the quiet account hero surface. */
 export function AccountHeroSkeleton() {
   return (
-    <section className="overflow-hidden rounded-3xl bg-muted" aria-hidden>
+    <section className="overflow-hidden rounded-3xl bg-background" aria-hidden>
       <div className="relative h-32 sm:h-40 md:h-44">
         <Skeleton className="absolute inset-0 rounded-none" />
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-24 bg-linear-to-t from-background via-background/60 to-transparent" />
         <div className="absolute right-3 top-3 z-10"><Skeleton className="h-9 w-24 rounded-full" /></div>
       </div>
-      <div className="relative z-10 px-5 pb-5 sm:px-6 sm:pb-6">
+      <div className="relative z-10 px-4 pb-4 sm:px-5 sm:pb-5">
         <div className="-mt-12 flex flex-col gap-4 md:flex-row md:items-end md:gap-5">
           <Skeleton className="size-24 shrink-0 rounded-full ring-4 ring-background" />
           <div className="min-w-0 max-w-2xl space-y-2.5 md:flex-1 md:pb-1">
@@ -31,7 +32,7 @@ export function AccountHeroSkeleton() {
 export function AccountTabsSkeleton({ count = 4 }: { count?: number }) {
   return (
     <div className="mt-3" aria-hidden>
-      <div className="-mx-4 overflow-x-auto px-4 scrollbar-hidden">
+      <div className="-mx-3 overflow-x-auto px-3 scrollbar-hidden sm:-mx-5 sm:px-5 lg:-mx-8 lg:px-8">
         <div className="flex min-w-max items-end gap-1 border-b border-border">
           {Array.from({ length: count }).map((_, index) => (
             <div key={index} className="flex items-center gap-1.5 px-3 py-2.5">

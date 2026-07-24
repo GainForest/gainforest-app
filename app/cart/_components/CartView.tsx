@@ -82,7 +82,7 @@ function CartItemRow({ item }: { item: CartItem }) {
           <button
             type="button"
             onClick={() => removeItem(item.orgDid, item.rkey)}
-            className="shrink-0 rounded-full p-1 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+            className="grid size-11 shrink-0 place-items-center rounded-full text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
             aria-label={t("removeItem", { title: item.title })}
           >
             <XIcon className="size-4" aria-hidden />
@@ -128,12 +128,15 @@ export function CartView({ onCheckout }: { onCheckout?: () => void } = {}) {
 
   if (!hydrated) {
     return (
-      <div className="mx-auto w-full max-w-5xl px-4 py-10" aria-busy="true">
-        <div className="rounded-3xl bg-muted p-6">
-          <Skeleton className="h-10 w-48 rounded-full" />
-          <div className="mt-6 grid gap-6 lg:grid-cols-[minmax(0,1fr)_320px]">
-            <Skeleton className="h-64 rounded-2xl bg-background" />
-            <Skeleton className="h-56 rounded-2xl bg-background" />
+      <div className="mx-auto w-full max-w-6xl px-3 py-4 sm:px-5 lg:px-8 lg:py-6" aria-busy="true">
+        <Skeleton className="h-10 w-48 rounded-full" />
+        <div className="mt-6 grid gap-6 lg:grid-cols-[minmax(0,1fr)_320px]">
+          <div className="space-y-4 rounded-2xl bg-muted p-4 sm:p-5">
+            <Skeleton className="h-20 rounded-xl" />
+            <Skeleton className="h-20 rounded-xl" />
+          </div>
+          <div className="rounded-2xl bg-muted p-4 sm:p-5">
+            <Skeleton className="h-32 rounded-xl" />
           </div>
         </div>
       </div>
@@ -142,36 +145,38 @@ export function CartView({ onCheckout }: { onCheckout?: () => void } = {}) {
 
   if (count === 0) {
     return (
-      <div className="mx-auto mt-10 flex w-[calc(100%_-_2rem)] max-w-5xl flex-col items-center gap-4 rounded-3xl bg-muted px-6 py-20 text-center">
-        <div className="grid size-16 place-items-center rounded-full bg-background text-muted-foreground">
-          <ShoppingCartIcon className="size-7" aria-hidden />
+      <div className="mx-auto w-full max-w-6xl px-3 py-4 sm:px-5 lg:px-8 lg:py-6">
+        <div className="flex flex-col items-center gap-4 rounded-2xl bg-muted p-4 py-12 text-center sm:p-6 sm:py-12">
+          <div className="grid size-16 place-items-center rounded-full bg-background text-muted-foreground">
+            <ShoppingCartIcon className="size-7" aria-hidden />
+          </div>
+          <DisplayHeading as="h1" className="text-3xl text-foreground">{t("emptyTitle")}</DisplayHeading>
+          <p className="max-w-md text-sm leading-6 text-muted-foreground">{t("emptyDescription")}</p>
+          <Button asChild className="mt-2">
+            <Link href="/projects">
+              <CompassIcon className="size-4" /> {t("exploreProjects")}
+            </Link>
+          </Button>
         </div>
-        <DisplayHeading as="h1" className="text-3xl text-foreground">{t("emptyTitle")}</DisplayHeading>
-        <p className="max-w-md text-sm leading-6 text-muted-foreground">{t("emptyDescription")}</p>
-        <Button asChild className="mt-2">
-          <Link href="/projects">
-            <CompassIcon className="size-4" /> {t("exploreProjects")}
-          </Link>
-        </Button>
       </div>
     );
   }
 
   return (
-    <div className="mx-auto w-full max-w-5xl px-4 py-8">
+    <div className="mx-auto w-full max-w-6xl px-3 py-4 sm:px-5 lg:px-8 lg:py-6">
       <div className="flex items-baseline gap-3">
         <DisplayHeading as="h1" className="text-4xl text-foreground">{t("title")}</DisplayHeading>
         <span className="text-sm text-muted-foreground">{t("projectCount", { count })}</span>
       </div>
 
       <div className="mt-6 grid gap-6 lg:grid-cols-[minmax(0,1fr)_320px] lg:items-start">
-        <ul className="divide-y divide-border-soft rounded-2xl bg-muted p-5">
+        <ul className="divide-y divide-border-soft rounded-2xl bg-muted p-4 sm:p-5">
           {items.map((item) => (
             <CartItemRow key={cartItemKey(item)} item={item} />
           ))}
         </ul>
 
-        <aside className="rounded-2xl bg-muted p-5">
+        <aside className="rounded-2xl bg-muted p-4 sm:p-5">
           <dl className="space-y-2 text-sm">
             <div className="flex items-center justify-between">
               <dt className="text-muted-foreground">{t("donations")}</dt>

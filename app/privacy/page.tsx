@@ -84,19 +84,18 @@ export default async function PrivacyPage() {
   const t = await getTranslations("privacy");
 
   return (
-    <main className="px-6 py-12 md:py-16">
-      <article className="mx-auto max-w-3xl">
+    <main className="mx-auto max-w-3xl px-3 py-4 sm:px-5 lg:px-8 lg:py-6">
         <header>
           <DisplayHeading as="h1" className="text-4xl font-medium tracking-tight text-foreground md:text-5xl">
             {t("title")}
           </DisplayHeading>
-          <div className="mt-5 flex flex-col gap-2 text-sm text-muted-foreground sm:flex-row sm:gap-5">
+          <div className="mt-2 flex flex-col gap-2 text-sm text-muted-foreground sm:flex-row sm:gap-5">
             <span>{t("effectiveDate")}</span>
             <span>{t("lastUpdated")}</span>
           </div>
         </header>
 
-        <div className="mt-10 space-y-5 rounded-2xl bg-muted p-5 text-[15px] leading-7 text-muted-foreground sm:p-6">
+        <div className="mt-6 space-y-5 rounded-2xl bg-muted p-4 text-[15px] leading-7 text-muted-foreground sm:mt-8 sm:p-5">
           {INTRO_PARAGRAPH_KEYS.map((key) => (
             <p key={key}>{renderPolicyText(t(`intro.${key}`))}</p>
           ))}
@@ -118,7 +117,6 @@ export default async function PrivacyPage() {
             </section>
           ))}
         </div>
-      </article>
     </main>
   );
 }

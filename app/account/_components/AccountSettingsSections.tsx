@@ -1212,7 +1212,7 @@ export function AccountSettingsSections({
 }) {
   const t = useTranslations("common.settings.groups");
   return (
-    <Accordion type="multiple" defaultValue={["account"]} className="space-y-1">
+    <Accordion type="multiple" defaultValue={["account"]} className="divide-y divide-border">
       <SettingsGroup value="account" title={t("account.title")} description={t("account.description")}>
         {handle ? <HandleSection did={did} handle={handle} /> : null}
         <PasswordSection did={did} />
@@ -1244,7 +1244,7 @@ export function OrganizationSettingsSections({
 }) {
   const t = useTranslations("common.settings.groups");
   return (
-    <Accordion type="multiple" className="space-y-1">
+    <Accordion type="multiple" className="divide-y divide-border">
       <SettingsGroup value="agents" title={t("agents.title")} description={t("agents.description")}>
         <div className="space-y-3">
           <p className="text-sm text-muted-foreground">{agentKeysHint}</p>

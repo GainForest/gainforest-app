@@ -550,7 +550,7 @@ export function RecordDrawer({
     <div
       ref={dialogRef}
       tabIndex={-1}
-      className="fixed inset-0 z-[90] flex justify-end"
+      className="fixed inset-0 z-[90] flex justify-end p-3 sm:p-4"
       role="dialog"
       aria-modal="true"
       aria-label={title}
@@ -558,9 +558,9 @@ export function RecordDrawer({
       <div className="drawer-scrim absolute inset-0 bg-foreground/25 backdrop-blur-[3px]" onClick={onClose} />
       <div
         className={cn(
-          "drawer-sheet thin-scroll relative flex h-full w-full flex-col overflow-y-auto bg-background shadow-[-24px_0_60px_-30px_rgba(20,30,15,0.5)]",
+          "drawer-sheet thin-scroll relative flex h-full max-h-full w-full flex-col overflow-y-auto rounded-3xl border border-border-soft bg-background shadow-[-24px_0_60px_-30px_rgba(20,30,15,0.5)]",
           isProject
-            ? "max-w-[540px] overscroll-contain sm:my-3 sm:h-[calc(100%_-_1.5rem)] sm:rounded-l-[28px] sm:border sm:border-r-0 sm:border-border-soft"
+            ? "max-w-[540px] overscroll-contain"
             : "max-w-[480px]",
         )}
       >
@@ -620,7 +620,7 @@ export function RecordDrawer({
             </div>
           </div>
         ) : (
-          <div className="sticky top-0 z-10 flex items-center justify-between gap-3 border-b border-border-soft bg-background/90 px-5 py-4 backdrop-blur-xl">
+          <div className="sticky top-0 z-10 flex items-center justify-between gap-3 border-b border-border-soft bg-background/90 px-4 py-4 backdrop-blur-xl sm:px-6">
             <KindBadge record={record} />
             <div className="flex items-center gap-2">
               {(observationHref ?? projectHref) ? <MaximizeButton href={(observationHref ?? projectHref)!} /> : null}
@@ -634,9 +634,9 @@ export function RecordDrawer({
             "pb-12",
             isProject
               ? showHero
-                ? "relative -mt-10 rounded-t-[28px] bg-background px-7 pt-7 sm:px-8"
-                : "px-7 pt-6 sm:px-8"
-              : `px-6 ${showHero ? "-mt-10" : "pt-5"}`,
+                ? "relative -mt-10 rounded-t-[28px] bg-background px-4 pt-6 sm:px-6"
+                : "px-4 pt-4 sm:px-6"
+              : `px-4 sm:px-6 ${showHero ? "-mt-10" : "pt-5"}`,
           )}
         >
           {record.kind === "site" ? <TrustedByBadges did={record.did} className="relative mb-3" variant="compact" /> : null}
@@ -935,15 +935,15 @@ export function RecordDrawer({
           {sections.map((s, i) =>
             s.fields.length === 0 ? null : (
               <div key={s.title ?? i} className="mt-6 border-t border-border-soft pt-5">
-                {s.title && (
-                  <div className="mb-3 text-[11px] font-medium uppercase tracking-[0.14em] text-foreground/45">
+                {s.title ? (
+                  <h3 className="mb-3 font-instrument text-lg italic text-foreground">
                     {s.title}
-                  </div>
-                )}
+                  </h3>
+                ) : null}
                 <dl className="grid grid-cols-2 gap-x-4 gap-y-4">
                   {s.fields.map((f) => (
                     <div key={f.label} className={f.wide ? "col-span-2" : ""}>
-                      <dt className="text-[11px] font-medium uppercase tracking-[0.08em] text-foreground/45">
+                      <dt className="text-xs font-medium text-muted-foreground">
                         {f.label}
                       </dt>
                       <dd className="mt-1 text-[14px] leading-[1.45] text-foreground">{f.value}</dd>
@@ -1097,7 +1097,7 @@ function ObservationMeasurementsPanel({ facts }: { facts: ObservationMeasurement
       <dl className="grid grid-cols-2 gap-x-4 gap-y-3">
         {facts.map((fact, index) => (
           <div key={`${fact.key ?? fact.label ?? "m"}-${index}`}>
-            <dt className="text-[11px] font-medium uppercase tracking-[0.08em] text-foreground/45">
+            <dt className="text-xs font-medium text-muted-foreground">
               {fact.key ? t(`fields.${fact.key}`) : fact.label ?? ""}
             </dt>
             <dd className="mt-1 text-[14px] leading-[1.45] text-foreground">{fact.value}</dd>
@@ -1189,7 +1189,7 @@ const OPTIONAL_OBSERVATION_FIELDS: Array<keyof ObservationDraft> = [
 
 const INPUT_CLASS = "mt-1.5 h-10 w-full rounded-xl border border-border-soft bg-background px-3 text-[14px] text-foreground outline-none transition-colors placeholder:text-muted-foreground/60 focus:border-primary/50 focus:ring-2 focus:ring-primary/10";
 const TEXTAREA_CLASS = "mt-1.5 min-h-20 w-full rounded-xl border border-border-soft bg-background px-3 py-2 text-[14px] leading-5 text-foreground outline-none transition-colors placeholder:text-muted-foreground/60 focus:border-primary/50 focus:ring-2 focus:ring-primary/10";
-const LABEL_CLASS = "text-[11px] font-medium uppercase tracking-[0.08em] text-foreground/45";
+const LABEL_CLASS = "text-xs font-medium text-muted-foreground";
 const OBSERVATION_KIND_OPTIONS = ["Plantae", "Animalia"] as const;
 const BASIS_OF_RECORD_OPTIONS = ["HumanObservation", "MachineObservation", "PreservedSpecimen", "MaterialSample", "LivingSpecimen"] as const;
 
@@ -1605,7 +1605,7 @@ export function ObservationLocationPickerModal({
     <div
       ref={dialogRef}
       tabIndex={-1}
-      className="fixed inset-0 z-[110] grid place-items-center px-4 py-6"
+      className="fixed inset-0 z-[110] grid place-items-center p-3 sm:p-4"
       role="dialog"
       aria-modal="true"
       aria-label={t("observation.chooseMapLocationTitle")}
@@ -1617,7 +1617,7 @@ export function ObservationLocationPickerModal({
         onClick={onClose}
       />
       <div className="relative z-[1] flex w-full max-w-[440px] flex-col overflow-hidden rounded-3xl border border-border-soft bg-background shadow-2xl">
-        <div className="flex items-start justify-between gap-3 px-5 py-4">
+        <div className="flex items-start justify-between gap-3 p-4 sm:px-6">
           <div>
             <h3 className="font-instrument text-[16px] italic text-foreground">{t("observation.chooseMapLocationTitle")}</h3>
             <p className="mt-1 text-[13px] leading-5 text-muted-foreground">{t("observation.movePin")}</p>
@@ -1627,13 +1627,13 @@ export function ObservationLocationPickerModal({
             type="button"
             onClick={onClose}
             aria-label={t("observation.closeMapLocationChooser")}
-            className="grid h-8 w-8 shrink-0 place-items-center rounded-full border border-border-soft text-foreground/70 transition-colors hover:text-foreground"
+            className="grid size-11 shrink-0 place-items-center rounded-full border border-border-soft text-foreground/70 transition-colors hover:text-foreground"
           >
             <XIcon className="h-4 w-4" />
           </button>
         </div>
         <div ref={elRef} className="h-80 w-full border-y border-border-soft bg-surface-sunken" />
-        <div className="flex flex-col gap-3 px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between sm:px-6">
           <p className="text-[13px] text-muted-foreground">
             {selected ? `${formatCoordinateInput(selected.lat)}, ${formatCoordinateInput(selected.lon)}` : t("observation.noMapLocation")}
           </p>
@@ -1641,7 +1641,7 @@ export function ObservationLocationPickerModal({
             <button
               type="button"
               onClick={onClose}
-              className="inline-flex h-10 items-center rounded-full border border-border-soft bg-background px-4 text-[13px] font-medium text-foreground/80 transition-colors hover:border-foreground/30"
+              className="inline-flex h-11 items-center rounded-full border border-border-soft bg-background px-4 text-[13px] font-medium text-foreground/80 transition-colors hover:border-foreground/30"
             >
               {t("actions.cancel")}
             </button>
@@ -1649,7 +1649,7 @@ export function ObservationLocationPickerModal({
               type="button"
               disabled={!selected}
               onClick={() => selected && onSelect(selected.lat, selected.lon)}
-              className="inline-flex h-10 items-center gap-2 rounded-full bg-primary px-4 text-[13px] font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-60"
+              className="inline-flex h-11 items-center gap-2 rounded-full bg-primary px-4 text-[13px] font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-60"
             >
               <CheckIcon className="h-3.5 w-3.5" />
               {t("observation.useLocation")}

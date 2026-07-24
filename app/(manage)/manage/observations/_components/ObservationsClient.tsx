@@ -490,10 +490,12 @@ export function ObservationsClient({
   target,
   initialPage,
   forProject = null,
+  embedded = false,
 }: {
   target: ManageTarget;
   initialPage: InitialPage;
   forProject?: string | null;
+  embedded?: boolean;
 }) {
   const t = useTranslations("upload.observations");
   const router = useRouter();
@@ -705,7 +707,7 @@ export function ObservationsClient({
     modal.pushModal(
       {
         id: "add-observations",
-        dialogWidth: "max-w-2xl w-[calc(100%-2rem)]",
+        dialogWidth: "max-w-2xl",
         // Full page on phones; centered max-w-2xl dialog on >=32rem.
         fullscreenOnMobile: true,
         content: (
@@ -733,7 +735,7 @@ export function ObservationsClient({
     modal.pushModal(
       {
         id: "group-observations-dataset",
-        dialogWidth: "max-w-lg w-[calc(100%-2rem)]",
+        dialogWidth: "max-w-lg",
         forceDialog: true,
         content: (
           <GroupObservationsDatasetModal
@@ -819,6 +821,7 @@ export function ObservationsClient({
       <ObservationBulkAddPanel
         target={target}
         forProject={forProject}
+        embedded={embedded}
         disabledReason={createPermission.reason}
         onUploaded={(records) =>
           setFreshRecords((prev) => {
@@ -836,7 +839,14 @@ export function ObservationsClient({
   return (
     <div className="bg-background pb-4">
       {!isEmpty ? (
-        <div className="mx-auto mt-5 max-w-6xl px-6">
+        <div
+          className={cn(
+            "mt-5",
+            embedded
+              ? "min-w-0"
+              : "mx-auto max-w-[90rem] px-3 sm:px-5 lg:px-8",
+          )}
+        >
           <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl bg-muted px-4 py-3">
             <p className="text-sm text-muted-foreground">
               {selectedRecords.size > 0 ? t("selectedForDelete", { count: selectedRecords.size }) : t("selectToDeleteHint")}
@@ -1401,12 +1411,14 @@ type ObservationProject = { rkey: string; did: string; atUri: string; title: str
 function ObservationBulkAddPanel({
   target,
   forProject,
+  embedded,
   disabledReason,
   onUploaded,
   onBack,
 }: {
   target: ManageTarget;
   forProject?: string | null;
+  embedded: boolean;
   disabledReason?: string | null;
   onUploaded: (records: OccurrenceRecord[]) => void;
   onBack: () => void;
@@ -2215,7 +2227,11 @@ function ObservationBulkAddPanel({
       onDragLeave={onDragLeave}
       onDrop={onDrop}
     >
-      <Container className="space-y-4 pt-3 pb-12">
+      <Container
+        family={embedded ? "full" : "wide"}
+        gutter={!embedded}
+        className="space-y-4 pt-3 pb-12"
+      >
         <div>
           <Button
             variant="ghost"

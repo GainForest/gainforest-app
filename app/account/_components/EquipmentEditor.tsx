@@ -174,14 +174,14 @@ export function EquipmentEditor({
   return (
     <div
       ref={dialogRef}
-      className="fixed inset-0 z-[110] flex justify-end"
+      className="fixed inset-0 z-[110] flex justify-end p-3 sm:p-4"
       role="dialog"
       aria-modal="true"
       aria-labelledby="equipment-editor-title"
     >
       <div aria-hidden className="absolute inset-0 bg-foreground/30 backdrop-blur-[2px]" onClick={() => !busy && onClose()} />
-      <div className="relative flex h-full w-full max-w-[460px] flex-col overflow-y-auto bg-background shadow-2xl">
-        <div className="sticky top-0 z-10 flex items-center justify-between gap-3 border-b border-border bg-background/95 px-5 py-4 backdrop-blur-xl">
+      <div className="relative flex h-full w-full max-w-[460px] flex-col overflow-y-auto rounded-3xl border border-border bg-background shadow-2xl">
+        <div className="sticky top-0 z-10 flex items-center justify-between gap-3 border-b border-border bg-background/95 p-4 backdrop-blur-xl sm:px-5">
           <h2 id="equipment-editor-title" className="font-instrument text-xl font-medium italic text-foreground">
             {isEdit ? t("editEquipment") : t("addEquipment")}
           </h2>
@@ -189,6 +189,7 @@ export function EquipmentEditor({
             ref={closeButtonRef}
             variant="ghost"
             size="icon-sm"
+            className="size-10"
             onClick={() => !busy && onClose()}
             aria-label={t("form.close")}
           >
@@ -196,8 +197,8 @@ export function EquipmentEditor({
           </Button>
         </div>
 
-        <div className="flex flex-col gap-4 px-5 py-6">
-          <div className="grid grid-cols-2 gap-3">
+        <div className="flex flex-col gap-4 p-4 sm:p-5">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             <Field label={t("form.name")}>
               <Input
                 value={draft.name}
@@ -214,7 +215,7 @@ export function EquipmentEditor({
             </Field>
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             <Field label={t("form.type")}>
               <NativeSelect
                 value={draft.category}
@@ -277,41 +278,42 @@ export function EquipmentEditor({
           ) : null}
         </div>
 
-        <div className="sticky bottom-0 mt-auto flex items-center justify-between gap-3 border-t border-border bg-background/95 px-5 py-4 backdrop-blur-xl">
-          {isEdit ? (
-            confirmDelete ? (
-              <div className="flex items-center gap-2">
-                <Button variant="destructive" size="sm" onClick={remove} disabled={busy}>
-                  {deleting ? <Loader2Icon className="animate-spin" /> : null}
-                  {deleting ? t("form.deleting") : t("form.confirmDelete")}
+        <div className="sticky bottom-0 mt-auto border-t border-border bg-background/95 p-4 backdrop-blur-xl sm:px-5">
+          {confirmDelete ? (
+            <div className="flex flex-col gap-2 sm:flex-row sm:justify-end">
+              <Button variant="destructive" className="min-h-11" onClick={remove} disabled={busy}>
+                {deleting ? <Loader2Icon className="animate-spin" /> : null}
+                {deleting ? t("form.deleting") : t("form.confirmDelete")}
+              </Button>
+              <Button variant="ghost" className="min-h-11" onClick={() => setConfirmDelete(false)} disabled={busy}>
+                {t("form.cancel")}
+              </Button>
+            </div>
+          ) : (
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+              {isEdit ? (
+                <Button
+                  variant="ghost"
+                  className="min-h-11 text-destructive hover:text-destructive"
+                  onClick={() => setConfirmDelete(true)}
+                  disabled={busy}
+                >
+                  {t("form.delete")}
                 </Button>
-                <Button variant="ghost" size="sm" onClick={() => setConfirmDelete(false)} disabled={busy}>
+              ) : (
+                <span />
+              )}
+              <div className="flex flex-col gap-2 sm:flex-row">
+                <Button variant="outline" className="min-h-11" onClick={() => !busy && onClose()} disabled={busy}>
                   {t("form.cancel")}
                 </Button>
+                <Button className="min-h-11" onClick={save} disabled={busy}>
+                  {saving ? <Loader2Icon className="animate-spin" /> : null}
+                  {saving ? t("form.saving") : isEdit ? t("form.save") : t("form.add")}
+                </Button>
               </div>
-            ) : (
-              <Button
-                variant="ghost"
-                size="sm"
-                className="text-destructive hover:text-destructive"
-                onClick={() => setConfirmDelete(true)}
-                disabled={busy}
-              >
-                {t("form.delete")}
-              </Button>
-            )
-          ) : (
-            <span />
+            </div>
           )}
-          <div className="flex items-center gap-2">
-            <Button variant="outline" size="sm" onClick={() => !busy && onClose()} disabled={busy}>
-              {t("form.cancel")}
-            </Button>
-            <Button size="sm" onClick={save} disabled={busy}>
-              {saving ? <Loader2Icon className="animate-spin" /> : null}
-              {saving ? t("form.saving") : isEdit ? t("form.save") : t("form.add")}
-            </Button>
-          </div>
         </div>
       </div>
     </div>

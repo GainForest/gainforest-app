@@ -60,7 +60,7 @@ export function BioblitzBestPicture({ round }: { round: BioblitzRound }) {
   return (
     <section>
       <div aria-hidden className="mx-auto h-px w-full max-w-6xl bg-border/60" />
-      <div className="mx-auto w-full max-w-6xl px-4 py-10 sm:px-6">
+      <div className="mx-auto w-full max-w-6xl px-3 py-6 sm:px-5 md:py-8 lg:px-8">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div>
             <div className="flex items-start gap-2">
@@ -81,13 +81,13 @@ export function BioblitzBestPicture({ round }: { round: BioblitzRound }) {
 
         <div className="mt-5">
           {phase === "error" ? (
-            <div className="rounded-2xl bg-muted px-6 py-14 text-center text-sm text-muted-foreground">
+            <div className="rounded-2xl bg-muted px-4 py-12 text-center text-sm text-muted-foreground sm:px-5">
               {t("error")}
             </div>
           ) : phase === "loading" ? (
             <BestPictureSkeleton />
           ) : entries.length === 0 ? (
-            <div className="rounded-2xl bg-muted px-6 py-14 text-center text-sm text-muted-foreground">
+            <div className="rounded-2xl bg-muted px-4 py-12 text-center text-sm text-muted-foreground sm:px-5">
               {t("empty")}
             </div>
           ) : (
@@ -150,12 +150,12 @@ function BestPictureCard({
   const hasImage = Boolean(url) && !imgError;
 
   return (
-    <li>
+    <li className="h-full">
       <button
         type="button"
         onClick={() => onOpen(record)}
         aria-label={t("openPhoto", { name: name ?? t("unnamed") })}
-        className="group relative flex w-full flex-col overflow-hidden rounded-2xl bg-surface-sunken text-left outline-none ring-1 ring-border/60 transition duration-300 hover:shadow-[0_18px_40px_-22px_rgba(20,30,15,0.55)] focus-visible:ring-2 focus-visible:ring-primary/60"
+        className="group relative flex h-full w-full flex-col overflow-hidden rounded-2xl bg-surface-sunken text-left outline-none ring-1 ring-border/60 transition duration-300 hover:shadow-[0_18px_40px_-22px_rgba(20,30,15,0.55)] focus-visible:ring-2 focus-visible:ring-primary/60"
       >
         <div className="relative aspect-[4/3] w-full overflow-hidden">
           {hasImage ? (
@@ -197,7 +197,7 @@ function BestPictureCard({
           ) : null}
         </div>
 
-        <div className="flex min-w-0 flex-col gap-0.5 px-3 py-2.5">
+        <div className="flex min-w-0 flex-1 flex-col gap-1 px-3 py-3">
           <span className="flex min-w-0 items-center gap-1.5 text-sm">
             <AuthorInline did={record.did} nameOverride={record.creatorName} avatarRefOverride={record.creatorAvatarRef} />
           </span>
@@ -212,9 +212,9 @@ function BestPictureSkeleton() {
   return (
     <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
       {Array.from({ length: TOP_LIMIT }).map((_, index) => (
-        <li key={index} className="overflow-hidden rounded-2xl ring-1 ring-border/60">
+        <li key={index} className="h-full overflow-hidden rounded-2xl ring-1 ring-border/60">
           <div className="aspect-[4/3] w-full animate-pulse bg-muted motion-reduce:animate-none" />
-          <div className="flex items-center justify-between px-3 py-2.5">
+          <div className="flex items-center justify-between px-3 py-3">
             <div className="h-4 w-28 animate-pulse rounded bg-muted motion-reduce:animate-none" />
             <div className="h-4 w-10 animate-pulse rounded bg-muted motion-reduce:animate-none" />
           </div>

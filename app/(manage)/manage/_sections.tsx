@@ -107,10 +107,16 @@ export async function ManageHomeSection({ target, wrapDashboard = true }: { targ
   );
 }
 
-export function ProjectsSection({ target }: { target: ManageTarget }) {
+export function ProjectsSection({
+  target,
+  embedded = false,
+}: {
+  target: ManageTarget;
+  embedded?: boolean;
+}) {
   return (
     <Suspense fallback={<InlineCardGridSkeleton />}>
-      <ManageProjectsClient target={target} />
+      <ManageProjectsClient target={target} embedded={embedded} />
     </Suspense>
   );
 }
@@ -160,7 +166,7 @@ export async function ProjectTimelineSection({ target, projectRkey }: { target: 
 
   if (!project) {
     return (
-      <div className="mx-auto w-full max-w-[1440px] px-4 py-6 sm:px-6">
+      <div className="mx-auto w-full max-w-[90rem] px-3 py-6 sm:px-5 lg:px-8">
         <ProjectManageBackLink target={target} label={manageT("backToProjects")} />
         <p className="mt-6 text-sm text-muted-foreground">{manageT("projectNotFound")}</p>
       </div>
@@ -197,7 +203,7 @@ export async function ProjectTimelineSection({ target, projectRkey }: { target: 
   const mutationRepo = target.kind === "group" ? target.did : undefined;
 
   return (
-    <div className="mx-auto w-full max-w-[1440px] px-4 py-4 sm:px-6 sm:py-6">
+    <div className="mx-auto w-full max-w-[90rem] px-3 py-4 sm:px-5 sm:py-6 lg:px-8">
       <div className="mb-5">
         <ProjectManageBackLink target={target} label={manageT("backToProjects")} />
       </div>
@@ -260,14 +266,20 @@ export function DroneSection({ target }: { target: ManageTarget }) {
   return <DroneAppFrame src={src} title="GainForest drone viewer" organizationName={target.displayName} />;
 }
 
-export async function BumicertsSection({ target }: { target: ManageTarget }) {
+export async function BumicertsSection({
+  target,
+  embedded = false,
+}: {
+  target: ManageTarget;
+  embedded?: boolean;
+}) {
   const account = await getAccountRouteData(target.did, target.identifier);
   try {
     const page = await fetchBumicertsByDid(target.did, 24);
-    return <ManageBumicertsClient target={target} did={target.did} ownerIdentifier={account.urlIdentifier} bumicerts={page.records} />;
+    return <ManageBumicertsClient target={target} did={target.did} ownerIdentifier={account.urlIdentifier} bumicerts={page.records} embedded={embedded} />;
   } catch (error) {
     const message = error instanceof Error ? error.message : "Failed to load recent Certs.";
-    return <ManageBumicertsClient target={target} did={target.did} ownerIdentifier={account.urlIdentifier} bumicerts={[]} error={message} />;
+    return <ManageBumicertsClient target={target} did={target.did} ownerIdentifier={account.urlIdentifier} bumicerts={[]} error={message} embedded={embedded} />;
   }
 }
 
@@ -294,7 +306,13 @@ export async function NewBumicertSection({ target, searchParams }: { target: Man
   );
 }
 
-export async function SettingsSection({ target }: { target: ManageTarget }) {
+export async function SettingsSection({
+  target,
+  embedded = false,
+}: {
+  target: ManageTarget;
+  embedded?: boolean;
+}) {
   const t = await getTranslations("upload.settings");
   const managedProjects = await fetchProjectsByDid(target.did, 500).then((page) => page.records).catch(() => []);
   const inaturalistProjects = managedProjects.map((project) => ({ projectUri: project.atUri, title: project.title }));
@@ -305,7 +323,11 @@ export async function SettingsSection({ target }: { target: ManageTarget }) {
     // carry the org-level tools instead — starting with AI agent keys — and
     // link to Members for governance.
     return (
-      <Container className="pt-4 pb-8">
+      <Container
+        family={embedded ? "full" : "standard"}
+        gutter={!embedded}
+        className="max-w-3xl pt-4 pb-8"
+      >
         <div className="mb-6">
           <h1 className="font-instrument text-3xl font-light italic leading-tight tracking-[-0.02em] text-foreground">{t("organizationTitle")}</h1>
           <p className="mt-1 text-sm text-muted-foreground">{t("organizationDescription")}</p>
@@ -334,12 +356,16 @@ export async function SettingsSection({ target }: { target: ManageTarget }) {
   const currentHandle = personalSession.isLoggedIn ? personalSession.handle : null;
 
   return (
-    <Container className="pt-4 pb-8">
+    <Container
+      family={embedded ? "full" : "standard"}
+      gutter={!embedded}
+      className="max-w-3xl pt-4 pb-8"
+    >
       <div className="mb-6">
         <h1 className="font-instrument text-3xl font-light italic">{t("personalTitle")}</h1>
         <p className="mt-1 text-sm text-muted-foreground">{t("personalDescription")}</p>
       </div>
-      <div className="mx-auto mt-8 mb-20 space-y-8">
+      <div className="mt-8 space-y-8 pb-8">
         <AccountSettingsSections
           did={target.did}
           handle={currentHandle}
@@ -353,9 +379,11 @@ export async function SettingsSection({ target }: { target: ManageTarget }) {
 export async function ObservationsSection({
   target,
   forProject,
+  embedded = false,
 }: {
   target: ManageTarget;
   forProject?: string | null;
+  embedded?: boolean;
 }) {
   // Observations are available to personal accounts and organizations alike,
   // so the steward can collect field data without first creating an org.
@@ -388,6 +416,7 @@ export async function ObservationsSection({
       target={target}
       initialPage={initialPage}
       forProject={forProject ?? null}
+      embedded={embedded}
     />
   );
 }

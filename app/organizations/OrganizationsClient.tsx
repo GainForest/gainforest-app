@@ -558,16 +558,16 @@ export function OrganizationsClient({
 
   return (
     <>
-      <section className="-mt-14 pb-20 md:pb-28">
+      <section className="-mt-14 pb-6 md:pb-8">
         <OrganizationsHero />
 
-        <div className="mx-auto max-w-6xl px-6">
-          <div className="relative z-20 mt-5 mb-0 space-y-2.5">
+        <div className="mx-auto max-w-[90rem] px-3 sm:px-5 lg:px-8">
+          <div className="relative z-20 mt-5 space-y-3">
             <div
               className="relative z-30 flex items-center gap-2 animate-in"
               style={{ animationDelay: "80ms" }}
             >
-              <div className="group/input-group border-input relative flex h-10 min-w-0 flex-1 items-center rounded-full border bg-background/50 shadow-xs backdrop-blur transition-[color,box-shadow] outline-none focus-within:border-ring focus-within:ring-[3px] focus-within:ring-ring/50">
+              <div className="group/input-group border-input relative flex h-11 min-w-0 flex-1 items-center rounded-full border bg-background/50 shadow-xs backdrop-blur transition-[color,box-shadow] outline-none focus-within:border-ring focus-within:ring-[3px] focus-within:ring-ring/50 sm:h-10">
                 <div className="flex h-auto cursor-text items-center justify-center gap-2 py-1.5 pl-3.5 text-sm font-medium text-muted-foreground select-none">
                   <SearchIcon className="h-4 w-4" />
                 </div>
@@ -696,7 +696,7 @@ export function OrganizationsClient({
             ) : view === "list" ? (
               <OrganizationList records={renderedRecords} onOpen={setDrawer} />
             ) : (
-              <div className="grid grid-cols-[repeat(auto-fill,minmax(300px,1fr))] gap-2 lg:gap-4">
+              <div className="grid grid-cols-1 gap-2 sm:grid-cols-[repeat(auto-fill,minmax(300px,1fr))] lg:gap-4">
                 {renderedRecords.map((record) => (
                   <OrganizationCard
                     key={record.id}
@@ -758,7 +758,7 @@ function OrganizationsErrorState({ onRetry }: { onRetry: () => void }) {
   return (
     <div
       role="alert"
-      className="flex flex-col items-center rounded-3xl bg-muted px-6 py-16 text-center"
+      className="flex flex-col items-center rounded-2xl bg-muted px-4 py-12 text-center sm:px-5"
     >
       <h3 className="font-instrument text-2xl italic text-foreground">
         {t("error.title")}
@@ -806,7 +806,7 @@ function OrganizationsHero() {
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_76%_36%,color-mix(in_oklab,var(--primary)_16%,transparent)_0%,transparent_28%),linear-gradient(90deg,color-mix(in_oklab,var(--background)_58%,transparent)_0%,color-mix(in_oklab,var(--background)_42%,transparent)_26%,transparent_58%),linear-gradient(180deg,color-mix(in_oklab,var(--background)_46%,transparent)_0%,transparent_42%,var(--background)_100%)]" />
       <div className="absolute inset-x-0 bottom-0 h-28 bg-gradient-to-t from-background via-background/70 to-transparent" />
 
-      <div className="relative z-10 mx-auto flex max-w-6xl flex-col px-8 pt-[64px] pb-8 sm:px-10 lg:px-9">
+      <div className="relative z-10 mx-auto flex max-w-[90rem] flex-col px-3 pb-8 pt-16 sm:px-5 lg:px-8">
         <h1
           aria-label={t("titleAriaLabel")}
           className="font-instrument max-w-4xl text-4xl font-light italic leading-[0.98] tracking-[-0.035em] text-foreground sm:text-5xl lg:text-6xl"
@@ -833,7 +833,7 @@ function ViewToggle({
 }) {
   const t = useTranslations("marketplace.organizations.view");
   return (
-    <div className="inline-flex h-10 shrink-0 items-center rounded-full border border-border bg-background/70 p-0.5 backdrop-blur">
+    <div className="inline-flex h-11 shrink-0 items-center rounded-full border border-border bg-background/70 p-0.5 backdrop-blur sm:h-10">
       {(
         [
           { id: "cards", label: t("cards"), Icon: LayoutGridIcon },
@@ -848,7 +848,7 @@ function ViewToggle({
           aria-pressed={view === id}
           aria-label={label}
           title={label}
-          className={`inline-flex h-9 w-9 items-center justify-center rounded-full p-0 text-sm font-medium transition-colors sm:w-auto sm:gap-1.5 sm:px-3 ${
+          className={`inline-flex size-10 items-center justify-center rounded-full p-0 text-sm font-medium transition-colors sm:h-9 sm:w-auto sm:gap-1.5 sm:px-3 ${
             view === id
               ? "bg-primary text-primary-foreground"
               : "text-muted-foreground hover:text-foreground"
@@ -876,7 +876,7 @@ function FilterChip({
       type="button"
       onClick={onClick}
       aria-pressed={selected}
-      className={`inline-flex h-9 shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full border px-3.5 text-sm font-medium transition-colors ${
+      className={`inline-flex min-h-11 shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full border px-3 text-sm font-medium transition-colors sm:min-h-9 ${
         selected
           ? "border-primary bg-primary text-primary-foreground"
           : "border-border bg-background text-muted-foreground hover:border-primary/30 hover:text-foreground"
@@ -891,7 +891,7 @@ function OrganizationsGridSkeleton() {
   const t = useTranslations("marketplace.organizations");
   return (
     <div
-      className="grid grid-cols-[repeat(auto-fill,minmax(300px,1fr))] gap-2 lg:gap-4"
+      className="grid grid-cols-1 gap-2 sm:grid-cols-[repeat(auto-fill,minmax(300px,1fr))] lg:gap-4"
       aria-label={t("loading")}
     >
       {Array.from({ length: 12 }).map((_, index) => (
@@ -903,9 +903,9 @@ function OrganizationsGridSkeleton() {
           <Skeleton className="h-28 shrink-0 rounded-none" />
 
           {/* Body */}
-          <div className="flex flex-1 flex-col px-5 pb-5">
+          <div className="flex flex-1 flex-col px-4 pb-4 sm:px-5 sm:pb-5">
             <div className="-mt-8 mb-3 flex items-end justify-between gap-2">
-              <Skeleton className="size-16 shrink-0 rounded-full ring-4 ring-card" />
+              <Skeleton className="size-16 shrink-0 rounded-full ring-4 ring-muted" />
               <Skeleton className="mb-1 h-6 w-20 rounded-full" />
             </div>
 
@@ -1107,7 +1107,7 @@ const OrganizationCard = memo(function OrganizationCard({
               className="h-full w-full object-cover transition-transform duration-500 ease-out group-hover:scale-105"
             />
           ) : (
-            <div className="absolute inset-0 grid place-items-center bg-[radial-gradient(circle_at_30%_20%,color-mix(in_oklab,var(--primary)_22%,transparent),transparent_70%),linear-gradient(135deg,var(--muted),var(--card))]">
+            <div className="absolute inset-0 grid place-items-center bg-[radial-gradient(circle_at_30%_20%,color-mix(in_oklab,var(--primary)_22%,transparent),transparent_70%),linear-gradient(135deg,var(--muted),color-mix(in_oklab,var(--primary)_8%,var(--muted)))]">
               <LeafIcon
                 className="size-10 text-primary/40"
                 aria-hidden="true"
@@ -1115,7 +1115,7 @@ const OrganizationCard = memo(function OrganizationCard({
               />
             </div>
           )}
-          <div className="absolute inset-0 bg-linear-to-t from-card via-card/40 to-transparent" />
+          <div className="absolute inset-0 bg-linear-to-t from-muted via-muted/40 to-transparent" />
 
           <TrustedByBadges
             did={record.did}
@@ -1132,11 +1132,11 @@ const OrganizationCard = memo(function OrganizationCard({
         </div>
 
         {/* Body */}
-        <div className="relative flex flex-1 flex-col px-5 pb-5">
+        <div className="relative flex flex-1 flex-col px-4 pb-4 sm:px-5 sm:pb-5">
           <div className="-mt-8 mb-3 flex items-end justify-between gap-2">
             <span
               aria-hidden
-              className="grid size-16 shrink-0 place-items-center overflow-hidden rounded-full bg-[linear-gradient(135deg,color-mix(in_oklab,var(--primary)_85%,var(--card)),color-mix(in_oklab,var(--primary)_45%,var(--card)))] text-lg font-semibold text-primary-foreground shadow-sm ring-4 ring-card"
+              className="grid size-16 shrink-0 place-items-center overflow-hidden rounded-full bg-[linear-gradient(135deg,color-mix(in_oklab,var(--primary)_85%,var(--muted)),color-mix(in_oklab,var(--primary)_45%,var(--muted)))] text-lg font-semibold text-primary-foreground shadow-sm ring-4 ring-muted"
             >
               {avatarUrl ? (
                 // eslint-disable-next-line @next/next/no-img-element
@@ -1157,7 +1157,7 @@ const OrganizationCard = memo(function OrganizationCard({
             )}
           </div>
 
-          <h3 className="line-clamp-1 font-instrument text-2xl italic leading-tight text-foreground">
+          <h3 className="min-w-0 break-words font-instrument text-2xl italic leading-tight text-foreground">
             {record.name}
           </h3>
           <p className="mt-1.5 line-clamp-2 text-sm leading-relaxed text-muted-foreground">
@@ -1212,7 +1212,7 @@ function EmptyState({
 }) {
   const t = useTranslations("marketplace.organizations");
   return (
-    <div className="flex flex-col items-center justify-center rounded-3xl bg-muted px-6 py-20 text-center">
+    <div className="flex flex-col items-center justify-center rounded-2xl bg-muted px-4 py-12 text-center sm:px-5">
       <LeafIcon className="mb-4 size-7 text-primary" aria-hidden />
       <h3 className="font-instrument mb-3 text-2xl italic text-foreground md:text-3xl">
         {t("empty.title")}

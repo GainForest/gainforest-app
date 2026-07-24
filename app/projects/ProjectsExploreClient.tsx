@@ -740,10 +740,10 @@ export function ProjectsExploreClient({
 
   return (
     <>
-      <section className="-mt-14 pb-20 md:pb-28">
+      <section className="-mt-14 pb-6 md:pb-8">
         <div className="relative isolate min-h-[240px] overflow-hidden">
           <HeroBackdrop />
-          <div className="relative z-10 mx-auto flex max-w-6xl flex-col px-8 pb-8 pt-[64px] sm:px-10 lg:px-9 animate-in">
+          <div className="relative z-10 mx-auto flex max-w-[90rem] flex-col px-3 pb-8 pt-16 sm:px-5 lg:px-8 animate-in">
             <h1 className="font-instrument max-w-4xl text-4xl font-light italic leading-[0.98] tracking-[-0.035em] text-foreground sm:text-5xl lg:text-6xl">
               {t("hero.title")}{" "}
               <span className="whitespace-nowrap text-foreground/85">
@@ -756,13 +756,13 @@ export function ProjectsExploreClient({
           </div>
         </div>
 
-        <div className="relative z-10 mx-auto max-w-6xl px-6">
+        <div className="relative z-10 mx-auto max-w-[90rem] px-3 sm:px-5 lg:px-8">
           <div className="relative z-20 mt-5 space-y-3">
             <div
               className="relative z-30 flex items-center gap-3 animate-in"
               style={{ animationDelay: "80ms" }}
             >
-              <div className="group/input-group border-input relative flex h-10 min-w-0 flex-1 items-center rounded-full border bg-background/50 shadow-xs backdrop-blur transition-[color,box-shadow] outline-none focus-within:border-ring focus-within:ring-[3px] focus-within:ring-ring/50">
+              <div className="group/input-group border-input relative flex h-11 min-w-0 flex-1 items-center rounded-full border bg-background/50 shadow-xs backdrop-blur transition-[color,box-shadow] outline-none focus-within:border-ring focus-within:ring-[3px] focus-within:ring-ring/50 sm:h-10">
                 <SearchIcon
                   className="ml-3 h-4 w-4 shrink-0 text-muted-foreground"
                   aria-hidden
@@ -777,7 +777,7 @@ export function ProjectsExploreClient({
                 />
               </div>
 
-              <div className="hidden h-10 shrink-0 items-center rounded-full border border-border bg-background/50 p-0.5 backdrop-blur sm:inline-flex">
+              <div className="hidden h-11 shrink-0 items-center rounded-full border border-border bg-background/50 p-0.5 backdrop-blur sm:inline-flex sm:h-10">
                 {viewOptions.map((option) => (
                   <button
                     key={option.id}
@@ -785,7 +785,7 @@ export function ProjectsExploreClient({
                     onClick={() => void setView(option.id)}
                     aria-pressed={view === option.id}
                     className={cn(
-                      "inline-flex h-9 items-center gap-1.5 rounded-full px-3 text-sm font-medium transition-colors",
+                      "inline-flex h-10 items-center gap-1.5 rounded-full px-3 text-sm font-medium transition-colors sm:h-9",
                       view === option.id
                         ? "bg-primary text-primary-foreground"
                         : "text-muted-foreground hover:text-foreground",
@@ -800,7 +800,7 @@ export function ProjectsExploreClient({
             </div>
 
             <div className="relative z-20 flex items-center justify-between gap-3 sm:justify-end">
-              <div className="inline-flex h-10 shrink-0 items-center rounded-full border border-border bg-background/50 p-0.5 backdrop-blur sm:hidden">
+              <div className="inline-flex h-11 shrink-0 items-center rounded-full border border-border bg-background/50 p-0.5 backdrop-blur sm:hidden">
                 {viewOptions.map((option) => (
                   <button
                     key={option.id}
@@ -810,7 +810,7 @@ export function ProjectsExploreClient({
                     aria-label={option.label}
                     title={option.label}
                     className={cn(
-                      "inline-flex h-9 w-9 items-center justify-center rounded-full",
+                      "inline-flex size-10 items-center justify-center rounded-full",
                       view === option.id
                         ? "bg-primary text-primary-foreground"
                         : "text-muted-foreground hover:text-foreground",
@@ -831,7 +831,7 @@ export function ProjectsExploreClient({
                     openFilters || activeFilterCount > 0 ? "default" : "outline"
                   }
                   size="sm"
-                  className="h-10 text-sm"
+                  className="h-11 text-sm sm:h-10"
                 >
                   <SlidersHorizontalIcon className="h-3.5 w-3.5" />
                   <span>{t("filters.allFilters")}</span>
@@ -884,7 +884,7 @@ export function ProjectsExploreClient({
                               filters.includes(chip.key) ? "default" : "outline"
                             }
                             size="sm"
-                            className="h-10 text-sm"
+                            className="h-11 text-sm sm:h-10"
                           >
                             {chip.label}
                           </Button>
@@ -926,24 +926,8 @@ export function ProjectsExploreClient({
             </p>
           ) : null}
 
-          <section
-            aria-labelledby="project-categories-heading"
-            className="mt-8 rounded-3xl bg-muted px-4 py-5 sm:px-6"
-          >
-            <div className="flex flex-col justify-between gap-2 sm:flex-row sm:items-end">
-              <div>
-                <h2
-                  id="project-categories-heading"
-                  className="font-instrument text-2xl italic tracking-tight text-foreground"
-                >
-                  {t("categories.title")}
-                </h2>
-              </div>
-              <p className="max-w-md text-sm text-muted-foreground">
-                {t("categories.description")}
-              </p>
-            </div>
-            <div className="mt-5 grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-6">
+          <section aria-label={t("categories.title")} className="mt-6">
+            <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-6">
               {CATEGORY_OPTIONS.map(({ key, Icon }) => {
                 const selected = category === key;
                 return (
@@ -956,7 +940,7 @@ export function ProjectsExploreClient({
                       "group flex min-h-20 flex-col items-start justify-between rounded-2xl p-3 text-left transition-colors motion-reduce:transition-none",
                       selected
                         ? "bg-primary text-primary-foreground"
-                        : "bg-background text-foreground hover:bg-background/80",
+                        : "bg-muted text-foreground hover:bg-muted/80",
                     )}
                   >
                     <span
@@ -998,7 +982,7 @@ export function ProjectsExploreClient({
 
           <section
             aria-labelledby="project-catalog-heading"
-            className="mt-14 sm:mt-16"
+            className="mt-10 sm:mt-12"
           >
             <div className="border-b border-border/70 pb-5">
               <h2
@@ -1176,48 +1160,41 @@ function FeaturedProjects({
   return (
     <section
       aria-labelledby="featured-projects-heading"
-      className="mt-14 sm:mt-16"
+      className="mt-10 sm:mt-12"
     >
-      <div className="mb-6 flex flex-col justify-between gap-3 sm:flex-row sm:items-end">
-        <div>
-          <h2
-            id="featured-projects-heading"
-            className="font-instrument text-3xl italic tracking-tight text-foreground sm:text-4xl"
-          >
-            {t("title")}
-          </h2>
-        </div>
-        <div className="flex items-end gap-3">
-          <p className="max-w-md text-sm leading-6 text-muted-foreground">
-            {t("description")}
-          </p>
-          {isCarousel ? (
-            <div className="flex shrink-0 gap-2">
-              <button
-                type="button"
-                onClick={() => scrollCarousel(-1)}
-                aria-label={t("previous")}
-                className="grid h-9 w-9 place-items-center rounded-full border border-border bg-background text-foreground transition hover:border-primary/30 hover:text-primary"
-              >
-                <ChevronLeftIcon className="h-4 w-4" aria-hidden />
-              </button>
-              <button
-                type="button"
-                onClick={() => scrollCarousel(1)}
-                aria-label={t("next")}
-                className="grid h-9 w-9 place-items-center rounded-full border border-border bg-background text-foreground transition hover:border-primary/30 hover:text-primary"
-              >
-                <ChevronRightIcon className="h-4 w-4" aria-hidden />
-              </button>
-            </div>
-          ) : null}
-        </div>
+      <div className="mb-6 flex items-center justify-between gap-3">
+        <h2
+          id="featured-projects-heading"
+          className="font-instrument text-3xl italic tracking-tight text-foreground sm:text-4xl"
+        >
+          {t("title")}
+        </h2>
+        {isCarousel ? (
+          <div className="flex shrink-0 gap-2">
+            <button
+              type="button"
+              onClick={() => scrollCarousel(-1)}
+              aria-label={t("previous")}
+              className="grid h-9 w-9 place-items-center rounded-full border border-border bg-background text-foreground transition hover:border-primary/30 hover:text-primary"
+            >
+              <ChevronLeftIcon className="h-4 w-4" aria-hidden />
+            </button>
+            <button
+              type="button"
+              onClick={() => scrollCarousel(1)}
+              aria-label={t("next")}
+              className="grid h-9 w-9 place-items-center rounded-full border border-border bg-background text-foreground transition hover:border-primary/30 hover:text-primary"
+            >
+              <ChevronRightIcon className="h-4 w-4" aria-hidden />
+            </button>
+          </div>
+        ) : null}
       </div>
       <div
         ref={carouselRef}
         className={cn(
           isCarousel
-            ? "flex snap-x snap-mandatory gap-4 overflow-x-auto pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+            ? "flex items-stretch snap-x snap-mandatory gap-4 overflow-x-auto pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
             : "grid gap-4 md:grid-cols-3",
         )}
       >
@@ -1260,14 +1237,14 @@ function FeaturedProjectCard({
   return (
     <article
       className={cn(
-        "group relative h-full min-w-0 overflow-hidden rounded-2xl bg-muted",
+        "group relative flex min-w-0 self-stretch overflow-hidden rounded-2xl bg-muted",
         className,
       )}
     >
       <Link
         href={localProjectHref(record.did, record.rkey)}
         aria-label={cardT("open", { title: record.title })}
-        className="flex h-full flex-col outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary/60"
+        className="flex h-full w-full flex-col outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary/60"
       >
         <span className="relative block aspect-[16/8] w-full overflow-hidden bg-muted">
           {record.imageUrl && !imgError ? (
@@ -1302,7 +1279,7 @@ function FeaturedProjectCard({
               <span className="truncate">{record.creatorName}</span>
             ) : null}
           </span>
-          <h3 className="mt-2 line-clamp-2 font-instrument text-2xl italic leading-tight text-foreground">
+          <h3 className="mt-2 min-w-0 break-words font-instrument text-2xl italic leading-tight text-foreground">
             {record.title}
           </h3>
           {record.shortDescription ? (
@@ -1348,7 +1325,7 @@ function SupportShelf({
   return (
     <section
       aria-labelledby="support-projects-heading"
-      className="mt-14 rounded-3xl bg-muted px-4 py-7 sm:mt-16 sm:px-7 sm:py-9"
+      className="mt-10 rounded-3xl bg-muted p-4 sm:mt-12 sm:p-5"
     >
       <div className="mb-6 flex flex-col justify-between gap-2 sm:flex-row sm:items-end">
         <div>
@@ -1392,13 +1369,13 @@ function SupportProjectCard({
   const place = countryName(record.country);
 
   return (
-    <article className="group min-h-44 overflow-hidden rounded-2xl bg-background">
+    <article className="group h-full overflow-hidden rounded-2xl bg-background">
       <Link
         href={localProjectHref(record.did, record.rkey)}
         aria-label={t("open", { title: record.title })}
-        className="grid h-full grid-cols-[8.5rem_minmax(0,1fr)] text-left outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary/60 sm:grid-cols-[11rem_minmax(0,1fr)]"
+        className="flex h-full flex-col text-left outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary/60 sm:grid sm:min-h-44 sm:grid-cols-[11rem_minmax(0,1fr)]"
       >
-        <span className="relative min-h-44 overflow-hidden bg-muted">
+        <span className="relative aspect-[16/10] overflow-hidden bg-muted sm:aspect-auto sm:min-h-44">
           {hasImage ? (
             <Image
               src={record.imageUrl!}
@@ -1428,7 +1405,7 @@ function SupportProjectCard({
                 </>
               ) : null}
             </span>
-            <h3 className="mt-2 line-clamp-2 font-instrument text-2xl italic leading-tight text-foreground">
+            <h3 className="mt-2 min-w-0 break-words font-instrument text-2xl italic leading-tight text-foreground">
               {record.title}
             </h3>
             {record.shortDescription ? (
@@ -1678,7 +1655,7 @@ function ProjectCard({
         </div>
         <div className="flex flex-1 flex-col p-4">
           <div className="flex-1">
-            <h2 className="line-clamp-2 font-instrument text-2xl italic leading-tight text-foreground">
+            <h2 className="min-w-0 break-words font-instrument text-2xl italic leading-tight text-foreground">
               {record.title}
             </h2>
             {record.shortDescription ? (

@@ -238,7 +238,7 @@ export function BioblitzClient() {
     <section className="relative -mt-14 flex min-h-[100dvh] shrink-0 flex-col overflow-hidden lg:min-h-[100dvh]">
       <BackgroundWash />
 
-      <div className="relative z-10 mx-auto flex w-full max-w-6xl flex-1 flex-col gap-5 px-4 pb-4 pt-[calc(3.5rem+0.75rem)] sm:px-6">
+      <div className="relative z-10 mx-auto flex w-full max-w-6xl flex-1 flex-col gap-5 px-3 pb-4 pt-[calc(3.5rem+0.75rem)] sm:px-5 lg:px-8">
         <HeroBand round={round} status={status} />
 
         <RoundNavigator

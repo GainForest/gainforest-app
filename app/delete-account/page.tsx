@@ -70,16 +70,15 @@ export default async function DeleteAccountPage() {
   const t = await getTranslations("deleteAccount");
 
   return (
-    <main className="px-6 py-12 md:py-16">
-      <article className="mx-auto max-w-3xl">
+    <main className="mx-auto max-w-3xl px-3 py-4 sm:px-5 lg:px-8 lg:py-6">
         <header>
           <DisplayHeading as="h1" className="text-4xl font-medium tracking-tight text-foreground md:text-5xl">
             {t("title")}
           </DisplayHeading>
-          <p className="mt-5 text-sm text-muted-foreground">{t("lastUpdated")}</p>
+          <p className="mt-2 text-sm text-muted-foreground">{t("lastUpdated")}</p>
         </header>
 
-        <p className="mt-10 text-[15px] leading-7 text-muted-foreground">
+        <p className="mt-6 text-[15px] leading-7 text-muted-foreground md:mt-8">
           {renderText(t("intro.p1"))}
         </p>
 
@@ -113,7 +112,6 @@ export default async function DeleteAccountPage() {
             </section>
           ))}
         </div>
-      </article>
     </main>
   );
 }

@@ -1203,7 +1203,7 @@ export function MobileComposerBar({
   };
 
   return (
-    // Fixed (not sticky): the app shell is `h-screen` (100vh) with the feed
+    // Fixed (not sticky): the app shell uses the dynamic viewport with the feed
     // scrolling inside <main>, so on mobile <main>'s bottom sits below the
     // visible fold — a `sticky bottom-0` bar pins there and disappears. Fixed
     // pins to the visual viewport bottom, so it stays visible. `sm:hidden`

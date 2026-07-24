@@ -140,7 +140,7 @@ export function StatusSection({ initial }: { initial?: StatusSnapshot }) {
   );
 
   return (
-    <section className="-mt-14 bg-background pb-20 md:pb-28">
+    <section className="-mt-14 bg-background pb-6 md:pb-8">
       <PictureHero
         lightSrc="/assets/media/images/status/status-hero-light@2x.webp"
         darkSrc="/assets/media/images/status/status-hero-dark@2x.webp"
@@ -151,7 +151,7 @@ export function StatusSection({ initial }: { initial?: StatusSnapshot }) {
         actions={total > 0 ? statusAction : null}
       />
 
-      <div className="relative z-10 mx-auto max-w-6xl px-6 pt-6">
+      <div className="relative z-10 mx-auto max-w-6xl px-3 pt-6 sm:px-5 lg:px-8">
         {loading ? (
           <StatusSkeleton />
         ) : snapshot.components.length === 0 ? (
@@ -173,7 +173,7 @@ export function StatusSection({ initial }: { initial?: StatusSnapshot }) {
             }
           />
         ) : (
-          <ul role="list" className="mt-8 grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
+          <ul role="list" className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
             {snapshot.components.map((c) => (
               <li key={c.id}>
                 <ServiceCard
@@ -188,8 +188,8 @@ export function StatusSection({ initial }: { initial?: StatusSnapshot }) {
 
         {/* Incident history */}
         {snapshot.components.length > 0 && (
-          <div className="mt-14">
-            <div className="flex items-baseline justify-between gap-4 pb-3">
+          <div className="mt-8 space-y-4">
+            <div className="flex items-baseline justify-between gap-4">
               <DisplayHeading as="h2" className="text-2xl font-normal text-foreground">{t("incidents.title")}</DisplayHeading>
               <span className="text-xs text-muted-foreground">
                 {incidents.length > 0 ? t("incidents.last", { count: incidents.length }) : t("incidents.window")}
@@ -200,7 +200,7 @@ export function StatusSection({ initial }: { initial?: StatusSnapshot }) {
                 {t("incidents.empty")}
               </p>
             ) : (
-              <ol role="list" className="mt-5 divide-y divide-border/50 rounded-2xl bg-muted/50 px-4">
+              <ol role="list" className="divide-y divide-border/50 rounded-2xl bg-muted/50 px-4">
                 {incidents.map((inc) => (
                   <IncidentRow key={inc.id} incident={inc} />
                 ))}
@@ -209,7 +209,7 @@ export function StatusSection({ initial }: { initial?: StatusSnapshot }) {
           </div>
         )}
 
-        <div className="mt-10 flex justify-center">
+        <div className="mt-8 flex justify-center">
           <Link
             href={STATUS_URL}
             target="_blank"
@@ -239,7 +239,7 @@ function ServiceCard({
   const t = useTranslations("common.status");
   const tone = componentTone(status);
   return (
-    <article className="flex h-full flex-col gap-4 rounded-2xl bg-muted/60 p-5">
+    <article className="flex h-full flex-col gap-4 rounded-2xl bg-muted/60 p-4 sm:p-5">
       <header className="flex items-start justify-between gap-3">
         <div className="min-w-0">
           <DisplayHeading as="h2" className="truncate text-lg text-foreground">{service.name}</DisplayHeading>
@@ -284,11 +284,11 @@ function StatusSkeleton() {
   return (
     <ul
       role="list"
-      className="mt-8 grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3"
+      className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3"
       aria-label={t("loadingAria")}
     >
       {Array.from({ length: 6 }).map((_, index) => (
-        <li key={index} className="rounded-2xl bg-muted/60 p-5">
+        <li key={index} className="rounded-2xl bg-muted/60 p-4 sm:p-5">
           <div className="flex items-start justify-between gap-3">
             <div className="space-y-2">
               <Skeleton className="h-4 w-32 rounded-full" />
@@ -308,7 +308,7 @@ function StatusSkeleton() {
 
 function Notice({ title, body }: { title: string; body: ReactNode }) {
   return (
-    <SectionSurface variant="muted" className="mt-8 flex flex-col items-center justify-center py-16 text-center" role="status">
+    <SectionSurface variant="muted" className="flex flex-col items-center justify-center py-10 text-center md:py-12" role="status">
       <DisplayHeading as="h2" className="text-2xl text-foreground">{title}</DisplayHeading>
       <p className="mt-2 max-w-md text-sm leading-6 text-muted-foreground">{body}</p>
     </SectionSurface>

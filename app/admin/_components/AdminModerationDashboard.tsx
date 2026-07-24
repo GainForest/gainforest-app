@@ -104,7 +104,7 @@ export function AdminModerationDashboard({
               aria-pressed={active}
               onClick={() => selectTab(entry.id)}
               className={cn(
-                "inline-flex shrink-0 items-center gap-2 rounded-full px-4 py-1.5 text-sm font-medium transition-colors",
+                "inline-flex min-h-11 shrink-0 items-center gap-2 rounded-full px-4 py-2 text-sm font-medium transition-colors",
                 active
                   ? "bg-primary text-primary-foreground shadow-sm"
                   : "text-muted-foreground hover:bg-background/80 hover:text-foreground",
@@ -255,7 +255,7 @@ function AdminPanel({
 }
 
 export function AdminEmptyState({ children }: { children: ReactNode }) {
-  return <div className="rounded-2xl bg-muted p-8 text-center text-sm text-muted-foreground">{children}</div>;
+  return <div className="py-8 text-center text-sm text-muted-foreground">{children}</div>;
 }
 
 export function AdminAvatar({ url }: { url: string | null }) {

@@ -57,7 +57,7 @@ export function SpeciesSuggestions({ subjectUri }: { subjectUri: string }) {
   if (!items?.length) return null;
 
   return (
-    <section className="mt-6 rounded-2xl border border-primary/20 bg-primary/10 p-4 sm:p-5">
+    <section className="mt-6 rounded-2xl bg-primary/10 p-4 sm:p-5">
       <div className="flex items-start gap-3">
         <span className="grid size-9 shrink-0 place-items-center rounded-full bg-primary/10 text-primary">
           <MicroscopeIcon className="size-4" aria-hidden />
@@ -68,9 +68,9 @@ export function SpeciesSuggestions({ subjectUri }: { subjectUri: string }) {
         </div>
       </div>
 
-      <ul className="mt-4 space-y-3">
+      <ul className="mt-4 divide-y divide-primary/15">
         {items.map(({ comment, suggestion }) => (
-          <li key={comment.uri} className="rounded-xl border border-border-soft bg-background/90 p-4">
+          <li key={comment.uri} className="py-4">
             <div className="flex items-start gap-3">
               <ResolvedAvatar
                 did={comment.did}

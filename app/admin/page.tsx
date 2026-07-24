@@ -133,7 +133,7 @@ export default async function AdminPage({
   const initialTab: AdminTab = TABS.includes(tab as AdminTab) ? (tab as AdminTab) : "taina";
 
   return (
-    <Container className="pt-4 pb-8">
+    <Container family="wide" className="pt-4 pb-8">
       <header className="mb-6">
         <div className="flex items-center gap-2">
           <ShieldCheckIcon className="size-5 text-muted-foreground" />

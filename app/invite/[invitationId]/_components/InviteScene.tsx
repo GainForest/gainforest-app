@@ -68,7 +68,7 @@ export function InviteScene({
     : item;
 
   return (
-    <main className="relative isolate flex min-h-[80vh] flex-col items-center justify-center overflow-hidden px-6 py-20">
+    <main className="relative isolate flex min-h-[80dvh] flex-col items-center justify-center overflow-hidden px-3 py-12 sm:px-5 sm:py-16">
       <div
         aria-hidden
         className="absolute left-1/2 top-[22%] -z-10 size-[30rem] -translate-x-1/2 rounded-full bg-primary/[0.07] blur-3xl"
@@ -138,7 +138,7 @@ export function InviteScene({
         </motion.p>
 
         {children ? (
-          <motion.div variants={sceneItem} className="mt-9 flex justify-center">
+          <motion.div variants={sceneItem} className="mt-9 flex w-full max-w-sm justify-center">
             {children}
           </motion.div>
         ) : null}

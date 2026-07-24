@@ -58,10 +58,8 @@ export function UnifiedSidebar({
         aria-hidden="true"
         className="pointer-events-none absolute inset-x-0 bottom-0 -z-10 h-108 overflow-hidden"
       >
-        {/* Ambient glow */}
         <div className="absolute -bottom-24 left-1/2 h-56 w-[160%] -translate-x-1/2 rounded-[50%] bg-primary/20 blur-3xl" />
         <div className="absolute bottom-0 left-1/3 h-32 w-32 -translate-x-1/2 rounded-full bg-primary/[0.12] blur-2xl" />
-        {/* Climbing-vine line art that bleeds off the bottom edge */}
         <ExploreArt />
       </div>
 
@@ -110,7 +108,9 @@ export function SidebarCollapseToggle({ collapsed, onToggle }: { collapsed: bool
             aria-expanded={!collapsed}
             className="absolute -right-3 top-7 z-40 grid size-6 place-items-center rounded-full border border-border bg-background text-muted-foreground shadow-sm transition-colors hover:border-primary/40 hover:text-primary hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
           >
-            <ChevronLeftIcon className={cn("size-3.5 transition-transform duration-300 motion-reduce:transition-none", collapsed && "rotate-180")} />
+            <span className="grid place-items-center">
+              <ChevronLeftIcon className={cn("size-3.5 transition-transform duration-300 motion-reduce:transition-none", collapsed && "rotate-180")} />
+            </span>
           </button>
         </TooltipTrigger>
         <TooltipContent side="right" sideOffset={8}>
@@ -229,14 +229,12 @@ function ExploreNav({ sessionDid }: { sessionDid: string | null }) {
   let leafIndex = 0;
 
   const renderSections = (items: typeof sections, showSectionLabels: boolean) =>
-    items.map((section, sectionIndex) => (
+    items.map((section) => (
       <div key={section.id} className="flex flex-col gap-0.5">
         {showSectionLabels && !collapsed ? (
-          <h2 className="px-2.5 pb-1 pt-1 font-instrument text-sm italic text-muted-foreground">
+          <div className="px-2.5 py-1 text-xs font-medium text-muted-foreground">
             {sectionsT(section.id)}
-          </h2>
-        ) : collapsed && sectionIndex > 0 ? (
-          <div aria-hidden className="mx-auto my-1 h-px w-6 rounded-full bg-border" />
+          </div>
         ) : null}
         <ul className="flex flex-col gap-0.5">
           {section.items.map((item) => {
@@ -436,34 +434,34 @@ function BumicertCreationCard({ sessionDid }: { sessionDid: string }) {
   }
 
   return (
-    <div className="group flex flex-col w-full h-20 border border-border bg-background rounded-2xl p-1">
-      <div className="flex-1 relative">
+    <div className="group flex h-20 w-full flex-col rounded-2xl border border-border bg-background p-1">
+      <div className="relative flex-1">
         <SparkleIcon
-          className="absolute bottom-2 left-4 size-6 rotate-30 opacity-50 group-hover:opacity-30 group-hover:scale-130 text-primary transition-all duration-300 animate-spin-slow"
+          className="absolute bottom-2 left-4 size-6 rotate-30 animate-spin-slow text-primary opacity-50 transition-all duration-300 group-hover:scale-130 group-hover:opacity-30 motion-reduce:animate-none motion-reduce:transition-none"
           fill="currentcolor"
           strokeWidth={0}
         />
         <SparkleIcon
-          className="absolute bottom-1 left-12 size-3 rotate-60 opacity-30 group-hover:opacity-50 group-hover:scale-130 text-primary transition-all duration-300 animate-spin-slow"
+          className="absolute bottom-1 left-12 size-3 rotate-60 animate-spin-slow text-primary opacity-30 transition-all duration-300 group-hover:scale-130 group-hover:opacity-50 motion-reduce:animate-none motion-reduce:transition-none"
           fill="currentcolor"
           strokeWidth={0}
         />
         <SparkleIcon
-          className="absolute bottom-2 right-2 size-6 rotate-60 opacity-50 group-hover:opacity-30 group-hover:scale-130 text-primary transition-all duration-300 animate-spin-slow"
+          className="absolute bottom-2 right-2 size-6 rotate-60 animate-spin-slow text-primary opacity-50 transition-all duration-300 group-hover:scale-130 group-hover:opacity-30 motion-reduce:animate-none motion-reduce:transition-none"
           fill="currentcolor"
           strokeWidth={0}
         />
         <SparkleIcon
-          className="absolute bottom-1 right-10 size-3 rotate-30 opacity-30 group-hover:opacity-50 group-hover:scale-130 text-primary transition-all duration-300 animate-spin-slow"
+          className="absolute bottom-1 right-10 size-3 rotate-30 animate-spin-slow text-primary opacity-30 transition-all duration-300 group-hover:scale-130 group-hover:opacity-50 motion-reduce:animate-none motion-reduce:transition-none"
           fill="currentcolor"
           strokeWidth={0}
         />
-        <div className="absolute z-1 -bottom-4 left-1/2 -translate-x-1/2 scale-100 group-hover:scale-120 -rotate-12 group-hover:-rotate-30 transition-transform bg-background/50 backdrop-blur-lg border border-border shadow-xl rounded-xl h-20 w-16 p-1 flex flex-col gap-1">
-          <div className="w-full h-10 bg-primary/20 rounded-lg flex items-center justify-center">
-            <LeafIcon className="text-primary size-6 opacity-80" />
+        <div className="absolute -bottom-4 left-1/2 z-1 flex h-20 w-16 -translate-x-1/2 -rotate-12 scale-100 flex-col gap-1 rounded-xl border border-border bg-background/50 p-1 shadow-xl backdrop-blur-lg transition-transform group-hover:-rotate-30 group-hover:scale-120 motion-reduce:transform-none motion-reduce:transition-none">
+          <div className="flex h-10 w-full items-center justify-center rounded-lg bg-primary/20">
+            <LeafIcon className="size-6 text-primary opacity-80" />
           </div>
-          <div className="bg-muted h-2 rounded-lg w-8" />
-          <div className="bg-muted h-2 rounded-lg w-full" />
+          <div className="h-2 w-8 rounded-lg bg-muted" />
+          <div className="h-2 w-full rounded-lg bg-muted" />
         </div>
       </div>
       <CreateProjectButton
@@ -504,34 +502,34 @@ function AddObservationsCard({ sessionDid }: { sessionDid: string }) {
   }
 
   return (
-    <div className="group flex flex-col w-full h-20 border border-border bg-background rounded-2xl p-1">
-      <div className="flex-1 relative">
+    <div className="group flex h-20 w-full flex-col rounded-2xl border border-border bg-background p-1">
+      <div className="relative flex-1">
         <SparkleIcon
-          className="absolute bottom-2 left-4 size-6 rotate-30 opacity-50 group-hover:opacity-30 group-hover:scale-130 text-primary transition-all duration-300 animate-spin-slow"
+          className="absolute bottom-2 left-4 size-6 rotate-30 animate-spin-slow text-primary opacity-50 transition-all duration-300 group-hover:scale-130 group-hover:opacity-30 motion-reduce:animate-none motion-reduce:transition-none"
           fill="currentcolor"
           strokeWidth={0}
         />
         <SparkleIcon
-          className="absolute bottom-1 left-12 size-3 rotate-60 opacity-30 group-hover:opacity-50 group-hover:scale-130 text-primary transition-all duration-300 animate-spin-slow"
+          className="absolute bottom-1 left-12 size-3 rotate-60 animate-spin-slow text-primary opacity-30 transition-all duration-300 group-hover:scale-130 group-hover:opacity-50 motion-reduce:animate-none motion-reduce:transition-none"
           fill="currentcolor"
           strokeWidth={0}
         />
         <SparkleIcon
-          className="absolute bottom-2 right-2 size-6 rotate-60 opacity-50 group-hover:opacity-30 group-hover:scale-130 text-primary transition-all duration-300 animate-spin-slow"
+          className="absolute bottom-2 right-2 size-6 rotate-60 animate-spin-slow text-primary opacity-50 transition-all duration-300 group-hover:scale-130 group-hover:opacity-30 motion-reduce:animate-none motion-reduce:transition-none"
           fill="currentcolor"
           strokeWidth={0}
         />
         <SparkleIcon
-          className="absolute bottom-1 right-10 size-3 rotate-30 opacity-30 group-hover:opacity-50 group-hover:scale-130 text-primary transition-all duration-300 animate-spin-slow"
+          className="absolute bottom-1 right-10 size-3 rotate-30 animate-spin-slow text-primary opacity-30 transition-all duration-300 group-hover:scale-130 group-hover:opacity-50 motion-reduce:animate-none motion-reduce:transition-none"
           fill="currentcolor"
           strokeWidth={0}
         />
-        <div className="absolute z-1 -bottom-4 left-1/2 -translate-x-1/2 scale-100 group-hover:scale-120 -rotate-12 group-hover:-rotate-30 transition-transform bg-background/50 backdrop-blur-lg border border-border shadow-xl rounded-xl h-20 w-16 p-1 flex flex-col gap-1">
-          <div className="w-full h-10 bg-primary/20 rounded-lg flex items-center justify-center">
-            <BinocularsIcon className="text-primary size-6 opacity-80" />
+        <div className="absolute -bottom-4 left-1/2 z-1 flex h-20 w-16 -translate-x-1/2 -rotate-12 scale-100 flex-col gap-1 rounded-xl border border-border bg-background/50 p-1 shadow-xl backdrop-blur-lg transition-transform group-hover:-rotate-30 group-hover:scale-120 motion-reduce:transform-none motion-reduce:transition-none">
+          <div className="flex h-10 w-full items-center justify-center rounded-lg bg-primary/20">
+            <BinocularsIcon className="size-6 text-primary opacity-80" />
           </div>
-          <div className="bg-muted h-2 rounded-lg w-8" />
-          <div className="bg-muted h-2 rounded-lg w-full" />
+          <div className="h-2 w-8 rounded-lg bg-muted" />
+          <div className="h-2 w-full rounded-lg bg-muted" />
         </div>
       </div>
       <AddObservationsButton
@@ -573,8 +571,6 @@ function SocialFooter() {
 }
 
 function ExploreArt() {
-  // Two climbing vines hugging either edge — growth creeping up the sides of
-  // the sidebar.
   return (
     <>
       <Vine side="left" className="bottom-0 left-0 h-26 w-5" />
@@ -584,8 +580,6 @@ function ExploreArt() {
 }
 
 function Vine({ side, className }: { side: "left" | "right"; className?: string }) {
-  // Drawn once for the left edge; the right edge mirrors it horizontally so
-  // the leaves always curl inward toward the sidebar.
   return (
     <svg
       viewBox="0 0 60 240"
@@ -593,7 +587,6 @@ function Vine({ side, className }: { side: "left" | "right"; className?: string 
       preserveAspectRatio="xMidYMax meet"
       className={cn("absolute text-primary", side === "right" && "-scale-x-100", className)}
     >
-      {/* Winding stem climbing from the bottom edge */}
       <path
         d="M16 240 C 9 206 24 188 16 158 C 9 130 26 110 16 80 C 10 56 22 36 16 8"
         className="stroke-primary/30"
@@ -601,7 +594,6 @@ function Vine({ side, className }: { side: "left" | "right"; className?: string 
         strokeLinecap="round"
         fill="none"
       />
-      {/* Leaves branching off, alternating sides of the stem */}
       <g className="fill-primary/20">
         <path d="M16 198 C 32 194 39 178 36 168 C 25 171 16 183 16 198 Z" />
         <path d="M16 150 C 2 147 -4 133 -1 124 C 11 127 16 138 16 150 Z" />

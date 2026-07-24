@@ -56,7 +56,7 @@ async function TainaContent() {
   ];
 
   return (
-    <main className="-mt-14 bg-background pb-20">
+    <main className="-mt-14 bg-background pb-8">
       <PictureHero
         compact
         lightSrc="/images/explore/explore-hero-light@2x.webp"
@@ -66,7 +66,7 @@ async function TainaContent() {
         accent={t("hero.accent")}
         lede={t("hero.description")}
       />
-      <div className="mx-auto grid w-full max-w-6xl gap-10 px-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,26rem)] lg:gap-14">
+      <div className="mx-auto grid w-full max-w-6xl gap-8 px-3 pt-6 sm:px-5 lg:grid-cols-[minmax(0,1fr)_minmax(0,26rem)] lg:gap-12 lg:px-8 lg:pt-8">
         {/* Intro + how it works */}
         <section className="max-w-xl">
           <div className="max-w-lg rounded-2xl bg-muted px-4 py-3 text-sm leading-6 text-muted-foreground">

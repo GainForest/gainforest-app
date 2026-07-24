@@ -69,27 +69,31 @@ describe("projects visual hierarchy source contract", () => {
     }
   });
 
-  it("keeps the category group prominent with rounded contrasting choices", () => {
+  it("keeps self-explanatory category choices open in the page flow", () => {
     expect(projectsSource).toContain(
-      'className="mt-8 rounded-3xl bg-muted px-4 py-5 sm:px-6"',
+      '<section aria-label={t("categories.title")} className="mt-6">',
     );
     expect(projectsSource).toContain(
       '"group flex min-h-20 flex-col items-start justify-between rounded-2xl p-3 text-left transition-colors motion-reduce:transition-none"',
     );
     expect(projectsSource).toContain(
-      '"bg-background text-foreground hover:bg-background/80"',
+      '"bg-muted text-foreground hover:bg-muted/80"',
     );
+    expect(projectsSource).not.toContain("project-categories-heading");
   });
 
   it("keeps featured, support, catalog, empty, error, and list surfaces rounded and visible", () => {
     expect(projectsSource).toContain(
-      '"group relative h-full min-w-0 overflow-hidden rounded-2xl bg-muted"',
+      '"group relative flex min-w-0 self-stretch overflow-hidden rounded-2xl bg-muted"',
     );
     expect(projectsSource).toContain(
-      'className="mt-14 rounded-3xl bg-muted px-4 py-7 sm:mt-16 sm:px-7 sm:py-9"',
+      '"flex items-stretch snap-x snap-mandatory gap-4',
     );
     expect(projectsSource).toContain(
-      'className="group min-h-44 overflow-hidden rounded-2xl bg-background"',
+      'className="mt-10 rounded-3xl bg-muted p-4 sm:mt-12 sm:p-5"',
+    );
+    expect(projectsSource).toContain(
+      'className="group h-full overflow-hidden rounded-2xl bg-background"',
     );
     expect(projectsSource).toContain(
       'className="group relative h-full overflow-hidden rounded-2xl bg-muted animate-in"',
@@ -106,6 +110,17 @@ describe("projects visual hierarchy source contract", () => {
     expect(projectListSource).toContain("hover:bg-background/70");
   });
 
+  it("keeps the featured shelf concise and its carousel peers structurally equal", () => {
+    const featuredSource = projectsSource.slice(
+      projectsSource.indexOf("function FeaturedProjects"),
+      projectsSource.indexOf("function FeaturedProjectCard"),
+    );
+
+    expect(featuredSource).not.toContain('t("description")');
+    expect(featuredSource).toContain("items-stretch");
+    expect(projectsSource).toContain("self-stretch");
+  });
+
   it("does not regress primary project groups or cards to imperceptible muted opacity", () => {
     expect(projectsSource).not.toMatch(/bg-muted\/(?:30|35|45)/);
   });
@@ -118,23 +133,26 @@ describe("projects visual hierarchy source contract", () => {
       'className="overflow-hidden rounded-2xl bg-muted divide-y divide-background"',
     );
     expect(organizationsSource).toContain(
-      'className="flex flex-col items-center rounded-3xl bg-muted px-6 py-16 text-center"',
+      'className="flex flex-col items-center rounded-2xl bg-muted px-4 py-12 text-center sm:px-5"',
     );
     expect(organizationsSource).toContain(
-      'className="flex flex-col items-center justify-center rounded-3xl bg-muted px-6 py-20 text-center"',
+      'className="flex flex-col items-center justify-center rounded-2xl bg-muted px-4 py-12 text-center sm:px-5"',
     );
     expect(organizationsSource).toContain(
       'className="flex h-full flex-col overflow-hidden rounded-2xl bg-muted"',
     );
+    expect(organizationsSource).toContain(
+      'grid grid-cols-1 gap-2 sm:grid-cols-[repeat(auto-fill,minmax(300px,1fr))]',
+    );
     expect(organizationsSource).not.toMatch(/bg-muted\/(?:30|35|45)/);
   });
 
-  it("keeps shared explorer and project-detail skeletons borderless and rounded", () => {
+  it("keeps shared explorer and project-detail skeletons family-aligned", () => {
     expect(pageLoadingSource).toContain(
-      'className="rounded-3xl bg-muted p-4 backdrop-blur"',
+      'max-w-[90rem] px-3 pt-5 sm:px-5 lg:px-8',
     );
     expect(pageLoadingSource).toContain(
-      'className="overflow-hidden rounded-2xl bg-muted"',
+      'className="flex h-full flex-col overflow-hidden rounded-2xl bg-muted"',
     );
     expect(pageLoadingSource).toContain(
       'className="space-y-4 rounded-3xl bg-muted p-4 lg:sticky lg:top-24"',
@@ -160,10 +178,8 @@ describe("projects visual hierarchy source contract", () => {
     expect(certPageSource).toContain(
       'className="overflow-hidden rounded-2xl bg-muted divide-y divide-background"',
     );
-    expect(certPageSource).toContain('"rounded-3xl bg-muted p-5"');
-    expect(certPageSource).toContain(
-      'className="rounded-3xl bg-muted p-5 sm:p-6"',
-    );
+    expect(certPageSource.match(/rounded-3xl bg-muted p-4 sm:p-5/g)).toHaveLength(2);
+    expect(certPageSource).not.toContain("rounded-3xl bg-muted p-5 sm:p-6");
     expect(certPageSource).toContain(
       'className="relative aspect-[4/3] w-full max-w-full overflow-hidden rounded-3xl bg-muted"',
     );

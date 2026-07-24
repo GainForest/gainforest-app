@@ -153,20 +153,20 @@ export function EditDeploymentDialog({
       <DialogPlaceholder
         dialogWidth="max-w-md"
         overlayClassName="z-[110] data-[state=open]:animate-none data-[state=closed]:animate-none data-[state=open]:bg-foreground/30 data-[state=open]:backdrop-blur-[2px]"
-        className="z-[110] flex w-[calc(100%-2rem)] flex-col gap-0 overflow-y-auto rounded-3xl border-border bg-background p-0 shadow-2xl"
+        className="z-[110] flex flex-col gap-0 overflow-y-auto rounded-3xl border-border bg-background p-0 shadow-2xl"
         onOpenAutoFocus={(event) => {
           event.preventDefault();
           closeButtonRef.current?.focus();
         }}
       >
-        <div className="sticky top-0 z-10 flex items-center justify-between gap-3 border-b border-border bg-background/95 px-5 py-4 backdrop-blur-xl">
+        <div className="sticky top-0 z-10 flex items-center justify-between gap-3 border-b border-border bg-background/95 p-4 backdrop-blur-xl sm:px-6">
           <DialogTitle className="font-instrument text-lg font-medium italic text-foreground">{t("editTitle")}</DialogTitle>
           <Button ref={closeButtonRef} variant="ghost" size="icon-sm" onClick={() => !saving && onClose()} aria-label={t("close")}>
             <XIcon />
           </Button>
         </div>
 
-        <div className="flex flex-col gap-4 px-5 py-5">
+        <div className="flex flex-col gap-4 p-4 sm:px-6">
           <p className="text-sm text-muted-foreground">{t("editIntro")}</p>
 
           <div className="flex flex-col gap-1.5">
@@ -227,7 +227,7 @@ export function EditDeploymentDialog({
           ) : null}
         </div>
 
-        <div className="sticky bottom-0 mt-auto flex items-center justify-end gap-2 border-t border-border bg-background/95 px-5 py-4 backdrop-blur-xl">
+        <div className="sticky bottom-0 mt-auto flex items-center justify-end gap-2 border-t border-border bg-background/95 p-4 backdrop-blur-xl sm:px-6">
           <Button variant="outline" size="sm" onClick={() => !saving && onClose()} disabled={saving}>
             {t("cancel")}
           </Button>

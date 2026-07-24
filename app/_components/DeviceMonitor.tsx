@@ -88,7 +88,7 @@ export function DeviceMonitor({ initial }: { initial?: DevicesSnapshot }) {
   ) : null;
 
   return (
-    <section className="-mt-14 bg-background pb-20 md:pb-28">
+    <section className="-mt-14 bg-background pb-6 md:pb-8">
       <PictureHero
         lightSrc="/assets/media/images/devices/devices-hero-light@2x.webp"
         darkSrc="/assets/media/images/devices/devices-hero-dark@2x.webp"
@@ -99,7 +99,7 @@ export function DeviceMonitor({ initial }: { initial?: DevicesSnapshot }) {
         actions={statusAction}
       />
 
-      <div className="relative z-10 mx-auto max-w-6xl px-6 pt-6">
+      <div className="relative z-10 mx-auto max-w-6xl px-3 pt-6 sm:px-5 lg:px-8">
         {!snapshot.configured ? (
           <NotConfigured />
         ) : snapshot.error && snapshot.devices.length === 0 ? (
@@ -109,7 +109,7 @@ export function DeviceMonitor({ initial }: { initial?: DevicesSnapshot }) {
         ) : snapshot.devices.length === 0 ? (
           <Notice tone="empty" title={t("empty.title")} body={t("empty.body")} />
         ) : (
-          <ul role="list" className="mt-8 grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
+          <ul role="list" className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
             {snapshot.devices.map((device) => (
               <li key={device.id}>
                 <DeviceCard device={device} />
@@ -125,9 +125,9 @@ export function DeviceMonitor({ initial }: { initial?: DevicesSnapshot }) {
 function DeviceCardsSkeleton() {
   const t = useTranslations("common.devices");
   return (
-    <ul role="list" className="mt-8 grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3" aria-label={t("loadingAria")}>
+    <ul role="list" className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3" aria-label={t("loadingAria")}>
       {Array.from({ length: 6 }).map((_, index) => (
-        <li key={index} className="flex h-full flex-col gap-5 rounded-2xl bg-muted/60 p-5">
+        <li key={index} className="flex h-full flex-col gap-4 rounded-2xl bg-muted/60 p-4 sm:p-5">
           <div className="flex items-start justify-between gap-3">
             <Skeleton className="h-4 w-32 rounded-full" />
             <Skeleton className="h-6 w-20 shrink-0 rounded-full" />
@@ -186,7 +186,7 @@ function DeviceCard({ device }: { device: Device }) {
   };
 
   return (
-    <article className="flex h-full flex-col gap-5 rounded-2xl bg-muted/60 p-5">
+    <article className="flex h-full flex-col gap-4 rounded-2xl bg-muted/60 p-4 sm:p-5">
       <header className="flex items-start justify-between gap-3">
         <DisplayHeading as="h2" className="truncate text-lg text-foreground">{device.name}</DisplayHeading>
         <span className={`inline-flex shrink-0 items-center gap-1.5 rounded-full bg-background/80 px-2.5 py-1 text-xs font-medium ${TONE_TEXT[tone]}`}>
@@ -299,7 +299,7 @@ function Stat({ label, value, sub }: { label: string; value: number | null; sub?
 function NotConfigured() {
   const t = useTranslations("common.devices");
   return (
-    <SectionSurface variant="muted" className="mt-8 flex flex-col items-center justify-center py-16 text-center">
+    <SectionSurface variant="muted" className="flex flex-col items-center justify-center py-10 text-center md:py-12">
       <DisplayHeading as="h2" className="text-2xl text-foreground">{t("notConfigured.title")}</DisplayHeading>
       <p className="mt-3 max-w-lg text-sm leading-6 text-muted-foreground">{t("notConfigured.body")}</p>
       <Link
@@ -319,7 +319,7 @@ function Notice({ title, body, tone }: { title: string; body: string; tone: "err
   return (
     <SectionSurface
       variant={tone === "error" ? "danger" : "muted"}
-      className="mt-8 flex flex-col items-center justify-center py-16 text-center"
+      className="flex flex-col items-center justify-center py-10 text-center md:py-12"
       role={tone === "error" ? "alert" : "status"}
     >
       <DisplayHeading as="h2" className="text-2xl text-foreground">{title}</DisplayHeading>

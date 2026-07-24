@@ -325,8 +325,8 @@ async function ProjectFallback({
   return (
     <>
       <ProjectBreadcrumbJsonLd jsonLd={breadcrumbJsonLd} />
-      <main className="min-h-screen bg-background pb-20">
-        <div className="mx-auto max-w-6xl px-6 py-8 lg:px-8">
+      <main className="min-h-dvh bg-background pb-20">
+        <div className="mx-auto max-w-6xl px-3 py-4 sm:px-5 sm:py-6 lg:px-8">
           <Link
             href="/projects"
             className="inline-flex items-center gap-1.5 text-[13px] font-medium text-muted-foreground transition-colors hover:text-foreground"
@@ -433,9 +433,9 @@ async function ProjectFallback({
 async function ProjectPublishing({ title }: { title: string | null }) {
   const t = await getTranslations("marketplace.projectPage");
   return (
-    <main className="min-h-screen bg-background">
+    <main className="min-h-dvh bg-background">
       <AutoRefresh intervalMs={8000} />
-      <div className="mx-auto flex min-h-[70vh] max-w-2xl flex-col items-center justify-center px-6 text-center">
+      <div className="mx-auto flex min-h-[70dvh] max-w-2xl flex-col items-center justify-center px-3 text-center sm:px-5 lg:px-8">
         <span className="inline-flex items-center gap-2 rounded-full bg-primary/10 px-3 py-1 text-[12px] font-medium text-primary-dark">
           <span className="relative flex h-2 w-2">
             <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-primary opacity-60 motion-reduce:animate-none" />
