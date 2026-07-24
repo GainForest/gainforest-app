@@ -41,7 +41,7 @@ describe("account and management visual hierarchy", () => {
 
   it("keeps Settings disclosures borderless with strong rounded inner surfaces", () => {
     const source = read("app/account/_components/AccountSettingsSections.tsx");
-    expect(source).toContain('<AccordionItem value={value} className="border-0">');
+    expect(source).toContain('<AccordionItem value={value} className="border-0 bg-background">');
     expect(source).toContain("bg-muted rounded-2xl");
     expect(source).not.toContain("bg-muted rounded-xl");
     expect(source).toContain("font-instrument text-lg font-light italic text-foreground");
@@ -85,7 +85,10 @@ describe("account and management visual hierarchy", () => {
     expect(settingsSection).not.toContain("max-w-3xl");
     expect(settingsSection).not.toContain("gutter={!embedded}");
     expect(settings.match(/data-slot="settings-accordion-group"/g)).toHaveLength(2);
-    expect(settings.match(/<Separator \/>/g)).toHaveLength(4);
+    expect(settings.match(/overflow-hidden rounded-2xl border-\[3px\] border-muted bg-background px-4 sm:px-5/g)).toHaveLength(2);
+    expect(settings).toContain('<AccordionItem value={value} className="border-0 bg-background">');
+    expect(settings.match(/<Separator className="mx-auto w-full" \/>/g)).toHaveLength(4);
+    expect(settings).not.toContain('data-slot="settings-accordion-group" className="overflow-hidden rounded-2xl bg-muted');
     expect(settings).not.toMatch(/<Accordion[^>]*className="(?:space-y-1|divide-y)/);
   });
 

@@ -401,8 +401,10 @@ A loading page is part of the same family; it must not introduce a different max
 
 - A settings tab inherits the exact width, outer padding, and vertical frame used by its peer tabs. Never add a nested page container or route-specific max-width inside the tab.
 - Put every settings category inside one explicit grouped `div` and one accordion root, not a stack of detached accordion containers.
-- Keep accordion items borderless at the perimeter and place a shared Separator between every pair of peer items.
-- The grouped `div` may use one quiet muted surface. Expanded content may use one stronger inner grouping layer; do not wrap each accordion item in another competing card.
+- Never give the outer group and its expanded inner regions the same muted fill. Similar outer and inner tones erase hierarchy instead of strengthening it.
+- When expandable items need a clear boundary and their bodies already contain muted regions, keep the list and every item on `bg-background`; enclose the whole list with `rounded-2xl`, `overflow-hidden`, and a 3px low-contrast muted frame.
+- Keep accordion items free of their own perimeter borders and place a shared Separator between every pair of peer items. Inset separators with parent horizontal padding so they are centered and stop short of the enclosure edge.
+- Expanded content may use one stronger muted inner grouping layer; do not wrap each accordion item in another competing card.
 
 ### Lists
 
@@ -496,7 +498,8 @@ Before merging UI work, verify:
 - [ ] Every control in a header or toolbar peer cluster has one intentional shared outer size
 - [ ] A lone narrow content column is centered unless a real sibling alignment requires otherwise
 - [ ] A settings tab uses the same outer frame as peer tabs, with no nested max-width or duplicate padding
-- [ ] Every settings category sits in one explicit grouped div and accordion root, with shared Separators between peers
+- [ ] Every settings category sits in one explicit grouped div and accordion root, with inset shared Separators between peers
+- [ ] An expandable list never repeats the same muted fill on both its enclosure and inner content
 - [ ] Grid and carousel peers stretch to equal structural height; no percentage-height item defeats flex stretching
 - [ ] Hero/media gradients that protect contrast are preserved
 - [ ] Phone content remains usable after all nested padding

@@ -1187,7 +1187,7 @@ function SettingsGroup({
   children: React.ReactNode;
 }) {
   return (
-    <AccordionItem value={value} className="border-0">
+    <AccordionItem value={value} className="border-0 bg-background">
       <AccordionTrigger className="py-5 text-left hover:no-underline">
         <span className="flex min-w-0 flex-col pr-3">
           <span className="font-instrument text-lg font-light italic text-foreground">{title}</span>
@@ -1213,22 +1213,22 @@ export function AccountSettingsSections({
 }) {
   const t = useTranslations("common.settings.groups");
   return (
-    <div data-slot="settings-accordion-group" className="overflow-hidden rounded-2xl bg-muted/50 px-4 sm:px-5">
+    <div data-slot="settings-accordion-group" className="overflow-hidden rounded-2xl border-[3px] border-muted bg-background px-4 sm:px-5">
       <Accordion type="multiple" defaultValue={["account"]}>
         <SettingsGroup value="account" title={t("account.title")} description={t("account.description")}>
           {handle ? <HandleSection did={did} handle={handle} /> : null}
           <PasswordSection did={did} />
         </SettingsGroup>
-        <Separator />
+        <Separator className="mx-auto w-full" />
         <SettingsGroup value="connections" title={t("connections.title")} description={t("connections.description")}>
           <BlueskySection did={did} />
           {integrations}
         </SettingsGroup>
-        <Separator />
+        <Separator className="mx-auto w-full" />
         <SettingsGroup value="agents" title={t("agents.title")} description={t("agents.description")}>
           <AgentKeysSection />
         </SettingsGroup>
-        <Separator />
+        <Separator className="mx-auto w-full" />
         <SettingsGroup value="advanced" title={t("advanced.title")} description={t("advanced.description")}>
           <AccountSection did={did} />
           {/* Destructive account deletion stays behind Advanced disclosure. */}
@@ -1250,7 +1250,7 @@ export function OrganizationSettingsSections({
 }) {
   const t = useTranslations("common.settings.groups");
   return (
-    <div data-slot="settings-accordion-group" className="overflow-hidden rounded-2xl bg-muted/50 px-4 sm:px-5">
+    <div data-slot="settings-accordion-group" className="overflow-hidden rounded-2xl border-[3px] border-muted bg-background px-4 sm:px-5">
       <Accordion type="multiple">
         <SettingsGroup value="agents" title={t("agents.title")} description={t("agents.description")}>
           <div className="space-y-3">
@@ -1258,7 +1258,7 @@ export function OrganizationSettingsSections({
             <AgentKeysSection />
           </div>
         </SettingsGroup>
-        <Separator />
+        <Separator className="mx-auto w-full" />
         <SettingsGroup value="connections" title={t("connections.title")} description={t("connections.description")}>
           {integrations}
         </SettingsGroup>
