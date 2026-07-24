@@ -2054,7 +2054,7 @@
       "deleteSelected": "Delete",
       "selectAria": "Select {name}",
       "deleteConfirmTitle": "Delete {count, plural, one {# recording} other {# recordings}}?",
-      "deleteConfirmBody": "The selected recordings — including their playable previews and spectrograms — will be permanently removed from this profile. This cannot be undone.",
+      "deleteConfirmBody": "The selected recordings will be permanently deleted — the archived original files, playable previews and spectrograms all go. This cannot be undone.",
       "deleteConfirmCancel": "Cancel",
       "deleteConfirmAction": "Delete {count, plural, one {# recording} other {# recordings}}",
       "deleteProgress": "Deleting… {done} of {total}",

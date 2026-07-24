@@ -2054,7 +2054,7 @@
       "deleteSelected": "Hapus",
       "selectAria": "Pilih {name}",
       "deleteConfirmTitle": "Hapus {count, plural, other {# rekaman}}?",
-      "deleteConfirmBody": "Rekaman yang dipilih — termasuk pratinjau yang dapat diputar dan spektrogramnya — akan dihapus permanen dari profil ini. Ini tidak dapat dibatalkan.",
+      "deleteConfirmBody": "Rekaman yang dipilih akan dihapus permanen — file asli yang diarsipkan, pratinjau yang dapat diputar, dan spektrogramnya ikut terhapus. Ini tidak dapat dibatalkan.",
       "deleteConfirmCancel": "Batal",
       "deleteConfirmAction": "Hapus {count, plural, other {# rekaman}}",
       "deleteProgress": "Menghapus… {done} dari {total}",

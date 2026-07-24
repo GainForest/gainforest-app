@@ -33,7 +33,13 @@ import { useModal } from "@/components/ui/modal/context";
 import { deleteRecord } from "@/app/(manage)/manage/_lib/mutations";
 import { resolvePdsHost } from "@/app/_lib/pds";
 import { listAcDeployments, type AcDeploymentItem } from "@/app/_lib/ac-deployment";
-import { AC_AUDIO_COLLECTION, listAllRecordings, type AcAudioListItem } from "@/app/_lib/ac-audio";
+import {
+  AC_AUDIO_COLLECTION,
+  audiomothStorageKey,
+  deleteArchivedOriginals,
+  listAllRecordings,
+  type AcAudioListItem,
+} from "@/app/_lib/ac-audio";
 import { deploymentDetailPath, parseAtUri } from "@/app/_lib/deployment-events";
 import { formatDate } from "@/app/_lib/format";
 import { RecordingsExplorer } from "@/app/_components/RecordingsExplorer";
@@ -140,6 +146,23 @@ export function AccountAudioViewer({
       }
       if (deleted.size > 0) {
         setRecordings((current) => current?.filter((item) => !deleted.has(item.uri)) ?? current);
+        // Also remove the archival originals from object storage — but only
+        // for objects no surviving record still points at (duplicate uploads
+        // can share one file). Best effort: an orphaned WAV must never block
+        // or fail the deletion the user asked for.
+        const survivingKeys = new Set(
+          (recordings ?? [])
+            .filter((item) => !deleted.has(item.uri))
+            .map((item) => audiomothStorageKey(item.accessUri))
+            .filter((key): key is string => key !== null),
+        );
+        const removableKeys = new Set(
+          items
+            .filter((item) => deleted.has(item.uri))
+            .map((item) => audiomothStorageKey(item.accessUri))
+            .filter((key): key is string => key !== null && !survivingKeys.has(key)),
+        );
+        if (removableKeys.size > 0) await deleteArchivedOriginals(removableKeys);
       }
       if (failed.size > 0) {
         // Keep the failed ones selected so the user can retry immediately.

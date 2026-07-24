@@ -161,6 +161,37 @@ export type AcAudioListItem = {
   createdAt: string;
 };
 
+/**
+ * Extract the object-storage key from an `accessUri` that points at our
+ * archival download endpoint (`/api/audiomoth/recordings?key=…`). Returns
+ * null for absent, malformed, or third-party URIs — those have no object in
+ * our bucket to clean up.
+ */
+export function audiomothStorageKey(accessUri: string | null | undefined): string | null {
+  if (!accessUri) return null;
+  try {
+    const url = new URL(accessUri, "https://placeholder.invalid");
+    if (!url.pathname.endsWith("/api/audiomoth/recordings")) return null;
+    const key = url.searchParams.get("key");
+    return key && key.startsWith("audiomoth/") ? key : null;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Best-effort removal of archival originals from object storage. Failures
+ * are swallowed — an orphaned WAV in the bucket is the pre-existing status
+ * quo and must never block the record deletion the user asked for.
+ */
+export async function deleteArchivedOriginals(keys: Iterable<string>): Promise<void> {
+  await Promise.allSettled(
+    [...keys].map((key) =>
+      fetch(`/api/audiomoth/recordings?key=${encodeURIComponent(key)}`, { method: "DELETE" }),
+    ),
+  );
+}
+
 /** Public getBlob URL for a blob on the owner's PDS. */
 export function pdsBlobUrl(host: string, did: string, cid: string): string {
   const params = new URLSearchParams({ did, cid });

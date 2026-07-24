@@ -2054,7 +2054,7 @@
       "deleteSelected": "Eliminar",
       "selectAria": "Seleccionar {name}",
       "deleteConfirmTitle": "¿Eliminar {count, plural, one {# grabación} other {# grabaciones}}?",
-      "deleteConfirmBody": "Las grabaciones seleccionadas —incluidas sus vistas previas reproducibles y espectrogramas— se eliminarán permanentemente de este perfil. Esto no se puede deshacer.",
+      "deleteConfirmBody": "Las grabaciones seleccionadas se eliminarán permanentemente: se borran los archivos originales archivados, las vistas previas reproducibles y los espectrogramas. Esto no se puede deshacer.",
       "deleteConfirmCancel": "Cancelar",
       "deleteConfirmAction": "Eliminar {count, plural, one {# grabación} other {# grabaciones}}",
       "deleteProgress": "Eliminando… {done} de {total}",

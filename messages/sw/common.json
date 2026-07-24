@@ -2054,7 +2054,7 @@
       "deleteSelected": "Futa",
       "selectAria": "Chagua {name}",
       "deleteConfirmTitle": "Futa {count, plural, one {rekodi #} other {rekodi #}}?",
-      "deleteConfirmBody": "Rekodi zilizochaguliwa — pamoja na vionjo vyake vinavyochezeka na spektrogramu — zitaondolewa kabisa kwenye wasifu huu. Hili haliwezi kutenduliwa.",
+      "deleteConfirmBody": "Rekodi zilizochaguliwa zitafutwa kabisa — faili halisi zilizohifadhiwa, vionjo vinavyochezeka na spektrogramu zote zitaondolewa. Hili haliwezi kutenduliwa.",
       "deleteConfirmCancel": "Ghairi",
       "deleteConfirmAction": "Futa {count, plural, one {rekodi #} other {rekodi #}}",
       "deleteProgress": "Inafuta… {done} kati ya {total}",
