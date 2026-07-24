@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { isAudioMothLabellingFlagEnabled } from "./feature-flags";
 
 describe("AudioMoth labelling feature flag", () => {
-  it("is available for admin review by default", () => {
+  it("is enabled by default", () => {
     expect(isAudioMothLabellingFlagEnabled(undefined)).toBe(true);
   });
 

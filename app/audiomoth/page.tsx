@@ -3,7 +3,6 @@ import { getTranslations } from "next-intl/server";
 import { fetchAuthSession } from "../_lib/auth-server";
 import { AudioMothClient } from "./_components/AudioMothClient";
 import { isAudioMothLabellingFlagEnabled } from "@/app/_lib/audiomoth/feature-flags";
-import { getGainForestModeratorAccess } from "@/app/internal/badges/_lib/access";
 
 export const dynamic = "force-dynamic";
 
@@ -19,10 +18,7 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default async function AudioMothPage() {
   const session = await fetchAuthSession().catch(() => ({ isLoggedIn: false as const }));
-  const moderator = session.isLoggedIn
-    ? await getGainForestModeratorAccess().catch(() => null)
-    : null;
-  const canUseLabelling = isAudioMothLabellingFlagEnabled() && Boolean(moderator?.isModerator);
+  const canUseLabelling = isAudioMothLabellingFlagEnabled();
 
   return (
     <main className="-mt-14 bg-background pb-20">

@@ -34,7 +34,6 @@ import {
   WrenchIcon,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { AdminOnlyIndicator } from "@/app/_components/AdminOnlyIndicator";
 import { PictureHero } from "@/app/_components/PictureHero";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
@@ -812,15 +811,14 @@ export function AudioMothClient({
     id: MainTabId;
     label: string;
     Icon: typeof ClockIcon;
-    adminOnly?: boolean;
   }> = [
     { id: "setup", label: t("mainTabs.setup"), Icon: WrenchIcon },
     { id: "deployments", label: t("mainTabs.deployments"), Icon: MapPinIcon },
     { id: "upload", label: t("mainTabs.upload"), Icon: HardDriveUploadIcon },
     ...(canUseLabelling
       ? [
-          { id: "label" as const, label: t("mainTabs.label"), Icon: TagsIcon, adminOnly: true },
-          { id: "identifications" as const, label: t("mainTabs.identifications"), Icon: ListChecksIcon, adminOnly: true },
+          { id: "label" as const, label: t("mainTabs.label"), Icon: TagsIcon },
+          { id: "identifications" as const, label: t("mainTabs.identifications"), Icon: ListChecksIcon },
         ]
       : []),
   ];
@@ -837,7 +835,7 @@ export function AudioMothClient({
       <div className="mx-auto flex w-full max-w-7xl flex-col gap-6 px-4 sm:px-6">
       {/* Setup (this device over USB) vs Deployment (field events) */}
       <nav className="flex w-full gap-1 self-start rounded-full border border-border bg-card/70 p-1 sm:w-auto" aria-label={t("title")}>
-        {mainTabs.map(({ id, label, Icon, adminOnly }) => (
+        {mainTabs.map(({ id, label, Icon }) => (
           <button
             key={id}
             type="button"
@@ -850,7 +848,6 @@ export function AudioMothClient({
           >
             <Icon className="size-4" />
             {label}
-            {adminOnly ? <AdminOnlyIndicator /> : null}
           </button>
         ))}
       </nav>
