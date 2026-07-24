@@ -65,9 +65,11 @@ export function UnifiedSidebar({
 
       <SidebarHeader />
 
-      <div className="mt-3 border-t border-border" />
+      {/* Single spacing owner around the hairline: equal 16px above and below,
+          so the brand header, the divider, and the profile row read evenly. */}
+      <div className="my-4 border-t border-border" />
 
-      <div className={cn("flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto pt-3 [scrollbar-width:thin]", collapsed ? "overflow-x-hidden" : "pr-1")}>
+      <div className={cn("flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto [scrollbar-width:thin]", collapsed ? "overflow-x-hidden" : "pr-1")}>
         {authSession?.isLoggedIn ? <SidebarProfileRow did={authSession.did} /> : null}
         <LayoutGroup id="unified-sidebar-nav">
           <ExploreNav sessionDid={authSession?.isLoggedIn ? authSession.did : null} />
@@ -255,7 +257,7 @@ function ExploreNav({ sessionDid }: { sessionDid: string | null }) {
               })}
             </ul>
           ) : (
-            <ul className="flex flex-col gap-0.5">
+            <ul className="flex flex-col gap-1">
               {section.items.map((item) => {
                 leafIndex += 1;
                 return (
@@ -274,10 +276,11 @@ function ExploreNav({ sessionDid }: { sessionDid: string | null }) {
     });
 
   return (
-    <div className="flex flex-col gap-1">
+    // 16px between nav groups (Explore ↔ Funding ↔ More); design.md §3.A group gap.
+    <div className="flex flex-col gap-4">
       {renderSections(primarySections, true, true)}
       {secondarySections.length > 0 ? (
-        <div className="mt-1 border-t border-border/70 pt-1">
+        <div className="border-t border-border/70 pt-2">
           {/* Single toggle whose chevron rotates; the extra destinations reveal
               with a smooth height/opacity animation instead of snapping in. */}
           <SidebarTooltip label={showMore ? sidebarT("hideMore") : sidebarT("more")}>
@@ -312,7 +315,7 @@ function ExploreNav({ sessionDid }: { sessionDid: string | null }) {
                 transition={{ duration: 0.25, ease: [0.25, 0.1, 0.25, 1] }}
                 className="overflow-hidden"
               >
-                <div className="flex flex-col gap-2 pt-1">{renderSections(secondarySections, true)}</div>
+                <div className="flex flex-col gap-4 pt-2">{renderSections(secondarySections, true)}</div>
               </motion.div>
             ) : null}
           </AnimatePresence>
@@ -325,7 +328,7 @@ function ExploreNav({ sessionDid }: { sessionDid: string | null }) {
 function SidebarHeader() {
   const collapsed = useSidebarCollapsed();
   return (
-    <div className={cn("mb-4 flex w-full flex-col gap-2", collapsed && "items-center")}>
+    <div className={cn("flex w-full flex-col gap-2", collapsed && "items-center")}>
       <Link className={cn("flex items-center rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50", collapsed ? "justify-center" : "gap-2.5")} href="/feed" aria-label="GainForest home">
         <motion.div
           initial={{ scale: 0.8, opacity: 0 }}
