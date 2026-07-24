@@ -369,12 +369,12 @@ assert(
 );
 assert(
   (accountSettings.match(/data-slot="settings-accordion-group"/g) ?? []).length === 2 &&
-    (accountSettings.match(/overflow-hidden rounded-2xl border-\[3px\] border-muted bg-background px-4 sm:px-5/g) ?? []).length === 2 &&
+    (accountSettings.match(/overflow-hidden rounded-3xl border-4 border-muted bg-background px-4 sm:px-5/g) ?? []).length === 2 &&
     accountSettings.includes('<AccordionItem value={value} className="border-0 bg-background">') &&
     (accountSettings.match(/<Separator className="mx-auto w-full" \/>/g) ?? []).length === 4 &&
     !accountSettings.includes('data-slot="settings-accordion-group" className="overflow-hidden rounded-2xl bg-muted') &&
     !/<Accordion[^>]*className="(?:space-y-1|divide-y)/.test(accountSettings),
-  "Expandable settings lists must use background items, a 3px muted frame, and inset separators",
+  "Expandable settings lists must use background items, a 4px muted frame, and inset separators",
 );
 const featuredProjects = projectsExplore.slice(
   projectsExplore.indexOf("function FeaturedProjects"),

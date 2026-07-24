@@ -85,7 +85,7 @@ describe("account and management visual hierarchy", () => {
     expect(settingsSection).not.toContain("max-w-3xl");
     expect(settingsSection).not.toContain("gutter={!embedded}");
     expect(settings.match(/data-slot="settings-accordion-group"/g)).toHaveLength(2);
-    expect(settings.match(/overflow-hidden rounded-2xl border-\[3px\] border-muted bg-background px-4 sm:px-5/g)).toHaveLength(2);
+    expect(settings.match(/overflow-hidden rounded-3xl border-4 border-muted bg-background px-4 sm:px-5/g)).toHaveLength(2);
     expect(settings).toContain('<AccordionItem value={value} className="border-0 bg-background">');
     expect(settings.match(/<Separator className="mx-auto w-full" \/>/g)).toHaveLength(4);
     expect(settings).not.toContain('data-slot="settings-accordion-group" className="overflow-hidden rounded-2xl bg-muted');

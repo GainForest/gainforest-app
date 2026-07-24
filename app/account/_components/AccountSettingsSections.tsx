@@ -1213,7 +1213,7 @@ export function AccountSettingsSections({
 }) {
   const t = useTranslations("common.settings.groups");
   return (
-    <div data-slot="settings-accordion-group" className="overflow-hidden rounded-2xl border-[3px] border-muted bg-background px-4 sm:px-5">
+    <div data-slot="settings-accordion-group" className="overflow-hidden rounded-3xl border-4 border-muted bg-background px-4 sm:px-5">
       <Accordion type="multiple" defaultValue={["account"]}>
         <SettingsGroup value="account" title={t("account.title")} description={t("account.description")}>
           {handle ? <HandleSection did={did} handle={handle} /> : null}
@@ -1250,7 +1250,7 @@ export function OrganizationSettingsSections({
 }) {
   const t = useTranslations("common.settings.groups");
   return (
-    <div data-slot="settings-accordion-group" className="overflow-hidden rounded-2xl border-[3px] border-muted bg-background px-4 sm:px-5">
+    <div data-slot="settings-accordion-group" className="overflow-hidden rounded-3xl border-4 border-muted bg-background px-4 sm:px-5">
       <Accordion type="multiple">
         <SettingsGroup value="agents" title={t("agents.title")} description={t("agents.description")}>
           <div className="space-y-3">
