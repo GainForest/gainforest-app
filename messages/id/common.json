@@ -2046,7 +2046,19 @@
       "nextMonth": "Bulan berikutnya",
       "prevDay": "Hari sebelumnya dengan rekaman",
       "nextDay": "Hari berikutnya dengan rekaman",
-      "allHours": "Semua jam"
+      "allHours": "Semua jam",
+      "selectCta": "Pilih",
+      "selectCancel": "Batal",
+      "selectHint": "Centang rekaman yang ingin dihapus. Penghapusan bersifat permanen dan tidak dapat dibatalkan.",
+      "selectedCount": "{count, plural, other {# dipilih}}",
+      "deleteSelected": "Hapus",
+      "selectAria": "Pilih {name}",
+      "deleteConfirmTitle": "Hapus {count, plural, other {# rekaman}}?",
+      "deleteConfirmBody": "Rekaman yang dipilih — termasuk pratinjau yang dapat diputar dan spektrogramnya — akan dihapus permanen dari profil ini. Ini tidak dapat dibatalkan.",
+      "deleteConfirmCancel": "Batal",
+      "deleteConfirmAction": "Hapus {count, plural, other {# rekaman}}",
+      "deleteProgress": "Menghapus… {done} dari {total}",
+      "deleteFailed": "{count, plural, other {# rekaman}} tidak dapat dihapus. Silakan coba lagi."
     }
   },
   "devices": {

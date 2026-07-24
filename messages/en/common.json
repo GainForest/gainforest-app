@@ -2046,7 +2046,19 @@
       "nextMonth": "Next month",
       "prevDay": "Previous day with recordings",
       "nextDay": "Next day with recordings",
-      "allHours": "All hours"
+      "allHours": "All hours",
+      "selectCta": "Select",
+      "selectCancel": "Cancel",
+      "selectHint": "Tick the recordings you want to remove. Deleting is permanent and cannot be undone.",
+      "selectedCount": "{count, plural, one {# selected} other {# selected}}",
+      "deleteSelected": "Delete",
+      "selectAria": "Select {name}",
+      "deleteConfirmTitle": "Delete {count, plural, one {# recording} other {# recordings}}?",
+      "deleteConfirmBody": "The selected recordings — including their playable previews and spectrograms — will be permanently removed from this profile. This cannot be undone.",
+      "deleteConfirmCancel": "Cancel",
+      "deleteConfirmAction": "Delete {count, plural, one {# recording} other {# recordings}}",
+      "deleteProgress": "Deleting… {done} of {total}",
+      "deleteFailed": "{count, plural, one {# recording} other {# recordings}} could not be deleted. Please try again."
     }
   },
   "devices": {

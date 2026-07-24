@@ -11,6 +11,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import { AudioLinesIcon, DownloadIcon, Loader2Icon, PauseIcon, PlayIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import { cn } from "@/lib/utils";
 import { pdsBlobUrl, type AcAudioListItem } from "@/app/_lib/ac-audio";
 
@@ -26,10 +27,17 @@ export function RecordingsPlayerList({
   did,
   host,
   items,
+  selectable = false,
+  selectedUris,
+  onToggleSelect,
 }: {
   did: string;
   host: string | null;
   items: AcAudioListItem[];
+  /** When true, each row shows a checkbox so recordings can be selected. */
+  selectable?: boolean;
+  selectedUris?: ReadonlySet<string>;
+  onToggleSelect?: (item: AcAudioListItem) => void;
 }) {
   const t = useTranslations("common.audiomoth.recordings");
 
@@ -101,15 +109,28 @@ export function RecordingsPlayerList({
         {shown.map((item) => {
           const playing = playingUri === item.uri;
           const progress = playing && trackDuration > 0 ? position / trackDuration : 0;
+          const selected = selectable && (selectedUris?.has(item.uri) ?? false);
           return (
             <li
               key={item.uri}
               className={cn(
                 "rounded-xl border px-3 py-2.5 transition-colors",
-                playing ? "border-primary/40 bg-primary/[0.04]" : "border-border/70",
+                selected
+                  ? "border-destructive/40 bg-destructive/[0.04]"
+                  : playing
+                    ? "border-primary/40 bg-primary/[0.04]"
+                    : "border-border/70",
               )}
             >
               <div className="flex items-center gap-3">
+                {selectable ? (
+                  <Checkbox
+                    checked={selected}
+                    onCheckedChange={() => onToggleSelect?.(item)}
+                    aria-label={t("selectAria", { name: item.name })}
+                    className="shrink-0"
+                  />
+                ) : null}
                 <Button
                   variant={playing ? "default" : "outline"}
                   size="icon-sm"

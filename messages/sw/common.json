@@ -2046,7 +2046,19 @@
       "nextMonth": "Mwezi ujao",
       "prevDay": "Siku iliyotangulia yenye rekodi",
       "nextDay": "Siku inayofuata yenye rekodi",
-      "allHours": "Saa zote"
+      "allHours": "Saa zote",
+      "selectCta": "Chagua",
+      "selectCancel": "Ghairi",
+      "selectHint": "Weka alama kwenye rekodi unazotaka kuondoa. Kufuta ni kwa kudumu na hakuwezi kutenduliwa.",
+      "selectedCount": "{count, plural, one {# imechaguliwa} other {# zimechaguliwa}}",
+      "deleteSelected": "Futa",
+      "selectAria": "Chagua {name}",
+      "deleteConfirmTitle": "Futa {count, plural, one {rekodi #} other {rekodi #}}?",
+      "deleteConfirmBody": "Rekodi zilizochaguliwa — pamoja na vionjo vyake vinavyochezeka na spektrogramu — zitaondolewa kabisa kwenye wasifu huu. Hili haliwezi kutenduliwa.",
+      "deleteConfirmCancel": "Ghairi",
+      "deleteConfirmAction": "Futa {count, plural, one {rekodi #} other {rekodi #}}",
+      "deleteProgress": "Inafuta… {done} kati ya {total}",
+      "deleteFailed": "{count, plural, one {Rekodi #} other {Rekodi #}} haikuweza kufutwa. Tafadhali jaribu tena."
     }
   },
   "devices": {

@@ -2046,7 +2046,19 @@
       "nextMonth": "Próximo mês",
       "prevDay": "Dia anterior com gravações",
       "nextDay": "Próximo dia com gravações",
-      "allHours": "Todas as horas"
+      "allHours": "Todas as horas",
+      "selectCta": "Selecionar",
+      "selectCancel": "Cancelar",
+      "selectHint": "Marque as gravações que deseja remover. A exclusão é permanente e não pode ser desfeita.",
+      "selectedCount": "{count, plural, one {# selecionada} other {# selecionadas}}",
+      "deleteSelected": "Excluir",
+      "selectAria": "Selecionar {name}",
+      "deleteConfirmTitle": "Excluir {count, plural, one {# gravação} other {# gravações}}?",
+      "deleteConfirmBody": "As gravações selecionadas — incluindo suas prévias reproduzíveis e espectrogramas — serão removidas permanentemente deste perfil. Isso não pode ser desfeito.",
+      "deleteConfirmCancel": "Cancelar",
+      "deleteConfirmAction": "Excluir {count, plural, one {# gravação} other {# gravações}}",
+      "deleteProgress": "Excluindo… {done} de {total}",
+      "deleteFailed": "{count, plural, one {# gravação não pôde ser excluída} other {# gravações não puderam ser excluídas}}. Tente novamente."
     }
   },
   "devices": {

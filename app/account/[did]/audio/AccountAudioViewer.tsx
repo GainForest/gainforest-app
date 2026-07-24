@@ -12,15 +12,28 @@
  * `?section=…`/`?mode=…` deep links (see ./page.tsx).
  */
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
-import { ArrowUpRightIcon, AudioLinesIcon, MapPinIcon, UploadIcon } from "lucide-react";
+import {
+  ArrowUpRightIcon,
+  AudioLinesIcon,
+  ListChecksIcon,
+  Loader2Icon,
+  MapPinIcon,
+  Trash2Icon,
+  TriangleAlertIcon,
+  UploadIcon,
+  XIcon,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Container from "@/components/ui/container";
+import { ModalContent, ModalDescription, ModalFooter, ModalHeader, ModalTitle } from "@/components/ui/modal/modal";
+import { useModal } from "@/components/ui/modal/context";
+import { deleteRecord } from "@/app/(manage)/manage/_lib/mutations";
 import { resolvePdsHost } from "@/app/_lib/pds";
 import { listAcDeployments, type AcDeploymentItem } from "@/app/_lib/ac-deployment";
-import { listAllRecordings, type AcAudioListItem } from "@/app/_lib/ac-audio";
+import { AC_AUDIO_COLLECTION, listAllRecordings, type AcAudioListItem } from "@/app/_lib/ac-audio";
 import { deploymentDetailPath, parseAtUri } from "@/app/_lib/deployment-events";
 import { formatDate } from "@/app/_lib/format";
 import { RecordingsExplorer } from "@/app/_components/RecordingsExplorer";
@@ -70,17 +83,88 @@ function groupRecordings(deployments: AcDeploymentItem[], recordings: AcAudioLis
 export function AccountAudioViewer({
   did,
   showUploadCta,
+  canDelete = false,
+  mutationRepo = null,
 }: {
   did: string;
   /** Whether to offer the personal SD-card upload flow (personal repos only). */
   showUploadCta: boolean;
+  /** Whether the viewer may delete recordings (owner / org admin). */
+  canDelete?: boolean;
+  /** Group repo DID for mutations, when the profile is an organization. */
+  mutationRepo?: string | null;
 }) {
   const t = useTranslations("common.audiomoth.recordings");
+  const modal = useModal();
 
   const [host, setHost] = useState<string | null>(null);
   const [deployments, setDeployments] = useState<AcDeploymentItem[] | null>(null);
   const [recordings, setRecordings] = useState<AcAudioListItem[] | null>(null);
   const [loadError, setLoadError] = useState(false);
+
+  /* ── Multi-select + delete ─────────────────────────────────────────────── */
+  const [selectMode, setSelectMode] = useState(false);
+  const [selectedUris, setSelectedUris] = useState<ReadonlySet<string>>(new Set());
+  const [deleteError, setDeleteError] = useState<string | null>(null);
+
+  const toggleSelect = useCallback((item: AcAudioListItem) => {
+    setSelectedUris((current) => {
+      const next = new Set(current);
+      if (next.has(item.uri)) next.delete(item.uri);
+      else next.add(item.uri);
+      return next;
+    });
+  }, []);
+
+  const exitSelectMode = useCallback(() => {
+    setSelectMode(false);
+    setSelectedUris(new Set());
+  }, []);
+
+  const performDelete = useCallback(
+    async (onProgress: (done: number, total: number) => void) => {
+      const items = (recordings ?? []).filter((item) => selectedUris.has(item.uri));
+      const repoOptions = mutationRepo ? { repo: mutationRepo } : undefined;
+      const deleted = new Set<string>();
+      const failed = new Set<string>();
+      let done = 0;
+      for (const item of items) {
+        try {
+          await deleteRecord(AC_AUDIO_COLLECTION, item.rkey, repoOptions);
+          deleted.add(item.uri);
+        } catch {
+          failed.add(item.uri);
+        }
+        done += 1;
+        onProgress(done, items.length);
+      }
+      if (deleted.size > 0) {
+        setRecordings((current) => current?.filter((item) => !deleted.has(item.uri)) ?? current);
+      }
+      if (failed.size > 0) {
+        // Keep the failed ones selected so the user can retry immediately.
+        setSelectedUris(failed);
+        setDeleteError(t("deleteFailed", { count: failed.size }));
+        throw new Error(t("deleteFailed", { count: failed.size }));
+      }
+      setDeleteError(null);
+      exitSelectMode();
+    },
+    [recordings, selectedUris, mutationRepo, exitSelectMode, t],
+  );
+
+  const confirmDelete = useCallback(() => {
+    const count = selectedUris.size;
+    if (count === 0) return;
+    modal.pushModal(
+      {
+        id: "delete-recordings",
+        content: <DeleteRecordingsModal count={count} onConfirm={performDelete} />,
+      },
+      true,
+    );
+    void modal.show();
+  }, [modal, performDelete, selectedUris.size]);
 
   useEffect(() => {
     const ctrl = new AbortController();
@@ -113,6 +197,7 @@ export function AccountAudioViewer({
 
   const loading = recordings === null;
   const total = recordings?.length ?? 0;
+  const selectedCount = selectedUris.size;
 
   return (
     <Container className="pt-4 pb-10">
@@ -127,15 +212,51 @@ export function AccountAudioViewer({
             ) : null}
           </h1>
         </div>
-        {showUploadCta ? (
-          <Button asChild size="sm">
-            <Link href="/audiomoth?tab=upload">
-              <UploadIcon className="size-4" />
-              {t("uploadCta")}
-            </Link>
-          </Button>
-        ) : null}
+        <div className="flex flex-wrap items-center gap-2">
+          {canDelete && total > 0 && !selectMode ? (
+            <Button variant="outline" size="sm" onClick={() => setSelectMode(true)}>
+              <ListChecksIcon className="size-4" />
+              {t("selectCta")}
+            </Button>
+          ) : null}
+          {selectMode ? (
+            <>
+              <span className="text-sm tabular-nums text-muted-foreground">
+                {t("selectedCount", { count: selectedCount })}
+              </span>
+              <Button variant="destructive" size="sm" disabled={selectedCount === 0} onClick={confirmDelete}>
+                <Trash2Icon className="size-4" />
+                {t("deleteSelected")}
+              </Button>
+              <Button variant="outline" size="sm" onClick={exitSelectMode}>
+                <XIcon className="size-4" />
+                {t("selectCancel")}
+              </Button>
+            </>
+          ) : showUploadCta ? (
+            <Button asChild size="sm">
+              <Link href="/audiomoth?tab=upload">
+                <UploadIcon className="size-4" />
+                {t("uploadCta")}
+              </Link>
+            </Button>
+          ) : null}
+        </div>
       </div>
+
+      {selectMode ? (
+        <p className="mt-3 flex items-center gap-1.5 rounded-lg bg-muted px-3 py-2 text-xs text-muted-foreground">
+          <TriangleAlertIcon className="size-3.5 shrink-0 text-warn" />
+          {t("selectHint")}
+        </p>
+      ) : null}
+
+      {deleteError ? (
+        <p className="mt-3 flex items-center gap-1.5 rounded-lg bg-warn/10 px-3 py-2 text-xs font-medium text-foreground/75">
+          <TriangleAlertIcon className="size-3.5 shrink-0 text-warn" />
+          {deleteError}
+        </p>
+      ) : null}
 
       {loading ? (
         <div className="mt-6 flex flex-col gap-2">
@@ -194,12 +315,88 @@ export function AccountAudioViewer({
                 ) : null}
               </div>
               <div className="mt-4">
-                <RecordingsExplorer did={did} host={host} items={group.items} />
+                <RecordingsExplorer
+                  did={did}
+                  host={host}
+                  items={group.items}
+                  selectable={selectMode}
+                  selectedUris={selectedUris}
+                  onToggleSelect={toggleSelect}
+                />
               </div>
             </section>
           ))}
         </div>
       )}
     </Container>
+  );
+}
+
+/**
+ * Warning dialog shown before recordings are removed. Deleting is permanent
+ * — the records (and their playable previews and spectrograms) disappear
+ * from the profile — so the dialog leads with an explicit warning sign.
+ */
+function DeleteRecordingsModal({
+  count,
+  onConfirm,
+}: {
+  count: number;
+  onConfirm: (onProgress: (done: number, total: number) => void) => Promise<void>;
+}) {
+  const t = useTranslations("common.audiomoth.recordings");
+  const modal = useModal();
+  const [pending, setPending] = useState(false);
+  const [progress, setProgress] = useState<{ done: number; total: number } | null>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  const close = async () => {
+    await modal.hide();
+    modal.popModal();
+  };
+
+  const confirm = async () => {
+    setPending(true);
+    setError(null);
+    try {
+      await onConfirm((done, total) => setProgress({ done, total }));
+      await close();
+    } catch (deleteRecordingsError) {
+      setError(
+        deleteRecordingsError instanceof Error ? deleteRecordingsError.message : t("deleteFailed", { count }),
+      );
+      setPending(false);
+      setProgress(null);
+    }
+  };
+
+  return (
+    <ModalContent dismissible={!pending} className="space-y-4">
+      <ModalHeader>
+        <ModalTitle className="flex items-center gap-2">
+          <span className="grid size-8 shrink-0 place-items-center rounded-full bg-destructive/10 text-destructive">
+            <TriangleAlertIcon className="size-4.5" />
+          </span>
+          {t("deleteConfirmTitle", { count })}
+        </ModalTitle>
+        <ModalDescription>{t("deleteConfirmBody", { count })}</ModalDescription>
+      </ModalHeader>
+      {error ? (
+        <p className="flex items-center gap-1.5 rounded-lg bg-warn/10 px-2.5 py-1.5 text-xs font-medium text-foreground/75">
+          <TriangleAlertIcon className="size-3.5 shrink-0 text-warn" /> {error}
+        </p>
+      ) : null}
+      <ModalFooter>
+        <Button type="button" variant="outline" disabled={pending} onClick={() => void close()}>
+          {t("deleteConfirmCancel")}
+        </Button>
+        <Button type="button" variant="destructive" disabled={pending} onClick={() => void confirm()}>
+          {pending ? <Loader2Icon className="size-4 animate-spin" /> : <Trash2Icon className="size-4" />}
+          {pending && progress
+            ? t("deleteProgress", { done: progress.done, total: progress.total })
+            : t("deleteConfirmAction", { count })}
+        </Button>
+      </ModalFooter>
+    </ModalContent>
   );
 }
