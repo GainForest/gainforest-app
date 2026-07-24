@@ -2023,9 +2023,7 @@
       "groupNameRequired": "Give this upload a name first.",
       "groupRemarks": "Created when uploading a folder of recordings.",
       "discovering": "Looking for recordings… {count} files found",
-      "readFailed": "The SD card could not be read. Remove and re-insert it, then try again — or drag the folder onto this page instead.",
-      "handedOffTitle": "{count} recordings are uploading in the background.",
-      "handedOffBody": "You can keep browsing or read another card — progress stays in the tray at the bottom."
+      "readFailed": "The SD card could not be read. Remove and re-insert it, then try again — or drag the folder onto this page instead."
     },
     "recordings": {
       "title": "Recordings",
@@ -2840,29 +2838,5 @@
       "lexiconLink": "The wallet record's schema, and every other one",
       "atprotoLink": "How the AT Protocol stores the record"
     }
-  },
-  "uploadTray": {
-    "label": "Background uploads",
-    "headlineUploading": "Uploading",
-    "headlineWaiting": "Waiting to upload",
-    "headlinePaused": "Upload paused",
-    "headlineFailed": "Upload failed",
-    "headlineDone": "Uploads complete",
-    "collapse": "Collapse",
-    "expand": "Expand",
-    "statusQueued": "Queued",
-    "statusDone": "Done",
-    "statusPaused": "Paused {percent}%",
-    "statusFailed": "Failed",
-    "statusSaving": "Saving…",
-    "statusRetrying": "Retry {attempt}/{max}",
-    "pause": "Pause",
-    "resume": "Resume",
-    "retry": "Retry",
-    "cancel": "Cancel this file",
-    "cancelAll": "Cancel all",
-    "hide": "Hide",
-    "remaining": "{count} of {total} left · {size}",
-    "allUploaded": "All {count} uploaded · {size}"
   }
 }

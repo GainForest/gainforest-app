@@ -2023,9 +2023,7 @@
       "groupNameRequired": "Primeiro dê um nome a este envio.",
       "groupRemarks": "Criado ao enviar uma pasta de gravações.",
       "discovering": "Procurando gravações… {count} arquivos encontrados",
-      "readFailed": "O cartão SD não pôde ser lido. Remova e insira novamente, depois tente de novo — ou arraste a pasta para esta página.",
-      "handedOffTitle": "{count} gravações estão sendo enviadas em segundo plano.",
-      "handedOffBody": "Você pode continuar navegando ou ler outro cartão — o progresso fica na bandeja embaixo."
+      "readFailed": "O cartão SD não pôde ser lido. Remova e insira novamente, depois tente de novo — ou arraste a pasta para esta página."
     },
     "recordings": {
       "title": "Gravações",
@@ -2840,29 +2838,5 @@
       "lexiconLink": "O esquema do registro da carteira, e todos os outros",
       "atprotoLink": "Como o AT Protocol guarda o registro"
     }
-  },
-  "uploadTray": {
-    "label": "Envios em segundo plano",
-    "headlineUploading": "Enviando",
-    "headlineWaiting": "Aguardando envio",
-    "headlinePaused": "Envio pausado",
-    "headlineFailed": "Falha no envio",
-    "headlineDone": "Envios concluídos",
-    "collapse": "Recolher",
-    "expand": "Expandir",
-    "statusQueued": "Na fila",
-    "statusDone": "Pronta",
-    "statusPaused": "Pausada {percent}%",
-    "statusFailed": "Falhou",
-    "statusSaving": "Salvando…",
-    "statusRetrying": "Tentativa {attempt}/{max}",
-    "pause": "Pausar",
-    "resume": "Retomar",
-    "retry": "Tentar de novo",
-    "cancel": "Cancelar este arquivo",
-    "cancelAll": "Cancelar tudo",
-    "hide": "Ocultar",
-    "remaining": "Faltam {count} de {total} · {size}",
-    "allUploaded": "{count} enviadas · {size}"
   }
 }

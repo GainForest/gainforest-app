@@ -9,14 +9,12 @@ test.use({ storageState: authStatePath });
 /**
  * AudioMoth SD-card upload flow: create a chime deployment, "insert" a card
  * of generated AudioMoth WAVs, verify the deployment is recognised from the
- * embedded chime ID, hand the batch to the background upload tray, and
- * confirm the recordings appear with a player on the deployment's detail
- * page.
+ * embedded chime ID, upload, and confirm the recordings appear with a player
+ * on the deployment's detail page.
  *
  * When the environment has no recordings storage configured
  * (DATA_JOBS_S3_*), the flow is still exercised up to the friendly
- * storage-unavailable message in the tray and the test passes with an
- * annotation.
+ * storage-unavailable message and the test passes with an annotation.
  * Uploaded archival objects live under audiomoth/<disposable-did>/ in the
  * test bucket; the disposable account teardown removes all PDS records.
  */
@@ -28,14 +26,8 @@ test("recognises an SD card and uploads recordings", async ({ page }, testInfo) 
 
   await page.getByRole("button", { name: /upload 2 recordings/i }).click();
 
-  // Uploading now runs in the app-wide tray, so the page itself goes straight
-  // back to the picker while the transfer continues in the background.
-  const tray = page.getByRole("region", { name: /background uploads/i });
-  await expect(tray).toBeVisible({ timeout: 30_000 });
-  await expect(page.getByText(/uploading in the background/i)).toBeVisible();
-
-  const doneHeading = tray.getByText(/uploads complete/i);
-  const notConfigured = tray.getByText(/storage is not set up yet/i);
+  const doneHeading = page.getByText(/upload complete/i);
+  const notConfigured = page.getByText(/storage is not set up yet/i);
   await expect(doneHeading.or(notConfigured)).toBeVisible({ timeout: 120_000 });
   await screenshotStep(page, testInfo, "audiomoth-upload-finished");
 
@@ -59,10 +51,10 @@ test("recognises an SD card and uploads recordings", async ({ page }, testInfo) 
   });
   await screenshotStep(page, testInfo, "audiomoth-deployment-recordings");
 
-  // Re-scanning the same card must recognise the files as already uploaded,
-  // leaving nothing to hand to the tray.
+  // Re-scanning the same card must recognise the files as already uploaded.
   await scanSdCardFiles(page, testInfo, deployment);
-  await expect(page.getByText(/already uploaded/i).first()).toBeVisible({ timeout: 60_000 });
-  await expect(page.getByRole("button", { name: /all recordings already uploaded/i })).toBeDisabled();
+  await page.getByRole("button", { name: /upload 2 recordings/i }).click();
+  await expect(page.getByText(/upload complete/i)).toBeVisible({ timeout: 60_000 });
+  await expect(page.getByText(/already uploaded/i).first()).toBeVisible();
   await screenshotStep(page, testInfo, "audiomoth-upload-dedupe");
 });
