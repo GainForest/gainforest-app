@@ -2023,7 +2023,9 @@
       "groupNameRequired": "Ipe jina upakiaji huu kwanza.",
       "groupRemarks": "Iliundwa wakati wa kupakia folda ya rekodi.",
       "discovering": "Inatafuta rekodi… faili {count} zimepatikana",
-      "readFailed": "Kadi ya SD haikuweza kusomwa. Iondoe na uiingize tena, kisha jaribu tena — au buruta folda kwenye ukurasa huu."
+      "readFailed": "Kadi ya SD haikuweza kusomwa. Iondoe na uiingize tena, kisha jaribu tena — au buruta folda kwenye ukurasa huu.",
+      "handedOffTitle": "Rekodi {count} zinapakiwa chinichini.",
+      "handedOffBody": "Unaweza kuendelea kuvinjari au kusoma kadi nyingine — maendeleo yanabaki kwenye trei chini."
     },
     "recordings": {
       "title": "Rekodi",
@@ -2838,5 +2840,29 @@
       "lexiconLink": "Muundo wa rekodi ya pochi, na mingine yote",
       "atprotoLink": "Jinsi AT Protocol inavyohifadhi rekodi"
     }
+  },
+  "uploadTray": {
+    "label": "Upakiaji wa chinichini",
+    "headlineUploading": "Inapakia",
+    "headlineWaiting": "Inasubiri kupakiwa",
+    "headlinePaused": "Upakiaji umesitishwa",
+    "headlineFailed": "Upakiaji umeshindikana",
+    "headlineDone": "Upakiaji umekamilika",
+    "collapse": "Kunja",
+    "expand": "Panua",
+    "statusQueued": "Kwenye foleni",
+    "statusDone": "Imekamilika",
+    "statusPaused": "Imesitishwa {percent}%",
+    "statusFailed": "Imeshindikana",
+    "statusSaving": "Inahifadhi…",
+    "statusRetrying": "Jaribio {attempt}/{max}",
+    "pause": "Sitisha",
+    "resume": "Endelea",
+    "retry": "Jaribu tena",
+    "cancel": "Ghairi faili hii",
+    "cancelAll": "Ghairi zote",
+    "hide": "Ficha",
+    "remaining": "Zimebaki {count} kati ya {total} · {size}",
+    "allUploaded": "{count} zimepakiwa · {size}"
   }
 }
