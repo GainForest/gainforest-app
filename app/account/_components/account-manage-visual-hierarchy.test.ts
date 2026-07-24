@@ -47,6 +47,15 @@ describe("account and management visual hierarchy", () => {
     expect(source).toContain("font-instrument text-lg font-light italic text-foreground");
   });
 
+  it("uses medium Geist for headings nested below settings categories", () => {
+    const settings = read("app/account/_components/AccountSettingsSections.tsx");
+    const inaturalist = read("app/(manage)/manage/settings/_components/INaturalistSettingsSection.tsx");
+
+    expect(settings.match(/<ContextHeading as="h2" className="text-sm/g)).toHaveLength(6);
+    expect(settings).not.toMatch(/<h2 className="font-instrument text-lg font-light italic/);
+    expect(inaturalist).toContain('<ContextHeading as="h2" className="text-sm">');
+  });
+
   it("keeps representative account, admin, and manage cards visible without decorative shells", () => {
     expect(read("app/account/_components/AccountSidebar.tsx")).toContain('"rounded-3xl bg-muted"');
     expect(read("app/admin/_components/AdminTainaPanel.tsx")).toContain("rounded-2xl bg-muted p-3");
@@ -85,6 +94,8 @@ describe("account and management visual hierarchy", () => {
     expect(settingsSection).not.toContain("max-w-3xl");
     expect(settingsSection).not.toContain("gutter={!embedded}");
     expect(settings.match(/data-slot="settings-accordion-group"/g)).toHaveLength(2);
+    expect(settings.match(/<Accordion type="single" collapsible/g)).toHaveLength(2);
+    expect(settings).not.toContain('<Accordion type="multiple"');
     expect(settings.match(/overflow-hidden rounded-3xl border-4 border-muted bg-background px-4 sm:px-5/g)).toHaveLength(2);
     expect(settings).toContain('<AccordionItem value={value} className="border-0 bg-background">');
     expect(settings.match(/<Separator className="mx-auto w-full" \/>/g)).toHaveLength(4);

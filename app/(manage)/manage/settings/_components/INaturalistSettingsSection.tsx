@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { ContextHeading } from "@/components/ui/typography";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { INATURALIST_OBSERVATION_SOURCE, inaturalistOccurrenceIdKey, type INaturalistObservationSummary, type INaturalistProjectSummary, type INaturalistSyncStatus } from "@/app/_lib/inaturalist-shared";
 import { createMultimediaFromUrl, createRecord, getRecord, putRecord } from "../../_lib/mutations";
@@ -359,7 +360,7 @@ export function INaturalistSettingsSection({
     <div className="space-y-3">
       <div className="flex items-center gap-2">
         <Image src="/assets/logos/inaturalist.png" alt="" width={18} height={18} className="rounded bg-background" />
-        <h2 className="font-instrument text-lg font-light italic">{t("title")}</h2>
+        <ContextHeading as="h2" className="text-sm">{t("title")}</ContextHeading>
       </div>
 
       <div className="rounded-2xl bg-muted p-4">

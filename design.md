@@ -266,15 +266,24 @@ Use the body sans face for:
 
 ### Display headings
 
-Use the italic display serif only for real visible content headings:
+Use the italic display serif only for real visible content headings at the primary or secondary contextual level:
 
 - Page title
-- Section title
+- Primary section title
 - Card title when the card is a meaningful content section
 - Empty-state title
 - Dialog title
 
 A text node is not a heading merely because it labels a group. Navigation labels, filter labels, table labels, fieldsets, and shell labels remain body sans.
+
+### Contextual nested headings
+
+Visual hierarchy is determined by the surrounding composition, not by whether the semantic tag is `h1`, `h2`, or `h3`.
+
+- Do not give a parent section heading and its nested subsection headings the same display treatment.
+- At the third visible hierarchy level and deeper, default to Geist with `font-medium`; use `font-semibold` only when the local density or emphasis requires it.
+- Keep the correct semantic heading tag for document structure while using the quieter contextual treatment. Use the shared `ContextHeading` primitive rather than manually recreating it.
+- A nested settings field group such as username, password, connection, or identity is contextual UI—not another display-serif section title.
 
 ### Brand face
 
@@ -404,6 +413,7 @@ A loading page is part of the same family; it must not introduce a different max
 - Never give the outer group and its expanded inner regions the same muted fill. Similar outer and inner tones erase hierarchy instead of strengthening it.
 - When expandable items need a clear boundary and their bodies already contain muted regions, keep the list and every item on `bg-background`; enclose the whole list with `rounded-3xl`, `overflow-hidden`, and a 4px low-contrast muted frame.
 - Keep accordion items free of their own perimeter borders and place a shared Separator between every pair of peer items. Inset separators with parent horizontal padding so they are centered and stop short of the enclosure edge.
+- Settings accordion groups use single-item expansion: opening one category collapses the previously open peer. Keep the active item collapsible so the entire group can return to its compact state.
 - Expanded content may use one stronger muted inner grouping layer; do not wrap each accordion item in another competing card.
 
 ### Lists
@@ -493,12 +503,13 @@ Before merging UI work, verify:
 - [ ] Lists use separators instead of repeated perimeter cards where appropriate
 - [ ] Borders remain on functional and separating boundaries
 - [ ] No decorative eyebrows, kickers, or supertitles
-- [ ] Display type appears only on real content headings
+- [ ] Display type appears only on primary or secondary contextual headings
+- [ ] Nested headings do not repeat their parent’s display treatment; third-level headings default to medium Geist
 - [ ] Shell/navigation labels use compact body typography
 - [ ] Every control in a header or toolbar peer cluster has one intentional shared outer size
 - [ ] A lone narrow content column is centered unless a real sibling alignment requires otherwise
 - [ ] A settings tab uses the same outer frame as peer tabs, with no nested max-width or duplicate padding
-- [ ] Every settings category sits in one explicit grouped div and accordion root, with inset shared Separators between peers
+- [ ] Every settings category sits in one explicit grouped div and single-expansion accordion root, with inset shared Separators between peers
 - [ ] An expandable list never repeats the same muted fill on both its enclosure and inner content
 - [ ] Grid and carousel peers stretch to equal structural height; no percentage-height item defeats flex stretching
 - [ ] Hero/media gradients that protect contrast are preserved

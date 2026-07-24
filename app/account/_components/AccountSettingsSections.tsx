@@ -26,6 +26,7 @@ import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Separator } from "@/components/ui/separator";
+import { ContextHeading } from "@/components/ui/typography";
 import {
   InputGroup,
   InputGroupAddon,
@@ -156,7 +157,7 @@ function HandleSection({ did, handle: initialHandle }: { did: string; handle: st
     <div className="space-y-3">
       <div className="flex items-center gap-2">
         <AtSignIcon className="h-4 w-4 text-foreground/70" />
-        <h2 className="font-instrument text-lg font-light italic">{t("title")}</h2>
+        <ContextHeading as="h2" className="text-sm">{t("title")}</ContextHeading>
       </div>
 
       <div className="bg-muted rounded-2xl p-1 w-full">
@@ -373,7 +374,7 @@ function PasswordSection({ did }: { did: string }) {
     <div className="space-y-3">
       <div className="flex items-center gap-2">
         <KeyRoundIcon className="h-4 w-4 text-foreground/70" />
-        <h2 className="font-instrument text-lg font-light italic">{t("title")}</h2>
+        <ContextHeading as="h2" className="text-sm">{t("title")}</ContextHeading>
       </div>
 
       <div className="bg-muted rounded-2xl p-1 flex flex-col items-center w-full">
@@ -587,7 +588,7 @@ export function AgentKeysSection() {
     <div className="space-y-3">
       <div className="flex items-center gap-2">
         <BotIcon className="h-4 w-4 text-foreground/70" />
-        <h2 className="font-instrument text-lg font-light italic">{t("title")}</h2>
+        <ContextHeading as="h2" className="text-sm">{t("title")}</ContextHeading>
       </div>
 
       <div className="bg-muted rounded-2xl p-1 w-full">
@@ -774,7 +775,7 @@ function BlueskySection({ did }: { did: string }) {
     <div className="space-y-3">
       <div className="flex items-center gap-2">
         <BlueskyIcon className="h-4 w-4 text-[#1185fe]" />
-        <h2 className="font-instrument text-lg font-light italic">{t("title")}</h2>
+        <ContextHeading as="h2" className="text-sm">{t("title")}</ContextHeading>
       </div>
 
       <div className="bg-muted rounded-2xl p-4 space-y-3">
@@ -841,7 +842,7 @@ function AccountSection({ did }: { did: string }) {
     <div className="space-y-3">
       <div className="flex items-center gap-2">
         <UserIcon className="h-4 w-4 text-foreground/70" />
-        <h2 className="font-instrument text-lg font-light italic">{t("title")}</h2>
+        <ContextHeading as="h2" className="text-sm">{t("title")}</ContextHeading>
       </div>
 
       <div className="bg-muted rounded-2xl p-1 flex flex-col items-center w-full">
@@ -1151,7 +1152,7 @@ function DangerZoneSection({ handle }: { handle: string | null }) {
     <div className="space-y-3">
       <div className="flex items-center gap-2">
         <AlertTriangleIcon className="h-4 w-4 text-destructive/80" />
-        <h2 className="font-instrument text-lg font-light italic text-destructive">{t("sectionTitle")}</h2>
+        <ContextHeading as="h2" className="text-sm text-destructive">{t("sectionTitle")}</ContextHeading>
       </div>
 
       <div className="rounded-2xl border border-destructive/30 bg-destructive/10 p-4">
@@ -1214,7 +1215,7 @@ export function AccountSettingsSections({
   const t = useTranslations("common.settings.groups");
   return (
     <div data-slot="settings-accordion-group" className="overflow-hidden rounded-3xl border-4 border-muted bg-background px-4 sm:px-5">
-      <Accordion type="multiple" defaultValue={["account"]}>
+      <Accordion type="single" collapsible defaultValue="account">
         <SettingsGroup value="account" title={t("account.title")} description={t("account.description")}>
           {handle ? <HandleSection did={did} handle={handle} /> : null}
           <PasswordSection did={did} />
@@ -1251,7 +1252,7 @@ export function OrganizationSettingsSections({
   const t = useTranslations("common.settings.groups");
   return (
     <div data-slot="settings-accordion-group" className="overflow-hidden rounded-3xl border-4 border-muted bg-background px-4 sm:px-5">
-      <Accordion type="multiple">
+      <Accordion type="single" collapsible>
         <SettingsGroup value="agents" title={t("agents.title")} description={t("agents.description")}>
           <div className="space-y-3">
             <p className="text-sm text-muted-foreground">{agentKeysHint}</p>

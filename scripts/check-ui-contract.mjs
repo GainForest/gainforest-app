@@ -199,6 +199,7 @@ const organizationsExplore = read("app/organizations/OrganizationsClient.tsx");
 const recordExplorer = read("app/_components/RecordExplorer.tsx");
 const pageLoadingSkeletons = read("app/_components/PageLoadingSkeletons.tsx");
 const accountSettings = read("app/account/_components/AccountSettingsSections.tsx");
+const inaturalistSettings = read("app/(manage)/manage/settings/_components/INaturalistSettingsSection.tsx");
 const manageSections = read("app/(manage)/manage/_sections.tsx");
 
 assert(
@@ -369,6 +370,8 @@ assert(
 );
 assert(
   (accountSettings.match(/data-slot="settings-accordion-group"/g) ?? []).length === 2 &&
+    (accountSettings.match(/<Accordion type="single" collapsible/g) ?? []).length === 2 &&
+    !accountSettings.includes('<Accordion type="multiple"') &&
     (accountSettings.match(/overflow-hidden rounded-3xl border-4 border-muted bg-background px-4 sm:px-5/g) ?? []).length === 2 &&
     accountSettings.includes('<AccordionItem value={value} className="border-0 bg-background">') &&
     (accountSettings.match(/<Separator className="mx-auto w-full" \/>/g) ?? []).length === 4 &&
@@ -437,6 +440,18 @@ for (const path of productionRuntimeTsxFiles) {
 assert(/Omit<ComponentPropsWithoutRef<"span">, "children">/.test(typography), "BrandWord must not accept arbitrary children");
 assert(/>\s*GainForest\s*<\/span>/.test(typography), "BrandWord must render the exact visible text GainForest");
 assert(/font-instrument italic/.test(typography), "DisplayHeading must always use italic Instrument Serif");
+assert(
+  /export function ContextHeading/.test(typography) &&
+    /data-heading-role="context"/.test(typography) &&
+    /font-sans font-medium text-foreground/.test(typography),
+  "ContextHeading must preserve semantic structure with medium Geist styling",
+);
+assert(
+  (accountSettings.match(/<ContextHeading\b/g) ?? []).length === 6 &&
+    !/<h2 className="font-instrument text-lg font-light italic/.test(accountSettings) &&
+    inaturalistSettings.includes('<ContextHeading as="h2" className="text-sm">'),
+  "Nested settings headings must not repeat their parent accordion display typography",
+);
 
 for (const path of ["app/_components/Footer.tsx", "app/_components/shell/UnifiedSidebar.tsx"]) {
   const source = read(path);
