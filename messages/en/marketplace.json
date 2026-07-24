@@ -566,6 +566,16 @@
         "collectors": "Collectors",
         "timeLeft": "Time left"
       },
+      "eligibility": {
+        "title": "Images screened",
+        "eligibleOnly": "Eligible images count",
+        "wildlife": "Wildlife",
+        "plants": "Outdoor plants",
+        "people": "People",
+        "potted": "Potted plants",
+        "other": "Other excluded",
+        "explainer": "Only clear outdoor wildlife and plant observations with a directly uploaded photo count. People, potted or indoor plants, unclear subjects, and observations without an uploaded photo are excluded."
+      },
       "empty": {
         "title": "No sightings yet",
         "description": "Be the first to add an observation this round."

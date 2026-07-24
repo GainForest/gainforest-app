@@ -566,6 +566,16 @@
         "collectors": "Participantes",
         "timeLeft": "Tempo restante"
       },
+      "eligibility": {
+        "title": "Imagens analisadas",
+        "eligibleOnly": "Só as válidas contam",
+        "wildlife": "Vida silvestre",
+        "plants": "Plantas ao ar livre",
+        "people": "Pessoas",
+        "potted": "Plantas em vasos",
+        "other": "Outras excluídas",
+        "explainer": "Só contam observações claras de vida silvestre ou plantas ao ar livre com uma foto enviada diretamente. Pessoas, plantas em vasos ou de interior, temas incertos e observações sem foto enviada são excluídos."
+      },
       "empty": {
         "title": "Ainda sem avistamentos",
         "description": "Seja o primeiro a adicionar uma observação nesta rodada."

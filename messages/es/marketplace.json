@@ -566,6 +566,16 @@
         "collectors": "Participantes",
         "timeLeft": "Tiempo restante"
       },
+      "eligibility": {
+        "title": "Imágenes revisadas",
+        "eligibleOnly": "Solo cuentan las válidas",
+        "wildlife": "Fauna silvestre",
+        "plants": "Plantas al aire libre",
+        "people": "Personas",
+        "potted": "Plantas en maceta",
+        "other": "Otras excluidas",
+        "explainer": "Solo cuentan las observaciones claras de fauna o plantas al aire libre con una foto subida directamente. Se excluyen personas, plantas en maceta o de interior, sujetos poco claros y observaciones sin una foto subida."
+      },
       "empty": {
         "title": "Aún no hay avistamientos",
         "description": "Sé quien añada la primera observación de esta ronda."

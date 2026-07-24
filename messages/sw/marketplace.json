@@ -566,6 +566,16 @@
         "collectors": "Wakusanyaji",
         "timeLeft": "Muda uliosalia"
       },
+      "eligibility": {
+        "title": "Picha zilizokaguliwa",
+        "eligibleOnly": "Picha halali pekee huhesabiwa",
+        "wildlife": "Wanyamapori",
+        "plants": "Mimea ya nje",
+        "people": "Watu",
+        "potted": "Mimea ya vyungu",
+        "other": "Nyingine zilizoondolewa",
+        "explainer": "Uchunguzi wazi wa wanyamapori au mimea ya nje wenye picha iliyopakiwa moja kwa moja pekee huhesabiwa. Watu, mimea ya vyungu au ya ndani, mada zisizoeleweka na uchunguzi usio na picha iliyopakiwa huondolewa."
+      },
       "empty": {
         "title": "Bado hakuna uoni",
         "description": "Kuwa wa kwanza kuongeza uoni katika raundi hii."

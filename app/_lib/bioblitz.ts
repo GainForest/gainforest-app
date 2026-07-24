@@ -25,6 +25,11 @@ import {
   type OccurrenceRecord,
 } from "./indexer";
 import { fetchEngagement } from "./feed-engagement";
+import {
+  classifyBioblitzImage,
+  isEligibleBioblitzCategory,
+  type BioblitzImageCategory,
+} from "./bioblitz-eligibility";
 
 /** Cash prizes awarded each round, in USD. */
 export const BIOBLITZ_PRIZES = {
@@ -232,11 +237,18 @@ type RoundCollector = {
   avatarRef: string | null;
 };
 
+export type RoundImageCounts = Record<BioblitzImageCategory, number> & {
+  /** Non-null imageEvidence wrappers that did not contain a usable blob ref. */
+  missingPhoto: number;
+};
+
 export type RoundBoard = {
   collectors: RoundCollector[];
-  /** Total valid observations uploaded inside the round window. */
+  /** Total eligible wildlife + outdoor plant observations. */
   totalObservations: number;
-  /** Distinct collectors who uploaded at least one observation. */
+  /** Breakdown of automatically classified image observations. */
+  imageCounts: RoundImageCounts;
+  /** Distinct collectors who uploaded at least one eligible observation. */
   collectorCount: number;
 };
 
@@ -244,6 +256,11 @@ type RawNode = {
   did?: string | null;
   uri?: string | null;
   createdAt?: string | null;
+  occurrenceRemarks?: string | null;
+  fieldNotes?: string | null;
+  scientificName?: string | null;
+  vernacularName?: string | null;
+  kingdom?: string | null;
   imageEvidence?: { file?: { ref?: string | null } | null } | null;
   certifiedProfileData?: {
     displayName?: string | null;
@@ -266,6 +283,11 @@ const ROUND_COLLECTORS_QUERY = `
           did
           uri
           createdAt
+          occurrenceRemarks
+          fieldNotes
+          scientificName
+          vernacularName
+          kingdom
           imageEvidence { file { ref } }
           certifiedProfileData {
             displayName
@@ -315,6 +337,15 @@ export async function fetchRoundCollectors(
   ]);
 
   const tally = new Map<string, RoundCollector>();
+  const imageCounts: RoundImageCounts = {
+    wildlife: 0,
+    plant: 0,
+    person: 0,
+    "potted-plant": 0,
+    indoors: 0,
+    unclassified: 0,
+    missingPhoto: 0,
+  };
   let total = 0;
   let after: string | null = null;
 
@@ -349,10 +380,23 @@ export async function fetchRoundCollectors(
     for (const n of nodes) {
       const did = n.did!;
       const uri = n.uri?.trim();
-      const imageRef = normaliseRef(n.imageEvidence?.file?.ref);
-      if (hidden.has(did) || (uri && hiddenRecords.has(uri)) || !imageRef) continue;
+      if (hidden.has(did) || (uri && hiddenRecords.has(uri))) continue;
       const t = Date.parse(n.createdAt ?? "");
       if (!Number.isFinite(t) || t < startMs || t > endMs) continue;
+
+      const imageRef = normaliseRef(n.imageEvidence?.file?.ref);
+      if (!imageRef) {
+        imageCounts.missingPhoto += 1;
+        continue;
+      }
+      const category = classifyBioblitzImage({
+        notes: n.occurrenceRemarks?.trim() || n.fieldNotes?.trim() || null,
+        scientificName: n.scientificName,
+        vernacularName: n.vernacularName,
+        kingdom: n.kingdom,
+      });
+      imageCounts[category] += 1;
+      if (!isEligibleBioblitzCategory(category)) continue;
       total += 1;
       const existing = tally.get(did);
       if (existing) {
@@ -380,6 +424,7 @@ export async function fetchRoundCollectors(
   return {
     collectors,
     totalObservations: total,
+    imageCounts,
     collectorCount: collectors.length,
   };
 }
@@ -414,7 +459,19 @@ export async function fetchRoundObservations(
   });
   return records.filter((r) => {
     const t = Date.parse(r.createdAt);
-    return Number.isFinite(t) && t >= startMs && t <= endMs;
+    return (
+      Number.isFinite(t) &&
+      t >= startMs &&
+      t <= endMs &&
+      isEligibleBioblitzCategory(
+        classifyBioblitzImage({
+          notes: r.remarks,
+          scientificName: r.scientificName,
+          vernacularName: r.vernacularName,
+          kingdom: r.kingdom,
+        }),
+      )
+    );
   });
 }
 

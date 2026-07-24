@@ -566,6 +566,16 @@
         "collectors": "Pengumpul",
         "timeLeft": "Sisa waktu"
       },
+      "eligibility": {
+        "title": "Gambar yang diperiksa",
+        "eligibleOnly": "Hanya gambar valid yang dihitung",
+        "wildlife": "Satwa liar",
+        "plants": "Tanaman luar ruangan",
+        "people": "Orang",
+        "potted": "Tanaman dalam pot",
+        "other": "Lainnya dikecualikan",
+        "explainer": "Hanya pengamatan jelas tentang satwa liar atau tanaman luar ruangan dengan foto yang diunggah langsung yang dihitung. Orang, tanaman dalam pot atau di dalam ruangan, subjek yang tidak jelas, dan pengamatan tanpa foto unggahan dikecualikan."
+      },
       "empty": {
         "title": "Belum ada pengamatan",
         "description": "Jadilah yang pertama menambahkan pengamatan di ronde ini."
