@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 import { fetchAuthSession } from "../_lib/auth-server";
 import { AudioMothClient } from "./_components/AudioMothClient";
+import { isAudioMothUploadTrayFlagEnabled } from "@/app/_lib/audiomoth/feature-flags";
 
 export const dynamic = "force-dynamic";
 
@@ -20,7 +21,10 @@ export default async function AudioMothPage() {
 
   return (
     <main className="-mt-14 bg-background pb-20">
-      <AudioMothClient sessionDid={session.isLoggedIn ? session.did : null} />
+      <AudioMothClient
+        sessionDid={session.isLoggedIn ? session.did : null}
+        useUploadTray={isAudioMothUploadTrayFlagEnabled()}
+      />
     </main>
   );
 }

@@ -304,8 +304,12 @@ function InfoRow({ label, value, dimmed }: { label: string; value: string; dimme
 
 export function AudioMothClient({
   sessionDid,
+  useUploadTray = false,
 }: {
   sessionDid: string | null;
+  /** Release switch: hand uploads to the background tray instead of the
+   *  page's own full-screen progress flow. Off until the tray is finished. */
+  useUploadTray?: boolean;
 }) {
   const t = useTranslations("common.audiomoth");
   const identificationsT = useTranslations("common.identifications");
@@ -848,7 +852,7 @@ export function AudioMothClient({
 
       {mainTab === "deployments" && <DeploymentsTab sessionDid={sessionDid} />}
 
-      {mainTab === "upload" && <UploadTab sessionDid={sessionDid} />}
+      {mainTab === "upload" && <UploadTab sessionDid={sessionDid} useTray={useUploadTray} />}
 
       {mainTab === "label" && <LabelTab sessionDid={sessionDid} />}
 

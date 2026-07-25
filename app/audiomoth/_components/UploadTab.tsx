@@ -12,6 +12,12 @@
  *   2. a compact 8 kHz preview is encoded locally → PDS blob
  *   3. an `ac.audio` record links preview + archival copy to the
  *      `ac.deployment` (created on the fly from the matched event if needed)
+ *
+ * Behind AUDIOMOTH_UPLOAD_TRAY_ENABLED (`useTray`) that pipeline moves out of
+ * this tab entirely: the batch is handed to the app-wide background upload
+ * tray, which keeps transferring while people browse. Both paths share the
+ * card reading, deployment matching and already-uploaded check above; only
+ * the confirm step differs. The flag is off until the tray is finished.
  */
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -70,6 +76,11 @@ import {
   type UploadedRecordingKeys,
 } from "@/app/_lib/ac-audio";
 import { computeFileCid } from "@/app/_lib/audiomoth/content-cid";
+import {
+  useUploadTray,
+  type UploadTarget,
+  type UploadTrayJob,
+} from "@/app/_components/upload-tray/upload-tray-context";
 
 /* ------------------------------------------------------------------ */
 /* Types                                                               */
@@ -178,8 +189,16 @@ async function collectDroppedFiles(items: DataTransferItemList, onProgress?: (co
 /* Component                                                           */
 /* ------------------------------------------------------------------ */
 
-export function UploadTab({ sessionDid }: { sessionDid: string | null }) {
+export function UploadTab({
+  sessionDid,
+  useTray = false,
+}: {
+  sessionDid: string | null;
+  /** Release switch — see AUDIOMOTH_UPLOAD_TRAY_ENABLED. */
+  useTray?: boolean;
+}) {
   const t = useTranslations("common.audiomoth.upload");
+  const tray = useUploadTray();
 
   const [stage, setStage] = useState<Stage>("pick");
   const [recordings, setRecordings] = useState<ScannedRecording[]>([]);
@@ -197,12 +216,16 @@ export function UploadTab({ sessionDid }: { sessionDid: string | null }) {
   const [uploadName, setUploadName] = useState("");
   /** Pre-upload check: which of the scanned files are already in the account. */
   const [dedup, setDedup] = useState<{ state: "checking" | "done"; skipped: number } | null>(null);
+  /** Tray path only: how many recordings the last confirm handed over. */
+  const [handedOff, setHandedOff] = useState(0);
 
   const folderInputRef = useRef<HTMLInputElement | null>(null);
   const filesInputRef = useRef<HTMLInputElement | null>(null);
   const cancelRef = useRef(false);
   /** Bumped on every new scan/reset so stale dedup checks stop writing state. */
   const scanTokenRef = useRef(0);
+  /** Keeps tray IDs unique when the same card is read twice in one session. */
+  const batchRef = useRef(0);
   const activeXhrsRef = useRef(new Set<XMLHttpRequest>());
   const retryAbortRef = useRef<AbortController | null>(null);
   const acDeploymentsRef = useRef<AcDeploymentItem[] | null>(null);
@@ -282,6 +305,7 @@ export function UploadTab({ sessionDid }: { sessionDid: string | null }) {
     setUploadName(folderName.trim());
     namedDeploymentRef.current = null;
     setDedup(null);
+    setHandedOff(0);
     if (wavs.length === 0) {
       setStage("review");
       return;
@@ -552,8 +576,68 @@ export function UploadTab({ sessionDid }: { sessionDid: string | null }) {
     [setRecording],
   );
 
+  /**
+   * Tray path: build one job per recording, hand the batch over and drop back
+   * to the picker — the transfer carries on in the tray while the user works.
+   * Returns false when there was nothing to hand over.
+   */
+  const handOffToTray = useCallback((): boolean => {
+    if (!sessionDid) return false;
+
+    const batch = ++batchRef.current;
+    const jobs: UploadTrayJob[] = [];
+
+    for (const [deploymentId, groupFiles] of groups) {
+      const event = deploymentId ? matchFor(deploymentId) : manualEvent;
+      const pending = groupFiles.filter(
+        (rec) => rec.info && (rec.status === "queued" || rec.status === "error"),
+      );
+      if (pending.length === 0) continue;
+
+      // Recordings with no matched deployment are grouped under the name the
+      // user gave this upload, so they stay findable on their profile.
+      let target: UploadTarget = { kind: "none" };
+      if (event) {
+        target = { kind: "event", event };
+      } else if (uploadName.trim()) {
+        const earliest = new Date(Math.min(...pending.map((rec) => recordingTime(rec).getTime())));
+        target = { kind: "named", name: uploadName.trim(), deployedAt: earliest.toISOString() };
+      }
+
+      for (const rec of pending) {
+        jobs.push({
+          id: `${batch}:${rec.id}`,
+          file: rec.file,
+          info: rec.info!,
+          recordedAt: recordingTime(rec).toISOString(),
+          cid: rec.cid,
+          deploymentId: deploymentId || undefined,
+          target,
+          makePreviews,
+        });
+      }
+    }
+
+    if (jobs.length === 0) return false;
+    tray.enqueue(sessionDid, jobs);
+
+    scanTokenRef.current += 1;
+    setRecordings([]);
+    setStage("pick");
+    setManualEventUri("none");
+    setGlobalError(null);
+    setUploadName("");
+    setDedup(null);
+    setHandedOff(jobs.length);
+    return true;
+  }, [groups, makePreviews, manualEvent, matchFor, sessionDid, tray, uploadName]);
+
   const startUpload = useCallback(async () => {
     if (!sessionDid) return;
+    if (useTray) {
+      handOffToTray();
+      return;
+    }
     const candidates = [...groups.values()]
       .flat()
       .filter((rec) => rec.status === "queued" || rec.status === "error");
@@ -750,7 +834,7 @@ export function UploadTab({ sessionDid }: { sessionDid: string | null }) {
     await Promise.all(Array.from({ length: CONCURRENCY }, worker));
     if (retryAbortRef.current === retryController) retryAbortRef.current = null;
     if (!cancelRef.current) setStage("done");
-  }, [describeUploadError, groups, makePreviews, manualEvent, matchFor, putToStorage, resolveAcDeployment, resolveNamedDeployment, sessionDid, setRecording, t]);
+  }, [describeUploadError, groups, handOffToTray, makePreviews, manualEvent, matchFor, putToStorage, resolveAcDeployment, resolveNamedDeployment, sessionDid, setRecording, t, useTray]);
 
   const cancelUpload = useCallback(() => {
     cancelRef.current = true;
@@ -770,6 +854,7 @@ export function UploadTab({ sessionDid }: { sessionDid: string | null }) {
     setUploadName("");
     namedDeploymentRef.current = null;
     setDedup(null);
+    setHandedOff(0);
   }, []);
 
   /* ---------------- render ---------------- */
@@ -824,6 +909,17 @@ export function UploadTab({ sessionDid }: { sessionDid: string | null }) {
           if (files.length) void scanFiles(files);
         }}
       />
+
+      {/* Tray path: the batch is the tray's job now — this is the receipt. */}
+      {useTray && stage === "pick" && handedOff > 0 ? (
+        <div className="flex items-start gap-2.5 rounded-2xl border border-primary/25 bg-primary/[0.06] px-4 py-3">
+          <CheckIcon className="mt-0.5 size-4 shrink-0 text-primary" />
+          <p className="text-sm text-foreground">
+            {t("handedOffTitle", { count: handedOff })}{" "}
+            <span className="text-muted-foreground">{t("handedOffBody")}</span>
+          </p>
+        </div>
+      ) : null}
 
       <AnimatePresence mode="wait">
         {stage === "pick" && (

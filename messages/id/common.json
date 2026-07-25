@@ -2023,7 +2023,9 @@
       "groupNameRequired": "Beri nama unggahan ini terlebih dahulu.",
       "groupRemarks": "Dibuat saat mengunggah folder rekaman.",
       "discovering": "Mencari rekaman… {count} berkas ditemukan",
-      "readFailed": "Kartu SD tidak dapat dibaca. Cabut dan masukkan kembali, lalu coba lagi — atau seret folder ke halaman ini."
+      "readFailed": "Kartu SD tidak dapat dibaca. Cabut dan masukkan kembali, lalu coba lagi — atau seret folder ke halaman ini.",
+      "handedOffTitle": "{count} rekaman sedang diunggah di latar belakang.",
+      "handedOffBody": "Kamu bisa terus menjelajah atau membaca kartu lain — progresnya ada di baki di bawah."
     },
     "recordings": {
       "title": "Rekaman",
@@ -2838,5 +2840,29 @@
       "lexiconLink": "Skema catatan dompet, dan semua skema lainnya",
       "atprotoLink": "Cara AT Protocol menyimpan catatannya"
     }
+  },
+  "uploadTray": {
+    "label": "Unggahan latar belakang",
+    "headlineUploading": "Mengunggah",
+    "headlineWaiting": "Menunggu diunggah",
+    "headlinePaused": "Unggahan dijeda",
+    "headlineFailed": "Unggahan gagal",
+    "headlineDone": "Unggahan selesai",
+    "collapse": "Ciutkan",
+    "expand": "Bentangkan",
+    "statusQueued": "Antre",
+    "statusDone": "Selesai",
+    "statusPaused": "Dijeda {percent}%",
+    "statusFailed": "Gagal",
+    "statusSaving": "Menyimpan…",
+    "statusRetrying": "Percobaan {attempt}/{max}",
+    "pause": "Jeda",
+    "resume": "Lanjutkan",
+    "retry": "Coba lagi",
+    "cancel": "Batalkan berkas ini",
+    "cancelAll": "Batalkan semua",
+    "hide": "Sembunyikan",
+    "remaining": "Sisa {count} dari {total} · {size}",
+    "allUploaded": "{count} terunggah · {size}"
   }
 }

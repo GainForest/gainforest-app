@@ -2023,7 +2023,9 @@
       "groupNameRequired": "Primero ponle un nombre a esta subida.",
       "groupRemarks": "Creado al subir una carpeta de grabaciones.",
       "discovering": "Buscando grabaciones… {count} archivos encontrados",
-      "readFailed": "No se pudo leer la tarjeta SD. Retírala y vuelve a insertarla, luego inténtalo de nuevo, o arrastra la carpeta a esta página."
+      "readFailed": "No se pudo leer la tarjeta SD. Retírala y vuelve a insertarla, luego inténtalo de nuevo, o arrastra la carpeta a esta página.",
+      "handedOffTitle": "{count} grabaciones se están subiendo en segundo plano.",
+      "handedOffBody": "Puedes seguir navegando o leer otra tarjeta: el progreso queda en la bandeja de abajo."
     },
     "recordings": {
       "title": "Grabaciones",
@@ -2838,5 +2840,29 @@
       "lexiconLink": "El esquema del registro de la billetera, y todos los demás",
       "atprotoLink": "Cómo guarda el registro el Protocolo AT"
     }
+  },
+  "uploadTray": {
+    "label": "Subidas en segundo plano",
+    "headlineUploading": "Subiendo",
+    "headlineWaiting": "En espera de subida",
+    "headlinePaused": "Subida en pausa",
+    "headlineFailed": "Error en la subida",
+    "headlineDone": "Subidas completadas",
+    "collapse": "Contraer",
+    "expand": "Expandir",
+    "statusQueued": "En cola",
+    "statusDone": "Lista",
+    "statusPaused": "En pausa {percent}%",
+    "statusFailed": "Falló",
+    "statusSaving": "Guardando…",
+    "statusRetrying": "Reintento {attempt}/{max}",
+    "pause": "Pausar",
+    "resume": "Reanudar",
+    "retry": "Reintentar",
+    "cancel": "Cancelar este archivo",
+    "cancelAll": "Cancelar todo",
+    "hide": "Ocultar",
+    "remaining": "Quedan {count} de {total} · {size}",
+    "allUploaded": "{count} subidas · {size}"
   }
 }
