@@ -46,6 +46,13 @@ type TrustedByBadgesProps = {
   iconClassName?: string;
   size?: keyof typeof ICON_SIZE_CLASS;
   variant?: "default" | "compact" | "plain";
+  /**
+   * Endorsements already resolved on the server. Pass this wherever the badges
+   * sit inside a block that must paint in one go (the account hero), so the row
+   * is present in the first render instead of popping in after a client fetch
+   * and pushing everything below it down.
+   */
+  initialEndorsements?: TrustedByEndorsement[] | null;
 };
 
 export function TrustedByBadges({
@@ -55,12 +62,19 @@ export function TrustedByBadges({
   iconClassName = "",
   size,
   variant = "default",
+  initialEndorsements = null,
 }: TrustedByBadgesProps) {
   const t = useTranslations("common.trust");
-  const [endorsements, setEndorsements] = useState<TrustedByEndorsement[]>([]);
+  const [endorsements, setEndorsements] = useState<TrustedByEndorsement[]>(initialEndorsements ?? []);
   const [cards, setCards] = useState<Record<string, EndorserCard>>({});
 
   useEffect(() => {
+    // Server-provided endorsements are authoritative — skip the client fetch
+    // entirely so nothing changes shape after hydration.
+    if (initialEndorsements) {
+      setEndorsements(initialEndorsements);
+      return;
+    }
     setEndorsements([]);
     if (!did.startsWith("did:")) return;
 
@@ -78,7 +92,7 @@ export function TrustedByBadges({
       active = false;
       controller.abort();
     };
-  }, [did]);
+  }, [did, initialEndorsements]);
 
   // Resolve avatars/handles for dynamic endorsers (the built-ins use bundled
   // logos and hardcoded handles, so they never need a lookup).

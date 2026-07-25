@@ -23,6 +23,7 @@ import { AccountWalletSupport } from "./AccountWalletSupport";
 import { formatCountry } from "../../_lib/format";
 import { SocialGlyph } from "@/app/_components/SocialIcon";
 import { TrustedByBadges } from "@/app/_components/TrustedByBadges";
+import type { TrustedByEndorsement } from "@/app/_lib/indexer";
 import { AccountAwards } from "./AccountAwards";
 import { ExpandableBio } from "./ExpandableBio";
 import { FollowButton, FollowProvider, FollowStats } from "@/app/_components/FollowButton";
@@ -65,10 +66,14 @@ export function AccountHero({
   account,
   editHref = null,
   memberships = [],
+  trustedBy = null,
 }: {
   account: AccountRouteData;
   editHref?: string | null;
   memberships?: AccountOrganization[];
+  /** Endorsements resolved on the server, so the trust row is in the first
+   *  paint instead of appearing later and pushing the bio down. */
+  trustedBy?: TrustedByEndorsement[] | null;
 }) {
   const [copied, setCopied] = useState(false);
   const [detailsOpen, setDetailsOpen] = useState(false);
@@ -124,12 +129,10 @@ export function AccountHero({
     <FollowProvider targetDid={account.did}>
     <section className="overflow-hidden rounded-3xl border border-border/60 bg-card">
       <div className="relative h-32 sm:h-40 md:h-44">
-        <motion.div
-          initial={{ scale: 1.04, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          transition={{ duration: 1.2, ease: [0.25, 0.1, 0.25, 1] }}
-          className="absolute inset-0"
-        >
+        {/* No entrance animation: the hero is part of the one-shot paint that
+            replaces the loading skeleton, so fading it in over 1.2s only makes
+            it read as another late-arriving component. */}
+        <div className="absolute inset-0">
           {account.coverUrl ? (
             <Image
               src={account.coverUrl}
@@ -150,7 +153,7 @@ export function AccountHero({
             />
           )}
           <div className="pointer-events-none absolute inset-x-0 bottom-0 h-14 bg-linear-to-t from-card to-transparent" />
-        </motion.div>
+        </div>
 
         <div className="absolute right-3 top-3 z-20 flex items-start gap-2">
           <div className="relative flex flex-col items-end gap-1.5">
@@ -285,7 +288,7 @@ export function AccountHero({
             {/* Trust + awards read as one quiet metadata row under the title;
                 each half renders nothing when the account has none. */}
             <div className="mt-3 flex flex-wrap items-center gap-x-5 gap-y-2 empty:mt-0">
-              <TrustedByBadges did={account.did} variant="plain" className="w-fit" />
+              <TrustedByBadges did={account.did} variant="plain" className="w-fit" initialEndorsements={trustedBy} />
               <AccountAwards did={account.did} className="w-fit" />
             </div>
             <AccountMemberships organizations={memberships} className="mt-3" />

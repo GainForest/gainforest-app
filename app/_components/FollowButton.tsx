@@ -120,6 +120,17 @@ export function FollowStats({
   const follow = useFollowState(targetDid);
   if (!targetDid) return null;
 
+  // Hold a same-height placeholder until the counts resolve, so the hero never
+  // paints "0 followers" and then silently corrects itself a moment later.
+  if (follow.status !== "ready") {
+    return (
+      <span aria-hidden className={cn("inline-flex flex-wrap items-center gap-x-4 gap-y-1", className)}>
+        <span className="skeleton inline-block h-5 w-24 rounded align-middle" />
+        <span className="skeleton inline-block h-5 w-24 rounded align-middle" />
+      </span>
+    );
+  }
+
   const linkId = identifier?.trim() || targetDid;
   return (
     <span className={cn("inline-flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-muted-foreground", className)}>
