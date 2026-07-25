@@ -5,9 +5,10 @@
  * Pure (no React, no DOM) so it can be unit tested; the component in
  * app/soundscape/_components/SoundscapeZoom.tsx owns the interaction state.
  *
- * A window never wraps past midnight: it is always a plain
- * `[start, start + span]` slice of the 0..1440 dial, which keeps the maths
- * (and the axis) honest at every zoom level.
+ * A window is a slice of the dial that MAY run past midnight — night is when
+ * most recorders are busiest, so 21:00–03:00 has to be one window and not two.
+ * `start` is always inside the day; `start + span` may be greater than 1440,
+ * and minutes are compared after wrapping them into that range.
  */
 
 import { formatMinuteOfDay } from "./audiomoth";
@@ -24,7 +25,7 @@ export const MIN_WINDOW_SPAN = 15;
 export const SERIES_GAP_MINUTES = 90;
 
 export type TimeWindow = {
-  /** Minutes since midnight of the left edge (0..1440 - span). */
+  /** Minutes since midnight where the window opens (0..1439). */
   start: number;
   /** Width of the window in minutes (MIN_WINDOW_SPAN..1440). */
   span: number;
@@ -32,13 +33,20 @@ export type TimeWindow = {
 
 export const FULL_DAY_WINDOW: TimeWindow = { start: 0, span: MINUTES_PER_DAY };
 
-/** Keeps a window inside the day and within the allowed zoom range. */
+/** Keeps the zoom level in range and the start inside the day. */
 export function clampWindow(window: TimeWindow): TimeWindow {
   const rawSpan = Number.isFinite(window.span) ? window.span : MINUTES_PER_DAY;
   const span = Math.min(MINUTES_PER_DAY, Math.max(MIN_WINDOW_SPAN, Math.round(rawSpan)));
+  if (span >= MINUTES_PER_DAY) return { start: 0, span: MINUTES_PER_DAY };
   const rawStart = Number.isFinite(window.start) ? window.start : 0;
-  const start = Math.min(MINUTES_PER_DAY - span, Math.max(0, Math.round(rawStart)));
+  const start = ((Math.round(rawStart) % MINUTES_PER_DAY) + MINUTES_PER_DAY) % MINUTES_PER_DAY;
   return { start, span };
+}
+
+/** The minute wrapped into the window's own range, i.e. start..start + span. */
+function unwrap(minuteOfDay: number, window: TimeWindow): number {
+  const offset = ((minuteOfDay - window.start) % MINUTES_PER_DAY + MINUTES_PER_DAY) % MINUTES_PER_DAY;
+  return window.start + offset;
 }
 
 export function windowEnd(window: TimeWindow): number {
@@ -50,12 +58,12 @@ export function isFullDay(window: TimeWindow): boolean {
 }
 
 export function isInWindow(minuteOfDay: number, window: TimeWindow): boolean {
-  return minuteOfDay >= window.start && minuteOfDay <= windowEnd(window);
+  return unwrap(minuteOfDay, window) <= windowEnd(window);
 }
 
-/** 0 at the left edge of the window, 1 at the right edge. */
+/** 0 where the window opens, 1 where it closes — wrapping past midnight. */
 export function windowFraction(minuteOfDay: number, window: TimeWindow): number {
-  return (minuteOfDay - window.start) / window.span;
+  return (unwrap(minuteOfDay, window) - window.start) / window.span;
 }
 
 /** Inverse of `windowFraction` — used to turn a cursor position into a time. */
@@ -92,9 +100,13 @@ export function centerWindow(window: TimeWindow, minuteOfDay: number): TimeWindo
   return clampWindow({ start: minuteOfDay - current.span / 2, span: current.span });
 }
 
-/** Like `formatMinuteOfDay`, but the end of the day reads 24:00, not 00:00. */
+/**
+ * Like `formatMinuteOfDay`, but the end of the day reads 24:00 rather than
+ * 00:00, and minutes past midnight (a window that wraps) read as themselves.
+ */
 export function formatWindowMinute(minuteOfDay: number): string {
-  return minuteOfDay >= MINUTES_PER_DAY ? "24:00" : formatMinuteOfDay(minuteOfDay);
+  if (minuteOfDay === MINUTES_PER_DAY) return "24:00";
+  return formatMinuteOfDay(((minuteOfDay % MINUTES_PER_DAY) + MINUTES_PER_DAY) % MINUTES_PER_DAY);
 }
 
 const TICK_STEPS = [1, 2, 5, 10, 15, 30, 60, 120, 180, 360, 720];

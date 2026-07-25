@@ -2921,7 +2921,7 @@
       "empty": "Rekodi zilizochambuliwa zitaonekana hapa kama saa ya mandhari ya sauti ya saa 24.",
       "emptyHint": "Chambua rekodi zako zilizopakiwa hapo juu ili kuanza.",
       "downloadPng": "Pakua picha",
-      "hoverHint": "Weka kishale juu ya saa ili kuona thamani na ubofye wakati ili kusikiliza. Sogeza gurudumu juu ya duara — au tumia + na − — ili kukuza sehemu ya siku, na buruta duara ili kupitia siku.",
+      "hoverHint": "Buruta kuzunguka duara ili kukuza nyakati hizo, na ubofye wakati ili kusikiliza. Tumia − au “Siku nzima” kurudi nyuma.",
       "clickToPlay": "Bofya ili kusikiliza rekodi hii",
       "clickToStop": "Bofya ili kusimamisha uchezaji",
       "loadingAudio": "Inapakia {name}…",
@@ -2936,11 +2936,13 @@
       "range": "Umekuzwa hadi {start} – {end}",
       "zoomIn": "Kuza",
       "zoomOut": "Punguza ukuzaji",
+      "earlier": "Mapema zaidi",
+      "later": "Baadaye",
       "reset": "Siku nzima",
       "empty": "Hakuna rekodi katika sehemu hii ya siku",
       "recordingsTitle": "Rekodi zinazoonekana",
       "recordingsCount": "{count, plural, one {rekodi #} other {rekodi #}}",
-      "recordingsEmpty": "Hakuna rekodi kwa wakati huu — punguza ukuzaji au buruta duara hadi sehemu nyingine ya siku."
+      "recordingsEmpty": "Hakuna rekodi kwa wakati huu — punguza ukuzaji, au tumia ‹ na › kuangalia sehemu nyingine ya siku."
     }
   }
 }

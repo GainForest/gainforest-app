@@ -30,9 +30,19 @@ describe("clampWindow", () => {
     expect(clampWindow({ start: 300, span: 5000 })).toEqual({ start: 0, span: MINUTES_PER_DAY });
   });
 
-  it("pulls a window that runs past midnight back inside the day", () => {
-    expect(clampWindow({ start: 1400, span: 120 })).toEqual({ start: MINUTES_PER_DAY - 120, span: 120 });
-    expect(clampWindow({ start: -60, span: 120 })).toEqual({ start: 0, span: 120 });
+  it("lets a window run past midnight, keeping the start inside the day", () => {
+    expect(clampWindow({ start: 1400, span: 120 })).toEqual({ start: 1400, span: 120 });
+    expect(clampWindow({ start: -60, span: 120 })).toEqual({ start: 1380, span: 120 });
+  });
+
+  it("a window across midnight holds the minutes on both sides", () => {
+    const night = { start: 1320, span: 300 }; // 22:00 -> 03:00
+    expect(isInWindow(1350, night)).toBe(true); // 22:30
+    expect(isInWindow(60, night)).toBe(true); // 01:00
+    expect(isInWindow(600, night)).toBe(false); // 10:00
+    expect(windowFraction(1320, night)).toBeCloseTo(0, 5);
+    expect(windowFraction(60, night)).toBeCloseTo(0.6, 5);
+    expect(windowFraction(180, night)).toBeCloseTo(1, 5);
   });
 
   it("survives non-finite input", () => {
@@ -66,10 +76,12 @@ describe("zoomWindow", () => {
     expect(window).toEqual(FULL_DAY_WINDOW);
   });
 
-  it("does not push the window out of the day when focusing an edge", () => {
+  it("zooming out at the edge of the day wraps the start backwards", () => {
     const zoomed = zoomWindow({ start: 0, span: 60 }, 2, 0);
+    expect(zoomed.span).toBe(120);
     expect(zoomed.start).toBe(0);
-    expect(windowEnd(zoomed)).toBeLessThanOrEqual(MINUTES_PER_DAY);
+    const around = zoomWindow({ start: 0, span: 60 }, 2, 30);
+    expect(around.start).toBe(MINUTES_PER_DAY - 30);
   });
 });
 
@@ -78,18 +90,18 @@ describe("panWindow / centerWindow", () => {
     expect(panWindow({ start: 300, span: 60 }, 30)).toEqual({ start: 330, span: 60 });
   });
 
-  it("stops at the edges of the day", () => {
-    expect(panWindow({ start: 30, span: 60 }, -500)).toEqual({ start: 0, span: 60 });
-    expect(panWindow({ start: 1300, span: 60 }, 500)).toEqual({ start: 1380, span: 60 });
+  it("rolls around midnight instead of stopping", () => {
+    expect(panWindow({ start: 30, span: 60 }, -60)).toEqual({ start: 1410, span: 60 });
+    expect(panWindow({ start: 1400, span: 60 }, 60)).toEqual({ start: 20, span: 60 });
   });
 
   it("centres on a minute", () => {
     expect(centerWindow({ start: 0, span: 60 }, 500)).toEqual({ start: 470, span: 60 });
   });
 
-  it("centring near midnight clamps instead of wrapping", () => {
-    expect(centerWindow({ start: 0, span: 60 }, 5)).toEqual({ start: 0, span: 60 });
-    expect(centerWindow({ start: 0, span: 60 }, 1439)).toEqual({ start: 1380, span: 60 });
+  it("centring near midnight wraps rather than clamping", () => {
+    expect(centerWindow({ start: 0, span: 60 }, 5)).toEqual({ start: 1415, span: 60 });
+    expect(centerWindow({ start: 0, span: 60 }, 1430)).toEqual({ start: 1400, span: 60 });
   });
 });
 

@@ -18,6 +18,8 @@ import {
   Loader2Icon,
   PauseIcon,
   PlayIcon,
+  ChevronLeftIcon,
+  ChevronRightIcon,
   MinusIcon,
   PlusIcon,
   RefreshCwIcon,
@@ -51,7 +53,9 @@ import {
   FULL_DAY_WINDOW,
   isFullDay,
   isInWindow,
+  panWindow,
   windowEnd,
+  windowFraction,
   zoomWindow,
   type TimeWindow,
 } from "@/lib/soundscape/zoom";
@@ -318,7 +322,15 @@ export function SoundscapeClient({ sessionDid }: { sessionDid: string | null }) 
   /** Every analyzed recording inside the zoom window — one row each, so two
    *  recordings a minute apart are still individually reachable. */
   const recordingsInView = useMemo(
-    () => analyzedRecordings.filter((entry) => isInWindow(wallClockMinuteOfDay(entry.time), zoom)),
+    () =>
+      analyzedRecordings
+        .filter((entry) => isInWindow(wallClockMinuteOfDay(entry.time), zoom))
+        .sort(
+          (a, b) =>
+            windowFraction(wallClockMinuteOfDay(a.time), zoom) -
+              windowFraction(wallClockMinuteOfDay(b.time), zoom) ||
+            wallClockDateKey(a.time).localeCompare(wallClockDateKey(b.time)),
+        ),
     [analyzedRecordings, zoom],
   );
 
@@ -735,18 +747,43 @@ export function SoundscapeClient({ sessionDid }: { sessionDid: string | null }) 
                       end: formatWindowMinute(windowEnd(zoom)),
                     })}
               </span>
-              <Button
-                type="button"
-                variant="outline"
-                size="icon"
-                className="size-8"
-                aria-label={t("zoom.zoomOut")}
-                title={t("zoom.zoomOut")}
-                disabled={isFullDay(zoom)}
-                onClick={() => zoomBy(ZOOM_STEP)}
-              >
-                <MinusIcon className="size-4" />
-              </Button>
+              {!isFullDay(zoom) ? (
+                <>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="icon"
+                    className="size-8"
+                    aria-label={t("zoom.earlier")}
+                    title={t("zoom.earlier")}
+                    onClick={() => setZoom((current) => panWindow(current, -current.span / 2))}
+                  >
+                    <ChevronLeftIcon className="size-4" />
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="icon"
+                    className="size-8"
+                    aria-label={t("zoom.later")}
+                    title={t("zoom.later")}
+                    onClick={() => setZoom((current) => panWindow(current, current.span / 2))}
+                  >
+                    <ChevronRightIcon className="size-4" />
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="icon"
+                    className="size-8"
+                    aria-label={t("zoom.zoomOut")}
+                    title={t("zoom.zoomOut")}
+                    onClick={() => zoomBy(ZOOM_STEP)}
+                  >
+                    <MinusIcon className="size-4" />
+                  </Button>
+                </>
+              ) : null}
               <Button
                 type="button"
                 variant="outline"

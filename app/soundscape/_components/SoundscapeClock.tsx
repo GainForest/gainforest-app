@@ -10,6 +10,10 @@
  * spread over the whole ring. At full-day zoom that is the familiar 24-hour
  * clock; zoomed in, minutes that shared a sliver of a degree get room to
  * breathe and can be pointed at individually.
+ *
+ * Zooming is a sweep: press on the ring and drag around it, and the arc you
+ * paint becomes the new window. A press without a sweep is a click, and plays
+ * the recording of that minute.
  */
 
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -21,15 +25,16 @@ import {
   type SoundscapePoint,
 } from "@/lib/soundscape/analysis";
 import {
+  clampWindow,
   formatWindowMinute,
   isFullDay,
   isInWindow,
+  MIN_WINDOW_SPAN,
+  MINUTES_PER_DAY,
   minuteAtFraction,
-  panWindow,
   windowEnd,
   windowFraction,
   windowTicks,
-  zoomWindow,
   type TimeWindow,
 } from "@/lib/soundscape/zoom";
 
@@ -83,7 +88,13 @@ function buildBandPath(
   const runs: Array<Array<{ x: number; y: number }>> = [];
   let run: Array<{ x: number; y: number }> = [];
   for (let index = 0; index < points.length; index++) {
-    if (run.length > 0 && points[index].minuteOfDay - points[index - 1].minuteOfDay > GAP_MINUTES) {
+    const gap =
+      index > 0
+        ? (windowFraction(points[index].minuteOfDay, view) -
+            windowFraction(points[index - 1].minuteOfDay, view)) *
+          view.span
+        : 0;
+    if (run.length > 0 && gap > GAP_MINUTES) {
       runs.push(run);
       run = [];
     }
@@ -107,6 +118,36 @@ function buildBandPath(
     .filter((segment) => segment.length > 1)
     .map((segment) => `M${segment.map((p) => `${p.x.toFixed(1)} ${p.y.toFixed(1)}`).join("L")}`);
   return segments.length > 0 ? segments.join("") : null;
+}
+
+/** A point on the dial at a raw angle, for shapes that are drawn by sweep. */
+function pointAtAngle(angle: number, radius: number): { x: number; y: number } {
+  return { x: CENTER + radius * Math.cos(angle), y: CENTER + radius * Math.sin(angle) };
+}
+
+/**
+ * Wedge for the sweep being made. `to` is the raw, unwrapped end of the drag,
+ * so its sign is the direction the pointer travelled: that is what decides
+ * which way round the ring the wedge goes.
+ */
+function sectorPath(from: number, to: number, view: TimeWindow, inner: number, outer: number): string {
+  const delta = (to - from) / view.span;
+  const angleFrom = windowFraction(from, view) * 2 * Math.PI;
+  const angleTo = angleFrom + delta * 2 * Math.PI;
+  const largeArc = Math.abs(delta) > 0.5 ? 1 : 0;
+  const clockwise = delta >= 0 ? 1 : 0;
+  const a = pointAtAngle(angleFrom, outer);
+  const b = pointAtAngle(angleTo, outer);
+  const aInner = pointAtAngle(angleFrom, inner);
+  const bInner = pointAtAngle(angleTo, inner);
+  return [
+    `M${aInner.x.toFixed(1)} ${aInner.y.toFixed(1)}`,
+    `L${a.x.toFixed(1)} ${a.y.toFixed(1)}`,
+    `A${outer} ${outer} 0 ${largeArc} ${clockwise} ${b.x.toFixed(1)} ${b.y.toFixed(1)}`,
+    `L${bInner.x.toFixed(1)} ${bInner.y.toFixed(1)}`,
+    `A${inner} ${inner} 0 ${largeArc} ${clockwise === 1 ? 0 : 1} ${aInner.x.toFixed(1)} ${aInner.y.toFixed(1)}`,
+    "Z",
+  ].join("");
 }
 
 type SoundscapeClockProps = {
@@ -134,15 +175,17 @@ export function SoundscapeClock(props: SoundscapeClockProps) {
   const { points, visibleBands, onPointClick, playingMinute, window: view, onWindowChange } = props;
   const svgRef = useRef<SVGSVGElement | null>(null);
   const [hover, setHover] = useState<HoverState | null>(null);
-  const [dragging, setDragging] = useState(false);
+  /** The arc being swept out, in minutes of the day (null while idle). */
+  const [brush, setBrush] = useState<{ from: number; to: number } | null>(null);
   const dragRef = useRef<{
-    startAngle: number;
-    startWindow: TimeWindow;
+    fromMinute: number;
+    lastAngle: number;
+    /** Signed angular travel since the press, so a sweep can pass 12 o'clock. */
+    travel: number;
     startClientX: number;
     startClientY: number;
     moved: boolean;
   } | null>(null);
-  // The wheel handler is registered once but needs the live window.
   const viewRef = useRef(view);
   viewRef.current = view;
   const zoomable = Boolean(onWindowChange);
@@ -156,11 +199,14 @@ export function SoundscapeClock(props: SoundscapeClockProps) {
     return () => window.removeEventListener("scroll", clear, { capture: true });
   }, [hover]);
 
-  /** Only the slice on show is drawn — the rest of the day is off the ring. */
-  const visiblePoints = useMemo(
-    () => (isFullDay(view) ? points : points.filter((point) => isInWindow(point.minuteOfDay, view))),
-    [points, view],
-  );
+  /** Only the slice on show is drawn, ordered by where it sits on the ring —
+   *  a window across midnight puts 23:00 before 01:00. */
+  const visiblePoints = useMemo(() => {
+    if (isFullDay(view)) return points;
+    return points
+      .filter((point) => isInWindow(point.minuteOfDay, view))
+      .sort((a, b) => windowFraction(a.minuteOfDay, view) - windowFraction(b.minuteOfDay, view));
+  }, [points, view]);
 
   const maxValue = useMemo(() => {
     let max = 0;
@@ -197,7 +243,11 @@ export function SoundscapeClock(props: SoundscapeClockProps) {
     // meet at the same angle — so leave it out.
     return windowTicks(view, 12)
       .filter((minute) => minute < windowEnd(view) - view.span * 0.02)
-      .map((minute) => ({ minute, label: formatWindowMinute(minute), major: minute % 60 === 0 }));
+      .map((minute) => ({
+        minute: minute % MINUTES_PER_DAY,
+        label: formatWindowMinute(minute),
+        major: minute % 60 === 0,
+      }));
   }, [view]);
 
   /** Where the cursor is on the dial, or null when it is off the ring. */
@@ -225,9 +275,8 @@ export function SoundscapeClock(props: SoundscapeClockProps) {
     let best: SoundscapePoint | null = null;
     let bestGap = Infinity;
     for (const point of visiblePoints) {
-      const gap = isFullDay(view)
-        ? Math.min(Math.abs(point.minuteOfDay - minute), 1440 - Math.abs(point.minuteOfDay - minute))
-        : Math.abs(point.minuteOfDay - minute);
+      const difference = Math.abs(point.minuteOfDay - minute);
+      const gap = Math.min(difference, MINUTES_PER_DAY - difference);
       if (gap < bestGap) {
         bestGap = gap;
         best = point;
@@ -239,34 +288,14 @@ export function SoundscapeClock(props: SoundscapeClockProps) {
     return best && bestGap <= tolerance ? best : null;
   };
 
-  /* Wheel over the ring zooms; anywhere else the page keeps its scroll.
-     Registered natively because React's wheel listener is passive. */
-  useEffect(() => {
-    const svg = svgRef.current;
-    if (!svg || !onWindowChange) return;
-    const handleWheel = (event: WheelEvent) => {
-      const pointer = readPointer(event);
-      if (!pointer) return;
-      const pinch = event.ctrlKey || event.metaKey;
-      if (!pinch && !pointer.onRing) return;
-      event.preventDefault();
-      // Gentle: about a quarter closer per mouse notch, so a flick of the
-      // wheel refines the view instead of slamming into the tightest zoom.
-      onWindowChange(zoomWindow(viewRef.current, Math.exp(event.deltaY * 0.0025), pointer.minute));
-    };
-    svg.addEventListener("wheel", handleWheel, { passive: false });
-    return () => svg.removeEventListener("wheel", handleWheel);
-    // readPointer only reads refs, so the listener never goes stale.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [onWindowChange]);
-
-  const handlePointerDown = (event: React.PointerEvent<SVGSVGElement>) => {
+  const handlePointerDown = (event: React.PointerEvent<HTMLDivElement>) => {
     if (event.button !== 0 || !onWindowChange) return;
     const pointer = readPointer(event);
     if (!pointer?.onRing) return;
     dragRef.current = {
-      startAngle: pointer.angle,
-      startWindow: viewRef.current,
+      fromMinute: pointer.minute,
+      lastAngle: pointer.angle,
+      travel: 0,
       startClientX: event.clientX,
       startClientY: event.clientY,
       moved: false,
@@ -274,7 +303,7 @@ export function SoundscapeClock(props: SoundscapeClockProps) {
     event.currentTarget.setPointerCapture(event.pointerId);
   };
 
-  const handlePointerMove = (event: React.PointerEvent<SVGSVGElement>) => {
+  const handlePointerMove = (event: React.PointerEvent<HTMLDivElement>) => {
     const pointer = readPointer(event);
     if (!pointer) return;
     const drag = dragRef.current;
@@ -282,13 +311,18 @@ export function SoundscapeClock(props: SoundscapeClockProps) {
       const travelled = Math.hypot(event.clientX - drag.startClientX, event.clientY - drag.startClientY);
       if (!drag.moved && travelled < DRAG_SLOP_PX) return;
       drag.moved = true;
-      setDragging(true);
       setHover(null);
-      // Turning the dial carries the times with the cursor.
-      let delta = pointer.angle - drag.startAngle;
-      if (delta > Math.PI) delta -= 2 * Math.PI;
-      if (delta < -Math.PI) delta += 2 * Math.PI;
-      onWindowChange?.(panWindow(drag.startWindow, -(delta / (2 * Math.PI)) * drag.startWindow.span));
+      // Accumulate the signed turn so a sweep can run past the ring's seam,
+      // and cap it at one full turn — the window on show is the most there is.
+      let step = pointer.angle - drag.lastAngle;
+      if (step > Math.PI) step -= 2 * Math.PI;
+      if (step < -Math.PI) step += 2 * Math.PI;
+      drag.lastAngle = pointer.angle;
+      drag.travel = Math.max(-2 * Math.PI, Math.min(2 * Math.PI, drag.travel + step));
+      setBrush({
+        from: drag.fromMinute,
+        to: drag.fromMinute + (drag.travel / (2 * Math.PI)) * viewRef.current.span,
+      });
       return;
     }
     if (!pointer.onRing || visiblePoints.length === 0) {
@@ -308,50 +342,62 @@ export function SoundscapeClock(props: SoundscapeClockProps) {
     });
   };
 
-  const endDrag = (event: React.PointerEvent<SVGSVGElement>) => {
+  const endDrag = (event: React.PointerEvent<HTMLDivElement>) => {
     const drag = dragRef.current;
     dragRef.current = null;
-    setDragging(false);
+    const swept = brush;
+    setBrush(null);
     if (event.currentTarget.hasPointerCapture(event.pointerId)) {
       event.currentTarget.releasePointerCapture(event.pointerId);
     }
-    if (drag?.moved) return;
-    if (hover && onPointClick) onPointClick(hover.point.minuteOfDay);
+    if (!drag?.moved) {
+      if (hover && onPointClick) onPointClick(hover.point.minuteOfDay);
+      return;
+    }
+    if (!swept || !onWindowChange) return;
+    // A sweep shorter than the tightest zoom is a slip of the hand, not a
+    // selection — leave the dial where it is rather than jumping somewhere odd.
+    const from = Math.min(swept.from, swept.to);
+    const to = Math.max(swept.from, swept.to);
+    if (to - from < MIN_WINDOW_SPAN / 2) return;
+    onWindowChange(clampWindow({ start: from, span: to - from }));
   };
 
   const zoomed = !isFullDay(view);
 
   return (
-    <div className="relative w-full">
+    /* The pointer handlers live on the wrapper, not the <svg>: the tooltip is
+       drawn over the dial and would otherwise swallow the press that starts a
+       sweep. Coordinates are still read from the dial's own box. */
+    <div
+      className="relative w-full"
+      onPointerDown={handlePointerDown}
+      onPointerMove={handlePointerMove}
+      onPointerUp={endDrag}
+      onPointerCancel={() => {
+        dragRef.current = null;
+        setBrush(null);
+      }}
+      onPointerLeave={(event) => {
+        // A 1px margin, so leaving across an edge still counts as leaving.
+        const rect = svgRef.current?.getBoundingClientRect();
+        const inside =
+          rect &&
+          event.clientX > rect.left + 1 &&
+          event.clientX < rect.right - 1 &&
+          event.clientY > rect.top + 1 &&
+          event.clientY < rect.bottom - 1;
+        if (!inside) setHover(null);
+      }}
+    >
       <svg
         ref={svgRef}
         viewBox={`0 0 ${VIEW_SIZE} ${VIEW_SIZE}`}
         className={`block h-auto w-full select-none ${
-          dragging ? "cursor-grabbing" : hover && onPointClick ? "cursor-pointer" : zoomable ? "cursor-grab" : ""
+          brush ? "cursor-crosshair" : hover && onPointClick ? "cursor-pointer" : zoomable ? "cursor-crosshair" : ""
         }`}
         role="img"
         aria-label={props.title}
-        onPointerDown={handlePointerDown}
-        onPointerMove={handlePointerMove}
-        onPointerUp={endDrag}
-        onPointerCancel={() => {
-          dragRef.current = null;
-          setDragging(false);
-        }}
-        onPointerLeave={(event) => {
-          // The tooltip sits over the dial and a global `[data-rk] *` rule
-          // makes it hit-testable, so React reports a leave the moment it
-          // appears — only clear the hover when the pointer really left.
-          const rect = svgRef.current?.getBoundingClientRect();
-          // A 1px margin, so leaving across an edge still counts as leaving.
-          const inside =
-            rect &&
-            event.clientX > rect.left + 1 &&
-            event.clientX < rect.right - 1 &&
-            event.clientY > rect.top + 1 &&
-            event.clientY < rect.bottom - 1;
-          if (!inside) setHover(null);
-        }}
         data-soundscape-clock
       >
         {/* Title */}
@@ -372,6 +418,28 @@ export function SoundscapeClock(props: SoundscapeClockProps) {
             className="text-muted-foreground"
           />
         ))}
+
+        {/* The sweep being painted */}
+        {brush ? (
+          <g>
+            <path
+              d={sectorPath(brush.from, brush.to, view, INNER_RADIUS, OUTER_RADIUS)}
+              className="fill-primary/15 stroke-primary/50"
+              strokeWidth={1.5}
+            />
+            <text
+              x={CENTER}
+              y={CENTER + 5}
+              fontSize={15}
+              textAnchor="middle"
+              className="fill-foreground tabular-nums"
+            >
+              {`${formatMinuteOfDay(brush.to >= brush.from ? brush.from : brush.to)} \u2013 ${formatMinuteOfDay(
+                brush.to >= brush.from ? brush.to : brush.from,
+              )}`}
+            </text>
+          </g>
+        ) : null}
 
         {/* Time spokes + labels */}
         {spokes.map((spoke) => {
@@ -530,16 +598,12 @@ export function SoundscapeClock(props: SoundscapeClockProps) {
 
       {hover ? (
         <div
+          // `data-chart-tooltip` is what keeps this out of the pointer's way
+          // (see globals.css): a tooltip that takes the pointer would cancel
+          // the very hover it is describing, and swallow presses on the dial.
+          data-chart-tooltip
           className="absolute z-10 min-w-40 -translate-x-1/2 rounded-lg border bg-popover px-3 py-2 text-xs shadow-md"
-          // `pointerEvents` is inline because a global `[data-rk] *` rule
-          // (RainbowKit) outranks the utility class — a tooltip that takes the
-          // pointer would cancel the very hover it is describing.
-          style={{
-            left: hover.x,
-            top: Math.max(0, hover.y - 8),
-            transform: "translate(-50%, -100%)",
-            pointerEvents: "none",
-          }}
+          style={{ left: hover.x, top: Math.max(0, hover.y - 8), transform: "translate(-50%, -100%)" }}
         >
           <p className="font-semibold tabular-nums text-foreground">{formatMinuteOfDay(hover.point.minuteOfDay)}</p>
           {onPointClick ? (

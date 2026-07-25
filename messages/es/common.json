@@ -2921,7 +2921,7 @@
       "empty": "Las grabaciones analizadas aparecerán aquí como un reloj de paisaje sonoro de 24 horas.",
       "emptyHint": "Analiza arriba tus grabaciones subidas para empezar.",
       "downloadPng": "Descargar imagen",
-      "hoverHint": "Pasa el cursor sobre el reloj para ver los valores y haz clic en una hora para escuchar. Desplaza la rueda sobre la esfera —o usa + y −— para ampliar una parte del día, y arrástrala para recorrer el día.",
+      "hoverHint": "Arrastra alrededor de la esfera para ampliar esas horas y haz clic en una hora para escuchar. Usa − o «Día completo» para volver.",
       "clickToPlay": "Haz clic para escuchar esta grabación",
       "clickToStop": "Haz clic para detener la reproducción",
       "loadingAudio": "Cargando {name}…",
@@ -2936,11 +2936,13 @@
       "range": "Ampliado a {start} – {end}",
       "zoomIn": "Acercar",
       "zoomOut": "Alejar",
+      "earlier": "Antes",
+      "later": "Después",
       "reset": "Día completo",
       "empty": "Sin grabaciones en esta parte del día",
       "recordingsTitle": "Grabaciones a la vista",
       "recordingsCount": "{count, plural, one {# grabación} other {# grabaciones}}",
-      "recordingsEmpty": "No hay grabaciones a esta hora: aleja el zoom o arrastra la esfera a otro momento del día."
+      "recordingsEmpty": "No hay grabaciones a esta hora: aleja el zoom o usa ‹ y › para mirar otro momento del día."
     }
   }
 }
