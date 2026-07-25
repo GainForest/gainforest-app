@@ -7,10 +7,15 @@ import { ACCOUNT_OVERVIEW_FOLDER_IDS, OVERVIEW_FOLDER_ART } from "./OverviewFold
  * controls, an overlapping round avatar, the identity column (name, bio,
  * follower counts, quiet facts) and the row of action pills.
  *
- * The measurements below track the real hero's type scale so the block keeps
- * the same height: the identity column is what drives it (it is taller than the
- * 96px avatar), so every line in it has to be accounted for or the page jumps
- * when the hero paints.
+ * Two rules run through every placeholder in this file:
+ *
+ * 1. Only paint what has a fixed size — the cover, the avatar, buttons. Copy
+ *    that comes from the account (its name, bio, counts) is left unpainted, so
+ *    no grey bar ever morphs into text of a different length.
+ * 2. Reserve that copy's space anyway. The heights below track the real hero's
+ *    type scale, and the identity column is what drives the hero's height (it
+ *    is taller than the 96px avatar), so every line has to be accounted for or
+ *    the page jumps when the hero paints.
  */
 export function AccountHeroSkeleton() {
   return (
@@ -31,13 +36,13 @@ export function AccountHeroSkeleton() {
           <Skeleton className="size-24 shrink-0 rounded-full ring-4 ring-card" />
           <div className="min-w-0 max-w-2xl md:flex-1 md:pb-1">
             {/* Display name — text-3xl/text-4xl at leading-[1.1]. */}
-            <Skeleton className="h-[33px] w-56 max-w-full md:h-10" />
+            <div className="h-[33px] md:h-10" />
             {/* Short bio — one line of text-sm/leading-relaxed. */}
-            <Skeleton className="mt-1.5 h-[23px] w-72 max-w-full" />
+            <div className="mt-1.5 h-[23px]" />
             {/* Follower / following counts. */}
-            <Skeleton className="mt-2.5 h-5 w-44 max-w-full" />
+            <div className="mt-2.5 h-5" />
             {/* Quiet facts row — joined date, country, organization type. */}
-            <Skeleton className="mt-2.5 h-5 w-32 max-w-full" />
+            <div className="mt-2.5 h-5" />
           </div>
         </div>
 
@@ -98,10 +103,11 @@ function OverviewFolderSkeleton({ id }: { id: string }) {
       <div className="relative pt-7">
         {/* tab */}
         <div className="absolute left-0 top-[12px] z-20 h-[19px] w-[42%] rounded-t-lg border border-b-0 border-border/60 bg-card" />
-        {/* body */}
+        {/* body — the figure is a live count and the title a short label, so
+            both are left unpainted; the card's min height holds the tile. */}
         <div className="relative z-10 flex min-h-[86px] flex-col justify-end rounded-[18px] rounded-tl-none border border-border/60 bg-card p-3.5">
-          <Skeleton className="h-6 w-10" />
-          <Skeleton className="mt-1 h-[19px] w-16" />
+          <div className="h-6" />
+          <div className="mt-1 h-[19px]" />
         </div>
       </div>
     </div>
