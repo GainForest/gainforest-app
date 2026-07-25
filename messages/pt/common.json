@@ -2925,7 +2925,7 @@
       "hoverHintAllDates": "Arraste ao redor do mostrador para ampliar esses horários e depois escolha uma gravação da lista para ouvir. Use − ou “Dia inteiro” para voltar.",
       "clickToPlay": "Clique para ouvir esta gravação",
       "clickToStop": "Clique para parar a reprodução",
-      "pickDayToPlay": "Escolha um único dia para ouvir este horário",
+      "pickDayToPlay": "Escolha um dia para ouvir",
       "loadingAudio": "Carregando {name}…",
       "playing": "Reproduzindo {name}",
       "stop": "Parar",

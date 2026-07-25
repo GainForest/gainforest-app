@@ -167,6 +167,9 @@ type SoundscapeClockProps = {
   /** Shown instead of the play hint when `onPointClick` is omitted, so the
    *  dial explains why a time cannot be played rather than ignoring clicks. */
   noPlayHintLabel?: string;
+  /** Band names without their frequency ranges, for the tooltip. The ranges
+   *  never change, so the legend carries them and the tooltip stays short. */
+  bandShortLabels?: string[];
   /** Slice of the day the dial is showing; the whole day by default. */
   window: TimeWindow;
   onWindowChange?: (window: TimeWindow) => void;
@@ -367,6 +370,10 @@ export function SoundscapeClock(props: SoundscapeClockProps) {
   };
 
   const zoomed = !isFullDay(view);
+
+  /* Tooltip bars are scaled to the loudest visible band at the hovered point:
+     the values are arbitrary units, so only the ranking between them reads. */
+  const hoverPeak = hover ? Math.max(0, ...hover.point.pmn.filter((_, band) => visibleBands[band])) : 0;
 
   return (
     /* The pointer handlers live on the wrapper, not the <svg>: the tooltip is
@@ -605,7 +612,7 @@ export function SoundscapeClock(props: SoundscapeClockProps) {
           // (see globals.css): a tooltip that takes the pointer would cancel
           // the very hover it is describing, and swallow presses on the dial.
           data-chart-tooltip
-          className="absolute z-10 min-w-40 -translate-x-1/2 rounded-lg border bg-popover px-3 py-2 text-xs shadow-md"
+          className="absolute z-10 min-w-56 -translate-x-1/2 rounded-lg border bg-popover px-3 py-2 text-xs shadow-md"
           style={{ left: hover.x, top: Math.max(0, hover.y - 8), transform: "translate(-50%, -100%)" }}
         >
           <p className="font-semibold tabular-nums text-foreground">{formatMinuteOfDay(hover.point.minuteOfDay)}</p>
@@ -616,17 +623,27 @@ export function SoundscapeClock(props: SoundscapeClockProps) {
           ) : props.noPlayHintLabel ? (
             <p className="mt-0.5 text-[11px] text-muted-foreground">{props.noPlayHintLabel}</p>
           ) : null}
-          <ul className="mt-1 space-y-0.5">
-            {hover.point.pmn.map((value, band) =>
-              visibleBands[band] ? (
-                <li key={band} className="flex items-center gap-1.5 text-muted-foreground">
-                  <span aria-hidden className="inline-block size-2 rounded-full" style={{ backgroundColor: BAND_COLORS[band] }} />
-                  <span className="tabular-nums">
-                    {props.bandLabels[band]}: {formatValue(value)}
+          <ul className="mt-1.5 space-y-1">
+            {hover.point.pmn.map((value, band) => {
+              if (!visibleBands[band]) return null;
+              const fill = hoverPeak > 0 ? Math.max(0, Math.min(100, (value / hoverPeak) * 100)) : 0;
+              return (
+                <li key={band} className="flex items-center gap-2">
+                  <span className="flex-1 truncate text-muted-foreground">
+                    {(props.bandShortLabels ?? props.bandLabels)[band]}
+                  </span>
+                  <span aria-hidden className="h-1.5 w-10 shrink-0 overflow-hidden rounded-full bg-muted">
+                    <span
+                      className="block h-full rounded-full"
+                      style={{ width: `${fill}%`, backgroundColor: BAND_COLORS[band] }}
+                    />
+                  </span>
+                  <span className="w-10 shrink-0 text-right tabular-nums text-muted-foreground/80">
+                    {formatValue(value)}
                   </span>
                 </li>
-              ) : null,
-            )}
+              );
+            })}
           </ul>
         </div>
       ) : null}

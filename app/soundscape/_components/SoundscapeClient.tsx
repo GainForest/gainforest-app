@@ -502,6 +502,9 @@ export function SoundscapeClient({ sessionDid }: { sessionDid: string | null }) 
     () => FREQUENCY_BANDS.map((band, index) => `${t(`bands.${band.labelKey}`)} \u00b7 ${bandRanges[index]}`),
     [bandRanges, t],
   );
+  /* The tooltip shows names only — the ranges never change from point to
+     point, so the legend and the band toggles below carry them instead. */
+  const bandShortLabels = useMemo(() => FREQUENCY_BANDS.map((band) => t(`bands.${band.labelKey}`)), [t]);
 
   const downloadPng = useCallback(async () => {
     const svg = chartRef.current?.querySelector<SVGSVGElement>("svg[data-soundscape-clock]");
@@ -821,6 +824,7 @@ export function SoundscapeClient({ sessionDid }: { sessionDid: string | null }) 
                   points={points}
                   visibleBands={visibleBands}
                   bandLabels={bandLabels}
+                  bandShortLabels={bandShortLabels}
                   title={t("chart.title", { date: chartDateLabel || t("chart.allDates") })}
                   radialLabel={t("chart.radialLabel")}
                   timeLabel={t("chart.timeLabel")}

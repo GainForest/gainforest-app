@@ -2925,7 +2925,7 @@
       "hoverHintAllDates": "Drag around the dial to zoom into those times, then pick a recording from the list to listen. Use − or “Whole day” to come back out.",
       "clickToPlay": "Click to listen to this recording",
       "clickToStop": "Click to stop playback",
-      "pickDayToPlay": "Pick a single day to listen to this time",
+      "pickDayToPlay": "Pick a day to listen",
       "loadingAudio": "Loading {name}…",
       "playing": "Playing {name}",
       "stop": "Stop",

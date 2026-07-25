@@ -2925,7 +2925,7 @@
       "hoverHintAllDates": "Seret mengelilingi piringan untuk memperbesar waktu tersebut, lalu pilih rekaman dari daftar untuk mendengarkan. Gunakan − atau “Sepanjang hari” untuk kembali.",
       "clickToPlay": "Klik untuk mendengarkan rekaman ini",
       "clickToStop": "Klik untuk menghentikan pemutaran",
-      "pickDayToPlay": "Pilih satu hari untuk mendengarkan waktu ini",
+      "pickDayToPlay": "Pilih satu hari untuk mendengarkan",
       "loadingAudio": "Memuat {name}…",
       "playing": "Memutar {name}",
       "stop": "Berhenti",
