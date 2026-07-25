@@ -36,16 +36,9 @@ import {
 import { buildSoundscapePoints, formatBandLabel, FREQUENCY_BANDS } from "@/lib/soundscape/analysis";
 import { computeRecordingPmn, RecordingTooShortError } from "@/lib/soundscape/pmn";
 import { loadPmnCache, savePmnCache, type PmnCache } from "@/lib/soundscape/pmn-cache";
+import { isRetryable, type AnalysisState, type AnalysisStatus } from "@/lib/soundscape/queue";
 import { cn } from "@/lib/utils";
 import { BAND_COLORS, SoundscapeClock } from "./SoundscapeClock";
-
-type AnalysisStatus = "idle" | "queued" | "downloading" | "analyzing" | "done" | "error";
-
-type AnalysisState = {
-  status: AnalysisStatus;
-  pmn?: number[];
-  errorKind?: "download" | "decode" | "tooShort";
-};
 
 /** One uploaded recording with everything the clock needs precomputed. */
 type LibraryRecording = {
@@ -166,7 +159,7 @@ export function SoundscapeClient({ sessionDid }: { sessionDid: string | null }) 
       const queued: Record<string, AnalysisState> = { ...current };
       for (const entry of library) {
         const state = queued[entry.item.uri];
-        if (entry.analyzable && (state?.status === "idle" || state?.status === "error")) {
+        if (entry.analyzable && isRetryable(state)) {
           queued[entry.item.uri] = { status: "queued" };
         }
       }
@@ -175,10 +168,9 @@ export function SoundscapeClient({ sessionDid }: { sessionDid: string | null }) 
   }, [library]);
 
   const analyzableCount = library.filter((entry) => entry.analyzable).length;
-  const remainingCount = library.filter((entry) => {
-    const status = results[entry.item.uri]?.status;
-    return entry.analyzable && (status === "idle" || status === "error");
-  }).length;
+  const remainingCount = library.filter(
+    (entry) => entry.analyzable && isRetryable(results[entry.item.uri]),
+  ).length;
   const doneCount = library.filter((entry) => results[entry.item.uri]?.status === "done").length;
   const active = library.find((entry) => {
     const status = results[entry.item.uri]?.status;
@@ -348,7 +340,11 @@ export function SoundscapeClient({ sessionDid }: { sessionDid: string | null }) 
             </Button>
             <Button type="button" size="sm" disabled={busy || remainingCount === 0} onClick={startAnalysis}>
               {busy ? <Loader2Icon className="size-4 animate-spin" /> : <PlayIcon className="size-4" />}
-              {remainingCount > 0 ? t("library.analyze", { count: remainingCount }) : t("library.analyzeDone")}
+              {busy
+                ? t("library.analyzeBusy", { done: doneCount, total: analyzableCount })
+                : remainingCount > 0
+                  ? t("library.analyze", { count: remainingCount })
+                  : t("library.analyzeDone")}
             </Button>
           </div>
         </div>

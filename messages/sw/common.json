@@ -2889,6 +2889,7 @@
       "count": "{count, plural, one {Rekodi # iliyopakiwa} other {Rekodi # zilizopakiwa}}",
       "downloadNote": "Kila rekodi asili hupakuliwa na kuchambuliwa mara moja tu; matokeo huhifadhiwa kwenye kifaa hiki.",
       "analyze": "Chambua {count, plural, one {rekodi #} other {rekodi #}}",
+      "analyzeBusy": "Inachakata {done} kati ya {total}…",
       "analyzeDone": "Rekodi zote zimechambuliwa",
       "downloading": "Inapakua {name}…",
       "analyzing": "Inachambua {name}…",

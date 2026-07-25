@@ -2889,6 +2889,7 @@
       "count": "{count, plural, one {# grabación subida} other {# grabaciones subidas}}",
       "downloadNote": "Cada original se descarga y analiza una sola vez; los resultados se recuerdan en este dispositivo.",
       "analyze": "Analizar {count, plural, one {# grabación} other {# grabaciones}}",
+      "analyzeBusy": "Procesando {done} de {total}…",
       "analyzeDone": "Todas las grabaciones analizadas",
       "downloading": "Descargando {name}…",
       "analyzing": "Analizando {name}…",

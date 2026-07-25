@@ -2889,6 +2889,7 @@
       "count": "{count, plural, other {# rekaman terunggah}}",
       "downloadNote": "Setiap rekaman asli diunduh dan dianalisis satu kali; hasilnya diingat di perangkat ini.",
       "analyze": "Analisis {count, plural, other {# rekaman}}",
+      "analyzeBusy": "Memproses {done} dari {total}…",
       "analyzeDone": "Semua rekaman sudah dianalisis",
       "downloading": "Mengunduh {name}…",
       "analyzing": "Menganalisis {name}…",
