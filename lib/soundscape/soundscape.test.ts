@@ -9,8 +9,8 @@ import {
   wallClockMinuteOfDay,
   WavDecodeError,
 } from "./audiomoth";
-import { parsePmnCache, trimPmnCache } from "./pmn-cache";
-import { buildSoundscapePoints, fftRadix2, formatBandLabel, FREQUENCY_BANDS } from "./analysis";
+import { parsePmnCache, toCacheEntry, trimPmnCache } from "./pmn-cache";
+import { buildSoundscapePoints, fftRadix2, formatBandRange, FREQUENCY_BANDS, nyquistHz } from "./analysis";
 import {
   binnedMaxPmn,
   computeRecordingPmn,
@@ -95,16 +95,33 @@ describe("wall clock helpers", () => {
 // ---------------------------------------------------------------------------
 
 describe("pmn cache", () => {
-  const vector = [1, 2, 3, 4, 5];
+  const bands = [1, 2, 3, 4, 5];
+  const spectrum = Array.from({ length: 192 }, (_, index) => index);
+  const vector = { bands, spectrum, sampleRate: 48000 };
 
   it("round-trips valid entries and drops malformed ones", () => {
     const raw = JSON.stringify({
       good: vector,
-      wrongLength: [1, 2],
+      wrongBandCount: { bands: [1, 2], spectrum, sampleRate: 48000 },
+      wrongSpectrumLength: { bands, spectrum: [1, 2, 3], sampleRate: 48000 },
+      missingSampleRate: { bands, spectrum },
+      nonFiniteSampleRate: { bands, spectrum, sampleRate: Number.NaN },
       wrongType: "nope",
-      nonFinite: [1, 2, 3, 4, Number.NaN],
+      nonFinite: { bands: [1, 2, 3, 4, Number.NaN], spectrum, sampleRate: 48000 },
     });
     expect(parsePmnCache(raw)).toEqual({ good: vector });
+  });
+
+  it("ignores v1 entries, whose bands used the old pseudo-Hz edges", () => {
+    // v1 stored a bare five-number vector. Those bands are not comparable to
+    // the real-Hz ones, so they must be recomputed rather than migrated.
+    expect(parsePmnCache(JSON.stringify({ legacy: bands }))).toEqual({});
+  });
+
+  it("rounds the cached spectrum to keep the payload small", () => {
+    const entry = toCacheEntry(bands, [1.4, 2.6, ...spectrum.slice(2)], 48000);
+    expect(entry.spectrum.slice(0, 2)).toEqual([1, 3]);
+    expect(entry.spectrum).toHaveLength(192);
   });
 
   it("tolerates missing or corrupt storage", () => {
@@ -250,17 +267,37 @@ describe("dft384Magnitude", () => {
 });
 
 describe("binnedMaxPmn", () => {
-  it("maps FFT bins to the five pseudo-Hz (index x 750) bins by max", () => {
+  it("maps FFT bins to voice bands by real Hz (index x sampleRate / 384)", () => {
     const pmn = new Float64Array(WINDOW_LENGTH / 2);
-    // freq index -> pseudo Hz (index*750): 2->1500 (bin0), 6->4500 (bin1),
-    // 13->9750 (bin2), 26->19500 (bin3), 79->59250 (bin4).
-    pmn[1] = 10; // index 2
-    pmn[5] = 20; // index 6
-    pmn[12] = 30; // index 13
-    pmn[25] = 40; // index 26
-    pmn[78] = 50; // index 79
-    expect(binnedMaxPmn(pmn)).toEqual([10, 20, 30, 40, 50]);
+    // At 48 kHz a bin spans 125 Hz, so index f sits at f * 125 Hz:
+    // 2->250 (rumble), 6->750 (low), 20->2500 (bird song),
+    // 40->5000 (high), 100->12500 (insects).
+    pmn[1] = 10;
+    pmn[5] = 20;
+    pmn[19] = 30;
+    pmn[39] = 40;
+    pmn[99] = 50;
+    expect(binnedMaxPmn(pmn, 48000)).toEqual([10, 20, 30, 40, 50]);
     expect(PMN_BIN_COUNT).toBe(5);
+  });
+
+  it("keeps every bin up to Nyquist — nothing is silently discarded", () => {
+    // Regression: the old pseudo-Hz cut dropped indices 81-192 (real
+    // 10-24 kHz at 48 kHz), 58% of the spectrum and the richest insect range.
+    for (let index = 1; index <= WINDOW_LENGTH / 2; index++) {
+      const pmn = new Float64Array(WINDOW_LENGTH / 2);
+      pmn[index - 1] = 1234;
+      const banded = binnedMaxPmn(pmn, 48000);
+      expect(banded, `FFT index ${index} was dropped`).toContain(1234);
+    }
+  });
+
+  it("tracks the sample rate: the same bin means a different band", () => {
+    const pmn = new Float64Array(WINDOW_LENGTH / 2);
+    pmn[39] = 7; // index 40
+    // 40 * 125 Hz = 5 kHz -> "high calls"; 40 * 651 Hz = 26 kHz -> "insects".
+    expect(binnedMaxPmn(pmn, 48000).indexOf(7)).toBe(3);
+    expect(binnedMaxPmn(pmn, 250000).indexOf(7)).toBe(4);
   });
 });
 
@@ -304,14 +341,24 @@ describe("buildSoundscapePoints", () => {
   });
 });
 
-describe("frequency bins", () => {
-  it("exposes the five GainForest soundscape bins verbatim", () => {
-    expect(FREQUENCY_BANDS.map(formatBandLabel)).toEqual([
-      "0-1500",
-      "1500-5000",
-      "5000-10000",
-      "10k-20000",
-      "20k-60000",
-    ]);
+describe("voice bands", () => {
+  it("describes ranges in real Hz, closing the top band at Nyquist", () => {
+    const ranges = FREQUENCY_BANDS.map((band) => formatBandRange(band, nyquistHz(48000)));
+    expect(ranges).toEqual(["0\u2013250 Hz", "250 Hz\u20131 kHz", "1\u20133 kHz", "3\u20138 kHz", "8\u201324 kHz"]);
+  });
+
+  it("never advertises range the recording cannot capture", () => {
+    const insects = FREQUENCY_BANDS[FREQUENCY_BANDS.length - 1];
+    expect(insects.maxHz).toBeNull();
+    // A 22.05 kHz-Nyquist recording must not claim it reaches 24 kHz.
+    expect(formatBandRange(insects, nyquistHz(44100))).toBe("8\u201322.1 kHz");
+    expect(formatBandRange(insects, nyquistHz(250000))).toBe("8\u2013125 kHz");
+  });
+
+  it("covers the spectrum without gaps", () => {
+    for (let index = 1; index < FREQUENCY_BANDS.length; index++) {
+      expect(FREQUENCY_BANDS[index].minHz).toBe(FREQUENCY_BANDS[index - 1].maxHz);
+    }
+    expect(FREQUENCY_BANDS[0].minHz).toBe(0);
   });
 });

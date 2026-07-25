@@ -7,31 +7,69 @@
 
 export type FrequencyBand = {
   id: string;
-  /** Exact legend label used by the GainForest soundscape plots. */
-  label: string;
+  /** Key under `common.soundscape.bands` holding the human-readable name. */
+  labelKey: string;
   minHz: number;
-  maxHz: number;
+  /** `null` means open-ended: everything up to the recording's Nyquist limit. */
+  maxHz: number | null;
 };
 
 /**
- * The same five frequency bins the GainForest xprize soundscape pipeline uses
- * (github.com/GainForest/xprize CircularMultiLineChart). Labels are shown
- * verbatim in the legend. The top bin reaches 60 kHz, so it only carries
- * signal for high-sample-rate AudioMoth recordings (≥120 kHz).
+ * Frequency bands in REAL Hz, grouped by the kind of voice that occupies them.
+ *
+ * The reference pipeline (github.com/GainForest/xprize, varunghat/
+ * circadian_soundscape) labelled its bins by `FFT index * 750`, which is only
+ * true Hz for a 288 kHz sample rate (384-point window * 750). At AudioMoth's
+ * usual 48 kHz a bin is 125 Hz wide, so those labels overstated frequency 6x
+ * AND silently discarded every bin above pseudo-60 kHz — real 10-24 kHz, 112
+ * of 192 bins, the richest insect range. These bands are derived from each
+ * recording's own sample rate instead, so nothing is dropped and the numbers
+ * mean what they say.
+ *
+ * Ranges are deliberately broad and region-neutral: they describe where energy
+ * sits, not which species produced it. Real voices overlap heavily, and the
+ * mapping differs by region — site-specific naming belongs to a later layer
+ * driven by actual `dwc.occurrence` labels, not to hard-coded constants.
  */
 export const FREQUENCY_BANDS: readonly FrequencyBand[] = [
-  { id: "b0", label: "0-1500", minHz: 0, maxHz: 1500 },
-  { id: "b1", label: "1500-5000", minHz: 1500, maxHz: 5000 },
-  { id: "b2", label: "5000-10000", minHz: 5000, maxHz: 10000 },
-  { id: "b3", label: "10k-20000", minHz: 10000, maxHz: 20000 },
-  { id: "b4", label: "20k-60000", minHz: 20000, maxHz: 60000 },
+  { id: "rumble", labelKey: "rumble", minHz: 0, maxHz: 250 },
+  { id: "lowCalls", labelKey: "lowCalls", minHz: 250, maxHz: 1000 },
+  { id: "birdSong", labelKey: "birdSong", minHz: 1000, maxHz: 3000 },
+  { id: "highCalls", labelKey: "highCalls", minHz: 3000, maxHz: 8000 },
+  { id: "insects", labelKey: "insects", minHz: 8000, maxHz: null },
 ] as const;
 
 /** Colours matching the reference matplotlib figure (blue→purple). */
 export const BAND_COLORS = ["#1f3fd6", "#189d18", "#f0a500", "#e01a1a", "#8e30b0"] as const;
 
-export function formatBandLabel(band: FrequencyBand): string {
-  return band.label;
+/** Highest frequency a recording can represent. */
+export function nyquistHz(sampleRate: number): number {
+  return sampleRate / 2;
+}
+
+function isKHz(hz: number): boolean {
+  return hz >= 1000;
+}
+
+function formatHz(hz: number, withUnit = true): string {
+  if (hz === 0) return "0";
+  if (!isKHz(hz)) return withUnit ? `${Math.round(hz)} Hz` : `${Math.round(hz)}`;
+  const kHz = hz / 1000;
+  const value = Number.isInteger(kHz) ? `${kHz}` : kHz.toFixed(1);
+  return withUnit ? `${value} kHz` : value;
+}
+
+/**
+ * Human-readable range for a band, e.g. "1–3 kHz" or "250 Hz–1 kHz". The
+ * open-ended top band is closed at `ceilingHz` (the Nyquist limit of the
+ * recordings being shown), so it never advertises frequencies the hardware
+ * cannot capture. The unit is only repeated when the two bounds need different
+ * ones.
+ */
+export function formatBandRange(band: FrequencyBand, ceilingHz: number): string {
+  const max = band.maxHz === null ? ceilingHz : Math.min(band.maxHz, ceilingHz);
+  const sameUnit = isKHz(band.minHz) === isKHz(max);
+  return `${formatHz(band.minHz, !sameUnit)}–${formatHz(max)}`;
 }
 
 // ---------------------------------------------------------------------------

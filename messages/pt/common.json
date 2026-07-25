@@ -2902,12 +2902,20 @@
       "statusError": "Não foi possível analisar esta gravação",
       "tooShort": "Curta demais para ser analisada (precisa de pelo menos um minuto completo)"
     },
+    "bands": {
+      "rumble": "Ronco",
+      "lowCalls": "Cantos graves",
+      "birdSong": "Canto de aves",
+      "highCalls": "Cantos agudos",
+      "insects": "Insetos"
+    },
     "chart": {
       "title": "Potência menos ruído — {date}",
       "allDates": "ainda sem gravações",
       "radialLabel": "Potência menos ruído",
       "timeLabel": "Hora do dia",
-      "legendTitle": "Faixas de frequência",
+      "legendTitle": "Grupos de vozes",
+      "bandsNote": "Intervalos indicativos. As vozes sobrepõem-se e os animais que cantam em cada intervalo variam com o lugar.",
       "empty": "As gravações analisadas aparecerão aqui como um relógio de paisagem sonora de 24 horas.",
       "emptyHint": "Analise acima suas gravações enviadas para começar.",
       "downloadPng": "Baixar imagem",

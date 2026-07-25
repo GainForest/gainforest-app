@@ -2902,12 +2902,20 @@
       "statusError": "No se pudo analizar esta grabación",
       "tooShort": "Demasiado corta para analizarla (necesita al menos un minuto completo)"
     },
+    "bands": {
+      "rumble": "Retumbo",
+      "lowCalls": "Cantos graves",
+      "birdSong": "Canto de aves",
+      "highCalls": "Cantos agudos",
+      "insects": "Insectos"
+    },
     "chart": {
       "title": "Potencia menos ruido — {date}",
       "allDates": "aún sin grabaciones",
       "radialLabel": "Potencia menos ruido",
       "timeLabel": "Hora del día",
-      "legendTitle": "Bandas de frecuencia",
+      "legendTitle": "Grupos de voces",
+      "bandsNote": "Rangos indicativos. Las voces se solapan y qué animales cantan en cada rango varía según el lugar.",
       "empty": "Las grabaciones analizadas aparecerán aquí como un reloj de paisaje sonoro de 24 horas.",
       "emptyHint": "Analiza arriba tus grabaciones subidas para empezar.",
       "downloadPng": "Descargar imagen",

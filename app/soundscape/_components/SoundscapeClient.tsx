@@ -33,9 +33,14 @@ import {
   wallClockMinuteOfDay,
   type WallClockTime,
 } from "@/lib/soundscape/audiomoth";
-import { buildSoundscapePoints, formatBandLabel, FREQUENCY_BANDS } from "@/lib/soundscape/analysis";
+import {
+  buildSoundscapePoints,
+  formatBandRange,
+  FREQUENCY_BANDS,
+  nyquistHz,
+} from "@/lib/soundscape/analysis";
 import { computeRecordingPmn, RecordingTooShortError } from "@/lib/soundscape/pmn";
-import { loadPmnCache, savePmnCache, type PmnCache } from "@/lib/soundscape/pmn-cache";
+import { loadPmnCache, savePmnCache, toCacheEntry, type PmnCache } from "@/lib/soundscape/pmn-cache";
 import { isRetryable, type AnalysisState, type AnalysisStatus } from "@/lib/soundscape/queue";
 import { cn } from "@/lib/utils";
 import { BAND_COLORS, SoundscapeClock } from "./SoundscapeClock";
@@ -96,7 +101,7 @@ export function SoundscapeClient({ sessionDid }: { sessionDid: string | null }) 
         const seeded: Record<string, AnalysisState> = {};
         for (const item of items) {
           const cached = cache[item.cid];
-          seeded[item.uri] = cached ? { status: "done", pmn: cached } : { status: "idle" };
+          seeded[item.uri] = cached ? { status: "done", pmn: cached.bands } : { status: "idle" };
         }
         setResults(seeded);
         setRecordings(items);
@@ -130,10 +135,10 @@ export function SoundscapeClient({ sessionDid }: { sessionDid: string | null }) 
         const buffer = await response.arrayBuffer();
         setResults((current) => ({ ...current, [uri]: { status: "analyzing" } }));
         const wav = openWav(buffer);
-        const { pmnPerBand } = await computeRecordingPmn(wav);
+        const { pmnPerBand, spectrum, sampleRate } = await computeRecordingPmn(wav);
         const cache = cacheRef.current ?? loadPmnCache();
         cacheRef.current = cache;
-        cache[cid] = pmnPerBand;
+        cache[cid] = toCacheEntry(pmnPerBand, spectrum, sampleRate);
         savePmnCache(cache);
         update = { status: "done", pmn: pmnPerBand };
       } catch (error) {
@@ -220,7 +225,24 @@ export function SoundscapeClient({ sessionDid }: { sessionDid: string | null }) 
           ? dateKeys[0]
           : `${dateKeys[0]} \u2013 ${dateKeys[dateKeys.length - 1]}`;
 
-  const bandLabels = useMemo(() => FREQUENCY_BANDS.map(formatBandLabel), []);
+  /**
+   * Top of the displayed spectrum: the highest frequency any of these
+   * recordings can actually represent, so the open-ended top band never
+   * advertises range the hardware never captured.
+   */
+  const ceilingHz = useMemo(() => {
+    const rates = library.map((entry) => entry.item.sampleRate).filter((rate): rate is number => !!rate);
+    return rates.length > 0 ? nyquistHz(Math.max(...rates)) : nyquistHz(48000);
+  }, [library]);
+
+  const bandRanges = useMemo(
+    () => FREQUENCY_BANDS.map((band) => formatBandRange(band, ceilingHz)),
+    [ceilingHz],
+  );
+  const bandLabels = useMemo(
+    () => FREQUENCY_BANDS.map((band, index) => `${t(`bands.${band.labelKey}`)} \u00b7 ${bandRanges[index]}`),
+    [bandRanges, t],
+  );
 
   const downloadPng = useCallback(async () => {
     const svg = chartRef.current?.querySelector<SVGSVGElement>("svg[data-soundscape-clock]");
@@ -447,20 +469,26 @@ export function SoundscapeClient({ sessionDid }: { sessionDid: string | null }) 
                       }
                       aria-pressed={visibleBands[index]}
                       className={cn(
-                        "flex w-full items-center gap-2 rounded-lg px-2 py-1.5 text-left text-sm transition-colors hover:bg-muted",
+                        "flex w-full items-start gap-2 rounded-lg px-2 py-1.5 text-left text-sm transition-colors hover:bg-muted",
                         !visibleBands[index] && "opacity-40",
                       )}
                     >
                       <span
                         aria-hidden
-                        className="inline-block h-0.5 w-5 rounded-full"
+                        className="mt-2 inline-block h-0.5 w-5 shrink-0 rounded-full"
                         style={{ backgroundColor: BAND_COLORS[index] }}
                       />
-                      <span className="tabular-nums text-foreground">{bandLabels[index]}</span>
+                      <span className="min-w-0">
+                        <span className="block text-foreground">{t(`bands.${band.labelKey}`)}</span>
+                        <span className="block text-xs tabular-nums text-muted-foreground">
+                          {bandRanges[index]}
+                        </span>
+                      </span>
                     </button>
                   </li>
                 ))}
               </ul>
+              <p className="mt-2 px-2 text-xs leading-5 text-muted-foreground">{t("chart.bandsNote")}</p>
             </aside>
           </div>
         ) : (

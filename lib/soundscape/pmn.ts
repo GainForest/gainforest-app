@@ -13,7 +13,7 @@
  * five bins; each recording contributes the MAX PMN per bin ("Max PMN Values").
  */
 
-import { fftRadix2 } from "./analysis";
+import { fftRadix2, FREQUENCY_BANDS } from "./analysis";
 import type { WavRecording } from "./audiomoth";
 
 export const WINDOW_LENGTH = 384;
@@ -23,9 +23,9 @@ const NOISE_CLAMP_DB = -90;
 const NEIGHBORHOOD_THRESHOLD_DB = 3;
 const NEIGH_ROWS = 9;
 const NEIGH_COLS = 3;
-const FREQUENCY_SCALE = 750; // process.py: df["Frequency"] *= 750
-const BIN_EDGES = [0, 1500, 5000, 10000, 20000, 60000] as const;
-export const PMN_BIN_COUNT = BIN_EDGES.length - 1;
+export const PMN_BIN_COUNT = FREQUENCY_BANDS.length;
+/** Retained FFT bins per window; index f covers f * (sampleRate / 384) Hz. */
+export const PMN_SPECTRUM_BINS = WINDOW_LENGTH / 2;
 
 export class RecordingTooShortError extends Error {
   constructor() {
@@ -338,15 +338,25 @@ export function segmentPmn(segment: Float32Array | Float64Array): Float64Array {
   return pmn;
 }
 
-/** Aggregate a length-192 PMN spectrum into the five frequency bins (max). */
-export function binnedMaxPmn(pmn192: Float64Array): number[] {
+/**
+ * Aggregate a length-192 PMN spectrum into the voice bands (max per band).
+ *
+ * Frequencies are the recording's REAL Hz — bin f is centred on
+ * `f * sampleRate / 384` — so the result depends on the sample rate. Every bin
+ * up to Nyquist lands in a band (the top band is open-ended), unlike the
+ * reference pipeline's pseudo-Hz cut which discarded everything above its
+ * highest edge.
+ */
+export function binnedMaxPmn(pmn192: Float64Array, sampleRate: number): number[] {
   const result = new Array(PMN_BIN_COUNT).fill(0);
   const seen = new Array(PMN_BIN_COUNT).fill(false);
+  const binWidthHz = sampleRate / WINDOW_LENGTH;
   for (let f = 1; f <= HALF; f++) {
-    const pseudoHz = f * FREQUENCY_SCALE;
-    // pd.cut default right=True: (edge_k, edge_{k+1}]
+    const hz = f * binWidthHz;
     for (let k = 0; k < PMN_BIN_COUNT; k++) {
-      if (pseudoHz > BIN_EDGES[k] && pseudoHz <= BIN_EDGES[k + 1]) {
+      const band = FREQUENCY_BANDS[k];
+      // Half-open on the left, matching the reference pd.cut(right=True).
+      if (hz > band.minHz && (band.maxHz === null || hz <= band.maxHz)) {
         const value = pmn192[f - 1];
         if (!seen[k] || value > result[k]) {
           result[k] = value;
@@ -360,14 +370,27 @@ export function binnedMaxPmn(pmn192: Float64Array): number[] {
 }
 
 export type PmnResult = {
-  /** Max PMN per frequency bin (5 values). */
+  /** Max PMN per voice band (one value per FREQUENCY_BANDS entry). */
   pmnPerBand: number[];
+  /**
+   * Max PMN per FFT bin across the whole recording (192 values). Kept so the
+   * bands can be recomputed later — different edges, or region-specific ones —
+   * without re-downloading and re-analyzing the audio.
+   */
+  spectrum: number[];
+  /** Needed to turn `spectrum` indices back into Hz. */
+  sampleRate: number;
   minutes: number;
 };
 
 /**
  * Full-file PMN: split into whole 60-second segments, PMN each, then take the
  * per-bin max across all segments (matching process.py's groupby-max).
+ *
+ * Banding happens once, at the end, on the per-bin maxima. That is exactly
+ * equivalent to banding every segment and taking the max of those (max over
+ * segments and max within a band commute), but it also yields the full
+ * spectrum for caching.
  */
 export async function computeRecordingPmn(
   recording: WavRecording,
@@ -377,15 +400,21 @@ export async function computeRecordingPmn(
   const minutes = Math.floor(recording.totalSamples / segmentSamples);
   if (minutes < 1) throw new RecordingTooShortError();
 
-  const perBandMax = new Array(PMN_BIN_COUNT).fill(0);
+  const spectrumMax = new Float64Array(HALF);
   const segment = new Float32Array(segmentSamples);
   for (let m = 0; m < minutes; m++) {
     recording.readWindow(m * segmentSamples, segment);
     const pmn192 = segmentPmn(segment);
-    const binned = binnedMaxPmn(pmn192);
-    for (let k = 0; k < PMN_BIN_COUNT; k++) perBandMax[k] = Math.max(perBandMax[k], binned[k]);
+    for (let f = 0; f < HALF; f++) {
+      if (pmn192[f] > spectrumMax[f]) spectrumMax[f] = pmn192[f];
+    }
     onProgress?.((m + 1) / minutes);
     if (minutes > 1) await new Promise((resolve) => setTimeout(resolve, 0));
   }
-  return { pmnPerBand: perBandMax, minutes };
+  return {
+    pmnPerBand: binnedMaxPmn(spectrumMax, recording.sampleRate),
+    spectrum: [...spectrumMax],
+    sampleRate: recording.sampleRate,
+    minutes,
+  };
 }

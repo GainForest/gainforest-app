@@ -2902,12 +2902,20 @@
       "statusError": "Couldn't analyze this recording",
       "tooShort": "Too short to analyze (needs at least one full minute)"
     },
+    "bands": {
+      "rumble": "Rumble",
+      "lowCalls": "Low calls",
+      "birdSong": "Bird song",
+      "highCalls": "High calls",
+      "insects": "Insects"
+    },
     "chart": {
       "title": "Power-Minus-Noise — {date}",
       "allDates": "no recordings yet",
       "radialLabel": "Power-Minus-Noise",
       "timeLabel": "Time (Hour)",
-      "legendTitle": "Frequency Bins",
+      "legendTitle": "Voice groups",
+      "bandsNote": "Indicative ranges. Voices overlap, and which animals sing where varies by place.",
       "empty": "Analyzed recordings will appear here as a 24-hour soundscape clock.",
       "emptyHint": "Analyze your uploaded recordings above to begin.",
       "downloadPng": "Download image",

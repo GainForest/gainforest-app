@@ -2902,12 +2902,20 @@
       "statusError": "Rekaman ini tidak dapat dianalisis",
       "tooShort": "Terlalu pendek untuk dianalisis (butuh minimal satu menit penuh)"
     },
+    "bands": {
+      "rumble": "Gemuruh",
+      "lowCalls": "Suara rendah",
+      "birdSong": "Kicau burung",
+      "highCalls": "Suara tinggi",
+      "insects": "Serangga"
+    },
     "chart": {
       "title": "Daya dikurangi derau — {date}",
       "allDates": "belum ada rekaman",
       "radialLabel": "Daya dikurangi derau",
       "timeLabel": "Waktu (Jam)",
-      "legendTitle": "Pita frekuensi",
+      "legendTitle": "Kelompok suara",
+      "bandsNote": "Rentang perkiraan. Suara saling tumpang tindih, dan hewan yang bersuara di tiap rentang berbeda menurut tempat.",
       "empty": "Rekaman yang dianalisis akan muncul di sini sebagai jam lanskap suara 24 jam.",
       "emptyHint": "Analisis rekaman terunggah Anda di atas untuk memulai.",
       "downloadPng": "Unduh gambar",

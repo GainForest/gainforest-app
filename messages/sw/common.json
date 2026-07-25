@@ -2902,12 +2902,20 @@
       "statusError": "Rekodi hii haikuweza kuchambuliwa",
       "tooShort": "Ni fupi mno kuchambuliwa (inahitaji angalau dakika moja kamili)"
     },
+    "bands": {
+      "rumble": "Mngurumo",
+      "lowCalls": "Sauti za chini",
+      "birdSong": "Kuimba kwa ndege",
+      "highCalls": "Sauti za juu",
+      "insects": "Wadudu"
+    },
     "chart": {
       "title": "Nguvu kasoro kelele — {date}",
       "allDates": "bado hakuna rekodi",
       "radialLabel": "Nguvu kasoro kelele",
       "timeLabel": "Saa (Saa za siku)",
-      "legendTitle": "Mikanda ya masafa",
+      "legendTitle": "Makundi ya sauti",
+      "bandsNote": "Viwango vya dalili. Sauti zinaingiliana, na wanyama wanaoimba katika kila kiwango hutofautiana kwa eneo.",
       "empty": "Rekodi zilizochambuliwa zitaonekana hapa kama saa ya mandhari ya sauti ya saa 24.",
       "emptyHint": "Chambua rekodi zako zilizopakiwa hapo juu ili kuanza.",
       "downloadPng": "Pakua picha",

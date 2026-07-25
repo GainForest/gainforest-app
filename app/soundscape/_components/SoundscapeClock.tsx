@@ -324,7 +324,9 @@ function Legend(props: {
   y: number;
 }) {
   const rowHeight = 20;
-  const width = 148;
+  // Wide enough for a translated voice-group name plus its frequency range
+  // (e.g. "Kuimba kwa ndege · 250 Hz–1 kHz") without clipping in the PNG export.
+  const width = 208;
   const height = 26 + props.labels.length * rowHeight;
   return (
     <g transform={`translate(${props.x} ${props.y})`}>
