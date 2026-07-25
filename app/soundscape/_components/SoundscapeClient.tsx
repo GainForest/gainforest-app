@@ -149,7 +149,9 @@ export function SoundscapeClient({ sessionDid }: { sessionDid: string | null }) 
           errorKind:
             error instanceof RecordingTooShortError
               ? "tooShort"
-              : error instanceof Error && error.message === "download_failed"
+              : // TypeError = fetch network/CORS failure (e.g. the storage bucket
+                // not allowing cross-origin GETs) — the bytes never arrived.
+                error instanceof TypeError || (error instanceof Error && error.message === "download_failed")
                 ? "download"
                 : "decode",
         };
