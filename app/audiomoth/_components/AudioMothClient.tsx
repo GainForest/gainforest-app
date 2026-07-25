@@ -84,7 +84,6 @@ import { UploadTab } from "./UploadTab";
 import { LabelTab } from "./LabelTab";
 import { IdentificationsClient } from "@/app/identifications/_components/IdentificationsClient";
 import { SoundscapeClient } from "@/app/soundscape/_components/SoundscapeClient";
-import { AdminOnlyIndicator } from "@/app/_components/AdminOnlyIndicator";
 
 /* ------------------------------------------------------------------ */
 /* Types                                                               */
@@ -309,15 +308,11 @@ function InfoRow({ label, value, dimmed }: { label: string; value: string; dimme
 export function AudioMothClient({
   sessionDid,
   useUploadTray = false,
-  canSeeSoundscape = false,
 }: {
   sessionDid: string | null;
   /** Release switch: hand uploads to the background tray instead of the
    *  page's own full-screen progress flow. Off until the tray is finished. */
   useUploadTray?: boolean;
-  /** The soundscape clock is admin-only while it is being iterated on.
-   *  Hiding the tab is cosmetic; the server decides who gets `true`. */
-  canSeeSoundscape?: boolean;
 }) {
   const t = useTranslations("common.audiomoth");
   const identificationsT = useTranslations("common.identifications");
@@ -331,8 +326,7 @@ export function AudioMothClient({
   const searchParams = useSearchParams();
   const [mainTab, setMainTab] = useState<MainTabId>(() => {
     const tab = searchParams.get("tab");
-    if (tab === "soundscape") return canSeeSoundscape ? "soundscape" : "setup";
-    if (tab === "label" || tab === "identifications") return tab;
+    if (tab === "soundscape" || tab === "label" || tab === "identifications") return tab;
     return tab === "deployments" || tab === "upload" ? tab : "setup";
   });
   const selectMainTab = useCallback((id: MainTabId) => {
@@ -823,23 +817,13 @@ export function AudioMothClient({
     id: MainTabId;
     label: string;
     Icon: typeof ClockIcon;
-    adminOnly?: boolean;
   }> = [
     { id: "setup", label: t("mainTabs.setup"), Icon: WrenchIcon },
     { id: "deployments", label: t("mainTabs.deployments"), Icon: MapPinIcon },
     { id: "upload", label: t("mainTabs.upload"), Icon: HardDriveUploadIcon },
     { id: "label", label: t("mainTabs.label"), Icon: TagsIcon },
     { id: "identifications", label: t("mainTabs.identifications"), Icon: ListChecksIcon },
-    ...(canSeeSoundscape
-      ? [
-          {
-            id: "soundscape" as const,
-            label: t("mainTabs.soundscape"),
-            Icon: AudioWaveformIcon,
-            adminOnly: true,
-          },
-        ]
-      : []),
+    { id: "soundscape", label: t("mainTabs.soundscape"), Icon: AudioWaveformIcon },
   ];
 
   return (
@@ -862,7 +846,7 @@ export function AudioMothClient({
       <div className="mx-auto flex w-full max-w-7xl flex-col gap-6 px-4 sm:px-6">
       {/* Setup (this device over USB) vs Deployment (field events) */}
       <nav className="flex w-full gap-1 self-start rounded-full border border-border bg-card/70 p-1 sm:w-auto" aria-label={t("title")}>
-        {mainTabs.map(({ id, label, Icon, adminOnly }) => (
+        {mainTabs.map(({ id, label, Icon }) => (
           <button
             key={id}
             type="button"
@@ -875,7 +859,6 @@ export function AudioMothClient({
           >
             <Icon className="size-4" />
             {label}
-            {adminOnly ? <AdminOnlyIndicator /> : null}
           </button>
         ))}
       </nav>
@@ -888,7 +871,7 @@ export function AudioMothClient({
 
       {mainTab === "identifications" && <IdentificationsClient sessionDid={sessionDid} />}
 
-      {mainTab === "soundscape" && canSeeSoundscape && (
+      {mainTab === "soundscape" && (
         <div className="flex flex-col gap-6">
           <p className="flex items-start gap-2 rounded-2xl bg-muted px-4 py-3 text-sm leading-6 text-muted-foreground">
             <InfoIcon className="mt-1 size-4 shrink-0" />

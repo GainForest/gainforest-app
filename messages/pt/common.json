@@ -2930,6 +2930,19 @@
       "playError": "Não foi possível reproduzir esta gravação no seu navegador.",
       "datesTitle": "Dias",
       "allDatesChip": "Todos os dias"
+    },
+    "zoom": {
+      "rangeAllDay": "Dia inteiro · 00:00 – 24:00",
+      "range": "Ampliado para {start} – {end}",
+      "hint": "Arraste para percorrer o dia, use + e − para ampliar e clique num ponto para ouvir.",
+      "zoomIn": "Ampliar",
+      "zoomOut": "Reduzir",
+      "reset": "Dia inteiro",
+      "empty": "Sem gravações neste intervalo",
+      "timeAxis": "Hora",
+      "recordingsTitle": "Gravações à vista",
+      "recordingsCount": "{count, plural, one {# gravação} other {# gravações}}",
+      "recordingsEmpty": "Não há gravações neste horário — reduza o zoom ou arraste para outra parte do dia."
     }
   }
 }

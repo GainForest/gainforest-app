@@ -2930,6 +2930,19 @@
       "playError": "Couldn't play this recording in your browser.",
       "datesTitle": "Days",
       "allDatesChip": "All days"
+    },
+    "zoom": {
+      "rangeAllDay": "Whole day · 00:00 – 24:00",
+      "range": "Zoomed to {start} – {end}",
+      "hint": "Drag to move through the day, use + and − to zoom, then click a point to listen.",
+      "zoomIn": "Zoom in",
+      "zoomOut": "Zoom out",
+      "reset": "Whole day",
+      "empty": "No recordings in this range",
+      "timeAxis": "Time",
+      "recordingsTitle": "Recordings in view",
+      "recordingsCount": "{count, plural, one {# recording} other {# recordings}}",
+      "recordingsEmpty": "No recordings at this time — zoom out or drag to another part of the day."
     }
   }
 }

@@ -43,10 +43,20 @@ import {
   nyquistHz,
 } from "@/lib/soundscape/analysis";
 import { computeRecordingPmn, RecordingTooShortError } from "@/lib/soundscape/pmn";
+import {
+  centerWindow,
+  formatWindowMinute,
+  FULL_DAY_WINDOW,
+  isFullDay,
+  isInWindow,
+  windowEnd,
+  type TimeWindow,
+} from "@/lib/soundscape/zoom";
 import { loadPmnCache, savePmnCache, toCacheEntry, type PmnCache } from "@/lib/soundscape/pmn-cache";
 import { isOutstanding, isRetryable, type AnalysisState, type AnalysisStatus } from "@/lib/soundscape/queue";
 import { cn } from "@/lib/utils";
 import { BAND_COLORS, SoundscapeClock } from "./SoundscapeClock";
+import { SoundscapeZoom } from "./SoundscapeZoom";
 
 /** One uploaded recording with everything the clock needs precomputed. */
 type LibraryRecording = {
@@ -87,6 +97,12 @@ function formatWallClock(time: WallClockTime): string {
   return `${wallClockDateKey(time)} ${String(time.hour).padStart(2, "0")}:${String(time.minute).padStart(2, "0")}`;
 }
 
+/** `07:04:30` — seconds included, because the point of the zoom view is to
+ *  tell recordings a minute (or less) apart from each other. */
+function formatClockTime(time: WallClockTime): string {
+  return [time.hour, time.minute, time.second].map((part) => String(part).padStart(2, "0")).join(":");
+}
+
 export function SoundscapeClient({ sessionDid }: { sessionDid: string | null }) {
   const t = useTranslations("common.soundscape");
   const [recordings, setRecordings] = useState<AcAudioListItem[] | null>(null);
@@ -94,6 +110,7 @@ export function SoundscapeClient({ sessionDid }: { sessionDid: string | null }) 
   const [reloadCounter, setReloadCounter] = useState(0);
   const [results, setResults] = useState<Record<string, AnalysisState>>({});
   const [selectedDate, setSelectedDate] = useState<string>(ALL_DATES);
+  const [zoom, setZoom] = useState<TimeWindow>(FULL_DAY_WINDOW);
   const [visibleBands, setVisibleBands] = useState<boolean[]>(FREQUENCY_BANDS.map(() => true));
   const [paused, setPaused] = useState(false);
   const processingRef = useRef(false);
@@ -250,44 +267,60 @@ export function SoundscapeClient({ sessionDid }: { sessionDid: string | null }) 
     if (selectedDate !== ALL_DATES && !dateKeys.includes(selectedDate)) setSelectedDate(ALL_DATES);
   }, [dateKeys, selectedDate]);
 
-  const points = useMemo(() => {
-    const usable = library.filter(
-      (entry): entry is LibraryRecording & { time: WallClockTime } =>
-        entry.time !== null && results[entry.item.uri]?.status === "done" && results[entry.item.uri]?.pmn !== undefined,
-    );
-    const filtered =
-      selectedDate === ALL_DATES ? usable : usable.filter((entry) => wallClockDateKey(entry.time) === selectedDate);
-    return buildSoundscapePoints(
-      filtered.map((entry) => ({
-        minuteOfDay: wallClockMinuteOfDay(entry.time),
-        pmn: results[entry.item.uri]!.pmn!,
-      })),
-    );
-  }, [library, results, selectedDate]);
-
-  // Which recording to play for each dial minute. When several recordings
-  // share a minute (same schedule slot across days), pick the loudest one —
-  // that's the max the chart draws.
-  const playableByMinute = useMemo(() => {
-    const analyzed = library.filter(
-      (entry): entry is AnalyzedLibraryRecording =>
-        entry.time !== null &&
-        results[entry.item.uri]?.status === "done" &&
-        results[entry.item.uri]?.pmn !== undefined,
-    ).map((entry) => ({ ...entry, pmn: results[entry.item.uri]!.pmn! }));
+  /** Analyzed recordings matching the date filter, earliest minute first. */
+  const analyzedRecordings = useMemo<AnalyzedLibraryRecording[]>(() => {
+    const analyzed = library
+      .filter(
+        (entry): entry is LibraryRecording & { time: WallClockTime } =>
+          entry.time !== null &&
+          results[entry.item.uri]?.status === "done" &&
+          results[entry.item.uri]?.pmn !== undefined,
+      )
+      .map((entry) => ({ ...entry, pmn: results[entry.item.uri]!.pmn! }));
     const filtered =
       selectedDate === ALL_DATES
         ? analyzed
         : analyzed.filter((entry) => wallClockDateKey(entry.time) === selectedDate);
+    return filtered.sort(
+      (a, b) =>
+        wallClockMinuteOfDay(a.time) - wallClockMinuteOfDay(b.time) ||
+        wallClockDateKey(a.time).localeCompare(wallClockDateKey(b.time)),
+    );
+  }, [library, results, selectedDate]);
+
+  const points = useMemo(
+    () =>
+      buildSoundscapePoints(
+        analyzedRecordings.map((entry) => ({ minuteOfDay: wallClockMinuteOfDay(entry.time), pmn: entry.pmn })),
+      ),
+    [analyzedRecordings],
+  );
+
+  // Which recording to play for each dial minute. When several recordings
+  // share a minute (same schedule slot across days), pick the loudest one —
+  // that's the max the chart draws. The zoom list below reaches the others.
+  const playableByMinute = useMemo(() => {
     const loudness = (entry: AnalyzedLibraryRecording) => entry.pmn.reduce((sum, value) => sum + value, 0);
     const byMinute = new Map<number, AnalyzedLibraryRecording>();
-    for (const entry of filtered) {
+    for (const entry of analyzedRecordings) {
       const minute = wallClockMinuteOfDay(entry.time);
       const existing = byMinute.get(minute);
       if (!existing || loudness(entry) > loudness(existing)) byMinute.set(minute, entry);
     }
     return byMinute;
-  }, [library, results, selectedDate]);
+  }, [analyzedRecordings]);
+
+  /** Every analyzed recording inside the zoom window — one row each, so two
+   *  recordings a minute apart are still individually reachable. */
+  const recordingsInView = useMemo(
+    () => analyzedRecordings.filter((entry) => isInWindow(wallClockMinuteOfDay(entry.time), zoom)),
+    [analyzedRecordings, zoom],
+  );
+
+  /* A new date filter is a new day to explore — start from the whole dial. */
+  useEffect(() => {
+    setZoom(FULL_DAY_WINDOW);
+  }, [selectedDate]);
 
   const stopPlayback = useCallback(() => {
     playTokenRef.current++;
@@ -301,9 +334,13 @@ export function SoundscapeClient({ sessionDid }: { sessionDid: string | null }) 
   }, []);
 
   // Stop if the playing recording disappears (date filter / library refresh).
+  const playableUris = useMemo(
+    () => new Set(analyzedRecordings.map((entry) => entry.item.uri)),
+    [analyzedRecordings],
+  );
   useEffect(() => {
-    if (player && playableByMinute.get(player.minuteOfDay)?.item.uri !== player.uri) stopPlayback();
-  }, [playableByMinute, player, stopPlayback]);
+    if (player && !playableUris.has(player.uri)) stopPlayback();
+  }, [playableUris, player, stopPlayback]);
 
   // Tear down audio on unmount.
   useEffect(() => {
@@ -318,11 +355,11 @@ export function SoundscapeClient({ sessionDid }: { sessionDid: string | null }) 
     };
   }, []);
 
-  const handlePointClick = useCallback(
-    (minuteOfDay: number) => {
-      const entry = playableByMinute.get(minuteOfDay);
-      if (!entry?.item.accessUri) return;
-      if (player?.minuteOfDay === minuteOfDay) {
+  /** Plays one specific recording (or stops it if it is the one playing). */
+  const playRecording = useCallback(
+    (entry: AnalyzedLibraryRecording) => {
+      if (!entry.item.accessUri) return;
+      if (player?.uri === entry.item.uri) {
         stopPlayback();
         return;
       }
@@ -330,6 +367,7 @@ export function SoundscapeClient({ sessionDid }: { sessionDid: string | null }) 
       setPlaybackFailed(false);
       const token = ++playTokenRef.current;
       const accessUri = entry.item.accessUri;
+      const minuteOfDay = wallClockMinuteOfDay(entry.time);
       setPlayer({ uri: entry.item.uri, minuteOfDay, name: entry.item.name, status: "loading" });
       void (async () => {
         try {
@@ -378,7 +416,27 @@ export function SoundscapeClient({ sessionDid }: { sessionDid: string | null }) 
         }
       })();
     },
-    [playableByMinute, player, stopPlayback],
+    [player, stopPlayback],
+  );
+
+  /* Clicking the dial plays the loudest recording of that minute and brings
+     the detail strip below to the same time, so the next click can be exact. */
+  const handlePointClick = useCallback(
+    (minuteOfDay: number) => {
+      setZoom((current) => centerWindow(current, minuteOfDay));
+      const entry = playableByMinute.get(minuteOfDay);
+      if (entry) playRecording(entry);
+    },
+    [playableByMinute, playRecording],
+  );
+
+  /* Clicking a point on the detail strip plays that minute's recording. */
+  const handleZoomMinuteClick = useCallback(
+    (minuteOfDay: number) => {
+      const entry = playableByMinute.get(minuteOfDay);
+      if (entry) playRecording(entry);
+    },
+    [playableByMinute, playRecording],
   );
 
   const chartDateLabel =
@@ -649,20 +707,106 @@ export function SoundscapeClient({ sessionDid }: { sessionDid: string | null }) 
 
         {points.length > 0 ? (
           <div className="mt-4 grid gap-6 lg:grid-cols-[minmax(0,1fr)_14rem]">
-            <div ref={chartRef} className="mx-auto w-full max-w-2xl">
-              <SoundscapeClock
+            <div className="flex min-w-0 flex-col gap-6">
+              <div ref={chartRef} className="mx-auto w-full max-w-2xl">
+                <SoundscapeClock
+                  points={points}
+                  visibleBands={visibleBands}
+                  bandLabels={bandLabels}
+                  title={t("chart.title", { date: chartDateLabel || t("chart.allDates") })}
+                  radialLabel={t("chart.radialLabel")}
+                  timeLabel={t("chart.timeLabel")}
+                  legendTitle={t("chart.legendTitle")}
+                  onPointClick={handlePointClick}
+                  playingMinute={player?.minuteOfDay ?? null}
+                  playHintLabel={t("chart.clickToPlay")}
+                  stopHintLabel={t("chart.clickToStop")}
+                  focusWindow={zoom}
+                />
+              </div>
+
+              {/* Detail strip: zoom the day down to the exact minute */}
+              <SoundscapeZoom
                 points={points}
+                window={zoom}
+                onWindowChange={setZoom}
                 visibleBands={visibleBands}
                 bandLabels={bandLabels}
-                title={t("chart.title", { date: chartDateLabel || t("chart.allDates") })}
-                radialLabel={t("chart.radialLabel")}
-                timeLabel={t("chart.timeLabel")}
-                legendTitle={t("chart.legendTitle")}
-                onPointClick={handlePointClick}
                 playingMinute={player?.minuteOfDay ?? null}
-                playHintLabel={t("chart.clickToPlay")}
-                stopHintLabel={t("chart.clickToStop")}
+                onMinuteClick={handleZoomMinuteClick}
+                labels={{
+                  range: isFullDay(zoom)
+                    ? t("zoom.rangeAllDay")
+                    : t("zoom.range", {
+                        start: formatWindowMinute(zoom.start),
+                        end: formatWindowMinute(windowEnd(zoom)),
+                      }),
+                  zoomIn: t("zoom.zoomIn"),
+                  zoomOut: t("zoom.zoomOut"),
+                  reset: t("zoom.reset"),
+                  hint: t("zoom.hint"),
+                  timeAxis: t("zoom.timeAxis"),
+                  empty: t("zoom.empty"),
+                  playHint: t("chart.clickToPlay"),
+                  stopHint: t("chart.clickToStop"),
+                }}
               />
+
+              {/* Every recording inside the window, individually playable */}
+              <div className="rounded-xl border bg-card/40">
+                <div className="flex flex-wrap items-center justify-between gap-2 border-b px-3 py-2.5">
+                  <p className="text-sm font-medium text-foreground">{t("zoom.recordingsTitle")}</p>
+                  <p className="text-xs tabular-nums text-muted-foreground">
+                    {t("zoom.recordingsCount", { count: recordingsInView.length })}
+                  </p>
+                </div>
+                {recordingsInView.length === 0 ? (
+                  <p className="px-3 py-6 text-center text-sm text-muted-foreground">{t("zoom.recordingsEmpty")}</p>
+                ) : (
+                  <ul className="max-h-64 divide-y overflow-y-auto">
+                    {recordingsInView.map((entry) => {
+                      const isPlaying = player?.uri === entry.item.uri;
+                      return (
+                        <li key={entry.item.uri}>
+                          <button
+                            type="button"
+                            onClick={() => playRecording(entry)}
+                            aria-pressed={isPlaying}
+                            className={cn(
+                              "flex w-full items-center gap-3 px-3 py-2 text-left text-sm transition-colors hover:bg-muted",
+                              isPlaying && "bg-primary/5",
+                            )}
+                          >
+                            <span className="grid size-7 shrink-0 place-items-center rounded-full border border-border text-muted-foreground">
+                              {isPlaying ? (
+                                player?.status === "loading" ? (
+                                  <Loader2Icon className="size-3.5 animate-spin text-primary" />
+                                ) : (
+                                  <SquareIcon className="size-3 fill-current text-primary" />
+                                )
+                              ) : (
+                                <PlayIcon className="size-3.5" />
+                              )}
+                            </span>
+                            <span className="w-20 shrink-0 font-medium tabular-nums text-foreground">
+                              {formatClockTime(entry.time)}
+                            </span>
+                            <span className="min-w-0 flex-1 truncate text-muted-foreground">
+                              {selectedDate === ALL_DATES ? `${wallClockDateKey(entry.time)} \u00b7 ` : ""}
+                              {entry.item.name}
+                            </span>
+                            {formatDuration(entry.item.durationSeconds) ? (
+                              <span className="shrink-0 text-xs tabular-nums text-muted-foreground">
+                                {formatDuration(entry.item.durationSeconds)}
+                              </span>
+                            ) : null}
+                          </button>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                )}
+              </div>
             </div>
             <aside>
               <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">

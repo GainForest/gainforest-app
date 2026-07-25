@@ -134,6 +134,28 @@ export type SoundscapePoint = {
 };
 
 /**
+ * Rounds a maximum up to a friendly 1/2/5/10 axis bound, so the radial and
+ * linear charts label their grid with round numbers.
+ */
+export function niceCeil(value: number): number {
+  if (value <= 0) return 1;
+  const magnitude = Math.pow(10, Math.floor(Math.log10(value)));
+  const normalized = value / magnitude;
+  const step = normalized <= 1 ? 1 : normalized <= 2 ? 2 : normalized <= 5 ? 5 : 10;
+  return step * magnitude;
+}
+
+/** Compact axis/tooltip formatting for PMN values (e.g. `12k`, `1.4M`). */
+export function formatPmnValue(value: number): string {
+  if (value === 0) return "0";
+  const abs = Math.abs(value);
+  if (abs >= 1_000_000) return `${(value / 1_000_000).toFixed(1)}M`;
+  if (abs >= 1000) return `${Math.round(value / 1000)}k`;
+  if (abs >= 10) return `${Math.round(value)}`;
+  return value.toPrecision(2);
+}
+
+/**
  * Folds per-recording results onto a 24-hour dial: one point per distinct
  * start minute, keeping the max PMN per bin when several recordings share a
  * minute (e.g. the same schedule slot across multiple days).

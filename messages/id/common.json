@@ -2930,6 +2930,19 @@
       "playError": "Rekaman ini tidak dapat diputar di peramban Anda.",
       "datesTitle": "Hari",
       "allDatesChip": "Semua hari"
+    },
+    "zoom": {
+      "rangeAllDay": "Sepanjang hari · 00:00 – 24:00",
+      "range": "Diperbesar ke {start} – {end}",
+      "hint": "Seret untuk menjelajah hari, gunakan + dan − untuk memperbesar, lalu klik sebuah titik untuk mendengarkan.",
+      "zoomIn": "Perbesar",
+      "zoomOut": "Perkecil",
+      "reset": "Sepanjang hari",
+      "empty": "Tidak ada rekaman pada rentang ini",
+      "timeAxis": "Waktu",
+      "recordingsTitle": "Rekaman yang terlihat",
+      "recordingsCount": "{count, plural, other {# rekaman}}",
+      "recordingsEmpty": "Tidak ada rekaman pada waktu ini — perkecil atau seret ke bagian hari yang lain."
     }
   }
 }

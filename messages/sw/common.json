@@ -2930,6 +2930,19 @@
       "playError": "Rekodi hii haikuweza kuchezwa kwenye kivinjari chako.",
       "datesTitle": "Siku",
       "allDatesChip": "Siku zote"
+    },
+    "zoom": {
+      "rangeAllDay": "Siku nzima · 00:00 – 24:00",
+      "range": "Umekuzwa hadi {start} – {end}",
+      "hint": "Buruta ili kupitia siku, tumia + na − kukuza, kisha bofya nukta ili kusikiliza.",
+      "zoomIn": "Kuza",
+      "zoomOut": "Punguza ukuzaji",
+      "reset": "Siku nzima",
+      "empty": "Hakuna rekodi katika kipindi hiki",
+      "timeAxis": "Wakati",
+      "recordingsTitle": "Rekodi zinazoonekana",
+      "recordingsCount": "{count, plural, one {rekodi #} other {rekodi #}}",
+      "recordingsEmpty": "Hakuna rekodi kwa wakati huu — punguza ukuzaji au buruta hadi sehemu nyingine ya siku."
     }
   }
 }

@@ -9,7 +9,13 @@
 
 import { useMemo, useRef, useState } from "react";
 import { formatMinuteOfDay } from "@/lib/soundscape/audiomoth";
-import { BAND_COLORS, type SoundscapePoint } from "@/lib/soundscape/analysis";
+import {
+  BAND_COLORS,
+  formatPmnValue as formatValue,
+  niceCeil,
+  type SoundscapePoint,
+} from "@/lib/soundscape/analysis";
+import { isFullDay, windowEnd, type TimeWindow } from "@/lib/soundscape/zoom";
 
 export { BAND_COLORS };
 
@@ -34,23 +40,6 @@ function angleForMinute(minuteOfDay: number): number {
 function polar(minuteOfDay: number, radius: number): { x: number; y: number } {
   const angle = angleForMinute(minuteOfDay);
   return { x: CENTER + radius * Math.cos(angle), y: CENTER + radius * Math.sin(angle) };
-}
-
-function niceCeil(value: number): number {
-  if (value <= 0) return 1;
-  const magnitude = Math.pow(10, Math.floor(Math.log10(value)));
-  const normalized = value / magnitude;
-  const step = normalized <= 1 ? 1 : normalized <= 2 ? 2 : normalized <= 5 ? 5 : 10;
-  return step * magnitude;
-}
-
-function formatValue(value: number): string {
-  if (value === 0) return "0";
-  const abs = Math.abs(value);
-  if (abs >= 1_000_000) return `${(value / 1_000_000).toFixed(1)}M`;
-  if (abs >= 1000) return `${Math.round(value / 1000)}k`;
-  if (abs >= 10) return `${Math.round(value)}`;
-  return value.toPrecision(2);
 }
 
 /**
@@ -106,10 +95,29 @@ type SoundscapeClockProps = {
   playingMinute?: number | null;
   playHintLabel?: string;
   stopHintLabel?: string;
+  /** Slice of the day the detail strip below is showing, shaded on the dial. */
+  focusWindow?: TimeWindow | null;
 };
 
+/** Shaded sector marking the slice of the day the detail strip is showing. */
+function sectorPath(window: TimeWindow, innerRadius: number, outerRadius: number): string {
+  const start = polar(window.start, outerRadius);
+  const end = polar(windowEnd(window), outerRadius);
+  const startInner = polar(window.start, innerRadius);
+  const endInner = polar(windowEnd(window), innerRadius);
+  const largeArc = window.span > 720 ? 1 : 0;
+  return [
+    `M${startInner.x.toFixed(1)} ${startInner.y.toFixed(1)}`,
+    `L${start.x.toFixed(1)} ${start.y.toFixed(1)}`,
+    `A${outerRadius} ${outerRadius} 0 ${largeArc} 1 ${end.x.toFixed(1)} ${end.y.toFixed(1)}`,
+    `L${endInner.x.toFixed(1)} ${endInner.y.toFixed(1)}`,
+    `A${innerRadius} ${innerRadius} 0 ${largeArc} 0 ${startInner.x.toFixed(1)} ${startInner.y.toFixed(1)}`,
+    "Z",
+  ].join("");
+}
+
 export function SoundscapeClock(props: SoundscapeClockProps) {
-  const { points, visibleBands, onPointClick, playingMinute } = props;
+  const { points, visibleBands, onPointClick, playingMinute, focusWindow } = props;
   const svgRef = useRef<SVGSVGElement | null>(null);
   const [hover, setHover] = useState<HoverState | null>(null);
 
@@ -177,7 +185,19 @@ export function SoundscapeClock(props: SoundscapeClockProps) {
         role="img"
         aria-label={props.title}
         onPointerMove={handlePointerMove}
-        onPointerLeave={() => setHover(null)}
+        onPointerLeave={(event) => {
+          // The tooltip sits over the dial and a global `[data-rk] *` rule
+          // makes it hit-testable, so React reports a leave the moment it
+          // appears — only clear the hover when the pointer really left.
+          const rect = svgRef.current?.getBoundingClientRect();
+          const outside =
+            !rect ||
+            event.clientX < rect.left ||
+            event.clientX > rect.right ||
+            event.clientY < rect.top ||
+            event.clientY > rect.bottom;
+          if (outside) setHover(null);
+        }}
         onClick={handleClick}
         data-soundscape-clock
       >
@@ -185,6 +205,15 @@ export function SoundscapeClock(props: SoundscapeClockProps) {
         <text x={CENTER} y={26} textAnchor="middle" fontSize={17} className="fill-foreground">
           {props.title}
         </text>
+
+        {/* Slice of the day the detail strip below is zoomed into */}
+        {focusWindow && !isFullDay(focusWindow) ? (
+          <path
+            d={sectorPath(focusWindow, INNER_RADIUS, OUTER_RADIUS + 8)}
+            className="fill-primary/10 stroke-primary/40"
+            strokeWidth={1}
+          />
+        ) : null}
 
         {/* Radial grid rings */}
         {gridRings.map((fraction) => (
@@ -328,8 +357,16 @@ export function SoundscapeClock(props: SoundscapeClockProps) {
 
       {hover ? (
         <div
-          className="pointer-events-none absolute z-10 min-w-40 -translate-x-1/2 rounded-lg border bg-popover px-3 py-2 text-xs shadow-md"
-          style={{ left: hover.x, top: Math.max(0, hover.y - 8), transform: "translate(-50%, -100%)" }}
+          className="absolute z-10 min-w-40 -translate-x-1/2 rounded-lg border bg-popover px-3 py-2 text-xs shadow-md"
+          // `pointerEvents` is inline because a global `[data-rk] *` rule
+          // (RainbowKit) outranks the utility class — a tooltip that takes the
+          // pointer would cancel the very hover it is describing.
+          style={{
+            left: hover.x,
+            top: Math.max(0, hover.y - 8),
+            transform: "translate(-50%, -100%)",
+            pointerEvents: "none",
+          }}
         >
           <p className="font-semibold text-foreground">{formatMinuteOfDay(hover.point.minuteOfDay)}</p>
           {onPointClick ? (
