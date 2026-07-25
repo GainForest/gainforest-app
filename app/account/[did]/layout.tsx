@@ -179,14 +179,6 @@ export default async function AccountLayout({
       <AccountChrome
         hero={
           <>
-            {moderator?.isModerator && testAccountFlagged !== null ? (
-              <StewardTools
-                did={account.did}
-                accountName={account.displayName}
-                initialTestFlagged={testAccountFlagged}
-                initialAwarded={awardedManualRecognition}
-              />
-            ) : null}
             {canEditProfile && target ? (
               <EditableAccountHeader
                 account={account}
@@ -200,6 +192,16 @@ export default async function AccountLayout({
             ) : (
               <AccountHero account={account} memberships={memberships} />
             )}
+            {/* Steward panel sits between the profile card and the tab bar so it
+                reads as a tool for this profile without pushing the profile down. */}
+            {moderator?.isModerator && testAccountFlagged !== null ? (
+              <StewardTools
+                did={account.did}
+                accountName={account.displayName}
+                initialTestFlagged={testAccountFlagged}
+                initialAwarded={awardedManualRecognition}
+              />
+            ) : null}
             <AccountTabBar
               did={account.urlIdentifier}
               accountKind={account.kind}
