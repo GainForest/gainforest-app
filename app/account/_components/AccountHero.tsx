@@ -24,6 +24,7 @@ import { formatCountry } from "../../_lib/format";
 import { SocialGlyph } from "@/app/_components/SocialIcon";
 import { TrustedByBadges } from "@/app/_components/TrustedByBadges";
 import { AccountAwards } from "./AccountAwards";
+import { ExpandableBio } from "./ExpandableBio";
 import { FollowButton, FollowProvider, FollowStats } from "@/app/_components/FollowButton";
 import { Button } from "@/components/ui/button";
 
@@ -260,9 +261,7 @@ export function AccountHero({
             <h1 className="font-instrument text-3xl font-light italic leading-[1.1] tracking-[-0.02em] text-foreground md:text-4xl">
               {account.displayName}
             </h1>
-            <p className="mt-1.5 line-clamp-2 text-sm leading-relaxed text-muted-foreground">
-              {account.description ?? ""}
-            </p>
+            <ExpandableBio text={account.description ?? ""} className="mt-1.5" />
             <FollowStats targetDid={account.did} identifier={account.urlIdentifier} className="mt-2.5" />
             {/* Quiet facts — read-only metadata rendered as text, never as
                 fake buttons, so only real actions look pressable. */}
