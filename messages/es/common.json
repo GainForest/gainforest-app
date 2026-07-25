@@ -117,8 +117,7 @@
       "labeler": "Etiquetado",
       "globe": "Globo",
       "audiomoth": "AudioMoth",
-      "identifications": "Identificaciones",
-      "soundscape": "Paisaje sonoro"
+      "identifications": "Identificaciones"
     },
     "prompts": {
       "signInDescription": "Inicia sesión para gestionar tu cuenta y contenido.",
@@ -1825,7 +1824,8 @@
       "deployments": "Despliegue",
       "upload": "Subir",
       "label": "Etiquetar",
-      "identifications": "Identificaciones"
+      "identifications": "Identificaciones",
+      "soundscape": "Paisaje sonoro"
     },
     "label": {
       "subtitle": "Revisa grabaciones de AudioMoth, marca llamadas por tiempo y frecuencia, y crea un conjunto de etiquetas claro para tus datos de campo.",

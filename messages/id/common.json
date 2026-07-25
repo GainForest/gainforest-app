@@ -117,8 +117,7 @@
       "labeler": "Pelabel",
       "globe": "Bola Dunia",
       "audiomoth": "AudioMoth",
-      "identifications": "Identifikasi",
-      "soundscape": "Lanskap suara"
+      "identifications": "Identifikasi"
     },
     "prompts": {
       "signInDescription": "Masuk untuk mengelola akun dan konten Anda.",
@@ -1825,7 +1824,8 @@
       "deployments": "Penempatan",
       "upload": "Unggah",
       "label": "Beri label",
-      "identifications": "Identifikasi"
+      "identifications": "Identifikasi",
+      "soundscape": "Lanskap suara"
     },
     "label": {
       "subtitle": "Tinjau rekaman AudioMoth, tandai suara berdasarkan waktu dan frekuensi, lalu buat kumpulan label yang rapi untuk data lapangan Anda.",

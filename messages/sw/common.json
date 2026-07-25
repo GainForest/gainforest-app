@@ -117,8 +117,7 @@
       "labeler": "Uwekaji lebo",
       "globe": "Dunia",
       "audiomoth": "AudioMoth",
-      "identifications": "Vitambulisho",
-      "soundscape": "Mandhari ya sauti"
+      "identifications": "Vitambulisho"
     },
     "prompts": {
       "signInDescription": "Ingia ili kusimamia akaunti na maudhui yako.",
@@ -1825,7 +1824,8 @@
       "deployments": "Usambazaji",
       "upload": "Pakia",
       "label": "Weka lebo",
-      "identifications": "Vitambulisho"
+      "identifications": "Vitambulisho",
+      "soundscape": "Mandhari ya sauti"
     },
     "label": {
       "subtitle": "Kagua rekodi za AudioMoth, weka alama za miito kwa muda na masafa, kisha tengeneza mkusanyiko safi wa lebo za data ya uwanjani.",

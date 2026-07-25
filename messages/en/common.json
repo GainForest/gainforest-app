@@ -117,8 +117,7 @@
       "labeler": "Labeler",
       "globe": "Globe",
       "audiomoth": "AudioMoth",
-      "identifications": "Identifications",
-      "soundscape": "Soundscape"
+      "identifications": "Identifications"
     },
     "prompts": {
       "signInDescription": "Sign in to manage your account and content.",
@@ -1825,7 +1824,8 @@
       "deployments": "Deployment",
       "upload": "Upload",
       "label": "Label",
-      "identifications": "Identifications"
+      "identifications": "Identifications",
+      "soundscape": "Soundscape"
     },
     "label": {
       "subtitle": "Review AudioMoth recordings, mark calls by time and frequency, and build a clean label set for your field data.",

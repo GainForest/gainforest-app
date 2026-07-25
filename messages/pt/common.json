@@ -117,8 +117,7 @@
       "labeler": "Identificação",
       "globe": "Globo",
       "audiomoth": "AudioMoth",
-      "identifications": "Identificações",
-      "soundscape": "Paisagem sonora"
+      "identifications": "Identificações"
     },
     "prompts": {
       "signInDescription": "Entre para gerenciar sua conta e conteúdo.",
@@ -1825,7 +1824,8 @@
       "deployments": "Implantação",
       "upload": "Enviar",
       "label": "Rotular",
-      "identifications": "Identificações"
+      "identifications": "Identificações",
+      "soundscape": "Paisagem sonora"
     },
     "label": {
       "subtitle": "Revise gravações do AudioMoth, marque chamados por tempo e frequência e crie um conjunto de rótulos organizado para seus dados de campo.",

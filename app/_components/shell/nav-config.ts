@@ -1,6 +1,5 @@
 import {
   AudioLinesIcon,
-  AudioWaveformIcon,
   BinocularsIcon,
   BotIcon,
   Building2Icon,
@@ -147,16 +146,6 @@ export const NAV_ITEMS: NavSection[] = [
         Icon: AudioLinesIcon,
         href: "/audiomoth",
         pathCheck: { startsWith: "/audiomoth" },
-      },
-      {
-        kind: "leaf",
-        id: "soundscape",
-        text: "Soundscape",
-        Icon: AudioWaveformIcon,
-        href: "/soundscape",
-        pathCheck: { startsWith: "/soundscape" },
-        // Still being iterated on; admin-only until the clock is ready.
-        adminOnly: true,
       },
     ],
   },
