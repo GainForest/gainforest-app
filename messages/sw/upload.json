@@ -923,7 +923,7 @@
     "draftRestored": "Rasimu imerejeshwa",
     "discardDraft": "Tupa rasimu",
     "unidentifiedOrganism": "Kiumbe kisichotambuliwa",
-    "selectToDeleteHint": "Chagua uchunguzi ili kuzifuta au kuziweka katika seti ya data.",
+    "clearSelection": "Ondoa uchaguzi",
     "selectedForDelete": "{count, plural, one {uchunguzi # umechaguliwa} other {uchunguzi # umechaguliwa}}",
     "deleteSelected": "Futa vilivyochaguliwa",
     "deleteSelectedTitle": "Futa uchunguzi uliochaguliwa?",

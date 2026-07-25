@@ -246,7 +246,9 @@ export function RecordExplorer({
   hiddenRecordIds?: ReadonlySet<string>;
   observationSelection?: {
     selectedIds: ReadonlySet<string>;
-    onToggle: (record: OccurrenceRecord, selected: boolean) => void;
+    /** True while at least one observation is selected (selection mode). */
+    active: boolean;
+    onToggle: (record: OccurrenceRecord, selected: boolean, shiftKey?: boolean) => void;
     getDisabledReason?: (record: OccurrenceRecord) => string | null;
   };
   onObservationVisibleRecordsChange?: (records: OccurrenceRecord[]) => void;

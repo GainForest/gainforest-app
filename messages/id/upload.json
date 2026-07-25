@@ -923,7 +923,7 @@
     "draftRestored": "Draf dipulihkan",
     "discardDraft": "Buang draf",
     "unidentifiedOrganism": "Organisme tidak teridentifikasi",
-    "selectToDeleteHint": "Pilih observasi untuk menghapusnya atau mengelompokkannya ke dalam set data.",
+    "clearSelection": "Batalkan pilihan",
     "selectedForDelete": "{count, plural, one {# observasi dipilih} other {# observasi dipilih}}",
     "deleteSelected": "Hapus yang dipilih",
     "deleteSelectedTitle": "Hapus observasi yang dipilih?",

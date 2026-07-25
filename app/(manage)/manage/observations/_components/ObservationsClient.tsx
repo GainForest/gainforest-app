@@ -509,7 +509,7 @@ export function ObservationsClient({
   const [visibleRecords, setVisibleRecords] = useState<OccurrenceRecord[]>([]);
   // True once the explorer has loaded and holds no observations at all. When
   // empty we strip the page back to just the heading and the seedling banner.
-  const [isEmpty, setIsEmpty] = useState(false);
+  const [, setIsEmpty] = useState(false);
   const [deletedRecordIds, setDeletedRecordIds] = useState<Set<string>>(() => new Set());
   const [isDeletingSelected, setIsDeletingSelected] = useState(false);
   const createPermission = canCreateRecord(target);
@@ -524,11 +524,25 @@ export function ObservationsClient({
   const deletePermission = canDeleteRecord(target, { ownRecord: target.kind === "personal" });
   const deleteDisabledReason = deletePermission.allowed ? null : deletePermission.reason;
   const selectedIds = useMemo(() => new Set(selectedRecords.keys()), [selectedRecords]);
+  /** Last plain-clicked tile — the fixed end of a shift-click range. */
+  const selectionAnchorRef = useRef<string | null>(null);
 
   useEffect(() => {
     configureObservationMutationRepo(target.kind === "group" ? target.did : null);
     return () => configureObservationMutationRepo(null);
   }, [target]);
+
+  // Escape drops the selection, the same way it does on the Audio tab.
+  useEffect(() => {
+    if (selectedRecords.size === 0) return;
+    const onKeyDown = (event: globalThis.KeyboardEvent) => {
+      if (event.key !== "Escape") return;
+      selectionAnchorRef.current = null;
+      setSelectedRecords(new Map());
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [selectedRecords.size]);
 
   // Group the steward's observations by the project they were collected for so
   // the list can be filtered per project (read straight from projectRef).
@@ -626,7 +640,33 @@ export function ObservationsClient({
     });
   }, []);
 
-  function toggleSelectedRecord(record: OccurrenceRecord, selected: boolean) {
+  /* ── Drive-style selection ────────────────────────────────────────────────
+   * Mirrors the account Audio tab: a checkbox fades in when a tile is hovered,
+   * clicking it selects the sighting, shift-click selects the whole range from
+   * the last plain click, Escape clears, and the header actions are replaced by
+   * a count + Delete toolbar while anything is selected. */
+  function toggleSelectedRecord(record: OccurrenceRecord, selected: boolean, shiftKey = false) {
+    if (deleteDisabledReason) return;
+    const anchorId = selectionAnchorRef.current;
+    if (shiftKey && anchorId && anchorId !== record.id) {
+      const from = visibleRecords.findIndex((candidate) => candidate.id === anchorId);
+      const to = visibleRecords.findIndex((candidate) => candidate.id === record.id);
+      if (from !== -1 && to !== -1) {
+        // Select everything between the anchor and the shift-clicked tile,
+        // inclusive. The anchor stays put so another shift-click just resizes
+        // the range, like Drive/Finder.
+        setSelectedRecords((current) => {
+          const next = new Map(current);
+          for (let i = Math.min(from, to); i <= Math.max(from, to); i += 1) {
+            const inRange = visibleRecords[i];
+            next.set(inRange.id, inRange);
+          }
+          return next;
+        });
+        return;
+      }
+    }
+    selectionAnchorRef.current = record.id;
     setSelectedRecords((current) => {
       const next = new Map(current);
       if (selected) next.set(record.id, record);
@@ -641,6 +681,7 @@ export function ObservationsClient({
   }
 
   function clearSelectedRecords() {
+    selectionAnchorRef.current = null;
     setSelectedRecords(new Map());
   }
 
@@ -823,44 +864,56 @@ export function ObservationsClient({
 
   return (
     <div className="bg-background pb-4">
-      {!isEmpty ? (
-        <div className="mx-auto mt-5 max-w-6xl px-6">
-          <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl bg-muted px-4 py-3">
-            <p className="text-sm text-muted-foreground">
-              {selectedRecords.size > 0 ? t("selectedForDelete", { count: selectedRecords.size }) : t("selectToDeleteHint")}
-            </p>
-            <div className="flex flex-wrap items-center gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={selectedRecords.size === visibleRecords.length && visibleRecords.length > 0 ? clearSelectedRecords : selectAllVisibleRecords}
-                disabled={visibleRecords.length === 0 || Boolean(deleteDisabledReason) || isDeletingSelected}
-                title={deleteDisabledReason ?? undefined}
-              >
-                {selectedRecords.size === visibleRecords.length && visibleRecords.length > 0 ? t("deselectAll") : t("selectAll")}
-              </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={openGroupIntoDataset}
-                disabled={selectedRecords.size === 0 || Boolean(createPermission.reason) || isDeletingSelected}
-                title={createPermission.reason ?? undefined}
-                className="text-muted-foreground hover:text-foreground"
-              >
-                <FolderPlusIcon className="size-4" />
-                {t("groupIntoDataset")}
-              </Button>
-              <Button
-                variant="destructive"
-                size="sm"
-                onClick={openDeleteSelectedModal}
-                disabled={selectedRecords.size === 0 || Boolean(deleteDisabledReason) || isDeletingSelected}
-                title={deleteDisabledReason ?? undefined}
-              >
-                {isDeletingSelected ? <Loader2Icon className="size-4 animate-spin" /> : <Trash2Icon className="size-4" />}
-                {isDeletingSelected ? t("deletingSelected") : t("deleteSelected")}
-              </Button>
-            </div>
+      {/* Drive-style selection toolbar: nothing is shown until a sighting is
+          picked, then a floating pill offers the actions for that selection.
+          Anchored to the viewport so it stays reachable while scrolling a long
+          grid instead of pushing the tiles around when it appears. */}
+      {selectedRecords.size > 0 ? (
+        <div className="pointer-events-none fixed inset-x-0 bottom-[max(1rem,env(safe-area-inset-bottom))] z-[75] flex justify-center px-4 pr-[4.5rem] sm:pr-4">
+          <div className="pointer-events-auto flex max-w-full flex-wrap items-center justify-center gap-1.5 rounded-3xl border border-border bg-card p-1.5 shadow-lg sm:rounded-full">
+            <button
+              type="button"
+              onClick={clearSelectedRecords}
+              aria-label={t("clearSelection")}
+              title={t("clearSelection")}
+              className="grid h-7 w-7 place-items-center rounded-full text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+            >
+              <XIcon className="size-4" />
+            </button>
+            <span className="px-0.5 text-sm font-medium tabular-nums text-foreground">
+              {t("selectedForDelete", { count: selectedRecords.size })}
+            </span>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={selectAllVisibleRecords}
+              disabled={selectedRecords.size === visibleRecords.length || isDeletingSelected}
+              className="rounded-full text-muted-foreground hover:text-foreground"
+            >
+              {t("selectAll")}
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={openGroupIntoDataset}
+              disabled={Boolean(createPermission.reason) || isDeletingSelected}
+              title={createPermission.reason ?? undefined}
+              className="rounded-full text-muted-foreground hover:text-foreground"
+            >
+              <FolderPlusIcon className="size-4" />
+              {t("groupIntoDataset")}
+            </Button>
+            <Button
+              variant="destructive"
+              size="sm"
+              onClick={openDeleteSelectedModal}
+              disabled={Boolean(deleteDisabledReason) || isDeletingSelected}
+              title={deleteDisabledReason ?? undefined}
+              className="rounded-full"
+            >
+              {isDeletingSelected ? <Loader2Icon className="size-4 animate-spin" /> : <Trash2Icon className="size-4" />}
+              {isDeletingSelected ? t("deletingSelected") : t("deleteSelected")}
+            </Button>
           </div>
         </div>
       ) : null}
@@ -904,6 +957,7 @@ export function ObservationsClient({
           hiddenRecordIds={deletedRecordIds}
           observationSelection={{
             selectedIds,
+            active: selectedRecords.size > 0,
             onToggle: toggleSelectedRecord,
             getDisabledReason: () => deleteDisabledReason,
           }}

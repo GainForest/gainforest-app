@@ -3,7 +3,8 @@
 import { memo, useEffect, useMemo, useRef, useState, type MouseEvent as ReactMouseEvent, type ReactNode } from "react";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
-import { AudioLinesIcon, CheckIcon, Layers3Icon, Loader2Icon, PauseIcon, PlayIcon, RulerIcon } from "lucide-react";
+import { AudioLinesIcon, Layers3Icon, Loader2Icon, PauseIcon, PlayIcon, RulerIcon } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   fetchObservationMeasurements,
   fetchObservationMediaCounts,
@@ -19,9 +20,18 @@ import { pauseOtherAudio, playExclusiveAudio, registerAudioElement } from "../_l
 import { resolveDidProfile, getCachedProfile } from "../_lib/did-profile";
 import { cn } from "@/lib/utils";
 
+/**
+ * Drive-style selection for the observation grid, mirroring the account Audio
+ * tab: a checkbox fades in on hover (and stays put once the tile is selected),
+ * shift-clicks are forwarded so the parent can select a whole range, and once
+ * anything is selected (`active`) a plain click anywhere on a tile toggles it
+ * instead of opening the sighting.
+ */
 type ObservationSelection = {
   selectedIds: ReadonlySet<string>;
-  onToggle: (record: OccurrenceRecord, selected: boolean) => void;
+  /** True while at least one observation is selected (selection mode). */
+  active: boolean;
+  onToggle: (record: OccurrenceRecord, selected: boolean, shiftKey?: boolean) => void;
   getDisabledReason?: (record: OccurrenceRecord) => string | null;
 };
 
@@ -241,19 +251,32 @@ const ObservationCard = memo(function ObservationCard({
     onOpen(record);
   }
 
+  // Once a selection exists the grid is in selection mode, so a plain click
+  // adds/removes tiles (Drive/Photos behaviour) rather than opening them.
+  const selectionActive = Boolean(selection?.active) && !selectionDisabled;
+
+  function activate(shiftKey = false) {
+    if (selectionActive) selection?.onToggle(record, !selected, shiftKey);
+    else open();
+  }
+
   return (
     <div
       role="button"
       tabIndex={0}
-      onClick={open}
+      onClick={(event) => activate(event.shiftKey)}
+      aria-selected={selection ? selected : undefined}
       onKeyDown={(e) => {
         if (e.key === "Enter" || e.key === " ") {
           e.preventDefault();
-          open();
+          activate(e.shiftKey);
         }
       }}
-      aria-label={t("openDetails", { name })}
-      className="group relative block aspect-square w-full cursor-pointer overflow-hidden rounded-lg bg-surface-sunken text-left outline-none transition-all duration-300 hover:z-10 hover:shadow-[0_18px_40px_-22px_rgba(20,30,15,0.55)] focus-visible:z-10 focus-visible:ring-2 focus-visible:ring-primary/60"
+      aria-label={selectionActive ? (selected ? t("deselectObservation") : t("selectObservation")) : t("openDetails", { name })}
+      className={cn(
+        "group relative block aspect-square w-full cursor-pointer select-none overflow-hidden rounded-lg bg-surface-sunken text-left outline-none transition-all duration-300 hover:z-10 hover:shadow-[0_18px_40px_-22px_rgba(20,30,15,0.55)] focus-visible:z-10 focus-visible:ring-2 focus-visible:ring-primary/60",
+        selected && "ring-2 ring-primary ring-offset-2 ring-offset-background",
+      )}
     >
       {hasImage ? (
         <Image
@@ -284,24 +307,22 @@ const ObservationCard = memo(function ObservationCard({
       )}
 
       {selection ? (
-        <button
-          type="button"
+        <Checkbox
+          checked={selected}
           disabled={selectionDisabled}
           title={disabledReason ?? undefined}
           aria-label={selected ? t("deselectObservation") : t("selectObservation")}
-          aria-pressed={selected}
           onClick={(event) => {
             event.stopPropagation();
-            if (!selectionDisabled) selection.onToggle(record, !selected);
+            if (!selectionDisabled) selection.onToggle(record, !selected, event.shiftKey);
           }}
-          className={`absolute left-2 top-2 z-30 grid h-8 w-8 cursor-pointer place-items-center rounded-full border shadow-md backdrop-blur-md transition ${
-            selected
-              ? "border-primary bg-primary text-primary-foreground"
-              : "border-white/55 bg-black/45 text-white hover:bg-black/60"
-          } disabled:cursor-not-allowed disabled:opacity-55`}
-        >
-          {selected ? <CheckIcon className="h-4 w-4" aria-hidden /> : null}
-        </button>
+          className={cn(
+            "absolute left-2 top-2 z-30 size-5 cursor-pointer border-white/70 bg-black/45 text-white shadow-md backdrop-blur-md transition-opacity",
+            // Hidden until the tile is hovered — unless it is already selected,
+            // or the grid is in selection mode, or the device has no hover.
+            selected || selection.active ? "opacity-100" : "opacity-70 sm:opacity-0 sm:group-hover:opacity-100 sm:group-focus-within:opacity-100",
+          )}
+        />
       ) : null}
 
       {!compact && mediaCount > 1 ? (
