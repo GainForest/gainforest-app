@@ -117,8 +117,7 @@
       "labeler": "Uwekaji lebo",
       "globe": "Dunia",
       "audiomoth": "AudioMoth",
-      "identifications": "Vitambulisho",
-      "soundscape": "Mandhari ya sauti"
+      "identifications": "Vitambulisho"
     },
     "prompts": {
       "signInDescription": "Ingia ili kusimamia akaunti na maudhui yako.",
@@ -1825,7 +1824,8 @@
       "deployments": "Usambazaji",
       "upload": "Pakia",
       "label": "Weka lebo",
-      "identifications": "Vitambulisho"
+      "identifications": "Vitambulisho",
+      "soundscape": "Mandhari ya sauti"
     },
     "label": {
       "subtitle": "Kagua rekodi za AudioMoth, weka alama za miito kwa muda na masafa, kisha tengeneza mkusanyiko safi wa lebo za data ya uwanjani.",
@@ -2869,27 +2869,37 @@
   "soundscape": {
     "meta": {
       "title": "Mandhari ya sauti",
-      "description": "Leta rekodi za AudioMoth na uunde saa ya mandhari ya sauti ya saa 24 kutokana na masafa yake."
+      "description": "Unda saa ya mandhari ya sauti ya saa 24 kutokana na rekodi za sauti zilizopakiwa tayari kwenye akaunti yako."
     },
     "hero": {
       "eyebrow": "Ufuatiliaji wa sauti",
-      "title": "Badilisha rekodi za AudioMoth kuwa saa ya mandhari ya sauti",
-      "description": "Dondosha hapa chini faili za WAV za AudioMoth za siku nzima. Kila rekodi huchunguzwa katika mikanda mitano ya masafa, na nyakati zenye sauti kubwa zaidi huchorwa kuzunguka saa ya saa 24.",
-      "timeNote": "Nyakati za rekodi husomwa kutoka kwa majina ya faili za AudioMoth (kwa mfano 20240404_153000.WAV). Vifaa vya AudioMoth kwa kawaida hutumia UTC isipokuwa vimewekwa vinginevyo. Rekodi zako haziondoki kwenye kifaa hiki — kila kitu huchambuliwa kwenye kivinjari chako."
+      "title": "Badilisha rekodi zako zilizopakiwa kuwa saa ya mandhari ya sauti",
+      "description": "Kila rekodi uliyopakia huchunguzwa katika mikanda mitano ya masafa, na nyakati zenye sauti kubwa zaidi huchorwa kuzunguka saa ya saa 24.",
+      "timeNote": "Nyakati za rekodi hutoka kwenye maelezo ya kila rekodi (saa ya kifaa, kwa kawaida UTC). Uchambuzi hupakua kila rekodi asili kwenye kivinjari chako mara moja tu — matokeo huhifadhiwa kwenye kifaa hiki."
     },
-    "import": {
-      "dropTitle": "Dondosha faili za WAV za AudioMoth hapa",
-      "dropHint": "Unaweza kuchagua faili nyingi kwa wakati mmoja — rekodi za siku nzima hufanya kazi vizuri zaidi.",
-      "browse": "Chagua faili",
-      "fileCount": "{count, plural, one {Rekodi #} other {Rekodi #}}",
-      "clearAll": "Futa zote",
-      "removeFile": "Ondoa {name}",
+    "library": {
+      "signInTitle": "Ingia ili kuunda mandhari yako ya sauti",
+      "signInBody": "Saa ya mandhari ya sauti huchorwa kutokana na rekodi zilizopakiwa tayari kwenye akaunti yako. Ingia ili kuona zako.",
+      "loading": "Inapakia rekodi zako…",
+      "loadFailed": "Rekodi zako hazikuweza kupakiwa. Jaribu tena baada ya muda mfupi.",
+      "emptyTitle": "Bado hakuna rekodi zilizopakiwa",
+      "emptyBody": "Saa ya mandhari ya sauti huundwa kutokana na rekodi za akaunti yako. Pakia kwanza rekodi za AudioMoth, kisha urudi hapa.",
+      "goToUpload": "Pakia rekodi",
+      "refresh": "Onyesha upya",
+      "count": "{count, plural, one {Rekodi # iliyopakiwa} other {Rekodi # zilizopakiwa}}",
+      "downloadNote": "Kila rekodi asili hupakuliwa na kuchambuliwa mara moja tu; matokeo huhifadhiwa kwenye kifaa hiki.",
+      "analyze": "Chambua {count, plural, one {rekodi #} other {rekodi #}}",
+      "analyzeDone": "Rekodi zote zimechambuliwa",
+      "downloading": "Inapakua {name}…",
       "analyzing": "Inachambua {name}…",
-      "progress": "Rekodi {done} kati ya {total} zimechambuliwa",
-      "statusError": "Faili hii haikuweza kusomwa",
-      "tooShort": "Rekodi ni fupi mno kuchambuliwa",
-      "onlyWav": "Faili za WAV pekee ndizo zinazokubaliwa.",
-      "timeFromModified": "Jina la faili halina tarehe na saa — inatumia muda wa marekebisho ya faili"
+      "progress": "{done} kati ya {total} zimechambuliwa",
+      "statusQueued": "Inasubiri…",
+      "statusAnalyzed": "Imechambuliwa",
+      "statusNotAnalyzed": "Bado haijachambuliwa",
+      "statusNoOriginal": "Faili asili ya sauti haipatikani",
+      "statusNoTime": "Hakuna muda wa rekodi",
+      "statusError": "Rekodi hii haikuweza kuchambuliwa",
+      "tooShort": "Ni fupi mno kuchambuliwa (inahitaji angalau dakika moja kamili)"
     },
     "chart": {
       "title": "Nguvu kasoro kelele — {date}",
@@ -2898,7 +2908,7 @@
       "timeLabel": "Saa (Saa za siku)",
       "legendTitle": "Mikanda ya masafa",
       "empty": "Rekodi zilizochambuliwa zitaonekana hapa kama saa ya mandhari ya sauti ya saa 24.",
-      "emptyHint": "Leta rekodi za AudioMoth hapo juu ili kuanza.",
+      "emptyHint": "Chambua rekodi zako zilizopakiwa hapo juu ili kuanza.",
       "downloadPng": "Pakua picha",
       "hoverHint": "Sogeza kishale juu ya saa ili kuona thamani.",
       "datesTitle": "Siku",
