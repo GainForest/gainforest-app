@@ -10,7 +10,14 @@ import {
   WavDecodeError,
 } from "./audiomoth";
 import { parsePmnCache, toCacheEntry, trimPmnCache } from "./pmn-cache";
-import { buildSoundscapePoints, fftRadix2, formatBandRange, FREQUENCY_BANDS, nyquistHz } from "./analysis";
+import {
+  buildSoundscapePoints,
+  fftRadix2,
+  formatBandRange,
+  formatPmnValue,
+  FREQUENCY_BANDS,
+  nyquistHz,
+} from "./analysis";
 import {
   binnedMaxPmn,
   computeRecordingPmn,
@@ -360,5 +367,17 @@ describe("voice bands", () => {
       expect(FREQUENCY_BANDS[index].minHz).toBe(FREQUENCY_BANDS[index - 1].maxHz);
     }
     expect(FREQUENCY_BANDS[0].minHz).toBe(0);
+  });
+});
+
+describe("formatPmnValue", () => {
+  it("keeps neighbouring axis labels distinct in the thousands", () => {
+    expect(formatPmnValue(0)).toBe("0");
+    expect(formatPmnValue(500)).toBe("500");
+    expect(formatPmnValue(1000)).toBe("1k");
+    expect(formatPmnValue(1500)).toBe("1.5k");
+    expect(formatPmnValue(2000)).toBe("2k");
+    expect(formatPmnValue(12_000)).toBe("12k");
+    expect(formatPmnValue(2_400_000)).toBe("2.4M");
   });
 });

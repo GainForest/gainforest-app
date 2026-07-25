@@ -145,12 +145,17 @@ export function niceCeil(value: number): number {
   return step * magnitude;
 }
 
-/** Compact axis/tooltip formatting for PMN values (e.g. `12k`, `1.4M`). */
+/**
+ * Compact axis/tooltip formatting for PMN values (e.g. `1.5k`, `12k`, `1.4M`).
+ * Thousands keep a decimal below 10k, otherwise an axis running 0..2000 would
+ * label both 1500 and 2000 as "2k".
+ */
 export function formatPmnValue(value: number): string {
   if (value === 0) return "0";
   const abs = Math.abs(value);
   if (abs >= 1_000_000) return `${(value / 1_000_000).toFixed(1)}M`;
-  if (abs >= 1000) return `${Math.round(value / 1000)}k`;
+  if (abs >= 10_000) return `${Math.round(value / 1000)}k`;
+  if (abs >= 1000) return `${(value / 1000).toFixed(1).replace(/\.0$/, "")}k`;
   if (abs >= 10) return `${Math.round(value)}`;
   return value.toPrecision(2);
 }

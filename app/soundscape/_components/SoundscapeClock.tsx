@@ -7,7 +7,7 @@
  * clockwise, so 6:00 is at the bottom, 12:00 at the left and 18:00 at the top.
  */
 
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { formatMinuteOfDay } from "@/lib/soundscape/audiomoth";
 import {
   BAND_COLORS,
@@ -121,6 +121,15 @@ export function SoundscapeClock(props: SoundscapeClockProps) {
   const svgRef = useRef<SVGSVGElement | null>(null);
   const [hover, setHover] = useState<HoverState | null>(null);
 
+  /* The tooltip is anchored to the chart, so it must not survive the page
+     scrolling out from under the cursor (no pointer event is fired then). */
+  useEffect(() => {
+    if (!hover) return;
+    const clear = () => setHover(null);
+    window.addEventListener("scroll", clear, { passive: true, capture: true });
+    return () => window.removeEventListener("scroll", clear, { capture: true });
+  }, [hover]);
+
   const maxValue = useMemo(() => {
     let max = 0;
     for (const point of points) {
@@ -190,13 +199,14 @@ export function SoundscapeClock(props: SoundscapeClockProps) {
           // makes it hit-testable, so React reports a leave the moment it
           // appears — only clear the hover when the pointer really left.
           const rect = svgRef.current?.getBoundingClientRect();
-          const outside =
-            !rect ||
-            event.clientX < rect.left ||
-            event.clientX > rect.right ||
-            event.clientY < rect.top ||
-            event.clientY > rect.bottom;
-          if (outside) setHover(null);
+          // A 1px margin, so leaving across an edge still counts as leaving.
+          const inside =
+            rect &&
+            event.clientX > rect.left + 1 &&
+            event.clientX < rect.right - 1 &&
+            event.clientY > rect.top + 1 &&
+            event.clientY < rect.bottom - 1;
+          if (!inside) setHover(null);
         }}
         onClick={handleClick}
         data-soundscape-clock

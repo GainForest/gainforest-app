@@ -85,6 +85,15 @@ export function SoundscapeZoom(props: SoundscapeZoomProps) {
   const viewRef = useRef(view);
   viewRef.current = view;
 
+  /* The tooltip is anchored to the chart, so it must not survive the page
+     scrolling out from under the cursor (no pointer event is fired then). */
+  useEffect(() => {
+    if (!hover) return;
+    const clear = () => setHover(null);
+    window.addEventListener("scroll", clear, { passive: true, capture: true });
+    return () => window.removeEventListener("scroll", clear, { capture: true });
+  }, [hover]);
+
   /** Points close enough to matter for the current window (plus a margin so
    *  the lines still enter the plot from off-screen neighbours). */
   const nearbyPoints = useMemo(() => {
@@ -276,13 +285,14 @@ export function SoundscapeZoom(props: SoundscapeZoomProps) {
    */
   const handlePointerLeave = (event: React.PointerEvent<SVGSVGElement>) => {
     const rect = svgRef.current?.getBoundingClientRect();
-    const outside =
-      !rect ||
-      event.clientX < rect.left ||
-      event.clientX > rect.right ||
-      event.clientY < rect.top ||
-      event.clientY > rect.bottom;
-    if (outside) setHover(null);
+    // A 1px margin, so leaving across an edge still counts as leaving.
+    const inside =
+      rect &&
+      event.clientX > rect.left + 1 &&
+      event.clientX < rect.right - 1 &&
+      event.clientY > rect.top + 1 &&
+      event.clientY < rect.bottom - 1;
+    if (!inside) setHover(null);
   };
 
   const endDrag = (event: React.PointerEvent<SVGSVGElement>) => {
