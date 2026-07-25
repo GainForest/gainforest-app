@@ -4,9 +4,9 @@ import { resolveAccountManageAccess } from "@/app/_lib/manage-server";
 import { canEditGroupProfile } from "@/app/(manage)/manage/_lib/cgs-permissions";
 import type { CgsRole } from "@/app/(manage)/manage/_lib/cgs";
 import { EditableAccountHeader } from "@/app/(manage)/manage/_components/EditableAccountHeader";
-import { fetchHiddenAccountDids, fetchRecognitionBadgesForDid, fetchTrustedByEndorsements, type TrustedByEndorsement } from "@/app/_lib/indexer";
+import { fetchHiddenAccountDids, fetchRecognitionBadgesForDid } from "@/app/_lib/indexer";
 import { fetchEndorsementsGivenCount } from "@/app/_lib/endorsements-given";
-import { isManualRecognitionBadgeKey, type ManualRecognitionBadgeKey } from "@/app/_lib/recognition-badges";
+import { isManualRecognitionBadgeKey } from "@/app/_lib/recognition-badges";
 import { getGainForestModeratorAccess } from "@/app/internal/badges/_lib/access";
 import { localizedAlternates } from "@/app/_lib/seo-metadata";
 import { getRequestOrigin } from "@/app/_lib/request-origin";
@@ -123,33 +123,10 @@ export default async function AccountLayout({
     getRequestOrigin(),
   ]);
 
-  // The hero's remaining reads run as one batch. The account section has a
-  // single loading boundary, so the profile paints in one step — which means
-  // the slowest read here sets the wait. Nothing may be awaited in sequence
-  // unless it genuinely depends on an earlier result.
-  const [access, memberships, moderator, trustedBy, showEndorsementsGiven] = await Promise.all([
-    // Owners (and org admins) edit their profile in place; everyone else —
-    // including plain org members, who can still manage records through the
-    // tabs — sees the read-only public hero.
-    resolveAccountManageAccess(account.urlIdentifier).catch(() => null),
-    // The organizations you belong to are private to you: the group service only
-    // lets us read your own memberships, so they surface as a "Member of…" row in
-    // the hero of your own profile (empty everywhere else).
-    loadAccountMemberships(account, session),
-    // GainForest stewards (any group member) can hide an account as a test
-    // account. Only resolved for signed-in viewers so the extra reads never run
-    // for ordinary visitors.
-    session.isLoggedIn ? getGainForestModeratorAccess().catch(() => null) : null,
-    // "Trusted by" used to resolve in the browser, which made a whole row appear
-    // under the bio a beat after the hero painted, pushing the rest down.
-    fetchTrustedByEndorsements(account.did).catch((): TrustedByEndorsement[] => []),
-    // The "Endorsements given" tab appears only for organizations that have
-    // signed at least one Organization Endorsement badge award. Cached per org.
-    account.kind === "organization"
-      ? fetchEndorsementsGivenCount(account.did).then((count) => count > 0).catch(() => false)
-      : false,
-  ]);
-
+  // Owners (and org admins) edit their profile in place; everyone else — including
+  // plain org members, who can still manage records through the tabs — sees the
+  // read-only public hero.
+  const access = await resolveAccountManageAccess(account.urlIdentifier).catch(() => null);
   const target = access?.status === "allowed" ? access.target : null;
   const groupRole: CgsRole | undefined = target?.kind === "group"
     ? target.role === "owner" ? "owner" : target.role === "admin" ? "admin" : "member"
@@ -161,20 +138,31 @@ export default async function AccountLayout({
     : false;
   const canManage = Boolean(target);
 
-  // Moderator-only reads. These genuinely depend on the moderator check above,
-  // so they're the one thing that still has to come second — and they run in
-  // parallel with each other.
-  const [testAccountFlagged, awardedManualRecognition] = moderator?.isModerator
-    ? await Promise.all([
-        fetchHiddenAccountDids().then((dids) => dids.has(account.did)).catch(() => false),
-        // Manually awarded recognition badges seed the moderator control's
-        // initial state; the public "Awards" row in the hero fetches its own
-        // data client-side (AccountAwards).
-        fetchRecognitionBadgesForDid(account.did)
-          .then((keys) => [...keys].filter(isManualRecognitionBadgeKey))
-          .catch((): ManualRecognitionBadgeKey[] => []),
-      ])
-    : [null, [] as ManualRecognitionBadgeKey[]];
+  // The organizations you belong to are private to you: the group service only
+  // lets us read your own memberships, so they surface as a "Member of…" row in
+  // the hero of your own profile (empty everywhere else).
+  const memberships = await loadAccountMemberships(account, session);
+
+  // GainForest stewards (any group member) can hide an account as a test
+  // account. Only resolve the current flag state for actual moderators so the
+  // extra reads never run for ordinary visitors.
+  const moderator = session.isLoggedIn ? await getGainForestModeratorAccess().catch(() => null) : null;
+  const testAccountFlagged = moderator?.isModerator
+    ? await fetchHiddenAccountDids().then((dids) => dids.has(account.did)).catch(() => false)
+    : null;
+  // Manually awarded recognition badges seed the moderator control's initial
+  // state; the public "Awards" row in the hero fetches its own data client-side
+  // (AccountAwards), so this read only runs for moderators.
+  const awardedManualRecognition = moderator?.isModerator
+    ? await fetchRecognitionBadgesForDid(account.did)
+        .then((keys) => [...keys].filter(isManualRecognitionBadgeKey))
+        .catch(() => [])
+    : [];
+  // The "Endorsements given" tab appears only for organizations that have
+  // signed at least one Organization Endorsement badge award. Cached per org.
+  const showEndorsementsGiven = account.kind === "organization"
+    ? (await fetchEndorsementsGivenCount(account.did).catch(() => 0)) > 0
+    : false;
   // The Equipment tab is a private inventory surface, not a public showcase:
   // organizations aggregate the whole team's gear, so — like Members — it
   // only shows to people who belong to the organization, and personal
@@ -202,7 +190,7 @@ export default async function AccountLayout({
                 memberships={memberships}
               />
             ) : (
-              <AccountHero account={account} memberships={memberships} trustedBy={trustedBy} />
+              <AccountHero account={account} memberships={memberships} />
             )}
             {/* Steward panel sits between the profile card and the tab bar so it
                 reads as a tool for this profile without pushing the profile down. */}

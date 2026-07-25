@@ -1,9 +1,9 @@
 "use client";
 
-import Link, { useLinkStatus } from "next/link";
+import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { usePathname, useSearchParams } from "next/navigation";
-import { BadgeCheckIcon, BinocularsIcon, BotIcon, ChevronDownIcon, FolderKanbanIcon, HeartHandshakeIcon, HomeIcon, ImageIcon, LayoutGridIcon, Loader2Icon, MessageSquareTextIcon, SettingsIcon, UsersIcon, WalletIcon, WrenchIcon } from "lucide-react";
+import { BadgeCheckIcon, BinocularsIcon, BotIcon, ChevronDownIcon, FolderKanbanIcon, HeartHandshakeIcon, HomeIcon, ImageIcon, LayoutGridIcon, MessageSquareTextIcon, SettingsIcon, UsersIcon, WalletIcon, WrenchIcon } from "lucide-react";
 import { stripLocaleFromPathname } from "@/lib/i18n/routing";
 import { cn } from "@/lib/utils";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
@@ -237,23 +237,6 @@ function buildTabs(
   return appendExtras(tabs);
 }
 
-/**
- * The tab icon, swapped for a spinner while that tab's route is being fetched.
- *
- * The account section has a single loading boundary covering the whole profile,
- * so switching tabs deliberately keeps the current content on screen rather
- * than flashing a skeleton. This is the feedback that replaces it — it costs no
- * layout space, so nothing shifts.
- */
-function TabIcon({ icon: Icon }: { icon: React.ElementType }) {
-  const { pending } = useLinkStatus();
-  return pending ? (
-    <Loader2Icon className="h-3.5 w-3.5 shrink-0 animate-spin" />
-  ) : (
-    <Icon className="h-3.5 w-3.5 shrink-0" />
-  );
-}
-
 interface OrgTabBarProps {
   did: string;
   accountKind?: AccountKind;
@@ -309,6 +292,7 @@ export function AccountTabBar({
         <div className="flex min-w-max items-end gap-1 border-b border-border">
           {primaryTabs.map((tab) => {
             const active = isActive(tab);
+            const Icon = tab.icon;
             return (
               <Link
                 key={tab.href}
@@ -318,7 +302,7 @@ export function AccountTabBar({
                   active ? "text-foreground" : "text-muted-foreground hover:text-foreground",
                 )}
               >
-                <TabIcon icon={tab.icon} />
+                <Icon className="h-3.5 w-3.5 shrink-0" />
                 {t(tab.labelKey)}
                 {active ? <span className="absolute inset-x-0 bottom-0 h-0.5 rounded-full bg-foreground" /> : null}
               </Link>

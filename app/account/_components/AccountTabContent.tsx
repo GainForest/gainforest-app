@@ -84,7 +84,7 @@ async function AccountMaEarthRoundsSection({ did, className = "" }: { did: strin
   if (rounds.length === 0) return null;
 
   return (
-    <section className={`rounded-3xl border border-border/60 bg-card p-5 sm:p-6 ${className}`.trim()}>
+    <section className={`rounded-3xl border border-border/60 bg-card p-5 org-animate org-fade-in-up org-delay-2 sm:p-6 ${className}`.trim()}>
       <div className="flex items-center gap-3">
         <span className="grid size-11 shrink-0 place-items-center overflow-hidden rounded-full bg-background shadow-sm ring-1 ring-border/70">
           <Image
@@ -120,7 +120,7 @@ async function AccountDataCouncilSection({ did }: { did: string }) {
   ]);
 
   return (
-    <section className="mt-8 rounded-3xl border border-border/60 bg-card p-5 sm:p-6">
+    <section className="mt-8 rounded-3xl border border-border/60 bg-card p-5 org-animate org-fade-in-up org-delay-2 sm:p-6">
       <div className="flex items-baseline gap-2">
         <h2 className="font-instrument text-2xl italic leading-none text-foreground">{t("title")}</h2>
         {members.length > 0 ? <span className="text-sm text-muted-foreground">{members.length}</span> : null}
@@ -187,7 +187,7 @@ async function AccountProjectUpdatesSection({ did }: { did: string }) {
   }).catch(() => []);
 
   return (
-    <section className="mt-8">
+    <section className="mt-8 org-animate org-fade-in-up org-delay-2">
       <ProjectTimelineReadonly
         organizationDid={did}
         entries={entries}
@@ -247,7 +247,7 @@ async function AccountOverviewGallerySection({ account, did }: { account: Accoun
   if (gallery.liveGalleries.length === 0 && !canUpload) return null;
 
   return (
-    <section className="mt-8">
+    <section className="mt-8 org-animate org-fade-in-up org-delay-2">
       <h2 className="font-instrument text-2xl italic leading-none text-foreground">{tabsT("gallery")}</h2>
       <div className="mt-4">
         <AccountGalleryClient
@@ -272,7 +272,7 @@ export async function AccountHomeTabContent({ account }: { account: AccountRoute
   return (
     <>
       {hasAbout ? (
-        <section className="mt-8">
+        <section className="mt-8 org-animate org-fade-in-up org-delay-1">
           <h2 className="font-instrument text-2xl italic leading-none text-foreground">{aboutT("title")}</h2>
           {account.kind === "organization" ? (
             <p className="mt-4 max-w-3xl whitespace-pre-line text-base leading-7 text-foreground/85 md:text-lg md:leading-8">
@@ -323,7 +323,7 @@ export async function AccountOverviewTabContent({ account, did }: { account: Acc
   return (
     <div className="space-y-5 py-2">
       {hasAbout ? (
-        <section>
+        <section className="org-animate org-fade-in-up org-delay-1">
           {account.detail?.richBody?.length ? (
             <RichText blocks={account.detail.richBody} />
           ) : (
@@ -332,7 +332,7 @@ export async function AccountOverviewTabContent({ account, did }: { account: Acc
         </section>
       ) : null}
 
-      <section>
+      <section className="org-animate org-fade-in-up org-delay-1">
         <OverviewFolders tiles={folderTiles} />
       </section>
 
@@ -469,7 +469,7 @@ export async function AccountEndorsementsGivenTabContent({ account, did }: { acc
   ]);
 
   return (
-    <section className="py-6">
+    <section className="py-6 org-animate org-fade-in-up org-delay-1">
       <div className="mb-5">
         <div className="flex items-baseline gap-2">
           <h2 className="font-instrument text-2xl italic leading-none text-foreground">{t("title")}</h2>
