@@ -27,3 +27,16 @@ export function isRetryable(state: AnalysisState | undefined): boolean {
   if (!state || state.status === "idle") return true;
   return state.status === "error" && state.errorKind !== "tooShort";
 }
+
+/**
+ * Whether a recording is still on the conveyor belt — queued, downloading or
+ * analyzing. This is the work a pause suspends and a resume carries on with,
+ * so it drives both the "Resume N recordings" count and whether the queue
+ * controls are shown at all.
+ *
+ * Deliberately distinct from `isRetryable`: an idle or failed recording needs
+ * the Analyze button to put it back in the queue, it is not outstanding work.
+ */
+export function isOutstanding(state: AnalysisState | undefined): boolean {
+  return state?.status === "queued" || state?.status === "downloading" || state?.status === "analyzing";
+}

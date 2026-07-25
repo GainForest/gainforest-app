@@ -16,6 +16,7 @@ import {
   DownloadIcon,
   FileAudioIcon,
   Loader2Icon,
+  PauseIcon,
   PlayIcon,
   RefreshCwIcon,
   SquareIcon,
@@ -43,7 +44,7 @@ import {
 } from "@/lib/soundscape/analysis";
 import { computeRecordingPmn, RecordingTooShortError } from "@/lib/soundscape/pmn";
 import { loadPmnCache, savePmnCache, toCacheEntry, type PmnCache } from "@/lib/soundscape/pmn-cache";
-import { isRetryable, type AnalysisState, type AnalysisStatus } from "@/lib/soundscape/queue";
+import { isOutstanding, isRetryable, type AnalysisState, type AnalysisStatus } from "@/lib/soundscape/queue";
 import { cn } from "@/lib/utils";
 import { BAND_COLORS, SoundscapeClock } from "./SoundscapeClock";
 
@@ -94,7 +95,9 @@ export function SoundscapeClient({ sessionDid }: { sessionDid: string | null }) 
   const [results, setResults] = useState<Record<string, AnalysisState>>({});
   const [selectedDate, setSelectedDate] = useState<string>(ALL_DATES);
   const [visibleBands, setVisibleBands] = useState<boolean[]>(FREQUENCY_BANDS.map(() => true));
+  const [paused, setPaused] = useState(false);
   const processingRef = useRef(false);
+  const abortRef = useRef<AbortController | null>(null);
   const cacheRef = useRef<PmnCache | null>(null);
   const chartRef = useRef<HTMLDivElement>(null);
   const [player, setPlayer] = useState<PlayerState | null>(null);
@@ -117,6 +120,7 @@ export function SoundscapeClient({ sessionDid }: { sessionDid: string | null }) 
     const controller = new AbortController();
     setRecordings(null);
     setLoadFailed(false);
+    setPaused(false);
     (async () => {
       try {
         const items = await listAllRecordings(sessionDid, controller.signal);
@@ -144,18 +148,21 @@ export function SoundscapeClient({ sessionDid }: { sessionDid: string | null }) 
   }, [sessionDid, reloadCounter]);
 
   /* Sequential analysis queue: download + analyze one recording at a time;
-     each settled state update re-triggers this effect for the next one. */
+     each settled state update re-triggers this effect for the next one.
+     While paused nothing new is dequeued, so resuming just picks up here. */
   useEffect(() => {
-    if (processingRef.current) return;
+    if (paused || processingRef.current) return;
     const next = library.find((entry) => entry.analyzable && results[entry.item.uri]?.status === "queued");
     if (!next) return;
     processingRef.current = true;
     const { uri, cid, accessUri } = next.item;
+    const controller = new AbortController();
+    abortRef.current = controller;
     setResults((current) => ({ ...current, [uri]: { status: "downloading" } }));
     void (async () => {
       let update: AnalysisState;
       try {
-        const response = await fetch(accessUri!);
+        const response = await fetch(accessUri!, { signal: controller.signal });
         if (!response.ok) throw new Error("download_failed");
         const buffer = await response.arrayBuffer();
         setResults((current) => ({ ...current, [uri]: { status: "analyzing" } }));
@@ -167,24 +174,40 @@ export function SoundscapeClient({ sessionDid }: { sessionDid: string | null }) 
         savePmnCache(cache);
         update = { status: "done", pmn: pmnPerBand };
       } catch (error) {
-        update = {
-          status: "error",
-          errorKind:
-            error instanceof RecordingTooShortError
-              ? "tooShort"
-              : // TypeError = fetch network/CORS failure (e.g. the storage bucket
-                // not allowing cross-origin GETs) — the bytes never arrived.
-                error instanceof TypeError || (error instanceof Error && error.message === "download_failed")
-                ? "download"
-                : "decode",
-        };
+        // Pausing aborts the in-flight download — that isn't a failure, the
+        // recording simply goes back in line for when analysis resumes.
+        update = controller.signal.aborted
+          ? { status: "queued" }
+          : {
+              status: "error",
+              errorKind:
+                error instanceof RecordingTooShortError
+                  ? "tooShort"
+                  : // TypeError = fetch network/CORS failure (e.g. the storage bucket
+                    // not allowing cross-origin GETs) — the bytes never arrived.
+                    error instanceof TypeError || (error instanceof Error && error.message === "download_failed")
+                    ? "download"
+                    : "decode",
+            };
       }
+      abortRef.current = null;
       processingRef.current = false;
       setResults((current) => ({ ...current, [uri]: update }));
     })();
-  }, [library, results]);
+  }, [library, paused, results]);
+
+  /* Pause stops the queue at the current recording. The download is the long
+     pole, so it is aborted outright; analysis that already started is cheap
+     and finishes so its result still lands in the cache. */
+  const pauseAnalysis = useCallback(() => {
+    setPaused(true);
+    abortRef.current?.abort();
+  }, []);
+
+  const resumeAnalysis = useCallback(() => setPaused(false), []);
 
   const startAnalysis = useCallback(() => {
+    setPaused(false);
     setResults((current) => {
       const queued: Record<string, AnalysisState> = { ...current };
       for (const entry of library) {
@@ -206,9 +229,10 @@ export function SoundscapeClient({ sessionDid }: { sessionDid: string | null }) 
     const status = results[entry.item.uri]?.status;
     return status === "downloading" || status === "analyzing";
   });
-  const busy =
-    active !== undefined ||
-    library.some((entry) => results[entry.item.uri]?.status === "queued");
+  /** Queued or in flight — the work a resume would carry on with. */
+  const outstandingCount = library.filter((entry) => isOutstanding(results[entry.item.uri])).length;
+  const busy = outstandingCount > 0;
+  const running = busy && !paused;
   const settledCount = library.filter((entry) => {
     const status = results[entry.item.uri]?.status;
     return status === "done" || status === "error";
@@ -481,7 +505,7 @@ export function SoundscapeClient({ sessionDid }: { sessionDid: string | null }) 
             </div>
           </div>
           <div className="flex flex-wrap items-center gap-2">
-            {busy ? (
+            {running ? (
               <span className="flex items-center gap-2 text-xs text-muted-foreground">
                 <Loader2Icon className="size-3.5 animate-spin" />
                 {active
@@ -490,25 +514,38 @@ export function SoundscapeClient({ sessionDid }: { sessionDid: string | null }) 
                     : t("library.analyzing", { name: active.item.name })
                   : t("library.progress", { done: doneCount, total: analyzableCount })}
               </span>
+            ) : paused && busy ? (
+              <span className="flex items-center gap-2 text-xs text-muted-foreground">
+                <PauseIcon className="size-3.5" />
+                {t("library.statusPaused", { done: doneCount, total: analyzableCount })}
+              </span>
             ) : null}
             <Button
               type="button"
               variant="ghost"
               size="sm"
-              disabled={busy}
+              disabled={active !== undefined}
               onClick={() => setReloadCounter((value) => value + 1)}
             >
               <RefreshCwIcon className="size-4" />
               {t("library.refresh")}
             </Button>
-            <Button type="button" size="sm" disabled={busy || remainingCount === 0} onClick={startAnalysis}>
-              {busy ? <Loader2Icon className="size-4 animate-spin" /> : <PlayIcon className="size-4" />}
-              {busy
-                ? t("library.analyzeBusy", { done: doneCount, total: analyzableCount })
-                : remainingCount > 0
-                  ? t("library.analyze", { count: remainingCount })
-                  : t("library.analyzeDone")}
-            </Button>
+            {running ? (
+              <Button type="button" size="sm" variant="outline" onClick={pauseAnalysis}>
+                <PauseIcon className="size-4" />
+                {t("library.pause")}
+              </Button>
+            ) : paused && busy ? (
+              <Button type="button" size="sm" onClick={resumeAnalysis}>
+                <PlayIcon className="size-4" />
+                {t("library.resume", { count: outstandingCount })}
+              </Button>
+            ) : (
+              <Button type="button" size="sm" disabled={remainingCount === 0} onClick={startAnalysis}>
+                <PlayIcon className="size-4" />
+                {remainingCount > 0 ? t("library.analyze", { count: remainingCount }) : t("library.analyzeDone")}
+              </Button>
+            )}
           </div>
         </div>
         {busy ? (
@@ -521,7 +558,7 @@ export function SoundscapeClient({ sessionDid }: { sessionDid: string | null }) 
             aria-label={t("library.progress", { done: settledCount, total: analyzableCount })}
           >
             <div
-              className="h-full bg-primary transition-[width]"
+              className={cn("h-full transition-[width]", paused ? "bg-muted-foreground/40" : "bg-primary")}
               style={{ width: `${(settledCount / Math.max(1, analyzableCount)) * 100}%` }}
             />
           </div>

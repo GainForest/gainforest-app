@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { isRetryable, type AnalysisState } from "./queue";
+import { isOutstanding, isRetryable, type AnalysisState } from "./queue";
 
 describe("isRetryable", () => {
   it("treats untouched recordings as pending", () => {
@@ -47,5 +47,35 @@ describe("isRetryable", () => {
       { status: "error", errorKind: "download" },
     ];
     expect(settled.filter(isRetryable)).toHaveLength(1);
+  });
+});
+
+describe("isOutstanding", () => {
+  it("counts queued and in-flight recordings", () => {
+    expect(isOutstanding({ status: "queued" })).toBe(true);
+    expect(isOutstanding({ status: "downloading" })).toBe(true);
+    expect(isOutstanding({ status: "analyzing" })).toBe(true);
+  });
+
+  it("ignores recordings that are not on the conveyor belt", () => {
+    expect(isOutstanding(undefined)).toBe(false);
+    expect(isOutstanding({ status: "idle" })).toBe(false);
+    expect(isOutstanding({ status: "done", pmn: [0, 0, 0, 0, 0] })).toBe(false);
+    expect(isOutstanding({ status: "error", errorKind: "download" })).toBe(false);
+  });
+
+  it("keeps the queue alive across a pause, because the aborted download requeues", () => {
+    // Pausing aborts the in-flight download and puts that recording back to
+    // "queued", so the paused header must still offer Resume rather than
+    // falling back to the Analyze button as if the run had finished.
+    const paused: Array<AnalysisState | undefined> = [
+      { status: "done", pmn: [0, 0, 0, 0, 0] },
+      { status: "queued" }, // the one that was downloading when paused
+      { status: "queued" },
+      { status: "error", errorKind: "tooShort" },
+    ];
+    expect(paused.filter(isOutstanding)).toHaveLength(2);
+    // ...and none of it is "retryable" work the Analyze button should re-offer.
+    expect(paused.filter(isRetryable)).toHaveLength(0);
   });
 });
