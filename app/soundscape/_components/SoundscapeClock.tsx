@@ -164,6 +164,9 @@ type SoundscapeClockProps = {
   playingMinute?: number | null;
   playHintLabel?: string;
   stopHintLabel?: string;
+  /** Shown instead of the play hint when `onPointClick` is omitted, so the
+   *  dial explains why a time cannot be played rather than ignoring clicks. */
+  noPlayHintLabel?: string;
   /** Slice of the day the dial is showing; the whole day by default. */
   window: TimeWindow;
   onWindowChange?: (window: TimeWindow) => void;
@@ -610,6 +613,8 @@ export function SoundscapeClock(props: SoundscapeClockProps) {
             <p className="mt-0.5 text-[11px] text-primary">
               {playingMinute === hover.point.minuteOfDay ? props.stopHintLabel : props.playHintLabel}
             </p>
+          ) : props.noPlayHintLabel ? (
+            <p className="mt-0.5 text-[11px] text-muted-foreground">{props.noPlayHintLabel}</p>
           ) : null}
           <ul className="mt-1 space-y-0.5">
             {hover.point.pmn.map((value, band) =>

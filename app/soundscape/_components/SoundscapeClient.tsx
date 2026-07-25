@@ -436,6 +436,12 @@ export function SoundscapeClient({ sessionDid }: { sessionDid: string | null }) 
     [player, stopPlayback],
   );
 
+  /* Across several days one dial minute holds one recording per day, so a
+     click there could only ever play an arbitrary one of them. The dial is
+     read-only in that mode; the zoom list below names the day of every
+     recording and plays them individually. */
+  const canPlayFromDial = selectedDate !== ALL_DATES;
+
   /* Clicking a time on the dial plays that minute's recording. */
   const handlePointClick = useCallback(
     (minuteOfDay: number) => {
@@ -685,7 +691,9 @@ export function SoundscapeClient({ sessionDid }: { sessionDid: string | null }) 
             <h2 className="font-medium text-foreground">
               {chartDateLabel ? t("chart.title", { date: chartDateLabel }) : t("chart.title", { date: t("chart.allDates") })}
             </h2>
-            <p className="mt-0.5 text-xs text-muted-foreground">{t("chart.hoverHint")}</p>
+            <p className="mt-0.5 text-xs text-muted-foreground">
+              {canPlayFromDial ? t("chart.hoverHint") : t("chart.hoverHintAllDates")}
+            </p>
             {player ? (
               <p className="mt-1.5 flex items-center gap-2 text-xs text-primary">
                 {player.status === "loading" ? (
@@ -817,10 +825,11 @@ export function SoundscapeClient({ sessionDid }: { sessionDid: string | null }) 
                   radialLabel={t("chart.radialLabel")}
                   timeLabel={t("chart.timeLabel")}
                   legendTitle={t("chart.legendTitle")}
-                  onPointClick={handlePointClick}
+                  onPointClick={canPlayFromDial ? handlePointClick : undefined}
                   playingMinute={player?.minuteOfDay ?? null}
                   playHintLabel={t("chart.clickToPlay")}
                   stopHintLabel={t("chart.clickToStop")}
+                  noPlayHintLabel={canPlayFromDial ? undefined : t("chart.pickDayToPlay")}
                   window={zoom}
                   onWindowChange={setZoom}
                   emptyLabel={t("zoom.empty")}
