@@ -2919,7 +2919,13 @@
       "empty": "Las grabaciones analizadas aparecerán aquí como un reloj de paisaje sonoro de 24 horas.",
       "emptyHint": "Analiza arriba tus grabaciones subidas para empezar.",
       "downloadPng": "Descargar imagen",
-      "hoverHint": "Mueve el cursor sobre el reloj para ver los valores.",
+      "hoverHint": "Mueve el cursor sobre el reloj para ver los valores; haz clic en una hora para escuchar su grabación.",
+      "clickToPlay": "Haz clic para escuchar esta grabación",
+      "clickToStop": "Haz clic para detener la reproducción",
+      "loadingAudio": "Cargando {name}…",
+      "playing": "Reproduciendo {name}",
+      "stop": "Detener",
+      "playError": "No se pudo reproducir esta grabación en tu navegador.",
       "datesTitle": "Días",
       "allDatesChip": "Todos los días"
     }

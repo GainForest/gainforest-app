@@ -2919,7 +2919,13 @@
       "empty": "As gravações analisadas aparecerão aqui como um relógio de paisagem sonora de 24 horas.",
       "emptyHint": "Analise acima suas gravações enviadas para começar.",
       "downloadPng": "Baixar imagem",
-      "hoverHint": "Passe o cursor sobre o relógio para ver os valores.",
+      "hoverHint": "Passe o cursor sobre o relógio para ver os valores; clique em um horário para ouvir a gravação.",
+      "clickToPlay": "Clique para ouvir esta gravação",
+      "clickToStop": "Clique para parar a reprodução",
+      "loadingAudio": "Carregando {name}…",
+      "playing": "Reproduzindo {name}",
+      "stop": "Parar",
+      "playError": "Não foi possível reproduzir esta gravação no seu navegador.",
       "datesTitle": "Dias",
       "allDatesChip": "Todos os dias"
     }

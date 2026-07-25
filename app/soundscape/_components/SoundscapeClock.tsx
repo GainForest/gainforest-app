@@ -100,10 +100,16 @@ type SoundscapeClockProps = {
   radialLabel: string;
   timeLabel: string;
   legendTitle: string;
+  /** When set, clicking a hovered time plays (or stops) its recording. */
+  onPointClick?: (minuteOfDay: number) => void;
+  /** Minute currently playing (highlighted on the dial), if any. */
+  playingMinute?: number | null;
+  playHintLabel?: string;
+  stopHintLabel?: string;
 };
 
 export function SoundscapeClock(props: SoundscapeClockProps) {
-  const { points, visibleBands } = props;
+  const { points, visibleBands, onPointClick, playingMinute } = props;
   const svgRef = useRef<SVGSVGElement | null>(null);
   const [hover, setHover] = useState<HoverState | null>(null);
 
@@ -158,16 +164,21 @@ export function SoundscapeClock(props: SoundscapeClockProps) {
     setHover({ point: best, x: (marker.x / VIEW_SIZE) * rect.width, y: (marker.y / VIEW_SIZE) * rect.height });
   };
 
+  const handleClick = () => {
+    if (hover && onPointClick) onPointClick(hover.point.minuteOfDay);
+  };
+
   return (
     <div className="relative w-full">
       <svg
         ref={svgRef}
         viewBox={`0 0 ${VIEW_SIZE} ${VIEW_SIZE}`}
-        className="block h-auto w-full select-none"
+        className={`block h-auto w-full select-none${hover && onPointClick ? " cursor-pointer" : ""}`}
         role="img"
         aria-label={props.title}
         onPointerMove={handlePointerMove}
         onPointerLeave={() => setHover(null)}
+        onClick={handleClick}
         data-soundscape-clock
       >
         {/* Title */}
@@ -268,6 +279,29 @@ export function SoundscapeClock(props: SoundscapeClockProps) {
           ) : null,
         )}
 
+        {/* Playing spoke */}
+        {playingMinute != null ? (
+          <g className="text-primary">
+            <line
+              x1={polar(playingMinute, INNER_RADIUS).x}
+              y1={polar(playingMinute, INNER_RADIUS).y}
+              x2={polar(playingMinute, OUTER_RADIUS).x}
+              y2={polar(playingMinute, OUTER_RADIUS).y}
+              stroke="currentColor"
+              strokeOpacity={0.7}
+              strokeWidth={2}
+            />
+            <circle
+              cx={polar(playingMinute, OUTER_RADIUS).x}
+              cy={polar(playingMinute, OUTER_RADIUS).y}
+              r={5}
+              fill="currentColor"
+            >
+              <animate attributeName="r" values="4;6;4" dur="1.2s" repeatCount="indefinite" />
+            </circle>
+          </g>
+        ) : null}
+
         {/* Hover spoke */}
         {hover ? (
           <line
@@ -298,6 +332,11 @@ export function SoundscapeClock(props: SoundscapeClockProps) {
           style={{ left: hover.x, top: Math.max(0, hover.y - 8), transform: "translate(-50%, -100%)" }}
         >
           <p className="font-semibold text-foreground">{formatMinuteOfDay(hover.point.minuteOfDay)}</p>
+          {onPointClick ? (
+            <p className="mt-0.5 text-[11px] text-primary">
+              {playingMinute === hover.point.minuteOfDay ? props.stopHintLabel : props.playHintLabel}
+            </p>
+          ) : null}
           <ul className="mt-1 space-y-0.5">
             {hover.point.pmn.map((value, band) =>
               visibleBands[band] ? (

@@ -2919,7 +2919,13 @@
       "empty": "Analyzed recordings will appear here as a 24-hour soundscape clock.",
       "emptyHint": "Analyze your uploaded recordings above to begin.",
       "downloadPng": "Download image",
-      "hoverHint": "Move your cursor over the clock to inspect values.",
+      "hoverHint": "Move your cursor over the clock to inspect values — click a time to listen to its recording.",
+      "clickToPlay": "Click to listen to this recording",
+      "clickToStop": "Click to stop playback",
+      "loadingAudio": "Loading {name}…",
+      "playing": "Playing {name}",
+      "stop": "Stop",
+      "playError": "Couldn't play this recording in your browser.",
       "datesTitle": "Days",
       "allDatesChip": "All days"
     }

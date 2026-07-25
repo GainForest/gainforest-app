@@ -18,7 +18,9 @@ import {
   Loader2Icon,
   PlayIcon,
   RefreshCwIcon,
+  SquareIcon,
   UploadIcon,
+  Volume2Icon,
   WavesIcon,
 } from "lucide-react";
 import Link from "next/link";
@@ -55,6 +57,24 @@ type LibraryRecording = {
 
 const ALL_DATES = "all";
 
+type AnalyzedLibraryRecording = LibraryRecording & { time: WallClockTime; pmn: number[] };
+
+type PlayerState = {
+  uri: string;
+  minuteOfDay: number;
+  name: string;
+  status: "loading" | "playing";
+};
+
+/**
+ * Browsers cap AudioBuffer sample rates well below AudioMoth's ultrasonic
+ * modes (up to 384 kHz), so recordings above this rate are decimated with a
+ * boxcar average before playback. Ultrasound isn't audible anyway — this only
+ * affects the preview player, never the analysis.
+ */
+const MAX_PLAYBACK_SAMPLE_RATE = 96_000;
+const DECIMATION_TARGET_RATE = 48_000;
+
 function formatDuration(seconds: number | null): string | null {
   if (seconds === null || !Number.isFinite(seconds)) return null;
   const m = Math.floor(seconds / 60);
@@ -77,6 +97,11 @@ export function SoundscapeClient({ sessionDid }: { sessionDid: string | null }) 
   const processingRef = useRef(false);
   const cacheRef = useRef<PmnCache | null>(null);
   const chartRef = useRef<HTMLDivElement>(null);
+  const [player, setPlayer] = useState<PlayerState | null>(null);
+  const [playbackFailed, setPlaybackFailed] = useState(false);
+  const audioContextRef = useRef<AudioContext | null>(null);
+  const audioSourceRef = useRef<AudioBufferSourceNode | null>(null);
+  const playTokenRef = useRef(0);
 
   const library = useMemo<LibraryRecording[]>(() => {
     return (recordings ?? []).map((item) => {
@@ -215,6 +240,122 @@ export function SoundscapeClient({ sessionDid }: { sessionDid: string | null }) 
       })),
     );
   }, [library, results, selectedDate]);
+
+  // Which recording to play for each dial minute. When several recordings
+  // share a minute (same schedule slot across days), pick the loudest one —
+  // that's the max the chart draws.
+  const playableByMinute = useMemo(() => {
+    const analyzed = library.filter(
+      (entry): entry is AnalyzedLibraryRecording =>
+        entry.time !== null &&
+        results[entry.item.uri]?.status === "done" &&
+        results[entry.item.uri]?.pmn !== undefined,
+    ).map((entry) => ({ ...entry, pmn: results[entry.item.uri]!.pmn! }));
+    const filtered =
+      selectedDate === ALL_DATES
+        ? analyzed
+        : analyzed.filter((entry) => wallClockDateKey(entry.time) === selectedDate);
+    const loudness = (entry: AnalyzedLibraryRecording) => entry.pmn.reduce((sum, value) => sum + value, 0);
+    const byMinute = new Map<number, AnalyzedLibraryRecording>();
+    for (const entry of filtered) {
+      const minute = wallClockMinuteOfDay(entry.time);
+      const existing = byMinute.get(minute);
+      if (!existing || loudness(entry) > loudness(existing)) byMinute.set(minute, entry);
+    }
+    return byMinute;
+  }, [library, results, selectedDate]);
+
+  const stopPlayback = useCallback(() => {
+    playTokenRef.current++;
+    try {
+      audioSourceRef.current?.stop();
+    } catch {
+      // Source may have already ended.
+    }
+    audioSourceRef.current = null;
+    setPlayer(null);
+  }, []);
+
+  // Stop if the playing recording disappears (date filter / library refresh).
+  useEffect(() => {
+    if (player && playableByMinute.get(player.minuteOfDay)?.item.uri !== player.uri) stopPlayback();
+  }, [playableByMinute, player, stopPlayback]);
+
+  // Tear down audio on unmount.
+  useEffect(() => {
+    return () => {
+      playTokenRef.current++;
+      try {
+        audioSourceRef.current?.stop();
+      } catch {
+        // Ignore.
+      }
+      void audioContextRef.current?.close().catch(() => {});
+    };
+  }, []);
+
+  const handlePointClick = useCallback(
+    (minuteOfDay: number) => {
+      const entry = playableByMinute.get(minuteOfDay);
+      if (!entry?.item.accessUri) return;
+      if (player?.minuteOfDay === minuteOfDay) {
+        stopPlayback();
+        return;
+      }
+      stopPlayback();
+      setPlaybackFailed(false);
+      const token = ++playTokenRef.current;
+      const accessUri = entry.item.accessUri;
+      setPlayer({ uri: entry.item.uri, minuteOfDay, name: entry.item.name, status: "loading" });
+      void (async () => {
+        try {
+          const response = await fetch(accessUri);
+          if (!response.ok) throw new Error("download_failed");
+          const buffer = await response.arrayBuffer();
+          const wav = openWav(buffer);
+          let samples = new Float32Array(wav.totalSamples);
+          wav.readWindow(0, samples);
+          let sampleRate = wav.sampleRate;
+          if (sampleRate > MAX_PLAYBACK_SAMPLE_RATE) {
+            const factor = Math.ceil(sampleRate / DECIMATION_TARGET_RATE);
+            const length = Math.floor(samples.length / factor);
+            const decimated = new Float32Array(length);
+            for (let i = 0; i < length; i++) {
+              let sum = 0;
+              for (let j = 0; j < factor; j++) sum += samples[i * factor + j];
+              decimated[i] = sum / factor;
+            }
+            samples = decimated;
+            sampleRate = sampleRate / factor;
+          }
+          if (token !== playTokenRef.current) return;
+          const context = (audioContextRef.current ??= new AudioContext());
+          await context.resume();
+          if (token !== playTokenRef.current) return;
+          const audioBuffer = context.createBuffer(1, samples.length, sampleRate);
+          audioBuffer.getChannelData(0).set(samples);
+          const source = context.createBufferSource();
+          source.buffer = audioBuffer;
+          source.connect(context.destination);
+          source.onended = () => {
+            if (token === playTokenRef.current) {
+              audioSourceRef.current = null;
+              setPlayer(null);
+            }
+          };
+          audioSourceRef.current = source;
+          source.start();
+          setPlayer((current) => (current?.uri === entry.item.uri ? { ...current, status: "playing" } : current));
+        } catch {
+          if (token === playTokenRef.current) {
+            setPlayer(null);
+            setPlaybackFailed(true);
+          }
+        }
+      })();
+    },
+    [playableByMinute, player, stopPlayback],
+  );
 
   const chartDateLabel =
     selectedDate !== ALL_DATES
@@ -420,6 +561,33 @@ export function SoundscapeClient({ sessionDid }: { sessionDid: string | null }) 
               {chartDateLabel ? t("chart.title", { date: chartDateLabel }) : t("chart.title", { date: t("chart.allDates") })}
             </h2>
             <p className="mt-0.5 text-xs text-muted-foreground">{t("chart.hoverHint")}</p>
+            {player ? (
+              <p className="mt-1.5 flex items-center gap-2 text-xs text-primary">
+                {player.status === "loading" ? (
+                  <Loader2Icon className="size-3.5 animate-spin" />
+                ) : (
+                  <Volume2Icon className="size-3.5" />
+                )}
+                <span className="truncate">
+                  {player.status === "loading"
+                    ? t("chart.loadingAudio", { name: player.name })
+                    : t("chart.playing", { name: player.name })}
+                </span>
+                <button
+                  type="button"
+                  onClick={stopPlayback}
+                  className="flex items-center gap-1 rounded-md border border-primary/40 px-1.5 py-0.5 font-medium transition-colors hover:bg-primary/10"
+                >
+                  <SquareIcon className="size-2.5 fill-current" />
+                  {t("chart.stop")}
+                </button>
+              </p>
+            ) : playbackFailed ? (
+              <p className="mt-1.5 flex items-center gap-1.5 text-xs text-destructive">
+                <AlertTriangleIcon className="size-3.5" />
+                {t("chart.playError")}
+              </p>
+            ) : null}
           </div>
           {points.length > 0 ? (
             <Button type="button" variant="outline" size="sm" onClick={() => void downloadPng()}>
@@ -453,6 +621,10 @@ export function SoundscapeClient({ sessionDid }: { sessionDid: string | null }) 
                 radialLabel={t("chart.radialLabel")}
                 timeLabel={t("chart.timeLabel")}
                 legendTitle={t("chart.legendTitle")}
+                onPointClick={handlePointClick}
+                playingMinute={player?.minuteOfDay ?? null}
+                playHintLabel={t("chart.clickToPlay")}
+                stopHintLabel={t("chart.clickToStop")}
               />
             </div>
             <aside>

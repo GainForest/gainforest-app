@@ -2919,7 +2919,13 @@
       "empty": "Rekaman yang dianalisis akan muncul di sini sebagai jam lanskap suara 24 jam.",
       "emptyHint": "Analisis rekaman terunggah Anda di atas untuk memulai.",
       "downloadPng": "Unduh gambar",
-      "hoverHint": "Gerakkan kursor di atas jam untuk melihat nilai.",
+      "hoverHint": "Gerakkan kursor di atas jam untuk melihat nilai — klik sebuah waktu untuk mendengarkan rekamannya.",
+      "clickToPlay": "Klik untuk mendengarkan rekaman ini",
+      "clickToStop": "Klik untuk menghentikan pemutaran",
+      "loadingAudio": "Memuat {name}…",
+      "playing": "Memutar {name}",
+      "stop": "Berhenti",
+      "playError": "Rekaman ini tidak dapat diputar di peramban Anda.",
       "datesTitle": "Hari",
       "allDatesChip": "Semua hari"
     }

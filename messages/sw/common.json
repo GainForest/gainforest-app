@@ -2919,7 +2919,13 @@
       "empty": "Rekodi zilizochambuliwa zitaonekana hapa kama saa ya mandhari ya sauti ya saa 24.",
       "emptyHint": "Chambua rekodi zako zilizopakiwa hapo juu ili kuanza.",
       "downloadPng": "Pakua picha",
-      "hoverHint": "Sogeza kishale juu ya saa ili kuona thamani.",
+      "hoverHint": "Sogeza kishale juu ya saa ili kuona thamani — bofya wakati ili kusikiliza rekodi yake.",
+      "clickToPlay": "Bofya ili kusikiliza rekodi hii",
+      "clickToStop": "Bofya ili kusimamisha uchezaji",
+      "loadingAudio": "Inapakia {name}…",
+      "playing": "Inacheza {name}",
+      "stop": "Simamisha",
+      "playError": "Rekodi hii haikuweza kuchezwa kwenye kivinjari chako.",
       "datesTitle": "Siku",
       "allDatesChip": "Siku zote"
     }
