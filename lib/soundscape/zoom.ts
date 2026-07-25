@@ -14,8 +14,11 @@ import { formatMinuteOfDay } from "./audiomoth";
 
 export const MINUTES_PER_DAY = 1440;
 
-/** Tightest zoom: ten minutes across the strip, i.e. ~1 px per second. */
-export const MIN_WINDOW_SPAN = 10;
+/**
+ * Tightest zoom: a quarter of an hour spread around the dial. Less than this
+ * and a sparse schedule leaves too few points to read as a ring.
+ */
+export const MIN_WINDOW_SPAN = 15;
 
 /** How far apart two points may be before a band line is broken. */
 export const SERIES_GAP_MINUTES = 90;

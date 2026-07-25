@@ -2921,7 +2921,7 @@
       "empty": "Analyzed recordings will appear here as a 24-hour soundscape clock.",
       "emptyHint": "Analyze your uploaded recordings above to begin.",
       "downloadPng": "Download image",
-      "hoverHint": "Move your cursor over the clock to inspect values — click a time to listen to its recording.",
+      "hoverHint": "Hover the clock to inspect values and click a time to listen. Scroll over the dial — or use + and − — to zoom into part of the day, and drag it to move through the day.",
       "clickToPlay": "Click to listen to this recording",
       "clickToStop": "Click to stop playback",
       "loadingAudio": "Loading {name}…",
@@ -2934,15 +2934,13 @@
     "zoom": {
       "rangeAllDay": "Whole day · 00:00 – 24:00",
       "range": "Zoomed to {start} – {end}",
-      "hint": "Drag to move through the day, use + and − to zoom, then click a point to listen.",
       "zoomIn": "Zoom in",
       "zoomOut": "Zoom out",
       "reset": "Whole day",
-      "empty": "No recordings in this range",
-      "timeAxis": "Time",
+      "empty": "No recordings in this part of the day",
       "recordingsTitle": "Recordings in view",
       "recordingsCount": "{count, plural, one {# recording} other {# recordings}}",
-      "recordingsEmpty": "No recordings at this time — zoom out or drag to another part of the day."
+      "recordingsEmpty": "No recordings at this time — zoom out or drag the dial to another part of the day."
     }
   }
 }

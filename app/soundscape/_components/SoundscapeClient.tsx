@@ -18,7 +18,10 @@ import {
   Loader2Icon,
   PauseIcon,
   PlayIcon,
+  MinusIcon,
+  PlusIcon,
   RefreshCwIcon,
+  RotateCcwIcon,
   SquareIcon,
   UploadIcon,
   Volume2Icon,
@@ -44,19 +47,18 @@ import {
 } from "@/lib/soundscape/analysis";
 import { computeRecordingPmn, RecordingTooShortError } from "@/lib/soundscape/pmn";
 import {
-  centerWindow,
   formatWindowMinute,
   FULL_DAY_WINDOW,
   isFullDay,
   isInWindow,
   windowEnd,
+  zoomWindow,
   type TimeWindow,
 } from "@/lib/soundscape/zoom";
 import { loadPmnCache, savePmnCache, toCacheEntry, type PmnCache } from "@/lib/soundscape/pmn-cache";
 import { isOutstanding, isRetryable, type AnalysisState, type AnalysisStatus } from "@/lib/soundscape/queue";
 import { cn } from "@/lib/utils";
 import { BAND_COLORS, SoundscapeClock } from "./SoundscapeClock";
-import { SoundscapeZoom } from "./SoundscapeZoom";
 
 /** One uploaded recording with everything the clock needs precomputed. */
 type LibraryRecording = {
@@ -67,6 +69,9 @@ type LibraryRecording = {
 };
 
 const ALL_DATES = "all";
+
+/** One notch of the zoom buttons on the dial. */
+const ZOOM_STEP = 1.6;
 
 type AnalyzedLibraryRecording = LibraryRecording & { time: WallClockTime; pmn: number[] };
 
@@ -419,24 +424,37 @@ export function SoundscapeClient({ sessionDid }: { sessionDid: string | null }) 
     [player, stopPlayback],
   );
 
-  /* Clicking the dial plays the loudest recording of that minute and brings
-     the detail strip below to the same time, so the next click can be exact. */
+  /* Clicking a time on the dial plays that minute's recording. */
   const handlePointClick = useCallback(
     (minuteOfDay: number) => {
-      setZoom((current) => centerWindow(current, minuteOfDay));
       const entry = playableByMinute.get(minuteOfDay);
       if (entry) playRecording(entry);
     },
     [playableByMinute, playRecording],
   );
 
-  /* Clicking a point on the detail strip plays that minute's recording. */
-  const handleZoomMinuteClick = useCallback(
-    (minuteOfDay: number) => {
-      const entry = playableByMinute.get(minuteOfDay);
-      if (entry) playRecording(entry);
+  /* The zoom buttons aim at what is playing, else at the loudest moment in
+     view, so zooming in from the whole day lands on the recordings rather than
+     on a blank hour in the middle of the dial. */
+  const zoomBy = useCallback(
+    (factor: number) => {
+      setZoom((current) => {
+        let focus = player && isInWindow(player.minuteOfDay, current) ? player.minuteOfDay : null;
+        if (focus === null) {
+          let loudest = -Infinity;
+          for (const point of points) {
+            if (!isInWindow(point.minuteOfDay, current)) continue;
+            const sum = point.pmn.reduce((total, value, band) => total + (visibleBands[band] ? value : 0), 0);
+            if (sum > loudest) {
+              loudest = sum;
+              focus = point.minuteOfDay;
+            }
+          }
+        }
+        return zoomWindow(current, factor, focus ?? undefined);
+      });
     },
-    [playableByMinute, playRecording],
+    [player, points, visibleBands],
   );
 
   const chartDateLabel =
@@ -692,18 +710,63 @@ export function SoundscapeClient({ sessionDid }: { sessionDid: string | null }) 
           ) : null}
         </div>
 
-        {dateKeys.length > 1 ? (
-          <div className="mt-4 flex flex-wrap items-center gap-1.5" role="group" aria-label={t("chart.datesTitle")}>
-            <DateChip active={selectedDate === ALL_DATES} onClick={() => setSelectedDate(ALL_DATES)}>
-              {t("chart.allDatesChip")}
-            </DateChip>
-            {dateKeys.map((key) => (
-              <DateChip key={key} active={selectedDate === key} onClick={() => setSelectedDate(key)}>
-                {key}
+        <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
+          {dateKeys.length > 1 ? (
+            <div className="flex flex-wrap items-center gap-1.5" role="group" aria-label={t("chart.datesTitle")}>
+              <DateChip active={selectedDate === ALL_DATES} onClick={() => setSelectedDate(ALL_DATES)}>
+                {t("chart.allDatesChip")}
               </DateChip>
-            ))}
-          </div>
-        ) : null}
+              {dateKeys.map((key) => (
+                <DateChip key={key} active={selectedDate === key} onClick={() => setSelectedDate(key)}>
+                  {key}
+                </DateChip>
+              ))}
+            </div>
+          ) : (
+            <span />
+          )}
+          {points.length > 0 ? (
+            <div className="flex items-center gap-1.5">
+              <span className="mr-1 text-sm tabular-nums text-muted-foreground">
+                {isFullDay(zoom)
+                  ? t("zoom.rangeAllDay")
+                  : t("zoom.range", {
+                      start: formatWindowMinute(zoom.start),
+                      end: formatWindowMinute(windowEnd(zoom)),
+                    })}
+              </span>
+              <Button
+                type="button"
+                variant="outline"
+                size="icon"
+                className="size-8"
+                aria-label={t("zoom.zoomOut")}
+                title={t("zoom.zoomOut")}
+                disabled={isFullDay(zoom)}
+                onClick={() => zoomBy(ZOOM_STEP)}
+              >
+                <MinusIcon className="size-4" />
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                size="icon"
+                className="size-8"
+                aria-label={t("zoom.zoomIn")}
+                title={t("zoom.zoomIn")}
+                onClick={() => zoomBy(1 / ZOOM_STEP)}
+              >
+                <PlusIcon className="size-4" />
+              </Button>
+              {!isFullDay(zoom) ? (
+                <Button type="button" variant="ghost" size="sm" onClick={() => setZoom(FULL_DAY_WINDOW)}>
+                  <RotateCcwIcon className="size-4" />
+                  {t("zoom.reset")}
+                </Button>
+              ) : null}
+            </div>
+          ) : null}
+        </div>
 
         {points.length > 0 ? (
           <div className="mt-4 grid gap-6 lg:grid-cols-[minmax(0,1fr)_14rem]">
@@ -721,38 +784,14 @@ export function SoundscapeClient({ sessionDid }: { sessionDid: string | null }) 
                   playingMinute={player?.minuteOfDay ?? null}
                   playHintLabel={t("chart.clickToPlay")}
                   stopHintLabel={t("chart.clickToStop")}
-                  focusWindow={zoom}
+                  window={zoom}
+                  onWindowChange={setZoom}
+                  emptyLabel={t("zoom.empty")}
                 />
               </div>
 
-              {/* Detail strip: zoom the day down to the exact minute */}
-              <SoundscapeZoom
-                points={points}
-                window={zoom}
-                onWindowChange={setZoom}
-                visibleBands={visibleBands}
-                bandLabels={bandLabels}
-                playingMinute={player?.minuteOfDay ?? null}
-                onMinuteClick={handleZoomMinuteClick}
-                labels={{
-                  range: isFullDay(zoom)
-                    ? t("zoom.rangeAllDay")
-                    : t("zoom.range", {
-                        start: formatWindowMinute(zoom.start),
-                        end: formatWindowMinute(windowEnd(zoom)),
-                      }),
-                  zoomIn: t("zoom.zoomIn"),
-                  zoomOut: t("zoom.zoomOut"),
-                  reset: t("zoom.reset"),
-                  hint: t("zoom.hint"),
-                  timeAxis: t("zoom.timeAxis"),
-                  empty: t("zoom.empty"),
-                  playHint: t("chart.clickToPlay"),
-                  stopHint: t("chart.clickToStop"),
-                }}
-              />
-
-              {/* Every recording inside the window, individually playable */}
+              {/* Zoomed in: every recording on show, individually playable */}
+              {!isFullDay(zoom) ? (
               <div className="rounded-xl border bg-card/40">
                 <div className="flex flex-wrap items-center justify-between gap-2 border-b px-3 py-2.5">
                   <p className="text-sm font-medium text-foreground">{t("zoom.recordingsTitle")}</p>
@@ -807,6 +846,7 @@ export function SoundscapeClient({ sessionDid }: { sessionDid: string | null }) 
                   </ul>
                 )}
               </div>
+              ) : null}
             </div>
             <aside>
               <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">

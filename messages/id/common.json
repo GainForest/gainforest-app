@@ -2921,7 +2921,7 @@
       "empty": "Rekaman yang dianalisis akan muncul di sini sebagai jam lanskap suara 24 jam.",
       "emptyHint": "Analisis rekaman terunggah Anda di atas untuk memulai.",
       "downloadPng": "Unduh gambar",
-      "hoverHint": "Gerakkan kursor di atas jam untuk melihat nilai — klik sebuah waktu untuk mendengarkan rekamannya.",
+      "hoverHint": "Arahkan kursor ke jam untuk melihat nilai dan klik sebuah waktu untuk mendengarkan. Gulir di atas piringan — atau gunakan + dan − — untuk memperbesar sebagian hari, dan seret untuk menjelajah hari.",
       "clickToPlay": "Klik untuk mendengarkan rekaman ini",
       "clickToStop": "Klik untuk menghentikan pemutaran",
       "loadingAudio": "Memuat {name}…",
@@ -2934,15 +2934,13 @@
     "zoom": {
       "rangeAllDay": "Sepanjang hari · 00:00 – 24:00",
       "range": "Diperbesar ke {start} – {end}",
-      "hint": "Seret untuk menjelajah hari, gunakan + dan − untuk memperbesar, lalu klik sebuah titik untuk mendengarkan.",
       "zoomIn": "Perbesar",
       "zoomOut": "Perkecil",
       "reset": "Sepanjang hari",
-      "empty": "Tidak ada rekaman pada rentang ini",
-      "timeAxis": "Waktu",
+      "empty": "Tidak ada rekaman pada bagian hari ini",
       "recordingsTitle": "Rekaman yang terlihat",
       "recordingsCount": "{count, plural, other {# rekaman}}",
-      "recordingsEmpty": "Tidak ada rekaman pada waktu ini — perkecil atau seret ke bagian hari yang lain."
+      "recordingsEmpty": "Tidak ada rekaman pada waktu ini — perkecil atau seret piringan ke bagian hari yang lain."
     }
   }
 }
