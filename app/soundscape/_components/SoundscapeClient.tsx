@@ -1,5 +1,14 @@
 "use client";
 
+/**
+ * Soundscape clock built from the user's already-uploaded recordings.
+ *
+ * The library is the account's `ac.audio` records: each one's archival
+ * original (accessUri) is downloaded into the browser once, run through the
+ * PMN pipeline, and the five per-band maxima are cached locally by record
+ * CID — so returning to this tab redraws the clock without re-downloading.
+ */
+
 import {
   AlertTriangleIcon,
   CheckIcon,
@@ -7,161 +16,206 @@ import {
   DownloadIcon,
   FileAudioIcon,
   Loader2Icon,
-  Trash2Icon,
+  PlayIcon,
+  RefreshCwIcon,
   UploadIcon,
-  XIcon,
+  WavesIcon,
 } from "lucide-react";
+import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
+import { listAllRecordings, type AcAudioListItem } from "@/app/_lib/ac-audio";
 import {
   openWav,
-  parseAudioMothTimestamp,
   wallClockDateKey,
-  wallClockFromEpochMillis,
+  wallClockFromIso,
   wallClockMinuteOfDay,
   type WallClockTime,
 } from "@/lib/soundscape/audiomoth";
 import { buildSoundscapePoints, formatBandLabel, FREQUENCY_BANDS } from "@/lib/soundscape/analysis";
 import { computeRecordingPmn, RecordingTooShortError } from "@/lib/soundscape/pmn";
+import { loadPmnCache, savePmnCache, type PmnCache } from "@/lib/soundscape/pmn-cache";
 import { cn } from "@/lib/utils";
 import { BAND_COLORS, SoundscapeClock } from "./SoundscapeClock";
 
-type FileStatus = "pending" | "analyzing" | "done" | "error";
+type AnalysisStatus = "idle" | "queued" | "downloading" | "analyzing" | "done" | "error";
 
-type ImportedRecording = {
-  id: string;
-  file: File;
-  name: string;
-  sizeBytes: number;
-  status: FileStatus;
-  errorKind?: "decode" | "tooShort";
-  timestamp: WallClockTime | null;
-  timeSource: "filename" | "modified";
+type AnalysisState = {
+  status: AnalysisStatus;
   pmn?: number[];
+  errorKind?: "download" | "decode" | "tooShort";
+};
+
+/** One uploaded recording with everything the clock needs precomputed. */
+type LibraryRecording = {
+  item: AcAudioListItem;
+  time: WallClockTime | null;
+  /** Analyzable = has an archival original AND a usable recording time. */
+  analyzable: boolean;
 };
 
 const ALL_DATES = "all";
 
-function isWavFile(file: File): boolean {
-  return /\.wav$/i.test(file.name) || file.type === "audio/wav" || file.type === "audio/x-wav";
+function formatDuration(seconds: number | null): string | null {
+  if (seconds === null || !Number.isFinite(seconds)) return null;
+  const m = Math.floor(seconds / 60);
+  const s = Math.round(seconds % 60);
+  return m > 0 ? `${m}m ${s}s` : `${s}s`;
 }
 
-function formatFileSize(bytes: number): string {
-  if (bytes < 1024) return `${bytes} B`;
-  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
-  if (bytes < 1024 * 1024 * 1024) return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
-  return `${(bytes / (1024 * 1024 * 1024)).toFixed(2)} GB`;
+function formatWallClock(time: WallClockTime): string {
+  return `${wallClockDateKey(time)} ${String(time.hour).padStart(2, "0")}:${String(time.minute).padStart(2, "0")}`;
 }
 
-function recordingTimestamp(file: File): { timestamp: WallClockTime | null; timeSource: "filename" | "modified" } {
-  const fromName = parseAudioMothTimestamp(file.name);
-  if (fromName) return { timestamp: fromName, timeSource: "filename" };
-  return { timestamp: wallClockFromEpochMillis(file.lastModified, "local"), timeSource: "modified" };
-}
-
-export function SoundscapeClient() {
+export function SoundscapeClient({ sessionDid }: { sessionDid: string | null }) {
   const t = useTranslations("common.soundscape");
-  const [recordings, setRecordings] = useState<ImportedRecording[]>([]);
+  const [recordings, setRecordings] = useState<AcAudioListItem[] | null>(null);
+  const [loadFailed, setLoadFailed] = useState(false);
+  const [reloadCounter, setReloadCounter] = useState(0);
+  const [results, setResults] = useState<Record<string, AnalysisState>>({});
   const [selectedDate, setSelectedDate] = useState<string>(ALL_DATES);
   const [visibleBands, setVisibleBands] = useState<boolean[]>(FREQUENCY_BANDS.map(() => true));
-  const [isDragOver, setIsDragOver] = useState(false);
-  const [rejectedNonWav, setRejectedNonWav] = useState(false);
-  const fileInputRef = useRef<HTMLInputElement>(null);
   const processingRef = useRef(false);
+  const cacheRef = useRef<PmnCache | null>(null);
   const chartRef = useRef<HTMLDivElement>(null);
 
-  const addFiles = useCallback((incoming: FileList | File[]) => {
-    const files = [...incoming];
-    const wavFiles = files.filter(isWavFile);
-    setRejectedNonWav(wavFiles.length < files.length);
-    if (wavFiles.length === 0) return;
-    setRecordings((current) => {
-      const known = new Set(current.map((entry) => `${entry.name}|${entry.sizeBytes}`));
-      const additions: ImportedRecording[] = [];
-      for (const file of wavFiles) {
-        const key = `${file.name}|${file.size}`;
-        if (known.has(key)) continue;
-        known.add(key);
-        additions.push({
-          id: `${key}|${Math.random().toString(36).slice(2)}`,
-          file,
-          name: file.name,
-          sizeBytes: file.size,
-          status: "pending",
-          ...recordingTimestamp(file),
-        });
-      }
-      return additions.length > 0 ? [...current, ...additions] : current;
+  const library = useMemo<LibraryRecording[]>(() => {
+    return (recordings ?? []).map((item) => {
+      const time = wallClockFromIso(item.recordedAt);
+      return { item, time, analyzable: Boolean(item.accessUri) && time !== null };
     });
-  }, []);
+  }, [recordings]);
 
-  // Sequential analysis queue: pick the next pending file, analyze it, and let
-  // the resulting state update re-trigger this effect for the one after.
+  /* Load the account's uploaded recordings and seed results from the cache. */
+  useEffect(() => {
+    if (!sessionDid) return;
+    let cancelled = false;
+    const controller = new AbortController();
+    setRecordings(null);
+    setLoadFailed(false);
+    (async () => {
+      try {
+        const items = await listAllRecordings(sessionDid, controller.signal);
+        if (cancelled) return;
+        const cache = cacheRef.current ?? loadPmnCache();
+        cacheRef.current = cache;
+        const seeded: Record<string, AnalysisState> = {};
+        for (const item of items) {
+          const cached = cache[item.cid];
+          seeded[item.uri] = cached ? { status: "done", pmn: cached } : { status: "idle" };
+        }
+        setResults(seeded);
+        setRecordings(items);
+      } catch {
+        if (!cancelled) {
+          setRecordings([]);
+          setLoadFailed(true);
+        }
+      }
+    })();
+    return () => {
+      cancelled = true;
+      controller.abort();
+    };
+  }, [sessionDid, reloadCounter]);
+
+  /* Sequential analysis queue: download + analyze one recording at a time;
+     each settled state update re-triggers this effect for the next one. */
   useEffect(() => {
     if (processingRef.current) return;
-    const next = recordings.find((entry) => entry.status === "pending");
+    const next = library.find((entry) => entry.analyzable && results[entry.item.uri]?.status === "queued");
     if (!next) return;
     processingRef.current = true;
-    setRecordings((current) =>
-      current.map((entry) => (entry.id === next.id ? { ...entry, status: "analyzing" as const } : entry)),
-    );
+    const { uri, cid, accessUri } = next.item;
+    setResults((current) => ({ ...current, [uri]: { status: "downloading" } }));
     void (async () => {
-      let update: Partial<ImportedRecording>;
+      let update: AnalysisState;
       try {
-        const buffer = await next.file.arrayBuffer();
+        const response = await fetch(accessUri!);
+        if (!response.ok) throw new Error("download_failed");
+        const buffer = await response.arrayBuffer();
+        setResults((current) => ({ ...current, [uri]: { status: "analyzing" } }));
         const wav = openWav(buffer);
         const { pmnPerBand } = await computeRecordingPmn(wav);
+        const cache = cacheRef.current ?? loadPmnCache();
+        cacheRef.current = cache;
+        cache[cid] = pmnPerBand;
+        savePmnCache(cache);
         update = { status: "done", pmn: pmnPerBand };
       } catch (error) {
         update = {
           status: "error",
-          errorKind: error instanceof RecordingTooShortError ? "tooShort" : "decode",
+          errorKind:
+            error instanceof RecordingTooShortError
+              ? "tooShort"
+              : error instanceof Error && error.message === "download_failed"
+                ? "download"
+                : "decode",
         };
       }
       processingRef.current = false;
-      setRecordings((current) => current.map((entry) => (entry.id === next.id ? { ...entry, ...update } : entry)));
+      setResults((current) => ({ ...current, [uri]: update }));
     })();
-  }, [recordings]);
+  }, [library, results]);
 
-  const removeRecording = (id: string) => {
-    setRecordings((current) => current.filter((entry) => entry.id !== id));
-  };
+  const startAnalysis = useCallback(() => {
+    setResults((current) => {
+      const queued: Record<string, AnalysisState> = { ...current };
+      for (const entry of library) {
+        const state = queued[entry.item.uri];
+        if (entry.analyzable && (state?.status === "idle" || state?.status === "error")) {
+          queued[entry.item.uri] = { status: "queued" };
+        }
+      }
+      return queued;
+    });
+  }, [library]);
 
-  const clearAll = () => {
-    setRecordings((current) => current.filter((entry) => entry.status === "analyzing"));
-    setSelectedDate(ALL_DATES);
-  };
-
-  const doneCount = recordings.filter((entry) => entry.status === "done").length;
-  const errorCount = recordings.filter((entry) => entry.status === "error").length;
-  const analyzing = recordings.find((entry) => entry.status === "analyzing");
-  const settledCount = doneCount + errorCount;
-  const busy = recordings.some((entry) => entry.status === "pending" || entry.status === "analyzing");
+  const analyzableCount = library.filter((entry) => entry.analyzable).length;
+  const remainingCount = library.filter((entry) => {
+    const status = results[entry.item.uri]?.status;
+    return entry.analyzable && (status === "idle" || status === "error");
+  }).length;
+  const doneCount = library.filter((entry) => results[entry.item.uri]?.status === "done").length;
+  const active = library.find((entry) => {
+    const status = results[entry.item.uri]?.status;
+    return status === "downloading" || status === "analyzing";
+  });
+  const busy =
+    active !== undefined ||
+    library.some((entry) => results[entry.item.uri]?.status === "queued");
+  const settledCount = library.filter((entry) => {
+    const status = results[entry.item.uri]?.status;
+    return status === "done" || status === "error";
+  }).length;
 
   const dateKeys = useMemo(() => {
     const keys = new Set<string>();
-    for (const entry of recordings) {
-      if (entry.status === "done" && entry.timestamp) keys.add(wallClockDateKey(entry.timestamp));
+    for (const entry of library) {
+      if (entry.time && results[entry.item.uri]?.status === "done") keys.add(wallClockDateKey(entry.time));
     }
     return [...keys].sort();
-  }, [recordings]);
+  }, [library, results]);
 
   useEffect(() => {
     if (selectedDate !== ALL_DATES && !dateKeys.includes(selectedDate)) setSelectedDate(ALL_DATES);
   }, [dateKeys, selectedDate]);
 
   const points = useMemo(() => {
-    const usable = recordings.filter(
-      (entry): entry is ImportedRecording & { pmn: number[]; timestamp: WallClockTime } =>
-        entry.status === "done" && entry.pmn !== undefined && entry.timestamp !== null,
+    const usable = library.filter(
+      (entry): entry is LibraryRecording & { time: WallClockTime } =>
+        entry.time !== null && results[entry.item.uri]?.status === "done" && results[entry.item.uri]?.pmn !== undefined,
     );
     const filtered =
-      selectedDate === ALL_DATES ? usable : usable.filter((entry) => wallClockDateKey(entry.timestamp) === selectedDate);
+      selectedDate === ALL_DATES ? usable : usable.filter((entry) => wallClockDateKey(entry.time) === selectedDate);
     return buildSoundscapePoints(
-      filtered.map((entry) => ({ minuteOfDay: wallClockMinuteOfDay(entry.timestamp), pmn: entry.pmn })),
+      filtered.map((entry) => ({
+        minuteOfDay: wallClockMinuteOfDay(entry.time),
+        pmn: results[entry.item.uri]!.pmn!,
+      })),
     );
-  }, [recordings, selectedDate]);
+  }, [library, results, selectedDate]);
 
   const chartDateLabel =
     selectedDate !== ALL_DATES
@@ -212,130 +266,131 @@ export function SoundscapeClient() {
     }
   }, [chartDateLabel]);
 
+  if (!sessionDid) {
+    return (
+      <div className="rounded-3xl border border-dashed border-border bg-muted/30 px-6 py-14 text-center">
+        <WavesIcon className="mx-auto size-8 text-primary" />
+        <h2 className="mt-4 text-lg font-medium text-foreground">{t("library.signInTitle")}</h2>
+        <p className="mx-auto mt-2 max-w-lg text-sm leading-6 text-muted-foreground">{t("library.signInBody")}</p>
+      </div>
+    );
+  }
+
+  if (recordings === null) {
+    return (
+      <div className="flex items-center justify-center gap-3 rounded-3xl border border-border bg-card/70 px-6 py-16 text-sm text-muted-foreground">
+        <Loader2Icon className="size-5 animate-spin text-primary" />
+        {t("library.loading")}
+      </div>
+    );
+  }
+
+  if (recordings.length === 0) {
+    return (
+      <div className="rounded-3xl border border-dashed border-border bg-muted/30 px-6 py-14 text-center">
+        <FileAudioIcon className="mx-auto size-8 text-primary" />
+        <h2 className="mt-4 text-lg font-medium text-foreground">{t("library.emptyTitle")}</h2>
+        <p className="mx-auto mt-2 max-w-lg text-sm leading-6 text-muted-foreground">
+          {loadFailed ? t("library.loadFailed") : t("library.emptyBody")}
+        </p>
+        <div className="mt-5 flex flex-wrap justify-center gap-2">
+          <Button asChild>
+            <Link href="/audiomoth?tab=upload">
+              <UploadIcon className="size-4" />
+              {t("library.goToUpload")}
+            </Link>
+          </Button>
+          <Button variant="outline" onClick={() => setReloadCounter((value) => value + 1)}>
+            <RefreshCwIcon className="size-4" />
+            {t("library.refresh")}
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="flex flex-col gap-8">
-      {/* Import area */}
-      <section
-        className={cn(
-          "rounded-2xl border border-dashed bg-muted/30 p-6 transition-colors",
-          isDragOver && "border-primary bg-primary/5",
-        )}
-        onDragOver={(event) => {
-          event.preventDefault();
-          setIsDragOver(true);
-        }}
-        onDragLeave={() => setIsDragOver(false)}
-        onDrop={(event) => {
-          event.preventDefault();
-          setIsDragOver(false);
-          addFiles(event.dataTransfer.files);
-        }}
-      >
-        <input
-          ref={fileInputRef}
-          type="file"
-          accept=".wav,audio/wav,audio/x-wav"
-          multiple
-          className="hidden"
-          onChange={(event) => {
-            if (event.target.files) addFiles(event.target.files);
-            event.target.value = "";
-          }}
-        />
-        <div className="flex flex-col items-center gap-3 text-center">
-          <span className="flex size-12 items-center justify-center rounded-full bg-primary/10 text-primary">
-            <UploadIcon className="size-5" />
-          </span>
-          <div>
-            <p className="font-medium text-foreground">{t("import.dropTitle")}</p>
-            <p className="mt-1 text-sm text-muted-foreground">{t("import.dropHint")}</p>
+      {/* Library of uploaded recordings */}
+      <section className="rounded-2xl border bg-background shadow-sm">
+        <div className="flex flex-wrap items-center justify-between gap-3 border-b px-4 py-3">
+          <div className="flex min-w-0 items-center gap-3">
+            <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-primary/10 text-primary">
+              <WavesIcon className="size-4.5" />
+            </span>
+            <div className="min-w-0">
+              <p className="text-sm font-medium text-foreground">{t("library.count", { count: recordings.length })}</p>
+              <p className="truncate text-xs text-muted-foreground">{t("library.downloadNote")}</p>
+            </div>
           </div>
-          <Button type="button" variant="outline" onClick={() => fileInputRef.current?.click()}>
-            <FileAudioIcon />
-            {t("import.browse")}
-          </Button>
-          {rejectedNonWav ? (
-            <p className="flex items-center gap-1.5 text-sm text-destructive">
-              <AlertTriangleIcon className="size-4" />
-              {t("import.onlyWav")}
-            </p>
-          ) : null}
+          <div className="flex flex-wrap items-center gap-2">
+            {busy ? (
+              <span className="flex items-center gap-2 text-xs text-muted-foreground">
+                <Loader2Icon className="size-3.5 animate-spin" />
+                {active
+                  ? results[active.item.uri]?.status === "downloading"
+                    ? t("library.downloading", { name: active.item.name })
+                    : t("library.analyzing", { name: active.item.name })
+                  : t("library.progress", { done: doneCount, total: analyzableCount })}
+              </span>
+            ) : null}
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              disabled={busy}
+              onClick={() => setReloadCounter((value) => value + 1)}
+            >
+              <RefreshCwIcon className="size-4" />
+              {t("library.refresh")}
+            </Button>
+            <Button type="button" size="sm" disabled={busy || remainingCount === 0} onClick={startAnalysis}>
+              {busy ? <Loader2Icon className="size-4 animate-spin" /> : <PlayIcon className="size-4" />}
+              {remainingCount > 0 ? t("library.analyze", { count: remainingCount }) : t("library.analyzeDone")}
+            </Button>
+          </div>
         </div>
-      </section>
-
-      {/* File list + progress */}
-      {recordings.length > 0 ? (
-        <section className="rounded-2xl border bg-background shadow-sm">
-          <div className="flex flex-wrap items-center justify-between gap-3 border-b px-4 py-3">
-            <p className="text-sm font-medium text-foreground">
-              {t("import.fileCount", { count: recordings.length })}
-            </p>
-            <div className="flex items-center gap-3">
-              {busy ? (
-                <span className="flex items-center gap-2 text-xs text-muted-foreground">
-                  <Loader2Icon className="size-3.5 animate-spin" />
-                  {analyzing
-                    ? t("import.analyzing", { name: analyzing.name })
-                    : t("import.progress", { done: settledCount, total: recordings.length })}
-                </span>
-              ) : null}
-              <Button type="button" variant="ghost" size="xs" onClick={clearAll}>
-                <Trash2Icon />
-                {t("import.clearAll")}
-              </Button>
-            </div>
+        {busy ? (
+          <div
+            className="h-1 w-full overflow-hidden bg-muted"
+            role="progressbar"
+            aria-valuemin={0}
+            aria-valuemax={analyzableCount}
+            aria-valuenow={settledCount}
+            aria-label={t("library.progress", { done: settledCount, total: analyzableCount })}
+          >
+            <div
+              className="h-full bg-primary transition-[width]"
+              style={{ width: `${(settledCount / Math.max(1, analyzableCount)) * 100}%` }}
+            />
           </div>
-          {busy ? (
-            <div className="h-1 w-full overflow-hidden bg-muted" role="progressbar" aria-valuemin={0} aria-valuemax={recordings.length} aria-valuenow={settledCount} aria-label={t("import.progress", { done: settledCount, total: recordings.length })}>
-              <div
-                className="h-full bg-primary transition-[width]"
-                style={{ width: `${(settledCount / Math.max(1, recordings.length)) * 100}%` }}
-              />
-            </div>
-          ) : null}
-          <ul className="max-h-72 divide-y overflow-y-auto">
-            {recordings.map((entry) => (
-              <li key={entry.id} className="flex items-center gap-3 px-4 py-2.5 text-sm">
-                <StatusIcon status={entry.status} />
+        ) : null}
+        <ul className="max-h-72 divide-y overflow-y-auto">
+          {library.map((entry) => {
+            const state = results[entry.item.uri] ?? { status: "idle" as const };
+            return (
+              <li key={entry.item.uri} className="flex items-center gap-3 px-4 py-2.5 text-sm">
+                <StatusIcon status={state.status} analyzable={entry.analyzable} />
                 <div className="min-w-0 flex-1">
-                  <p className="truncate font-medium text-foreground">{entry.name}</p>
+                  <p className="truncate font-medium text-foreground">{entry.item.name}</p>
                   <p className="flex flex-wrap items-center gap-x-2 text-xs text-muted-foreground">
-                    <span>{formatFileSize(entry.sizeBytes)}</span>
-                    {entry.timestamp ? (
+                    {entry.time ? (
                       <span className="flex items-center gap-1">
                         <ClockIcon className="size-3" />
-                        {wallClockDateKey(entry.timestamp)}{" "}
-                        {`${String(entry.timestamp.hour).padStart(2, "0")}:${String(entry.timestamp.minute).padStart(2, "0")}`}
-                        {entry.timeSource === "modified" ? (
-                          <span className="text-amber-600 dark:text-amber-400" title={t("import.timeFromModified")}>
-                            *
-                          </span>
-                        ) : null}
+                        {formatWallClock(entry.time)}
                       </span>
                     ) : null}
-                    {entry.status === "error" ? (
-                      <span className="text-destructive">
-                        {entry.errorKind === "tooShort" ? t("import.tooShort") : t("import.statusError")}
-                      </span>
+                    {formatDuration(entry.item.durationSeconds) ? (
+                      <span>{formatDuration(entry.item.durationSeconds)}</span>
                     ) : null}
+                    <StatusLabel entry={entry} state={state} />
                   </p>
                 </div>
-                <button
-                  type="button"
-                  onClick={() => removeRecording(entry.id)}
-                  aria-label={t("import.removeFile", { name: entry.name })}
-                  className="flex size-6 shrink-0 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive"
-                >
-                  <XIcon className="size-3.5" />
-                </button>
               </li>
-            ))}
-          </ul>
-          {recordings.some((entry) => entry.timeSource === "modified") ? (
-            <p className="border-t px-4 py-2 text-xs text-muted-foreground">* {t("import.timeFromModified")}</p>
-          ) : null}
-        </section>
-      ) : null}
+            );
+          })}
+        </ul>
+      </section>
 
       {/* Chart */}
       <section className="rounded-2xl border bg-background p-4 shadow-sm sm:p-6">
@@ -422,8 +477,10 @@ export function SoundscapeClient() {
   );
 }
 
-function StatusIcon(props: { status: FileStatus }) {
-  switch (props.status) {
+function StatusIcon({ status, analyzable }: { status: AnalysisStatus; analyzable: boolean }) {
+  if (!analyzable) return <AlertTriangleIcon className="size-4 shrink-0 text-muted-foreground/60" />;
+  switch (status) {
+    case "downloading":
     case "analyzing":
       return <Loader2Icon className="size-4 shrink-0 animate-spin text-primary" />;
     case "done":
@@ -432,6 +489,32 @@ function StatusIcon(props: { status: FileStatus }) {
       return <AlertTriangleIcon className="size-4 shrink-0 text-destructive" />;
     default:
       return <FileAudioIcon className="size-4 shrink-0 text-muted-foreground" />;
+  }
+}
+
+function StatusLabel({ entry, state }: { entry: LibraryRecording; state: AnalysisState }) {
+  const t = useTranslations("common.soundscape.library");
+  if (!entry.analyzable) {
+    return (
+      <span>{entry.time === null ? t("statusNoTime") : t("statusNoOriginal")}</span>
+    );
+  }
+  switch (state.status) {
+    case "queued":
+      return <span>{t("statusQueued")}</span>;
+    case "done":
+      return <span className="text-primary">{t("statusAnalyzed")}</span>;
+    case "error":
+      return (
+        <span className="text-destructive">
+          {state.errorKind === "tooShort" ? t("tooShort") : t("statusError")}
+        </span>
+      );
+    case "downloading":
+    case "analyzing":
+      return null;
+    default:
+      return <span>{t("statusNotAnalyzed")}</span>;
   }
 }
 

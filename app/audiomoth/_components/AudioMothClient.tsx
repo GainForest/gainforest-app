@@ -894,7 +894,7 @@ export function AudioMothClient({
             <InfoIcon className="mt-1 size-4 shrink-0" />
             <span>{soundscapeT("hero.timeNote")}</span>
           </p>
-          <SoundscapeClient />
+          <SoundscapeClient sessionDid={sessionDid} />
         </div>
       )}
 

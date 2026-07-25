@@ -2869,27 +2869,37 @@
   "soundscape": {
     "meta": {
       "title": "Lanskap suara",
-      "description": "Impor rekaman AudioMoth dan buat jam lanskap suara 24 jam dari kandungan frekuensinya."
+      "description": "Buat jam lanskap suara 24 jam dari rekaman audio yang sudah diunggah ke akun Anda."
     },
     "hero": {
       "eyebrow": "Pemantauan akustik",
-      "title": "Ubah rekaman AudioMoth menjadi jam lanskap suara",
-      "description": "Letakkan file WAV AudioMoth selama satu hari di bawah ini. Setiap rekaman dipindai dalam lima pita frekuensi, dan momen paling nyaring digambar mengelilingi jam 24 jam.",
-      "timeNote": "Waktu rekaman dibaca dari nama file AudioMoth (misalnya 20240404_153000.WAV). Perangkat AudioMoth biasanya memakai UTC kecuali diatur berbeda. Rekaman Anda tidak pernah meninggalkan perangkat ini — semuanya dianalisis di browser Anda."
+      "title": "Ubah rekaman yang sudah diunggah menjadi jam lanskap suara",
+      "description": "Setiap rekaman yang telah Anda unggah dipindai dalam lima pita frekuensi, dan momen paling nyaring digambar mengelilingi jam 24 jam.",
+      "timeNote": "Waktu rekaman berasal dari detail rekaman itu sendiri (jam perangkat, biasanya UTC). Analisis mengunduh setiap rekaman asli ke browser Anda satu kali — hasilnya diingat di perangkat ini."
     },
-    "import": {
-      "dropTitle": "Letakkan file WAV AudioMoth di sini",
-      "dropHint": "Anda dapat memilih banyak file sekaligus — rekaman satu hari penuh paling baik.",
-      "browse": "Pilih file",
-      "fileCount": "{count, plural, other {# rekaman}}",
-      "clearAll": "Hapus semua",
-      "removeFile": "Hapus {name}",
+    "library": {
+      "signInTitle": "Masuk untuk membuat lanskap suara Anda",
+      "signInBody": "Jam lanskap suara digambar dari rekaman yang sudah diunggah ke akun Anda. Masuk untuk melihat milik Anda.",
+      "loading": "Memuat rekaman Anda…",
+      "loadFailed": "Rekaman Anda tidak dapat dimuat. Coba lagi sebentar lagi.",
+      "emptyTitle": "Belum ada rekaman yang diunggah",
+      "emptyBody": "Jam lanskap suara dibuat dari rekaman di akun Anda. Unggah rekaman AudioMoth terlebih dahulu, lalu kembali ke sini.",
+      "goToUpload": "Unggah rekaman",
+      "refresh": "Segarkan",
+      "count": "{count, plural, other {# rekaman terunggah}}",
+      "downloadNote": "Setiap rekaman asli diunduh dan dianalisis satu kali; hasilnya diingat di perangkat ini.",
+      "analyze": "Analisis {count, plural, other {# rekaman}}",
+      "analyzeDone": "Semua rekaman sudah dianalisis",
+      "downloading": "Mengunduh {name}…",
       "analyzing": "Menganalisis {name}…",
-      "progress": "{done} dari {total} rekaman dianalisis",
-      "statusError": "File ini tidak dapat dibaca",
-      "tooShort": "Rekaman terlalu pendek untuk dianalisis",
-      "onlyWav": "Hanya file WAV yang didukung.",
-      "timeFromModified": "Nama file tidak memuat stempel waktu — memakai waktu modifikasi file"
+      "progress": "{done} dari {total} dianalisis",
+      "statusQueued": "Menunggu…",
+      "statusAnalyzed": "Dianalisis",
+      "statusNotAnalyzed": "Belum dianalisis",
+      "statusNoOriginal": "File audio asli tidak tersedia",
+      "statusNoTime": "Tidak ada waktu rekaman",
+      "statusError": "Rekaman ini tidak dapat dianalisis",
+      "tooShort": "Terlalu pendek untuk dianalisis (butuh minimal satu menit penuh)"
     },
     "chart": {
       "title": "Daya dikurangi derau — {date}",
@@ -2898,7 +2908,7 @@
       "timeLabel": "Waktu (Jam)",
       "legendTitle": "Pita frekuensi",
       "empty": "Rekaman yang dianalisis akan muncul di sini sebagai jam lanskap suara 24 jam.",
-      "emptyHint": "Impor rekaman AudioMoth di atas untuk memulai.",
+      "emptyHint": "Analisis rekaman terunggah Anda di atas untuk memulai.",
       "downloadPng": "Unduh gambar",
       "hoverHint": "Gerakkan kursor di atas jam untuk melihat nilai.",
       "datesTitle": "Hari",

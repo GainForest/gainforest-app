@@ -2869,27 +2869,37 @@
   "soundscape": {
     "meta": {
       "title": "Paisaje sonoro",
-      "description": "Importa grabaciones de AudioMoth y crea un reloj de paisaje sonoro de 24 horas a partir de sus frecuencias."
+      "description": "Crea un reloj de paisaje sonoro de 24 horas a partir de las grabaciones de audio ya subidas a tu cuenta."
     },
     "hero": {
       "eyebrow": "Monitoreo acústico",
-      "title": "Convierte grabaciones de AudioMoth en un reloj de paisaje sonoro",
-      "description": "Suelta abajo un día de archivos WAV de AudioMoth. Cada grabación se analiza en cinco bandas de frecuencia y los momentos más sonoros se dibujan alrededor de un reloj de 24 horas.",
-      "timeNote": "Las horas de grabación se leen de los nombres de archivo de AudioMoth (por ejemplo 20240404_153000.WAV). Los dispositivos AudioMoth suelen usar UTC salvo que se configuren de otra forma. Tus grabaciones nunca salen de este dispositivo: todo se analiza en tu navegador."
+      "title": "Convierte tus grabaciones subidas en un reloj de paisaje sonoro",
+      "description": "Cada grabación que has subido se analiza en cinco bandas de frecuencia y los momentos más sonoros se dibujan alrededor de un reloj de 24 horas.",
+      "timeNote": "Las horas de grabación provienen de los propios datos de cada grabación (el reloj del dispositivo, normalmente UTC). El análisis descarga cada grabación original en tu navegador una sola vez; los resultados se recuerdan en este dispositivo."
     },
-    "import": {
-      "dropTitle": "Suelta aquí los archivos WAV de AudioMoth",
-      "dropHint": "Puedes seleccionar muchos archivos a la vez; un día completo de grabaciones funciona mejor.",
-      "browse": "Elegir archivos",
-      "fileCount": "{count, plural, one {# grabación} other {# grabaciones}}",
-      "clearAll": "Quitar todo",
-      "removeFile": "Quitar {name}",
+    "library": {
+      "signInTitle": "Inicia sesión para crear tu paisaje sonoro",
+      "signInBody": "El reloj de paisaje sonoro se dibuja a partir de las grabaciones ya subidas a tu cuenta. Inicia sesión para ver las tuyas.",
+      "loading": "Cargando tus grabaciones…",
+      "loadFailed": "No se pudieron cargar tus grabaciones. Inténtalo de nuevo en un momento.",
+      "emptyTitle": "Aún no hay grabaciones subidas",
+      "emptyBody": "El reloj de paisaje sonoro se crea a partir de las grabaciones de tu cuenta. Sube primero grabaciones de AudioMoth y vuelve aquí.",
+      "goToUpload": "Subir grabaciones",
+      "refresh": "Actualizar",
+      "count": "{count, plural, one {# grabación subida} other {# grabaciones subidas}}",
+      "downloadNote": "Cada original se descarga y analiza una sola vez; los resultados se recuerdan en este dispositivo.",
+      "analyze": "Analizar {count, plural, one {# grabación} other {# grabaciones}}",
+      "analyzeDone": "Todas las grabaciones analizadas",
+      "downloading": "Descargando {name}…",
       "analyzing": "Analizando {name}…",
-      "progress": "{done} de {total} grabaciones analizadas",
-      "statusError": "No se pudo leer este archivo",
-      "tooShort": "La grabación es demasiado corta para analizarla",
-      "onlyWav": "Solo se admiten archivos WAV.",
-      "timeFromModified": "El nombre del archivo no incluye fecha y hora; se usa la fecha de modificación"
+      "progress": "{done} de {total} analizadas",
+      "statusQueued": "En espera…",
+      "statusAnalyzed": "Analizada",
+      "statusNotAnalyzed": "Aún sin analizar",
+      "statusNoOriginal": "El archivo de audio original no está disponible",
+      "statusNoTime": "Sin hora de grabación",
+      "statusError": "No se pudo analizar esta grabación",
+      "tooShort": "Demasiado corta para analizarla (necesita al menos un minuto completo)"
     },
     "chart": {
       "title": "Potencia menos ruido — {date}",
@@ -2898,7 +2908,7 @@
       "timeLabel": "Hora del día",
       "legendTitle": "Bandas de frecuencia",
       "empty": "Las grabaciones analizadas aparecerán aquí como un reloj de paisaje sonoro de 24 horas.",
-      "emptyHint": "Importa grabaciones de AudioMoth arriba para empezar.",
+      "emptyHint": "Analiza arriba tus grabaciones subidas para empezar.",
       "downloadPng": "Descargar imagen",
       "hoverHint": "Mueve el cursor sobre el reloj para ver los valores.",
       "datesTitle": "Días",

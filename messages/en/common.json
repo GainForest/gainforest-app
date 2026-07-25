@@ -2869,27 +2869,37 @@
   "soundscape": {
     "meta": {
       "title": "Soundscape",
-      "description": "Import AudioMoth recordings and build a 24-hour soundscape clock from their frequency content."
+      "description": "Build a 24-hour soundscape clock from the audio recordings already uploaded to your account."
     },
     "hero": {
       "eyebrow": "Acoustic monitoring",
-      "title": "Turn AudioMoth recordings into a soundscape clock",
-      "description": "Drop a day of AudioMoth WAV files below. Each recording is scanned for sound energy in five frequency bins, and the loudest moments are drawn around a 24-hour clock.",
-      "timeNote": "Recording times are read from the AudioMoth file names (for example 20240404_153000.WAV). AudioMoth devices usually name files in UTC unless configured otherwise. Your recordings never leave this device — everything is analyzed in your browser."
+      "title": "Turn your uploaded recordings into a soundscape clock",
+      "description": "Each recording you have uploaded is scanned for sound energy in five frequency bins, and the loudest moments are drawn around a 24-hour clock.",
+      "timeNote": "Recording times come from each recording's own details (the device clock, usually UTC). Analysis downloads each original recording into your browser once — results are remembered on this device."
     },
-    "import": {
-      "dropTitle": "Drop AudioMoth WAV files here",
-      "dropHint": "You can select many files at once — a whole day of recordings works best.",
-      "browse": "Choose files",
-      "fileCount": "{count, plural, one {# recording} other {# recordings}}",
-      "clearAll": "Clear all",
-      "removeFile": "Remove {name}",
+    "library": {
+      "signInTitle": "Sign in to build your soundscape",
+      "signInBody": "The soundscape clock is drawn from the recordings already uploaded to your account. Sign in to see yours.",
+      "loading": "Loading your recordings…",
+      "loadFailed": "Your recordings could not be loaded. Try again in a moment.",
+      "emptyTitle": "No uploaded recordings yet",
+      "emptyBody": "The soundscape clock is built from the recordings in your account. Upload AudioMoth recordings first, then come back here.",
+      "goToUpload": "Upload recordings",
+      "refresh": "Refresh",
+      "count": "{count, plural, one {# uploaded recording} other {# uploaded recordings}}",
+      "downloadNote": "Each original is downloaded and analyzed once; results are remembered on this device.",
+      "analyze": "Analyze {count, plural, one {# recording} other {# recordings}}",
+      "analyzeDone": "All recordings analyzed",
+      "downloading": "Downloading {name}…",
       "analyzing": "Analyzing {name}…",
-      "progress": "{done} of {total} recordings analyzed",
-      "statusError": "Couldn't read this file",
-      "tooShort": "Recording is too short to analyze",
-      "onlyWav": "Only WAV files are supported.",
-      "timeFromModified": "No timestamp in the file name — using the file's modified time instead"
+      "progress": "{done} of {total} analyzed",
+      "statusQueued": "Waiting…",
+      "statusAnalyzed": "Analyzed",
+      "statusNotAnalyzed": "Not analyzed yet",
+      "statusNoOriginal": "The original audio file isn't available",
+      "statusNoTime": "No recording time",
+      "statusError": "Couldn't analyze this recording",
+      "tooShort": "Too short to analyze (needs at least one full minute)"
     },
     "chart": {
       "title": "Power-Minus-Noise — {date}",
@@ -2898,7 +2908,7 @@
       "timeLabel": "Time (Hour)",
       "legendTitle": "Frequency Bins",
       "empty": "Analyzed recordings will appear here as a 24-hour soundscape clock.",
-      "emptyHint": "Import AudioMoth recordings above to begin.",
+      "emptyHint": "Analyze your uploaded recordings above to begin.",
       "downloadPng": "Download image",
       "hoverHint": "Move your cursor over the clock to inspect values.",
       "datesTitle": "Days",

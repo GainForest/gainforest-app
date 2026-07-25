@@ -5,9 +5,11 @@ import {
   parseAudioMothTimestamp,
   wallClockDateKey,
   wallClockFromEpochMillis,
+  wallClockFromIso,
   wallClockMinuteOfDay,
   WavDecodeError,
 } from "./audiomoth";
+import { parsePmnCache, trimPmnCache } from "./pmn-cache";
 import { buildSoundscapePoints, fftRadix2, formatBandLabel, FREQUENCY_BANDS } from "./analysis";
 import {
   binnedMaxPmn,
@@ -65,6 +67,56 @@ describe("wall clock helpers", () => {
     expect(formatMinuteOfDay(0)).toBe("00:00");
     expect(formatMinuteOfDay(15 * 60 + 5)).toBe("15:05");
     expect(formatMinuteOfDay(1440)).toBe("00:00");
+  });
+
+  it("reads the device wall clock from a recordedAt ISO string via UTC components", () => {
+    // Upload stores the AudioMoth device clock as a UTC instant, so the UTC
+    // fields are the wall clock regardless of the viewer's timezone.
+    expect(wallClockFromIso("2024-04-04T15:30:00.000Z")).toEqual({
+      year: 2024,
+      month: 4,
+      day: 4,
+      hour: 15,
+      minute: 30,
+      second: 0,
+    });
+    // Offset forms are normalized to the same instant first.
+    expect(wallClockFromIso("2024-04-04T17:30:00+02:00")).toEqual(
+      wallClockFromIso("2024-04-04T15:30:00Z"),
+    );
+    expect(wallClockFromIso("")).toBeNull();
+    expect(wallClockFromIso(null)).toBeNull();
+    expect(wallClockFromIso("not a date")).toBeNull();
+  });
+});
+
+// ---------------------------------------------------------------------------
+// PMN cache
+// ---------------------------------------------------------------------------
+
+describe("pmn cache", () => {
+  const vector = [1, 2, 3, 4, 5];
+
+  it("round-trips valid entries and drops malformed ones", () => {
+    const raw = JSON.stringify({
+      good: vector,
+      wrongLength: [1, 2],
+      wrongType: "nope",
+      nonFinite: [1, 2, 3, 4, Number.NaN],
+    });
+    expect(parsePmnCache(raw)).toEqual({ good: vector });
+  });
+
+  it("tolerates missing or corrupt storage", () => {
+    expect(parsePmnCache(null)).toEqual({});
+    expect(parsePmnCache("not json")).toEqual({});
+    expect(parsePmnCache("[1,2,3]")).toEqual({});
+  });
+
+  it("trims the earliest-inserted entries beyond the cap", () => {
+    const cache = Object.fromEntries(["a", "b", "c", "d"].map((key) => [key, vector]));
+    expect(Object.keys(trimPmnCache(cache, 2))).toEqual(["c", "d"]);
+    expect(trimPmnCache(cache, 10)).toBe(cache);
   });
 });
 
