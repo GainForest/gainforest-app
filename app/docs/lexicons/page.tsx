@@ -88,6 +88,16 @@ export default async function LexiconsOverviewPage() {
 
       <div className="mt-14 grid gap-3 sm:grid-cols-2">
         <Link
+          href="/docs/hypercerts"
+          className="group rounded-xl border border-border/60 px-5 py-4 no-underline transition-colors hover:border-primary/50 sm:col-span-2"
+        >
+          <div className="flex items-center gap-1.5 text-[13.5px] font-medium text-foreground group-hover:text-primary">
+            {t("hypercertsLinkTitle")}
+            <ArrowUpRightIcon className="h-3.5 w-3.5 opacity-50" />
+          </div>
+          <p className="m-0 mt-1 text-[12.5px] leading-relaxed text-muted-foreground">{t("hypercertsLinkDesc")}</p>
+        </Link>
+        <Link
           href="/docs/atproto"
           className="group rounded-xl border border-border/60 px-5 py-4 no-underline transition-colors hover:border-primary/50"
         >

@@ -78,6 +78,7 @@ export default async function CgsDocsPage() {
         <div className="grid gap-3 sm:grid-cols-2">
           <MoreCard href="/docs/atproto" title={t("more.atprotoTitle")} desc={t("more.atprotoDesc")} />
           <MoreCard href="/docs/lexicons" title={t("more.lexiconsTitle")} desc={t("more.lexiconsDesc")} />
+          <MoreCard href="/docs/hypercerts" title={t("more.hypercertsTitle")} desc={t("more.hypercertsDesc")} />
           <MoreCard href="/docs/ePDS" title={t("more.epdsTitle")} desc={t("more.epdsDesc")} />
           <MoreCard href={GITHUB_URL} external title={t("more.githubTitle")} desc={t("more.githubDesc")} />
         </div>

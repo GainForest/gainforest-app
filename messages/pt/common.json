@@ -1409,7 +1409,9 @@
       "breadcrumbAria": "Navegação da documentação",
       "schemas": "Esquemas de dados",
       "guideIntro": "Este guia define as convenções da aplicação usadas com o esquema de ocorrência. O esquema continua sendo Darwin Core genérico; o guia explica como as gravações do AudioMoth, as caixas do espectrograma e os registros de ocorrência se conectam."
-    }
+    },
+    "hypercertsLinkTitle": "Construir sobre os léxicos do Hypercerts",
+    "hypercertsLinkDesc": "Convenções, divergências e conselhos de interoperabilidade para quem escreve registros do Hypercerts no próprio aplicativo."
   },
   "taina": {
     "meta": {
@@ -2551,7 +2553,9 @@
       "githubTitle": "CGS no GitHub",
       "githubDesc": "O código-fonte completo do serviço de grupos, aberto para qualquer pessoa ler, rodar e melhorar.",
       "atprotoTitle": "Como funciona o AT Protocol",
-      "atprotoDesc": "Um passeio interativo pela rede aberta sobre a qual tudo isto é construído."
+      "atprotoDesc": "Um passeio interativo pela rede aberta sobre a qual tudo isto é construído.",
+      "hypercertsTitle": "Léxicos do Hypercerts",
+      "hypercertsDesc": "Como a GainForest e a Ma Earth modelam o trabalho de impacto, e o que escrever para servir aos dois."
     }
   },
   "atproto": {
@@ -2943,6 +2947,308 @@
       "recordingsTitle": "Gravações à vista",
       "recordingsCount": "{count, plural, one {# gravação} other {# gravações}}",
       "recordingsEmpty": "Não há gravações neste horário — reduza o zoom ou use ‹ e › para ver outra parte do dia."
+    }
+  },
+  "hypercerts": {
+    "metaTitle": "Construir sobre os léxicos do Hypercerts — GainForest",
+    "metaDescription": "Como a GainForest e a Ma Earth modelam o trabalho de impacto com os léxicos org.hypercerts, onde os dois aplicativos concordam, onde divergem e o que escrever para que um terceiro aplicativo interopere com ambos.",
+    "kicker": "Interoperabilidade do Hypercerts",
+    "title": "Construir sobre os léxicos do Hypercerts",
+    "lead": "Os esquemas do Hypercerts são propositalmente frouxos: uniões por toda parte, quase nada obrigatório e nenhuma opinião sobre qual conta guarda qual registro. Dois aplicativos em produção já os escrevem — GainForest e Ma Earth. Esta página mostra o formato em que ambos convergiram, os pontos em que se afastaram e o que o seu aplicativo deve fazer para que os três consigam se ler.",
+    "why": {
+      "heading": "Por que esta página existe",
+      "p1": "Um léxico é um formato de transmissão, não um aplicativo. `org.hypercerts.claim.activity` exige exatamente três campos e deixa o resto com você: a descrição longa pode ser três coisas diferentes, o escopo de trabalho duas, quem contribui duas, uma imagem duas. Duas equipes que leem o mesmo esquema vão produzir registros que validam perfeitamente e ainda assim não renderizam no aplicativo da outra.",
+      "p2": "Tudo abaixo vem das duas bases de código em produção. Onde elas concordam, trate como convenção. Onde discordam, dizemos qual formato escrever e quais aceitar: escreva de forma estrita e leia de forma generosa.",
+      "callout": "Regra prática: escreva o formato que os dois aplicativos já leem e aceite todos os formatos que qualquer um deles já escreve."
+    },
+    "graph": {
+      "heading": "A teia de registros",
+      "intro": "No Hypercerts nada é aninhado. Cada relação é um registro separado mais uma referência forte: um par `uri` + `cid` que fixa uma versão exata do destino. Toque em um registro para ver quem o escreve e como ele é anexado.",
+      "ariaLabel": "Grafo dos registros do Hypercerts e dos campos que os ligam",
+      "hint": "Toque em um registro",
+      "attachedVia": "Anexado por",
+      "bothApps": "Ambos os aplicativos",
+      "gainforestOnly": "Apenas GainForest",
+      "maearthOnly": "Apenas Ma Earth",
+      "roles": {
+        "collection": "O contêiner que as pessoas realmente veem. A GainForest chama de projeto; a Ma Earth também. `type` é o discriminador de texto livre: ambos escrevem `\"project\"`, e a Ma Earth ainda escreve `\"snapshot\"` para congelar candidaturas de rodada.",
+        "activity": "A reivindicação em si: escopo, período, quem contribuiu, lugares. A GainForest a exibe como o Cert; a Ma Earth a mantém interna e cria uma automaticamente por projeto. É o registro para o qual todo o resto aponta.",
+        "attachment": "O cavalo de batalha. Um único NSID cobre evidências, imagens de galeria e atualizações de andamento; `contentType` é a única coisa que os separa. Carrega arquivos, links e referências `at://` a outros registros.",
+        "location": "Um sítio. A geometria fica em um único campo de texto, então um polígono é GeoJSON serializado. Referenciado por `activity.locations[]` e `collection.location`.",
+        "rights": "Termos de licenciamento da reivindicação. A Ma Earth aponta cada atividade para um único registro padrão de toda a plataforma; a GainForest hoje omite o campo por completo.",
+        "tag": "Um átomo de escopo reutilizável com uma chave de máquina como `mangrove_restoration`. Referenciado de dentro do objeto CEL de escopo de trabalho, nunca do nível superior da atividade.",
+        "receipt": "Uma nota de pagamento. A GainForest escreve uma por doação a partir da sua conta facilitadora; quem envia pode permanecer anônimo. Aponta de volta para o que foi financiado.",
+        "evaluation": "Julgamento de terceiros sobre uma reivindicação: resumo, nota opcional em uma escala mín./máx. explícita, DIDs de quem avalia e links para relatórios. A GainForest os exibe num Cert, mas nenhum dos dois aplicativos os escreve ainda: é a lacuna que um aplicativo avaliador preencheria."
+      },
+      "links": {
+        "items": "`collection.items[].itemIdentifier`: uma referência forte mais um peso opcional em texto.",
+        "locations": "`activity.locations[]`: lista de referências fortes. `collection.location` é uma referência única.",
+        "rights": "`activity.rights`: uma única referência forte a um registro de direitos que pode estar no PDS de outra pessoa.",
+        "usedTags": "`activity.workScope.usedTags[]`: aninhado dentro do objeto CEL, não no nível superior da atividade.",
+        "subjects": "`attachment.subjects[]`: na prática, um conjunto sem ordem. Nunca dependa da posição.",
+        "for": "`receipt.for`: uma referência forte no esquema atual; versões anteriores usavam uma URI `at://` simples, então aceite as duas.",
+        "subject": "`evaluation.subject`: uma única referência forte ao que está sendo avaliado."
+      }
+    },
+    "pattern": {
+      "heading": "O padrão a copiar: um projeto carrega exatamente uma reivindicação",
+      "intro": "Os dois aplicativos convergiram para o mesmo núcleo, de forma independente. Se você copiar uma única coisa desta página, copie esta.",
+      "r1": {
+        "title": "Um projeto é uma coleção",
+        "text": "Crie um `org.hypercerts.collection` com `type: \"project\"`. Ele guarda a narrativa pública: título, resumo, descrição e capa."
+      },
+      "r2": {
+        "title": "Ele nasce junto com uma atividade",
+        "text": "Emita um `org.hypercerts.claim.activity` no mesmo momento e coloque a referência forte dele em `items[]`. A GainForest constrói os dois a partir de um formulário; a Ma Earth chama isso de atividade inicial."
+      },
+      "r3": {
+        "title": "Os dois registros permanecem sincronizados",
+        "text": "Título, resumo, descrição, datas e capa são espelhados do projeto para a reivindicação. A sincronização da Ma Earth é aditiva: um campo editado na atividade nunca é sobrescrito pelo projeto."
+      },
+      "r4": {
+        "title": "Mais atividades são fases, não projetos",
+        "text": "Uma segunda atividade sob a mesma coleção é um período operacional posterior, com escopo, prazo e sítios próprios. Nunca emita uma segunda coleção para o mesmo trabalho."
+      },
+      "note": "Um consumidor que só entende coleções continua vendo um projeto completo. Um que só entende reivindicações continua vendo o trabalho estruturado. Essa redundância é justamente o objetivo."
+    },
+    "sequence": {
+      "heading": "A ordem de publicação importa",
+      "intro": "Referências fortes embutem um CID, então os filhos precisam existir antes dos pais. Percorra uma publicação completa e veja as referências se acumularem.",
+      "play": "Reproduzir",
+      "pause": "Pausar",
+      "back": "Voltar",
+      "next": "Avançar",
+      "stepLabel": "Passo {n} de {total}",
+      "repoLabel": "Registros no repositório",
+      "empty": "Nada foi escrito ainda.",
+      "steps": {
+        "s1": {
+          "title": "Envie os blobs primeiro",
+          "text": "Fotos de capa, PDFs e áudio sobem como blobs antes que qualquer registro os mencione. Você recebe de volta um objeto blob para embutir em `#smallImage`, `#largeImage` ou `#smallBlob`."
+        },
+        "s2": {
+          "title": "Emita os sítios",
+          "text": "Um `app.certified.location` por lugar. Guarde o par `uri` + `cid`: a reivindicação vai referenciá-lo, e reemitir o mesmo sítio duas vezes é o erro de duplicação mais comum."
+        },
+        "s3": {
+          "title": "Resolva as etiquetas de escopo",
+          "text": "Procure um `org.hypercerts.workscope.tag` existente para cada chave de escopo antes de criar um. Os dois aplicativos leem antes de criar, para que uma etiqueta nunca se duplique por projeto."
+        },
+        "s4": {
+          "title": "Escreva a reivindicação",
+          "text": "`org.hypercerts.claim.activity` reúne tudo: título, resumo, descrição, escopo de trabalho com as referências das etiquetas aninhadas dentro, datas, quem contribuiu, `locations[]` e uma referência `rights`."
+        },
+        "s5": {
+          "title": "Escreva a coleção",
+          "text": "`org.hypercerts.collection` com `type: \"project\"` e `items[]` contendo a referência forte da reivindicação. Agora o projeto é descobrível e está completo."
+        },
+        "s6": {
+          "title": "Anexe o contexto",
+          "text": "Imagens de galeria, evidências e atualizações são registros `org.hypercerts.context.attachment` que apontam de volta para o projeto e para a reivindicação por `subjects[]`."
+        },
+        "s7": {
+          "title": "Edições mudam os CIDs",
+          "text": "Editar a reivindicação gera um CID novo, o que invalida em silêncio a referência guardada em `collection.items[]`. Regrave o pai sempre que um filho mudar, ou rode um reconciliador que faça isso por você."
+        },
+        "s8": {
+          "title": "O dinheiro chega depois",
+          "text": "Os registros `org.hypercerts.funding.receipt` são escritos depois, muitas vezes por uma terceira conta, e apontam de volta para a coleção ou para a reivindicação por `for`."
+        }
+      }
+    },
+    "divergence": {
+      "heading": "Onde os dois aplicativos divergem",
+      "intro": "Oito campos em que a GainForest e a Ma Earth escolheram opções válidas diferentes. Parte da distância é defasagem de versão: a GainForest acompanha uma revisão mais recente do léxico e a Ma Earth fixa uma versão anterior. Escolha um para ver os dois formatos e o que o seu aplicativo deve fazer.",
+      "gainforestLabel": "A GainForest escreve",
+      "maearthLabel": "A Ma Earth escreve",
+      "adviceLabel": "O que você deve fazer",
+      "topics": {
+        "description": {
+          "label": "Descrição longa",
+          "title": "`description`: texto simples ou documento rico",
+          "gainforest": "Um `org.hypercerts.defs#descriptionString` embutido com texto simples. Simples, mas títulos, imagens e links não sobrevivem.",
+          "maearth": "Um `pub.leaflet.pages.linearDocument`, o mesmo modelo de blocos que o Leaflet usa, com as imagens embutidas reenviadas como blobs do PDS para que o registro renderize sem recorrer ao aplicativo de origem.",
+          "advice": "Escreva o documento do Leaflet: é o que preserva a estrutura, e os dois aplicativos o renderizam. Mas `descriptionString` continua sendo um braço de primeira classe do esquema atual, então decodifique-o sempre também: boa parte dos registros publicados o carrega."
+        },
+        "workScope": {
+          "label": "Escopo de trabalho",
+          "title": "`workScope`: texto separado por vírgulas ou expressão CEL",
+          "gainforest": "O editor de projetos escreve o antigo `#workScopeString`; o formulário avulso de Cert escreve o objeto CEL. Os dois formatos convivem no mesmo aplicativo.",
+          "maearth": "Sempre o objeto CEL e sempre o mesmo predicado estreito. Não há avaliador de CEL por trás: a expressão é um formato de transmissão que codifica uma lista de etiquetas.",
+          "advice": "Escreva CEL com `scope.hasAny([...])` e aninhe as referências das etiquetas em `usedTags`. Na leitura, use `scope` se existir; caso contrário, extraia os literais entre aspas de `expression`: essa alternativa sobrevive a qualquer formato de predicado."
+        },
+        "tags": {
+          "label": "Hospedagem das etiquetas",
+          "title": "`workscope.tag`: de quem é o registro da etiqueta?",
+          "gainforest": "As etiquetas são emitidas no repositório de quem as cria, com a chave de escopo como rkey, então `getRecord` funciona como checagem de existência e a escrita é idempotente por conta.",
+          "maearth": "Uma única taxonomia curada de toda a plataforma no PDS da plataforma, com rkeys TID, um ciclo de vida proposta → aceita → obsoleta e uma etapa de publicação administrativa. Os rkeys antigos em formato de slug foram reemitidos como TID.",
+          "advice": "Faça a junção por `key`, nunca pela URI. O mesmo conceito existe legitimamente como muitos registros em muitos repositórios; trate `usedTags[]` como procedência e `key` como identidade."
+        },
+        "subjects": {
+          "label": "Sujeitos do anexo",
+          "title": "`attachment.subjects[]`: qual vem primeiro?",
+          "gainforest": "`subjects[0]` é a reivindicação; sujeitos extras acrescentam contexto, como o sítio onde a evidência foi coletada.",
+          "maearth": "`subjects[0]` é a coleção do projeto e `subjects[1]` é a reivindicação. Anexos de galeria carregam só a coleção; uma atualização sem atividade se espalha por todas as atividades publicadas.",
+          "advice": "Faça a correspondência por pertencimento, não por índice: um anexo pertence a um registro se qualquer URI de sujeito coincidir. Emita tanto a coleção quanto a reivindicação para que consumidores que leem por índice, de um lado ou do outro, ainda o encontrem."
+        },
+        "rights": {
+          "label": "Direitos",
+          "title": "`activity.rights`: presente ou ausente",
+          "gainforest": "Não é escrito. Hoje os Certs não carregam nenhuma referência de direitos.",
+          "maearth": "Cada atividade referencia um único registro de direitos padrão de toda a plataforma. O registro em si fica hospedado na conta da hypercerts.org e é importado por AT-URI, então é uma referência entre repositórios por design.",
+          "advice": "Escreva uma referência de direitos: custa pouco e torna suas reivindicações utilizáveis por qualquer pessoa com política de licenciamento. Nunca presuma que ela resolve dentro do seu próprio repositório e compare apenas por `uri`: o CID muda sempre que o texto dos direitos é editado."
+        },
+        "location": {
+          "label": "Sítios",
+          "title": "`app.certified.location`: o mesmo lugar, duas URIs de referência espacial",
+          "gainforest": "`srs` é a URI CRS84 da OGC. Pontos são escritos como `\"lat,lng\"`.",
+          "maearth": "`srs` é a URI EPSG:4326 da OGC, tratada como canônica pela sua rotina de reparo. Polígonos são GeoJSON serializado e arredondado a seis casas decimais para que a string fique abaixo do limite de grafemas; sítios aproximados são borrados para um círculo de 10 km antes da publicação.",
+          "advice": "As duas URIs significam WGS84 com a ordem de eixos que estes registros de fato usam, então aceite qualquer uma e nunca reordene coordenadas com base em `srs`. Ramifique seu parser por `locationType`, não pelo formato da string."
+        },
+        "contributors": {
+          "label": "Quem contribui",
+          "title": "`contributors[]`: identidade embutida ou registro separado",
+          "gainforest": "`#contributorIdentity` embutido, e o valor pode ser um DID ou um nome digitado num formulário.",
+          "maearth": "Também `#contributorIdentity` embutido, sempre um DID, derivado da tabela de contribuições. O próprio DID da organização inicializa a atividade inicial.",
+          "advice": "Use a forma embutida: o registro `contributorInformation` existe, mas nenhum dos dois aplicativos o escreve. Nunca presuma que `identity` é um DID válido; mostre-o como nome quando não for."
+        },
+        "receipt": {
+          "label": "Recibos de financiamento",
+          "title": "`org.hypercerts.funding.receipt`: quem escreve o dinheiro",
+          "gainforest": "Escrito por uma conta facilitadora dedicada, não por quem doa nem pelo projeto. Doações anônimas substituem quem envia por um HMAC com sal, de modo que a mesma pessoa não pode ser correlacionada entre recibos.",
+          "maearth": "Ainda não é escrito no PDS; o financiamento fica no banco de dados da plataforma.",
+          "advice": "Nunca presuma que um recibo está no repositório do projeto financiado: indexe recibos globalmente e resolva `for` de volta ao sujeito. Aceite tanto uma referência forte quanto uma URI `at://` simples em `for`, e sempre defina `createdAt` ou o seu recibo fica por último em todos os feeds."
+        }
+      }
+    },
+    "repos": {
+      "heading": "Qual conta guarda o registro",
+      "intro": "Os esquemas não dizem nada sobre em qual repositório cada coisa vai, e é aí que os aplicativos mais se surpreendem. Alterne entre os aplicativos para ver onde cada registro realmente aterrissa.",
+      "kinds": {
+        "personal": "Repositório pessoal",
+        "group": "Repositório de grupo",
+        "platform": "Repositório da plataforma",
+        "facilitator": "Repositório facilitador",
+        "none": "Não é escrito"
+      },
+      "kindNotes": {
+        "personal": "O PDS da própria pessoa que iniciou a sessão.",
+        "group": "Uma conta de organização compartilhada, escrita através de um serviço de grupo para que quem participa nunca tenha as credenciais.",
+        "platform": "Uma conta do próprio aplicativo, usada para registros que precisam ser compartilhados por todas as organizações.",
+        "facilitator": "Uma conta de serviço que registra eventos que nenhum participante deveria escrever sozinho."
+      },
+      "apps": {
+        "gainforest": "GainForest",
+        "maearth": "Ma Earth",
+        "advice": "Recomendado"
+      },
+      "rows": {
+        "project": {
+          "gainforest": "Repositório pessoal, ou um repositório de grupo quando se publica como organização.",
+          "maearth": "Sempre o repositório de grupo da organização. Um projeto não pode ser publicado antes da sua organização.",
+          "advice": "Coloque o projeto e a reivindicação dele no mesmo repositório da entidade que fez o trabalho. Assim toda a reivindicação é verificável a partir de uma única conta."
+        },
+        "attachment": {
+          "gainforest": "O mesmo repositório do Cert que ele documenta.",
+          "maearth": "O repositório da organização, escrito sob a sessão de quem publica através do serviço de grupo.",
+          "advice": "Guarde a evidência junto do seu sujeito quando puder, mas leia os anexos globalmente: evidência de terceiros sobre a reivindicação de outra pessoa é legítima e não deveria sumir."
+        },
+        "tag": {
+          "gainforest": "O repositório de quem a cria, com rkey igual à chave de escopo.",
+          "maearth": "Um único repositório da plataforma, curado, com rkeys TID.",
+          "advice": "Qualquer um funciona. Publique em algum lugar uma taxonomia estável e documentada e referencie-a por `key` para que outros aplicativos consigam mapeá-la."
+        },
+        "rights": {
+          "gainforest": "Não é escrito.",
+          "maearth": "Referenciado na conta da hypercerts.org; só é bifurcado para o repositório da plataforma quando o texto precisa mudar.",
+          "advice": "Referencie um registro de direitos compartilhado em vez de emitir a sua própria cópia. Bifurque só quando precisar de termos diferentes."
+        },
+        "receipt": {
+          "gainforest": "Uma conta facilitadora dedicada que liquida os pagamentos.",
+          "maearth": "Não é escrito.",
+          "advice": "Uma conta de serviço é a decisão certa: quem doa não deveria ter que assinar um registro para que a doação apareça, e um projeto não deveria conseguir inventar o próprio histórico de financiamento."
+        },
+        "snapshot": {
+          "gainforest": "Não é escrito.",
+          "maearth": "O repositório da plataforma, como coleção com `type: \"snapshot\"` cujos itens fixam cada registro do qual uma revisão dependeu.",
+          "advice": "Congele uma decisão como uma coleção de referências fortes. É a trilha de auditoria à prova de adulteração mais barata que os esquemas oferecem."
+        }
+      },
+      "rowLabels": {
+        "project": "Projeto e sua reivindicação",
+        "attachment": "Evidências, galeria e atualizações",
+        "tag": "Etiquetas de escopo",
+        "rights": "Direitos",
+        "receipt": "Recibos de financiamento",
+        "snapshot": "Instantâneos de revisão congelados"
+      }
+    },
+    "reading": {
+      "heading": "Ler registros escritos por outras pessoas",
+      "intro": "Seis hábitos defensivos que separam um leitor que funciona com um único aplicativo de um leitor que funciona com a rede inteira.",
+      "items": {
+        "unions": {
+          "title": "Ramifique por `$type`, nunca pelo formato",
+          "text": "Todo braço de união é rotulado. Faça um switch sobre `$type` e mantenha um ramo alternativo explícito: um registro com um tipo que você não conhece não é um registro quebrado."
+        },
+        "optional": {
+          "title": "Presuma que todo campo pode faltar",
+          "text": "Numa reivindicação, só `title`, `shortDescription` e `createdAt` são obrigatórios. Derive o resumo da descrição, recorra ao projeto pai e renderize registros escassos em vez de escondê-los."
+        },
+        "numbers": {
+          "title": "Números chegam como texto",
+          "text": "Pesos, valores de medição e quantias são strings para evitar perda de precisão de ponto flutuante. Faça o parse com cuidado e descarte o que não converter, em vez de renderizar `NaN`."
+        },
+        "cids": {
+          "title": "Compare por URI, não por CID",
+          "text": "Qualquer edição troca o CID, então um CID diferente normalmente significa desatualizado, não falsificado. Os dois aplicativos comparam `uri` para identidade e tratam a divergência de CID como tarefa de reparo."
+        },
+        "index": {
+          "title": "Não confie na ordem dos arrays",
+          "text": "Nem `subjects[]` nem `items[]` têm garantia de ordem entre aplicativos. Busque por URI e trate a posição, no máximo, como uma pista."
+        },
+        "openStrings": {
+          "title": "`contentType` e `type` são vocabulários abertos",
+          "text": "`\"evidence\"`, `\"gallery\"`, `\"update\"`, `\"report\"` e `\"tree-dataset\"` são convenções, não enumerações. Normalize para minúsculas, reconheça o que você conhece e renderize o resto de forma genérica em vez de descartar."
+        }
+      }
+    },
+    "checklist": {
+      "heading": "Lista de verificação de compatibilidade",
+      "intro": "Se alguém passasse dez minutos revisando o primeiro projeto publicado pelo seu aplicativo, é isto que essa pessoa olharia.",
+      "doLabel": "Faça",
+      "dontLabel": "Evite",
+      "do": {
+        "d1": "Publique uma coleção com `type: \"project\"` carregando uma reivindicação em `items[]`.",
+        "d2": "Defina `createdAt` em todo registro e preserve o valor original entre edições.",
+        "d3": "Escreva descrições como documentos do Leaflet e escopos de trabalho como CEL com `usedTags`.",
+        "d4": "Dê aos anexos tanto a coleção quanto a reivindicação como sujeitos.",
+        "d5": "Guarde o par `uri` + `cid` de tudo o que escrever e regrave os pais quando um filho mudar.",
+        "d6": "Fixe uma versão do pacote de léxicos publicado para que suas strings `$type` não possam divergir."
+      },
+      "dont": {
+        "n1": "Não invente um NSID novo para algo que um registro existente já modela.",
+        "n2": "Não presuma que um registro referenciado está no mesmo repositório, nem sequer no seu PDS.",
+        "n3": "Não trate `subjects[0]` nem `items[0]` como se tivessem significado.",
+        "n4": "Não descarte em silêncio registros cujo braço de união ou `contentType` você não reconhece.",
+        "n5": "Não emita uma segunda coleção para uma nova fase do mesmo trabalho.",
+        "n6": "Não coloque números onde o esquema pede strings numéricas."
+      }
+    },
+    "snippets": {
+      "copy": "Copiar",
+      "copied": "Copiado"
+    },
+    "more": {
+      "heading": "Continue lendo",
+      "lexiconsTitle": "Referência de esquemas",
+      "lexiconsDesc": "Todos os léxicos que este aplicativo lê e escreve, campo a campo.",
+      "cgsTitle": "Contas de grupo",
+      "cgsDesc": "Como uma equipe inteira escreve num repositório compartilhado sem compartilhar uma senha.",
+      "packageTitle": "@hypercerts-org/lexicon",
+      "packageDesc": "Tipos gerados e constantes NSID para todos os esquemas desta página.",
+      "skillTitle": "Guia para agentes",
+      "skillDesc": "Os mesmos registros, escritos como chamadas prontas para copiar e colar por um agente de IA."
     }
   }
 }

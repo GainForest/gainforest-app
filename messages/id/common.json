@@ -1409,7 +1409,9 @@
       "breadcrumbAria": "Jejak navigasi dokumentasi",
       "schemas": "Skema data",
       "guideIntro": "Panduan ini menetapkan konvensi aplikasi yang digunakan bersama skema kemunculan. Skemanya tetap berupa Darwin Core umum; panduan ini menjelaskan hubungan antara rekaman AudioMoth, kotak spektrogram, dan rekaman kemunculan."
-    }
+    },
+    "hypercertsLinkTitle": "Membangun di atas leksikon Hypercerts",
+    "hypercertsLinkDesc": "Konvensi, perbedaan, dan saran interoperabilitas bagi pengembang yang menulis catatan Hypercerts di aplikasinya sendiri."
   },
   "taina": {
     "meta": {
@@ -2551,7 +2553,9 @@
       "githubTitle": "CGS di GitHub",
       "githubDesc": "Kode sumber lengkap layanan grup, terbuka untuk dibaca, dijalankan, dan diperbaiki siapa pun.",
       "atprotoTitle": "Cara kerja AT Protocol",
-      "atprotoDesc": "Tur interaktif jaringan terbuka tempat semua ini dibangun."
+      "atprotoDesc": "Tur interaktif jaringan terbuka tempat semua ini dibangun.",
+      "hypercertsTitle": "Leksikon Hypercerts",
+      "hypercertsDesc": "Bagaimana GainForest dan Ma Earth memodelkan kerja dampak, dan apa yang harus ditulis agar cocok dengan keduanya."
     }
   },
   "atproto": {
@@ -2943,6 +2947,308 @@
       "recordingsTitle": "Rekaman yang terlihat",
       "recordingsCount": "{count, plural, other {# rekaman}}",
       "recordingsEmpty": "Tidak ada rekaman pada waktu ini — perkecil, atau gunakan ‹ dan › untuk melihat bagian hari yang lain."
+    }
+  },
+  "hypercerts": {
+    "metaTitle": "Membangun di atas leksikon Hypercerts — GainForest",
+    "metaDescription": "Bagaimana GainForest dan Ma Earth memodelkan kerja dampak dengan leksikon org.hypercerts, di mana kedua aplikasi sepakat, di mana mereka berbeda, dan apa yang harus ditulis agar aplikasi ketiga bisa saling terhubung dengan keduanya.",
+    "kicker": "Interoperabilitas Hypercerts",
+    "title": "Membangun di atas leksikon Hypercerts",
+    "lead": "Skema Hypercerts sengaja dibuat longgar: union di mana-mana, hampir tidak ada yang wajib, dan tidak ada pendapat tentang akun mana yang menyimpan catatan mana. Dua aplikasi produksi sudah menulisnya — GainForest dan Ma Earth. Halaman ini menunjukkan bentuk yang disepakati keduanya, titik-titik tempat mereka menyimpang, dan apa yang sebaiknya dilakukan aplikasi Anda agar ketiganya bisa saling membaca.",
+    "why": {
+      "heading": "Mengapa halaman ini ada",
+      "p1": "Leksikon adalah format pertukaran data, bukan aplikasi. `org.hypercerts.claim.activity` mewajibkan tepat tiga bidang dan menyerahkan sisanya kepada Anda: deskripsi panjang bisa berupa tiga hal berbeda, lingkup kerja dua, seorang kontributor dua, sebuah gambar dua. Dua tim yang membaca skema yang sama akan menghasilkan catatan yang lolos validasi sempurna namun tetap gagal ditampilkan di aplikasi satu sama lain.",
+      "p2": "Semua di bawah ini diambil dari dua basis kode yang berjalan sungguhan. Di tempat mereka sepakat, anggap itu konvensi. Di tempat mereka berbeda, kami menyebutkan bentuk mana yang harus ditulis dan bentuk mana yang harus diterima: tulislah dengan ketat, bacalah dengan longgar.",
+      "callout": "Aturan praktis: tulis bentuk yang sudah dibaca kedua aplikasi, dan terima setiap bentuk yang sudah ditulis salah satu dari keduanya."
+    },
+    "graph": {
+      "heading": "Jaring catatan",
+      "intro": "Tidak ada yang bersarang di Hypercerts. Setiap relasi adalah catatan terpisah ditambah referensi kuat: pasangan `uri` + `cid` yang mengunci versi persis dari targetnya. Ketuk sebuah catatan untuk melihat siapa yang menulisnya dan bagaimana ia ditautkan.",
+      "ariaLabel": "Graf catatan Hypercerts dan bidang-bidang yang menautkannya",
+      "hint": "Ketuk sebuah catatan",
+      "attachedVia": "Ditautkan lewat",
+      "bothApps": "Kedua aplikasi",
+      "gainforestOnly": "Hanya GainForest",
+      "maearthOnly": "Hanya Ma Earth",
+      "roles": {
+        "collection": "Wadah yang benar-benar dilihat pengguna. GainForest menyebutnya proyek; Ma Earth juga. `type` adalah pembeda berupa teks bebas: keduanya menulis `\"project\"`, dan Ma Earth juga menulis `\"snapshot\"` untuk membekukan pengajuan putaran pendanaan.",
+        "activity": "Klaimnya sendiri: lingkup, periode, kontributor, tempat. GainForest menampilkannya sebagai Cert; Ma Earth menyimpannya secara internal dan membuat satu otomatis per proyek. Inilah catatan yang ditunjuk oleh semua yang lain.",
+        "attachment": "Kuda beban. Satu NSID mencakup bukti, gambar galeri, dan pembaruan kemajuan; `contentType` adalah satu-satunya pembedanya. Membawa berkas, tautan, dan referensi `at://` ke catatan lain.",
+        "location": "Sebuah lokasi. Geometri disimpan dalam satu bidang teks, jadi poligon berupa GeoJSON yang diserialkan. Dirujuk dari `activity.locations[]` dan `collection.location`.",
+        "rights": "Ketentuan lisensi untuk klaim. Ma Earth mengarahkan setiap aktivitas ke satu catatan bawaan seluruh platform; GainForest saat ini menghilangkan bidang ini sepenuhnya.",
+        "tag": "Atom lingkup yang dapat dipakai ulang dengan kunci mesin seperti `mangrove_restoration`. Dirujuk dari dalam objek CEL lingkup kerja, tidak pernah dari tingkat teratas aktivitas.",
+        "receipt": "Catatan pembayaran. GainForest menulis satu per donasi dari akun fasilitatornya; pengirim boleh tetap anonim. Menunjuk kembali ke apa pun yang didanai.",
+        "evaluation": "Penilaian pihak ketiga atas sebuah klaim: ringkasan, skor opsional pada skala min./maks. yang eksplisit, DID para penilai, dan tautan ke laporan. GainForest menampilkannya pada Cert, tetapi belum ada aplikasi yang menulisnya: inilah celah yang bisa diisi aplikasi penilai."
+      },
+      "links": {
+        "items": "`collection.items[].itemIdentifier`: sebuah referensi kuat ditambah bobot teks opsional.",
+        "locations": "`activity.locations[]`: larik referensi kuat. `collection.location` hanya satu referensi.",
+        "rights": "`activity.rights`: satu referensi kuat ke catatan hak yang mungkin berada di PDS orang lain.",
+        "usedTags": "`activity.workScope.usedTags[]`: bersarang di dalam objek CEL, bukan di tingkat teratas aktivitas.",
+        "subjects": "`attachment.subjects[]`: dalam praktiknya himpunan tanpa urutan. Jangan pernah mengandalkan posisi.",
+        "for": "`receipt.for`: referensi kuat pada skema saat ini; rilis sebelumnya menuliskannya sebagai URI `at://` biasa, jadi terimalah keduanya.",
+        "subject": "`evaluation.subject`: satu referensi kuat ke apa pun yang sedang dinilai."
+      }
+    },
+    "pattern": {
+      "heading": "Satu pola yang layak ditiru: proyek membawa tepat satu klaim",
+      "intro": "Kedua aplikasi sampai pada inti yang sama, secara terpisah. Kalau Anda hanya menyalin satu hal dari halaman ini, salin yang ini.",
+      "r1": {
+        "title": "Proyek adalah sebuah koleksi",
+        "text": "Buat `org.hypercerts.collection` dengan `type: \"project\"`. Ia memuat cerita publiknya: judul, ringkasan, deskripsi, dan sampul."
+      },
+      "r2": {
+        "title": "Ia dibuat bersama satu aktivitas",
+        "text": "Terbitkan `org.hypercerts.claim.activity` pada saat yang sama dan taruh referensi kuatnya di `items[]`. GainForest membangun keduanya dari satu formulir; Ma Earth menyebutnya aktivitas awal."
+      },
+      "r3": {
+        "title": "Kedua catatan tetap selaras",
+        "text": "Judul, ringkasan, deskripsi, tanggal, dan sampul dicerminkan dari proyek ke klaim. Sinkronisasi Ma Earth bersifat menambah: bidang yang diedit di aktivitas tidak pernah ditimpa oleh proyek."
+      },
+      "r4": {
+        "title": "Aktivitas tambahan adalah fase, bukan proyek",
+        "text": "Aktivitas kedua di bawah koleksi yang sama adalah periode operasional berikutnya, dengan lingkup, rentang waktu, dan lokasi sendiri. Jangan pernah menerbitkan koleksi kedua untuk pekerjaan yang sama."
+      },
+      "note": "Konsumen yang hanya memahami koleksi tetap melihat proyek yang utuh. Konsumen yang hanya memahami klaim tetap melihat pekerjaan yang terstruktur. Justru itulah tujuan pengulangan ini."
+    },
+    "sequence": {
+      "heading": "Urutan penerbitan itu penting",
+      "intro": "Referensi kuat menyematkan CID, jadi anak harus ada sebelum induk. Telusuri satu penerbitan penuh dan lihat referensinya menumpuk.",
+      "play": "Putar",
+      "pause": "Jeda",
+      "back": "Kembali",
+      "next": "Lanjut",
+      "stepLabel": "Langkah {n} dari {total}",
+      "repoLabel": "Catatan di repositori",
+      "empty": "Belum ada yang ditulis.",
+      "steps": {
+        "s1": {
+          "title": "Unggah blob terlebih dahulu",
+          "text": "Foto sampul, PDF, dan audio diunggah sebagai blob sebelum ada catatan yang menyebutnya. Anda menerima objek blob untuk disematkan di `#smallImage`, `#largeImage`, atau `#smallBlob`."
+        },
+        "s2": {
+          "title": "Terbitkan lokasinya",
+          "text": "Satu `app.certified.location` per tempat. Simpan pasangan `uri` + `cid`: klaim akan merujuknya, dan menerbitkan ulang lokasi yang sama dua kali adalah bug duplikasi paling umum."
+        },
+        "s3": {
+          "title": "Selesaikan tag lingkup kerja",
+          "text": "Cari `org.hypercerts.workscope.tag` yang sudah ada untuk setiap kunci lingkup sebelum membuat yang baru. Kedua aplikasi membaca dulu lalu membuat, sehingga sebuah tag tidak pernah terduplikasi per proyek."
+        },
+        "s4": {
+          "title": "Tulis klaimnya",
+          "text": "`org.hypercerts.claim.activity` menyatukan semuanya: judul, ringkasan, deskripsi, lingkup kerja dengan referensi tag bersarang di dalamnya, tanggal, kontributor, `locations[]`, dan sebuah referensi `rights`."
+        },
+        "s5": {
+          "title": "Tulis koleksinya",
+          "text": "`org.hypercerts.collection` dengan `type: \"project\"` dan `items[]` yang memuat referensi kuat klaim. Kini proyeknya bisa ditemukan dan sudah lengkap."
+        },
+        "s6": {
+          "title": "Lampirkan konteksnya",
+          "text": "Gambar galeri, bukti, dan pembaruan adalah catatan `org.hypercerts.context.attachment` yang menunjuk kembali ke proyek dan klaim melalui `subjects[]`."
+        },
+        "s7": {
+          "title": "Penyuntingan mengubah CID",
+          "text": "Menyunting klaim menghasilkan CID baru, yang diam-diam membatalkan referensi yang tersimpan di `collection.items[]`. Tulis ulang induknya setiap kali anaknya berubah, atau jalankan penyelaras yang melakukannya untuk Anda."
+        },
+        "s8": {
+          "title": "Uang datang belakangan",
+          "text": "Catatan `org.hypercerts.funding.receipt` ditulis kemudian, sering kali oleh akun ketiga, dan menunjuk kembali ke koleksi atau klaim melalui `for`."
+        }
+      }
+    },
+    "divergence": {
+      "heading": "Di mana kedua aplikasi berbeda",
+      "intro": "Delapan bidang tempat GainForest dan Ma Earth memilih opsi sah yang berbeda. Sebagian jaraknya hanyalah selisih versi: GainForest mengikuti revisi leksikon yang lebih baru, Ma Earth mengunci rilis yang lebih lama. Pilih salah satu untuk melihat kedua bentuknya dan apa yang sebaiknya dilakukan aplikasi Anda.",
+      "gainforestLabel": "GainForest menulis",
+      "maearthLabel": "Ma Earth menulis",
+      "adviceLabel": "Yang sebaiknya Anda lakukan",
+      "topics": {
+        "description": {
+          "label": "Deskripsi panjang",
+          "title": "`description`: teks biasa atau dokumen kaya",
+          "gainforest": "Sebuah `org.hypercerts.defs#descriptionString` sebaris berisi teks biasa. Sederhana, tetapi judul, gambar, dan tautan tidak bertahan.",
+          "maearth": "Sebuah `pub.leaflet.pages.linearDocument`, model blok yang sama seperti yang dipakai Leaflet, dengan gambar sebaris diunggah ulang sebagai blob PDS sehingga catatannya bisa ditampilkan tanpa mengakses aplikasi asalnya.",
+          "advice": "Tulis dokumen Leaflet: itulah yang mempertahankan struktur, dan kedua aplikasi menampilkannya. Namun `descriptionString` tetap merupakan cabang penuh dalam skema saat ini, jadi selalu terjemahkan juga: sebagian besar catatan yang sudah terbit memakainya."
+        },
+        "workScope": {
+          "label": "Lingkup kerja",
+          "title": "`workScope`: teks berkoma atau ekspresi CEL",
+          "gainforest": "Editor proyek menulis `#workScopeString` warisan lama; formulir Cert mandiri menulis objek CEL. Kedua bentuk hidup berdampingan di aplikasi yang sama.",
+          "maearth": "Selalu objek CEL, dan selalu predikat sempit yang sama. Tidak ada evaluator CEL di baliknya: ekspresinya adalah format pertukaran yang mengkodekan daftar tag.",
+          "advice": "Tulis CEL dengan `scope.hasAny([...])` dan sarangkan referensi tag di `usedTags`. Saat membaca, ambil `scope` bila ada; jika tidak, tarik literal berkutip dari `expression` — cadangan itu bertahan pada bentuk predikat apa pun."
+        },
+        "tags": {
+          "label": "Penempatan tag",
+          "title": "`workscope.tag`: siapa pemilik catatan tag-nya?",
+          "gainforest": "Tag diterbitkan di repositori penulisnya sendiri dengan kunci lingkup sebagai rkey, sehingga `getRecord` berfungsi sebagai pemeriksaan keberadaan dan penulisannya idempoten per akun.",
+          "maearth": "Satu taksonomi terkurasi seluruh platform di PDS platform, dengan rkey TID, siklus hidup diusulkan → diterima → usang, dan langkah penerbitan oleh admin. Rkey slug warisan lama diterbitkan ulang sebagai TID.",
+          "advice": "Gabungkan berdasarkan `key`, jangan berdasarkan URI. Konsep yang sama secara sah bisa ada sebagai banyak catatan di banyak repositori; perlakukan `usedTags[]` sebagai asal-usul dan `key` sebagai identitas."
+        },
+        "subjects": {
+          "label": "Subjek lampiran",
+          "title": "`attachment.subjects[]`: yang mana yang pertama?",
+          "gainforest": "`subjects[0]` adalah klaimnya; subjek tambahan memberi konteks, misalnya lokasi tempat bukti dikumpulkan.",
+          "maearth": "`subjects[0]` adalah koleksi proyek dan `subjects[1]` adalah klaimnya. Lampiran galeri hanya membawa koleksi; pembaruan tanpa aktivitas disebar ke setiap aktivitas yang sudah terbit.",
+          "advice": "Cocokkan berdasarkan keanggotaan, bukan indeks: sebuah lampiran milik suatu catatan jika ada URI subjek yang cocok. Sertakan koleksi sekaligus klaim agar konsumen yang membaca berdasarkan indeks, dari sisi mana pun, tetap menemukannya."
+        },
+        "rights": {
+          "label": "Hak",
+          "title": "`activity.rights`: ada atau tidak ada",
+          "gainforest": "Tidak ditulis. Saat ini Cert tidak membawa referensi hak apa pun.",
+          "maearth": "Setiap aktivitas merujuk satu catatan hak bawaan seluruh platform. Catatannya sendiri ditempatkan di akun hypercerts.org dan diimpor lewat AT-URI, jadi memang dirancang sebagai referensi lintas repositori.",
+          "advice": "Tulislah referensi hak: biayanya kecil dan membuat klaim Anda bisa dipakai siapa pun yang punya kebijakan lisensi. Jangan pernah menganggapnya bisa dipecahkan di dalam repositori Anda sendiri, dan bandingkan hanya berdasarkan `uri`: CID berubah setiap kali teks haknya disunting."
+        },
+        "location": {
+          "label": "Lokasi",
+          "title": "`app.certified.location`: tempat yang sama, dua URI referensi spasial",
+          "gainforest": "`srs` berupa URI CRS84 dari OGC. Titik ditulis sebagai `\"lat,lng\"`.",
+          "maearth": "`srs` berupa URI EPSG:4326 dari OGC, yang dianggap kanonis oleh proses perbaikannya. Poligon berupa GeoJSON terserialkan yang dibulatkan ke enam desimal agar teksnya tetap di bawah batas grafem; lokasi perkiraan dikaburkan menjadi lingkaran 10 km sebelum diterbitkan.",
+          "advice": "Kedua URI itu berarti WGS84 dengan urutan sumbu yang benar-benar dipakai catatan ini, jadi terimalah keduanya dan jangan pernah menukar urutan koordinat berdasarkan `srs`. Percabangkan parser Anda pada `locationType`, bukan pada bentuk teksnya."
+        },
+        "contributors": {
+          "label": "Kontributor",
+          "title": "`contributors[]`: identitas sebaris atau catatan tersendiri",
+          "gainforest": "`#contributorIdentity` sebaris, dan nilainya bisa berupa DID atau nama orang yang diketik di formulir.",
+          "maearth": "Juga `#contributorIdentity` sebaris, selalu berupa DID, diturunkan dari tabel kontribusi. DID organisasi itu sendiri mengisi aktivitas awal.",
+          "advice": "Gunakan bentuk sebaris: catatan `contributorInformation` memang ada, tetapi tidak satu pun aplikasi menulisnya. Jangan pernah menganggap `identity` pasti terbaca sebagai DID; tampilkan sebagai nama bila bukan."
+        },
+        "receipt": {
+          "label": "Tanda terima pendanaan",
+          "title": "`org.hypercerts.funding.receipt`: siapa yang menulis uangnya",
+          "gainforest": "Ditulis oleh akun fasilitator khusus, bukan oleh pendonor atau proyeknya. Donasi anonim mengganti pengirim dengan HMAC bergaram sehingga pendonor yang sama tidak bisa dikaitkan antar tanda terima.",
+          "maearth": "Belum ditulis ke PDS; data pendanaan berada di basis data platform.",
+          "advice": "Jangan pernah menganggap tanda terima berada di repositori proyek yang didanai: indeks tanda terima secara global dan telusuri `for` kembali ke subjeknya. Terima baik referensi kuat maupun URI `at://` biasa pada `for`, dan selalu isi `createdAt` atau tanda terima Anda akan berada di urutan terakhir pada setiap linimasa."
+        }
+      }
+    },
+    "repos": {
+      "heading": "Akun mana yang menyimpan catatannya",
+      "intro": "Skemanya tidak berkata apa pun tentang penempatan repositori, dan di sinilah aplikasi paling sering saling mengejutkan. Ganti antar aplikasi untuk melihat di mana setiap catatan sebenarnya mendarat.",
+      "kinds": {
+        "personal": "Repositori pribadi",
+        "group": "Repositori grup",
+        "platform": "Repositori platform",
+        "facilitator": "Repositori fasilitator",
+        "none": "Tidak ditulis"
+      },
+      "kindNotes": {
+        "personal": "PDS milik pengguna yang sedang masuk.",
+        "group": "Akun organisasi bersama, ditulis lewat layanan grup sehingga anggotanya tidak pernah memegang kredensialnya.",
+        "platform": "Satu akun milik aplikasi itu sendiri, dipakai untuk catatan yang harus dibagi ke semua organisasi.",
+        "facilitator": "Akun layanan yang mencatat peristiwa yang tidak boleh ditulis sendirian oleh peserta mana pun."
+      },
+      "apps": {
+        "gainforest": "GainForest",
+        "maearth": "Ma Earth",
+        "advice": "Disarankan"
+      },
+      "rows": {
+        "project": {
+          "gainforest": "Repositori pribadi, atau repositori grup ketika pengguna menerbitkan sebagai organisasi.",
+          "maearth": "Selalu repositori grup organisasinya. Proyek tidak bisa diterbitkan sebelum organisasinya terbit.",
+          "advice": "Taruh proyek dan klaimnya di repositori yang sama dengan pihak yang melakukan pekerjaannya. Dengan begitu seluruh klaim bisa diverifikasi dari satu akun."
+        },
+        "attachment": {
+          "gainforest": "Repositori yang sama dengan Cert yang didokumentasikannya.",
+          "maearth": "Repositori organisasi, ditulis di bawah sesi penulisnya melalui layanan grup.",
+          "advice": "Simpan bukti bersama subjeknya bila memungkinkan, tetapi bacalah lampiran secara global: bukti pihak ketiga tentang klaim orang lain itu sah dan tidak boleh hilang."
+        },
+        "tag": {
+          "gainforest": "Repositori penulisnya sendiri, dengan rkey sama dengan kunci lingkup.",
+          "maearth": "Satu repositori platform terkurasi, dengan rkey TID.",
+          "advice": "Keduanya bisa. Terbitkan taksonomi yang stabil dan terdokumentasi di suatu tempat lalu rujuk lewat `key` agar aplikasi lain bisa memetakannya."
+        },
+        "rights": {
+          "gainforest": "Tidak ditulis.",
+          "maearth": "Dirujuk pada akun hypercerts.org; baru disalin ke repositori platform ketika teksnya harus diubah.",
+          "advice": "Rujuk catatan hak bersama alih-alih menerbitkan salinan Anda sendiri. Salin hanya bila Anda butuh ketentuan yang berbeda."
+        },
+        "receipt": {
+          "gainforest": "Akun fasilitator khusus yang menyelesaikan pembayaran.",
+          "maearth": "Tidak ditulis.",
+          "advice": "Akun layanan adalah pilihan yang tepat: pendonor tidak seharusnya perlu menandatangani catatan agar donasinya terlihat, dan sebuah proyek tidak seharusnya bisa mengarang riwayat pendanaannya sendiri."
+        },
+        "snapshot": {
+          "gainforest": "Tidak ditulis.",
+          "maearth": "Repositori platform, sebagai koleksi dengan `type: \"snapshot\"` yang itemnya mengunci setiap catatan yang menjadi dasar sebuah peninjauan.",
+          "advice": "Bekukan sebuah keputusan sebagai koleksi referensi kuat. Itulah jejak audit antimanipulasi termurah yang diberikan skema ini."
+        }
+      },
+      "rowLabels": {
+        "project": "Proyek dan klaimnya",
+        "attachment": "Bukti, galeri, dan pembaruan",
+        "tag": "Tag lingkup kerja",
+        "rights": "Hak",
+        "receipt": "Tanda terima pendanaan",
+        "snapshot": "Cuplikan peninjauan yang dibekukan"
+      }
+    },
+    "reading": {
+      "heading": "Membaca catatan yang ditulis orang lain",
+      "intro": "Enam kebiasaan bertahan yang membedakan pembaca yang hanya jalan pada satu aplikasi dari pembaca yang jalan di seluruh jaringan.",
+      "items": {
+        "unions": {
+          "title": "Percabangkan pada `$type`, jangan pada bentuk",
+          "text": "Setiap cabang union diberi label. Gunakan switch pada `$type` dan sediakan cabang cadangan yang eksplisit: catatan dengan tipe yang tidak Anda kenal bukan berarti catatan rusak."
+        },
+        "optional": {
+          "title": "Anggap setiap bidang bisa hilang",
+          "text": "Pada sebuah klaim, hanya `title`, `shortDescription`, dan `createdAt` yang wajib. Turunkan ringkasan dari deskripsinya, mundur ke proyek induknya, dan tampilkan catatan yang minim alih-alih menyembunyikannya."
+        },
+        "numbers": {
+          "title": "Angka datang sebagai teks",
+          "text": "Bobot, nilai pengukuran, dan jumlah uang semuanya berupa teks untuk menghindari hilangnya presisi bilangan pecahan. Uraikan dengan hati-hati dan buang apa pun yang gagal diuraikan alih-alih menampilkan `NaN`."
+        },
+        "cids": {
+          "title": "Bandingkan berdasarkan URI, bukan CID",
+          "text": "Setiap penyuntingan mengganti CID, jadi CID yang tidak cocok biasanya berarti usang, bukan palsu. Kedua aplikasi membandingkan `uri` untuk identitas dan menganggap pergeseran CID sebagai tugas perbaikan."
+        },
+        "index": {
+          "title": "Jangan percaya urutan larik",
+          "text": "Baik `subjects[]` maupun `items[]` tidak menjamin urutan antar aplikasi. Cari berdasarkan URI dan anggap posisi sebagai petunjuk saja."
+        },
+        "openStrings": {
+          "title": "`contentType` dan `type` adalah kosakata terbuka",
+          "text": "`\"evidence\"`, `\"gallery\"`, `\"update\"`, `\"report\"`, dan `\"tree-dataset\"` adalah konvensi, bukan enum. Ubah ke huruf kecil, cocokkan yang Anda kenal, dan tampilkan sisanya secara umum alih-alih membuangnya."
+        }
+      }
+    },
+    "checklist": {
+      "heading": "Daftar periksa kompatibilitas",
+      "intro": "Kalau seseorang punya sepuluh menit untuk meninjau proyek pertama yang diterbitkan aplikasi Anda, inilah yang akan dia periksa.",
+      "doLabel": "Lakukan",
+      "dontLabel": "Hindari",
+      "do": {
+        "d1": "Terbitkan satu koleksi dengan `type: \"project\"` yang membawa satu klaim di `items[]`.",
+        "d2": "Isi `createdAt` pada setiap catatan, dan pertahankan nilai aslinya saat menyunting.",
+        "d3": "Tulis deskripsi sebagai dokumen Leaflet dan lingkup kerja sebagai CEL dengan `usedTags`.",
+        "d4": "Beri lampiran subjek berupa koleksi sekaligus klaimnya.",
+        "d5": "Simpan pasangan `uri` + `cid` dari semua yang Anda tulis dan tulis ulang induknya saat anaknya berubah.",
+        "d6": "Kunci satu versi paket leksikon resmi agar string `$type` Anda tidak bisa menyimpang."
+      },
+      "dont": {
+        "n1": "Jangan mengarang NSID baru untuk sesuatu yang sudah dimodelkan catatan yang ada.",
+        "n2": "Jangan menganggap catatan yang dirujuk berada di repositori yang sama, atau bahkan di PDS Anda.",
+        "n3": "Jangan menganggap `subjects[0]` atau `items[0]` punya arti khusus.",
+        "n4": "Jangan diam-diam membuang catatan yang cabang union atau `contentType`-nya tidak Anda kenali.",
+        "n5": "Jangan menerbitkan koleksi kedua untuk fase baru dari pekerjaan yang sama.",
+        "n6": "Jangan menaruh angka di tempat yang menurut skema harus berupa teks numerik."
+      }
+    },
+    "snippets": {
+      "copy": "Salin",
+      "copied": "Tersalin"
+    },
+    "more": {
+      "heading": "Bacaan lanjutan",
+      "lexiconsTitle": "Rujukan skema",
+      "lexiconsDesc": "Setiap leksikon yang dibaca dan ditulis aplikasi ini, bidang demi bidang.",
+      "cgsTitle": "Akun grup",
+      "cgsDesc": "Bagaimana satu tim penuh menulis ke satu repositori bersama tanpa berbagi kata sandi.",
+      "packageTitle": "@hypercerts-org/lexicon",
+      "packageDesc": "Tipe hasil generasi dan konstanta NSID untuk semua skema di halaman ini.",
+      "skillTitle": "Panduan agen",
+      "skillDesc": "Catatan yang sama, ditulis sebagai panggilan siap salin-tempel untuk agen AI."
     }
   }
 }

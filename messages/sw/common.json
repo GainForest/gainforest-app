@@ -1409,7 +1409,9 @@
       "breadcrumbAria": "Njia ya urambazaji ya nyaraka",
       "schemas": "Miundo ya data",
       "guideIntro": "Mwongozo huu unaeleza kanuni za programu zinazotumiwa pamoja na muundo wa matukio. Muundo unabaki Darwin Core wa jumla; mwongozo unaeleza jinsi rekodi za AudioMoth, visanduku vya spektrogramu na rekodi za matukio zinavyounganishwa."
-    }
+    },
+    "hypercertsLinkTitle": "Kujenga juu ya leksikoni za Hypercerts",
+    "hypercertsLinkDesc": "Kanuni, tofauti, na ushauri wa ushirikiano kwa wasanidi wanaoandika rekodi za Hypercerts katika programu yao."
   },
   "taina": {
     "meta": {
@@ -2551,7 +2553,9 @@
       "githubTitle": "CGS kwenye GitHub",
       "githubDesc": "Msimbo kamili wa chanzo wa huduma ya vikundi, wazi kwa yeyote kusoma, kuendesha na kuboresha.",
       "atprotoTitle": "Jinsi AT Protocol inavyofanya kazi",
-      "atprotoDesc": "Ziara shirikishi ya mtandao wazi ambao yote haya yamejengwa juu yake."
+      "atprotoDesc": "Ziara shirikishi ya mtandao wazi ambao yote haya yamejengwa juu yake.",
+      "hypercertsTitle": "Leksikoni za Hypercerts",
+      "hypercertsDesc": "Jinsi GainForest na Ma Earth zinavyoweka muundo wa kazi ya athari, na kile cha kuandika ili ulingane na zote mbili."
     }
   },
   "atproto": {
@@ -2943,6 +2947,308 @@
       "recordingsTitle": "Rekodi zinazoonekana",
       "recordingsCount": "{count, plural, one {rekodi #} other {rekodi #}}",
       "recordingsEmpty": "Hakuna rekodi kwa wakati huu — punguza ukuzaji, au tumia ‹ na › kuangalia sehemu nyingine ya siku."
+    }
+  },
+  "hypercerts": {
+    "metaTitle": "Kujenga juu ya leksikoni za Hypercerts — GainForest",
+    "metaDescription": "Jinsi GainForest na Ma Earth zinavyoweka muundo wa kazi ya athari kwa kutumia leksikoni za org.hypercerts, mahali programu hizo mbili zinapokubaliana, mahali zinapotofautiana, na kile cha kuandika ili programu ya tatu ishirikiane na zote mbili.",
+    "kicker": "Ushirikiano wa Hypercerts",
+    "title": "Kujenga juu ya leksikoni za Hypercerts",
+    "lead": "Skimu za Hypercerts zimeachwa huru kwa makusudi: muungano wa aina kila mahali, karibu hakuna sehemu ya lazima, na hakuna msimamo kuhusu akaunti ipi inashikilia rekodi ipi. Programu mbili zinazotumika tayari zinaziandika — GainForest na Ma Earth. Ukurasa huu unaonyesha muundo ambao zote mbili zilikubaliana, sehemu zilipotofautiana, na kile ambacho programu yako inapaswa kufanya ili zote tatu ziweze kusomana.",
+    "why": {
+      "heading": "Kwa nini ukurasa huu upo",
+      "p1": "Leksikoni ni muundo wa kupitisha data, si programu. `org.hypercerts.claim.activity` inahitaji sehemu tatu tu na kukuachia mengine yote: maelezo marefu yanaweza kuwa vitu vitatu tofauti, upeo wa kazi viwili, mchangiaji viwili, picha viwili. Timu mbili zinazosoma skimu ile ile zitatengeneza rekodi zinazopita uthibitisho kikamilifu na bado zisionekane vizuri kwenye programu ya mwenzake.",
+      "p2": "Kila kilicho hapa chini kimetolewa kwenye misimbo miwili inayotumika kweli. Mahali zinapokubaliana, kichukue kama kanuni. Mahali zinapotofautiana, tunataja muundo upi wa kuandika na miundo ipi ya kukubali: andika kwa uangalifu mkali, soma kwa ukarimu.",
+      "callout": "Kanuni ya msingi: andika muundo ambao programu zote mbili tayari zinausoma, na ukubali kila muundo ambao yoyote kati yao tayari inauandika."
+    },
+    "graph": {
+      "heading": "Mtandao wa rekodi",
+      "intro": "Hakuna kitu kilichowekwa ndani ya kingine katika Hypercerts. Kila uhusiano ni rekodi tofauti pamoja na kiungo imara: jozi ya `uri` + `cid` inayobana toleo kamili la lengo. Gusa rekodi ili kuona nani anaiandika na jinsi inavyoungwa.",
+      "ariaLabel": "Mchoro wa rekodi za Hypercerts na sehemu zinazoziunganisha",
+      "hint": "Gusa rekodi",
+      "attachedVia": "Imeungwa kupitia",
+      "bothApps": "Programu zote mbili",
+      "gainforestOnly": "GainForest pekee",
+      "maearthOnly": "Ma Earth pekee",
+      "roles": {
+        "collection": "Kasha ambalo watumiaji huliona kweli. GainForest hulita mradi; Ma Earth pia. `type` ni kitofautishi cha maandishi huru: zote mbili huandika `\"project\"`, na Ma Earth huandika pia `\"snapshot\"` kwa maombi ya duru yaliyogandishwa.",
+        "activity": "Dai lenyewe: upeo, kipindi, wachangiaji, maeneo. GainForest hulionyesha kama Cert; Ma Earth hulihifadhi ndani na hutengeneza moja kiotomatiki kwa kila mradi. Hii ndiyo rekodi ambayo kila kitu kingine huielekeza.",
+        "attachment": "Mfanyakazi mkuu. NSID moja hubeba ushahidi, picha za matunzio, na taarifa za maendeleo; `contentType` ndiyo kitu pekee kinachozitofautisha. Hubeba faili, viungo, na marejeo ya `at://` kwa rekodi nyingine.",
+        "location": "Eneo. Jiometri huhifadhiwa katika sehemu moja ya maandishi, hivyo poligoni ni GeoJSON iliyogeuzwa kuwa maandishi. Hurejewa kutoka `activity.locations[]` na `collection.location`.",
+        "rights": "Masharti ya leseni ya dai. Ma Earth huelekeza kila shughuli kwenye rekodi moja ya kawaida ya jukwaa zima; GainForest kwa sasa huiacha sehemu hiyo kabisa.",
+        "tag": "Kipande cha upeo kinachoweza kutumika tena chenye ufunguo wa mashine kama `mangrove_restoration`. Hurejewa kutoka ndani ya kitu cha CEL cha upeo wa kazi, kamwe si kutoka ngazi ya juu ya shughuli.",
+        "receipt": "Kumbukumbu ya malipo. GainForest huandika moja kwa kila mchango kutoka akaunti yake ya mwezeshaji; mtumaji anaweza kubaki bila kutambulika. Huelekeza tena kwenye kile kilichofadhiliwa.",
+        "evaluation": "Hukumu ya upande wa tatu kuhusu dai: muhtasari, alama ya hiari kwenye kipimo dhahiri cha chini/juu, DID za wakaguzi, na viungo vya ripoti. GainForest huzionyesha kwenye Cert lakini hakuna programu inayoziandika bado: hii ndiyo nafasi ambayo programu ya ukaguzi ingejaza."
+      },
+      "links": {
+        "items": "`collection.items[].itemIdentifier`: kiungo imara pamoja na uzito wa hiari wa maandishi.",
+        "locations": "`activity.locations[]`: safu ya viungo imara. `collection.location` ni kiungo kimoja tu.",
+        "rights": "`activity.rights`: kiungo kimoja imara kwa rekodi ya haki ambayo inaweza kuwa kwenye PDS ya mtu mwingine.",
+        "usedTags": "`activity.workScope.usedTags[]`: kimewekwa ndani ya kitu cha CEL, si kwenye ngazi ya juu ya shughuli.",
+        "subjects": "`attachment.subjects[]`: kwa vitendo ni seti isiyo na mpangilio. Usitegemee nafasi kamwe.",
+        "for": "`receipt.for`: kiungo imara katika skimu ya sasa; matoleo ya awali yaliiweka kama URI ya kawaida ya `at://`, hivyo kubali zote mbili.",
+        "subject": "`evaluation.subject`: kiungo kimoja imara kwa chochote kinachokaguliwa."
+      }
+    },
+    "pattern": {
+      "heading": "Muundo mmoja wa kuiga: mradi hubeba dai moja tu",
+      "intro": "Programu zote mbili zilifikia msingi ule ule, kila moja kivyake. Ukiiga kitu kimoja tu kutoka ukurasa huu, iga hiki.",
+      "r1": {
+        "title": "Mradi ni mkusanyiko",
+        "text": "Tengeneza `org.hypercerts.collection` yenye `type: \"project\"`. Hubeba hadithi ya wazi: kichwa, muhtasari, maelezo, na picha ya juu."
+      },
+      "r2": {
+        "title": "Hutengenezwa pamoja na shughuli moja",
+        "text": "Tengeneza `org.hypercerts.claim.activity` wakati huo huo na uweke kiungo chake imara ndani ya `items[]`. GainForest hujenga zote mbili kutoka fomu moja; Ma Earth huiita shughuli ya kwanza."
+      },
+      "r3": {
+        "title": "Rekodi hizo mbili hubaki sawa",
+        "text": "Kichwa, muhtasari, maelezo, tarehe na picha huakisiwa kutoka mradi kwenda kwenye dai. Ulinganishaji wa Ma Earth ni wa kuongeza tu: sehemu iliyohaririwa kwenye shughuli haiandikwi upya na mradi."
+      },
+      "r4": {
+        "title": "Shughuli za ziada ni awamu, si miradi",
+        "text": "Shughuli ya pili chini ya mkusanyiko ule ule ni kipindi cha utendaji kilichofuata, chenye upeo, muda na maeneo yake. Usitengeneze kamwe mkusanyiko wa pili kwa kazi ile ile."
+      },
+      "note": "Mtumiaji anayeelewa mikusanyiko pekee bado huona mradi kamili. Anayeelewa madai pekee bado huona kazi iliyopangwa. Urudufu huo ndio lengo hasa."
+    },
+    "sequence": {
+      "heading": "Mpangilio wa kuchapisha ni muhimu",
+      "intro": "Viungo imara hubeba CID ndani yake, hivyo watoto lazima wawepo kabla ya wazazi. Pitia uchapishaji kamili mmoja na uone viungo vikijikusanya.",
+      "play": "Cheza",
+      "pause": "Simamisha",
+      "back": "Rudi",
+      "next": "Endelea",
+      "stepLabel": "Hatua {n} kati ya {total}",
+      "repoLabel": "Rekodi zilizomo kwenye hifadhi",
+      "empty": "Bado hakuna kilichoandikwa.",
+      "steps": {
+        "s1": {
+          "title": "Pakia blob kwanza",
+          "text": "Picha za jalada, PDF na sauti hupakiwa kama blob kabla rekodi yoyote haijazitaja. Utapokea kitu cha blob cha kuweka ndani ya `#smallImage`, `#largeImage` au `#smallBlob`."
+        },
+        "s2": {
+          "title": "Tengeneza maeneo",
+          "text": "`app.certified.location` moja kwa kila mahali. Hifadhi jozi ya `uri` + `cid`: dai litairejea, na kutengeneza eneo lile lile mara mbili ndio hitilafu ya kurudia inayotokea zaidi."
+        },
+        "s3": {
+          "title": "Tafuta lebo za upeo wa kazi",
+          "text": "Tafuta `org.hypercerts.workscope.tag` iliyopo kwa kila ufunguo wa upeo kabla ya kutengeneza mpya. Programu zote mbili husoma kabla ya kutengeneza ili lebo isirudiwe kwa kila mradi."
+        },
+        "s4": {
+          "title": "Andika dai",
+          "text": "`org.hypercerts.claim.activity` huunganisha yote: kichwa, muhtasari, maelezo, upeo wa kazi wenye viungo vya lebo ndani yake, tarehe, wachangiaji, `locations[]`, na kiungo cha `rights`."
+        },
+        "s5": {
+          "title": "Andika mkusanyiko",
+          "text": "`org.hypercerts.collection` yenye `type: \"project\"` na `items[]` inayobeba kiungo imara cha dai. Sasa mradi unapatikana na umekamilika."
+        },
+        "s6": {
+          "title": "Ambatanisha muktadha",
+          "text": "Picha za matunzio, ushahidi na taarifa mpya ni rekodi za `org.hypercerts.context.attachment` zinazoelekeza tena kwenye mradi na dai kupitia `subjects[]`."
+        },
+        "s7": {
+          "title": "Uhariri hubadilisha CID",
+          "text": "Kuhariri dai hutengeneza CID mpya, jambo linalobatilisha kimyakimya kiungo kilichohifadhiwa ndani ya `collection.items[]`. Andika upya mzazi kila mtoto anapobadilika, au endesha kirekebishi kinachofanya hivyo kwa niaba yako."
+        },
+        "s8": {
+          "title": "Fedha huja baadaye",
+          "text": "Rekodi za `org.hypercerts.funding.receipt` huandikwa baadaye, mara nyingi na akaunti ya tatu, na huelekeza tena kwenye mkusanyiko au dai kupitia `for`."
+        }
+      }
+    },
+    "divergence": {
+      "heading": "Mahali programu hizo mbili zinapotofautiana",
+      "intro": "Sehemu nane ambapo GainForest na Ma Earth zilichagua chaguo halali tofauti. Sehemu ya tofauti hiyo ni suala la matoleo tu: GainForest hufuata toleo jipya zaidi la leksikoni, Ma Earth hushikilia toleo la awali. Chagua moja ili kuona miundo yote miwili na kile ambacho programu yako inapaswa kufanya.",
+      "gainforestLabel": "GainForest huandika",
+      "maearthLabel": "Ma Earth huandika",
+      "adviceLabel": "Unachopaswa kufanya",
+      "topics": {
+        "description": {
+          "label": "Maelezo marefu",
+          "title": "`description`: maandishi sahili au hati tajiri",
+          "gainforest": "`org.hypercerts.defs#descriptionString` iliyowekwa moja kwa moja yenye maandishi sahili. Rahisi, lakini vichwa, picha na viungo havisalii.",
+          "maearth": "`pub.leaflet.pages.linearDocument`, muundo ule ule wa vizuizi anaotumia Leaflet, na picha za ndani zikipakiwa upya kama blob za PDS ili rekodi ionekane bila kuitegemea programu ya asili.",
+          "advice": "Andika hati ya Leaflet: ndiyo inayohifadhi muundo, na programu zote mbili huionyesha. Lakini `descriptionString` bado ni tawi kamili katika skimu ya sasa, hivyo daima isome pia: sehemu kubwa ya rekodi zilizochapishwa inaibeba."
+        },
+        "workScope": {
+          "label": "Upeo wa kazi",
+          "title": "`workScope`: maandishi yenye koma au usemi wa CEL",
+          "gainforest": "Kihariri cha miradi huandika `#workScopeString` ya zamani; fomu ya Cert inayojitegemea huandika kitu cha CEL. Miundo yote miwili ipo hai ndani ya programu ile ile.",
+          "maearth": "Daima kitu cha CEL, na daima kigezo kile kile chembamba. Hakuna kikokotoo cha CEL nyuma yake: usemi huo ni muundo wa kupitisha data unaosimba orodha ya lebo.",
+          "advice": "Andika CEL kwa `scope.hasAny([...])` na uweke viungo vya lebo ndani ya `usedTags`. Unaposoma, chukua `scope` ikiwepo; vinginevyo toa maneno yaliyo ndani ya alama za nukuu kutoka `expression` — njia hiyo mbadala hufanya kazi kwa umbo lolote la kigezo."
+        },
+        "tags": {
+          "label": "Uhifadhi wa lebo",
+          "title": "`workscope.tag`: rekodi ya lebo ni ya nani?",
+          "gainforest": "Lebo hutengenezwa katika hifadhi ya mwandishi mwenyewe, ufunguo wa upeo ukiwa rkey, hivyo `getRecord` hufanya kazi ya kuthibitisha uwepo na uandishi hauongezi nakala kwa kila akaunti.",
+          "maearth": "Uainishaji mmoja uliochaguliwa kwa jukwaa zima kwenye PDS ya jukwaa, rkey za TID, mzunguko wa kupendekezwa → kukubaliwa → kupitwa na wakati, na hatua ya uchapishaji na msimamizi. Rkey za zamani za maneno zilitengenezwa upya kama TID.",
+          "advice": "Unganisha kwa `key`, kamwe si kwa URI. Dhana ile ile inaweza kuwepo halali kama rekodi nyingi katika hifadhi nyingi; chukua `usedTags[]` kama chanzo na `key` kama utambulisho."
+        },
+        "subjects": {
+          "label": "Mada za kiambatisho",
+          "title": "`attachment.subjects[]`: ipi huwa ya kwanza?",
+          "gainforest": "`subjects[0]` ni dai; mada za ziada huongeza muktadha, kama eneo ambapo ushahidi ulikusanywa.",
+          "maearth": "`subjects[0]` ni mkusanyiko wa mradi na `subjects[1]` ni dai. Viambatisho vya matunzio hubeba mkusanyiko pekee; taarifa isiyo na shughuli husambaa kwa kila shughuli iliyochapishwa.",
+          "advice": "Linganisha kwa uanachama, si kwa nafasi: kiambatisho ni cha rekodi fulani ikiwa URI yoyote ya mada inalingana. Toa mkusanyiko na dai vyote viwili ili watumiaji wanaosoma kwa nafasi, upande wowote, waendelee kukipata."
+        },
+        "rights": {
+          "label": "Haki",
+          "title": "`activity.rights`: ipo au haipo",
+          "gainforest": "Haiandikwi. Kwa sasa Cert hazibebi kiungo chochote cha haki.",
+          "maearth": "Kila shughuli hurejea rekodi moja ya haki ya kawaida ya jukwaa zima. Rekodi yenyewe imehifadhiwa kwenye akaunti ya hypercerts.org na huingizwa kwa AT-URI, hivyo ni kiungo cha kuvuka hifadhi kwa makusudi.",
+          "advice": "Andika kiungo cha haki: hakigharimu kitu na hufanya madai yako yatumike kwa yeyote mwenye sera ya leseni. Usidhani kamwe kwamba kinapatikana ndani ya hifadhi yako mwenyewe, na linganisha kwa `uri` pekee: CID hubadilika kila maandishi ya haki yanapohaririwa."
+        },
+        "location": {
+          "label": "Maeneo",
+          "title": "`app.certified.location`: mahali pale pale, URI mbili za marejeo ya anga",
+          "gainforest": "`srs` ni URI ya CRS84 ya OGC. Nukta huandikwa kama `\"lat,lng\"`.",
+          "maearth": "`srs` ni URI ya EPSG:4326 ya OGC, ambayo mchakato wake wa kurekebisha huichukua kama sahihi. Poligoni ni GeoJSON iliyogeuzwa maandishi na kuzungushwa hadi tarakimu sita ili maandishi yasizidi kikomo cha herufi; maeneo ya makadirio hufichwa kuwa duara la kilomita 10 kabla ya kuchapishwa.",
+          "advice": "URI zote mbili zinamaanisha WGS84 kwa mpangilio wa mihimili ambao rekodi hizi hutumia kweli, hivyo kubali yoyote na usibadilishe kamwe mpangilio wa viwianishi kutokana na `srs`. Gawa kichanganuzi chako kwa `locationType`, si kwa umbo la maandishi."
+        },
+        "contributors": {
+          "label": "Wachangiaji",
+          "title": "`contributors[]`: utambulisho wa moja kwa moja au rekodi tofauti",
+          "gainforest": "`#contributorIdentity` ya moja kwa moja, na thamani yake inaweza kuwa DID au jina la mtu lililoandikwa kwenye fomu.",
+          "maearth": "Pia `#contributorIdentity` ya moja kwa moja, daima DID, iliyotokana na jedwali la michango. DID ya shirika lenyewe huanzisha shughuli ya kwanza.",
+          "advice": "Tumia muundo wa moja kwa moja: rekodi ya `contributorInformation` ipo lakini hakuna programu yoyote inayoiandika. Usidhani kamwe kwamba `identity` ni DID halali; ionyeshe kama jina isipokuwa hivyo."
+        },
+        "receipt": {
+          "label": "Risiti za ufadhili",
+          "title": "`org.hypercerts.funding.receipt`: nani anaandika fedha",
+          "gainforest": "Huandikwa na akaunti maalum ya mwezeshaji, si na mtoaji wala mradi. Michango isiyo na jina hubadilisha mtumaji kwa HMAC yenye chumvi ili mtoaji yule yule asiweze kuunganishwa kati ya risiti tofauti.",
+          "maearth": "Bado haiandikwi kwenye PDS; ufadhili upo kwenye hifadhidata ya jukwaa.",
+          "advice": "Usidhani kamwe kwamba risiti ipo kwenye hifadhi ya mradi uliofadhiliwa: fahirisi risiti kimataifa na fuata `for` kurudi kwenye mada. Kubali kiungo imara na pia URI ya kawaida ya `at://` ndani ya `for`, na daima weka `createdAt` la sivyo risiti yako itapangwa mwisho kwenye kila mtiririko."
+        }
+      }
+    },
+    "repos": {
+      "heading": "Akaunti ipi inashikilia rekodi",
+      "intro": "Skimu hazisemi chochote kuhusu hifadhi ipi ibebe nini, na hapo ndipo programu hushangazana zaidi. Badilisha kati ya programu ili kuona kila rekodi inakotua hasa.",
+      "kinds": {
+        "personal": "Hifadhi binafsi",
+        "group": "Hifadhi ya kikundi",
+        "platform": "Hifadhi ya jukwaa",
+        "facilitator": "Hifadhi ya mwezeshaji",
+        "none": "Haiandikwi"
+      },
+      "kindNotes": {
+        "personal": "PDS ya mtumiaji mwenyewe aliyeingia.",
+        "group": "Akaunti ya shirika inayoshirikiwa, inayoandikwa kupitia huduma ya kikundi ili wanachama wasishike kamwe siri zake.",
+        "platform": "Akaunti moja inayomilikiwa na programu yenyewe, inayotumika kwa rekodi zinazopaswa kushirikiwa na kila shirika.",
+        "facilitator": "Akaunti ya huduma inayorekodi matukio ambayo hakuna mshiriki anayepaswa kuaminiwa kuyaandika peke yake."
+      },
+      "apps": {
+        "gainforest": "GainForest",
+        "maearth": "Ma Earth",
+        "advice": "Inashauriwa"
+      },
+      "rows": {
+        "project": {
+          "gainforest": "Hifadhi binafsi, au hifadhi ya kikundi mtumiaji anapochapisha kama shirika.",
+          "maearth": "Daima hifadhi ya kikundi ya shirika. Mradi hauwezi kuchapishwa kabla shirika lake halijachapishwa.",
+          "advice": "Weka mradi na dai lake katika hifadhi ile ile ya mhusika aliyefanya kazi. Hivyo dai zima huthibitishwa kutoka akaunti moja."
+        },
+        "attachment": {
+          "gainforest": "Hifadhi ile ile ya Cert inayoandikwa kumbukumbu yake.",
+          "maearth": "Hifadhi ya shirika, ikiandikwa chini ya kipindi cha mwandishi kupitia huduma ya kikundi.",
+          "advice": "Hifadhi ushahidi pamoja na mada yake pale inapowezekana, lakini soma viambatisho kimataifa: ushahidi wa upande wa tatu kuhusu dai la mtu mwingine ni halali na haupaswi kutoweka."
+        },
+        "tag": {
+          "gainforest": "Hifadhi ya mwandishi mwenyewe, rkey ikiwa sawa na ufunguo wa upeo.",
+          "maearth": "Hifadhi moja ya jukwaa iliyochaguliwa, yenye rkey za TID.",
+          "advice": "Zote mbili zinafaa. Chapisha mahali fulani uainishaji thabiti na wenye nyaraka kisha urejee kwa `key` ili programu nyingine ziweze kuulinganisha."
+        },
+        "rights": {
+          "gainforest": "Haiandikwi.",
+          "maearth": "Hurejewa kwenye akaunti ya hypercerts.org; huhamishiwa kwenye hifadhi ya jukwaa pale tu maandishi yanapohitaji kubadilika.",
+          "advice": "Rejea rekodi ya haki inayoshirikiwa badala ya kutengeneza nakala yako. Tengeneza nakala pale tu unapohitaji masharti tofauti."
+        },
+        "receipt": {
+          "gainforest": "Akaunti maalum ya mwezeshaji inayokamilisha malipo.",
+          "maearth": "Haiandikwi.",
+          "advice": "Akaunti ya huduma ndiyo uamuzi sahihi: mtoaji hapaswi kulazimika kusaini rekodi ili mchango wake uonekane, na mradi haupaswi kuweza kubuni historia yake ya ufadhili."
+        },
+        "snapshot": {
+          "gainforest": "Haiandikwi.",
+          "maearth": "Hifadhi ya jukwaa, kama mkusanyiko wenye `type: \"snapshot\"` ambao vipengele vyake hubana kila rekodi ambayo ukaguzi ulitegemea.",
+          "advice": "Gandisha uamuzi kama mkusanyiko wa viungo imara. Ndiyo njia rahisi zaidi ya ufuatiliaji usiodanganyika ambayo skimu hizi hukupa."
+        }
+      },
+      "rowLabels": {
+        "project": "Mradi na dai lake",
+        "attachment": "Ushahidi, matunzio na taarifa mpya",
+        "tag": "Lebo za upeo wa kazi",
+        "rights": "Haki",
+        "receipt": "Risiti za ufadhili",
+        "snapshot": "Picha za ukaguzi zilizogandishwa"
+      }
+    },
+    "reading": {
+      "heading": "Kusoma rekodi zilizoandikwa na watu wengine",
+      "intro": "Tabia sita za tahadhari zinazotofautisha kisomaji kinachofanya kazi na programu moja na kisomaji kinachofanya kazi na mtandao mzima.",
+      "items": {
+        "unions": {
+          "title": "Gawa kwa `$type`, kamwe si kwa umbo",
+          "text": "Kila tawi la muungano lina lebo. Tumia switch juu ya `$type` na uweke tawi mbadala la wazi: rekodi yenye aina usiyoifahamu si rekodi mbovu."
+        },
+        "optional": {
+          "title": "Dhani kila sehemu inaweza kukosekana",
+          "text": "Kwenye dai, ni `title`, `shortDescription` na `createdAt` pekee zinazohitajika. Tengeneza muhtasari kutoka maelezo, rudi kwenye mradi mzazi, na onyesha rekodi zenye taarifa chache badala ya kuzificha."
+        },
+        "numbers": {
+          "title": "Namba huja kama maandishi",
+          "text": "Uzito, thamani za vipimo na kiasi cha fedha vyote ni maandishi ili kuepuka upotevu wa usahihi wa desimali. Changanua kwa tahadhari na uache chochote kisichochanganuka badala ya kuonyesha `NaN`."
+        },
+        "cids": {
+          "title": "Linganisha kwa URI, si kwa CID",
+          "text": "Uhariri wowote hubadilisha CID, hivyo CID isiyolingana mara nyingi humaanisha imepitwa na wakati, si kwamba imeghushiwa. Programu zote mbili hulinganisha `uri` kwa utambulisho na huchukua mabadiliko ya CID kama kazi ya kurekebisha."
+        },
+        "index": {
+          "title": "Usiamini mpangilio wa safu",
+          "text": "Wala `subjects[]` wala `items[]` hazina uhakika wa mpangilio kati ya programu. Tafuta kwa URI na uchukue nafasi kama dokezo tu."
+        },
+        "openStrings": {
+          "title": "`contentType` na `type` ni msamiati wazi",
+          "text": "`\"evidence\"`, `\"gallery\"`, `\"update\"`, `\"report\"` na `\"tree-dataset\"` ni makubaliano, si orodha funge. Geuza kuwa herufi ndogo, tambua unavyovifahamu, na onyesha vingine kwa njia ya jumla badala ya kuviacha."
+        }
+      }
+    },
+    "checklist": {
+      "heading": "Orodha ya kukagua ushirikiano",
+      "intro": "Kama mkaguzi angepata dakika kumi na mradi wa kwanza uliochapishwa na programu yako, haya ndiyo angeyaangalia.",
+      "doLabel": "Fanya",
+      "dontLabel": "Epuka",
+      "do": {
+        "d1": "Chapisha mkusanyiko mmoja wenye `type: \"project\"` unaobeba dai moja ndani ya `items[]`.",
+        "d2": "Weka `createdAt` kwenye kila rekodi, na uhifadhi thamani ya awali unapohariri.",
+        "d3": "Andika maelezo kama hati za Leaflet na upeo wa kazi kama CEL yenye `usedTags`.",
+        "d4": "Wapa viambatisho mkusanyiko na dai vyote viwili kama mada.",
+        "d5": "Hifadhi jozi ya `uri` + `cid` ya kila unachoandika na uandike upya wazazi mtoto anapobadilika.",
+        "d6": "Shikilia toleo maalum la kifurushi rasmi cha leksikoni ili maandishi yako ya `$type` yasipotoke."
+      },
+      "dont": {
+        "n1": "Usibuni NSID mpya kwa kitu ambacho rekodi iliyopo tayari inakiwakilisha.",
+        "n2": "Usidhani rekodi inayorejewa ipo kwenye hifadhi ile ile, wala hata kwenye PDS yako.",
+        "n3": "Usichukue `subjects[0]` wala `items[0]` kama vyenye maana maalum.",
+        "n4": "Usiache kimyakimya rekodi ambazo tawi lake la muungano au `contentType` huitambui.",
+        "n5": "Usitengeneze mkusanyiko wa pili kwa awamu mpya ya kazi ile ile.",
+        "n6": "Usiweke namba pale skimu inapoomba maandishi ya kinamba."
+      }
+    },
+    "snippets": {
+      "copy": "Nakili",
+      "copied": "Imenakiliwa"
+    },
+    "more": {
+      "heading": "Endelea kusoma",
+      "lexiconsTitle": "Marejeo ya skimu",
+      "lexiconsDesc": "Kila leksikoni ambayo programu hii husoma na kuandika, sehemu kwa sehemu.",
+      "cgsTitle": "Akaunti za kikundi",
+      "cgsDesc": "Jinsi timu nzima inavyoandika kwenye hifadhi moja inayoshirikiwa bila kushirikiana nenosiri.",
+      "packageTitle": "@hypercerts-org/lexicon",
+      "packageDesc": "Aina zilizotengenezwa na thabiti za NSID kwa kila skimu iliyo kwenye ukurasa huu.",
+      "skillTitle": "Mwongozo wa wakala",
+      "skillDesc": "Rekodi zile zile, zikiandikwa kama miito tayari kunakiliwa na wakala wa AI."
     }
   }
 }
