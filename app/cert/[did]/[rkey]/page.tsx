@@ -39,9 +39,8 @@ import {
   attachProjectTitlesToGalleries,
   fetchAccountMaEarthRounds,
   fetchBumicertsByDid,
-  fetchImageOccurrencesByDid,
-  fetchObservationSummaryByDid,
   fetchProjectImageGalleriesByDid,
+  fetchProjectObservations,
   fetchProjectsByDid,
   fetchRecordByUri,
   fetchRecordDetail,
@@ -70,7 +69,7 @@ import { FundingStatus } from "./_components/donate/FundingStatus";
 import { BumicertTimeline } from "./_components/timeline/BumicertTimeline";
 import { getEntriesForActivities } from "./_components/timeline/attachmentSubjects";
 import { resolveTimelineReferences } from "./_components/timeline/timelineReferenceResolver";
-import type { TimelineReference } from "./_components/timeline/timelineReferences";
+import { collectTimelineReferenceLookupInput, type TimelineReference } from "./_components/timeline/timelineReferences";
 import { canCreateRecord, canDeleteRecord, canUpdateRecord } from "@/app/(manage)/manage/_lib/cgs-permissions";
 import { ProjectFeaturedToggle } from "@/app/projects/_components/ProjectFeaturedToggle";
 
@@ -334,20 +333,37 @@ export async function BumicertDetailBody({
 
   const isOverviewTab = activeTab === "overview";
   const showsDetailSidebar = activeTab !== "timeline";
-  const [moreBumicerts, observations, observationSummary, linkedTimelineCount, reviewCounts, projectGalleries] = isOverviewTab
+  const [moreBumicerts, overviewAttachments, reviewCounts, projectContext] = isOverviewTab
     ? await Promise.all([
         fetchBumicertsByDid(record.did, 6)
           .then((page) => page.records.filter((item) => item.id !== record.id).slice(0, 5))
           .catch(() => []),
-        fetchImageOccurrencesByDid(record.did, 24).catch(() => []),
-        fetchObservationSummaryByDid(record.did).catch(() => null),
-        fetchTimelineAttachmentsByDid(record.did)
-          .then((items) => getEntriesForActivities(items, matchUris).length)
-          .catch(() => null),
+        fetchTimelineAttachmentsByDid(record.did).then(
+          (items) => ({ ok: true as const, items }),
+          () => ({ ok: false as const, items: [] as TimelineAttachmentItem[] }),
+        ),
         fetchReviewCounts(record.atUri).catch(() => null),
-        fetchGalleriesForBumicertProject(record.did, record.atUri).catch(() => []),
+        fetchBumicertProjectContext(record.did, record.atUri).catch(() => EMPTY_PROJECT_CONTEXT),
       ])
-    : [[], [] as OccurrenceRecord[], null, null, null, [] as ProjectImageGallery[]];
+    : [[], { ok: false as const, items: [] as TimelineAttachmentItem[] }, null, EMPTY_PROJECT_CONTEXT];
+
+  const overviewTimelineEntries = getEntriesForActivities(overviewAttachments.items, matchUris);
+  const linkedTimelineCount = overviewAttachments.ok ? overviewTimelineEntries.length : null;
+  const projectGalleries = projectContext.galleries;
+
+  // Only sightings linked to this Cert's project belong here — filed under the
+  // project, recorded at one of its places, or pinned to one of its updates.
+  const overviewTimelineLinks = collectTimelineReferenceLookupInput(overviewTimelineEntries);
+  const projectObservations = isOverviewTab
+    ? await fetchProjectObservations(record.did, {
+        projectUris: [...matchUris, ...(projectContext.projectUri ? [projectContext.projectUri] : [])],
+        siteUris: record.locationUris,
+        datasetUris: overviewTimelineLinks.datasetUris,
+        observationUris: overviewTimelineLinks.occurrenceUris,
+      }).catch(() => null)
+    : null;
+  const observations: OccurrenceRecord[] = projectObservations?.images ?? [];
+  const observationSummary = projectObservations?.summary ?? null;
 
   const reviews = activeTab === "reviews"
     ? await fetchReviewsForSubject(record.atUri).catch(() => ({ evaluations: [], comments: [] }))
@@ -608,16 +624,16 @@ export async function ProjectDetailView({
   // posted anywhere on the project show up under Reviews.
   const reviewSubjectUris = [...new Set([record.atUri, ...(engagementSubjectUri ? [engagementSubjectUri] : [])])];
 
-  const [certManageAccess, receiptsResult, observations, observationSummary, reviewCounts, projectGalleries, reviews, attachmentsResult, timelineAccess] = await Promise.all([
+  const [certManageAccess, receiptsResult, reviewCounts, projectGalleries, reviews, attachmentsResult, timelineAccess] = await Promise.all([
     resolveCertManageAccess(record.did, owner.kind, authSession),
     fetchReceipts().then(
       (all) => ({ ok: true as const, receipts: all.filter((receipt) => receipt.bumicertUri === record.atUri) }),
       () => ({ ok: false as const, receipts: [] as FundingReceipt[] }),
     ),
-    fetchImageOccurrencesByDid(record.did, 24).catch(() => [] as OccurrenceRecord[]),
-    fetchObservationSummaryByDid(record.did).catch(() => null),
     fetchReviewCountsForSubjects(reviewSubjectUris).catch(() => null),
-    fetchGalleriesForBumicertProject(record.did, record.atUri).catch(() => [] as ProjectImageGallery[]),
+    fetchBumicertProjectContext(record.did, record.atUri)
+      .then((context) => context.galleries)
+      .catch(() => [] as ProjectImageGallery[]),
     fetchReviewsForSubjects(reviewSubjectUris).catch(() => ({ evaluations: [], comments: [] })),
     fetchTimelineAttachmentsByDid(record.did).then(
       (items) => ({ ok: true as const, items }),
@@ -636,25 +652,39 @@ export async function ProjectDetailView({
   const timelineAttachments = attachmentsResult.items;
   const timelineAttachmentsUnavailable = !attachmentsResult.ok;
   const timelineEntries = getEntriesForActivities(timelineAttachments, matchUris);
-  const timelineReferences = timelineEntries.length
-    ? await resolveTimelineReferences({
-        entries: timelineEntries,
-        copy: {
-          linkedRecord: referenceT("linkedRecord"),
-          linkedAudioRecord: referenceT("linkedAudioRecord"),
-          audioEvidence: referenceT("audioEvidence"),
-          linkedDataset: referenceT("linkedDataset"),
-          linkedTreeRecord: referenceT("linkedTreeRecord"),
-          linkedSiteRecord: referenceT("linkedSiteRecord"),
-          siteEvidence: referenceT("siteEvidence"),
-          linkedNatureData: timelineT("fallbacks.linkedNatureData"),
-          treeCount: (count: number) => timelineEntryT("treeCount", { count }),
-          speciesCount: (count: number) => timelineEntryT("speciesCount", { count }),
-          observationCount: (count: number) => timelineEntryT("observationCount", { count }),
-          individualCount: (count: number) => referenceT("individualCount", { count }),
-        },
-      }).catch(() => [])
-    : [];
+  const timelineLinks = collectTimelineReferenceLookupInput(timelineEntries);
+  // Sightings are the project's evidence only when they are linked to it —
+  // filed under the project, recorded at one of its places, or pinned to one of
+  // its updates. Never every sighting the account happens to own.
+  const [timelineReferences, projectObservations] = await Promise.all([
+    timelineEntries.length
+      ? resolveTimelineReferences({
+          entries: timelineEntries,
+          copy: {
+            linkedRecord: referenceT("linkedRecord"),
+            linkedAudioRecord: referenceT("linkedAudioRecord"),
+            audioEvidence: referenceT("audioEvidence"),
+            linkedDataset: referenceT("linkedDataset"),
+            linkedTreeRecord: referenceT("linkedTreeRecord"),
+            linkedSiteRecord: referenceT("linkedSiteRecord"),
+            siteEvidence: referenceT("siteEvidence"),
+            linkedNatureData: timelineT("fallbacks.linkedNatureData"),
+            treeCount: (count: number) => timelineEntryT("treeCount", { count }),
+            speciesCount: (count: number) => timelineEntryT("speciesCount", { count }),
+            observationCount: (count: number) => timelineEntryT("observationCount", { count }),
+            individualCount: (count: number) => referenceT("individualCount", { count }),
+          },
+        }).catch(() => [] as TimelineReference[])
+      : Promise.resolve([] as TimelineReference[]),
+    fetchProjectObservations(record.did, {
+      projectUris: matchUris,
+      siteUris: record.locationUris,
+      datasetUris: timelineLinks.datasetUris,
+      observationUris: timelineLinks.occurrenceUris,
+    }).catch(() => null),
+  ]);
+  const observations: OccurrenceRecord[] = projectObservations?.images ?? [];
+  const observationSummary = projectObservations?.summary ?? null;
   const emptyTimelineSources = { audio: [], occurrences: [], occurrencesIncomplete: false, treeGroups: [], places: [] };
 
   const canManageDonations = certManageAccess.canManageDonations;
@@ -1142,20 +1172,30 @@ function ProjectDetailSection({
   );
 }
 
-async function fetchGalleriesForBumicertProject(
+/** The project a standalone Cert belongs to, plus that project's galleries.
+ *  Both the gallery strip and the sighting scope need the project URI, so they
+ *  share one lookup. */
+type BumicertProjectContext = { projectUri: string | null; galleries: ProjectImageGallery[] };
+
+const EMPTY_PROJECT_CONTEXT: BumicertProjectContext = { projectUri: null, galleries: [] };
+
+async function fetchBumicertProjectContext(
   did: string,
   bumicertUri: string,
-): Promise<ProjectImageGallery[]> {
+): Promise<BumicertProjectContext> {
   const [projects, galleries] = await Promise.all([
     fetchProjectsByDid(did, 1000).then((page) => page.records),
     fetchProjectImageGalleriesByDid(did),
   ]);
   const project = projects.find((item) => item.bumicertUris.includes(bumicertUri));
-  if (!project) return [];
-  return attachProjectTitlesToGalleries(
-    galleries.filter((gallery) => gallery.projectUri === project.atUri),
-    [project],
-  );
+  if (!project) return EMPTY_PROJECT_CONTEXT;
+  return {
+    projectUri: project.atUri,
+    galleries: attachProjectTitlesToGalleries(
+      galleries.filter((gallery) => gallery.projectUri === project.atUri),
+      [project],
+    ),
+  };
 }
 
 function buildBumicertJsonLd(
