@@ -769,6 +769,7 @@
     "loadError": "No pudimos cargar este proyecto. Inténtalo de nuevo.",
     "saveError": "No pudimos guardar tu cambio. Inténtalo de nuevo.",
     "timelineDescription": "Añade, consulta y elimina las pruebas asociadas a la cronología de este proyecto.",
+    "observationsDescription": "Todos los avistamientos de naturaleza registrados para este proyecto. Lo que añadas aquí quedará asociado a él.",
     "sitesTitle": "Sitio del proyecto",
     "sitesDescription": "Elige el área cartografiada de este proyecto. Vincula un sitio guardado o crea uno nuevo.",
     "currentSiteLabel": "Sitio actual",

@@ -34,7 +34,7 @@ import { ModalContent, ModalDescription, ModalFooter, ModalHeader, ModalTitle } 
 import { useModal } from "@/components/ui/modal/context";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
-import { manageApiHref, manageHref, profileBasePath, type ManageTarget } from "@/lib/links";
+import { manageApiHref, profileBasePath, type ManageTarget } from "@/lib/links";
 import { localProjectHref } from "@/app/_lib/urls";
 import { notifyProjectsChanged } from "@/app/_lib/projects-events";
 import { WORK_SCOPE_MESSAGE_KEYS, type KnownWorkScopeKey } from "@/app/_lib/work-scope-labels";
@@ -309,7 +309,7 @@ export function ManageProjectsClient({ target }: { target: ManageTarget }) {
                       project={project}
                       index={index}
                       galleryHref={`${profileBasePath(target)}/projects/${encodeURIComponent(project.rkey)}/gallery`}
-                      observationsHref={manageHref(target, "observations", { project: project.atUri })}
+                      observationsHref={`${profileBasePath(target)}/projects/${encodeURIComponent(project.rkey)}/observations`}
                       sitesHref={`${profileBasePath(target)}/projects/${encodeURIComponent(project.rkey)}/sites`}
                       timelineHref={`${profileBasePath(target)}/projects/${encodeURIComponent(project.rkey)}/timeline`}
                       onEdit={() => openEdit(project)}

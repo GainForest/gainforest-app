@@ -769,6 +769,7 @@
     "loadError": "Não conseguimos carregar este projeto. Tente novamente.",
     "saveError": "Não conseguimos salvar sua alteração. Tente novamente.",
     "timelineDescription": "Adicione, veja e remova as evidências fixadas na linha do tempo deste projeto.",
+    "observationsDescription": "Todos os registros de natureza feitos para este projeto. O que você adicionar aqui ficará vinculado a ele.",
     "sitesTitle": "Local do projeto",
     "sitesDescription": "Escolha a área mapeada deste projeto. Vincule um local salvo ou crie um novo.",
     "currentSiteLabel": "Local atual",

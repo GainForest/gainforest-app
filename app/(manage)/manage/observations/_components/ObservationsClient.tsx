@@ -58,6 +58,7 @@ import { AddObservationsModal } from "./AddObservationsModal";
 
 import { GroupObservationsDatasetModal, type ObservationDatasetGroup } from "./GroupObservationsDatasetModal";
 import { deleteObservationDataset } from "./observation-dataset-mutations";
+import { projectScopeUris, resolveObservationFilterUris } from "./observation-scope";
 import { takeAddDataHandoff } from "../../_lib/upload/add-data-handoff";
 import {
   fetchDefaultObservationCenter,
@@ -490,10 +491,15 @@ export function ObservationsClient({
   target,
   initialPage,
   forProject = null,
+  project = null,
 }: {
   target: ManageTarget;
   initialPage: InitialPage;
   forProject?: string | null;
+  /** Pins the whole page to one project: only that project's sightings are
+   *  listed, and new ones are filed under it. Used by the project's own
+   *  Observations page, where the scope is the point of the page. */
+  project?: { uri: string; title: string } | null;
 }) {
   const t = useTranslations("upload.observations");
   const router = useRouter();
@@ -513,7 +519,9 @@ export function ObservationsClient({
   const [deletedRecordIds, setDeletedRecordIds] = useState<Set<string>>(() => new Set());
   const [isDeletingSelected, setIsDeletingSelected] = useState(false);
   const createPermission = canCreateRecord(target);
-  const [projectFilter, setProjectFilter] = useQueryState("project", parseAsString.withOptions(QUERY_STATE_OPTIONS));
+  const [projectQuery, setProjectFilter] = useQueryState("project", parseAsString.withOptions(QUERY_STATE_OPTIONS));
+  // A pinned project wins over the URL filter — the page is that project's.
+  const projectFilter = project?.uri ?? projectQuery;
   const [projectGroups, setProjectGroups] = useState<ObservationProjectGroup[]>([]);
   const [projectContexts, setProjectContexts] = useState<ObservationProjectContext[]>([]);
   const [datasetGroups, setDatasetGroups] = useState<ObservationDatasetGroup[]>([]);
@@ -620,16 +628,23 @@ export function ObservationsClient({
   }, [projectContexts, projectGroups]);
   const activeProject = activeGroup
     ? { projectUri: activeGroup.projectUri, title: activeGroup.title }
-    : projectOptions.find((project) => project.projectUri === projectFilter) ?? null;
+    : projectOptions.find((option) => option.projectUri === projectFilter)
+      ?? (project ? { projectUri: project.uri, title: project.title } : null);
   const activeDataset = datasetGroups.find((group) => group.datasetUri === datasetFilter) ?? null;
-  // A dataset filter takes precedence over a project filter; the folder row and
-  // the project pills clear each other on click so only one is ever active.
-  const filterUris = useMemo(() => {
-    if (activeDataset) return new Set(activeDataset.uris);
-    if (activeGroup) return new Set(activeGroup.uris);
-    if (projectFilter && activeProject) return new Set<string>();
-    return null;
-  }, [activeDataset, activeGroup, activeProject, projectFilter]);
+  const projectUris = useMemo(
+    () => projectScopeUris(projectFilter, activeGroup?.uris ?? null),
+    [activeGroup, projectFilter],
+  );
+  const filterUris = useMemo(
+    () => resolveObservationFilterUris(projectUris, activeDataset?.uris ?? null),
+    [activeDataset, projectUris],
+  );
+  // On a project's page, only folders that actually hold some of its sightings
+  // are worth offering.
+  const visibleDatasetGroups = useMemo(() => {
+    if (!project || !projectUris) return datasetGroups;
+    return datasetGroups.filter((group) => group.uris.some((uri) => projectUris.has(uri)));
+  }, [datasetGroups, project, projectUris]);
 
   const handleVisibleRecordsChange = useCallback((records: OccurrenceRecord[]) => {
     setVisibleRecords(records);
@@ -923,7 +938,7 @@ export function ObservationsClient({
           kind="occurrence"
           ownerDid={target.did}
           showHero={false}
-          initialPage={activeGroup || activeDataset ? undefined : initialPage}
+          initialPage={projectFilter || activeDataset ? undefined : initialPage}
           extraInitialRecords={freshRecords}
           defaultOccurrenceMedia="all"
           filterUris={filterUris}
@@ -936,8 +951,11 @@ export function ObservationsClient({
           hideOccurrenceFilters
           toolbarAfterSearchRow={
             <ObservationFilterChipRow
-              datasets={datasetGroups}
-              projects={projectOptions}
+              datasets={visibleDatasetGroups}
+              // On a project's own page the scope is fixed, so the project
+              // pills (including "All observations") would only break out of it.
+              projects={project ? [] : projectOptions}
+              lockedToProject={Boolean(project)}
               datasetValue={datasetFilter ?? null}
               projectValue={projectFilter ?? null}
               onDatasetChange={(next) => {
@@ -1363,6 +1381,7 @@ function ObservationFilterChipRow({
   projects,
   datasetValue,
   projectValue,
+  lockedToProject = false,
   onDatasetChange,
   onProjectChange,
 }: {
@@ -1370,6 +1389,9 @@ function ObservationFilterChipRow({
   projects: Array<ObservationProjectContext & { count?: number }>;
   datasetValue: string | null;
   projectValue: string | null;
+  /** True when the page is pinned to one project, so "All observations" only
+   *  clears the dataset folder instead of leaving the project. */
+  lockedToProject?: boolean;
   onDatasetChange: (next: string | null) => void;
   onProjectChange: (next: string | null) => void;
 }) {
@@ -1378,9 +1400,9 @@ function ObservationFilterChipRow({
 
   return (
     <div className="scrollbar-hidden flex items-center gap-1.5 overflow-x-auto pb-1" aria-label={t("filterChipsAria")}>
-      <ObservationFilterPill selected={!datasetValue && !projectValue} onClick={() => {
+      <ObservationFilterPill selected={!datasetValue && (lockedToProject || !projectValue)} onClick={() => {
         onDatasetChange(null);
-        onProjectChange(null);
+        if (!lockedToProject) onProjectChange(null);
       }}>
         {t("filterAllObservations")}
       </ObservationFilterPill>
