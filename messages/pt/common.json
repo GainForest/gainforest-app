@@ -3080,7 +3080,7 @@
         "tags": {
           "label": "Hospedagem das etiquetas",
           "title": "`workscope.tag`: de quem é o registro da etiqueta?",
-          "gainforest": "As etiquetas são emitidas no repositório de quem as cria, com a chave de escopo como rkey, então `getRecord` funciona como checagem de existência e a escrita é idempotente por conta.",
+          "gainforest": "As etiquetas são emitidas na mesma conta com a qual o Cert é publicado — pessoal ou da organização — com a chave de escopo como rkey, então `getRecord` funciona como checagem de existência e a escrita é idempotente por conta.",
           "maearth": "Uma única taxonomia curada de toda a plataforma no PDS da plataforma, com rkeys TID, um ciclo de vida proposta → aceita → obsoleta e uma etapa de publicação administrativa. Os rkeys antigos em formato de slug foram reemitidos como TID.",
           "advice": "Faça a junção por `key`, nunca pela URI. O mesmo conceito existe legitimamente como muitos registros em muitos repositórios; trate `usedTags[]` como procedência e `key` como identidade."
         },
@@ -3125,14 +3125,14 @@
       "heading": "Qual conta guarda o registro",
       "intro": "Os esquemas não dizem nada sobre em qual repositório cada coisa vai, e é aí que os aplicativos mais se surpreendem. Alterne entre os aplicativos para ver onde cada registro realmente aterrissa.",
       "kinds": {
-        "personal": "Repositório pessoal",
+        "personalOrGroup": "Repositório pessoal ou de grupo",
         "group": "Repositório de grupo",
         "platform": "Repositório da plataforma",
         "facilitator": "Repositório facilitador",
         "none": "Não é escrito"
       },
       "kindNotes": {
-        "personal": "O PDS da própria pessoa que iniciou a sessão.",
+        "personalOrGroup": "O PDS da própria pessoa que iniciou a sessão, ou uma conta de organização compartilhada quando ela publica em nome dessa organização. Todo o grafo segue a conta com a qual você está agindo.",
         "group": "Uma conta de organização compartilhada, escrita através de um serviço de grupo para que quem participa nunca tenha as credenciais.",
         "platform": "Uma conta do próprio aplicativo, usada para registros que precisam ser compartilhados por todas as organizações.",
         "facilitator": "Uma conta de serviço que registra eventos que nenhum participante deveria escrever sozinho."
@@ -3144,17 +3144,17 @@
       },
       "rows": {
         "project": {
-          "gainforest": "Repositório pessoal, ou um repositório de grupo quando se publica como organização.",
+          "gainforest": "A conta com a qual você publica: o seu próprio repositório quando age como você mesma pessoa, o da organização quando age em nome dela. Os dois caminhos escrevem os mesmos registros.",
           "maearth": "Sempre o repositório de grupo da organização. Um projeto não pode ser publicado antes da sua organização.",
-          "advice": "Coloque o projeto e a reivindicação dele no mesmo repositório da entidade que fez o trabalho. Assim toda a reivindicação é verificável a partir de uma única conta."
+          "advice": "Coloque o projeto e a reivindicação dele no mesmo repositório de quem fez o trabalho — a conta da própria pessoa para trabalho individual, a da organização quando foi um time. Assim toda a reivindicação é verificável a partir de uma única conta."
         },
         "attachment": {
-          "gainforest": "O mesmo repositório do Cert que ele documenta.",
+          "gainforest": "A mesma conta do Cert que ele documenta — pessoal ou da organização, seguindo a conta com a qual a evidência foi publicada.",
           "maearth": "O repositório da organização, escrito sob a sessão de quem publica através do serviço de grupo.",
-          "advice": "Guarde a evidência junto do seu sujeito quando puder, mas leia os anexos globalmente: evidência de terceiros sobre a reivindicação de outra pessoa é legítima e não deveria sumir."
+          "advice": "Guarde a evidência na mesma conta do seu sujeito quando puder, mas leia os anexos globalmente: evidência de terceiros sobre a reivindicação de outra pessoa é legítima e não deveria sumir."
         },
         "tag": {
-          "gainforest": "O repositório de quem a cria, com rkey igual à chave de escopo.",
+          "gainforest": "A mesma conta do Cert, com a chave de escopo como rkey. Por isso uma organização que publica os próprios Certs também emite as próprias cópias das etiquetas.",
           "maearth": "Um único repositório da plataforma, curado, com rkeys TID.",
           "advice": "Qualquer um funciona. Publique em algum lugar uma taxonomia estável e documentada e referencie-a por `key` para que outros aplicativos consigam mapeá-la."
         },

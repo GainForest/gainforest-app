@@ -3080,7 +3080,7 @@
         "tags": {
           "label": "Tag hosting",
           "title": "`workscope.tag` — who owns the tag record?",
-          "gainforest": "Tags are minted in the author's own repo with the scope key as the rkey, so `getRecord` is an existence check and the write is idempotent per account.",
+          "gainforest": "Tags are minted in the same account the Cert is published as — personal or organization — with the scope key as the rkey, so `getRecord` is an existence check and the write is idempotent per account.",
           "maearth": "One curated platform-wide taxonomy on the platform PDS, TID rkeys, with a proposed → accepted → deprecated lifecycle and an admin publish step. Legacy slug rkeys were re-minted at TIDs.",
           "advice": "Join on `key`, never on the URI. The same concept legitimately exists as many records across many repos; treat `usedTags[]` as provenance and `key` as identity."
         },
@@ -3125,14 +3125,14 @@
       "heading": "Which account holds the record",
       "intro": "The schemas say nothing about repo placement, and this is where apps surprise each other most. Switch between the two apps to see where each record actually lands.",
       "kinds": {
-        "personal": "Personal repo",
+        "personalOrGroup": "Personal or group repo",
         "group": "Group repo",
         "platform": "Platform repo",
         "facilitator": "Facilitator repo",
         "none": "Not written"
       },
       "kindNotes": {
-        "personal": "The signed-in user's own PDS.",
+        "personalOrGroup": "The signed-in person's own PDS, or a shared organization account when they publish on behalf of that organization. The whole graph follows whichever account you are acting as.",
         "group": "A shared organization account, written through a group service so members never hold its credentials.",
         "platform": "One account owned by the app itself, used for records that must be shared across every organization.",
         "facilitator": "A service account that records events no participant should be trusted to write alone."
@@ -3144,17 +3144,17 @@
       },
       "rows": {
         "project": {
-          "gainforest": "Personal repo, or a group repo when the user publishes as an organization.",
+          "gainforest": "Whichever account you publish as: your own repo when you act as yourself, the organization's repo when you act on its behalf. Both paths write the same records.",
           "maearth": "Always the organization's group repo. Projects cannot be published before their organization is.",
-          "advice": "Put the project and its claim in the same repo as the entity that did the work. That makes the whole claim verifiable from one account."
+          "advice": "Put the project and its claim in the same repo as whoever did the work — a person's own account for solo work, the organization's account when a team did it. That makes the whole claim verifiable from one account."
         },
         "attachment": {
-          "gainforest": "Same repo as the cert it documents.",
+          "gainforest": "The same account as the Cert it documents — personal or organization, following the account the evidence was published as.",
           "maearth": "The organization's repo, written under the author's session through the group service.",
-          "advice": "Keep evidence with its subject when you can, but read attachments globally — third-party evidence about someone else's claim is legitimate and should not disappear."
+          "advice": "Keep evidence in the same account as its subject when you can, but read attachments globally — third-party evidence about someone else's claim is legitimate and should not disappear."
         },
         "tag": {
-          "gainforest": "The author's own repo, rkey equal to the scope key.",
+          "gainforest": "The same account as the Cert, with the scope key as the rkey. An organization that publishes its own Certs therefore mints its own copies of the tags.",
           "maearth": "One curated platform repo, TID rkeys.",
           "advice": "Either works. Publish a stable, documented taxonomy somewhere and reference it by `key` so other apps can map it."
         },

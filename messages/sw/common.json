@@ -3080,7 +3080,7 @@
         "tags": {
           "label": "Uhifadhi wa lebo",
           "title": "`workscope.tag`: rekodi ya lebo ni ya nani?",
-          "gainforest": "Lebo hutengenezwa katika hifadhi ya mwandishi mwenyewe, ufunguo wa upeo ukiwa rkey, hivyo `getRecord` hufanya kazi ya kuthibitisha uwepo na uandishi hauongezi nakala kwa kila akaunti.",
+          "gainforest": "Lebo hutengenezwa katika akaunti ile ile inayochapisha Cert — binafsi au ya shirika — ufunguo wa upeo ukiwa rkey, hivyo `getRecord` hufanya kazi ya kuthibitisha uwepo na uandishi hauongezi nakala kwa kila akaunti.",
           "maearth": "Uainishaji mmoja uliochaguliwa kwa jukwaa zima kwenye PDS ya jukwaa, rkey za TID, mzunguko wa kupendekezwa → kukubaliwa → kupitwa na wakati, na hatua ya uchapishaji na msimamizi. Rkey za zamani za maneno zilitengenezwa upya kama TID.",
           "advice": "Unganisha kwa `key`, kamwe si kwa URI. Dhana ile ile inaweza kuwepo halali kama rekodi nyingi katika hifadhi nyingi; chukua `usedTags[]` kama chanzo na `key` kama utambulisho."
         },
@@ -3125,14 +3125,14 @@
       "heading": "Akaunti ipi inashikilia rekodi",
       "intro": "Skimu hazisemi chochote kuhusu hifadhi ipi ibebe nini, na hapo ndipo programu hushangazana zaidi. Badilisha kati ya programu ili kuona kila rekodi inakotua hasa.",
       "kinds": {
-        "personal": "Hifadhi binafsi",
+        "personalOrGroup": "Hifadhi binafsi au ya kikundi",
         "group": "Hifadhi ya kikundi",
         "platform": "Hifadhi ya jukwaa",
         "facilitator": "Hifadhi ya mwezeshaji",
         "none": "Haiandikwi"
       },
       "kindNotes": {
-        "personal": "PDS ya mtumiaji mwenyewe aliyeingia.",
+        "personalOrGroup": "PDS ya mtu aliyeingia mwenyewe, au akaunti ya shirika inayoshirikiwa anapochapisha kwa niaba ya shirika hilo. Mtandao mzima hufuata akaunti unayoitumia wakati huo.",
         "group": "Akaunti ya shirika inayoshirikiwa, inayoandikwa kupitia huduma ya kikundi ili wanachama wasishike kamwe siri zake.",
         "platform": "Akaunti moja inayomilikiwa na programu yenyewe, inayotumika kwa rekodi zinazopaswa kushirikiwa na kila shirika.",
         "facilitator": "Akaunti ya huduma inayorekodi matukio ambayo hakuna mshiriki anayepaswa kuaminiwa kuyaandika peke yake."
@@ -3144,17 +3144,17 @@
       },
       "rows": {
         "project": {
-          "gainforest": "Hifadhi binafsi, au hifadhi ya kikundi mtumiaji anapochapisha kama shirika.",
+          "gainforest": "Akaunti unayochapisha nayo: hifadhi yako mwenyewe unapotenda kama wewe binafsi, hifadhi ya shirika unapotenda kwa niaba yake. Njia zote mbili huandika rekodi zile zile.",
           "maearth": "Daima hifadhi ya kikundi ya shirika. Mradi hauwezi kuchapishwa kabla shirika lake halijachapishwa.",
-          "advice": "Weka mradi na dai lake katika hifadhi ile ile ya mhusika aliyefanya kazi. Hivyo dai zima huthibitishwa kutoka akaunti moja."
+          "advice": "Weka mradi na dai lake katika hifadhi ile ile ya aliyefanya kazi — akaunti binafsi ya mtu kwa kazi ya peke yake, akaunti ya shirika pale timu ilipofanya. Hivyo dai zima huthibitishwa kutoka akaunti moja."
         },
         "attachment": {
-          "gainforest": "Hifadhi ile ile ya Cert inayoandikwa kumbukumbu yake.",
+          "gainforest": "Akaunti ile ile ya Cert inayoandikwa kumbukumbu yake — binafsi au ya shirika, kufuata akaunti iliyotumika kuchapisha ushahidi.",
           "maearth": "Hifadhi ya shirika, ikiandikwa chini ya kipindi cha mwandishi kupitia huduma ya kikundi.",
-          "advice": "Hifadhi ushahidi pamoja na mada yake pale inapowezekana, lakini soma viambatisho kimataifa: ushahidi wa upande wa tatu kuhusu dai la mtu mwingine ni halali na haupaswi kutoweka."
+          "advice": "Hifadhi ushahidi katika akaunti ile ile ya mada yake inapowezekana, lakini soma viambatisho kimataifa: ushahidi wa upande wa tatu kuhusu dai la mtu mwingine ni halali na haupaswi kutoweka."
         },
         "tag": {
-          "gainforest": "Hifadhi ya mwandishi mwenyewe, rkey ikiwa sawa na ufunguo wa upeo.",
+          "gainforest": "Akaunti ile ile ya Cert, ufunguo wa upeo ukiwa rkey. Kwa hivyo shirika linalochapisha Cert zake mwenyewe hutengeneza pia nakala zake za lebo.",
           "maearth": "Hifadhi moja ya jukwaa iliyochaguliwa, yenye rkey za TID.",
           "advice": "Zote mbili zinafaa. Chapisha mahali fulani uainishaji thabiti na wenye nyaraka kisha urejee kwa `key` ili programu nyingine ziweze kuulinganisha."
         },

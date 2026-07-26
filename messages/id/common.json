@@ -3080,7 +3080,7 @@
         "tags": {
           "label": "Penempatan tag",
           "title": "`workscope.tag`: siapa pemilik catatan tag-nya?",
-          "gainforest": "Tag diterbitkan di repositori penulisnya sendiri dengan kunci lingkup sebagai rkey, sehingga `getRecord` berfungsi sebagai pemeriksaan keberadaan dan penulisannya idempoten per akun.",
+          "gainforest": "Tag diterbitkan di akun yang sama dengan Cert — pribadi atau organisasi — dengan kunci lingkup sebagai rkey, sehingga `getRecord` berfungsi sebagai pemeriksaan keberadaan dan penulisannya idempoten per akun.",
           "maearth": "Satu taksonomi terkurasi seluruh platform di PDS platform, dengan rkey TID, siklus hidup diusulkan → diterima → usang, dan langkah penerbitan oleh admin. Rkey slug warisan lama diterbitkan ulang sebagai TID.",
           "advice": "Gabungkan berdasarkan `key`, jangan berdasarkan URI. Konsep yang sama secara sah bisa ada sebagai banyak catatan di banyak repositori; perlakukan `usedTags[]` sebagai asal-usul dan `key` sebagai identitas."
         },
@@ -3125,14 +3125,14 @@
       "heading": "Akun mana yang menyimpan catatannya",
       "intro": "Skemanya tidak berkata apa pun tentang penempatan repositori, dan di sinilah aplikasi paling sering saling mengejutkan. Ganti antar aplikasi untuk melihat di mana setiap catatan sebenarnya mendarat.",
       "kinds": {
-        "personal": "Repositori pribadi",
+        "personalOrGroup": "Repositori pribadi atau grup",
         "group": "Repositori grup",
         "platform": "Repositori platform",
         "facilitator": "Repositori fasilitator",
         "none": "Tidak ditulis"
       },
       "kindNotes": {
-        "personal": "PDS milik pengguna yang sedang masuk.",
+        "personalOrGroup": "PDS milik orang yang sedang masuk, atau akun organisasi bersama ketika ia menerbitkan atas nama organisasi tersebut. Seluruh graf mengikuti akun yang sedang Anda pakai.",
         "group": "Akun organisasi bersama, ditulis lewat layanan grup sehingga anggotanya tidak pernah memegang kredensialnya.",
         "platform": "Satu akun milik aplikasi itu sendiri, dipakai untuk catatan yang harus dibagi ke semua organisasi.",
         "facilitator": "Akun layanan yang mencatat peristiwa yang tidak boleh ditulis sendirian oleh peserta mana pun."
@@ -3144,17 +3144,17 @@
       },
       "rows": {
         "project": {
-          "gainforest": "Repositori pribadi, atau repositori grup ketika pengguna menerbitkan sebagai organisasi.",
+          "gainforest": "Akun yang Anda pakai untuk menerbitkan: repositori Anda sendiri saat bertindak sebagai diri sendiri, repositori organisasi saat bertindak atas namanya. Kedua jalur menulis catatan yang sama.",
           "maearth": "Selalu repositori grup organisasinya. Proyek tidak bisa diterbitkan sebelum organisasinya terbit.",
-          "advice": "Taruh proyek dan klaimnya di repositori yang sama dengan pihak yang melakukan pekerjaannya. Dengan begitu seluruh klaim bisa diverifikasi dari satu akun."
+          "advice": "Taruh proyek dan klaimnya di repositori yang sama dengan pihak yang mengerjakannya — akun pribadi seseorang untuk kerja sendiri, akun organisasi bila dikerjakan tim. Dengan begitu seluruh klaim bisa diverifikasi dari satu akun."
         },
         "attachment": {
-          "gainforest": "Repositori yang sama dengan Cert yang didokumentasikannya.",
+          "gainforest": "Akun yang sama dengan Cert yang didokumentasikannya — pribadi atau organisasi, mengikuti akun yang dipakai saat bukti diterbitkan.",
           "maearth": "Repositori organisasi, ditulis di bawah sesi penulisnya melalui layanan grup.",
-          "advice": "Simpan bukti bersama subjeknya bila memungkinkan, tetapi bacalah lampiran secara global: bukti pihak ketiga tentang klaim orang lain itu sah dan tidak boleh hilang."
+          "advice": "Simpan bukti di akun yang sama dengan subjeknya bila memungkinkan, tetapi bacalah lampiran secara global: bukti pihak ketiga tentang klaim orang lain itu sah dan tidak boleh hilang."
         },
         "tag": {
-          "gainforest": "Repositori penulisnya sendiri, dengan rkey sama dengan kunci lingkup.",
+          "gainforest": "Akun yang sama dengan Cert, dengan kunci lingkup sebagai rkey. Karena itu organisasi yang menerbitkan Cert-nya sendiri juga membuat salinan tag-nya sendiri.",
           "maearth": "Satu repositori platform terkurasi, dengan rkey TID.",
           "advice": "Keduanya bisa. Terbitkan taksonomi yang stabil dan terdokumentasi di suatu tempat lalu rujuk lewat `key` agar aplikasi lain bisa memetakannya."
         },

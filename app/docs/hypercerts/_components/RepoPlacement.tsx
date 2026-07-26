@@ -8,7 +8,7 @@ import { RichText } from "./RichText";
 
 type AppId = "gainforest" | "maearth" | "advice";
 type RowId = "project" | "attachment" | "tag" | "rights" | "receipt" | "snapshot";
-type RepoKind = "personal" | "group" | "platform" | "facilitator" | "none";
+type RepoKind = "personalOrGroup" | "group" | "platform" | "facilitator" | "none";
 
 const APPS: AppId[] = ["gainforest", "maearth", "advice"];
 const ROWS: RowId[] = ["project", "attachment", "tag", "rights", "receipt", "snapshot"];
@@ -25,16 +25,16 @@ const ROW_NSIDS: Record<RowId, string> = {
 
 // Which account each record lands in, per app.
 const PLACEMENT: Record<RowId, Record<AppId, RepoKind>> = {
-  project: { gainforest: "personal", maearth: "group", advice: "group" },
-  attachment: { gainforest: "personal", maearth: "group", advice: "group" },
-  tag: { gainforest: "personal", maearth: "platform", advice: "platform" },
+  project: { gainforest: "personalOrGroup", maearth: "group", advice: "personalOrGroup" },
+  attachment: { gainforest: "personalOrGroup", maearth: "group", advice: "personalOrGroup" },
+  tag: { gainforest: "personalOrGroup", maearth: "platform", advice: "platform" },
   rights: { gainforest: "none", maearth: "platform", advice: "platform" },
   receipt: { gainforest: "facilitator", maearth: "none", advice: "facilitator" },
   snapshot: { gainforest: "none", maearth: "platform", advice: "platform" },
 };
 
 const KIND_STYLES: Record<RepoKind, string> = {
-  personal: "border-emerald-500/40 text-emerald-700 dark:text-emerald-400",
+  personalOrGroup: "border-emerald-500/40 text-emerald-700 dark:text-emerald-400",
   group: "border-sky-500/40 text-sky-700 dark:text-sky-400",
   platform: "border-violet-500/40 text-violet-700 dark:text-violet-400",
   facilitator: "border-amber-500/40 text-amber-700 dark:text-amber-400",
@@ -54,14 +54,14 @@ export function RepoPlacement() {
     advice: t("apps.advice"),
   };
   const kindLabels: Record<RepoKind, string> = {
-    personal: t("kinds.personal"),
+    personalOrGroup: t("kinds.personalOrGroup"),
     group: t("kinds.group"),
     platform: t("kinds.platform"),
     facilitator: t("kinds.facilitator"),
     none: t("kinds.none"),
   };
   const kindNotes: Record<Exclude<RepoKind, "none">, string> = {
-    personal: t("kindNotes.personal"),
+    personalOrGroup: t("kindNotes.personalOrGroup"),
     group: t("kindNotes.group"),
     platform: t("kindNotes.platform"),
     facilitator: t("kindNotes.facilitator"),
