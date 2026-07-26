@@ -132,6 +132,49 @@ export async function attachObservationsToDataset(
   return { attached, skipped, errors };
 }
 
+export type UnnestDatasetResult = {
+  unnestedFrom: string[];
+  unnestErrors: Array<{ rkey: string; error: string }>;
+};
+
+/**
+ * Drop a dataset from the `items[]` of the given project collections. Used when
+ * a dataset is deleted (no dangling reference) and when it is filed under a
+ * different project (a dataset lives in one project, the same way each of its
+ * sightings names one project in `projectRef`).
+ */
+export async function unnestDatasetFromProjects(
+  input: { datasetUri: string; parentRkeys: string[] },
+  options?: RepoOptions,
+): Promise<UnnestDatasetResult> {
+  const unnestedFrom: string[] = [];
+  const unnestErrors: Array<{ rkey: string; error: string }> = [];
+  for (const rkey of input.parentRkeys) {
+    try {
+      const current = await getRecord(COLLECTION_COLLECTION, rkey, options);
+      const items = Array.isArray(current.record.items) ? current.record.items : [];
+      const nextItems = items.filter((item) => itemUri(item) !== input.datasetUri);
+      if (nextItems.length === items.length) continue; // nothing to remove
+      const nextRecord: Record<string, unknown> = {
+        ...current.record,
+        $type: typeof current.record.$type === "string" ? current.record.$type : COLLECTION_COLLECTION,
+        items: nextItems,
+      };
+      await putRecord(COLLECTION_COLLECTION, rkey, nextRecord, {
+        swapRecord: current.cid,
+        ...(options?.repo ? { repo: options.repo } : {}),
+      });
+      unnestedFrom.push(rkey);
+    } catch (error) {
+      unnestErrors.push({
+        rkey,
+        error: error instanceof Error ? error.message : "A parent collection could not be updated.",
+      });
+    }
+  }
+  return { unnestedFrom, unnestErrors };
+}
+
 export type DeleteObservationDatasetResult = {
   detached: string[];
   detachErrors: Array<{ rkey: string; error: string }>;
@@ -180,31 +223,10 @@ export async function deleteObservationDataset(
 
   // Unnest the dataset from any project collection that lists it in items[], so
   // no dangling reference is left behind.
-  const unnestedFrom: string[] = [];
-  const unnestErrors: Array<{ rkey: string; error: string }> = [];
-  for (const rkey of input.parentRkeys) {
-    try {
-      const current = await getRecord(COLLECTION_COLLECTION, rkey, options);
-      const items = Array.isArray(current.record.items) ? current.record.items : [];
-      const nextItems = items.filter((item) => itemUri(item) !== input.datasetUri);
-      if (nextItems.length === items.length) continue; // nothing to remove
-      const nextRecord: Record<string, unknown> = {
-        ...current.record,
-        $type: typeof current.record.$type === "string" ? current.record.$type : COLLECTION_COLLECTION,
-        items: nextItems,
-      };
-      await putRecord(COLLECTION_COLLECTION, rkey, nextRecord, {
-        swapRecord: current.cid,
-        ...(options?.repo ? { repo: options.repo } : {}),
-      });
-      unnestedFrom.push(rkey);
-    } catch (error) {
-      unnestErrors.push({
-        rkey,
-        error: error instanceof Error ? error.message : "A parent collection could not be updated.",
-      });
-    }
-  }
+  const { unnestedFrom, unnestErrors } = await unnestDatasetFromProjects(
+    { datasetUri: input.datasetUri, parentRkeys: input.parentRkeys },
+    options,
+  );
 
   let collectionDeleted = false;
   let collectionError: string | null = null;

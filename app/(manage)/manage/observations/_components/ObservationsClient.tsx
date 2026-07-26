@@ -1046,6 +1046,7 @@ export function ObservationsClient({
                     datasetUri: activeDataset.datasetUri,
                     datasetCid: null,
                     name: activeDataset.name,
+                    parentRkeys: activeDataset.parentRkeys,
                     occurrences: activeDataset.uris.map((uri) => ({
                       rkey: uri.split("/").pop() ?? "",
                       projectRef: null,

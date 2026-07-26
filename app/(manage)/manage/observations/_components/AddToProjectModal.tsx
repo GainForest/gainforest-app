@@ -20,7 +20,15 @@ export type AddToProjectTarget =
   /** Loose sightings picked in the list. */
   | { kind: "observations"; occurrences: ProjectAttachInput[] }
   /** A whole dataset folder, listed on the project as a record too. */
-  | { kind: "dataset"; datasetUri: string; datasetCid: string | null; name: string; occurrences: ProjectAttachInput[] };
+  | {
+      kind: "dataset";
+      datasetUri: string;
+      datasetCid: string | null;
+      name: string;
+      /** Projects currently listing the folder, so it can move rather than multiply. */
+      parentRkeys: string[];
+      occurrences: ProjectAttachInput[];
+    };
 
 type ProjectOption = {
   atUri: string;
@@ -132,6 +140,7 @@ export function AddToProjectModal({
                 siteUri: selectedProject.locationUri,
                 datasetUri: subject.datasetUri,
                 datasetCid: subject.datasetCid,
+                parentRkeys: subject.parentRkeys,
                 occurrences,
               },
               repoOptions,

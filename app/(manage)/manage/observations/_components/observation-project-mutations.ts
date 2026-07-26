@@ -1,7 +1,7 @@
 "use client";
 
 import { getRecord, putRecord } from "../../_lib/mutations";
-import { nestDatasetUnderProject } from "./observation-dataset-mutations";
+import { nestDatasetUnderProject, unnestDatasetFromProjects } from "./observation-dataset-mutations";
 
 // An observation belongs to a project when it carries the project's AT-URI in
 // `projectRef` — the same field the add flows write. Filing an already-published
@@ -83,6 +83,8 @@ export type AttachDatasetToProjectResult = AttachToProjectResult & {
   /** False when the dataset record itself could not be listed on the project. */
   nested: boolean;
   nestError: string | null;
+  /** Projects the dataset was removed from, because it moved here. */
+  unnestedFrom: string[];
 };
 
 /**
@@ -93,6 +95,11 @@ export type AttachDatasetToProjectResult = AttachToProjectResult & {
  * per-observation stamp is what every count, gallery and filter reads, so
  * without it the folder would look attached while its sightings stayed
  * invisible to the project.
+ *
+ * A dataset lives in ONE project. Two projects could each list it in `items[]`,
+ * but a sighting names a single project in `projectRef` — so a shared folder
+ * would show up under both while its sightings counted for only the last one.
+ * Filing therefore moves the folder: it is unlisted from its previous project.
  */
 export async function attachDatasetToProject(
   input: {
@@ -100,6 +107,8 @@ export async function attachDatasetToProject(
     siteUri?: string | null;
     datasetUri: string;
     datasetCid?: string | null;
+    /** Projects currently listing this dataset; all but the target are dropped. */
+    parentRkeys?: string[];
     occurrences: ProjectAttachInput[];
   },
   options?: RepoOptions,
@@ -116,10 +125,18 @@ export async function attachDatasetToProject(
     nestError = error instanceof Error ? error.message : "The folder could not be listed on the project.";
   }
 
+  // Drop the folder from whatever project held it before, so the listing and
+  // the sightings never disagree about where it lives.
+  const targetRkey = input.projectUri.split("/").pop();
+  const staleParents = (input.parentRkeys ?? []).filter((rkey) => rkey !== targetRkey);
+  const { unnestedFrom } = staleParents.length
+    ? await unnestDatasetFromProjects({ datasetUri: input.datasetUri, parentRkeys: staleParents }, options)
+    : { unnestedFrom: [] as string[] };
+
   const result = await attachObservationsToProject(
     { projectUri: input.projectUri, siteUri: input.siteUri, occurrences: input.occurrences },
     options,
   );
 
-  return { ...result, nested, nestError };
+  return { ...result, nested, nestError, unnestedFrom };
 }
