@@ -494,7 +494,6 @@ export async function BumicertDetailBody({
                   timelineCount: linkedTimelineCount,
                   reviews: reviewCounts,
                   detailHref,
-                  ownerHref: `/account/${encodeURIComponent(owner.urlIdentifier)}`,
                 }}
                 workScopeLabels={workScopeLabels}
               />
@@ -719,7 +718,10 @@ export async function ProjectDetailView({
   // fall back so zero-state chips are not dead ends.
   const anchors = {
     boundaries: hasPlaces ? placesHref : detailHref,
-    sightings: hasObservations ? `${detailHref}#observations` : ownerProfileHref,
+    // With no photo gallery to jump to, stay on the project — the owner's
+    // profile lists the whole account's sightings, which is a different scope
+    // than the number on this chip.
+    sightings: hasObservations ? `${detailHref}#observations` : detailHref,
     timeline: showUpdates ? updatesHref : detailHref,
     reviews: reviewsHref,
   };
@@ -900,7 +902,6 @@ export async function ProjectDetailView({
                     timelineCount: timelineEntries.length,
                     reviews: reviewCounts,
                     detailHref,
-                    ownerHref: ownerProfileHref,
                     anchors,
                   }}
                 />
@@ -1854,7 +1855,6 @@ type EvidenceInfo = {
   timelineCount: number | null;
   reviews: ReviewCounts | null;
   detailHref: string;
-  ownerHref: string;
   /**
    * In-page anchor hrefs for the integrated layout. When set, the evidence
    * chips scroll to inline sections instead of switching tabs.
@@ -1949,7 +1949,7 @@ function OverviewPanel({
  * evidence-rich and evidence-light Bumicerts are distinguishable at a glance.
  */
 function EvidenceSection({ evidence }: { evidence: EvidenceInfo }) {
-  const { boundaries, observationSummary, timelineCount, reviews, detailHref, ownerHref } = evidence;
+  const { boundaries, observationSummary, timelineCount, reviews, detailHref } = evidence;
 
   const reviewVoices = reviews ? reviews.evaluations + reviews.comments : 0;
   const reviewLabel = !reviews || reviewVoices === 0
@@ -1973,7 +1973,7 @@ function EvidenceSection({ evidence }: { evidence: EvidenceInfo }) {
     ...(observationSummary
       ? [{
           key: "sightings",
-          href: anchors?.sightings ?? ownerHref,
+          href: anchors?.sightings ?? detailHref,
           icon: <LeafIcon className="h-3.5 w-3.5" aria-hidden />,
           label: observationSummary.count > 0
             ? `${formatCompact(observationSummary.count)} nature sighting${observationSummary.count === 1 ? "" : "s"}${
