@@ -1,6 +1,6 @@
 import { Suspense } from "react";
 import Link from "next/link";
-import { ArrowLeftIcon } from "lucide-react";
+import { ArrowLeftIcon, FolderKanbanIcon } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 import { fetchReceipts } from "@/app/_lib/dashboard";
 import {
@@ -19,7 +19,7 @@ import { BumicertTimeline } from "@/app/cert/[did]/[rkey]/_components/timeline/B
 import { getEntriesForActivity } from "@/app/cert/[did]/[rkey]/_components/timeline/attachmentSubjects";
 import { resolveTimelineReferences } from "@/app/cert/[did]/[rkey]/_components/timeline/timelineReferenceResolver";
 import { canCreateRecord, canDeleteRecord } from "./_lib/cgs-permissions";
-import { profileBasePath } from "@/lib/links";
+import { manageHref, profileBasePath } from "@/lib/links";
 import { ProjectSitesManagerClient } from "./projects/[rkey]/sites/_components/ProjectSitesManagerClient";
 import { droneAppHref } from "@/app/_lib/urls";
 import { listLatestPdsRecords, resolveBlobUrl, resolvePdsHost } from "@/app/_lib/pds";
@@ -134,11 +134,11 @@ export function ProjectCertsSection({ target, projectRkey }: { target: ManageTar
 async function fetchManagedProjectRef(
   did: string,
   rkey: string,
-): Promise<{ atUri: string; cid: string | null; title: string } | null> {
+): Promise<{ atUri: string; cid: string | null; title: string; locationUri: string | null } | null> {
   const projects = await fetchProjectsByDid(did, 500).then((page) => page.records).catch(() => []);
   const project = projects.find((entry) => entry.rkey === rkey) ?? null;
   if (!project) return null;
-  return { atUri: project.atUri, cid: project.cid, title: project.title };
+  return { atUri: project.atUri, cid: project.cid, title: project.title, locationUri: project.locationUri };
 }
 
 function ProjectManageBackLink({ target, label }: { target: ManageTarget; label: string }) {
@@ -426,9 +426,19 @@ export async function ProjectObservationsSection({
       <div className="mb-5">
         <ProjectManageBackLink target={target} label={manageT("backToProjects")} />
       </div>
-      <div className="mb-4 max-w-3xl">
-        <h1 className="font-instrument text-3xl font-light italic tracking-[-0.03em] text-foreground sm:text-4xl">{project.title}</h1>
-        <p className="mt-2 text-sm leading-6 text-muted-foreground">{manageT("observationsDescription")}</p>
+      <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+        <div className="max-w-3xl">
+          <h1 className="font-instrument text-3xl font-light italic tracking-[-0.03em] text-foreground sm:text-4xl">{project.title}</h1>
+          <p className="mt-2 text-sm leading-6 text-muted-foreground">{manageT("observationsDescription")}</p>
+        </div>
+        {/* Sightings published before the project existed live on the account
+            list; send stewards there with this project already picked. */}
+        <Button asChild variant="outline" size="sm" className="shrink-0">
+          <Link href={manageHref(target, "observations", { attachTo: project.atUri })}>
+            <FolderKanbanIcon className="size-4" />
+            {manageT("addExistingObservations")}
+          </Link>
+        </Button>
       </div>
       <ObservationsClient
         target={target}
@@ -436,7 +446,7 @@ export async function ProjectObservationsSection({
         // Pre-selects this project in the bulk add panel, the same way the
         // "add for this project" entry points elsewhere do.
         forProject={`${target.did}/${projectRkey}`}
-        project={{ uri: project.atUri, title: project.title }}
+        project={{ uri: project.atUri, title: project.title, siteUri: project.locationUri }}
       />
     </div>
   );

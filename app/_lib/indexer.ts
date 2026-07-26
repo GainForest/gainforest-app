@@ -192,6 +192,8 @@ export type OccurrenceRecord = {
   eventDate: string | null;
   habitat: string | null;
   siteRef: string | null;
+  /** AT-URI of the project this sighting was filed under, when it has one. */
+  projectRef: string | null;
   datasetRef: string | null;
   datasetName: string | null;
   dynamicProperties: string | null;
@@ -219,7 +221,7 @@ const OCCURRENCE_NODE_FIELDS = `
   scientificName vernacularName kingdom family genus
   basisOfRecord recordedBy individualCount
   datasetName country countryCode stateProvince locality decimalLatitude decimalLongitude coordinateUncertaintyInMeters
-  habitat siteRef datasetRef dynamicProperties
+  habitat siteRef projectRef datasetRef dynamicProperties
   occurrenceRemarks fieldNotes
   thumbnailUrl speciesImageUrl associatedMedia
   imageEvidence { file { ref } }
@@ -268,6 +270,7 @@ type RawOccurrence = {
   coordinateUncertaintyInMeters?: number | string | null;
   habitat?: string | null;
   siteRef?: string | null;
+  projectRef?: string | null;
   datasetRef?: string | null;
   dynamicProperties?: string | null;
   establishmentMeans?: string | null;
@@ -342,6 +345,7 @@ function mapOccurrence(n: RawOccurrence): OccurrenceRecord {
     eventDate: n.eventDate?.trim() || null,
     habitat: n.habitat?.trim() || null,
     siteRef: n.siteRef?.trim() || null,
+    projectRef: n.projectRef?.trim() || null,
     datasetRef: n.datasetRef?.trim() || null,
     datasetName: n.datasetName?.trim() || null,
     dynamicProperties: n.dynamicProperties?.trim() || null,
@@ -415,6 +419,7 @@ export function occurrenceFromPdsRecord(item: PdsOccurrenceItem): OccurrenceReco
       (typeof value.coordinateUncertaintyInMeters === "number" ? value.coordinateUncertaintyInMeters : null),
     habitat: pdsString(value.habitat),
     siteRef: pdsString(value.siteRef),
+    projectRef: pdsString(value.projectRef),
     datasetRef: pdsString(value.datasetRef),
     dynamicProperties: pdsString(value.dynamicProperties),
     establishmentMeans: pdsString(value.establishmentMeans),
@@ -676,6 +681,7 @@ function mapAudioRecord(n: RawAudioRecord, audioRef: string | null, audioUrl: st
     eventDate: n.metadata?.recordedAt ?? null,
     habitat: null,
     siteRef: n.siteRef?.trim() || null,
+    projectRef: null,
     datasetRef: null,
     datasetName: null,
     dynamicProperties: null,
@@ -3016,6 +3022,8 @@ export type ProjectRecord = {
   creatorAvatarRef: string | null;
   bumicertUris: string[];
   bumicertCount: number;
+  /** AT-URIs of observation datasets filed under this project. */
+  datasetUris: string[];
   locationUri: string | null;
   /** ISO country code resolved from the project's location record, if any. */
   country: string | null;
@@ -3148,11 +3156,13 @@ function collectionImageMeta(image: RawCollectionImage): { url: string | null; r
 function mapProjectCollection(n: RawProjectCollection): ProjectRecord {
   const banner = collectionImageMeta(n.banner ?? null);
   const avatar = collectionImageMeta(n.avatar ?? null);
-  const bumicertUris = Array.isArray(n.items)
-    ? n.items
-        .map((item) => item?.itemIdentifier?.uri)
-        .filter((uri): uri is string => typeof uri === "string" && uri.includes("/org.hypercerts.claim.activity/"))
+  const itemUris = Array.isArray(n.items)
+    ? n.items.map((item) => item?.itemIdentifier?.uri).filter((uri): uri is string => typeof uri === "string")
     : [];
+  const bumicertUris = itemUris.filter((uri) => uri.includes("/org.hypercerts.claim.activity/"));
+  // A project can also hold observation datasets, filed whole from the
+  // observations list. Their sightings count as the project's evidence.
+  const datasetUris = itemUris.filter((uri) => uri.includes("/app.gainforest.dwc.dataset/"));
 
   return {
     kind: "project",
@@ -3171,6 +3181,7 @@ function mapProjectCollection(n: RawProjectCollection): ProjectRecord {
     creatorAvatarRef: profileAvatarRef(n.certifiedProfileData),
     bumicertUris,
     bumicertCount: bumicertUris.length,
+    datasetUris,
     locationUri: n.location?.uri ?? null,
     country: null,
     scopeTags: [],

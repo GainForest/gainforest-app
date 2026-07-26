@@ -770,6 +770,7 @@
     "saveError": "We couldn't save your change. Please try again.",
     "timelineDescription": "Add, view, and remove the evidence pinned to this project's timeline.",
     "observationsDescription": "Every nature sighting recorded for this project. Anything you add here is filed under it.",
+    "addExistingObservations": "Add existing sightings",
     "sitesTitle": "Project site",
     "sitesDescription": "Choose the mapped area for this project. Link a saved site or create a new one.",
     "currentSiteLabel": "Current site",

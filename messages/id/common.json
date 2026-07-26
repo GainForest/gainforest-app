@@ -770,6 +770,7 @@
     "saveError": "Kami tidak dapat menyimpan perubahan Anda. Silakan coba lagi.",
     "timelineDescription": "Tambahkan, lihat, dan hapus bukti yang disematkan pada lini masa proyek ini.",
     "observationsDescription": "Semua pengamatan alam yang tercatat untuk proyek ini. Apa pun yang Anda tambahkan di sini akan tercatat di bawahnya.",
+    "addExistingObservations": "Tambahkan pengamatan yang ada",
     "sitesTitle": "Situs proyek",
     "sitesDescription": "Pilih area terpetakan untuk proyek ini. Tautkan situs tersimpan atau buat yang baru.",
     "currentSiteLabel": "Situs saat ini",

@@ -63,6 +63,7 @@ function occurrence(overrides: Partial<OccurrenceRecord> = {}): OccurrenceRecord
     eventDate: "2024-05-01",
     habitat: null,
     siteRef: "at://did:example:org/app.certified.location/site-1",
+    projectRef: null,
     datasetRef: "at://did:example:org/app.gainforest.dwc.dataset/dataset-1",
     datasetName: null,
     dynamicProperties: null,

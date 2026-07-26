@@ -358,7 +358,7 @@ export async function BumicertDetailBody({
     ? await fetchProjectObservations(record.did, {
         projectUris: [...matchUris, ...(projectContext.projectUri ? [projectContext.projectUri] : [])],
         siteUris: record.locationUris,
-        datasetUris: overviewTimelineLinks.datasetUris,
+        datasetUris: [...overviewTimelineLinks.datasetUris, ...projectContext.datasetUris],
         observationUris: overviewTimelineLinks.occurrenceUris,
       }).catch(() => null)
     : null;
@@ -566,6 +566,7 @@ export async function ProjectDetailView({
   editHref,
   editLabel,
   timelineMatchUris,
+  projectDatasetUris,
   projectRkey,
   engagementSubjectUri,
 }: {
@@ -578,6 +579,9 @@ export async function ProjectDetailView({
   editHref?: string;
   editLabel?: string;
   timelineMatchUris?: string[];
+  /** Observation datasets filed under the project, whose sightings count as
+   *  the project's evidence. */
+  projectDatasetUris?: string[];
   /** Project (collection) rkey, so deleting removes the project, not the Cert. */
   projectRkey?: string;
   /** When set, render the feed's like + comment bar for this record URI under
@@ -678,7 +682,7 @@ export async function ProjectDetailView({
     fetchProjectObservations(record.did, {
       projectUris: matchUris,
       siteUris: record.locationUris,
-      datasetUris: timelineLinks.datasetUris,
+      datasetUris: [...timelineLinks.datasetUris, ...(projectDatasetUris ?? [])],
       observationUris: timelineLinks.occurrenceUris,
     }).catch(() => null),
   ]);
@@ -1176,9 +1180,9 @@ function ProjectDetailSection({
 /** The project a standalone Cert belongs to, plus that project's galleries.
  *  Both the gallery strip and the sighting scope need the project URI, so they
  *  share one lookup. */
-type BumicertProjectContext = { projectUri: string | null; galleries: ProjectImageGallery[] };
+type BumicertProjectContext = { projectUri: string | null; datasetUris: string[]; galleries: ProjectImageGallery[] };
 
-const EMPTY_PROJECT_CONTEXT: BumicertProjectContext = { projectUri: null, galleries: [] };
+const EMPTY_PROJECT_CONTEXT: BumicertProjectContext = { projectUri: null, datasetUris: [], galleries: [] };
 
 async function fetchBumicertProjectContext(
   did: string,
@@ -1192,6 +1196,7 @@ async function fetchBumicertProjectContext(
   if (!project) return EMPTY_PROJECT_CONTEXT;
   return {
     projectUri: project.atUri,
+    datasetUris: project.datasetUris,
     galleries: attachProjectTitlesToGalleries(
       galleries.filter((gallery) => gallery.projectUri === project.atUri),
       [project],

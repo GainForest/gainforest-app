@@ -17,6 +17,7 @@ import {
   nestDatasetUnderProject,
   type AttachObservationsResult,
 } from "./observation-dataset-mutations";
+import { attachObservationsToProject } from "./observation-project-mutations";
 
 export type ObservationDatasetGroup = {
   datasetUri: string;
@@ -141,6 +142,24 @@ export function GroupObservationsDatasetModal({
           await nestDatasetUnderProject({ projectUri, datasetUri: dataset.uri, datasetCid: dataset.cid }, repoOptions);
         } catch {
           // Non-fatal — observations are grouped even if nesting fails.
+        }
+        try {
+          // Listing the folder on the project is not enough: counts, galleries
+          // and filters all read `projectRef` off each sighting, so stamp it
+          // too or the folder joins the project while its sightings don't.
+          await attachObservationsToProject(
+            {
+              projectUri,
+              occurrences: observations.map((record) => ({
+                rkey: record.rkey,
+                projectRef: record.projectRef,
+                siteRef: record.siteRef,
+              })),
+            },
+            repoOptions,
+          );
+        } catch {
+          // Non-fatal — the grouping itself already succeeded.
         }
       }
 

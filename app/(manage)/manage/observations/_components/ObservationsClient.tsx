@@ -58,6 +58,7 @@ import { AddObservationsModal } from "./AddObservationsModal";
 
 import { GroupObservationsDatasetModal, type ObservationDatasetGroup } from "./GroupObservationsDatasetModal";
 import { deleteObservationDataset } from "./observation-dataset-mutations";
+import { AddToProjectModal, type AddToProjectTarget } from "./AddToProjectModal";
 import { projectScopeUris, resolveObservationFilterUris } from "./observation-scope";
 import { takeAddDataHandoff } from "../../_lib/upload/add-data-handoff";
 import {
@@ -402,6 +403,7 @@ async function buildOptimisticOccurrence(input: {
     eventDate: analysis.eventDate.trim() || null,
     habitat: analysis.habitat.trim() || null,
     siteRef: null,
+    projectRef: null,
     datasetRef: null,
     datasetName: null,
     dynamicProperties: null,
@@ -499,7 +501,7 @@ export function ObservationsClient({
   /** Pins the whole page to one project: only that project's sightings are
    *  listed, and new ones are filed under it. Used by the project's own
    *  Observations page, where the scope is the point of the page. */
-  project?: { uri: string; title: string } | null;
+  project?: { uri: string; title: string; siteUri?: string | null } | null;
 }) {
   const t = useTranslations("upload.observations");
   const router = useRouter();
@@ -522,6 +524,9 @@ export function ObservationsClient({
   const [projectQuery, setProjectFilter] = useQueryState("project", parseAsString.withOptions(QUERY_STATE_OPTIONS));
   // A pinned project wins over the URL filter — the page is that project's.
   const projectFilter = project?.uri ?? projectQuery;
+  // Set when arriving from a project's "Add existing sightings" button, so the
+  // add-to-project picker opens on the project they came from.
+  const [attachToProject] = useQueryState("attachTo", parseAsString.withOptions(QUERY_STATE_OPTIONS));
   const [projectGroups, setProjectGroups] = useState<ObservationProjectGroup[]>([]);
   const [projectContexts, setProjectContexts] = useState<ObservationProjectContext[]>([]);
   const [datasetGroups, setDatasetGroups] = useState<ObservationDatasetGroup[]>([]);
@@ -554,22 +559,21 @@ export function ObservationsClient({
 
   // Group the steward's observations by the project they were collected for so
   // the list can be filtered per project (read straight from projectRef).
-  useEffect(() => {
-    let cancelled = false;
-    (async () => {
-      try {
-        const response = await fetch(manageApiHref("/api/manage/observations/projects", target), { cache: "no-store" });
-        const data = (await response.json()) as { groups?: ObservationProjectGroup[] };
-        if (cancelled || !response.ok || !Array.isArray(data?.groups)) return;
-        setProjectGroups(data.groups);
-      } catch {
-        // Filtering is an enhancement; ignore load failures.
-      }
-    })();
-    return () => {
-      cancelled = true;
-    };
+  // Re-fetched after filing sightings under a project so counts stay fresh.
+  const loadProjectGroups = useCallback(async () => {
+    try {
+      const response = await fetch(manageApiHref("/api/manage/observations/projects", target), { cache: "no-store" });
+      const data = (await response.json()) as { groups?: ObservationProjectGroup[] };
+      if (!response.ok || !Array.isArray(data?.groups)) return;
+      setProjectGroups(data.groups);
+    } catch {
+      // Filtering is an enhancement; ignore load failures.
+    }
   }, [target]);
+
+  useEffect(() => {
+    void loadProjectGroups();
+  }, [loadProjectGroups]);
 
   // The project filter can point at a project that has zero observations yet
   // (for example when arriving from a project card). Load project titles too so
@@ -756,6 +760,7 @@ export function ObservationsClient({
           <AddObservationsModal
             target={target}
             projectRef={activeProject?.projectUri ?? null}
+            projectSiteRef={project?.siteUri ?? null}
             onClose={close}
             onViewObservations={() => {
               close();
@@ -768,6 +773,43 @@ export function ObservationsClient({
     );
     void modal.show();
   }, [activeProject?.projectUri, createPermission.reason, modal, router, target]);
+
+  // File already-published sightings — or a whole folder of them — under a
+  // project. Collecting first and sorting later is how field work actually
+  // goes, so membership has to be editable after the fact.
+  const openAddToProject = useCallback(
+    (subject: AddToProjectTarget) => {
+      if (createPermission.reason) return;
+      modal.pushModal(
+        {
+          id: "add-observations-to-project",
+          dialogWidth: "max-w-lg w-[calc(100%-2rem)]",
+          forceDialog: true,
+          content: (
+            <AddToProjectModal
+              target={target}
+              subject={subject}
+              preselectedProjectUri={project?.uri ?? attachToProject ?? null}
+              onDone={({ projectUri, result }) => {
+                const moved = new Set(result.attached);
+                setSelectedRecords(new Map());
+                setFreshRecords((current) =>
+                  current.map((record) =>
+                    record.kind === "occurrence" && moved.has(record.rkey) ? { ...record, projectRef: projectUri } : record,
+                  ),
+                );
+                void loadProjectGroups();
+                router.refresh();
+              }}
+            />
+          ),
+        },
+        true,
+      );
+      void modal.show();
+    },
+    [attachToProject, createPermission.reason, loadProjectGroups, modal, project?.uri, router, target],
+  );
 
   // Group the currently-selected observations into a dataset (new or existing),
   // then refresh folder counts and the listing.
@@ -907,6 +949,30 @@ export function ObservationsClient({
             >
               {t("selectAll")}
             </Button>
+            {/* Pointless on a project's own page — everything listed there is
+                already filed under it. */}
+            {project ? null : (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() =>
+                  openAddToProject({
+                    kind: "observations",
+                    occurrences: Array.from(selectedRecords.values()).map((record) => ({
+                      rkey: record.rkey,
+                      projectRef: record.projectRef,
+                      siteRef: record.siteRef,
+                    })),
+                  })
+                }
+                disabled={Boolean(createPermission.reason) || isDeletingSelected}
+                title={createPermission.reason ?? undefined}
+                className="rounded-full text-muted-foreground hover:text-foreground"
+              >
+                <FolderKanbanIcon className="size-4" />
+                {t("addToProject.action")}
+              </Button>
+            )}
             <Button
               variant="ghost"
               size="sm"
@@ -950,6 +1016,7 @@ export function ObservationsClient({
           hideToolbarWhenEmpty
           hideOccurrenceFilters
           toolbarAfterSearchRow={
+            <div className="space-y-2">
             <ObservationFilterChipRow
               datasets={visibleDatasetGroups}
               // On a project's own page the scope is fixed, so the project
@@ -967,6 +1034,34 @@ export function ObservationsClient({
                 if (next) void setDatasetFilter(null);
               }}
             />
+            {/* An open folder can be filed under a project whole, rather than
+                selecting its sightings one by one. */}
+            {activeDataset && !project ? (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() =>
+                  openAddToProject({
+                    kind: "dataset",
+                    datasetUri: activeDataset.datasetUri,
+                    datasetCid: null,
+                    name: activeDataset.name,
+                    occurrences: activeDataset.uris.map((uri) => ({
+                      rkey: uri.split("/").pop() ?? "",
+                      projectRef: null,
+                      siteRef: null,
+                    })).filter((occurrence) => occurrence.rkey.length > 0),
+                  })
+                }
+                disabled={Boolean(createPermission.reason)}
+                title={createPermission.reason ?? undefined}
+                className="rounded-full"
+              >
+                <FolderKanbanIcon className="size-3.5" />
+                {t("addToProject.datasetAction", { name: activeDataset.name })}
+              </Button>
+            ) : null}
+            </div>
           }
           enableCompactObservationCards
           defaultCardDensity="compact"

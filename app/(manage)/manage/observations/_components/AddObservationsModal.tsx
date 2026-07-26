@@ -280,6 +280,7 @@ function quickGroupStatus(items: QuickItem[]): ItemStatus {
 export function AddObservationsModal({
   target,
   projectRef,
+  projectSiteRef = null,
   onViewObservations,
   onClose,
   onBack,
@@ -287,6 +288,9 @@ export function AddObservationsModal({
   target: ManageTarget;
   /** When set, each new observation is attached to this project (at-uri). */
   projectRef?: string | null;
+  /** The pinned project's mapped site, so sightings added from a project page
+   *  carry the same site link as ones filed through the project picker. */
+  projectSiteRef?: string | null;
   /** Navigate to the observations list (called after a successful add). */
   onViewObservations: () => void;
   onClose: () => void;
@@ -799,7 +803,7 @@ export function AddObservationsModal({
     // observer picked in the modal (with its site carried along when it has one).
     const selectedProject = projects.find((project) => project.atUri === selectedProjectUri) ?? null;
     const effectiveProjectUri = projectRef ?? selectedProject?.atUri ?? null;
-    const effectiveSiteUri = projectRef ? null : (selectedProject?.locationUri ?? null);
+    const effectiveSiteUri = projectRef ? projectSiteRef : (selectedProject?.locationUri ?? null);
     const tags = fields.tags.map((tag) => tag.trim()).filter(Boolean);
     const occurrence = await createObservationOccurrence({
       basisOfRecord: "HumanObservation",

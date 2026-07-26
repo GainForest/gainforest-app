@@ -770,6 +770,7 @@
     "saveError": "Hatukuweza kuhifadhi mabadiliko yako. Tafadhali jaribu tena.",
     "timelineDescription": "Ongeza, tazama, na uondoe ushahidi uliobandikwa kwenye ratiba ya mradi huu.",
     "observationsDescription": "Kila uonaji wa asili uliorekodiwa kwa mradi huu. Chochote unachoongeza hapa kitahifadhiwa chini yake.",
+    "addExistingObservations": "Ongeza uonaji uliopo",
     "sitesTitle": "Eneo la mradi",
     "sitesDescription": "Chagua eneo lililochorwa kwa mradi huu. Unganisha eneo lililohifadhiwa au tengeneza jipya.",
     "currentSiteLabel": "Eneo la sasa",
