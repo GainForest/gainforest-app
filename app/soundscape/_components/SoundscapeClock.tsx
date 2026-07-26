@@ -53,8 +53,6 @@ const DRAG_SLOP_PX = 4;
 
 type HoverState = {
   point: SoundscapePoint;
-  x: number;
-  y: number;
 };
 
 function angleForMinute(minuteOfDay: number, view: TimeWindow): number {
@@ -162,14 +160,9 @@ type SoundscapeClockProps = {
   onPointClick?: (minuteOfDay: number) => void;
   /** Minute currently playing (highlighted on the dial), if any. */
   playingMinute?: number | null;
-  playHintLabel?: string;
-  stopHintLabel?: string;
-  /** Shown instead of the play hint when `onPointClick` is omitted, so the
-   *  dial explains why a time cannot be played rather than ignoring clicks. */
-  noPlayHintLabel?: string;
-  /** Band names without their frequency ranges, for the tooltip. The ranges
-   *  never change, so the legend carries them and the tooltip stays short. */
-  bandShortLabels?: string[];
+  /** Fired when a click lands on the dial but not on a time — clicking off
+   *  the ring is how you stop whatever that ring started. */
+  onBackgroundClick?: () => void;
   /** Slice of the day the dial is showing; the whole day by default. */
   window: TimeWindow;
   onWindowChange?: (window: TimeWindow) => void;
@@ -340,12 +333,7 @@ export function SoundscapeClock(props: SoundscapeClockProps) {
       setHover(null);
       return;
     }
-    const marker = polar(best.minuteOfDay, OUTER_RADIUS, view);
-    setHover({
-      point: best,
-      x: (marker.x / VIEW_SIZE) * pointer.rect.width,
-      y: (marker.y / VIEW_SIZE) * pointer.rect.height,
-    });
+    setHover({ point: best });
   };
 
   const endDrag = (event: React.PointerEvent<HTMLDivElement>) => {
@@ -357,7 +345,10 @@ export function SoundscapeClock(props: SoundscapeClockProps) {
       event.currentTarget.releasePointerCapture(event.pointerId);
     }
     if (!drag?.moved) {
-      if (hover && onPointClick) onPointClick(hover.point.minuteOfDay);
+      /* On a time: play it (or nothing, when the dial is read-only). Off the
+         ring: a click on empty space stops what is playing. */
+      if (hover) onPointClick?.(hover.point.minuteOfDay);
+      else props.onBackgroundClick?.();
       return;
     }
     if (!swept || !onWindowChange) return;
@@ -370,10 +361,6 @@ export function SoundscapeClock(props: SoundscapeClockProps) {
   };
 
   const zoomed = !isFullDay(view);
-
-  /* Tooltip bars are scaled to the loudest visible band at the hovered point:
-     the values are arbitrary units, so only the ranking between them reads. */
-  const hoverPeak = hover ? Math.max(0, ...hover.point.pmn.filter((_, band) => visibleBands[band])) : 0;
 
   return (
     /* The pointer handlers live on the wrapper, not the <svg>: the tooltip is
@@ -590,6 +577,21 @@ export function SoundscapeClock(props: SoundscapeClockProps) {
           />
         ) : null}
 
+        {/* The hovered time, printed in the middle of the dial — the same
+            readout a sweep uses for its range. Hover and sweep never coincide:
+            starting a drag clears the hover. */}
+        {hover ? (
+          <text
+            x={CENTER}
+            y={CENTER + 5}
+            fontSize={15}
+            textAnchor="middle"
+            className="fill-foreground tabular-nums"
+          >
+            {formatMinuteOfDay(hover.point.minuteOfDay)}
+          </text>
+        ) : null}
+
         {zoomed && visiblePoints.length === 0 && props.emptyLabel ? (
           <text x={CENTER} y={CENTER + 4} fontSize={14} textAnchor="middle" className="fill-muted-foreground">
             {props.emptyLabel}
@@ -605,48 +607,6 @@ export function SoundscapeClock(props: SoundscapeClockProps) {
           y={VIEW_SIZE - 168}
         />
       </svg>
-
-      {hover ? (
-        <div
-          // `data-chart-tooltip` is what keeps this out of the pointer's way
-          // (see globals.css): a tooltip that takes the pointer would cancel
-          // the very hover it is describing, and swallow presses on the dial.
-          data-chart-tooltip
-          className="absolute z-10 min-w-56 -translate-x-1/2 rounded-lg border bg-popover px-3 py-2 text-xs shadow-md"
-          style={{ left: hover.x, top: Math.max(0, hover.y - 8), transform: "translate(-50%, -100%)" }}
-        >
-          <p className="font-semibold tabular-nums text-foreground">{formatMinuteOfDay(hover.point.minuteOfDay)}</p>
-          {onPointClick ? (
-            <p className="mt-0.5 text-[11px] text-primary">
-              {playingMinute === hover.point.minuteOfDay ? props.stopHintLabel : props.playHintLabel}
-            </p>
-          ) : props.noPlayHintLabel ? (
-            <p className="mt-0.5 text-[11px] text-muted-foreground">{props.noPlayHintLabel}</p>
-          ) : null}
-          <ul className="mt-1.5 space-y-1">
-            {hover.point.pmn.map((value, band) => {
-              if (!visibleBands[band]) return null;
-              const fill = hoverPeak > 0 ? Math.max(0, Math.min(100, (value / hoverPeak) * 100)) : 0;
-              return (
-                <li key={band} className="flex items-center gap-2">
-                  <span className="flex-1 truncate text-muted-foreground">
-                    {(props.bandShortLabels ?? props.bandLabels)[band]}
-                  </span>
-                  <span aria-hidden className="h-1.5 w-10 shrink-0 overflow-hidden rounded-full bg-muted">
-                    <span
-                      className="block h-full rounded-full"
-                      style={{ width: `${fill}%`, backgroundColor: BAND_COLORS[band] }}
-                    />
-                  </span>
-                  <span className="w-10 shrink-0 text-right tabular-nums text-muted-foreground/80">
-                    {formatValue(value)}
-                  </span>
-                </li>
-              );
-            })}
-          </ul>
-        </div>
-      ) : null}
     </div>
   );
 }
