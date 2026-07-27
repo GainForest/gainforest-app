@@ -10,6 +10,7 @@ import {
   CheckCircle2Icon,
   ChevronLeftIcon,
   FolderKanbanIcon,
+  FolderMinusIcon,
   FolderPlusIcon,
   ImagePlusIcon,
   Layers2Icon,
@@ -57,7 +58,7 @@ import { LocationPickerModal, LocationPickerModalId } from "./LocationPickerModa
 import { AddObservationsModal } from "./AddObservationsModal";
 
 import { GroupObservationsDatasetModal, type ObservationDatasetGroup } from "./GroupObservationsDatasetModal";
-import { deleteObservationDataset } from "./observation-dataset-mutations";
+import { deleteObservationDataset, removeObservationsFromDataset } from "./observation-dataset-mutations";
 import { AddToProjectModal, type AddToProjectTarget } from "./AddToProjectModal";
 import { projectScopeUris, resolveObservationFilterUris } from "./observation-scope";
 import { takeAddDataHandoff } from "../../_lib/upload/add-data-handoff";
@@ -811,6 +812,49 @@ export function ObservationsClient({
     [attachToProject, createPermission.reason, loadProjectGroups, modal, project?.uri, router, target],
   );
 
+  // Take the selected sightings out of their folder. They survive as loose
+  // sightings — the counterpart to filing them, and the reason folder
+  // membership is now a choice rather than a one-way door.
+  const openRemoveFromDataset = useCallback(() => {
+    const records = Array.from(selectedRecords.values()).filter((record) => record.datasetRef);
+    if (records.length === 0 || createPermission.reason) return;
+    modal.pushModal(
+      {
+        id: "remove-observations-dataset",
+        content: (
+          <ManageConfirmModal
+            title={t("dataset.removeTitle", { count: records.length })}
+            description={t("dataset.removeDescription")}
+            confirmLabel={t("dataset.removeConfirm")}
+            cancelLabel={t("cancel")}
+            onConfirm={async () => {
+              await modal.hide();
+              modal.popModal();
+              const repoOptions = target.kind === "group" ? { repo: target.did } : undefined;
+              const result = await removeObservationsFromDataset(
+                { occurrences: records.map((record) => ({ rkey: record.rkey, datasetRef: record.datasetRef })) },
+                repoOptions,
+              );
+              const loose = new Set(result.removed);
+              setSelectedRecords(new Map());
+              setFreshRecords((current) =>
+                current.map((record) =>
+                  record.kind === "occurrence" && loose.has(record.rkey)
+                    ? { ...record, datasetRef: null, datasetName: null }
+                    : record,
+                ),
+              );
+              void loadDatasetGroups();
+              router.refresh();
+            }}
+          />
+        ),
+      },
+      true,
+    );
+    void modal.show();
+  }, [createPermission.reason, loadDatasetGroups, modal, router, selectedRecords, t, target]);
+
   // Group the currently-selected observations into a dataset (new or existing),
   // then refresh folder counts and the listing.
   const openGroupIntoDataset = useCallback(() => {
@@ -984,6 +1028,19 @@ export function ObservationsClient({
               <FolderPlusIcon className="size-4" />
               {t("groupIntoDataset")}
             </Button>
+            {Array.from(selectedRecords.values()).some((record) => record.datasetRef) ? (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={openRemoveFromDataset}
+                disabled={Boolean(createPermission.reason) || isDeletingSelected}
+                title={createPermission.reason ?? undefined}
+                className="rounded-full text-muted-foreground hover:text-foreground"
+              >
+                <FolderMinusIcon className="size-4" />
+                {t("dataset.removeAction")}
+              </Button>
+            ) : null}
             <Button
               variant="destructive"
               size="sm"

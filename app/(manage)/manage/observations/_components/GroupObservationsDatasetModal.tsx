@@ -76,10 +76,17 @@ export function GroupObservationsDatasetModal({
   const [isPending, setIsPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Only orphan observations can join a dataset; ones already grouped are shown
-  // as a hint so the count the steward sees lines up with what will move.
-  const alreadyGrouped = useMemo(() => observations.filter((record) => Boolean(record.datasetRef)), [observations]);
-  const movable = observations.length - alreadyGrouped.length;
+  // Sightings already in another folder are moved, not skipped — the hint says
+  // how many will change folder so the count lines up with what happens.
+  const fromOtherFolder = useMemo(
+    () => observations.filter((record) => Boolean(record.datasetRef) && record.datasetRef !== selectedUri),
+    [observations, selectedUri],
+  );
+  const alreadyHere = useMemo(
+    () => observations.filter((record) => Boolean(selectedUri) && record.datasetRef === selectedUri),
+    [observations, selectedUri],
+  );
+  const movable = observations.length - alreadyHere.length;
 
   const repoOptions = target.kind === "group" ? { repo: target.did } : undefined;
   const filteredDatasets = useMemo(() => {
@@ -100,7 +107,7 @@ export function GroupObservationsDatasetModal({
 
   const handleConfirm = async () => {
     if (movable === 0) {
-      setError(t("allAlreadyGrouped"));
+      setError(t("allAlreadyHere"));
       return;
     }
     if (mode === "new" && name.trim().length === 0) {
@@ -328,8 +335,11 @@ export function GroupObservationsDatasetModal({
           <p className="text-xs text-muted-foreground">{t("addsToProject", { project: projectName })}</p>
         ) : null}
 
-        {alreadyGrouped.length > 0 ? (
-          <p className="text-xs text-muted-foreground">{t("someAlreadyGrouped", { count: alreadyGrouped.length })}</p>
+        {fromOtherFolder.length > 0 ? (
+          <p className="text-xs text-muted-foreground">{t("someWillMove", { count: fromOtherFolder.length })}</p>
+        ) : null}
+        {alreadyHere.length > 0 ? (
+          <p className="text-xs text-muted-foreground">{t("someAlreadyHere", { count: alreadyHere.length })}</p>
         ) : null}
 
         {error ? <p className="text-sm text-destructive">{error}</p> : null}

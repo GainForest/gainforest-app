@@ -70,17 +70,44 @@ export type AttachInputOccurrence = { rkey: string; datasetRef: string | null };
 
 export type AttachObservationsResult = {
   attached: string[];
+  /** Already in the target folder — nothing to do. */
   skipped: Array<{ rkey: string; reason: "already" }>;
+  /** Rkeys that came out of a different folder, keyed by the folder they left. */
+  movedFrom: Record<string, string[]>;
   errors: Array<{ rkey: string; error: string }>;
 };
 
+function datasetRefOf(record: Record<string, unknown>): string | null {
+  return typeof record.datasetRef === "string" && record.datasetRef.trim().length > 0 ? record.datasetRef : null;
+}
+
+/** Apply the count deltas a move implies: one folder loses records, another gains
+ *  them. Best-effort — folder views derive their counts from the occurrences
+ *  themselves, so a stale `recordCount` is cosmetic. */
+async function applyDatasetCountDeltas(
+  deltas: Map<string, number>,
+  options?: RepoOptions,
+): Promise<void> {
+  for (const [datasetUri, delta] of deltas) {
+    if (delta === 0) continue;
+    const rkey = datasetUri.split("/").pop();
+    if (!rkey) continue;
+    await incrementObservationDatasetCount(rkey, delta, options).catch(() => {});
+  }
+}
+
 /**
- * Move observations into a dataset by stamping `datasetRef` (the dataset
- * AT-URI) + `datasetName` onto each occurrence (a read-modify-write
- * that preserves everything else, including photo evidence). Observations that
- * already live in a dataset are left alone so membership never silently moves;
- * detach them first to re-group. Never touches `dynamicProperties`, so an
- * observation is never mislabelled as a measured tree.
+ * Put observations into a dataset by stamping `datasetRef` (the dataset AT-URI)
+ * + `datasetName` onto each occurrence — a read-modify-write that preserves
+ * everything else, including photo evidence and project membership. Never
+ * touches `dynamicProperties`, so an observation is never mislabelled as a
+ * measured tree.
+ *
+ * An observation lives in one folder (`datasetRef` is a single at-uri, matching
+ * Darwin Core, where a dataset is the batch a record was derived from). Filing
+ * one that already sits in another folder therefore MOVES it: the old folder's
+ * `recordCount` goes down as the new one's goes up. Ones already in the target
+ * are left alone.
  */
 export async function attachObservationsToDataset(
   input: {
@@ -92,15 +119,25 @@ export async function attachObservationsToDataset(
 ): Promise<AttachObservationsResult> {
   const attached: string[] = [];
   const skipped: Array<{ rkey: string; reason: "already" }> = [];
+  const movedFrom: Record<string, string[]> = {};
   const errors: Array<{ rkey: string; error: string }> = [];
+  const deltas = new Map<string, number>();
+  const bump = (uri: string, by: number) => deltas.set(uri, (deltas.get(uri) ?? 0) + by);
 
   for (const occurrence of input.occurrences) {
-    if (occurrence.datasetRef) {
+    if (occurrence.datasetRef === input.datasetUri) {
       skipped.push({ rkey: occurrence.rkey, reason: "already" });
       continue;
     }
     try {
       const current = await getRecord(OCCURRENCE_COLLECTION, occurrence.rkey, options);
+      // Read the folder off the record, not the caller's copy: another tab may
+      // have moved it since the list was loaded.
+      const previous = datasetRefOf(current.record);
+      if (previous === input.datasetUri) {
+        skipped.push({ rkey: occurrence.rkey, reason: "already" });
+        continue;
+      }
       const nextRecord: Record<string, unknown> = {
         ...current.record,
         $type: typeof current.record.$type === "string" ? current.record.$type : OCCURRENCE_COLLECTION,
@@ -112,6 +149,10 @@ export async function attachObservationsToDataset(
         ...(options?.repo ? { repo: options.repo } : {}),
       });
       attached.push(occurrence.rkey);
+      if (previous) {
+        movedFrom[previous] = [...(movedFrom[previous] ?? []), occurrence.rkey];
+        bump(previous, -1);
+      }
     } catch (error) {
       errors.push({
         rkey: occurrence.rkey,
@@ -120,16 +161,63 @@ export async function attachObservationsToDataset(
     }
   }
 
-  if (attached.length > 0) {
-    const datasetRkey = input.datasetUri.split("/").pop();
-    if (datasetRkey) {
-      await incrementObservationDatasetCount(datasetRkey, attached.length, options).catch(() => {
-        // Non-fatal: the folder view derives counts from occurrence refs.
+  if (attached.length > 0) bump(input.datasetUri, attached.length);
+  await applyDatasetCountDeltas(deltas, options);
+
+  return { attached, skipped, movedFrom, errors };
+}
+
+export type RemoveFromDatasetResult = {
+  removed: string[];
+  /** Was not in a folder to begin with. */
+  skipped: string[];
+  errors: Array<{ rkey: string; error: string }>;
+};
+
+/**
+ * Take observations out of their folder without deleting anything: `datasetRef`
+ * and `datasetName` are cleared and the folder's `recordCount` goes down. The
+ * observations survive as loose sightings — the counterpart to filing them.
+ */
+export async function removeObservationsFromDataset(
+  input: { occurrences: AttachInputOccurrence[] },
+  options?: RepoOptions,
+): Promise<RemoveFromDatasetResult> {
+  const removed: string[] = [];
+  const skipped: string[] = [];
+  const errors: Array<{ rkey: string; error: string }> = [];
+  const deltas = new Map<string, number>();
+
+  for (const occurrence of input.occurrences) {
+    try {
+      const current = await getRecord(OCCURRENCE_COLLECTION, occurrence.rkey, options);
+      const previous = datasetRefOf(current.record);
+      if (!previous) {
+        skipped.push(occurrence.rkey);
+        continue;
+      }
+      const nextRecord: Record<string, unknown> = {
+        ...current.record,
+        $type: typeof current.record.$type === "string" ? current.record.$type : OCCURRENCE_COLLECTION,
+      };
+      delete nextRecord.datasetRef;
+      delete nextRecord.datasetName;
+      await putRecord(OCCURRENCE_COLLECTION, occurrence.rkey, nextRecord, {
+        swapRecord: current.cid,
+        ...(options?.repo ? { repo: options.repo } : {}),
+      });
+      removed.push(occurrence.rkey);
+      deltas.set(previous, (deltas.get(previous) ?? 0) - 1);
+    } catch (error) {
+      errors.push({
+        rkey: occurrence.rkey,
+        error: error instanceof Error ? error.message : "This observation could not be taken out of its folder.",
       });
     }
   }
 
-  return { attached, skipped, errors };
+  await applyDatasetCountDeltas(deltas, options);
+  return { removed, skipped, errors };
 }
 
 export type UnnestDatasetResult = {
