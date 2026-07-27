@@ -47,6 +47,7 @@ import { buildCommentTree, type CommentTreeNode } from "../_lib/feed-engagement"
 import { formatCompact, formatCompactUsd, formatRelative } from "../_lib/format";
 import { FeedAudioClip } from "./FeedAudioClip";
 import { FeedImageLightbox } from "./FeedImageLightbox";
+import { observationBatchGridLayout, observationBatchTileLayout } from "./feed-layout";
 import { ResolvedAvatar } from "./ResolvedAvatar";
 import { AccountHoverCard } from "@/app/_components/AccountHoverCard";
 import { QuickLikeButton } from "@/app/_components/QuickLike";
@@ -1191,27 +1192,36 @@ function ObservationBatchCard({
               like / comment that sighting; the final "+N" tile opens the full
               set instead. */}
           {thumbs.length > 0 ? (
-            <div className="mt-2 grid grid-cols-4 gap-1.5 sm:gap-2">
+            <div
+              className={cn(
+                "mt-2 grid aspect-[16/9] gap-1.5 overflow-hidden rounded-xl sm:gap-2",
+                observationBatchGridLayout(thumbs.length),
+              )}
+            >
               {thumbs.map((it, idx) => {
                 const isOverlay = idx === thumbs.length - 1 && remaining > 0;
+                const tileClassName = cn("relative min-h-0", observationBatchTileLayout(thumbs.length, idx));
                 if (isOverlay) {
                   return (
                     <Link
                       key={it.id}
                       href={href}
-                      className="block rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50"
+                      className={cn(
+                        tileClassName,
+                        "block focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary/50",
+                      )}
                     >
                       <ObservationThumb item={it} overlay={`+${formatCompact(remaining)}`} />
                     </Link>
                   );
                 }
                 return (
-                  <div key={it.id} className="relative">
+                  <div key={it.id} className={tileClassName}>
                     <button
                       type="button"
                       onClick={() => onOpenImage(it)}
                       aria-label={t("actions.openImage")}
-                      className="block w-full cursor-zoom-in rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50"
+                      className="block h-full w-full cursor-zoom-in focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary/50"
                     >
                       <ObservationThumb item={it} overlay={null} />
                     </button>
@@ -1444,8 +1454,8 @@ function BatchCommentNode({
   );
 }
 
-/** Square thumbnail for one sighting in a batch montage, with an optional
- *  "+N" overlay on the final tile to signal the rest of the run. */
+/** Cropped thumbnail for one sighting in the fixed-height batch montage, with
+ *  an optional "+N" overlay on the final tile to signal the rest of the run. */
 function ObservationThumb({ item, overlay }: { item: ActivityFeedItem; overlay: string | null }) {
   const [resolved, setResolved] = useState<string | null>(null);
 
@@ -1464,8 +1474,8 @@ function ObservationThumb({ item, overlay }: { item: ActivityFeedItem; overlay: 
   const src = item.imageUrl ?? resolved;
 
   return (
-    <span className="relative block aspect-square overflow-hidden rounded-lg border border-border/60 bg-muted">
-      {src ? <Image src={src} alt="" fill unoptimized sizes="140px" className="object-cover" /> : null}
+    <span className="relative block h-full min-h-0 w-full overflow-hidden rounded-lg border border-border/60 bg-muted">
+      {src ? <Image src={src} alt="" fill unoptimized sizes="(max-width: 672px) 50vw, 304px" className="object-cover" /> : null}
       {overlay ? (
         <span className="absolute inset-0 grid place-items-center bg-black/55 text-sm font-semibold text-white">
           {overlay}

@@ -49,7 +49,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { ModalContent, ModalHeader, ModalTitle, ModalDescription } from "@/components/ui/modal/modal";
-import { useModal } from "@/components/ui/modal/context";
+import { useIsDrawer, useModal } from "@/components/ui/modal/context";
 import { cn } from "@/lib/utils";
 import { manageApiHref, type ManageTarget } from "@/lib/links";
 import { canCreateRecord } from "../../_lib/cgs-permissions";
@@ -296,6 +296,7 @@ export function AddObservationsModal({
 }) {
   const t = useTranslations("upload.observations.quickAdd");
   const modal = useModal();
+  const isDrawer = useIsDrawer();
   // Switches the modal between the photo quick-add flow and the CSV importer
   // reachable from the "More ways" menu.
   const [mode, setMode] = useState<"photos" | "csv">("photos");
@@ -935,7 +936,7 @@ export function AddObservationsModal({
   // Success screen — shown once at least one observation has been added.
   if (addedCount !== null && items.length === 0) {
     return (
-      <ModalContent className="space-y-5" dismissible={false}>
+      <ModalContent className="space-y-5">
         <div className="flex flex-col items-center gap-3 py-4 text-center">
           <span className="grid size-14 place-items-center rounded-2xl bg-primary/10 text-primary ring-1 ring-primary/15">
             <CheckCircle2Icon className="size-7" />
@@ -959,7 +960,11 @@ export function AddObservationsModal({
   const showEmptyState = items.length === 0;
 
   return (
-    <ModalContent className="space-y-4" dismissible={false}>
+    <ModalContent
+      className="space-y-4"
+      dismissible={!isPreparing && !isSubmitting}
+      showCloseButton={false}
+    >
       <ModalHeader>
         <div className="flex items-start justify-between gap-3">
           <div className="flex min-w-0 items-center gap-2">
@@ -1014,6 +1019,7 @@ export function AddObservationsModal({
               onClick={onClose}
               aria-label={t("close")}
               className="-mr-1 -mt-1 rounded-full"
+              disabled={isPreparing || isSubmitting}
             >
               <XIcon className="size-4" />
             </Button>
@@ -1050,11 +1056,10 @@ export function AddObservationsModal({
         className={cn(
           "rounded-2xl border border-dashed transition-colors",
           isDragging ? "border-primary bg-primary/10" : "border-primary/30",
-          // Below the modal system's 32rem drawer breakpoint the dialog runs
-          // fullscreen (fullscreenOnMobile), so let the empty drop zone grow
-          // into the freed-up height instead of leaving a dead lower half.
           showEmptyState
-            ? "px-6 py-10 max-[32rem]:grid max-[32rem]:min-h-[55dvh] max-[32rem]:place-items-center"
+            ? isDrawer
+              ? "px-4 py-8"
+              : "px-6 py-10"
             : "p-3",
         )}
       >
@@ -1099,7 +1104,7 @@ export function AddObservationsModal({
           // Phones scroll the dialog as one surface (nested scrollers trap the
           // touch gesture); larger screens keep the list in its own scroll area
           // so the footer stays put.
-          <div className="space-y-3 sm:max-h-[52vh] sm:overflow-y-auto sm:pr-1">
+          <div className={cn("space-y-3", !isDrawer && "max-h-[52vh] overflow-y-auto pr-1")}>
             {prepareProgress ? (
               <QuickProgress
                 label={t("preparingProgress", { done: prepareProgress.done, total: prepareProgress.total })}
@@ -1283,11 +1288,14 @@ export function AddObservationsModal({
       ) : null}
 
       {!showEmptyState ? (
-        // On phones the whole dialog scrolls, so pin the submit bar to the
-        // bottom edge (full-bleed over the dialog's p-6) — the primary action
-        // stays reachable however long the card list grows. From sm up the list
-        // scrolls internally instead and the footer sits statically below it.
-        <div className="sticky bottom-0 z-10 -mx-6 -mb-6 space-y-3 border-t border-border bg-background px-6 pb-5 pt-3 sm:static sm:mx-0 sm:mb-0 sm:bg-transparent sm:px-0 sm:pb-0">
+        // The drawer owns phone scrolling, so its action bar stays pinned to
+        // the bottom of that one scroll surface. Dialogs keep a static footer.
+        <div
+          className={cn(
+            "space-y-3 border-t border-border pt-3",
+            isDrawer && "sticky bottom-0 z-10 -mx-4 -mb-4 bg-background px-4 pb-4",
+          )}
+        >
           {isSubmitting && uploadProgress ? (
             <QuickProgress
               label={t("uploadingProgress", { done: uploadProgress.done, total: uploadProgress.total })}

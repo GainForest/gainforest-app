@@ -231,7 +231,7 @@ export function ObservationCsvUpload({
   // ── Done screen ────────────────────────────────────────────────────────────
   if (phase === "done") {
     return (
-      <ModalContent className="space-y-5" dismissible={false}>
+      <ModalContent className="space-y-5">
         <div className="flex flex-col items-center gap-3 py-4 text-center">
           <span className="grid size-14 place-items-center rounded-2xl bg-primary/10 text-primary ring-1 ring-primary/15">
             <CheckCircle2Icon className="size-7" />
@@ -255,7 +255,7 @@ export function ObservationCsvUpload({
   const uploading = phase === "uploading";
 
   return (
-    <ModalContent className="space-y-4" dismissible={false}>
+    <ModalContent className="space-y-4" dismissible={!uploading} showCloseButton={false}>
       <ModalHeader>
         <div className="flex items-start justify-between gap-3">
           <div className="flex items-start gap-2">

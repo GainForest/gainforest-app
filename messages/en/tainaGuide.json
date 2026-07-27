@@ -116,7 +116,7 @@
       "steps": {
         "start": {
           "title": "Start a new project",
-          "body": "Click Create a Project in the sidebar, or Add project on your My Projects page."
+          "body": "Open Projects, then choose Add project on your My Projects page."
         },
         "name": {
           "title": "Name it",

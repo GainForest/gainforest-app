@@ -41,9 +41,9 @@ export function BioblitzObservationsMap({ round }: { round: BioblitzRound }) {
   const timeBounds = useMemo(() => ({ start: round.start, end: round.end }), [round.start, round.end]);
 
   return (
-    <section>
+    <section className="min-w-0 max-w-full">
       <div aria-hidden className="mx-auto h-px w-full max-w-6xl bg-border/60" />
-      <div className="mx-auto w-full max-w-6xl px-4 py-10 sm:px-6">
+      <div className="mx-auto min-w-0 w-full max-w-6xl px-3 py-10 sm:px-5 lg:px-8">
         <div className="flex items-start gap-2">
           <span className="mt-1 flex size-5 items-center justify-center text-primary [&_svg]:size-4">
             <MapPinnedIcon aria-hidden />

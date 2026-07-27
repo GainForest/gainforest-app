@@ -494,6 +494,10 @@
     "wallet": "Billetera",
     "more": "Más"
   },
+  "accountHero": {
+    "showProfile": "Mostrar perfil",
+    "hideProfile": "Ocultar perfil"
+  },
   "equipment": {
     "metadataTitle": "Equipos — {name}",
     "personalIntro": "Equipos de campo registrados en este perfil — cada unidad con su portador actual, sitio y estado.",

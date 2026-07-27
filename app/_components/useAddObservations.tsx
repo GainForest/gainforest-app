@@ -98,11 +98,10 @@ export function useAddObservations(
       target,
       observationsHref: manageHref({ basePath: groupManageBasePath(target.identifier) }, "observations"),
     });
-    // Fullscreen on phones: the quick-add flow has photo cards, species
-    // pickers and a date picker — a floating card at calc(100%-2rem) was too
-    // cramped. On >=32rem it stays a centered max-w-2xl dialog.
+    // Phones use the shared swipeable bottom sheet; larger screens keep a
+    // task-sized dialog with enough room for photo review and species fields.
     modal.pushModal(
-      { id: modalId, dialogWidth: "max-w-2xl w-[calc(100%-2rem)]", fullscreenOnMobile: true },
+      { id: modalId, dialogWidth: "max-w-2xl" },
       true,
     );
     void modal.show();

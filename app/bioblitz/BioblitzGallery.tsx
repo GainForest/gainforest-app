@@ -64,9 +64,9 @@ export function BioblitzGallery({ round }: { round: BioblitzRound }) {
   const hasRecords = phase === "ready" && records.length > 0;
 
   return (
-    <section>
+    <section className="min-w-0 max-w-full">
       <div aria-hidden className="mx-auto h-px w-full max-w-6xl bg-border/60" />
-      <div className="mx-auto w-full max-w-6xl px-4 py-10 sm:px-6">
+      <div className="mx-auto min-w-0 w-full max-w-6xl px-3 py-10 sm:px-5 lg:px-8">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div className="min-w-0">
             <div className="flex flex-wrap items-center gap-2">
@@ -89,7 +89,7 @@ export function BioblitzGallery({ round }: { round: BioblitzRound }) {
           {hasRecords ? <ViewToggle view={view} onView={setView} t={t} /> : null}
         </div>
 
-        <div className="mt-5">
+        <div className="mt-5 min-w-0 max-w-full">
           {phase === "error" ? (
             <div className="rounded-2xl bg-foreground/5 px-6 py-14 text-center text-sm text-muted-foreground">
               {t("error")}
@@ -113,7 +113,7 @@ export function BioblitzGallery({ round }: { round: BioblitzRound }) {
               </ul>
             </QuickLikeProvider>
           ) : (
-            <div className="bioblitz-marquee relative overflow-hidden">
+            <div className="bioblitz-marquee relative min-w-0 w-full max-w-full overflow-hidden">
               <MarqueeRow items={rowA} dir="left" animate={animate} onOpen={setDrawer} t={t} />
               <div className="h-3" aria-hidden />
               <MarqueeRow items={rowB} dir="right" animate={animate} onOpen={setDrawer} t={t} />
@@ -182,7 +182,7 @@ function MarqueeRow({
     ? `bioblitz-marquee-track ${dir === "left" ? "bioblitz-marquee-left" : "bioblitz-marquee-right"} inline-flex h-36 gap-3`
     : "flex h-36 flex-wrap justify-center gap-3";
   return (
-    <div className="h-36 overflow-hidden">
+    <div className="h-36 min-w-0 w-full max-w-full overflow-hidden">
       <div className={trackClass}>
         {sequence.map((record, index) => (
           <GalleryCard key={`${record.id}-${index}`} record={record} onOpen={onOpen} t={t} />

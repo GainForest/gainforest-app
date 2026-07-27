@@ -693,9 +693,9 @@ export function ObservationsClient({
     modal.pushModal(
       {
         id: "add-observations",
-        dialogWidth: "max-w-2xl w-[calc(100%-2rem)]",
-        // Full page on phones; centered max-w-2xl dialog on >=32rem.
-        fullscreenOnMobile: true,
+        // Phones inherit the shared bottom sheet; larger screens use the
+        // wider review dialog needed by observation cards.
+        dialogWidth: "max-w-2xl",
         content: (
           <AddObservationsModal
             target={target}

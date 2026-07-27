@@ -12,6 +12,7 @@ import { localizedAlternates } from "@/app/_lib/seo-metadata";
 import { getRequestOrigin } from "@/app/_lib/request-origin";
 import { AccountChrome } from "../_components/AccountChrome";
 import { AccountHero } from "../_components/AccountHero";
+import { AccountHeroDisclosure } from "../_components/AccountHeroDisclosure";
 import { AccountTabBar } from "../_components/AccountTabBar";
 import { StewardTools } from "../_components/StewardTools";
 import { loadAccountMemberships } from "../_components/AccountTabContent";
@@ -187,19 +188,21 @@ export default async function AccountLayout({
                 initialAwarded={awardedManualRecognition}
               />
             ) : null}
-            {canEditProfile && target ? (
-              <EditableAccountHeader
-                account={account}
-                writeRepoDid={target.kind === "group" ? target.did : undefined}
-                groupRole={groupRole}
-                settingsHref={accountSettingsPath(account.urlIdentifier)}
-                viewPublicHref={null}
-                showAbout={false}
-                memberships={memberships}
-              />
-            ) : (
-              <AccountHero account={account} memberships={memberships} />
-            )}
+            <AccountHeroDisclosure account={account}>
+              {canEditProfile && target ? (
+                <EditableAccountHeader
+                  account={account}
+                  writeRepoDid={target.kind === "group" ? target.did : undefined}
+                  groupRole={groupRole}
+                  settingsHref={accountSettingsPath(account.urlIdentifier)}
+                  viewPublicHref={null}
+                  showAbout={false}
+                  memberships={memberships}
+                />
+              ) : (
+                <AccountHero account={account} memberships={memberships} />
+              )}
+            </AccountHeroDisclosure>
             <AccountTabBar
               did={account.urlIdentifier}
               accountKind={account.kind}

@@ -494,6 +494,10 @@
     "wallet": "Wallet",
     "more": "More"
   },
+  "accountHero": {
+    "showProfile": "Show profile",
+    "hideProfile": "Hide profile"
+  },
   "equipment": {
     "metadataTitle": "Equipment — {name}",
     "personalIntro": "Field equipment registered on this profile — each unit with its current holder, site and status.",
