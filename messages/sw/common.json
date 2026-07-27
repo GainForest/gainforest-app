@@ -3336,10 +3336,10 @@
         },
         "workScope": {
           "label": "Upeo wa kazi",
-          "title": "`workScope`: maandishi yenye koma au usemi wa CEL",
-          "gainforest": "Kihariri cha miradi huandika `#workScopeString` ya zamani; fomu ya Cert inayojitegemea huandika kitu cha CEL. Miundo yote miwili ipo hai ndani ya programu ile ile.",
+          "title": "`workScope` — usemi wa CEL (mifuatano ya koma ya zamani bado ipo)",
+          "gainforest": "Kihariri cha miradi na fomu ya Cert vyote huandika kitu cha CEL. Rekodi zilizochapishwa kabla ya kuunganishwa huku bado zina `#workScopeString` ya zamani, na baadhi zina lebo zilizotafsiriwa (\"Reforestasi\") badala ya funguo thabiti.",
           "maearth": "Daima kitu cha CEL, na daima kigezo kile kile chembamba. Hakuna kikokotoo cha CEL nyuma yake: usemi huo ni muundo wa kupitisha data unaosimba orodha ya lebo.",
-          "advice": "Andika CEL kwa `scope.hasAny([...])` na uweke viungo vya lebo ndani ya `usedTags`. Unaposoma, chukua `scope` ikiwepo; vinginevyo toa maneno yaliyo ndani ya alama za nukuu kutoka `expression` — njia hiyo mbadala hufanya kazi kwa umbo lolote la kigezo."
+          "advice": "Andika CEL kwa `scope.hasAny([...])` na weka marejeleo ya lebo ndani ya `usedTags`. Unaposoma, tumia `usedTags` ikiwa ipo; la sivyo, chukua maandishi yaliyo kwenye nukuu katika `expression`; la sivyo, gawa `scope` kwa koma — na rudisha lebo zilizotafsiriwa kuwa funguo, vinginevyo rekodi za zamani zitapoteza upeo wake."
         },
         "tags": {
           "label": "Uhifadhi wa lebo",

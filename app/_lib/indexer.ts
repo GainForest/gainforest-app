@@ -20,7 +20,7 @@ import { countryCodeFromCertifiedLocation, fetchCertifiedLocationCountryCode, ty
 import { blobUrl, resolveBlobUrl, resolvePdsHost, normaliseRef } from "./pds";
 import { fetchEndorserRecords } from "./endorsers";
 import { asNumber, formatNumber, formatDate, formatDateTime, formatCountry } from "./format";
-import { normalizeKnownWorkScopeKey } from "./work-scope-labels";
+import { workScopeTermToKey } from "./work-scope-cel";
 import { hasMaEarthDonationUrl } from "./maearth-donation-data";
 
 // ── Generic GraphQL helper ────────────────────────────────────────────────
@@ -1592,7 +1592,7 @@ const SENTENCE_SCOPE_TAG_RE = /[.!?:]/;
 function isTagLikeScopeValue(tag: string): boolean {
   const trimmed = tag.trim();
   if (!trimmed) return false;
-  if (normalizeKnownWorkScopeKey(trimmed)) return true;
+  if (workScopeTermToKey(trimmed)) return true;
   if (AREA_SCOPE_TAG_RE.test(trimmed)) return true;
   if (trimmed.length > MAX_SCOPE_TAG_LENGTH) return false;
   if (SENTENCE_SCOPE_TAG_RE.test(trimmed)) return false;
@@ -1614,7 +1614,9 @@ function normalizeScopeTag(tag: string): string | null {
     return `${(area[1] ?? "").trim() || "⬡"} ${formatted} ha`;
   }
   if (!isTagLikeScopeValue(trimmed)) return null;
-  return normalizeKnownWorkScopeKey(trimmed) ?? trimmed;
+  // `workScopeTermToKey` also re-keys translated labels, so a legacy record
+  // saved as "Reforestasi" renders as reforestation instead of a stray tag.
+  return workScopeTermToKey(trimmed) ?? trimmed;
 }
 
 /**

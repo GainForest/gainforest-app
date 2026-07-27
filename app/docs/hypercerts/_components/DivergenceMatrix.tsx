@@ -44,9 +44,20 @@ switch (doc?.$type) {
   },
   workScope: {
     gainforest: `"workScope": {
-  "$type": "org.hypercerts.claim.activity#workScopeString",
-  "scope": "reforestation, agroforestry"
-}`,
+  "$type": "org.hypercerts.workscope.cel",
+  "expression": "scope.hasAny([\\"reforestation\\", \\"agroforestry\\"])",
+  "usedTags": [
+    { "uri": "at://did:plc:…/org.hypercerts.workscope.tag/reforestation",
+      "cid": "bafy…" }
+  ],
+  "version": "v1",
+  "createdAt": "2026-07-27T10:00:00Z"
+}
+
+// Records published before this was unified still carry the
+// legacy arm — sometimes holding translated display labels:
+// { "$type": "org.hypercerts.claim.activity#workScopeString",
+//   "scope": "Reforestasi, Pemantauan alam" }`,
     maearth: `"workScope": {
   "$type": "org.hypercerts.workscope.cel",
   "expression": "scope.hasAny([\\"restoration\\", \\"education\\"])",

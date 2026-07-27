@@ -3336,10 +3336,10 @@
         },
         "workScope": {
           "label": "Work scope",
-          "title": "`workScope` — comma string or CEL expression",
-          "gainforest": "The project editor writes the legacy `#workScopeString`; the standalone Cert form writes the CEL object. Both shapes are live in the same app.",
+          "title": "`workScope` — CEL expression (legacy comma strings still in the wild)",
+          "gainforest": "Both the project editor and the standalone Cert form write the CEL object. Records published before this was unified still carry the legacy `#workScopeString`, and some of those hold translated display labels (\"Reforestasi\") rather than stable keys.",
           "maearth": "Always the CEL object, and always the same narrow predicate. There is no CEL evaluator behind it — the expression is a wire format that encodes a tag list.",
-          "advice": "Write CEL with `scope.hasAny([...])` and nest the tag refs in `usedTags`. When reading, take `scope` if present, otherwise pull the quoted literals out of `expression` — that fallback survives any predicate shape."
+          "advice": "Write CEL with `scope.hasAny([...])` and nest the tag refs in `usedTags`. When reading, take `usedTags` if present, else the quoted literals in `expression`, else split `scope` on commas — and map translated labels back to keys, or old records lose their scope."
         },
         "tags": {
           "label": "Tag hosting",

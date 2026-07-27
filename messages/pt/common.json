@@ -3336,10 +3336,10 @@
         },
         "workScope": {
           "label": "Escopo de trabalho",
-          "title": "`workScope`: texto separado por vírgulas ou expressão CEL",
-          "gainforest": "O editor de projetos escreve o antigo `#workScopeString`; o formulário avulso de Cert escreve o objeto CEL. Os dois formatos convivem no mesmo aplicativo.",
+          "title": "`workScope` — expressão CEL (strings com vírgulas antigas ainda circulam)",
+          "gainforest": "Tanto o editor de projetos quanto o formulário de Cert escrevem o objeto CEL. Registros publicados antes desta unificação ainda carregam o antigo `#workScopeString`, e alguns contêm rótulos traduzidos (\"Reforestasi\") em vez de chaves estáveis.",
           "maearth": "Sempre o objeto CEL e sempre o mesmo predicado estreito. Não há avaliador de CEL por trás: a expressão é um formato de transmissão que codifica uma lista de etiquetas.",
-          "advice": "Escreva CEL com `scope.hasAny([...])` e aninhe as referências das etiquetas em `usedTags`. Na leitura, use `scope` se existir; caso contrário, extraia os literais entre aspas de `expression`: essa alternativa sobrevive a qualquer formato de predicado."
+          "advice": "Escreva CEL com `scope.hasAny([...])` e aninhe as referências de tags em `usedTags`. Ao ler, use `usedTags` se existir; senão, os literais entre aspas em `expression`; senão, divida `scope` por vírgulas — e converta rótulos traduzidos de volta em chaves, ou registros antigos perdem o escopo."
         },
         "tags": {
           "label": "Hospedagem das etiquetas",

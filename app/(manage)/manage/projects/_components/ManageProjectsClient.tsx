@@ -37,7 +37,8 @@ import { cn } from "@/lib/utils";
 import { manageApiHref, profileBasePath, type ManageTarget } from "@/lib/links";
 import { localProjectHref } from "@/app/_lib/urls";
 import { notifyProjectsChanged } from "@/app/_lib/projects-events";
-import { WORK_SCOPE_MESSAGE_KEYS, type KnownWorkScopeKey } from "@/app/_lib/work-scope-labels";
+import { buildWorkScopeLabels, type KnownWorkScopeKey, type WorkScopeLabels } from "@/app/_lib/work-scope-labels";
+import { buildWorkScopeCel } from "@/app/_lib/work-scope-cel";
 import { compressImageIfNeeded } from "../../observations/_components/observation-image";
 import { canCreateRecord, canDeleteRecord, canUpdateRecord } from "../../_lib/cgs-permissions";
 import { createRecord, deleteRecord, getRecord, putRecord, uploadBlob } from "../../_lib/mutations";
@@ -57,6 +58,7 @@ import {
   extractRkey,
   resolveSiteRefs,
   scopeList,
+  scopeSelection,
   type ProjectCertDraft,
   type StrongRef,
 } from "../../_lib/project-cert";
@@ -604,7 +606,9 @@ function ProjectEditor({
 }) {
   const t = useTranslations("marketplace.manageProjects.editor");
   const workScopeT = useTranslations("common.workScopes");
-  const workScopes = WORK_SCOPE_KEYS.map((key) => workScopeT(WORK_SCOPE_MESSAGE_KEYS[key]));
+  // Labels are for rendering only — the draft stores keys, so switching
+  // language never changes what gets published.
+  const workScopeLabels = buildWorkScopeLabels(workScopeT);
 
   const [draft, setDraft] = useState<ProjectCertDraft>(() => draftFromProject(state.project));
   const [contributorProfiles, setContributorProfiles] = useState<Record<string, ActorResult>>({});
@@ -842,19 +846,28 @@ function ProjectEditor({
           ? null
           : undefined;
 
+      // Scope tags are records, so they have to exist before the cert can
+      // strongly reference them. Build the CEL object once and reuse it for
+      // whichever write path runs below.
+      const workScope = await buildWorkScopeCel(scopeSelection(draft), {
+        client: { getRecord, createRecord },
+        labels: workScopeLabels,
+        repo: repoOptions?.repo,
+      });
+
       if (isEdit) {
         const project = state.project;
         // 1) Update (or create) the bound cert so it mirrors the project.
         let certRef: StrongRef | undefined;
         if (linkedCert) {
-          const certRecord = buildCertRecord(draft, { existing: linkedCert.record, image: cover, siteRefs });
+          const certRecord = buildCertRecord(draft, { existing: linkedCert.record, image: cover, siteRefs, workScope });
           const certResult = await putRecord(CERT_COLLECTION, linkedCert.rkey, certRecord, {
             ...(linkedCert.cid ? { swapRecord: linkedCert.cid } : {}),
             ...(repoOptions ?? {}),
           });
           certRef = { uri: certResult.uri, cid: certResult.cid };
         } else {
-          const certRecord = buildCertRecord(draft, { image: cover, siteRefs });
+          const certRecord = buildCertRecord(draft, { image: cover, siteRefs, workScope });
           const certResult = await createRecord(CERT_COLLECTION, certRecord, undefined, repoOptions);
           certRef = { uri: certResult.uri, cid: certResult.cid };
         }
@@ -872,7 +885,7 @@ function ProjectEditor({
       } else {
         // Create flow: cert first, then the project that links to it. If the
         // project write fails, roll the orphan cert back.
-        const certRecord = buildCertRecord(draft, { image: cover, siteRefs });
+        const certRecord = buildCertRecord(draft, { image: cover, siteRefs, workScope });
         const certResult = await createRecord(CERT_COLLECTION, certRecord, undefined, repoOptions);
         const certRef: StrongRef = { uri: certResult.uri, cid: certResult.cid };
         try {
@@ -951,7 +964,7 @@ function ProjectEditor({
               ) : stepId === "focus" ? (
                 <div className="mx-auto max-w-2xl">
                   <WizardStepHeader title={t("steps.focus.title")} subtitle={t("steps.focus.subtitle")} />
-                  <ScopeSection draft={draft} setDraft={setDraft} workScopes={workScopes} t={t} />
+                  <ScopeSection draft={draft} setDraft={setDraft} workScopeLabels={workScopeLabels} t={t} />
                 </div>
               ) : stepId === "timeline" ? (
                 <div className="mx-auto max-w-2xl">
@@ -1041,7 +1054,7 @@ function ProjectEditor({
           </section>
 
           <section className="space-y-8">
-            <ScopeSection draft={draft} setDraft={setDraft} workScopes={workScopes} t={t} />
+            <ScopeSection draft={draft} setDraft={setDraft} workScopeLabels={workScopeLabels} t={t} />
             <DatesSection draft={draft} setDraft={setDraft} t={t} />
           </section>
 
@@ -1091,15 +1104,15 @@ function ProjectEditor({
 function ScopeSection({
   draft,
   setDraft,
-  workScopes,
+  workScopeLabels,
   t,
 }: {
   draft: ProjectCertDraft;
   setDraft: React.Dispatch<React.SetStateAction<ProjectCertDraft>>;
-  workScopes: string[];
+  workScopeLabels: WorkScopeLabels;
   t: ReturnType<typeof useTranslations>;
 }) {
-  const toggleScope = (scope: string) => {
+  const toggleScope = (scope: KnownWorkScopeKey) => {
     setDraft((current) => ({
       ...current,
       scopes: current.scopes.includes(scope) ? current.scopes.filter((item) => item !== scope) : [...current.scopes, scope],
@@ -1109,7 +1122,7 @@ function ScopeSection({
   return (
     <Field label={t("fields.scope.label")} hint={t("fields.scope.hint")}>
       <div className="flex flex-wrap gap-2">
-        {workScopes.map((scope) => {
+        {WORK_SCOPE_KEYS.map((scope) => {
           const active = draft.scopes.includes(scope);
           return (
             <button
@@ -1123,7 +1136,7 @@ function ScopeSection({
                   : "border-border bg-background/70 text-foreground/75 hover:border-primary/35 hover:text-foreground",
               )}
             >
-              {scope}
+              {workScopeLabels[scope]}
             </button>
           );
         })}
@@ -1702,7 +1715,8 @@ function ReviewList({
   hasCover: boolean;
   t: ReturnType<typeof useTranslations>;
 }) {
-  const focus = scopeList(draft);
+  const workScopeT = useTranslations("common.workScopes");
+  const focus = scopeList(draft, buildWorkScopeLabels(workScopeT));
   const people = contributorList(draft).map((identity) => displayContributor(identity, contributorProfiles, t("fields.people.selectedProfile")));
   const placeCount = draft.selectedLocationUris.length;
   const timeline = draft.startDate

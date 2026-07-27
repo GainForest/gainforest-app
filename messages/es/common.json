@@ -3336,10 +3336,10 @@
         },
         "workScope": {
           "label": "Alcance de trabajo",
-          "title": "`workScope`: cadena separada por comas o expresión CEL",
-          "gainforest": "El editor de proyectos escribe el heredado `#workScopeString`; el formulario independiente de Cert escribe el objeto CEL. Ambas formas conviven en la misma app.",
+          "title": "`workScope` — expresión CEL (todavía circulan cadenas separadas por comas)",
+          "gainforest": "Tanto el editor de proyectos como el formulario de Cert escriben el objeto CEL. Los registros publicados antes de esta unificación aún llevan el heredado `#workScopeString`, y algunos contienen etiquetas traducidas (\"Reforestasi\") en lugar de claves estables.",
           "maearth": "Siempre el objeto CEL y siempre el mismo predicado estrecho. Detrás no hay ningún evaluador de CEL: la expresión es un formato de transmisión que codifica una lista de etiquetas.",
-          "advice": "Escribe CEL con `scope.hasAny([...])` y anida las referencias de etiquetas en `usedTags`. Al leer, toma `scope` si existe y, si no, extrae los literales entrecomillados de `expression`: ese respaldo sobrevive a cualquier forma de predicado."
+          "advice": "Escribe CEL con `scope.hasAny([...])` y anida las referencias de etiquetas en `usedTags`. Al leer, usa `usedTags` si existe; si no, los literales entrecomillados de `expression`; si no, divide `scope` por comas — y reasigna las etiquetas traducidas a sus claves, o los registros antiguos perderán su alcance."
         },
         "tags": {
           "label": "Alojamiento de etiquetas",

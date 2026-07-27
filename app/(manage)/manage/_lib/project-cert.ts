@@ -14,6 +14,13 @@
  * contributors, and places.
  */
 
+import {
+  decodeWorkScope,
+  type WorkScopeCel,
+  type WorkScopeSelection,
+} from "@/app/_lib/work-scope-cel";
+import type { KnownWorkScopeKey } from "@/app/_lib/work-scope-labels";
+
 export const PROJECT_COLLECTION = "org.hypercerts.collection";
 export const CERT_COLLECTION = "org.hypercerts.claim.activity";
 
@@ -30,7 +37,13 @@ export type ProjectCertDraft = {
   title: string;
   shortDescription: string;
   description: string;
-  scopes: string[];
+  /**
+   * Stable work-scope keys (`biodiversity_monitoring`), never translated
+   * labels. The editor used to store whatever the chip rendered, which put
+   * localized text into published records — render `labels[key]`, store `key`.
+   */
+  scopes: KnownWorkScopeKey[];
+  /** Free-text scope terms, comma separated. */
   customScope: string;
   startDate: string; // yyyy-mm-dd (date input)
   endDate: string; // yyyy-mm-dd (date input)
@@ -66,12 +79,29 @@ export function clampSummary(value: string): string {
   return value.trim().slice(0, 300);
 }
 
-export function scopeList(draft: Pick<ProjectCertDraft, "scopes" | "customScope">): string[] {
-  return [...draft.scopes, draft.customScope.trim()].map((item) => item.trim()).filter(Boolean);
+/**
+ * The draft's scope as the CEL builder wants it: stable keys plus free text.
+ * `draft.scopes` holds keys (not translated labels) — see the note on
+ * `ProjectCertDraft.scopes`.
+ */
+export function scopeSelection(draft: Pick<ProjectCertDraft, "scopes" | "customScope">): WorkScopeSelection {
+  const keys = draft.scopes
+    .map((item) => item.trim())
+    .filter(Boolean) as KnownWorkScopeKey[];
+  const custom = draft.customScope
+    .split(",")
+    .map((item) => item.trim())
+    .filter(Boolean);
+  return { keys, custom };
 }
 
-function scopeString(draft: Pick<ProjectCertDraft, "scopes" | "customScope">): string {
-  return scopeList(draft).join(", ");
+/** Display terms for the scope, for UI that just needs something to render. */
+export function scopeList(
+  draft: Pick<ProjectCertDraft, "scopes" | "customScope">,
+  labels?: Partial<Record<string, string>>,
+): string[] {
+  const { keys, custom } = scopeSelection(draft);
+  return [...keys.map((key) => labels?.[key] ?? key), ...custom];
 }
 
 export function contributorList(draft: Pick<ProjectCertDraft, "contributors">): string[] {
@@ -144,6 +174,8 @@ export function buildCertRecord(
     image?: Record<string, unknown> | null;
     siteRefs?: StrongRef[];
     createdAt?: string;
+    /** CEL work scope from `buildWorkScopeCel`; null clears, undefined keeps. */
+    workScope?: WorkScopeCel | null;
   } = {},
 ): Record<string, unknown> {
   const base = isRecord(options.existing) ? { ...options.existing } : {};
@@ -162,12 +194,11 @@ export function buildCertRecord(
   if (story) record.description = { $type: "org.hypercerts.defs#descriptionString", value: story };
   else delete record.description;
 
-  const scope = scopeString(draft);
-  if (scope) {
-    record.workScope = { $type: "org.hypercerts.claim.activity#workScopeString", scope };
-  } else {
-    delete record.workScope;
-  }
+  // Work scope is CEL-only on write. It is built async (tag records have to
+  // exist first), so callers resolve it and hand it in; `undefined` means the
+  // caller had nothing to say and an existing scope should be left alone.
+  if (options.workScope === null) delete record.workScope;
+  else if (options.workScope) record.workScope = options.workScope;
 
   const startIso = dateInputToIso(draft.startDate);
   if (startIso) record.startDate = startIso;
@@ -274,8 +305,9 @@ function projectItemUri(value: unknown): string | null {
 export function certToDraftFields(
   record: Record<string, unknown> | null | undefined,
 ): Pick<ProjectCertDraft, "scopes" | "customScope" | "startDate" | "endDate" | "ongoing" | "contributors" | "selectedLocationUris"> {
-  const scopeRaw = isRecord(record?.workScope) ? stringValue(record!.workScope.scope) : null;
-  const scopes = scopeRaw ? scopeRaw.split(",").map((item) => item.trim()).filter(Boolean) : [];
+  // Reads accept both union arms: CEL (what we write now) and the legacy comma
+  // string, whose terms may be translated display labels from an older editor.
+  const { keys, custom } = decodeWorkScope(record?.workScope);
   const contributors = Array.isArray(record?.contributors)
     ? record!.contributors
         .map((entry) => {
@@ -288,8 +320,8 @@ export function certToDraftFields(
   const startDate = isoToDateInput(record?.startDate);
   const endDate = isoToDateInput(record?.endDate);
   return {
-    scopes,
-    customScope: "",
+    scopes: keys,
+    customScope: custom.join(", "),
     startDate,
     endDate,
     ongoing: !endDate,

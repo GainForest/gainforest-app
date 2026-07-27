@@ -3336,10 +3336,10 @@
         },
         "workScope": {
           "label": "Lingkup kerja",
-          "title": "`workScope`: teks berkoma atau ekspresi CEL",
-          "gainforest": "Editor proyek menulis `#workScopeString` warisan lama; formulir Cert mandiri menulis objek CEL. Kedua bentuk hidup berdampingan di aplikasi yang sama.",
+          "title": "`workScope` — ekspresi CEL (string berkoma lama masih beredar)",
+          "gainforest": "Editor proyek dan formulir Cert sama-sama menulis objek CEL. Rekaman yang diterbitkan sebelum penyatuan ini masih membawa `#workScopeString` lama, dan sebagian berisi label tampilan terjemahan (\"Reforestasi\") alih-alih kunci yang stabil.",
           "maearth": "Selalu objek CEL, dan selalu predikat sempit yang sama. Tidak ada evaluator CEL di baliknya: ekspresinya adalah format pertukaran yang mengkodekan daftar tag.",
-          "advice": "Tulis CEL dengan `scope.hasAny([...])` dan sarangkan referensi tag di `usedTags`. Saat membaca, ambil `scope` bila ada; jika tidak, tarik literal berkutip dari `expression` — cadangan itu bertahan pada bentuk predikat apa pun."
+          "advice": "Tulis CEL dengan `scope.hasAny([...])` dan sematkan referensi tag di `usedTags`. Saat membaca, pakai `usedTags` bila ada; jika tidak, ambil literal berkutip dari `expression`; jika tidak, pecah `scope` per koma — dan petakan label terjemahan kembali ke kuncinya, atau rekaman lama akan kehilangan cakupannya."
         },
         "tags": {
           "label": "Penempatan tag",
