@@ -51,6 +51,12 @@ import {
 } from "@/app/_lib/audiomoth/wav-metadata";
 import { renderSpectrogramPng } from "@/app/_lib/audiomoth/spectrogram";
 import {
+  activeUploadFolderMode,
+  isUploadFolderChosen,
+  type UploadFolderMode,
+} from "@/app/_lib/audiomoth/upload-folder";
+import { UploadFolderPicker } from "./UploadFolderPicker";
+import {
   AUDIO_UPLOAD_MAX_ATTEMPTS,
   isNetworkFetchError,
   isRetryableStorageError,
@@ -214,6 +220,14 @@ export function UploadTab({
   const [activeUploadIds, setActiveUploadIds] = useState<string[]>([]);
   /** User-editable group name for recordings without a matched deployment. */
   const [uploadName, setUploadName] = useState("");
+  /** Folders (ac.deployments) already in the account, for "add to existing". */
+  const [folders, setFolders] = useState<AcDeploymentItem[] | null>(null);
+  /** Recordings already in each folder, filled by the already-uploaded check. */
+  const [folderCounts, setFolderCounts] = useState<Map<string, number>>(new Map());
+  /** Add to a folder you already have, or start a new one. */
+  const [folderMode, setFolderMode] = useState<UploadFolderMode>("existing");
+  const [selectedFolderUri, setSelectedFolderUri] = useState("");
+  const [folderQuery, setFolderQuery] = useState("");
   /** Pre-upload check: which of the scanned files are already in the account. */
   const [dedup, setDedup] = useState<{ state: "checking" | "done"; skipped: number } | null>(null);
   /** Tray path only: how many recordings the last confirm handed over. */
@@ -243,6 +257,34 @@ export function UploadTab({
     return () => ctrl.abort();
   }, [sessionDid]);
 
+  /* ---------------- folders to upload into ---------------- */
+
+  /**
+   * The folders the account already has — every `ac.deployment`, which is
+   * what groups recordings on the profile. Reloaded after an upload creates
+   * one, so a second card can be added to the folder just made.
+   */
+  const loadFolders = useCallback(
+    async (signal?: AbortSignal) => {
+      if (!sessionDid) return;
+      try {
+        const list = await listAcDeployments(sessionDid, signal);
+        if (signal?.aborted) return;
+        acDeploymentsRef.current = list;
+        setFolders(list);
+      } catch {
+        if (!signal?.aborted) setFolders([]);
+      }
+    },
+    [sessionDid],
+  );
+
+  useEffect(() => {
+    const ctrl = new AbortController();
+    void loadFolders(ctrl.signal);
+    return () => ctrl.abort();
+  }, [loadFolders]);
+
   /* ---------------- scanning ---------------- */
 
   const setRecording = useCallback((id: string, patch: Partial<ScannedRecording>) => {
@@ -271,6 +313,7 @@ export function UploadTab({
         return;
       }
       if (scanTokenRef.current !== token) return;
+      setFolderCounts(keys.countsByDeployment);
 
       let skipped = 0;
       const BATCH = 4;
@@ -303,6 +346,8 @@ export function UploadTab({
     setRecordings([]);
     setUploadedBytes(0);
     setUploadName(folderName.trim());
+    setSelectedFolderUri("");
+    setFolderQuery("");
     namedDeploymentRef.current = null;
     setDedup(null);
     setHandedOff(0);
@@ -460,6 +505,19 @@ export function UploadTab({
     [groups, manualEvent, matchFor],
   );
 
+  /* ---------------- folder choice ---------------- */
+
+  /** With no folders yet there is nothing to choose from — name a new one. */
+  const activeFolderMode = activeUploadFolderMode(folderMode, folders?.length ?? 0);
+
+  /** Everything the batch needs before it can start. */
+  const folderChosen = isUploadFolderChosen({
+    needsFolder: needsName,
+    mode: activeFolderMode,
+    selectedFolderUri,
+    newFolderName: uploadName,
+  });
+
   const stats = useMemo(() => {
     const readable = recordings.filter((r) => r.info);
     const totalBytes = readable.reduce((sum, r) => sum + r.file.size, 0);
@@ -504,11 +562,15 @@ export function UploadTab({
   );
 
   /**
-   * The named group for this upload: one ac.deployment carrying the
-   * user-chosen name, created on first use and reused for every file (and
-   * across retries), so the profile's audio page groups them together.
+   * The folder this upload's unmatched recordings go into: either the
+   * existing ac.deployment the user picked, or one carrying the name they
+   * typed — created on first use and reused for every file (and across
+   * retries), so the profile's audio page groups them together.
    */
-  const resolveNamedDeployment = useCallback(async (): Promise<string | null> => {
+  const resolveGroupDeployment = useCallback(async (): Promise<string | null> => {
+    // Picked an existing folder: it is the target for the whole batch, no
+    // record is created and retries keep landing in the same place.
+    if (activeFolderMode === "existing") return selectedFolderUri || null;
     if (namedDeploymentRef.current) return namedDeploymentRef.current;
     const name = uploadName.trim();
     if (!name) return null;
@@ -528,7 +590,7 @@ export function UploadTab({
     } catch {
       return null;
     }
-  }, [recordings, t, uploadName]);
+  }, [activeFolderMode, recordings, selectedFolderUri, t, uploadName]);
 
   /**
    * Plain-language error per failure point: the storage transfer (connection
@@ -599,7 +661,9 @@ export function UploadTab({
       let target: UploadTarget = { kind: "none" };
       if (event) {
         target = { kind: "event", event };
-      } else if (uploadName.trim()) {
+      } else if (activeFolderMode === "existing" && selectedFolderUri) {
+        target = { kind: "existing", uri: selectedFolderUri };
+      } else if (activeFolderMode === "new" && uploadName.trim()) {
         const earliest = new Date(Math.min(...pending.map((rec) => recordingTime(rec).getTime())));
         target = { kind: "named", name: uploadName.trim(), deployedAt: earliest.toISOString() };
       }
@@ -627,10 +691,24 @@ export function UploadTab({
     setManualEventUri("none");
     setGlobalError(null);
     setUploadName("");
+    setSelectedFolderUri("");
+    setFolderQuery("");
     setDedup(null);
     setHandedOff(jobs.length);
+    void loadFolders();
     return true;
-  }, [groups, makePreviews, manualEvent, matchFor, sessionDid, tray, uploadName]);
+  }, [
+    activeFolderMode,
+    groups,
+    loadFolders,
+    makePreviews,
+    manualEvent,
+    matchFor,
+    selectedFolderUri,
+    sessionDid,
+    tray,
+    uploadName,
+  ]);
 
   const startUpload = useCallback(async () => {
     if (!sessionDid) return;
@@ -667,7 +745,7 @@ export function UploadTab({
       for (const [deploymentId, groupFiles] of groups) {
         if (cancelRef.current) break;
         const event = deploymentId ? matchFor(deploymentId) : manualEvent;
-        const deploymentRef = event ? await resolveAcDeployment(event) : await resolveNamedDeployment();
+        const deploymentRef = event ? await resolveAcDeployment(event) : await resolveGroupDeployment();
 
         // Skip files already uploaded for this deployment (re-inserted card or
         // a save whose response was lost before a manual retry).
@@ -834,7 +912,9 @@ export function UploadTab({
     await Promise.all(Array.from({ length: CONCURRENCY }, worker));
     if (retryAbortRef.current === retryController) retryAbortRef.current = null;
     if (!cancelRef.current) setStage("done");
-  }, [describeUploadError, groups, handOffToTray, makePreviews, manualEvent, matchFor, putToStorage, resolveAcDeployment, resolveNamedDeployment, sessionDid, setRecording, t, useTray]);
+    // A new folder may have been created for this batch — offer it next time.
+    void loadFolders();
+  }, [describeUploadError, groups, handOffToTray, loadFolders, makePreviews, manualEvent, matchFor, putToStorage, resolveAcDeployment, resolveGroupDeployment, sessionDid, setRecording, t, useTray]);
 
   const cancelUpload = useCallback(() => {
     cancelRef.current = true;
@@ -852,6 +932,8 @@ export function UploadTab({
     setManualEventUri("none");
     setGlobalError(null);
     setUploadName("");
+    setSelectedFolderUri("");
+    setFolderQuery("");
     namedDeploymentRef.current = null;
     setDedup(null);
     setHandedOff(0);
@@ -1153,23 +1235,22 @@ export function UploadTab({
                   <p className="rounded-xl bg-destructive/10 px-3.5 py-2.5 text-sm text-destructive">{globalError}</p>
                 ) : null}
 
-                {/* Name prompt — recordings that would otherwise be scattered
-                    under "Other recordings" get grouped under this name. */}
+                {/* Folder prompt — recordings that would otherwise be scattered
+                    under "Other recordings" join a folder the account already
+                    has, or start a new one. */}
                 {stage === "review" && needsName && (
-                  <div className="flex flex-col gap-1.5 rounded-2xl border border-border bg-card/90 px-4 py-3.5">
-                    <Label htmlFor="upload-group-name" className="text-sm font-medium text-foreground">
-                      {t("groupNameLabel")}
-                    </Label>
-                    <p className="text-xs text-muted-foreground">{t("groupNameHelp")}</p>
-                    <Input
-                      id="upload-group-name"
-                      value={uploadName}
-                      onChange={(e) => setUploadName(e.target.value)}
-                      placeholder={t("groupNamePlaceholder")}
-                      maxLength={120}
-                      className="mt-1 sm:max-w-sm"
-                    />
-                  </div>
+                  <UploadFolderPicker
+                    folders={folders}
+                    counts={folderCounts}
+                    mode={folderMode}
+                    onModeChange={setFolderMode}
+                    selectedUri={selectedFolderUri}
+                    onSelect={setSelectedFolderUri}
+                    query={folderQuery}
+                    onQueryChange={setFolderQuery}
+                    newName={uploadName}
+                    onNewNameChange={setUploadName}
+                  />
                 )}
 
                 {/* Footer actions */}
@@ -1188,8 +1269,14 @@ export function UploadTab({
                       </Button>
                       <Button
                         size="sm"
-                        disabled={(needsName && !uploadName.trim()) || dedup?.state === "checking" || uploadableCount === 0}
-                        title={needsName && !uploadName.trim() ? t("groupNameRequired") : undefined}
+                        disabled={!folderChosen || dedup?.state === "checking" || uploadableCount === 0}
+                        title={
+                          !folderChosen
+                            ? activeFolderMode === "existing"
+                              ? t("folderRequired")
+                              : t("groupNameRequired")
+                            : undefined
+                        }
                         onClick={() => void startUpload()}
                       >
                         <UploadIcon className="size-4" />

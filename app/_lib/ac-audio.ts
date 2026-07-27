@@ -295,6 +295,8 @@ export type UploadedRecordingKeys = {
   cids: Set<string>;
   /** `name + file size` keys for records created before CIDs were stored. */
   legacy: Set<string>;
+  /** How many recordings each `ac.deployment` already holds, keyed by AT-URI. */
+  countsByDeployment: Map<string, number>;
 };
 
 /** Fallback identity for records that predate `originalCid`. */
@@ -312,7 +314,7 @@ export async function listUploadedRecordingKeys(did: string, signal?: AbortSigna
   const host = await resolvePdsHost(did, signal);
   if (!host) throw new Error(`Could not resolve the data host for ${did}.`);
 
-  const keys: UploadedRecordingKeys = { cids: new Set(), legacy: new Set() };
+  const keys: UploadedRecordingKeys = { cids: new Set(), legacy: new Set(), countsByDeployment: new Map() };
   let cursor: string | undefined;
   do {
     const params = new URLSearchParams({ repo: did, collection: AC_AUDIO_COLLECTION, limit: "100" });
@@ -335,6 +337,9 @@ export async function listUploadedRecordingKeys(did: string, signal?: AbortSigna
       const metadata = isRecord(r.value.metadata) ? r.value.metadata : null;
       if (typeof r.value.name === "string" && typeof metadata?.fileSizeBytes === "number") {
         keys.legacy.add(legacyRecordingKey(r.value.name, metadata.fileSizeBytes));
+      }
+      if (typeof r.value.deploymentRef === "string") {
+        keys.countsByDeployment.set(r.value.deploymentRef, (keys.countsByDeployment.get(r.value.deploymentRef) ?? 0) + 1);
       }
     }
     cursor = typeof data.cursor === "string" ? data.cursor : undefined;

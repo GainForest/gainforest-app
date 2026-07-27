@@ -86,6 +86,8 @@ export interface UploadTrayItem {
 /** Where a file's `ac.audio` record should be filed. */
 export type UploadTarget =
   | { kind: "event"; event: DeploymentEventItem }
+  /** A folder (`ac.deployment`) the account already has. */
+  | { kind: "existing"; uri: string }
   | { kind: "named"; name: string; deployedAt: string }
   | { kind: "none" };
 
@@ -167,6 +169,7 @@ export function UploadTrayProvider({ children }: { children: React.ReactNode }) 
 
   const targetKey = useCallback((target: UploadTarget): string => {
     if (target.kind === "event") return `event:${target.event.uri}`;
+    if (target.kind === "existing") return `existing:${target.uri}`;
     if (target.kind === "named") return `named:${target.name}`;
     return "none";
   }, []);
@@ -184,6 +187,7 @@ export function UploadTrayProvider({ children }: { children: React.ReactNode }) 
 
       const pending = (async (): Promise<string | null> => {
         if (job.target.kind === "none") return null;
+        if (job.target.kind === "existing") return job.target.uri;
         if (job.target.kind === "named") {
           const name = job.target.name.trim();
           if (!name) return null;
