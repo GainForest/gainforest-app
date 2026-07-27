@@ -1412,7 +1412,9 @@
       "guideIntro": "Panduan ini menetapkan konvensi aplikasi yang digunakan bersama skema kemunculan. Skemanya tetap berupa Darwin Core umum; panduan ini menjelaskan hubungan antara rekaman AudioMoth, kotak spektrogram, dan rekaman kemunculan."
     },
     "hypercertsLinkTitle": "Membangun di atas leksikon Hypercerts",
-    "hypercertsLinkDesc": "Konvensi, perbedaan, dan saran interoperabilitas bagi pengembang yang menulis catatan Hypercerts di aplikasinya sendiri."
+    "hypercertsLinkDesc": "Konvensi, perbedaan, dan saran interoperabilitas bagi pengembang yang menulis catatan Hypercerts di aplikasinya sendiri.",
+    "dataModelLinkTitle": "Bagaimana data Anda saling terhubung",
+    "dataModelLinkDesc": "Panduan berbahasa sederhana tentang cara pengamatan, kumpulan data, proyek, dan organisasi saling terhubung."
   },
   "taina": {
     "meta": {
@@ -2556,7 +2558,229 @@
       "atprotoTitle": "Cara kerja AT Protocol",
       "atprotoDesc": "Tur interaktif jaringan terbuka tempat semua ini dibangun.",
       "hypercertsTitle": "Leksikon Hypercerts",
-      "hypercertsDesc": "Bagaimana GainForest dan Ma Earth memodelkan kerja dampak, dan apa yang harus ditulis agar cocok dengan keduanya."
+      "hypercertsDesc": "Bagaimana GainForest dan Ma Earth memodelkan kerja dampak, dan apa yang harus ditulis agar cocok dengan keduanya.",
+      "dataModelTitle": "Bagaimana data Anda saling terhubung",
+      "dataModelDesc": "Pengamatan, kumpulan data, proyek, dan organisasi: apa masing-masingnya dan tiga cara semuanya terhubung."
+    }
+  },
+  "dataModel": {
+    "metaTitle": "Bagaimana data Anda saling terhubung",
+    "metaDescription": "Panduan berbahasa sederhana tentang pengamatan, kumpulan data, proyek, dan organisasi di GainForest: apa masing-masingnya dan tiga cara semuanya saling terhubung.",
+    "kicker": "Model data",
+    "title": "Bagaimana data Anda saling terhubung",
+    "lead": "Anda memotret sebatang pohon. Beberapa bulan kemudian foto itu menjadi bagian dari kumpulan data bernama, di dalam sebuah proyek, diterbitkan oleh sebuah organisasi, dan bisa dibaca siapa saja di jaringan terbuka. Halaman ini menelusuri rantai tersebut: apa setiap bagiannya dan apa yang sebenarnya menghubungkannya ke bagian berikutnya.",
+    "bigIdea": {
+      "heading": "Inti gagasannya: setiap catatan adalah satu kartu di dalam lemari arsip",
+      "p1": "GainForest tidak punya basis data pusat yang memiliki data Anda. Setiap akun — akun Anda dan akun setiap organisasi — adalah lemari arsipnya sendiri, dan setiap hal yang Anda buat adalah kartu yang disimpan di dalamnya: satu kartu per pengamatan, satu per foto, satu per kumpulan data, satu per proyek.",
+      "p2": "Kartu tidak pernah berpindah lemari, dan tidak ada yang disembunyikan di dalam sesuatu yang lain. Sebagai gantinya, kartu saling menunjuk. Kartu foto membawa alamat pengamatan tempatnya bernaung; kartu pengamatan membawa alamat kumpulan datanya. Hanya itu arti «menambahkan sesuatu ke sesuatu» di sini: menuliskan sebuah alamat pada sebuah kartu."
+    },
+    "pieces": {
+      "heading": "Enam bagian",
+      "intro": "Hampir semua yang Anda lihat di aplikasi adalah salah satu dari enam hal ini. Ketuk salah satunya untuk melihat apa itu, apa namanya di balik layar, dan bagaimana ia mengait ke tetangganya.",
+      "hooksLabel": "Cara terhubungnya",
+      "observation": {
+        "name": "Pengamatan",
+        "plain": "Satu spesies, di satu tempat, pada satu saat. Pohon yang Anda ukur, burung yang Anda dengar, katak yang seseorang potret.",
+        "detail": "Ia membawa nama ilmiah, tanggal, koordinat, dan catatan apa pun. Inilah satuan terkecil data alam di GainForest, dan ia bisa berdiri sendiri dengan nyaman: tidak butuh kumpulan data maupun proyek.",
+        "hooks": "Menunjuk ke atas ke sebuah kumpulan data, sebuah proyek, dan sebuah lokasi. Ketiganya boleh dibiarkan kosong."
+      },
+      "evidence": {
+        "name": "Bukti",
+        "plain": "Foto, rekaman suara, hasil ukur meteran — bukti yang menempel pada sebuah pengamatan.",
+        "detail": "Foto, audio, dan video disimpan sebagai kartu tersendiri, dan pengukuran seperti tinggi pohon atau diameter batang adalah kartu lain lagi. Dengan dipisahkan, Anda bisa menambah foto kedua, atau pengukuran musim depan, tanpa menulis ulang pengamatannya.",
+        "hooks": "Menunjuk ke bawah tepat ke satu pengamatan. Satu bukti tidak pernah dipakai bersama oleh dua penampakan."
+      },
+      "dataset": {
+        "name": "Kumpulan data",
+        "plain": "Map bernama untuk sekumpulan pengamatan yang menjadi satu kesatuan: biasanya satu survei, satu perjalanan, satu musim.",
+        "detail": "«Survei Lembah Danum Maret 2025» adalah sebuah kumpulan data. Ia menyimpan nama, deskripsi, dan hitungan berjalan, dan inilah yang diunduh atau dikutip orang lain saat memakai karya Anda.",
+        "hooks": "Ia tidak mendaftar anggotanya. Justru setiap pengamatan yang menunjuk kepadanya, jadi kumpulan data hanyalah semua pengamatan yang membawa alamatnya."
+      },
+      "site": {
+        "name": "Lokasi",
+        "plain": "Sebuah tempat di peta: petak hutan, kawasan lindung, atau plot dengan batas yang digambar mengelilinginya.",
+        "detail": "Sebuah lokasi menyimpan nama, titik pusat, dan bentuk, sehingga pengamatan, lapisan peta, dan proyek sama-sama bisa berkata «ini terjadi di sini» tanpa masing-masing menggambar ulang peta.",
+        "hooks": "Pengamatan menunjuk kepadanya, dan klaim sebuah proyek mendaftarnya sebagai salah satu tempat pekerjaan berlangsung."
+      },
+      "project": {
+        "name": "Proyek",
+        "plain": "Kisah publik dari sebuah pekerjaan: upaya restorasi, program pemantauan, atau inisiatif komunitas.",
+        "detail": "Proyek adalah koleksi — kartu yang tugas utamanya memegang daftar kartu lain. Ia punya judul, ringkasan, gambar sampul, dan daftar itu. Setiap proyek juga mendapat kembaran yang diam-diam, yaitu klaim, yang membawa tanggal, orang, dan tempat.",
+        "hooks": "Memegang daftar isi: klaimnya, ditambah kumpulan data mana pun yang disarangkan di dalamnya. Pengamatan juga bisa menunjuk langsung kepadanya."
+      },
+      "organization": {
+        "name": "Organisasi",
+        "plain": "Tim dengan akunnya sendiri — lemari arsip bersama yang bisa ditulisi beberapa orang.",
+        "detail": "Organisasi bukan map dan bukan label. Ia adalah akun tersendiri, dengan profil, daftar anggota, dan peran. Proyek, kumpulan data, dan pengamatannya adalah kartu-kartu yang tersimpan di akun itu.",
+        "hooks": "Tidak ada yang menunjuk ke organisasi. Catatan menjadi miliknya karena tersimpan di akunnya — persis itulah yang dicatat oleh alamat di depan setiap kartu."
+      }
+    },
+    "map": {
+      "heading": "Peta keterhubungan",
+      "intro": "Setiap panah di bawah adalah kolom nyata pada catatan nyata. Ketuk sebuah kotak — atau bingkai putus-putus di sekelilingnya — untuk menyalakan tautannya dan membaca artinya.",
+      "ariaLabel": "Peta interaktif tentang bagaimana catatan GainForest saling terhubung",
+      "hint": "Panah menyala sesuai pilihan Anda. Bingkai putus-putus adalah akun yang menyimpan semua catatan ini.",
+      "nodes": {
+        "site": {
+          "name": "Lokasi",
+          "desc": "Tempat dengan batas. Pengamatan menunjuk kepadanya lewat siteRef, dan klaim sebuah proyek mendaftarnya di locations[] sehingga pekerjaannya tampil di peta."
+        },
+        "project": {
+          "name": "Proyek",
+          "desc": "Kartu koleksi. Ia memegang daftar — items[] — yang berisi klaimnya dan kumpulan data mana pun yang disarangkan di dalamnya."
+        },
+        "cert": {
+          "name": "Klaim",
+          "desc": "Kembaran proyek yang dibuat otomatis. Ia membawa tanggal, para kontributor, cakupan kerja, dan tempat, sehingga kartu proyek tetap berupa daftar sederhana."
+        },
+        "dataset": {
+          "name": "Kumpulan data",
+          "desc": "Map bernama. Ia tidak pernah mendaftar pengamatannya; pengamatanlah yang membawa alamatnya di datasetRef, dan kumpulan data hanya menyimpan hitungan."
+        },
+        "observation": {
+          "name": "Pengamatan",
+          "desc": "Poros dari seluruh gambar. Satu kartu bisa menunjuk ke kumpulan data, proyek, dan lokasi sekaligus — atau tidak ke mana-mana, dan berdiri sendiri."
+        },
+        "evidence": {
+          "name": "Bukti",
+          "desc": "Setiap foto, rekaman, dan pengukuran adalah kartu tersendiri yang menunjuk balik ke pengamatan lewat occurrenceRef."
+        },
+        "account": {
+          "name": "Satu akun (perorangan atau organisasi)",
+          "desc": "Bingkai ini bukan tautan, melainkan alamat. Setiap kartu tinggal di dalam tepat satu akun, dan «proyek ini milik organisasi itu» hanya berarti kartu proyeknya ditulis ke akun organisasi tersebut."
+        }
+      }
+    },
+    "kinds": {
+      "heading": "Tiga cara hal-hal terhubung",
+      "intro": "Begitu Anda bisa mengenali tiga pola ini, keseluruhan sistem berhenti terasa rumit.",
+      "pointer": {
+        "title": "Yang kecil menunjuk ke atas",
+        "text": "Kartu yang lebih kecil menyimpan alamat kartu yang lebih besar. Menambahkan pengamatan ke kumpulan data berarti menulis ulang pengamatan itu; kumpulan datanya sendiri tidak tersentuh."
+      },
+      "list": {
+        "title": "Yang besar memegang daftar",
+        "text": "Sebuah proyek memegang daftar isi di dalamnya. Menyarangkan kumpulan data ke dalam proyek berarti menambah satu baris ke daftar itu."
+      },
+      "home": {
+        "title": "Ia memang tinggal di sana",
+        "text": "Menjadi milik sebuah organisasi sama sekali bukan tautan. Itu soal akun mana yang ditulisi kartu tersebut, dan hal itu sudah melekat pada alamat kartunya."
+      }
+    },
+    "journey": {
+      "heading": "Satu penampakan, dari awal sampai akhir",
+      "intro": "Saksikan gambarnya dibangun langkah demi langkah, dari satu foto sampai proyek yang diterbitkan oleh sebuah organisasi.",
+      "ariaLabel": "Diagram langkah demi langkah sebuah pengamatan menjadi bagian dari kumpulan data, proyek, dan organisasi",
+      "back": "Langkah sebelumnya",
+      "next": "Langkah berikutnya",
+      "play": "Putar",
+      "pause": "Jeda",
+      "stepLabel": "Langkah {n} dari {total}",
+      "nodes": {
+        "observation": "Pengamatan",
+        "evidence": "Foto",
+        "dataset": "Kumpulan",
+        "project": "Proyek",
+        "cert": "Klaim",
+        "account": "Akun organisasi"
+      },
+      "steps": {
+        "s1": {
+          "title": "Anda mencatat satu penampakan",
+          "text": "Anda mengunggah foto pohon beserta spesies, tanggal, dan lokasinya, lalu aplikasi menulis satu kartu pengamatan. Pada titik ini ia belum menjadi milik apa pun: hanya satu penampakan di akun Anda."
+        },
+        "s2": {
+          "title": "Buktinya menggantung padanya",
+          "text": "Gambar disimpan sebagai kartu tersendiri yang menunjuk balik ke pengamatan. Tambahkan tiga foto dan satu pengukuran tinggi, maka Anda punya empat kartu yang semuanya menunjuk ke penampakan yang sama."
+        },
+        "s3": {
+          "title": "Anda mengelompokkannya ke kumpulan data",
+          "text": "Pilih sekumpulan pengamatan dan beri nama kelompoknya — «Survei Maret 2025». Sebuah kartu kumpulan data dibuat, dan setiap pengamatan terpilih mendapat alamat kumpulan data itu. Pengamatan yang sudah ada di kumpulan data dilewati, jadi tidak ada yang berpindah diam-diam."
+        },
+        "s4": {
+          "title": "Anda mengumpulkannya untuk sebuah proyek",
+          "text": "Jika Anda memilih proyek saat mengunggah, pengamatan juga membawa alamat proyek dan mewarisi lokasi proyeknya, sehingga mendarat di titik yang tepat pada peta."
+        },
+        "s5": {
+          "title": "Kumpulan data bergabung ke proyek",
+          "text": "Kumpulan data ditambahkan ke daftar isi proyek. Kini halaman proyek bisa menampilkan satu map penuh sekaligus, bukan ratusan penampakan yang berserak."
+        },
+        "s6": {
+          "title": "Klaim proyek terisi",
+          "text": "Setiap proyek diam-diam membawa klaim kembar yang memuat tanggal, para kontributor, cakupan kerja, dan tempat. Anda tidak pernah menyuntingnya langsung; ia selalu disesuaikan dengan proyeknya."
+        },
+        "s7": {
+          "title": "Anda menerbitkan sebagai organisasi Anda",
+          "text": "Ganti akun yang Anda pakai menerbitkan, dan semua kartu ini ditulis ke akun bersama organisasi, bukan ke akun Anda. Tidak ada tautan yang berubah — yang berubah hanya alamat di depannya."
+        }
+      }
+    },
+    "publishAs": {
+      "heading": "Data ini mendarat di akun siapa?",
+      "intro": "Inilah satu-satunya pilihan yang menentukan siapa pemilik datanya. Geser sakelarnya dan perhatikan apa yang berubah — dan apa yang tidak.",
+      "publishingAs": "Menerbitkan sebagai",
+      "storedAt": "Disimpan di",
+      "option": {
+        "personal": "Saya sendiri",
+        "organization": "Organisasi saya"
+      },
+      "summary": {
+        "personal": "Catatan ditulis ke akun Anda sendiri. Hanya Anda yang bisa mengubahnya, dan nama Anda melekat di mana pun catatan itu muncul.",
+        "organization": "Catatan ditulis ke akun bersama organisasi. Catatan tampil atas nama organisasi, dan rekan setim bisa terus mengerjakannya tanpa Anda."
+      },
+      "guard": {
+        "personal": "Tidak ada apa pun di antara Anda dan akun Anda sendiri: Anda masuk, lalu Anda menulis.",
+        "organization": "Sebuah layanan penjaga berdiri di depan akun bersama dan memeriksa peran Anda sebelum setiap penulisan. Tidak ada yang pernah memegang kata sandi organisasi, dan setiap tindakan dicatat."
+      },
+      "roles": {
+        "member": {
+          "name": "Anggota",
+          "text": "Bisa menambah catatan baru serta menyunting atau menghapus catatan yang ia tambahkan."
+        },
+        "admin": {
+          "name": "Pengelola",
+          "text": "Bisa menyunting atau menghapus apa pun di organisasi, dan mengundang orang."
+        },
+        "owner": {
+          "name": "Pemilik",
+          "text": "Semua yang bisa dilakukan pengelola, ditambah mengubah peran orang lain."
+        }
+      },
+      "note": "Berpindah akun tidak memindahkan apa pun yang sudah Anda terbitkan sebelumnya. Catatan tetap berada di akun tempatnya ditulis, jadi sebaiknya putuskan sebelum mengunggah dalam jumlah besar, bukan sesudahnya."
+    },
+    "faq": {
+      "heading": "Pertanyaan umum",
+      "q1": {
+        "question": "Apakah pengamatan harus berada di dalam kumpulan data?",
+        "answer": "Tidak. Kumpulan data, proyek, dan lokasi semuanya opsional. Pengamatan yang berdiri sendiri sepenuhnya sah, dan banyak yang memang begitu: kumpulan data adalah kemudahan bagi orang yang menerbitkan dan mengunduh secara berkelompok."
+      },
+      "q2": {
+        "question": "Bisakah satu pengamatan berada di dua kumpulan data?",
+        "answer": "Tidak. Pengamatan membawa satu alamat kumpulan data saja, jadi ia berada di satu map pada satu waktu. Untuk memindahkannya, keluarkan dulu dari kumpulan pertama lalu tambahkan ke kumpulan kedua."
+      },
+      "q3": {
+        "question": "Apa yang terjadi pada pengamatan saya jika saya menghapus kumpulan data?",
+        "answer": "Pengamatan tetap selamat. Menghapus kumpulan data pertama-tama membersihkan alamat kumpulan data dari setiap pengamatan di dalamnya, lalu mencabut map itu dari proyek mana pun yang mendaftarnya. Anda tetap punya penampakan yang sama, hanya tidak lagi terkelompok."
+      },
+      "q4": {
+        "question": "Bisakah saya memindahkan proyek pribadi saya ke sebuah organisasi?",
+        "answer": "Tidak dengan sekali klik. Akun tempat sebuah catatan tinggal adalah bagian dari identitasnya, jadi memindahkannya berarti menerbitkannya ulang dari akun organisasi. Biasanya lebih mudah memutuskan sejak awal siapa yang seharusnya memiliki pekerjaan itu."
+      },
+      "q5": {
+        "question": "Siapa saja yang bisa melihat semua ini?",
+        "answer": "Semua orang. Catatan tersimpan di jaringan terbuka AT Protocol, jadi aplikasi apa pun — bukan hanya GainForest — bisa membacanya. Justru itu maksudnya: kerja lapangan Anda tetap milik Anda dan tetap bisa dibawa pindah, bukan terkunci di basis data satu perusahaan."
+      }
+    },
+    "more": {
+      "heading": "Bacaan lanjutan",
+      "lexiconsTitle": "Skema data",
+      "lexiconsDesc": "Format catatan yang persis, kolom demi kolom, lengkap dengan skema mentah di balik setiap kartu di halaman ini.",
+      "cgsTitle": "Cara kerja akun kelompok",
+      "cgsDesc": "Layanan penjaga yang memungkinkan satu tim berbagi satu akun organisasi, lengkap dengan peran dan jejak audit.",
+      "atprotoTitle": "Apa itu AT Protocol?",
+      "atprotoDesc": "Jaringan terbuka yang menopang semuanya: akun, repositori, dan alasan tidak ada yang terkunci.",
+      "epdsTitle": "Cara kerja ePDS",
+      "epdsDesc": "Di mana akun dan catatannya sebenarnya ditempatkan, dan bagaimana proses masuk bekerja."
     }
   },
   "atproto": {

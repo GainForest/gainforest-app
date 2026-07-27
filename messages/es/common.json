@@ -1412,7 +1412,9 @@
       "guideIntro": "Esta guía define las convenciones de la aplicación utilizadas con el esquema de presencias. El esquema sigue siendo Darwin Core genérico; la guía explica cómo se conectan las grabaciones de AudioMoth, los cuadros del espectrograma y los registros de presencia."
     },
     "hypercertsLinkTitle": "Construir sobre los léxicos de Hypercerts",
-    "hypercertsLinkDesc": "Convenciones, divergencias y consejos de interoperabilidad para quien escriba registros de Hypercerts en su propia app."
+    "hypercertsLinkDesc": "Convenciones, divergencias y consejos de interoperabilidad para quien escriba registros de Hypercerts en su propia app.",
+    "dataModelLinkTitle": "Cómo encaja tu información",
+    "dataModelLinkDesc": "Un recorrido en lenguaje sencillo por cómo se enlazan observaciones, conjuntos de datos, proyectos y organizaciones."
   },
   "taina": {
     "meta": {
@@ -2556,7 +2558,229 @@
       "atprotoTitle": "Cómo funciona el AT Protocol",
       "atprotoDesc": "Un recorrido interactivo por la red abierta sobre la que está construido todo esto.",
       "hypercertsTitle": "Léxicos de Hypercerts",
-      "hypercertsDesc": "Cómo GainForest y Ma Earth modelan el trabajo de impacto, y qué escribir para encajar en ambas."
+      "hypercertsDesc": "Cómo GainForest y Ma Earth modelan el trabajo de impacto, y qué escribir para encajar en ambas.",
+      "dataModelTitle": "Cómo encaja tu información",
+      "dataModelDesc": "Observaciones, conjuntos de datos, proyectos y organizaciones: qué es cada uno y las tres formas de enlazarse."
+    }
+  },
+  "dataModel": {
+    "metaTitle": "Cómo encaja tu información",
+    "metaDescription": "Un recorrido en lenguaje sencillo por las observaciones, los conjuntos de datos, los proyectos y las organizaciones de GainForest: qué es cada uno y las tres formas en que se enlazan.",
+    "kicker": "Modelo de datos",
+    "title": "Cómo encaja tu información",
+    "lead": "Fotografías un árbol. Meses después esa foto forma parte de un conjunto de datos con nombre, dentro de un proyecto, publicado por una organización y legible por cualquiera en la red abierta. Esta página recorre esa cadena: qué es cada pieza y qué la conecta realmente con la siguiente.",
+    "bigIdea": {
+      "heading": "La idea central: cada registro es una ficha en un archivador",
+      "p1": "GainForest no tiene una base de datos central que sea dueña de tu información. Cada cuenta —la tuya y la de cada organización— es su propio archivador, y cada cosa que creas es una ficha guardada en él: una ficha por observación, una por foto, una por conjunto de datos, una por proyecto.",
+      "p2": "Las fichas nunca cambian de archivador y nada queda escondido dentro de otra cosa. En vez de eso, las fichas se señalan entre sí. La ficha de una foto lleva la dirección de la observación a la que pertenece; la ficha de una observación lleva la dirección de su conjunto de datos. Eso es todo lo que significa aquí «añadir algo a algo»: escribir una dirección en una ficha."
+    },
+    "pieces": {
+      "heading": "Las seis piezas",
+      "intro": "Casi todo lo que ves en la aplicación es una de estas seis cosas. Toca una para ver qué es, cómo se llama por dentro y cómo se engancha con sus vecinas.",
+      "hooksLabel": "Cómo se enlaza",
+      "observation": {
+        "name": "Observación",
+        "plain": "Una especie, en un lugar, en un momento. Un árbol que mediste, un ave que escuchaste, una rana que alguien fotografió.",
+        "detail": "Lleva el nombre científico, la fecha, las coordenadas y las notas. Es la unidad más pequeña de información de naturaleza en GainForest y puede existir perfectamente por su cuenta: no necesita ni conjunto de datos ni proyecto.",
+        "hooks": "Señala hacia arriba a un conjunto de datos, a un proyecto y a un sitio. Cualquiera de los tres puede quedar en blanco."
+      },
+      "evidence": {
+        "name": "Evidencia",
+        "plain": "La foto, la grabación de sonido, la medida con cinta métrica: la prueba adjunta a una observación.",
+        "detail": "Las fotos, los audios y los vídeos se guardan como fichas propias, y las mediciones como la altura del árbol o el diámetro del tronco son otra ficha más. Mantenerlas separadas permite añadir una segunda foto, o la medición de la próxima temporada, sin reescribir la observación.",
+        "hooks": "Señala hacia abajo a exactamente una observación. Una evidencia nunca se comparte entre dos avistamientos."
+      },
+      "dataset": {
+        "name": "Conjunto de datos",
+        "plain": "Una carpeta con nombre para un lote de observaciones que van juntas: normalmente un muestreo, un viaje, una temporada.",
+        "detail": "«Muestreo del valle de Danum, marzo de 2025» es un conjunto de datos. Guarda un nombre, una descripción y un recuento, y es lo que otras personas descargan o citan cuando usan tu trabajo.",
+        "hooks": "No lista a sus miembros. Son las observaciones las que lo señalan, así que un conjunto de datos es simplemente todas las observaciones que llevan su dirección."
+      },
+      "site": {
+        "name": "Sitio",
+        "plain": "Un lugar en el mapa: un parche de bosque, una reserva, una parcela con un límite dibujado alrededor.",
+        "detail": "Un sitio guarda un nombre, un punto central y una forma, para que observaciones, capas de mapa y proyectos puedan decir «esto pasó aquí» sin que cada uno vuelva a dibujar el mapa.",
+        "hooks": "Las observaciones lo señalan, y la declaración de un proyecto lo incluye entre los lugares donde ocurrió el trabajo."
+      },
+      "project": {
+        "name": "Proyecto",
+        "plain": "La historia pública de un trabajo: una restauración, un programa de monitoreo, una iniciativa comunitaria.",
+        "detail": "Un proyecto es una colección: una ficha cuya tarea principal es sostener una lista de otras fichas. Tiene título, resumen, imagen de portada y esa lista. Cada proyecto recibe además un gemelo discreto, la declaración, que lleva las fechas, las personas y los lugares.",
+        "hooks": "Sostiene una lista de elementos: su declaración y los conjuntos de datos anidados en él. Las observaciones también pueden señalarlo directamente."
+      },
+      "organization": {
+        "name": "Organización",
+        "plain": "Un equipo con su propia cuenta: un archivador compartido en el que pueden escribir varias personas.",
+        "detail": "Una organización no es una carpeta ni una etiqueta. Es una cuenta por derecho propio, con perfil, lista de integrantes y roles. Sus proyectos, conjuntos de datos y observaciones son las fichas guardadas en esa cuenta.",
+        "hooks": "Nada señala a una organización. Los registros le pertenecen por estar guardados en su cuenta, que es justo lo que indica la dirección que encabeza cada ficha."
+      }
+    },
+    "map": {
+      "heading": "El mapa de enlaces",
+      "intro": "Cada flecha de abajo es un campo real de un registro real. Toca una caja —o el marco punteado que las rodea— para iluminar sus enlaces y leer qué significan.",
+      "ariaLabel": "Mapa interactivo de cómo se enlazan entre sí los registros de GainForest",
+      "hint": "Las flechas se iluminan según lo que selecciones. El marco punteado es la cuenta que guarda todos estos registros.",
+      "nodes": {
+        "site": {
+          "name": "Sitio",
+          "desc": "Un lugar con límites. Las observaciones lo señalan con siteRef y la declaración de un proyecto lo lista en locations[], de modo que el trabajo aparece en el mapa."
+        },
+        "project": {
+          "name": "Proyecto",
+          "desc": "La ficha de colección. Mantiene una lista —items[]— con su declaración y los conjuntos de datos que se hayan anidado en él."
+        },
+        "cert": {
+          "name": "Declaración",
+          "desc": "El gemelo del proyecto, creado automáticamente. Lleva las fechas, las personas que contribuyen, el alcance del trabajo y los lugares, para que la ficha del proyecto siga siendo una lista sencilla."
+        },
+        "dataset": {
+          "name": "Conjunto de datos",
+          "desc": "La carpeta con nombre. Nunca lista sus observaciones: son ellas las que llevan su dirección en datasetRef, y el conjunto solo guarda un recuento."
+        },
+        "observation": {
+          "name": "Observación",
+          "desc": "El eje de todo el dibujo. Una ficha puede señalar a la vez a un conjunto de datos, un proyecto y un sitio, o a ninguno, y quedarse sola."
+        },
+        "evidence": {
+          "name": "Evidencia",
+          "desc": "Cada foto, grabación y medición es una ficha propia que señala de vuelta a la observación mediante occurrenceRef."
+        },
+        "account": {
+          "name": "Una cuenta (una persona o una organización)",
+          "desc": "El marco no es un enlace, es una dirección. Cada ficha vive dentro de exactamente una cuenta, y «este proyecto pertenece a esa organización» solo significa que la ficha del proyecto se escribió en la cuenta de la organización."
+        }
+      }
+    },
+    "kinds": {
+      "heading": "Tres formas de enlazar las cosas",
+      "intro": "En cuanto reconoces estos tres patrones, el sistema entero deja de parecer complicado.",
+      "pointer": {
+        "title": "El hijo señala hacia arriba",
+        "text": "La ficha pequeña guarda la dirección de la grande. Añadir una observación a un conjunto de datos significa reescribir esa observación; el conjunto de datos ni se toca."
+      },
+      "list": {
+        "title": "El padre guarda una lista",
+        "text": "Un proyecto sostiene una lista de lo que contiene. Anidar un conjunto de datos en un proyecto significa añadir una entrada a esa lista."
+      },
+      "home": {
+        "title": "Sencillamente vive ahí",
+        "text": "Pertenecer a una organización no es un enlace. Es en qué cuenta se escribió la ficha, y va incorporado en la dirección de la ficha."
+      }
+    },
+    "journey": {
+      "heading": "Un avistamiento, de principio a fin",
+      "intro": "Mira cómo se construye el dibujo, paso a paso, desde una sola foto hasta un proyecto publicado por una organización.",
+      "ariaLabel": "Diagrama paso a paso de una observación que pasa a formar parte de un conjunto de datos, un proyecto y una organización",
+      "back": "Paso anterior",
+      "next": "Paso siguiente",
+      "play": "Reproducir",
+      "pause": "Pausar",
+      "stepLabel": "Paso {n} de {total}",
+      "nodes": {
+        "observation": "Observación",
+        "evidence": "Foto",
+        "dataset": "Conjunto",
+        "project": "Proyecto",
+        "cert": "Declaración",
+        "account": "Cuenta de la organización"
+      },
+      "steps": {
+        "s1": {
+          "title": "Registras un avistamiento",
+          "text": "Subes la foto de un árbol con su especie, fecha y ubicación, y la aplicación escribe una ficha de observación. En este punto no pertenece a nada: es sencillamente un avistamiento en tu cuenta."
+        },
+        "s2": {
+          "title": "La evidencia cuelga de ella",
+          "text": "La imagen se guarda como ficha propia que señala de vuelta a la observación. Añade tres fotos y una medición de altura y tendrás cuatro fichas, todas apuntando al mismo avistamiento."
+        },
+        "s3": {
+          "title": "La agrupas en un conjunto de datos",
+          "text": "Seleccionas un lote de observaciones y le pones nombre al grupo: «Muestreo de marzo de 2025». Se crea una ficha de conjunto de datos y cada observación seleccionada recibe esa dirección. Las que ya están en un conjunto se omiten, así nada se mueve en silencio."
+        },
+        "s4": {
+          "title": "La recoges para un proyecto",
+          "text": "Si eliges un proyecto mientras subes, la observación lleva además la dirección del proyecto y hereda su sitio, de modo que aterriza en el punto correcto del mapa."
+        },
+        "s5": {
+          "title": "El conjunto entra en el proyecto",
+          "text": "El conjunto de datos se añade a la lista de elementos del proyecto. Ahora la página del proyecto puede mostrar una carpeta entera de una vez, en lugar de cientos de avistamientos sueltos."
+        },
+        "s6": {
+          "title": "Se completa la declaración del proyecto",
+          "text": "Cada proyecto lleva discretamente una declaración gemela con las fechas, las personas que contribuyen, el alcance del trabajo y los lugares. Nunca la editas directamente: se mantiene al día con el proyecto."
+        },
+        "s7": {
+          "title": "Publicas como tu organización",
+          "text": "Cambias la cuenta con la que publicas y todas estas fichas se escriben en la cuenta compartida de la organización en lugar de en la tuya. Los enlaces no cambian en nada: solo cambia la dirección que las encabeza."
+        }
+      }
+    },
+    "publishAs": {
+      "heading": "¿En qué cuenta aterriza?",
+      "intro": "Esta es la única decisión que define de quién es la información. Cambia el interruptor y observa qué cambia, y qué no.",
+      "publishingAs": "Publicando como",
+      "storedAt": "Guardado en",
+      "option": {
+        "personal": "Yo",
+        "organization": "Mi organización"
+      },
+      "summary": {
+        "personal": "Los registros se escriben en tu propia cuenta. Eres la única persona que puede cambiarlos y tu nombre aparece en ellos allá donde se muestren.",
+        "organization": "Los registros se escriben en la cuenta compartida de la organización. Aparecen bajo el nombre de la organización y tus compañeras pueden seguir trabajando en ellos sin ti."
+      },
+      "guard": {
+        "personal": "Nada se interpone entre tú y tu propia cuenta: inicias sesión y escribes.",
+        "organization": "Un servicio de guardia se sitúa delante de la cuenta compartida y comprueba tu rol antes de cada escritura. Nadie llega a manejar la contraseña de la organización y cada acción queda registrada."
+      },
+      "roles": {
+        "member": {
+          "name": "Integrante",
+          "text": "Puede añadir registros nuevos y editar o borrar los que añadió."
+        },
+        "admin": {
+          "name": "Administración",
+          "text": "Puede editar o borrar cualquier cosa de la organización e invitar personas."
+        },
+        "owner": {
+          "name": "Propiedad",
+          "text": "Todo lo que puede hacer la administración, y además cambiar los roles de las demás personas."
+        }
+      },
+      "note": "Cambiar de cuenta no mueve nada de lo que publicaste antes. Los registros se quedan en la cuenta en la que se escribieron, así que conviene decidirlo antes de una subida grande y no después."
+    },
+    "faq": {
+      "heading": "Preguntas frecuentes",
+      "q1": {
+        "question": "¿Una observación tiene que estar en un conjunto de datos?",
+        "answer": "No. El conjunto de datos, el proyecto y el sitio son opcionales. Una observación suelta es perfectamente válida, y muchas lo son: el conjunto de datos es una comodidad para quienes publican y descargan por lotes."
+      },
+      "q2": {
+        "question": "¿Puede una observación estar en dos conjuntos de datos?",
+        "answer": "No. Una observación lleva una sola dirección de conjunto de datos, así que está en una carpeta a la vez. Para moverla, la sacas del primer conjunto y luego la añades al segundo."
+      },
+      "q3": {
+        "question": "¿Qué pasa con mis observaciones si borro un conjunto de datos?",
+        "answer": "Sobreviven. Al borrar un conjunto de datos primero se quita esa dirección de todas sus observaciones y se retira la carpeta de cualquier proyecto que la listara. Te quedas con los mismos avistamientos, simplemente desagrupados."
+      },
+      "q4": {
+        "question": "¿Puedo mover a una organización un proyecto que hice a título personal?",
+        "answer": "No con un interruptor. La cuenta en la que vive un registro forma parte de su identidad, así que moverlo significa volver a publicarlo desde la cuenta de la organización. Suele ser más fácil decidir de antemano de quién debe ser el trabajo."
+      },
+      "q5": {
+        "question": "¿Quién puede ver todo esto?",
+        "answer": "Todo el mundo. Los registros se guardan en la red abierta del Protocolo AT, así que cualquier aplicación —no solo GainForest— puede leerlos. Esa es la idea: tu trabajo de campo sigue siendo tuyo y sigue siendo portátil, en vez de quedar encerrado en la base de datos de una empresa."
+      }
+    },
+    "more": {
+      "heading": "Sigue leyendo",
+      "lexiconsTitle": "Esquemas de datos",
+      "lexiconsDesc": "Los formatos exactos de cada registro, campo a campo, con los esquemas en crudo detrás de cada ficha de esta página.",
+      "cgsTitle": "Cómo funcionan las cuentas de grupo",
+      "cgsDesc": "El servicio de guardia que permite a todo un equipo compartir una cuenta de organización, con roles y registro de auditoría.",
+      "atprotoTitle": "¿Qué es el Protocolo AT?",
+      "atprotoDesc": "La red abierta que está debajo de todo: cuentas, repositorios y por qué nada queda encerrado.",
+      "epdsTitle": "Cómo funciona ePDS",
+      "epdsDesc": "Dónde se alojan realmente las cuentas y sus registros, y cómo funciona el inicio de sesión."
     }
   },
   "atproto": {

@@ -1412,7 +1412,9 @@
       "guideIntro": "Mwongozo huu unaeleza kanuni za programu zinazotumiwa pamoja na muundo wa matukio. Muundo unabaki Darwin Core wa jumla; mwongozo unaeleza jinsi rekodi za AudioMoth, visanduku vya spektrogramu na rekodi za matukio zinavyounganishwa."
     },
     "hypercertsLinkTitle": "Kujenga juu ya leksikoni za Hypercerts",
-    "hypercertsLinkDesc": "Kanuni, tofauti, na ushauri wa ushirikiano kwa wasanidi wanaoandika rekodi za Hypercerts katika programu yao."
+    "hypercertsLinkDesc": "Kanuni, tofauti, na ushauri wa ushirikiano kwa wasanidi wanaoandika rekodi za Hypercerts katika programu yao.",
+    "dataModelLinkTitle": "Jinsi data yako inavyoungana",
+    "dataModelLinkDesc": "Ziara kwa lugha rahisi ya jinsi uchunguzi, seti za data, miradi na mashirika vinavyounganishwa."
   },
   "taina": {
     "meta": {
@@ -2556,7 +2558,229 @@
       "atprotoTitle": "Jinsi AT Protocol inavyofanya kazi",
       "atprotoDesc": "Ziara shirikishi ya mtandao wazi ambao yote haya yamejengwa juu yake.",
       "hypercertsTitle": "Leksikoni za Hypercerts",
-      "hypercertsDesc": "Jinsi GainForest na Ma Earth zinavyoweka muundo wa kazi ya athari, na kile cha kuandika ili ulingane na zote mbili."
+      "hypercertsDesc": "Jinsi GainForest na Ma Earth zinavyoweka muundo wa kazi ya athari, na kile cha kuandika ili ulingane na zote mbili.",
+      "dataModelTitle": "Jinsi data yako inavyoungana",
+      "dataModelDesc": "Uchunguzi, seti za data, miradi na mashirika: kila kimoja ni nini, na njia tatu vinavyounganishwa."
+    }
+  },
+  "dataModel": {
+    "metaTitle": "Jinsi data yako inavyoungana",
+    "metaDescription": "Ziara kwa lugha rahisi ya uchunguzi, seti za data, miradi na mashirika ndani ya GainForest: kila kimoja ni nini, na njia tatu vinavyounganishwa.",
+    "kicker": "Muundo wa data",
+    "title": "Jinsi data yako inavyoungana",
+    "lead": "Unapiga picha ya mti. Miezi kadhaa baadaye picha hiyo ni sehemu ya seti ya data yenye jina, ndani ya mradi, iliyochapishwa na shirika, na inasomeka na mtu yeyote kwenye mtandao huria. Ukurasa huu unapitia mnyororo huo: kila kipande ni nini, na ni nini hasa kinachokiunganisha na kinachofuata.",
+    "bigIdea": {
+      "heading": "Wazo kuu: kila kumbukumbu ni kadi ndani ya kabati la mafaili",
+      "p1": "GainForest haina hifadhidata kuu inayomiliki data yako. Kila akaunti — yako na ya kila shirika — ni kabati lake dogo la mafaili, na kila kitu unachotengeneza ni kadi iliyowekwa humo: kadi moja kwa kila uchunguzi, moja kwa kila picha, moja kwa kila seti ya data, moja kwa kila mradi.",
+      "p2": "Kadi hazihami kutoka kabati moja kwenda jingine, na hakuna kinachofichwa ndani ya kitu kingine. Badala yake, kadi zinaelekezana. Kadi ya picha inabeba anwani ya uchunguzi inaomilikiwa nao; kadi ya uchunguzi inabeba anwani ya seti yake ya data. Hiyo ndiyo maana yote ya «kuongeza kitu kwenye kitu kingine» hapa: kuandika anwani kwenye kadi."
+    },
+    "pieces": {
+      "heading": "Vipande sita",
+      "intro": "Karibu kila kitu unachokiona kwenye programu ni mojawapo ya hivi sita. Gusa kimoja uone ni nini, kinaitwaje ndani ya mfumo, na kinavyoshikamana na majirani zake.",
+      "hooksLabel": "Jinsi kinavyounganishwa",
+      "observation": {
+        "name": "Uchunguzi",
+        "plain": "Spishi moja, mahali pamoja, kwa wakati mmoja. Mti uliopima, ndege uliyemsikia, chura aliyepigwa picha na mtu.",
+        "detail": "Unabeba jina la kisayansi, tarehe, viwianishi na maelezo yoyote. Ni kipimo kidogo kabisa cha data ya mazingira katika GainForest, na unaweza kusimama peke yake bila shida: hauhitaji seti ya data wala mradi.",
+        "hooks": "Unaelekeza juu kwenye seti ya data, kwenye mradi na kwenye eneo. Chochote kati ya hivyo vitatu kinaweza kuachwa wazi."
+      },
+      "evidence": {
+        "name": "Ushahidi",
+        "plain": "Picha, rekodi ya sauti, kipimo cha tepu — uthibitisho ulioambatanishwa na uchunguzi.",
+        "detail": "Picha, sauti na video huhifadhiwa kama kadi zao wenyewe, na vipimo kama urefu wa mti au kipenyo cha shina ni kadi nyingine tena. Kuvitenganisha kunakuwezesha kuongeza picha ya pili, au kipimo cha msimu ujao, bila kuandika upya uchunguzi.",
+        "hooks": "Unaelekeza chini kwenye uchunguzi mmoja tu. Ushahidi haushirikiwi kamwe kati ya matukio mawili."
+      },
+      "dataset": {
+        "name": "Seti ya data",
+        "plain": "Folda yenye jina kwa kundi la uchunguzi unaokwenda pamoja: mara nyingi utafiti mmoja, safari moja, msimu mmoja.",
+        "detail": "«Utafiti wa Bonde la Danum, Machi 2025» ni seti ya data. Inahifadhi jina, maelezo na hesabu inayoendelea, na ndiyo watu wengine wanapakua au kunukuu wanapotumia kazi yako.",
+        "hooks": "Haiorodheshi wanachama wake. Badala yake kila uchunguzi ndio unaoielekeza, hivyo seti ya data ni kila uchunguzi unaobeba anwani yake."
+      },
+      "site": {
+        "name": "Eneo",
+        "plain": "Mahali kwenye ramani: kipande cha msitu, hifadhi, au kiwanja chenye mpaka uliochorwa kuzunguka.",
+        "detail": "Eneo linahifadhi jina, kitovu na umbo, ili uchunguzi, tabaka za ramani na miradi vyote viweze kusema «hili lilitokea hapa» bila kila kimoja kuchora ramani upya.",
+        "hooks": "Uchunguzi unalielekeza, na dai la mradi linaliorodhesha miongoni mwa maeneo ambako kazi ilifanyika."
+      },
+      "project": {
+        "name": "Mradi",
+        "plain": "Simulizi ya hadhara ya kazi fulani: juhudi za urejeshaji, mpango wa ufuatiliaji, au jitihada ya jamii.",
+        "detail": "Mradi ni mkusanyiko — kadi ambayo kazi yake kuu ni kushikilia orodha ya kadi nyingine. Una kichwa, muhtasari, picha ya jalada, na orodha hiyo. Kila mradi pia hupata pacha wa kimya, yaani dai, linalobeba tarehe, watu na maeneo.",
+        "hooks": "Unashikilia orodha ya vipengele: dai lake, pamoja na seti zozote za data zilizowekwa ndani yake. Uchunguzi pia unaweza kuuelekeza moja kwa moja."
+      },
+      "organization": {
+        "name": "Shirika",
+        "plain": "Timu yenye akaunti yake mwenyewe — kabati la mafaili linaloshirikiwa ambalo watu kadhaa wanaweza kuandika ndani yake.",
+        "detail": "Shirika si folda wala lebo. Ni akaunti kamili yenyewe, yenye wasifu, orodha ya wanachama na majukumu. Miradi, seti za data na uchunguzi wake ni kadi zilizohifadhiwa katika akaunti hiyo.",
+        "hooks": "Hakuna kinachoelekeza kwenye shirika. Kumbukumbu ni mali yake kwa sababu zimehifadhiwa katika akaunti yake — na hiyo ndiyo hasa anwani iliyo mbele ya kila kadi inayoirekodi."
+      }
+    },
+    "map": {
+      "heading": "Ramani ya viungo",
+      "intro": "Kila mshale hapa chini ni sehemu halisi ndani ya kumbukumbu halisi. Gusa kisanduku — au fremu ya vitone inayovizunguka — ili kuwasha viungo vyake na kusoma maana yake.",
+      "ariaLabel": "Ramani shirikishi ya jinsi kumbukumbu za GainForest zinavyounganishwa",
+      "hint": "Mishale huwaka kulingana na ulichochagua. Fremu ya vitone ni akaunti inayohifadhi kumbukumbu hizi zote.",
+      "nodes": {
+        "site": {
+          "name": "Eneo",
+          "desc": "Mahali penye mpaka. Uchunguzi unalielekeza kwa siteRef, na dai la mradi linaliorodhesha ndani ya locations[] ili kazi ionekane kwenye ramani."
+        },
+        "project": {
+          "name": "Mradi",
+          "desc": "Kadi ya mkusanyiko. Inashikilia orodha — items[] — yenye dai lake na seti zozote za data zilizowekwa ndani yake."
+        },
+        "cert": {
+          "name": "Dai",
+          "desc": "Pacha wa mradi, anayetengenezwa kiotomatiki. Anabeba tarehe, wachangiaji, upeo wa kazi na maeneo, ili kadi ya mradi ibaki orodha rahisi."
+        },
+        "dataset": {
+          "name": "Seti ya data",
+          "desc": "Folda yenye jina. Haiorodheshi kamwe uchunguzi wake; uchunguzi ndio unaobeba anwani yake katika datasetRef, na seti hiyo inahifadhi hesabu tu."
+        },
+        "observation": {
+          "name": "Uchunguzi",
+          "desc": "Kitovu cha picha nzima. Kadi moja inaweza kuelekeza kwenye seti ya data, mradi na eneo kwa wakati mmoja — au isielekeze popote, ikabaki peke yake."
+        },
+        "evidence": {
+          "name": "Ushahidi",
+          "desc": "Kila picha, rekodi na kipimo ni kadi yake yenyewe inayoelekeza kurudi kwenye uchunguzi kupitia occurrenceRef."
+        },
+        "account": {
+          "name": "Akaunti moja (mtu au shirika)",
+          "desc": "Fremu si kiungo, ni anwani. Kila kadi inaishi ndani ya akaunti moja tu, na «mradi huu ni wa shirika lile» kunamaanisha tu kwamba kadi ya mradi iliandikwa ndani ya akaunti ya shirika."
+        }
+      }
+    },
+    "kinds": {
+      "heading": "Njia tatu za kuunganisha vitu",
+      "intro": "Mara tu unapoweza kutambua mifumo hii mitatu, mfumo mzima huacha kuonekana mgumu.",
+      "pointer": {
+        "title": "Mtoto anaelekeza juu",
+        "text": "Kadi ndogo inahifadhi anwani ya kadi kubwa. Kuongeza uchunguzi kwenye seti ya data kunamaanisha kuandika upya uchunguzi huo mmoja; seti ya data yenyewe haiguswi."
+      },
+      "list": {
+        "title": "Mzazi anashikilia orodha",
+        "text": "Mradi unashikilia orodha ya vilivyomo ndani yake. Kuweka seti ya data ndani ya mradi kunamaanisha kuongeza kipengele kimoja kwenye orodha hiyo."
+      },
+      "home": {
+        "title": "Kinaishi hapo tu",
+        "text": "Kuwa mali ya shirika si kiungo hata kidogo. Ni swali la kadi iliandikwa katika akaunti ipi, na jambo hilo limejengwa ndani ya anwani ya kadi."
+      }
+    },
+    "journey": {
+      "heading": "Tukio moja, mwanzo hadi mwisho",
+      "intro": "Tazama picha ikijengwa hatua kwa hatua, kutoka picha moja hadi mradi uliochapishwa na shirika.",
+      "ariaLabel": "Mchoro wa hatua kwa hatua wa uchunguzi ukiwa sehemu ya seti ya data, mradi na shirika",
+      "back": "Hatua iliyotangulia",
+      "next": "Hatua inayofuata",
+      "play": "Cheza",
+      "pause": "Sitisha",
+      "stepLabel": "Hatua {n} kati ya {total}",
+      "nodes": {
+        "observation": "Uchunguzi",
+        "evidence": "Picha",
+        "dataset": "Seti",
+        "project": "Mradi",
+        "cert": "Dai",
+        "account": "Akaunti ya shirika"
+      },
+      "steps": {
+        "s1": {
+          "title": "Unarekodi tukio",
+          "text": "Unapakia picha ya mti pamoja na spishi, tarehe na mahali, kisha programu inaandika kadi moja ya uchunguzi. Kwa sasa haihusiani na kitu chochote: ni tukio tu ndani ya akaunti yako."
+        },
+        "s2": {
+          "title": "Ushahidi unaning'inia juu yake",
+          "text": "Picha huhifadhiwa kama kadi yake yenyewe inayoelekeza kurudi kwenye uchunguzi. Ongeza picha tatu na kipimo cha urefu, nawe utakuwa na kadi nne, zote zikielekeza tukio lilelile."
+        },
+        "s3": {
+          "title": "Unaikusanya ndani ya seti ya data",
+          "text": "Chagua kundi la uchunguzi kisha ulipe jina — «Utafiti wa Machi 2025». Kadi ya seti ya data hutengenezwa, na kila uchunguzi uliochaguliwa hupewa anwani ya seti hiyo. Uchunguzi ambao tayari uko kwenye seti huachwa, ili kusiwe na kinachohama kimyakimya."
+        },
+        "s4": {
+          "title": "Unaikusanya kwa ajili ya mradi",
+          "text": "Ukichagua mradi wakati wa kupakia, uchunguzi pia unabeba anwani ya mradi na kurithi eneo lake, hivyo unatua mahali sahihi kwenye ramani."
+        },
+        "s5": {
+          "title": "Seti ya data inajiunga na mradi",
+          "text": "Seti ya data inaongezwa kwenye orodha ya vipengele vya mradi. Sasa ukurasa wa mradi unaweza kuonyesha folda nzima kwa mara moja badala ya mamia ya matukio yaliyotawanyika."
+        },
+        "s6": {
+          "title": "Dai la mradi linajazwa",
+          "text": "Kila mradi hubeba kimyakimya dai pacha lenye tarehe, wachangiaji, upeo wa kazi na maeneo. Hulihariri moja kwa moja; linawekwa sambamba na mradi."
+        },
+        "s7": {
+          "title": "Unachapisha kama shirika lako",
+          "text": "Badilisha akaunti unayochapishia, na kadi hizi zote zitaandikwa ndani ya akaunti ya pamoja ya shirika badala ya yako. Hakuna kiungo kinachobadilika — kinachobadilika ni anwani iliyo mbele yake tu."
+        }
+      }
+    },
+    "publishAs": {
+      "heading": "Data inatua kwenye akaunti ya nani?",
+      "intro": "Hili ndilo chaguo pekee linaloamua nani anamiliki data. Geuza swichi uone kinachobadilika — na kisichobadilika.",
+      "publishingAs": "Unachapisha kama",
+      "storedAt": "Imehifadhiwa katika",
+      "option": {
+        "personal": "Mimi mwenyewe",
+        "organization": "Shirika langu"
+      },
+      "summary": {
+        "personal": "Kumbukumbu zinaandikwa ndani ya akaunti yako mwenyewe. Wewe pekee ndiye unaweza kuzibadilisha, na jina lako linaonekana juu yake popote zinapotokea.",
+        "organization": "Kumbukumbu zinaandikwa ndani ya akaunti ya pamoja ya shirika. Zinaonekana chini ya jina la shirika, na wenzako wanaweza kuendelea kuzifanyia kazi bila wewe."
+      },
+      "guard": {
+        "personal": "Hakuna kinachosimama kati yako na akaunti yako mwenyewe: unaingia, unaandika.",
+        "organization": "Huduma ya ulinzi inasimama mbele ya akaunti ya pamoja na kukagua jukumu lako kabla ya kila uandishi. Hakuna anayeshika nenosiri la shirika, na kila kitendo kinawekwa kumbukumbu."
+      },
+      "roles": {
+        "member": {
+          "name": "Mwanachama",
+          "text": "Anaweza kuongeza kumbukumbu mpya, na kuhariri au kufuta zile alizoongeza."
+        },
+        "admin": {
+          "name": "Msimamizi",
+          "text": "Anaweza kuhariri au kufuta chochote ndani ya shirika, na kualika watu."
+        },
+        "owner": {
+          "name": "Mmiliki",
+          "text": "Yote anayoweza msimamizi, pamoja na kubadilisha majukumu ya watu wengine."
+        }
+      },
+      "note": "Kubadilisha akaunti hakuhamishi chochote ulichochapisha awali. Kumbukumbu hubaki katika akaunti zilikoandikwa, hivyo ni vyema kuamua kabla ya upakiaji mkubwa badala ya baadaye."
+    },
+    "faq": {
+      "heading": "Maswali ya kawaida",
+      "q1": {
+        "question": "Je, uchunguzi lazima uwe ndani ya seti ya data?",
+        "answer": "Hapana. Seti ya data, mradi na eneo yote ni ya hiari. Uchunguzi uliosimama peke yake ni halali kabisa, na wengi wako hivyo: seti ya data ni urahisi kwa wanaochapisha na kupakua kwa makundi."
+      },
+      "q2": {
+        "question": "Je, uchunguzi mmoja unaweza kuwa katika seti mbili za data?",
+        "answer": "Hapana. Uchunguzi unabeba anwani moja tu ya seti ya data, hivyo upo ndani ya folda moja kwa wakati mmoja. Ili kuuhamisha, uuondoe kwenye seti ya kwanza kisha uuongeze kwenye ya pili."
+      },
+      "q3": {
+        "question": "Nini kitatokea kwa uchunguzi wangu nikifuta seti ya data?",
+        "answer": "Utabaki salama. Kufuta seti ya data kunaanza kwa kuondoa anwani ya seti hiyo kwenye kila uchunguzi ndani yake, na kuiondoa folda kwenye mradi wowote ulioiorodhesha. Unabaki na matukio yaleyale, ila hayajakusanywa tena."
+      },
+      "q4": {
+        "question": "Je, ninaweza kuhamishia shirika mradi niliouunda binafsi?",
+        "answer": "Si kwa kubonyeza swichi. Akaunti ambamo kumbukumbu inaishi ni sehemu ya utambulisho wake, hivyo kuihamisha kunamaanisha kuichapisha upya kutoka akaunti ya shirika. Mara nyingi ni rahisi kuamua mapema nani anapaswa kumiliki kazi hiyo."
+      },
+      "q5": {
+        "question": "Nani anaweza kuona haya yote?",
+        "answer": "Kila mtu. Kumbukumbu zinahifadhiwa kwenye mtandao huria wa AT Protocol, hivyo programu yoyote — si GainForest pekee — inaweza kuzisoma. Hiyo ndiyo lengo: kazi yako ya shambani inabaki yako na inabaki inayohamishika, badala ya kufungiwa ndani ya hifadhidata ya kampuni moja."
+      }
+    },
+    "more": {
+      "heading": "Endelea kusoma",
+      "lexiconsTitle": "Miundo ya data",
+      "lexiconsDesc": "Miundo kamili ya kila kumbukumbu, sehemu kwa sehemu, pamoja na miundo halisi iliyo nyuma ya kila kadi kwenye ukurasa huu.",
+      "cgsTitle": "Jinsi akaunti za vikundi zinavyofanya kazi",
+      "cgsDesc": "Huduma ya ulinzi inayoruhusu timu nzima kushiriki akaunti moja ya shirika, ikiwa na majukumu na kumbukumbu ya ukaguzi.",
+      "atprotoTitle": "AT Protocol ni nini?",
+      "atprotoDesc": "Mtandao huria ulio chini ya yote: akaunti, hazina za kumbukumbu, na kwa nini hakuna kinachofungiwa ndani.",
+      "epdsTitle": "Jinsi ePDS inavyofanya kazi",
+      "epdsDesc": "Mahali akaunti na kumbukumbu zake zinapohifadhiwa kwa kweli, na jinsi kuingia kunavyofanya kazi."
     }
   },
   "atproto": {

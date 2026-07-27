@@ -1412,7 +1412,9 @@
       "guideIntro": "This guide defines the application-level conventions used with the occurrence schema. The schema remains generic Darwin Core; the guide explains how AudioMoth recordings, spectrogram boxes, and occurrence records connect."
     },
     "hypercertsLinkTitle": "Building on the Hypercerts lexicons",
-    "hypercertsLinkDesc": "Conventions, divergences, and interoperability advice for developers writing Hypercerts records in their own app."
+    "hypercertsLinkDesc": "Conventions, divergences, and interoperability advice for developers writing Hypercerts records in their own app.",
+    "dataModelLinkTitle": "How your data fits together",
+    "dataModelLinkDesc": "A plain-language tour of how observations, datasets, projects and organizations link to one another."
   },
   "taina": {
     "meta": {
@@ -2556,7 +2558,229 @@
       "atprotoTitle": "How the AT Protocol works",
       "atprotoDesc": "An interactive tour of the open network everything here is built on.",
       "hypercertsTitle": "Hypercerts lexicons",
-      "hypercertsDesc": "How GainForest and Ma Earth model impact work, and what to write so your app fits both."
+      "hypercertsDesc": "How GainForest and Ma Earth model impact work, and what to write so your app fits both.",
+      "dataModelTitle": "How your data fits together",
+      "dataModelDesc": "Observations, datasets, projects and organizations — what each one is, and the three ways they link."
+    }
+  },
+  "dataModel": {
+    "metaTitle": "How your data fits together",
+    "metaDescription": "A plain-language tour of observations, datasets, projects and organizations on GainForest — what each one is, and the three ways they link to each other.",
+    "kicker": "Data model",
+    "title": "How your data fits together",
+    "lead": "You photograph a tree. Months later that photo is part of a named dataset, inside a project, published by an organization, and readable by anyone on the open network. This page walks through that chain — what each piece is, and what actually connects it to the next one.",
+    "bigIdea": {
+      "heading": "The big idea: every record is a card in a filing cabinet",
+      "p1": "GainForest has no central database that owns your data. Every account — yours, and every organization's — is its own small filing cabinet, and each thing you create is a card filed in it: one card per observation, one per photo, one per dataset, one per project.",
+      "p2": "Cards never move between cabinets, and nothing is ever tucked inside something else. Instead, cards point at each other. A photo card carries the address of the observation it belongs to; an observation card carries the address of its dataset. That is all \"adding something to something else\" really means here: writing an address onto a card."
+    },
+    "pieces": {
+      "heading": "The six pieces",
+      "intro": "Almost everything you see in the app is one of these six. Tap one to see what it is, what it is called under the hood, and how it hooks onto its neighbours.",
+      "hooksLabel": "How it links",
+      "observation": {
+        "name": "Observation",
+        "plain": "One species, in one place, at one moment. A tree you measured, a bird you heard, a frog someone photographed.",
+        "detail": "It carries the scientific name, the date, the coordinates and any notes. It is the smallest unit of nature data on GainForest, and it can happily exist on its own — it needs no dataset and no project.",
+        "hooks": "Points up at a dataset, at a project and at a site. Any of the three can be left blank."
+      },
+      "evidence": {
+        "name": "Evidence",
+        "plain": "The photo, the sound recording, the tape-measure reading — the proof attached to an observation.",
+        "detail": "Photos, audio and video are stored as their own cards, and measurements such as tree height or trunk diameter are yet another card. Keeping them separate means you can add a second photo, or next season's measurement, without rewriting the observation.",
+        "hooks": "Points down at exactly one observation. A piece of evidence is never shared between two sightings."
+      },
+      "dataset": {
+        "name": "Dataset",
+        "plain": "A named folder for a batch of observations that belong together — usually one survey, one trip, one season.",
+        "detail": "\"March 2025 Danum Valley survey\" is a dataset. It stores a name, a description and a running count, and it is what other people download or cite when they use your work.",
+        "hooks": "It does not list its members. Each observation points at it instead, so a dataset is simply every observation carrying its address."
+      },
+      "site": {
+        "name": "Site",
+        "plain": "A place on the map: a forest patch, a reserve, a plot with a boundary drawn around it.",
+        "detail": "A site holds a name, a centre point and a shape, so observations, map layers and projects can all say \"this happened here\" without each of them redrawing the map.",
+        "hooks": "Observations point at it, and a project's claim lists it among the places the work happened."
+      },
+      "project": {
+        "name": "Project",
+        "plain": "The public story of a body of work: a restoration effort, a monitoring programme, a community initiative.",
+        "detail": "A project is a collection — a card whose main job is to hold a list of other cards. It has a title, a summary, a cover image, and that list. Every project also gets a quiet twin, the claim, which carries the dates, the people and the places.",
+        "hooks": "Holds a list of items: its claim, plus any datasets nested under it. Observations can also point straight at it."
+      },
+      "organization": {
+        "name": "Organization",
+        "plain": "A team with its own account — a shared filing cabinet that several people can write into.",
+        "detail": "An organization is not a folder and not a tag. It is an account in its own right, with a profile, a member list and roles. Its projects, datasets and observations are the cards filed in that account.",
+        "hooks": "Nothing points at an organization. Records belong to it by being stored in its account — which is exactly what the address in front of every card records."
+      }
+    },
+    "map": {
+      "heading": "The link map",
+      "intro": "Every arrow below is a real field in a real record. Tap a box — or the dashed frame around them — to light up its links and read what they mean.",
+      "ariaLabel": "Interactive map of how GainForest records link to each other",
+      "hint": "Arrows light up for whatever you selected. The dashed frame is the account that stores all of these records.",
+      "nodes": {
+        "site": {
+          "name": "Site",
+          "desc": "A place with a boundary. Observations point at it with siteRef, and a project's claim lists it under locations[] so the work shows up on the map."
+        },
+        "project": {
+          "name": "Project",
+          "desc": "The collection card. It keeps a list — items[] — holding its claim and any datasets that have been nested under it."
+        },
+        "cert": {
+          "name": "Claim",
+          "desc": "The project's twin, created automatically. It carries the dates, contributors, work scope and places, so the project card can stay a simple list."
+        },
+        "dataset": {
+          "name": "Dataset",
+          "desc": "The named folder. It never lists its observations; the observations carry its address in datasetRef, and the dataset only keeps a count."
+        },
+        "observation": {
+          "name": "Observation",
+          "desc": "The hub of the whole picture. One card can point at a dataset, a project and a site at the same time — or at none of them, and simply stand alone."
+        },
+        "evidence": {
+          "name": "Evidence",
+          "desc": "Each photo, recording and measurement is its own card, pointing back at the observation through occurrenceRef."
+        },
+        "account": {
+          "name": "One account (a person or an organization)",
+          "desc": "The frame is not a link, it is an address. Every card lives inside exactly one account, and \"this project belongs to that organization\" only means the project card was written into the organization's account."
+        }
+      }
+    },
+    "kinds": {
+      "heading": "Three ways things get linked",
+      "intro": "Once you can spot these three patterns, the whole system stops feeling complicated.",
+      "pointer": {
+        "title": "The child points up",
+        "text": "The smaller card stores the address of the bigger one. Adding an observation to a dataset means rewriting that one observation; the dataset itself is untouched."
+      },
+      "list": {
+        "title": "The parent keeps a list",
+        "text": "A project holds a list of what is inside it. Nesting a dataset under a project means adding one entry to that list."
+      },
+      "home": {
+        "title": "It simply lives there",
+        "text": "Belonging to an organization is not a link at all. It is which account the card was written into, and it is baked into the card's address."
+      }
+    },
+    "journey": {
+      "heading": "One sighting, start to finish",
+      "intro": "Watch the picture get built, step by step, from a single photo to a project published by an organization.",
+      "ariaLabel": "Step-by-step diagram of an observation becoming part of a dataset, a project and an organization",
+      "back": "Previous step",
+      "next": "Next step",
+      "play": "Play",
+      "pause": "Pause",
+      "stepLabel": "Step {n} of {total}",
+      "nodes": {
+        "observation": "Observation",
+        "evidence": "Photo",
+        "dataset": "Dataset",
+        "project": "Project",
+        "cert": "Claim",
+        "account": "Organization account"
+      },
+      "steps": {
+        "s1": {
+          "title": "You record a sighting",
+          "text": "You upload a photo of a tree with its species, date and location, and the app writes one observation card. At this point it belongs to nothing — it is simply a sighting in your account."
+        },
+        "s2": {
+          "title": "The evidence hangs off it",
+          "text": "The image is stored as its own card pointing back at the observation. Add three photos and a height measurement and you have four cards, all pointing at the same sighting."
+        },
+        "s3": {
+          "title": "You group it into a dataset",
+          "text": "Select a batch of observations and name the group — \"March 2025 survey\". A dataset card is created, and each selected observation gets that dataset's address written onto it. Observations already in a dataset are skipped, so nothing silently moves."
+        },
+        "s4": {
+          "title": "You collect it for a project",
+          "text": "If you pick a project while uploading, the observation also carries the project's address, and inherits the project's site so it lands in the right spot on the map."
+        },
+        "s5": {
+          "title": "The dataset joins the project",
+          "text": "The dataset is added to the project's list of items. Now the project page can show a whole folder at once instead of hundreds of loose sightings."
+        },
+        "s6": {
+          "title": "The project's claim fills in",
+          "text": "Every project quietly carries a twin claim holding the dates, the contributors, the work scope and the places. You never edit it directly; it is kept in step with the project."
+        },
+        "s7": {
+          "title": "You publish as your organization",
+          "text": "Switch the account you publish as, and all of these cards are written into the organization's shared account instead of your own. Nothing about the links changes — only the address in front of them."
+        }
+      }
+    },
+    "publishAs": {
+      "heading": "Whose account does it land in?",
+      "intro": "This is the one choice that decides who owns the data. Flip the switch and watch what changes — and what does not.",
+      "publishingAs": "Publishing as",
+      "storedAt": "Stored at",
+      "option": {
+        "personal": "Myself",
+        "organization": "My organization"
+      },
+      "summary": {
+        "personal": "The records are written into your own account. You are the only person who can change them, and your name is on them wherever they appear.",
+        "organization": "The records are written into the organization's shared account. They appear under the organization's name, and teammates can keep working on them without you."
+      },
+      "guard": {
+        "personal": "Nothing stands between you and your own account: you sign in, you write.",
+        "organization": "A guard service sits in front of the shared account and checks your role before every write. Nobody ever handles the organization's password, and every action is logged."
+      },
+      "roles": {
+        "member": {
+          "name": "Member",
+          "text": "Can add new records, and edit or delete the ones they added."
+        },
+        "admin": {
+          "name": "Admin",
+          "text": "Can edit or delete anything in the organization, and invite people."
+        },
+        "owner": {
+          "name": "Owner",
+          "text": "Everything an admin can do, plus changing other people's roles."
+        }
+      },
+      "note": "Switching does not move anything you published earlier. Records stay in the account they were written into, so it is worth deciding before a big upload rather than after."
+    },
+    "faq": {
+      "heading": "Common questions",
+      "q1": {
+        "question": "Does an observation have to be in a dataset?",
+        "answer": "No. A dataset, a project and a site are all optional. A lone observation is perfectly valid, and plenty of them are — a dataset is a convenience for people who publish and download in batches."
+      },
+      "q2": {
+        "question": "Can one observation be in two datasets?",
+        "answer": "No. An observation carries a single dataset address, so it sits in one folder at a time. To move it, take it out of the first dataset and then add it to the second."
+      },
+      "q3": {
+        "question": "What happens to my observations if I delete a dataset?",
+        "answer": "They survive. Deleting a dataset first clears the dataset address off every observation in it, and removes the folder from any project that listed it. You are left with the same sightings, simply ungrouped."
+      },
+      "q4": {
+        "question": "Can I move a project I made personally into an organization?",
+        "answer": "Not by flicking a switch. The account a record lives in is part of its identity, so moving it means publishing it again from the organization's account. It is usually easier to decide upfront who should own the work."
+      },
+      "q5": {
+        "question": "Who can see all of this?",
+        "answer": "Everyone. Records are stored on the open AT Protocol network, so any app — not only GainForest — can read them. That is the point: your fieldwork stays yours and stays portable, instead of being locked inside one company's database."
+      }
+    },
+    "more": {
+      "heading": "Keep reading",
+      "lexiconsTitle": "Data schemas",
+      "lexiconsDesc": "The exact record formats, field by field, with the raw schemas behind every card on this page.",
+      "cgsTitle": "How group accounts work",
+      "cgsDesc": "The guard service that lets a whole team share one organization account, with roles and an audit trail.",
+      "atprotoTitle": "What is the AT Protocol?",
+      "atprotoDesc": "The open network underneath it all: accounts, repositories, and why nothing is locked in.",
+      "epdsTitle": "How ePDS works",
+      "epdsDesc": "Where accounts and their records are actually hosted, and how signing in works."
     }
   },
   "atproto": {
