@@ -316,9 +316,10 @@ export function SoundscapeClient({ sessionDid }: { sessionDid: string | null }) 
     [analyzedRecordings],
   );
 
-  // Which recording to play for each dial minute. When several recordings
-  // share a minute (same schedule slot across days), pick the loudest one —
-  // that's the max the chart draws. The zoom list below reaches the others.
+  // Which recording to play for each dial minute. The dial draws the average
+  // of everything in a minute, so when several recordings share one (same
+  // schedule slot across days) no single file is "the" one — play the loudest
+  // and let the zoom list below reach the others.
   const playableByMinute = useMemo(() => {
     const loudness = (entry: AnalyzedLibraryRecording) => entry.pmn.reduce((sum, value) => sum + value, 0);
     const byMinute = new Map<number, AnalyzedLibraryRecording>();
@@ -485,6 +486,10 @@ export function SoundscapeClient({ sessionDid }: { sessionDid: string | null }) 
     },
     [player, points, visibleBands],
   );
+
+  /* How many days the dial is folding together. Above one, every point is a
+     mean of several recordings, and the chart says so. */
+  const averagedDayCount = selectedDate === ALL_DATES ? dateKeys.length : 1;
 
   const chartDateLabel =
     selectedDate !== ALL_DATES
@@ -771,6 +776,11 @@ export function SoundscapeClient({ sessionDid }: { sessionDid: string | null }) 
             <h2 className="font-medium text-foreground">
               {chartDateLabel ? t("chart.title", { date: chartDateLabel }) : t("chart.title", { date: t("chart.allDates") })}
             </h2>
+            {averagedDayCount > 1 ? (
+              <p className="mt-0.5 text-xs text-muted-foreground">
+                {t("chart.averageNote", { count: averagedDayCount })}
+              </p>
+            ) : null}
             <p className="mt-0.5 text-xs text-muted-foreground">
               {canPlayFromDial ? t("chart.hoverHint") : t("chart.hoverHintAllDates")}
             </p>
@@ -916,6 +926,7 @@ export function SoundscapeClient({ sessionDid }: { sessionDid: string | null }) 
                   visibleBands={visibleBands}
                   bandLabels={bandLabels}
                   title={t("chart.title", { date: chartDateLabel || t("chart.allDates") })}
+                  subtitle={averagedDayCount > 1 ? t("chart.averageNote", { count: averagedDayCount }) : undefined}
                   radialLabel={t("chart.radialLabel")}
                   timeLabel={t("chart.timeLabel")}
                   legendTitle={t("chart.legendTitle")}

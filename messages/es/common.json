@@ -3198,7 +3198,8 @@
       "stop": "Detener",
       "playError": "No se pudo reproducir esta grabación en tu navegador.",
       "datesTitle": "Días",
-      "allDatesChip": "Todos los días"
+      "allDatesChip": "Todos los días",
+      "averageNote": "Promedio de {count} días: cada hora del reloj es la media de las grabaciones de ese momento."
     },
     "zoom": {
       "rangeAllDay": "Día completo · 00:00 – 24:00",

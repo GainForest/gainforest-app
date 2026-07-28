@@ -3198,7 +3198,8 @@
       "stop": "Stop",
       "playError": "Couldn't play this recording in your browser.",
       "datesTitle": "Days",
-      "allDatesChip": "All days"
+      "allDatesChip": "All days",
+      "averageNote": "Averaged across {count} days — each time on the dial is the mean of that slot's recordings."
     },
     "zoom": {
       "rangeAllDay": "Whole day · 00:00 – 24:00",

@@ -3198,7 +3198,8 @@
       "stop": "Berhenti",
       "playError": "Rekaman ini tidak dapat diputar di peramban Anda.",
       "datesTitle": "Hari",
-      "allDatesChip": "Semua hari"
+      "allDatesChip": "Semua hari",
+      "averageNote": "Rata-rata dari {count} hari — setiap waktu pada dial adalah rerata rekaman pada jam tersebut."
     },
     "zoom": {
       "rangeAllDay": "Sepanjang hari · 00:00 – 24:00",

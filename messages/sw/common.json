@@ -3198,7 +3198,8 @@
       "stop": "Simamisha",
       "playError": "Rekodi hii haikuweza kuchezwa kwenye kivinjari chako.",
       "datesTitle": "Siku",
-      "allDatesChip": "Siku zote"
+      "allDatesChip": "Siku zote",
+      "averageNote": "Wastani wa siku {count} — kila saa kwenye duara ni wastani wa rekodi za saa hiyo."
     },
     "zoom": {
       "rangeAllDay": "Siku nzima · 00:00 – 24:00",

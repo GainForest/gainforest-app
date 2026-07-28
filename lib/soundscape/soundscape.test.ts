@@ -337,14 +337,38 @@ describe("computeRecordingPmn", () => {
 });
 
 describe("buildSoundscapePoints", () => {
-  it("merges recordings in the same minute with per-bin max and sorts", () => {
+  it("merges recordings in the same minute with a per-bin mean and sorts", () => {
     const points = buildSoundscapePoints([
       { minuteOfDay: 930, pmn: [1, 2, 3, 4, 5] },
       { minuteOfDay: 90, pmn: [5, 5, 5, 5, 5] },
       { minuteOfDay: 930, pmn: [4, 1, 6, 2, 9] },
     ]);
     expect(points.map((point) => point.minuteOfDay)).toEqual([90, 930]);
-    expect(points[1].pmn).toEqual([4, 2, 6, 4, 9]);
+    expect(points[1].pmn).toEqual([2.5, 1.5, 4.5, 3, 7]);
+    expect(points.map((point) => point.count)).toEqual([1, 2]);
+  });
+
+  it("never lets one loud day stand in for the others", () => {
+    const quiet = { minuteOfDay: 360, pmn: [10, 10, 10, 10, 10] };
+    const loud = { minuteOfDay: 360, pmn: [1000, 1000, 1000, 1000, 1000] };
+    const [point] = buildSoundscapePoints([quiet, quiet, loud]);
+    for (const value of point.pmn) {
+      expect(value).toBeGreaterThan(10);
+      expect(value).toBeLessThan(1000);
+    }
+    expect(point.count).toBe(3);
+  });
+
+  it("leaves a single recording per minute untouched", () => {
+    const points = buildSoundscapePoints([
+      { minuteOfDay: 60, pmn: [1, 2, 3, 4, 5] },
+      { minuteOfDay: 120, pmn: [9, 8, 7, 6, 5] },
+    ]);
+    expect(points.map((point) => point.pmn)).toEqual([
+      [1, 2, 3, 4, 5],
+      [9, 8, 7, 6, 5],
+    ]);
+    expect(points.map((point) => point.count)).toEqual([1, 1]);
   });
 });
 

@@ -153,6 +153,9 @@ type SoundscapeClockProps = {
   visibleBands: boolean[];
   bandLabels: string[];
   title: string;
+  /** Optional second line under the title — e.g. that the dial is an average
+   *  of several days. Drawn inside the SVG so the exported PNG carries it. */
+  subtitle?: string;
   radialLabel: string;
   timeLabel: string;
   legendTitle: string;
@@ -401,6 +404,11 @@ export function SoundscapeClock(props: SoundscapeClockProps) {
         <text x={CENTER} y={26} textAnchor="middle" fontSize={17} className="fill-foreground">
           {props.title}
         </text>
+        {props.subtitle ? (
+          <text x={CENTER} y={48} textAnchor="middle" fontSize={12} className="fill-muted-foreground">
+            {props.subtitle}
+          </text>
+        ) : null}
 
         {/* Radial grid rings */}
         {gridRings.map((fraction) => (

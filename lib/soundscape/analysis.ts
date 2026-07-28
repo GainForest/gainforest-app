@@ -129,8 +129,10 @@ export function fftRadix2(real: Float64Array, imag: Float64Array): void {
 export type SoundscapePoint = {
   /** Minutes since midnight (0..1439). */
   minuteOfDay: number;
-  /** Max PMN per frequency bin among recordings starting in this minute. */
+  /** Mean PMN per frequency bin across recordings starting in this minute. */
   pmn: number[];
+  /** How many recordings were averaged into this point (>= 1). */
+  count: number;
 };
 
 /**
@@ -162,25 +164,35 @@ export function formatPmnValue(value: number): string {
 
 /**
  * Folds per-recording results onto a 24-hour dial: one point per distinct
- * start minute, keeping the max PMN per bin when several recordings share a
+ * start minute, averaging the PMN per bin when several recordings share a
  * minute (e.g. the same schedule slot across multiple days).
+ *
+ * The mean, not the max: on a multi-day view one unusually loud morning would
+ * otherwise stand in for every morning, overstating the site's typical sound
+ * and making the multi-day dial incomparable with a single-day one. Averaging
+ * gives a typical day, and `count` says how many recordings back each point.
  */
 export function buildSoundscapePoints(
   recordings: Array<{ minuteOfDay: number; pmn: number[] }>,
 ): SoundscapePoint[] {
-  const byMinute = new Map<number, number[]>();
+  const byMinute = new Map<number, { sums: number[]; count: number }>();
   for (const recording of recordings) {
     const minute = ((Math.round(recording.minuteOfDay) % 1440) + 1440) % 1440;
     const existing = byMinute.get(minute);
     if (!existing) {
-      byMinute.set(minute, [...recording.pmn]);
+      byMinute.set(minute, { sums: [...recording.pmn], count: 1 });
       continue;
     }
-    for (let i = 0; i < existing.length; i++) {
-      existing[i] = Math.max(existing[i], recording.pmn[i] ?? 0);
+    for (let i = 0; i < existing.sums.length; i++) {
+      existing.sums[i] += recording.pmn[i] ?? 0;
     }
+    existing.count++;
   }
   return [...byMinute.entries()]
-    .map(([minuteOfDay, pmn]) => ({ minuteOfDay, pmn }))
+    .map(([minuteOfDay, { sums, count }]) => ({
+      minuteOfDay,
+      pmn: sums.map((sum) => sum / count),
+      count,
+    }))
     .sort((a, b) => a.minuteOfDay - b.minuteOfDay);
 }
