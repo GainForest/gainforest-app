@@ -4,15 +4,15 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { Building2Icon, CalendarIcon, CheckIcon, EarthIcon, GlobeIcon, Share2Icon } from "lucide-react";
-import type { AccountRouteData } from "../_lib/account-route";
+import { accountFollowersPath, accountFollowingPath, type AccountRouteData } from "../_lib/account-route";
 import type { AccountOrganization } from "./AccountOrganizationsGrid";
 import { AccountMemberships } from "./AccountMemberships";
 import { AccountWalletSupport } from "./AccountWalletSupport";
 import { AccountAwards } from "./AccountAwards";
-import { FollowButton, FollowProvider, FollowStats } from "@/app/_components/FollowButton";
+import { FollowButton, FollowProvider, useFollowState } from "@/app/_components/FollowButton";
 import { SocialGlyph } from "@/app/_components/SocialIcon";
 import { TrustedByBadges } from "@/app/_components/TrustedByBadges";
-import { formatCountry } from "@/app/_lib/format";
+import { formatCompact, formatCountry } from "@/app/_lib/format";
 import { Button } from "@/components/ui/button";
 
 function formatWebsite(url: string): string {
@@ -45,6 +45,66 @@ function formatSinceDate(value: string | null): string | null {
   return date.toLocaleDateString("en-US", { month: "short", year: "numeric", timeZone: "UTC" });
 }
 
+/** A single muted stat/fact tile. Renders as a link when `href` is provided. */
+function DetailTile({
+  href,
+  icon,
+  value,
+  label,
+}: {
+  href?: string;
+  icon?: React.ReactNode;
+  value?: React.ReactNode;
+  label: React.ReactNode;
+}) {
+  const body = (
+    <>
+      {icon}
+      {value != null ? (
+        <>
+          <span className="font-semibold tabular-nums text-foreground">{value}</span>{" "}
+        </>
+      ) : null}
+      <span>{label}</span>
+    </>
+  );
+  const className =
+    "inline-flex items-center gap-1.5 rounded-xl bg-muted px-3 py-2 text-[13px] text-muted-foreground";
+  return href ? (
+    <Link href={href} className={`${className} transition-colors hover:text-foreground`}>
+      {body}
+    </Link>
+  ) : (
+    <span className={className}>{body}</span>
+  );
+}
+
+/** Followers / following tiles that read the shared follow state. */
+function FollowStatTiles({
+  targetDid,
+  identifier,
+}: {
+  targetDid: string;
+  identifier: string;
+}) {
+  const t = useTranslations("common.follow");
+  const follow = useFollowState(targetDid);
+  return (
+    <>
+      <DetailTile
+        href={accountFollowersPath(identifier)}
+        value={formatCompact(follow.followers)}
+        label={t("followersLabel")}
+      />
+      <DetailTile
+        href={accountFollowingPath(identifier)}
+        value={formatCompact(follow.following)}
+        label={t("followingLabel")}
+      />
+    </>
+  );
+}
+
 /** Profile metadata and actions shown only inside the Overview tab. */
 export function AccountOverviewDetails({
   account,
@@ -62,7 +122,6 @@ export function AccountOverviewDetails({
   );
   const country = account.country ? formatCountry(account.country) : null;
   const orgType = account.kind === "organization" ? account.orgType ?? account.summary.certOrgType : null;
-  const hasFacts = Boolean(sinceDate || country || orgType);
 
   useEffect(() => {
     let cancelled = false;
@@ -95,45 +154,35 @@ export function AccountOverviewDetails({
 
   return (
     <FollowProvider targetDid={account.did}>
-      <section
-        data-account-overview-details
-        className="rounded-2xl border border-border/60 bg-card p-4 sm:p-5"
-      >
+      <section data-account-overview-details className="space-y-3">
         <h2 className="font-instrument text-2xl font-light italic text-foreground">
           {heroT("accountDetails")}
         </h2>
 
-        <FollowStats
-          targetDid={account.did}
-          identifier={account.urlIdentifier}
-          className="mt-3"
-        />
+        <div className="flex flex-wrap items-center gap-2">
+          <FollowStatTiles targetDid={account.did} identifier={account.urlIdentifier} />
+          {orgType ? (
+            <DetailTile
+              icon={<Building2Icon className="size-3.5 opacity-70" aria-hidden />}
+              label={orgType}
+            />
+          ) : null}
+          {country ? <DetailTile label={country} /> : null}
+          {sinceDate ? (
+            <DetailTile
+              icon={<CalendarIcon className="size-3.5 opacity-70" aria-hidden />}
+              label={heroT("sinceDate", { date: sinceDate })}
+            />
+          ) : null}
+        </div>
 
-        {hasFacts ? (
-          <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2 text-[13px] text-muted-foreground">
-            {orgType ? (
-              <span className="inline-flex items-center gap-1.5">
-                <Building2Icon className="size-3.5 opacity-70" aria-hidden />
-                {orgType}
-              </span>
-            ) : null}
-            {country ? <span className="inline-flex items-center gap-1.5">{country}</span> : null}
-            {sinceDate ? (
-              <span className="inline-flex items-center gap-1.5">
-                <CalendarIcon className="size-3.5 opacity-70" aria-hidden />
-                {heroT("sinceDate", { date: sinceDate })}
-              </span>
-            ) : null}
-          </div>
-        ) : null}
-
-        <div className="mt-3 flex flex-wrap items-center gap-x-5 gap-y-2 empty:mt-0">
+        <div className="flex flex-wrap items-center gap-x-5 gap-y-2 empty:hidden">
           <TrustedByBadges did={account.did} variant="plain" className="w-fit" />
           <AccountAwards did={account.did} className="w-fit" />
         </div>
-        <AccountMemberships organizations={memberships} className="mt-3" />
+        <AccountMemberships organizations={memberships} />
 
-        <div className="mt-5 flex flex-wrap items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2 rounded-2xl bg-muted p-2">
           <FollowButton targetDid={account.did} name={account.displayName} size="default" />
           {account.kind === "organization" ? (
             <Button
