@@ -1965,9 +1965,12 @@
   "observationGrid": {
     "sectionTitle": "Observações",
     "openDetails": "Abrir detalhes da observação: {name}",
+    "openAction": "Abrir",
     "mediaCount": "{count, plural, one {# item de mídia} other {# itens de mídia}}",
     "selectObservation": "Selecionar observação",
     "deselectObservation": "Desmarcar observação",
+    "selectObservationNamed": "Selecionar observação: {name}",
+    "deselectObservationNamed": "Desmarcar observação: {name}",
     "playSound": "Reproduzir som",
     "pauseSound": "Pausar som",
     "natureSoundRecording": "Gravação de som da natureza",

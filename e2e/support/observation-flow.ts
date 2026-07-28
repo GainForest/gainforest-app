@@ -33,7 +33,7 @@ function escapeRegExp(value: string): string {
   return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
-function buildObservationCsv(input: {
+type ObservationCsvRow = {
   scientificName: string;
   vernacularName: string;
   recordedBy: string;
@@ -41,7 +41,13 @@ function buildObservationCsv(input: {
   country: string;
   habitat: string;
   occurrenceRemarks: string;
-}): string {
+};
+
+function buildObservationCsv(input: ObservationCsvRow): string {
+  return buildObservationCsvRows([input]);
+}
+
+function buildObservationCsvRows(rows: ObservationCsvRow[]): string {
   const headers = [
     "scientificName",
     "vernacularName",
@@ -54,20 +60,24 @@ function buildObservationCsv(input: {
     "habitat",
     "occurrenceRemarks",
   ];
-  const row = [
-    input.scientificName,
-    input.vernacularName,
-    OBSERVATION_EVENT_DATE,
-    OBSERVATION_LATITUDE,
-    OBSERVATION_LONGITUDE,
-    input.recordedBy,
-    input.locality,
-    input.country,
-    input.habitat,
-    input.occurrenceRemarks,
-  ];
+  const body = rows.map((input) =>
+    [
+      input.scientificName,
+      input.vernacularName,
+      OBSERVATION_EVENT_DATE,
+      OBSERVATION_LATITUDE,
+      OBSERVATION_LONGITUDE,
+      input.recordedBy,
+      input.locality,
+      input.country,
+      input.habitat,
+      input.occurrenceRemarks,
+    ]
+      .map(escapeCsv)
+      .join(","),
+  );
 
-  return `${headers.join(",")}\n${row.map(escapeCsv).join(",")}\n`;
+  return `${headers.join(",")}\n${body.join("\n")}\n`;
 }
 
 async function selectUploadSite(page: Page, siteName: string): Promise<void> {
@@ -258,5 +268,145 @@ export async function createEditDeleteObservation(page: Page, testInfo: TestInfo
     await screenshotStep(page, testInfo, "observation-drawer-deleted");
   } finally {
     if (observation) await cleanupObservationIfNeeded(page, observation, deleted);
+  }
+}
+
+/* ── Right-click to group (ECO-787) ─────────────────────────────────────────
+ * Uploads two sightings, then drives the grouping entirely from the tile's
+ * right-click menu: right-click outside the selection claims that one tile,
+ * right-click inside a multi-tile selection keeps it whole, and "Group into
+ * dataset" opens the same modal the bottom action bar uses. */
+
+async function uploadObservationRows(
+  page: Page,
+  testInfo: TestInfo,
+  siteName: string,
+  rows: ObservationCsvRow[],
+): Promise<void> {
+  const count = rows.length;
+  await page.goto(`${manageBasePath()}/trees?mode=upload`, { waitUntil: "domcontentloaded" });
+  await expect(page.getByRole("heading", { name: /upload trees/i })).toBeVisible({ timeout: 60_000 });
+
+  await page.locator('input[type="file"]').first().setInputFiles({
+    name: "e2e-observations-group.csv",
+    mimeType: "text/csv",
+    buffer: Buffer.from(buildObservationCsvRows(rows)),
+  });
+  await expect(page.getByText("e2e-observations-group.csv")).toBeVisible({ timeout: 15_000 });
+  await selectUploadSite(page, siteName);
+
+  const continueToMapping = page.getByRole("button", { name: /continue to match headings/i });
+  await expect(continueToMapping).toBeEnabled({ timeout: 15_000 });
+  await continueToMapping.click();
+
+  await expect(page.getByRole("heading", { name: /match file headings/i })).toBeVisible({ timeout: 15_000 });
+  const continueToPreview = page.getByRole("button", { name: /continue to preview/i });
+  await expect(continueToPreview).toBeEnabled({ timeout: 15_000 });
+  await continueToPreview.click();
+
+  await expect(page.getByRole("heading", { name: /review & verify/i })).toBeVisible({ timeout: 15_000 });
+  await expect(page.getByText(new RegExp(`all\\s+${count}\\s+rows?\\s+(?:is|are)\\s+ready`, "i"))).toBeVisible({ timeout: 60_000 });
+  await screenshotStep(page, testInfo, "grouping-upload-preview");
+  await page.getByRole("button", { name: new RegExp(`upload ${count} valid rows?`, "i") }).click();
+
+  await expect(page.getByText(new RegExp(`successfully saved ${count} trees?`, "i"))).toBeVisible({ timeout: 120_000 });
+}
+
+/** The manage grid reads from the indexer, which trails the PDS write. */
+async function waitForObservationTile(page: Page, name: string): Promise<Locator> {
+  const tile = page.getByRole("button", { name: new RegExp(`open observation details: ${escapeRegExp(name)}`, "i") }).first();
+  const deadline = Date.now() + 180_000;
+
+  while (Date.now() <= deadline) {
+    if (await tile.isVisible({ timeout: 10_000 }).catch(() => false)) return tile;
+    console.log(`[e2e] Waiting for "${name}" to appear in the observations grid.`);
+    await page.waitForTimeout(5_000);
+    await page.reload({ waitUntil: "domcontentloaded" });
+  }
+
+  throw new Error(`Timed out waiting for observation tile "${name}".`);
+}
+
+export async function groupObservationsFromContextMenu(page: Page, testInfo: TestInfo, siteName: string): Promise<void> {
+  const suffix = `${Date.now()}-${testInfo.workerIndex}-${testInfo.retry}`;
+  const names = [`E2E Right Click One ${suffix}`, `E2E Right Click Two ${suffix}`];
+  const datasetName = `E2E right-click folder ${suffix}`;
+  const created: PdsRepoRecord[] = [];
+
+  console.log("[e2e] Uploading two sightings for the right-click grouping check.");
+  await uploadObservationRows(
+    page,
+    testInfo,
+    siteName,
+    names.map((vernacularName, index) => ({
+      scientificName: `E2E Contextus menuensis ${index + 1} ${suffix}`,
+      vernacularName,
+      recordedBy: "Disposable E2E Observer",
+      locality: "Disposable test plot",
+      country: "Brazil",
+      habitat: "E2E canopy gap",
+      occurrenceRemarks: "Created by the disposable browser test to check right-click grouping.",
+    })),
+  );
+
+  for (const [index] of names.entries()) {
+    const record = await waitForOccurrenceByScientificName(`E2E Contextus menuensis ${index + 1} ${suffix}`);
+    trackCreatedPdsRecord(record);
+    created.push(record);
+  }
+
+  try {
+    await page.goto(`${manageBasePath()}/observations`, { waitUntil: "domcontentloaded" });
+    const firstTile = await waitForObservationTile(page, names[0]);
+    await waitForObservationTile(page, names[1]);
+    await screenshotStep(page, testInfo, "grouping-observations-grid");
+
+    // 1. Right-click with nothing selected: the tile becomes the selection and
+    //    the menu offers the grouping actions.
+    await firstTile.click({ button: "right" });
+    const menu = page.getByRole("menu").first();
+    await expect(menu).toBeVisible({ timeout: 10_000 });
+    await expect(menu.getByRole("menuitem", { name: /^open$/i })).toBeVisible();
+    await expect(menu.getByRole("menuitem", { name: /group into dataset/i })).toBeVisible();
+    await expect(menu.getByRole("menuitem", { name: /add to project/i })).toBeVisible();
+    await screenshotStep(page, testInfo, "grouping-context-menu-single");
+    // Escape dismisses the menu without dropping the tile it claimed.
+    await page.keyboard.press("Escape");
+    await expect(menu).not.toBeVisible({ timeout: 10_000 });
+    await expect(page.getByText(/1 observation selected/i).first()).toBeVisible({ timeout: 10_000 });
+
+    // 2. Add the second tile, then right-click inside the selection: it stays
+    //    whole and the menu says it covers both.
+    const secondTile = page.getByRole("button", { name: new RegExp(escapeRegExp(names[1]), "i") }).first();
+    await secondTile.locator("[role='checkbox']").click();
+    await expect(page.getByText(/2 observations selected/i).first()).toBeVisible({ timeout: 10_000 });
+
+    const firstSelected = page.getByRole("button", { name: new RegExp(escapeRegExp(names[0]), "i") }).first();
+    await firstSelected.click({ button: "right" });
+    const multiMenu = page.getByRole("menu").first();
+    await expect(multiMenu).toBeVisible({ timeout: 10_000 });
+    await expect(multiMenu.getByText(/2 observations selected/i)).toBeVisible();
+    await screenshotStep(page, testInfo, "grouping-context-menu-multiple");
+
+    // 3. Group both into a brand-new folder straight from the menu.
+    await multiMenu.getByRole("menuitem", { name: /group into dataset/i }).click();
+    const nameField = page.locator("#observation-dataset-name");
+    await expect(nameField).toBeVisible({ timeout: 15_000 });
+    await nameField.fill(datasetName);
+    await screenshotStep(page, testInfo, "grouping-dataset-modal");
+    await page.getByRole("button", { name: /create & group/i }).click();
+
+    await expect(nameField).not.toBeVisible({ timeout: 60_000 });
+    await expect(page.getByRole("button", { name: new RegExp(escapeRegExp(datasetName), "i") }).first()).toBeVisible({ timeout: 60_000 });
+    await screenshotStep(page, testInfo, "grouping-dataset-created");
+    console.log(`[e2e] Right-click grouping created folder "${datasetName}".`);
+  } finally {
+    const org = readCgsOrgMetadata();
+    for (const record of created) {
+      const { rkey } = parseAtUri(record.uri);
+      await page.request.post("/api/manage/proxy", {
+        data: { operation: "deleteOccurrenceCascade", rkey, ...(org ? { repo: org.groupDid } : {}) },
+      }).catch(() => null);
+    }
   }
 }

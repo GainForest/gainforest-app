@@ -1965,9 +1965,12 @@
   "observationGrid": {
     "sectionTitle": "Observasi",
     "openDetails": "Buka detail observasi: {name}",
+    "openAction": "Buka",
     "mediaCount": "{count, plural, one {# item media} other {# item media}}",
     "selectObservation": "Pilih observasi",
     "deselectObservation": "Batalkan pilihan observasi",
+    "selectObservationNamed": "Pilih observasi: {name}",
+    "deselectObservationNamed": "Batalkan pilihan observasi: {name}",
     "playSound": "Putar suara",
     "pauseSound": "Jeda suara",
     "natureSoundRecording": "Rekaman suara alam",

@@ -38,7 +38,7 @@ import {
   type SiteSourceFilter,
 } from "../_lib/indexer";
 import { RecordDrawer } from "./RecordDrawer";
-import { ObservationGrid } from "./ObservationGrid";
+import { ObservationGrid, type ObservationContextMenu } from "./ObservationGrid";
 import { RecordMap } from "./RecordMap";
 import { StatsTileGrid } from "./StatsTile";
 import { isPdsBlobUrl, resolveBlobUrl } from "../_lib/pds";
@@ -250,6 +250,8 @@ export function RecordExplorer({
     active: boolean;
     onToggle: (record: OccurrenceRecord, selected: boolean, shiftKey?: boolean) => void;
     getDisabledReason?: (record: OccurrenceRecord) => string | null;
+    /** Right-click actions offered on each observation tile. */
+    contextMenu?: ObservationContextMenu;
   };
   onObservationVisibleRecordsChange?: (records: OccurrenceRecord[]) => void;
   /** When set, only records whose at:// URI is in this set are shown, and the

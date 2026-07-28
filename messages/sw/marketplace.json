@@ -1965,9 +1965,12 @@
   "observationGrid": {
     "sectionTitle": "Uchunguzi",
     "openDetails": "Fungua maelezo ya uchunguzi: {name}",
+    "openAction": "Fungua",
     "mediaCount": "{count, plural, one {kipengee # cha media} other {vipengee # vya media}}",
     "selectObservation": "Chagua uchunguzi",
     "deselectObservation": "Ondoa uteuzi wa uchunguzi",
+    "selectObservationNamed": "Chagua uchunguzi: {name}",
+    "deselectObservationNamed": "Ondoa uchaguzi wa uchunguzi: {name}",
     "playSound": "Cheza sauti",
     "pauseSound": "Sitisha sauti",
     "natureSoundRecording": "Rekodi ya sauti ya asili",

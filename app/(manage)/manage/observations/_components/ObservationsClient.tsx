@@ -28,6 +28,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { useTranslations } from "next-intl";
 import { InlineCardGridSkeleton } from "@/app/_components/PageLoadingSkeletons";
 import { RecordExplorer } from "@/app/_components/RecordExplorer";
+import type { ObservationContextMenu, ObservationContextMenuItem } from "@/app/_components/ObservationGrid";
 import { EmptyHeroBanner } from "@/app/_components/EmptyHeroBanner";
 import type { ExplorerRecord, OccurrenceRecord } from "@/app/_lib/indexer";
 import { resolveBlobUrl } from "@/app/_lib/pds";
@@ -551,6 +552,9 @@ export function ObservationsClient({
     if (selectedRecords.size === 0) return;
     const onKeyDown = (event: globalThis.KeyboardEvent) => {
       if (event.key !== "Escape") return;
+      // A right-click menu is open on top of the grid — Escape belongs to it,
+      // and dismissing a menu should not also throw the selection away.
+      if (event.target instanceof Element && event.target.closest("[role='menu']")) return;
       selectionAnchorRef.current = null;
       setSelectedRecords(new Map());
     };
@@ -944,6 +948,91 @@ export function ObservationsClient({
     [datasetFilter, deleteDisabledReason, loadDatasetGroups, modal, router, setDatasetFilter, t, target],
   );
 
+  /* ── Right-click to group ─────────────────────────────────────────────────
+   * Same actions as the floating selection bar, but reachable straight from a
+   * tile. Finder/Drive semantics: right-clicking a tile that is not part of the
+   * current selection makes it the selection first, so the menu always acts on
+   * what it is pointing at; right-clicking inside a selection keeps it whole. */
+  function handleContextMenuOpen(record: OccurrenceRecord) {
+    if (deleteDisabledReason) return;
+    if (selectedRecords.has(record.id)) return;
+    selectionAnchorRef.current = record.id;
+    setSelectedRecords(new Map([[record.id, record]]));
+  }
+
+  const contextMenu = useMemo<ObservationContextMenu | undefined>(() => {
+    if (deleteDisabledReason) return undefined;
+    const records = Array.from(selectedRecords.values());
+    const createReason = createPermission.reason ?? null;
+    const items: ObservationContextMenuItem[] = [];
+    // Pointless on a project's own page — everything listed there is already
+    // filed under it.
+    if (!project) {
+      items.push({
+        id: "add-to-project",
+        label: t("addToProject.action"),
+        icon: <FolderKanbanIcon aria-hidden />,
+        disabled: Boolean(createReason) || isDeletingSelected,
+        disabledReason: createReason,
+        onSelect: () =>
+          openAddToProject({
+            kind: "observations",
+            occurrences: records.map((record) => ({
+              rkey: record.rkey,
+              projectRef: record.projectRef,
+              siteRef: record.siteRef,
+            })),
+          }),
+      });
+    }
+    items.push({
+      id: "group-into-dataset",
+      label: t("groupIntoDataset"),
+      icon: <FolderPlusIcon aria-hidden />,
+      disabled: Boolean(createReason) || isDeletingSelected,
+      disabledReason: createReason,
+      onSelect: openGroupIntoDataset,
+    });
+    if (records.some((record) => record.datasetRef)) {
+      items.push({
+        id: "remove-from-dataset",
+        label: t("dataset.removeAction"),
+        icon: <FolderMinusIcon aria-hidden />,
+        disabled: Boolean(createReason) || isDeletingSelected,
+        disabledReason: createReason,
+        onSelect: openRemoveFromDataset,
+      });
+    }
+    items.push({ id: "before-delete", separator: true });
+    items.push({
+      id: "delete",
+      label: t("deleteSelected"),
+      icon: <Trash2Icon aria-hidden />,
+      destructive: true,
+      disabled: isDeletingSelected,
+      onSelect: openDeleteSelectedModal,
+    });
+    return {
+      onOpen: handleContextMenuOpen,
+      // Only worth a heading once the menu covers more than the tile itself.
+      label: records.length > 1 ? t("selectedForDelete", { count: records.length }) : undefined,
+      items,
+    };
+    // `handleContextMenuOpen` / `openDeleteSelectedModal` are re-created every
+    // render on purpose; the selection they read is in the dependency list.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [
+    createPermission.reason,
+    deleteDisabledReason,
+    isDeletingSelected,
+    openAddToProject,
+    openGroupIntoDataset,
+    openRemoveFromDataset,
+    project,
+    selectedRecords,
+    t,
+  ]);
+
   if (mode === "add") {
     return (
       <ObservationBulkAddPanel
@@ -1131,6 +1220,7 @@ export function ObservationsClient({
             active: selectedRecords.size > 0,
             onToggle: toggleSelectedRecord,
             getDisabledReason: () => deleteDisabledReason,
+            contextMenu,
           }}
           onObservationVisibleRecordsChange={handleVisibleRecordsChange}
         />
