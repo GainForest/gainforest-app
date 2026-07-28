@@ -30,6 +30,12 @@ import {
   isEligibleBioblitzCategory,
   type BioblitzImageCategory,
 } from "./bioblitz-eligibility";
+import {
+  fetchBioblitzExclusions,
+  fetchBioblitzExclusionsStrict,
+  indexBioblitzExclusions,
+  isAccountExcludedFromBioblitzRound,
+} from "./bioblitz-exclusions";
 
 /** Cash prizes awarded each round, in USD. */
 export const BIOBLITZ_PRIZES = {
@@ -111,6 +117,16 @@ function generatedRound(id: number): BioblitzRound {
 function roundIdFor(now: number): number {
   if (now <= FIRST_ROUND_END_MS) return 1;
   return 2 + Math.floor(Math.max(0, now - SECOND_ROUND_START_MS) / STANDARD_ROUND_MS);
+}
+
+/**
+ * Resolve a timestamp to its BioBlitz round. Dates before the program began do
+ * not belong to a round; this matters when applying weekly exclusions to the
+ * all-time standings.
+ */
+export function bioblitzRoundIdAt(timestamp: number): number | null {
+  if (!Number.isFinite(timestamp) || timestamp < Date.parse(FIRST_ROUND_START)) return null;
+  return roundIdFor(timestamp);
 }
 
 /** Rounds available to the UI, oldest first. Includes the current round and a
@@ -318,6 +334,7 @@ export async function fetchRoundCollectors(
   round: BioblitzRound,
   scope: BoardScope = "round",
   signal?: AbortSignal,
+  exclusionRead: "best-effort" | "required" = "best-effort",
 ): Promise<RoundBoard> {
   const startMs = scope === "all" ? Number.NEGATIVE_INFINITY : Date.parse(round.start);
   const endMs = scope === "all" ? Number.POSITIVE_INFINITY : Date.parse(round.end);
@@ -331,10 +348,16 @@ export async function fetchRoundCollectors(
   // Accounts and individual observations a steward hid are excluded from the
   // challenge. The explicit file-ref check below is also important: a non-null
   // imageEvidence wrapper alone is not proof that an image blob was uploaded.
-  const [hidden, hiddenRecords] = await Promise.all([
+  const exclusionPromise =
+    exclusionRead === "required"
+      ? fetchBioblitzExclusionsStrict(signal)
+      : fetchBioblitzExclusions(signal).catch(() => []);
+  const [hidden, hiddenRecords, exclusionRecords] = await Promise.all([
     fetchHiddenAccountDids(signal).catch(() => new Set<string>()),
     fetchHiddenRecordUris(signal).catch(() => new Set<string>()),
+    exclusionPromise,
   ]);
+  const exclusions = indexBioblitzExclusions(exclusionRecords);
 
   const tally = new Map<string, RoundCollector>();
   const imageCounts: RoundImageCounts = {
@@ -383,6 +406,8 @@ export async function fetchRoundCollectors(
       if (hidden.has(did) || (uri && hiddenRecords.has(uri))) continue;
       const t = Date.parse(n.createdAt ?? "");
       if (!Number.isFinite(t) || t < startMs || t > endMs) continue;
+      const observationRoundId = scope === "round" ? round.id : bioblitzRoundIdAt(t);
+      if (isAccountExcludedFromBioblitzRound(exclusions, did, observationRoundId)) continue;
 
       const imageRef = normaliseRef(n.imageEvidence?.file?.ref);
       if (!imageRef) {

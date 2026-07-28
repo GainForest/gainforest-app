@@ -61,10 +61,20 @@ export function OwnerFilterButton({
   ownerDid,
   onChange,
   className,
+  labels,
 }: {
   ownerDid: string | null;
   onChange: (did: string | null) => void;
   className?: string;
+  /** Optional context-specific copy when this picker is used outside filtering. */
+  labels?: Partial<{
+    button: string;
+    ariaLabel: string;
+    searchPlaceholder: string;
+    hint: string;
+    noResults: string;
+    clear: string;
+  }>;
 }) {
   const t = useTranslations("marketplace.ownerFilter");
   const [open, setOpen] = useState(false);
@@ -99,6 +109,7 @@ export function OwnerFilterButton({
   }, [query, open]);
 
   const selectedLabel = ownerDid ? profile?.displayName ?? t("selectedFallback") : null;
+  const pickerAriaLabel = labels?.ariaLabel ?? t("ariaLabel");
   const trimmedQuery = query.trim();
 
   return (
@@ -112,7 +123,7 @@ export function OwnerFilterButton({
       <PopoverTrigger asChild>
         <button
           type="button"
-          aria-label={t("ariaLabel")}
+          aria-label={selectedLabel ? `${pickerAriaLabel}: ${selectedLabel}` : pickerAriaLabel}
           className={cn(
             "inline-flex h-10 shrink-0 items-center gap-2 whitespace-nowrap rounded-full border px-3.5 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50",
             ownerDid
@@ -131,7 +142,7 @@ export function OwnerFilterButton({
           ) : (
             <UserRoundIcon className="h-4 w-4" />
           )}
-          <span className="max-w-[140px] truncate">{ownerDid ? selectedLabel : t("button")}</span>
+          <span className="max-w-[140px] truncate">{ownerDid ? selectedLabel : labels?.button ?? t("button")}</span>
           <ChevronDownIcon className={cn("h-3.5 w-3.5 transition-transform", open && "rotate-180")} />
         </button>
       </PopoverTrigger>
@@ -143,8 +154,8 @@ export function OwnerFilterButton({
             type="text"
             value={query}
             onChange={(event) => setQuery(event.target.value)}
-            placeholder={t("searchPlaceholder")}
-            aria-label={t("searchPlaceholder")}
+            placeholder={labels?.searchPlaceholder ?? t("searchPlaceholder")}
+            aria-label={labels?.searchPlaceholder ?? t("searchPlaceholder")}
             className="h-9 w-full rounded-lg border border-border bg-background pl-9 pr-3 text-sm text-foreground outline-none placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/40"
           />
         </div>
@@ -162,16 +173,16 @@ export function OwnerFilterButton({
               <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-muted">
                 <XIcon className="h-3.5 w-3.5" />
               </span>
-              {t("showAll")}
+              {labels?.clear ?? t("showAll")}
             </button>
           ) : null}
 
           {loading ? (
             <p className="px-2.5 py-6 text-center text-xs text-muted-foreground">{t("searching")}</p>
           ) : trimmedQuery.length >= MIN_QUERY_LENGTH && results.length === 0 ? (
-            <p className="px-2.5 py-6 text-center text-xs text-muted-foreground">{t("noResults")}</p>
+            <p className="px-2.5 py-6 text-center text-xs text-muted-foreground">{labels?.noResults ?? t("noResults")}</p>
           ) : trimmedQuery.length < MIN_QUERY_LENGTH && !ownerDid ? (
-            <p className="px-2.5 py-6 text-center text-xs text-muted-foreground">{t("hint")}</p>
+            <p className="px-2.5 py-6 text-center text-xs text-muted-foreground">{labels?.hint ?? t("hint")}</p>
           ) : null}
 
           {results.map((result) => {
@@ -180,6 +191,7 @@ export function OwnerFilterButton({
               <button
                 key={result.did}
                 type="button"
+                aria-pressed={active}
                 onClick={() => {
                   onChange(result.did);
                   setOpen(false);

@@ -1291,6 +1291,37 @@
       "subtitle": "Review grant and event applicants, manage flagged accounts, and oversee Tainá agents."
     }
   },
+  "adminBioblitzExclusions": {
+    "title": "Weekly observation-count leaderboard",
+    "description": "Choose an account and BioBlitz round whose observations should not be included in that week's observation totals.",
+    "effect": "This only changes the observation-count leaderboard. The account and its observations stay visible and remain eligible for best picture.",
+    "accountLabel": "Account",
+    "chooseAccount": "Choose an account",
+    "accountPickerAria": "Choose the account whose observations should not count",
+    "searchPlaceholder": "Search people and organizations",
+    "searchHint": "Type an account name to search",
+    "noResults": "No matching accounts",
+    "clearSelection": "Clear account selection",
+    "weekLabel": "BioBlitz week",
+    "roundLabel": "Round {round}",
+    "add": "Don't count this week",
+    "adding": "Updating…",
+    "finalized": "Round ended",
+    "unavailable": "Weekly counting couldn't be loaded safely. Try again before making changes.",
+    "permissionNotice": "Only organization administrators can change weekly counting.",
+    "empty": "Every account currently counts toward its BioBlitz week.",
+    "unnamed": "Unnamed account",
+    "removeLabel": "Count {name} in the leaderboard again",
+    "errors": {
+      "notSignedIn": "Sign in again to continue.",
+      "forbidden": "You don't have permission to change weekly counting.",
+      "invalidRound": "Choose a valid BioBlitz week.",
+      "accountNotFound": "That account could not be found.",
+      "finalized": "This BioBlitz round has ended, so its counting can no longer change.",
+      "add": "The weekly counting change could not be saved. Please try again.",
+      "remove": "The account could not be restored to the leaderboard. Please try again."
+    }
+  },
   "adminTaina": {
     "title": "Tainá agents",
     "description": "Everyone running a Tainá field assistant — their bot, when they last used it, and what it has spent. Messages you send are delivered by their Tainá, in its own voice.",

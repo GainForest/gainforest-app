@@ -1291,6 +1291,37 @@
       "subtitle": "Kagua waombaji wa ruzuku na matukio, dhibiti akaunti zilizowekwa alama, na simamia mawakala wa Tainá."
     }
   },
+  "adminBioblitzExclusions": {
+    "title": "Msimamo wa kila wiki kwa idadi ya uchunguzi",
+    "description": "Chagua akaunti na raundi ya BioBlitz ambayo uchunguzi wake haupaswi kuingizwa katika jumla ya wiki hiyo.",
+    "effect": "Hii inabadilisha tu msimamo wa idadi ya uchunguzi. Akaunti na uchunguzi wake vitaendelea kuonekana na kushindania picha bora.",
+    "accountLabel": "Akaunti",
+    "chooseAccount": "Chagua akaunti",
+    "accountPickerAria": "Chagua akaunti ambayo uchunguzi wake haupaswi kuhesabiwa",
+    "searchPlaceholder": "Tafuta watu na mashirika",
+    "searchHint": "Andika jina la akaunti ili kutafuta",
+    "noResults": "Hakuna akaunti zinazolingana",
+    "clearSelection": "Ondoa akaunti iliyochaguliwa",
+    "weekLabel": "Wiki ya BioBlitz",
+    "roundLabel": "Raundi {round}",
+    "add": "Usihesabu wiki hii",
+    "adding": "Inasasisha…",
+    "finalized": "Raundi imekwisha",
+    "unavailable": "Uhesabuji wa kila wiki haukuweza kupakiwa kwa usalama. Jaribu tena kabla ya kufanya mabadiliko.",
+    "permissionNotice": "Wasimamizi wa shirika pekee ndio wanaoweza kubadilisha uhesabuji wa kila wiki.",
+    "empty": "Kwa sasa, kila akaunti inahesabiwa katika wiki yake ya BioBlitz.",
+    "unnamed": "Akaunti isiyo na jina",
+    "removeLabel": "Hesabu {name} tena kwenye msimamo",
+    "errors": {
+      "notSignedIn": "Ingia tena ili kuendelea.",
+      "forbidden": "Huna ruhusa ya kubadilisha uhesabuji wa kila wiki.",
+      "invalidRound": "Chagua wiki halali ya BioBlitz.",
+      "accountNotFound": "Akaunti hiyo haikupatikana.",
+      "finalized": "Raundi hii ya BioBlitz imekwisha, kwa hivyo uhesabuji hauwezi kubadilishwa tena.",
+      "add": "Mabadiliko ya uhesabuji wa kila wiki hayakuweza kuhifadhiwa. Jaribu tena.",
+      "remove": "Akaunti haikuweza kurudishwa kwenye msimamo. Jaribu tena."
+    }
+  },
   "adminTaina": {
     "title": "Mawakala wa Tainá",
     "description": "Kila mtu anayetumia msaidizi wa uwandani wa Tainá — boti yake, mara ya mwisho alipoitumia, na kiasi ilichotumia. Ujumbe unaotuma unafikishwa na Tainá wake, kwa sauti yake mwenyewe.",

@@ -1,0 +1,28 @@
+{
+  "lexicon": 1,
+  "id": "app.gainforest.bioblitz.exclusion",
+  "defs": {
+    "main": {
+      "type": "record",
+      "description": "A moderation record that removes one account's observations from the BioBlitz observation-count leaderboard for one round. It does not affect best-picture eligibility or hide, delete, or invalidate the account or its observations.",
+      "key": "tid",
+      "record": {
+        "type": "object",
+        "required": ["subject", "roundId", "createdAt"],
+        "properties": {
+          "subject": {
+            "type": "string",
+            "format": "did",
+            "description": "The account whose observations do not count in this round."
+          },
+          "roundId": {
+            "type": "integer",
+            "minimum": 1,
+            "description": "The stable BioBlitz round number."
+          },
+          "createdAt": { "type": "string", "format": "datetime" }
+        }
+      }
+    }
+  }
+}

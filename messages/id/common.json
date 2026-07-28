@@ -1291,6 +1291,37 @@
       "subtitle": "Tinjau pelamar hibah dan acara, kelola akun yang ditandai, dan awasi agen Tainá."
     }
   },
+  "adminBioblitzExclusions": {
+    "title": "Papan peringkat jumlah pengamatan mingguan",
+    "description": "Pilih akun dan ronde BioBlitz yang pengamatannya tidak boleh dimasukkan dalam total pengamatan pekan tersebut.",
+    "effect": "Ini hanya mengubah papan peringkat jumlah pengamatan. Akun dan pengamatannya tetap terlihat dan tetap berhak mengikuti foto terbaik.",
+    "accountLabel": "Akun",
+    "chooseAccount": "Pilih akun",
+    "accountPickerAria": "Pilih akun yang pengamatannya tidak boleh dihitung",
+    "searchPlaceholder": "Cari orang dan organisasi",
+    "searchHint": "Ketik nama akun untuk mencari",
+    "noResults": "Tidak ada akun yang cocok",
+    "clearSelection": "Hapus pilihan akun",
+    "weekLabel": "Pekan BioBlitz",
+    "roundLabel": "Ronde {round}",
+    "add": "Jangan hitung pekan ini",
+    "adding": "Memperbarui…",
+    "finalized": "Ronde telah berakhir",
+    "unavailable": "Penghitungan mingguan tidak dapat dimuat dengan aman. Coba lagi sebelum membuat perubahan.",
+    "permissionNotice": "Hanya administrator organisasi yang dapat mengubah penghitungan mingguan.",
+    "empty": "Saat ini semua akun dihitung dalam pekan BioBlitz masing-masing.",
+    "unnamed": "Akun tanpa nama",
+    "removeLabel": "Hitung kembali {name} di papan peringkat",
+    "errors": {
+      "notSignedIn": "Masuk kembali untuk melanjutkan.",
+      "forbidden": "Anda tidak memiliki izin untuk mengubah penghitungan mingguan.",
+      "invalidRound": "Pilih pekan BioBlitz yang valid.",
+      "accountNotFound": "Akun tersebut tidak dapat ditemukan.",
+      "finalized": "Ronde BioBlitz ini telah berakhir, sehingga penghitungan tidak dapat diubah lagi.",
+      "add": "Perubahan penghitungan mingguan tidak dapat disimpan. Coba lagi.",
+      "remove": "Akun tidak dapat dikembalikan ke papan peringkat. Coba lagi."
+    }
+  },
   "adminTaina": {
     "title": "Agen Tainá",
     "description": "Semua orang yang menjalankan asisten lapangan Tainá — bot mereka, kapan terakhir dipakai, dan berapa yang sudah dihabiskan. Pesan yang Anda kirim disampaikan oleh Tainá mereka, dengan suaranya sendiri.",

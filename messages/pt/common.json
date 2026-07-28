@@ -1291,6 +1291,37 @@
       "subtitle": "Revise candidatos a bolsas e eventos, gerencie contas sinalizadas e supervisione os agentes Tainá."
     }
   },
+  "adminBioblitzExclusions": {
+    "title": "Classificação semanal por número de observações",
+    "description": "Escolha uma conta e uma rodada do BioBlitz cujas observações não devem entrar no total daquela semana.",
+    "effect": "Isto só altera a classificação por número de observações. A conta e as observações continuam visíveis e elegíveis para melhor fotografia.",
+    "accountLabel": "Conta",
+    "chooseAccount": "Escolher uma conta",
+    "accountPickerAria": "Escolher a conta cujas observações não devem contar",
+    "searchPlaceholder": "Pesquisar pessoas e organizações",
+    "searchHint": "Digite o nome de uma conta para pesquisar",
+    "noResults": "Nenhuma conta correspondente",
+    "clearSelection": "Limpar a conta selecionada",
+    "weekLabel": "Semana do BioBlitz",
+    "roundLabel": "Rodada {round}",
+    "add": "Não contar esta semana",
+    "adding": "A atualizar…",
+    "finalized": "Rodada terminada",
+    "unavailable": "Não foi possível carregar a contagem semanal com segurança. Tente novamente antes de fazer alterações.",
+    "permissionNotice": "Apenas administradores da organização podem alterar a contagem semanal.",
+    "empty": "Atualmente, todas as contas contam para a respetiva semana do BioBlitz.",
+    "unnamed": "Conta sem nome",
+    "removeLabel": "Voltar a contar {name} na classificação",
+    "errors": {
+      "notSignedIn": "Inicie sessão novamente para continuar.",
+      "forbidden": "Não tem permissão para alterar a contagem semanal.",
+      "invalidRound": "Escolha uma semana válida do BioBlitz.",
+      "accountNotFound": "Não foi possível encontrar essa conta.",
+      "finalized": "Esta rodada do BioBlitz terminou, por isso a contagem já não pode mudar.",
+      "add": "Não foi possível guardar a alteração da contagem semanal. Tente novamente.",
+      "remove": "Não foi possível repor a conta na classificação. Tente novamente."
+    }
+  },
   "adminTaina": {
     "title": "Agentes Tainá",
     "description": "Todas as pessoas com uma assistente de campo Tainá: o bot, quando o usaram pela última vez e quanto ele já gastou. As mensagens que você enviar são entregues pela Tainá delas, com a própria voz.",

@@ -8,13 +8,14 @@ import { getGainForestModeratorAccess, getInternalBadgeAccess } from "@/app/inte
 import { fetchFlaggedTestAccounts } from "@/app/internal/badges/_lib/test-accounts";
 import { fetchFlaggedTestRecords } from "@/app/internal/badges/_lib/test-records";
 import { fetchGrantApplicants } from "@/app/_lib/grants";
-import { fetchBioblitzRegistrants } from "@/app/_lib/bioblitz";
+import { bioblitzRounds, endedRounds, featuredRound, fetchBioblitzRegistrants } from "@/app/_lib/bioblitz";
 import { fetchTainaAdminResidents } from "@/app/_lib/taina-agent";
 import { hasStoredAgentKey, isDataJobsConfigured, listAllJobs, toPublicJob } from "@/app/_lib/data-jobs";
 import { fetchIndexedCertifiedProfileCards } from "@/app/_lib/indexer";
 import { BUILTIN_ENDORSERS, fetchEndorserRecords } from "@/app/_lib/endorsers";
 import { fetchEndorsementAwarding, type AwardEndorsementsData } from "./_lib/award-endorsements";
 import { fetchFacilitatorStats, type FacilitatorStats } from "./_lib/facilitator-stats";
+import { fetchBioblitzExclusionRows } from "@/app/internal/badges/_lib/bioblitz-exclusion-mutations";
 import { AdminModerationDashboard, type AdminTab } from "./_components/AdminModerationDashboard";
 import type { AdminTainaRow } from "./_components/AdminTainaPanel";
 import type { AdminDataJobRow } from "./_components/AdminDataJobsPanel";
@@ -117,12 +118,29 @@ export default async function AdminPage({
   }
 
   const t = await getTranslations("common.adminModeration");
-  const [{ tab }, testAccounts, testRecords, grantApplicants, bioblitzRegistrants, taina, dataJobRows, endorsers, awardEndorsements, facilitatorStats] = await Promise.all([
+  const now = Date.now();
+  const adminBioblitzRounds = bioblitzRounds(now, 1);
+  const defaultBioblitzRoundId = featuredRound(now).id;
+  const finalizedBioblitzRoundIds = endedRounds(now).map((round) => round.id);
+  const [
+    { tab },
+    testAccounts,
+    testRecords,
+    grantApplicants,
+    bioblitzRegistrants,
+    bioblitzExclusions,
+    taina,
+    dataJobRows,
+    endorsers,
+    awardEndorsements,
+    facilitatorStats,
+  ] = await Promise.all([
     searchParams,
     fetchFlaggedTestAccounts().catch(() => []),
     moderator.repoDid ? fetchFlaggedTestRecords(moderator.repoDid).catch(() => []) : Promise.resolve([]),
     fetchGrantApplicants().catch(() => []),
     fetchBioblitzRegistrants().catch(() => []),
+    fetchBioblitzExclusionRows().catch(() => null),
     loadTainaRows(),
     loadDataJobRows(),
     moderator.repoDid ? fetchEndorserRecords(moderator.repoDid).catch(() => []) : Promise.resolve([]),
@@ -148,6 +166,11 @@ export default async function AdminPage({
         testRecords={testRecords}
         grantApplicants={grantApplicants}
         bioblitzRegistrants={bioblitzRegistrants}
+        bioblitzExclusions={bioblitzExclusions}
+        finalizedBioblitzRoundIds={finalizedBioblitzRoundIds}
+        bioblitzRounds={adminBioblitzRounds}
+        defaultBioblitzRoundId={defaultBioblitzRoundId}
+        canManageBioblitzExclusions={moderator.role === "owner" || moderator.role === "admin"}
         tainaRows={taina?.rows ?? null}
         tainaAllowanceUsd={taina?.allowanceUsd ?? 25}
         dataJobRows={dataJobRows}
