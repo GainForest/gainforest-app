@@ -55,18 +55,17 @@ export function AccountHeroSkeleton() {
   );
 }
 
-/** Loading placeholder for the muted stat tiles + actions bar in Overview. */
+/** Loading placeholder for the muted fact tiles + inline actions in Overview. */
 export function AccountOverviewDetailsSkeleton() {
   return (
-    <section className="mt-6 space-y-3">
+    <section className="mt-6 space-y-4">
       <Skeleton className="h-7 w-36" />
       <div className="flex flex-wrap gap-2">
-        <Skeleton className="h-9 w-28 rounded-xl" />
-        <Skeleton className="h-9 w-28 rounded-xl" />
-        <Skeleton className="h-9 w-24 rounded-xl" />
-        <Skeleton className="h-9 w-20 rounded-xl" />
+        <Skeleton className="h-[4.25rem] min-w-[16rem] flex-[2] rounded-2xl" />
+        <Skeleton className="h-[4.25rem] min-w-[9rem] flex-1 rounded-2xl" />
+        <Skeleton className="h-[4.25rem] min-w-[9rem] flex-1 rounded-2xl" />
       </div>
-      <div className="flex flex-wrap gap-2 rounded-2xl bg-muted p-2">
+      <div className="flex flex-wrap gap-2">
         <Skeleton className="h-9 w-24 rounded-full" />
         <Skeleton className="h-9 w-32 rounded-full" />
         <Skeleton className="h-9 w-36 rounded-full" />

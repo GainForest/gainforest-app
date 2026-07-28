@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
-import { Building2Icon, CalendarIcon, CheckIcon, EarthIcon, GlobeIcon, Share2Icon } from "lucide-react";
+import { CheckIcon, EarthIcon, GlobeIcon, Share2Icon } from "lucide-react";
 import { accountFollowersPath, accountFollowingPath, type AccountRouteData } from "../_lib/account-route";
 import type { AccountOrganization } from "./AccountOrganizationsGrid";
 import { AccountMemberships } from "./AccountMemberships";
@@ -14,6 +14,7 @@ import { SocialGlyph } from "@/app/_components/SocialIcon";
 import { TrustedByBadges } from "@/app/_components/TrustedByBadges";
 import { formatCompact, formatCountry } from "@/app/_lib/format";
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
 function formatWebsite(url: string): string {
   return url.replace(/^https?:\/\//, "").replace(/\/$/, "");
@@ -45,63 +46,46 @@ function formatSinceDate(value: string | null): string | null {
   return date.toLocaleDateString("en-US", { month: "short", year: "numeric", timeZone: "UTC" });
 }
 
-/** A single muted stat/fact tile. Renders as a link when `href` is provided. */
-function DetailTile({
-  href,
-  icon,
-  value,
-  label,
-}: {
-  href?: string;
-  icon?: React.ReactNode;
-  value?: React.ReactNode;
-  label: React.ReactNode;
-}) {
-  const body = (
-    <>
-      {icon}
-      {value != null ? (
-        <>
-          <span className="font-semibold tabular-nums text-foreground">{value}</span>{" "}
-        </>
-      ) : null}
-      <span>{label}</span>
-    </>
-  );
-  const className =
-    "inline-flex items-center gap-1.5 rounded-xl bg-muted px-3 py-2 text-[13px] text-muted-foreground";
-  return href ? (
-    <Link href={href} className={`${className} transition-colors hover:text-foreground`}>
-      {body}
-    </Link>
-  ) : (
-    <span className={className}>{body}</span>
+const TILE = "min-w-[9rem] flex-1 rounded-2xl bg-muted p-3";
+
+/** A muted grid tile with a small label and its content below. */
+function FactTile({ label, children }: { label: React.ReactNode; children: React.ReactNode }) {
+  return (
+    <div className={TILE}>
+      <div className="text-xs font-medium text-muted-foreground">{label}</div>
+      <div className="mt-1 text-sm font-medium text-foreground">{children}</div>
+    </div>
   );
 }
 
-/** Followers / following tiles that read the shared follow state. */
-function FollowStatTiles({
-  targetDid,
-  identifier,
+/** A muted grid tile wrapping a self-labeling component; hides itself when the
+ *  component renders nothing (awards / trusted-by / memberships). */
+function ComponentTile({ children }: { children: React.ReactNode }) {
+  return <div className={cn(TILE, "flex items-center empty:hidden")}>{children}</div>;
+}
+
+/** Followers + following counts and the Follow button, in one muted tile. */
+function FollowStatTile({
+  account,
 }: {
-  targetDid: string;
-  identifier: string;
+  account: AccountRouteData;
 }) {
   const t = useTranslations("common.follow");
-  const follow = useFollowState(targetDid);
+  const follow = useFollowState(account.did);
   return (
-    <>
-      <DetailTile
-        href={accountFollowersPath(identifier)}
-        value={formatCompact(follow.followers)}
-        label={t("followersLabel")}
-      />
-      <DetailTile
-        href={accountFollowingPath(identifier)}
-        value={formatCompact(follow.following)}
-        label={t("followingLabel")}
-      />
-    </>
+    <div className="flex min-w-[16rem] flex-[2] items-center justify-between gap-3 rounded-2xl bg-muted p-3">
+      <div className="flex gap-6">
+        <Link href={accountFollowersPath(account.urlIdentifier)} className="transition-colors hover:text-foreground">
+          <div className="text-lg font-semibold tabular-nums text-foreground">{formatCompact(follow.followers)}</div>
+          <div className="text-xs text-muted-foreground">{t("followersLabel")}</div>
+        </Link>
+        <Link href={accountFollowingPath(account.urlIdentifier)} className="transition-colors hover:text-foreground">
+          <div className="text-lg font-semibold tabular-nums text-foreground">{formatCompact(follow.following)}</div>
+          <div className="text-xs text-muted-foreground">{t("followingLabel")}</div>
+        </Link>
+      </div>
+      <FollowButton targetDid={account.did} name={account.displayName} size="sm" />
+    </div>
   );
 }
 
@@ -154,47 +138,39 @@ export function AccountOverviewDetails({
 
   return (
     <FollowProvider targetDid={account.did}>
-      <section data-account-overview-details className="mt-6 space-y-3">
+      <section data-account-overview-details className="mt-6 space-y-4">
         <h2 className="font-instrument text-2xl font-light italic text-foreground">
           {heroT("aboutName", { name: account.displayName })}
         </h2>
 
+        <div className="flex flex-wrap gap-2">
+          <FollowStatTile account={account} />
+          {orgType ? <FactTile label={heroT("typeLabel")}>{orgType}</FactTile> : null}
+          {country ? <FactTile label={heroT("countryLabel")}>{country}</FactTile> : null}
+          {sinceDate ? <FactTile label={heroT("joinedLabel")}>{sinceDate}</FactTile> : null}
+          {memberships.length > 0 ? (
+            <ComponentTile>
+              <AccountMemberships organizations={memberships} />
+            </ComponentTile>
+          ) : null}
+          <ComponentTile>
+            <AccountAwards did={account.did} />
+          </ComponentTile>
+          <ComponentTile>
+            <TrustedByBadges did={account.did} variant="plain" className="w-fit" />
+          </ComponentTile>
+        </div>
+
         <div className="flex flex-wrap items-center gap-2">
-          <FollowStatTiles targetDid={account.did} identifier={account.urlIdentifier} />
-          {orgType ? (
-            <DetailTile
-              icon={<Building2Icon className="size-3.5 opacity-70" aria-hidden />}
-              label={orgType}
-            />
-          ) : null}
-          {country ? <DetailTile label={country} /> : null}
-          {sinceDate ? (
-            <DetailTile
-              icon={<CalendarIcon className="size-3.5 opacity-70" aria-hidden />}
-              label={heroT("sinceDate", { date: sinceDate })}
-            />
-          ) : null}
-        </div>
-
-        <div className="flex flex-wrap items-center gap-x-5 gap-y-2 empty:hidden">
-          <TrustedByBadges did={account.did} variant="plain" className="w-fit" />
-          <AccountAwards did={account.did} className="w-fit" />
-        </div>
-        <AccountMemberships organizations={memberships} />
-
-        <div className="flex flex-wrap items-center gap-2 rounded-2xl bg-muted p-2 empty:hidden">
-          <FollowButton targetDid={account.did} name={account.displayName} size="default" />
-          {account.kind === "organization" ? (
-            <Button
-              type="button"
-              variant="outline"
-              onClick={handleShare}
-              aria-label={heroT("copyProfileLink")}
-            >
-              {copied ? <CheckIcon /> : <Share2Icon />}
-              {copied ? heroT("copied") : heroT("share")}
-            </Button>
-          ) : null}
+          <Button
+            type="button"
+            variant="secondary"
+            onClick={handleShare}
+            aria-label={heroT("copyProfileLink")}
+          >
+            {copied ? <CheckIcon /> : <Share2Icon />}
+            {copied ? heroT("copied") : heroT("share")}
+          </Button>
           <AccountWalletSupport
             did={account.did}
             name={account.displayName}
@@ -202,7 +178,7 @@ export function AccountOverviewDetails({
             walletAddress={walletAddress}
           />
           {account.kind === "organization" ? (
-            <Button asChild variant="outline">
+            <Button asChild variant="secondary">
               <Link href={`/globe/${encodeURIComponent(account.urlIdentifier)}`}>
                 <EarthIcon />
                 {globeT("viewOnGlobe")}
@@ -210,7 +186,7 @@ export function AccountOverviewDetails({
             </Button>
           ) : null}
           {account.website ? (
-            <Button asChild variant="outline" className="max-w-full">
+            <Button asChild variant="secondary" className="max-w-full">
               <Link href={externalHref(account.website)} target="_blank" rel="noopener noreferrer">
                 <GlobeIcon />
                 <span className="max-w-64 truncate">{formatWebsite(account.website)}</span>
@@ -220,7 +196,7 @@ export function AccountOverviewDetails({
           {account.socialLinks.map((url) => {
             const label = formatWebsite(url);
             return (
-              <Button key={url} asChild variant="outline" className="max-w-full">
+              <Button key={url} asChild variant="secondary" className="max-w-full">
                 <Link href={externalHref(url)} target="_blank" rel="noopener noreferrer">
                   <SocialGlyph platform={classifySocial(url)} />
                   <span className="max-w-52 truncate">{label}</span>
