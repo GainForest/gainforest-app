@@ -55,7 +55,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { cn } from "@/lib/utils";
 import { manageApiHref, manageHref, type ManageTarget } from "@/lib/links";
 import { WORK_SCOPE_MESSAGE_KEYS, type KnownWorkScopeKey, type WorkScopeLabels } from "@/app/_lib/work-scope-labels";
-import { buildWorkScopeCel } from "@/app/_lib/work-scope-cel";
+import { buildWorkScopeCel, workScopeTermToKey } from "@/app/_lib/work-scope-cel";
 
 /* ── Types ──────────────────────────────────────────────────────────────── */
 
@@ -151,7 +151,11 @@ function normalizeDraftValues(values: Partial<FormValues> & { customScope?: stri
   return {
     ...EMPTY_FORM,
     ...values,
-    scopes: Array.isArray(values.scopes) ? values.scopes : [],
+    // Drafts persist in localStorage across releases, so re-key anything that
+    // predates scopes being stored as keys rather than translated labels.
+    scopes: Array.isArray(values.scopes)
+      ? values.scopes.map((scope) => workScopeTermToKey(scope) ?? scope)
+      : [],
     contributors: Array.isArray(values.contributors) && values.contributors.length ? values.contributors : [""],
     selectedLocationUris: Array.isArray(values.selectedLocationUris) ? values.selectedLocationUris : [],
     acceptedTerms: values.acceptedTerms === true,
