@@ -249,8 +249,6 @@ export function BioblitzClient() {
           onSelect={(id) => setSelectedRoundId(id === currentRound.id ? null : id)}
         />
 
-        <ProofNote />
-
         <div className="grid min-w-0 flex-1 gap-4 lg:min-h-[34rem] lg:grid-cols-[minmax(0,5fr)_1px_minmax(0,7fr)]">
           <div className="flex min-w-0 flex-col gap-4 lg:min-h-0">
             <Prizes />
@@ -669,22 +667,6 @@ function HowItWorks() {
           ))}
         </ol>
       </Card>
-    </FadeIn>
-  );
-}
-
-// ── Data-as-proof wide card ───────────────────────────────────────────────────
-
-function ProofNote() {
-  const t = useTranslations("marketplace.bioblitz.how.proof");
-  return (
-    <FadeIn delay={0.05}>
-      <div className="rounded-2xl border border-primary/15 bg-primary/5 p-4 sm:p-5">
-        <h2 className="text-base font-semibold text-foreground sm:text-lg">{t("title")}</h2>
-        <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{t("intro")}</p>
-        <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{t("uses")}</p>
-        <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{t("outro")}</p>
-      </div>
     </FadeIn>
   );
 }
