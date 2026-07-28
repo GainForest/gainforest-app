@@ -1301,6 +1301,7 @@
     "searchPlaceholder": "Tafuta watu na mashirika",
     "searchHint": "Andika jina la akaunti ili kutafuta",
     "noResults": "Hakuna akaunti zinazolingana",
+    "observationCount": "Uchunguzi {count, number}",
     "clearSelection": "Ondoa akaunti iliyochaguliwa",
     "weekLabel": "Wiki ya BioBlitz",
     "roundLabel": "Raundi {round}",

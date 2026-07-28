@@ -1301,6 +1301,7 @@
     "searchPlaceholder": "Cari orang dan organisasi",
     "searchHint": "Ketik nama akun untuk mencari",
     "noResults": "Tidak ada akun yang cocok",
+    "observationCount": "{count, number} pengamatan",
     "clearSelection": "Hapus pilihan akun",
     "weekLabel": "Pekan BioBlitz",
     "roundLabel": "Ronde {round}",

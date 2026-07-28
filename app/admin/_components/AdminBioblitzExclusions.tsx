@@ -2,13 +2,13 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useMemo, useState, type FormEvent } from "react";
+import { useEffect, useMemo, useState, type FormEvent } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { InfoIcon, Loader2Icon, PlusIcon, Trash2Icon, UserRoundIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { OwnerFilterButton } from "@/app/_components/OwnerFilter";
 import { accountPath } from "@/app/account/_lib/account-route";
-import type { BioblitzRound } from "@/app/_lib/bioblitz";
+import { fetchRoundCollectors, type BioblitzRound } from "@/app/_lib/bioblitz";
 import type { BioblitzExclusionAdminRow } from "@/app/_lib/bioblitz-exclusions";
 
 type ApiErrorCode =
@@ -60,6 +60,7 @@ export function AdminBioblitzExclusions({
   const [adding, setAdding] = useState(false);
   const [removingRkey, setRemovingRkey] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [observationCounts, setObservationCounts] = useState<Map<string, number> | null>(null);
 
   const roundById = useMemo(() => new Map(rounds.map((round) => [round.id, round])), [rounds]);
   const finalizedRounds = useMemo(() => new Set(finalizedRoundIds), [finalizedRoundIds]);
@@ -73,6 +74,28 @@ export function AdminBioblitzExclusions({
       ),
     [exclusions, locale],
   );
+
+  useEffect(() => {
+    const round = roundById.get(selectedRoundId);
+    if (initial === null || !round) {
+      setObservationCounts(null);
+      return;
+    }
+
+    const controller = new AbortController();
+    setObservationCounts(null);
+    fetchRoundCollectors(round, "round", controller.signal)
+      .then((board) => {
+        if (controller.signal.aborted) return;
+        setObservationCounts(
+          new Map(board.collectors.map((collector) => [collector.did, collector.count])),
+        );
+      })
+      .catch((caught) => {
+        if ((caught as Error).name !== "AbortError") setObservationCounts(null);
+      });
+    return () => controller.abort();
+  }, [initial, roundById, selectedRoundId]);
 
   if (initial === null) {
     return (
@@ -193,6 +216,8 @@ export function AdminBioblitzExclusions({
               ownerDid={selectedDid}
               onChange={setSelectedDid}
               className="w-full justify-between"
+              observationCounts={observationCounts}
+              formatObservationCount={(count) => t("observationCount", { count })}
               labels={{
                 button: t("chooseAccount"),
                 ariaLabel: t("accountPickerAria"),

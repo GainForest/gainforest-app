@@ -1301,6 +1301,7 @@
     "searchPlaceholder": "Buscar personas y organizaciones",
     "searchHint": "Escribe el nombre de una cuenta para buscar",
     "noResults": "No hay cuentas coincidentes",
+    "observationCount": "{count, plural, one {# observación} other {# observaciones}}",
     "clearSelection": "Borrar la cuenta seleccionada",
     "weekLabel": "Semana de BioBlitz",
     "roundLabel": "Ronda {round}",

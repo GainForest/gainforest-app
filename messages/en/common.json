@@ -1301,6 +1301,7 @@
     "searchPlaceholder": "Search people and organizations",
     "searchHint": "Type an account name to search",
     "noResults": "No matching accounts",
+    "observationCount": "{count, plural, one {# observation} other {# observations}}",
     "clearSelection": "Clear account selection",
     "weekLabel": "BioBlitz week",
     "roundLabel": "Round {round}",
