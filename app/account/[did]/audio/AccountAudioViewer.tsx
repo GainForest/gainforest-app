@@ -30,6 +30,7 @@ import Container from "@/components/ui/container";
 import { ModalContent, ModalDescription, ModalFooter, ModalHeader, ModalTitle } from "@/components/ui/modal/modal";
 import { useModal } from "@/components/ui/modal/context";
 import { deleteRecord } from "@/app/(manage)/manage/_lib/mutations";
+import { SOUNDSCAPE_ANALYSIS_COLLECTION } from "@/lib/soundscape/analysis-record";
 import { resolvePdsHost } from "@/app/_lib/pds";
 import { listAcDeployments, type AcDeploymentItem } from "@/app/_lib/ac-deployment";
 import {
@@ -142,6 +143,10 @@ export function AccountAudioViewer({
         try {
           await deleteRecord(AC_AUDIO_COLLECTION, item.rkey, repoOptions);
           deleted.add(item.uri);
+          // The soundscape analysis describes audio that no longer exists.
+          // Best effort: a leftover analysis is harmless, and must never turn
+          // a successful deletion into a failed one.
+          await deleteRecord(SOUNDSCAPE_ANALYSIS_COLLECTION, item.rkey, repoOptions).catch(() => {});
         } catch {
           failed.add(item.uri);
         }

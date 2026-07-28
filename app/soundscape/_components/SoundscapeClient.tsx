@@ -36,6 +36,8 @@ import { useTranslations } from "next-intl";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { listAllRecordings, type AcAudioListItem } from "@/app/_lib/ac-audio";
+import { listStoredAnalyses, saveStoredAnalysis } from "@/app/_lib/soundscape-analysis";
+import { buildAnalysisRecord, isUsableAnalysis } from "@/lib/soundscape/analysis-record";
 import {
   openWav,
   wallClockDateKey,
@@ -162,15 +164,30 @@ export function SoundscapeClient({ sessionDid }: { sessionDid: string | null }) 
     setPaused(false);
     (async () => {
       try {
-        const items = await listAllRecordings(sessionDid, controller.signal);
+        /* The stored analyses are what make this survive a new browser, so
+           they are fetched alongside the library rather than after it. A repo
+           that has never been analyzed simply yields none. */
+        const [items, stored] = await Promise.all([
+          listAllRecordings(sessionDid, controller.signal),
+          listStoredAnalyses(sessionDid, controller.signal).catch(() => new Map()),
+        ]);
         if (cancelled) return;
         const cache = cacheRef.current ?? loadPmnCache();
         cacheRef.current = cache;
         const seeded: Record<string, AnalysisState> = {};
+        let cacheGrew = false;
         for (const item of items) {
+          const analysis = stored.get(item.rkey);
+          if (!cache[item.cid] && analysis && isUsableAnalysis(analysis, item.cid)) {
+            // Warm the local cache from the account's own copy, so the next
+            // visit doesn't even need the network.
+            cache[item.cid] = toCacheEntry(analysis.bands, analysis.spectrum, analysis.sampleRate);
+            cacheGrew = true;
+          }
           const cached = cache[item.cid];
           seeded[item.uri] = cached ? { status: "done", pmn: cached.bands } : { status: "idle" };
         }
+        if (cacheGrew) savePmnCache(cache);
         setResults(seeded);
         setRecordings(items);
       } catch {
@@ -194,7 +211,7 @@ export function SoundscapeClient({ sessionDid }: { sessionDid: string | null }) 
     const next = library.find((entry) => entry.analyzable && results[entry.item.uri]?.status === "queued");
     if (!next) return;
     processingRef.current = true;
-    const { uri, cid, accessUri } = next.item;
+    const { uri, cid, rkey, accessUri } = next.item;
     const controller = new AbortController();
     abortRef.current = controller;
     setResults((current) => ({ ...current, [uri]: { status: "downloading" } }));
@@ -211,6 +228,13 @@ export function SoundscapeClient({ sessionDid }: { sessionDid: string | null }) 
         cacheRef.current = cache;
         cache[cid] = toCacheEntry(pmnPerBand, spectrum, sampleRate);
         savePmnCache(cache);
+        /* Keep the result in the account, not just this browser. Best effort:
+           the dial already has its numbers, and a failed write only costs the
+           next visit a re-analysis, so it must never fail the recording. */
+        void saveStoredAnalysis({
+          rkey,
+          record: buildAnalysisRecord({ audioUri: uri, audioCid: cid, sampleRate, bands: pmnPerBand, spectrum }),
+        }).catch(() => {});
         update = { status: "done", pmn: pmnPerBand };
       } catch (error) {
         // Pausing aborts the in-flight download — that isn't a failure, the
