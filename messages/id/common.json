@@ -3177,6 +3177,7 @@
     "groups": {
       "title": "Folder",
       "hint": "Setiap lanskap suara dibuat dari satu folder rekaman — pilih folder yang ingin dikerjakan.",
+      "hintSingle": "Lanskap suara ini dibuat dari satu-satunya folder rekaman Anda.",
       "chip": "{name} · {count, plural, other {# rekaman}}",
       "unassigned": "Tidak dalam folder",
       "unknown": "Folder dihapus"
@@ -3279,6 +3280,25 @@
       "play": "Putar",
       "pause": "Jeda"
     }
+  },
+  "recordingFolders": {
+    "renameAction": "Ganti nama",
+    "deleteAction": "Hapus",
+    "emptyFolder": "Belum ada rekaman di folder ini.",
+    "renameTitle": "Ganti nama folder",
+    "renameBody": "Hanya nama folder yang berubah — rekaman di dalamnya tetap di tempatnya, begitu juga apa pun yang sudah dibagikan dari rekaman itu.",
+    "nameLabel": "Nama folder",
+    "namePlaceholder": "mis. Tepi sungai, musim kemarau",
+    "nameRequired": "Beri nama folder ini.",
+    "save": "Simpan",
+    "saving": "Menyimpan…",
+    "cancel": "Batal",
+    "renameFailed": "Nama folder tidak dapat diganti. Silakan coba lagi.",
+    "deleteTitle": "Hapus “{name}”?",
+    "deleteBody": "{count, plural, =0 {Folder akan dihapus permanen. Ini tidak dapat dibatalkan.} other {Folder beserta # rekaman di dalamnya akan dihapus permanen — file asli yang diarsipkan, pratinjau yang dapat diputar, spektrogram, dan analisisnya ikut terhapus. Ini tidak dapat dibatalkan.}}",
+    "deleteProgress": "Menghapus… {done} dari {total}",
+    "deletePartial": "{count, plural, other {# rekaman}} tidak dapat dihapus, jadi folder tetap dipertahankan. Silakan coba lagi.",
+    "deleteFailed": "Folder tidak dapat dihapus. Silakan coba lagi."
   },
   "hypercerts": {
     "metaTitle": "Membangun di atas leksikon Hypercerts — GainForest",

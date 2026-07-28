@@ -3177,6 +3177,7 @@
     "groups": {
       "title": "Folders",
       "hint": "Each soundscape is built from one folder of recordings — pick the folder to work on.",
+      "hintSingle": "This soundscape is built from your one folder of recordings.",
       "chip": "{name} · {count, plural, one {# recording} other {# recordings}}",
       "unassigned": "Not in a folder",
       "unknown": "Removed folder"
@@ -3279,6 +3280,25 @@
       "play": "Play",
       "pause": "Pause"
     }
+  },
+  "recordingFolders": {
+    "renameAction": "Rename",
+    "deleteAction": "Delete",
+    "emptyFolder": "No recordings in this folder yet.",
+    "renameTitle": "Rename folder",
+    "renameBody": "Only the folder's name changes — the recordings in it stay where they are, and so does anything already shared from them.",
+    "nameLabel": "Folder name",
+    "namePlaceholder": "e.g. Riverbank, dry season",
+    "nameRequired": "Give the folder a name.",
+    "save": "Save",
+    "saving": "Saving…",
+    "cancel": "Cancel",
+    "renameFailed": "The folder could not be renamed. Please try again.",
+    "deleteTitle": "Delete “{name}”?",
+    "deleteBody": "{count, plural, =0 {The folder is permanently deleted. This cannot be undone.} one {The folder and the # recording in it are permanently deleted — the archived original file, playable preview, spectrogram and analysis all go. This cannot be undone.} other {The folder and the # recordings in it are permanently deleted — the archived original files, playable previews, spectrograms and analyses all go. This cannot be undone.}}",
+    "deleteProgress": "Deleting… {done} of {total}",
+    "deletePartial": "{count, plural, one {# recording} other {# recordings}} could not be deleted, so the folder was kept. Please try again.",
+    "deleteFailed": "The folder could not be deleted. Please try again."
   },
   "hypercerts": {
     "metaTitle": "Building on the Hypercerts lexicons — GainForest",

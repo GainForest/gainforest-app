@@ -3177,6 +3177,7 @@
     "groups": {
       "title": "Folda",
       "hint": "Kila mandhari ya sauti hutengenezwa kutoka kwa folda moja ya rekodi — chagua folda ya kufanyia kazi.",
+      "hintSingle": "Mandhari hii ya sauti hutengenezwa kutoka kwa folda yako pekee ya rekodi.",
       "chip": "{name} · {count, plural, one {rekodi #} other {rekodi #}}",
       "unassigned": "Haiko kwenye folda",
       "unknown": "Folda imeondolewa"
@@ -3279,6 +3280,25 @@
       "play": "Cheza",
       "pause": "Simamisha"
     }
+  },
+  "recordingFolders": {
+    "renameAction": "Badilisha jina",
+    "deleteAction": "Futa",
+    "emptyFolder": "Bado hakuna rekodi katika folda hii.",
+    "renameTitle": "Badilisha jina la folda",
+    "renameBody": "Jina la folda pekee ndilo linalobadilika — rekodi zilizomo hubaki pale zilipo, na vivyo hivyo chochote kilichokwisha shirikiwa kutoka kwazo.",
+    "nameLabel": "Jina la folda",
+    "namePlaceholder": "mf. Ukingo wa mto, msimu wa kiangazi",
+    "nameRequired": "Ipe folda jina.",
+    "save": "Hifadhi",
+    "saving": "Inahifadhi…",
+    "cancel": "Ghairi",
+    "renameFailed": "Jina la folda halikuweza kubadilishwa. Tafadhali jaribu tena.",
+    "deleteTitle": "Futa “{name}”?",
+    "deleteBody": "{count, plural, =0 {Folda itafutwa kabisa. Hili haliwezi kutenduliwa.} one {Folda pamoja na rekodi # iliyomo zitafutwa kabisa — faili halisi iliyohifadhiwa, kionjo kinachochezeka, spektrogramu na uchanganuzi wake vyote vitaondolewa. Hili haliwezi kutenduliwa.} other {Folda pamoja na rekodi # zilizomo zitafutwa kabisa — faili halisi zilizohifadhiwa, vionjo vinavyochezeka, spektrogramu na uchanganuzi wake vyote vitaondolewa. Hili haliwezi kutenduliwa.}}",
+    "deleteProgress": "Inafuta… {done} kati ya {total}",
+    "deletePartial": "{count, plural, one {Rekodi #} other {Rekodi #}} haikuweza kufutwa, hivyo folda imebaki. Tafadhali jaribu tena.",
+    "deleteFailed": "Folda haikuweza kufutwa. Tafadhali jaribu tena."
   },
   "hypercerts": {
     "metaTitle": "Kujenga juu ya leksikoni za Hypercerts — GainForest",

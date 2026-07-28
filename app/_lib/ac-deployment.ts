@@ -159,6 +159,9 @@ export function configGainLabel(config: AudioMothConfig): string | undefined {
 
 type MutationResult = { uri: string; cid: string };
 
+/** Write target: the signed-in account by default, an organization's repo when given. */
+export type DeploymentWriteOptions = { repo?: string | null };
+
 async function postMutation<T>(body: Record<string, unknown>, fallbackMessage: string): Promise<T> {
   const res = await fetch("/api/manage/proxy", {
     method: "POST",
@@ -229,13 +232,61 @@ export async function createAcDeployment(draft: AcDeploymentDraft): Promise<Muta
   );
 }
 
-export async function deleteAcDeployment(item: AcDeploymentItem): Promise<void> {
+export async function deleteAcDeployment(item: AcDeploymentItem, options?: DeploymentWriteOptions): Promise<void> {
   await postMutation<{ success?: boolean }>(
     {
       operation: "deleteRecord",
       collection: AC_DEPLOYMENT_COLLECTION,
       rkey: item.rkey,
+      ...(options?.repo ? { repo: options.repo } : {}),
     },
     "Could not delete the recorder deployment.",
+  );
+}
+
+/** The parts of a folder its owner can change after the fact. */
+export type AcDeploymentEdit = {
+  /** The folder's display name — what the picker, the profile and a published
+   *  soundscape's title all read. */
+  name: string;
+};
+
+/**
+ * The stored record with the edit applied. Everything else — the recorder,
+ * its schedule, where and when it was deployed — is measurement, not naming,
+ * and is carried over untouched.
+ */
+export function buildUpdatedAcDeploymentRecord(
+  item: AcDeploymentItem,
+  edit: AcDeploymentEdit,
+): AcDeploymentRecord {
+  const { uri: _uri, rkey: _rkey, cid: _cid, did: _did, ...record } = item;
+  return { ...record, name: edit.name.trim() };
+}
+
+export function applyAcDeploymentEdit(
+  item: AcDeploymentItem,
+  edit: AcDeploymentEdit,
+  cid: string,
+): AcDeploymentItem {
+  return { ...item, ...buildUpdatedAcDeploymentRecord(item, edit), cid };
+}
+
+/** Rename a folder of recordings. The recordings themselves never move. */
+export async function updateAcDeployment(
+  item: AcDeploymentItem,
+  edit: AcDeploymentEdit,
+  options?: DeploymentWriteOptions,
+): Promise<MutationResult> {
+  return postMutation<MutationResult>(
+    {
+      operation: "putRecord",
+      collection: AC_DEPLOYMENT_COLLECTION,
+      rkey: item.rkey,
+      swapRecord: item.cid,
+      record: buildUpdatedAcDeploymentRecord(item, edit),
+      ...(options?.repo ? { repo: options.repo } : {}),
+    },
+    "Could not rename the folder.",
   );
 }

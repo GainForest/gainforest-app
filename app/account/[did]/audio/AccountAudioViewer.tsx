@@ -5,9 +5,11 @@
  * repo's `ac.audio` recordings, grouped by recorder deployment and rendered
  * with the same spectrogram player used on deployment detail pages.
  *
- * Deliberately no forms here — deployments are created by the AudioMoth
- * page's acoustic chime and recordings by the SD-card upload, so this tab
- * only has to answer one question: "what did my recorders capture?"
+ * Deliberately almost no forms here — deployments are created by the
+ * AudioMoth page's acoustic chime and recordings by the SD-card upload, so
+ * this tab only has to answer one question: "what did my recorders capture?"
+ * The exceptions are the two things an owner can only fix after the fact:
+ * renaming a folder and deleting one.
  * The full record editor still exists for power users behind explicit
  * `?section=…`/`?mode=…` deep links (see ./page.tsx).
  */
@@ -20,6 +22,7 @@ import {
   AudioLinesIcon,
   Loader2Icon,
   MapPinIcon,
+  PencilIcon,
   Trash2Icon,
   TriangleAlertIcon,
   UploadIcon,
@@ -29,17 +32,17 @@ import { Button } from "@/components/ui/button";
 import Container from "@/components/ui/container";
 import { ModalContent, ModalDescription, ModalFooter, ModalHeader, ModalTitle } from "@/components/ui/modal/modal";
 import { useModal } from "@/components/ui/modal/context";
-import { deleteRecord } from "@/app/(manage)/manage/_lib/mutations";
-import { SOUNDSCAPE_ANALYSIS_COLLECTION } from "@/lib/soundscape/analysis-record";
 import { resolvePdsHost } from "@/app/_lib/pds";
-import { listAcDeployments, type AcDeploymentItem } from "@/app/_lib/ac-deployment";
 import {
-  AC_AUDIO_COLLECTION,
-  audiomothStorageKey,
-  deleteArchivedOriginals,
-  listAllRecordings,
-  type AcAudioListItem,
-} from "@/app/_lib/ac-audio";
+  applyAcDeploymentEdit,
+  deleteAcDeployment,
+  listAcDeployments,
+  updateAcDeployment,
+  type AcDeploymentItem,
+} from "@/app/_lib/ac-deployment";
+import { listAllRecordings, type AcAudioListItem } from "@/app/_lib/ac-audio";
+import { deleteRecordings } from "@/app/_lib/ac-audio-delete";
+import { DeleteFolderModal, RenameFolderModal } from "@/app/_components/RecordingFolderModals";
 import { deploymentDetailPath, parseAtUri } from "@/app/_lib/deployment-events";
 import { formatDate } from "@/app/_lib/format";
 import { RecordingsExplorer } from "@/app/_components/RecordingsExplorer";
@@ -48,12 +51,24 @@ type DeploymentGroup = {
   key: string;
   name: string;
   deployedAt: string | null;
+  /** The folder's own record — absent for the "other recordings" group. */
+  deployment: AcDeploymentItem | null;
   /** Local path of the deployment's detail page, when it has a chime event. */
   detailPath: string | null;
   items: AcAudioListItem[];
 };
 
-function groupRecordings(deployments: AcDeploymentItem[], recordings: AcAudioListItem[]): DeploymentGroup[] {
+function groupRecordings(
+  deployments: AcDeploymentItem[],
+  recordings: AcAudioListItem[],
+  /**
+   * Show folders that hold no recordings. Only the owner sees these: an
+   * upload that failed after naming its folder leaves one behind, and it
+   * would otherwise be invisible here while still cluttering the folder
+   * picker on the next upload — with nowhere to delete it.
+   */
+  includeEmpty: boolean,
+): DeploymentGroup[] {
   const byUri = new Map(deployments.map((d) => [d.uri, d]));
   const grouped = new Map<string, AcAudioListItem[]>();
   for (const item of recordings) {
@@ -64,14 +79,15 @@ function groupRecordings(deployments: AcDeploymentItem[], recordings: AcAudioLis
   }
 
   const groups: DeploymentGroup[] = [];
-  for (const [key, items] of grouped) {
-    if (!key) continue;
-    const deployment = byUri.get(key)!;
+  for (const deployment of deployments) {
+    const items = grouped.get(deployment.uri) ?? [];
+    if (items.length === 0 && !includeEmpty) continue;
     const eventParts = deployment.eventRef ? parseAtUri(deployment.eventRef) : null;
     groups.push({
-      key,
+      key: deployment.uri,
       name: deployment.name,
       deployedAt: deployment.deployedAt ?? null,
+      deployment,
       detailPath: eventParts ? deploymentDetailPath(eventParts.did, eventParts.rkey) : null,
       items,
     });
@@ -81,7 +97,7 @@ function groupRecordings(deployments: AcDeploymentItem[], recordings: AcAudioLis
 
   const ungrouped = grouped.get("");
   if (ungrouped?.length) {
-    groups.push({ key: "", name: "", deployedAt: null, detailPath: null, items: ungrouped });
+    groups.push({ key: "", name: "", deployedAt: null, deployment: null, detailPath: null, items: ungrouped });
   }
   return groups;
 }
@@ -101,6 +117,7 @@ export function AccountAudioViewer({
   mutationRepo?: string | null;
 }) {
   const t = useTranslations("common.audiomoth.recordings");
+  const tFolders = useTranslations("common.recordingFolders");
   const modal = useModal();
 
   const [host, setHost] = useState<string | null>(null);
@@ -135,43 +152,14 @@ export function AccountAudioViewer({
   const performDelete = useCallback(
     async (onProgress: (done: number, total: number) => void) => {
       const items = (recordings ?? []).filter((item) => selectedUris.has(item.uri));
-      const repoOptions = mutationRepo ? { repo: mutationRepo } : undefined;
-      const deleted = new Set<string>();
-      const failed = new Set<string>();
-      let done = 0;
-      for (const item of items) {
-        try {
-          await deleteRecord(AC_AUDIO_COLLECTION, item.rkey, repoOptions);
-          deleted.add(item.uri);
-          // The soundscape analysis describes audio that no longer exists.
-          // Best effort: a leftover analysis is harmless, and must never turn
-          // a successful deletion into a failed one.
-          await deleteRecord(SOUNDSCAPE_ANALYSIS_COLLECTION, item.rkey, repoOptions).catch(() => {});
-        } catch {
-          failed.add(item.uri);
-        }
-        done += 1;
-        onProgress(done, items.length);
-      }
+      const { deleted, failed } = await deleteRecordings({
+        items,
+        survivors: (recordings ?? []).filter((item) => !selectedUris.has(item.uri)),
+        repo: mutationRepo,
+        onProgress,
+      });
       if (deleted.size > 0) {
         setRecordings((current) => current?.filter((item) => !deleted.has(item.uri)) ?? current);
-        // Also remove the archival originals from object storage — but only
-        // for objects no surviving record still points at (duplicate uploads
-        // can share one file). Best effort: an orphaned WAV must never block
-        // or fail the deletion the user asked for.
-        const survivingKeys = new Set(
-          (recordings ?? [])
-            .filter((item) => !deleted.has(item.uri))
-            .map((item) => audiomothStorageKey(item.accessUri))
-            .filter((key): key is string => key !== null),
-        );
-        const removableKeys = new Set(
-          items
-            .filter((item) => deleted.has(item.uri))
-            .map((item) => audiomothStorageKey(item.accessUri))
-            .filter((key): key is string => key !== null && !survivingKeys.has(key)),
-        );
-        if (removableKeys.size > 0) await deleteArchivedOriginals(removableKeys);
       }
       if (failed.size > 0) {
         // Keep the failed ones selected so the user can retry immediately.
@@ -198,6 +186,70 @@ export function AccountAudioViewer({
     void modal.show();
   }, [modal, performDelete, selectedUris.size]);
 
+  /* ── Folder rename / delete (owner or org admin) ────────────────────────
+   * A folder is named while an SD card uploads, so its name is the thing most
+   * often worth fixing. Deleting takes the recordings filed in it with it —
+   * an empty folder record left behind would only strand them. */
+  const renameFolder = useCallback(
+    (deployment: AcDeploymentItem) => {
+      modal.pushModal(
+        {
+          id: "rename-recording-folder",
+          content: (
+            <RenameFolderModal
+              currentName={deployment.name}
+              onSave={async (name) => {
+                const { cid } = await updateAcDeployment(deployment, { name }, { repo: mutationRepo });
+                const updated = applyAcDeploymentEdit(deployment, { name }, cid);
+                setDeployments((current) =>
+                  current?.map((item) => (item.uri === updated.uri ? updated : item)) ?? current,
+                );
+              }}
+            />
+          ),
+        },
+        true,
+      );
+      void modal.show();
+    },
+    [modal, mutationRepo],
+  );
+
+  const confirmDeleteFolder = useCallback(
+    (group: DeploymentGroup) => {
+      const deployment = group.deployment;
+      if (!deployment) return;
+      modal.pushModal(
+        {
+          id: "delete-recording-folder",
+          content: (
+            <DeleteFolderModal
+              name={group.name}
+              count={group.items.length}
+              onConfirm={async (onProgress) => {
+                const { deleted, failed } = await deleteRecordings({
+                  items: group.items,
+                  survivors: (recordings ?? []).filter((item) => item.deploymentRef !== deployment.uri),
+                  repo: mutationRepo,
+                  onProgress,
+                });
+                if (deleted.size > 0) {
+                  setRecordings((current) => current?.filter((item) => !deleted.has(item.uri)) ?? current);
+                }
+                if (failed.size > 0) throw new Error(tFolders("deletePartial", { count: failed.size }));
+                await deleteAcDeployment(deployment, { repo: mutationRepo });
+                setDeployments((current) => current?.filter((item) => item.uri !== deployment.uri) ?? current);
+              }}
+            />
+          ),
+        },
+        true,
+      );
+      void modal.show();
+    },
+    [modal, mutationRepo, recordings, tFolders],
+  );
+
   useEffect(() => {
     const ctrl = new AbortController();
     (async () => {
@@ -223,8 +275,8 @@ export function AccountAudioViewer({
   }, [did]);
 
   const groups = useMemo(
-    () => (deployments && recordings ? groupRecordings(deployments, recordings) : []),
-    [deployments, recordings],
+    () => (deployments && recordings ? groupRecordings(deployments, recordings, canDelete) : []),
+    [canDelete, deployments, recordings],
   );
 
   /** Every recording's URI in on-screen order, for shift-click ranges. */
@@ -322,7 +374,9 @@ export function AccountAudioViewer({
         <p className="mt-6 rounded-2xl border border-border bg-card/90 px-5 py-8 text-center text-sm text-muted-foreground">
           {t("loadError")}
         </p>
-      ) : total === 0 ? (
+      ) : groups.length === 0 ? (
+        /* Nothing at all — an owner whose only folders are empty still sees
+           them below, so they can be cleaned up. */
         <div className="mt-6 rounded-3xl border border-dashed border-border bg-muted/30 px-6 py-14 text-center">
           <span className="mx-auto grid h-12 w-12 place-items-center rounded-full bg-primary/10 text-primary">
             <AudioLinesIcon className="size-6" />
@@ -340,46 +394,75 @@ export function AccountAudioViewer({
         </div>
       ) : (
         <div className="mt-6 flex flex-col gap-4">
-          {groups.map((group) => (
-            <section key={group.key || "other"} className="rounded-2xl border border-border bg-card/90 p-5 sm:p-6">
-              <div className="flex flex-wrap items-center justify-between gap-2">
-                <div className="flex min-w-0 items-center gap-2.5">
-                  <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-primary/10 text-primary">
-                    {group.key ? <MapPinIcon className="size-4" /> : <AudioLinesIcon className="size-4" />}
-                  </span>
-                  <div className="min-w-0">
-                    <h2 className="truncate text-sm font-medium text-foreground">
-                      {group.key ? group.name : t("otherGroup")}
-                    </h2>
-                    <p className="text-xs text-muted-foreground">
-                      {[group.deployedAt ? formatDate(group.deployedAt) : null, t("groupCount", { count: group.items.length })]
-                        .filter(Boolean)
-                        .join(" · ")}
-                    </p>
+          {groups.map((group) => {
+            const folder = group.deployment;
+            return (
+              <section key={group.key || "other"} className="rounded-2xl border border-border bg-card/90 p-5 sm:p-6">
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <div className="flex min-w-0 items-center gap-2.5">
+                    <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-primary/10 text-primary">
+                      {group.key ? <MapPinIcon className="size-4" /> : <AudioLinesIcon className="size-4" />}
+                    </span>
+                    <div className="min-w-0">
+                      <h2 className="truncate text-sm font-medium text-foreground">
+                        {group.key ? group.name : t("otherGroup")}
+                      </h2>
+                      <p className="text-xs text-muted-foreground">
+                        {[group.deployedAt ? formatDate(group.deployedAt) : null, t("groupCount", { count: group.items.length })]
+                          .filter(Boolean)
+                          .join(" · ")}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex shrink-0 items-center gap-1">
+                    {group.detailPath ? (
+                      <Link
+                        href={group.detailPath}
+                        className="inline-flex shrink-0 items-center gap-1 px-2 text-xs font-medium text-primary underline-offset-2 hover:underline"
+                      >
+                        {t("viewDeployment")}
+                        <ArrowUpRightIcon className="size-3" aria-hidden />
+                      </Link>
+                    ) : null}
+                    {canDelete && folder ? (
+                      <>
+                        <Button type="button" variant="ghost" size="sm" onClick={() => renameFolder(folder)}>
+                          <PencilIcon className="size-4" />
+                          {tFolders("renameAction")}
+                        </Button>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          className="text-destructive hover:bg-destructive/10 hover:text-destructive"
+                          onClick={() => confirmDeleteFolder(group)}
+                        >
+                          <Trash2Icon className="size-4" />
+                          {tFolders("deleteAction")}
+                        </Button>
+                      </>
+                    ) : null}
                   </div>
                 </div>
-                {group.detailPath ? (
-                  <Link
-                    href={group.detailPath}
-                    className="inline-flex shrink-0 items-center gap-1 text-xs font-medium text-primary underline-offset-2 hover:underline"
-                  >
-                    {t("viewDeployment")}
-                    <ArrowUpRightIcon className="size-3" aria-hidden />
-                  </Link>
-                ) : null}
-              </div>
-              <div className="mt-4">
-                <RecordingsExplorer
-                  did={did}
-                  host={host}
-                  items={group.items}
-                  selectable={canDelete}
-                  selectedUris={selectedUris}
-                  onToggleSelect={toggleSelect}
-                />
-              </div>
-            </section>
-          ))}
+                <div className="mt-4">
+                  {group.items.length === 0 ? (
+                    <p className="rounded-xl border border-dashed border-border bg-muted/20 px-4 py-6 text-center text-xs text-muted-foreground">
+                      {tFolders("emptyFolder")}
+                    </p>
+                  ) : (
+                    <RecordingsExplorer
+                      did={did}
+                      host={host}
+                      items={group.items}
+                      selectable={canDelete}
+                      selectedUris={selectedUris}
+                      onToggleSelect={toggleSelect}
+                    />
+                  )}
+                </div>
+              </section>
+            );
+          })}
         </div>
       )}
     </Container>

@@ -29,11 +29,13 @@ import {
   ChevronRightIcon,
   FolderKanbanIcon,
   MinusIcon,
+  PencilIcon,
   PlusIcon,
   RefreshCwIcon,
   RotateCcwIcon,
   Share2Icon,
   SquareIcon,
+  Trash2Icon,
   UploadIcon,
   Volume2Icon,
   WavesIcon,
@@ -43,7 +45,15 @@ import { useTranslations } from "next-intl";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { listAllRecordings, type AcAudioListItem } from "@/app/_lib/ac-audio";
-import { listAcDeployments, type AcDeploymentItem } from "@/app/_lib/ac-deployment";
+import { deleteRecordings } from "@/app/_lib/ac-audio-delete";
+import {
+  applyAcDeploymentEdit,
+  deleteAcDeployment,
+  listAcDeployments,
+  updateAcDeployment,
+  type AcDeploymentItem,
+} from "@/app/_lib/ac-deployment";
+import { DeleteFolderModal, RenameFolderModal } from "@/app/_components/RecordingFolderModals";
 import { listStoredAnalyses, saveStoredAnalysis } from "@/app/_lib/soundscape-analysis";
 import { buildAnalysisRecord, isUsableAnalysis } from "@/lib/soundscape/analysis-record";
 import {
@@ -149,6 +159,7 @@ function formatClockTime(time: WallClockTime): string {
 
 export function SoundscapeClient({ sessionDid }: { sessionDid: string | null }) {
   const t = useTranslations("common.soundscape");
+  const tFolders = useTranslations("common.recordingFolders");
   const [recordings, setRecordings] = useState<AcAudioListItem[] | null>(null);
   const [deployments, setDeployments] = useState<AcDeploymentItem[]>([]);
   const [selectedGroupId, setSelectedGroupId] = useState<string | null>(null);
@@ -209,6 +220,14 @@ export function SoundscapeClient({ sessionDid }: { sessionDid: string | null }) 
 
   const selectedGroupName = groups.find((group) => group.id === selectedGroup)?.name ?? "";
 
+  /** The selected folder's own record — absent for the two synthetic groups
+   *  (a folder whose record was removed, recordings that never had one), which
+   *  is exactly when renaming and deleting can't be offered. */
+  const selectedDeployment = useMemo(
+    () => deployments.find((deployment) => deployment.uri === selectedGroup) ?? null,
+    [deployments, selectedGroup],
+  );
+
   /** The recordings a soundscape can be built from: the selected folder's. */
   const library = useMemo<LibraryRecording[]>(
     () => allRecordings.filter((entry) => (entry.item.deploymentRef ?? UNASSIGNED_GROUP) === selectedGroup),
@@ -219,7 +238,7 @@ export function SoundscapeClient({ sessionDid }: { sessionDid: string | null }) 
      from the old one are let go (anything already analyzed stays cached), and
      the date filter and zoom go back to their defaults. A download already in
      flight is left to finish so its result still lands in the cache. */
-  const selectGroup = useCallback((id: string) => {
+  const selectGroup = useCallback((id: string | null) => {
     setSelectedGroupId(id);
     setSelectedDate(ALL_DATES);
     setZoom(FULL_DAY_WINDOW);
@@ -753,6 +772,78 @@ export function SoundscapeClient({ sessionDid }: { sessionDid: string | null }) 
     void modal.show();
   }, [closeShareModal, modal, publishSoundscape, shareInput, shareTarget]);
 
+  /* ── Managing the selected folder ───────────────────────────────────────
+     A folder is named in a hurry while an SD card uploads, so fixing its name
+     later is the common case; deleting it (with the recordings filed in it)
+     is the rare one. Both write the folder's own `ac.deployment` record, so
+     neither is offered for the synthetic groups. */
+  const renameFolder = useCallback(() => {
+    const folder = selectedDeployment;
+    if (!folder) return;
+    modal.pushModal(
+      {
+        id: "soundscape-rename-folder",
+        content: (
+          <RenameFolderModal
+            currentName={folder.name}
+            onSave={async (name) => {
+              const { cid } = await updateAcDeployment(folder, { name });
+              const updated = applyAcDeploymentEdit(folder, { name }, cid);
+              setDeployments((current) =>
+                current.map((item) => (item.uri === updated.uri ? updated : item)),
+              );
+            }}
+          />
+        ),
+      },
+      true,
+    );
+    void modal.show();
+  }, [modal, selectedDeployment]);
+
+  const deleteFolder = useCallback(() => {
+    const folder = selectedDeployment;
+    if (!folder) return;
+    const inFolder = allRecordings
+      .filter((entry) => entry.item.deploymentRef === folder.uri)
+      .map((entry) => entry.item);
+    const survivors = allRecordings
+      .filter((entry) => entry.item.deploymentRef !== folder.uri)
+      .map((entry) => entry.item);
+    /* Nothing may be mid-download while its record is being deleted. */
+    pauseAnalysis();
+    modal.pushModal(
+      {
+        id: "soundscape-delete-folder",
+        content: (
+          <DeleteFolderModal
+            name={folder.name}
+            count={inFolder.length}
+            onConfirm={async (onProgress) => {
+              const { deleted, failed } = await deleteRecordings({
+                items: inFolder,
+                survivors,
+                onProgress,
+              });
+              if (deleted.size > 0) {
+                setRecordings((current) => current?.filter((item) => !deleted.has(item.uri)) ?? current);
+              }
+              /* The folder record only goes once it is empty: removing it while
+                 recordings still point at it would strand them in the group
+                 the picker labels "Removed folder". */
+              if (failed.size > 0) throw new Error(tFolders("deletePartial", { count: failed.size }));
+              await deleteAcDeployment(folder);
+              setDeployments((current) => current.filter((item) => item.uri !== folder.uri));
+              selectGroup(null);
+            }}
+          />
+        ),
+      },
+      true,
+    );
+    void modal.show();
+  }, [allRecordings, modal, pauseAnalysis, selectGroup, selectedDeployment, tFolders]);
+
   const downloadPng = useCallback(async () => {
     const svg = chartRef.current?.querySelector<SVGSVGElement>("svg[data-soundscape-clock]");
     if (!svg) return;
@@ -838,16 +929,40 @@ export function SoundscapeClient({ sessionDid }: { sessionDid: string | null }) 
     <div className="flex flex-col gap-8">
       {/* Folder picker: a soundscape is built per folder (ac.deployment),
           never from the whole account at once. */}
-      {groups.length > 1 ? (
+      {groups.length > 1 || selectedDeployment ? (
         <section className="rounded-2xl border bg-background p-4 shadow-sm">
-          <div className="flex min-w-0 items-start gap-3">
-            <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-primary/10 text-primary">
-              <FolderOpenIcon className="size-4.5" />
-            </span>
-            <div className="min-w-0">
-              <p className="text-sm font-medium text-foreground">{t("groups.title")}</p>
-              <p className="text-xs text-muted-foreground">{t("groups.hint")}</p>
+          <div className="flex flex-wrap items-start justify-between gap-3">
+            <div className="flex min-w-0 items-start gap-3">
+              <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-primary/10 text-primary">
+                <FolderOpenIcon className="size-4.5" />
+              </span>
+              <div className="min-w-0">
+                <p className="text-sm font-medium text-foreground">{t("groups.title")}</p>
+                <p className="text-xs text-muted-foreground">
+                  {groups.length > 1 ? t("groups.hint") : t("groups.hintSingle")}
+                </p>
+              </div>
             </div>
+            {/* Renaming and deleting act on the selected folder, so they sit
+                with the picker rather than on every chip. */}
+            {selectedDeployment ? (
+              <div className="flex shrink-0 items-center gap-1">
+                <Button type="button" variant="ghost" size="sm" onClick={renameFolder}>
+                  <PencilIcon className="size-4" />
+                  {tFolders("renameAction")}
+                </Button>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  className="text-destructive hover:bg-destructive/10 hover:text-destructive"
+                  onClick={deleteFolder}
+                >
+                  <Trash2Icon className="size-4" />
+                  {tFolders("deleteAction")}
+                </Button>
+              </div>
+            ) : null}
           </div>
           <div className="mt-3 flex flex-wrap gap-1.5" role="group" aria-label={t("groups.title")}>
             {groups.map((group) => (

@@ -3177,6 +3177,7 @@
     "groups": {
       "title": "Pastas",
       "hint": "Cada paisagem sonora é criada a partir de uma pasta de gravações — escolha a pasta com que trabalhar.",
+      "hintSingle": "Esta paisagem sonora é criada a partir da sua única pasta de gravações.",
       "chip": "{name} · {count, plural, one {# gravação} other {# gravações}}",
       "unassigned": "Sem pasta",
       "unknown": "Pasta removida"
@@ -3279,6 +3280,25 @@
       "play": "Reproduzir",
       "pause": "Pausar"
     }
+  },
+  "recordingFolders": {
+    "renameAction": "Renomear",
+    "deleteAction": "Excluir",
+    "emptyFolder": "Ainda não há gravações nesta pasta.",
+    "renameTitle": "Renomear pasta",
+    "renameBody": "Apenas o nome da pasta muda — as gravações dentro dela ficam onde estão, assim como tudo o que já foi compartilhado a partir delas.",
+    "nameLabel": "Nome da pasta",
+    "namePlaceholder": "ex.: Margem do rio, estação seca",
+    "nameRequired": "Dê um nome à pasta.",
+    "save": "Salvar",
+    "saving": "Salvando…",
+    "cancel": "Cancelar",
+    "renameFailed": "Não foi possível renomear a pasta. Tente novamente.",
+    "deleteTitle": "Excluir “{name}”?",
+    "deleteBody": "{count, plural, =0 {A pasta será excluída permanentemente. Isso não pode ser desfeito.} one {A pasta e a # gravação nela serão excluídas permanentemente — o arquivo original arquivado, a prévia reproduzível, o espectrograma e a análise também são apagados. Isso não pode ser desfeito.} other {A pasta e as # gravações nela serão excluídas permanentemente — os arquivos originais arquivados, as prévias reproduzíveis, os espectrogramas e as análises também são apagados. Isso não pode ser desfeito.}}",
+    "deleteProgress": "Excluindo… {done} de {total}",
+    "deletePartial": "{count, plural, one {# gravação não pôde ser excluída} other {# gravações não puderam ser excluídas}}, então a pasta foi mantida. Tente novamente.",
+    "deleteFailed": "Não foi possível excluir a pasta. Tente novamente."
   },
   "hypercerts": {
     "metaTitle": "Construir sobre os léxicos do Hypercerts — GainForest",
