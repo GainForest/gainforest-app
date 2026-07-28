@@ -48,20 +48,20 @@ function formatSinceDate(value: string | null): string | null {
 
 const TILE = "min-w-[9rem] flex-1 rounded-2xl bg-muted p-3";
 
-/** A muted grid tile with a small label and its content below. */
-function FactTile({ label, children }: { label: React.ReactNode; children: React.ReactNode }) {
+/**
+ * A muted grid tile: label pinned top-left, content below. Hides itself when
+ * its body renders nothing, so async tiles (awards / trusted-by / memberships)
+ * never leave a lonely label behind.
+ */
+function LabeledTile({ label, children }: { label: React.ReactNode; children: React.ReactNode }) {
   return (
-    <div className={TILE}>
+    <div className={cn(TILE, "flex flex-col [&:has([data-tile-body]:empty)]:hidden")}>
       <div className="text-xs font-medium text-muted-foreground">{label}</div>
-      <div className="mt-1 text-sm font-medium text-foreground">{children}</div>
+      <div data-tile-body className="mt-1 text-sm font-medium text-foreground">
+        {children}
+      </div>
     </div>
   );
-}
-
-/** A muted grid tile wrapping a self-labeling component; hides itself when the
- *  component renders nothing (awards / trusted-by / memberships). */
-function ComponentTile({ children }: { children: React.ReactNode }) {
-  return <div className={cn(TILE, "flex items-center empty:hidden")}>{children}</div>;
 }
 
 /** Followers + following counts and the Follow button, in one muted tile. */
@@ -101,6 +101,9 @@ export function AccountOverviewDetails({
   const [copied, setCopied] = useState(false);
   const heroT = useTranslations("upload.dashboardClient.hero");
   const globeT = useTranslations("marketplace.globe");
+  const orgsT = useTranslations("common.accountOrganizations");
+  const recognitionT = useTranslations("common.recognition");
+  const trustT = useTranslations("common.trust");
   const sinceDate = formatSinceDate(
     account.kind === "organization" ? account.foundedDate ?? account.createdAt : account.createdAt,
   );
@@ -145,20 +148,18 @@ export function AccountOverviewDetails({
 
         <div className="flex flex-wrap gap-2">
           <FollowStatTile account={account} />
-          {orgType ? <FactTile label={heroT("typeLabel")}>{orgType}</FactTile> : null}
-          {country ? <FactTile label={heroT("countryLabel")}>{country}</FactTile> : null}
-          {sinceDate ? <FactTile label={heroT("joinedLabel")}>{sinceDate}</FactTile> : null}
-          {memberships.length > 0 ? (
-            <ComponentTile>
-              <AccountMemberships organizations={memberships} />
-            </ComponentTile>
-          ) : null}
-          <ComponentTile>
-            <AccountAwards did={account.did} />
-          </ComponentTile>
-          <ComponentTile>
-            <TrustedByBadges did={account.did} variant="plain" className="w-fit" />
-          </ComponentTile>
+          {orgType ? <LabeledTile label={heroT("typeLabel")}>{orgType}</LabeledTile> : null}
+          {country ? <LabeledTile label={heroT("countryLabel")}>{country}</LabeledTile> : null}
+          {sinceDate ? <LabeledTile label={heroT("joinedLabel")}>{sinceDate}</LabeledTile> : null}
+          <LabeledTile label={orgsT("memberOf")}>
+            <AccountMemberships organizations={memberships} hideLabel />
+          </LabeledTile>
+          <LabeledTile label={recognitionT("awardsLabel")}>
+            <AccountAwards did={account.did} hideLabel />
+          </LabeledTile>
+          <LabeledTile label={trustT("trustedBy")}>
+            <TrustedByBadges did={account.did} variant="plain" hideLabel />
+          </LabeledTile>
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
@@ -196,10 +197,9 @@ export function AccountOverviewDetails({
           {account.socialLinks.map((url) => {
             const label = formatWebsite(url);
             return (
-              <Button key={url} asChild variant="secondary" className="max-w-full">
-                <Link href={externalHref(url)} target="_blank" rel="noopener noreferrer">
+              <Button key={url} asChild variant="secondary" size="icon">
+                <Link href={externalHref(url)} target="_blank" rel="noopener noreferrer" aria-label={label} title={label}>
                   <SocialGlyph platform={classifySocial(url)} />
-                  <span className="max-w-52 truncate">{label}</span>
                 </Link>
               </Button>
             );
