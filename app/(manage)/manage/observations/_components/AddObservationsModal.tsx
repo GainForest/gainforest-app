@@ -309,8 +309,11 @@ export function AddObservationsModal({
    *  upload without leaving the flow. Only the generic quick-add turns this on;
    *  a project- or account-scoped page keeps its target locked. */
   allowAccountSwitch?: boolean;
-  /** Navigate to the observations list (called after a successful add). */
-  onViewObservations: () => void;
+  /** Navigate to the observations list (called after a successful add). Receives
+   *  the account the batch actually landed in — which may differ from the
+   *  target the modal opened with if the uploader switched "Uploading for" —
+   *  so the caller can route to that account's observations. */
+  onViewObservations: (uploadedTarget: ManageTarget) => void;
   onClose: () => void;
   /** When set, a back arrow returns to whatever opened this flow (e.g. the feed
    *  composer) instead of closing outright. */
@@ -375,6 +378,27 @@ export function AddObservationsModal({
       setSelectedProjectUri("");
     }
   }, [initialTarget]);
+
+  // No interstitial after a fully successful upload: the moment every card is
+  // in, hand off to the caller so the uploader lands directly on the
+  // observations list of the account the batch went to. Partial failures keep
+  // the modal open (items remain) so the errored cards can be fixed.
+  const handedOffRef = useRef(false);
+  useEffect(() => {
+    if (addedCount === null || items.length !== 0) {
+      handedOffRef.current = false; // armed for the next batch
+      return;
+    }
+    if (!handedOffRef.current) {
+      handedOffRef.current = true;
+      onViewObservations(target);
+    }
+    // This instance stays mounted between opens (drafts survive a plain
+    // close), so clear the success state once the modal has animated out —
+    // otherwise a later open would resurrect the redirect card.
+    const timer = setTimeout(() => setAddedCount(null), 700);
+    return () => clearTimeout(timer);
+  }, [addedCount, items.length, onViewObservations, target]);
 
   const { personal, groups: accountGroups } = useAccountList(allowAccountSwitch ? sessionDid : null);
   const [, setActiveContext] = useActiveAccountContext(sessionDid ?? "");
@@ -1030,25 +1054,23 @@ export function AddObservationsModal({
     );
   }
 
-  // Success screen — shown once at least one observation has been added.
+  // Fully successful upload — the effect above is already routing to the
+  // uploaded account's observations; show a beat of confirmation while the
+  // modal closes and the navigation happens, with no buttons to stop at.
   if (addedCount !== null && items.length === 0) {
     return (
       <ModalContent className="space-y-5" dismissible={false}>
-        <div className="flex flex-col items-center gap-3 py-4 text-center">
+        <div className="flex flex-col items-center gap-3 py-6 text-center">
           <span className="grid size-14 place-items-center rounded-2xl bg-primary/10 text-primary ring-1 ring-primary/15">
             <CheckCircle2Icon className="size-7" />
           </span>
           <div>
             <ModalTitle>{t("doneTitle", { count: addedCount })}</ModalTitle>
-            <ModalDescription className="mt-1">{t("doneBody")}</ModalDescription>
+            <ModalDescription className="mt-1">
+              {t("doneRedirect", { name: target.displayName?.trim() || target.identifier })}
+            </ModalDescription>
           </div>
-        </div>
-        <div className="flex flex-col gap-2 sm:flex-row sm:justify-center">
-          <Button variant="outline" onClick={() => setAddedCount(null)}>
-            <ImagePlusIcon className="size-4" />
-            {t("addMore")}
-          </Button>
-          <Button onClick={onViewObservations}>{t("viewObservations")}</Button>
+          <Loader2Icon className="size-4 animate-spin text-muted-foreground" />
         </div>
       </ModalContent>
     );
@@ -1057,7 +1079,11 @@ export function AddObservationsModal({
   const showEmptyState = items.length === 0;
 
   return (
-    <ModalContent className="space-y-4" dismissible={false}>
+    // flex (not space-y) so child margins can't collapse into the dialog's
+    // wrapper: the "Uploading for" footer relies on -mb-6 to bleed over the
+    // dialog's p-6, and a collapsed margin would leave a strip of padding
+    // below it instead of sitting flush on the bottom edge.
+    <ModalContent className="flex flex-col gap-4" dismissible={false}>
       <ModalHeader>
         <div className="flex items-start justify-between gap-3">
           <div className="flex min-w-0 items-center gap-2">
@@ -1419,7 +1445,7 @@ export function AddObservationsModal({
           can retarget the batch at any point without hunting for the sidebar
           switcher. Full-bleed over the dialog's p-6, flush to the bottom edge. */}
       {showAccountPicker ? (
-        <div className="-mx-6 -mb-6 flex flex-wrap items-center gap-x-3 gap-y-2 rounded-b-4xl border-t border-border bg-muted/40 px-6 py-3.5 max-[32rem]:-mx-4 max-[32rem]:-mb-4 max-[32rem]:rounded-none">
+        <div className="-mx-6 -mb-6 flex flex-wrap items-center gap-x-3 gap-y-2 rounded-b-4xl border-t border-border bg-primary/10 px-6 pt-3.5 pb-3 max-[32rem]:-mx-4 max-[32rem]:-mb-4 max-[32rem]:rounded-none">
           <span className="text-sm text-muted-foreground">{t("uploadingForLabel")}</span>
           <Select value={target.did} onValueChange={chooseUploadTarget} disabled={isSubmitting}>
             <SelectTrigger

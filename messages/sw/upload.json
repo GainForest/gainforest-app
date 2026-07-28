@@ -690,6 +690,7 @@
       "photoUploadFailed": "Hatukuweza kuhifadhi picha hii. Tafadhali jaribu tena.",
       "doneTitle": "{count, plural, one {Uchunguzi # umeongezwa} other {Uchunguzi # umeongezwa}}",
       "doneBody": "Utaonekana katika uchunguzi wako hivi punde.",
+      "doneRedirect": "Inafungua uchunguzi wa {name}…",
       "viewObservations": "Tazama uchunguzi",
       "combineTip": "Buruta picha moja juu ya nyingine ili kuziunganisha kuwa uchunguzi mmoja.",
       "photoCount": "{count, plural, one {picha #} other {picha #}}",
