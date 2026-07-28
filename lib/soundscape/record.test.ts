@@ -174,10 +174,12 @@ describe("soundscapePoints / sourceForMinute", () => {
     source({ minuteOfDay: 20, audioUri: "at://later", pmn: [2, 2, 2, 2, 2] }),
   ];
 
-  it("keeps the loudest value per band for a shared minute", () => {
+  it("averages a shared minute, exactly like the clock it was shared from", () => {
     const points = soundscapePoints(sources);
     expect(points).toHaveLength(2);
-    expect(points[0]).toEqual({ minuteOfDay: 10, pmn: [9, 1, 1, 1, 1] });
+    expect(points[0].minuteOfDay).toBe(10);
+    expect(points[0].pmn).toEqual([5, 0.5, 0.5, 0.5, 0.5]);
+    expect(points[0].count).toBe(2);
   });
 
   it("plays the loudest recording of the clicked minute", () => {

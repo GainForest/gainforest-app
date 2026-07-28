@@ -17,7 +17,7 @@
  * tested; `app/_lib/soundscape-record.ts` owns reading and writing it.
  */
 
-import { FREQUENCY_BANDS, type SoundscapePoint } from "./analysis";
+import { buildSoundscapePoints, FREQUENCY_BANDS, type SoundscapePoint } from "./analysis";
 
 export const SOUNDSCAPE_COLLECTION = "app.gainforest.ac.soundscape";
 
@@ -219,27 +219,17 @@ export function parseSoundscapeRecord(value: unknown): PublishedSoundscape | nul
   };
 }
 
-/** Fold a published soundscape's sources onto the 24-hour dial. Mirrors
- *  `buildSoundscapePoints`, kept here so callers don't have to reshape. */
+/** Fold a published soundscape's sources onto the 24-hour dial. Delegates to
+ *  `buildSoundscapePoints` so a shared clock averages its days exactly like
+ *  the one it was shared from — the two must never tell different stories
+ *  about the same recordings. */
 export function soundscapePoints(sources: SoundscapeSource[]): SoundscapePoint[] {
-  const byMinute = new Map<number, number[]>();
-  for (const source of sources) {
-    const existing = byMinute.get(source.minuteOfDay);
-    if (!existing) {
-      byMinute.set(source.minuteOfDay, [...source.pmn]);
-      continue;
-    }
-    for (let index = 0; index < existing.length; index++) {
-      existing[index] = Math.max(existing[index], source.pmn[index] ?? 0);
-    }
-  }
-  return [...byMinute.entries()]
-    .map(([minuteOfDay, pmn]) => ({ minuteOfDay, pmn }))
-    .sort((a, b) => a.minuteOfDay - b.minuteOfDay);
+  return buildSoundscapePoints(sources);
 }
 
-/** The recording a click on `minuteOfDay` should play: the loudest one at
- *  that minute, which is also the one the dial drew. */
+/** The recording a click on `minuteOfDay` should play. The dial draws the
+ *  average of everything in that minute, so no single recording is "the" one
+ *  — play the loudest. */
 export function sourceForMinute(sources: SoundscapeSource[], minuteOfDay: number): SoundscapeSource | null {
   let best: SoundscapeSource | null = null;
   for (const source of sources) {

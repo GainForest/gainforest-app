@@ -78,6 +78,22 @@ export function PublishedSoundscapeView({
   const points = useMemo(() => soundscapePoints(soundscape.sources), [soundscape.sources]);
   const dateRange = useMemo(() => formatSoundscapeDateRange(soundscape.sources), [soundscape.sources]);
 
+  /* A shared clock has to stand on its own: whoever opens the link never saw
+     the recordings behind it, so it says what the line and the shading are. */
+  const chartSubtitle = useMemo(() => {
+    let min = Infinity;
+    let max = 0;
+    for (const point of points) {
+      if (point.count < min) min = point.count;
+      if (point.count > max) max = point.count;
+    }
+    if (max < 2) return undefined;
+    return [
+      min === max ? t("chart.averageNote", { count: max }) : t("chart.averageNoteRange", { min, max }),
+      t("chart.spreadNote"),
+    ];
+  }, [points, t]);
+
   const bandRanges = useMemo(
     () => FREQUENCY_BANDS.map((band) => formatBandRange(band, soundscape.ceilingHz)),
     [soundscape.ceilingHz],
@@ -291,6 +307,10 @@ export function PublishedSoundscapeView({
             visibleBands={visibleBands}
             bandLabels={bandLabels}
             title={soundscape.title || t("chart.title", { date: dateRange })}
+            subtitle={chartSubtitle}
+            pointDetail={(point) =>
+              point.count > 1 ? t("chart.pointRecordings", { count: point.count }) : null
+            }
             radialLabel={t("chart.radialLabel")}
             timeLabel={t("chart.timeLabel")}
             legendTitle={t("chart.legendTitle")}
