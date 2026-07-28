@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Fragment, useCallback, useEffect, useId, useRef, useState, type ChangeEvent, type DragEvent, type KeyboardEvent } from "react";
 import { useTranslations } from "next-intl";
 import {
+  AlertTriangleIcon,
   ArchiveIcon,
   ArrowLeftIcon,
   CameraIcon,
@@ -348,7 +349,9 @@ export function AddObservationsModal({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [batchStory, setBatchStory] = useState("");
-  const [addedCount, setAddedCount] = useState<number | null>(null);
+  // Result of the last submit run — drives the outcome screen. `failed` counts
+  // the cards from that run that errored and are still in the list.
+  const [outcome, setOutcome] = useState<{ added: number; failed: number } | null>(null);
   // Tracks how many observations have finished uploading during a submit run, so
   // the footer can show a progress bar instead of just a spinning button.
   const [uploadProgress, setUploadProgress] = useState<{ done: number; total: number } | null>(null);
@@ -378,27 +381,6 @@ export function AddObservationsModal({
       setSelectedProjectUri("");
     }
   }, [initialTarget]);
-
-  // No interstitial after a fully successful upload: the moment every card is
-  // in, hand off to the caller so the uploader lands directly on the
-  // observations list of the account the batch went to. Partial failures keep
-  // the modal open (items remain) so the errored cards can be fixed.
-  const handedOffRef = useRef(false);
-  useEffect(() => {
-    if (addedCount === null || items.length !== 0) {
-      handedOffRef.current = false; // armed for the next batch
-      return;
-    }
-    if (!handedOffRef.current) {
-      handedOffRef.current = true;
-      onViewObservations(target);
-    }
-    // This instance stays mounted between opens (drafts survive a plain
-    // close), so clear the success state once the modal has animated out —
-    // otherwise a later open would resurrect the redirect card.
-    const timer = setTimeout(() => setAddedCount(null), 700);
-    return () => clearTimeout(timer);
-  }, [addedCount, items.length, onViewObservations, target]);
 
   const { personal, groups: accountGroups } = useAccountList(allowAccountSwitch ? sessionDid : null);
   const [, setActiveContext] = useActiveAccountContext(sessionDid ?? "");
@@ -675,7 +657,7 @@ export function AddObservationsModal({
         setError(disabledReason);
         return;
       }
-      setAddedCount(null);
+      setOutcome(null);
       const imageFiles = Array.from(fileList ?? []).filter((file) => file.type.startsWith("image/"));
       if (imageFiles.length === 0) return;
 
@@ -1032,10 +1014,13 @@ export function AddObservationsModal({
     setIsSubmitting(false);
     setUploadProgress(null);
     if (success > 0) {
-      if (success === queue.length) setBatchStory("");
-      setAddedCount(success);
+      const failed = queue.length - success;
+      if (failed === 0) setBatchStory("");
+      setOutcome({ added: success, failed });
       setError(null);
     } else {
+      // Nothing made it — stay on the card list, where every card already
+      // shows its own error and the submit button doubles as retry.
       setError(t("uploadFailed"));
     }
   }
@@ -1054,23 +1039,61 @@ export function AddObservationsModal({
     );
   }
 
-  // Fully successful upload — the effect above is already routing to the
-  // uploaded account's observations; show a beat of confirmation while the
-  // modal closes and the navigation happens, with no buttons to stop at.
-  if (addedCount !== null && items.length === 0) {
+  // Outcome screen — the batch finished; nothing navigates on its own. Say
+  // what happened (all in, or how many failed) and let the uploader decide:
+  // stay to add or fix more, or go to the account's observations.
+  if (outcome !== null) {
+    const allIn = outcome.failed === 0;
+    const accountName = target.displayName?.trim() || target.identifier;
     return (
       <ModalContent className="space-y-5" dismissible={false}>
-        <div className="flex flex-col items-center gap-3 py-6 text-center">
-          <span className="grid size-14 place-items-center rounded-2xl bg-primary/10 text-primary ring-1 ring-primary/15">
-            <CheckCircle2Icon className="size-7" />
+        <div className="flex flex-col items-center gap-3 py-4 text-center">
+          <span
+            className={cn(
+              "grid size-14 place-items-center rounded-2xl ring-1",
+              allIn
+                ? "bg-primary/10 text-primary ring-primary/15"
+                : "bg-amber-500/10 text-amber-600 ring-amber-500/20",
+            )}
+          >
+            {allIn ? <CheckCircle2Icon className="size-7" /> : <AlertTriangleIcon className="size-7" />}
           </span>
           <div>
-            <ModalTitle>{t("doneTitle", { count: addedCount })}</ModalTitle>
+            <ModalTitle>
+              {allIn
+                ? t("doneTitle", { count: outcome.added })
+                : t("partialTitle", { added: outcome.added, total: outcome.added + outcome.failed })}
+            </ModalTitle>
             <ModalDescription className="mt-1">
-              {t("doneRedirect", { name: target.displayName?.trim() || target.identifier })}
+              {allIn
+                ? t("doneAccount", { name: accountName })
+                : t("partialBody", { failed: outcome.failed })}
             </ModalDescription>
           </div>
-          <Loader2Icon className="size-4 animate-spin text-muted-foreground" />
+        </div>
+        <div className="flex flex-col gap-2 sm:flex-row sm:justify-center">
+          {allIn ? (
+            <>
+              <Button variant="outline" onClick={() => setOutcome(null)}>
+                <ImagePlusIcon className="size-4" />
+                {t("addMore")}
+              </Button>
+              <Button onClick={() => { setOutcome(null); onViewObservations(target); }}>
+                {t("viewObservations")}
+              </Button>
+            </>
+          ) : (
+            <>
+              <Button variant="outline" onClick={() => setOutcome(null)}>{t("reviewPhotos")}</Button>
+              <Button variant="outline" onClick={() => { setOutcome(null); onViewObservations(target); }}>
+                {t("viewObservations")}
+              </Button>
+              <Button onClick={() => { setOutcome(null); void submit(); }}>
+                <RotateCcwIcon className="size-4" />
+                {t("tryAgain")}
+              </Button>
+            </>
+          )}
         </div>
       </ModalContent>
     );
