@@ -3189,9 +3189,9 @@
       "insects": "Insetos"
     },
     "chart": {
-      "title": "Potência menos ruído — {date}",
+      "title": "Paisagem sonora — {date}",
       "allDates": "ainda sem gravações",
-      "radialLabel": "Potência menos ruído",
+      "radialLabel": "Volume",
       "timeLabel": "Hora do dia",
       "legendTitle": "Grupos de vozes",
       "bandsNote": "Intervalos indicativos. As vozes sobrepõem-se e os animais que cantam em cada intervalo variam com o lugar.",

@@ -3189,9 +3189,9 @@
       "insects": "Insectos"
     },
     "chart": {
-      "title": "Potencia menos ruido — {date}",
+      "title": "Paisaje sonoro — {date}",
       "allDates": "aún sin grabaciones",
-      "radialLabel": "Potencia menos ruido",
+      "radialLabel": "Volumen",
       "timeLabel": "Hora del día",
       "legendTitle": "Grupos de voces",
       "bandsNote": "Rangos indicativos. Las voces se solapan y qué animales cantan en cada rango varía según el lugar.",

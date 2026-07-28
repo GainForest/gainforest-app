@@ -1,8 +1,10 @@
 "use client";
 
 /**
- * Polar "Power-Minus-Noise" chart, styled after the GainForest soundscape
- * figures: each frequency bin is a coloured line drawn radially around a dial.
+ * The soundscape dial — a polar chart of the Power-Minus-Noise measure (the
+ * name the pipeline uses; the UI just calls the whole thing a soundscape),
+ * styled after the GainForest soundscape figures: each frequency bin is a
+ * coloured line drawn radially around a dial.
  * Time runs clockwise from the right (3 o'clock), so a full day puts 6:00 at
  * the bottom, 12:00 at the left and 18:00 at the top.
  *

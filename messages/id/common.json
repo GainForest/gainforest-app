@@ -3189,9 +3189,9 @@
       "insects": "Serangga"
     },
     "chart": {
-      "title": "Daya dikurangi derau — {date}",
+      "title": "Lanskap suara — {date}",
       "allDates": "belum ada rekaman",
-      "radialLabel": "Daya dikurangi derau",
+      "radialLabel": "Volume suara",
       "timeLabel": "Waktu (Jam)",
       "legendTitle": "Kelompok suara",
       "bandsNote": "Rentang perkiraan. Suara saling tumpang tindih, dan hewan yang bersuara di tiap rentang berbeda menurut tempat.",

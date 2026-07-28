@@ -3189,9 +3189,9 @@
       "insects": "Insects"
     },
     "chart": {
-      "title": "Power-Minus-Noise — {date}",
+      "title": "Soundscape — {date}",
       "allDates": "no recordings yet",
-      "radialLabel": "Power-Minus-Noise",
+      "radialLabel": "Loudness",
       "timeLabel": "Time (Hour)",
       "legendTitle": "Voice groups",
       "bandsNote": "Indicative ranges. Voices overlap, and which animals sing where varies by place.",

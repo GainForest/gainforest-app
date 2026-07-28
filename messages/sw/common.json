@@ -3189,9 +3189,9 @@
       "insects": "Wadudu"
     },
     "chart": {
-      "title": "Nguvu kasoro kelele — {date}",
+      "title": "Mandhari ya sauti — {date}",
       "allDates": "bado hakuna rekodi",
-      "radialLabel": "Nguvu kasoro kelele",
+      "radialLabel": "Kiwango cha sauti",
       "timeLabel": "Saa (Saa za siku)",
       "legendTitle": "Makundi ya sauti",
       "bandsNote": "Viwango vya dalili. Sauti zinaingiliana, na wanyama wanaoimba katika kila kiwango hutofautiana kwa eneo.",
