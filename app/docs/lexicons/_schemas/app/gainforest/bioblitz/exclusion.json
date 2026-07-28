@@ -20,6 +20,10 @@
             "minimum": 1,
             "description": "The stable BioBlitz round number."
           },
+          "excluded": {
+            "type": "boolean",
+            "description": "Whether observations are excluded from the count. Missing means true for backwards compatibility; false restores counting through a newer append-only event."
+          },
           "createdAt": { "type": "string", "format": "datetime" }
         }
       }

@@ -17,6 +17,8 @@ export type BioblitzExclusionRecord = {
   uri: string;
   subjectDid: string;
   roundId: number;
+  /** False is an append-only restoration event created by another steward. */
+  excluded: boolean;
   createdAt: string;
 };
 
@@ -64,6 +66,9 @@ export function parseBioblitzExclusionRecord(entry: unknown): BioblitzExclusionR
     uri,
     subjectDid,
     roundId: roundId as number,
+    // Records created before append-only restoration was introduced represent
+    // exclusions, so an absent field remains backwards-compatible.
+    excluded: typeof value.excluded === "boolean" ? value.excluded : true,
     createdAt,
   };
 }
@@ -105,7 +110,9 @@ export async function fetchBioblitzExclusionRecords(
     if (!cursor) break;
   }
 
-  return records.sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+  return records.sort(
+    (a, b) => b.createdAt.localeCompare(a.createdAt) || b.uri.localeCompare(a.uri),
+  );
 }
 
 /** Public, briefly cached read used by every leaderboard calculation. */
@@ -127,12 +134,51 @@ export function invalidateBioblitzExclusionsCache(): void {
   invalidateCachedAsyncByPrefix(EXCLUSION_CACHE_KEY);
 }
 
-/** Deduplicate records by round + account while retaining their weekly scope. */
+/**
+ * Resolve the append-only event stream to one current exclusion per account and
+ * round. The newest event wins, so any group member can restore counting by
+ * creating an `excluded: false` event without deleting another member's record.
+ */
+export function effectiveBioblitzExclusionRecords(
+  records: readonly BioblitzExclusionRecord[],
+): BioblitzExclusionRecord[] {
+  const newestFirst = [...records].sort(
+    (a, b) => b.createdAt.localeCompare(a.createdAt) || b.uri.localeCompare(a.uri),
+  );
+  const seen = new Set<string>();
+  const active: BioblitzExclusionRecord[] = [];
+  for (const record of newestFirst) {
+    const key = `${record.roundId}:${record.subjectDid}`;
+    if (seen.has(key)) continue;
+    seen.add(key);
+    if (record.excluded) active.push(record);
+  }
+  return active;
+}
+
+/**
+ * Resolve any historical/stale event rkey to the account/week that it names,
+ * then return that pair's current active exclusion. This prevents a stale UI
+ * from reporting a successful restoration while a concurrent exclusion wins.
+ */
+export function resolveActiveBioblitzExclusion(
+  records: readonly BioblitzExclusionRecord[],
+  rkey: string,
+): BioblitzExclusionRecord | null {
+  const requested = records.find((record) => record.rkey === rkey);
+  if (!requested) return null;
+  return effectiveBioblitzExclusionRecords(records).find(
+    (record) =>
+      record.subjectDid === requested.subjectDid && record.roundId === requested.roundId,
+  ) ?? null;
+}
+
+/** Index the current weekly exclusion state for fast leaderboard checks. */
 export function indexBioblitzExclusions(
   records: readonly BioblitzExclusionRecord[],
 ): BioblitzExclusionsByRound {
   const byRound: BioblitzExclusionsByRound = new Map();
-  for (const record of records) {
+  for (const record of effectiveBioblitzExclusionRecords(records)) {
     const dids = byRound.get(record.roundId) ?? new Set<string>();
     dids.add(record.subjectDid);
     byRound.set(record.roundId, dids);

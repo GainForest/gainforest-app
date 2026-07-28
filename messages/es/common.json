@@ -1308,7 +1308,7 @@
     "adding": "Actualizando…",
     "finalized": "Ronda finalizada",
     "unavailable": "No se pudo cargar el conteo semanal de forma segura. Inténtalo de nuevo antes de hacer cambios.",
-    "permissionNotice": "Solo los administradores de la organización pueden cambiar el conteo semanal.",
+    "permissionNotice": "Solo los miembros del equipo de administración pueden cambiar el conteo semanal.",
     "empty": "Actualmente, todas las cuentas cuentan para su semana de BioBlitz.",
     "unnamed": "Cuenta sin nombre",
     "removeLabel": "Volver a contar a {name} en la clasificación",

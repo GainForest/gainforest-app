@@ -1308,7 +1308,7 @@
     "adding": "Updating…",
     "finalized": "Round ended",
     "unavailable": "Weekly counting couldn't be loaded safely. Try again before making changes.",
-    "permissionNotice": "Only organization administrators can change weekly counting.",
+    "permissionNotice": "Only members of the admin team can change weekly counting.",
     "empty": "Every account currently counts toward its BioBlitz week.",
     "unnamed": "Unnamed account",
     "removeLabel": "Count {name} in the leaderboard again",

@@ -170,7 +170,7 @@ export default async function AdminPage({
         finalizedBioblitzRoundIds={finalizedBioblitzRoundIds}
         bioblitzRounds={adminBioblitzRounds}
         defaultBioblitzRoundId={defaultBioblitzRoundId}
-        canManageBioblitzExclusions={moderator.role === "owner" || moderator.role === "admin"}
+        canManageBioblitzExclusions={moderator.isModerator}
         tainaRows={taina?.rows ?? null}
         tainaAllowanceUsd={taina?.allowanceUsd ?? 25}
         dataJobRows={dataJobRows}

@@ -17,12 +17,7 @@ async function loadAccess() {
   if (!access.isLoggedIn) {
     return { error: Response.json({ error: "not_signed_in" }, { status: 401 }) } as const;
   }
-  if (
-    !access.configured ||
-    !access.isModerator ||
-    !access.repoDid ||
-    (access.role !== "owner" && access.role !== "admin")
-  ) {
+  if (!access.configured || !access.isModerator || !access.repoDid) {
     return { error: Response.json({ error: "forbidden" }, { status: 403 }) } as const;
   }
   return { repoDid: access.repoDid } as const;

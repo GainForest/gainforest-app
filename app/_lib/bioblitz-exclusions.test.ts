@@ -4,18 +4,25 @@ import {
   indexBioblitzExclusions,
   isAccountExcludedFromBioblitzRound,
   parseBioblitzExclusionRecord,
+  resolveActiveBioblitzExclusion,
   type BioblitzExclusionRecord,
 } from "./bioblitz-exclusions";
 
 const ACCOUNT_A = "did:plc:account-a";
 const ACCOUNT_B = "did:plc:account-b";
 
-function exclusion(subjectDid: string, roundId: number, rkey: string): BioblitzExclusionRecord {
+function exclusion(
+  subjectDid: string,
+  roundId: number,
+  rkey: string,
+  excluded = true,
+): BioblitzExclusionRecord {
   return {
     rkey,
     uri: `at://did:plc:moderation/app.gainforest.bioblitz.exclusion/${rkey}`,
     subjectDid,
     roundId,
+    excluded,
     createdAt: "2026-07-28T00:00:00.000Z",
   };
 }
@@ -57,6 +64,30 @@ describe("BioBlitz weekly exclusions", () => {
     expect(isAccountExcludedFromBioblitzRound(indexed, ACCOUNT_A, 3)).toBe(false);
     expect(isAccountExcludedFromBioblitzRound(indexed, ACCOUNT_B, 3)).toBe(true);
     expect(isAccountExcludedFromBioblitzRound(indexed, ACCOUNT_A, null)).toBe(false);
+  });
+
+  it("lets a newer restoration event override another member's exclusion", () => {
+    const indexed = indexBioblitzExclusions([
+      exclusion(ACCOUNT_A, 2, "exclude"),
+      {
+        ...exclusion(ACCOUNT_A, 2, "restore", false),
+        createdAt: "2026-07-29T00:00:00.000Z",
+      },
+    ]);
+
+    expect(isAccountExcludedFromBioblitzRound(indexed, ACCOUNT_A, 2)).toBe(false);
+  });
+
+  it("resolves a stale duplicate rkey to the currently active exclusion", () => {
+    const records = [
+      exclusion(ACCOUNT_A, 2, "stale"),
+      {
+        ...exclusion(ACCOUNT_A, 2, "winning"),
+        createdAt: "2026-07-29T00:00:00.000Z",
+      },
+    ];
+
+    expect(resolveActiveBioblitzExclusion(records, "stale")?.rkey).toBe("winning");
   });
 
   it("maps timestamps to the fixed round windows for all-time standings", () => {

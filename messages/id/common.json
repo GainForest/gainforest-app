@@ -1308,7 +1308,7 @@
     "adding": "Memperbarui…",
     "finalized": "Ronde telah berakhir",
     "unavailable": "Penghitungan mingguan tidak dapat dimuat dengan aman. Coba lagi sebelum membuat perubahan.",
-    "permissionNotice": "Hanya administrator organisasi yang dapat mengubah penghitungan mingguan.",
+    "permissionNotice": "Hanya anggota tim admin yang dapat mengubah penghitungan mingguan.",
     "empty": "Saat ini semua akun dihitung dalam pekan BioBlitz masing-masing.",
     "unnamed": "Akun tanpa nama",
     "removeLabel": "Hitung kembali {name} di papan peringkat",
