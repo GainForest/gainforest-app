@@ -3174,6 +3174,13 @@
       "statusError": "Couldn't analyze this recording",
       "tooShort": "Too short to analyze (needs at least one full minute)"
     },
+    "groups": {
+      "title": "Folders",
+      "hint": "Each soundscape is built from one folder of recordings — pick the folder to work on.",
+      "chip": "{name} · {count, plural, one {# recording} other {# recordings}}",
+      "unassigned": "Not in a folder",
+      "unknown": "Removed folder"
+    },
     "bands": {
       "rumble": "Rumble",
       "lowCalls": "Low calls",
@@ -3232,6 +3239,7 @@
     },
     "share": {
       "recordTitle": "Soundscape · {dates}",
+      "recordTitleNamed": "Soundscape · {name} · {dates}",
       "shareToFeed": "Share to feed",
       "addToProject": "Add to a project",
       "captionLabel": "Say something about it (optional)",

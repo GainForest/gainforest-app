@@ -3174,6 +3174,13 @@
       "statusError": "Rekodi hii haikuweza kuchambuliwa",
       "tooShort": "Ni fupi mno kuchambuliwa (inahitaji angalau dakika moja kamili)"
     },
+    "groups": {
+      "title": "Folda",
+      "hint": "Kila mandhari ya sauti hutengenezwa kutoka kwa folda moja ya rekodi — chagua folda ya kufanyia kazi.",
+      "chip": "{name} · {count, plural, one {rekodi #} other {rekodi #}}",
+      "unassigned": "Haiko kwenye folda",
+      "unknown": "Folda imeondolewa"
+    },
     "bands": {
       "rumble": "Mngurumo",
       "lowCalls": "Sauti za chini",
@@ -3232,6 +3239,7 @@
     },
     "share": {
       "recordTitle": "Mandhari ya sauti · {dates}",
+      "recordTitleNamed": "Mandhari ya sauti · {name} · {dates}",
       "shareToFeed": "Shiriki kwenye mlisho",
       "addToProject": "Ongeza kwenye mradi",
       "captionLabel": "Sema kitu kuhusu hii (si lazima)",

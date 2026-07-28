@@ -3174,6 +3174,13 @@
       "statusError": "No se pudo analizar esta grabación",
       "tooShort": "Demasiado corta para analizarla (necesita al menos un minuto completo)"
     },
+    "groups": {
+      "title": "Carpetas",
+      "hint": "Cada paisaje sonoro se crea a partir de una carpeta de grabaciones: elige la carpeta con la que trabajar.",
+      "chip": "{name} · {count, plural, one {# grabación} other {# grabaciones}}",
+      "unassigned": "Sin carpeta",
+      "unknown": "Carpeta eliminada"
+    },
     "bands": {
       "rumble": "Retumbo",
       "lowCalls": "Cantos graves",
@@ -3232,6 +3239,7 @@
     },
     "share": {
       "recordTitle": "Paisaje sonoro · {dates}",
+      "recordTitleNamed": "Paisaje sonoro · {name} · {dates}",
       "shareToFeed": "Compartir en el muro",
       "addToProject": "Añadir a un proyecto",
       "captionLabel": "Cuenta algo sobre esto (opcional)",

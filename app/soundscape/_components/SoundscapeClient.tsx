@@ -3,10 +3,16 @@
 /**
  * Soundscape clock built from the user's already-uploaded recordings.
  *
- * The library is the account's `ac.audio` records: each one's archival
- * original (accessUri) is downloaded into the browser once, run through the
- * PMN pipeline, and the five per-band maxima are cached locally by record
- * CID — so returning to this tab redraws the clock without re-downloading.
+ * The library is the account's `ac.audio` records, grouped by the folder
+ * each recording was uploaded into (its `deploymentRef` — every folder is an
+ * `ac.deployment` record, whether it came from a chime-matched deployment or
+ * was simply named at upload time). A soundscape describes one place and one
+ * recorder schedule, so the clock is always built per folder — never across
+ * the whole account. Each recording's
+ * archival original (accessUri) is downloaded into the browser once, run
+ * through the PMN pipeline, and the five per-band maxima are cached locally
+ * by record CID — so returning to this tab redraws the clock without
+ * re-downloading.
  */
 
 import {
@@ -15,6 +21,7 @@ import {
   ClockIcon,
   DownloadIcon,
   FileAudioIcon,
+  FolderOpenIcon,
   Loader2Icon,
   PauseIcon,
   PlayIcon,
@@ -36,6 +43,7 @@ import { useTranslations } from "next-intl";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { listAllRecordings, type AcAudioListItem } from "@/app/_lib/ac-audio";
+import { listAcDeployments, type AcDeploymentItem } from "@/app/_lib/ac-deployment";
 import { listStoredAnalyses, saveStoredAnalysis } from "@/app/_lib/soundscape-analysis";
 import { buildAnalysisRecord, isUsableAnalysis } from "@/lib/soundscape/analysis-record";
 import {
@@ -89,6 +97,18 @@ type LibraryRecording = {
 
 const ALL_DATES = "all";
 
+/** Group id for recordings that carry no `deploymentRef` (uploaded before
+ *  folders existed — today's uploader always puts recordings in a folder). */
+const UNASSIGNED_GROUP = "unassigned";
+
+/** One folder's worth of recordings — the unit a soundscape is built from. */
+type RecordingGroup = {
+  /** The folder's `ac.deployment` AT-URI, or {@link UNASSIGNED_GROUP}. */
+  id: string;
+  name: string;
+  count: number;
+};
+
 /** One notch of the zoom buttons on the dial. */
 const ZOOM_STEP = 1.6;
 
@@ -130,6 +150,8 @@ function formatClockTime(time: WallClockTime): string {
 export function SoundscapeClient({ sessionDid }: { sessionDid: string | null }) {
   const t = useTranslations("common.soundscape");
   const [recordings, setRecordings] = useState<AcAudioListItem[] | null>(null);
+  const [deployments, setDeployments] = useState<AcDeploymentItem[]>([]);
+  const [selectedGroupId, setSelectedGroupId] = useState<string | null>(null);
   const [loadFailed, setLoadFailed] = useState(false);
   const [reloadCounter, setReloadCounter] = useState(0);
   const [results, setResults] = useState<Record<string, AnalysisState>>({});
@@ -147,12 +169,73 @@ export function SoundscapeClient({ sessionDid }: { sessionDid: string | null }) 
   const audioSourceRef = useRef<AudioBufferSourceNode | null>(null);
   const playTokenRef = useRef(0);
 
-  const library = useMemo<LibraryRecording[]>(() => {
+  const allRecordings = useMemo<LibraryRecording[]>(() => {
     return (recordings ?? []).map((item) => {
       const time = wallClockFromIso(item.recordedAt);
       return { item, time, analyzable: Boolean(item.accessUri) && time !== null };
     });
   }, [recordings]);
+
+  /* One group per folder that has recordings (newest first, the order
+     listAcDeployments returns), then folders whose record was since deleted,
+     then recordings never put in a folder. */
+  const groups = useMemo<RecordingGroup[]>(() => {
+    const counts = new Map<string, number>();
+    for (const entry of allRecordings) {
+      const id = entry.item.deploymentRef ?? UNASSIGNED_GROUP;
+      counts.set(id, (counts.get(id) ?? 0) + 1);
+    }
+    const known = new Set(deployments.map((d) => d.uri));
+    const result: RecordingGroup[] = [];
+    for (const deployment of deployments) {
+      const count = counts.get(deployment.uri);
+      if (count) result.push({ id: deployment.uri, name: deployment.name, count });
+    }
+    for (const [id, count] of counts) {
+      if (id === UNASSIGNED_GROUP || known.has(id)) continue;
+      result.push({ id, name: t("groups.unknown"), count });
+    }
+    const unassigned = counts.get(UNASSIGNED_GROUP);
+    if (unassigned) result.push({ id: UNASSIGNED_GROUP, name: t("groups.unassigned"), count: unassigned });
+    return result;
+  }, [allRecordings, deployments, t]);
+
+  /* Derived, not synced: falls back to the first (newest) folder until the
+     user picks one, so the dial never flashes empty while state catches up. */
+  const selectedGroup = useMemo(() => {
+    if (selectedGroupId && groups.some((group) => group.id === selectedGroupId)) return selectedGroupId;
+    return groups[0]?.id ?? null;
+  }, [groups, selectedGroupId]);
+
+  const selectedGroupName = groups.find((group) => group.id === selectedGroup)?.name ?? "";
+
+  /** The recordings a soundscape can be built from: the selected folder's. */
+  const library = useMemo<LibraryRecording[]>(
+    () => allRecordings.filter((entry) => (entry.item.deploymentRef ?? UNASSIGNED_GROUP) === selectedGroup),
+    [allRecordings, selectedGroup],
+  );
+
+  /* Switching folder is starting a new soundscape: pending queue items
+     from the old one are let go (anything already analyzed stays cached), and
+     the date filter and zoom go back to their defaults. A download already in
+     flight is left to finish so its result still lands in the cache. */
+  const selectGroup = useCallback((id: string) => {
+    setSelectedGroupId(id);
+    setSelectedDate(ALL_DATES);
+    setZoom(FULL_DAY_WINDOW);
+    setPaused(false);
+    setResults((current) => {
+      let changed = false;
+      const next: Record<string, AnalysisState> = { ...current };
+      for (const key of Object.keys(next)) {
+        if (next[key]?.status === "queued") {
+          next[key] = { status: "idle" };
+          changed = true;
+        }
+      }
+      return changed ? next : current;
+    });
+  }, []);
 
   /* Load the account's uploaded recordings and seed results from the cache. */
   useEffect(() => {
@@ -167,9 +250,12 @@ export function SoundscapeClient({ sessionDid }: { sessionDid: string | null }) 
         /* The stored analyses are what make this survive a new browser, so
            they are fetched alongside the library rather than after it. A repo
            that has never been analyzed simply yields none. */
-        const [items, stored] = await Promise.all([
+        const [items, stored, deploymentItems] = await Promise.all([
           listAllRecordings(sessionDid, controller.signal),
           listStoredAnalyses(sessionDid, controller.signal).catch(() => new Map()),
+          // Folder names are presentation only — recordings still group by
+          // their deploymentRef when this fails.
+          listAcDeployments(sessionDid, controller.signal).catch(() => [] as AcDeploymentItem[]),
         ]);
         if (cancelled) return;
         const cache = cacheRef.current ?? loadPmnCache();
@@ -189,6 +275,7 @@ export function SoundscapeClient({ sessionDid }: { sessionDid: string | null }) 
         }
         if (cacheGrew) savePmnCache(cache);
         setResults(seeded);
+        setDeployments(deploymentItems);
         setRecordings(items);
       } catch {
         if (!cancelled) {
@@ -549,14 +636,17 @@ export function SoundscapeClient({ sessionDid }: { sessionDid: string | null }) 
       : t("chart.averageNoteRange", { min: averagedCounts.min, max: averagedCounts.max })
     : null;
 
-  /* Two lines at most: what the line is, then what the shading is. Both go
-     into the SVG so the downloaded image explains itself. */
+  /* A few short lines: which folder this is, what the line is, then what the
+     shading is. All go into the SVG so the downloaded image explains itself. */
   const chartSubtitle = useMemo(() => {
-    if (!averageNote) return undefined;
-    const lines = [averageNote, t("chart.spreadNote")];
-    if (slotMinutes > 1) lines.push(t("chart.slotNote", { minutes: slotMinutes }));
-    return lines;
-  }, [averageNote, slotMinutes, t]);
+    const lines: string[] = [];
+    if (groups.length > 1 && selectedGroupName) lines.push(selectedGroupName);
+    if (averageNote) {
+      lines.push(averageNote, t("chart.spreadNote"));
+      if (slotMinutes > 1) lines.push(t("chart.slotNote", { minutes: slotMinutes }));
+    }
+    return lines.length > 0 ? lines : undefined;
+  }, [averageNote, groups.length, selectedGroupName, slotMinutes, t]);
 
   const pointDetail = useCallback(
     (point: { count: number }) => (point.count > 1 ? t("chart.pointRecordings", { count: point.count }) : null),
@@ -610,11 +700,14 @@ export function SoundscapeClient({ sessionDid }: { sessionDid: string | null }) 
       pmn: entry.pmn,
     }));
     return {
-      title: t("share.recordTitle", { dates: chartDateLabel }),
+      title:
+        selectedGroup !== UNASSIGNED_GROUP && selectedGroupName
+          ? t("share.recordTitleNamed", { name: selectedGroupName, dates: chartDateLabel })
+          : t("share.recordTitle", { dates: chartDateLabel }),
       ceilingHz,
       sources,
     };
-  }, [analyzedRecordings, ceilingHz, chartDateLabel, t]);
+  }, [analyzedRecordings, ceilingHz, chartDateLabel, selectedGroup, selectedGroupName, t]);
 
   const closeShareModal = useCallback(() => {
     void modal.hide().then(() => modal.clear());
@@ -743,7 +836,30 @@ export function SoundscapeClient({ sessionDid }: { sessionDid: string | null }) 
 
   return (
     <div className="flex flex-col gap-8">
-      {/* Library of uploaded recordings */}
+      {/* Folder picker: a soundscape is built per folder (ac.deployment),
+          never from the whole account at once. */}
+      {groups.length > 1 ? (
+        <section className="rounded-2xl border bg-background p-4 shadow-sm">
+          <div className="flex min-w-0 items-start gap-3">
+            <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-primary/10 text-primary">
+              <FolderOpenIcon className="size-4.5" />
+            </span>
+            <div className="min-w-0">
+              <p className="text-sm font-medium text-foreground">{t("groups.title")}</p>
+              <p className="text-xs text-muted-foreground">{t("groups.hint")}</p>
+            </div>
+          </div>
+          <div className="mt-3 flex flex-wrap gap-1.5" role="group" aria-label={t("groups.title")}>
+            {groups.map((group) => (
+              <DateChip key={group.id} active={group.id === selectedGroup} onClick={() => selectGroup(group.id)}>
+                {t("groups.chip", { name: group.name, count: group.count })}
+              </DateChip>
+            ))}
+          </div>
+        </section>
+      ) : null}
+
+      {/* Library of the selected folder's recordings */}
       <section className="rounded-2xl border bg-background shadow-sm">
         <div className="flex flex-wrap items-center justify-between gap-3 border-b px-4 py-3">
           <div className="flex min-w-0 items-center gap-3">
@@ -751,7 +867,7 @@ export function SoundscapeClient({ sessionDid }: { sessionDid: string | null }) 
               <WavesIcon className="size-4.5" />
             </span>
             <div className="min-w-0">
-              <p className="text-sm font-medium text-foreground">{t("library.count", { count: recordings.length })}</p>
+              <p className="text-sm font-medium text-foreground">{t("library.count", { count: library.length })}</p>
               <p className="truncate text-xs text-muted-foreground">{t("library.downloadNote")}</p>
             </div>
           </div>

@@ -3174,6 +3174,13 @@
       "statusError": "Não foi possível analisar esta gravação",
       "tooShort": "Curta demais para ser analisada (precisa de pelo menos um minuto completo)"
     },
+    "groups": {
+      "title": "Pastas",
+      "hint": "Cada paisagem sonora é criada a partir de uma pasta de gravações — escolha a pasta com que trabalhar.",
+      "chip": "{name} · {count, plural, one {# gravação} other {# gravações}}",
+      "unassigned": "Sem pasta",
+      "unknown": "Pasta removida"
+    },
     "bands": {
       "rumble": "Ronco",
       "lowCalls": "Cantos graves",
@@ -3232,6 +3239,7 @@
     },
     "share": {
       "recordTitle": "Paisagem sonora · {dates}",
+      "recordTitleNamed": "Paisagem sonora · {name} · {dates}",
       "shareToFeed": "Compartilhar no mural",
       "addToProject": "Adicionar a um projeto",
       "captionLabel": "Conte algo sobre isso (opcional)",
