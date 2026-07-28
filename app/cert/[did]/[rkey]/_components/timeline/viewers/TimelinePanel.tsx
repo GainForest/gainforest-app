@@ -104,6 +104,7 @@ export function TimelinePanel({
       linkedProjectPlace: entryT("linkedProjectPlace"),
       linkedTreeGroup: entryT("linkedTreeGroup"),
       linkedSound: entryT("linkedSound"),
+      linkedSoundscape: entryT("linkedSoundscape"),
       groupedData: entryT("groupedData"),
       unresolvedReferenceBody: entryT("unresolvedReferenceBody"),
     }),

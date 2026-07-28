@@ -3212,6 +3212,52 @@
       "recordingsTitle": "Recordings in view",
       "recordingsCount": "{count, plural, one {# recording} other {# recordings}}",
       "recordingsEmpty": "No recordings at this time — zoom out, or use ‹ and › to look at another part of the day."
+    },
+    "published": {
+      "summary": "{count, plural, one {# recording} other {# recordings}} · {dates}",
+      "playHint": "Click a time on the dial to hear that recording.",
+      "metaTitle": "Soundscape",
+      "metaDescription": "A 24-hour soundscape clock built from field recordings.",
+      "notFoundTitle": "This soundscape isn't available",
+      "notFoundBody": "It may have been removed, or the account that published it can't be reached right now.",
+      "byLine": "Shared by {name}",
+      "openWorkbench": "Build your own soundscape",
+      "inFeedTitle": "Soundscape",
+      "openFull": "Open the soundscape"
+    },
+    "share": {
+      "recordTitle": "Soundscape · {dates}",
+      "shareToFeed": "Share to feed",
+      "addToProject": "Add to a project",
+      "captionLabel": "Say something about it (optional)",
+      "cancel": "Cancel",
+      "close": "Close",
+      "errorGeneric": "That didn't work. Try again in a moment.",
+      "untitledProject": "Untitled project",
+      "feed": {
+        "title": "Share this soundscape",
+        "subtitle": "Your post shows the clock built from {count, plural, one {# recording} other {# recordings}}, and anyone can play those recordings from it.",
+        "defaultCaption": "A 24-hour soundscape from {count, plural, one {# recording} other {# recordings}}.",
+        "linkNote": "The soundscape is added to your post automatically.",
+        "post": "Post to feed",
+        "posting": "Posting…",
+        "postedTitle": "Shared to the feed",
+        "postedBody": "Your soundscape is in the feed now, ready to listen to.",
+        "viewFeed": "Open the feed"
+      },
+      "project": {
+        "title": "Add to a project",
+        "subtitle": "Pick a project and the soundscape joins its evidence timeline.",
+        "captionPlaceholder": "What does this soundscape show? (optional)",
+        "loading": "Loading your projects…",
+        "loadError": "Your projects couldn't be loaded. Try again in a moment.",
+        "empty": "You don't have a project yet.",
+        "createProject": "Create a project",
+        "searchPlaceholder": "Search your projects",
+        "addedTitle": "Added to the timeline",
+        "addedBody": "The soundscape is now on {project}'s evidence timeline.",
+        "viewProject": "Open the project"
+      }
     }
   },
   "hypercerts": {

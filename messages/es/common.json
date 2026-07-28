@@ -3212,6 +3212,52 @@
       "recordingsTitle": "Grabaciones a la vista",
       "recordingsCount": "{count, plural, one {# grabación} other {# grabaciones}}",
       "recordingsEmpty": "No hay grabaciones a esta hora: aleja el zoom o usa ‹ y › para mirar otro momento del día."
+    },
+    "published": {
+      "summary": "{count, plural, one {# grabación} other {# grabaciones}} · {dates}",
+      "playHint": "Haz clic en una hora del reloj para escuchar esa grabación.",
+      "metaTitle": "Paisaje sonoro",
+      "metaDescription": "Un reloj de paisaje sonoro de 24 horas creado a partir de grabaciones de campo.",
+      "notFoundTitle": "Este paisaje sonoro no está disponible",
+      "notFoundBody": "Puede que se haya eliminado, o que ahora mismo no se pueda acceder a la cuenta que lo publicó.",
+      "byLine": "Compartido por {name}",
+      "openWorkbench": "Crea tu propio paisaje sonoro",
+      "inFeedTitle": "Paisaje sonoro",
+      "openFull": "Abrir el paisaje sonoro"
+    },
+    "share": {
+      "recordTitle": "Paisaje sonoro · {dates}",
+      "shareToFeed": "Compartir en el muro",
+      "addToProject": "Añadir a un proyecto",
+      "captionLabel": "Cuenta algo sobre esto (opcional)",
+      "cancel": "Cancelar",
+      "close": "Cerrar",
+      "errorGeneric": "No funcionó. Inténtalo de nuevo en un momento.",
+      "untitledProject": "Proyecto sin título",
+      "feed": {
+        "title": "Comparte este paisaje sonoro",
+        "subtitle": "Tu publicación muestra el reloj creado con {count, plural, one {# grabación} other {# grabaciones}}, y cualquiera puede reproducir esas grabaciones desde ahí.",
+        "defaultCaption": "Un paisaje sonoro de 24 horas con {count, plural, one {# grabación} other {# grabaciones}}.",
+        "linkNote": "El paisaje sonoro se añade a tu publicación automáticamente.",
+        "post": "Publicar en el muro",
+        "posting": "Publicando…",
+        "postedTitle": "Compartido en el muro",
+        "postedBody": "Tu paisaje sonoro ya está en el muro, listo para escuchar.",
+        "viewFeed": "Abrir el muro"
+      },
+      "project": {
+        "title": "Añadir a un proyecto",
+        "subtitle": "Elige un proyecto y el paisaje sonoro se sumará a su línea de tiempo de evidencias.",
+        "captionPlaceholder": "¿Qué muestra este paisaje sonoro? (opcional)",
+        "loading": "Cargando tus proyectos…",
+        "loadError": "No se pudieron cargar tus proyectos. Inténtalo de nuevo en un momento.",
+        "empty": "Todavía no tienes ningún proyecto.",
+        "createProject": "Crear un proyecto",
+        "searchPlaceholder": "Buscar en tus proyectos",
+        "addedTitle": "Añadido a la línea de tiempo",
+        "addedBody": "El paisaje sonoro ya está en la línea de tiempo de evidencias de {project}.",
+        "viewProject": "Abrir el proyecto"
+      }
     }
   },
   "hypercerts": {

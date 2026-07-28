@@ -9,6 +9,7 @@ import {
   MusicIcon,
   TreesIcon,
   VideoIcon,
+  WavesIcon,
   type LucideIcon,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -19,6 +20,7 @@ function tileIcon(kind: FeedTileKind): LucideIcon {
   if (kind === "tree") return TreesIcon;
   if (kind === "nature") return LeafIcon;
   if (kind === "audio") return MusicIcon;
+  if (kind === "soundscape") return WavesIcon;
   if (kind === "image") return ImageIcon;
   if (kind === "video") return VideoIcon;
   if (kind === "link") return GlobeIcon;

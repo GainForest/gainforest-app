@@ -3212,6 +3212,52 @@
       "recordingsTitle": "Rekodi zinazoonekana",
       "recordingsCount": "{count, plural, one {rekodi #} other {rekodi #}}",
       "recordingsEmpty": "Hakuna rekodi kwa wakati huu — punguza ukuzaji, au tumia ‹ na › kuangalia sehemu nyingine ya siku."
+    },
+    "published": {
+      "summary": "{count, plural, one {rekodi #} other {rekodi #}} · {dates}",
+      "playHint": "Bofya saa kwenye duara ili kusikiliza rekodi ya wakati huo.",
+      "metaTitle": "Mandhari ya sauti",
+      "metaDescription": "Saa ya mandhari ya sauti ya saa 24 iliyoundwa kutoka rekodi za shambani.",
+      "notFoundTitle": "Mandhari hii ya sauti haipatikani",
+      "notFoundBody": "Huenda imeondolewa, au akaunti iliyoichapisha haifikiki kwa sasa.",
+      "byLine": "Imeshirikiwa na {name}",
+      "openWorkbench": "Tengeneza mandhari yako ya sauti",
+      "inFeedTitle": "Mandhari ya sauti",
+      "openFull": "Fungua mandhari ya sauti"
+    },
+    "share": {
+      "recordTitle": "Mandhari ya sauti · {dates}",
+      "shareToFeed": "Shiriki kwenye mlisho",
+      "addToProject": "Ongeza kwenye mradi",
+      "captionLabel": "Sema kitu kuhusu hii (si lazima)",
+      "cancel": "Ghairi",
+      "close": "Funga",
+      "errorGeneric": "Haikufanya kazi. Jaribu tena baada ya muda mfupi.",
+      "untitledProject": "Mradi usio na jina",
+      "feed": {
+        "title": "Shiriki mandhari hii ya sauti",
+        "subtitle": "Chapisho lako litaonyesha saa iliyoundwa kutoka {count, plural, one {rekodi #} other {rekodi #}}, na yeyote anaweza kucheza rekodi hizo kutoka hapo.",
+        "defaultCaption": "Mandhari ya sauti ya saa 24 kutoka {count, plural, one {rekodi #} other {rekodi #}}.",
+        "linkNote": "Mandhari ya sauti huongezwa kwenye chapisho lako moja kwa moja.",
+        "post": "Chapisha kwenye mlisho",
+        "posting": "Inachapisha…",
+        "postedTitle": "Imeshirikiwa kwenye mlisho",
+        "postedBody": "Mandhari yako ya sauti sasa iko kwenye mlisho, tayari kusikilizwa.",
+        "viewFeed": "Fungua mlisho"
+      },
+      "project": {
+        "title": "Ongeza kwenye mradi",
+        "subtitle": "Chagua mradi na mandhari ya sauti itaingia kwenye ratiba yake ya ushahidi.",
+        "captionPlaceholder": "Mandhari hii ya sauti inaonyesha nini? (si lazima)",
+        "loading": "Inapakia miradi yako…",
+        "loadError": "Miradi yako haikuweza kupakiwa. Jaribu tena baada ya muda mfupi.",
+        "empty": "Bado huna mradi wowote.",
+        "createProject": "Tengeneza mradi",
+        "searchPlaceholder": "Tafuta miradi yako",
+        "addedTitle": "Imeongezwa kwenye ratiba",
+        "addedBody": "Mandhari ya sauti sasa iko kwenye ratiba ya ushahidi ya {project}.",
+        "viewProject": "Fungua mradi"
+      }
     }
   },
   "hypercerts": {

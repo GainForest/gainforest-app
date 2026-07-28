@@ -47,6 +47,8 @@ import { fetchBlueskyPostLinks } from "../_lib/bluesky-crosspost";
 import { buildCommentTree, type CommentTreeNode } from "../_lib/feed-engagement";
 import { formatCompact, formatCompactUsd, formatRelative } from "../_lib/format";
 import { FeedAudioClip } from "./FeedAudioClip";
+import { FeedSoundscapeCard } from "./FeedSoundscapeCard";
+import { extractSoundscapeLink } from "@/lib/soundscape/record";
 import { FeedImageLightbox } from "./FeedImageLightbox";
 import { ResolvedAvatar } from "./ResolvedAvatar";
 import { AccountHoverCard } from "@/app/_components/AccountHoverCard";
@@ -670,8 +672,12 @@ function FeedRow({
     Boolean(interactions.viewerDid && item.actorDid === interactions.viewerDid);
   // Likes/reshares/comments on a reshare row act on the original record.
   const subjectUri = item.reshare?.subjectUri ?? item.id;
-  const bodyText = overrideText ?? item.text;
+  const rawBodyText = overrideText ?? item.text;
   const bodyMentions = overrideMentions ?? item.mentions;
+  // A post that shares a soundscape carries its permalink; the dial is drawn
+  // below the caption, so the bare URL comes out of the text.
+  const sharedSoundscape = extractSoundscapeLink(rawBodyText);
+  const bodyText = sharedSoundscape ? sharedSoundscape.text : rawBodyText;
   // Posts have no detail page of their own — their row link went to the
   // author's profile, which read as a misclick. Instead, clicking a post's
   // text toggles the same expand/collapse as "Show more".
@@ -805,6 +811,11 @@ function FeedRow({
           {/* Bioacoustic sighting — spectrogram of the labelled section with
               in-place playback of that sound. */}
           {item.bioacoustics ? <FeedAudioClip clip={item.bioacoustics} /> : null}
+
+          {/* Shared soundscape — the 24-hour clock, playable in place. */}
+          {sharedSoundscape ? (
+            <FeedSoundscapeCard did={sharedSoundscape.did} rkey={sharedSoundscape.rkey} />
+          ) : null}
         </div>
 
       </div>
@@ -829,8 +840,11 @@ function FeedRow({
               initialMentions={bodyMentions}
               max={300}
               onSave={async (text, mentions) => {
-                await interactions.editPost(item.id, text, mentions);
-                setOverrideText(text);
+                // The author edits the caption they can see; the shared
+                // soundscape's link is put back so the post keeps its dial.
+                const saved = sharedSoundscape ? `${text}\n${sharedSoundscape.link}` : text;
+                await interactions.editPost(item.id, saved, mentions);
+                setOverrideText(saved);
                 setOverrideMentions(mentions);
               }}
               onCancel={() => setEditing(false)}

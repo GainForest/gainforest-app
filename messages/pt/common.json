@@ -3212,6 +3212,52 @@
       "recordingsTitle": "Gravações à vista",
       "recordingsCount": "{count, plural, one {# gravação} other {# gravações}}",
       "recordingsEmpty": "Não há gravações neste horário — reduza o zoom ou use ‹ e › para ver outra parte do dia."
+    },
+    "published": {
+      "summary": "{count, plural, one {# gravação} other {# gravações}} · {dates}",
+      "playHint": "Clique em um horário no relógio para ouvir aquela gravação.",
+      "metaTitle": "Paisagem sonora",
+      "metaDescription": "Um relógio de paisagem sonora de 24 horas criado a partir de gravações de campo.",
+      "notFoundTitle": "Esta paisagem sonora não está disponível",
+      "notFoundBody": "Ela pode ter sido removida, ou a conta que a publicou não está acessível no momento.",
+      "byLine": "Compartilhado por {name}",
+      "openWorkbench": "Crie sua própria paisagem sonora",
+      "inFeedTitle": "Paisagem sonora",
+      "openFull": "Abrir a paisagem sonora"
+    },
+    "share": {
+      "recordTitle": "Paisagem sonora · {dates}",
+      "shareToFeed": "Compartilhar no mural",
+      "addToProject": "Adicionar a um projeto",
+      "captionLabel": "Conte algo sobre isso (opcional)",
+      "cancel": "Cancelar",
+      "close": "Fechar",
+      "errorGeneric": "Não funcionou. Tente novamente em instantes.",
+      "untitledProject": "Projeto sem título",
+      "feed": {
+        "title": "Compartilhe esta paisagem sonora",
+        "subtitle": "Sua publicação mostra o relógio criado com {count, plural, one {# gravação} other {# gravações}}, e qualquer pessoa pode ouvir essas gravações por ali.",
+        "defaultCaption": "Uma paisagem sonora de 24 horas com {count, plural, one {# gravação} other {# gravações}}.",
+        "linkNote": "A paisagem sonora é adicionada à sua publicação automaticamente.",
+        "post": "Publicar no mural",
+        "posting": "Publicando…",
+        "postedTitle": "Compartilhado no mural",
+        "postedBody": "Sua paisagem sonora já está no mural, pronta para ouvir.",
+        "viewFeed": "Abrir o mural"
+      },
+      "project": {
+        "title": "Adicionar a um projeto",
+        "subtitle": "Escolha um projeto e a paisagem sonora entra na linha do tempo de evidências dele.",
+        "captionPlaceholder": "O que esta paisagem sonora mostra? (opcional)",
+        "loading": "Carregando seus projetos…",
+        "loadError": "Não foi possível carregar seus projetos. Tente novamente em instantes.",
+        "empty": "Você ainda não tem nenhum projeto.",
+        "createProject": "Criar um projeto",
+        "searchPlaceholder": "Buscar seus projetos",
+        "addedTitle": "Adicionado à linha do tempo",
+        "addedBody": "A paisagem sonora agora está na linha do tempo de evidências de {project}.",
+        "viewProject": "Abrir o projeto"
+      }
     }
   },
   "hypercerts": {

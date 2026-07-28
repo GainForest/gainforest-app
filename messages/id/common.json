@@ -3212,6 +3212,52 @@
       "recordingsTitle": "Rekaman yang terlihat",
       "recordingsCount": "{count, plural, other {# rekaman}}",
       "recordingsEmpty": "Tidak ada rekaman pada waktu ini — perkecil, atau gunakan ‹ dan › untuk melihat bagian hari yang lain."
+    },
+    "published": {
+      "summary": "{count, plural, other {# rekaman}} · {dates}",
+      "playHint": "Klik salah satu waktu pada jam untuk mendengarkan rekaman itu.",
+      "metaTitle": "Lanskap suara",
+      "metaDescription": "Jam lanskap suara 24 jam yang dibuat dari rekaman lapangan.",
+      "notFoundTitle": "Lanskap suara ini tidak tersedia",
+      "notFoundBody": "Mungkin sudah dihapus, atau akun yang menerbitkannya sedang tidak dapat dijangkau.",
+      "byLine": "Dibagikan oleh {name}",
+      "openWorkbench": "Buat lanskap suaramu sendiri",
+      "inFeedTitle": "Lanskap suara",
+      "openFull": "Buka lanskap suara"
+    },
+    "share": {
+      "recordTitle": "Lanskap suara · {dates}",
+      "shareToFeed": "Bagikan ke beranda",
+      "addToProject": "Tambahkan ke proyek",
+      "captionLabel": "Ceritakan sedikit (opsional)",
+      "cancel": "Batal",
+      "close": "Tutup",
+      "errorGeneric": "Tidak berhasil. Coba lagi sebentar lagi.",
+      "untitledProject": "Proyek tanpa judul",
+      "feed": {
+        "title": "Bagikan lanskap suara ini",
+        "subtitle": "Kirimanmu menampilkan jam yang dibuat dari {count, plural, other {# rekaman}}, dan siapa pun bisa memutar rekaman itu dari sana.",
+        "defaultCaption": "Lanskap suara 24 jam dari {count, plural, other {# rekaman}}.",
+        "linkNote": "Lanskap suara ditambahkan ke kirimanmu secara otomatis.",
+        "post": "Kirim ke beranda",
+        "posting": "Mengirim…",
+        "postedTitle": "Dibagikan ke beranda",
+        "postedBody": "Lanskap suaramu sudah ada di beranda dan siap didengarkan.",
+        "viewFeed": "Buka beranda"
+      },
+      "project": {
+        "title": "Tambahkan ke proyek",
+        "subtitle": "Pilih proyek, dan lanskap suara akan masuk ke linimasa buktinya.",
+        "captionPlaceholder": "Apa yang ditunjukkan lanskap suara ini? (opsional)",
+        "loading": "Memuat proyekmu…",
+        "loadError": "Proyekmu tidak dapat dimuat. Coba lagi sebentar lagi.",
+        "empty": "Kamu belum punya proyek.",
+        "createProject": "Buat proyek",
+        "searchPlaceholder": "Cari proyekmu",
+        "addedTitle": "Ditambahkan ke linimasa",
+        "addedBody": "Lanskap suara kini ada di linimasa bukti {project}.",
+        "viewProject": "Buka proyek"
+      }
     }
   },
   "hypercerts": {

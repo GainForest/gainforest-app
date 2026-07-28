@@ -19,6 +19,9 @@ const EVIDENCE_CONTENT_TYPE_REGISTRY = [
   { value: "dataset", translationKey: "dataset", filePickerEligible: true, evidenceKind: "file" },
   { value: "certificate", translationKey: "certificate", filePickerEligible: true, evidenceKind: "file" },
   { value: "audio", translationKey: "audio", filePickerEligible: true, evidenceKind: "audio" },
+  // A published 24-hour soundscape clock built from a set of recordings. It
+  // files under "sounds" like the recordings it is made of.
+  { value: "soundscape", translationKey: "audio", filePickerEligible: false, evidenceKind: "audio" },
   { value: "other", translationKey: "other", filePickerEligible: true, evidenceKind: "file" },
   { value: "tree-dataset", translationKey: "treeDataset", filePickerEligible: false, evidenceKind: "tree" },
   { value: "biodiversity", translationKey: "biodiversity", filePickerEligible: false, evidenceKind: "nature" },

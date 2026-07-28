@@ -20,10 +20,12 @@ import {
   PlayIcon,
   ChevronLeftIcon,
   ChevronRightIcon,
+  FolderKanbanIcon,
   MinusIcon,
   PlusIcon,
   RefreshCwIcon,
   RotateCcwIcon,
+  Share2Icon,
   SquareIcon,
   UploadIcon,
   Volume2Icon,
@@ -60,6 +62,15 @@ import {
   type TimeWindow,
 } from "@/lib/soundscape/zoom";
 import { loadPmnCache, savePmnCache, toCacheEntry, type PmnCache } from "@/lib/soundscape/pmn-cache";
+import type { SoundscapeSource } from "@/lib/soundscape/record";
+import { useModal } from "@/components/ui/modal/context";
+import {
+  AddSoundscapeToProjectModal,
+  ShareSoundscapeToFeedModal,
+  useShareTarget,
+  useSoundscapePublisher,
+  type SoundscapePublishInput,
+} from "./ShareSoundscape";
 import { isOutstanding, isRetryable, type AnalysisState, type AnalysisStatus } from "@/lib/soundscape/queue";
 import { cn } from "@/lib/utils";
 import { BAND_COLORS, SoundscapeClock } from "./SoundscapeClock";
@@ -503,6 +514,75 @@ export function SoundscapeClient({ sessionDid }: { sessionDid: string | null }) 
     [bandRanges, t],
   );
 
+  /* ── Sharing ────────────────────────────────────────────────────────────
+     What is on the dial right now — the analyzed recordings of the selected
+     day(s) — is what gets published. Zoom and hidden bands are ways of
+     reading the same soundscape, so they deliberately don't change what is
+     shared: a reader gets the whole thing and explores it themselves. */
+  const modal = useModal();
+  const shareTarget = useShareTarget(sessionDid);
+  const publishSoundscape = useSoundscapePublisher(shareTarget);
+
+  const shareInput = useMemo<SoundscapePublishInput | null>(() => {
+    if (analyzedRecordings.length === 0) return null;
+    const sources: SoundscapeSource[] = analyzedRecordings.map((entry) => ({
+      audioUri: entry.item.uri,
+      name: entry.item.name,
+      date: wallClockDateKey(entry.time),
+      minuteOfDay: wallClockMinuteOfDay(entry.time),
+      pmn: entry.pmn,
+    }));
+    return {
+      title: t("share.recordTitle", { dates: chartDateLabel }),
+      ceilingHz,
+      sources,
+    };
+  }, [analyzedRecordings, ceilingHz, chartDateLabel, t]);
+
+  const closeShareModal = useCallback(() => {
+    void modal.hide().then(() => modal.clear());
+  }, [modal]);
+
+  const openShareToFeed = useCallback(() => {
+    if (!shareInput) return;
+    modal.pushModal(
+      {
+        id: "soundscape-share-feed",
+        dialogWidth: "max-w-lg w-[calc(100%-2rem)]",
+        content: (
+          <ShareSoundscapeToFeedModal
+            input={shareInput}
+            target={shareTarget}
+            publish={publishSoundscape}
+            onClose={closeShareModal}
+          />
+        ),
+      },
+      true,
+    );
+    void modal.show();
+  }, [closeShareModal, modal, publishSoundscape, shareInput, shareTarget]);
+
+  const openAddToProject = useCallback(() => {
+    if (!shareInput) return;
+    modal.pushModal(
+      {
+        id: "soundscape-add-to-project",
+        dialogWidth: "max-w-lg w-[calc(100%-2rem)]",
+        content: (
+          <AddSoundscapeToProjectModal
+            input={shareInput}
+            target={shareTarget}
+            publish={publishSoundscape}
+            onClose={closeShareModal}
+          />
+        ),
+      },
+      true,
+    );
+    void modal.show();
+  }, [closeShareModal, modal, publishSoundscape, shareInput, shareTarget]);
+
   const downloadPng = useCallback(async () => {
     const svg = chartRef.current?.querySelector<SVGSVGElement>("svg[data-soundscape-clock]");
     if (!svg) return;
@@ -723,10 +803,24 @@ export function SoundscapeClient({ sessionDid }: { sessionDid: string | null }) 
             ) : null}
           </div>
           {points.length > 0 ? (
-            <Button type="button" variant="outline" size="sm" onClick={() => void downloadPng()}>
-              <DownloadIcon />
-              {t("chart.downloadPng")}
-            </Button>
+            <div className="flex flex-wrap items-center gap-2">
+              {shareInput ? (
+                <>
+                  <Button type="button" size="sm" onClick={openShareToFeed}>
+                    <Share2Icon />
+                    {t("share.shareToFeed")}
+                  </Button>
+                  <Button type="button" variant="outline" size="sm" onClick={openAddToProject}>
+                    <FolderKanbanIcon />
+                    {t("share.addToProject")}
+                  </Button>
+                </>
+              ) : null}
+              <Button type="button" variant="outline" size="sm" onClick={() => void downloadPng()}>
+                <DownloadIcon />
+                {t("chart.downloadPng")}
+              </Button>
+            </div>
           ) : null}
         </div>
 
