@@ -26,9 +26,9 @@ export const SOUNDSCAPE_COLLECTION = "app.gainforest.ac.soundscape";
  *
  * An atproto record must fit comfortably inside the PDS's ~1 MB ceiling; at
  * roughly 160 bytes of JSON per entry this caps a record near 320 kB, which
- * leaves ample headroom. Above the cap the quietest recordings are dropped
- * (see `capSourceRecordings`) — the dial keeps its shape because the clock
- * only ever draws the loudest recording of each minute anyway.
+ * leaves ample headroom. Above the cap an even sample is kept (see
+ * `capSourceRecordings`) — never a selection by loudness, which would bias
+ * the average the dial now draws.
  */
 export const MAX_SOUNDSCAPE_RECORDINGS = 2000;
 
@@ -82,16 +82,45 @@ function currentBands(): SoundscapeBand[] {
   return FREQUENCY_BANDS.map((band) => ({ id: band.id, minHz: band.minHz, maxHz: band.maxHz }));
 }
 
-/** Total loudness of a recording — used to decide what survives the cap. */
+/** Total loudness of a recording. */
 function loudness(source: SoundscapeSource): number {
   return source.pmn.reduce((sum, value) => sum + value, 0);
 }
 
 /**
- * Trim a source list to `max` entries, keeping the loudest recording of each
- * minute-of-day first (those are the ones the dial draws), then the loudest of
- * whatever is left. Order is normalised to earliest-minute-first so a stored
- * record reads chronologically.
+ * Positions of an n-item list in repeated-midpoint order: the middle first,
+ * then the middles of each half, and so on. Any prefix of the result is spread
+ * roughly evenly across the whole list, so taking "the first k" of a run of
+ * dates samples the whole deployment instead of its first few days.
+ */
+function spreadOrder(length: number): number[] {
+  const order: number[] = [];
+  const ranges: Array<[number, number]> = [[0, length - 1]];
+  while (ranges.length > 0) {
+    const [low, high] = ranges.shift()!;
+    if (low > high) continue;
+    const middle = (low + high) >> 1;
+    order.push(middle);
+    ranges.push([low, middle - 1], [middle + 1, high]);
+  }
+  return order;
+}
+
+/**
+ * Trim a source list to `max` entries by taking an even sample: one recording
+ * from each time of day per pass, and within a time of day, dates spread
+ * across the whole deployment.
+ *
+ * Deliberately blind to loudness. The dial averages the recordings at each
+ * time of day and shades their spread, so dropping the quiet ones would push
+ * the average up and cut off the very tail that makes the spread visible —
+ * a published clock would then read louder and steadier than the library it
+ * came from. An even sample keeps both unbiased.
+ *
+ * Each pass starts at a different time of day, so when the budget runs out
+ * mid-pass the shortfall lands somewhere different rather than always thinning
+ * the same end of the day. Order is normalised to earliest-minute-first so a
+ * stored record reads chronologically.
  */
 export function capSourceRecordings(
   sources: SoundscapeSource[],
@@ -101,24 +130,30 @@ export function capSourceRecordings(
     a.minuteOfDay - b.minuteOfDay || a.date.localeCompare(b.date);
   if (sources.length <= max) return [...sources].sort(byTime);
 
-  const loudestPerMinute = new Map<number, SoundscapeSource>();
+  const byMinute = new Map<number, SoundscapeSource[]>();
   for (const source of sources) {
-    const existing = loudestPerMinute.get(source.minuteOfDay);
-    if (!existing || loudness(source) > loudness(existing)) loudestPerMinute.set(source.minuteOfDay, source);
+    const group = byMinute.get(source.minuteOfDay);
+    if (group) group.push(source);
+    else byMinute.set(source.minuteOfDay, [source]);
   }
-  const kept = [...loudestPerMinute.values()];
-  if (kept.length >= max) {
-    return kept
-      .sort((a, b) => loudness(b) - loudness(a))
-      .slice(0, max)
-      .sort(byTime);
+  const minutes = [...byMinute.keys()].sort((a, b) => a - b);
+  // Within a time of day: chronological, then reordered so any prefix covers
+  // the whole run of dates.
+  const queues = minutes.map((minute) => {
+    const group = byMinute.get(minute)!.sort((a, b) => a.date.localeCompare(b.date));
+    return spreadOrder(group.length).map((index) => group[index]);
+  });
+
+  const kept: SoundscapeSource[] = [];
+  const deepest = Math.max(...queues.map((queue) => queue.length));
+  for (let pass = 0; pass < deepest && kept.length < max; pass++) {
+    for (let step = 0; step < queues.length && kept.length < max; step++) {
+      const queue = queues[(step + pass) % queues.length];
+      const source = queue[pass];
+      if (source) kept.push(source);
+    }
   }
-  const keptUris = new Set(kept.map((source) => source.audioUri));
-  const rest = sources
-    .filter((source) => !keptUris.has(source.audioUri))
-    .sort((a, b) => loudness(b) - loudness(a))
-    .slice(0, max - kept.length);
-  return [...kept, ...rest].sort(byTime);
+  return kept.sort(byTime);
 }
 
 /** The distinct dates a soundscape covers, earliest first. */

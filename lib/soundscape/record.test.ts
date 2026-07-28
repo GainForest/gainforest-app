@@ -39,22 +39,66 @@ describe("capSourceRecordings", () => {
     expect(capped.map((entry) => entry.date)).toEqual(["2026-03-14", "2026-03-16"]);
   });
 
-  it("keeps the loudest recording of each minute when over the cap", () => {
-    const loud = source({ minuteOfDay: 5, audioUri: "at://loud", pmn: [900, 0, 0, 0, 0] });
-    const quiet = source({ minuteOfDay: 5, audioUri: "at://quiet", pmn: [1, 0, 0, 0, 0] });
-    const capped = capSourceRecordings([quiet, loud, source({ minuteOfDay: 9 })], 2);
-    expect(capped.map((entry) => entry.audioUri)).toContain("at://loud");
-    expect(capped.map((entry) => entry.audioUri)).not.toContain("at://quiet");
-  });
-
-  it("drops the quietest minutes once even one-per-minute exceeds the cap", () => {
+  it("keeps every time of day covered rather than the loudest hours", () => {
     const sources = [
       source({ minuteOfDay: 1, audioUri: "at://a", pmn: [10, 0, 0, 0, 0] }),
       source({ minuteOfDay: 2, audioUri: "at://b", pmn: [20, 0, 0, 0, 0] }),
       source({ minuteOfDay: 3, audioUri: "at://c", pmn: [30, 0, 0, 0, 0] }),
     ];
     const capped = capSourceRecordings(sources, 2);
-    expect(capped.map((entry) => entry.audioUri)).toEqual(["at://b", "at://c"]);
+    expect(capped).toHaveLength(2);
+    // Two different times of day, not the two loudest recordings.
+    expect(new Set(capped.map((entry) => entry.minuteOfDay)).size).toBe(2);
+  });
+
+  it("never lets loudness decide what survives", () => {
+    // One time of day, 20 days, one of them far louder than the rest.
+    const days = Array.from({ length: 20 }, (_, index) =>
+      source({
+        minuteOfDay: 300,
+        audioUri: `at://day${index}`,
+        date: `2026-03-${String(index + 1).padStart(2, "0")}`,
+        pmn: [index === 7 ? 90_000 : 10, 0, 0, 0, 0],
+      }),
+    );
+    const capped = capSourceRecordings(days, 4);
+    expect(capped).toHaveLength(4);
+    // The loud day is one of twenty: keeping it every time would mean the
+    // published average was computed from a top-truncated sample.
+    expect(capped.filter((entry) => entry.audioUri === "at://day7")).toHaveLength(0);
+  });
+
+  it("samples dates across the whole deployment, not just its start", () => {
+    const days = Array.from({ length: 21 }, (_, index) =>
+      source({
+        minuteOfDay: 300,
+        audioUri: `at://day${index}`,
+        date: `2026-03-${String(index + 1).padStart(2, "0")}`,
+      }),
+    );
+    const capped = capSourceRecordings(days, 5);
+    const kept = capped.map((entry) => Number(entry.date.slice(-2)));
+    expect(kept).toHaveLength(5);
+    // Spread, not the first five days.
+    expect(Math.max(...kept) - Math.min(...kept)).toBeGreaterThan(10);
+  });
+
+  it("spreads a partial final pass around the dial instead of thinning one end", () => {
+    // 10 times of day, 3 days each; a budget of 25 leaves the last pass short.
+    const sources = Array.from({ length: 30 }, (_, index) =>
+      source({
+        minuteOfDay: (index % 10) * 60,
+        audioUri: `at://s${index}`,
+        date: `2026-03-0${Math.floor(index / 10) + 1}`,
+      }),
+    );
+    const capped = capSourceRecordings(sources, 25);
+    const perMinute = new Map<number, number>();
+    for (const entry of capped) perMinute.set(entry.minuteOfDay, (perMinute.get(entry.minuteOfDay) ?? 0) + 1);
+    expect(capped).toHaveLength(25);
+    expect(perMinute.size).toBe(10);
+    // Every time of day keeps 2 or 3 — none is starved.
+    for (const count of perMinute.values()) expect(count).toBeGreaterThanOrEqual(2);
   });
 
   it("never returns more than the cap", () => {
