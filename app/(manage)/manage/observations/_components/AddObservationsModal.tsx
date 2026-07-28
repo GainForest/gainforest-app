@@ -9,9 +9,9 @@ import {
   ArrowLeftIcon,
   CameraIcon,
   CheckCircle2Icon,
-  ChevronDownIcon,
   CircleHelpIcon,
   CopyIcon,
+  EllipsisIcon,
   FileSpreadsheetIcon,
   FolderOpenIcon,
   ImagePlusIcon,
@@ -51,7 +51,17 @@ import {
 import { ModalContent, ModalHeader, ModalTitle, ModalDescription } from "@/components/ui/modal/modal";
 import { useModal } from "@/components/ui/modal/context";
 import { cn } from "@/lib/utils";
-import { manageApiHref, type ManageTarget } from "@/lib/links";
+import {
+  groupManageTarget,
+  manageApiHref,
+  personalManageTarget,
+  type ManageTarget,
+} from "@/lib/links";
+import {
+  switcherGroupIdentifier,
+  useAccountList,
+  useActiveAccountContext,
+} from "@/app/_lib/account-switcher";
 import { canCreateRecord } from "../../_lib/cgs-permissions";
 import {
   cleanFileName,
@@ -278,9 +288,11 @@ function quickGroupStatus(items: QuickItem[]): ItemStatus {
 }
 
 export function AddObservationsModal({
-  target,
+  target: initialTarget,
   projectRef,
   projectSiteRef = null,
+  sessionDid = null,
+  allowAccountSwitch = false,
   onViewObservations,
   onClose,
   onBack,
@@ -291,6 +303,12 @@ export function AddObservationsModal({
   /** The pinned project's mapped site, so sightings added from a project page
    *  carry the same site link as ones filed through the project picker. */
   projectSiteRef?: string | null;
+  /** Signed-in user's DID. Required for the "Uploading for" account picker. */
+  sessionDid?: string | null;
+  /** Opt-in "Uploading for" selector so a multi-org user can retarget the
+   *  upload without leaving the flow. Only the generic quick-add turns this on;
+   *  a project- or account-scoped page keeps its target locked. */
+  allowAccountSwitch?: boolean;
   /** Navigate to the observations list (called after a successful add). */
   onViewObservations: () => void;
   onClose: () => void;
@@ -341,6 +359,82 @@ export function AddObservationsModal({
   // actually has projects — zero extra chrome otherwise.
   const [projects, setProjects] = useState<QuickProject[]>([]);
   const [selectedProjectUri, setSelectedProjectUri] = useState<string>("");
+
+  // "Uploading for": the account these observations land in. Seeded from the
+  // caller's target (usually the active-account context) and switchable inline
+  // when allowAccountSwitch is on and the user belongs to organizations.
+  const [activeTarget, setActiveTarget] = useState<ManageTarget>(initialTarget);
+  const target = activeTarget;
+  // Re-seed if the caller hands us a different account (a fresh open() reuses
+  // this mounted instance rather than remounting).
+  const seededTargetDid = useRef(initialTarget.did);
+  useEffect(() => {
+    if (seededTargetDid.current !== initialTarget.did) {
+      seededTargetDid.current = initialTarget.did;
+      setActiveTarget(initialTarget);
+      setSelectedProjectUri("");
+    }
+  }, [initialTarget]);
+
+  const { personal, groups: accountGroups } = useAccountList(allowAccountSwitch ? sessionDid : null);
+  const [, setActiveContext] = useActiveAccountContext(sessionDid ?? "");
+  // The picker only earns its place for a multi-org user in the generic
+  // quick-add flow — a single-account user (and any project-pinned open) sees
+  // no extra chrome.
+  const showAccountPicker =
+    allowAccountSwitch && Boolean(sessionDid) && !projectRef && accountGroups.length > 0;
+
+  // Switch which account the batch is filed under, and remember it for the
+  // session so subsequent uploads default to the same place.
+  const chooseUploadTarget = useCallback(
+    (did: string) => {
+      if (did === target.did) return;
+      if (sessionDid && did === sessionDid) {
+        const next = personalManageTarget({
+          did: sessionDid,
+          accountKind: "user",
+          identifier: personal?.handle ?? sessionDid,
+          displayName: personal?.displayName ?? null,
+          avatarUrl: personal?.avatarUrl ?? null,
+        });
+        setActiveTarget(next);
+        setActiveContext({ type: "personal", did: sessionDid });
+      } else {
+        const group = accountGroups.find((candidate) => candidate.groupDid === did);
+        if (!group) return;
+        const identifier = switcherGroupIdentifier(group);
+        const next = groupManageTarget({
+          did: group.groupDid,
+          accountKind: "organization",
+          identifier,
+          role: group.role,
+          displayName: group.displayName,
+          avatarUrl: group.avatarUrl,
+          currentUserDid: sessionDid,
+        });
+        setActiveTarget(next);
+        setActiveContext({ type: "group", did: group.groupDid, identifier, role: group.role });
+      }
+      // The old account's projects don't belong to the new one.
+      setSelectedProjectUri("");
+    },
+    [accountGroups, personal, sessionDid, setActiveContext, target.did],
+  );
+
+  const personalLabel =
+    personal?.displayName?.trim() || personal?.handle?.trim() || t("uploadingForPersonal");
+  // Flat option list for the footer picker: the personal account first, then
+  // every organization the member belongs to.
+  const uploadTargets: { did: string; name: string; avatarUrl: string | null }[] = [
+    ...(sessionDid
+      ? [{ did: sessionDid, name: personalLabel, avatarUrl: personal?.avatarUrl ?? null }]
+      : []),
+    ...accountGroups.map((group) => ({
+      did: group.groupDid,
+      name: group.displayName?.trim() || group.handle?.trim() || group.groupDid,
+      avatarUrl: group.avatarUrl ?? null,
+    })),
+  ];
 
   const createPermission = canCreateRecord(target);
   const disabledReason = createPermission.allowed ? null : createPermission.reason;
@@ -988,12 +1082,13 @@ export function AddObservationsModal({
                 <Button
                   type="button"
                   variant="outline"
-                  size="sm"
+                  size="icon-sm"
                   className="-mt-1 rounded-full"
                   disabled={isSubmitting}
+                  aria-label={t("moreWays")}
+                  title={t("moreWays")}
                 >
-                  {t("moreWays")}
-                  <ChevronDownIcon className="size-4" />
+                  <EllipsisIcon className="size-4" />
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
@@ -1291,7 +1386,14 @@ export function AddObservationsModal({
         // bottom edge (full-bleed over the dialog's p-6) — the primary action
         // stays reachable however long the card list grows. From sm up the list
         // scrolls internally instead and the footer sits statically below it.
-        <div className="sticky bottom-0 z-10 -mx-6 -mb-6 space-y-3 border-t border-border bg-background px-6 pb-5 pt-3 sm:static sm:mx-0 sm:mb-0 sm:bg-transparent sm:px-0 sm:pb-0">
+        <div
+          className={cn(
+            "sticky bottom-0 z-10 -mx-6 space-y-3 border-t border-border bg-background px-6 pt-3 sm:static sm:mx-0 sm:bg-transparent sm:px-0 sm:pt-3",
+            // When the "Uploading for" footer sits below, don't bleed to the
+            // very bottom — let that bar own the modal's bottom edge.
+            showAccountPicker ? "pb-3" : "-mb-6 pb-5 sm:mb-0 sm:pb-0",
+          )}
+        >
           {isSubmitting && uploadProgress ? (
             <QuickProgress
               label={t("uploadingProgress", { done: uploadProgress.done, total: uploadProgress.total })}
@@ -1312,7 +1414,48 @@ export function AddObservationsModal({
           </div>
         </div>
       ) : null}
+
+      {/* “Uploading for” lives in a persistent footer bar so a multi-org member
+          can retarget the batch at any point without hunting for the sidebar
+          switcher. Full-bleed over the dialog's p-6, flush to the bottom edge. */}
+      {showAccountPicker ? (
+        <div className="-mx-6 -mb-6 flex flex-wrap items-center gap-x-3 gap-y-2 rounded-b-4xl border-t border-border bg-muted/40 px-6 py-3.5 max-[32rem]:-mx-4 max-[32rem]:-mb-4 max-[32rem]:rounded-none">
+          <span className="text-sm text-muted-foreground">{t("uploadingForLabel")}</span>
+          <Select value={target.did} onValueChange={chooseUploadTarget} disabled={isSubmitting}>
+            <SelectTrigger
+              className="h-9 w-auto min-w-[11rem] gap-2 rounded-xl bg-background font-medium"
+              aria-label={t("uploadingForLabel")}
+            >
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {uploadTargets.map((option) => (
+                <SelectItem key={option.did} value={option.did}>
+                  <span className="flex items-center gap-2">
+                    <AccountBadge url={option.avatarUrl} name={option.name} />
+                    <span className="truncate">{option.name}</span>
+                  </span>
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+      ) : null}
     </ModalContent>
+  );
+}
+
+// Small round account avatar for the “Uploading for” picker — image when the
+// account has one, otherwise its first initial on a soft tint.
+function AccountBadge({ url, name }: { url: string | null; name: string }) {
+  return (
+    <span className="relative flex size-5 shrink-0 items-center justify-center overflow-hidden rounded-full bg-primary/10 text-[10px] font-semibold text-primary">
+      {url ? (
+        <Image src={url} alt="" fill unoptimized sizes="20px" className="object-cover" />
+      ) : (
+        (name.trim()[0] ?? "?").toUpperCase()
+      )}
+    </span>
   );
 }
 
