@@ -1125,6 +1125,7 @@
       "copied": "Tersalin",
       "copyProfileLink": "Salin tautan profil",
       "accountDetails": "Detail akun",
+      "aboutName": "Tentang {name}",
       "showAccountDetails": "Tampilkan detail akun",
       "hideAccountDetails": "Sembunyikan detail akun",
       "did": "DID",

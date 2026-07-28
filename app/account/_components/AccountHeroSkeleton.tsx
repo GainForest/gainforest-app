@@ -58,7 +58,7 @@ export function AccountHeroSkeleton() {
 /** Loading placeholder for the muted stat tiles + actions bar in Overview. */
 export function AccountOverviewDetailsSkeleton() {
   return (
-    <section className="space-y-3">
+    <section className="mt-6 space-y-3">
       <Skeleton className="h-7 w-36" />
       <div className="flex flex-wrap gap-2">
         <Skeleton className="h-9 w-28 rounded-xl" />

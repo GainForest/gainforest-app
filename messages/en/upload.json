@@ -1125,6 +1125,7 @@
       "copied": "Copied",
       "copyProfileLink": "Copy profile link",
       "accountDetails": "Account details",
+      "aboutName": "About {name}",
       "showAccountDetails": "Show account details",
       "hideAccountDetails": "Hide account details",
       "did": "DID",

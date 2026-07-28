@@ -154,9 +154,9 @@ export function AccountOverviewDetails({
 
   return (
     <FollowProvider targetDid={account.did}>
-      <section data-account-overview-details className="space-y-3">
+      <section data-account-overview-details className="mt-6 space-y-3">
         <h2 className="font-instrument text-2xl font-light italic text-foreground">
-          {heroT("accountDetails")}
+          {heroT("aboutName", { name: account.displayName })}
         </h2>
 
         <div className="flex flex-wrap items-center gap-2">
@@ -182,7 +182,7 @@ export function AccountOverviewDetails({
         </div>
         <AccountMemberships organizations={memberships} />
 
-        <div className="flex flex-wrap items-center gap-2 rounded-2xl bg-muted p-2">
+        <div className="flex flex-wrap items-center gap-2 rounded-2xl bg-muted p-2 empty:hidden">
           <FollowButton targetDid={account.did} name={account.displayName} size="default" />
           {account.kind === "organization" ? (
             <Button
