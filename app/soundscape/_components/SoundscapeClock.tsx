@@ -24,6 +24,7 @@ import {
   niceCeil,
   type SoundscapePoint,
 } from "@/lib/soundscape/analysis";
+import { radiusForValue as dialRadius } from "@/lib/soundscape/dial";
 import {
   clampWindow,
   formatWindowMinute,
@@ -65,16 +66,9 @@ function polar(minuteOfDay: number, radius: number, view: TimeWindow): { x: numb
   return { x: CENTER + radius * Math.cos(angle), y: CENTER + radius * Math.sin(angle) };
 }
 
-/**
- * Radial scale mirrors the reference matplotlib figure: the domain runs from
- * -maxValue at the inner edge to +maxValue at the outer edge, so a value of 0
- * sits at mid-radius and all (non-negative) PMN values fill the outer half.
- * This keeps every band visible instead of collapsing quiet hours to a point.
- */
+/** This dial's radii, applied to the shared scale in ../../lib/soundscape/dial. */
 function radiusForValue(value: number, maxValue: number): number {
-  if (maxValue <= 0) return INNER_RADIUS;
-  const clamped = Math.max(-maxValue, Math.min(value, maxValue));
-  return INNER_RADIUS + ((clamped + maxValue) / (2 * maxValue)) * (OUTER_RADIUS - INNER_RADIUS);
+  return dialRadius(value, maxValue, INNER_RADIUS, OUTER_RADIUS);
 }
 
 /**
@@ -496,6 +490,7 @@ export function SoundscapeClock(props: SoundscapeClockProps) {
               className="fill-primary/15 stroke-primary/50"
               strokeWidth={1.5}
             />
+            <circle cx={CENTER} cy={CENTER} r={INNER_RADIUS + 10} fill="var(--card, #ffffff)" fillOpacity={0.85} />
             <text
               x={CENTER}
               y={CENTER + 5}
@@ -540,22 +535,21 @@ export function SoundscapeClock(props: SoundscapeClockProps) {
           );
         })}
 
-        {/* Radial value labels along the start-of-window axis (0 at mid-radius) */}
-        {gridRings
-          .filter((fraction) => fraction >= 0.5)
-          .map((fraction) => (
-            <text
-              key={`value-${fraction}`}
-              x={CENTER + INNER_RADIUS + fraction * (OUTER_RADIUS - INNER_RADIUS)}
-              y={CENTER - 4}
-              fontSize={10}
-              textAnchor="middle"
-              className="fill-muted-foreground"
-              opacity={0.85}
-            >
-              {formatValue((2 * fraction - 1) * maxValue)}
-            </text>
-          ))}
+        {/* Radial value labels along the start-of-window axis: 0 at the inner
+            edge, the axis maximum at the outer ring. */}
+        {[0, ...gridRings].map((fraction) => (
+          <text
+            key={`value-${fraction}`}
+            x={CENTER + INNER_RADIUS + fraction * (OUTER_RADIUS - INNER_RADIUS)}
+            y={CENTER - 4}
+            fontSize={10}
+            textAnchor="middle"
+            className="fill-muted-foreground"
+            opacity={0.85}
+          >
+            {formatValue(fraction * maxValue)}
+          </text>
+        ))}
 
         {/* Axis labels */}
         <text
@@ -662,6 +656,9 @@ export function SoundscapeClock(props: SoundscapeClockProps) {
             starting a drag clears the hover. */}
         {hover ? (
           <g>
+            {/* Lines now reach much closer to the middle, so the readout gets
+                a backdrop rather than sitting directly on top of them. */}
+            <circle cx={CENTER} cy={CENTER} r={INNER_RADIUS + 10} fill="var(--card, #ffffff)" fillOpacity={0.85} />
             <text
               x={CENTER}
               y={CENTER + 5}
