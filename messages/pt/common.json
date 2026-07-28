@@ -3263,6 +3263,13 @@
         "addedBody": "A paisagem sonora agora está na linha do tempo de evidências de {project}.",
         "viewProject": "Abrir o projeto"
       }
+    },
+    "card": {
+      "title": "Paisagem sonora",
+      "tapHint": "Toque no anel para ouvir",
+      "dialAria": "Relógio da paisagem sonora de 24 horas — toque em um horário para ouvir",
+      "play": "Reproduzir",
+      "pause": "Pausar"
     }
   },
   "hypercerts": {

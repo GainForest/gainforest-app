@@ -3263,6 +3263,13 @@
         "addedBody": "The soundscape is now on {project}'s evidence timeline.",
         "viewProject": "Open the project"
       }
+    },
+    "card": {
+      "title": "Soundscape",
+      "tapHint": "Tap the ring to listen",
+      "dialAria": "24-hour soundscape dial — tap a time to listen",
+      "play": "Play",
+      "pause": "Pause"
     }
   },
   "hypercerts": {

@@ -3263,6 +3263,13 @@
         "addedBody": "Mandhari ya sauti sasa iko kwenye ratiba ya ushahidi ya {project}.",
         "viewProject": "Fungua mradi"
       }
+    },
+    "card": {
+      "title": "Mandhari ya sauti",
+      "tapHint": "Gusa pete ili kusikiliza",
+      "dialAria": "Saa ya mandhari ya sauti ya saa 24 — gusa wakati ili kusikiliza",
+      "play": "Cheza",
+      "pause": "Simamisha"
     }
   },
   "hypercerts": {

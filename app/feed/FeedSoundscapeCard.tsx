@@ -11,16 +11,13 @@
  * viewport.
  */
 
-import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
-import { useTranslations } from "next-intl";
-import { ArrowUpRightIcon, Loader2Icon, WavesIcon } from "lucide-react";
+import { Loader2Icon } from "lucide-react";
 import { fetchPublishedSoundscape } from "@/app/_lib/soundscape-record";
 import { soundscapeHref, type PublishedSoundscape } from "@/lib/soundscape/record";
-import { PublishedSoundscapeView } from "@/app/soundscape/_components/PublishedSoundscapeView";
+import { SoundscapeCard } from "@/app/soundscape/_components/SoundscapeCard";
 
 export function FeedSoundscapeCard({ did, rkey }: { did: string; rkey: string }) {
-  const t = useTranslations("common.soundscape.published");
   const containerRef = useRef<HTMLDivElement | null>(null);
   const [inView, setInView] = useState(false);
   const [soundscape, setSoundscape] = useState<PublishedSoundscape | null | undefined>(undefined);
@@ -61,34 +58,19 @@ export function FeedSoundscapeCard({ did, rkey }: { did: string; rkey: string })
   if (soundscape === null) return null;
 
   return (
-    <div ref={containerRef} className="mt-2 overflow-hidden rounded-xl border border-border/60 bg-card/40">
-      <div className="flex items-center justify-between gap-2 border-b border-border/60 px-3 py-2">
-        <p className="flex min-w-0 items-center gap-1.5 text-xs font-medium text-foreground">
-          <WavesIcon className="size-3.5 shrink-0 text-primary" />
-          <span className="truncate">{soundscape?.title || t("inFeedTitle")}</span>
-        </p>
-        <Link
-          href={soundscapeHref(did, rkey)}
-          onClick={(event) => event.stopPropagation()}
-          className="inline-flex shrink-0 items-center gap-1 text-xs font-medium text-primary hover:underline"
-        >
-          {t("openFull")}
-          <ArrowUpRightIcon className="size-3" />
-        </Link>
-      </div>
+    <div
+      ref={containerRef}
+      className="mt-2"
+      // The dial is an interactive control of its own (tap a time to listen);
+      // a click inside it must not also toggle the post row.
+      onClick={(event) => event.stopPropagation()}
+    >
       {soundscape === undefined ? (
-        <div className="flex h-40 items-center justify-center gap-2 text-xs text-muted-foreground">
+        <div className="flex h-40 items-center justify-center rounded-xl border border-border/60 bg-card/40 text-muted-foreground">
           <Loader2Icon className="size-4 animate-spin" />
         </div>
       ) : (
-        <div
-          className="p-3"
-          // The dial is an interactive control of its own (click a time to
-          // listen); a click inside it must not also toggle the post row.
-          onClick={(event) => event.stopPropagation()}
-        >
-          <PublishedSoundscapeView soundscape={soundscape} />
-        </div>
+        <SoundscapeCard soundscape={soundscape} href={soundscapeHref(did, rkey)} />
       )}
     </div>
   );

@@ -9,12 +9,11 @@
  * nothing extra until a reader actually looks at the soundscape.
  */
 
-import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
-import { ArrowUpRightIcon, Loader2Icon, WavesIcon } from "lucide-react";
+import { Loader2Icon, WavesIcon } from "lucide-react";
 import { fetchPublishedSoundscape } from "@/app/_lib/soundscape-record";
-import { PublishedSoundscapeView } from "@/app/soundscape/_components/PublishedSoundscapeView";
+import { SoundscapeCard } from "@/app/soundscape/_components/SoundscapeCard";
 import { parseSoundscapeHref, type PublishedSoundscape } from "@/lib/soundscape/record";
 import type { TimelinePreviewPayload } from "../../../shared/timelineFeedViewModel";
 
@@ -57,24 +56,11 @@ export function SoundscapePreviewRenderer({ preview }: { preview: TimelinePrevie
   }
 
   return (
-    <div className="rounded-xl border border-border/60 bg-background p-3 sm:p-4">
-      <div className="mb-3 flex items-center justify-between gap-2">
-        <p className="flex min-w-0 items-center gap-1.5 text-sm font-medium text-foreground">
-          <WavesIcon className="size-4 shrink-0 text-primary" />
-          <span className="truncate">{soundscape.title || preview.title}</span>
-        </p>
-        <Link
-          href={preview.href}
-          className="inline-flex shrink-0 items-center gap-1 text-xs font-medium text-primary hover:underline"
-        >
-          {t("openFull")}
-          <ArrowUpRightIcon className="size-3" />
-        </Link>
-      </div>
+    <div className="mx-auto max-w-2xl">
       {soundscape.note ? (
-        <p className="mb-3 text-sm leading-6 text-muted-foreground">{soundscape.note}</p>
+        <p className="mb-2 text-sm leading-6 text-muted-foreground">{soundscape.note}</p>
       ) : null}
-      <PublishedSoundscapeView soundscape={soundscape} />
+      <SoundscapeCard soundscape={soundscape} href={preview.href} />
     </div>
   );
 }

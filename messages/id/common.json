@@ -3263,6 +3263,13 @@
         "addedBody": "Lanskap suara kini ada di linimasa bukti {project}.",
         "viewProject": "Buka proyek"
       }
+    },
+    "card": {
+      "title": "Lanskap suara",
+      "tapHint": "Ketuk cincin untuk mendengarkan",
+      "dialAria": "Jam lanskap suara 24 jam — ketuk waktu untuk mendengarkan",
+      "play": "Putar",
+      "pause": "Jeda"
     }
   },
   "hypercerts": {
