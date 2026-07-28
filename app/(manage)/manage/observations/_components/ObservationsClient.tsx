@@ -532,7 +532,7 @@ export function ObservationsClient({
   const [projectGroups, setProjectGroups] = useState<ObservationProjectGroup[]>([]);
   const [projectContexts, setProjectContexts] = useState<ObservationProjectContext[]>([]);
   const [datasetGroups, setDatasetGroups] = useState<ObservationDatasetGroup[]>([]);
-  // False until the first dataset fetch settles, so the folder strip can show a
+  // False until the first dataset fetch settles, so the dataset strip can show a
   // loading skeleton instead of briefly flashing the "no datasets yet" hint.
   const [, setDatasetsLoaded] = useState(false);
   const [datasetFilter, setDatasetFilter] = useQueryState("dataset", parseAsString.withOptions(QUERY_STATE_OPTIONS));
@@ -609,8 +609,8 @@ export function ObservationsClient({
   }, [target]);
 
   // Group observations by the dataset they were filed into so the steward can
-  // see datasets as folders and filter the list down to one. Re-fetched after a
-  // grouping action so folder counts stay fresh.
+  // see them as datasets and filter the list down to one. Re-fetched after a
+  // grouping action so dataset counts stay fresh.
   const loadDatasetGroups = useCallback(async () => {
     try {
       const response = await fetch(manageApiHref("/api/manage/observations/datasets", target), { cache: "no-store" });
@@ -648,7 +648,7 @@ export function ObservationsClient({
     () => resolveObservationFilterUris(projectUris, activeDataset?.uris ?? null),
     [activeDataset, projectUris],
   );
-  // On a project's page, only folders that actually hold some of its sightings
+  // On a project's page, only datasets that actually hold some of its sightings
   // are worth offering.
   const visibleDatasetGroups = useMemo(() => {
     if (!project || !projectUris) return datasetGroups;
@@ -779,7 +779,7 @@ export function ObservationsClient({
     void modal.show();
   }, [activeProject?.projectUri, createPermission.reason, modal, router, target]);
 
-  // File already-published sightings — or a whole folder of them — under a
+  // File already-published sightings — or a whole dataset of them — under a
   // project. Collecting first and sorting later is how field work actually
   // goes, so membership has to be editable after the fact.
   const openAddToProject = useCallback(
@@ -816,8 +816,8 @@ export function ObservationsClient({
     [attachToProject, createPermission.reason, loadProjectGroups, modal, project?.uri, router, target],
   );
 
-  // Take the selected sightings out of their folder. They survive as loose
-  // sightings — the counterpart to filing them, and the reason folder
+  // Take the selected sightings out of their dataset. They survive as loose
+  // sightings — the counterpart to filing them, and the reason dataset
   // membership is now a choice rather than a one-way door.
   const openRemoveFromDataset = useCallback(() => {
     const records = Array.from(selectedRecords.values()).filter((record) => record.datasetRef);
@@ -860,7 +860,7 @@ export function ObservationsClient({
   }, [createPermission.reason, loadDatasetGroups, modal, router, selectedRecords, t, target]);
 
   // Group the currently-selected observations into a dataset (new or existing),
-  // then refresh folder counts and the listing.
+  // then refresh dataset counts and the listing.
   const openGroupIntoDataset = useCallback(() => {
     const records = Array.from(selectedRecords.values());
     if (records.length === 0 || createPermission.reason) return;
@@ -1180,7 +1180,7 @@ export function ObservationsClient({
                 if (next) void setDatasetFilter(null);
               }}
             />
-            {/* An open folder can be filed under a project whole, rather than
+            {/* An open dataset can be filed under a project whole, rather than
                 selecting its sightings one by one. */}
             {activeDataset && !project ? (
               <Button
@@ -1633,7 +1633,7 @@ function ObservationFilterChipRow({
   datasetValue: string | null;
   projectValue: string | null;
   /** True when the page is pinned to one project, so "All observations" only
-   *  clears the dataset folder instead of leaving the project. */
+   *  clears the dataset instead of leaving the project. */
   lockedToProject?: boolean;
   onDatasetChange: (next: string | null) => void;
   onProjectChange: (next: string | null) => void;

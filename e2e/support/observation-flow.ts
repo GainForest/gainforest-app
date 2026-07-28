@@ -330,7 +330,7 @@ async function waitForObservationTile(page: Page, name: string): Promise<Locator
 export async function groupObservationsFromContextMenu(page: Page, testInfo: TestInfo, siteName: string): Promise<void> {
   const suffix = `${Date.now()}-${testInfo.workerIndex}-${testInfo.retry}`;
   const names = [`E2E Right Click One ${suffix}`, `E2E Right Click Two ${suffix}`];
-  const datasetName = `E2E right-click folder ${suffix}`;
+  const datasetName = `E2E right-click dataset ${suffix}`;
   const created: PdsRepoRecord[] = [];
 
   console.log("[e2e] Uploading two sightings for the right-click grouping check.");
@@ -388,7 +388,7 @@ export async function groupObservationsFromContextMenu(page: Page, testInfo: Tes
     await expect(multiMenu.getByText(/2 observations selected/i)).toBeVisible();
     await screenshotStep(page, testInfo, "grouping-context-menu-multiple");
 
-    // 3. Group both into a brand-new folder straight from the menu.
+    // 3. Group both into a brand-new dataset straight from the menu.
     await multiMenu.getByRole("menuitem", { name: /group into dataset/i }).click();
     const nameField = page.locator("#observation-dataset-name");
     await expect(nameField).toBeVisible({ timeout: 15_000 });
@@ -399,7 +399,7 @@ export async function groupObservationsFromContextMenu(page: Page, testInfo: Tes
     await expect(nameField).not.toBeVisible({ timeout: 60_000 });
     await expect(page.getByRole("button", { name: new RegExp(escapeRegExp(datasetName), "i") }).first()).toBeVisible({ timeout: 60_000 });
     await screenshotStep(page, testInfo, "grouping-dataset-created");
-    console.log(`[e2e] Right-click grouping created folder "${datasetName}".`);
+    console.log(`[e2e] Right-click grouping created dataset "${datasetName}".`);
   } finally {
     const org = readCgsOrgMetadata();
     for (const record of created) {

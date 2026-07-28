@@ -70,9 +70,9 @@ export type AttachInputOccurrence = { rkey: string; datasetRef: string | null };
 
 export type AttachObservationsResult = {
   attached: string[];
-  /** Already in the target folder — nothing to do. */
+  /** Already in the target dataset — nothing to do. */
   skipped: Array<{ rkey: string; reason: "already" }>;
-  /** Rkeys that came out of a different folder, keyed by the folder they left. */
+  /** Rkeys that came out of a different dataset, keyed by the dataset they left. */
   movedFrom: Record<string, string[]>;
   errors: Array<{ rkey: string; error: string }>;
 };
@@ -81,8 +81,8 @@ function datasetRefOf(record: Record<string, unknown>): string | null {
   return typeof record.datasetRef === "string" && record.datasetRef.trim().length > 0 ? record.datasetRef : null;
 }
 
-/** Apply the count deltas a move implies: one folder loses records, another gains
- *  them. Best-effort — folder views derive their counts from the occurrences
+/** Apply the count deltas a move implies: one dataset loses records, another gains
+ *  them. Best-effort — dataset views derive their counts from the occurrences
  *  themselves, so a stale `recordCount` is cosmetic. */
 async function applyDatasetCountDeltas(
   deltas: Map<string, number>,
@@ -103,9 +103,9 @@ async function applyDatasetCountDeltas(
  * touches `dynamicProperties`, so an observation is never mislabelled as a
  * measured tree.
  *
- * An observation lives in one folder (`datasetRef` is a single at-uri, matching
+ * An observation lives in one dataset (`datasetRef` is a single at-uri, matching
  * Darwin Core, where a dataset is the batch a record was derived from). Filing
- * one that already sits in another folder therefore MOVES it: the old folder's
+ * one that already sits in another dataset therefore MOVES it: the old dataset's
  * `recordCount` goes down as the new one's goes up. Ones already in the target
  * are left alone.
  */
@@ -131,7 +131,7 @@ export async function attachObservationsToDataset(
     }
     try {
       const current = await getRecord(OCCURRENCE_COLLECTION, occurrence.rkey, options);
-      // Read the folder off the record, not the caller's copy: another tab may
+      // Read the dataset off the record, not the caller's copy: another tab may
       // have moved it since the list was loaded.
       const previous = datasetRefOf(current.record);
       if (previous === input.datasetUri) {
@@ -169,14 +169,14 @@ export async function attachObservationsToDataset(
 
 export type RemoveFromDatasetResult = {
   removed: string[];
-  /** Was not in a folder to begin with. */
+  /** Was not in a dataset to begin with. */
   skipped: string[];
   errors: Array<{ rkey: string; error: string }>;
 };
 
 /**
- * Take observations out of their folder without deleting anything: `datasetRef`
- * and `datasetName` are cleared and the folder's `recordCount` goes down. The
+ * Take observations out of their dataset without deleting anything: `datasetRef`
+ * and `datasetName` are cleared and the dataset's `recordCount` goes down. The
  * observations survive as loose sightings — the counterpart to filing them.
  */
 export async function removeObservationsFromDataset(
@@ -211,7 +211,7 @@ export async function removeObservationsFromDataset(
     } catch (error) {
       errors.push({
         rkey: occurrence.rkey,
-        error: error instanceof Error ? error.message : "This observation could not be taken out of its folder.",
+        error: error instanceof Error ? error.message : "This observation could not be taken out of its dataset.",
       });
     }
   }

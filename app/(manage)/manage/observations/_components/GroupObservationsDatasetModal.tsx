@@ -76,9 +76,9 @@ export function GroupObservationsDatasetModal({
   const [isPending, setIsPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Sightings already in another folder are moved, not skipped — the hint says
-  // how many will change folder so the count lines up with what happens.
-  const fromOtherFolder = useMemo(
+  // Sightings already in another dataset are moved, not skipped — the hint says
+  // how many will change dataset so the count lines up with what happens.
+  const fromOtherDataset = useMemo(
     () => observations.filter((record) => Boolean(record.datasetRef) && record.datasetRef !== selectedUri),
     [observations, selectedUri],
   );
@@ -151,9 +151,9 @@ export function GroupObservationsDatasetModal({
           // Non-fatal — observations are grouped even if nesting fails.
         }
         try {
-          // Listing the folder on the project is not enough: counts, galleries
+          // Listing the dataset on the project is not enough: counts, galleries
           // and filters all read `projectRef` off each sighting, so stamp it
-          // too or the folder joins the project while its sightings don't.
+          // too or the dataset joins the project while its sightings don't.
           await attachObservationsToProject(
             {
               projectUri,
@@ -335,8 +335,8 @@ export function GroupObservationsDatasetModal({
           <p className="text-xs text-muted-foreground">{t("addsToProject", { project: projectName })}</p>
         ) : null}
 
-        {fromOtherFolder.length > 0 ? (
-          <p className="text-xs text-muted-foreground">{t("someWillMove", { count: fromOtherFolder.length })}</p>
+        {fromOtherDataset.length > 0 ? (
+          <p className="text-xs text-muted-foreground">{t("someWillMove", { count: fromOtherDataset.length })}</p>
         ) : null}
         {alreadyHere.length > 0 ? (
           <p className="text-xs text-muted-foreground">{t("someAlreadyHere", { count: alreadyHere.length })}</p>

@@ -2632,7 +2632,7 @@
       },
       "dataset": {
         "name": "Conjunto de datos",
-        "plain": "Una carpeta con nombre para un lote de observaciones que van juntas: normalmente un muestreo, un viaje, una temporada.",
+        "plain": "Un grupo con nombre de observaciones que van juntas: normalmente un muestreo, un viaje, una temporada.",
         "detail": "«Muestreo del valle de Danum, marzo de 2025» es un conjunto de datos. Guarda un nombre, una descripción y un recuento, y es lo que otras personas descargan o citan cuando usan tu trabajo.",
         "hooks": "No lista a sus miembros. Son las observaciones las que lo señalan, así que un conjunto de datos es simplemente todas las observaciones que llevan su dirección."
       },
@@ -2675,7 +2675,7 @@
         },
         "dataset": {
           "name": "Conjunto de datos",
-          "desc": "La carpeta con nombre. Nunca lista sus observaciones: son ellas las que llevan su dirección en datasetRef, y el conjunto solo guarda un recuento."
+          "desc": "El grupo con nombre. Nunca lista sus observaciones: son ellas las que llevan su dirección en datasetRef, y el conjunto solo guarda un recuento."
         },
         "observation": {
           "name": "Observación",
@@ -2743,7 +2743,7 @@
         },
         "s5": {
           "title": "El conjunto entra en el proyecto",
-          "text": "El conjunto de datos se añade a la lista de elementos del proyecto. Ahora la página del proyecto puede mostrar una carpeta entera de una vez, en lugar de cientos de avistamientos sueltos."
+          "text": "El conjunto de datos se añade a la lista de elementos del proyecto. Ahora la página del proyecto puede mostrar un conjunto entero de una vez, en lugar de cientos de avistamientos sueltos."
         },
         "s6": {
           "title": "Se completa la declaración del proyecto",
@@ -2796,11 +2796,11 @@
       },
       "q2": {
         "question": "¿Puede una observación estar en dos conjuntos de datos?",
-        "answer": "No. Una observación lleva una sola dirección de conjunto de datos, así que está en una carpeta a la vez. Para moverla, la sacas del primer conjunto y luego la añades al segundo."
+        "answer": "No. Una observación lleva una sola dirección de conjunto de datos, así que está en un conjunto a la vez. Para moverla, la sacas del primer conjunto y luego la añades al segundo."
       },
       "q3": {
         "question": "¿Qué pasa con mis observaciones si borro un conjunto de datos?",
-        "answer": "Sobreviven. Al borrar un conjunto de datos primero se quita esa dirección de todas sus observaciones y se retira la carpeta de cualquier proyecto que la listara. Te quedas con los mismos avistamientos, simplemente desagrupados."
+        "answer": "Sobreviven. Al borrar un conjunto de datos primero se quita esa dirección de todas sus observaciones y se retira el conjunto de cualquier proyecto que lo listara. Te quedas con los mismos avistamientos, simplemente desagrupados."
       },
       "q4": {
         "question": "¿Puedo mover a una organización un proyecto que hice a título personal?",

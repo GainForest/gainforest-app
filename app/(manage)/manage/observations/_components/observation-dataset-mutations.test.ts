@@ -19,7 +19,7 @@ const FOLDER_B = "at://did:plc:x/app.gainforest.dwc.dataset/b";
 const DATASET = "app.gainforest.dwc.dataset";
 const OCCURRENCE = "app.gainforest.dwc.occurrence";
 
-/** Occurrence reads by default; folder reads carry a recordCount. */
+/** Occurrence reads by default; dataset reads carry a recordCount. */
 function stubRecords(occurrence: Record<string, unknown> = {}) {
   getRecord.mockImplementation((collection: string, rkey: string) => {
     if (collection === DATASET) {
@@ -59,7 +59,7 @@ describe("attachObservationsToDataset", () => {
     expect(countWrites()).toEqual([["a", 11]]);
   });
 
-  it("moves a sighting out of the folder it was in, and adjusts both counts", async () => {
+  it("moves a sighting out of the dataset it was in, and adjusts both counts", async () => {
     stubRecords({ datasetRef: FOLDER_B, datasetName: "Flowers" });
 
     const result = await attachObservationsToDataset({
@@ -70,12 +70,12 @@ describe("attachObservationsToDataset", () => {
 
     expect(result.attached).toEqual(["occ1"]);
     expect(result.movedFrom).toEqual({ [FOLDER_B]: ["occ1"] });
-    // The folder it left goes down; the one it joined goes up.
+    // The dataset it left goes down; the one it joined goes up.
     expect(countWrites()).toEqual([["b", 9], ["a", 11]]);
   });
 
-  it("reads the current folder off the record, not the caller's stale copy", async () => {
-    // Another tab already moved it into the target folder.
+  it("reads the current dataset off the record, not the caller's stale copy", async () => {
+    // Another tab already moved it into the target dataset.
     stubRecords({ datasetRef: FOLDER_A });
 
     const result = await attachObservationsToDataset({
@@ -88,7 +88,7 @@ describe("attachObservationsToDataset", () => {
     expect(putRecord).not.toHaveBeenCalled();
   });
 
-  it("leaves sightings already in the target folder alone", async () => {
+  it("leaves sightings already in the target dataset alone", async () => {
     const result = await attachObservationsToDataset({
       datasetUri: FOLDER_A,
       datasetName: "Backyard birds",
@@ -101,7 +101,7 @@ describe("attachObservationsToDataset", () => {
 });
 
 describe("removeObservationsFromDataset", () => {
-  it("clears the folder fields, keeps everything else, and counts down", async () => {
+  it("clears the dataset fields, keeps everything else, and counts down", async () => {
     stubRecords({ datasetRef: FOLDER_B, datasetName: "Flowers", projectRef: "at://did:plc:x/org.hypercerts.collection/p" });
 
     const result = await removeObservationsFromDataset({
@@ -112,12 +112,12 @@ describe("removeObservationsFromDataset", () => {
     const record = putRecord.mock.calls.find(([collection]) => collection === OCCURRENCE)![2] as Record<string, unknown>;
     expect(record.datasetRef).toBeUndefined();
     expect(record.datasetName).toBeUndefined();
-    // Taking a sighting out of a folder says nothing about its project or photo.
+    // Taking a sighting out of a dataset says nothing about its project or photo.
     expect(record).toMatchObject({ projectRef: "at://did:plc:x/org.hypercerts.collection/p", imageEvidence: { file: { ref: "bafy…" } } });
     expect(countWrites()).toEqual([["b", 9]]);
   });
 
-  it("does nothing for a sighting that is not in a folder", async () => {
+  it("does nothing for a sighting that is not in a dataset", async () => {
     const result = await removeObservationsFromDataset({ occurrences: [{ rkey: "occ1", datasetRef: null }] });
 
     expect(result.skipped).toEqual(["occ1"]);

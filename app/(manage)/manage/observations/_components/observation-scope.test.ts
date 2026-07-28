@@ -24,20 +24,20 @@ describe("projectScopeUris", () => {
 });
 
 describe("resolveObservationFilterUris", () => {
-  it("passes the project scope through when no folder is open", () => {
+  it("passes the project scope through when no dataset is open", () => {
     expect(resolveObservationFilterUris(null, null)).toBeNull();
     expect([...(resolveObservationFilterUris(new Set([A]), null) ?? [])]).toEqual([A]);
   });
 
-  it("filters by folder alone outside a project", () => {
+  it("filters by dataset alone outside a project", () => {
     expect([...(resolveObservationFilterUris(null, [A, B]) ?? [])]).toEqual([A, B]);
   });
 
-  it("shows only the project's share of a folder", () => {
+  it("shows only the project's share of a dataset", () => {
     expect([...(resolveObservationFilterUris(new Set([A, C]), [A, B]) ?? [])]).toEqual([A]);
   });
 
-  it("shows nothing when a folder holds none of the project's sightings", () => {
+  it("shows nothing when a dataset holds none of the project's sightings", () => {
     expect(resolveObservationFilterUris(new Set([C]), [A, B])?.size).toBe(0);
   });
 });

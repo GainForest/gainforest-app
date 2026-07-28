@@ -2632,7 +2632,7 @@
       },
       "dataset": {
         "name": "Dataset",
-        "plain": "A named folder for a batch of observations that belong together — usually one survey, one trip, one season.",
+        "plain": "A named group of observations that belong together — usually one survey, one trip, one season.",
         "detail": "\"March 2025 Danum Valley survey\" is a dataset. It stores a name, a description and a running count, and it is what other people download or cite when they use your work.",
         "hooks": "It does not list its members. Each observation points at it instead, so a dataset is simply every observation carrying its address."
       },
@@ -2675,7 +2675,7 @@
         },
         "dataset": {
           "name": "Dataset",
-          "desc": "The named folder. It never lists its observations; the observations carry its address in datasetRef, and the dataset only keeps a count."
+          "desc": "The named group. It never lists its observations; the observations carry its address in datasetRef, and the dataset only keeps a count."
         },
         "observation": {
           "name": "Observation",
@@ -2743,7 +2743,7 @@
         },
         "s5": {
           "title": "The dataset joins the project",
-          "text": "The dataset is added to the project's list of items. Now the project page can show a whole folder at once instead of hundreds of loose sightings."
+          "text": "The dataset is added to the project's list of items. Now the project page can show a whole dataset at once instead of hundreds of loose sightings."
         },
         "s6": {
           "title": "The project's claim fills in",
@@ -2796,11 +2796,11 @@
       },
       "q2": {
         "question": "Can one observation be in two datasets?",
-        "answer": "No. An observation carries a single dataset address, so it sits in one folder at a time. To move it, take it out of the first dataset and then add it to the second."
+        "answer": "No. An observation carries a single dataset address, so it sits in one dataset at a time. To move it, take it out of the first dataset and then add it to the second."
       },
       "q3": {
         "question": "What happens to my observations if I delete a dataset?",
-        "answer": "They survive. Deleting a dataset first clears the dataset address off every observation in it, and removes the folder from any project that listed it. You are left with the same sightings, simply ungrouped."
+        "answer": "They survive. Deleting a dataset first clears the dataset address off every observation in it, and removes the dataset from any project that listed it. You are left with the same sightings, simply ungrouped."
       },
       "q4": {
         "question": "Can I move a project I made personally into an organization?",

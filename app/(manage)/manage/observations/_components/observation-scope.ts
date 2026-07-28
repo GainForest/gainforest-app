@@ -17,8 +17,8 @@ export function projectScopeUris(
   return new Set(projectGroupUris ?? []);
 }
 
-/** Combines the project scope with an open dataset folder. Inside a project a
- *  folder can only ever show that project's share of it. */
+/** Combines the project scope with an open dataset. Inside a project a
+ *  dataset can only ever show that project's share of it. */
 export function resolveObservationFilterUris(
   projectUris: ReadonlySet<string> | null,
   datasetUris: readonly string[] | null | undefined,

@@ -2632,7 +2632,7 @@
       },
       "dataset": {
         "name": "Kumpulan data",
-        "plain": "Map bernama untuk sekumpulan pengamatan yang menjadi satu kesatuan: biasanya satu survei, satu perjalanan, satu musim.",
+        "plain": "Kelompok bernama untuk sekumpulan pengamatan yang menjadi satu kesatuan: biasanya satu survei, satu perjalanan, satu musim.",
         "detail": "«Survei Lembah Danum Maret 2025» adalah sebuah kumpulan data. Ia menyimpan nama, deskripsi, dan hitungan berjalan, dan inilah yang diunduh atau dikutip orang lain saat memakai karya Anda.",
         "hooks": "Ia tidak mendaftar anggotanya. Justru setiap pengamatan yang menunjuk kepadanya, jadi kumpulan data hanyalah semua pengamatan yang membawa alamatnya."
       },
@@ -2675,7 +2675,7 @@
         },
         "dataset": {
           "name": "Kumpulan data",
-          "desc": "Map bernama. Ia tidak pernah mendaftar pengamatannya; pengamatanlah yang membawa alamatnya di datasetRef, dan kumpulan data hanya menyimpan hitungan."
+          "desc": "Kelompok bernama. Ia tidak pernah mendaftar pengamatannya; pengamatanlah yang membawa alamatnya di datasetRef, dan kumpulan data hanya menyimpan hitungan."
         },
         "observation": {
           "name": "Pengamatan",
@@ -2743,7 +2743,7 @@
         },
         "s5": {
           "title": "Kumpulan data bergabung ke proyek",
-          "text": "Kumpulan data ditambahkan ke daftar isi proyek. Kini halaman proyek bisa menampilkan satu map penuh sekaligus, bukan ratusan penampakan yang berserak."
+          "text": "Kumpulan data ditambahkan ke daftar isi proyek. Kini halaman proyek bisa menampilkan satu kumpulan data penuh sekaligus, bukan ratusan penampakan yang berserak."
         },
         "s6": {
           "title": "Klaim proyek terisi",
@@ -2796,11 +2796,11 @@
       },
       "q2": {
         "question": "Bisakah satu pengamatan berada di dua kumpulan data?",
-        "answer": "Tidak. Pengamatan membawa satu alamat kumpulan data saja, jadi ia berada di satu map pada satu waktu. Untuk memindahkannya, keluarkan dulu dari kumpulan pertama lalu tambahkan ke kumpulan kedua."
+        "answer": "Tidak. Pengamatan membawa satu alamat kumpulan data saja, jadi ia berada di satu kumpulan data pada satu waktu. Untuk memindahkannya, keluarkan dulu dari kumpulan pertama lalu tambahkan ke kumpulan kedua."
       },
       "q3": {
         "question": "Apa yang terjadi pada pengamatan saya jika saya menghapus kumpulan data?",
-        "answer": "Pengamatan tetap selamat. Menghapus kumpulan data pertama-tama membersihkan alamat kumpulan data dari setiap pengamatan di dalamnya, lalu mencabut map itu dari proyek mana pun yang mendaftarnya. Anda tetap punya penampakan yang sama, hanya tidak lagi terkelompok."
+        "answer": "Pengamatan tetap selamat. Menghapus kumpulan data pertama-tama membersihkan alamat kumpulan data dari setiap pengamatan di dalamnya, lalu mencabut kumpulan data itu dari proyek mana pun yang mendaftarnya. Anda tetap punya penampakan yang sama, hanya tidak lagi terkelompok."
       },
       "q4": {
         "question": "Bisakah saya memindahkan proyek pribadi saya ke sebuah organisasi?",

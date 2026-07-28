@@ -2632,7 +2632,7 @@
       },
       "dataset": {
         "name": "Seti ya data",
-        "plain": "Folda yenye jina kwa kundi la uchunguzi unaokwenda pamoja: mara nyingi utafiti mmoja, safari moja, msimu mmoja.",
+        "plain": "Kundi lenye jina la uchunguzi unaokwenda pamoja: mara nyingi utafiti mmoja, safari moja, msimu mmoja.",
         "detail": "«Utafiti wa Bonde la Danum, Machi 2025» ni seti ya data. Inahifadhi jina, maelezo na hesabu inayoendelea, na ndiyo watu wengine wanapakua au kunukuu wanapotumia kazi yako.",
         "hooks": "Haiorodheshi wanachama wake. Badala yake kila uchunguzi ndio unaoielekeza, hivyo seti ya data ni kila uchunguzi unaobeba anwani yake."
       },
@@ -2675,7 +2675,7 @@
         },
         "dataset": {
           "name": "Seti ya data",
-          "desc": "Folda yenye jina. Haiorodheshi kamwe uchunguzi wake; uchunguzi ndio unaobeba anwani yake katika datasetRef, na seti hiyo inahifadhi hesabu tu."
+          "desc": "Kundi lenye jina. Haliorodheshi kamwe uchunguzi wake; uchunguzi ndio unaobeba anwani yake katika datasetRef, na seti hiyo inahifadhi hesabu tu."
         },
         "observation": {
           "name": "Uchunguzi",
@@ -2743,7 +2743,7 @@
         },
         "s5": {
           "title": "Seti ya data inajiunga na mradi",
-          "text": "Seti ya data inaongezwa kwenye orodha ya vipengele vya mradi. Sasa ukurasa wa mradi unaweza kuonyesha folda nzima kwa mara moja badala ya mamia ya matukio yaliyotawanyika."
+          "text": "Seti ya data inaongezwa kwenye orodha ya vipengele vya mradi. Sasa ukurasa wa mradi unaweza kuonyesha seti nzima kwa mara moja badala ya mamia ya matukio yaliyotawanyika."
         },
         "s6": {
           "title": "Dai la mradi linajazwa",
@@ -2796,11 +2796,11 @@
       },
       "q2": {
         "question": "Je, uchunguzi mmoja unaweza kuwa katika seti mbili za data?",
-        "answer": "Hapana. Uchunguzi unabeba anwani moja tu ya seti ya data, hivyo upo ndani ya folda moja kwa wakati mmoja. Ili kuuhamisha, uuondoe kwenye seti ya kwanza kisha uuongeze kwenye ya pili."
+        "answer": "Hapana. Uchunguzi unabeba anwani moja tu ya seti ya data, hivyo upo ndani ya seti moja kwa wakati mmoja. Ili kuuhamisha, uuondoe kwenye seti ya kwanza kisha uuongeze kwenye ya pili."
       },
       "q3": {
         "question": "Nini kitatokea kwa uchunguzi wangu nikifuta seti ya data?",
-        "answer": "Utabaki salama. Kufuta seti ya data kunaanza kwa kuondoa anwani ya seti hiyo kwenye kila uchunguzi ndani yake, na kuiondoa folda kwenye mradi wowote ulioiorodhesha. Unabaki na matukio yaleyale, ila hayajakusanywa tena."
+        "answer": "Utabaki salama. Kufuta seti ya data kunaanza kwa kuondoa anwani ya seti hiyo kwenye kila uchunguzi ndani yake, na kuiondoa seti hiyo kwenye mradi wowote ulioiorodhesha. Unabaki na matukio yaleyale, ila hayajakusanywa tena."
       },
       "q4": {
         "question": "Je, ninaweza kuhamishia shirika mradi niliouunda binafsi?",

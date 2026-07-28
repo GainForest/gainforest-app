@@ -93,13 +93,13 @@ export type AttachDatasetToProjectResult = AttachToProjectResult & {
  *
  * Both halves matter. The listing is the record-level relationship; the
  * per-observation stamp is what every count, gallery and filter reads, so
- * without it the folder would look attached while its sightings stayed
+ * without it the dataset would look attached while its sightings stayed
  * invisible to the project.
  *
  * A dataset lives in ONE project. Two projects could each list it in `items[]`,
- * but a sighting names a single project in `projectRef` — so a shared folder
+ * but a sighting names a single project in `projectRef` — so a shared dataset
  * would show up under both while its sightings counted for only the last one.
- * Filing therefore moves the folder: it is unlisted from its previous project.
+ * Filing therefore moves the dataset: it is unlisted from its previous project.
  */
 export async function attachDatasetToProject(
   input: {
@@ -122,10 +122,10 @@ export async function attachDatasetToProject(
     );
   } catch (error) {
     nested = false;
-    nestError = error instanceof Error ? error.message : "The folder could not be listed on the project.";
+    nestError = error instanceof Error ? error.message : "The dataset could not be listed on the project.";
   }
 
-  // Drop the folder from whatever project held it before, so the listing and
+  // Drop the dataset from whatever project held it before, so the listing and
   // the sightings never disagree about where it lives.
   const targetRkey = input.projectUri.split("/").pop();
   const staleParents = (input.parentRkeys ?? []).filter((rkey) => rkey !== targetRkey);

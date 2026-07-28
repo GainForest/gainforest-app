@@ -121,7 +121,7 @@ describe("attachObservationsToProject", () => {
 });
 
 describe("attachDatasetToProject", () => {
-  it("lists the folder on the project and files every sighting in it", async () => {
+  it("lists the dataset on the project and files every sighting in it", async () => {
     const result = await attachDatasetToProject({
       projectUri: PROJECT,
       datasetUri: "at://did:plc:x/app.gainforest.dwc.dataset/d1",
@@ -140,7 +140,7 @@ describe("attachDatasetToProject", () => {
     expect(result.attached).toEqual(["occ1", "occ2"]);
   });
 
-  it("still files the sightings when the folder could not be listed", async () => {
+  it("still files the sightings when the dataset could not be listed", async () => {
     // The per-sighting stamp is what every count and filter reads, so it must
     // not depend on the record-level listing succeeding.
     nestDatasetUnderProject.mockRejectedValue(new Error("swap failed"));
@@ -159,7 +159,7 @@ describe("attachDatasetToProject", () => {
 });
 
 describe("a dataset lives in one project", () => {
-  it("moves the folder out of the project that held it before", async () => {
+  it("moves the dataset out of the project that held it before", async () => {
     unnestDatasetFromProjects.mockResolvedValue({ unnestedFrom: ["old-project"], unnestErrors: [] });
 
     const result = await attachDatasetToProject({
@@ -178,7 +178,7 @@ describe("a dataset lives in one project", () => {
     expect(result.unnestedFrom).toEqual(["old-project"]);
   });
 
-  it("does not touch other projects when the folder has no previous home", async () => {
+  it("does not touch other projects when the dataset has no previous home", async () => {
     await attachDatasetToProject({
       projectUri: PROJECT,
       datasetUri: "at://did:plc:x/app.gainforest.dwc.dataset/d1",

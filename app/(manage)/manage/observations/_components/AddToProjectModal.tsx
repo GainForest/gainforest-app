@@ -19,13 +19,13 @@ import {
 export type AddToProjectTarget =
   /** Loose sightings picked in the list. */
   | { kind: "observations"; occurrences: ProjectAttachInput[] }
-  /** A whole dataset folder, listed on the project as a record too. */
+  /** A whole dataset, listed on the project as a record too. */
   | {
       kind: "dataset";
       datasetUri: string;
       datasetCid: string | null;
       name: string;
-      /** Projects currently listing the folder, so it can move rather than multiply. */
+      /** Projects currently listing the dataset, so it can move rather than multiply. */
       parentRkeys: string[];
       occurrences: ProjectAttachInput[];
     };
@@ -53,7 +53,7 @@ function toProjectOption(raw: unknown): ProjectOption | null {
 }
 
 /**
- * Files already-published sightings — or a whole folder of them — under a
+ * Files already-published sightings — or a whole dataset of them — under a
  * project. The counterpart to picking a project while adding: stewards collect
  * first and sort later, and until now nothing could be filed after the fact.
  */

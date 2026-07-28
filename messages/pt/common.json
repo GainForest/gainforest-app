@@ -2632,7 +2632,7 @@
       },
       "dataset": {
         "name": "Conjunto de dados",
-        "plain": "Uma pasta com nome para um lote de observações que andam juntas: normalmente um levantamento, uma viagem, uma estação.",
+        "plain": "Um grupo com nome de observações que andam juntas: normalmente um levantamento, uma viagem, uma estação.",
         "detail": "«Levantamento do vale de Danum, março de 2025» é um conjunto de dados. Guarda um nome, uma descrição e uma contagem, e é o que outras pessoas descarregam ou citam quando usam o seu trabalho.",
         "hooks": "Não lista os seus membros. São as observações que apontam para ele, por isso um conjunto de dados é simplesmente todas as observações que carregam o seu endereço."
       },
@@ -2675,7 +2675,7 @@
         },
         "dataset": {
           "name": "Conjunto de dados",
-          "desc": "A pasta com nome. Nunca lista as suas observações: são elas que carregam o seu endereço em datasetRef, e o conjunto guarda apenas uma contagem."
+          "desc": "O grupo com nome. Nunca lista as suas observações: são elas que carregam o seu endereço em datasetRef, e o conjunto guarda apenas uma contagem."
         },
         "observation": {
           "name": "Observação",
@@ -2743,7 +2743,7 @@
         },
         "s5": {
           "title": "O conjunto entra no projeto",
-          "text": "O conjunto de dados é acrescentado à lista de itens do projeto. Agora a página do projeto pode mostrar uma pasta inteira de uma vez, em vez de centenas de avistamentos soltos."
+          "text": "O conjunto de dados é acrescentado à lista de itens do projeto. Agora a página do projeto pode mostrar um conjunto inteiro de uma vez, em vez de centenas de avistamentos soltos."
         },
         "s6": {
           "title": "A declaração do projeto preenche-se",
@@ -2796,11 +2796,11 @@
       },
       "q2": {
         "question": "Uma observação pode estar em dois conjuntos de dados?",
-        "answer": "Não. Uma observação carrega um único endereço de conjunto de dados, por isso está numa pasta de cada vez. Para a mudar, tira-a do primeiro conjunto e acrescenta-a ao segundo."
+        "answer": "Não. Uma observação carrega um único endereço de conjunto de dados, por isso está num conjunto de cada vez. Para a mudar, tira-a do primeiro conjunto e acrescenta-a ao segundo."
       },
       "q3": {
         "question": "O que acontece às minhas observações se apagar um conjunto de dados?",
-        "answer": "Sobrevivem. Apagar um conjunto de dados começa por limpar esse endereço de todas as suas observações e retira a pasta de qualquer projeto que a listasse. Fica com os mesmos avistamentos, apenas desagrupados."
+        "answer": "Sobrevivem. Apagar um conjunto de dados começa por limpar esse endereço de todas as suas observações e retira o conjunto de qualquer projeto que o listasse. Fica com os mesmos avistamentos, apenas desagrupados."
       },
       "q4": {
         "question": "Posso mover para uma organização um projeto que fiz a título pessoal?",
