@@ -208,22 +208,147 @@ function InlineEditActions({
   isSaving,
   onSave,
   onCancel,
+  largeTargets = false,
 }: {
   isSaving: boolean;
   onSave: () => void;
   onCancel: () => void;
+  largeTargets?: boolean;
 }) {
   const t = useTranslations("upload.dashboardClient");
   return (
     <span className="mt-2 flex items-center gap-1.5">
-      <Button type="button" size="sm" onClick={onSave} disabled={isSaving}>
+      <Button type="button" size="sm" className={cn(largeTargets && "h-11")} onClick={onSave} disabled={isSaving}>
         {isSaving ? <Loader2Icon className="animate-spin" /> : <CheckIcon />}
         {t("actions.save")}
       </Button>
-      <Button type="button" size="sm" variant="ghost" onClick={onCancel} disabled={isSaving}>
+      <Button type="button" size="sm" variant="ghost" className={cn(largeTargets && "h-11")} onClick={onCancel} disabled={isSaving}>
         <XIcon /> {t("actions.cancel")}
       </Button>
     </span>
+  );
+}
+
+function EditableCompactHero({
+  account,
+  editState,
+  inlineField,
+  isSaving,
+  saveError,
+  onChange,
+  onEdit,
+  onSave,
+  onCancel,
+  onEditLogo,
+  editDisabledReason = null,
+}: {
+  account: AccountRouteData;
+  editState: HeroEditState;
+  inlineField: InlineField;
+  isSaving: boolean;
+  saveError: string | null;
+  onChange: (field: "displayName" | "description", value: string) => void;
+  onEdit: () => void;
+  onSave: () => void;
+  onCancel: () => void;
+  onEditLogo: () => void;
+  editDisabledReason?: string | null;
+}) {
+  const t = useTranslations("upload.dashboardClient");
+  const logoObjectUrl = useMemo(
+    () => (editState.logoFile ? URL.createObjectURL(editState.logoFile) : null),
+    [editState.logoFile],
+  );
+  useEffect(() => () => {
+    if (logoObjectUrl) URL.revokeObjectURL(logoObjectUrl);
+  }, [logoObjectUrl]);
+
+  const logoUrl = logoObjectUrl ?? account.avatarUrl;
+  const editing = inlineField === "profile";
+  const canEdit = !editDisabledReason;
+  const initial = (editState.displayName || account.displayName).charAt(0).toUpperCase();
+
+  return (
+    <section
+      data-account-compact-hero
+      data-account-compact-editor
+      className="rounded-2xl bg-muted/60 px-3 py-3 sm:px-4"
+    >
+      <div className="flex min-w-0 items-start gap-3">
+        <button
+          type="button"
+          onClick={canEdit ? onEditLogo : undefined}
+          disabled={!canEdit || isSaving}
+          title={editDisabledReason ?? undefined}
+          className="group/avatar relative size-11 shrink-0 overflow-hidden rounded-full bg-background ring-1 ring-border/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:cursor-not-allowed"
+          aria-label={logoUrl
+            ? account.kind === "organization" ? t("hero.changeLogo") : t("hero.changePhoto")
+            : account.kind === "organization" ? t("hero.addLogo") : t("hero.addPhoto")}
+        >
+          {logoUrl ? (
+            <Image src={logoUrl} alt="" fill unoptimized sizes="44px" className="object-cover" />
+          ) : (
+            <span className="grid size-full place-items-center text-sm font-semibold text-muted-foreground">
+              {initial}
+            </span>
+          )}
+          <span className="absolute inset-0 grid place-items-center bg-black/0 opacity-0 transition-all group-hover/avatar:bg-black/35 group-hover/avatar:opacity-100 group-focus-visible/avatar:bg-black/35 group-focus-visible/avatar:opacity-100">
+            <ImagePlusIcon className="size-4 text-white drop-shadow" aria-hidden />
+          </span>
+        </button>
+
+        {editing ? (
+          <div className="min-w-0 flex-1 space-y-2">
+            <h1 className="sr-only">{editState.displayName || account.displayName}</h1>
+            <input
+              type="text"
+              value={editState.displayName}
+              onChange={(event) => onChange("displayName", event.target.value)}
+              placeholder={account.kind === "organization" ? t("hero.organizationName") : t("hero.displayName")}
+              aria-label={account.kind === "organization" ? t("hero.organizationName") : t("hero.displayName")}
+              className="w-full border-b border-border/60 bg-transparent font-instrument text-xl font-light italic leading-tight text-foreground outline-none transition-colors placeholder:text-foreground/40 focus:border-primary"
+              autoFocus
+            />
+            <textarea
+              value={editState.description}
+              onChange={(event) => onChange("description", event.target.value)}
+              placeholder={t("hero.shortBioPlaceholder")}
+              aria-label={t("hero.shortBioPlaceholder")}
+              rows={2}
+              className="w-full resize-none border-b border-border/60 bg-transparent text-xs leading-5 text-muted-foreground outline-none transition-colors field-sizing-content placeholder:text-muted-foreground/60 focus:border-primary"
+            />
+            <InlineEditActions isSaving={isSaving} onSave={onSave} onCancel={onCancel} largeTargets />
+          </div>
+        ) : (
+          <div className="min-w-0 flex-1">
+            <h1 className="truncate font-instrument text-xl font-light italic leading-tight text-foreground">
+              {editState.displayName || account.displayName}
+            </h1>
+            {editState.description ? (
+              <p className="mt-0.5 line-clamp-1 text-xs text-muted-foreground">
+                {editState.description}
+              </p>
+            ) : null}
+          </div>
+        )}
+
+        {!editing ? (
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon-sm"
+            onClick={onEdit}
+            disabled={!canEdit || isSaving}
+            title={editDisabledReason ?? undefined}
+            aria-label={t("hero.editProfileAria")}
+            className="size-11 shrink-0"
+          >
+            <PencilIcon />
+          </Button>
+        ) : null}
+      </div>
+      {saveError ? <p className="mt-2 text-xs text-destructive">{saveError}</p> : null}
+    </section>
   );
 }
 
@@ -318,13 +443,11 @@ function EditableHero({
   onEditSocials,
   editDisabledReason = null,
   memberships,
-  headingLevel: NameHeading,
 }: {
   account: AccountRouteData;
   settingsHref: string;
   viewPublicHref: string | null;
   memberships: AccountOrganization[];
-  headingLevel: "h1" | "h2";
   editState: HeroEditState;
   inlineField: InlineField;
   isSaving: boolean;
@@ -470,9 +593,9 @@ function EditableHero({
           ) : (
             <>
               <div className="flex items-start gap-2">
-                <NameHeading className="font-instrument text-3xl font-light italic leading-[1.1] tracking-[-0.02em] text-foreground md:text-4xl">
+                <h1 className="font-instrument text-3xl font-light italic leading-[1.1] tracking-[-0.02em] text-foreground md:text-4xl">
                   {editState.displayName || account.displayName}
-                </NameHeading>
+                </h1>
                 {canEdit ? (
                   <Button type="button" variant="ghost" size="icon-sm" onClick={() => onEditField("profile")} aria-label={t("hero.editProfileAria")}>
                     <PencilIcon />
@@ -614,7 +737,7 @@ export function EditableAccountHeader({
   viewPublicHref,
   showAbout = true,
   memberships = [],
-  headingLevel = "h1",
+  variant = "full",
 }: {
   account: AccountRouteData;
   /** When editing an org repo, the group DID writes are routed to. */
@@ -632,8 +755,8 @@ export function EditableAccountHeader({
    * instead, so it passes false to avoid a duplicate.
    */
   showAbout?: boolean;
-  /** Semantic heading used when this editor is embedded below a page title. */
-  headingLevel?: "h1" | "h2";
+  /** Compact identity editor for account tabs; full editor for manage surfaces. */
+  variant?: "full" | "compact";
 }) {
   const router = useRouter();
   const modal = useModal();
@@ -901,6 +1024,27 @@ export function EditableAccountHeader({
     <SocialLinksEditorModal current={editSocials} onConfirm={(socials) => void saveChanges({ socials })} />,
   );
 
+  if (variant === "compact") {
+    return (
+      <EditableCompactHero
+        account={account}
+        editState={editState}
+        inlineField={inlineField}
+        isSaving={isSaving}
+        saveError={saveError}
+        onChange={(field, value) => handleChange(field, value)}
+        onEdit={() => {
+          setSaveError(null);
+          setInlineField("profile");
+        }}
+        onSave={() => void saveChanges()}
+        onCancel={resetState}
+        onEditLogo={openLogoModal}
+        editDisabledReason={profileEditPermission.reason}
+      />
+    );
+  }
+
   return (
     <div className="space-y-6">
       <EditableHero
@@ -908,7 +1052,6 @@ export function EditableAccountHeader({
         settingsHref={settingsHref}
         viewPublicHref={viewPublicHref}
         memberships={memberships}
-        headingLevel={headingLevel}
         editState={editState}
         inlineField={inlineField}
         isSaving={isSaving}

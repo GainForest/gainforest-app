@@ -44,6 +44,7 @@ function DialogPlaceholder({
   children,
   dialogWidth,
   fullscreen = false,
+  role = "dialog",
   ...props
 }: React.ComponentProps<typeof DialogPrimitive.Content> & {
   showCloseButton?: boolean;
@@ -60,6 +61,8 @@ function DialogPlaceholder({
       <DialogOverlay />
       <DialogPrimitive.Content
         data-slot="dialog-content"
+        role={role}
+        aria-modal="true"
         className={cn(
           "bg-background data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 fixed top-[50%] left-[50%] z-[130] grid w-[calc(100%-1.5rem)] translate-x-[-50%] translate-y-[-50%] gap-4 rounded-4xl border p-4 shadow-lg duration-200 transition-[max-width] motion-reduce:animate-none motion-reduce:transition-none sm:w-full sm:p-5",
           // Keep centered dialogs inside the dynamic viewport with the same

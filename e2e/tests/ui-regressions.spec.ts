@@ -41,14 +41,15 @@ test("account headers stay compact while Overview owns profile details", async (
 
   await page.goto(`${accountPath}/observations`);
   await expect(page.locator("[data-account-compact-hero]")).toBeVisible();
-  await expect(page.locator("[data-account-overview-profile]")).toHaveCount(0);
+  await expect(page.locator("[data-account-overview-details]")).toHaveCount(0);
   await expect(page.getByRole("button", { name: /(?:show|hide) profile/i })).toHaveCount(0);
 
   await page.goto(accountPath);
   await expect(page.locator("[data-account-compact-hero]")).toBeVisible();
-  const profileDetails = page.locator("[data-account-overview-profile]");
+  const profileDetails = page.locator("[data-account-overview-details]");
   await expect(profileDetails).toBeVisible();
   await expect(profileDetails.getByText(/\d+ followers/)).toBeVisible();
+  await expect(profileDetails.getByRole("link", { name: /beesandtreesug\.org/i })).toBeVisible();
   await expect(page.getByRole("button", { name: /(?:show|hide) profile/i })).toHaveCount(0);
 });
 

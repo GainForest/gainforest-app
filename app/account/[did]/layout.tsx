@@ -1,6 +1,9 @@
 import type { Metadata } from "next";
 import { fetchAuthSession } from "@/app/_lib/auth-server";
 import { resolveAccountManageAccess } from "@/app/_lib/manage-server";
+import { canEditGroupProfile } from "@/app/(manage)/manage/_lib/cgs-permissions";
+import type { CgsRole } from "@/app/(manage)/manage/_lib/cgs";
+import { EditableAccountHeader } from "@/app/(manage)/manage/_components/EditableAccountHeader";
 import { fetchHiddenAccountDids, fetchRecognitionBadgesForDid } from "@/app/_lib/indexer";
 import { fetchEndorsementsGivenCount } from "@/app/_lib/endorsements-given";
 import { isManualRecognitionBadgeKey } from "@/app/_lib/recognition-badges";
@@ -11,7 +14,7 @@ import { AccountChrome } from "../_components/AccountChrome";
 import { AccountCompactHero } from "../_components/AccountCompactHero";
 import { AccountTabBar } from "../_components/AccountTabBar";
 import { StewardTools } from "../_components/StewardTools";
-import { getAccountRouteData, readAccountRouteParams, readOptionalAccountRouteParams, type AccountRouteData } from "../_lib/account-route";
+import { accountSettingsPath, getAccountRouteData, readAccountRouteParams, readOptionalAccountRouteParams, type AccountRouteData } from "../_lib/account-route";
 
 function absoluteUrlOrNull(value: string | null | undefined): string | null {
   if (!value) return null;
@@ -119,11 +122,23 @@ export default async function AccountLayout({
     getRequestOrigin(),
   ]);
 
-  // Management access still gates private account tabs. Profile metadata and
-  // its role-gated editor now live inside Overview rather than the shared
-  // account header.
+  // Management access gates private account tabs and the compact identity
+  // editor. Personal owners and eligible group roles can edit name, bio, and
+  // avatar directly in the shared header; everyone else sees it read-only.
   const access = await resolveAccountManageAccess(account.urlIdentifier).catch(() => null);
   const target = access?.status === "allowed" ? access.target : null;
+  const groupRole: CgsRole | undefined = target?.kind === "group"
+    ? target.role === "owner"
+      ? "owner"
+      : target.role === "admin"
+        ? "admin"
+        : "member"
+    : undefined;
+  const canEditProfile = target
+    ? target.kind === "group"
+      ? canEditGroupProfile({ kind: "group", role: groupRole }).allowed
+      : true
+    : false;
   const canManage = Boolean(target);
 
   // GainForest stewards (any group member) can hide an account as a test
@@ -134,8 +149,8 @@ export default async function AccountLayout({
     ? await fetchHiddenAccountDids().then((dids) => dids.has(account.did)).catch(() => false)
     : null;
   // Manually awarded recognition badges seed the moderator control's initial
-  // state; the public "Awards" row in the hero fetches its own data client-side
-  // (AccountAwards), so this read only runs for moderators.
+  // state; the public Awards row in Overview fetches its own data client-side,
+  // so this read only runs for moderators.
   const awardedManualRecognition = moderator?.isModerator
     ? await fetchRecognitionBadgesForDid(account.did)
         .then((keys) => [...keys].filter(isManualRecognitionBadgeKey))
@@ -170,7 +185,19 @@ export default async function AccountLayout({
                 initialAwarded={awardedManualRecognition}
               />
             ) : null}
-            <AccountCompactHero account={account} />
+            {canEditProfile && target ? (
+              <EditableAccountHeader
+                account={account}
+                writeRepoDid={target.kind === "group" ? target.did : undefined}
+                groupRole={groupRole}
+                settingsHref={accountSettingsPath(account.urlIdentifier)}
+                viewPublicHref={null}
+                showAbout={false}
+                variant="compact"
+              />
+            ) : (
+              <AccountCompactHero account={account} />
+            )}
             <AccountTabBar
               did={account.urlIdentifier}
               accountKind={account.kind}

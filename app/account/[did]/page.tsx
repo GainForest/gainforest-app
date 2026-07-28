@@ -1,8 +1,8 @@
 import { Suspense } from "react";
 import { CanonicalRedirect } from "../_components/CanonicalRedirect";
 import { AccountHomeTabContent, AccountOverviewTabContent } from "../_components/AccountTabContent";
-import { AccountOverviewProfile } from "../_components/AccountOverviewProfile";
-import { AccountHeroSkeleton } from "../_components/AccountHeroSkeleton";
+import { AccountOverviewDetailsSection } from "../_components/AccountOverviewDetailsSection";
+import { AccountOverviewDetailsSkeleton } from "../_components/AccountHeroSkeleton";
 import { accountPath, getAccountRouteData, readAccountRouteParams } from "../_lib/account-route";
 
 export default async function AccountByDidPage({ params }: { params: Promise<{ did: string }> }) {
@@ -15,8 +15,8 @@ export default async function AccountByDidPage({ params }: { params: Promise<{ d
 
   return (
     <>
-      <Suspense fallback={<AccountHeroSkeleton />}>
-        <AccountOverviewProfile account={account} />
+      <Suspense fallback={<AccountOverviewDetailsSkeleton />}>
+        <AccountOverviewDetailsSection account={account} />
       </Suspense>
       {account.kind === "user" ? (
         <AccountOverviewTabContent account={account} did={did} />

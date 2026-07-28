@@ -141,6 +141,7 @@ function DrawerPlaceholder({
   className,
   children,
   dismissible = true,
+  role = "dialog",
   ...props
 }: React.ComponentProps<typeof DrawerPrimitive.Content> & {
   dismissible?: boolean;
@@ -155,6 +156,8 @@ function DrawerPlaceholder({
       <DrawerPrimitive.Content
         ref={contentRef}
         data-slot="drawer-content"
+        role={role}
+        aria-modal="true"
         className={cn(
           "group/drawer-content bg-background fixed z-[130] flex h-auto min-h-0 min-w-0 flex-col overflow-hidden motion-reduce:animate-none motion-reduce:transition-none",
           "data-[vaul-drawer-direction=top]:inset-x-0 data-[vaul-drawer-direction=top]:top-0 data-[vaul-drawer-direction=top]:mb-24 data-[vaul-drawer-direction=top]:max-h-[80dvh] data-[vaul-drawer-direction=top]:rounded-b-3xl data-[vaul-drawer-direction=top]:border-b",
