@@ -35,6 +35,23 @@ test("shared desktop dialogs keep a viewport gutter and restore focus", async ({
   await expect(trigger).toBeFocused();
 });
 
+test("account headers stay compact while Overview owns profile details", async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 900 });
+  const accountPath = "/account/t0fl10.certified.one";
+
+  await page.goto(`${accountPath}/observations`);
+  await expect(page.locator("[data-account-compact-hero]")).toBeVisible();
+  await expect(page.locator("[data-account-overview-profile]")).toHaveCount(0);
+  await expect(page.getByRole("button", { name: /(?:show|hide) profile/i })).toHaveCount(0);
+
+  await page.goto(accountPath);
+  await expect(page.locator("[data-account-compact-hero]")).toBeVisible();
+  const profileDetails = page.locator("[data-account-overview-profile]");
+  await expect(profileDetails).toBeVisible();
+  await expect(profileDetails.getByText(/\d+ followers/)).toBeVisible();
+  await expect(page.getByRole("button", { name: /(?:show|hide) profile/i })).toHaveCount(0);
+});
+
 test("BioBlitz stays within narrow viewports and keeps registration concise", async ({ page }) => {
   for (const width of [320, 390]) {
     await page.setViewportSize({ width, height: 844 });
@@ -48,6 +65,7 @@ test("BioBlitz stays within narrow viewports and keeps registration concise", as
     expect(dimensions.scrollWidth).toBeLessThanOrEqual(dimensions.clientWidth);
   }
 
+  await expect(page.getByRole("heading", { name: "Your data does more than win prizes" })).toBeVisible();
   await expect(page.getByRole("link", { name: "BioBlitz Terms" })).toBeVisible();
   await expect(page.getByRole("link", { name: "Privacy Notice" })).toBeVisible();
   await expect(page.getByText("Register so we can track your entries and send your prize if you win.", { exact: true })).toHaveCount(0);

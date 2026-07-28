@@ -64,10 +64,12 @@ export function AccountHero({
   account,
   editHref = null,
   memberships = [],
+  headingLevel: NameHeading = "h1",
 }: {
   account: AccountRouteData;
   editHref?: string | null;
   memberships?: AccountOrganization[];
+  headingLevel?: "h1" | "h2";
 }) {
   const [copied, setCopied] = useState(false);
   const [detailsOpen, setDetailsOpen] = useState(false);
@@ -257,9 +259,9 @@ export function AccountHero({
             )}
           </div>
           <div className="min-w-0 max-w-2xl md:flex-1 md:pb-1">
-            <h1 className="font-instrument text-3xl font-light italic leading-[1.1] tracking-[-0.02em] text-foreground md:text-4xl">
+            <NameHeading className="font-instrument text-3xl font-light italic leading-[1.1] tracking-[-0.02em] text-foreground md:text-4xl">
               {account.displayName}
-            </h1>
+            </NameHeading>
             <p className="mt-1.5 line-clamp-2 text-sm leading-relaxed text-muted-foreground">
               {account.description ?? ""}
             </p>

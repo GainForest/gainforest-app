@@ -494,10 +494,6 @@
     "wallet": "Dompet",
     "more": "Lainnya"
   },
-  "accountHero": {
-    "showProfile": "Tampilkan profil",
-    "hideProfile": "Sembunyikan profil"
-  },
   "equipment": {
     "metadataTitle": "Peralatan — {name}",
     "personalIntro": "Peralatan lapangan yang terdaftar di profil ini — setiap unit dengan pemegang, lokasi, dan statusnya saat ini.",

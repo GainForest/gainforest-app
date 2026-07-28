@@ -1,5 +1,20 @@
 import { Skeleton } from "@/components/ui/skeleton";
 
+/** Loading placeholder for the compact identity header shared by every tab. */
+export function AccountCompactHeroSkeleton() {
+  return (
+    <section className="rounded-2xl bg-muted/60 px-3 py-3 sm:px-4">
+      <div className="flex min-w-0 items-center gap-3">
+        <Skeleton className="size-11 shrink-0 rounded-full" />
+        <div className="min-w-0 flex-1 space-y-1.5">
+          <Skeleton className="h-5 w-44 max-w-full" />
+          <Skeleton className="h-3 w-72 max-w-full" />
+        </div>
+      </div>
+    </section>
+  );
+}
+
 /**
  * Loading placeholder that mirrors the card-style account hero shared by
  * {@link AccountHero} and {@link EditableHero}: a cover band, an overlapping

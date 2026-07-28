@@ -318,11 +318,13 @@ function EditableHero({
   onEditSocials,
   editDisabledReason = null,
   memberships,
+  headingLevel: NameHeading,
 }: {
   account: AccountRouteData;
   settingsHref: string;
   viewPublicHref: string | null;
   memberships: AccountOrganization[];
+  headingLevel: "h1" | "h2";
   editState: HeroEditState;
   inlineField: InlineField;
   isSaving: boolean;
@@ -468,9 +470,9 @@ function EditableHero({
           ) : (
             <>
               <div className="flex items-start gap-2">
-                <h1 className="font-instrument text-3xl font-light italic leading-[1.1] tracking-[-0.02em] text-foreground md:text-4xl">
+                <NameHeading className="font-instrument text-3xl font-light italic leading-[1.1] tracking-[-0.02em] text-foreground md:text-4xl">
                   {editState.displayName || account.displayName}
-                </h1>
+                </NameHeading>
                 {canEdit ? (
                   <Button type="button" variant="ghost" size="icon-sm" onClick={() => onEditField("profile")} aria-label={t("hero.editProfileAria")}>
                     <PencilIcon />
@@ -612,6 +614,7 @@ export function EditableAccountHeader({
   viewPublicHref,
   showAbout = true,
   memberships = [],
+  headingLevel = "h1",
 }: {
   account: AccountRouteData;
   /** When editing an org repo, the group DID writes are routed to. */
@@ -629,6 +632,8 @@ export function EditableAccountHeader({
    * instead, so it passes false to avoid a duplicate.
    */
   showAbout?: boolean;
+  /** Semantic heading used when this editor is embedded below a page title. */
+  headingLevel?: "h1" | "h2";
 }) {
   const router = useRouter();
   const modal = useModal();
@@ -903,6 +908,7 @@ export function EditableAccountHeader({
         settingsHref={settingsHref}
         viewPublicHref={viewPublicHref}
         memberships={memberships}
+        headingLevel={headingLevel}
         editState={editState}
         inlineField={inlineField}
         isSaving={isSaving}

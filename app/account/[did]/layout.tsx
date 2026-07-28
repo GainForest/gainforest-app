@@ -1,9 +1,6 @@
 import type { Metadata } from "next";
 import { fetchAuthSession } from "@/app/_lib/auth-server";
 import { resolveAccountManageAccess } from "@/app/_lib/manage-server";
-import { canEditGroupProfile } from "@/app/(manage)/manage/_lib/cgs-permissions";
-import type { CgsRole } from "@/app/(manage)/manage/_lib/cgs";
-import { EditableAccountHeader } from "@/app/(manage)/manage/_components/EditableAccountHeader";
 import { fetchHiddenAccountDids, fetchRecognitionBadgesForDid } from "@/app/_lib/indexer";
 import { fetchEndorsementsGivenCount } from "@/app/_lib/endorsements-given";
 import { isManualRecognitionBadgeKey } from "@/app/_lib/recognition-badges";
@@ -11,12 +8,10 @@ import { getGainForestModeratorAccess } from "@/app/internal/badges/_lib/access"
 import { localizedAlternates } from "@/app/_lib/seo-metadata";
 import { getRequestOrigin } from "@/app/_lib/request-origin";
 import { AccountChrome } from "../_components/AccountChrome";
-import { AccountHero } from "../_components/AccountHero";
-import { AccountHeroDisclosure } from "../_components/AccountHeroDisclosure";
+import { AccountCompactHero } from "../_components/AccountCompactHero";
 import { AccountTabBar } from "../_components/AccountTabBar";
 import { StewardTools } from "../_components/StewardTools";
-import { loadAccountMemberships } from "../_components/AccountTabContent";
-import { accountSettingsPath, getAccountRouteData, readAccountRouteParams, readOptionalAccountRouteParams, type AccountRouteData } from "../_lib/account-route";
+import { getAccountRouteData, readAccountRouteParams, readOptionalAccountRouteParams, type AccountRouteData } from "../_lib/account-route";
 
 function absoluteUrlOrNull(value: string | null | undefined): string | null {
   if (!value) return null;
@@ -124,25 +119,12 @@ export default async function AccountLayout({
     getRequestOrigin(),
   ]);
 
-  // Owners (and org admins) edit their profile in place; everyone else — including
-  // plain org members, who can still manage records through the tabs — sees the
-  // read-only public hero.
+  // Management access still gates private account tabs. Profile metadata and
+  // its role-gated editor now live inside Overview rather than the shared
+  // account header.
   const access = await resolveAccountManageAccess(account.urlIdentifier).catch(() => null);
   const target = access?.status === "allowed" ? access.target : null;
-  const groupRole: CgsRole | undefined = target?.kind === "group"
-    ? target.role === "owner" ? "owner" : target.role === "admin" ? "admin" : "member"
-    : undefined;
-  const canEditProfile = target
-    ? target.kind === "group"
-      ? canEditGroupProfile({ kind: "group", role: groupRole }).allowed
-      : true
-    : false;
   const canManage = Boolean(target);
-
-  // The organizations you belong to are private to you: the group service only
-  // lets us read your own memberships, so they surface as a "Member of…" row in
-  // the hero of your own profile (empty everywhere else).
-  const memberships = await loadAccountMemberships(account, session);
 
   // GainForest stewards (any group member) can hide an account as a test
   // account. Only resolve the current flag state for actual moderators so the
@@ -188,21 +170,7 @@ export default async function AccountLayout({
                 initialAwarded={awardedManualRecognition}
               />
             ) : null}
-            <AccountHeroDisclosure account={account}>
-              {canEditProfile && target ? (
-                <EditableAccountHeader
-                  account={account}
-                  writeRepoDid={target.kind === "group" ? target.did : undefined}
-                  groupRole={groupRole}
-                  settingsHref={accountSettingsPath(account.urlIdentifier)}
-                  viewPublicHref={null}
-                  showAbout={false}
-                  memberships={memberships}
-                />
-              ) : (
-                <AccountHero account={account} memberships={memberships} />
-              )}
-            </AccountHeroDisclosure>
+            <AccountCompactHero account={account} />
             <AccountTabBar
               did={account.urlIdentifier}
               accountKind={account.kind}
