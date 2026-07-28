@@ -1010,10 +1010,10 @@
       "someWillMove": "{count, plural, one {# observación saldrá de su conjunto actual.} other {# observaciones saldrán de su conjunto actual.}}",
       "someAlreadyHere": "{count, plural, one {# observación ya está en este conjunto y se dejará como está.} other {# observaciones ya están en este conjunto y se dejarán como están.}}",
       "allAlreadyHere": "Estas observaciones ya están en este conjunto.",
-      "removeAction": "Sacar del conjunto",
-      "removeTitle": "{count, plural, one {¿Sacar # observación de su conjunto?} other {¿Sacar # observaciones de su conjunto?}}",
+      "removeAction": "Quitar del conjunto",
+      "removeTitle": "{count, plural, one {¿Quitar # observación de su conjunto?} other {¿Quitar # observaciones de su conjunto?}}",
       "removeDescription": "Se quedan en tus observaciones y conservan sus fotos, su proyecto y su lugar: solo dejan de pertenecer al conjunto.",
-      "removeConfirm": "Sacar"
+      "removeConfirm": "Quitar"
     },
     "datasetDeleteAria": "Eliminar el conjunto {name}",
     "datasetDeleteTitle": "¿Eliminar el conjunto “{name}”?",

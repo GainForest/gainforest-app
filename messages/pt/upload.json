@@ -1010,10 +1010,10 @@
       "someWillMove": "{count, plural, one {# registro sairá do conjunto atual.} other {# registros sairão do conjunto atual.}}",
       "someAlreadyHere": "{count, plural, one {# registro já está neste conjunto e será mantido como está.} other {# registros já estão neste conjunto e serão mantidos como estão.}}",
       "allAlreadyHere": "Estes registros já estão neste conjunto.",
-      "removeAction": "Tirar do conjunto",
-      "removeTitle": "{count, plural, one {Tirar # registro do conjunto?} other {Tirar # registros do conjunto?}}",
+      "removeAction": "Remover do conjunto",
+      "removeTitle": "{count, plural, one {Remover # registro do conjunto?} other {Remover # registros do conjunto?}}",
       "removeDescription": "Eles continuam nos seus registros e mantêm fotos, projeto e local — apenas deixam de pertencer ao conjunto.",
-      "removeConfirm": "Tirar"
+      "removeConfirm": "Remover"
     },
     "datasetDeleteAria": "Excluir o conjunto {name}",
     "datasetDeleteTitle": "Excluir o conjunto “{name}”?",
