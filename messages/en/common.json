@@ -3199,7 +3199,8 @@
       "playError": "Couldn't play this recording in your browser.",
       "datesTitle": "Days",
       "allDatesChip": "All days",
-      "averageNote": "Averaged across {count} days — each time on the dial is the mean of that slot's recordings."
+      "averageNote": "Averaged across {count} recordings at each time — the dial shows a typical day, not the loudest one.",
+      "averageNoteRange": "Averaged across {min}–{max} recordings at each time — the dial shows a typical day, not the loudest one."
     },
     "zoom": {
       "rangeAllDay": "Whole day · 00:00 – 24:00",

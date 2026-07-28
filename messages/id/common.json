@@ -3199,7 +3199,8 @@
       "playError": "Rekaman ini tidak dapat diputar di peramban Anda.",
       "datesTitle": "Hari",
       "allDatesChip": "Semua hari",
-      "averageNote": "Rata-rata dari {count} hari — setiap waktu pada dial adalah rerata rekaman pada jam tersebut."
+      "averageNote": "Rata-rata dari {count} rekaman pada tiap waktu — dial menampilkan hari yang khas, bukan yang paling bising.",
+      "averageNoteRange": "Rata-rata dari {min}–{max} rekaman pada tiap waktu — dial menampilkan hari yang khas, bukan yang paling bising."
     },
     "zoom": {
       "rangeAllDay": "Sepanjang hari · 00:00 – 24:00",

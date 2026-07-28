@@ -487,9 +487,26 @@ export function SoundscapeClient({ sessionDid }: { sessionDid: string | null }) 
     [player, points, visibleBands],
   );
 
-  /* How many days the dial is folding together. Above one, every point is a
-     mean of several recordings, and the chart says so. */
-  const averagedDayCount = selectedDate === ALL_DATES ? dateKeys.length : 1;
+  /* How many recordings sit behind each point. Over a multi-week deployment
+     coverage is rarely even — a battery dies, a card fills, a schedule changes
+     — so the note reports the real spread rather than claiming every time of
+     day is backed by the full run of days. */
+  const averagedCounts = useMemo(() => {
+    if (points.length === 0) return null;
+    let min = Infinity;
+    let max = 0;
+    for (const point of points) {
+      if (point.count < min) min = point.count;
+      if (point.count > max) max = point.count;
+    }
+    return max > 1 ? { min, max } : null;
+  }, [points]);
+
+  const averageNote = averagedCounts
+    ? averagedCounts.min === averagedCounts.max
+      ? t("chart.averageNote", { count: averagedCounts.max })
+      : t("chart.averageNoteRange", { min: averagedCounts.min, max: averagedCounts.max })
+    : null;
 
   const chartDateLabel =
     selectedDate !== ALL_DATES
@@ -776,11 +793,7 @@ export function SoundscapeClient({ sessionDid }: { sessionDid: string | null }) 
             <h2 className="font-medium text-foreground">
               {chartDateLabel ? t("chart.title", { date: chartDateLabel }) : t("chart.title", { date: t("chart.allDates") })}
             </h2>
-            {averagedDayCount > 1 ? (
-              <p className="mt-0.5 text-xs text-muted-foreground">
-                {t("chart.averageNote", { count: averagedDayCount })}
-              </p>
-            ) : null}
+            {averageNote ? <p className="mt-0.5 text-xs text-muted-foreground">{averageNote}</p> : null}
             <p className="mt-0.5 text-xs text-muted-foreground">
               {canPlayFromDial ? t("chart.hoverHint") : t("chart.hoverHintAllDates")}
             </p>
@@ -926,7 +939,7 @@ export function SoundscapeClient({ sessionDid }: { sessionDid: string | null }) 
                   visibleBands={visibleBands}
                   bandLabels={bandLabels}
                   title={t("chart.title", { date: chartDateLabel || t("chart.allDates") })}
-                  subtitle={averagedDayCount > 1 ? t("chart.averageNote", { count: averagedDayCount }) : undefined}
+                  subtitle={averageNote ?? undefined}
                   radialLabel={t("chart.radialLabel")}
                   timeLabel={t("chart.timeLabel")}
                   legendTitle={t("chart.legendTitle")}
