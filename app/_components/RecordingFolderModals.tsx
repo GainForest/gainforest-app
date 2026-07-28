@@ -14,13 +14,18 @@
 
 import { useState } from "react";
 import { useTranslations } from "next-intl";
-import { Loader2Icon, PencilIcon, Trash2Icon, TriangleAlertIcon } from "lucide-react";
+import { FolderInputIcon, Loader2Icon, PencilIcon, Trash2Icon, TriangleAlertIcon } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ModalContent, ModalDescription, ModalFooter, ModalHeader, ModalTitle } from "@/components/ui/modal/modal";
 import { useModal } from "@/components/ui/modal/context";
+import {
+  UploadFolderPicker,
+  type UploadFolderOptionItem,
+} from "@/app/audiomoth/_components/UploadFolderPicker";
+import { activeUploadFolderMode, type UploadFolderMode } from "@/app/_lib/audiomoth/upload-folder";
 
 const FOLDER_NAME_MAX = 120;
 
@@ -164,6 +169,106 @@ export function DeleteFolderModal({
         <Button type="button" variant="destructive" disabled={pending} onClick={() => void confirm()}>
           {pending ? <Loader2Icon className="size-4 animate-spin" /> : <Trash2Icon className="size-4" />}
           {pending && progress ? t("deleteProgress", { done: progress.done, total: progress.total }) : t("deleteAction")}
+        </Button>
+      </ModalFooter>
+    </ModalContent>
+  );
+}
+
+/** Where a selection of recordings should end up. */
+export type MoveRecordingsTarget =
+  | { kind: "existing"; uri: string }
+  | { kind: "new"; name: string };
+
+/**
+ * Move the selected recordings into another folder.
+ *
+ * Recordings are filed by the folder that happened to be picked while the SD
+ * card uploaded, which is often wrong afterwards: two sites on one card, or a
+ * card emptied into the previous site's folder. The destination is chosen with
+ * the very same picker the uploader uses — an existing folder or a new one —
+ * so "where do these recordings go?" is answered the same way in both places.
+ */
+export function MoveRecordingsModal({
+  count,
+  folders,
+  counts,
+  onMove,
+}: {
+  /** How many recordings are being moved. */
+  count: number;
+  /** The account's folders; null while they are still loading. */
+  folders: UploadFolderOptionItem[] | null;
+  /** Recordings already in each folder, keyed by folder AT-URI. */
+  counts: Map<string, number>;
+  onMove: (target: MoveRecordingsTarget, onProgress: (done: number, total: number) => void) => Promise<void>;
+}) {
+  const t = useTranslations("common.recordingFolders");
+  const close = useCloseModal();
+  const [mode, setMode] = useState<UploadFolderMode>("existing");
+  const [selectedUri, setSelectedUri] = useState("");
+  const [query, setQuery] = useState("");
+  const [newName, setNewName] = useState("");
+  const [pending, setPending] = useState(false);
+  const [progress, setProgress] = useState<{ done: number; total: number } | null>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  const activeMode = activeUploadFolderMode(mode, folders?.length ?? 0);
+  const target: MoveRecordingsTarget | null =
+    activeMode === "existing"
+      ? selectedUri
+        ? { kind: "existing", uri: selectedUri }
+        : null
+      : newName.trim()
+        ? { kind: "new", name: newName.trim() }
+        : null;
+
+  const move = async () => {
+    if (!target) return;
+    setPending(true);
+    setError(null);
+    try {
+      await onMove(target, (done, total) => setProgress({ done, total }));
+      await close();
+    } catch (moveError) {
+      setError(moveError instanceof Error && moveError.message ? moveError.message : t("moveFailed"));
+      setPending(false);
+      setProgress(null);
+    }
+  };
+
+  return (
+    <ModalContent dismissible={!pending} className="space-y-4">
+      <ModalHeader>
+        <ModalTitle>{t("moveTitle", { count })}</ModalTitle>
+        <ModalDescription>{t("moveBody")}</ModalDescription>
+      </ModalHeader>
+      {/* The uploader's own destination picker, so both places look and
+          behave identically. */}
+      <UploadFolderPicker
+        folders={folders}
+        counts={counts}
+        mode={mode}
+        onModeChange={setMode}
+        selectedUri={selectedUri}
+        onSelect={setSelectedUri}
+        query={query}
+        onQueryChange={setQuery}
+        newName={newName}
+        onNewNameChange={setNewName}
+      />
+      {error ? (
+        <p className="flex items-center gap-1.5 rounded-lg bg-warn/10 px-2.5 py-1.5 text-xs font-medium text-foreground/75">
+          <TriangleAlertIcon className="size-3.5 shrink-0 text-warn" /> {error}
+        </p>
+      ) : null}
+      <ModalFooter>
+        <Button type="button" variant="outline" disabled={pending} onClick={() => void close()}>
+          {t("cancel")}
+        </Button>
+        <Button type="button" disabled={pending || !target} onClick={() => void move()}>
+          {pending ? <Loader2Icon className="size-4 animate-spin" /> : <FolderInputIcon className="size-4" />}
+          {pending && progress ? t("moveProgress", { done: progress.done, total: progress.total }) : t("moveAction")}
         </Button>
       </ModalFooter>
     </ModalContent>

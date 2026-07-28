@@ -221,12 +221,16 @@ export function buildAcDeploymentRecord(draft: AcDeploymentDraft): AcDeploymentR
   return record;
 }
 
-export async function createAcDeployment(draft: AcDeploymentDraft): Promise<MutationResult> {
+export async function createAcDeployment(
+  draft: AcDeploymentDraft,
+  options?: DeploymentWriteOptions,
+): Promise<MutationResult> {
   return postMutation<MutationResult>(
     {
       operation: "createRecord",
       collection: AC_DEPLOYMENT_COLLECTION,
       record: buildAcDeploymentRecord(draft),
+      ...(options?.repo ? { repo: options.repo } : {}),
     },
     "Could not save the recorder deployment.",
   );

@@ -287,6 +287,82 @@ export async function listRecordingsForDeployment(
 }
 
 
+/* ── Moving recordings between folders ──────────────────────────────── */
+
+/**
+ * Put one recording in a different folder. Which folder a recording is in is
+ * a single field (`deploymentRef`), but it lives in a record full of blob
+ * refs and parsed WAV metadata this app never models in full — so the stored
+ * record is read back and written whole, with only that one field changed.
+ */
+async function moveRecording(
+  item: AcAudioListItem,
+  deploymentRef: string,
+  repo?: string | null,
+): Promise<void> {
+  const scope = repo ? { repo } : {};
+  const current = await postMutation<{ cid: string; record: Record<string, unknown> }>(
+    { operation: "getRecord", collection: AC_AUDIO_COLLECTION, rkey: item.rkey, ...scope },
+    "The recording could not be read.",
+  );
+  await postMutation<MutationResult>(
+    {
+      operation: "putRecord",
+      collection: AC_AUDIO_COLLECTION,
+      rkey: item.rkey,
+      swapRecord: current.cid,
+      record: { ...current.record, deploymentRef },
+      ...scope,
+    },
+    "The recording could not be moved.",
+  );
+}
+
+export type MoveRecordingsOutcome = {
+  /** AT-URIs now in the destination folder. */
+  moved: Set<string>;
+  /** AT-URIs that stayed put — worth keeping selected for a retry. */
+  failed: Set<string>;
+};
+
+/**
+ * Move a selection of recordings into one folder, one at a time so a single
+ * failure costs one recording rather than the whole batch.
+ */
+export async function moveRecordings({
+  items,
+  deploymentRef,
+  repo,
+  onProgress,
+}: {
+  items: readonly AcAudioListItem[];
+  /** AT-URI of the destination `ac.deployment`. */
+  deploymentRef: string;
+  /** Group repo DID, when moving on an organization's profile. */
+  repo?: string | null;
+  onProgress?: (done: number, total: number) => void;
+}): Promise<MoveRecordingsOutcome> {
+  const moved = new Set<string>();
+  const failed = new Set<string>();
+  let done = 0;
+  for (const item of items) {
+    if (item.deploymentRef === deploymentRef) {
+      // Already there: nothing to write, and no reason to call it a failure.
+      moved.add(item.uri);
+    } else {
+      try {
+        await moveRecording(item, deploymentRef, repo);
+        moved.add(item.uri);
+      } catch {
+        failed.add(item.uri);
+      }
+    }
+    done += 1;
+    onProgress?.(done, items.length);
+  }
+  return { moved, failed };
+}
+
 /* ── Already-uploaded detection ───────────────────────────────────────────── */
 
 /** Identity keys of every recording already in a repo, for pre-upload dedup. */

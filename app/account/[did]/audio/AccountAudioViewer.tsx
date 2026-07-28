@@ -20,6 +20,7 @@ import Link from "next/link";
 import {
   ArrowUpRightIcon,
   AudioLinesIcon,
+  FolderInputIcon,
   Loader2Icon,
   MapPinIcon,
   PencilIcon,
@@ -35,14 +36,19 @@ import { useModal } from "@/components/ui/modal/context";
 import { resolvePdsHost } from "@/app/_lib/pds";
 import {
   applyAcDeploymentEdit,
+  createAcDeployment,
   deleteAcDeployment,
   listAcDeployments,
   updateAcDeployment,
   type AcDeploymentItem,
 } from "@/app/_lib/ac-deployment";
-import { listAllRecordings, type AcAudioListItem } from "@/app/_lib/ac-audio";
+import { listAllRecordings, moveRecordings, type AcAudioListItem } from "@/app/_lib/ac-audio";
 import { deleteRecordings } from "@/app/_lib/ac-audio-delete";
-import { DeleteFolderModal, RenameFolderModal } from "@/app/_components/RecordingFolderModals";
+import {
+  DeleteFolderModal,
+  MoveRecordingsModal,
+  RenameFolderModal,
+} from "@/app/_components/RecordingFolderModals";
 import { deploymentDetailPath, parseAtUri } from "@/app/_lib/deployment-events";
 import { formatDate } from "@/app/_lib/format";
 import { RecordingsExplorer } from "@/app/_components/RecordingsExplorer";
@@ -128,8 +134,8 @@ export function AccountAudioViewer({
   /* ── Drive-style selection + delete ───────────────────────────────────────
    * No separate "select mode": clicking a recording toggles its selection
    * (like Google Drive), shift-click selects the whole range since the last
-   * plain click, and a toolbar with the count + Delete replaces the header
-   * actions while anything is selected. Escape or ✕ clears it. */
+   * plain click, and a toolbar with the count, Move and Delete replaces the
+   * header actions while anything is selected. Escape or ✕ clears it. */
   const [selectedUris, setSelectedUris] = useState<ReadonlySet<string>>(new Set());
   const [deleteError, setDeleteError] = useState<string | null>(null);
   /** Last plain-clicked row — the fixed end of a shift-click range. */
@@ -172,6 +178,76 @@ export function AccountAudioViewer({
     },
     [recordings, selectedUris, mutationRepo, clearSelection, t],
   );
+
+  /**
+   * Move the selection into another folder — an existing one, or a new one
+   * named in the dialog. A card emptied into the wrong folder, or one card
+   * holding two sites, was until now permanent.
+   */
+  const confirmMove = useCallback(() => {
+    const items = (recordings ?? []).filter((item) => selectedUris.has(item.uri));
+    if (items.length === 0) return;
+    const counts = new Map<string, number>();
+    for (const item of recordings ?? []) {
+      if (item.deploymentRef) counts.set(item.deploymentRef, (counts.get(item.deploymentRef) ?? 0) + 1);
+    }
+    modal.pushModal(
+      {
+        id: "move-recordings",
+        dialogWidth: "max-w-lg w-[calc(100%-2rem)]",
+        content: (
+          <MoveRecordingsModal
+            count={items.length}
+            folders={deployments}
+            counts={counts}
+            onMove={async (target, onProgress) => {
+              let deploymentRef: string;
+              if (target.kind === "existing") {
+                deploymentRef = target.uri;
+              } else {
+                /* A folder named here is dated by the recordings going into
+                   it, so it sorts with them rather than at today's date. */
+                const times = items
+                  .map((item) => new Date(item.recordedAt ?? item.createdAt).getTime())
+                  .filter((time) => Number.isFinite(time));
+                const created = await createAcDeployment(
+                  {
+                    name: target.name,
+                    deployedAt: times.length ? new Date(Math.min(...times)) : new Date(),
+                    remarks: tFolders("newFolderRemarks"),
+                  },
+                  { repo: mutationRepo },
+                );
+                deploymentRef = created.uri;
+                const refreshed = await listAcDeployments(did).catch(() => null);
+                if (refreshed) setDeployments(refreshed);
+              }
+              const { moved, failed } = await moveRecordings({
+                items,
+                deploymentRef,
+                repo: mutationRepo,
+                onProgress,
+              });
+              if (moved.size > 0) {
+                setRecordings(
+                  (current) =>
+                    current?.map((item) => (moved.has(item.uri) ? { ...item, deploymentRef } : item)) ?? current,
+                );
+              }
+              if (failed.size > 0) {
+                // Keep the ones that stayed put selected, ready for a retry.
+                setSelectedUris(failed);
+                throw new Error(tFolders("movePartial", { count: failed.size }));
+              }
+              clearSelection();
+            }}
+          />
+        ),
+      },
+      true,
+    );
+    void modal.show();
+  }, [clearSelection, deployments, did, modal, mutationRepo, recordings, selectedUris, tFolders]);
 
   const confirmDelete = useCallback(() => {
     const count = selectedUris.size;
@@ -342,6 +418,10 @@ export function AccountAudioViewer({
             <span className="px-0.5 text-sm font-medium tabular-nums text-foreground">
               {t("selectedCount", { count: selectedCount })}
             </span>
+            <Button variant="outline" size="sm" onClick={confirmMove}>
+              <FolderInputIcon className="size-4" />
+              {tFolders("moveAction")}
+            </Button>
             <Button variant="destructive" size="sm" onClick={confirmDelete}>
               <Trash2Icon className="size-4" />
               {t("deleteSelected")}
