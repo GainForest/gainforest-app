@@ -3200,7 +3200,10 @@
       "datesTitle": "Hari",
       "allDatesChip": "Semua hari",
       "averageNote": "Rata-rata dari {count} rekaman pada tiap waktu — dial menampilkan hari yang khas, bukan yang paling bising.",
-      "averageNoteRange": "Rata-rata dari {min}–{max} rekaman pada tiap waktu — dial menampilkan hari yang khas, bukan yang paling bising."
+      "averageNoteRange": "Rata-rata dari {min}–{max} rekaman pada tiap waktu — dial menampilkan hari yang khas, bukan yang paling bising.",
+      "spreadNote": "Arsiran mencakup 80% bagian tengah rekaman tersebut — makin lebar, makin berbeda tiap harinya.",
+      "slotNote": "Rekaman dikelompokkan dalam slot {minutes} menit, karena waktu mulainya bergeser dari hari ke hari.",
+      "pointRecordings": "{count, plural, other {# rekaman}}"
     },
     "zoom": {
       "rangeAllDay": "Sepanjang hari · 00:00 – 24:00",

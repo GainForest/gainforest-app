@@ -3200,7 +3200,10 @@
       "datesTitle": "Siku",
       "allDatesChip": "Siku zote",
       "averageNote": "Wastani wa rekodi {count} kwa kila saa — duara linaonyesha siku ya kawaida, si yenye kelele zaidi.",
-      "averageNoteRange": "Wastani wa rekodi {min}–{max} kwa kila saa — duara linaonyesha siku ya kawaida, si yenye kelele zaidi."
+      "averageNoteRange": "Wastani wa rekodi {min}–{max} kwa kila saa — duara linaonyesha siku ya kawaida, si yenye kelele zaidi.",
+      "spreadNote": "Kivuli kinajumuisha asilimia 80 ya kati ya rekodi hizo — kikiwa kipana, siku zinatofautiana.",
+      "slotNote": "Rekodi zimepangwa katika vipindi vya dakika {minutes}, kwa sababu nyakati zake za kuanza hubadilika kila siku.",
+      "pointRecordings": "{count, plural, one {rekodi #} other {rekodi #}}"
     },
     "zoom": {
       "rangeAllDay": "Siku nzima · 00:00 – 24:00",

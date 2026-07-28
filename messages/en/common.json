@@ -3200,7 +3200,10 @@
       "datesTitle": "Days",
       "allDatesChip": "All days",
       "averageNote": "Averaged across {count} recordings at each time — the dial shows a typical day, not the loudest one.",
-      "averageNoteRange": "Averaged across {min}–{max} recordings at each time — the dial shows a typical day, not the loudest one."
+      "averageNoteRange": "Averaged across {min}–{max} recordings at each time — the dial shows a typical day, not the loudest one.",
+      "spreadNote": "Shading covers the middle 80% of those recordings — wide means the days differ.",
+      "slotNote": "Recordings grouped into {minutes}-minute slots, because their start times move from day to day.",
+      "pointRecordings": "{count, plural, one {# recording} other {# recordings}}"
     },
     "zoom": {
       "rangeAllDay": "Whole day · 00:00 – 24:00",

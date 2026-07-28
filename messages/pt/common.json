@@ -3200,7 +3200,10 @@
       "datesTitle": "Dias",
       "allDatesChip": "Todos os dias",
       "averageNote": "Média de {count} gravações em cada horário — o mostrador mostra um dia típico, não o mais barulhento.",
-      "averageNoteRange": "Média de {min} a {max} gravações em cada horário — o mostrador mostra um dia típico, não o mais barulhento."
+      "averageNoteRange": "Média de {min} a {max} gravações em cada horário — o mostrador mostra um dia típico, não o mais barulhento.",
+      "spreadNote": "O sombreado cobre os 80% centrais dessas gravações — se for largo, os dias diferem.",
+      "slotNote": "Gravações agrupadas em faixas de {minutes} minutos, porque os horários de início mudam de um dia para o outro.",
+      "pointRecordings": "{count, plural, one {# gravação} other {# gravações}}"
     },
     "zoom": {
       "rangeAllDay": "Dia inteiro · 00:00 – 24:00",

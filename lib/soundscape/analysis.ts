@@ -129,11 +129,72 @@ export function fftRadix2(real: Float64Array, imag: Float64Array): void {
 export type SoundscapePoint = {
   /** Minutes since midnight (0..1439). */
   minuteOfDay: number;
-  /** Mean PMN per frequency bin across recordings starting in this minute. */
+  /** Mean PMN per frequency bin across recordings in this time slot. */
   pmn: number[];
+  /** 10th percentile per bin — bottom of the "usual" range. */
+  low: number[];
+  /** 90th percentile per bin — top of the "usual" range. */
+  high: number[];
   /** How many recordings were averaged into this point (>= 1). */
   count: number;
 };
+
+/**
+ * Linear-interpolated percentile of an ascending array. With one or two
+ * samples there is no distribution to speak of, so this degrades to the min
+ * and max rather than pretending to a percentile.
+ */
+function percentile(sorted: number[], fraction: number): number {
+  if (sorted.length === 0) return 0;
+  if (sorted.length === 1) return sorted[0];
+  const position = fraction * (sorted.length - 1);
+  const lower = Math.floor(position);
+  const upper = Math.ceil(position);
+  if (lower === upper) return sorted[lower];
+  return sorted[lower] + (sorted[upper] - sorted[lower]) * (position - lower);
+}
+
+/** Slot widths the dial can fold recordings into. Each divides 1440. */
+export const SLOT_OPTIONS = [1, 2, 5, 10, 15, 30] as const;
+
+/** Fraction of recordings that must share a slot before it counts as aligned. */
+const ALIGNMENT_TARGET = 0.6;
+
+/**
+ * Picks how wide a time slot has to be for the days to actually fold together.
+ *
+ * A scheduled AudioMoth stamps 07:00:00 every day, so minute-wide slots line
+ * up perfectly and nothing needs widening. Continuous recording is different:
+ * files are back-to-back, so their start times can walk a few minutes per day
+ * and never share a minute. Minute-wide slots would then hold one recording
+ * each and a three-week deployment would draw 1440 lonely samples instead of
+ * an average — exactly the noisy dial that averaging was meant to fix.
+ *
+ * So: widen only until most recordings have company, and never widen a
+ * single-day view, where there is nothing to average in the first place.
+ */
+export function chooseSlotMinutes(minutesOfDay: number[], dayCount: number): number {
+  if (dayCount < 2 || minutesOfDay.length === 0) return 1;
+  for (const slot of SLOT_OPTIONS) {
+    const perSlot = new Map<number, number>();
+    for (const minute of minutesOfDay) {
+      const key = snapToSlot(minute, slot);
+      perSlot.set(key, (perSlot.get(key) ?? 0) + 1);
+    }
+    let shared = 0;
+    for (const count of perSlot.values()) if (count > 1) shared += count;
+    if (shared / minutesOfDay.length >= ALIGNMENT_TARGET) return slot;
+  }
+  // Nothing lines up even at half-hour slots: leave the times alone rather
+  // than smearing genuinely unrelated recordings together.
+  return 1;
+}
+
+/** Rounds a minute of the day onto the nearest slot boundary. */
+export function snapToSlot(minuteOfDay: number, slotMinutes: number): number {
+  const minute = ((Math.round(minuteOfDay) % 1440) + 1440) % 1440;
+  return (Math.round(minute / slotMinutes) * slotMinutes) % 1440;
+}
 
 /**
  * Rounds a maximum up to a friendly 1/2/5/10 axis bound, so the radial and
@@ -174,25 +235,37 @@ export function formatPmnValue(value: number): string {
  */
 export function buildSoundscapePoints(
   recordings: Array<{ minuteOfDay: number; pmn: number[] }>,
+  options: { slotMinutes?: number } = {},
 ): SoundscapePoint[] {
-  const byMinute = new Map<number, { sums: number[]; count: number }>();
+  const slotMinutes = options.slotMinutes && options.slotMinutes > 0 ? options.slotMinutes : 1;
+  const bySlot = new Map<number, number[][]>();
   for (const recording of recordings) {
-    const minute = ((Math.round(recording.minuteOfDay) % 1440) + 1440) % 1440;
-    const existing = byMinute.get(minute);
+    const slot = snapToSlot(recording.minuteOfDay, slotMinutes);
+    const existing = bySlot.get(slot);
     if (!existing) {
-      byMinute.set(minute, { sums: [...recording.pmn], count: 1 });
+      bySlot.set(
+        slot,
+        recording.pmn.map((value) => [value]),
+      );
       continue;
     }
-    for (let i = 0; i < existing.sums.length; i++) {
-      existing.sums[i] += recording.pmn[i] ?? 0;
+    for (let i = 0; i < existing.length; i++) {
+      existing[i].push(recording.pmn[i] ?? 0);
     }
-    existing.count++;
   }
-  return [...byMinute.entries()]
-    .map(([minuteOfDay, { sums, count }]) => ({
-      minuteOfDay,
-      pmn: sums.map((sum) => sum / count),
-      count,
-    }))
+  return [...bySlot.entries()]
+    .map(([minuteOfDay, perBand]) => {
+      const count = perBand[0]?.length ?? 0;
+      const pmn: number[] = [];
+      const low: number[] = [];
+      const high: number[] = [];
+      for (const values of perBand) {
+        pmn.push(values.reduce((sum, value) => sum + value, 0) / values.length);
+        const sorted = [...values].sort((a, b) => a - b);
+        low.push(percentile(sorted, 0.1));
+        high.push(percentile(sorted, 0.9));
+      }
+      return { minuteOfDay, pmn, low, high, count };
+    })
     .sort((a, b) => a.minuteOfDay - b.minuteOfDay);
 }

@@ -45,7 +45,9 @@ import {
 } from "@/lib/soundscape/audiomoth";
 import {
   buildSoundscapePoints,
+  chooseSlotMinutes,
   formatBandRange,
+  snapToSlot,
   FREQUENCY_BANDS,
   nyquistHz,
 } from "@/lib/soundscape/analysis";
@@ -308,12 +310,25 @@ export function SoundscapeClient({ sessionDid }: { sessionDid: string | null }) 
     );
   }, [library, results, selectedDate]);
 
+  /* How wide a slot on the dial has to be for these recordings to fold
+     together — a minute for a scheduled deployment, wider when start times
+     walk across the days (continuous recording). */
+  const slotMinutes = useMemo(
+    () =>
+      chooseSlotMinutes(
+        analyzedRecordings.map((entry) => wallClockMinuteOfDay(entry.time)),
+        selectedDate === ALL_DATES ? dateKeys.length : 1,
+      ),
+    [analyzedRecordings, dateKeys.length, selectedDate],
+  );
+
   const points = useMemo(
     () =>
       buildSoundscapePoints(
         analyzedRecordings.map((entry) => ({ minuteOfDay: wallClockMinuteOfDay(entry.time), pmn: entry.pmn })),
+        { slotMinutes },
       ),
-    [analyzedRecordings],
+    [analyzedRecordings, slotMinutes],
   );
 
   // Which recording to play for each dial minute. The dial draws the average
@@ -324,12 +339,14 @@ export function SoundscapeClient({ sessionDid }: { sessionDid: string | null }) 
     const loudness = (entry: AnalyzedLibraryRecording) => entry.pmn.reduce((sum, value) => sum + value, 0);
     const byMinute = new Map<number, AnalyzedLibraryRecording>();
     for (const entry of analyzedRecordings) {
-      const minute = wallClockMinuteOfDay(entry.time);
+      // Keyed by the slot the dial actually drew, so a click lands on a
+      // recording even when the slot is wider than a minute.
+      const minute = snapToSlot(wallClockMinuteOfDay(entry.time), slotMinutes);
       const existing = byMinute.get(minute);
       if (!existing || loudness(entry) > loudness(existing)) byMinute.set(minute, entry);
     }
     return byMinute;
-  }, [analyzedRecordings]);
+  }, [analyzedRecordings, slotMinutes]);
 
   /** Every analyzed recording inside the zoom window — one row each, so two
    *  recordings a minute apart are still individually reachable. */
@@ -507,6 +524,20 @@ export function SoundscapeClient({ sessionDid }: { sessionDid: string | null }) 
       ? t("chart.averageNote", { count: averagedCounts.max })
       : t("chart.averageNoteRange", { min: averagedCounts.min, max: averagedCounts.max })
     : null;
+
+  /* Two lines at most: what the line is, then what the shading is. Both go
+     into the SVG so the downloaded image explains itself. */
+  const chartSubtitle = useMemo(() => {
+    if (!averageNote) return undefined;
+    const lines = [averageNote, t("chart.spreadNote")];
+    if (slotMinutes > 1) lines.push(t("chart.slotNote", { minutes: slotMinutes }));
+    return lines;
+  }, [averageNote, slotMinutes, t]);
+
+  const pointDetail = useCallback(
+    (point: { count: number }) => (point.count > 1 ? t("chart.pointRecordings", { count: point.count }) : null),
+    [t],
+  );
 
   const chartDateLabel =
     selectedDate !== ALL_DATES
@@ -939,7 +970,8 @@ export function SoundscapeClient({ sessionDid }: { sessionDid: string | null }) 
                   visibleBands={visibleBands}
                   bandLabels={bandLabels}
                   title={t("chart.title", { date: chartDateLabel || t("chart.allDates") })}
-                  subtitle={averageNote ?? undefined}
+                  subtitle={chartSubtitle}
+                  pointDetail={pointDetail}
                   radialLabel={t("chart.radialLabel")}
                   timeLabel={t("chart.timeLabel")}
                   legendTitle={t("chart.legendTitle")}

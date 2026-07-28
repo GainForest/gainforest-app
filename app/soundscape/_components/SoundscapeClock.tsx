@@ -77,14 +77,15 @@ function radiusForValue(value: number, maxValue: number): number {
   return INNER_RADIUS + ((clamped + maxValue) / (2 * maxValue)) * (OUTER_RADIUS - INNER_RADIUS);
 }
 
-function buildBandPath(
-  points: SoundscapePoint[],
-  band: number,
-  maxValue: number,
-  view: TimeWindow,
-): string | null {
-  const runs: Array<Array<{ x: number; y: number }>> = [];
-  let run: Array<{ x: number; y: number }> = [];
+/**
+ * Splits the visible points into unbroken runs of indices, so a gap in the
+ * recordings breaks the line instead of drawing a straight bridge across an
+ * hour nobody recorded. Returns whether the day closes into a loop, which
+ * only a full-day view can do.
+ */
+function buildRuns(points: SoundscapePoint[], view: TimeWindow): { runs: number[][]; wraps: boolean } {
+  const runs: number[][] = [];
+  let run: number[] = [];
   for (let index = 0; index < points.length; index++) {
     const gap =
       index > 0
@@ -96,25 +97,62 @@ function buildBandPath(
       runs.push(run);
       run = [];
     }
-    run.push(polar(points[index].minuteOfDay, radiusForValue(points[index].pmn[band] ?? 0, maxValue), view));
+    run.push(index);
   }
   if (run.length > 0) runs.push(run);
 
-  // Only a full day can close the loop; a zoomed slice has two open ends.
   const wraps =
     isFullDay(view) &&
     points.length > 2 &&
     points[0].minuteOfDay + 1440 - points[points.length - 1].minuteOfDay <= GAP_MINUTES;
-  if (wraps && runs.length === 1) {
-    return `M${runs[0].map((p) => `${p.x.toFixed(1)} ${p.y.toFixed(1)}`).join("L")}Z`;
-  }
   if (wraps && runs.length > 1) {
     const tail = runs.pop()!;
     runs[0] = [...tail, ...runs[0]];
   }
+  return { runs, wraps: wraps && runs.length === 1 };
+}
+
+const pathFrom = (coords: Array<{ x: number; y: number }>) =>
+  coords.map((p) => `${p.x.toFixed(1)} ${p.y.toFixed(1)}`).join("L");
+
+function buildBandPath(
+  points: SoundscapePoint[],
+  band: number,
+  maxValue: number,
+  view: TimeWindow,
+): string | null {
+  const { runs, wraps } = buildRuns(points, view);
+  const coordsFor = (run: number[]) =>
+    run.map((index) => polar(points[index].minuteOfDay, radiusForValue(points[index].pmn[band] ?? 0, maxValue), view));
+  if (wraps) return `M${pathFrom(coordsFor(runs[0]))}Z`;
   const segments = runs
-    .filter((segment) => segment.length > 1)
-    .map((segment) => `M${segment.map((p) => `${p.x.toFixed(1)} ${p.y.toFixed(1)}`).join("L")}`);
+    .filter((run) => run.length > 1)
+    .map((run) => `M${pathFrom(coordsFor(run))}`);
+  return segments.length > 0 ? segments.join("") : null;
+}
+
+/**
+ * Ribbon between the 10th and 90th percentile of the recordings behind each
+ * point: how much this time of day varies from one recording to the next. A
+ * narrow ribbon means every day sounds like this; a wide one means the mean is
+ * standing in for very different days.
+ */
+function buildSpreadPath(
+  points: SoundscapePoint[],
+  band: number,
+  maxValue: number,
+  view: TimeWindow,
+): string | null {
+  const { runs, wraps } = buildRuns(points, view);
+  const edge = (run: number[], key: "low" | "high") =>
+    run.map((index) =>
+      polar(points[index].minuteOfDay, radiusForValue(points[index][key][band] ?? 0, maxValue), view),
+    );
+  // A closed day is an annulus: outer loop and inner loop, evenodd-filled.
+  if (wraps) return `M${pathFrom(edge(runs[0], "high"))}ZM${pathFrom(edge(runs[0], "low"))}Z`;
+  const segments = runs
+    .filter((run) => run.length > 1)
+    .map((run) => `M${pathFrom(edge(run, "high"))}L${pathFrom(edge(run, "low").reverse())}Z`);
   return segments.length > 0 ? segments.join("") : null;
 }
 
@@ -153,9 +191,12 @@ type SoundscapeClockProps = {
   visibleBands: boolean[];
   bandLabels: string[];
   title: string;
-  /** Optional second line under the title — e.g. that the dial is an average
-   *  of several days. Drawn inside the SVG so the exported PNG carries it. */
-  subtitle?: string;
+  /** Optional lines under the title — e.g. that the dial is an average of
+   *  several days. Drawn inside the SVG so the exported PNG carries them. */
+  subtitle?: string[];
+  /** Extra line for the centre readout on hover, e.g. how many recordings
+   *  that time of day is made of. */
+  pointDetail?: (point: SoundscapePoint) => string | null;
   radialLabel: string;
   timeLabel: string;
   legendTitle: string;
@@ -210,15 +251,21 @@ export function SoundscapeClock(props: SoundscapeClockProps) {
       .sort((a, b) => windowFraction(a.minuteOfDay, view) - windowFraction(b.minuteOfDay, view));
   }, [points, view]);
 
+  /** Only worth shading when some point actually averages several recordings. */
+  const hasSpread = useMemo(() => visiblePoints.some((point) => point.count > 1), [visiblePoints]);
+
   const maxValue = useMemo(() => {
     let max = 0;
     for (const point of visiblePoints) {
       for (let band = 0; band < point.pmn.length; band++) {
-        if (visibleBands[band]) max = Math.max(max, point.pmn[band]);
+        if (!visibleBands[band]) continue;
+        // The ribbon has to fit inside the dial too, or the loudest nights
+        // would be clipped against the outer ring.
+        max = Math.max(max, point.pmn[band], hasSpread ? (point.high[band] ?? 0) : 0);
       }
     }
     return niceCeil(max);
-  }, [visiblePoints, visibleBands]);
+  }, [visiblePoints, visibleBands, hasSpread]);
 
   const bandPaths = useMemo(
     () =>
@@ -228,6 +275,16 @@ export function SoundscapeClock(props: SoundscapeClockProps) {
           : null,
       ),
     [visiblePoints, visibleBands, maxValue, view],
+  );
+
+  const spreadPaths = useMemo(
+    () =>
+      BAND_COLORS.map((_, band) =>
+        hasSpread && visibleBands[band] && visiblePoints.length > 0
+          ? buildSpreadPath(visiblePoints, band, maxValue, view)
+          : null,
+      ),
+    [hasSpread, visiblePoints, visibleBands, maxValue, view],
   );
 
   const gridRings = [0.25, 0.5, 0.75, 1];
@@ -404,11 +461,18 @@ export function SoundscapeClock(props: SoundscapeClockProps) {
         <text x={CENTER} y={26} textAnchor="middle" fontSize={17} className="fill-foreground">
           {props.title}
         </text>
-        {props.subtitle ? (
-          <text x={CENTER} y={48} textAnchor="middle" fontSize={12} className="fill-muted-foreground">
-            {props.subtitle}
+        {(props.subtitle ?? []).map((line, index) => (
+          <text
+            key={line}
+            x={CENTER}
+            y={46 + index * 16}
+            textAnchor="middle"
+            fontSize={12}
+            className="fill-muted-foreground"
+          >
+            {line}
           </text>
-        ) : null}
+        ))}
 
         {/* Radial grid rings */}
         {gridRings.map((fraction) => (
@@ -531,6 +595,14 @@ export function SoundscapeClock(props: SoundscapeClockProps) {
             })
           : null}
 
+        {/* Spread ribbons, under the lines: where the recordings behind each
+            point disagree, and by how much. */}
+        {spreadPaths.map((path, band) =>
+          path ? (
+            <path key={`spread-${band}`} d={path} fill={BAND_COLORS[band]} fillOpacity={0.13} fillRule="evenodd" />
+          ) : null,
+        )}
+
         {/* Band lines */}
         {bandPaths.map((path, band) =>
           path ? (
@@ -589,15 +661,22 @@ export function SoundscapeClock(props: SoundscapeClockProps) {
             readout a sweep uses for its range. Hover and sweep never coincide:
             starting a drag clears the hover. */}
         {hover ? (
-          <text
-            x={CENTER}
-            y={CENTER + 5}
-            fontSize={15}
-            textAnchor="middle"
-            className="fill-foreground tabular-nums"
-          >
-            {formatMinuteOfDay(hover.point.minuteOfDay)}
-          </text>
+          <g>
+            <text
+              x={CENTER}
+              y={CENTER + 5}
+              fontSize={15}
+              textAnchor="middle"
+              className="fill-foreground tabular-nums"
+            >
+              {formatMinuteOfDay(hover.point.minuteOfDay)}
+            </text>
+            {props.pointDetail?.(hover.point) ? (
+              <text x={CENTER} y={CENTER + 22} fontSize={11} textAnchor="middle" className="fill-muted-foreground">
+                {props.pointDetail(hover.point)}
+              </text>
+            ) : null}
+          </g>
         ) : null}
 
         {zoomed && visiblePoints.length === 0 && props.emptyLabel ? (

@@ -12,6 +12,7 @@ import {
 import { parsePmnCache, toCacheEntry, trimPmnCache } from "./pmn-cache";
 import {
   buildSoundscapePoints,
+  chooseSlotMinutes,
   fftRadix2,
   formatBandRange,
   formatPmnValue,
@@ -369,6 +370,63 @@ describe("buildSoundscapePoints", () => {
       [9, 8, 7, 6, 5],
     ]);
     expect(points.map((point) => point.count)).toEqual([1, 1]);
+    // Nothing to disagree with, so the ribbon has no width.
+    expect(points[0].low).toEqual(points[0].high);
+  });
+
+  it("reports the spread of the recordings behind a point", () => {
+    const [point] = buildSoundscapePoints(
+      [1, 2, 3, 4, 5, 6, 7, 8, 9, 100].map((value) => ({ minuteOfDay: 300, pmn: [value] })),
+    );
+    expect(point.low[0]).toBeLessThan(point.pmn[0]);
+    expect(point.high[0]).toBeGreaterThan(point.pmn[0]);
+    // The 100 is one recording in ten: inside the mean, outside the ribbon.
+    expect(point.high[0]).toBeLessThan(100);
+  });
+
+  it("folds recordings into a wider slot when asked", () => {
+    const points = buildSoundscapePoints(
+      [
+        { minuteOfDay: 418, pmn: [10] },
+        { minuteOfDay: 421, pmn: [20] },
+        { minuteOfDay: 600, pmn: [30] },
+      ],
+      { slotMinutes: 5 },
+    );
+    expect(points.map((point) => point.minuteOfDay)).toEqual([420, 600]);
+    expect(points[0].pmn).toEqual([15]);
+    expect(points[0].count).toBe(2);
+  });
+});
+
+describe("chooseSlotMinutes", () => {
+  it("keeps minute slots for a scheduled deployment that lands on the same times", () => {
+    const minutes: number[] = [];
+    for (let day = 0; day < 21; day++) for (const slot of [0, 360, 720, 1080]) minutes.push(slot);
+    expect(chooseSlotMinutes(minutes, 21)).toBe(1);
+  });
+
+  it("widens the slot when start times walk across the days", () => {
+    // Continuous recording: every day's schedule shifts by a few minutes, so
+    // no two days ever share a minute.
+    const minutes: number[] = [];
+    for (let day = 0; day < 21; day++) for (let slot = 0; slot < 1440; slot += 60) minutes.push(slot + day * 3);
+    const chosen = chooseSlotMinutes(minutes, 21);
+    expect(chosen).toBeGreaterThan(1);
+    const points = buildSoundscapePoints(
+      minutes.map((minuteOfDay) => ({ minuteOfDay, pmn: [1] })),
+      { slotMinutes: chosen },
+    );
+    const averaged = points.filter((point) => point.count > 1).length;
+    expect(averaged).toBeGreaterThan(points.length / 2);
+  });
+
+  it("never widens a single day, where there is nothing to average", () => {
+    expect(chooseSlotMinutes([0, 3, 7, 11, 19], 1)).toBe(1);
+  });
+
+  it("leaves unrelated one-off recordings alone rather than smearing them", () => {
+    expect(chooseSlotMinutes([0, 200, 640, 900, 1300], 5)).toBe(1);
   });
 });
 
