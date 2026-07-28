@@ -208,21 +208,19 @@ function InlineEditActions({
   isSaving,
   onSave,
   onCancel,
-  largeTargets = false,
 }: {
   isSaving: boolean;
   onSave: () => void;
   onCancel: () => void;
-  largeTargets?: boolean;
 }) {
   const t = useTranslations("upload.dashboardClient");
   return (
     <span className="mt-2 flex items-center gap-1.5">
-      <Button type="button" size="sm" className={cn(largeTargets && "h-11")} onClick={onSave} disabled={isSaving}>
+      <Button type="button" size="sm" onClick={onSave} disabled={isSaving}>
         {isSaving ? <Loader2Icon className="animate-spin" /> : <CheckIcon />}
         {t("actions.save")}
       </Button>
-      <Button type="button" size="sm" variant="ghost" className={cn(largeTargets && "h-11")} onClick={onCancel} disabled={isSaving}>
+      <Button type="button" size="sm" variant="ghost" onClick={onCancel} disabled={isSaving}>
         <XIcon /> {t("actions.cancel")}
       </Button>
     </span>
@@ -317,7 +315,7 @@ function EditableCompactHero({
               rows={2}
               className="w-full resize-none border-b border-border/60 bg-transparent text-xs leading-5 text-muted-foreground outline-none transition-colors field-sizing-content placeholder:text-muted-foreground/60 focus:border-primary"
             />
-            <InlineEditActions isSaving={isSaving} onSave={onSave} onCancel={onCancel} largeTargets />
+            <InlineEditActions isSaving={isSaving} onSave={onSave} onCancel={onCancel} />
           </div>
         ) : (
           <div className="min-w-0 flex-1">
@@ -341,7 +339,7 @@ function EditableCompactHero({
             disabled={!canEdit || isSaving}
             title={editDisabledReason ?? undefined}
             aria-label={t("hero.editProfileAria")}
-            className="size-11 shrink-0"
+            className="shrink-0"
           >
             <PencilIcon />
           </Button>
