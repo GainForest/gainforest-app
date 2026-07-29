@@ -12,7 +12,7 @@ import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
 import { formatCompact } from "@/app/_lib/format";
-import { fetchFollowConnections, fetchFollowStats, type FollowConnection } from "@/app/_lib/follows";
+import { fetchFollowConnections, fetchFollowStats, subscribeFollowChanges, type FollowConnection } from "@/app/_lib/follows";
 import { AuthorChip } from "@/app/_components/AuthorChip";
 import { FollowButton } from "@/app/_components/FollowButton";
 import { AutoLoadMoreButton } from "@/app/_components/AutoLoadMoreButton";
@@ -41,6 +41,26 @@ export function FollowConnections({
       .catch(() => {});
     return () => controller.abort();
   }, [did]);
+
+  // Keep the tab counts live while the page is open: following someone from a
+  // row (or anywhere else in the app) bumps this account's numbers immediately.
+  useEffect(
+    () =>
+      subscribeFollowChanges((change) => {
+        setCounts((prev) => {
+          if (!prev) return prev;
+          let next = prev;
+          if (change.viewerDid === did) {
+            next = { ...next, following: Math.max(0, next.following + change.delta) };
+          }
+          if (change.targetDid === did) {
+            next = { ...next, followers: Math.max(0, next.followers + change.delta) };
+          }
+          return next;
+        });
+      }),
+    [did],
+  );
 
   return (
     <section className="py-6">
