@@ -105,6 +105,11 @@ function DonationCard({
             </span>
           )}
         </div>
+        {item.message ? (
+          <p className="mt-1 whitespace-pre-line break-words text-xs italic leading-snug text-foreground/70">
+            “{item.message}”
+          </p>
+        ) : null}
       </div>
 
       {explorerUrl && (

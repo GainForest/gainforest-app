@@ -6,6 +6,7 @@
 
 import { createHash, createHmac } from "node:crypto";
 import { FACILITATOR_DID } from "@/app/_lib/urls";
+import { sanitizeDonationMessage } from "@/lib/donation/message";
 import { PAYMENT_NETWORK, PAYMENT_RAIL } from "./usdc";
 
 export type DidIdentifier = `did:${string}:${string}`;
@@ -130,8 +131,13 @@ export async function writeFundingReceipt(params: {
   receiptSubject?: { uri: string; cid: string };
   /** Owner-only tag for anonymous donations — see computeDonorHash. */
   donorHash?: string | null;
+  /** Optional short note the donor left with their gift. Stored as the
+   *  receipt's free-text `notes` and shown back to the recipient. It carries
+   *  no donor name, so an anonymous donation's message stays unattributed. */
+  message?: string | null;
 }): Promise<string | null> {
   const now = new Date().toISOString();
+  const message = sanitizeDonationMessage(params.message);
   return putReceiptRecord({
     $type: "org.hypercerts.funding.receipt",
     from: params.from,
@@ -142,7 +148,9 @@ export async function writeFundingReceipt(params: {
     paymentNetwork: PAYMENT_NETWORK,
     transactionId: params.transactionHash,
     for: params.receiptSubject,
-    notes: `${params.from.$type === "app.certified.defs#did" ? params.from.did : params.from.value} paid ${params.amount}${params.currency} using wallet`,
+    // `notes` carries the donor's own message when they left one. Leaving it
+    // blank keeps the receipt exactly as before (no synthetic note).
+    ...(message ? { notes: message } : {}),
     occurredAt: now,
     // Required by the org.hypercerts.funding.receipt lexicon. Receipts
     // without it sort last on every createdAt-ordered feed (indexer

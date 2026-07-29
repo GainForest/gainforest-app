@@ -14,6 +14,7 @@ type RawReceiptValue = {
   createdAt?: string;
   transactionId?: string;
   paymentNetwork?: string;
+  notes?: string;
   for?: { uri?: string };
 };
 
@@ -72,6 +73,7 @@ function ownedProjectReceipt(
     bumicertUri: subjectUri,
     txHash: value.transactionId ?? null,
     paymentNetwork: value.paymentNetwork ?? null,
+    message: value.notes?.trim() || null,
   };
 }
 

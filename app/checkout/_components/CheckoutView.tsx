@@ -29,6 +29,8 @@ import {
 import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Textarea } from "@/components/ui/textarea";
+import { DONATION_MESSAGE_MAX_LENGTH, sanitizeDonationMessage } from "@/lib/donation/message";
 import type { AuthSession } from "@/app/_lib/auth";
 import { SocialGlyph } from "@/app/_components/SocialIcon";
 import { blockExplorerUrl } from "@/app/_lib/urls";
@@ -302,6 +304,7 @@ export function CheckoutView({
   const [connecting, setConnecting] = useState(false);
   const [connectError, setConnectError] = useState<string | null>(null);
   const [anonymous, setAnonymous] = useState(false);
+  const [message, setMessage] = useState("");
   const [phase, setPhase] = useState<"review" | "paying" | "done">("review");
   const [lineStates, setLineStates] = useState<Record<string, LineState>>({});
   const [completed, setCompleted] = useState<CompletedLine[]>([]);
@@ -427,6 +430,10 @@ export function CheckoutView({
     payingRef.current = true;
     setPhase("paying");
 
+    // One optional note travels with every donation line. Blank stays absent,
+    // so it never touches the receipt when the donor leaves it empty.
+    const donationMessage = sanitizeDonationMessage(message);
+
     const lines = payableItems.map((item) => ({ item, key: cartItemKey(item) }));
     const includeTip = tipUsd > 0 && tipEnabled && tipConfig.status === "ready" && !!tipConfig.address;
     const initialStates: Record<string, LineState> = {};
@@ -519,6 +526,7 @@ export function CheckoutView({
             })),
             ...(includeTip ? { tipAmount: String(tipUsd) } : {}),
             anonymous: authSession.isLoggedIn ? anonymous : true,
+            ...(donationMessage ? { message: donationMessage } : {}),
           },
         });
 
@@ -601,6 +609,7 @@ export function CheckoutView({
             amount: String(item.amountUsd),
             currency: "USDC",
             anonymous: authSession.isLoggedIn ? anonymous : true,
+            ...(donationMessage ? { message: donationMessage } : {}),
           },
         });
         if ("txHash" in outcome) {
@@ -856,6 +865,30 @@ export function CheckoutView({
           ) : (
             <p className="mt-2 text-xs leading-5 text-muted-foreground">{t("signedOutNote")}</p>
           )}
+        </section>
+
+        {/* ── Optional message ────────────────────────────────────────────── */}
+        <section className="rounded-3xl border border-border-soft bg-surface p-5">
+          <h2 className="text-sm font-semibold text-foreground">{t("messageTitle")}</h2>
+          <p className="mt-1 text-xs leading-5 text-muted-foreground">{t("messageHint")}</p>
+          <Textarea
+            value={message}
+            onChange={(event) => setMessage(event.target.value.slice(0, DONATION_MESSAGE_MAX_LENGTH))}
+            maxLength={DONATION_MESSAGE_MAX_LENGTH}
+            disabled={paying}
+            rows={3}
+            placeholder={t("messagePlaceholder")}
+            aria-label={t("messageTitle")}
+            className="mt-3 resize-none"
+          />
+          <div className="mt-1.5 flex items-start justify-between gap-3">
+            <span className="min-w-0 text-xs leading-5 text-muted-foreground">
+              {anonymous || !authSession.isLoggedIn ? t("messageAnonymousNote") : null}
+            </span>
+            <span className="shrink-0 text-xs tabular-nums text-muted-foreground/70" aria-hidden>
+              {message.length}/{DONATION_MESSAGE_MAX_LENGTH}
+            </span>
+          </div>
         </section>
 
         {/* ── Wallet ──────────────────────────────────────────────────────── */}

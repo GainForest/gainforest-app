@@ -23,6 +23,9 @@ export type FundingReceipt = {
   bumicertUri: string | null;
   txHash: string | null;
   paymentNetwork: string | null;
+  /** Optional short note the donor left with their gift, shown back to the
+   *  recipient. Never carries the donor's name. */
+  message: string | null;
   /** Owner-only view: this receipt is anonymous and matched to the viewer
    *  via their donor hash (see app/_lib/anonymous-donations.ts). */
   isAnonymous?: boolean;
@@ -40,7 +43,7 @@ const RECEIPTS_QUERY = `
       pageInfo { hasNextPage endCursor }
       edges {
         node {
-          uri createdAt occurredAt amount currency transactionId paymentNetwork
+          uri createdAt occurredAt amount currency transactionId paymentNetwork notes
           certifiedProfileData { displayName }
           from {
             __typename
@@ -67,6 +70,7 @@ type RawReceipt = {
   currency?: string | null;
   transactionId?: string | null;
   paymentNetwork?: string | null;
+  notes?: string | null;
   from?: RawFrom;
   certifiedProfileData?: { displayName?: string | null } | null;
   for?: { uri?: string | null } | null;
@@ -112,6 +116,7 @@ function mapReceipt(node: RawReceipt): FundingReceipt {
     bumicertUri,
     txHash: node.transactionId ?? null,
     paymentNetwork: node.paymentNetwork ?? null,
+    message: node.notes?.trim() || null,
   };
 }
 
@@ -172,7 +177,7 @@ const DONOR_RECEIPTS_QUERY = `
       pageInfo { hasNextPage endCursor }
       edges {
         node {
-          uri createdAt occurredAt amount currency transactionId paymentNetwork
+          uri createdAt occurredAt amount currency transactionId paymentNetwork notes
           from {
             __typename
             ... on OrgHypercertsFundingReceiptText { value }

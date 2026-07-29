@@ -14,6 +14,7 @@ function receipt(overrides: Partial<FundingReceipt> = {}): FundingReceipt {
     bumicertUri: "at://did:plc:forest/org.hypercerts.claim.activity/project",
     txHash: `0x${"1".padStart(64, "0")}`,
     paymentNetwork: "eip155:1",
+    message: null,
     ...overrides,
   };
 }

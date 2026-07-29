@@ -2540,6 +2540,11 @@ function DonationLeaderboardRow({ entry }: { entry: DonationLeaderboardEntry }) 
           <DonationSupporterBadge rank={entry.rank} />
           <span className="w-full min-w-0 whitespace-normal break-words">{donationEntrySummary(entry)}</span>
         </div>
+        {entry.latestReceipt.message ? (
+          <p className="mt-1.5 w-full min-w-0 whitespace-pre-line break-words rounded-2xl bg-muted/60 px-3 py-2 text-[13px] italic leading-snug text-foreground/80">
+            “{entry.latestReceipt.message}”
+          </p>
+        ) : null}
       </div>
 
       <span className="shrink-0 whitespace-nowrap pt-0.5 text-[15px] font-bold tabular-nums text-primary sm:text-[17px]">

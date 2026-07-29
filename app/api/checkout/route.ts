@@ -10,6 +10,7 @@ import {
   writeTipReceipt,
   type ReceiptSender,
 } from "@/lib/facilitator/receipts";
+import { sanitizeDonationMessage } from "@/lib/donation/message";
 import { fetchAuthSession } from "@/app/_lib/auth-server";
 
 export const runtime = "nodejs";
@@ -43,6 +44,7 @@ type ParsedBody = {
   lines: CheckoutLine[];
   tipAmount: string | null;
   anonymous: boolean;
+  message: string | null;
 };
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -87,6 +89,9 @@ function parseBody(raw: unknown): { ok: true; body: ParsedBody } | { ok: false; 
       lines,
       tipAmount,
       anonymous: raw.anonymous,
+      // One optional note applies to every donation in the cart. Blank input
+      // normalises to null, leaving the receipts unchanged.
+      message: sanitizeDonationMessage(raw.message),
     },
   };
 }
@@ -227,6 +232,7 @@ export async function POST(request: Request) {
         transactionHash: result.transactionHash,
         receiptSubject,
         donorHash: sessionDid ? computeDonorHash(sessionDid, result.transactionHash) : null,
+        message: body.message,
       });
       result.cardEligible = Boolean(!body.anonymous && receiptSubject && result.receiptUri);
     } catch (error) {

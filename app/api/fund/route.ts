@@ -9,6 +9,7 @@ import {
   type ReceiptSender,
   type ReceiptText,
 } from "@/lib/facilitator/receipts";
+import { sanitizeDonationMessage } from "@/lib/donation/message";
 import { fetchAuthSession } from "@/app/_lib/auth-server";
 
 export const runtime = "nodejs";
@@ -23,6 +24,7 @@ type SettlementBody = {
   amount?: unknown;
   currency?: unknown;
   anonymous?: unknown;
+  message?: unknown;
 };
 
 type ParsedSettlementBody = {
@@ -31,6 +33,7 @@ type ParsedSettlementBody = {
   amount?: string;
   currency?: "USDC";
   anonymous: boolean;
+  message: string | null;
 };
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -65,6 +68,7 @@ function parseBody(raw: unknown): { ok: true; body: ParsedSettlementBody } | { o
       activityUri: typeof body.activityUri === "string" ? body.activityUri : undefined,
       amount: typeof body.amount === "string" ? body.amount : undefined,
       currency: body.currency === "USDC" ? "USDC" : undefined,
+      message: sanitizeDonationMessage(body.message),
     },
   };
 }
@@ -181,6 +185,7 @@ export async function POST(request: Request) {
       transactionHash,
       receiptSubject,
       donorHash,
+      message: body.message,
     });
   } catch (error) {
     // The payment has already settled on-chain. Surface success and log receipt failures.
