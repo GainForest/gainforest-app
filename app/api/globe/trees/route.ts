@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
-import { GLOBE_URL } from "../../../_lib/urls";
-import { fetchMaEarthOrganizationDids } from "../../../_lib/indexer";
+import { fetchGlobeRoster } from "../_roster";
 import { fetchOrganizationTreeCount } from "../../../globe/_lib/trees";
 import type { GlobeTreeStat } from "../../../globe/_lib/globe-types";
 
@@ -25,8 +24,6 @@ const COUNT_CONCURRENCY = 24;
 /** Per-org budget: PDS resolution + site records + tree file download. */
 const PER_ORG_TIMEOUT_MS = 30_000;
 
-const UPSTREAM_REVALIDATE_SECONDS = 3600;
-
 async function mapWithConcurrency<T>(
   items: T[],
   limit: number,
@@ -43,35 +40,10 @@ async function mapWithConcurrency<T>(
   );
 }
 
-/** Same discovery set as `/api/globe/organizations`: the curated Green Globe
- *  index plus every Ma Earth–badged organization. The client joins the counts
- *  back onto the roster it already has, so only DIDs are needed here. */
-async function discoverDids(): Promise<string[]> {
-  const dids = new Set<string>();
-  try {
-    const res = await fetch(`${GLOBE_URL}/api/list-organizations`, {
-      next: { revalidate: UPSTREAM_REVALIDATE_SECONDS },
-    });
-    if (res.ok) {
-      const orgs = (await res.json()) as Array<{ did?: string | null }>;
-      for (const org of orgs) {
-        const did = org?.did?.trim();
-        if (did) dids.add(did);
-      }
-    }
-  } catch {
-    /* fall through with whatever we have */
-  }
-  try {
-    for (const did of await fetchMaEarthOrganizationDids()) dids.add(did);
-  } catch (error) {
-    console.warn("[globe/trees] Ma Earth badge index failed", error);
-  }
-  return [...dids];
-}
-
 async function buildStats(): Promise<GlobeTreeStat[]> {
-  const dids = await discoverDids();
+  // Same roster as `/api/globe/organizations`, so the client can join these
+  // counts straight onto the roster it already has.
+  const dids = (await fetchGlobeRoster()).orgs.map((org) => org.did);
   const stats: GlobeTreeStat[] = [];
   await mapWithConcurrency(dids, COUNT_CONCURRENCY, async (did) => {
     try {
