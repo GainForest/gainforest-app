@@ -36,6 +36,7 @@ import { resolveStrongRef } from "@/app/_lib/pds";
 import { createContextAttachment } from "@/app/cert/[did]/[rkey]/_components/timeline/contextAttachmentMutations";
 import {
   soundscapeHref,
+  SOUNDSCAPE_ATTACHMENT_CONTENT_TYPE,
   type SoundscapeDraft,
   type SoundscapeSource,
 } from "@/lib/soundscape/record";
@@ -44,9 +45,7 @@ import {
 const POST_MAX = 300;
 const CAPTION_MAX = 200;
 
-/** `contentType` marking a timeline attachment as a soundscape. Read back by
- *  the timeline viewer to draw the dial instead of a plain link. */
-export const SOUNDSCAPE_ATTACHMENT_CONTENT_TYPE = "soundscape";
+export { SOUNDSCAPE_ATTACHMENT_CONTENT_TYPE };
 
 export type ShareTarget = {
   /** Group DID when acting as an organization; undefined for the personal repo. */

@@ -70,6 +70,7 @@
       "tabs": {
         "images": "Imagens",
         "audio": "Sons",
+        "soundscape": "Paisagem sonora",
         "trees": "Árvores",
         "biodiversity": "Observações",
         "files": "Arquivos"
@@ -120,6 +121,9 @@
       "uploadType": "Carregar {type}",
       "manage": "Gerenciar",
       "untitledRecording": "Gravação sem título",
+      "untitledSoundscape": "Paisagem sonora sem título",
+      "soundscapeHelp": "Escolha uma paisagem sonora já criada com as gravações desta organização. Quem ler a atualização pode ouvi-la ali mesmo.",
+      "soundscapeEmpty": "Nenhuma paisagem sonora desta organização pôde ser lida agora.",
       "unnamedTreeDataset": "Grupo de árvores sem nome",
       "unknownObservation": "Avistamento da natureza desconhecido",
       "treeCount": "{count, plural, =1 {1 árvore} other {# árvores}}",
@@ -140,6 +144,7 @@
       "attachmentTitles": {
         "images": "Imagens",
         "audio": "Gravações de som",
+        "soundscape": "Paisagem sonora",
         "trees": "Grupo de árvores",
         "biodiversity": "Observações"
       },
@@ -154,6 +159,7 @@
       "tabDescriptions": {
         "images": "Envie fotos do projeto.",
         "audio": "Adicione sons já salvos por esta organização.",
+        "soundscape": "Adicione a paisagem sonora de 24 horas criada com as gravações desta organização.",
         "trees": "Adicione informações de árvores agrupadas por local do projeto.",
         "biodiversity": "Filtre observações e adicione registros exibidos ou grupos salvos.",
         "files": "Adicione relatórios, fotos, vídeos ou páginas web."

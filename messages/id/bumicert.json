@@ -70,6 +70,7 @@
       "tabs": {
         "images": "Gambar",
         "audio": "Suara",
+        "soundscape": "Lanskap suara",
         "trees": "Pohon",
         "biodiversity": "Observasi",
         "files": "Berkas"
@@ -120,6 +121,9 @@
       "uploadType": "Unggah {type}",
       "manage": "Kelola",
       "untitledRecording": "Rekaman tanpa judul",
+      "untitledSoundscape": "Lanskap suara tanpa judul",
+      "soundscapeHelp": "Pilih lanskap suara yang sudah dibuat dari rekaman organisasi ini. Pembaca dapat memutarnya langsung dari pembaruan.",
+      "soundscapeEmpty": "Belum ada lanskap suara dari organisasi ini yang bisa dibaca saat ini.",
       "unnamedTreeDataset": "Grup pohon tanpa nama",
       "unknownObservation": "Temuan alam tidak diketahui",
       "treeCount": "{count, plural, =1 {1 pohon} other {# pohon}}",
@@ -140,6 +144,7 @@
       "attachmentTitles": {
         "images": "Gambar",
         "audio": "Rekaman suara",
+        "soundscape": "Lanskap suara",
         "trees": "Grup pohon",
         "biodiversity": "Observasi"
       },
@@ -154,6 +159,7 @@
       "tabDescriptions": {
         "images": "Unggah foto proyek.",
         "audio": "Tambahkan suara yang sudah disimpan oleh organisasi ini.",
+        "soundscape": "Tambahkan lanskap suara 24 jam yang dibuat dari rekaman organisasi ini.",
         "trees": "Tambahkan informasi pohon yang dikelompokkan berdasarkan lokasi proyek.",
         "biodiversity": "Filter observasi dan tambahkan catatan yang ditampilkan atau grup tersimpan.",
         "files": "Tambahkan laporan, foto, video, atau halaman web."

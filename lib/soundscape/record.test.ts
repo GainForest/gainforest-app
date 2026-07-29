@@ -7,6 +7,7 @@ import {
   MAX_SOUNDSCAPE_RECORDINGS,
   parseSoundscapeHref,
   parseSoundscapeRecord,
+  parseSoundscapeSummary,
   soundscapeDates,
   soundscapeHref,
   soundscapePoints,
@@ -208,6 +209,46 @@ describe("parseSoundscapeRecord", () => {
       recordings: [{ audio: "at://a", date: "2026-03-14", minuteOfDay: 10, pmn: [7] }],
     });
     expect(parsed?.sources[0].pmn).toEqual([7, 0, 0, 0, 0]);
+  });
+});
+
+describe("parseSoundscapeSummary", () => {
+  it("describes a published soundscape without carrying its recordings", () => {
+    const record = buildSoundscapeRecord({
+      title: "Dawn chorus",
+      note: "  Three mornings at the ridge  ",
+      ceilingHz: 24_000,
+      sources: [
+        source({ minuteOfDay: 330, date: "2026-03-16" }),
+        source({ minuteOfDay: 400, date: "2026-03-14" }),
+      ],
+    });
+    const summary = parseSoundscapeSummary(record);
+    expect(summary).toMatchObject({
+      title: "Dawn chorus",
+      note: "Three mornings at the ridge",
+      dates: ["2026-03-14", "2026-03-16"],
+      recordingCount: 2,
+    });
+    expect(summary).not.toHaveProperty("sources");
+  });
+
+  it("reads the dates off the recordings when the record has no date list", () => {
+    const summary = parseSoundscapeSummary({
+      title: "Old shape",
+      recordings: [
+        { audio: "at://a", date: "2026-03-14", minuteOfDay: 10, pmn: [1] },
+        { audio: "at://b", date: "2026-03-14", minuteOfDay: 20, pmn: [1] },
+      ],
+    });
+    expect(summary?.dates).toEqual(["2026-03-14"]);
+    expect(summary?.recordingCount).toBe(2);
+  });
+
+  it("rejects anything a listing must not offer", () => {
+    expect(parseSoundscapeSummary(null)).toBeNull();
+    expect(parseSoundscapeSummary({ title: "x" })).toBeNull();
+    expect(parseSoundscapeSummary({ title: "x", recordings: [] })).toBeNull();
   });
 });
 

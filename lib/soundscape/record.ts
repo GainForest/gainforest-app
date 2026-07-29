@@ -21,6 +21,11 @@ import { buildSoundscapePoints, FREQUENCY_BANDS, type SoundscapePoint } from "./
 
 export const SOUNDSCAPE_COLLECTION = "app.gainforest.ac.soundscape";
 
+/** `contentType` marking a timeline attachment as a soundscape. Written when
+ *  one is added to a project update, read back by the timeline viewer so it
+ *  draws the dial instead of a plain link. */
+export const SOUNDSCAPE_ATTACHMENT_CONTENT_TYPE = "soundscape";
+
 /**
  * Upper bound on how many recordings one published soundscape carries.
  *
@@ -161,12 +166,16 @@ export function soundscapeDates(sources: SoundscapeSource[]): string[] {
   return [...new Set(sources.map((source) => source.date))].sort();
 }
 
-/** `2026-03-14` or `2026-03-14 – 2026-03-16`; empty when there are no sources. */
-export function formatSoundscapeDateRange(sources: SoundscapeSource[]): string {
-  const dates = soundscapeDates(sources);
+/** `2026-03-14` or `2026-03-14 – 2026-03-16`; empty when there are no dates. */
+export function formatDateRange(dates: string[]): string {
   if (dates.length === 0) return "";
   if (dates.length === 1) return dates[0];
   return `${dates[0]} \u2013 ${dates[dates.length - 1]}`;
+}
+
+/** `2026-03-14` or `2026-03-14 – 2026-03-16`; empty when there are no sources. */
+export function formatSoundscapeDateRange(sources: SoundscapeSource[]): string {
+  return formatDateRange(soundscapeDates(sources));
 }
 
 /** Build the record body for `app.gainforest.ac.soundscape`. */
@@ -250,6 +259,53 @@ export function parseSoundscapeRecord(value: unknown): PublishedSoundscape | nul
     ceilingHz,
     bands,
     sources,
+    createdAt: typeof value.createdAt === "string" ? value.createdAt : null,
+  };
+}
+
+/**
+ * A published soundscape as it appears in a *list* — enough to recognise and
+ * choose one, and nothing else.
+ *
+ * A soundscape record carries up to {@link MAX_SOUNDSCAPE_RECORDINGS} entries,
+ * so a picker that parsed every record in full would hold megabytes of band
+ * values it never draws. The dates and the count are all a chooser shows, and
+ * both are already written at the top of the record.
+ */
+export type SoundscapeSummary = {
+  title: string;
+  note: string | null;
+  /** Distinct local dates the recordings cover, earliest first. */
+  dates: string[];
+  recordingCount: number;
+  createdAt: string | null;
+};
+
+/**
+ * Summarise a stored record without keeping its recordings. Returns null for
+ * anything unusable — same bar as {@link parseSoundscapeRecord}, so a listing
+ * never offers a soundscape that would fail to draw once opened.
+ */
+export function parseSoundscapeSummary(value: unknown): SoundscapeSummary | null {
+  if (!isRecordValue(value)) return null;
+  const recordings = Array.isArray(value.recordings) ? value.recordings : [];
+  if (recordings.length === 0) return null;
+  // `dates` is written at publish time; older or hand-written records without
+  // it fall back to reading the dates off the recordings themselves.
+  const dates = Array.isArray(value.dates)
+    ? [...new Set(value.dates.filter((entry): entry is string => typeof entry === "string"))].sort()
+    : [
+        ...new Set(
+          recordings.flatMap((entry) =>
+            isRecordValue(entry) && typeof entry.date === "string" ? [entry.date] : [],
+          ),
+        ),
+      ].sort();
+  return {
+    title: typeof value.title === "string" ? value.title : "",
+    note: typeof value.note === "string" && value.note.trim() ? value.note.trim() : null,
+    dates,
+    recordingCount: recordings.length,
     createdAt: typeof value.createdAt === "string" ? value.createdAt : null,
   };
 }

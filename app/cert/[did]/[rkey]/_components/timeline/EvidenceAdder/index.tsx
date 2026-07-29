@@ -10,6 +10,7 @@ import {
   Loader2Icon,
   MicIcon,
   TreesIcon,
+  WavesIcon,
   type LucideIcon,
 } from "lucide-react";
 import { useTranslations } from "next-intl";
@@ -42,6 +43,8 @@ import { NatureEvidencePicker } from "./NatureEvidencePicker";
 import { NatureCsvUpload } from "./NatureCsvUpload";
 import { FileEvidencePicker } from "./FileEvidencePicker";
 import { ImageEvidencePicker } from "./ImageEvidencePicker";
+import { SoundscapeEvidencePicker } from "./SoundscapeEvidencePicker";
+import { hasPublishedSoundscapes } from "@/app/_lib/soundscape-record";
 import {
   hasTimelineSourceData,
   type EvidenceTab,
@@ -55,6 +58,7 @@ export type { TimelineMutationPermission, TimelineSourceData } from "./types";
 const EVIDENCE_TABS: Array<{ id: EvidenceTab; icon: LucideIcon }> = [
   { id: "image", icon: ImageIcon },
   { id: "audio", icon: MicIcon },
+  { id: "soundscape", icon: WavesIcon },
   { id: "trees", icon: TreesIcon },
   { id: "nature", icon: BinocularsIcon },
   { id: "files", icon: FileTextIcon },
@@ -85,6 +89,9 @@ export function EvidenceAdder({
 }) {
   const evidenceT = useTranslations("bumicert.detail.evidenceAdder");
   const [activeTab, setActiveTab] = useState<EvidenceTab | null>(null);
+  // A soundscape is only worth offering when this account has published one;
+  // a project with no recordings behind it never grows the extra button.
+  const [soundscapesAvailable, setSoundscapesAvailable] = useState(false);
   const [caption, setCaption] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -100,19 +107,36 @@ export function EvidenceAdder({
   const tabLabels: Record<EvidenceTab, string> = {
     image: evidenceT("tabs.images"),
     audio: evidenceT("tabs.audio"),
+    soundscape: evidenceT("tabs.soundscape"),
     trees: evidenceT("tabs.trees"),
     nature: evidenceT("tabs.biodiversity"),
     files: evidenceT("tabs.files"),
   };
+  // Image and file uploads need nothing from the account; the soundscape
+  // picker reads its own list. The rest share one load of the org's evidence.
+  const activeTabNeedsSources =
+    activeTab !== null && activeTab !== "image" && activeTab !== "files" && activeTab !== "soundscape";
+
   useEffect(() => {
-    if (activeTab === null || activeTab === "image" || activeTab === "files" || sourceState.status !== "idle") {
+    const controller = new AbortController();
+    setSoundscapesAvailable(false);
+    hasPublishedSoundscapes(organizationDid, controller.signal)
+      .then((available) => {
+        if (!controller.signal.aborted) setSoundscapesAvailable(available);
+      })
+      .catch(() => {});
+    return () => controller.abort();
+  }, [organizationDid]);
+
+  useEffect(() => {
+    if (!activeTabNeedsSources || sourceState.status !== "idle") {
       return;
     }
 
     setSourceState((current) =>
       current.status === "idle" ? { ...current, status: "loading" } : current,
     );
-  }, [activeTab, sourceState.status]);
+  }, [activeTabNeedsSources, sourceState.status]);
 
   useEffect(() => {
     if (sourceState.status !== "loading") {
@@ -258,9 +282,11 @@ export function EvidenceAdder({
     });
   }
 
+  const visibleTabs = EVIDENCE_TABS.filter(
+    (tab) => tab.id !== "soundscape" || soundscapesAvailable,
+  );
   const activeConfig = activeTab ? EVIDENCE_TABS.find((tab) => tab.id === activeTab)! : null;
   const captionTitle = caption.trim() ? titleFromCaption(caption) : null;
-  const activeTabNeedsSources = activeTab !== null && activeTab !== "image" && activeTab !== "files";
   const activeSources = sourceState.data;
 
   function renderAttachmentPanel() {
@@ -290,6 +316,15 @@ export function EvidenceAdder({
         {sourceState.status === "ready" && activeTab === "audio" ? (
           <AudioEvidencePicker
             data={activeSources.audio}
+            caption={caption}
+            captionTitle={captionTitle}
+            isSubmitting={isSubmitting}
+            submitDrafts={submitDrafts}
+          />
+        ) : null}
+        {activeTab === "soundscape" ? (
+          <SoundscapeEvidencePicker
+            organizationDid={organizationDid}
             caption={caption}
             captionTitle={captionTitle}
             isSubmitting={isSubmitting}
@@ -366,7 +401,7 @@ export function EvidenceAdder({
         <div className="flex flex-col gap-2 border-t border-border/60 px-2 py-2 sm:flex-row sm:items-center sm:justify-between">
           <TooltipProvider delayDuration={150}>
             <div className="flex flex-wrap items-center gap-1">
-              {EVIDENCE_TABS.map(({ id, icon: Icon }) => (
+              {visibleTabs.map(({ id, icon: Icon }) => (
                 <Tooltip key={id}>
                   <TooltipTrigger asChild>
                     <Button

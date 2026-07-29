@@ -8,13 +8,22 @@
  * out readers of a feed post.
  */
 
-import { getPdsRecord, parseAtUri, resolvePdsHost, blobUrl } from "./pds";
+import {
+  getPdsRecord,
+  listLatestPdsRecords,
+  listRepoCollections,
+  parseAtUri,
+  resolvePdsHost,
+  blobUrl,
+} from "./pds";
 import {
   buildSoundscapeRecord,
   parseSoundscapeRecord,
+  parseSoundscapeSummary,
   SOUNDSCAPE_COLLECTION,
   type PublishedSoundscape,
   type SoundscapeDraft,
+  type SoundscapeSummary,
 } from "@/lib/soundscape/record";
 
 export type CreatedSoundscape = { uri: string; cid: string; rkey: string; did: string };
@@ -50,6 +59,50 @@ export async function fetchPublishedSoundscape(
   const record = await getPdsRecord(did, SOUNDSCAPE_COLLECTION, rkey, signal);
   if (!record) return null;
   return parseSoundscapeRecord(record.value);
+}
+
+/**
+ * How many published soundscapes a picker offers. A repo accumulates one
+ * record per shared analysis, and each can run to a few hundred kilobytes, so
+ * a listing takes the newest handful rather than the whole history.
+ */
+export const SOUNDSCAPE_LIST_LIMIT = 12;
+
+/** A published soundscape, listed. */
+export type ListedSoundscape = SoundscapeSummary & {
+  uri: string;
+  did: string;
+  rkey: string;
+};
+
+/**
+ * Whether an account has ever published a soundscape.
+ *
+ * Cheap on purpose: this decides whether to *offer* soundscapes at all, so it
+ * runs for anyone who can post an update on a project, and an account with no
+ * recordings must not pay for a listing to be told it has nothing.
+ */
+export async function hasPublishedSoundscapes(did: string, signal?: AbortSignal): Promise<boolean> {
+  const collections = await listRepoCollections(did, signal);
+  return collections.includes(SOUNDSCAPE_COLLECTION);
+}
+
+/**
+ * The account's most recently published soundscapes, newest first. Summaries
+ * only — the dial itself is drawn from the full record, read once a reader
+ * actually opens one.
+ */
+export async function listPublishedSoundscapes(
+  did: string,
+  signal?: AbortSignal,
+): Promise<ListedSoundscape[]> {
+  const records = await listLatestPdsRecords(did, SOUNDSCAPE_COLLECTION, SOUNDSCAPE_LIST_LIMIT, signal);
+  return records.flatMap((record) => {
+    const summary = parseSoundscapeSummary(record.value);
+    const parts = parseAtUri(record.uri);
+    if (!summary || !parts) return [];
+    return [{ ...summary, uri: record.uri, did: parts.did, rkey: parts.rkey }];
+  });
 }
 
 /** Same, addressed by AT-URI (how the evidence timeline stores it). */
