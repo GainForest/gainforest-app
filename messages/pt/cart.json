@@ -56,6 +56,8 @@
     "tipTitle": "Adicionar gorjeta",
     "tipNone": "Sem gorjeta",
     "cardsPreviewTitle": "Cartas que você receberá",
+    "cardsUnavailableNote": "As cartas estão disponíveis apenas para doações a projetos qualificados. Esta finalização não inclui nenhuma.",
+    "cardsCheckingNote": "Verificando quais doações vão gerar cartas…",
     "tipDescription": "Sem taxas de plataforma e cobrimos cada taxa de rede. As gorjetas mantêm a GainForest funcionando.",
     "tipSliderLabel": "Valor da gorjeta",
     "tipNudgeTitle": "Pode adicionar uma gorjeta?",

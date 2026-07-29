@@ -56,6 +56,8 @@
     "tipTitle": "Ongeza bahashishi",
     "tipNone": "Hakuna bahashishi",
     "cardsPreviewTitle": "Kadi utakazopokea",
+    "cardsUnavailableNote": "Kadi hupatikana tu kwa michango ya miradi inayostahiki. Malipo haya hayana mchango kama huo.",
+    "cardsCheckingNote": "Tunaangalia ni michango ipi itakayokupa kadi…",
     "tipDescription": "Hakuna ada za jukwaa, na tunalipa kila ada ya mtandao. Bahashishi huweka GainForest ikiendelea.",
     "tipSliderLabel": "Kiasi cha bahashishi",
     "tipNudgeTitle": "Je, unaweza kuongeza bahashishi?",

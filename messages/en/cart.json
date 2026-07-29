@@ -56,6 +56,8 @@
     "tipTitle": "Add a tip",
     "tipNone": "No tip",
     "cardsPreviewTitle": "Cards you’ll receive",
+    "cardsUnavailableNote": "Cards are only available for eligible project donations. This checkout does not include one.",
+    "cardsCheckingNote": "Checking which donations will earn cards…",
     "tipDescription": "No platform fees, and we cover every network fee. Tips keep GainForest running.",
     "tipSliderLabel": "Tip amount",
     "tipNudgeTitle": "Can you add a tip?",

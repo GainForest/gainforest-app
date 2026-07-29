@@ -56,6 +56,8 @@
     "tipTitle": "Añadir propina",
     "tipNone": "Sin propina",
     "cardsPreviewTitle": "Cartas que recibirás",
+    "cardsUnavailableNote": "Las cartas solo están disponibles para donaciones a proyectos elegibles. Esta compra no incluye ninguna.",
+    "cardsCheckingNote": "Comprobando qué donaciones otorgarán cartas…",
     "tipDescription": "Sin comisiones de plataforma y cubrimos cada tarifa de red. Las propinas mantienen a GainForest en marcha.",
     "tipSliderLabel": "Monto de la propina",
     "tipNudgeTitle": "¿Puedes añadir una propina?",
