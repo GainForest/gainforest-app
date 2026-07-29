@@ -23,6 +23,7 @@ import {
   binnedMaxPmn,
   computeRecordingPmn,
   dft384Magnitude,
+  MIN_SEGMENT_SECONDS,
   PMN_BIN_COUNT,
   RecordingTooShortError,
   segmentPmn,
@@ -331,9 +332,62 @@ describe("segmentPmn", () => {
 });
 
 describe("computeRecordingPmn", () => {
-  it("rejects recordings shorter than one 60-second segment", async () => {
+  /**
+   * A tone that bursts once a second over quiet noise: PMN measures energy
+   * above the background, so a steady tone would read as background and score
+   * zero. Evenly spaced bursts make the score roughly proportional to duration.
+   */
+  function burstySamples(sampleRate: number, seconds: number): number[] {
+    const total = Math.round(sampleRate * seconds);
+    const samples = new Array<number>(total);
+    for (let i = 0; i < total; i++) {
+      const noise = (((i * 2654435761) % 1000) / 1000 - 0.5) * 0.01;
+      const inBurst = i % sampleRate < sampleRate / 2;
+      samples[i] = noise + (inBurst ? 0.6 * Math.sin((2 * Math.PI * 48 * i) / WINDOW_LENGTH) : 0);
+    }
+    return samples;
+  }
+
+  it(`rejects recordings shorter than ${MIN_SEGMENT_SECONDS} seconds`, async () => {
     const wav = openWav(makeWavBuffer({ sampleRate: 8000, samples: new Array(1000).fill(0) }));
     await expect(computeRecordingPmn(wav)).rejects.toBeInstanceOf(RecordingTooShortError);
+  });
+
+  it("analyzes a recording shorter than a minute but at or above the minimum", async () => {
+    // A 55-second duty cycle is a common recorder schedule.
+    const wav = openWav(makeWavBuffer({ sampleRate: 1000, samples: burstySamples(1000, 55) }));
+    const result = await computeRecordingPmn(wav);
+    expect(result.minutes).toBe(1);
+    expect(result.pmnPerBand).toHaveLength(PMN_BIN_COUNT);
+    expect(Math.max(...result.pmnPerBand)).toBeGreaterThan(0);
+  });
+
+  it("scales a partial segment to a full minute, so 55s and 60s read alike", async () => {
+    const sampleRate = 1000;
+    const full = await computeRecordingPmn(
+      openWav(makeWavBuffer({ sampleRate, samples: burstySamples(sampleRate, 60) })),
+    );
+    const partial = await computeRecordingPmn(
+      openWav(makeWavBuffer({ sampleRate, samples: burstySamples(sampleRate, 55) })),
+    );
+    const fullPeak = Math.max(...full.pmnPerBand);
+    const partialPeak = Math.max(...partial.pmnPerBand);
+    // Without scaling the shorter clip would sum ~8% less energy.
+    expect(Math.abs(partialPeak - fullPeak) / fullPeak).toBeLessThan(0.05);
+  });
+
+  it("leaves recordings with at least one whole segment untouched", async () => {
+    // 90 seconds: the reference pipeline analyzes the first minute and ignores
+    // the tail, and so do we — published numbers must not shift.
+    const sampleRate = 1000;
+    const minute = await computeRecordingPmn(
+      openWav(makeWavBuffer({ sampleRate, samples: burstySamples(sampleRate, 60) })),
+    );
+    const minuteAndAHalf = await computeRecordingPmn(
+      openWav(makeWavBuffer({ sampleRate, samples: burstySamples(sampleRate, 90) })),
+    );
+    expect(minuteAndAHalf.minutes).toBe(1);
+    expect(minuteAndAHalf.pmnPerBand).toEqual(minute.pmnPerBand);
   });
 });
 

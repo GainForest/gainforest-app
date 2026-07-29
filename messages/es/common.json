@@ -3172,7 +3172,7 @@
       "statusNoOriginal": "El archivo de audio original no está disponible",
       "statusNoTime": "Sin hora de grabación",
       "statusError": "No se pudo analizar esta grabación",
-      "tooShort": "Demasiado corta para analizarla (necesita al menos un minuto completo)"
+      "tooShort": "Demasiado corta para analizarla (necesita al menos 30 segundos)"
     },
     "groups": {
       "title": "Carpetas",

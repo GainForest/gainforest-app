@@ -18,7 +18,14 @@ import type { WavRecording } from "./audiomoth";
 
 export const WINDOW_LENGTH = 384;
 const HALF = WINDOW_LENGTH / 2; // 192 retained FFT bins
-const SEGMENT_SECONDS = 60;
+export const SEGMENT_SECONDS = 60;
+/**
+ * Shortest recording we will still analyze. PMN sums energy across time, so a
+ * shorter clip is scaled up to a 60-second equivalent (see below) — that only
+ * holds while the clip is long enough to be representative, hence a floor at
+ * half a segment. Schedules like AudioMoth's 55-second duty cycle land here.
+ */
+export const MIN_SEGMENT_SECONDS = 30;
 const NOISE_CLAMP_DB = -90;
 const NEIGHBORHOOD_THRESHOLD_DB = 3;
 const NEIGH_ROWS = 9;
@@ -29,7 +36,7 @@ export const PMN_SPECTRUM_BINS = WINDOW_LENGTH / 2;
 
 export class RecordingTooShortError extends Error {
   constructor() {
-    super("Recording shorter than one 60-second segment");
+    super(`Recording shorter than ${MIN_SEGMENT_SECONDS} seconds`);
     this.name = "RecordingTooShortError";
   }
 }
@@ -313,8 +320,17 @@ function thresholdNeighborhood(less: Float64Array, rows: number, cols: number): 
   return out;
 }
 
-/** PMN per FFT bin (length 192) for one 60-second segment. */
-export function segmentPmn(segment: Float32Array | Float64Array): Float64Array {
+/**
+ * PMN per FFT bin (length 192) for one segment.
+ *
+ * Pass `sampleRate` for a segment shorter than 60 seconds and the result is
+ * scaled to what a full segment would have summed to, so a short recording
+ * sits on the same scale as a full one. PMN is a SUM over time steps, so it
+ * grows linearly with duration; without this a 55-second clip would read ~8%
+ * quieter than the same soundscape recorded for a full minute. Full segments
+ * are untouched, keeping the numbers identical to the reference pipeline.
+ */
+export function segmentPmn(segment: Float32Array | Float64Array, sampleRate?: number): Float64Array {
   const { data: raw, timeSteps } = spectrogramDb(segment);
   const rolled = smoothNoiseProfile(raw, HALF, timeSteps);
   let mode = dbModePerRow(rolled, HALF, timeSteps);
@@ -329,11 +345,17 @@ export function segmentPmn(segment: Float32Array | Float64Array): Float64Array {
     }
   }
   const ale = thresholdNeighborhood(less, HALF, timeSteps);
+  // Time steps a full 60-second segment would have had, so partial segments
+  // are reported on the same scale. Unknown sample rate -> no scaling.
+  const fullTimeSteps = sampleRate
+    ? Math.floor((Math.floor(sampleRate * SEGMENT_SECONDS) - WINDOW_LENGTH) / WINDOW_LENGTH) + 1
+    : timeSteps;
+  const scale = fullTimeSteps > timeSteps ? fullTimeSteps / timeSteps : 1;
   const pmn = new Float64Array(HALF);
   for (let i = 0; i < HALF; i++) {
     let sum = 0;
     for (let t = 0; t < timeSteps; t++) sum += ale[i * timeSteps + t];
-    pmn[i] = sum;
+    pmn[i] = sum * scale;
   }
   return pmn;
 }
@@ -380,12 +402,22 @@ export type PmnResult = {
   spectrum: number[];
   /** Needed to turn `spectrum` indices back into Hz. */
   sampleRate: number;
+  /**
+   * Segments analyzed. A recording shorter than a minute counts as one
+   * (partial) segment, scaled to a 60-second equivalent.
+   */
   minutes: number;
 };
 
 /**
  * Full-file PMN: split into whole 60-second segments, PMN each, then take the
  * per-bin max across all segments (matching process.py's groupby-max).
+ *
+ * A recording shorter than one segment but at least `MIN_SEGMENT_SECONDS` is
+ * analyzed as a single partial segment, scaled to what a full minute would
+ * have summed to. Recordings with at least one full segment are unchanged:
+ * their leftover tail is still ignored, exactly as the reference pipeline
+ * does, so published numbers never shift under an existing recording.
  *
  * Banding happens once, at the end, on the per-bin maxima. That is exactly
  * equivalent to banding every segment and taking the max of those (max over
@@ -396,15 +428,23 @@ export async function computeRecordingPmn(
   recording: WavRecording,
   onProgress?: (fraction: number) => void,
 ): Promise<PmnResult> {
-  const segmentSamples = Math.floor(recording.sampleRate * SEGMENT_SECONDS);
-  const minutes = Math.floor(recording.totalSamples / segmentSamples);
-  if (minutes < 1) throw new RecordingTooShortError();
+  const fullSegmentSamples = Math.floor(recording.sampleRate * SEGMENT_SECONDS);
+  const minSegmentSamples = Math.floor(recording.sampleRate * MIN_SEGMENT_SECONDS);
+  const fullSegments = Math.floor(recording.totalSamples / fullSegmentSamples);
+  if (fullSegments < 1 && recording.totalSamples < minSegmentSamples) throw new RecordingTooShortError();
+
+  // Whole segments when there are any; otherwise the whole (short) recording,
+  // trimmed to whole analysis windows.
+  const minutes = Math.max(1, fullSegments);
+  const segmentSamples =
+    fullSegments >= 1 ? fullSegmentSamples : Math.floor(recording.totalSamples / WINDOW_LENGTH) * WINDOW_LENGTH;
+  if (segmentSamples < WINDOW_LENGTH) throw new RecordingTooShortError();
 
   const spectrumMax = new Float64Array(HALF);
   const segment = new Float32Array(segmentSamples);
   for (let m = 0; m < minutes; m++) {
     recording.readWindow(m * segmentSamples, segment);
-    const pmn192 = segmentPmn(segment);
+    const pmn192 = segmentPmn(segment, recording.sampleRate);
     for (let f = 0; f < HALF; f++) {
       if (pmn192[f] > spectrumMax[f]) spectrumMax[f] = pmn192[f];
     }
