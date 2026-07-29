@@ -71,7 +71,7 @@ import {
   FREQUENCY_BANDS,
   nyquistHz,
 } from "@/lib/soundscape/analysis";
-import { computeRecordingPmn, RecordingTooShortError } from "@/lib/soundscape/pmn";
+import { computeRecordingPmn, MIN_SEGMENT_SECONDS, RecordingTooShortError } from "@/lib/soundscape/pmn";
 import {
   formatWindowMinute,
   FULL_DAY_WINDOW,
@@ -1376,7 +1376,7 @@ function StatusLabel({ entry, state }: { entry: LibraryRecording; state: Analysi
     case "error":
       return (
         <span className="text-destructive">
-          {state.errorKind === "tooShort" ? t("tooShort") : t("statusError")}
+          {state.errorKind === "tooShort" ? t("tooShort", { seconds: MIN_SEGMENT_SECONDS }) : t("statusError")}
         </span>
       );
     case "downloading":

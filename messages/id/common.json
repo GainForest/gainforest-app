@@ -3172,7 +3172,7 @@
       "statusNoOriginal": "File audio asli tidak tersedia",
       "statusNoTime": "Tidak ada waktu rekaman",
       "statusError": "Rekaman ini tidak dapat dianalisis",
-      "tooShort": "Terlalu pendek untuk dianalisis (butuh minimal 30 detik)"
+      "tooShort": "Terlalu pendek untuk dianalisis (butuh minimal {seconds} detik)"
     },
     "groups": {
       "title": "Folder",

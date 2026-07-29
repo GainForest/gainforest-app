@@ -3172,7 +3172,7 @@
       "statusNoOriginal": "O arquivo de áudio original não está disponível",
       "statusNoTime": "Sem horário de gravação",
       "statusError": "Não foi possível analisar esta gravação",
-      "tooShort": "Curta demais para ser analisada (precisa de pelo menos 30 segundos)"
+      "tooShort": "Curta demais para ser analisada (precisa de pelo menos {seconds} segundos)"
     },
     "groups": {
       "title": "Pastas",

@@ -3172,7 +3172,7 @@
       "statusNoOriginal": "The original audio file isn't available",
       "statusNoTime": "No recording time",
       "statusError": "Couldn't analyze this recording",
-      "tooShort": "Too short to analyze (needs at least 30 seconds)"
+      "tooShort": "Too short to analyze (needs at least {seconds} seconds)"
     },
     "groups": {
       "title": "Folders",

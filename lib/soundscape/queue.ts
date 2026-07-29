@@ -19,9 +19,9 @@ export type AnalysisState = {
  * Whether a recording is still worth (re)queuing.
  *
  * Missing state means it was never touched, so it counts as pending. A
- * "too short" failure is deterministic — the file will never contain a full
- * 60-second segment — so it must not inflate the retry count, otherwise the
- * Analyze button keeps offering work that can never succeed.
+ * "too short" failure is deterministic — the file will never be long enough
+ * for the PMN pipeline's minimum — so it must not inflate the retry count,
+ * otherwise the Analyze button keeps offering work that can never succeed.
  */
 export function isRetryable(state: AnalysisState | undefined): boolean {
   if (!state || state.status === "idle") return true;

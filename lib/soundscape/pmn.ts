@@ -21,9 +21,19 @@ const HALF = WINDOW_LENGTH / 2; // 192 retained FFT bins
 export const SEGMENT_SECONDS = 60;
 /**
  * Shortest recording we will still analyze. PMN sums energy across time, so a
- * shorter clip is scaled up to a 60-second equivalent (see below) — that only
- * holds while the clip is long enough to be representative, hence a floor at
- * half a segment. Schedules like AudioMoth's 55-second duty cycle land here.
+ * shorter clip is scaled up to a 60-second equivalent (see `segmentPmn`).
+ *
+ * That correction is good but not perfect: the background-noise floor is
+ * estimated from the clip itself, and a shorter clip catches fewer of the
+ * loud moments the estimate is drawn from, so short recordings still read a
+ * little quiet. Measured against the same synthetic 48 kHz dawn chorus:
+ * 55 s lands within ~1% of a full minute, 30 s within ~5-13% (worst in the
+ * low bands). Hence the floor at half a segment — below that the numbers stop
+ * being comparable with full-minute recordings on the same dial.
+ *
+ * Within one library this bias is invisible as long as the schedule is
+ * consistent (every file 55 s reads like every other file). It only shows as
+ * a small step where a library MIXES durations.
  */
 export const MIN_SEGMENT_SECONDS = 30;
 const NOISE_CLAMP_DB = -90;

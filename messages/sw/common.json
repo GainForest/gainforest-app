@@ -3172,7 +3172,7 @@
       "statusNoOriginal": "Faili asili ya sauti haipatikani",
       "statusNoTime": "Hakuna muda wa rekodi",
       "statusError": "Rekodi hii haikuweza kuchambuliwa",
-      "tooShort": "Ni fupi mno kuchambuliwa (inahitaji angalau sekunde 30)"
+      "tooShort": "Ni fupi mno kuchambuliwa (inahitaji angalau sekunde {seconds})"
     },
     "groups": {
       "title": "Folda",
