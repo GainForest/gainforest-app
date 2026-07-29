@@ -140,6 +140,21 @@ function featureCollection(features: GeoJSON.Feature[]): GeoJSON.FeatureCollecti
   return { type: "FeatureCollection", features };
 }
 
+/** Minimum span, in degrees, for the camera box around an organization's own
+ *  location. A bare coordinate has no extent at all and a generalised location
+ *  is only a few km across; without a floor the camera slams to street level
+ *  when all the viewer asked for is "where is this organization". */
+const ORG_LOCATION_MIN_SPAN = 0.5;
+
+function withMinSpan(bounds: LngLatBounds, min = ORG_LOCATION_MIN_SPAN): LngLatBounds {
+  const [west, south, east, north] = bounds;
+  const halfWidth = Math.max((east - west) / 2, min / 2);
+  const halfHeight = Math.max((north - south) / 2, min / 2);
+  const centerX = (west + east) / 2;
+  const centerY = (south + north) / 2;
+  return [centerX - halfWidth, centerY - halfHeight, centerX + halfWidth, centerY + halfHeight];
+}
+
 export function GlobeExplorer({ orgDid = null, orgName = null, orgIdentifier = null, project = null }: GlobeExplorerProps) {
   const t = useTranslations("marketplace.globe");
   const mode: GlobeMode = project ? "project" : orgDid ? "organization" : "global";
@@ -197,11 +212,16 @@ export function GlobeExplorer({ orgDid = null, orgName = null, orgIdentifier = n
   // ── Sites of the focused organization ────────────────────────────────────
   const [siteState, setSiteState] = useState<SiteState>(EMPTY_SITE_STATE);
   const [selectedSiteUri, setSelectedSiteUri] = useState<string | null>(null);
+  // Whether the viewer explicitly asked to see every site at once. Focusing an
+  // organization starts at its own location instead, so this stays false until
+  // "All sites" is picked.
+  const [fitAllSites, setFitAllSites] = useState(false);
   const [boundsNonce, setBoundsNonce] = useState(0);
   const bumpBounds = useCallback(() => setBoundsNonce((n) => n + 1), []);
 
   useEffect(() => {
     setSelectedSiteUri(null);
+    setFitAllSites(false);
     if (!focusDid || mode === "project") {
       setSiteState(EMPTY_SITE_STATE);
       return;
@@ -613,6 +633,28 @@ export function GlobeExplorer({ orgDid = null, orgName = null, orgIdentifier = n
     [highlightFeatures],
   );
 
+  // Where the camera goes when an organization is focused without a specific
+  // site picked: the place the organization says it is based. Falling back to
+  // the union of its project sites would frame the average of places it works
+  // in, which can be an ocean between two distant sites.
+  const orgLocationBounds = useMemo(() => {
+    if (mode === "project") return null;
+    if (orgLocationUri) {
+      const bounds = geojsonBounds(
+        featureCollection(
+          focusedState.features.filter((feature) => feature.properties?.siteUri === orgLocationUri),
+        ),
+      );
+      if (bounds) return withMinSpan(bounds);
+    }
+    // No mapped geometry for it yet — the roster already carries the same
+    // declared location as a coordinate.
+    if (selectedOrg && typeof selectedOrg.lat === "number" && typeof selectedOrg.lon === "number") {
+      return pointBounds(selectedOrg.lat, selectedOrg.lon, ORG_LOCATION_MIN_SPAN / 2);
+    }
+    return null;
+  }, [mode, orgLocationUri, focusedState.features, selectedOrg]);
+
   useEffect(() => {
     if (!focusDid && mode === "global") return;
     if (selectedSiteUri) {
@@ -623,14 +665,16 @@ export function GlobeExplorer({ orgDid = null, orgName = null, orgIdentifier = n
       }
     }
     if (focusedState.status !== "ready") return;
-    if (focusedState.bounds) {
+    if (!fitAllSites && orgLocationBounds) {
+      setMapBounds(orgLocationBounds);
+    } else if (focusedState.bounds) {
       setMapBounds(focusedState.bounds);
-    } else if (selectedOrg && typeof selectedOrg.lat === "number" && typeof selectedOrg.lon === "number") {
-      setMapBounds(pointBounds(selectedOrg.lat, selectedOrg.lon, 0.5));
+    } else if (orgLocationBounds) {
+      setMapBounds(orgLocationBounds);
     }
     // boundsNonce re-fits on repeat selections of the same org/site.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [focusDid, mode, focusedState, selectedSiteUri, highlightFeatures, selectedOrg, boundsNonce]);
+  }, [focusDid, mode, focusedState, selectedSiteUri, highlightFeatures, orgLocationBounds, fitAllSites, boundsNonce]);
 
   // Extra camera padding so fitted sites are not hidden under the side panel
   // (desktop) or the bottom sheet (mobile).
@@ -676,6 +720,7 @@ export function GlobeExplorer({ orgDid = null, orgName = null, orgIdentifier = n
     (did: string | null) => {
       if (mode !== "global") return;
       setSelectedSiteUri(null);
+      setFitAllSites(false);
       if (!did) {
         void setQueryOrg(null);
         setMapBounds(WORLD_BOUNDS);
@@ -691,6 +736,9 @@ export function GlobeExplorer({ orgDid = null, orgName = null, orgIdentifier = n
   const selectSite = useCallback(
     (uri: string | null) => {
       setSelectedSiteUri(uri);
+      // "All sites" is the only way to ask for the whole footprint; picking a
+      // single site or focusing an org keeps the tighter framing.
+      setFitAllSites(uri === null);
       bumpBounds();
     },
     [bumpBounds],
