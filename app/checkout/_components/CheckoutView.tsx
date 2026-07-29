@@ -36,7 +36,6 @@ import { SocialGlyph } from "@/app/_components/SocialIcon";
 import { blockExplorerUrl } from "@/app/_lib/urls";
 import {
   cartItemKey,
-  MAX_TIP_PERCENT,
   tipAmountUsd,
   useCart,
   type CartItem,
@@ -91,8 +90,8 @@ type CompletedLine = {
 export type CheckoutSideEffects = "live" | "mock";
 
 const TIP_LINE_KEY = "gainforest-tip";
-/** The app's quiet section eyebrow — small, uppercase, tracked, never bold. */
-const SECTION_LABEL = "text-xs font-medium uppercase tracking-[0.16em] text-muted-foreground";
+/** Compact tip choices — replaces the old full-width slider. */
+const TIP_PRESETS = [0, 5, 10, 15, 20] as const;
 const MOCK_RECIPIENT_ADDRESS = "0x1111111111111111111111111111111111111111";
 const MOCK_WALLET_ADDRESS = "0x2222222222222222222222222222222222222222";
 const MOCK_TIP_ADDRESS = "0x3333333333333333333333333333333333333333";
@@ -854,31 +853,20 @@ export function CheckoutView({
       <div className="mt-8 grid gap-x-12 gap-y-8 lg:grid-cols-[minmax(0,1fr)_320px] lg:items-start">
         {/* ── Donation options: divider-separated, no boxes ────────────────── */}
         <div className="min-w-0 divide-y divide-border-soft">
-          {/* Donor identity */}
-          <section className="pb-7">
-            <h2 className={SECTION_LABEL}>{t("donorTitle")}</h2>
+          {/* Anonymity — the control speaks for itself, no eyebrow */}
+          <section className="pb-6">
             {authSession.isLoggedIn ? (
-              <label className="mt-3 flex min-w-0 cursor-pointer items-start gap-3">
-                <Checkbox checked={anonymous} onCheckedChange={(checked) => setAnonymous(checked === true)} className="mt-0.5" disabled={paying} />
-                <span className="min-w-0">
-                  <span className="block text-sm text-foreground">{t("anonymousLabel")}</span>
-                  <span className="mt-1 block text-sm leading-6 text-muted-foreground">{t("anonymousHint")}</span>
-                </span>
+              <label className="flex cursor-pointer items-center justify-between gap-4">
+                <span className="text-sm text-foreground">{t("anonymousLabel")}</span>
+                <Checkbox checked={anonymous} onCheckedChange={(checked) => setAnonymous(checked === true)} disabled={paying} />
               </label>
             ) : (
-              <p className="mt-3 text-sm leading-6 text-muted-foreground">{t("signedOutNote")}</p>
+              <p className="text-sm text-muted-foreground">{t("signedOutNote")}</p>
             )}
           </section>
 
-          {/* Optional message */}
-          <section className="py-7">
-            <div className="flex items-baseline justify-between gap-3">
-              <h2 className={SECTION_LABEL}>{t("messageTitle")}</h2>
-              <span className="shrink-0 text-xs tabular-nums text-muted-foreground/60" aria-hidden>
-                {message.length}/{DONATION_MESSAGE_MAX_LENGTH}
-              </span>
-            </div>
-            <p className="mt-2 text-sm leading-6 text-muted-foreground">{t("messageHint")}</p>
+          {/* Message — placeholder is the label */}
+          <section className="py-6">
             <Textarea
               value={message}
               onChange={(event) => setMessage(event.target.value.slice(0, DONATION_MESSAGE_MAX_LENGTH))}
@@ -886,19 +874,19 @@ export function CheckoutView({
               disabled={paying}
               rows={3}
               placeholder={t("messagePlaceholder")}
-              aria-label={t("messageTitle")}
-              className="mt-3 min-h-20 resize-none rounded-xl border-0 bg-muted/40 shadow-none focus-visible:bg-muted/60 dark:bg-muted/40"
+              aria-label={t("messagePlaceholder")}
+              className="min-h-20 resize-none rounded-xl border-0 bg-muted/40 shadow-none focus-visible:bg-muted/60 dark:bg-muted/40"
             />
-            {anonymous || !authSession.isLoggedIn ? (
-              <p className="mt-2 text-xs leading-5 text-muted-foreground">{t("messageAnonymousNote")}</p>
-            ) : null}
+            <div className="mt-2 flex items-center justify-between gap-3 text-xs text-muted-foreground">
+              <span className="min-w-0 truncate">{anonymous || !authSession.isLoggedIn ? t("messageAnonymousNote") : ""}</span>
+              <span className="shrink-0 tabular-nums text-muted-foreground/60" aria-hidden>{message.length}/{DONATION_MESSAGE_MAX_LENGTH}</span>
+            </div>
           </section>
 
           {/* Wallet */}
-          <section className="py-7">
-            <h2 className={SECTION_LABEL}>{t("walletTitle")}</h2>
+          <section className="py-6">
             {wallet ? (
-              <div className="mt-3 flex items-center justify-between gap-3 rounded-2xl bg-muted/40 px-4 py-3">
+              <div className="flex items-center justify-between gap-3 rounded-2xl bg-muted/40 px-4 py-3">
                 <div className="min-w-0">
                   <p className="truncate font-mono text-sm text-foreground">{shortWallet(wallet.address)}</p>
                   <p className="mt-0.5 text-xs text-muted-foreground">
@@ -908,8 +896,8 @@ export function CheckoutView({
                 <BadgeCheckIcon className="size-5 shrink-0 text-primary" aria-hidden />
               </div>
             ) : (
-              <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-3">
-                <p className="min-w-0 flex-1 text-sm leading-6 text-muted-foreground">{t("walletHint")}</p>
+              <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-3">
+                <p className="min-w-0 text-sm text-muted-foreground">{t("walletHint")}</p>
                 <Button size="sm" onClick={() => void handleConnect()} disabled={connecting}>
                   <WalletIcon className="size-4" /> {connecting ? t("connecting") : t("connectWallet")}
                 </Button>
@@ -918,66 +906,32 @@ export function CheckoutView({
             )}
           </section>
 
-          {/* Tip */}
+          {/* Tip — compact preset chips, not a full-width scrubber */}
           {tipEnabled ? (
-            <section className="py-7 last:pb-0">
-              <h2 className={SECTION_LABEL}>{t("tipTitle")}</h2>
-              <p className="mt-2 text-sm leading-6 text-muted-foreground">{t("tipDescription")}</p>
-              <div className="relative mt-11">
-                {/* Value bubble tracks the slider thumb, MaEarth-style. */}
-                <div
-                  className="pointer-events-none absolute -top-9 -translate-x-1/2"
-                  style={{
-                    left: `calc(${(tipPercent / MAX_TIP_PERCENT) * 100}% + ${(0.5 - tipPercent / MAX_TIP_PERCENT) * 16}px)`,
-                  }}
-                  aria-hidden
-                >
-                  <span className="block whitespace-nowrap rounded-lg bg-foreground px-2.5 py-1 text-xs font-medium text-background">
-                    {tipPercent}% (${tipUsd.toFixed(2)})
-                  </span>
-                  <span className="mx-auto block size-0 border-x-[5px] border-t-[5px] border-x-transparent border-t-foreground" />
-                </div>
-                <input
-                  type="range"
-                  min={0}
-                  max={MAX_TIP_PERCENT}
-                  step={1}
-                  value={tipPercent}
-                  disabled={paying}
-                  onChange={(event) => setTipPercent(Number(event.target.value))}
-                  className="w-full accent-primary"
-                  aria-label={t("tipSliderLabel")}
-                />
-                <div className="mt-1.5 flex justify-between text-[10px] text-muted-foreground">
-                  <span>0%</span>
-                  <span>{MAX_TIP_PERCENT}%</span>
-                </div>
+            <section className="py-6 last:pb-0">
+              <div className="flex items-center justify-between gap-3">
+                <span className="text-sm text-foreground">{t("tipTitle")}</span>
+                <span className="text-sm tabular-nums text-muted-foreground">${tipUsd.toFixed(2)}</span>
               </div>
-
-              {/* Gentle nudge when the slider sits at zero — never blocking. */}
-              {tipPercent === 0 ? (
-                <div className="mt-5 rounded-2xl bg-muted/50 px-4 py-5 text-center">
-                  <p className="font-instrument text-xl italic text-foreground">{t("tipNudgeTitle")}</p>
-                  <p className="mt-1 text-sm leading-6 text-muted-foreground">{t("tipNudgeBody")}</p>
-                  <div className="mt-3 flex flex-wrap items-center justify-center gap-2">
-                    {[5, 10, 15].map((percent) => (
-                      <button
-                        key={percent}
-                        type="button"
-                        disabled={paying}
-                        onClick={() => setTipPercent(percent)}
-                        className="rounded-full bg-background/70 px-4 py-1.5 text-xs font-medium text-foreground ring-1 ring-foreground/10 transition-colors hover:bg-background disabled:pointer-events-none disabled:opacity-50"
-                        aria-label={t("tipNudgeSet", { percent })}
-                      >
-                        {percent}%
-                      </button>
-                    ))}
-                  </div>
-                  <p className="mt-3 text-xs text-muted-foreground">
-                    {t("yourTip")} <span className="text-foreground">${tipUsd.toFixed(2)}</span>
-                  </p>
-                </div>
-              ) : null}
+              <div className="mt-3 flex flex-wrap gap-1.5">
+                {TIP_PRESETS.map((percent) => {
+                  const active = tipPercent === percent;
+                  return (
+                    <button
+                      key={percent}
+                      type="button"
+                      disabled={paying}
+                      aria-pressed={active}
+                      onClick={() => setTipPercent(percent)}
+                      className={`rounded-full px-3.5 py-1.5 text-xs font-medium transition-colors disabled:pointer-events-none disabled:opacity-50 ${
+                        active ? "bg-primary text-primary-foreground" : "bg-muted/60 text-foreground hover:bg-muted"
+                      }`}
+                    >
+                      {percent === 0 ? t("tipNone") : `${percent}%`}
+                    </button>
+                  );
+                })}
+              </div>
             </section>
           ) : null}
         </div>
@@ -985,9 +939,7 @@ export function CheckoutView({
         {/* ── Order summary (sticky soft surface, no hard border) ──────────── */}
         <aside className="lg:sticky lg:top-24">
           <div className="rounded-3xl bg-card/70 p-6 shadow-sm shadow-primary/5 ring-1 ring-foreground/5 backdrop-blur">
-            <h2 className={SECTION_LABEL}>{t("summaryTitle")}</h2>
-
-            <ul className="mt-4 space-y-2.5">
+            <ul className="space-y-2.5">
               {payableItems.map((item) => {
                 const key = cartItemKey(item);
                 const line = lineStates[key];
@@ -1062,14 +1014,6 @@ export function CheckoutView({
             {wallet && wallet.balance !== null && !hasEnoughBalance ? (
               <p className="mt-3 rounded-2xl bg-destructive/10 px-3 py-2 text-sm text-destructive">
                 {t("insufficientBalance")}
-              </p>
-            ) : null}
-
-            {payableItems.length > 1 || (tipEnabled && tipUsd > 0) ? (
-              <p className="mt-4 text-xs leading-5 text-muted-foreground">
-                {FACILITATOR_WALLET_ADDRESS
-                  ? t("singleApprovalNote")
-                  : t("multiApprovalNote", { count: payableItems.length + (tipEnabled && tipUsd > 0 ? 1 : 0) })}
               </p>
             ) : null}
 
