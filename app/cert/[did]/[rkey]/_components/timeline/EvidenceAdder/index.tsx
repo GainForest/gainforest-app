@@ -9,8 +9,8 @@ import {
   ImageIcon,
   Loader2Icon,
   MicIcon,
+  MusicIcon,
   TreesIcon,
-  WavesIcon,
   type LucideIcon,
 } from "lucide-react";
 import { useTranslations } from "next-intl";
@@ -58,7 +58,7 @@ export type { TimelineMutationPermission, TimelineSourceData } from "./types";
 const EVIDENCE_TABS: Array<{ id: EvidenceTab; icon: LucideIcon }> = [
   { id: "image", icon: ImageIcon },
   { id: "audio", icon: MicIcon },
-  { id: "soundscape", icon: WavesIcon },
+  { id: "soundscape", icon: MusicIcon },
   { id: "trees", icon: TreesIcon },
   { id: "nature", icon: BinocularsIcon },
   { id: "files", icon: FileTextIcon },

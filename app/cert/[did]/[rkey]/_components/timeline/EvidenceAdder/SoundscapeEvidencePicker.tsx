@@ -15,7 +15,7 @@
  */
 
 import { useEffect, useState } from "react";
-import { Loader2Icon, WavesIcon } from "lucide-react";
+import { Loader2Icon, MusicIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
 import {
   listPublishedSoundscapes,
@@ -117,7 +117,7 @@ export function SoundscapeEvidencePicker({
             key={soundscape.uri}
             selected={selected.has(soundscape.uri)}
             onToggle={() => toggle(soundscape.uri)}
-            icon={WavesIcon}
+            icon={MusicIcon}
             primary={soundscape.title.trim() || evidenceT("untitledSoundscape")}
             secondary={soundscapeT("summary", {
               count: soundscape.recordingCount,
