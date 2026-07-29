@@ -2100,7 +2100,7 @@
       "deleteSelected": "Excluir",
       "selectAria": "Selecionar {name}",
       "deleteConfirmTitle": "Excluir {count, plural, one {# gravação} other {# gravações}}?",
-      "deleteConfirmBody": "As gravações selecionadas serão excluídas permanentemente — os arquivos originais arquivados, as prévias reproduzíveis e os espectrogramas também são apagados. Isso não pode ser desfeito.",
+      "deleteConfirmBody": "As gravações selecionadas serão excluídas permanentemente — os arquivos originais arquivados, as prévias reproduzíveis, os espectrogramas e todas as identificações marcadas nelas também são apagados. Isso não pode ser desfeito.",
       "deleteConfirmCancel": "Cancelar",
       "deleteConfirmAction": "Excluir {count, plural, one {# gravação} other {# gravações}}",
       "deleteProgress": "Excluindo… {done} de {total}",
@@ -3302,7 +3302,8 @@
     "cancel": "Cancelar",
     "renameFailed": "Não foi possível renomear a pasta. Tente novamente.",
     "deleteTitle": "Excluir “{name}”?",
-    "deleteBody": "{count, plural, =0 {A pasta será excluída permanentemente. Isso não pode ser desfeito.} one {A pasta e a # gravação nela serão excluídas permanentemente — o arquivo original arquivado, a prévia reproduzível, o espectrograma e a análise também são apagados. Isso não pode ser desfeito.} other {A pasta e as # gravações nela serão excluídas permanentemente — os arquivos originais arquivados, as prévias reproduzíveis, os espectrogramas e as análises também são apagados. Isso não pode ser desfeito.}}",
+    "deleteBody": "{count, plural, =0 {A pasta será excluída permanentemente. Isso não pode ser desfeito.} one {A pasta e a # gravação nela serão excluídas permanentemente — o arquivo original arquivado, a prévia reproduzível, o espectrograma, a análise e todas as identificações marcadas nela também são apagados. Isso não pode ser desfeito.} other {A pasta e as # gravações nela serão excluídas permanentemente — os arquivos originais arquivados, as prévias reproduzíveis, os espectrogramas, as análises e todas as identificações marcadas nelas também são apagados. Isso não pode ser desfeito.}}",
+    "identificationsIncluded": "{count, plural, one {Isso inclui # identificação salva, que também será excluída.} other {Isso inclui # identificações salvas, que também serão excluídas.}}",
     "deleteProgress": "Excluindo… {done} de {total}",
     "deletePartial": "{count, plural, one {# gravação não pôde ser excluída} other {# gravações não puderam ser excluídas}}, então a pasta foi mantida. Tente novamente.",
     "deleteFailed": "Não foi possível excluir a pasta. Tente novamente."

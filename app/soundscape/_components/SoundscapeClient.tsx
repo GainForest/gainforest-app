@@ -45,7 +45,7 @@ import { useTranslations } from "next-intl";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { listAllRecordings, type AcAudioListItem } from "@/app/_lib/ac-audio";
-import { deleteRecordings } from "@/app/_lib/ac-audio-delete";
+import { countIdentificationsOn, deleteRecordings } from "@/app/_lib/ac-audio-delete";
 import {
   applyAcDeploymentEdit,
   deleteAcDeployment,
@@ -819,6 +819,7 @@ export function SoundscapeClient({ sessionDid }: { sessionDid: string | null }) 
           <DeleteFolderModal
             name={folder.name}
             count={inFolder.length}
+            countIdentifications={() => countIdentificationsOn(inFolder)}
             onConfirm={async (onProgress) => {
               const { deleted, failed } = await deleteRecordings({
                 items: inFolder,

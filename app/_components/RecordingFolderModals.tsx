@@ -12,7 +12,7 @@
  * page-level context.
  */
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import { FolderInputIcon, Loader2Icon, PencilIcon, Trash2Icon, TriangleAlertIcon } from "lucide-react";
 
@@ -111,22 +111,61 @@ export function RenameFolderModal({
 }
 
 /**
+ * Counts the identifications a delete would take with it, for the dialog's
+ * warning. The listing can be slow on a big repo and can fail outright, so it
+ * only ever *adds* a number to a warning that already says identifications go
+ * — it never gates the button.
+ */
+function useIdentificationCount(count: (() => Promise<number>) | undefined): number | null {
+  const [identifications, setIdentifications] = useState<number | null>(null);
+  useEffect(() => {
+    if (!count) return;
+    let cancelled = false;
+    count()
+      .then((value) => {
+        if (!cancelled) setIdentifications(value);
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, [count]);
+  return identifications;
+}
+
+/** The "… including N identifications" line, once the count is in. */
+function IdentificationNote({ count }: { count: number | null }) {
+  const t = useTranslations("common.recordingFolders");
+  if (count === null || count === 0) return null;
+  return (
+    <p className="rounded-lg bg-warn/10 px-2.5 py-1.5 text-xs font-medium text-foreground/75">
+      {t("identificationsIncluded", { count })}
+    </p>
+  );
+}
+
+/**
  * Delete a folder and everything filed in it. Emptying the folder first and
  * leaving it behind would only strand the recordings, so the dialog is
- * explicit about the recordings going too.
+ * explicit about the recordings — and the identifications drawn on them —
+ * going too.
  */
 export function DeleteFolderModal({
   name,
   count,
+  countIdentifications,
   onConfirm,
 }: {
   name: string;
   /** Recordings in the folder — all of them go with it. */
   count: number;
+  /** Resolves how many identifications are drawn on those recordings. */
+  countIdentifications?: () => Promise<number>;
   onConfirm: (onProgress: (done: number, total: number) => void) => Promise<void>;
 }) {
   const t = useTranslations("common.recordingFolders");
   const close = useCloseModal();
+  const identifications = useIdentificationCount(countIdentifications);
   const [pending, setPending] = useState(false);
   const [progress, setProgress] = useState<{ done: number; total: number } | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -157,6 +196,7 @@ export function DeleteFolderModal({
         </ModalTitle>
         <ModalDescription>{t("deleteBody", { count })}</ModalDescription>
       </ModalHeader>
+      <IdentificationNote count={identifications} />
       {error ? (
         <p className="flex items-center gap-1.5 rounded-lg bg-warn/10 px-2.5 py-1.5 text-xs font-medium text-foreground/75">
           <TriangleAlertIcon className="size-3.5 shrink-0 text-warn" /> {error}

@@ -2100,7 +2100,7 @@
       "deleteSelected": "Futa",
       "selectAria": "Chagua {name}",
       "deleteConfirmTitle": "Futa {count, plural, one {rekodi #} other {rekodi #}}?",
-      "deleteConfirmBody": "Rekodi zilizochaguliwa zitafutwa kabisa — faili halisi zilizohifadhiwa, vionjo vinavyochezeka na spektrogramu zote zitaondolewa. Hili haliwezi kutenduliwa.",
+      "deleteConfirmBody": "Rekodi zilizochaguliwa zitafutwa kabisa — faili halisi zilizohifadhiwa, vionjo vinavyochezeka, spektrogramu na kila utambulisho uliowekwa juu yake vyote vitaondolewa. Hili haliwezi kutenduliwa.",
       "deleteConfirmCancel": "Ghairi",
       "deleteConfirmAction": "Futa {count, plural, one {rekodi #} other {rekodi #}}",
       "deleteProgress": "Inafuta… {done} kati ya {total}",
@@ -3302,7 +3302,8 @@
     "cancel": "Ghairi",
     "renameFailed": "Jina la folda halikuweza kubadilishwa. Tafadhali jaribu tena.",
     "deleteTitle": "Futa “{name}”?",
-    "deleteBody": "{count, plural, =0 {Folda itafutwa kabisa. Hili haliwezi kutenduliwa.} one {Folda pamoja na rekodi # iliyomo zitafutwa kabisa — faili halisi iliyohifadhiwa, kionjo kinachochezeka, spektrogramu na uchanganuzi wake vyote vitaondolewa. Hili haliwezi kutenduliwa.} other {Folda pamoja na rekodi # zilizomo zitafutwa kabisa — faili halisi zilizohifadhiwa, vionjo vinavyochezeka, spektrogramu na uchanganuzi wake vyote vitaondolewa. Hili haliwezi kutenduliwa.}}",
+    "deleteBody": "{count, plural, =0 {Folda itafutwa kabisa. Hili haliwezi kutenduliwa.} one {Folda pamoja na rekodi # iliyomo zitafutwa kabisa — faili halisi iliyohifadhiwa, kionjo kinachochezeka, spektrogramu, uchanganuzi na kila utambulisho uliowekwa juu yake vyote vitaondolewa. Hili haliwezi kutenduliwa.} other {Folda pamoja na rekodi # zilizomo zitafutwa kabisa — faili halisi zilizohifadhiwa, vionjo vinavyochezeka, spektrogramu, uchanganuzi na kila utambulisho uliowekwa juu yake vyote vitaondolewa. Hili haliwezi kutenduliwa.}}",
+    "identificationsIncluded": "{count, plural, one {Hii inajumuisha utambulisho # uliohifadhiwa, ambao pia utafutwa.} other {Hii inajumuisha utambulisho # uliohifadhiwa, ambao pia utafutwa.}}",
     "deleteProgress": "Inafuta… {done} kati ya {total}",
     "deletePartial": "{count, plural, one {Rekodi #} other {Rekodi #}} haikuweza kufutwa, hivyo folda imebaki. Tafadhali jaribu tena.",
     "deleteFailed": "Folda haikuweza kufutwa. Tafadhali jaribu tena."

@@ -15,6 +15,7 @@
  */
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+
 import { useTranslations } from "next-intl";
 import Link from "next/link";
 import {
@@ -43,7 +44,7 @@ import {
   type AcDeploymentItem,
 } from "@/app/_lib/ac-deployment";
 import { listAllRecordings, moveRecordings, type AcAudioListItem } from "@/app/_lib/ac-audio";
-import { deleteRecordings } from "@/app/_lib/ac-audio-delete";
+import { countIdentificationsOn, deleteRecordings } from "@/app/_lib/ac-audio-delete";
 import {
   DeleteFolderModal,
   MoveRecordingsModal,
@@ -252,15 +253,22 @@ export function AccountAudioViewer({
   const confirmDelete = useCallback(() => {
     const count = selectedUris.size;
     if (count === 0) return;
+    const items = (recordings ?? []).filter((item) => selectedUris.has(item.uri));
     modal.pushModal(
       {
         id: "delete-recordings",
-        content: <DeleteRecordingsModal count={count} onConfirm={performDelete} />,
+        content: (
+          <DeleteRecordingsModal
+            count={count}
+            countIdentifications={() => countIdentificationsOn(items)}
+            onConfirm={performDelete}
+          />
+        ),
       },
       true,
     );
     void modal.show();
-  }, [modal, performDelete, selectedUris.size]);
+  }, [modal, performDelete, recordings, selectedUris]);
 
   /* ── Folder rename / delete (owner or org admin) ────────────────────────
    * A folder is named while an SD card uploads, so its name is the thing most
@@ -302,6 +310,7 @@ export function AccountAudioViewer({
             <DeleteFolderModal
               name={group.name}
               count={group.items.length}
+              countIdentifications={() => countIdentificationsOn(group.items)}
               onConfirm={async (onProgress) => {
                 const { deleted, failed } = await deleteRecordings({
                   items: group.items,
@@ -551,18 +560,24 @@ export function AccountAudioViewer({
 
 /**
  * Warning dialog shown before recordings are removed. Deleting is permanent
- * — the records (and their playable previews and spectrograms) disappear
- * from the profile — so the dialog leads with an explicit warning sign.
+ * — the records (and their playable previews, spectrograms and the
+ * identifications drawn on them) disappear from the profile — so the dialog
+ * leads with an explicit warning sign.
  */
 function DeleteRecordingsModal({
   count,
+  countIdentifications,
   onConfirm,
 }: {
   count: number;
+  /** Resolves how many identifications are drawn on the selected recordings. */
+  countIdentifications?: () => Promise<number>;
   onConfirm: (onProgress: (done: number, total: number) => void) => Promise<void>;
 }) {
   const t = useTranslations("common.audiomoth.recordings");
+  const tFolders = useTranslations("common.recordingFolders");
   const modal = useModal();
+  const [identifications, setIdentifications] = useState<number | null>(null);
   const [pending, setPending] = useState(false);
   const [progress, setProgress] = useState<{ done: number; total: number } | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -571,6 +586,21 @@ function DeleteRecordingsModal({
     await modal.hide();
     modal.popModal();
   };
+
+  /* The count only ever adds a number to a warning that already says
+     identifications go, so a slow or failed listing never gates the button. */
+  useEffect(() => {
+    if (!countIdentifications) return;
+    let cancelled = false;
+    countIdentifications()
+      .then((value) => {
+        if (!cancelled) setIdentifications(value);
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, [countIdentifications]);
 
   const confirm = async () => {
     setPending(true);
@@ -598,6 +628,11 @@ function DeleteRecordingsModal({
         </ModalTitle>
         <ModalDescription>{t("deleteConfirmBody", { count })}</ModalDescription>
       </ModalHeader>
+      {identifications ? (
+        <p className="rounded-lg bg-warn/10 px-2.5 py-1.5 text-xs font-medium text-foreground/75">
+          {tFolders("identificationsIncluded", { count: identifications })}
+        </p>
+      ) : null}
       {error ? (
         <p className="flex items-center gap-1.5 rounded-lg bg-warn/10 px-2.5 py-1.5 text-xs font-medium text-foreground/75">
           <TriangleAlertIcon className="size-3.5 shrink-0 text-warn" /> {error}

@@ -2100,7 +2100,7 @@
       "deleteSelected": "Eliminar",
       "selectAria": "Seleccionar {name}",
       "deleteConfirmTitle": "¿Eliminar {count, plural, one {# grabación} other {# grabaciones}}?",
-      "deleteConfirmBody": "Las grabaciones seleccionadas se eliminarán permanentemente: se borran los archivos originales archivados, las vistas previas reproducibles y los espectrogramas. Esto no se puede deshacer.",
+      "deleteConfirmBody": "Las grabaciones seleccionadas se eliminarán permanentemente: se borran los archivos originales archivados, las vistas previas reproducibles, los espectrogramas y todas las identificaciones marcadas en ellas. Esto no se puede deshacer.",
       "deleteConfirmCancel": "Cancelar",
       "deleteConfirmAction": "Eliminar {count, plural, one {# grabación} other {# grabaciones}}",
       "deleteProgress": "Eliminando… {done} de {total}",
@@ -3302,7 +3302,8 @@
     "cancel": "Cancelar",
     "renameFailed": "No se pudo renombrar la carpeta. Inténtalo de nuevo.",
     "deleteTitle": "¿Eliminar «{name}»?",
-    "deleteBody": "{count, plural, =0 {La carpeta se eliminará permanentemente. Esto no se puede deshacer.} one {La carpeta y la # grabación que contiene se eliminarán permanentemente: se borran el archivo original archivado, la vista previa reproducible, el espectrograma y el análisis. Esto no se puede deshacer.} other {La carpeta y las # grabaciones que contiene se eliminarán permanentemente: se borran los archivos originales archivados, las vistas previas reproducibles, los espectrogramas y los análisis. Esto no se puede deshacer.}}",
+    "deleteBody": "{count, plural, =0 {La carpeta se eliminará permanentemente. Esto no se puede deshacer.} one {La carpeta y la # grabación que contiene se eliminarán permanentemente: se borran el archivo original archivado, la vista previa reproducible, el espectrograma, el análisis y todas las identificaciones marcadas en ella. Esto no se puede deshacer.} other {La carpeta y las # grabaciones que contiene se eliminarán permanentemente: se borran los archivos originales archivados, las vistas previas reproducibles, los espectrogramas, los análisis y todas las identificaciones marcadas en ellas. Esto no se puede deshacer.}}",
+    "identificationsIncluded": "{count, plural, one {Esto incluye # identificación guardada, que también se eliminará.} other {Esto incluye # identificaciones guardadas, que también se eliminarán.}}",
     "deleteProgress": "Eliminando… {done} de {total}",
     "deletePartial": "{count, plural, one {# grabación no se pudo eliminar} other {# grabaciones no se pudieron eliminar}}, así que la carpeta se conservó. Inténtalo de nuevo.",
     "deleteFailed": "No se pudo eliminar la carpeta. Inténtalo de nuevo."
