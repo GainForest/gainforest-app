@@ -68,8 +68,10 @@ cross-posting to Bluesky is just writing the SAME record body a second time
 into the user's own repo under the `app.bsky.feed.post` NSID, **reusing the
 GainForest post's rkey** — so the mapping is deterministic
 (`at://did/app.gainforest.feed.post/RKEY` ⇄ `at://did/app.bsky.feed.post/RKEY`,
-public URL `https://bsky.app/profile/DID/post/RKEY`). The wiring lives in
-`app/_lib/bluesky-crosspost.ts`.
+public URL `https://bsky.app/profile/HANDLE/post/RKEY`). The wiring lives in
+`app/_lib/bluesky-crosspost.ts`. The profile segment must stay unescaped —
+bsky.app doesn't route a percent-encoded DID (`did%3Aplc%3A…`) and shows a
+blank page for it.
 
 Rules baked into the client:
 
@@ -92,7 +94,8 @@ Rules baked into the client:
   best-effort too.
 - The feed only renders a "View on Bluesky" link for twins the public Bluesky
   appview actually returns (`app.bsky.feed.getPosts`), so links never point at
-  posts bsky.app can't show. Note this also means posts only surface on
+  posts bsky.app can't show. The link uses the author handle that same lookup
+  returns, so it matches the address bsky.app itself shows. Note this also means posts only surface on
   Bluesky if the PDS is crawled by a Bluesky relay (`com.atproto.sync.requestCrawl`).
 
 ## Relationship to the existing comment/review layer
