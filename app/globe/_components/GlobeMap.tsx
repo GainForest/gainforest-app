@@ -719,9 +719,10 @@ export function GlobeMap({
       // from any tree to clear the selection.
       map.on("click", TREES_POINT_LAYER, (event: MapLayerMouseEvent) => {
         const feature = event.features?.[0];
-        if (!feature || feature.id === undefined) return;
+        if (!feature || feature.id === undefined || feature.geometry.type !== "Point") return;
         event.preventDefault();
-        selectTreeRef.current?.(treeDetail(feature.id, feature.properties ?? null));
+        const [lon, lat] = feature.geometry.coordinates;
+        selectTreeRef.current?.(treeDetail(feature.id, lon, lat, feature.properties ?? null));
       });
       map.on("click", (event: MapLayerMouseEvent) => {
         if (event.defaultPrevented) return;
