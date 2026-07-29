@@ -707,7 +707,7 @@ export function CheckoutView({
   const cardsHref = recentReceiptQuery.size > 0 ? `/cards?${recentReceiptQuery.toString()}` : "/cards";
 
   if (!hydrated) {
-    return <div className="mx-auto w-full max-w-3xl px-4 py-10" aria-busy="true" />;
+    return <div className="mx-auto w-full max-w-5xl px-4 py-10" aria-busy="true" />;
   }
 
   // ── Success ───────────────────────────────────────────────────────────────
@@ -829,7 +829,7 @@ export function CheckoutView({
   const paying = phase === "paying";
 
   return (
-    <div className="mx-auto w-full max-w-3xl px-4 py-8">
+    <div className="mx-auto w-full max-w-5xl px-4 py-8">
       {onBackToCart ? (
         <button
           type="button"
@@ -845,79 +845,81 @@ export function CheckoutView({
       )}
       <h1 className="mt-3 text-3xl font-semibold text-foreground">{t("title")}</h1>
 
-      <div className="mt-4 flex items-center gap-2.5 rounded-2xl border border-primary/20 bg-primary/5 px-4 py-3">
-        <LeafIcon className="size-4 shrink-0 text-primary" aria-hidden />
-        <p className="text-sm font-medium text-foreground">{t("encouragement")}</p>
-      </div>
-
-      <div className="mt-6 flex flex-col gap-4">
-        {/* ── Donor identity ──────────────────────────────────────────────── */}
-        <section className="rounded-3xl border border-border-soft bg-surface p-5">
-          <h2 className="text-sm font-semibold text-foreground">{t("donorTitle")}</h2>
-          {authSession.isLoggedIn ? (
-            <label className="mt-3 flex min-w-0 cursor-pointer items-start gap-3">
-              <Checkbox checked={anonymous} onCheckedChange={(checked) => setAnonymous(checked === true)} className="mt-1" disabled={paying} />
-              <span className="min-w-0">
-                <span className="block text-sm font-medium text-foreground">{t("anonymousLabel")}</span>
-                <span className="mt-0.5 block text-xs leading-5 text-muted-foreground">{t("anonymousHint")}</span>
-              </span>
-            </label>
-          ) : (
-            <p className="mt-2 text-xs leading-5 text-muted-foreground">{t("signedOutNote")}</p>
-          )}
-        </section>
-
-        {/* ── Optional message ────────────────────────────────────────────── */}
-        <section className="rounded-3xl border border-border-soft bg-surface p-5">
-          <h2 className="text-sm font-semibold text-foreground">{t("messageTitle")}</h2>
-          <p className="mt-1 text-xs leading-5 text-muted-foreground">{t("messageHint")}</p>
-          <Textarea
-            value={message}
-            onChange={(event) => setMessage(event.target.value.slice(0, DONATION_MESSAGE_MAX_LENGTH))}
-            maxLength={DONATION_MESSAGE_MAX_LENGTH}
-            disabled={paying}
-            rows={3}
-            placeholder={t("messagePlaceholder")}
-            aria-label={t("messageTitle")}
-            className="mt-3 resize-none"
-          />
-          <div className="mt-1.5 flex items-start justify-between gap-3">
-            <span className="min-w-0 text-xs leading-5 text-muted-foreground">
-              {anonymous || !authSession.isLoggedIn ? t("messageAnonymousNote") : null}
-            </span>
-            <span className="shrink-0 text-xs tabular-nums text-muted-foreground/70" aria-hidden>
-              {message.length}/{DONATION_MESSAGE_MAX_LENGTH}
-            </span>
+      <div className="mt-6 grid gap-6 lg:grid-cols-[minmax(0,1fr)_340px] lg:items-start">
+        {/* ── Donation options ─────────────────────────────────────────────── */}
+        <div className="flex min-w-0 flex-col gap-4">
+          <div className="flex items-center gap-2.5 rounded-2xl border border-primary/15 bg-primary/[0.06] px-4 py-3">
+            <LeafIcon className="size-4 shrink-0 text-primary" aria-hidden />
+            <p className="text-sm font-medium text-foreground">{t("encouragement")}</p>
           </div>
-        </section>
 
-        {/* ── Wallet ──────────────────────────────────────────────────────── */}
-        <section className="rounded-3xl border border-border-soft bg-surface p-5">
-          <h2 className="text-sm font-semibold text-foreground">{t("walletTitle")}</h2>
-          {wallet ? (
-            <div className="mt-3 flex items-center justify-between rounded-2xl border border-border bg-background px-4 py-3">
-              <div>
-                <p className="font-mono text-sm font-medium text-foreground">{shortWallet(wallet.address)}</p>
-                <p className="mt-0.5 text-xs text-muted-foreground">
-                  {wallet.balance !== null ? t("available", { amount: `$${formatUsdc(wallet.balance)}` }) : t("balanceUnavailable")}
-                </p>
-              </div>
-              <BadgeCheckIcon className="size-5 text-primary" aria-hidden />
-            </div>
-          ) : (
-            <div className="mt-3 flex flex-col gap-2">
-              <p className="text-xs leading-5 text-muted-foreground">{t("walletHint")}</p>
-              <Button onClick={() => void handleConnect()} disabled={connecting} className="w-full sm:w-auto">
-                <WalletIcon className="size-4" /> {connecting ? t("connecting") : t("connectWallet")}
-              </Button>
-              {connectError ? <p className="text-sm text-destructive">{connectError}</p> : null}
-            </div>
-          )}
-        </section>
-
-        {/* ── Tip ─────────────────────────────────────────────────────────── */}
-        {tipEnabled ? (
+          {/* Donor identity */}
           <section className="rounded-3xl border border-border-soft bg-surface p-5">
+            <h2 className="text-sm font-semibold text-foreground">{t("donorTitle")}</h2>
+            {authSession.isLoggedIn ? (
+              <label className="mt-3 flex min-w-0 cursor-pointer items-start gap-3">
+                <Checkbox checked={anonymous} onCheckedChange={(checked) => setAnonymous(checked === true)} className="mt-0.5" disabled={paying} />
+                <span className="min-w-0">
+                  <span className="block text-sm font-medium text-foreground">{t("anonymousLabel")}</span>
+                  <span className="mt-0.5 block text-xs leading-5 text-muted-foreground">{t("anonymousHint")}</span>
+                </span>
+              </label>
+            ) : (
+              <p className="mt-2 text-xs leading-5 text-muted-foreground">{t("signedOutNote")}</p>
+            )}
+          </section>
+
+          {/* Optional message */}
+          <section className="rounded-3xl border border-border-soft bg-surface p-5">
+            <div className="flex items-baseline justify-between gap-3">
+              <h2 className="text-sm font-semibold text-foreground">{t("messageTitle")}</h2>
+              <span className="shrink-0 text-xs tabular-nums text-muted-foreground/60" aria-hidden>
+                {message.length}/{DONATION_MESSAGE_MAX_LENGTH}
+              </span>
+            </div>
+            <p className="mt-1 text-xs leading-5 text-muted-foreground">{t("messageHint")}</p>
+            <Textarea
+              value={message}
+              onChange={(event) => setMessage(event.target.value.slice(0, DONATION_MESSAGE_MAX_LENGTH))}
+              maxLength={DONATION_MESSAGE_MAX_LENGTH}
+              disabled={paying}
+              rows={3}
+              placeholder={t("messagePlaceholder")}
+              aria-label={t("messageTitle")}
+              className="mt-2.5 resize-none"
+            />
+            {anonymous || !authSession.isLoggedIn ? (
+              <p className="mt-1.5 text-xs leading-5 text-muted-foreground">{t("messageAnonymousNote")}</p>
+            ) : null}
+          </section>
+
+          {/* Wallet */}
+          <section className="rounded-3xl border border-border-soft bg-surface p-5">
+            <h2 className="text-sm font-semibold text-foreground">{t("walletTitle")}</h2>
+            {wallet ? (
+              <div className="mt-3 flex items-center justify-between gap-3 rounded-2xl border border-border bg-background px-4 py-2.5">
+                <div className="min-w-0">
+                  <p className="truncate font-mono text-sm font-medium text-foreground">{shortWallet(wallet.address)}</p>
+                  <p className="mt-0.5 text-xs text-muted-foreground">
+                    {wallet.balance !== null ? t("available", { amount: `$${formatUsdc(wallet.balance)}` }) : t("balanceUnavailable")}
+                  </p>
+                </div>
+                <BadgeCheckIcon className="size-5 shrink-0 text-primary" aria-hidden />
+              </div>
+            ) : (
+              <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-2.5">
+                <p className="min-w-0 flex-1 text-xs leading-5 text-muted-foreground">{t("walletHint")}</p>
+                <Button size="sm" onClick={() => void handleConnect()} disabled={connecting}>
+                  <WalletIcon className="size-4" /> {connecting ? t("connecting") : t("connectWallet")}
+                </Button>
+                {connectError ? <p className="w-full text-xs text-destructive">{connectError}</p> : null}
+              </div>
+            )}
+          </section>
+
+          {/* Tip */}
+          {tipEnabled ? (
+            <section className="rounded-3xl border border-border-soft bg-surface p-5">
             <h2 className="text-sm font-semibold text-foreground">{t("tipTitle")}</h2>
             <p className="mt-1 text-xs leading-5 text-muted-foreground">{t("tipDescription")}</p>
             <div className="relative mt-12">
@@ -975,10 +977,12 @@ export function CheckoutView({
                 </p>
               </div>
             ) : null}
-          </section>
-        ) : null}
+            </section>
+          ) : null}
+        </div>
 
-        {/* ── Summary + progress ──────────────────────────────────────────── */}
+        {/* ── Order summary (sticky) ───────────────────────────────────────── */}
+        <aside className="lg:sticky lg:top-24">
         <section className="rounded-3xl border border-border-soft bg-surface p-5">
           <h2 className="text-sm font-semibold text-foreground">{t("summaryTitle")}</h2>
 
@@ -1070,7 +1074,7 @@ export function CheckoutView({
 
           <Button
             size="lg"
-            className="mt-4 h-12 w-full"
+            className="mt-4 w-full"
             disabled={
               paying ||
               !wallet ||
@@ -1098,6 +1102,7 @@ export function CheckoutView({
             <p className="mt-3 text-center text-xs leading-5 text-muted-foreground">{t("footerNote")}</p>
           ) : null}
         </section>
+        </aside>
       </div>
     </div>
   );
