@@ -91,6 +91,8 @@ type CompletedLine = {
 export type CheckoutSideEffects = "live" | "mock";
 
 const TIP_LINE_KEY = "gainforest-tip";
+/** The app's quiet section eyebrow — small, uppercase, tracked, never bold. */
+const SECTION_LABEL = "text-xs font-medium uppercase tracking-[0.16em] text-muted-foreground";
 const MOCK_RECIPIENT_ADDRESS = "0x1111111111111111111111111111111111111111";
 const MOCK_WALLET_ADDRESS = "0x2222222222222222222222222222222222222222";
 const MOCK_TIP_ADDRESS = "0x3333333333333333333333333333333333333333";
@@ -721,8 +723,8 @@ export function CheckoutView({
               cardsHref={sideEffects === "mock" ? "/_test/my-cards" : cardsHref}
             />
           ) : null}
-          <p className="mt-2 font-instrument text-4xl font-medium italic text-primary">{t("thankYou")}</p>
-          <p className="text-pretty font-medium text-muted-foreground">
+          <p className="mt-2 font-instrument text-5xl italic text-primary">{t("thankYou")}</p>
+          <p className="text-pretty text-muted-foreground">
             {t("successSummary", { amount: `$${donatedTotal.toFixed(2)}` })}
           </p>
           <p className="text-xs text-muted-foreground">
@@ -734,20 +736,20 @@ export function CheckoutView({
           </p>
         </div>
 
-        <ul className="mt-6 divide-y divide-border-soft rounded-3xl border border-border-soft bg-surface p-4">
+        <ul className="mt-6 divide-y divide-border-soft rounded-3xl bg-card/70 p-5 shadow-sm shadow-primary/5 ring-1 ring-foreground/5 backdrop-blur">
           {completed.map((line, index) => {
             const txHref = blockExplorerUrl(line.txHash, PAYMENT_NETWORK);
             return (
               <li key={`${line.txHash}-${index}`} className="flex items-center justify-between gap-3 py-3 first:pt-0 last:pb-0">
                 <div className="min-w-0">
-                  <p className="truncate text-sm font-medium text-foreground">
+                  <p className="truncate text-sm text-foreground">
                     {line.kind === "tip" ? <HeartHandshakeIcon className="mr-1 inline size-3.5 text-primary" aria-hidden /> : null}
                     {line.title}
                   </p>
                   <p className="truncate text-xs text-muted-foreground">{line.orgName}</p>
                 </div>
                 <div className="flex shrink-0 items-center gap-2">
-                  <span className="text-sm font-semibold text-foreground">${line.amountUsd.toFixed(2)}</span>
+                  <span className="text-sm tabular-nums text-foreground">${line.amountUsd.toFixed(2)}</span>
                   {txHref ? (
                     <Link href={txHref} target="_blank" rel="noreferrer" className="text-muted-foreground hover:text-foreground" aria-label={t("paymentDetails")}>
                       <ArrowUpRightIcon className="size-4" aria-hidden />
@@ -759,7 +761,7 @@ export function CheckoutView({
           })}
         </ul>
 
-        <div className="mt-4 flex w-full flex-col gap-2 rounded-3xl bg-muted p-3 pt-2">
+        <div className="mt-4 flex w-full flex-col gap-2 rounded-3xl bg-muted/50 p-4 pt-3">
           <div className="flex items-center gap-1.5 text-muted-foreground">
             <Share2Icon className="size-3.5" aria-hidden />
             <span className="text-sm">{t("shareTitle")}</span>
@@ -810,7 +812,7 @@ export function CheckoutView({
         <div className="grid size-16 place-items-center rounded-full bg-muted text-muted-foreground">
           <ShoppingCartIcon className="size-7" aria-hidden />
         </div>
-        <h1 className="text-2xl font-semibold text-foreground">{t("emptyTitle")}</h1>
+        <h1 className="font-instrument text-4xl italic text-foreground">{t("emptyTitle")}</h1>
         {onExploreMore ? (
           <Button className="mt-2" onClick={onExploreMore}>
             <CompassIcon className="size-4" /> {t("exploreMore")}
@@ -843,41 +845,40 @@ export function CheckoutView({
           <ArrowLeftIcon className="size-4" aria-hidden /> {t("backToCart")}
         </Link>
       )}
-      <h1 className="mt-3 text-3xl font-semibold text-foreground">{t("title")}</h1>
+      <h1 className="mt-4 font-instrument text-4xl italic leading-none tracking-[-0.01em] text-foreground sm:text-5xl">{t("title")}</h1>
+      <p className="mt-3 flex items-center gap-2 font-instrument text-lg italic text-muted-foreground">
+        <LeafIcon className="size-4 shrink-0 text-primary" aria-hidden />
+        {t("encouragement")}
+      </p>
 
-      <div className="mt-6 grid gap-6 lg:grid-cols-[minmax(0,1fr)_340px] lg:items-start">
-        {/* ── Donation options ─────────────────────────────────────────────── */}
-        <div className="flex min-w-0 flex-col gap-4">
-          <div className="flex items-center gap-2.5 rounded-2xl border border-primary/15 bg-primary/[0.06] px-4 py-3">
-            <LeafIcon className="size-4 shrink-0 text-primary" aria-hidden />
-            <p className="text-sm font-medium text-foreground">{t("encouragement")}</p>
-          </div>
-
+      <div className="mt-8 grid gap-x-12 gap-y-8 lg:grid-cols-[minmax(0,1fr)_320px] lg:items-start">
+        {/* ── Donation options: divider-separated, no boxes ────────────────── */}
+        <div className="min-w-0 divide-y divide-border-soft">
           {/* Donor identity */}
-          <section className="rounded-3xl border border-border-soft bg-surface p-5">
-            <h2 className="text-sm font-semibold text-foreground">{t("donorTitle")}</h2>
+          <section className="pb-7">
+            <h2 className={SECTION_LABEL}>{t("donorTitle")}</h2>
             {authSession.isLoggedIn ? (
               <label className="mt-3 flex min-w-0 cursor-pointer items-start gap-3">
                 <Checkbox checked={anonymous} onCheckedChange={(checked) => setAnonymous(checked === true)} className="mt-0.5" disabled={paying} />
                 <span className="min-w-0">
-                  <span className="block text-sm font-medium text-foreground">{t("anonymousLabel")}</span>
-                  <span className="mt-0.5 block text-xs leading-5 text-muted-foreground">{t("anonymousHint")}</span>
+                  <span className="block text-sm text-foreground">{t("anonymousLabel")}</span>
+                  <span className="mt-1 block text-sm leading-6 text-muted-foreground">{t("anonymousHint")}</span>
                 </span>
               </label>
             ) : (
-              <p className="mt-2 text-xs leading-5 text-muted-foreground">{t("signedOutNote")}</p>
+              <p className="mt-3 text-sm leading-6 text-muted-foreground">{t("signedOutNote")}</p>
             )}
           </section>
 
           {/* Optional message */}
-          <section className="rounded-3xl border border-border-soft bg-surface p-5">
+          <section className="py-7">
             <div className="flex items-baseline justify-between gap-3">
-              <h2 className="text-sm font-semibold text-foreground">{t("messageTitle")}</h2>
+              <h2 className={SECTION_LABEL}>{t("messageTitle")}</h2>
               <span className="shrink-0 text-xs tabular-nums text-muted-foreground/60" aria-hidden>
                 {message.length}/{DONATION_MESSAGE_MAX_LENGTH}
               </span>
             </div>
-            <p className="mt-1 text-xs leading-5 text-muted-foreground">{t("messageHint")}</p>
+            <p className="mt-2 text-sm leading-6 text-muted-foreground">{t("messageHint")}</p>
             <Textarea
               value={message}
               onChange={(event) => setMessage(event.target.value.slice(0, DONATION_MESSAGE_MAX_LENGTH))}
@@ -886,20 +887,20 @@ export function CheckoutView({
               rows={3}
               placeholder={t("messagePlaceholder")}
               aria-label={t("messageTitle")}
-              className="mt-2.5 resize-none"
+              className="mt-3 min-h-20 resize-none rounded-xl border-0 bg-muted/40 shadow-none focus-visible:bg-muted/60 dark:bg-muted/40"
             />
             {anonymous || !authSession.isLoggedIn ? (
-              <p className="mt-1.5 text-xs leading-5 text-muted-foreground">{t("messageAnonymousNote")}</p>
+              <p className="mt-2 text-xs leading-5 text-muted-foreground">{t("messageAnonymousNote")}</p>
             ) : null}
           </section>
 
           {/* Wallet */}
-          <section className="rounded-3xl border border-border-soft bg-surface p-5">
-            <h2 className="text-sm font-semibold text-foreground">{t("walletTitle")}</h2>
+          <section className="py-7">
+            <h2 className={SECTION_LABEL}>{t("walletTitle")}</h2>
             {wallet ? (
-              <div className="mt-3 flex items-center justify-between gap-3 rounded-2xl border border-border bg-background px-4 py-2.5">
+              <div className="mt-3 flex items-center justify-between gap-3 rounded-2xl bg-muted/40 px-4 py-3">
                 <div className="min-w-0">
-                  <p className="truncate font-mono text-sm font-medium text-foreground">{shortWallet(wallet.address)}</p>
+                  <p className="truncate font-mono text-sm text-foreground">{shortWallet(wallet.address)}</p>
                   <p className="mt-0.5 text-xs text-muted-foreground">
                     {wallet.balance !== null ? t("available", { amount: `$${formatUsdc(wallet.balance)}` }) : t("balanceUnavailable")}
                   </p>
@@ -907,8 +908,8 @@ export function CheckoutView({
                 <BadgeCheckIcon className="size-5 shrink-0 text-primary" aria-hidden />
               </div>
             ) : (
-              <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-2.5">
-                <p className="min-w-0 flex-1 text-xs leading-5 text-muted-foreground">{t("walletHint")}</p>
+              <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-3">
+                <p className="min-w-0 flex-1 text-sm leading-6 text-muted-foreground">{t("walletHint")}</p>
                 <Button size="sm" onClick={() => void handleConnect()} disabled={connecting}>
                   <WalletIcon className="size-4" /> {connecting ? t("connecting") : t("connectWallet")}
                 </Button>
@@ -919,189 +920,189 @@ export function CheckoutView({
 
           {/* Tip */}
           {tipEnabled ? (
-            <section className="rounded-3xl border border-border-soft bg-surface p-5">
-            <h2 className="text-sm font-semibold text-foreground">{t("tipTitle")}</h2>
-            <p className="mt-1 text-xs leading-5 text-muted-foreground">{t("tipDescription")}</p>
-            <div className="relative mt-12">
-              {/* Value bubble tracks the slider thumb, MaEarth-style. */}
-              <div
-                className="pointer-events-none absolute -top-10 -translate-x-1/2"
-                style={{
-                  left: `calc(${(tipPercent / MAX_TIP_PERCENT) * 100}% + ${(0.5 - tipPercent / MAX_TIP_PERCENT) * 16}px)`,
-                }}
-                aria-hidden
-              >
-                <span className="block whitespace-nowrap rounded-lg bg-foreground px-2.5 py-1 text-xs font-semibold text-background">
-                  {tipPercent}% (${tipUsd.toFixed(2)})
-                </span>
-                <span className="mx-auto block size-0 border-x-[5px] border-t-[5px] border-x-transparent border-t-foreground" />
-              </div>
-              <input
-                type="range"
-                min={0}
-                max={MAX_TIP_PERCENT}
-                step={1}
-                value={tipPercent}
-                disabled={paying}
-                onChange={(event) => setTipPercent(Number(event.target.value))}
-                className="w-full accent-primary"
-                aria-label={t("tipSliderLabel")}
-              />
-              <div className="mt-1 flex justify-between text-[10px] text-muted-foreground">
-                <span>0%</span>
-                <span>{MAX_TIP_PERCENT}%</span>
-              </div>
-            </div>
-
-            {/* Gentle nudge when the slider sits at zero — never blocking. */}
-            {tipPercent === 0 ? (
-              <div className="mt-4 rounded-2xl bg-muted px-4 py-5 text-center">
-                <p className="text-sm font-semibold text-foreground">{t("tipNudgeTitle")}</p>
-                <p className="mt-1 text-xs leading-5 text-muted-foreground">{t("tipNudgeBody")}</p>
-                <div className="mt-3 flex flex-wrap items-center justify-center gap-2">
-                  {[5, 10, 15].map((percent) => (
-                    <button
-                      key={percent}
-                      type="button"
-                      disabled={paying}
-                      onClick={() => setTipPercent(percent)}
-                      className="rounded-full border border-border bg-background px-4 py-1.5 text-xs font-semibold text-foreground transition-colors hover:border-foreground disabled:pointer-events-none disabled:opacity-50"
-                      aria-label={t("tipNudgeSet", { percent })}
-                    >
-                      {percent}%
-                    </button>
-                  ))}
+            <section className="py-7 last:pb-0">
+              <h2 className={SECTION_LABEL}>{t("tipTitle")}</h2>
+              <p className="mt-2 text-sm leading-6 text-muted-foreground">{t("tipDescription")}</p>
+              <div className="relative mt-11">
+                {/* Value bubble tracks the slider thumb, MaEarth-style. */}
+                <div
+                  className="pointer-events-none absolute -top-9 -translate-x-1/2"
+                  style={{
+                    left: `calc(${(tipPercent / MAX_TIP_PERCENT) * 100}% + ${(0.5 - tipPercent / MAX_TIP_PERCENT) * 16}px)`,
+                  }}
+                  aria-hidden
+                >
+                  <span className="block whitespace-nowrap rounded-lg bg-foreground px-2.5 py-1 text-xs font-medium text-background">
+                    {tipPercent}% (${tipUsd.toFixed(2)})
+                  </span>
+                  <span className="mx-auto block size-0 border-x-[5px] border-t-[5px] border-x-transparent border-t-foreground" />
                 </div>
-                <p className="mt-3 text-xs text-muted-foreground">
-                  {t("yourTip")} <span className="font-semibold text-foreground">${tipUsd.toFixed(2)}</span>
-                </p>
+                <input
+                  type="range"
+                  min={0}
+                  max={MAX_TIP_PERCENT}
+                  step={1}
+                  value={tipPercent}
+                  disabled={paying}
+                  onChange={(event) => setTipPercent(Number(event.target.value))}
+                  className="w-full accent-primary"
+                  aria-label={t("tipSliderLabel")}
+                />
+                <div className="mt-1.5 flex justify-between text-[10px] text-muted-foreground">
+                  <span>0%</span>
+                  <span>{MAX_TIP_PERCENT}%</span>
+                </div>
               </div>
-            ) : null}
+
+              {/* Gentle nudge when the slider sits at zero — never blocking. */}
+              {tipPercent === 0 ? (
+                <div className="mt-5 rounded-2xl bg-muted/50 px-4 py-5 text-center">
+                  <p className="font-instrument text-xl italic text-foreground">{t("tipNudgeTitle")}</p>
+                  <p className="mt-1 text-sm leading-6 text-muted-foreground">{t("tipNudgeBody")}</p>
+                  <div className="mt-3 flex flex-wrap items-center justify-center gap-2">
+                    {[5, 10, 15].map((percent) => (
+                      <button
+                        key={percent}
+                        type="button"
+                        disabled={paying}
+                        onClick={() => setTipPercent(percent)}
+                        className="rounded-full bg-background/70 px-4 py-1.5 text-xs font-medium text-foreground ring-1 ring-foreground/10 transition-colors hover:bg-background disabled:pointer-events-none disabled:opacity-50"
+                        aria-label={t("tipNudgeSet", { percent })}
+                      >
+                        {percent}%
+                      </button>
+                    ))}
+                  </div>
+                  <p className="mt-3 text-xs text-muted-foreground">
+                    {t("yourTip")} <span className="text-foreground">${tipUsd.toFixed(2)}</span>
+                  </p>
+                </div>
+              ) : null}
             </section>
           ) : null}
         </div>
 
-        {/* ── Order summary (sticky) ───────────────────────────────────────── */}
+        {/* ── Order summary (sticky soft surface, no hard border) ──────────── */}
         <aside className="lg:sticky lg:top-24">
-        <section className="rounded-3xl border border-border-soft bg-surface p-5">
-          <h2 className="text-sm font-semibold text-foreground">{t("summaryTitle")}</h2>
+          <div className="rounded-3xl bg-card/70 p-6 shadow-sm shadow-primary/5 ring-1 ring-foreground/5 backdrop-blur">
+            <h2 className={SECTION_LABEL}>{t("summaryTitle")}</h2>
 
-          <ul className="mt-3 space-y-2">
-            {payableItems.map((item) => {
-              const key = cartItemKey(item);
-              const line = lineStates[key];
-              return (
-                <li key={key} className="flex items-center justify-between gap-3 text-sm">
+            <ul className="mt-4 space-y-2.5">
+              {payableItems.map((item) => {
+                const key = cartItemKey(item);
+                const line = lineStates[key];
+                return (
+                  <li key={key} className="flex items-center justify-between gap-3 text-sm">
+                    <span className="flex min-w-0 items-center gap-2">
+                      {line?.phase === "signing" || line?.phase === "processing" ? (
+                        <Loader2Icon className="size-3.5 shrink-0 animate-spin text-primary" aria-hidden />
+                      ) : line?.phase === "done" ? (
+                        <CheckIcon className="size-3.5 shrink-0 text-primary" aria-hidden />
+                      ) : line?.phase === "failed" ? (
+                        <CircleAlertIcon className="size-3.5 shrink-0 text-destructive" aria-hidden />
+                      ) : null}
+                      <span className="truncate text-foreground">{item.title}</span>
+                    </span>
+                    <span className="shrink-0 tabular-nums text-foreground">${item.amountUsd.toFixed(2)}</span>
+                  </li>
+                );
+              })}
+              {tipEnabled && tipUsd > 0 ? (
+                <li className="flex items-center justify-between gap-3 text-sm">
                   <span className="flex min-w-0 items-center gap-2">
-                    {line?.phase === "signing" || line?.phase === "processing" ? (
+                    {lineStates[TIP_LINE_KEY]?.phase === "signing" ? (
                       <Loader2Icon className="size-3.5 shrink-0 animate-spin text-primary" aria-hidden />
-                    ) : line?.phase === "done" ? (
+                    ) : lineStates[TIP_LINE_KEY]?.phase === "done" ? (
                       <CheckIcon className="size-3.5 shrink-0 text-primary" aria-hidden />
-                    ) : line?.phase === "failed" ? (
+                    ) : lineStates[TIP_LINE_KEY]?.phase === "failed" ? (
                       <CircleAlertIcon className="size-3.5 shrink-0 text-destructive" aria-hidden />
                     ) : null}
-                    <span className="truncate text-foreground">{item.title}</span>
+                    <span className="truncate text-muted-foreground">{t("tipLineLabel")}</span>
                   </span>
-                  <span className="shrink-0 font-medium text-foreground">${item.amountUsd.toFixed(2)}</span>
+                  <span className="shrink-0 tabular-nums text-foreground">${tipUsd.toFixed(2)}</span>
                 </li>
-              );
-            })}
-            {tipEnabled && tipUsd > 0 ? (
-              <li className="flex items-center justify-between gap-3 text-sm">
-                <span className="flex min-w-0 items-center gap-2">
-                  {lineStates[TIP_LINE_KEY]?.phase === "signing" ? (
-                    <Loader2Icon className="size-3.5 shrink-0 animate-spin text-primary" aria-hidden />
-                  ) : lineStates[TIP_LINE_KEY]?.phase === "done" ? (
-                    <CheckIcon className="size-3.5 shrink-0 text-primary" aria-hidden />
-                  ) : lineStates[TIP_LINE_KEY]?.phase === "failed" ? (
-                    <CircleAlertIcon className="size-3.5 shrink-0 text-destructive" aria-hidden />
-                  ) : null}
-                  <span className="truncate text-muted-foreground">{t("tipLineLabel")}</span>
-                </span>
-                <span className="shrink-0 font-medium text-foreground">${tipUsd.toFixed(2)}</span>
-              </li>
-            ) : null}
-          </ul>
+              ) : null}
+            </ul>
 
-          {Object.values(lineStates).some((line) => line.phase === "failed") ? (
-            <div className="mt-3 space-y-1">
-              {Object.entries(lineStates)
-                .filter(([, line]) => line.phase === "failed" && line.error)
-                .map(([key, line]) => (
-                  <p key={key} className="rounded-2xl bg-destructive/10 px-3 py-2 text-xs text-destructive">
-                    {line.error}
-                  </p>
-                ))}
-            </div>
-          ) : null}
-
-          {blockedItems.length > 0 ? (
-            <p className="mt-3 rounded-2xl bg-amber-500/10 px-3 py-2 text-xs leading-5 text-amber-700 dark:text-amber-400">
-              {t("blockedItems", { titles: blockedItems.map((item) => item.title).join(", ") })}
-            </p>
-          ) : null}
-
-          <div className="mt-4 border-t border-border-soft pt-3">
-            <div className="flex items-center justify-between text-sm">
-              <span className="text-muted-foreground">{t("donations")}</span>
-              <span className="font-medium text-foreground">${subtotalUsd.toFixed(2)}</span>
-            </div>
-            {tipEnabled && tipUsd > 0 ? (
-              <div className="mt-1 flex items-center justify-between text-sm">
-                <span className="text-muted-foreground">{t("tipLineLabel")}</span>
-                <span className="font-medium text-foreground">${tipUsd.toFixed(2)}</span>
+            {Object.values(lineStates).some((line) => line.phase === "failed") ? (
+              <div className="mt-3 space-y-1">
+                {Object.entries(lineStates)
+                  .filter(([, line]) => line.phase === "failed" && line.error)
+                  .map(([key, line]) => (
+                    <p key={key} className="rounded-2xl bg-destructive/10 px-3 py-2 text-xs text-destructive">
+                      {line.error}
+                    </p>
+                  ))}
               </div>
             ) : null}
-            <div className="mt-2 flex items-center justify-between">
-              <span className="text-sm font-semibold text-foreground">{t("total")}</span>
-              <span className="text-2xl font-semibold tracking-tight text-foreground">${totalUsd.toFixed(2)}</span>
+
+            {blockedItems.length > 0 ? (
+              <p className="mt-3 rounded-2xl bg-amber-500/10 px-3 py-2 text-xs leading-5 text-amber-700 dark:text-amber-400">
+                {t("blockedItems", { titles: blockedItems.map((item) => item.title).join(", ") })}
+              </p>
+            ) : null}
+
+            <div className="mt-4 border-t border-border-soft pt-4">
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-muted-foreground">{t("donations")}</span>
+                <span className="tabular-nums text-foreground">${subtotalUsd.toFixed(2)}</span>
+              </div>
+              {tipEnabled && tipUsd > 0 ? (
+                <div className="mt-1.5 flex items-center justify-between text-sm">
+                  <span className="text-muted-foreground">{t("tipLineLabel")}</span>
+                  <span className="tabular-nums text-foreground">${tipUsd.toFixed(2)}</span>
+                </div>
+              ) : null}
+              <div className="mt-3 flex items-baseline justify-between">
+                <span className="text-sm text-muted-foreground">{t("total")}</span>
+                <span className="text-3xl font-medium tracking-tight tabular-nums text-foreground">${totalUsd.toFixed(2)}</span>
+              </div>
             </div>
+
+            {wallet && wallet.balance !== null && !hasEnoughBalance ? (
+              <p className="mt-3 rounded-2xl bg-destructive/10 px-3 py-2 text-sm text-destructive">
+                {t("insufficientBalance")}
+              </p>
+            ) : null}
+
+            {payableItems.length > 1 || (tipEnabled && tipUsd > 0) ? (
+              <p className="mt-4 text-xs leading-5 text-muted-foreground">
+                {FACILITATOR_WALLET_ADDRESS
+                  ? t("singleApprovalNote")
+                  : t("multiApprovalNote", { count: payableItems.length + (tipEnabled && tipUsd > 0 ? 1 : 0) })}
+              </p>
+            ) : null}
+
+            <Button
+              size="lg"
+              className="mt-5 w-full"
+              disabled={
+                paying ||
+                !wallet ||
+                checkingRecipients ||
+                payableItems.length === 0 ||
+                (wallet.balance !== null && !hasEnoughBalance)
+              }
+              onClick={() => {
+                if (Object.values(lineStates).some((line) => line.phase === "failed")) handleRetry();
+                void handleDonate();
+              }}
+            >
+              {paying ? (
+                <>
+                  <Loader2Icon className="size-4 animate-spin" /> {t("processing")}
+                </>
+              ) : Object.values(lineStates).some((line) => line.phase === "failed") ? (
+                t("tryAgain")
+              ) : (
+                t("donateNow", { amount: `$${totalUsd.toFixed(2)}` })
+              )}
+            </Button>
+            {paying ? <p className="mt-2 text-center text-xs text-muted-foreground">{t("doNotClose")}</p> : null}
+            {!paying ? (
+              <p className="mt-3 text-center text-xs leading-5 text-muted-foreground">{t("footerNote")}</p>
+            ) : null}
           </div>
-
-          {wallet && wallet.balance !== null && !hasEnoughBalance ? (
-            <p className="mt-3 rounded-2xl bg-destructive/10 px-3 py-2 text-sm font-medium text-destructive">
-              {t("insufficientBalance")}
-            </p>
-          ) : null}
-
-          {payableItems.length > 1 || (tipEnabled && tipUsd > 0) ? (
-            <p className="mt-3 text-xs leading-5 text-muted-foreground">
-              {FACILITATOR_WALLET_ADDRESS
-                ? t("singleApprovalNote")
-                : t("multiApprovalNote", { count: payableItems.length + (tipEnabled && tipUsd > 0 ? 1 : 0) })}
-            </p>
-          ) : null}
-
-          <Button
-            size="lg"
-            className="mt-4 w-full"
-            disabled={
-              paying ||
-              !wallet ||
-              checkingRecipients ||
-              payableItems.length === 0 ||
-              (wallet.balance !== null && !hasEnoughBalance)
-            }
-            onClick={() => {
-              if (Object.values(lineStates).some((line) => line.phase === "failed")) handleRetry();
-              void handleDonate();
-            }}
-          >
-            {paying ? (
-              <>
-                <Loader2Icon className="size-4 animate-spin" /> {t("processing")}
-              </>
-            ) : Object.values(lineStates).some((line) => line.phase === "failed") ? (
-              t("tryAgain")
-            ) : (
-              t("donateNow", { amount: `$${totalUsd.toFixed(2)}` })
-            )}
-          </Button>
-          {paying ? <p className="mt-2 text-center text-xs text-muted-foreground">{t("doNotClose")}</p> : null}
-          {!paying ? (
-            <p className="mt-3 text-center text-xs leading-5 text-muted-foreground">{t("footerNote")}</p>
-          ) : null}
-        </section>
         </aside>
       </div>
     </div>
