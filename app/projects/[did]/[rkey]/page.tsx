@@ -4,7 +4,7 @@ import Image from "next/image";
 import { notFound, redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { ArrowLeftIcon, ArrowUpRightIcon, FolderKanbanIcon } from "lucide-react";
-import { fetchRecordByUri, fetchRecordDetail } from "../../../_lib/indexer";
+import { fetchRecordByUri, fetchRecordDetail, type RecordDetail } from "../../../_lib/indexer";
 import { getPdsRecord, isPdsBlobUrl } from "../../../_lib/pds";
 import { RichText } from "../../../_components/RichText";
 import { AutoRefresh } from "./_components/AutoRefresh";
@@ -30,6 +30,7 @@ type ProjectExplorerRecord = Extract<
   NonNullable<Awaited<ReturnType<typeof fetchRecordByUri>>>,
   { kind: "project" }
 >;
+type ProjectStory = Pick<RecordDetail, "blurb" | "richBody">;
 
 type LoadedProject = {
   record: ProjectExplorerRecord | null;
@@ -60,6 +61,20 @@ async function loadProject(params: ProjectPageParams): Promise<LoadedProject> {
     notFound();
   }
   return { record, pendingTitle: null, did, rkey, urlIdentifier };
+}
+
+/** Read the story from the project record itself. The PDS is authoritative and
+ * avoids silently falling back to a summary if the indexer only has partial
+ * collection data. */
+async function loadProjectStory(did: string, rkey: string, atUri: string): Promise<ProjectStory | null> {
+  const pdsRecord = await getPdsRecord(did, COLLECTION, rkey).catch(() => null);
+  const description = pdsRecord?.value.description;
+  if (typeof description === "object" && description !== null && "value" in description) {
+    const value = (description as { value?: unknown }).value;
+    if (typeof value === "string" && value.trim()) return { blurb: value.trim(), richBody: null };
+  }
+  // Preserve Leaflet rich-text support and provide a fallback for PDS outages.
+  return fetchRecordDetail(atUri).catch(() => null);
 }
 
 export async function generateMetadata({ params }: { params: ProjectPageParams }): Promise<Metadata> {
@@ -190,9 +205,7 @@ export default async function ProjectDetailPage({
     const [routeData, origin, projectDetail] = await Promise.all([
       certRkey ? loadBumicertRouteData(did, certRkey, urlIdentifier) : Promise.resolve(null),
       getRequestOrigin(),
-      // The collection is the project source of truth. Its full story may be
-      // present even when an older linked Cert only has the short summary.
-      fetchRecordDetail(record.atUri).catch(() => null),
+      loadProjectStory(did, rkey, record.atUri),
     ]);
 
     if (routeData) {
@@ -252,7 +265,7 @@ async function ProjectFallback({
     getTranslations("marketplace.projectPage"),
     getAccountRouteData(did, urlIdentifier).catch(() => null),
     getRequestOrigin(),
-    fetchRecordDetail(record.atUri).catch(() => null),
+    loadProjectStory(did, rkey, record.atUri),
   ]);
 
   if (owner && owner.urlIdentifier !== urlIdentifier) {

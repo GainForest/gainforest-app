@@ -586,7 +586,7 @@ export async function ProjectDetailView({
   projectDatasetUris?: string[];
   /** The project's own long story. Prefer it over the linked Cert's copy so
    *  projects created before the records were kept in sync still render fully. */
-  projectDetail?: RecordDetail | null;
+  projectDetail?: Pick<RecordDetail, "blurb" | "richBody"> | null;
   /** Project (collection) rkey, so deleting removes the project, not the Cert. */
   projectRkey?: string;
   /** When set, render the feed's like + comment bar for this record URI under
