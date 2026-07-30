@@ -16,7 +16,8 @@ type OverviewStats = {
 };
 
 // Personal accounts and organizations own the same data, so both surface the
-// same folders on their manage home. Titles come from translations.
+// same folders on their manage home. Titles come from translations. Keep the
+// ids in step with MANAGE_OVERVIEW_FOLDER_IDS, which shapes the placeholder.
 function buildTiles(stats: OverviewStats, target: ManageTarget): OverviewFolderTile[] {
   return [
     { id: "projects", title: "Projects", href: manageHref(target, "projects"), count: stats.projects },

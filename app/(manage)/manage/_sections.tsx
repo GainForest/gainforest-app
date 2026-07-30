@@ -1,6 +1,6 @@
 import { Suspense } from "react";
 import Link from "next/link";
-import { ArrowLeftIcon } from "lucide-react";
+import { ArrowLeftIcon, FolderKanbanIcon } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 import { fetchReceipts } from "@/app/_lib/dashboard";
 import {
@@ -19,7 +19,7 @@ import { BumicertTimeline } from "@/app/cert/[did]/[rkey]/_components/timeline/B
 import { getEntriesForActivity } from "@/app/cert/[did]/[rkey]/_components/timeline/attachmentSubjects";
 import { resolveTimelineReferences } from "@/app/cert/[did]/[rkey]/_components/timeline/timelineReferenceResolver";
 import { canCreateRecord, canDeleteRecord } from "./_lib/cgs-permissions";
-import { profileBasePath } from "@/lib/links";
+import { manageHref, profileBasePath } from "@/lib/links";
 import { ProjectSitesManagerClient } from "./projects/[rkey]/sites/_components/ProjectSitesManagerClient";
 import { droneAppHref } from "@/app/_lib/urls";
 import { listLatestPdsRecords, resolveBlobUrl, resolvePdsHost } from "@/app/_lib/pds";
@@ -134,11 +134,11 @@ export function ProjectCertsSection({ target, projectRkey }: { target: ManageTar
 async function fetchManagedProjectRef(
   did: string,
   rkey: string,
-): Promise<{ atUri: string; cid: string | null; title: string } | null> {
+): Promise<{ atUri: string; cid: string | null; title: string; locationUri: string | null } | null> {
   const projects = await fetchProjectsByDid(did, 500).then((page) => page.records).catch(() => []);
   const project = projects.find((entry) => entry.rkey === rkey) ?? null;
   if (!project) return null;
-  return { atUri: project.atUri, cid: project.cid, title: project.title };
+  return { atUri: project.atUri, cid: project.cid, title: project.title, locationUri: project.locationUri };
 }
 
 function ProjectManageBackLink({ target, label }: { target: ManageTarget; label: string }) {
@@ -350,17 +350,10 @@ export async function SettingsSection({ target }: { target: ManageTarget }) {
   );
 }
 
-export async function ObservationsSection({
-  target,
-  forProject,
-}: {
-  target: ManageTarget;
-  forProject?: string | null;
-}) {
-  // Observations are available to personal accounts and organizations alike,
-  // so the steward can collect field data without first creating an org.
-  // The indexer lags fresh writes, so read the newest records straight from
-  // the owner's PDS as well — a sighting added moments ago still shows up.
+/** First page of a steward's sightings. The indexer lags fresh writes, so the
+ *  newest records are read straight from the owner's PDS too — a sighting added
+ *  moments ago still shows up. */
+async function loadObservationsInitialPage(target: ManageTarget) {
   const [initialObservations, pdsLatest] = await Promise.all([
     walkOccurrences({
       media: "all",
@@ -375,20 +368,87 @@ export async function ObservationsSection({
   const fresh = pdsLatest
     .map((item) => occurrenceFromPdsRecord(item))
     .filter((record): record is OccurrenceRecord => record !== null && !indexed.has(record.id));
-  const initialPage = fresh.length
-    ? {
-        ...initialObservations,
-        records: [...fresh, ...initialObservations.records].sort((a, b) =>
-          (b.createdAt ?? "").localeCompare(a.createdAt ?? ""),
-        ),
-      }
-    : initialObservations;
+  if (fresh.length === 0) return initialObservations;
+  return {
+    ...initialObservations,
+    records: [...fresh, ...initialObservations.records].sort((a, b) =>
+      (b.createdAt ?? "").localeCompare(a.createdAt ?? ""),
+    ),
+  };
+}
+
+export async function ObservationsSection({
+  target,
+  forProject,
+}: {
+  target: ManageTarget;
+  forProject?: string | null;
+}) {
+  // Observations are available to personal accounts and organizations alike,
+  // so the steward can collect field data without first creating an org.
+  const initialPage = await loadObservationsInitialPage(target);
   return (
     <ObservationsClient
       target={target}
       initialPage={initialPage}
       forProject={forProject ?? null}
     />
+  );
+}
+
+/** One project's sightings, reached from its card on the Projects page. Same
+ *  tools as the account-wide list, but pinned to the project: only its own
+ *  sightings are listed, and anything added here is filed under it. */
+export async function ProjectObservationsSection({
+  target,
+  projectRkey,
+}: {
+  target: ManageTarget;
+  projectRkey: string;
+}) {
+  const [manageT, project] = await Promise.all([
+    getTranslations("common.projectManage"),
+    fetchManagedProjectRef(target.did, projectRkey),
+  ]);
+
+  if (!project) {
+    return (
+      <div className="mx-auto w-full max-w-[1440px] px-4 py-6 sm:px-6">
+        <ProjectManageBackLink target={target} label={manageT("backToProjects")} />
+        <p className="mt-6 text-sm text-muted-foreground">{manageT("projectNotFound")}</p>
+      </div>
+    );
+  }
+
+  const initialPage = await loadObservationsInitialPage(target);
+  return (
+    <div className="mx-auto w-full max-w-[1440px] px-4 py-4 sm:px-6 sm:py-6">
+      <div className="mb-5">
+        <ProjectManageBackLink target={target} label={manageT("backToProjects")} />
+      </div>
+      <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+        <div className="max-w-3xl">
+          <h1 className="font-instrument text-3xl font-light italic tracking-[-0.03em] text-foreground sm:text-4xl">{project.title}</h1>
+          <p className="mt-2 text-sm leading-6 text-muted-foreground">{manageT("observationsDescription")}</p>
+        </div>
+        {/* Sightings published before the project existed live on the account
+            list; send stewards there with this project already picked. */}
+        <Button asChild variant="outline" size="sm" className="shrink-0">
+          <Link href={manageHref(target, "observations", { attachTo: project.atUri })}>
+            <FolderKanbanIcon className="size-4" />
+            {manageT("addExistingObservations")}
+          </Link>
+        </Button>
+      </div>
+      <ObservationsClient
+        target={target}
+        initialPage={initialPage}
+        // Pre-selects this project in the bulk add panel, the same way the
+        // "add for this project" entry points elsewhere do.
+        forProject={`${target.did}/${projectRkey}`}
+        project={{ uri: project.atUri, title: project.title, siteUri: project.locationUri }}
+      />
+    </div>
   );
 }
 

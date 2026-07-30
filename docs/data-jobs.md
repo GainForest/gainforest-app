@@ -66,13 +66,17 @@ are missing the feature degrades gracefully: the submit page shows a
 
 ### Bucket CORS (required)
 
-Browser part uploads must be able to read the `ETag` response header:
+Browser part uploads must be able to read the `ETag` response header, and the
+AudioMoth soundscape tab `fetch()`es archival originals cross-origin (the
+`/api/audiomoth/recordings` GET redirects to a presigned bucket URL), so `GET`
+must be allowed too — without it every soundscape analysis fails with a CORS
+error:
 
 ```json
 [
   {
-    "AllowedOrigins": ["https://www.gainforest.app"],
-    "AllowedMethods": ["PUT"],
+    "AllowedOrigins": ["https://www.gainforest.app", "https://gainforest.app"],
+    "AllowedMethods": ["GET", "PUT"],
     "AllowedHeaders": ["*"],
     "ExposeHeaders": ["ETag"],
     "MaxAgeSeconds": 3600

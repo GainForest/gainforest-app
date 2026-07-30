@@ -269,7 +269,7 @@
   "bioblitz": {
     "metadata": {
       "title": "Desafío BioBlitz semanal",
-      "description": "Sal a la calle, fotografía seres vivos y añade tus avistamientos. Cada semana, quien más registre y la mejor foto ganan un premio."
+      "description": "Sal al aire libre y fotografía biodiversidad silvestre. Cada observación válida debe incluir una foto subida; las personas y las plantas en maceta no cuentan."
     },
     "banner": {
       "message": "El Reto BioBlitz Semanal está en marcha. Fotografía la naturaleza y gana premios.",
@@ -281,7 +281,7 @@
       "eyebrow": "Reto BioBlitz Semanal",
       "titlePrefix": "Reto",
       "titleEmphasis": "BioBlitz",
-      "description": "Una carrera semanal y amistosa para registrar la naturaleza. Fotografía cualquier ser vivo —una planta, ave, insecto u hongo—, añádelo a GainForest y sube en la tabla. Nueva ronda y nuevos premios cada semana.",
+      "description": "Una carrera semanal y amistosa para registrar biodiversidad al aire libre. Añade observaciones con tus propias fotos subidas. Las personas y las plantas en maceta no cuentan.",
       "program": "Parte del programa Klarna AI for Climate Resilience, con GainForest."
     },
     "rsvp": {
@@ -325,7 +325,7 @@
           "participation": {
             "title": "2. Cómo participar",
             "paragraphs": {
-              "p1": "Necesitas una cuenta de GainForest y debes registrarte en cada ronda. Las observaciones aptas deben añadirse durante las fechas indicadas para esa ronda e incluir pruebas auténticas de un organismo vivo.",
+              "p1": "Necesitas una cuenta de GainForest y debes registrarte en cada ronda. Una observación válida debe añadirse durante las fechas indicadas, mostrar biodiversidad al aire libre e incluir una foto subida directamente con la observación. Las personas y las plantas en maceta no cuentan.",
               "p2": "Cada persona puede usar una sola cuenta. Las entradas automatizadas, duplicadas, manipuladas, retrodatadas, engañosas o fraudulentas pueden retirarse del desafío."
             }
           },
@@ -514,11 +514,11 @@
       "steps": {
         "outside": {
           "title": "Sal a explorar",
-          "blurb": "Bosque, campo o tu jardín: cualquier ser vivo cuenta."
+          "blurb": "Registra biodiversidad al aire libre. Las personas y las plantas en maceta no cuentan."
         },
         "upload": {
           "title": "Sube tus fotos",
-          "blurb": "Añádelas en tu página Mis observaciones, o con Tainá, también en GainForest."
+          "blurb": "Cada observación necesita su propia foto subida. Añádela en Mis observaciones o con Tainá."
         },
         "review": {
           "title": "Revisa el nombre de la especie",
@@ -535,10 +535,10 @@
     "board": {
       "title": "Tabla de esta ronda",
       "live": "En vivo",
-      "subtitleLive": "Quién lidera el premio a más observaciones ahora mismo.",
+      "subtitleLive": "Quién lidera ahora mismo con observaciones fotográficas válidas.",
       "subtitleEnded": "Clasificación final de esta ronda.",
       "subtitleUpcoming": "Sé la primera persona en la tabla cuando abra la ronda.",
-      "subtitleAll": "Quienes más registran en todo el reto.",
+      "subtitleAll": "Quienes tienen más observaciones fotográficas válidas en todo el reto.",
       "scope": {
         "round": "Esta ronda",
         "all": "Histórico"
@@ -565,6 +565,16 @@
         "observationsAll": "Observaciones (histórico)",
         "collectors": "Participantes",
         "timeLeft": "Tiempo restante"
+      },
+      "eligibility": {
+        "title": "Imágenes revisadas",
+        "eligibleOnly": "Solo cuentan las válidas",
+        "wildlife": "Fauna silvestre",
+        "plants": "Plantas al aire libre",
+        "people": "Personas",
+        "potted": "Plantas en maceta",
+        "other": "Otras excluidas",
+        "explainer": "Solo cuentan las observaciones claras de fauna o plantas al aire libre con una foto subida directamente. Se excluyen personas, plantas en maceta o de interior, sujetos poco claros y observaciones sin una foto subida."
       },
       "empty": {
         "title": "Aún no hay avistamientos",
@@ -1955,9 +1965,12 @@
   "observationGrid": {
     "sectionTitle": "Observaciones",
     "openDetails": "Abrir detalles de la observación: {name}",
+    "openAction": "Abrir",
     "mediaCount": "{count, plural, one {# elemento multimedia} other {# elementos multimedia}}",
     "selectObservation": "Seleccionar observación",
     "deselectObservation": "Deseleccionar observación",
+    "selectObservationNamed": "Seleccionar observación: {name}",
+    "deselectObservationNamed": "Deseleccionar observación: {name}",
     "playSound": "Reproducir sonido",
     "pauseSound": "Pausar sonido",
     "natureSoundRecording": "Grabación de sonido de la naturaleza",

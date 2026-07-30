@@ -14,6 +14,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import {
   ArchiveIcon,
   AudioLinesIcon,
+  AudioWaveformIcon,
   BatteryMediumIcon,
   CheckIcon,
   ClockIcon,
@@ -21,6 +22,7 @@ import {
   DownloadIcon,
   FingerprintIcon,
   HardDriveUploadIcon,
+  InfoIcon,
   ListChecksIcon,
   Loader2Icon,
   TagsIcon,
@@ -34,7 +36,6 @@ import {
   WrenchIcon,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { AdminOnlyIndicator } from "@/app/_components/AdminOnlyIndicator";
 import { PictureHero } from "@/app/_components/PictureHero";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
@@ -82,12 +83,13 @@ import { DeploymentsTab } from "./DeploymentsTab";
 import { UploadTab } from "./UploadTab";
 import { LabelTab } from "./LabelTab";
 import { IdentificationsClient } from "@/app/identifications/_components/IdentificationsClient";
+import { SoundscapeClient } from "@/app/soundscape/_components/SoundscapeClient";
 
 /* ------------------------------------------------------------------ */
 /* Types                                                               */
 /* ------------------------------------------------------------------ */
 
-type MainTabId = "setup" | "deployments" | "upload" | "label" | "identifications";
+type MainTabId = "setup" | "deployments" | "upload" | "label" | "identifications" | "soundscape";
 
 type TabId = "device" | "configure" | "firmware";
 
@@ -305,13 +307,16 @@ function InfoRow({ label, value, dimmed }: { label: string; value: string; dimme
 
 export function AudioMothClient({
   sessionDid,
-  canUseLabelling,
+  useUploadTray = false,
 }: {
   sessionDid: string | null;
-  canUseLabelling: boolean;
+  /** Release switch: hand uploads to the background tray instead of the
+   *  page's own full-screen progress flow. Off until the tray is finished. */
+  useUploadTray?: boolean;
 }) {
   const t = useTranslations("common.audiomoth");
   const identificationsT = useTranslations("common.identifications");
+  const soundscapeT = useTranslations("common.soundscape");
 
   const [supported, setSupported] = useState<boolean | null>(null);
   const [device, setDevice] = useState<AudioMothDevice | null>(null);
@@ -321,7 +326,7 @@ export function AudioMothClient({
   const searchParams = useSearchParams();
   const [mainTab, setMainTab] = useState<MainTabId>(() => {
     const tab = searchParams.get("tab");
-    if (tab === "label" || tab === "identifications") return canUseLabelling ? tab : "setup";
+    if (tab === "soundscape" || tab === "label" || tab === "identifications") return tab;
     return tab === "deployments" || tab === "upload" ? tab : "setup";
   });
   const selectMainTab = useCallback((id: MainTabId) => {
@@ -812,17 +817,13 @@ export function AudioMothClient({
     id: MainTabId;
     label: string;
     Icon: typeof ClockIcon;
-    adminOnly?: boolean;
   }> = [
     { id: "setup", label: t("mainTabs.setup"), Icon: WrenchIcon },
     { id: "deployments", label: t("mainTabs.deployments"), Icon: MapPinIcon },
     { id: "upload", label: t("mainTabs.upload"), Icon: HardDriveUploadIcon },
-    ...(canUseLabelling
-      ? [
-          { id: "label" as const, label: t("mainTabs.label"), Icon: TagsIcon, adminOnly: true },
-          { id: "identifications" as const, label: t("mainTabs.identifications"), Icon: ListChecksIcon, adminOnly: true },
-        ]
-      : []),
+    { id: "label", label: t("mainTabs.label"), Icon: TagsIcon },
+    { id: "identifications", label: t("mainTabs.identifications"), Icon: ListChecksIcon },
+    { id: "soundscape", label: t("mainTabs.soundscape"), Icon: AudioWaveformIcon },
   ];
 
   return (
@@ -832,12 +833,20 @@ export function AudioMothClient({
         lightSrc="/images/explore/explore-hero-light@2x.webp"
         darkSrc="/images/explore/explore-hero-dark@2x.webp"
         title={t("title")}
-        lede={mainTab === "label" ? t("label.subtitle") : mainTab === "identifications" ? identificationsT("subtitle") : t("subtitle")}
+        lede={
+          mainTab === "label"
+            ? t("label.subtitle")
+            : mainTab === "identifications"
+              ? identificationsT("subtitle")
+              : mainTab === "soundscape"
+                ? soundscapeT("hero.description")
+                : t("subtitle")
+        }
       />
       <div className="mx-auto flex w-full max-w-7xl flex-col gap-6 px-4 sm:px-6">
       {/* Setup (this device over USB) vs Deployment (field events) */}
       <nav className="flex w-full gap-1 self-start rounded-full border border-border bg-card/70 p-1 sm:w-auto" aria-label={t("title")}>
-        {mainTabs.map(({ id, label, Icon, adminOnly }) => (
+        {mainTabs.map(({ id, label, Icon }) => (
           <button
             key={id}
             type="button"
@@ -850,18 +859,27 @@ export function AudioMothClient({
           >
             <Icon className="size-4" />
             {label}
-            {adminOnly ? <AdminOnlyIndicator /> : null}
           </button>
         ))}
       </nav>
 
       {mainTab === "deployments" && <DeploymentsTab sessionDid={sessionDid} />}
 
-      {mainTab === "upload" && <UploadTab sessionDid={sessionDid} />}
+      {mainTab === "upload" && <UploadTab sessionDid={sessionDid} useTray={useUploadTray} />}
 
-      {canUseLabelling && mainTab === "label" && <LabelTab sessionDid={sessionDid} />}
+      {mainTab === "label" && <LabelTab sessionDid={sessionDid} />}
 
-      {canUseLabelling && mainTab === "identifications" && <IdentificationsClient sessionDid={sessionDid} />}
+      {mainTab === "identifications" && <IdentificationsClient sessionDid={sessionDid} />}
+
+      {mainTab === "soundscape" && (
+        <div className="flex flex-col gap-6">
+          <p className="flex items-start gap-2 rounded-2xl bg-muted px-4 py-3 text-sm leading-6 text-muted-foreground">
+            <InfoIcon className="mt-1 size-4 shrink-0" />
+            <span>{soundscapeT("hero.timeNote")}</span>
+          </p>
+          <SoundscapeClient sessionDid={sessionDid} />
+        </div>
+      )}
 
       {mainTab === "setup" && supported === false && (
         <Card>

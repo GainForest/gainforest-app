@@ -150,6 +150,8 @@ async function directProjectFromRecord(did: string, record: ListedRecord): Promi
   const banner = await collectionImageUrl(did, value.banner);
   const avatar = await collectionImageUrl(did, value.avatar);
   const items = Array.isArray(value.items) ? value.items.map(itemUriFromValue).filter((uri): uri is string => Boolean(uri)) : [];
+  const certUris = items.filter((uri) => uri.includes("/org.hypercerts.claim.activity/"));
+  const datasetUris = items.filter((uri) => uri.includes("/app.gainforest.dwc.dataset/"));
   const location = isRecord(value.location) ? extractString(value.location.uri) : null;
 
   return {
@@ -167,8 +169,9 @@ async function directProjectFromRecord(did: string, record: ListedRecord): Promi
     imageRef: banner.ref ?? avatar.ref,
     creatorName: null,
     creatorAvatarRef: null,
-    bumicertUris: items,
-    bumicertCount: items.length,
+    bumicertUris: certUris,
+    bumicertCount: certUris.length,
+    datasetUris,
     locationUri: location,
     country: null,
     rawRecord: value,

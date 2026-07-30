@@ -10,6 +10,7 @@ import {
   CheckCircle2Icon,
   ChevronLeftIcon,
   FolderKanbanIcon,
+  FolderMinusIcon,
   FolderPlusIcon,
   ImagePlusIcon,
   Layers2Icon,
@@ -27,6 +28,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { useTranslations } from "next-intl";
 import { InlineCardGridSkeleton } from "@/app/_components/PageLoadingSkeletons";
 import { RecordExplorer } from "@/app/_components/RecordExplorer";
+import type { ObservationContextMenu, ObservationContextMenuItem } from "@/app/_components/ObservationGrid";
 import { EmptyHeroBanner } from "@/app/_components/EmptyHeroBanner";
 import type { ExplorerRecord, OccurrenceRecord } from "@/app/_lib/indexer";
 import { resolveBlobUrl } from "@/app/_lib/pds";
@@ -57,7 +59,9 @@ import { LocationPickerModal, LocationPickerModalId } from "./LocationPickerModa
 import { AddObservationsModal } from "./AddObservationsModal";
 
 import { GroupObservationsDatasetModal, type ObservationDatasetGroup } from "./GroupObservationsDatasetModal";
-import { deleteObservationDataset } from "./observation-dataset-mutations";
+import { deleteObservationDataset, removeObservationsFromDataset } from "./observation-dataset-mutations";
+import { AddToProjectModal, type AddToProjectTarget } from "./AddToProjectModal";
+import { projectScopeUris, resolveObservationFilterUris } from "./observation-scope";
 import { takeAddDataHandoff } from "../../_lib/upload/add-data-handoff";
 import {
   fetchDefaultObservationCenter,
@@ -401,6 +405,7 @@ async function buildOptimisticOccurrence(input: {
     eventDate: analysis.eventDate.trim() || null,
     habitat: analysis.habitat.trim() || null,
     siteRef: null,
+    projectRef: null,
     datasetRef: null,
     datasetName: null,
     dynamicProperties: null,
@@ -490,10 +495,15 @@ export function ObservationsClient({
   target,
   initialPage,
   forProject = null,
+  project = null,
 }: {
   target: ManageTarget;
   initialPage: InitialPage;
   forProject?: string | null;
+  /** Pins the whole page to one project: only that project's sightings are
+   *  listed, and new ones are filed under it. Used by the project's own
+   *  Observations page, where the scope is the point of the page. */
+  project?: { uri: string; title: string; siteUri?: string | null } | null;
 }) {
   const t = useTranslations("upload.observations");
   const router = useRouter();
@@ -509,45 +519,66 @@ export function ObservationsClient({
   const [visibleRecords, setVisibleRecords] = useState<OccurrenceRecord[]>([]);
   // True once the explorer has loaded and holds no observations at all. When
   // empty we strip the page back to just the heading and the seedling banner.
-  const [isEmpty, setIsEmpty] = useState(false);
+  const [, setIsEmpty] = useState(false);
   const [deletedRecordIds, setDeletedRecordIds] = useState<Set<string>>(() => new Set());
   const [isDeletingSelected, setIsDeletingSelected] = useState(false);
   const createPermission = canCreateRecord(target);
-  const [projectFilter, setProjectFilter] = useQueryState("project", parseAsString.withOptions(QUERY_STATE_OPTIONS));
+  const [projectQuery, setProjectFilter] = useQueryState("project", parseAsString.withOptions(QUERY_STATE_OPTIONS));
+  // A pinned project wins over the URL filter — the page is that project's.
+  const projectFilter = project?.uri ?? projectQuery;
+  // Set when arriving from a project's "Add existing sightings" button, so the
+  // add-to-project picker opens on the project they came from.
+  const [attachToProject] = useQueryState("attachTo", parseAsString.withOptions(QUERY_STATE_OPTIONS));
   const [projectGroups, setProjectGroups] = useState<ObservationProjectGroup[]>([]);
   const [projectContexts, setProjectContexts] = useState<ObservationProjectContext[]>([]);
   const [datasetGroups, setDatasetGroups] = useState<ObservationDatasetGroup[]>([]);
-  // False until the first dataset fetch settles, so the folder strip can show a
+  // False until the first dataset fetch settles, so the dataset strip can show a
   // loading skeleton instead of briefly flashing the "no datasets yet" hint.
   const [, setDatasetsLoaded] = useState(false);
   const [datasetFilter, setDatasetFilter] = useQueryState("dataset", parseAsString.withOptions(QUERY_STATE_OPTIONS));
   const deletePermission = canDeleteRecord(target, { ownRecord: target.kind === "personal" });
   const deleteDisabledReason = deletePermission.allowed ? null : deletePermission.reason;
   const selectedIds = useMemo(() => new Set(selectedRecords.keys()), [selectedRecords]);
+  /** Last plain-clicked tile — the fixed end of a shift-click range. */
+  const selectionAnchorRef = useRef<string | null>(null);
 
   useEffect(() => {
     configureObservationMutationRepo(target.kind === "group" ? target.did : null);
     return () => configureObservationMutationRepo(null);
   }, [target]);
 
+  // Escape drops the selection, the same way it does on the Audio tab.
+  useEffect(() => {
+    if (selectedRecords.size === 0) return;
+    const onKeyDown = (event: globalThis.KeyboardEvent) => {
+      if (event.key !== "Escape") return;
+      // A right-click menu is open on top of the grid — Escape belongs to it,
+      // and dismissing a menu should not also throw the selection away.
+      if (event.target instanceof Element && event.target.closest("[role='menu']")) return;
+      selectionAnchorRef.current = null;
+      setSelectedRecords(new Map());
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [selectedRecords.size]);
+
   // Group the steward's observations by the project they were collected for so
   // the list can be filtered per project (read straight from projectRef).
-  useEffect(() => {
-    let cancelled = false;
-    (async () => {
-      try {
-        const response = await fetch(manageApiHref("/api/manage/observations/projects", target), { cache: "no-store" });
-        const data = (await response.json()) as { groups?: ObservationProjectGroup[] };
-        if (cancelled || !response.ok || !Array.isArray(data?.groups)) return;
-        setProjectGroups(data.groups);
-      } catch {
-        // Filtering is an enhancement; ignore load failures.
-      }
-    })();
-    return () => {
-      cancelled = true;
-    };
+  // Re-fetched after filing sightings under a project so counts stay fresh.
+  const loadProjectGroups = useCallback(async () => {
+    try {
+      const response = await fetch(manageApiHref("/api/manage/observations/projects", target), { cache: "no-store" });
+      const data = (await response.json()) as { groups?: ObservationProjectGroup[] };
+      if (!response.ok || !Array.isArray(data?.groups)) return;
+      setProjectGroups(data.groups);
+    } catch {
+      // Filtering is an enhancement; ignore load failures.
+    }
   }, [target]);
+
+  useEffect(() => {
+    void loadProjectGroups();
+  }, [loadProjectGroups]);
 
   // The project filter can point at a project that has zero observations yet
   // (for example when arriving from a project card). Load project titles too so
@@ -578,8 +609,8 @@ export function ObservationsClient({
   }, [target]);
 
   // Group observations by the dataset they were filed into so the steward can
-  // see datasets as folders and filter the list down to one. Re-fetched after a
-  // grouping action so folder counts stay fresh.
+  // see them as datasets and filter the list down to one. Re-fetched after a
+  // grouping action so dataset counts stay fresh.
   const loadDatasetGroups = useCallback(async () => {
     try {
       const response = await fetch(manageApiHref("/api/manage/observations/datasets", target), { cache: "no-store" });
@@ -606,16 +637,23 @@ export function ObservationsClient({
   }, [projectContexts, projectGroups]);
   const activeProject = activeGroup
     ? { projectUri: activeGroup.projectUri, title: activeGroup.title }
-    : projectOptions.find((project) => project.projectUri === projectFilter) ?? null;
+    : projectOptions.find((option) => option.projectUri === projectFilter)
+      ?? (project ? { projectUri: project.uri, title: project.title } : null);
   const activeDataset = datasetGroups.find((group) => group.datasetUri === datasetFilter) ?? null;
-  // A dataset filter takes precedence over a project filter; the folder row and
-  // the project pills clear each other on click so only one is ever active.
-  const filterUris = useMemo(() => {
-    if (activeDataset) return new Set(activeDataset.uris);
-    if (activeGroup) return new Set(activeGroup.uris);
-    if (projectFilter && activeProject) return new Set<string>();
-    return null;
-  }, [activeDataset, activeGroup, activeProject, projectFilter]);
+  const projectUris = useMemo(
+    () => projectScopeUris(projectFilter, activeGroup?.uris ?? null),
+    [activeGroup, projectFilter],
+  );
+  const filterUris = useMemo(
+    () => resolveObservationFilterUris(projectUris, activeDataset?.uris ?? null),
+    [activeDataset, projectUris],
+  );
+  // On a project's page, only datasets that actually hold some of its sightings
+  // are worth offering.
+  const visibleDatasetGroups = useMemo(() => {
+    if (!project || !projectUris) return datasetGroups;
+    return datasetGroups.filter((group) => group.uris.some((uri) => projectUris.has(uri)));
+  }, [datasetGroups, project, projectUris]);
 
   const handleVisibleRecordsChange = useCallback((records: OccurrenceRecord[]) => {
     setVisibleRecords(records);
@@ -626,7 +664,33 @@ export function ObservationsClient({
     });
   }, []);
 
-  function toggleSelectedRecord(record: OccurrenceRecord, selected: boolean) {
+  /* ── Drive-style selection ────────────────────────────────────────────────
+   * Mirrors the account Audio tab: a checkbox fades in when a tile is hovered,
+   * clicking it selects the sighting, shift-click selects the whole range from
+   * the last plain click, Escape clears, and the header actions are replaced by
+   * a count + Delete toolbar while anything is selected. */
+  function toggleSelectedRecord(record: OccurrenceRecord, selected: boolean, shiftKey = false) {
+    if (deleteDisabledReason) return;
+    const anchorId = selectionAnchorRef.current;
+    if (shiftKey && anchorId && anchorId !== record.id) {
+      const from = visibleRecords.findIndex((candidate) => candidate.id === anchorId);
+      const to = visibleRecords.findIndex((candidate) => candidate.id === record.id);
+      if (from !== -1 && to !== -1) {
+        // Select everything between the anchor and the shift-clicked tile,
+        // inclusive. The anchor stays put so another shift-click just resizes
+        // the range, like Drive/Finder.
+        setSelectedRecords((current) => {
+          const next = new Map(current);
+          for (let i = Math.min(from, to); i <= Math.max(from, to); i += 1) {
+            const inRange = visibleRecords[i];
+            next.set(inRange.id, inRange);
+          }
+          return next;
+        });
+        return;
+      }
+    }
+    selectionAnchorRef.current = record.id;
     setSelectedRecords((current) => {
       const next = new Map(current);
       if (selected) next.set(record.id, record);
@@ -641,6 +705,7 @@ export function ObservationsClient({
   }
 
   function clearSelectedRecords() {
+    selectionAnchorRef.current = null;
     setSelectedRecords(new Map());
   }
 
@@ -700,6 +765,7 @@ export function ObservationsClient({
           <AddObservationsModal
             target={target}
             projectRef={activeProject?.projectUri ?? null}
+            projectSiteRef={project?.siteUri ?? null}
             onClose={close}
             onViewObservations={() => {
               close();
@@ -713,8 +779,88 @@ export function ObservationsClient({
     void modal.show();
   }, [activeProject?.projectUri, createPermission.reason, modal, router, target]);
 
+  // File already-published sightings — or a whole dataset of them — under a
+  // project. Collecting first and sorting later is how field work actually
+  // goes, so membership has to be editable after the fact.
+  const openAddToProject = useCallback(
+    (subject: AddToProjectTarget) => {
+      if (createPermission.reason) return;
+      modal.pushModal(
+        {
+          id: "add-observations-to-project",
+          dialogWidth: "max-w-lg w-[calc(100%-2rem)]",
+          forceDialog: true,
+          content: (
+            <AddToProjectModal
+              target={target}
+              subject={subject}
+              preselectedProjectUri={project?.uri ?? attachToProject ?? null}
+              onDone={({ projectUri, result }) => {
+                const moved = new Set(result.attached);
+                setSelectedRecords(new Map());
+                setFreshRecords((current) =>
+                  current.map((record) =>
+                    record.kind === "occurrence" && moved.has(record.rkey) ? { ...record, projectRef: projectUri } : record,
+                  ),
+                );
+                void loadProjectGroups();
+                router.refresh();
+              }}
+            />
+          ),
+        },
+        true,
+      );
+      void modal.show();
+    },
+    [attachToProject, createPermission.reason, loadProjectGroups, modal, project?.uri, router, target],
+  );
+
+  // Take the selected sightings out of their dataset. They survive as loose
+  // sightings — the counterpart to filing them, and the reason dataset
+  // membership is now a choice rather than a one-way door.
+  const openRemoveFromDataset = useCallback(() => {
+    const records = Array.from(selectedRecords.values()).filter((record) => record.datasetRef);
+    if (records.length === 0 || createPermission.reason) return;
+    modal.pushModal(
+      {
+        id: "remove-observations-dataset",
+        content: (
+          <ManageConfirmModal
+            title={t("dataset.removeTitle", { count: records.length })}
+            description={t("dataset.removeDescription")}
+            confirmLabel={t("dataset.removeConfirm")}
+            cancelLabel={t("cancel")}
+            onConfirm={async () => {
+              await modal.hide();
+              modal.popModal();
+              const repoOptions = target.kind === "group" ? { repo: target.did } : undefined;
+              const result = await removeObservationsFromDataset(
+                { occurrences: records.map((record) => ({ rkey: record.rkey, datasetRef: record.datasetRef })) },
+                repoOptions,
+              );
+              const loose = new Set(result.removed);
+              setSelectedRecords(new Map());
+              setFreshRecords((current) =>
+                current.map((record) =>
+                  record.kind === "occurrence" && loose.has(record.rkey)
+                    ? { ...record, datasetRef: null, datasetName: null }
+                    : record,
+                ),
+              );
+              void loadDatasetGroups();
+              router.refresh();
+            }}
+          />
+        ),
+      },
+      true,
+    );
+    void modal.show();
+  }, [createPermission.reason, loadDatasetGroups, modal, router, selectedRecords, t, target]);
+
   // Group the currently-selected observations into a dataset (new or existing),
-  // then refresh folder counts and the listing.
+  // then refresh dataset counts and the listing.
   const openGroupIntoDataset = useCallback(() => {
     const records = Array.from(selectedRecords.values());
     if (records.length === 0 || createPermission.reason) return;
@@ -802,6 +948,91 @@ export function ObservationsClient({
     [datasetFilter, deleteDisabledReason, loadDatasetGroups, modal, router, setDatasetFilter, t, target],
   );
 
+  /* ── Right-click to group ─────────────────────────────────────────────────
+   * Same actions as the floating selection bar, but reachable straight from a
+   * tile. Finder/Drive semantics: right-clicking a tile that is not part of the
+   * current selection makes it the selection first, so the menu always acts on
+   * what it is pointing at; right-clicking inside a selection keeps it whole. */
+  function handleContextMenuOpen(record: OccurrenceRecord) {
+    if (deleteDisabledReason) return;
+    if (selectedRecords.has(record.id)) return;
+    selectionAnchorRef.current = record.id;
+    setSelectedRecords(new Map([[record.id, record]]));
+  }
+
+  const contextMenu = useMemo<ObservationContextMenu | undefined>(() => {
+    if (deleteDisabledReason) return undefined;
+    const records = Array.from(selectedRecords.values());
+    const createReason = createPermission.reason ?? null;
+    const items: ObservationContextMenuItem[] = [];
+    // Pointless on a project's own page — everything listed there is already
+    // filed under it.
+    if (!project) {
+      items.push({
+        id: "add-to-project",
+        label: t("addToProject.action"),
+        icon: <FolderKanbanIcon aria-hidden />,
+        disabled: Boolean(createReason) || isDeletingSelected,
+        disabledReason: createReason,
+        onSelect: () =>
+          openAddToProject({
+            kind: "observations",
+            occurrences: records.map((record) => ({
+              rkey: record.rkey,
+              projectRef: record.projectRef,
+              siteRef: record.siteRef,
+            })),
+          }),
+      });
+    }
+    items.push({
+      id: "group-into-dataset",
+      label: t("groupIntoDataset"),
+      icon: <FolderPlusIcon aria-hidden />,
+      disabled: Boolean(createReason) || isDeletingSelected,
+      disabledReason: createReason,
+      onSelect: openGroupIntoDataset,
+    });
+    if (records.some((record) => record.datasetRef)) {
+      items.push({
+        id: "remove-from-dataset",
+        label: t("dataset.removeAction"),
+        icon: <FolderMinusIcon aria-hidden />,
+        disabled: Boolean(createReason) || isDeletingSelected,
+        disabledReason: createReason,
+        onSelect: openRemoveFromDataset,
+      });
+    }
+    items.push({ id: "before-delete", separator: true });
+    items.push({
+      id: "delete",
+      label: t("deleteSelected"),
+      icon: <Trash2Icon aria-hidden />,
+      destructive: true,
+      disabled: isDeletingSelected,
+      onSelect: openDeleteSelectedModal,
+    });
+    return {
+      onOpen: handleContextMenuOpen,
+      // Only worth a heading once the menu covers more than the tile itself.
+      label: records.length > 1 ? t("selectedForDelete", { count: records.length }) : undefined,
+      items,
+    };
+    // `handleContextMenuOpen` / `openDeleteSelectedModal` are re-created every
+    // render on purpose; the selection they read is in the dependency list.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [
+    createPermission.reason,
+    deleteDisabledReason,
+    isDeletingSelected,
+    openAddToProject,
+    openGroupIntoDataset,
+    openRemoveFromDataset,
+    project,
+    selectedRecords,
+    t,
+  ]);
+
   if (mode === "add") {
     return (
       <ObservationBulkAddPanel
@@ -823,44 +1054,93 @@ export function ObservationsClient({
 
   return (
     <div className="bg-background pb-4">
-      {!isEmpty ? (
-        <div className="mx-auto mt-5 max-w-6xl px-6">
-          <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl bg-muted px-4 py-3">
-            <p className="text-sm text-muted-foreground">
-              {selectedRecords.size > 0 ? t("selectedForDelete", { count: selectedRecords.size }) : t("selectToDeleteHint")}
-            </p>
-            <div className="flex flex-wrap items-center gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={selectedRecords.size === visibleRecords.length && visibleRecords.length > 0 ? clearSelectedRecords : selectAllVisibleRecords}
-                disabled={visibleRecords.length === 0 || Boolean(deleteDisabledReason) || isDeletingSelected}
-                title={deleteDisabledReason ?? undefined}
-              >
-                {selectedRecords.size === visibleRecords.length && visibleRecords.length > 0 ? t("deselectAll") : t("selectAll")}
-              </Button>
+      {/* Drive-style selection toolbar: nothing is shown until a sighting is
+          picked, then a floating pill offers the actions for that selection.
+          Anchored to the viewport so it stays reachable while scrolling a long
+          grid instead of pushing the tiles around when it appears. */}
+      {selectedRecords.size > 0 ? (
+        <div className="pointer-events-none fixed inset-x-0 bottom-[max(1rem,env(safe-area-inset-bottom))] z-[75] flex justify-center px-4 pr-[4.5rem] sm:pr-4">
+          <div className="pointer-events-auto flex max-w-full flex-wrap items-center justify-center gap-1.5 rounded-3xl border border-border bg-card p-1.5 shadow-lg sm:rounded-full">
+            <button
+              type="button"
+              onClick={clearSelectedRecords}
+              aria-label={t("clearSelection")}
+              title={t("clearSelection")}
+              className="grid h-7 w-7 place-items-center rounded-full text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+            >
+              <XIcon className="size-4" />
+            </button>
+            <span className="px-0.5 text-sm font-medium tabular-nums text-foreground">
+              {t("selectedForDelete", { count: selectedRecords.size })}
+            </span>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={selectAllVisibleRecords}
+              disabled={selectedRecords.size === visibleRecords.length || isDeletingSelected}
+              className="rounded-full text-muted-foreground hover:text-foreground"
+            >
+              {t("selectAll")}
+            </Button>
+            {/* Pointless on a project's own page — everything listed there is
+                already filed under it. */}
+            {project ? null : (
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={openGroupIntoDataset}
-                disabled={selectedRecords.size === 0 || Boolean(createPermission.reason) || isDeletingSelected}
+                onClick={() =>
+                  openAddToProject({
+                    kind: "observations",
+                    occurrences: Array.from(selectedRecords.values()).map((record) => ({
+                      rkey: record.rkey,
+                      projectRef: record.projectRef,
+                      siteRef: record.siteRef,
+                    })),
+                  })
+                }
+                disabled={Boolean(createPermission.reason) || isDeletingSelected}
                 title={createPermission.reason ?? undefined}
-                className="text-muted-foreground hover:text-foreground"
+                className="rounded-full text-muted-foreground hover:text-foreground"
               >
-                <FolderPlusIcon className="size-4" />
-                {t("groupIntoDataset")}
+                <FolderKanbanIcon className="size-4" />
+                {t("addToProject.action")}
               </Button>
+            )}
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={openGroupIntoDataset}
+              disabled={Boolean(createPermission.reason) || isDeletingSelected}
+              title={createPermission.reason ?? undefined}
+              className="rounded-full text-muted-foreground hover:text-foreground"
+            >
+              <FolderPlusIcon className="size-4" />
+              {t("groupIntoDataset")}
+            </Button>
+            {Array.from(selectedRecords.values()).some((record) => record.datasetRef) ? (
               <Button
-                variant="destructive"
+                variant="ghost"
                 size="sm"
-                onClick={openDeleteSelectedModal}
-                disabled={selectedRecords.size === 0 || Boolean(deleteDisabledReason) || isDeletingSelected}
-                title={deleteDisabledReason ?? undefined}
+                onClick={openRemoveFromDataset}
+                disabled={Boolean(createPermission.reason) || isDeletingSelected}
+                title={createPermission.reason ?? undefined}
+                className="rounded-full text-muted-foreground hover:text-foreground"
               >
-                {isDeletingSelected ? <Loader2Icon className="size-4 animate-spin" /> : <Trash2Icon className="size-4" />}
-                {isDeletingSelected ? t("deletingSelected") : t("deleteSelected")}
+                <FolderMinusIcon className="size-4" />
+                {t("dataset.removeAction")}
               </Button>
-            </div>
+            ) : null}
+            <Button
+              variant="destructive"
+              size="sm"
+              onClick={openDeleteSelectedModal}
+              disabled={Boolean(deleteDisabledReason) || isDeletingSelected}
+              title={deleteDisabledReason ?? undefined}
+              className="rounded-full"
+            >
+              {isDeletingSelected ? <Loader2Icon className="size-4 animate-spin" /> : <Trash2Icon className="size-4" />}
+              {isDeletingSelected ? t("deletingSelected") : t("deleteSelected")}
+            </Button>
           </div>
         </div>
       ) : null}
@@ -870,7 +1150,7 @@ export function ObservationsClient({
           kind="occurrence"
           ownerDid={target.did}
           showHero={false}
-          initialPage={activeGroup || activeDataset ? undefined : initialPage}
+          initialPage={projectFilter || activeDataset ? undefined : initialPage}
           extraInitialRecords={freshRecords}
           defaultOccurrenceMedia="all"
           filterUris={filterUris}
@@ -882,9 +1162,13 @@ export function ObservationsClient({
           hideToolbarWhenEmpty
           hideOccurrenceFilters
           toolbarAfterSearchRow={
+            <div className="space-y-2">
             <ObservationFilterChipRow
-              datasets={datasetGroups}
-              projects={projectOptions}
+              datasets={visibleDatasetGroups}
+              // On a project's own page the scope is fixed, so the project
+              // pills (including "All observations") would only break out of it.
+              projects={project ? [] : projectOptions}
+              lockedToProject={Boolean(project)}
               datasetValue={datasetFilter ?? null}
               projectValue={projectFilter ?? null}
               onDatasetChange={(next) => {
@@ -896,6 +1180,35 @@ export function ObservationsClient({
                 if (next) void setDatasetFilter(null);
               }}
             />
+            {/* An open dataset can be filed under a project whole, rather than
+                selecting its sightings one by one. */}
+            {activeDataset && !project ? (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() =>
+                  openAddToProject({
+                    kind: "dataset",
+                    datasetUri: activeDataset.datasetUri,
+                    datasetCid: null,
+                    name: activeDataset.name,
+                    parentRkeys: activeDataset.parentRkeys,
+                    occurrences: activeDataset.uris.map((uri) => ({
+                      rkey: uri.split("/").pop() ?? "",
+                      projectRef: null,
+                      siteRef: null,
+                    })).filter((occurrence) => occurrence.rkey.length > 0),
+                  })
+                }
+                disabled={Boolean(createPermission.reason)}
+                title={createPermission.reason ?? undefined}
+                className="rounded-full"
+              >
+                <FolderKanbanIcon className="size-3.5" />
+                {t("addToProject.datasetAction", { name: activeDataset.name })}
+              </Button>
+            ) : null}
+            </div>
           }
           enableCompactObservationCards
           defaultCardDensity="compact"
@@ -904,8 +1217,10 @@ export function ObservationsClient({
           hiddenRecordIds={deletedRecordIds}
           observationSelection={{
             selectedIds,
+            active: selectedRecords.size > 0,
             onToggle: toggleSelectedRecord,
             getDisabledReason: () => deleteDisabledReason,
+            contextMenu,
           }}
           onObservationVisibleRecordsChange={handleVisibleRecordsChange}
         />
@@ -1309,6 +1624,7 @@ function ObservationFilterChipRow({
   projects,
   datasetValue,
   projectValue,
+  lockedToProject = false,
   onDatasetChange,
   onProjectChange,
 }: {
@@ -1316,6 +1632,9 @@ function ObservationFilterChipRow({
   projects: Array<ObservationProjectContext & { count?: number }>;
   datasetValue: string | null;
   projectValue: string | null;
+  /** True when the page is pinned to one project, so "All observations" only
+   *  clears the dataset instead of leaving the project. */
+  lockedToProject?: boolean;
   onDatasetChange: (next: string | null) => void;
   onProjectChange: (next: string | null) => void;
 }) {
@@ -1324,9 +1643,9 @@ function ObservationFilterChipRow({
 
   return (
     <div className="scrollbar-hidden flex items-center gap-1.5 overflow-x-auto pb-1" aria-label={t("filterChipsAria")}>
-      <ObservationFilterPill selected={!datasetValue && !projectValue} onClick={() => {
+      <ObservationFilterPill selected={!datasetValue && (lockedToProject || !projectValue)} onClick={() => {
         onDatasetChange(null);
-        onProjectChange(null);
+        if (!lockedToProject) onProjectChange(null);
       }}>
         {t("filterAllObservations")}
       </ObservationFilterPill>

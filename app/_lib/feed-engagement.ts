@@ -31,8 +31,11 @@ import {
 export type Engagement = {
   likeCount: number;
   commentCount: number;
+  repostCount: number;
   /** AT-URI of the viewer's own like record, when they've liked this subject. */
   viewerLikeUri: string | null;
+  /** AT-URI of the viewer's own repost record, when they've reshared this subject. */
+  viewerRepostUri: string | null;
 };
 
 export type FeedComment = {
@@ -94,7 +97,7 @@ export type Liker = {
 };
 
 export function emptyEngagement(): Engagement {
-  return { likeCount: 0, commentCount: 0, viewerLikeUri: null };
+  return { likeCount: 0, commentCount: 0, repostCount: 0, viewerLikeUri: null, viewerRepostUri: null };
 }
 
 const CHUNK = 100; // indexer `in` filter cap
@@ -129,6 +132,18 @@ const LIKES_BY_SUBJECT_QUERY = `
   }
 `;
 
+// Reposts mirror likes: app.gainforest.feed.repost records with a subject
+// strongRef. Queried separately (with its own catch in fetchEngagement) so an
+// indexer that doesn't ingest the collection yet degrades to zero counts
+// without breaking like/comment aggregation.
+const REPOSTS_BY_SUBJECT_QUERY = `
+  query FeedRepostsBySubject($uris: [String!]!) {
+    appGainforestFeedRepost(first: ${SCAN_CAP}, where: { subject: { uri: { in: $uris } } }) {
+      edges { node { uri did subject { uri } } }
+    }
+  }
+`;
+
 // Count by thread root, so a subject's count includes both its top-level
 // comments and every nested reply (all of which carry `reply.root == subject`).
 const COMMENT_COUNTS_QUERY = `
@@ -158,7 +173,7 @@ export async function fetchEngagement(
 
   await Promise.all(
     chunk(unique, CHUNK).map(async (uriChunk) => {
-      const [likeData, commentData] = await Promise.all([
+      const [likeData, commentData, repostData] = await Promise.all([
         indexerQuery<{ appGainforestFeedLike?: { edges?: Array<{ node?: LikeNode | null } | null> | null } | null }>(
           LIKES_BY_SUBJECT_QUERY,
           { uris: uriChunk },
@@ -166,6 +181,11 @@ export async function fetchEngagement(
         ).catch(() => null),
         indexerQuery<{ appGainforestFeedPost?: { edges?: Array<{ node?: CommentCountNode | null } | null> | null } | null }>(
           COMMENT_COUNTS_QUERY,
+          { uris: uriChunk },
+          signal,
+        ).catch(() => null),
+        indexerQuery<{ appGainforestFeedRepost?: { edges?: Array<{ node?: LikeNode | null } | null> | null } | null }>(
+          REPOSTS_BY_SUBJECT_QUERY,
           { uris: uriChunk },
           signal,
         ).catch(() => null),
@@ -186,6 +206,16 @@ export async function fetchEngagement(
         if (!rootUri) continue;
         const e = out.get(rootUri);
         if (e) e.commentCount += 1;
+      }
+
+      for (const edge of repostData?.appGainforestFeedRepost?.edges ?? []) {
+        const node = edge?.node;
+        const subjectUri = node?.subject?.uri;
+        if (!subjectUri) continue;
+        const e = out.get(subjectUri);
+        if (!e) continue;
+        e.repostCount += 1;
+        if (viewerDid && node?.did === viewerDid && node.uri) e.viewerRepostUri = node.uri;
       }
     }),
   );

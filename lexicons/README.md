@@ -18,6 +18,7 @@ re-forking them.
 |----------------------------|-----------------------|---------|
 | `app.gainforest.feed.post` | `app.bsky.feed.post`  | A feed post. A **comment is a reply-post** — a post carrying a `reply: { root, parent }`. |
 | `app.gainforest.feed.like` | `app.bsky.feed.like`  | A like of any record/post/comment. Unlike = delete the record. |
+| `app.gainforest.feed.repost` | `app.bsky.feed.repost` | A reshare of any record/post/comment. Undo = delete the record. |
 
 There is **no separate comment lexicon** — that's the Bluesky model: a comment is
 a `post` whose `reply.parent` points at the thing being commented on.
@@ -53,8 +54,12 @@ they ship with `@atproto/api` and are loaded into the proxy agent already:
 - `com.atproto.label.defs#selfLabels` — `post.labels`.
 
 `entities` / `textSlice` from the Bluesky source were dropped — they're marked
-deprecated there in favour of `facets`. `app.gainforest.feed.repost` (a verbatim
-port of `app.bsky.feed.repost`) is a trivial add if reposts are wanted later.
+deprecated there in favour of `facets`. `app.gainforest.feed.repost` is a
+verbatim port of `app.bsky.feed.repost`; the reshare button writes/deletes it
+and counts are read from the hyperindex (`appGainforestFeedRepost`). Surfacing
+reshared records as timeline rows ("X reshared …", Bluesky's `reasonRepost`)
+still needs feed-merge wiring in `app/_lib/feed.ts` once the indexer ingests
+the collection.
 
 ## Bluesky cross-posting (`app.gainforest.actor.preferences`)
 
@@ -63,8 +68,10 @@ cross-posting to Bluesky is just writing the SAME record body a second time
 into the user's own repo under the `app.bsky.feed.post` NSID, **reusing the
 GainForest post's rkey** — so the mapping is deterministic
 (`at://did/app.gainforest.feed.post/RKEY` ⇄ `at://did/app.bsky.feed.post/RKEY`,
-public URL `https://bsky.app/profile/DID/post/RKEY`). The wiring lives in
-`app/_lib/bluesky-crosspost.ts`.
+public URL `https://bsky.app/profile/HANDLE/post/RKEY`). The wiring lives in
+`app/_lib/bluesky-crosspost.ts`. The profile segment must stay unescaped —
+bsky.app doesn't route a percent-encoded DID (`did%3Aplc%3A…`) and shows a
+blank page for it.
 
 Rules baked into the client:
 
@@ -87,7 +94,8 @@ Rules baked into the client:
   best-effort too.
 - The feed only renders a "View on Bluesky" link for twins the public Bluesky
   appview actually returns (`app.bsky.feed.getPosts`), so links never point at
-  posts bsky.app can't show. Note this also means posts only surface on
+  posts bsky.app can't show. The link uses the author handle that same lookup
+  returns, so it matches the address bsky.app itself shows. Note this also means posts only surface on
   Bluesky if the PDS is crawled by a Bluesky relay (`com.atproto.sync.requestCrawl`).
 
 ## Relationship to the existing comment/review layer

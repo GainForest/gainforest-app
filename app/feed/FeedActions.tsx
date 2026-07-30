@@ -12,13 +12,15 @@
 
 import { useCallback, useEffect, useId, useMemo, useRef, useState, type ReactNode } from "react";
 import { useTranslations } from "next-intl";
-import { EyeOffIcon, HeartIcon, ImageIcon, Loader2Icon, MessageCircleIcon, PencilIcon, ReplyIcon, SendHorizonalIcon, Trash2Icon, UserIcon, XIcon } from "lucide-react";
+import { EyeOffIcon, HeartIcon, ImageIcon, Loader2Icon, MessageCircleIcon, PencilIcon, Repeat2Icon, ReplyIcon, SendHorizonalIcon, Trash2Icon, UserIcon, XIcon } from "lucide-react";
 import {
   createFeedComment,
   createFeedLike,
   createFeedPost,
+  createFeedRepost,
   deleteFeedLike,
   deleteFeedPost,
+  deleteFeedRepost,
   updateFeedPost,
 } from "@/app/(manage)/manage/_lib/mutations";
 import {
@@ -128,6 +130,9 @@ export type FeedInteractions = {
   getEngagement: (uri: string) => Engagement;
   loadEngagement: (uris: string[]) => void;
   toggleLike: (uri: string) => Promise<void>;
+  /** Reshare (repost) `uri` as the acting account, or undo an existing reshare
+   *  — the Bluesky model: a repost record in the resharer's repo, undo = delete. */
+  toggleRepost: (uri: string) => Promise<void>;
   getLikers: (uri: string) => LikersState;
   loadLikers: (uri: string) => void;
   getComments: (uri: string) => FeedComment[] | undefined;
@@ -217,13 +222,16 @@ export function useFeedInteractions(sessionDid: string | null): FeedInteractions
           setEngagement((prev) => {
             const next = new Map(prev);
             for (const [u, e] of map) {
-              // Don't clobber an optimistic like the indexer hasn't caught yet.
+              // Don't clobber an optimistic like/reshare the indexer hasn't caught yet.
               const existing = prev.get(u);
+              let merged = e;
               if (existing?.viewerLikeUri === "optimistic" && !e.viewerLikeUri) {
-                next.set(u, { ...e, likeCount: Math.max(e.likeCount, existing.likeCount), viewerLikeUri: "optimistic" });
-              } else {
-                next.set(u, e);
+                merged = { ...merged, likeCount: Math.max(e.likeCount, existing.likeCount), viewerLikeUri: "optimistic" };
               }
+              if (existing?.viewerRepostUri === "optimistic" && !e.viewerRepostUri) {
+                merged = { ...merged, repostCount: Math.max(e.repostCount, existing.repostCount), viewerRepostUri: "optimistic" };
+              }
+              next.set(u, merged);
             }
             return next;
           });
@@ -293,6 +301,35 @@ export function useFeedInteractions(sessionDid: string | null): FeedInteractions
       }
     },
     [engagement, setOne, patchViewerLiker, repoOption],
+  );
+
+  // Reshare toggle, mirroring toggleLike: optimistic count + viewer-state flip
+  // first, then the repost record write (create, or delete on undo), reverting
+  // the overlay when the write fails.
+  const toggleRepost = useCallback(
+    async (uri: string) => {
+      const current = engagement.get(uri) ?? emptyEngagement();
+      if (current.viewerRepostUri) {
+        const repostUri = current.viewerRepostUri;
+        setOne(uri, { repostCount: Math.max(0, current.repostCount - 1), viewerRepostUri: null });
+        try {
+          if (repostUri !== "optimistic") await deleteFeedRepost(rkeyOf(repostUri), repoOption);
+        } catch (error) {
+          setOne(uri, { repostCount: current.repostCount, viewerRepostUri: repostUri });
+          throw error;
+        }
+        return;
+      }
+      setOne(uri, { repostCount: current.repostCount + 1, viewerRepostUri: "optimistic" });
+      try {
+        const result = await createFeedRepost(uri, repoOption);
+        setOne(uri, { viewerRepostUri: result.uri });
+      } catch (error) {
+        setOne(uri, { repostCount: current.repostCount, viewerRepostUri: null });
+        throw error;
+      }
+    },
+    [engagement, setOne, repoOption],
   );
 
   const getLikers = useCallback((uri: string): LikersState => likers.get(uri) ?? EMPTY_LIKERS, [likers]);
@@ -464,6 +501,7 @@ export function useFeedInteractions(sessionDid: string | null): FeedInteractions
     getEngagement,
     loadEngagement,
     toggleLike,
+    toggleRepost,
     getLikers,
     loadLikers,
     getComments,
@@ -1429,7 +1467,65 @@ function LikersTooltipBody({
   );
 }
 
-// ── Per-row action bar (like + comment) ──────────────────────────────────────
+// ── Reshare (repost) button ──────────────────────────────────────────────────
+
+/** Reshare toggle + count, the Bluesky repost button: recycle arrows that turn
+ *  green while the viewer's own reshare exists, `aria-pressed` for its state,
+ *  and a signed-out click routed to login. Clicking again undoes the reshare
+ *  (deletes the repost record), so the action is always reversible. */
+export function RepostButton({
+  subjectUri,
+  signedIn,
+  interactions,
+  size = "default",
+}: {
+  subjectUri: string;
+  signedIn: boolean;
+  interactions: FeedInteractions;
+  size?: "default" | "sm";
+}) {
+  const t = useTranslations("common.feed");
+  const engagement = interactions.getEngagement(subjectUri);
+  const reposted = Boolean(engagement.viewerRepostUri);
+  const [busy, setBusy] = useState(false);
+  const hasReposts = engagement.repostCount > 0;
+
+  async function onRepost() {
+    if (!signedIn) {
+      redirectToLogin();
+      return;
+    }
+    if (busy) return;
+    setBusy(true);
+    try {
+      await interactions.toggleRepost(subjectUri);
+    } catch {
+      // The optimistic state already reverted; nothing more to surface here.
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <button
+      type="button"
+      onClick={() => void onRepost()}
+      aria-pressed={reposted}
+      aria-label={reposted ? t("actions.reshared") : t("actions.reshare")}
+      title={reposted ? t("actions.undoReshare") : t("actions.reshareHint")}
+      className={cn(
+        "inline-flex items-center gap-1.5 rounded-full font-medium transition-colors hover:bg-muted",
+        size === "sm" ? "px-2 py-0.5 text-[11px]" : "px-2.5 py-1 text-xs",
+        reposted ? "text-emerald-600 dark:text-emerald-400" : "text-muted-foreground hover:text-foreground",
+      )}
+    >
+      <Repeat2Icon className={cn(size === "sm" ? "size-3.5" : "size-4", reposted && "stroke-[2.5]")} />
+      <span className="tabular-nums">{hasReposts ? engagement.repostCount : t("actions.reshare")}</span>
+    </button>
+  );
+}
+
+// ── Per-row action bar (like + repost + comment) ─────────────────────────────
 
 export function FeedActionBar({
   subjectUri,
@@ -1459,6 +1555,7 @@ export function FeedActionBar({
     <div className="mt-2">
       <div className="flex items-center gap-1 text-muted-foreground">
         <LikeButton subjectUri={subjectUri} signedIn={signedIn} interactions={interactions} />
+        <RepostButton subjectUri={subjectUri} signedIn={signedIn} interactions={interactions} />
         <button
           type="button"
           onClick={onCommentClick}

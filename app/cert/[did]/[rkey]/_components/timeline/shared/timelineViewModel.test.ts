@@ -38,6 +38,7 @@ const feedCopy: TimelineFeedCopy = {
   linkedProjectPlace: "Linked project place",
   linkedTreeGroup: "Linked tree group",
   linkedSound: "Linked sound",
+  linkedSoundscape: "Linked soundscape",
   groupedData: "Grouped data",
   unresolvedReferenceBody: "This linked evidence could not be loaded yet.",
 };

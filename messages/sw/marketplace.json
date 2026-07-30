@@ -269,7 +269,7 @@
   "bioblitz": {
     "metadata": {
       "title": "Changamoto ya kila wiki ya BioBlitz",
-      "description": "Toka nje, piga picha viumbe hai, na ongeza uoni wako. Kila wiki, mkusanyaji bora na picha bora hushinda zawadi."
+      "description": "Toka nje upige picha za bioanuwai ya porini. Kila uchunguzi halali lazima uwe na picha iliyopakiwa; watu na mimea ya vyungu hazihesabiki."
     },
     "banner": {
       "message": "Changamoto ya BioBlitz ya Wiki inaendelea. Piga picha asili na ushinde zawadi.",
@@ -281,7 +281,7 @@
       "eyebrow": "Changamoto ya BioBlitz ya Wiki",
       "titlePrefix": "Changamoto ya",
       "titleEmphasis": "BioBlitz",
-      "description": "Mashindano ya kirafiki ya kila wiki ya kurekodi asili. Piga picha kiumbe chochote hai — mmea, ndege, mdudu au kuvu —, kiongeze kwenye GainForest, na upande kwenye ubao. Raundi mpya, zawadi mpya, kila wiki.",
+      "description": "Mashindano ya kirafiki ya kila wiki ya kurekodi bioanuwai ya nje. Ongeza uchunguzi wenye picha ulizopakia mwenyewe. Watu na mimea ya vyungu hazihesabiki.",
       "program": "Sehemu ya programu ya Klarna AI for Climate Resilience, pamoja na GainForest."
     },
     "rsvp": {
@@ -325,7 +325,7 @@
           "participation": {
             "title": "2. Jinsi ya kushiriki",
             "paragraphs": {
-              "p1": "Unahitaji akaunti ya GainForest na lazima ujisajili kwa kila raundi. Uchunguzi unaostahiki lazima uongezwe ndani ya tarehe zilizoonyeshwa kwa raundi hiyo na uwe na ushahidi halisi wa kiumbe hai.",
+              "p1": "Unahitaji akaunti ya GainForest na lazima ujisajili kwa kila raundi. Uchunguzi halali lazima uongezwe ndani ya tarehe zilizoonyeshwa, uonyeshe bioanuwai ya nje, na uwe na picha iliyopakiwa moja kwa moja pamoja na uchunguzi. Watu na mimea ya vyungu hazihesabiki.",
               "p2": "Kila mtu anaweza kutumia akaunti moja. Mawasilisho ya kiotomatiki, yaliyorudiwa, yaliyobadilishwa, yaliyopewa tarehe ya nyuma, yanayopotosha au ya udanganyifu yanaweza kuondolewa kwenye changamoto."
             }
           },
@@ -514,11 +514,11 @@
       "steps": {
         "outside": {
           "title": "Toka nje",
-          "blurb": "Msitu, shamba au uwanja wako — kiumbe chochote hai kinahesabika."
+          "blurb": "Rekodi bioanuwai ya nje. Watu na mimea ya vyungu hazihesabiki."
         },
         "upload": {
           "title": "Pakia picha zako",
-          "blurb": "Ziongeze kwenye ukurasa wako wa Uchunguzi wangu, au kwa Tainá — pia kwenye GainForest."
+          "blurb": "Kila uchunguzi unahitaji picha yake iliyopakiwa. Uongeze kwenye Uchunguzi wangu au kwa Tainá."
         },
         "review": {
           "title": "Angalia jina la spishi",
@@ -535,10 +535,10 @@
     "board": {
       "title": "Ubao wa raundi hii",
       "live": "Moja kwa moja",
-      "subtitleLive": "Nani anaongoza zawadi ya uoni mwingi zaidi sasa hivi.",
+      "subtitleLive": "Nani anaongoza kwa uchunguzi halali wenye picha sasa hivi.",
       "subtitleEnded": "Matokeo ya mwisho ya raundi hii.",
       "subtitleUpcoming": "Kuwa wa kwanza kwenye ubao raundi itakapoanza.",
-      "subtitleAll": "Wakusanyaji hai zaidi katika changamoto nzima.",
+      "subtitleAll": "Uchunguzi halali wenye picha mwingi zaidi katika changamoto nzima.",
       "scope": {
         "round": "Raundi hii",
         "all": "Wakati wote"
@@ -565,6 +565,16 @@
         "observationsAll": "Uoni (wakati wote)",
         "collectors": "Wakusanyaji",
         "timeLeft": "Muda uliosalia"
+      },
+      "eligibility": {
+        "title": "Picha zilizokaguliwa",
+        "eligibleOnly": "Picha halali pekee huhesabiwa",
+        "wildlife": "Wanyamapori",
+        "plants": "Mimea ya nje",
+        "people": "Watu",
+        "potted": "Mimea ya vyungu",
+        "other": "Nyingine zilizoondolewa",
+        "explainer": "Uchunguzi wazi wa wanyamapori au mimea ya nje wenye picha iliyopakiwa moja kwa moja pekee huhesabiwa. Watu, mimea ya vyungu au ya ndani, mada zisizoeleweka na uchunguzi usio na picha iliyopakiwa huondolewa."
       },
       "empty": {
         "title": "Bado hakuna uoni",
@@ -1955,9 +1965,12 @@
   "observationGrid": {
     "sectionTitle": "Uchunguzi",
     "openDetails": "Fungua maelezo ya uchunguzi: {name}",
+    "openAction": "Fungua",
     "mediaCount": "{count, plural, one {kipengee # cha media} other {vipengee # vya media}}",
     "selectObservation": "Chagua uchunguzi",
     "deselectObservation": "Ondoa uteuzi wa uchunguzi",
+    "selectObservationNamed": "Chagua uchunguzi: {name}",
+    "deselectObservationNamed": "Ondoa uchaguzi wa uchunguzi: {name}",
     "playSound": "Cheza sauti",
     "pauseSound": "Sitisha sauti",
     "natureSoundRecording": "Rekodi ya sauti ya asili",

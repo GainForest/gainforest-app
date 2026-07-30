@@ -16,6 +16,7 @@ const copy: TimelineFeedCopy = {
   linkedProjectPlace: "Linked project place",
   linkedTreeGroup: "Linked tree group",
   linkedSound: "Linked sound",
+  linkedSoundscape: "Linked soundscape",
   groupedData: "Grouped data",
   unresolvedReferenceBody: "This linked evidence could not be loaded yet.",
 };
@@ -59,6 +60,37 @@ describe("timeline feed view model", () => {
       ["audio", "Morning birds", "audio"],
     ]);
     expect(tiles[0]?.caption).toBe("report.pdf");
+  });
+
+  it("opens a linked soundscape as a playable clock, not a link", () => {
+    const tiles = buildTimelineFeedTiles({
+      entryId: "entry",
+      content: [uriContent("at://did:example:org/app.gainforest.ac.soundscape/3kabc")],
+      references: [],
+      copy,
+    });
+
+    expect(tiles).toHaveLength(1);
+    expect(tiles[0]).toMatchObject({
+      kind: "soundscape",
+      title: "Linked soundscape",
+      preview: {
+        kind: "soundscape",
+        href: "/soundscape/did%3Aexample%3Aorg/3kabc",
+      },
+    });
+  });
+
+  it("prefers a resolved title for a linked soundscape", () => {
+    const uri = "at://did:example:org/app.gainforest.ac.soundscape/3kabc";
+    const tiles = buildTimelineFeedTiles({
+      entryId: "entry",
+      content: [uriContent(uri)],
+      references: [{ id: uri, kind: "unknown", title: "Ridge nights" }],
+      copy,
+    });
+
+    expect(tiles[0]?.title).toBe("Ridge nights");
   });
 
   it("uses plain fallback copy for unresolved references", () => {

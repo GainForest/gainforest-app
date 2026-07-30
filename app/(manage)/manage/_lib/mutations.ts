@@ -438,6 +438,7 @@ export async function createMultimediaFromUrl(input: CreateMultimediaFromUrlInpu
 
 const FEED_POST_COLLECTION = "app.gainforest.feed.post";
 const FEED_LIKE_COLLECTION = "app.gainforest.feed.like";
+const FEED_REPOST_COLLECTION = "app.gainforest.feed.repost";
 
 type FeedWriteResult = { uri: string; cid: string; rkey: string };
 
@@ -606,6 +607,29 @@ export async function createFeedLike(
 /** Remove a like (unlike) by the like record's rkey. */
 export async function deleteFeedLike(rkey: string, options?: { repo?: string }): Promise<void> {
   await deleteRecord(FEED_LIKE_COLLECTION, rkey, options);
+}
+
+/** Reshare (repost) any record/post/comment (app.gainforest.feed.repost — the
+ *  Bluesky repost model: a tiny record in the resharer's own repo whose subject
+ *  strongRef pins the exact version reshared). Returns the repost record's rkey
+ *  so the caller can later undo it via deleteFeedRepost. */
+export async function createFeedRepost(
+  subjectUri: string,
+  options?: { repo?: string },
+): Promise<FeedWriteResult> {
+  const subject: StrongRef = await resolveStrongRef(subjectUri);
+  const record = {
+    $type: FEED_REPOST_COLLECTION,
+    subject,
+    createdAt: new Date().toISOString(),
+  };
+  const result = await createRecord(FEED_REPOST_COLLECTION, record, undefined, options);
+  return { ...result, rkey: rkeyOf(result.uri) };
+}
+
+/** Undo a reshare by the repost record's rkey (delete the record, as Bluesky). */
+export async function deleteFeedRepost(rkey: string, options?: { repo?: string }): Promise<void> {
+  await deleteRecord(FEED_REPOST_COLLECTION, rkey, options);
 }
 
 // ── Social graph: follows ───────────────────────────────────────────────────

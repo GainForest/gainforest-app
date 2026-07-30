@@ -13,23 +13,40 @@
  * five bins; each recording contributes the MAX PMN per bin ("Max PMN Values").
  */
 
-import { fftRadix2 } from "./analysis";
+import { fftRadix2, FREQUENCY_BANDS } from "./analysis";
 import type { WavRecording } from "./audiomoth";
 
 export const WINDOW_LENGTH = 384;
 const HALF = WINDOW_LENGTH / 2; // 192 retained FFT bins
-const SEGMENT_SECONDS = 60;
+export const SEGMENT_SECONDS = 60;
+/**
+ * Shortest recording we will still analyze. PMN sums energy across time, so a
+ * shorter clip is scaled up to a 60-second equivalent (see `segmentPmn`).
+ *
+ * That correction is good but not perfect: the background-noise floor is
+ * estimated from the clip itself, and a shorter clip catches fewer of the
+ * loud moments the estimate is drawn from, so short recordings still read a
+ * little quiet. Measured against the same synthetic 48 kHz dawn chorus:
+ * 55 s lands within ~1% of a full minute, 30 s within ~5-13% (worst in the
+ * low bands). Hence the floor at half a segment — below that the numbers stop
+ * being comparable with full-minute recordings on the same dial.
+ *
+ * Within one library this bias is invisible as long as the schedule is
+ * consistent (every file 55 s reads like every other file). It only shows as
+ * a small step where a library MIXES durations.
+ */
+export const MIN_SEGMENT_SECONDS = 30;
 const NOISE_CLAMP_DB = -90;
 const NEIGHBORHOOD_THRESHOLD_DB = 3;
 const NEIGH_ROWS = 9;
 const NEIGH_COLS = 3;
-const FREQUENCY_SCALE = 750; // process.py: df["Frequency"] *= 750
-const BIN_EDGES = [0, 1500, 5000, 10000, 20000, 60000] as const;
-export const PMN_BIN_COUNT = BIN_EDGES.length - 1;
+export const PMN_BIN_COUNT = FREQUENCY_BANDS.length;
+/** Retained FFT bins per window; index f covers f * (sampleRate / 384) Hz. */
+export const PMN_SPECTRUM_BINS = WINDOW_LENGTH / 2;
 
 export class RecordingTooShortError extends Error {
   constructor() {
-    super("Recording shorter than one 60-second segment");
+    super(`Recording shorter than ${MIN_SEGMENT_SECONDS} seconds`);
     this.name = "RecordingTooShortError";
   }
 }
@@ -313,8 +330,17 @@ function thresholdNeighborhood(less: Float64Array, rows: number, cols: number): 
   return out;
 }
 
-/** PMN per FFT bin (length 192) for one 60-second segment. */
-export function segmentPmn(segment: Float32Array | Float64Array): Float64Array {
+/**
+ * PMN per FFT bin (length 192) for one segment.
+ *
+ * Pass `sampleRate` for a segment shorter than 60 seconds and the result is
+ * scaled to what a full segment would have summed to, so a short recording
+ * sits on the same scale as a full one. PMN is a SUM over time steps, so it
+ * grows linearly with duration; without this a 55-second clip would read ~8%
+ * quieter than the same soundscape recorded for a full minute. Full segments
+ * are untouched, keeping the numbers identical to the reference pipeline.
+ */
+export function segmentPmn(segment: Float32Array | Float64Array, sampleRate?: number): Float64Array {
   const { data: raw, timeSteps } = spectrogramDb(segment);
   const rolled = smoothNoiseProfile(raw, HALF, timeSteps);
   let mode = dbModePerRow(rolled, HALF, timeSteps);
@@ -329,24 +355,40 @@ export function segmentPmn(segment: Float32Array | Float64Array): Float64Array {
     }
   }
   const ale = thresholdNeighborhood(less, HALF, timeSteps);
+  // Time steps a full 60-second segment would have had, so partial segments
+  // are reported on the same scale. Unknown sample rate -> no scaling.
+  const fullTimeSteps = sampleRate
+    ? Math.floor((Math.floor(sampleRate * SEGMENT_SECONDS) - WINDOW_LENGTH) / WINDOW_LENGTH) + 1
+    : timeSteps;
+  const scale = fullTimeSteps > timeSteps ? fullTimeSteps / timeSteps : 1;
   const pmn = new Float64Array(HALF);
   for (let i = 0; i < HALF; i++) {
     let sum = 0;
     for (let t = 0; t < timeSteps; t++) sum += ale[i * timeSteps + t];
-    pmn[i] = sum;
+    pmn[i] = sum * scale;
   }
   return pmn;
 }
 
-/** Aggregate a length-192 PMN spectrum into the five frequency bins (max). */
-export function binnedMaxPmn(pmn192: Float64Array): number[] {
+/**
+ * Aggregate a length-192 PMN spectrum into the voice bands (max per band).
+ *
+ * Frequencies are the recording's REAL Hz — bin f is centred on
+ * `f * sampleRate / 384` — so the result depends on the sample rate. Every bin
+ * up to Nyquist lands in a band (the top band is open-ended), unlike the
+ * reference pipeline's pseudo-Hz cut which discarded everything above its
+ * highest edge.
+ */
+export function binnedMaxPmn(pmn192: Float64Array, sampleRate: number): number[] {
   const result = new Array(PMN_BIN_COUNT).fill(0);
   const seen = new Array(PMN_BIN_COUNT).fill(false);
+  const binWidthHz = sampleRate / WINDOW_LENGTH;
   for (let f = 1; f <= HALF; f++) {
-    const pseudoHz = f * FREQUENCY_SCALE;
-    // pd.cut default right=True: (edge_k, edge_{k+1}]
+    const hz = f * binWidthHz;
     for (let k = 0; k < PMN_BIN_COUNT; k++) {
-      if (pseudoHz > BIN_EDGES[k] && pseudoHz <= BIN_EDGES[k + 1]) {
+      const band = FREQUENCY_BANDS[k];
+      // Half-open on the left, matching the reference pd.cut(right=True).
+      if (hz > band.minHz && (band.maxHz === null || hz <= band.maxHz)) {
         const value = pmn192[f - 1];
         if (!seen[k] || value > result[k]) {
           result[k] = value;
@@ -360,32 +402,69 @@ export function binnedMaxPmn(pmn192: Float64Array): number[] {
 }
 
 export type PmnResult = {
-  /** Max PMN per frequency bin (5 values). */
+  /** Max PMN per voice band (one value per FREQUENCY_BANDS entry). */
   pmnPerBand: number[];
+  /**
+   * Max PMN per FFT bin across the whole recording (192 values). Kept so the
+   * bands can be recomputed later — different edges, or region-specific ones —
+   * without re-downloading and re-analyzing the audio.
+   */
+  spectrum: number[];
+  /** Needed to turn `spectrum` indices back into Hz. */
+  sampleRate: number;
+  /**
+   * Segments analyzed. A recording shorter than a minute counts as one
+   * (partial) segment, scaled to a 60-second equivalent.
+   */
   minutes: number;
 };
 
 /**
  * Full-file PMN: split into whole 60-second segments, PMN each, then take the
  * per-bin max across all segments (matching process.py's groupby-max).
+ *
+ * A recording shorter than one segment but at least `MIN_SEGMENT_SECONDS` is
+ * analyzed as a single partial segment, scaled to what a full minute would
+ * have summed to. Recordings with at least one full segment are unchanged:
+ * their leftover tail is still ignored, exactly as the reference pipeline
+ * does, so published numbers never shift under an existing recording.
+ *
+ * Banding happens once, at the end, on the per-bin maxima. That is exactly
+ * equivalent to banding every segment and taking the max of those (max over
+ * segments and max within a band commute), but it also yields the full
+ * spectrum for caching.
  */
 export async function computeRecordingPmn(
   recording: WavRecording,
   onProgress?: (fraction: number) => void,
 ): Promise<PmnResult> {
-  const segmentSamples = Math.floor(recording.sampleRate * SEGMENT_SECONDS);
-  const minutes = Math.floor(recording.totalSamples / segmentSamples);
-  if (minutes < 1) throw new RecordingTooShortError();
+  const fullSegmentSamples = Math.floor(recording.sampleRate * SEGMENT_SECONDS);
+  const minSegmentSamples = Math.floor(recording.sampleRate * MIN_SEGMENT_SECONDS);
+  const fullSegments = Math.floor(recording.totalSamples / fullSegmentSamples);
+  if (fullSegments < 1 && recording.totalSamples < minSegmentSamples) throw new RecordingTooShortError();
 
-  const perBandMax = new Array(PMN_BIN_COUNT).fill(0);
+  // Whole segments when there are any; otherwise the whole (short) recording,
+  // trimmed to whole analysis windows.
+  const minutes = Math.max(1, fullSegments);
+  const segmentSamples =
+    fullSegments >= 1 ? fullSegmentSamples : Math.floor(recording.totalSamples / WINDOW_LENGTH) * WINDOW_LENGTH;
+  if (segmentSamples < WINDOW_LENGTH) throw new RecordingTooShortError();
+
+  const spectrumMax = new Float64Array(HALF);
   const segment = new Float32Array(segmentSamples);
   for (let m = 0; m < minutes; m++) {
     recording.readWindow(m * segmentSamples, segment);
-    const pmn192 = segmentPmn(segment);
-    const binned = binnedMaxPmn(pmn192);
-    for (let k = 0; k < PMN_BIN_COUNT; k++) perBandMax[k] = Math.max(perBandMax[k], binned[k]);
+    const pmn192 = segmentPmn(segment, recording.sampleRate);
+    for (let f = 0; f < HALF; f++) {
+      if (pmn192[f] > spectrumMax[f]) spectrumMax[f] = pmn192[f];
+    }
     onProgress?.((m + 1) / minutes);
     if (minutes > 1) await new Promise((resolve) => setTimeout(resolve, 0));
   }
-  return { pmnPerBand: perBandMax, minutes };
+  return {
+    pmnPerBand: binnedMaxPmn(spectrumMax, recording.sampleRate),
+    spectrum: [...spectrumMax],
+    sampleRate: recording.sampleRate,
+    minutes,
+  };
 }

@@ -189,6 +189,14 @@ body {
   pointer-events: auto;
 }
 
+/* …which unfortunately covers the whole app, so anything that has to stay
+   out of the pointer's way — chart tooltips drawn under the cursor — needs to
+   say so louder, including its children. */
+[data-chart-tooltip],
+[data-chart-tooltip] * {
+  pointer-events: none !important;
+}
+
 ::view-transition-group(root),
 ::view-transition-old(root),
 ::view-transition-new(root) {

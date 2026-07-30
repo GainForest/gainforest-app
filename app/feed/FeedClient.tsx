@@ -19,6 +19,7 @@ import {
   PinIcon,
   PinOffIcon,
   RefreshCwIcon,
+  Repeat2Icon,
   UserIcon,
   UsersRoundIcon,
 } from "lucide-react";
@@ -46,6 +47,8 @@ import { fetchBlueskyPostLinks } from "../_lib/bluesky-crosspost";
 import { buildCommentTree, type CommentTreeNode } from "../_lib/feed-engagement";
 import { formatCompact, formatCompactUsd, formatRelative } from "../_lib/format";
 import { FeedAudioClip } from "./FeedAudioClip";
+import { FeedSoundscapeCard } from "./FeedSoundscapeCard";
+import { extractSoundscapeLink } from "@/lib/soundscape/record";
 import { FeedImageLightbox } from "./FeedImageLightbox";
 import { ResolvedAvatar } from "./ResolvedAvatar";
 import { AccountHoverCard } from "@/app/_components/AccountHoverCard";
@@ -87,12 +90,13 @@ function groupFeedEntries(items: ActivityFeedItem[]): FeedEntry[] {
   let i = 0;
   while (i < items.length) {
     const item = items[i];
-    if (item.kind === "observation" && item.actorDid && !item.bioacoustics) {
+    if (item.kind === "observation" && item.actorDid && !item.bioacoustics && !item.reshare) {
       let j = i + 1;
       while (
         j < items.length &&
         items[j].kind === "observation" &&
         !items[j].bioacoustics &&
+        !items[j].reshare &&
         items[j].actorDid === item.actorDid &&
         Math.abs(batchTime(items[j - 1].createdAt) - batchTime(items[j].createdAt)) <= MAX_BATCH_GAP_MS
       )
@@ -322,10 +326,11 @@ export function FeedClient({
   );
   const entries = useMemo(() => groupFeedEntries(visibleItems), [visibleItems]);
 
-  // Pull like + comment engagement for the loaded rows from the indexer.
+  // Pull like + comment engagement for the loaded rows from the indexer. A
+  // reshare row's engagement belongs to the ORIGINAL record it resurfaces.
   const { loadEngagement } = interactions;
   useEffect(() => {
-    if (items.length > 0) loadEngagement(items.map((it) => it.id));
+    if (items.length > 0) loadEngagement(items.map((it) => it.reshare?.subjectUri ?? it.id));
   }, [items, loadEngagement]);
 
   // A just-posted update shows optimistically until the indexer surfaces it as a
@@ -344,7 +349,7 @@ export function FeedClient({
   const blueskyCheckedRef = useRef<Set<string>>(new Set());
   useEffect(() => {
     const pending = visibleItems
-      .filter((it) => it.kind === "post" && !blueskyCheckedRef.current.has(it.id))
+      .filter((it) => it.kind === "post" && !it.reshare && !blueskyCheckedRef.current.has(it.id))
       .map((it) => it.id);
     if (pending.length === 0) return;
     for (const id of pending) blueskyCheckedRef.current.add(id);
@@ -370,12 +375,6 @@ export function FeedClient({
           >
             {t("hero.title")} {t("hero.accent")}
           </h1>
-          {/* The description restates the title on small screens where vertical
-              space is scarce, so it's hidden there and the feed starts higher;
-              it returns from sm up. */}
-          <p className="mt-3 hidden max-w-xl text-base leading-7 text-muted-foreground sm:block">
-            {t("hero.description")}
-          </p>
         </div>
       </div>
 
@@ -435,7 +434,7 @@ export function FeedClient({
           </div>
         ) : (
           <>
-            <ol className="relative divide-y divide-border/50">
+            <ol className="relative divide-y divide-border/80">
               {entries.map((entry) =>
                 entry.type === "batch" ? (
                   <ObservationBatchCard
@@ -665,11 +664,20 @@ function FeedRow({
   const [overrideText, setOverrideText] = useState<string | null>(null);
   const [overrideMentions, setOverrideMentions] = useState<MentionCandidate[] | null>(null);
   // Only the author of a feed post may edit it (and only posts — other kinds
-  // mirror non-post records whose text isn't a feed post to rewrite).
+  // mirror non-post records whose text isn't a feed post to rewrite). Reshare
+  // rows are excluded: their id is the repost record, not the post itself.
   const canEditPost =
-    item.kind === "post" && Boolean(interactions.viewerDid && item.actorDid === interactions.viewerDid);
-  const bodyText = overrideText ?? item.text;
+    item.kind === "post" &&
+    !item.reshare &&
+    Boolean(interactions.viewerDid && item.actorDid === interactions.viewerDid);
+  // Likes/reshares/comments on a reshare row act on the original record.
+  const subjectUri = item.reshare?.subjectUri ?? item.id;
+  const rawBodyText = overrideText ?? item.text;
   const bodyMentions = overrideMentions ?? item.mentions;
+  // A post that shares a soundscape carries its permalink; the dial is drawn
+  // below the caption, so the bare URL comes out of the text.
+  const sharedSoundscape = extractSoundscapeLink(rawBodyText);
+  const bodyText = sharedSoundscape ? sharedSoundscape.text : rawBodyText;
   // Posts have no detail page of their own — their row link went to the
   // author's profile, which read as a misclick. Instead, clicking a post's
   // text toggles the same expand/collapse as "Show more".
@@ -698,6 +706,23 @@ function FeedRow({
 
         {/* Content */}
         <div className="min-w-0 flex-1">
+          {/* Reshare attribution — who resurfaced this record (Bluesky's
+              "Reposted by X" header); the row below is the original. */}
+          {item.reshare ? (
+            <p className="mb-1 flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
+              <Repeat2Icon className="size-3.5 shrink-0 text-emerald-600 dark:text-emerald-400" />
+              <AccountHoverCard
+                did={item.reshare.did}
+                name={item.reshare.name}
+                avatarRef={item.reshare.avatarRef}
+                triggerClassName="min-w-0"
+              >
+                <span className="block truncate hover:underline">
+                  {t("actions.resharedBy", { name: item.reshare.name ?? shortDid(item.reshare.did) })}
+                </span>
+              </AccountHoverCard>
+            </p>
+          ) : null}
           {/* Pinned chip — a steward pinned this post to the top of the feed. */}
           {item.pinned ? (
             <p className="mb-1 flex items-center gap-1 text-[11px] font-medium uppercase tracking-wide text-primary">
@@ -775,7 +800,7 @@ function FeedRow({
                 <FeedImage item={item} />
               </button>
               <QuickLikeButton
-                subjectUri={item.id}
+                subjectUri={subjectUri}
                 signedIn={signedIn}
                 interactions={interactions}
                 className="absolute bottom-2 right-2"
@@ -786,6 +811,11 @@ function FeedRow({
           {/* Bioacoustic sighting — spectrogram of the labelled section with
               in-place playback of that sound. */}
           {item.bioacoustics ? <FeedAudioClip clip={item.bioacoustics} /> : null}
+
+          {/* Shared soundscape — the 24-hour clock, playable in place. */}
+          {sharedSoundscape ? (
+            <FeedSoundscapeCard did={sharedSoundscape.did} rkey={sharedSoundscape.rkey} />
+          ) : null}
         </div>
 
       </div>
@@ -793,7 +823,7 @@ function FeedRow({
       {/* Like + comment, aligned under the row content (outside the link). */}
       <div className="pb-2 pl-16 pr-3">
         <FeedActionBar
-          subjectUri={item.id}
+          subjectUri={subjectUri}
           signedIn={signedIn}
           interactions={interactions}
           extraActions={
@@ -810,8 +840,11 @@ function FeedRow({
               initialMentions={bodyMentions}
               max={300}
               onSave={async (text, mentions) => {
-                await interactions.editPost(item.id, text, mentions);
-                setOverrideText(text);
+                // The author edits the caption they can see; the shared
+                // soundscape's link is put back so the post keeps its dial.
+                const saved = sharedSoundscape ? `${text}\n${sharedSoundscape.link}` : text;
+                await interactions.editPost(item.id, saved, mentions);
+                setOverrideText(saved);
                 setOverrideMentions(mentions);
               }}
               onCancel={() => setEditing(false)}
@@ -831,7 +864,7 @@ function FeedRow({
           )
         ) : null}
         {/* Admin-only: pin / unpin this post to the top of the feed. */}
-        {isAdmin && onTogglePin && item.kind === "post" ? (
+        {isAdmin && onTogglePin && item.kind === "post" && !item.reshare ? (
           <div className="mt-1">
             <PinToggleButton pinned={Boolean(item.pinned)} onToggle={() => onTogglePin(item)} />
           </div>
@@ -1018,7 +1051,7 @@ function RowTextWrapper({
   );
 }
 
-/** Feed-row body text clamped to two lines, with a "Show more" toggle that
+/** Feed-row body text clamped to four lines, with a "Show more" toggle that
  *  appears only when the text actually overflows. Rendered inside the row's
  *  link, so the toggle swallows the click instead of navigating. Pass
  *  `expanded` + `onToggle` to control expansion from the row (posts, where
@@ -1059,8 +1092,8 @@ function ExpandableBody({
         className={cn(
           // pre-wrap keeps the author's line breaks even while clamped — the
           // clamp then counts rendered lines, so a many-line post still folds.
-          "mt-0.5 whitespace-pre-wrap break-words text-sm leading-relaxed text-muted-foreground",
-          !expanded && "line-clamp-2",
+          "mt-0.5 whitespace-pre-wrap break-words text-sm leading-relaxed text-foreground/80",
+          !expanded && "line-clamp-4",
         )}
       >
         <MentionText text={text} mentions={mentions} />

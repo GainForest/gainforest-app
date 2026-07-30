@@ -6,6 +6,7 @@ import { DocumentPreviewRenderer } from "../renderers/previews/DocumentPreviewRe
 import { ExternalLinkPreviewRenderer } from "../renderers/previews/ExternalLinkPreviewRenderer";
 import { MediaPreviewRenderer } from "../renderers/previews/MediaPreviewRenderer";
 import { SitePreviewRenderer } from "../renderers/previews/SitePreviewRenderer";
+import { SoundscapePreviewRenderer } from "../renderers/previews/SoundscapePreviewRenderer";
 import { TextPreviewRenderer } from "../renderers/previews/TextPreviewRenderer";
 
 type PreviewRendererProps = { preview: TimelinePreviewPayload };
@@ -15,6 +16,7 @@ const PREVIEW_RENDERER_REGISTRY = {
   image: MediaPreviewRenderer,
   video: MediaPreviewRenderer,
   audio: MediaPreviewRenderer,
+  soundscape: SoundscapePreviewRenderer,
   pdf: DocumentPreviewRenderer,
   document: DocumentPreviewRenderer,
   link: ExternalLinkPreviewRenderer,

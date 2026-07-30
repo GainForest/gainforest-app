@@ -162,6 +162,9 @@ function treePhotos(properties: TreeProperties | null): string[] {
 /** Everything the tree detail sidebar needs, derived from a feature. */
 export type TreeDetail = {
   id: string | number;
+  /** Where the tree stands — what a shared link points at. */
+  lon: number;
+  lat: number;
   species: string | null;
   height: string | null;
   dbh: string | null;
@@ -170,13 +173,17 @@ export type TreeDetail = {
   photos: string[];
 };
 
-/** Build a `TreeDetail` from a clicked feature's id + properties. */
+/** Build a `TreeDetail` from a clicked feature's id, position + properties. */
 export function treeDetail(
   id: string | number,
+  lon: number,
+  lat: number,
   properties: TreeProperties | null,
 ): TreeDetail {
   return {
     id,
+    lon,
+    lat,
     species: treeSpeciesName(properties),
     height: treeHeight(properties),
     dbh: treeDbh(properties),
@@ -184,6 +191,59 @@ export function treeDetail(
     notes: treeNotes(properties),
     photos: treePhotos(properties),
   };
+}
+
+// ── Shareable tree links ───────────────────────────────────────────────────
+
+/**
+ * Trees are shared by position, not by index. The uploaded tree files carry no
+ * identifier the app can rely on (every partner's export has different
+ * columns, and the numeric feature id is just the row number of whichever blob
+ * happened to load), so a link keyed on the row would point at a different
+ * tree the day an organization re-uploads its data. A coordinate keeps meaning
+ * the same thing forever.
+ */
+
+/** Decimal places kept in a share link — ~10cm, far finer than trees stand. */
+const TREE_KEY_PRECISION = 6;
+
+/** Degrees a shared coordinate may miss the stored tree by and still match
+ *  (~10m) — enough to survive a re-export that nudges positions. */
+const TREE_MATCH_TOLERANCE = 0.0001;
+
+/** "lon,lat" key used in the `tree` query parameter of a shared link. */
+export function treeShareKey(lon: number, lat: number): string {
+  return `${lon.toFixed(TREE_KEY_PRECISION)},${lat.toFixed(TREE_KEY_PRECISION)}`;
+}
+
+/** Parse a `tree` query parameter back into a coordinate (null when malformed). */
+export function parseTreeShareKey(value: string | null): { lon: number; lat: number } | null {
+  if (!value) return null;
+  const [lon, lat] = value.split(",").map((part) => Number.parseFloat(part.trim()));
+  if (!Number.isFinite(lon) || !Number.isFinite(lat)) return null;
+  if (Math.abs(lon) > 180 || Math.abs(lat) > 90) return null;
+  return { lon, lat };
+}
+
+/** The tree a shared link points at: the closest one to the link's coordinate,
+ *  as long as it is within the match tolerance. */
+export function findTreeByShareKey(
+  trees: GeoJSON.FeatureCollection | null,
+  key: string | null,
+): TreeDetail | null {
+  const target = parseTreeShareKey(key);
+  if (!trees || !target) return null;
+  let best: { feature: GeoJSON.Feature<GeoJSON.Point>; distance: number } | null = null;
+  for (const feature of trees.features) {
+    if (!isPointFeature(feature)) continue;
+    const [lon, lat] = feature.geometry.coordinates;
+    const distance = Math.hypot(lon - target.lon, lat - target.lat);
+    if (distance > TREE_MATCH_TOLERANCE) continue;
+    if (!best || distance < best.distance) best = { feature, distance };
+  }
+  if (!best) return null;
+  const [lon, lat] = best.feature.geometry.coordinates;
+  return treeDetail(best.feature.id ?? treeShareKey(lon, lat), lon, lat, best.feature.properties);
 }
 
 function isPointFeature(feature: unknown): feature is GeoJSON.Feature<GeoJSON.Point> {

@@ -70,17 +70,44 @@ export type AttachInputOccurrence = { rkey: string; datasetRef: string | null };
 
 export type AttachObservationsResult = {
   attached: string[];
+  /** Already in the target dataset — nothing to do. */
   skipped: Array<{ rkey: string; reason: "already" }>;
+  /** Rkeys that came out of a different dataset, keyed by the dataset they left. */
+  movedFrom: Record<string, string[]>;
   errors: Array<{ rkey: string; error: string }>;
 };
 
+function datasetRefOf(record: Record<string, unknown>): string | null {
+  return typeof record.datasetRef === "string" && record.datasetRef.trim().length > 0 ? record.datasetRef : null;
+}
+
+/** Apply the count deltas a move implies: one dataset loses records, another gains
+ *  them. Best-effort — dataset views derive their counts from the occurrences
+ *  themselves, so a stale `recordCount` is cosmetic. */
+async function applyDatasetCountDeltas(
+  deltas: Map<string, number>,
+  options?: RepoOptions,
+): Promise<void> {
+  for (const [datasetUri, delta] of deltas) {
+    if (delta === 0) continue;
+    const rkey = datasetUri.split("/").pop();
+    if (!rkey) continue;
+    await incrementObservationDatasetCount(rkey, delta, options).catch(() => {});
+  }
+}
+
 /**
- * Move observations into a dataset by stamping `datasetRef` (the dataset
- * AT-URI) + `datasetName` onto each occurrence (a read-modify-write
- * that preserves everything else, including photo evidence). Observations that
- * already live in a dataset are left alone so membership never silently moves;
- * detach them first to re-group. Never touches `dynamicProperties`, so an
- * observation is never mislabelled as a measured tree.
+ * Put observations into a dataset by stamping `datasetRef` (the dataset AT-URI)
+ * + `datasetName` onto each occurrence — a read-modify-write that preserves
+ * everything else, including photo evidence and project membership. Never
+ * touches `dynamicProperties`, so an observation is never mislabelled as a
+ * measured tree.
+ *
+ * An observation lives in one dataset (`datasetRef` is a single at-uri, matching
+ * Darwin Core, where a dataset is the batch a record was derived from). Filing
+ * one that already sits in another dataset therefore MOVES it: the old dataset's
+ * `recordCount` goes down as the new one's goes up. Ones already in the target
+ * are left alone.
  */
 export async function attachObservationsToDataset(
   input: {
@@ -92,15 +119,25 @@ export async function attachObservationsToDataset(
 ): Promise<AttachObservationsResult> {
   const attached: string[] = [];
   const skipped: Array<{ rkey: string; reason: "already" }> = [];
+  const movedFrom: Record<string, string[]> = {};
   const errors: Array<{ rkey: string; error: string }> = [];
+  const deltas = new Map<string, number>();
+  const bump = (uri: string, by: number) => deltas.set(uri, (deltas.get(uri) ?? 0) + by);
 
   for (const occurrence of input.occurrences) {
-    if (occurrence.datasetRef) {
+    if (occurrence.datasetRef === input.datasetUri) {
       skipped.push({ rkey: occurrence.rkey, reason: "already" });
       continue;
     }
     try {
       const current = await getRecord(OCCURRENCE_COLLECTION, occurrence.rkey, options);
+      // Read the dataset off the record, not the caller's copy: another tab may
+      // have moved it since the list was loaded.
+      const previous = datasetRefOf(current.record);
+      if (previous === input.datasetUri) {
+        skipped.push({ rkey: occurrence.rkey, reason: "already" });
+        continue;
+      }
       const nextRecord: Record<string, unknown> = {
         ...current.record,
         $type: typeof current.record.$type === "string" ? current.record.$type : OCCURRENCE_COLLECTION,
@@ -112,6 +149,10 @@ export async function attachObservationsToDataset(
         ...(options?.repo ? { repo: options.repo } : {}),
       });
       attached.push(occurrence.rkey);
+      if (previous) {
+        movedFrom[previous] = [...(movedFrom[previous] ?? []), occurrence.rkey];
+        bump(previous, -1);
+      }
     } catch (error) {
       errors.push({
         rkey: occurrence.rkey,
@@ -120,16 +161,106 @@ export async function attachObservationsToDataset(
     }
   }
 
-  if (attached.length > 0) {
-    const datasetRkey = input.datasetUri.split("/").pop();
-    if (datasetRkey) {
-      await incrementObservationDatasetCount(datasetRkey, attached.length, options).catch(() => {
-        // Non-fatal: the folder view derives counts from occurrence refs.
+  if (attached.length > 0) bump(input.datasetUri, attached.length);
+  await applyDatasetCountDeltas(deltas, options);
+
+  return { attached, skipped, movedFrom, errors };
+}
+
+export type RemoveFromDatasetResult = {
+  removed: string[];
+  /** Was not in a dataset to begin with. */
+  skipped: string[];
+  errors: Array<{ rkey: string; error: string }>;
+};
+
+/**
+ * Take observations out of their dataset without deleting anything: `datasetRef`
+ * and `datasetName` are cleared and the dataset's `recordCount` goes down. The
+ * observations survive as loose sightings — the counterpart to filing them.
+ */
+export async function removeObservationsFromDataset(
+  input: { occurrences: AttachInputOccurrence[] },
+  options?: RepoOptions,
+): Promise<RemoveFromDatasetResult> {
+  const removed: string[] = [];
+  const skipped: string[] = [];
+  const errors: Array<{ rkey: string; error: string }> = [];
+  const deltas = new Map<string, number>();
+
+  for (const occurrence of input.occurrences) {
+    try {
+      const current = await getRecord(OCCURRENCE_COLLECTION, occurrence.rkey, options);
+      const previous = datasetRefOf(current.record);
+      if (!previous) {
+        skipped.push(occurrence.rkey);
+        continue;
+      }
+      const nextRecord: Record<string, unknown> = {
+        ...current.record,
+        $type: typeof current.record.$type === "string" ? current.record.$type : OCCURRENCE_COLLECTION,
+      };
+      delete nextRecord.datasetRef;
+      delete nextRecord.datasetName;
+      await putRecord(OCCURRENCE_COLLECTION, occurrence.rkey, nextRecord, {
+        swapRecord: current.cid,
+        ...(options?.repo ? { repo: options.repo } : {}),
+      });
+      removed.push(occurrence.rkey);
+      deltas.set(previous, (deltas.get(previous) ?? 0) - 1);
+    } catch (error) {
+      errors.push({
+        rkey: occurrence.rkey,
+        error: error instanceof Error ? error.message : "This observation could not be taken out of its dataset.",
       });
     }
   }
 
-  return { attached, skipped, errors };
+  await applyDatasetCountDeltas(deltas, options);
+  return { removed, skipped, errors };
+}
+
+export type UnnestDatasetResult = {
+  unnestedFrom: string[];
+  unnestErrors: Array<{ rkey: string; error: string }>;
+};
+
+/**
+ * Drop a dataset from the `items[]` of the given project collections. Used when
+ * a dataset is deleted (no dangling reference) and when it is filed under a
+ * different project (a dataset lives in one project, the same way each of its
+ * sightings names one project in `projectRef`).
+ */
+export async function unnestDatasetFromProjects(
+  input: { datasetUri: string; parentRkeys: string[] },
+  options?: RepoOptions,
+): Promise<UnnestDatasetResult> {
+  const unnestedFrom: string[] = [];
+  const unnestErrors: Array<{ rkey: string; error: string }> = [];
+  for (const rkey of input.parentRkeys) {
+    try {
+      const current = await getRecord(COLLECTION_COLLECTION, rkey, options);
+      const items = Array.isArray(current.record.items) ? current.record.items : [];
+      const nextItems = items.filter((item) => itemUri(item) !== input.datasetUri);
+      if (nextItems.length === items.length) continue; // nothing to remove
+      const nextRecord: Record<string, unknown> = {
+        ...current.record,
+        $type: typeof current.record.$type === "string" ? current.record.$type : COLLECTION_COLLECTION,
+        items: nextItems,
+      };
+      await putRecord(COLLECTION_COLLECTION, rkey, nextRecord, {
+        swapRecord: current.cid,
+        ...(options?.repo ? { repo: options.repo } : {}),
+      });
+      unnestedFrom.push(rkey);
+    } catch (error) {
+      unnestErrors.push({
+        rkey,
+        error: error instanceof Error ? error.message : "A parent collection could not be updated.",
+      });
+    }
+  }
+  return { unnestedFrom, unnestErrors };
 }
 
 export type DeleteObservationDatasetResult = {
@@ -180,31 +311,10 @@ export async function deleteObservationDataset(
 
   // Unnest the dataset from any project collection that lists it in items[], so
   // no dangling reference is left behind.
-  const unnestedFrom: string[] = [];
-  const unnestErrors: Array<{ rkey: string; error: string }> = [];
-  for (const rkey of input.parentRkeys) {
-    try {
-      const current = await getRecord(COLLECTION_COLLECTION, rkey, options);
-      const items = Array.isArray(current.record.items) ? current.record.items : [];
-      const nextItems = items.filter((item) => itemUri(item) !== input.datasetUri);
-      if (nextItems.length === items.length) continue; // nothing to remove
-      const nextRecord: Record<string, unknown> = {
-        ...current.record,
-        $type: typeof current.record.$type === "string" ? current.record.$type : COLLECTION_COLLECTION,
-        items: nextItems,
-      };
-      await putRecord(COLLECTION_COLLECTION, rkey, nextRecord, {
-        swapRecord: current.cid,
-        ...(options?.repo ? { repo: options.repo } : {}),
-      });
-      unnestedFrom.push(rkey);
-    } catch (error) {
-      unnestErrors.push({
-        rkey,
-        error: error instanceof Error ? error.message : "A parent collection could not be updated.",
-      });
-    }
-  }
+  const { unnestedFrom, unnestErrors } = await unnestDatasetFromProjects(
+    { datasetUri: input.datasetUri, parentRkeys: input.parentRkeys },
+    options,
+  );
 
   let collectionDeleted = false;
   let collectionError: string | null = null;
