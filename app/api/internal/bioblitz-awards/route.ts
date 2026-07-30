@@ -84,7 +84,9 @@ export async function POST(request: Request) {
     // Recompute the round's winners from the live data (test/hidden accounts
     // are already excluded by the board tally).
     const [board, liked] = await Promise.all([
-      fetchRoundCollectors(round, "round"),
+      // Weekly counting records are governance input to this irreversible
+      // award, so this path reads them uncached and fails closed.
+      fetchRoundCollectors(round, "round", undefined, "required"),
       fetchRoundTopLiked(round, 1),
     ]);
     const mostObservations = board.collectors[0] ?? null;

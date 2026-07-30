@@ -70,6 +70,7 @@
       "tabs": {
         "images": "Imágenes",
         "audio": "Sonidos",
+        "soundscape": "Paisaje sonoro",
         "trees": "Árboles",
         "biodiversity": "Observaciones",
         "files": "Archivos"
@@ -120,6 +121,9 @@
       "uploadType": "Subir {type}",
       "manage": "Administrar",
       "untitledRecording": "Grabación sin título",
+      "untitledSoundscape": "Paisaje sonoro sin título",
+      "soundscapeHelp": "Elige un paisaje sonoro ya creado con las grabaciones de esta organización. Quien lea la actualización podrá escucharlo ahí mismo.",
+      "soundscapeEmpty": "Ahora mismo no se pudo leer ningún paisaje sonoro de esta organización.",
       "unnamedTreeDataset": "Grupo de árboles sin nombre",
       "unknownObservation": "Avistamiento de naturaleza desconocido",
       "treeCount": "{count, plural, =1 {1 árbol} other {# árboles}}",
@@ -140,6 +144,7 @@
       "attachmentTitles": {
         "images": "Imágenes",
         "audio": "Grabaciones de sonido",
+        "soundscape": "Paisaje sonoro",
         "trees": "Grupo de árboles",
         "biodiversity": "Observaciones"
       },
@@ -154,6 +159,7 @@
       "tabDescriptions": {
         "images": "Sube fotos del proyecto.",
         "audio": "Añade sonidos ya guardados por esta organización.",
+        "soundscape": "Añade el paisaje sonoro de 24 horas creado con las grabaciones de esta organización.",
         "trees": "Añade información de árboles agrupada por lugar del proyecto.",
         "biodiversity": "Filtra observaciones y agrega registros mostrados o grupos guardados.",
         "files": "Añade informes, fotos, videos o páginas web."
@@ -258,6 +264,7 @@
       "linkedProjectPlace": "Lugar del proyecto vinculado",
       "linkedTreeGroup": "Grupo de árboles vinculado",
       "linkedSound": "Sonido vinculado",
+      "linkedSoundscape": "Paisaje sonoro vinculado",
       "groupedData": "Datos agrupados",
       "openMap": "Abrir mapa",
       "viewMap": "Ver mapa",

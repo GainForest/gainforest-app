@@ -25,6 +25,7 @@ export function getTimelineEvidenceKind(
   if (contentHasRecordCollection(content, "app.certified.location")) return "site";
   if (contentHasRecordCollection(content, "app.gainforest.dwc.dataset")) return "tree";
   if (contentHasRecordCollection(content, "app.gainforest.ac.audio")) return "audio";
+  if (contentHasRecordCollection(content, "app.gainforest.ac.soundscape")) return "audio";
   if (contentHasRecordCollection(content, "app.gainforest.dwc.occurrence")) return "nature";
   if (contentHasFileLikeItem(content)) return "file";
 

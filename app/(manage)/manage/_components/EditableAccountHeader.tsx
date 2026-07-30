@@ -28,6 +28,7 @@ import type { AccountOrganization } from "@/app/account/_components/AccountOrgan
 import { AccountAwards } from "@/app/account/_components/AccountAwards";
 import { AccountMemberships } from "@/app/account/_components/AccountMemberships";
 import { AccountWalletSupport } from "@/app/account/_components/AccountWalletSupport";
+import { ExpandableBio } from "@/app/account/_components/ExpandableBio";
 import { countryFlag } from "@/app/_lib/format";
 import { resolvePdsHost } from "@/app/_lib/pds";
 import { putRecord, uploadBlob } from "../_lib/mutations";
@@ -477,9 +478,12 @@ function EditableHero({
                   </Button>
                 ) : null}
               </div>
-              <p className={cn("mt-1.5 line-clamp-2 text-sm leading-relaxed", editState.description ? "text-muted-foreground" : "text-muted-foreground/60")}>
-                {editState.description || t("hero.noBio")}
-              </p>
+              <ExpandableBio
+                text={editState.description}
+                placeholder={t("hero.noBio")}
+                emptyClassName="text-muted-foreground/60"
+                className="mt-1.5"
+              />
               <FollowStats targetDid={account.did} identifier={account.urlIdentifier} className="mt-2.5" />
               <AccountAwards did={account.did} className="mt-3 w-fit" />
               <AccountMemberships organizations={memberships} className="mt-3" />

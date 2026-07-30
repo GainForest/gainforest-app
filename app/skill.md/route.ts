@@ -225,7 +225,7 @@ send what was measured.)
 
 A project and its cert are created **together**: create the cert first, then the
 project that links it via \`items[]\`. Create a **site** first if the work has a
-location.
+location, and a **work-scope tag** for each kind of work.
 
 ### 2a. (Optional) Create a site
 
@@ -241,6 +241,30 @@ location.
 # → keep { uri, cid } to reference as a site
 \`\`\`
 
+### 2a-bis. Create a work-scope tag per kind of work
+
+The cert's \`workScope\` points at tag records, so they have to exist first. Use
+the scope key as the **rkey** — then creating the same tag twice is harmless and
+every cert in the repo reuses one record.
+
+\`\`\`json
+{ "operation":"createRecord", "collection":"org.hypercerts.workscope.tag",
+  "rkey":"reforestation",
+  "record": {
+    "key":"reforestation",
+    "name":"Reforestation",
+    "category":"topic",
+    "createdAt":"2026-01-15T09:30:00Z" } }
+# → keep { uri, cid } for each tag
+\`\`\`
+
+Prefer these keys where they fit, so your work lines up with everyone else's:
+\`reforestation\`, \`forest_protection\`, \`biodiversity_monitoring\`,
+\`community_stewardship\`, \`carbon_removal\`, \`restoration_maintenance\`. Anything
+else is fine as a lowercase, hyphenated key (\`mangrove-nursery\`) — the
+vocabulary is open. Keys are stable identifiers: never translate them, and never
+put a display label in \`key\`.
+
 ### 2b. Create the cert (the structured claim)
 
 \`\`\`json
@@ -250,8 +274,10 @@ location.
     "shortDescription":"Restoring 2 ha of degraded riverbank with native trees.",
     "description": { "$type":"org.hypercerts.defs#descriptionString",
       "value":"Full story of the work, methods, and community involvement." },
-    "workScope": { "$type":"org.hypercerts.claim.activity#workScopeString",
-      "scope":"reforestation, agroforestry" },
+    "workScope": { "$type":"org.hypercerts.workscope.cel",
+      "expression":"scope.hasAny(['reforestation', 'agroforestry'])",
+      "usedTags": [ { "uri":"<tag uri>", "cid":"<tag cid>" } ],
+      "version":"v1", "createdAt":"2026-01-15T09:30:00Z" },
     "startDate":"2026-01-01T00:00:00Z",
     "endDate":"2026-06-30T00:00:00Z",
     "contributors": [ { "contributorIdentity": {
@@ -262,9 +288,11 @@ location.
 # → keep { uri, cid } — the project links to this cert
 \`\`\`
 
-Notes: omit \`endDate\` for ongoing work. \`workScope.scope\` is a
-comma-separated tag list. \`locations[]\` are StrongRefs to sites from 2a. To set
-a cover image, \`uploadBlob\` then add
+Notes: omit \`endDate\` for ongoing work. \`workScope\` lists the tag keys from
+2a-bis in \`expression\` and their StrongRefs in \`usedTags\` — keep the two in
+sync. You may still *read* the older \`#workScopeString\` arm (a comma-separated
+list) on records other apps wrote, but do not write it. \`locations[]\` are
+StrongRefs to sites from 2a. To set a cover image, \`uploadBlob\` then add
 \`"image": { "$type":"org.hypercerts.defs#smallImage", "image": <BLOB> }\`.
 
 ### 2c. Create the project that carries the cert
@@ -343,6 +371,7 @@ app.gainforest.dwc.dataset      — a tree group / dataset of occurrences
 app.gainforest.ac.multimedia    — a photo (links an occurrence via occurrenceRef)
 app.certified.location          — a site / place (referenced by siteRef / locations)
 org.hypercerts.claim.activity   — the cert: the structured claim of work
+org.hypercerts.workscope.tag    — a kind of work (rkey = the scope key; referenced by workScope.usedTags[])
 org.hypercerts.collection       — the project (type "project"; carries the cert in items[])
 org.hypercerts.context.attachment — a timeline evidence entry (subjects[0] = the cert)
 \`\`\`

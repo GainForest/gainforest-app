@@ -61,10 +61,25 @@ export function OwnerFilterButton({
   ownerDid,
   onChange,
   className,
+  labels,
+  observationCounts,
+  formatObservationCount,
 }: {
   ownerDid: string | null;
   onChange: (did: string | null) => void;
   className?: string;
+  /** Optional per-account counts for contexts such as BioBlitz moderation. */
+  observationCounts?: ReadonlyMap<string, number> | null;
+  formatObservationCount?: (count: number) => string;
+  /** Optional context-specific copy when this picker is used outside filtering. */
+  labels?: Partial<{
+    button: string;
+    ariaLabel: string;
+    searchPlaceholder: string;
+    hint: string;
+    noResults: string;
+    clear: string;
+  }>;
 }) {
   const t = useTranslations("marketplace.ownerFilter");
   const [open, setOpen] = useState(false);
@@ -99,6 +114,14 @@ export function OwnerFilterButton({
   }, [query, open]);
 
   const selectedLabel = ownerDid ? profile?.displayName ?? t("selectedFallback") : null;
+  const selectedObservationCount = ownerDid && observationCounts
+    ? observationCounts.get(ownerDid) ?? 0
+    : null;
+  const selectedCountLabel = selectedObservationCount !== null && formatObservationCount
+    ? formatObservationCount(selectedObservationCount)
+    : null;
+  const pickerAriaLabel = labels?.ariaLabel ?? t("ariaLabel");
+  const selectedAriaLabel = [pickerAriaLabel, selectedLabel, selectedCountLabel].filter(Boolean).join(": ");
   const trimmedQuery = query.trim();
 
   return (
@@ -112,7 +135,7 @@ export function OwnerFilterButton({
       <PopoverTrigger asChild>
         <button
           type="button"
-          aria-label={t("ariaLabel")}
+          aria-label={selectedAriaLabel}
           className={cn(
             "inline-flex h-10 shrink-0 items-center gap-2 whitespace-nowrap rounded-full border px-3.5 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50",
             ownerDid
@@ -131,7 +154,10 @@ export function OwnerFilterButton({
           ) : (
             <UserRoundIcon className="h-4 w-4" />
           )}
-          <span className="max-w-[140px] truncate">{ownerDid ? selectedLabel : t("button")}</span>
+          <span className="max-w-[140px] truncate">{ownerDid ? selectedLabel : labels?.button ?? t("button")}</span>
+          {selectedCountLabel ? (
+            <span className="shrink-0 text-xs font-normal opacity-80">{selectedCountLabel}</span>
+          ) : null}
           <ChevronDownIcon className={cn("h-3.5 w-3.5 transition-transform", open && "rotate-180")} />
         </button>
       </PopoverTrigger>
@@ -143,8 +169,8 @@ export function OwnerFilterButton({
             type="text"
             value={query}
             onChange={(event) => setQuery(event.target.value)}
-            placeholder={t("searchPlaceholder")}
-            aria-label={t("searchPlaceholder")}
+            placeholder={labels?.searchPlaceholder ?? t("searchPlaceholder")}
+            aria-label={labels?.searchPlaceholder ?? t("searchPlaceholder")}
             className="h-9 w-full rounded-lg border border-border bg-background pl-9 pr-3 text-sm text-foreground outline-none placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/40"
           />
         </div>
@@ -162,24 +188,29 @@ export function OwnerFilterButton({
               <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-muted">
                 <XIcon className="h-3.5 w-3.5" />
               </span>
-              {t("showAll")}
+              {labels?.clear ?? t("showAll")}
             </button>
           ) : null}
 
           {loading ? (
             <p className="px-2.5 py-6 text-center text-xs text-muted-foreground">{t("searching")}</p>
           ) : trimmedQuery.length >= MIN_QUERY_LENGTH && results.length === 0 ? (
-            <p className="px-2.5 py-6 text-center text-xs text-muted-foreground">{t("noResults")}</p>
+            <p className="px-2.5 py-6 text-center text-xs text-muted-foreground">{labels?.noResults ?? t("noResults")}</p>
           ) : trimmedQuery.length < MIN_QUERY_LENGTH && !ownerDid ? (
-            <p className="px-2.5 py-6 text-center text-xs text-muted-foreground">{t("hint")}</p>
+            <p className="px-2.5 py-6 text-center text-xs text-muted-foreground">{labels?.hint ?? t("hint")}</p>
           ) : null}
 
           {results.map((result) => {
             const active = result.did === ownerDid;
+            const observationCount = observationCounts ? observationCounts.get(result.did) ?? 0 : null;
+            const countLabel = observationCount !== null && formatObservationCount
+              ? formatObservationCount(observationCount)
+              : null;
             return (
               <button
                 key={result.did}
                 type="button"
+                aria-pressed={active}
                 onClick={() => {
                   onChange(result.did);
                   setOpen(false);
@@ -197,6 +228,9 @@ export function OwnerFilterButton({
                   className="h-7 w-7 shrink-0"
                 />
                 <span className="min-w-0 flex-1 truncate">{result.displayName}</span>
+                {countLabel ? (
+                  <span className="shrink-0 text-xs tabular-nums text-muted-foreground">{countLabel}</span>
+                ) : null}
                 {active ? <CheckIcon className="h-3.5 w-3.5 shrink-0" /> : null}
               </button>
             );

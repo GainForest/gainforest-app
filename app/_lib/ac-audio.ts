@@ -42,6 +42,13 @@ export type AcAudioDraft = {
   spectrogramBlob?: UploadedBlobRef | null;
   /** URL of the archival original (object storage redirect). */
   accessUri?: string;
+  /**
+   * Content CID (CIDv1 raw sha-256) of the archival *original* — the
+   * full-resolution file behind `accessUri`, as opposed to the compressed
+   * preview variant stored as the PDS blob. Lets re-scans of the same SD
+   * card recognise byte-identical recordings and skip them.
+   */
+  originalCid?: string;
   deploymentRef?: string;
   recordedBy?: string;
   tags?: string[];
@@ -112,6 +119,7 @@ export function buildAcAudioRecord(draft: AcAudioDraft): Record<string, unknown>
     record.spectrogram = { file: draft.spectrogramBlob };
   }
   if (draft.accessUri) record.accessUri = draft.accessUri;
+  if (draft.originalCid) record.originalCid = draft.originalCid;
   if (draft.deploymentRef) record.deploymentRef = draft.deploymentRef;
   if (draft.recordedBy) record.recordedBy = draft.recordedBy;
   if (draft.tags?.length) record.tags = draft.tags;
@@ -152,6 +160,37 @@ export type AcAudioListItem = {
   siteRef?: string | null;
   createdAt: string;
 };
+
+/**
+ * Extract the object-storage key from an `accessUri` that points at our
+ * archival download endpoint (`/api/audiomoth/recordings?key=…`). Returns
+ * null for absent, malformed, or third-party URIs — those have no object in
+ * our bucket to clean up.
+ */
+export function audiomothStorageKey(accessUri: string | null | undefined): string | null {
+  if (!accessUri) return null;
+  try {
+    const url = new URL(accessUri, "https://placeholder.invalid");
+    if (!url.pathname.endsWith("/api/audiomoth/recordings")) return null;
+    const key = url.searchParams.get("key");
+    return key && key.startsWith("audiomoth/") ? key : null;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Best-effort removal of archival originals from object storage. Failures
+ * are swallowed — an orphaned WAV in the bucket is the pre-existing status
+ * quo and must never block the record deletion the user asked for.
+ */
+export async function deleteArchivedOriginals(keys: Iterable<string>): Promise<void> {
+  await Promise.allSettled(
+    [...keys].map((key) =>
+      fetch(`/api/audiomoth/recordings?key=${encodeURIComponent(key)}`, { method: "DELETE" }),
+    ),
+  );
+}
 
 /** Public getBlob URL for a blob on the owner's PDS. */
 export function pdsBlobUrl(host: string, did: string, cid: string): string {
@@ -247,6 +286,143 @@ export async function listRecordingsForDeployment(
   return listAcAudioItems(did, (value) => value.deploymentRef === deploymentUri, signal);
 }
 
+
+/* ── Moving recordings between folders ──────────────────────────────── */
+
+/**
+ * Put one recording in a different folder. Which folder a recording is in is
+ * a single field (`deploymentRef`), but it lives in a record full of blob
+ * refs and parsed WAV metadata this app never models in full — so the stored
+ * record is read back and written whole, with only that one field changed.
+ */
+async function moveRecording(
+  item: AcAudioListItem,
+  deploymentRef: string,
+  repo?: string | null,
+): Promise<void> {
+  const scope = repo ? { repo } : {};
+  const current = await postMutation<{ cid: string; record: Record<string, unknown> }>(
+    { operation: "getRecord", collection: AC_AUDIO_COLLECTION, rkey: item.rkey, ...scope },
+    "The recording could not be read.",
+  );
+  await postMutation<MutationResult>(
+    {
+      operation: "putRecord",
+      collection: AC_AUDIO_COLLECTION,
+      rkey: item.rkey,
+      swapRecord: current.cid,
+      record: { ...current.record, deploymentRef },
+      ...scope,
+    },
+    "The recording could not be moved.",
+  );
+}
+
+export type MoveRecordingsOutcome = {
+  /** AT-URIs now in the destination folder. */
+  moved: Set<string>;
+  /** AT-URIs that stayed put — worth keeping selected for a retry. */
+  failed: Set<string>;
+};
+
+/**
+ * Move a selection of recordings into one folder, one at a time so a single
+ * failure costs one recording rather than the whole batch.
+ */
+export async function moveRecordings({
+  items,
+  deploymentRef,
+  repo,
+  onProgress,
+}: {
+  items: readonly AcAudioListItem[];
+  /** AT-URI of the destination `ac.deployment`. */
+  deploymentRef: string;
+  /** Group repo DID, when moving on an organization's profile. */
+  repo?: string | null;
+  onProgress?: (done: number, total: number) => void;
+}): Promise<MoveRecordingsOutcome> {
+  const moved = new Set<string>();
+  const failed = new Set<string>();
+  let done = 0;
+  for (const item of items) {
+    if (item.deploymentRef === deploymentRef) {
+      // Already there: nothing to write, and no reason to call it a failure.
+      moved.add(item.uri);
+    } else {
+      try {
+        await moveRecording(item, deploymentRef, repo);
+        moved.add(item.uri);
+      } catch {
+        failed.add(item.uri);
+      }
+    }
+    done += 1;
+    onProgress?.(done, items.length);
+  }
+  return { moved, failed };
+}
+
+/* ── Already-uploaded detection ───────────────────────────────────────────── */
+
+/** Identity keys of every recording already in a repo, for pre-upload dedup. */
+export type UploadedRecordingKeys = {
+  /** Content CIDs (`originalCid`) of the archival originals. */
+  cids: Set<string>;
+  /** `name + file size` keys for records created before CIDs were stored. */
+  legacy: Set<string>;
+  /** How many recordings each `ac.deployment` already holds, keyed by AT-URI. */
+  countsByDeployment: Map<string, number>;
+};
+
+/** Fallback identity for records that predate `originalCid`. */
+export function legacyRecordingKey(name: string, fileSizeBytes: number): string {
+  return `${name}\u0000${fileSizeBytes}`;
+}
+
+/**
+ * Every recording identity in a repo — content CIDs where stored, plus a
+ * name+size fallback for older records — so the uploader can skip files
+ * whose content is already in the account before uploading anything.
+ * Throws when the repo cannot be listed (callers then skip dedup).
+ */
+export async function listUploadedRecordingKeys(did: string, signal?: AbortSignal): Promise<UploadedRecordingKeys> {
+  const host = await resolvePdsHost(did, signal);
+  if (!host) throw new Error(`Could not resolve the data host for ${did}.`);
+
+  const keys: UploadedRecordingKeys = { cids: new Set(), legacy: new Set(), countsByDeployment: new Map() };
+  let cursor: string | undefined;
+  do {
+    const params = new URLSearchParams({ repo: did, collection: AC_AUDIO_COLLECTION, limit: "100" });
+    if (cursor) params.set("cursor", cursor);
+    const res = await fetch(`https://${host}/xrpc/com.atproto.repo.listRecords?${params.toString()}`, {
+      signal,
+      cache: "no-store",
+    });
+    if (!res.ok) {
+      if (res.status === 400 && keys.cids.size === 0 && keys.legacy.size === 0) return keys; // no collection yet
+      throw new Error(`Could not load recordings (${res.status}).`);
+    }
+    const data = (await res.json()) as {
+      records?: Array<{ value?: unknown }>;
+      cursor?: unknown;
+    };
+    for (const r of data.records ?? []) {
+      if (!isRecord(r.value)) continue;
+      if (typeof r.value.originalCid === "string") keys.cids.add(r.value.originalCid);
+      const metadata = isRecord(r.value.metadata) ? r.value.metadata : null;
+      if (typeof r.value.name === "string" && typeof metadata?.fileSizeBytes === "number") {
+        keys.legacy.add(legacyRecordingKey(r.value.name, metadata.fileSizeBytes));
+      }
+      if (typeof r.value.deploymentRef === "string") {
+        keys.countsByDeployment.set(r.value.deploymentRef, (keys.countsByDeployment.get(r.value.deploymentRef) ?? 0) + 1);
+      }
+    }
+    cursor = typeof data.cursor === "string" ? data.cursor : undefined;
+  } while (cursor);
+
+  return keys;
+}
 
 /**
  * The names (filenames) of all ac.audio records already linked to a

@@ -9,7 +9,7 @@
  * picks it up from the PDS and the post surfaces on bsky.app. We reuse the
  * GainForest post's rkey for the twin, which makes the mapping deterministic:
  * at://did/app.gainforest.feed.post/RKEY ⇄ at://did/app.bsky.feed.post/RKEY,
- * and the public URL is always https://bsky.app/profile/DID/post/RKEY.
+ * and the public URL is always https://bsky.app/profile/<handle or DID>/post/RKEY.
  *
  * Opt-in and consent live in `app.gainforest.actor.preferences` (rkey "self")
  * on the user's PDS — same singleton pattern as app.gainforest.notification.seen.
@@ -34,14 +34,29 @@ const CERTIFIED_PROFILE_COLLECTION = "app.certified.actor.profile";
  *  app/_lib/bluesky-profile.ts. */
 const APPVIEW_BASE = (process.env.NEXT_PUBLIC_BLUESKY_APPVIEW_URL || "https://public.api.bsky.app").replace(/\/+$/, "");
 
-/** Canonical bsky.app URL for a cross-posted twin. */
-export function blueskyPostUrl(did: string, rkey: string): string {
-  return `https://bsky.app/profile/${encodeURIComponent(did)}/post/${encodeURIComponent(rkey)}`;
+/**
+ * Path-segment encoding for the bsky.app `/profile/<actor>` slot. The actor is
+ * a handle or a DID, and bsky.app only routes DIDs in their bare form — a
+ * blanket encodeURIComponent turns `did:plc:abc` into `did%3Aplc%3Aabc`, which
+ * bsky.app renders as a blank page. Colons are legal in a path segment, so we
+ * hand them back after encoding. did:web DIDs that carry a genuinely escaped
+ * colon (`example.com%3A3000`) survive: their `%` becomes `%25` first, so the
+ * literal `%3A` we restore never appears in them.
+ */
+function encodeActor(actor: string): string {
+  return encodeURIComponent(actor).replace(/%3A/g, ":");
 }
 
-/** Canonical bsky.app URL for an account. */
-export function blueskyProfileUrl(did: string): string {
-  return `https://bsky.app/profile/${encodeURIComponent(did)}`;
+/** Canonical bsky.app URL for a cross-posted twin. `actor` is the author's
+ *  handle when we know it (prettier, and what bsky.app itself canonicalises
+ *  to) or their DID otherwise — both resolve. */
+export function blueskyPostUrl(actor: string, rkey: string): string {
+  return `https://bsky.app/profile/${encodeActor(actor)}/post/${encodeURIComponent(rkey)}`;
+}
+
+/** Canonical bsky.app URL for an account (handle or DID). */
+export function blueskyProfileUrl(actor: string): string {
+  return `https://bsky.app/profile/${encodeActor(actor)}`;
 }
 
 // ── Preference (opt-in + consent) ────────────────────────────────────────────
@@ -223,6 +238,10 @@ export async function deleteBlueskyTwin(rkey: string): Promise<void> {
  * do. Batched (getPosts caps at 25 URIs per call); failures return an empty
  * map so links simply don't render. Only twins the relay actually indexed
  * count — a link should never point at a post bsky.app can't show.
+ *
+ * The link is built from the author handle the appview returns, so it matches
+ * the address bsky.app itself shows (…/profile/alice.example/post/RKEY); the
+ * DID is the fallback when the handle can't be verified.
  */
 export async function fetchBlueskyPostLinks(uris: string[]): Promise<Map<string, string>> {
   const found = new Map<string, string>();
@@ -245,12 +264,19 @@ export async function fetchBlueskyPostLinks(uris: string[]): Promise<Map<string,
       headers: { accept: "application/json" },
     }).catch(() => null);
     if (!res?.ok) continue;
-    const payload = (await res.json().catch(() => null)) as { posts?: Array<{ uri?: unknown }> } | null;
+    const payload = (await res.json().catch(() => null)) as {
+      posts?: Array<{ uri?: unknown; author?: { handle?: unknown } }>;
+    } | null;
     for (const post of payload?.posts ?? []) {
       if (typeof post.uri !== "string") continue;
       const sourceUri = byTwinUri.get(post.uri);
       const parsed = parseAtUri(post.uri);
-      if (sourceUri && parsed) found.set(sourceUri, blueskyPostUrl(parsed.did, parsed.rkey));
+      if (!sourceUri || !parsed) continue;
+      // "handle.invalid" is the appview's marker for a handle that failed
+      // bidirectional resolution — it isn't addressable, so use the DID.
+      const handle = typeof post.author?.handle === "string" ? post.author.handle : "";
+      const actor = handle && handle !== "handle.invalid" ? handle : parsed.did;
+      found.set(sourceUri, blueskyPostUrl(actor, parsed.rkey));
     }
   }
   return found;

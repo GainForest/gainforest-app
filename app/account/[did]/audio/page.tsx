@@ -5,6 +5,7 @@ import { resolveAccountManageAccess } from "@/app/_lib/manage-server";
 import { ObservationsSubNav } from "../../_components/ObservationsSubNav";
 import { accountAudioPath, getAccountRouteData, readAccountRouteParams } from "../../_lib/account-route";
 import { AudioSection } from "@/app/(manage)/manage/_sections";
+import { canDeleteRecord } from "@/app/(manage)/manage/_lib/cgs-permissions";
 import { AccountAudioViewer } from "./AccountAudioViewer";
 
 export const metadata: Metadata = {
@@ -45,7 +46,12 @@ export default async function AccountAudioPage({ params, searchParams }: PagePro
       {wantsEditor ? (
         <AudioSection target={target} />
       ) : (
-        <AccountAudioViewer did={target.did} showUploadCta={target.kind === "personal"} />
+        <AccountAudioViewer
+          did={target.did}
+          showUploadCta={target.kind === "personal"}
+          canDelete={canDeleteRecord(target).allowed}
+          mutationRepo={target.kind === "group" ? target.did : null}
+        />
       )}
     </>
   );

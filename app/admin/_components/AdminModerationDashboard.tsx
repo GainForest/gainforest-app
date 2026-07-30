@@ -8,7 +8,8 @@ import { useTranslations } from "next-intl";
 import { ArchiveIcon, AwardIcon, BotIcon, Building2Icon, FlaskConicalIcon, LeafIcon, SproutIcon, UserRoundIcon, WalletIcon } from "lucide-react";
 import { AdminOnlyIndicator } from "@/app/_components/AdminOnlyIndicator";
 import type { GrantApplicant } from "@/app/_lib/grants";
-import type { BioblitzRegistrant } from "@/app/_lib/bioblitz";
+import type { BioblitzRegistrant, BioblitzRound } from "@/app/_lib/bioblitz";
+import type { BioblitzExclusionAdminRow } from "@/app/_lib/bioblitz-exclusions";
 import type { FlaggedTestAccount } from "@/app/internal/badges/_lib/test-accounts";
 import type { FlaggedTestRecord } from "@/app/internal/badges/_lib/test-records";
 import type { BuiltinEndorser, EndorserRecord } from "@/app/_lib/endorsers";
@@ -24,6 +25,7 @@ import { AdminDataJobsPanel, type AdminDataJobRow } from "./AdminDataJobsPanel";
 import { AdminFacilitatorPanel } from "./AdminFacilitatorPanel";
 import { EndorsersManager } from "./EndorsersManager";
 import { AwardEndorsementsPanel } from "./AwardEndorsementsPanel";
+import { AdminBioblitzExclusions } from "./AdminBioblitzExclusions";
 
 export type AdminTab = "taina" | "dataJobs" | "grants" | "bioblitz" | "testAccounts" | "endorsers" | "awardEndorsements" | "facilitator";
 
@@ -39,6 +41,11 @@ export function AdminModerationDashboard({
   testRecords,
   grantApplicants,
   bioblitzRegistrants,
+  bioblitzExclusions,
+  finalizedBioblitzRoundIds,
+  bioblitzRounds,
+  defaultBioblitzRoundId,
+  canManageBioblitzExclusions,
   tainaRows,
   tainaAllowanceUsd,
   dataJobRows,
@@ -52,6 +59,12 @@ export function AdminModerationDashboard({
   testRecords: FlaggedTestRecord[];
   grantApplicants: GrantApplicant[];
   bioblitzRegistrants: BioblitzRegistrant[];
+  /** null = weekly counting records could not be loaded safely. */
+  bioblitzExclusions: BioblitzExclusionAdminRow[] | null;
+  finalizedBioblitzRoundIds: number[];
+  bioblitzRounds: BioblitzRound[];
+  defaultBioblitzRoundId: number;
+  canManageBioblitzExclusions: boolean;
   /** null = the Tainá runtime was unreachable (distinct from an empty roster). */
   tainaRows: AdminTainaRow[] | null;
   tainaAllowanceUsd: number;
@@ -63,6 +76,7 @@ export function AdminModerationDashboard({
   facilitatorStats: FacilitatorStats;
 }) {
   const t = useTranslations("common.adminModeration");
+  const tBioblitzExclusions = useTranslations("common.adminBioblitzExclusions");
   const tTaina = useTranslations("common.adminTaina");
   const tDataJobs = useTranslations("common.adminDataJobs");
   const tTest = useTranslations("common.adminTestAccounts");
@@ -158,15 +172,31 @@ export function AdminModerationDashboard({
           <GrantApplicantsList applicants={grantApplicants} />
         </AdminPanel>
       ) : tab === "bioblitz" ? (
-        <AdminPanel
-          Icon={LeafIcon}
-          title={t("bioblitz.title")}
-          description={t("bioblitz.description")}
-          count={bioblitzRegistrants.length}
-          footer={t("awardHint")}
-        >
-          <BioblitzRegistrantsList registrants={bioblitzRegistrants} />
-        </AdminPanel>
+        <div className="space-y-5">
+          <AdminPanel
+            Icon={LeafIcon}
+            title={tBioblitzExclusions("title")}
+            description={tBioblitzExclusions("description")}
+            count={bioblitzExclusions?.length ?? 0}
+          >
+            <AdminBioblitzExclusions
+              initial={bioblitzExclusions}
+              finalizedRoundIds={finalizedBioblitzRoundIds}
+              rounds={bioblitzRounds}
+              defaultRoundId={defaultBioblitzRoundId}
+              canManage={canManageBioblitzExclusions}
+            />
+          </AdminPanel>
+          <AdminPanel
+            Icon={LeafIcon}
+            title={t("bioblitz.title")}
+            description={t("bioblitz.description")}
+            count={bioblitzRegistrants.length}
+            footer={t("awardHint")}
+          >
+            <BioblitzRegistrantsList registrants={bioblitzRegistrants} />
+          </AdminPanel>
+        </div>
       ) : tab === "testAccounts" ? (
         <div className="space-y-5">
           <AdminPanel

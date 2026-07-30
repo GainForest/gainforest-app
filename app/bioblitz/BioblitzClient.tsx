@@ -853,6 +853,8 @@ function Board({
           ))}
         </div>
 
+        {board ? <EligibilityBreakdown board={board} /> : null}
+
         <div className="mt-3 min-h-0 flex-1 overflow-y-auto pr-1">
           {board ? (
             collectors.length === 0 ? (
@@ -882,6 +884,44 @@ function Board({
         </div>
       </Card>
     </FadeIn>
+  );
+}
+
+function EligibilityBreakdown({ board }: { board: RoundBoard }) {
+  const t = useTranslations("marketplace.bioblitz.board.eligibility");
+  const otherExcluded =
+    board.imageCounts.indoors +
+    board.imageCounts.unclassified +
+    board.imageCounts.missingPhoto;
+  const items = [
+    { key: "wildlife", value: board.imageCounts.wildlife, eligible: true },
+    { key: "plants", value: board.imageCounts.plant, eligible: true },
+    { key: "people", value: board.imageCounts.person, eligible: false },
+    { key: "potted", value: board.imageCounts["potted-plant"], eligible: false },
+    { key: "other", value: otherExcluded, eligible: false },
+  ] as const;
+
+  return (
+    <div className="mt-3 rounded-2xl border border-border/70 bg-foreground/[0.025] p-2.5">
+      <div className="flex items-center justify-between gap-2">
+        <p className="text-[11px] font-semibold text-foreground">{t("title")}</p>
+        <p className="text-[10px] font-medium text-primary">{t("eligibleOnly")}</p>
+      </div>
+      <div className="mt-2 grid grid-cols-5 gap-1">
+        {items.map((item) => (
+          <div
+            key={item.key}
+            className={`rounded-xl px-1.5 py-1.5 text-center ${item.eligible ? "bg-primary/10" : "bg-foreground/5"}`}
+          >
+            <div className={`text-sm font-semibold tabular-nums ${item.eligible ? "text-primary" : "text-muted-foreground"}`}>
+              {formatNumber(item.value)}
+            </div>
+            <div className="text-[9px] font-medium leading-tight text-muted-foreground">{t(item.key)}</div>
+          </div>
+        ))}
+      </div>
+      <p className="mt-2 text-[10px] leading-snug text-muted-foreground">{t("explainer")}</p>
+    </div>
   );
 }
 

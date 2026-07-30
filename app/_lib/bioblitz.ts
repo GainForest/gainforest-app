@@ -17,8 +17,25 @@
 
 import { INDEXER_URL } from "./urls";
 import { normaliseRef, resolveBlobUrl } from "./pds";
-import { fetchHiddenAccountDids, indexerQuery, walkOccurrences, type OccurrenceRecord } from "./indexer";
+import {
+  fetchHiddenAccountDids,
+  fetchHiddenRecordUris,
+  indexerQuery,
+  walkOccurrences,
+  type OccurrenceRecord,
+} from "./indexer";
 import { fetchEngagement } from "./feed-engagement";
+import {
+  classifyBioblitzImage,
+  isEligibleBioblitzCategory,
+  type BioblitzImageCategory,
+} from "./bioblitz-eligibility";
+import {
+  fetchBioblitzExclusions,
+  fetchBioblitzExclusionsStrict,
+  indexBioblitzExclusions,
+  isAccountExcludedFromBioblitzRound,
+} from "./bioblitz-exclusions";
 
 /** Cash prizes awarded each round, in USD. */
 export const BIOBLITZ_PRIZES = {
@@ -100,6 +117,16 @@ function generatedRound(id: number): BioblitzRound {
 function roundIdFor(now: number): number {
   if (now <= FIRST_ROUND_END_MS) return 1;
   return 2 + Math.floor(Math.max(0, now - SECOND_ROUND_START_MS) / STANDARD_ROUND_MS);
+}
+
+/**
+ * Resolve a timestamp to its BioBlitz round. Dates before the program began do
+ * not belong to a round; this matters when applying weekly exclusions to the
+ * all-time standings.
+ */
+export function bioblitzRoundIdAt(timestamp: number): number | null {
+  if (!Number.isFinite(timestamp) || timestamp < Date.parse(FIRST_ROUND_START)) return null;
+  return roundIdFor(timestamp);
 }
 
 /** Rounds available to the UI, oldest first. Includes the current round and a
@@ -226,17 +253,31 @@ type RoundCollector = {
   avatarRef: string | null;
 };
 
+export type RoundImageCounts = Record<BioblitzImageCategory, number> & {
+  /** Non-null imageEvidence wrappers that did not contain a usable blob ref. */
+  missingPhoto: number;
+};
+
 export type RoundBoard = {
   collectors: RoundCollector[];
-  /** Total valid observations uploaded inside the round window. */
+  /** Total eligible wildlife + outdoor plant observations. */
   totalObservations: number;
-  /** Distinct collectors who uploaded at least one observation. */
+  /** Breakdown of automatically classified image observations. */
+  imageCounts: RoundImageCounts;
+  /** Distinct collectors who uploaded at least one eligible observation. */
   collectorCount: number;
 };
 
 type RawNode = {
   did?: string | null;
+  uri?: string | null;
   createdAt?: string | null;
+  occurrenceRemarks?: string | null;
+  fieldNotes?: string | null;
+  scientificName?: string | null;
+  vernacularName?: string | null;
+  kingdom?: string | null;
+  imageEvidence?: { file?: { ref?: string | null } | null } | null;
   certifiedProfileData?: {
     displayName?: string | null;
     avatar?: { image?: { ref?: string | null } | null } | null;
@@ -256,7 +297,14 @@ const ROUND_COLLECTORS_QUERY = `
       edges {
         node {
           did
+          uri
           createdAt
+          occurrenceRemarks
+          fieldNotes
+          scientificName
+          vernacularName
+          kingdom
+          imageEvidence { file { ref } }
           certifiedProfileData {
             displayName
             avatar { __typename ... on OrgHypercertsDefsSmallImage { image { ref } } }
@@ -286,6 +334,7 @@ export async function fetchRoundCollectors(
   round: BioblitzRound,
   scope: BoardScope = "round",
   signal?: AbortSignal,
+  exclusionRead: "best-effort" | "required" = "best-effort",
 ): Promise<RoundBoard> {
   const startMs = scope === "all" ? Number.NEGATIVE_INFINITY : Date.parse(round.start);
   const endMs = scope === "all" ? Number.POSITIVE_INFINITY : Date.parse(round.end);
@@ -296,11 +345,30 @@ export async function fetchRoundCollectors(
       ? { imageEvidence: { isNull: false } }
       : { imageEvidence: { isNull: false }, createdAt: { gte: round.start, lte: round.end } };
 
-  // Accounts a steward flagged as "test" are excluded from the challenge — they
-  // don't count toward the leaderboard, totals or prize eligibility.
-  const hidden = await fetchHiddenAccountDids(signal).catch(() => new Set<string>());
+  // Accounts and individual observations a steward hid are excluded from the
+  // challenge. The explicit file-ref check below is also important: a non-null
+  // imageEvidence wrapper alone is not proof that an image blob was uploaded.
+  const exclusionPromise =
+    exclusionRead === "required"
+      ? fetchBioblitzExclusionsStrict(signal)
+      : fetchBioblitzExclusions(signal).catch(() => []);
+  const [hidden, hiddenRecords, exclusionRecords] = await Promise.all([
+    fetchHiddenAccountDids(signal).catch(() => new Set<string>()),
+    fetchHiddenRecordUris(signal).catch(() => new Set<string>()),
+    exclusionPromise,
+  ]);
+  const exclusions = indexBioblitzExclusions(exclusionRecords);
 
   const tally = new Map<string, RoundCollector>();
+  const imageCounts: RoundImageCounts = {
+    wildlife: 0,
+    plant: 0,
+    person: 0,
+    "potted-plant": 0,
+    indoors: 0,
+    unclassified: 0,
+    missingPhoto: 0,
+  };
   let total = 0;
   let after: string | null = null;
 
@@ -334,9 +402,26 @@ export async function fetchRoundCollectors(
 
     for (const n of nodes) {
       const did = n.did!;
-      if (hidden.has(did)) continue;
+      const uri = n.uri?.trim();
+      if (hidden.has(did) || (uri && hiddenRecords.has(uri))) continue;
       const t = Date.parse(n.createdAt ?? "");
       if (!Number.isFinite(t) || t < startMs || t > endMs) continue;
+      const observationRoundId = scope === "round" ? round.id : bioblitzRoundIdAt(t);
+      if (isAccountExcludedFromBioblitzRound(exclusions, did, observationRoundId)) continue;
+
+      const imageRef = normaliseRef(n.imageEvidence?.file?.ref);
+      if (!imageRef) {
+        imageCounts.missingPhoto += 1;
+        continue;
+      }
+      const category = classifyBioblitzImage({
+        notes: n.occurrenceRemarks?.trim() || n.fieldNotes?.trim() || null,
+        scientificName: n.scientificName,
+        vernacularName: n.vernacularName,
+        kingdom: n.kingdom,
+      });
+      imageCounts[category] += 1;
+      if (!isEligibleBioblitzCategory(category)) continue;
       total += 1;
       const existing = tally.get(did);
       if (existing) {
@@ -364,6 +449,7 @@ export async function fetchRoundCollectors(
   return {
     collectors,
     totalObservations: total,
+    imageCounts,
     collectorCount: collectors.length,
   };
 }
@@ -398,7 +484,19 @@ export async function fetchRoundObservations(
   });
   return records.filter((r) => {
     const t = Date.parse(r.createdAt);
-    return Number.isFinite(t) && t >= startMs && t <= endMs;
+    return (
+      Number.isFinite(t) &&
+      t >= startMs &&
+      t <= endMs &&
+      isEligibleBioblitzCategory(
+        classifyBioblitzImage({
+          notes: r.remarks,
+          scientificName: r.scientificName,
+          vernacularName: r.vernacularName,
+          kingdom: r.kingdom,
+        }),
+      )
+    );
   });
 }
 

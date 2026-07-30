@@ -70,6 +70,7 @@
       "tabs": {
         "images": "Images",
         "audio": "Sounds",
+        "soundscape": "Soundscape",
         "trees": "Trees",
         "biodiversity": "Observations",
         "files": "Files"
@@ -120,6 +121,9 @@
       "uploadType": "Upload {type}",
       "manage": "Manage",
       "untitledRecording": "Untitled recording",
+      "untitledSoundscape": "Untitled soundscape",
+      "soundscapeHelp": "Pick a soundscape already built from this organization's recordings. Readers can play it from the update.",
+      "soundscapeEmpty": "No soundscape could be read from this organization right now.",
       "unnamedTreeDataset": "Unnamed tree group",
       "unknownObservation": "Unknown nature sighting",
       "treeCount": "{count, plural, =1 {1 tree} other {# trees}}",
@@ -140,6 +144,7 @@
       "attachmentTitles": {
         "images": "Images",
         "audio": "Sound recordings",
+        "soundscape": "Soundscape",
         "trees": "Tree group",
         "biodiversity": "Observations"
       },
@@ -154,6 +159,7 @@
       "tabDescriptions": {
         "images": "Upload project photos.",
         "audio": "Add sounds already saved by this organization.",
+        "soundscape": "Add the 24-hour soundscape built from this organization's recordings.",
         "trees": "Add tree information grouped by project place.",
         "biodiversity": "Filter observations and add displayed records or saved groups.",
         "files": "Add reports, photos, videos, or web pages."
@@ -258,6 +264,7 @@
       "linkedProjectPlace": "Linked project place",
       "linkedTreeGroup": "Linked tree group",
       "linkedSound": "Linked sound",
+      "linkedSoundscape": "Linked soundscape",
       "groupedData": "Grouped data",
       "openMap": "Open map",
       "viewMap": "View map",

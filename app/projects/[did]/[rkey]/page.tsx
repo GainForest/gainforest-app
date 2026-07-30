@@ -216,6 +216,9 @@ export default async function ProjectDetailPage({
             // (collection) URI — older projects attached their updates to the
             // collection, which is where this project's timeline lives.
             timelineMatchUris={[routeData.record.atUri, record.atUri]}
+            // Observation datasets filed under this project — their sightings
+            // are the project's evidence too.
+            projectDatasetUris={record.datasetUris}
             // Like + comment target the project (collection) record, so the count
             // matches the activity feed (which folds Certs into their project).
             engagementSubjectUri={record.atUri}

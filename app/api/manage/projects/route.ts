@@ -86,6 +86,8 @@ async function directProjectFromRecord(did: string, record: ListedRecord): Promi
   const banner = await collectionImageUrl(did, value.banner);
   const avatar = await collectionImageUrl(did, value.avatar);
   const items = Array.isArray(value.items) ? value.items.map(itemUriFromValue).filter((uri): uri is string => Boolean(uri)) : [];
+  const certUris = items.filter((uri) => uri.includes("/org.hypercerts.claim.activity/"));
+  const datasetUris = items.filter((uri) => uri.includes("/app.gainforest.dwc.dataset/"));
   const location = isRecord(value.location) ? extractString(value.location.uri) : null;
 
   return {
@@ -103,8 +105,9 @@ async function directProjectFromRecord(did: string, record: ListedRecord): Promi
     imageRef: banner.ref ?? avatar.ref,
     creatorName: null,
     creatorAvatarRef: null,
-    bumicertUris: items,
-    bumicertCount: items.length,
+    bumicertUris: certUris,
+    bumicertCount: certUris.length,
+    datasetUris,
     locationUri: location,
     country: null,
     rawRecord: value,
@@ -136,6 +139,7 @@ function mergeProjects(indexed: ProjectRecord[], direct: ManagedProject[]): Mana
       imageRef: project.imageRef ?? directProject?.imageRef ?? null,
       bumicertUris: project.bumicertUris.length > 0 ? project.bumicertUris : directProject?.bumicertUris ?? [],
       bumicertCount: project.bumicertUris.length > 0 ? project.bumicertCount : directProject?.bumicertCount ?? project.bumicertCount,
+      datasetUris: project.datasetUris.length > 0 ? project.datasetUris : directProject?.datasetUris ?? [],
       locationUri: project.locationUri ?? directProject?.locationUri ?? null,
     });
   }

@@ -297,34 +297,147 @@ export function ObservationDetailSkeleton() {
   );
 }
 
-export function FeedPageSkeleton() {
+/**
+ * Space a line of copy will fill. Left unpainted — the text that lands here is
+ * a name or a sentence of unknown length, so a bar would only morph into
+ * something a different size. The height still holds the row open.
+ */
+function TextSpace({ height, className = "" }: { height: number; className?: string }) {
+  return <div className={className} style={{ height }} />;
+}
+
+/** A text row — post, project or organization — mirroring `FeedRow`. */
+function FeedRowSkeleton({ bodyLines }: { bodyLines: number }) {
   return (
-    <main className="mx-auto w-full max-w-3xl px-6 py-8" aria-busy="true" aria-live="polite">
-      <div className="mb-6 rounded-3xl border border-border/60 bg-card/90 p-4 shadow-sm">
-        <div className="flex items-start gap-3">
-          <Skeleton className="size-10 rounded-full" />
-          <div className="min-w-0 flex-1 space-y-2">
-            <Skeleton className="h-4 w-40 rounded-full" />
-            <Skeleton className="h-16 w-full rounded-2xl" />
-          </div>
+    <li className="relative">
+      <div className="flex gap-3 rounded-2xl px-3 pb-1.5 pt-3.5">
+        <Skeleton className="mt-0.5 size-10 shrink-0 rounded-full" />
+        <div className="min-w-0 flex-1">
+          {/* Author line (text-sm) then the verb line (text-xs). */}
+          <TextSpace height={20} />
+          <TextSpace height={16} className="mt-0.5" />
+          {/* Body — text-sm at leading-relaxed. */}
+          <TextSpace height={22.75 * bodyLines} className="mt-0.5" />
         </div>
       </div>
-      <div className="space-y-4">
-        {Array.from({ length: 5 }).map((_, index) => (
-          <article key={index} className="rounded-3xl border border-border/60 bg-card p-4 shadow-sm">
-            <div className="flex gap-3">
-              <Skeleton className="size-10 shrink-0 rounded-full" />
-              <div className="min-w-0 flex-1 space-y-2">
-                <Skeleton className="h-3.5 w-1/3 rounded-full" />
-                <Skeleton className="h-3 w-1/4 rounded-full" />
-                <Skeleton className="h-4 w-4/5 rounded-full" />
-                <Skeleton className="h-3 w-2/3 rounded-full" />
+      {/* Like / reshare / comment — fixed-size controls, so they are painted. */}
+      <div className="pb-2 pl-16 pr-3">
+        <div className="mt-2 flex items-center gap-1">
+          {["w-14", "w-20", "w-20"].map((width) => (
+            <Skeleton key={width} className={`h-[26px] rounded-full ${width}`} />
+          ))}
+        </div>
+      </div>
+    </li>
+  );
+}
+
+/** A collapsed run of sightings, mirroring `ObservationBatchCard`. */
+function FeedBatchRowSkeleton() {
+  return (
+    <li className="relative">
+      <div className="flex gap-3 rounded-2xl px-3 py-3.5">
+        <Skeleton className="mt-0.5 size-10 shrink-0 rounded-full" />
+        <div className="min-w-0 flex-1">
+          <TextSpace height={20} />
+          <TextSpace height={16} className="mt-0.5" />
+          {/* Species summary (text-[15px] at leading-snug). */}
+          <TextSpace height={20.6} className="mt-1.5" />
+          {/* Thumbnail montage — square tiles whose size is set by the grid. */}
+          <div className="mt-2 grid grid-cols-4 gap-1.5 sm:gap-2">
+            {Array.from({ length: 4 }).map((_, index) => (
+              <Skeleton key={index} className="aspect-square rounded-lg" />
+            ))}
+          </div>
+          <TextSpace height={16} className="mt-2" />
+        </div>
+      </div>
+    </li>
+  );
+}
+
+/**
+ * Loading placeholder for the activity feed. Mirrors `FeedClient`'s shell — the
+ * pulled-up hero band and its title, the filter strip that stands in for the
+ * right rail below `lg`, the composer card, and the divided row list with the
+ * rail alongside it — so the feed does not jump or re-flow when the first page
+ * of activity arrives.
+ *
+ * Everything with a fixed size is painted — the shell, the composer, avatars,
+ * thumbnails, the action controls, and the labels that read the same on every
+ * visit. The activity itself (who posted, what they wrote) is only given room,
+ * never a bar, so nothing morphs into differently-sized text when it lands.
+ *
+ * Real rows still vary in height — a one-line post against a run of sightings
+ * with a photo montage — so the mix below approximates rather than tracks them:
+ * the shell, the composer and the first rows land in place, and the further
+ * down the list you go the looser the match becomes.
+ */
+export function FeedPageSkeleton() {
+  return (
+    <section className="-mt-14 pb-24 md:pb-32" aria-busy="true" aria-live="polite">
+      {/* Hero */}
+      <div className="relative isolate overflow-hidden">
+        <div className="absolute inset-0 -z-10 bg-linear-to-b from-primary/8 via-primary/2 to-transparent" />
+        <div className="mx-auto flex max-w-3xl flex-col px-6 pb-4 pt-16 sm:px-8 sm:pb-6 sm:pt-[76px] lg:max-w-4xl">
+          {/* Fixed copy, so it is painted at the size it will render: one line
+              at every step of the type scale (it only wraps below ~370px). */}
+          <Skeleton className="h-[31px] w-[21rem] max-w-full rounded-lg sm:h-[35px] sm:w-[26rem] lg:h-[47px] lg:w-[34rem]" />
+        </div>
+      </div>
+
+      <div className="mx-auto flex w-full max-w-3xl gap-10 px-4 sm:px-6 lg:max-w-4xl">
+        <div className="min-w-0 flex-1">
+          {/* Horizontal filter pills — shown where the right rail is hidden. */}
+          <div className="-mx-4 mb-3 border-b border-border/60 sm:-mx-6 lg:hidden">
+            <div className="flex items-center gap-1 px-4 py-2 sm:px-6">
+              {["w-16", "w-16", "w-20", "w-24", "w-28"].map((width) => (
+                <Skeleton key={width} className={`h-7 shrink-0 rounded-full ${width}`} />
+              ))}
+            </div>
+          </div>
+
+          {/* Composer — the inline card only exists from sm up. */}
+          <div className="hidden sm:block">
+            <div className="mb-3 rounded-2xl border border-border/60 bg-card/40 p-3">
+              <div className="flex gap-3">
+                <Skeleton className="mt-0.5 size-9 shrink-0 rounded-full" />
+                <Skeleton className="h-[62px] flex-1 rounded-lg" />
+              </div>
+              <div className="mt-1 flex items-center justify-between gap-2 pl-12">
+                <TextSpace height={16} />
+                <Skeleton className="h-8 w-[72px] rounded-full" />
               </div>
             </div>
-          </article>
-        ))}
+          </div>
+
+          <ol className="relative divide-y divide-border/80">
+            <FeedRowSkeleton bodyLines={2} />
+            <FeedBatchRowSkeleton />
+            <FeedRowSkeleton bodyLines={2} />
+            <FeedBatchRowSkeleton />
+            <FeedRowSkeleton bodyLines={2} />
+          </ol>
+        </div>
+
+        {/* Right rail — the vertical filter list from lg up. */}
+        <aside className="hidden w-44 shrink-0 lg:block">
+          <div className="flex flex-col gap-1">
+            <div className="flex flex-col gap-0.5">
+              {["w-8", "w-12", "w-16", "w-20", "w-24"].map((width) => (
+                <div key={width} className="flex items-center gap-3 px-3 py-1.5">
+                  <Skeleton className="size-4 shrink-0 rounded-sm" />
+                  <Skeleton className={`h-5 rounded-full ${width}`} />
+                </div>
+              ))}
+            </div>
+            <div className="px-3 py-1">
+              <Skeleton className="h-4 w-24 rounded-full" />
+            </div>
+          </div>
+        </aside>
       </div>
-    </main>
+    </section>
   );
 }
 

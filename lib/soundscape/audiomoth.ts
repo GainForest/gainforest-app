@@ -102,6 +102,18 @@ export function wallClockFromEpochMillis(epochMillis: number, zone: "utc" | "loc
   return isPlausibleWallClock(time) ? time : null;
 }
 
+/**
+ * Wall-clock time of an uploaded recording from its `metadata.recordedAt`
+ * ISO string. Upload parsed the device clock (file name or WAV comment,
+ * AudioMoth convention: UTC) into a UTC instant, so the UTC components ARE
+ * the device's wall clock. Never interpreted through the viewer's timezone.
+ */
+export function wallClockFromIso(iso: string | null | undefined): WallClockTime | null {
+  if (!iso) return null;
+  const millis = Date.parse(iso);
+  return Number.isFinite(millis) ? wallClockFromEpochMillis(millis, "utc") : null;
+}
+
 function isPlausibleWallClock(time: WallClockTime): boolean {
   return (
     time.year >= 2000 &&

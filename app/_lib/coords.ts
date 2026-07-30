@@ -164,42 +164,6 @@ export async function resolveCertifiedLocationCoords(
   return result;
 }
 
-// ── Org DID → coordinates (Green Globe via our /api/site-points proxy) ──────
-//
-// The indexer's certified-location records for orgs are mostly geojson-URI
-// stubs with a null uri, so we use Green Globe's curated mapPoints instead —
-// the same did → {lat,lon} data data.gainforest.app plots.
-
-type SitePoint = { lat: number; lon: number; name: string | null };
-let sitePointPromise: Promise<Map<string, SitePoint>> | null = null;
-
-// Note: deliberately NOT abortable. The site-point map is a global, cached
-// fetch; tying it to a render's AbortSignal lets StrictMode's double-invoke
-// cancel the first request and poison the cache with an empty result.
-async function loadSitePointMap(): Promise<Map<string, SitePoint>> {
-  if (sitePointPromise) return sitePointPromise;
-  const p = (async () => {
-    const map = new Map<string, SitePoint>();
-    const res = await fetch("/api/site-points");
-    if (!res.ok) throw new Error(`site-points ${res.status}`);
-    const json = (await res.json()) as {
-      points?: Record<string, { lat: number; lon: number; name?: string | null }>;
-    };
-    for (const [did, pt] of Object.entries(json.points ?? {})) {
-      if (typeof pt?.lat === "number" && typeof pt?.lon === "number") {
-        map.set(did, { lat: pt.lat, lon: pt.lon, name: pt.name ?? null });
-      }
-    }
-    return map;
-  })();
-  sitePointPromise = p;
-  // Don't cache a failure: allow a later retry to repopulate the map.
-  p.catch(() => {
-    if (sitePointPromise === p) sitePointPromise = null;
-  });
-  return p;
-}
-
 // ── Public: resolve points for records ────────────────────────────────────
 
 /**

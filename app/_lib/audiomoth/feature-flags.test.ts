@@ -1,16 +1,16 @@
 import { describe, expect, it } from "vitest";
-import { isAudioMothLabellingFlagEnabled } from "./feature-flags";
+import { isAudioMothUploadTrayFlagEnabled } from "./feature-flags";
 
-describe("AudioMoth labelling feature flag", () => {
-  it("is available for admin review by default", () => {
-    expect(isAudioMothLabellingFlagEnabled(undefined)).toBe(true);
+describe("AudioMoth upload tray feature flag", () => {
+  it("is disabled by default", () => {
+    expect(isAudioMothUploadTrayFlagEnabled(undefined)).toBe(false);
   });
 
-  it.each(["false", "FALSE", " false "])("can be disabled with %j", (value) => {
-    expect(isAudioMothLabellingFlagEnabled(value)).toBe(false);
+  it.each(["true", "TRUE", " true "])("can be enabled with %j", (value) => {
+    expect(isAudioMothUploadTrayFlagEnabled(value)).toBe(true);
   });
 
-  it("does not treat other values as disabled", () => {
-    expect(isAudioMothLabellingFlagEnabled("true")).toBe(true);
+  it.each(["false", "1", "yes", ""])("does not treat %j as enabled", (value) => {
+    expect(isAudioMothUploadTrayFlagEnabled(value)).toBe(false);
   });
 });

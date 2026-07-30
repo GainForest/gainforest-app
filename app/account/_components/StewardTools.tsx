@@ -25,8 +25,8 @@ type Props = {
 };
 
 /**
- * Compact, collapsible steward panel for GainForest moderators, shown above a
- * profile. Folds the two stewardship actions — hiding an account as a test
+ * Compact, collapsible steward panel for GainForest moderators, shown between
+ * the profile card and the profile tab bar. Folds the two stewardship actions — hiding an account as a test
  * account, and awarding recognition badges — into one minimal card so it never
  * dominates the profile. Collapsed by default; the header surfaces current
  * state (hidden status + awarded badges) at a glance.
@@ -92,7 +92,7 @@ export function StewardTools({ did, accountName, initialTestFlagged, initialAwar
   }
 
   return (
-    <section className="mb-4 overflow-hidden rounded-2xl border border-border bg-card/60">
+    <section className="mb-4 mt-4 overflow-hidden rounded-2xl border border-border bg-card/60">
       <button
         type="button"
         onClick={() => setOpen((value) => !value)}

@@ -55,6 +55,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { cn } from "@/lib/utils";
 import { manageApiHref, manageHref, type ManageTarget } from "@/lib/links";
 import { WORK_SCOPE_MESSAGE_KEYS, type KnownWorkScopeKey, type WorkScopeLabels } from "@/app/_lib/work-scope-labels";
+import { buildWorkScopeCel, workScopeTermToKey } from "@/app/_lib/work-scope-cel";
 
 /* ── Types ──────────────────────────────────────────────────────────────── */
 
@@ -105,7 +106,6 @@ type FormIssue = { field: FormField; step: StepId; message: string };
 const DRAFT_STORAGE_KEY = "bumicerts:create-drafts:v1";
 const COLLECTION = "org.hypercerts.claim.activity";
 const PROJECT_COLLECTION = "org.hypercerts.collection";
-const WORK_SCOPE_TAG_COLLECTION = "org.hypercerts.workscope.tag";
 const MAX_IMAGE_BYTES = 5 * 1024 * 1024;
 const TITLE_MAX = 120;
 const TERMS_URL = "https://www.certified.app/terms";
@@ -151,7 +151,11 @@ function normalizeDraftValues(values: Partial<FormValues> & { customScope?: stri
   return {
     ...EMPTY_FORM,
     ...values,
-    scopes: Array.isArray(values.scopes) ? values.scopes : [],
+    // Drafts persist in localStorage across releases, so re-key anything that
+    // predates scopes being stored as keys rather than translated labels.
+    scopes: Array.isArray(values.scopes)
+      ? values.scopes.map((scope) => workScopeTermToKey(scope) ?? scope)
+      : [],
     contributors: Array.isArray(values.contributors) && values.contributors.length ? values.contributors : [""],
     selectedLocationUris: Array.isArray(values.selectedLocationUris) ? values.selectedLocationUris : [],
     acceptedTerms: values.acceptedTerms === true,
@@ -254,10 +258,6 @@ function scopeList(values: FormValues, labels: WorkScopeLabels) {
 function scopeKeys(values: FormValues) {
   const active = new Set(values.scopes);
   return WORK_SCOPE_KEYS.filter((scope) => active.has(scope));
-}
-function buildWorkScopeExpression(values: FormValues) {
-  const keys = scopeKeys(values).map((scope) => `'${scope}'`).join(", ");
-  return `scope.hasAny([${keys}])`;
 }
 function contributorList(values: FormValues) {
   return values.contributors.map((item) => item.trim()).filter(Boolean);
@@ -1364,37 +1364,16 @@ export function NewBumicertClient({
     setPrefilledCoverUrl(linkedProject?.imageUrl ?? null);
   };
 
-  const buildWorkScopeRecord = async () => {
-    const createdAt = new Date().toISOString();
-    const writeOptions = target.kind === "group" ? { repo: target.did } : undefined;
-    const refs = await Promise.all(scopeKeys(values).map(async (scope) => {
-      const record = {
-        $type: WORK_SCOPE_TAG_COLLECTION,
-        key: scope,
-        name: workScopeLabels[scope],
-        category: "topic",
-        createdAt,
-      };
-      const existing = await getRecord(WORK_SCOPE_TAG_COLLECTION, scope, writeOptions).catch(() => null);
-      if (existing) return { uri: existing.uri, cid: existing.cid };
-
-      try {
-        const result = await createRecord(WORK_SCOPE_TAG_COLLECTION, record, scope, writeOptions);
-        return { uri: result.uri, cid: result.cid };
-      } catch (error) {
-        const racedExisting = await getRecord(WORK_SCOPE_TAG_COLLECTION, scope, writeOptions).catch(() => null);
-        if (racedExisting) return { uri: racedExisting.uri, cid: racedExisting.cid };
-        throw error;
-      }
-    }));
-    return {
-      $type: "org.hypercerts.workscope.cel",
-      expression: buildWorkScopeExpression(values),
-      usedTags: refs,
-      version: "v1",
-      createdAt,
-    };
-  };
+  // Shared with the project editor so both forms publish the same CEL shape.
+  const buildWorkScopeRecord = () =>
+    buildWorkScopeCel(
+      { keys: scopeKeys(values), custom: [] },
+      {
+        client: { getRecord, createRecord },
+        labels: workScopeLabels,
+        repo: target.kind === "group" ? target.did : undefined,
+      },
+    );
 
   const handlePublish = async (event: FormEvent) => {
     event.preventDefault();
@@ -1427,7 +1406,9 @@ export function NewBumicertClient({
         title: values.title.trim(),
         shortDescription: clampDescription(values.shortDescription),
         description: { $type: "org.hypercerts.defs#descriptionString", value: values.description.trim() },
-        workScope,
+        // Validation already requires a scope; stay defensive so an empty
+        // selection omits the field instead of publishing `workScope: null`.
+        ...(workScope ? { workScope } : {}),
         startDate: dateToIso(values.startDate),
         ...(values.ongoing ? {} : { endDate: dateToIso(values.endDate) }),
         contributors: contributorList(values).map((identity) => ({

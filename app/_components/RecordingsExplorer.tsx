@@ -67,10 +67,17 @@ export function RecordingsExplorer({
   did,
   host,
   items,
+  selectable = false,
+  selectedUris,
+  onToggleSelect,
 }: {
   did: string;
   host: string | null;
   items: AcAudioListItem[];
+  /** When true, player rows show checkboxes so recordings can be selected. */
+  selectable?: boolean;
+  selectedUris?: ReadonlySet<string>;
+  onToggleSelect?: (item: AcAudioListItem, shiftKey?: boolean) => void;
 }) {
   const t = useTranslations("common.audiomoth.recordings");
   const locale = useLocale();
@@ -127,7 +134,16 @@ export function RecordingsExplorer({
 
   /* ── Small sets keep the plain list ────────────────────────────────────── */
   if (items.length <= FLAT_THRESHOLD || !selectedDay || !month) {
-    return <RecordingsPlayerList did={did} host={host} items={items} />;
+    return (
+      <RecordingsPlayerList
+        did={did}
+        host={host}
+        items={items}
+        selectable={selectable}
+        selectedUris={selectedUris}
+        onToggleSelect={onToggleSelect}
+      />
+    );
   }
 
   /* ── Calendar grid for the visible month ───────────────────────────────── */
@@ -323,7 +339,15 @@ export function RecordingsExplorer({
 
           {/* Keyed so switching day/hour remounts the list and pauses playback */}
           <div className="mt-3">
-            <RecordingsPlayerList key={`${selectedDay}:${selectedHour ?? "all"}`} did={did} host={host} items={shownItems} />
+            <RecordingsPlayerList
+              key={`${selectedDay}:${selectedHour ?? "all"}`}
+              did={did}
+              host={host}
+              items={shownItems}
+              selectable={selectable}
+              selectedUris={selectedUris}
+              onToggleSelect={onToggleSelect}
+            />
           </div>
         </div>
       </div>

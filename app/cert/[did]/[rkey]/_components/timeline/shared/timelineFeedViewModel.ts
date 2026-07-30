@@ -1,4 +1,5 @@
 import { parseAtUri } from "../atUri";
+import { SOUNDSCAPE_COLLECTION, soundscapeHref } from "@/lib/soundscape/record";
 import {
   parseAttachmentContent,
   type ParsedAttachmentContent,
@@ -14,6 +15,7 @@ export type FeedTileKind =
   | "tree"
   | "nature"
   | "audio"
+  | "soundscape"
   | "image"
   | "video"
   | "pdf"
@@ -22,7 +24,7 @@ export type FeedTileKind =
   | "record";
 
 export type TimelinePreviewPayload = {
-  kind: "site" | "image" | "video" | "audio" | "pdf" | "document" | "link" | "text";
+  kind: "site" | "image" | "video" | "audio" | "soundscape" | "pdf" | "document" | "link" | "text";
   href: string;
   title: string;
   body?: string;
@@ -54,6 +56,7 @@ export type TimelineFeedCopy = {
   linkedProjectPlace: string;
   linkedTreeGroup: string;
   linkedSound: string;
+  linkedSoundscape: string;
   groupedData: string;
   unresolvedReferenceBody: string;
 };
@@ -147,6 +150,9 @@ function fallbackReferenceTitle(uri: string, copy: TimelineFeedCopy): { title: s
   }
   if (parsed?.collection === "app.gainforest.ac.audio") {
     return { title: copy.linkedSound, kind: "audio" };
+  }
+  if (parsed?.collection === SOUNDSCAPE_COLLECTION) {
+    return { title: copy.linkedSoundscape, kind: "soundscape" };
   }
   return { title: copy.linkedItem, kind: "record" };
 }
@@ -276,6 +282,27 @@ export function buildTimelineFeedTiles(args: {
     }
 
     if (item.kind === "uri" && item.uriKind === "at-uri") {
+      // A published soundscape draws its own dial: the record carries every
+      // number the chart needs, so the tile opens the playable clock rather
+      // than a link to somewhere else.
+      const soundscape = parseAtUri(item.uri);
+      if (soundscape?.collection === SOUNDSCAPE_COLLECTION) {
+        const title = cleanText(refsByUri.get(item.uri)?.title) ?? args.copy.linkedSoundscape;
+        return [
+          {
+            id: tileId,
+            kind: "soundscape" as const,
+            title,
+            caption: args.copy.linkedSoundscape,
+            preview: {
+              kind: "soundscape" as const,
+              href: soundscapeHref(soundscape.did, soundscape.rkey),
+              title,
+            },
+          },
+        ];
+      }
+
       const reference = refsByUri.get(item.uri);
       const fallback = fallbackReferenceTitle(item.uri, args.copy);
       const preview = previewForReference(item.uri, reference, args.copy);
