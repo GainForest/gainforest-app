@@ -5889,13 +5889,18 @@ export type TimelineDatasetRecord = {
   record: { name: string; description: string | null; recordCount: number | null; createdAt: string | null };
 };
 
+// These selections must stay within the pub.leaflet schema vendored in
+// hypercerts-lexicon — the indexer is generated from that snapshot, not from
+// upstream Leaflet. One field the snapshot doesn't know (e.g. atMention's
+// `href`, iframe's `aspectRatio`) makes GraphQL reject the whole query, which
+// blanks every timeline the query serves.
 const TIMELINE_ATTACHMENT_LEAFLET_FACETS_FRAGMENT = `
   fragment TimelineAttachmentLeafletFacets on PubLeafletRichtextFacet {
     index { byteStart byteEnd }
     features {
       __typename
       ... on PubLeafletRichtextFacetLink { uri }
-      ... on PubLeafletRichtextFacetAtMention { href }
+      ... on PubLeafletRichtextFacetAtMention { atURI }
     }
   }
 `;
@@ -5910,7 +5915,7 @@ const TIMELINE_ATTACHMENT_LEAFLET_BLOCKS_SELECTION = `
       ... on PubLeafletBlocksBlockquote { plaintext facets { ...TimelineAttachmentLeafletFacets } }
       ... on PubLeafletBlocksCode { plaintext language }
       ... on PubLeafletBlocksImage { alt image { ref mimeType size } aspectRatio { width height } }
-      ... on PubLeafletBlocksIframe { url height aspectRatio { width height } }
+      ... on PubLeafletBlocksIframe { url height }
       ... on PubLeafletBlocksWebsite { src title description previewImage { ref } }
       ... on PubLeafletBlocksButton { text url }
       ... on PubLeafletBlocksHorizontalRule { empty }
@@ -6003,7 +6008,7 @@ type RawTimelineBskyFacet = {
 
 type RawTimelineLeafletFacet = {
   index?: { byteStart?: number | null; byteEnd?: number | null } | null;
-  features?: Array<{ __typename?: string | null; uri?: string | null; href?: string | null } | null> | null;
+  features?: Array<{ __typename?: string | null; uri?: string | null; atURI?: string | null } | null> | null;
 };
 
 type RawTimelineLeafletContent = {
@@ -6126,7 +6131,7 @@ function normalizeTimelineLeafletFacets(facets: RawTimelineLeafletFacet[] | null
       features.push({
         __typename: feature.__typename,
         ...(feature.uri ? { uri: feature.uri } : {}),
-        ...(feature.href ? { href: feature.href } : {}),
+        ...(feature.atURI ? { atURI: feature.atURI } : {}),
       });
     }
     return [{
@@ -6935,7 +6940,7 @@ function countryFlagSafe(code: string | null): string {
 // rich body + scope tags always surface instead of silently dropping.
 type RawFacet = {
   index?: { byteStart?: number | null; byteEnd?: number | null } | null;
-  features?: Array<{ __typename?: string; uri?: string | null; href?: string | null }> | null;
+  features?: Array<{ __typename?: string; uri?: string | null; atURI?: string | null }> | null;
 };
 type RawLeafletContent = {
   __typename?: string;
@@ -6981,13 +6986,16 @@ type CertifiedOrgNode = {
 // Shared GraphQL pieces for decoding `pub.leaflet.pages.linearDocument`s. The
 // same fragment + block selection is reused by bumicert descriptions and org
 // `longDescription`s so rich text + media render identically everywhere.
+// Like the timeline fragments above, these must only name fields that exist in
+// hypercerts-lexicon's vendored pub.leaflet snapshot — the schema the indexer
+// actually serves.
 const FACETS_FRAGMENT = `
   fragment Facets on PubLeafletRichtextFacet {
     index { byteStart byteEnd }
     features {
       __typename
       ... on PubLeafletRichtextFacetLink { uri }
-      ... on PubLeafletRichtextFacetAtMention { href }
+      ... on PubLeafletRichtextFacetAtMention { atURI }
     }
   }
 `;
@@ -7000,7 +7008,7 @@ const LEAFLET_BLOCKS_SELECTION = `
       ... on PubLeafletBlocksBlockquote { plaintext facets { ...Facets } }
       ... on PubLeafletBlocksCode { plaintext language }
       ... on PubLeafletBlocksImage { alt image { ref } aspectRatio { width height } }
-      ... on PubLeafletBlocksIframe { url height aspectRatio { width height } }
+      ... on PubLeafletBlocksIframe { url height }
       ... on PubLeafletBlocksWebsite { src title description previewImage { ref } }
       ... on PubLeafletBlocksButton { text url }
       ... on PubLeafletBlocksHorizontalRule { empty }
@@ -7133,9 +7141,10 @@ function spansFromText(text: string, facets: RawFacet[] | null | undefined): Ric
             case "PubLeafletRichtextFacetLink":
               if (ft.uri) span.href = ft.uri;
               break;
-            case "PubLeafletRichtextFacetAtMention":
-              if (ft.href) span.href = ft.href;
-              break;
+            // AtMention carries only `atURI` in the vendored lexicon (no ready
+            // `href`), so mentions render as plain text until the app decides
+            // how to route at:// URIs.
+
           }
         }
       }
