@@ -3306,7 +3306,32 @@
     "identificationsIncluded": "{count, plural, one {Esto incluye # identificación guardada, que también se eliminará.} other {Esto incluye # identificaciones guardadas, que también se eliminarán.}}",
     "deleteProgress": "Eliminando… {done} de {total}",
     "deletePartial": "{count, plural, one {# grabación no se pudo eliminar} other {# grabaciones no se pudieron eliminar}}, así que la carpeta se conservó. Inténtalo de nuevo.",
-    "deleteFailed": "No se pudo eliminar la carpeta. Inténtalo de nuevo."
+    "deleteFailed": "No se pudo eliminar la carpeta. Inténtalo de nuevo.",
+    "addToProject": {
+      "action": "Añadir a un proyecto",
+      "title": "Añadir “{name}” a un proyecto",
+      "body": "La carpeta se une a la línea de tiempo de evidencia del proyecto; sus grabaciones se quedan exactamente donde están.",
+      "noteLabel": "Nota (opcional)",
+      "notePlaceholder": "¿Qué muestran estas grabaciones?",
+      "defaultNote": "{count, plural, =0 {Una carpeta de grabadora.} one {Una carpeta de grabadora con # grabación.} other {Una carpeta de grabadora con # grabaciones.}}",
+      "untitledProject": "Proyecto sin título",
+      "loading": "Cargando tus proyectos…",
+      "loadError": "No se pudieron cargar tus proyectos. Inténtalo de nuevo en un momento.",
+      "empty": "Todavía no tienes un proyecto: crea uno abajo.",
+      "searchPlaceholder": "Busca en tus proyectos",
+      "newProject": "Nuevo proyecto",
+      "newProjectTitleLabel": "Nombre del proyecto",
+      "newProjectTitlePlaceholder": "p. ej. Restauración de la ribera",
+      "newProjectTitleRequired": "Dale al proyecto un nombre de al menos 3 caracteres.",
+      "createAndAdd": "Crear y añadir",
+      "creating": "Creando…",
+      "addedTitle": "Añadido a la línea de tiempo",
+      "addedBody": "“{name}” ya está en la línea de tiempo de evidencia de {project}.",
+      "viewProject": "Abrir el proyecto",
+      "close": "Cerrar",
+      "cancel": "Cancelar",
+      "failed": "No se pudo añadir la carpeta. Inténtalo de nuevo."
+    }
   },
   "hypercerts": {
     "metaTitle": "Construir sobre los léxicos de Hypercerts — GainForest",

@@ -3306,7 +3306,32 @@
     "identificationsIncluded": "{count, plural, one {Isso inclui # identificação salva, que também será excluída.} other {Isso inclui # identificações salvas, que também serão excluídas.}}",
     "deleteProgress": "Excluindo… {done} de {total}",
     "deletePartial": "{count, plural, one {# gravação não pôde ser excluída} other {# gravações não puderam ser excluídas}}, então a pasta foi mantida. Tente novamente.",
-    "deleteFailed": "Não foi possível excluir a pasta. Tente novamente."
+    "deleteFailed": "Não foi possível excluir a pasta. Tente novamente.",
+    "addToProject": {
+      "action": "Adicionar a um projeto",
+      "title": "Adicionar “{name}” a um projeto",
+      "body": "A pasta entra na linha do tempo de evidências do projeto — as gravações ficam exatamente onde estão.",
+      "noteLabel": "Nota (opcional)",
+      "notePlaceholder": "O que estas gravações mostram?",
+      "defaultNote": "{count, plural, =0 {Uma pasta de gravador.} one {Uma pasta de gravador com # gravação.} other {Uma pasta de gravador com # gravações.}}",
+      "untitledProject": "Projeto sem título",
+      "loading": "Carregando seus projetos…",
+      "loadError": "Não foi possível carregar seus projetos. Tente novamente em instantes.",
+      "empty": "Você ainda não tem um projeto — crie um abaixo.",
+      "searchPlaceholder": "Pesquise seus projetos",
+      "newProject": "Novo projeto",
+      "newProjectTitleLabel": "Nome do projeto",
+      "newProjectTitlePlaceholder": "ex.: Restauração da margem do rio",
+      "newProjectTitleRequired": "Dê ao projeto um nome com pelo menos 3 caracteres.",
+      "createAndAdd": "Criar e adicionar",
+      "creating": "Criando…",
+      "addedTitle": "Adicionado à linha do tempo",
+      "addedBody": "“{name}” agora está na linha do tempo de evidências de {project}.",
+      "viewProject": "Abrir o projeto",
+      "close": "Fechar",
+      "cancel": "Cancelar",
+      "failed": "Não foi possível adicionar a pasta. Tente novamente."
+    }
   },
   "hypercerts": {
     "metaTitle": "Construir sobre os léxicos do Hypercerts — GainForest",

@@ -3306,7 +3306,32 @@
     "identificationsIncluded": "{count, plural, one {Hii inajumuisha utambulisho # uliohifadhiwa, ambao pia utafutwa.} other {Hii inajumuisha utambulisho # uliohifadhiwa, ambao pia utafutwa.}}",
     "deleteProgress": "Inafuta… {done} kati ya {total}",
     "deletePartial": "{count, plural, one {Rekodi #} other {Rekodi #}} haikuweza kufutwa, hivyo folda imebaki. Tafadhali jaribu tena.",
-    "deleteFailed": "Folda haikuweza kufutwa. Tafadhali jaribu tena."
+    "deleteFailed": "Folda haikuweza kufutwa. Tafadhali jaribu tena.",
+    "addToProject": {
+      "action": "Ongeza kwenye mradi",
+      "title": "Ongeza “{name}” kwenye mradi",
+      "body": "Folda inajiunga na ratiba ya ushahidi ya mradi — rekodi zake zinabaki pale zilipo.",
+      "noteLabel": "Kidokezo (hiari)",
+      "notePlaceholder": "Rekodi hizi zinaonyesha nini?",
+      "defaultNote": "{count, plural, =0 {Folda ya kinasa sauti.} one {Folda ya kinasa sauti yenye rekodi #.} other {Folda ya kinasa sauti yenye rekodi #.}}",
+      "untitledProject": "Mradi usio na jina",
+      "loading": "Inapakia miradi yako…",
+      "loadError": "Miradi yako haikuweza kupakiwa. Jaribu tena baada ya muda mfupi.",
+      "empty": "Bado huna mradi — unda mmoja hapa chini.",
+      "searchPlaceholder": "Tafuta miradi yako",
+      "newProject": "Mradi mpya",
+      "newProjectTitleLabel": "Jina la mradi",
+      "newProjectTitlePlaceholder": "mf. Urejeshaji wa kingo za mto",
+      "newProjectTitleRequired": "Ipe mradi jina la angalau herufi 3.",
+      "createAndAdd": "Unda na uongeze",
+      "creating": "Inaunda…",
+      "addedTitle": "Imeongezwa kwenye ratiba",
+      "addedBody": "“{name}” sasa iko kwenye ratiba ya ushahidi ya {project}.",
+      "viewProject": "Fungua mradi",
+      "close": "Funga",
+      "cancel": "Ghairi",
+      "failed": "Folda haikuweza kuongezwa. Tafadhali jaribu tena."
+    }
   },
   "hypercerts": {
     "metaTitle": "Kujenga juu ya leksikoni za Hypercerts — GainForest",

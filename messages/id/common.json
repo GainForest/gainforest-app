@@ -3306,7 +3306,32 @@
     "identificationsIncluded": "{count, plural, other {Ini termasuk # identifikasi tersimpan, yang juga akan dihapus.}}",
     "deleteProgress": "Menghapus… {done} dari {total}",
     "deletePartial": "{count, plural, other {# rekaman}} tidak dapat dihapus, jadi folder tetap dipertahankan. Silakan coba lagi.",
-    "deleteFailed": "Folder tidak dapat dihapus. Silakan coba lagi."
+    "deleteFailed": "Folder tidak dapat dihapus. Silakan coba lagi.",
+    "addToProject": {
+      "action": "Tambahkan ke proyek",
+      "title": "Tambahkan “{name}” ke proyek",
+      "body": "Folder ini bergabung ke linimasa bukti proyek — rekamannya tetap berada di tempatnya.",
+      "noteLabel": "Catatan (opsional)",
+      "notePlaceholder": "Apa yang ditunjukkan rekaman ini?",
+      "defaultNote": "{count, plural, =0 {Folder perekam.} other {Folder perekam dengan # rekaman.}}",
+      "untitledProject": "Proyek tanpa judul",
+      "loading": "Memuat proyek Anda…",
+      "loadError": "Proyek Anda tidak dapat dimuat. Coba lagi sebentar lagi.",
+      "empty": "Anda belum punya proyek — buat satu di bawah.",
+      "searchPlaceholder": "Cari proyek Anda",
+      "newProject": "Proyek baru",
+      "newProjectTitleLabel": "Nama proyek",
+      "newProjectTitlePlaceholder": "mis. Restorasi tepi sungai",
+      "newProjectTitleRequired": "Beri proyek nama minimal 3 karakter.",
+      "createAndAdd": "Buat & tambahkan",
+      "creating": "Membuat…",
+      "addedTitle": "Ditambahkan ke linimasa",
+      "addedBody": "“{name}” sekarang ada di linimasa bukti {project}.",
+      "viewProject": "Buka proyek",
+      "close": "Tutup",
+      "cancel": "Batal",
+      "failed": "Folder tidak dapat ditambahkan. Silakan coba lagi."
+    }
   },
   "hypercerts": {
     "metaTitle": "Membangun di atas leksikon Hypercerts — GainForest",
