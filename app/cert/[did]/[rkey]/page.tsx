@@ -50,6 +50,7 @@ import {
   type ObservationSummary,
   type OccurrenceRecord,
   type ProjectImageGallery,
+  type RecordDetail,
   type TimelineAttachmentItem,
 } from "../../../_lib/indexer";
 import { isPdsBlobUrl } from "../../../_lib/pds";
@@ -567,6 +568,7 @@ export async function ProjectDetailView({
   editLabel,
   timelineMatchUris,
   projectDatasetUris,
+  projectDetail,
   projectRkey,
   engagementSubjectUri,
 }: {
@@ -582,6 +584,9 @@ export async function ProjectDetailView({
   /** Observation datasets filed under the project, whose sightings count as
    *  the project's evidence. */
   projectDatasetUris?: string[];
+  /** The project's own long story. Prefer it over the linked Cert's copy so
+   *  projects created before the records were kept in sync still render fully. */
+  projectDetail?: RecordDetail | null;
   /** Project (collection) rkey, so deleting removes the project, not the Cert. */
   projectRkey?: string;
   /** When set, render the feed's like + comment bar for this record URI under
@@ -619,7 +624,10 @@ export async function ProjectDetailView({
   const projectGlobeHref = projectRkey
     ? `/globe/${encodeURIComponent(owner.urlIdentifier)}/${encodeURIComponent(projectRkey)}`
     : `/globe/${encodeURIComponent(owner.urlIdentifier)}`;
-  const description = detail?.blurb ?? record.shortDescription;
+  // The collection is the public project. Its long story takes precedence
+  // over the linked Cert's mirrored copy; older projects may only have it here.
+  const story = projectDetail?.richBody?.length || projectDetail?.blurb ? projectDetail : detail;
+  const description = story?.blurb ?? record.shortDescription;
   const ownerProfileHref = `/account/${encodeURIComponent(owner.urlIdentifier)}`;
 
   // Reviews live on the Cert URI, but the project page's like + comment bar
@@ -875,8 +883,8 @@ export async function ProjectDetailView({
                     />
                   </div>
                 ) : null}
-                {detail?.richBody && detail.richBody.length > 0 ? (
-                  <div className="mt-7"><RichText blocks={detail.richBody} className="text-base leading-7 md:text-lg md:leading-8" /></div>
+                {story?.richBody && story.richBody.length > 0 ? (
+                  <div className="mt-7"><RichText blocks={story.richBody} className="text-base leading-7 md:text-lg md:leading-8" /></div>
                 ) : description ? (
                   <p className="mt-7 whitespace-pre-line text-base leading-7 text-foreground/76 md:text-lg md:leading-8">{description}</p>
                 ) : null}

@@ -7043,6 +7043,21 @@ const ACTIVITY_DETAIL_QUERY = `
   }
 `;
 
+// Collections hold the project's own long story. It is normally mirrored to
+// the linked Cert, but older projects may only have it on the collection.
+const PROJECT_DETAIL_QUERY = `
+  ${FACETS_FRAGMENT}
+  query ProjectDetail($uri: String!) {
+    orgHypercertsCollectionByUri(uri: $uri) {
+      description {
+        __typename
+        ... on OrgHypercertsDefsDescriptionString { value }
+        ... on PubLeafletPagesLinearDocument { ${LEAFLET_BLOCKS_SELECTION} }
+      }
+    }
+  }
+`;
+
 // Owner organization socials from the certified actor record and profile.
 const OWNER_SOCIALS_QUERY = `
   query OwnerSocials($cert: String!, $profile: String!) {
@@ -7258,19 +7273,25 @@ function buildOwnerSocials(owner: OwnerOrg | null): { socials: SocialLink[]; bio
   return { socials, bio };
 }
 
+function buildDescriptionDetail(description: BumiDetailNode["description"]): Pick<RecordDetail, "blurb" | "richBody"> {
+  if (description?.__typename === "PubLeafletPagesLinearDocument") {
+    const richBody = leafletToRich(description.blocks ?? []);
+    return { richBody, blurb: richToPlain(richBody) };
+  }
+  if (description?.__typename === "OrgHypercertsDefsDescriptionString") {
+    return { richBody: null, blurb: sv(description.value) };
+  }
+  return { richBody: null, blurb: null };
+}
+
 function buildBumicertDetail(
   n: BumiDetailNode,
   owner: { socials: SocialLink[]; bio: string | null },
 ): RecordDetail {
   // Description: rich Leaflet doc (preferred), else plain string, else org bio.
-  let richBody: RichBlock[] | null = null;
-  let blurb: string | null = null;
-  if (n.description?.__typename === "PubLeafletPagesLinearDocument") {
-    richBody = leafletToRich(n.description.blocks ?? []);
-    blurb = richToPlain(richBody);
-  } else if (n.description?.__typename === "OrgHypercertsDefsDescriptionString") {
-    blurb = sv(n.description.value);
-  }
+  const description = buildDescriptionDetail(n.description);
+  const richBody = description.richBody;
+  let blurb = description.blurb;
   if (!richBody && !blurb && owner.bio) {
     blurb = owner.bio;
   }
@@ -7299,6 +7320,13 @@ function buildBumicertDetail(
   ].filter((s) => s.fields.length > 0);
 
   return { blurb, richBody, badges, sections, links: [], socials: owner.socials };
+}
+
+type ProjectDetailNode = { description?: BumiDetailNode["description"] };
+
+function buildProjectDetail(n: ProjectDetailNode): RecordDetail {
+  const { blurb, richBody } = buildDescriptionDetail(n.description);
+  return { blurb, richBody, badges: [], sections: [], links: [] };
 }
 
 /** Fetch an owning organization's socials/bio for a record DID. */
@@ -7458,6 +7486,20 @@ export async function fetchRecordDetail(
     const n = data?.orgHypercertsClaimActivityByUri;
     if (!n) return null;
     const detail = buildBumicertDetail(n, owner);
+    if (detail.richBody?.length) {
+      detail.richBody = await resolveRichImages(detail.richBody, did, signal);
+    }
+    return detail;
+  }
+  if (collection === "org.hypercerts.collection") {
+    const data = await indexerQuery<{ orgHypercertsCollectionByUri?: ProjectDetailNode | null }>(
+      PROJECT_DETAIL_QUERY,
+      { uri: atUri },
+      signal,
+    );
+    const n = data?.orgHypercertsCollectionByUri;
+    if (!n) return null;
+    const detail = buildProjectDetail(n);
     if (detail.richBody?.length) {
       detail.richBody = await resolveRichImages(detail.richBody, did, signal);
     }
