@@ -1272,7 +1272,8 @@
       "endorsers": "Apoiadores",
       "awardEndorsements": "Conceder endossos",
       "facilitator": "Carteira facilitadora",
-      "dataJobs": "Lotes de dados"
+      "dataJobs": "Lotes de dados",
+      "blockedDomains": "Endereços bloqueados"
     },
     "unnamed": "Conta sem nome",
     "awardHint": "Abra um perfil para conceder um selo.",
@@ -1321,6 +1322,31 @@
       "finalized": "Esta rodada do BioBlitz terminou, por isso a contagem já não pode mudar.",
       "add": "Não foi possível guardar a alteração da contagem semanal. Tente novamente.",
       "remove": "Não foi possível repor a conta na classificação. Tente novamente."
+    }
+  },
+  "adminBlockedDomains": {
+    "title": "Endereços bloqueados",
+    "description": "Endereços de servidor cujas contas ficam fora do site público. Tudo o que publicam — organizações, projetos, observações, publicações — fica oculto do explorador, da busca, do globo, do mural e de todas as contagens públicas.",
+    "effect": "Bloquear um endereço oculta tudo o que foi publicado a partir dele. Nada é apagado: as contas e os seus registos continuam no servidor delas, e desbloquear traz tudo de volta.",
+    "domainLabel": "Endereço do servidor",
+    "domainPlaceholder": "dev.exemplo.org",
+    "add": "Bloquear endereço",
+    "adding": "A bloquear…",
+    "builtinBadge": "Sempre bloqueado",
+    "accountCount": "{count, plural, one {# conta} other {# contas}}",
+    "accountsUnknown": "Número de contas indisponível",
+    "empty": "Nenhum endereço está bloqueado neste momento.",
+    "unavailable": "A lista de endereços bloqueados não pôde ser carregada com segurança. Tente novamente antes de fazer alterações.",
+    "permissionNotice": "Apenas membros da equipa de administração podem alterar endereços bloqueados.",
+    "propagationHint": "As alterações chegam ao site público em poucos minutos.",
+    "removeLabel": "Desbloquear {domain}",
+    "errors": {
+      "notSignedIn": "Inicie sessão novamente para continuar.",
+      "forbidden": "Não tem permissão para alterar endereços bloqueados.",
+      "invalidDomain": "Introduza um endereço de servidor válido, como dev.exemplo.org.",
+      "alreadyBuiltin": "Esse endereço está sempre bloqueado e não pode ser alterado aqui.",
+      "add": "Não foi possível bloquear o endereço. Tente novamente.",
+      "remove": "Não foi possível desbloquear o endereço. Tente novamente."
     }
   },
   "adminTaina": {

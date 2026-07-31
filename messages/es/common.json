@@ -1272,7 +1272,8 @@
       "endorsers": "Avaladores",
       "awardEndorsements": "Otorgar respaldos",
       "facilitator": "Billetera facilitadora",
-      "dataJobs": "Lotes de datos"
+      "dataJobs": "Lotes de datos",
+      "blockedDomains": "Direcciones bloqueadas"
     },
     "unnamed": "Cuenta sin nombre",
     "awardHint": "Abre un perfil para otorgar una insignia.",
@@ -1321,6 +1322,31 @@
       "finalized": "Esta ronda de BioBlitz ha finalizado, por lo que el conteo ya no puede cambiar.",
       "add": "No se pudo guardar el cambio de conteo semanal. Inténtalo de nuevo.",
       "remove": "No se pudo restaurar la cuenta en la clasificación. Inténtalo de nuevo."
+    }
+  },
+  "adminBlockedDomains": {
+    "title": "Direcciones bloqueadas",
+    "description": "Direcciones de servidor cuyas cuentas se mantienen fuera del sitio público. Todo lo que publican —organizaciones, proyectos, observaciones, publicaciones— se oculta del explorador, la búsqueda, el globo, el muro y todos los recuentos públicos.",
+    "effect": "Bloquear una dirección oculta todo lo publicado desde ella. No borra nada: las cuentas y sus registros siguen en su propio servidor, y al desbloquearla vuelven a aparecer.",
+    "domainLabel": "Dirección del servidor",
+    "domainPlaceholder": "dev.ejemplo.org",
+    "add": "Bloquear dirección",
+    "adding": "Bloqueando…",
+    "builtinBadge": "Siempre bloqueada",
+    "accountCount": "{count, plural, one {# cuenta} other {# cuentas}}",
+    "accountsUnknown": "Número de cuentas no disponible",
+    "empty": "Ahora mismo no hay direcciones bloqueadas.",
+    "unavailable": "No se pudo cargar la lista de direcciones bloqueadas de forma segura. Inténtalo de nuevo antes de hacer cambios.",
+    "permissionNotice": "Solo los miembros del equipo de administración pueden cambiar las direcciones bloqueadas.",
+    "propagationHint": "Los cambios llegan al sitio público en unos minutos.",
+    "removeLabel": "Desbloquear {domain}",
+    "errors": {
+      "notSignedIn": "Vuelve a iniciar sesión para continuar.",
+      "forbidden": "No tienes permiso para cambiar las direcciones bloqueadas.",
+      "invalidDomain": "Escribe una dirección de servidor válida, como dev.ejemplo.org.",
+      "alreadyBuiltin": "Esa dirección está siempre bloqueada y no se puede cambiar aquí.",
+      "add": "No se pudo bloquear la dirección. Inténtalo de nuevo.",
+      "remove": "No se pudo desbloquear la dirección. Inténtalo de nuevo."
     }
   },
   "adminTaina": {

@@ -1272,7 +1272,8 @@
       "endorsers": "Pendukung",
       "awardEndorsements": "Berikan dukungan",
       "facilitator": "Dompet fasilitator",
-      "dataJobs": "Batch data"
+      "dataJobs": "Batch data",
+      "blockedDomains": "Alamat diblokir"
     },
     "unnamed": "Akun tanpa nama",
     "awardHint": "Buka profil untuk memberikan lencana.",
@@ -1321,6 +1322,31 @@
       "finalized": "Ronde BioBlitz ini telah berakhir, sehingga penghitungan tidak dapat diubah lagi.",
       "add": "Perubahan penghitungan mingguan tidak dapat disimpan. Coba lagi.",
       "remove": "Akun tidak dapat dikembalikan ke papan peringkat. Coba lagi."
+    }
+  },
+  "adminBlockedDomains": {
+    "title": "Alamat diblokir",
+    "description": "Alamat server yang akunnya dijauhkan dari situs publik. Semua yang mereka terbitkan — organisasi, proyek, pengamatan, kiriman — disembunyikan dari penjelajah, pencarian, globe, beranda, dan semua penghitungan publik.",
+    "effect": "Memblokir sebuah alamat menyembunyikan semua yang diterbitkan dari sana. Tidak ada yang dihapus: akun dan catatannya tetap ada di server mereka sendiri, dan membuka blokir akan memunculkannya kembali.",
+    "domainLabel": "Alamat server",
+    "domainPlaceholder": "dev.contoh.org",
+    "add": "Blokir alamat",
+    "adding": "Memblokir…",
+    "builtinBadge": "Selalu diblokir",
+    "accountCount": "{count, plural, other {# akun}}",
+    "accountsUnknown": "Jumlah akun tidak tersedia",
+    "empty": "Saat ini tidak ada alamat yang diblokir.",
+    "unavailable": "Daftar alamat yang diblokir tidak dapat dimuat dengan aman. Coba lagi sebelum membuat perubahan.",
+    "permissionNotice": "Hanya anggota tim admin yang dapat mengubah alamat yang diblokir.",
+    "propagationHint": "Perubahan sampai ke situs publik dalam beberapa menit.",
+    "removeLabel": "Buka blokir {domain}",
+    "errors": {
+      "notSignedIn": "Masuk lagi untuk melanjutkan.",
+      "forbidden": "Anda tidak punya izin untuk mengubah alamat yang diblokir.",
+      "invalidDomain": "Masukkan alamat server yang valid, seperti dev.contoh.org.",
+      "alreadyBuiltin": "Alamat itu selalu diblokir dan tidak bisa diubah di sini.",
+      "add": "Alamat tidak dapat diblokir. Silakan coba lagi.",
+      "remove": "Blokir alamat tidak dapat dibuka. Silakan coba lagi."
     }
   },
   "adminTaina": {

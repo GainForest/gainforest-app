@@ -29,7 +29,7 @@ import { LEGACY_BROAD_VERNACULARS, parseAudioSegmentDynamicProperties } from "./
 import { getAddress } from "viem";
 import { getTipWalletAddress } from "@/lib/facilitator/tip";
 import { fetchPinnedPostUris } from "./feed-pins";
-import { fetchHiddenAccountDids, fetchHiddenRecordUris, indexerQuery } from "./indexer";
+import { fetchHiddenRecordUris, fetchPublicHiddenAccountDids, indexerQuery } from "./indexer";
 import { mentionCandidatesFromFacets, type MentionCandidate, type RawIndexedFacet } from "./mentions";
 import { normaliseRef } from "./pds";
 import { FACILITATOR_DID, accountHref, localBumicertHref, localObservationHref, localProjectHref } from "./urls";
@@ -753,8 +753,8 @@ const RESHARE_PROJECT_SUBJECTS_QUERY = `
  */
 async function resolveReshares(
   pageItems: ActivityFeedItem[],
-  hidden: Set<string>,
-  hiddenRecords: Set<string>,
+  hidden: ReadonlySet<string>,
+  hiddenRecords: ReadonlySet<string>,
 ): Promise<ActivityFeedItem[]> {
   const pending = pageItems.filter((it) => it.reshare);
   if (pending.length === 0) return pageItems;
@@ -1156,7 +1156,7 @@ async function applyPinnedPost(
   if (!wantsPins) return page;
   const [pinnedItems, hidden, hiddenRecords] = await Promise.all([
     fetchPinnedFeedItems(),
-    fetchHiddenAccountDids().catch(() => new Set<string>()),
+    fetchPublicHiddenAccountDids().catch(() => new Set<string>()),
     fetchHiddenRecordUris().catch(() => new Set<string>()),
   ]);
   const visible = pinnedItems.filter(
@@ -1426,12 +1426,13 @@ async function buildFeedPageUncached(
 
   const { items: donationItems, certUriById, recipientById } = mapDonations(receiptNodes);
 
-  // Accounts a GainForest steward flagged as "test" are hidden from the feed —
-  // every row owned by a flagged DID is dropped before the merge. Individual
-  // records flagged as test (posts, observations, …) are dropped the same way
-  // by their AT-URI, without hiding the rest of the account.
+  // Accounts a GainForest steward flagged as "test", and accounts hosted on a
+  // blocked server address, are hidden from the feed — every row owned by such
+  // a DID is dropped before the merge. Individual records flagged as test
+  // (posts, observations, …) are dropped the same way by their AT-URI, without
+  // hiding the rest of the account.
   const [hidden, hiddenRecords] = await Promise.all([
-    fetchHiddenAccountDids().catch(() => new Set<string>()),
+    fetchPublicHiddenAccountDids().catch(() => new Set<string>()),
     fetchHiddenRecordUris().catch(() => new Set<string>()),
   ]);
 

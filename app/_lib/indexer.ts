@@ -13,6 +13,8 @@
  */
 
 import { cachedAsync } from "./async-cache";
+import { fetchBlockedDomainDids } from "./blocked-domains";
+import { GAINFOREST_MODERATION_REPO_DID } from "./moderation-repo";
 import { recognitionKeyFromTitle } from "./recognition-badges";
 import { PUBLIC_EXPLORE_CACHE_TTL_MS, publicExploreCache } from "./public-explore-cache";
 import { INDEXER_URL } from "./urls";
@@ -1993,10 +1995,10 @@ export const TEST_RECORD_BADGE_TITLE = "test-record";
 
 /** The admin group account (admins-gxlw.certified.one) that gates who may flag
  *  test accounts and holds the `test-account` moderation badges. Its members
- *  can flag/unflag; the public hiding read scans this same repo. Kept separate
- *  from the public GainForest content repo and from FEATURED_BADGE_REPO_DID. */
-export const GAINFOREST_MODERATION_REPO_DID =
-  process.env.NEXT_PUBLIC_MODERATION_ACCOUNT_DID?.trim() || "did:plc:vfpcbimtprblyuubjako72qx";
+ *  can flag/unflag; the public hiding read scans this same repo. Re-exported
+ *  from its own module so moderation readers can use it without importing the
+ *  whole indexer. */
+export { GAINFOREST_MODERATION_REPO_DID };
 
 /** Short cache so a steward's flag/unflag propagates to the public grids within
  *  a few minutes, without re-scanning the badge repo on every request. */
@@ -2100,6 +2102,25 @@ export async function fetchHiddenRecordUris(signal?: AbortSignal): Promise<Set<s
 }
 
 /**
+ * Every account the public surfaces must leave out: the ones a steward flagged
+ * as a test account, plus every account hosted on a blocked server address.
+ * This is the set explore, search, the feed, the globe and BioBlitz subtract —
+ * `fetchHiddenAccountDids` stays flag-only, because the admin tools that list
+ * and toggle flags must not see address blocks mixed in.
+ */
+export async function fetchPublicHiddenAccountDids(signal?: AbortSignal): Promise<ReadonlySet<string>> {
+  const [flagged, blocked] = await Promise.all([
+    fetchHiddenAccountDids(signal).catch(() => EMPTY_DID_SET),
+    fetchBlockedDomainDids(signal).catch(() => EMPTY_DID_SET),
+  ]);
+  if (blocked.size === 0) return flagged;
+  if (flagged.size === 0) return blocked;
+  const union = new Set<string>(flagged);
+  for (const did of blocked) union.add(did);
+  return union;
+}
+
+/**
  * Map of account DID -> the set of recognition badge keys it currently holds
  * (e.g. "rewilding-grant", "bioblitz-best-picture"). Scans the same moderation
  * repo as the hidden-account flag, but matches the recognition badge titles.
@@ -2195,7 +2216,7 @@ export async function fetchRecognitionBadgesForDids(
  *  flagged or not). */
 async function hiddenDidsForScope(ownerScoped: boolean, signal?: AbortSignal): Promise<ReadonlySet<string>> {
   if (ownerScoped) return EMPTY_DID_SET;
-  return fetchHiddenAccountDids(signal).catch(() => EMPTY_DID_SET);
+  return fetchPublicHiddenAccountDids(signal).catch(() => EMPTY_DID_SET);
 }
 
 /** Same scoping rule for record-level flags: the public catalogs hide flagged
@@ -2261,7 +2282,7 @@ export async function searchAccountsByName(
     { first: Math.max(1, Math.min(limit * 3, 40)), where: { displayName: { contains: q } } },
     signal,
   );
-  const hidden = await fetchHiddenAccountDids(signal).catch(() => EMPTY_DID_SET);
+  const hidden = await fetchPublicHiddenAccountDids(signal).catch(() => EMPTY_DID_SET);
   const seen = new Set<string>();
   const results: AccountSearchResult[] = [];
   for (const edge of data?.appCertifiedActorProfile?.edges ?? []) {

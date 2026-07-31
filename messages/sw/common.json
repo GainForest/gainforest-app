@@ -1272,7 +1272,8 @@
       "endorsers": "Wadhamini",
       "awardEndorsements": "Toa idhini",
       "facilitator": "Pochi ya uwezeshaji",
-      "dataJobs": "Makundi ya data"
+      "dataJobs": "Makundi ya data",
+      "blockedDomains": "Anwani zilizozuiwa"
     },
     "unnamed": "Akaunti isiyo na jina",
     "awardHint": "Fungua wasifu ili kutoa beji.",
@@ -1321,6 +1322,31 @@
       "finalized": "Raundi hii ya BioBlitz imekwisha, kwa hivyo uhesabuji hauwezi kubadilishwa tena.",
       "add": "Mabadiliko ya uhesabuji wa kila wiki hayakuweza kuhifadhiwa. Jaribu tena.",
       "remove": "Akaunti haikuweza kurudishwa kwenye msimamo. Jaribu tena."
+    }
+  },
+  "adminBlockedDomains": {
+    "title": "Anwani zilizozuiwa",
+    "description": "Anwani za seva ambazo akaunti zake huzuiwa kuonekana kwenye tovuti ya umma. Kila kitu wanachochapisha — mashirika, miradi, uchunguzi, machapisho — hufichwa kwenye kivinjari, utafutaji, dunia, mlisho na kila hesabu ya umma.",
+    "effect": "Kuzuia anwani huficha kila kilichochapishwa kutoka kwake. Hakuna kinachofutwa: akaunti na kumbukumbu zake hubaki kwenye seva yao, na ukiondoa zuio vinarudi.",
+    "domainLabel": "Anwani ya seva",
+    "domainPlaceholder": "dev.mfano.org",
+    "add": "Zuia anwani",
+    "adding": "Inazuia…",
+    "builtinBadge": "Imezuiwa daima",
+    "accountCount": "{count, plural, one {akaunti #} other {akaunti #}}",
+    "accountsUnknown": "Idadi ya akaunti haipatikani",
+    "empty": "Hakuna anwani iliyozuiwa kwa sasa.",
+    "unavailable": "Orodha ya anwani zilizozuiwa haikuweza kupakiwa kwa usalama. Jaribu tena kabla ya kufanya mabadiliko.",
+    "permissionNotice": "Ni wanachama wa timu ya usimamizi pekee wanaoweza kubadilisha anwani zilizozuiwa.",
+    "propagationHint": "Mabadiliko hufika kwenye tovuti ya umma ndani ya dakika chache.",
+    "removeLabel": "Ondoa zuio la {domain}",
+    "errors": {
+      "notSignedIn": "Ingia tena ili kuendelea.",
+      "forbidden": "Huna ruhusa ya kubadilisha anwani zilizozuiwa.",
+      "invalidDomain": "Weka anwani halali ya seva, kama dev.mfano.org.",
+      "alreadyBuiltin": "Anwani hiyo imezuiwa daima na haiwezi kubadilishwa hapa.",
+      "add": "Anwani haikuweza kuzuiwa. Tafadhali jaribu tena.",
+      "remove": "Zuio la anwani halikuweza kuondolewa. Tafadhali jaribu tena."
     }
   },
   "adminTaina": {

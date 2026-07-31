@@ -1272,7 +1272,8 @@
       "endorsers": "Endorsers",
       "awardEndorsements": "Award endorsements",
       "facilitator": "Facilitator wallet",
-      "dataJobs": "Data batches"
+      "dataJobs": "Data batches",
+      "blockedDomains": "Blocked addresses"
     },
     "unnamed": "Unnamed account",
     "awardHint": "Open a profile to award a badge.",
@@ -1321,6 +1322,31 @@
       "finalized": "This BioBlitz round has ended, so its counting can no longer change.",
       "add": "The weekly counting change could not be saved. Please try again.",
       "remove": "The account could not be restored to the leaderboard. Please try again."
+    }
+  },
+  "adminBlockedDomains": {
+    "title": "Blocked addresses",
+    "description": "Server addresses whose accounts are kept off the public site. Everything they publish — organizations, projects, observations, posts — is hidden from the explorer, search, the globe, the feed and every public count.",
+    "effect": "Blocking an address hides everything published from it. It does not delete anything: the accounts and their records stay on their own server, and unblocking brings them back.",
+    "domainLabel": "Server address",
+    "domainPlaceholder": "dev.example.org",
+    "add": "Block address",
+    "adding": "Blocking…",
+    "builtinBadge": "Always blocked",
+    "accountCount": "{count, plural, one {# account} other {# accounts}}",
+    "accountsUnknown": "Account count unavailable",
+    "empty": "No addresses are blocked right now.",
+    "unavailable": "The blocked address list couldn't be loaded safely. Try again before making changes.",
+    "permissionNotice": "Only members of the admin team can change blocked addresses.",
+    "propagationHint": "Changes reach the public site within a few minutes.",
+    "removeLabel": "Unblock {domain}",
+    "errors": {
+      "notSignedIn": "Sign in again to continue.",
+      "forbidden": "You don't have permission to change blocked addresses.",
+      "invalidDomain": "Enter a valid server address, like dev.example.org.",
+      "alreadyBuiltin": "That address is always blocked and can't be changed here.",
+      "add": "The address could not be blocked. Please try again.",
+      "remove": "The address could not be unblocked. Please try again."
     }
   },
   "adminTaina": {
