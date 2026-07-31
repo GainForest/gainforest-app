@@ -1,7 +1,7 @@
 import { headers } from "next/headers";
 import { NextResponse } from "next/server";
 import { fetchAuthSession } from "@/app/_lib/auth-server";
-import { getAuthBaseUrl, HANDLE_CHANGED_COOKIE } from "@/app/_lib/auth";
+import { getAuthBaseUrl, HANDLE_CHANGED_COOKIE, HANDLE_CHANGED_WINDOW_MS } from "@/app/_lib/auth";
 import { forgetDidIdentity } from "@/app/_lib/did-identity";
 import { relayUpstreamCookies } from "@/app/_lib/upstream-cookies";
 
@@ -79,7 +79,9 @@ export async function POST(request: Request) {
         sameSite: "lax",
         secure: true,
         path: "/",
-        maxAge: 15 * 60,
+        // The cookie must live exactly as long as readers honour it — one
+        // constant, so the two can't drift apart.
+        maxAge: HANDLE_CHANGED_WINDOW_MS / 1000,
       });
     }
     return response;
