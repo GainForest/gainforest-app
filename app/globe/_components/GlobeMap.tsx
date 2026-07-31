@@ -20,7 +20,7 @@ import "maplibre-gl/dist/maplibre-gl.css";
 import "./globe.css";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
-import { formatCountry } from "../../_lib/format";
+import { countryName } from "../../_lib/format";
 import { resolveDidProfile } from "../../_lib/did-profile";
 import {
   EMPTY_FEATURE_COLLECTION,
@@ -130,8 +130,8 @@ function popupContent(name: string, country: string | null): HTMLElement {
   if (country) {
     const sub = document.createElement("p");
     sub.className = "globe-popup-country";
-    // formatCountry already includes the flag — do not prepend countryFlag too.
-    sub.textContent = formatCountry(country);
+    // Plain country name — the globe view carries no flag emoji.
+    sub.textContent = countryName(country);
     root.appendChild(sub);
   }
   return root;
