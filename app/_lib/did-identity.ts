@@ -43,7 +43,10 @@ async function lookupDidIdentity(did: string): Promise<DidIdentity> {
   const url = didDocumentUrl(did);
   if (!url) return EMPTY_IDENTITY;
 
-  const response = await fetch(url, { cache: "no-store" });
+  // This sits on the critical path of every signed-in request (the session's
+  // username is reconciled against the DID document), so a hung directory must
+  // not hang the page — time out and fall back to the session's username.
+  const response = await fetch(url, { cache: "no-store", signal: AbortSignal.timeout(5000) });
   if (!response.ok) return EMPTY_IDENTITY;
   const doc = (await response.json().catch(() => null)) as DidDocument | null;
   if (!doc) return EMPTY_IDENTITY;
@@ -75,7 +78,9 @@ export function resolveDidIdentity(did: string): Promise<DidIdentity> {
 }
 
 /** Forget the cached identity for one DID. Called right after the user changes
- *  their username so the new one shows up immediately instead of after the TTL. */
+ *  their username so this instance re-reads it at once instead of after the
+ *  TTL. Other serverless instances keep their copy for up to the TTL — the
+ *  page the user is on updates client-side, so they still see the change. */
 export function forgetDidIdentity(did: string): void {
   invalidateCachedAsyncByPrefix(`${CACHE_PREFIX}${did}`);
 }
