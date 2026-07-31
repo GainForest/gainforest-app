@@ -2062,6 +2062,7 @@
       "groupNameRequired": "Beri nama unggahan ini terlebih dahulu.",
       "folderTitle": "Rekaman ini akan disimpan di mana?",
       "folderExistingHelp": "Tambahkan ke folder yang sudah Anda miliki, agar semua data dari lokasi ini tetap menyatu.",
+      "folderResumedHelp": "Anda sudah punya folder dengan nama ini, jadi rekaman ini akan digabungkan ke sana, bukan membuat folder baru.",
       "folderExistingAction": "Pilih folder yang ada",
       "folderNewAction": "Folder baru",
       "folderSearchPlaceholder": "Cari folder Anda",

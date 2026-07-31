@@ -2062,6 +2062,7 @@
       "groupNameRequired": "Primeiro dê um nome a este envio.",
       "folderTitle": "Onde estas gravações devem ficar?",
       "folderExistingHelp": "Adicione-as a uma pasta que você já tem, para que tudo deste local fique junto.",
+      "folderResumedHelp": "Você já tem uma pasta com este nome, então estas gravações vão para ela em vez de começar uma nova.",
       "folderExistingAction": "Escolher uma pasta existente",
       "folderNewAction": "Nova pasta",
       "folderSearchPlaceholder": "Busque nas suas pastas",

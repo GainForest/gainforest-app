@@ -2062,6 +2062,7 @@
       "groupNameRequired": "Primero ponle un nombre a esta subida.",
       "folderTitle": "¿Dónde deben ir estas grabaciones?",
       "folderExistingHelp": "Añádelas a una carpeta que ya tengas, para que todo lo de este sitio quede junto.",
+      "folderResumedHelp": "Ya tienes una carpeta con este nombre, así que estas grabaciones se añadirán a ella en lugar de crear una nueva.",
       "folderExistingAction": "Elegir una carpeta existente",
       "folderNewAction": "Nueva carpeta",
       "folderSearchPlaceholder": "Busca en tus carpetas",

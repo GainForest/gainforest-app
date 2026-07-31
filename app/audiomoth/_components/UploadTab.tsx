@@ -52,7 +52,9 @@ import {
 import { renderSpectrogramPng } from "@/app/_lib/audiomoth/spectrogram";
 import {
   activeUploadFolderMode,
+  findUploadFolderByName,
   isUploadFolderChosen,
+  planNamedUploadFolder,
   type UploadFolderMode,
 } from "@/app/_lib/audiomoth/upload-folder";
 import { UploadFolderPicker } from "./UploadFolderPicker";
@@ -228,6 +230,8 @@ export function UploadTab({
   const [folderMode, setFolderMode] = useState<UploadFolderMode>("existing");
   const [selectedFolderUri, setSelectedFolderUri] = useState("");
   const [folderQuery, setFolderQuery] = useState("");
+  /** True when the folder below was picked for the user, not by them. */
+  const [folderResumed, setFolderResumed] = useState(false);
   /** Pre-upload check: which of the scanned files are already in the account. */
   const [dedup, setDedup] = useState<{ state: "checking" | "done"; skipped: number } | null>(null);
   /** Tray path only: how many recordings the last confirm handed over. */
@@ -245,6 +249,8 @@ export function UploadTab({
   const acDeploymentsRef = useRef<AcDeploymentItem[] | null>(null);
   /** ac.deployment created for this named upload — reused across retries. */
   const namedDeploymentRef = useRef<string | null>(null);
+  /** Scan whose folder was already matched by name, so it happens once. */
+  const folderMatchTokenRef = useRef(-1);
 
   /* ---------------- deployments for matching ---------------- */
 
@@ -284,6 +290,33 @@ export function UploadTab({
     void loadFolders(ctrl.signal);
     return () => ctrl.abort();
   }, [loadFolders]);
+
+  /**
+   * Resuming an interrupted upload: the same card is read again, so its name
+   * already belongs to a folder in the account. That folder is selected for
+   * the user instead of offering to start a second one with the same name —
+   * the rest of the card joins the recordings that made it the first time.
+   */
+  useEffect(() => {
+    const token = scanTokenRef.current;
+    if (folderMatchTokenRef.current === token) return; // matched, or the user has chosen
+    if (!folders || !uploadName.trim()) return;
+    folderMatchTokenRef.current = token;
+    const match = findUploadFolderByName(folders, uploadName);
+    if (!match) return;
+    setFolderMode("existing");
+    setSelectedFolderUri(match.uri);
+    setFolderResumed(true);
+  }, [folders, uploadName]);
+
+  /**
+   * The moment the user touches the folder controls the choice is theirs —
+   * a folder list that finishes loading late must not move it under them.
+   */
+  const noteFolderChoice = useCallback(() => {
+    folderMatchTokenRef.current = scanTokenRef.current;
+    setFolderResumed(false);
+  }, []);
 
   /* ---------------- scanning ---------------- */
 
@@ -348,6 +381,7 @@ export function UploadTab({
     setUploadName(folderName.trim());
     setSelectedFolderUri("");
     setFolderQuery("");
+    setFolderResumed(false);
     namedDeploymentRef.current = null;
     setDedup(null);
     setHandedOff(0);
@@ -575,6 +609,17 @@ export function UploadTab({
     const name = uploadName.trim();
     if (!name) return null;
     try {
+      // A folder with this name already exists (an interrupted upload read the
+      // same card again): add to it rather than splitting the site in two.
+      if (!acDeploymentsRef.current && sessionDid) {
+        acDeploymentsRef.current = await listAcDeployments(sessionDid).catch(() => []);
+      }
+      const plan = planNamedUploadFolder(acDeploymentsRef.current ?? [], name);
+      if (plan.action === "none") return null;
+      if (plan.action === "reuse") {
+        namedDeploymentRef.current = plan.uri;
+        return plan.uri;
+      }
       const readable = recordings.filter((r) => r.info);
       const earliest = readable.length
         ? new Date(Math.min(...readable.map((r) => recordingTime(r).getTime())))
@@ -590,7 +635,7 @@ export function UploadTab({
     } catch {
       return null;
     }
-  }, [activeFolderMode, recordings, selectedFolderUri, t, uploadName]);
+  }, [activeFolderMode, recordings, selectedFolderUri, sessionDid, t, uploadName]);
 
   /**
    * Plain-language error per failure point: the storage transfer (connection
@@ -664,6 +709,8 @@ export function UploadTab({
       } else if (activeFolderMode === "existing" && selectedFolderUri) {
         target = { kind: "existing", uri: selectedFolderUri };
       } else if (activeFolderMode === "new" && uploadName.trim()) {
+        // The tray resolves a named target to an existing folder of that name
+        // before creating one, so a resumed card never forks a new folder.
         const earliest = new Date(Math.min(...pending.map((rec) => recordingTime(rec).getTime())));
         target = { kind: "named", name: uploadName.trim(), deployedAt: earliest.toISOString() };
       }
@@ -693,6 +740,7 @@ export function UploadTab({
     setUploadName("");
     setSelectedFolderUri("");
     setFolderQuery("");
+    setFolderResumed(false);
     setDedup(null);
     setHandedOff(jobs.length);
     void loadFolders();
@@ -934,6 +982,7 @@ export function UploadTab({
     setUploadName("");
     setSelectedFolderUri("");
     setFolderQuery("");
+    setFolderResumed(false);
     namedDeploymentRef.current = null;
     setDedup(null);
     setHandedOff(0);
@@ -1243,13 +1292,23 @@ export function UploadTab({
                     folders={folders}
                     counts={folderCounts}
                     mode={folderMode}
-                    onModeChange={setFolderMode}
+                    onModeChange={(mode) => {
+                      noteFolderChoice();
+                      setFolderMode(mode);
+                    }}
                     selectedUri={selectedFolderUri}
-                    onSelect={setSelectedFolderUri}
+                    onSelect={(uri) => {
+                      noteFolderChoice();
+                      setSelectedFolderUri(uri);
+                    }}
                     query={folderQuery}
                     onQueryChange={setFolderQuery}
                     newName={uploadName}
-                    onNewNameChange={setUploadName}
+                    onNewNameChange={(name) => {
+                      noteFolderChoice();
+                      setUploadName(name);
+                    }}
+                    resumed={folderResumed}
                   />
                 )}
 

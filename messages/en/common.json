@@ -2062,6 +2062,7 @@
       "groupNameRequired": "Give this upload a name first.",
       "folderTitle": "Where should these recordings go?",
       "folderExistingHelp": "Add them to a folder you already have, so everything from this site stays together.",
+      "folderResumedHelp": "You already have a folder with this name, so these recordings will join it instead of starting a new one.",
       "folderExistingAction": "Choose an existing folder",
       "folderNewAction": "New folder",
       "folderSearchPlaceholder": "Search your folders",

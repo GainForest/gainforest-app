@@ -43,6 +43,7 @@ export function UploadFolderPicker({
   onQueryChange,
   newName,
   onNewNameChange,
+  resumed = false,
 }: {
   folders: UploadFolderOptionItem[] | null;
   counts: Map<string, number>;
@@ -54,6 +55,8 @@ export function UploadFolderPicker({
   onQueryChange: (query: string) => void;
   newName: string;
   onNewNameChange: (name: string) => void;
+  /** The selected folder was matched to this card, not chosen by hand. */
+  resumed?: boolean;
 }) {
   const t = useTranslations("common.audiomoth.upload");
 
@@ -67,7 +70,11 @@ export function UploadFolderPicker({
         <div className="min-w-0">
           <p className="text-sm font-medium text-foreground">{t("folderTitle")}</p>
           <p className="mt-0.5 text-xs text-muted-foreground">
-            {activeMode === "existing" ? t("folderExistingHelp") : t("groupNameHelp")}
+            {activeMode === "existing"
+              ? resumed && selectedUri
+                ? t("folderResumedHelp")
+                : t("folderExistingHelp")
+              : t("groupNameHelp")}
           </p>
         </div>
         {hasFolders ? (

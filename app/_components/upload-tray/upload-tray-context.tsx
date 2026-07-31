@@ -56,6 +56,7 @@ import {
   uploadPreviewBlob,
 } from "@/app/_lib/ac-audio";
 import { computeFileCid } from "@/app/_lib/audiomoth/content-cid";
+import { planNamedUploadFolder } from "@/app/_lib/audiomoth/upload-folder";
 
 /* ------------------------------------------------------------------ */
 /* Types                                                               */
@@ -185,15 +186,26 @@ export function UploadTrayProvider({ children }: { children: React.ReactNode }) 
       const cached = deploymentRef.current.get(key);
       if (cached) return cached;
 
+      const loadFolders = async (): Promise<AcDeploymentItem[]> => {
+        if (!acDeploymentsRef.current) {
+          acDeploymentsRef.current = await listAcDeployments(job.sessionDid).catch(() => []);
+        }
+        return acDeploymentsRef.current;
+      };
+
       const pending = (async (): Promise<string | null> => {
         if (job.target.kind === "none") return null;
         if (job.target.kind === "existing") return job.target.uri;
         if (job.target.kind === "named") {
-          const name = job.target.name.trim();
-          if (!name) return null;
+          // An upload resumed by re-reading the same card offers the same
+          // folder name — those recordings belong in the folder that already
+          // exists, not in a second one beside it.
+          const plan = planNamedUploadFolder(await loadFolders(), job.target.name);
+          if (plan.action === "none") return null;
+          if (plan.action === "reuse") return plan.uri;
           try {
             const created = await createAcDeployment({
-              name,
+              name: plan.name,
               deployedAt: new Date(job.target.deployedAt),
               remarks: t("groupRemarks"),
             });
@@ -205,10 +217,7 @@ export function UploadTrayProvider({ children }: { children: React.ReactNode }) 
         }
 
         const event = job.target.event;
-        if (!acDeploymentsRef.current) {
-          acDeploymentsRef.current = await listAcDeployments(job.sessionDid).catch(() => []);
-        }
-        const existing = acDeploymentsRef.current.find((d) => d.eventRef === event.uri);
+        const existing = (await loadFolders()).find((d) => d.eventRef === event.uri);
         if (existing) return existing.uri;
         try {
           const created = await createAcDeployment({

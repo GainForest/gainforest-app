@@ -2062,6 +2062,7 @@
       "groupNameRequired": "Ipe jina upakiaji huu kwanza.",
       "folderTitle": "Rekodi hizi ziwekwe wapi?",
       "folderExistingHelp": "Ziongeze kwenye folda uliyo nayo tayari, ili kila kitu cha eneo hili kibaki pamoja.",
+      "folderResumedHelp": "Tayari una folda yenye jina hili, hivyo rekodi hizi zitaingia humo badala ya kuanzisha folda mpya.",
       "folderExistingAction": "Chagua folda iliyopo",
       "folderNewAction": "Folda mpya",
       "folderSearchPlaceholder": "Tafuta folda zako",

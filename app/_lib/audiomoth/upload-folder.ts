@@ -12,6 +12,50 @@
 /** The bits of an `ac.deployment` the folder picker needs. */
 export type UploadFolderOption = { uri: string; name: string };
 
+/** Folder names compare on trimmed, case- and whitespace-insensitive text. */
+function folderNameKey(name: string): string {
+  return name.trim().replace(/\s+/g, " ").toLowerCase();
+}
+
+/**
+ * The folder already carrying this name, if the account has one.
+ *
+ * An upload interrupted halfway is almost always resumed by reading the same
+ * card again, which offers the same folder name — creating a second folder
+ * then splits one site's recordings in two. The card's recordings belong in
+ * the folder that already exists, so both the picker (which pre-selects it)
+ * and the uploader (which never creates a duplicate) look it up by name.
+ */
+export function findUploadFolderByName<T extends UploadFolderOption>(
+  folders: T[],
+  name: string,
+): T | null {
+  const needle = folderNameKey(name);
+  if (!needle) return null;
+  return folders.find((folder) => folderNameKey(folder.name) === needle) ?? null;
+}
+
+/**
+ * What a batch headed for a folder of a given name should do: join the
+ * folder of that name if the account has one, otherwise create it. Both
+ * upload pipelines (the tab and the background tray) run this before
+ * writing, so neither can ever end up with two folders of the same name.
+ */
+export type NamedUploadFolderPlan =
+  | { action: "reuse"; uri: string }
+  | { action: "create"; name: string }
+  | { action: "none" };
+
+export function planNamedUploadFolder<T extends UploadFolderOption>(
+  folders: T[],
+  name: string,
+): NamedUploadFolderPlan {
+  const trimmed = name.trim();
+  if (!trimmed) return { action: "none" };
+  const existing = findUploadFolderByName(folders, trimmed);
+  return existing ? { action: "reuse", uri: existing.uri } : { action: "create", name: trimmed };
+}
+
 export type UploadFolderMode = "existing" | "new";
 
 /**

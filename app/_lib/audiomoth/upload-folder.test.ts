@@ -3,7 +3,9 @@ import { describe, expect, it } from "vitest";
 import {
   activeUploadFolderMode,
   filterUploadFolders,
+  findUploadFolderByName,
   isUploadFolderChosen,
+  planNamedUploadFolder,
 } from "./upload-folder";
 
 const folders = [
@@ -49,6 +51,44 @@ describe("filterUploadFolders", () => {
       "River bank",
       "FOREST interior",
     ]);
+  });
+});
+
+describe("findUploadFolderByName", () => {
+  it("finds the folder a re-read card would otherwise duplicate", () => {
+    expect(findUploadFolderByName(folders, "River bank")?.uri).toBe(folders[1]!.uri);
+  });
+
+  it("ignores case and stray whitespace in the card's name", () => {
+    expect(findUploadFolderByName(folders, "  forest   INTERIOR ")?.uri).toBe(folders[2]!.uri);
+  });
+
+  it("matches the whole name only, never a fragment", () => {
+    expect(findUploadFolderByName(folders, "River")).toBeNull();
+    expect(findUploadFolderByName(folders, "Forest edge")).toBeNull();
+  });
+
+  it("returns nothing for a new name or a blank one", () => {
+    expect(findUploadFolderByName(folders, "Canopy")).toBeNull();
+    expect(findUploadFolderByName(folders, "   ")).toBeNull();
+    expect(findUploadFolderByName([], "River bank")).toBeNull();
+  });
+});
+
+describe("planNamedUploadFolder", () => {
+  it("reuses the folder a resumed upload would otherwise duplicate", () => {
+    expect(planNamedUploadFolder(folders, "river BANK")).toEqual({
+      action: "reuse",
+      uri: folders[1]!.uri,
+    });
+  });
+
+  it("creates a folder for a genuinely new name, trimmed", () => {
+    expect(planNamedUploadFolder(folders, "  Canopy  ")).toEqual({ action: "create", name: "Canopy" });
+  });
+
+  it("does nothing for a blank name", () => {
+    expect(planNamedUploadFolder(folders, "   ")).toEqual({ action: "none" });
   });
 });
 
