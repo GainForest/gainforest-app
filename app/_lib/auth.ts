@@ -55,7 +55,15 @@ export function getAuthForwardCookie(cookieHeader: string | null): string | null
  *  cached copy for up to the cache TTL. */
 export const HANDLE_CHANGED_COOKIE = "gainforest_handle_changed";
 
-const HANDLE_CHANGED_WINDOW_MS = 15 * 60 * 1000;
+/**
+ * How long the username-change marker is honoured.
+ *
+ * MUST stay LONGER than the identity cache TTL in `did-identity.ts`. The marker
+ * is what makes instances re-read an identity they cached before the change; if
+ * it expired first, a still-cached pre-change identity could take over again and
+ * flip the user back to their old username. Asserted by a test.
+ */
+export const HANDLE_CHANGED_WINDOW_MS = 15 * 60 * 1000;
 const HANDLE_CHANGED_BUCKET_MS = 30 * 1000;
 
 /**

@@ -22,7 +22,10 @@ export type DidIdentity = {
 const EMPTY_IDENTITY: DidIdentity = { handle: null, pdsHost: null };
 
 const CACHE_PREFIX = "did-identity:";
-const CACHE_TTL_MS = 5 * 60 * 1000;
+/** How long a looked-up identity is reused. Must stay SHORTER than the
+ *  username-change marker window in `auth.ts` — see the note there. Asserted by
+ *  a test, so raising this alone will fail the build. */
+export const IDENTITY_CACHE_TTL_MS = 5 * 60 * 1000;
 
 type DidDocument = {
   alsoKnownAs?: unknown;
@@ -79,7 +82,7 @@ export function resolveDidIdentity(did: string, freshness?: string | null): Prom
   if (!did.startsWith("did:")) return Promise.resolve(EMPTY_IDENTITY);
   const key = freshness ? `${CACHE_PREFIX}${did}:${freshness}` : `${CACHE_PREFIX}${did}`;
   // A rejected loader drops itself from the cache, so a later call can retry.
-  return cachedAsync(key, CACHE_TTL_MS, () => lookupDidIdentity(did)).catch(() => EMPTY_IDENTITY);
+  return cachedAsync(key, IDENTITY_CACHE_TTL_MS, () => lookupDidIdentity(did)).catch(() => EMPTY_IDENTITY);
 }
 
 /** Forget the cached identity for one DID. Called right after the user changes

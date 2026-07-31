@@ -108,3 +108,14 @@ describe("fetchAuthSession", () => {
     expect(await fetchAuthSession()).toMatchObject({ handle: "lotamoros.certified.one" });
   });
 });
+
+describe("username-change marker vs identity cache", () => {
+  it("honours the marker for longer than a looked-up identity is reused", async () => {
+    const { HANDLE_CHANGED_WINDOW_MS } = await import("./auth");
+    const { IDENTITY_CACHE_TTL_MS } = await import("./did-identity");
+
+    // If the marker expired first, an instance still holding the pre-change
+    // identity would take over again and show the old username.
+    expect(HANDLE_CHANGED_WINDOW_MS).toBeGreaterThan(IDENTITY_CACHE_TTL_MS);
+  });
+});
