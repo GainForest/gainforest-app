@@ -2,6 +2,7 @@ import { headers } from "next/headers";
 import { NextResponse } from "next/server";
 import { fetchAuthSession } from "@/app/_lib/auth-server";
 import { getAuthBaseUrl } from "@/app/_lib/auth";
+import { forgetDidIdentity } from "@/app/_lib/did-identity";
 
 export const dynamic = "force-dynamic";
 
@@ -62,6 +63,9 @@ export async function POST(request: Request) {
       return NextResponse.json({ code: "handle_unavailable", error: "Changing your username isn’t available yet." }, { status: 501 });
     }
     const result = await upstream.json().catch(() => ({ error: "Could not update your username right now. Please try again later." }));
+    // The DID document now says something new; drop the cached identity so the
+    // next page render shows the username the user just chose.
+    if (upstream.ok) forgetDidIdentity(session.did);
     return NextResponse.json(result, { status: upstream.status });
   } catch (error) {
     const message = error instanceof Error ? error.message : "Failed to update username";

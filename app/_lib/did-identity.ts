@@ -7,9 +7,12 @@
  * PDS, certified.one by default) are candidates for showing the member's
  * email instead — the email itself comes from other, access-gated sources.
  *
- * Server-side only. Results are cached per DID for the lifetime of the
- * process; concurrent lookups of the same DID share one request.
+ * Server-side only. Results are cached per DID for a few minutes (a handle can
+ * change at any time, so the cache must expire); concurrent lookups of the same
+ * DID share one request.
  */
+
+import { cachedAsync, invalidateCachedAsyncByPrefix } from "./async-cache";
 
 export type DidIdentity = {
   handle: string | null;
@@ -18,7 +21,8 @@ export type DidIdentity = {
 
 const EMPTY_IDENTITY: DidIdentity = { handle: null, pdsHost: null };
 
-const identityCache = new Map<string, Promise<DidIdentity>>();
+const CACHE_PREFIX = "did-identity:";
+const CACHE_TTL_MS = 5 * 60 * 1000;
 
 type DidDocument = {
   alsoKnownAs?: unknown;
@@ -64,17 +68,16 @@ async function lookupDidIdentity(did: string): Promise<DidIdentity> {
 
 export function resolveDidIdentity(did: string): Promise<DidIdentity> {
   if (!did.startsWith("did:")) return Promise.resolve(EMPTY_IDENTITY);
-  let promise = identityCache.get(did);
-  if (!promise) {
-    const lookup = lookupDidIdentity(did).catch(() => {
-      // Network failure: drop the entry so a later call can retry.
-      if (identityCache.get(did) === lookup) identityCache.delete(did);
-      return EMPTY_IDENTITY;
-    });
-    promise = lookup;
-    identityCache.set(did, promise);
-  }
-  return promise;
+  // A rejected loader drops itself from the cache, so a later call can retry.
+  return cachedAsync(`${CACHE_PREFIX}${did}`, CACHE_TTL_MS, () => lookupDidIdentity(did)).catch(
+    () => EMPTY_IDENTITY,
+  );
+}
+
+/** Forget the cached identity for one DID. Called right after the user changes
+ *  their username so the new one shows up immediately instead of after the TTL. */
+export function forgetDidIdentity(did: string): void {
+  invalidateCachedAsyncByPrefix(`${CACHE_PREFIX}${did}`);
 }
 
 /** Hosts that identify the configured ePDS (email-first PDS). */
