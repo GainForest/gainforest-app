@@ -39,17 +39,20 @@ test("account headers stay compact while Overview owns profile details", async (
   await page.setViewportSize({ width: 1280, height: 900 });
   const accountPath = "/account/t0fl10.certified.one";
 
+  // Every tab shares one header — photo, name, facts and links — and only the
+  // Overview carries the profile column (support, about, counts, projects).
   await page.goto(`${accountPath}/observations`);
-  await expect(page.locator("[data-account-compact-hero]")).toBeVisible();
-  await expect(page.locator("[data-account-overview-details]")).toHaveCount(0);
+  const hero = page.locator("[data-account-hero]");
+  await expect(hero).toBeVisible();
+  await expect(hero.getByRole("link", { name: /beesandtreesug\.org/i })).toBeVisible();
+  await expect(page.locator("[data-account-overview-panel]")).toHaveCount(0);
   await expect(page.getByRole("button", { name: /(?:show|hide) profile/i })).toHaveCount(0);
 
   await page.goto(accountPath);
-  await expect(page.locator("[data-account-compact-hero]")).toBeVisible();
-  const profileDetails = page.locator("[data-account-overview-details]");
-  await expect(profileDetails).toBeVisible();
-  await expect(profileDetails.getByRole("link", { name: /followers/i })).toBeVisible();
-  await expect(profileDetails.getByRole("link", { name: /beesandtreesug\.org/i })).toBeVisible();
+  await expect(hero).toBeVisible();
+  const profilePanel = page.locator("[data-account-overview-panel]");
+  await expect(profilePanel).toBeVisible();
+  await expect(profilePanel.getByRole("link", { name: /followers/i })).toBeVisible();
   await expect(page.getByRole("button", { name: /(?:show|hide) profile/i })).toHaveCount(0);
 });
 

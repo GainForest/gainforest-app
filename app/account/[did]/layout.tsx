@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import type { Metadata } from "next";
 import { fetchAuthSession } from "@/app/_lib/auth-server";
 import { resolveAccountManageAccess } from "@/app/_lib/manage-server";
@@ -10,11 +11,12 @@ import { isManualRecognitionBadgeKey } from "@/app/_lib/recognition-badges";
 import { getGainForestModeratorAccess } from "@/app/internal/badges/_lib/access";
 import { localizedAlternates } from "@/app/_lib/seo-metadata";
 import { getRequestOrigin } from "@/app/_lib/request-origin";
+import { FollowProvider } from "@/app/_components/FollowButton";
 import { AccountChrome } from "../_components/AccountChrome";
-import { AccountCompactHero } from "../_components/AccountCompactHero";
+import { AccountProfileHero } from "../_components/AccountProfileHero";
 import { AccountTabBar } from "../_components/AccountTabBar";
 import { StewardTools } from "../_components/StewardTools";
-import { accountSettingsPath, getAccountRouteData, readAccountRouteParams, readOptionalAccountRouteParams, type AccountRouteData } from "../_lib/account-route";
+import { accountSettingsPath, getAccountProjects, getAccountRouteData, readAccountRouteParams, readOptionalAccountRouteParams, type AccountRouteData } from "../_lib/account-route";
 
 function absoluteUrlOrNull(value: string | null | undefined): string | null {
   if (!value) return null;
@@ -108,6 +110,20 @@ export async function generateMetadata({ params }: { params: Promise<{ did: stri
   };
 }
 
+/** Tab bar with the project count filled in — one indexer read, streamed in. */
+async function AccountTabsWithCounts({
+  tabProps,
+  did,
+  observationCount,
+}: {
+  tabProps: React.ComponentProps<typeof AccountTabBar>;
+  did: string;
+  observationCount: number;
+}) {
+  const projects = await getAccountProjects(did);
+  return <AccountTabBar {...tabProps} counts={{ projects: projects.length, observations: observationCount }} />;
+}
+
 export default async function AccountLayout({
   children,
   params,
@@ -171,56 +187,68 @@ export default async function AccountLayout({
 
   const profileJsonLd = buildAccountProfileJsonLd(origin, account);
 
+  // Tab labels carry a count so a visitor can see how much there is before
+  // clicking. Sightings come free with the account summary; the project count
+  // needs its own read, so it streams in rather than holding up the page.
+  const tabProps = {
+    did: account.urlIdentifier,
+    accountKind: account.kind,
+    includeSettings: canManage,
+    showOrgData: canManage,
+    // Tainá is a personal Telegram assistant, so its dashboard tab only
+    // appears to the signed-in owner of this profile. Ownership (session DID
+    // === account DID) is the whole gate: it can only ever match a personal
+    // repo, and some personal accounts carry an organization record, so don't
+    // also require kind === "user".
+    includeTaina: isOwner,
+    // Personal owners and organization members get a private Wallet entry. The
+    // page/API then apply the finer owner/admin/member permissions for setup
+    // and signer management.
+    includeWallet: isOwner || (account.kind === "organization" && canManage),
+    showEndorsementsGiven,
+    showEquipment,
+  } as const;
+  const observationCount = account.summary.observationCount;
+
   return (
     <main className="w-full">
       <AccountProfileJsonLd jsonLd={profileJsonLd} />
-      <AccountChrome
-        hero={
-          <>
-            {moderator?.isModerator && testAccountFlagged !== null ? (
-              <StewardTools
-                did={account.did}
-                accountName={account.displayName}
-                initialTestFlagged={testAccountFlagged}
-                initialAwarded={awardedManualRecognition}
-              />
-            ) : null}
-            {canEditProfile && target ? (
-              <EditableAccountHeader
-                account={account}
-                writeRepoDid={target.kind === "group" ? target.did : undefined}
-                groupRole={groupRole}
-                settingsHref={accountSettingsPath(account.urlIdentifier)}
-                viewPublicHref={null}
-                showAbout={false}
-                variant="compact"
-              />
-            ) : (
-              <AccountCompactHero account={account} />
-            )}
-            <AccountTabBar
-              did={account.urlIdentifier}
-              accountKind={account.kind}
-              includeSettings={canManage}
-              showOrgData={canManage}
-              // Tainá is a personal Telegram assistant, so its dashboard tab
-              // only appears to the signed-in owner of this profile. Ownership
-              // (session DID === account DID) is the whole gate: it can only
-              // ever match a personal repo, and some personal accounts carry
-              // an organization record, so don't also require kind === "user".
-              includeTaina={isOwner}
-              // Personal owners and organization members get a private Wallet
-              // entry. The page/API then apply the finer owner/admin/member
-              // permissions for setup and signer management.
-              includeWallet={isOwner || (account.kind === "organization" && canManage)}
-              showEndorsementsGiven={showEndorsementsGiven}
-              showEquipment={showEquipment}
-            />
-          </>
-        }
-      >
-        {children}
-      </AccountChrome>
+      {/* One follow state for the whole profile, so the header's Follow button
+          and the Overview's follower count always agree. */}
+      <FollowProvider targetDid={account.did}>
+        <AccountChrome
+          hero={
+            <>
+              {moderator?.isModerator && testAccountFlagged !== null ? (
+                <StewardTools
+                  did={account.did}
+                  accountName={account.displayName}
+                  initialTestFlagged={testAccountFlagged}
+                  initialAwarded={awardedManualRecognition}
+                />
+              ) : null}
+              {canEditProfile && target ? (
+                <EditableAccountHeader
+                  account={account}
+                  writeRepoDid={target.kind === "group" ? target.did : undefined}
+                  groupRole={groupRole}
+                  settingsHref={accountSettingsPath(account.urlIdentifier)}
+                  viewPublicHref={null}
+                  showAbout={false}
+                  variant="compact"
+                />
+              ) : (
+                <AccountProfileHero account={account} />
+              )}
+              <Suspense fallback={<AccountTabBar {...tabProps} counts={{ observations: observationCount }} />}>
+                <AccountTabsWithCounts tabProps={tabProps} did={account.did} observationCount={observationCount} />
+              </Suspense>
+            </>
+          }
+        >
+          {children}
+        </AccountChrome>
+      </FollowProvider>
     </main>
   );
 }

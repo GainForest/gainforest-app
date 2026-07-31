@@ -1,6 +1,6 @@
 import Container from "@/components/ui/container";
 import {
-  AccountCompactHeroSkeleton,
+  AccountProfileHeroSkeleton,
   AccountOverviewContentSkeleton,
   AccountTabsSkeleton,
 } from "./_components/AccountHeroSkeleton";
@@ -15,7 +15,7 @@ export default function AccountSectionLoading() {
   return (
     <main className="w-full">
       <Container className="pt-4 pb-8">
-        <AccountCompactHeroSkeleton />
+        <AccountProfileHeroSkeleton />
         <AccountTabsSkeleton />
         <AccountOverviewContentSkeleton />
       </Container>

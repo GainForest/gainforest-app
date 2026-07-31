@@ -1,15 +1,17 @@
 import { Skeleton } from "@/components/ui/skeleton";
 
-/** Loading placeholder for the compact identity header shared by every tab. */
-export function AccountCompactHeroSkeleton() {
+/** Loading placeholder for the identity header shared by every tab. */
+export function AccountProfileHeroSkeleton() {
   return (
-    <section className="rounded-2xl bg-muted/60 px-3 py-3 sm:px-4">
-      <div className="flex min-w-0 items-center gap-3">
-        <Skeleton className="size-11 shrink-0 rounded-full" />
-        <div className="min-w-0 flex-1 space-y-1.5">
-          <Skeleton className="h-5 w-44 max-w-full" />
-          <Skeleton className="h-3 w-72 max-w-full" />
-        </div>
+    <section className="flex items-start gap-4 pt-1 sm:gap-5">
+      <Skeleton className="size-14 shrink-0 rounded-2xl sm:size-[68px]" />
+      <div className="min-w-0 flex-1 space-y-2.5">
+        <Skeleton className="h-8 w-56 max-w-full sm:h-9" />
+        <Skeleton className="h-4 w-72 max-w-full" />
+      </div>
+      <div className="flex shrink-0 items-center gap-2">
+        <Skeleton className="h-9 w-24 rounded-full" />
+        <Skeleton className="size-9 rounded-full" />
       </div>
     </section>
   );
@@ -55,34 +57,14 @@ export function AccountHeroSkeleton() {
   );
 }
 
-/** Loading placeholder for the muted fact tiles + inline actions in Overview. */
-export function AccountOverviewDetailsSkeleton() {
+/** Loading placeholder for {@link AccountTabBar} — plain text tabs. */
+export function AccountTabsSkeleton({ count = 4 }: { count?: number }) {
   return (
-    <section className="mt-6 space-y-4">
-      <Skeleton className="h-7 w-36" />
-      <div className="flex flex-wrap gap-2">
-        <Skeleton className="h-[4.25rem] min-w-[16rem] flex-[2] rounded-2xl" />
-        <Skeleton className="h-[4.25rem] min-w-[9rem] flex-1 rounded-2xl" />
-        <Skeleton className="h-[4.25rem] min-w-[9rem] flex-1 rounded-2xl" />
-      </div>
-      <div className="flex flex-wrap gap-2">
-        <Skeleton className="h-9 w-24 rounded-full" />
-        <Skeleton className="h-9 w-32 rounded-full" />
-        <Skeleton className="h-9 w-36 rounded-full" />
-      </div>
-    </section>
-  );
-}
-
-/** Loading placeholder for {@link AccountTabBar} — icon + label tabs. */
-export function AccountTabsSkeleton({ count = 5 }: { count?: number }) {
-  return (
-    <div className="mt-3">
+    <div className="mt-5">
       <div className="-mx-4 overflow-x-auto px-4 scrollbar-hidden">
-        <div className="flex min-w-max items-end gap-1 border-b border-border">
+        <div className="flex min-w-max items-end gap-5 border-b border-border">
           {Array.from({ length: count }).map((_, index) => (
-            <div key={index} className="flex items-center gap-1.5 px-3 py-2.5">
-              <Skeleton className="size-3.5 rounded-sm" />
+            <div key={index} className="pb-2.5 pt-1">
               <Skeleton className="h-4 w-16" />
             </div>
           ))}
@@ -117,22 +99,38 @@ export function OverviewFoldersSkeleton({ count = 4 }: { count?: number }) {
 }
 
 /**
- * Loading placeholder for the default account overview tab: the folder-tile
- * grid followed by the share-profile card. Shared by the account section's
+ * Loading placeholder for the account Overview: the record stream on the left
+ * and the profile column on the right. Shared by the account section's
  * full-shell loading and the per-tab page loading so the two transitions line
  * up without a jump.
  */
 export function AccountOverviewContentSkeleton() {
   return (
-    <div className="space-y-5 py-2">
-      <OverviewFoldersSkeleton />
-      <section className="rounded-2xl border border-border bg-card/80 p-4 sm:flex sm:items-center sm:justify-between sm:gap-4">
-        <div className="min-w-0 space-y-2">
-          <Skeleton className="h-4 w-40" />
-          <Skeleton className="h-3.5 w-64 max-w-full" />
+    <div className="mt-8 flex flex-col-reverse gap-10 lg:flex-row lg:gap-12">
+      <div className="min-w-0 flex-1 space-y-5 border-t border-border/60 pt-5">
+        {Array.from({ length: 4 }).map((_, index) => (
+          <div key={index} className="flex flex-col gap-1.5 sm:flex-row sm:gap-6">
+            <Skeleton className="h-4 w-20 sm:shrink-0" />
+            <div className="min-w-0 flex-1 space-y-2">
+              <Skeleton className="h-4 w-2/3" />
+              <Skeleton className="h-3 w-1/2" />
+            </div>
+          </div>
+        ))}
+      </div>
+      <aside className="space-y-6 lg:w-[20rem] lg:shrink-0 xl:w-[22rem]">
+        <Skeleton className="h-44 w-full rounded-2xl" />
+        <div className="space-y-2">
+          <Skeleton className="h-4 w-24" />
+          <Skeleton className="h-3.5 w-full" />
+          <Skeleton className="h-3.5 w-5/6" />
         </div>
-        <Skeleton className="mt-3 h-9 w-36 rounded-full sm:mt-0" />
-      </section>
+        <div className="space-y-3">
+          {Array.from({ length: 4 }).map((_, index) => (
+            <Skeleton key={index} className="h-4 w-full" />
+          ))}
+        </div>
+      </aside>
     </div>
   );
 }

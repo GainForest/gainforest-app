@@ -1,38 +1,32 @@
-import Image from "next/image";
 import Link from "next/link";
 import { Suspense } from "react";
 import { notFound } from "next/navigation";
-import { BadgeCheckIcon, ChevronRightIcon } from "lucide-react";
-import { getLocale, getTranslations } from "next-intl/server";
+import { ChevronRightIcon } from "lucide-react";
+import { getTranslations } from "next-intl/server";
 import { AccountGalleryClient } from "./AccountGalleryClient";
 import type { GalleryProjectOption } from "./AccountGalleryUploader";
-import { canCreateRecord } from "../../(manage)/manage/_lib/cgs-permissions";
-import { RichText } from "../../_components/RichText";
 import { InlineCardGridSkeleton } from "../../_components/PageLoadingSkeletons";
 import { RecordExplorer } from "../../_components/RecordExplorer";
+import { AccountActivityFeed } from "./AccountActivityFeed";
 import { AccountBumicertsGrid } from "./AccountBumicertsGrid";
+import { AccountOverviewSidebar } from "./AccountOverviewSidebar";
 import { AccountProjectsGrid } from "./AccountProjectsGrid";
 import { EndorsementsGivenGrid } from "./EndorsementsGivenGrid";
 import type { AccountOrganization } from "./AccountOrganizationsGrid";
-import { OverviewFolders, type OverviewFolderTile } from "./OverviewFolders";
 import { AccountContentColumns, AccountSidebar } from "./AccountSidebar";
-import { ShareProfileButton } from "./ShareProfileButton";
 import { DonationHistory } from "./DonationHistory";
 import { fetchReceipts } from "../../_lib/dashboard";
 import { fetchOwnAnonymousReceipts } from "../../_lib/anonymous-donations";
-import { fetchPublicDataCouncilMembers, type PublicDataCouncilMember } from "../../_lib/data-council";
 import { fetchEndorsementsGiven } from "../../_lib/endorsements-given";
 import type { AuthSession } from "../../_lib/auth";
 import { fetchAuthSession } from "../../_lib/auth-server";
 import { fetchUserCgsGroups, resolveAccountManageAccess } from "../../_lib/manage-server";
 import { BumicertsSection, ObservationsSection, ProjectsSection } from "../../(manage)/manage/_sections";
-import { monogram } from "../../_lib/did-profile";
-import { attachProjectTitlesToGalleries, fetchAccountMaEarthRounds, fetchBumicertsByDid, fetchIndexedCertifiedProfileCards, fetchObservationSummaryByDid, fetchProjectImageGalleriesByDid, fetchProjectsByDid, fetchTimelineAttachmentsByDid, type TimelineAttachmentItem } from "../../_lib/indexer";
+import { attachProjectTitlesToGalleries, fetchBumicertsByDid, fetchIndexedCertifiedProfileCards, fetchObservationSummaryByDid, fetchProjectImageGalleriesByDid, fetchProjectsByDid, fetchTimelineAttachmentsByDid, type TimelineAttachmentItem } from "../../_lib/indexer";
 import { getEntriesForActivities } from "@/app/cert/[did]/[rkey]/_components/timeline/attachmentSubjects";
 import { resolveTimelineReferences } from "@/app/cert/[did]/[rkey]/_components/timeline/timelineReferenceResolver";
 import { ProjectTimelineReadonly } from "@/app/projects/[did]/[rkey]/_components/ProjectTimelineReadonly";
-import type { AccountRouteData } from "../_lib/account-route";
-import { accountDonationsPath, accountObservationsPath, accountPath, accountProjectsPath } from "../_lib/account-route";
+import { getAccountProjects, type AccountRouteData } from "../_lib/account-route";
 
 type ManageAction = {
   href: string;
@@ -54,93 +48,6 @@ function ManageActionRow({ action }: { action?: ManageAction | null }) {
       </span>
       <ChevronRightIcon className="h-4 w-4 shrink-0 text-muted-foreground" />
     </Link>
-  );
-}
-
-function DataCouncilAvatar({ member }: { member: PublicDataCouncilMember }) {
-  const mono = monogram(member.displayName?.trim() || "Member", member.did);
-  return (
-    <div className="relative flex size-10 shrink-0 items-center justify-center overflow-hidden rounded-full text-sm font-semibold text-white">
-      {member.avatarUrl ? (
-        <Image src={member.avatarUrl} alt="" fill className="object-cover" unoptimized />
-      ) : (
-        <span aria-hidden style={{ backgroundColor: mono.bg }} className="flex size-full items-center justify-center">
-          {mono.char}
-        </span>
-      )}
-    </div>
-  );
-}
-
-// Ma Earth verifies organizations round by round (per-round badge awards). We
-// surface the *specific* rounds an account was part of — an explicit, per-round
-// statement of record, rather than the generic "Trusted by Ma Earth" emblem.
-async function AccountMaEarthRoundsSection({ did, className = "" }: { did: string; className?: string }) {
-  const [t, rounds] = await Promise.all([
-    getTranslations("common.maEarthRounds"),
-    fetchAccountMaEarthRounds(did).catch(() => [] as number[]),
-  ]);
-
-  if (rounds.length === 0) return null;
-
-  return (
-    <section className={`rounded-3xl border border-border/60 bg-card p-5 org-animate org-fade-in-up org-delay-2 sm:p-6 ${className}`.trim()}>
-      <div className="flex items-center gap-3">
-        <span className="grid size-11 shrink-0 place-items-center overflow-hidden rounded-full bg-background shadow-sm ring-1 ring-border/70">
-          <Image
-            src="/assets/media/images/badges/ma-earth-logo.webp"
-            width={44}
-            height={44}
-            alt=""
-            className="h-full w-full object-contain"
-          />
-        </span>
-        <h2 className="font-instrument text-2xl italic leading-none text-foreground">{t("title")}</h2>
-      </div>
-      <p className="mt-3 max-w-2xl text-sm leading-6 text-muted-foreground">{t("description")}</p>
-      <ul className="mt-4 flex flex-wrap gap-2">
-        {rounds.map((round) => (
-          <li
-            key={round}
-            className="inline-flex items-center gap-2 rounded-full border border-border/60 bg-background/60 px-3.5 py-2 text-sm font-medium text-foreground"
-          >
-            <BadgeCheckIcon className="size-4 shrink-0 text-primary" aria-hidden />
-            {t("round", { round })}
-          </li>
-        ))}
-      </ul>
-    </section>
-  );
-}
-
-async function AccountDataCouncilSection({ did }: { did: string }) {
-  const [t, members] = await Promise.all([
-    getTranslations("common.accountDataCouncil"),
-    fetchPublicDataCouncilMembers(did).catch(() => []),
-  ]);
-
-  return (
-    <section className="mt-8 rounded-3xl border border-border/60 bg-card p-5 org-animate org-fade-in-up org-delay-2 sm:p-6">
-      <div className="flex items-baseline gap-2">
-        <h2 className="font-instrument text-2xl italic leading-none text-foreground">{t("title")}</h2>
-        {members.length > 0 ? <span className="text-sm text-muted-foreground">{members.length}</span> : null}
-      </div>
-      <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">{t("description")}</p>
-      {members.length > 0 ? (
-        <div className="mt-4 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
-          {members.map((member) => (
-            <div key={member.did} className="flex items-center gap-3 rounded-2xl border border-border/60 bg-background/60 px-3 py-3">
-              <DataCouncilAvatar member={member} />
-              <p className="min-w-0 truncate text-sm font-medium text-foreground">
-                {member.displayName?.trim() || t("memberFallback")}
-              </p>
-            </div>
-          ))}
-        </div>
-      ) : (
-        <p className="mt-4 rounded-2xl bg-muted/50 px-3.5 py-2.5 text-sm text-muted-foreground">{t("empty")}</p>
-      )}
-    </section>
   );
 }
 
@@ -233,122 +140,47 @@ async function loadAccountGalleryData(account: AccountRouteData, did: string) {
   return { liveGalleries, orphanedGalleries, projectOptions, target };
 }
 
-// Organizations no longer get a standalone Files & photos tab; instead the photo
-// gallery lives inline on the Overview, right under the About blurb. We only
-// render it when there are photos to show or the viewer can add some, so an
-// empty org landing page stays clean.
-async function AccountOverviewGallerySection({ account, did }: { account: AccountRouteData; did: string }) {
-  const [tabsT, gallery] = await Promise.all([
-    getTranslations("common.accountTabs"),
-    loadAccountGalleryData(account, did),
-  ]);
-
-  const canUpload = gallery.target ? canCreateRecord(gallery.target).allowed : false;
-  if (gallery.liveGalleries.length === 0 && !canUpload) return null;
-
-  return (
-    <section className="mt-8 org-animate org-fade-in-up org-delay-2">
-      <h2 className="font-instrument text-2xl italic leading-none text-foreground">{tabsT("gallery")}</h2>
-      <div className="mt-4">
-        <AccountGalleryClient
-          initialGalleries={gallery.liveGalleries}
-          orphanedGalleries={gallery.orphanedGalleries}
-          projects={gallery.projectOptions}
-          target={gallery.target}
-          accountName={account.displayName}
-        />
-      </div>
-    </section>
-  );
-}
-
-export async function AccountHomeTabContent({ account }: { account: AccountRouteData }) {
-  const organizationAbout = account.kind === "organization" ? account.longDescription?.trim() ?? "" : "";
-  const hasAbout = account.kind === "organization"
-    ? organizationAbout.length > 0
-    : Boolean(account.detail?.richBody?.length || account.detail?.blurb);
-  const aboutT = await getTranslations("common.accountAbout");
-
-  return (
-    <>
-      {hasAbout ? (
-        <section className="mt-8 org-animate org-fade-in-up org-delay-1">
-          <h2 className="font-instrument text-2xl italic leading-none text-foreground">{aboutT("title")}</h2>
-          {account.kind === "organization" ? (
-            <p className="mt-4 max-w-3xl whitespace-pre-line text-base leading-7 text-foreground/85 md:text-lg md:leading-8">
-              {organizationAbout}
-            </p>
-          ) : account.detail?.richBody?.length ? (
-            <div className="mt-4">
-              <RichText blocks={account.detail.richBody} />
-            </div>
-          ) : (
-            <p className="mt-4 max-w-3xl text-base leading-7 text-foreground/85 md:text-lg md:leading-8">
-              {account.detail?.blurb}
-            </p>
-          )}
-        </section>
-      ) : null}
-      {account.kind === "organization" ? <AccountOverviewGallerySection account={account} did={account.did} /> : null}
-      {account.kind === "organization" ? <AccountMaEarthRoundsSection did={account.did} className="mt-8" /> : null}
-      {account.kind === "organization" ? <AccountProjectUpdatesSection did={account.did} /> : null}
-      {account.kind === "organization" ? <AccountDataCouncilSection did={account.did} /> : null}
-    </>
-  );
-}
-
-// Compact, full-width profile landing for personal accounts: a short bio, a row
-// of at-a-glance stat tiles that link into each tab, and a slim share card.
-// Replaces the bulky right-hand sidebar that used to crowd the Certs page.
-export async function AccountOverviewTabContent({ account, did }: { account: AccountRouteData; did: string }) {
-  const [tabsT, shareT, locale, projects, receipts, observationSummary] = await Promise.all([
-    getTranslations("common.accountTabs"),
-    getTranslations("marketplace.account.sidebar"),
-    getLocale(),
-    fetchProjectsByDid(did, 1000).then((page) => page.records).catch(() => []),
+/**
+ * An account's landing view: the stream of everything it has published, with a
+ * column beside it for who the account is, how to support it, and where its
+ * work lives. Personal and organization profiles share the same shape — the
+ * side column simply drops the blocks that don't apply.
+ */
+export async function AccountOverviewContent({ account, did }: { account: AccountRouteData; did: string }) {
+  const [session, projects, receipts, observationSummary] = await Promise.all([
+    fetchAuthSession().catch(() => ({ isLoggedIn: false }) as AuthSession),
+    getAccountProjects(did),
     fetchReceipts().catch(() => []),
     fetchObservationSummaryByDid(did).catch(() => null),
   ]);
-  const donationCount = receipts.filter((receipt) => receipt.from?.type === "did" && receipt.from.id === did).length;
-  const hasAbout = Boolean(account.detail?.richBody?.length || account.detail?.blurb);
+  const memberships = await loadAccountMemberships(account, session);
 
-  const folderTiles: OverviewFolderTile[] = [
-    { id: "projects", title: tabsT("projects"), href: accountProjectsPath(account.urlIdentifier), count: projects.length },
-    { id: "observations", title: tabsT("observations"), href: accountObservationsPath(account.urlIdentifier), count: observationSummary?.count ?? 0 },
-    { id: "donations", title: tabsT("donations"), href: accountDonationsPath(account.urlIdentifier), count: donationCount },
-  ];
+  const received = receipts.filter((receipt) => receipt.orgDid === did);
+  const receivedUsd = received.reduce((total, receipt) => total + (receipt.amount || 0), 0);
+  const supporters = new Set(received.map((receipt) => receipt.from?.id).filter(Boolean)).size;
+  const donationCount = receipts.filter((receipt) => receipt.from?.type === "did" && receipt.from.id === did).length;
 
   return (
-    <div className="space-y-5 py-2">
-      {hasAbout ? (
-        <section className="org-animate org-fade-in-up org-delay-1">
-          {account.detail?.richBody?.length ? (
-            <RichText blocks={account.detail.richBody} />
-          ) : (
-            <p className="max-w-3xl text-base leading-7 text-foreground/85 md:text-lg md:leading-8">{account.detail?.blurb}</p>
-          )}
-        </section>
-      ) : null}
-
-      <section className="org-animate org-fade-in-up org-delay-1">
-        <OverviewFolders tiles={folderTiles} />
-      </section>
-
-      <AccountMaEarthRoundsSection did={did} />
-
-      <section className="rounded-2xl border border-border bg-card/80 p-4 sm:flex sm:items-center sm:justify-between sm:gap-4">
-        <div className="min-w-0">
-          <h2 className="text-sm font-semibold text-foreground">{shareT("shareProfileTitle")}</h2>
-          <p className="mt-0.5 text-sm leading-relaxed text-muted-foreground">{shareT("shareProfileBody")}</p>
-        </div>
-        <div className="mt-3 shrink-0 sm:mt-0">
-          <ShareProfileButton
-            profilePath={`/${locale}${accountPath(account.urlIdentifier)}`}
-            label={shareT("copyProfileLink")}
-            copiedLabel={shareT("profileLinkCopied")}
-          />
-        </div>
-      </section>
+    // On a narrow screen the profile column comes first: who this account is
+    // and how to support it, before the (possibly very long) record stream.
+    <div className="mt-8 flex flex-col-reverse gap-10 lg:flex-row lg:gap-12">
+      <div className="min-w-0 flex-1 org-animate org-fade-in-up">
+        <AccountActivityFeed did={did} />
+      </div>
+      <aside className="lg:w-[20rem] lg:shrink-0 xl:w-[22rem]">
+        <AccountOverviewSidebar
+          account={account}
+          projects={projects}
+          counts={{
+            projects: projects.length,
+            observations: observationSummary?.count ?? account.summary.observationCount ?? 0,
+            donations: account.kind === "user" ? donationCount : null,
+          }}
+          receivedUsd={receivedUsd}
+          supporters={supporters}
+          memberships={memberships}
+        />
+      </aside>
     </div>
   );
 }
@@ -442,14 +274,28 @@ export async function AccountObservationsTabContent({ account, did }: { account:
 
 export async function AccountProjectsTabContent({ account, did }: { account: AccountRouteData; did: string }) {
   const access = await resolveAccountManageAccess(account.urlIdentifier).catch(() => null);
+  // Updates published across all of an organization's projects read as one
+  // timeline; it sits under the project list, where those projects live.
+  const updates = account.kind === "organization" ? <AccountProjectUpdatesSection did={did} /> : null;
+
   if (access?.status === "allowed") {
-    return <ProjectsSection target={access.target} />;
+    return (
+      <>
+        <ProjectsSection target={access.target} />
+        {updates}
+      </>
+    );
   }
 
   const projects = await fetchProjectsByDid(did, 1000, null, undefined, undefined, { withScopeTags: true })
     .then((page) => page.records)
     .catch(() => []);
-  return <AccountProjectsGrid projects={projects} />;
+  return (
+    <>
+      <AccountProjectsGrid projects={projects} />
+      {updates}
+    </>
+  );
 }
 
 // Organizations this org has publicly endorsed (its signed "Organization
