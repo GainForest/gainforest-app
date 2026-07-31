@@ -5,13 +5,14 @@ import Link from "next/link";
 import { Fragment, useCallback, useEffect, useId, useRef, useState, type ChangeEvent, type DragEvent, type KeyboardEvent } from "react";
 import { useTranslations } from "next-intl";
 import {
+  AlertTriangleIcon,
   ArchiveIcon,
   ArrowLeftIcon,
   CameraIcon,
   CheckCircle2Icon,
-  ChevronDownIcon,
   CircleHelpIcon,
   CopyIcon,
+  EllipsisIcon,
   FileSpreadsheetIcon,
   FolderOpenIcon,
   ImagePlusIcon,
@@ -51,7 +52,17 @@ import {
 import { ModalContent, ModalHeader, ModalTitle, ModalDescription } from "@/components/ui/modal/modal";
 import { useIsDrawer, useModal } from "@/components/ui/modal/context";
 import { cn } from "@/lib/utils";
-import { manageApiHref, type ManageTarget } from "@/lib/links";
+import {
+  groupManageTarget,
+  manageApiHref,
+  personalManageTarget,
+  type ManageTarget,
+} from "@/lib/links";
+import {
+  switcherGroupIdentifier,
+  useAccountList,
+  useActiveAccountContext,
+} from "@/app/_lib/account-switcher";
 import { canCreateRecord } from "../../_lib/cgs-permissions";
 import {
   cleanFileName,
@@ -278,8 +289,11 @@ function quickGroupStatus(items: QuickItem[]): ItemStatus {
 }
 
 export function AddObservationsModal({
-  target,
+  target: initialTarget,
   projectRef,
+  projectSiteRef = null,
+  sessionDid = null,
+  allowAccountSwitch = false,
   onViewObservations,
   onClose,
   onBack,
@@ -287,8 +301,20 @@ export function AddObservationsModal({
   target: ManageTarget;
   /** When set, each new observation is attached to this project (at-uri). */
   projectRef?: string | null;
-  /** Navigate to the observations list (called after a successful add). */
-  onViewObservations: () => void;
+  /** The pinned project's mapped site, so sightings added from a project page
+   *  carry the same site link as ones filed through the project picker. */
+  projectSiteRef?: string | null;
+  /** Signed-in user's DID. Required for the "Uploading for" account picker. */
+  sessionDid?: string | null;
+  /** Opt-in "Uploading for" selector so a multi-org user can retarget the
+   *  upload without leaving the flow. Only the generic quick-add turns this on;
+   *  a project- or account-scoped page keeps its target locked. */
+  allowAccountSwitch?: boolean;
+  /** Navigate to the observations list (called after a successful add). Receives
+   *  the account the batch actually landed in — which may differ from the
+   *  target the modal opened with if the uploader switched "Uploading for" —
+   *  so the caller can route to that account's observations. */
+  onViewObservations: (uploadedTarget: ManageTarget) => void;
   onClose: () => void;
   /** When set, a back arrow returns to whatever opened this flow (e.g. the feed
    *  composer) instead of closing outright. */
@@ -324,7 +350,9 @@ export function AddObservationsModal({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [batchStory, setBatchStory] = useState("");
-  const [addedCount, setAddedCount] = useState<number | null>(null);
+  // Result of the last submit run — drives the outcome screen. `failed` counts
+  // the cards from that run that errored and are still in the list.
+  const [outcome, setOutcome] = useState<{ added: number; failed: number } | null>(null);
   // Tracks how many observations have finished uploading during a submit run, so
   // the footer can show a progress bar instead of just a spinning button.
   const [uploadProgress, setUploadProgress] = useState<{ done: number; total: number } | null>(null);
@@ -338,6 +366,82 @@ export function AddObservationsModal({
   // actually has projects — zero extra chrome otherwise.
   const [projects, setProjects] = useState<QuickProject[]>([]);
   const [selectedProjectUri, setSelectedProjectUri] = useState<string>("");
+
+  // "Uploading for": the account these observations land in. Seeded from the
+  // caller's target (usually the active-account context) and switchable inline
+  // when allowAccountSwitch is on and the user belongs to organizations.
+  const [activeTarget, setActiveTarget] = useState<ManageTarget>(initialTarget);
+  const target = activeTarget;
+  // Re-seed if the caller hands us a different account (a fresh open() reuses
+  // this mounted instance rather than remounting).
+  const seededTargetDid = useRef(initialTarget.did);
+  useEffect(() => {
+    if (seededTargetDid.current !== initialTarget.did) {
+      seededTargetDid.current = initialTarget.did;
+      setActiveTarget(initialTarget);
+      setSelectedProjectUri("");
+    }
+  }, [initialTarget]);
+
+  const { personal, groups: accountGroups } = useAccountList(allowAccountSwitch ? sessionDid : null);
+  const [, setActiveContext] = useActiveAccountContext(sessionDid ?? "");
+  // The picker only earns its place for a multi-org user in the generic
+  // quick-add flow — a single-account user (and any project-pinned open) sees
+  // no extra chrome.
+  const showAccountPicker =
+    allowAccountSwitch && Boolean(sessionDid) && !projectRef && accountGroups.length > 0;
+
+  // Switch which account the batch is filed under, and remember it for the
+  // session so subsequent uploads default to the same place.
+  const chooseUploadTarget = useCallback(
+    (did: string) => {
+      if (did === target.did) return;
+      if (sessionDid && did === sessionDid) {
+        const next = personalManageTarget({
+          did: sessionDid,
+          accountKind: "user",
+          identifier: personal?.handle ?? sessionDid,
+          displayName: personal?.displayName ?? null,
+          avatarUrl: personal?.avatarUrl ?? null,
+        });
+        setActiveTarget(next);
+        setActiveContext({ type: "personal", did: sessionDid });
+      } else {
+        const group = accountGroups.find((candidate) => candidate.groupDid === did);
+        if (!group) return;
+        const identifier = switcherGroupIdentifier(group);
+        const next = groupManageTarget({
+          did: group.groupDid,
+          accountKind: "organization",
+          identifier,
+          role: group.role,
+          displayName: group.displayName,
+          avatarUrl: group.avatarUrl,
+          currentUserDid: sessionDid,
+        });
+        setActiveTarget(next);
+        setActiveContext({ type: "group", did: group.groupDid, identifier, role: group.role });
+      }
+      // The old account's projects don't belong to the new one.
+      setSelectedProjectUri("");
+    },
+    [accountGroups, personal, sessionDid, setActiveContext, target.did],
+  );
+
+  const personalLabel =
+    personal?.displayName?.trim() || personal?.handle?.trim() || t("uploadingForPersonal");
+  // Flat option list for the footer picker: the personal account first, then
+  // every organization the member belongs to.
+  const uploadTargets: { did: string; name: string; avatarUrl: string | null }[] = [
+    ...(sessionDid
+      ? [{ did: sessionDid, name: personalLabel, avatarUrl: personal?.avatarUrl ?? null }]
+      : []),
+    ...accountGroups.map((group) => ({
+      did: group.groupDid,
+      name: group.displayName?.trim() || group.handle?.trim() || group.groupDid,
+      avatarUrl: group.avatarUrl ?? null,
+    })),
+  ];
 
   const createPermission = canCreateRecord(target);
   const disabledReason = createPermission.allowed ? null : createPermission.reason;
@@ -554,7 +658,7 @@ export function AddObservationsModal({
         setError(disabledReason);
         return;
       }
-      setAddedCount(null);
+      setOutcome(null);
       const imageFiles = Array.from(fileList ?? []).filter((file) => file.type.startsWith("image/"));
       if (imageFiles.length === 0) return;
 
@@ -800,7 +904,7 @@ export function AddObservationsModal({
     // observer picked in the modal (with its site carried along when it has one).
     const selectedProject = projects.find((project) => project.atUri === selectedProjectUri) ?? null;
     const effectiveProjectUri = projectRef ?? selectedProject?.atUri ?? null;
-    const effectiveSiteUri = projectRef ? null : (selectedProject?.locationUri ?? null);
+    const effectiveSiteUri = projectRef ? projectSiteRef : (selectedProject?.locationUri ?? null);
     const tags = fields.tags.map((tag) => tag.trim()).filter(Boolean);
     const occurrence = await createObservationOccurrence({
       basisOfRecord: "HumanObservation",
@@ -911,10 +1015,13 @@ export function AddObservationsModal({
     setIsSubmitting(false);
     setUploadProgress(null);
     if (success > 0) {
-      if (success === queue.length) setBatchStory("");
-      setAddedCount(success);
+      const failed = queue.length - success;
+      if (failed === 0) setBatchStory("");
+      setOutcome({ added: success, failed });
       setError(null);
     } else {
+      // Nothing made it — stay on the card list, where every card already
+      // shows its own error and the submit button doubles as retry.
       setError(t("uploadFailed"));
     }
   }
@@ -933,25 +1040,61 @@ export function AddObservationsModal({
     );
   }
 
-  // Success screen — shown once at least one observation has been added.
-  if (addedCount !== null && items.length === 0) {
+  // Outcome screen — the batch finished; nothing navigates on its own. Say
+  // what happened (all in, or how many failed) and let the uploader decide:
+  // stay to add or fix more, or go to the account's observations.
+  if (outcome !== null) {
+    const allIn = outcome.failed === 0;
+    const accountName = target.displayName?.trim() || target.identifier;
     return (
       <ModalContent className="space-y-5">
         <div className="flex flex-col items-center gap-3 py-4 text-center">
-          <span className="grid size-14 place-items-center rounded-2xl bg-primary/10 text-primary ring-1 ring-primary/15">
-            <CheckCircle2Icon className="size-7" />
+          <span
+            className={cn(
+              "grid size-14 place-items-center rounded-2xl ring-1",
+              allIn
+                ? "bg-primary/10 text-primary ring-primary/15"
+                : "bg-amber-500/10 text-amber-600 ring-amber-500/20",
+            )}
+          >
+            {allIn ? <CheckCircle2Icon className="size-7" /> : <AlertTriangleIcon className="size-7" />}
           </span>
           <div>
-            <ModalTitle>{t("doneTitle", { count: addedCount })}</ModalTitle>
-            <ModalDescription className="mt-1">{t("doneBody")}</ModalDescription>
+            <ModalTitle>
+              {allIn
+                ? t("doneTitle", { count: outcome.added })
+                : t("partialTitle", { added: outcome.added, total: outcome.added + outcome.failed })}
+            </ModalTitle>
+            <ModalDescription className="mt-1">
+              {allIn
+                ? t("doneAccount", { name: accountName })
+                : t("partialBody", { failed: outcome.failed })}
+            </ModalDescription>
           </div>
         </div>
         <div className="flex flex-col gap-2 sm:flex-row sm:justify-center">
-          <Button variant="outline" onClick={() => setAddedCount(null)}>
-            <ImagePlusIcon className="size-4" />
-            {t("addMore")}
-          </Button>
-          <Button onClick={onViewObservations}>{t("viewObservations")}</Button>
+          {allIn ? (
+            <>
+              <Button variant="outline" onClick={() => setOutcome(null)}>
+                <ImagePlusIcon className="size-4" />
+                {t("addMore")}
+              </Button>
+              <Button onClick={() => { setOutcome(null); onViewObservations(target); }}>
+                {t("viewObservations")}
+              </Button>
+            </>
+          ) : (
+            <>
+              <Button variant="outline" onClick={() => setOutcome(null)}>{t("reviewPhotos")}</Button>
+              <Button variant="outline" onClick={() => { setOutcome(null); onViewObservations(target); }}>
+                {t("viewObservations")}
+              </Button>
+              <Button onClick={() => { setOutcome(null); void submit(); }}>
+                <RotateCcwIcon className="size-4" />
+                {t("tryAgain")}
+              </Button>
+            </>
+          )}
         </div>
       </ModalContent>
     );
@@ -960,8 +1103,12 @@ export function AddObservationsModal({
   const showEmptyState = items.length === 0;
 
   return (
+    // flex (not space-y) so child margins can't collapse into the dialog's
+    // wrapper: the "Uploading for" footer relies on -mb-6 to bleed over the
+    // dialog's p-6, and a collapsed margin would leave a strip of padding
+    // below it instead of sitting flush on the bottom edge.
     <ModalContent
-      className="space-y-4"
+      className="flex flex-col gap-4"
       dismissible={!isPreparing && !isSubmitting}
       showCloseButton={false}
     >
@@ -989,12 +1136,13 @@ export function AddObservationsModal({
                 <Button
                   type="button"
                   variant="outline"
-                  size="sm"
+                  size="icon-sm"
                   className="-mt-1 rounded-full"
                   disabled={isSubmitting}
+                  aria-label={t("moreWays")}
+                  title={t("moreWays")}
                 >
-                  {t("moreWays")}
-                  <ChevronDownIcon className="size-4" />
+                  <EllipsisIcon className="size-4" />
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
@@ -1293,7 +1441,10 @@ export function AddObservationsModal({
         <div
           className={cn(
             "space-y-3 border-t border-border pt-3",
-            isDrawer && "sticky bottom-0 z-10 -mx-4 -mb-4 bg-background px-4 pb-4",
+            isDrawer && "sticky bottom-0 z-10 -mx-4 bg-background px-4",
+            // When the "Uploading for" bar sits below, let it own the modal's
+            // bottom edge instead of bleeding this footer over it.
+            isDrawer && (showAccountPicker ? "pb-3" : "-mb-4 pb-4"),
           )}
         >
           {isSubmitting && uploadProgress ? (
@@ -1316,7 +1467,48 @@ export function AddObservationsModal({
           </div>
         </div>
       ) : null}
+
+      {/* “Uploading for” lives in a persistent footer bar so a multi-org member
+          can retarget the batch at any point without hunting for the sidebar
+          switcher. Full-bleed over the dialog's p-6, flush to the bottom edge. */}
+      {showAccountPicker ? (
+        <div className="-mx-6 -mb-6 flex flex-wrap items-center gap-x-3 gap-y-2 rounded-b-4xl border-t border-border bg-primary/10 px-6 pt-3.5 pb-3 max-[32rem]:-mx-4 max-[32rem]:-mb-4 max-[32rem]:rounded-none">
+          <span className="text-sm text-muted-foreground">{t("uploadingForLabel")}</span>
+          <Select value={target.did} onValueChange={chooseUploadTarget} disabled={isSubmitting}>
+            <SelectTrigger
+              className="h-9 w-auto min-w-[11rem] gap-2 rounded-xl bg-background font-medium"
+              aria-label={t("uploadingForLabel")}
+            >
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {uploadTargets.map((option) => (
+                <SelectItem key={option.did} value={option.did}>
+                  <span className="flex items-center gap-2">
+                    <AccountBadge url={option.avatarUrl} name={option.name} />
+                    <span className="truncate">{option.name}</span>
+                  </span>
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+      ) : null}
     </ModalContent>
+  );
+}
+
+// Small round account avatar for the “Uploading for” picker — image when the
+// account has one, otherwise its first initial on a soft tint.
+function AccountBadge({ url, name }: { url: string | null; name: string }) {
+  return (
+    <span className="relative flex size-5 shrink-0 items-center justify-center overflow-hidden rounded-full bg-primary/10 text-[10px] font-semibold text-primary">
+      {url ? (
+        <Image src={url} alt="" fill unoptimized sizes="20px" className="object-cover" />
+      ) : (
+        (name.trim()[0] ?? "?").toUpperCase()
+      )}
+    </span>
   );
 }
 

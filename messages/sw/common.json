@@ -8,6 +8,9 @@
     "changeAria": "Badilisha lugha",
     "currentLanguage": "Lugha ya sasa"
   },
+  "adminOnly": {
+    "label": "Wasimamizi pekee"
+  },
   "navigation": {
     "navigation": "Urambazaji",
     "openNavigation": "Fungua urambazaji",
@@ -65,23 +68,9 @@
     "myAccount": "Akaunti yangu",
     "signOut": "Ondoka",
     "settings": "Mipangilio",
+    "organizationRole": "Shirika · {role}",
     "switchAccount": "Badilisha akaunti",
-    "switchAccountHint": "Vipakizi vipya na miradi huhifadhiwa kwenye akaunti unayochagua hapa.",
-    "organizationRole": "Shirika · {role}"
-  },
-  "publishAs": {
-    "label": "Unachapisha kama",
-    "badgePersonal": "Binafsi",
-    "badgeOrganization": "Shirika",
-    "personalFallback": "Akaunti binafsi",
-    "organizationFallback": "Akaunti ya shirika",
-    "personalDescription": "Huenda kwenye wasifu wako binafsi",
-    "organizationDescription": "Huenda kwenye wasifu wa pamoja wa shirika",
-    "menuTitle": "Chagua mahali pa kuchapisha",
-    "menuPersonalSubtitle": "Akaunti yako binafsi",
-    "menuOrganizationSubtitle": "Akaunti ya pamoja ya shirika",
-    "organizationsLabel": "Mashirika yako",
-    "switchHint": "Badilisha akaunti unayochapisha nayo"
+    "switchAccountHint": "Vipakizi vipya na miradi huhifadhiwa kwenye akaunti unayochagua hapa."
   },
   "errorPage": {
     "title": "Hitilafu imetokea.",
@@ -131,7 +120,6 @@
       "labeler": "Uwekaji lebo",
       "globe": "Dunia",
       "audiomoth": "AudioMoth",
-      "soundscape": "Mandhari ya sauti",
       "identifications": "Vitambulisho"
     },
     "prompts": {
@@ -489,9 +477,9 @@
     "photos": "Picha",
     "files": "Faili",
     "taina": "Tainá",
+    "wallet": "Pochi",
     "endorsementsGiven": "Idhini",
     "equipment": "Vifaa",
-    "wallet": "Pochi",
     "more": "Zaidi"
   },
   "equipment": {
@@ -620,6 +608,101 @@
       "member": "Mwanachama"
     }
   },
+  "accountWallet": {
+    "title": "Pochi",
+    "intro": "Pochi yako binafsi ya michango, inayolindwa na funguo zako za siri. Michango kwa miradi yako inafika kwenye anwani hii.",
+    "loadError": "Imeshindwa kupakia pochi yako.",
+    "passkeyUnsupported": "Kifaa hiki hakitumii funguo za siri. Jaribu kifaa chenye Face ID, alama ya kidole, au ufunguo wa usalama.",
+    "passkeyLabel": "GainForest — {name}",
+    "passkeyLabelFallback": "Pochi ya GainForest",
+    "createError": "Imeshindwa kuunda pochi. Tafadhali jaribu tena.",
+    "addSignerError": "Imeshindwa kuongeza ufunguo wa siri. Tafadhali jaribu tena.",
+    "removeSignerError": "Imeshindwa kuondoa ufunguo huu wa siri. Tafadhali jaribu tena.",
+    "deleteError": "Imeshindwa kuondoa pochi. Tafadhali jaribu tena.",
+    "emptyTitle": "Bado hakuna pochi",
+    "emptyHint": "Unda pochi yako ya michango kwa ufunguo wa siri (Face ID, alama ya kidole, au ufunguo wa usalama). Hakuna maneno ya siri ya kupanda, hakuna cha kusakinisha.",
+    "creating": "Inasubiri ufunguo wako wa siri…",
+    "createButton": "Unda pochi kwa ufunguo wa siri",
+    "defaultName": "Pochi yangu ya michango",
+    "copyAddress": "Nakili anwani",
+    "copied": "Imenakiliwa",
+    "copy": "Nakili",
+    "readyHint": "Anwani hii inaweza kupokea michango mara moja. Ni yako na ni funguo za siri zilizo hapa chini pekee zinazoweza kutumia fedha zake.",
+    "activeHint": "Pochi hii iko hai kwenye blockchain. Funguo zake za siri sasa zinasimamiwa kwenye mnyororo.",
+    "signersHeading": "Nani anaweza kuidhinisha malipo",
+    "signersLocked": "Imefungwa",
+    "unnamedPasskey": "Ufunguo wa siri",
+    "removeSigner": "Ondoa ufunguo wa siri",
+    "addPasskey": "Ongeza ufunguo mwingine wa siri",
+    "signerLabelPlaceholder": "Ipe jina ufunguo huu (mf. Simu yangu)",
+    "signersHint": "Ongeza ufunguo wa siri kutoka kifaa kingine au mtu unayemwamini — yeyote kati yao anaweza kuidhinisha malipo.",
+    "deleteButton": "Ondoa pochi",
+    "deleteConfirmTitle": "Ondoa pochi hii?",
+    "deleteConfirmBody": "Hatua hii haiwezi kutenduliwa. Ukiunda pochi mpya baadaye kwa ufunguo mpya wa siri, itakuwa na anwani tofauti.",
+    "deleteConfirmFunds": "Pochi hii tayari ina fedha, hivyo haiwezi kuondolewa.",
+    "deleteConfirmCancel": "Ghairi",
+    "deleteConfirmButton": "Ndiyo, ondoa pochi",
+    "viewOnExplorer": "Tazama anwani hii kwenye Etherscan",
+    "explorer": "Etherscan",
+    "balancesHeading": "Salio",
+    "balancesEmpty": "Bado hakuna fedha. Michango inayotumwa kwa anwani hii itaonekana hapa.",
+    "balancesError": "Salio halipatikani kwa sasa. Onyesha upya ili kujaribu tena.",
+    "sendHeading": "Tuma fedha",
+    "sendIntro": "Hamisha fedha kutoka pochi hii kwenda anwani nyingine yoyote ya pochi. Unaidhinisha kila uhamisho kwa ufunguo wako wa siri.",
+    "sendToken": "Sarafu",
+    "sendRecipient": "Anwani ya mpokeaji",
+    "sendRecipientPlaceholder": "Anwani ya mpokeaji (0x…)",
+    "sendRecipientInvalid": "Weka anwani sahihi ya pochi — inaanza na 0x ikifuatiwa na herufi 40.",
+    "sendAmount": "Kiasi",
+    "sendAmountInvalid": "Weka kiasi sahihi.",
+    "sendAmountTooHigh": "Hicho ni zaidi ya kilichomo kwenye pochi hii.",
+    "sendMax": "Juu",
+    "sendButton": "Tuma kwa ufunguo wa siri",
+    "sendPreparing": "Inaandaa…",
+    "sendAwaitingPasskey": "Inasubiri ufunguo wako wa siri…",
+    "sendSubmitting": "Inatuma — inaweza kuchukua dakika moja…",
+    "sendSuccess": "Imetumwa! Uhamisho umethibitishwa.",
+    "sendViewTx": "Tazama muamala",
+    "sendGasNote": "GainForest inalipia ada ya mtandao.",
+    "sendNoSigner": "Ni mtu mwenye ufunguo wa siri uliosajiliwa kwenye pochi hii pekee anayeweza kutuma kutoka kwake.",
+    "sendErrorNotConfigured": "Utumaji bado haujawezeshwa kwenye seva hii.",
+    "sendErrorInsufficient": "Pochi hii haina fedha za kutosha kwa uhamisho huo.",
+    "sendErrorBusy": "Mtandao una shughuli nyingi kwa sasa. Tafadhali jaribu tena baada ya dakika chache.",
+    "sendErrorSignature": "Idhini ya ufunguo wa siri haikuweza kuthibitishwa. Tafadhali jaribu tena.",
+    "sendErrorGeneric": "Uhamisho haukuweza kukamilika. Tafadhali jaribu tena.",
+    "thresholdHeading": "Idhini zinazohitajika",
+    "thresholdOption": "{count} kati ya {total, plural, one {ufunguo wa siri #} other {funguo za siri #}}",
+    "thresholdHint": "Ni funguo ngapi za siri zinazopaswa kuidhinisha kila uhamisho. Kuhitaji zaidi ya moja ni salama zaidi — ufunguo mmoja uliopotea au kuibiwa hauwezi kuhamisha fedha peke yake. Kubadilisha hili kunaipa pochi anwani mpya, kwa hivyo kunawezekana tu kabla pochi haijapokea fedha.",
+    "thresholdUpdateError": "Haikuweza kubadilisha hitaji la idhini. Tafadhali jaribu tena.",
+    "thresholdLockedFunds": "Pochi tayari ina fedha, kwa hivyo hitaji la idhini haliwezi kubadilishwa tena.",
+    "thresholdSingleWarning": "Kwa sasa ufunguo mmoja wa siri unaweza kuhamisha fedha. Fikiria kuhitaji idhini zaidi.",
+    "sendApprovalsNeeded": "Pochi hii inahitaji idhini {count} kwa funguo tofauti za siri. Wewe unatoa ya kwanza; zilizobaki zinaweza kutolewa hapa au kutoka kifaa kingine.",
+    "sendApprovalOf": "Idhini ya {current} kati ya {total} — inasubiri ufunguo wa siri…",
+    "sendDuplicatePasskey": "Kila idhini inahitaji ufunguo tofauti wa siri.",
+    "pendingHeading": "Uhamisho unasubiri idhini",
+    "pendingProgress": "Idhini {current} kati ya {total} zimetolewa",
+    "pendingRemoteHint": "Wenye funguo nyingine za siri wanaweza kuidhinisha kutoka kifaa chao — uhamisho unabaki hapa hadi upate idhini za kutosha. Idhini ya mwisho ndiyo inayoutuma.",
+    "pendingApprove": "Idhinisha kwa ufunguo wa siri",
+    "pendingApproveAndSend": "Idhinisha na kutuma",
+    "pendingCancel": "Ghairi uhamisho",
+    "pendingInvalid": "Uhamisho huu unaosubiri si halali tena — pochi ilibadilika tangu ulipoanzishwa. Ughairi ili kuanzisha mpya.",
+    "pendingCancelForbidden": "Ni aliyeanzisha uhamisho huu au msimamizi wa pochi pekee anayeweza kuughairi.",
+    "sendStartButton": "Anzisha uhamisho kwa ufunguo wa siri",
+    "sendErrorExpired": "Uhamisho huu si halali tena — pochi au ada za mtandao zilibadilika. Tafadhali uanzishe tena.",
+    "sendErrorPendingExists": "Tayari kuna uhamisho unaosubiri idhini. Ukamilishe au uughairi kwanza.",
+    "sendErrorApprovalInvalid": "Idhini hii haikuweza kuthibitishwa. Tafadhali jaribu tena.",
+    "onchainManageHint": "Pochi hii inatumika kwenye blockchain, kwa hivyo mabadiliko ya funguo za siri yanarekodiwa kwenye mnyororo na yanahitaji idhini za kawaida. GainForest inalipia ada ya mtandao.",
+    "thresholdOnchainHint": "Ni funguo ngapi za siri zinazopaswa kuidhinisha kila uhamisho. Badiliko hili linarekodiwa kwenye blockchain — anwani ya pochi haibadiliki.",
+    "manageForbidden": "Ni mmiliki wa shirika au msimamizi pekee anayeweza kufanya badiliko hili."
+  },
+  "accountSupport": {
+    "button": "Saidia",
+    "buttonAria": "Saidia {name} moja kwa moja",
+    "modalTitle": "Saidia {name}",
+    "modalDescription": "Chagua kiasi cha kumpa {name} moja kwa moja.",
+    "directNote": "100% inaenda moja kwa moja kwa {name}, bila ada ya jukwaa na ada ya mtandao imelipiwa kwa ajili yako.",
+    "cartLabel": "Msaada wa moja kwa moja kwa akaunti"
+  },
   "accountDonations": {
     "emptyHeroDescription": "Unga mkono mradi na michango yako itaonekana hapa, kila moja ikiwa na kiungo kwa mradi uliouunga mkono.",
     "emptyHeroCta": "Gundua miradi",
@@ -692,6 +775,8 @@
     "loadError": "Hatukuweza kupakia mradi huu. Tafadhali jaribu tena.",
     "saveError": "Hatukuweza kuhifadhi mabadiliko yako. Tafadhali jaribu tena.",
     "timelineDescription": "Ongeza, tazama, na uondoe ushahidi uliobandikwa kwenye ratiba ya mradi huu.",
+    "observationsDescription": "Kila uonaji wa asili uliorekodiwa kwa mradi huu. Chochote unachoongeza hapa kitahifadhiwa chini yake.",
+    "addExistingObservations": "Ongeza uonaji uliopo",
     "sitesTitle": "Eneo la mradi",
     "sitesDescription": "Chagua eneo lililochorwa kwa mradi huu. Unganisha eneo lililohifadhiwa au tengeneza jipya.",
     "currentSiteLabel": "Eneo la sasa",
@@ -1001,8 +1086,7 @@
     "eyebrow": "Shughuli zinazoendelea",
     "hero": {
       "title": "Kinachotokea kwenye",
-      "accent": "GainForest",
-      "description": "Mtiririko wa moja kwa moja wa miradi mipya, vivutio vya asili, mashirika, na masasisho ya jamii — yote mahali pamoja."
+      "accent": "GainForest"
     },
     "filters": {
       "all": "Yote",
@@ -1056,6 +1140,11 @@
     "actions": {
       "like": "Penda",
       "liked": "Umependa",
+      "reshare": "Shiriki tena",
+      "reshared": "Umeshiriki tena",
+      "undoReshare": "Ondoa kushiriki tena",
+      "reshareHint": "Shiriki hii na wafuasi wako",
+      "resharedBy": "{name} ameshiriki tena",
       "comment": "Toa maoni",
       "comments": "{count, plural, one {maoni #} other {maoni #}}",
       "signInToInteract": "Ingia ili kuchapisha, kupenda na kutoa maoni",
@@ -1088,6 +1177,8 @@
       "unpin": "Ondoa kubandika"
     },
     "composer": {
+      "title": "Shiriki taarifa",
+      "close": "Funga",
       "placeholder": "Shiriki taarifa mpya na jamii…",
       "signedOut": "Ingia ili kushiriki taarifa mpya",
       "addObservation": "Ongeza uchunguzi wa asili",
@@ -1095,9 +1186,7 @@
       "posting": "Inachapisha…",
       "postedTitle": "Imechapishwa",
       "postedNote": "Taarifa yako ipo hewani na itaonekana kwenye mlisho hivi karibuni.",
-      "postingAs": "Unachapisha kama {name}",
-      "title": "Shiriki taarifa",
-      "close": "Funga"
+      "postingAs": "Unachapisha kama {name}"
     },
     "quickLike": {
       "like": "Penda picha hii",
@@ -1130,6 +1219,13 @@
     "unhideAction": "Ionyeshe tena",
     "genericError": "Hitilafu imetokea. Tafadhali jaribu tena."
   },
+  "testRecord": {
+    "hideAction": "Ficha kama jaribio",
+    "hideHint": "Ficha kipengee hiki kutoka mlisho wa umma na kurasa za uchunguzi kama maudhui ya majaribio",
+    "confirmHide": "Ficha kwa kila mtu",
+    "cancel": "Ghairi",
+    "genericError": "Hitilafu imetokea. Tafadhali jaribu tena."
+  },
   "adminTestAccounts": {
     "title": "Akaunti za majaribio",
     "description": "Akaunti hizi zimewekwa alama kama za majaribio, hivyo miradi, uchunguzi, matokeo ya utafutaji na shughuli za mlisho zake zimefichwa kwa kila mtu.",
@@ -1138,6 +1234,24 @@
     "unnamed": "Akaunti isiyo na jina",
     "error": "Hitilafu imetokea. Tafadhali jaribu tena."
   },
+  "adminTestRecords": {
+    "title": "Machapisho na uchunguzi vilivyofichwa",
+    "description": "Machapisho na uchunguzi huu vimewekwa alama kama vya majaribio, hivyo vimefichwa kutoka mlisho wa umma na kurasa za uchunguzi. Sehemu nyingine ya akaunti ya mmiliki bado inaonekana.",
+    "empty": "Hakuna chapisho au uchunguzi uliofichwa kwa sasa.",
+    "remove": "Onyesha tena",
+    "unnamed": "Akaunti isiyo na jina",
+    "error": "Hitilafu imetokea. Tafadhali jaribu tena.",
+    "itemLabel": "{kind} ya {name}",
+    "hiddenAgo": "Imefichwa {time}",
+    "kinds": {
+      "post": "Chapisho",
+      "observation": "Uchunguzi",
+      "project": "Mradi",
+      "organization": "Sasisho la shirika",
+      "donation": "Mchango",
+      "record": "Kipengee"
+    }
+  },
   "recognition": {
     "eyebrow": "Msimamizi wa GainForest",
     "title": "Toa beji za kutambua",
@@ -1145,7 +1259,6 @@
     "award": "Toa",
     "remove": "Ondoa",
     "genericError": "Hitilafu imetokea. Tafadhali jaribu tena.",
-    "chipsAria": "Beji za kutambua",
     "badges": {
       "rewilding-grant": {
         "label": "Ruzuku ya Rewilding",
@@ -1153,13 +1266,13 @@
       },
       "bioblitz-most-images": {
         "label": "BioBlitz — uchunguzi mwingi zaidi",
-        "description": "Alishinda raundi ya BioBlitz kwa uchunguzi mwingi zaidi.",
-        "labelWithRound": "BioBlitz {roundName} — uchunguzi mwingi zaidi"
+        "labelWithRound": "BioBlitz {roundName} — uchunguzi mwingi zaidi",
+        "description": "Alishinda raundi ya BioBlitz kwa uchunguzi mwingi zaidi."
       },
       "bioblitz-best-picture": {
         "label": "BioBlitz — picha bora",
-        "description": "Alishinda raundi ya BioBlitz kwa picha bora zaidi.",
-        "labelWithRound": "BioBlitz {roundName} — picha bora"
+        "labelWithRound": "BioBlitz {roundName} — picha bora",
+        "description": "Alishinda raundi ya BioBlitz kwa picha bora zaidi."
       }
     },
     "awardsLabel": "Tuzo",
@@ -1203,6 +1316,38 @@
     "page": {
       "title": "Msimamizi",
       "subtitle": "Kagua waombaji wa ruzuku na matukio, dhibiti akaunti zilizowekwa alama, na simamia mawakala wa Tainá."
+    }
+  },
+  "adminBioblitzExclusions": {
+    "title": "Msimamo wa kila wiki kwa idadi ya uchunguzi",
+    "description": "Chagua akaunti na raundi ya BioBlitz ambayo uchunguzi wake haupaswi kuingizwa katika jumla ya wiki hiyo.",
+    "effect": "Hii inabadilisha tu msimamo wa idadi ya uchunguzi. Akaunti na uchunguzi wake vitaendelea kuonekana na kushindania picha bora.",
+    "accountLabel": "Akaunti",
+    "chooseAccount": "Chagua akaunti",
+    "accountPickerAria": "Chagua akaunti ambayo uchunguzi wake haupaswi kuhesabiwa",
+    "searchPlaceholder": "Tafuta watu na mashirika",
+    "searchHint": "Andika jina la akaunti ili kutafuta",
+    "noResults": "Hakuna akaunti zinazolingana",
+    "observationCount": "Uchunguzi {count, number}",
+    "clearSelection": "Ondoa akaunti iliyochaguliwa",
+    "weekLabel": "Wiki ya BioBlitz",
+    "roundLabel": "Raundi {round}",
+    "add": "Usihesabu wiki hii",
+    "adding": "Inasasisha…",
+    "finalized": "Raundi imekwisha",
+    "unavailable": "Uhesabuji wa kila wiki haukuweza kupakiwa kwa usalama. Jaribu tena kabla ya kufanya mabadiliko.",
+    "permissionNotice": "Wanachama wa timu ya usimamizi pekee ndio wanaoweza kubadilisha uhesabuji wa kila wiki.",
+    "empty": "Kwa sasa, kila akaunti inahesabiwa katika wiki yake ya BioBlitz.",
+    "unnamed": "Akaunti isiyo na jina",
+    "removeLabel": "Hesabu {name} tena kwenye msimamo",
+    "errors": {
+      "notSignedIn": "Ingia tena ili kuendelea.",
+      "forbidden": "Huna ruhusa ya kubadilisha uhesabuji wa kila wiki.",
+      "invalidRound": "Chagua wiki halali ya BioBlitz.",
+      "accountNotFound": "Akaunti hiyo haikupatikana.",
+      "finalized": "Raundi hii ya BioBlitz imekwisha, kwa hivyo uhesabuji hauwezi kubadilishwa tena.",
+      "add": "Mabadiliko ya uhesabuji wa kila wiki hayakuweza kuhifadhiwa. Jaribu tena.",
+      "remove": "Akaunti haikuweza kurudishwa kwenye msimamo. Jaribu tena."
     }
   },
   "adminTaina": {
@@ -1324,7 +1469,11 @@
       "breadcrumbAria": "Njia ya urambazaji ya nyaraka",
       "schemas": "Miundo ya data",
       "guideIntro": "Mwongozo huu unaeleza kanuni za programu zinazotumiwa pamoja na muundo wa matukio. Muundo unabaki Darwin Core wa jumla; mwongozo unaeleza jinsi rekodi za AudioMoth, visanduku vya spektrogramu na rekodi za matukio zinavyounganishwa."
-    }
+    },
+    "hypercertsLinkTitle": "Kujenga juu ya leksikoni za Hypercerts",
+    "hypercertsLinkDesc": "Kanuni, tofauti, na ushauri wa ushirikiano kwa wasanidi wanaoandika rekodi za Hypercerts katika programu yao.",
+    "dataModelLinkTitle": "Jinsi data yako inavyoungana",
+    "dataModelLinkDesc": "Ziara kwa lugha rahisi ya jinsi uchunguzi, seti za data, miradi na mashirika vinavyounganishwa."
   },
   "taina": {
     "meta": {
@@ -1740,7 +1889,89 @@
       "deployments": "Usambazaji",
       "upload": "Pakia",
       "label": "Weka lebo",
-      "identifications": "Vitambulisho"
+      "identifications": "Vitambulisho",
+      "soundscape": "Mandhari ya sauti"
+    },
+    "label": {
+      "subtitle": "Kagua rekodi za AudioMoth, weka alama za miito kwa muda na masafa, kisha tengeneza mkusanyiko safi wa lebo za data ya uwanjani.",
+      "signInTitle": "Ingia ili kuweka lebo kwenye rekodi",
+      "signInBody": "Matukio yanahifadhiwa kwenye akaunti yako. Ingia, pakia rekodi za AudioMoth, kisha weka alama kwenye sauti za wanyamapori.",
+      "loadingRecordings": "Inapakia rekodi zako za AudioMoth…",
+      "loadFailed": "Rekodi zako hazikuweza kupakiwa. Jaribu tena.",
+      "occurrencesLoadFailed": "Matukio yaliyohifadhiwa kwa rekodi hii hayakuweza kupakiwa.",
+      "noRecordingsTitle": "Pakia rekodi kwanza",
+      "noRecordingsBody": "Sehemu ya kuweka lebo hutumia rekodi zilizohifadhiwa kwenye akaunti yako ili kila kisanduku kiwe tukio la bioanuwai lililounganishwa.",
+      "uploadFirst": "Pakia rekodi za AudioMoth",
+      "refresh": "Onyesha upya",
+      "savedAtproto": "Kila kisanduku kilichohifadhiwa ni tukio la bioanuwai kwenye akaunti yako.",
+      "openToLoad": "Fungua kupakia lebo",
+      "saved": "Imehifadhiwa",
+      "deleteConfirm": "Ufute tukio hili? Litaondolewa kwenye akaunti yako na haliwezi kurejeshwa.",
+      "deleteFailed": "Tukio halikuweza kufutwa. Jaribu tena.",
+      "saveFailed": "Tukio halikuweza kuhifadhiwa. Kisanduku bado kipo ili ujaribu tena.",
+      "recordedAtMissing": "Rekodi hii haina muda halali wa kuanza, kwa hivyo muda wa tukio hauwezi kukokotolewa.",
+      "audioUnavailable": "Rekodi hii haina faili asili au hakikisho linaloweza kuchezwa. Pakia tena huku mahakikisho yakiwa yamewashwa.",
+      "commonName": "Jina la kawaida/kienyeji (si lazima)",
+      "commonNamePlaceholder": "Chura wa mtini",
+      "scientificName": "Jina la kisayansi (si lazima)",
+      "scientificNamePlaceholder": "Boana faber",
+      "scientificNameHint": "Acha wazi ili kuhifadhi kundi pana sahihi, kama Anura kwa vyura.",
+      "saveOccurrence": "Hifadhi tukio",
+      "saveAtprotoHint": "Huunda tukio la Darwin Core lililounganishwa na rekodi hii ya sauti.",
+      "stepImport": "Chagua rekodi",
+      "stepDraw": "Chora kisanduku cha muda na masafa",
+      "stepDescribe": "Eleza ulichosikia",
+      "emptyTitle": "Weka lebo sauti za wanyamapori katika rekodi za AudioMoth",
+      "emptyBody": "Chagua folda ya kadi ya SD au faili za WAV. Chagua rekodi, chora kisanduku kuzunguka mwito, kisha uitambue kama ndege, chura, mdudu, sauti nyingine au dokezo.",
+      "chooseFolder": "Chagua kadi ya SD au folda",
+      "chooseFiles": "Chagua faili za WAV",
+      "privacyNote": "Rekodi zako zinasalia kwenye kifaa hiki unapoweka lebo.",
+      "workspaceSummary": "Rekodi {files} · lebo {labels}",
+      "savedLocally": "Rasimu zinahifadhiwa kwenye kivinjari hiki. Zihamishe zikiwa tayari.",
+      "addFiles": "Ongeza rekodi",
+      "export": "Hamisha CSV",
+      "closeSet": "Funga mkusanyiko",
+      "recordings": "Rekodi",
+      "search": "Tafuta faili…",
+      "labelCount": "Lebo {count}",
+      "notLabelled": "Haijawekewa lebo",
+      "filePosition": "Rekodi {current} kati ya {total}",
+      "previousFile": "Rekodi iliyotangulia",
+      "nextFile": "Rekodi inayofuata",
+      "labelsTitle": "Lebo ({count})",
+      "selectToEdit": "Chagua lebo ili kuihariri",
+      "labelsEmpty": "Bado hakuna lebo. Chora kisanduku juu ya sauti kwenye spektrogramu ili kuanza.",
+      "deleteLabel": "Futa lebo",
+      "editLabel": "Hariri lebo",
+      "newLabel": "Lebo mpya",
+      "describeSelection": "Kuna nini katika kisanduku hiki?",
+      "drawFirst": "Chora kisanduku ili kuanza",
+      "clearSelection": "Futa uteuzi",
+      "drawHint": "Buruta kwenye spektrogramu kuweka alama kwenye sauti unayotaka. Kisanduku kinanasa muda ilipotokea na masafa yake.",
+      "timeRange": "Muda",
+      "frequencyRange": "Masafa",
+      "whatIsIt": "Ulisikia nini?",
+      "categories": {
+        "bird": "Ndege",
+        "frog": "Chura",
+        "insect": "Mdudu",
+        "other": "Nyingine",
+        "note": "Dokezo"
+      },
+      "species": "Spishi (si lazima)",
+      "speciesPlaceholder": "Jina la kawaida au kisayansi",
+      "speciesHint": "Acha wazi ikiwa unajua tu kundi la mnyama.",
+      "noteRequired": "Dokezo",
+      "noteOptional": "Dokezo (si lazima)",
+      "notePlaceholder": "Aina ya mwito, uhakika, hali ya hewa au maelezo mengine muhimu…",
+      "updateLabel": "Sasisha lebo",
+      "saveLabel": "Hifadhi lebo",
+      "saveHint": "Imehifadhiwa kwenye kivinjari hiki hadi uhamishe mkusanyiko wa lebo.",
+      "drawInstruction": "Buruta kuchora · chagua kisanduku kuhariri",
+      "spectrogramAria": "Spektrogramu shirikishi ya sauti",
+      "buildingSpectrogram": "Inatengeneza spektrogramu…",
+      "spectrogramFailed": "Rekodi hii haikuweza kubadilishwa kuwa spektrogramu.",
+      "audioUnsupported": "Kivinjari chako hakiwezi kucheza rekodi hii."
     },
     "deployments": {
       "intro": "Usambazaji hurekodi mahali na wakati AudioMoth ilipowekwa uwandani. Kila mmoja hucheza mlio wa akustika unaoweka saa, mahali na kitambulisho cha usambazaji cha kinasa sauti.",
@@ -1837,13 +2068,38 @@
       "doneWithErrors": "Imekamilika na makosa {count}",
       "doneBody": "Rekodi {count} zimepakiwa. {skipped} zilikuwepo tayari na zilirukwa.",
       "uploadMore": "Pakia kadi nyingine",
+      "retryFailed": "Jaribu tena faili zilizoshindwa ({count})",
       "statusSkipped": "Imeshapakiwa",
+      "statusRetrying": "Inajaribu tena {attempt} kati ya {max}…",
+      "dedupChecking": "Inakagua ni rekodi zipi tayari zipo kwenye akaunti yako…",
+      "dedupSkipped": "Rekodi {count} tayari zipo kwenye akaunti yako na zitarukwa.",
+      "allUploaded": "Rekodi zote tayari zimepakiwa",
       "statusSaving": "Inahifadhi…",
       "notConfigured": "Hifadhi ya rekodi bado haijasanidiwa. Tafadhali wasiliana na timu.",
       "uploadFailed": "Upakiaji haukuweza kukamilika. Tafadhali jaribu tena.",
+      "errorConnection": "Muunganisho wako ulikatika wakati faili hii ilipokuwa ikipakiwa. Kagua intaneti yako, kisha utumie “Jaribu tena faili zilizoshindwa”.",
+      "errorStorageRejected": "Hatukuweza kupokea faili hii. Tafadhali jaribu tena.",
+      "errorSaveConnection": "Faili ilitumwa, lakini intaneti ilikatika kabla hatujamaliza. Gusa “Jaribu tena faili zilizoshindwa”.",
+      "errorSaveFailed": "Faili ilipakiwa, lakini haikuweza kuhifadhiwa kwenye akaunti yako. Tafadhali jaribu tena.",
+      "errorOffline": "Hakuna muunganisho wa intaneti. Kagua Wi-Fi yako kisha ujaribu tena.",
       "deploymentFallback": "Imeundwa kiotomatiki wakati wa kupakia rekodi za kadi ya SD.",
+      "groupNameLabel": "Ipe jina upakiaji huu",
+      "groupNameHelp": "Rekodi hizi zitawekwa pamoja chini ya jina hili kwenye wasifu wako, ili uzipate baadaye.",
+      "groupNamePlaceholder": "mfano: Ukingo wa msitu — Aprili 2024",
+      "groupNameRequired": "Ipe jina upakiaji huu kwanza.",
+      "folderTitle": "Rekodi hizi ziwekwe wapi?",
+      "folderExistingHelp": "Ziongeze kwenye folda uliyo nayo tayari, ili kila kitu cha eneo hili kibaki pamoja.",
+      "folderExistingAction": "Chagua folda iliyopo",
+      "folderNewAction": "Folda mpya",
+      "folderSearchPlaceholder": "Tafuta folda zako",
+      "folderNoMatch": "Hakuna folda inayolingana na utafutaji wako.",
+      "folderRequired": "Chagua folda kwanza.",
+      "folderLoading": "Inapakia folda zako…",
+      "groupRemarks": "Iliundwa wakati wa kupakia folda ya rekodi.",
       "discovering": "Inatafuta rekodi… faili {count} zimepatikana",
-      "readFailed": "Kadi ya SD haikuweza kusomwa. Iondoe na uiingize tena, kisha jaribu tena — au buruta folda kwenye ukurasa huu."
+      "readFailed": "Kadi ya SD haikuweza kusomwa. Iondoe na uiingize tena, kisha jaribu tena — au buruta folda kwenye ukurasa huu.",
+      "handedOffTitle": "Rekodi {count} zinapakiwa chinichini.",
+      "handedOffBody": "Unaweza kuendelea kuvinjari au kusoma kadi nyingine — maendeleo yanabaki kwenye trei chini."
     },
     "recordings": {
       "title": "Rekodi",
@@ -1866,250 +2122,17 @@
       "nextMonth": "Mwezi ujao",
       "prevDay": "Siku iliyotangulia yenye rekodi",
       "nextDay": "Siku inayofuata yenye rekodi",
-      "allHours": "Saa zote"
-    },
-    "label": {
-      "subtitle": "Kagua rekodi za AudioMoth, weka alama za miito kwa muda na masafa, kisha tengeneza mkusanyiko safi wa lebo za data ya uwanjani.",
-      "signInTitle": "Ingia ili kuweka lebo kwenye rekodi",
-      "signInBody": "Matukio yanahifadhiwa kwenye akaunti yako. Ingia, pakia rekodi za AudioMoth, kisha weka alama kwenye sauti za wanyamapori.",
-      "loadingRecordings": "Inapakia rekodi zako za AudioMoth…",
-      "loadFailed": "Rekodi zako hazikuweza kupakiwa. Jaribu tena.",
-      "occurrencesLoadFailed": "Matukio yaliyohifadhiwa kwa rekodi hii hayakuweza kupakiwa.",
-      "noRecordingsTitle": "Pakia rekodi kwanza",
-      "noRecordingsBody": "Sehemu ya kuweka lebo hutumia rekodi zilizohifadhiwa kwenye akaunti yako ili kila kisanduku kiwe tukio la bioanuwai lililounganishwa.",
-      "uploadFirst": "Pakia rekodi za AudioMoth",
-      "refresh": "Onyesha upya",
-      "savedAtproto": "Kila kisanduku kilichohifadhiwa ni tukio la bioanuwai kwenye akaunti yako.",
-      "openToLoad": "Fungua kupakia lebo",
-      "saved": "Imehifadhiwa",
-      "deleteConfirm": "Ufute tukio hili? Litaondolewa kwenye akaunti yako na haliwezi kurejeshwa.",
-      "deleteFailed": "Tukio halikuweza kufutwa. Jaribu tena.",
-      "saveFailed": "Tukio halikuweza kuhifadhiwa. Kisanduku bado kipo ili ujaribu tena.",
-      "recordedAtMissing": "Rekodi hii haina muda halali wa kuanza, kwa hivyo muda wa tukio hauwezi kukokotolewa.",
-      "audioUnavailable": "Rekodi hii haina faili asili au hakikisho linaloweza kuchezwa. Pakia tena huku mahakikisho yakiwa yamewashwa.",
-      "commonName": "Jina la kawaida/kienyeji (si lazima)",
-      "commonNamePlaceholder": "Chura wa mtini",
-      "scientificName": "Jina la kisayansi (si lazima)",
-      "scientificNamePlaceholder": "Boana faber",
-      "scientificNameHint": "Acha wazi ili kuhifadhi kundi pana sahihi, kama Anura kwa vyura.",
-      "saveOccurrence": "Hifadhi tukio",
-      "saveAtprotoHint": "Huunda tukio la Darwin Core lililounganishwa na rekodi hii ya sauti.",
-      "stepImport": "Chagua rekodi",
-      "stepDraw": "Chora kisanduku cha muda na masafa",
-      "stepDescribe": "Eleza ulichosikia",
-      "emptyTitle": "Weka lebo sauti za wanyamapori katika rekodi za AudioMoth",
-      "emptyBody": "Chagua folda ya kadi ya SD au faili za WAV. Chagua rekodi, chora kisanduku kuzunguka mwito, kisha uitambue kama ndege, chura, mdudu, sauti nyingine au dokezo.",
-      "chooseFolder": "Chagua kadi ya SD au folda",
-      "chooseFiles": "Chagua faili za WAV",
-      "privacyNote": "Rekodi zako zinasalia kwenye kifaa hiki unapoweka lebo.",
-      "workspaceSummary": "Rekodi {files} · lebo {labels}",
-      "savedLocally": "Rasimu zinahifadhiwa kwenye kivinjari hiki. Zihamishe zikiwa tayari.",
-      "addFiles": "Ongeza rekodi",
-      "export": "Hamisha CSV",
-      "closeSet": "Funga mkusanyiko",
-      "recordings": "Rekodi",
-      "search": "Tafuta faili…",
-      "labelCount": "Lebo {count}",
-      "notLabelled": "Haijawekewa lebo",
-      "filePosition": "Rekodi {current} kati ya {total}",
-      "previousFile": "Rekodi iliyotangulia",
-      "nextFile": "Rekodi inayofuata",
-      "labelsTitle": "Lebo ({count})",
-      "selectToEdit": "Chagua lebo ili kuihariri",
-      "labelsEmpty": "Bado hakuna lebo. Chora kisanduku juu ya sauti kwenye spektrogramu ili kuanza.",
-      "deleteLabel": "Futa lebo",
-      "editLabel": "Hariri lebo",
-      "newLabel": "Lebo mpya",
-      "describeSelection": "Kuna nini katika kisanduku hiki?",
-      "drawFirst": "Chora kisanduku ili kuanza",
-      "clearSelection": "Futa uteuzi",
-      "drawHint": "Buruta kwenye spektrogramu kuweka alama kwenye sauti unayotaka. Kisanduku kinanasa muda ilipotokea na masafa yake.",
-      "timeRange": "Muda",
-      "frequencyRange": "Masafa",
-      "whatIsIt": "Ulisikia nini?",
-      "categories": {
-        "bird": "Ndege",
-        "frog": "Chura",
-        "insect": "Mdudu",
-        "other": "Nyingine",
-        "note": "Dokezo"
-      },
-      "species": "Spishi (si lazima)",
-      "speciesPlaceholder": "Jina la kawaida au kisayansi",
-      "speciesHint": "Acha wazi ikiwa unajua tu kundi la mnyama.",
-      "noteRequired": "Dokezo",
-      "noteOptional": "Dokezo (si lazima)",
-      "notePlaceholder": "Aina ya mwito, uhakika, hali ya hewa au maelezo mengine muhimu…",
-      "updateLabel": "Sasisha lebo",
-      "saveLabel": "Hifadhi lebo",
-      "saveHint": "Imehifadhiwa kwenye kivinjari hiki hadi uhamishe mkusanyiko wa lebo.",
-      "drawInstruction": "Buruta kuchora · chagua kisanduku kuhariri",
-      "spectrogramAria": "Spektrogramu shirikishi ya sauti",
-      "buildingSpectrogram": "Inatengeneza spektrogramu…",
-      "spectrogramFailed": "Rekodi hii haikuweza kubadilishwa kuwa spektrogramu.",
-      "audioUnsupported": "Kivinjari chako hakiwezi kucheza rekodi hii."
-    }
-  },
-  "soundscape": {
-    "meta": {
-      "title": "Mandhari ya sauti",
-      "description": "Leta rekodi za AudioMoth na uunde saa ya mandhari ya sauti ya saa 24 kutokana na masafa yake."
-    },
-    "hero": {
-      "eyebrow": "Ufuatiliaji wa sauti",
-      "title": "Badilisha rekodi za AudioMoth kuwa saa ya mandhari ya sauti",
-      "description": "Dondosha hapa chini faili za WAV za AudioMoth za siku nzima. Kila rekodi huchunguzwa katika mikanda mitano ya masafa, na nyakati zenye sauti kubwa zaidi huchorwa kuzunguka saa ya saa 24.",
-      "timeNote": "Nyakati za rekodi husomwa kutoka kwa majina ya faili za AudioMoth (kwa mfano 20240404_153000.WAV). Vifaa vya AudioMoth kwa kawaida hutumia UTC isipokuwa vimewekwa vinginevyo. Rekodi zako haziondoki kwenye kifaa hiki — kila kitu huchambuliwa kwenye kivinjari chako."
-    },
-    "import": {
-      "dropTitle": "Dondosha faili za WAV za AudioMoth hapa",
-      "dropHint": "Unaweza kuchagua faili nyingi kwa wakati mmoja — rekodi za siku nzima hufanya kazi vizuri zaidi.",
-      "browse": "Chagua faili",
-      "fileCount": "{count, plural, one {Rekodi #} other {Rekodi #}}",
-      "clearAll": "Futa zote",
-      "removeFile": "Ondoa {name}",
-      "analyzing": "Inachambua {name}…",
-      "progress": "Rekodi {done} kati ya {total} zimechambuliwa",
-      "statusError": "Faili hii haikuweza kusomwa",
-      "tooShort": "Rekodi ni fupi mno kuchambuliwa",
-      "onlyWav": "Faili za WAV pekee ndizo zinazokubaliwa.",
-      "timeFromModified": "Jina la faili halina tarehe na saa — inatumia muda wa marekebisho ya faili"
-    },
-    "chart": {
-      "title": "Nguvu kasoro kelele — {date}",
-      "allDates": "bado hakuna rekodi",
-      "radialLabel": "Nguvu kasoro kelele",
-      "timeLabel": "Saa (Saa za siku)",
-      "legendTitle": "Mikanda ya masafa",
-      "empty": "Rekodi zilizochambuliwa zitaonekana hapa kama saa ya mandhari ya sauti ya saa 24.",
-      "emptyHint": "Leta rekodi za AudioMoth hapo juu ili kuanza.",
-      "downloadPng": "Pakua picha",
-      "hoverHint": "Sogeza kishale juu ya saa ili kuona thamani.",
-      "datesTitle": "Siku",
-      "allDatesChip": "Siku zote"
-    }
-  },
-  "adminOnly": {
-    "label": "Wasimamizi pekee"
-  },
-  "accountWallet": {
-    "title": "Pochi",
-    "intro": "Pochi yako binafsi ya michango, inayolindwa na funguo zako za siri. Michango kwa miradi yako inafika kwenye anwani hii.",
-    "loadError": "Imeshindwa kupakia pochi yako.",
-    "passkeyUnsupported": "Kifaa hiki hakitumii funguo za siri. Jaribu kifaa chenye Face ID, alama ya kidole, au ufunguo wa usalama.",
-    "passkeyLabel": "GainForest — {name}",
-    "passkeyLabelFallback": "Pochi ya GainForest",
-    "createError": "Imeshindwa kuunda pochi. Tafadhali jaribu tena.",
-    "addSignerError": "Imeshindwa kuongeza ufunguo wa siri. Tafadhali jaribu tena.",
-    "removeSignerError": "Imeshindwa kuondoa ufunguo huu wa siri. Tafadhali jaribu tena.",
-    "deleteError": "Imeshindwa kuondoa pochi. Tafadhali jaribu tena.",
-    "emptyTitle": "Bado hakuna pochi",
-    "emptyHint": "Unda pochi yako ya michango kwa ufunguo wa siri (Face ID, alama ya kidole, au ufunguo wa usalama). Hakuna maneno ya siri ya kupanda, hakuna cha kusakinisha.",
-    "creating": "Inasubiri ufunguo wako wa siri…",
-    "createButton": "Unda pochi kwa ufunguo wa siri",
-    "defaultName": "Pochi yangu ya michango",
-    "copyAddress": "Nakili anwani",
-    "copied": "Imenakiliwa",
-    "copy": "Nakili",
-    "readyHint": "Anwani hii inaweza kupokea michango mara moja. Ni yako na ni funguo za siri zilizo hapa chini pekee zinazoweza kutumia fedha zake.",
-    "activeHint": "Pochi hii iko hai kwenye blockchain. Funguo zake za siri sasa zinasimamiwa kwenye mnyororo.",
-    "signersHeading": "Nani anaweza kuidhinisha malipo",
-    "signersLocked": "Imefungwa",
-    "unnamedPasskey": "Ufunguo wa siri",
-    "removeSigner": "Ondoa ufunguo wa siri",
-    "addPasskey": "Ongeza ufunguo mwingine wa siri",
-    "signerLabelPlaceholder": "Ipe jina ufunguo huu (mf. Simu yangu)",
-    "signersHint": "Ongeza ufunguo wa siri kutoka kifaa kingine au mtu unayemwamini — yeyote kati yao anaweza kuidhinisha malipo.",
-    "deleteButton": "Ondoa pochi",
-    "deleteConfirmTitle": "Ondoa pochi hii?",
-    "deleteConfirmBody": "Hatua hii haiwezi kutenduliwa. Ukiunda pochi mpya baadaye kwa ufunguo mpya wa siri, itakuwa na anwani tofauti.",
-    "deleteConfirmFunds": "Pochi hii tayari ina fedha, hivyo haiwezi kuondolewa.",
-    "deleteConfirmCancel": "Ghairi",
-    "deleteConfirmButton": "Ndiyo, ondoa pochi",
-    "viewOnExplorer": "Tazama anwani hii kwenye Etherscan",
-    "explorer": "Etherscan",
-    "balancesHeading": "Salio",
-    "balancesEmpty": "Bado hakuna fedha. Michango inayotumwa kwa anwani hii itaonekana hapa.",
-    "balancesError": "Salio halipatikani kwa sasa. Onyesha upya ili kujaribu tena.",
-    "sendHeading": "Tuma fedha",
-    "sendIntro": "Hamisha fedha kutoka pochi hii kwenda anwani nyingine yoyote ya pochi. Unaidhinisha kila uhamisho kwa ufunguo wako wa siri.",
-    "sendToken": "Sarafu",
-    "sendRecipient": "Anwani ya mpokeaji",
-    "sendRecipientPlaceholder": "Anwani ya mpokeaji (0x…)",
-    "sendRecipientInvalid": "Weka anwani sahihi ya pochi — inaanza na 0x ikifuatiwa na herufi 40.",
-    "sendAmount": "Kiasi",
-    "sendAmountInvalid": "Weka kiasi sahihi.",
-    "sendAmountTooHigh": "Hicho ni zaidi ya kilichomo kwenye pochi hii.",
-    "sendMax": "Juu",
-    "sendButton": "Tuma kwa ufunguo wa siri",
-    "sendPreparing": "Inaandaa…",
-    "sendAwaitingPasskey": "Inasubiri ufunguo wako wa siri…",
-    "sendSubmitting": "Inatuma — inaweza kuchukua dakika moja…",
-    "sendSuccess": "Imetumwa! Uhamisho umethibitishwa.",
-    "sendViewTx": "Tazama muamala",
-    "sendGasNote": "GainForest inalipia ada ya mtandao.",
-    "sendNoSigner": "Ni mtu mwenye ufunguo wa siri uliosajiliwa kwenye pochi hii pekee anayeweza kutuma kutoka kwake.",
-    "sendErrorNotConfigured": "Utumaji bado haujawezeshwa kwenye seva hii.",
-    "sendErrorInsufficient": "Pochi hii haina fedha za kutosha kwa uhamisho huo.",
-    "sendErrorBusy": "Mtandao una shughuli nyingi kwa sasa. Tafadhali jaribu tena baada ya dakika chache.",
-    "sendErrorSignature": "Idhini ya ufunguo wa siri haikuweza kuthibitishwa. Tafadhali jaribu tena.",
-    "sendErrorGeneric": "Uhamisho haukuweza kukamilika. Tafadhali jaribu tena.",
-    "thresholdHeading": "Idhini zinazohitajika",
-    "thresholdOption": "{count} kati ya {total, plural, one {ufunguo wa siri #} other {funguo za siri #}}",
-    "thresholdHint": "Ni funguo ngapi za siri zinazopaswa kuidhinisha kila uhamisho. Kuhitaji zaidi ya moja ni salama zaidi — ufunguo mmoja uliopotea au kuibiwa hauwezi kuhamisha fedha peke yake. Kubadilisha hili kunaipa pochi anwani mpya, kwa hivyo kunawezekana tu kabla pochi haijapokea fedha.",
-    "thresholdUpdateError": "Haikuweza kubadilisha hitaji la idhini. Tafadhali jaribu tena.",
-    "thresholdLockedFunds": "Pochi tayari ina fedha, kwa hivyo hitaji la idhini haliwezi kubadilishwa tena.",
-    "thresholdSingleWarning": "Kwa sasa ufunguo mmoja wa siri unaweza kuhamisha fedha. Fikiria kuhitaji idhini zaidi.",
-    "sendApprovalsNeeded": "Pochi hii inahitaji idhini {count} kwa funguo tofauti za siri. Wewe unatoa ya kwanza; zilizobaki zinaweza kutolewa hapa au kutoka kifaa kingine.",
-    "sendApprovalOf": "Idhini ya {current} kati ya {total} — inasubiri ufunguo wa siri…",
-    "sendDuplicatePasskey": "Kila idhini inahitaji ufunguo tofauti wa siri.",
-    "pendingHeading": "Uhamisho unasubiri idhini",
-    "pendingProgress": "Idhini {current} kati ya {total} zimetolewa",
-    "pendingRemoteHint": "Wenye funguo nyingine za siri wanaweza kuidhinisha kutoka kifaa chao — uhamisho unabaki hapa hadi upate idhini za kutosha. Idhini ya mwisho ndiyo inayoutuma.",
-    "pendingApprove": "Idhinisha kwa ufunguo wa siri",
-    "pendingApproveAndSend": "Idhinisha na kutuma",
-    "pendingCancel": "Ghairi uhamisho",
-    "pendingInvalid": "Uhamisho huu unaosubiri si halali tena — pochi ilibadilika tangu ulipoanzishwa. Ughairi ili kuanzisha mpya.",
-    "pendingCancelForbidden": "Ni aliyeanzisha uhamisho huu au msimamizi wa pochi pekee anayeweza kuughairi.",
-    "sendStartButton": "Anzisha uhamisho kwa ufunguo wa siri",
-    "sendErrorExpired": "Uhamisho huu si halali tena — pochi au ada za mtandao zilibadilika. Tafadhali uanzishe tena.",
-    "sendErrorPendingExists": "Tayari kuna uhamisho unaosubiri idhini. Ukamilishe au uughairi kwanza.",
-    "sendErrorApprovalInvalid": "Idhini hii haikuweza kuthibitishwa. Tafadhali jaribu tena.",
-    "onchainManageHint": "Pochi hii inatumika kwenye blockchain, kwa hivyo mabadiliko ya funguo za siri yanarekodiwa kwenye mnyororo na yanahitaji idhini za kawaida. GainForest inalipia ada ya mtandao.",
-    "thresholdOnchainHint": "Ni funguo ngapi za siri zinazopaswa kuidhinisha kila uhamisho. Badiliko hili linarekodiwa kwenye blockchain — anwani ya pochi haibadiliki.",
-    "manageForbidden": "Ni mmiliki wa shirika au msimamizi pekee anayeweza kufanya badiliko hili."
-  },
-  "accountSupport": {
-    "button": "Saidia",
-    "buttonAria": "Saidia {name} moja kwa moja",
-    "modalTitle": "Saidia {name}",
-    "modalDescription": "Chagua kiasi cha kumpa {name} moja kwa moja.",
-    "directNote": "100% inaenda moja kwa moja kwa {name}, bila ada ya jukwaa na ada ya mtandao imelipiwa kwa ajili yako.",
-    "cartLabel": "Msaada wa moja kwa moja kwa akaunti"
-  },
-  "testRecord": {
-    "hideAction": "Ficha kama jaribio",
-    "hideHint": "Ficha kipengee hiki kutoka mlisho wa umma na kurasa za uchunguzi kama maudhui ya majaribio",
-    "confirmHide": "Ficha kwa kila mtu",
-    "cancel": "Ghairi",
-    "genericError": "Hitilafu imetokea. Tafadhali jaribu tena."
-  },
-  "adminTestRecords": {
-    "title": "Machapisho na uchunguzi vilivyofichwa",
-    "description": "Machapisho na uchunguzi huu vimewekwa alama kama vya majaribio, hivyo vimefichwa kutoka mlisho wa umma na kurasa za uchunguzi. Sehemu nyingine ya akaunti ya mmiliki bado inaonekana.",
-    "empty": "Hakuna chapisho au uchunguzi uliofichwa kwa sasa.",
-    "remove": "Onyesha tena",
-    "unnamed": "Akaunti isiyo na jina",
-    "error": "Hitilafu imetokea. Tafadhali jaribu tena.",
-    "itemLabel": "{kind} ya {name}",
-    "hiddenAgo": "Imefichwa {time}",
-    "kinds": {
-      "post": "Chapisho",
-      "observation": "Uchunguzi",
-      "project": "Mradi",
-      "organization": "Sasisho la shirika",
-      "donation": "Mchango",
-      "record": "Kipengee"
+      "allHours": "Saa zote",
+      "selectedCount": "{count, plural, one {# imechaguliwa} other {# zimechaguliwa}}",
+      "deleteSelected": "Futa",
+      "selectAria": "Chagua {name}",
+      "deleteConfirmTitle": "Futa {count, plural, one {rekodi #} other {rekodi #}}?",
+      "deleteConfirmBody": "Rekodi zilizochaguliwa zitafutwa kabisa — faili halisi zilizohifadhiwa, vionjo vinavyochezeka, spektrogramu na kila utambulisho uliowekwa juu yake vyote vitaondolewa. Hili haliwezi kutenduliwa.",
+      "deleteConfirmCancel": "Ghairi",
+      "deleteConfirmAction": "Futa {count, plural, one {rekodi #} other {rekodi #}}",
+      "deleteProgress": "Inafuta… {done} kati ya {total}",
+      "deleteFailed": "{count, plural, one {Rekodi #} other {Rekodi #}} haikuweza kufutwa. Tafadhali jaribu tena.",
+      "clearSelection": "Ondoa uchaguzi"
     }
   },
   "devices": {
@@ -2600,7 +2623,231 @@
       "githubTitle": "CGS kwenye GitHub",
       "githubDesc": "Msimbo kamili wa chanzo wa huduma ya vikundi, wazi kwa yeyote kusoma, kuendesha na kuboresha.",
       "atprotoTitle": "Jinsi AT Protocol inavyofanya kazi",
-      "atprotoDesc": "Ziara shirikishi ya mtandao wazi ambao yote haya yamejengwa juu yake."
+      "atprotoDesc": "Ziara shirikishi ya mtandao wazi ambao yote haya yamejengwa juu yake.",
+      "hypercertsTitle": "Leksikoni za Hypercerts",
+      "hypercertsDesc": "Jinsi GainForest na Ma Earth zinavyoweka muundo wa kazi ya athari, na kile cha kuandika ili ulingane na zote mbili.",
+      "dataModelTitle": "Jinsi data yako inavyoungana",
+      "dataModelDesc": "Uchunguzi, seti za data, miradi na mashirika: kila kimoja ni nini, na njia tatu vinavyounganishwa."
+    }
+  },
+  "dataModel": {
+    "metaTitle": "Jinsi data yako inavyoungana",
+    "metaDescription": "Ziara kwa lugha rahisi ya uchunguzi, seti za data, miradi na mashirika ndani ya GainForest: kila kimoja ni nini, na njia tatu vinavyounganishwa.",
+    "kicker": "Muundo wa data",
+    "title": "Jinsi data yako inavyoungana",
+    "lead": "Unapiga picha ya mti. Miezi kadhaa baadaye picha hiyo ni sehemu ya seti ya data yenye jina, ndani ya mradi, iliyochapishwa na shirika, na inasomeka na mtu yeyote kwenye mtandao huria. Ukurasa huu unapitia mnyororo huo: kila kipande ni nini, na ni nini hasa kinachokiunganisha na kinachofuata.",
+    "bigIdea": {
+      "heading": "Wazo kuu: kila kumbukumbu ni kadi ndani ya kabati la mafaili",
+      "p1": "GainForest haina hifadhidata kuu inayomiliki data yako. Kila akaunti — yako na ya kila shirika — ni kabati lake dogo la mafaili, na kila kitu unachotengeneza ni kadi iliyowekwa humo: kadi moja kwa kila uchunguzi, moja kwa kila picha, moja kwa kila seti ya data, moja kwa kila mradi.",
+      "p2": "Kadi hazihami kutoka kabati moja kwenda jingine, na hakuna kinachofichwa ndani ya kitu kingine. Badala yake, kadi zinaelekezana. Kadi ya picha inabeba anwani ya uchunguzi inaomilikiwa nao; kadi ya uchunguzi inabeba anwani ya seti yake ya data. Hiyo ndiyo maana yote ya «kuongeza kitu kwenye kitu kingine» hapa: kuandika anwani kwenye kadi."
+    },
+    "pieces": {
+      "heading": "Vipande sita",
+      "intro": "Karibu kila kitu unachokiona kwenye programu ni mojawapo ya hivi sita. Gusa kimoja uone ni nini, kinaitwaje ndani ya mfumo, na kinavyoshikamana na majirani zake.",
+      "hooksLabel": "Jinsi kinavyounganishwa",
+      "observation": {
+        "name": "Uchunguzi",
+        "plain": "Spishi moja, mahali pamoja, kwa wakati mmoja. Mti uliopima, ndege uliyemsikia, chura aliyepigwa picha na mtu.",
+        "detail": "Unabeba jina la kisayansi, tarehe, viwianishi na maelezo yoyote. Ni kipimo kidogo kabisa cha data ya mazingira katika GainForest, na unaweza kusimama peke yake bila shida: hauhitaji seti ya data wala mradi.",
+        "hooks": "Unaelekeza juu kwenye seti ya data, kwenye mradi na kwenye eneo. Chochote kati ya hivyo vitatu kinaweza kuachwa wazi."
+      },
+      "evidence": {
+        "name": "Ushahidi",
+        "plain": "Picha, rekodi ya sauti, kipimo cha tepu — uthibitisho ulioambatanishwa na uchunguzi.",
+        "detail": "Picha, sauti na video huhifadhiwa kama kadi zao wenyewe, na vipimo kama urefu wa mti au kipenyo cha shina ni kadi nyingine tena. Kuvitenganisha kunakuwezesha kuongeza picha ya pili, au kipimo cha msimu ujao, bila kuandika upya uchunguzi.",
+        "hooks": "Unaelekeza chini kwenye uchunguzi mmoja tu. Ushahidi haushirikiwi kamwe kati ya matukio mawili."
+      },
+      "dataset": {
+        "name": "Seti ya data",
+        "plain": "Kundi lenye jina la uchunguzi unaokwenda pamoja: mara nyingi utafiti mmoja, safari moja, msimu mmoja.",
+        "detail": "«Utafiti wa Bonde la Danum, Machi 2025» ni seti ya data. Inahifadhi jina, maelezo na hesabu inayoendelea, na ndiyo watu wengine wanapakua au kunukuu wanapotumia kazi yako.",
+        "hooks": "Haiorodheshi wanachama wake. Badala yake kila uchunguzi ndio unaoielekeza, hivyo seti ya data ni kila uchunguzi unaobeba anwani yake."
+      },
+      "site": {
+        "name": "Eneo",
+        "plain": "Mahali kwenye ramani: kipande cha msitu, hifadhi, au kiwanja chenye mpaka uliochorwa kuzunguka.",
+        "detail": "Eneo linahifadhi jina, kitovu na umbo, ili uchunguzi, tabaka za ramani na miradi vyote viweze kusema «hili lilitokea hapa» bila kila kimoja kuchora ramani upya.",
+        "hooks": "Uchunguzi unalielekeza, na dai la mradi linaliorodhesha miongoni mwa maeneo ambako kazi ilifanyika."
+      },
+      "project": {
+        "name": "Mradi",
+        "plain": "Simulizi ya hadhara ya kazi fulani: juhudi za urejeshaji, mpango wa ufuatiliaji, au jitihada ya jamii.",
+        "detail": "Mradi ni mkusanyiko — kadi ambayo kazi yake kuu ni kushikilia orodha ya kadi nyingine. Una kichwa, muhtasari, picha ya jalada, na orodha hiyo. Kila mradi pia hupata pacha wa kimya, yaani dai, linalobeba tarehe, watu na maeneo.",
+        "hooks": "Unashikilia orodha ya vipengele: dai lake, pamoja na seti zozote za data zilizowekwa ndani yake. Uchunguzi pia unaweza kuuelekeza moja kwa moja."
+      },
+      "organization": {
+        "name": "Shirika",
+        "plain": "Timu yenye akaunti yake mwenyewe — kabati la mafaili linaloshirikiwa ambalo watu kadhaa wanaweza kuandika ndani yake.",
+        "detail": "Shirika si folda wala lebo. Ni akaunti kamili yenyewe, yenye wasifu, orodha ya wanachama na majukumu. Miradi, seti za data na uchunguzi wake ni kadi zilizohifadhiwa katika akaunti hiyo.",
+        "hooks": "Hakuna kinachoelekeza kwenye shirika. Kumbukumbu ni mali yake kwa sababu zimehifadhiwa katika akaunti yake — na hiyo ndiyo hasa anwani iliyo mbele ya kila kadi inayoirekodi."
+      }
+    },
+    "map": {
+      "heading": "Ramani ya viungo",
+      "intro": "Kila mshale hapa chini ni sehemu halisi ndani ya kumbukumbu halisi. Gusa kisanduku — au fremu ya vitone inayovizunguka — ili kuwasha viungo vyake na kusoma maana yake.",
+      "ariaLabel": "Ramani shirikishi ya jinsi kumbukumbu za GainForest zinavyounganishwa",
+      "hint": "Mishale huwaka kulingana na ulichochagua. Fremu ya vitone ni akaunti inayohifadhi kumbukumbu hizi zote.",
+      "nodes": {
+        "site": {
+          "name": "Eneo",
+          "desc": "Mahali penye mpaka. Uchunguzi unalielekeza kwa siteRef, na dai la mradi linaliorodhesha ndani ya locations[] ili kazi ionekane kwenye ramani."
+        },
+        "project": {
+          "name": "Mradi",
+          "desc": "Kadi ya mkusanyiko. Inashikilia orodha — items[] — yenye dai lake na seti zozote za data zilizowekwa ndani yake."
+        },
+        "cert": {
+          "name": "Dai",
+          "desc": "Pacha wa mradi, anayetengenezwa kiotomatiki. Anabeba tarehe, wachangiaji, upeo wa kazi na maeneo, ili kadi ya mradi ibaki orodha rahisi."
+        },
+        "dataset": {
+          "name": "Seti ya data",
+          "desc": "Kundi lenye jina. Haliorodheshi kamwe uchunguzi wake; uchunguzi ndio unaobeba anwani yake katika datasetRef, na seti hiyo inahifadhi hesabu tu."
+        },
+        "observation": {
+          "name": "Uchunguzi",
+          "desc": "Kitovu cha picha nzima. Kadi moja inaweza kuelekeza kwenye seti ya data, mradi na eneo kwa wakati mmoja — au isielekeze popote, ikabaki peke yake."
+        },
+        "evidence": {
+          "name": "Ushahidi",
+          "desc": "Kila picha, rekodi na kipimo ni kadi yake yenyewe inayoelekeza kurudi kwenye uchunguzi kupitia occurrenceRef."
+        },
+        "account": {
+          "name": "Akaunti moja (mtu au shirika)",
+          "desc": "Fremu si kiungo, ni anwani. Kila kadi inaishi ndani ya akaunti moja tu, na «mradi huu ni wa shirika lile» kunamaanisha tu kwamba kadi ya mradi iliandikwa ndani ya akaunti ya shirika."
+        }
+      }
+    },
+    "kinds": {
+      "heading": "Njia tatu za kuunganisha vitu",
+      "intro": "Mara tu unapoweza kutambua mifumo hii mitatu, mfumo mzima huacha kuonekana mgumu.",
+      "pointer": {
+        "title": "Mtoto anaelekeza juu",
+        "text": "Kadi ndogo inahifadhi anwani ya kadi kubwa. Kuongeza uchunguzi kwenye seti ya data kunamaanisha kuandika upya uchunguzi huo mmoja; seti ya data yenyewe haiguswi."
+      },
+      "list": {
+        "title": "Mzazi anashikilia orodha",
+        "text": "Mradi unashikilia orodha ya vilivyomo ndani yake. Kuweka seti ya data ndani ya mradi kunamaanisha kuongeza kipengele kimoja kwenye orodha hiyo."
+      },
+      "home": {
+        "title": "Kinaishi hapo tu",
+        "text": "Kuwa mali ya shirika si kiungo hata kidogo. Ni swali la kadi iliandikwa katika akaunti ipi, na jambo hilo limejengwa ndani ya anwani ya kadi."
+      }
+    },
+    "journey": {
+      "heading": "Tukio moja, mwanzo hadi mwisho",
+      "intro": "Tazama picha ikijengwa hatua kwa hatua, kutoka picha moja hadi mradi uliochapishwa na shirika.",
+      "ariaLabel": "Mchoro wa hatua kwa hatua wa uchunguzi ukiwa sehemu ya seti ya data, mradi na shirika",
+      "back": "Hatua iliyotangulia",
+      "next": "Hatua inayofuata",
+      "play": "Cheza",
+      "pause": "Sitisha",
+      "stepLabel": "Hatua {n} kati ya {total}",
+      "nodes": {
+        "observation": "Uchunguzi",
+        "evidence": "Picha",
+        "dataset": "Seti",
+        "project": "Mradi",
+        "cert": "Dai",
+        "account": "Akaunti ya shirika"
+      },
+      "steps": {
+        "s1": {
+          "title": "Unarekodi tukio",
+          "text": "Unapakia picha ya mti pamoja na spishi, tarehe na mahali, kisha programu inaandika kadi moja ya uchunguzi. Kwa sasa haihusiani na kitu chochote: ni tukio tu ndani ya akaunti yako."
+        },
+        "s2": {
+          "title": "Ushahidi unaning'inia juu yake",
+          "text": "Picha huhifadhiwa kama kadi yake yenyewe inayoelekeza kurudi kwenye uchunguzi. Ongeza picha tatu na kipimo cha urefu, nawe utakuwa na kadi nne, zote zikielekeza tukio lilelile."
+        },
+        "s3": {
+          "title": "Unaikusanya ndani ya seti ya data",
+          "text": "Chagua kundi la uchunguzi kisha ulipe jina — «Utafiti wa Machi 2025». Kadi ya seti ya data hutengenezwa, na kila uchunguzi uliochaguliwa hupewa anwani ya seti hiyo. Uchunguzi ambao tayari uko kwenye seti huachwa, ili kusiwe na kinachohama kimyakimya."
+        },
+        "s4": {
+          "title": "Unaikusanya kwa ajili ya mradi",
+          "text": "Ukichagua mradi wakati wa kupakia, uchunguzi pia unabeba anwani ya mradi na kurithi eneo lake, hivyo unatua mahali sahihi kwenye ramani."
+        },
+        "s5": {
+          "title": "Seti ya data inajiunga na mradi",
+          "text": "Seti ya data inaongezwa kwenye orodha ya vipengele vya mradi. Sasa ukurasa wa mradi unaweza kuonyesha seti nzima kwa mara moja badala ya mamia ya matukio yaliyotawanyika."
+        },
+        "s6": {
+          "title": "Dai la mradi linajazwa",
+          "text": "Kila mradi hubeba kimyakimya dai pacha lenye tarehe, wachangiaji, upeo wa kazi na maeneo. Hulihariri moja kwa moja; linawekwa sambamba na mradi."
+        },
+        "s7": {
+          "title": "Unachapisha kama shirika lako",
+          "text": "Badilisha akaunti unayochapishia, na kadi hizi zote zitaandikwa ndani ya akaunti ya pamoja ya shirika badala ya yako. Hakuna kiungo kinachobadilika — kinachobadilika ni anwani iliyo mbele yake tu."
+        }
+      }
+    },
+    "publishAs": {
+      "heading": "Data inatua kwenye akaunti ya nani?",
+      "intro": "Hili ndilo chaguo pekee linaloamua nani anamiliki data. Geuza swichi uone kinachobadilika — na kisichobadilika.",
+      "publishingAs": "Unachapisha kama",
+      "storedAt": "Imehifadhiwa katika",
+      "option": {
+        "personal": "Mimi mwenyewe",
+        "organization": "Shirika langu"
+      },
+      "summary": {
+        "personal": "Kumbukumbu zinaandikwa ndani ya akaunti yako mwenyewe. Wewe pekee ndiye unaweza kuzibadilisha, na jina lako linaonekana juu yake popote zinapotokea.",
+        "organization": "Kumbukumbu zinaandikwa ndani ya akaunti ya pamoja ya shirika. Zinaonekana chini ya jina la shirika, na wenzako wanaweza kuendelea kuzifanyia kazi bila wewe."
+      },
+      "guard": {
+        "personal": "Hakuna kinachosimama kati yako na akaunti yako mwenyewe: unaingia, unaandika.",
+        "organization": "Huduma ya ulinzi inasimama mbele ya akaunti ya pamoja na kukagua jukumu lako kabla ya kila uandishi. Hakuna anayeshika nenosiri la shirika, na kila kitendo kinawekwa kumbukumbu."
+      },
+      "roles": {
+        "member": {
+          "name": "Mwanachama",
+          "text": "Anaweza kuongeza kumbukumbu mpya, na kuhariri au kufuta zile alizoongeza."
+        },
+        "admin": {
+          "name": "Msimamizi",
+          "text": "Anaweza kuhariri au kufuta chochote ndani ya shirika, na kualika watu."
+        },
+        "owner": {
+          "name": "Mmiliki",
+          "text": "Yote anayoweza msimamizi, pamoja na kubadilisha majukumu ya watu wengine."
+        }
+      },
+      "note": "Kubadilisha akaunti hakuhamishi chochote ulichochapisha awali. Kumbukumbu hubaki katika akaunti zilikoandikwa, hivyo ni vyema kuamua kabla ya upakiaji mkubwa badala ya baadaye."
+    },
+    "faq": {
+      "heading": "Maswali ya kawaida",
+      "q1": {
+        "question": "Je, uchunguzi lazima uwe ndani ya seti ya data?",
+        "answer": "Hapana. Seti ya data, mradi na eneo yote ni ya hiari. Uchunguzi uliosimama peke yake ni halali kabisa, na wengi wako hivyo: seti ya data ni urahisi kwa wanaochapisha na kupakua kwa makundi."
+      },
+      "q2": {
+        "question": "Je, uchunguzi mmoja unaweza kuwa katika seti mbili za data?",
+        "answer": "Hapana. Uchunguzi unabeba anwani moja tu ya seti ya data, hivyo upo ndani ya seti moja kwa wakati mmoja. Ili kuuhamisha, uuondoe kwenye seti ya kwanza kisha uuongeze kwenye ya pili."
+      },
+      "q3": {
+        "question": "Nini kitatokea kwa uchunguzi wangu nikifuta seti ya data?",
+        "answer": "Utabaki salama. Kufuta seti ya data kunaanza kwa kuondoa anwani ya seti hiyo kwenye kila uchunguzi ndani yake, na kuiondoa seti hiyo kwenye mradi wowote ulioiorodhesha. Unabaki na matukio yaleyale, ila hayajakusanywa tena."
+      },
+      "q4": {
+        "question": "Je, ninaweza kuhamishia shirika mradi niliouunda binafsi?",
+        "answer": "Si kwa kubonyeza swichi. Akaunti ambamo kumbukumbu inaishi ni sehemu ya utambulisho wake, hivyo kuihamisha kunamaanisha kuichapisha upya kutoka akaunti ya shirika. Mara nyingi ni rahisi kuamua mapema nani anapaswa kumiliki kazi hiyo."
+      },
+      "q5": {
+        "question": "Nani anaweza kuona haya yote?",
+        "answer": "Kila mtu. Kumbukumbu zinahifadhiwa kwenye mtandao huria wa AT Protocol, hivyo programu yoyote — si GainForest pekee — inaweza kuzisoma. Hiyo ndiyo lengo: kazi yako ya shambani inabaki yako na inabaki inayohamishika, badala ya kufungiwa ndani ya hifadhidata ya kampuni moja."
+      }
+    },
+    "more": {
+      "heading": "Endelea kusoma",
+      "lexiconsTitle": "Miundo ya data",
+      "lexiconsDesc": "Miundo kamili ya kila kumbukumbu, sehemu kwa sehemu, pamoja na miundo halisi iliyo nyuma ya kila kadi kwenye ukurasa huu.",
+      "cgsTitle": "Jinsi akaunti za vikundi zinavyofanya kazi",
+      "cgsDesc": "Huduma ya ulinzi inayoruhusu timu nzima kushiriki akaunti moja ya shirika, ikiwa na majukumu na kumbukumbu ya ukaguzi.",
+      "atprotoTitle": "AT Protocol ni nini?",
+      "atprotoDesc": "Mtandao huria ulio chini ya yote: akaunti, hazina za kumbukumbu, na kwa nini hakuna kinachofungiwa ndani.",
+      "epdsTitle": "Jinsi ePDS inavyofanya kazi",
+      "epdsDesc": "Mahali akaunti na kumbukumbu zake zinapohifadhiwa kwa kweli, na jinsi kuingia kunavyofanya kazi."
     }
   },
   "atproto": {
@@ -2891,5 +3138,517 @@
       "lexiconLink": "Muundo wa rekodi ya pochi, na mingine yote",
       "atprotoLink": "Jinsi AT Protocol inavyohifadhi rekodi"
     }
+  },
+  "uploadTray": {
+    "label": "Upakiaji wa chinichini",
+    "headlineUploading": "Inapakia",
+    "headlineWaiting": "Inasubiri kupakiwa",
+    "headlinePaused": "Upakiaji umesitishwa",
+    "headlineFailed": "Upakiaji umeshindikana",
+    "headlineDone": "Upakiaji umekamilika",
+    "collapse": "Kunja",
+    "expand": "Panua",
+    "statusQueued": "Kwenye foleni",
+    "statusDone": "Imekamilika",
+    "statusPaused": "Imesitishwa {percent}%",
+    "statusFailed": "Imeshindikana",
+    "statusSaving": "Inahifadhi…",
+    "statusRetrying": "Jaribio {attempt}/{max}",
+    "pause": "Sitisha",
+    "resume": "Endelea",
+    "retry": "Jaribu tena",
+    "cancel": "Ghairi faili hii",
+    "cancelAll": "Ghairi zote",
+    "hide": "Ficha",
+    "remaining": "Zimebaki {count} kati ya {total} · {size}",
+    "allUploaded": "{count} zimepakiwa · {size}"
+  },
+  "soundscape": {
+    "meta": {
+      "title": "Mandhari ya sauti",
+      "description": "Unda saa ya mandhari ya sauti ya saa 24 kutokana na rekodi za sauti zilizopakiwa tayari kwenye akaunti yako."
+    },
+    "hero": {
+      "eyebrow": "Ufuatiliaji wa sauti",
+      "title": "Badilisha rekodi zako zilizopakiwa kuwa saa ya mandhari ya sauti",
+      "description": "Kila rekodi uliyopakia huchunguzwa katika mikanda mitano ya masafa, na nyakati zenye sauti kubwa zaidi huchorwa kuzunguka saa ya saa 24.",
+      "timeNote": "Nyakati za rekodi hutoka kwenye maelezo ya kila rekodi (saa ya kifaa, kwa kawaida UTC). Uchambuzi hupakua kila rekodi asili kwenye kivinjari chako mara moja tu — matokeo huhifadhiwa kwenye kifaa hiki."
+    },
+    "library": {
+      "signInTitle": "Ingia ili kuunda mandhari yako ya sauti",
+      "signInBody": "Saa ya mandhari ya sauti huchorwa kutokana na rekodi zilizopakiwa tayari kwenye akaunti yako. Ingia ili kuona zako.",
+      "loading": "Inapakia rekodi zako…",
+      "loadFailed": "Rekodi zako hazikuweza kupakiwa. Jaribu tena baada ya muda mfupi.",
+      "emptyTitle": "Bado hakuna rekodi zilizopakiwa",
+      "emptyBody": "Saa ya mandhari ya sauti huundwa kutokana na rekodi za akaunti yako. Pakia kwanza rekodi za AudioMoth, kisha urudi hapa.",
+      "goToUpload": "Pakia rekodi",
+      "refresh": "Onyesha upya",
+      "count": "{count, plural, one {Rekodi # iliyopakiwa} other {Rekodi # zilizopakiwa}}",
+      "downloadNote": "Kila rekodi asili hupakuliwa na kuchambuliwa mara moja tu; matokeo huhifadhiwa kwenye kifaa hiki.",
+      "analyze": "Chambua {count, plural, one {rekodi #} other {rekodi #}}",
+      "analyzeDone": "Rekodi zote zimechambuliwa",
+      "pause": "Sitisha",
+      "resume": "Endelea {count, plural, one {rekodi #} other {rekodi #}}",
+      "statusPaused": "Imesitishwa · {done} kati ya {total} zimechambuliwa",
+      "downloading": "Inapakua {name}…",
+      "analyzing": "Inachambua {name}…",
+      "progress": "{done} kati ya {total} zimechambuliwa",
+      "statusQueued": "Inasubiri…",
+      "statusAnalyzed": "Imechambuliwa",
+      "statusNotAnalyzed": "Bado haijachambuliwa",
+      "statusNoOriginal": "Faili asili ya sauti haipatikani",
+      "statusNoTime": "Hakuna muda wa rekodi",
+      "statusError": "Rekodi hii haikuweza kuchambuliwa",
+      "tooShort": "Ni fupi mno kuchambuliwa (inahitaji angalau sekunde {seconds})"
+    },
+    "groups": {
+      "title": "Folda",
+      "hint": "Kila mandhari ya sauti hutengenezwa kutoka kwa folda moja ya rekodi — chagua folda ya kufanyia kazi.",
+      "hintSingle": "Mandhari hii ya sauti hutengenezwa kutoka kwa folda yako pekee ya rekodi.",
+      "chip": "{name} · {count, plural, one {rekodi #} other {rekodi #}}",
+      "unassigned": "Haiko kwenye folda",
+      "unknown": "Folda imeondolewa"
+    },
+    "bands": {
+      "rumble": "Mngurumo",
+      "lowCalls": "Sauti za chini",
+      "birdSong": "Kuimba kwa ndege",
+      "highCalls": "Sauti za juu",
+      "insects": "Wadudu"
+    },
+    "chart": {
+      "title": "Mandhari ya sauti — {date}",
+      "allDates": "bado hakuna rekodi",
+      "radialLabel": "Kiwango cha sauti",
+      "timeLabel": "Saa (Saa za siku)",
+      "legendTitle": "Makundi ya sauti",
+      "bandsNote": "Viwango vya dalili. Sauti zinaingiliana, na wanyama wanaoimba katika kila kiwango hutofautiana kwa eneo.",
+      "empty": "Rekodi zilizochambuliwa zitaonekana hapa kama saa ya mandhari ya sauti ya saa 24.",
+      "emptyHint": "Chambua rekodi zako zilizopakiwa hapo juu ili kuanza.",
+      "downloadPng": "Pakua picha",
+      "hoverHint": "Buruta kuzunguka duara ili kukuza nyakati hizo, na ubofye wakati ili kusikiliza. Tumia − au “Siku nzima” kurudi nyuma.",
+      "hoverHintAllDates": "Buruta kuzunguka duara ili kukuza nyakati hizo, kisha chagua rekodi kutoka orodha ili kusikiliza. Tumia − au “Siku nzima” kurudi nyuma.",
+      "loadingAudio": "Inapakia {name}…",
+      "playing": "Inacheza {name}",
+      "stop": "Simamisha",
+      "playError": "Rekodi hii haikuweza kuchezwa kwenye kivinjari chako.",
+      "datesTitle": "Siku",
+      "allDatesChip": "Siku zote",
+      "averageNote": "Wastani wa rekodi {count} kwa kila saa — duara linaonyesha siku ya kawaida, si yenye kelele zaidi.",
+      "averageNoteRange": "Wastani wa rekodi {min}–{max} kwa kila saa — duara linaonyesha siku ya kawaida, si yenye kelele zaidi.",
+      "spreadNote": "Kivuli kinajumuisha asilimia 80 ya kati ya rekodi hizo — kikiwa kipana, siku zinatofautiana.",
+      "slotNote": "Rekodi zimepangwa katika vipindi vya dakika {minutes}, kwa sababu nyakati zake za kuanza hubadilika kila siku.",
+      "pointRecordings": "{count, plural, one {rekodi #} other {rekodi #}}"
+    },
+    "zoom": {
+      "rangeAllDay": "Siku nzima · 00:00 – 24:00",
+      "range": "Umekuzwa hadi {start} – {end}",
+      "zoomIn": "Kuza",
+      "zoomOut": "Punguza ukuzaji",
+      "earlier": "Mapema zaidi",
+      "later": "Baadaye",
+      "reset": "Siku nzima",
+      "empty": "Hakuna rekodi katika sehemu hii ya siku",
+      "recordingsTitle": "Rekodi zinazoonekana",
+      "recordingsCount": "{count, plural, one {rekodi #} other {rekodi #}}",
+      "recordingsEmpty": "Hakuna rekodi kwa wakati huu — punguza ukuzaji, au tumia ‹ na › kuangalia sehemu nyingine ya siku."
+    },
+    "published": {
+      "summary": "{count, plural, one {rekodi #} other {rekodi #}} · {dates}",
+      "playHint": "Bofya saa kwenye duara ili kusikiliza rekodi ya wakati huo.",
+      "metaTitle": "Mandhari ya sauti",
+      "metaDescription": "Saa ya mandhari ya sauti ya saa 24 iliyoundwa kutoka rekodi za shambani.",
+      "notFoundTitle": "Mandhari hii ya sauti haipatikani",
+      "notFoundBody": "Huenda imeondolewa, au akaunti iliyoichapisha haifikiki kwa sasa.",
+      "byLine": "Imeshirikiwa na {name}",
+      "openWorkbench": "Tengeneza mandhari yako ya sauti",
+      "inFeedTitle": "Mandhari ya sauti",
+      "openFull": "Fungua mandhari ya sauti"
+    },
+    "share": {
+      "recordTitle": "Mandhari ya sauti · {dates}",
+      "recordTitleNamed": "Mandhari ya sauti · {name} · {dates}",
+      "shareToFeed": "Shiriki kwenye mlisho",
+      "addToProject": "Ongeza kwenye mradi",
+      "captionLabel": "Sema kitu kuhusu hii (si lazima)",
+      "cancel": "Ghairi",
+      "close": "Funga",
+      "errorGeneric": "Haikufanya kazi. Jaribu tena baada ya muda mfupi.",
+      "untitledProject": "Mradi usio na jina",
+      "feed": {
+        "title": "Shiriki mandhari hii ya sauti",
+        "subtitle": "Chapisho lako litaonyesha saa iliyoundwa kutoka {count, plural, one {rekodi #} other {rekodi #}}, na yeyote anaweza kucheza rekodi hizo kutoka hapo.",
+        "defaultCaption": "Mandhari ya sauti ya saa 24 kutoka {count, plural, one {rekodi #} other {rekodi #}}.",
+        "linkNote": "Mandhari ya sauti huongezwa kwenye chapisho lako moja kwa moja.",
+        "post": "Chapisha kwenye mlisho",
+        "posting": "Inachapisha…",
+        "postedTitle": "Imeshirikiwa kwenye mlisho",
+        "postedBody": "Mandhari yako ya sauti sasa iko kwenye mlisho, tayari kusikilizwa.",
+        "viewFeed": "Fungua mlisho"
+      },
+      "project": {
+        "title": "Ongeza kwenye mradi",
+        "subtitle": "Chagua mradi na mandhari ya sauti itaingia kwenye ratiba yake ya ushahidi.",
+        "captionPlaceholder": "Mandhari hii ya sauti inaonyesha nini? (si lazima)",
+        "loading": "Inapakia miradi yako…",
+        "loadError": "Miradi yako haikuweza kupakiwa. Jaribu tena baada ya muda mfupi.",
+        "empty": "Bado huna mradi wowote.",
+        "createProject": "Tengeneza mradi",
+        "searchPlaceholder": "Tafuta miradi yako",
+        "addedTitle": "Imeongezwa kwenye ratiba",
+        "addedBody": "Mandhari ya sauti sasa iko kwenye ratiba ya ushahidi ya {project}.",
+        "viewProject": "Fungua mradi"
+      }
+    },
+    "card": {
+      "title": "Mandhari ya sauti",
+      "tapHint": "Gusa pete ili kusikiliza",
+      "dialAria": "Saa ya mandhari ya sauti ya saa 24 — gusa wakati ili kusikiliza",
+      "play": "Cheza",
+      "pause": "Simamisha"
+    }
+  },
+  "recordingFolders": {
+    "renameAction": "Badilisha jina",
+    "deleteAction": "Futa",
+    "emptyFolder": "Bado hakuna rekodi katika folda hii.",
+    "moveAction": "Hamisha",
+    "moveTitle": "Hamisha {count, plural, one {rekodi #} other {rekodi #}}",
+    "moveBody": "Chagua folda ambayo rekodi hizi zinafaa kuwamo. Kuhamisha hakubadilishi kitu kingine — sauti, uchanganuzi wake na chochote kilichokwisha shirikiwa hubaki vilevile.",
+    "moveProgress": "Inahamisha… {done} kati ya {total}",
+    "movePartial": "{count, plural, one {Rekodi #} other {Rekodi #}} haikuweza kuhamishwa. Tafadhali jaribu tena.",
+    "moveFailed": "Rekodi hazikuweza kuhamishwa. Tafadhali jaribu tena.",
+    "newFolderRemarks": "Imeundwa wakati wa kuhamisha rekodi kwenye folda mpya.",
+    "renameTitle": "Badilisha jina la folda",
+    "renameBody": "Jina la folda pekee ndilo linalobadilika — rekodi zilizomo hubaki pale zilipo, na vivyo hivyo chochote kilichokwisha shirikiwa kutoka kwazo.",
+    "nameLabel": "Jina la folda",
+    "namePlaceholder": "mf. Ukingo wa mto, msimu wa kiangazi",
+    "nameRequired": "Ipe folda jina.",
+    "save": "Hifadhi",
+    "saving": "Inahifadhi…",
+    "cancel": "Ghairi",
+    "renameFailed": "Jina la folda halikuweza kubadilishwa. Tafadhali jaribu tena.",
+    "deleteTitle": "Futa “{name}”?",
+    "deleteBody": "{count, plural, =0 {Folda itafutwa kabisa. Hili haliwezi kutenduliwa.} one {Folda pamoja na rekodi # iliyomo zitafutwa kabisa — faili halisi iliyohifadhiwa, kionjo kinachochezeka, spektrogramu, uchanganuzi na kila utambulisho uliowekwa juu yake vyote vitaondolewa. Hili haliwezi kutenduliwa.} other {Folda pamoja na rekodi # zilizomo zitafutwa kabisa — faili halisi zilizohifadhiwa, vionjo vinavyochezeka, spektrogramu, uchanganuzi na kila utambulisho uliowekwa juu yake vyote vitaondolewa. Hili haliwezi kutenduliwa.}}",
+    "identificationsIncluded": "{count, plural, one {Hii inajumuisha utambulisho # uliohifadhiwa, ambao pia utafutwa.} other {Hii inajumuisha utambulisho # uliohifadhiwa, ambao pia utafutwa.}}",
+    "deleteProgress": "Inafuta… {done} kati ya {total}",
+    "deletePartial": "{count, plural, one {Rekodi #} other {Rekodi #}} haikuweza kufutwa, hivyo folda imebaki. Tafadhali jaribu tena.",
+    "deleteFailed": "Folda haikuweza kufutwa. Tafadhali jaribu tena."
+  },
+  "hypercerts": {
+    "metaTitle": "Kujenga juu ya leksikoni za Hypercerts — GainForest",
+    "metaDescription": "Jinsi GainForest na Ma Earth zinavyoweka muundo wa kazi ya athari kwa kutumia leksikoni za org.hypercerts, mahali programu hizo mbili zinapokubaliana, mahali zinapotofautiana, na kile cha kuandika ili programu ya tatu ishirikiane na zote mbili.",
+    "kicker": "Ushirikiano wa Hypercerts",
+    "title": "Kujenga juu ya leksikoni za Hypercerts",
+    "lead": "Skimu za Hypercerts zimeachwa huru kwa makusudi: muungano wa aina kila mahali, karibu hakuna sehemu ya lazima, na hakuna msimamo kuhusu akaunti ipi inashikilia rekodi ipi. Programu mbili zinazotumika tayari zinaziandika — GainForest na Ma Earth. Ukurasa huu unaonyesha muundo ambao zote mbili zilikubaliana, sehemu zilipotofautiana, na kile ambacho programu yako inapaswa kufanya ili zote tatu ziweze kusomana.",
+    "why": {
+      "heading": "Kwa nini ukurasa huu upo",
+      "p1": "Leksikoni ni muundo wa kupitisha data, si programu. `org.hypercerts.claim.activity` inahitaji sehemu tatu tu na kukuachia mengine yote: maelezo marefu yanaweza kuwa vitu vitatu tofauti, upeo wa kazi viwili, mchangiaji viwili, picha viwili. Timu mbili zinazosoma skimu ile ile zitatengeneza rekodi zinazopita uthibitisho kikamilifu na bado zisionekane vizuri kwenye programu ya mwenzake.",
+      "p2": "Kila kilicho hapa chini kimetolewa kwenye misimbo miwili inayotumika kweli. Mahali zinapokubaliana, kichukue kama kanuni. Mahali zinapotofautiana, tunataja muundo upi wa kuandika na miundo ipi ya kukubali: andika kwa uangalifu mkali, soma kwa ukarimu.",
+      "callout": "Kanuni ya msingi: andika muundo ambao programu zote mbili tayari zinausoma, na ukubali kila muundo ambao yoyote kati yao tayari inauandika."
+    },
+    "graph": {
+      "heading": "Mtandao wa rekodi",
+      "intro": "Hakuna kitu kilichowekwa ndani ya kingine katika Hypercerts. Kila uhusiano ni rekodi tofauti pamoja na kiungo imara: jozi ya `uri` + `cid` inayobana toleo kamili la lengo. Gusa rekodi ili kuona nani anaiandika na jinsi inavyoungwa.",
+      "ariaLabel": "Mchoro wa rekodi za Hypercerts na sehemu zinazoziunganisha",
+      "hint": "Gusa rekodi",
+      "attachedVia": "Imeungwa kupitia",
+      "bothApps": "Programu zote mbili",
+      "gainforestOnly": "GainForest pekee",
+      "maearthOnly": "Ma Earth pekee",
+      "roles": {
+        "collection": "Kasha ambalo watumiaji huliona kweli. GainForest hulita mradi; Ma Earth pia. `type` ni kitofautishi cha maandishi huru: zote mbili huandika `\"project\"`, na Ma Earth huandika pia `\"snapshot\"` kwa maombi ya duru yaliyogandishwa.",
+        "activity": "Dai lenyewe: upeo, kipindi, wachangiaji, maeneo. GainForest hulionyesha kama Cert; Ma Earth hulihifadhi ndani na hutengeneza moja kiotomatiki kwa kila mradi. Hii ndiyo rekodi ambayo kila kitu kingine huielekeza.",
+        "attachment": "Mfanyakazi mkuu. NSID moja hubeba ushahidi, picha za matunzio, na taarifa za maendeleo; `contentType` ndiyo kitu pekee kinachozitofautisha. Hubeba faili, viungo, na marejeo ya `at://` kwa rekodi nyingine.",
+        "location": "Eneo. Jiometri huhifadhiwa katika sehemu moja ya maandishi, hivyo poligoni ni GeoJSON iliyogeuzwa kuwa maandishi. Hurejewa kutoka `activity.locations[]` na `collection.location`.",
+        "rights": "Masharti ya leseni ya dai. Ma Earth huelekeza kila shughuli kwenye rekodi moja ya kawaida ya jukwaa zima; GainForest kwa sasa huiacha sehemu hiyo kabisa.",
+        "tag": "Kipande cha upeo kinachoweza kutumika tena chenye ufunguo wa mashine kama `mangrove_restoration`. Hurejewa kutoka ndani ya kitu cha CEL cha upeo wa kazi, kamwe si kutoka ngazi ya juu ya shughuli.",
+        "receipt": "Kumbukumbu ya malipo. GainForest huandika moja kwa kila mchango kutoka akaunti yake ya mwezeshaji; mtumaji anaweza kubaki bila kutambulika. Huelekeza tena kwenye kile kilichofadhiliwa.",
+        "evaluation": "Hukumu ya upande wa tatu kuhusu dai: muhtasari, alama ya hiari kwenye kipimo dhahiri cha chini/juu, DID za wakaguzi, na viungo vya ripoti. GainForest huzionyesha kwenye Cert lakini hakuna programu inayoziandika bado: hii ndiyo nafasi ambayo programu ya ukaguzi ingejaza."
+      },
+      "links": {
+        "items": "`collection.items[].itemIdentifier`: kiungo imara pamoja na uzito wa hiari wa maandishi.",
+        "locations": "`activity.locations[]`: safu ya viungo imara. `collection.location` ni kiungo kimoja tu.",
+        "rights": "`activity.rights`: kiungo kimoja imara kwa rekodi ya haki ambayo inaweza kuwa kwenye PDS ya mtu mwingine.",
+        "usedTags": "`activity.workScope.usedTags[]`: kimewekwa ndani ya kitu cha CEL, si kwenye ngazi ya juu ya shughuli.",
+        "subjects": "`attachment.subjects[]`: kwa vitendo ni seti isiyo na mpangilio. Usitegemee nafasi kamwe.",
+        "for": "`receipt.for`: kiungo imara katika skimu ya sasa; matoleo ya awali yaliiweka kama URI ya kawaida ya `at://`, hivyo kubali zote mbili.",
+        "subject": "`evaluation.subject`: kiungo kimoja imara kwa chochote kinachokaguliwa."
+      }
+    },
+    "pattern": {
+      "heading": "Muundo mmoja wa kuiga: mradi hubeba dai moja tu",
+      "intro": "Programu zote mbili zilifikia msingi ule ule, kila moja kivyake. Ukiiga kitu kimoja tu kutoka ukurasa huu, iga hiki.",
+      "r1": {
+        "title": "Mradi ni mkusanyiko",
+        "text": "Tengeneza `org.hypercerts.collection` yenye `type: \"project\"`. Hubeba hadithi ya wazi: kichwa, muhtasari, maelezo, na picha ya juu."
+      },
+      "r2": {
+        "title": "Hutengenezwa pamoja na shughuli moja",
+        "text": "Tengeneza `org.hypercerts.claim.activity` wakati huo huo na uweke kiungo chake imara ndani ya `items[]`. GainForest hujenga zote mbili kutoka fomu moja; Ma Earth huiita shughuli ya kwanza."
+      },
+      "r3": {
+        "title": "Rekodi hizo mbili hubaki sawa",
+        "text": "Kichwa, muhtasari, maelezo, tarehe na picha huakisiwa kutoka mradi kwenda kwenye dai. Ulinganishaji wa Ma Earth ni wa kuongeza tu: sehemu iliyohaririwa kwenye shughuli haiandikwi upya na mradi."
+      },
+      "r4": {
+        "title": "Shughuli za ziada ni awamu, si miradi",
+        "text": "Shughuli ya pili chini ya mkusanyiko ule ule ni kipindi cha utendaji kilichofuata, chenye upeo, muda na maeneo yake. Usitengeneze kamwe mkusanyiko wa pili kwa kazi ile ile."
+      },
+      "note": "Mtumiaji anayeelewa mikusanyiko pekee bado huona mradi kamili. Anayeelewa madai pekee bado huona kazi iliyopangwa. Urudufu huo ndio lengo hasa."
+    },
+    "sequence": {
+      "heading": "Mpangilio wa kuchapisha ni muhimu",
+      "intro": "Viungo imara hubeba CID ndani yake, hivyo watoto lazima wawepo kabla ya wazazi. Pitia uchapishaji kamili mmoja na uone viungo vikijikusanya.",
+      "play": "Cheza",
+      "pause": "Simamisha",
+      "back": "Rudi",
+      "next": "Endelea",
+      "stepLabel": "Hatua {n} kati ya {total}",
+      "repoLabel": "Rekodi zilizomo kwenye hifadhi",
+      "empty": "Bado hakuna kilichoandikwa.",
+      "steps": {
+        "s1": {
+          "title": "Pakia blob kwanza",
+          "text": "Picha za jalada, PDF na sauti hupakiwa kama blob kabla rekodi yoyote haijazitaja. Utapokea kitu cha blob cha kuweka ndani ya `#smallImage`, `#largeImage` au `#smallBlob`."
+        },
+        "s2": {
+          "title": "Tengeneza maeneo",
+          "text": "`app.certified.location` moja kwa kila mahali. Hifadhi jozi ya `uri` + `cid`: dai litairejea, na kutengeneza eneo lile lile mara mbili ndio hitilafu ya kurudia inayotokea zaidi."
+        },
+        "s3": {
+          "title": "Tafuta lebo za upeo wa kazi",
+          "text": "Tafuta `org.hypercerts.workscope.tag` iliyopo kwa kila ufunguo wa upeo kabla ya kutengeneza mpya. Programu zote mbili husoma kabla ya kutengeneza ili lebo isirudiwe kwa kila mradi."
+        },
+        "s4": {
+          "title": "Andika dai",
+          "text": "`org.hypercerts.claim.activity` huunganisha yote: kichwa, muhtasari, maelezo, upeo wa kazi wenye viungo vya lebo ndani yake, tarehe, wachangiaji, `locations[]`, na kiungo cha `rights`."
+        },
+        "s5": {
+          "title": "Andika mkusanyiko",
+          "text": "`org.hypercerts.collection` yenye `type: \"project\"` na `items[]` inayobeba kiungo imara cha dai. Sasa mradi unapatikana na umekamilika."
+        },
+        "s6": {
+          "title": "Ambatanisha muktadha",
+          "text": "Picha za matunzio, ushahidi na taarifa mpya ni rekodi za `org.hypercerts.context.attachment` zinazoelekeza tena kwenye mradi na dai kupitia `subjects[]`."
+        },
+        "s7": {
+          "title": "Uhariri hubadilisha CID",
+          "text": "Kuhariri dai hutengeneza CID mpya, jambo linalobatilisha kimyakimya kiungo kilichohifadhiwa ndani ya `collection.items[]`. Andika upya mzazi kila mtoto anapobadilika, au endesha kirekebishi kinachofanya hivyo kwa niaba yako."
+        },
+        "s8": {
+          "title": "Fedha huja baadaye",
+          "text": "Rekodi za `org.hypercerts.funding.receipt` huandikwa baadaye, mara nyingi na akaunti ya tatu, na huelekeza tena kwenye mkusanyiko au dai kupitia `for`."
+        }
+      }
+    },
+    "divergence": {
+      "heading": "Mahali programu hizo mbili zinapotofautiana",
+      "intro": "Sehemu nane ambapo GainForest na Ma Earth zilichagua chaguo halali tofauti. Sehemu ya tofauti hiyo ni suala la matoleo tu: GainForest hufuata toleo jipya zaidi la leksikoni, Ma Earth hushikilia toleo la awali. Chagua moja ili kuona miundo yote miwili na kile ambacho programu yako inapaswa kufanya.",
+      "gainforestLabel": "GainForest huandika",
+      "maearthLabel": "Ma Earth huandika",
+      "adviceLabel": "Unachopaswa kufanya",
+      "topics": {
+        "description": {
+          "label": "Maelezo marefu",
+          "title": "`description`: maandishi sahili au hati tajiri",
+          "gainforest": "`org.hypercerts.defs#descriptionString` iliyowekwa moja kwa moja yenye maandishi sahili. Rahisi, lakini vichwa, picha na viungo havisalii.",
+          "maearth": "`pub.leaflet.pages.linearDocument`, muundo ule ule wa vizuizi anaotumia Leaflet, na picha za ndani zikipakiwa upya kama blob za PDS ili rekodi ionekane bila kuitegemea programu ya asili.",
+          "advice": "Andika hati ya Leaflet: ndiyo inayohifadhi muundo, na programu zote mbili huionyesha. Lakini `descriptionString` bado ni tawi kamili katika skimu ya sasa, hivyo daima isome pia: sehemu kubwa ya rekodi zilizochapishwa inaibeba."
+        },
+        "workScope": {
+          "label": "Upeo wa kazi",
+          "title": "`workScope` — usemi wa CEL (mifuatano ya koma ya zamani bado ipo)",
+          "gainforest": "Kihariri cha miradi na fomu ya Cert vyote huandika kitu cha CEL. Rekodi zilizochapishwa kabla ya kuunganishwa huku bado zina `#workScopeString` ya zamani, na baadhi zina lebo zilizotafsiriwa (\"Reforestasi\") badala ya funguo thabiti.",
+          "maearth": "Daima kitu cha CEL, na daima kigezo kile kile chembamba. Hakuna kikokotoo cha CEL nyuma yake: usemi huo ni muundo wa kupitisha data unaosimba orodha ya lebo.",
+          "advice": "Andika CEL kwa `scope.hasAny([...])` na weka marejeleo ya lebo ndani ya `usedTags`. Unaposoma, tumia `usedTags` ikiwa ipo; la sivyo, chukua maandishi yaliyo kwenye nukuu katika `expression`; la sivyo, gawa `scope` kwa koma — na rudisha lebo zilizotafsiriwa kuwa funguo, vinginevyo rekodi za zamani zitapoteza upeo wake."
+        },
+        "tags": {
+          "label": "Uhifadhi wa lebo",
+          "title": "`workscope.tag`: rekodi ya lebo ni ya nani?",
+          "gainforest": "Lebo hutengenezwa katika akaunti ile ile inayochapisha Cert — binafsi au ya shirika — ufunguo wa upeo ukiwa rkey, hivyo `getRecord` hufanya kazi ya kuthibitisha uwepo na uandishi hauongezi nakala kwa kila akaunti.",
+          "maearth": "Uainishaji mmoja uliochaguliwa kwa jukwaa zima kwenye PDS ya jukwaa, rkey za TID, mzunguko wa kupendekezwa → kukubaliwa → kupitwa na wakati, na hatua ya uchapishaji na msimamizi. Rkey za zamani za maneno zilitengenezwa upya kama TID.",
+          "advice": "Unganisha kwa `key`, kamwe si kwa URI. Dhana ile ile inaweza kuwepo halali kama rekodi nyingi katika hifadhi nyingi; chukua `usedTags[]` kama chanzo na `key` kama utambulisho."
+        },
+        "subjects": {
+          "label": "Mada za kiambatisho",
+          "title": "`attachment.subjects[]`: ipi huwa ya kwanza?",
+          "gainforest": "`subjects[0]` ni dai; mada za ziada huongeza muktadha, kama eneo ambapo ushahidi ulikusanywa.",
+          "maearth": "`subjects[0]` ni mkusanyiko wa mradi na `subjects[1]` ni dai. Viambatisho vya matunzio hubeba mkusanyiko pekee; taarifa isiyo na shughuli husambaa kwa kila shughuli iliyochapishwa.",
+          "advice": "Linganisha kwa uanachama, si kwa nafasi: kiambatisho ni cha rekodi fulani ikiwa URI yoyote ya mada inalingana. Toa mkusanyiko na dai vyote viwili ili watumiaji wanaosoma kwa nafasi, upande wowote, waendelee kukipata."
+        },
+        "rights": {
+          "label": "Haki",
+          "title": "`activity.rights`: ipo au haipo",
+          "gainforest": "Haiandikwi. Kwa sasa Cert hazibebi kiungo chochote cha haki.",
+          "maearth": "Kila shughuli hurejea rekodi moja ya haki ya kawaida ya jukwaa zima. Rekodi yenyewe imehifadhiwa kwenye akaunti ya hypercerts.org na huingizwa kwa AT-URI, hivyo ni kiungo cha kuvuka hifadhi kwa makusudi.",
+          "advice": "Andika kiungo cha haki: hakigharimu kitu na hufanya madai yako yatumike kwa yeyote mwenye sera ya leseni. Usidhani kamwe kwamba kinapatikana ndani ya hifadhi yako mwenyewe, na linganisha kwa `uri` pekee: CID hubadilika kila maandishi ya haki yanapohaririwa."
+        },
+        "location": {
+          "label": "Maeneo",
+          "title": "`app.certified.location`: mahali pale pale, URI mbili za marejeo ya anga",
+          "gainforest": "`srs` ni URI ya CRS84 ya OGC. Nukta huandikwa kama `\"lat,lng\"`.",
+          "maearth": "`srs` ni URI ya EPSG:4326 ya OGC, ambayo mchakato wake wa kurekebisha huichukua kama sahihi. Poligoni ni GeoJSON iliyogeuzwa maandishi na kuzungushwa hadi tarakimu sita ili maandishi yasizidi kikomo cha herufi; maeneo ya makadirio hufichwa kuwa duara la kilomita 10 kabla ya kuchapishwa.",
+          "advice": "URI zote mbili zinamaanisha WGS84 kwa mpangilio wa mihimili ambao rekodi hizi hutumia kweli, hivyo kubali yoyote na usibadilishe kamwe mpangilio wa viwianishi kutokana na `srs`. Gawa kichanganuzi chako kwa `locationType`, si kwa umbo la maandishi."
+        },
+        "contributors": {
+          "label": "Wachangiaji",
+          "title": "`contributors[]`: utambulisho wa moja kwa moja au rekodi tofauti",
+          "gainforest": "`#contributorIdentity` ya moja kwa moja, na thamani yake inaweza kuwa DID au jina la mtu lililoandikwa kwenye fomu.",
+          "maearth": "Pia `#contributorIdentity` ya moja kwa moja, daima DID, iliyotokana na jedwali la michango. DID ya shirika lenyewe huanzisha shughuli ya kwanza.",
+          "advice": "Tumia muundo wa moja kwa moja: rekodi ya `contributorInformation` ipo lakini hakuna programu yoyote inayoiandika. Usidhani kamwe kwamba `identity` ni DID halali; ionyeshe kama jina isipokuwa hivyo."
+        },
+        "receipt": {
+          "label": "Risiti za ufadhili",
+          "title": "`org.hypercerts.funding.receipt`: nani anaandika fedha",
+          "gainforest": "Huandikwa na akaunti maalum ya mwezeshaji, si na mtoaji wala mradi. Michango isiyo na jina hubadilisha mtumaji kwa HMAC yenye chumvi ili mtoaji yule yule asiweze kuunganishwa kati ya risiti tofauti.",
+          "maearth": "Bado haiandikwi kwenye PDS; ufadhili upo kwenye hifadhidata ya jukwaa.",
+          "advice": "Usidhani kamwe kwamba risiti ipo kwenye hifadhi ya mradi uliofadhiliwa: fahirisi risiti kimataifa na fuata `for` kurudi kwenye mada. Kubali kiungo imara na pia URI ya kawaida ya `at://` ndani ya `for`, na daima weka `createdAt` la sivyo risiti yako itapangwa mwisho kwenye kila mtiririko."
+        }
+      }
+    },
+    "repos": {
+      "heading": "Akaunti ipi inashikilia rekodi",
+      "intro": "Skimu hazisemi chochote kuhusu hifadhi ipi ibebe nini, na hapo ndipo programu hushangazana zaidi. Badilisha kati ya programu ili kuona kila rekodi inakotua hasa.",
+      "kinds": {
+        "personalOrGroup": "Hifadhi binafsi au ya kikundi",
+        "group": "Hifadhi ya kikundi",
+        "platform": "Hifadhi ya jukwaa",
+        "facilitator": "Hifadhi ya mwezeshaji",
+        "none": "Haiandikwi"
+      },
+      "kindNotes": {
+        "personalOrGroup": "PDS ya mtu aliyeingia mwenyewe, au akaunti ya shirika inayoshirikiwa anapochapisha kwa niaba ya shirika hilo. Mtandao mzima hufuata akaunti unayoitumia wakati huo.",
+        "group": "Akaunti ya shirika inayoshirikiwa, inayoandikwa kupitia huduma ya kikundi ili wanachama wasishike kamwe siri zake.",
+        "platform": "Akaunti moja inayomilikiwa na programu yenyewe, inayotumika kwa rekodi zinazopaswa kushirikiwa na kila shirika.",
+        "facilitator": "Akaunti ya huduma inayorekodi matukio ambayo hakuna mshiriki anayepaswa kuaminiwa kuyaandika peke yake."
+      },
+      "apps": {
+        "gainforest": "GainForest",
+        "maearth": "Ma Earth",
+        "advice": "Inashauriwa"
+      },
+      "rows": {
+        "project": {
+          "gainforest": "Akaunti unayochapisha nayo: hifadhi yako mwenyewe unapotenda kama wewe binafsi, hifadhi ya shirika unapotenda kwa niaba yake. Njia zote mbili huandika rekodi zile zile.",
+          "maearth": "Daima hifadhi ya kikundi ya shirika. Mradi hauwezi kuchapishwa kabla shirika lake halijachapishwa.",
+          "advice": "Weka mradi na dai lake katika hifadhi ile ile ya aliyefanya kazi — akaunti binafsi ya mtu kwa kazi ya peke yake, akaunti ya shirika pale timu ilipofanya. Hivyo dai zima huthibitishwa kutoka akaunti moja."
+        },
+        "attachment": {
+          "gainforest": "Akaunti ile ile ya Cert inayoandikwa kumbukumbu yake — binafsi au ya shirika, kufuata akaunti iliyotumika kuchapisha ushahidi.",
+          "maearth": "Hifadhi ya shirika, ikiandikwa chini ya kipindi cha mwandishi kupitia huduma ya kikundi.",
+          "advice": "Hifadhi ushahidi katika akaunti ile ile ya mada yake inapowezekana, lakini soma viambatisho kimataifa: ushahidi wa upande wa tatu kuhusu dai la mtu mwingine ni halali na haupaswi kutoweka."
+        },
+        "tag": {
+          "gainforest": "Akaunti ile ile ya Cert, ufunguo wa upeo ukiwa rkey. Kwa hivyo shirika linalochapisha Cert zake mwenyewe hutengeneza pia nakala zake za lebo.",
+          "maearth": "Hifadhi moja ya jukwaa iliyochaguliwa, yenye rkey za TID.",
+          "advice": "Zote mbili zinafaa. Chapisha mahali fulani uainishaji thabiti na wenye nyaraka kisha urejee kwa `key` ili programu nyingine ziweze kuulinganisha."
+        },
+        "rights": {
+          "gainforest": "Haiandikwi.",
+          "maearth": "Hurejewa kwenye akaunti ya hypercerts.org; huhamishiwa kwenye hifadhi ya jukwaa pale tu maandishi yanapohitaji kubadilika.",
+          "advice": "Rejea rekodi ya haki inayoshirikiwa badala ya kutengeneza nakala yako. Tengeneza nakala pale tu unapohitaji masharti tofauti."
+        },
+        "receipt": {
+          "gainforest": "Akaunti maalum ya mwezeshaji inayokamilisha malipo.",
+          "maearth": "Haiandikwi.",
+          "advice": "Akaunti ya huduma ndiyo uamuzi sahihi: mtoaji hapaswi kulazimika kusaini rekodi ili mchango wake uonekane, na mradi haupaswi kuweza kubuni historia yake ya ufadhili."
+        },
+        "snapshot": {
+          "gainforest": "Haiandikwi.",
+          "maearth": "Hifadhi ya jukwaa, kama mkusanyiko wenye `type: \"snapshot\"` ambao vipengele vyake hubana kila rekodi ambayo ukaguzi ulitegemea.",
+          "advice": "Gandisha uamuzi kama mkusanyiko wa viungo imara. Ndiyo njia rahisi zaidi ya ufuatiliaji usiodanganyika ambayo skimu hizi hukupa."
+        }
+      },
+      "rowLabels": {
+        "project": "Mradi na dai lake",
+        "attachment": "Ushahidi, matunzio na taarifa mpya",
+        "tag": "Lebo za upeo wa kazi",
+        "rights": "Haki",
+        "receipt": "Risiti za ufadhili",
+        "snapshot": "Picha za ukaguzi zilizogandishwa"
+      }
+    },
+    "reading": {
+      "heading": "Kusoma rekodi zilizoandikwa na watu wengine",
+      "intro": "Tabia sita za tahadhari zinazotofautisha kisomaji kinachofanya kazi na programu moja na kisomaji kinachofanya kazi na mtandao mzima.",
+      "items": {
+        "unions": {
+          "title": "Gawa kwa `$type`, kamwe si kwa umbo",
+          "text": "Kila tawi la muungano lina lebo. Tumia switch juu ya `$type` na uweke tawi mbadala la wazi: rekodi yenye aina usiyoifahamu si rekodi mbovu."
+        },
+        "optional": {
+          "title": "Dhani kila sehemu inaweza kukosekana",
+          "text": "Kwenye dai, ni `title`, `shortDescription` na `createdAt` pekee zinazohitajika. Tengeneza muhtasari kutoka maelezo, rudi kwenye mradi mzazi, na onyesha rekodi zenye taarifa chache badala ya kuzificha."
+        },
+        "numbers": {
+          "title": "Namba huja kama maandishi",
+          "text": "Uzito, thamani za vipimo na kiasi cha fedha vyote ni maandishi ili kuepuka upotevu wa usahihi wa desimali. Changanua kwa tahadhari na uache chochote kisichochanganuka badala ya kuonyesha `NaN`."
+        },
+        "cids": {
+          "title": "Linganisha kwa URI, si kwa CID",
+          "text": "Uhariri wowote hubadilisha CID, hivyo CID isiyolingana mara nyingi humaanisha imepitwa na wakati, si kwamba imeghushiwa. Programu zote mbili hulinganisha `uri` kwa utambulisho na huchukua mabadiliko ya CID kama kazi ya kurekebisha."
+        },
+        "index": {
+          "title": "Usiamini mpangilio wa safu",
+          "text": "Wala `subjects[]` wala `items[]` hazina uhakika wa mpangilio kati ya programu. Tafuta kwa URI na uchukue nafasi kama dokezo tu."
+        },
+        "openStrings": {
+          "title": "`contentType` na `type` ni msamiati wazi",
+          "text": "`\"evidence\"`, `\"gallery\"`, `\"update\"`, `\"report\"` na `\"tree-dataset\"` ni makubaliano, si orodha funge. Geuza kuwa herufi ndogo, tambua unavyovifahamu, na onyesha vingine kwa njia ya jumla badala ya kuviacha."
+        }
+      }
+    },
+    "checklist": {
+      "heading": "Orodha ya kukagua ushirikiano",
+      "intro": "Kama mkaguzi angepata dakika kumi na mradi wa kwanza uliochapishwa na programu yako, haya ndiyo angeyaangalia.",
+      "doLabel": "Fanya",
+      "dontLabel": "Epuka",
+      "do": {
+        "d1": "Chapisha mkusanyiko mmoja wenye `type: \"project\"` unaobeba dai moja ndani ya `items[]`.",
+        "d2": "Weka `createdAt` kwenye kila rekodi, na uhifadhi thamani ya awali unapohariri.",
+        "d3": "Andika maelezo kama hati za Leaflet na upeo wa kazi kama CEL yenye `usedTags`.",
+        "d4": "Wapa viambatisho mkusanyiko na dai vyote viwili kama mada.",
+        "d5": "Hifadhi jozi ya `uri` + `cid` ya kila unachoandika na uandike upya wazazi mtoto anapobadilika.",
+        "d6": "Shikilia toleo maalum la kifurushi rasmi cha leksikoni ili maandishi yako ya `$type` yasipotoke."
+      },
+      "dont": {
+        "n1": "Usibuni NSID mpya kwa kitu ambacho rekodi iliyopo tayari inakiwakilisha.",
+        "n2": "Usidhani rekodi inayorejewa ipo kwenye hifadhi ile ile, wala hata kwenye PDS yako.",
+        "n3": "Usichukue `subjects[0]` wala `items[0]` kama vyenye maana maalum.",
+        "n4": "Usiache kimyakimya rekodi ambazo tawi lake la muungano au `contentType` huitambui.",
+        "n5": "Usitengeneze mkusanyiko wa pili kwa awamu mpya ya kazi ile ile.",
+        "n6": "Usiweke namba pale skimu inapoomba maandishi ya kinamba."
+      }
+    },
+    "snippets": {
+      "copy": "Nakili",
+      "copied": "Imenakiliwa"
+    },
+    "more": {
+      "heading": "Endelea kusoma",
+      "lexiconsTitle": "Marejeo ya skimu",
+      "lexiconsDesc": "Kila leksikoni ambayo programu hii husoma na kuandika, sehemu kwa sehemu.",
+      "cgsTitle": "Akaunti za kikundi",
+      "cgsDesc": "Jinsi timu nzima inavyoandika kwenye hifadhi moja inayoshirikiwa bila kushirikiana nenosiri.",
+      "packageTitle": "@hypercerts-org/lexicon",
+      "packageDesc": "Aina zilizotengenezwa na thabiti za NSID kwa kila skimu iliyo kwenye ukurasa huu.",
+      "skillTitle": "Mwongozo wa wakala",
+      "skillDesc": "Rekodi zile zile, zikiandikwa kama miito tayari kunakiliwa na wakala wa AI."
+    }
+  },
+  "publishAs": {
+    "label": "Unachapisha kama",
+    "badgePersonal": "Binafsi",
+    "badgeOrganization": "Shirika",
+    "personalFallback": "Akaunti binafsi",
+    "organizationFallback": "Akaunti ya shirika",
+    "personalDescription": "Huenda kwenye wasifu wako binafsi",
+    "organizationDescription": "Huenda kwenye wasifu wa pamoja wa shirika",
+    "menuTitle": "Chagua mahali pa kuchapisha",
+    "menuPersonalSubtitle": "Akaunti yako binafsi",
+    "menuOrganizationSubtitle": "Akaunti ya pamoja ya shirika",
+    "organizationsLabel": "Mashirika yako",
+    "switchHint": "Badilisha akaunti unayochapisha nayo"
   }
 }

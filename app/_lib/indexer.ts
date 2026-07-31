@@ -20,7 +20,7 @@ import { countryCodeFromCertifiedLocation, fetchCertifiedLocationCountryCode, ty
 import { blobUrl, resolveBlobUrl, resolvePdsHost, normaliseRef } from "./pds";
 import { fetchEndorserRecords } from "./endorsers";
 import { asNumber, formatNumber, formatDate, formatDateTime, formatCountry } from "./format";
-import { normalizeKnownWorkScopeKey } from "./work-scope-labels";
+import { workScopeTermToKey } from "./work-scope-cel";
 import { hasMaEarthDonationUrl } from "./maearth-donation-data";
 
 // ── Generic GraphQL helper ────────────────────────────────────────────────
@@ -192,6 +192,8 @@ export type OccurrenceRecord = {
   eventDate: string | null;
   habitat: string | null;
   siteRef: string | null;
+  /** AT-URI of the project this sighting was filed under, when it has one. */
+  projectRef: string | null;
   datasetRef: string | null;
   datasetName: string | null;
   dynamicProperties: string | null;
@@ -219,7 +221,7 @@ const OCCURRENCE_NODE_FIELDS = `
   scientificName vernacularName kingdom family genus
   basisOfRecord recordedBy individualCount
   datasetName country countryCode stateProvince locality decimalLatitude decimalLongitude coordinateUncertaintyInMeters
-  habitat siteRef datasetRef dynamicProperties
+  habitat siteRef projectRef datasetRef dynamicProperties
   occurrenceRemarks fieldNotes
   thumbnailUrl speciesImageUrl associatedMedia
   imageEvidence { file { ref } }
@@ -268,6 +270,7 @@ type RawOccurrence = {
   coordinateUncertaintyInMeters?: number | string | null;
   habitat?: string | null;
   siteRef?: string | null;
+  projectRef?: string | null;
   datasetRef?: string | null;
   dynamicProperties?: string | null;
   establishmentMeans?: string | null;
@@ -342,6 +345,7 @@ function mapOccurrence(n: RawOccurrence): OccurrenceRecord {
     eventDate: n.eventDate?.trim() || null,
     habitat: n.habitat?.trim() || null,
     siteRef: n.siteRef?.trim() || null,
+    projectRef: n.projectRef?.trim() || null,
     datasetRef: n.datasetRef?.trim() || null,
     datasetName: n.datasetName?.trim() || null,
     dynamicProperties: n.dynamicProperties?.trim() || null,
@@ -415,6 +419,7 @@ export function occurrenceFromPdsRecord(item: PdsOccurrenceItem): OccurrenceReco
       (typeof value.coordinateUncertaintyInMeters === "number" ? value.coordinateUncertaintyInMeters : null),
     habitat: pdsString(value.habitat),
     siteRef: pdsString(value.siteRef),
+    projectRef: pdsString(value.projectRef),
     datasetRef: pdsString(value.datasetRef),
     dynamicProperties: pdsString(value.dynamicProperties),
     establishmentMeans: pdsString(value.establishmentMeans),
@@ -676,6 +681,7 @@ function mapAudioRecord(n: RawAudioRecord, audioRef: string | null, audioUrl: st
     eventDate: n.metadata?.recordedAt ?? null,
     habitat: null,
     siteRef: n.siteRef?.trim() || null,
+    projectRef: null,
     datasetRef: null,
     datasetName: null,
     dynamicProperties: null,
@@ -1057,30 +1063,139 @@ export async function fetchObservationSummaryByDid(
   };
 }
 
-/** Load recent image observations owned by a single DID. Used by Bumicert detail
- * pages to show a compact evidence gallery connected to the publishing
- * organization. */
-export async function fetchImageOccurrencesByDid(
+/** The links that make a sighting part of a project. A sighting counts as the
+ *  project's evidence only when the steward attached it — by filing it under
+ *  the project (`projectRef`), recording it at one of the project's places
+ *  (`siteRef`), pinning its dataset to the project (`datasetRef`), or attaching
+ *  the sighting itself to a project update. Sightings that merely share the
+ *  same account are *not* project evidence. */
+export type ProjectObservationScope = {
+  /** Project (and Cert) AT-URIs sightings can be filed under. */
+  projectUris: string[];
+  /** Certified-location AT-URIs the project maps. */
+  siteUris: string[];
+  /** Dataset AT-URIs attached to the project. */
+  datasetUris: string[];
+  /** Sighting AT-URIs pinned directly to a project update. */
+  observationUris: string[];
+};
+
+export type ProjectObservations = {
+  /** Count + latest date across every sighting linked to the project. */
+  summary: ObservationSummary;
+  /** Photo sightings with resolved image URLs, newest first. */
+  images: OccurrenceRecord[];
+};
+
+const EMPTY_PROJECT_OBSERVATIONS: ProjectObservations = {
+  summary: { count: 0, latestAt: null },
+  images: [],
+};
+
+/** How many linked sightings one link kind is counted up to. Projects beyond
+ *  this still render; only the headline count becomes a floor. */
+const PROJECT_OBSERVATION_COUNT_CAP = INDEXER_MAX_PAGE;
+
+/** Just enough to count linked sightings and date the latest one. */
+const PROJECT_OBSERVATION_LINK_QUERY = `
+  query ProjectObservationLinks($first: Int!, $where: AppGainforestDwcOccurrenceWhereInput) {
+    appGainforestDwcOccurrence(first: $first, where: $where, sortBy: createdAt, sortDirection: DESC) {
+      edges { node { uri did rkey createdAt } }
+    }
+  }
+`;
+
+function uniqueUris(values: Iterable<string>): string[] {
+  const out = new Set<string>();
+  for (const value of values) {
+    const trimmed = value?.trim();
+    if (trimmed) out.add(trimmed);
+  }
+  return [...out];
+}
+
+/** The `where` clauses that select a project's own sightings. One clause per
+ *  link kind, because the indexer schema has no `OR`. */
+function projectObservationWheres(did: string, scope: ProjectObservationScope): Record<string, unknown>[] {
+  const projectUris = uniqueUris(scope.projectUris);
+  const siteUris = uniqueUris(scope.siteUris);
+  const datasetUris = uniqueUris(scope.datasetUris);
+  const observationUris = uniqueUris(scope.observationUris);
+  return [
+    ...(projectUris.length ? [{ did: { eq: did }, projectRef: { in: projectUris } }] : []),
+    ...(siteUris.length ? [{ did: { eq: did }, siteRef: { in: siteUris } }] : []),
+    ...(datasetUris.length ? [{ did: { eq: did }, datasetRef: { in: datasetUris } }] : []),
+    // Older imports filed project evidence in `datasetRef` using the project's
+    // own URI, so treat that as a project link too.
+    ...(projectUris.length ? [{ did: { eq: did }, datasetRef: { in: projectUris } }] : []),
+    ...(observationUris.length ? [{ uri: { in: observationUris } }] : []),
+  ];
+}
+
+/** Load the sightings that belong to one project — never the whole account.
+ *  Results from each link kind are merged by AT-URI, so a sighting linked twice
+ *  is only counted once. */
+export async function fetchProjectObservations(
   did: string,
-  target = 24,
+  scope: ProjectObservationScope,
+  imageTarget = 24,
   signal?: AbortSignal,
-): Promise<OccurrenceRecord[]> {
-  const where = { did: { eq: did }, imageEvidence: { isNull: false } };
-  const page = await fetchOccurrencePage(Math.min(INDEXER_MAX_PAGE, Math.max(target, 24)), null, signal, where);
-  const matches = page.nodes.filter((node) => Boolean(node.imageEvidence?.file?.ref));
-  let mapped = matches.map(mapOccurrence);
-  mapped = await resolveImages(
-    mapped,
-    (record) => {
-      if (record.imageUrl) return null;
-      const raw = matches.find((node) => node.rkey === record.rkey && node.did === record.did);
-      const ref = raw?.imageEvidence?.file?.ref ?? null;
-      return ref ? { did: record.did, ref } : null;
-    },
+): Promise<ProjectObservations> {
+  const wheres = projectObservationWheres(did, scope);
+  if (wheres.length === 0) return EMPTY_PROJECT_OBSERVATIONS;
+
+  const [linkPages, imagePages] = await Promise.all([
+    Promise.all(
+      wheres.map((where) =>
+        indexerQuery<{ appGainforestDwcOccurrence?: Connection<{ uri?: string | null; did: string; rkey: string; createdAt: string }> }>(
+          PROJECT_OBSERVATION_LINK_QUERY,
+          { first: PROJECT_OBSERVATION_COUNT_CAP, where },
+          signal,
+        ).catch(() => null),
+      ),
+    ),
+    Promise.all(
+      wheres.map((where) =>
+        fetchOccurrencePage(Math.max(imageTarget * 2, 48), null, signal, { ...where, imageEvidence: { isNull: false } })
+          .then((page) => page.nodes)
+          .catch(() => [] as RawOccurrence[]),
+      ),
+    ),
+  ]);
+
+  const linkedAt = new Map<string, string>();
+  for (const data of linkPages) {
+    for (const edge of data?.appGainforestDwcOccurrence?.edges ?? []) {
+      const node = edge?.node;
+      if (!node?.did) continue;
+      linkedAt.set(node.uri || `at://${node.did}/app.gainforest.dwc.occurrence/${node.rkey}`, node.createdAt);
+    }
+  }
+  if (linkedAt.size === 0) return EMPTY_PROJECT_OBSERVATIONS;
+  const latestAt = [...linkedAt.values()].reduce<string | null>(
+    (latest, at) => (!latest || Date.parse(at) > Date.parse(latest) ? at : latest),
+    null,
+  );
+
+  const photosByUri = new Map<string, OccurrenceRecord>();
+  for (const node of imagePages.flat()) {
+    const record = mapOccurrence(node);
+    if (record.media.includes("image")) photosByUri.set(record.atUri, record);
+  }
+  const photos = [...photosByUri.values()]
+    .sort((a, b) => Date.parse(b.createdAt) - Date.parse(a.createdAt))
+    .slice(0, Math.max(imageTarget * 2, imageTarget));
+  const resolved = await resolveImages(
+    photos,
+    (record) => (record.imageUrl ? null : record.imageRef ? { did: record.did, ref: record.imageRef } : null),
     (record, url) => ({ ...record, imageUrl: url }),
     signal,
   );
-  return mapped.filter((record) => Boolean(record.imageUrl)).slice(0, target);
+
+  return {
+    summary: { count: linkedAt.size, latestAt },
+    images: resolved.filter((record) => Boolean(record.imageUrl)).slice(0, imageTarget),
+  };
 }
 
 // ── 2. Bumicerts (hypercert claim activities) ──────────────────────────────
@@ -1477,7 +1592,7 @@ const SENTENCE_SCOPE_TAG_RE = /[.!?:]/;
 function isTagLikeScopeValue(tag: string): boolean {
   const trimmed = tag.trim();
   if (!trimmed) return false;
-  if (normalizeKnownWorkScopeKey(trimmed)) return true;
+  if (workScopeTermToKey(trimmed)) return true;
   if (AREA_SCOPE_TAG_RE.test(trimmed)) return true;
   if (trimmed.length > MAX_SCOPE_TAG_LENGTH) return false;
   if (SENTENCE_SCOPE_TAG_RE.test(trimmed)) return false;
@@ -1499,7 +1614,9 @@ function normalizeScopeTag(tag: string): string | null {
     return `${(area[1] ?? "").trim() || "⬡"} ${formatted} ha`;
   }
   if (!isTagLikeScopeValue(trimmed)) return null;
-  return normalizeKnownWorkScopeKey(trimmed) ?? trimmed;
+  // `workScopeTermToKey` also re-keys translated labels, so a legacy record
+  // saved as "Reforestasi" renders as reforestation instead of a stray tag.
+  return workScopeTermToKey(trimmed) ?? trimmed;
 }
 
 /**
@@ -2907,6 +3024,8 @@ export type ProjectRecord = {
   creatorAvatarRef: string | null;
   bumicertUris: string[];
   bumicertCount: number;
+  /** AT-URIs of observation datasets filed under this project. */
+  datasetUris: string[];
   locationUri: string | null;
   /** ISO country code resolved from the project's location record, if any. */
   country: string | null;
@@ -3039,11 +3158,13 @@ function collectionImageMeta(image: RawCollectionImage): { url: string | null; r
 function mapProjectCollection(n: RawProjectCollection): ProjectRecord {
   const banner = collectionImageMeta(n.banner ?? null);
   const avatar = collectionImageMeta(n.avatar ?? null);
-  const bumicertUris = Array.isArray(n.items)
-    ? n.items
-        .map((item) => item?.itemIdentifier?.uri)
-        .filter((uri): uri is string => typeof uri === "string" && uri.includes("/org.hypercerts.claim.activity/"))
+  const itemUris = Array.isArray(n.items)
+    ? n.items.map((item) => item?.itemIdentifier?.uri).filter((uri): uri is string => typeof uri === "string")
     : [];
+  const bumicertUris = itemUris.filter((uri) => uri.includes("/org.hypercerts.claim.activity/"));
+  // A project can also hold observation datasets, filed whole from the
+  // observations list. Their sightings count as the project's evidence.
+  const datasetUris = itemUris.filter((uri) => uri.includes("/app.gainforest.dwc.dataset/"));
 
   return {
     kind: "project",
@@ -3062,6 +3183,7 @@ function mapProjectCollection(n: RawProjectCollection): ProjectRecord {
     creatorAvatarRef: profileAvatarRef(n.certifiedProfileData),
     bumicertUris,
     bumicertCount: bumicertUris.length,
+    datasetUris,
     locationUri: n.location?.uri ?? null,
     country: null,
     scopeTags: [],

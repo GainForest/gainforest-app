@@ -31,7 +31,7 @@
       "wallet": "Unaweza kupokea michango na zawadi! Tengeneza pochi yako kwenye kichupo cha Pochi katika akaunti yako.",
       "createProject": "Unaweza kuonyesha kazi yako kwa kuunda mradi — inachukua dakika chache tu.",
       "observations": "Unaweza kupakia hadi picha 50 za asili kwa mara moja — spishi zinatambuliwa kiotomatiki.",
-      "bioblitz": "Kuna changamoto ya BioBlitz kila wiki — piga picha ya kiumbe chochote hai na ushinde zawadi!",
+      "bioblitz": "Kuna changamoto ya BioBlitz kila wiki — piga picha za bioanuwai ya nje na ushinde zawadi!",
       "ask": "Unaweza kuniuliza chochote kuhusu GainForest kwa lugha yako — nibofye tu!"
     },
     "haveQuestion": "Nina swali",
@@ -230,7 +230,7 @@
     "bioblitz": {
       "question": "Ninajiungaje na BioBlitz na kushinda?",
       "title": "Jiunge na changamoto ya BioBlitz",
-      "intro": "BioBlitz ni mashindano ya kirafiki ya kila wiki ya kurekodi asili. Piga picha kiumbe chochote hai, pakia, na upande kwenye ubao.",
+      "intro": "BioBlitz ni mashindano ya kirafiki ya kila wiki ya kurekodi bioanuwai ya nje. Kila ingizo linahitaji picha iliyopakiwa; watu na mimea ya vyungu hazihesabiki.",
       "steps": {
         "open": {
           "title": "Fungua BioBlitz",
@@ -242,7 +242,7 @@
         },
         "upload": {
           "title": "Piga picha na upakie",
-          "body": "Toka nje, piga picha kiumbe chochote hai, na ukiongeze kama uchunguzi wakati wa raundi."
+          "body": "Toka nje, piga picha za bioanuwai ya porini, na upakie picha pamoja na kila uchunguzi wakati wa raundi."
         },
         "win": {
           "title": "Shinda zawadi",
@@ -251,7 +251,7 @@
       },
       "tour": {
         "register": "Bofya Jisajili kushiriki — bofya mara moja na umeingia.",
-        "upload": "Kisha pakia picha za asili hapa wakati wa raundi — kila uchunguzi unahesabika."
+        "upload": "Kisha pakia picha za bioanuwai ya nje hapa wakati wa raundi — watu na mimea ya vyungu hazihesabiki."
       }
     }
   }

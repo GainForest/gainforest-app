@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { fetchAuthSession } from "@/app/_lib/auth-server";
-import { getS3Config, presignDownload, presignUrl } from "@/app/_lib/s3-storage";
+import { deleteObject, getS3Config, presignDownload, presignUrl } from "@/app/_lib/s3-storage";
+import { AUDIOMOTH_KEY_PATTERN, isDeletableAudiomothKey } from "@/app/_lib/audiomoth/storage-keys";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -17,6 +18,10 @@ export const dynamic = "force-dynamic";
  *       archival original. This is the stable target of `ac.audio.accessUri`;
  *       recordings are public biodiversity data (their records and preview
  *       blobs are public on the PDS already).
+ * DELETE ?key=… removes the archival original from the bucket (session-gated;
+ *       only keys inside the caller's own DID namespace can be deleted). Used
+ *       by the profile's recording deletion so the object storage doesn't
+ *       accumulate orphaned WAVs after their ac.audio records are gone.
  */
 
 const MAX_FILES_PER_CALL = 50;
@@ -24,8 +29,7 @@ const MAX_FILE_BYTES = 2 * 1024 * 1024 * 1024; // single-PUT S3 limit is 5GB; ca
 const PUT_EXPIRES_SECONDS = 3600;
 const GET_EXPIRES_SECONDS = 3600;
 
-/** audiomoth/{did}/{deploymentId or "unassigned"}/{filename} */
-const KEY_PATTERN = /^audiomoth\/did:[a-z0-9:%.\-_]+\/(?:[0-9a-f]{16}|unassigned)\/[A-Za-z0-9._\-]{1,200}$/i;
+const KEY_PATTERN = AUDIOMOTH_KEY_PATTERN;
 
 function sanitizeFilename(name: string): string | null {
   const base = name.split("/").pop()?.split("\\").pop()?.trim() ?? "";
@@ -87,4 +91,40 @@ export async function GET(request: Request) {
   }
   const filename = key.split("/").pop();
   return NextResponse.redirect(presignDownload(config, key, GET_EXPIRES_SECONDS, filename), 302);
+}
+
+export async function DELETE(request: Request) {
+  // CSRF defense-in-depth: our own client fetches are always same-origin.
+  // Browsers attach Sec-Fetch-Site automatically and it can't be spoofed
+  // cross-site, so reject anything a foreign page tries to trigger — even
+  // if the session cookie were ever configured to travel cross-site.
+  const fetchSite = request.headers.get("sec-fetch-site");
+  if (fetchSite && fetchSite !== "same-origin" && fetchSite !== "same-site") {
+    return NextResponse.json({ error: "forbidden" }, { status: 403 });
+  }
+  const session = await fetchAuthSession();
+  if (!session.isLoggedIn) {
+    return NextResponse.json({ error: "not_signed_in" }, { status: 401 });
+  }
+  const config = getS3Config();
+  if (!config) {
+    return NextResponse.json({ error: "not_configured" }, { status: 503 });
+  }
+  const key = new URL(request.url).searchParams.get("key") ?? "";
+  // Only keys the PUT presign can actually create, inside the caller's own
+  // DID namespace, may be deleted. (Org-repo records whose file was uploaded
+  // by someone else keep the object — the caller's record delete still works.)
+  const verdict = isDeletableAudiomothKey(key, session.did);
+  if (verdict === "not_found") {
+    return NextResponse.json({ error: "not_found" }, { status: 404 });
+  }
+  if (verdict === "forbidden") {
+    return NextResponse.json({ error: "forbidden" }, { status: 403 });
+  }
+  try {
+    await deleteObject(config, key);
+  } catch {
+    return NextResponse.json({ error: "delete_failed" }, { status: 502 });
+  }
+  return NextResponse.json({ ok: true });
 }

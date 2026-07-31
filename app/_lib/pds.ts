@@ -177,6 +177,31 @@ export async function getPdsRecord(
 }
 
 /**
+ * The collections a repo actually holds records in.
+ *
+ * A repo only lists a collection once something has been written to it, so
+ * this answers "does this account have any X at all?" for the price of one
+ * small request — where listing the records themselves could mean megabytes
+ * of record bodies just to find out the answer is none.
+ */
+export async function listRepoCollections(
+  did: string,
+  signal?: AbortSignal,
+): Promise<string[]> {
+  const host = await resolvePdsHost(did, signal);
+  if (!host) return [];
+  const params = new URLSearchParams({ repo: did });
+  const res = await fetch(
+    `https://${host}/xrpc/com.atproto.repo.describeRepo?${params.toString()}`,
+    { signal, cache: "no-store" },
+  ).catch(() => null);
+  if (!res?.ok) return [];
+  const payload = (await res.json().catch(() => null)) as { collections?: unknown } | null;
+  if (!Array.isArray(payload?.collections)) return [];
+  return payload.collections.filter((entry): entry is string => typeof entry === "string");
+}
+
+/**
  * List the newest records of a collection straight from the owner's PDS
  * (public `com.atproto.repo.listRecords`, newest-first). One page only — this
  * exists to surface freshly written records the indexer hasn't seen yet, not

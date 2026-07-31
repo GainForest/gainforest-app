@@ -337,9 +337,17 @@ export async function updateAudioOccurrence(
   return parseAudioOccurrenceItem({ uri: result.uri, cid: result.cid, value: record }, draft.source.uri)!;
 }
 
-export async function deleteAudioOccurrence(item: AudioOccurrenceItem): Promise<void> {
+export async function deleteAudioOccurrence(
+  item: AudioOccurrenceItem,
+  options?: { repo?: string | null },
+): Promise<void> {
   await postMutation<{ success?: boolean }>(
-    { operation: "deleteRecord", collection: OCCURRENCE_COLLECTION, rkey: item.rkey },
+    {
+      operation: "deleteRecord",
+      collection: OCCURRENCE_COLLECTION,
+      rkey: item.rkey,
+      ...(options?.repo ? { repo: options.repo } : {}),
+    },
     "The occurrence could not be deleted.",
   );
 }
@@ -387,6 +395,29 @@ export async function listAudioOccurrences(
     if (parsed) items.push(parsed);
   }
   return items.sort((a, b) => a.bounds.startTimeSeconds - b.bounds.startTimeSeconds);
+}
+
+/**
+ * The identifications drawn on a given set of recordings.
+ *
+ * Used when recordings are about to be deleted: an identification is a box on
+ * one recording, so it cannot outlive the audio it points at — both to warn
+ * the user how many are at stake and to take them with it.
+ */
+export async function listAudioOccurrencesForRecordings(
+  did: string,
+  audioUris: Iterable<string>,
+  signal?: AbortSignal,
+): Promise<AudioOccurrenceItem[]> {
+  const wanted = new Set(audioUris);
+  if (wanted.size === 0) return [];
+  const records = await listOccurrenceRecords(did, signal);
+  const items: AudioOccurrenceItem[] = [];
+  for (const entry of records) {
+    const parsed = parseAudioOccurrenceItem(entry);
+    if (parsed && wanted.has(parsed.sourceAudioUri)) items.push(parsed);
+  }
+  return items;
 }
 
 /** Every bioacoustic occurrence in a repo, newest first — across all recordings. */

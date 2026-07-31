@@ -11,6 +11,9 @@ import { ChromeGate } from "./_components/ChromeGate";
 import { ClientErrorListener } from "./_components/ClientErrorListener";
 import { AccountDrawerProvider } from "./_components/AccountDrawer";
 import { AppCartProvider } from "./_components/cart/AppCartProvider";
+import { UploadTray } from "./_components/upload-tray/UploadTray";
+import { UploadTrayProvider } from "./_components/upload-tray/upload-tray-context";
+import { isAudioMothUploadTrayFlagEnabled } from "./_lib/audiomoth/feature-flags";
 import { LinkPrefetcher } from "./_components/LinkPrefetcher";
 import { RouteChangeIndicator } from "./_components/RouteChangeIndicator";
 import { ModalHost, ModalProvider } from "@/components/ui/modal/context";
@@ -227,7 +230,16 @@ export default async function RootLayout({ children }: { children: React.ReactNo
               <ModalProvider>
                 <AccountDrawerProvider>
                   <AppCartProvider>
-                    <ChromeGate authSession={authSession}>{children}</ChromeGate>
+                    {/* Recording uploads run above the router so they keep
+                        going while people navigate the app; the tray is the
+                        visible part of that queue. The provider always mounts
+                        (the Upload tab reads its context either way) but the
+                        panel itself only renders behind the release flag, so
+                        with the flag off there is no tray in the DOM at all. */}
+                    <UploadTrayProvider>
+                      <ChromeGate authSession={authSession}>{children}</ChromeGate>
+                      {isAudioMothUploadTrayFlagEnabled() ? <UploadTray /> : null}
+                    </UploadTrayProvider>
                     {/* The modal chrome mounts at the bottom of the provider
                         tree so inline modal content pushed via pushModal keeps
                         access to the app-level contexts above this line. */}

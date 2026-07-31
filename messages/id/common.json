@@ -8,6 +8,9 @@
     "changeAria": "Ubah bahasa",
     "currentLanguage": "Bahasa saat ini"
   },
+  "adminOnly": {
+    "label": "Khusus admin"
+  },
   "navigation": {
     "navigation": "Navigasi",
     "openNavigation": "Buka navigasi",
@@ -65,23 +68,9 @@
     "myAccount": "Akun saya",
     "signOut": "Keluar",
     "settings": "Pengaturan",
+    "organizationRole": "Organisasi · {role}",
     "switchAccount": "Ganti akun",
-    "switchAccountHint": "Unggahan dan proyek baru disimpan ke akun yang Anda pilih di sini.",
-    "organizationRole": "Organisasi · {role}"
-  },
-  "publishAs": {
-    "label": "Menerbitkan sebagai",
-    "badgePersonal": "Pribadi",
-    "badgeOrganization": "Organisasi",
-    "personalFallback": "Akun pribadi",
-    "organizationFallback": "Akun organisasi",
-    "personalDescription": "Masuk ke profil pribadi Anda",
-    "organizationDescription": "Masuk ke profil bersama organisasi",
-    "menuTitle": "Pilih tempat menerbitkan",
-    "menuPersonalSubtitle": "Akun pribadi Anda",
-    "menuOrganizationSubtitle": "Akun bersama organisasi",
-    "organizationsLabel": "Organisasi Anda",
-    "switchHint": "Ganti akun yang Anda gunakan untuk menerbitkan"
+    "switchAccountHint": "Unggahan dan proyek baru disimpan ke akun yang Anda pilih di sini."
   },
   "errorPage": {
     "title": "Terjadi kesalahan.",
@@ -131,7 +120,6 @@
       "labeler": "Pelabel",
       "globe": "Bola Dunia",
       "audiomoth": "AudioMoth",
-      "soundscape": "Lanskap suara",
       "identifications": "Identifikasi"
     },
     "prompts": {
@@ -489,9 +477,9 @@
     "photos": "Foto",
     "files": "Berkas",
     "taina": "Tainá",
+    "wallet": "Dompet",
     "endorsementsGiven": "Dukungan",
     "equipment": "Peralatan",
-    "wallet": "Dompet",
     "more": "Lainnya"
   },
   "equipment": {
@@ -620,6 +608,101 @@
       "member": "Anggota"
     }
   },
+  "accountWallet": {
+    "title": "Dompet",
+    "intro": "Dompet donasi pribadi Anda, diamankan dengan kunci sandi Anda. Donasi untuk proyek Anda masuk ke alamat ini.",
+    "loadError": "Tidak dapat memuat dompet Anda.",
+    "passkeyUnsupported": "Perangkat ini tidak mendukung kunci sandi. Coba perangkat dengan Face ID, sidik jari, atau kunci keamanan.",
+    "passkeyLabel": "GainForest — {name}",
+    "passkeyLabelFallback": "Dompet GainForest",
+    "createError": "Tidak dapat membuat dompet. Silakan coba lagi.",
+    "addSignerError": "Tidak dapat menambahkan kunci sandi. Silakan coba lagi.",
+    "removeSignerError": "Tidak dapat menghapus kunci sandi ini. Silakan coba lagi.",
+    "deleteError": "Tidak dapat menghapus dompet. Silakan coba lagi.",
+    "emptyTitle": "Belum ada dompet",
+    "emptyHint": "Buat dompet donasi Anda dengan kunci sandi (Face ID, sidik jari, atau kunci keamanan). Tanpa frasa benih, tanpa perlu memasang apa pun.",
+    "creating": "Menunggu kunci sandi Anda…",
+    "createButton": "Buat dompet dengan kunci sandi",
+    "defaultName": "Dompet donasi saya",
+    "copyAddress": "Salin alamat",
+    "copied": "Disalin",
+    "copy": "Salin",
+    "readyHint": "Alamat ini bisa langsung menerima donasi. Alamat ini milik Anda dan hanya kunci sandi di bawah yang dapat membelanjakannya.",
+    "activeHint": "Dompet ini sudah aktif di blockchain. Kunci sandinya kini dikelola di rantai.",
+    "signersHeading": "Siapa yang dapat menyetujui pembayaran",
+    "signersLocked": "Terkunci",
+    "unnamedPasskey": "Kunci sandi",
+    "removeSigner": "Hapus kunci sandi",
+    "addPasskey": "Tambahkan kunci sandi lain",
+    "signerLabelPlaceholder": "Beri nama kunci ini (mis. Ponsel saya)",
+    "signersHint": "Tambahkan kunci sandi dari perangkat lain atau orang yang Anda percaya — semuanya dapat menyetujui pembayaran.",
+    "deleteButton": "Hapus dompet",
+    "deleteConfirmTitle": "Hapus dompet ini?",
+    "deleteConfirmBody": "Tindakan ini tidak dapat dibatalkan. Jika nanti Anda membuat dompet baru dengan kunci sandi baru, alamatnya akan berbeda.",
+    "deleteConfirmFunds": "Dompet ini sudah berisi dana, jadi tidak dapat dihapus.",
+    "deleteConfirmCancel": "Batal",
+    "deleteConfirmButton": "Ya, hapus dompet",
+    "viewOnExplorer": "Lihat alamat ini di Etherscan",
+    "explorer": "Etherscan",
+    "balancesHeading": "Saldo",
+    "balancesEmpty": "Belum ada dana. Donasi yang dikirim ke alamat ini akan muncul di sini.",
+    "balancesError": "Saldo tidak tersedia saat ini. Muat ulang untuk mencoba lagi.",
+    "sendHeading": "Kirim dana",
+    "sendIntro": "Pindahkan uang dari dompet ini ke alamat dompet lain mana pun. Anda menyetujui setiap transfer dengan kunci sandi Anda.",
+    "sendToken": "Mata uang",
+    "sendRecipient": "Alamat penerima",
+    "sendRecipientPlaceholder": "Alamat penerima (0x…)",
+    "sendRecipientInvalid": "Masukkan alamat dompet yang valid — dimulai dengan 0x diikuti 40 karakter.",
+    "sendAmount": "Jumlah",
+    "sendAmountInvalid": "Masukkan jumlah yang valid.",
+    "sendAmountTooHigh": "Itu lebih dari yang dimiliki dompet ini.",
+    "sendMax": "Maks",
+    "sendButton": "Kirim dengan kunci sandi",
+    "sendPreparing": "Menyiapkan…",
+    "sendAwaitingPasskey": "Menunggu kunci sandi Anda…",
+    "sendSubmitting": "Mengirim — ini bisa memakan waktu satu menit…",
+    "sendSuccess": "Terkirim! Transfer telah dikonfirmasi.",
+    "sendViewTx": "Lihat transaksi",
+    "sendGasNote": "GainForest menanggung biaya jaringan.",
+    "sendNoSigner": "Hanya orang dengan kunci sandi yang terdaftar di dompet ini yang dapat mengirim darinya.",
+    "sendErrorNotConfigured": "Pengiriman belum diaktifkan di server ini.",
+    "sendErrorInsufficient": "Dompet ini tidak memiliki cukup dana untuk transfer itu.",
+    "sendErrorBusy": "Jaringan sedang sibuk saat ini. Silakan coba lagi dalam beberapa menit.",
+    "sendErrorSignature": "Persetujuan kunci sandi tidak dapat diverifikasi. Silakan coba lagi.",
+    "sendErrorGeneric": "Transfer tidak dapat diselesaikan. Silakan coba lagi.",
+    "thresholdHeading": "Persetujuan yang diperlukan",
+    "thresholdOption": "{count} dari {total, plural, other {# kunci sandi}}",
+    "thresholdHint": "Berapa banyak kunci sandi yang harus menyetujui setiap transfer. Mewajibkan lebih dari satu lebih aman — satu kunci sandi yang hilang atau dicuri tidak bisa memindahkan dana sendirian. Mengubah ini memberi dompet alamat baru, jadi hanya bisa dilakukan sebelum dompet berisi dana.",
+    "thresholdUpdateError": "Tidak dapat mengubah persyaratan persetujuan. Silakan coba lagi.",
+    "thresholdLockedFunds": "Dompet sudah berisi dana, jadi persyaratan persetujuan tidak dapat diubah lagi.",
+    "thresholdSingleWarning": "Saat ini satu kunci sandi saja dapat memindahkan dana. Pertimbangkan untuk mewajibkan lebih banyak persetujuan.",
+    "sendApprovalsNeeded": "Dompet ini membutuhkan {count} persetujuan dengan kunci sandi yang berbeda. Anda memberikan yang pertama; sisanya dapat diberikan di sini atau dari perangkat lain.",
+    "sendApprovalOf": "Persetujuan {current} dari {total} — menunggu kunci sandi…",
+    "sendDuplicatePasskey": "Setiap persetujuan membutuhkan kunci sandi yang berbeda.",
+    "pendingHeading": "Transfer menunggu persetujuan",
+    "pendingProgress": "{current} dari {total} persetujuan diberikan",
+    "pendingRemoteHint": "Pemegang kunci sandi lain dapat menyetujui dari perangkat mereka sendiri — transfer tetap di sini sampai persetujuannya cukup. Persetujuan terakhir mengirimkannya.",
+    "pendingApprove": "Setujui dengan kunci sandi",
+    "pendingApproveAndSend": "Setujui & kirim",
+    "pendingCancel": "Batalkan transfer",
+    "pendingInvalid": "Transfer yang menunggu ini tidak lagi valid — dompet berubah sejak dimulai. Batalkan untuk memulai yang baru.",
+    "pendingCancelForbidden": "Hanya orang yang memulai transfer ini atau pengelola dompet yang dapat membatalkannya.",
+    "sendStartButton": "Mulai transfer dengan kunci sandi",
+    "sendErrorExpired": "Transfer ini tidak lagi valid — dompet atau biaya jaringan berubah. Silakan mulai lagi.",
+    "sendErrorPendingExists": "Sudah ada transfer yang menunggu persetujuan. Selesaikan atau batalkan dulu.",
+    "sendErrorApprovalInvalid": "Persetujuan ini tidak dapat diverifikasi. Silakan coba lagi.",
+    "onchainManageHint": "Dompet ini aktif di blockchain, jadi perubahan kunci sandi dicatat di rantai dan membutuhkan persetujuan seperti biasa. GainForest menanggung biaya jaringan.",
+    "thresholdOnchainHint": "Berapa banyak kunci sandi yang harus menyetujui setiap transfer. Perubahan ini dicatat di blockchain — alamat dompet tetap sama.",
+    "manageForbidden": "Hanya pemilik organisasi atau admin yang dapat melakukan perubahan ini."
+  },
+  "accountSupport": {
+    "button": "Dukung",
+    "buttonAria": "Dukung {name} secara langsung",
+    "modalTitle": "Dukung {name}",
+    "modalDescription": "Pilih jumlah yang ingin diberikan langsung kepada {name}.",
+    "directNote": "100% langsung diberikan kepada {name}, tanpa biaya platform dan biaya jaringan ditanggung untuk Anda.",
+    "cartLabel": "Dukungan langsung untuk akun"
+  },
   "accountDonations": {
     "emptyHeroDescription": "Dukung sebuah proyek dan kontribusi Anda akan muncul di sini, masing-masing tertaut ke proyek yang Anda dukung.",
     "emptyHeroCta": "Jelajahi proyek",
@@ -692,6 +775,8 @@
     "loadError": "Kami tidak dapat memuat proyek ini. Silakan coba lagi.",
     "saveError": "Kami tidak dapat menyimpan perubahan Anda. Silakan coba lagi.",
     "timelineDescription": "Tambahkan, lihat, dan hapus bukti yang disematkan pada lini masa proyek ini.",
+    "observationsDescription": "Semua pengamatan alam yang tercatat untuk proyek ini. Apa pun yang Anda tambahkan di sini akan tercatat di bawahnya.",
+    "addExistingObservations": "Tambahkan pengamatan yang ada",
     "sitesTitle": "Situs proyek",
     "sitesDescription": "Pilih area terpetakan untuk proyek ini. Tautkan situs tersimpan atau buat yang baru.",
     "currentSiteLabel": "Situs saat ini",
@@ -1001,8 +1086,7 @@
     "eyebrow": "Aktivitas langsung",
     "hero": {
       "title": "Apa yang terjadi di",
-      "accent": "GainForest",
-      "description": "Aliran langsung proyek terbaru, temuan alam, organisasi, dan pembaruan komunitas — semuanya di satu tempat."
+      "accent": "GainForest"
     },
     "filters": {
       "all": "Semua",
@@ -1056,6 +1140,11 @@
     "actions": {
       "like": "Suka",
       "liked": "Disukai",
+      "reshare": "Bagikan ulang",
+      "reshared": "Dibagikan ulang",
+      "undoReshare": "Batalkan bagikan ulang",
+      "reshareHint": "Bagikan ini kepada pengikut Anda",
+      "resharedBy": "{name} membagikan ulang",
       "comment": "Komentar",
       "comments": "{count, plural, other {# komentar}}",
       "signInToInteract": "Masuk untuk memposting, menyukai, dan berkomentar",
@@ -1088,6 +1177,8 @@
       "unpin": "Lepas sematan"
     },
     "composer": {
+      "title": "Bagikan pembaruan",
+      "close": "Tutup",
       "placeholder": "Bagikan kabar terbaru dengan komunitas…",
       "signedOut": "Masuk untuk membagikan kabar terbaru",
       "addObservation": "Tambahkan pengamatan alam",
@@ -1095,9 +1186,7 @@
       "posting": "Memposting…",
       "postedTitle": "Terposting",
       "postedNote": "Kabar Anda sudah tayang dan akan muncul di feed sebentar lagi.",
-      "postingAs": "Memposting sebagai {name}",
-      "title": "Bagikan pembaruan",
-      "close": "Tutup"
+      "postingAs": "Memposting sebagai {name}"
     },
     "quickLike": {
       "like": "Sukai foto ini",
@@ -1130,6 +1219,13 @@
     "unhideAction": "Tampilkan kembali",
     "genericError": "Terjadi kesalahan. Silakan coba lagi."
   },
+  "testRecord": {
+    "hideAction": "Sembunyikan sebagai uji coba",
+    "hideHint": "Sembunyikan entri ini dari feed publik dan halaman jelajah sebagai konten uji coba",
+    "confirmHide": "Sembunyikan dari semua orang",
+    "cancel": "Batal",
+    "genericError": "Terjadi kesalahan. Silakan coba lagi."
+  },
   "adminTestAccounts": {
     "title": "Akun uji coba",
     "description": "Akun-akun ini ditandai sebagai uji coba, jadi proyek, pengamatan, hasil pencarian, dan aktivitas feed-nya disembunyikan dari semua orang.",
@@ -1138,6 +1234,24 @@
     "unnamed": "Akun tanpa nama",
     "error": "Terjadi kesalahan. Silakan coba lagi."
   },
+  "adminTestRecords": {
+    "title": "Postingan & pengamatan tersembunyi",
+    "description": "Postingan dan pengamatan ini ditandai sebagai uji coba, jadi disembunyikan dari feed publik dan halaman jelajah. Bagian lain dari akun pemiliknya tetap terlihat.",
+    "empty": "Belum ada postingan atau pengamatan yang disembunyikan.",
+    "remove": "Tampilkan kembali",
+    "unnamed": "Akun tanpa nama",
+    "error": "Terjadi kesalahan. Silakan coba lagi.",
+    "itemLabel": "{kind} oleh {name}",
+    "hiddenAgo": "Disembunyikan {time}",
+    "kinds": {
+      "post": "Postingan",
+      "observation": "Pengamatan",
+      "project": "Proyek",
+      "organization": "Pembaruan organisasi",
+      "donation": "Donasi",
+      "record": "Entri"
+    }
+  },
   "recognition": {
     "eyebrow": "Pengelola GainForest",
     "title": "Berikan lencana penghargaan",
@@ -1145,7 +1259,6 @@
     "award": "Berikan",
     "remove": "Hapus",
     "genericError": "Terjadi kesalahan. Silakan coba lagi.",
-    "chipsAria": "Lencana penghargaan",
     "badges": {
       "rewilding-grant": {
         "label": "Hibah Rewilding",
@@ -1153,13 +1266,13 @@
       },
       "bioblitz-most-images": {
         "label": "BioBlitz — observasi terbanyak",
-        "description": "Memenangkan ronde BioBlitz untuk observasi terbanyak.",
-        "labelWithRound": "BioBlitz {roundName} — observasi terbanyak"
+        "labelWithRound": "BioBlitz {roundName} — observasi terbanyak",
+        "description": "Memenangkan ronde BioBlitz untuk observasi terbanyak."
       },
       "bioblitz-best-picture": {
         "label": "BioBlitz — foto terbaik",
-        "description": "Memenangkan ronde BioBlitz untuk foto terbaik.",
-        "labelWithRound": "BioBlitz {roundName} — foto terbaik"
+        "labelWithRound": "BioBlitz {roundName} — foto terbaik",
+        "description": "Memenangkan ronde BioBlitz untuk foto terbaik."
       }
     },
     "awardsLabel": "Penghargaan",
@@ -1203,6 +1316,38 @@
     "page": {
       "title": "Admin",
       "subtitle": "Tinjau pelamar hibah dan acara, kelola akun yang ditandai, dan awasi agen Tainá."
+    }
+  },
+  "adminBioblitzExclusions": {
+    "title": "Papan peringkat jumlah pengamatan mingguan",
+    "description": "Pilih akun dan ronde BioBlitz yang pengamatannya tidak boleh dimasukkan dalam total pengamatan pekan tersebut.",
+    "effect": "Ini hanya mengubah papan peringkat jumlah pengamatan. Akun dan pengamatannya tetap terlihat dan tetap berhak mengikuti foto terbaik.",
+    "accountLabel": "Akun",
+    "chooseAccount": "Pilih akun",
+    "accountPickerAria": "Pilih akun yang pengamatannya tidak boleh dihitung",
+    "searchPlaceholder": "Cari orang dan organisasi",
+    "searchHint": "Ketik nama akun untuk mencari",
+    "noResults": "Tidak ada akun yang cocok",
+    "observationCount": "{count, number} pengamatan",
+    "clearSelection": "Hapus pilihan akun",
+    "weekLabel": "Pekan BioBlitz",
+    "roundLabel": "Ronde {round}",
+    "add": "Jangan hitung pekan ini",
+    "adding": "Memperbarui…",
+    "finalized": "Ronde telah berakhir",
+    "unavailable": "Penghitungan mingguan tidak dapat dimuat dengan aman. Coba lagi sebelum membuat perubahan.",
+    "permissionNotice": "Hanya anggota tim admin yang dapat mengubah penghitungan mingguan.",
+    "empty": "Saat ini semua akun dihitung dalam pekan BioBlitz masing-masing.",
+    "unnamed": "Akun tanpa nama",
+    "removeLabel": "Hitung kembali {name} di papan peringkat",
+    "errors": {
+      "notSignedIn": "Masuk kembali untuk melanjutkan.",
+      "forbidden": "Anda tidak memiliki izin untuk mengubah penghitungan mingguan.",
+      "invalidRound": "Pilih pekan BioBlitz yang valid.",
+      "accountNotFound": "Akun tersebut tidak dapat ditemukan.",
+      "finalized": "Ronde BioBlitz ini telah berakhir, sehingga penghitungan tidak dapat diubah lagi.",
+      "add": "Perubahan penghitungan mingguan tidak dapat disimpan. Coba lagi.",
+      "remove": "Akun tidak dapat dikembalikan ke papan peringkat. Coba lagi."
     }
   },
   "adminTaina": {
@@ -1324,7 +1469,11 @@
       "breadcrumbAria": "Jejak navigasi dokumentasi",
       "schemas": "Skema data",
       "guideIntro": "Panduan ini menetapkan konvensi aplikasi yang digunakan bersama skema kemunculan. Skemanya tetap berupa Darwin Core umum; panduan ini menjelaskan hubungan antara rekaman AudioMoth, kotak spektrogram, dan rekaman kemunculan."
-    }
+    },
+    "hypercertsLinkTitle": "Membangun di atas leksikon Hypercerts",
+    "hypercertsLinkDesc": "Konvensi, perbedaan, dan saran interoperabilitas bagi pengembang yang menulis catatan Hypercerts di aplikasinya sendiri.",
+    "dataModelLinkTitle": "Bagaimana data Anda saling terhubung",
+    "dataModelLinkDesc": "Panduan berbahasa sederhana tentang cara pengamatan, kumpulan data, proyek, dan organisasi saling terhubung."
   },
   "taina": {
     "meta": {
@@ -1740,7 +1889,89 @@
       "deployments": "Penempatan",
       "upload": "Unggah",
       "label": "Beri label",
-      "identifications": "Identifikasi"
+      "identifications": "Identifikasi",
+      "soundscape": "Lanskap suara"
+    },
+    "label": {
+      "subtitle": "Tinjau rekaman AudioMoth, tandai suara berdasarkan waktu dan frekuensi, lalu buat kumpulan label yang rapi untuk data lapangan Anda.",
+      "signInTitle": "Masuk untuk memberi label rekaman",
+      "signInBody": "Catatan keberadaan disimpan ke akun Anda. Masuk, unggah rekaman AudioMoth, lalu tandai suara satwa yang ditemukan.",
+      "loadingRecordings": "Memuat rekaman AudioMoth Anda…",
+      "loadFailed": "Rekaman Anda tidak dapat dimuat. Silakan coba lagi.",
+      "occurrencesLoadFailed": "Catatan keberadaan tersimpan untuk rekaman ini tidak dapat dimuat.",
+      "noRecordingsTitle": "Unggah rekaman terlebih dahulu",
+      "noRecordingsBody": "Ruang kerja pelabelan menggunakan rekaman yang sudah tersimpan di akun agar setiap kotak menjadi catatan keberadaan biodiversitas yang tertaut.",
+      "uploadFirst": "Unggah rekaman AudioMoth",
+      "refresh": "Muat ulang",
+      "savedAtproto": "Setiap kotak yang disimpan menjadi catatan keberadaan biodiversitas di akun Anda.",
+      "openToLoad": "Buka untuk memuat label",
+      "saved": "Tersimpan",
+      "deleteConfirm": "Hapus catatan keberadaan ini? Catatan akan dihapus dari akun dan tidak dapat dipulihkan.",
+      "deleteFailed": "Catatan keberadaan tidak dapat dihapus. Silakan coba lagi.",
+      "saveFailed": "Catatan keberadaan tidak dapat disimpan. Kotak tetap ada agar Anda dapat mencoba lagi.",
+      "recordedAtMissing": "Rekaman ini tidak memiliki waktu mulai yang sah, sehingga waktu keberadaan tidak dapat dihitung.",
+      "audioUnavailable": "Rekaman ini tidak memiliki berkas asli atau pratinjau yang dapat diputar. Unggah kembali dengan pratinjau diaktifkan.",
+      "commonName": "Nama umum/lokal (opsional)",
+      "commonNamePlaceholder": "Katak pohon",
+      "scientificName": "Nama ilmiah (opsional)",
+      "scientificNamePlaceholder": "Boana faber",
+      "scientificNameHint": "Biarkan kosong untuk menyimpan kelompok luas yang tepat, seperti Anura untuk katak.",
+      "saveOccurrence": "Simpan keberadaan",
+      "saveAtprotoHint": "Membuat catatan Darwin Core yang tertaut ke rekaman audio ini.",
+      "stepImport": "Pilih rekaman",
+      "stepDraw": "Gambar kotak waktu dan frekuensi",
+      "stepDescribe": "Jelaskan suara yang terdengar",
+      "emptyTitle": "Beri label suara satwa dalam rekaman AudioMoth",
+      "emptyBody": "Pilih folder kartu SD atau sekumpulan berkas WAV. Pilih rekaman, tarik kotak di sekitar suara, lalu tandai sebagai burung, katak, serangga, suara lain, atau catatan.",
+      "chooseFolder": "Pilih kartu SD atau folder",
+      "chooseFiles": "Pilih berkas WAV",
+      "privacyNote": "Rekaman tetap berada di perangkat ini saat Anda memberi label.",
+      "workspaceSummary": "{files} rekaman · {labels} label",
+      "savedLocally": "Draf disimpan di peramban ini. Ekspor jika sudah siap.",
+      "addFiles": "Tambah rekaman",
+      "export": "Ekspor CSV",
+      "closeSet": "Tutup kumpulan",
+      "recordings": "Rekaman",
+      "search": "Cari berkas…",
+      "labelCount": "{count} label",
+      "notLabelled": "Belum diberi label",
+      "filePosition": "Rekaman {current} dari {total}",
+      "previousFile": "Rekaman sebelumnya",
+      "nextFile": "Rekaman berikutnya",
+      "labelsTitle": "Label ({count})",
+      "selectToEdit": "Pilih label untuk mengedit",
+      "labelsEmpty": "Belum ada label. Tarik kotak di atas suara pada spektrogram untuk memulai.",
+      "deleteLabel": "Hapus label",
+      "editLabel": "Ubah label",
+      "newLabel": "Label baru",
+      "describeSelection": "Apa yang ada di kotak ini?",
+      "drawFirst": "Gambar kotak untuk memulai",
+      "clearSelection": "Hapus pilihan",
+      "drawHint": "Tarik pada spektrogram untuk menandai suara yang ingin diberi label. Kotak merekam waktu kejadian dan rentang frekuensinya.",
+      "timeRange": "Waktu",
+      "frequencyRange": "Frekuensi",
+      "whatIsIt": "Apa yang Anda dengar?",
+      "categories": {
+        "bird": "Burung",
+        "frog": "Katak",
+        "insect": "Serangga",
+        "other": "Lainnya",
+        "note": "Catatan"
+      },
+      "species": "Spesies (opsional)",
+      "speciesPlaceholder": "Nama umum atau ilmiah",
+      "speciesHint": "Biarkan kosong jika Anda hanya tahu kelompok satwanya.",
+      "noteRequired": "Catatan",
+      "noteOptional": "Catatan (opsional)",
+      "notePlaceholder": "Jenis suara, keyakinan, cuaca, atau hal berguna lainnya…",
+      "updateLabel": "Perbarui label",
+      "saveLabel": "Simpan label",
+      "saveHint": "Disimpan di peramban ini sampai Anda mengekspor kumpulan label.",
+      "drawInstruction": "Tarik untuk menggambar · pilih kotak untuk mengedit",
+      "spectrogramAria": "Spektrogram audio interaktif",
+      "buildingSpectrogram": "Membuat spektrogram…",
+      "spectrogramFailed": "Rekaman ini tidak dapat diubah menjadi spektrogram.",
+      "audioUnsupported": "Peramban Anda tidak dapat memutar rekaman ini."
     },
     "deployments": {
       "intro": "Penempatan mencatat di mana dan kapan sebuah AudioMoth dipasang di lapangan. Masing-masing memutar nada akustik yang mengatur jam, lokasi, dan ID penempatan perekam.",
@@ -1837,13 +2068,38 @@
       "doneWithErrors": "Selesai dengan {count} kesalahan",
       "doneBody": "{count} rekaman terunggah. {skipped} sudah ada dan dilewati.",
       "uploadMore": "Unggah kartu lain",
+      "retryFailed": "Coba lagi file yang gagal ({count})",
       "statusSkipped": "Sudah diunggah",
+      "statusRetrying": "Mencoba lagi {attempt} dari {max}…",
+      "dedupChecking": "Memeriksa rekaman mana yang sudah ada di akun Anda…",
+      "dedupSkipped": "{count} rekaman sudah ada di akun Anda dan akan dilewati.",
+      "allUploaded": "Semua rekaman sudah diunggah",
       "statusSaving": "Menyimpan…",
       "notConfigured": "Penyimpanan rekaman belum disiapkan. Silakan hubungi tim.",
       "uploadFailed": "Unggahan tidak dapat diselesaikan. Silakan coba lagi.",
+      "errorConnection": "Koneksi Anda terputus saat file ini diunggah. Periksa internet Anda, lalu gunakan “Coba lagi file yang gagal”.",
+      "errorStorageRejected": "Kami tidak dapat menerima file ini. Silakan coba lagi.",
+      "errorSaveConnection": "File sudah terkirim, tetapi internet terputus sebelum kami selesai. Ketuk “Coba lagi file yang gagal”.",
+      "errorSaveFailed": "File sudah terunggah, tetapi tidak dapat disimpan ke akun Anda. Silakan coba lagi.",
+      "errorOffline": "Tidak ada koneksi internet. Periksa Wi-Fi Anda dan coba lagi.",
       "deploymentFallback": "Dibuat otomatis saat mengunggah rekaman kartu SD.",
+      "groupNameLabel": "Beri nama unggahan ini",
+      "groupNameHelp": "Rekaman ini akan dikelompokkan dengan nama ini di profil Anda, agar mudah ditemukan nanti.",
+      "groupNamePlaceholder": "mis. Tepi hutan — April 2024",
+      "groupNameRequired": "Beri nama unggahan ini terlebih dahulu.",
+      "folderTitle": "Rekaman ini akan disimpan di mana?",
+      "folderExistingHelp": "Tambahkan ke folder yang sudah Anda miliki, agar semua data dari lokasi ini tetap menyatu.",
+      "folderExistingAction": "Pilih folder yang ada",
+      "folderNewAction": "Folder baru",
+      "folderSearchPlaceholder": "Cari folder Anda",
+      "folderNoMatch": "Tidak ada folder yang cocok dengan pencarian Anda.",
+      "folderRequired": "Pilih folder terlebih dahulu.",
+      "folderLoading": "Memuat folder Anda…",
+      "groupRemarks": "Dibuat saat mengunggah folder rekaman.",
       "discovering": "Mencari rekaman… {count} berkas ditemukan",
-      "readFailed": "Kartu SD tidak dapat dibaca. Cabut dan masukkan kembali, lalu coba lagi — atau seret folder ke halaman ini."
+      "readFailed": "Kartu SD tidak dapat dibaca. Cabut dan masukkan kembali, lalu coba lagi — atau seret folder ke halaman ini.",
+      "handedOffTitle": "{count} rekaman sedang diunggah di latar belakang.",
+      "handedOffBody": "Kamu bisa terus menjelajah atau membaca kartu lain — progresnya ada di baki di bawah."
     },
     "recordings": {
       "title": "Rekaman",
@@ -1866,250 +2122,17 @@
       "nextMonth": "Bulan berikutnya",
       "prevDay": "Hari sebelumnya dengan rekaman",
       "nextDay": "Hari berikutnya dengan rekaman",
-      "allHours": "Semua jam"
-    },
-    "label": {
-      "subtitle": "Tinjau rekaman AudioMoth, tandai suara berdasarkan waktu dan frekuensi, lalu buat kumpulan label yang rapi untuk data lapangan Anda.",
-      "signInTitle": "Masuk untuk memberi label rekaman",
-      "signInBody": "Catatan keberadaan disimpan ke akun Anda. Masuk, unggah rekaman AudioMoth, lalu tandai suara satwa yang ditemukan.",
-      "loadingRecordings": "Memuat rekaman AudioMoth Anda…",
-      "loadFailed": "Rekaman Anda tidak dapat dimuat. Silakan coba lagi.",
-      "occurrencesLoadFailed": "Catatan keberadaan tersimpan untuk rekaman ini tidak dapat dimuat.",
-      "noRecordingsTitle": "Unggah rekaman terlebih dahulu",
-      "noRecordingsBody": "Ruang kerja pelabelan menggunakan rekaman yang sudah tersimpan di akun agar setiap kotak menjadi catatan keberadaan biodiversitas yang tertaut.",
-      "uploadFirst": "Unggah rekaman AudioMoth",
-      "refresh": "Muat ulang",
-      "savedAtproto": "Setiap kotak yang disimpan menjadi catatan keberadaan biodiversitas di akun Anda.",
-      "openToLoad": "Buka untuk memuat label",
-      "saved": "Tersimpan",
-      "deleteConfirm": "Hapus catatan keberadaan ini? Catatan akan dihapus dari akun dan tidak dapat dipulihkan.",
-      "deleteFailed": "Catatan keberadaan tidak dapat dihapus. Silakan coba lagi.",
-      "saveFailed": "Catatan keberadaan tidak dapat disimpan. Kotak tetap ada agar Anda dapat mencoba lagi.",
-      "recordedAtMissing": "Rekaman ini tidak memiliki waktu mulai yang sah, sehingga waktu keberadaan tidak dapat dihitung.",
-      "audioUnavailable": "Rekaman ini tidak memiliki berkas asli atau pratinjau yang dapat diputar. Unggah kembali dengan pratinjau diaktifkan.",
-      "commonName": "Nama umum/lokal (opsional)",
-      "commonNamePlaceholder": "Katak pohon",
-      "scientificName": "Nama ilmiah (opsional)",
-      "scientificNamePlaceholder": "Boana faber",
-      "scientificNameHint": "Biarkan kosong untuk menyimpan kelompok luas yang tepat, seperti Anura untuk katak.",
-      "saveOccurrence": "Simpan keberadaan",
-      "saveAtprotoHint": "Membuat catatan Darwin Core yang tertaut ke rekaman audio ini.",
-      "stepImport": "Pilih rekaman",
-      "stepDraw": "Gambar kotak waktu dan frekuensi",
-      "stepDescribe": "Jelaskan suara yang terdengar",
-      "emptyTitle": "Beri label suara satwa dalam rekaman AudioMoth",
-      "emptyBody": "Pilih folder kartu SD atau sekumpulan berkas WAV. Pilih rekaman, tarik kotak di sekitar suara, lalu tandai sebagai burung, katak, serangga, suara lain, atau catatan.",
-      "chooseFolder": "Pilih kartu SD atau folder",
-      "chooseFiles": "Pilih berkas WAV",
-      "privacyNote": "Rekaman tetap berada di perangkat ini saat Anda memberi label.",
-      "workspaceSummary": "{files} rekaman · {labels} label",
-      "savedLocally": "Draf disimpan di peramban ini. Ekspor jika sudah siap.",
-      "addFiles": "Tambah rekaman",
-      "export": "Ekspor CSV",
-      "closeSet": "Tutup kumpulan",
-      "recordings": "Rekaman",
-      "search": "Cari berkas…",
-      "labelCount": "{count} label",
-      "notLabelled": "Belum diberi label",
-      "filePosition": "Rekaman {current} dari {total}",
-      "previousFile": "Rekaman sebelumnya",
-      "nextFile": "Rekaman berikutnya",
-      "labelsTitle": "Label ({count})",
-      "selectToEdit": "Pilih label untuk mengedit",
-      "labelsEmpty": "Belum ada label. Tarik kotak di atas suara pada spektrogram untuk memulai.",
-      "deleteLabel": "Hapus label",
-      "editLabel": "Ubah label",
-      "newLabel": "Label baru",
-      "describeSelection": "Apa yang ada di kotak ini?",
-      "drawFirst": "Gambar kotak untuk memulai",
-      "clearSelection": "Hapus pilihan",
-      "drawHint": "Tarik pada spektrogram untuk menandai suara yang ingin diberi label. Kotak merekam waktu kejadian dan rentang frekuensinya.",
-      "timeRange": "Waktu",
-      "frequencyRange": "Frekuensi",
-      "whatIsIt": "Apa yang Anda dengar?",
-      "categories": {
-        "bird": "Burung",
-        "frog": "Katak",
-        "insect": "Serangga",
-        "other": "Lainnya",
-        "note": "Catatan"
-      },
-      "species": "Spesies (opsional)",
-      "speciesPlaceholder": "Nama umum atau ilmiah",
-      "speciesHint": "Biarkan kosong jika Anda hanya tahu kelompok satwanya.",
-      "noteRequired": "Catatan",
-      "noteOptional": "Catatan (opsional)",
-      "notePlaceholder": "Jenis suara, keyakinan, cuaca, atau hal berguna lainnya…",
-      "updateLabel": "Perbarui label",
-      "saveLabel": "Simpan label",
-      "saveHint": "Disimpan di peramban ini sampai Anda mengekspor kumpulan label.",
-      "drawInstruction": "Tarik untuk menggambar · pilih kotak untuk mengedit",
-      "spectrogramAria": "Spektrogram audio interaktif",
-      "buildingSpectrogram": "Membuat spektrogram…",
-      "spectrogramFailed": "Rekaman ini tidak dapat diubah menjadi spektrogram.",
-      "audioUnsupported": "Peramban Anda tidak dapat memutar rekaman ini."
-    }
-  },
-  "soundscape": {
-    "meta": {
-      "title": "Lanskap suara",
-      "description": "Impor rekaman AudioMoth dan buat jam lanskap suara 24 jam dari kandungan frekuensinya."
-    },
-    "hero": {
-      "eyebrow": "Pemantauan akustik",
-      "title": "Ubah rekaman AudioMoth menjadi jam lanskap suara",
-      "description": "Letakkan file WAV AudioMoth selama satu hari di bawah ini. Setiap rekaman dipindai dalam lima pita frekuensi, dan momen paling nyaring digambar mengelilingi jam 24 jam.",
-      "timeNote": "Waktu rekaman dibaca dari nama file AudioMoth (misalnya 20240404_153000.WAV). Perangkat AudioMoth biasanya memakai UTC kecuali diatur berbeda. Rekaman Anda tidak pernah meninggalkan perangkat ini — semuanya dianalisis di browser Anda."
-    },
-    "import": {
-      "dropTitle": "Letakkan file WAV AudioMoth di sini",
-      "dropHint": "Anda dapat memilih banyak file sekaligus — rekaman satu hari penuh paling baik.",
-      "browse": "Pilih file",
-      "fileCount": "{count, plural, other {# rekaman}}",
-      "clearAll": "Hapus semua",
-      "removeFile": "Hapus {name}",
-      "analyzing": "Menganalisis {name}…",
-      "progress": "{done} dari {total} rekaman dianalisis",
-      "statusError": "File ini tidak dapat dibaca",
-      "tooShort": "Rekaman terlalu pendek untuk dianalisis",
-      "onlyWav": "Hanya file WAV yang didukung.",
-      "timeFromModified": "Nama file tidak memuat stempel waktu — memakai waktu modifikasi file"
-    },
-    "chart": {
-      "title": "Daya dikurangi derau — {date}",
-      "allDates": "belum ada rekaman",
-      "radialLabel": "Daya dikurangi derau",
-      "timeLabel": "Waktu (Jam)",
-      "legendTitle": "Pita frekuensi",
-      "empty": "Rekaman yang dianalisis akan muncul di sini sebagai jam lanskap suara 24 jam.",
-      "emptyHint": "Impor rekaman AudioMoth di atas untuk memulai.",
-      "downloadPng": "Unduh gambar",
-      "hoverHint": "Gerakkan kursor di atas jam untuk melihat nilai.",
-      "datesTitle": "Hari",
-      "allDatesChip": "Semua hari"
-    }
-  },
-  "adminOnly": {
-    "label": "Khusus admin"
-  },
-  "accountWallet": {
-    "title": "Dompet",
-    "intro": "Dompet donasi pribadi Anda, diamankan dengan kunci sandi Anda. Donasi untuk proyek Anda masuk ke alamat ini.",
-    "loadError": "Tidak dapat memuat dompet Anda.",
-    "passkeyUnsupported": "Perangkat ini tidak mendukung kunci sandi. Coba perangkat dengan Face ID, sidik jari, atau kunci keamanan.",
-    "passkeyLabel": "GainForest — {name}",
-    "passkeyLabelFallback": "Dompet GainForest",
-    "createError": "Tidak dapat membuat dompet. Silakan coba lagi.",
-    "addSignerError": "Tidak dapat menambahkan kunci sandi. Silakan coba lagi.",
-    "removeSignerError": "Tidak dapat menghapus kunci sandi ini. Silakan coba lagi.",
-    "deleteError": "Tidak dapat menghapus dompet. Silakan coba lagi.",
-    "emptyTitle": "Belum ada dompet",
-    "emptyHint": "Buat dompet donasi Anda dengan kunci sandi (Face ID, sidik jari, atau kunci keamanan). Tanpa frasa benih, tanpa perlu memasang apa pun.",
-    "creating": "Menunggu kunci sandi Anda…",
-    "createButton": "Buat dompet dengan kunci sandi",
-    "defaultName": "Dompet donasi saya",
-    "copyAddress": "Salin alamat",
-    "copied": "Disalin",
-    "copy": "Salin",
-    "readyHint": "Alamat ini bisa langsung menerima donasi. Alamat ini milik Anda dan hanya kunci sandi di bawah yang dapat membelanjakannya.",
-    "activeHint": "Dompet ini sudah aktif di blockchain. Kunci sandinya kini dikelola di rantai.",
-    "signersHeading": "Siapa yang dapat menyetujui pembayaran",
-    "signersLocked": "Terkunci",
-    "unnamedPasskey": "Kunci sandi",
-    "removeSigner": "Hapus kunci sandi",
-    "addPasskey": "Tambahkan kunci sandi lain",
-    "signerLabelPlaceholder": "Beri nama kunci ini (mis. Ponsel saya)",
-    "signersHint": "Tambahkan kunci sandi dari perangkat lain atau orang yang Anda percaya — semuanya dapat menyetujui pembayaran.",
-    "deleteButton": "Hapus dompet",
-    "deleteConfirmTitle": "Hapus dompet ini?",
-    "deleteConfirmBody": "Tindakan ini tidak dapat dibatalkan. Jika nanti Anda membuat dompet baru dengan kunci sandi baru, alamatnya akan berbeda.",
-    "deleteConfirmFunds": "Dompet ini sudah berisi dana, jadi tidak dapat dihapus.",
-    "deleteConfirmCancel": "Batal",
-    "deleteConfirmButton": "Ya, hapus dompet",
-    "viewOnExplorer": "Lihat alamat ini di Etherscan",
-    "explorer": "Etherscan",
-    "balancesHeading": "Saldo",
-    "balancesEmpty": "Belum ada dana. Donasi yang dikirim ke alamat ini akan muncul di sini.",
-    "balancesError": "Saldo tidak tersedia saat ini. Muat ulang untuk mencoba lagi.",
-    "sendHeading": "Kirim dana",
-    "sendIntro": "Pindahkan uang dari dompet ini ke alamat dompet lain mana pun. Anda menyetujui setiap transfer dengan kunci sandi Anda.",
-    "sendToken": "Mata uang",
-    "sendRecipient": "Alamat penerima",
-    "sendRecipientPlaceholder": "Alamat penerima (0x…)",
-    "sendRecipientInvalid": "Masukkan alamat dompet yang valid — dimulai dengan 0x diikuti 40 karakter.",
-    "sendAmount": "Jumlah",
-    "sendAmountInvalid": "Masukkan jumlah yang valid.",
-    "sendAmountTooHigh": "Itu lebih dari yang dimiliki dompet ini.",
-    "sendMax": "Maks",
-    "sendButton": "Kirim dengan kunci sandi",
-    "sendPreparing": "Menyiapkan…",
-    "sendAwaitingPasskey": "Menunggu kunci sandi Anda…",
-    "sendSubmitting": "Mengirim — ini bisa memakan waktu satu menit…",
-    "sendSuccess": "Terkirim! Transfer telah dikonfirmasi.",
-    "sendViewTx": "Lihat transaksi",
-    "sendGasNote": "GainForest menanggung biaya jaringan.",
-    "sendNoSigner": "Hanya orang dengan kunci sandi yang terdaftar di dompet ini yang dapat mengirim darinya.",
-    "sendErrorNotConfigured": "Pengiriman belum diaktifkan di server ini.",
-    "sendErrorInsufficient": "Dompet ini tidak memiliki cukup dana untuk transfer itu.",
-    "sendErrorBusy": "Jaringan sedang sibuk saat ini. Silakan coba lagi dalam beberapa menit.",
-    "sendErrorSignature": "Persetujuan kunci sandi tidak dapat diverifikasi. Silakan coba lagi.",
-    "sendErrorGeneric": "Transfer tidak dapat diselesaikan. Silakan coba lagi.",
-    "thresholdHeading": "Persetujuan yang diperlukan",
-    "thresholdOption": "{count} dari {total, plural, other {# kunci sandi}}",
-    "thresholdHint": "Berapa banyak kunci sandi yang harus menyetujui setiap transfer. Mewajibkan lebih dari satu lebih aman — satu kunci sandi yang hilang atau dicuri tidak bisa memindahkan dana sendirian. Mengubah ini memberi dompet alamat baru, jadi hanya bisa dilakukan sebelum dompet berisi dana.",
-    "thresholdUpdateError": "Tidak dapat mengubah persyaratan persetujuan. Silakan coba lagi.",
-    "thresholdLockedFunds": "Dompet sudah berisi dana, jadi persyaratan persetujuan tidak dapat diubah lagi.",
-    "thresholdSingleWarning": "Saat ini satu kunci sandi saja dapat memindahkan dana. Pertimbangkan untuk mewajibkan lebih banyak persetujuan.",
-    "sendApprovalsNeeded": "Dompet ini membutuhkan {count} persetujuan dengan kunci sandi yang berbeda. Anda memberikan yang pertama; sisanya dapat diberikan di sini atau dari perangkat lain.",
-    "sendApprovalOf": "Persetujuan {current} dari {total} — menunggu kunci sandi…",
-    "sendDuplicatePasskey": "Setiap persetujuan membutuhkan kunci sandi yang berbeda.",
-    "pendingHeading": "Transfer menunggu persetujuan",
-    "pendingProgress": "{current} dari {total} persetujuan diberikan",
-    "pendingRemoteHint": "Pemegang kunci sandi lain dapat menyetujui dari perangkat mereka sendiri — transfer tetap di sini sampai persetujuannya cukup. Persetujuan terakhir mengirimkannya.",
-    "pendingApprove": "Setujui dengan kunci sandi",
-    "pendingApproveAndSend": "Setujui & kirim",
-    "pendingCancel": "Batalkan transfer",
-    "pendingInvalid": "Transfer yang menunggu ini tidak lagi valid — dompet berubah sejak dimulai. Batalkan untuk memulai yang baru.",
-    "pendingCancelForbidden": "Hanya orang yang memulai transfer ini atau pengelola dompet yang dapat membatalkannya.",
-    "sendStartButton": "Mulai transfer dengan kunci sandi",
-    "sendErrorExpired": "Transfer ini tidak lagi valid — dompet atau biaya jaringan berubah. Silakan mulai lagi.",
-    "sendErrorPendingExists": "Sudah ada transfer yang menunggu persetujuan. Selesaikan atau batalkan dulu.",
-    "sendErrorApprovalInvalid": "Persetujuan ini tidak dapat diverifikasi. Silakan coba lagi.",
-    "onchainManageHint": "Dompet ini aktif di blockchain, jadi perubahan kunci sandi dicatat di rantai dan membutuhkan persetujuan seperti biasa. GainForest menanggung biaya jaringan.",
-    "thresholdOnchainHint": "Berapa banyak kunci sandi yang harus menyetujui setiap transfer. Perubahan ini dicatat di blockchain — alamat dompet tetap sama.",
-    "manageForbidden": "Hanya pemilik organisasi atau admin yang dapat melakukan perubahan ini."
-  },
-  "accountSupport": {
-    "button": "Dukung",
-    "buttonAria": "Dukung {name} secara langsung",
-    "modalTitle": "Dukung {name}",
-    "modalDescription": "Pilih jumlah yang ingin diberikan langsung kepada {name}.",
-    "directNote": "100% langsung diberikan kepada {name}, tanpa biaya platform dan biaya jaringan ditanggung untuk Anda.",
-    "cartLabel": "Dukungan langsung untuk akun"
-  },
-  "testRecord": {
-    "hideAction": "Sembunyikan sebagai uji coba",
-    "hideHint": "Sembunyikan entri ini dari feed publik dan halaman jelajah sebagai konten uji coba",
-    "confirmHide": "Sembunyikan dari semua orang",
-    "cancel": "Batal",
-    "genericError": "Terjadi kesalahan. Silakan coba lagi."
-  },
-  "adminTestRecords": {
-    "title": "Postingan & pengamatan tersembunyi",
-    "description": "Postingan dan pengamatan ini ditandai sebagai uji coba, jadi disembunyikan dari feed publik dan halaman jelajah. Bagian lain dari akun pemiliknya tetap terlihat.",
-    "empty": "Belum ada postingan atau pengamatan yang disembunyikan.",
-    "remove": "Tampilkan kembali",
-    "unnamed": "Akun tanpa nama",
-    "error": "Terjadi kesalahan. Silakan coba lagi.",
-    "itemLabel": "{kind} oleh {name}",
-    "hiddenAgo": "Disembunyikan {time}",
-    "kinds": {
-      "post": "Postingan",
-      "observation": "Pengamatan",
-      "project": "Proyek",
-      "organization": "Pembaruan organisasi",
-      "donation": "Donasi",
-      "record": "Entri"
+      "allHours": "Semua jam",
+      "selectedCount": "{count, plural, other {# dipilih}}",
+      "deleteSelected": "Hapus",
+      "selectAria": "Pilih {name}",
+      "deleteConfirmTitle": "Hapus {count, plural, other {# rekaman}}?",
+      "deleteConfirmBody": "Rekaman yang dipilih akan dihapus permanen — file asli yang diarsipkan, pratinjau yang dapat diputar, spektrogram, dan setiap identifikasi yang ditandai padanya ikut terhapus. Ini tidak dapat dibatalkan.",
+      "deleteConfirmCancel": "Batal",
+      "deleteConfirmAction": "Hapus {count, plural, other {# rekaman}}",
+      "deleteProgress": "Menghapus… {done} dari {total}",
+      "deleteFailed": "{count, plural, other {# rekaman}} tidak dapat dihapus. Silakan coba lagi.",
+      "clearSelection": "Batalkan pilihan"
     }
   },
   "devices": {
@@ -2600,7 +2623,231 @@
       "githubTitle": "CGS di GitHub",
       "githubDesc": "Kode sumber lengkap layanan grup, terbuka untuk dibaca, dijalankan, dan diperbaiki siapa pun.",
       "atprotoTitle": "Cara kerja AT Protocol",
-      "atprotoDesc": "Tur interaktif jaringan terbuka tempat semua ini dibangun."
+      "atprotoDesc": "Tur interaktif jaringan terbuka tempat semua ini dibangun.",
+      "hypercertsTitle": "Leksikon Hypercerts",
+      "hypercertsDesc": "Bagaimana GainForest dan Ma Earth memodelkan kerja dampak, dan apa yang harus ditulis agar cocok dengan keduanya.",
+      "dataModelTitle": "Bagaimana data Anda saling terhubung",
+      "dataModelDesc": "Pengamatan, kumpulan data, proyek, dan organisasi: apa masing-masingnya dan tiga cara semuanya terhubung."
+    }
+  },
+  "dataModel": {
+    "metaTitle": "Bagaimana data Anda saling terhubung",
+    "metaDescription": "Panduan berbahasa sederhana tentang pengamatan, kumpulan data, proyek, dan organisasi di GainForest: apa masing-masingnya dan tiga cara semuanya saling terhubung.",
+    "kicker": "Model data",
+    "title": "Bagaimana data Anda saling terhubung",
+    "lead": "Anda memotret sebatang pohon. Beberapa bulan kemudian foto itu menjadi bagian dari kumpulan data bernama, di dalam sebuah proyek, diterbitkan oleh sebuah organisasi, dan bisa dibaca siapa saja di jaringan terbuka. Halaman ini menelusuri rantai tersebut: apa setiap bagiannya dan apa yang sebenarnya menghubungkannya ke bagian berikutnya.",
+    "bigIdea": {
+      "heading": "Inti gagasannya: setiap catatan adalah satu kartu di dalam lemari arsip",
+      "p1": "GainForest tidak punya basis data pusat yang memiliki data Anda. Setiap akun — akun Anda dan akun setiap organisasi — adalah lemari arsipnya sendiri, dan setiap hal yang Anda buat adalah kartu yang disimpan di dalamnya: satu kartu per pengamatan, satu per foto, satu per kumpulan data, satu per proyek.",
+      "p2": "Kartu tidak pernah berpindah lemari, dan tidak ada yang disembunyikan di dalam sesuatu yang lain. Sebagai gantinya, kartu saling menunjuk. Kartu foto membawa alamat pengamatan tempatnya bernaung; kartu pengamatan membawa alamat kumpulan datanya. Hanya itu arti «menambahkan sesuatu ke sesuatu» di sini: menuliskan sebuah alamat pada sebuah kartu."
+    },
+    "pieces": {
+      "heading": "Enam bagian",
+      "intro": "Hampir semua yang Anda lihat di aplikasi adalah salah satu dari enam hal ini. Ketuk salah satunya untuk melihat apa itu, apa namanya di balik layar, dan bagaimana ia mengait ke tetangganya.",
+      "hooksLabel": "Cara terhubungnya",
+      "observation": {
+        "name": "Pengamatan",
+        "plain": "Satu spesies, di satu tempat, pada satu saat. Pohon yang Anda ukur, burung yang Anda dengar, katak yang seseorang potret.",
+        "detail": "Ia membawa nama ilmiah, tanggal, koordinat, dan catatan apa pun. Inilah satuan terkecil data alam di GainForest, dan ia bisa berdiri sendiri dengan nyaman: tidak butuh kumpulan data maupun proyek.",
+        "hooks": "Menunjuk ke atas ke sebuah kumpulan data, sebuah proyek, dan sebuah lokasi. Ketiganya boleh dibiarkan kosong."
+      },
+      "evidence": {
+        "name": "Bukti",
+        "plain": "Foto, rekaman suara, hasil ukur meteran — bukti yang menempel pada sebuah pengamatan.",
+        "detail": "Foto, audio, dan video disimpan sebagai kartu tersendiri, dan pengukuran seperti tinggi pohon atau diameter batang adalah kartu lain lagi. Dengan dipisahkan, Anda bisa menambah foto kedua, atau pengukuran musim depan, tanpa menulis ulang pengamatannya.",
+        "hooks": "Menunjuk ke bawah tepat ke satu pengamatan. Satu bukti tidak pernah dipakai bersama oleh dua penampakan."
+      },
+      "dataset": {
+        "name": "Kumpulan data",
+        "plain": "Kelompok bernama untuk sekumpulan pengamatan yang menjadi satu kesatuan: biasanya satu survei, satu perjalanan, satu musim.",
+        "detail": "«Survei Lembah Danum Maret 2025» adalah sebuah kumpulan data. Ia menyimpan nama, deskripsi, dan hitungan berjalan, dan inilah yang diunduh atau dikutip orang lain saat memakai karya Anda.",
+        "hooks": "Ia tidak mendaftar anggotanya. Justru setiap pengamatan yang menunjuk kepadanya, jadi kumpulan data hanyalah semua pengamatan yang membawa alamatnya."
+      },
+      "site": {
+        "name": "Lokasi",
+        "plain": "Sebuah tempat di peta: petak hutan, kawasan lindung, atau plot dengan batas yang digambar mengelilinginya.",
+        "detail": "Sebuah lokasi menyimpan nama, titik pusat, dan bentuk, sehingga pengamatan, lapisan peta, dan proyek sama-sama bisa berkata «ini terjadi di sini» tanpa masing-masing menggambar ulang peta.",
+        "hooks": "Pengamatan menunjuk kepadanya, dan klaim sebuah proyek mendaftarnya sebagai salah satu tempat pekerjaan berlangsung."
+      },
+      "project": {
+        "name": "Proyek",
+        "plain": "Kisah publik dari sebuah pekerjaan: upaya restorasi, program pemantauan, atau inisiatif komunitas.",
+        "detail": "Proyek adalah koleksi — kartu yang tugas utamanya memegang daftar kartu lain. Ia punya judul, ringkasan, gambar sampul, dan daftar itu. Setiap proyek juga mendapat kembaran yang diam-diam, yaitu klaim, yang membawa tanggal, orang, dan tempat.",
+        "hooks": "Memegang daftar isi: klaimnya, ditambah kumpulan data mana pun yang disarangkan di dalamnya. Pengamatan juga bisa menunjuk langsung kepadanya."
+      },
+      "organization": {
+        "name": "Organisasi",
+        "plain": "Tim dengan akunnya sendiri — lemari arsip bersama yang bisa ditulisi beberapa orang.",
+        "detail": "Organisasi bukan map dan bukan label. Ia adalah akun tersendiri, dengan profil, daftar anggota, dan peran. Proyek, kumpulan data, dan pengamatannya adalah kartu-kartu yang tersimpan di akun itu.",
+        "hooks": "Tidak ada yang menunjuk ke organisasi. Catatan menjadi miliknya karena tersimpan di akunnya — persis itulah yang dicatat oleh alamat di depan setiap kartu."
+      }
+    },
+    "map": {
+      "heading": "Peta keterhubungan",
+      "intro": "Setiap panah di bawah adalah kolom nyata pada catatan nyata. Ketuk sebuah kotak — atau bingkai putus-putus di sekelilingnya — untuk menyalakan tautannya dan membaca artinya.",
+      "ariaLabel": "Peta interaktif tentang bagaimana catatan GainForest saling terhubung",
+      "hint": "Panah menyala sesuai pilihan Anda. Bingkai putus-putus adalah akun yang menyimpan semua catatan ini.",
+      "nodes": {
+        "site": {
+          "name": "Lokasi",
+          "desc": "Tempat dengan batas. Pengamatan menunjuk kepadanya lewat siteRef, dan klaim sebuah proyek mendaftarnya di locations[] sehingga pekerjaannya tampil di peta."
+        },
+        "project": {
+          "name": "Proyek",
+          "desc": "Kartu koleksi. Ia memegang daftar — items[] — yang berisi klaimnya dan kumpulan data mana pun yang disarangkan di dalamnya."
+        },
+        "cert": {
+          "name": "Klaim",
+          "desc": "Kembaran proyek yang dibuat otomatis. Ia membawa tanggal, para kontributor, cakupan kerja, dan tempat, sehingga kartu proyek tetap berupa daftar sederhana."
+        },
+        "dataset": {
+          "name": "Kumpulan data",
+          "desc": "Kelompok bernama. Ia tidak pernah mendaftar pengamatannya; pengamatanlah yang membawa alamatnya di datasetRef, dan kumpulan data hanya menyimpan hitungan."
+        },
+        "observation": {
+          "name": "Pengamatan",
+          "desc": "Poros dari seluruh gambar. Satu kartu bisa menunjuk ke kumpulan data, proyek, dan lokasi sekaligus — atau tidak ke mana-mana, dan berdiri sendiri."
+        },
+        "evidence": {
+          "name": "Bukti",
+          "desc": "Setiap foto, rekaman, dan pengukuran adalah kartu tersendiri yang menunjuk balik ke pengamatan lewat occurrenceRef."
+        },
+        "account": {
+          "name": "Satu akun (perorangan atau organisasi)",
+          "desc": "Bingkai ini bukan tautan, melainkan alamat. Setiap kartu tinggal di dalam tepat satu akun, dan «proyek ini milik organisasi itu» hanya berarti kartu proyeknya ditulis ke akun organisasi tersebut."
+        }
+      }
+    },
+    "kinds": {
+      "heading": "Tiga cara hal-hal terhubung",
+      "intro": "Begitu Anda bisa mengenali tiga pola ini, keseluruhan sistem berhenti terasa rumit.",
+      "pointer": {
+        "title": "Yang kecil menunjuk ke atas",
+        "text": "Kartu yang lebih kecil menyimpan alamat kartu yang lebih besar. Menambahkan pengamatan ke kumpulan data berarti menulis ulang pengamatan itu; kumpulan datanya sendiri tidak tersentuh."
+      },
+      "list": {
+        "title": "Yang besar memegang daftar",
+        "text": "Sebuah proyek memegang daftar isi di dalamnya. Menyarangkan kumpulan data ke dalam proyek berarti menambah satu baris ke daftar itu."
+      },
+      "home": {
+        "title": "Ia memang tinggal di sana",
+        "text": "Menjadi milik sebuah organisasi sama sekali bukan tautan. Itu soal akun mana yang ditulisi kartu tersebut, dan hal itu sudah melekat pada alamat kartunya."
+      }
+    },
+    "journey": {
+      "heading": "Satu penampakan, dari awal sampai akhir",
+      "intro": "Saksikan gambarnya dibangun langkah demi langkah, dari satu foto sampai proyek yang diterbitkan oleh sebuah organisasi.",
+      "ariaLabel": "Diagram langkah demi langkah sebuah pengamatan menjadi bagian dari kumpulan data, proyek, dan organisasi",
+      "back": "Langkah sebelumnya",
+      "next": "Langkah berikutnya",
+      "play": "Putar",
+      "pause": "Jeda",
+      "stepLabel": "Langkah {n} dari {total}",
+      "nodes": {
+        "observation": "Pengamatan",
+        "evidence": "Foto",
+        "dataset": "Kumpulan",
+        "project": "Proyek",
+        "cert": "Klaim",
+        "account": "Akun organisasi"
+      },
+      "steps": {
+        "s1": {
+          "title": "Anda mencatat satu penampakan",
+          "text": "Anda mengunggah foto pohon beserta spesies, tanggal, dan lokasinya, lalu aplikasi menulis satu kartu pengamatan. Pada titik ini ia belum menjadi milik apa pun: hanya satu penampakan di akun Anda."
+        },
+        "s2": {
+          "title": "Buktinya menggantung padanya",
+          "text": "Gambar disimpan sebagai kartu tersendiri yang menunjuk balik ke pengamatan. Tambahkan tiga foto dan satu pengukuran tinggi, maka Anda punya empat kartu yang semuanya menunjuk ke penampakan yang sama."
+        },
+        "s3": {
+          "title": "Anda mengelompokkannya ke kumpulan data",
+          "text": "Pilih sekumpulan pengamatan dan beri nama kelompoknya — «Survei Maret 2025». Sebuah kartu kumpulan data dibuat, dan setiap pengamatan terpilih mendapat alamat kumpulan data itu. Pengamatan yang sudah ada di kumpulan data dilewati, jadi tidak ada yang berpindah diam-diam."
+        },
+        "s4": {
+          "title": "Anda mengumpulkannya untuk sebuah proyek",
+          "text": "Jika Anda memilih proyek saat mengunggah, pengamatan juga membawa alamat proyek dan mewarisi lokasi proyeknya, sehingga mendarat di titik yang tepat pada peta."
+        },
+        "s5": {
+          "title": "Kumpulan data bergabung ke proyek",
+          "text": "Kumpulan data ditambahkan ke daftar isi proyek. Kini halaman proyek bisa menampilkan satu kumpulan data penuh sekaligus, bukan ratusan penampakan yang berserak."
+        },
+        "s6": {
+          "title": "Klaim proyek terisi",
+          "text": "Setiap proyek diam-diam membawa klaim kembar yang memuat tanggal, para kontributor, cakupan kerja, dan tempat. Anda tidak pernah menyuntingnya langsung; ia selalu disesuaikan dengan proyeknya."
+        },
+        "s7": {
+          "title": "Anda menerbitkan sebagai organisasi Anda",
+          "text": "Ganti akun yang Anda pakai menerbitkan, dan semua kartu ini ditulis ke akun bersama organisasi, bukan ke akun Anda. Tidak ada tautan yang berubah — yang berubah hanya alamat di depannya."
+        }
+      }
+    },
+    "publishAs": {
+      "heading": "Data ini mendarat di akun siapa?",
+      "intro": "Inilah satu-satunya pilihan yang menentukan siapa pemilik datanya. Geser sakelarnya dan perhatikan apa yang berubah — dan apa yang tidak.",
+      "publishingAs": "Menerbitkan sebagai",
+      "storedAt": "Disimpan di",
+      "option": {
+        "personal": "Saya sendiri",
+        "organization": "Organisasi saya"
+      },
+      "summary": {
+        "personal": "Catatan ditulis ke akun Anda sendiri. Hanya Anda yang bisa mengubahnya, dan nama Anda melekat di mana pun catatan itu muncul.",
+        "organization": "Catatan ditulis ke akun bersama organisasi. Catatan tampil atas nama organisasi, dan rekan setim bisa terus mengerjakannya tanpa Anda."
+      },
+      "guard": {
+        "personal": "Tidak ada apa pun di antara Anda dan akun Anda sendiri: Anda masuk, lalu Anda menulis.",
+        "organization": "Sebuah layanan penjaga berdiri di depan akun bersama dan memeriksa peran Anda sebelum setiap penulisan. Tidak ada yang pernah memegang kata sandi organisasi, dan setiap tindakan dicatat."
+      },
+      "roles": {
+        "member": {
+          "name": "Anggota",
+          "text": "Bisa menambah catatan baru serta menyunting atau menghapus catatan yang ia tambahkan."
+        },
+        "admin": {
+          "name": "Pengelola",
+          "text": "Bisa menyunting atau menghapus apa pun di organisasi, dan mengundang orang."
+        },
+        "owner": {
+          "name": "Pemilik",
+          "text": "Semua yang bisa dilakukan pengelola, ditambah mengubah peran orang lain."
+        }
+      },
+      "note": "Berpindah akun tidak memindahkan apa pun yang sudah Anda terbitkan sebelumnya. Catatan tetap berada di akun tempatnya ditulis, jadi sebaiknya putuskan sebelum mengunggah dalam jumlah besar, bukan sesudahnya."
+    },
+    "faq": {
+      "heading": "Pertanyaan umum",
+      "q1": {
+        "question": "Apakah pengamatan harus berada di dalam kumpulan data?",
+        "answer": "Tidak. Kumpulan data, proyek, dan lokasi semuanya opsional. Pengamatan yang berdiri sendiri sepenuhnya sah, dan banyak yang memang begitu: kumpulan data adalah kemudahan bagi orang yang menerbitkan dan mengunduh secara berkelompok."
+      },
+      "q2": {
+        "question": "Bisakah satu pengamatan berada di dua kumpulan data?",
+        "answer": "Tidak. Pengamatan membawa satu alamat kumpulan data saja, jadi ia berada di satu kumpulan data pada satu waktu. Untuk memindahkannya, keluarkan dulu dari kumpulan pertama lalu tambahkan ke kumpulan kedua."
+      },
+      "q3": {
+        "question": "Apa yang terjadi pada pengamatan saya jika saya menghapus kumpulan data?",
+        "answer": "Pengamatan tetap selamat. Menghapus kumpulan data pertama-tama membersihkan alamat kumpulan data dari setiap pengamatan di dalamnya, lalu mencabut kumpulan data itu dari proyek mana pun yang mendaftarnya. Anda tetap punya penampakan yang sama, hanya tidak lagi terkelompok."
+      },
+      "q4": {
+        "question": "Bisakah saya memindahkan proyek pribadi saya ke sebuah organisasi?",
+        "answer": "Tidak dengan sekali klik. Akun tempat sebuah catatan tinggal adalah bagian dari identitasnya, jadi memindahkannya berarti menerbitkannya ulang dari akun organisasi. Biasanya lebih mudah memutuskan sejak awal siapa yang seharusnya memiliki pekerjaan itu."
+      },
+      "q5": {
+        "question": "Siapa saja yang bisa melihat semua ini?",
+        "answer": "Semua orang. Catatan tersimpan di jaringan terbuka AT Protocol, jadi aplikasi apa pun — bukan hanya GainForest — bisa membacanya. Justru itu maksudnya: kerja lapangan Anda tetap milik Anda dan tetap bisa dibawa pindah, bukan terkunci di basis data satu perusahaan."
+      }
+    },
+    "more": {
+      "heading": "Bacaan lanjutan",
+      "lexiconsTitle": "Skema data",
+      "lexiconsDesc": "Format catatan yang persis, kolom demi kolom, lengkap dengan skema mentah di balik setiap kartu di halaman ini.",
+      "cgsTitle": "Cara kerja akun kelompok",
+      "cgsDesc": "Layanan penjaga yang memungkinkan satu tim berbagi satu akun organisasi, lengkap dengan peran dan jejak audit.",
+      "atprotoTitle": "Apa itu AT Protocol?",
+      "atprotoDesc": "Jaringan terbuka yang menopang semuanya: akun, repositori, dan alasan tidak ada yang terkunci.",
+      "epdsTitle": "Cara kerja ePDS",
+      "epdsDesc": "Di mana akun dan catatannya sebenarnya ditempatkan, dan bagaimana proses masuk bekerja."
     }
   },
   "atproto": {
@@ -2891,5 +3138,517 @@
       "lexiconLink": "Skema catatan dompet, dan semua skema lainnya",
       "atprotoLink": "Cara AT Protocol menyimpan catatannya"
     }
+  },
+  "uploadTray": {
+    "label": "Unggahan latar belakang",
+    "headlineUploading": "Mengunggah",
+    "headlineWaiting": "Menunggu diunggah",
+    "headlinePaused": "Unggahan dijeda",
+    "headlineFailed": "Unggahan gagal",
+    "headlineDone": "Unggahan selesai",
+    "collapse": "Ciutkan",
+    "expand": "Bentangkan",
+    "statusQueued": "Antre",
+    "statusDone": "Selesai",
+    "statusPaused": "Dijeda {percent}%",
+    "statusFailed": "Gagal",
+    "statusSaving": "Menyimpan…",
+    "statusRetrying": "Percobaan {attempt}/{max}",
+    "pause": "Jeda",
+    "resume": "Lanjutkan",
+    "retry": "Coba lagi",
+    "cancel": "Batalkan berkas ini",
+    "cancelAll": "Batalkan semua",
+    "hide": "Sembunyikan",
+    "remaining": "Sisa {count} dari {total} · {size}",
+    "allUploaded": "{count} terunggah · {size}"
+  },
+  "soundscape": {
+    "meta": {
+      "title": "Lanskap suara",
+      "description": "Buat jam lanskap suara 24 jam dari rekaman audio yang sudah diunggah ke akun Anda."
+    },
+    "hero": {
+      "eyebrow": "Pemantauan akustik",
+      "title": "Ubah rekaman yang sudah diunggah menjadi jam lanskap suara",
+      "description": "Setiap rekaman yang telah Anda unggah dipindai dalam lima pita frekuensi, dan momen paling nyaring digambar mengelilingi jam 24 jam.",
+      "timeNote": "Waktu rekaman berasal dari detail rekaman itu sendiri (jam perangkat, biasanya UTC). Analisis mengunduh setiap rekaman asli ke browser Anda satu kali — hasilnya diingat di perangkat ini."
+    },
+    "library": {
+      "signInTitle": "Masuk untuk membuat lanskap suara Anda",
+      "signInBody": "Jam lanskap suara digambar dari rekaman yang sudah diunggah ke akun Anda. Masuk untuk melihat milik Anda.",
+      "loading": "Memuat rekaman Anda…",
+      "loadFailed": "Rekaman Anda tidak dapat dimuat. Coba lagi sebentar lagi.",
+      "emptyTitle": "Belum ada rekaman yang diunggah",
+      "emptyBody": "Jam lanskap suara dibuat dari rekaman di akun Anda. Unggah rekaman AudioMoth terlebih dahulu, lalu kembali ke sini.",
+      "goToUpload": "Unggah rekaman",
+      "refresh": "Segarkan",
+      "count": "{count, plural, other {# rekaman terunggah}}",
+      "downloadNote": "Setiap rekaman asli diunduh dan dianalisis satu kali; hasilnya diingat di perangkat ini.",
+      "analyze": "Analisis {count, plural, other {# rekaman}}",
+      "analyzeDone": "Semua rekaman sudah dianalisis",
+      "pause": "Jeda",
+      "resume": "Lanjutkan {count, plural, other {# rekaman}}",
+      "statusPaused": "Dijeda · {done} dari {total} dianalisis",
+      "downloading": "Mengunduh {name}…",
+      "analyzing": "Menganalisis {name}…",
+      "progress": "{done} dari {total} dianalisis",
+      "statusQueued": "Menunggu…",
+      "statusAnalyzed": "Dianalisis",
+      "statusNotAnalyzed": "Belum dianalisis",
+      "statusNoOriginal": "File audio asli tidak tersedia",
+      "statusNoTime": "Tidak ada waktu rekaman",
+      "statusError": "Rekaman ini tidak dapat dianalisis",
+      "tooShort": "Terlalu pendek untuk dianalisis (butuh minimal {seconds} detik)"
+    },
+    "groups": {
+      "title": "Folder",
+      "hint": "Setiap lanskap suara dibuat dari satu folder rekaman — pilih folder yang ingin dikerjakan.",
+      "hintSingle": "Lanskap suara ini dibuat dari satu-satunya folder rekaman Anda.",
+      "chip": "{name} · {count, plural, other {# rekaman}}",
+      "unassigned": "Tidak dalam folder",
+      "unknown": "Folder dihapus"
+    },
+    "bands": {
+      "rumble": "Gemuruh",
+      "lowCalls": "Suara rendah",
+      "birdSong": "Kicau burung",
+      "highCalls": "Suara tinggi",
+      "insects": "Serangga"
+    },
+    "chart": {
+      "title": "Lanskap suara — {date}",
+      "allDates": "belum ada rekaman",
+      "radialLabel": "Volume suara",
+      "timeLabel": "Waktu (Jam)",
+      "legendTitle": "Kelompok suara",
+      "bandsNote": "Rentang perkiraan. Suara saling tumpang tindih, dan hewan yang bersuara di tiap rentang berbeda menurut tempat.",
+      "empty": "Rekaman yang dianalisis akan muncul di sini sebagai jam lanskap suara 24 jam.",
+      "emptyHint": "Analisis rekaman terunggah Anda di atas untuk memulai.",
+      "downloadPng": "Unduh gambar",
+      "hoverHint": "Seret mengelilingi piringan untuk memperbesar waktu tersebut, dan klik sebuah waktu untuk mendengarkan. Gunakan − atau “Sepanjang hari” untuk kembali.",
+      "hoverHintAllDates": "Seret mengelilingi piringan untuk memperbesar waktu tersebut, lalu pilih rekaman dari daftar untuk mendengarkan. Gunakan − atau “Sepanjang hari” untuk kembali.",
+      "loadingAudio": "Memuat {name}…",
+      "playing": "Memutar {name}",
+      "stop": "Berhenti",
+      "playError": "Rekaman ini tidak dapat diputar di peramban Anda.",
+      "datesTitle": "Hari",
+      "allDatesChip": "Semua hari",
+      "averageNote": "Rata-rata dari {count} rekaman pada tiap waktu — dial menampilkan hari yang khas, bukan yang paling bising.",
+      "averageNoteRange": "Rata-rata dari {min}–{max} rekaman pada tiap waktu — dial menampilkan hari yang khas, bukan yang paling bising.",
+      "spreadNote": "Arsiran mencakup 80% bagian tengah rekaman tersebut — makin lebar, makin berbeda tiap harinya.",
+      "slotNote": "Rekaman dikelompokkan dalam slot {minutes} menit, karena waktu mulainya bergeser dari hari ke hari.",
+      "pointRecordings": "{count, plural, other {# rekaman}}"
+    },
+    "zoom": {
+      "rangeAllDay": "Sepanjang hari · 00:00 – 24:00",
+      "range": "Diperbesar ke {start} – {end}",
+      "zoomIn": "Perbesar",
+      "zoomOut": "Perkecil",
+      "earlier": "Lebih awal",
+      "later": "Lebih akhir",
+      "reset": "Sepanjang hari",
+      "empty": "Tidak ada rekaman pada bagian hari ini",
+      "recordingsTitle": "Rekaman yang terlihat",
+      "recordingsCount": "{count, plural, other {# rekaman}}",
+      "recordingsEmpty": "Tidak ada rekaman pada waktu ini — perkecil, atau gunakan ‹ dan › untuk melihat bagian hari yang lain."
+    },
+    "published": {
+      "summary": "{count, plural, other {# rekaman}} · {dates}",
+      "playHint": "Klik salah satu waktu pada jam untuk mendengarkan rekaman itu.",
+      "metaTitle": "Lanskap suara",
+      "metaDescription": "Jam lanskap suara 24 jam yang dibuat dari rekaman lapangan.",
+      "notFoundTitle": "Lanskap suara ini tidak tersedia",
+      "notFoundBody": "Mungkin sudah dihapus, atau akun yang menerbitkannya sedang tidak dapat dijangkau.",
+      "byLine": "Dibagikan oleh {name}",
+      "openWorkbench": "Buat lanskap suaramu sendiri",
+      "inFeedTitle": "Lanskap suara",
+      "openFull": "Buka lanskap suara"
+    },
+    "share": {
+      "recordTitle": "Lanskap suara · {dates}",
+      "recordTitleNamed": "Lanskap suara · {name} · {dates}",
+      "shareToFeed": "Bagikan ke beranda",
+      "addToProject": "Tambahkan ke proyek",
+      "captionLabel": "Ceritakan sedikit (opsional)",
+      "cancel": "Batal",
+      "close": "Tutup",
+      "errorGeneric": "Tidak berhasil. Coba lagi sebentar lagi.",
+      "untitledProject": "Proyek tanpa judul",
+      "feed": {
+        "title": "Bagikan lanskap suara ini",
+        "subtitle": "Kirimanmu menampilkan jam yang dibuat dari {count, plural, other {# rekaman}}, dan siapa pun bisa memutar rekaman itu dari sana.",
+        "defaultCaption": "Lanskap suara 24 jam dari {count, plural, other {# rekaman}}.",
+        "linkNote": "Lanskap suara ditambahkan ke kirimanmu secara otomatis.",
+        "post": "Kirim ke beranda",
+        "posting": "Mengirim…",
+        "postedTitle": "Dibagikan ke beranda",
+        "postedBody": "Lanskap suaramu sudah ada di beranda dan siap didengarkan.",
+        "viewFeed": "Buka beranda"
+      },
+      "project": {
+        "title": "Tambahkan ke proyek",
+        "subtitle": "Pilih proyek, dan lanskap suara akan masuk ke linimasa buktinya.",
+        "captionPlaceholder": "Apa yang ditunjukkan lanskap suara ini? (opsional)",
+        "loading": "Memuat proyekmu…",
+        "loadError": "Proyekmu tidak dapat dimuat. Coba lagi sebentar lagi.",
+        "empty": "Kamu belum punya proyek.",
+        "createProject": "Buat proyek",
+        "searchPlaceholder": "Cari proyekmu",
+        "addedTitle": "Ditambahkan ke linimasa",
+        "addedBody": "Lanskap suara kini ada di linimasa bukti {project}.",
+        "viewProject": "Buka proyek"
+      }
+    },
+    "card": {
+      "title": "Lanskap suara",
+      "tapHint": "Ketuk cincin untuk mendengarkan",
+      "dialAria": "Jam lanskap suara 24 jam — ketuk waktu untuk mendengarkan",
+      "play": "Putar",
+      "pause": "Jeda"
+    }
+  },
+  "recordingFolders": {
+    "renameAction": "Ganti nama",
+    "deleteAction": "Hapus",
+    "emptyFolder": "Belum ada rekaman di folder ini.",
+    "moveAction": "Pindahkan",
+    "moveTitle": "Pindahkan {count, plural, other {# rekaman}}",
+    "moveBody": "Pilih folder tempat rekaman ini seharusnya berada. Memindahkan tidak mengubah hal lain — audio, analisisnya, dan apa pun yang sudah dibagikan tetap sama.",
+    "moveProgress": "Memindahkan… {done} dari {total}",
+    "movePartial": "{count, plural, other {# rekaman}} tidak dapat dipindahkan. Silakan coba lagi.",
+    "moveFailed": "Rekaman tidak dapat dipindahkan. Silakan coba lagi.",
+    "newFolderRemarks": "Dibuat saat memindahkan rekaman ke folder baru.",
+    "renameTitle": "Ganti nama folder",
+    "renameBody": "Hanya nama folder yang berubah — rekaman di dalamnya tetap di tempatnya, begitu juga apa pun yang sudah dibagikan dari rekaman itu.",
+    "nameLabel": "Nama folder",
+    "namePlaceholder": "mis. Tepi sungai, musim kemarau",
+    "nameRequired": "Beri nama folder ini.",
+    "save": "Simpan",
+    "saving": "Menyimpan…",
+    "cancel": "Batal",
+    "renameFailed": "Nama folder tidak dapat diganti. Silakan coba lagi.",
+    "deleteTitle": "Hapus “{name}”?",
+    "deleteBody": "{count, plural, =0 {Folder akan dihapus permanen. Ini tidak dapat dibatalkan.} other {Folder beserta # rekaman di dalamnya akan dihapus permanen — file asli yang diarsipkan, pratinjau yang dapat diputar, spektrogram, analisis, dan setiap identifikasi yang ditandai padanya ikut terhapus. Ini tidak dapat dibatalkan.}}",
+    "identificationsIncluded": "{count, plural, other {Ini termasuk # identifikasi tersimpan, yang juga akan dihapus.}}",
+    "deleteProgress": "Menghapus… {done} dari {total}",
+    "deletePartial": "{count, plural, other {# rekaman}} tidak dapat dihapus, jadi folder tetap dipertahankan. Silakan coba lagi.",
+    "deleteFailed": "Folder tidak dapat dihapus. Silakan coba lagi."
+  },
+  "hypercerts": {
+    "metaTitle": "Membangun di atas leksikon Hypercerts — GainForest",
+    "metaDescription": "Bagaimana GainForest dan Ma Earth memodelkan kerja dampak dengan leksikon org.hypercerts, di mana kedua aplikasi sepakat, di mana mereka berbeda, dan apa yang harus ditulis agar aplikasi ketiga bisa saling terhubung dengan keduanya.",
+    "kicker": "Interoperabilitas Hypercerts",
+    "title": "Membangun di atas leksikon Hypercerts",
+    "lead": "Skema Hypercerts sengaja dibuat longgar: union di mana-mana, hampir tidak ada yang wajib, dan tidak ada pendapat tentang akun mana yang menyimpan catatan mana. Dua aplikasi produksi sudah menulisnya — GainForest dan Ma Earth. Halaman ini menunjukkan bentuk yang disepakati keduanya, titik-titik tempat mereka menyimpang, dan apa yang sebaiknya dilakukan aplikasi Anda agar ketiganya bisa saling membaca.",
+    "why": {
+      "heading": "Mengapa halaman ini ada",
+      "p1": "Leksikon adalah format pertukaran data, bukan aplikasi. `org.hypercerts.claim.activity` mewajibkan tepat tiga bidang dan menyerahkan sisanya kepada Anda: deskripsi panjang bisa berupa tiga hal berbeda, lingkup kerja dua, seorang kontributor dua, sebuah gambar dua. Dua tim yang membaca skema yang sama akan menghasilkan catatan yang lolos validasi sempurna namun tetap gagal ditampilkan di aplikasi satu sama lain.",
+      "p2": "Semua di bawah ini diambil dari dua basis kode yang berjalan sungguhan. Di tempat mereka sepakat, anggap itu konvensi. Di tempat mereka berbeda, kami menyebutkan bentuk mana yang harus ditulis dan bentuk mana yang harus diterima: tulislah dengan ketat, bacalah dengan longgar.",
+      "callout": "Aturan praktis: tulis bentuk yang sudah dibaca kedua aplikasi, dan terima setiap bentuk yang sudah ditulis salah satu dari keduanya."
+    },
+    "graph": {
+      "heading": "Jaring catatan",
+      "intro": "Tidak ada yang bersarang di Hypercerts. Setiap relasi adalah catatan terpisah ditambah referensi kuat: pasangan `uri` + `cid` yang mengunci versi persis dari targetnya. Ketuk sebuah catatan untuk melihat siapa yang menulisnya dan bagaimana ia ditautkan.",
+      "ariaLabel": "Graf catatan Hypercerts dan bidang-bidang yang menautkannya",
+      "hint": "Ketuk sebuah catatan",
+      "attachedVia": "Ditautkan lewat",
+      "bothApps": "Kedua aplikasi",
+      "gainforestOnly": "Hanya GainForest",
+      "maearthOnly": "Hanya Ma Earth",
+      "roles": {
+        "collection": "Wadah yang benar-benar dilihat pengguna. GainForest menyebutnya proyek; Ma Earth juga. `type` adalah pembeda berupa teks bebas: keduanya menulis `\"project\"`, dan Ma Earth juga menulis `\"snapshot\"` untuk membekukan pengajuan putaran pendanaan.",
+        "activity": "Klaimnya sendiri: lingkup, periode, kontributor, tempat. GainForest menampilkannya sebagai Cert; Ma Earth menyimpannya secara internal dan membuat satu otomatis per proyek. Inilah catatan yang ditunjuk oleh semua yang lain.",
+        "attachment": "Kuda beban. Satu NSID mencakup bukti, gambar galeri, dan pembaruan kemajuan; `contentType` adalah satu-satunya pembedanya. Membawa berkas, tautan, dan referensi `at://` ke catatan lain.",
+        "location": "Sebuah lokasi. Geometri disimpan dalam satu bidang teks, jadi poligon berupa GeoJSON yang diserialkan. Dirujuk dari `activity.locations[]` dan `collection.location`.",
+        "rights": "Ketentuan lisensi untuk klaim. Ma Earth mengarahkan setiap aktivitas ke satu catatan bawaan seluruh platform; GainForest saat ini menghilangkan bidang ini sepenuhnya.",
+        "tag": "Atom lingkup yang dapat dipakai ulang dengan kunci mesin seperti `mangrove_restoration`. Dirujuk dari dalam objek CEL lingkup kerja, tidak pernah dari tingkat teratas aktivitas.",
+        "receipt": "Catatan pembayaran. GainForest menulis satu per donasi dari akun fasilitatornya; pengirim boleh tetap anonim. Menunjuk kembali ke apa pun yang didanai.",
+        "evaluation": "Penilaian pihak ketiga atas sebuah klaim: ringkasan, skor opsional pada skala min./maks. yang eksplisit, DID para penilai, dan tautan ke laporan. GainForest menampilkannya pada Cert, tetapi belum ada aplikasi yang menulisnya: inilah celah yang bisa diisi aplikasi penilai."
+      },
+      "links": {
+        "items": "`collection.items[].itemIdentifier`: sebuah referensi kuat ditambah bobot teks opsional.",
+        "locations": "`activity.locations[]`: larik referensi kuat. `collection.location` hanya satu referensi.",
+        "rights": "`activity.rights`: satu referensi kuat ke catatan hak yang mungkin berada di PDS orang lain.",
+        "usedTags": "`activity.workScope.usedTags[]`: bersarang di dalam objek CEL, bukan di tingkat teratas aktivitas.",
+        "subjects": "`attachment.subjects[]`: dalam praktiknya himpunan tanpa urutan. Jangan pernah mengandalkan posisi.",
+        "for": "`receipt.for`: referensi kuat pada skema saat ini; rilis sebelumnya menuliskannya sebagai URI `at://` biasa, jadi terimalah keduanya.",
+        "subject": "`evaluation.subject`: satu referensi kuat ke apa pun yang sedang dinilai."
+      }
+    },
+    "pattern": {
+      "heading": "Satu pola yang layak ditiru: proyek membawa tepat satu klaim",
+      "intro": "Kedua aplikasi sampai pada inti yang sama, secara terpisah. Kalau Anda hanya menyalin satu hal dari halaman ini, salin yang ini.",
+      "r1": {
+        "title": "Proyek adalah sebuah koleksi",
+        "text": "Buat `org.hypercerts.collection` dengan `type: \"project\"`. Ia memuat cerita publiknya: judul, ringkasan, deskripsi, dan sampul."
+      },
+      "r2": {
+        "title": "Ia dibuat bersama satu aktivitas",
+        "text": "Terbitkan `org.hypercerts.claim.activity` pada saat yang sama dan taruh referensi kuatnya di `items[]`. GainForest membangun keduanya dari satu formulir; Ma Earth menyebutnya aktivitas awal."
+      },
+      "r3": {
+        "title": "Kedua catatan tetap selaras",
+        "text": "Judul, ringkasan, deskripsi, tanggal, dan sampul dicerminkan dari proyek ke klaim. Sinkronisasi Ma Earth bersifat menambah: bidang yang diedit di aktivitas tidak pernah ditimpa oleh proyek."
+      },
+      "r4": {
+        "title": "Aktivitas tambahan adalah fase, bukan proyek",
+        "text": "Aktivitas kedua di bawah koleksi yang sama adalah periode operasional berikutnya, dengan lingkup, rentang waktu, dan lokasi sendiri. Jangan pernah menerbitkan koleksi kedua untuk pekerjaan yang sama."
+      },
+      "note": "Konsumen yang hanya memahami koleksi tetap melihat proyek yang utuh. Konsumen yang hanya memahami klaim tetap melihat pekerjaan yang terstruktur. Justru itulah tujuan pengulangan ini."
+    },
+    "sequence": {
+      "heading": "Urutan penerbitan itu penting",
+      "intro": "Referensi kuat menyematkan CID, jadi anak harus ada sebelum induk. Telusuri satu penerbitan penuh dan lihat referensinya menumpuk.",
+      "play": "Putar",
+      "pause": "Jeda",
+      "back": "Kembali",
+      "next": "Lanjut",
+      "stepLabel": "Langkah {n} dari {total}",
+      "repoLabel": "Catatan di repositori",
+      "empty": "Belum ada yang ditulis.",
+      "steps": {
+        "s1": {
+          "title": "Unggah blob terlebih dahulu",
+          "text": "Foto sampul, PDF, dan audio diunggah sebagai blob sebelum ada catatan yang menyebutnya. Anda menerima objek blob untuk disematkan di `#smallImage`, `#largeImage`, atau `#smallBlob`."
+        },
+        "s2": {
+          "title": "Terbitkan lokasinya",
+          "text": "Satu `app.certified.location` per tempat. Simpan pasangan `uri` + `cid`: klaim akan merujuknya, dan menerbitkan ulang lokasi yang sama dua kali adalah bug duplikasi paling umum."
+        },
+        "s3": {
+          "title": "Selesaikan tag lingkup kerja",
+          "text": "Cari `org.hypercerts.workscope.tag` yang sudah ada untuk setiap kunci lingkup sebelum membuat yang baru. Kedua aplikasi membaca dulu lalu membuat, sehingga sebuah tag tidak pernah terduplikasi per proyek."
+        },
+        "s4": {
+          "title": "Tulis klaimnya",
+          "text": "`org.hypercerts.claim.activity` menyatukan semuanya: judul, ringkasan, deskripsi, lingkup kerja dengan referensi tag bersarang di dalamnya, tanggal, kontributor, `locations[]`, dan sebuah referensi `rights`."
+        },
+        "s5": {
+          "title": "Tulis koleksinya",
+          "text": "`org.hypercerts.collection` dengan `type: \"project\"` dan `items[]` yang memuat referensi kuat klaim. Kini proyeknya bisa ditemukan dan sudah lengkap."
+        },
+        "s6": {
+          "title": "Lampirkan konteksnya",
+          "text": "Gambar galeri, bukti, dan pembaruan adalah catatan `org.hypercerts.context.attachment` yang menunjuk kembali ke proyek dan klaim melalui `subjects[]`."
+        },
+        "s7": {
+          "title": "Penyuntingan mengubah CID",
+          "text": "Menyunting klaim menghasilkan CID baru, yang diam-diam membatalkan referensi yang tersimpan di `collection.items[]`. Tulis ulang induknya setiap kali anaknya berubah, atau jalankan penyelaras yang melakukannya untuk Anda."
+        },
+        "s8": {
+          "title": "Uang datang belakangan",
+          "text": "Catatan `org.hypercerts.funding.receipt` ditulis kemudian, sering kali oleh akun ketiga, dan menunjuk kembali ke koleksi atau klaim melalui `for`."
+        }
+      }
+    },
+    "divergence": {
+      "heading": "Di mana kedua aplikasi berbeda",
+      "intro": "Delapan bidang tempat GainForest dan Ma Earth memilih opsi sah yang berbeda. Sebagian jaraknya hanyalah selisih versi: GainForest mengikuti revisi leksikon yang lebih baru, Ma Earth mengunci rilis yang lebih lama. Pilih salah satu untuk melihat kedua bentuknya dan apa yang sebaiknya dilakukan aplikasi Anda.",
+      "gainforestLabel": "GainForest menulis",
+      "maearthLabel": "Ma Earth menulis",
+      "adviceLabel": "Yang sebaiknya Anda lakukan",
+      "topics": {
+        "description": {
+          "label": "Deskripsi panjang",
+          "title": "`description`: teks biasa atau dokumen kaya",
+          "gainforest": "Sebuah `org.hypercerts.defs#descriptionString` sebaris berisi teks biasa. Sederhana, tetapi judul, gambar, dan tautan tidak bertahan.",
+          "maearth": "Sebuah `pub.leaflet.pages.linearDocument`, model blok yang sama seperti yang dipakai Leaflet, dengan gambar sebaris diunggah ulang sebagai blob PDS sehingga catatannya bisa ditampilkan tanpa mengakses aplikasi asalnya.",
+          "advice": "Tulis dokumen Leaflet: itulah yang mempertahankan struktur, dan kedua aplikasi menampilkannya. Namun `descriptionString` tetap merupakan cabang penuh dalam skema saat ini, jadi selalu terjemahkan juga: sebagian besar catatan yang sudah terbit memakainya."
+        },
+        "workScope": {
+          "label": "Lingkup kerja",
+          "title": "`workScope` — ekspresi CEL (string berkoma lama masih beredar)",
+          "gainforest": "Editor proyek dan formulir Cert sama-sama menulis objek CEL. Rekaman yang diterbitkan sebelum penyatuan ini masih membawa `#workScopeString` lama, dan sebagian berisi label tampilan terjemahan (\"Reforestasi\") alih-alih kunci yang stabil.",
+          "maearth": "Selalu objek CEL, dan selalu predikat sempit yang sama. Tidak ada evaluator CEL di baliknya: ekspresinya adalah format pertukaran yang mengkodekan daftar tag.",
+          "advice": "Tulis CEL dengan `scope.hasAny([...])` dan sematkan referensi tag di `usedTags`. Saat membaca, pakai `usedTags` bila ada; jika tidak, ambil literal berkutip dari `expression`; jika tidak, pecah `scope` per koma — dan petakan label terjemahan kembali ke kuncinya, atau rekaman lama akan kehilangan cakupannya."
+        },
+        "tags": {
+          "label": "Penempatan tag",
+          "title": "`workscope.tag`: siapa pemilik catatan tag-nya?",
+          "gainforest": "Tag diterbitkan di akun yang sama dengan Cert — pribadi atau organisasi — dengan kunci lingkup sebagai rkey, sehingga `getRecord` berfungsi sebagai pemeriksaan keberadaan dan penulisannya idempoten per akun.",
+          "maearth": "Satu taksonomi terkurasi seluruh platform di PDS platform, dengan rkey TID, siklus hidup diusulkan → diterima → usang, dan langkah penerbitan oleh admin. Rkey slug warisan lama diterbitkan ulang sebagai TID.",
+          "advice": "Gabungkan berdasarkan `key`, jangan berdasarkan URI. Konsep yang sama secara sah bisa ada sebagai banyak catatan di banyak repositori; perlakukan `usedTags[]` sebagai asal-usul dan `key` sebagai identitas."
+        },
+        "subjects": {
+          "label": "Subjek lampiran",
+          "title": "`attachment.subjects[]`: yang mana yang pertama?",
+          "gainforest": "`subjects[0]` adalah klaimnya; subjek tambahan memberi konteks, misalnya lokasi tempat bukti dikumpulkan.",
+          "maearth": "`subjects[0]` adalah koleksi proyek dan `subjects[1]` adalah klaimnya. Lampiran galeri hanya membawa koleksi; pembaruan tanpa aktivitas disebar ke setiap aktivitas yang sudah terbit.",
+          "advice": "Cocokkan berdasarkan keanggotaan, bukan indeks: sebuah lampiran milik suatu catatan jika ada URI subjek yang cocok. Sertakan koleksi sekaligus klaim agar konsumen yang membaca berdasarkan indeks, dari sisi mana pun, tetap menemukannya."
+        },
+        "rights": {
+          "label": "Hak",
+          "title": "`activity.rights`: ada atau tidak ada",
+          "gainforest": "Tidak ditulis. Saat ini Cert tidak membawa referensi hak apa pun.",
+          "maearth": "Setiap aktivitas merujuk satu catatan hak bawaan seluruh platform. Catatannya sendiri ditempatkan di akun hypercerts.org dan diimpor lewat AT-URI, jadi memang dirancang sebagai referensi lintas repositori.",
+          "advice": "Tulislah referensi hak: biayanya kecil dan membuat klaim Anda bisa dipakai siapa pun yang punya kebijakan lisensi. Jangan pernah menganggapnya bisa dipecahkan di dalam repositori Anda sendiri, dan bandingkan hanya berdasarkan `uri`: CID berubah setiap kali teks haknya disunting."
+        },
+        "location": {
+          "label": "Lokasi",
+          "title": "`app.certified.location`: tempat yang sama, dua URI referensi spasial",
+          "gainforest": "`srs` berupa URI CRS84 dari OGC. Titik ditulis sebagai `\"lat,lng\"`.",
+          "maearth": "`srs` berupa URI EPSG:4326 dari OGC, yang dianggap kanonis oleh proses perbaikannya. Poligon berupa GeoJSON terserialkan yang dibulatkan ke enam desimal agar teksnya tetap di bawah batas grafem; lokasi perkiraan dikaburkan menjadi lingkaran 10 km sebelum diterbitkan.",
+          "advice": "Kedua URI itu berarti WGS84 dengan urutan sumbu yang benar-benar dipakai catatan ini, jadi terimalah keduanya dan jangan pernah menukar urutan koordinat berdasarkan `srs`. Percabangkan parser Anda pada `locationType`, bukan pada bentuk teksnya."
+        },
+        "contributors": {
+          "label": "Kontributor",
+          "title": "`contributors[]`: identitas sebaris atau catatan tersendiri",
+          "gainforest": "`#contributorIdentity` sebaris, dan nilainya bisa berupa DID atau nama orang yang diketik di formulir.",
+          "maearth": "Juga `#contributorIdentity` sebaris, selalu berupa DID, diturunkan dari tabel kontribusi. DID organisasi itu sendiri mengisi aktivitas awal.",
+          "advice": "Gunakan bentuk sebaris: catatan `contributorInformation` memang ada, tetapi tidak satu pun aplikasi menulisnya. Jangan pernah menganggap `identity` pasti terbaca sebagai DID; tampilkan sebagai nama bila bukan."
+        },
+        "receipt": {
+          "label": "Tanda terima pendanaan",
+          "title": "`org.hypercerts.funding.receipt`: siapa yang menulis uangnya",
+          "gainforest": "Ditulis oleh akun fasilitator khusus, bukan oleh pendonor atau proyeknya. Donasi anonim mengganti pengirim dengan HMAC bergaram sehingga pendonor yang sama tidak bisa dikaitkan antar tanda terima.",
+          "maearth": "Belum ditulis ke PDS; data pendanaan berada di basis data platform.",
+          "advice": "Jangan pernah menganggap tanda terima berada di repositori proyek yang didanai: indeks tanda terima secara global dan telusuri `for` kembali ke subjeknya. Terima baik referensi kuat maupun URI `at://` biasa pada `for`, dan selalu isi `createdAt` atau tanda terima Anda akan berada di urutan terakhir pada setiap linimasa."
+        }
+      }
+    },
+    "repos": {
+      "heading": "Akun mana yang menyimpan catatannya",
+      "intro": "Skemanya tidak berkata apa pun tentang penempatan repositori, dan di sinilah aplikasi paling sering saling mengejutkan. Ganti antar aplikasi untuk melihat di mana setiap catatan sebenarnya mendarat.",
+      "kinds": {
+        "personalOrGroup": "Repositori pribadi atau grup",
+        "group": "Repositori grup",
+        "platform": "Repositori platform",
+        "facilitator": "Repositori fasilitator",
+        "none": "Tidak ditulis"
+      },
+      "kindNotes": {
+        "personalOrGroup": "PDS milik orang yang sedang masuk, atau akun organisasi bersama ketika ia menerbitkan atas nama organisasi tersebut. Seluruh graf mengikuti akun yang sedang Anda pakai.",
+        "group": "Akun organisasi bersama, ditulis lewat layanan grup sehingga anggotanya tidak pernah memegang kredensialnya.",
+        "platform": "Satu akun milik aplikasi itu sendiri, dipakai untuk catatan yang harus dibagi ke semua organisasi.",
+        "facilitator": "Akun layanan yang mencatat peristiwa yang tidak boleh ditulis sendirian oleh peserta mana pun."
+      },
+      "apps": {
+        "gainforest": "GainForest",
+        "maearth": "Ma Earth",
+        "advice": "Disarankan"
+      },
+      "rows": {
+        "project": {
+          "gainforest": "Akun yang Anda pakai untuk menerbitkan: repositori Anda sendiri saat bertindak sebagai diri sendiri, repositori organisasi saat bertindak atas namanya. Kedua jalur menulis catatan yang sama.",
+          "maearth": "Selalu repositori grup organisasinya. Proyek tidak bisa diterbitkan sebelum organisasinya terbit.",
+          "advice": "Taruh proyek dan klaimnya di repositori yang sama dengan pihak yang mengerjakannya — akun pribadi seseorang untuk kerja sendiri, akun organisasi bila dikerjakan tim. Dengan begitu seluruh klaim bisa diverifikasi dari satu akun."
+        },
+        "attachment": {
+          "gainforest": "Akun yang sama dengan Cert yang didokumentasikannya — pribadi atau organisasi, mengikuti akun yang dipakai saat bukti diterbitkan.",
+          "maearth": "Repositori organisasi, ditulis di bawah sesi penulisnya melalui layanan grup.",
+          "advice": "Simpan bukti di akun yang sama dengan subjeknya bila memungkinkan, tetapi bacalah lampiran secara global: bukti pihak ketiga tentang klaim orang lain itu sah dan tidak boleh hilang."
+        },
+        "tag": {
+          "gainforest": "Akun yang sama dengan Cert, dengan kunci lingkup sebagai rkey. Karena itu organisasi yang menerbitkan Cert-nya sendiri juga membuat salinan tag-nya sendiri.",
+          "maearth": "Satu repositori platform terkurasi, dengan rkey TID.",
+          "advice": "Keduanya bisa. Terbitkan taksonomi yang stabil dan terdokumentasi di suatu tempat lalu rujuk lewat `key` agar aplikasi lain bisa memetakannya."
+        },
+        "rights": {
+          "gainforest": "Tidak ditulis.",
+          "maearth": "Dirujuk pada akun hypercerts.org; baru disalin ke repositori platform ketika teksnya harus diubah.",
+          "advice": "Rujuk catatan hak bersama alih-alih menerbitkan salinan Anda sendiri. Salin hanya bila Anda butuh ketentuan yang berbeda."
+        },
+        "receipt": {
+          "gainforest": "Akun fasilitator khusus yang menyelesaikan pembayaran.",
+          "maearth": "Tidak ditulis.",
+          "advice": "Akun layanan adalah pilihan yang tepat: pendonor tidak seharusnya perlu menandatangani catatan agar donasinya terlihat, dan sebuah proyek tidak seharusnya bisa mengarang riwayat pendanaannya sendiri."
+        },
+        "snapshot": {
+          "gainforest": "Tidak ditulis.",
+          "maearth": "Repositori platform, sebagai koleksi dengan `type: \"snapshot\"` yang itemnya mengunci setiap catatan yang menjadi dasar sebuah peninjauan.",
+          "advice": "Bekukan sebuah keputusan sebagai koleksi referensi kuat. Itulah jejak audit antimanipulasi termurah yang diberikan skema ini."
+        }
+      },
+      "rowLabels": {
+        "project": "Proyek dan klaimnya",
+        "attachment": "Bukti, galeri, dan pembaruan",
+        "tag": "Tag lingkup kerja",
+        "rights": "Hak",
+        "receipt": "Tanda terima pendanaan",
+        "snapshot": "Cuplikan peninjauan yang dibekukan"
+      }
+    },
+    "reading": {
+      "heading": "Membaca catatan yang ditulis orang lain",
+      "intro": "Enam kebiasaan bertahan yang membedakan pembaca yang hanya jalan pada satu aplikasi dari pembaca yang jalan di seluruh jaringan.",
+      "items": {
+        "unions": {
+          "title": "Percabangkan pada `$type`, jangan pada bentuk",
+          "text": "Setiap cabang union diberi label. Gunakan switch pada `$type` dan sediakan cabang cadangan yang eksplisit: catatan dengan tipe yang tidak Anda kenal bukan berarti catatan rusak."
+        },
+        "optional": {
+          "title": "Anggap setiap bidang bisa hilang",
+          "text": "Pada sebuah klaim, hanya `title`, `shortDescription`, dan `createdAt` yang wajib. Turunkan ringkasan dari deskripsinya, mundur ke proyek induknya, dan tampilkan catatan yang minim alih-alih menyembunyikannya."
+        },
+        "numbers": {
+          "title": "Angka datang sebagai teks",
+          "text": "Bobot, nilai pengukuran, dan jumlah uang semuanya berupa teks untuk menghindari hilangnya presisi bilangan pecahan. Uraikan dengan hati-hati dan buang apa pun yang gagal diuraikan alih-alih menampilkan `NaN`."
+        },
+        "cids": {
+          "title": "Bandingkan berdasarkan URI, bukan CID",
+          "text": "Setiap penyuntingan mengganti CID, jadi CID yang tidak cocok biasanya berarti usang, bukan palsu. Kedua aplikasi membandingkan `uri` untuk identitas dan menganggap pergeseran CID sebagai tugas perbaikan."
+        },
+        "index": {
+          "title": "Jangan percaya urutan larik",
+          "text": "Baik `subjects[]` maupun `items[]` tidak menjamin urutan antar aplikasi. Cari berdasarkan URI dan anggap posisi sebagai petunjuk saja."
+        },
+        "openStrings": {
+          "title": "`contentType` dan `type` adalah kosakata terbuka",
+          "text": "`\"evidence\"`, `\"gallery\"`, `\"update\"`, `\"report\"`, dan `\"tree-dataset\"` adalah konvensi, bukan enum. Ubah ke huruf kecil, cocokkan yang Anda kenal, dan tampilkan sisanya secara umum alih-alih membuangnya."
+        }
+      }
+    },
+    "checklist": {
+      "heading": "Daftar periksa kompatibilitas",
+      "intro": "Kalau seseorang punya sepuluh menit untuk meninjau proyek pertama yang diterbitkan aplikasi Anda, inilah yang akan dia periksa.",
+      "doLabel": "Lakukan",
+      "dontLabel": "Hindari",
+      "do": {
+        "d1": "Terbitkan satu koleksi dengan `type: \"project\"` yang membawa satu klaim di `items[]`.",
+        "d2": "Isi `createdAt` pada setiap catatan, dan pertahankan nilai aslinya saat menyunting.",
+        "d3": "Tulis deskripsi sebagai dokumen Leaflet dan lingkup kerja sebagai CEL dengan `usedTags`.",
+        "d4": "Beri lampiran subjek berupa koleksi sekaligus klaimnya.",
+        "d5": "Simpan pasangan `uri` + `cid` dari semua yang Anda tulis dan tulis ulang induknya saat anaknya berubah.",
+        "d6": "Kunci satu versi paket leksikon resmi agar string `$type` Anda tidak bisa menyimpang."
+      },
+      "dont": {
+        "n1": "Jangan mengarang NSID baru untuk sesuatu yang sudah dimodelkan catatan yang ada.",
+        "n2": "Jangan menganggap catatan yang dirujuk berada di repositori yang sama, atau bahkan di PDS Anda.",
+        "n3": "Jangan menganggap `subjects[0]` atau `items[0]` punya arti khusus.",
+        "n4": "Jangan diam-diam membuang catatan yang cabang union atau `contentType`-nya tidak Anda kenali.",
+        "n5": "Jangan menerbitkan koleksi kedua untuk fase baru dari pekerjaan yang sama.",
+        "n6": "Jangan menaruh angka di tempat yang menurut skema harus berupa teks numerik."
+      }
+    },
+    "snippets": {
+      "copy": "Salin",
+      "copied": "Tersalin"
+    },
+    "more": {
+      "heading": "Bacaan lanjutan",
+      "lexiconsTitle": "Rujukan skema",
+      "lexiconsDesc": "Setiap leksikon yang dibaca dan ditulis aplikasi ini, bidang demi bidang.",
+      "cgsTitle": "Akun grup",
+      "cgsDesc": "Bagaimana satu tim penuh menulis ke satu repositori bersama tanpa berbagi kata sandi.",
+      "packageTitle": "@hypercerts-org/lexicon",
+      "packageDesc": "Tipe hasil generasi dan konstanta NSID untuk semua skema di halaman ini.",
+      "skillTitle": "Panduan agen",
+      "skillDesc": "Catatan yang sama, ditulis sebagai panggilan siap salin-tempel untuk agen AI."
+    }
+  },
+  "publishAs": {
+    "label": "Menerbitkan sebagai",
+    "badgePersonal": "Pribadi",
+    "badgeOrganization": "Organisasi",
+    "personalFallback": "Akun pribadi",
+    "organizationFallback": "Akun organisasi",
+    "personalDescription": "Masuk ke profil pribadi Anda",
+    "organizationDescription": "Masuk ke profil bersama organisasi",
+    "menuTitle": "Pilih tempat menerbitkan",
+    "menuPersonalSubtitle": "Akun pribadi Anda",
+    "menuOrganizationSubtitle": "Akun bersama organisasi",
+    "organizationsLabel": "Organisasi Anda",
+    "switchHint": "Ganti akun yang Anda gunakan untuk menerbitkan"
   }
 }

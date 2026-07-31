@@ -70,6 +70,7 @@
       "tabs": {
         "images": "Picha",
         "audio": "Sauti",
+        "soundscape": "Mandhari ya sauti",
         "trees": "Miti",
         "biodiversity": "Uchunguzi",
         "files": "Faili"
@@ -120,6 +121,9 @@
       "uploadType": "Pakia {type}",
       "manage": "Dhibiti",
       "untitledRecording": "Kurekodi bila jina",
+      "untitledSoundscape": "Mandhari ya sauti isiyo na jina",
+      "soundscapeHelp": "Chagua mandhari ya sauti iliyoundwa tayari kutoka rekodi za shirika hili. Wasomaji wanaweza kuisikiliza hapo hapo kwenye taarifa.",
+      "soundscapeEmpty": "Hakuna mandhari ya sauti ya shirika hili inayoweza kusomwa kwa sasa.",
       "unnamedTreeDataset": "Kikundi cha miti kisicho na jina",
       "unknownObservation": "Mwonekano wa asili usiojulikana",
       "treeCount": "{count, plural, =1 {mti 1} other {miti #}}",
@@ -140,6 +144,7 @@
       "attachmentTitles": {
         "images": "Picha",
         "audio": "Rekodi za sauti",
+        "soundscape": "Mandhari ya sauti",
         "trees": "Kikundi cha miti",
         "biodiversity": "Uchunguzi"
       },
@@ -154,6 +159,7 @@
       "tabDescriptions": {
         "images": "Pakia picha za mradi.",
         "audio": "Ongeza sauti ambazo tayari zimehifadhiwa na shirika hili.",
+        "soundscape": "Ongeza mandhari ya sauti ya saa 24 iliyoundwa kutoka rekodi za shirika hili.",
         "trees": "Ongeza taarifa za miti zilizopangwa kwa eneo la mradi.",
         "biodiversity": "Chuja uchunguzi na uongeze rekodi zinazoonyeshwa au vikundi vilivyohifadhiwa.",
         "files": "Ongeza ripoti, picha, video, au kurasa za wavuti."
@@ -258,6 +264,7 @@
       "linkedProjectPlace": "Eneo la mradi lililounganishwa",
       "linkedTreeGroup": "Kikundi cha miti kilichounganishwa",
       "linkedSound": "Sauti iliyounganishwa",
+      "linkedSoundscape": "Mandhari ya sauti iliyounganishwa",
       "groupedData": "Data iliyopangwa",
       "openMap": "Fungua ramani",
       "viewMap": "Tazama ramani",

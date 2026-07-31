@@ -71,7 +71,7 @@ export function useAddObservations(
   // Unique per caller so several triggers (sidebar, feed header, composer)
   // never portal into each other's modal container.
   const modalId = `add-observations-${useId()}`;
-  const [state, setState] = useState<{ target: ManageTarget; observationsHref: string } | null>(null);
+  const [state, setState] = useState<{ target: ManageTarget } | null>(null);
 
   const open = () => {
     let target: ManageTarget;
@@ -94,10 +94,7 @@ export function useAddObservations(
       target = personalManageTarget({ did: sessionDid, accountKind: "user", identifier: sessionDid });
     }
 
-    setState({
-      target,
-      observationsHref: manageHref({ basePath: groupManageBasePath(target.identifier) }, "observations"),
-    });
+    setState({ target });
     // Phones use the shared swipeable bottom sheet; larger screens keep a
     // task-sized dialog with enough room for photo review and species fields.
     modal.pushModal(
@@ -116,11 +113,18 @@ export function useAddObservations(
       {state ? (
         <AddObservationsModalLazy
           target={state.target}
+          sessionDid={sessionDid}
+          allowAccountSwitch
           onClose={closeModal}
           onBack={onBack}
-          onViewObservations={() => {
+          onViewObservations={(uploadedTarget) => {
             closeModal();
-            router.push(state.observationsHref);
+            // Route to whichever account the batch landed in — the uploader may
+            // have switched "Uploading for" mid-flow, so the href can't be
+            // frozen from the target the modal opened with.
+            router.push(
+              manageHref({ basePath: groupManageBasePath(uploadedTarget.identifier) }, "observations"),
+            );
           }}
         />
       ) : null}

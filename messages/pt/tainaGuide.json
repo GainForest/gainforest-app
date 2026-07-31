@@ -31,7 +31,7 @@
       "wallet": "Você pode receber doações e gorjetas! Crie sua carteira na aba Carteira da sua conta.",
       "createProject": "Você pode mostrar seu trabalho criando um projeto — leva só alguns minutos.",
       "observations": "Você pode enviar até 50 fotos da natureza de uma vez — as espécies são identificadas automaticamente.",
-      "bioblitz": "Há um desafio BioBlitz toda semana — fotografe qualquer ser vivo e ganhe prêmios!",
+      "bioblitz": "Há um desafio BioBlitz toda semana — fotografe a biodiversidade ao ar livre e ganhe prêmios!",
       "ask": "Você pode me perguntar qualquer coisa sobre a GainForest, no seu idioma — é só clicar em mim!"
     },
     "haveQuestion": "Tenho uma pergunta",
@@ -230,7 +230,7 @@
     "bioblitz": {
       "question": "Como participo do BioBlitz e ganho?",
       "title": "Participe do desafio BioBlitz",
-      "intro": "O BioBlitz é uma corrida semanal e amistosa para registrar a natureza. Fotografe qualquer ser vivo, envie e suba no placar.",
+      "intro": "O BioBlitz é uma corrida semanal e amistosa para registrar a biodiversidade ao ar livre. Cada entrada precisa de uma foto enviada; pessoas e plantas em vasos não contam.",
       "steps": {
         "open": {
           "title": "Abra o BioBlitz",
@@ -242,7 +242,7 @@
         },
         "upload": {
           "title": "Fotografe e envie",
-          "body": "Saia, fotografe qualquer ser vivo e adicione como observações durante a rodada."
+          "body": "Saia, fotografe a biodiversidade silvestre e envie uma foto com cada observação durante a rodada."
         },
         "win": {
           "title": "Ganhe prêmios",
@@ -251,7 +251,7 @@
       },
       "tour": {
         "register": "Clique em Registrar para participar — um clique e você está dentro.",
-        "upload": "Depois envie fotos de natureza por aqui durante a rodada — cada observação conta."
+        "upload": "Depois envie fotos de biodiversidade ao ar livre durante a rodada — pessoas e plantas em vasos não contam."
       }
     }
   }

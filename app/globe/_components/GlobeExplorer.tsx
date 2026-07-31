@@ -70,7 +70,7 @@ import {
   fetchOrganizationLayers,
 } from "../_lib/layers";
 import { buildDroneTimeSeries, type DroneTimeSeries } from "../_lib/time-series";
-import { fetchOrganizationTrees, type TreeDetail } from "../_lib/trees";
+import { fetchOrganizationTrees, findTreeByShareKey, treeShareKey, type TreeDetail } from "../_lib/trees";
 import type {
   GlobeLayer,
   GlobeLayerGroup,
@@ -80,6 +80,10 @@ import type {
 } from "../_lib/globe-types";
 
 const WORLD_BOUNDS: LngLatBounds = [-150, -50, 150, 65];
+
+/** Span, in degrees, framed around a tree opened from a shared link (~200m) —
+ *  close enough to stand next to it, wide enough to see its neighbours. */
+const TREE_FOCUS_SPAN = 0.002;
 
 /**
  * Elevation inside the overlay. The whole panel deliberately avoids hard
@@ -140,6 +144,21 @@ function featureCollection(features: GeoJSON.Feature[]): GeoJSON.FeatureCollecti
   return { type: "FeatureCollection", features };
 }
 
+/** Minimum span, in degrees, for the camera box around an organization's own
+ *  location. A bare coordinate has no extent at all and a generalised location
+ *  is only a few km across; without a floor the camera slams to street level
+ *  when all the viewer asked for is "where is this organization". */
+const ORG_LOCATION_MIN_SPAN = 0.5;
+
+function withMinSpan(bounds: LngLatBounds, min = ORG_LOCATION_MIN_SPAN): LngLatBounds {
+  const [west, south, east, north] = bounds;
+  const halfWidth = Math.max((east - west) / 2, min / 2);
+  const halfHeight = Math.max((north - south) / 2, min / 2);
+  const centerX = (west + east) / 2;
+  const centerY = (south + north) / 2;
+  return [centerX - halfWidth, centerY - halfHeight, centerX + halfWidth, centerY + halfHeight];
+}
+
 export function GlobeExplorer({ orgDid = null, orgName = null, orgIdentifier = null, project = null }: GlobeExplorerProps) {
   const t = useTranslations("marketplace.globe");
   const mode: GlobeMode = project ? "project" : orgDid ? "organization" : "global";
@@ -196,12 +215,22 @@ export function GlobeExplorer({ orgDid = null, orgName = null, orgIdentifier = n
 
   // ── Sites of the focused organization ────────────────────────────────────
   const [siteState, setSiteState] = useState<SiteState>(EMPTY_SITE_STATE);
-  const [selectedSiteUri, setSelectedSiteUri] = useState<string | null>(null);
+  // Which site is open lives in the URL (`?site=<record key>`) so any view of
+  // the globe can be linked to and re-opened exactly as it was shared.
+  const [querySite, setQuerySite] = useQueryState("site", parseAsString);
+  const selectedSiteUri = useMemo(
+    () => (querySite ? siteState.sites.find((site) => site.rkey === querySite)?.uri ?? null : null),
+    [querySite, siteState.sites],
+  );
+  // Whether the viewer explicitly asked to see every site at once. Focusing an
+  // organization starts at its own location instead, so this stays false until
+  // "All sites" is picked.
+  const [fitAllSites, setFitAllSites] = useState(false);
   const [boundsNonce, setBoundsNonce] = useState(0);
   const bumpBounds = useCallback(() => setBoundsNonce((n) => n + 1), []);
 
   useEffect(() => {
-    setSelectedSiteUri(null);
+    setFitAllSites(false);
     if (!focusDid || mode === "project") {
       setSiteState(EMPTY_SITE_STATE);
       return;
@@ -328,6 +357,17 @@ export function GlobeExplorer({ orgDid = null, orgName = null, orgIdentifier = n
   }>({ status: "idle", data: null });
   const [treesVisible, setTreesVisible] = useState(true);
   const [selectedTree, setSelectedTree] = useState<TreeDetail | null>(null);
+  // The open tree is mirrored into the URL (`?tree=<lon>,<lat>`) so a single
+  // tree can be linked to. Trees are keyed by position because the uploaded
+  // files carry no identifier that survives a re-upload.
+  const [queryTree, setQueryTree] = useQueryState("tree", parseAsString);
+  const selectTree = useCallback(
+    (tree: TreeDetail | null) => {
+      setSelectedTree(tree);
+      void setQueryTree(tree ? treeShareKey(tree.lon, tree.lat) : null);
+    },
+    [setQueryTree],
+  );
 
   useEffect(() => {
     setTreesState({ status: "idle", data: null });
@@ -350,6 +390,24 @@ export function GlobeExplorer({ orgDid = null, orgName = null, orgIdentifier = n
       });
     return () => controller.abort();
   }, [focusDid, mode]);
+
+  // ── Shared link to a single tree ─────────────────────────────────────────
+  // Read once, straight from the address bar, so it is never confused with a
+  // tree the viewer opens by clicking (which writes the same parameter).
+  const [pendingTreeKey, setPendingTreeKey] = useState<string | null>(null);
+  // Set while a shared tree owns the camera, so the site/organization framing
+  // below cannot steal it back when the site data finishes loading later.
+  const [treeCameraHeld, setTreeCameraHeld] = useState(false);
+  const releaseTreeCamera = useCallback(() => setTreeCameraHeld(false), []);
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const shared = params.get("tree");
+    if (!shared) return;
+    setPendingTreeKey(shared);
+    // A link that names a site as well was made with that site framed — the
+    // tree card still opens, but the camera stays on the site.
+    setTreeCameraHeld(!params.get("site"));
+  }, []);
 
   // ── Data layers ──────────────────────────────────────────────────────────
   const [globalLayers, setGlobalLayers] = useState<GlobeLayer[] | null>(null);
@@ -444,15 +502,21 @@ export function GlobeExplorer({ orgDid = null, orgName = null, orgIdentifier = n
 
   const [mapBounds, setMapBounds] = useState<LngLatBounds | null>(null);
 
-  // Layer flights: when a layer with a declared footprint becomes visible the
-  // camera flies straight to it, so it is always clear which toggle just
-  // changed the map. The nonce re-triggers the flight on repeat requests.
-  const [layerFlightNonce, setLayerFlightNonce] = useState(0);
-  const flyToLayer = useCallback((layer: GlobeLayer) => {
-    if (!layer.bounds) return;
-    setMapBounds(layer.bounds);
-    setLayerFlightNonce((nonce) => nonce + 1);
+  // Direct flights: when a layer with a declared footprint becomes visible (or
+  // a shared link points at one tree) the camera flies straight there, so it is
+  // always clear what just changed. The nonce re-triggers repeat requests.
+  const [flightNonce, setFlightNonce] = useState(0);
+  const flyToBounds = useCallback((bounds: LngLatBounds) => {
+    setMapBounds(bounds);
+    setFlightNonce((nonce) => nonce + 1);
   }, []);
+  const flyToLayer = useCallback(
+    (layer: GlobeLayer) => {
+      if (!layer.bounds) return;
+      flyToBounds(layer.bounds);
+    },
+    [flyToBounds],
+  );
 
   const toggleLayer = useCallback(
     (layer: GlobeLayer) => {
@@ -479,10 +543,12 @@ export function GlobeExplorer({ orgDid = null, orgName = null, orgIdentifier = n
     [flyToLayer],
   );
 
-  const flyToSeries = useCallback((series: DroneTimeSeries) => {
-    setMapBounds(series.bounds);
-    setLayerFlightNonce((nonce) => nonce + 1);
-  }, []);
+  const flyToSeries = useCallback(
+    (series: DroneTimeSeries) => {
+      flyToBounds(series.bounds);
+    },
+    [flyToBounds],
+  );
 
   /** Turn a drone time series on (starting at its latest capture) or off. */
   const toggleSeries = useCallback(
@@ -613,8 +679,62 @@ export function GlobeExplorer({ orgDid = null, orgName = null, orgIdentifier = n
     [highlightFeatures],
   );
 
+  // Where the camera goes when an organization is focused without a specific
+  // site picked: the place the organization says it is based. Falling back to
+  // the union of its project sites would frame the average of places it works
+  // in, which can be an ocean between two distant sites.
+  const orgLocationBounds = useMemo(() => {
+    if (mode === "project") return null;
+    if (orgLocationUri) {
+      const bounds = geojsonBounds(
+        featureCollection(
+          focusedState.features.filter((feature) => feature.properties?.siteUri === orgLocationUri),
+        ),
+      );
+      if (bounds) return withMinSpan(bounds);
+    }
+    // No mapped geometry for it yet — the roster already carries the same
+    // declared location as a coordinate.
+    if (selectedOrg && typeof selectedOrg.lat === "number" && typeof selectedOrg.lon === "number") {
+      return pointBounds(selectedOrg.lat, selectedOrg.lon, ORG_LOCATION_MIN_SPAN / 2);
+    }
+    return null;
+  }, [mode, orgLocationUri, focusedState.features, selectedOrg]);
+
+  // A shared tree link: once the organization's trees are in, open the tree the
+  // link points at and fly to it. Resolved by position — see `treeShareKey`.
+  useEffect(() => {
+    if (!pendingTreeKey || treesState.status !== "ready") return;
+    if (mode === "project" && projectState.status !== "ready") return;
+    const tree = findTreeByShareKey(visibleTrees, pendingTreeKey);
+    setPendingTreeKey(null);
+    if (!tree) {
+      // The link points at nothing here any more — hand the camera back and
+      // drop the stale parameter rather than leaving a dead link in the bar.
+      setTreeCameraHeld(false);
+      void setQueryTree(null);
+      return;
+    }
+    setSelectedTree(tree);
+    setTreesVisible(true);
+    // Only fly to it when the link is about the tree alone — a link that names
+    // a site as well keeps that site framed, with the tree card open on top.
+    if (treeCameraHeld) flyToBounds(pointBounds(tree.lat, tree.lon, TREE_FOCUS_SPAN / 2));
+  }, [
+    pendingTreeKey,
+    treesState.status,
+    projectState.status,
+    visibleTrees,
+    mode,
+    treeCameraHeld,
+    setQueryTree,
+    flyToBounds,
+  ]);
+
   useEffect(() => {
     if (!focusDid && mode === "global") return;
+    // A shared tree owns the camera until the viewer asks for something else.
+    if (treeCameraHeld) return;
     if (selectedSiteUri) {
       const bounds = geojsonBounds(featureCollection(highlightFeatures));
       if (bounds) {
@@ -623,14 +743,16 @@ export function GlobeExplorer({ orgDid = null, orgName = null, orgIdentifier = n
       }
     }
     if (focusedState.status !== "ready") return;
-    if (focusedState.bounds) {
+    if (!fitAllSites && orgLocationBounds) {
+      setMapBounds(orgLocationBounds);
+    } else if (focusedState.bounds) {
       setMapBounds(focusedState.bounds);
-    } else if (selectedOrg && typeof selectedOrg.lat === "number" && typeof selectedOrg.lon === "number") {
-      setMapBounds(pointBounds(selectedOrg.lat, selectedOrg.lon, 0.5));
+    } else if (orgLocationBounds) {
+      setMapBounds(orgLocationBounds);
     }
     // boundsNonce re-fits on repeat selections of the same org/site.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [focusDid, mode, focusedState, selectedSiteUri, highlightFeatures, selectedOrg, boundsNonce]);
+  }, [focusDid, mode, focusedState, selectedSiteUri, highlightFeatures, orgLocationBounds, fitAllSites, boundsNonce, treeCameraHeld]);
 
   // Extra camera padding so fitted sites are not hidden under the side panel
   // (desktop) or the bottom sheet (mobile).
@@ -669,13 +791,19 @@ export function GlobeExplorer({ orgDid = null, orgName = null, orgIdentifier = n
 
   // Drop any open tree card when trees are hidden or the org changes.
   useEffect(() => {
-    if (!treesVisible) setSelectedTree(null);
+    if (!treesVisible) selectTree(null);
+    // selectTree only clears the shared link; re-running on its identity would
+    // fight the tree the viewer just opened.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [treesVisible]);
 
   const selectOrganization = useCallback(
     (did: string | null) => {
       if (mode !== "global") return;
-      setSelectedSiteUri(null);
+      void setQuerySite(null);
+      void setQueryTree(null);
+      setFitAllSites(false);
+      releaseTreeCamera();
       if (!did) {
         void setQueryOrg(null);
         setMapBounds(WORLD_BOUNDS);
@@ -685,15 +813,20 @@ export function GlobeExplorer({ orgDid = null, orgName = null, orgIdentifier = n
       void setQueryOrg(did);
       bumpBounds();
     },
-    [mode, setQueryOrg, bumpBounds],
+    [mode, setQueryOrg, setQuerySite, setQueryTree, releaseTreeCamera, bumpBounds],
   );
 
   const selectSite = useCallback(
     (uri: string | null) => {
-      setSelectedSiteUri(uri);
+      const rkey = uri ? siteState.sites.find((site) => site.uri === uri)?.rkey ?? null : null;
+      void setQuerySite(rkey);
+      // "All sites" is the only way to ask for the whole footprint; picking a
+      // single site or focusing an org keeps the tighter framing.
+      setFitAllSites(uri === null);
+      releaseTreeCamera();
       bumpBounds();
     },
-    [bumpBounds],
+    [siteState.sites, setQuerySite, releaseTreeCamera, bumpBounds],
   );
 
   // Mobile quick-search: clear any focused org so the roster (with its search
@@ -743,6 +876,7 @@ export function GlobeExplorer({ orgDid = null, orgName = null, orgIdentifier = n
         },
         onClear: mode === "global" ? () => selectOrganization(null) : undefined,
         onRefit: () => {
+          releaseTreeCamera();
           bumpBounds();
           collapseSheet();
         },
@@ -803,10 +937,10 @@ export function GlobeExplorer({ orgDid = null, orgName = null, orgIdentifier = n
         sitesGeojson={sitesCollection}
         highlightGeojson={highlightCollection}
         treesGeojson={treesVisible ? visibleTrees : null}
-        onSelectTree={setSelectedTree}
+        onSelectTree={selectTree}
         selectedTreeId={selectedTree?.id ?? null}
         bounds={mapBounds}
-        boundsKey={`${focusDid ?? "none"}:${selectedSiteUri ?? "all"}:${boundsNonce}:layer${layerFlightNonce}`}
+        boundsKey={`${focusDid ?? "none"}:${selectedSiteUri ?? "all"}:${boundsNonce}:fly${flightNonce}`}
         boundsPadding={
           isDesktop
             ? { top: 48, bottom: 64, left: 416, right: 64 }
@@ -845,7 +979,10 @@ export function GlobeExplorer({ orgDid = null, orgName = null, orgIdentifier = n
           <TreeDetailPanel
             key={String(selectedTree.id)}
             tree={selectedTree}
-            onClose={() => setSelectedTree(null)}
+            onClose={() => {
+              releaseTreeCamera();
+              selectTree(null);
+            }}
           />
         ) : null}
       </AnimatePresence>

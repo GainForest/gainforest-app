@@ -32,6 +32,11 @@
             "maxGraphemes": 2048,
             "description": "URI to the original full-resolution audio resource (e.g. object storage URL). When present, the PDS blob is a compressed variant and this points to the archival original. Aligns with AC ac:accessURI."
           },
+          "originalCid": {
+            "type": "string",
+            "format": "cid",
+            "description": "Content CID (CIDv1, raw, SHA-256 — atproto's blob-ref convention) of the archival original behind accessUri, i.e. the full-resolution file that blob is a compressed variant of. The original lives in object storage rather than on the PDS, so no blob ref carries its CID; this field supplies that content address so uploaders can recognise and skip byte-identical recordings."
+          },
           "variantLiteral": {
             "type": "string",
             "maxGraphemes": 64,

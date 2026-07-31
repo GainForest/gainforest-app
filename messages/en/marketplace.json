@@ -269,7 +269,7 @@
   "bioblitz": {
     "metadata": {
       "title": "Weekly BioBlitz Challenge",
-      "description": "Go outside, photograph living things, and add your sightings. Each week the top collector and the best photo win a prize."
+      "description": "Go outside and photograph wild biodiversity. Each eligible observation must include an uploaded photo; people and potted plants do not count."
     },
     "banner": {
       "message": "The Weekly BioBlitz Challenge is live. Photograph nature and win prizes.",
@@ -281,7 +281,7 @@
       "eyebrow": "Weekly BioBlitz Challenge",
       "titlePrefix": "BioBlitz",
       "titleEmphasis": "Challenge",
-      "description": "A friendly weekly race to record nature. Photograph any living thing you find, add it to GainForest, and climb the board.",
+      "description": "A friendly weekly race to record outdoor biodiversity. Add observations with your own uploaded photos. People and potted plants do not count.",
       "program": "Part of the Klarna AI for Climate Resilience program, with GainForest."
     },
     "rsvp": {
@@ -325,7 +325,7 @@
           "participation": {
             "title": "2. How to participate",
             "paragraphs": {
-              "p1": "You need a GainForest account and must register for each round. Eligible observations must be added during the dates shown for that round and include genuine evidence of a living organism.",
+              "p1": "You need a GainForest account and must register for each round. An eligible observation must be added during the dates shown for that round, show outdoor biodiversity, and include a photo uploaded directly with the observation. People and potted plants do not count.",
               "p2": "Each person may use one account. Automated, duplicate, manipulated, backdated, misleading, or otherwise fraudulent entries may be removed from the challenge."
             }
           },
@@ -514,11 +514,11 @@
       "steps": {
         "outside": {
           "title": "Head outside",
-          "blurb": "Forest, field, or your backyard — any living thing counts."
+          "blurb": "Record outdoor biodiversity. People and potted plants do not count."
         },
         "upload": {
           "title": "Upload your photos",
-          "blurb": "Add them on your My Observations page, or with Tainá — also on GainForest."
+          "blurb": "Each observation needs its own uploaded photo. Add it on My Observations or with Tainá."
         },
         "review": {
           "title": "Check the species name",
@@ -535,10 +535,10 @@
     "board": {
       "title": "This round's board",
       "live": "Live",
-      "subtitleLive": "Who is leading the most observations prize right now.",
+      "subtitleLive": "Who is leading with eligible photo observations right now.",
       "subtitleEnded": "Final standings for this round.",
       "subtitleUpcoming": "Be the first to get on the board when the round opens.",
-      "subtitleAll": "The most active data collectors across the challenge.",
+      "subtitleAll": "The most eligible photo observations across the challenge.",
       "scope": {
         "round": "This round",
         "all": "All time"
@@ -565,6 +565,16 @@
         "observationsAll": "Observations (all time)",
         "collectors": "Collectors",
         "timeLeft": "Time left"
+      },
+      "eligibility": {
+        "title": "Images screened",
+        "eligibleOnly": "Eligible images count",
+        "wildlife": "Wildlife",
+        "plants": "Outdoor plants",
+        "people": "People",
+        "potted": "Potted plants",
+        "other": "Other excluded",
+        "explainer": "Only clear outdoor wildlife and plant observations with a directly uploaded photo count. People, potted or indoor plants, unclear subjects, and observations without an uploaded photo are excluded."
       },
       "empty": {
         "title": "No sightings yet",
@@ -1955,9 +1965,12 @@
   "observationGrid": {
     "sectionTitle": "Observations",
     "openDetails": "Open observation details: {name}",
+    "openAction": "Open",
     "mediaCount": "{count, plural, one {# media item} other {# media items}}",
     "selectObservation": "Select observation",
     "deselectObservation": "Deselect observation",
+    "selectObservationNamed": "Select observation: {name}",
+    "deselectObservationNamed": "Deselect observation: {name}",
     "playSound": "Play sound",
     "pauseSound": "Pause sound",
     "natureSoundRecording": "Nature sound recording",
