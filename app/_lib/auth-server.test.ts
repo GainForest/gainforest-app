@@ -16,7 +16,11 @@ function headerList(cookie: string | null) {
 /** Stand-in for the auth service + plc.directory. The auth service answers with
  *  the username it recorded at sign-in; the DID document answers with the
  *  current one. */
-function stubNetwork(options: { sessionHandle: string | null; documentHandle?: string | null; documentFails?: boolean }) {
+function stubNetwork(options: {
+  sessionHandle: string | null;
+  documentHandle?: string | null;
+  documentFails?: boolean;
+}) {
   return vi.fn(async (input: string | URL) => {
     const url = String(input);
     if (url.startsWith(`${AUTH_BASE_URL}/api/auth/session`)) {
@@ -83,5 +87,24 @@ describe("fetchAuthSession", () => {
     vi.stubGlobal("fetch", stubNetwork({ sessionHandle: null }));
     const { fetchAuthSession } = await load();
     expect(await fetchAuthSession()).toEqual({ isLoggedIn: false });
+  });
+
+  it("re-reads a cached identity when the username-change cookie appears", async () => {
+    // First request caches the pre-change identity.
+    const options = { sessionHandle: "y2vrxs.certified.one", documentHandle: "y2vrxs.certified.one" };
+    vi.stubGlobal("fetch", stubNetwork(options));
+    const { fetchAuthSession } = await load();
+    expect(await fetchAuthSession()).toMatchObject({ handle: "y2vrxs.certified.one" });
+
+    // The user changes their username (the DID document moves on) — without
+    // the cookie, the cached identity keeps answering.
+    options.documentHandle = "lotamoros.certified.one";
+    expect(await fetchAuthSession()).toMatchObject({ handle: "y2vrxs.certified.one" });
+
+    // With the cookie the change flow sets, the identity is read again.
+    headersMock.mockReturnValue(
+      headerList(`__Secure_gainforest_session=abc; gainforest_handle_changed=${Date.now()}`),
+    );
+    expect(await fetchAuthSession()).toMatchObject({ handle: "lotamoros.certified.one" });
   });
 });

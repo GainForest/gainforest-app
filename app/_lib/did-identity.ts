@@ -69,12 +69,17 @@ async function lookupDidIdentity(did: string): Promise<DidIdentity> {
   return { handle, pdsHost };
 }
 
-export function resolveDidIdentity(did: string): Promise<DidIdentity> {
+/**
+ * `freshness` (optional) is folded into the cache key: pass a value that
+ * changes when the caller knows the identity just changed (the username-change
+ * cookie), and instances still holding the pre-change identity under the old
+ * key will look it up again instead of serving it for the rest of the TTL.
+ */
+export function resolveDidIdentity(did: string, freshness?: string | null): Promise<DidIdentity> {
   if (!did.startsWith("did:")) return Promise.resolve(EMPTY_IDENTITY);
+  const key = freshness ? `${CACHE_PREFIX}${did}:${freshness}` : `${CACHE_PREFIX}${did}`;
   // A rejected loader drops itself from the cache, so a later call can retry.
-  return cachedAsync(`${CACHE_PREFIX}${did}`, CACHE_TTL_MS, () => lookupDidIdentity(did)).catch(
-    () => EMPTY_IDENTITY,
-  );
+  return cachedAsync(key, CACHE_TTL_MS, () => lookupDidIdentity(did)).catch(() => EMPTY_IDENTITY);
 }
 
 /** Forget the cached identity for one DID. Called right after the user changes
