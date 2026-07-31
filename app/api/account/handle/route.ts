@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import { fetchAuthSession } from "@/app/_lib/auth-server";
 import { getAuthBaseUrl, HANDLE_CHANGED_COOKIE } from "@/app/_lib/auth";
 import { forgetDidIdentity } from "@/app/_lib/did-identity";
+import { relayUpstreamCookies } from "@/app/_lib/upstream-cookies";
 
 export const dynamic = "force-dynamic";
 
@@ -63,7 +64,10 @@ export async function POST(request: Request) {
       return NextResponse.json({ code: "handle_unavailable", error: "Changing your username isn’t available yet." }, { status: 501 });
     }
     const result = await upstream.json().catch(() => ({ error: "Could not update your username right now. Please try again later." }));
-    const response = NextResponse.json(result, { status: upstream.status });
+    // The auth service re-seals the session with the new username and returns
+    // it as a cookie. Pass it on, or the user stays signed in under the old
+    // name until they next sign in.
+    const response = relayUpstreamCookies(upstream, NextResponse.json(result, { status: upstream.status }));
     if (upstream.ok) {
       // The DID document now says something new. Drop this instance's cached
       // identity, and mark the change in a short-lived cookie so the user's
