@@ -1780,6 +1780,12 @@
         "confirm": "Excluir projeto",
         "error": "Não foi possível excluir o projeto."
       },
+      "discardModal": {
+        "title": "Descartar este projeto?",
+        "description": "Fechar esta janela apagará o progresso da criação do seu projeto.",
+        "keepEditing": "Continuar editando",
+        "discard": "Descartar progresso"
+      },
       "wizard": {
         "back": "Voltar",
         "next": "Avançar",

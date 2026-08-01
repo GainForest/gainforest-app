@@ -1780,6 +1780,12 @@
         "confirm": "Futa mradi",
         "error": "Mradi haukuweza kufutwa."
       },
+      "discardModal": {
+        "title": "Uachane na mradi huu?",
+        "description": "Kufunga dirisha hili kutafuta hatua ulizokamilisha za kuunda mradi wako.",
+        "keepEditing": "Endelea kuhariri",
+        "discard": "Futa hatua zilizofikiwa"
+      },
       "wizard": {
         "back": "Rudi",
         "next": "Endelea",

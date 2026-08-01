@@ -925,6 +925,38 @@ function ProjectEditor({
     const goNext = () => setStepIndex((index) => Math.min(index + 1, lastIndex));
     const goPrev = () => setStepIndex((index) => Math.max(index - 1, 0));
 
+    // Closing the wizard throws the draft away, so an untouched form closes
+    // silently but any entered input asks for confirmation first. The confirm
+    // is pushed as its own stack entry rather than swapping this one out: the
+    // wizard stays mounted (just animated aside), so "keep editing" pops back
+    // with the draft, step position and photo preview all intact.
+    const draftTouched =
+      coverFile !== null ||
+      draft.title.trim().length > 0 ||
+      draft.shortDescription.trim().length > 0 ||
+      draft.description.trim().length > 0 ||
+      draft.scopes.length > 0 ||
+      draft.customScope.trim().length > 0 ||
+      draft.startDate.length > 0 ||
+      draft.endDate.length > 0 ||
+      draft.ongoing !== emptyProjectCertDraft.ongoing ||
+      draft.contributors.some((contributor) => contributor.trim().length > 0) ||
+      draft.selectedLocationUris.length > 0;
+    const requestClose = () => {
+      if (!draftTouched) {
+        onClose();
+        return;
+      }
+      modal.pushModal({
+        // Inset like the wizard's own width: this dialog inherits forceDialog
+        // from the stack, so on a phone it stays a dialog and a bare max-w-md
+        // would sit edge-to-edge.
+        id: "discard-project-draft",
+        dialogWidth: "max-w-md w-[calc(100%-2rem)]",
+        content: <DiscardProjectDraftModal onDiscard={onClose} />,
+      });
+    };
+
     return (
       <div className="relative w-full">
         <div className="mb-5 flex items-center justify-between gap-3">
@@ -933,7 +965,7 @@ function ProjectEditor({
               <RotateCcwIcon className="size-4" /> {t("startOver")}
             </Button>
           ) : <span />}
-          <Button type="button" variant="ghost" size="icon-sm" onClick={onClose} aria-label={t("close")} className="text-muted-foreground" disabled={saving}>
+          <Button type="button" variant="ghost" size="icon-sm" onClick={requestClose} aria-label={t("close")} className="text-muted-foreground" disabled={saving}>
             <XIcon className="size-5" />
           </Button>
         </div>
@@ -1826,6 +1858,37 @@ function PhotoPanel({
         className="sr-only"
       />
     </div>
+  );
+}
+
+/**
+ * Pushed over the create-project wizard when the steward tries to close it with
+ * unsaved input. Deliberately non-dismissible — Esc and click-outside are the
+ * exact accidents this guard exists to catch, so the only ways out are the two
+ * buttons. "Keep editing" pops back to the wizard (still mounted, draft
+ * intact); discarding hands off to the wizard's own close.
+ */
+function DiscardProjectDraftModal({ onDiscard }: { onDiscard: () => void }) {
+  const t = useTranslations("marketplace.manageProjects.editor.discardModal");
+  const modal = useModal();
+
+  return (
+    <ModalContent dismissible={false} className="space-y-4">
+      <ModalHeader>
+        <ModalTitle className="flex items-center gap-2">
+          <TriangleAlertIcon className="size-5 text-warn" />
+          {t("title")}
+        </ModalTitle>
+        <ModalDescription>{t("description")}</ModalDescription>
+      </ModalHeader>
+      <ModalFooter>
+        <Button type="button" variant="outline" onClick={() => modal.popModal()}>{t("keepEditing")}</Button>
+        <Button type="button" variant="destructive" onClick={onDiscard}>
+          <Trash2Icon className="size-4" />
+          {t("discard")}
+        </Button>
+      </ModalFooter>
+    </ModalContent>
   );
 }
 
