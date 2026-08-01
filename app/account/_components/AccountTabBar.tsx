@@ -3,8 +3,9 @@
 import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { usePathname, useSearchParams } from "next/navigation";
-import { BadgeCheckIcon, BinocularsIcon, BotIcon, ChevronDownIcon, FolderKanbanIcon, HeartHandshakeIcon, HomeIcon, ImageIcon, LayoutGridIcon, MessageSquareTextIcon, SettingsIcon, UsersIcon, WalletIcon, WrenchIcon } from "lucide-react";
+import { BadgeCheckIcon, BinocularsIcon, BotIcon, ChevronDownIcon, FolderKanbanIcon, HeartHandshakeIcon, HomeIcon, ImageIcon, MessageSquareTextIcon, SettingsIcon, UsersIcon, WalletIcon, WrenchIcon } from "lucide-react";
 import { stripLocaleFromPathname } from "@/lib/i18n/routing";
+import { formatNumber } from "@/app/_lib/format";
 import { cn } from "@/lib/utils";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import type { AccountKind } from "../_lib/account-route";
@@ -231,11 +232,22 @@ function buildTabs(
   if (scope === "account" && showEndorsementsGiven) {
     tabs.push(endorsementsGivenTab);
   }
-  // Organizations no longer get a standalone Files & photos tab — their photo
-  // gallery is surfaced inline on the Overview, under the About blurb. The
-  // /gallery + /attachments routes still work; they're just no longer linked here.
+  // Organizations show a few recent photos in the Overview sidebar; the full
+  // library (and file attachments) stays one click away under More.
+  if (scope === "account") {
+    tabs.push({
+      labelKey: "filesAndPhotos",
+      href: paths.gallery,
+      icon: ImageIcon,
+      exact: false,
+      matchPaths: [accountAttachmentsPath(did)],
+    });
+  }
   return appendExtras(tabs);
 }
+
+/** At-a-glance totals shown beside a tab label, e.g. "Projects 12". */
+export type AccountTabCounts = Partial<Record<TabLabelKey, number | null>>;
 
 interface OrgTabBarProps {
   did: string;
@@ -248,6 +260,7 @@ interface OrgTabBarProps {
   showEquipment?: boolean;
   includeWallet?: boolean;
   manageBasePath?: string;
+  counts?: AccountTabCounts;
 }
 
 export function AccountTabBar({
@@ -261,6 +274,7 @@ export function AccountTabBar({
   showEquipment = false,
   includeWallet = false,
   manageBasePath,
+  counts,
 }: OrgTabBarProps) {
   const t = useTranslations("common.accountTabs");
   const pathname = stripLocaleFromPathname(usePathname() ?? "/");
@@ -287,24 +301,26 @@ export function AccountTabBar({
   const moreActive = moreTabs.some(isActive);
 
   return (
-    <div className="mt-3">
+    <div className="mt-5">
       <div className="-mx-4 overflow-x-auto px-4 scrollbar-hidden">
-        <div className="flex min-w-max items-end gap-1 border-b border-border">
+        <div className="flex min-w-max items-end gap-5 border-b border-border">
           {primaryTabs.map((tab) => {
             const active = isActive(tab);
-            const Icon = tab.icon;
+            const count = counts?.[tab.labelKey];
             return (
               <Link
                 key={tab.href}
                 href={tab.href}
                 className={cn(
-                  "relative flex items-center gap-1.5 whitespace-nowrap px-3 py-2.5 text-sm font-medium transition-colors duration-150 select-none",
-                  active ? "text-foreground" : "text-muted-foreground hover:text-foreground",
+                  "relative flex items-baseline gap-1.5 whitespace-nowrap pb-2.5 pt-1 text-[15px] transition-colors duration-150 select-none",
+                  active ? "font-medium text-foreground" : "text-muted-foreground hover:text-foreground",
                 )}
               >
-                <Icon className="h-3.5 w-3.5 shrink-0" />
                 {t(tab.labelKey)}
-                {active ? <span className="absolute inset-x-0 bottom-0 h-0.5 rounded-full bg-foreground" /> : null}
+                {typeof count === "number" ? (
+                  <span className="text-xs tabular-nums text-muted-foreground">{formatNumber(count)}</span>
+                ) : null}
+                {active ? <span className="absolute inset-x-0 -bottom-px h-0.5 rounded-full bg-foreground" /> : null}
               </Link>
             );
           })}
@@ -315,14 +331,13 @@ export function AccountTabBar({
                 <button
                   type="button"
                   className={cn(
-                    "relative flex items-center gap-1.5 whitespace-nowrap px-3 py-2.5 text-sm font-medium transition-colors duration-150 select-none",
-                    moreActive ? "text-foreground" : "text-muted-foreground hover:text-foreground",
+                    "relative flex items-center gap-1 whitespace-nowrap pb-2.5 pt-1 text-[15px] transition-colors duration-150 select-none",
+                    moreActive ? "font-medium text-foreground" : "text-muted-foreground hover:text-foreground",
                   )}
                 >
-                  <LayoutGridIcon className="h-3.5 w-3.5 shrink-0" />
                   {t("more")}
                   <ChevronDownIcon className="h-3.5 w-3.5 shrink-0" />
-                  {moreActive ? <span className="absolute inset-x-0 bottom-0 h-0.5 rounded-full bg-foreground" /> : null}
+                  {moreActive ? <span className="absolute inset-x-0 -bottom-px h-0.5 rounded-full bg-foreground" /> : null}
                 </button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="start" className="min-w-52">

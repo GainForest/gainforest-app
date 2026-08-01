@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import Image from "next/image";
 import Link from "next/link";
 import { motion } from "framer-motion";
@@ -28,6 +28,15 @@ import type { AccountOrganization } from "@/app/account/_components/AccountOrgan
 import { AccountAwards } from "@/app/account/_components/AccountAwards";
 import { AccountMemberships } from "@/app/account/_components/AccountMemberships";
 import { AccountWalletSupport } from "@/app/account/_components/AccountWalletSupport";
+import {
+  AccountHeroActions,
+  AccountHeroFrame,
+  AccountHeroMeta,
+  AccountHeroName,
+  HERO_AVATAR_CLASS,
+  displayOrgType,
+  heroDateLabel,
+} from "@/app/account/_components/AccountProfileHero";
 import { ExpandableBio } from "@/app/account/_components/ExpandableBio";
 import { countryFlag } from "@/app/_lib/format";
 import { resolvePdsHost } from "@/app/_lib/pds";
@@ -225,6 +234,220 @@ function InlineEditActions({
         <XIcon /> {t("actions.cancel")}
       </Button>
     </span>
+  );
+}
+
+/**
+ * The owner's version of the public account header: the same photo, name and
+ * facts line every visitor sees, with each field opening its editor in place.
+ * It renders through the shared hero shell so an owner's profile never looks
+ * different from the page other people see.
+ */
+function EditableCompactHero({
+  account,
+  editState,
+  inlineField,
+  isSaving,
+  saveError,
+  onChange,
+  onEdit,
+  onSave,
+  onCancel,
+  onEditLogo,
+  onEditCountry,
+  onEditWebsite,
+  onEditStartDate,
+  onEditVisibility,
+  onEditOrgType,
+  onEditSocials,
+  editDisabledReason = null,
+}: {
+  account: AccountRouteData;
+  editState: HeroEditState;
+  inlineField: InlineField;
+  isSaving: boolean;
+  saveError: string | null;
+  onChange: (field: "displayName" | "description", value: string) => void;
+  onEdit: () => void;
+  onSave: () => void;
+  onCancel: () => void;
+  onEditLogo: () => void;
+  onEditCountry: () => void;
+  onEditWebsite: () => void;
+  onEditStartDate: () => void;
+  onEditVisibility: () => void;
+  onEditOrgType: () => void;
+  onEditSocials: () => void;
+  editDisabledReason?: string | null;
+}) {
+  const t = useTranslations("upload.dashboardClient");
+  const overviewT = useTranslations("common.accountOverview");
+  const locale = useLocale();
+  const logoObjectUrl = useMemo(
+    () => (editState.logoFile ? URL.createObjectURL(editState.logoFile) : null),
+    [editState.logoFile],
+  );
+  useEffect(() => () => {
+    if (logoObjectUrl) URL.revokeObjectURL(logoObjectUrl);
+  }, [logoObjectUrl]);
+
+  const logoUrl = logoObjectUrl ?? account.avatarUrl;
+  const editing = inlineField === "profile";
+  const canEdit = !editDisabledReason;
+  const initial = (editState.displayName || account.displayName).charAt(0).toUpperCase();
+  const isOrg = account.kind === "organization";
+  const countryLabel = editState.country ? countryName(editState.country) : null;
+  const flag = editState.country ? countryFlag(editState.country) : "";
+  const since = formatSinceDate(editState.startDate);
+  const joined = heroDateLabel(account.createdAt, locale, false);
+
+  return (
+    <div data-account-hero-editor>
+      <AccountHeroFrame
+        avatar={
+          <button
+            type="button"
+            onClick={canEdit ? onEditLogo : undefined}
+            disabled={!canEdit || isSaving}
+            title={editDisabledReason ?? undefined}
+            className={cn(
+              HERO_AVATAR_CLASS,
+              "group/avatar focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:cursor-not-allowed",
+            )}
+            aria-label={logoUrl
+              ? isOrg ? t("hero.changeLogo") : t("hero.changePhoto")
+              : isOrg ? t("hero.addLogo") : t("hero.addPhoto")}
+          >
+            {logoUrl ? (
+              <Image src={logoUrl} alt="" fill unoptimized sizes="68px" className="object-cover" />
+            ) : (
+              <span className="grid size-full place-items-center text-lg font-semibold text-muted-foreground">
+                {initial}
+              </span>
+            )}
+            <span className="absolute inset-0 grid place-items-center bg-black/0 opacity-0 transition-all group-hover/avatar:bg-black/35 group-hover/avatar:opacity-100 group-focus-visible/avatar:bg-black/35 group-focus-visible/avatar:opacity-100">
+              <ImagePlusIcon className="size-4 text-white drop-shadow" aria-hidden />
+            </span>
+          </button>
+        }
+        actions={editing ? null : <AccountHeroActions account={account} />}
+      >
+        {editing ? (
+          <div className="min-w-0 space-y-2">
+            <h1 className="sr-only">{editState.displayName || account.displayName}</h1>
+            <input
+              type="text"
+              value={editState.displayName}
+              onChange={(event) => onChange("displayName", event.target.value)}
+              placeholder={isOrg ? t("hero.organizationName") : t("hero.displayName")}
+              aria-label={isOrg ? t("hero.organizationName") : t("hero.displayName")}
+              className="w-full border-b border-border/60 bg-transparent font-instrument text-[1.75rem] font-light italic leading-[1.15] text-foreground outline-none transition-colors placeholder:text-foreground/40 focus:border-primary sm:text-4xl"
+              autoFocus
+            />
+            <textarea
+              value={editState.description}
+              onChange={(event) => onChange("description", event.target.value)}
+              placeholder={t("hero.shortBioPlaceholder")}
+              aria-label={t("hero.shortBioPlaceholder")}
+              rows={2}
+              className="w-full resize-none border-b border-border/60 bg-transparent text-sm leading-6 text-muted-foreground outline-none transition-colors field-sizing-content placeholder:text-muted-foreground/60 focus:border-primary"
+            />
+            <InlineEditActions isSaving={isSaving} onSave={onSave} onCancel={onCancel} />
+          </div>
+        ) : (
+          <>
+            <div className="flex min-w-0 items-start gap-1.5">
+              <AccountHeroName className="min-w-0 break-words">
+                {editState.displayName || account.displayName}
+              </AccountHeroName>
+              {canEdit ? (
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon-sm"
+                  onClick={onEdit}
+                  disabled={isSaving}
+                  aria-label={t("hero.editProfileAria")}
+                  className="mt-1 shrink-0"
+                >
+                  <PencilIcon />
+                </Button>
+              ) : null}
+            </div>
+            {/* Editable facts sit in the same line as the public header's, just
+                pulled left so the chip padding keeps the text aligned. */}
+            <AccountHeroMeta className="-ml-2 mt-0.5 gap-x-0">
+              {isOrg ? (
+                <FactChip onClick={onEditOrgType} disabled={!canEdit} title={editDisabledReason ?? undefined} empty={!editState.orgType.trim()}>
+                  {displayOrgType(editState.orgType) ?? t("hero.addType")}
+                </FactChip>
+              ) : null}
+              {isOrg ? (
+                <FactChip onClick={onEditCountry} disabled={!canEdit} title={editDisabledReason ?? undefined} empty={!countryLabel}>
+                  {flag ? <span className="text-sm leading-none" aria-hidden="true">{flag}</span> : null}
+                  {countryLabel ?? t("hero.addCountry")}
+                </FactChip>
+              ) : null}
+              {isOrg ? (
+                <FactChip onClick={onEditStartDate} disabled={!canEdit} title={editDisabledReason ?? undefined} empty={since.state === "empty"}>
+                  {since.state === "valid"
+                    ? overviewT("sinceDate", { date: since.label ?? "" })
+                    : since.state === "invalid"
+                      ? t("hero.invalidDate")
+                      : t("hero.addStartDate")}
+                </FactChip>
+              ) : joined ? (
+                <span className="px-1">{overviewT("joinedDate", { date: joined })}</span>
+              ) : null}
+              {isOrg ? (
+                <FactChip onClick={onEditVisibility} disabled={!canEdit} title={editDisabledReason ?? undefined}>
+                  {editState.visibility === "Unlisted" ? <LockIcon className="size-3.5 opacity-70" aria-hidden /> : <EyeIcon className="size-3.5 opacity-70" aria-hidden />}
+                  {editState.visibility}
+                </FactChip>
+              ) : null}
+            </AccountHeroMeta>
+            <div className="-ml-2 mt-0.5 flex flex-wrap items-center gap-y-1">
+              <FactChip
+                onClick={onEditWebsite}
+                disabled={!canEdit}
+                title={editState.website ? formatWebsite(editState.website) : editDisabledReason ?? undefined}
+                empty={!editState.website}
+              >
+                <GlobeIcon className="size-3.5 opacity-70" aria-hidden />
+                <span className="max-w-52 truncate">
+                  {editState.website ? formatWebsite(editState.website) : t("hero.addWebsite")}
+                </span>
+              </FactChip>
+              {isOrg ? (
+                <>
+                  {editState.socials.map((url) => {
+                    const label = formatWebsite(url);
+                    return (
+                      <Button key={url} asChild variant="ghost" size="icon-sm" className="text-muted-foreground hover:text-foreground" title={label} aria-label={t("hero.openSocialLink", { link: label })}>
+                        <Link href={externalHref(url)} target="_blank" rel="noopener noreferrer">
+                          <SocialGlyph platform={classifySocial(url)} />
+                        </Link>
+                      </Button>
+                    );
+                  })}
+                  <FactChip
+                    onClick={onEditSocials}
+                    disabled={!canEdit}
+                    title={editDisabledReason ?? t("hero.addSocialLinks")}
+                    aria-label={t("hero.addSocialLinks")}
+                    empty={editState.socials.length === 0}
+                  >
+                    <Link2Icon className="size-3.5 opacity-70" aria-hidden />
+                    {editState.socials.length === 0 ? t("hero.addSocialLinks") : null}
+                  </FactChip>
+                </>
+              ) : null}
+            </div>
+          </>
+        )}
+        {saveError ? <p className="mt-2 text-xs text-destructive">{saveError}</p> : null}
+      </AccountHeroFrame>
+    </div>
   );
 }
 
@@ -575,12 +798,14 @@ function FactChip({
   title,
   empty = false,
   children,
+  "aria-label": ariaLabel,
 }: {
   onClick?: () => void;
   disabled?: boolean;
   title?: string;
   empty?: boolean;
   children: React.ReactNode;
+  "aria-label"?: string;
 }) {
   return (
     <button
@@ -588,6 +813,7 @@ function FactChip({
       onClick={onClick}
       disabled={disabled}
       title={title}
+      aria-label={ariaLabel}
       className={cn(
         "group inline-flex h-8 items-center gap-1.5 rounded-full px-3 text-[13px] transition-colors disabled:cursor-not-allowed disabled:opacity-60",
         empty
@@ -616,6 +842,7 @@ export function EditableAccountHeader({
   viewPublicHref,
   showAbout = true,
   memberships = [],
+  variant = "full",
 }: {
   account: AccountRouteData;
   /** When editing an org repo, the group DID writes are routed to. */
@@ -633,6 +860,12 @@ export function EditableAccountHeader({
    * instead, so it passes false to avoid a duplicate.
    */
   showAbout?: boolean;
+  /**
+   * `compact` — the identity header shared by every account tab.
+   * `about` — just the organization's About text, for the Overview sidebar.
+   * `full` — cover, identity and facts, for the manage surfaces.
+   */
+  variant?: "full" | "compact" | "about";
 }) {
   const router = useRouter();
   const modal = useModal();
@@ -899,6 +1132,52 @@ export function EditableAccountHeader({
     "manage-socials-editor",
     <SocialLinksEditorModal current={editSocials} onConfirm={(socials) => void saveChanges({ socials })} />,
   );
+
+  // The Overview sidebar renders the About text on its own; it reuses this
+  // component (rather than duplicating the record write) purely for the editor.
+  if (variant === "about") {
+    return (
+      <AboutSection
+        value={editLongDescription}
+        draft={editLongDescription}
+        isEditing={inlineField === "about"}
+        isSaving={isSaving}
+        saveError={inlineField === "about" ? saveError : null}
+        onEdit={() => { setSaveError(null); setInlineField("about"); }}
+        onChange={setEditLongDescription}
+        onSave={() => void saveChanges({ longDescription: editLongDescription })}
+        onCancel={() => { setEditLongDescription((pendingOptimisticSave?.state ?? accountState).longDescription); setSaveError(null); setInlineField(null); }}
+        editDisabledReason={profileEditPermission.reason}
+      />
+    );
+  }
+
+  if (variant === "compact") {
+    return (
+      <EditableCompactHero
+        account={account}
+        editState={editState}
+        inlineField={inlineField}
+        isSaving={isSaving}
+        saveError={saveError}
+        onChange={(field, value) => handleChange(field, value)}
+        onEdit={() => {
+          setSaveError(null);
+          setInlineField("profile");
+        }}
+        onSave={() => void saveChanges()}
+        onCancel={resetState}
+        onEditLogo={openLogoModal}
+        onEditCountry={openCountryModal}
+        onEditWebsite={openWebsiteModal}
+        onEditStartDate={openStartDateModal}
+        onEditVisibility={openVisibilityModal}
+        onEditOrgType={openOrgTypeModal}
+        onEditSocials={openSocialsModal}
+        editDisabledReason={profileEditPermission.reason}
+      />
+    );
+  }
 
   return (
     <div className="space-y-6">

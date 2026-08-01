@@ -31,7 +31,7 @@ export function FollowProvider({ targetDid, children }: { targetDid: string | nu
 
 /** Use the provider's shared state when present, else fetch our own. Both hooks
  *  are always called (rules of hooks); the self-fetch idles on a null target. */
-function useFollowState(targetDid: string | null): UseFollow {
+export function useFollowState(targetDid: string | null): UseFollow {
   const shared = useContext(FollowContext);
   const own = useFollow(shared ? null : targetDid);
   return shared ?? own;

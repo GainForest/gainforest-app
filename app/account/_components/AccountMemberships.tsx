@@ -16,16 +16,18 @@ import type { AccountOrganization } from "./AccountOrganizationsGrid";
 export function AccountMemberships({
   organizations,
   className,
+  hideLabel = false,
 }: {
   organizations: AccountOrganization[];
   className?: string;
+  hideLabel?: boolean;
 }) {
   const t = useTranslations("common.accountOrganizations");
   if (organizations.length === 0) return null;
 
   return (
     <div className={cn("flex flex-wrap items-center gap-x-2 gap-y-1.5", className)}>
-      <span className="text-xs font-medium text-muted-foreground">{t("memberOf")}</span>
+      {hideLabel ? null : <span className="text-xs font-medium text-muted-foreground">{t("memberOf")}</span>}
       {organizations.map((organization) => {
         const initial = organization.displayName.trim().charAt(0).toUpperCase() || "?";
         return (

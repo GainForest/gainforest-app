@@ -955,6 +955,30 @@
   "accountAbout": {
     "title": "About"
   },
+  "accountOverview": {
+    "sinceDate": "Since {date}",
+    "joinedDate": "Joined {date}",
+    "share": "Copy link to this profile",
+    "shareCopied": "Link copied",
+    "supportTitle": "Support this account",
+    "supportBody": "Money goes straight to {name}. Totals come from public records, so they can lag a little behind.",
+    "supporters": "{count, plural, one {# supporter} other {# supporters}}",
+    "seeAll": "See all",
+    "seeAllCount": "See all {count}",
+    "recentActivity": "Recent activity",
+    "atAGlance": "At a glance",
+    "loadMoreRecords": "Load more",
+    "recordsEmpty": "Nothing published yet.",
+    "recordsError": "Couldn't load this account's records right now.",
+    "recordBatch": "{count, plural, one {Published # nature sighting} other {Published # nature sightings}}",
+    "recordKind": {
+      "project": "Project",
+      "observation": "Nature sighting",
+      "organization": "Organization",
+      "post": "Update",
+      "donation": "Donation"
+    }
+  },
   "accountDataCouncil": {
     "title": "Data Council",
     "description": "People with this badge help steward the organization’s shared data and evidence.",
