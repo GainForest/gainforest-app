@@ -462,9 +462,7 @@ function AboutSection({
   onSave,
   onCancel,
   editDisabledReason = null,
-  compact = false,
 }: {
-  compact?: boolean;
   value: string;
   draft: string;
   isEditing: boolean;
@@ -485,9 +483,7 @@ function AboutSection({
       transition={{ duration: 0.4, delay: 0.1, ease: SECTION_EASE }}
     >
       <div className="flex items-center gap-2">
-        <h2 className={cn("text-foreground", compact ? "text-base font-semibold" : "font-instrument text-2xl italic leading-none")}>
-          {t("about.title")}
-        </h2>
+        <h2 className="font-instrument text-2xl italic leading-none text-foreground">{t("about.title")}</h2>
         {isEditing || editDisabledReason ? null : (
           <button
             type="button"
@@ -514,11 +510,7 @@ function AboutSection({
         </div>
       ) : (
         <>
-          <p className={cn(
-            "mt-3 max-w-3xl whitespace-pre-line",
-            compact ? "text-sm leading-6" : "text-base leading-7 md:text-lg md:leading-8",
-            text ? (compact ? "text-muted-foreground" : "text-foreground/85") : "text-muted-foreground/60",
-          )}>
+          <p className={cn("mt-3 max-w-3xl whitespace-pre-line text-base leading-7 md:text-lg md:leading-8", text ? "text-foreground/85" : "text-muted-foreground/60")}>
             {text || t("about.empty")}
           </p>
           {editDisabledReason ? <p className="mt-2 text-xs text-muted-foreground">{editDisabledReason}</p> : null}
@@ -1146,7 +1138,6 @@ export function EditableAccountHeader({
   if (variant === "about") {
     return (
       <AboutSection
-        compact
         value={editLongDescription}
         draft={editLongDescription}
         isEditing={inlineField === "about"}

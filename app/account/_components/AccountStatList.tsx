@@ -49,10 +49,13 @@ export function AccountStatList({
 }) {
   const t = useTranslations("common.accountTabs");
   const followT = useTranslations("common.follow");
+  const overviewT = useTranslations("common.accountOverview");
   const follow = useFollowState(did);
 
   return (
-    <nav className="border-t border-border/60">
+    <section>
+      <h2 className="mb-2 text-base font-semibold text-foreground">{overviewT("atAGlance")}</h2>
+      <nav className="border-t border-border/60">
       <StatRow
         label={t("observations")}
         value={formatCompact(counts.observations)}
@@ -76,6 +79,7 @@ export function AccountStatList({
         value={formatCompact(follow.following)}
         href={accountFollowingPath(identifier)}
       />
-    </nav>
+      </nav>
+    </section>
   );
 }

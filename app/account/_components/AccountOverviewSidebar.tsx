@@ -2,10 +2,6 @@ import Image from "next/image";
 import Link from "next/link";
 import { getTranslations } from "next-intl/server";
 import { BadgeCheckIcon } from "lucide-react";
-import { canEditGroupProfile } from "@/app/(manage)/manage/_lib/cgs-permissions";
-import type { CgsRole } from "@/app/(manage)/manage/_lib/cgs";
-import { EditableAccountHeader } from "@/app/(manage)/manage/_components/EditableAccountHeader";
-import { RichText } from "@/app/_components/RichText";
 import { TrustedByBadges } from "@/app/_components/TrustedByBadges";
 import { AccountAwards } from "./AccountAwards";
 import { AccountMemberships } from "./AccountMemberships";
@@ -13,13 +9,10 @@ import { AccountStatList, type AccountStatCounts } from "./AccountStatList";
 import { AccountSupportCard } from "./AccountSupportCard";
 import type { AccountOrganization } from "./AccountOrganizationsGrid";
 import { monogram } from "@/app/_lib/did-profile";
-import { fetchAccountMaEarthRounds, fetchProjectImageGalleriesByDid, type ProjectRecord } from "@/app/_lib/indexer";
+import { fetchAccountMaEarthRounds, fetchProjectImageGalleriesByDid } from "@/app/_lib/indexer";
 import { fetchPublicDataCouncilMembers, type PublicDataCouncilMember } from "@/app/_lib/data-council";
-import { resolveAccountManageAccess } from "@/app/_lib/manage-server";
-import { formatCountry } from "@/app/_lib/format";
-import { localProjectHref } from "@/app/_lib/urls";
 import type { AccountRouteData } from "../_lib/account-route";
-import { accountGalleryPath, accountProjectsPath, accountSettingsPath } from "../_lib/account-route";
+import { accountGalleryPath } from "../_lib/account-route";
 
 /** Quiet section wrapper: a small label, then the section's content. */
 function SidebarSection({
@@ -47,106 +40,6 @@ function SidebarLink({ href, label }: { href: string; label: string }) {
     <Link href={href} className="text-sm text-muted-foreground transition-colors hover:text-foreground">
       {label}
     </Link>
-  );
-}
-
-/** The account's own words: the short bio, then the long description. */
-async function AboutCard({
-  account,
-  canEditProfile,
-  writeRepoDid,
-  groupRole,
-}: {
-  account: AccountRouteData;
-  canEditProfile: boolean;
-  writeRepoDid?: string;
-  groupRole?: CgsRole;
-}) {
-  const t = await getTranslations("common.accountAbout");
-  const bio = account.description?.trim() ?? "";
-  const longDescription = account.kind === "organization" ? account.longDescription?.trim() ?? "" : "";
-  const richBody = account.kind === "organization" ? null : account.detail?.richBody ?? null;
-  const blurb = account.kind === "organization" ? null : account.detail?.blurb?.trim() ?? null;
-
-  // Organizations can edit their long description in place; the shared header
-  // editor owns the record write, so the card mounts its "about" variant rather
-  // than duplicating the save logic.
-  if (account.kind === "organization" && canEditProfile) {
-    return (
-      <section className="space-y-3">
-        {bio ? <p className="text-sm leading-6 text-foreground/80">{bio}</p> : null}
-        <EditableAccountHeader
-          account={account}
-          writeRepoDid={writeRepoDid}
-          groupRole={groupRole}
-          settingsHref={accountSettingsPath(account.urlIdentifier)}
-          viewPublicHref={null}
-          variant="about"
-        />
-      </section>
-    );
-  }
-
-  if (!bio && !longDescription && !richBody?.length && !blurb) return null;
-
-  return (
-    <SidebarSection title={t("title")}>
-      {bio ? <p className="text-sm leading-6 text-foreground/80">{bio}</p> : null}
-      {longDescription ? (
-        <p className="whitespace-pre-line text-sm leading-6 text-muted-foreground">{longDescription}</p>
-      ) : null}
-      {richBody?.length ? (
-        <div className="text-sm leading-6 text-muted-foreground">
-          <RichText blocks={richBody} />
-        </div>
-      ) : blurb ? (
-        <p className="text-sm leading-6 text-muted-foreground">{blurb}</p>
-      ) : null}
-    </SidebarSection>
-  );
-}
-
-/** A few of the account's projects, newest first, with a link to the full list. */
-async function ProjectsCard({ account, projects }: { account: AccountRouteData; projects: ProjectRecord[] }) {
-  const [t, overviewT] = await Promise.all([
-    getTranslations("common.accountTabs"),
-    getTranslations("common.accountOverview"),
-  ]);
-  if (projects.length === 0) return null;
-
-  return (
-    <SidebarSection
-      title={t("projects")}
-      action={
-        projects.length > 4 ? (
-          <SidebarLink href={accountProjectsPath(account.urlIdentifier)} label={overviewT("seeAll")} />
-        ) : null
-      }
-    >
-      <ul className="space-y-3">
-        {projects.slice(0, 4).map((project) => (
-          <li key={project.id}>
-            <Link href={localProjectHref(account.urlIdentifier, project.rkey)} className="group flex items-start gap-3">
-              <span className="relative size-11 shrink-0 overflow-hidden rounded-xl bg-muted ring-1 ring-border/50">
-                {project.imageUrl ? (
-                  <Image src={project.imageUrl} alt="" fill unoptimized sizes="44px" className="object-cover" />
-                ) : null}
-              </span>
-              <span className="min-w-0 flex-1">
-                <span className="block text-sm font-medium leading-snug text-foreground group-hover:underline">
-                  {project.title}
-                </span>
-                {project.country ? (
-                  <span className="mt-0.5 block truncate text-xs text-muted-foreground">
-                    {formatCountry(project.country)}
-                  </span>
-                ) : null}
-              </span>
-            </Link>
-          </li>
-        ))}
-      </ul>
-    </SidebarSection>
   );
 }
 
@@ -260,39 +153,28 @@ async function DataCouncilCard({ did }: { did: string }) {
 }
 
 /**
- * The right-hand column of an account's Overview: how to support it, what it
- * says about itself, its numbers, its projects and photos, and who vouches for
- * it. Each block hides itself when it has nothing to show, so a brand-new
- * profile stays quiet instead of showing a wall of empty cards.
+ * The side rail of an account's Overview — the supporting details, not the
+ * story: how to support the account, its numbers at a glance, a peek at its
+ * photos, and who vouches for it. Who the account is and what it runs lead the
+ * main column instead (see {@link AccountAboutSection}).
+ *
+ * Each block hides itself when it has nothing to show, so a brand-new profile
+ * stays quiet instead of showing a wall of empty cards.
  */
 export async function AccountOverviewSidebar({
   account,
-  projects,
   counts,
   receivedUsd,
   supporters,
   memberships,
 }: {
   account: AccountRouteData;
-  projects: ProjectRecord[];
   counts: AccountStatCounts;
   receivedUsd: number;
   supporters: number;
   memberships: AccountOrganization[];
 }) {
   const organizationsT = await getTranslations("common.accountOrganizations");
-
-  // Group profile edits are role-gated; personal owners always qualify.
-  const access = await resolveAccountManageAccess(account.urlIdentifier).catch(() => null);
-  const target = access?.status === "allowed" ? access.target : null;
-  const groupRole: CgsRole | undefined = target?.kind === "group"
-    ? target.role === "owner" ? "owner" : target.role === "admin" ? "admin" : "member"
-    : undefined;
-  const canEditProfile = target
-    ? target.kind === "group"
-      ? canEditGroupProfile({ kind: "group", role: groupRole }).allowed
-      : true
-    : false;
 
   return (
     <div data-account-overview-panel className="space-y-7">
@@ -304,16 +186,7 @@ export async function AccountOverviewSidebar({
         supporters={supporters}
       />
 
-      <AboutCard
-        account={account}
-        canEditProfile={canEditProfile}
-        writeRepoDid={target?.kind === "group" ? target.did : undefined}
-        groupRole={groupRole}
-      />
-
       <AccountStatList did={account.did} identifier={account.urlIdentifier} counts={counts} />
-
-      <ProjectsCard account={account} projects={projects} />
 
       <PhotosCard account={account} />
       {account.kind === "organization" ? <MaEarthCard did={account.did} /> : null}

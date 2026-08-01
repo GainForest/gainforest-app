@@ -432,10 +432,10 @@ export async function editProfile(page: Page, testInfo: TestInfo): Promise<void>
   await compactBioInput.fill("Compact profile editing persisted from browser testing.");
   await clickAndWaitForRefresh(page, compactEditor.getByRole("button", { name: /^save$/i }));
   await expect(compactEditor.getByText("Disposable E2E Compact Profile", { exact: true })).toBeVisible({ timeout: 30_000 });
-  // The header carries the name; the short bio reads on the Overview's profile
-  // column, beside the record stream.
-  const overviewPanel = page.locator("[data-account-overview-panel]");
-  await expect(overviewPanel.getByText("Compact profile editing persisted from browser testing.", { exact: true })).toBeVisible({ timeout: 30_000 });
+  // The header carries the name; the short bio leads the Overview's About
+  // section, ahead of the projects and the record stream.
+  const about = page.locator("[data-account-about]");
+  await expect(about.getByText("Compact profile editing persisted from browser testing.", { exact: true })).toBeVisible({ timeout: 30_000 });
 
   const avatar = compactEditor.locator("img").first();
   const previousAvatarSrc = await avatar.getAttribute("src");
@@ -458,7 +458,7 @@ export async function editProfile(page: Page, testInfo: TestInfo): Promise<void>
 
   await page.goto(profilePath, { waitUntil: "domcontentloaded" });
   await expect(
-    page.locator("[data-account-overview-panel]").getByText("Compact profile editing persisted from browser testing.", { exact: true }),
+    page.locator("[data-account-about]").getByText("Compact profile editing persisted from browser testing.", { exact: true }),
   ).toBeVisible({ timeout: 60_000 });
   await screenshotStep(page, testInfo, "compact-profile-edit-saved");
 }

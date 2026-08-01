@@ -150,38 +150,64 @@ export function OverviewFoldersSkeleton({ ids }: { ids: readonly string[] }) {
 }
 
 /**
- * Loading placeholder for the account Overview: the record stream on the left
- * and the profile column beside it. Shared by the account section's full-shell
- * loading and the per-tab page loading so the two transitions line up without a
- * jump. Only the fixed-size shapes are painted — the support card, the photo
- * thumbnails — while account copy just holds its space.
+ * Loading placeholder for the account Overview, mirroring its reading order:
+ * About and the projects up top, the record stream below, and the side rail
+ * beside them. Shared by the account section's full-shell loading and the
+ * per-tab page loading so the two transitions line up without a jump. Only the
+ * fixed-size shapes are painted — the support card, the project thumbnails —
+ * while account copy just holds its space.
  */
 export function AccountOverviewContentSkeleton() {
   return (
-    <div className="mt-8 flex flex-col-reverse gap-10 lg:flex-row lg:gap-12">
-      <div className="min-w-0 flex-1 border-t border-border/60">
-        {Array.from({ length: 4 }).map((_, index) => (
-          <div key={index} className="flex flex-col gap-1.5 border-b border-border/60 py-5 sm:flex-row sm:gap-6">
-            {/* Relative date + record kind. */}
-            <div className="sm:w-28 sm:shrink-0">
-              <div className="h-5" />
-              <div className="mt-0.5 h-4" />
-            </div>
-            {/* Headline + a line of context. */}
-            <div className="min-w-0 flex-1">
-              <div className="h-6" />
-              <div className="mt-1 h-5" />
-            </div>
+    <div className="mt-8 grid gap-10 lg:grid-cols-[minmax(0,1fr)_20rem] lg:items-start lg:gap-12 xl:grid-cols-[minmax(0,1fr)_22rem]">
+      <div className="min-w-0 space-y-10 lg:col-start-1 lg:row-start-1">
+        {/* About — a heading and a few lines of the account's own words. */}
+        <div>
+          <Skeleton className="h-6 w-24" />
+          <div className="mt-3 h-24 max-w-3xl" />
+        </div>
+        {/* Projects — two columns of thumbnail + title + place. */}
+        <div>
+          <Skeleton className="h-6 w-24" />
+          <div className="mt-4 grid gap-3 sm:grid-cols-2">
+            {Array.from({ length: 2 }).map((_, index) => (
+              <div key={index} className="flex gap-3 rounded-2xl border border-border/60 bg-card/40 p-3">
+                <Skeleton className="size-16 shrink-0 rounded-xl" />
+                <div className="min-w-0 flex-1">
+                  <div className="h-5" />
+                  <div className="mt-0.5 h-4" />
+                </div>
+              </div>
+            ))}
           </div>
-        ))}
+        </div>
       </div>
-      <aside className="lg:w-[20rem] lg:shrink-0 xl:w-[22rem]">
+
+      <aside className="min-w-0 lg:col-start-2 lg:row-start-1 lg:row-span-2">
         <Skeleton className="h-40 w-full rounded-2xl" />
-        {/* About, then the counts table — both are account copy, so they only
-            reserve their height. */}
-        <div className="mt-7 h-[7.5rem]" />
+        {/* The counts table — account data, so it only reserves its height. */}
         <div className="mt-7 h-[11.5rem] border-t border-border/60" />
       </aside>
+
+      <section className="min-w-0 lg:col-start-1 lg:row-start-2">
+        <Skeleton className="h-6 w-36" />
+        <div className="mt-4 border-t border-border/60">
+          {Array.from({ length: 4 }).map((_, index) => (
+            <div key={index} className="flex flex-col gap-1.5 border-b border-border/60 py-5 sm:flex-row sm:gap-6">
+              {/* Relative date + record kind. */}
+              <div className="sm:w-28 sm:shrink-0">
+                <div className="h-5" />
+                <div className="mt-0.5 h-4" />
+              </div>
+              {/* Headline + a line of context. */}
+              <div className="min-w-0 flex-1">
+                <div className="h-6" />
+                <div className="mt-1 h-5" />
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
     </div>
   );
 }

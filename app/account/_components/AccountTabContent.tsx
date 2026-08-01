@@ -7,9 +7,11 @@ import { AccountGalleryClient } from "./AccountGalleryClient";
 import type { GalleryProjectOption } from "./AccountGalleryUploader";
 import { InlineCardGridSkeleton } from "../../_components/PageLoadingSkeletons";
 import { RecordExplorer } from "../../_components/RecordExplorer";
+import { AccountAboutSection } from "./AccountAboutSection";
 import { AccountActivityFeed } from "./AccountActivityFeed";
 import { AccountBumicertsGrid } from "./AccountBumicertsGrid";
 import { AccountOverviewSidebar } from "./AccountOverviewSidebar";
+import { AccountProjectsSection } from "./AccountProjectsSection";
 import { AccountProjectsGrid } from "./AccountProjectsGrid";
 import { EndorsementsGivenGrid } from "./EndorsementsGivenGrid";
 import type { AccountOrganization } from "./AccountOrganizationsGrid";
@@ -141,10 +143,15 @@ async function loadAccountGalleryData(account: AccountRouteData, did: string) {
 }
 
 /**
- * An account's landing view: the stream of everything it has published, with a
- * column beside it for who the account is, how to support it, and where its
- * work lives. Personal and organization profiles share the same shape — the
- * side column simply drops the blocks that don't apply.
+ * An account's landing view, in the order a visitor asks the questions:
+ *
+ *   1. Who is this?      — About, leading the page.
+ *   2. What do they run?  — their projects.
+ *   3. What have they been doing? — the stream of records they've published.
+ *
+ * The side rail carries the supporting details (support, counts, photos,
+ * recognition) rather than the story. Personal and organization profiles share
+ * the same shape — blocks that don't apply simply hide themselves.
  */
 export async function AccountOverviewContent({ account, did }: { account: AccountRouteData; did: string }) {
   const [session, projects, receipts, observationSummary] = await Promise.all([
@@ -160,17 +167,22 @@ export async function AccountOverviewContent({ account, did }: { account: Accoun
   const supporters = new Set(received.map((receipt) => receipt.from?.id).filter(Boolean)).size;
   const donationCount = receipts.filter((receipt) => receipt.from?.type === "did" && receipt.from.id === did).length;
 
+  const activityT = await getTranslations("common.accountOverview");
+
   return (
-    // On a narrow screen the profile column comes first: who this account is
-    // and how to support it, before the (possibly very long) record stream.
-    <div className="mt-8 flex flex-col-reverse gap-10 lg:flex-row lg:gap-12">
-      <div className="min-w-0 flex-1 org-animate org-fade-in-up">
-        <AccountActivityFeed did={did} />
+    // Explicit grid placement so the rail can sit beside the story on wide
+    // screens while, on a phone, it slots between the projects and the record
+    // stream — the stream keeps loading as you scroll, so nothing useful may
+    // sit below it.
+    <div className="mt-8 grid gap-10 lg:grid-cols-[minmax(0,1fr)_20rem] lg:items-start lg:gap-12 xl:grid-cols-[minmax(0,1fr)_22rem]">
+      <div className="min-w-0 space-y-10 org-animate org-fade-in-up lg:col-start-1 lg:row-start-1">
+        <AccountAboutSection account={account} />
+        <AccountProjectsSection account={account} projects={projects} />
       </div>
-      <aside className="lg:w-[20rem] lg:shrink-0 xl:w-[22rem]">
+
+      <aside className="min-w-0 lg:col-start-2 lg:row-start-1 lg:row-span-2">
         <AccountOverviewSidebar
           account={account}
-          projects={projects}
           counts={{
             projects: projects.length,
             observations: observationSummary?.count ?? account.summary.observationCount ?? 0,
@@ -181,6 +193,13 @@ export async function AccountOverviewContent({ account, did }: { account: Accoun
           memberships={memberships}
         />
       </aside>
+
+      <section className="min-w-0 lg:col-start-1 lg:row-start-2">
+        <h2 className="font-instrument text-2xl italic leading-none text-foreground">{activityT("recentActivity")}</h2>
+        <div className="mt-4">
+          <AccountActivityFeed did={did} />
+        </div>
+      </section>
     </div>
   );
 }
