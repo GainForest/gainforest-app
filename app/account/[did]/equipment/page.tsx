@@ -4,9 +4,8 @@ import { getTranslations } from "next-intl/server";
 import { fetchAuthSession } from "@/app/_lib/auth-server";
 import { listGroupMemberDids } from "@/app/_lib/equipment-server";
 import { resolveAccountManageAccess } from "@/app/_lib/manage-server";
-import { CanonicalRedirect } from "@/app/account/_components/CanonicalRedirect";
 import { EquipmentSection } from "../../_components/EquipmentSection";
-import { accountEquipmentPath, getAccountRouteData, readAccountRouteParams } from "../../_lib/account-route";
+import { getAccountRouteData, readAccountRouteParams } from "../../_lib/account-route";
 
 export async function generateMetadata({ params }: { params: Promise<{ did: string }> }): Promise<Metadata> {
   const { did, urlIdentifier } = await readAccountRouteParams(params);
@@ -23,10 +22,6 @@ export async function generateMetadata({ params }: { params: Promise<{ did: stri
 export default async function AccountEquipmentPage({ params }: { params: Promise<{ did: string }> }) {
   const { did, urlIdentifier } = await readAccountRouteParams(params);
   const account = await getAccountRouteData(did, urlIdentifier);
-
-  if (urlIdentifier !== account.urlIdentifier) {
-    return <CanonicalRedirect to={accountEquipmentPath(account.urlIdentifier)} />;
-  }
 
   const session = await fetchAuthSession().catch(() => ({ isLoggedIn: false as const }));
   const viewerDid = session.isLoggedIn ? session.did : null;

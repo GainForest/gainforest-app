@@ -4,7 +4,8 @@ import Image from "next/image";
 import { notFound, redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { ArrowLeftIcon, ArrowUpRightIcon, FolderKanbanIcon } from "lucide-react";
-import { fetchRecordByUri, fetchRecordDetail, type RecordDetail } from "../../../_lib/indexer";
+import { fetchRecordByUri, fetchRecordDetail, isAccountPubliclyListed, type RecordDetail } from "../../../_lib/indexer";
+import { NOINDEX_ROBOTS } from "../../../_lib/seo-metadata";
 import { getPdsRecord, isPdsBlobUrl } from "../../../_lib/pds";
 import { RichText } from "../../../_components/RichText";
 import { AutoRefresh } from "./_components/AutoRefresh";
@@ -78,7 +79,7 @@ async function loadProjectStory(did: string, rkey: string, atUri: string): Promi
 }
 
 export async function generateMetadata({ params }: { params: ProjectPageParams }): Promise<Metadata> {
-  const { record, pendingTitle, urlIdentifier, rkey } = await loadProject(params);
+  const { record, pendingTitle, urlIdentifier, rkey, did } = await loadProject(params);
   const t = await getTranslations("marketplace.projectPage");
   if (!record) {
     return {
@@ -91,9 +92,14 @@ export async function generateMetadata({ params }: { params: ProjectPageParams }
   const detailHref = localProjectHref(urlIdentifier, rkey);
   const title = t("metaTitle", { name: record.title });
   const previewImage = record.imageUrl ? [{ url: record.imageUrl, alt: record.title }] : undefined;
+  // A project page opens for anyone with the link, but until its account puts
+  // itself on the explore pages the work stays out of search results. A failed
+  // lookup keeps it out too — never index on the strength of a guess.
+  const listed = await isAccountPubliclyListed(did).catch(() => false);
   return {
     title,
     description,
+    ...(listed ? {} : { robots: NOINDEX_ROBOTS }),
     alternates: await localizedAlternates(localProjectHref(urlIdentifier, rkey)),
     openGraph: {
       title,

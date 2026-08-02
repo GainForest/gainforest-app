@@ -165,7 +165,37 @@
       "checkout": "Pago"
     },
     "myCardsTitle": "Galería Mis cartas",
-    "myCardsDescription": "Previsualiza la galería de cartas coleccionadas con coleccionables de muestra."
+    "myCardsDescription": "Previsualiza la galería de cartas coleccionadas con coleccionables de muestra.",
+    "projectVisibility": {
+      "title": "Tarjeta de visibilidad del proyecto",
+      "description": "La tarjeta de Gestionar → Proyectos que indica a una cuenta qué es público y si aparece en las páginas de exploración, en cada uno de sus estados.",
+      "mockNote": "Añadir una cuenta a las páginas de exploración es un efecto real, así que esta vista previa nunca lo hace. Solo se sustituyen por datos de prueba las dos llamadas al servidor de la tarjeta.",
+      "mockBadge": "Modo de prueba · no se publica nada",
+      "cardTitle": "Visibilidad del proyecto",
+      "cardDescription": "Comprueba cómo la página de proyectos informa de lo que es público y de qué cambia aparecer en las páginas de exploración.",
+      "scenarios": {
+        "unlisted": {
+          "label": "Propietario · sin aparecer en las páginas de exploración",
+          "body": "La cuenta puede añadirse a las listas de exploración."
+        },
+        "listed": {
+          "label": "Propietario · aparece en las páginas de exploración",
+          "body": "Ya aparece, así que no se ofrece ninguna acción."
+        },
+        "member": {
+          "label": "Miembro · sin aparecer en las páginas de exploración",
+          "body": "Los miembros ven la situación de la cuenta, pero no pueden cambiarla."
+        },
+        "unavailable": {
+          "label": "Ahora mismo no se puede cambiar",
+          "body": "El estado sigue mostrándose; el botón se omite en lugar de quedar inservible."
+        },
+        "unknown": {
+          "label": "No se pudo leer el estado",
+          "body": "La tarjeta lo dice en lugar de afirmar que la cuenta no aparece."
+        }
+      }
+    }
   },
   "myCards": {
     "eyebrow": "Coleccionables",

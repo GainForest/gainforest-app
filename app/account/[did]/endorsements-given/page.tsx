@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
-import { CanonicalRedirect } from "@/app/account/_components/CanonicalRedirect";
 import { AccountEndorsementsGivenTabContent } from "../../_components/AccountTabContent";
 import {
   accountEndorsementsGivenPath,
@@ -31,10 +30,6 @@ export default async function AccountEndorsementsGivenPage({ params }: { params:
 
   if (account.kind !== "organization") {
     notFound();
-  }
-
-  if (urlIdentifier !== account.urlIdentifier) {
-    return <CanonicalRedirect to={accountEndorsementsGivenPath(account.urlIdentifier)} />;
   }
 
   return <AccountEndorsementsGivenTabContent account={account} did={account.did} />;

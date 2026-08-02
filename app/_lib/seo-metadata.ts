@@ -6,6 +6,18 @@ import { getCanonicalPathname, getSeoLocalizedPathnames } from "@/lib/i18n/routi
 const SOCIAL_IMAGE = "/og/gainforest-og-2.png";
 const SITE_NAME = "GainForest";
 
+/**
+ * Keep a page out of search results while leaving it reachable by link.
+ * Used for work whose account hasn't put itself on the explore pages: the page
+ * still opens for anyone it was shared with, but it isn't handed to crawlers.
+ */
+export const NOINDEX_ROBOTS = {
+  index: false,
+  follow: false,
+  nocache: true,
+  googleBot: { index: false, follow: false, noimageindex: true },
+} as const satisfies NonNullable<Metadata["robots"]>;
+
 export async function localizedAlternates(
   pathname: string,
 ): Promise<NonNullable<Metadata["alternates"]>> {

@@ -165,7 +165,37 @@
       "checkout": "Checkout"
     },
     "myCardsTitle": "My Cards gallery",
-    "myCardsDescription": "Preview the collected-cards gallery, populated with sample collectibles."
+    "myCardsDescription": "Preview the collected-cards gallery, populated with sample collectibles.",
+    "projectVisibility": {
+      "title": "Project visibility card",
+      "description": "The card on Manage → Projects that tells an account what is public and whether it shows on the explore pages, in each state it can be in.",
+      "mockNote": "Listing an account on the explore pages is a real side effect, so this preview never performs one. Only the card's two server calls are replaced by fixtures.",
+      "mockBadge": "Mock mode · nothing is listed",
+      "cardTitle": "Project visibility",
+      "cardDescription": "See how the projects page reports what is public and what listing on the explore pages changes.",
+      "scenarios": {
+        "unlisted": {
+          "label": "Owner · not on the explore pages",
+          "body": "The account can add itself to the explore lists."
+        },
+        "listed": {
+          "label": "Owner · on the explore pages",
+          "body": "Already listed, so no action is offered."
+        },
+        "member": {
+          "label": "Member · not on the explore pages",
+          "body": "Members see where the account stands, but cannot change it."
+        },
+        "unavailable": {
+          "label": "Listing cannot be changed right now",
+          "body": "The status still shows; the button is left out instead of being rendered dead."
+        },
+        "unknown": {
+          "label": "Listing status could not be read",
+          "body": "The card says so rather than claiming the account is not listed."
+        }
+      }
+    }
   },
   "myCards": {
     "eyebrow": "Collectibles",

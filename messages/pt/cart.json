@@ -165,7 +165,37 @@
       "checkout": "Pagamento"
     },
     "myCardsTitle": "Galeria Minhas cartas",
-    "myCardsDescription": "Veja uma prévia da galeria de cartas colecionadas com exemplos."
+    "myCardsDescription": "Veja uma prévia da galeria de cartas colecionadas com exemplos.",
+    "projectVisibility": {
+      "title": "Cartão de visibilidade do projeto",
+      "description": "O cartão em Gerenciar → Projetos que informa à conta o que é público e se ela aparece nas páginas de exploração, em cada estado possível.",
+      "mockNote": "Adicionar uma conta às páginas de exploração é um efeito real, então esta prévia nunca faz isso. Apenas as duas chamadas ao servidor do cartão são substituídas por dados fictícios.",
+      "mockBadge": "Modo de teste · nada é publicado",
+      "cardTitle": "Visibilidade do projeto",
+      "cardDescription": "Veja como a página de projetos informa o que é público e o que aparecer nas páginas de exploração muda.",
+      "scenarios": {
+        "unlisted": {
+          "label": "Proprietário · fora das páginas de exploração",
+          "body": "A conta pode se adicionar às listas de exploração."
+        },
+        "listed": {
+          "label": "Proprietário · nas páginas de exploração",
+          "body": "Já aparece, então nenhuma ação é oferecida."
+        },
+        "member": {
+          "label": "Membro · fora das páginas de exploração",
+          "body": "Membros veem a situação da conta, mas não podem alterá-la."
+        },
+        "unavailable": {
+          "label": "Não pode ser alterado agora",
+          "body": "O estado continua visível; o botão é omitido em vez de ficar inerte."
+        },
+        "unknown": {
+          "label": "Não foi possível ler o estado",
+          "body": "O cartão diz isso em vez de afirmar que a conta não aparece."
+        }
+      }
+    }
   },
   "myCards": {
     "eyebrow": "Colecionáveis",

@@ -165,7 +165,37 @@
       "checkout": "Pembayaran"
     },
     "myCardsTitle": "Galeri Kartu Saya",
-    "myCardsDescription": "Pratinjau galeri kartu yang telah dikumpulkan dengan contoh koleksi."
+    "myCardsDescription": "Pratinjau galeri kartu yang telah dikumpulkan dengan contoh koleksi.",
+    "projectVisibility": {
+      "title": "Kartu visibilitas proyek",
+      "description": "Kartu di Kelola → Proyek yang memberi tahu akun apa yang bersifat publik dan apakah akun tampil di halaman jelajah, dalam setiap keadaannya.",
+      "mockNote": "Menambahkan akun ke halaman jelajah adalah efek nyata, jadi pratinjau ini tidak pernah melakukannya. Hanya dua panggilan server kartu ini yang diganti dengan data contoh.",
+      "mockBadge": "Mode contoh · tidak ada yang ditampilkan",
+      "cardTitle": "Visibilitas proyek",
+      "cardDescription": "Lihat bagaimana halaman proyek menjelaskan apa yang publik dan apa yang berubah saat tampil di halaman jelajah.",
+      "scenarios": {
+        "unlisted": {
+          "label": "Pemilik · belum tampil di halaman jelajah",
+          "body": "Akun dapat menambahkan dirinya ke daftar jelajah."
+        },
+        "listed": {
+          "label": "Pemilik · tampil di halaman jelajah",
+          "body": "Sudah tampil, jadi tidak ada tindakan yang ditawarkan."
+        },
+        "member": {
+          "label": "Anggota · belum tampil di halaman jelajah",
+          "body": "Anggota melihat keadaan akun, tetapi tidak dapat mengubahnya."
+        },
+        "unavailable": {
+          "label": "Tidak dapat diubah saat ini",
+          "body": "Keadaannya tetap terlihat; tombol dihilangkan alih-alih dibiarkan mati."
+        },
+        "unknown": {
+          "label": "Keadaan tidak dapat dibaca",
+          "body": "Kartu menyatakannya, bukan mengklaim akun tidak tampil."
+        }
+      }
+    }
   },
   "myCards": {
     "eyebrow": "Koleksi",

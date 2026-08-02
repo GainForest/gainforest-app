@@ -45,6 +45,7 @@ import {
   fetchRecordByUri,
   fetchRecordDetail,
   fetchTimelineAttachmentsByDid,
+  isAccountPubliclyListed,
   type BumicertRecord,
   type DetailBadge,
   type ObservationSummary,
@@ -54,6 +55,7 @@ import {
   type TimelineAttachmentItem,
 } from "../../../_lib/indexer";
 import { isPdsBlobUrl } from "../../../_lib/pds";
+import { NOINDEX_ROBOTS } from "../../../_lib/seo-metadata";
 import { blockExplorerUrl, INDEXER_URL, localBumicertHref, localProjectHref } from "../../../_lib/urls";
 import { getRequestOrigin } from "../../../_lib/request-origin";
 import { fetchAuthSession } from "../../../_lib/auth-server";
@@ -215,9 +217,13 @@ type ProjectDetailTab = "overview" | "places" | "updates" | "reviews";
 export async function generateMetadata({ params }: { params: BumicertPageParams }): Promise<Metadata> {
   const { record, owner, urlIdentifier } = await readRouteData(params);
   const description = record.shortDescription ?? `Cert published by ${owner.displayName}.`;
+  // Same rule as the project page: reachable by link, but kept out of search
+  // results until the account puts itself on the explore pages.
+  const listed = await isAccountPubliclyListed(record.did).catch(() => false);
   return {
     title: `${record.title} — Cert`,
     description,
+    ...(listed ? {} : { robots: NOINDEX_ROBOTS }),
     alternates: { canonical: localBumicertHref(urlIdentifier, record.rkey) },
     openGraph: {
       title: record.title,
