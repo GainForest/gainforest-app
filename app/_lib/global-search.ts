@@ -150,7 +150,10 @@ async function didFromIdentifierQuery(query: string): Promise<string | null> {
  * every DID is checked against the indexer afterwards, so accounts with no
  * presence here never reach the palette.
  */
-async function didsByHandlePrefix(query: string, limit: number): Promise<string[]> {
+async function actorsByHandlePrefix(
+  query: string,
+  limit: number,
+): Promise<Array<{ did: string; handle: string }>> {
   const q = query.replace(/^@+/, "").trim();
   if (!q) return [];
   const params = new URLSearchParams({ q, limit: String(limit) });
@@ -162,29 +165,69 @@ async function didsByHandlePrefix(query: string, limit: number): Promise<string[
   const payload = (await res.json().catch(() => null)) as
     | { actors?: Array<{ did?: unknown; handle?: unknown }> }
     | null;
-  const dids: string[] = [];
+  const actors: Array<{ did: string; handle: string }> = [];
   for (const actor of payload?.actors ?? []) {
     // Only handle matches are wanted here — display-name matches already come
     // from the indexer, and the appview's names can disagree with ours.
-    const handle = typeof actor?.handle === "string" ? actor.handle.toLowerCase() : "";
-    if (!handle.includes(q.toLowerCase())) continue;
-    if (typeof actor?.did === "string" && actor.did.startsWith("did:")) dids.push(actor.did);
+    const handle = typeof actor?.handle === "string" ? actor.handle : "";
+    if (!handle.toLowerCase().includes(q.toLowerCase())) continue;
+    if (typeof actor?.did === "string" && actor.did.startsWith("did:")) {
+      actors.push({ did: actor.did, handle });
+    }
   }
-  return dids;
+  return actors;
+}
+
+// Last-resort handle lookup for accounts the indexer can't join a handle onto
+// (older indexer deployments lack that field). Cached across keystrokes.
+const plcHandleByDid = new Map<string, Promise<string | null>>();
+
+function fetchHandleFromPlc(did: string): Promise<string | null> {
+  let pending = plcHandleByDid.get(did);
+  if (!pending) {
+    pending = (async () => {
+      if (did.startsWith("did:web:")) {
+        return did.slice("did:web:".length).split(":")[0] || null;
+      }
+      if (!did.startsWith("did:plc:")) return null;
+      const res = await fetch(`https://plc.directory/${did}`, {
+        headers: { accept: "application/json" },
+        signal: AbortSignal.timeout(2500),
+      }).catch(() => null);
+      if (!res?.ok) return null;
+      const doc = (await res.json().catch(() => null)) as { alsoKnownAs?: unknown } | null;
+      const aka = Array.isArray(doc?.alsoKnownAs) ? doc.alsoKnownAs : [];
+      const first = aka.find((v): v is string => typeof v === "string" && v.startsWith("at://"));
+      return first ? first.slice("at://".length) || null : null;
+    })();
+    plcHandleByDid.set(did, pending);
+    pending.then((handle) => {
+      if (!handle) plcHandleByDid.delete(did);
+    });
+  }
+  return pending;
 }
 
 /** Search accounts by display name and by handle (exact or partial), split
  *  into people vs organizations. */
 async function searchAccounts(query: string, signal?: AbortSignal): Promise<AccountMatch[]> {
-  const [byName, exactDid, handleDids] = await Promise.all([
+  const [byName, exactDid, handleActors] = await Promise.all([
     searchAccountsByName(query, ACCOUNT_FETCH_LIMIT, signal).catch(() => []),
     didFromIdentifierQuery(query).catch(() => null),
-    didsByHandlePrefix(query, ACCOUNT_FETCH_LIMIT).catch(() => []),
+    actorsByHandlePrefix(query, ACCOUNT_FETCH_LIMIT).catch(() => []),
   ]);
 
   // One round trip covers both open questions: whether each name match is an
   // organization, and whether each handle match exists on GainForest at all.
-  const allDids = [...new Set([...byName.map((a) => a.did), ...(exactDid ? [exactDid] : []), ...handleDids])];
+  const handleByDidFromAppview = new Map(handleActors.map((a) => [a.did, a.handle]));
+  const typedIdentifier = identifierFromQuery(query);
+  const allDids = [
+    ...new Set([
+      ...byName.map((a) => a.did),
+      ...(exactDid ? [exactDid] : []),
+      ...handleActors.map((a) => a.did),
+    ]),
+  ];
   const cards = allDids.length > 0
     ? await fetchAccountCards(allDids, signal).catch(() => new Map<string, AccountCard>())
     : new Map<string, AccountCard>();
@@ -197,19 +240,41 @@ async function searchAccounts(query: string, signal?: AbortSignal): Promise<Acco
     merged.push(match);
   };
 
+  // Handles prefer the indexer's own join, but older indexer deployments don't
+  // have it — fall back to what the appview said, or what the user typed.
+  const handleFor = (did: string, indexed: string | null): string | null =>
+    indexed ??
+    handleByDidFromAppview.get(did) ??
+    (did === exactDid && typedIdentifier && !typedIdentifier.startsWith("did:") ? typedIdentifier : null);
+
   // An exactly-typed handle or DID is the most specific thing the user can ask
   // for, so it leads — then name matches, then partial handle matches.
-  if (exactDid) push(cards.get(exactDid));
+  if (exactDid) {
+    const card = cards.get(exactDid);
+    if (card) push({ ...card, handle: handleFor(exactDid, card.handle) });
+  }
   for (const account of byName) {
     push({
       did: account.did,
       displayName: account.displayName,
       avatarRef: account.avatarRef,
-      handle: account.handle ?? cards.get(account.did)?.handle ?? null,
+      handle: handleFor(account.did, account.handle ?? cards.get(account.did)?.handle ?? null),
       isOrganization: cards.get(account.did)?.isOrganization ?? false,
     });
   }
-  for (const did of handleDids) push(cards.get(did));
+  for (const actor of handleActors) {
+    const card = cards.get(actor.did);
+    if (card) push({ ...card, handle: handleFor(actor.did, card.handle) });
+  }
+
+  // Whatever still has no handle gets a last-resort directory lookup — cached,
+  // best-effort, and only needed on indexer deployments without the handle join.
+  await Promise.all(
+    merged.map(async (match) => {
+      if (match.handle) return;
+      match.handle = await fetchHandleFromPlc(match.did).catch(() => null);
+    }),
+  );
 
   return merged;
 }

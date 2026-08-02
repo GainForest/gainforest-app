@@ -2276,14 +2276,36 @@ export type AccountSearchResult = {
   handle: string | null;
 };
 
-const ACCOUNT_SEARCH_QUERY = `
+// The `author { handle }` join (ActorIdentity) only exists on newer indexer
+// deployments; older ones reject the whole query over the unknown field. Probe
+// the schema once per session and drop the field where it doesn't exist, so
+// account search degrades to "no handles" instead of "no results".
+let authorIdentitySupport: Promise<boolean> | null = null;
+
+function indexerSupportsAuthorIdentity(): Promise<boolean> {
+  if (!authorIdentitySupport) {
+    authorIdentitySupport = indexerQuery<{ __type?: { name?: string | null } | null }>(
+      `query ActorIdentityProbe { __type(name: "ActorIdentity") { name } }`,
+      {},
+    )
+      .then((data) => Boolean(data?.__type?.name))
+      .catch(() => {
+        // Transient failure — forget the answer so the next call re-probes.
+        authorIdentitySupport = null;
+        return false;
+      });
+  }
+  return authorIdentitySupport;
+}
+
+const accountSearchQuery = (withHandle: boolean) => `
   query OwnerAccountSearch($first: Int!, $where: AppCertifiedActorProfileWhereInput) {
     appCertifiedActorProfile(first: $first, where: $where, sortBy: displayName, sortDirection: ASC) {
       edges {
         node {
           did
           displayName
-          author { handle }
+          ${withHandle ? "author { handle }" : ""}
           avatar { __typename ... on OrgHypercertsDefsSmallImage { image { ref } } }
         }
       }
@@ -2307,8 +2329,9 @@ export async function searchAccountsByName(
 ): Promise<AccountSearchResult[]> {
   const q = query.trim();
   if (q.length < 2) return [];
+  const withHandle = await indexerSupportsAuthorIdentity();
   const data = await indexerQuery<{ appCertifiedActorProfile?: Connection<RawAccountSearchNode> }>(
-    ACCOUNT_SEARCH_QUERY,
+    accountSearchQuery(withHandle),
     { first: Math.max(1, Math.min(limit * 3, 40)), where: { displayName: { contains: q } } },
     signal,
   );
@@ -2342,14 +2365,14 @@ export type AccountCard = {
   isOrganization: boolean;
 };
 
-const ACCOUNTS_BY_DIDS_QUERY = `
+const accountsByDidsQuery = (withHandle: boolean) => `
   query AccountsByDids($dids: [String!], $first: Int!) {
     profiles: appCertifiedActorProfile(first: $first, where: { did: { in: $dids } }) {
       edges {
         node {
           did
           displayName
-          author { handle }
+          ${withHandle ? "author { handle }" : ""}
           avatar { __typename ... on OrgHypercertsDefsSmallImage { image { ref } } }
         }
       }
@@ -2358,7 +2381,7 @@ const ACCOUNTS_BY_DIDS_QUERY = `
       edges {
         node {
           did
-          author { handle }
+          ${withHandle ? "author { handle }" : ""}
           ${CERTIFIED_PROFILE_DATA_FIELDS}
         }
       }
@@ -2393,11 +2416,12 @@ export async function fetchAccountCards(
 ): Promise<Map<string, AccountCard>> {
   const cards = new Map<string, AccountCard>();
   if (dids.length === 0) return cards;
+  const withHandle = await indexerSupportsAuthorIdentity();
   const data = await indexerQuery<{
     profiles?: Connection<RawAccountCardProfile>;
     orgs?: Connection<RawAccountCardOrg>;
   }>(
-    ACCOUNTS_BY_DIDS_QUERY,
+    accountsByDidsQuery(withHandle),
     { dids, first: Math.min(Math.max(dids.length, 1) * 2, 100) },
     signal,
   );
