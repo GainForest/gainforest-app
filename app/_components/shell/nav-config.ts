@@ -37,11 +37,17 @@ export type NavSection = {
 
 // `text` values here are fallbacks/documentation only — the sidebar renders
 // translated labels from common.sidebar.items / common.sidebar.sections.
+//
+// Structure follows the "commons + capability groups" navigation model:
+// "The commons" is the permanent shared space every visitor sees (browse,
+// discover, fund). Personal capability groups ("Your work", "Your funding")
+// are not static config — they render from the account's actual capabilities
+// in capability-nav.tsx and appear only when the account has them.
 export const NAV_ITEMS: NavSection[] = [
   {
     kind: "section",
-    id: "explore",
-    text: "EXPLORE",
+    id: "commons",
+    text: "THE COMMONS",
     items: [
       {
         kind: "leaf",
@@ -83,13 +89,6 @@ export const NAV_ITEMS: NavSection[] = [
         href: "/globe",
         pathCheck: { startsWith: "/globe" },
       },
-    ],
-  },
-  {
-    kind: "section",
-    id: "funding",
-    text: "FUNDING",
-    items: [
       {
         kind: "leaf",
         id: "bioblitz",

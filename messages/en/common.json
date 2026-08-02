@@ -86,7 +86,10 @@
       "explore": "EXPLORE",
       "funding": "FUNDING",
       "manage": "MANAGE",
-      "ai": "AI"
+      "ai": "AI",
+      "commons": "THE COMMONS",
+      "work": "YOUR WORK",
+      "yourFunding": "YOUR FUNDING"
     },
     "items": {
       "bumicerts": "Certs",
@@ -118,7 +121,9 @@
       "labeler": "Labeler",
       "globe": "Globe",
       "audiomoth": "AudioMoth",
-      "identifications": "Identifications"
+      "identifications": "Identifications",
+      "library": "Library",
+      "portfolio": "Portfolio"
     },
     "prompts": {
       "signInDescription": "Sign in to manage your account and content.",
@@ -157,7 +162,13 @@
       "admin": "Admin"
     },
     "more": "More",
-    "hideMore": "Hide"
+    "hideMore": "Hide",
+    "getStarted": {
+      "title": "Get started",
+      "description": "Share your first observation or back a project.",
+      "startUploading": "Start uploading",
+      "fundProject": "Fund a project"
+    }
   },
   "settings": {
     "handle": {

@@ -86,7 +86,10 @@
       "explore": "EXPLORAR",
       "funding": "FINANCIAMENTO",
       "manage": "GERENCIAR",
-      "ai": "AI"
+      "ai": "AI",
+      "commons": "EM COMUM",
+      "work": "SEU TRABALHO",
+      "yourFunding": "SEU FINANCIAMENTO"
     },
     "items": {
       "bumicerts": "certificados",
@@ -118,7 +121,9 @@
       "labeler": "Identificação",
       "globe": "Globo",
       "audiomoth": "AudioMoth",
-      "identifications": "Identificações"
+      "identifications": "Identificações",
+      "library": "Biblioteca",
+      "portfolio": "Portfólio"
     },
     "prompts": {
       "signInDescription": "Entre para gerenciar sua conta e conteúdo.",
@@ -157,7 +162,13 @@
       "admin": "Administração"
     },
     "more": "Mais",
-    "hideMore": "Ocultar"
+    "hideMore": "Ocultar",
+    "getStarted": {
+      "title": "Comece",
+      "description": "Compartilhe sua primeira observação ou apoie um projeto.",
+      "startUploading": "Começar a enviar",
+      "fundProject": "Financiar um projeto"
+    }
   },
   "settings": {
     "handle": {

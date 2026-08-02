@@ -86,7 +86,10 @@
       "explore": "GUNDUA",
       "funding": "UFADHILI",
       "manage": "SIMAMIA",
-      "ai": "AI"
+      "ai": "AI",
+      "commons": "YA PAMOJA",
+      "work": "KAZI YAKO",
+      "yourFunding": "UFADHILI WAKO"
     },
     "items": {
       "bumicerts": "vyeti",
@@ -118,7 +121,9 @@
       "labeler": "Uwekaji lebo",
       "globe": "Dunia",
       "audiomoth": "AudioMoth",
-      "identifications": "Vitambulisho"
+      "identifications": "Vitambulisho",
+      "library": "Maktaba",
+      "portfolio": "Kwingineko"
     },
     "prompts": {
       "signInDescription": "Ingia ili kusimamia akaunti na maudhui yako.",
@@ -157,7 +162,13 @@
       "admin": "Msimamizi"
     },
     "more": "Zaidi",
-    "hideMore": "Ficha"
+    "hideMore": "Ficha",
+    "getStarted": {
+      "title": "Anza",
+      "description": "Shiriki uchunguzi wako wa kwanza au fadhili mradi.",
+      "startUploading": "Anza kupakia",
+      "fundProject": "Fadhili mradi"
+    }
   },
   "settings": {
     "handle": {

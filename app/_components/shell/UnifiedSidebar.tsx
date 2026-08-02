@@ -30,6 +30,12 @@ import {
 } from "../../_lib/account-switcher";
 import { AdminOnlyIndicator } from "../AdminOnlyIndicator";
 import { SignInPrompt } from "../AuthFlow";
+import {
+  FundingNavSection,
+  GetStartedCard,
+  WorkNavSection,
+  useAccountCapabilities,
+} from "./capability-nav";
 import { NAV_ITEMS, isLeafActive, type NavLeaf } from "./nav-config";
 import { useCanonicalPathname } from "./paths";
 import { SidebarCollapsedProvider, SidebarTooltip, useSidebarCollapsed } from "./sidebar-context";
@@ -45,6 +51,12 @@ export function UnifiedSidebar({
   authSession: AuthSession | null;
   collapsed?: boolean;
 }) {
+  const sessionDid = authSession?.isLoggedIn ? authSession.did : null;
+  const sessionHandle = authSession?.isLoggedIn ? authSession.handle : null;
+  // Capability groups ("Your work", "Your funding") appear only when the
+  // account actually has them; an account with neither gets the "Get started"
+  // offer card instead of empty sections.
+  const capabilities = useAccountCapabilities(sessionDid);
   return (
     <SidebarCollapsedProvider value={collapsed}>
     <nav
@@ -71,15 +83,29 @@ export function UnifiedSidebar({
       <div className={cn("flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto pt-3", collapsed ? "overflow-x-hidden" : "pr-1")}>
         {authSession?.isLoggedIn ? <SidebarProfileRow did={authSession.did} /> : null}
         <LayoutGroup id="unified-sidebar-nav">
-          <ExploreNav sessionDid={authSession?.isLoggedIn ? authSession.did : null} />
+          <ExploreNav
+            sessionDid={sessionDid}
+            capabilityContent={
+              sessionDid && capabilities.ready && (capabilities.hasWork || capabilities.hasFunding) ? (
+                <>
+                  {capabilities.hasWork ? <WorkNavSection sessionDid={sessionDid} sessionHandle={sessionHandle} /> : null}
+                  {capabilities.hasFunding ? <FundingNavSection sessionDid={sessionDid} sessionHandle={sessionHandle} /> : null}
+                </>
+              ) : null
+            }
+          />
         </LayoutGroup>
 
         <div className="mt-auto flex flex-col gap-3 pt-4">
-          {authSession?.isLoggedIn ? (
-            <>
-              <BumicertCreationCard sessionDid={authSession.did} />
-              <AddObservationsCard sessionDid={authSession.did} />
-            </>
+          {sessionDid ? (
+            capabilities.ready && !capabilities.hasWork && !capabilities.hasFunding ? (
+              <GetStartedCard sessionDid={sessionDid} />
+            ) : (
+              <>
+                <BumicertCreationCard sessionDid={sessionDid} />
+                {capabilities.hasWork ? null : <AddObservationsCard sessionDid={sessionDid} />}
+              </>
+            )
           ) : (
             <SignInPrompt collapsed={collapsed} />
           )}
@@ -171,7 +197,15 @@ function SidebarProfileRow({ did }: { did: string }) {
   );
 }
 
-function ExploreNav({ sessionDid }: { sessionDid: string | null }) {
+function ExploreNav({
+  sessionDid,
+  capabilityContent,
+}: {
+  sessionDid: string | null;
+  /** "Your work" / "Your funding" capability groups, rendered between the
+   *  commons and the "More" disclosure so shared nav always comes first. */
+  capabilityContent?: React.ReactNode;
+}) {
   const pathname = useCanonicalPathname();
   const t = useTranslations("common.sidebar.items");
   const sidebarT = useTranslations("common.sidebar");
@@ -244,6 +278,7 @@ function ExploreNav({ sessionDid }: { sessionDid: string | null }) {
   return (
     <div className="flex flex-col gap-1">
       {renderSections(primarySections, true)}
+      {capabilityContent ? <div className="mt-1 flex flex-col gap-1">{capabilityContent}</div> : null}
       {secondarySections.length > 0 ? (
         <div className="mt-1 border-t border-border/70 pt-1">
           {!showMore ? (

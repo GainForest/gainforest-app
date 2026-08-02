@@ -86,7 +86,10 @@
       "explore": "JELAJAHI",
       "funding": "PENDANAAN",
       "manage": "KELOLA",
-      "ai": "AI"
+      "ai": "AI",
+      "commons": "RUANG BERSAMA",
+      "work": "KARYA ANDA",
+      "yourFunding": "PENDANAAN ANDA"
     },
     "items": {
       "bumicerts": "sertifikat",
@@ -118,7 +121,9 @@
       "labeler": "Pelabel",
       "globe": "Bola Dunia",
       "audiomoth": "AudioMoth",
-      "identifications": "Identifikasi"
+      "identifications": "Identifikasi",
+      "library": "Pustaka",
+      "portfolio": "Portofolio"
     },
     "prompts": {
       "signInDescription": "Masuk untuk mengelola akun dan konten Anda.",
@@ -157,7 +162,13 @@
       "admin": "Admin"
     },
     "more": "Lainnya",
-    "hideMore": "Sembunyikan"
+    "hideMore": "Sembunyikan",
+    "getStarted": {
+      "title": "Mulai",
+      "description": "Bagikan observasi pertama Anda atau dukung sebuah proyek.",
+      "startUploading": "Mulai mengunggah",
+      "fundProject": "Danai proyek"
+    }
   },
   "settings": {
     "handle": {
