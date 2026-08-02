@@ -3222,6 +3222,8 @@
       "radialLabel": "Volume",
       "timeLabel": "Hora do dia",
       "legendTitle": "Grupos de vozes",
+      "legendHint": "Clique num grupo de vozes para mostrá-lo ou ocultá-lo.",
+      "showAllBands": "Mostrar todos",
       "bandsNote": "Intervalos indicativos. As vozes sobrepõem-se e os animais que cantam em cada intervalo variam com o lugar.",
       "empty": "As gravações analisadas aparecerão aqui como um relógio de paisagem sonora de 24 horas.",
       "emptyHint": "Analise acima suas gravações enviadas para começar.",

@@ -3222,6 +3222,8 @@
       "radialLabel": "Volumen",
       "timeLabel": "Hora del día",
       "legendTitle": "Grupos de voces",
+      "legendHint": "Haz clic en un grupo de voces para mostrarlo u ocultarlo.",
+      "showAllBands": "Mostrar todos",
       "bandsNote": "Rangos indicativos. Las voces se solapan y qué animales cantan en cada rango varía según el lugar.",
       "empty": "Las grabaciones analizadas aparecerán aquí como un reloj de paisaje sonoro de 24 horas.",
       "emptyHint": "Analiza arriba tus grabaciones subidas para empezar.",

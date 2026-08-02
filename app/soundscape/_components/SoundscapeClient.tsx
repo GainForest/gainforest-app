@@ -1311,6 +1311,7 @@ export function SoundscapeClient({ sessionDid }: { sessionDid: string | null }) 
               <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
                 {t("chart.legendTitle")}
               </p>
+              <p className="mt-1 text-xs leading-5 text-muted-foreground/80">{t("chart.legendHint")}</p>
               <ul className="mt-2 space-y-1">
                 {FREQUENCY_BANDS.map((band, index) => (
                   <li key={band.id}>
@@ -1340,6 +1341,15 @@ export function SoundscapeClient({ sessionDid }: { sessionDid: string | null }) 
                   </li>
                 ))}
               </ul>
+              {visibleBands.some((visible) => !visible) ? (
+                <button
+                  type="button"
+                  onClick={() => setVisibleBands(FREQUENCY_BANDS.map(() => true))}
+                  className="mt-1 rounded-lg px-2 py-1 text-xs font-medium text-primary transition-colors hover:bg-muted"
+                >
+                  {t("chart.showAllBands")}
+                </button>
+              ) : null}
               <p className="mt-2 px-2 text-xs leading-5 text-muted-foreground">{t("chart.bandsNote")}</p>
             </aside>
           </div>

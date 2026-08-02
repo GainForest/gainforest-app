@@ -3222,6 +3222,8 @@
       "radialLabel": "Volume suara",
       "timeLabel": "Waktu (Jam)",
       "legendTitle": "Kelompok suara",
+      "legendHint": "Klik kelompok suara untuk menampilkan atau menyembunyikannya.",
+      "showAllBands": "Tampilkan semua",
       "bandsNote": "Rentang perkiraan. Suara saling tumpang tindih, dan hewan yang bersuara di tiap rentang berbeda menurut tempat.",
       "empty": "Rekaman yang dianalisis akan muncul di sini sebagai jam lanskap suara 24 jam.",
       "emptyHint": "Analisis rekaman terunggah Anda di atas untuk memulai.",

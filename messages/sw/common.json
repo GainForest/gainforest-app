@@ -3222,6 +3222,8 @@
       "radialLabel": "Kiwango cha sauti",
       "timeLabel": "Saa (Saa za siku)",
       "legendTitle": "Makundi ya sauti",
+      "legendHint": "Bofya kundi la sauti ili kulionyesha au kulificha.",
+      "showAllBands": "Onyesha yote",
       "bandsNote": "Viwango vya dalili. Sauti zinaingiliana, na wanyama wanaoimba katika kila kiwango hutofautiana kwa eneo.",
       "empty": "Rekodi zilizochambuliwa zitaonekana hapa kama saa ya mandhari ya sauti ya saa 24.",
       "emptyHint": "Chambua rekodi zako zilizopakiwa hapo juu ili kuanza.",
