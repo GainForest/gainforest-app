@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
-import { CanonicalRedirect } from "@/app/account/_components/CanonicalRedirect";
 import { OrgManageTabContent } from "../../_components/OrgManageTabContent";
-import { accountMembersPath, getAccountRouteData, readAccountRouteParams } from "../../_lib/account-route";
+import { getAccountRouteData, readAccountRouteParams } from "../../_lib/account-route";
 
 export const metadata: Metadata = {
   title: "Members — GainForest",
@@ -11,10 +10,6 @@ export const metadata: Metadata = {
 export default async function AccountMembersPage({ params }: { params: Promise<{ did: string }> }) {
   const { did, urlIdentifier } = await readAccountRouteParams(params);
   const account = await getAccountRouteData(did, urlIdentifier);
-
-  if (urlIdentifier !== account.urlIdentifier) {
-    return <CanonicalRedirect to={accountMembersPath(account.urlIdentifier)} />;
-  }
 
   return <OrgManageTabContent identifier={account.urlIdentifier} tab="members" />;
 }

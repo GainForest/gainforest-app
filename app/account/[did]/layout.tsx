@@ -10,6 +10,7 @@ import { isManualRecognitionBadgeKey } from "@/app/_lib/recognition-badges";
 import { getGainForestModeratorAccess } from "@/app/internal/badges/_lib/access";
 import { localizedAlternates, NOINDEX_ROBOTS } from "@/app/_lib/seo-metadata";
 import { getRequestOrigin } from "@/app/_lib/request-origin";
+import { AccountCanonicalPath } from "../_components/AccountCanonicalPath";
 import { AccountChrome } from "../_components/AccountChrome";
 import { AccountHero } from "../_components/AccountHero";
 import { AccountTabBar } from "../_components/AccountTabBar";
@@ -182,6 +183,10 @@ export default async function AccountLayout({
   return (
     <main className="w-full">
       <AccountProfileJsonLd jsonLd={profileJsonLd} />
+      {/* Swaps a DID / stale-handle address for the canonical one in place —
+          no navigation, no re-render. Each tab page used to do this with a
+          client redirect, which loaded every profile twice. */}
+      <AccountCanonicalPath identifier={account.urlIdentifier} />
       <AccountChrome
         hero={
           <>
