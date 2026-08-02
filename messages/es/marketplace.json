@@ -1841,12 +1841,12 @@
       "cta": "Crear un proyecto"
     },
     "publish": {
-      "alwaysPublicTitle": "Tus proyectos son públicos",
-      "alwaysPublicBody": "Cualquier persona con el enlace puede abrir las páginas de tus proyectos, y los buscadores pueden encontrarlas. Esto es así desde el momento en que guardas un proyecto.",
+      "alwaysPublicTitle": "Cualquiera con el enlace puede abrir tus proyectos",
+      "alwaysPublicBody": "Desde que guardas un proyecto, su página se abre para cualquiera con quien la compartas. Que la gente pueda encontrarla sin enlace depende de ti.",
       "listedTitle": "Aparece en las páginas de exploración",
-      "listedBody": "Quienes exploran GainForest pueden encontrar esta cuenta y sus proyectos en las listas de exploración.",
+      "listedBody": "Quienes exploran GainForest pueden encontrar esta cuenta y sus proyectos, y los buscadores pueden mostrarlos.",
       "unlistedTitle": "No aparece en las páginas de exploración",
-      "unlistedBody": "Las páginas de tus proyectos siguen abriéndose para cualquiera con el enlace. Añadirlas a las páginas de exploración permite que la gente las encuentre navegando por GainForest.",
+      "unlistedBody": "Tus proyectos no aparecen cuando la gente explora GainForest y quedan fuera de los resultados de búsqueda. Solo quienes reciban un enlace pueden abrirlos.",
       "action": "Mostrar en las páginas de exploración",
       "publishing": "Añadiendo…",
       "justListedBody": "Listo. Puede tardar unos minutos en aparecer en las páginas de exploración.",

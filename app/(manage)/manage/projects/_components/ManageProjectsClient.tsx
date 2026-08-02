@@ -9,7 +9,6 @@ import { parseAsString, parseAsStringEnum, useQueryStates } from "nuqs";
 import {
   BadgeCheckIcon,
   BinocularsIcon,
-  GlobeIcon,
   CalendarDaysIcon,
   ChevronLeftIcon,
   ChevronRightIcon,
@@ -43,6 +42,7 @@ import { compressImageIfNeeded } from "../../observations/_components/observatio
 import { canCreateRecord, canDeleteRecord, canUpdateRecord } from "../../_lib/cgs-permissions";
 import { createRecord, deleteRecord, getRecord, putRecord, uploadBlob } from "../../_lib/mutations";
 import { SiteEditorModal, SiteEditorModalId } from "../../_modals/SiteEditorModal";
+import { ProjectVisibilityCard } from "./ProjectVisibilityCard";
 import {
   CERT_COLLECTION,
   PROJECT_COLLECTION,
@@ -286,7 +286,7 @@ export function ManageProjectsClient({ target }: { target: ManageTarget }) {
               </div>
             ) : null}
 
-            {projects.length > 0 && !loading ? <PublishCard target={target} /> : null}
+            {projects.length > 0 && !loading ? <ProjectVisibilityCard target={target} /> : null}
 
             {loading ? (
               <ProjectsSkeleton />
@@ -324,131 +324,6 @@ export function ManageProjectsClient({ target }: { target: ManageTarget }) {
           </>
         )}
       </div>
-    </div>
-  );
-}
-
-/**
- * Where this account's projects can be seen.
- *
- * Two different things used to be conflated here. A saved project is public
- * the moment it exists: its page opens for anyone with the link, it shows on
- * the account's own page and in search, and it goes into the sitemap. What the
- * button actually changes is narrower — the browse/explore lists only show
- * accounts holding a featured badge (see `app/_lib/publish-org.ts`), so a new
- * account is missing from them until an owner/admin adds itself.
- *
- * So the card states the always-true part first and never claims the button
- * decides it, and it always shows which of the two listing states the account
- * is in without anyone pressing anything. When the listing action isn't a real
- * choice (not configured, or the viewer is a plain member), the button is left
- * out rather than rendered dead.
- */
-function PublishCard({ target }: { target: ManageTarget }) {
-  const t = useTranslations("marketplace.manageProjects.publish");
-  // `state` is only about whether the listing status could be read at all;
-  // `listed` is the status itself, and `available` whether it can be changed
-  // from here. Keeping them apart means an account still learns where it
-  // stands on a server that can't perform the change.
-  const [state, setState] = useState<"loading" | "ready" | "unknown">("loading");
-  const [listed, setListed] = useState(false);
-  const [available, setAvailable] = useState(false);
-  const [justListed, setJustListed] = useState(false);
-  const [publishing, setPublishing] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  // Listing exposes the whole organization on the explore pages — owner/admin only.
-  const allowed = target.kind !== "group" || target.role === "owner" || target.role === "admin";
-
-  useEffect(() => {
-    let cancelled = false;
-    fetch(manageApiHref("/api/manage/publish", target), { cache: "no-store" })
-      .then((response) => (response.ok ? response.json() : null))
-      .then((data: { available?: boolean; published?: boolean } | null) => {
-        if (cancelled) return;
-        if (!data) {
-          setState("unknown");
-          return;
-        }
-        setListed(Boolean(data.published));
-        setAvailable(Boolean(data.available));
-        setState("ready");
-      })
-      .catch(() => {
-        if (!cancelled) setState("unknown");
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, [target]);
-
-  const publish = async () => {
-    if (!allowed || publishing) return;
-    setPublishing(true);
-    setError(null);
-    try {
-      const response = await fetch(manageApiHref("/api/manage/publish", target), { method: "POST", cache: "no-store" });
-      const data = (await response.json().catch(() => null)) as { published?: boolean; error?: string } | null;
-      if (!response.ok || !data?.published) throw new Error(data?.error || t("error"));
-      setListed(true);
-      setJustListed(true);
-    } catch (caught) {
-      setError((caught as Error).message || t("error"));
-    } finally {
-      setPublishing(false);
-    }
-  };
-
-  // Nothing is claimed until the listing status is known.
-  if (state === "loading") return null;
-
-  const known = state === "ready";
-  const canAct = known && allowed && available && !listed;
-
-  return (
-    <div className={cn("rounded-2xl border px-4 py-3", listed ? "border-primary/25 bg-primary/5" : "border-border bg-background/70")}>
-      <div className="flex min-w-0 items-start gap-3">
-        <GlobeIcon className="mt-0.5 h-5 w-5 shrink-0 text-muted-foreground" />
-        <div className="min-w-0">
-          <p className="text-sm font-medium text-foreground">{t("alwaysPublicTitle")}</p>
-          <p className="text-xs text-muted-foreground">{t("alwaysPublicBody")}</p>
-        </div>
-      </div>
-
-      {known ? (
-        <div className="mt-3 flex flex-col gap-3 border-t border-border/60 pt-3 sm:flex-row sm:items-center sm:justify-between" role="status" aria-live="polite">
-          <div className="flex min-w-0 items-start gap-3">
-            {listed ? (
-              <BadgeCheckIcon className="mt-0.5 h-5 w-5 shrink-0 text-primary" />
-            ) : (
-              <BinocularsIcon className="mt-0.5 h-5 w-5 shrink-0 text-muted-foreground" />
-            )}
-            <div className="min-w-0">
-              <p className="text-sm font-medium text-foreground">{listed ? t("listedTitle") : t("unlistedTitle")}</p>
-              <p className="text-xs text-muted-foreground">
-                {justListed ? t("justListedBody") : listed ? t("listedBody") : t("unlistedBody")}
-              </p>
-            </div>
-          </div>
-          {canAct ? (
-            <Button type="button" onClick={() => void publish()} disabled={publishing} className="shrink-0">
-              {publishing ? <Loader2Icon className="animate-spin" /> : <GlobeIcon />}
-              {publishing ? t("publishing") : t("action")}
-            </Button>
-          ) : null}
-        </div>
-      ) : null}
-
-      {!known ? <p className="mt-2 text-xs text-muted-foreground">{t("statusUnknown")}</p> : null}
-      {known && !listed && !allowed ? <p className="mt-2 text-xs text-muted-foreground">{t("memberBlocked")}</p> : null}
-      {known && !listed && allowed && !available ? (
-        <p className="mt-2 text-xs text-muted-foreground">{t("unavailable")}</p>
-      ) : null}
-      {error ? (
-        <p className="mt-2 flex items-center gap-1.5 text-xs font-medium text-destructive">
-          <TriangleAlertIcon className="h-3.5 w-3.5" />
-          {error}
-        </p>
-      ) : null}
     </div>
   );
 }

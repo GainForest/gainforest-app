@@ -1841,12 +1841,12 @@
       "cta": "Buat proyek"
     },
     "publish": {
-      "alwaysPublicTitle": "Proyek Anda bersifat publik",
-      "alwaysPublicBody": "Siapa pun yang punya tautannya bisa membuka halaman proyek Anda, dan mesin pencari bisa menemukannya. Ini berlaku sejak Anda menyimpan proyek.",
+      "alwaysPublicTitle": "Siapa pun yang punya tautannya bisa membuka proyek Anda",
+      "alwaysPublicBody": "Sejak Anda menyimpan proyek, halamannya bisa dibuka oleh siapa pun yang Anda beri tautannya. Apakah orang bisa menemukannya tanpa tautan, itu keputusan Anda.",
       "listedTitle": "Tampil di halaman jelajah",
-      "listedBody": "Orang yang menjelajahi GainForest dapat menemukan akun ini dan proyeknya di daftar jelajah.",
+      "listedBody": "Orang yang menjelajahi GainForest dapat menemukan akun ini dan proyeknya, dan mesin pencari dapat menampilkannya.",
       "unlistedTitle": "Belum tampil di halaman jelajah",
-      "unlistedBody": "Halaman proyek Anda tetap bisa dibuka siapa pun yang punya tautannya. Menambahkannya ke halaman jelajah membuat orang bisa menemukannya sambil menjelajahi GainForest.",
+      "unlistedBody": "Proyek Anda tidak muncul saat orang menjelajahi GainForest, dan tidak dimasukkan ke hasil pencarian. Hanya orang yang Anda kirimi tautan yang bisa membukanya.",
       "action": "Tampilkan di halaman jelajah",
       "publishing": "Menambahkan…",
       "justListedBody": "Selesai. Mungkin perlu beberapa menit untuk muncul di halaman jelajah.",

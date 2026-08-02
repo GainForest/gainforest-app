@@ -1929,6 +1929,32 @@ export async function fetchTrustedByEndorsements(
   return endorsements;
 }
 
+/**
+ * Every account that shows on the public explore pages — the same set the
+ * explore lists are built from, so anything outside it is unlisted. An award
+ * subjects either a bare DID or a record in the awardee's repo, so both resolve
+ * to the owning account.
+ *
+ * Used to decide what may be handed to search engines: an account that hasn't
+ * put itself on the explore pages doesn't get its pages indexed either.
+ */
+export async function fetchPubliclyListedDids(signal?: AbortSignal): Promise<Set<string>> {
+  const index = await fetchFeaturedBadgeIndex(signal);
+  const dids = new Set<string>(index.dids);
+  for (const uri of index.recordUris) {
+    const owner = uri.match(/^at:\/\/([^/]+)\//)?.[1];
+    if (owner?.startsWith("did:")) dids.add(owner);
+  }
+  return dids;
+}
+
+/** True when this account shows on the public explore pages. */
+export async function isAccountPubliclyListed(did: string, signal?: AbortSignal): Promise<boolean> {
+  if (!did.startsWith("did:")) return false;
+  const listed = await fetchPubliclyListedDids(signal);
+  return listed.has(did);
+}
+
 /** The Ma Earth funding rounds, mapped to their per-round badge keys. Round 3
  *  is open for applications but has no awards yet, so it only resolves once Ma
  *  Earth verifies it. Ordered so callers can render rounds ascending. */

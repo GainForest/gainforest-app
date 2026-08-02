@@ -4,11 +4,11 @@ import { resolveAccountManageAccess } from "@/app/_lib/manage-server";
 import { canEditGroupProfile } from "@/app/(manage)/manage/_lib/cgs-permissions";
 import type { CgsRole } from "@/app/(manage)/manage/_lib/cgs";
 import { EditableAccountHeader } from "@/app/(manage)/manage/_components/EditableAccountHeader";
-import { fetchHiddenAccountDids, fetchRecognitionBadgesForDid } from "@/app/_lib/indexer";
+import { fetchHiddenAccountDids, fetchRecognitionBadgesForDid, isAccountPubliclyListed } from "@/app/_lib/indexer";
 import { fetchEndorsementsGivenCount } from "@/app/_lib/endorsements-given";
 import { isManualRecognitionBadgeKey } from "@/app/_lib/recognition-badges";
 import { getGainForestModeratorAccess } from "@/app/internal/badges/_lib/access";
-import { localizedAlternates } from "@/app/_lib/seo-metadata";
+import { localizedAlternates, NOINDEX_ROBOTS } from "@/app/_lib/seo-metadata";
 import { getRequestOrigin } from "@/app/_lib/request-origin";
 import { AccountChrome } from "../_components/AccountChrome";
 import { AccountHero } from "../_components/AccountHero";
@@ -90,9 +90,15 @@ export async function generateMetadata({ params }: { params: Promise<{ did: stri
   const description = account.description ?? `Public GainForest profile for ${account.displayName}.`;
   const previewImage = account.avatarUrl ? [{ url: account.avatarUrl, alt: account.displayName }] : undefined;
 
+  // A profile opens for anyone with the link, but it is only handed to search
+  // engines once the account puts itself on the explore pages — the same line
+  // its projects follow. A failed lookup keeps it out.
+  const listed = await isAccountPubliclyListed(account.did).catch(() => false);
+
   return {
     title,
     description,
+    ...(listed ? {} : { robots: NOINDEX_ROBOTS }),
     alternates: await localizedAlternates(`/account/${encodeURIComponent(account.urlIdentifier)}`),
     openGraph: {
       title,

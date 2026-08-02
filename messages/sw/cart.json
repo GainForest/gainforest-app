@@ -119,6 +119,36 @@
       "project": "Mradi",
       "cart": "Kikapu",
       "checkout": "Malipo"
+    },
+    "projectVisibility": {
+      "title": "Kadi ya mwonekano wa mradi",
+      "description": "Kadi iliyo kwenye Dhibiti → Miradi inayoieleza akaunti kilicho cha hadhara na kama inaonyeshwa kwenye kurasa za uchunguzi, katika kila hali yake.",
+      "mockNote": "Kuongeza akaunti kwenye kurasa za uchunguzi ni tendo halisi, hivyo onyesho hili halifanyi hivyo kamwe. Ni miito miwili ya seva ya kadi hii pekee inayobadilishwa na data ya mfano.",
+      "mockBadge": "Hali ya majaribio · hakuna kinachoonyeshwa",
+      "cardTitle": "Mwonekano wa mradi",
+      "cardDescription": "Ona jinsi ukurasa wa miradi unavyoeleza kilicho cha hadhara na kinachobadilika unapoonyeshwa kwenye kurasa za uchunguzi.",
+      "scenarios": {
+        "unlisted": {
+          "label": "Mmiliki · haionyeshwi kwenye kurasa za uchunguzi",
+          "body": "Akaunti inaweza kujiongeza kwenye orodha za uchunguzi."
+        },
+        "listed": {
+          "label": "Mmiliki · inaonyeshwa kwenye kurasa za uchunguzi",
+          "body": "Tayari inaonyeshwa, hivyo hakuna hatua inayotolewa."
+        },
+        "member": {
+          "label": "Mwanachama · haionyeshwi kwenye kurasa za uchunguzi",
+          "body": "Wanachama huona hali ya akaunti, lakini hawawezi kuibadilisha."
+        },
+        "unavailable": {
+          "label": "Haiwezi kubadilishwa kwa sasa",
+          "body": "Hali bado inaonyeshwa; kitufe kinaachwa badala ya kuwekwa bila kazi."
+        },
+        "unknown": {
+          "label": "Hali haikuweza kusomwa",
+          "body": "Kadi inasema hivyo badala ya kudai akaunti haionyeshwi."
+        }
+      }
     }
   }
 }

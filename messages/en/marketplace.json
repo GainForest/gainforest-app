@@ -1841,12 +1841,12 @@
       "cta": "Create a project"
     },
     "publish": {
-      "alwaysPublicTitle": "Your projects are public",
-      "alwaysPublicBody": "Anyone with the link can open your project pages, and search engines can find them. That is true from the moment you save a project.",
+      "alwaysPublicTitle": "Anyone with the link can open your projects",
+      "alwaysPublicBody": "From the moment you save a project, its page opens for anyone you share it with. Whether people can find it without a link is up to you.",
       "listedTitle": "Shown on the explore pages",
-      "listedBody": "People browsing GainForest can find this account and its projects in the explore lists.",
+      "listedBody": "People browsing GainForest can find this account and its projects, and search engines can list them.",
       "unlistedTitle": "Not shown on the explore pages",
-      "unlistedBody": "Your project pages still open for anyone with the link. Adding them to the explore pages lets people find them by browsing GainForest.",
+      "unlistedBody": "Your projects don’t appear when people browse GainForest, and they are kept out of search results. Only people you send a link to can reach them.",
       "action": "Show on explore pages",
       "publishing": "Adding…",
       "justListedBody": "Done. It can take a few minutes to appear on the explore pages.",

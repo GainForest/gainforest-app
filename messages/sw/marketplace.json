@@ -1841,12 +1841,12 @@
       "cta": "Unda mradi"
     },
     "publish": {
-      "alwaysPublicTitle": "Miradi yako ni ya hadhara",
-      "alwaysPublicBody": "Mtu yeyote mwenye kiungo anaweza kufungua kurasa za miradi yako, na injini za utafutaji zinaweza kuzipata. Hii ni hivyo tangu unapohifadhi mradi.",
+      "alwaysPublicTitle": "Mtu yeyote mwenye kiungo anaweza kufungua miradi yako",
+      "alwaysPublicBody": "Tangu unapohifadhi mradi, ukurasa wake hufunguka kwa yeyote unayemshirikisha kiungo. Kama watu wanaweza kuupata bila kiungo ni uamuzi wako.",
       "listedTitle": "Inaonyeshwa kwenye kurasa za uchunguzi",
-      "listedBody": "Watu wanaovinjari GainForest wanaweza kupata akaunti hii na miradi yake kwenye orodha za uchunguzi.",
+      "listedBody": "Watu wanaovinjari GainForest wanaweza kupata akaunti hii na miradi yake, na injini za utafutaji zinaweza kuzionyesha.",
       "unlistedTitle": "Haionyeshwi kwenye kurasa za uchunguzi",
-      "unlistedBody": "Kurasa za miradi yako bado zinafunguka kwa yeyote mwenye kiungo. Kuziongeza kwenye kurasa za uchunguzi huwawezesha watu kuzipata wanapovinjari GainForest.",
+      "unlistedBody": "Miradi yako haionekani watu wanapovinjari GainForest, na huachwa nje ya matokeo ya utafutaji. Ni watu unaowatumia kiungo pekee wanaoweza kuifikia.",
       "action": "Onyesha kwenye kurasa za uchunguzi",
       "publishing": "Inaongeza…",
       "justListedBody": "Imekamilika. Inaweza kuchukua dakika chache kuonekana kwenye kurasa za uchunguzi.",
