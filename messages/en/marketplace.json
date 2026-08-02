@@ -1841,16 +1841,19 @@
       "cta": "Create a project"
     },
     "publish": {
-      "title": "Show your work on the explore pages",
-      "description": "Publishing makes this account and all of its projects visible to everyone browsing GainForest.",
-      "action": "Publish",
-      "publishing": "Publishing…",
-      "publishedTitle": "Published on the explore pages",
-      "publishedHint": "This account and its projects are visible to everyone browsing GainForest.",
-      "justPublishedHint": "Done! It can take a few minutes to appear on the explore pages.",
-      "memberBlocked": "Only organization owners and admins can publish.",
-      "error": "Publishing didn’t go through. Please try again later.",
-      "unavailable": "Publishing isn’t available right now. Please try again later."
+      "alwaysPublicTitle": "Your projects are public",
+      "alwaysPublicBody": "Anyone with the link can open your project pages, and search engines can find them. That is true from the moment you save a project.",
+      "listedTitle": "Shown on the explore pages",
+      "listedBody": "People browsing GainForest can find this account and its projects in the explore lists.",
+      "unlistedTitle": "Not shown on the explore pages",
+      "unlistedBody": "Your project pages still open for anyone with the link. Adding them to the explore pages lets people find them by browsing GainForest.",
+      "action": "Show on explore pages",
+      "publishing": "Adding…",
+      "justListedBody": "Done. It can take a few minutes to appear on the explore pages.",
+      "memberBlocked": "Only organization owners and admins can change this.",
+      "error": "That didn’t go through. Please try again later.",
+      "unavailable": "This can’t be changed right now. Please try again later.",
+      "statusUnknown": "We couldn’t check whether this account is shown on the explore pages."
     }
   },
   "manageBumicerts": {

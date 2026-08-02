@@ -1841,16 +1841,19 @@
       "cta": "Unda mradi"
     },
     "publish": {
-      "title": "Onyesha kazi yako kwenye kurasa za uchunguzi",
-      "description": "Kuchapisha hufanya akaunti hii na miradi yake yote ionekane kwa kila mtu anayevinjari GainForest.",
-      "action": "Chapisha",
-      "publishing": "Inachapisha…",
-      "publishedTitle": "Imechapishwa kwenye kurasa za uchunguzi",
-      "publishedHint": "Akaunti hii na miradi yake inaonekana kwa kila mtu anayevinjari GainForest.",
-      "justPublishedHint": "Imekamilika! Inaweza kuchukua dakika chache kuonekana kwenye kurasa za uchunguzi.",
-      "memberBlocked": "Wamiliki na wasimamizi wa shirika pekee ndio wanaweza kuchapisha.",
-      "error": "Uchapishaji haukufanikiwa. Tafadhali jaribu tena baadaye.",
-      "unavailable": "Uchapishaji haupatikani kwa sasa. Tafadhali jaribu tena baadaye."
+      "alwaysPublicTitle": "Miradi yako ni ya hadhara",
+      "alwaysPublicBody": "Mtu yeyote mwenye kiungo anaweza kufungua kurasa za miradi yako, na injini za utafutaji zinaweza kuzipata. Hii ni hivyo tangu unapohifadhi mradi.",
+      "listedTitle": "Inaonyeshwa kwenye kurasa za uchunguzi",
+      "listedBody": "Watu wanaovinjari GainForest wanaweza kupata akaunti hii na miradi yake kwenye orodha za uchunguzi.",
+      "unlistedTitle": "Haionyeshwi kwenye kurasa za uchunguzi",
+      "unlistedBody": "Kurasa za miradi yako bado zinafunguka kwa yeyote mwenye kiungo. Kuziongeza kwenye kurasa za uchunguzi huwawezesha watu kuzipata wanapovinjari GainForest.",
+      "action": "Onyesha kwenye kurasa za uchunguzi",
+      "publishing": "Inaongeza…",
+      "justListedBody": "Imekamilika. Inaweza kuchukua dakika chache kuonekana kwenye kurasa za uchunguzi.",
+      "memberBlocked": "Wamiliki na wasimamizi wa shirika pekee ndio wanaweza kubadilisha hili.",
+      "error": "Haikufanikiwa. Tafadhali jaribu tena baadaye.",
+      "unavailable": "Hili haliwezi kubadilishwa kwa sasa. Tafadhali jaribu tena baadaye.",
+      "statusUnknown": "Hatukuweza kuthibitisha kama akaunti hii inaonyeshwa kwenye kurasa za uchunguzi."
     }
   },
   "manageBumicerts": {

@@ -5,28 +5,30 @@ import type { ManageTarget } from "@/lib/links";
 
 export const runtime = "nodejs";
 
-/** Publishing puts the whole account on the public explore pages, so for
- *  organizations it needs an owner/admin — a plain member can't do it.
- *  Personal accounts publish themselves. */
+/** Listing the account on the public explore pages is an account-wide change,
+ *  so for organizations it needs an owner/admin — a plain member can't do it.
+ *  Personal accounts list themselves. */
 function canPublish(target: ManageTarget): boolean {
   if (target.kind !== "group") return true;
   return target.role === "owner" || target.role === "admin";
 }
 
+/** `published` (is this account in the explore lists?) is a plain read of the
+ *  public badge repo, so it is answered even when this server can't perform the
+ *  change — `available` covers that separately. Otherwise an unconfigured
+ *  server would leave people unable to see where they stand. */
 export async function GET(request: Request) {
   const target = await resolveManageApiTarget(request);
   if (isResponse(target)) return target;
 
-  if (!publishingConfigured()) {
-    return Response.json({ available: false, published: false, allowed: canPublish(target) });
-  }
+  const available = publishingConfigured();
   try {
     const published = await isPublished(target.did);
-    return Response.json({ available: true, published, allowed: canPublish(target) });
+    return Response.json({ available, published, allowed: canPublish(target) });
   } catch (error) {
     const status = error instanceof PublishOrgError ? error.status : 500;
-    // Status lookups should degrade quietly: the card simply hides.
-    return Response.json({ available: false, published: false, allowed: canPublish(target) }, { status: status >= 500 ? 200 : status });
+    // A failed lookup must not be reported as "not listed": say nothing is known.
+    return Response.json({ error: "status-unavailable" }, { status: status >= 500 ? 502 : status });
   }
 }
 

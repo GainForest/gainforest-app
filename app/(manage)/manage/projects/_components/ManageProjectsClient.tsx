@@ -328,16 +328,35 @@ export function ManageProjectsClient({ target }: { target: ManageTarget }) {
   );
 }
 
-// Self-serve publishing: the public explore pages only list accounts holding
-// a featured badge, so freshly created organizations are invisible there
-// until an owner/admin publishes. The button awards the GainForest badge to
-// the whole account through the server (see /api/manage/publish), which makes
-// this organization and all of its projects appear on the explore pages.
+/**
+ * Where this account's projects can be seen.
+ *
+ * Two different things used to be conflated here. A saved project is public
+ * the moment it exists: its page opens for anyone with the link, it shows on
+ * the account's own page and in search, and it goes into the sitemap. What the
+ * button actually changes is narrower — the browse/explore lists only show
+ * accounts holding a featured badge (see `app/_lib/publish-org.ts`), so a new
+ * account is missing from them until an owner/admin adds itself.
+ *
+ * So the card states the always-true part first and never claims the button
+ * decides it, and it always shows which of the two listing states the account
+ * is in without anyone pressing anything. When the listing action isn't a real
+ * choice (not configured, or the viewer is a plain member), the button is left
+ * out rather than rendered dead.
+ */
 function PublishCard({ target }: { target: ManageTarget }) {
   const t = useTranslations("marketplace.manageProjects.publish");
-  const [status, setStatus] = useState<"loading" | "idle" | "publishing" | "published" | "justPublished" | "unavailable" | "hidden">("loading");
+  // `state` is only about whether the listing status could be read at all;
+  // `listed` is the status itself, and `available` whether it can be changed
+  // from here. Keeping them apart means an account still learns where it
+  // stands on a server that can't perform the change.
+  const [state, setState] = useState<"loading" | "ready" | "unknown">("loading");
+  const [listed, setListed] = useState(false);
+  const [available, setAvailable] = useState(false);
+  const [justListed, setJustListed] = useState(false);
+  const [publishing, setPublishing] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  // Publishing exposes the whole organization publicly — owner/admin only.
+  // Listing exposes the whole organization on the explore pages — owner/admin only.
   const allowed = target.kind !== "group" || target.role === "owner" || target.role === "admin";
 
   useEffect(() => {
@@ -346,12 +365,16 @@ function PublishCard({ target }: { target: ManageTarget }) {
       .then((response) => (response.ok ? response.json() : null))
       .then((data: { available?: boolean; published?: boolean } | null) => {
         if (cancelled) return;
-        if (!data) setStatus("hidden");
-        else if (!data.available) setStatus("unavailable");
-        else setStatus(data.published ? "published" : "idle");
+        if (!data) {
+          setState("unknown");
+          return;
+        }
+        setListed(Boolean(data.published));
+        setAvailable(Boolean(data.available));
+        setState("ready");
       })
       .catch(() => {
-        if (!cancelled) setStatus("hidden");
+        if (!cancelled) setState("unknown");
       });
     return () => {
       cancelled = true;
@@ -359,59 +382,67 @@ function PublishCard({ target }: { target: ManageTarget }) {
   }, [target]);
 
   const publish = async () => {
-    if (!allowed || status === "publishing") return;
-    setStatus("publishing");
+    if (!allowed || publishing) return;
+    setPublishing(true);
     setError(null);
     try {
       const response = await fetch(manageApiHref("/api/manage/publish", target), { method: "POST", cache: "no-store" });
       const data = (await response.json().catch(() => null)) as { published?: boolean; error?: string } | null;
       if (!response.ok || !data?.published) throw new Error(data?.error || t("error"));
-      setStatus("justPublished");
+      setListed(true);
+      setJustListed(true);
     } catch (caught) {
       setError((caught as Error).message || t("error"));
-      setStatus("idle");
+    } finally {
+      setPublishing(false);
     }
   };
 
-  if (status === "loading" || status === "hidden") return null;
+  // Nothing is claimed until the listing status is known.
+  if (state === "loading") return null;
 
-  if (status === "published" || status === "justPublished") {
-    return (
-      <div className="flex items-center gap-3 rounded-2xl border border-primary/25 bg-primary/5 px-4 py-3">
-        <BadgeCheckIcon className="h-5 w-5 shrink-0 text-primary" />
-        <div className="min-w-0">
-          <p className="text-sm font-medium text-foreground">{t("publishedTitle")}</p>
-          <p className="text-xs text-muted-foreground">
-            {status === "justPublished" ? t("justPublishedHint") : t("publishedHint")}
-          </p>
-        </div>
-      </div>
-    );
-  }
+  const known = state === "ready";
+  const canAct = known && allowed && available && !listed;
 
   return (
-    <div className="rounded-2xl border border-border bg-background/70 px-4 py-3">
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex min-w-0 items-start gap-3">
-          <GlobeIcon className="mt-0.5 h-5 w-5 shrink-0 text-muted-foreground" />
-          <div className="min-w-0">
-            <p className="text-sm font-medium text-foreground">{t("title")}</p>
-            <p className="text-xs text-muted-foreground">{t("description")}</p>
-          </div>
+    <div className={cn("rounded-2xl border px-4 py-3", listed ? "border-primary/25 bg-primary/5" : "border-border bg-background/70")}>
+      <div className="flex min-w-0 items-start gap-3">
+        <GlobeIcon className="mt-0.5 h-5 w-5 shrink-0 text-muted-foreground" />
+        <div className="min-w-0">
+          <p className="text-sm font-medium text-foreground">{t("alwaysPublicTitle")}</p>
+          <p className="text-xs text-muted-foreground">{t("alwaysPublicBody")}</p>
         </div>
-        <Button
-          type="button"
-          onClick={() => void publish()}
-          disabled={!allowed || status === "publishing" || status === "unavailable"}
-          title={!allowed ? t("memberBlocked") : status === "unavailable" ? t("unavailable") : undefined}
-          className="shrink-0"
-        >
-          {status === "publishing" ? <Loader2Icon className="animate-spin" /> : <GlobeIcon />}
-          {status === "publishing" ? t("publishing") : t("action")}
-        </Button>
       </div>
-      {!allowed ? <p className="mt-2 text-xs text-muted-foreground">{t("memberBlocked")}</p> : null}
-      {allowed && status === "unavailable" ? <p className="mt-2 text-xs text-muted-foreground">{t("unavailable")}</p> : null}
+
+      {known ? (
+        <div className="mt-3 flex flex-col gap-3 border-t border-border/60 pt-3 sm:flex-row sm:items-center sm:justify-between" role="status" aria-live="polite">
+          <div className="flex min-w-0 items-start gap-3">
+            {listed ? (
+              <BadgeCheckIcon className="mt-0.5 h-5 w-5 shrink-0 text-primary" />
+            ) : (
+              <BinocularsIcon className="mt-0.5 h-5 w-5 shrink-0 text-muted-foreground" />
+            )}
+            <div className="min-w-0">
+              <p className="text-sm font-medium text-foreground">{listed ? t("listedTitle") : t("unlistedTitle")}</p>
+              <p className="text-xs text-muted-foreground">
+                {justListed ? t("justListedBody") : listed ? t("listedBody") : t("unlistedBody")}
+              </p>
+            </div>
+          </div>
+          {canAct ? (
+            <Button type="button" onClick={() => void publish()} disabled={publishing} className="shrink-0">
+              {publishing ? <Loader2Icon className="animate-spin" /> : <GlobeIcon />}
+              {publishing ? t("publishing") : t("action")}
+            </Button>
+          ) : null}
+        </div>
+      ) : null}
+
+      {!known ? <p className="mt-2 text-xs text-muted-foreground">{t("statusUnknown")}</p> : null}
+      {known && !listed && !allowed ? <p className="mt-2 text-xs text-muted-foreground">{t("memberBlocked")}</p> : null}
+      {known && !listed && allowed && !available ? (
+        <p className="mt-2 text-xs text-muted-foreground">{t("unavailable")}</p>
+      ) : null}
       {error ? (
         <p className="mt-2 flex items-center gap-1.5 text-xs font-medium text-destructive">
           <TriangleAlertIcon className="h-3.5 w-3.5" />

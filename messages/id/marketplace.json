@@ -1841,16 +1841,19 @@
       "cta": "Buat proyek"
     },
     "publish": {
-      "title": "Tampilkan karya Anda di halaman jelajah",
-      "description": "Menerbitkan membuat akun ini dan semua proyeknya terlihat oleh semua orang yang menjelajahi GainForest.",
-      "action": "Terbitkan",
-      "publishing": "Menerbitkan…",
-      "publishedTitle": "Diterbitkan di halaman jelajah",
-      "publishedHint": "Akun ini dan proyek-proyeknya terlihat oleh semua orang yang menjelajahi GainForest.",
-      "justPublishedHint": "Selesai! Mungkin perlu beberapa menit untuk muncul di halaman jelajah.",
-      "memberBlocked": "Hanya pemilik dan admin organisasi yang dapat menerbitkan.",
-      "error": "Penerbitan tidak berhasil. Silakan coba lagi nanti.",
-      "unavailable": "Penerbitan tidak tersedia saat ini. Silakan coba lagi nanti."
+      "alwaysPublicTitle": "Proyek Anda bersifat publik",
+      "alwaysPublicBody": "Siapa pun yang punya tautannya bisa membuka halaman proyek Anda, dan mesin pencari bisa menemukannya. Ini berlaku sejak Anda menyimpan proyek.",
+      "listedTitle": "Tampil di halaman jelajah",
+      "listedBody": "Orang yang menjelajahi GainForest dapat menemukan akun ini dan proyeknya di daftar jelajah.",
+      "unlistedTitle": "Belum tampil di halaman jelajah",
+      "unlistedBody": "Halaman proyek Anda tetap bisa dibuka siapa pun yang punya tautannya. Menambahkannya ke halaman jelajah membuat orang bisa menemukannya sambil menjelajahi GainForest.",
+      "action": "Tampilkan di halaman jelajah",
+      "publishing": "Menambahkan…",
+      "justListedBody": "Selesai. Mungkin perlu beberapa menit untuk muncul di halaman jelajah.",
+      "memberBlocked": "Hanya pemilik dan admin organisasi yang dapat mengubah ini.",
+      "error": "Tidak berhasil. Silakan coba lagi nanti.",
+      "unavailable": "Ini tidak dapat diubah saat ini. Silakan coba lagi nanti.",
+      "statusUnknown": "Kami tidak dapat memeriksa apakah akun ini tampil di halaman jelajah."
     }
   },
   "manageBumicerts": {

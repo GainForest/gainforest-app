@@ -1841,16 +1841,19 @@
       "cta": "Crear un proyecto"
     },
     "publish": {
-      "title": "Muestra tu trabajo en las páginas de exploración",
-      "description": "Publicar hace que esta cuenta y todos sus proyectos sean visibles para cualquiera que explore GainForest.",
-      "action": "Publicar",
-      "publishing": "Publicando…",
-      "publishedTitle": "Publicado en las páginas de exploración",
-      "publishedHint": "Esta cuenta y sus proyectos son visibles para cualquiera que explore GainForest.",
-      "justPublishedHint": "¡Listo! Puede tardar unos minutos en aparecer en las páginas de exploración.",
-      "memberBlocked": "Solo los propietarios y administradores de la organización pueden publicar.",
-      "error": "No se pudo publicar. Inténtalo de nuevo más tarde.",
-      "unavailable": "La publicación no está disponible en este momento. Inténtalo de nuevo más tarde."
+      "alwaysPublicTitle": "Tus proyectos son públicos",
+      "alwaysPublicBody": "Cualquier persona con el enlace puede abrir las páginas de tus proyectos, y los buscadores pueden encontrarlas. Esto es así desde el momento en que guardas un proyecto.",
+      "listedTitle": "Aparece en las páginas de exploración",
+      "listedBody": "Quienes exploran GainForest pueden encontrar esta cuenta y sus proyectos en las listas de exploración.",
+      "unlistedTitle": "No aparece en las páginas de exploración",
+      "unlistedBody": "Las páginas de tus proyectos siguen abriéndose para cualquiera con el enlace. Añadirlas a las páginas de exploración permite que la gente las encuentre navegando por GainForest.",
+      "action": "Mostrar en las páginas de exploración",
+      "publishing": "Añadiendo…",
+      "justListedBody": "Listo. Puede tardar unos minutos en aparecer en las páginas de exploración.",
+      "memberBlocked": "Solo los propietarios y administradores de la organización pueden cambiar esto.",
+      "error": "No se pudo completar. Inténtalo de nuevo más tarde.",
+      "unavailable": "Esto no se puede cambiar en este momento. Inténtalo de nuevo más tarde.",
+      "statusUnknown": "No pudimos comprobar si esta cuenta aparece en las páginas de exploración."
     }
   },
   "manageBumicerts": {
