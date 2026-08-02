@@ -18,8 +18,8 @@
 import { INDEXER_URL } from "./urls";
 import { normaliseRef, resolveBlobUrl } from "./pds";
 import {
-  fetchHiddenAccountDids,
   fetchHiddenRecordUris,
+  fetchPublicHiddenAccountDids,
   indexerQuery,
   walkOccurrences,
   type OccurrenceRecord,
@@ -345,15 +345,16 @@ export async function fetchRoundCollectors(
       ? { imageEvidence: { isNull: false } }
       : { imageEvidence: { isNull: false }, createdAt: { gte: round.start, lte: round.end } };
 
-  // Accounts and individual observations a steward hid are excluded from the
-  // challenge. The explicit file-ref check below is also important: a non-null
-  // imageEvidence wrapper alone is not proof that an image blob was uploaded.
+  // Accounts and individual observations a steward hid — and every account on
+  // a blocked server address — are excluded from the challenge. The explicit
+  // file-ref check below is also important: a non-null imageEvidence wrapper
+  // alone is not proof that an image blob was uploaded.
   const exclusionPromise =
     exclusionRead === "required"
       ? fetchBioblitzExclusionsStrict(signal)
       : fetchBioblitzExclusions(signal).catch(() => []);
   const [hidden, hiddenRecords, exclusionRecords] = await Promise.all([
-    fetchHiddenAccountDids(signal).catch(() => new Set<string>()),
+    fetchPublicHiddenAccountDids(signal).catch(() => new Set<string>()),
     fetchHiddenRecordUris(signal).catch(() => new Set<string>()),
     exclusionPromise,
   ]);

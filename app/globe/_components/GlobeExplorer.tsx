@@ -46,7 +46,7 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 import { useMobileNav } from "../../_components/shell/mobile-nav-context";
-import { countryFlag, countryName, formatCountry } from "../../_lib/format";
+import { countryName } from "../../_lib/format";
 import { resolveCertifiedLocationCoords } from "../../_lib/coords";
 import { TrustedByBadges } from "../../_components/TrustedByBadges";
 import { GlobeMap } from "./GlobeMap";
@@ -1577,9 +1577,6 @@ function GlobalPanel({
                     onClick={() => onSelect(org.did)}
                     className="group flex w-full items-center gap-2.5 px-4 py-2 text-left transition-colors hover:bg-white/[0.06]"
                   >
-                    <span className="grid size-8 shrink-0 place-items-center rounded-full bg-primary/10 text-base">
-                      {(org.country ? countryFlag(org.country) : "") || "🌍"}
-                    </span>
                     <span className="min-w-0 flex-1">
                       <span className="flex items-center gap-1.5 text-sm font-medium text-foreground group-hover:text-primary">
                         <span className="truncate">{org.name}</span>
@@ -1596,7 +1593,9 @@ function GlobalPanel({
                       </span>
                       {org.country ? (
                         <span className="block truncate text-[11px] text-muted-foreground">
-                          {/* Name only — the row's avatar circle is already the flag. */}
+                          {/* Plain country name — no flag emoji. Rows keep a
+                              single left edge, and orgs whose country is
+                              unknown (most of them today) omit the line. */}
                           {countryName(org.country)}
                         </span>
                       ) : null}
@@ -1726,8 +1725,7 @@ function FocusPanel({
             </Link>
           ) : selectedOrg?.country ? (
             <p className="mt-0.5 text-xs text-muted-foreground">
-              {/* formatCountry already includes the flag. */}
-              {formatCountry(selectedOrg.country)}
+              {countryName(selectedOrg.country)}
             </p>
           ) : null}
         </div>

@@ -4,8 +4,9 @@ import Image from "next/image";
 import { notFound, redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { ArrowLeftIcon, ArrowUpRightIcon, FolderKanbanIcon } from "lucide-react";
-import { fetchRecordByUri } from "../../../_lib/indexer";
+import { fetchRecordByUri, fetchRecordDetail, type RecordDetail } from "../../../_lib/indexer";
 import { getPdsRecord, isPdsBlobUrl } from "../../../_lib/pds";
+import { RichText } from "../../../_components/RichText";
 import { AutoRefresh } from "./_components/AutoRefresh";
 import { getAccountRouteData, readAccountRouteParams } from "../../../account/_lib/account-route";
 import { accountHref, localProjectHref } from "../../../_lib/urls";
@@ -29,6 +30,7 @@ type ProjectExplorerRecord = Extract<
   NonNullable<Awaited<ReturnType<typeof fetchRecordByUri>>>,
   { kind: "project" }
 >;
+type ProjectStory = Pick<RecordDetail, "blurb" | "richBody">;
 
 type LoadedProject = {
   record: ProjectExplorerRecord | null;
@@ -59,6 +61,20 @@ async function loadProject(params: ProjectPageParams): Promise<LoadedProject> {
     notFound();
   }
   return { record, pendingTitle: null, did, rkey, urlIdentifier };
+}
+
+/** Read the story from the project record itself. The PDS is authoritative and
+ * avoids silently falling back to a summary if the indexer only has partial
+ * collection data. */
+async function loadProjectStory(did: string, rkey: string, atUri: string): Promise<ProjectStory | null> {
+  const pdsRecord = await getPdsRecord(did, COLLECTION, rkey).catch(() => null);
+  const description = pdsRecord?.value.description;
+  if (typeof description === "object" && description !== null && "value" in description) {
+    const value = (description as { value?: unknown }).value;
+    if (typeof value === "string" && value.trim()) return { blurb: value.trim(), richBody: null };
+  }
+  // Preserve Leaflet rich-text support and provide a fallback for PDS outages.
+  return fetchRecordDetail(atUri).catch(() => null);
 }
 
 export async function generateMetadata({ params }: { params: ProjectPageParams }): Promise<Metadata> {
@@ -186,9 +202,10 @@ export default async function ProjectDetailPage({
   const certUri = record.bumicertUris[0] ?? null;
   if (certUri) {
     const certRkey = rkeyFromUri(certUri);
-    const [routeData, origin] = await Promise.all([
+    const [routeData, origin, projectDetail] = await Promise.all([
       certRkey ? loadBumicertRouteData(did, certRkey, urlIdentifier) : Promise.resolve(null),
       getRequestOrigin(),
+      loadProjectStory(did, rkey, record.atUri),
     ]);
 
     if (routeData) {
@@ -219,6 +236,7 @@ export default async function ProjectDetailPage({
             // Observation datasets filed under this project — their sightings
             // are the project's evidence too.
             projectDatasetUris={record.datasetUris}
+            projectDetail={projectDetail}
             // Like + comment target the project (collection) record, so the count
             // matches the activity feed (which folds Certs into their project).
             engagementSubjectUri={record.atUri}
@@ -243,10 +261,11 @@ async function ProjectFallback({
   rkey: string;
   urlIdentifier: string;
 }) {
-  const [t, owner, origin] = await Promise.all([
+  const [t, owner, origin, projectDetail] = await Promise.all([
     getTranslations("marketplace.projectPage"),
     getAccountRouteData(did, urlIdentifier).catch(() => null),
     getRequestOrigin(),
+    loadProjectStory(did, rkey, record.atUri),
   ]);
 
   if (owner && owner.urlIdentifier !== urlIdentifier) {
@@ -255,6 +274,7 @@ async function ProjectFallback({
 
   const ownerIdentifier = owner?.urlIdentifier ?? urlIdentifier;
   const ownerName = owner?.displayName ?? record.creatorName ?? "";
+  const description = projectDetail?.blurb ?? record.shortDescription;
   const projectHref = localProjectHref(ownerIdentifier, rkey);
   const breadcrumbJsonLd = buildProjectBreadcrumbJsonLd(origin, projectHref, t("back"), record.title);
 
@@ -303,9 +323,13 @@ async function ProjectFallback({
               )}
             </div>
 
-            {record.shortDescription ? (
+            {projectDetail?.richBody && projectDetail.richBody.length > 0 ? (
+              <div className="mt-6 max-w-3xl">
+                <RichText blocks={projectDetail.richBody} className="text-base leading-7 md:text-lg md:leading-8" />
+              </div>
+            ) : description ? (
               <p className="mt-6 max-w-3xl whitespace-pre-line text-base leading-7 text-foreground/80 md:text-lg md:leading-8">
-                {record.shortDescription}
+                {description}
               </p>
             ) : (
               <p className="mt-6 max-w-2xl text-[15px] leading-[1.6] text-foreground/60">{t("noCerts")}</p>

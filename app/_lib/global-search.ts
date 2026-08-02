@@ -14,7 +14,7 @@
  */
 
 import {
-  fetchHiddenAccountDids,
+  fetchPublicHiddenAccountDids,
   fetchProjects,
   searchAccountsByName,
   walkOccurrences,
@@ -103,10 +103,11 @@ export async function searchEverything(
   const q = query.trim();
   if (q.length < MIN_QUERY_LENGTH) return EMPTY_RESULTS;
 
-  // Accounts a steward flagged as "test" never surface in search — neither the
-  // accounts themselves nor any of their projects / observations. Resolved once
-  // (cached) and applied as a final guard over every stream's results.
-  const hidden = await fetchHiddenAccountDids(signal).catch(() => new Set<string>());
+  // Accounts a steward flagged as "test", and accounts hosted on a blocked
+  // server address, never surface in search — neither the accounts themselves
+  // nor any of their projects / observations. Resolved once (cached) and
+  // applied as a final guard over every stream's results.
+  const hidden = await fetchPublicHiddenAccountDids(signal).catch(() => new Set<string>());
 
   const [projectResult, orgResult, observationResult] = await Promise.allSettled([
     fetchProjects(PER_KIND_CAP, null, signal, undefined, {

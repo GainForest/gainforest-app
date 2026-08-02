@@ -23,6 +23,9 @@ const env = {
   ...process.env,
   E2E_PORT: port,
   NEXT_PUBLIC_AUTH_PROVIDER: process.env.NEXT_PUBLIC_AUTH_PROVIDER || "certs",
+  // The suite's disposable accounts live on the development server the app
+  // blocks by default, so nothing is blocked during an e2e run.
+  NEXT_PUBLIC_BLOCKED_PDS_DOMAINS: process.env.NEXT_PUBLIC_BLOCKED_PDS_DOMAINS ?? "",
 };
 
 const children = [];

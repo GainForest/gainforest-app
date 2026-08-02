@@ -2,6 +2,7 @@ import { headers } from "next/headers";
 import { getCertifiedProfileCard } from "@/app/account/_lib/account-route";
 import { fetchIndexedCertifiedProfileCards, type IndexedCertifiedProfileCard } from "@/app/_lib/indexer";
 import { getAuthBaseUrl, getAuthForwardCookie } from "@/app/_lib/auth";
+import { relayUpstreamCookies } from "@/app/_lib/upstream-cookies";
 import { LANGUAGE_COOKIE_NAME, isSupportedLanguageCode } from "@/lib/i18n/languages";
 import { LOCALE_REQUEST_HEADER_NAME } from "@/lib/i18n/routing";
 
@@ -107,12 +108,5 @@ export async function GET(request: Request) {
     },
   });
 
-  const getSetCookie = (upstream.headers as Headers & { getSetCookie?: () => string[] }).getSetCookie;
-  const setCookies = typeof getSetCookie === "function" ? getSetCookie.call(upstream.headers) : [];
-  const fallbackSetCookie = upstream.headers.get("set-cookie");
-  for (const cookieValue of setCookies.length > 0 ? setCookies : fallbackSetCookie ? [fallbackSetCookie] : []) {
-    response.headers.append("set-cookie", cookieValue);
-  }
-
-  return response;
+  return relayUpstreamCookies(upstream, response);
 }

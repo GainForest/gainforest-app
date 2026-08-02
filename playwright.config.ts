@@ -38,6 +38,9 @@ if (authBaseUrl) {
   process.env.NEXT_PUBLIC_AUTH_BASE_URL = authBaseUrl.replace(/\/$/, "");
 }
 process.env.NEXT_PUBLIC_AUTH_PROVIDER ??= "certs";
+// The suite's disposable accounts live on the very server the app blocks by
+// default, so the public surfaces must not filter them out during a run.
+process.env.NEXT_PUBLIC_BLOCKED_PDS_DOMAINS ??= "";
 
 function getConfiguredWorkers(): number | undefined {
   const configured = process.env.E2E_WORKERS;

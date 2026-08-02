@@ -2,6 +2,7 @@ import { headers } from "next/headers";
 import { NextResponse } from "next/server";
 import { fetchAuthSession } from "@/app/_lib/auth-server";
 import { getAuthBaseUrl } from "@/app/_lib/auth";
+import { relayUpstreamCookies } from "@/app/_lib/upstream-cookies";
 
 export const dynamic = "force-dynamic";
 
@@ -20,7 +21,9 @@ export async function POST() {
       headers: cookie ? { cookie } : undefined,
     });
     const result = await upstream.json().catch(() => ({ error: "Invalid response from auth server" }));
-    return NextResponse.json(result, { status: upstream.status });
+    // The auth service may refresh the session here (it backfills the account
+    // email the first time it resolves it) — pass the cookie on.
+    return relayUpstreamCookies(upstream, NextResponse.json(result, { status: upstream.status }));
   } catch (error) {
     const message = error instanceof Error ? error.message : "Failed to send reset email";
     return NextResponse.json({ error: message }, { status: 502 });

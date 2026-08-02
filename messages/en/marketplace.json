@@ -1780,6 +1780,12 @@
         "confirm": "Delete project",
         "error": "Project could not be deleted."
       },
+      "discardModal": {
+        "title": "Discard this project?",
+        "description": "Closing this window will delete the progress of your project creation.",
+        "keepEditing": "Keep editing",
+        "discard": "Discard progress"
+      },
       "wizard": {
         "back": "Back",
         "next": "Next",

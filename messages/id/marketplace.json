@@ -1780,6 +1780,12 @@
         "confirm": "Hapus proyek",
         "error": "Proyek tidak dapat dihapus."
       },
+      "discardModal": {
+        "title": "Buang proyek ini?",
+        "description": "Menutup jendela ini akan menghapus progres pembuatan proyek Anda.",
+        "keepEditing": "Lanjutkan mengedit",
+        "discard": "Buang progres"
+      },
       "wizard": {
         "back": "Kembali",
         "next": "Lanjut",

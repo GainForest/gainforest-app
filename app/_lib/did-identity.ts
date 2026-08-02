@@ -7,9 +7,12 @@
  * PDS, certified.one by default) are candidates for showing the member's
  * email instead — the email itself comes from other, access-gated sources.
  *
- * Server-side only. Results are cached per DID for the lifetime of the
- * process; concurrent lookups of the same DID share one request.
+ * Server-side only. Results are cached per DID for a few minutes (a handle can
+ * change at any time, so the cache must expire); concurrent lookups of the same
+ * DID share one request.
  */
+
+import { cachedAsync, invalidateCachedAsyncByPrefix } from "./async-cache";
 
 export type DidIdentity = {
   handle: string | null;
@@ -18,7 +21,11 @@ export type DidIdentity = {
 
 const EMPTY_IDENTITY: DidIdentity = { handle: null, pdsHost: null };
 
-const identityCache = new Map<string, Promise<DidIdentity>>();
+const CACHE_PREFIX = "did-identity:";
+/** How long a looked-up identity is reused. Must stay SHORTER than the
+ *  username-change marker window in `auth.ts` — see the note there. Asserted by
+ *  a test, so raising this alone will fail the build. */
+export const IDENTITY_CACHE_TTL_MS = 5 * 60 * 1000;
 
 type DidDocument = {
   alsoKnownAs?: unknown;
@@ -39,7 +46,10 @@ async function lookupDidIdentity(did: string): Promise<DidIdentity> {
   const url = didDocumentUrl(did);
   if (!url) return EMPTY_IDENTITY;
 
-  const response = await fetch(url, { cache: "no-store" });
+  // This sits on the critical path of every signed-in request (the session's
+  // username is reconciled against the DID document), so a hung directory must
+  // not hang the page — time out and fall back to the session's username.
+  const response = await fetch(url, { cache: "no-store", signal: AbortSignal.timeout(5000) });
   if (!response.ok) return EMPTY_IDENTITY;
   const doc = (await response.json().catch(() => null)) as DidDocument | null;
   if (!doc) return EMPTY_IDENTITY;
@@ -62,19 +72,25 @@ async function lookupDidIdentity(did: string): Promise<DidIdentity> {
   return { handle, pdsHost };
 }
 
-export function resolveDidIdentity(did: string): Promise<DidIdentity> {
+/**
+ * `freshness` (optional) is folded into the cache key: pass a value that
+ * changes when the caller knows the identity just changed (the username-change
+ * cookie), and instances still holding the pre-change identity under the old
+ * key will look it up again instead of serving it for the rest of the TTL.
+ */
+export function resolveDidIdentity(did: string, freshness?: string | null): Promise<DidIdentity> {
   if (!did.startsWith("did:")) return Promise.resolve(EMPTY_IDENTITY);
-  let promise = identityCache.get(did);
-  if (!promise) {
-    const lookup = lookupDidIdentity(did).catch(() => {
-      // Network failure: drop the entry so a later call can retry.
-      if (identityCache.get(did) === lookup) identityCache.delete(did);
-      return EMPTY_IDENTITY;
-    });
-    promise = lookup;
-    identityCache.set(did, promise);
-  }
-  return promise;
+  const key = freshness ? `${CACHE_PREFIX}${did}:${freshness}` : `${CACHE_PREFIX}${did}`;
+  // A rejected loader drops itself from the cache, so a later call can retry.
+  return cachedAsync(key, IDENTITY_CACHE_TTL_MS, () => lookupDidIdentity(did)).catch(() => EMPTY_IDENTITY);
+}
+
+/** Forget the cached identity for one DID. Called right after the user changes
+ *  their username so this instance re-reads it at once instead of after the
+ *  TTL. Other serverless instances keep their copy for up to the TTL — the
+ *  page the user is on updates client-side, so they still see the change. */
+export function forgetDidIdentity(did: string): void {
+  invalidateCachedAsyncByPrefix(`${CACHE_PREFIX}${did}`);
 }
 
 /** Hosts that identify the configured ePDS (email-first PDS). */

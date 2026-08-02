@@ -5,7 +5,6 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
 import {
-  ArchiveIcon,
   ArrowRightIcon,
   BinocularsIcon,
   CheckIcon,
@@ -19,7 +18,6 @@ import {
   MailIcon,
   PlusIcon,
   SettingsIcon,
-  ShieldCheckIcon,
   SparklesIcon,
   UserIcon,
   Building2Icon,
@@ -38,7 +36,6 @@ import { accountIdentifierFromManagePath, type ManageAccountKind } from "@/lib/l
 import { stripLocaleFromPathname } from "@/lib/i18n/routing";
 import {
   accountObservationsPath,
-  accountOrganizationsPath,
   accountPath,
   accountProjectsPath,
   accountSettingsPath,
@@ -1066,24 +1063,6 @@ function AuthenticatedMenu({
               </Link>
 
               {/* General options — apply to the signed-in user */}
-              <Link
-                href={accountOrganizationsPath(personalIdentifier)}
-                onClick={() => setOpen(false)}
-                className="flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-sm text-foreground transition-colors hover:bg-muted/60"
-              >
-                <ShieldCheckIcon className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
-                {sidebarT("profileRow.myOrganizations")}
-              </Link>
-
-              <Link
-                href="/submit-data"
-                onClick={() => setOpen(false)}
-                className="flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-sm text-foreground transition-colors hover:bg-muted/60"
-              >
-                <ArchiveIcon className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
-                {sidebarT("profileRow.submitData")}
-              </Link>
-
               {adminHref ? (
                 <Link
                   href={adminHref}

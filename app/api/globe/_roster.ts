@@ -12,8 +12,8 @@
  */
 
 import {
-  fetchHiddenAccountDids,
   fetchMaEarthOrganizationDids,
+  fetchPublicHiddenAccountDids,
   indexerQuery,
   isLikelyTestRecordName,
 } from "../../_lib/indexer";
@@ -165,7 +165,7 @@ export async function fetchGlobeRoster(): Promise<GlobeRoster> {
   const [certifiedOrgs, maEarthDids, hidden] = await Promise.all([
     fetchCertifiedOrgs(),
     fetchMaEarthDidsWithRetry(),
-    fetchHiddenAccountDids().catch(() => new Set<string>()),
+    fetchPublicHiddenAccountDids().catch(() => new Set<string>()),
   ]);
 
   const orgs = certifiedOrgs ?? [];

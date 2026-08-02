@@ -157,7 +157,6 @@
       "myProjects": "Miradi yangu",
       "myOrganizations": "Mashirika yangu",
       "admin": "Msimamizi",
-      "submitData": "Tuma data ya uwandani",
       "personalAccount": "Akaunti binafsi",
       "organizationAccount": "Akaunti ya shirika",
       "myCards": "Kadi Zangu"
@@ -1278,7 +1277,8 @@
       "endorsers": "Wadhamini",
       "awardEndorsements": "Toa idhini",
       "facilitator": "Pochi ya uwezeshaji",
-      "dataJobs": "Makundi ya data"
+      "dataJobs": "Makundi ya data",
+      "blockedDomains": "Anwani zilizozuiwa"
     },
     "unnamed": "Akaunti isiyo na jina",
     "awardHint": "Fungua wasifu ili kutoa beji.",
@@ -1327,6 +1327,31 @@
       "finalized": "Raundi hii ya BioBlitz imekwisha, kwa hivyo uhesabuji hauwezi kubadilishwa tena.",
       "add": "Mabadiliko ya uhesabuji wa kila wiki hayakuweza kuhifadhiwa. Jaribu tena.",
       "remove": "Akaunti haikuweza kurudishwa kwenye msimamo. Jaribu tena."
+    }
+  },
+  "adminBlockedDomains": {
+    "title": "Anwani zilizozuiwa",
+    "description": "Anwani za seva ambazo akaunti zake huzuiwa kuonekana kwenye tovuti ya umma. Kila kitu wanachochapisha — mashirika, miradi, uchunguzi, machapisho — hufichwa kwenye kivinjari, utafutaji, dunia, mlisho na kila hesabu ya umma.",
+    "effect": "Kuzuia anwani huficha kila kilichochapishwa kutoka kwake. Hakuna kinachofutwa: akaunti na kumbukumbu zake hubaki kwenye seva yao, na ukiondoa zuio vinarudi.",
+    "domainLabel": "Anwani ya seva",
+    "domainPlaceholder": "dev.mfano.org",
+    "add": "Zuia anwani",
+    "adding": "Inazuia…",
+    "builtinBadge": "Imezuiwa daima",
+    "accountCount": "{count, plural, one {akaunti #} other {akaunti #}}",
+    "accountsUnknown": "Idadi ya akaunti haipatikani",
+    "empty": "Hakuna anwani iliyozuiwa kwa sasa.",
+    "unavailable": "Orodha ya anwani zilizozuiwa haikuweza kupakiwa kwa usalama. Jaribu tena kabla ya kufanya mabadiliko.",
+    "permissionNotice": "Ni wanachama wa timu ya usimamizi pekee wanaoweza kubadilisha anwani zilizozuiwa.",
+    "propagationHint": "Mabadiliko hufika kwenye tovuti ya umma ndani ya dakika chache.",
+    "removeLabel": "Ondoa zuio la {domain}",
+    "errors": {
+      "notSignedIn": "Ingia tena ili kuendelea.",
+      "forbidden": "Huna ruhusa ya kubadilisha anwani zilizozuiwa.",
+      "invalidDomain": "Weka anwani halali ya seva, kama dev.mfano.org.",
+      "alreadyBuiltin": "Anwani hiyo imezuiwa daima na haiwezi kubadilishwa hapa.",
+      "add": "Anwani haikuweza kuzuiwa. Tafadhali jaribu tena.",
+      "remove": "Zuio la anwani halikuweza kuondolewa. Tafadhali jaribu tena."
     }
   },
   "adminTaina": {
@@ -2068,6 +2093,7 @@
       "groupNameRequired": "Ipe jina upakiaji huu kwanza.",
       "folderTitle": "Rekodi hizi ziwekwe wapi?",
       "folderExistingHelp": "Ziongeze kwenye folda uliyo nayo tayari, ili kila kitu cha eneo hili kibaki pamoja.",
+      "folderResumedHelp": "Tayari una folda yenye jina hili, hivyo rekodi hizi zitaingia humo badala ya kuanzisha folda mpya.",
       "folderExistingAction": "Chagua folda iliyopo",
       "folderNewAction": "Folda mpya",
       "folderSearchPlaceholder": "Tafuta folda zako",
@@ -3312,7 +3338,32 @@
     "identificationsIncluded": "{count, plural, one {Hii inajumuisha utambulisho # uliohifadhiwa, ambao pia utafutwa.} other {Hii inajumuisha utambulisho # uliohifadhiwa, ambao pia utafutwa.}}",
     "deleteProgress": "Inafuta… {done} kati ya {total}",
     "deletePartial": "{count, plural, one {Rekodi #} other {Rekodi #}} haikuweza kufutwa, hivyo folda imebaki. Tafadhali jaribu tena.",
-    "deleteFailed": "Folda haikuweza kufutwa. Tafadhali jaribu tena."
+    "deleteFailed": "Folda haikuweza kufutwa. Tafadhali jaribu tena.",
+    "addToProject": {
+      "action": "Ongeza kwenye mradi",
+      "title": "Ongeza “{name}” kwenye mradi",
+      "body": "Folda inajiunga na ratiba ya ushahidi ya mradi — rekodi zake zinabaki pale zilipo.",
+      "noteLabel": "Kidokezo (hiari)",
+      "notePlaceholder": "Rekodi hizi zinaonyesha nini?",
+      "defaultNote": "{count, plural, =0 {Folda ya kinasa sauti.} one {Folda ya kinasa sauti yenye rekodi #.} other {Folda ya kinasa sauti yenye rekodi #.}}",
+      "untitledProject": "Mradi usio na jina",
+      "loading": "Inapakia miradi yako…",
+      "loadError": "Miradi yako haikuweza kupakiwa. Jaribu tena baada ya muda mfupi.",
+      "empty": "Bado huna mradi — unda mmoja hapa chini.",
+      "searchPlaceholder": "Tafuta miradi yako",
+      "newProject": "Mradi mpya",
+      "newProjectTitleLabel": "Jina la mradi",
+      "newProjectTitlePlaceholder": "mf. Urejeshaji wa kingo za mto",
+      "newProjectTitleRequired": "Ipe mradi jina la angalau herufi 3.",
+      "createAndAdd": "Unda na uongeze",
+      "creating": "Inaunda…",
+      "addedTitle": "Imeongezwa kwenye ratiba",
+      "addedBody": "“{name}” sasa iko kwenye ratiba ya ushahidi ya {project}.",
+      "viewProject": "Fungua mradi",
+      "close": "Funga",
+      "cancel": "Ghairi",
+      "failed": "Folda haikuweza kuongezwa. Tafadhali jaribu tena."
+    }
   },
   "hypercerts": {
     "metaTitle": "Kujenga juu ya leksikoni za Hypercerts — GainForest",

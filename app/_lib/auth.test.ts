@@ -46,3 +46,22 @@ describe("getAuthForwardCookie", () => {
     );
   });
 });
+
+describe("getHandleChangeFreshness", () => {
+  it("accepts a recent marker and buckets it", async () => {
+    const { getHandleChangeFreshness } = await loadAuth();
+    const now = Date.now();
+    const value = getHandleChangeFreshness(`gainforest_handle_changed=${now}`);
+    expect(value).toBe(String(Math.floor(now / 30_000)));
+  });
+
+  it("ignores a missing, malformed, expired, or future marker", async () => {
+    const { getHandleChangeFreshness } = await loadAuth();
+    const now = Date.now();
+    expect(getHandleChangeFreshness(null)).toBeNull();
+    expect(getHandleChangeFreshness("theme=dark")).toBeNull();
+    expect(getHandleChangeFreshness("gainforest_handle_changed=garbage")).toBeNull();
+    expect(getHandleChangeFreshness(`gainforest_handle_changed=${now - 16 * 60_000}`)).toBeNull();
+    expect(getHandleChangeFreshness(`gainforest_handle_changed=${now + 5 * 60_000}`)).toBeNull();
+  });
+});
