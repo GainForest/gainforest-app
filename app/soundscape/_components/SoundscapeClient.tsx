@@ -107,6 +107,10 @@ type LibraryRecording = {
 
 const ALL_DATES = "all";
 
+/** Stamped faintly over the dial of a downloaded soundscape, so the picture
+ *  still says where it came from if its edges are trimmed. */
+const SOUNDSCAPE_WATERMARK_SRC = "/decor/gainforest-logo.svg";
+
 /** Group id for recordings that carry no `deploymentRef` (uploaded before
  *  folders existed — today's uploader always puts recordings in a folder). */
 const UNASSIGNED_GROUP = "unassigned";
@@ -864,23 +868,52 @@ export function SoundscapeClient({ sessionDid }: { sessionDid: string | null }) 
         image.onerror = () => reject(new Error("SVG rasterization failed"));
         image.src = url;
       });
-      /* A small credit strip below the clock, so the image still names its
-         source once it travels into a report or a slide deck. It lives in
-         added canvas space — the clock itself is never covered. */
-      const creditHeight = 56;
+      /* The image should still name its source after it has travelled into a
+         report or a slide deck, including if somebody trims its edges. So the
+         credit is carried twice, both inside the picture: once faintly across
+         the dial, where it cannot be cropped away without taking the chart
+         with it, and once as a readable line at the foot of the canvas. */
       const canvas = document.createElement("canvas");
       canvas.width = 1440;
-      canvas.height = 1440 + creditHeight;
+      canvas.height = 1440;
       const context = canvas.getContext("2d");
       if (!context) return;
       context.fillStyle = "#ffffff";
       context.fillRect(0, 0, canvas.width, canvas.height);
       context.drawImage(image, 0, 0, 1440, 1440);
-      context.fillStyle = "#64748b";
-      context.font = "500 26px ui-sans-serif, system-ui, sans-serif";
+
       context.textAlign = "center";
       context.textBaseline = "middle";
-      context.fillText(t("chart.credit"), canvas.width / 2, 1440 + creditHeight / 2 - 8);
+
+      /* Best effort: a logo that will not load must not cost the download. */
+      const mark = new Image();
+      const markLoaded = await new Promise<boolean>((resolve) => {
+        mark.onload = () => resolve(true);
+        mark.onerror = () => resolve(false);
+        mark.src = SOUNDSCAPE_WATERMARK_SRC;
+      });
+      if (markLoaded) {
+        /* The dial's empty centre: clean background, so the mark stays legible,
+           and nothing can trim it off without cutting the chart in half. The
+           centre comes from the SVG's own viewBox, so it stays right if the
+           chart's layout ever changes; the size matches the centre hole
+           (INNER_RADIUS 34 of 760 view units ≈ 0.089 of the width). */
+        const vb = svg.viewBox.baseVal;
+        const scale = canvas.width / vb.width;
+        const cx = (vb.x + vb.width / 2) * scale;
+        const cy = (vb.y + vb.height / 2) * scale;
+        const size = Math.round(canvas.width * 0.089);
+        context.save();
+        context.globalAlpha = 0.45;
+        context.drawImage(mark, cx - size / 2, cy - size / 2, size, size);
+        context.restore();
+      }
+
+      /* Bottom right, clear of the chart's own centred time-axis label. */
+      context.textAlign = "right";
+      context.fillStyle = "#64748b";
+      context.font = "500 24px ui-sans-serif, system-ui, sans-serif";
+      context.fillText(t("chart.credit"), canvas.width - 28, 1416);
       const anchor = document.createElement("a");
       anchor.href = canvas.toDataURL("image/png");
       anchor.download = `soundscape-${chartDateLabel || "clock"}.png`;
