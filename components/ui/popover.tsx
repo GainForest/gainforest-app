@@ -5,6 +5,10 @@ import { cn } from "@/lib/utils";
 
 const Popover = PopoverPrimitive.Root;
 const PopoverTrigger = PopoverPrimitive.Trigger;
+/** Positions the popover against an element that is not the trigger — for
+ *  cases that drive `open` themselves (hover on a pointer, tap on a touch
+ *  screen) and so must not inherit the trigger's own click toggle. */
+const PopoverAnchor = PopoverPrimitive.Anchor;
 
 function PopoverContent({
   className,
@@ -29,4 +33,4 @@ function PopoverContent({
   );
 }
 
-export { Popover, PopoverTrigger, PopoverContent };
+export { Popover, PopoverAnchor, PopoverTrigger, PopoverContent };
