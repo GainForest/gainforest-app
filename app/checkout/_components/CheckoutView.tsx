@@ -1008,7 +1008,13 @@ export function CheckoutView({
           </Button>
           {paying ? <p className="mt-2 text-center text-xs text-muted-foreground">{t("doNotClose")}</p> : null}
           {!paying ? (
-            <p className="mt-3 text-center text-xs leading-5 text-muted-foreground">{t("footerNote")}</p>
+            <p className="mt-3 text-center text-xs leading-5 text-muted-foreground">
+              {/* Names the donation figure from the summary above, so "100%"
+                 can't be read as covering the tip or the larger total. */}
+              {tipEnabled && tipUsd > 0
+                ? t("footerNoteWithTip", { amount: `$${subtotalUsd.toFixed(2)}`, tip: `$${tipUsd.toFixed(2)}` })
+                : t("footerNote", { amount: `$${subtotalUsd.toFixed(2)}` })}
+            </p>
           ) : null}
         </section>
       </div>
