@@ -28,7 +28,6 @@ import {
   GLOBE_INITIAL_ZOOM,
   GLOBE_TITILER_ENDPOINT,
   LANDCOVER_TILES_URL,
-  MA_EARTH_LOGO_URL,
   ORG_LOCATION_COLOR,
   PROJECT_SITE_COLOR,
   globeMapStyle,
@@ -37,7 +36,6 @@ import { resolveLayerUrl } from "../_lib/layers";
 import { treeDbh, treeDetail, treeHeight, treeSpeciesName, type TreeDetail } from "../_lib/trees";
 import {
   DEFAULT_BADGE_ID,
-  MA_EARTH_BADGE_ID,
   buildCircleBadge,
   buildDefaultBadge,
   loadHtmlImage,
@@ -398,11 +396,7 @@ export function GlobeMap({
         .filter((org) => typeof org.lat === "number" && typeof org.lon === "number")
         .map((org) => {
           const hasLogo = logoStatusRef.current.get(org.did) === "loaded";
-          const iconId = hasLogo
-            ? orgLogoImageId(org.did)
-            : org.maEarth
-              ? MA_EARTH_BADGE_ID
-              : DEFAULT_BADGE_ID;
+          const iconId = hasLogo ? orgLogoImageId(org.did) : DEFAULT_BADGE_ID;
           return {
             type: "Feature" as const,
             geometry: { type: "Point" as const, coordinates: [org.lon as number, org.lat as number] },
@@ -749,35 +743,33 @@ export function GlobeMap({
 
       // Organization markers: each org's own logo, cropped into a small
       // circular badge. Orgs without a resolvable avatar fall back to a
-      // GainForest mark (or a Ma Earth mark for badge holders) at the same
-      // compact size, drawn client-side so no extra pin assets are needed.
+      // neutral, unbranded dot badge at the same compact size, drawn
+      // client-side so no extra pin assets are needed.
       map.addSource(MARKER_SOURCE, { type: "geojson", data: EMPTY_FEATURE_COLLECTION });
-      Promise.all([Promise.resolve(buildDefaultBadge()), loadHtmlImage(MA_EARTH_LOGO_URL).then((img) => buildCircleBadge(img, "cover"))])
-        .then(([defaultBadge, maEarthBadge]) => {
-          if (!map.hasImage(DEFAULT_BADGE_ID)) {
-            map.addImage(DEFAULT_BADGE_ID, defaultBadge.image, { pixelRatio: defaultBadge.pixelRatio });
-          }
-          if (!map.hasImage(MA_EARTH_BADGE_ID)) {
-            map.addImage(MA_EARTH_BADGE_ID, maEarthBadge.image, { pixelRatio: maEarthBadge.pixelRatio });
-          }
-          if (!map.getLayer(MARKER_LAYER)) {
-            map.addLayer({
-              id: MARKER_LAYER,
-              type: "symbol",
-              source: MARKER_SOURCE,
-              layout: {
-                "icon-image": ["get", "iconId"],
-                "icon-size": 1,
-                "icon-allow-overlap": true,
-                "icon-anchor": "center",
-              },
-            });
-          }
-          // Any orgs whose source data was set before the layer/fallback
-          // badges existed need their iconId re-resolved now that they do.
-          setMarkerData();
-        })
-        .catch((error) => console.warn("[globe] marker badges failed", error));
+      try {
+        const defaultBadge = buildDefaultBadge();
+        if (!map.hasImage(DEFAULT_BADGE_ID)) {
+          map.addImage(DEFAULT_BADGE_ID, defaultBadge.image, { pixelRatio: defaultBadge.pixelRatio });
+        }
+        if (!map.getLayer(MARKER_LAYER)) {
+          map.addLayer({
+            id: MARKER_LAYER,
+            type: "symbol",
+            source: MARKER_SOURCE,
+            layout: {
+              "icon-image": ["get", "iconId"],
+              "icon-size": 1,
+              "icon-allow-overlap": true,
+              "icon-anchor": "center",
+            },
+          });
+        }
+        // Any orgs whose source data was set before the layer/fallback badge
+        // existed need their iconId re-resolved now that they do.
+        setMarkerData();
+      } catch (error) {
+        console.warn("[globe] marker badges failed", error);
+      }
 
       // Hover card — only rebuilt when the hovered org changes, not on every
       // mousemove event over the same marker.
