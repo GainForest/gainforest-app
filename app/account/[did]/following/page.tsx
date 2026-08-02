@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import { CanonicalRedirect } from "@/app/account/_components/CanonicalRedirect";
 import { getTranslations } from "next-intl/server";
 import { FollowConnections } from "../../_components/FollowConnections";
 import {
@@ -27,10 +26,6 @@ export async function generateMetadata({ params }: { params: Promise<{ did: stri
 export default async function AccountFollowingPage({ params }: { params: Promise<{ did: string }> }) {
   const { did, urlIdentifier } = await readAccountRouteParams(params);
   const account = await getAccountRouteData(did, urlIdentifier);
-
-  if (urlIdentifier !== account.urlIdentifier) {
-    return <CanonicalRedirect to={accountFollowingPath(account.urlIdentifier)} />;
-  }
 
   return <FollowConnections did={account.did} identifier={account.urlIdentifier} active="following" />;
 }

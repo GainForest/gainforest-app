@@ -1,4 +1,5 @@
 import "server-only";
+import { cachedAsync, invalidateCachedAsyncByPrefix } from "./async-cache";
 import { resolvePdsHost } from "./pds";
 import { resolveInternalBadgeRepoDid } from "@/app/internal/badges/_lib/access";
 import { BADGE_AWARD_COLLECTION, BADGE_DEFINITION_COLLECTION } from "@/app/internal/badges/_lib/badge-records";
@@ -30,6 +31,11 @@ const FALLBACK_GAINFOREST_REPO_DID = "did:plc:yjck2sybksyigp3zvbq7bfki";
 const PUBLISH_BADGE_TITLE = "Published on GainForest";
 const PUBLISH_BADGE_DESCRIPTION = "Organization published its work on the GainForest explore pages.";
 const MAX_AWARD_PAGES = 40;
+/** The listing lookup walks the whole award list in the GainForest repo, and
+ *  the manage → projects page asks on every load. A short cache keeps that off
+ *  the hot path; publishing drops it so the answer flips straight away. */
+const PUBLISH_STATUS_CACHE_PREFIX = "publish-status:";
+const PUBLISH_STATUS_CACHE_MS = 60_000;
 
 export class PublishOrgError extends Error {
   status: number;
@@ -153,13 +159,17 @@ function awardBadgeUri(value: unknown): string | null {
 }
 
 /** True when the GainForest repo already carries a GainForest-badge award for
- *  this account (published, or manually endorsed with the same badge). */
-export async function isPublished(subjectDid: string): Promise<boolean> {
-  const repoDid = await gainforestRepoDid();
-  const definition = await findPublishBadgeDefinition(repoDid);
-  if (!definition) return false;
-  const awards = await listRepoRecords(repoDid, BADGE_AWARD_COLLECTION, MAX_AWARD_PAGES);
-  return awards.some((entry) => awardBadgeUri(entry.value) === definition.uri && awardSubjectDid(entry.value) === subjectDid);
+ *  this account (published, or manually endorsed with the same badge). This is
+ *  a plain read of a public repo, so it answers regardless of whether this
+ *  server is configured to *write* publish awards. */
+export function isPublished(subjectDid: string): Promise<boolean> {
+  return cachedAsync(`${PUBLISH_STATUS_CACHE_PREFIX}${subjectDid}`, PUBLISH_STATUS_CACHE_MS, async () => {
+    const repoDid = await gainforestRepoDid();
+    const definition = await findPublishBadgeDefinition(repoDid);
+    if (!definition) return false;
+    const awards = await listRepoRecords(repoDid, BADGE_AWARD_COLLECTION, MAX_AWARD_PAGES);
+    return awards.some((entry) => awardBadgeUri(entry.value) === definition.uri && awardSubjectDid(entry.value) === subjectDid);
+  });
 }
 
 /** Award the "Published on GainForest" badge to `subjectDid` through CGS.
@@ -196,4 +206,6 @@ export async function publishAccount(subjectDid: string): Promise<void> {
     note: "Published from the GainForest app",
     createdAt: new Date().toISOString(),
   });
+  // The account is listed now; don't let a cached "no" outlive the change.
+  invalidateCachedAsyncByPrefix(PUBLISH_STATUS_CACHE_PREFIX);
 }

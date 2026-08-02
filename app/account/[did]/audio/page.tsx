@@ -1,9 +1,8 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { CanonicalRedirect } from "@/app/account/_components/CanonicalRedirect";
 import { resolveAccountManageAccess } from "@/app/_lib/manage-server";
 import { ObservationsSubNav } from "../../_components/ObservationsSubNav";
-import { accountAudioPath, getAccountRouteData, readAccountRouteParams } from "../../_lib/account-route";
+import { getAccountRouteData, readAccountRouteParams } from "../../_lib/account-route";
 import { AudioSection } from "@/app/(manage)/manage/_sections";
 import { canDeleteRecord } from "@/app/(manage)/manage/_lib/cgs-permissions";
 import { AccountAudioViewer } from "./AccountAudioViewer";
@@ -28,10 +27,6 @@ type PageProps = {
 export default async function AccountAudioPage({ params, searchParams }: PageProps) {
   const { did, urlIdentifier } = await readAccountRouteParams(params);
   const account = await getAccountRouteData(did, urlIdentifier);
-
-  if (urlIdentifier !== account.urlIdentifier) {
-    return <CanonicalRedirect to={accountAudioPath(account.urlIdentifier)} />;
-  }
 
   const access = await resolveAccountManageAccess(account.urlIdentifier);
   if (access.status !== "allowed") notFound();

@@ -1,4 +1,5 @@
 import type { MetadataRoute } from "next";
+import { fetchPubliclyListedDids } from "./_lib/indexer";
 import { INDEXER_URL } from "./_lib/urls";
 import { getRequestOrigin } from "./_lib/request-origin";
 import { SUPPORTED_LOCALES, type SupportedLanguageCode } from "@/lib/i18n/languages";
@@ -9,11 +10,17 @@ export const revalidate = 3600;
 type SitemapEntry = MetadataRoute.Sitemap[number];
 type ChangeFrequency = NonNullable<SitemapEntry["changeFrequency"]>;
 
-// Section pages plus every project detail page: each project page is a
-// crawlable marketplace landing page (server-rendered title, description,
-// OpenGraph, and JSON-LD) carrying the full impact-certificate experience.
-// DID-based URLs redirect (308) to the handle-based canonical, which also
-// carries the canonical <link>.
+// Section pages plus the detail pages of accounts that put themselves on the
+// public explore pages. Each of those project pages is a crawlable marketplace
+// landing page (server-rendered title, description, OpenGraph, and JSON-LD)
+// carrying the full impact-certificate experience. DID-based URLs redirect
+// (308) to the handle-based canonical, which also carries the canonical <link>.
+//
+// Work belonging to an account that hasn't listed itself is left out entirely,
+// and its pages carry a noindex of their own — it stays reachable by link
+// without being offered to search engines. Nature sightings are the exception:
+// they are browsable on /observations no matter who recorded them, so they are
+// public by design and stay in the sitemap.
 const ROUTES: Array<{ path: string; priority: number; changeFrequency: ChangeFrequency }> = [
   { path: "", priority: 1, changeFrequency: "daily" },
   { path: "/observations", priority: 0.8, changeFrequency: "daily" },
@@ -158,9 +165,21 @@ function shouldIncludeObservationDetail(node: SitemapObservationNode): node is S
   return Boolean(node.thumbnailUrl || node.speciesImageUrl || node.imageEvidence?.file?.ref);
 }
 
+/**
+ * Accounts that put themselves on the public explore pages. Only their work is
+ * offered to search engines: everything else stays reachable by link but out of
+ * the sitemap (and carries a noindex on its own page). A failed lookup returns
+ * an empty set, so a bad answer withholds pages rather than exposing them.
+ */
+async function listedDids(): Promise<Set<string>> {
+  return fetchPubliclyListedDids().catch(() => new Set<string>());
+}
+
 async function fetchOrganizationEntries(origin: string): Promise<MetadataRoute.Sitemap> {
   const entries: MetadataRoute.Sitemap = [];
   let after: string | null = null;
+  const listed = await listedDids();
+  if (listed.size === 0) return entries;
 
   try {
     for (let page = 0; page < 5; page += 1) {
@@ -184,6 +203,7 @@ async function fetchOrganizationEntries(origin: string): Promise<MetadataRoute.S
       for (const edge of connection.edges ?? []) {
         const node = edge.node;
         if (!node || !shouldIncludeOrganizationProfile(node)) continue;
+        if (!listed.has(node.did)) continue;
         entries.push(
           ...buildLocalizedEntries({
             origin,
@@ -208,6 +228,8 @@ async function fetchOrganizationEntries(origin: string): Promise<MetadataRoute.S
 async function fetchProjectEntries(origin: string): Promise<MetadataRoute.Sitemap> {
   const entries: MetadataRoute.Sitemap = [];
   let after: string | null = null;
+  const listed = await listedDids();
+  if (listed.size === 0) return entries;
 
   try {
     for (let page = 0; page < 5; page += 1) {
@@ -231,6 +253,7 @@ async function fetchProjectEntries(origin: string): Promise<MetadataRoute.Sitema
       for (const edge of connection.edges ?? []) {
         const node = edge.node;
         if (!node?.did || !node.rkey) continue;
+        if (!listed.has(node.did)) continue;
         entries.push(
           ...buildLocalizedEntries({
             origin,
