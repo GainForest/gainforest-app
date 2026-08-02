@@ -1,3 +1,4 @@
+import { isAccountPubliclyListed } from "@/app/_lib/indexer";
 import { invalidatePublicExploreCache } from "@/app/_lib/public-explore-cache";
 import { PublishOrgError, isPublished, publishAccount, publishingConfigured } from "@/app/_lib/publish-org";
 import { isResponse, resolveManageApiTarget } from "../_lib/target";
@@ -13,18 +14,30 @@ function canPublish(target: ManageTarget): boolean {
   return target.role === "owner" || target.role === "admin";
 }
 
-/** `published` (is this account in the explore lists?) is a plain read of the
- *  public badge repo, so it is answered even when this server can't perform the
- *  change — `available` covers that separately. Otherwise an unconfigured
- *  server would leave people unable to see where they stand. */
+/**
+ * `published` answers the question the card actually asks: is this account in
+ * the explore lists? That is true for anyone the lists are built from — an
+ * account that published itself, and equally one GainForest or a partner
+ * programme badged. Asking only about the self-serve badge would tell hundreds
+ * of already-listed accounts they are not listed.
+ *
+ * It's a plain read of public repos, so it is answered even when this server
+ * can't perform the change — `available` covers that separately. Otherwise an
+ * unconfigured server would leave people unable to see where they stand.
+ */
 export async function GET(request: Request) {
   const target = await resolveManageApiTarget(request);
   if (isResponse(target)) return target;
 
   const available = publishingConfigured();
   try {
-    const published = await isPublished(target.did);
-    return Response.json({ available, published, allowed: canPublish(target) });
+    // The badge index is cached for a day, so a just-published account is
+    // caught by the direct lookup instead.
+    const [selfPublished, listed] = await Promise.all([
+      isPublished(target.did),
+      isAccountPubliclyListed(target.did).catch(() => false),
+    ]);
+    return Response.json({ available, published: selfPublished || listed, allowed: canPublish(target) });
   } catch (error) {
     const status = error instanceof PublishOrgError ? error.status : 500;
     // A failed lookup must not be reported as "not listed": say nothing is known.
