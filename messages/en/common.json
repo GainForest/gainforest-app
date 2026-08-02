@@ -3226,6 +3226,7 @@
       "empty": "Analyzed recordings will appear here as a 24-hour soundscape clock.",
       "emptyHint": "Analyze your uploaded recordings above to begin.",
       "downloadPng": "Download image",
+      "credit": "Made with GainForest · gainforest.app",
       "hoverHint": "Drag around the dial to zoom into those times, and click a time to listen. Use − or “Whole day” to come back out.",
       "hoverHintAllDates": "Drag around the dial to zoom into those times, then pick a recording from the list to listen. Use − or “Whole day” to come back out.",
       "loadingAudio": "Loading {name}…",

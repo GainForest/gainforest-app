@@ -864,14 +864,23 @@ export function SoundscapeClient({ sessionDid }: { sessionDid: string | null }) 
         image.onerror = () => reject(new Error("SVG rasterization failed"));
         image.src = url;
       });
+      /* A small credit strip below the clock, so the image still names its
+         source once it travels into a report or a slide deck. It lives in
+         added canvas space — the clock itself is never covered. */
+      const creditHeight = 56;
       const canvas = document.createElement("canvas");
       canvas.width = 1440;
-      canvas.height = 1440;
+      canvas.height = 1440 + creditHeight;
       const context = canvas.getContext("2d");
       if (!context) return;
       context.fillStyle = "#ffffff";
       context.fillRect(0, 0, canvas.width, canvas.height);
-      context.drawImage(image, 0, 0, canvas.width, canvas.height);
+      context.drawImage(image, 0, 0, 1440, 1440);
+      context.fillStyle = "#64748b";
+      context.font = "500 26px ui-sans-serif, system-ui, sans-serif";
+      context.textAlign = "center";
+      context.textBaseline = "middle";
+      context.fillText(t("chart.credit"), canvas.width / 2, 1440 + creditHeight / 2 - 8);
       const anchor = document.createElement("a");
       anchor.href = canvas.toDataURL("image/png");
       anchor.download = `soundscape-${chartDateLabel || "clock"}.png`;
@@ -881,7 +890,7 @@ export function SoundscapeClient({ sessionDid }: { sessionDid: string | null }) 
     } finally {
       URL.revokeObjectURL(url);
     }
-  }, [chartDateLabel]);
+  }, [chartDateLabel, t]);
 
   if (!sessionDid) {
     return (

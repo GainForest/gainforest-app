@@ -3226,6 +3226,7 @@
       "empty": "Rekaman yang dianalisis akan muncul di sini sebagai jam lanskap suara 24 jam.",
       "emptyHint": "Analisis rekaman terunggah Anda di atas untuk memulai.",
       "downloadPng": "Unduh gambar",
+      "credit": "Dibuat dengan GainForest · gainforest.app",
       "hoverHint": "Seret mengelilingi piringan untuk memperbesar waktu tersebut, dan klik sebuah waktu untuk mendengarkan. Gunakan − atau “Sepanjang hari” untuk kembali.",
       "hoverHintAllDates": "Seret mengelilingi piringan untuk memperbesar waktu tersebut, lalu pilih rekaman dari daftar untuk mendengarkan. Gunakan − atau “Sepanjang hari” untuk kembali.",
       "loadingAudio": "Memuat {name}…",

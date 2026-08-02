@@ -3226,6 +3226,7 @@
       "empty": "As gravações analisadas aparecerão aqui como um relógio de paisagem sonora de 24 horas.",
       "emptyHint": "Analise acima suas gravações enviadas para começar.",
       "downloadPng": "Baixar imagem",
+      "credit": "Feito com GainForest · gainforest.app",
       "hoverHint": "Arraste ao redor do mostrador para ampliar esses horários e clique num horário para ouvir. Use − ou “Dia inteiro” para voltar.",
       "hoverHintAllDates": "Arraste ao redor do mostrador para ampliar esses horários e depois escolha uma gravação da lista para ouvir. Use − ou “Dia inteiro” para voltar.",
       "loadingAudio": "Carregando {name}…",
