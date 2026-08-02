@@ -20,6 +20,7 @@ import {
   CompassIcon,
   CopyIcon,
   HeartHandshakeIcon,
+  InfoIcon,
   LeafIcon,
   Loader2Icon,
   Share2Icon,
@@ -29,6 +30,7 @@ import {
 import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
+import QuickTooltip from "@/components/ui/quick-tooltip";
 import type { AuthSession } from "@/app/_lib/auth";
 import { SocialGlyph } from "@/app/_components/SocialIcon";
 import { blockExplorerUrl } from "@/app/_lib/urls";
@@ -1008,12 +1010,30 @@ export function CheckoutView({
           </Button>
           {paying ? <p className="mt-2 text-center text-xs text-muted-foreground">{t("doNotClose")}</p> : null}
           {!paying ? (
-            <p className="mt-3 text-center text-xs leading-5 text-muted-foreground">
-              {/* Names the donation figure from the summary above, so "100%"
-                 can't be read as covering the tip or the larger total. */}
-              {tipEnabled && tipUsd > 0
-                ? t("footerNoteWithTip", { amount: `$${subtotalUsd.toFixed(2)}`, tip: `$${tipUsd.toFixed(2)}` })
-                : t("footerNote", { amount: `$${subtotalUsd.toFixed(2)}` })}
+            /* Names the donation figure from the summary above, so "100%"
+               can't be read as covering the tip or the larger total. The
+               fee and tip detail sits behind the info button rather than
+               crowding the line. */
+            <p className="mt-3 flex items-center justify-center gap-1.5 text-center text-xs leading-5 text-muted-foreground">
+              <span>{t("footerNote", { amount: `$${subtotalUsd.toFixed(2)}` })}</span>
+              <QuickTooltip
+                asChild
+                contentClassName="max-w-64"
+                content={
+                  <span>
+                    {t("footerInfoFees")}
+                    {tipEnabled && tipUsd > 0 ? ` ${t("footerInfoTip", { tip: `$${tipUsd.toFixed(2)}` })}` : ""}
+                  </span>
+                }
+              >
+                <button
+                  type="button"
+                  aria-label={t("footerInfoLabel")}
+                  className="inline-flex size-4 shrink-0 items-center justify-center rounded-full text-muted-foreground/70 transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
+                >
+                  <InfoIcon className="size-3.5" aria-hidden />
+                </button>
+              </QuickTooltip>
             </p>
           ) : null}
         </section>
