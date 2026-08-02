@@ -47,7 +47,7 @@ export const NAV_ITEMS: NavSection[] = [
   {
     kind: "section",
     id: "commons",
-    text: "THE COMMONS",
+    text: "EXPLORE THE COMMONS",
     items: [
       {
         kind: "leaf",
