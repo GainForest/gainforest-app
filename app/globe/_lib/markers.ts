@@ -8,9 +8,10 @@
  * misattributing sites to GainForest or Ma Earth.
  */
 
-/** Display diameter in CSS pixels — small and unobtrusive vs. the old ~36-42px pins. */
-const ORG_BADGE_SIZE_CSS = 20;
-const ORG_BADGE_RING_CSS = 1.25;
+/** Display diameter in CSS pixels — big enough to read a logo at a glance,
+ *  still well under the old ~36-42px pins. */
+const ORG_BADGE_SIZE_CSS = 26;
+const ORG_BADGE_RING_CSS = 1.5;
 
 export const DEFAULT_BADGE_ID = "orgBadgeDefault";
 
