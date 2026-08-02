@@ -24,18 +24,19 @@
     "trigger": "Tafuta",
     "open": "Fungua utafutaji",
     "title": "Tafuta GainForest",
-    "placeholder": "Tafuta miradi, mashirika, uchunguzi…",
+    "placeholder": "Tafuta miradi, watu, mashirika, uchunguzi…",
     "clear": "Futa utafutaji",
     "escKey": "esc",
     "kinds": {
       "cert": "Certs",
       "project": "Miradi",
+      "person": "Watu",
       "organization": "Mashirika",
       "observation": "Uchunguzi"
     },
     "idle": {
       "headline": "Andika ili kutafuta",
-      "body": "Pata miradi, mashirika na uchunguzi."
+      "body": "Pata miradi, watu, mashirika na uchunguzi."
     },
     "noResults": {
       "headline": "Hakuna matokeo ya “{query}”",

@@ -8,6 +8,7 @@ import {
   SearchIcon,
   XIcon,
   LayersIcon,
+  UserRoundIcon,
   Building2Icon,
   LeafIcon,
   CornerDownLeftIcon,
@@ -28,6 +29,7 @@ const SEARCH_DEBOUNCE_MS = 250;
 
 const KIND_ICON: Record<GlobalSearchKind, LucideIcon> = {
   project: LayersIcon,
+  person: UserRoundIcon,
   organization: Building2Icon,
   observation: LeafIcon,
 };
@@ -399,7 +401,7 @@ function ResultRow({
 }
 
 function ResultThumb({ hit }: { hit: GlobalSearchHit }) {
-  if (hit.kind === "organization") {
+  if (hit.kind === "organization" || hit.kind === "person") {
     return (
       <BumicertOwnerAvatar
         did={hit.did}

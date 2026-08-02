@@ -2,11 +2,13 @@
  * Global search — the data layer behind the top-right ⌘K command palette.
  *
  * Unlike the explore pages (which page a single record stream), the palette
- * searches Projects, Organizations, and Observations at once. Each stream is a
- * thin wrapper over the existing indexer
+ * searches Projects, People, Organizations, and Observations at once. Each
+ * stream is a thin wrapper over the existing indexer
  * fetchers, which already push the user's query down to Hyperindex as a
  * server-side `contains` filter — so this stays a handful of cheap queries
  * per keystroke (debounced upstream) instead of downloading a whole corpus.
+ * Queries that look like an atproto identifier (`@alice.bsky.social`,
+ * `did:plc:…`) additionally resolve to an exact account.
  *
  * Everything runs in the browser, directly against the indexer, exactly like
  * the explore grids. `Promise.allSettled` keeps one slow/failed stream from
@@ -17,6 +19,8 @@ import {
   fetchPublicHiddenAccountDids,
   fetchProjects,
   searchAccountsByName,
+  fetchOrganizationDids,
+  fetchAccountSearchResult,
   walkOccurrences,
   isLikelyTestRecordName,
 } from "./indexer";
@@ -26,7 +30,7 @@ import {
   accountHref,
 } from "./urls";
 
-export type GlobalSearchKind = "project" | "organization" | "observation";
+export type GlobalSearchKind = "project" | "person" | "organization" | "observation";
 
 /** A single result row in the palette. */
 export type GlobalSearchHit = {
@@ -64,10 +68,149 @@ export const MIN_QUERY_LENGTH = 2;
 /** Per-section result cap. Keeps the dropdown compact and the queries light. */
 const PER_KIND_CAP = 5;
 
+/** One account query feeds two sections (people + organizations), so it asks
+ *  for more rows than a single section shows. */
+const ACCOUNT_FETCH_LIMIT = PER_KIND_CAP * 2;
+
 /** Section order in the palette. */
-const KIND_ORDER: GlobalSearchKind[] = ["project", "organization", "observation"];
+const KIND_ORDER: GlobalSearchKind[] = ["project", "person", "organization", "observation"];
 
 const EMPTY_RESULTS: GlobalSearchResults = { sections: [], flat: [], totalCount: 0 };
+
+// ── Accounts (people + organizations) ────────────────────────────────────
+
+type AccountMatch = {
+  did: string;
+  displayName: string | null;
+  avatarRef: string | null;
+  isOrganization: boolean;
+  handle: string | null;
+};
+
+/** Pull an atproto identifier out of the query, if it looks like one: a DID,
+ *  or a handle (`alice.bsky.social`, with or without the leading `@`).
+ *  Free-text names (spaces, no dot) can never resolve, so they're skipped. */
+function identifierFromQuery(query: string): string | null {
+  const cleaned = query.replace(/^@+/, "").trim().toLowerCase();
+  if (cleaned.startsWith("did:")) return cleaned;
+  if (!/^[a-z0-9][a-z0-9-]*(\.[a-z0-9][a-z0-9-]*)+$/.test(cleaned)) return null;
+  return cleaned;
+}
+
+// Handle↔DID lookups hit public, CORS-open identity endpoints directly from
+// the browser (like the rest of the palette) and are cached across keystrokes.
+const didByHandle = new Map<string, Promise<string | null>>();
+const handleByDid = new Map<string, Promise<string | null>>();
+
+const IDENTITY_RESOLVERS = ["https://public.api.bsky.app", "https://bsky.social"];
+
+function resolveHandleToDid(handle: string): Promise<string | null> {
+  let pending = didByHandle.get(handle);
+  if (!pending) {
+    pending = (async () => {
+      for (const base of IDENTITY_RESOLVERS) {
+        const params = new URLSearchParams({ handle });
+        const res = await fetch(`${base}/xrpc/com.atproto.identity.resolveHandle?${params.toString()}`, {
+          headers: { accept: "application/json" },
+          signal: AbortSignal.timeout(4000),
+        }).catch(() => null);
+        if (!res?.ok) continue;
+        const payload = (await res.json().catch(() => null)) as { did?: unknown } | null;
+        if (typeof payload?.did === "string" && payload.did.startsWith("did:")) return payload.did;
+      }
+      return null;
+    })();
+    didByHandle.set(handle, pending);
+    // Let a transient network failure be retried on the next keystroke.
+    pending.then((did) => {
+      if (!did) didByHandle.delete(handle);
+    });
+  }
+  return pending;
+}
+
+/** Best-effort handle for a DID — shown as the result's subtitle so
+ *  same-named accounts stay distinguishable. */
+function fetchHandleForDid(did: string): Promise<string | null> {
+  let pending = handleByDid.get(did);
+  if (!pending) {
+    pending = (async () => {
+      if (did.startsWith("did:web:")) {
+        return did.slice("did:web:".length).split(":")[0] || null;
+      }
+      if (!did.startsWith("did:plc:")) return null;
+      const res = await fetch(`https://plc.directory/${did}`, {
+        headers: { accept: "application/json" },
+        signal: AbortSignal.timeout(2500),
+      }).catch(() => null);
+      if (!res?.ok) return null;
+      const doc = (await res.json().catch(() => null)) as { alsoKnownAs?: unknown } | null;
+      const aka = Array.isArray(doc?.alsoKnownAs) ? doc.alsoKnownAs : [];
+      const first = aka.find((v): v is string => typeof v === "string" && v.startsWith("at://"));
+      return first ? first.slice("at://".length) || null : null;
+    })();
+    handleByDid.set(did, pending);
+    pending.then((handle) => {
+      if (!handle) handleByDid.delete(did);
+    });
+  }
+  return pending;
+}
+
+/** Exact handle/DID lookup: resolve the identifier, then check the indexer
+ *  for that account. Accounts with no presence on the network stay hidden. */
+async function findAccountByIdentifier(
+  query: string,
+  signal?: AbortSignal,
+): Promise<(AccountMatch & { exact: true }) | null> {
+  const identifier = identifierFromQuery(query);
+  if (!identifier) return null;
+  const did = identifier.startsWith("did:") ? identifier : await resolveHandleToDid(identifier);
+  if (!did) return null;
+  const account = await fetchAccountSearchResult(did, signal);
+  if (!account) return null;
+  return { ...account, handle: null, exact: true };
+}
+
+/** Search accounts by display name and by exact handle/DID, split into people
+ *  vs organizations, with handles joined in for subtitles. */
+async function searchAccounts(query: string, signal?: AbortSignal): Promise<AccountMatch[]> {
+  const [byName, exact] = await Promise.all([
+    searchAccountsByName(query, ACCOUNT_FETCH_LIMIT, signal).catch(() => []),
+    findAccountByIdentifier(query, signal).catch(() => null),
+  ]);
+
+  const merged: Array<Omit<AccountMatch, "isOrganization"> & { isOrganization: boolean | null }> = [];
+  const seen = new Set<string>();
+  if (exact) {
+    merged.push(exact);
+    seen.add(exact.did);
+  }
+  for (const account of byName) {
+    if (seen.has(account.did)) continue;
+    seen.add(account.did);
+    merged.push({ ...account, handle: null, isOrganization: null });
+  }
+  if (merged.length === 0) return [];
+
+  // One extra query splits the name matches into people vs organizations;
+  // handles resolve in parallel (cached, best-effort).
+  const unknownDids = merged.filter((m) => m.isOrganization === null).map((m) => m.did);
+  const [orgDids, handles] = await Promise.all([
+    unknownDids.length > 0
+      ? fetchOrganizationDids(unknownDids, signal).catch(() => new Set<string>())
+      : Promise.resolve(new Set<string>()),
+    Promise.all(merged.map((m) => fetchHandleForDid(m.did).catch(() => null))),
+  ]);
+
+  return merged.map((m, i) => ({
+    did: m.did,
+    displayName: m.displayName,
+    avatarRef: m.avatarRef,
+    isOrganization: m.isOrganization ?? orgDids.has(m.did),
+    handle: handles[i],
+  }));
+}
 
 function observationTitle(record: {
   vernacularName: string | null;
@@ -109,12 +252,12 @@ export async function searchEverything(
   // applied as a final guard over every stream's results.
   const hidden = await fetchPublicHiddenAccountDids(signal).catch(() => new Set<string>());
 
-  const [projectResult, orgResult, observationResult] = await Promise.allSettled([
+  const [projectResult, accountResult, observationResult] = await Promise.allSettled([
     fetchProjects(PER_KIND_CAP, null, signal, undefined, {
       query: q,
       featuredBadgesOnly: false,
     }),
-    searchAccountsByName(q, PER_KIND_CAP, signal),
+    searchAccounts(q, signal),
     walkOccurrences({
       media: "all",
       target: PER_KIND_CAP,
@@ -130,6 +273,7 @@ export async function searchEverything(
 
   const byKind: Record<GlobalSearchKind, GlobalSearchHit[]> = {
     project: [],
+    person: [],
     organization: [],
     observation: [],
   };
@@ -149,14 +293,17 @@ export async function searchEverything(
     }
   }
 
-  if (orgResult.status === "fulfilled") {
-    for (const account of orgResult.value) {
-      if (hidden.has(account.did)) continue;
-      byKind.organization.push({
-        kind: "organization",
+  if (accountResult.status === "fulfilled") {
+    for (const account of accountResult.value) {
+      if (hidden.has(account.did) || isLikelyTestRecordName(account.displayName)) continue;
+      const handle = account.handle ? `@${account.handle}` : null;
+      const title = account.displayName ?? handle;
+      if (!title) continue;
+      byKind[account.isOrganization ? "organization" : "person"].push({
+        kind: account.isOrganization ? "organization" : "person",
         id: account.did,
-        title: account.displayName,
-        subtitle: null,
+        title,
+        subtitle: handle === title ? null : handle,
         href: accountHref(account.did),
         did: account.did,
         avatarRef: account.avatarRef,

@@ -2323,6 +2323,88 @@ export async function searchAccountsByName(
   return results;
 }
 
+const ORG_DIDS_QUERY = `
+  query AccountOrgSplit($dids: [String!], $first: Int!) {
+    appCertifiedActorOrganization(first: $first, where: { did: { in: $dids } }) {
+      edges { node { did } }
+    }
+  }
+`;
+
+/** Of the given account DIDs, the subset that publish a certified organization
+ *  record. Lets account search split its hits into people vs organizations. */
+export async function fetchOrganizationDids(
+  dids: string[],
+  signal?: AbortSignal,
+): Promise<Set<string>> {
+  const out = new Set<string>();
+  if (dids.length === 0) return out;
+  const data = await indexerQuery<{ appCertifiedActorOrganization?: Connection<{ did?: string | null }> }>(
+    ORG_DIDS_QUERY,
+    { dids, first: Math.min(dids.length * 2, 50) },
+    signal,
+  );
+  for (const edge of data?.appCertifiedActorOrganization?.edges ?? []) {
+    const did = edge?.node?.did?.trim();
+    if (did) out.add(did);
+  }
+  return out;
+}
+
+/** An account matched by an exact handle/DID query in search. */
+export type ExactAccountMatch = {
+  did: string;
+  displayName: string | null;
+  avatarRef: string | null;
+  isOrganization: boolean;
+};
+
+const ACCOUNT_BY_DID_QUERY = `
+  query AccountByDid($profile: String!, $org: String!) {
+    profile: appCertifiedActorProfileByUri(uri: $profile) {
+      displayName
+      avatar { __typename ... on OrgHypercertsDefsSmallImage { image { ref } } }
+    }
+    org: appCertifiedActorOrganizationByUri(uri: $org) {
+      did
+      ${CERTIFIED_PROFILE_DATA_FIELDS}
+    }
+  }
+`;
+
+/** Look one account up by DID — powers handle/DID queries typed into search.
+ *  Returns null when the DID has no presence on the network (neither a
+ *  certified profile nor an organization record is indexed). */
+export async function fetchAccountSearchResult(
+  did: string,
+  signal?: AbortSignal,
+): Promise<ExactAccountMatch | null> {
+  const data = await indexerQuery<{
+    profile?: {
+      displayName?: string | null;
+      avatar?: { image?: { ref?: string | null } | null } | null;
+    } | null;
+    org?: { did?: string | null; certifiedProfileData?: CertifiedProfileData } | null;
+  }>(
+    ACCOUNT_BY_DID_QUERY,
+    {
+      profile: `at://${did}/app.certified.actor.profile/self`,
+      org: `at://${did}/app.certified.actor.organization/self`,
+    },
+    signal,
+  );
+  const profile = data?.profile ?? null;
+  const org = data?.org ?? null;
+  if (!profile && !org) return null;
+  return {
+    did,
+    displayName: profile?.displayName?.trim() || profileName(org?.certifiedProfileData),
+    avatarRef:
+      normaliseRef(profile?.avatar?.image?.ref) ?? profileAvatarRef(org?.certifiedProfileData),
+    isOrganization: Boolean(org),
+  };
+}
+
 function mapActivity(n: RawActivity): BumicertRecord {
   let imageUrl: string | null = null;
   let imageRef: string | null = null;
