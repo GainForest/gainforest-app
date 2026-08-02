@@ -19,10 +19,10 @@ import {
   fetchPublicHiddenAccountDids,
   fetchProjects,
   searchAccountsByName,
-  fetchOrganizationDids,
-  fetchAccountSearchResult,
+  fetchAccountCards,
   walkOccurrences,
   isLikelyTestRecordName,
+  type AccountCard,
 } from "./indexer";
 import {
   localProjectHref,
@@ -97,12 +97,14 @@ function identifierFromQuery(query: string): string | null {
   return cleaned;
 }
 
-// Handle↔DID lookups hit public, CORS-open identity endpoints directly from
-// the browser (like the rest of the palette) and are cached across keystrokes.
+// Handle lookups hit public, CORS-open atproto endpoints directly from the
+// browser (like the rest of the palette) and are cached across keystrokes.
 const didByHandle = new Map<string, Promise<string | null>>();
-const handleByDid = new Map<string, Promise<string | null>>();
 
 const IDENTITY_RESOLVERS = ["https://public.api.bsky.app", "https://bsky.social"];
+
+/** Public appview used for handle prefix matching. */
+const APPVIEW_BASE = "https://public.api.bsky.app";
 
 function resolveHandleToDid(handle: string): Promise<string | null> {
   let pending = didByHandle.get(handle);
@@ -129,87 +131,87 @@ function resolveHandleToDid(handle: string): Promise<string | null> {
   return pending;
 }
 
-/** Best-effort handle for a DID — shown as the result's subtitle so
- *  same-named accounts stay distinguishable. */
-function fetchHandleForDid(did: string): Promise<string | null> {
-  let pending = handleByDid.get(did);
-  if (!pending) {
-    pending = (async () => {
-      if (did.startsWith("did:web:")) {
-        return did.slice("did:web:".length).split(":")[0] || null;
-      }
-      if (!did.startsWith("did:plc:")) return null;
-      const res = await fetch(`https://plc.directory/${did}`, {
-        headers: { accept: "application/json" },
-        signal: AbortSignal.timeout(2500),
-      }).catch(() => null);
-      if (!res?.ok) return null;
-      const doc = (await res.json().catch(() => null)) as { alsoKnownAs?: unknown } | null;
-      const aka = Array.isArray(doc?.alsoKnownAs) ? doc.alsoKnownAs : [];
-      const first = aka.find((v): v is string => typeof v === "string" && v.startsWith("at://"));
-      return first ? first.slice("at://".length) || null : null;
-    })();
-    handleByDid.set(did, pending);
-    pending.then((handle) => {
-      if (!handle) handleByDid.delete(did);
-    });
-  }
-  return pending;
-}
-
-/** Exact handle/DID lookup: resolve the identifier, then check the indexer
- *  for that account. Accounts with no presence on the network stay hidden. */
-async function findAccountByIdentifier(
-  query: string,
-  signal?: AbortSignal,
-): Promise<(AccountMatch & { exact: true }) | null> {
+/** Exact handle/DID lookup: resolve the identifier to a DID. */
+async function didFromIdentifierQuery(query: string): Promise<string | null> {
   const identifier = identifierFromQuery(query);
   if (!identifier) return null;
-  const did = identifier.startsWith("did:") ? identifier : await resolveHandleToDid(identifier);
-  if (!did) return null;
-  const account = await fetchAccountSearchResult(did, signal);
-  if (!account) return null;
-  return { ...account, handle: null, exact: true };
+  if (identifier.startsWith("did:")) return identifier;
+  return resolveHandleToDid(identifier);
 }
 
-/** Search accounts by display name and by exact handle/DID, split into people
- *  vs organizations, with handles joined in for subtitles. */
+/**
+ * DIDs whose handle matches the query as a prefix, via the public appview's
+ * actor typeahead.
+ *
+ * The indexer can return an account's handle but cannot search by one, so
+ * partial handles (`sharfyae`) would otherwise find nothing. The appview
+ * indexes handles across the network — including this app's own `certified.one`
+ * accounts — so it fills exactly that gap. Its matches are only *candidates*:
+ * every DID is checked against the indexer afterwards, so accounts with no
+ * presence here never reach the palette.
+ */
+async function didsByHandlePrefix(query: string, limit: number): Promise<string[]> {
+  const q = query.replace(/^@+/, "").trim();
+  if (!q) return [];
+  const params = new URLSearchParams({ q, limit: String(limit) });
+  const res = await fetch(`${APPVIEW_BASE}/xrpc/app.bsky.actor.searchActorsTypeahead?${params.toString()}`, {
+    headers: { accept: "application/json" },
+    signal: AbortSignal.timeout(3000),
+  }).catch(() => null);
+  if (!res?.ok) return [];
+  const payload = (await res.json().catch(() => null)) as
+    | { actors?: Array<{ did?: unknown; handle?: unknown }> }
+    | null;
+  const dids: string[] = [];
+  for (const actor of payload?.actors ?? []) {
+    // Only handle matches are wanted here — display-name matches already come
+    // from the indexer, and the appview's names can disagree with ours.
+    const handle = typeof actor?.handle === "string" ? actor.handle.toLowerCase() : "";
+    if (!handle.includes(q.toLowerCase())) continue;
+    if (typeof actor?.did === "string" && actor.did.startsWith("did:")) dids.push(actor.did);
+  }
+  return dids;
+}
+
+/** Search accounts by display name and by handle (exact or partial), split
+ *  into people vs organizations. */
 async function searchAccounts(query: string, signal?: AbortSignal): Promise<AccountMatch[]> {
-  const [byName, exact] = await Promise.all([
+  const [byName, exactDid, handleDids] = await Promise.all([
     searchAccountsByName(query, ACCOUNT_FETCH_LIMIT, signal).catch(() => []),
-    findAccountByIdentifier(query, signal).catch(() => null),
+    didFromIdentifierQuery(query).catch(() => null),
+    didsByHandlePrefix(query, ACCOUNT_FETCH_LIMIT).catch(() => []),
   ]);
 
-  const merged: Array<Omit<AccountMatch, "isOrganization"> & { isOrganization: boolean | null }> = [];
+  // One round trip covers both open questions: whether each name match is an
+  // organization, and whether each handle match exists on GainForest at all.
+  const allDids = [...new Set([...byName.map((a) => a.did), ...(exactDid ? [exactDid] : []), ...handleDids])];
+  const cards = allDids.length > 0
+    ? await fetchAccountCards(allDids, signal).catch(() => new Map<string, AccountCard>())
+    : new Map<string, AccountCard>();
+
+  const merged: AccountMatch[] = [];
   const seen = new Set<string>();
-  if (exact) {
-    merged.push(exact);
-    seen.add(exact.did);
-  }
+  const push = (match: AccountMatch | undefined) => {
+    if (!match || seen.has(match.did)) return;
+    seen.add(match.did);
+    merged.push(match);
+  };
+
+  // An exactly-typed handle or DID is the most specific thing the user can ask
+  // for, so it leads — then name matches, then partial handle matches.
+  if (exactDid) push(cards.get(exactDid));
   for (const account of byName) {
-    if (seen.has(account.did)) continue;
-    seen.add(account.did);
-    merged.push({ ...account, handle: null, isOrganization: null });
+    push({
+      did: account.did,
+      displayName: account.displayName,
+      avatarRef: account.avatarRef,
+      handle: account.handle ?? cards.get(account.did)?.handle ?? null,
+      isOrganization: cards.get(account.did)?.isOrganization ?? false,
+    });
   }
-  if (merged.length === 0) return [];
+  for (const did of handleDids) push(cards.get(did));
 
-  // One extra query splits the name matches into people vs organizations;
-  // handles resolve in parallel (cached, best-effort).
-  const unknownDids = merged.filter((m) => m.isOrganization === null).map((m) => m.did);
-  const [orgDids, handles] = await Promise.all([
-    unknownDids.length > 0
-      ? fetchOrganizationDids(unknownDids, signal).catch(() => new Set<string>())
-      : Promise.resolve(new Set<string>()),
-    Promise.all(merged.map((m) => fetchHandleForDid(m.did).catch(() => null))),
-  ]);
-
-  return merged.map((m, i) => ({
-    did: m.did,
-    displayName: m.displayName,
-    avatarRef: m.avatarRef,
-    isOrganization: m.isOrganization ?? orgDids.has(m.did),
-    handle: handles[i],
-  }));
+  return merged;
 }
 
 function observationTitle(record: {
