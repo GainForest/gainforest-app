@@ -39,12 +39,12 @@ test("account headers stay compact while Overview owns profile details", async (
   await page.setViewportSize({ width: 1280, height: 900 });
   const accountPath = "/account/t0fl10.certified.one";
 
-  // Every tab shares one compact header — photo, name, facts, actions, and
-  // trust. The Overview carries the description, outward links, and details.
+  // Every tab shares one compact header — photo, name, facts, website, actions,
+  // and trust. The Overview carries the description, social links, and details.
   await page.goto(`${accountPath}/observations`);
   const hero = page.locator("[data-account-hero]");
   await expect(hero).toBeVisible();
-  await expect(hero.getByRole("link", { name: /beesandtreesug\.org/i })).toHaveCount(0);
+  await expect(hero.getByRole("link", { name: /beesandtreesug\.org/i })).toBeVisible();
   await expect(page.locator("[data-account-about]")).toHaveCount(0);
   await expect(page.locator("[data-account-overview-panel]")).toHaveCount(0);
   await expect(page.getByRole("button", { name: /(?:show|hide) profile/i })).toHaveCount(0);
@@ -66,14 +66,14 @@ test("account headers stay compact while Overview owns profile details", async (
   await expect(atAGlanceHeading).toHaveClass(/font-instrument/);
   await expect(atAGlanceHeading).toHaveClass(/italic/);
   await expect(atAGlance.locator("[data-account-overview-bio]")).toBeVisible();
-  // Support belongs to At a glance rather than sitting as an unrelated rail block.
-  await expect(atAGlance.locator("[data-account-overview-support]")).toHaveCount(1);
+  // Support is a two-column tile within At a glance whenever this account can
+  // receive support; it is never an unrelated rail block.
   await expect(profilePanel.locator(":scope > [data-account-overview-support]")).toHaveCount(0);
   await expect(atAGlance.locator("[data-account-stat-tile]")).toHaveCount(4);
   await expect(atAGlance.locator("[data-account-stat-tile] svg")).toHaveCount(4);
   await expect(atAGlance.locator('[data-account-stat-tile="bumicerts"]')).toHaveCount(0);
   await expect(atAGlance.locator('[data-account-stat-tile="supporters"]')).toBeVisible();
-  await expect(atAGlance.locator('[data-account-overview-tile="website"]')).toBeVisible();
+  await expect(atAGlance.locator('[data-account-overview-tile="website"]')).toHaveCount(0);
 
   // Audience counts belong immediately below Follow + share — not in the rail's
   // work/funding tiles.
@@ -116,10 +116,14 @@ test("account Overview stacks its supporting rail before the wide desktop layout
       await expect(statTiles.nth(0)).toHaveClass(/bg-muted/);
       await expect(statTiles.nth(0)).not.toHaveClass(/(?:border|shadow)/);
       await expect(statTiles.nth(0).locator(".font-instrument")).toHaveClass(/italic/);
-      await expect(statTiles.nth(0).locator("svg")).toHaveClass(/size-14/);
+      await expect(statTiles.nth(0).locator("svg")).toHaveClass(/size-16/);
       await expect(statTiles.nth(0).locator("svg")).toHaveClass(/text-primary/);
       await expect(statTiles.nth(0).locator("svg")).toHaveClass(/opacity-20/);
-      await expect(statTiles.nth(0).locator("svg")).toHaveClass(/-right-2/);
+      await expect(statTiles.nth(0).locator("svg")).toHaveClass(/-bottom-3/);
+      await expect(statTiles.nth(0).locator("svg")).toHaveClass(/-left-3/);
+      await expect(statTiles.nth(0).locator("svg")).not.toHaveClass(/rotate/);
+      await expect(statTiles.nth(0).getByText("Observations", { exact: true })).toHaveClass(/text-left/);
+      await expect(statTiles.nth(0).locator(".font-instrument")).toHaveClass(/text-right/);
       const [firstTile, secondTile, thirdTile, fourthTile] = await Promise.all([
         statTiles.nth(0).boundingBox(),
         statTiles.nth(1).boundingBox(),

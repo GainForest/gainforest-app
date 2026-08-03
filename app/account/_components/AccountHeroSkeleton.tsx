@@ -158,7 +158,7 @@ export function OverviewFoldersSkeleton({ ids }: { ids: readonly string[] }) {
  * About and the projects up top, the record stream below, and the side rail
  * beside them. Shared by the account section's full-shell loading and the
  * per-tab page loading so the two transitions line up without a jump. Only the
- * fixed-size shapes are painted — the support card, the project thumbnails —
+ * fixed-size shapes are painted — the support tile, the project thumbnails —
  * while account copy just holds its space.
  */
 export function AccountOverviewContentSkeleton() {
@@ -188,10 +188,15 @@ export function AccountOverviewContentSkeleton() {
       </div>
 
       <aside className="min-w-0 border-t border-border/60 pt-10 xl:col-start-2 xl:row-start-1 xl:row-span-2 xl:border-t-0 xl:pt-0">
-        <Skeleton className="h-40 w-full rounded-2xl" />
-        {/* The responsive detail grid gains columns in a wide stacked rail and
-            returns to compact rows in the narrow desktop sidebar. */}
-        <div className="mt-7 h-80 border-t border-border/60 md:h-52 xl:h-80" />
+        <Skeleton className="h-6 w-28" />
+        {/* At a glance starts with a deliberately wider support tile, then fills
+            remaining space with the responsive detail grid. */}
+        <div className="mt-4 grid grid-cols-[repeat(auto-fit,minmax(min(100%,8.5rem),1fr))] gap-2">
+          <Skeleton className="col-span-2 h-20 rounded-2xl" />
+          {Array.from({ length: 6 }).map((_, index) => (
+            <Skeleton key={index} className="h-20 rounded-2xl" />
+          ))}
+        </div>
       </aside>
 
       <section className="min-w-0 border-t border-border/60 pt-10 xl:col-start-1 xl:row-start-2">

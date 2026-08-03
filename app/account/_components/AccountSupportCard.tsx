@@ -1,13 +1,14 @@
 "use client";
 
 /**
- * A compact support action within At a glance. The account story leads the
- * page, so support stays available without competing with it as a large card.
+ * A two-column support tile within At a glance. It deliberately breaks the
+ * smaller metric-tile rhythm so the account's direct call to action is clear.
  * It only appears once a wallet is set up (or once something has already been
  * received); totals come from public records and can lag behind recent gifts.
  */
 
 import { useEffect, useState } from "react";
+import { HeartHandshakeIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { formatCompactUsd } from "@/app/_lib/format";
 import { AccountWalletSupport } from "./AccountWalletSupport";
@@ -56,13 +57,21 @@ export function AccountSupportCard({
   if (!hasHistory && (!checked || !walletAddress)) return null;
 
   return (
-    <section className="flex flex-wrap items-center justify-between gap-3">
-      <div className="min-w-0">
-        <h2 className="text-base font-semibold text-foreground">{t("supportTitle")}</h2>
+    <section
+      data-account-overview-support
+      aria-label={t("supportTitle")}
+      className="relative col-span-2 grid min-h-20 min-w-0 grid-cols-[minmax(0,1fr)_auto] gap-3 overflow-hidden rounded-2xl bg-primary p-3 text-primary-foreground"
+    >
+      <HeartHandshakeIcon
+        aria-hidden
+        className="pointer-events-none absolute -bottom-3 -left-3 size-16 text-primary-foreground opacity-20"
+      />
+      <div className="relative z-10 flex min-w-0 flex-col justify-between">
+        <p className="text-left text-xs font-medium text-primary-foreground/80">{t("supportTitle")}</p>
         {hasHistory ? (
-          <p className="mt-0.5 flex flex-wrap items-baseline gap-x-2 text-sm text-muted-foreground">
-            <span className="font-semibold tabular-nums text-foreground">{formatCompactUsd(receivedUsd)}</span>
-            {supporters > 0 ? <span>{t("supporters", { count: supporters })}</span> : null}
+          <p className="flex min-w-0 flex-wrap items-baseline gap-x-2 text-sm">
+            <span className="font-semibold tabular-nums text-primary-foreground">{formatCompactUsd(receivedUsd)}</span>
+            {supporters > 0 ? <span className="text-primary-foreground/80">{t("supporters", { count: supporters })}</span> : null}
           </p>
         ) : null}
       </div>
@@ -72,7 +81,7 @@ export function AccountSupportCard({
         name={name}
         image={image}
         walletAddress={walletAddress}
-        className="h-9 shrink-0 px-3"
+        className="relative z-10 h-8 shrink-0 border-primary-foreground/20 bg-primary-foreground px-3 text-primary hover:bg-primary-foreground/90 hover:text-primary"
       />
     </section>
   );

@@ -437,7 +437,7 @@ export async function editProfile(page: Page, testInfo: TestInfo): Promise<void>
   const overviewBio = page.locator("[data-account-overview-bio]");
   await expect(overviewBio.getByText("Compact profile editing persisted from browser testing.", { exact: true })).toBeVisible({ timeout: 30_000 });
   await expect(page.getByRole("button", { name: /edit short description/i })).toBeVisible({ timeout: 30_000 });
-  await expect(page.getByRole("button", { name: /edit website/i })).toBeVisible({ timeout: 30_000 });
+  await expect(compactEditor.getByRole("button", { name: /edit website|add website/i })).toBeVisible({ timeout: 30_000 });
 
   const avatar = compactEditor.locator("img").first();
   const previousAvatarSrc = await avatar.getAttribute("src");

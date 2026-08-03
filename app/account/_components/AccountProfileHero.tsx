@@ -15,9 +15,10 @@
 
 import type { ReactNode } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import { useState } from "react";
 import { useTranslations } from "next-intl";
-import { CheckIcon, Share2Icon } from "lucide-react";
+import { CheckIcon, GlobeIcon, Share2Icon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { formatCountry } from "@/app/_lib/format";
@@ -95,6 +96,36 @@ export function AccountHeroMetaDot() {
     <span aria-hidden className="pl-2 text-muted-foreground/50">
       ·
     </span>
+  );
+}
+
+function websiteHref(url: string): string {
+  return /^[a-z][a-z0-9+.-]*:/i.test(url) ? url : `https://${url}`;
+}
+
+function websiteLabel(url: string): string {
+  return url.replace(/^https?:\/\//, "").replace(/\/$/, "");
+}
+
+/** The account website is a durable identity link, so it remains in the hero. */
+export function AccountHeroWebsite({ website, className }: { website: string | null | undefined; className?: string }) {
+  const value = website?.trim();
+  if (!value) return null;
+
+  const label = websiteLabel(value);
+  return (
+    <Link
+      href={websiteHref(value)}
+      target="_blank"
+      rel="noopener noreferrer"
+      className={cn(
+        "mt-2 inline-flex max-w-full items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary",
+        className,
+      )}
+    >
+      <GlobeIcon className="size-3.5 shrink-0 opacity-70" aria-hidden />
+      <span className="truncate">{label}</span>
+    </Link>
   );
 }
 
@@ -213,6 +244,7 @@ export function AccountProfileHero({ account }: { account: AccountRouteData }) {
     >
       <AccountHeroName>{account.displayName}</AccountHeroName>
       <AccountHeroFacts account={account} />
+      <AccountHeroWebsite website={account.website} />
       <AccountHeroTrustedBy did={account.did} className="mt-2" />
     </AccountHeroFrame>
   );

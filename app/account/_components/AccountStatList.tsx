@@ -10,10 +10,10 @@ import type { ReactNode } from "react";
 import Link from "next/link";
 import { useLocale, useTranslations } from "next-intl";
 import {
+  AtSignIcon,
   BinocularsIcon,
   CalendarIcon,
   FolderKanbanIcon,
-  Globe2Icon,
   HeartHandshakeIcon,
   Link2Icon,
   PencilIcon,
@@ -51,7 +51,6 @@ type AccountStatTile = {
 
 export type AccountOverviewEditActions = {
   onEditBio?: () => void;
-  onEditWebsite?: () => void;
   onEditStartDate?: () => void;
   onEditSocials?: () => void;
   onEditVisibility?: () => void;
@@ -85,18 +84,9 @@ export function classifySocialUrl(url: string): string {
   }
 }
 
-/**
- * Website is its own profile field. Every entry from `socialLinks` belongs in
- * one combined social tile, including ordinary URLs stored by older profiles.
- */
-export function overviewAccountLinks(
-  website: string | null | undefined,
-  socialLinks: string[],
-): { website: string | null; socialLinks: string[] } {
-  return {
-    website: website?.trim() || null,
-    socialLinks: socialLinks.map((url) => url.trim()).filter(Boolean),
-  };
+/** Every `socialLinks` entry belongs in the one combined social tile. */
+export function overviewSocialLinks(socialLinks: string[]): string[] {
+  return socialLinks.map((url) => url.trim()).filter(Boolean);
 }
 
 /**
@@ -128,10 +118,11 @@ const STAT_ICONS: Record<AccountStatTileId, LucideIcon> = {
   supporters: UsersIcon,
 };
 
-// Every watermark arrives from the same top-right direction. The icons add a
-// quiet field-note texture without competing with a tile's actual content.
-const WATERMARK_CLASS = "pointer-events-none absolute -right-2 -top-2 z-0 size-14 rotate-12 text-primary opacity-20";
-const TILE_CLASS = "relative flex min-h-20 min-w-0 flex-col items-center justify-center overflow-hidden rounded-2xl bg-muted p-3 text-center";
+// Watermarks settle into the clipped bottom-left corner. Their quiet presence
+// anchors the tiles without competing with the information in opposing corners.
+const WATERMARK_CLASS = "pointer-events-none absolute -bottom-3 -left-3 z-0 size-16 text-primary opacity-20";
+const TILE_CLASS = "relative min-h-20 min-w-0 overflow-hidden rounded-2xl bg-muted p-3";
+const CONTENT_TILE_CLASS = `${TILE_CLASS} flex flex-col justify-between`;
 
 function TileWatermark({ icon: Icon }: { icon: LucideIcon }) {
   return <Icon aria-hidden className={WATERMARK_CLASS} />;
@@ -143,7 +134,7 @@ function EditDetailButton({ label, onClick }: { label: string; onClick: () => vo
     <button
       type="button"
       onClick={onClick}
-      className="absolute bottom-2 right-2 z-20 grid size-6 place-items-center rounded-full text-foreground opacity-55 transition-opacity hover:bg-background hover:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+      className="absolute right-2 top-2 z-20 grid size-6 place-items-center rounded-full text-foreground opacity-55 transition-opacity hover:bg-background hover:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
       aria-label={overviewT("editDetail", { detail: label })}
     >
       <PencilIcon className="size-3.5" aria-hidden />
@@ -156,11 +147,9 @@ function StatTile({ stat, label }: { stat: AccountStatTile; label: string }) {
   const content = (
     <>
       <TileWatermark icon={Icon} />
-      <span className="relative z-10 block">
-        <span className="block font-instrument text-2xl font-light italic leading-none tabular-nums text-foreground">
-          {formatCompact(stat.count)}
-        </span>
-        <span className="mt-1 block text-xs text-muted-foreground">{label}</span>
+      <span className="relative z-10 block text-left text-xs text-muted-foreground">{label}</span>
+      <span className="relative z-10 block text-right font-instrument text-2xl font-light italic leading-none tabular-nums text-foreground">
+        {formatCompact(stat.count)}
       </span>
     </>
   );
@@ -170,7 +159,7 @@ function StatTile({ stat, label }: { stat: AccountStatTile; label: string }) {
       <Link
         href={stat.href}
         data-account-stat-tile={stat.id}
-        className={`${TILE_CLASS} transition-colors hover:bg-muted/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background`}
+        className={`${CONTENT_TILE_CLASS} transition-colors hover:bg-muted/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background`}
       >
         {content}
       </Link>
@@ -178,7 +167,7 @@ function StatTile({ stat, label }: { stat: AccountStatTile; label: string }) {
   }
 
   return (
-    <div data-account-stat-tile={stat.id} className={TILE_CLASS}>
+    <div data-account-stat-tile={stat.id} className={CONTENT_TILE_CLASS}>
       {content}
     </div>
   );
@@ -202,21 +191,21 @@ function DetailTile({
   const overviewT = useTranslations("common.accountOverview");
   const Icon = icon;
   const content = (
-    <span className="relative z-10 block min-w-0">
-      <span className="block truncate text-sm font-medium text-foreground">{value}</span>
-      <span className="mt-1 block text-xs text-muted-foreground">{label}</span>
-    </span>
+    <>
+      <span className="relative z-10 block text-left text-xs text-muted-foreground">{label}</span>
+      <span className="relative z-10 block truncate text-right text-sm font-medium text-foreground">{value}</span>
+    </>
   );
 
   if (href) {
     return (
-      <div data-account-overview-tile={id} className={TILE_CLASS}>
+      <div data-account-overview-tile={id} className={CONTENT_TILE_CLASS}>
         <TileWatermark icon={Icon} />
         <Link
           href={href}
           target="_blank"
           rel="noopener noreferrer"
-          className="absolute inset-0 z-10 flex min-w-0 items-center justify-center p-3 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+          className="absolute inset-0 z-10 flex min-w-0 flex-col justify-between p-3 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
         >
           {content}
         </Link>
@@ -231,7 +220,7 @@ function DetailTile({
         type="button"
         data-account-overview-tile={id}
         onClick={onEdit}
-        className={`${TILE_CLASS} transition-colors hover:bg-muted/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background`}
+        className={`${CONTENT_TILE_CLASS} transition-colors hover:bg-muted/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background`}
         aria-label={overviewT("editDetail", { detail: label })}
       >
         <TileWatermark icon={Icon} />
@@ -241,7 +230,7 @@ function DetailTile({
   }
 
   return (
-    <div data-account-overview-tile={id} className={TILE_CLASS}>
+    <div data-account-overview-tile={id} className={CONTENT_TILE_CLASS}>
       <TileWatermark icon={Icon} />
       {content}
     </div>
@@ -260,26 +249,27 @@ function SocialLinksTile({
 
   return (
     <div data-account-overview-tile="social-links" className={TILE_CLASS}>
-      <TileWatermark icon={Link2Icon} />
-      <span className="relative z-10 flex flex-wrap justify-center gap-1.5">
-        {links.length > 0 ? links.map((url) => {
-          const linkLabel = formatWebsiteLabel(url);
-          return (
-            <Link
-              key={url}
-              href={externalHref(url)}
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label={linkLabel}
-              title={linkLabel}
-              className="grid size-7 place-items-center rounded-full text-primary opacity-70 transition-opacity hover:opacity-100 focus-visible:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
-            >
-              <SocialGlyph platform={classifySocialUrl(url)} />
-            </Link>
-          );
-        }) : <span className="text-sm font-medium text-foreground">{overviewT("addSocialLinks")}</span>}
-      </span>
-      <span className="relative z-10 mt-1 block text-xs text-muted-foreground">{label}</span>
+      <TileWatermark icon={AtSignIcon} />
+      {links.length > 0 ? (
+        <span className="relative z-10 grid w-fit grid-cols-3 justify-items-start gap-1.5">
+          {links.map((url) => {
+            const linkLabel = formatWebsiteLabel(url);
+            return (
+              <Link
+                key={url}
+                href={externalHref(url)}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label={linkLabel}
+                title={linkLabel}
+                className="grid size-6 place-items-center rounded-full text-primary opacity-70 transition-opacity hover:opacity-100 focus-visible:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+              >
+                <SocialGlyph platform={classifySocialUrl(url)} />
+              </Link>
+            );
+          })}
+        </span>
+      ) : null}
       {onEdit ? <EditDetailButton label={label} onClick={onEdit} /> : null}
     </div>
   );
@@ -323,7 +313,7 @@ export function AccountStatList({
   const locale = useLocale();
   const t = useTranslations("common.accountTabs");
   const overviewT = useTranslations("common.accountOverview");
-  const links = overviewAccountLinks(account.website, account.socialLinks);
+  const socialLinks = overviewSocialLinks(account.socialLinks);
   const isOrganization = account.kind === "organization";
   const date = isOrganization
     ? heroDateLabel(account.foundedDate ?? account.createdAt, locale, true)
@@ -336,19 +326,18 @@ export function AccountStatList({
     supporters: overviewT("supportersLabel"),
   };
   const showDate = Boolean(date) || Boolean(isOrganization && editActions?.onEditStartDate);
-  const showWebsite = Boolean(links.website) || Boolean(editActions?.onEditWebsite);
-  const showSocialLinks = links.socialLinks.length > 0 || Boolean(isOrganization && editActions?.onEditSocials);
+  const showSocialLinks = socialLinks.length > 0 || Boolean(isOrganization && editActions?.onEditSocials);
   const showVisibility = isOrganization && Boolean(editActions?.onEditVisibility);
 
   return (
     <section data-account-stat-tiles>
       <AccountSectionHeading>{overviewT("atAGlance")}</AccountSectionHeading>
       <Bio value={bio} editor={bioEditor} onEdit={editActions?.onEditBio} />
-      {support ? <div data-account-overview-support className="mt-4">{support}</div> : null}
       <nav
         aria-label={overviewT("atAGlance")}
         className="mt-4 grid grid-cols-[repeat(auto-fit,minmax(min(100%,8.5rem),1fr))] gap-2"
       >
+        {support}
         {accountStatTiles(account.urlIdentifier, account.kind, counts).map((stat) => (
           <StatTile key={stat.id} stat={stat} label={labels[stat.id]} />
         ))}
@@ -361,17 +350,7 @@ export function AccountStatList({
             onEdit={isOrganization ? editActions?.onEditStartDate : undefined}
           />
         ) : null}
-        {showWebsite ? (
-          <DetailTile
-            id="website"
-            label={overviewT("website")}
-            value={links.website ? formatWebsiteLabel(links.website) : overviewT("addWebsite")}
-            icon={Globe2Icon}
-            href={links.website ? externalHref(links.website) : undefined}
-            onEdit={editActions?.onEditWebsite}
-          />
-        ) : null}
-        {showSocialLinks ? <SocialLinksTile links={links.socialLinks} onEdit={editActions?.onEditSocials} /> : null}
+        {showSocialLinks ? <SocialLinksTile links={socialLinks} onEdit={editActions?.onEditSocials} /> : null}
         {showVisibility ? (
           <DetailTile
             id="visibility"

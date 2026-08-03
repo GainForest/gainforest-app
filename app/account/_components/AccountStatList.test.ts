@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { accountStatTiles, type AccountStatCounts } from "./AccountStatList";
+import { accountStatTiles, overviewSocialLinks, type AccountStatCounts } from "./AccountStatList";
 
 const counts: AccountStatCounts = {
   observations: 1_284,
@@ -24,5 +24,19 @@ describe("accountStatTiles", () => {
     expect(tiles).toHaveLength(4);
     expect(tiles.find((tile) => tile.id === "donations")).toEqual({ id: "donations", count: 4, href: null });
     expect(tiles.at(-1)).toEqual({ id: "supporters", count: 9, href: null });
+  });
+});
+
+describe("overviewSocialLinks", () => {
+  it("keeps every social link in the combined social tile", () => {
+    const socialLinks = ["https://mangaroa-farms.nz/", "https://instagram.com/mangaroafarms"];
+
+    expect(overviewSocialLinks(socialLinks)).toEqual(socialLinks);
+  });
+
+  it("removes empty values without changing valid social links", () => {
+    expect(overviewSocialLinks([" https://example.org/donate ", "  "])).toEqual([
+      "https://example.org/donate",
+    ]);
   });
 });
