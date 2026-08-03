@@ -1,7 +1,7 @@
 "use client";
 
 /**
- * A compact support action for the Overview rail. The account story leads the
+ * A compact support action within At a glance. The account story leads the
  * page, so support stays available without competing with it as a large card.
  * It only appears once a wallet is set up (or once something has already been
  * received); totals come from public records and can lag behind recent gifts.

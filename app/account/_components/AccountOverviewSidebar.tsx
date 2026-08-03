@@ -200,6 +200,16 @@ export async function AccountOverviewSidebar({
       : true
     : false;
 
+  const support = (
+    <AccountSupportCard
+      did={account.did}
+      name={account.displayName}
+      image={account.avatarUrl}
+      receivedUsd={receivedUsd}
+      supporters={supporters}
+    />
+  );
+
   return (
     // Each block opens with its own hairline so the rail reads as a short stack
     // of labelled sections instead of one column of loose text. The first block
@@ -210,14 +220,6 @@ export async function AccountOverviewSidebar({
       data-account-overview-panel
       className="space-y-6 [&>*]:max-w-md [&>*]:border-t [&>*]:border-border/60 [&>*]:pt-6 [&>*:first-child]:border-t-0 [&>*:first-child]:pt-0 [&>[data-account-stat-tiles]]:max-w-none xl:[&>*]:max-w-none"
     >
-      <AccountSupportCard
-        did={account.did}
-        name={account.displayName}
-        image={account.avatarUrl}
-        receivedUsd={receivedUsd}
-        supporters={supporters}
-      />
-
       {canEditProfile && target ? (
         <EditableAccountHeader
           account={account}
@@ -227,10 +229,11 @@ export async function AccountOverviewSidebar({
           viewPublicHref={null}
           showAbout={false}
           overviewCounts={counts}
+          overviewSupport={support}
           variant="overview"
         />
       ) : (
-        <AccountStatList account={account} counts={counts} />
+        <AccountStatList account={account} counts={counts} support={support} />
       )}
 
       <PhotosCard account={account} />

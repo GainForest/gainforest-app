@@ -469,6 +469,7 @@ function AboutSection({
 function EditableOverview({
   account,
   counts,
+  support,
   editState,
   inlineField,
   isSaving,
@@ -484,6 +485,7 @@ function EditableOverview({
 }: {
   account: AccountRouteData;
   counts: AccountStatCounts;
+  support?: React.ReactNode;
   editState: HeroEditState;
   inlineField: InlineField;
   isSaving: boolean;
@@ -504,6 +506,7 @@ function EditableOverview({
     <AccountStatList
       account={account}
       counts={counts}
+      support={support}
       editActions={{
         onEditBio,
         onEditWebsite,
@@ -853,6 +856,7 @@ export function EditableAccountHeader({
   showAbout = true,
   memberships = [],
   overviewCounts,
+  overviewSupport,
   variant = "full",
 }: {
   account: AccountRouteData;
@@ -867,6 +871,8 @@ export function EditableAccountHeader({
   memberships?: AccountOrganization[];
   /** Counts rendered by the authorized Overview details editor. */
   overviewCounts?: AccountStatCounts;
+  /** Wallet support content grouped with the editable At a glance section. */
+  overviewSupport?: React.ReactNode;
   /**
    * Whether to render the organization About section beneath the hero. The
    * dashboard shows it inline; the profile renders About in its Overview tab
@@ -1173,6 +1179,7 @@ export function EditableAccountHeader({
       <EditableOverview
         account={account}
         counts={overviewCounts}
+        support={overviewSupport}
         editState={editState}
         inlineField={inlineField}
         isSaving={isSaving}

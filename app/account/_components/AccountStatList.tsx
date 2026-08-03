@@ -28,13 +28,7 @@ import {
   accountProjectsPath,
   type AccountRouteData,
 } from "../_lib/account-route";
-import {
-  classifySocialUrl,
-  externalHref,
-  formatWebsiteLabel,
-  heroDateLabel,
-  splitAccountLinks,
-} from "./AccountProfileHero";
+import { heroDateLabel } from "./AccountProfileHero";
 import { AccountSectionHeading } from "./AccountSectionHeading";
 
 export type AccountStatCounts = {
@@ -62,6 +56,48 @@ export type AccountOverviewEditActions = {
   onEditSocials?: () => void;
   onEditVisibility?: () => void;
 };
+
+/** Strip the scheme so an external address reads as plain text. */
+export function formatWebsiteLabel(url: string): string {
+  return url.replace(/^https?:\/\//, "").replace(/\/$/, "");
+}
+
+export function externalHref(url: string): string {
+  return /^[a-z][a-z0-9+.-]*:/i.test(url) ? url : `https://${url}`;
+}
+
+/** Best-guess platform for a social URL, for the right glyph. */
+export function classifySocialUrl(url: string): string {
+  try {
+    const host = new URL(externalHref(url)).hostname.replace(/^www\./, "");
+    if (host === "x.com" || host.includes("twitter.")) return "x";
+    if (host.includes("linkedin.")) return "linkedin";
+    if (host.includes("github.")) return "github";
+    if (host.includes("instagram.")) return "instagram";
+    if (host.includes("facebook.") || host === "fb.com") return "facebook";
+    if (host.includes("youtube.") || host === "youtu.be") return "youtube";
+    if (host === "t.me" || host.includes("telegram.")) return "telegram";
+    if (host.includes("tiktok.")) return "tiktok";
+    if (host.includes("bsky.") || host.includes("bluesky.")) return "bluesky";
+    return "website";
+  } catch {
+    return "website";
+  }
+}
+
+/**
+ * Website is its own profile field. Every entry from `socialLinks` belongs in
+ * one combined social tile, including ordinary URLs stored by older profiles.
+ */
+export function overviewAccountLinks(
+  website: string | null | undefined,
+  socialLinks: string[],
+): { website: string | null; socialLinks: string[] } {
+  return {
+    website: website?.trim() || null,
+    socialLinks: socialLinks.map((url) => url.trim()).filter(Boolean),
+  };
+}
 
 /**
  * The donation count is still useful on organization profiles, but organizations
@@ -274,17 +310,20 @@ export function AccountStatList({
   counts,
   editActions,
   bioEditor,
+  support,
 }: {
   account: AccountRouteData;
   counts: AccountStatCounts;
   editActions?: AccountOverviewEditActions;
   /** Rendered only by the owner editor while changing an existing short bio. */
   bioEditor?: ReactNode;
+  /** The account's wallet action and contribution summary, grouped with its overview. */
+  support?: ReactNode;
 }) {
   const locale = useLocale();
   const t = useTranslations("common.accountTabs");
   const overviewT = useTranslations("common.accountOverview");
-  const links = splitAccountLinks(account.website, account.socialLinks);
+  const links = overviewAccountLinks(account.website, account.socialLinks);
   const isOrganization = account.kind === "organization";
   const date = isOrganization
     ? heroDateLabel(account.foundedDate ?? account.createdAt, locale, true)
@@ -305,6 +344,7 @@ export function AccountStatList({
     <section data-account-stat-tiles>
       <AccountSectionHeading>{overviewT("atAGlance")}</AccountSectionHeading>
       <Bio value={bio} editor={bioEditor} onEdit={editActions?.onEditBio} />
+      {support ? <div data-account-overview-support className="mt-4">{support}</div> : null}
       <nav
         aria-label={overviewT("atAGlance")}
         className="mt-4 grid grid-cols-[repeat(auto-fit,minmax(min(100%,8.5rem),1fr))] gap-2"

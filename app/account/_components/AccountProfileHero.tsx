@@ -17,13 +17,11 @@ import type { ReactNode } from "react";
 import Image from "next/image";
 import { useState } from "react";
 import { useTranslations } from "next-intl";
-import Link from "next/link";
-import { CheckIcon, GlobeIcon, Share2Icon } from "lucide-react";
+import { CheckIcon, Share2Icon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { formatCountry } from "@/app/_lib/format";
 import { FollowButton, FollowStats } from "@/app/_components/FollowButton";
-import { SocialGlyph } from "@/app/_components/SocialIcon";
 import { TrustedByBadges } from "@/app/_components/TrustedByBadges";
 import type { AccountRouteData } from "../_lib/account-route";
 
@@ -97,124 +95,6 @@ export function AccountHeroMetaDot() {
     <span aria-hidden className="pl-2 text-muted-foreground/50">
       ·
     </span>
-  );
-}
-
-/** Strip the scheme so a website reads as plain text: "gainforest.net". */
-export function formatWebsiteLabel(url: string): string {
-  return url.replace(/^https?:\/\//, "").replace(/\/$/, "");
-}
-
-export function externalHref(url: string): string {
-  return /^[a-z][a-z0-9+.-]*:/i.test(url) ? url : `https://${url}`;
-}
-
-/** Best-guess platform for a social URL, for the right glyph. */
-export function classifySocialUrl(url: string): string {
-  try {
-    const host = new URL(externalHref(url)).hostname.replace(/^www\./, "");
-    if (host === "x.com" || host.includes("twitter.")) return "x";
-    if (host.includes("linkedin.")) return "linkedin";
-    if (host.includes("github.")) return "github";
-    if (host.includes("instagram.")) return "instagram";
-    if (host.includes("facebook.") || host === "fb.com") return "facebook";
-    if (host.includes("youtube.") || host === "youtu.be") return "youtube";
-    if (host === "t.me" || host.includes("telegram.")) return "telegram";
-    if (host.includes("tiktok.")) return "tiktok";
-    if (host.includes("bsky.") || host.includes("bluesky.")) return "bluesky";
-    return "website";
-  } catch {
-    return "website";
-  }
-}
-
-/**
- * Split an account's outward links into the one that is plainly its own site
- * and the platform profiles that sit beside it.
- *
- * A personal profile stores its website in its own field, but an organization
- * keeps every URL in one list — so without this an org's own site would show as
- * an unlabelled globe wedged between the Facebook and Instagram glyphs. Naming
- * it is the difference between "🌐" and "mangaroa.org".
- */
-export function splitAccountLinks(
-  website: string | null,
-  socialLinks: string[],
-): { website: string | null; socialLinks: string[] } {
-  const named = website?.trim();
-  if (named) return { website: named, socialLinks };
-
-  // Organization URLs also include links such as contact and donation pages.
-  // Without their optional labels here, only a bare-domain URL can safely be
-  // promoted as the account's own website; everything else remains an icon.
-  const index = socialLinks.findIndex((url) => {
-    if (classifySocialUrl(url) !== "website") return false;
-    try {
-      return new URL(externalHref(url)).pathname.replace(/\/+$/, "") === "";
-    } catch {
-      return false;
-    }
-  });
-  if (index === -1) return { website: null, socialLinks };
-  return { website: socialLinks[index], socialLinks: socialLinks.filter((_, position) => position !== index) };
-}
-
-/** Website + social links, as quiet inline links under the facts line. */
-export function AccountHeroLinks({
-  website,
-  socialLinks,
-  endorsement,
-  className,
-}: {
-  website: string | null;
-  socialLinks: string[];
-  /** A small proof mark that belongs alongside the account's outward links. */
-  endorsement?: ReactNode;
-  className?: string;
-}) {
-  if (!website && socialLinks.length === 0 && !endorsement) return null;
-
-  return (
-    <div
-      className={cn(
-        "flex flex-wrap items-center gap-x-3 gap-y-1.5",
-        (website || socialLinks.length > 0) && "mt-2",
-        className,
-      )}
-    >
-      {website ? (
-        <Link
-          href={externalHref(website)}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="inline-flex max-w-full items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
-        >
-          <GlobeIcon className="size-3.5 shrink-0 opacity-70" aria-hidden />
-          <span className="truncate">{formatWebsiteLabel(website)}</span>
-        </Link>
-      ) : null}
-      {socialLinks.length > 0 ? (
-        <span className="flex flex-wrap items-center gap-2">
-          {socialLinks.map((url) => {
-            const label = formatWebsiteLabel(url);
-            return (
-              <Link
-                key={url}
-                href={externalHref(url)}
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label={label}
-                title={label}
-                className="text-muted-foreground transition-colors hover:text-foreground"
-              >
-                <SocialGlyph platform={classifySocialUrl(url)} />
-              </Link>
-            );
-          })}
-        </span>
-      ) : null}
-      {endorsement}
-    </div>
   );
 }
 

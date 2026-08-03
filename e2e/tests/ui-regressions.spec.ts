@@ -66,6 +66,9 @@ test("account headers stay compact while Overview owns profile details", async (
   await expect(atAGlanceHeading).toHaveClass(/font-instrument/);
   await expect(atAGlanceHeading).toHaveClass(/italic/);
   await expect(atAGlance.locator("[data-account-overview-bio]")).toBeVisible();
+  // Support belongs to At a glance rather than sitting as an unrelated rail block.
+  await expect(atAGlance.locator("[data-account-overview-support]")).toHaveCount(1);
+  await expect(profilePanel.locator(":scope > [data-account-overview-support]")).toHaveCount(0);
   await expect(atAGlance.locator("[data-account-stat-tile]")).toHaveCount(4);
   await expect(atAGlance.locator("[data-account-stat-tile] svg")).toHaveCount(4);
   await expect(atAGlance.locator('[data-account-stat-tile="bumicerts"]')).toHaveCount(0);
