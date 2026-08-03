@@ -2,7 +2,6 @@ import Image from "next/image";
 import Link from "next/link";
 import { getTranslations } from "next-intl/server";
 import { BadgeCheckIcon } from "lucide-react";
-import { TrustedByBadges } from "@/app/_components/TrustedByBadges";
 import { AccountAwards } from "./AccountAwards";
 import { AccountMemberships } from "./AccountMemberships";
 import { AccountStatList, type AccountStatCounts } from "./AccountStatList";
@@ -154,9 +153,9 @@ async function DataCouncilCard({ did }: { did: string }) {
 
 /**
  * The side rail of an account's Overview — the supporting details, not the
- * story: how to support the account, its numbers at a glance, a peek at its
- * photos, and who vouches for it. Who the account is and what it runs lead the
- * main column instead (see {@link AccountAboutSection}).
+ * story: how to support the account, its numbers at a glance, and a peek at
+ * its photos. The account's endorsement belongs in its hero; who it is and
+ * what it runs lead the main column instead (see {@link AccountAboutSection}).
  *
  * Each block hides itself when it has nothing to show, so a brand-new profile
  * stays quiet instead of showing a wall of empty cards.
@@ -195,7 +194,6 @@ export async function AccountOverviewSidebar({
       {/* Recognition rows fetch their own data and render nothing when empty. */}
       <div className="space-y-4">
         <AccountAwards did={account.did} />
-        <TrustedByBadges did={account.did} variant="plain" />
         {memberships.length > 0 ? (
           <div className="space-y-2">
             <h2 className="text-sm font-medium text-muted-foreground">{organizationsT("memberOf")}</h2>

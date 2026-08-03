@@ -33,6 +33,7 @@ import {
   AccountHeroFrame,
   AccountHeroMeta,
   AccountHeroName,
+  AccountHeroTrustedBy,
   HERO_AVATAR_CLASS,
   displayOrgType,
   heroDateLabel,
@@ -442,6 +443,7 @@ function EditableCompactHero({
                   </FactChip>
                 </>
               ) : null}
+              <AccountHeroTrustedBy did={account.did} className="ml-2" />
             </div>
           </>
         )}

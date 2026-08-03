@@ -5,11 +5,11 @@
  * of plain-language facts (type · place · since), and the two actions a visitor
  * needs — follow and share.
  *
- * Everything else about the account (bio, links, counts, projects) lives in the
- * Overview column beside the record stream, so this header stays the same
- * height on every tab. The pieces below are exported so the owner's editable
- * header (see `EditableAccountHeader`) can render the exact same shell with
- * editable fields inside it.
+ * The hero carries durable identity: name, facts, outward links, and any
+ * endorsement. The Overview carries the account's story, work, and counts.
+ * The pieces below are exported so the owner's editable header (see
+ * `EditableAccountHeader`) can render the exact same shell with editable fields
+ * inside it.
  */
 
 import type { ReactNode } from "react";
@@ -23,13 +23,21 @@ import { cn } from "@/lib/utils";
 import { formatCountry } from "@/app/_lib/format";
 import { FollowButton } from "@/app/_components/FollowButton";
 import { SocialGlyph } from "@/app/_components/SocialIcon";
+import { TrustedByBadges } from "@/app/_components/TrustedByBadges";
 import type { AccountRouteData } from "../_lib/account-route";
 
 /** Photo frame: a soft-cornered square, like the app's record thumbnails. */
 export const HERO_AVATAR_CLASS =
   "relative size-14 shrink-0 overflow-hidden rounded-2xl bg-muted ring-1 ring-border/60 sm:size-[68px]";
 
-/** Frame every hero variant shares: photo, identity block, actions. */
+/**
+ * Frame every hero variant shares: photo, identity block, actions.
+ *
+ * On a phone, the identity has its own full-width row beneath the photo and
+ * actions. Keeping the name in the same row as a Follow pill and share button
+ * left long account names with a needlessly thin text column. From `sm` up,
+ * the familiar horizontal hero returns.
+ */
 export function AccountHeroFrame({
   avatar,
   actions,
@@ -40,10 +48,17 @@ export function AccountHeroFrame({
   children: ReactNode;
 }) {
   return (
-    <section data-account-hero className="flex items-start gap-4 pt-1 sm:gap-5">
-      {avatar}
-      <div className="min-w-0 flex-1">{children}</div>
-      {actions ? <div className="flex shrink-0 items-center gap-2">{actions}</div> : null}
+    <section
+      data-account-hero
+      className="grid grid-cols-[auto_minmax(0,1fr)] items-center gap-x-4 pt-1 sm:flex sm:items-start sm:gap-5"
+    >
+      <div className="col-start-1 row-start-1 shrink-0 sm:order-1">{avatar}</div>
+      <div className="col-span-2 row-start-2 mt-3 min-w-0 sm:order-2 sm:mt-0 sm:flex-1">{children}</div>
+      {actions ? (
+        <div className="col-start-2 row-start-1 flex justify-self-end gap-2 sm:order-3 sm:ml-auto sm:shrink-0">
+          {actions}
+        </div>
+      ) : null}
     </section>
   );
 }
@@ -112,16 +127,25 @@ export function classifySocialUrl(url: string): string {
 export function AccountHeroLinks({
   website,
   socialLinks,
+  endorsement,
   className,
 }: {
   website: string | null;
   socialLinks: string[];
+  /** A small proof mark that belongs alongside the account's outward links. */
+  endorsement?: ReactNode;
   className?: string;
 }) {
-  if (!website && socialLinks.length === 0) return null;
+  if (!website && socialLinks.length === 0 && !endorsement) return null;
 
   return (
-    <div className={cn("mt-2 flex flex-wrap items-center gap-x-3 gap-y-1.5", className)}>
+    <div
+      className={cn(
+        "flex flex-wrap items-center gap-x-3 gap-y-1.5",
+        (website || socialLinks.length > 0) && "mt-2",
+        className,
+      )}
+    >
       {website ? (
         <Link
           href={externalHref(website)}
@@ -153,6 +177,7 @@ export function AccountHeroLinks({
           })}
         </span>
       ) : null}
+      {endorsement}
     </div>
   );
 }
@@ -249,6 +274,11 @@ export function AccountHeroActions({ account }: { account: AccountRouteData }) {
   );
 }
 
+/** A quiet proof mark belongs with identity, not below the Overview fold. */
+export function AccountHeroTrustedBy({ did, className }: { did: string; className?: string }) {
+  return <TrustedByBadges did={did} variant="plain" size="xs" className={cn("shrink-0", className)} />;
+}
+
 /** The public (read-only) account header. */
 export function AccountProfileHero({ account }: { account: AccountRouteData }) {
   const initial = account.displayName.charAt(0).toUpperCase();
@@ -270,7 +300,11 @@ export function AccountProfileHero({ account }: { account: AccountRouteData }) {
     >
       <AccountHeroName>{account.displayName}</AccountHeroName>
       <AccountHeroFacts account={account} />
-      <AccountHeroLinks website={account.website} socialLinks={account.socialLinks} />
+      <AccountHeroLinks
+        website={account.website}
+        socialLinks={account.socialLinks}
+        endorsement={<AccountHeroTrustedBy did={account.did} />}
+      />
     </AccountHeroFrame>
   );
 }
