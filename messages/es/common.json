@@ -963,6 +963,7 @@
     "supportTitle": "Apoya esta cuenta",
     "supportBody": "El dinero va directamente a {name}. Los totales provienen de los registros públicos, así que pueden tardar un poco en actualizarse.",
     "supporters": "{count, plural, one {# persona que apoya} other {# personas que apoyan}}",
+    "donationsReceived": "Donaciones recibidas",
     "seeAll": "Ver todo",
     "seeAllCount": "Ver los {count}",
     "recentActivity": "Actividad reciente",

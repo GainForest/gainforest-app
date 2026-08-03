@@ -42,10 +42,13 @@ export const HERO_AVATAR_CLASS =
 export function AccountHeroFrame({
   avatar,
   actions,
+  actionFooter,
   children,
 }: {
   avatar: ReactNode;
   actions?: ReactNode;
+  /** Context for the actions, such as the account's audience counts. */
+  actionFooter?: ReactNode;
   children: ReactNode;
 }) {
   return (
@@ -55,9 +58,10 @@ export function AccountHeroFrame({
     >
       <div className="col-start-1 row-start-1 shrink-0 sm:order-1">{avatar}</div>
       <div className="col-span-2 row-start-2 mt-3 min-w-0 sm:order-2 sm:mt-0 sm:flex-1">{children}</div>
-      {actions ? (
-        <div className="col-start-2 row-start-1 flex justify-self-end gap-2 sm:order-3 sm:ml-auto sm:shrink-0">
-          {actions}
+      {actions || actionFooter ? (
+        <div className="col-start-2 row-start-1 justify-self-end sm:order-3 sm:ml-auto sm:shrink-0">
+          {actions ? <div className="flex justify-end gap-2">{actions}</div> : null}
+          {actionFooter ? <div className="mt-2 flex justify-end">{actionFooter}</div> : null}
         </div>
       ) : null}
     </section>
@@ -330,12 +334,16 @@ export function AccountProfileHero({ account }: { account: AccountRouteData }) {
         </div>
       }
       actions={<AccountHeroActions account={account} />}
+      actionFooter={
+        <FollowStats
+          targetDid={account.did}
+          identifier={account.urlIdentifier}
+          className="max-w-full justify-end text-right"
+        />
+      }
     >
       <AccountHeroName>{account.displayName}</AccountHeroName>
       <AccountHeroFacts account={account} />
-      {/* Audience belongs with identity and with the Follow button, not in the
-          Overview's list of published-record counts. */}
-      <FollowStats targetDid={account.did} identifier={account.urlIdentifier} className="mt-2" />
       <AccountHeroLinks
         website={links.website}
         socialLinks={links.socialLinks}

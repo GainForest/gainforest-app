@@ -963,6 +963,7 @@
     "supportTitle": "Support this account",
     "supportBody": "Money goes straight to {name}. Totals come from public records, so they can lag a little behind.",
     "supporters": "{count, plural, one {# supporter} other {# supporters}}",
+    "donationsReceived": "Donations received",
     "seeAll": "See all",
     "seeAllCount": "See all {count}",
     "recentActivity": "Recent activity",

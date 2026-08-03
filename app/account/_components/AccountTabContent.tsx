@@ -166,7 +166,7 @@ export async function AccountOverviewContent({ account, did }: { account: Accoun
   const received = receipts.filter((receipt) => receipt.orgDid === did);
   const receivedUsd = received.reduce((total, receipt) => total + (receipt.amount || 0), 0);
   const supporters = new Set(received.map((receipt) => receipt.from?.id).filter(Boolean)).size;
-  const donationCount = receipts.filter((receipt) => receipt.from?.type === "did" && receipt.from.id === did).length;
+  const sentDonationCount = receipts.filter((receipt) => receipt.from?.type === "did" && receipt.from.id === did).length;
 
   const activityT = await getTranslations("common.accountOverview");
 
@@ -196,7 +196,8 @@ export async function AccountOverviewContent({ account, did }: { account: Accoun
           counts={{
             projects: projects.length,
             observations: observationSummary?.count ?? account.summary.observationCount ?? 0,
-            donations: account.kind === "user" ? donationCount : null,
+            bumicerts: account.summary.bumicertCount,
+            donations: account.kind === "user" ? sentDonationCount : received.length,
           }}
           receivedUsd={receivedUsd}
           supporters={supporters}

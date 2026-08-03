@@ -192,7 +192,7 @@ export async function AccountOverviewSidebar({
     // capped, so a label and its number never sit half a screen apart.
     <div
       data-account-overview-panel
-      className="max-w-md space-y-6 xl:max-w-none [&>*]:border-t [&>*]:border-border/60 [&>*]:pt-6 [&>*:first-child]:border-t-0 [&>*:first-child]:pt-0"
+      className="space-y-6 [&>*]:max-w-md [&>*]:border-t [&>*]:border-border/60 [&>*]:pt-6 [&>*:first-child]:border-t-0 [&>*:first-child]:pt-0 [&>[data-account-stat-tiles]]:max-w-none xl:[&>*]:max-w-none"
     >
       <AccountSupportCard
         did={account.did}
@@ -202,7 +202,7 @@ export async function AccountOverviewSidebar({
         supporters={supporters}
       />
 
-      <AccountStatList identifier={account.urlIdentifier} counts={counts} />
+      <AccountStatList identifier={account.urlIdentifier} accountKind={account.kind} counts={counts} />
 
       <PhotosCard account={account} />
       {account.kind === "organization" ? <MaEarthCard did={account.did} /> : null}

@@ -963,6 +963,7 @@
     "supportTitle": "Unga mkono akaunti hii",
     "supportBody": "Fedha huenda moja kwa moja kwa {name}. Jumla hutoka kwenye kumbukumbu za umma, hivyo zinaweza kuchelewa kidogo.",
     "supporters": "{count, plural, one {mfadhili #} other {wafadhili #}}",
+    "donationsReceived": "Michango iliyopokelewa",
     "seeAll": "Ona vyote",
     "seeAllCount": "Ona zote {count}",
     "recentActivity": "Shughuli za hivi karibuni",

@@ -15,19 +15,22 @@ import { OVERVIEW_FOLDER_ART } from "./OverviewFolderArt";
  */
 export function AccountProfileHeroSkeleton() {
   return (
-    <section className="flex items-start gap-4 pt-1 sm:gap-5">
-      <Skeleton className="size-14 shrink-0 rounded-2xl sm:size-[68px]" />
-      <div className="min-w-0 flex-1">
+    <section className="grid grid-cols-[auto_minmax(0,1fr)] items-center gap-x-4 pt-1 sm:flex sm:items-start sm:gap-5">
+      <Skeleton className="col-start-1 row-start-1 size-14 shrink-0 rounded-2xl sm:order-1 sm:size-[68px]" />
+      <div className="col-span-2 row-start-2 mt-3 min-w-0 sm:order-2 sm:mt-0 sm:flex-1">
         {/* Display name — text-[1.75rem]/text-4xl at leading-[1.15]. */}
         <div className="h-8 sm:h-[42px]" />
-        {/* Facts line, follower counts, then the row of quiet links. */}
+        {/* Facts line, then the row of quiet links. */}
         <div className="mt-1.5 h-5" />
         <div className="mt-2 h-5" />
-        <div className="mt-2 h-5" />
       </div>
-      <div className="flex shrink-0 items-center gap-2">
-        <Skeleton className="h-9 w-[104px] rounded-full" />
-        <Skeleton className="size-9 rounded-full" />
+      <div className="col-start-2 row-start-1 justify-self-end sm:order-3 sm:ml-auto sm:shrink-0">
+        <div className="flex justify-end gap-2">
+          <Skeleton className="h-9 w-[104px] rounded-full" />
+          <Skeleton className="size-9 rounded-full" />
+        </div>
+        {/* The live follower row sits directly below these actions. */}
+        <div className="mt-2 h-5" />
       </div>
     </section>
   );
@@ -186,8 +189,8 @@ export function AccountOverviewContentSkeleton() {
 
       <aside className="min-w-0 border-t border-border/60 pt-10 xl:col-start-2 xl:row-start-1 xl:row-span-2 xl:border-t-0 xl:pt-0">
         <Skeleton className="h-40 w-full rounded-2xl" />
-        {/* The counts table — account data, so it only reserves its height. */}
-        <div className="mt-7 h-[11.5rem] border-t border-border/60" />
+        {/* The tiles use one row when the rail is stacked and two in its narrow desktop column. */}
+        <div className="mt-7 h-64 border-t border-border/60 md:h-40 xl:h-64" />
       </aside>
 
       <section className="min-w-0 border-t border-border/60 pt-10 xl:col-start-1 xl:row-start-2">

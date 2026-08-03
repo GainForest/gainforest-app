@@ -963,6 +963,7 @@
     "supportTitle": "Dukung akun ini",
     "supportBody": "Dana langsung diteruskan ke {name}. Total berasal dari catatan publik, jadi bisa sedikit tertinggal.",
     "supporters": "{count, plural, other {# pendukung}}",
+    "donationsReceived": "Donasi diterima",
     "seeAll": "Lihat semua",
     "seeAllCount": "Lihat semua {count}",
     "recentActivity": "Aktivitas terbaru",

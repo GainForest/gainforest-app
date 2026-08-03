@@ -332,6 +332,15 @@ function EditableCompactHero({
           </button>
         }
         actions={editing ? null : <AccountHeroActions account={account} />}
+        actionFooter={
+          editing ? null : (
+            <FollowStats
+              targetDid={account.did}
+              identifier={account.urlIdentifier}
+              className="max-w-full justify-end text-right"
+            />
+          )
+        }
       >
         {editing ? (
           <div className="min-w-0 space-y-2">
@@ -407,9 +416,6 @@ function EditableCompactHero({
                 </FactChip>
               ) : null}
             </AccountHeroMeta>
-            {/* Same place as the public hero's counts, so switching between the
-                owner and visitor views doesn't move them. */}
-            <FollowStats targetDid={account.did} identifier={account.urlIdentifier} className="mt-1.5" />
             <div className="-ml-2 mt-1.5 flex flex-wrap items-center gap-y-1">
               <FactChip
                 onClick={onEditWebsite}

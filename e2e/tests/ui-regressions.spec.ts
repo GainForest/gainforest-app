@@ -62,10 +62,25 @@ test("account headers stay compact while Overview owns profile details", async (
 
   const profilePanel = page.locator("[data-account-overview-panel]");
   await expect(profilePanel).toBeVisible();
-  await expect(profilePanel.getByRole("heading", { name: /at a glance/i })).toBeVisible();
-  // Audience counts belong with identity, beside the Follow button — not mixed
-  // into the rail's list of published-record counts.
-  await expect(hero.getByRole("link", { name: /followers/i })).toBeVisible();
+  const atAGlance = profilePanel.locator("[data-account-stat-tiles]");
+  const atAGlanceHeading = atAGlance.getByRole("heading", { name: /at a glance/i });
+  await expect(atAGlanceHeading).toBeVisible();
+  await expect(atAGlanceHeading).toHaveClass(/font-instrument/);
+  await expect(atAGlanceHeading).toHaveClass(/italic/);
+  await expect(atAGlance.locator("[data-account-stat-tile]")).toHaveCount(4);
+  await expect(atAGlance.locator("[data-account-stat-tile] svg")).toHaveCount(4);
+  await expect(atAGlance.locator('[data-account-stat-tile="bumicerts"]')).toHaveAttribute("href", /\/certs$/);
+
+  // Audience counts belong immediately below Follow + share — not in the rail's
+  // work/funding tiles.
+  const share = hero.getByRole("button", { name: /copy link to this profile/i });
+  const followers = hero.getByRole("link", { name: /followers/i });
+  await expect(share).toBeVisible();
+  await expect(followers).toBeVisible();
+  const [shareBox, followersBox] = await Promise.all([share.boundingBox(), followers.boundingBox()]);
+  expect(shareBox).not.toBeNull();
+  expect(followersBox).not.toBeNull();
+  expect(followersBox!.y).toBeGreaterThanOrEqual(shareBox!.y + shareBox!.height);
   await expect(profilePanel.getByRole("link", { name: /followers/i })).toHaveCount(0);
   await expect(page.getByRole("button", { name: /(?:show|hide) profile/i })).toHaveCount(0);
 });
@@ -73,7 +88,7 @@ test("account headers stay compact while Overview owns profile details", async (
 test("account Overview stacks its supporting rail before the wide desktop layout", async ({ page }) => {
   const accountPath = "/account/t0fl10.certified.one";
 
-  for (const width of [390, 1024]) {
+  for (const width of [320, 390, 1024, 1172]) {
     await page.setViewportSize({ width, height: 900 });
     await page.goto(accountPath);
 
@@ -88,6 +103,33 @@ test("account Overview stacks its supporting rail before the wide desktop layout
     expect(projectsBox).not.toBeNull();
     expect(railBox).not.toBeNull();
     expect(railBox!.y).toBeGreaterThan(projectsBox!.y);
+
+    // Below the wide two-column breakpoint, the rail becomes a full-width
+    // section. Its four stat tiles must use that row rather than remaining as
+    // a narrow two-by-two block aligned to the left.
+    if (width === 1172) {
+      const statTiles = profilePanel.locator("[data-account-stat-tile]");
+      await expect(statTiles).toHaveCount(4);
+      await expect(statTiles.nth(0)).toHaveClass(/items-center/);
+      await expect(statTiles.nth(0)).toHaveClass(/bg-muted/);
+      await expect(statTiles.nth(0)).not.toHaveClass(/(?:border|shadow)/);
+      await expect(statTiles.nth(0).locator(".font-instrument")).toHaveClass(/italic/);
+      await expect(statTiles.nth(0).locator("svg")).toHaveClass(/absolute/);
+      const [firstTile, secondTile, thirdTile, fourthTile] = await Promise.all([
+        statTiles.nth(0).boundingBox(),
+        statTiles.nth(1).boundingBox(),
+        statTiles.nth(2).boundingBox(),
+        statTiles.nth(3).boundingBox(),
+      ]);
+      expect(firstTile).not.toBeNull();
+      expect(secondTile).not.toBeNull();
+      expect(thirdTile).not.toBeNull();
+      expect(fourthTile).not.toBeNull();
+      expect(secondTile!.y).toBe(firstTile!.y);
+      expect(thirdTile!.y).toBe(firstTile!.y);
+      expect(fourthTile!.y).toBe(firstTile!.y);
+      expect(fourthTile!.x + fourthTile!.width).toBeGreaterThanOrEqual(railBox!.x + railBox!.width - 2);
+    }
 
     const dimensions = await page.evaluate(() => ({
       clientWidth: document.documentElement.clientWidth,
