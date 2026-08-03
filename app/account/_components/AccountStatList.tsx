@@ -28,7 +28,13 @@ import {
   accountProjectsPath,
   type AccountRouteData,
 } from "../_lib/account-route";
-import { heroDateLabel } from "./AccountProfileHero";
+import {
+  classifySocialUrl,
+  externalHref,
+  formatWebsiteLabel,
+  heroDateLabel,
+  splitAccountLinks,
+} from "./AccountProfileHero";
 import { AccountSectionHeading } from "./AccountSectionHeading";
 
 export type AccountStatCounts = {
@@ -56,59 +62,29 @@ export type AccountOverviewEditActions = {
   onEditVisibility?: () => void;
 };
 
-/** Strip the scheme so an external address reads as plain text. */
-export function formatWebsiteLabel(url: string): string {
-  return url.replace(/^https?:\/\//, "").replace(/\/$/, "");
+/** In the two-column desktop rail, fill a final first-column orphan. */
+export function shouldSpanLastTileOnDesktop(tileCount: number): boolean {
+  return tileCount % 2 === 1;
 }
 
-export function externalHref(url: string): string {
-  return /^[a-z][a-z0-9+.-]*:/i.test(url) ? url : `https://${url}`;
-}
-
-/** Best-guess platform for a social URL, for the right glyph. */
-export function classifySocialUrl(url: string): string {
-  try {
-    const host = new URL(externalHref(url)).hostname.replace(/^www\./, "");
-    if (host === "x.com" || host.includes("twitter.")) return "x";
-    if (host.includes("linkedin.")) return "linkedin";
-    if (host.includes("github.")) return "github";
-    if (host.includes("instagram.")) return "instagram";
-    if (host.includes("facebook.") || host === "fb.com") return "facebook";
-    if (host.includes("youtube.") || host === "youtu.be") return "youtube";
-    if (host === "t.me" || host.includes("telegram.")) return "telegram";
-    if (host.includes("tiktok.")) return "tiktok";
-    if (host.includes("bsky.") || host.includes("bluesky.")) return "bluesky";
-    return "website";
-  } catch {
-    return "website";
-  }
-}
-
-/** Every `socialLinks` entry belongs in the one combined social tile. */
-export function overviewSocialLinks(socialLinks: string[]): string[] {
-  return socialLinks.map((url) => url.trim()).filter(Boolean);
-}
-
-/**
- * The donation count is still useful on organization profiles, but organizations
- * do not have a public donation-history tab yet. Leave that tile informational
- * rather than linking visitors to a route that deliberately returns not found.
- */
+/** Published work and personal giving that have useful public destinations. */
 export function accountStatTiles(
   identifier: string,
   accountKind: AccountStatKind,
   counts: AccountStatCounts,
 ): AccountStatTile[] {
-  return [
+  const workTiles: AccountStatTile[] = [
     { id: "observations", count: counts.observations, href: accountObservationsPath(identifier) },
     { id: "projects", count: counts.projects, href: accountProjectsPath(identifier) },
-    {
-      id: "donations",
-      count: counts.donations,
-      href: accountKind === "user" ? accountDonationsPath(identifier) : null,
-    },
-    { id: "supporters", count: counts.supporters, href: null },
   ];
+
+  // Received donations already have their own support tile. Personal donation
+  // history stays useful because it describes what the person has given.
+  if (accountKind === "user") {
+    workTiles.push({ id: "donations", count: counts.donations, href: accountDonationsPath(identifier) });
+  }
+
+  return [...workTiles, { id: "supporters", count: counts.supporters, href: null }];
 }
 
 const STAT_ICONS: Record<AccountStatTileId, LucideIcon> = {
@@ -313,7 +289,8 @@ export function AccountStatList({
   const locale = useLocale();
   const t = useTranslations("common.accountTabs");
   const overviewT = useTranslations("common.accountOverview");
-  const socialLinks = overviewSocialLinks(account.socialLinks);
+  const links = splitAccountLinks(account.website, account.socialLinks);
+  const socialLinks = links.socialLinks;
   const isOrganization = account.kind === "organization";
   const date = isOrganization
     ? heroDateLabel(account.foundedDate ?? account.createdAt, locale, true)
@@ -328,6 +305,10 @@ export function AccountStatList({
   const showDate = Boolean(date) || Boolean(isOrganization && editActions?.onEditStartDate);
   const showSocialLinks = socialLinks.length > 0 || Boolean(isOrganization && editActions?.onEditSocials);
   const showVisibility = isOrganization && Boolean(editActions?.onEditVisibility);
+  const tileCount = accountStatTiles(account.urlIdentifier, account.kind, counts).length
+    + Number(showDate)
+    + Number(showSocialLinks)
+    + Number(showVisibility);
 
   return (
     <section data-account-stat-tiles>
@@ -335,7 +316,7 @@ export function AccountStatList({
       <Bio value={bio} editor={bioEditor} onEdit={editActions?.onEditBio} />
       <nav
         aria-label={overviewT("atAGlance")}
-        className="mt-4 grid grid-cols-[repeat(auto-fit,minmax(min(100%,8.5rem),1fr))] gap-2"
+        className={`mt-4 grid grid-cols-[repeat(auto-fit,minmax(min(100%,8.5rem),1fr))] gap-2${shouldSpanLastTileOnDesktop(tileCount) ? " xl:[&>*:last-child]:col-span-2" : ""}`}
       >
         {support}
         {accountStatTiles(account.urlIdentifier, account.kind, counts).map((stat) => (

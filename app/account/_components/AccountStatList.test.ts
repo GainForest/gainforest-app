@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { accountStatTiles, overviewSocialLinks, type AccountStatCounts } from "./AccountStatList";
+import { accountStatTiles, shouldSpanLastTileOnDesktop, type AccountStatCounts } from "./AccountStatList";
 
 const counts: AccountStatCounts = {
   observations: 1_284,
@@ -18,25 +18,18 @@ describe("accountStatTiles", () => {
     ]);
   });
 
-  it("keeps an organization's received donation count informative without a dead link", () => {
+  it("keeps received donations in the support tile rather than duplicating them", () => {
     const tiles = accountStatTiles("mangaroa-farm.certified.app", "organization", counts);
 
-    expect(tiles).toHaveLength(4);
-    expect(tiles.find((tile) => tile.id === "donations")).toEqual({ id: "donations", count: 4, href: null });
+    expect(tiles).toHaveLength(3);
+    expect(tiles.find((tile) => tile.id === "donations")).toBeUndefined();
     expect(tiles.at(-1)).toEqual({ id: "supporters", count: 9, href: null });
   });
 });
 
-describe("overviewSocialLinks", () => {
-  it("keeps every social link in the combined social tile", () => {
-    const socialLinks = ["https://mangaroa-farms.nz/", "https://instagram.com/mangaroafarms"];
-
-    expect(overviewSocialLinks(socialLinks)).toEqual(socialLinks);
-  });
-
-  it("removes empty values without changing valid social links", () => {
-    expect(overviewSocialLinks([" https://example.org/donate ", "  "])).toEqual([
-      "https://example.org/donate",
-    ]);
+describe("shouldSpanLastTileOnDesktop", () => {
+  it("fills only an orphaned first-column tile in the right rail", () => {
+    expect(shouldSpanLastTileOnDesktop(5)).toBe(true);
+    expect(shouldSpanLastTileOnDesktop(4)).toBe(false);
   });
 });

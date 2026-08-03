@@ -37,6 +37,7 @@ import {
   AccountHeroWebsite,
   HERO_AVATAR_CLASS,
   displayOrgType,
+  splitAccountLinks,
 } from "@/app/account/_components/AccountProfileHero";
 import { AccountStatList, type AccountStatCounts } from "@/app/account/_components/AccountStatList";
 import { ExpandableBio } from "@/app/account/_components/ExpandableBio";
@@ -293,6 +294,8 @@ function EditableCompactHero({
   const isOrg = account.kind === "organization";
   const countryLabel = editState.country ? countryName(editState.country) : null;
   const flag = editState.country ? countryFlag(editState.country) : "";
+  const profileLinks = splitAccountLinks(editState.website, editState.socials);
+  const website = profileLinks.website;
 
   return (
     <div data-account-hero-editor>
@@ -391,22 +394,29 @@ function EditableCompactHero({
                 </FactChip>
               ) : null}
             </AccountHeroMeta>
-            {editState.website.trim() || canEdit ? (
+            {website || canEdit ? (
               <div className="mt-2 flex min-w-0 items-center gap-1">
-                <AccountHeroWebsite website={editState.website} className="mt-0" />
+                <AccountHeroWebsite website={website} className="mt-0" />
                 {canEdit ? (
                   <button
                     type="button"
                     onClick={onEditWebsite}
                     disabled={isSaving}
                     title={editDisabledReason ?? undefined}
-                    aria-label={editState.website.trim() ? t("hero.editWebsite") : t("hero.addWebsite")}
+                    aria-label={website ? t("hero.editWebsite") : t("hero.addWebsite")}
                     className={cn(
                       "shrink-0 rounded-full text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary disabled:cursor-not-allowed disabled:opacity-60",
-                      editState.website.trim() ? "grid size-7 place-items-center" : "inline-flex h-7 items-center gap-1.5 px-2 text-xs",
+                      website ? "grid size-7 place-items-center" : "inline-flex h-7 items-center gap-1.5 px-2 text-xs",
                     )}
                   >
-                    {editState.website.trim() ? <PencilIcon className="size-3.5" aria-hidden /> : <><GlobeIcon className="size-3.5" aria-hidden /> {t("hero.addWebsite")}</>}
+                    {website ? (
+                      <PencilIcon className="size-3.5" aria-hidden />
+                    ) : (
+                      <>
+                        <GlobeIcon className="size-3.5" aria-hidden />
+                        {t("hero.addWebsite")}
+                      </>
+                    )}
                   </button>
                 ) : null}
               </div>

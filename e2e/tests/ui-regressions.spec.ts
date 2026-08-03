@@ -69,8 +69,8 @@ test("account headers stay compact while Overview owns profile details", async (
   // Support is a two-column tile within At a glance whenever this account can
   // receive support; it is never an unrelated rail block.
   await expect(profilePanel.locator(":scope > [data-account-overview-support]")).toHaveCount(0);
-  await expect(atAGlance.locator("[data-account-stat-tile]")).toHaveCount(4);
-  await expect(atAGlance.locator("[data-account-stat-tile] svg")).toHaveCount(4);
+  await expect(atAGlance.locator("[data-account-stat-tile]")).toHaveCount(3);
+  await expect(atAGlance.locator("[data-account-stat-tile] svg")).toHaveCount(3);
   await expect(atAGlance.locator('[data-account-stat-tile="bumicerts"]')).toHaveCount(0);
   await expect(atAGlance.locator('[data-account-stat-tile="supporters"]')).toBeVisible();
   await expect(atAGlance.locator('[data-account-overview-tile="website"]')).toHaveCount(0);
@@ -111,8 +111,8 @@ test("account Overview stacks its supporting rail before the wide desktop layout
     // that section and fit more than two stats across when the space permits.
     if (width === 1172) {
       const statTiles = profilePanel.locator("[data-account-stat-tile]");
-      await expect(statTiles).toHaveCount(4);
-      await expect(statTiles.nth(0)).toHaveClass(/items-center/);
+      await expect(statTiles).toHaveCount(3);
+      await expect(statTiles.nth(0)).toHaveClass(/justify-between/);
       await expect(statTiles.nth(0)).toHaveClass(/bg-muted/);
       await expect(statTiles.nth(0)).not.toHaveClass(/(?:border|shadow)/);
       await expect(statTiles.nth(0).locator(".font-instrument")).toHaveClass(/italic/);
@@ -124,19 +124,17 @@ test("account Overview stacks its supporting rail before the wide desktop layout
       await expect(statTiles.nth(0).locator("svg")).not.toHaveClass(/rotate/);
       await expect(statTiles.nth(0).getByText("Observations", { exact: true })).toHaveClass(/text-left/);
       await expect(statTiles.nth(0).locator(".font-instrument")).toHaveClass(/text-right/);
-      const [firstTile, secondTile, thirdTile, fourthTile] = await Promise.all([
+      await expect(profilePanel.locator('[data-account-stat-tile="donations"]')).toHaveCount(0);
+      const [firstTile, secondTile, thirdTile] = await Promise.all([
         statTiles.nth(0).boundingBox(),
         statTiles.nth(1).boundingBox(),
         statTiles.nth(2).boundingBox(),
-        statTiles.nth(3).boundingBox(),
       ]);
       expect(firstTile).not.toBeNull();
       expect(secondTile).not.toBeNull();
       expect(thirdTile).not.toBeNull();
-      expect(fourthTile).not.toBeNull();
       expect(secondTile!.y).toBe(firstTile!.y);
       expect(thirdTile!.y).toBe(firstTile!.y);
-      expect(fourthTile!.y).toBe(firstTile!.y);
       expect(firstTile!.x).toBeGreaterThanOrEqual(railBox!.x);
       expect(firstTile!.x - railBox!.x).toBeLessThanOrEqual(2);
       expect(Math.abs(projectsBox!.x - firstTile!.x)).toBeLessThanOrEqual(2);

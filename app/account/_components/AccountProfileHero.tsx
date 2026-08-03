@@ -5,9 +5,9 @@
  * of plain-language facts (type · place), and the two actions a visitor
  * needs — follow and share.
  *
- * The hero carries durable identity: name, facts, who follows the account,
- * and any endorsement. The Overview carries the short description, outward
- * links, work, and supporting profile details.
+ * The hero carries durable identity: name, facts, website, who follows the
+ * account, and any endorsement. The Overview carries the short description,
+ * social links, work, and supporting profile details.
  * The pieces below are exported so the owner's editable header (see
  * `EditableAccountHeader`) can render the exact same shell with editable fields
  * inside it.
@@ -99,12 +99,60 @@ export function AccountHeroMetaDot() {
   );
 }
 
-function websiteHref(url: string): string {
+export function externalHref(url: string): string {
   return /^[a-z][a-z0-9+.-]*:/i.test(url) ? url : `https://${url}`;
 }
 
-function websiteLabel(url: string): string {
+/** Strip a URL scheme so an external address reads as plain text. */
+export function formatWebsiteLabel(url: string): string {
   return url.replace(/^https?:\/\//, "").replace(/\/$/, "");
+}
+
+/** Best-guess platform for a social URL, for the right glyph. */
+export function classifySocialUrl(url: string): string {
+  try {
+    const host = new URL(externalHref(url)).hostname.replace(/^www\./, "");
+    if (host === "x.com" || host.includes("twitter.")) return "x";
+    if (host.includes("linkedin.")) return "linkedin";
+    if (host.includes("github.")) return "github";
+    if (host.includes("instagram.")) return "instagram";
+    if (host.includes("facebook.") || host === "fb.com") return "facebook";
+    if (host.includes("youtube.") || host === "youtu.be") return "youtube";
+    if (host === "t.me" || host.includes("telegram.")) return "telegram";
+    if (host.includes("tiktok.")) return "tiktok";
+    if (host.includes("bsky.") || host.includes("bluesky.")) return "bluesky";
+    return "website";
+  } catch {
+    return "website";
+  }
+}
+
+/**
+ * Profiles written before the dedicated website field stored every URL in
+ * `socialLinks`. Keep a root site in the hero, while platform profiles remain
+ * together in the social tile.
+ */
+export function splitAccountLinks(
+  website: string | null | undefined,
+  socialLinks: string[],
+): { website: string | null; socialLinks: string[] } {
+  const named = website?.trim();
+  const normalizedSocialLinks = socialLinks.map((url) => url.trim()).filter(Boolean);
+  if (named) return { website: named, socialLinks: normalizedSocialLinks };
+
+  const index = normalizedSocialLinks.findIndex((url) => {
+    if (classifySocialUrl(url) !== "website") return false;
+    try {
+      return new URL(externalHref(url)).pathname.replace(/\/+$/, "") === "";
+    } catch {
+      return false;
+    }
+  });
+  if (index === -1) return { website: null, socialLinks: normalizedSocialLinks };
+  return {
+    website: normalizedSocialLinks[index],
+    socialLinks: normalizedSocialLinks.filter((_, position) => position !== index),
+  };
 }
 
 /** The account website is a durable identity link, so it remains in the hero. */
@@ -112,10 +160,10 @@ export function AccountHeroWebsite({ website, className }: { website: string | n
   const value = website?.trim();
   if (!value) return null;
 
-  const label = websiteLabel(value);
+  const label = formatWebsiteLabel(value);
   return (
     <Link
-      href={websiteHref(value)}
+      href={externalHref(value)}
       target="_blank"
       rel="noopener noreferrer"
       className={cn(
@@ -219,6 +267,7 @@ export function AccountHeroTrustedBy({ did, className }: { did: string; classNam
 /** The public (read-only) account header. */
 export function AccountProfileHero({ account }: { account: AccountRouteData }) {
   const initial = account.displayName.charAt(0).toUpperCase();
+  const links = splitAccountLinks(account.website, account.socialLinks);
 
   return (
     <AccountHeroFrame
@@ -244,7 +293,7 @@ export function AccountProfileHero({ account }: { account: AccountRouteData }) {
     >
       <AccountHeroName>{account.displayName}</AccountHeroName>
       <AccountHeroFacts account={account} />
-      <AccountHeroWebsite website={account.website} />
+      <AccountHeroWebsite website={links.website} />
       <AccountHeroTrustedBy did={account.did} className="mt-2" />
     </AccountHeroFrame>
   );
