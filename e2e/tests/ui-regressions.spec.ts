@@ -118,7 +118,7 @@ test("account Overview stacks its supporting rail before the wide desktop layout
       await expect(statTiles.nth(0).locator(".font-instrument")).toHaveClass(/italic/);
       await expect(statTiles.nth(0).locator("svg")).toHaveClass(/size-16/);
       await expect(statTiles.nth(0).locator("svg")).toHaveClass(/text-primary/);
-      await expect(statTiles.nth(0).locator("svg")).toHaveClass(/opacity-20/);
+      await expect(statTiles.nth(0).locator("svg")).toHaveClass(/opacity-10/);
       await expect(statTiles.nth(0).locator("svg")).toHaveClass(/-bottom-3/);
       await expect(statTiles.nth(0).locator("svg")).toHaveClass(/-left-3/);
       await expect(statTiles.nth(0).locator("svg")).not.toHaveClass(/rotate/);

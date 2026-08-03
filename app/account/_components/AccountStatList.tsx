@@ -96,7 +96,7 @@ const STAT_ICONS: Record<AccountStatTileId, LucideIcon> = {
 
 // Watermarks settle into the clipped bottom-left corner. Their quiet presence
 // anchors the tiles without competing with the information in opposing corners.
-const WATERMARK_CLASS = "pointer-events-none absolute -bottom-3 -left-3 z-0 size-16 text-primary opacity-20";
+const WATERMARK_CLASS = "pointer-events-none absolute -bottom-3 -left-3 z-0 size-16 text-primary opacity-10";
 const TILE_CLASS = "relative min-h-20 min-w-0 overflow-hidden rounded-2xl bg-muted p-3";
 const CONTENT_TILE_CLASS = `${TILE_CLASS} flex flex-col justify-between`;
 
