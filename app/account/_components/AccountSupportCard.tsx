@@ -56,9 +56,9 @@ export function AccountSupportCard({
   if (!hasHistory && (!checked || !walletAddress)) return null;
 
   return (
-    <section className="flex flex-wrap items-center justify-between gap-3 border-b border-border/60 pb-4">
+    <section className="flex flex-wrap items-center justify-between gap-3">
       <div className="min-w-0">
-        <h2 className="text-sm font-medium text-foreground">{t("supportTitle")}</h2>
+        <h2 className="text-base font-semibold text-foreground">{t("supportTitle")}</h2>
         {hasHistory ? (
           <p className="mt-0.5 flex flex-wrap items-baseline gap-x-2 text-sm text-muted-foreground">
             <span className="font-semibold tabular-nums text-foreground">{formatCompactUsd(receivedUsd)}</span>

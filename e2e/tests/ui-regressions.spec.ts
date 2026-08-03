@@ -62,8 +62,39 @@ test("account headers stay compact while Overview owns profile details", async (
 
   const profilePanel = page.locator("[data-account-overview-panel]");
   await expect(profilePanel).toBeVisible();
-  await expect(profilePanel.getByRole("link", { name: /followers/i })).toBeVisible();
+  await expect(profilePanel.getByRole("heading", { name: /at a glance/i })).toBeVisible();
+  // Audience counts belong with identity, beside the Follow button — not mixed
+  // into the rail's list of published-record counts.
+  await expect(hero.getByRole("link", { name: /followers/i })).toBeVisible();
+  await expect(profilePanel.getByRole("link", { name: /followers/i })).toHaveCount(0);
   await expect(page.getByRole("button", { name: /(?:show|hide) profile/i })).toHaveCount(0);
+});
+
+test("account Overview stacks its supporting rail before the wide desktop layout", async ({ page }) => {
+  const accountPath = "/account/t0fl10.certified.one";
+
+  for (const width of [390, 1024]) {
+    await page.setViewportSize({ width, height: 900 });
+    await page.goto(accountPath);
+
+    const about = page.locator("[data-account-about]");
+    const projects = page.getByRole("heading", { name: "Projects", exact: true });
+    const profilePanel = page.locator("[data-account-overview-panel]");
+    await expect(about).toBeVisible();
+    await expect(projects).toBeVisible();
+    await expect(profilePanel).toBeVisible();
+
+    const [projectsBox, railBox] = await Promise.all([projects.boundingBox(), profilePanel.boundingBox()]);
+    expect(projectsBox).not.toBeNull();
+    expect(railBox).not.toBeNull();
+    expect(railBox!.y).toBeGreaterThan(projectsBox!.y);
+
+    const dimensions = await page.evaluate(() => ({
+      clientWidth: document.documentElement.clientWidth,
+      scrollWidth: document.documentElement.scrollWidth,
+    }));
+    expect(dimensions.scrollWidth).toBeLessThanOrEqual(dimensions.clientWidth);
+  }
 });
 
 test("BioBlitz stays within narrow viewports and keeps registration concise", async ({ page }) => {

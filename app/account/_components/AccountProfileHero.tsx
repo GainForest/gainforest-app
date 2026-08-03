@@ -5,8 +5,9 @@
  * of plain-language facts (type · place · since), and the two actions a visitor
  * needs — follow and share.
  *
- * The hero carries durable identity: name, facts, outward links, and any
- * endorsement. The Overview carries the account's story, work, and counts.
+ * The hero carries durable identity: name, facts, who follows the account,
+ * outward links, and any endorsement. The Overview carries the account's story,
+ * its work, and how much of each kind of record it has published.
  * The pieces below are exported so the owner's editable header (see
  * `EditableAccountHeader`) can render the exact same shell with editable fields
  * inside it.
@@ -21,7 +22,7 @@ import { CheckIcon, GlobeIcon, Share2Icon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { formatCountry } from "@/app/_lib/format";
-import { FollowButton } from "@/app/_components/FollowButton";
+import { FollowButton, FollowStats } from "@/app/_components/FollowButton";
 import { SocialGlyph } from "@/app/_components/SocialIcon";
 import { TrustedByBadges } from "@/app/_components/TrustedByBadges";
 import type { AccountRouteData } from "../_lib/account-route";
@@ -121,6 +122,37 @@ export function classifySocialUrl(url: string): string {
   } catch {
     return "website";
   }
+}
+
+/**
+ * Split an account's outward links into the one that is plainly its own site
+ * and the platform profiles that sit beside it.
+ *
+ * A personal profile stores its website in its own field, but an organization
+ * keeps every URL in one list — so without this an org's own site would show as
+ * an unlabelled globe wedged between the Facebook and Instagram glyphs. Naming
+ * it is the difference between "🌐" and "mangaroa.org".
+ */
+export function splitAccountLinks(
+  website: string | null,
+  socialLinks: string[],
+): { website: string | null; socialLinks: string[] } {
+  const named = website?.trim();
+  if (named) return { website: named, socialLinks };
+
+  // Organization URLs also include links such as contact and donation pages.
+  // Without their optional labels here, only a bare-domain URL can safely be
+  // promoted as the account's own website; everything else remains an icon.
+  const index = socialLinks.findIndex((url) => {
+    if (classifySocialUrl(url) !== "website") return false;
+    try {
+      return new URL(externalHref(url)).pathname.replace(/\/+$/, "") === "";
+    } catch {
+      return false;
+    }
+  });
+  if (index === -1) return { website: null, socialLinks };
+  return { website: socialLinks[index], socialLinks: socialLinks.filter((_, position) => position !== index) };
 }
 
 /** Website + social links, as quiet inline links under the facts line. */
@@ -282,6 +314,7 @@ export function AccountHeroTrustedBy({ did, className }: { did: string; classNam
 /** The public (read-only) account header. */
 export function AccountProfileHero({ account }: { account: AccountRouteData }) {
   const initial = account.displayName.charAt(0).toUpperCase();
+  const links = splitAccountLinks(account.website, account.socialLinks);
 
   return (
     <AccountHeroFrame
@@ -300,9 +333,12 @@ export function AccountProfileHero({ account }: { account: AccountRouteData }) {
     >
       <AccountHeroName>{account.displayName}</AccountHeroName>
       <AccountHeroFacts account={account} />
+      {/* Audience belongs with identity and with the Follow button, not in the
+          Overview's list of published-record counts. */}
+      <FollowStats targetDid={account.did} identifier={account.urlIdentifier} className="mt-2" />
       <AccountHeroLinks
-        website={account.website}
-        socialLinks={account.socialLinks}
+        website={links.website}
+        socialLinks={links.socialLinks}
         endorsement={<AccountHeroTrustedBy did={account.did} />}
       />
     </AccountHeroFrame>

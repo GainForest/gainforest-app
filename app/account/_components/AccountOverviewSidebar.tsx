@@ -34,6 +34,15 @@ function SidebarSection({
   );
 }
 
+/**
+ * A rail block that renders nothing until its own data arrives. Hiding it
+ * while empty keeps the rail's dividers honest: an empty block would otherwise
+ * leave a stray hairline behind.
+ */
+function QuietRailBlock({ children }: { children: React.ReactNode }) {
+  return <section className="empty:hidden">{children}</section>;
+}
+
 function SidebarLink({ href, label }: { href: string; label: string }) {
   return (
     <Link href={href} className="text-sm text-muted-foreground transition-colors hover:text-foreground">
@@ -176,7 +185,15 @@ export async function AccountOverviewSidebar({
   const organizationsT = await getTranslations("common.accountOrganizations");
 
   return (
-    <div data-account-overview-panel className="space-y-7">
+    // Each block opens with its own hairline so the rail reads as a short stack
+    // of labelled sections instead of one column of loose text. The first block
+    // skips the rule — whatever sits above it (the tab bar beside the story, the
+    // project list when stacked) already draws one. Stacked, the rail is also
+    // capped, so a label and its number never sit half a screen apart.
+    <div
+      data-account-overview-panel
+      className="max-w-md space-y-6 xl:max-w-none [&>*]:border-t [&>*]:border-border/60 [&>*]:pt-6 [&>*:first-child]:border-t-0 [&>*:first-child]:pt-0"
+    >
       <AccountSupportCard
         did={account.did}
         name={account.displayName}
@@ -185,22 +202,22 @@ export async function AccountOverviewSidebar({
         supporters={supporters}
       />
 
-      <AccountStatList did={account.did} identifier={account.urlIdentifier} counts={counts} />
+      <AccountStatList identifier={account.urlIdentifier} counts={counts} />
 
       <PhotosCard account={account} />
       {account.kind === "organization" ? <MaEarthCard did={account.did} /> : null}
       {account.kind === "organization" ? <DataCouncilCard did={account.did} /> : null}
 
       {/* Recognition rows fetch their own data and render nothing when empty. */}
-      <div className="space-y-4">
+      <QuietRailBlock>
         <AccountAwards did={account.did} />
-        {memberships.length > 0 ? (
-          <div className="space-y-2">
-            <h2 className="text-sm font-medium text-muted-foreground">{organizationsT("memberOf")}</h2>
-            <AccountMemberships organizations={memberships} hideLabel />
-          </div>
-        ) : null}
-      </div>
+      </QuietRailBlock>
+      {memberships.length > 0 ? (
+        <section className="space-y-2">
+          <h2 className="text-base font-semibold text-foreground">{organizationsT("memberOf")}</h2>
+          <AccountMemberships organizations={memberships} hideLabel />
+        </section>
+      ) : null}
     </div>
   );
 }

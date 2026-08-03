@@ -407,7 +407,10 @@ function EditableCompactHero({
                 </FactChip>
               ) : null}
             </AccountHeroMeta>
-            <div className="-ml-2 mt-0.5 flex flex-wrap items-center gap-y-1">
+            {/* Same place as the public hero's counts, so switching between the
+                owner and visitor views doesn't move them. */}
+            <FollowStats targetDid={account.did} identifier={account.urlIdentifier} className="mt-1.5" />
+            <div className="-ml-2 mt-1.5 flex flex-wrap items-center gap-y-1">
               <FactChip
                 onClick={onEditWebsite}
                 disabled={!canEdit}

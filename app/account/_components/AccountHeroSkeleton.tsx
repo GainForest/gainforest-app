@@ -20,8 +20,9 @@ export function AccountProfileHeroSkeleton() {
       <div className="min-w-0 flex-1">
         {/* Display name — text-[1.75rem]/text-4xl at leading-[1.15]. */}
         <div className="h-8 sm:h-[42px]" />
-        {/* Facts line, then the row of quiet links. */}
+        {/* Facts line, follower counts, then the row of quiet links. */}
         <div className="mt-1.5 h-5" />
+        <div className="mt-2 h-5" />
         <div className="mt-2 h-5" />
       </div>
       <div className="flex shrink-0 items-center gap-2">
@@ -159,8 +160,8 @@ export function OverviewFoldersSkeleton({ ids }: { ids: readonly string[] }) {
  */
 export function AccountOverviewContentSkeleton() {
   return (
-    <div className="mt-8 grid gap-10 lg:grid-cols-[minmax(0,1fr)_20rem] lg:items-start lg:gap-12 xl:grid-cols-[minmax(0,1fr)_22rem]">
-      <div className="min-w-0 space-y-10 lg:col-start-1 lg:row-start-1">
+    <div className="mt-8 grid gap-10 xl:grid-cols-[minmax(0,1fr)_20rem] xl:items-start xl:gap-x-12 xl:gap-y-10 2xl:grid-cols-[minmax(0,1fr)_22rem]">
+      <div className="min-w-0 space-y-10 xl:col-start-1 xl:row-start-1 [&>*+*]:border-t [&>*+*]:border-border/60 [&>*+*]:pt-10">
         {/* About — a heading and a few lines of the account's own words. */}
         <div>
           <Skeleton className="h-6 w-24" />
@@ -183,15 +184,15 @@ export function AccountOverviewContentSkeleton() {
         </div>
       </div>
 
-      <aside className="min-w-0 lg:col-start-2 lg:row-start-1 lg:row-span-2">
+      <aside className="min-w-0 border-t border-border/60 pt-10 xl:col-start-2 xl:row-start-1 xl:row-span-2 xl:border-t-0 xl:pt-0">
         <Skeleton className="h-40 w-full rounded-2xl" />
         {/* The counts table — account data, so it only reserves its height. */}
         <div className="mt-7 h-[11.5rem] border-t border-border/60" />
       </aside>
 
-      <section className="min-w-0 lg:col-start-1 lg:row-start-2">
+      <section className="min-w-0 border-t border-border/60 pt-10 xl:col-start-1 xl:row-start-2">
         <Skeleton className="h-6 w-36" />
-        <div className="mt-4 border-t border-border/60">
+        <div className="mt-4">
           {Array.from({ length: 4 }).map((_, index) => (
             <div key={index} className="flex flex-col gap-1.5 border-b border-border/60 py-5 sm:flex-row sm:gap-6">
               {/* Relative date + record kind. */}

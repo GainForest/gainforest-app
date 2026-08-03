@@ -12,6 +12,7 @@ import { AccountActivityFeed } from "./AccountActivityFeed";
 import { AccountBumicertsGrid } from "./AccountBumicertsGrid";
 import { AccountOverviewSidebar } from "./AccountOverviewSidebar";
 import { AccountProjectsSection } from "./AccountProjectsSection";
+import { AccountSectionHeading } from "./AccountSectionHeading";
 import { AccountProjectsGrid } from "./AccountProjectsGrid";
 import { EndorsementsGivenGrid } from "./EndorsementsGivenGrid";
 import type { AccountOrganization } from "./AccountOrganizationsGrid";
@@ -171,16 +172,25 @@ export async function AccountOverviewContent({ account, did }: { account: Accoun
 
   return (
     // Explicit grid placement so the rail can sit beside the story on wide
-    // screens while, on a phone, it slots between the projects and the record
-    // stream — the stream keeps loading as you scroll, so nothing useful may
-    // sit below it.
-    <div className="mt-8 grid gap-10 lg:grid-cols-[minmax(0,1fr)_20rem] lg:items-start lg:gap-12 xl:grid-cols-[minmax(0,1fr)_22rem]">
-      <div className="min-w-0 space-y-10 org-animate org-fade-in-up lg:col-start-1 lg:row-start-1">
+    // screens while, on a narrower one, it slots between the projects and the
+    // record stream — the stream keeps loading as you scroll, so nothing useful
+    // may sit below it.
+    //
+    // The split waits for `xl`: the app keeps a 16rem navigation sidebar, so at
+    // `lg` a 20rem rail would squeeze the story into a column too narrow to read
+    // project titles in.
+    <div className="mt-8 grid gap-10 xl:grid-cols-[minmax(0,1fr)_20rem] xl:items-start xl:gap-x-12 xl:gap-y-10 2xl:grid-cols-[minmax(0,1fr)_22rem]">
+      {/* Every section after the first opens with a hairline, so About and the
+          project list read as two blocks instead of one long run of text. The
+          first needs none: the tab bar already draws a rule right above it. */}
+      <div className="min-w-0 space-y-10 org-animate org-fade-in-up xl:col-start-1 xl:row-start-1 [&>*+*]:border-t [&>*+*]:border-border/60 [&>*+*]:pt-10">
         <AccountAboutSection account={account} />
         <AccountProjectsSection account={account} projects={projects} />
       </div>
 
-      <aside className="min-w-0 lg:col-start-2 lg:row-start-1 lg:row-span-2">
+      {/* Stacked, the rail is just the next section down, so it takes the same
+          opening rule; beside the story it needs none. */}
+      <aside className="min-w-0 border-t border-border/60 pt-10 xl:col-start-2 xl:row-start-1 xl:row-span-2 xl:border-t-0 xl:pt-0">
         <AccountOverviewSidebar
           account={account}
           counts={{
@@ -194,8 +204,8 @@ export async function AccountOverviewContent({ account, did }: { account: Accoun
         />
       </aside>
 
-      <section className="min-w-0 lg:col-start-1 lg:row-start-2">
-        <h2 className="font-instrument text-2xl italic leading-none text-foreground">{activityT("recentActivity")}</h2>
+      <section className="min-w-0 border-t border-border/60 pt-10 xl:col-start-1 xl:row-start-2">
+        <AccountSectionHeading>{activityT("recentActivity")}</AccountSectionHeading>
         <div className="mt-4">
           <AccountActivityFeed did={did} />
         </div>

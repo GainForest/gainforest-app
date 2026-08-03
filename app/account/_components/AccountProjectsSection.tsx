@@ -7,6 +7,7 @@ import { localProjectHref } from "@/app/_lib/urls";
 import type { ProjectRecord } from "@/app/_lib/indexer";
 import type { AccountRouteData } from "../_lib/account-route";
 import { accountProjectsPath } from "../_lib/account-route";
+import { AccountSectionHeading } from "./AccountSectionHeading";
 
 /** How many projects the Overview shows before deferring to the Projects tab. */
 const MAX_PROJECTS = 6;
@@ -33,17 +34,20 @@ export async function AccountProjectsSection({
 
   return (
     <section>
-      <div className="flex items-baseline justify-between gap-4">
-        <h2 className="font-instrument text-2xl italic leading-none text-foreground">{tabsT("projects")}</h2>
-        <Link
-          href={accountProjectsPath(account.urlIdentifier)}
-          className="text-sm text-muted-foreground transition-colors hover:text-foreground"
-        >
-          {projects.length > shown.length
-            ? overviewT("seeAllCount", { count: projects.length })
-            : overviewT("seeAll")}
-        </Link>
-      </div>
+      <AccountSectionHeading
+        action={
+          <Link
+            href={accountProjectsPath(account.urlIdentifier)}
+            className="text-sm text-muted-foreground transition-colors hover:text-foreground"
+          >
+            {projects.length > shown.length
+              ? overviewT("seeAllCount", { count: projects.length })
+              : overviewT("seeAll")}
+          </Link>
+        }
+      >
+        {tabsT("projects")}
+      </AccountSectionHeading>
 
       {/* grid-cols-1 (not a bare `grid`) so the column can shrink past the
           truncated title's min-content width instead of overflowing on phones. */}

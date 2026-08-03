@@ -116,7 +116,7 @@ export function AccountActivityFeed({ did }: { did: string }) {
 
   if (items.length === 0) {
     return (
-      <p className="border-t border-border/60 py-12 text-center text-sm text-muted-foreground">
+      <p className="py-10 text-center text-sm text-muted-foreground">
         {failed ? t("recordsError") : t("recordsEmpty")}
       </p>
     );
@@ -126,7 +126,9 @@ export function AccountActivityFeed({ did }: { did: string }) {
 
   return (
     <div>
-      <ul className="divide-y divide-border/60 border-t border-border/60">
+      {/* No rule on top: the section that owns this stream already draws one
+          above its heading, and two hairlines a heading apart read as noise. */}
+      <ul className="divide-y divide-border/40">
         {rows.map((row) => (
           <li key={row.key} className="py-5">
             {row.type === "batch" ? <BatchRow items={row.items} /> : <SingleRow item={row.item} />}
@@ -295,7 +297,7 @@ function Thumb({ item }: { item: ActivityFeedItem }) {
 
 function ActivityFeedSkeleton() {
   return (
-    <ul className="divide-y divide-border/60 border-t border-border/60">
+    <ul className="divide-y divide-border/40">
       {Array.from({ length: 4 }).map((_, index) => (
         <li key={index} className="flex flex-col gap-1.5 py-5 sm:flex-row sm:gap-6">
           <span className="skeleton h-4 w-20 rounded sm:shrink-0" />

@@ -6,6 +6,7 @@ import { RichText } from "@/app/_components/RichText";
 import { resolveAccountManageAccess } from "@/app/_lib/manage-server";
 import type { AccountRouteData } from "../_lib/account-route";
 import { accountSettingsPath } from "../_lib/account-route";
+import { AccountSectionHeading } from "./AccountSectionHeading";
 
 /**
  * What this account says about itself — the first thing the Overview shows.
@@ -55,8 +56,8 @@ export async function AccountAboutSection({ account }: { account: AccountRouteDa
 
   return (
     <section data-account-about>
-      <h2 className="font-instrument text-2xl italic leading-none text-foreground">{t("title")}</h2>
-      <div className="mt-3 max-w-3xl space-y-3 text-base leading-7 md:text-lg md:leading-8">
+      <AccountSectionHeading>{t("title")}</AccountSectionHeading>
+      <div className="mt-4 max-w-3xl space-y-3 text-base leading-7 md:text-lg md:leading-8">
         {bio ? <p className="text-foreground/85">{bio}</p> : null}
         {longDescription ? (
           <p className="whitespace-pre-line text-muted-foreground">{longDescription}</p>
