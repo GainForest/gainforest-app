@@ -768,6 +768,7 @@
         }
       },
       "apply": "Postular con un clic",
+      "applicationsUnderReview": "Las solicitudes están en revisión. Las personas seleccionadas se anunciarán pronto.",
       "details": "Leer detalles de la subvención",
       "appliedTitle": "Solicitud enviada",
       "appliedNote": "Tu solicitud para {project} ya se publicó en el feed.",

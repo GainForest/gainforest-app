@@ -768,6 +768,7 @@
         }
       },
       "apply": "Omba kwa Mbofyo Mmoja",
+      "applicationsUnderReview": "Maombi yanapitiwa. Waombaji watakaochaguliwa watatangazwa hivi karibuni.",
       "details": "Soma maelezo ya ruzuku",
       "appliedTitle": "Maombi yametumwa",
       "appliedNote": "Maombi yako kwa {project} sasa yamechapishwa kwenye mlisho.",

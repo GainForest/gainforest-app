@@ -768,6 +768,7 @@
         }
       },
       "apply": "One-Click Apply",
+      "applicationsUnderReview": "Applications are under review. Selected recipients will be announced soon.",
       "details": "Read grant details",
       "appliedTitle": "Application sent",
       "appliedNote": "Your application for {project} is now posted to the feed.",

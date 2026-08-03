@@ -768,6 +768,7 @@
         }
       },
       "apply": "Candidatar-se com um clique",
+      "applicationsUnderReview": "As candidaturas estão em análise. As pessoas selecionadas serão anunciadas em breve.",
       "details": "Ler detalhes do subsídio",
       "appliedTitle": "Candidatura enviada",
       "appliedNote": "Sua candidatura para {project} já foi publicada no feed.",
