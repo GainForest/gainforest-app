@@ -39,26 +39,24 @@ test("account headers stay compact while Overview owns profile details", async (
   await page.setViewportSize({ width: 1280, height: 900 });
   const accountPath = "/account/t0fl10.certified.one";
 
-  // Every tab shares one header — photo, name, facts and links — and only the
-  // Overview carries the About text and the supporting side rail.
+  // Every tab shares one compact header — photo, name, facts, actions, and
+  // trust. The Overview carries the description, outward links, and details.
   await page.goto(`${accountPath}/observations`);
   const hero = page.locator("[data-account-hero]");
   await expect(hero).toBeVisible();
-  await expect(hero.getByRole("link", { name: /beesandtreesug\.org/i })).toBeVisible();
+  await expect(hero.getByRole("link", { name: /beesandtreesug\.org/i })).toHaveCount(0);
   await expect(page.locator("[data-account-about]")).toHaveCount(0);
   await expect(page.locator("[data-account-overview-panel]")).toHaveCount(0);
   await expect(page.getByRole("button", { name: /(?:show|hide) profile/i })).toHaveCount(0);
 
   await page.goto(accountPath);
   await expect(hero).toBeVisible();
-  // About leads the Overview: it sits above the record stream, not beside it.
+  // A short bio lives exactly once: first inside At a glance, never in a
+  // duplicate About section. Longer account stories still render there.
   const about = page.locator("[data-account-about]");
   const stream = page.getByRole("heading", { name: /recent activity/i });
-  await expect(about).toBeVisible();
+  await expect(about).toHaveCount(0);
   await expect(stream).toBeVisible();
-  const aboutBox = await about.boundingBox();
-  const streamBox = await stream.boundingBox();
-  expect(aboutBox!.y).toBeLessThan(streamBox!.y);
 
   const profilePanel = page.locator("[data-account-overview-panel]");
   await expect(profilePanel).toBeVisible();
@@ -67,9 +65,12 @@ test("account headers stay compact while Overview owns profile details", async (
   await expect(atAGlanceHeading).toBeVisible();
   await expect(atAGlanceHeading).toHaveClass(/font-instrument/);
   await expect(atAGlanceHeading).toHaveClass(/italic/);
+  await expect(atAGlance.locator("[data-account-overview-bio]")).toBeVisible();
   await expect(atAGlance.locator("[data-account-stat-tile]")).toHaveCount(4);
   await expect(atAGlance.locator("[data-account-stat-tile] svg")).toHaveCount(4);
-  await expect(atAGlance.locator('[data-account-stat-tile="bumicerts"]')).toHaveAttribute("href", /\/certs$/);
+  await expect(atAGlance.locator('[data-account-stat-tile="bumicerts"]')).toHaveCount(0);
+  await expect(atAGlance.locator('[data-account-stat-tile="supporters"]')).toBeVisible();
+  await expect(atAGlance.locator('[data-account-overview-tile="website"]')).toBeVisible();
 
   // Audience counts belong immediately below Follow + share — not in the rail's
   // work/funding tiles.
@@ -92,10 +93,8 @@ test("account Overview stacks its supporting rail before the wide desktop layout
     await page.setViewportSize({ width, height: 900 });
     await page.goto(accountPath);
 
-    const about = page.locator("[data-account-about]");
     const projects = page.getByRole("heading", { name: "Projects", exact: true });
     const profilePanel = page.locator("[data-account-overview-panel]");
-    await expect(about).toBeVisible();
     await expect(projects).toBeVisible();
     await expect(profilePanel).toBeVisible();
 
@@ -104,9 +103,9 @@ test("account Overview stacks its supporting rail before the wide desktop layout
     expect(railBox).not.toBeNull();
     expect(railBox!.y).toBeGreaterThan(projectsBox!.y);
 
-    // Below the wide two-column breakpoint, the rail becomes a full-width
-    // section. Its four stat tiles must use that row rather than remaining as
-    // a narrow two-by-two block aligned to the left.
+    // Below the wide two-column breakpoint, the supporting rail occupies the
+    // same content line as Projects. Its available-width grid must align to
+    // that section and fit more than two stats across when the space permits.
     if (width === 1172) {
       const statTiles = profilePanel.locator("[data-account-stat-tile]");
       await expect(statTiles).toHaveCount(4);
@@ -114,7 +113,10 @@ test("account Overview stacks its supporting rail before the wide desktop layout
       await expect(statTiles.nth(0)).toHaveClass(/bg-muted/);
       await expect(statTiles.nth(0)).not.toHaveClass(/(?:border|shadow)/);
       await expect(statTiles.nth(0).locator(".font-instrument")).toHaveClass(/italic/);
-      await expect(statTiles.nth(0).locator("svg")).toHaveClass(/absolute/);
+      await expect(statTiles.nth(0).locator("svg")).toHaveClass(/size-14/);
+      await expect(statTiles.nth(0).locator("svg")).toHaveClass(/text-primary/);
+      await expect(statTiles.nth(0).locator("svg")).toHaveClass(/opacity-20/);
+      await expect(statTiles.nth(0).locator("svg")).toHaveClass(/-right-2/);
       const [firstTile, secondTile, thirdTile, fourthTile] = await Promise.all([
         statTiles.nth(0).boundingBox(),
         statTiles.nth(1).boundingBox(),
@@ -128,7 +130,9 @@ test("account Overview stacks its supporting rail before the wide desktop layout
       expect(secondTile!.y).toBe(firstTile!.y);
       expect(thirdTile!.y).toBe(firstTile!.y);
       expect(fourthTile!.y).toBe(firstTile!.y);
-      expect(fourthTile!.x + fourthTile!.width).toBeGreaterThanOrEqual(railBox!.x + railBox!.width - 2);
+      expect(firstTile!.x).toBeGreaterThanOrEqual(railBox!.x);
+      expect(firstTile!.x - railBox!.x).toBeLessThanOrEqual(2);
+      expect(Math.abs(projectsBox!.x - firstTile!.x)).toBeLessThanOrEqual(2);
     }
 
     const dimensions = await page.evaluate(() => ({

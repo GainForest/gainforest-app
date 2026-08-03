@@ -2,12 +2,12 @@
 
 /**
  * The identity header shared by every account tab: photo, name, a single line
- * of plain-language facts (type · place · since), and the two actions a visitor
+ * of plain-language facts (type · place), and the two actions a visitor
  * needs — follow and share.
  *
  * The hero carries durable identity: name, facts, who follows the account,
- * outward links, and any endorsement. The Overview carries the account's story,
- * its work, and how much of each kind of record it has published.
+ * and any endorsement. The Overview carries the short description, outward
+ * links, work, and supporting profile details.
  * The pieces below are exported so the owner's editable header (see
  * `EditableAccountHeader`) can render the exact same shell with editable fields
  * inside it.
@@ -16,7 +16,7 @@
 import type { ReactNode } from "react";
 import Image from "next/image";
 import { useState } from "react";
-import { useLocale, useTranslations } from "next-intl";
+import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { CheckIcon, GlobeIcon, Share2Icon } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -233,7 +233,7 @@ export function displayOrgType(value: string | null | undefined): string | null 
     .join(", ");
 }
 
-/** Year-level "Since 2022" / "Joined Jun 2022" date for the facts line. */
+/** Compact account date for the Overview detail tile. */
 export function heroDateLabel(value: string | null | undefined, locale: string, yearOnly: boolean): string | null {
   if (!value) return null;
   const date = new Date(value);
@@ -242,23 +242,13 @@ export function heroDateLabel(value: string | null | undefined, locale: string, 
     yearOnly ? { year: "numeric", timeZone: "UTC" } : { month: "short", year: "numeric", timeZone: "UTC" });
 }
 
-/** Read-only facts line, shared by the public hero and the editable one's
- *  non-editable fields. */
+/** Read-only identity facts: organization type and country. */
 export function AccountHeroFacts({ account }: { account: AccountRouteData }) {
-  const t = useTranslations("common.accountOverview");
-  const locale = useLocale();
   const isOrganization = account.kind === "organization";
   const orgType = isOrganization ? displayOrgType(account.orgType ?? account.summary.certOrgType) : null;
   const country = account.country ? formatCountry(account.country) : null;
-  const since = isOrganization
-    ? heroDateLabel(account.foundedDate ?? account.createdAt, locale, true)
-    : heroDateLabel(account.createdAt, locale, false);
 
-  const facts = [
-    orgType,
-    country,
-    since ? (isOrganization ? t("sinceDate", { date: since }) : t("joinedDate", { date: since })) : null,
-  ].filter((fact): fact is string => Boolean(fact));
+  const facts = [orgType, country].filter((fact): fact is string => Boolean(fact));
 
   if (facts.length === 0) return null;
 
@@ -318,7 +308,6 @@ export function AccountHeroTrustedBy({ did, className }: { did: string; classNam
 /** The public (read-only) account header. */
 export function AccountProfileHero({ account }: { account: AccountRouteData }) {
   const initial = account.displayName.charAt(0).toUpperCase();
-  const links = splitAccountLinks(account.website, account.socialLinks);
 
   return (
     <AccountHeroFrame
@@ -344,11 +333,7 @@ export function AccountProfileHero({ account }: { account: AccountRouteData }) {
     >
       <AccountHeroName>{account.displayName}</AccountHeroName>
       <AccountHeroFacts account={account} />
-      <AccountHeroLinks
-        website={links.website}
-        socialLinks={links.socialLinks}
-        endorsement={<AccountHeroTrustedBy did={account.did} />}
-      />
+      <AccountHeroTrustedBy did={account.did} className="mt-2" />
     </AccountHeroFrame>
   );
 }

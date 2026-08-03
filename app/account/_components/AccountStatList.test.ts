@@ -4,17 +4,17 @@ import { accountStatTiles, type AccountStatCounts } from "./AccountStatList";
 const counts: AccountStatCounts = {
   observations: 1_284,
   projects: 12,
-  bumicerts: 7,
   donations: 4,
+  supporters: 9,
 };
 
 describe("accountStatTiles", () => {
-  it("includes certificates and links every available user history", () => {
+  it("shows work and support activity without a deprecated Certs tile", () => {
     expect(accountStatTiles("mangaroa-farm.certified.app", "user", counts)).toEqual([
       { id: "observations", count: 1_284, href: "/account/mangaroa-farm.certified.app/observations" },
       { id: "projects", count: 12, href: "/account/mangaroa-farm.certified.app/projects" },
-      { id: "bumicerts", count: 7, href: "/account/mangaroa-farm.certified.app/certs" },
       { id: "donations", count: 4, href: "/account/mangaroa-farm.certified.app/donations" },
+      { id: "supporters", count: 9, href: null },
     ]);
   });
 
@@ -22,6 +22,7 @@ describe("accountStatTiles", () => {
     const tiles = accountStatTiles("mangaroa-farm.certified.app", "organization", counts);
 
     expect(tiles).toHaveLength(4);
-    expect(tiles.at(-1)).toEqual({ id: "donations", count: 4, href: null });
+    expect(tiles.find((tile) => tile.id === "donations")).toEqual({ id: "donations", count: 4, href: null });
+    expect(tiles.at(-1)).toEqual({ id: "supporters", count: 9, href: null });
   });
 });

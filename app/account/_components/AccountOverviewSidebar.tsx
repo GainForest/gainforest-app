@@ -2,6 +2,10 @@ import Image from "next/image";
 import Link from "next/link";
 import { getTranslations } from "next-intl/server";
 import { BadgeCheckIcon } from "lucide-react";
+import { EditableAccountHeader } from "@/app/(manage)/manage/_components/EditableAccountHeader";
+import { canEditGroupProfile } from "@/app/(manage)/manage/_lib/cgs-permissions";
+import type { CgsRole } from "@/app/(manage)/manage/_lib/cgs";
+import { resolveAccountManageAccess } from "@/app/_lib/manage-server";
 import { AccountAwards } from "./AccountAwards";
 import { AccountMemberships } from "./AccountMemberships";
 import { AccountStatList, type AccountStatCounts } from "./AccountStatList";
@@ -11,7 +15,7 @@ import { monogram } from "@/app/_lib/did-profile";
 import { fetchAccountMaEarthRounds, fetchProjectImageGalleriesByDid } from "@/app/_lib/indexer";
 import { fetchPublicDataCouncilMembers, type PublicDataCouncilMember } from "@/app/_lib/data-council";
 import type { AccountRouteData } from "../_lib/account-route";
-import { accountGalleryPath } from "../_lib/account-route";
+import { accountGalleryPath, accountSettingsPath } from "../_lib/account-route";
 
 /** Quiet section wrapper: a small label, then the section's content. */
 function SidebarSection({
@@ -182,7 +186,19 @@ export async function AccountOverviewSidebar({
   supporters: number;
   memberships: AccountOrganization[];
 }) {
-  const organizationsT = await getTranslations("common.accountOrganizations");
+  const [organizationsT, access] = await Promise.all([
+    getTranslations("common.accountOrganizations"),
+    resolveAccountManageAccess(account.urlIdentifier).catch(() => null),
+  ]);
+  const target = access?.status === "allowed" ? access.target : null;
+  const groupRole: CgsRole | undefined = target?.kind === "group"
+    ? target.role === "owner" ? "owner" : target.role === "admin" ? "admin" : "member"
+    : undefined;
+  const canEditProfile = target
+    ? target.kind === "group"
+      ? canEditGroupProfile({ kind: "group", role: groupRole }).allowed
+      : true
+    : false;
 
   return (
     // Each block opens with its own hairline so the rail reads as a short stack
@@ -202,7 +218,20 @@ export async function AccountOverviewSidebar({
         supporters={supporters}
       />
 
-      <AccountStatList identifier={account.urlIdentifier} accountKind={account.kind} counts={counts} />
+      {canEditProfile && target ? (
+        <EditableAccountHeader
+          account={account}
+          writeRepoDid={target.kind === "group" ? target.did : undefined}
+          groupRole={groupRole}
+          settingsHref={accountSettingsPath(account.urlIdentifier)}
+          viewPublicHref={null}
+          showAbout={false}
+          overviewCounts={counts}
+          variant="overview"
+        />
+      ) : (
+        <AccountStatList account={account} counts={counts} />
+      )}
 
       <PhotosCard account={account} />
       {account.kind === "organization" ? <MaEarthCard did={account.did} /> : null}

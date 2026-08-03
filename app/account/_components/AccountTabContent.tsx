@@ -196,8 +196,8 @@ export async function AccountOverviewContent({ account, did }: { account: Accoun
           counts={{
             projects: projects.length,
             observations: observationSummary?.count ?? account.summary.observationCount ?? 0,
-            bumicerts: account.summary.bumicertCount,
             donations: account.kind === "user" ? sentDonationCount : received.length,
+            supporters,
           }}
           receivedUsd={receivedUsd}
           supporters={supporters}

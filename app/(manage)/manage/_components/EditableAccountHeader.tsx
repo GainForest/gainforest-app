@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { useLocale, useTranslations } from "next-intl";
+import { useTranslations } from "next-intl";
 import Image from "next/image";
 import Link from "next/link";
 import { motion } from "framer-motion";
@@ -36,8 +36,8 @@ import {
   AccountHeroTrustedBy,
   HERO_AVATAR_CLASS,
   displayOrgType,
-  heroDateLabel,
 } from "@/app/account/_components/AccountProfileHero";
+import { AccountStatList, type AccountStatCounts } from "@/app/account/_components/AccountStatList";
 import { ExpandableBio } from "@/app/account/_components/ExpandableBio";
 import { countryFlag } from "@/app/_lib/format";
 import { resolvePdsHost } from "@/app/_lib/pds";
@@ -256,11 +256,7 @@ function EditableCompactHero({
   onCancel,
   onEditLogo,
   onEditCountry,
-  onEditWebsite,
-  onEditStartDate,
-  onEditVisibility,
   onEditOrgType,
-  onEditSocials,
   editDisabledReason = null,
 }: {
   account: AccountRouteData;
@@ -274,16 +270,11 @@ function EditableCompactHero({
   onCancel: () => void;
   onEditLogo: () => void;
   onEditCountry: () => void;
-  onEditWebsite: () => void;
-  onEditStartDate: () => void;
-  onEditVisibility: () => void;
   onEditOrgType: () => void;
-  onEditSocials: () => void;
   editDisabledReason?: string | null;
 }) {
   const t = useTranslations("upload.dashboardClient");
-  const overviewT = useTranslations("common.accountOverview");
-  const locale = useLocale();
+
   const logoObjectUrl = useMemo(
     () => (editState.logoFile ? URL.createObjectURL(editState.logoFile) : null),
     [editState.logoFile],
@@ -299,8 +290,6 @@ function EditableCompactHero({
   const isOrg = account.kind === "organization";
   const countryLabel = editState.country ? countryName(editState.country) : null;
   const flag = editState.country ? countryFlag(editState.country) : "";
-  const since = formatSinceDate(editState.startDate);
-  const joined = heroDateLabel(account.createdAt, locale, false);
 
   return (
     <div data-account-hero-editor>
@@ -398,62 +387,8 @@ function EditableCompactHero({
                   {countryLabel ?? t("hero.addCountry")}
                 </FactChip>
               ) : null}
-              {isOrg ? (
-                <FactChip onClick={onEditStartDate} disabled={!canEdit} title={editDisabledReason ?? undefined} empty={since.state === "empty"}>
-                  {since.state === "valid"
-                    ? overviewT("sinceDate", { date: since.label ?? "" })
-                    : since.state === "invalid"
-                      ? t("hero.invalidDate")
-                      : t("hero.addStartDate")}
-                </FactChip>
-              ) : joined ? (
-                <span className="px-1">{overviewT("joinedDate", { date: joined })}</span>
-              ) : null}
-              {isOrg ? (
-                <FactChip onClick={onEditVisibility} disabled={!canEdit} title={editDisabledReason ?? undefined}>
-                  {editState.visibility === "Unlisted" ? <LockIcon className="size-3.5 opacity-70" aria-hidden /> : <EyeIcon className="size-3.5 opacity-70" aria-hidden />}
-                  {editState.visibility}
-                </FactChip>
-              ) : null}
             </AccountHeroMeta>
-            <div className="-ml-2 mt-1.5 flex flex-wrap items-center gap-y-1">
-              <FactChip
-                onClick={onEditWebsite}
-                disabled={!canEdit}
-                title={editState.website ? formatWebsite(editState.website) : editDisabledReason ?? undefined}
-                empty={!editState.website}
-              >
-                <GlobeIcon className="size-3.5 opacity-70" aria-hidden />
-                <span className="max-w-52 truncate">
-                  {editState.website ? formatWebsite(editState.website) : t("hero.addWebsite")}
-                </span>
-              </FactChip>
-              {isOrg ? (
-                <>
-                  {editState.socials.map((url) => {
-                    const label = formatWebsite(url);
-                    return (
-                      <Button key={url} asChild variant="ghost" size="icon-sm" className="text-muted-foreground hover:text-foreground" title={label} aria-label={t("hero.openSocialLink", { link: label })}>
-                        <Link href={externalHref(url)} target="_blank" rel="noopener noreferrer">
-                          <SocialGlyph platform={classifySocial(url)} />
-                        </Link>
-                      </Button>
-                    );
-                  })}
-                  <FactChip
-                    onClick={onEditSocials}
-                    disabled={!canEdit}
-                    title={editDisabledReason ?? t("hero.addSocialLinks")}
-                    aria-label={t("hero.addSocialLinks")}
-                    empty={editState.socials.length === 0}
-                  >
-                    <Link2Icon className="size-3.5 opacity-70" aria-hidden />
-                    {editState.socials.length === 0 ? t("hero.addSocialLinks") : null}
-                  </FactChip>
-                </>
-              ) : null}
-              <AccountHeroTrustedBy did={account.did} className="ml-2" />
-            </div>
+            <AccountHeroTrustedBy did={account.did} className="mt-2" />
           </>
         )}
         {saveError ? <p className="mt-2 text-xs text-destructive">{saveError}</p> : null}
@@ -528,6 +463,70 @@ function AboutSection({
         </>
       )}
     </motion.section>
+  );
+}
+
+function EditableOverview({
+  account,
+  counts,
+  editState,
+  inlineField,
+  isSaving,
+  saveError,
+  onChange,
+  onEditBio,
+  onSaveBio,
+  onCancelBio,
+  onEditWebsite,
+  onEditStartDate,
+  onEditVisibility,
+  onEditSocials,
+}: {
+  account: AccountRouteData;
+  counts: AccountStatCounts;
+  editState: HeroEditState;
+  inlineField: InlineField;
+  isSaving: boolean;
+  saveError: string | null;
+  onChange: (field: "description", value: string) => void;
+  onEditBio: () => void;
+  onSaveBio: () => void;
+  onCancelBio: () => void;
+  onEditWebsite: () => void;
+  onEditStartDate: () => void;
+  onEditVisibility: () => void;
+  onEditSocials: () => void;
+}) {
+  const t = useTranslations("upload.dashboardClient");
+  const editingBio = inlineField === "profile";
+
+  return (
+    <AccountStatList
+      account={account}
+      counts={counts}
+      editActions={{
+        onEditBio,
+        onEditWebsite,
+        onEditStartDate: account.kind === "organization" ? onEditStartDate : undefined,
+        onEditSocials: account.kind === "organization" ? onEditSocials : undefined,
+        onEditVisibility: account.kind === "organization" ? onEditVisibility : undefined,
+      }}
+      bioEditor={editingBio ? (
+        <div className="space-y-2">
+          <textarea
+            value={editState.description}
+            onChange={(event) => onChange("description", event.target.value)}
+            placeholder={t("hero.shortBioPlaceholder")}
+            aria-label={t("hero.shortBioPlaceholder")}
+            rows={3}
+            className="w-full resize-none rounded-xl border border-border/60 bg-transparent p-3 text-sm leading-6 text-foreground outline-none transition-colors field-sizing-content placeholder:text-muted-foreground/60 focus:border-primary"
+            autoFocus
+          />
+          <InlineEditActions isSaving={isSaving} onSave={onSaveBio} onCancel={onCancelBio} />
+          {saveError ? <p className="text-sm text-destructive">{saveError}</p> : null}
+        </div>
+      ) : undefined}
+    />
   );
 }
 
@@ -853,6 +852,7 @@ export function EditableAccountHeader({
   viewPublicHref,
   showAbout = true,
   memberships = [],
+  overviewCounts,
   variant = "full",
 }: {
   account: AccountRouteData;
@@ -865,6 +865,8 @@ export function EditableAccountHeader({
   viewPublicHref: string | null;
   /** Organizations this person belongs to, shown as a "Member of…" hero row. */
   memberships?: AccountOrganization[];
+  /** Counts rendered by the authorized Overview details editor. */
+  overviewCounts?: AccountStatCounts;
   /**
    * Whether to render the organization About section beneath the hero. The
    * dashboard shows it inline; the profile renders About in its Overview tab
@@ -874,9 +876,10 @@ export function EditableAccountHeader({
   /**
    * `compact` — the identity header shared by every account tab.
    * `about` — just the organization's About text, for the Overview sidebar.
+   * `overview` — editable profile details in the public Overview grid.
    * `full` — cover, identity and facts, for the manage surfaces.
    */
-  variant?: "full" | "compact" | "about";
+  variant?: "full" | "compact" | "about" | "overview";
 }) {
   const router = useRouter();
   const modal = useModal();
@@ -1163,6 +1166,33 @@ export function EditableAccountHeader({
     );
   }
 
+  if (variant === "overview") {
+    if (!overviewCounts) return null;
+
+    return (
+      <EditableOverview
+        account={account}
+        counts={overviewCounts}
+        editState={editState}
+        inlineField={inlineField}
+        isSaving={isSaving}
+        saveError={saveError}
+        onChange={(field, value) => handleChange(field, value)}
+        onEditBio={() => { setSaveError(null); setInlineField("profile"); }}
+        onSaveBio={() => void saveChanges({ description: editDescription })}
+        onCancelBio={() => {
+          setEditDescription((pendingOptimisticSave?.state ?? accountState).description);
+          setSaveError(null);
+          setInlineField(null);
+        }}
+        onEditWebsite={account.kind === "organization" && !account.website?.trim() ? openSocialsModal : openWebsiteModal}
+        onEditStartDate={openStartDateModal}
+        onEditVisibility={openVisibilityModal}
+        onEditSocials={openSocialsModal}
+      />
+    );
+  }
+
   if (variant === "compact") {
     return (
       <EditableCompactHero
@@ -1180,11 +1210,7 @@ export function EditableAccountHeader({
         onCancel={resetState}
         onEditLogo={openLogoModal}
         onEditCountry={openCountryModal}
-        onEditWebsite={openWebsiteModal}
-        onEditStartDate={openStartDateModal}
-        onEditVisibility={openVisibilityModal}
         onEditOrgType={openOrgTypeModal}
-        onEditSocials={openSocialsModal}
         editDisabledReason={profileEditPermission.reason}
       />
     );

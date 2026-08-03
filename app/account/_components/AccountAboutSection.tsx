@@ -11,15 +11,12 @@ import { AccountSectionHeading } from "./AccountSectionHeading";
 /**
  * What this account says about itself — the first thing the Overview shows.
  *
- * Someone landing here wants to know who they're looking at before they see
- * what it has been publishing, so this leads the page: the short bio as a
- * lead line, then the long description. Organizations edit the long text in
- * place; the shared header editor owns that record write, so this mounts its
- * "about" variant rather than duplicating the save logic.
+ * The short bio belongs first in the Overview's At a glance section. This
+ * section carries only the longer account story; organizations edit that text
+ * in place through the shared header editor rather than duplicating its write.
  */
 export async function AccountAboutSection({ account }: { account: AccountRouteData }) {
   const t = await getTranslations("common.accountAbout");
-  const bio = account.description?.trim() ?? "";
   const longDescription = account.kind === "organization" ? account.longDescription?.trim() ?? "" : "";
   const richBody = account.kind === "organization" ? null : account.detail?.richBody ?? null;
   const blurb = account.kind === "organization" ? null : account.detail?.blurb?.trim() ?? null;
@@ -38,8 +35,7 @@ export async function AccountAboutSection({ account }: { account: AccountRouteDa
 
   if (account.kind === "organization" && canEditProfile) {
     return (
-      <section data-account-about className="space-y-3">
-        {bio ? <p className="max-w-3xl text-base leading-7 text-foreground/85 md:text-lg md:leading-8">{bio}</p> : null}
+      <section data-account-about>
         <EditableAccountHeader
           account={account}
           writeRepoDid={target?.kind === "group" ? target.did : undefined}
@@ -52,13 +48,12 @@ export async function AccountAboutSection({ account }: { account: AccountRouteDa
     );
   }
 
-  if (!bio && !longDescription && !richBody?.length && !blurb) return null;
+  if (!longDescription && !richBody?.length && !blurb) return null;
 
   return (
     <section data-account-about>
       <AccountSectionHeading>{t("title")}</AccountSectionHeading>
       <div className="mt-4 max-w-3xl space-y-3 text-base leading-7 md:text-lg md:leading-8">
-        {bio ? <p className="text-foreground/85">{bio}</p> : null}
         {longDescription ? (
           <p className="whitespace-pre-line text-muted-foreground">{longDescription}</p>
         ) : null}

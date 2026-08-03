@@ -189,8 +189,9 @@ export function AccountOverviewContentSkeleton() {
 
       <aside className="min-w-0 border-t border-border/60 pt-10 xl:col-start-2 xl:row-start-1 xl:row-span-2 xl:border-t-0 xl:pt-0">
         <Skeleton className="h-40 w-full rounded-2xl" />
-        {/* The tiles use one row when the rail is stacked and two in its narrow desktop column. */}
-        <div className="mt-7 h-64 border-t border-border/60 md:h-40 xl:h-64" />
+        {/* The responsive detail grid gains columns in a wide stacked rail and
+            returns to compact rows in the narrow desktop sidebar. */}
+        <div className="mt-7 h-80 border-t border-border/60 md:h-52 xl:h-80" />
       </aside>
 
       <section className="min-w-0 border-t border-border/60 pt-10 xl:col-start-1 xl:row-start-2">
