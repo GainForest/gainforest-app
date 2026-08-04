@@ -39,9 +39,11 @@ import {
   countdownTo,
   endedRounds,
   featuredRound,
+  fetchBioblitzWinnerAwards,
   fetchCollectorOrgs,
   fetchRoundCollectors,
   fetchRoundTopLiked,
+  frozenWinnersFor,
   roundStatus,
   type BioblitzRound,
   type BoardScope,
@@ -74,13 +76,17 @@ type WinnerAccount = {
   did: string;
   name: string | null;
   avatarRef: string | null;
-  count: number;
+  /** Null when the frozen winner record carries no tally (e.g. best picture). */
+  count: number | null;
 };
 
 type PastRoundSummary = {
   round: BioblitzRound;
   mostSubmitted: WinnerAccount | null;
   mostLiked: WinnerAccount | null;
+  /** True when both prizes are frozen (badge award or hand-pinned), so this
+   *  row can no longer drift with live data. */
+  final: boolean;
 };
 
 export function BioblitzClient() {
@@ -191,37 +197,63 @@ export function BioblitzClient() {
     const controller = new AbortController();
     let cancelled = false;
     setPastWinners(null);
-    Promise.all(
-      pastRounds.map(async (pastRound): Promise<PastRoundSummary> => {
-        const [pastBoard, liked] = await Promise.all([
-          fetchRoundCollectors(pastRound, "round", controller.signal).catch(() => null),
-          fetchRoundTopLiked(pastRound, 1, controller.signal).catch(() => []),
-        ]);
-        const topCollector = pastBoard?.collectors[0] ?? null;
-        const topLiked = liked[0] ?? null;
-        return {
-          round: pastRound,
-          mostSubmitted: topCollector
-            ? {
-                did: topCollector.did,
-                name: topCollector.displayName,
-                avatarRef: topCollector.avatarRef,
-                count: topCollector.count,
-              }
-            : null,
-          mostLiked: topLiked
-            ? {
-                did: topLiked.record.did,
-                name: topLiked.record.creatorName,
-                avatarRef: topLiked.record.creatorAvatarRef,
-                count: topLiked.likeCount,
-              }
-            : null,
-        };
-      }),
-    )
+    (async () => {
+      // Awarded winner badges (and hand-pinned overrides) freeze a past round's
+      // winners permanently. Only prizes that are not frozen yet fall back to
+      // the live recomputation — which can still drift until they are awarded.
+      const awards = await fetchBioblitzWinnerAwards(controller.signal).catch(() => null);
+      return Promise.all(
+        pastRounds.map(async (pastRound): Promise<PastRoundSummary> => {
+          const frozen = frozenWinnersFor(pastRound, awards);
+          const needBoard = frozen.mostObservations === undefined;
+          const needLiked = frozen.bestPicture === undefined;
+          const [pastBoard, liked] = await Promise.all([
+            needBoard
+              ? fetchRoundCollectors(pastRound, "round", controller.signal).catch(() => null)
+              : null,
+            needLiked ? fetchRoundTopLiked(pastRound, 1, controller.signal).catch(() => []) : [],
+          ]);
+          const topCollector = pastBoard?.collectors[0] ?? null;
+          const topLiked = liked?.[0] ?? null;
+          const mostSubmitted: WinnerAccount | null =
+            frozen.mostObservations !== undefined
+              ? frozen.mostObservations && {
+                  did: frozen.mostObservations.did,
+                  name: null,
+                  avatarRef: null,
+                  count: frozen.mostObservations.count,
+                }
+              : topCollector && {
+                  did: topCollector.did,
+                  name: topCollector.displayName,
+                  avatarRef: topCollector.avatarRef,
+                  count: topCollector.count,
+                };
+          const mostLiked: WinnerAccount | null =
+            frozen.bestPicture !== undefined
+              ? frozen.bestPicture && {
+                  did: frozen.bestPicture.did,
+                  name: null,
+                  avatarRef: null,
+                  count: frozen.bestPicture.count,
+                }
+              : topLiked && {
+                  did: topLiked.record.did,
+                  name: topLiked.record.creatorName,
+                  avatarRef: topLiked.record.creatorAvatarRef,
+                  count: topLiked.likeCount,
+                };
+          return {
+            round: pastRound,
+            mostSubmitted,
+            mostLiked,
+            final: frozen.mostObservations !== undefined && frozen.bestPicture !== undefined,
+          };
+        }),
+      );
+    })()
       .then((result) => {
-        if (!cancelled) setPastWinners(result);
+        if (!cancelled && result) setPastWinners(result);
       })
       .catch((err) => {
         if ((err as Error).name !== "AbortError" && !cancelled) setPastWinners([]);
@@ -561,7 +593,8 @@ function PastWinners({
   // Moderator-only round badge awarding; renders nothing for regular viewers.
   const awardHook = useBioblitzAwardState();
   if (rounds.length === 0) return null;
-  const rows = summaries ?? rounds.map((round) => ({ round, mostSubmitted: null, mostLiked: null }));
+  const rows: PastRoundSummary[] =
+    summaries ?? rounds.map((round) => ({ round, mostSubmitted: null, mostLiked: null, final: false }));
 
   return (
     <FadeIn delay={0.08}>
@@ -576,8 +609,20 @@ function PastWinners({
           {rows.map((summary) => (
             <li key={summary.round.id} className="rounded-2xl bg-foreground/5 px-3 py-2">
               <div className="flex items-center justify-between gap-2">
-                <span className="text-xs font-semibold text-foreground">{summary.round.label}</span>
-                <span className="text-[10px] tabular-nums text-muted-foreground">
+                <span className="flex min-w-0 items-center gap-1.5">
+                  <span className="truncate text-xs font-semibold text-foreground">{summary.round.label}</span>
+                  {summaries != null ? (
+                    <span
+                      title={summary.final ? t("finalHint") : t("provisionalHint")}
+                      className={`shrink-0 rounded-full px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-[0.08em] ${
+                        summary.final ? "bg-primary/10 text-primary" : "bg-foreground/10 text-muted-foreground"
+                      }`}
+                    >
+                      {summary.final ? t("final") : t("provisional")}
+                    </span>
+                  ) : null}
+                </span>
+                <span className="shrink-0 text-[10px] tabular-nums text-muted-foreground">
                   {formatDateRange(summary.round.start, summary.round.end, locale)}
                 </span>
               </div>
@@ -586,14 +631,22 @@ function PastWinners({
                   icon={<TrophyIcon />}
                   label={t("mostSubmitted")}
                   winner={summary.mostSubmitted}
-                  countLabel={summary.mostSubmitted ? boardT("observations", { count: summary.mostSubmitted.count }) : null}
+                  countLabel={
+                    summary.mostSubmitted && summary.mostSubmitted.count != null
+                      ? boardT("observations", { count: summary.mostSubmitted.count })
+                      : null
+                  }
                   pending={summaries == null ? "…" : t("pending")}
                 />
                 <WinnerPill
                   icon={<CameraIcon />}
                   label={t("mostLiked")}
                   winner={summary.mostLiked}
-                  countLabel={summary.mostLiked ? bestT("likes", { count: summary.mostLiked.count }) : null}
+                  countLabel={
+                    summary.mostLiked && summary.mostLiked.count != null
+                      ? bestT("likes", { count: summary.mostLiked.count })
+                      : null
+                  }
                   pending={summaries == null ? "…" : t("pending")}
                 />
               </div>
