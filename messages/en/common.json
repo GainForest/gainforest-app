@@ -24,18 +24,19 @@
     "trigger": "Search",
     "open": "Open search",
     "title": "Search GainForest",
-    "placeholder": "Search projects, organizations, observations…",
+    "placeholder": "Search projects, people, organizations, observations…",
     "clear": "Clear search",
     "escKey": "esc",
     "kinds": {
       "cert": "Certs",
       "project": "Projects",
+      "person": "People",
       "organization": "Organizations",
       "observation": "Observations"
     },
     "idle": {
       "headline": "Type to search",
-      "body": "Find projects, organizations, and observations."
+      "body": "Find projects, people, organizations, and observations."
     },
     "noResults": {
       "headline": "No results for “{query}”",
@@ -157,7 +158,6 @@
       "myProjects": "My projects",
       "myOrganizations": "My organizations",
       "admin": "Admin",
-      "submitData": "Submit field data",
       "personalAccount": "Personal account",
       "organizationAccount": "Organization account",
       "myCards": "My Cards"
@@ -1278,7 +1278,8 @@
       "endorsers": "Endorsers",
       "awardEndorsements": "Award endorsements",
       "facilitator": "Facilitator wallet",
-      "dataJobs": "Data batches"
+      "dataJobs": "Data batches",
+      "blockedDomains": "Blocked addresses"
     },
     "unnamed": "Unnamed account",
     "awardHint": "Open a profile to award a badge.",
@@ -1327,6 +1328,31 @@
       "finalized": "This BioBlitz round has ended, so its counting can no longer change.",
       "add": "The weekly counting change could not be saved. Please try again.",
       "remove": "The account could not be restored to the leaderboard. Please try again."
+    }
+  },
+  "adminBlockedDomains": {
+    "title": "Blocked addresses",
+    "description": "Server addresses whose accounts are kept off the public site. Everything they publish — organizations, projects, observations, posts — is hidden from the explorer, search, the globe, the feed and every public count.",
+    "effect": "Blocking an address hides everything published from it. It does not delete anything: the accounts and their records stay on their own server, and unblocking brings them back.",
+    "domainLabel": "Server address",
+    "domainPlaceholder": "dev.example.org",
+    "add": "Block address",
+    "adding": "Blocking…",
+    "builtinBadge": "Always blocked",
+    "accountCount": "{count, plural, one {# account} other {# accounts}}",
+    "accountsUnknown": "Account count unavailable",
+    "empty": "No addresses are blocked right now.",
+    "unavailable": "The blocked address list couldn't be loaded safely. Try again before making changes.",
+    "permissionNotice": "Only members of the admin team can change blocked addresses.",
+    "propagationHint": "Changes reach the public site within a few minutes.",
+    "removeLabel": "Unblock {domain}",
+    "errors": {
+      "notSignedIn": "Sign in again to continue.",
+      "forbidden": "You don't have permission to change blocked addresses.",
+      "invalidDomain": "Enter a valid server address, like dev.example.org.",
+      "alreadyBuiltin": "That address is always blocked and can't be changed here.",
+      "add": "The address could not be blocked. Please try again.",
+      "remove": "The address could not be unblocked. Please try again."
     }
   },
   "adminTaina": {
@@ -2068,6 +2094,7 @@
       "groupNameRequired": "Give this upload a name first.",
       "folderTitle": "Where should these recordings go?",
       "folderExistingHelp": "Add them to a folder you already have, so everything from this site stays together.",
+      "folderResumedHelp": "You already have a folder with this name, so these recordings will join it instead of starting a new one.",
       "folderExistingAction": "Choose an existing folder",
       "folderNewAction": "New folder",
       "folderSearchPlaceholder": "Search your folders",
@@ -3201,10 +3228,13 @@
       "radialLabel": "Loudness",
       "timeLabel": "Time (Hour)",
       "legendTitle": "Voice groups",
+      "legendHint": "Click a voice group to show or hide it.",
+      "showAllBands": "Show all",
       "bandsNote": "Indicative ranges. Voices overlap, and which animals sing where varies by place.",
       "empty": "Analyzed recordings will appear here as a 24-hour soundscape clock.",
       "emptyHint": "Analyze your uploaded recordings above to begin.",
       "downloadPng": "Download image",
+      "credit": "Made with GainForest · gainforest.app",
       "hoverHint": "Drag around the dial to zoom into those times, and click a time to listen. Use − or “Whole day” to come back out.",
       "hoverHintAllDates": "Drag around the dial to zoom into those times, then pick a recording from the list to listen. Use − or “Whole day” to come back out.",
       "loadingAudio": "Loading {name}…",
@@ -3312,7 +3342,32 @@
     "identificationsIncluded": "{count, plural, one {This includes # saved identification, which will be deleted as well.} other {This includes # saved identifications, which will be deleted as well.}}",
     "deleteProgress": "Deleting… {done} of {total}",
     "deletePartial": "{count, plural, one {# recording} other {# recordings}} could not be deleted, so the folder was kept. Please try again.",
-    "deleteFailed": "The folder could not be deleted. Please try again."
+    "deleteFailed": "The folder could not be deleted. Please try again.",
+    "addToProject": {
+      "action": "Add to project",
+      "title": "Add “{name}” to a project",
+      "body": "The folder joins the project's evidence timeline — its recordings stay exactly where they are.",
+      "noteLabel": "Note (optional)",
+      "notePlaceholder": "What do these recordings show?",
+      "defaultNote": "{count, plural, =0 {A recorder folder.} one {A recorder folder with # recording.} other {A recorder folder with # recordings.}}",
+      "untitledProject": "Untitled project",
+      "loading": "Loading your projects…",
+      "loadError": "Your projects couldn't be loaded. Try again in a moment.",
+      "empty": "You don't have a project yet — create one below.",
+      "searchPlaceholder": "Search your projects",
+      "newProject": "New project",
+      "newProjectTitleLabel": "Project name",
+      "newProjectTitlePlaceholder": "e.g. Riverbank restoration",
+      "newProjectTitleRequired": "Give the project a name of at least 3 characters.",
+      "createAndAdd": "Create & add",
+      "creating": "Creating…",
+      "addedTitle": "Added to the timeline",
+      "addedBody": "“{name}” is now on {project}'s evidence timeline.",
+      "viewProject": "Open the project",
+      "close": "Close",
+      "cancel": "Cancel",
+      "failed": "The folder could not be added. Please try again."
+    }
   },
   "hypercerts": {
     "metaTitle": "Building on the Hypercerts lexicons — GainForest",

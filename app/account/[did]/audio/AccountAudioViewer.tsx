@@ -22,6 +22,7 @@ import {
   ArrowUpRightIcon,
   AudioLinesIcon,
   FolderInputIcon,
+  FolderKanbanIcon,
   Loader2Icon,
   MapPinIcon,
   PencilIcon,
@@ -32,6 +33,13 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Container from "@/components/ui/container";
+import {
+  ContextMenu,
+  ContextMenuContent,
+  ContextMenuItem,
+  ContextMenuSeparator,
+  ContextMenuTrigger,
+} from "@/components/ui/context-menu";
 import { ModalContent, ModalDescription, ModalFooter, ModalHeader, ModalTitle } from "@/components/ui/modal/modal";
 import { useModal } from "@/components/ui/modal/context";
 import { resolvePdsHost } from "@/app/_lib/pds";
@@ -50,6 +58,7 @@ import {
   MoveRecordingsModal,
   RenameFolderModal,
 } from "@/app/_components/RecordingFolderModals";
+import { AddDeploymentToProjectModal } from "@/app/_components/AddDeploymentToProjectModal";
 import { deploymentDetailPath, parseAtUri } from "@/app/_lib/deployment-events";
 import { formatDate } from "@/app/_lib/format";
 import { RecordingsExplorer } from "@/app/_components/RecordingsExplorer";
@@ -335,6 +344,38 @@ export function AccountAudioViewer({
     [modal, mutationRepo, recordings, tFolders],
   );
 
+  /**
+   * Right-click → "Add to project": the folder joins a project's evidence
+   * timeline (an existing project, or one named in the dialog). The folder
+   * and its recordings stay exactly where they are — the project only gains
+   * a timeline entry pointing at them.
+   */
+  const addFolderToProject = useCallback(
+    (group: DeploymentGroup) => {
+      const deployment = group.deployment;
+      if (!deployment) return;
+      const detailUrl = group.detailPath ? new URL(group.detailPath, window.location.origin).toString() : null;
+      modal.pushModal(
+        {
+          id: "add-deployment-to-project",
+          dialogWidth: "max-w-lg w-[calc(100%-2rem)]",
+          content: (
+            <AddDeploymentToProjectModal
+              folderName={deployment.name}
+              detailUrl={detailUrl}
+              recordingUris={group.items.map((item) => item.uri)}
+              did={did}
+              mutationRepo={mutationRepo}
+            />
+          ),
+        },
+        true,
+      );
+      void modal.show();
+    },
+    [did, modal, mutationRepo],
+  );
+
   useEffect(() => {
     const ctrl = new AbortController();
     (async () => {
@@ -485,8 +526,8 @@ export function AccountAudioViewer({
         <div className="mt-6 flex flex-col gap-4">
           {groups.map((group) => {
             const folder = group.deployment;
-            return (
-              <section key={group.key || "other"} className="rounded-2xl border border-border bg-card/90 p-5 sm:p-6">
+            const section = (
+              <section className="rounded-2xl border border-border bg-card/90 p-5 sm:p-6">
                 <div className="flex flex-wrap items-center justify-between gap-2">
                   <div className="flex min-w-0 items-center gap-2.5">
                     <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-primary/10 text-primary">
@@ -550,6 +591,31 @@ export function AccountAudioViewer({
                   )}
                 </div>
               </section>
+            );
+            // Owners and org admins get a right-click menu on the folder —
+            // the same actions as the header buttons, plus "Add to project".
+            if (!canDelete || !folder) {
+              return <div key={group.key || "other"}>{section}</div>;
+            }
+            return (
+              <ContextMenu key={group.key}>
+                <ContextMenuTrigger asChild>{section}</ContextMenuTrigger>
+                <ContextMenuContent>
+                  <ContextMenuItem onSelect={() => addFolderToProject(group)}>
+                    <FolderKanbanIcon />
+                    {tFolders("addToProject.action")}
+                  </ContextMenuItem>
+                  <ContextMenuItem onSelect={() => renameFolder(folder)}>
+                    <PencilIcon />
+                    {tFolders("renameAction")}
+                  </ContextMenuItem>
+                  <ContextMenuSeparator />
+                  <ContextMenuItem variant="destructive" onSelect={() => confirmDeleteFolder(group)}>
+                    <Trash2Icon />
+                    {tFolders("deleteAction")}
+                  </ContextMenuItem>
+                </ContextMenuContent>
+              </ContextMenu>
             );
           })}
         </div>

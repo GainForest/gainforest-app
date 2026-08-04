@@ -5,11 +5,12 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { ArchiveIcon, AwardIcon, BotIcon, Building2Icon, FlaskConicalIcon, LeafIcon, SproutIcon, UserRoundIcon, WalletIcon } from "lucide-react";
+import { ArchiveIcon, AwardIcon, BotIcon, Building2Icon, FlaskConicalIcon, LeafIcon, ServerOffIcon, SproutIcon, UserRoundIcon, WalletIcon } from "lucide-react";
 import { AdminOnlyIndicator } from "@/app/_components/AdminOnlyIndicator";
 import type { GrantApplicant } from "@/app/_lib/grants";
 import type { BioblitzRegistrant, BioblitzRound } from "@/app/_lib/bioblitz";
 import type { BioblitzExclusionAdminRow } from "@/app/_lib/bioblitz-exclusions";
+import type { BlockedDomainAdminRow } from "@/app/_lib/blocked-domains";
 import type { FlaggedTestAccount } from "@/app/internal/badges/_lib/test-accounts";
 import type { FlaggedTestRecord } from "@/app/internal/badges/_lib/test-records";
 import type { BuiltinEndorser, EndorserRecord } from "@/app/_lib/endorsers";
@@ -26,8 +27,9 @@ import { AdminFacilitatorPanel } from "./AdminFacilitatorPanel";
 import { EndorsersManager } from "./EndorsersManager";
 import { AwardEndorsementsPanel } from "./AwardEndorsementsPanel";
 import { AdminBioblitzExclusions } from "./AdminBioblitzExclusions";
+import { AdminBlockedDomains, type BuiltinBlockedDomain } from "./AdminBlockedDomains";
 
-export type AdminTab = "taina" | "dataJobs" | "grants" | "bioblitz" | "testAccounts" | "endorsers" | "awardEndorsements" | "facilitator";
+export type AdminTab = "taina" | "dataJobs" | "grants" | "bioblitz" | "testAccounts" | "blockedDomains" | "endorsers" | "awardEndorsements" | "facilitator";
 
 /**
  * The /admin control room: one tab bar, one card-shaped panel per concern
@@ -46,6 +48,9 @@ export function AdminModerationDashboard({
   bioblitzRounds,
   defaultBioblitzRoundId,
   canManageBioblitzExclusions,
+  builtinBlockedDomains,
+  blockedDomains,
+  canManageBlockedDomains,
   tainaRows,
   tainaAllowanceUsd,
   dataJobRows,
@@ -65,6 +70,10 @@ export function AdminModerationDashboard({
   bioblitzRounds: BioblitzRound[];
   defaultBioblitzRoundId: number;
   canManageBioblitzExclusions: boolean;
+  builtinBlockedDomains: BuiltinBlockedDomain[];
+  /** null = the blocked address list could not be loaded safely. */
+  blockedDomains: BlockedDomainAdminRow[] | null;
+  canManageBlockedDomains: boolean;
   /** null = the Tainá runtime was unreachable (distinct from an empty roster). */
   tainaRows: AdminTainaRow[] | null;
   tainaAllowanceUsd: number;
@@ -77,6 +86,7 @@ export function AdminModerationDashboard({
 }) {
   const t = useTranslations("common.adminModeration");
   const tBioblitzExclusions = useTranslations("common.adminBioblitzExclusions");
+  const tBlockedDomains = useTranslations("common.adminBlockedDomains");
   const tTaina = useTranslations("common.adminTaina");
   const tDataJobs = useTranslations("common.adminDataJobs");
   const tTest = useTranslations("common.adminTestAccounts");
@@ -99,6 +109,12 @@ export function AdminModerationDashboard({
     { id: "grants", label: t("tabs.grants"), Icon: SproutIcon, count: grantApplicants.length },
     { id: "bioblitz", label: t("tabs.bioblitz"), Icon: LeafIcon, count: bioblitzRegistrants.length },
     { id: "testAccounts", label: t("tabs.testAccounts"), Icon: FlaskConicalIcon, count: testAccounts.length + testRecords.length },
+    {
+      id: "blockedDomains",
+      label: t("tabs.blockedDomains"),
+      Icon: ServerOffIcon,
+      count: builtinBlockedDomains.length + (blockedDomains?.length ?? 0),
+    },
     { id: "endorsers", label: t("tabs.endorsers"), Icon: Building2Icon, count: builtinEndorsers.length + endorsers.length },
     { id: "awardEndorsements", label: t("tabs.awardEndorsements"), Icon: AwardIcon, count: awardEndorsements.awards.length },
     { id: "facilitator", label: t("tabs.facilitator"), Icon: WalletIcon, count: facilitatorStats.receiptCount ?? 0 },
@@ -216,6 +232,20 @@ export function AdminModerationDashboard({
             <AdminTestRecordsList records={testRecords} />
           </AdminPanel>
         </div>
+      ) : tab === "blockedDomains" ? (
+        <AdminPanel
+          Icon={ServerOffIcon}
+          title={tBlockedDomains("title")}
+          description={tBlockedDomains("description")}
+          count={builtinBlockedDomains.length + (blockedDomains?.length ?? 0)}
+          footer={tBlockedDomains("propagationHint")}
+        >
+          <AdminBlockedDomains
+            builtins={builtinBlockedDomains}
+            initial={blockedDomains}
+            canManage={canManageBlockedDomains}
+          />
+        </AdminPanel>
       ) : tab === "endorsers" ? (
         <AdminPanel
           Icon={Building2Icon}

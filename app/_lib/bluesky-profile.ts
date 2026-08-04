@@ -58,6 +58,40 @@ export async function resolveBlueskyHandleToDid(handle: string): Promise<string 
 }
 
 /**
+ * Typeahead search for public Bluesky actors by name or handle. Returns an
+ * empty list when the appview is unreachable or the query is blank.
+ */
+export async function searchBlueskyActors(query: string, limit = 8): Promise<BlueskyProfileCard[]> {
+  const q = query.trim();
+  if (!q) return [];
+
+  const params = new URLSearchParams({ q, limit: String(Math.max(1, Math.min(limit, 25))) });
+  const response = await fetch(`${APPVIEW_BASE}/xrpc/app.bsky.actor.searchActorsTypeahead?${params.toString()}`, {
+    headers: { accept: "application/json" },
+    signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
+  }).catch(() => null);
+  if (!response?.ok) return [];
+
+  const payload = (await response.json().catch(() => null)) as
+    | { actors?: Array<{ did?: unknown; handle?: unknown; displayName?: unknown; avatar?: unknown }> }
+    | null;
+
+  const results: BlueskyProfileCard[] = [];
+  for (const actor of payload?.actors ?? []) {
+    const did = asDid(actor?.did);
+    if (!did) continue;
+    const handle = nonEmpty(actor?.handle);
+    results.push({
+      did,
+      handle: handle && handle !== "handle.invalid" ? handle : null,
+      displayName: nonEmpty(actor?.displayName),
+      avatarUrl: nonEmpty(actor?.avatar),
+    });
+  }
+  return results;
+}
+
+/**
  * Read a public Bluesky profile card for a DID or handle. Returns null when the
  * account has no Bluesky presence.
  */

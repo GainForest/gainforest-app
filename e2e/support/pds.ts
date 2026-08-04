@@ -10,6 +10,7 @@ const E2E_PDS_COLLECTIONS = {
   certifiedLocation: "app.certified.location",
   occurrence: "app.gainforest.dwc.occurrence",
   audioRecording: "app.gainforest.ac.audio",
+  acDeployment: "app.gainforest.ac.deployment",
 } as const;
 
 const createdRecordsPath = "e2e/.auth/created-records.jsonl";
@@ -300,6 +301,12 @@ export async function waitForAudioRecordingByName(name: string): Promise<PdsRepo
   }
 
   throw new Error(`Timed out waiting for direct PDS audio recording named ${name}. Last count: ${latestCount}.`);
+}
+
+/** Every recording folder (`ac.deployment`) currently carrying this name. */
+export async function listAcDeploymentFoldersByName(name: string): Promise<PdsRepoRecord[]> {
+  const records = await listPdsRecords(E2E_PDS_COLLECTIONS.acDeployment);
+  return records.filter((record) => record.value.name === name);
 }
 
 export async function waitForPdsRecordDeleted(uri: string): Promise<void> {

@@ -301,6 +301,16 @@ export function chimeDurationSeconds(samples: Float32Array): number {
   return samples.length / SAMPLE_RATE;
 }
 
+/**
+ * Trailing silence appended to the playback buffer. `onended` fires when the
+ * source finishes *scheduling*, while the last samples are still in the output
+ * pipeline (hardware / Bluetooth latency can be hundreds of ms). Closing the
+ * AudioContext at that moment drops them, audibly clipping the final note and
+ * the protocol's stop bits. Half a second of silence lets the audible tail
+ * drain fully before the context is closed.
+ */
+export const PLAYBACK_TAIL_SECONDS = 0.5;
+
 /** Play the chime through the Web Audio API, resolving when it finishes. */
 export async function playChime(samples: Float32Array<ArrayBuffer>): Promise<void> {
   const Ctx = window.AudioContext ?? (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
@@ -308,7 +318,8 @@ export async function playChime(samples: Float32Array<ArrayBuffer>): Promise<voi
   const context = new Ctx({ sampleRate: SAMPLE_RATE });
   try {
     if (context.state === "suspended") await context.resume();
-    const buffer = context.createBuffer(1, samples.length, SAMPLE_RATE);
+    const tail = Math.round(PLAYBACK_TAIL_SECONDS * SAMPLE_RATE);
+    const buffer = context.createBuffer(1, samples.length + tail, SAMPLE_RATE);
     buffer.copyToChannel(samples, 0);
     await new Promise<void>((resolve, reject) => {
       const source = context.createBufferSource();

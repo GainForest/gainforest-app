@@ -14,45 +14,88 @@
 
 import { withAbort } from "./async-cache";
 
+type DidDocument = {
+  alsoKnownAs?: unknown;
+  service?: Array<{ type?: string; serviceEndpoint?: string }>;
+};
+
 // Cache the in-flight promise (not just the settled value) so concurrent
 // resolutions of the same DID — e.g. 48 bumicert covers owned by a handful of
-// orgs — share one plc.directory request instead of firing duplicates.
-const pdsHostCache = new Map<string, Promise<string | null>>();
+// orgs — share one plc.directory request instead of firing duplicates. The
+// whole DID document is cached so PDS-host and handle resolution share one
+// fetch.
+const didDocCache = new Map<string, Promise<DidDocument | null>>();
 
-async function lookupPdsHost(did: string): Promise<string | null> {
-  const res = await fetch(`https://plc.directory/${did}`);
-  if (!res.ok) return null;
-  const doc: { service?: Array<{ type?: string; serviceEndpoint?: string }> } =
-    await res.json();
-  const endpoint = doc.service?.find(
-    (s) => s.type === "AtprotoPersonalDataServer",
-  )?.serviceEndpoint;
-  return endpoint ? new URL(endpoint).host : null;
+/** DID document URL for a did:web (per the did:web spec). */
+function didWebDocUrl(did: string): string {
+  const segments = did.slice("did:web:".length).split(":").map(decodeURIComponent);
+  const [host, ...path] = segments;
+  return path.length
+    ? `https://${host}/${path.join("/")}/did.json`
+    : `https://${host}/.well-known/did.json`;
+}
+
+function lookupDidDocument(did: string): Promise<DidDocument | null> {
+  let promise = didDocCache.get(did);
+  if (!promise) {
+    const url = did.startsWith("did:web:") ? didWebDocUrl(did) : `https://plc.directory/${did}`;
+    const lookup: Promise<DidDocument | null> = fetch(url)
+      .then((res) => (res.ok ? (res.json() as Promise<DidDocument>) : null))
+      .catch(() => {
+        // Network failure: drop the entry so a later call can retry, but
+        // resolve null for everyone currently waiting on this lookup.
+        if (didDocCache.get(did) === lookup) didDocCache.delete(did);
+        return null;
+      });
+    promise = lookup;
+    didDocCache.set(did, promise);
+  }
+  return promise;
 }
 
 export function resolvePdsHost(
   did: string,
   signal?: AbortSignal,
 ): Promise<string | null> {
-  let promise = pdsHostCache.get(did);
-  if (!promise) {
-    // did:web resolves to its own host without a plc lookup.
-    if (did.startsWith("did:web:")) {
-      promise = Promise.resolve(did.slice("did:web:".length).replace(/:/g, "/"));
-    } else {
-      const lookup = lookupPdsHost(did).catch(() => {
-        // Network failure: drop the entry so a later call can retry, but
-        // resolve null for everyone currently waiting on this lookup.
-        if (pdsHostCache.get(did) === lookup) pdsHostCache.delete(did);
-        return null;
-      });
-      promise = lookup;
-    }
-    pdsHostCache.set(did, promise);
+  // did:web serves from its own host — no document fetch needed.
+  if (did.startsWith("did:web:")) {
+    return withAbort(Promise.resolve(did.slice("did:web:".length).replace(/:/g, "/")), signal);
   }
+  const promise = lookupDidDocument(did).then((doc) => {
+    const endpoint = doc?.service?.find(
+      (s) => s.type === "AtprotoPersonalDataServer",
+    )?.serviceEndpoint;
+    try {
+      return endpoint ? new URL(endpoint).host : null;
+    } catch {
+      return null;
+    }
+  });
   // The underlying lookup keeps running (and fills the cache) even if this
   // caller aborts; only the caller's await is rejected.
   return withAbort(promise, signal);
+}
+
+/**
+ * Read an account's handle from its DID document (`alsoKnownAs`). Works for
+ * every atproto account — certified-network or Bluesky — since handles live at
+ * the identity layer, not in any app record. Shares the cached DID-document
+ * fetch with `resolvePdsHost`, so calling both costs one request.
+ */
+export async function resolveDidHandle(
+  did: string,
+  signal?: AbortSignal,
+): Promise<string | null> {
+  if (!did.startsWith("did:")) return null;
+  const doc = await withAbort(lookupDidDocument(did), signal).catch(() => null);
+  const aka = Array.isArray(doc?.alsoKnownAs) ? doc.alsoKnownAs : [];
+  for (const entry of aka) {
+    if (typeof entry === "string" && entry.startsWith("at://")) {
+      const handle = entry.slice("at://".length).trim();
+      if (handle) return handle;
+    }
+  }
+  return null;
 }
 
 /** Normalise an indexer blob ref. Hyperindex sometimes serialises a ref as a

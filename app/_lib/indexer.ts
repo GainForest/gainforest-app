@@ -13,6 +13,8 @@
  */
 
 import { cachedAsync } from "./async-cache";
+import { fetchBlockedDomainDids } from "./blocked-domains";
+import { GAINFOREST_MODERATION_REPO_DID } from "./moderation-repo";
 import { recognitionKeyFromTitle } from "./recognition-badges";
 import { PUBLIC_EXPLORE_CACHE_TTL_MS, publicExploreCache } from "./public-explore-cache";
 import { INDEXER_URL } from "./urls";
@@ -1927,6 +1929,32 @@ export async function fetchTrustedByEndorsements(
   return endorsements;
 }
 
+/**
+ * Every account that shows on the public explore pages — the same set the
+ * explore lists are built from, so anything outside it is unlisted. An award
+ * subjects either a bare DID or a record in the awardee's repo, so both resolve
+ * to the owning account.
+ *
+ * Used to decide what may be handed to search engines: an account that hasn't
+ * put itself on the explore pages doesn't get its pages indexed either.
+ */
+export async function fetchPubliclyListedDids(signal?: AbortSignal): Promise<Set<string>> {
+  const index = await fetchFeaturedBadgeIndex(signal);
+  const dids = new Set<string>(index.dids);
+  for (const uri of index.recordUris) {
+    const owner = uri.match(/^at:\/\/([^/]+)\//)?.[1];
+    if (owner?.startsWith("did:")) dids.add(owner);
+  }
+  return dids;
+}
+
+/** True when this account shows on the public explore pages. */
+export async function isAccountPubliclyListed(did: string, signal?: AbortSignal): Promise<boolean> {
+  if (!did.startsWith("did:")) return false;
+  const listed = await fetchPubliclyListedDids(signal);
+  return listed.has(did);
+}
+
 /** The Ma Earth funding rounds, mapped to their per-round badge keys. Round 3
  *  is open for applications but has no awards yet, so it only resolves once Ma
  *  Earth verifies it. Ordered so callers can render rounds ascending. */
@@ -1993,10 +2021,10 @@ export const TEST_RECORD_BADGE_TITLE = "test-record";
 
 /** The admin group account (admins-gxlw.certified.one) that gates who may flag
  *  test accounts and holds the `test-account` moderation badges. Its members
- *  can flag/unflag; the public hiding read scans this same repo. Kept separate
- *  from the public GainForest content repo and from FEATURED_BADGE_REPO_DID. */
-export const GAINFOREST_MODERATION_REPO_DID =
-  process.env.NEXT_PUBLIC_MODERATION_ACCOUNT_DID?.trim() || "did:plc:vfpcbimtprblyuubjako72qx";
+ *  can flag/unflag; the public hiding read scans this same repo. Re-exported
+ *  from its own module so moderation readers can use it without importing the
+ *  whole indexer. */
+export { GAINFOREST_MODERATION_REPO_DID };
 
 /** Short cache so a steward's flag/unflag propagates to the public grids within
  *  a few minutes, without re-scanning the badge repo on every request. */
@@ -2100,6 +2128,25 @@ export async function fetchHiddenRecordUris(signal?: AbortSignal): Promise<Set<s
 }
 
 /**
+ * Every account the public surfaces must leave out: the ones a steward flagged
+ * as a test account, plus every account hosted on a blocked server address.
+ * This is the set explore, search, the feed, the globe and BioBlitz subtract —
+ * `fetchHiddenAccountDids` stays flag-only, because the admin tools that list
+ * and toggle flags must not see address blocks mixed in.
+ */
+export async function fetchPublicHiddenAccountDids(signal?: AbortSignal): Promise<ReadonlySet<string>> {
+  const [flagged, blocked] = await Promise.all([
+    fetchHiddenAccountDids(signal).catch(() => EMPTY_DID_SET),
+    fetchBlockedDomainDids(signal).catch(() => EMPTY_DID_SET),
+  ]);
+  if (blocked.size === 0) return flagged;
+  if (flagged.size === 0) return blocked;
+  const union = new Set<string>(flagged);
+  for (const did of blocked) union.add(did);
+  return union;
+}
+
+/**
  * Map of account DID -> the set of recognition badge keys it currently holds
  * (e.g. "rewilding-grant", "bioblitz-best-picture"). Scans the same moderation
  * repo as the hidden-account flag, but matches the recognition badge titles.
@@ -2195,7 +2242,7 @@ export async function fetchRecognitionBadgesForDids(
  *  flagged or not). */
 async function hiddenDidsForScope(ownerScoped: boolean, signal?: AbortSignal): Promise<ReadonlySet<string>> {
   if (ownerScoped) return EMPTY_DID_SET;
-  return fetchHiddenAccountDids(signal).catch(() => EMPTY_DID_SET);
+  return fetchPublicHiddenAccountDids(signal).catch(() => EMPTY_DID_SET);
 }
 
 /** Same scoping rule for record-level flags: the public catalogs hide flagged
@@ -2225,15 +2272,40 @@ export type AccountSearchResult = {
   did: string;
   displayName: string;
   avatarRef: string | null;
+  /** Current handle, as seen by the indexer. Null when it can't resolve one. */
+  handle: string | null;
 };
 
-const ACCOUNT_SEARCH_QUERY = `
+// The `author { handle }` join (ActorIdentity) only exists on newer indexer
+// deployments; older ones reject the whole query over the unknown field. Probe
+// the schema once per session and drop the field where it doesn't exist, so
+// account search degrades to "no handles" instead of "no results".
+let authorIdentitySupport: Promise<boolean> | null = null;
+
+function indexerSupportsAuthorIdentity(): Promise<boolean> {
+  if (!authorIdentitySupport) {
+    authorIdentitySupport = indexerQuery<{ __type?: { name?: string | null } | null }>(
+      `query ActorIdentityProbe { __type(name: "ActorIdentity") { name } }`,
+      {},
+    )
+      .then((data) => Boolean(data?.__type?.name))
+      .catch(() => {
+        // Transient failure — forget the answer so the next call re-probes.
+        authorIdentitySupport = null;
+        return false;
+      });
+  }
+  return authorIdentitySupport;
+}
+
+const accountSearchQuery = (withHandle: boolean) => `
   query OwnerAccountSearch($first: Int!, $where: AppCertifiedActorProfileWhereInput) {
     appCertifiedActorProfile(first: $first, where: $where, sortBy: displayName, sortDirection: ASC) {
       edges {
         node {
           did
           displayName
+          ${withHandle ? "author { handle }" : ""}
           avatar { __typename ... on OrgHypercertsDefsSmallImage { image { ref } } }
         }
       }
@@ -2244,6 +2316,7 @@ const ACCOUNT_SEARCH_QUERY = `
 type RawAccountSearchNode = {
   did?: string | null;
   displayName?: string | null;
+  author?: { handle?: string | null } | null;
   avatar?: { image?: { ref?: string | null } | null } | null;
 };
 
@@ -2256,12 +2329,13 @@ export async function searchAccountsByName(
 ): Promise<AccountSearchResult[]> {
   const q = query.trim();
   if (q.length < 2) return [];
+  const withHandle = await indexerSupportsAuthorIdentity();
   const data = await indexerQuery<{ appCertifiedActorProfile?: Connection<RawAccountSearchNode> }>(
-    ACCOUNT_SEARCH_QUERY,
+    accountSearchQuery(withHandle),
     { first: Math.max(1, Math.min(limit * 3, 40)), where: { displayName: { contains: q } } },
     signal,
   );
-  const hidden = await fetchHiddenAccountDids(signal).catch(() => EMPTY_DID_SET);
+  const hidden = await fetchPublicHiddenAccountDids(signal).catch(() => EMPTY_DID_SET);
   const seen = new Set<string>();
   const results: AccountSearchResult[] = [];
   for (const edge of data?.appCertifiedActorProfile?.edges ?? []) {
@@ -2270,10 +2344,118 @@ export async function searchAccountsByName(
     const displayName = node?.displayName?.trim();
     if (!did || !displayName || seen.has(did) || hidden.has(did) || isLikelyTestRecordName(displayName)) continue;
     seen.add(did);
-    results.push({ did, displayName, avatarRef: normaliseRef(node?.avatar?.image?.ref) });
+    results.push({
+      did,
+      displayName,
+      avatarRef: normaliseRef(node?.avatar?.image?.ref),
+      handle: sv(node?.author?.handle),
+    });
     if (results.length >= limit) break;
   }
   return results;
+}
+
+/** An account resolved by DID rather than matched by name. */
+export type AccountCard = {
+  did: string;
+  displayName: string | null;
+  avatarRef: string | null;
+  handle: string | null;
+  /** True when the account publishes a certified organization record. */
+  isOrganization: boolean;
+};
+
+const accountsByDidsQuery = (withHandle: boolean) => `
+  query AccountsByDids($dids: [String!], $first: Int!) {
+    profiles: appCertifiedActorProfile(first: $first, where: { did: { in: $dids } }) {
+      edges {
+        node {
+          did
+          displayName
+          ${withHandle ? "author { handle }" : ""}
+          avatar { __typename ... on OrgHypercertsDefsSmallImage { image { ref } } }
+        }
+      }
+    }
+    orgs: appCertifiedActorOrganization(first: $first, where: { did: { in: $dids } }) {
+      edges {
+        node {
+          did
+          ${withHandle ? "author { handle }" : ""}
+          ${CERTIFIED_PROFILE_DATA_FIELDS}
+        }
+      }
+    }
+  }
+`;
+
+type RawAccountCardProfile = {
+  did?: string | null;
+  displayName?: string | null;
+  author?: { handle?: string | null } | null;
+  avatar?: { image?: { ref?: string | null } | null } | null;
+};
+
+type RawAccountCardOrg = {
+  did?: string | null;
+  author?: { handle?: string | null } | null;
+  certifiedProfileData?: CertifiedProfileData;
+};
+
+/**
+ * Look up accounts by DID, in one round trip: display name, avatar, current
+ * handle, and whether each is an organization.
+ *
+ * DIDs with no presence on the network (neither a certified profile nor an
+ * organization record) are simply absent from the result — which is what lets
+ * search filter an external handle match down to accounts that exist here.
+ */
+export async function fetchAccountCards(
+  dids: string[],
+  signal?: AbortSignal,
+): Promise<Map<string, AccountCard>> {
+  const cards = new Map<string, AccountCard>();
+  if (dids.length === 0) return cards;
+  const withHandle = await indexerSupportsAuthorIdentity();
+  const data = await indexerQuery<{
+    profiles?: Connection<RawAccountCardProfile>;
+    orgs?: Connection<RawAccountCardOrg>;
+  }>(
+    accountsByDidsQuery(withHandle),
+    { dids, first: Math.min(Math.max(dids.length, 1) * 2, 100) },
+    signal,
+  );
+
+  for (const edge of data?.profiles?.edges ?? []) {
+    const node = edge?.node;
+    const did = sv(node?.did);
+    if (!did) continue;
+    cards.set(did, {
+      did,
+      displayName: sv(node?.displayName),
+      avatarRef: normaliseRef(node?.avatar?.image?.ref),
+      handle: sv(node?.author?.handle),
+      isOrganization: false,
+    });
+  }
+
+  // An organization record is the deciding signal, and carries its own name /
+  // avatar for accounts that publish no separate profile record.
+  for (const edge of data?.orgs?.edges ?? []) {
+    const node = edge?.node;
+    const did = sv(node?.did);
+    if (!did) continue;
+    const existing = cards.get(did);
+    cards.set(did, {
+      did,
+      displayName: existing?.displayName ?? profileName(node?.certifiedProfileData),
+      avatarRef: existing?.avatarRef ?? profileAvatarRef(node?.certifiedProfileData),
+      handle: existing?.handle ?? sv(node?.author?.handle),
+      isOrganization: true,
+    });
+  }
+
+  return cards;
 }
 
 function mapActivity(n: RawActivity): BumicertRecord {
@@ -5889,13 +6071,18 @@ export type TimelineDatasetRecord = {
   record: { name: string; description: string | null; recordCount: number | null; createdAt: string | null };
 };
 
+// These selections must stay within the pub.leaflet schema vendored in
+// hypercerts-lexicon — the indexer is generated from that snapshot, not from
+// upstream Leaflet. One field the snapshot doesn't know (e.g. atMention's
+// `href`, iframe's `aspectRatio`) makes GraphQL reject the whole query, which
+// blanks every timeline the query serves.
 const TIMELINE_ATTACHMENT_LEAFLET_FACETS_FRAGMENT = `
   fragment TimelineAttachmentLeafletFacets on PubLeafletRichtextFacet {
     index { byteStart byteEnd }
     features {
       __typename
       ... on PubLeafletRichtextFacetLink { uri }
-      ... on PubLeafletRichtextFacetAtMention { href }
+      ... on PubLeafletRichtextFacetAtMention { atURI }
     }
   }
 `;
@@ -5910,7 +6097,7 @@ const TIMELINE_ATTACHMENT_LEAFLET_BLOCKS_SELECTION = `
       ... on PubLeafletBlocksBlockquote { plaintext facets { ...TimelineAttachmentLeafletFacets } }
       ... on PubLeafletBlocksCode { plaintext language }
       ... on PubLeafletBlocksImage { alt image { ref mimeType size } aspectRatio { width height } }
-      ... on PubLeafletBlocksIframe { url height aspectRatio { width height } }
+      ... on PubLeafletBlocksIframe { url height }
       ... on PubLeafletBlocksWebsite { src title description previewImage { ref } }
       ... on PubLeafletBlocksButton { text url }
       ... on PubLeafletBlocksHorizontalRule { empty }
@@ -6003,7 +6190,7 @@ type RawTimelineBskyFacet = {
 
 type RawTimelineLeafletFacet = {
   index?: { byteStart?: number | null; byteEnd?: number | null } | null;
-  features?: Array<{ __typename?: string | null; uri?: string | null; href?: string | null } | null> | null;
+  features?: Array<{ __typename?: string | null; uri?: string | null; atURI?: string | null } | null> | null;
 };
 
 type RawTimelineLeafletContent = {
@@ -6126,7 +6313,7 @@ function normalizeTimelineLeafletFacets(facets: RawTimelineLeafletFacet[] | null
       features.push({
         __typename: feature.__typename,
         ...(feature.uri ? { uri: feature.uri } : {}),
-        ...(feature.href ? { href: feature.href } : {}),
+        ...(feature.atURI ? { atURI: feature.atURI } : {}),
       });
     }
     return [{
@@ -6935,7 +7122,7 @@ function countryFlagSafe(code: string | null): string {
 // rich body + scope tags always surface instead of silently dropping.
 type RawFacet = {
   index?: { byteStart?: number | null; byteEnd?: number | null } | null;
-  features?: Array<{ __typename?: string; uri?: string | null; href?: string | null }> | null;
+  features?: Array<{ __typename?: string; uri?: string | null; atURI?: string | null }> | null;
 };
 type RawLeafletContent = {
   __typename?: string;
@@ -6981,13 +7168,16 @@ type CertifiedOrgNode = {
 // Shared GraphQL pieces for decoding `pub.leaflet.pages.linearDocument`s. The
 // same fragment + block selection is reused by bumicert descriptions and org
 // `longDescription`s so rich text + media render identically everywhere.
+// Like the timeline fragments above, these must only name fields that exist in
+// hypercerts-lexicon's vendored pub.leaflet snapshot — the schema the indexer
+// actually serves.
 const FACETS_FRAGMENT = `
   fragment Facets on PubLeafletRichtextFacet {
     index { byteStart byteEnd }
     features {
       __typename
       ... on PubLeafletRichtextFacetLink { uri }
-      ... on PubLeafletRichtextFacetAtMention { href }
+      ... on PubLeafletRichtextFacetAtMention { atURI }
     }
   }
 `;
@@ -7000,7 +7190,7 @@ const LEAFLET_BLOCKS_SELECTION = `
       ... on PubLeafletBlocksBlockquote { plaintext facets { ...Facets } }
       ... on PubLeafletBlocksCode { plaintext language }
       ... on PubLeafletBlocksImage { alt image { ref } aspectRatio { width height } }
-      ... on PubLeafletBlocksIframe { url height aspectRatio { width height } }
+      ... on PubLeafletBlocksIframe { url height }
       ... on PubLeafletBlocksWebsite { src title description previewImage { ref } }
       ... on PubLeafletBlocksButton { text url }
       ... on PubLeafletBlocksHorizontalRule { empty }
@@ -7039,6 +7229,21 @@ const ACTIVITY_DETAIL_QUERY = `
       }
       contributors { __typename }
       locations { uri }
+    }
+  }
+`;
+
+// Collections hold the project's own long story. It is normally mirrored to
+// the linked Cert, but older projects may only have it on the collection.
+const PROJECT_DETAIL_QUERY = `
+  ${FACETS_FRAGMENT}
+  query ProjectDetail($uri: String!) {
+    orgHypercertsCollectionByUri(uri: $uri) {
+      description {
+        __typename
+        ... on OrgHypercertsDefsDescriptionString { value }
+        ... on PubLeafletPagesLinearDocument { ${LEAFLET_BLOCKS_SELECTION} }
+      }
     }
   }
 `;
@@ -7118,9 +7323,10 @@ function spansFromText(text: string, facets: RawFacet[] | null | undefined): Ric
             case "PubLeafletRichtextFacetLink":
               if (ft.uri) span.href = ft.uri;
               break;
-            case "PubLeafletRichtextFacetAtMention":
-              if (ft.href) span.href = ft.href;
-              break;
+            // AtMention carries only `atURI` in the vendored lexicon (no ready
+            // `href`), so mentions render as plain text until the app decides
+            // how to route at:// URIs.
+
           }
         }
       }
@@ -7258,19 +7464,25 @@ function buildOwnerSocials(owner: OwnerOrg | null): { socials: SocialLink[]; bio
   return { socials, bio };
 }
 
+function buildDescriptionDetail(description: BumiDetailNode["description"]): Pick<RecordDetail, "blurb" | "richBody"> {
+  if (description?.__typename === "PubLeafletPagesLinearDocument") {
+    const richBody = leafletToRich(description.blocks ?? []);
+    return { richBody, blurb: richToPlain(richBody) };
+  }
+  if (description?.__typename === "OrgHypercertsDefsDescriptionString") {
+    return { richBody: null, blurb: sv(description.value) };
+  }
+  return { richBody: null, blurb: null };
+}
+
 function buildBumicertDetail(
   n: BumiDetailNode,
   owner: { socials: SocialLink[]; bio: string | null },
 ): RecordDetail {
   // Description: rich Leaflet doc (preferred), else plain string, else org bio.
-  let richBody: RichBlock[] | null = null;
-  let blurb: string | null = null;
-  if (n.description?.__typename === "PubLeafletPagesLinearDocument") {
-    richBody = leafletToRich(n.description.blocks ?? []);
-    blurb = richToPlain(richBody);
-  } else if (n.description?.__typename === "OrgHypercertsDefsDescriptionString") {
-    blurb = sv(n.description.value);
-  }
+  const description = buildDescriptionDetail(n.description);
+  const richBody = description.richBody;
+  let blurb = description.blurb;
   if (!richBody && !blurb && owner.bio) {
     blurb = owner.bio;
   }
@@ -7299,6 +7511,13 @@ function buildBumicertDetail(
   ].filter((s) => s.fields.length > 0);
 
   return { blurb, richBody, badges, sections, links: [], socials: owner.socials };
+}
+
+type ProjectDetailNode = { description?: BumiDetailNode["description"] };
+
+function buildProjectDetail(n: ProjectDetailNode): RecordDetail {
+  const { blurb, richBody } = buildDescriptionDetail(n.description);
+  return { blurb, richBody, badges: [], sections: [], links: [] };
 }
 
 /** Fetch an owning organization's socials/bio for a record DID. */
@@ -7458,6 +7677,20 @@ export async function fetchRecordDetail(
     const n = data?.orgHypercertsClaimActivityByUri;
     if (!n) return null;
     const detail = buildBumicertDetail(n, owner);
+    if (detail.richBody?.length) {
+      detail.richBody = await resolveRichImages(detail.richBody, did, signal);
+    }
+    return detail;
+  }
+  if (collection === "org.hypercerts.collection") {
+    const data = await indexerQuery<{ orgHypercertsCollectionByUri?: ProjectDetailNode | null }>(
+      PROJECT_DETAIL_QUERY,
+      { uri: atUri },
+      signal,
+    );
+    const n = data?.orgHypercertsCollectionByUri;
+    if (!n) return null;
+    const detail = buildProjectDetail(n);
     if (detail.richBody?.length) {
       detail.richBody = await resolveRichImages(detail.richBody, did, signal);
     }

@@ -24,18 +24,19 @@
     "trigger": "Cari",
     "open": "Buka pencarian",
     "title": "Cari GainForest",
-    "placeholder": "Cari proyek, organisasi, observasi…",
+    "placeholder": "Cari proyek, orang, organisasi, observasi…",
     "clear": "Hapus pencarian",
     "escKey": "esc",
     "kinds": {
       "cert": "Cert",
       "project": "Proyek",
+      "person": "Orang",
       "organization": "Organisasi",
       "observation": "Observasi"
     },
     "idle": {
       "headline": "Ketik untuk mencari",
-      "body": "Temukan proyek, organisasi, dan observasi."
+      "body": "Temukan proyek, orang, organisasi, dan observasi."
     },
     "noResults": {
       "headline": "Tidak ada hasil untuk “{query}”",
@@ -157,7 +158,6 @@
       "myProjects": "Proyek saya",
       "myOrganizations": "Organisasi saya",
       "admin": "Admin",
-      "submitData": "Kirim data lapangan",
       "personalAccount": "Akun pribadi",
       "organizationAccount": "Akun organisasi",
       "myCards": "Kartu Saya"
@@ -1278,7 +1278,8 @@
       "endorsers": "Pendukung",
       "awardEndorsements": "Berikan dukungan",
       "facilitator": "Dompet fasilitator",
-      "dataJobs": "Batch data"
+      "dataJobs": "Batch data",
+      "blockedDomains": "Alamat diblokir"
     },
     "unnamed": "Akun tanpa nama",
     "awardHint": "Buka profil untuk memberikan lencana.",
@@ -1327,6 +1328,31 @@
       "finalized": "Ronde BioBlitz ini telah berakhir, sehingga penghitungan tidak dapat diubah lagi.",
       "add": "Perubahan penghitungan mingguan tidak dapat disimpan. Coba lagi.",
       "remove": "Akun tidak dapat dikembalikan ke papan peringkat. Coba lagi."
+    }
+  },
+  "adminBlockedDomains": {
+    "title": "Alamat diblokir",
+    "description": "Alamat server yang akunnya dijauhkan dari situs publik. Semua yang mereka terbitkan — organisasi, proyek, pengamatan, kiriman — disembunyikan dari penjelajah, pencarian, globe, beranda, dan semua penghitungan publik.",
+    "effect": "Memblokir sebuah alamat menyembunyikan semua yang diterbitkan dari sana. Tidak ada yang dihapus: akun dan catatannya tetap ada di server mereka sendiri, dan membuka blokir akan memunculkannya kembali.",
+    "domainLabel": "Alamat server",
+    "domainPlaceholder": "dev.contoh.org",
+    "add": "Blokir alamat",
+    "adding": "Memblokir…",
+    "builtinBadge": "Selalu diblokir",
+    "accountCount": "{count, plural, other {# akun}}",
+    "accountsUnknown": "Jumlah akun tidak tersedia",
+    "empty": "Saat ini tidak ada alamat yang diblokir.",
+    "unavailable": "Daftar alamat yang diblokir tidak dapat dimuat dengan aman. Coba lagi sebelum membuat perubahan.",
+    "permissionNotice": "Hanya anggota tim admin yang dapat mengubah alamat yang diblokir.",
+    "propagationHint": "Perubahan sampai ke situs publik dalam beberapa menit.",
+    "removeLabel": "Buka blokir {domain}",
+    "errors": {
+      "notSignedIn": "Masuk lagi untuk melanjutkan.",
+      "forbidden": "Anda tidak punya izin untuk mengubah alamat yang diblokir.",
+      "invalidDomain": "Masukkan alamat server yang valid, seperti dev.contoh.org.",
+      "alreadyBuiltin": "Alamat itu selalu diblokir dan tidak bisa diubah di sini.",
+      "add": "Alamat tidak dapat diblokir. Silakan coba lagi.",
+      "remove": "Blokir alamat tidak dapat dibuka. Silakan coba lagi."
     }
   },
   "adminTaina": {
@@ -2068,6 +2094,7 @@
       "groupNameRequired": "Beri nama unggahan ini terlebih dahulu.",
       "folderTitle": "Rekaman ini akan disimpan di mana?",
       "folderExistingHelp": "Tambahkan ke folder yang sudah Anda miliki, agar semua data dari lokasi ini tetap menyatu.",
+      "folderResumedHelp": "Anda sudah punya folder dengan nama ini, jadi rekaman ini akan digabungkan ke sana, bukan membuat folder baru.",
       "folderExistingAction": "Pilih folder yang ada",
       "folderNewAction": "Folder baru",
       "folderSearchPlaceholder": "Cari folder Anda",
@@ -3201,10 +3228,13 @@
       "radialLabel": "Volume suara",
       "timeLabel": "Waktu (Jam)",
       "legendTitle": "Kelompok suara",
+      "legendHint": "Klik kelompok suara untuk menampilkan atau menyembunyikannya.",
+      "showAllBands": "Tampilkan semua",
       "bandsNote": "Rentang perkiraan. Suara saling tumpang tindih, dan hewan yang bersuara di tiap rentang berbeda menurut tempat.",
       "empty": "Rekaman yang dianalisis akan muncul di sini sebagai jam lanskap suara 24 jam.",
       "emptyHint": "Analisis rekaman terunggah Anda di atas untuk memulai.",
       "downloadPng": "Unduh gambar",
+      "credit": "Dibuat dengan GainForest · gainforest.app",
       "hoverHint": "Seret mengelilingi piringan untuk memperbesar waktu tersebut, dan klik sebuah waktu untuk mendengarkan. Gunakan − atau “Sepanjang hari” untuk kembali.",
       "hoverHintAllDates": "Seret mengelilingi piringan untuk memperbesar waktu tersebut, lalu pilih rekaman dari daftar untuk mendengarkan. Gunakan − atau “Sepanjang hari” untuk kembali.",
       "loadingAudio": "Memuat {name}…",
@@ -3312,7 +3342,32 @@
     "identificationsIncluded": "{count, plural, other {Ini termasuk # identifikasi tersimpan, yang juga akan dihapus.}}",
     "deleteProgress": "Menghapus… {done} dari {total}",
     "deletePartial": "{count, plural, other {# rekaman}} tidak dapat dihapus, jadi folder tetap dipertahankan. Silakan coba lagi.",
-    "deleteFailed": "Folder tidak dapat dihapus. Silakan coba lagi."
+    "deleteFailed": "Folder tidak dapat dihapus. Silakan coba lagi.",
+    "addToProject": {
+      "action": "Tambahkan ke proyek",
+      "title": "Tambahkan “{name}” ke proyek",
+      "body": "Folder ini bergabung ke linimasa bukti proyek — rekamannya tetap berada di tempatnya.",
+      "noteLabel": "Catatan (opsional)",
+      "notePlaceholder": "Apa yang ditunjukkan rekaman ini?",
+      "defaultNote": "{count, plural, =0 {Folder perekam.} other {Folder perekam dengan # rekaman.}}",
+      "untitledProject": "Proyek tanpa judul",
+      "loading": "Memuat proyek Anda…",
+      "loadError": "Proyek Anda tidak dapat dimuat. Coba lagi sebentar lagi.",
+      "empty": "Anda belum punya proyek — buat satu di bawah.",
+      "searchPlaceholder": "Cari proyek Anda",
+      "newProject": "Proyek baru",
+      "newProjectTitleLabel": "Nama proyek",
+      "newProjectTitlePlaceholder": "mis. Restorasi tepi sungai",
+      "newProjectTitleRequired": "Beri proyek nama minimal 3 karakter.",
+      "createAndAdd": "Buat & tambahkan",
+      "creating": "Membuat…",
+      "addedTitle": "Ditambahkan ke linimasa",
+      "addedBody": "“{name}” sekarang ada di linimasa bukti {project}.",
+      "viewProject": "Buka proyek",
+      "close": "Tutup",
+      "cancel": "Batal",
+      "failed": "Folder tidak dapat ditambahkan. Silakan coba lagi."
+    }
   },
   "hypercerts": {
     "metaTitle": "Membangun di atas leksikon Hypercerts — GainForest",

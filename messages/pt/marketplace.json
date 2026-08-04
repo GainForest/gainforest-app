@@ -768,6 +768,7 @@
         }
       },
       "apply": "Candidatar-se com um clique",
+      "applicationsUnderReview": "As candidaturas estão em análise. As pessoas selecionadas serão anunciadas em breve.",
       "details": "Ler detalhes do subsídio",
       "appliedTitle": "Candidatura enviada",
       "appliedNote": "Sua candidatura para {project} já foi publicada no feed.",
@@ -1780,6 +1781,12 @@
         "confirm": "Excluir projeto",
         "error": "Não foi possível excluir o projeto."
       },
+      "discardModal": {
+        "title": "Descartar este projeto?",
+        "description": "Fechar esta janela apagará o progresso da criação do seu projeto.",
+        "keepEditing": "Continuar editando",
+        "discard": "Descartar progresso"
+      },
       "wizard": {
         "back": "Voltar",
         "next": "Avançar",
@@ -1835,16 +1842,19 @@
       "cta": "Criar um projeto"
     },
     "publish": {
-      "title": "Mostre seu trabalho nas páginas de exploração",
-      "description": "Publicar torna esta conta e todos os seus projetos visíveis para qualquer pessoa navegando no GainForest.",
-      "action": "Publicar",
-      "publishing": "Publicando…",
-      "publishedTitle": "Publicado nas páginas de exploração",
-      "publishedHint": "Esta conta e seus projetos estão visíveis para qualquer pessoa navegando no GainForest.",
-      "justPublishedHint": "Pronto! Pode levar alguns minutos para aparecer nas páginas de exploração.",
-      "memberBlocked": "Apenas proprietários e administradores da organização podem publicar.",
-      "error": "A publicação não foi concluída. Tente novamente mais tarde.",
-      "unavailable": "A publicação não está disponível no momento. Tente novamente mais tarde."
+      "alwaysPublicTitle": "Qualquer pessoa com o link pode abrir seus projetos",
+      "alwaysPublicBody": "A partir do momento em que você salva um projeto, a página dele abre para quem você compartilhar. Se as pessoas podem encontrá-lo sem um link é decisão sua.",
+      "listedTitle": "Aparece nas páginas de exploração",
+      "listedBody": "Quem navega no GainForest encontra esta conta e seus projetos, e os buscadores podem listá-los.",
+      "unlistedTitle": "Não aparece nas páginas de exploração",
+      "unlistedBody": "Seus projetos não aparecem quando as pessoas navegam no GainForest e ficam fora dos resultados de busca. Só quem receber um link consegue abri-los.",
+      "action": "Mostrar nas páginas de exploração",
+      "publishing": "Adicionando…",
+      "justListedBody": "Pronto. Pode levar alguns minutos para aparecer nas páginas de exploração.",
+      "memberBlocked": "Apenas proprietários e administradores da organização podem alterar isso.",
+      "error": "Não foi possível concluir. Tente novamente mais tarde.",
+      "unavailable": "Isso não pode ser alterado no momento. Tente novamente mais tarde.",
+      "statusUnknown": "Não conseguimos verificar se esta conta aparece nas páginas de exploração."
     }
   },
   "manageBumicerts": {

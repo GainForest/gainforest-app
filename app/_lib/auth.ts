@@ -50,6 +50,44 @@ export function getAuthForwardCookie(cookieHeader: string | null): string | null
   return cookieHeader;
 }
 
+/** Set (with a fresh timestamp) when the user changes their username, so every
+ *  server instance they reach re-reads their identity instead of serving a
+ *  cached copy for up to the cache TTL. */
+export const HANDLE_CHANGED_COOKIE = "gainforest_handle_changed";
+
+/**
+ * How long the username-change marker is honoured.
+ *
+ * MUST stay LONGER than the identity cache TTL in `did-identity.ts`. The marker
+ * is what makes instances re-read an identity they cached before the change; if
+ * it expired first, a still-cached pre-change identity could take over again and
+ * flip the user back to their old username. Asserted by a test.
+ */
+export const HANDLE_CHANGED_WINDOW_MS = 15 * 60 * 1000;
+const HANDLE_CHANGED_BUCKET_MS = 30 * 1000;
+
+/**
+ * Freshness marker for the signed-in user's identity lookup, derived from the
+ * username-change cookie. Returns a value that changes when the cookie does and
+ * is folded into the identity cache key — forcing a fresh lookup on instances
+ * still holding the pre-change identity. The value is bucketed and only
+ * accepted from a short window, so a forged cookie can't mint unbounded cache
+ * keys — and it carries no username, so there is nothing to spoof.
+ */
+export function getHandleChangeFreshness(cookieHeader: string | null): string | null {
+  if (!cookieHeader) return null;
+  const cookie = cookieHeader
+    .split(";")
+    .map((part) => part.trim())
+    .find((part) => part.startsWith(`${HANDLE_CHANGED_COOKIE}=`));
+  if (!cookie) return null;
+  const timestamp = Number(cookie.slice(HANDLE_CHANGED_COOKIE.length + 1));
+  if (!Number.isFinite(timestamp)) return null;
+  const now = Date.now();
+  if (timestamp > now + 60_000 || timestamp < now - HANDLE_CHANGED_WINDOW_MS) return null;
+  return String(Math.floor(timestamp / HANDLE_CHANGED_BUCKET_MS));
+}
+
 export function parseAuthSession(value: unknown): AuthSession {
   if (
     typeof value === "object" &&

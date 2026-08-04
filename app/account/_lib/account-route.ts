@@ -9,7 +9,7 @@ import {
 import { shortDid } from "../../_lib/format";
 import { preferredDidIdentifier } from "../../_lib/urls";
 import { fetchCertifiedLocationCountryCode } from "../../_lib/country-location";
-import { resolveBlobUrl, resolvePdsHost } from "../../_lib/pds";
+import { resolveBlobUrl, resolveDidHandle, resolvePdsHost } from "../../_lib/pds";
 
 export type AccountKind = "organization" | "user";
 
@@ -267,19 +267,24 @@ export const getAccountRouteData = cache(async (
 });
 
 /**
- * Slim profile card for a DID, read straight from `app.certified.actor.profile`.
- * Used by account pickers/cards where we only need basic profile copy +
- * avatar per group. Only app certified profile data is used.
+ * Slim profile card for a DID: profile copy + avatar read straight from
+ * `app.certified.actor.profile`, plus the account's handle from its DID
+ * document (handles live at the identity layer, not in the record — the
+ * DID-document fetch is shared with avatar/PDS resolution, so it's free).
+ * Used by account pickers/cards.
  */
 export const getCertifiedProfileCard = cache(
   async (did: string): Promise<{ displayName: string | null; description: string | null; avatarUrl: string | null; handle: string | null }> => {
     if (!did.startsWith("did:")) return { displayName: null, description: null, avatarUrl: null, handle: null };
-    const profile = await fetchDirectCertifiedProfile(did).catch(() => null);
+    const [profile, handle] = await Promise.all([
+      fetchDirectCertifiedProfile(did).catch(() => null),
+      resolveDidHandle(did).catch(() => null),
+    ]);
     return {
       displayName: profile?.displayName ?? null,
       description: profile?.description ?? null,
       avatarUrl: profile?.avatarUrl ?? null,
-      handle: null,
+      handle,
     };
   },
 );

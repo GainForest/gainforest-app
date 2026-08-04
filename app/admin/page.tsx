@@ -16,6 +16,10 @@ import { BUILTIN_ENDORSERS, fetchEndorserRecords } from "@/app/_lib/endorsers";
 import { fetchEndorsementAwarding, type AwardEndorsementsData } from "./_lib/award-endorsements";
 import { fetchFacilitatorStats, type FacilitatorStats } from "./_lib/facilitator-stats";
 import { fetchBioblitzExclusionRows } from "@/app/internal/badges/_lib/bioblitz-exclusion-mutations";
+import {
+  fetchBlockedDomainRows,
+  fetchBuiltinBlockedDomainRows,
+} from "@/app/internal/badges/_lib/blocked-domain-mutations";
 import { AdminModerationDashboard, type AdminTab } from "./_components/AdminModerationDashboard";
 import type { AdminTainaRow } from "./_components/AdminTainaPanel";
 import type { AdminDataJobRow } from "./_components/AdminDataJobsPanel";
@@ -25,7 +29,7 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 };
 
-const TABS: AdminTab[] = ["taina", "dataJobs", "grants", "bioblitz", "testAccounts", "endorsers", "awardEndorsements", "facilitator"];
+const TABS: AdminTab[] = ["taina", "dataJobs", "grants", "bioblitz", "testAccounts", "blockedDomains", "endorsers", "awardEndorsements", "facilitator"];
 
 const EMPTY_FACILITATOR_STATS: FacilitatorStats = {
   address: null,
@@ -129,6 +133,8 @@ export default async function AdminPage({
     grantApplicants,
     bioblitzRegistrants,
     bioblitzExclusions,
+    builtinBlockedDomains,
+    blockedDomains,
     taina,
     dataJobRows,
     endorsers,
@@ -141,6 +147,8 @@ export default async function AdminPage({
     fetchGrantApplicants().catch(() => []),
     fetchBioblitzRegistrants().catch(() => []),
     fetchBioblitzExclusionRows().catch(() => null),
+    fetchBuiltinBlockedDomainRows().catch(() => []),
+    fetchBlockedDomainRows().catch(() => null),
     loadTainaRows(),
     loadDataJobRows(),
     moderator.repoDid ? fetchEndorserRecords(moderator.repoDid).catch(() => []) : Promise.resolve([]),
@@ -171,6 +179,9 @@ export default async function AdminPage({
         bioblitzRounds={adminBioblitzRounds}
         defaultBioblitzRoundId={defaultBioblitzRoundId}
         canManageBioblitzExclusions={moderator.isModerator}
+        builtinBlockedDomains={builtinBlockedDomains}
+        blockedDomains={blockedDomains}
+        canManageBlockedDomains={moderator.isModerator}
         tainaRows={taina?.rows ?? null}
         tainaAllowanceUsd={taina?.allowanceUsd ?? 25}
         dataJobRows={dataJobRows}

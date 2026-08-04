@@ -39,26 +39,18 @@
     "encouragement": "Keren! Donasi Anda mendukung konservasi yang dipimpin komunitas.",
     "donorTitle": "Bagaimana donasi Anda ditampilkan",
     "anonymousLabel": "Donasi secara anonim",
-    "anonymousHint": "Donasi anonim tidak pernah muncul secara publik atas nama Anda. Anda tetap dapat melihatnya di profil, tetapi donasi tersebut tidak menghasilkan kartu.",
-    "signedOutNote": "Anda belum masuk, jadi donasi Anda akan ditampilkan sebagai anonim dan tidak menghasilkan kartu.",
-    "messageTitle": "Tambahkan pesan (opsional)",
-    "messageHint": "Kata penyemangat, atau alasan Anda berdonasi. Penerima akan melihatnya.",
-    "messagePlaceholder": "Tambahkan pesan (opsional)…",
-    "messageAnonymousNote": "Pesan Anda tidak akan ditampilkan atas nama Anda.",
+    "anonymousHint": "Donasi anonim tidak pernah muncul secara publik atas nama Anda — Anda tetap dapat melihatnya di profil Anda sendiri.",
+    "signedOutNote": "Anda belum masuk, jadi donasi Anda akan ditampilkan sebagai anonim.",
     "walletTitle": "Dompet pembayaran",
-    "walletHint": "Dibayar dalam USDC di Ethereum.",
+    "walletHint": "Donasi dibayar dalam USDC di Ethereum. Hubungkan dompet Anda untuk melanjutkan — biaya jaringan ditanggung untuk Anda.",
     "connectWallet": "Hubungkan dompet",
     "connecting": "Menghubungkan…",
     "connectFailed": "Koneksi dompet gagal.",
     "noWallet": "Tidak ditemukan dompet yang didukung. Pasang MetaMask atau dompet lain yang kompatibel untuk melanjutkan.",
     "available": "Tersedia: {amount}",
     "balanceUnavailable": "Saldo tidak tersedia",
-    "tipTitle": "Tambahkan tip",
-    "tipNone": "Tanpa tip",
-    "cardsPreviewTitle": "Kartu yang akan Anda terima",
-    "cardsUnavailableNote": "Kartu hanya tersedia untuk donasi proyek yang memenuhi syarat. Pembayaran ini tidak menyertakannya.",
-    "cardsCheckingNote": "Memeriksa donasi mana yang akan menghasilkan kartu…",
-    "tipDescription": "Tanpa biaya platform, dan kami menanggung setiap biaya jaringan. Tip menjaga GainForest tetap berjalan.",
+    "tipTitle": "Tip untuk GainForest (opsional)",
+    "tipDescription": "GainForest tidak mengenakan biaya platform dan menanggung biaya jaringan untuk setiap donasi. Tip dari donatur menjaga layanan ini tetap berjalan.",
     "tipSliderLabel": "Jumlah tip",
     "tipNudgeTitle": "Bisakah Anda menambahkan tip?",
     "tipNudgeBody": "Tip membantu GainForest mendukung para penjaga lahan untuk menjaga alam!",
@@ -71,7 +63,10 @@
     "insufficientBalance": "Dompet Anda tidak memiliki cukup USDC untuk total ini.",
     "multiApprovalNote": "{count, plural, other {Dompet Anda akan meminta persetujuan # pembayaran, satu per satu.}}",
     "donateNow": "Donasi {amount} sekarang",
-    "footerNote": "100% sampai ke setiap penerima — kami menanggung biayanya.",
+    "footerNote": "100% dari {amount} donasi Anda masuk ke dompet terverifikasi setiap penerima.",
+    "footerInfoLabel": "Apa saja yang tercakup",
+    "footerInfoFees": "GainForest tidak memungut biaya platform dan menanggung biaya jaringan untuk Anda.",
+    "footerInfoTip": "Tip {tip} Anda terpisah. Tip tidak pernah diambil dari donasi Anda.",
     "processing": "Memproses…",
     "doNotClose": "Jangan tutup jendela ini.",
     "tryAgain": "Coba lagi",
@@ -88,7 +83,6 @@
     "successSummary": "Donasi Anda sebesar {amount} berhasil diselesaikan.",
     "recordedWithProfile": "Dicatat dengan profil GainForest Anda.",
     "recordedAnonymous": "Dicatat sebagai anonim.",
-    "receiptIssue": "Pembayaran Anda selesai, tetapi satu atau beberapa catatan donasi publik tidak dapat dibuat. Donasi tersebut tidak akan muncul di Kartu Saya.",
     "paymentDetails": "Detail pembayaran",
     "shareTitle": "Bagikan kepada orang lain",
     "shareText": "Saya baru saja berdonasi {amount} untuk mendukung proyek alam di GainForest: {url}",
@@ -99,6 +93,15 @@
     "exploreMore": "Jelajahi proyek lainnya",
     "emptyTitle": "Keranjang Anda kosong",
     "singleApprovalNote": "Dompet Anda akan meminta satu persetujuan untuk seluruh total. GainForest kemudian meneruskan setiap donasi kepada penerimanya.",
+    "messageTitle": "Tambahkan pesan (opsional)",
+    "messageHint": "Kata penyemangat, atau alasan Anda berdonasi. Penerima akan melihatnya.",
+    "messagePlaceholder": "Tambahkan pesan (opsional)…",
+    "messageAnonymousNote": "Pesan Anda tidak akan ditampilkan atas nama Anda.",
+    "tipNone": "Tanpa tip",
+    "cardsPreviewTitle": "Kartu yang akan Anda terima",
+    "cardsUnavailableNote": "Kartu hanya tersedia untuk donasi proyek yang memenuhi syarat. Pembayaran ini tidak menyertakannya.",
+    "cardsCheckingNote": "Memeriksa donasi mana yang akan menghasilkan kartu…",
+    "receiptIssue": "Pembayaran Anda selesai, tetapi satu atau beberapa catatan donasi publik tidak dapat dibuat. Donasi tersebut tidak akan muncul di Kartu Saya.",
     "reward": {
       "eyebrow": "Koleksi terbuka",
       "guardianOf": "Penjaga",
@@ -171,6 +174,36 @@
       "project": "Proyek",
       "cart": "Keranjang",
       "checkout": "Pembayaran"
+    },
+    "projectVisibility": {
+      "title": "Kartu visibilitas proyek",
+      "description": "Kartu di Kelola → Proyek yang memberi tahu akun apa yang bersifat publik dan apakah akun tampil di halaman jelajah, dalam setiap keadaannya.",
+      "mockNote": "Menambahkan akun ke halaman jelajah adalah efek nyata, jadi pratinjau ini tidak pernah melakukannya. Hanya dua panggilan server kartu ini yang diganti dengan data contoh.",
+      "mockBadge": "Mode contoh · tidak ada yang ditampilkan",
+      "cardTitle": "Visibilitas proyek",
+      "cardDescription": "Lihat bagaimana halaman proyek menjelaskan apa yang publik dan apa yang berubah saat tampil di halaman jelajah.",
+      "scenarios": {
+        "unlisted": {
+          "label": "Pemilik · belum tampil di halaman jelajah",
+          "body": "Akun dapat menambahkan dirinya ke daftar jelajah."
+        },
+        "listed": {
+          "label": "Pemilik · tampil di halaman jelajah",
+          "body": "Sudah tampil, jadi tidak ada tindakan yang ditawarkan."
+        },
+        "member": {
+          "label": "Anggota · belum tampil di halaman jelajah",
+          "body": "Anggota melihat keadaan akun, tetapi tidak dapat mengubahnya."
+        },
+        "unavailable": {
+          "label": "Tidak dapat diubah saat ini",
+          "body": "Keadaannya tetap terlihat; tombol dihilangkan alih-alih dibiarkan mati."
+        },
+        "unknown": {
+          "label": "Keadaan tidak dapat dibaca",
+          "body": "Kartu menyatakannya, bukan mengklaim akun tidak tampil."
+        }
+      }
     },
     "myCardsTitle": "Galeri Kartu Saya",
     "myCardsDescription": "Pratinjau galeri kartu yang telah dikumpulkan dengan contoh koleksi."

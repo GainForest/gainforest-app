@@ -107,6 +107,10 @@ type LibraryRecording = {
 
 const ALL_DATES = "all";
 
+/** Stamped faintly over the dial of a downloaded soundscape, so the picture
+ *  still says where it came from if its edges are trimmed. */
+const SOUNDSCAPE_WATERMARK_SRC = "/decor/gainforest-logo.svg";
+
 /** Group id for recordings that carry no `deploymentRef` (uploaded before
  *  folders existed — today's uploader always puts recordings in a folder). */
 const UNASSIGNED_GROUP = "unassigned";
@@ -864,6 +868,11 @@ export function SoundscapeClient({ sessionDid }: { sessionDid: string | null }) 
         image.onerror = () => reject(new Error("SVG rasterization failed"));
         image.src = url;
       });
+      /* The image should still name its source after it has travelled into a
+         report or a slide deck, including if somebody trims its edges. So the
+         credit is carried twice, both inside the picture: once faintly across
+         the dial, where it cannot be cropped away without taking the chart
+         with it, and once as a readable line at the foot of the canvas. */
       const canvas = document.createElement("canvas");
       canvas.width = 1440;
       canvas.height = 1440;
@@ -871,7 +880,40 @@ export function SoundscapeClient({ sessionDid }: { sessionDid: string | null }) 
       if (!context) return;
       context.fillStyle = "#ffffff";
       context.fillRect(0, 0, canvas.width, canvas.height);
-      context.drawImage(image, 0, 0, canvas.width, canvas.height);
+      context.drawImage(image, 0, 0, 1440, 1440);
+
+      context.textAlign = "center";
+      context.textBaseline = "middle";
+
+      /* Best effort: a logo that will not load must not cost the download. */
+      const mark = new Image();
+      const markLoaded = await new Promise<boolean>((resolve) => {
+        mark.onload = () => resolve(true);
+        mark.onerror = () => resolve(false);
+        mark.src = SOUNDSCAPE_WATERMARK_SRC;
+      });
+      if (markLoaded) {
+        /* The dial's empty centre: clean background, so the mark stays legible,
+           and nothing can trim it off without cutting the chart in half. The
+           centre comes from the SVG's own viewBox, so it stays right if the
+           chart's layout ever changes; the size matches the centre hole
+           (INNER_RADIUS 34 of 760 view units ≈ 0.089 of the width). */
+        const vb = svg.viewBox.baseVal;
+        const scale = canvas.width / vb.width;
+        const cx = (vb.x + vb.width / 2) * scale;
+        const cy = (vb.y + vb.height / 2) * scale;
+        const size = Math.round(canvas.width * 0.089);
+        context.save();
+        context.globalAlpha = 0.45;
+        context.drawImage(mark, cx - size / 2, cy - size / 2, size, size);
+        context.restore();
+      }
+
+      /* Bottom right, clear of the chart's own centred time-axis label. */
+      context.textAlign = "right";
+      context.fillStyle = "#64748b";
+      context.font = "500 24px ui-sans-serif, system-ui, sans-serif";
+      context.fillText(t("chart.credit"), canvas.width - 28, 1416);
       const anchor = document.createElement("a");
       anchor.href = canvas.toDataURL("image/png");
       anchor.download = `soundscape-${chartDateLabel || "clock"}.png`;
@@ -881,7 +923,7 @@ export function SoundscapeClient({ sessionDid }: { sessionDid: string | null }) 
     } finally {
       URL.revokeObjectURL(url);
     }
-  }, [chartDateLabel]);
+  }, [chartDateLabel, t]);
 
   if (!sessionDid) {
     return (
@@ -1302,6 +1344,7 @@ export function SoundscapeClient({ sessionDid }: { sessionDid: string | null }) 
               <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
                 {t("chart.legendTitle")}
               </p>
+              <p className="mt-1 text-xs leading-5 text-muted-foreground/80">{t("chart.legendHint")}</p>
               <ul className="mt-2 space-y-1">
                 {FREQUENCY_BANDS.map((band, index) => (
                   <li key={band.id}>
@@ -1331,6 +1374,15 @@ export function SoundscapeClient({ sessionDid }: { sessionDid: string | null }) 
                   </li>
                 ))}
               </ul>
+              {visibleBands.some((visible) => !visible) ? (
+                <button
+                  type="button"
+                  onClick={() => setVisibleBands(FREQUENCY_BANDS.map(() => true))}
+                  className="mt-1 rounded-lg px-2 py-1 text-xs font-medium text-primary transition-colors hover:bg-muted"
+                >
+                  {t("chart.showAllBands")}
+                </button>
+              ) : null}
               <p className="mt-2 px-2 text-xs leading-5 text-muted-foreground">{t("chart.bandsNote")}</p>
             </aside>
           </div>

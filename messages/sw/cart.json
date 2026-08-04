@@ -39,26 +39,18 @@
     "encouragement": "Vizuri! Mchango wako unaunga mkono uhifadhi unaoongozwa na jamii.",
     "donorTitle": "Jinsi mchango wako unavyoonekana",
     "anonymousLabel": "Changia bila kutajwa jina",
-    "anonymousHint": "Michango isiyo na jina haionekani hadharani kwa jina lako. Bado unaweza kuiona kwenye wasifu wako, lakini haikupi kadi.",
-    "signedOutNote": "Hujaingia, kwa hivyo michango yako itaonekana bila jina na haitakupa kadi.",
-    "messageTitle": "Ongeza ujumbe (hiari)",
-    "messageHint": "Neno la kutia moyo, au sababu ya kutoa. Mpokeaji ataliona.",
-    "messagePlaceholder": "Ongeza ujumbe (hiari)…",
-    "messageAnonymousNote": "Ujumbe wako hautaonyeshwa kwa jina lako.",
+    "anonymousHint": "Michango isiyo na jina haionekani kamwe hadharani kwa jina lako — bado utaiona kwenye wasifu wako mwenyewe.",
+    "signedOutNote": "Hujaingia, kwa hivyo michango yako itaonekana kama isiyojulikana.",
     "walletTitle": "Pochi ya malipo",
-    "walletHint": "Hulipwa kwa USDC kwenye Ethereum.",
+    "walletHint": "Michango hulipwa kwa USDC kwenye Ethereum. Unganisha pochi yako ili kuendelea — ada za mtandao zinalipiwa kwa niaba yako.",
     "connectWallet": "Unganisha pochi",
     "connecting": "Inaunganisha…",
     "connectFailed": "Muunganisho wa pochi umeshindikana.",
     "noWallet": "Hakuna pochi inayotumika iliyopatikana. Sakinisha MetaMask au pochi nyingine inayooana ili kuendelea.",
     "available": "Inapatikana: {amount}",
     "balanceUnavailable": "Salio halipatikani",
-    "tipTitle": "Ongeza bahashishi",
-    "tipNone": "Hakuna bahashishi",
-    "cardsPreviewTitle": "Kadi utakazopokea",
-    "cardsUnavailableNote": "Kadi hupatikana tu kwa michango ya miradi inayostahiki. Malipo haya hayana mchango kama huo.",
-    "cardsCheckingNote": "Tunaangalia ni michango ipi itakayokupa kadi…",
-    "tipDescription": "Hakuna ada za jukwaa, na tunalipa kila ada ya mtandao. Bahashishi huweka GainForest ikiendelea.",
+    "tipTitle": "Bahashishi kwa GainForest (hiari)",
+    "tipDescription": "GainForest haitozi ada za jukwaa na hulipa ada za mtandao kwa kila mchango. Bahashishi kutoka kwa wachangiaji huweka huduma hii ikiendelea.",
     "tipSliderLabel": "Kiasi cha bahashishi",
     "tipNudgeTitle": "Je, unaweza kuongeza bahashishi?",
     "tipNudgeBody": "Bahashishi husaidia GainForest kuwaunga mkono walinzi wa ardhi kutunza asili!",
@@ -71,7 +63,10 @@
     "insufficientBalance": "Pochi yako haina USDC ya kutosha kwa jumla hii.",
     "multiApprovalNote": "{count, plural, one {Pochi yako itakuomba uidhinishe malipo #.} other {Pochi yako itakuomba uidhinishe malipo #, moja baada ya nyingine.}}",
     "donateNow": "Changia {amount} sasa",
-    "footerNote": "Asilimia 100 humfikia kila mpokeaji — sisi hulipa ada.",
+    "footerNote": "Asilimia 100 ya {amount} ya michango yako huenda kwenye pochi iliyothibitishwa ya kila mpokeaji.",
+    "footerInfoLabel": "Hii inahusu nini",
+    "footerInfoFees": "GainForest haitozi ada ya jukwaa na inalipa ada za mtandao kwa niaba yako.",
+    "footerInfoTip": "Bahashishi yako ya {tip} ni tofauti. Haitolewi kamwe kutoka kwa michango yako.",
     "processing": "Inachakata…",
     "doNotClose": "Usifunge dirisha hili.",
     "tryAgain": "Jaribu tena",
@@ -88,7 +83,6 @@
     "successSummary": "Michango yako ya {amount} imekamilika kwa mafanikio.",
     "recordedWithProfile": "Imerekodiwa na wasifu wako wa GainForest.",
     "recordedAnonymous": "Imerekodiwa kama isiyojulikana.",
-    "receiptIssue": "Malipo yako yamekamilika, lakini rekodi moja au zaidi za umma za mchango hazikuweza kuundwa. Michango hiyo haitaonekana kwenye Kadi Zangu.",
     "paymentDetails": "Maelezo ya malipo",
     "shareTitle": "Shiriki hii na wengine",
     "shareText": "Nimetoa mchango wa {amount} kuunga mkono miradi ya asili kwenye GainForest: {url}",
@@ -99,6 +93,15 @@
     "exploreMore": "Chunguza miradi zaidi",
     "emptyTitle": "Kikapu chako ni tupu",
     "singleApprovalNote": "Pochi yako itaomba idhini moja tu kwa jumla yote. Kisha GainForest hupeleka kila mchango kwa mpokeaji wake.",
+    "messageTitle": "Ongeza ujumbe (hiari)",
+    "messageHint": "Neno la kutia moyo, au sababu ya kutoa. Mpokeaji ataliona.",
+    "messagePlaceholder": "Ongeza ujumbe (hiari)…",
+    "messageAnonymousNote": "Ujumbe wako hautaonyeshwa kwa jina lako.",
+    "tipNone": "Hakuna bahashishi",
+    "cardsPreviewTitle": "Kadi utakazopokea",
+    "cardsUnavailableNote": "Kadi hupatikana tu kwa michango ya miradi inayostahiki. Malipo haya hayana mchango kama huo.",
+    "cardsCheckingNote": "Tunaangalia ni michango ipi itakayokupa kadi…",
+    "receiptIssue": "Malipo yako yamekamilika, lakini rekodi moja au zaidi za umma za mchango hazikuweza kuundwa. Michango hiyo haitaonekana kwenye Kadi Zangu.",
     "reward": {
       "eyebrow": "Mkusanyiko umefunguliwa",
       "guardianOf": "Mlinzi wa",
@@ -171,6 +174,36 @@
       "project": "Mradi",
       "cart": "Kikapu",
       "checkout": "Malipo"
+    },
+    "projectVisibility": {
+      "title": "Kadi ya mwonekano wa mradi",
+      "description": "Kadi iliyo kwenye Dhibiti → Miradi inayoieleza akaunti kilicho cha hadhara na kama inaonyeshwa kwenye kurasa za uchunguzi, katika kila hali yake.",
+      "mockNote": "Kuongeza akaunti kwenye kurasa za uchunguzi ni tendo halisi, hivyo onyesho hili halifanyi hivyo kamwe. Ni miito miwili ya seva ya kadi hii pekee inayobadilishwa na data ya mfano.",
+      "mockBadge": "Hali ya majaribio · hakuna kinachoonyeshwa",
+      "cardTitle": "Mwonekano wa mradi",
+      "cardDescription": "Ona jinsi ukurasa wa miradi unavyoeleza kilicho cha hadhara na kinachobadilika unapoonyeshwa kwenye kurasa za uchunguzi.",
+      "scenarios": {
+        "unlisted": {
+          "label": "Mmiliki · haionyeshwi kwenye kurasa za uchunguzi",
+          "body": "Akaunti inaweza kujiongeza kwenye orodha za uchunguzi."
+        },
+        "listed": {
+          "label": "Mmiliki · inaonyeshwa kwenye kurasa za uchunguzi",
+          "body": "Tayari inaonyeshwa, hivyo hakuna hatua inayotolewa."
+        },
+        "member": {
+          "label": "Mwanachama · haionyeshwi kwenye kurasa za uchunguzi",
+          "body": "Wanachama huona hali ya akaunti, lakini hawawezi kuibadilisha."
+        },
+        "unavailable": {
+          "label": "Haiwezi kubadilishwa kwa sasa",
+          "body": "Hali bado inaonyeshwa; kitufe kinaachwa badala ya kuwekwa bila kazi."
+        },
+        "unknown": {
+          "label": "Hali haikuweza kusomwa",
+          "body": "Kadi inasema hivyo badala ya kudai akaunti haionyeshwi."
+        }
+      }
     },
     "myCardsTitle": "Matunzio ya Kadi Zangu",
     "myCardsDescription": "Hakiki matunzio ya kadi zilizokusanywa yenye mifano ya kadi."

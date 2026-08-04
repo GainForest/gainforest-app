@@ -329,6 +329,7 @@ export function AudioMothClient({
     if (tab === "soundscape" || tab === "label" || tab === "identifications") return tab;
     return tab === "deployments" || tab === "upload" ? tab : "setup";
   });
+  const mainTabNavRef = useRef<HTMLElement>(null);
   const selectMainTab = useCallback((id: MainTabId) => {
     setMainTab(id);
     const params = new URLSearchParams(searchParams.toString());
@@ -336,6 +337,13 @@ export function AudioMothClient({
     else params.set("tab", id);
     router.replace(params.size > 0 ? `?${params.toString()}` : "?", { scroll: false });
   }, [router, searchParams]);
+
+  // Keep the selected item in view when the compact tab bar scrolls on phones
+  // and smaller tablets. The desktop bar remains a single, non-scrolling row.
+  useEffect(() => {
+    const selectedTab = mainTabNavRef.current?.querySelector<HTMLElement>(`[data-main-tab="${mainTab}"]`);
+    selectedTab?.scrollIntoView({ block: "nearest", inline: "nearest" });
+  }, [mainTab]);
   const [tab, setTab] = useState<TabId>("firmware");
   const [connecting, setConnecting] = useState(false);
   const [wizard, setWizard] = useState<WizardState | null>(null);
@@ -845,14 +853,19 @@ export function AudioMothClient({
       />
       <div className="mx-auto flex w-full max-w-7xl flex-col gap-6 px-4 sm:px-6">
       {/* Setup (this device over USB) vs Deployment (field events) */}
-      <nav className="flex w-full gap-1 self-start rounded-full border border-border bg-card/70 p-1 sm:w-auto" aria-label={t("title")}>
+      <nav
+        ref={mainTabNavRef}
+        className="flex w-full max-w-full gap-1 self-start overflow-x-auto overscroll-x-contain rounded-full border border-border bg-card/70 p-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden lg:w-auto lg:overflow-visible"
+        aria-label={t("title")}
+      >
         {mainTabs.map(({ id, label, Icon }) => (
           <button
             key={id}
             type="button"
+            data-main-tab={id}
             onClick={() => selectMainTab(id)}
             className={cn(
-              "flex min-w-0 flex-1 items-center justify-center gap-1 rounded-full px-2 py-2 text-xs font-medium transition-colors sm:flex-none sm:gap-2 sm:px-4 sm:text-sm",
+              "flex shrink-0 items-center justify-center gap-2 whitespace-nowrap rounded-full px-3 py-2 text-sm font-medium transition-colors lg:px-4",
               mainTab === id ? "bg-primary text-primary-foreground shadow-sm" : "text-muted-foreground hover:text-foreground",
             )}
             aria-current={mainTab === id ? "page" : undefined}

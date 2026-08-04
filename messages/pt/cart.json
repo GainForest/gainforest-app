@@ -39,26 +39,18 @@
     "encouragement": "Que bom! Sua doação apoia a conservação liderada pelas comunidades.",
     "donorTitle": "Como sua doação aparece",
     "anonymousLabel": "Doar anonimamente",
-    "anonymousHint": "Doações anônimas nunca aparecem publicamente no seu nome. Você ainda pode vê-las no seu perfil, mas elas não geram cartas.",
-    "signedOutNote": "Você não está conectado, então suas doações aparecerão como anônimas e não gerarão cartas.",
-    "messageTitle": "Adicione uma mensagem (opcional)",
-    "messageHint": "Uma palavra de incentivo ou o motivo da sua doação. Quem receber poderá vê-la.",
-    "messagePlaceholder": "Adicione uma mensagem (opcional)…",
-    "messageAnonymousNote": "Sua mensagem não será exibida com o seu nome.",
+    "anonymousHint": "Doações anônimas nunca aparecem publicamente com o seu nome — você ainda pode vê-las no seu próprio perfil.",
+    "signedOutNote": "Você não está conectado, então suas doações aparecerão como anônimas.",
     "walletTitle": "Carteira de pagamento",
-    "walletHint": "Pago em USDC na Ethereum.",
+    "walletHint": "As doações são pagas em USDC na Ethereum. Conecte sua carteira para continuar — as taxas de rede são cobertas para você.",
     "connectWallet": "Conectar carteira",
     "connecting": "Conectando…",
     "connectFailed": "A conexão da carteira falhou.",
     "noWallet": "Nenhuma carteira compatível foi encontrada. Instale a MetaMask ou outra carteira compatível para continuar.",
     "available": "Disponível: {amount}",
     "balanceUnavailable": "Saldo indisponível",
-    "tipTitle": "Adicionar gorjeta",
-    "tipNone": "Sem gorjeta",
-    "cardsPreviewTitle": "Cartas que você receberá",
-    "cardsUnavailableNote": "As cartas estão disponíveis apenas para doações a projetos qualificados. Esta finalização não inclui nenhuma.",
-    "cardsCheckingNote": "Verificando quais doações vão gerar cartas…",
-    "tipDescription": "Sem taxas de plataforma e cobrimos cada taxa de rede. As gorjetas mantêm a GainForest funcionando.",
+    "tipTitle": "Gorjeta para a GainForest (opcional)",
+    "tipDescription": "A GainForest não cobra taxas de plataforma e cobre as taxas de rede de cada doação. As gorjetas dos doadores mantêm este serviço funcionando.",
     "tipSliderLabel": "Valor da gorjeta",
     "tipNudgeTitle": "Pode adicionar uma gorjeta?",
     "tipNudgeBody": "As gorjetas ajudam a GainForest a apoiar os guardiões da terra para cuidar da natureza!",
@@ -71,7 +63,10 @@
     "insufficientBalance": "Sua carteira não tem USDC suficiente para este total.",
     "multiApprovalNote": "{count, plural, one {Sua carteira pedirá que você aprove # pagamento.} other {Sua carteira pedirá que você aprove # pagamentos, um após o outro.}}",
     "donateNow": "Doar {amount} agora",
-    "footerNote": "100% chega a cada destinatário — nós cobrimos as taxas.",
+    "footerNote": "100% dos seus {amount} em doações vai para a carteira verificada de cada destinatário.",
+    "footerInfoLabel": "O que isso cobre",
+    "footerInfoFees": "A GainForest não cobra taxa de plataforma e paga as taxas de rede para você.",
+    "footerInfoTip": "Sua gorjeta de {tip} é à parte. Ela nunca sai das suas doações.",
     "processing": "Processando…",
     "doNotClose": "Não feche esta janela.",
     "tryAgain": "Tentar novamente",
@@ -88,7 +83,6 @@
     "successSummary": "Suas doações de {amount} foram concluídas com sucesso.",
     "recordedWithProfile": "Registrado com seu perfil GainForest.",
     "recordedAnonymous": "Registrado como anônimo.",
-    "receiptIssue": "Seu pagamento foi concluído, mas um ou mais registros públicos de doação não puderam ser criados. Essas doações não aparecerão em Minhas cartas.",
     "paymentDetails": "Detalhes do pagamento",
     "shareTitle": "Compartilhe com outras pessoas",
     "shareText": "Acabei de doar {amount} para apoiar projetos de natureza na GainForest: {url}",
@@ -99,6 +93,15 @@
     "exploreMore": "Explorar mais projetos",
     "emptyTitle": "Seu carrinho está vazio",
     "singleApprovalNote": "Sua carteira pedirá uma única aprovação pelo total. Depois, a GainForest encaminha cada doação para o destinatário.",
+    "messageTitle": "Adicione uma mensagem (opcional)",
+    "messageHint": "Uma palavra de incentivo ou o motivo da sua doação. Quem receber poderá vê-la.",
+    "messagePlaceholder": "Adicione uma mensagem (opcional)…",
+    "messageAnonymousNote": "Sua mensagem não será exibida com o seu nome.",
+    "tipNone": "Sem gorjeta",
+    "cardsPreviewTitle": "Cartas que você receberá",
+    "cardsUnavailableNote": "As cartas estão disponíveis apenas para doações a projetos qualificados. Esta finalização não inclui nenhuma.",
+    "cardsCheckingNote": "Verificando quais doações vão gerar cartas…",
+    "receiptIssue": "Seu pagamento foi concluído, mas um ou mais registros públicos de doação não puderam ser criados. Essas doações não aparecerão em Minhas cartas.",
     "reward": {
       "eyebrow": "Colecionável desbloqueado",
       "guardianOf": "Guardião de",
@@ -171,6 +174,36 @@
       "project": "Projeto",
       "cart": "Carrinho",
       "checkout": "Pagamento"
+    },
+    "projectVisibility": {
+      "title": "Cartão de visibilidade do projeto",
+      "description": "O cartão em Gerenciar → Projetos que informa à conta o que é público e se ela aparece nas páginas de exploração, em cada estado possível.",
+      "mockNote": "Adicionar uma conta às páginas de exploração é um efeito real, então esta prévia nunca faz isso. Apenas as duas chamadas ao servidor do cartão são substituídas por dados fictícios.",
+      "mockBadge": "Modo de teste · nada é publicado",
+      "cardTitle": "Visibilidade do projeto",
+      "cardDescription": "Veja como a página de projetos informa o que é público e o que aparecer nas páginas de exploração muda.",
+      "scenarios": {
+        "unlisted": {
+          "label": "Proprietário · fora das páginas de exploração",
+          "body": "A conta pode se adicionar às listas de exploração."
+        },
+        "listed": {
+          "label": "Proprietário · nas páginas de exploração",
+          "body": "Já aparece, então nenhuma ação é oferecida."
+        },
+        "member": {
+          "label": "Membro · fora das páginas de exploração",
+          "body": "Membros veem a situação da conta, mas não podem alterá-la."
+        },
+        "unavailable": {
+          "label": "Não pode ser alterado agora",
+          "body": "O estado continua visível; o botão é omitido em vez de ficar inerte."
+        },
+        "unknown": {
+          "label": "Não foi possível ler o estado",
+          "body": "O cartão diz isso em vez de afirmar que a conta não aparece."
+        }
+      }
     },
     "myCardsTitle": "Galeria Minhas cartas",
     "myCardsDescription": "Veja uma prévia da galeria de cartas colecionadas com exemplos."

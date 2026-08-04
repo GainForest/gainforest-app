@@ -14,6 +14,9 @@ import { resolveBlobUrl } from "./pds";
  *  queryable from the admin review surface. */
 export const REWILDING_GRANT_TAG = "rewilding-grant";
 
+/** Public applications are paused while the current submissions are reviewed. */
+export const REWILDING_GRANT_APPLICATIONS_OPEN = false;
+
 export type GrantApplicant = {
   did: string;
   displayName: string | null;

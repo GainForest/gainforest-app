@@ -1,7 +1,9 @@
 import { headers } from "next/headers";
 import { NextResponse } from "next/server";
 import { fetchAuthSession } from "@/app/_lib/auth-server";
-import { getAuthBaseUrl } from "@/app/_lib/auth";
+import { getAuthBaseUrl, HANDLE_CHANGED_COOKIE, HANDLE_CHANGED_WINDOW_MS } from "@/app/_lib/auth";
+import { forgetDidIdentity } from "@/app/_lib/did-identity";
+import { relayUpstreamCookies } from "@/app/_lib/upstream-cookies";
 
 export const dynamic = "force-dynamic";
 
@@ -62,7 +64,27 @@ export async function POST(request: Request) {
       return NextResponse.json({ code: "handle_unavailable", error: "Changing your username isn’t available yet." }, { status: 501 });
     }
     const result = await upstream.json().catch(() => ({ error: "Could not update your username right now. Please try again later." }));
-    return NextResponse.json(result, { status: upstream.status });
+    // The auth service re-seals the session with the new username and returns
+    // it as a cookie. Pass it on, or the user stays signed in under the old
+    // name until they next sign in.
+    const response = relayUpstreamCookies(upstream, NextResponse.json(result, { status: upstream.status }));
+    if (upstream.ok) {
+      // The DID document now says something new. Drop this instance's cached
+      // identity, and mark the change in a short-lived cookie so the user's
+      // next requests re-read it on every other instance too — without the
+      // cookie they could see their old username for up to the cache TTL.
+      forgetDidIdentity(session.did);
+      response.cookies.set(HANDLE_CHANGED_COOKIE, String(Date.now()), {
+        httpOnly: true,
+        sameSite: "lax",
+        secure: true,
+        path: "/",
+        // The cookie must live exactly as long as readers honour it — one
+        // constant, so the two can't drift apart.
+        maxAge: HANDLE_CHANGED_WINDOW_MS / 1000,
+      });
+    }
+    return response;
   } catch (error) {
     const message = error instanceof Error ? error.message : "Failed to update username";
     return NextResponse.json({ error: message }, { status: 502 });

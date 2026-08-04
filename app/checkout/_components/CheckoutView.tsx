@@ -20,6 +20,7 @@ import {
   CompassIcon,
   CopyIcon,
   HeartHandshakeIcon,
+  InfoIcon,
   Loader2Icon,
   Share2Icon,
   ShoppingCartIcon,
@@ -28,6 +29,7 @@ import {
 import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Popover, PopoverAnchor, PopoverContent } from "@/components/ui/popover";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { DONATION_MESSAGE_MAX_LENGTH, sanitizeDonationMessage } from "@/lib/donation/message";
@@ -310,6 +312,8 @@ export function CheckoutView({
   const [lineStates, setLineStates] = useState<Record<string, LineState>>({});
   const [completed, setCompleted] = useState<CompletedLine[]>([]);
   const [copied, setCopied] = useState(false);
+  /** The fee/tip explainer beside the footer note. */
+  const [feeInfoOpen, setFeeInfoOpen] = useState(false);
   const payingRef = useRef(false);
 
   // Verify each organization's donation wallet once.
@@ -1080,6 +1084,13 @@ export function CheckoutView({
               )}
             </Button>
 
+            {payableItems.length > 1 || (tipEnabled && tipUsd > 0) ? (
+              <p className="mt-3 text-xs leading-5 text-muted-foreground">
+                {FACILITATOR_WALLET_ADDRESS
+                  ? t("singleApprovalNote")
+                  : t("multiApprovalNote", { count: payableItems.length + (tipEnabled && tipUsd > 0 ? 1 : 0) })}
+              </p>
+            ) : null}
             {connectError ? <p className="mt-3 text-xs text-destructive">{connectError}</p> : null}
             {wallet && wallet.balance !== null && !hasEnoughBalance ? (
               <p className="mt-3 rounded-2xl bg-destructive/10 px-3 py-2 text-xs text-destructive">
@@ -1087,7 +1098,43 @@ export function CheckoutView({
               </p>
             ) : null}
             {paying ? <p className="mt-2 text-xs text-muted-foreground">{t("doNotClose")}</p> : null}
-            {!paying ? <p className="mt-3 text-xs leading-5 text-muted-foreground">{t("footerNote")}</p> : null}
+            {!paying ? (
+              <p className="mt-3 flex items-center justify-center gap-1.5 text-center text-xs leading-5 text-muted-foreground">
+                <span>{t("footerNote", { amount: `$${subtotalUsd.toFixed(2)}` })}</span>
+                <Popover open={feeInfoOpen} onOpenChange={setFeeInfoOpen}>
+                  <PopoverAnchor asChild>
+                    <button
+                      type="button"
+                      aria-label={t("footerInfoLabel")}
+                      aria-expanded={feeInfoOpen}
+                      onClick={() => setFeeInfoOpen(true)}
+                      onPointerEnter={(event) => {
+                        if (event.pointerType === "mouse") setFeeInfoOpen(true);
+                      }}
+                      onPointerLeave={(event) => {
+                        if (event.pointerType === "mouse") setFeeInfoOpen(false);
+                      }}
+                      onFocus={(event) => {
+                        if (event.currentTarget.matches(":focus-visible")) setFeeInfoOpen(true);
+                      }}
+                      onBlur={() => setFeeInfoOpen(false)}
+                      className="inline-flex size-4 shrink-0 items-center justify-center rounded-full text-muted-foreground/70 transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
+                    >
+                      <InfoIcon className="size-3.5" aria-hidden />
+                    </button>
+                  </PopoverAnchor>
+                  <PopoverContent
+                    align="end"
+                    side="top"
+                    className="w-64 p-3 text-xs leading-5 text-muted-foreground"
+                    onOpenAutoFocus={(event) => event.preventDefault()}
+                  >
+                    {t("footerInfoFees")}
+                    {tipEnabled && tipUsd > 0 ? ` ${t("footerInfoTip", { tip: `$${tipUsd.toFixed(2)}` })}` : ""}
+                  </PopoverContent>
+                </Popover>
+              </p>
+            ) : null}
           </section>
         </aside>
       </div>
