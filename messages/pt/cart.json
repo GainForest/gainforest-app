@@ -205,6 +205,15 @@
         }
       }
     },
+    "bioblitzNotifications": {
+      "title": "Estados do email dos vencedores do BioBlitz",
+      "description": "As linhas de estado de produção para emails de vencedores, incluindo email ausente e acompanhamento manual.",
+      "mockBadge": "Modo simulado · sem emails",
+      "mockNote": "Todos os vencedores são fictícios. Marcar como tratado altera apenas a memória.",
+      "cardTitle": "Emails dos vencedores do BioBlitz",
+      "cardDescription": "Visualize cada estado de entrega e contato manual para moderadores.",
+      "fixtureLabel": "Email do vencedor"
+    },
     "invitationDelivery": {
       "title": "Estados de entrega de convites",
       "description": "A linha de convite pendente de produção para emails enviados, atrasados, links manuais e ações restritas por função.",

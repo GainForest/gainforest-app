@@ -1,5 +1,6 @@
 import { timingSafeEqual } from "node:crypto";
 import { NextRequest, NextResponse } from "next/server";
+import { reconcileRecentBioblitzNotifications } from "@/app/_lib/bioblitz-notification-reconciliation";
 import { createDrainRuntime } from "@/lib/email-notifications/drain-runtime";
 
 export const runtime = "nodejs";
@@ -32,8 +33,14 @@ export async function GET(request: NextRequest) {
   }
 
   try {
+    let reconciliation: { candidates: number; completed: boolean };
+    try {
+      reconciliation = { candidates: await reconcileRecentBioblitzNotifications(), completed: true };
+    } catch {
+      reconciliation = { candidates: 0, completed: false };
+    }
     const result = await createDrainRuntime().drain(new Date(invocationStartedAt + USABLE_INVOCATION_MS));
-    return NextResponse.json(result);
+    return NextResponse.json({ ...result, reconciliation });
   } catch {
     return NextResponse.json({ error: "Notification recovery could not complete. Retry the scheduled request." }, { status: 503 });
   }

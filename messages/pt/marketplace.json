@@ -603,7 +603,21 @@
         "action": "Conceder selos aos vencedores",
         "actionMissing": "Conceder selos pendentes",
         "done": "Selos dos vencedores concedidos",
-        "error": "Não foi possível conceder os selos. Tente novamente."
+        "error": "Não foi possível atualizar os selos ou o estado do email. Tente novamente.",
+        "notification": {
+          "mostObservations": "Email de mais observações",
+          "bestPicture": "Email de melhor foto",
+          "sent": "Enviado",
+          "delayed": "Atrasado — continuaremos tentando",
+          "missing_email": "Nenhum email da conta encontrado; contate o vencedor manualmente",
+          "lookup_failed": "Falha ao buscar o email; tente depois ou contate o vencedor",
+          "cannot_send": "Não pode ser enviado automaticamente",
+          "handled_manually": "Tratado manualmente",
+          "not_prepared": "Não preparado; contate o vencedor manualmente",
+          "notification_setup_failed": "Falha na configuração do email; contate o vencedor",
+          "markHandled": "Marcar como tratado",
+          "marking": "Marcando…"
+        }
       }
     },
     "map": {

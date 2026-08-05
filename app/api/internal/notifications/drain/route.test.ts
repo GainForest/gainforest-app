@@ -24,8 +24,10 @@ const drain = vi.fn<(_deadline: Date) => Promise<DrainOutcome>>(async () => ({
   elapsedMs: 25,
 }));
 const createDrainRuntime = vi.fn(() => ({ drain }));
+const reconcileRecentBioblitzNotifications = vi.fn(async () => 2);
 
 vi.mock("@/lib/email-notifications/drain-runtime", () => ({ createDrainRuntime }));
+vi.mock("@/app/_lib/bioblitz-notification-reconciliation", () => ({ reconcileRecentBioblitzNotifications }));
 
 function request(token?: string): NextRequest {
   return new NextRequest("https://example.test/api/internal/notifications/drain", {
@@ -41,6 +43,7 @@ describe("notification drain route", () => {
     process.env.NOTIFICATION_CRON_SECRET = secret;
     createDrainRuntime.mockClear();
     drain.mockClear();
+    reconcileRecentBioblitzNotifications.mockClear();
   });
 
   afterEach(() => {
@@ -72,7 +75,7 @@ describe("notification drain route", () => {
     const after = Date.now();
     expect(response.status).toBe(200);
     const body = await response.json();
-    expect(body).toMatchObject({ kind: "completed", claimed: 2, outcomes: { sent: 1, requeued: 1 } });
+    expect(body).toMatchObject({ kind: "completed", claimed: 2, outcomes: { sent: 1, requeued: 1 }, reconciliation: { candidates: 2, completed: true } });
     expect(JSON.stringify(body)).not.toContain("@example.com");
     expect(drain).toHaveBeenCalledTimes(1);
     const deadline = drain.mock.calls[0][0] as Date;
