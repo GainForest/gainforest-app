@@ -4,6 +4,7 @@ import type { OccurrenceRecord } from "@/app/_lib/indexer";
 vi.mock("server-only", () => ({}));
 import {
   buildWinnerInfoMarkdown,
+  createPinnedPdsLookup,
   extensionForImageContentType,
   isPublicAddress,
   winnerPackageFilename,
@@ -44,6 +45,22 @@ describe("BioBlitz winner packages", () => {
     expect(isPublicAddress("2606:4700:4700::1111")).toBe(true);
     expect(isPublicAddress("::1")).toBe(false);
     expect(isPublicAddress("not-an-ip")).toBe(false);
+  });
+
+  it("returns an address list when Node requests all pinned PDS candidates", async () => {
+    const lookup = createPinnedPdsLookup("203.0.113.9", 4);
+    const addresses = await new Promise<Array<{ address: string; family: number }>>((resolve, reject) => {
+      (lookup as unknown as (
+        hostname: string,
+        options: { all: true },
+        callback: (error: Error | null, result: Array<{ address: string; family: number }>) => void,
+      ) => void)("pds.example", { all: true }, (error, result) => {
+        if (error) reject(error);
+        else resolve(result);
+      });
+    });
+
+    expect(addresses).toEqual([{ address: "203.0.113.9", family: 4 }]);
   });
 
   it("maps packaged files to concise observation data in info.md", () => {
