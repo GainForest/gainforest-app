@@ -8,6 +8,10 @@ import {
   type BioblitzRound,
   type RoundCollector,
 } from "@/app/_lib/bioblitz";
+import {
+  effectiveBioblitzExclusionRecords,
+  fetchBioblitzExclusionsStrict,
+} from "@/app/_lib/bioblitz-exclusions";
 import { fetchIndexedCertifiedProfileCards } from "@/app/_lib/indexer";
 import type {
   BioblitzAdminRegistrant,
@@ -51,15 +55,19 @@ export async function loadBioblitzAdminRound(
 ): Promise<BioblitzAdminRoundData> {
   const round = resolveBioblitzAdminRound(roundId, now);
   const ended = roundStatus(round, now) === "ended";
-  const [confirmedWinners, registrants, board] = await Promise.all([
+  const [confirmedWinners, registrants, board, exclusionRecords] = await Promise.all([
     ended
       ? loadBioblitzConfirmedWinners(round, badgeRepoDid)
       : Promise.resolve<Partial<Record<BioblitzWinnerPrize, BioblitzConfirmedWinner>>>({}),
     fetchBioblitzRoundRegistrants(round),
     fetchRoundCollectors(round, "round", undefined, "required", { includeExcluded: true }),
+    fetchBioblitzExclusionsStrict(),
   ]);
   const rawCollectors = board.unfilteredCollectors ?? board.collectors;
   const collectorByDid = new Map(rawCollectors.map((collector) => [collector.did, collector]));
+  const activeRoundExclusions = effectiveBioblitzExclusionRecords(exclusionRecords).filter(
+    (exclusion) => exclusion.roundId === round.id,
+  );
 
   const winners: Winner[] = [];
   for (const prize of ["most-observations", "best-picture"] as const) {
@@ -76,9 +84,15 @@ export async function loadBioblitzAdminRound(
     });
   }
 
-  const profileCards = await fetchIndexedCertifiedProfileCards(
-    [...new Set(winners.map((winner) => winner.did))],
-  ).catch(() => new Map<string, { displayName: string | null; avatarUrl: string | null }>());
+  const profileDids = [...new Set([
+    ...winners.map((winner) => winner.did),
+    ...activeRoundExclusions.map((exclusion) => exclusion.subjectDid),
+  ])];
+  const profileCards = profileDids.length === 0
+    ? new Map<string, { displayName: string | null; avatarUrl: string | null }>()
+    : await fetchIndexedCertifiedProfileCards(profileDids).catch(
+      () => new Map<string, { displayName: string | null; avatarUrl: string | null }>(),
+    );
   const rawCountByDid = new Map(rawCollectors.map((collector) => [collector.did, collector.count]));
   const rows = new Map<string, BioblitzAdminRegistrant>(
     registrants.map((registrant) => [
@@ -94,6 +108,32 @@ export async function loadBioblitzAdminRound(
       },
     ]),
   );
+
+  // Keep every actively ignored account visible and reversible even when it
+  // never published a round-registration post (or that old post is gone).
+  // Its raw tally remains available for a moderator to review before restoring.
+  for (const exclusion of activeRoundExclusions) {
+    const collector = collectorByDid.get(exclusion.subjectDid);
+    const profile = profileCards.get(exclusion.subjectDid);
+    const existing = rows.get(exclusion.subjectDid);
+    if (existing) {
+      if (!existing.displayName) {
+        existing.displayName = collector?.displayName ?? profile?.displayName ?? null;
+      }
+      if (!existing.avatarUrl) existing.avatarUrl = profile?.avatarUrl ?? null;
+      if (collector) existing.observationCount = collector.count;
+      continue;
+    }
+    rows.set(exclusion.subjectDid, {
+      did: exclusion.subjectDid,
+      displayName: collector?.displayName ?? profile?.displayName ?? null,
+      avatarUrl: profile?.avatarUrl ?? null,
+      registeredAt: null,
+      observationCount: collector?.count ?? 0,
+      wins: [],
+      availablePackages: [],
+    });
+  }
 
   // Winner selection predates round-tag registration. Preserve visibility for
   // a legitimate winner even if historical registration data is incomplete.
