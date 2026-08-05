@@ -593,6 +593,138 @@ begin
   end loop;
 end $$;
 
+create function public.notification_invitation_create(
+  p_invitation_id uuid,p_repo text,p_email text,p_role text,p_inviter_did text,p_inviter_handle text,p_inviter_email text,
+  p_group_name text,p_group_handle text,p_inviter_name text,p_inviter_url text,p_public_origin text,p_locale text,
+  p_enqueue_notification boolean,p_created_at timestamptz,p_expires_at timestamptz
+) returns jsonb language plpgsql security definer set search_path='' as $$
+declare
+  v_invitation record;
+  v_outbox_id uuid;
+  v_outbox_status text;
+  v_duplicate boolean;
+  v_event_key text;
+  v_event_hash text;
+  v_payload jsonb;
+  v_existing boolean;
+begin
+  if p_invitation_id is null then raise exception 'invitation ID is required'; end if;
+  if p_repo is null or length(p_repo) not between 1 and 256 then raise exception 'invitation repo must contain 1 to 256 characters'; end if;
+  if p_email is null or length(p_email) not between 3 and 320 or p_email<>lower(trim(p_email)) or position('@' in p_email)<=1 then raise exception 'invitation email must be normalized'; end if;
+  if p_role not in ('member','admin') then raise exception 'invitation role must be member or admin'; end if;
+  if p_inviter_did is null or length(p_inviter_did) not between 1 and 256 then raise exception 'inviter DID is required'; end if;
+  if p_enqueue_notification is null then raise exception 'invitation notification choice is required'; end if;
+  if p_created_at is null or p_expires_at is null or p_expires_at<=p_created_at or p_expires_at>p_created_at+interval '30 days' then raise exception 'invitation expiry must follow creation by at most 30 days'; end if;
+  if p_public_origin is null or length(p_public_origin) not between 8 and 512 or p_public_origin !~ '^https?://' then raise exception 'public origin must be an HTTP(S) origin'; end if;
+  if p_locale is not null and length(p_locale)>35 then raise exception 'locale must contain at most 35 characters'; end if;
+
+  select * into v_invitation from public.cgs_group_invitations
+    where repo=p_repo and email=p_email and status='pending' for update;
+  v_existing=found;
+  if v_existing and v_invitation.expires_at<=p_created_at then
+    update public.cgs_group_invitations set status='expired' where id=v_invitation.id;
+    perform * from public.notification_outbox_suppress_event('organization-invite:' || v_invitation.id::text,'invitation');
+    v_existing=false;
+  end if;
+  if v_existing then
+    if v_invitation.role<>p_role then raise exception 'invitation_role_conflict: cancel the pending invitation before changing its role'; end if;
+  else
+    begin
+      insert into public.cgs_group_invitations(
+        id,repo,email,role,status,inviter_did,inviter_handle,inviter_email,group_name,group_handle,created_at,updated_at,expires_at,last_email_error
+      ) values (
+        p_invitation_id,p_repo,p_email,p_role,'pending',p_inviter_did,p_inviter_handle,p_inviter_email,p_group_name,p_group_handle,
+        p_created_at,p_created_at,p_expires_at,null
+      ) returning * into v_invitation;
+    exception when unique_violation then
+      select * into v_invitation from public.cgs_group_invitations
+        where repo=p_repo and email=p_email and status='pending' for update;
+      if not found then raise; end if;
+      if v_invitation.role<>p_role then raise exception 'invitation_role_conflict: cancel the pending invitation before changing its role'; end if;
+    end;
+  end if;
+
+  if p_enqueue_notification then
+    v_event_key='organization-invite:' || v_invitation.id::text;
+    v_event_hash=extensions.notification_outbox_sha256(pg_catalog.convert_to(v_event_key,'UTF8'));
+    select id,status into v_outbox_id,v_outbox_status from public.notification_outbox where event_key_hash=v_event_hash for update;
+    if found then
+      if (select event_type from public.notification_outbox where id=v_outbox_id)<>'invitation' then
+        raise exception 'notification_outbox_idempotency_conflict: event type differs';
+      end if;
+      v_duplicate=true;
+    else
+      v_payload=pg_catalog.jsonb_build_object(
+        'invitationId',v_invitation.id::text,
+        'invitedEmail',v_invitation.email,
+        'organizationName',v_invitation.group_name,
+        'inviterName',p_inviter_name,
+        'inviterUrl',p_inviter_url,
+        'role',v_invitation.role,
+        'acceptUrl',rtrim(p_public_origin,'/') || '/invite/' || v_invitation.id::text,
+        'siteUrl',rtrim(p_public_origin,'/')
+      );
+      select outbox_id,status,duplicate into v_outbox_id,v_outbox_status,v_duplicate
+        from public.notification_outbox_enqueue(
+          v_event_key,'invitation',v_payload,v_invitation.id::text,null,v_invitation.email,
+          'organization-invitation',p_locale,null,p_created_at
+        );
+    end if;
+  end if;
+
+  return pg_catalog.jsonb_build_object(
+    'invitation',to_jsonb(v_invitation),
+    'notification',case when v_outbox_id is null then null else pg_catalog.jsonb_build_object(
+      'outbox_id',v_outbox_id,'status',v_outbox_status,'duplicate',v_duplicate
+    ) end
+  );
+end $$;
+
+create function public.notification_invitation_close(
+  p_invitation_id uuid,p_status text,p_accepted_by_did text,p_accepted_by_email text
+) returns jsonb language plpgsql security definer set search_path='' as $$
+declare v_invitation record; v_notification record;
+begin
+  if p_status not in ('accepted','canceled','expired') then raise exception 'unsupported invitation terminal status'; end if;
+  select * into v_invitation from public.cgs_group_invitations where id=p_invitation_id for update;
+  if not found then raise exception 'invitation_not_found'; end if;
+  if v_invitation.status<>'pending' and v_invitation.status<>p_status then raise exception 'invitation_not_pending'; end if;
+  if p_status='accepted' then
+    if p_accepted_by_did is null or p_accepted_by_email is null then raise exception 'accepted invitation requires recipient identity'; end if;
+    update public.cgs_group_invitations set status='accepted',accepted_at=coalesce(accepted_at,clock_timestamp()),
+      accepted_by_did=coalesce(accepted_by_did,p_accepted_by_did),accepted_by_email=coalesce(accepted_by_email,p_accepted_by_email)
+      where id=p_invitation_id returning * into v_invitation;
+  else
+    if p_accepted_by_did is not null or p_accepted_by_email is not null then raise exception 'non-accepted invitation must not include recipient identity'; end if;
+    update public.cgs_group_invitations set status=p_status where id=p_invitation_id returning * into v_invitation;
+  end if;
+  select * into v_notification from public.notification_outbox_suppress_event('organization-invite:' || p_invitation_id::text,'invitation');
+  return pg_catalog.jsonb_build_object('invitation',to_jsonb(v_invitation),'notification',to_jsonb(v_notification));
+end $$;
+
+create function public.notification_invitation_retry(p_invitation_id uuid)
+returns jsonb language plpgsql security definer set search_path='' as $$
+declare v_invitation record; v public.notification_outbox%rowtype; v_hash text;
+begin
+  select * into v_invitation from public.cgs_group_invitations where id=p_invitation_id for update;
+  if not found then raise exception 'invitation_not_found'; end if;
+  if v_invitation.status<>'pending' or v_invitation.expires_at<=clock_timestamp() then raise exception 'invitation_not_pending'; end if;
+  v_hash=extensions.notification_outbox_sha256(pg_catalog.convert_to('organization-invite:' || p_invitation_id::text,'UTF8'));
+  select * into v from public.notification_outbox where event_key_hash=v_hash for update;
+  if not found then raise exception 'invitation_notification_missing'; end if;
+  if v.last_manual_retry_at is not null and v.last_manual_retry_at>clock_timestamp()-interval '1 minute' then raise exception 'invitation_retry_cooldown'; end if;
+  if v.status in ('queued','waiting_recipient') then
+    update public.notification_outbox set next_attempt_at=clock_timestamp(),last_manual_retry_at=clock_timestamp(),manual_retry_count=manual_retry_count+1
+      where id=v.id returning * into v;
+  elsif v.status='dead' and v.last_error_code='provider_rejected' and v.template_key is not null and v.provider_call_phase='idle' then
+    update public.notification_outbox set status='queued',terminal_at=null,next_attempt_at=clock_timestamp(),last_error_code=null,last_error_summary=null,
+      last_manual_retry_at=clock_timestamp(),manual_retry_count=manual_retry_count+1 where id=v.id returning * into v;
+  else
+    raise exception 'invitation_notification_not_safely_retryable';
+  end if;
+  return pg_catalog.jsonb_build_object('outbox_id',v.id,'status',v.status,'retryable',true,'next_attempt_at',v.next_attempt_at);
+end $$;
+
 create function public.notification_outbox_cleanup(p_batch_size integer)
 returns table(active_expired integer,redacted integer,deleted integer)
 language plpgsql security definer set search_path='' as $$
@@ -648,6 +780,9 @@ revoke all on function public.notification_outbox_mark_dead(uuid,uuid,text) from
 revoke all on function public.notification_outbox_suppress_claimed(uuid,uuid,text) from public,anon,authenticated;
 revoke all on function public.notification_outbox_release_claim(uuid,uuid) from public,anon,authenticated;
 revoke all on function public.notification_outbox_suppress_event(text,text) from public,anon,authenticated;
+revoke all on function public.notification_invitation_create(uuid,text,text,text,text,text,text,text,text,text,text,text,text,boolean,timestamptz,timestamptz) from public,anon,authenticated;
+revoke all on function public.notification_invitation_close(uuid,text,text,text) from public,anon,authenticated;
+revoke all on function public.notification_invitation_retry(uuid) from public,anon,authenticated;
 revoke all on function public.notification_outbox_cleanup(integer) from public,anon,authenticated;
 
 grant execute on function public.notification_outbox_enqueue(text,text,jsonb,text,text,text,text,text,text,timestamptz) to service_role;
@@ -667,4 +802,7 @@ grant execute on function public.notification_outbox_mark_dead(uuid,uuid,text) t
 grant execute on function public.notification_outbox_suppress_claimed(uuid,uuid,text) to service_role;
 grant execute on function public.notification_outbox_release_claim(uuid,uuid) to service_role;
 grant execute on function public.notification_outbox_suppress_event(text,text) to service_role;
+grant execute on function public.notification_invitation_create(uuid,text,text,text,text,text,text,text,text,text,text,text,text,boolean,timestamptz,timestamptz) to service_role;
+grant execute on function public.notification_invitation_close(uuid,text,text,text) to service_role;
+grant execute on function public.notification_invitation_retry(uuid) to service_role;
 grant execute on function public.notification_outbox_cleanup(integer) to service_role;

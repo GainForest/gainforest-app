@@ -6,13 +6,19 @@ import {
   createGroupInvitation,
   GroupInvitationError,
   isInvitationRole,
+  invitationNotificationAfterProcess,
   listPendingGroupInvitationsForEmail,
   listPendingGroupInvitationsForRepo,
   normalizeInvitationEmail,
 } from "@/app/_lib/cgs-invitations";
 import { fetchCgsMembersWithCookie } from "@/app/_lib/cgs-server";
+import { readNotificationConfig } from "@/lib/notifications/config";
+import { createInvitationRuntime } from "@/lib/notifications/invitation-runtime";
 
 export const runtime = "nodejs";
+export const maxDuration = 30;
+
+const USABLE_INVOCATION_MS = 27_000;
 
 const createInvitationSchema = z.object({
   repo: z.string().min(1),
@@ -62,6 +68,7 @@ export async function GET(request: Request) {
 }
 
 export async function POST(request: Request) {
+  const invocationStartedAt = Date.now();
   const session = await fetchAuthSession();
   if (!session.isLoggedIn) return jsonError(new GroupInvitationError("Please sign in and try again.", 401), "Please sign in and try again.");
 
@@ -74,7 +81,8 @@ export async function POST(request: Request) {
   const origin = new URL(request.url).origin;
 
   try {
-    const invitation = await createGroupInvitation({
+    const notificationConfig = readNotificationConfig();
+    let invitation = await createGroupInvitation({
       repo: parsed.data.repo.trim(),
       email: parsed.data.email,
       role: parsed.data.role,
@@ -82,7 +90,23 @@ export async function POST(request: Request) {
       cookie: getAuthForwardCookie(headerList.get("cookie")),
       origin,
       acceptLanguage: headerList.get("accept-language"),
+      enqueueNotification: !notificationConfig.emailDisabled,
     });
+    if (invitation.notification?.status === "queued") {
+      try {
+        const processed = await createInvitationRuntime().process(
+          invitation.notification.outboxId,
+          new Date(invocationStartedAt + USABLE_INVOCATION_MS),
+        );
+        invitation = {
+          ...invitation,
+          notification: invitationNotificationAfterProcess(invitation.notification, processed),
+        };
+      } catch {
+        // The invitation and queued notification are already durable. Recovery
+        // can retry without exposing provider or configuration details.
+      }
+    }
     return Response.json({ invitation }, { headers: { "cache-control": "no-store" } });
   } catch (error) {
     return jsonError(error, "Could not create invitation.", 502);

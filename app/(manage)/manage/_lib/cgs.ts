@@ -39,6 +39,13 @@ export type CgsPendingInvitation = {
   role: "member" | "admin";
   status: "pending" | "accepted" | "canceled" | "expired";
   createdAt?: string | null;
+  notification?: {
+    outboxId: string;
+    status: "waiting_recipient" | "queued" | "processing" | "sent" | "suppressed" | "dead";
+    retryable: boolean;
+    errorCode?: string;
+    nextAttemptAt?: string;
+  } | null;
 };
 
 export type RegisterCgsGroupResponse = {
@@ -187,6 +194,16 @@ export async function cancelCgsInvitation(invitationId: string) {
     method: "DELETE",
   });
   return parseJsonResponse<{ invitation: CgsPendingInvitation }>(res, "Could not remove invitation.");
+}
+
+export async function retryCgsInvitationEmail(invitationId: string) {
+  const res = await fetch(`/api/cgs/invitations/${encodeURIComponent(invitationId)}/retry`, {
+    method: "POST",
+  });
+  return parseJsonResponse<{ notification: NonNullable<CgsPendingInvitation["notification"]> }>(
+    res,
+    "Could not try the invitation email again.",
+  );
 }
 
 export async function removeCgsMember(repo: string, memberDid: string) {
