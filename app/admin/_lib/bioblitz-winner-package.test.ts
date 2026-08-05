@@ -8,6 +8,7 @@ import {
   extensionForImageContentType,
   isPublicAddress,
   winnerPackageFilename,
+  winnerPackageFolderName,
 } from "./bioblitz-winner-package";
 
 const OBSERVATION = {
@@ -21,7 +22,9 @@ const OBSERVATION = {
 } as OccurrenceRecord;
 
 describe("BioBlitz winner packages", () => {
-  it("uses clear, marketing-ready archive filenames", () => {
+  it("uses clear, marketing-ready archive filenames and root folders", () => {
+    expect(winnerPackageFolderName(12, "most-observations")).toBe("Round 12 Most Observations Winner");
+    expect(winnerPackageFolderName(12, "best-picture")).toBe("Round 12 Best Picture Winner");
     expect(winnerPackageFilename(12, "most-observations")).toBe("Round 12 Most Observations Winner.zip");
     expect(winnerPackageFilename(12, "best-picture")).toBe("Round 12 Best Picture Winner.zip");
   });

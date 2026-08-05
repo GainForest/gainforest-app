@@ -83,9 +83,13 @@ export type BioblitzWinnerPackage = {
   body: Blob;
 };
 
-export function winnerPackageFilename(roundId: number, prize: BioblitzWinnerPrize): string {
+export function winnerPackageFolderName(roundId: number, prize: BioblitzWinnerPrize): string {
   const category = prize === "most-observations" ? "Most Observations" : "Best Picture";
-  return `Round ${roundId} ${category} Winner.zip`;
+  return `Round ${roundId} ${category} Winner`;
+}
+
+export function winnerPackageFilename(roundId: number, prize: BioblitzWinnerPrize): string {
+  return `${winnerPackageFolderName(roundId, prize)}.zip`;
 }
 
 export function extensionForImageContentType(contentType: string | null): string | null {
@@ -119,6 +123,7 @@ export async function createBioblitzWinnerPackage(
 
   try {
     configure(ZIP_OPTIONS);
+    const rootFolder = winnerPackageFolderName(round.id, prize);
     const writer = new ZipWriter(new BlobWriter("application/zip"), ZIP_OPTIONS);
     const included: IncludedObservation[] = [];
     const skipped: string[] = [];
@@ -128,7 +133,7 @@ export async function createBioblitzWinnerPackage(
     const profile = await fetchPdsImage(pdsTarget, winner.did, winner.avatarRef, MAX_ASSET_BYTES);
     if (profile && profile.bytes.byteLength <= MAX_TOTAL_ASSET_BYTES) {
       profileFilename = `profile.${profile.extension}`;
-      await writer.add(profileFilename, new Uint8ArrayReader(profile.bytes), ZIP_OPTIONS);
+      await writer.add(`${rootFolder}/${profileFilename}`, new Uint8ArrayReader(profile.bytes), ZIP_OPTIONS);
       totalBytes += profile.bytes.byteLength;
     }
 
@@ -150,7 +155,7 @@ export async function createBioblitzWinnerPackage(
       }
 
       const filename = `observations/${String(included.length + 1).padStart(2, "0")}.${asset.extension}`;
-      await writer.add(filename, new Uint8ArrayReader(asset.bytes), ZIP_OPTIONS);
+      await writer.add(`${rootFolder}/${filename}`, new Uint8ArrayReader(asset.bytes), ZIP_OPTIONS);
       totalBytes += asset.bytes.byteLength;
       included.push({ ...rankedObservation, filename });
     }
@@ -163,7 +168,7 @@ export async function createBioblitzWinnerPackage(
       observations: included,
       skipped,
     });
-    await writer.add("info.md", new TextReader(info), ZIP_OPTIONS);
+    await writer.add(`${rootFolder}/info.md`, new TextReader(info), ZIP_OPTIONS);
     return {
       filename: winnerPackageFilename(round.id, prize),
       body: (await writer.close()) as Blob,
