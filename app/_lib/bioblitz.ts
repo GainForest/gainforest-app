@@ -22,6 +22,7 @@ import {
   fetchHiddenRecordUris,
   fetchPublicHiddenAccountDids,
   indexerQuery,
+  indexerQueryStrict,
   walkOccurrences,
   type OccurrenceRecord,
 } from "./indexer";
@@ -53,6 +54,8 @@ export type RoundWinner = {
   did: string;
   /** Final observation count, when relevant (the "most observations" prize). */
   count?: number;
+  /** Exact winning observation, when relevant (the "best picture" prize). */
+  winningObservationUri?: string;
 };
 
 export type BioblitzRound = {
@@ -309,7 +312,7 @@ export function isWithinRoundUploadWindow(
 /** A collector on the round board, with everything the UI needs to render a
  *  row without a second lookup (name + avatar come from the indexer; the DID is
  *  only used internally to resolve a richer profile/avatar). */
-type RoundCollector = {
+export type RoundCollector = {
   did: string;
   count: number;
   displayName: string | null;
@@ -323,6 +326,11 @@ export type RoundImageCounts = Record<BioblitzImageCategory, number> & {
 
 export type RoundBoard = {
   collectors: RoundCollector[];
+  /**
+   * Present only for administrative reads that need to show a contributor's
+   * eligible observation count before weekly leaderboard exclusions apply.
+   */
+  unfilteredCollectors?: RoundCollector[];
   /** Total eligible wildlife + outdoor plant observations. */
   totalObservations: number;
   /** Breakdown of automatically classified image observations. */
@@ -387,6 +395,11 @@ const PAGE_SIZE = 1000;
  *  contributed to the challenge so far. */
 export type BoardScope = "round" | "all";
 
+type FetchRoundCollectorsOptions = {
+  /** Keep a second tally before round-specific exclusion records are applied. */
+  includeExcluded?: boolean;
+};
+
 /**
  * Tally the collectors who uploaded photo observations.
  *
@@ -400,6 +413,7 @@ export async function fetchRoundCollectors(
   scope: BoardScope = "round",
   signal?: AbortSignal,
   exclusionRead: "best-effort" | "required" = "best-effort",
+  options?: FetchRoundCollectorsOptions,
 ): Promise<RoundBoard> {
   const startMs = scope === "all" ? Number.NEGATIVE_INFINITY : Date.parse(round.start);
   const endMs = scope === "all" ? Number.POSITIVE_INFINITY : Date.parse(round.end);
@@ -426,6 +440,7 @@ export async function fetchRoundCollectors(
   const exclusions = indexBioblitzExclusions(exclusionRecords);
 
   const tally = new Map<string, RoundCollector>();
+  const unfilteredTally = options?.includeExcluded ? new Map<string, RoundCollector>() : null;
   const imageCounts: RoundImageCounts = {
     wildlife: 0,
     plant: 0,
@@ -473,13 +488,16 @@ export async function fetchRoundCollectors(
       const t = Date.parse(n.createdAt ?? "");
       if (!Number.isFinite(t) || t < startMs || t > endMs) continue;
       const observationRoundId = scope === "round" ? round.id : bioblitzRoundIdAt(t);
-      if (isAccountExcludedFromBioblitzRound(exclusions, did, observationRoundId)) continue;
+      const excluded = isAccountExcludedFromBioblitzRound(exclusions, did, observationRoundId);
       // Backdating guard: skip records actually published well after the round.
       if (scope === "round" && !isWithinRoundUploadWindow(n.rkey, endMs)) continue;
 
       const imageRef = normaliseRef(n.imageEvidence?.file?.ref);
       if (!imageRef) {
-        imageCounts.missingPhoto += 1;
+        // Keep the public board exactly as it was: ignored accounts do not
+        // influence any leaderboard metric. The optional admin tally only
+        // needs eligible, image-backed observations.
+        if (!excluded) imageCounts.missingPhoto += 1;
         continue;
       }
       const category = classifyBioblitzImage({
@@ -488,38 +506,51 @@ export async function fetchRoundCollectors(
         vernacularName: n.vernacularName,
         kingdom: n.kingdom,
       });
-      imageCounts[category] += 1;
+      if (!excluded) imageCounts[category] += 1;
       if (!isEligibleBioblitzCategory(category)) continue;
+
+      if (unfilteredTally) incrementRoundCollector(unfilteredTally, did, n);
+      if (excluded) continue;
+
       total += 1;
-      const existing = tally.get(did);
-      if (existing) {
-        existing.count += 1;
-        if (!existing.displayName) existing.displayName = profileName(n);
-        if (!existing.avatarRef) existing.avatarRef = profileAvatarRef(n);
-      } else {
-        tally.set(did, {
-          did,
-          count: 1,
-          displayName: profileName(n),
-          avatarRef: profileAvatarRef(n),
-        });
-      }
+      incrementRoundCollector(tally, did, n);
     }
 
     if (!conn?.pageInfo?.hasNextPage || !conn.pageInfo.endCursor) break;
     after = conn.pageInfo.endCursor;
   }
 
-  const collectors = [...tally.values()].sort(
-    (a, b) => b.count - a.count || (a.displayName ?? "").localeCompare(b.displayName ?? ""),
-  );
+  const collectors = sortRoundCollectors(tally);
 
   return {
     collectors,
+    ...(unfilteredTally ? { unfilteredCollectors: sortRoundCollectors(unfilteredTally) } : {}),
     totalObservations: total,
     imageCounts,
     collectorCount: collectors.length,
   };
+}
+
+function incrementRoundCollector(tally: Map<string, RoundCollector>, did: string, node: RawNode): void {
+  const existing = tally.get(did);
+  if (existing) {
+    existing.count += 1;
+    if (!existing.displayName) existing.displayName = profileName(node);
+    if (!existing.avatarRef) existing.avatarRef = profileAvatarRef(node);
+    return;
+  }
+  tally.set(did, {
+    did,
+    count: 1,
+    displayName: profileName(node),
+    avatarRef: profileAvatarRef(node),
+  });
+}
+
+function sortRoundCollectors(tally: Map<string, RoundCollector>): RoundCollector[] {
+  return [...tally.values()].sort(
+    (a, b) => b.count - a.count || (a.displayName ?? "").localeCompare(b.displayName ?? ""),
+  );
 }
 
 // ── Round observations (for the map) ─────────────────────────────────────────
@@ -912,6 +943,9 @@ type BioblitzRegistrantsResponse = {
   } | null;
 };
 
+const MAX_BIOBLITZ_REGISTRANT_PAGES = 25;
+const REGISTRANT_AVATAR_CONCURRENCY = 8;
+
 const REGISTRANTS_QUERY = `
   query BioblitzRegistrants($first: Int!, $after: String, $tag: String!) {
     appGainforestFeedPost(
@@ -938,23 +972,49 @@ const REGISTRANTS_QUERY = `
 /**
  * Every account that registered for the BioBlitz (published a join post),
  * newest first, de-duplicated to one row per account. Scans the program-wide
- * `bioblitz` tag so it covers all rounds. Returns an empty list on any error.
+ * `bioblitz` tag so it covers all rounds. It fails rather than silently showing
+ * an incomplete roster if the bounded scan is exceeded.
  */
-export async function fetchBioblitzRegistrants(signal?: AbortSignal): Promise<BioblitzRegistrant[]> {
+export function fetchBioblitzRegistrants(signal?: AbortSignal): Promise<BioblitzRegistrant[]> {
+  return fetchBioblitzRegistrantsForTag(BIOBLITZ_TAG, signal);
+}
+
+/** Registrants who explicitly joined one BioBlitz round. */
+export function fetchBioblitzRoundRegistrants(
+  round: BioblitzRound,
+  signal?: AbortSignal,
+): Promise<BioblitzRegistrant[]> {
+  return fetchBioblitzRegistrantsForTag(bioblitzRoundTag(round), signal);
+}
+
+async function fetchBioblitzRegistrantsForTag(
+  tag: string,
+  signal?: AbortSignal,
+): Promise<BioblitzRegistrant[]> {
   const nodes: RawRegistrantNode[] = [];
+  const seenCursors = new Set<string>();
   let after: string | null = null;
 
-  for (let page = 0; page < 10; page += 1) {
-    const data: BioblitzRegistrantsResponse | null = await indexerQuery<BioblitzRegistrantsResponse>(
+  for (let page = 0; page < MAX_BIOBLITZ_REGISTRANT_PAGES; page += 1) {
+    const data: BioblitzRegistrantsResponse | null = await indexerQueryStrict<BioblitzRegistrantsResponse>(
       REGISTRANTS_QUERY,
-      { first: 100, after, tag: BIOBLITZ_TAG },
+      { first: 100, after, tag },
       signal,
-    ).catch(() => null);
-
+    );
     const connection: BioblitzRegistrantsResponse["appGainforestFeedPost"] = data?.appGainforestFeedPost;
-    nodes.push(...((connection?.edges ?? []).flatMap((edge: { node?: RawRegistrantNode | null } | null) => (edge?.node ? [edge.node] : []))));
-    after = connection?.pageInfo?.hasNextPage ? connection.pageInfo.endCursor ?? null : null;
-    if (!after) break;
+    if (!connection) throw new Error("Could not load BioBlitz registrations.");
+
+    nodes.push(...((connection.edges ?? []).flatMap((edge: { node?: RawRegistrantNode | null } | null) => (edge?.node ? [edge.node] : []))));
+    if (!connection.pageInfo?.hasNextPage) break;
+    const nextCursor: string | null = connection.pageInfo.endCursor ?? null;
+    if (!nextCursor || seenCursors.has(nextCursor)) {
+      throw new Error("Could not finish loading BioBlitz registrations.");
+    }
+    if (page === MAX_BIOBLITZ_REGISTRANT_PAGES - 1) {
+      throw new Error("This BioBlitz roster is too large to load safely.");
+    }
+    seenCursors.add(nextCursor);
+    after = nextCursor;
   }
 
   const seen = new Set<string>();
@@ -966,16 +1026,22 @@ export async function fetchBioblitzRegistrants(signal?: AbortSignal): Promise<Bi
     deduped.push(node);
   }
 
-  return Promise.all(
-    deduped.map(async (node): Promise<BioblitzRegistrant> => {
+  const registrants: BioblitzRegistrant[] = new Array(deduped.length);
+  let cursor = 0;
+  const workers = Array.from({ length: Math.min(REGISTRANT_AVATAR_CONCURRENCY, deduped.length) }, async () => {
+    while (cursor < deduped.length) {
+      const index = cursor++;
+      const node = deduped[index]!;
       const did = node.did!.trim();
       const ref = node.certifiedProfileData?.avatar?.image?.ref ?? null;
-      return {
+      registrants[index] = {
         did,
         displayName: node.certifiedProfileData?.displayName?.trim() || null,
         avatarUrl: ref ? await resolveBlobUrl(did, ref).catch(() => null) : null,
         createdAt: node.createdAt ?? "",
       };
-    }),
-  );
+    }
+  });
+  await Promise.all(workers);
+  return registrants;
 }

@@ -1292,11 +1292,6 @@
       "description": "Cuentas que solicitaron la subvención de Resilvestrar la web. Abre un perfil para otorgar la insignia de la subvención.",
       "empty": "Nadie ha solicitado la subvención todavía."
     },
-    "bioblitz": {
-      "title": "Inscritos en BioBlitz",
-      "description": "Cuentas que se inscribieron en el BioBlitz. Abre un perfil para otorgar una insignia de ganador.",
-      "empty": "Nadie se ha inscrito en el BioBlitz todavía."
-    },
     "page": {
       "title": "Administración",
       "subtitle": "Revisa solicitantes de subvenciones y eventos, gestiona cuentas marcadas y supervisa los agentes Tainá."
@@ -1332,6 +1327,46 @@
       "finalized": "Esta ronda de BioBlitz ha finalizado, por lo que el conteo ya no puede cambiar.",
       "add": "No se pudo guardar el cambio de conteo semanal. Inténtalo de nuevo.",
       "remove": "No se pudo restaurar la cuenta en la clasificación. Inténtalo de nuevo."
+    }
+  },
+  "adminBioblitzDashboard": {
+    "roundsAria": "Rondas de BioBlitz",
+    "round": "Ronda {round}",
+    "status": {
+      "upcoming": "Próxima",
+      "live": "En curso",
+      "ended": "Finalizada"
+    },
+    "observations": "{count, plural, one {# observación} other {# observaciones}}",
+    "ignored": "Ignorada",
+    "counted": "Cuenta",
+    "notCounted": "No cuenta",
+    "prize": {
+      "most-observations": "Más observaciones",
+      "best-picture": "Mejor foto"
+    },
+    "openProfile": "Abrir perfil",
+    "joined": "Se unió el {date}",
+    "download": {
+      "most-observations": "Kit de más observaciones",
+      "best-picture": "Kit de mejor foto"
+    },
+    "ignore": "Ignorar",
+    "countAgain": "Volver a contar",
+    "loading": "Cargando inscritos de BioBlitz",
+    "empty": "No hay inscritos",
+    "loadError": "No se pudo cargar esta ronda.",
+    "unnamed": "Cuenta sin nombre",
+    "errors": {
+      "notSignedIn": "Vuelve a iniciar sesión para continuar.",
+      "forbidden": "No tienes acceso a este panel de BioBlitz.",
+      "finalized": "Esta ronda ha finalizado, por lo que el conteo no puede cambiar.",
+      "roundNotFound": "Esa ronda de BioBlitz no está disponible.",
+      "winnerNotFound": "El kit de este ganador aún no está disponible.",
+      "ignore": "No se pudo guardar el cambio de conteo. Inténtalo de nuevo.",
+      "restore": "No se pudo restaurar el conteo. Inténtalo de nuevo.",
+      "download": "No se pudo preparar el kit del ganador. Inténtalo de nuevo.",
+      "load": "No se pudo cargar esta ronda. Inténtalo de nuevo."
     }
   },
   "adminBlockedDomains": {

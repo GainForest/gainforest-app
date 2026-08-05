@@ -29,10 +29,11 @@ import { hasMaEarthDonationUrl } from "./maearth-donation-data";
 
 type GqlResponse<T> = { data?: T | null; errors?: Array<{ message: string }> };
 
-export async function indexerQuery<T>(
+async function queryIndexer<T>(
   query: string,
   variables: Record<string, unknown>,
-  signal?: AbortSignal,
+  signal: AbortSignal | undefined,
+  rejectPartialErrors: boolean,
 ): Promise<T | null> {
   const res = await fetch(INDEXER_URL, {
     method: "POST",
@@ -49,10 +50,28 @@ export async function indexerQuery<T>(
   } catch {
     throw new Error(`indexer ${res.status}: non-JSON response`);
   }
-  if (json.errors?.length && !json.data) {
+  if (json.errors?.length && (rejectPartialErrors || !json.data)) {
     throw new Error(json.errors[0]?.message ?? "indexer graphql error");
   }
   return json.data ?? null;
+}
+
+/** Best-effort indexer read that permits usable partial GraphQL data. */
+export function indexerQuery<T>(
+  query: string,
+  variables: Record<string, unknown>,
+  signal?: AbortSignal,
+): Promise<T | null> {
+  return queryIndexer(query, variables, signal, false);
+}
+
+/** All-or-fail indexer read for workflows where a missing edge is unsafe. */
+export function indexerQueryStrict<T>(
+  query: string,
+  variables: Record<string, unknown>,
+  signal?: AbortSignal,
+): Promise<T | null> {
+  return queryIndexer(query, variables, signal, true);
 }
 
 type PageInfo = { hasNextPage: boolean; endCursor: string | null };
@@ -6791,6 +6810,26 @@ export type RecordKind = ExplorerRecord["kind"];
 // indexer's `*ByUri` field and reuse the same mappers + per-record image
 // resolution as the list fetchers. The collection in the URI selects the query.
 
+/**
+ * Read one occurrence from the indexer without resolving its media URL. Server
+ * consumers that fetch a blob themselves can use this to avoid an unpinned
+ * second PDS request.
+ */
+export async function fetchOccurrenceByUri(
+  atUri: string,
+  signal?: AbortSignal,
+): Promise<OccurrenceRecord | null> {
+  const match = atUri.match(/^at:\/\/([^/]+)\/([^/]+)\/(.+)$/);
+  if (!match || match[2] !== "app.gainforest.dwc.occurrence") return null;
+  const data = await indexerQuery<{ appGainforestDwcOccurrenceByUri?: RawOccurrence | null }>(
+    OCCURRENCE_BY_URI_QUERY,
+    { uri: atUri },
+    signal,
+  );
+  const node = data?.appGainforestDwcOccurrenceByUri;
+  return node?.did ? mapOccurrence(node) : null;
+}
+
 export async function fetchRecordByUri(
   atUri: string,
   signal?: AbortSignal,
@@ -6800,18 +6839,11 @@ export async function fetchRecordByUri(
   const collection = m[2];
 
   if (collection === "app.gainforest.dwc.occurrence") {
-    const data = await indexerQuery<{ appGainforestDwcOccurrenceByUri?: RawOccurrence | null }>(
-      OCCURRENCE_BY_URI_QUERY,
-      { uri: atUri },
-      signal,
-    );
-    const n = data?.appGainforestDwcOccurrenceByUri;
-    if (!n?.did) return null;
-    const rec = mapOccurrence(n);
-    const ref = n.imageEvidence?.file?.ref ?? n.spectrogramEvidence?.file?.ref ?? null;
-    if (ref) {
+    const rec = await fetchOccurrenceByUri(atUri, signal);
+    if (!rec) return null;
+    if (rec.imageRef) {
       try {
-        rec.imageUrl = await resolveBlobUrl(rec.did, ref, signal);
+        rec.imageUrl = await resolveBlobUrl(rec.did, rec.imageRef, signal);
       } catch {
         /* keep placeholder */
       }

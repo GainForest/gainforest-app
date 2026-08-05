@@ -59,6 +59,10 @@ export type InternalBadgeData = {
   pendingAwards: PendingBadgeAwardRecord[];
 };
 
+/** Source-of-truth data used by mutations. Pending awards are intentionally
+ * omitted because this reader never loads their collection. */
+export type StrictInternalBadgeData = Omit<InternalBadgeData, "pendingAwards">;
+
 type ListedRecord = {
   uri?: unknown;
   cid?: unknown;
@@ -385,11 +389,20 @@ async function fetchIndexedBadgeRecords(repoDid: string, includeAwards: boolean)
   return { definitions, awards };
 }
 
-async function fetchDirectBadgeRecords(repoDid: string, includeAwards: boolean): Promise<{ definitions: BadgeDefinitionRecord[]; awards: BadgeAwardRecord[] }> {
-  const [definitionEntries, awardEntries] = await Promise.all([
-    listCollection(repoDid, BADGE_DEFINITION_COLLECTION).catch(() => []),
-    includeAwards ? listCollection(repoDid, BADGE_AWARD_COLLECTION).catch(() => []) : Promise.resolve([]),
-  ]);
+async function fetchDirectBadgeRecords(
+  repoDid: string,
+  includeAwards: boolean,
+  strict = false,
+): Promise<{ definitions: BadgeDefinitionRecord[]; awards: BadgeAwardRecord[] }> {
+  const [definitionEntries, awardEntries] = strict
+    ? await Promise.all([
+      listCollection(repoDid, BADGE_DEFINITION_COLLECTION),
+      includeAwards ? listCollection(repoDid, BADGE_AWARD_COLLECTION) : Promise.resolve([]),
+    ])
+    : await Promise.all([
+      listCollection(repoDid, BADGE_DEFINITION_COLLECTION).catch(() => []),
+      includeAwards ? listCollection(repoDid, BADGE_AWARD_COLLECTION).catch(() => []) : Promise.resolve([]),
+    ]);
 
   const definitions = uniqueByUri((await Promise.all(definitionEntries.map((entry) => normalizeDefinition(repoDid, entry))))
     .filter((entry): entry is BadgeDefinitionRecord => Boolean(entry)))
@@ -417,6 +430,25 @@ function mergeByUri<T extends { uri: string }>(preferred: T[], fallback: T[]): T
   const dedupedPreferred = uniqueByUri(preferred);
   const seen = new Set(dedupedPreferred.map((entry) => entry.uri));
   return [...dedupedPreferred, ...fallback.filter((entry) => !seen.has(entry.uri))];
+}
+
+/**
+ * Read the source of truth immediately before a badge mutation. Unlike the
+ * dashboard reader below, this deliberately never turns a failed PDS read into
+ * an empty list: writing a duplicate award is worse than asking a steward to
+ * retry.
+ */
+export async function fetchInternalBadgeDataStrict(
+  repoDid: string,
+  options: { includeAwards?: boolean } = {},
+): Promise<StrictInternalBadgeData> {
+  const includeAwards = options.includeAwards ?? true;
+  const direct = await fetchDirectBadgeRecords(repoDid, includeAwards, true);
+  return {
+    repoDid,
+    definitions: direct.definitions,
+    awards: direct.awards,
+  };
 }
 
 export async function fetchInternalBadgeData(repoDid: string, options: { includeAwards?: boolean } = {}): Promise<InternalBadgeData> {

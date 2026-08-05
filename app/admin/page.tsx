@@ -8,13 +8,14 @@ import { getGainForestModeratorAccess, getInternalBadgeAccess } from "@/app/inte
 import { fetchFlaggedTestAccounts } from "@/app/internal/badges/_lib/test-accounts";
 import { fetchFlaggedTestRecords } from "@/app/internal/badges/_lib/test-records";
 import { fetchGrantApplicants } from "@/app/_lib/grants";
-import { bioblitzRounds, endedRounds, featuredRound, fetchBioblitzRegistrants } from "@/app/_lib/bioblitz";
+import { bioblitzRounds } from "@/app/_lib/bioblitz";
 import { fetchTainaAdminResidents } from "@/app/_lib/taina-agent";
 import { hasStoredAgentKey, isDataJobsConfigured, listAllJobs, toPublicJob } from "@/app/_lib/data-jobs";
 import { fetchIndexedCertifiedProfileCards } from "@/app/_lib/indexer";
 import { BUILTIN_ENDORSERS, fetchEndorserRecords } from "@/app/_lib/endorsers";
 import { fetchEndorsementAwarding, type AwardEndorsementsData } from "./_lib/award-endorsements";
 import { fetchFacilitatorStats, type FacilitatorStats } from "./_lib/facilitator-stats";
+import { loadBioblitzAdminRound } from "./_lib/bioblitz-dashboard";
 import { fetchBioblitzExclusionRows } from "@/app/internal/badges/_lib/bioblitz-exclusion-mutations";
 import {
   fetchBlockedDomainRows,
@@ -123,15 +124,14 @@ export default async function AdminPage({
 
   const t = await getTranslations("common.adminModeration");
   const now = Date.now();
-  const adminBioblitzRounds = bioblitzRounds(now, 1);
-  const defaultBioblitzRoundId = featuredRound(now).id;
-  const finalizedBioblitzRoundIds = endedRounds(now).map((round) => round.id);
+  const adminBioblitzRounds = bioblitzRounds(now, 0);
+  const defaultBioblitzRoundId = adminBioblitzRounds.at(-1)?.id ?? 1;
   const [
     { tab },
     testAccounts,
     testRecords,
     grantApplicants,
-    bioblitzRegistrants,
+    initialBioblitzData,
     bioblitzExclusions,
     builtinBlockedDomains,
     blockedDomains,
@@ -145,7 +145,7 @@ export default async function AdminPage({
     fetchFlaggedTestAccounts().catch(() => []),
     moderator.repoDid ? fetchFlaggedTestRecords(moderator.repoDid).catch(() => []) : Promise.resolve([]),
     fetchGrantApplicants().catch(() => []),
-    fetchBioblitzRegistrants().catch(() => []),
+    loadBioblitzAdminRound(defaultBioblitzRoundId, now, moderator.repoDid).catch(() => null),
     fetchBioblitzExclusionRows().catch(() => null),
     fetchBuiltinBlockedDomainRows().catch(() => []),
     fetchBlockedDomainRows().catch(() => null),
@@ -173,12 +173,12 @@ export default async function AdminPage({
         testAccounts={testAccounts}
         testRecords={testRecords}
         grantApplicants={grantApplicants}
-        bioblitzRegistrants={bioblitzRegistrants}
+        bioblitzRegistrantCount={initialBioblitzData?.registrants.length ?? 0}
+        initialBioblitzData={initialBioblitzData}
         bioblitzExclusions={bioblitzExclusions}
-        finalizedBioblitzRoundIds={finalizedBioblitzRoundIds}
         bioblitzRounds={adminBioblitzRounds}
         defaultBioblitzRoundId={defaultBioblitzRoundId}
-        canManageBioblitzExclusions={moderator.isModerator}
+        canManageBioblitz={moderator.isModerator}
         builtinBlockedDomains={builtinBlockedDomains}
         blockedDomains={blockedDomains}
         canManageBlockedDomains={moderator.isModerator}
