@@ -9,6 +9,7 @@
     "build": "next build",
     "check:i18n": "node scripts/check-i18n-untranslated.mjs",
     "test:unit": "vitest run",
+    "test:db": "bash scripts/test-notification-outbox-db.sh",
     "start": "next start --port 3040",
     "test:e2e": "playwright test",
     "test:e2e:headed": "playwright test --headed",
