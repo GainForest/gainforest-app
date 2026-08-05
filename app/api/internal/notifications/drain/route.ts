@@ -39,8 +39,10 @@ export async function GET(request: NextRequest) {
     } catch {
       reconciliation = { candidates: 0, completed: false };
     }
-    const result = await createDrainRuntime().drain(new Date(invocationStartedAt + USABLE_INVOCATION_MS));
-    return NextResponse.json({ ...result, reconciliation });
+    const runtime = createDrainRuntime();
+    const result = await runtime.drain(new Date(invocationStartedAt + USABLE_INVOCATION_MS));
+    const health = result.kind === "disabled" ? null : await runtime.health();
+    return NextResponse.json({ ...result, reconciliation, health });
   } catch {
     return NextResponse.json({ error: "Notification recovery could not complete. Retry the scheduled request." }, { status: 503 });
   }
