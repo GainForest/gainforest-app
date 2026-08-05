@@ -30,3 +30,7 @@ The first registered experience lives at `/_test/donation-flow` and stages the r
 ## Invitation delivery experience
 
 `/_test/invitation-delivery` renders the production `PendingInvitationRow` for sent, delayed, manual-link, and role-restricted states. Its retry, copy, and cancel callbacks update fixture state only; the route never calls invitation, notification, clipboard, or membership APIs.
+
+## BioBlitz notification experience
+
+`/_test/bioblitz-notifications` renders the production moderator status row for sent, delayed, missing-email, lookup-failure, and setup-failure states. **Mark handled manually** updates fixture state only; it never reads awards, writes the outbox, or contacts a winner.

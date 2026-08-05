@@ -8,7 +8,7 @@ The notification outbox durably coordinates email delivery. The application writ
 
 This baseline was canonicalized before any migration-runner deployment. The existing non-production database was configured through SQL Editor, which does not add versions to `supabase_migrations.schema_migrations`. Do not rewrite this baseline after its version has been recorded. An environment that has recorded an older form must be reset or have its migration history explicitly repaired before using this migration tree.
 
-The foundation table has 34 columns, grouped by responsibility:
+The table has 36 columns, grouped by responsibility:
 
 | Responsibility | Columns |
 | --- | --- |
@@ -17,7 +17,7 @@ The foundation table has 34 columns, grouped by responsibility:
 | Frozen provider request | `frozen_from`, `frozen_to`, `frozen_subject`, `frozen_html`, `frozen_text` |
 | Queue scheduling and lease ownership | `status`, `next_attempt_at`, `processing_run_count`, `provider_attempt_count`, `locked_until`, `processing_token`, `claimed_from_status` |
 | Provider result and ambiguity safety | `provider_call_phase`, `provider_call_is_ambiguous_retry`, `provider_id`, `provider_idempotency_key`, `provider_idempotency_expires_at` |
-| Diagnostics and manual retry | `last_error_code`, `last_error_summary`, `last_manual_retry_at`, `manual_retry_count` |
+| Diagnostics and operator actions | `last_error_code`, `last_error_summary`, `last_manual_retry_at`, `manual_retry_count`, `manual_handled_at`, `manual_handled_by` |
 | Lifecycle | `terminal_at`, `created_at`, `updated_at` |
 
 ## State markers
@@ -36,6 +36,7 @@ There is intentionally no `delivery_mode`, `frozen_at`, `redacted_at`, `provider
 - `processing_run_count` increments whenever a worker successfully claims the row.
 - `provider_attempt_count` increments only when `notification_outbox_begin_provider_call` starts a provider transmission.
 - `manual_retry_count` and `last_manual_retry_at` support operator-initiated invitation retries and their cooldown.
+- `manual_handled_at` and `manual_handled_by` audit when a moderator replaces automatic BioBlitz delivery with manual follow-up.
 
 ## Mutation boundary
 

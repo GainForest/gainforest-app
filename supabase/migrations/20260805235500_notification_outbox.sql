@@ -65,6 +65,8 @@ create table public.notification_outbox (
   last_error_summary text,
   last_manual_retry_at timestamptz,
   manual_retry_count integer not null default 0,
+  manual_handled_at timestamptz,
+  manual_handled_by text,
 
   -- Terminal and audit timestamps.
   terminal_at timestamptz,
@@ -79,6 +81,10 @@ create table public.notification_outbox (
   constraint notification_outbox_processing_run_count_check check (processing_run_count >= 0),
   constraint notification_outbox_provider_attempt_count_check check (provider_attempt_count >= 0),
   constraint notification_outbox_manual_retry_count_check check (manual_retry_count >= 0),
+  constraint notification_outbox_manual_handling_check check (
+    (manual_handled_at is null and manual_handled_by is null) or
+    (manual_handled_at is not null and manual_handled_by is not null and status='suppressed' and length(manual_handled_by) between 5 and 256)
+  ),
   constraint notification_outbox_source_id_bound check (source_id is null or length(source_id) between 1 and 512),
   constraint notification_outbox_recipient_did_bound check (recipient_did is null or (length(recipient_did) between 5 and 256 and recipient_did like 'did:%')),
   constraint notification_outbox_recipient_email_format check (
@@ -160,6 +166,10 @@ comment on column public.notification_outbox.last_manual_retry_at is
   'Most recent operator-initiated retry time, used to enforce invitation retry cooldowns.';
 comment on column public.notification_outbox.manual_retry_count is
   'Number of operator-initiated invitation retries.';
+comment on column public.notification_outbox.manual_handled_at is
+  'Time a moderator replaced automatic BioBlitz email with manual follow-up.';
+comment on column public.notification_outbox.manual_handled_by is
+  'Moderator DID responsible for manual BioBlitz follow-up.';
 
 create unique index notification_outbox_event_key_unique on public.notification_outbox(event_key_hash);
 create unique index notification_outbox_provider_key_unique on public.notification_outbox(provider_idempotency_key)
@@ -569,7 +579,7 @@ begin
     select * into v from public.notification_outbox where event_key_hash=v_hash for update;
     if found then
       if v.event_type<>p_event_type then raise exception 'notification_outbox_idempotency_conflict: event type differs'; end if;
-      if v.status in ('waiting_recipient','queued') or (v.status='processing' and v.provider_call_phase='idle') then
+      if v.status in ('waiting_recipient','queued','dead') or (v.status='processing' and v.provider_call_phase='idle') then
         update public.notification_outbox set status='suppressed',terminal_at=clock_timestamp(),
           input_fingerprint_hash=null,payload=null,source_id=null,recipient_did=null,recipient_email=null,
           template_key=null,locale=null,frozen_from=null,frozen_to=null,frozen_subject=null,
@@ -725,6 +735,19 @@ begin
   return pg_catalog.jsonb_build_object('outbox_id',v.id,'status',v.status,'retryable',true,'next_attempt_at',v.next_attempt_at);
 end $$;
 
+create function public.notification_bioblitz_mark_handled(p_event_key text,p_moderator_did text)
+returns jsonb language plpgsql security definer set search_path='' as $$
+declare v record;
+begin
+  if p_event_key is null or p_event_key not like 'bioblitz:%' or length(p_event_key)>512 then raise exception 'invalid BioBlitz event key'; end if;
+  if p_moderator_did is null or p_moderator_did not like 'did:%' or length(p_moderator_did)>256 then raise exception 'invalid moderator identity'; end if;
+  select * into v from public.notification_outbox_suppress_event(p_event_key,'bioblitz_winner');
+  if v.status='sent' then raise exception 'bioblitz_notification_already_sent'; end if;
+  if v.status<>'suppressed' then raise exception 'bioblitz_notification_not_safely_suppressible'; end if;
+  update public.notification_outbox set manual_handled_at=coalesce(manual_handled_at,clock_timestamp()),manual_handled_by=coalesce(manual_handled_by,p_moderator_did) where id=v.outbox_id;
+  return pg_catalog.jsonb_build_object('outbox_id',v.outbox_id,'status','suppressed','retryable',false,'handled_manually',true);
+end $$;
+
 create function public.notification_outbox_cleanup(p_batch_size integer)
 returns table(active_expired integer,redacted integer,deleted integer)
 language plpgsql security definer set search_path='' as $$
@@ -783,6 +806,7 @@ revoke all on function public.notification_outbox_suppress_event(text,text) from
 revoke all on function public.notification_invitation_create(uuid,text,text,text,text,text,text,text,text,text,text,text,text,boolean,timestamptz,timestamptz) from public,anon,authenticated;
 revoke all on function public.notification_invitation_close(uuid,text,text,text) from public,anon,authenticated;
 revoke all on function public.notification_invitation_retry(uuid) from public,anon,authenticated;
+revoke all on function public.notification_bioblitz_mark_handled(text,text) from public,anon,authenticated;
 revoke all on function public.notification_outbox_cleanup(integer) from public,anon,authenticated;
 
 grant execute on function public.notification_outbox_enqueue(text,text,jsonb,text,text,text,text,text,text,timestamptz) to service_role;
@@ -805,4 +829,5 @@ grant execute on function public.notification_outbox_suppress_event(text,text) t
 grant execute on function public.notification_invitation_create(uuid,text,text,text,text,text,text,text,text,text,text,text,text,boolean,timestamptz,timestamptz) to service_role;
 grant execute on function public.notification_invitation_close(uuid,text,text,text) to service_role;
 grant execute on function public.notification_invitation_retry(uuid) to service_role;
+grant execute on function public.notification_bioblitz_mark_handled(text,text) to service_role;
 grant execute on function public.notification_outbox_cleanup(integer) to service_role;
