@@ -70,6 +70,9 @@
     "signOut": "Keluar",
     "settings": "Pengaturan",
     "organizationRole": "Organisasi · {role}",
+    "roleOwner": "Pemilik",
+    "roleAdmin": "Administrator",
+    "roleMember": "Anggota",
     "switchAccount": "Ganti akun",
     "switchAccountHint": "Unggahan dan proyek baru disimpan ke akun yang Anda pilih di sini."
   },
@@ -707,7 +710,8 @@
     "emptyHeroDescription": "Dukung sebuah proyek dan kontribusi Anda akan muncul di sini, masing-masing tertaut ke proyek yang Anda dukung.",
     "emptyHeroCta": "Jelajahi proyek",
     "anonymousNote": "Donasi anonim juga muncul di sini, tetapi hanya Anda yang dapat melihatnya — donasi itu tidak pernah ditampilkan secara publik atas nama Anda. Beberapa donasi anonim lama tidak dapat ditampilkan.",
-    "anonymousBadge": "Hanya terlihat oleh Anda"
+    "anonymousBadge": "Hanya terlihat oleh Anda",
+    "messageQuote": "Pesan donor: “{message}”"
   },
   "accountProjects": {
     "emptyEyebrow": "Belum ada proyek",

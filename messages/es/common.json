@@ -70,6 +70,9 @@
     "signOut": "Cerrar sesión",
     "settings": "Configuración",
     "organizationRole": "Organización · {role}",
+    "roleOwner": "Propietario",
+    "roleAdmin": "Administrador",
+    "roleMember": "Miembro",
     "switchAccount": "Cambiar de cuenta",
     "switchAccountHint": "Las nuevas subidas y proyectos se guardan en la cuenta que elijas aquí."
   },
@@ -707,7 +710,8 @@
     "emptyHeroDescription": "Apoya un proyecto y tus contribuciones aparecerán aquí, cada una enlazada al proyecto que apoyaste.",
     "emptyHeroCta": "Explorar proyectos",
     "anonymousNote": "Las donaciones anónimas también aparecen aquí, pero solo tú puedes verlas — nunca se muestran públicamente con tu nombre. Algunas donaciones anónimas antiguas no se pueden mostrar.",
-    "anonymousBadge": "Solo visible para ti"
+    "anonymousBadge": "Solo visible para ti",
+    "messageQuote": "Mensaje del donante: «{message}»"
   },
   "accountProjects": {
     "emptyEyebrow": "Sin proyectos",

@@ -24,6 +24,7 @@ describe("recent funding receipt verification", () => {
         transactionId: `0x${"b".repeat(64)}`,
         paymentNetwork: "eip155:1",
         occurredAt: "2025-01-01T00:00:00.000Z",
+        notes: "  Thank you for protecting the forest.  ",
         for: { uri: "at://did:plc:forest/org.hypercerts.claim.activity/project" },
       },
     }));
@@ -38,16 +39,16 @@ describe("recent funding receipt verification", () => {
       amount: 42.5,
       from: { type: "did", id: "did:plc:alice" },
       bumicertUri: "at://did:plc:forest/org.hypercerts.claim.activity/project",
+      message: "Thank you for protecting the forest.",
     });
   });
 
   it("keeps valid recent receipts when another receipt lookup fails", async () => {
     vi.stubEnv("FACILITATOR_SERVICE_HOST", "https://pds.example.test");
     const secondUri = `at://${FACILITATOR_DID}/org.hypercerts.funding.receipt/${"c".repeat(64)}`;
-    let calls = 0;
-    vi.stubGlobal("fetch", vi.fn(async () => {
-      calls += 1;
-      if (calls === 2) return Response.json({ message: "not ready" }, { status: 503 });
+    vi.stubGlobal("fetch", vi.fn(async (input: string | URL | Request) => {
+      const rkey = new URL(String(input)).searchParams.get("rkey");
+      if (rkey === "c".repeat(64)) return Response.json({ message: "not ready" }, { status: 503 });
       return Response.json({
         uri: RECEIPT_URI,
         value: {
@@ -63,6 +64,23 @@ describe("recent funding receipt verification", () => {
     const result = await fetchRecentOwnedFundingReceipts("did:plc:alice", [RECEIPT_URI, secondUri]);
     expect(result.receipts).toHaveLength(1);
     expect(result.partial).toBe(true);
+  });
+
+  it("maps whitespace-only notes to null", async () => {
+    vi.stubEnv("FACILITATOR_SERVICE_HOST", "https://pds.example.test");
+    vi.stubGlobal("fetch", vi.fn(async () => Response.json({
+      uri: RECEIPT_URI,
+      value: {
+        from: { $type: "app.certified.defs#did", did: "did:plc:alice" },
+        amount: "42.5",
+        currency: "USDC",
+        notes: "  \n ",
+        for: { uri: "at://did:plc:forest/org.hypercerts.claim.activity/project" },
+      },
+    })));
+
+    const result = await fetchRecentOwnedFundingReceipts("did:plc:alice", [RECEIPT_URI]);
+    expect(result.receipts[0]?.message).toBeNull();
   });
 
   it("rejects receipts owned by another donor and ignores untrusted URIs", async () => {

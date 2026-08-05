@@ -70,6 +70,9 @@
     "signOut": "Sign out",
     "settings": "Settings",
     "organizationRole": "Organization · {role}",
+    "roleOwner": "Owner",
+    "roleAdmin": "Admin",
+    "roleMember": "Member",
     "switchAccount": "Switch account",
     "switchAccountHint": "New uploads and projects are saved to the account you choose here."
   },
@@ -707,7 +710,8 @@
     "emptyHeroDescription": "Support a project and your contributions show up here, each linked to the project you backed.",
     "emptyHeroCta": "Explore projects",
     "anonymousNote": "Anonymous donations appear here too, but only you can see them — they are never shown publicly under your name. Some older anonymous donations can’t be shown.",
-    "anonymousBadge": "Only visible to you"
+    "anonymousBadge": "Only visible to you",
+    "messageQuote": "Donor message: “{message}”"
   },
   "accountProjects": {
     "emptyEyebrow": "No projects",

@@ -544,8 +544,11 @@ function groupName(group: MenuGroup): string {
   return group.displayName?.trim() || "Organization account";
 }
 
-function roleLabel(role: CgsGroupMembership["role"]): string {
-  return role === "owner" ? "Owner" : role === "admin" ? "Admin" : "Member";
+function roleLabel(
+  role: CgsGroupMembership["role"],
+  t: ReturnType<typeof useTranslations<"common.auth">>,
+): string {
+  return role === "owner" ? t("roleOwner") : role === "admin" ? t("roleAdmin") : t("roleMember");
 }
 
 function AccountDot({
@@ -710,7 +713,7 @@ function AuthenticatedMenu({
   const displayLabel = showingGroup ? groupDisplayLabel : personalDisplayLabel;
   const secondaryLabel = showingGroup
     ? currentGroup
-      ? authT("organizationRole", { role: roleLabel(currentGroup.role) })
+      ? authT("organizationRole", { role: roleLabel(currentGroup.role, authT) })
       : "Organization"
     : personalSecondaryLabel;
   const triggerAvatarUrl = showingGroup ? currentGroup?.avatarUrl : personalCard?.avatarUrl;
@@ -772,7 +775,7 @@ function AuthenticatedMenu({
         label: groupName(group),
         // Spell out that this is an organization (not just the viewer's role)
         // so it's obvious which entries publish to a shared account.
-        subtitle: authT("organizationRole", { role: roleLabel(group.role) }),
+        subtitle: authT("organizationRole", { role: roleLabel(group.role, authT) }),
         identifier,
         avatarUrl: group.avatarUrl,
         icon: <Building2Icon className="h-4 w-4" />,
@@ -1020,7 +1023,7 @@ function AuthenticatedMenu({
                     <AccountDot label={label} icon={<MailIcon className="h-4 w-4" />} />
                     <span className="min-w-0 flex-1">
                       <span className="block truncate text-sm font-medium text-foreground">{label}</span>
-                      <span className="block truncate text-xs text-muted-foreground">{invitationT("role", { role: roleLabel(invitation.role) })}</span>
+                      <span className="block truncate text-xs text-muted-foreground">{invitationT("role", { role: roleLabel(invitation.role, authT) })}</span>
                     </span>
                     <button
                       type="button"

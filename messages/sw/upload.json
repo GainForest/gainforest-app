@@ -979,6 +979,7 @@
       "pickProject": "Chagua mradi kwanza.",
       "someAlreadyThere": "{count, plural, one {Uonaji # tayari upo kwenye mradi huu na utaachwa kama ulivyo.} other {Uonaji # tayari upo kwenye mradi huu na utaachwa kama ulivyo.}}",
       "attachFailed": "Uonaji huu haukuweza kuongezwa kwenye mradi. Tafadhali jaribu tena.",
+      "partialMoveFailed": "Seti ya data imeongezwa, lakini haikuweza kuondolewa kutoka kwenye miradi yote ya awali. Tafadhali jaribu tena.",
       "cancel": "Ghairi",
       "confirm": "{count, plural, one {Ongeza uonaji #} other {Ongeza uonaji #}}"
     },

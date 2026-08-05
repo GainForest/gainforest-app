@@ -2,12 +2,12 @@ import "server-only";
 
 import { fetchFundingReceiptsByDonorDid, type FundingReceipt } from "@/app/_lib/dashboard";
 import { fetchRecordByUri } from "@/app/_lib/indexer";
-import { fetchRecentOwnedFundingReceipts } from "@/app/_lib/recent-funding-receipts";
+import { fetchRecentOwnedFundingReceipts, MAX_RECENT_RECEIPTS } from "@/app/_lib/recent-funding-receipts";
 import { blockExplorerUrl, localBumicertHref } from "@/app/_lib/urls";
 import type { EarnedCard, EarnedCardsResult } from "@/app/_components/rewards/earned-card";
 import { dedupeCardReceipts, fundingReceiptCardIdentity } from "@/app/_components/rewards/receipt-card-model";
 
-const MAX_RECENT_RECEIPTS = 20;
+const METADATA_CONCURRENCY = 8;
 
 type FallbackLabels = {
   projectTitle: string;
@@ -28,16 +28,22 @@ async function cardsFromReceipts(
     new Set(receipts.flatMap((receipt) => (receipt.bumicertUri ? [receipt.bumicertUri] : []))),
   );
   let metadataPartial = false;
-  const metadataEntries = await Promise.all(
-    uniqueProjectUris.map(async (uri) => {
-      try {
-        return [uri, await fetchRecordByUri(uri)] as const;
-      } catch {
-        metadataPartial = true;
-        return [uri, null] as const;
-      }
-    }),
-  );
+  const metadataEntries: Array<readonly [string, Awaited<ReturnType<typeof fetchRecordByUri>> | null]> = [];
+  for (let index = 0; index < uniqueProjectUris.length; index += METADATA_CONCURRENCY) {
+    const batch = uniqueProjectUris.slice(index, index + METADATA_CONCURRENCY);
+    metadataEntries.push(
+      ...(await Promise.all(
+        batch.map(async (uri) => {
+          try {
+            return [uri, await fetchRecordByUri(uri)] as const;
+          } catch {
+            metadataPartial = true;
+            return [uri, null] as const;
+          }
+        }),
+      )),
+    );
+  }
   const metadata = new Map(metadataEntries);
 
   const cards = receipts.map((receipt): EarnedCard => {
@@ -104,7 +110,7 @@ export async function fetchEarnedCards(
   const receipts = dedupeCardReceipts([
     ...(history.status === "fulfilled" ? history.value : []),
     ...(recent.status === "fulfilled" ? recent.value.receipts : []),
-  ]).filter((receipt) => receipt.from?.type === "did" && receipt.from.id === ownerDid);
+  ].filter((receipt) => receipt.from?.type === "did" && receipt.from.id === ownerDid));
   const { cards, metadataPartial } = await cardsFromReceipts(receipts, fallback);
 
   return {

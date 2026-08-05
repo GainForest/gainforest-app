@@ -239,20 +239,7 @@ export async function unnestDatasetFromProjects(
   const unnestErrors: Array<{ rkey: string; error: string }> = [];
   for (const rkey of input.parentRkeys) {
     try {
-      const current = await getRecord(COLLECTION_COLLECTION, rkey, options);
-      const items = Array.isArray(current.record.items) ? current.record.items : [];
-      const nextItems = items.filter((item) => itemUri(item) !== input.datasetUri);
-      if (nextItems.length === items.length) continue; // nothing to remove
-      const nextRecord: Record<string, unknown> = {
-        ...current.record,
-        $type: typeof current.record.$type === "string" ? current.record.$type : COLLECTION_COLLECTION,
-        items: nextItems,
-      };
-      await putRecord(COLLECTION_COLLECTION, rkey, nextRecord, {
-        swapRecord: current.cid,
-        ...(options?.repo ? { repo: options.repo } : {}),
-      });
-      unnestedFrom.push(rkey);
+      if (await unnestDatasetFromParent(rkey, input.datasetUri, options)) unnestedFrom.push(rkey);
     } catch (error) {
       unnestErrors.push({
         rkey,

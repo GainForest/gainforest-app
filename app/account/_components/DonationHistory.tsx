@@ -49,6 +49,7 @@ function DonationCard({
   index: number;
   anonymousBadge: string;
 }) {
+  const t = useTranslations("common.accountDonations");
   const amount = item.amount;
   const txId = item.txHash;
   const occurredAt = item.occurredAt ?? item.createdAt;
@@ -107,7 +108,7 @@ function DonationCard({
         </div>
         {item.message ? (
           <p className="mt-1 whitespace-pre-line break-words text-xs italic leading-snug text-foreground/70">
-            “{item.message}”
+            {t("messageQuote", { message: item.message })}
           </p>
         ) : null}
       </div>

@@ -70,6 +70,9 @@
     "signOut": "Ondoka",
     "settings": "Mipangilio",
     "organizationRole": "Shirika · {role}",
+    "roleOwner": "Mmiliki",
+    "roleAdmin": "Msimamizi",
+    "roleMember": "Mwanachama",
     "switchAccount": "Badilisha akaunti",
     "switchAccountHint": "Vipakizi vipya na miradi huhifadhiwa kwenye akaunti unayochagua hapa."
   },
@@ -707,7 +710,8 @@
     "emptyHeroDescription": "Unga mkono mradi na michango yako itaonekana hapa, kila moja ikiwa na kiungo kwa mradi uliouunga mkono.",
     "emptyHeroCta": "Gundua miradi",
     "anonymousNote": "Michango isiyo na jina pia huonekana hapa, lakini ni wewe pekee unayeweza kuiona — haionyeshwi kamwe hadharani kwa jina lako. Baadhi ya michango ya zamani isiyo na jina haiwezi kuonyeshwa.",
-    "anonymousBadge": "Inaonekana kwako pekee"
+    "anonymousBadge": "Inaonekana kwako pekee",
+    "messageQuote": "Ujumbe wa mfadhili: “{message}”"
   },
   "accountProjects": {
     "emptyEyebrow": "Hakuna miradi",

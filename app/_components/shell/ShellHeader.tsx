@@ -199,6 +199,7 @@ export function ShellHeader({
               transition={{ type: "spring", stiffness: 90, damping: 22, mass: 1 }}
               style={{ pointerEvents: collecting ? "none" : "auto" }}
               aria-hidden={collecting}
+              inert={collecting}
             >
               <AnimatePresence mode="wait">
                 {rightContent ?? routeActions ? (

@@ -43,7 +43,7 @@ import QuickTooltip from "@/components/ui/quick-tooltip";
 import { manageApiHref, type ManageTarget } from "@/lib/links";
 import { cn } from "@/lib/utils";
 import { ManageConfirmModal } from "../../_components/ManageConfirmModal";
-import { canCreateRecord, canDeleteRecord } from "../../_lib/cgs-permissions";
+import { canCreateRecord, canDeleteRecord, canUpdateRecord } from "../../_lib/cgs-permissions";
 import { createMultimediaFromUrl, createRecord, deleteOccurrenceCascade, getRecord, putRecord } from "../../_lib/mutations";
 import {
   configureObservationMutationRepo,
@@ -523,6 +523,7 @@ export function ObservationsClient({
   const [deletedRecordIds, setDeletedRecordIds] = useState<Set<string>>(() => new Set());
   const [isDeletingSelected, setIsDeletingSelected] = useState(false);
   const createPermission = canCreateRecord(target);
+  const updatePermission = canUpdateRecord(target);
   const [projectQuery, setProjectFilter] = useQueryState("project", parseAsString.withOptions(QUERY_STATE_OPTIONS));
   // A pinned project wins over the URL filter — the page is that project's.
   const projectFilter = project?.uri ?? projectQuery;
@@ -784,7 +785,7 @@ export function ObservationsClient({
   // goes, so membership has to be editable after the fact.
   const openAddToProject = useCallback(
     (subject: AddToProjectTarget) => {
-      if (createPermission.reason) return;
+      if (updatePermission.reason) return;
       modal.pushModal(
         {
           id: "add-observations-to-project",
@@ -813,7 +814,7 @@ export function ObservationsClient({
       );
       void modal.show();
     },
-    [attachToProject, createPermission.reason, loadProjectGroups, modal, project?.uri, router, target],
+    [attachToProject, loadProjectGroups, modal, project?.uri, router, target, updatePermission.reason],
   );
 
   // Take the selected sightings out of their dataset. They survive as loose
@@ -821,7 +822,7 @@ export function ObservationsClient({
   // membership is now a choice rather than a one-way door.
   const openRemoveFromDataset = useCallback(() => {
     const records = Array.from(selectedRecords.values()).filter((record) => record.datasetRef);
-    if (records.length === 0 || createPermission.reason) return;
+    if (records.length === 0 || updatePermission.reason) return;
     modal.pushModal(
       {
         id: "remove-observations-dataset",
@@ -857,13 +858,13 @@ export function ObservationsClient({
       true,
     );
     void modal.show();
-  }, [createPermission.reason, loadDatasetGroups, modal, router, selectedRecords, t, target]);
+  }, [loadDatasetGroups, modal, router, selectedRecords, t, target, updatePermission.reason]);
 
   // Group the currently-selected observations into a dataset (new or existing),
   // then refresh dataset counts and the listing.
   const openGroupIntoDataset = useCallback(() => {
     const records = Array.from(selectedRecords.values());
-    if (records.length === 0 || createPermission.reason) return;
+    if (records.length === 0 || updatePermission.reason) return;
     modal.pushModal(
       {
         id: "group-observations-dataset",
@@ -895,7 +896,7 @@ export function ObservationsClient({
       true,
     );
     void modal.show();
-  }, [activeProject, createPermission.reason, datasetGroups, loadDatasetGroups, modal, router, selectedRecords, target]);
+  }, [activeProject, datasetGroups, loadDatasetGroups, modal, router, selectedRecords, target, updatePermission.reason]);
 
   // Delete a dataset WITHOUT deleting its observations — the records are
   // ungrouped (datasetRef cleared) and survive.
@@ -963,7 +964,7 @@ export function ObservationsClient({
   const contextMenu = useMemo<ObservationContextMenu | undefined>(() => {
     if (deleteDisabledReason) return undefined;
     const records = Array.from(selectedRecords.values());
-    const createReason = createPermission.reason ?? null;
+    const updateReason = updatePermission.reason ?? null;
     const items: ObservationContextMenuItem[] = [];
     // Pointless on a project's own page — everything listed there is already
     // filed under it.
@@ -972,8 +973,8 @@ export function ObservationsClient({
         id: "add-to-project",
         label: t("addToProject.action"),
         icon: <FolderKanbanIcon aria-hidden />,
-        disabled: Boolean(createReason) || isDeletingSelected,
-        disabledReason: createReason,
+        disabled: Boolean(updateReason) || isDeletingSelected,
+        disabledReason: updateReason,
         onSelect: () =>
           openAddToProject({
             kind: "observations",
@@ -989,8 +990,8 @@ export function ObservationsClient({
       id: "group-into-dataset",
       label: t("groupIntoDataset"),
       icon: <FolderPlusIcon aria-hidden />,
-      disabled: Boolean(createReason) || isDeletingSelected,
-      disabledReason: createReason,
+      disabled: Boolean(updateReason) || isDeletingSelected,
+      disabledReason: updateReason,
       onSelect: openGroupIntoDataset,
     });
     if (records.some((record) => record.datasetRef)) {
@@ -998,8 +999,8 @@ export function ObservationsClient({
         id: "remove-from-dataset",
         label: t("dataset.removeAction"),
         icon: <FolderMinusIcon aria-hidden />,
-        disabled: Boolean(createReason) || isDeletingSelected,
-        disabledReason: createReason,
+        disabled: Boolean(updateReason) || isDeletingSelected,
+        disabledReason: updateReason,
         onSelect: openRemoveFromDataset,
       });
     }
@@ -1022,7 +1023,6 @@ export function ObservationsClient({
     // render on purpose; the selection they read is in the dependency list.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
-    createPermission.reason,
     deleteDisabledReason,
     isDeletingSelected,
     openAddToProject,
@@ -1031,6 +1031,7 @@ export function ObservationsClient({
     project,
     selectedRecords,
     t,
+    updatePermission.reason,
   ]);
 
   if (mode === "add") {
@@ -1098,8 +1099,8 @@ export function ObservationsClient({
                     })),
                   })
                 }
-                disabled={Boolean(createPermission.reason) || isDeletingSelected}
-                title={createPermission.reason ?? undefined}
+                disabled={Boolean(updatePermission.reason) || isDeletingSelected}
+                title={updatePermission.reason ?? undefined}
                 className="rounded-full text-muted-foreground hover:text-foreground"
               >
                 <FolderKanbanIcon className="size-4" />
@@ -1110,8 +1111,8 @@ export function ObservationsClient({
               variant="ghost"
               size="sm"
               onClick={openGroupIntoDataset}
-              disabled={Boolean(createPermission.reason) || isDeletingSelected}
-              title={createPermission.reason ?? undefined}
+              disabled={Boolean(updatePermission.reason) || isDeletingSelected}
+              title={updatePermission.reason ?? undefined}
               className="rounded-full text-muted-foreground hover:text-foreground"
             >
               <FolderPlusIcon className="size-4" />
@@ -1122,8 +1123,8 @@ export function ObservationsClient({
                 variant="ghost"
                 size="sm"
                 onClick={openRemoveFromDataset}
-                disabled={Boolean(createPermission.reason) || isDeletingSelected}
-                title={createPermission.reason ?? undefined}
+                disabled={Boolean(updatePermission.reason) || isDeletingSelected}
+                title={updatePermission.reason ?? undefined}
                 className="rounded-full text-muted-foreground hover:text-foreground"
               >
                 <FolderMinusIcon className="size-4" />
@@ -1200,8 +1201,8 @@ export function ObservationsClient({
                     })).filter((occurrence) => occurrence.rkey.length > 0),
                   })
                 }
-                disabled={Boolean(createPermission.reason)}
-                title={createPermission.reason ?? undefined}
+                disabled={Boolean(updatePermission.reason)}
+                title={updatePermission.reason ?? undefined}
                 className="rounded-full"
               >
                 <FolderKanbanIcon className="size-3.5" />

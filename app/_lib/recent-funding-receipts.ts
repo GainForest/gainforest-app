@@ -4,7 +4,7 @@ import type { FundingReceipt } from "./dashboard";
 import { FACILITATOR_DID } from "./urls";
 
 const RECEIPT_COLLECTION = "org.hypercerts.funding.receipt";
-const MAX_RECENT_RECEIPTS = 20;
+export const MAX_RECENT_RECEIPTS = 20;
 
 type RawReceiptValue = {
   from?: { $type?: string; did?: string; value?: string };

@@ -28,8 +28,6 @@ type CollectAnimationContextValue = {
   phase: CollectPhase;
   /** Header publishes the morph target (the account pocket) here. */
   registerTarget: (element: HTMLElement | null) => void;
-  /** Live screen rect of the pocket, or null when no header is mounted. */
-  getTargetRect: () => DOMRect | null;
   /** Start collecting; resolves with the pocket rect once the morph settles. */
   beginCollect: () => Promise<DOMRect | null>;
   /** End collecting; the header morphs back to normal. */
@@ -43,7 +41,6 @@ type CollectAnimationContextValue = {
 const noop: CollectAnimationContextValue = {
   phase: "idle",
   registerTarget: () => {},
-  getTargetRect: () => null,
   beginCollect: async () => null,
   endCollect: () => {},
   pulseKey: 0,
@@ -63,11 +60,6 @@ export function CollectAnimationProvider({ children }: { children: React.ReactNo
     targetRef.current = element;
   }, []);
 
-  const getTargetRect = useCallback(
-    () => targetRef.current?.getBoundingClientRect() ?? null,
-    [],
-  );
-
   const beginCollect = useCallback(async () => {
     setPhase("collecting");
     // Let the header widen its pocket before we measure where to fly cards.
@@ -80,8 +72,8 @@ export function CollectAnimationProvider({ children }: { children: React.ReactNo
   }, []);
 
   const value = useMemo<CollectAnimationContextValue>(
-    () => ({ phase, registerTarget, getTargetRect, beginCollect, endCollect, pulseKey, pulse }),
-    [phase, registerTarget, getTargetRect, beginCollect, endCollect, pulseKey, pulse],
+    () => ({ phase, registerTarget, beginCollect, endCollect, pulseKey, pulse }),
+    [phase, registerTarget, beginCollect, endCollect, pulseKey, pulse],
   );
 
   return <CollectAnimationContext.Provider value={value}>{children}</CollectAnimationContext.Provider>;

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { DONATION_MESSAGE_MAX_LENGTH, sanitizeDonationMessage } from "./message";
+import { clampDonationMessage, DONATION_MESSAGE_MAX_LENGTH, sanitizeDonationMessage } from "./message";
 
 describe("sanitizeDonationMessage", () => {
   it("returns null for blank or non-string input (blank changes nothing)", () => {
@@ -18,6 +18,15 @@ describe("sanitizeDonationMessage", () => {
   it("clamps to the maximum length", () => {
     const long = "a".repeat(DONATION_MESSAGE_MAX_LENGTH + 50);
     expect(sanitizeDonationMessage(long)).toHaveLength(DONATION_MESSAGE_MAX_LENGTH);
+  });
+
+
+  it("clamps at a Unicode code-point boundary", () => {
+    const message = `${"a".repeat(DONATION_MESSAGE_MAX_LENGTH - 1)}🌳z`;
+    const result = sanitizeDonationMessage(message);
+    expect(result).toBe(`${"a".repeat(DONATION_MESSAGE_MAX_LENGTH - 1)}🌳`);
+    expect(Array.from(result ?? "")).toHaveLength(DONATION_MESSAGE_MAX_LENGTH);
+    expect(clampDonationMessage(message)).toBe(result);
   });
 
   it("keeps a normal short message intact", () => {

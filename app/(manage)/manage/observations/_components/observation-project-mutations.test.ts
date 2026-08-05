@@ -2,16 +2,14 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const getRecord = vi.fn();
 const putRecord = vi.fn();
-const nestDatasetUnderProject = vi.fn();
-const unnestDatasetFromProjects = vi.fn();
+const setDatasetProject = vi.fn();
 
 vi.mock("../../_lib/mutations", () => ({
   getRecord: (...args: unknown[]) => getRecord(...args),
   putRecord: (...args: unknown[]) => putRecord(...args),
 }));
 vi.mock("./observation-dataset-mutations", () => ({
-  nestDatasetUnderProject: (...args: unknown[]) => nestDatasetUnderProject(...args),
-  unnestDatasetFromProjects: (...args: unknown[]) => unnestDatasetFromProjects(...args),
+  setDatasetProject: (...args: unknown[]) => setDatasetProject(...args),
 }));
 
 const { attachDatasetToProject, attachObservationsToProject } = await import("./observation-project-mutations");
@@ -37,12 +35,10 @@ function storedRecord(overrides: Record<string, unknown> = {}) {
 beforeEach(() => {
   getRecord.mockReset();
   putRecord.mockReset();
-  nestDatasetUnderProject.mockReset();
-  unnestDatasetFromProjects.mockReset();
-  unnestDatasetFromProjects.mockResolvedValue({ unnestedFrom: [], unnestErrors: [] });
+  setDatasetProject.mockReset();
+  setDatasetProject.mockResolvedValue({ nested: true, nestError: null, unnestedFrom: [], unnestErrors: [] });
   getRecord.mockResolvedValue(storedRecord());
   putRecord.mockResolvedValue({ uri: "at://…", cid: "cid-2" });
-  nestDatasetUnderProject.mockResolvedValue(undefined);
 });
 
 describe("attachObservationsToProject", () => {
@@ -121,7 +117,7 @@ describe("attachObservationsToProject", () => {
 });
 
 describe("attachDatasetToProject", () => {
-  it("lists the dataset on the project and files every sighting in it", async () => {
+  it("lists the dataset before filing every sighting in it", async () => {
     const result = await attachDatasetToProject({
       projectUri: PROJECT,
       datasetUri: "at://did:plc:x/app.gainforest.dwc.dataset/d1",
@@ -132,35 +128,42 @@ describe("attachDatasetToProject", () => {
       ],
     });
 
-    expect(nestDatasetUnderProject).toHaveBeenCalledWith(
-      { projectUri: PROJECT, datasetUri: "at://did:plc:x/app.gainforest.dwc.dataset/d1", datasetCid: "dataset-cid" },
+    expect(setDatasetProject).toHaveBeenCalledWith(
+      {
+        projectUri: PROJECT,
+        datasetUri: "at://did:plc:x/app.gainforest.dwc.dataset/d1",
+        datasetCid: "dataset-cid",
+        currentParentRkeys: [],
+      },
       undefined,
     );
     expect(result.nested).toBe(true);
     expect(result.attached).toEqual(["occ1", "occ2"]);
   });
 
-  it("still files the sightings when the dataset could not be listed", async () => {
-    // The per-sighting stamp is what every count and filter reads, so it must
-    // not depend on the record-level listing succeeding.
-    nestDatasetUnderProject.mockRejectedValue(new Error("swap failed"));
+  it("does not unnest or stamp sightings when nesting the dataset fails", async () => {
+    setDatasetProject.mockResolvedValue({
+      nested: false,
+      nestError: "swap failed",
+      unnestedFrom: [],
+      unnestErrors: [],
+    });
 
     const result = await attachDatasetToProject({
       projectUri: PROJECT,
       datasetUri: "at://did:plc:x/app.gainforest.dwc.dataset/d1",
       datasetCid: null,
+      parentRkeys: ["old-project"],
       occurrences: [{ rkey: "occ1", projectRef: null, siteRef: null }],
     });
 
-    expect(result.nested).toBe(false);
-    expect(result.nestError).toBe("swap failed");
-    expect(result.attached).toEqual(["occ1"]);
+    expect(result).toMatchObject({ nested: false, nestError: "swap failed", attached: [] });
+    expect(getRecord).not.toHaveBeenCalled();
+    expect(putRecord).not.toHaveBeenCalled();
   });
-});
 
-describe("a dataset lives in one project", () => {
   it("moves the dataset out of the project that held it before", async () => {
-    unnestDatasetFromProjects.mockResolvedValue({ unnestedFrom: ["old-project"], unnestErrors: [] });
+    setDatasetProject.mockResolvedValue({ nested: true, nestError: null, unnestedFrom: ["old-project"], unnestErrors: [] });
 
     const result = await attachDatasetToProject({
       projectUri: PROJECT,
@@ -170,23 +173,26 @@ describe("a dataset lives in one project", () => {
       occurrences: [{ rkey: "occ1", projectRef: OTHER_PROJECT, siteRef: null }],
     });
 
-    // "p1" is the project being filed into — only the stale parent is dropped.
-    expect(unnestDatasetFromProjects).toHaveBeenCalledWith(
-      { datasetUri: "at://did:plc:x/app.gainforest.dwc.dataset/d1", parentRkeys: ["old-project"] },
-      undefined,
-    );
+    expect(setDatasetProject).toHaveBeenCalledWith(expect.objectContaining({ currentParentRkeys: ["old-project", "p1"] }), undefined);
     expect(result.unnestedFrom).toEqual(["old-project"]);
   });
 
-  it("does not touch other projects when the dataset has no previous home", async () => {
-    await attachDatasetToProject({
+  it("returns stale-parent unnest failures so the caller can keep the modal open", async () => {
+    setDatasetProject.mockResolvedValue({
+      nested: true,
+      nestError: null,
+      unnestedFrom: ["old-project"],
+      unnestErrors: [{ rkey: "stale-project", error: "swap failed" }],
+    });
+
+    const result = await attachDatasetToProject({
       projectUri: PROJECT,
       datasetUri: "at://did:plc:x/app.gainforest.dwc.dataset/d1",
       datasetCid: null,
-      parentRkeys: [],
-      occurrences: [{ rkey: "occ1", projectRef: null, siteRef: null }],
+      parentRkeys: ["old-project", "stale-project"],
+      occurrences: [{ rkey: "occ1", projectRef: OTHER_PROJECT, siteRef: null }],
     });
 
-    expect(unnestDatasetFromProjects).not.toHaveBeenCalled();
+    expect(result.unnestErrors).toEqual([{ rkey: "stale-project", error: "swap failed" }]);
   });
 });

@@ -9,7 +9,7 @@
  * only the unpaid projects behind for a retry.
  */
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useId, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import {
   ArrowLeftIcon,
@@ -32,7 +32,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Popover, PopoverAnchor, PopoverContent } from "@/components/ui/popover";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
-import { DONATION_MESSAGE_MAX_LENGTH, sanitizeDonationMessage } from "@/lib/donation/message";
+import { clampDonationMessage, DONATION_MESSAGE_MAX_LENGTH, sanitizeDonationMessage } from "@/lib/donation/message";
 import type { AuthSession } from "@/app/_lib/auth";
 import { SocialGlyph } from "@/app/_components/SocialIcon";
 import { blockExplorerUrl } from "@/app/_lib/urls";
@@ -308,6 +308,7 @@ export function CheckoutView({
   const [connectError, setConnectError] = useState<string | null>(null);
   const [anonymous, setAnonymous] = useState(false);
   const [message, setMessage] = useState("");
+  const messageCountId = `${useId()}-count`;
   const [phase, setPhase] = useState<"review" | "paying" | "done">("review");
   const [lineStates, setLineStates] = useState<Record<string, LineState>>({});
   const [completed, setCompleted] = useState<CompletedLine[]>([]);
@@ -975,17 +976,18 @@ export function CheckoutView({
             <section className={authSession.isLoggedIn ? "pt-5" : undefined}>
               <Textarea
                 value={message}
-                onChange={(event) => setMessage(event.target.value.slice(0, DONATION_MESSAGE_MAX_LENGTH))}
-                maxLength={DONATION_MESSAGE_MAX_LENGTH}
+                onChange={(event) => setMessage(clampDonationMessage(event.target.value))}
+                maxLength={DONATION_MESSAGE_MAX_LENGTH * 2}
                 disabled={paying}
                 rows={3}
                 placeholder={t("messagePlaceholder")}
                 aria-label={t("messagePlaceholder")}
+                aria-describedby={messageCountId}
                 className="min-h-20 resize-none rounded-xl border-border/60 bg-background shadow-none"
               />
               <div className="mt-2 flex items-center justify-between gap-3 text-xs text-muted-foreground">
                 <span className="min-w-0 truncate">{anonymous || !authSession.isLoggedIn ? t("messageAnonymousNote") : ""}</span>
-                <span className="shrink-0 tabular-nums text-muted-foreground/60" aria-hidden>{message.length}/{DONATION_MESSAGE_MAX_LENGTH}</span>
+                <span id={messageCountId} className="shrink-0 tabular-nums text-muted-foreground/60">{Array.from(message).length}/{DONATION_MESSAGE_MAX_LENGTH}</span>
               </div>
             </section>
           </div>

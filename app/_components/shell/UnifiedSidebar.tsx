@@ -144,7 +144,7 @@ function SidebarProfileRow({ did }: { did: string }) {
     <SidebarTooltip label={name}>
       <Link
         href={href}
-        aria-label={collapsed ? name : t("viewProfile")}
+        aria-label={collapsed ? name : undefined}
         className={cn(
           buttonVariants({ variant: "ghost" }),
           "group w-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50",

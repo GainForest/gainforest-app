@@ -1,7 +1,7 @@
 "use client";
 
 import { getRecord, putRecord } from "../../_lib/mutations";
-import { nestDatasetUnderProject, unnestDatasetFromProjects } from "./observation-dataset-mutations";
+import { setDatasetProject } from "./observation-dataset-mutations";
 
 // An observation belongs to a project when it carries the project's AT-URI in
 // `projectRef` — the same field the add flows write. Filing an already-published
@@ -85,6 +85,8 @@ export type AttachDatasetToProjectResult = AttachToProjectResult & {
   nestError: string | null;
   /** Projects the dataset was removed from, because it moved here. */
   unnestedFrom: string[];
+  /** Previous projects that could not be updated after the dataset was nested. */
+  unnestErrors: Array<{ rkey: string; error: string }>;
 };
 
 /**
@@ -113,30 +115,37 @@ export async function attachDatasetToProject(
   },
   options?: RepoOptions,
 ): Promise<AttachDatasetToProjectResult> {
-  let nested = true;
-  let nestError: string | null = null;
-  try {
-    await nestDatasetUnderProject(
-      { projectUri: input.projectUri, datasetUri: input.datasetUri, datasetCid: input.datasetCid },
-      options,
-    );
-  } catch (error) {
-    nested = false;
-    nestError = error instanceof Error ? error.message : "The dataset could not be listed on the project.";
+  const datasetMove = await setDatasetProject(
+    {
+      projectUri: input.projectUri,
+      datasetUri: input.datasetUri,
+      datasetCid: input.datasetCid,
+      currentParentRkeys: input.parentRkeys ?? [],
+    },
+    options,
+  );
+  if (datasetMove.nestError) {
+    return {
+      attached: [],
+      skipped: [],
+      errors: [],
+      nested: false,
+      nestError: datasetMove.nestError,
+      unnestedFrom: [],
+      unnestErrors: [],
+    };
   }
-
-  // Drop the dataset from whatever project held it before, so the listing and
-  // the sightings never disagree about where it lives.
-  const targetRkey = input.projectUri.split("/").pop();
-  const staleParents = (input.parentRkeys ?? []).filter((rkey) => rkey !== targetRkey);
-  const { unnestedFrom } = staleParents.length
-    ? await unnestDatasetFromProjects({ datasetUri: input.datasetUri, parentRkeys: staleParents }, options)
-    : { unnestedFrom: [] as string[] };
 
   const result = await attachObservationsToProject(
     { projectUri: input.projectUri, siteUri: input.siteUri, occurrences: input.occurrences },
     options,
   );
 
-  return { ...result, nested, nestError, unnestedFrom };
+  return {
+    ...result,
+    nested: datasetMove.nested,
+    nestError: null,
+    unnestedFrom: datasetMove.unnestedFrom,
+    unnestErrors: datasetMove.unnestErrors,
+  };
 }

@@ -12,12 +12,13 @@ vi.mock("../../_lib/mutations", () => ({
   deleteRecord: (...args: unknown[]) => deleteRecord(...args),
 }));
 
-const { attachObservationsToDataset, removeObservationsFromDataset } = await import("./observation-dataset-mutations");
+const { attachObservationsToDataset, removeObservationsFromDataset, setDatasetProject } = await import("./observation-dataset-mutations");
 
 const FOLDER_A = "at://did:plc:x/app.gainforest.dwc.dataset/a";
 const FOLDER_B = "at://did:plc:x/app.gainforest.dwc.dataset/b";
 const DATASET = "app.gainforest.dwc.dataset";
 const OCCURRENCE = "app.gainforest.dwc.occurrence";
+const COLLECTION = "org.hypercerts.collection";
 
 /** Occurrence reads by default; dataset reads carry a recordCount. */
 function stubRecords(occurrence: Record<string, unknown> = {}) {
@@ -122,5 +123,54 @@ describe("removeObservationsFromDataset", () => {
 
     expect(result.skipped).toEqual(["occ1"]);
     expect(putRecord).not.toHaveBeenCalled();
+  });
+});
+
+
+describe("setDatasetProject", () => {
+  const datasetUri = "at://did:plc:x/app.gainforest.dwc.dataset/d1";
+  const targetUri = "at://did:plc:x/org.hypercerts.collection/target";
+
+  it("aborts before unnesting when the target cannot be nested", async () => {
+    getRecord.mockImplementation((collection: string, rkey: string) => {
+      if (collection === COLLECTION && rkey === "target") return Promise.reject(new Error("target changed"));
+      return Promise.resolve({ record: { $type: COLLECTION, items: [] }, cid: `${rkey}-cid` });
+    });
+
+    const result = await setDatasetProject({ datasetUri, projectUri: targetUri, currentParentRkeys: ["old"] });
+
+    expect(result).toEqual({ nested: false, unnestedFrom: [], unnestErrors: [], nestError: "target changed" });
+    expect(getRecord).toHaveBeenCalledTimes(1);
+    expect(putRecord).not.toHaveBeenCalled();
+  });
+
+  it("detaches from matching parents and reports an unnest failure", async () => {
+    getRecord.mockImplementation((collection: string, rkey: string) => {
+      if (collection === COLLECTION && rkey === "broken") return Promise.reject(new Error("stale parent"));
+      return Promise.resolve({
+        record: { $type: COLLECTION, items: [{ itemIdentifier: { uri: datasetUri } }] },
+        cid: `${rkey}-cid`,
+      });
+    });
+
+    const result = await setDatasetProject({ datasetUri, projectUri: "", currentParentRkeys: ["old", "broken"] });
+
+    expect(result.nested).toBe(false);
+    expect(result.unnestedFrom).toEqual(["old"]);
+    expect(result.unnestErrors).toEqual([{ rkey: "broken", error: "stale parent" }]);
+    expect(putRecord).toHaveBeenCalledWith(COLLECTION, "old", expect.objectContaining({ items: [] }), expect.any(Object));
+  });
+
+  it("does not unnest the target project while removing stale parents", async () => {
+    getRecord.mockImplementation((collection: string, rkey: string) => Promise.resolve({
+      record: { $type: COLLECTION, items: rkey === "target" ? [] : [{ itemIdentifier: { uri: datasetUri } }] },
+      cid: `${rkey}-cid`,
+    }));
+
+    const result = await setDatasetProject({ datasetUri, projectUri: targetUri, currentParentRkeys: ["target", "old"] });
+
+    expect(result.unnestedFrom).toEqual(["old"]);
+    expect(getRecord.mock.calls.filter(([collection, rkey]) => collection === COLLECTION && rkey === "target")).toHaveLength(1);
+    expect(putRecord.mock.calls.filter(([collection, rkey]) => collection === COLLECTION && rkey === "target")).toHaveLength(1);
   });
 });

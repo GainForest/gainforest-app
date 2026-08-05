@@ -14,6 +14,11 @@
  *  `notes` lexicon cap (500) so the stored value always validates. */
 export const DONATION_MESSAGE_MAX_LENGTH = 280;
 
+/** Clamp text without splitting a Unicode code point. */
+export function clampDonationMessage(value: string): string {
+  return Array.from(value).slice(0, DONATION_MESSAGE_MAX_LENGTH).join("");
+}
+
 /**
  * Normalise a raw donor message into what we actually persist:
  *  - non-strings and blank input become `null` (blank changes nothing), and
@@ -23,5 +28,5 @@ export function sanitizeDonationMessage(raw: unknown): string | null {
   if (typeof raw !== "string") return null;
   const normalised = raw.replace(/\r\n/g, "\n").trim();
   if (!normalised) return null;
-  return normalised.slice(0, DONATION_MESSAGE_MAX_LENGTH);
+  return clampDonationMessage(normalised);
 }

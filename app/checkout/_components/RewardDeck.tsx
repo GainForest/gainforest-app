@@ -178,7 +178,10 @@ function RewardFlight({
       // imperatively, before the final approach. React state batching could
       // otherwise apply overflow after the gulp has already started.
       const mask = maskRef.current;
-      if (!mask) return;
+      if (!mask) {
+        onDone();
+        return;
+      }
       mask.style.inset = "auto";
       mask.style.left = "0";
       mask.style.top = "0";

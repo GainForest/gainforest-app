@@ -8,7 +8,6 @@ import { useEffect, useId, useState, type MouseEvent } from "react";
 import { ModalContent } from "@/components/ui/modal/modal";
 import { ModalPortal, useModal } from "@/components/ui/modal/context";
 import {
-  groupManageBasePath,
   groupManageTarget,
   manageApiHref,
   manageHref,
@@ -120,7 +119,7 @@ function AuthenticatedCreateProjectButton({
 
     setWizard({
       target,
-      projectsHref: manageHref({ basePath: groupManageBasePath(target.identifier) }, "projects"),
+      projectsHref: manageHref(target, "projects"),
     });
     modal.pushModal({ id: modalId, dialogWidth: "max-w-3xl w-[calc(100%-2rem)]", forceDialog: true }, true);
     void modal.show();
@@ -135,7 +134,7 @@ function AuthenticatedCreateProjectButton({
   const handleChangeTarget = (nextTarget: ManageTarget) => {
     setWizard({
       target: nextTarget,
-      projectsHref: manageHref({ basePath: groupManageBasePath(nextTarget.identifier) }, "projects"),
+      projectsHref: manageHref(nextTarget, "projects"),
     });
   };
 

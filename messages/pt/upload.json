@@ -979,6 +979,7 @@
       "pickProject": "Escolha um projeto primeiro.",
       "someAlreadyThere": "{count, plural, one {# registro já está neste projeto e será mantido como está.} other {# registros já estão neste projeto e serão mantidos como estão.}}",
       "attachFailed": "Não foi possível adicionar estes registros ao projeto. Tente novamente.",
+      "partialMoveFailed": "O conjunto de dados foi adicionado, mas não pôde ser removido de todos os projetos anteriores. Tente novamente.",
       "cancel": "Cancelar",
       "confirm": "{count, plural, one {Adicionar # registro} other {Adicionar # registros}}"
     },

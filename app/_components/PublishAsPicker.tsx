@@ -193,49 +193,53 @@ function PublishAsChip({
   className?: string;
   t: ReturnType<typeof useTranslations<"common.publishAs">>;
 } & React.ComponentPropsWithoutRef<"button">) {
+  const chipClassName = cn(
+    "flex w-full items-center gap-2.5 rounded-2xl border px-3 py-2 text-left transition-colors",
+    isGroup ? "border-sky-500/30 bg-sky-500/5" : "border-primary/30 bg-primary/5",
+    canSwitch
+      ? isGroup
+        ? "cursor-pointer hover:border-sky-500/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
+        : "cursor-pointer hover:border-primary/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
+      : "cursor-default",
+    disabled && "opacity-70",
+    className,
+  );
+  const content = <>
+    <AccountAvatar avatarUrl={avatarUrl} isGroup={isGroup} />
+    <span className="min-w-0 flex-1">
+      <span className="block text-[10px] font-medium uppercase tracking-[0.12em] text-muted-foreground">
+        {t("label")}
+      </span>
+      <span className="flex items-center gap-1.5">
+        <span className="truncate text-sm font-medium text-foreground">{name}</span>
+        <span
+          className={cn(
+            "inline-flex shrink-0 items-center gap-1 rounded-full px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide",
+            isGroup ? "bg-sky-500/15 text-sky-600 dark:text-sky-400" : "bg-primary/15 text-primary",
+          )}
+        >
+          {isGroup ? <Building2Icon className="size-3" /> : <UserIcon className="size-3" />}
+          {isGroup ? t("badgeOrganization") : t("badgePersonal")}
+        </span>
+      </span>
+      <span className="block truncate text-xs text-muted-foreground">
+        {isGroup ? t("organizationDescription") : t("personalDescription")}
+      </span>
+    </span>
+  </>;
+
+  if (!canSwitch) return <div className={chipClassName}>{content}</div>;
+
   return (
     <button
       type="button"
-      // Static chips are informational, not clickable.
-      tabIndex={canSwitch ? undefined : -1}
-      aria-disabled={!canSwitch}
       aria-label={`${t("label")}: ${name}`}
-      title={canSwitch ? t("switchHint") : undefined}
+      title={t("switchHint")}
       {...props}
-      className={cn(
-        "flex w-full items-center gap-2.5 rounded-2xl border px-3 py-2 text-left transition-colors",
-        isGroup ? "border-sky-500/30 bg-sky-500/5" : "border-primary/30 bg-primary/5",
-        canSwitch
-          ? isGroup
-            ? "cursor-pointer hover:border-sky-500/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
-            : "cursor-pointer hover:border-primary/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
-          : "cursor-default focus-visible:outline-none",
-        disabled && "opacity-70",
-        className,
-      )}
+      className={chipClassName}
     >
-      <AccountAvatar avatarUrl={avatarUrl} isGroup={isGroup} />
-      <span className="min-w-0 flex-1">
-        <span className="block text-[10px] font-medium uppercase tracking-[0.12em] text-muted-foreground">
-          {t("label")}
-        </span>
-        <span className="flex items-center gap-1.5">
-          <span className="truncate text-sm font-medium text-foreground">{name}</span>
-          <span
-            className={cn(
-              "inline-flex shrink-0 items-center gap-1 rounded-full px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide",
-              isGroup ? "bg-sky-500/15 text-sky-600 dark:text-sky-400" : "bg-primary/15 text-primary",
-            )}
-          >
-            {isGroup ? <Building2Icon className="size-3" /> : <UserIcon className="size-3" />}
-            {isGroup ? t("badgeOrganization") : t("badgePersonal")}
-          </span>
-        </span>
-        <span className="block truncate text-xs text-muted-foreground">
-          {isGroup ? t("organizationDescription") : t("personalDescription")}
-        </span>
-      </span>
-      {canSwitch ? <ChevronsUpDownIcon className="size-4 shrink-0 text-muted-foreground" /> : null}
+      {content}
+      <ChevronsUpDownIcon className="size-4 shrink-0 text-muted-foreground" />
     </button>
   );
 }
