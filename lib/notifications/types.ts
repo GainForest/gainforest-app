@@ -152,6 +152,14 @@ export interface NotificationCleanupResult {
   readonly deleted: number;
 }
 
+export interface NotificationQueueHealth {
+  readonly waitingRecipient: number;
+  readonly queued: number;
+  readonly processing: number;
+  readonly dead: number;
+  readonly oldestDueAgeSeconds: number;
+}
+
 export interface NotificationEnqueueRepository {
   enqueue(input: NotificationEnqueueInput): Promise<NotificationEnqueueResult>;
 }

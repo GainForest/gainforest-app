@@ -91,6 +91,22 @@ describe("SupabaseNotificationRepository", () => {
     expect(fetchMock.mock.calls[0][1]?.body).toBe(JSON.stringify({ p_batch_size: 250 }));
   });
 
+  it("decodes aggregate queue health without row data", async () => {
+    fetchMock.mockResolvedValueOnce(Response.json({
+      waiting_recipient: 2,
+      queued: 3,
+      processing: 1,
+      dead: 4,
+      oldest_due_age_seconds: 125,
+    }));
+    const repository = new SupabaseNotificationRepository();
+    await expect(repository.health()).resolves.toEqual({
+      waitingRecipient: 2, queued: 3, processing: 1, dead: 4, oldestDueAgeSeconds: 125,
+    });
+    expect(fetchMock.mock.calls[0][0]).toBe("https://project.supabase.co/rest/v1/rpc/notification_outbox_health");
+    expect(fetchMock.mock.calls[0][1]?.body).toBe("{}");
+  });
+
   it("calls claim RPC with the committed signature and service-role boundary", async () => {
     fetchMock.mockResolvedValueOnce(Response.json([{
       outbox_id: rawRow.id,
