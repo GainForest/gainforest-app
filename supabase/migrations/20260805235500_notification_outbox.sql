@@ -98,7 +98,7 @@ create table public.notification_outbox (
   constraint notification_outbox_error_code_check check (last_error_code is null or last_error_code in (
     'recipient_missing','recipient_lookup_failed','provider_5xx','provider_timeout',
     'provider_rate_limited','provider_rejected','provider_idempotency_expired',
-    'active_retention_expired','invitation_not_pending','manually_suppressed'
+    'active_retention_expired','notification_invalid','invitation_not_pending','manually_suppressed'
   )),
   constraint notification_outbox_error_summary_bound check (last_error_summary is null or length(last_error_summary) between 1 and 512),
   constraint notification_outbox_recipient_contract check (
@@ -264,15 +264,22 @@ begin
   if p_lease_seconds is null or p_lease_seconds not between 1 and 300 then raise exception 'lease seconds must be between 1 and 300'; end if;
   select * into v from public.notification_outbox where id=p_outbox_id for update;
   if not found then return; end if;
-  if v.status='processing' and v.locked_until<=clock_timestamp() and v.provider_call_phase='in_flight' and v.provider_idempotency_expires_at<=clock_timestamp() then
+  if not ((v.status in ('waiting_recipient','queued') and v.next_attempt_at<=clock_timestamp()) or
+          (v.status='processing' and v.locked_until<=clock_timestamp())) then return; end if;
+  if v.created_at<=clock_timestamp()-interval '7 days' then
+    update public.notification_outbox set status='dead',terminal_at=clock_timestamp(),last_error_code='active_retention_expired',
+      last_error_summary='Notification exceeded the seven-day active retention limit',locked_until=null,processing_token=null,
+      claimed_from_status=null,provider_call_phase='idle',provider_call_is_ambiguous_retry=false,provider_call_started_at=null,provider_idempotency_expires_at=null,ambiguous_since=null
+      where id=p_outbox_id;
+    return;
+  end if;
+  if v.status='processing' and v.provider_call_phase='in_flight' and v.provider_idempotency_expires_at<=clock_timestamp() then
     update public.notification_outbox set status='dead',terminal_at=clock_timestamp(),last_error_code='provider_idempotency_expired',
       last_error_summary='Provider outcome remained ambiguous beyond the stored idempotency guarantee',locked_until=null,processing_token=null,
       claimed_from_status=null,provider_call_phase='idle',provider_call_is_ambiguous_retry=false,provider_call_started_at=null,provider_idempotency_expires_at=null,ambiguous_since=null
       where id=p_outbox_id;
     return;
   end if;
-  if not ((v.status in ('waiting_recipient','queued') and v.next_attempt_at<=clock_timestamp()) or
-          (v.status='processing' and v.locked_until<=clock_timestamp() and (v.provider_call_phase='idle' or v.provider_idempotency_expires_at>clock_timestamp()))) then return; end if;
   v_previous=v.status;
   update public.notification_outbox set status='processing',locked_until=clock_timestamp()+make_interval(secs=>p_lease_seconds),
     processing_token=p_token,claimed_from_status=case when v.status='processing' then v.claimed_from_status else v.status end,
@@ -294,6 +301,12 @@ begin
     (n.status='processing' and n.locked_until<=clock_timestamp())
     order by coalesce(n.locked_until,n.next_attempt_at),n.created_at limit p_batch_size for update skip locked
   loop
+    if v.created_at<=clock_timestamp()-interval '7 days' then
+      update public.notification_outbox set status='dead',terminal_at=clock_timestamp(),last_error_code='active_retention_expired',
+        last_error_summary='Notification exceeded the seven-day active retention limit',locked_until=null,processing_token=null,
+        claimed_from_status=null,provider_call_phase='idle',provider_call_is_ambiguous_retry=false,provider_call_started_at=null,provider_idempotency_expires_at=null,ambiguous_since=null where id=v.id;
+      continue;
+    end if;
     if v.status='processing' and v.provider_call_phase='in_flight' and v.provider_idempotency_expires_at<=clock_timestamp() then
       update public.notification_outbox set status='dead',terminal_at=clock_timestamp(),last_error_code='provider_idempotency_expired',
         last_error_summary='Provider outcome remained ambiguous beyond the stored idempotency guarantee',locked_until=null,processing_token=null,
@@ -308,6 +321,28 @@ begin
     outbox_id=v.id; previous_status=v.status; resume_provider_call_phase=v.provider_call_phase; processing_token=v_token; locked_until=v_until;
     return next;
   end loop;
+end $$;
+
+create function public.notification_outbox_expire_claimed(p_outbox_id uuid,p_token uuid,p_error_code text)
+returns boolean language plpgsql security definer set search_path='' as $$
+declare v public.notification_outbox%rowtype;
+begin
+  if p_error_code not in ('active_retention_expired','provider_idempotency_expired') then raise exception 'unsupported claimed expiry code'; end if;
+  select * into v from public.notification_outbox
+    where id=p_outbox_id and status='processing' and processing_token=p_token for update;
+  if not found then return false; end if;
+  if p_error_code='active_retention_expired' and v.created_at>clock_timestamp()-interval '7 days' then return false; end if;
+  if p_error_code='provider_idempotency_expired' and
+     (v.provider_call_phase<>'in_flight' or v.provider_idempotency_expires_at>clock_timestamp()) then return false; end if;
+  update public.notification_outbox set status='dead',terminal_at=clock_timestamp(),last_error_code=p_error_code,
+    last_error_summary=case p_error_code
+      when 'provider_idempotency_expired' then 'Provider outcome remained ambiguous beyond the stored idempotency guarantee'
+      else 'Notification exceeded the seven-day active retention limit'
+    end,
+    locked_until=null,processing_token=null,claimed_from_status=null,provider_call_phase='idle',
+    provider_call_is_ambiguous_retry=false,provider_call_started_at=null,provider_idempotency_expires_at=null,ambiguous_since=null
+    where id=p_outbox_id;
+  return true;
 end $$;
 
 create function public.notification_outbox_resolve_recipient(p_outbox_id uuid,p_token uuid,p_recipient_email text)
@@ -390,7 +425,7 @@ create function public.notification_outbox_record_provider_failure(p_outbox_id u
 returns boolean language plpgsql security definer set search_path='' as $$
 declare n integer;
 begin
-  if p_error_code not in ('provider_5xx','provider_rate_limited','provider_rejected') then raise exception 'unsupported provider error code'; end if;
+  if p_error_code not in ('provider_5xx','provider_rate_limited','provider_rejected','notification_invalid') then raise exception 'unsupported provider error code'; end if;
   update public.notification_outbox set
     provider_call_phase=case when provider_call_is_ambiguous_retry then 'in_flight' else 'idle' end,
     provider_call_started_at=case when provider_call_is_ambiguous_retry then provider_call_started_at else null end,
@@ -400,9 +435,27 @@ begin
     last_error_summary=case p_error_code
       when 'provider_5xx' then 'Provider returned a retryable server error'
       when 'provider_rate_limited' then 'Provider rate limit requires a later retry'
-      else 'Provider permanently rejected the notification'
+      when 'provider_rejected' then 'Provider permanently rejected the notification'
+      else 'Notification delivery input is invalid'
     end
     where id=p_outbox_id and status='processing' and processing_token=p_token and provider_call_phase='in_flight';
+  get diagnostics n=row_count; return n=1;
+end $$;
+
+create function public.notification_outbox_terminal_provider_failure(p_outbox_id uuid,p_token uuid,p_error_code text)
+returns boolean language plpgsql security definer set search_path='' as $$
+declare n integer;
+begin
+  if p_error_code not in ('provider_rejected','notification_invalid') then raise exception 'unsupported permanent provider error code'; end if;
+  update public.notification_outbox set status='dead',terminal_at=clock_timestamp(),last_error_code=p_error_code,
+    last_error_summary=case p_error_code
+      when 'provider_rejected' then 'Provider permanently rejected the notification'
+      else 'Notification delivery input is invalid'
+    end,
+    locked_until=null,processing_token=null,claimed_from_status=null,provider_call_phase='idle',
+    provider_call_is_ambiguous_retry=false,provider_call_started_at=null,provider_idempotency_expires_at=null,ambiguous_since=null
+    where id=p_outbox_id and status='processing' and processing_token=p_token
+      and provider_call_phase='in_flight' and not provider_call_is_ambiguous_retry;
   get diagnostics n=row_count; return n=1;
 end $$;
 
@@ -419,10 +472,14 @@ end $$;
 
 create function public.notification_outbox_requeue(p_outbox_id uuid,p_token uuid,p_next_attempt_at timestamptz,p_error_code text)
 returns boolean language plpgsql security definer set search_path='' as $$
-declare n integer;
+declare n integer; v public.notification_outbox%rowtype;
 begin
   if p_next_attempt_at is null or p_next_attempt_at<=clock_timestamp() or p_next_attempt_at>clock_timestamp()+interval '7 days' then raise exception 'next attempt must be within seven days'; end if;
   if p_error_code not in ('provider_5xx','provider_rate_limited','provider_rejected','recipient_lookup_failed') then raise exception 'unsupported requeue error code'; end if;
+  select * into v from public.notification_outbox
+    where id=p_outbox_id and status='processing' and processing_token=p_token for update;
+  if not found then return false; end if;
+  if p_next_attempt_at>v.created_at+interval '7 days' then raise exception 'next attempt must not exceed the notification active boundary'; end if;
   update public.notification_outbox set status='queued',next_attempt_at=p_next_attempt_at,last_error_code=p_error_code,
     last_error_summary=case p_error_code
       when 'provider_5xx' then 'Provider returned a retryable server error'
@@ -438,13 +495,14 @@ create function public.notification_outbox_mark_dead(p_outbox_id uuid,p_token uu
 returns boolean language plpgsql security definer set search_path='' as $$
 declare n integer;
 begin
-  if p_error_code not in ('provider_rejected','provider_timeout','provider_idempotency_expired','active_retention_expired') then raise exception 'unsupported terminal error code'; end if;
+  if p_error_code not in ('provider_rejected','provider_timeout','provider_idempotency_expired','active_retention_expired','notification_invalid') then raise exception 'unsupported terminal error code'; end if;
   update public.notification_outbox set status='dead',terminal_at=clock_timestamp(),last_error_code=p_error_code,
     last_error_summary=case p_error_code
       when 'provider_rejected' then 'Provider permanently rejected the notification'
       when 'provider_timeout' then 'Provider outcome remained uncertain'
       when 'provider_idempotency_expired' then 'Provider outcome remained ambiguous beyond the stored idempotency guarantee'
-      else 'Notification exceeded the seven-day active retention limit'
+      when 'active_retention_expired' then 'Notification exceeded the seven-day active retention limit'
+      else 'Notification delivery input is invalid'
     end,
     locked_until=null,processing_token=null,claimed_from_status=null where id=p_outbox_id and status='processing' and processing_token=p_token and provider_call_phase='idle';
   get diagnostics n=row_count; return n=1;
@@ -551,12 +609,14 @@ end $$;
 revoke all on function public.notification_outbox_enqueue(text,text,jsonb,text,text,text,text,text,text,text,timestamptz) from public,anon,authenticated;
 revoke all on function public.notification_outbox_claim_one(uuid,uuid,integer) from public,anon,authenticated;
 revoke all on function public.notification_outbox_claim_due(integer,integer) from public,anon,authenticated;
+revoke all on function public.notification_outbox_expire_claimed(uuid,uuid,text) from public,anon,authenticated;
 revoke all on function public.notification_outbox_resolve_recipient(uuid,uuid,text) from public,anon,authenticated;
 revoke all on function public.notification_outbox_wait_recipient(uuid,uuid,timestamptz,text) from public,anon,authenticated;
 revoke all on function public.notification_outbox_freeze_request(uuid,uuid,text,text,text,text,text) from public,anon,authenticated;
 revoke all on function public.notification_outbox_begin_provider_call(uuid,uuid,timestamptz) from public,anon,authenticated;
 revoke all on function public.notification_outbox_defer_ambiguous(uuid,uuid,timestamptz) from public,anon,authenticated;
 revoke all on function public.notification_outbox_record_provider_failure(uuid,uuid,text) from public,anon,authenticated;
+revoke all on function public.notification_outbox_terminal_provider_failure(uuid,uuid,text) from public,anon,authenticated;
 revoke all on function public.notification_outbox_mark_sent(uuid,uuid,text) from public,anon,authenticated;
 revoke all on function public.notification_outbox_requeue(uuid,uuid,timestamptz,text) from public,anon,authenticated;
 revoke all on function public.notification_outbox_mark_dead(uuid,uuid,text) from public,anon,authenticated;
@@ -568,12 +628,14 @@ revoke all on function public.notification_outbox_cleanup(integer) from public,a
 grant execute on function public.notification_outbox_enqueue(text,text,jsonb,text,text,text,text,text,text,text,timestamptz) to service_role;
 grant execute on function public.notification_outbox_claim_one(uuid,uuid,integer) to service_role;
 grant execute on function public.notification_outbox_claim_due(integer,integer) to service_role;
+grant execute on function public.notification_outbox_expire_claimed(uuid,uuid,text) to service_role;
 grant execute on function public.notification_outbox_resolve_recipient(uuid,uuid,text) to service_role;
 grant execute on function public.notification_outbox_wait_recipient(uuid,uuid,timestamptz,text) to service_role;
 grant execute on function public.notification_outbox_freeze_request(uuid,uuid,text,text,text,text,text) to service_role;
 grant execute on function public.notification_outbox_begin_provider_call(uuid,uuid,timestamptz) to service_role;
 grant execute on function public.notification_outbox_defer_ambiguous(uuid,uuid,timestamptz) to service_role;
 grant execute on function public.notification_outbox_record_provider_failure(uuid,uuid,text) to service_role;
+grant execute on function public.notification_outbox_terminal_provider_failure(uuid,uuid,text) to service_role;
 grant execute on function public.notification_outbox_mark_sent(uuid,uuid,text) to service_role;
 grant execute on function public.notification_outbox_requeue(uuid,uuid,timestamptz,text) to service_role;
 grant execute on function public.notification_outbox_mark_dead(uuid,uuid,text) to service_role;

@@ -29,6 +29,8 @@ select pg_temp.assert_true(has_table_privilege('service_role','public.notificati
 select pg_temp.assert_true(not has_function_privilege('public','public.notification_outbox_claim_due(integer,integer)','execute'), 'PUBLIC cannot claim');
 select pg_temp.assert_true(not has_function_privilege('anon','public.notification_outbox_enqueue(text,text,jsonb,text,text,text,text,text,text,text,timestamptz)','execute'), 'anon cannot enqueue');
 select pg_temp.assert_true(has_function_privilege('service_role','public.notification_outbox_claim_due(integer,integer)','execute'), 'service role can claim');
+select pg_temp.assert_true(not has_function_privilege('public','public.notification_outbox_expire_claimed(uuid,uuid,text)','execute') and has_function_privilege('service_role','public.notification_outbox_expire_claimed(uuid,uuid,text)','execute'), 'claimed expiry is service-role-only');
+select pg_temp.assert_true(not has_function_privilege('public','public.notification_outbox_terminal_provider_failure(uuid,uuid,text)','execute') and has_function_privilege('service_role','public.notification_outbox_terminal_provider_failure(uuid,uuid,text)','execute'), 'atomic permanent provider terminalization is service-role-only');
 select pg_temp.assert_true(to_regprocedure('public.notification_outbox_suppress_event(text,text)') is not null, 'mode-independent suppression RPC exists');
 select pg_temp.assert_true(to_regprocedure('public.notification_outbox_suppress_event(text,text,text)') is null, 'mode-dependent suppression RPC is absent');
 select pg_temp.assert_true((select count(*)=1 from pg_proc p join pg_namespace n on n.oid=p.pronamespace where n.nspname='public' and p.proname='notification_outbox_suppress_event'), 'only one suppression RPC signature exists');
@@ -162,8 +164,13 @@ update public.notification_outbox set next_attempt_at=clock_timestamp()-interval
 select * from public.notification_outbox_claim_one((select outbox_id from bio),'30000000-0000-4000-8000-000000000003',60);
 select pg_temp.assert_true(public.notification_outbox_resolve_recipient((select outbox_id from bio),'30000000-0000-4000-8000-000000000003','winner@example.com'), 'recipient resolution freezes destination candidate under claim');
 select pg_temp.assert_true((select recipient_email='winner@example.com' from public.notification_outbox where id=(select outbox_id from bio)), 'resolved email stored');
-select pg_temp.assert_true(public.notification_outbox_release_claim((select outbox_id from bio),'30000000-0000-4000-8000-000000000003'), 'resolved claim can release');
-select pg_temp.assert_true((select status='queued' from public.notification_outbox where id=(select outbox_id from bio)), 'resolved recipient releases to queued');
+update public.notification_outbox set locked_until=clock_timestamp()-interval '1 second' where id=(select outbox_id from bio);
+create temp table resolved_reclaim as select * from public.notification_outbox_claim_one((select outbox_id from bio),'30000000-0000-4000-8000-000000000004',60);
+select pg_temp.assert_true((select previous_status='processing' and resume_provider_call_phase='idle' from resolved_reclaim), 'resolved recipient work is reclaimable after a crash');
+select pg_temp.assert_true((select recipient_email='winner@example.com' and processing_token='30000000-0000-4000-8000-000000000004' from public.notification_outbox where id=(select outbox_id from bio)), 'reclaim preserves the persisted recipient under the new token');
+select pg_temp.assert_true(not public.notification_outbox_release_claim((select outbox_id from bio),'30000000-0000-4000-8000-000000000003'), 'pre-crash token cannot release reclaimed recipient work');
+select pg_temp.assert_true(public.notification_outbox_release_claim((select outbox_id from bio),'30000000-0000-4000-8000-000000000004'), 'reclaimed resolved recipient can release');
+select pg_temp.assert_true((select status='queued' and recipient_email='winner@example.com' from public.notification_outbox where id=(select outbox_id from bio)), 'resolved recipient remains frozen when released to queued');
 
 -- Frozen request, provider phases, separate counters, authoritative failure, and terminal capture.
 select * from public.notification_outbox_claim_one((select outbox_id from queued_three),'39000000-0000-4000-8000-000000000001',60);
@@ -195,6 +202,40 @@ select pg_temp.assert_raises(
   'unsupported requeue error code', 'timeout cannot use ordinary requeue'
 );
 select pg_temp.assert_true(public.notification_outbox_requeue((select outbox_id from queued_two),'40000000-0000-4000-8000-000000000001',clock_timestamp()+interval '5 minutes','provider_5xx'), 'idle work requeues');
+
+-- Fresh authoritative permanent provider responses terminalize directly from
+-- in_flight in one token-owned transition. Resumed ambiguity is defer-only.
+create temp table permanent_provider_codes(code text);
+insert into permanent_provider_codes values ('provider_rejected'),('notification_invalid');
+do $$
+declare v_code text; v_id uuid; v_token uuid; v_key text;
+begin
+  for v_code in select code from permanent_provider_codes loop
+    v_token=pg_catalog.gen_random_uuid(); v_key='atomic-permanent:' || v_code;
+    select outbox_id into v_id from public.notification_outbox_enqueue(
+      v_key,'signup','{}',v_key,null,(v_code || '@example.com'), 'welcome','en',v_key,'resend',clock_timestamp()
+    );
+    perform public.notification_outbox_claim_one(v_id,v_token,60);
+    perform pg_temp.assert_true(public.notification_outbox_freeze_request(v_id,v_token,'from@example.com',(v_code || '@example.com'),'Permanent','Permanent','Permanent'),'atomic permanent request freezes');
+    perform pg_temp.assert_true(public.notification_outbox_begin_provider_call(v_id,v_token,clock_timestamp()+interval '1 hour'),'atomic permanent provider call begins');
+    perform pg_temp.assert_true(public.notification_outbox_terminal_provider_failure(v_id,v_token,v_code),'fresh permanent provider result terminalizes atomically');
+    perform pg_temp.assert_true((select status='dead' and last_error_code=v_code and provider_call_phase='idle' and processing_token is null and locked_until is null from public.notification_outbox where id=v_id),'atomic permanent terminalization clears provider and lease state');
+    perform pg_temp.assert_true(not exists(select 1 from public.notification_outbox_claim_one(v_id,pg_catalog.gen_random_uuid(),60)),'atomic permanent terminal row is unclaimable');
+    perform pg_temp.assert_true(not public.notification_outbox_mark_sent(v_id,v_token,'late-provider'),'atomic permanent terminal row cannot later complete sent');
+    perform pg_temp.assert_true(not public.notification_outbox_terminal_provider_failure(v_id,v_token,v_code),'atomic permanent transition rejects stale ownership');
+  end loop;
+end $$;
+
+create temp table atomic_ambiguous as
+select * from public.notification_outbox_enqueue('atomic:ambiguous','signup','{}','atomic-ambiguous',null,'atomic-ambiguous@example.com','welcome','en','atomic-ambiguous','resend',clock_timestamp());
+select * from public.notification_outbox_claim_one((select outbox_id from atomic_ambiguous),'49000000-0000-4000-8000-000000000001',60);
+select public.notification_outbox_freeze_request((select outbox_id from atomic_ambiguous),'49000000-0000-4000-8000-000000000001','from@example.com','atomic-ambiguous@example.com','Ambiguous','Ambiguous','Ambiguous');
+select public.notification_outbox_begin_provider_call((select outbox_id from atomic_ambiguous),'49000000-0000-4000-8000-000000000001',clock_timestamp()+interval '1 hour');
+update public.notification_outbox set locked_until=clock_timestamp()-interval '1 second' where id=(select outbox_id from atomic_ambiguous);
+create temp table atomic_ambiguous_reclaim as select * from public.notification_outbox_claim_one((select outbox_id from atomic_ambiguous),'49000000-0000-4000-8000-000000000002',60);
+select pg_temp.assert_true(not public.notification_outbox_terminal_provider_failure((select outbox_id from atomic_ambiguous),'49000000-0000-4000-8000-000000000002','provider_rejected'), 'resumed ambiguous retry refuses permanent terminalization');
+select pg_temp.assert_true((select status='processing' and provider_call_phase='in_flight' and provider_call_is_ambiguous_retry from public.notification_outbox where id=(select outbox_id from atomic_ambiguous)), 'refused permanent terminalization preserves ambiguity');
+select pg_temp.assert_true(public.notification_outbox_defer_ambiguous((select outbox_id from atomic_ambiguous),'49000000-0000-4000-8000-000000000002',clock_timestamp()+interval '1 second'), 'refused resumed permanent response remains defer-only');
 
 create temp table capture as
 select * from public.notification_outbox_enqueue('capture:event','signup','{}'::jsonb,'capture',null,'capture@example.com','welcome','en','capture','capture',clock_timestamp());
@@ -359,9 +400,59 @@ select public.notification_outbox_freeze_request((select id from public.notifica
 select pg_temp.assert_true(public.notification_outbox_suppress_claimed((select id from public.notification_outbox where event_key_hash=encode(extensions.digest('suppress:claimed','sha256'),'hex')),'68100000-0000-4000-8000-000000000001','manually_suppressed'), 'claimed idle suppression succeeds');
 select pg_temp.assert_true((select status='suppressed' and redacted_at is not null and payload is null and recipient_email is null and source_id is null and provider_idempotency_key is null and frozen_subject is null and frozen_html is null and processing_token is null from public.notification_outbox where event_key_hash=encode(extensions.digest('suppress:claimed','sha256'),'hex')), 'claimed suppression redacts private data and frozen content, then invalidates ownership');
 
--- Retention: active age is created_at; sent/dead redaction is terminal_at; all
--- rows delete at 90 days from created_at. Tests run as database owner solely to
--- move clocks in this disposable database.
+-- Claim and token-owned transitions enforce retention/provider boundaries
+-- independently of cleanup while preserving unexpired live leases.
+truncate public.notification_outbox;
+select * from public.notification_outbox_enqueue('retention:claim-one','signup','{}','claim-one',null,'claim-one@example.com','welcome','en','claim-one','resend',clock_timestamp());
+update public.notification_outbox set created_at=clock_timestamp()-interval '7 days' where source_id='claim-one';
+select pg_temp.assert_true(not exists(select 1 from public.notification_outbox_claim_one((select id from public.notification_outbox where source_id='claim-one'),'72000000-0000-4000-8000-000000000001',60)), 'claim_one does not return retention-expired due work');
+select pg_temp.assert_true((select status='dead' and last_error_code='active_retention_expired' from public.notification_outbox where source_id='claim-one'), 'claim_one terminalizes retention-expired due work');
+
+select * from public.notification_outbox_enqueue('retention:claim-due','signup','{}','claim-due',null,'claim-due@example.com','welcome','en','claim-due','resend',clock_timestamp());
+update public.notification_outbox set created_at=clock_timestamp()-interval '7 days' where source_id='claim-due';
+select * from public.notification_outbox_claim_due(10,60);
+select pg_temp.assert_true((select status='dead' and last_error_code='active_retention_expired' from public.notification_outbox where source_id='claim-due'), 'claim_due terminalizes retention-expired due work');
+
+select * from public.notification_outbox_enqueue('retention:owned-idle','signup','{}','owned-idle',null,'owned-idle@example.com','welcome','en','owned-idle','resend',clock_timestamp());
+select * from public.notification_outbox_claim_one((select id from public.notification_outbox where source_id='owned-idle'),'72100000-0000-4000-8000-000000000001',60);
+update public.notification_outbox set created_at=clock_timestamp()-interval '7 days' where source_id='owned-idle';
+select pg_temp.assert_true(not exists(select 1 from public.notification_outbox_claim_one((select id from public.notification_outbox where source_id='owned-idle'),'72100000-0000-4000-8000-000000000002',60)), 'claim_one preserves an unexpired live lease');
+select pg_temp.assert_true((select status='processing' and processing_token='72100000-0000-4000-8000-000000000001' from public.notification_outbox where source_id='owned-idle'), 'live lease ownership is unchanged');
+select pg_temp.assert_true(public.notification_outbox_expire_claimed((select id from public.notification_outbox where source_id='owned-idle'),'72100000-0000-4000-8000-000000000001','active_retention_expired'), 'owner expires idle work at active retention boundary');
+
+select * from public.notification_outbox_enqueue('retention:active-flight','signup','{}','active-flight',null,'active-flight@example.com','welcome','en','active-flight','resend',clock_timestamp());
+select * from public.notification_outbox_claim_one((select id from public.notification_outbox where source_id='active-flight'),'72150000-0000-4000-8000-000000000001',60);
+select public.notification_outbox_freeze_request((select id from public.notification_outbox where source_id='active-flight'),'72150000-0000-4000-8000-000000000001','from@example.com','active-flight@example.com','Flight','Flight','Flight');
+select public.notification_outbox_begin_provider_call((select id from public.notification_outbox where source_id='active-flight'),'72150000-0000-4000-8000-000000000001',clock_timestamp()+interval '1 hour');
+update public.notification_outbox set created_at=clock_timestamp()-interval '7 days' where source_id='active-flight';
+select pg_temp.assert_true(public.notification_outbox_expire_claimed((select id from public.notification_outbox where source_id='active-flight'),'72150000-0000-4000-8000-000000000001','active_retention_expired'), 'owner expires in-flight work at active retention boundary');
+select pg_temp.assert_true((select status='dead' and provider_call_phase='idle' and last_error_code='active_retention_expired' from public.notification_outbox where source_id='active-flight'), 'active retention safely terminalizes in-flight work');
+
+select * from public.notification_outbox_enqueue('retention:owned-flight','signup','{}','owned-flight',null,'owned-flight@example.com','welcome','en','owned-flight','resend',clock_timestamp());
+select * from public.notification_outbox_claim_one((select id from public.notification_outbox where source_id='owned-flight'),'72200000-0000-4000-8000-000000000001',60);
+select public.notification_outbox_freeze_request((select id from public.notification_outbox where source_id='owned-flight'),'72200000-0000-4000-8000-000000000001','from@example.com','owned-flight@example.com','Flight','Flight','Flight');
+select public.notification_outbox_begin_provider_call((select id from public.notification_outbox where source_id='owned-flight'),'72200000-0000-4000-8000-000000000001',clock_timestamp()+interval '1 hour');
+select pg_temp.assert_true(not public.notification_outbox_expire_claimed((select id from public.notification_outbox where source_id='owned-flight'),'72200000-0000-4000-8000-000000000001','provider_idempotency_expired'), 'owner cannot expire ambiguity before its stored boundary');
+update public.notification_outbox set provider_idempotency_expires_at=clock_timestamp()-interval '1 second' where source_id='owned-flight';
+select pg_temp.assert_true(public.notification_outbox_expire_claimed((select id from public.notification_outbox where source_id='owned-flight'),'72200000-0000-4000-8000-000000000001','provider_idempotency_expired'), 'owner expires in-flight ambiguity at stored boundary');
+select pg_temp.assert_true((select status='dead' and last_error_code='provider_idempotency_expired' from public.notification_outbox where source_id='owned-flight'), 'owned in-flight expiry is terminal');
+
+select * from public.notification_outbox_enqueue('invalid:terminal','signup','{}','invalid-terminal',null,'invalid@example.com','welcome','en','invalid-terminal','resend',clock_timestamp());
+select * from public.notification_outbox_claim_one((select id from public.notification_outbox where source_id='invalid-terminal'),'72300000-0000-4000-8000-000000000001',60);
+select pg_temp.assert_true(public.notification_outbox_mark_dead((select id from public.notification_outbox where source_id='invalid-terminal'),'72300000-0000-4000-8000-000000000001','notification_invalid'), 'deterministic invalid idle work terminates');
+select pg_temp.assert_true((select status='dead' and last_error_code='notification_invalid' and last_error_summary='Notification delivery input is invalid' from public.notification_outbox where source_id='invalid-terminal'), 'invalid terminal detail is allowlisted');
+
+select * from public.notification_outbox_enqueue('requeue:active-bound','signup','{}','requeue-active-bound',null,'bound@example.com','welcome','en','requeue-active-bound','resend',clock_timestamp());
+select * from public.notification_outbox_claim_one((select id from public.notification_outbox where source_id='requeue-active-bound'),'72400000-0000-4000-8000-000000000001',60);
+update public.notification_outbox set created_at=clock_timestamp()-interval '6 days' where source_id='requeue-active-bound';
+select pg_temp.assert_raises(
+  format($q$select public.notification_outbox_requeue('%s','72400000-0000-4000-8000-000000000001',clock_timestamp()+interval '2 days','provider_5xx')$q$,(select id from public.notification_outbox where source_id='requeue-active-bound')),
+  'active boundary', 'token-owned requeue rejects a timestamp beyond the row active boundary'
+);
+select pg_temp.assert_true((select status='processing' and processing_token='72400000-0000-4000-8000-000000000001' from public.notification_outbox where source_id='requeue-active-bound'), 'rejected out-of-bound requeue preserves ownership');
+
+-- Remaining retention behavior uses terminal_at for redaction, created_at for
+-- cleanup, and owner-only clock changes in this disposable database.
 truncate public.notification_outbox;
 select * from public.notification_outbox_enqueue('retention:active','signup','{"private":true}','a',null,'active@example.com','welcome','en','a','resend',clock_timestamp());
 update public.notification_outbox set created_at=clock_timestamp()-interval '7 days 1 second', updated_at=clock_timestamp()-interval '7 days 1 second';
