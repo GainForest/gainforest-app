@@ -748,6 +748,19 @@ begin
   return pg_catalog.jsonb_build_object('outbox_id',v.outbox_id,'status','suppressed','retryable',false,'handled_manually',true);
 end $$;
 
+create function public.notification_outbox_health()
+returns jsonb language sql stable security definer set search_path='' as $$
+  select pg_catalog.jsonb_build_object(
+    'waiting_recipient',count(*) filter (where status='waiting_recipient'),
+    'queued',count(*) filter (where status='queued'),
+    'processing',count(*) filter (where status='processing'),
+    'dead',count(*) filter (where status='dead' and template_key is not null),
+    'oldest_due_age_seconds',coalesce(greatest(0,extract(epoch from (clock_timestamp()-min(next_attempt_at) filter (where status in ('waiting_recipient','queued') and next_attempt_at<=clock_timestamp())))::bigint),0)
+  )
+  from public.notification_outbox
+  where status in ('waiting_recipient','queued','processing','dead')
+$$;
+
 create function public.notification_outbox_cleanup(p_batch_size integer)
 returns table(active_expired integer,redacted integer,deleted integer)
 language plpgsql security definer set search_path='' as $$
@@ -807,6 +820,7 @@ revoke all on function public.notification_invitation_create(uuid,text,text,text
 revoke all on function public.notification_invitation_close(uuid,text,text,text) from public,anon,authenticated;
 revoke all on function public.notification_invitation_retry(uuid) from public,anon,authenticated;
 revoke all on function public.notification_bioblitz_mark_handled(text,text) from public,anon,authenticated;
+revoke all on function public.notification_outbox_health() from public,anon,authenticated;
 revoke all on function public.notification_outbox_cleanup(integer) from public,anon,authenticated;
 
 grant execute on function public.notification_outbox_enqueue(text,text,jsonb,text,text,text,text,text,text,timestamptz) to service_role;
@@ -830,4 +844,5 @@ grant execute on function public.notification_invitation_create(uuid,text,text,t
 grant execute on function public.notification_invitation_close(uuid,text,text,text) to service_role;
 grant execute on function public.notification_invitation_retry(uuid) to service_role;
 grant execute on function public.notification_bioblitz_mark_handled(text,text) to service_role;
+grant execute on function public.notification_outbox_health() to service_role;
 grant execute on function public.notification_outbox_cleanup(integer) to service_role;

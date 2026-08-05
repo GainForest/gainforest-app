@@ -71,6 +71,7 @@ with expected(signature) as (values
   ('notification_outbox_expire_claimed(uuid, uuid, text)'),
   ('notification_outbox_freeze_request(uuid, uuid, text, text, text, text, text)'),
   ('notification_outbox_guard_immutable()'),
+  ('notification_outbox_health()'),
   ('notification_outbox_mark_dead(uuid, uuid, text)'),
   ('notification_outbox_mark_sent(uuid, uuid, text)'),
   ('notification_outbox_record_provider_failure(uuid, uuid, text)'),
@@ -104,6 +105,7 @@ select pg_temp.assert_true(not has_function_privilege('public','public.notificat
 select pg_temp.assert_true(not has_function_privilege('authenticated','public.notification_invitation_close(uuid,text,text,text)','execute') and has_function_privilege('service_role','public.notification_invitation_close(uuid,text,text,text)','execute'), 'invitation closing is service-role-only');
 select pg_temp.assert_true(not has_function_privilege('anon','public.notification_invitation_retry(uuid)','execute') and has_function_privilege('service_role','public.notification_invitation_retry(uuid)','execute'), 'invitation retry is service-role-only');
 select pg_temp.assert_true(not has_function_privilege('authenticated','public.notification_bioblitz_mark_handled(text,text)','execute') and has_function_privilege('service_role','public.notification_bioblitz_mark_handled(text,text)','execute'), 'BioBlitz manual handling is service-role-only');
+select pg_temp.assert_true(not has_function_privilege('public','public.notification_outbox_health()','execute') and has_function_privilege('service_role','public.notification_outbox_health()','execute'), 'queue health is service-role-only');
 select pg_temp.assert_true(to_regprocedure('extensions.notification_outbox_sha256(bytea)') is not null, 'internal SHA-256 helper exists');
 select pg_temp.assert_true(not has_function_privilege('public','extensions.notification_outbox_sha256(bytea)','execute') and not has_function_privilege('anon','extensions.notification_outbox_sha256(bytea)','execute') and not has_function_privilege('authenticated','extensions.notification_outbox_sha256(bytea)','execute') and not has_function_privilege('service_role','extensions.notification_outbox_sha256(bytea)','execute'), 'internal SHA-256 helper is not directly callable by API roles');
 select pg_temp.assert_true(to_regprocedure('public.notification_outbox_wait_recipient(uuid,uuid,timestamp with time zone,text,text)') is null, 'free-form recipient error summary RPC is absent');
@@ -751,8 +753,17 @@ select pg_temp.assert_raises(
   'unsupported suppression code', 'claimed suppression rejects a NULL error code'
 );
 
+-- Queue health exposes aggregate backlog only, including oldest due age.
+truncate public.notification_outbox;
+select * from public.notification_outbox_enqueue('health:queued','signup','{}','health-q',null,'health@example.com','welcome','en','health-q',clock_timestamp());
+select * from public.notification_outbox_enqueue('health:waiting','bioblitz_winner','{}','health-w','did:plc:winner',null,'bioblitz-winner',null,null,clock_timestamp());
+update public.notification_outbox set next_attempt_at=clock_timestamp()-interval '2 minutes' where source_id='health-q';
+create temp table queue_health as select public.notification_outbox_health() result;
+select pg_temp.assert_true((select (result->>'queued')::integer=1 and (result->>'waiting_recipient')::integer=1 and (result->>'processing')::integer=0 and (result->>'dead')::integer=0 from queue_health), 'queue health returns aggregate status counts');
+select pg_temp.assert_true((select (result->>'oldest_due_age_seconds')::integer between 119 and 125 from queue_health), 'queue health returns bounded oldest due age without row data');
+
 -- Direct invalid states and bounds are rejected by table constraints.
-select pg_temp.assert_raises(format($q$update public.notification_outbox set status='unknown' where id='%s'$q$,(select id from public.notification_outbox limit 1)),'notification_outbox_status_check','unknown status rejected');
-select pg_temp.assert_raises(format($q$update public.notification_outbox set processing_run_count=-1 where id='%s'$q$,(select id from public.notification_outbox limit 1)),'notification_outbox_processing_run_count_check','negative processing count rejected');
+select pg_temp.assert_raises(format($q$update public.notification_outbox set status='unknown' where id='%s'$q$,(select id from public.notification_outbox where source_id='health-q')),'notification_outbox_status_check','unknown status rejected');
+select pg_temp.assert_raises(format($q$update public.notification_outbox set processing_run_count=-1 where id='%s'$q$,(select id from public.notification_outbox where source_id='health-q')),'notification_outbox_processing_run_count_check','negative processing count rejected');
 
 select 'notification outbox SQL contracts passed';

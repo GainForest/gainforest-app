@@ -216,6 +216,25 @@ notification_outbox_enqueue(
 
 Active work expires after seven days. Sent rows clear private delivery data seven days after becoming terminal; dead rows clear it after fourteen days. Cleared terminal tombstones preserve event deduplication until cleanup deletes the row 90 days after creation.
 
+## Recovery and monitoring
+
+cron-job.org calls the recovery route every five minutes:
+
+```text
+GET https://<app-host>/api/internal/notifications/drain
+Authorization: Bearer <NOTIFICATION_CRON_SECRET>
+```
+
+`NOTIFICATION_CRON_SECRET` must contain at least 16 characters. The route rejects a missing or invalid secret before constructing the runtime, reconciles recent BioBlitz awards, runs retention cleanup, processes a bounded batch, and returns aggregate counts only.
+
+`notification_outbox_health()` reports waiting, queued, processing, and uncleared dead counts plus the oldest due age. Alert on non-2xx recovery responses, repeated incomplete reconciliation, rising dead or queued counts, and oldest due age above two recovery intervals. Responses and structured logs must not include recipients, payloads, frozen content, provider bodies, or secrets.
+
+To stop all notification email, set `EMAIL_DISABLED=true`. This prevents new enqueue operations and provider calls without deleting durable rows. Do not drop or reverse the migration while retained rows exist.
+
+Invitation creation and notification enqueue share one transaction. Email failure never removes the invitation. Eligible owners and admins can expedite a safely retryable invitation with a database-enforced cooldown. Acceptance, cancellation, and expiry suppress unsent work.
+
+BioBlitz awards succeed independently of email. When an address is unavailable, moderators are told that manual contact may be needed. Marking an award handled records the first moderator and preserves a suppression tombstone so reconciliation cannot send it later.
+
 ## Validation
 
 Run:

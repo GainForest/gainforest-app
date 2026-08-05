@@ -30,6 +30,7 @@ export function createDrainRuntime(environment: Environment = process.env) {
     : rejectDisabledNotificationProcessing;
 
   return {
+    health: () => repository.health(),
     drain: (invocationDeadline: Date) => drainNotifications(invocationDeadline, {
       config,
       clock,
