@@ -19,11 +19,9 @@ export const runtime = "nodejs";
  *
  * GET  → per ended round, whether each of the two winner badges has been
  *        awarded yet (drives the "Award winner badges" button on /bioblitz).
- * POST → { roundId }: award the round's winners their badges. The winners are
- *        recomputed server-side from the same data the public page shows —
- *        most observations goes to the round's top collector, best picture to
- *        the owner of the round's most-liked photo — so nothing about the
- *        recipients is ever trusted from the request body.
+ * POST → { roundId }: snapshots the round's computed winners into durable
+ *        recognition awards. Nothing about recipients or the winning picture
+ *        is trusted from the request body.
  */
 
 type RoundAwardState = { id: number; mostImages: boolean; bestPicture: boolean };
@@ -87,10 +85,9 @@ export async function POST(request: Request) {
   const cookie = getAuthForwardCookie(headerList.get("cookie"));
 
   try {
-    // Hand-pinned winners (BIOBLITZ_ROUND_OVERRIDES) take precedence; only
-    // prizes without a pin are recomputed from the live data (test/hidden
-    // accounts and post-round backdated uploads are already excluded by the
-    // board tally).
+    // Hand-pinned winners take precedence; only prizes without a pin are
+    // recomputed from the final board. The selected recipient and picture are
+    // then snapshotted into a durable recognition award.
     const pinned = frozenWinnersFor(round, null);
     const [board, liked] = await Promise.all([
       // Weekly counting records are governance input to this irreversible
@@ -105,11 +102,15 @@ export async function POST(request: Request) {
       pinned.mostObservations !== undefined
         ? pinned.mostObservations
         : topCollector && { did: topCollector.did, count: topCollector.count as number | null };
+    const computedBestPicture = liked?.[0] ?? null;
     const bestPicture =
       pinned.bestPicture !== undefined
-        ? pinned.bestPicture
-        : liked?.[0]
-          ? { did: liked[0].record.did, count: null }
+        ? pinned.bestPicture && {
+            did: pinned.bestPicture.did,
+            winningObservationUri: round.bestPicture?.winningObservationUri,
+          }
+        : computedBestPicture
+          ? { did: computedBestPicture.record.did, winningObservationUri: computedBestPicture.record.atUri }
           : null;
     if (!mostObservations && !bestPicture) {
       return Response.json({ error: "This round has no winners to award yet." }, { status: 409 });
@@ -132,6 +133,7 @@ export async function POST(request: Request) {
         bestPicture.did,
         bioblitzBadgeKey("best-picture", round.id),
         `BioBlitz ${round.label} winner — best picture.`,
+        bestPicture.winningObservationUri,
       );
     }
 

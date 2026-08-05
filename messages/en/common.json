@@ -1334,6 +1334,46 @@
       "remove": "The account could not be restored to the leaderboard. Please try again."
     }
   },
+  "adminBioblitzDashboard": {
+    "roundsAria": "BioBlitz rounds",
+    "round": "Round {round}",
+    "status": {
+      "upcoming": "Upcoming",
+      "live": "Live",
+      "ended": "Closed"
+    },
+    "observations": "{count, plural, one {# observation} other {# observations}}",
+    "ignored": "Ignored",
+    "counted": "Counted",
+    "notCounted": "Not counted",
+    "prize": {
+      "most-observations": "Most observations",
+      "best-picture": "Best picture"
+    },
+    "openProfile": "Open profile",
+    "joined": "Joined {date}",
+    "download": {
+      "most-observations": "Most-observations kit",
+      "best-picture": "Best-picture kit"
+    },
+    "ignore": "Ignore",
+    "countAgain": "Count again",
+    "loading": "Loading BioBlitz registrants",
+    "empty": "No registrants",
+    "loadError": "Couldn't load this round.",
+    "unnamed": "Unnamed account",
+    "errors": {
+      "notSignedIn": "Sign in again to continue.",
+      "forbidden": "You don't have access to this BioBlitz dashboard.",
+      "finalized": "This round is closed, so its observation count can't change.",
+      "roundNotFound": "That BioBlitz round isn't available.",
+      "winnerNotFound": "This winner package isn't available yet.",
+      "ignore": "The observation-count change couldn't be saved. Please try again.",
+      "restore": "The observation count couldn't be restored. Please try again.",
+      "download": "The winner package couldn't be prepared. Please try again.",
+      "load": "Couldn't load this round. Please try again."
+    }
+  },
   "adminBlockedDomains": {
     "title": "Blocked addresses",
     "description": "Server addresses whose accounts are kept off the public site. Everything they publish — organizations, projects, observations, posts — is hidden from the explorer, search, the globe, the feed and every public count.",

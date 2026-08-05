@@ -8,7 +8,7 @@ import { useTranslations } from "next-intl";
 import { ArchiveIcon, AwardIcon, BotIcon, Building2Icon, FlaskConicalIcon, LeafIcon, ServerOffIcon, SproutIcon, UserRoundIcon, WalletIcon } from "lucide-react";
 import { AdminOnlyIndicator } from "@/app/_components/AdminOnlyIndicator";
 import type { GrantApplicant } from "@/app/_lib/grants";
-import type { BioblitzRegistrant, BioblitzRound } from "@/app/_lib/bioblitz";
+import type { BioblitzRound } from "@/app/_lib/bioblitz";
 import type { BioblitzExclusionAdminRow } from "@/app/_lib/bioblitz-exclusions";
 import type { BlockedDomainAdminRow } from "@/app/_lib/blocked-domains";
 import type { FlaggedTestAccount } from "@/app/internal/badges/_lib/test-accounts";
@@ -26,8 +26,9 @@ import { AdminDataJobsPanel, type AdminDataJobRow } from "./AdminDataJobsPanel";
 import { AdminFacilitatorPanel } from "./AdminFacilitatorPanel";
 import { EndorsersManager } from "./EndorsersManager";
 import { AwardEndorsementsPanel } from "./AwardEndorsementsPanel";
-import { AdminBioblitzExclusions } from "./AdminBioblitzExclusions";
+import { AdminBioblitzDashboard } from "./AdminBioblitzDashboard";
 import { AdminBlockedDomains, type BuiltinBlockedDomain } from "./AdminBlockedDomains";
+import type { BioblitzAdminRoundData } from "../_lib/bioblitz-dashboard-types";
 
 export type AdminTab = "taina" | "dataJobs" | "grants" | "bioblitz" | "testAccounts" | "blockedDomains" | "endorsers" | "awardEndorsements" | "facilitator";
 
@@ -42,12 +43,12 @@ export function AdminModerationDashboard({
   testAccounts,
   testRecords,
   grantApplicants,
-  bioblitzRegistrants,
+  bioblitzRegistrantCount,
+  initialBioblitzData,
   bioblitzExclusions,
-  finalizedBioblitzRoundIds,
   bioblitzRounds,
   defaultBioblitzRoundId,
-  canManageBioblitzExclusions,
+  canManageBioblitz,
   builtinBlockedDomains,
   blockedDomains,
   canManageBlockedDomains,
@@ -63,13 +64,14 @@ export function AdminModerationDashboard({
   testAccounts: FlaggedTestAccount[];
   testRecords: FlaggedTestRecord[];
   grantApplicants: GrantApplicant[];
-  bioblitzRegistrants: BioblitzRegistrant[];
+  /** The current round's roster count, shown in the parent tab. */
+  bioblitzRegistrantCount: number;
+  initialBioblitzData: BioblitzAdminRoundData | null;
   /** null = weekly counting records could not be loaded safely. */
   bioblitzExclusions: BioblitzExclusionAdminRow[] | null;
-  finalizedBioblitzRoundIds: number[];
   bioblitzRounds: BioblitzRound[];
   defaultBioblitzRoundId: number;
-  canManageBioblitzExclusions: boolean;
+  canManageBioblitz: boolean;
   builtinBlockedDomains: BuiltinBlockedDomain[];
   /** null = the blocked address list could not be loaded safely. */
   blockedDomains: BlockedDomainAdminRow[] | null;
@@ -85,7 +87,6 @@ export function AdminModerationDashboard({
   facilitatorStats: FacilitatorStats;
 }) {
   const t = useTranslations("common.adminModeration");
-  const tBioblitzExclusions = useTranslations("common.adminBioblitzExclusions");
   const tBlockedDomains = useTranslations("common.adminBlockedDomains");
   const tTaina = useTranslations("common.adminTaina");
   const tDataJobs = useTranslations("common.adminDataJobs");
@@ -107,7 +108,7 @@ export function AdminModerationDashboard({
     { id: "taina", label: t("tabs.taina"), Icon: BotIcon, count: tainaRows?.length ?? 0 },
     { id: "dataJobs", label: t("tabs.dataJobs"), Icon: ArchiveIcon, count: dataJobRows?.length ?? 0 },
     { id: "grants", label: t("tabs.grants"), Icon: SproutIcon, count: grantApplicants.length },
-    { id: "bioblitz", label: t("tabs.bioblitz"), Icon: LeafIcon, count: bioblitzRegistrants.length },
+    { id: "bioblitz", label: t("tabs.bioblitz"), Icon: LeafIcon, count: bioblitzRegistrantCount },
     { id: "testAccounts", label: t("tabs.testAccounts"), Icon: FlaskConicalIcon, count: testAccounts.length + testRecords.length },
     {
       id: "blockedDomains",
@@ -188,31 +189,13 @@ export function AdminModerationDashboard({
           <GrantApplicantsList applicants={grantApplicants} />
         </AdminPanel>
       ) : tab === "bioblitz" ? (
-        <div className="space-y-5">
-          <AdminPanel
-            Icon={LeafIcon}
-            title={tBioblitzExclusions("title")}
-            description={tBioblitzExclusions("description")}
-            count={bioblitzExclusions?.length ?? 0}
-          >
-            <AdminBioblitzExclusions
-              initial={bioblitzExclusions}
-              finalizedRoundIds={finalizedBioblitzRoundIds}
-              rounds={bioblitzRounds}
-              defaultRoundId={defaultBioblitzRoundId}
-              canManage={canManageBioblitzExclusions}
-            />
-          </AdminPanel>
-          <AdminPanel
-            Icon={LeafIcon}
-            title={t("bioblitz.title")}
-            description={t("bioblitz.description")}
-            count={bioblitzRegistrants.length}
-            footer={t("awardHint")}
-          >
-            <BioblitzRegistrantsList registrants={bioblitzRegistrants} />
-          </AdminPanel>
-        </div>
+        <AdminBioblitzDashboard
+          rounds={bioblitzRounds}
+          defaultRoundId={defaultBioblitzRoundId}
+          initialData={initialBioblitzData}
+          initialExclusions={bioblitzExclusions}
+          canManage={canManageBioblitz}
+        />
       ) : tab === "testAccounts" ? (
         <div className="space-y-5">
           <AdminPanel
@@ -355,31 +338,6 @@ function GrantApplicantsList({ applicants }: { applicants: GrantApplicant[] }) {
               </span>
               {applicant.applicationText ? (
                 <span className="mt-0.5 line-clamp-2 text-sm leading-relaxed text-muted-foreground">{applicant.applicationText}</span>
-              ) : null}
-            </span>
-          </Link>
-        </li>
-      ))}
-    </ul>
-  );
-}
-
-function BioblitzRegistrantsList({ registrants }: { registrants: BioblitzRegistrant[] }) {
-  const t = useTranslations("common.adminModeration");
-  if (registrants.length === 0) return <AdminEmptyState>{t("bioblitz.empty")}</AdminEmptyState>;
-  return (
-    <ul className="divide-y divide-border/70">
-      {registrants.map((registrant) => (
-        <li key={registrant.did} className="py-3 first:pt-0 last:pb-0">
-          <Link
-            href={accountPath(registrant.did)}
-            className="flex min-w-0 items-center gap-3 rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-          >
-            <AdminAvatar url={registrant.avatarUrl} />
-            <span className="flex min-w-0 flex-1 items-baseline gap-2">
-              <span className="truncate font-medium text-foreground">{registrant.displayName || t("unnamed")}</span>
-              {registrant.createdAt ? (
-                <span className="shrink-0 text-xs text-muted-foreground">{formatRelative(registrant.createdAt)}</span>
               ) : null}
             </span>
           </Link>

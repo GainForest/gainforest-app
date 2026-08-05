@@ -1334,6 +1334,46 @@
       "remove": "No se pudo restaurar la cuenta en la clasificación. Inténtalo de nuevo."
     }
   },
+  "adminBioblitzDashboard": {
+    "roundsAria": "Rondas de BioBlitz",
+    "round": "Ronda {round}",
+    "status": {
+      "upcoming": "Próxima",
+      "live": "En curso",
+      "ended": "Finalizada"
+    },
+    "observations": "{count, plural, one {# observación} other {# observaciones}}",
+    "ignored": "Ignorada",
+    "counted": "Cuenta",
+    "notCounted": "No cuenta",
+    "prize": {
+      "most-observations": "Más observaciones",
+      "best-picture": "Mejor foto"
+    },
+    "openProfile": "Abrir perfil",
+    "joined": "Se unió el {date}",
+    "download": {
+      "most-observations": "Kit de más observaciones",
+      "best-picture": "Kit de mejor foto"
+    },
+    "ignore": "Ignorar",
+    "countAgain": "Volver a contar",
+    "loading": "Cargando inscritos de BioBlitz",
+    "empty": "No hay inscritos",
+    "loadError": "No se pudo cargar esta ronda.",
+    "unnamed": "Cuenta sin nombre",
+    "errors": {
+      "notSignedIn": "Vuelve a iniciar sesión para continuar.",
+      "forbidden": "No tienes acceso a este panel de BioBlitz.",
+      "finalized": "Esta ronda ha finalizado, por lo que el conteo no puede cambiar.",
+      "roundNotFound": "Esa ronda de BioBlitz no está disponible.",
+      "winnerNotFound": "El kit de este ganador aún no está disponible.",
+      "ignore": "No se pudo guardar el cambio de conteo. Inténtalo de nuevo.",
+      "restore": "No se pudo restaurar el conteo. Inténtalo de nuevo.",
+      "download": "No se pudo preparar el kit del ganador. Inténtalo de nuevo.",
+      "load": "No se pudo cargar esta ronda. Inténtalo de nuevo."
+    }
+  },
   "adminBlockedDomains": {
     "title": "Direcciones bloqueadas",
     "description": "Direcciones de servidor cuyas cuentas se mantienen fuera del sitio público. Todo lo que publican —organizaciones, proyectos, observaciones, publicaciones— se oculta del explorador, la búsqueda, el globo, el muro y todos los recuentos públicos.",

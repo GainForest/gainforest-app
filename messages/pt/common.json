@@ -1334,6 +1334,46 @@
       "remove": "Não foi possível repor a conta na classificação. Tente novamente."
     }
   },
+  "adminBioblitzDashboard": {
+    "roundsAria": "Rodadas do BioBlitz",
+    "round": "Rodada {round}",
+    "status": {
+      "upcoming": "Próxima",
+      "live": "Em curso",
+      "ended": "Terminada"
+    },
+    "observations": "{count, plural, one {# observação} other {# observações}}",
+    "ignored": "Ignorada",
+    "counted": "Conta",
+    "notCounted": "Não conta",
+    "prize": {
+      "most-observations": "Mais observações",
+      "best-picture": "Melhor foto"
+    },
+    "openProfile": "Abrir perfil",
+    "joined": "Entrou em {date}",
+    "download": {
+      "most-observations": "Kit de mais observações",
+      "best-picture": "Kit de melhor foto"
+    },
+    "ignore": "Ignorar",
+    "countAgain": "Voltar a contar",
+    "loading": "A carregar inscritos do BioBlitz",
+    "empty": "Sem inscritos",
+    "loadError": "Não foi possível carregar esta rodada.",
+    "unnamed": "Conta sem nome",
+    "errors": {
+      "notSignedIn": "Inicie sessão novamente para continuar.",
+      "forbidden": "Não tem acesso a este painel do BioBlitz.",
+      "finalized": "Esta rodada terminou, por isso a contagem de observações não pode mudar.",
+      "roundNotFound": "Essa rodada do BioBlitz não está disponível.",
+      "winnerNotFound": "O kit deste vencedor ainda não está disponível.",
+      "ignore": "Não foi possível guardar a alteração da contagem. Tente novamente.",
+      "restore": "Não foi possível repor a contagem. Tente novamente.",
+      "download": "Não foi possível preparar o kit do vencedor. Tente novamente.",
+      "load": "Não foi possível carregar esta rodada. Tente novamente."
+    }
+  },
   "adminBlockedDomains": {
     "title": "Endereços bloqueados",
     "description": "Endereços de servidor cujas contas ficam fora do site público. Tudo o que publicam — organizações, projetos, observações, publicações — fica oculto do explorador, da busca, do globo, do mural e de todas as contagens públicas.",
