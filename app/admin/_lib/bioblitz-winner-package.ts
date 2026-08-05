@@ -324,6 +324,24 @@ async function fetchPdsImage(
   }
 }
 
+/**
+ * Pin a Node HTTPS lookup to one address that already passed the public-IP
+ * check. Node's auto-family selection requests `{ all: true }`, which needs
+ * an address-list callback even though we deliberately return just one target.
+ */
+export function createPinnedPdsLookup(
+  address: string,
+  family: 4 | 6,
+): NonNullable<RequestOptions["lookup"]> {
+  return (_hostname, options, callback) => {
+    if (options.all) {
+      callback(null, [{ address, family }]);
+      return;
+    }
+    callback(null, address, family);
+  };
+}
+
 function requestPinnedBlob(
   target: PinnedPdsTarget,
   did: string,
@@ -333,9 +351,7 @@ function requestPinnedBlob(
   const url = new URL("/xrpc/com.atproto.sync.getBlob", target.url);
   url.searchParams.set("did", did);
   url.searchParams.set("cid", cid);
-  const lookup: NonNullable<RequestOptions["lookup"]> = (_hostname, _options, callback) => {
-    callback(null, target.address, target.family);
-  };
+  const lookup = createPinnedPdsLookup(target.address, target.family);
 
   return new Promise((resolve, reject) => {
     const request = httpsRequest(
