@@ -11,6 +11,12 @@ import {
   useState,
 } from "react";
 import { useLocale, useTranslations } from "next-intl";
+import {
+  DatabaseIcon,
+  HeartHandshakeIcon,
+  MegaphoneIcon,
+  SparklesIcon,
+} from "lucide-react";
 import { stripLocaleFromPathname } from "@/lib/i18n/routing";
 import { ACTIVE_MANAGE_CONTEXT_KEY, accountManageBasePath } from "@/lib/links";
 import { hasLabelEvidence, isUnidentifiedRecord } from "@/app/labeler/_lib/evidence";
@@ -48,6 +54,16 @@ const VIEWPORT_PADDING = 12;
 const DRAG_THRESHOLD_PX = 4;
 const STORAGE_KEY = "gainforest.floatingTaina.position.v1";
 const MINIMIZED_STORAGE_KEY = "gainforest.floatingTaina.minimized.v1";
+// Bump this id whenever the curated What's New items change. An unread release
+// appears beside Tainá once. Opening, closing, or minimizing it acknowledges
+// that release across refreshes and tabs.
+const WHATS_NEW_RELEASE_ID = "2026-07-06";
+const WHATS_NEW_STORAGE_KEY = "gainforest.floatingTaina.whatsNewSeen.v1";
+const WHATS_NEW_ITEMS = [
+  { id: "guidedHelp", Icon: SparklesIcon },
+  { id: "fieldData", Icon: DatabaseIcon },
+  { id: "donations", Icon: HeartHandshakeIcon },
+] as const;
 // Active tour survives full page loads (locale redirects, hard navigations)
 // via sessionStorage — the widget rehydrates it on mount.
 const TOUR_STORAGE_KEY = "gainforest.floatingTaina.tour.v1";
@@ -134,6 +150,7 @@ interface Rect {
 }
 type PanelView =
   | { kind: "home" }
+  | { kind: "whatsNew" }
   | { kind: "guide"; guideId: string }
   // Tainá opening with a tip the visitor hasn't seen yet (sprite click).
   | { kind: "tip"; tipId: string };
@@ -290,6 +307,7 @@ export function FloatingTainaGuide() {
   const [input, setInput] = useState("");
   const [streaming, setStreaming] = useState(false);
   const [minimized, setMinimized] = useState(false);
+  const [hasUnreadWhatsNew, setHasUnreadWhatsNew] = useState(false);
   // Whether the signed-in user owns at least one project. `null` = unknown
   // (signed out, not yet checked, or the check failed) — in that case we
   // don't second-guess the user. Refreshed every time a project-dependent
@@ -335,6 +353,11 @@ export function FloatingTainaGuide() {
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const panelBodyRef = useRef<HTMLDivElement>(null);
+  const whatsNewTriggerRef = useRef<HTMLButtonElement>(null);
+  const spriteRef = useRef<HTMLDivElement>(null);
+  const restoreWhatsNewFocusRef = useRef(false);
+  const whatsNewBackRef = useRef<HTMLButtonElement>(null);
+  const restoreButtonRef = useRef<HTMLButtonElement>(null);
   const savedPositionRef = useRef<Position | null>(null);
   const lastSpritePosRef = useRef<Position>({ x: 0, y: 0 });
   // Which tour step we've already auto-navigated for. Guards against redirect
@@ -377,8 +400,13 @@ export function FloatingTainaGuide() {
     setPosition(clampToViewport(saved ?? defaultPosition()));
     try {
       setMinimized(window.localStorage.getItem(MINIMIZED_STORAGE_KEY) === "1");
+      setHasUnreadWhatsNew(
+        window.localStorage.getItem(WHATS_NEW_STORAGE_KEY) !== WHATS_NEW_RELEASE_ID,
+      );
     } catch {
-      // ignore storage errors
+      // Storage can be unavailable in private browsing. Keep the entry usable,
+      // but never auto-open it.
+      setHasUnreadWhatsNew(true);
     }
     setMounted(true);
   }, []);
@@ -388,6 +416,18 @@ export function FloatingTainaGuide() {
     const onResize = () => setPosition((p) => clampToViewport(p));
     window.addEventListener("resize", onResize);
     return () => window.removeEventListener("resize", onResize);
+  }, [mounted]);
+
+  // Keep the unread dot in sync when the release is opened in another tab.
+  useEffect(() => {
+    if (!mounted) return;
+    const onStorage = (event: StorageEvent) => {
+      if (event.key === WHATS_NEW_STORAGE_KEY) {
+        setHasUnreadWhatsNew(event.newValue !== WHATS_NEW_RELEASE_ID);
+      }
+    };
+    window.addEventListener("storage", onStorage);
+    return () => window.removeEventListener("storage", onStorage);
   }, [mounted]);
 
   // Persist position (skip while a tour drives the sprite around).
@@ -425,14 +465,45 @@ export function FloatingTainaGuide() {
     panelBodyRef.current?.scrollTo({ top: 0 });
   }, [view, open]);
 
+  const acknowledgeWhatsNew = useCallback(() => {
+    setHasUnreadWhatsNew(false);
+    try {
+      window.localStorage.setItem(WHATS_NEW_STORAGE_KEY, WHATS_NEW_RELEASE_ID);
+    } catch {
+      // The widget still works when storage is unavailable.
+    }
+  }, []);
+
+  const closePanel = useCallback(() => {
+    const restoreWhatsNewFocus = view.kind === "whatsNew";
+    if (restoreWhatsNewFocus) acknowledgeWhatsNew();
+    setOpen(false);
+    setView({ kind: "home" });
+    if (restoreWhatsNewFocus) restoreWhatsNewFocusRef.current = true;
+  }, [acknowledgeWhatsNew, view.kind]);
+
+  useEffect(() => {
+    if (open || !restoreWhatsNewFocusRef.current) return;
+    restoreWhatsNewFocusRef.current = false;
+    (whatsNewTriggerRef.current ?? spriteRef.current)?.focus();
+  }, [open]);
+
+  const minimizePanel = useCallback(() => {
+    if (hasUnreadWhatsNew) acknowledgeWhatsNew();
+    setOpen(false);
+    setView({ kind: "home" });
+    setMinimized(true);
+    window.requestAnimationFrame(() => restoreButtonRef.current?.focus());
+  }, [acknowledgeWhatsNew, hasUnreadWhatsNew]);
+
   useEffect(() => {
     if (!open) return;
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setOpen(false);
+      if (e.key === "Escape") closePanel();
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [open]);
+  }, [open, closePanel]);
 
   // Persist the minimized preference.
   useEffect(() => {
@@ -449,12 +520,22 @@ export function FloatingTainaGuide() {
   useEffect(() => {
     const onOpen = () => {
       setMinimized(false);
+      setView({ kind: "home" });
       setOpen(true);
       setWaveActive(true);
     };
     window.addEventListener("taina:open", onOpen);
     return () => window.removeEventListener("taina:open", onOpen);
   }, []);
+
+  const openWhatsNew = useCallback(() => {
+    acknowledgeWhatsNew();
+    setMinimized(false);
+    setView({ kind: "whatsNew" });
+    setOpen(true);
+    setWaveActive(true);
+    window.requestAnimationFrame(() => whatsNewBackRef.current?.focus());
+  }, [acknowledgeWhatsNew]);
 
   // Opening a guide checks the visitor's session (every tour needs one) and,
   // for project-dependent guides (donation setup), whether the user actually
@@ -756,9 +837,20 @@ export function FloatingTainaGuide() {
     }
     if (streaming) return "review";
     if (tour) return spotRect ? "waving" : "waiting";
-    if (waveActive || activeTip !== null || helpObs) return "waving";
+    if (waveActive || hasUnreadWhatsNew || activeTip !== null || helpObs) return "waving";
     return "idle";
-  }, [dragging, dragDirection, streaming, waveActive, tour, spotRect, tourMoving, activeTip, helpObs]);
+  }, [
+    dragging,
+    dragDirection,
+    streaming,
+    waveActive,
+    hasUnreadWhatsNew,
+    tour,
+    spotRect,
+    tourMoving,
+    activeTip,
+    helpObs,
+  ]);
 
   const markFirstFrame = useCallback(() => setFirstFramePainted(true), []);
 
@@ -1075,6 +1167,7 @@ export function FloatingTainaGuide() {
   if (minimized && !tour) {
     return (
       <button
+        ref={restoreButtonRef}
         type="button"
         onClick={() => {
           setMinimized(false);
@@ -1176,17 +1269,25 @@ export function FloatingTainaGuide() {
       {open && !tour ? (
         <div
           role="dialog"
-          aria-label={`${TAINA_SIM.name} — ${t("role")}`}
+          aria-label={
+            view.kind === "whatsNew"
+              ? t("whatsNew.title")
+              : `${TAINA_SIM.name} — ${t("role")}`
+          }
           className="fixed z-[60] flex flex-col overflow-hidden rounded-2xl border border-border bg-background shadow-xl"
           style={{ left: panelPos.x, top: panelPos.y, width: PANEL_W, height: PANEL_H }}
           data-no-drag
         >
           {/* header */}
           <div className="flex items-center gap-3 border-b border-border px-3 py-2.5">
-            {view.kind === "guide" ? (
+            {view.kind !== "home" ? (
               <button
+                ref={view.kind === "whatsNew" ? whatsNewBackRef : undefined}
                 type="button"
-                onClick={() => setView({ kind: "home" })}
+                onClick={() => {
+                  setView({ kind: "home" });
+                  window.requestAnimationFrame(() => inputRef.current?.focus());
+                }}
                 className="grid h-7 w-7 shrink-0 place-items-center rounded-full text-foreground/60 hover:bg-foreground/5 hover:text-foreground"
                 aria-label={t("back")}
               >
@@ -1203,9 +1304,11 @@ export function FloatingTainaGuide() {
             )}
             <div className="min-w-0 flex-1">
               <div className="truncate text-[15px] font-medium text-foreground">
-                {view.kind === "guide" && guideView
-                  ? guidesT(`${guideView.id}.title`)
-                  : TAINA_SIM.name}
+                {view.kind === "whatsNew"
+                  ? t("whatsNew.title")
+                  : view.kind === "guide" && guideView
+                    ? guidesT(`${guideView.id}.title`)
+                    : TAINA_SIM.name}
               </div>
               {view.kind === "home" || view.kind === "tip" ? (
                 <div className="truncate text-[11px] text-foreground/55">{t("role")}</div>
@@ -1213,10 +1316,7 @@ export function FloatingTainaGuide() {
             </div>
             <button
               type="button"
-              onClick={() => {
-                setOpen(false);
-                setMinimized(true);
-              }}
+              onClick={minimizePanel}
               className="grid h-7 w-7 place-items-center rounded-full text-foreground/55 hover:bg-foreground/5 hover:text-foreground"
               aria-label={t("minimizeLabel")}
               title={t("minimizeLabel")}
@@ -1225,7 +1325,7 @@ export function FloatingTainaGuide() {
             </button>
             <button
               type="button"
-              onClick={() => setOpen(false)}
+              onClick={closePanel}
               className="grid h-7 w-7 place-items-center rounded-full text-foreground/55 hover:bg-foreground/5 hover:text-foreground"
               aria-label={t("close")}
             >
@@ -1309,6 +1409,32 @@ export function FloatingTainaGuide() {
                   </div>
                 </div>
               </>
+            ) : view.kind === "whatsNew" ? (
+              <section aria-labelledby="taina-whats-new-title">
+                <div className="flex items-center gap-2 px-1 py-1">
+                  <MegaphoneIcon aria-hidden className="size-4 text-primary" />
+                  <h2
+                    id="taina-whats-new-title"
+                    className="text-sm font-medium text-foreground"
+                  >
+                    {t("whatsNew.title")}
+                  </h2>
+                </div>
+
+                <ul className="mt-3 space-y-2">
+                  {WHATS_NEW_ITEMS.map(({ id, Icon }) => (
+                    <li
+                      key={id}
+                      className="flex items-start gap-3 rounded-2xl bg-muted px-3 py-3"
+                    >
+                      <Icon aria-hidden className="mt-0.5 size-4 shrink-0 text-primary" />
+                      <p className="text-[12px] leading-relaxed text-muted-foreground">
+                        {t(`whatsNew.items.${id}.body`)}
+                      </p>
+                    </li>
+                  ))}
+                </ul>
+              </section>
             ) : guideView ? (
               <>
                 <p className="text-foreground/70">{guidesT(`${guideView.id}.intro`)}</p>
@@ -1417,23 +1543,7 @@ export function FloatingTainaGuide() {
 
       {/* ── SPRITE ───────────────────────────────────────────────────── */}
       <div
-        role="button"
-        aria-label={t("spriteLabel")}
-        tabIndex={0}
-        onPointerDown={onPointerDown}
-        onPointerMove={onPointerMove}
-        onPointerUp={onPointerUp}
-        onPointerCancel={onPointerCancel}
-        onKeyDown={(e) => {
-          if ((e.target as HTMLElement).closest("[data-no-drag]")) return;
-          if ((e.key === "Enter" || e.key === " ") && !tour) {
-            e.preventDefault();
-            togglePanelFromSprite();
-          }
-        }}
-        className={`group fixed select-none ${tour ? "transition-all duration-500 ease-out" : ""} ${
-          dragging ? "cursor-grabbing" : tour ? "cursor-default" : "cursor-grab"
-        }`}
+        className={`group fixed select-none transition-opacity duration-150 ${tour ? "transition-all duration-500 ease-out" : ""}`}
         style={{
           zIndex: Z_SPRITE,
           left: position.x,
@@ -1441,48 +1551,65 @@ export function FloatingTainaGuide() {
           width: SPRITE_W,
           height: SPRITE_H,
           touchAction: "none",
+          opacity: open && view.kind === "whatsNew" ? 0 : 1,
+          pointerEvents: open && view.kind === "whatsNew" ? "none" : "auto",
         }}
       >
-        {/* Soft halo behind the sprite so page content underneath doesn't
-            visually collide with her (same treatment as data-soil). */}
         <div
-          aria-hidden
-          className="pointer-events-none absolute -inset-2 rounded-full"
-          style={{
-            background:
-              "radial-gradient(ellipse at 50% 56%, var(--background) 0%, var(--background) 52%, color-mix(in srgb, var(--background) 78%, transparent) 68%, transparent 92%)",
-            backdropFilter: "blur(6px)",
-            WebkitBackdropFilter: "blur(6px)",
+          ref={spriteRef}
+          role="button"
+          aria-label={t("spriteLabel")}
+          aria-hidden={open && view.kind === "whatsNew"}
+          tabIndex={open && view.kind === "whatsNew" ? -1 : 0}
+          onPointerDown={onPointerDown}
+          onPointerMove={onPointerMove}
+          onPointerUp={onPointerUp}
+          onPointerCancel={onPointerCancel}
+          onKeyDown={(e) => {
+            if ((e.key === "Enter" || e.key === " ") && !tour) {
+              e.preventDefault();
+              togglePanelFromSprite();
+            }
           }}
-        />
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src={TAINA_SIM.posterUrl}
-          alt=""
-          width={SPRITE_W}
-          height={SPRITE_H}
-          className="absolute inset-0 transition-opacity duration-200"
-          style={{ imageRendering: "pixelated", opacity: firstFramePainted ? 0 : 1 }}
-          draggable={false}
-        />
-        <canvas
-          ref={canvasRef}
-          width={192}
-          height={208}
-          style={{ width: SPRITE_W, height: SPRITE_H, imageRendering: "pixelated" }}
-          className="absolute inset-0"
-        />
+          className={`absolute inset-0 ${dragging ? "cursor-grabbing" : tour ? "cursor-default" : "cursor-grab"}`}
+        >
+          {/* Soft halo behind the sprite so page content underneath doesn't
+              visually collide with her (same treatment as data-soil). */}
+          <div
+            aria-hidden
+            className="pointer-events-none absolute -inset-2 rounded-full"
+            style={{
+              background:
+                "radial-gradient(ellipse at 50% 56%, var(--background) 0%, var(--background) 52%, color-mix(in srgb, var(--background) 78%, transparent) 68%, transparent 92%)",
+              backdropFilter: "blur(6px)",
+              WebkitBackdropFilter: "blur(6px)",
+            }}
+          />
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={TAINA_SIM.posterUrl}
+            alt=""
+            width={SPRITE_W}
+            height={SPRITE_H}
+            className="absolute inset-0 transition-opacity duration-200"
+            style={{ imageRendering: "pixelated", opacity: firstFramePainted ? 0 : 1 }}
+            draggable={false}
+          />
+          <canvas
+            ref={canvasRef}
+            width={192}
+            height={208}
+            style={{ width: SPRITE_W, height: SPRITE_H, imageRendering: "pixelated" }}
+            className="absolute inset-0"
+          />
+        </div>
         {/* Minimize — revealed on hover/focus (desktop); the panel header has
             the same control for touch users. */}
         {!tour && !dragging ? (
           <button
             type="button"
             data-no-drag
-            onClick={(e) => {
-              e.stopPropagation();
-              setOpen(false);
-              setMinimized(true);
-            }}
+            onClick={minimizePanel}
             aria-label={t("minimizeLabel")}
             title={t("minimizeLabel")}
             className="absolute -right-1 -top-1 z-10 hidden h-5 w-5 place-items-center rounded-full border border-border bg-background text-[12px] leading-none text-foreground/60 shadow-sm hover:text-foreground focus-visible:grid group-hover:grid"
@@ -1490,15 +1617,17 @@ export function FloatingTainaGuide() {
             –
           </button>
         ) : null}
-        {/* "Can you help?" — an occasional speech bubble asking for help with
-            an unidentified observation. "I think I know!" jumps to the labeler
-            with exactly that observation preselected. */}
-        {!open && !tour && !dragging && helpObs ? (
+        {/* What's New and Did you know remain independent. When both are
+            visible, their separate bubbles stack instead of replacing each
+            other or sharing content. */}
+        {!open &&
+        !tour &&
+        !dragging &&
+        (hasUnreadWhatsNew || helpObs || (activeTip !== null && TAINA_TIPS[activeTip])) ? (
           <div
             data-no-drag
-            role="status"
-            className={`absolute z-10 rounded-2xl border border-border bg-background/95 p-3 shadow-[0_4px_16px_-4px_rgba(40,50,30,0.3)] backdrop-blur-sm ${
-              position.y < 300 ? "top-full mt-2" : "bottom-full mb-2"
+            className={`absolute z-10 flex gap-2 ${
+              position.y < 300 ? "top-full mt-2 flex-col" : "bottom-full mb-2 flex-col-reverse"
             }`}
             style={{
               width: TIP_BUBBLE_W,
@@ -1506,6 +1635,54 @@ export function FloatingTainaGuide() {
                 ? { right: 0 }
                 : { left: 0 }),
             }}
+          >
+        {/* Unread announcements get their own prominent speech bubble. Any
+            explicit dismissal acknowledges only the current release. */}
+        {hasUnreadWhatsNew ? (
+          <div
+            data-no-drag
+            role="status"
+            className="rounded-2xl border border-border bg-background/95 p-3 shadow-[0_4px_16px_-4px_rgba(40,50,30,0.3)] backdrop-blur-sm"
+          >
+            <div className="flex items-start justify-between gap-2">
+              <div className="flex items-center gap-1.5 text-[11px] font-medium uppercase tracking-wide text-primary">
+                <MegaphoneIcon aria-hidden className="size-3.5" />
+                {t("whatsNew.title")}
+              </div>
+              <button
+                type="button"
+                onClick={(event) => {
+                  event.stopPropagation();
+                  acknowledgeWhatsNew();
+                }}
+                aria-label={t("whatsNew.dismissLabel")}
+                title={t("whatsNew.dismissLabel")}
+                className="-mr-1 -mt-1 grid h-5 w-5 shrink-0 place-items-center rounded-full text-[12px] leading-none text-foreground/50 hover:bg-foreground/5 hover:text-foreground"
+              >
+                ×
+              </button>
+            </div>
+            <button
+              type="button"
+              onClick={(event) => {
+                event.stopPropagation();
+                openWhatsNew();
+              }}
+              aria-label={t("whatsNew.openLabelUnread")}
+              className="mt-1 block w-full text-left text-[12px] leading-relaxed text-foreground hover:text-primary"
+            >
+              {t("whatsNew.popupBody")}
+            </button>
+          </div>
+        ) : null}
+        {/* "Can you help?" — an occasional speech bubble asking for help with
+            an unidentified observation. "I think I know!" jumps to the labeler
+            with exactly that observation preselected. */}
+        {helpObs ? (
+          <div
+            data-no-drag
+            role="status"
+            className="rounded-2xl border border-border bg-background/95 p-3 shadow-[0_4px_16px_-4px_rgba(40,50,30,0.3)] backdrop-blur-sm"
           >
             <div className="flex items-start justify-between gap-2">
               <div className="text-[11px] font-medium uppercase tracking-wide text-primary">
@@ -1551,19 +1728,11 @@ export function FloatingTainaGuide() {
         {/* "Did you know?" tip — an occasional speech bubble with a feature
             discovery. Clicking it opens the chat (on the linked guide when the
             tip has one). */}
-        {!open && !tour && !dragging && !helpObs && activeTip !== null && TAINA_TIPS[activeTip] ? (
+        {!helpObs && activeTip !== null && TAINA_TIPS[activeTip] ? (
           <div
             data-no-drag
             role="status"
-            className={`absolute z-10 rounded-2xl border border-border bg-background/95 p-3 shadow-[0_4px_16px_-4px_rgba(40,50,30,0.3)] backdrop-blur-sm ${
-              position.y < 220 ? "top-full mt-2" : "bottom-full mb-2"
-            }`}
-            style={{
-              width: TIP_BUBBLE_W,
-              ...(typeof window !== "undefined" && position.x + SPRITE_W / 2 > window.innerWidth / 2
-                ? { right: 0 }
-                : { left: 0 }),
-            }}
+            className="rounded-2xl border border-border bg-background/95 p-3 shadow-[0_4px_16px_-4px_rgba(40,50,30,0.3)] backdrop-blur-sm"
           >
             <div className="flex items-start justify-between gap-2">
               <div className="text-[11px] font-medium uppercase tracking-wide text-primary">
@@ -1611,21 +1780,37 @@ export function FloatingTainaGuide() {
             })()}
           </div>
         ) : null}
-        {!open && !tour && activeTip === null && !helpObs ? (
-          <div
-            aria-hidden
+          </div>
+        ) : null}
+        {!open && !tour && !hasUnreadWhatsNew && activeTip === null && !helpObs ? (
+          <button
+            ref={whatsNewTriggerRef}
+            type="button"
+            data-no-drag
+            onClick={(event) => {
+              event.stopPropagation();
+              openWhatsNew();
+            }}
+            aria-label={t(
+              hasUnreadWhatsNew ? "whatsNew.openLabelUnread" : "whatsNew.openLabel",
+            )}
             className={
-              "pointer-events-none absolute left-1/2 top-full mt-1 " +
-              "-translate-x-1/2 whitespace-nowrap rounded-full " +
+              "absolute left-1/2 top-full mt-1 inline-flex " +
+              "-translate-x-1/2 items-center gap-1.5 whitespace-nowrap rounded-full " +
               "border border-border bg-background/95 " +
-              "px-2.5 py-[3px] text-[11px] text-primary " +
+              "px-2.5 py-[3px] text-[11px] font-medium text-primary " +
               "shadow-[0_2px_8px_-3px_rgba(40,50,30,0.22)] " +
-              "backdrop-blur-sm transition-opacity duration-150 " +
-              (dragging ? "opacity-0" : "opacity-100")
+              "backdrop-blur-sm transition-[opacity,transform,box-shadow] duration-150 " +
+              "hover:-translate-x-1/2 hover:-translate-y-0.5 hover:shadow-md " +
+              "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 " +
+              (dragging ? "pointer-events-none opacity-0" : "opacity-100")
             }
           >
-            {t("shield")}
-          </div>
+            {hasUnreadWhatsNew ? (
+              <span aria-hidden className="size-1.5 rounded-full bg-primary" />
+            ) : null}
+            {t("whatsNew.trigger")}
+          </button>
         ) : null}
       </div>
     </>

@@ -92,7 +92,59 @@
     "copyShareText": "Copiar texto para compartir",
     "exploreMore": "Explorar más proyectos",
     "emptyTitle": "Tu carrito está vacío",
-    "singleApprovalNote": "Tu billetera pedirá una sola aprobación por el total. Después, GainForest envía cada donación a su destinatario."
+    "singleApprovalNote": "Tu billetera pedirá una sola aprobación por el total. Después, GainForest envía cada donación a su destinatario.",
+    "messageTitle": "Añade un mensaje (opcional)",
+    "messageHint": "Unas palabras de ánimo o por qué donaste. La persona destinataria lo verá.",
+    "messagePlaceholder": "Añade un mensaje (opcional)…",
+    "messageAnonymousNote": "Tu mensaje no se mostrará con tu nombre.",
+    "tipNone": "Sin propina",
+    "cardsPreviewTitle": "Cartas que recibirás",
+    "cardsUnavailableNote": "Las cartas solo están disponibles para donaciones a proyectos elegibles. Esta compra no incluye ninguna.",
+    "cardsCheckingNote": "Comprobando qué donaciones otorgarán cartas…",
+    "receiptIssue": "Tu pago se completó, pero no se pudieron crear uno o más registros públicos de donación. Esas donaciones no aparecerán en Mis cartas.",
+    "reward": {
+      "eyebrow": "Coleccionable desbloqueado",
+      "guardianOf": "Guardián de",
+      "contributed": "Contribuido",
+      "moreProjects": "{count, plural, one {# proyecto más} other {# proyectos más}}",
+      "mint": "N.º {mint}",
+      "verified": "Verificado en la cadena",
+      "tiltHint": "Mueve el cursor sobre la carta para captar la luz",
+      "tiers": {
+        "seedling": {
+          "name": "Brote",
+          "rarity": "Común"
+        },
+        "sapling": {
+          "name": "Retoño",
+          "rarity": "Poco común"
+        },
+        "grove": {
+          "name": "Arboleda",
+          "rarity": "Raro"
+        },
+        "canopy": {
+          "name": "Dosel",
+          "rarity": "Épico"
+        },
+        "oldGrowth": {
+          "name": "Bosque antiguo",
+          "rarity": "Legendario"
+        }
+      },
+      "overallEyebrow": "Contribución total",
+      "overallTitle": "Colección completa",
+      "overallSubtitle": "{count, plural, one {# proyecto apoyado} other {# proyectos apoyados}}",
+      "collect": "Coleccionar",
+      "collectAll": "Coleccionar todo ({count})",
+      "prevCard": "Carta anterior",
+      "nextCard": "Carta siguiente",
+      "deckHint": "Desliza para ver tus coleccionables",
+      "cardPosition": "Carta {current} de {total}",
+      "collectedTitle": "¡Todo coleccionado!",
+      "collectedBody": "Tus cartas verificadas están listas en Mis cartas.",
+      "viewMyCards": "Ver Mis cartas"
+    }
   },
   "testRegistry": {
     "eyebrow": "Experiencias de UI",
@@ -152,6 +204,28 @@
           "body": "La tarjeta lo dice en lugar de afirmar que la cuenta no aparece."
         }
       }
-    }
+    },
+    "myCardsTitle": "Galería Mis cartas",
+    "myCardsDescription": "Previsualiza la galería de cartas coleccionadas con coleccionables de muestra."
+  },
+  "myCards": {
+    "eyebrow": "Coleccionables",
+    "title": "Mis cartas",
+    "description": "Cada carta proviene de un recibo de donación verificado vinculado a tu cuenta.",
+    "count": "{count, plural, one {# carta} other {# cartas}}",
+    "emptyTitle": "Aún no hay cartas",
+    "emptyBody": "Dona a un proyecto con la sesión iniciada y mostrando tu nombre para ganar tu primera carta.",
+    "browseProjects": "Explorar proyectos",
+    "signedOutTitle": "Inicia sesión para ver tus cartas",
+    "signedOutBody": "Las cartas se vinculan a tu cuenta para que sigan disponibles en otros navegadores y dispositivos.",
+    "unavailableTitle": "No se pudieron cargar tus cartas",
+    "unavailableBody": "Tus registros de donación están seguros. Intenta cargar tus cartas de nuevo.",
+    "tryAgain": "Intentar de nuevo",
+    "partialBody": "No se pudieron cargar algunos registros de donación o detalles de proyectos. Las cartas mostradas están verificadas, pero tu colección podría estar incompleta.",
+    "fallbackProject": "Proyecto apoyado",
+    "fallbackOrganization": "Equipo del proyecto",
+    "verifiedDonation": "Donación verificada",
+    "viewProject": "Ver proyecto",
+    "viewPayment": "Ver pago"
   }
 }

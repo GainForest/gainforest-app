@@ -159,8 +159,9 @@ function hasMessageKey(messages, key) {
   return true;
 }
 
-function isAllowed(pathKey, value) {
-  return allowedExactValues.has(value)
+function isAllowed(locale, pathKey, value) {
+  return (locale === "es" && pathKey === "publishAs.badgePersonal" && value === "Personal")
+    || allowedExactValues.has(value)
     || allowedPathPatterns.some((pattern) => pattern.test(pathKey))
     || technicalValuePatterns.some((pattern) => pattern.test(value));
 }
@@ -300,7 +301,7 @@ for (const namespace of namespaces) {
       if (
         englishValue === value
         && /[A-Za-z]{3,}/.test(value)
-        && !isAllowed(key, value)
+        && !isAllowed(locale, key, value)
       ) {
         problems.push(`${localePath}:${key} is still identical to English: ${JSON.stringify(value)}`);
       }

@@ -68,7 +68,13 @@
     "userAccount": "User account",
     "myAccount": "My Account",
     "signOut": "Sign out",
-    "settings": "Settings"
+    "settings": "Settings",
+    "organizationRole": "Organization · {role}",
+    "roleOwner": "Owner",
+    "roleAdmin": "Admin",
+    "roleMember": "Member",
+    "switchAccount": "Switch account",
+    "switchAccountHint": "New uploads and projects are saved to the account you choose here."
   },
   "errorPage": {
     "title": "Something went wrong.",
@@ -154,7 +160,10 @@
       "myObservations": "My observations",
       "myProjects": "My projects",
       "myOrganizations": "My organizations",
-      "admin": "Admin"
+      "admin": "Admin",
+      "personalAccount": "Personal account",
+      "organizationAccount": "Organization account",
+      "myCards": "My Cards"
     },
     "more": "More",
     "hideMore": "Hide"
@@ -701,7 +710,8 @@
     "emptyHeroDescription": "Support a project and your contributions show up here, each linked to the project you backed.",
     "emptyHeroCta": "Explore projects",
     "anonymousNote": "Anonymous donations appear here too, but only you can see them — they are never shown publicly under your name. Some older anonymous donations can’t be shown.",
-    "anonymousBadge": "Only visible to you"
+    "anonymousBadge": "Only visible to you",
+    "messageQuote": "Donor message: “{message}”"
   },
   "accountProjects": {
     "emptyEyebrow": "No projects",
@@ -3664,5 +3674,19 @@
       "skillTitle": "Agent guide",
       "skillDesc": "The same records, written as copy-pasteable calls for an AI agent."
     }
+  },
+  "publishAs": {
+    "label": "Publishing as",
+    "badgePersonal": "Personal",
+    "badgeOrganization": "Organization",
+    "personalFallback": "Personal account",
+    "organizationFallback": "Organization account",
+    "personalDescription": "Goes to your personal profile",
+    "organizationDescription": "Goes to the organization's shared profile",
+    "menuTitle": "Choose where to publish",
+    "menuPersonalSubtitle": "Your personal account",
+    "menuOrganizationSubtitle": "Shared organization account",
+    "organizationsLabel": "Your organizations",
+    "switchHint": "Change who you're publishing as"
   }
 }

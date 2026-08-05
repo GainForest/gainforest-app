@@ -18,8 +18,9 @@ import {
   MailIcon,
   PlusIcon,
   SettingsIcon,
+  SparklesIcon,
   UserIcon,
-  UsersIcon,
+  Building2Icon,
   WrenchIcon,
 } from "lucide-react";
 import {
@@ -543,8 +544,11 @@ function groupName(group: MenuGroup): string {
   return group.displayName?.trim() || "Organization account";
 }
 
-function roleLabel(role: CgsGroupMembership["role"]): string {
-  return role === "owner" ? "Owner" : role === "admin" ? "Admin" : "Member";
+function roleLabel(
+  role: CgsGroupMembership["role"],
+  t: ReturnType<typeof useTranslations<"common.auth">>,
+): string {
+  return role === "owner" ? t("roleOwner") : role === "admin" ? t("roleAdmin") : t("roleMember");
 }
 
 function AccountDot({
@@ -708,10 +712,12 @@ function AuthenticatedMenu({
   const groupDisplayLabel = currentGroup ? groupName(currentGroup) : groupFallbackLabel;
   const displayLabel = showingGroup ? groupDisplayLabel : personalDisplayLabel;
   const secondaryLabel = showingGroup
-    ? currentGroup ? roleLabel(currentGroup.role) : "Organization"
+    ? currentGroup
+      ? authT("organizationRole", { role: roleLabel(currentGroup.role, authT) })
+      : "Organization"
     : personalSecondaryLabel;
   const triggerAvatarUrl = showingGroup ? currentGroup?.avatarUrl : personalCard?.avatarUrl;
-  const triggerIcon = showingGroup ? <UsersIcon className="h-4 w-4" /> : <UserIcon className="h-3.5 w-3.5" />;
+  const triggerIcon = showingGroup ? <Building2Icon className="h-4 w-4" /> : <UserIcon className="h-3.5 w-3.5" />;
   // Quick links point at each account's own profile identifier (handle or DID).
   const personalIdentifier = personalCard?.handle?.trim() ?? session.did;
   // GainForest moderators (members of the admin group, any role) reach the
@@ -767,10 +773,12 @@ function AuthenticatedMenu({
         key: group.groupDid,
         kind: "group",
         label: groupName(group),
-        subtitle: roleLabel(group.role),
+        // Spell out that this is an organization (not just the viewer's role)
+        // so it's obvious which entries publish to a shared account.
+        subtitle: authT("organizationRole", { role: roleLabel(group.role, authT) }),
         identifier,
         avatarUrl: group.avatarUrl,
-        icon: <UsersIcon className="h-4 w-4" />,
+        icon: <Building2Icon className="h-4 w-4" />,
         group,
         subItems: buildSubItems(identifier),
       };
@@ -945,7 +953,13 @@ function AuthenticatedMenu({
             </div>
 
             <div className="max-h-[min(70vh,34rem)] overflow-y-auto p-2">
-              {/* Accounts */}
+              {/* Accounts — explain what selecting one actually does: it decides
+                  whether new uploads/projects are published as the person or as
+                  an organization. */}
+              <p className="px-2.5 pb-0.5 pt-1 text-[10px] font-medium uppercase tracking-[0.12em] text-muted-foreground">
+                {authT("switchAccount")}
+              </p>
+              <p className="px-2.5 pb-2 text-xs leading-4 text-muted-foreground">{authT("switchAccountHint")}</p>
               <div className="flex flex-col gap-0.5">
                 {accounts.map((account) => (
                   <AccountBlock
@@ -1009,7 +1023,7 @@ function AuthenticatedMenu({
                     <AccountDot label={label} icon={<MailIcon className="h-4 w-4" />} />
                     <span className="min-w-0 flex-1">
                       <span className="block truncate text-sm font-medium text-foreground">{label}</span>
-                      <span className="block truncate text-xs text-muted-foreground">{invitationT("role", { role: roleLabel(invitation.role) })}</span>
+                      <span className="block truncate text-xs text-muted-foreground">{invitationT("role", { role: roleLabel(invitation.role, authT) })}</span>
                     </span>
                     <button
                       type="button"
@@ -1025,6 +1039,31 @@ function AuthenticatedMenu({
               })}
 
               <div className="my-2 h-px bg-border/60" />
+
+              {/* My Cards — the collectibles earned from donations. Given a
+                  holographic treatment so it reads as something special. */}
+              <Link
+                href="/cards"
+                onClick={() => setOpen(false)}
+                className="group relative mb-1 flex items-center gap-2.5 overflow-hidden rounded-xl border border-primary/30 px-2.5 py-2.5 text-sm font-medium text-foreground shadow-[0_6px_20px_-10px_rgba(79,70,229,0.6)] transition-colors"
+              >
+                <span
+                  aria-hidden
+                  className="absolute inset-0 opacity-70"
+                  style={{
+                    backgroundImage:
+                      "linear-gradient(115deg, rgba(255,0,128,0.12), rgba(255,214,0,0.09), rgba(0,229,255,0.12), rgba(123,47,247,0.12))",
+                  }}
+                />
+                <span
+                  aria-hidden
+                  className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/25 to-transparent transition-transform duration-700 ease-out group-hover:translate-x-full"
+                />
+                <span className="relative grid size-6 shrink-0 place-items-center rounded-lg bg-primary/15 text-primary">
+                  <SparklesIcon className="h-3.5 w-3.5" />
+                </span>
+                <span className="relative flex-1">{sidebarT("profileRow.myCards")}</span>
+              </Link>
 
               {/* General options — apply to the signed-in user */}
               {adminHref ? (

@@ -68,7 +68,13 @@
     "userAccount": "Conta de usuário",
     "myAccount": "Minha conta",
     "signOut": "Sair",
-    "settings": "Configurações"
+    "settings": "Configurações",
+    "organizationRole": "Organização · {role}",
+    "roleOwner": "Proprietário",
+    "roleAdmin": "Administrador",
+    "roleMember": "Membro",
+    "switchAccount": "Trocar de conta",
+    "switchAccountHint": "Novos envios e projetos são salvos na conta que você escolher aqui."
   },
   "errorPage": {
     "title": "Algo deu errado.",
@@ -154,7 +160,10 @@
       "myObservations": "Minhas observações",
       "myProjects": "Meus projetos",
       "myOrganizations": "Minhas organizações",
-      "admin": "Administração"
+      "admin": "Administração",
+      "personalAccount": "Conta pessoal",
+      "organizationAccount": "Conta de organização",
+      "myCards": "Minhas cartas"
     },
     "more": "Mais",
     "hideMore": "Ocultar"
@@ -701,7 +710,8 @@
     "emptyHeroDescription": "Apoie um projeto e suas contribuições aparecerão aqui, cada uma vinculada ao projeto que você apoiou.",
     "emptyHeroCta": "Explorar projetos",
     "anonymousNote": "Doações anônimas também aparecem aqui, mas só você pode vê-las — elas nunca são exibidas publicamente com o seu nome. Algumas doações anônimas antigas não podem ser exibidas.",
-    "anonymousBadge": "Visível só para você"
+    "anonymousBadge": "Visível só para você",
+    "messageQuote": "Mensagem do doador: «{message}»"
   },
   "accountProjects": {
     "emptyEyebrow": "Sem projetos",
@@ -3664,5 +3674,19 @@
       "skillTitle": "Guia para agentes",
       "skillDesc": "Os mesmos registros, escritos como chamadas prontas para copiar e colar por um agente de IA."
     }
+  },
+  "publishAs": {
+    "label": "Publicando como",
+    "badgePersonal": "Pessoal",
+    "badgeOrganization": "Organização",
+    "personalFallback": "Conta pessoal",
+    "organizationFallback": "Conta de organização",
+    "personalDescription": "Vai para o seu perfil pessoal",
+    "organizationDescription": "Vai para o perfil compartilhado da organização",
+    "menuTitle": "Escolha onde publicar",
+    "menuPersonalSubtitle": "Sua conta pessoal",
+    "menuOrganizationSubtitle": "Conta compartilhada da organização",
+    "organizationsLabel": "Suas organizações",
+    "switchHint": "Mude com qual conta você publica"
   }
 }

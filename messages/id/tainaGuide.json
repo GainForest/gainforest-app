@@ -37,7 +37,26 @@
     "haveQuestion": "Aku punya pertanyaan",
     "helpTitle": "Bisa bantu?",
     "helpBody": "Seseorang memotret ini, tapi belum ada yang tahu spesiesnya. Kamu mengenalinya?",
-    "helpCta": "Sepertinya aku tahu!"
+    "helpCta": "Sepertinya aku tahu!",
+    "whatsNew": {
+      "trigger": "Apa yang baru?",
+      "openLabel": "Lihat yang baru di GainForest",
+      "openLabelUnread": "Lihat pembaruan baru di GainForest",
+      "dismissLabel": "Tutup Yang baru",
+      "title": "Yang baru",
+      "popupBody": "Saya punya beberapa fitur baru GainForest untuk ditunjukkan kepada Anda.",
+      "items": {
+        "guidedHelp": {
+          "body": "Pilih pertanyaan umum dan Tainá dapat menunjukkan tempat yang tepat di layar Anda."
+        },
+        "fieldData": {
+          "body": "Tim lapangan kini dapat mengirim foto dan berkas survei bersama untuk ditinjau, bahkan dalam kumpulan yang sangat besar."
+        },
+        "donations": {
+          "body": "Organisasi dapat membuat dompet donasi bersama dengan kunci sandi, lalu mengizinkan anggota lain menambahkan milik mereka."
+        }
+      }
+    }
   },
   "guides": {
     "wallet": {

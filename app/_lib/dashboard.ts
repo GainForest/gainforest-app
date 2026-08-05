@@ -23,6 +23,9 @@ export type FundingReceipt = {
   bumicertUri: string | null;
   txHash: string | null;
   paymentNetwork: string | null;
+  /** Optional short note the donor left with their gift, shown back to the
+   *  recipient. Never carries the donor's name. */
+  message: string | null;
   /** Owner-only view: this receipt is anonymous and matched to the viewer
    *  via their donor hash (see app/_lib/anonymous-donations.ts). */
   isAnonymous?: boolean;
@@ -40,7 +43,7 @@ const RECEIPTS_QUERY = `
       pageInfo { hasNextPage endCursor }
       edges {
         node {
-          uri createdAt occurredAt amount currency transactionId paymentNetwork
+          uri createdAt occurredAt amount currency transactionId paymentNetwork notes
           certifiedProfileData { displayName }
           from {
             __typename
@@ -67,6 +70,7 @@ type RawReceipt = {
   currency?: string | null;
   transactionId?: string | null;
   paymentNetwork?: string | null;
+  notes?: string | null;
   from?: RawFrom;
   certifiedProfileData?: { displayName?: string | null } | null;
   for?: { uri?: string | null } | null;
@@ -112,6 +116,7 @@ function mapReceipt(node: RawReceipt): FundingReceipt {
     bumicertUri,
     txHash: node.transactionId ?? null,
     paymentNetwork: node.paymentNetwork ?? null,
+    message: node.notes?.trim() || null,
   };
 }
 
@@ -154,6 +159,84 @@ async function fetchReceiptsUncached(): Promise<FundingReceipt[]> {
 
 export async function fetchReceipts(signal?: AbortSignal): Promise<FundingReceipt[]> {
   return publicExploreCache("funding-receipts", { ttl: TOTAL_STATS_CACHE_MS }, fetchReceiptsUncached, signal);
+}
+
+const DONOR_RECEIPTS_QUERY = `
+  query DonorFundingReceipts($repoDid: String!, $donorDid: String!, $first: Int!, $after: String) {
+    orgHypercertsFundingReceipt(
+      where: {
+        did: { eq: $repoDid }
+        from: { did: { eq: $donorDid } }
+        for: { isNull: false }
+      }
+      first: $first
+      after: $after
+      sortBy: createdAt
+      sortDirection: DESC
+    ) {
+      pageInfo { hasNextPage endCursor }
+      edges {
+        node {
+          uri createdAt occurredAt amount currency transactionId paymentNetwork notes
+          from {
+            __typename
+            ... on OrgHypercertsFundingReceiptText { value }
+            ... on AppCertifiedDefsDid { did }
+          }
+          for { uri }
+        }
+      }
+    }
+  }
+`;
+
+/**
+ * Fresh, ownership-filtered receipt history for one signed-in donor. Unlike
+ * the public dashboard sweep this is deliberately not cached: a newly earned
+ * card should appear as soon as Hyperindex has indexed its receipt.
+ */
+export async function fetchFundingReceiptsByDonorDid(
+  donorDid: string,
+  signal?: AbortSignal,
+): Promise<FundingReceipt[]> {
+  const all: FundingReceipt[] = [];
+  let after: string | null = null;
+
+  for (let page = 0; page < 100; page += 1) {
+    const response: Response = await fetch(INDEXER_URL, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        query: DONOR_RECEIPTS_QUERY,
+        variables: { repoDid: FACILITATOR_DID, donorDid, first: 1000, after },
+      }),
+      cache: "no-store",
+      signal,
+    });
+    const json = (await response.json().catch(() => null)) as {
+      data?: {
+        orgHypercertsFundingReceipt?: {
+          pageInfo?: { hasNextPage?: boolean; endCursor?: string | null };
+          edges?: Array<{ node?: RawReceipt | null }>;
+        } | null;
+      };
+      errors?: Array<{ message?: string }>;
+    } | null;
+
+    const connection = json?.data?.orgHypercertsFundingReceipt;
+    if (!response.ok || !connection || (json?.errors?.length ?? 0) > 0) {
+      throw new Error(json?.errors?.[0]?.message || "Unable to load donation receipts");
+    }
+
+    for (const edge of connection.edges ?? []) {
+      if (edge.node?.uri) all.push(mapReceipt(edge.node));
+    }
+
+    if (!connection.pageInfo?.hasNextPage || !connection.pageInfo.endCursor) return all;
+    after = connection.pageInfo.endCursor;
+  }
+
+  throw new Error("Donation receipt history exceeded the safe page limit");
 }
 
 // ── Aggregations ported from the GainForest donations view ────────────────

@@ -37,7 +37,26 @@
     "haveQuestion": "Tenho uma pergunta",
     "helpTitle": "Pode ajudar?",
     "helpBody": "Alguém fotografou isto, mas ninguém sabe ainda que espécie é. Você reconhece?",
-    "helpCta": "Acho que sei!"
+    "helpCta": "Acho que sei!",
+    "whatsNew": {
+      "trigger": "O que há de novo?",
+      "openLabel": "Ver as novidades do GainForest",
+      "openLabelUnread": "Ver novas atualizações do GainForest",
+      "dismissLabel": "Fechar novidades",
+      "title": "Novidades",
+      "popupBody": "Tenho algumas novidades do GainForest para mostrar a você.",
+      "items": {
+        "guidedHelp": {
+          "body": "Escolha uma pergunta frequente e a Tainá poderá apontar os lugares certos na sua tela."
+        },
+        "fieldData": {
+          "body": "Equipes de campo agora podem enviar fotos e arquivos de pesquisa juntos para revisão, mesmo em lotes muito grandes."
+        },
+        "donations": {
+          "body": "Organizações podem criar uma carteira compartilhada com uma chave de acesso e permitir que outros membros adicionem a própria chave."
+        }
+      }
+    }
   },
   "guides": {
     "wallet": {

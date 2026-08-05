@@ -92,7 +92,59 @@
     "copyShareText": "Nakili maandishi ya kushiriki",
     "exploreMore": "Chunguza miradi zaidi",
     "emptyTitle": "Kikapu chako ni tupu",
-    "singleApprovalNote": "Pochi yako itaomba idhini moja tu kwa jumla yote. Kisha GainForest hupeleka kila mchango kwa mpokeaji wake."
+    "singleApprovalNote": "Pochi yako itaomba idhini moja tu kwa jumla yote. Kisha GainForest hupeleka kila mchango kwa mpokeaji wake.",
+    "messageTitle": "Ongeza ujumbe (hiari)",
+    "messageHint": "Neno la kutia moyo, au sababu ya kutoa. Mpokeaji ataliona.",
+    "messagePlaceholder": "Ongeza ujumbe (hiari)…",
+    "messageAnonymousNote": "Ujumbe wako hautaonyeshwa kwa jina lako.",
+    "tipNone": "Hakuna bahashishi",
+    "cardsPreviewTitle": "Kadi utakazopokea",
+    "cardsUnavailableNote": "Kadi hupatikana tu kwa michango ya miradi inayostahiki. Malipo haya hayana mchango kama huo.",
+    "cardsCheckingNote": "Tunaangalia ni michango ipi itakayokupa kadi…",
+    "receiptIssue": "Malipo yako yamekamilika, lakini rekodi moja au zaidi za umma za mchango hazikuweza kuundwa. Michango hiyo haitaonekana kwenye Kadi Zangu.",
+    "reward": {
+      "eyebrow": "Mkusanyiko umefunguliwa",
+      "guardianOf": "Mlinzi wa",
+      "contributed": "Umechangia",
+      "moreProjects": "{count, plural, one {mradi # zaidi} other {miradi # zaidi}}",
+      "mint": "Na. {mint}",
+      "verified": "Imethibitishwa mtandaoni",
+      "tiltHint": "Sogeza kishale juu ya kadi ili kunasa mwanga",
+      "tiers": {
+        "seedling": {
+          "name": "Mche",
+          "rarity": "Kawaida"
+        },
+        "sapling": {
+          "name": "Mmea",
+          "rarity": "Si kawaida"
+        },
+        "grove": {
+          "name": "Kichaka",
+          "rarity": "Nadra"
+        },
+        "canopy": {
+          "name": "Dari",
+          "rarity": "Adhimu"
+        },
+        "oldGrowth": {
+          "name": "Msitu wa Kale",
+          "rarity": "Hadithi"
+        }
+      },
+      "overallEyebrow": "Jumla ya mchango",
+      "overallTitle": "Mkusanyiko kamili",
+      "overallSubtitle": "{count, plural, one {mradi # ulioungwa mkono} other {miradi # iliyoungwa mkono}}",
+      "collect": "Kusanya",
+      "collectAll": "Kusanya zote ({count})",
+      "prevCard": "Kadi iliyotangulia",
+      "nextCard": "Kadi inayofuata",
+      "deckHint": "Telezesha ili kuona kadi zako",
+      "cardPosition": "Kadi ya {current} kati ya {total}",
+      "collectedTitle": "Zote zimekusanywa!",
+      "collectedBody": "Kadi zako zilizothibitishwa ziko tayari kwenye Kadi Zangu.",
+      "viewMyCards": "Tazama Kadi Zangu"
+    }
   },
   "testRegistry": {
     "eyebrow": "Majaribio ya kiolesura",
@@ -152,6 +204,28 @@
           "body": "Kadi inasema hivyo badala ya kudai akaunti haionyeshwi."
         }
       }
-    }
+    },
+    "myCardsTitle": "Matunzio ya Kadi Zangu",
+    "myCardsDescription": "Hakiki matunzio ya kadi zilizokusanywa yenye mifano ya kadi."
+  },
+  "myCards": {
+    "eyebrow": "Kadi za kukusanya",
+    "title": "Kadi Zangu",
+    "description": "Kila kadi hutokana na risiti ya mchango wa mradi iliyothibitishwa na kuunganishwa na akaunti yako.",
+    "count": "{count, plural, one {kadi #} other {kadi #}}",
+    "emptyTitle": "Bado hakuna kadi",
+    "emptyBody": "Changia mradi ukiwa umeingia na ukionyesha jina lako ili kupata kadi yako ya kwanza.",
+    "browseProjects": "Vinjari miradi",
+    "signedOutTitle": "Ingia ili kuona kadi zako",
+    "signedOutBody": "Kadi huunganishwa na akaunti yako ili zipatikane katika vivinjari na vifaa tofauti.",
+    "unavailableTitle": "Kadi zako hazikuweza kupakiwa",
+    "unavailableBody": "Rekodi zako za michango ziko salama. Tafadhali jaribu kupakia kadi zako tena.",
+    "tryAgain": "Jaribu tena",
+    "partialBody": "Baadhi ya rekodi za michango au maelezo ya miradi hayakuweza kupakiwa. Kadi zinazoonyeshwa zimethibitishwa, lakini mkusanyiko wako unaweza kutokamilika.",
+    "fallbackProject": "Mradi uliosaidiwa",
+    "fallbackOrganization": "Timu ya mradi",
+    "verifiedDonation": "Mchango uliothibitishwa",
+    "viewProject": "Tazama mradi",
+    "viewPayment": "Tazama malipo"
   }
 }

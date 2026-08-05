@@ -31,6 +31,7 @@ const ROUTES: Array<{ path: string; priority: number; changeFrequency: ChangeFre
   { path: "/bioblitz/terms", priority: 0.35, changeFrequency: "yearly" },
   { path: "/bioblitz/privacy", priority: 0.35, changeFrequency: "yearly" },
   { path: "/grants", priority: 0.6, changeFrequency: "weekly" },
+  { path: "/soundscape", priority: 0.5, changeFrequency: "monthly" },
   { path: "/submit-data", priority: 0.55, changeFrequency: "weekly" },
   { path: "/labeler", priority: 0.6, changeFrequency: "daily" },
   { path: "/taina", priority: 0.55, changeFrequency: "weekly" },

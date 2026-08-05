@@ -18,6 +18,7 @@ import { Button } from "@/components/ui/button";
 import { ModalContent, ModalHeader, ModalTitle, ModalDescription } from "@/components/ui/modal/modal";
 import { cn } from "@/lib/utils";
 import type { ManageTarget } from "@/lib/links";
+import { PublishAsPicker } from "@/app/_components/PublishAsPicker";
 import { canCreateRecord } from "../../_lib/cgs-permissions";
 import { autoDetectMappings, mappingsCoverRequiredFields } from "../../_lib/upload/column-mapper";
 import type { ColumnMapping } from "../../_lib/upload/types";
@@ -59,11 +60,16 @@ function measurementColumns(mappings: ColumnMapping[]): { target: MeasurementTar
 
 export function ObservationCsvUpload({
   target,
+  sessionDid,
+  onChangeTarget,
   projectRef,
   onBack,
   onClose,
 }: {
   target: ManageTarget;
+  /** Enables switching the destination account (see PublishAsPicker). */
+  sessionDid?: string | null;
+  onChangeTarget?: (target: ManageTarget) => void;
   /** When set, the stored dataset is linked to this project (at-uri). */
   projectRef?: string | null;
   onBack: () => void;
@@ -282,6 +288,16 @@ export function ObservationCsvUpload({
           </Button>
         </div>
       </ModalHeader>
+
+      {/* Which account this dataset will be stored under — switchable from the
+          global entry points, read-only on account-scoped pages, and locked
+          once the upload has started. */}
+      <PublishAsPicker
+        target={target}
+        sessionDid={sessionDid}
+        onChangeTarget={onChangeTarget}
+        disabled={uploading}
+      />
 
       {phase === "select" ? (
         <div

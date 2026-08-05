@@ -308,8 +308,11 @@ export async function BumicertDetailBody({
 }) {
   const { record, detail, owner, fundingConfig, authSession } = routeData;
   const matchUris = timelineMatchUris && timelineMatchUris.length > 0 ? timelineMatchUris : [record.atUri];
-  const globeT = await getTranslations("marketplace.globe");
-  const workScopeT = await getTranslations("common.workScopes");
+  const [globeT, workScopeT, supportT] = await Promise.all([
+    getTranslations("marketplace.globe"),
+    getTranslations("common.workScopes"),
+    getTranslations("bumicert.detail.support"),
+  ]);
   const workScopeLabels: WorkScopeLabels = {
     reforestation: workScopeT("reforestation"),
     forest_protection: workScopeT("forestProtection"),
@@ -958,7 +961,11 @@ export async function ProjectDetailView({
                   <ProjectDetailSection id="donations" icon={<HeartIcon className="h-4 w-4" aria-hidden />} title={supportT("donations")} count={formatNumber(donationEntries.length)}>
                     <div className="overflow-hidden rounded-3xl bg-card/70 shadow-sm shadow-primary/5 ring-1 ring-foreground/5 backdrop-blur divide-y divide-border/60">
                       {donationEntries.map((entry) => (
-                        <DonationLeaderboardRow key={entry.key} entry={entry} />
+                        <DonationLeaderboardRow
+                          key={entry.key}
+                          entry={entry}
+                          messageQuote={entry.latestReceipt.message ? supportT("messageQuote", { message: entry.latestReceipt.message }) : null}
+                        />
                       ))}
                     </div>
                   </ProjectDetailSection>
@@ -2250,7 +2257,7 @@ function SiteBoundariesPanel({
   );
 }
 
-function DonationsPanel({
+async function DonationsPanel({
   record,
   owner,
   fundingConfig,
@@ -2271,6 +2278,7 @@ function DonationsPanel({
   mutationRepo?: string;
   maEarthOption?: MaEarthDonationOption | null;
 }) {
+  const supportT = await getTranslations("bumicert.detail.support");
   const usdReceipts = receipts.filter((receipt) => ["USD", "USDC"].includes(receipt.currency.toUpperCase()));
   const totalUsd = usdReceipts.reduce((sum, receipt) => sum + receipt.amount, 0);
   const donationEntries = buildDonationLeaderboard(usdReceipts);
@@ -2357,7 +2365,11 @@ function DonationsPanel({
           {donationEntries.length > 0 ? (
             <div className="overflow-hidden rounded-3xl bg-card/70 shadow-sm shadow-primary/5 ring-1 ring-foreground/5 backdrop-blur divide-y divide-border/60">
               {donationEntries.map((entry) => (
-                <DonationLeaderboardRow key={entry.key} entry={entry} />
+                <DonationLeaderboardRow
+                  key={entry.key}
+                  entry={entry}
+                  messageQuote={entry.latestReceipt.message ? supportT("messageQuote", { message: entry.latestReceipt.message }) : null}
+                />
               ))}
             </div>
           ) : maEarth ? (
@@ -2576,7 +2588,7 @@ function DonationSupporterBadge({ rank }: { rank: number }) {
   );
 }
 
-function DonationLeaderboardRow({ entry }: { entry: DonationLeaderboardEntry }) {
+function DonationLeaderboardRow({ entry, messageQuote }: { entry: DonationLeaderboardEntry; messageQuote: string | null }) {
   const actionHref = donationEntryHref(entry);
   const content = (
     <>
@@ -2599,6 +2611,11 @@ function DonationLeaderboardRow({ entry }: { entry: DonationLeaderboardEntry }) 
           <DonationSupporterBadge rank={entry.rank} />
           <span className="w-full min-w-0 whitespace-normal break-words">{donationEntrySummary(entry)}</span>
         </div>
+        {messageQuote ? (
+          <p className="mt-1.5 w-full min-w-0 whitespace-pre-line break-words rounded-2xl bg-muted/60 px-3 py-2 text-[13px] italic leading-snug text-foreground/80">
+            {messageQuote}
+          </p>
+        ) : null}
       </div>
 
       <span className="shrink-0 whitespace-nowrap pt-0.5 text-[15px] font-bold tabular-nums text-primary sm:text-[17px]">

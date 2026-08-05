@@ -8,9 +8,9 @@ import {
   isDidIdentifier,
   writeFundingReceipt,
   writeTipReceipt,
-  type DidIdentifier,
   type ReceiptSender,
 } from "@/lib/facilitator/receipts";
+import { sanitizeDonationMessage } from "@/lib/donation/message";
 import { fetchAuthSession } from "@/app/_lib/auth-server";
 
 export const runtime = "nodejs";
@@ -44,7 +44,7 @@ type ParsedBody = {
   lines: CheckoutLine[];
   tipAmount: string | null;
   anonymous: boolean;
-  donorDid?: string;
+  message: string | null;
 };
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -83,15 +83,15 @@ function parseBody(raw: unknown): { ok: true; body: ParsedBody } | { ok: false; 
     if (parseUsdcAmount(tipAmount) === 0n) tipAmount = null;
   }
 
-  if (raw.donorDid !== undefined && typeof raw.donorDid !== "string") return { ok: false, error: "Invalid supporter profile" };
-
   return {
     ok: true,
     body: {
       lines,
       tipAmount,
       anonymous: raw.anonymous,
-      donorDid: typeof raw.donorDid === "string" ? raw.donorDid : undefined,
+      // One optional note applies to every donation in the cart. Blank input
+      // normalises to null, leaving the receipts unchanged.
+      message: sanitizeDonationMessage(raw.message),
     },
   };
 }
@@ -102,6 +102,7 @@ type LineResult = {
   amount: string;
   transactionHash?: `0x${string}`;
   receiptUri?: string | null;
+  cardEligible?: boolean;
   error?: string;
 };
 
@@ -113,18 +114,18 @@ export async function POST(request: Request) {
   if (!parsed.ok) return Response.json({ error: parsed.error }, { status: 400 });
   const body = parsed.body;
 
-  let donorDid: DidIdentifier | undefined;
-  if (!body.anonymous) {
-    if (typeof body.donorDid !== "string" || !isDidIdentifier(body.donorDid)) {
-      return Response.json(
-        {
-          code: "NON_ANONYMOUS_DONATION_REQUIRES_DONOR_DID",
-          error: "We couldn’t link this donation to your profile. Please sign in again or donate anonymously.",
-        },
-        { status: 422 },
-      );
-    }
-    donorDid = body.donorDid;
+  // Receipt ownership comes only from the authenticated session. Never trust
+  // a client-supplied profile identifier for a payment or collectible.
+  const session = await fetchAuthSession();
+  const attributedDonorDid = session.isLoggedIn && isDidIdentifier(session.did) ? session.did : null;
+  if (!body.anonymous && !attributedDonorDid) {
+    return Response.json(
+      {
+        code: "NON_ANONYMOUS_DONATION_REQUIRES_DONOR_DID",
+        error: "We couldn’t link this donation to your profile. Please sign in again or donate anonymously.",
+      },
+      { status: 422 },
+    );
   }
 
   let payload: ReturnType<typeof parsePaymentSignature>;
@@ -195,16 +196,12 @@ export async function POST(request: Request) {
 
   const sender: ReceiptSender = body.anonymous
     ? { $type: "org.hypercerts.funding.receipt#text", value: authorization.from }
-    : { $type: "app.certified.defs#did", did: donorDid! };
+    : { $type: "app.certified.defs#did", did: attributedDonorDid! };
 
-  // Anonymous donations stay unattributed in the public records, but carry an
-  // opaque owner hash (derived from the SESSION, never the request body) so
-  // the donor can still see them on their own donations page.
-  let sessionDid: string | null = null;
-  if (body.anonymous) {
-    const session = await fetchAuthSession();
-    if (session.isLoggedIn) sessionDid = session.did;
-  }
+  // Anonymous donations stay unattributed in public. Their owner hash remains
+  // available to donation history, but cards intentionally require a public,
+  // session-owned donor receipt so collection lookup stays deterministic.
+  const sessionDid = body.anonymous && session.isLoggedIn ? session.did : null;
 
   // Fan out. A failed transfer here is reported per line; the pulled funds
   // stay in the facilitator wallet for manual follow-up.
@@ -235,7 +232,9 @@ export async function POST(request: Request) {
         transactionHash: result.transactionHash,
         receiptSubject,
         donorHash: sessionDid ? computeDonorHash(sessionDid, result.transactionHash) : null,
+        message: body.message,
       });
+      result.cardEligible = Boolean(!body.anonymous && receiptSubject && result.receiptUri);
     } catch (error) {
       // The transfer settled; only the public note failed.
       console.error("[checkout] Failed to write funding receipt:", error);

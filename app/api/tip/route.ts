@@ -2,7 +2,7 @@ import { formatUsdcAmount, normalizeUsdcAmountString, parseUsdcAmount } from "@/
 import { parsePaymentSignature } from "@/lib/facilitator/eip3009";
 import { executeTransferWithAuthorization, SettlementTimeoutError } from "@/lib/facilitator";
 import { getTipWalletAddress, TIP_ENS_NAME } from "@/lib/facilitator/tip";
-import { computeDonorHash, isDidIdentifier, writeTipReceipt, type DidIdentifier } from "@/lib/facilitator/receipts";
+import { computeDonorHash, isDidIdentifier, writeTipReceipt } from "@/lib/facilitator/receipts";
 import { fetchAuthSession } from "@/app/_lib/auth-server";
 
 export const runtime = "nodejs";
@@ -41,6 +41,18 @@ export async function POST(request: Request) {
 
   const rawBody = await request.json().catch(() => null);
   const body = isRecord(rawBody) ? rawBody : {};
+  const anonymous = body.anonymous !== false;
+  const session = await fetchAuthSession();
+  const attributedDonorDid = session.isLoggedIn && isDidIdentifier(session.did) ? session.did : null;
+  if (!anonymous && !attributedDonorDid) {
+    return Response.json(
+      {
+        code: "NON_ANONYMOUS_DONATION_REQUIRES_DONOR_DID",
+        error: "We couldn’t link this tip to your profile. Please sign in again or tip anonymously.",
+      },
+      { status: 422 },
+    );
+  }
 
   let payload: ReturnType<typeof parsePaymentSignature>;
   try {
@@ -81,21 +93,16 @@ export async function POST(request: Request) {
     return Response.json({ error: "Payment could not be completed. Please try again later." }, { status: 500 });
   }
 
-  const donorDid = typeof body.donorDid === "string" && isDidIdentifier(body.donorDid) ? body.donorDid : null;
-  const anonymous = body.anonymous !== false;
-  const from =
-    !anonymous && donorDid
-      ? ({ $type: "app.certified.defs#did", did: donorDid } as const)
-      : ({ $type: "org.hypercerts.funding.receipt#text", value: authorization.from } as const);
+  const from = anonymous
+    ? ({ $type: "org.hypercerts.funding.receipt#text", value: authorization.from } as const)
+    : ({ $type: "app.certified.defs#did", did: attributedDonorDid! } as const);
 
   // Anonymous tips stay unattributed publicly but carry an opaque owner hash
   // (derived from the SESSION, never the request body) so the donor can still
   // see them on their own donations page.
-  let donorHash: string | null = null;
-  if (anonymous) {
-    const session = await fetchAuthSession();
-    if (session.isLoggedIn) donorHash = computeDonorHash(session.did, transactionHash);
-  }
+  const donorHash = anonymous && session.isLoggedIn
+    ? computeDonorHash(session.did, transactionHash)
+    : null;
 
   let receiptUri: string | null = null;
   try {

@@ -597,4 +597,3 @@ export function useUploadTray(): UploadTrayApi {
   if (!value) throw new Error("useUploadTray must be used inside <UploadTrayProvider>");
   return value;
 }
-

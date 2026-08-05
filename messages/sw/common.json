@@ -68,7 +68,13 @@
     "userAccount": "Akaunti ya mtumiaji",
     "myAccount": "Akaunti yangu",
     "signOut": "Ondoka",
-    "settings": "Mipangilio"
+    "settings": "Mipangilio",
+    "organizationRole": "Shirika · {role}",
+    "roleOwner": "Mmiliki",
+    "roleAdmin": "Msimamizi",
+    "roleMember": "Mwanachama",
+    "switchAccount": "Badilisha akaunti",
+    "switchAccountHint": "Vipakizi vipya na miradi huhifadhiwa kwenye akaunti unayochagua hapa."
   },
   "errorPage": {
     "title": "Hitilafu imetokea.",
@@ -154,7 +160,10 @@
       "myObservations": "Uchunguzi wangu",
       "myProjects": "Miradi yangu",
       "myOrganizations": "Mashirika yangu",
-      "admin": "Msimamizi"
+      "admin": "Msimamizi",
+      "personalAccount": "Akaunti binafsi",
+      "organizationAccount": "Akaunti ya shirika",
+      "myCards": "Kadi Zangu"
     },
     "more": "Zaidi",
     "hideMore": "Ficha"
@@ -701,7 +710,8 @@
     "emptyHeroDescription": "Unga mkono mradi na michango yako itaonekana hapa, kila moja ikiwa na kiungo kwa mradi uliouunga mkono.",
     "emptyHeroCta": "Gundua miradi",
     "anonymousNote": "Michango isiyo na jina pia huonekana hapa, lakini ni wewe pekee unayeweza kuiona — haionyeshwi kamwe hadharani kwa jina lako. Baadhi ya michango ya zamani isiyo na jina haiwezi kuonyeshwa.",
-    "anonymousBadge": "Inaonekana kwako pekee"
+    "anonymousBadge": "Inaonekana kwako pekee",
+    "messageQuote": "Ujumbe wa mfadhili: “{message}”"
   },
   "accountProjects": {
     "emptyEyebrow": "Hakuna miradi",
@@ -3664,5 +3674,19 @@
       "skillTitle": "Mwongozo wa wakala",
       "skillDesc": "Rekodi zile zile, zikiandikwa kama miito tayari kunakiliwa na wakala wa AI."
     }
+  },
+  "publishAs": {
+    "label": "Unachapisha kama",
+    "badgePersonal": "Binafsi",
+    "badgeOrganization": "Shirika",
+    "personalFallback": "Akaunti binafsi",
+    "organizationFallback": "Akaunti ya shirika",
+    "personalDescription": "Huenda kwenye wasifu wako binafsi",
+    "organizationDescription": "Huenda kwenye wasifu wa pamoja wa shirika",
+    "menuTitle": "Chagua mahali pa kuchapisha",
+    "menuPersonalSubtitle": "Akaunti yako binafsi",
+    "menuOrganizationSubtitle": "Akaunti ya pamoja ya shirika",
+    "organizationsLabel": "Mashirika yako",
+    "switchHint": "Badilisha akaunti unayochapisha nayo"
   }
 }

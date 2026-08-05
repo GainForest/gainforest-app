@@ -68,7 +68,13 @@
     "userAccount": "Akun pengguna",
     "myAccount": "Akun saya",
     "signOut": "Keluar",
-    "settings": "Pengaturan"
+    "settings": "Pengaturan",
+    "organizationRole": "Organisasi · {role}",
+    "roleOwner": "Pemilik",
+    "roleAdmin": "Administrator",
+    "roleMember": "Anggota",
+    "switchAccount": "Ganti akun",
+    "switchAccountHint": "Unggahan dan proyek baru disimpan ke akun yang Anda pilih di sini."
   },
   "errorPage": {
     "title": "Terjadi kesalahan.",
@@ -154,7 +160,10 @@
       "myObservations": "Observasi saya",
       "myProjects": "Proyek saya",
       "myOrganizations": "Organisasi saya",
-      "admin": "Admin"
+      "admin": "Admin",
+      "personalAccount": "Akun pribadi",
+      "organizationAccount": "Akun organisasi",
+      "myCards": "Kartu Saya"
     },
     "more": "Lainnya",
     "hideMore": "Sembunyikan"
@@ -701,7 +710,8 @@
     "emptyHeroDescription": "Dukung sebuah proyek dan kontribusi Anda akan muncul di sini, masing-masing tertaut ke proyek yang Anda dukung.",
     "emptyHeroCta": "Jelajahi proyek",
     "anonymousNote": "Donasi anonim juga muncul di sini, tetapi hanya Anda yang dapat melihatnya — donasi itu tidak pernah ditampilkan secara publik atas nama Anda. Beberapa donasi anonim lama tidak dapat ditampilkan.",
-    "anonymousBadge": "Hanya terlihat oleh Anda"
+    "anonymousBadge": "Hanya terlihat oleh Anda",
+    "messageQuote": "Pesan donor: “{message}”"
   },
   "accountProjects": {
     "emptyEyebrow": "Belum ada proyek",
@@ -3664,5 +3674,19 @@
       "skillTitle": "Panduan agen",
       "skillDesc": "Catatan yang sama, ditulis sebagai panggilan siap salin-tempel untuk agen AI."
     }
+  },
+  "publishAs": {
+    "label": "Menerbitkan sebagai",
+    "badgePersonal": "Pribadi",
+    "badgeOrganization": "Organisasi",
+    "personalFallback": "Akun pribadi",
+    "organizationFallback": "Akun organisasi",
+    "personalDescription": "Masuk ke profil pribadi Anda",
+    "organizationDescription": "Masuk ke profil bersama organisasi",
+    "menuTitle": "Pilih tempat menerbitkan",
+    "menuPersonalSubtitle": "Akun pribadi Anda",
+    "menuOrganizationSubtitle": "Akun bersama organisasi",
+    "organizationsLabel": "Organisasi Anda",
+    "switchHint": "Ganti akun yang Anda gunakan untuk menerbitkan"
   }
 }

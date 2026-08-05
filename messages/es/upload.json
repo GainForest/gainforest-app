@@ -979,6 +979,7 @@
       "pickProject": "Elige primero un proyecto.",
       "someAlreadyThere": "{count, plural, one {# avistamiento ya está en este proyecto y se dejará como está.} other {# avistamientos ya están en este proyecto y se dejarán como están.}}",
       "attachFailed": "No se pudieron añadir estos avistamientos al proyecto. Inténtalo de nuevo.",
+      "partialMoveFailed": "El conjunto de datos se añadió, pero no se pudo eliminar de todos los proyectos anteriores. Inténtalo de nuevo.",
       "cancel": "Cancelar",
       "confirm": "{count, plural, one {Añadir # avistamiento} other {Añadir # avistamientos}}"
     },

@@ -406,7 +406,8 @@
       "round": "Rodada {round}",
       "includesMaEarth": "O total inclui doações do GainForest e da Ma Earth.",
       "viaMaEarth": "Arrecadado pela campanha na Ma Earth.",
-      "notAccepting": "Este projeto ainda não aceita doações. Siga {name} para receber novidades."
+      "notAccepting": "Este projeto ainda não aceita doações. Siga {name} para receber novidades.",
+      "messageQuote": "Mensagem do doador: «{message}»"
     }
   },
   "create": {

@@ -406,7 +406,8 @@
       "round": "Duru ya {round}",
       "includesMaEarth": "Jumla inajumuisha michango ya GainForest na Ma Earth.",
       "viaMaEarth": "Imekusanywa kupitia kampeni ya Ma Earth.",
-      "notAccepting": "Mradi huu bado haupokei michango. Fuata {name} kupata habari mpya."
+      "notAccepting": "Mradi huu bado haupokei michango. Fuata {name} kupata habari mpya.",
+      "messageQuote": "Ujumbe wa mfadhili: “{message}”"
     }
   },
   "create": {

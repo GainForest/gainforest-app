@@ -150,6 +150,16 @@ export function AddToProjectModal({
               repoOptions,
             );
 
+      if ("nestError" in result && typeof result.nestError === "string") {
+        setError(result.nestError);
+        setIsPending(false);
+        return;
+      }
+      if ("unnestErrors" in result && Array.isArray(result.unnestErrors) && result.unnestErrors.length > 0) {
+        setError(t("partialMoveFailed"));
+        setIsPending(false);
+        return;
+      }
       if (result.attached.length === 0 && result.errors.length > 0) {
         setError(result.errors[0]?.error ?? t("attachFailed"));
         setIsPending(false);

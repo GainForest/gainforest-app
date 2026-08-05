@@ -8,7 +8,6 @@ import { useEffect, useId, useState, type MouseEvent } from "react";
 import { ModalContent } from "@/components/ui/modal/modal";
 import { ModalPortal, useModal } from "@/components/ui/modal/context";
 import {
-  groupManageBasePath,
   groupManageTarget,
   manageApiHref,
   manageHref,
@@ -82,7 +81,7 @@ function AuthenticatedCreateProjectButton({
 }) {
   const router = useRouter();
   const modal = useModal();
-  const { groups } = useAccountList(sessionDid);
+  const { personal, groups } = useAccountList(sessionDid);
   const [activeContext, setActiveContext] = useActiveAccountContext(sessionDid);
   // Unique per instance so several create-project buttons (sidebar card,
   // headers) never portal into each other's modal container.
@@ -104,15 +103,23 @@ function AuthenticatedCreateProjectButton({
         accountKind: "organization",
         identifier,
         role: activeGroup?.role ?? null,
+        displayName: activeGroup?.displayName ?? null,
+        avatarUrl: activeGroup?.avatarUrl ?? null,
         currentUserDid: sessionDid,
       });
     } else {
-      target = personalManageTarget({ did: sessionDid, accountKind: "user", identifier: sessionDid });
+      target = personalManageTarget({
+        did: sessionDid,
+        accountKind: "user",
+        identifier: sessionDid,
+        displayName: personal?.displayName ?? null,
+        avatarUrl: personal?.avatarUrl ?? null,
+      });
     }
 
     setWizard({
       target,
-      projectsHref: manageHref({ basePath: groupManageBasePath(target.identifier) }, "projects"),
+      projectsHref: manageHref(target, "projects"),
     });
     modal.pushModal({ id: modalId, dialogWidth: "max-w-3xl w-[calc(100%-2rem)]", forceDialog: true }, true);
     void modal.show();
@@ -120,6 +127,15 @@ function AuthenticatedCreateProjectButton({
 
   const closeModal = () => {
     void modal.hide().then(() => modal.clear());
+  };
+
+  // The wizard's in-modal "Publishing as" switcher re-targets the create flow;
+  // keep the post-save redirect pointing at the same account's project list.
+  const handleChangeTarget = (nextTarget: ManageTarget) => {
+    setWizard({
+      target: nextTarget,
+      projectsHref: manageHref(nextTarget, "projects"),
+    });
   };
 
   // The wizard renders at this call site (via ModalPortal), so it keeps this
@@ -133,6 +149,8 @@ function AuthenticatedCreateProjectButton({
         {wizard ? (
           <CreateProjectModalLazy
             target={wizard.target}
+            sessionDid={sessionDid}
+            onChangeTarget={handleChangeTarget}
             onClose={closeModal}
             onSaved={() => {
               closeModal();

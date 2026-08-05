@@ -979,6 +979,7 @@
       "pickProject": "Choose a project first.",
       "someAlreadyThere": "{count, plural, one {# sighting is already in this project and will be left as is.} other {# sightings are already in this project and will be left as is.}}",
       "attachFailed": "These sightings could not be added to the project. Please try again.",
+      "partialMoveFailed": "The dataset was added, but could not be removed from every previous project. Please try again.",
       "cancel": "Cancel",
       "confirm": "{count, plural, one {Add # sighting} other {Add # sightings}}"
     },
