@@ -603,7 +603,21 @@
         "action": "Otorgar insignias a los ganadores",
         "actionMissing": "Otorgar insignias pendientes",
         "done": "Insignias de ganadores otorgadas",
-        "error": "No se pudieron otorgar las insignias. Inténtalo de nuevo."
+        "error": "No se pudieron actualizar las insignias o el estado del correo. Inténtalo de nuevo.",
+        "notification": {
+          "mostObservations": "Correo de más observaciones",
+          "bestPicture": "Correo de mejor foto",
+          "sent": "Enviado",
+          "delayed": "Retrasado; seguiremos intentándolo",
+          "missing_email": "No encontramos un correo de la cuenta; contacta al ganador manualmente",
+          "lookup_failed": "Falló la búsqueda del correo; inténtalo más tarde o contacta al ganador",
+          "cannot_send": "No se puede enviar automáticamente",
+          "handled_manually": "Gestionado manualmente",
+          "not_prepared": "No preparado; contacta al ganador manualmente",
+          "notification_setup_failed": "Falló la configuración del correo; contacta al ganador",
+          "markHandled": "Marcar como gestionado",
+          "marking": "Marcando…"
+        }
       }
     },
     "map": {

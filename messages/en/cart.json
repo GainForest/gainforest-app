@@ -205,6 +205,15 @@
         }
       }
     },
+    "bioblitzNotifications": {
+      "title": "BioBlitz winner email states",
+      "description": "The production moderator status rows for winner emails, including missing account email and manual follow-up.",
+      "mockBadge": "Mock mode · no email",
+      "mockNote": "All winners are fixtures. Marking a row handled changes memory only and never writes an award or notification.",
+      "cardTitle": "BioBlitz winner emails",
+      "cardDescription": "Preview every moderator-facing delivery and manual-contact state.",
+      "fixtureLabel": "Winner email"
+    },
     "invitationDelivery": {
       "title": "Invitation delivery states",
       "description": "The production pending-invitation row for sent, delayed, manual-link, and role-restricted email states.",
