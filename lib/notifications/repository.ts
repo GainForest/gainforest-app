@@ -5,6 +5,11 @@ import type {
   Claim,
   FrozenEmailRequest,
   Json,
+  NotificationCleanupResult,
+  NotificationEnqueueInput,
+  NotificationEnqueueRepository,
+  NotificationEnqueueResult,
+  NotificationOrchestrationRepository,
   NotificationRepository,
   NotificationRow,
   ProviderErrorCode,
@@ -14,7 +19,7 @@ import type {
 
 type RepositoryCode = "repository_unavailable" | "repository_rejected" | "invalid_response" | "stale_claim";
 type RepositoryOperation =
-  | "claim_due" | "claim_one" | "get_claimed" | "expire_claimed" | "resolve_recipient" | "wait_recipient"
+  | "enqueue" | "cleanup" | "claim_due" | "claim_one" | "get_claimed" | "expire_claimed" | "resolve_recipient" | "wait_recipient"
   | "freeze_request" | "begin_provider_call" | "defer_ambiguous" | "record_provider_failure"
   | "terminal_provider_failure" | "mark_sent" | "requeue" | "mark_dead" | "suppress_claimed" | "release_claim";
 
@@ -34,6 +39,7 @@ interface RepositoryOptions {
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const EVENTS = new Set(["signup", "membership_joined", "invitation", "bioblitz_winner"]);
+const OUTBOX_STATUSES = new Set(["waiting_recipient", "queued", "processing", "sent", "suppressed", "dead"]);
 const PREVIOUS = new Set(["waiting_recipient", "queued", "processing"]);
 const PHASES = new Set(["idle", "in_flight"]);
 const MODES = new Set(["capture", "resend"]);
@@ -144,7 +150,7 @@ function decodeRow(value: unknown): NotificationRow | null {
   };
 }
 
-export class SupabaseNotificationRepository implements NotificationRepository {
+export class SupabaseNotificationRepository implements NotificationRepository, NotificationEnqueueRepository, NotificationOrchestrationRepository {
   private readonly log: NonNullable<RepositoryOptions["log"]>;
 
   constructor(options: RepositoryOptions = {}) {
@@ -174,6 +180,57 @@ export class SupabaseNotificationRepository implements NotificationRepository {
       const response = await supabaseRpc<unknown>(name, parameters);
       if (typeof response !== "boolean") this.invalid("Notification repository returned an invalid transition response. Verify the committed outbox RPC signature.");
       return response;
+    });
+  }
+
+  async enqueue(input: NotificationEnqueueInput): Promise<NotificationEnqueueResult> {
+    return this.run("enqueue", async () => {
+      const response = await supabaseRpc<unknown>("notification_outbox_enqueue", {
+        p_event_key: input.eventKey,
+        p_event_type: input.eventType,
+        p_payload: input.payload,
+        p_source_id: input.sourceId,
+        p_recipient_did: input.recipientDid,
+        p_recipient_email: input.recipientEmail,
+        p_template_key: input.templateKey,
+        p_locale: input.locale,
+        p_provider_idempotency_key: input.providerIdempotencyKey,
+        p_delivery_mode: input.deliveryMode,
+        p_next_attempt_at: input.nextAttemptAt.toISOString(),
+      });
+      if (!Array.isArray(response) || response.length !== 1) {
+        this.invalid("Notification repository returned an invalid enqueue response. Verify the committed enqueue RPC signature.");
+      }
+      const item = object(response[0]);
+      if (!item || typeof item.outbox_id !== "string" || !UUID.test(item.outbox_id)
+        || typeof item.status !== "string" || !OUTBOX_STATUSES.has(item.status)
+        || typeof item.duplicate !== "boolean") {
+        this.invalid("Notification repository returned an invalid enqueue response. Verify the committed enqueue RPC signature.");
+      }
+      return {
+        outboxId: item.outbox_id,
+        status: item.status as NotificationEnqueueResult["status"],
+        duplicate: item.duplicate,
+      };
+    });
+  }
+
+  async cleanup(batchSize: number): Promise<NotificationCleanupResult> {
+    return this.run("cleanup", async () => {
+      const response = await supabaseRpc<unknown>("notification_outbox_cleanup", { p_batch_size: batchSize });
+      if (!Array.isArray(response) || response.length !== 1) {
+        this.invalid("Notification repository returned an invalid cleanup response. Verify the committed cleanup RPC signature.");
+      }
+      const item = object(response[0]);
+      const counts = item && [item.active_expired, item.redacted, item.deleted];
+      if (!item || !counts || counts.some(value => typeof value !== "number" || !Number.isInteger(value) || value < 0)) {
+        this.invalid("Notification repository returned an invalid cleanup response. Verify the committed cleanup RPC signature.");
+      }
+      return {
+        activeExpired: item.active_expired as number,
+        redacted: item.redacted as number,
+        deleted: item.deleted as number,
+      };
     });
   }
 

@@ -47,6 +47,50 @@ afterEach(() => {
 });
 
 describe("SupabaseNotificationRepository", () => {
+  it("uses the exact enqueue wire contract and decodes duplicate ownership", async () => {
+    fetchMock.mockResolvedValueOnce(Response.json([{
+      outbox_id: rawRow.id,
+      status: "queued",
+      duplicate: true,
+    }]));
+    const repository = new SupabaseNotificationRepository();
+    await expect(repository.enqueue({
+      eventKey: "signup:source-1",
+      eventType: "signup",
+      payload: { name: "Test" },
+      sourceId: "source-1",
+      recipientDid: "did:plc:user",
+      recipientEmail: "person@example.com",
+      templateKey: "welcome-signup",
+      locale: "en",
+      providerIdempotencyKey: "source-1",
+      deliveryMode: "capture",
+      nextAttemptAt: new Date("2026-08-06T01:00:00.000Z"),
+    })).resolves.toEqual({ outboxId: rawRow.id, status: "queued", duplicate: true });
+    expect(fetchMock.mock.calls[0][0]).toBe("https://project.supabase.co/rest/v1/rpc/notification_outbox_enqueue");
+    expect(fetchMock.mock.calls[0][1]?.body).toBe(JSON.stringify({
+      p_event_key: "signup:source-1",
+      p_event_type: "signup",
+      p_payload: { name: "Test" },
+      p_source_id: "source-1",
+      p_recipient_did: "did:plc:user",
+      p_recipient_email: "person@example.com",
+      p_template_key: "welcome-signup",
+      p_locale: "en",
+      p_provider_idempotency_key: "source-1",
+      p_delivery_mode: "capture",
+      p_next_attempt_at: "2026-08-06T01:00:00.000Z",
+    }));
+  });
+
+  it("uses the exact cleanup wire contract and decodes aggregate counts", async () => {
+    fetchMock.mockResolvedValueOnce(Response.json([{ active_expired: 2, redacted: 3, deleted: 4 }]));
+    const repository = new SupabaseNotificationRepository();
+    await expect(repository.cleanup(250)).resolves.toEqual({ activeExpired: 2, redacted: 3, deleted: 4 });
+    expect(fetchMock.mock.calls[0][0]).toBe("https://project.supabase.co/rest/v1/rpc/notification_outbox_cleanup");
+    expect(fetchMock.mock.calls[0][1]?.body).toBe(JSON.stringify({ p_batch_size: 250 }));
+  });
+
   it("calls claim RPC with the committed signature and service-role boundary", async () => {
     fetchMock.mockResolvedValueOnce(Response.json([{
       outbox_id: rawRow.id,
@@ -156,6 +200,34 @@ describe("SupabaseNotificationRepository", () => {
     await expect(repository.releaseClaim(rawRow.id, rawRow.processing_token)).rejects.toThrow(
       "Notification repository returned an invalid transition response",
     );
+
+    fetchMock.mockResolvedValueOnce(Response.json([{ outbox_id: rawRow.id, status: "queued", duplicate: "yes" }]));
+    await expect(repository.enqueue({
+      eventKey: "signup:source-1", eventType: "signup", payload: null, sourceId: "source-1",
+      recipientDid: null, recipientEmail: "person@example.com", templateKey: "welcome-signup", locale: null,
+      providerIdempotencyKey: "source-1", deliveryMode: "capture", nextAttemptAt: new Date(),
+    })).rejects.toThrow("Notification repository returned an invalid enqueue response");
+
+    fetchMock.mockResolvedValueOnce(Response.json([]));
+    await expect(repository.cleanup(100)).rejects.toThrow("Notification repository returned an invalid cleanup response");
+  });
+
+  it("redacts idempotency conflict details from enqueue failures", async () => {
+    const secret = "person@example.com payload-secret service-role-secret";
+    fetchMock.mockResolvedValueOnce(Response.json({ message: secret }, { status: 409 }));
+    const log = vi.fn();
+    const repository = new SupabaseNotificationRepository({ log });
+
+    const error = await repository.enqueue({
+      eventKey: "signup:source-1", eventType: "signup", payload: null, sourceId: "source-1",
+      recipientDid: null, recipientEmail: "person@example.com", templateKey: "welcome-signup", locale: null,
+      providerIdempotencyKey: "source-1", deliveryMode: "capture", nextAttemptAt: new Date("2026-08-06T01:00:00.000Z"),
+    }).catch((reason: unknown) => reason);
+
+    expect(error).toBeInstanceOf(NotificationRepositoryError);
+    expect((error as NotificationRepositoryError).code).toBe("repository_rejected");
+    expect(JSON.stringify(error)).not.toContain(secret);
+    expect(log).toHaveBeenCalledWith({ code: "repository_rejected", operation: "enqueue" });
   });
 
   it("redacts database response details, addresses, payloads, and credentials", async () => {

@@ -126,6 +126,43 @@ export interface Clock {
   sleep(ms: number, signal?: AbortSignal): Promise<void>;
 }
 
+export interface NotificationEnqueueInput {
+  readonly eventKey: string;
+  readonly eventType: EventType;
+  readonly payload: Json;
+  readonly sourceId: string | null;
+  readonly recipientDid: string | null;
+  readonly recipientEmail: string | null;
+  readonly templateKey: string;
+  readonly locale: string | null;
+  readonly providerIdempotencyKey: string | null;
+  readonly deliveryMode: PersistedDeliveryMode;
+  readonly nextAttemptAt: Date;
+}
+
+export interface NotificationEnqueueResult {
+  readonly outboxId: string;
+  readonly status: OutboxStatus;
+  readonly duplicate: boolean;
+}
+
+export interface NotificationCleanupResult {
+  readonly activeExpired: number;
+  readonly redacted: number;
+  readonly deleted: number;
+}
+
+export interface NotificationEnqueueRepository {
+  enqueue(input: NotificationEnqueueInput): Promise<NotificationEnqueueResult>;
+}
+
+export interface NotificationOrchestrationRepository {
+  cleanup(batchSize: number): Promise<NotificationCleanupResult>;
+  claimDue(batchSize: number, leaseSeconds: number): Promise<Claim[]>;
+  claimOne(outboxId: string, token: string, leaseSeconds: number): Promise<Claim | null>;
+  releaseClaim(outboxId: string, token: string): Promise<boolean>;
+}
+
 export interface NotificationRepository {
   claimDue(batchSize: number, leaseSeconds: number): Promise<Claim[]>;
   claimOne(outboxId: string, token: string, leaseSeconds: number): Promise<Claim | null>;
