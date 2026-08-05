@@ -26,6 +26,7 @@ export function createDrainRuntime(environment: Environment = process.env) {
     : async () => ({ kind: "disabled" } as const);
 
   return {
+    health: () => repository.health(),
     drain: (invocationDeadline: Date) => drainNotifications(invocationDeadline, {
       config,
       clock,
