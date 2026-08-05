@@ -1292,11 +1292,6 @@
       "description": "Akun yang mengajukan hibah Meliarkan Kembali Web. Buka profil untuk memberikan lencana hibah.",
       "empty": "Belum ada yang mengajukan hibah."
     },
-    "bioblitz": {
-      "title": "Pendaftar BioBlitz",
-      "description": "Akun yang mendaftar BioBlitz. Buka profil untuk memberikan lencana pemenang.",
-      "empty": "Belum ada yang mendaftar BioBlitz."
-    },
     "page": {
       "title": "Admin",
       "subtitle": "Tinjau pelamar hibah dan acara, kelola akun yang ditandai, dan awasi agen Tainá."

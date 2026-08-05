@@ -142,6 +142,8 @@ export function AdminBioblitzDashboard({
     if (roundId === selectedRoundId) return;
     setSelectedRoundId(roundId);
     setRoundData(null);
+    setLoading(true);
+    setError(null);
     setOpenRegistrantDid(undefined);
   }
 
@@ -209,7 +211,7 @@ export function AdminBioblitzDashboard({
                   <ChevronRightIcon className={cn("size-3.5 transition-transform lg:group-hover:translate-x-0.5", selected && "text-primary")} aria-hidden />
                 </span>
                 <span className="mt-1 text-[11px] tabular-nums text-muted-foreground">{formatRoundDates(round, locale)}</span>
-                <span className={cn("mt-2 h-1 w-8 rounded-full", statusColor(status))} aria-label={t(`status.${status}`)} />
+                <span role="img" className={cn("mt-2 h-1 w-8 rounded-full", statusColor(status))} aria-label={t(`status.${status}`)} />
               </button>
             );
           })}

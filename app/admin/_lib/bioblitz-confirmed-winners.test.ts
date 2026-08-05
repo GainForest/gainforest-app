@@ -94,4 +94,27 @@ describe("confirmed BioBlitz winners", () => {
       ),
     ).rejects.toBeInstanceOf(BioblitzWinnerConflictError);
   });
+
+  it("fails closed when a suppressed prize still has an issued award", async () => {
+    fetchInternalBadgeDataStrict.mockResolvedValue(
+      badgeData([{ badgeUri: "at://did:plc:gainforest/app.certified.badge.definition/most", did: "did:plc:awarded" }]),
+    );
+
+    await expect(
+      loadBioblitzConfirmedWinners({ ...ROUND, mostObservations: null }, "did:plc:gainforest"),
+    ).rejects.toBeInstanceOf(BioblitzWinnerConflictError);
+  });
+
+  it("fails closed when one round prize has two recipients", async () => {
+    fetchInternalBadgeDataStrict.mockResolvedValue(
+      badgeData([
+        { badgeUri: "at://did:plc:gainforest/app.certified.badge.definition/most", did: "did:plc:first" },
+        { badgeUri: "at://did:plc:gainforest/app.certified.badge.definition/most", did: "did:plc:second" },
+      ]),
+    );
+
+    await expect(
+      loadBioblitzConfirmedWinners(ROUND, "did:plc:gainforest"),
+    ).rejects.toBeInstanceOf(BioblitzWinnerConflictError);
+  });
 });

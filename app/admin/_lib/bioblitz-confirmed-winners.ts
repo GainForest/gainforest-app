@@ -2,7 +2,7 @@ import "server-only";
 
 import type { BioblitzRound, RoundWinner } from "@/app/_lib/bioblitz";
 import { bioblitzBadgeKey, recognitionKeyFromTitle } from "@/app/_lib/recognition-badges";
-import { fetchInternalBadgeDataStrict, type InternalBadgeData } from "@/app/internal/badges/_lib/badge-records";
+import { fetchInternalBadgeDataStrict, type StrictInternalBadgeData } from "@/app/internal/badges/_lib/badge-records";
 import type { BioblitzWinnerPrize } from "./bioblitz-dashboard-types";
 
 export type BioblitzConfirmedWinner = {
@@ -67,7 +67,7 @@ function configuredWinner(
 }
 
 function awardedWinner(
-  data: InternalBadgeData,
+  data: StrictInternalBadgeData,
   roundId: number,
   prize: BioblitzWinnerPrize,
 ): BioblitzConfirmedWinner | null {

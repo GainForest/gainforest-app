@@ -59,6 +59,10 @@ export type InternalBadgeData = {
   pendingAwards: PendingBadgeAwardRecord[];
 };
 
+/** Source-of-truth data used by mutations. Pending awards are intentionally
+ * omitted because this reader never loads their collection. */
+export type StrictInternalBadgeData = Omit<InternalBadgeData, "pendingAwards">;
+
 type ListedRecord = {
   uri?: unknown;
   cid?: unknown;
@@ -437,14 +441,13 @@ function mergeByUri<T extends { uri: string }>(preferred: T[], fallback: T[]): T
 export async function fetchInternalBadgeDataStrict(
   repoDid: string,
   options: { includeAwards?: boolean } = {},
-): Promise<InternalBadgeData> {
+): Promise<StrictInternalBadgeData> {
   const includeAwards = options.includeAwards ?? true;
   const direct = await fetchDirectBadgeRecords(repoDid, includeAwards, true);
   return {
     repoDid,
     definitions: direct.definitions,
     awards: direct.awards,
-    pendingAwards: [],
   };
 }
 

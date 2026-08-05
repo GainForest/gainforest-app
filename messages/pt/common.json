@@ -1292,11 +1292,6 @@
       "description": "Contas que se candidataram ao subsídio de Resselvagem da web. Abra um perfil para conceder o selo do subsídio.",
       "empty": "Ninguém se candidatou ao subsídio ainda."
     },
-    "bioblitz": {
-      "title": "Inscritos no BioBlitz",
-      "description": "Contas que se inscreveram no BioBlitz. Abra um perfil para conceder um selo de vencedor.",
-      "empty": "Ninguém se inscreveu no BioBlitz ainda."
-    },
     "page": {
       "title": "Administração",
       "subtitle": "Revise candidatos a bolsas e eventos, gerencie contas sinalizadas e supervisione os agentes Tainá."

@@ -14,7 +14,7 @@ import type {
   BioblitzAdminRoundData,
   BioblitzWinnerPrize,
 } from "./bioblitz-dashboard-types";
-import { loadBioblitzConfirmedWinners } from "./bioblitz-confirmed-winners";
+import { loadBioblitzConfirmedWinners, type BioblitzConfirmedWinner } from "./bioblitz-confirmed-winners";
 
 export class BioblitzAdminRoundNotFoundError extends Error {
   constructor() {
@@ -51,10 +51,10 @@ export async function loadBioblitzAdminRound(
 ): Promise<BioblitzAdminRoundData> {
   const round = resolveBioblitzAdminRound(roundId, now);
   const ended = roundStatus(round, now) === "ended";
-  const confirmedWinners = ended
-    ? await loadBioblitzConfirmedWinners(round, badgeRepoDid)
-    : {};
-  const [registrants, board] = await Promise.all([
+  const [confirmedWinners, registrants, board] = await Promise.all([
+    ended
+      ? loadBioblitzConfirmedWinners(round, badgeRepoDid)
+      : Promise.resolve<Partial<Record<BioblitzWinnerPrize, BioblitzConfirmedWinner>>>({}),
     fetchBioblitzRoundRegistrants(round),
     fetchRoundCollectors(round, "round", undefined, "required", { includeExcluded: true }),
   ]);

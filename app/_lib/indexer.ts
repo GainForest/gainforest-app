@@ -29,10 +29,11 @@ import { hasMaEarthDonationUrl } from "./maearth-donation-data";
 
 type GqlResponse<T> = { data?: T | null; errors?: Array<{ message: string }> };
 
-export async function indexerQuery<T>(
+async function queryIndexer<T>(
   query: string,
   variables: Record<string, unknown>,
-  signal?: AbortSignal,
+  signal: AbortSignal | undefined,
+  rejectPartialErrors: boolean,
 ): Promise<T | null> {
   const res = await fetch(INDEXER_URL, {
     method: "POST",
@@ -49,10 +50,28 @@ export async function indexerQuery<T>(
   } catch {
     throw new Error(`indexer ${res.status}: non-JSON response`);
   }
-  if (json.errors?.length && !json.data) {
+  if (json.errors?.length && (rejectPartialErrors || !json.data)) {
     throw new Error(json.errors[0]?.message ?? "indexer graphql error");
   }
   return json.data ?? null;
+}
+
+/** Best-effort indexer read that permits usable partial GraphQL data. */
+export function indexerQuery<T>(
+  query: string,
+  variables: Record<string, unknown>,
+  signal?: AbortSignal,
+): Promise<T | null> {
+  return queryIndexer(query, variables, signal, false);
+}
+
+/** All-or-fail indexer read for workflows where a missing edge is unsafe. */
+export function indexerQueryStrict<T>(
+  query: string,
+  variables: Record<string, unknown>,
+  signal?: AbortSignal,
+): Promise<T | null> {
+  return queryIndexer(query, variables, signal, true);
 }
 
 type PageInfo = { hasNextPage: boolean; endCursor: string | null };

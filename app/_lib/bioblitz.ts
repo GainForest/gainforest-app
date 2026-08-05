@@ -22,6 +22,7 @@ import {
   fetchHiddenRecordUris,
   fetchPublicHiddenAccountDids,
   indexerQuery,
+  indexerQueryStrict,
   walkOccurrences,
   type OccurrenceRecord,
 } from "./indexer";
@@ -995,7 +996,7 @@ async function fetchBioblitzRegistrantsForTag(
   let after: string | null = null;
 
   for (let page = 0; page < MAX_BIOBLITZ_REGISTRANT_PAGES; page += 1) {
-    const data: BioblitzRegistrantsResponse | null = await indexerQuery<BioblitzRegistrantsResponse>(
+    const data: BioblitzRegistrantsResponse | null = await indexerQueryStrict<BioblitzRegistrantsResponse>(
       REGISTRANTS_QUERY,
       { first: 100, after, tag },
       signal,

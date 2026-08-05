@@ -1292,11 +1292,6 @@
       "description": "Cuentas que solicitaron la subvención de Resilvestrar la web. Abre un perfil para otorgar la insignia de la subvención.",
       "empty": "Nadie ha solicitado la subvención todavía."
     },
-    "bioblitz": {
-      "title": "Inscritos en BioBlitz",
-      "description": "Cuentas que se inscribieron en el BioBlitz. Abre un perfil para otorgar una insignia de ganador.",
-      "empty": "Nadie se ha inscrito en el BioBlitz todavía."
-    },
     "page": {
       "title": "Administración",
       "subtitle": "Revisa solicitantes de subvenciones y eventos, gestiona cuentas marcadas y supervisa los agentes Tainá."

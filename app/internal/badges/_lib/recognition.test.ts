@@ -72,6 +72,23 @@ describe("recognition award claims", () => {
         "did:plc:attempted-winner",
         "bioblitz-most-images-round-4",
       ),
-    ).rejects.toMatchObject({ status: 409 });
+    ).rejects.toMatchObject({
+      status: 409,
+      message: "This BioBlitz prize was already awarded to another account.",
+    });
+  });
+
+  it("does not assign a legacy BioBlitz key without a round", async () => {
+    await expect(
+      awardRecognition(
+        "did:plc:gainforest",
+        "session=moderator",
+        "did:plc:winner",
+        "bioblitz-most-images",
+      ),
+    ).rejects.toMatchObject({ status: 400 });
+
+    expect(fetchInternalBadgeDataStrict).not.toHaveBeenCalled();
+    expect(fetchMock).not.toHaveBeenCalled();
   });
 });

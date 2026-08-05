@@ -31,14 +31,19 @@ describe("BioBlitz winner packages", () => {
     expect(isPublicAddress("8.8.8.8")).toBe(true);
     expect(isPublicAddress("127.0.0.1")).toBe(false);
     expect(isPublicAddress("10.0.0.8")).toBe(false);
+    expect(isPublicAddress("100.64.0.1")).toBe(false);
     expect(isPublicAddress("169.254.169.254")).toBe(false);
+    expect(isPublicAddress("172.16.0.1")).toBe(false);
+    expect(isPublicAddress("192.168.1.1")).toBe(false);
     expect(isPublicAddress("::ffff:127.0.0.1")).toBe(false);
     expect(isPublicAddress("::ffff:7f00:1")).toBe(false);
     expect(isPublicAddress("0:0:0:0:0:0:0:1")).toBe(false);
     expect(isPublicAddress("fec0::1")).toBe(false);
+    expect(isPublicAddress("fd00::1")).toBe(false);
     expect(isPublicAddress("ff02::1")).toBe(false);
     expect(isPublicAddress("2606:4700:4700::1111")).toBe(true);
     expect(isPublicAddress("::1")).toBe(false);
+    expect(isPublicAddress("not-an-ip")).toBe(false);
   });
 
   it("maps packaged files to concise observation data in info.md", () => {
@@ -53,13 +58,13 @@ describe("BioBlitz winner packages", () => {
       },
       profileFilename: "profile.jpg",
       observations: [{ filename: "observations/01.jpg", record: OBSERVATION, likeCount: 14 }],
-      skipped: ["Unidentified"],
+      skipped: ["Unidentified\nwith a line break"],
     });
 
     expect(info).toContain("# Round 12 Best Picture Winner");
     expect(info).toContain("Profile image: profile.jpg");
     expect(info).toContain("| observations/01.jpg | Ara macao | 2025-05-04 | Cloud Forest Reserve, Ecuador | 14 | Seen near a fruiting tree with two juveniles |");
-    expect(info).toContain("- Unidentified");
+    expect(info).toContain("- Unidentified with a line break");
     expect(info).toContain("The confirmed winning picture is first when it is available.");
   });
 });

@@ -1292,11 +1292,6 @@
       "description": "Accounts that applied for the Rewilding the Web grant. Open a profile to award the grant badge.",
       "empty": "No one has applied for the grant yet."
     },
-    "bioblitz": {
-      "title": "BioBlitz registrants",
-      "description": "Accounts that registered for the BioBlitz. Open a profile to award a winner badge.",
-      "empty": "No one has registered for the BioBlitz yet."
-    },
     "page": {
       "title": "Admin",
       "subtitle": "Review grant and event applicants, manage flagged accounts, and oversee Tainá agents."

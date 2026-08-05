@@ -50,6 +50,30 @@ describe("GET /api/admin/bioblitz/[roundId]/winner-package", () => {
     expect(createBioblitzWinnerPackage).not.toHaveBeenCalled();
   });
 
+  it("rejects a moderator without the moderation repository before generating an archive", async () => {
+    getGainForestModeratorAccess.mockResolvedValue({ isLoggedIn: true, isModerator: true, repoDid: null });
+
+    const response = await GET(
+      new Request("https://example.test/api/admin/bioblitz/3/winner-package?prize=best-picture"),
+      context("3"),
+    );
+
+    expect(response.status).toBe(403);
+    expect(createBioblitzWinnerPackage).not.toHaveBeenCalled();
+  });
+
+  it("rejects an unknown prize before generating an archive", async () => {
+    getGainForestModeratorAccess.mockResolvedValue({ isLoggedIn: true, isModerator: true, repoDid: "did:plc:gainforest" });
+
+    const response = await GET(
+      new Request("https://example.test/api/admin/bioblitz/3/winner-package?prize=everything"),
+      context("3"),
+    );
+
+    expect(response.status).toBe(400);
+    expect(createBioblitzWinnerPackage).not.toHaveBeenCalled();
+  });
+
   it("passes only the validated round, prize, and moderator-owned repo to package generation", async () => {
     getGainForestModeratorAccess.mockResolvedValue({ isLoggedIn: true, isModerator: true, repoDid: "did:plc:gainforest" });
 

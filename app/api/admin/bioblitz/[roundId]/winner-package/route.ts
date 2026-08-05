@@ -28,7 +28,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ roun
   if (!access?.isLoggedIn) {
     return NextResponse.json({ error: "not_signed_in" }, { status: 401 });
   }
-  if (!access.isModerator) {
+  if (!access.isModerator || !access.repoDid) {
     return NextResponse.json({ error: "forbidden" }, { status: 403 });
   }
 

@@ -510,7 +510,7 @@ export function buildWinnerInfoMarkdown({
 
   if (skipped.length > 0) {
     lines.push("", "## Unavailable observation images", "");
-    for (const label of skipped) lines.push(`- ${label}`);
+    for (const label of skipped) lines.push(`- ${markdownCell(label)}`);
   }
 
   lines.push(

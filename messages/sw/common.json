@@ -1292,11 +1292,6 @@
       "description": "Akaunti zilizoomba ruzuku ya Kurudisha Uasilia kwenye Wavuti. Fungua wasifu ili kutoa beji ya ruzuku.",
       "empty": "Bado hakuna aliyeomba ruzuku."
     },
-    "bioblitz": {
-      "title": "Waliojisajili BioBlitz",
-      "description": "Akaunti zilizojisajili BioBlitz. Fungua wasifu ili kutoa beji ya mshindi.",
-      "empty": "Bado hakuna aliyejisajili BioBlitz."
-    },
     "page": {
       "title": "Msimamizi",
       "subtitle": "Kagua waombaji wa ruzuku na matukio, dhibiti akaunti zilizowekwa alama, na simamia mawakala wa Tainá."

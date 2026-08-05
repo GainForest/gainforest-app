@@ -12,7 +12,7 @@ import {
   BADGE_DEFINITION_COLLECTION,
   fetchInternalBadgeDataStrict,
   type BadgeAwardRecord,
-  type InternalBadgeData,
+  type StrictInternalBadgeData,
   type StrongRef,
 } from "./badge-records";
 
@@ -74,7 +74,7 @@ function findDefinition(
   return match ? { uri: match.uri, cid: match.cid } : null;
 }
 
-function matchingAwards(data: InternalBadgeData, key: RecognitionBadgeKey): BadgeAwardRecord[] {
+function matchingAwards(data: Pick<StrictInternalBadgeData, "definitions" | "awards">, key: RecognitionBadgeKey): BadgeAwardRecord[] {
   const definitionUris = new Set(
     data.definitions
       .filter((definition) => normalizeTitle(definition.title) === key)
@@ -84,7 +84,8 @@ function matchingAwards(data: InternalBadgeData, key: RecognitionBadgeKey): Badg
 }
 
 function isSingleWinnerPrize(key: RecognitionBadgeKey): boolean {
-  return parseRecognitionBadgeKey(key)?.family === "bioblitz";
+  const parsed = parseRecognitionBadgeKey(key);
+  return parsed?.family === "bioblitz" && parsed.roundId !== null;
 }
 
 function definitionRkey(key: RecognitionBadgeKey): string {
@@ -100,7 +101,7 @@ function awardRkey(key: RecognitionBadgeKey, subjectDid: string): string {
 }
 
 function assertAwardCanBeCreated(
-  data: InternalBadgeData,
+  data: Pick<StrictInternalBadgeData, "definitions" | "awards">,
   key: RecognitionBadgeKey,
   subjectDid: string,
 ): boolean {
@@ -167,6 +168,10 @@ export async function awardRecognition(
 ): Promise<void> {
   if (!isRecognitionBadgeKey(key)) throw new RecognitionMutationError("Unknown badge.", 400);
   const normalizedKey = canonicalKey(key);
+  const parsedKey = parseRecognitionBadgeKey(normalizedKey);
+  if (parsedKey?.family === "bioblitz" && parsedKey.roundId === null) {
+    throw new RecognitionMutationError("Unknown badge.", 400);
+  }
 
   let data = await fetchInternalBadgeDataStrict(repoDid, { includeAwards: true });
   if (!assertAwardCanBeCreated(data, normalizedKey, subjectDid)) return;
