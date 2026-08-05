@@ -2,18 +2,18 @@ import { createHmac, timingSafeEqual } from "node:crypto";
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { getCertifiedProfileCard } from "@/app/account/_lib/account-route";
-import { sendResendEmail, EmailSendError } from "@/lib/email/resend";
-import {
-  renderWelcomeEmailTemplate,
-  resolveWelcomeEmailLocale,
-} from "@/lib/email/welcome-template";
+import { resolveWelcomeEmailLocale } from "@/lib/email/welcome-template";
+import { NotificationProducerInputError } from "@/lib/email-notifications/signup-and-membership-notifications";
+import { createWelcomeRuntime } from "@/lib/email-notifications/welcome-runtime";
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
+export const maxDuration = 30;
 
 const SIGNATURE_HEADER = "x-gainforest-webhook-signature";
 const TIMESTAMP_HEADER = "x-gainforest-webhook-timestamp";
 const MAX_SIGNATURE_AGE_MS = 5 * 60 * 1000;
 const MAX_WEBHOOK_BODY_BYTES = 64 * 1024;
+const USABLE_INVOCATION_MS = 27_000;
 
 const welcomeUserSchema = z.object({
   did: z.string().min(1).max(256),
@@ -127,6 +127,7 @@ async function friendlyName(event: z.infer<typeof welcomeEventSchema>): Promise<
 }
 
 export async function POST(request: NextRequest) {
+  const invocationStartedAt = Date.now();
   const secret = configuredSecret();
   if (!secret) {
     return NextResponse.json({ error: "Welcome email webhook is not configured." }, { status: 503 });
@@ -162,28 +163,34 @@ export async function POST(request: NextRequest) {
     explicitLocale: event.locale,
     acceptLanguage: request.headers.get("accept-language"),
   });
-  const rendered = renderWelcomeEmailTemplate({
-    variant: event.type === "organization.membership.joined" ? "organization-invite" : "direct-signup",
+  const name = await friendlyName(event) ?? undefined;
+  const common = {
+    authEventId: event.eventId,
+    userDid: event.user.did,
+    email: event.user.email,
+    name,
     locale,
-    name: await friendlyName(event),
-    organizationName: await organizationName(event),
-    invitedByName: undefined,
-    invitedByEmail: undefined,
-  });
+    createdAt: event.createdAt ?? new Date(invocationStartedAt).toISOString(),
+  };
+  const input = event.type === "organization.membership.joined"
+    ? {
+      ...common,
+      type: "membership_joined" as const,
+      organizationDid: event.organization.did,
+      organizationName: await organizationName(event),
+    }
+    : { ...common, type: "signup" as const };
 
   try {
-    const result = await sendResendEmail({
-      to: event.user.email,
-      subject: rendered.subject,
-      html: rendered.html,
-      text: rendered.text,
-      idempotencyKey: event.eventId,
-    });
-
-    return NextResponse.json({ ok: true, id: result.id });
+    const notification = await createWelcomeRuntime().deliver(
+      input,
+      new Date(invocationStartedAt + USABLE_INVOCATION_MS),
+    );
+    return NextResponse.json({ ok: true, notification });
   } catch (error) {
-    const status = error instanceof EmailSendError ? error.status : 502;
-    const message = error instanceof Error ? error.message : "Could not send welcome email.";
-    return NextResponse.json({ error: message }, { status });
+    if (error instanceof NotificationProducerInputError) {
+      return NextResponse.json({ error: "Invalid welcome email event payload." }, { status: 400 });
+    }
+    return NextResponse.json({ error: "Welcome email event could not be queued. Retry the signed event." }, { status: 503 });
   }
 }
