@@ -2,47 +2,38 @@ import "server-only";
 
 import { randomUUID } from "node:crypto";
 import { SupabaseInvitationSourceReader } from "./invitation-source";
-import {
-  drainNotifications,
-  createNotificationProcessor,
-  type NotificationProcessor,
-} from "./orchestrator";
+import { createNotificationProcessor, processNotificationById } from "./orchestrator";
 import { ApplicationNotificationRenderer } from "./renderer";
 import { createNotificationRuntimeCore } from "./runtime";
 import type { UserEmailReader } from "./types";
 
 type Environment = Readonly<Record<string, string | undefined>>;
 const WORKER_SAFETY_MARGIN_MS = 2_000;
+const PROCESSING_LEASE_SECONDS = 120;
+const unusedUserEmailReader: UserEmailReader = { lookup: async () => ({ kind: "error" }) };
 
-const userEmailReader: UserEmailReader = {
-  lookup: async () => ({ kind: "error" }),
-};
-
-export function createDrainRuntime(environment: Environment = process.env) {
+export function createInvitationRuntime(environment: Environment = process.env) {
   const { config, repository, provider, clock, from } = createNotificationRuntimeCore(environment);
-  const processor: NotificationProcessor = provider
+  const processor = provider
     ? createNotificationProcessor({
       from,
       repository,
       provider,
       renderer: new ApplicationNotificationRenderer(),
       clock,
-      userEmailReader,
+      userEmailReader: unusedUserEmailReader,
       invitationSourceReader: new SupabaseInvitationSourceReader(),
       safetyMarginMs: WORKER_SAFETY_MARGIN_MS,
     })
-    : async () => {
-      throw new Error("Notification processor cannot run while email delivery is disabled.");
-    };
+    : async () => ({ kind: "disabled" } as const);
 
   return {
-    drain: (invocationDeadline: Date) => drainNotifications(invocationDeadline, {
-      config,
-      clock,
-      repository,
-      processor,
-      tokenFactory: randomUUID,
-      log: summary => console.info(JSON.stringify({ event: "notification_drain", ...summary })),
-    }),
+    config,
+    process: (outboxId: string, invocationDeadline: Date) => processNotificationById(
+      outboxId,
+      invocationDeadline,
+      { config, clock, repository, processor, tokenFactory: randomUUID },
+      { leaseSeconds: PROCESSING_LEASE_SECONDS, safetyMarginMs: WORKER_SAFETY_MARGIN_MS },
+    ),
   };
 }
