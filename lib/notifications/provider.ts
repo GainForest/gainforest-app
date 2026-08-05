@@ -65,10 +65,15 @@ export class CaptureEmailProvider implements EmailProvider {
   }
 }
 
-export function createEmailProvider(mode: DeliveryMode, sink: CaptureSink): EmailProvider | null {
+export function createEmailProvider(
+  mode: DeliveryMode,
+  sink: CaptureSink,
+  resendProvider?: EmailProvider,
+): EmailProvider | null {
   if (mode === "disabled") return null;
   if (mode === "capture") return new CaptureEmailProvider(sink);
+  if (resendProvider) return resendProvider;
   throw new Error(
-    "EMAIL_DELIVERY_MODE=resend is unavailable: this milestone intentionally has no live email provider adapter. Use disabled or capture.",
+    "EMAIL_DELIVERY_MODE=resend requires an explicitly configured Resend provider adapter. Configure RESEND_API_KEY or use disabled/capture.",
   );
 }

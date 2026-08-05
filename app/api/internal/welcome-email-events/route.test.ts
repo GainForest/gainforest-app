@@ -1,23 +1,24 @@
 import { createHmac } from "node:crypto";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { NextRequest } from "next/server";
+import type { WelcomeNotificationInput, WelcomeNotificationOutcome } from "@/lib/notifications/welcome";
 
-const sendResendEmail = vi.fn(async () => ({ id: "resend-test-id" }));
+vi.mock("server-only", () => ({}));
+
+const deliver = vi.fn<(_input: WelcomeNotificationInput, _deadline: Date) => Promise<WelcomeNotificationOutcome>>(async () => ({
+  kind: "durable" as const,
+  outboxId: "10000000-0000-4000-8000-000000000001",
+  status: "sent" as const,
+  duplicate: false,
+  retryable: false,
+}));
 const getCertifiedProfileCard = vi.fn(async (did: string): Promise<{ displayName: string | null; avatarUrl: string | null }> => ({
   displayName: did === "did:plc:org" ? "Resolved Org" : "Forest Member",
   avatarUrl: null,
 }));
 
-vi.mock("@/lib/email/resend", () => ({
-  EmailSendError: class EmailSendError extends Error {
-    status: number;
-    constructor(message: string, status = 502) {
-      super(message);
-      this.name = "EmailSendError";
-      this.status = status;
-    }
-  },
-  sendResendEmail,
+vi.mock("@/lib/notifications/welcome-runtime", () => ({
+  createWelcomeRuntime: () => ({ deliver }),
 }));
 
 vi.mock("@/app/account/_lib/account-route", () => ({
@@ -45,21 +46,25 @@ function signedRequest(body: unknown, secret: string): NextRequest {
 describe("welcome email event webhook", () => {
   const secret = "test-webhook-secret-123";
   const originalSecret = process.env.WELCOME_EMAIL_WEBHOOK_SECRET;
-  const originalResendKey = process.env.RESEND_API_KEY;
 
   beforeEach(() => {
     process.env.WELCOME_EMAIL_WEBHOOK_SECRET = secret;
-    process.env.RESEND_API_KEY = "re_test";
-    sendResendEmail.mockClear();
+    deliver.mockReset();
+    deliver.mockResolvedValue({
+      kind: "durable",
+      outboxId: "10000000-0000-4000-8000-000000000001",
+      status: "sent",
+      duplicate: false,
+      retryable: false,
+    });
     getCertifiedProfileCard.mockClear();
   });
 
   afterEach(() => {
     process.env.WELCOME_EMAIL_WEBHOOK_SECRET = originalSecret;
-    process.env.RESEND_API_KEY = originalResendKey;
   });
 
-  it("accepts organization.membership.joined and uses eventId as the Resend idempotency key", async () => {
+  it("accepts organization.membership.joined and durably delegates the stable auth event", async () => {
     const { POST } = await import("./route");
     const response = await POST(signedRequest({
       type: "organization.membership.joined",
@@ -76,16 +81,30 @@ describe("welcome email event webhook", () => {
       },
     }, secret));
 
-    await expect(response.json()).resolves.toEqual({ ok: true, id: "resend-test-id" });
+    await expect(response.json()).resolves.toEqual({
+      ok: true,
+      notification: {
+        kind: "durable",
+        outboxId: "10000000-0000-4000-8000-000000000001",
+        status: "sent",
+        duplicate: false,
+        retryable: false,
+      },
+    });
     expect(response.status).toBe(200);
     expect(getCertifiedProfileCard).toHaveBeenCalledWith("did:plc:user");
     expect(getCertifiedProfileCard).toHaveBeenCalledWith("did:plc:org");
-    expect(sendResendEmail).toHaveBeenCalledWith(expect.objectContaining({
-      to: "member@example.com",
-      idempotencyKey: "organization.membershipJoined.v1:test",
-      subject: "You’ve joined Resolved Org on GainForest",
-      html: expect.stringContaining("Hi Forest Member,"),
-    }));
+    expect(deliver).toHaveBeenCalledWith({
+      type: "membership_joined",
+      authEventId: "organization.membershipJoined.v1:test",
+      userDid: "did:plc:user",
+      email: "member@example.com",
+      name: "Forest Member",
+      locale: "en",
+      organizationDid: "did:plc:org",
+      organizationName: "Resolved Org",
+      createdAt: expect.any(String),
+    }, expect.any(Date));
   });
 
   it("omits the greeting instead of deriving a name from the handle", async () => {
@@ -104,10 +123,7 @@ describe("welcome email event webhook", () => {
     }, secret));
 
     expect(response.status).toBe(200);
-    expect(sendResendEmail).toHaveBeenCalledWith(expect.objectContaining({
-      html: expect.not.stringContaining("Hi Forest Steward,"),
-      text: expect.not.stringContaining("Hi Forest Steward,"),
-    }));
+    expect(deliver).toHaveBeenCalledWith(expect.objectContaining({ name: undefined }), expect.any(Date));
   });
 
   it("does not use an explicit user name that is actually the handle", async () => {
@@ -127,10 +143,7 @@ describe("welcome email event webhook", () => {
     }, secret));
 
     expect(response.status).toBe(200);
-    expect(sendResendEmail).toHaveBeenCalledWith(expect.objectContaining({
-      html: expect.not.stringContaining("Hi forest-steward.example.com,"),
-      text: expect.not.stringContaining("Hi forest-steward.example.com,"),
-    }));
+    expect(deliver).toHaveBeenCalledWith(expect.objectContaining({ name: undefined }), expect.any(Date));
   });
 
   it("rejects unsupported organization event types", async () => {
@@ -149,6 +162,43 @@ describe("welcome email event webhook", () => {
 
     expect(response.status).toBe(400);
     await expect(response.json()).resolves.toEqual({ error: "Invalid welcome email event payload." });
-    expect(sendResendEmail).not.toHaveBeenCalled();
+    expect(deliver).not.toHaveBeenCalled();
+  });
+
+  it("returns success when delivery is durably queued for retry", async () => {
+    deliver.mockResolvedValueOnce({
+      kind: "durable",
+      outboxId: "10000000-0000-4000-8000-000000000001",
+      status: "queued",
+      duplicate: false,
+      retryable: true,
+      errorCode: "provider_rate_limited",
+    });
+    const { POST } = await import("./route");
+    const response = await POST(signedRequest({
+      type: "user.signup.completed",
+      eventId: "user.signup.completed.v1:queued",
+      user: { did: "did:plc:user", email: "member@example.com" },
+    }, secret));
+    expect(response.status).toBe(200);
+    await expect(response.json()).resolves.toMatchObject({
+      ok: true,
+      notification: { status: "queued", retryable: true, errorCode: "provider_rate_limited" },
+    });
+  });
+
+  it("redacts runtime failures and returns a retryable webhook response", async () => {
+    deliver.mockRejectedValueOnce(new Error("member@example.com provider-secret"));
+    const { POST } = await import("./route");
+    const response = await POST(signedRequest({
+      type: "user.signup.completed",
+      eventId: "user.signup.completed.v1:error",
+      user: { did: "did:plc:user", email: "member@example.com" },
+    }, secret));
+    expect(response.status).toBe(503);
+    const body = await response.text();
+    expect(body).toContain("Welcome email event could not be queued");
+    expect(body).not.toContain("member@example.com");
+    expect(body).not.toContain("provider-secret");
   });
 });

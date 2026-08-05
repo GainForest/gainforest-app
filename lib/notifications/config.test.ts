@@ -45,7 +45,7 @@ describe("notification configuration", () => {
       .toThrow("EMAIL_SIGNUP_ENABLED must be exactly true or false; received \"1\"");
   });
 
-  it("keeps disabled/capture local and rejects the intentionally absent live adapter", async () => {
+  it("keeps disabled/capture local and requires explicit live adapter injection", async () => {
     const fetchMock = vi.fn();
     vi.stubGlobal("fetch", fetchMock);
     const sink: Parameters<typeof createEmailProvider>[1] = {
@@ -67,7 +67,14 @@ describe("notification configuration", () => {
     expect(fetchMock).not.toHaveBeenCalled();
 
     expect(() => createEmailProvider("resend", sink)).toThrow(
-      "EMAIL_DELIVERY_MODE=resend is unavailable: this milestone intentionally has no live email provider adapter. Use disabled or capture.",
+      "EMAIL_DELIVERY_MODE=resend requires an explicitly configured Resend provider adapter. Configure RESEND_API_KEY or use disabled/capture.",
     );
+    const resend = {
+      timeoutMs: 10_000,
+      idempotencyGuaranteeMs: 23 * 60 * 60 * 1000,
+      send: vi.fn(),
+    };
+    expect(createEmailProvider("resend", sink, resend)).toBe(resend);
+    expect(fetchMock).not.toHaveBeenCalled();
   });
 });
