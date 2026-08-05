@@ -183,9 +183,9 @@ export function AdminBioblitzDashboard({
   }
 
   return (
-    <div className="grid gap-6 lg:grid-cols-[minmax(14rem,22vw)_minmax(0,1fr)] lg:items-start lg:gap-10">
+    <div className="grid gap-4 lg:grid-cols-[13.5rem_minmax(0,1fr)] lg:items-start">
       <nav aria-label={t("roundsAria")} className="min-w-0 lg:sticky lg:top-4">
-        <div className="flex gap-2 overflow-x-auto pb-1 lg:flex-col lg:gap-1.5 lg:overflow-visible lg:pb-0">
+        <div className="flex gap-2 overflow-x-auto pb-1 lg:flex-col lg:overflow-visible lg:pb-0">
           {visibleRounds.map((round) => {
             const selected = round.id === selectedRoundId;
             const status = roundStatus(round);
@@ -196,16 +196,16 @@ export function AdminBioblitzDashboard({
                 aria-pressed={selected}
                 onClick={() => selectRound(round.id)}
                 className={cn(
-                  "group flex min-w-36 shrink-0 flex-col rounded-[1.35rem] px-4 py-3 text-left transition-[background-color,color,transform] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:min-w-40 lg:min-w-0 lg:px-5 lg:py-4",
+                  "group flex min-w-32 shrink-0 flex-col rounded-2xl px-3 py-2.5 text-left transition-[background-color,color,transform] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:min-w-36 lg:min-w-0",
                   selected
                     ? "bg-primary/[0.09] text-primary"
                     : "text-foreground hover:bg-muted/70",
                 )}
               >
                 <span className="flex min-w-0 items-center gap-2">
-                  <span className="min-w-0 flex-1 truncate text-base font-semibold tracking-[-0.01em]">{t("round", { round: round.id })}</span>
+                  <span className="min-w-0 flex-1 truncate text-sm font-semibold tracking-[-0.01em]">{t("round", { round: round.id })}</span>
                   {status === "live" || status === "upcoming" ? (
-                    <span className="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-muted px-2.5 py-1 text-[11px] font-medium text-muted-foreground">
+                    <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-muted px-2 py-0.5 text-[10px] font-medium text-muted-foreground">
                       <span className={cn("size-1.5 rounded-full", statusColor(status))} aria-hidden />
                       {t(`status.${status}`)}
                     </span>
@@ -213,7 +213,7 @@ export function AdminBioblitzDashboard({
                     <span className="sr-only">{t(`status.${status}`)}</span>
                   )}
                 </span>
-                <span className={cn("mt-1 text-sm tabular-nums", selected ? "text-primary/80" : "text-muted-foreground")}>
+                <span className={cn("mt-1 text-[11px] tabular-nums", selected ? "text-primary/80" : "text-muted-foreground")}>
                   {formatRoundDates(round, locale)}
                 </span>
               </button>
@@ -222,7 +222,7 @@ export function AdminBioblitzDashboard({
         </div>
       </nav>
 
-      <section className="min-w-0 overflow-hidden rounded-[2.25rem] border-[0.4rem] border-muted/80 bg-card shadow-none sm:rounded-[2.75rem]">
+      <section className="min-w-0 overflow-hidden rounded-3xl border-[0.35rem] border-muted/80 bg-card shadow-none">
         {error ? (
           <p role="alert" className="border-b border-destructive/15 bg-destructive/[0.06] px-4 py-3 text-sm text-destructive sm:px-5">
             {error}
@@ -241,7 +241,7 @@ export function AdminBioblitzDashboard({
             collapsible
             value={openRegistrantDid}
             onValueChange={setOpenRegistrantDid}
-            className="px-4 sm:px-8"
+            className="px-4 sm:px-5"
           >
             {roundData.registrants.map((registrant) => {
               const exclusion = exclusionsByDid.get(registrant.did) ?? null;
@@ -250,25 +250,25 @@ export function AdminBioblitzDashboard({
               const mutationKey = `${ignored ? "restore" : "exclude"}:${registrant.did}`;
               return (
                 <AccordionItem key={registrant.did} value={registrant.did} className="border-border/80 last:border-b-0">
-                  <AccordionTrigger className="gap-4 px-0 py-5 text-left hover:no-underline sm:gap-6 sm:py-6 [&>svg]:size-5 [&>svg]:text-foreground">
+                  <AccordionTrigger className="gap-3 px-0 py-3.5 text-left hover:no-underline [&>svg]:size-4 [&>svg]:text-foreground">
                     <RegistrantAvatar url={registrant.avatarUrl} name={name} />
                     <span className="min-w-0 flex-1">
-                      <span className="flex min-w-0 flex-wrap items-center gap-x-3 gap-y-2">
-                        <span className="max-w-full truncate text-lg font-semibold tracking-[-0.02em] text-foreground sm:text-xl">{name}</span>
+                      <span className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1">
+                        <span className="max-w-full truncate text-base font-medium tracking-[-0.01em] text-foreground">{name}</span>
                         {registrant.wins.map((prize) => <WinnerPill key={prize} prize={prize} t={t} />)}
                         {ignored ? (
-                          <span className="inline-flex items-center gap-1.5 rounded-full border border-amber-500/25 bg-transparent px-2.5 py-1 text-xs font-medium text-amber-700 dark:text-amber-300">
-                            <EyeOffIcon className="size-3.5" aria-hidden />
+                          <span className="inline-flex items-center gap-1 rounded-full border border-amber-500/25 bg-transparent px-2 py-0.5 text-[10px] font-semibold text-amber-700 dark:text-amber-300">
+                            <EyeOffIcon className="size-3" aria-hidden />
                             {t("ignored")}
                           </span>
                         ) : (
-                          <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-500/20 bg-transparent px-2.5 py-1 text-xs font-medium text-emerald-700 dark:text-emerald-300">
-                            <CheckIcon className="size-3.5" aria-hidden />
+                          <span className="inline-flex items-center gap-1 rounded-full border border-emerald-500/20 bg-transparent px-2 py-0.5 text-[10px] font-semibold text-emerald-700 dark:text-emerald-300">
+                            <CheckIcon className="size-3" aria-hidden />
                             {t("counted")}
                           </span>
                         )}
                       </span>
-                      <span className="mt-1.5 flex items-center gap-1.5 text-sm tabular-nums text-muted-foreground sm:text-base">
+                      <span className="mt-1 flex items-center gap-1.5 text-xs tabular-nums text-muted-foreground">
                         <span>{t("observations", { count: registrant.observationCount })}</span>
                         {ignored ? <span aria-hidden>·</span> : null}
                         {ignored ? <span>{t("notCounted")}</span> : null}
@@ -276,7 +276,7 @@ export function AdminBioblitzDashboard({
                     </span>
                   </AccordionTrigger>
                   <AccordionContent className="px-0">
-                    <div className="ml-[4rem] flex flex-wrap items-center gap-2 border-t border-border/80 pt-4 sm:ml-20">
+                    <div className="ml-[3.25rem] flex flex-wrap items-center gap-2 border-t border-border/80 pt-3">
                       <Link
                         href={accountPath(registrant.did)}
                         className="inline-flex h-8 items-center gap-1.5 rounded-full border border-border bg-background px-3 text-xs font-medium text-foreground transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
@@ -335,9 +335,9 @@ export function AdminBioblitzDashboard({
 
 function RegistrantAvatar({ url, name }: { url: string | null; name: string }) {
   return (
-    <span className="flex size-12 shrink-0 items-center justify-center overflow-hidden rounded-full bg-muted text-base font-semibold text-primary sm:size-16 sm:text-lg">
+    <span className="flex size-10 shrink-0 items-center justify-center overflow-hidden rounded-full bg-muted text-sm font-semibold text-primary">
       {url ? (
-        <Image src={url} alt="" width={64} height={64} unoptimized className="size-full object-cover" />
+        <Image src={url} alt="" width={40} height={40} unoptimized className="size-full object-cover" />
       ) : (
         initialsForName(name)
       )}
@@ -365,7 +365,7 @@ function WinnerPill({
   t: ReturnType<typeof useTranslations<"common.adminBioblitzDashboard">>;
 }) {
   return (
-    <span className="inline-flex items-center rounded-full bg-primary/10 px-3 py-1 text-xs font-medium text-primary sm:text-sm">
+    <span className="inline-flex items-center rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-semibold text-primary">
       {t(`prize.${prize}`)}
     </span>
   );
@@ -373,13 +373,13 @@ function WinnerPill({
 
 function BioblitzRosterSkeleton({ label }: { label: string }) {
   return (
-    <div aria-label={label} aria-busy="true" className="px-4 sm:px-8">
+    <div aria-label={label} aria-busy="true" className="px-4 sm:px-5">
       {Array.from({ length: 6 }, (_, index) => (
-        <div key={index} className="flex items-center gap-4 border-b border-border/80 py-5 last:border-b-0 sm:gap-6 sm:py-6">
-          <span className="size-12 animate-pulse rounded-full bg-muted sm:size-16" />
-          <span className="min-w-0 flex-1 space-y-2.5">
-            <span className="block h-4 w-36 animate-pulse rounded-full bg-muted sm:h-5" />
-            <span className="block h-3.5 w-24 animate-pulse rounded-full bg-muted/80 sm:h-4" />
+        <div key={index} className="flex items-center gap-3 border-b border-border/80 py-3.5 last:border-b-0">
+          <span className="size-10 animate-pulse rounded-full bg-muted" />
+          <span className="min-w-0 flex-1 space-y-2">
+            <span className="block h-3.5 w-32 animate-pulse rounded-full bg-muted" />
+            <span className="block h-3 w-20 animate-pulse rounded-full bg-muted/80" />
           </span>
         </div>
       ))}
