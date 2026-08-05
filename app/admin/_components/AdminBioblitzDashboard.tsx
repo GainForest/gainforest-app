@@ -18,6 +18,7 @@ import { roundStatus, type BioblitzRound } from "@/app/_lib/bioblitz";
 import type { BioblitzExclusionAdminRow } from "@/app/_lib/bioblitz-exclusions";
 import type {
   BioblitzAdminRegistrant,
+  BioblitzAdminRoundCount,
   BioblitzAdminRoundData,
   BioblitzWinnerPrize,
 } from "@/app/admin/_lib/bioblitz-dashboard-types";
@@ -28,6 +29,15 @@ async function loadRound(roundId: number, signal: AbortSignal): Promise<Bioblitz
   const data = (await response.json().catch(() => null)) as BioblitzAdminRoundData & { error?: string } | null;
   if (!response.ok || !data || data.error) throw new Error(data?.error ?? "round_load_failed");
   return data;
+}
+
+async function loadRoundCounts(signal: AbortSignal): Promise<BioblitzAdminRoundCount[]> {
+  const response = await fetch("/api/admin/bioblitz/round-counts", { cache: "no-store", signal });
+  const data = (await response.json().catch(() => null)) as
+    | { counts?: BioblitzAdminRoundCount[]; error?: string }
+    | null;
+  if (!response.ok || !data?.counts) throw new Error(data?.error ?? "round_counts_load_failed");
+  return data.counts;
 }
 
 async function addExclusion(subjectDid: string, roundId: number): Promise<BioblitzExclusionAdminRow> {
@@ -95,6 +105,11 @@ export function AdminBioblitzDashboard({
   const [roundData, setRoundData] = useState<BioblitzAdminRoundData | null>(
     initialData?.roundId === safeDefaultRoundId ? initialData : null,
   );
+  const [roundObservationCounts, setRoundObservationCounts] = useState<Record<number, number>>(() =>
+    initialData?.roundId === safeDefaultRoundId
+      ? { [initialData.roundId]: initialData.totalObservations }
+      : {},
+  );
   const [exclusions, setExclusions] = useState(initialExclusions);
   const [openRegistrantDid, setOpenRegistrantDid] = useState<string | undefined>();
   const [loading, setLoading] = useState(initialData?.roundId !== safeDefaultRoundId);
@@ -121,7 +136,13 @@ export function AdminBioblitzDashboard({
     setError(null);
     loadRound(selectedRoundId, controller.signal)
       .then((data) => {
-        if (!controller.signal.aborted) setRoundData(data);
+        if (controller.signal.aborted) return;
+        setRoundData(data);
+        setRoundObservationCounts((current) =>
+          current[data.roundId] === data.totalObservations
+            ? current
+            : { ...current, [data.roundId]: data.totalObservations },
+        );
       })
       .catch((caught) => {
         if (!controller.signal.aborted && (caught as Error).name !== "AbortError") {
@@ -133,6 +154,29 @@ export function AdminBioblitzDashboard({
       });
     return () => controller.abort();
   }, [refreshCount, selectedRoundId, t]);
+
+  useEffect(() => {
+    const controller = new AbortController();
+    loadRoundCounts(controller.signal)
+      .then((counts) => {
+        if (controller.signal.aborted) return;
+        setRoundObservationCounts((current) => {
+          let changed = false;
+          const next = { ...current };
+          for (const count of counts) {
+            // A freshly loaded roster is the authoritative, up-to-date count
+            // after an ignore/restore action. This optional background request
+            // only fills in round-rail values we do not already have.
+            if (count.totalObservations === null || current[count.roundId] !== undefined) continue;
+            next[count.roundId] = count.totalObservations;
+            changed = true;
+          }
+          return changed ? next : current;
+        });
+      })
+      .catch(() => {});
+    return () => controller.abort();
+  }, []);
 
   function selectRound(roundId: number) {
     if (roundId === selectedRoundId) return;
@@ -189,6 +233,7 @@ export function AdminBioblitzDashboard({
           {visibleRounds.map((round) => {
             const selected = round.id === selectedRoundId;
             const status = roundStatus(round);
+            const totalObservations = roundObservationCounts[round.id];
             return (
               <button
                 key={round.id}
@@ -213,8 +258,21 @@ export function AdminBioblitzDashboard({
                     <span className="sr-only">{t(`status.${status}`)}</span>
                   )}
                 </span>
-                <span className={cn("mt-1 text-[11px] tabular-nums", selected ? "text-primary/80" : "text-muted-foreground")}>
-                  {formatRoundDates(round, locale)}
+                <span className="mt-1 flex min-w-0 items-center justify-between gap-2">
+                  <span className={cn("truncate text-[11px] tabular-nums", selected ? "text-primary/80" : "text-muted-foreground")}>
+                    {formatRoundDates(round, locale)}
+                  </span>
+                  {typeof totalObservations === "number" ? (
+                    <span
+                      aria-label={t("observations", { count: totalObservations })}
+                      className={cn(
+                        "shrink-0 text-sm tabular-nums",
+                        selected ? "text-primary" : "text-muted-foreground",
+                      )}
+                    >
+                      {formatObservationCount(totalObservations, locale)}
+                    </span>
+                  ) : null}
                 </span>
               </button>
             );
@@ -261,12 +319,7 @@ export function AdminBioblitzDashboard({
                             <EyeOffIcon className="size-3" aria-hidden />
                             {t("ignored")}
                           </span>
-                        ) : (
-                          <span className="inline-flex items-center gap-1 rounded-full border border-emerald-500/20 bg-transparent px-2 py-0.5 text-[10px] font-semibold text-emerald-700 dark:text-emerald-300">
-                            <CheckIcon className="size-3" aria-hidden />
-                            {t("counted")}
-                          </span>
-                        )}
+                        ) : null}
                       </span>
                       <span className="mt-1 flex items-center gap-1.5 text-xs tabular-nums text-muted-foreground">
                         <span>{t("observations", { count: registrant.observationCount })}</span>
@@ -396,6 +449,10 @@ function formatShortDate(value: string, locale: string): string {
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return "";
   return new Intl.DateTimeFormat(locale, { month: "short", day: "numeric", year: "numeric", timeZone: "UTC" }).format(date);
+}
+
+function formatObservationCount(value: number, locale: string): string {
+  return new Intl.NumberFormat(locale).format(value);
 }
 
 function statusColor(status: "upcoming" | "live" | "ended"): string {

@@ -15,6 +15,7 @@ import {
 import { fetchIndexedCertifiedProfileCards } from "@/app/_lib/indexer";
 import type {
   BioblitzAdminRegistrant,
+  BioblitzAdminRoundCount,
   BioblitzAdminRoundData,
   BioblitzWinnerPrize,
 } from "./bioblitz-dashboard-types";
@@ -32,6 +33,27 @@ export function resolveBioblitzAdminRound(roundId: number, now = Date.now()): Bi
   const round = bioblitzRounds(now, 0).find((candidate) => candidate.id === roundId);
   if (!round) throw new BioblitzAdminRoundNotFoundError();
   return round;
+}
+
+/**
+ * Load accurate eligible-observation totals for the compact round rail.
+ * A failed source deliberately produces no number rather than a misleading
+ * zero, and every round is fetched in parallel so this optional enhancement
+ * never serializes the main roster load.
+ */
+export async function loadBioblitzAdminRoundCounts(
+  rounds: readonly BioblitzRound[],
+): Promise<BioblitzAdminRoundCount[]> {
+  return Promise.all(
+    rounds.map(async (round) => {
+      try {
+        const board = await fetchRoundCollectors(round, "round", undefined, "required");
+        return { roundId: round.id, totalObservations: board.totalObservations };
+      } catch {
+        return { roundId: round.id, totalObservations: null };
+      }
+    }),
+  );
 }
 
 type Winner = {
@@ -161,6 +183,7 @@ export async function loadBioblitzAdminRound(
 
   return {
     roundId: round.id,
+    totalObservations: board.totalObservations,
     registrants: [...rows.values()].sort((a, b) => {
       const winnerDifference = Number(b.wins.length > 0) - Number(a.wins.length > 0);
       if (winnerDifference) return winnerDifference;

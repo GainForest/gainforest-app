@@ -16,5 +16,14 @@ export type BioblitzAdminRegistrant = {
 /** Serializable, round-scoped payload used by the admin dashboard endpoint. */
 export type BioblitzAdminRoundData = {
   roundId: number;
+  /** Eligible observations after current round exclusions. */
+  totalObservations: number;
   registrants: BioblitzAdminRegistrant[];
+};
+
+/** A lightweight count for one round in the moderator round rail. */
+export type BioblitzAdminRoundCount = {
+  roundId: number;
+  /** null means the count could not be loaded safely. */
+  totalObservations: number | null;
 };

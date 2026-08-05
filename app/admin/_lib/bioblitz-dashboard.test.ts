@@ -35,7 +35,7 @@ vi.mock("@/app/_lib/bioblitz-exclusions", () => ({
 vi.mock("@/app/_lib/indexer", () => ({ fetchIndexedCertifiedProfileCards }));
 vi.mock("./bioblitz-confirmed-winners", () => ({ loadBioblitzConfirmedWinners }));
 
-import { loadBioblitzAdminRound } from "./bioblitz-dashboard";
+import { loadBioblitzAdminRound, loadBioblitzAdminRoundCounts } from "./bioblitz-dashboard";
 
 const ROUND = {
   id: 5,
@@ -88,9 +88,21 @@ describe("BioBlitz admin roster", () => {
     );
   });
 
+  it("returns eligible totals for the round rail without substituting failed reads for zero", async () => {
+    await expect(loadBioblitzAdminRoundCounts([ROUND])).resolves.toEqual([
+      { roundId: 5, totalObservations: 4 },
+    ]);
+
+    fetchRoundCollectors.mockRejectedValueOnce(new Error("indexer unavailable"));
+    await expect(loadBioblitzAdminRoundCounts([ROUND])).resolves.toEqual([
+      { roundId: 5, totalObservations: null },
+    ]);
+  });
+
   it("keeps an actively ignored collector visible when they never registered for the round", async () => {
     const data = await loadBioblitzAdminRound(5, Date.parse("2026-07-28T12:00:00.000Z"));
 
+    expect(data.totalObservations).toBe(4);
     expect(data.registrants).toEqual([
       {
         did: BEES_DID,
