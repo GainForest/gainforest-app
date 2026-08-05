@@ -5,15 +5,11 @@ import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import {
-  CameraIcon,
   CheckIcon,
-  ChevronRightIcon,
   DownloadIcon,
   EyeOffIcon,
   ExternalLinkIcon,
   Loader2Icon,
-  TrophyIcon,
-  UserRoundIcon,
 } from "lucide-react";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
@@ -187,9 +183,9 @@ export function AdminBioblitzDashboard({
   }
 
   return (
-    <div className="grid gap-4 lg:grid-cols-[13.5rem_minmax(0,1fr)] lg:items-start">
+    <div className="grid gap-6 lg:grid-cols-[minmax(14rem,22vw)_minmax(0,1fr)] lg:items-start lg:gap-10">
       <nav aria-label={t("roundsAria")} className="min-w-0 lg:sticky lg:top-4">
-        <div className="flex gap-2 overflow-x-auto pb-1 lg:flex-col lg:overflow-visible lg:pb-0">
+        <div className="flex gap-2 overflow-x-auto pb-1 lg:flex-col lg:gap-1.5 lg:overflow-visible lg:pb-0">
           {visibleRounds.map((round) => {
             const selected = round.id === selectedRoundId;
             const status = roundStatus(round);
@@ -200,25 +196,33 @@ export function AdminBioblitzDashboard({
                 aria-pressed={selected}
                 onClick={() => selectRound(round.id)}
                 className={cn(
-                  "group relative flex min-w-32 shrink-0 flex-col overflow-hidden rounded-2xl border px-3 py-2.5 text-left transition-[border-color,background-color,transform] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:min-w-36 lg:min-w-0",
+                  "group flex min-w-36 shrink-0 flex-col rounded-[1.35rem] px-4 py-3 text-left transition-[background-color,color,transform] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:min-w-40 lg:min-w-0 lg:px-5 lg:py-4",
                   selected
-                    ? "border-primary/25 bg-primary/[0.09] text-foreground shadow-sm"
-                    : "border-border/70 bg-card/60 text-muted-foreground hover:border-primary/20 hover:bg-muted/50 hover:text-foreground",
+                    ? "bg-primary/[0.09] text-primary"
+                    : "text-foreground hover:bg-muted/70",
                 )}
               >
-                <span className="flex items-center justify-between gap-2">
-                  <span className="text-sm font-semibold">{t("round", { round: round.id })}</span>
-                  <ChevronRightIcon className={cn("size-3.5 transition-transform lg:group-hover:translate-x-0.5", selected && "text-primary")} aria-hidden />
+                <span className="flex min-w-0 items-center gap-2">
+                  <span className="min-w-0 flex-1 truncate text-base font-semibold tracking-[-0.01em]">{t("round", { round: round.id })}</span>
+                  {status === "live" || status === "upcoming" ? (
+                    <span className="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-muted px-2.5 py-1 text-[11px] font-medium text-muted-foreground">
+                      <span className={cn("size-1.5 rounded-full", statusColor(status))} aria-hidden />
+                      {t(`status.${status}`)}
+                    </span>
+                  ) : (
+                    <span className="sr-only">{t(`status.${status}`)}</span>
+                  )}
                 </span>
-                <span className="mt-1 text-[11px] tabular-nums text-muted-foreground">{formatRoundDates(round, locale)}</span>
-                <span role="img" className={cn("mt-2 h-1 w-8 rounded-full", statusColor(status))} aria-label={t(`status.${status}`)} />
+                <span className={cn("mt-1 text-sm tabular-nums", selected ? "text-primary/80" : "text-muted-foreground")}>
+                  {formatRoundDates(round, locale)}
+                </span>
               </button>
             );
           })}
         </div>
       </nav>
 
-      <section className="min-w-0 overflow-hidden rounded-3xl border border-border bg-card/90 shadow-sm">
+      <section className="min-w-0 overflow-hidden rounded-[2.25rem] border-[0.4rem] border-muted/80 bg-card shadow-none sm:rounded-[2.75rem]">
         {error ? (
           <p role="alert" className="border-b border-destructive/15 bg-destructive/[0.06] px-4 py-3 text-sm text-destructive sm:px-5">
             {error}
@@ -232,41 +236,47 @@ export function AdminBioblitzDashboard({
         ) : roundData.registrants.length === 0 ? (
           <div className="p-8 text-center text-sm text-muted-foreground">{t("empty")}</div>
         ) : (
-          <Accordion type="single" collapsible value={openRegistrantDid} onValueChange={setOpenRegistrantDid} className="divide-y divide-border/70">
+          <Accordion
+            type="single"
+            collapsible
+            value={openRegistrantDid}
+            onValueChange={setOpenRegistrantDid}
+            className="px-4 sm:px-8"
+          >
             {roundData.registrants.map((registrant) => {
               const exclusion = exclusionsByDid.get(registrant.did) ?? null;
               const ignored = Boolean(exclusion);
               const name = registrant.displayName || t("unnamed");
               const mutationKey = `${ignored ? "restore" : "exclude"}:${registrant.did}`;
               return (
-                <AccordionItem key={registrant.did} value={registrant.did} className="border-0">
-                  <AccordionTrigger className="gap-3 px-4 py-3.5 text-left hover:no-underline sm:px-5">
-                    <RegistrantAvatar url={registrant.avatarUrl} />
+                <AccordionItem key={registrant.did} value={registrant.did} className="border-border/80 last:border-b-0">
+                  <AccordionTrigger className="gap-4 px-0 py-5 text-left hover:no-underline sm:gap-6 sm:py-6 [&>svg]:size-5 [&>svg]:text-foreground">
+                    <RegistrantAvatar url={registrant.avatarUrl} name={name} />
                     <span className="min-w-0 flex-1">
-                      <span className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1">
-                        <span className="max-w-full truncate font-medium text-foreground">{name}</span>
+                      <span className="flex min-w-0 flex-wrap items-center gap-x-3 gap-y-2">
+                        <span className="max-w-full truncate text-lg font-semibold tracking-[-0.02em] text-foreground sm:text-xl">{name}</span>
                         {registrant.wins.map((prize) => <WinnerPill key={prize} prize={prize} t={t} />)}
                         {ignored ? (
-                          <span className="inline-flex items-center gap-1 rounded-full bg-amber-500/10 px-2 py-0.5 text-[10px] font-semibold text-amber-700 dark:text-amber-300">
-                            <EyeOffIcon className="size-3" aria-hidden />
+                          <span className="inline-flex items-center gap-1.5 rounded-full border border-amber-500/25 bg-transparent px-2.5 py-1 text-xs font-medium text-amber-700 dark:text-amber-300">
+                            <EyeOffIcon className="size-3.5" aria-hidden />
                             {t("ignored")}
                           </span>
                         ) : (
-                          <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/10 px-2 py-0.5 text-[10px] font-semibold text-emerald-700 dark:text-emerald-300">
-                            <CheckIcon className="size-3" aria-hidden />
+                          <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-500/20 bg-transparent px-2.5 py-1 text-xs font-medium text-emerald-700 dark:text-emerald-300">
+                            <CheckIcon className="size-3.5" aria-hidden />
                             {t("counted")}
                           </span>
                         )}
                       </span>
-                      <span className="mt-1 flex items-center gap-1.5 text-xs tabular-nums text-muted-foreground">
+                      <span className="mt-1.5 flex items-center gap-1.5 text-sm tabular-nums text-muted-foreground sm:text-base">
                         <span>{t("observations", { count: registrant.observationCount })}</span>
                         {ignored ? <span aria-hidden>·</span> : null}
                         {ignored ? <span>{t("notCounted")}</span> : null}
                       </span>
                     </span>
                   </AccordionTrigger>
-                  <AccordionContent className="px-4 sm:px-5">
-                    <div className="ml-[3.25rem] flex flex-wrap items-center gap-2 border-t border-border/70 pt-3">
+                  <AccordionContent className="px-0">
+                    <div className="ml-[4rem] flex flex-wrap items-center gap-2 border-t border-border/80 pt-4 sm:ml-20">
                       <Link
                         href={accountPath(registrant.did)}
                         className="inline-flex h-8 items-center gap-1.5 rounded-full border border-border bg-background px-3 text-xs font-medium text-foreground transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
@@ -323,16 +333,28 @@ export function AdminBioblitzDashboard({
   );
 }
 
-function RegistrantAvatar({ url }: { url: string | null }) {
+function RegistrantAvatar({ url, name }: { url: string | null; name: string }) {
   return (
-    <span className="flex size-10 shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-muted">
+    <span className="flex size-12 shrink-0 items-center justify-center overflow-hidden rounded-full bg-muted text-base font-semibold text-primary sm:size-16 sm:text-lg">
       {url ? (
-        <Image src={url} alt="" width={40} height={40} unoptimized className="size-full object-cover" />
+        <Image src={url} alt="" width={64} height={64} unoptimized className="size-full object-cover" />
       ) : (
-        <UserRoundIcon className="size-4 text-muted-foreground" aria-hidden />
+        initialsForName(name)
       )}
     </span>
   );
+}
+
+function initialsForName(name: string): string {
+  const initials = name
+    .trim()
+    .split(/\s+/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((part) => Array.from(part)[0] ?? "")
+    .join("")
+    .toUpperCase();
+  return initials || "?";
 }
 
 function WinnerPill({
@@ -342,10 +364,8 @@ function WinnerPill({
   prize: BioblitzWinnerPrize;
   t: ReturnType<typeof useTranslations<"common.adminBioblitzDashboard">>;
 }) {
-  const Icon = prize === "most-observations" ? TrophyIcon : CameraIcon;
   return (
-    <span className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-semibold text-primary">
-      <Icon className="size-3" aria-hidden />
+    <span className="inline-flex items-center rounded-full bg-primary/10 px-3 py-1 text-xs font-medium text-primary sm:text-sm">
       {t(`prize.${prize}`)}
     </span>
   );
@@ -353,13 +373,13 @@ function WinnerPill({
 
 function BioblitzRosterSkeleton({ label }: { label: string }) {
   return (
-    <div aria-label={label} aria-busy="true" className="divide-y divide-border/70">
+    <div aria-label={label} aria-busy="true" className="px-4 sm:px-8">
       {Array.from({ length: 6 }, (_, index) => (
-        <div key={index} className="flex items-center gap-3 px-4 py-3.5 sm:px-5">
-          <span className="size-10 animate-pulse rounded-2xl bg-muted" />
-          <span className="min-w-0 flex-1 space-y-2">
-            <span className="block h-3.5 w-32 animate-pulse rounded bg-muted" />
-            <span className="block h-3 w-20 animate-pulse rounded bg-muted/80" />
+        <div key={index} className="flex items-center gap-4 border-b border-border/80 py-5 last:border-b-0 sm:gap-6 sm:py-6">
+          <span className="size-12 animate-pulse rounded-full bg-muted sm:size-16" />
+          <span className="min-w-0 flex-1 space-y-2.5">
+            <span className="block h-4 w-36 animate-pulse rounded-full bg-muted sm:h-5" />
+            <span className="block h-3.5 w-24 animate-pulse rounded-full bg-muted/80 sm:h-4" />
           </span>
         </div>
       ))}
