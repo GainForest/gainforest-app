@@ -11,6 +11,7 @@ import type {
   NotificationEnqueueRepository,
   NotificationEnqueueResult,
   NotificationOrchestrationRepository,
+  NotificationQueueHealth,
   NotificationRepository,
   NotificationRow,
   ProviderErrorCode,
@@ -21,7 +22,7 @@ import type {
 
 type RepositoryCode = "repository_unavailable" | "repository_rejected" | "invalid_response" | "stale_claim";
 type RepositoryOperation =
-  | "enqueue" | "cleanup" | "claim_due" | "claim_one" | "get_claimed" | "expire_claimed" | "resolve_recipient" | "wait_recipient"
+  | "enqueue" | "cleanup" | "health" | "claim_due" | "claim_one" | "get_claimed" | "expire_claimed" | "resolve_recipient" | "wait_recipient"
   | "freeze_request" | "begin_provider_call" | "defer_ambiguous" | "record_provider_failure"
   | "terminal_provider_failure" | "mark_sent" | "requeue" | "mark_dead" | "suppress_claimed" | "release_claim";
 
@@ -254,6 +255,24 @@ export class SupabaseNotificationRepository implements NotificationRepository, N
         "Notification repository returned an invalid cleanup response. Verify the committed cleanup RPC signature.",
       );
       return result;
+    });
+  }
+
+  async health(): Promise<NotificationQueueHealth> {
+    return this.run("health", async () => {
+      const response = await supabaseRpc<unknown>("notification_outbox_health", {});
+      const item = object(response);
+      const counts = item && [item.waiting_recipient, item.queued, item.processing, item.dead, item.oldest_due_age_seconds];
+      if (!item || !counts || counts.some(value => typeof value !== "number" || !Number.isInteger(value) || value < 0)) {
+        this.invalid("Notification repository returned an invalid health response. Verify the committed health RPC signature.");
+      }
+      return {
+        waitingRecipient: item.waiting_recipient as number,
+        queued: item.queued as number,
+        processing: item.processing as number,
+        dead: item.dead as number,
+        oldestDueAgeSeconds: item.oldest_due_age_seconds as number,
+      };
     });
   }
 
