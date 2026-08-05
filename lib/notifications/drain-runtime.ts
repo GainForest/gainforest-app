@@ -5,14 +5,10 @@ import { SupabaseInvitationSourceReader } from "./invitation-source";
 import { drainNotifications, createNotificationProcessor } from "./orchestrator";
 import { ApplicationNotificationRenderer } from "./renderer";
 import { createNotificationRuntimeCore } from "./runtime";
-import type { UserEmailReader } from "./types";
+import { SupabaseUserEmailReader } from "./user-email";
 
 type Environment = Readonly<Record<string, string | undefined>>;
 const WORKER_SAFETY_MARGIN_MS = 2_000;
-
-const userEmailReader: UserEmailReader = {
-  lookup: async () => ({ kind: "error" }),
-};
 
 export function createDrainRuntime(environment: Environment = process.env) {
   const { config, repository, provider, clock, from } = createNotificationRuntimeCore(environment);
@@ -23,7 +19,7 @@ export function createDrainRuntime(environment: Environment = process.env) {
     provider,
     renderer: new ApplicationNotificationRenderer(),
     clock,
-    userEmailReader,
+    userEmailReader: new SupabaseUserEmailReader(),
     invitationSourceReader: new SupabaseInvitationSourceReader(),
     safetyMarginMs: WORKER_SAFETY_MARGIN_MS,
   });

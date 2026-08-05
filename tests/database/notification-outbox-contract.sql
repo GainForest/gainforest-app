@@ -38,6 +38,7 @@ select pg_temp.assert_true(not has_function_privilege('public','public.notificat
 select pg_temp.assert_true(not has_function_privilege('public','public.notification_invitation_create(uuid,text,text,text,text,text,text,text,text,text,text,text,text,text,timestamp with time zone,timestamp with time zone)','execute') and has_function_privilege('service_role','public.notification_invitation_create(uuid,text,text,text,text,text,text,text,text,text,text,text,text,text,timestamp with time zone,timestamp with time zone)','execute'), 'atomic invitation creation is service-role-only');
 select pg_temp.assert_true(not has_function_privilege('authenticated','public.notification_invitation_close(uuid,text,text,text)','execute') and has_function_privilege('service_role','public.notification_invitation_close(uuid,text,text,text)','execute'), 'invitation closing is service-role-only');
 select pg_temp.assert_true(not has_function_privilege('anon','public.notification_invitation_retry(uuid)','execute') and has_function_privilege('service_role','public.notification_invitation_retry(uuid)','execute'), 'invitation retry is service-role-only');
+select pg_temp.assert_true(not has_function_privilege('authenticated','public.notification_bioblitz_mark_handled(text,text)','execute') and has_function_privilege('service_role','public.notification_bioblitz_mark_handled(text,text)','execute'), 'BioBlitz manual handling is service-role-only');
 select pg_temp.assert_true(to_regprocedure('extensions.notification_outbox_sha256(bytea)') is not null, 'internal SHA-256 helper exists');
 select pg_temp.assert_true(not has_function_privilege('public','extensions.notification_outbox_sha256(bytea)','execute') and not has_function_privilege('anon','extensions.notification_outbox_sha256(bytea)','execute') and not has_function_privilege('authenticated','extensions.notification_outbox_sha256(bytea)','execute') and not has_function_privilege('service_role','extensions.notification_outbox_sha256(bytea)','execute'), 'internal SHA-256 helper is not directly callable by API roles');
 select pg_temp.assert_true(to_regprocedure('public.notification_outbox_wait_recipient(uuid,uuid,timestamp with time zone,text,text)') is null, 'free-form recipient error summary RPC is absent');
@@ -490,6 +491,39 @@ select pg_temp.assert_raises(
   $$select public.notification_invitation_retry('81000000-0000-4000-8000-000000000003')$$,
   'invitation_notification_not_safely_retryable', 'invalid immutable notification cannot be manually retried'
 );
+
+-- BioBlitz manual handling suppresses future sends, records moderator handling,
+-- and refuses an in-flight provider boundary.
+select * from public.notification_outbox_enqueue(
+  'bioblitz:4:most-observations:did:plc:winner','bioblitz_winner','{"roundId":4}','bioblitz:4:most-observations','did:plc:winner',
+  null,'bioblitz-winner',null,null,'resend',clock_timestamp()
+);
+create temp table bioblitz_handled as select public.notification_bioblitz_mark_handled(
+  'bioblitz:4:most-observations:did:plc:winner','did:plc:moderator'
+) result;
+select pg_temp.assert_true((select result->>'status'='suppressed' and (result->>'handled_manually')::boolean from bioblitz_handled), 'moderator marks BioBlitz notification handled');
+select pg_temp.assert_true((select status='suppressed' and manual_handled_at is not null and manual_handled_by='did:plc:moderator' and payload is null and recipient_did is null from public.notification_outbox where event_key_hash=encode(extensions.digest('bioblitz:4:most-observations:did:plc:winner','sha256'),'hex')), 'manual handling redacts delivery data and stores the moderator audit');
+select public.notification_bioblitz_mark_handled('bioblitz:4:most-observations:did:plc:winner','did:plc:other-moderator');
+select pg_temp.assert_true((select manual_handled_by='did:plc:moderator' from public.notification_outbox where event_key_hash=encode(extensions.digest('bioblitz:4:most-observations:did:plc:winner','sha256'),'hex')), 'manual handling replay preserves the first moderator audit');
+create temp table bioblitz_handled_replay as select * from public.notification_outbox_enqueue(
+  'bioblitz:4:most-observations:did:plc:winner','bioblitz_winner','{"roundId":4}','bioblitz:4:most-observations','did:plc:winner',
+  null,'bioblitz-winner',null,null,'resend',clock_timestamp()
+);
+select pg_temp.assert_true((select status='suppressed' and duplicate from bioblitz_handled_replay), 'manual handling tombstone blocks reconciliation replay');
+
+select * from public.notification_outbox_enqueue(
+  'bioblitz:4:best-picture:did:plc:winner','bioblitz_winner','{"roundId":4}','bioblitz:4:best-picture','did:plc:winner',
+  null,'bioblitz-winner',null,null,'resend',clock_timestamp()
+);
+select * from public.notification_outbox_claim_one((select id from public.notification_outbox where source_id='bioblitz:4:best-picture'),'83000000-0000-4000-8000-000000000001',60);
+select public.notification_outbox_resolve_recipient((select id from public.notification_outbox where source_id='bioblitz:4:best-picture'),'83000000-0000-4000-8000-000000000001','winner@example.com');
+select public.notification_outbox_freeze_request((select id from public.notification_outbox where source_id='bioblitz:4:best-picture'),'83000000-0000-4000-8000-000000000001','from@example.com','winner@example.com','Winner','Winner html','Winner text');
+select public.notification_outbox_begin_provider_call((select id from public.notification_outbox where source_id='bioblitz:4:best-picture'),'83000000-0000-4000-8000-000000000001',clock_timestamp()+interval '1 hour');
+select pg_temp.assert_raises(
+  $$select public.notification_bioblitz_mark_handled('bioblitz:4:best-picture:did:plc:winner','did:plc:moderator')$$,
+  'bioblitz_notification_not_safely_suppressible', 'manual handling refuses in-flight provider work'
+);
+select pg_temp.assert_true((select manual_handled_at is null and status='processing' from public.notification_outbox where source_id='bioblitz:4:best-picture'), 'refused in-flight handling stores no false audit');
 
 -- Claim and token-owned transitions enforce retention/provider boundaries
 -- independently of cleanup while preserving unexpired live leases.

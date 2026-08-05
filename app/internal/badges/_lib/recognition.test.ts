@@ -28,6 +28,9 @@ function data(awards: Array<{ did: string }> = []): InternalBadgeData {
     awards: awards.map((award) => ({
       badge: { uri: DEFINITION.uri, cid: DEFINITION.cid },
       subjectDid: award.did,
+      note: "Winner",
+      url: null,
+      createdAt: "2026-08-06T01:00:00.000Z",
     })),
     pendingAwards: [],
   } as unknown as InternalBadgeData;
@@ -47,12 +50,13 @@ describe("recognition award claims", () => {
     fetchInternalBadgeDataStrict.mockResolvedValue(data());
     fetchMock.mockResolvedValue(new Response(JSON.stringify({ uri: "at://did:plc:gainforest/app.certified.badge.award/winner", cid: "bafy" }), { status: 200 }));
 
-    await awardRecognition(
+    const snapshot = await awardRecognition(
       "did:plc:gainforest",
       "session=moderator",
       "did:plc:winner",
       "bioblitz-most-images-round-4",
     );
+    expect(snapshot).toMatchObject({ subjectDid: "did:plc:winner", createdAt: expect.any(String) });
 
     const request = JSON.parse(fetchMock.mock.calls[0]![1].body as string);
     expect(request.rkey).toBe("recognition-award-bioblitz-most-images-round-4");
