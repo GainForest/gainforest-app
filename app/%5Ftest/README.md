@@ -26,3 +26,7 @@ The first registered experience lives at `/_test/donation-flow` and stages the r
 3. `CheckoutView`
 
 `CheckoutView sideEffects="mock"` uses the same UI and in-app state machine while replacing recipient lookup, tip lookup, wallet connection, balance reads, and settlement with local fixtures. The amount modal uses `ModalPortal`, preserving the registry's memory-backed cart context inside the root modal chrome.
+
+## Invitation delivery experience
+
+`/_test/invitation-delivery` renders the production `PendingInvitationRow` for sent, delayed, manual-link, and role-restricted states. Its retry, copy, and cancel callbacks update fixture state only; the route never calls invitation, notification, clipboard, or membership APIs.

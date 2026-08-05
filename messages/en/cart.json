@@ -205,6 +205,23 @@
         }
       }
     },
+    "invitationDelivery": {
+      "title": "Invitation delivery states",
+      "description": "The production pending-invitation row for sent, delayed, manual-link, and role-restricted email states.",
+      "mockBadge": "Mock mode · no email",
+      "mockNote": "All addresses are fixtures. Retry, copy, and cancel update memory only and never call a live service.",
+      "cardTitle": "Invitation email delivery",
+      "cardDescription": "Preview delivery status, safe retry, copy-link, and cancel actions for organization invitations.",
+      "scenarios": {
+        "sent": "Owner · email sent",
+        "delayed": "Owner · temporary delivery problem",
+        "manual": "Owner · share the link directly",
+        "admin": "Admin invite · actions restricted"
+      },
+      "mockRetried": "Mock retry completed without sending an email.",
+      "mockCopied": "Mock invitation link copied without using the clipboard.",
+      "mockCanceled": "Mock invitation removed from this preview."
+    },
     "myCardsTitle": "My Cards gallery",
     "myCardsDescription": "Preview the collected-cards gallery, populated with sample collectibles."
   },

@@ -205,6 +205,23 @@
         }
       }
     },
+    "invitationDelivery": {
+      "title": "Estados de entrega de invitaciones",
+      "description": "La fila de invitación pendiente de producción para correos enviados, retrasados, enlaces manuales y acciones restringidas por rol.",
+      "mockBadge": "Modo simulado · sin correos",
+      "mockNote": "Todas las direcciones son de prueba. Reintentar, copiar y cancelar solo actualizan la memoria y nunca llaman a un servicio real.",
+      "cardTitle": "Entrega del correo de invitación",
+      "cardDescription": "Previsualiza el estado, el reintento seguro, copiar enlace y cancelar invitaciones de organización.",
+      "scenarios": {
+        "sent": "Propietario · correo enviado",
+        "delayed": "Propietario · problema temporal de entrega",
+        "manual": "Propietario · compartir el enlace directamente",
+        "admin": "Invitación de administrador · acciones restringidas"
+      },
+      "mockRetried": "Reintento simulado completado sin enviar correo.",
+      "mockCopied": "Enlace simulado copiado sin usar el portapapeles.",
+      "mockCanceled": "Invitación simulada eliminada de esta vista previa."
+    },
     "myCardsTitle": "Galería Mis cartas",
     "myCardsDescription": "Previsualiza la galería de cartas coleccionadas con coleccionables de muestra."
   },

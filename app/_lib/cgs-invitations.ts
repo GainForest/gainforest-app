@@ -1,12 +1,55 @@
+import "server-only";
+
 import { accountPath, getCertifiedProfileCard } from "@/app/account/_lib/account-route";
 import { getAuthBaseUrl, getAuthInternalServiceToken } from "@/app/_lib/auth";
 import { fetchCgsMembersWithCookie, type CgsServerRole } from "@/app/_lib/cgs-server";
-import { renderGroupInvitationEmailTemplate, resolveGroupInvitationEmailLocale } from "@/lib/email/group-invitation-template";
-import { supabaseFilterValue, supabaseInsert, supabasePatch, supabaseSelect } from "@/lib/supabase/rest";
+import { resolveGroupInvitationEmailLocale } from "@/lib/email/group-invitation-template";
+import { supabaseFilterValue, supabaseRpc, supabaseSelect } from "@/lib/supabase/rest";
+import type { ProcessOneOutcome } from "@/lib/notifications/orchestrator";
+import type { PersistedDeliveryMode } from "@/lib/notifications/types";
 import type { AuthSession } from "./auth";
 
 export type GroupInvitationRole = "member" | "admin";
 type GroupInvitationStatus = "pending" | "accepted" | "canceled" | "expired";
+export type InvitationNotificationStatus = "waiting_recipient" | "queued" | "processing" | "sent" | "suppressed" | "dead";
+
+export type InvitationNotificationSummary = {
+  outboxId: string;
+  status: InvitationNotificationStatus;
+  retryable: boolean;
+  errorCode?: string;
+  nextAttemptAt?: string;
+  duplicate?: boolean;
+};
+
+export function invitationNotificationAfterProcess(
+  notification: InvitationNotificationSummary,
+  result: ProcessOneOutcome,
+): InvitationNotificationSummary {
+  if (result.kind !== "processed") {
+    const status = result.kind === "deadline" || result.kind === "disabled" ? "queued" : "processing";
+    return { ...notification, status, retryable: status === "queued" };
+  }
+  switch (result.result.kind) {
+    case "sent":
+      return { ...notification, status: "sent", retryable: false, errorCode: undefined };
+    case "requeued":
+      return { ...notification, status: "queued", retryable: true, errorCode: result.result.errorCode };
+    case "waiting_recipient":
+      return { ...notification, status: "waiting_recipient", retryable: true, errorCode: result.result.errorCode };
+    case "ambiguous_deferred":
+      return { ...notification, status: "processing", retryable: false };
+    case "dead":
+      return { ...notification, status: "dead", retryable: result.result.errorCode === "provider_rejected", errorCode: result.result.errorCode };
+    case "suppressed":
+      return { ...notification, status: "suppressed", retryable: false };
+    case "disabled":
+    case "released_insufficient_time":
+      return { ...notification, status: "queued", retryable: true };
+    case "stale_claim":
+      return { ...notification, status: "processing", retryable: false };
+  }
+}
 
 export type GroupInvitation = {
   id: string;
@@ -26,6 +69,7 @@ export type GroupInvitation = {
   acceptedByEmail: string | null;
   emailSentAt: string | null;
   lastEmailError: string | null;
+  notification: InvitationNotificationSummary | null;
 };
 
 const TABLE = "cgs_group_invitations";
@@ -69,6 +113,22 @@ type RawInvitation = {
   accepted_by_email?: unknown;
   email_sent_at?: unknown;
   last_email_error?: unknown;
+};
+
+type RawNotification = {
+  id?: unknown;
+  outbox_id?: unknown;
+  source_id?: unknown;
+  status?: unknown;
+  duplicate?: unknown;
+  last_error_code?: unknown;
+  next_attempt_at?: unknown;
+  retryable?: unknown;
+};
+
+type RawInvitationMutation = {
+  invitation?: unknown;
+  notification?: unknown;
 };
 
 export class GroupInvitationError extends Error {
@@ -127,6 +187,7 @@ function normalizeInvitation(row: RawInvitation): GroupInvitation | null {
     acceptedByEmail: asString(row.accepted_by_email),
     emailSentAt: asString(row.email_sent_at),
     lastEmailError: asString(row.last_email_error),
+    notification: null,
   };
 }
 
@@ -137,22 +198,47 @@ function normalizeInvitations(rows: RawInvitation[]): GroupInvitation[] {
   });
 }
 
+function normalizeNotification(value: unknown): InvitationNotificationSummary | null {
+  if (typeof value !== "object" || value === null || Array.isArray(value)) return null;
+  const row = value as RawNotification;
+  const outboxId = asString(row.outbox_id) ?? asString(row.id);
+  const status = asString(row.status);
+  if (!outboxId || !status || !["waiting_recipient", "queued", "processing", "sent", "suppressed", "dead"].includes(status)) return null;
+  const errorCode = asString(row.last_error_code) ?? undefined;
+  const retryable = typeof row.retryable === "boolean"
+    ? row.retryable
+    : status === "queued" || status === "waiting_recipient" || (status === "dead" && errorCode === "provider_rejected");
+  return {
+    outboxId,
+    status: status as InvitationNotificationStatus,
+    retryable,
+    ...(errorCode ? { errorCode } : {}),
+    ...(asString(row.next_attempt_at) ? { nextAttemptAt: asString(row.next_attempt_at)! } : {}),
+    ...(typeof row.duplicate === "boolean" ? { duplicate: row.duplicate } : {}),
+  };
+}
+
+async function withNotifications(invitations: GroupInvitation[]): Promise<GroupInvitation[]> {
+  if (invitations.length === 0) return invitations;
+  const ids = invitations.map(invitation => invitation.id);
+  const rows = await supabaseSelect<RawNotification>(
+    `/notification_outbox?select=id,source_id,status,last_error_code,next_attempt_at&source_id=in.(${ids.join(",")})`,
+  );
+  const byInvitation = new Map<string, InvitationNotificationSummary>();
+  for (const row of rows) {
+    const sourceId = asString(row.source_id);
+    const notification = normalizeNotification(row);
+    if (sourceId && notification) byInvitation.set(sourceId, notification);
+  }
+  return invitations.map(invitation => ({ ...invitation, notification: byInvitation.get(invitation.id) ?? null }));
+}
+
 function invitationQuery(filters: string): string {
   return `/${TABLE}?select=${INVITATION_SELECT}&${filters}`;
 }
 
 export async function getGroupInvitation(invitationId: string): Promise<GroupInvitation | null> {
   const rows = await supabaseSelect<RawInvitation>(invitationQuery(`id=eq.${supabaseFilterValue(invitationId)}&limit=1`));
-  return normalizeInvitations(rows)[0] ?? null;
-}
-
-async function getPendingInvitation(repo: string, email: string): Promise<GroupInvitation | null> {
-  const rows = await supabaseSelect<RawInvitation>(invitationQuery([
-    `repo=eq.${supabaseFilterValue(repo)}`,
-    `email=eq.${supabaseFilterValue(email)}`,
-    "status=eq.pending",
-    "limit=1",
-  ].join("&")));
   return normalizeInvitations(rows)[0] ?? null;
 }
 
@@ -199,21 +285,17 @@ export async function listPendingGroupInvitationsForRepo(repo: string): Promise<
     "order=created_at.desc",
     "limit=100",
   ].join("&")));
-  return normalizeInvitations(rows);
+  return withNotifications(normalizeInvitations(rows));
 }
 
 function publicBaseUrl(origin: string): string {
   return (process.env.NEXT_PUBLIC_SITE_URL?.trim() || origin).replace(/\/$/, "");
 }
 
-function publicInvitationUrl(origin: string, invitationId: string): string {
-  return new URL(`/invite/${encodeURIComponent(invitationId)}`, publicBaseUrl(origin)).toString();
-}
-
-async function inviterDisplay(invitation: GroupInvitation, origin: string): Promise<{ name: string; url: string | null }> {
-  const card = await getCertifiedProfileCard(invitation.inviterDid).catch(() => null);
+async function inviterDisplay(inviterDid: string, inviterHandle: string | null, origin: string): Promise<{ name: string; url: string | null }> {
+  const card = await getCertifiedProfileCard(inviterDid).catch(() => null);
   const name = card?.displayName?.trim() || "Unknown User";
-  const identifier = invitation.inviterHandle?.trim() || card?.handle?.trim() || invitation.inviterDid;
+  const identifier = inviterHandle?.trim() || card?.handle?.trim() || inviterDid;
   return {
     name,
     url: identifier ? new URL(accountPath(identifier), publicBaseUrl(origin)).toString() : null,
@@ -244,53 +326,6 @@ function canCancelInvitation(role: CgsServerRole | null, invitationRole: GroupIn
   if (role === "owner") return true;
   if (role === "admin") return invitationRole === "member";
   return false;
-}
-
-async function sendInvitationEmail({
-  invitation,
-  origin,
-  acceptLanguage,
-}: {
-  invitation: GroupInvitation;
-  origin: string;
-  acceptLanguage: string | null;
-}): Promise<void> {
-  const apiKey = process.env.RESEND_API_KEY?.trim();
-  const from = process.env.EMAIL_FROM?.trim() || "GainForest <noreply@gainforest.id>";
-  if (!apiKey) {
-    throw new Error("RESEND_API_KEY is required to send invitations.");
-  }
-
-  const acceptUrl = publicInvitationUrl(origin, invitation.id);
-  const inviter = await inviterDisplay(invitation, origin);
-  const rendered = renderGroupInvitationEmailTemplate({
-    locale: resolveGroupInvitationEmailLocale({ acceptLanguage }),
-    invitedEmail: invitation.email,
-    organizationName: invitation.groupName,
-    inviterName: inviter.name,
-    inviterUrl: inviter.url,
-    role: invitation.role,
-    acceptUrl,
-    siteUrl: publicBaseUrl(origin),
-  });
-
-  const response = await fetch("https://api.resend.com/emails", {
-    method: "POST",
-    headers: {
-      authorization: `Bearer ${apiKey}`,
-      "content-type": "application/json",
-    },
-    body: JSON.stringify({
-      from,
-      to: [invitation.email],
-      subject: rendered.subject,
-      html: rendered.html,
-      text: rendered.text,
-    }),
-    cache: "no-store",
-  });
-  const data = await response.json().catch(() => null) as { message?: string; error?: string } | null;
-  if (!response.ok) throw new Error(data?.message ?? data?.error ?? "Invitation email could not be sent.");
 }
 
 async function addMemberViaAuthService(invitation: GroupInvitation, memberDid: string): Promise<void> {
@@ -324,6 +359,40 @@ async function addMemberViaAuthService(invitation: GroupInvitation, memberDid: s
   }
 }
 
+function mutationResult(value: unknown): { invitation: GroupInvitation; notification: InvitationNotificationSummary | null } | null {
+  if (typeof value !== "object" || value === null || Array.isArray(value)) return null;
+  const result = value as RawInvitationMutation;
+  if (typeof result.invitation !== "object" || result.invitation === null || Array.isArray(result.invitation)) return null;
+  const invitation = normalizeInvitation(result.invitation as RawInvitation);
+  if (!invitation) return null;
+  const notification = result.notification === null || result.notification === undefined
+    ? null
+    : normalizeNotification(result.notification);
+  if (result.notification !== null && result.notification !== undefined && !notification) return null;
+  return { invitation: { ...invitation, notification }, notification };
+}
+
+function knownRpcError(error: unknown, operation: "create" | "close" | "retry"): GroupInvitationError {
+  const message = error instanceof Error ? error.message : "";
+  if (message.includes("invitation_role_conflict")) {
+    return new GroupInvitationError("Cancel the pending invitation before changing this person’s role.", 409);
+  }
+  if (message.includes("invitation_retry_cooldown")) {
+    return new GroupInvitationError("Please wait a minute before trying to send this email again.", 429);
+  }
+  if (message.includes("invitation_notification_not_safely_retryable")) {
+    return new GroupInvitationError("This email can’t be retried safely. Copy the invitation link and share it directly.", 409);
+  }
+  if (message.includes("invitation_not_found")) return new GroupInvitationError("Invitation not found.", 404);
+  if (message.includes("invitation_not_pending")) return new GroupInvitationError("This invitation is no longer pending.", 409);
+  const fallback = operation === "create"
+    ? "Invitation could not be saved. Please try again."
+    : operation === "retry"
+      ? "The email could not be queued again. Please try later."
+      : "The invitation could not be updated. Please try again.";
+  return new GroupInvitationError(fallback, 502);
+}
+
 export async function createGroupInvitation({
   repo,
   email,
@@ -332,6 +401,7 @@ export async function createGroupInvitation({
   cookie,
   origin,
   acceptLanguage,
+  deliveryMode,
 }: {
   repo: string;
   email: string;
@@ -340,6 +410,7 @@ export async function createGroupInvitation({
   cookie: string | null;
   origin: string;
   acceptLanguage: string | null;
+  deliveryMode: PersistedDeliveryMode | null;
 }): Promise<GroupInvitation> {
   const normalizedEmail = normalizeInvitationEmail(email);
   if (!repo.trim()) throw new GroupInvitationError("Choose an organization before inviting someone.", 400);
@@ -351,53 +422,56 @@ export async function createGroupInvitation({
     throw new GroupInvitationError(role === "admin" ? "Only organization owners can invite admins." : "Only organization owners and admins can invite members.", 403);
   }
 
-  const existing = await getPendingInvitation(repo, normalizedEmail);
-  const now = new Date().toISOString();
-  const expiresAt = new Date(Date.now() + INVITE_TTL_MS).toISOString();
+  const now = new Date();
+  const invitationId = crypto.randomUUID();
   const group = await groupDisplay(repo);
-  const baseFields = {
-    repo,
-    email: normalizedEmail,
-    role,
-    status: "pending",
-    inviter_did: session.did,
-    inviter_handle: session.handle,
-    inviter_email: session.email ?? null,
-    group_name: group.name,
-    group_handle: group.handle,
-    expires_at: expiresAt,
-    last_email_error: null,
-  };
-
-  let invitation: GroupInvitation | null;
-  if (existing) {
-    const updated = await supabasePatch<RawInvitation>(`/${TABLE}?id=eq.${supabaseFilterValue(existing.id)}`, {
-      ...baseFields,
-      updated_at: now,
-    });
-    invitation = normalizeInvitations(updated)[0] ?? null;
-  } else {
-    invitation = normalizeInvitation(await supabaseInsert<RawInvitation>(`/${TABLE}`, {
-      id: crypto.randomUUID(),
-      ...baseFields,
-      created_at: now,
-    }));
-  }
-  if (!invitation) throw new GroupInvitationError("Invitation could not be saved.", 502);
-
+  const inviter = await inviterDisplay(session.did, session.handle, origin);
   try {
-    await sendInvitationEmail({ invitation, origin, acceptLanguage });
-    const updated = await supabasePatch<RawInvitation>(`/${TABLE}?id=eq.${supabaseFilterValue(invitation.id)}`, {
-      email_sent_at: new Date().toISOString(),
-      last_email_error: null,
+    const raw = await supabaseRpc<unknown>("notification_invitation_create", {
+      p_invitation_id: invitationId,
+      p_repo: repo,
+      p_email: normalizedEmail,
+      p_role: role,
+      p_inviter_did: session.did,
+      p_inviter_handle: session.handle,
+      p_inviter_email: session.email ?? null,
+      p_group_name: group.name,
+      p_group_handle: group.handle,
+      p_inviter_name: inviter.name,
+      p_inviter_url: inviter.url,
+      p_public_origin: publicBaseUrl(origin),
+      p_locale: resolveGroupInvitationEmailLocale({ acceptLanguage }),
+      p_delivery_mode: deliveryMode,
+      p_created_at: now.toISOString(),
+      p_expires_at: new Date(now.getTime() + INVITE_TTL_MS).toISOString(),
     });
-    return normalizeInvitations(updated)[0] ?? invitation;
+    const result = mutationResult(raw);
+    if (!result) throw new GroupInvitationError("Invitation service returned an invalid response.", 502);
+    return result.invitation;
   } catch (error) {
-    const internalMessage = error instanceof Error ? error.message : "Invitation email could not be sent.";
-    await supabasePatch<RawInvitation>(`/${TABLE}?id=eq.${supabaseFilterValue(invitation.id)}`, {
-      last_email_error: internalMessage,
-    }).catch(() => undefined);
-    throw new GroupInvitationError("We couldn’t send the invitation email. Please try again in a few minutes.", 502);
+    if (error instanceof GroupInvitationError) throw error;
+    throw knownRpcError(error, "create");
+  }
+}
+
+async function closeInvitation(
+  invitationId: string,
+  status: "accepted" | "canceled" | "expired",
+  acceptedByDid: string | null = null,
+  acceptedByEmail: string | null = null,
+): Promise<GroupInvitation> {
+  try {
+    const result = mutationResult(await supabaseRpc<unknown>("notification_invitation_close", {
+      p_invitation_id: invitationId,
+      p_status: status,
+      p_accepted_by_did: acceptedByDid,
+      p_accepted_by_email: acceptedByEmail,
+    }));
+    if (!result) throw new GroupInvitationError("Invitation service returned an invalid response.", 502);
+    return result.invitation;
+  } catch (error) {
+    if (error instanceof GroupInvitationError) throw error;
+    throw knownRpcError(error, "close");
   }
 }
 
@@ -412,12 +486,30 @@ export async function cancelGroupInvitation({
   if (!invitation) throw new GroupInvitationError("Invitation not found.", 404);
   if (!canCancelInvitation(actorRole, invitation.role)) throw new GroupInvitationError("Only organization owners and admins can remove invitations.", 403);
   if (invitation.status !== "pending") throw new GroupInvitationError("This invitation is no longer pending.", 409);
+  return closeInvitation(invitation.id, "canceled");
+}
 
-  const updated = await supabasePatch<RawInvitation>(`/${TABLE}?id=eq.${supabaseFilterValue(invitation.id)}`, {
-    status: "canceled",
-    updated_at: new Date().toISOString(),
-  });
-  return normalizeInvitations(updated)[0] ?? { ...invitation, status: "canceled" };
+export async function retryGroupInvitation({
+  invitationId,
+  actorRole,
+}: {
+  invitationId: string;
+  actorRole: CgsServerRole | null;
+}): Promise<InvitationNotificationSummary> {
+  const invitation = await getGroupInvitation(invitationId);
+  if (!invitation) throw new GroupInvitationError("Invitation not found.", 404);
+  if (!canCancelInvitation(actorRole, invitation.role)) throw new GroupInvitationError("Only organization owners and admins can retry invitation emails.", 403);
+  if (invitation.status !== "pending") throw new GroupInvitationError("This invitation is no longer pending.", 409);
+  try {
+    const notification = normalizeNotification(await supabaseRpc<unknown>("notification_invitation_retry", {
+      p_invitation_id: invitationId,
+    }));
+    if (!notification) throw new GroupInvitationError("Invitation service returned an invalid response.", 502);
+    return notification;
+  } catch (error) {
+    if (error instanceof GroupInvitationError) throw error;
+    throw knownRpcError(error, "retry");
+  }
 }
 
 export async function acceptGroupInvitation({
@@ -431,7 +523,7 @@ export async function acceptGroupInvitation({
   if (!invitation) throw new GroupInvitationError("Invitation not found.", 404);
   if (invitation.status !== "pending") throw new GroupInvitationError("This invitation is no longer pending.", 409);
   if (new Date(invitation.expiresAt).getTime() < Date.now()) {
-    await supabasePatch<RawInvitation>(`/${TABLE}?id=eq.${supabaseFilterValue(invitation.id)}`, { status: "expired" }).catch(() => undefined);
+    await closeInvitation(invitation.id, "expired").catch(() => undefined);
     throw new GroupInvitationError("This invitation has expired.", 410);
   }
 
@@ -442,12 +534,5 @@ export async function acceptGroupInvitation({
   }
 
   await addMemberViaAuthService(invitation, session.did);
-
-  const updated = await supabasePatch<RawInvitation>(`/${TABLE}?id=eq.${supabaseFilterValue(invitation.id)}`, {
-    status: "accepted",
-    accepted_at: new Date().toISOString(),
-    accepted_by_did: session.did,
-    accepted_by_email: sessionEmail,
-  });
-  return normalizeInvitations(updated)[0] ?? { ...invitation, status: "accepted", acceptedAt: new Date().toISOString(), acceptedByDid: session.did, acceptedByEmail: sessionEmail };
+  return closeInvitation(invitation.id, "accepted", session.did, sessionEmail);
 }
