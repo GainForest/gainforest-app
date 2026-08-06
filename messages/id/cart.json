@@ -175,6 +175,8 @@
       "cart": "Keranjang",
       "checkout": "Pembayaran"
     },
+    "myCardsTitle": "Galeri Kartu Saya",
+    "myCardsDescription": "Pratinjau galeri kartu yang telah dikumpulkan dengan contoh koleksi.",
     "projectVisibility": {
       "title": "Kartu visibilitas proyek",
       "description": "Kartu di Kelola → Proyek yang memberi tahu akun apa yang bersifat publik dan apakah akun tampil di halaman jelajah, dalam setiap keadaannya.",

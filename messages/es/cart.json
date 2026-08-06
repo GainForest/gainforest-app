@@ -175,6 +175,8 @@
       "cart": "Carrito",
       "checkout": "Pago"
     },
+    "myCardsTitle": "Galería Mis cartas",
+    "myCardsDescription": "Previsualiza la galería de cartas coleccionadas con coleccionables de muestra.",
     "projectVisibility": {
       "title": "Tarjeta de visibilidad del proyecto",
       "description": "La tarjeta de Gestionar → Proyectos que indica a una cuenta qué es público y si aparece en las páginas de exploración, en cada uno de sus estados.",
