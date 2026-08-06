@@ -3,7 +3,7 @@ import { describe, expect, it, vi } from "vitest";
 vi.mock("server-only", () => ({}));
 
 import type { NotificationConfig } from "./config";
-import { enqueueMembershipJoined, enqueueSignup, NotificationProducerInputError } from "./outbox";
+import { enqueueMembershipJoined, enqueueSignup, NotificationProducerInputError } from "./signup-and-membership-notifications";
 
 const NOW = new Date("2026-08-06T01:00:00.000Z");
 
