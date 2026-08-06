@@ -2,12 +2,10 @@ import { describe, expect, it, vi } from "vitest";
 
 vi.mock("server-only", () => ({}));
 
-import { CaptureEmailProvider } from "./provider";
 import { NotificationRepositoryError } from "./repository";
 import { processNotificationClaim } from "./worker";
 import type {
   Claim,
-  DeliveryMode,
   EmailProvider,
   FrozenEmailRequest,
   InvitationSourceReader,
@@ -33,7 +31,6 @@ function row(overrides: Partial<NotificationRow> = {}): NotificationRow {
     recipientEmail: "person@example.com",
     templateKey: "welcome",
     locale: "en",
-    deliveryMode: "capture",
     frozenRequest: null,
     frozenAt: null,
     status: "processing",
@@ -207,7 +204,6 @@ function setup(repository = new StateRepository(), provider: EmailProvider = scr
   const invitationSendability = vi.fn<InvitationSourceReader["getSendability"]>();
   invitationSendability.mockResolvedValue({ kind: "sendable" });
   const dependencies = {
-    mode: "capture" as DeliveryMode,
     from: "GainForest <noreply@example.com>",
     repository,
     provider,
@@ -319,7 +315,6 @@ describe("notification worker provider state machine", () => {
   it("defers uncertain transport without ordinary requeue and preserves original resumed expiry", async () => {
     const originalExpiry = new Date(NOW.getTime() + 60_000);
     const initial = row({
-      deliveryMode: "capture",
       frozenRequest: {
         from: "from@example.com", to: "person@example.com", subject: "Frozen",
         html: "Frozen html", text: "Frozen text", idempotencyKey: "source-1",
@@ -452,13 +447,7 @@ describe("notification worker preflight and safety", () => {
     }
   });
 
-  it("releases idle work when disabled or when the deadline/lease cannot fit a call", async () => {
-    const disabledRepository = new StateRepository();
-    const disabled = setup(disabledRepository);
-    disabled.dependencies.mode = "disabled";
-    expect((await processNotificationClaim(claim(), disabled.dependencies)).kind).toBe("disabled");
-    expect(disabledRepository.actions).toEqual(["release"]);
-
+  it("releases idle work when the deadline or lease cannot fit a call", async () => {
     const shortRepository = new StateRepository();
     const short = setup(shortRepository);
     short.dependencies.invocationDeadline = new Date(NOW.getTime() + 14_999);
@@ -481,51 +470,6 @@ describe("notification worker preflight and safety", () => {
     expect(repository.actions).toEqual(["release"]);
   });
 
-  it("durably backs off idle work created under a different delivery mode", async () => {
-    const repository = new StateRepository(row({ deliveryMode: "resend" }));
-    const value = setup(repository);
-
-    await expect(processNotificationClaim(claim(), value.dependencies)).resolves.toEqual({
-      kind: "requeued",
-      errorCode: "delivery_mode_mismatch",
-    });
-    expect(repository.actions).toEqual(["requeue:delivery_mode_mismatch"]);
-    expect(repository.transitionTimes).toEqual([{
-      action: "requeue:delivery_mode_mismatch",
-      at: new Date(NOW.getTime() + 60_000),
-    }]);
-  });
-
-  it("preserves recipient-lookup backoff before handling a delivery-mode mismatch", async () => {
-    const repository = new StateRepository(row({
-      eventType: "bioblitz_winner",
-      deliveryMode: "resend",
-      recipientDid: "did:plc:winner",
-      recipientEmail: null,
-    }));
-    const value = setup(repository);
-    value.userEmailLookup.mockResolvedValueOnce({ kind: "missing" });
-
-    await expect(processNotificationClaim(claim({ previousStatus: "waiting_recipient" }), value.dependencies)).resolves.toEqual({
-      kind: "waiting_recipient",
-      errorCode: "recipient_missing",
-    });
-    expect(repository.actions).toEqual(["wait:recipient_missing"]);
-  });
-
-  it("capture follows freeze/begin/sent, records the exact immutable request, and terminates as capture", async () => {
-    const captured: FrozenEmailRequest[] = [];
-    const provider = new CaptureEmailProvider({
-      idempotencyGuaranteeMs: 7 * 24 * 60 * 60 * 1000,
-      captureOnce: async (_key, request) => { captured.push(structuredClone(request)); return "captured" as const; },
-    });
-    const repository = new StateRepository();
-    const { dependencies } = setup(repository, provider);
-
-    expect((await processNotificationClaim(claim(), dependencies)).kind).toBe("sent");
-    expect(repository.actions).toEqual(["freeze", "begin", "sent:capture"]);
-    expect(captured).toEqual([repository.current.frozenRequest]);
-  });
 });
 
 describe("notification worker review regressions", () => {
@@ -670,18 +614,6 @@ describe("notification worker review regressions", () => {
     const malformed = new StateRepository();
     vi.spyOn(malformed, "getClaimed").mockRejectedValueOnce(new NotificationRepositoryError("invalid_response"));
     await expect(processNotificationClaim(claim(), setup(malformed).dependencies)).rejects.toMatchObject({ code: "invalid_response" });
-  });
-
-  it("documents the orchestration rule by never claiming inside processing when globally disabled", async () => {
-    const repository = new StateRepository();
-    const claimDue = vi.spyOn(repository, "claimDue");
-    const claimOne = vi.spyOn(repository, "claimOne");
-    const value = setup(repository);
-    value.dependencies.mode = "disabled";
-    expect(await processNotificationClaim(claim(), value.dependencies)).toEqual({ kind: "disabled" });
-    expect(claimDue).not.toHaveBeenCalled();
-    expect(claimOne).not.toHaveBeenCalled();
-    expect(repository.actions).toEqual(["release"]);
   });
 
   it("rechecks the deadline after rendering and prevents freeze/provider start", async () => {

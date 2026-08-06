@@ -101,7 +101,7 @@ function hasTime(clock: Pick<Clock, "now">, deadline: Date, safetyMarginMs: numb
 }
 
 function deliveryDisabled(config: NotificationConfig): boolean {
-  return config.deliveryMode === "disabled";
+  return config.emailDisabled;
 }
 
 function emptyOutcomes(): Record<OutcomeKind, number> {
@@ -112,7 +112,6 @@ function emptyOutcomes(): Record<OutcomeKind, number> {
     ambiguous_deferred: 0,
     dead: 0,
     suppressed: 0,
-    disabled: 0,
     released_insufficient_time: 0,
     stale_claim: 0,
     unexpected_failure: 0,

@@ -13,11 +13,8 @@ import type { Claim, ProcessResult } from "./types";
 const NOW = new Date("2026-08-06T01:00:00.000Z");
 const DEADLINE = new Date("2026-08-06T01:01:00.000Z");
 
-function config(deliveryMode: NotificationConfig["deliveryMode"] = "capture"): NotificationConfig {
-  return {
-    deliveryMode,
-    producers: { signup: false, membershipJoined: false, invitation: false, bioblitzWinner: false },
-  };
+function config(emailDisabled = false): NotificationConfig {
+  return { emailDisabled };
 }
 
 function claim(sequence: number, phase: Claim["resumeProviderCallPhase"] = "idle"): Claim {
@@ -51,7 +48,7 @@ function dependencies(
 
 describe("processNotificationById", () => {
   it("returns before token generation and repository access when disabled", async () => {
-    const deps = dependencies({ config: config("disabled") });
+    const deps = dependencies({ config: config(true) });
     await expect(processNotificationById("10000000-0000-4000-8000-000000000001", DEADLINE, deps)).resolves.toEqual({ kind: "disabled" });
     expect(deps.tokenFactory).not.toHaveBeenCalled();
     expect(deps.repository.claimOne).not.toHaveBeenCalled();
@@ -108,7 +105,7 @@ describe("processNotificationById", () => {
 
 describe("drainNotifications", () => {
   it("returns before cleanup and claiming when disabled", async () => {
-    const deps = dependencies({ config: config("disabled") });
+    const deps = dependencies({ config: config(true) });
     await expect(drainNotifications(DEADLINE, deps)).resolves.toEqual({ kind: "disabled" });
     expect(deps.repository.cleanup).not.toHaveBeenCalled();
     expect(deps.repository.claimDue).not.toHaveBeenCalled();

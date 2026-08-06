@@ -98,13 +98,12 @@ function eventTime(event: WelcomeEvent, value: string | undefined, receiptTime: 
 
 async function enqueue(
   dependencies: WelcomeProducerDependencies,
-  input: Omit<NotificationEnqueueInput, "deliveryMode" | "nextAttemptAt">,
+  input: Omit<NotificationEnqueueInput, "nextAttemptAt">,
   nextAttemptAt: Date,
 ): Promise<WelcomeEnqueueOutcome> {
-  if (dependencies.config.deliveryMode === "disabled") return { kind: "disabled" };
+  if (dependencies.config.emailDisabled) return { kind: "disabled" };
   const result = await dependencies.repository.enqueue({
     ...input,
-    deliveryMode: dependencies.config.deliveryMode,
     nextAttemptAt,
   });
   return { kind: "enqueued", ...result };
@@ -114,9 +113,7 @@ export async function enqueueSignup(
   input: SignupNotificationInput,
   dependencies: WelcomeProducerDependencies,
 ): Promise<WelcomeEnqueueOutcome> {
-  if (dependencies.config.deliveryMode === "disabled" || !dependencies.config.producers.signup) {
-    return { kind: "disabled" };
-  }
+  if (dependencies.config.emailDisabled) return { kind: "disabled" };
   const receiptTime = dependencies.clock.now();
   const providerPrefix = WELCOME_PROVIDER_PREFIX.signup;
   const eventId = boundedIdentifier(
@@ -148,9 +145,7 @@ export async function enqueueMembershipJoined(
   input: MembershipJoinedNotificationInput,
   dependencies: WelcomeProducerDependencies,
 ): Promise<WelcomeEnqueueOutcome> {
-  if (dependencies.config.deliveryMode === "disabled" || !dependencies.config.producers.membershipJoined) {
-    return { kind: "disabled" };
-  }
+  if (dependencies.config.emailDisabled) return { kind: "disabled" };
   const receiptTime = dependencies.clock.now();
   const providerPrefix = WELCOME_PROVIDER_PREFIX.membership;
   const eventId = boundedIdentifier(

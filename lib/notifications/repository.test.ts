@@ -15,7 +15,6 @@ const rawRow = {
   recipient_email: "person@example.com",
   template_key: "welcome",
   locale: "en",
-  delivery_mode: "capture",
   frozen_from: null,
   frozen_to: null,
   frozen_subject: null,
@@ -64,7 +63,6 @@ describe("SupabaseNotificationRepository", () => {
       templateKey: "welcome-signup",
       locale: "en",
       providerIdempotencyKey: "signup:source-1",
-      deliveryMode: "capture",
       nextAttemptAt: new Date("2026-08-06T01:00:00.000Z"),
     })).resolves.toEqual({ outboxId: rawRow.id, status: "queued", duplicate: true });
     expect(fetchMock.mock.calls[0][0]).toBe("https://project.supabase.co/rest/v1/rpc/notification_outbox_enqueue");
@@ -78,7 +76,6 @@ describe("SupabaseNotificationRepository", () => {
       p_template_key: "welcome-signup",
       p_locale: "en",
       p_provider_idempotency_key: "signup:source-1",
-      p_delivery_mode: "capture",
       p_next_attempt_at: "2026-08-06T01:00:00.000Z",
     });
   });
@@ -208,7 +205,7 @@ describe("SupabaseNotificationRepository", () => {
     await expect(repository.enqueue({
       eventKey: "signup:source-1", eventType: "signup", payload: null, sourceId: "source-1",
       recipientDid: null, recipientEmail: "person@example.com", templateKey: "welcome-signup", locale: null,
-      providerIdempotencyKey: "signup:source-1", deliveryMode: "capture", nextAttemptAt: new Date(),
+      providerIdempotencyKey: "signup:source-1", nextAttemptAt: new Date(),
     })).rejects.toThrow("Notification repository returned an invalid enqueue response");
 
     fetchMock.mockResolvedValueOnce(Response.json([]));
@@ -224,7 +221,7 @@ describe("SupabaseNotificationRepository", () => {
     const error = await repository.enqueue({
       eventKey: "signup:source-1", eventType: "signup", payload: null, sourceId: "source-1",
       recipientDid: null, recipientEmail: "person@example.com", templateKey: "welcome-signup", locale: null,
-      providerIdempotencyKey: "signup:source-1", deliveryMode: "capture", nextAttemptAt: new Date("2026-08-06T01:00:00.000Z"),
+      providerIdempotencyKey: "signup:source-1", nextAttemptAt: new Date("2026-08-06T01:00:00.000Z"),
     }).catch((reason: unknown) => reason);
 
     expect(error).toBeInstanceOf(NotificationRepositoryError);

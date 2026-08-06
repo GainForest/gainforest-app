@@ -43,10 +43,9 @@ const EVENTS = new Set(["signup", "membership_joined", "invitation", "bioblitz_w
 const OUTBOX_STATUSES = new Set(["waiting_recipient", "queued", "processing", "sent", "suppressed", "dead"]);
 const PREVIOUS = new Set(["waiting_recipient", "queued", "processing"]);
 const PHASES = new Set(["idle", "in_flight"]);
-const MODES = new Set(["capture", "resend"]);
 const ROW_SELECT = [
   "id", "event_type", "payload", "source_id", "recipient_did", "recipient_email", "template_key", "locale",
-  "delivery_mode", "frozen_from", "frozen_to", "frozen_subject", "frozen_html", "frozen_text", "frozen_at",
+  "frozen_from", "frozen_to", "frozen_subject", "frozen_html", "frozen_text", "frozen_at",
   "status", "provider_call_phase", "provider_call_is_ambiguous_retry", "provider_idempotency_key",
   "provider_idempotency_expires_at", "processing_run_count", "provider_attempt_count", "processing_token",
   "locked_until", "created_at",
@@ -99,7 +98,6 @@ function decodeRow(value: unknown): NotificationRow | null {
     || !isJson(item.payload)
     || !nullableString(item.source_id) || !nullableString(item.recipient_did) || !nullableString(item.recipient_email)
     || typeof item.template_key !== "string" || !nullableString(item.locale)
-    || typeof item.delivery_mode !== "string" || !MODES.has(item.delivery_mode)
     || item.status !== "processing"
     || typeof item.provider_call_phase !== "string" || !PHASES.has(item.provider_call_phase)
     || typeof item.provider_call_is_ambiguous_retry !== "boolean"
@@ -128,7 +126,6 @@ function decodeRow(value: unknown): NotificationRow | null {
     recipientEmail: item.recipient_email,
     templateKey: item.template_key,
     locale: item.locale,
-    deliveryMode: item.delivery_mode as NotificationRow["deliveryMode"],
     frozenRequest: completeFrozen ? {
       from: item.frozen_from as string,
       to: item.frozen_to as string,
@@ -200,7 +197,6 @@ export class SupabaseNotificationRepository implements NotificationRepository, N
         p_template_key: input.templateKey,
         p_locale: input.locale,
         p_provider_idempotency_key: input.providerIdempotencyKey,
-        p_delivery_mode: input.deliveryMode,
         p_next_attempt_at: input.nextAttemptAt.toISOString(),
       });
       if (!Array.isArray(response) || response.length !== 1) {

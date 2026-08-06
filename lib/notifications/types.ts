@@ -2,8 +2,6 @@ import "server-only";
 
 export type Json = null | boolean | number | string | Json[] | { [key: string]: Json };
 
-export type DeliveryMode = "disabled" | "capture" | "resend";
-export type PersistedDeliveryMode = Exclude<DeliveryMode, "disabled">;
 export type EventType = "signup" | "membership_joined" | "invitation" | "bioblitz_winner";
 export type OutboxStatus = "waiting_recipient" | "queued" | "processing" | "sent" | "suppressed" | "dead";
 export type ProviderCallPhase = "idle" | "in_flight";
@@ -11,7 +9,7 @@ export type PreviousStatus = "waiting_recipient" | "queued" | "processing";
 
 export type RecipientErrorCode = "recipient_missing" | "recipient_lookup_failed";
 export type ProviderErrorCode = "provider_5xx" | "provider_rate_limited" | "provider_rejected" | "notification_invalid";
-export type RequeueErrorCode = ProviderErrorCode | "recipient_lookup_failed" | "delivery_mode_mismatch";
+export type RequeueErrorCode = Exclude<ProviderErrorCode, "notification_invalid"> | "recipient_lookup_failed";
 export type TerminalErrorCode =
   | "provider_rejected"
   | "provider_timeout"
@@ -47,7 +45,6 @@ export interface NotificationRow {
   readonly recipientEmail: string | null;
   readonly templateKey: string;
   readonly locale: string | null;
-  readonly deliveryMode: PersistedDeliveryMode;
   readonly frozenRequest: FrozenEmailRequest | null;
   readonly frozenAt: Date | null;
   readonly status: "processing";
@@ -74,15 +71,6 @@ export interface EmailProvider {
   /** Verified period during which this provider honors the same idempotency key. */
   readonly idempotencyGuaranteeMs: number;
   send(request: FrozenEmailRequest, options: { readonly timeoutMs: number }): Promise<ProviderOutcome>;
-}
-
-export type CaptureResult = "captured" | "duplicate";
-
-/** Stores at most one immutable request for each idempotency key. */
-export interface CaptureSink {
-  /** Lifetime for which this sink preserves both captured effects and key ownership. */
-  readonly idempotencyGuaranteeMs: number;
-  captureOnce(idempotencyKey: string, request: FrozenEmailRequest): Promise<CaptureResult> | CaptureResult;
 }
 
 export interface RenderableRow {
@@ -137,7 +125,6 @@ export interface NotificationEnqueueInput {
   readonly templateKey: string;
   readonly locale: string | null;
   readonly providerIdempotencyKey: string | null;
-  readonly deliveryMode: PersistedDeliveryMode;
   readonly nextAttemptAt: Date;
 }
 
@@ -192,7 +179,6 @@ export type ProcessResult =
   | { readonly kind: "ambiguous_deferred" }
   | { readonly kind: "dead"; readonly errorCode: TerminalErrorCode }
   | { readonly kind: "suppressed" }
-  | { readonly kind: "disabled" }
   /** The orchestrator must not reclaim this row again during the same invocation. */
   | { readonly kind: "released_insufficient_time" }
   | { readonly kind: "stale_claim" };

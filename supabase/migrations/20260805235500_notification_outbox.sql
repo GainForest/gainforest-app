@@ -32,7 +32,6 @@ create table public.notification_outbox (
   recipient_email text,
   template_key text,
   locale text,
-  delivery_mode text,
   frozen_from text,
   frozen_to text,
   frozen_subject text,
@@ -66,10 +65,6 @@ create table public.notification_outbox (
   constraint notification_outbox_fingerprint_format check (input_fingerprint_hash is null or input_fingerprint_hash ~ '^[0-9a-f]{64}$'),
   constraint notification_outbox_event_type_check check (event_type in ('signup','membership_joined','invitation','bioblitz_winner')),
   constraint notification_outbox_status_check check (status in ('waiting_recipient','queued','processing','sent','suppressed','dead')),
-  constraint notification_outbox_delivery_mode_check check (
-    (redacted_at is null and delivery_mode in ('capture','resend')) or
-    (redacted_at is not null and delivery_mode is null)
-  ),
   constraint notification_outbox_provider_phase_check check (provider_call_phase in ('idle','in_flight')),
   constraint notification_outbox_processing_run_count_check check (processing_run_count >= 0),
   constraint notification_outbox_provider_attempt_count_check check (provider_attempt_count >= 0),
@@ -99,8 +94,7 @@ create table public.notification_outbox (
   constraint notification_outbox_error_code_check check (last_error_code is null or last_error_code in (
     'recipient_missing','recipient_lookup_failed','provider_5xx','provider_timeout',
     'provider_rate_limited','provider_rejected','provider_idempotency_expired',
-    'active_retention_expired','notification_invalid','invitation_not_pending','manually_suppressed',
-    'delivery_mode_mismatch'
+    'active_retention_expired','notification_invalid','invitation_not_pending','manually_suppressed'
   )),
   constraint notification_outbox_error_summary_bound check (last_error_summary is null or length(last_error_summary) between 1 and 512),
   constraint notification_outbox_recipient_contract check (
@@ -132,7 +126,7 @@ create table public.notification_outbox (
     redacted_at is null or (
       status in ('sent','dead','suppressed') and input_fingerprint_hash is null and payload is null and source_id is null and
       recipient_did is null and recipient_email is null and template_key is null and locale is null and
-      delivery_mode is null and frozen_from is null and frozen_to is null and frozen_subject is null and
+      frozen_from is null and frozen_to is null and frozen_subject is null and
       frozen_html is null and frozen_text is null and frozen_at is null and provider_id is null and
       provider_idempotency_key is null and last_error_code is null and last_error_summary is null and
       processing_run_count=0 and provider_attempt_count=0 and not provider_call_is_ambiguous_retry and last_manual_retry_at is null and manual_retry_count=0
@@ -159,7 +153,6 @@ begin
     or new.event_type is distinct from old.event_type
     or (new.input_fingerprint_hash is distinct from old.input_fingerprint_hash and new.redacted_at is null)
     or (new.provider_idempotency_key is distinct from old.provider_idempotency_key and new.redacted_at is null)
-    or (new.delivery_mode is distinct from old.delivery_mode and new.redacted_at is null)
     or (old.frozen_at is not null and new.redacted_at is null and (
       new.frozen_from is distinct from old.frozen_from or new.frozen_to is distinct from old.frozen_to or
       new.frozen_subject is distinct from old.frozen_subject or new.frozen_html is distinct from old.frozen_html or
@@ -178,7 +171,7 @@ revoke all on function public.notification_outbox_guard_immutable() from public,
 create function public.notification_outbox_enqueue(
   p_event_key text, p_event_type text, p_payload jsonb, p_source_id text,
   p_recipient_did text, p_recipient_email text, p_template_key text, p_locale text,
-  p_provider_idempotency_key text, p_delivery_mode text, p_next_attempt_at timestamptz
+  p_provider_idempotency_key text, p_next_attempt_at timestamptz
 ) returns table(outbox_id uuid,status text,duplicate boolean)
 language plpgsql security definer set search_path='' as $$
 declare
@@ -191,7 +184,6 @@ declare
 begin
   if p_event_key is null or length(p_event_key) not between 1 and 512 then raise exception 'event key must contain 1 to 512 characters'; end if;
   if p_event_type is null or p_event_type not in ('signup','membership_joined','invitation','bioblitz_winner') then raise exception 'unsupported event type'; end if;
-  if p_delivery_mode is null or p_delivery_mode not in ('capture','resend') then raise exception 'delivery mode must be capture or resend; disabled producers must not enqueue'; end if;
   if p_event_type in ('signup','membership_joined') then
     if p_source_id is null then raise exception 'source ID is required for welcome provider key ownership'; end if;
     v_expected_provider_key=case p_event_type
@@ -221,7 +213,7 @@ begin
     v_fingerprint=extensions.notification_outbox_sha256(pg_catalog.convert_to(jsonb_build_object(
       'event_type',p_event_type,'payload',p_payload,'source_id',p_source_id,'recipient_did',p_recipient_did,
       'recipient_email',p_recipient_email,'template_key',p_template_key,'locale',p_locale,
-      'provider_idempotency_key',v_provider_key,'delivery_mode',p_delivery_mode
+      'provider_idempotency_key',v_provider_key
     )::text,'UTF8'));
     if v_existing.redacted_at is not null or v_existing.status='suppressed' or v_existing.input_fingerprint_hash=v_fingerprint then
       return query select v_existing.id,v_existing.status,true; return;
@@ -234,16 +226,16 @@ begin
   v_fingerprint=extensions.notification_outbox_sha256(pg_catalog.convert_to(jsonb_build_object(
     'event_type',p_event_type,'payload',p_payload,'source_id',p_source_id,'recipient_did',p_recipient_did,
     'recipient_email',p_recipient_email,'template_key',p_template_key,'locale',p_locale,
-    'provider_idempotency_key',v_provider_key,'delivery_mode',p_delivery_mode
+    'provider_idempotency_key',v_provider_key
   )::text,'UTF8'));
 
   begin
     insert into public.notification_outbox(
       id,event_key_hash,input_fingerprint_hash,event_type,payload,source_id,recipient_did,recipient_email,
-      template_key,locale,delivery_mode,provider_idempotency_key,status,next_attempt_at
+      template_key,locale,provider_idempotency_key,status,next_attempt_at
     ) values (
       v_id,v_event_hash,v_fingerprint,p_event_type,p_payload,p_source_id,p_recipient_did,p_recipient_email,
-      p_template_key,p_locale,p_delivery_mode,v_provider_key,
+      p_template_key,p_locale,v_provider_key,
       case when p_event_type='bioblitz_winner' and p_recipient_email is null then 'waiting_recipient' else 'queued' end,
       coalesce(p_next_attempt_at,clock_timestamp())
     );
@@ -255,7 +247,7 @@ begin
     v_fingerprint=extensions.notification_outbox_sha256(pg_catalog.convert_to(jsonb_build_object(
       'event_type',p_event_type,'payload',p_payload,'source_id',p_source_id,'recipient_did',p_recipient_did,
       'recipient_email',p_recipient_email,'template_key',p_template_key,'locale',p_locale,
-      'provider_idempotency_key',v_provider_key,'delivery_mode',p_delivery_mode
+      'provider_idempotency_key',v_provider_key
     )::text,'UTF8'));
     if v_existing.redacted_at is not null or v_existing.status='suppressed' or v_existing.input_fingerprint_hash=v_fingerprint then
       return query select v_existing.id,v_existing.status,true; return;
@@ -485,7 +477,7 @@ returns boolean language plpgsql security definer set search_path='' as $$
 declare n integer; v public.notification_outbox%rowtype;
 begin
   if p_next_attempt_at is null or p_next_attempt_at<=clock_timestamp() or p_next_attempt_at>clock_timestamp()+interval '7 days' then raise exception 'next attempt must be within seven days'; end if;
-  if p_error_code is null or p_error_code not in ('provider_5xx','provider_rate_limited','provider_rejected','recipient_lookup_failed','delivery_mode_mismatch') then raise exception 'unsupported requeue error code'; end if;
+  if p_error_code is null or p_error_code not in ('provider_5xx','provider_rate_limited','provider_rejected','recipient_lookup_failed') then raise exception 'unsupported requeue error code'; end if;
   select * into v from public.notification_outbox
     where id=p_outbox_id and status='processing' and processing_token=p_token for update;
   if not found then return false; end if;
@@ -495,7 +487,6 @@ begin
       when 'provider_5xx' then 'Provider returned a retryable server error'
       when 'provider_rate_limited' then 'Provider rate limit requires a later retry'
       when 'provider_rejected' then 'Provider permanently rejected the notification'
-      when 'delivery_mode_mismatch' then 'Notification delivery mode does not match the active provider'
       else 'Recipient lookup failed'
     end,
     locked_until=null,processing_token=null,claimed_from_status=null where id=p_outbox_id and status='processing' and processing_token=p_token and provider_call_phase='idle' and recipient_email is not null;
@@ -526,7 +517,7 @@ begin
   if p_error_code is null or p_error_code not in ('invitation_not_pending','manually_suppressed') then raise exception 'unsupported suppression code'; end if;
   update public.notification_outbox set status='suppressed',terminal_at=clock_timestamp(),redacted_at=clock_timestamp(),
     input_fingerprint_hash=null,payload=null,source_id=null,recipient_did=null,recipient_email=null,
-    template_key=null,locale=null,delivery_mode=null,frozen_from=null,frozen_to=null,frozen_subject=null,
+    template_key=null,locale=null,frozen_from=null,frozen_to=null,frozen_subject=null,
     frozen_html=null,frozen_text=null,frozen_at=null,provider_id=null,provider_idempotency_key=null,
     last_error_code=null,last_error_summary=null,processing_run_count=0,provider_attempt_count=0,provider_call_is_ambiguous_retry=false,
     last_manual_retry_at=null,manual_retry_count=0,locked_until=null,processing_token=null,claimed_from_status=null
@@ -558,7 +549,7 @@ begin
       if v.status in ('waiting_recipient','queued') or (v.status='processing' and v.provider_call_phase='idle') then
         update public.notification_outbox set status='suppressed',terminal_at=clock_timestamp(),redacted_at=clock_timestamp(),
           input_fingerprint_hash=null,payload=null,source_id=null,recipient_did=null,recipient_email=null,
-          template_key=null,locale=null,delivery_mode=null,frozen_from=null,frozen_to=null,frozen_subject=null,
+          template_key=null,locale=null,frozen_from=null,frozen_to=null,frozen_subject=null,
           frozen_html=null,frozen_text=null,frozen_at=null,provider_id=null,provider_idempotency_key=null,
           last_error_code=null,last_error_summary=null,processing_run_count=0,provider_attempt_count=0,provider_call_is_ambiguous_retry=false,
           last_manual_retry_at=null,manual_retry_count=0,locked_until=null,processing_token=null,claimed_from_status=null
@@ -568,9 +559,9 @@ begin
     end if;
     v_id=pg_catalog.gen_random_uuid();
     begin
-      insert into public.notification_outbox(id,event_key_hash,input_fingerprint_hash,event_type,template_key,delivery_mode,provider_idempotency_key,status,
+      insert into public.notification_outbox(id,event_key_hash,input_fingerprint_hash,event_type,template_key,provider_idempotency_key,status,
         terminal_at,redacted_at,last_error_code)
-      values(v_id,v_hash,null,p_event_type,null,null,null,'suppressed',clock_timestamp(),clock_timestamp(),null);
+      values(v_id,v_hash,null,p_event_type,null,null,'suppressed',clock_timestamp(),clock_timestamp(),null);
       return query select v_id,'suppressed'::text,false; return;
     exception when unique_violation then
       -- A concurrent enqueue or suppression owns the event hash. Retry the
@@ -605,7 +596,7 @@ begin
       get diagnostics n=row_count; a=a+n;
     elsif (v.status='sent' and v.terminal_at<=clock_timestamp()-interval '7 days') or (v.status='dead' and v.terminal_at<=clock_timestamp()-interval '14 days') then
       update public.notification_outbox set input_fingerprint_hash=null,payload=null,source_id=null,recipient_did=null,recipient_email=null,
-        template_key=null,locale=null,delivery_mode=null,frozen_from=null,frozen_to=null,frozen_subject=null,frozen_html=null,frozen_text=null,frozen_at=null,
+        template_key=null,locale=null,frozen_from=null,frozen_to=null,frozen_subject=null,frozen_html=null,frozen_text=null,frozen_at=null,
         provider_id=null,provider_idempotency_key=null,last_error_code=null,last_error_summary=null,
         processing_run_count=0,provider_attempt_count=0,provider_call_is_ambiguous_retry=false,last_manual_retry_at=null,manual_retry_count=0,redacted_at=clock_timestamp() where id=v.id
         and not (status='processing' and locked_until>clock_timestamp());
@@ -617,7 +608,7 @@ end $$;
 
 -- All callable state transitions are service-role-only. Keep signatures explicit
 -- so future overloads do not accidentally inherit PUBLIC execution.
-revoke all on function public.notification_outbox_enqueue(text,text,jsonb,text,text,text,text,text,text,text,timestamptz) from public,anon,authenticated;
+revoke all on function public.notification_outbox_enqueue(text,text,jsonb,text,text,text,text,text,text,timestamptz) from public,anon,authenticated;
 revoke all on function public.notification_outbox_claim_one(uuid,uuid,integer) from public,anon,authenticated;
 revoke all on function public.notification_outbox_claim_due(integer,integer) from public,anon,authenticated;
 revoke all on function public.notification_outbox_expire_claimed(uuid,uuid,text) from public,anon,authenticated;
@@ -636,7 +627,7 @@ revoke all on function public.notification_outbox_release_claim(uuid,uuid) from 
 revoke all on function public.notification_outbox_suppress_event(text,text) from public,anon,authenticated;
 revoke all on function public.notification_outbox_cleanup(integer) from public,anon,authenticated;
 
-grant execute on function public.notification_outbox_enqueue(text,text,jsonb,text,text,text,text,text,text,text,timestamptz) to service_role;
+grant execute on function public.notification_outbox_enqueue(text,text,jsonb,text,text,text,text,text,text,timestamptz) to service_role;
 grant execute on function public.notification_outbox_claim_one(uuid,uuid,integer) to service_role;
 grant execute on function public.notification_outbox_claim_due(integer,integer) to service_role;
 grant execute on function public.notification_outbox_expire_claimed(uuid,uuid,text) to service_role;

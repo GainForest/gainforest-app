@@ -4,7 +4,6 @@ import { NotificationRepositoryError } from "./repository";
 import type {
   Claim,
   Clock,
-  DeliveryMode,
   EmailProvider,
   FrozenEmailRequest,
   InvitationSourceReader,
@@ -28,10 +27,9 @@ const MAX_POST_PROVIDER_TRANSITIONS = 2;
 const TRANSITION_SCHEDULING_BUFFER_MS = 1_000;
 
 export interface NotificationWorkerDependencies {
-  readonly mode: DeliveryMode;
   readonly from: string;
   readonly repository: NotificationRepository;
-  readonly provider: EmailProvider | null;
+  readonly provider: EmailProvider;
   readonly renderer: NotificationRenderer;
   readonly clock: Clock;
   readonly userEmailReader: UserEmailReader;
@@ -76,7 +74,7 @@ function requiredCallUntil(now: Date, dependencies: NotificationWorkerDependenci
   const transitionReserveMs = dependencies.repository.transitionTimeoutMs * MAX_POST_PROVIDER_TRANSITIONS
     + TRANSITION_SCHEDULING_BUFFER_MS;
   return now.getTime()
-    + (dependencies.provider?.timeoutMs ?? 0)
+    + dependencies.provider.timeoutMs
     + Math.max(dependencies.safetyMarginMs, transitionReserveMs);
 }
 
@@ -316,10 +314,6 @@ export async function processNotificationClaim(
     return expireClaimed(row, claim, dependencies, "provider_idempotency_expired");
   }
 
-  if (dependencies.mode === "disabled" || !dependencies.provider) {
-    if (isAmbiguous(row, claim)) return deferAmbiguity(row, claim, dependencies, row.providerIdempotencyExpiresAt);
-    return release(row, claim, dependencies, { kind: "disabled" });
-  }
   const initialBoundary = await boundaryOrBudget(row, claim, dependencies);
   if (initialBoundary) return initialBoundary;
 
@@ -379,11 +373,6 @@ export async function processNotificationClaim(
         { kind: "suppressed" },
       );
     }
-  }
-
-  if (row.deliveryMode !== dependencies.mode) {
-    if (isAmbiguous(row, claim)) return deferAmbiguity(row, claim, dependencies, row.providerIdempotencyExpiresAt);
-    return durableRequeue(row, claim, dependencies, "delivery_mode_mismatch");
   }
 
   const prepared = await prepareRequest(row, claim, dependencies);
