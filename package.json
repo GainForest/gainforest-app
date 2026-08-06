@@ -17,6 +17,7 @@
     "test:e2e:publish-report": "pnpm test:e2e && pnpm publish:e2e-report"
   },
   "dependencies": {
+    "@atproto/syntax": "^0.7.4",
     "@radix-ui/react-dialog": "^1.1.15",
     "@rainbow-me/rainbowkit": "^2.2.11",
     "@tanstack/react-query": "^5.101.0",

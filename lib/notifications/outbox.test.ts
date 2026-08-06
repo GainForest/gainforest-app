@@ -138,6 +138,37 @@ describe("welcome notification enqueue boundaries", () => {
   });
 
   it.each([
+    "did:plc2:user",
+    "did:plc:user%",
+  ])("rejects a user DID outside the ATProto DID syntax: %s", async (userDid) => {
+    const deps = dependencies(config());
+
+    await expect(enqueueSignup({
+      authEventId: "auth-event-1",
+      userDid,
+      email: "member@example.com",
+    }, deps)).rejects.toMatchObject({
+      name: "NotificationProducerInputError",
+      field: "userDid",
+    });
+    expect(deps.repository.enqueue).not.toHaveBeenCalled();
+  });
+
+  it("rejects an email address with consecutive dots before repository access", async () => {
+    const deps = dependencies(config());
+
+    await expect(enqueueSignup({
+      authEventId: "auth-event-1",
+      userDid: "did:plc:user",
+      email: "member..name@example.com",
+    }, deps)).rejects.toMatchObject({
+      name: "NotificationProducerInputError",
+      field: "email",
+    });
+    expect(deps.repository.enqueue).not.toHaveBeenCalled();
+  });
+
+  it.each([
     ["signup", enqueueSignup, config(), 250],
     ["membership", enqueueMembershipJoined, config(), 226],
   ] as const)("rejects a %s auth event ID that cannot fit the namespaced provider key", async (_event, producer, notificationConfig, length) => {

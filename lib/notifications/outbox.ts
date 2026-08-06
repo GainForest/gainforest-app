@@ -1,5 +1,7 @@
 import "server-only";
 
+import { isValidDid } from "@atproto/syntax";
+import { z } from "zod";
 import type { NotificationConfig } from "./config";
 import type {
   Clock,
@@ -50,6 +52,7 @@ const WELCOME_PROVIDER_PREFIX = {
   membership: "organization-membership-joined:",
 } as const satisfies Record<WelcomeEvent, string>;
 const MAX_PROVIDER_KEY_LENGTH = 256;
+const EMAIL_ADDRESS_SCHEMA = z.email().min(3).max(320);
 
 function boundedIdentifier(event: WelcomeEvent, field: string, value: string, maximum = 512): string {
   if (typeof value !== "string" || value.length < 1 || value.length > maximum || value !== value.trim()) {
@@ -60,7 +63,7 @@ function boundedIdentifier(event: WelcomeEvent, field: string, value: string, ma
 
 function did(event: WelcomeEvent, field: string, value: string): string {
   const normalized = boundedIdentifier(event, field, value, 256);
-  if (!/^did:[a-z0-9]+:[A-Za-z0-9._:%-]+$/.test(normalized)) {
+  if (!isValidDid(normalized)) {
     throw new NotificationProducerInputError(event, field, "Supply a valid bounded DID.");
   }
   return normalized;
@@ -68,7 +71,7 @@ function did(event: WelcomeEvent, field: string, value: string): string {
 
 function email(event: WelcomeEvent, value: string): string {
   const normalized = typeof value === "string" ? value.trim().toLowerCase() : "";
-  if (normalized.length < 3 || normalized.length > 320 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalized)) {
+  if (!EMAIL_ADDRESS_SCHEMA.safeParse(normalized).success) {
     throw new NotificationProducerInputError(event, "email", "Supply a normalized deliverable address.");
   }
   return normalized;
