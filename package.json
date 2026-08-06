@@ -10,6 +10,7 @@
     "check:i18n": "node scripts/check-i18n-untranslated.mjs",
     "test:unit": "vitest run",
     "test:db": "bash scripts/test-notification-outbox-db.sh",
+    "test:notifications:local": "bash scripts/test-notifications-local.sh",
     "start": "next start --port 3040",
     "test:e2e": "playwright test",
     "test:e2e:headed": "playwright test --headed",
@@ -59,6 +60,7 @@
     "@types/papaparse": "^5.5.2",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "supabase": "2.111.0",
     "tailwindcss": "^4",
     "typescript": "^5",
     "vitest": "^4.1.8"

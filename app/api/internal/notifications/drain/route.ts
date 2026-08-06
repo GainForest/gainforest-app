@@ -23,6 +23,17 @@ function authorized(request: NextRequest, secret: string): boolean {
   return supplied.length === expected.length && timingSafeEqual(supplied, expected);
 }
 
+function skipBioblitzReconciliation(environment: NodeJS.ProcessEnv = process.env): boolean {
+  const configured = environment.NOTIFICATION_TEST_SKIP_BIOBLITZ_RECONCILIATION?.trim();
+  if (!configured) return false;
+  if (configured !== "true" || environment.NODE_ENV === "production") {
+    throw new Error(
+      "NOTIFICATION_TEST_SKIP_BIOBLITZ_RECONCILIATION is test-only, must be exactly true, and is unavailable in production.",
+    );
+  }
+  return true;
+}
+
 export async function GET(request: NextRequest) {
   const invocationStartedAt = Date.now();
   const secret = configuredSecret();
@@ -35,12 +46,16 @@ export async function GET(request: NextRequest) {
 
   try {
     let reconciliation: { candidates: number; completed: boolean };
-    try {
-      reconciliation = await reconcileRecentBioblitzNotifications(
-        new Date(invocationStartedAt + RECONCILIATION_BUDGET_MS),
-      );
-    } catch {
-      reconciliation = { candidates: 0, completed: false };
+    if (skipBioblitzReconciliation()) {
+      reconciliation = { candidates: 0, completed: true };
+    } else {
+      try {
+        reconciliation = await reconcileRecentBioblitzNotifications(
+          new Date(invocationStartedAt + RECONCILIATION_BUDGET_MS),
+        );
+      } catch {
+        reconciliation = { candidates: 0, completed: false };
+      }
     }
     const runtime = createDrainRuntime();
     const result = await runtime.drain(new Date(invocationStartedAt + USABLE_INVOCATION_MS));

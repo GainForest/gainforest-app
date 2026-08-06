@@ -48,6 +48,7 @@ describe("notification drain route", () => {
   });
 
   afterEach(() => {
+    vi.unstubAllEnvs();
     process.env.NOTIFICATION_CRON_SECRET = originalSecret;
   });
 
@@ -66,6 +67,28 @@ describe("notification drain route", () => {
     const response = await GET(request(token));
     expect(response.status).toBe(401);
     await expect(response.json()).resolves.toEqual({ error: "Unauthorized notification recovery request." });
+    expect(createDrainRuntime).not.toHaveBeenCalled();
+  });
+
+  it("skips external BioBlitz discovery only for the explicit non-production smoke hook", async () => {
+    vi.stubEnv("NOTIFICATION_TEST_SKIP_BIOBLITZ_RECONCILIATION", "true");
+    const { GET } = await import("./route");
+    const response = await GET(request(secret));
+    expect(response.status).toBe(200);
+    await expect(response.json()).resolves.toMatchObject({
+      reconciliation: { candidates: 0, completed: true },
+    });
+    expect(reconcileRecentBioblitzNotifications).not.toHaveBeenCalled();
+    expect(drain).toHaveBeenCalledTimes(1);
+  });
+
+  it("rejects the smoke-only reconciliation hook in production", async () => {
+    vi.stubEnv("NOTIFICATION_TEST_SKIP_BIOBLITZ_RECONCILIATION", "true");
+    vi.stubEnv("NODE_ENV", "production");
+    const { GET } = await import("./route");
+    const response = await GET(request(secret));
+    expect(response.status).toBe(503);
+    expect(reconcileRecentBioblitzNotifications).not.toHaveBeenCalled();
     expect(createDrainRuntime).not.toHaveBeenCalled();
   });
 

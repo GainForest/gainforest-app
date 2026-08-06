@@ -217,6 +217,28 @@ notification_outbox_enqueue(
 
 Active work expires after seven days. Sent rows clear private delivery data seven days after becoming terminal; dead rows clear it after fourteen days. Cleared terminal tombstones preserve event deduplication until cleanup deletes the row 90 days after creation.
 
+## Database prerequisites
+
+The canonical migration requires these private tables in the same Supabase project:
+
+- `public.cgs_group_invitations`, defined by `docs/cgs-group-invitations.sql`;
+- `public.user_emails`, defined by `docs/user-emails.sql`.
+
+The migration checks every required prerequisite column and fails with corrective guidance when the tables are missing or incomplete. For a new environment, apply both prerequisite SQL files before `supabase/migrations/20260805235500_notification_outbox.sql`.
+
+## Local validation
+
+```bash
+pnpm test:db
+pnpm test:notifications:local
+pnpm test:unit
+pnpm build
+```
+
+`test:db` runs the SQL contract and concurrency races in a disposable PostgreSQL container. `test:notifications:local` starts the pinned local Supabase stack and exercises authenticated recovery, transactional invitations, BioBlitz recipient resolution, frozen delivery, and manual suppression without calling Resend or any production service. The smoke process uses production code with two non-production loopback hooks: a local Resend-compatible endpoint and an explicit bypass for authoritative BioBlitz award discovery.
+
+The full smoke test reserves local ports `54321`, `54322`, `3055`, and `3056`. Supabase publishes its API and database ports on all host interfaces, so run it only on a trusted network or behind a firewall. Set `KEEP_NOTIFICATION_LOCAL_STACK=1` to preserve the local database for inspection, `NOTIFICATION_LOCAL_APP_PORT=<port>` when `3055` is occupied, or `NOTIFICATION_LOCAL_RESEND_PORT=<port>` when `3056` is occupied.
+
 ## Recovery and monitoring
 
 cron-job.org calls the recovery route every five minutes:
@@ -236,12 +258,4 @@ Invitation creation and notification enqueue share one transaction. Email failur
 
 BioBlitz awards succeed independently of email. When an address is unavailable, moderators are told that manual contact may be needed. Marking an award handled records the first moderator and preserves a suppression tombstone so reconciliation cannot send it later.
 
-## Validation
-
-Run:
-
-```bash
-pnpm test:db
-```
-
-The test starts a disposable local PostgreSQL container, applies all migrations, verifies the exact schema and RPC contract, and exercises concurrency behavior. It refuses remote Docker endpoints.
+The local database tests refuse remote Docker endpoints. Do not provide production Supabase credentials, Resend keys, or real recipient addresses to either test.

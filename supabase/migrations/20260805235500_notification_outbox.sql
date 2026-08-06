@@ -2,6 +2,33 @@
 -- This migration is the source of truth for the final table and RPC surface.
 -- It intentionally does not baseline user_emails or cgs_group_invitations;
 -- those remain externally managed prerequisites.
+do $$
+begin
+  if pg_catalog.to_regclass('public.cgs_group_invitations') is null
+    or pg_catalog.to_regclass('public.user_emails') is null
+  then
+    raise exception 'notification outbox prerequisites are missing: apply docs/cgs-group-invitations.sql and docs/user-emails.sql before this migration';
+  end if;
+
+  if exists (
+    select 1
+    from (values
+      ('cgs_group_invitations','id'),('cgs_group_invitations','repo'),('cgs_group_invitations','email'),
+      ('cgs_group_invitations','role'),('cgs_group_invitations','status'),('cgs_group_invitations','inviter_did'),
+      ('cgs_group_invitations','inviter_handle'),('cgs_group_invitations','inviter_email'),('cgs_group_invitations','group_name'),
+      ('cgs_group_invitations','group_handle'),('cgs_group_invitations','created_at'),('cgs_group_invitations','updated_at'),
+      ('cgs_group_invitations','expires_at'),('cgs_group_invitations','accepted_at'),('cgs_group_invitations','accepted_by_did'),
+      ('cgs_group_invitations','accepted_by_email'),('cgs_group_invitations','email_sent_at'),('cgs_group_invitations','last_email_error'),
+      ('user_emails','did'),('user_emails','email')
+    ) as required(table_name,column_name)
+    left join information_schema.columns actual
+      on actual.table_schema='public' and actual.table_name=required.table_name and actual.column_name=required.column_name
+    where actual.column_name is null
+  ) then
+    raise exception 'notification outbox prerequisites are incomplete: rerun docs/cgs-group-invitations.sql and docs/user-emails.sql before this migration';
+  end if;
+end $$;
+
 create schema if not exists extensions;
 create extension if not exists pgcrypto with schema extensions;
 
