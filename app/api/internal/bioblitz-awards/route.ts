@@ -1,4 +1,5 @@
 import { headers } from "next/headers";
+import { after } from "next/server";
 import { getAuthForwardCookie } from "@/app/_lib/auth";
 import {
   endedRounds,
@@ -13,8 +14,10 @@ import {
   bioblitzNotificationSourceId,
   listBioblitzNotificationSummaries,
   markBioblitzNotificationHandled,
-  notifyBioblitzWinner,
+  prepareBioblitzWinnerNotification,
+  processBioblitzWinnerNotification,
   type BioblitzNotificationSummary,
+  type PreparedBioblitzNotification,
 } from "@/app/_lib/bioblitz-notifications";
 import { getGainForestModeratorAccess } from "@/app/internal/badges/_lib/access";
 import { fetchInternalBadgeData, type InternalBadgeData } from "@/app/internal/badges/_lib/badge-records";
@@ -101,6 +104,26 @@ function notificationInput(round: BioblitzRound, prize: BioblitzPrize, award: Re
   return { roundId: round.id, roundLabel: round.label, prize, winnerDid: award.subjectDid, createdAt: award.createdAt };
 }
 
+type PreparedAwardNotification = PreparedBioblitzNotification & { prize: BioblitzPrize };
+
+function scheduleNotificationProcessing(prepared: PreparedAwardNotification[], deadline: Date): void {
+  const outboxIds = prepared.flatMap(item => item.processOutboxId ? [item.processOutboxId] : []);
+  if (outboxIds.length === 0) return;
+  after(async () => {
+    await Promise.all(outboxIds.map(outboxId => processBioblitzWinnerNotification(outboxId, deadline)));
+  });
+}
+
+function applyPreparedNotifications(state: RoundAwardState, prepared: PreparedAwardNotification[]): RoundAwardState {
+  let result = state;
+  for (const item of prepared) {
+    result = item.prize === "most-observations"
+      ? { ...result, mostImagesNotification: item.notification }
+      : { ...result, bestPictureNotification: item.notification };
+  }
+  return result;
+}
+
 export async function GET() {
   const loaded = await loadAccess();
   if ("error" in loaded) return loaded.error;
@@ -129,9 +152,12 @@ export async function POST(request: Request): Promise<Response> {
   try {
     if (action === "reconcile") {
       const data = await fetchInternalBadgeData(loaded.repoDid, { includeAwards: true });
-      for (const input of canonicalBioblitzAwardInputs(data, rounds)) {
-        await notifyBioblitzWinner(input, new Date(invocationStartedAt + USABLE_INVOCATION_MS));
-      }
+      const inputs = canonicalBioblitzAwardInputs(data, rounds);
+      const prepared = await Promise.all(inputs.map(async input => ({
+        prize: input.prize,
+        ...await prepareBioblitzWinnerNotification(input),
+      })));
+      scheduleNotificationProcessing(prepared, new Date(invocationStartedAt + USABLE_INVOCATION_MS));
       return Response.json({ rounds: await awardStateFor(data, rounds) }, { headers: { "cache-control": "no-store" } });
     }
 
@@ -177,7 +203,7 @@ export async function POST(request: Request): Promise<Response> {
     }
 
     const failures: unknown[] = [];
-    let durableAwards = 0;
+    const notificationInputs: BioblitzWinnerInput[] = [];
     if (mostObservations) {
       try {
         const countNote = mostObservations.count != null ? ` (${mostObservations.count})` : "";
@@ -185,8 +211,7 @@ export async function POST(request: Request): Promise<Response> {
           loaded.repoDid, cookie, mostObservations.did, bioblitzBadgeKey("most-images", round.id),
           `BioBlitz ${round.label} winner — most observations${countNote}.`,
         );
-        durableAwards += 1;
-        await notifyBioblitzWinner(notificationInput(round, "most-observations", award), new Date(invocationStartedAt + USABLE_INVOCATION_MS));
+        notificationInputs.push(notificationInput(round, "most-observations", award));
       } catch (error) {
         failures.push(error);
       }
@@ -197,16 +222,21 @@ export async function POST(request: Request): Promise<Response> {
           loaded.repoDid, cookie, bestPicture.did, bioblitzBadgeKey("best-picture", round.id),
           `BioBlitz ${round.label} winner — best picture.`, bestPicture.winningObservationUri,
         );
-        durableAwards += 1;
-        await notifyBioblitzWinner(notificationInput(round, "best-picture", award), new Date(invocationStartedAt + USABLE_INVOCATION_MS));
+        notificationInputs.push(notificationInput(round, "best-picture", award));
       } catch (error) {
         failures.push(error);
       }
     }
-    if (durableAwards === 0 && failures.length > 0) throw failures[0];
+    if (notificationInputs.length === 0 && failures.length > 0) throw failures[0];
+
+    const prepared = await Promise.all(notificationInputs.map(async input => ({
+      prize: input.prize,
+      ...await prepareBioblitzWinnerNotification(input),
+    })));
+    scheduleNotificationProcessing(prepared, new Date(invocationStartedAt + USABLE_INVOCATION_MS));
 
     const data = await fetchInternalBadgeData(loaded.repoDid, { includeAwards: true });
-    const state = (await awardStateFor(data, [round]))[0]!;
+    const state = applyPreparedNotifications((await awardStateFor(data, [round]))[0]!, prepared);
     return Response.json(state, { headers: { "cache-control": "no-store" } });
   } catch (error) {
     console.error("[bioblitz-awards] POST failed:", error);

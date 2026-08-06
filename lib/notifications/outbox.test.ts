@@ -78,7 +78,6 @@ describe("welcome notification enqueue boundaries", () => {
       recipientEmail: "user@example.com",
       templateKey: "welcome-signup",
       locale: "en-BT",
-      providerIdempotencyKey: "auth-event-1",
       deliveryMode: "capture",
       nextAttemptAt: NOW,
     });
@@ -110,7 +109,6 @@ describe("welcome notification enqueue boundaries", () => {
       recipientEmail: "member@example.com",
       templateKey: "welcome-membership-joined",
       locale: null,
-      providerIdempotencyKey: "membership-event-1",
       deliveryMode: "capture",
       nextAttemptAt: NOW,
     });

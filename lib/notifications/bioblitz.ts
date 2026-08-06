@@ -60,7 +60,6 @@ export async function enqueueBioblitzWinner(input: BioblitzWinnerInput, dependen
     recipientEmail: null,
     templateKey: "bioblitz-winner",
     locale: null,
-    providerIdempotencyKey: null,
     deliveryMode: dependencies.config.deliveryMode,
     nextAttemptAt: dependencies.clock.now(),
   });

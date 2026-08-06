@@ -18,7 +18,7 @@ EMAIL_BIOBLITZ_WINNER_ENABLED=false
 
 `capture` uses process-local memory. It never contacts Resend, but it is not durable across process restarts and must not be treated as a delivery environment.
 
-`resend` requires `RESEND_API_KEY`. `EMAIL_FROM` must be a verified single-line sender. Resend idempotency is conservatively treated as 23 hours 55 minutes within its documented 24-hour window; ambiguous sends stop after the stored deadline rather than risk a duplicate.
+`resend` requires `RESEND_API_KEY`. `EMAIL_FROM` must be a verified single-line sender. Every provider request uses the outbox row UUID as its idempotency key. Resend idempotency is conservatively treated as 23 hours 55 minutes within its documented 24-hour window; ambiguous sends stop after the stored deadline rather than risk a duplicate. An explicit HTTP 408 response is retryable, while a transport timeout with no authoritative response remains ambiguous.
 
 ## Database prerequisites and migration order
 
@@ -72,6 +72,7 @@ The route:
 
 - rejects a missing server secret before constructing the runtime;
 - uses a constant-time bearer comparison;
+- starts no new recent-award reconciliation work after its ten-second budget and handles at most twenty candidates; an enqueue already started is allowed to finish before queue draining begins;
 - reconciles recent canonical BioBlitz awards without recalculating winners;
 - cleans retention-expired rows;
 - processes at most 20 rows with concurrency at most four;
@@ -126,9 +127,16 @@ Rows persist their original `capture` or `resend` mode. Changing the global mode
 
 ## Invitation and BioBlitz operator behavior
 
-Invitation creation and notification enqueue share one transaction. Email failure never removes the invitation. Owners and eligible admins can expedite a safe queued/rejected email; the database enforces a one-minute cooldown and rejects sent, processing, ambiguous, or immutable-invalid work. Acceptance, cancellation, and expiry suppress unsent delivery.
+Invitation creation and notification enqueue share one transaction. Email failure never removes the invitation. Owners and eligible admins can expedite a safe queued/rejected email; the database enforces a one-minute cooldown and rejects sent, processing, ambiguous, or immutable-invalid work. Acceptance, cancellation, and expiry suppress unsent delivery. An invitation created while delivery is disabled is never retroactively emailed by submitting the same invitation again after enablement; remove it and create a new invitation if an email should be sent.
 
-A BioBlitz badge award succeeds independently of notification setup. Missing private email is shown to the moderator immediately. **Mark handled manually** records the first moderator and leaves a suppression tombstone so reconciliation cannot send later. It refuses a provider call already in flight.
+Both BioBlitz prize badges are attempted before any notification lookup or provider work begins. Notification preparation commits deterministic outbox work, and provider processing runs through Next.js `after()` with cron as recovery. Missing private email or setup failure is shown to the moderator immediately. **Mark handled manually** records the first moderator and leaves a suppression tombstone so reconciliation cannot send later. It refuses a provider call already in flight.
+
+## Release notes
+
+- Signup and organization-membership welcome emails now recover durably after temporary delivery failures.
+- Organization invitations remain valid when email delivery is delayed, show a safe retry or copy-link action, and never change recipient or content across retries.
+- BioBlitz winner badges no longer wait on email delivery; moderators are warned when an address is missing or notification setup fails.
+- Delivery remains disabled until the migration, recovery call, sender, provider credentials, and individual producer flags are deliberately enabled.
 
 ## Retention
 

@@ -128,7 +128,6 @@ export async function enqueueSignup(
     recipientEmail: email("signup", input.email),
     templateKey: "welcome-signup",
     locale: optionalText("signup", "locale", input.locale, 35),
-    providerIdempotencyKey: eventId,
   }, receiptTime);
 }
 
@@ -161,6 +160,5 @@ export async function enqueueMembershipJoined(
     recipientEmail: email("membership", input.email),
     templateKey: "welcome-membership-joined",
     locale: optionalText("membership", "locale", input.locale, 35),
-    providerIdempotencyKey: eventId,
   }, receiptTime);
 }

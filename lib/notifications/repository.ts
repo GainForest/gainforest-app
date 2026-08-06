@@ -18,7 +18,7 @@ import type {
   TerminalErrorCode,
 } from "./types";
 
-type RepositoryCode = "repository_unavailable" | "repository_rejected" | "invalid_response" | "stale_claim";
+type RepositoryCode = "repository_unavailable" | "repository_rejected" | "idempotency_conflict" | "invalid_response" | "stale_claim";
 type RepositoryOperation =
   | "enqueue" | "cleanup" | "health" | "claim_due" | "claim_one" | "get_claimed" | "expire_claimed" | "resolve_recipient" | "wait_recipient"
   | "freeze_request" | "begin_provider_call" | "defer_ambiguous" | "record_provider_failure"
@@ -118,6 +118,8 @@ function decodeRow(value: unknown): NotificationRow | null {
   if (!noFrozen && !completeFrozen) return null;
   const expiresAt = item.provider_idempotency_expires_at === null ? null : date(item.provider_idempotency_expires_at);
   if (item.provider_idempotency_expires_at !== null && !expiresAt) return null;
+  if (item.provider_call_phase === "idle" && (item.provider_call_is_ambiguous_retry || expiresAt !== null)) return null;
+  if (item.provider_call_phase === "in_flight" && (!expiresAt || !completeFrozen)) return null;
 
   return {
     id: item.id,
@@ -163,10 +165,16 @@ export class SupabaseNotificationRepository implements NotificationRepository, N
       return await work();
     } catch (error) {
       if (error instanceof NotificationRepositoryError) throw error;
-      const status = object(error)?.status;
-      const code: RepositoryCode = typeof status === "number" && status >= 500
-        ? "repository_unavailable"
-        : "repository_rejected";
+      const details = object(error);
+      const status = details?.status;
+      const message = typeof details?.message === "string" ? details.message : "";
+      const code: RepositoryCode = operation === "enqueue"
+        && (message.includes("notification_outbox_idempotency_conflict")
+          || message.includes("notification_outbox_provider_key_conflict"))
+        ? "idempotency_conflict"
+        : typeof status === "number" && status >= 500
+          ? "repository_unavailable"
+          : "repository_rejected";
       this.log({ code, operation });
       throw new NotificationRepositoryError(code);
     }
@@ -195,7 +203,7 @@ export class SupabaseNotificationRepository implements NotificationRepository, N
         p_recipient_email: input.recipientEmail,
         p_template_key: input.templateKey,
         p_locale: input.locale,
-        p_provider_idempotency_key: input.providerIdempotencyKey,
+        p_provider_idempotency_key: null,
         p_delivery_mode: input.deliveryMode,
         p_next_attempt_at: input.nextAttemptAt.toISOString(),
       });

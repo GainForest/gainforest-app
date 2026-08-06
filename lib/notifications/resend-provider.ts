@@ -29,9 +29,14 @@ function errorName(payload: ResendPayload | null): string | null {
 }
 
 function retryAfterMs(response: Response): number | undefined {
-  const seconds = Number(response.headers.get("retry-after"));
-  if (!Number.isFinite(seconds) || seconds <= 0) return undefined;
-  return Math.min(seconds * 1000, MAX_RETRY_AFTER_MS);
+  const value = response.headers.get("retry-after")?.trim();
+  if (!value) return undefined;
+  const seconds = Number(value);
+  const delay = Number.isFinite(seconds)
+    ? seconds * 1000
+    : Date.parse(value) - Date.now();
+  if (!Number.isFinite(delay) || delay <= 0) return undefined;
+  return Math.min(delay, MAX_RETRY_AFTER_MS);
 }
 
 async function boundedPayload(response: Response): Promise<ResendPayload | null> {
@@ -94,6 +99,9 @@ export class ResendEmailProvider implements EmailProvider {
       }
       if (response.status === 409 && name === "invalid_idempotent_request") {
         return { kind: "permanent", errorCode: "notification_invalid" };
+      }
+      if (response.status === 408) {
+        return { kind: "transient", errorCode: "provider_timeout" };
       }
       if (response.status === 429 && name === "rate_limit_exceeded") {
         return {

@@ -63,7 +63,6 @@ describe("SupabaseNotificationRepository", () => {
       recipientEmail: "person@example.com",
       templateKey: "welcome-signup",
       locale: "en",
-      providerIdempotencyKey: "source-1",
       deliveryMode: "capture",
       nextAttemptAt: new Date("2026-08-06T01:00:00.000Z"),
     })).resolves.toEqual({ outboxId: rawRow.id, status: "queued", duplicate: true });
@@ -77,7 +76,7 @@ describe("SupabaseNotificationRepository", () => {
       p_recipient_email: "person@example.com",
       p_template_key: "welcome-signup",
       p_locale: "en",
-      p_provider_idempotency_key: "source-1",
+      p_provider_idempotency_key: null,
       p_delivery_mode: "capture",
       p_next_attempt_at: "2026-08-06T01:00:00.000Z",
     }));
@@ -221,29 +220,51 @@ describe("SupabaseNotificationRepository", () => {
     await expect(repository.enqueue({
       eventKey: "signup:source-1", eventType: "signup", payload: null, sourceId: "source-1",
       recipientDid: null, recipientEmail: "person@example.com", templateKey: "welcome-signup", locale: null,
-      providerIdempotencyKey: "source-1", deliveryMode: "capture", nextAttemptAt: new Date(),
+      deliveryMode: "capture", nextAttemptAt: new Date(),
     })).rejects.toThrow("Notification repository returned an invalid enqueue response");
 
     fetchMock.mockResolvedValueOnce(Response.json([]));
     await expect(repository.cleanup(100)).rejects.toThrow("Notification repository returned an invalid cleanup response");
   });
 
-  it("redacts idempotency conflict details from enqueue failures", async () => {
+  it("preserves a typed idempotency conflict without exposing database details", async () => {
     const secret = "person@example.com payload-secret service-role-secret";
-    fetchMock.mockResolvedValueOnce(Response.json({ message: secret }, { status: 409 }));
+    fetchMock.mockResolvedValueOnce(Response.json({
+      message: `notification_outbox_idempotency_conflict: ${secret}`,
+    }, { status: 400 }));
     const log = vi.fn();
     const repository = new SupabaseNotificationRepository({ log });
 
     const error = await repository.enqueue({
       eventKey: "signup:source-1", eventType: "signup", payload: null, sourceId: "source-1",
       recipientDid: null, recipientEmail: "person@example.com", templateKey: "welcome-signup", locale: null,
-      providerIdempotencyKey: "source-1", deliveryMode: "capture", nextAttemptAt: new Date("2026-08-06T01:00:00.000Z"),
+      deliveryMode: "capture", nextAttemptAt: new Date("2026-08-06T01:00:00.000Z"),
     }).catch((reason: unknown) => reason);
 
     expect(error).toBeInstanceOf(NotificationRepositoryError);
-    expect((error as NotificationRepositoryError).code).toBe("repository_rejected");
+    expect((error as NotificationRepositoryError).code).toBe("idempotency_conflict");
     expect(JSON.stringify(error)).not.toContain(secret);
-    expect(log).toHaveBeenCalledWith({ code: "repository_rejected", operation: "enqueue" });
+    expect(log).toHaveBeenCalledWith({ code: "idempotency_conflict", operation: "enqueue" });
+  });
+
+  it.each([
+    { provider_call_phase: "idle", provider_call_is_ambiguous_retry: true },
+    { provider_call_phase: "in_flight", provider_idempotency_expires_at: null },
+    {
+      provider_call_phase: "in_flight",
+      provider_call_is_ambiguous_retry: true,
+      provider_idempotency_expires_at: "2026-08-07T01:00:00.000Z",
+    },
+  ])("rejects an impossible provider phase returned by the database", async malformed => {
+    fetchMock.mockResolvedValueOnce(Response.json([{ ...rawRow, ...malformed }]));
+    const repository = new SupabaseNotificationRepository();
+    await expect(repository.getClaimed({
+      outboxId: rawRow.id,
+      previousStatus: "processing",
+      resumeProviderCallPhase: malformed.provider_call_phase as "idle" | "in_flight",
+      processingToken: rawRow.processing_token,
+      lockedUntil: new Date(rawRow.locked_until),
+    })).rejects.toMatchObject({ code: "invalid_response" });
   });
 
   it("redacts database response details, addresses, payloads, and credentials", async () => {

@@ -20,7 +20,10 @@ beforeEach(() => {
   fetchMock.mockReset();
 });
 
-afterEach(() => vi.unstubAllGlobals());
+afterEach(() => {
+  vi.restoreAllMocks();
+  vi.unstubAllGlobals();
+});
 
 describe("ResendEmailProvider", () => {
   it("sends the complete immutable payload with the frozen idempotency key", async () => {
@@ -67,6 +70,29 @@ describe("ResendEmailProvider", () => {
     await expect(provider.send(request, { timeoutMs: 8_000 })).resolves.toEqual({
       kind: "transient",
       errorCode: "provider_5xx",
+    });
+  });
+
+  it("retries an explicit HTTP request timeout instead of terminalizing the notification", async () => {
+    fetchMock.mockResolvedValueOnce(Response.json({ name: "request_timeout" }, { status: 408 }));
+    const provider = new ResendEmailProvider({ apiKey: "re_test" });
+    await expect(provider.send(request, { timeoutMs: 8_000 })).resolves.toEqual({
+      kind: "transient",
+      errorCode: "provider_timeout",
+    });
+  });
+
+  it("honors an HTTP-date Retry-After value", async () => {
+    vi.spyOn(Date, "now").mockReturnValue(new Date("2026-08-06T12:00:00.000Z").getTime());
+    fetchMock.mockResolvedValueOnce(Response.json({ name: "rate_limit_exceeded" }, {
+      status: 429,
+      headers: { "retry-after": "Thu, 06 Aug 2026 12:02:00 GMT" },
+    }));
+    const provider = new ResendEmailProvider({ apiKey: "re_test" });
+    await expect(provider.send(request, { timeoutMs: 8_000 })).resolves.toEqual({
+      kind: "transient",
+      errorCode: "provider_rate_limited",
+      retryAfterMs: 120_000,
     });
   });
 

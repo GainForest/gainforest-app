@@ -71,22 +71,22 @@ truncate public.notification_outbox;
 create temp table first_enqueue as
 select * from public.notification_outbox_enqueue(
   'signup:event-1', 'signup', '{"name":"One"}'::jsonb, 'event-1', null,
-  'person@example.com', 'welcome', 'en', 'event-1', 'resend', clock_timestamp()
+  'person@example.com', 'welcome', 'en', null, 'resend', clock_timestamp()
 );
 select pg_temp.assert_true(not (select duplicate from first_enqueue), 'first enqueue is not duplicate');
 select pg_temp.assert_true((select length(event_key_hash)=64 from public.notification_outbox where id=(select outbox_id from first_enqueue)), 'event hash is SHA-256 hex');
 select pg_temp.assert_true((select length(input_fingerprint_hash)=64 from public.notification_outbox where id=(select outbox_id from first_enqueue)), 'input fingerprint is stored');
-select pg_temp.assert_true((select provider_idempotency_key='event-1' from public.notification_outbox where id=(select outbox_id from first_enqueue)), 'welcome provider key preserves the immutable auth event source ID');
+select pg_temp.assert_true((select provider_idempotency_key=id::text from public.notification_outbox where id=(select outbox_id from first_enqueue)), 'welcome provider key is generated from its outbox row UUID');
 
 create temp table duplicate_enqueue as
 select * from public.notification_outbox_enqueue(
   'signup:event-1', 'signup', '{"name":"One"}'::jsonb, 'event-1', null,
-  'person@example.com', 'welcome', 'en', 'event-1', 'resend', clock_timestamp() + interval '1 hour'
+  'person@example.com', 'welcome', 'en', null, 'resend', clock_timestamp() + interval '1 hour'
 );
 select pg_temp.assert_true((select duplicate from duplicate_enqueue), 'exact replay is duplicate');
 select pg_temp.assert_true((select outbox_id from first_enqueue)=(select outbox_id from duplicate_enqueue), 'exact replay returns same row');
 select pg_temp.assert_raises(
-  $$select * from public.notification_outbox_enqueue('signup:event-1','signup','{"name":"Changed"}'::jsonb,'event-1',null,'person@example.com','welcome','en','event-1','resend',clock_timestamp())$$,
+  $$select * from public.notification_outbox_enqueue('signup:event-1','signup','{"name":"Changed"}'::jsonb,'event-1',null,'person@example.com','welcome','en',null,'resend',clock_timestamp())$$,
   'notification_outbox_idempotency_conflict', 'changed delivery input conflicts'
 );
 select pg_temp.assert_raises(
@@ -119,9 +119,14 @@ select * from public.notification_outbox_enqueue(
   'invitee@example.com', 'invite', 'en', null, 'resend', clock_timestamp()
 );
 select pg_temp.assert_true((select provider_idempotency_key=id::text from public.notification_outbox where id=(select outbox_id from generated_provider_key)), 'invitation provider key is generated from its row UUID');
-select pg_temp.assert_raises(
-  $$select * from public.notification_outbox_enqueue('welcome:key-collision','signup','{}'::jsonb,'event-1',null,'other@example.com','welcome','en','event-1','resend',clock_timestamp())$$,
-  'provider', 'two rows cannot share a provider key'
+create temp table independent_welcome_key as
+select * from public.notification_outbox_enqueue(
+  'welcome:key-collision','signup','{}'::jsonb,'event-1',null,'other@example.com','welcome','en','event-1','resend',clock_timestamp()
+);
+select pg_temp.assert_true(
+  (select provider_idempotency_key=id::text from public.notification_outbox where id=(select outbox_id from independent_welcome_key))
+  and (select outbox_id from independent_welcome_key)<>(select outbox_id from first_enqueue),
+  'event types and event hashes cannot collide through a caller-supplied provider key'
 );
 select pg_temp.assert_raises(
   $$select * from public.notification_outbox_enqueue('bio-no-did','bioblitz_winner','{}'::jsonb,'x',null,null,'bio','en',null,'resend',clock_timestamp())$$,
@@ -196,17 +201,9 @@ select pg_temp.assert_raises(
 select pg_temp.assert_true(public.notification_outbox_begin_provider_call((select outbox_id from queued_two),'40000000-0000-4000-8000-000000000001',clock_timestamp()+interval '24 hours'), 'provider call starts durably');
 select pg_temp.assert_true((select provider_call_phase='in_flight' and provider_attempt_count=1 and processing_run_count=2 from public.notification_outbox where id=(select outbox_id from queued_two)), 'provider and processing counts are separate');
 select pg_temp.assert_true(not public.notification_outbox_release_claim((select outbox_id from queued_two),'40000000-0000-4000-8000-000000000001'), 'in-flight claim cannot be released');
-select pg_temp.assert_raises(
-  format($q$select public.notification_outbox_record_provider_failure('%s','40000000-0000-4000-8000-000000000001','provider_timeout')$q$,(select outbox_id from queued_two)),
-  'unsupported provider error code', 'timeout cannot clear an ambiguous provider call'
-);
-select pg_temp.assert_true(public.notification_outbox_record_provider_failure((select outbox_id from queued_two),'40000000-0000-4000-8000-000000000001','provider_5xx'), 'authoritative response returns to idle');
+select pg_temp.assert_true(public.notification_outbox_record_provider_failure((select outbox_id from queued_two),'40000000-0000-4000-8000-000000000001','provider_timeout'), 'an authoritative HTTP 408 response returns to idle');
 select pg_temp.assert_true((select provider_call_phase='idle' and provider_idempotency_expires_at is null from public.notification_outbox where id=(select outbox_id from queued_two)), 'authoritative failure clears ambiguity state');
-select pg_temp.assert_raises(
-  format($q$select public.notification_outbox_requeue('%s','40000000-0000-4000-8000-000000000001',clock_timestamp()+interval '5 minutes','provider_timeout')$q$,(select outbox_id from queued_two)),
-  'unsupported requeue error code', 'timeout cannot use ordinary requeue'
-);
-select pg_temp.assert_true(public.notification_outbox_requeue((select outbox_id from queued_two),'40000000-0000-4000-8000-000000000001',clock_timestamp()+interval '5 minutes','provider_5xx'), 'idle work requeues');
+select pg_temp.assert_true(public.notification_outbox_requeue((select outbox_id from queued_two),'40000000-0000-4000-8000-000000000001',clock_timestamp()+interval '5 minutes','provider_timeout'), 'an authoritative HTTP 408 response can use ordinary requeue');
 
 -- Fresh authoritative permanent provider responses terminalize directly from
 -- in_flight in one token-owned transition. Resumed ambiguity is defer-only.
@@ -467,6 +464,27 @@ select pg_temp.assert_raises(
 create temp table invitation_canceled as select public.notification_invitation_close('81000000-0000-4000-8000-000000000001','canceled',null,null) result;
 select pg_temp.assert_true((select result#>>'{invitation,status}'='canceled' and result#>>'{notification,status}'='suppressed' from invitation_canceled), 'cancel and notification suppression commit together');
 select pg_temp.assert_true((select status='suppressed' and recipient_email is null and payload is null from public.notification_outbox where event_key_hash=encode(extensions.digest('organization-invite:81000000-0000-4000-8000-000000000001','sha256'),'hex')), 'canceled invitation redacts unsent notification');
+
+select * from public.notification_outbox_enqueue(
+  'organization-invite:81000000-0000-4000-8000-000000000007','invitation','{"invitationId":"different","invitedEmail":"wrong@example.com","role":"member"}',
+  'different',null,'wrong@example.com','organization-invitation','en',null,'resend',clock_timestamp()
+);
+select pg_temp.assert_raises(
+  $$select public.notification_invitation_create('81000000-0000-4000-8000-000000000007','did:plc:bound','bound@example.com','member','did:plc:owner',null,null,'Bound Org',null,'Owner',null,'https://example.test','en','resend',clock_timestamp(),clock_timestamp()+interval '7 days')$$,
+  'notification_outbox_idempotency_conflict', 'same-type outbox conflict cannot be attached to a different invitation'
+);
+select pg_temp.assert_true(not exists(select 1 from public.cgs_group_invitations where id='81000000-0000-4000-8000-000000000007'), 'same-type outbox conflict rolls invitation creation back');
+
+create temp table disabled_invitation as select public.notification_invitation_create(
+  '81000000-0000-4000-8000-000000000008','did:plc:disabled','disabled@example.com','member','did:plc:original',null,null,
+  'Disabled Org',null,'Original Inviter',null,'https://example.test','en',null,clock_timestamp(),clock_timestamp()+interval '7 days'
+) result;
+create temp table duplicate_disabled_invitation as select public.notification_invitation_create(
+  '81000000-0000-4000-8000-000000000009','did:plc:disabled','disabled@example.com','member','did:plc:different',null,null,
+  'Changed Org',null,'Different Inviter',null,'https://other.example','pt','resend',clock_timestamp(),clock_timestamp()+interval '7 days'
+) result;
+select pg_temp.assert_true((select result#>>'{invitation,id}'='81000000-0000-4000-8000-000000000008' and result->'notification'='null'::jsonb from duplicate_disabled_invitation), 'an existing disabled invitation is not retroactively emailed by a later duplicate');
+select pg_temp.assert_true(not exists(select 1 from public.notification_outbox where event_key_hash=encode(extensions.digest('organization-invite:81000000-0000-4000-8000-000000000008','sha256'),'hex')), 'disabled invitation duplicate creates no outbox row');
 
 create temp table invitation_rejected as select public.notification_invitation_create(
   '81000000-0000-4000-8000-000000000002','did:plc:forest','rejected@example.com','member','did:plc:owner',null,null,

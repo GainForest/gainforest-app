@@ -59,7 +59,6 @@ describe("enqueueBioblitzWinner", () => {
       recipientEmail: null,
       templateKey: "bioblitz-winner",
       locale: null,
-      providerIdempotencyKey: null,
       deliveryMode: "capture",
       nextAttemptAt: NOW,
     });

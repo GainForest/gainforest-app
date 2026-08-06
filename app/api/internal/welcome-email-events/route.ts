@@ -4,6 +4,7 @@ import { z } from "zod";
 import { getCertifiedProfileCard } from "@/app/account/_lib/account-route";
 import { resolveWelcomeEmailLocale } from "@/lib/email/welcome-template";
 import { NotificationProducerInputError } from "@/lib/notifications/outbox";
+import { NotificationRepositoryError } from "@/lib/notifications/repository";
 import { createWelcomeRuntime } from "@/lib/notifications/welcome-runtime";
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -13,6 +14,7 @@ const SIGNATURE_HEADER = "x-gainforest-webhook-signature";
 const TIMESTAMP_HEADER = "x-gainforest-webhook-timestamp";
 const MAX_SIGNATURE_AGE_MS = 5 * 60 * 1000;
 const MAX_WEBHOOK_BODY_BYTES = 64 * 1024;
+const PROFILE_ENRICHMENT_TIMEOUT_MS = 2_000;
 const USABLE_INVOCATION_MS = 27_000;
 
 const welcomeUserSchema = z.object({
@@ -54,8 +56,26 @@ function requestBodyTooLarge(request: NextRequest): boolean {
   return Number.isFinite(parsed) && parsed > MAX_WEBHOOK_BODY_BYTES;
 }
 
-function bodyByteLength(value: string): number {
-  return new TextEncoder().encode(value).byteLength;
+async function readBoundedBody(request: NextRequest): Promise<string | null> {
+  if (!request.body) return "";
+  const reader = request.body.getReader();
+  const chunks: Uint8Array[] = [];
+  let total = 0;
+  try {
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      total += value.byteLength;
+      if (total > MAX_WEBHOOK_BODY_BYTES) {
+        await reader.cancel().catch(() => undefined);
+        return null;
+      }
+      chunks.push(value);
+    }
+  } finally {
+    reader.releaseLock();
+  }
+  return Buffer.concat(chunks, total).toString("utf8");
 }
 
 function normalizeSignature(value: string | null): string | null {
@@ -65,6 +85,7 @@ function normalizeSignature(value: string | null): string | null {
 }
 
 function safeCompareHex(left: string, right: string): boolean {
+  if (!/^[0-9a-f]{64}$/i.test(left) || !/^[0-9a-f]{64}$/i.test(right)) return false;
   const leftBuffer = Buffer.from(left, "hex");
   const rightBuffer = Buffer.from(right, "hex");
   return leftBuffer.length === rightBuffer.length && timingSafeEqual(leftBuffer, rightBuffer);
@@ -110,7 +131,7 @@ function plainDisplayName(value: string | null | undefined, event: z.infer<typeo
 
   const handle = event.user.handle?.trim();
   if (handle && name.toLowerCase() === handle.toLowerCase()) return null;
-  if (name === event.user.email || name.startsWith("did:")) return null;
+  if (name.toLowerCase() === event.user.email.toLowerCase() || name.startsWith("did:")) return null;
 
   return name;
 }
@@ -126,6 +147,27 @@ async function friendlyName(event: z.infer<typeof welcomeEventSchema>): Promise<
   return plainDisplayName(card?.displayName, event);
 }
 
+async function boundedEnrichment(event: z.infer<typeof welcomeEventSchema>): Promise<{
+  name: string | null;
+  organizationName: string | undefined;
+}> {
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  const fallback = new Promise<{ name: null; organizationName: undefined }>(resolve => {
+    timer = setTimeout(() => resolve({ name: null, organizationName: undefined }), PROFILE_ENRICHMENT_TIMEOUT_MS);
+  });
+  try {
+    return await Promise.race([
+      Promise.all([friendlyName(event), organizationName(event)]).then(([name, resolvedOrganizationName]) => ({
+        name,
+        organizationName: resolvedOrganizationName,
+      })),
+      fallback,
+    ]);
+  } finally {
+    if (timer) clearTimeout(timer);
+  }
+}
+
 export async function POST(request: NextRequest) {
   const invocationStartedAt = Date.now();
   const secret = configuredSecret();
@@ -137,8 +179,8 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Welcome email event payload is too large." }, { status: 413 });
   }
 
-  const rawBody = await request.text();
-  if (bodyByteLength(rawBody) > MAX_WEBHOOK_BODY_BYTES) {
+  const rawBody = await readBoundedBody(request);
+  if (rawBody === null) {
     return NextResponse.json({ error: "Welcome email event payload is too large." }, { status: 413 });
   }
 
@@ -163,12 +205,12 @@ export async function POST(request: NextRequest) {
     explicitLocale: event.locale,
     acceptLanguage: request.headers.get("accept-language"),
   });
-  const name = await friendlyName(event) ?? undefined;
+  const enrichment = await boundedEnrichment(event);
   const common = {
     authEventId: event.eventId,
     userDid: event.user.did,
     email: event.user.email,
-    name,
+    name: enrichment.name ?? undefined,
     locale,
     createdAt: event.createdAt ?? new Date(invocationStartedAt).toISOString(),
   };
@@ -177,7 +219,7 @@ export async function POST(request: NextRequest) {
       ...common,
       type: "membership_joined" as const,
       organizationDid: event.organization.did,
-      organizationName: await organizationName(event),
+      organizationName: enrichment.organizationName,
     }
     : { ...common, type: "signup" as const };
 
@@ -190,6 +232,11 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     if (error instanceof NotificationProducerInputError) {
       return NextResponse.json({ error: "Invalid welcome email event payload." }, { status: 400 });
+    }
+    if (error instanceof NotificationRepositoryError && error.code === "idempotency_conflict") {
+      return NextResponse.json({
+        error: "Welcome email event ID conflicts with a previously accepted event.",
+      }, { status: 409 });
     }
     return NextResponse.json({ error: "Welcome email event could not be queued. Retry the signed event." }, { status: 503 });
   }

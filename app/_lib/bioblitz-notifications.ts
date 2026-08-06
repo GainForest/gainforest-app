@@ -21,6 +21,11 @@ export type BioblitzNotificationSummary = {
   canMarkHandled: boolean;
 };
 
+export type PreparedBioblitzNotification = {
+  notification: BioblitzNotificationSummary;
+  processOutboxId: string | null;
+};
+
 type RawRow = { event_key_hash?: unknown; status?: unknown; last_error_code?: unknown; manual_handled_at?: unknown };
 const sourceId = (roundId: number, prize: BioblitzPrize) => `bioblitz:${roundId}:${prize}`;
 
@@ -61,22 +66,52 @@ function afterProcess(result: ProcessOneOutcome, recipientStatus: "ready" | "mis
   }
 }
 
-export async function notifyBioblitzWinner(input: BioblitzWinnerInput, deadline: Date): Promise<BioblitzNotificationSummary> {
+export async function prepareBioblitzWinnerNotification(
+  input: BioblitzWinnerInput,
+): Promise<PreparedBioblitzNotification> {
   try {
     const queued = await createBioblitzProducerRuntime().enqueue(input);
-    if (queued.kind === "disabled") return { status: "notification_setup_failed", canMarkHandled: true };
-    if (queued.status === "sent") return { status: "sent", canMarkHandled: false };
-    if (queued.status === "suppressed") return { status: "handled_manually", canMarkHandled: false };
-    if (queued.status === "dead") return { status: "cannot_send", canMarkHandled: true };
-    try {
-      const processed = await createBioblitzProcessRuntime().process(queued.outboxId, deadline);
-      return afterProcess(processed, queued.recipientStatus);
-    } catch {
-      return { status: queued.recipientStatus === "ready" ? "delayed" : queued.recipientStatus, canMarkHandled: true };
+    if (queued.kind === "disabled") {
+      return { notification: { status: "notification_setup_failed", canMarkHandled: true }, processOutboxId: null };
     }
+    if (queued.status === "sent") {
+      return { notification: { status: "sent", canMarkHandled: false }, processOutboxId: null };
+    }
+    if (queued.status === "suppressed") {
+      return { notification: { status: "handled_manually", canMarkHandled: false }, processOutboxId: null };
+    }
+    if (queued.status === "dead") {
+      return { notification: { status: "cannot_send", canMarkHandled: true }, processOutboxId: null };
+    }
+    return {
+      notification: {
+        status: queued.recipientStatus === "ready" ? "delayed" : queued.recipientStatus,
+        canMarkHandled: true,
+      },
+      processOutboxId: queued.status === "queued" || queued.status === "waiting_recipient" ? queued.outboxId : null,
+    };
   } catch {
-    return { status: "notification_setup_failed", canMarkHandled: true };
+    return { notification: { status: "notification_setup_failed", canMarkHandled: true }, processOutboxId: null };
   }
+}
+
+export async function processBioblitzWinnerNotification(
+  outboxId: string,
+  deadline: Date,
+): Promise<BioblitzNotificationSummary> {
+  try {
+    const processed = await createBioblitzProcessRuntime().process(outboxId, deadline);
+    return afterProcess(processed, "ready");
+  } catch {
+    return { status: "delayed", canMarkHandled: true };
+  }
+}
+
+export async function notifyBioblitzWinner(input: BioblitzWinnerInput, deadline: Date): Promise<BioblitzNotificationSummary> {
+  const prepared = await prepareBioblitzWinnerNotification(input);
+  return prepared.processOutboxId
+    ? processBioblitzWinnerNotification(prepared.processOutboxId, deadline)
+    : prepared.notification;
 }
 
 export async function markBioblitzNotificationHandled(input: {
