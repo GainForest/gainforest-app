@@ -4,7 +4,7 @@ vi.mock("server-only", () => ({}));
 
 const { getGroupInvitation, retryGroupInvitation, fetchAuthSession, fetchCgsMemberRoleWithCookie, processNotification, GroupInvitationError } = vi.hoisted(() => {
   class HoistedGroupInvitationError extends Error {
-    constructor(message: string, readonly status = 400) {
+    constructor(message: string, readonly status = 400, readonly code?: string) {
       super(message);
       this.name = "GroupInvitationError";
     }
@@ -67,6 +67,35 @@ describe("POST invitation email retry", () => {
       did: "did:plc:admin",
     });
     expect(processNotification).toHaveBeenCalledWith(queued.outboxId, expect.any(Date));
+  });
+
+  it("returns a stable not-found code when the route preflight cannot find the invitation", async () => {
+    getGroupInvitation.mockResolvedValueOnce(null);
+    const { POST } = await import("./route");
+    const response = await POST(new Request("https://example.test"), { params: Promise.resolve({ invitationId }) });
+    expect(response.status).toBe(404);
+    await expect(response.json()).resolves.toEqual({
+      error: "Invitation not found.",
+      code: "invitation_not_found",
+    });
+    expect(retryGroupInvitation).not.toHaveBeenCalled();
+    expect(process).not.toHaveBeenCalled();
+  });
+
+  it("returns a stable error code for localized retry feedback", async () => {
+    retryGroupInvitation.mockRejectedValueOnce(new GroupInvitationError(
+      "Please wait a minute before trying to send this email again.",
+      429,
+      "invitation_retry_cooldown",
+    ));
+    const { POST } = await import("./route");
+    const response = await POST(new Request("https://example.test"), { params: Promise.resolve({ invitationId }) });
+    expect(response.status).toBe(429);
+    await expect(response.json()).resolves.toEqual({
+      error: "Please wait a minute before trying to send this email again.",
+      code: "invitation_retry_cooldown",
+    });
+    expect(process).not.toHaveBeenCalled();
   });
 
   it("reserves 55 seconds for immediate retry delivery", async () => {

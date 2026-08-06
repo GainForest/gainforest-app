@@ -110,6 +110,23 @@ describe("createGroupInvitation", () => {
     expect(fetchMock).not.toHaveBeenCalled();
   });
 
+  it("uses the localized generic inviter copy when the inviter profile is unavailable", async () => {
+    getCertifiedProfileCard.mockImplementation(async (did: string) => did === "did:plc:forest"
+      ? { displayName: "Forest Circle", handle: "forest.example.com", avatarUrl: null }
+      : { displayName: null, handle: null, avatarUrl: null });
+    supabaseRpc.mockResolvedValue({ invitation: rawInvitation, notification: null });
+
+    await createGroupInvitation({
+      repo: "did:plc:forest", email: "invitee@example.com", role: "member", session,
+      cookie: "session=cookie", acceptLanguage: "es", enqueueNotification: false,
+    });
+
+    expect(supabaseRpc).toHaveBeenCalledWith("notification_invitation_create", expect.objectContaining({
+      p_inviter_name: null,
+      p_locale: "es",
+    }));
+  });
+
   it("persists the invitation without an outbox row when its producer is disabled", async () => {
     supabaseRpc.mockResolvedValue({ invitation: rawInvitation, notification: null });
     const invitation = await createGroupInvitation({
@@ -139,6 +156,7 @@ describe("createGroupInvitation", () => {
     expect((error as GroupInvitationError).message).toBe("Cancel the pending invitation before changing this person’s role.");
     expect((error as GroupInvitationError).message).not.toContain("invitee@example.com");
     expect((error as GroupInvitationError).message).not.toContain("private payload");
+    expect((error as GroupInvitationError).code).toBe("invitation_role_conflict");
     expect((error as GroupInvitationError).status).toBe(409);
   });
 

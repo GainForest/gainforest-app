@@ -276,17 +276,9 @@ select pg_temp.assert_raises(
 select pg_temp.assert_true(public.notification_outbox_begin_provider_call((select outbox_id from queued_two),'40000000-0000-4000-8000-000000000001',clock_timestamp()+interval '24 hours'), 'provider call starts durably');
 select pg_temp.assert_true((select provider_call_phase='in_flight' and provider_attempt_count=1 and processing_run_count=2 from public.notification_outbox where id=(select outbox_id from queued_two)), 'provider and processing counts are separate');
 select pg_temp.assert_true(not public.notification_outbox_release_claim((select outbox_id from queued_two),'40000000-0000-4000-8000-000000000001'), 'in-flight claim cannot be released');
-select pg_temp.assert_raises(
-  format($q$select public.notification_outbox_record_provider_failure('%s','40000000-0000-4000-8000-000000000001','provider_timeout')$q$,(select outbox_id from queued_two)),
-  'unsupported provider error code', 'timeout cannot clear an ambiguous provider call'
-);
-select pg_temp.assert_true(public.notification_outbox_record_provider_failure((select outbox_id from queued_two),'40000000-0000-4000-8000-000000000001','provider_5xx'), 'authoritative response returns to idle');
+select pg_temp.assert_true(public.notification_outbox_record_provider_failure((select outbox_id from queued_two),'40000000-0000-4000-8000-000000000001','provider_timeout'), 'an authoritative HTTP 408 response returns to idle');
 select pg_temp.assert_true((select provider_call_phase='idle' and provider_idempotency_expires_at is null from public.notification_outbox where id=(select outbox_id from queued_two)), 'authoritative failure clears ambiguity state');
-select pg_temp.assert_raises(
-  format($q$select public.notification_outbox_requeue('%s','40000000-0000-4000-8000-000000000001',clock_timestamp()+interval '5 minutes','provider_timeout')$q$,(select outbox_id from queued_two)),
-  'unsupported requeue error code', 'timeout cannot use ordinary requeue'
-);
-select pg_temp.assert_true(public.notification_outbox_requeue((select outbox_id from queued_two),'40000000-0000-4000-8000-000000000001',clock_timestamp()+interval '5 minutes','provider_5xx'), 'idle work requeues');
+select pg_temp.assert_true(public.notification_outbox_requeue((select outbox_id from queued_two),'40000000-0000-4000-8000-000000000001',clock_timestamp()+interval '5 minutes','provider_timeout'), 'an authoritative HTTP 408 response can use ordinary requeue');
 
 -- Fresh authoritative permanent provider responses terminalize directly from
 -- in_flight in one token-owned transition. Resumed ambiguity is defer-only.
@@ -537,6 +529,27 @@ create temp table invitation_canceled as select public.notification_invitation_c
 select pg_temp.assert_true((select result#>>'{invitation,status}'='canceled' and result#>>'{notification,status}'='suppressed' from invitation_canceled), 'cancel and notification suppression commit together');
 select pg_temp.assert_true((select status='suppressed' and recipient_email is null and payload is null from public.notification_outbox where event_key_hash=encode(extensions.digest('organization-invite:81000000-0000-4000-8000-000000000001','sha256'),'hex')), 'canceled invitation redacts unsent notification');
 
+select * from public.notification_outbox_enqueue(
+  'organization-invite:81000000-0000-4000-8000-000000000007','invitation','{"invitationId":"different","invitedEmail":"wrong@example.com","role":"member"}',
+  'different',null,'wrong@example.com','organization-invitation','en',null,clock_timestamp()
+);
+select pg_temp.assert_raises(
+  $$select public.notification_invitation_create('81000000-0000-4000-8000-000000000007','did:plc:bound','bound@example.com','member','did:plc:owner',null,null,'Bound Org',null,'Owner',null,'https://example.test','en',true,clock_timestamp(),clock_timestamp()+interval '7 days')$$,
+  'notification_outbox_idempotency_conflict', 'same-type outbox conflict cannot be attached to a different invitation'
+);
+select pg_temp.assert_true(not exists(select 1 from public.cgs_group_invitations where id='81000000-0000-4000-8000-000000000007'), 'same-type outbox conflict rolls invitation creation back');
+
+create temp table disabled_invitation as select public.notification_invitation_create(
+  '81000000-0000-4000-8000-000000000008','did:plc:disabled','disabled@example.com','member','did:plc:original',null,null,
+  'Disabled Org',null,'Original Inviter',null,'https://example.test','en',false,clock_timestamp(),clock_timestamp()+interval '7 days'
+) result;
+create temp table duplicate_disabled_invitation as select public.notification_invitation_create(
+  '81000000-0000-4000-8000-000000000009','did:plc:disabled','disabled@example.com','member','did:plc:different',null,null,
+  'Changed Org',null,'Different Inviter',null,'https://other.example','pt',true,clock_timestamp(),clock_timestamp()+interval '7 days'
+) result;
+select pg_temp.assert_true((select result#>>'{invitation,id}'='81000000-0000-4000-8000-000000000008' and result->'notification'='null'::jsonb from duplicate_disabled_invitation), 'an existing disabled invitation is not retroactively emailed by a later duplicate');
+select pg_temp.assert_true(not exists(select 1 from public.notification_outbox where event_key_hash=encode(extensions.digest('organization-invite:81000000-0000-4000-8000-000000000008','sha256'),'hex')), 'disabled invitation duplicate creates no outbox row');
+
 create temp table invitation_rejected as select public.notification_invitation_create(
   '81000000-0000-4000-8000-000000000002','did:plc:forest','rejected@example.com','member','did:plc:owner',null,null,
   'Forest Circle',null,'Owner',null,'https://example.test','en',true,clock_timestamp(),clock_timestamp()+interval '7 days'
@@ -566,7 +579,7 @@ select pg_temp.assert_raises(
 -- and refuses an in-flight provider boundary.
 select * from public.notification_outbox_enqueue(
   'bioblitz:4:most-observations:did:plc:winner','bioblitz_winner','{"roundId":4}','bioblitz:4:most-observations','did:plc:winner',
-  null,'bioblitz-winner',null,null,'resend',clock_timestamp()
+  null,'bioblitz-winner',null,null,clock_timestamp()
 );
 create temp table bioblitz_handled as select public.notification_bioblitz_mark_handled(
   'bioblitz:4:most-observations:did:plc:winner','did:plc:moderator'
@@ -577,13 +590,13 @@ select public.notification_bioblitz_mark_handled('bioblitz:4:most-observations:d
 select pg_temp.assert_true((select manual_handled_by='did:plc:moderator' from public.notification_outbox where event_key_hash=encode(extensions.digest('bioblitz:4:most-observations:did:plc:winner','sha256'),'hex')), 'manual handling replay preserves the first moderator audit');
 create temp table bioblitz_handled_replay as select * from public.notification_outbox_enqueue(
   'bioblitz:4:most-observations:did:plc:winner','bioblitz_winner','{"roundId":4}','bioblitz:4:most-observations','did:plc:winner',
-  null,'bioblitz-winner',null,null,'resend',clock_timestamp()
+  null,'bioblitz-winner',null,null,clock_timestamp()
 );
 select pg_temp.assert_true((select status='suppressed' and duplicate from bioblitz_handled_replay), 'manual handling tombstone blocks reconciliation replay');
 
 select * from public.notification_outbox_enqueue(
   'bioblitz:4:best-picture:did:plc:winner','bioblitz_winner','{"roundId":4}','bioblitz:4:best-picture','did:plc:winner',
-  null,'bioblitz-winner',null,null,'resend',clock_timestamp()
+  null,'bioblitz-winner',null,null,clock_timestamp()
 );
 select * from public.notification_outbox_claim_one((select id from public.notification_outbox where source_id='bioblitz:4:best-picture'),'83000000-0000-4000-8000-000000000001',60);
 select public.notification_outbox_resolve_recipient((select id from public.notification_outbox where source_id='bioblitz:4:best-picture'),'83000000-0000-4000-8000-000000000001','winner@example.com');

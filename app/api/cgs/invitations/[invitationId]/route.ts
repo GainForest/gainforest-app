@@ -8,8 +8,9 @@ export const runtime = "nodejs";
 
 function jsonError(error: unknown, fallback: string, status = 400) {
   const message = error instanceof GroupInvitationError ? error.message : fallback;
-  const code = error instanceof GroupInvitationError ? error.status : status;
-  return Response.json({ error: message }, { status: code, headers: { "cache-control": "no-store" } });
+  const responseStatus = error instanceof GroupInvitationError ? error.status : status;
+  const code = error instanceof GroupInvitationError ? error.code : undefined;
+  return Response.json({ error: message, ...(code ? { code } : {}) }, { status: responseStatus, headers: { "cache-control": "no-store" } });
 }
 
 export async function DELETE(_request: Request, { params }: { params: Promise<{ invitationId: string }> }) {
@@ -19,7 +20,7 @@ export async function DELETE(_request: Request, { params }: { params: Promise<{ 
 
   try {
     const invitation = await getGroupInvitation(invitationId);
-    if (!invitation) throw new GroupInvitationError("Invitation not found.", 404);
+    if (!invitation) throw new GroupInvitationError("Invitation not found.", 404, "invitation_not_found");
 
     const headerList = await headers();
     const cookie = getAuthForwardCookie(headerList.get("cookie"));

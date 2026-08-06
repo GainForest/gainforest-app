@@ -14,6 +14,7 @@ import {
   addCgsMember,
   cancelCgsInvitation,
   inviteCgsMember,
+  invitationErrorTranslationKey,
   removeCgsMember,
   resolveCgsMemberIdentity,
   retryCgsInvitationEmail,
@@ -320,6 +321,10 @@ export function GroupMembers({
 }) {
   const dataCouncilT = useTranslations("upload.settings.dataCouncil");
   const invitationsT = useTranslations("common.groupInvitations.members");
+  const invitationMutationError = (mutationError: unknown, fallback: "sendError" | "cancelError" | "retryError") => {
+    const key = invitationErrorTranslationKey(mutationError);
+    return key ? invitationsT(key) : invitationsT(fallback);
+  };
   const dataCouncilLoadError = dataCouncilT("errors.load");
   const dataCouncilSaveError = dataCouncilT("errors.save");
   const canAddRemove = currentRole === "owner" || currentRole === "admin";
@@ -449,7 +454,7 @@ export function GroupMembers({
               ? invitationsT("createdDelayed")
               : invitationsT("createdManual"));
         } catch (err) {
-          setError(memberErrorMessage(err, invitationsT("sendError")));
+          setError(invitationMutationError(err, "sendError"));
         }
       });
       return;
@@ -554,7 +559,7 @@ export function GroupMembers({
         setSuccess(invitationsT("canceled", { email: invitation.email }));
       } catch (err) {
         setPendingInvitations(previousInvitations);
-        setError(memberErrorMessage(err, invitationsT("cancelError")));
+        setError(invitationMutationError(err, "cancelError"));
       }
     });
   };
@@ -569,7 +574,7 @@ export function GroupMembers({
         setPendingInvitations(current => current.map(item => item.id === invitation.id ? { ...item, notification } : item));
         setSuccess(notification.status === "sent" ? invitationsT("retrySent") : invitationsT("retryQueued"));
       } catch (err) {
-        setError(memberErrorMessage(err, invitationsT("retryError")));
+        setError(invitationMutationError(err, "retryError"));
       }
     });
   };

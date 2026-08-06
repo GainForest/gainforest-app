@@ -19,6 +19,25 @@ const input = { roundId: 4, roundLabel: "Week 4", prize: "best-picture" as const
 beforeEach(() => { enqueue.mockReset(); process.mockReset(); supabaseSelect.mockReset(); supabaseRpc.mockReset(); });
 
 describe("BioBlitz notification summaries", () => {
+  it("prepares durable work without starting provider processing", async () => {
+    enqueue.mockResolvedValue({
+      kind: "enqueued",
+      outboxId: "10000000-0000-4000-8000-000000000001",
+      status: "queued",
+      duplicate: false,
+      recipientStatus: "ready",
+    });
+    const module = await import("./bioblitz-notifications") as unknown as Record<string, unknown>;
+    const prepare = module.prepareBioblitzWinnerNotification;
+    expect(prepare).toBeTypeOf("function");
+    const result = await (prepare as (value: typeof input) => Promise<unknown>)(input);
+    expect(result).toEqual({
+      notification: { status: "delayed", canMarkHandled: true, canRetry: false },
+      processOutboxId: "10000000-0000-4000-8000-000000000001",
+    });
+    expect(process).not.toHaveBeenCalled();
+  });
+
   it("maps private outbox state to plain moderator statuses", async () => {
     const mostHash = createHash("sha256").update("bioblitz:4:most-observations:did:plc:most").digest("hex");
     const bestHash = createHash("sha256").update("bioblitz:4:best-picture:did:plc:best").digest("hex");

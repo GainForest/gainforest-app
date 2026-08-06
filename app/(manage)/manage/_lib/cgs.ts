@@ -58,6 +58,58 @@ const CGS_HANDLE_MIN_LEN = 3;
 const CGS_HANDLE_NAME_MAX_LEN = 18;
 const MAX_HANDLE_RETRIES = 6;
 
+const INVITATION_ERROR_CODES = new Set([
+  "invitation_role_conflict",
+  "invitation_retry_cooldown",
+  "invitation_notification_not_safely_retryable",
+  "invitation_not_found",
+  "invitation_not_pending",
+] as const);
+
+export type CgsInvitationErrorCode =
+  | "invitation_role_conflict"
+  | "invitation_retry_cooldown"
+  | "invitation_notification_not_safely_retryable"
+  | "invitation_not_found"
+  | "invitation_not_pending";
+
+class CgsRequestError extends Error {
+  readonly code: CgsInvitationErrorCode | null;
+
+  constructor(message: string, code: CgsInvitationErrorCode | null) {
+    super(message);
+    this.name = "CgsRequestError";
+    this.code = code;
+  }
+}
+
+function invitationErrorCode(value: unknown): CgsInvitationErrorCode | null {
+  return typeof value === "string" && INVITATION_ERROR_CODES.has(value as CgsInvitationErrorCode)
+    ? value as CgsInvitationErrorCode
+    : null;
+}
+
+export type InvitationErrorTranslationKey =
+  | "roleConflictError"
+  | "retryCooldownError"
+  | "retryUnsafeError"
+  | "notFoundError"
+  | "notPendingError";
+
+export function invitationErrorTranslationKey(error: unknown): InvitationErrorTranslationKey | null {
+  const code = typeof error === "object" && error !== null && "code" in error
+    ? invitationErrorCode(error.code)
+    : null;
+  switch (code) {
+    case "invitation_role_conflict": return "roleConflictError";
+    case "invitation_retry_cooldown": return "retryCooldownError";
+    case "invitation_notification_not_safely_retryable": return "retryUnsafeError";
+    case "invitation_not_found": return "notFoundError";
+    case "invitation_not_pending": return "notPendingError";
+    default: return null;
+  }
+}
+
 function sanitizeCgsHandleName(name: string, maxLen: number): string {
   const label = name
     .trim()
@@ -114,9 +166,12 @@ type CgsMutationPayload =
   | { operation: "uploadBlob"; repo: string; blobData: string; blobMimeType: string };
 
 async function parseJsonResponse<T>(res: Response, fallback: string): Promise<T> {
-  const data = (await res.json().catch(() => ({}))) as T & { error?: string; message?: string };
+  const data = (await res.json().catch(() => ({}))) as T & { error?: string; message?: string; code?: unknown };
   if (!res.ok || data.error) {
-    throw new Error(formatCgsErrorMessage(data.message ?? data.error, fallback));
+    throw new CgsRequestError(
+      formatCgsErrorMessage(data.message ?? data.error, fallback),
+      invitationErrorCode(data.code),
+    );
   }
   return data;
 }

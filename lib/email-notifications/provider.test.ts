@@ -29,6 +29,7 @@ describe("ResendEmailProvider", () => {
   });
 
   it.each([
+    [408, { kind: "transient", errorCode: "provider_timeout" }],
     [429, { kind: "transient", errorCode: "provider_rate_limited" }],
     [503, { kind: "transient", errorCode: "provider_5xx" }],
     [400, { kind: "permanent", errorCode: "notification_invalid" }],

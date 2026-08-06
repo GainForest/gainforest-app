@@ -462,13 +462,14 @@ create function public.notification_outbox_record_provider_failure(p_outbox_id u
 returns boolean language plpgsql security definer set search_path='' as $$
 declare n integer;
 begin
-  if p_error_code is null or p_error_code not in ('provider_5xx','provider_rate_limited','provider_rejected','notification_invalid') then raise exception 'unsupported provider error code'; end if;
+  if p_error_code is null or p_error_code not in ('provider_5xx','provider_timeout','provider_rate_limited','provider_rejected','notification_invalid') then raise exception 'unsupported provider error code'; end if;
   update public.notification_outbox set
     provider_call_phase=case when provider_call_is_ambiguous_retry then 'in_flight' else 'idle' end,
     provider_idempotency_expires_at=case when provider_call_is_ambiguous_retry then provider_idempotency_expires_at else null end,
     last_error_code=p_error_code,
     last_error_summary=case p_error_code
       when 'provider_5xx' then 'Provider returned a retryable server error'
+      when 'provider_timeout' then 'Provider returned an authoritative request timeout'
       when 'provider_rate_limited' then 'Provider rate limit requires a later retry'
       when 'provider_rejected' then 'Provider permanently rejected the notification'
       else 'Notification delivery input is invalid'
@@ -510,7 +511,7 @@ returns boolean language plpgsql security definer set search_path='' as $$
 declare n integer; v public.notification_outbox%rowtype;
 begin
   if p_next_attempt_at is null or p_next_attempt_at<=clock_timestamp() or p_next_attempt_at>clock_timestamp()+interval '7 days' then raise exception 'next attempt must be within seven days'; end if;
-  if p_error_code is null or p_error_code not in ('provider_5xx','provider_rate_limited','provider_rejected','recipient_lookup_failed') then raise exception 'unsupported requeue error code'; end if;
+  if p_error_code is null or p_error_code not in ('provider_5xx','provider_timeout','provider_rate_limited','provider_rejected','recipient_lookup_failed') then raise exception 'unsupported requeue error code'; end if;
   select * into v from public.notification_outbox
     where id=p_outbox_id and status='processing' and processing_token=p_token for update;
   if not found then return false; end if;
@@ -518,6 +519,7 @@ begin
   update public.notification_outbox set status='queued',next_attempt_at=p_next_attempt_at,last_error_code=p_error_code,
     last_error_summary=case p_error_code
       when 'provider_5xx' then 'Provider returned a retryable server error'
+      when 'provider_timeout' then 'Provider returned an authoritative request timeout'
       when 'provider_rate_limited' then 'Provider rate limit requires a later retry'
       when 'provider_rejected' then 'Provider permanently rejected the notification'
       else 'Recipient lookup failed'
@@ -617,6 +619,7 @@ declare
   v_event_hash text;
   v_payload jsonb;
   v_existing boolean;
+  v_outbox public.notification_outbox%rowtype;
 begin
   if p_invitation_id is null then raise exception 'invitation ID is required'; end if;
   if p_repo is null or length(p_repo) not between 1 and 256 then raise exception 'invitation repo must contain 1 to 256 characters'; end if;
@@ -650,36 +653,45 @@ begin
       select * into v_invitation from public.cgs_group_invitations
         where repo=p_repo and email=p_email and status='pending' for update;
       if not found then raise; end if;
+      v_existing=true;
       if v_invitation.role<>p_role then raise exception 'invitation_role_conflict: cancel the pending invitation before changing its role'; end if;
     end;
   end if;
 
-  if p_enqueue_notification then
-    v_event_key='organization-invite:' || v_invitation.id::text;
-    v_event_hash=extensions.notification_outbox_sha256(pg_catalog.convert_to(v_event_key,'UTF8'));
-    select id,status into v_outbox_id,v_outbox_status from public.notification_outbox where event_key_hash=v_event_hash for update;
-    if found then
-      if (select event_type from public.notification_outbox where id=v_outbox_id)<>'invitation' then
-        raise exception 'notification_outbox_idempotency_conflict: event type differs';
-      end if;
-      v_duplicate=true;
-    else
-      v_payload=pg_catalog.jsonb_build_object(
-        'invitationId',v_invitation.id::text,
-        'invitedEmail',v_invitation.email,
-        'organizationName',v_invitation.group_name,
-        'inviterName',p_inviter_name,
-        'inviterUrl',p_inviter_url,
-        'role',v_invitation.role,
-        'acceptUrl',rtrim(p_public_origin,'/') || '/invite/' || v_invitation.id::text,
-        'siteUrl',rtrim(p_public_origin,'/')
-      );
-      select outbox_id,status,duplicate into v_outbox_id,v_outbox_status,v_duplicate
-        from public.notification_outbox_enqueue(
-          v_event_key,'invitation',v_payload,v_invitation.id::text,null,v_invitation.email,
-          'organization-invitation',p_locale,null,p_created_at
-        );
+  v_event_key='organization-invite:' || v_invitation.id::text;
+  v_event_hash=extensions.notification_outbox_sha256(pg_catalog.convert_to(v_event_key,'UTF8'));
+  select * into v_outbox from public.notification_outbox where event_key_hash=v_event_hash for update;
+  if found then
+    if v_outbox.event_type<>'invitation'
+      or v_outbox.source_id is distinct from v_invitation.id::text
+      or v_outbox.recipient_email is distinct from v_invitation.email
+      or v_outbox.template_key is distinct from 'organization-invitation'
+      or v_outbox.provider_idempotency_key is distinct from v_outbox.id::text
+      or v_outbox.payload->>'invitationId' is distinct from v_invitation.id::text
+      or v_outbox.payload->>'invitedEmail' is distinct from v_invitation.email
+      or v_outbox.payload->>'role' is distinct from v_invitation.role
+    then
+      raise exception 'notification_outbox_idempotency_conflict: invitation delivery identity differs';
     end if;
+    v_outbox_id=v_outbox.id;
+    v_outbox_status=v_outbox.status;
+    v_duplicate=true;
+  elsif not v_existing and p_enqueue_notification then
+    v_payload=pg_catalog.jsonb_build_object(
+      'invitationId',v_invitation.id::text,
+      'invitedEmail',v_invitation.email,
+      'organizationName',v_invitation.group_name,
+      'inviterName',p_inviter_name,
+      'inviterUrl',p_inviter_url,
+      'role',v_invitation.role,
+      'acceptUrl',rtrim(p_public_origin,'/') || '/invite/' || v_invitation.id::text,
+      'siteUrl',rtrim(p_public_origin,'/')
+    );
+    select outbox_id,status,duplicate into v_outbox_id,v_outbox_status,v_duplicate
+      from public.notification_outbox_enqueue(
+        v_event_key,'invitation',v_payload,v_invitation.id::text,null,v_invitation.email,
+        'organization-invitation',p_locale,null,p_created_at
+      );
   end if;
 
   return pg_catalog.jsonb_build_object(

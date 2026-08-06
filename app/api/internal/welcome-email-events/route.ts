@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { getCertifiedProfileCard } from "@/app/account/_lib/account-route";
 import { resolveWelcomeEmailLocale } from "@/lib/email/welcome-template";
+import { NotificationRepositoryError } from "@/lib/email-notifications/repository";
 import { NotificationProducerInputError } from "@/lib/email-notifications/signup-and-membership-notifications";
 import { createWelcomeRuntime } from "@/lib/email-notifications/welcome-runtime";
 export const runtime = "nodejs";
@@ -55,8 +56,26 @@ function requestBodyTooLarge(request: NextRequest): boolean {
   return Number.isFinite(parsed) && parsed > MAX_WEBHOOK_BODY_BYTES;
 }
 
-function bodyByteLength(value: string): number {
-  return new TextEncoder().encode(value).byteLength;
+async function readBoundedBody(request: NextRequest): Promise<string | null> {
+  if (!request.body) return "";
+  const reader = request.body.getReader();
+  const chunks: Uint8Array[] = [];
+  let total = 0;
+  try {
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      total += value.byteLength;
+      if (total > MAX_WEBHOOK_BODY_BYTES) {
+        await reader.cancel().catch(() => undefined);
+        return null;
+      }
+      chunks.push(value);
+    }
+  } finally {
+    reader.releaseLock();
+  }
+  return Buffer.concat(chunks, total).toString("utf8");
 }
 
 function normalizeSignature(value: string | null): string | null {
@@ -66,6 +85,7 @@ function normalizeSignature(value: string | null): string | null {
 }
 
 function safeCompareHex(left: string, right: string): boolean {
+  if (!/^[0-9a-f]{64}$/i.test(left) || !/^[0-9a-f]{64}$/i.test(right)) return false;
   const leftBuffer = Buffer.from(left, "hex");
   const rightBuffer = Buffer.from(right, "hex");
   return leftBuffer.length === rightBuffer.length && timingSafeEqual(leftBuffer, rightBuffer);
@@ -127,7 +147,7 @@ function plainDisplayName(value: string | null | undefined, event: z.infer<typeo
 
   const handle = event.user.handle?.trim();
   if (handle && name.toLowerCase() === handle.toLowerCase()) return null;
-  if (name === event.user.email || name.startsWith("did:")) return null;
+  if (name.toLowerCase() === event.user.email.toLowerCase() || name.startsWith("did:")) return null;
 
   return name;
 }
@@ -154,8 +174,8 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Welcome email event payload is too large." }, { status: 413 });
   }
 
-  const rawBody = await request.text();
-  if (bodyByteLength(rawBody) > MAX_WEBHOOK_BODY_BYTES) {
+  const rawBody = await readBoundedBody(request);
+  if (rawBody === null) {
     return NextResponse.json({ error: "Welcome email event payload is too large." }, { status: 413 });
   }
 
@@ -211,6 +231,11 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     if (error instanceof NotificationProducerInputError) {
       return NextResponse.json({ error: "Invalid welcome email event payload." }, { status: 400 });
+    }
+    if (error instanceof NotificationRepositoryError && error.code === "idempotency_conflict") {
+      return NextResponse.json({
+        error: "Welcome email event ID conflicts with a previously accepted event.",
+      }, { status: 409 });
     }
     console.error("welcome-email-events delivery failed", {
       eventIdHash: createHash("sha256").update(event.eventId).digest("hex").slice(0, 16),

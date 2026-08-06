@@ -9,6 +9,12 @@ import type { ProcessOneOutcome } from "@/lib/email-notifications/orchestrator";
 import type { AuthSession } from "./auth";
 
 export type GroupInvitationRole = "member" | "admin";
+export type GroupInvitationErrorCode =
+  | "invitation_role_conflict"
+  | "invitation_retry_cooldown"
+  | "invitation_notification_not_safely_retryable"
+  | "invitation_not_found"
+  | "invitation_not_pending";
 type GroupInvitationStatus = "pending" | "accepted" | "canceled" | "expired";
 export type InvitationNotificationStatus = "waiting_recipient" | "queued" | "processing" | "sent" | "suppressed" | "dead";
 
@@ -130,12 +136,14 @@ type RawInvitationMutation = {
 };
 
 export class GroupInvitationError extends Error {
-  status: number;
+  readonly status: number;
+  readonly code?: GroupInvitationErrorCode;
 
-  constructor(message: string, status = 400) {
+  constructor(message: string, status = 400, code?: GroupInvitationErrorCode) {
     super(message);
     this.name = "GroupInvitationError";
     this.status = status;
+    this.code = code;
   }
 }
 
@@ -310,9 +318,9 @@ function publicBaseUrl(): string {
   return url.origin;
 }
 
-async function inviterDisplay(inviterDid: string, inviterHandle: string | null, publicOrigin: string): Promise<{ name: string; url: string | null }> {
+async function inviterDisplay(inviterDid: string, inviterHandle: string | null, publicOrigin: string): Promise<{ name: string | null; url: string | null }> {
   const card = await getCertifiedProfileCard(inviterDid).catch(() => null);
-  const name = card?.displayName?.trim() || "Unknown User";
+  const name = card?.displayName?.trim() || null;
   const identifier = inviterHandle?.trim() || card?.handle?.trim() || inviterDid;
   return {
     name,
@@ -389,16 +397,16 @@ function mutationResult(value: unknown): { invitation: GroupInvitation; notifica
 function knownRpcError(error: unknown, operation: "create" | "close" | "retry"): GroupInvitationError {
   const message = error instanceof Error ? error.message : "";
   if (message.includes("invitation_role_conflict")) {
-    return new GroupInvitationError("Cancel the pending invitation before changing this person’s role.", 409);
+    return new GroupInvitationError("Cancel the pending invitation before changing this person’s role.", 409, "invitation_role_conflict");
   }
   if (message.includes("invitation_retry_cooldown")) {
-    return new GroupInvitationError("Please wait a minute before trying to send this email again.", 429);
+    return new GroupInvitationError("Please wait a minute before trying to send this email again.", 429, "invitation_retry_cooldown");
   }
   if (message.includes("invitation_notification_not_safely_retryable")) {
-    return new GroupInvitationError("This email can’t be retried safely. Copy the invitation link and share it directly.", 409);
+    return new GroupInvitationError("This email can’t be retried safely. Copy the invitation link and share it directly.", 409, "invitation_notification_not_safely_retryable");
   }
-  if (message.includes("invitation_not_found")) return new GroupInvitationError("Invitation not found.", 404);
-  if (message.includes("invitation_not_pending")) return new GroupInvitationError("This invitation is no longer pending.", 409);
+  if (message.includes("invitation_not_found")) return new GroupInvitationError("Invitation not found.", 404, "invitation_not_found");
+  if (message.includes("invitation_not_pending")) return new GroupInvitationError("This invitation is no longer pending.", 409, "invitation_not_pending");
   const fallback = operation === "create"
     ? "Invitation could not be saved. Please try again."
     : operation === "retry"
@@ -497,9 +505,9 @@ export async function cancelGroupInvitation({
   actorRole: CgsServerRole | null;
 }): Promise<GroupInvitation> {
   const invitation = await getGroupInvitation(invitationId);
-  if (!invitation) throw new GroupInvitationError("Invitation not found.", 404);
+  if (!invitation) throw new GroupInvitationError("Invitation not found.", 404, "invitation_not_found");
   if (!canCancelInvitation(actorRole, invitation.role)) throw new GroupInvitationError("Only organization owners and admins can remove invitations.", 403);
-  if (invitation.status !== "pending") throw new GroupInvitationError("This invitation is no longer pending.", 409);
+  if (invitation.status !== "pending") throw new GroupInvitationError("This invitation is no longer pending.", 409, "invitation_not_pending");
   return closeInvitation(invitation.id, "canceled");
 }
 
@@ -511,9 +519,9 @@ export async function retryGroupInvitation({
   actorRole: CgsServerRole | null;
 }): Promise<InvitationNotificationSummary> {
   const invitation = await getGroupInvitation(invitationId);
-  if (!invitation) throw new GroupInvitationError("Invitation not found.", 404);
+  if (!invitation) throw new GroupInvitationError("Invitation not found.", 404, "invitation_not_found");
   if (!canCancelInvitation(actorRole, invitation.role)) throw new GroupInvitationError("Only organization owners and admins can retry invitation emails.", 403);
-  if (invitation.status !== "pending") throw new GroupInvitationError("This invitation is no longer pending.", 409);
+  if (invitation.status !== "pending") throw new GroupInvitationError("This invitation is no longer pending.", 409, "invitation_not_pending");
   try {
     const notification = normalizeNotification(await supabaseRpc<unknown>("notification_invitation_retry", {
       p_invitation_id: invitationId,
@@ -534,8 +542,8 @@ export async function acceptGroupInvitation({
   session: Extract<AuthSession, { isLoggedIn: true }>;
 }): Promise<GroupInvitation> {
   const invitation = await getGroupInvitation(invitationId);
-  if (!invitation) throw new GroupInvitationError("Invitation not found.", 404);
-  if (invitation.status !== "pending") throw new GroupInvitationError("This invitation is no longer pending.", 409);
+  if (!invitation) throw new GroupInvitationError("Invitation not found.", 404, "invitation_not_found");
+  if (invitation.status !== "pending") throw new GroupInvitationError("This invitation is no longer pending.", 409, "invitation_not_pending");
   if (new Date(invitation.expiresAt).getTime() < Date.now()) {
     await closeInvitation(invitation.id, "expired").catch(() => undefined);
     throw new GroupInvitationError("This invitation has expired.", 410);
