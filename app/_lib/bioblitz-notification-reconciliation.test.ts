@@ -3,13 +3,16 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 vi.mock("server-only", () => ({}));
 
 const mocks = vi.hoisted(() => ({
-  fetchData: vi.fn(), list: vi.fn(), enqueue: vi.fn(), rounds: [] as Array<{ id: number; label: string }>,
+  fetchData: vi.fn(), list: vi.fn(), enqueue: vi.fn(), rounds: [] as Array<{ id: number; label: string }>, enabled: true,
 }));
 vi.mock("./bioblitz", () => ({ endedRounds: () => mocks.rounds }));
 vi.mock("@/app/internal/badges/_lib/badge-records", () => ({ fetchInternalBadgeData: mocks.fetchData }));
 vi.mock("./bioblitz-notifications", () => ({ listBioblitzNotificationSummaries: mocks.list }));
 vi.mock("@/lib/notifications/bioblitz-runtime", () => ({
-  createBioblitzProducerRuntime: () => ({ enqueue: mocks.enqueue }),
+  createBioblitzProducerRuntime: () => ({
+    config: { emailDisabled: !mocks.enabled },
+    enqueue: mocks.enqueue,
+  }),
 }));
 
 import { canonicalBioblitzAwardInputs, reconcileRecentBioblitzNotifications } from "./bioblitz-notification-reconciliation";
@@ -24,6 +27,7 @@ function data(dids: string[]) {
 }
 
 beforeEach(() => {
+  mocks.enabled = true;
   mocks.rounds = [round];
   mocks.fetchData.mockReset();
   mocks.list.mockReset();
@@ -52,6 +56,13 @@ describe("canonicalBioblitzAwardInputs", () => {
 });
 
 describe("reconcileRecentBioblitzNotifications", () => {
+  it("does not query award data when the BioBlitz producer is disabled", async () => {
+    mocks.enabled = false;
+    await expect(reconcileRecentBioblitzNotifications(new Date(Date.now() + 1_000)))
+      .resolves.toEqual({ candidates: 0, completed: true });
+    expect(mocks.fetchData).not.toHaveBeenCalled();
+  });
+
   it("does not start upstream work after its deadline has passed", async () => {
     await expect(reconcileRecentBioblitzNotifications(new Date(Date.now() - 1)))
       .resolves.toEqual({ candidates: 0, completed: false });

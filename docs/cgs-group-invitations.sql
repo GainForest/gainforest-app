@@ -78,5 +78,9 @@ for each row execute function public.set_cgs_group_invitations_updated_at();
 
 alter table public.cgs_group_invitations enable row level security;
 
--- The app uses the service-role key server-side. Keep browser/API clients out of
--- this table unless/until dedicated policies are designed.
+-- Server code reads invitations through PostgREST and performs mutations only
+-- through the secured notification_invitation_* RPCs. RLS bypass does not
+-- replace table privileges, so grant the service role only the direct read it
+-- needs while keeping browser roles out.
+revoke all on public.cgs_group_invitations from public, anon, authenticated, service_role;
+grant select on public.cgs_group_invitations to service_role;

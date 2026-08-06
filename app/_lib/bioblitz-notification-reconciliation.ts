@@ -73,6 +73,10 @@ export async function reconcileRecentBioblitzNotifications(
 ): Promise<{ candidates: number; completed: boolean }> {
   let candidates = 0;
   try {
+    const producer = createBioblitzProducerRuntime();
+    if (producer.config.emailDisabled) {
+      return { candidates: 0, completed: true };
+    }
     const rounds = endedRounds();
     const data = await beforeDeadline(
       () => fetchInternalBadgeData(GAINFOREST_MODERATION_REPO_DID, { includeAwards: true }),
@@ -82,7 +86,6 @@ export async function reconcileRecentBioblitzNotifications(
     const summaries = await beforeDeadline(() => listBioblitzNotificationSummaries(inputs), deadline);
     const missing = inputs.filter(input => summaries.get(`bioblitz:${input.roundId}:${input.prize}`)?.status === "not_prepared");
     if (missing.length === 0) return { candidates: 0, completed: true };
-    const producer = createBioblitzProducerRuntime();
     for (const input of missing.slice(0, MAX_RECONCILIATION_CANDIDATES)) {
       if (Date.now() >= deadline.getTime()) return { candidates, completed: false };
       // Once a database mutation starts, await its definitive result. Racing it

@@ -1,4 +1,5 @@
-import { request } from "node:https";
+import { request as httpRequest } from "node:http";
+import { request as httpsRequest } from "node:https";
 
 const RESEND_EMAILS_API_URL = "https://api.resend.com/emails";
 const DEFAULT_EMAIL_FROM = "GainForest <noreply@gainforest.id>";
@@ -34,8 +35,12 @@ async function postJson(
 }> {
   const body = JSON.stringify(payload);
   const parsedUrl = new URL(url);
+  if (parsedUrl.protocol !== "http:" && parsedUrl.protocol !== "https:") {
+    throw new Error("Resend API URL must use HTTP or HTTPS.");
+  }
 
   return new Promise((resolve, reject) => {
+    const request = parsedUrl.protocol === "http:" ? httpRequest : httpsRequest;
     const req = request({
       protocol: parsedUrl.protocol,
       hostname: parsedUrl.hostname,
@@ -84,6 +89,7 @@ export async function sendResendEmail({
   idempotencyKey,
   timeoutMs = 15_000,
   apiKey: suppliedApiKey,
+  apiUrl,
 }: {
   from?: string;
   to: string;
@@ -93,6 +99,7 @@ export async function sendResendEmail({
   idempotencyKey?: string;
   timeoutMs?: number;
   apiKey?: string;
+  apiUrl?: string;
 }): Promise<{ id: string | null }> {
   const apiKey = suppliedApiKey?.trim() || process.env.RESEND_API_KEY?.trim();
   if (!apiKey) {
@@ -107,7 +114,7 @@ export async function sendResendEmail({
     headers["idempotency-key"] = idempotencyKey.trim().slice(0, 256);
   }
 
-  const response = await postJson(RESEND_EMAILS_API_URL, headers, {
+  const response = await postJson(apiUrl?.trim() || RESEND_EMAILS_API_URL, headers, {
     from: getEmailFrom(from),
     to: [to],
     subject,
