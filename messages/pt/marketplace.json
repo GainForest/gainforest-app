@@ -613,8 +613,10 @@
           "lookup_failed": "Falha ao buscar o email; tente depois ou contate o vencedor",
           "cannot_send": "Não pode ser enviado automaticamente",
           "handled_manually": "Tratado manualmente",
-          "not_prepared": "Não preparado; contate o vencedor manualmente",
-          "notification_setup_failed": "Falha na configuração do email; contate o vencedor",
+          "not_prepared": "Email não preparado; tente novamente ou trate manualmente",
+          "notification_setup_failed": "Falha na configuração do email; tente novamente ou trate manualmente",
+          "retry": "Tentar notificação novamente",
+          "retrying": "Tentando novamente…",
           "markHandled": "Marcar como tratado",
           "marking": "Marcando…"
         }

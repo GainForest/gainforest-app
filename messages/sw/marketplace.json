@@ -613,8 +613,10 @@
           "lookup_failed": "Utafutaji wa barua pepe umeshindwa; jaribu baadaye au wasiliana na mshindi",
           "cannot_send": "Haiwezi kutumwa kiotomatiki",
           "handled_manually": "Imeshughulikiwa mwenyewe",
-          "not_prepared": "Haijaandaliwa; wasiliana na mshindi mwenyewe",
-          "notification_setup_failed": "Mpangilio wa barua pepe umeshindwa; wasiliana na mshindi",
+          "not_prepared": "Barua pepe haijaandaliwa; jaribu tena au ishughulikie mwenyewe",
+          "notification_setup_failed": "Mpangilio wa barua pepe umeshindwa; jaribu tena au ishughulikie mwenyewe",
+          "retry": "Jaribu arifa tena",
+          "retrying": "Inajaribu tena…",
           "markHandled": "Weka alama kuwa imeshughulikiwa",
           "marking": "Inaweka alama…"
         }

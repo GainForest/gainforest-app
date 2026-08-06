@@ -14,12 +14,21 @@ function data(dids: string[]) {
 }
 
 describe("canonicalBioblitzAwardInputs", () => {
-  it("derives recent notifications from committed awards without winner calculation", () => {
-    expect(canonicalBioblitzAwardInputs(data(["did:plc:winner"]), [round], new Date("2026-08-06T02:00:00.000Z")))
+  it("derives notifications from committed awards without winner calculation", () => {
+    expect(canonicalBioblitzAwardInputs(data(["did:plc:winner"]), [round]))
       .toEqual([{ roundId: 4, roundLabel: "Week 4", prize: "most-observations", winnerDid: "did:plc:winner", createdAt: "2026-08-05T01:00:00.000Z" }]);
   });
 
+  it("allows an explicit moderator action for an older recorded award", () => {
+    const old = {
+      definitions: [definition],
+      awards: [{ badge: { uri: definition.uri }, subjectDid: "did:plc:winner", createdAt: "2020-01-01T00:00:00.000Z" }],
+    } as never;
+    expect(canonicalBioblitzAwardInputs(old, [round]))
+      .toEqual([{ roundId: 4, roundLabel: "Week 4", prize: "most-observations", winnerDid: "did:plc:winner", createdAt: "2020-01-01T00:00:00.000Z" }]);
+  });
+
   it("fails closed on conflicting winners for one round prize", () => {
-    expect(canonicalBioblitzAwardInputs(data(["did:plc:first", "did:plc:second"]), [round], new Date("2026-08-07T02:00:00.000Z"))).toEqual([]);
+    expect(canonicalBioblitzAwardInputs(data(["did:plc:first", "did:plc:second"]), [round])).toEqual([]);
   });
 });

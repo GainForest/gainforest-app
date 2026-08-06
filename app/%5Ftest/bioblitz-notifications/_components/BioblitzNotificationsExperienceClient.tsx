@@ -7,12 +7,13 @@ import { useTranslations } from "next-intl";
 import { BioblitzPrizeNotificationStatus, type NotificationSummary } from "@/app/bioblitz/BioblitzAwardControls";
 
 const STATUSES: NotificationSummary[] = [
-  { status: "sent", canMarkHandled: false },
-  { status: "delayed", canMarkHandled: true },
-  { status: "missing_email", canMarkHandled: true },
-  { status: "lookup_failed", canMarkHandled: true },
-  { status: "cannot_send", canMarkHandled: true },
-  { status: "notification_setup_failed", canMarkHandled: true },
+  { status: "sent", canMarkHandled: false, canRetry: false },
+  { status: "delayed", canMarkHandled: true, canRetry: false },
+  { status: "missing_email", canMarkHandled: true, canRetry: false },
+  { status: "lookup_failed", canMarkHandled: true, canRetry: false },
+  { status: "cannot_send", canMarkHandled: true, canRetry: false },
+  { status: "not_prepared", canMarkHandled: true, canRetry: true },
+  { status: "notification_setup_failed", canMarkHandled: true, canRetry: true },
 ];
 
 export function BioblitzNotificationsExperienceClient() {
@@ -40,7 +41,8 @@ export function BioblitzNotificationsExperienceClient() {
               label={page("fixtureLabel")}
               notification={notification}
               busy={false}
-              onMarkHandled={() => setStatuses(current => current.map((item, itemIndex) => itemIndex === index ? { status: "handled_manually", canMarkHandled: false } : item))}
+              onRetry={() => setStatuses(current => current.map((item, itemIndex) => itemIndex === index ? { status: "delayed", canMarkHandled: true, canRetry: false } : item))}
+              onMarkHandled={() => setStatuses(current => current.map((item, itemIndex) => itemIndex === index ? { status: "handled_manually", canMarkHandled: false, canRetry: false } : item))}
             />
           ))}
         </section>
