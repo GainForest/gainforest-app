@@ -8,14 +8,14 @@ import { NotificationProducerInputError } from "@/lib/email-notifications/signup
 import { createWelcomeRuntime } from "@/lib/email-notifications/welcome-runtime";
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
-export const maxDuration = 30;
+export const maxDuration = 60;
 
 const SIGNATURE_HEADER = "x-gainforest-webhook-signature";
 const TIMESTAMP_HEADER = "x-gainforest-webhook-timestamp";
 const MAX_SIGNATURE_AGE_MS = 5 * 60 * 1000;
 const MAX_WEBHOOK_BODY_BYTES = 64 * 1024;
 const PROFILE_ENRICHMENT_TIMEOUT_MS = 2_000;
-const USABLE_INVOCATION_MS = 27_000;
+const USABLE_INVOCATION_MS = 55_000;
 
 const welcomeUserSchema = z.object({
   did: z.string().min(1).max(256),

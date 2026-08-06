@@ -114,6 +114,27 @@ describe("welcome email event webhook", () => {
     }, expect.any(Date));
   });
 
+  it("reserves 55 seconds for immediate welcome delivery", async () => {
+    const { POST, maxDuration } = await import("./route");
+    const before = Date.now();
+    const response = await POST(signedRequest({
+      type: "user.signup.completed",
+      eventId: "user.signup.completed.v1:delivery-budget",
+      user: {
+        did: "did:plc:user",
+        email: "member@example.com",
+      },
+    }, secret));
+    const after = Date.now();
+
+    expect(response.status).toBe(200);
+    const invocationDeadline = deliver.mock.calls[0]?.[1];
+    expect(invocationDeadline).toBeInstanceOf(Date);
+    expect(invocationDeadline!.getTime()).toBeGreaterThanOrEqual(before + 55_000);
+    expect(invocationDeadline!.getTime()).toBeLessThanOrEqual(after + 55_000);
+    expect(maxDuration).toBe(60);
+  });
+
   it("omits the greeting instead of deriving a name from the handle", async () => {
     getCertifiedProfileCard.mockResolvedValueOnce({ displayName: null, avatarUrl: null });
     const { POST } = await import("./route");
