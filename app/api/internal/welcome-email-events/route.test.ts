@@ -1,6 +1,7 @@
 import { createHmac } from "node:crypto";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { NextRequest } from "next/server";
+import { NotificationRepositoryError } from "@/lib/email-notifications/repository";
 import { NotificationProducerInputError } from "@/lib/email-notifications/signup-and-membership-notifications";
 import type { WelcomeNotificationInput, WelcomeNotificationOutcome } from "@/lib/email-notifications/welcome";
 
@@ -13,10 +14,11 @@ const deliver = vi.fn<(_input: WelcomeNotificationInput, _deadline: Date) => Pro
   duplicate: false,
   retryable: false,
 }));
-const getCertifiedProfileCard = vi.fn(async (did: string): Promise<{ displayName: string | null; avatarUrl: string | null }> => ({
+const defaultProfileCard = async (did: string): Promise<{ displayName: string | null; avatarUrl: string | null }> => ({
   displayName: did === "did:plc:org" ? "Resolved Org" : "Forest Member",
   avatarUrl: null,
-}));
+});
+const getCertifiedProfileCard = vi.fn(defaultProfileCard);
 
 vi.mock("@/lib/email-notifications/welcome-runtime", () => ({
   createWelcomeRuntime: () => ({ deliver }),
@@ -26,8 +28,7 @@ vi.mock("@/app/account/_lib/account-route", () => ({
   getCertifiedProfileCard,
 }));
 
-function signedRequest(body: unknown, secret: string): NextRequest {
-  const rawBody = JSON.stringify(body);
+function signedRawRequest(rawBody: string, secret: string, headers: HeadersInit = {}): NextRequest {
   const timestamp = String(Math.floor(Date.now() / 1000));
   const signature = createHmac("sha256", secret)
     .update(`${timestamp}.${rawBody}`)
@@ -39,9 +40,14 @@ function signedRequest(body: unknown, secret: string): NextRequest {
       "content-type": "application/json",
       "x-gainforest-webhook-timestamp": timestamp,
       "x-gainforest-webhook-signature": `sha256=${signature}`,
+      ...headers,
     },
     body: rawBody,
   });
+}
+
+function signedRequest(body: unknown, secret: string): NextRequest {
+  return signedRawRequest(JSON.stringify(body), secret);
 }
 
 describe("welcome email event webhook", () => {
@@ -59,10 +65,7 @@ describe("welcome email event webhook", () => {
       retryable: false,
     });
     getCertifiedProfileCard.mockReset();
-    getCertifiedProfileCard.mockImplementation(async did => ({
-      displayName: did === "did:plc:org" ? "Resolved Org" : "Forest Member",
-      avatarUrl: null,
-    }));
+    getCertifiedProfileCard.mockImplementation(defaultProfileCard);
   });
 
   afterEach(() => {
@@ -207,6 +210,23 @@ describe("welcome email event webhook", () => {
     expect(deliver).toHaveBeenCalledWith(expect.objectContaining({ name: undefined }), expect.any(Date));
   });
 
+  it("does not use an email address as a display name when casing differs", async () => {
+    getCertifiedProfileCard.mockResolvedValueOnce({ displayName: null, avatarUrl: null });
+    const { POST } = await import("./route");
+    const response = await POST(signedRequest({
+      type: "user.signup.completed",
+      eventId: "user.signup.completed.v1:email-name-test",
+      user: {
+        did: "did:plc:user",
+        name: "Member@Example.com",
+        email: "member@example.com",
+      },
+    }, secret));
+
+    expect(response.status).toBe(200);
+    expect(deliver).toHaveBeenCalledWith(expect.objectContaining({ name: undefined }), expect.any(Date));
+  });
+
   it("rejects unsupported organization event types", async () => {
     const { POST } = await import("./route");
     const response = await POST(signedRequest({
@@ -224,6 +244,30 @@ describe("welcome email event webhook", () => {
     expect(response.status).toBe(400);
     await expect(response.json()).resolves.toEqual({ error: "Invalid welcome email event payload." });
     expect(deliver).not.toHaveBeenCalled();
+  });
+
+  it("rejects a valid digest with trailing non-hex signature data", async () => {
+    const request = signedRequest({
+      type: "user.signup.completed",
+      eventId: "user.signup.completed.v1:malformed-signature",
+      user: { did: "did:plc:user", email: "member@example.com" },
+    }, secret);
+    request.headers.set(
+      "x-gainforest-webhook-signature",
+      `${request.headers.get("x-gainforest-webhook-signature")}garbage`,
+    );
+    const { POST } = await import("./route");
+    const response = await POST(request);
+    expect(response.status).toBe(401);
+    expect(deliver).not.toHaveBeenCalled();
+  });
+
+  it("rejects an oversized streamed body before signature verification or delivery", async () => {
+    const { POST } = await import("./route");
+    const response = await POST(signedRawRequest("x".repeat(64 * 1024 + 1), secret, { "content-length": "1" }));
+    expect(response.status).toBe(413);
+    expect(deliver).not.toHaveBeenCalled();
+    expect(getCertifiedProfileCard).not.toHaveBeenCalled();
   });
 
   it("returns success when delivery is durably queued for retry", async () => {
@@ -260,6 +304,20 @@ describe("welcome email event webhook", () => {
     }, secret));
     expect(response.status).toBe(400);
     await expect(response.text()).resolves.not.toContain("member@example.com");
+  });
+
+  it("returns a non-retryable conflict when an event ID changes identity", async () => {
+    deliver.mockRejectedValueOnce(new NotificationRepositoryError("idempotency_conflict"));
+    const { POST } = await import("./route");
+    const response = await POST(signedRequest({
+      type: "user.signup.completed",
+      eventId: "user.signup.completed.v1:conflict",
+      user: { did: "did:plc:user", email: "member@example.com" },
+    }, secret));
+    expect(response.status).toBe(409);
+    await expect(response.json()).resolves.toEqual({
+      error: "Welcome email event ID conflicts with a previously accepted event.",
+    });
   });
 
   it("redacts and logs runtime failures before returning a retryable webhook response", async () => {

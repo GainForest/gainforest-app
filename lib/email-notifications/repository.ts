@@ -20,7 +20,7 @@ import type {
   TerminalErrorCode,
 } from "./types";
 
-type RepositoryCode = "repository_unavailable" | "repository_rejected" | "invalid_response" | "stale_claim";
+type RepositoryCode = "repository_unavailable" | "repository_rejected" | "idempotency_conflict" | "invalid_response" | "stale_claim";
 type RepositoryOperation =
   | "enqueue" | "cleanup" | "health" | "claim_due" | "claim_one" | "get_claimed" | "expire_claimed" | "resolve_recipient" | "wait_recipient"
   | "freeze_request" | "begin_provider_call" | "defer_ambiguous" | "record_provider_failure"
@@ -121,7 +121,12 @@ const notificationRowSchema = z.object({
   processing_token: uuidSchema,
   locked_until: databaseDateSchema,
   created_at: databaseDateSchema,
-}).and(frozenColumnsSchema).transform((item): NotificationRow => ({
+}).and(frozenColumnsSchema).refine(
+  item => item.provider_call_phase === "idle"
+    ? !item.provider_call_is_ambiguous_retry && item.provider_idempotency_expires_at === null
+    : item.provider_idempotency_expires_at !== null,
+  { message: "Provider call phase and idempotency state are inconsistent." },
+).transform((item): NotificationRow => ({
   id: item.id,
   eventType: item.event_type,
   payload: item.payload,
@@ -173,6 +178,19 @@ const cleanupResponseSchema = z.tuple([
     deleted: item.deleted,
   })),
 ]);
+const queueHealthResponseSchema = z.object({
+  waiting_recipient: nonnegativeIntegerSchema,
+  queued: nonnegativeIntegerSchema,
+  processing: nonnegativeIntegerSchema,
+  dead: nonnegativeIntegerSchema,
+  oldest_due_age_seconds: nonnegativeIntegerSchema,
+}).transform((item): NotificationQueueHealth => ({
+  waitingRecipient: item.waiting_recipient,
+  queued: item.queued,
+  processing: item.processing,
+  dead: item.dead,
+  oldestDueAgeSeconds: item.oldest_due_age_seconds,
+}));
 const claimsResponseSchema = z.array(claimSchema);
 const claimOneResponseSchema = claimsResponseSchema.max(1);
 const claimedRowResponseSchema = z.tuple([notificationRowSchema]);
@@ -193,10 +211,16 @@ export class SupabaseNotificationRepository implements NotificationRepository, N
         if (error.code === "invalid_response") this.log({ code: error.code, operation });
         throw error;
       }
-      const status = object(error)?.status;
-      const code: RepositoryCode = typeof status === "number" && status >= 500
-        ? "repository_unavailable"
-        : "repository_rejected";
+      const details = object(error);
+      const status = details?.status;
+      const message = typeof details?.message === "string" ? details.message : "";
+      const code: RepositoryCode = operation === "enqueue"
+        && (message.includes("notification_outbox_idempotency_conflict")
+          || message.includes("notification_outbox_provider_key_conflict"))
+        ? "idempotency_conflict"
+        : typeof status === "number" && status >= 500
+          ? "repository_unavailable"
+          : "repository_rejected";
       this.log({ code, operation });
       throw new NotificationRepositoryError(code);
     }
@@ -261,18 +285,11 @@ export class SupabaseNotificationRepository implements NotificationRepository, N
   async health(): Promise<NotificationQueueHealth> {
     return this.run("health", async () => {
       const response = await supabaseRpc<unknown>("notification_outbox_health", {});
-      const item = object(response);
-      const counts = item && [item.waiting_recipient, item.queued, item.processing, item.dead, item.oldest_due_age_seconds];
-      if (!item || !counts || counts.some(value => typeof value !== "number" || !Number.isInteger(value) || value < 0)) {
-        this.invalid("Notification repository returned an invalid health response. Verify the committed health RPC signature.");
-      }
-      return {
-        waitingRecipient: item.waiting_recipient as number,
-        queued: item.queued as number,
-        processing: item.processing as number,
-        dead: item.dead as number,
-        oldestDueAgeSeconds: item.oldest_due_age_seconds as number,
-      };
+      return this.decode(
+        queueHealthResponseSchema,
+        response,
+        "Notification repository returned an invalid health response. Verify the committed health RPC signature.",
+      );
     });
   }
 

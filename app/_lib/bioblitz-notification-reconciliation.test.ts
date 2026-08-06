@@ -31,4 +31,5 @@ describe("canonicalBioblitzAwardInputs", () => {
   it("fails closed on conflicting winners for one round prize", () => {
     expect(canonicalBioblitzAwardInputs(data(["did:plc:first", "did:plc:second"]), [round])).toEqual([]);
   });
+
 });
