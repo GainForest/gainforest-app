@@ -144,6 +144,118 @@ describe("SupabaseNotificationRepository", () => {
     expect(url).toContain("status=eq.processing");
   });
 
+  it("preserves permissive string timestamp parsing and ignores unknown row fields", async () => {
+    fetchMock.mockResolvedValueOnce(Response.json([{
+      ...rawRow,
+      locked_until: "2026-08-06 01:02:00+00",
+      created_at: "2026-08-06",
+      future_database_column: "ignored",
+    }]));
+    const repository = new SupabaseNotificationRepository();
+
+    const row = await repository.getClaimed({
+      outboxId: rawRow.id,
+      previousStatus: "queued",
+      resumeProviderCallPhase: "idle",
+      processingToken: rawRow.processing_token,
+      lockedUntil: new Date(rawRow.locked_until),
+    });
+
+    expect(row.lockedUntil).toEqual(new Date("2026-08-06T01:02:00.000Z"));
+    expect(row.createdAt).toEqual(new Date("2026-08-06T00:00:00.000Z"));
+    expect(row).not.toHaveProperty("future_database_column");
+  });
+
+  it.each([
+    ["the nil UUID", "00000000-0000-0000-0000-000000000000"],
+    ["the max UUID", "ffffffff-ffff-ffff-ffff-ffffffffffff"],
+  ])("rejects %s even though Zod's generic UUID format accepts it", async (_label, outboxId) => {
+    fetchMock.mockResolvedValueOnce(Response.json([{
+      outbox_id: outboxId,
+      previous_status: "queued",
+      resume_provider_call_phase: "idle",
+      processing_token: rawRow.processing_token,
+      locked_until: rawRow.locked_until,
+    }]));
+
+    await expect(new SupabaseNotificationRepository().claimDue(1, 60)).rejects.toMatchObject({
+      code: "invalid_response",
+    });
+  });
+
+  it("decodes a complete frozen request and provider expiry", async () => {
+    fetchMock.mockResolvedValueOnce(Response.json([{
+      ...rawRow,
+      provider_call_phase: "in_flight",
+      frozen_from: "GainForest <noreply@gainforest.id>",
+      frozen_to: "person@example.com",
+      frozen_subject: "Welcome",
+      frozen_html: "<p>Welcome</p>",
+      frozen_text: "Welcome",
+      provider_idempotency_expires_at: "2026-08-07 01:00:00+00",
+    }]));
+
+    const row = await new SupabaseNotificationRepository().getClaimed({
+      outboxId: rawRow.id,
+      previousStatus: "queued",
+      resumeProviderCallPhase: "idle",
+      processingToken: rawRow.processing_token,
+      lockedUntil: new Date(rawRow.locked_until),
+    });
+
+    expect(row.frozenRequest).toEqual({
+      from: "GainForest <noreply@gainforest.id>",
+      to: "person@example.com",
+      subject: "Welcome",
+      html: "<p>Welcome</p>",
+      text: "Welcome",
+      idempotencyKey: rawRow.provider_idempotency_key,
+    });
+    expect(row.providerIdempotencyExpiresAt).toEqual(new Date("2026-08-07T01:00:00.000Z"));
+  });
+
+  it("rejects non-string timestamps and partially frozen requests", async () => {
+    const repository = new SupabaseNotificationRepository();
+    const claim = {
+      outboxId: rawRow.id,
+      previousStatus: "queued" as const,
+      resumeProviderCallPhase: "idle" as const,
+      processingToken: rawRow.processing_token,
+      lockedUntil: new Date(rawRow.locked_until),
+    };
+
+    fetchMock.mockResolvedValueOnce(Response.json([{ ...rawRow, locked_until: 0 }]));
+    await expect(repository.getClaimed(claim)).rejects.toMatchObject({ code: "invalid_response" });
+
+    fetchMock.mockResolvedValueOnce(Response.json([{
+      ...rawRow,
+      frozen_from: "from@example.com",
+    }]));
+    await expect(repository.getClaimed(claim)).rejects.toMatchObject({ code: "invalid_response" });
+  });
+
+  it("keeps the payload JSON nesting limit at 20 levels", async () => {
+    const nestedPayload = (depth: number): unknown => {
+      let value: unknown = "leaf";
+      for (let index = 0; index < depth; index += 1) value = [value];
+      return value;
+    };
+    const repository = new SupabaseNotificationRepository();
+    const claim = {
+      outboxId: rawRow.id,
+      previousStatus: "queued" as const,
+      resumeProviderCallPhase: "idle" as const,
+      processingToken: rawRow.processing_token,
+      lockedUntil: new Date(rawRow.locked_until),
+    };
+
+    fetchMock.mockResolvedValueOnce(Response.json([{ ...rawRow, payload: nestedPayload(20) }]));
+    await expect(repository.getClaimed(claim)).resolves.toMatchObject({ payload: nestedPayload(20) });
+
+    fetchMock.mockResolvedValueOnce(Response.json([{ ...rawRow, payload: nestedPayload(21) }]));
+    await expect(repository.getClaimed(claim)).rejects.toMatchObject({ code: "invalid_response" });
+  });
+
   it("uses exact claimOne wire name and body", async () => {
     fetchMock.mockResolvedValueOnce(Response.json([]));
     const repository = new SupabaseNotificationRepository();

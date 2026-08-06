@@ -1,6 +1,7 @@
 import "server-only";
 
 import { SUPABASE_RPC_TIMEOUT_MS, supabaseRpc, supabaseSelect } from "@/lib/supabase/rest";
+import { z } from "zod";
 import type {
   Claim,
   FrozenEmailRequest,
@@ -40,10 +41,13 @@ interface RepositoryOptions {
 }
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
-const EVENTS = new Set(["signup", "membership_joined", "invitation", "bioblitz_winner"]);
-const OUTBOX_STATUSES = new Set(["waiting_recipient", "queued", "processing", "sent", "suppressed", "dead"]);
-const PREVIOUS = new Set(["waiting_recipient", "queued", "processing"]);
-const PHASES = new Set(["idle", "in_flight"]);
+const uuidSchema = z.string().regex(UUID);
+const eventTypeSchema = z.enum(["signup", "membership_joined", "invitation", "bioblitz_winner"]);
+const outboxStatusSchema = z.enum(["waiting_recipient", "queued", "processing", "sent", "suppressed", "dead"]);
+const previousStatusSchema = z.enum(["waiting_recipient", "queued", "processing"]);
+const providerCallPhaseSchema = z.enum(["idle", "in_flight"]);
+const databaseDateSchema = z.string().pipe(z.coerce.date());
+const nonnegativeIntegerSchema = z.number().refine(value => Number.isInteger(value) && value >= 0);
 const ROW_SELECT = [
   "id", "event_type", "payload", "source_id", "recipient_did", "recipient_email", "template_key", "locale",
   "frozen_from", "frozen_to", "frozen_subject", "frozen_html", "frozen_text",
@@ -56,16 +60,6 @@ function object(value: unknown): Record<string, unknown> | null {
   return typeof value === "object" && value !== null && !Array.isArray(value) ? value as Record<string, unknown> : null;
 }
 
-function date(value: unknown): Date | null {
-  if (typeof value !== "string") return null;
-  const parsed = new Date(value);
-  return Number.isNaN(parsed.getTime()) ? null : parsed;
-}
-
-function nullableString(value: unknown): value is string | null {
-  return value === null || typeof value === "string";
-}
-
 function isJson(value: unknown, depth = 0): value is Json {
   if (depth > 20) return false;
   if (value === null || typeof value === "string" || typeof value === "boolean") return true;
@@ -75,79 +69,131 @@ function isJson(value: unknown, depth = 0): value is Json {
   return valueObject !== null && Object.values(valueObject).every(item => isJson(item, depth + 1));
 }
 
-function decodeClaim(value: unknown): Claim | null {
-  const item = object(value);
-  if (!item || typeof item.outbox_id !== "string" || !UUID.test(item.outbox_id)
-    || typeof item.previous_status !== "string" || !PREVIOUS.has(item.previous_status)
-    || typeof item.resume_provider_call_phase !== "string" || !PHASES.has(item.resume_provider_call_phase)
-    || typeof item.processing_token !== "string" || !UUID.test(item.processing_token)) return null;
-  const lockedUntil = date(item.locked_until);
-  if (!lockedUntil) return null;
-  return {
+const jsonSchema = z.custom<Json>(isJson);
+
+const claimSchema = z.object({
+  outbox_id: uuidSchema,
+  previous_status: previousStatusSchema,
+  resume_provider_call_phase: providerCallPhaseSchema,
+  processing_token: uuidSchema,
+  locked_until: databaseDateSchema,
+}).transform((item): Claim => ({
+  outboxId: item.outbox_id,
+  previousStatus: item.previous_status,
+  resumeProviderCallPhase: item.resume_provider_call_phase,
+  processingToken: item.processing_token,
+  lockedUntil: item.locked_until,
+}));
+
+const frozenColumnsSchema = z.union([
+  z.object({
+    frozen_from: z.null(),
+    frozen_to: z.null(),
+    frozen_subject: z.null(),
+    frozen_html: z.null(),
+    frozen_text: z.null(),
+  }),
+  z.object({
+    frozen_from: z.string(),
+    frozen_to: z.string(),
+    frozen_subject: z.string(),
+    frozen_html: z.string(),
+    frozen_text: z.string(),
+  }),
+]);
+
+const notificationRowSchema = z.object({
+  id: uuidSchema,
+  event_type: eventTypeSchema,
+  payload: jsonSchema,
+  source_id: z.string().nullable(),
+  recipient_did: z.string().nullable(),
+  recipient_email: z.string().nullable(),
+  template_key: z.string(),
+  locale: z.string().nullable(),
+  status: z.literal("processing"),
+  provider_call_phase: providerCallPhaseSchema,
+  provider_call_is_ambiguous_retry: z.boolean(),
+  provider_idempotency_key: z.string(),
+  provider_idempotency_expires_at: databaseDateSchema.nullable(),
+  processing_run_count: nonnegativeIntegerSchema,
+  provider_attempt_count: nonnegativeIntegerSchema,
+  processing_token: uuidSchema,
+  locked_until: databaseDateSchema,
+  created_at: databaseDateSchema,
+}).and(frozenColumnsSchema).refine(
+  item => item.provider_call_phase === "idle"
+    ? !item.provider_call_is_ambiguous_retry && item.provider_idempotency_expires_at === null
+    : item.provider_idempotency_expires_at !== null,
+  { message: "Provider call phase and idempotency state are inconsistent." },
+).transform((item): NotificationRow => ({
+  id: item.id,
+  eventType: item.event_type,
+  payload: item.payload,
+  sourceId: item.source_id,
+  recipientDid: item.recipient_did,
+  recipientEmail: item.recipient_email,
+  templateKey: item.template_key,
+  locale: item.locale,
+  frozenRequest: item.frozen_from === null ? null : {
+    from: item.frozen_from,
+    to: item.frozen_to,
+    subject: item.frozen_subject,
+    html: item.frozen_html,
+    text: item.frozen_text,
+    idempotencyKey: item.provider_idempotency_key,
+  },
+  status: item.status,
+  providerCallPhase: item.provider_call_phase,
+  providerCallIsAmbiguousRetry: item.provider_call_is_ambiguous_retry,
+  providerIdempotencyKey: item.provider_idempotency_key,
+  providerIdempotencyExpiresAt: item.provider_idempotency_expires_at,
+  processingRunCount: item.processing_run_count,
+  providerAttemptCount: item.provider_attempt_count,
+  processingToken: item.processing_token,
+  lockedUntil: item.locked_until,
+  createdAt: item.created_at,
+}));
+
+const transitionResponseSchema = z.boolean();
+const enqueueResponseSchema = z.tuple([
+  z.object({
+    outbox_id: uuidSchema,
+    status: outboxStatusSchema,
+    duplicate: z.boolean(),
+  }).transform((item): NotificationEnqueueResult => ({
     outboxId: item.outbox_id,
-    previousStatus: item.previous_status as Claim["previousStatus"],
-    resumeProviderCallPhase: item.resume_provider_call_phase as Claim["resumeProviderCallPhase"],
-    processingToken: item.processing_token,
-    lockedUntil,
-  };
-}
-
-function decodeRow(value: unknown): NotificationRow | null {
-  const item = object(value);
-  if (!item || typeof item.id !== "string" || !UUID.test(item.id)
-    || typeof item.event_type !== "string" || !EVENTS.has(item.event_type)
-    || !isJson(item.payload)
-    || !nullableString(item.source_id) || !nullableString(item.recipient_did) || !nullableString(item.recipient_email)
-    || typeof item.template_key !== "string" || !nullableString(item.locale)
-    || item.status !== "processing"
-    || typeof item.provider_call_phase !== "string" || !PHASES.has(item.provider_call_phase)
-    || typeof item.provider_call_is_ambiguous_retry !== "boolean"
-    || typeof item.provider_idempotency_key !== "string"
-    || typeof item.processing_run_count !== "number" || !Number.isInteger(item.processing_run_count) || item.processing_run_count < 0
-    || typeof item.provider_attempt_count !== "number" || !Number.isInteger(item.provider_attempt_count) || item.provider_attempt_count < 0
-    || typeof item.processing_token !== "string" || !UUID.test(item.processing_token)) return null;
-  const lockedUntil = date(item.locked_until);
-  const createdAt = date(item.created_at);
-  if (!lockedUntil || !createdAt) return null;
-
-  const frozenValues = [item.frozen_from, item.frozen_to, item.frozen_subject, item.frozen_html, item.frozen_text];
-  const noFrozen = frozenValues.every(field => field === null);
-  const completeFrozen = frozenValues.every(field => typeof field === "string");
-  if (!noFrozen && !completeFrozen) return null;
-  const expiresAt = item.provider_idempotency_expires_at === null ? null : date(item.provider_idempotency_expires_at);
-  if (item.provider_idempotency_expires_at !== null && !expiresAt) return null;
-  if ((item.provider_call_phase === "idle" && (item.provider_call_is_ambiguous_retry || expiresAt !== null))
-    || (item.provider_call_phase === "in_flight" && expiresAt === null)) return null;
-
-  return {
-    id: item.id,
-    eventType: item.event_type as NotificationRow["eventType"],
-    payload: item.payload,
-    sourceId: item.source_id,
-    recipientDid: item.recipient_did,
-    recipientEmail: item.recipient_email,
-    templateKey: item.template_key,
-    locale: item.locale,
-    frozenRequest: completeFrozen ? {
-      from: item.frozen_from as string,
-      to: item.frozen_to as string,
-      subject: item.frozen_subject as string,
-      html: item.frozen_html as string,
-      text: item.frozen_text as string,
-      idempotencyKey: item.provider_idempotency_key,
-    } : null,
-    status: "processing",
-    providerCallPhase: item.provider_call_phase as NotificationRow["providerCallPhase"],
-    providerCallIsAmbiguousRetry: item.provider_call_is_ambiguous_retry,
-    providerIdempotencyKey: item.provider_idempotency_key,
-    providerIdempotencyExpiresAt: expiresAt,
-    processingRunCount: item.processing_run_count,
-    providerAttemptCount: item.provider_attempt_count,
-    processingToken: item.processing_token,
-    lockedUntil,
-    createdAt,
-  };
-}
+    status: item.status,
+    duplicate: item.duplicate,
+  })),
+]);
+const cleanupResponseSchema = z.tuple([
+  z.object({
+    active_expired: nonnegativeIntegerSchema,
+    redacted: nonnegativeIntegerSchema,
+    deleted: nonnegativeIntegerSchema,
+  }).transform((item): NotificationCleanupResult => ({
+    activeExpired: item.active_expired,
+    redacted: item.redacted,
+    deleted: item.deleted,
+  })),
+]);
+const queueHealthResponseSchema = z.object({
+  waiting_recipient: nonnegativeIntegerSchema,
+  queued: nonnegativeIntegerSchema,
+  processing: nonnegativeIntegerSchema,
+  dead: nonnegativeIntegerSchema,
+  oldest_due_age_seconds: nonnegativeIntegerSchema,
+}).transform((item): NotificationQueueHealth => ({
+  waitingRecipient: item.waiting_recipient,
+  queued: item.queued,
+  processing: item.processing,
+  dead: item.dead,
+  oldestDueAgeSeconds: item.oldest_due_age_seconds,
+}));
+const claimsResponseSchema = z.array(claimSchema);
+const claimOneResponseSchema = claimsResponseSchema.max(1);
+const claimedRowResponseSchema = z.tuple([notificationRowSchema]);
 
 export class SupabaseNotificationRepository implements NotificationRepository, NotificationEnqueueRepository, NotificationOrchestrationRepository {
   readonly transitionTimeoutMs = SUPABASE_RPC_TIMEOUT_MS;
@@ -184,11 +230,20 @@ export class SupabaseNotificationRepository implements NotificationRepository, N
     throw new NotificationRepositoryError("invalid_response", message);
   }
 
+  private decode<TSchema extends z.ZodType>(schema: TSchema, value: unknown, message: string): z.output<TSchema> {
+    const result = schema.safeParse(value);
+    if (!result.success) this.invalid(message);
+    return result.data;
+  }
+
   private async transition(operation: RepositoryOperation, name: string, parameters: Record<string, unknown>): Promise<boolean> {
     return this.run(operation, async () => {
       const response = await supabaseRpc<unknown>(name, parameters);
-      if (typeof response !== "boolean") this.invalid("Notification repository returned an invalid transition response. Verify the committed outbox RPC signature.");
-      return response;
+      return this.decode(
+        transitionResponseSchema,
+        response,
+        "Notification repository returned an invalid transition response. Verify the committed outbox RPC signature.",
+      );
     });
   }
 
@@ -206,57 +261,35 @@ export class SupabaseNotificationRepository implements NotificationRepository, N
         p_provider_idempotency_key: input.providerIdempotencyKey,
         p_next_attempt_at: input.nextAttemptAt.toISOString(),
       });
-      if (!Array.isArray(response) || response.length !== 1) {
-        this.invalid("Notification repository returned an invalid enqueue response. Verify the committed enqueue RPC signature.");
-      }
-      const item = object(response[0]);
-      if (!item || typeof item.outbox_id !== "string" || !UUID.test(item.outbox_id)
-        || typeof item.status !== "string" || !OUTBOX_STATUSES.has(item.status)
-        || typeof item.duplicate !== "boolean") {
-        this.invalid("Notification repository returned an invalid enqueue response. Verify the committed enqueue RPC signature.");
-      }
-      return {
-        outboxId: item.outbox_id,
-        status: item.status as NotificationEnqueueResult["status"],
-        duplicate: item.duplicate,
-      };
+      const [result] = this.decode(
+        enqueueResponseSchema,
+        response,
+        "Notification repository returned an invalid enqueue response. Verify the committed enqueue RPC signature.",
+      );
+      return result;
     });
   }
 
   async cleanup(batchSize: number): Promise<NotificationCleanupResult> {
     return this.run("cleanup", async () => {
       const response = await supabaseRpc<unknown>("notification_outbox_cleanup", { p_batch_size: batchSize });
-      if (!Array.isArray(response) || response.length !== 1) {
-        this.invalid("Notification repository returned an invalid cleanup response. Verify the committed cleanup RPC signature.");
-      }
-      const item = object(response[0]);
-      const counts = item && [item.active_expired, item.redacted, item.deleted];
-      if (!item || !counts || counts.some(value => typeof value !== "number" || !Number.isInteger(value) || value < 0)) {
-        this.invalid("Notification repository returned an invalid cleanup response. Verify the committed cleanup RPC signature.");
-      }
-      return {
-        activeExpired: item.active_expired as number,
-        redacted: item.redacted as number,
-        deleted: item.deleted as number,
-      };
+      const [result] = this.decode(
+        cleanupResponseSchema,
+        response,
+        "Notification repository returned an invalid cleanup response. Verify the committed cleanup RPC signature.",
+      );
+      return result;
     });
   }
 
   async health(): Promise<NotificationQueueHealth> {
     return this.run("health", async () => {
       const response = await supabaseRpc<unknown>("notification_outbox_health", {});
-      const item = object(response);
-      const counts = item && [item.waiting_recipient, item.queued, item.processing, item.dead, item.oldest_due_age_seconds];
-      if (!item || !counts || counts.some(value => typeof value !== "number" || !Number.isInteger(value) || value < 0)) {
-        this.invalid("Notification repository returned an invalid health response. Verify the committed health RPC signature.");
-      }
-      return {
-        waitingRecipient: item.waiting_recipient as number,
-        queued: item.queued as number,
-        processing: item.processing as number,
-        dead: item.dead as number,
-        oldestDueAgeSeconds: item.oldest_due_age_seconds as number,
-      };
+      return this.decode(
+        queueHealthResponseSchema,
+        response,
+        "Notification repository returned an invalid health response. Verify the committed health RPC signature.",
+      );
     });
   }
 
@@ -266,10 +299,11 @@ export class SupabaseNotificationRepository implements NotificationRepository, N
         p_batch_size: batchSize,
         p_lease_seconds: leaseSeconds,
       });
-      if (!Array.isArray(response)) this.invalid("Notification repository returned an invalid claim response. Verify the committed claim RPC signature.");
-      const claims = response.map(decodeClaim);
-      if (claims.some(value => value === null)) this.invalid("Notification repository returned an invalid claim response. Verify the committed claim RPC signature.");
-      return claims as Claim[];
+      return this.decode(
+        claimsResponseSchema,
+        response,
+        "Notification repository returned an invalid claim response. Verify the committed claim RPC signature.",
+      );
     });
   }
 
@@ -278,11 +312,12 @@ export class SupabaseNotificationRepository implements NotificationRepository, N
       const response = await supabaseRpc<unknown>("notification_outbox_claim_one", {
         p_outbox_id: outboxId, p_token: token, p_lease_seconds: leaseSeconds,
       });
-      if (!Array.isArray(response) || response.length > 1) this.invalid("Notification repository returned an invalid claim response. Verify the committed claim RPC signature.");
-      if (response.length === 0) return null;
-      const claimed = decodeClaim(response[0]);
-      if (!claimed) this.invalid("Notification repository returned an invalid claim response. Verify the committed claim RPC signature.");
-      return claimed;
+      const claims = this.decode(
+        claimOneResponseSchema,
+        response,
+        "Notification repository returned an invalid claim response. Verify the committed claim RPC signature.",
+      );
+      return claims[0] ?? null;
     });
   }
 
@@ -296,9 +331,12 @@ export class SupabaseNotificationRepository implements NotificationRepository, N
       });
       const response = await supabaseSelect<unknown>(`/notification_outbox?${query}`);
       if (response.length === 0) throw new NotificationRepositoryError("stale_claim", "Notification claim is no longer owned by this worker.");
-      if (response.length !== 1) this.invalid("Notification repository returned an invalid claimed row. The row contract may have changed.");
-      const claimedRow = decodeRow(response[0]);
-      if (!claimedRow || claimedRow.processingToken !== claim.processingToken) {
+      const [claimedRow] = this.decode(
+        claimedRowResponseSchema,
+        response,
+        "Notification repository returned an invalid claimed row. The row contract may have changed.",
+      );
+      if (claimedRow.processingToken !== claim.processingToken) {
         this.invalid("Notification repository returned an invalid claimed row. The row contract may have changed.");
       }
       return claimedRow;
