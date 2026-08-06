@@ -15,17 +15,15 @@ const rawRow = {
   recipient_email: "person@example.com",
   template_key: "welcome",
   locale: "en",
-  delivery_mode: "capture",
   frozen_from: null,
   frozen_to: null,
   frozen_subject: null,
   frozen_html: null,
   frozen_text: null,
-  frozen_at: null,
   status: "processing",
   provider_call_phase: "idle",
   provider_call_is_ambiguous_retry: false,
-  provider_idempotency_key: "source-1",
+  provider_idempotency_key: "signup:source-1",
   provider_idempotency_expires_at: null,
   processing_run_count: 1,
   provider_attempt_count: 0,
@@ -63,11 +61,11 @@ describe("SupabaseNotificationRepository", () => {
       recipientEmail: "person@example.com",
       templateKey: "welcome-signup",
       locale: "en",
-      deliveryMode: "capture",
+      providerIdempotencyKey: "signup:source-1",
       nextAttemptAt: new Date("2026-08-06T01:00:00.000Z"),
     })).resolves.toEqual({ outboxId: rawRow.id, status: "queued", duplicate: true });
     expect(fetchMock.mock.calls[0][0]).toBe("https://project.supabase.co/rest/v1/rpc/notification_outbox_enqueue");
-    expect(fetchMock.mock.calls[0][1]?.body).toBe(JSON.stringify({
+    expect(JSON.parse(String(fetchMock.mock.calls[0][1]?.body))).toEqual({
       p_event_key: "signup:source-1",
       p_event_type: "signup",
       p_payload: { name: "Test" },
@@ -76,10 +74,9 @@ describe("SupabaseNotificationRepository", () => {
       p_recipient_email: "person@example.com",
       p_template_key: "welcome-signup",
       p_locale: "en",
-      p_provider_idempotency_key: null,
-      p_delivery_mode: "capture",
+      p_provider_idempotency_key: "signup:source-1",
       p_next_attempt_at: "2026-08-06T01:00:00.000Z",
-    }));
+    });
   });
 
   it("uses the exact cleanup wire contract and decodes aggregate counts", async () => {
@@ -87,23 +84,7 @@ describe("SupabaseNotificationRepository", () => {
     const repository = new SupabaseNotificationRepository();
     await expect(repository.cleanup(250)).resolves.toEqual({ activeExpired: 2, redacted: 3, deleted: 4 });
     expect(fetchMock.mock.calls[0][0]).toBe("https://project.supabase.co/rest/v1/rpc/notification_outbox_cleanup");
-    expect(fetchMock.mock.calls[0][1]?.body).toBe(JSON.stringify({ p_batch_size: 250 }));
-  });
-
-  it("decodes aggregate queue health without row data", async () => {
-    fetchMock.mockResolvedValueOnce(Response.json({
-      waiting_recipient: 2,
-      queued: 3,
-      processing: 1,
-      dead: 4,
-      oldest_due_age_seconds: 125,
-    }));
-    const repository = new SupabaseNotificationRepository();
-    await expect(repository.health()).resolves.toEqual({
-      waitingRecipient: 2, queued: 3, processing: 1, dead: 4, oldestDueAgeSeconds: 125,
-    });
-    expect(fetchMock.mock.calls[0][0]).toBe("https://project.supabase.co/rest/v1/rpc/notification_outbox_health");
-    expect(fetchMock.mock.calls[0][1]?.body).toBe("{}");
+    expect(JSON.parse(String(fetchMock.mock.calls[0][1]?.body))).toEqual({ p_batch_size: 250 });
   });
 
   it("calls claim RPC with the committed signature and service-role boundary", async () => {
@@ -123,7 +104,7 @@ describe("SupabaseNotificationRepository", () => {
     const headers = new Headers(init?.headers);
     expect(url).toBe("https://project.supabase.co/rest/v1/rpc/notification_outbox_claim_due");
     expect(init?.method).toBe("POST");
-    expect(init?.body).toBe(JSON.stringify({ p_batch_size: 4, p_lease_seconds: 120 }));
+    expect(JSON.parse(String(init?.body))).toEqual({ p_batch_size: 4, p_lease_seconds: 120 });
     expect(headers.get("apikey")).toBe("service-role-secret");
     expect(headers.get("authorization")).toBe("Bearer service-role-secret");
   });
@@ -152,11 +133,11 @@ describe("SupabaseNotificationRepository", () => {
     const repository = new SupabaseNotificationRepository();
     expect(await repository.claimOne(rawRow.id, rawRow.processing_token, 45)).toBeNull();
     expect(fetchMock.mock.calls[0][0]).toBe("https://project.supabase.co/rest/v1/rpc/notification_outbox_claim_one");
-    expect(fetchMock.mock.calls[0][1]?.body).toBe(JSON.stringify({
+    expect(JSON.parse(String(fetchMock.mock.calls[0][1]?.body))).toEqual({
       p_outbox_id: rawRow.id,
       p_token: rawRow.processing_token,
       p_lease_seconds: 45,
-    }));
+    });
   });
 
   it.each([
@@ -177,11 +158,12 @@ describe("SupabaseNotificationRepository", () => {
     fetchMock.mockResolvedValueOnce(Response.json(true));
     expect(await invoke(new SupabaseNotificationRepository())).toBe(true);
     expect(fetchMock.mock.calls[0][0]).toBe(`https://project.supabase.co/rest/v1/rpc/notification_outbox_${suffix}`);
-    expect(fetchMock.mock.calls[0][1]?.body).toBe(JSON.stringify(expectedBody));
+    expect(JSON.parse(String(fetchMock.mock.calls[0][1]?.body))).toEqual(expectedBody);
   });
 
   it("distinguishes an empty token-owned row read as stale_claim but rejects malformed non-empty rows", async () => {
-    const repository = new SupabaseNotificationRepository();
+    const log = vi.fn();
+    const repository = new SupabaseNotificationRepository({ log });
     const ownedClaim = {
       outboxId: rawRow.id,
       previousStatus: "queued" as const,
@@ -193,6 +175,8 @@ describe("SupabaseNotificationRepository", () => {
     await expect(repository.getClaimed(ownedClaim)).rejects.toMatchObject({ code: "stale_claim" });
     fetchMock.mockResolvedValueOnce(Response.json([{ ...rawRow, recipient_email: 42 }]));
     await expect(repository.getClaimed(ownedClaim)).rejects.toMatchObject({ code: "invalid_response" });
+    expect(log).toHaveBeenCalledTimes(1);
+    expect(log).toHaveBeenCalledWith({ code: "invalid_response", operation: "get_claimed" });
   });
 
   it("rejects malformed claim, row, and transition responses with actionable internal errors", async () => {
@@ -220,51 +204,33 @@ describe("SupabaseNotificationRepository", () => {
     await expect(repository.enqueue({
       eventKey: "signup:source-1", eventType: "signup", payload: null, sourceId: "source-1",
       recipientDid: null, recipientEmail: "person@example.com", templateKey: "welcome-signup", locale: null,
-      deliveryMode: "capture", nextAttemptAt: new Date(),
+      providerIdempotencyKey: "signup:source-1", nextAttemptAt: new Date(),
     })).rejects.toThrow("Notification repository returned an invalid enqueue response");
 
     fetchMock.mockResolvedValueOnce(Response.json([]));
     await expect(repository.cleanup(100)).rejects.toThrow("Notification repository returned an invalid cleanup response");
   });
 
-  it("preserves a typed idempotency conflict without exposing database details", async () => {
+  it("redacts idempotency conflict details from enqueue failures", async () => {
     const secret = "person@example.com payload-secret service-role-secret";
-    fetchMock.mockResolvedValueOnce(Response.json({
-      message: `notification_outbox_idempotency_conflict: ${secret}`,
-    }, { status: 400 }));
+    fetchMock.mockResolvedValueOnce(Response.json({ message: secret }, { status: 409 }));
     const log = vi.fn();
     const repository = new SupabaseNotificationRepository({ log });
 
     const error = await repository.enqueue({
       eventKey: "signup:source-1", eventType: "signup", payload: null, sourceId: "source-1",
       recipientDid: null, recipientEmail: "person@example.com", templateKey: "welcome-signup", locale: null,
-      deliveryMode: "capture", nextAttemptAt: new Date("2026-08-06T01:00:00.000Z"),
+      providerIdempotencyKey: "signup:source-1", nextAttemptAt: new Date("2026-08-06T01:00:00.000Z"),
     }).catch((reason: unknown) => reason);
 
     expect(error).toBeInstanceOf(NotificationRepositoryError);
-    expect((error as NotificationRepositoryError).code).toBe("idempotency_conflict");
-    expect(JSON.stringify(error)).not.toContain(secret);
-    expect(log).toHaveBeenCalledWith({ code: "idempotency_conflict", operation: "enqueue" });
-  });
-
-  it.each([
-    { provider_call_phase: "idle", provider_call_is_ambiguous_retry: true },
-    { provider_call_phase: "in_flight", provider_idempotency_expires_at: null },
-    {
-      provider_call_phase: "in_flight",
-      provider_call_is_ambiguous_retry: true,
-      provider_idempotency_expires_at: "2026-08-07T01:00:00.000Z",
-    },
-  ])("rejects an impossible provider phase returned by the database", async malformed => {
-    fetchMock.mockResolvedValueOnce(Response.json([{ ...rawRow, ...malformed }]));
-    const repository = new SupabaseNotificationRepository();
-    await expect(repository.getClaimed({
-      outboxId: rawRow.id,
-      previousStatus: "processing",
-      resumeProviderCallPhase: malformed.provider_call_phase as "idle" | "in_flight",
-      processingToken: rawRow.processing_token,
-      lockedUntil: new Date(rawRow.locked_until),
-    })).rejects.toMatchObject({ code: "invalid_response" });
+    expect((error as NotificationRepositoryError).code).toBe("repository_rejected");
+    expect((error as Error).message).toBe(
+      "Notification repository operation failed (repository_rejected). Check Supabase availability and service-role configuration.",
+    );
+    expect((error as Error).message).not.toContain(secret);
+    expect((error as Error).stack ?? "").not.toContain(secret);
+    expect(log).toHaveBeenCalledWith({ code: "repository_rejected", operation: "enqueue" });
   });
 
   it("redacts database response details, addresses, payloads, and credentials", async () => {

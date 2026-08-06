@@ -4,7 +4,6 @@ import { NotificationRepositoryError } from "./repository";
 import type {
   Claim,
   Clock,
-  DeliveryMode,
   EmailProvider,
   FrozenEmailRequest,
   InvitationSourceReader,
@@ -14,6 +13,7 @@ import type {
   ProcessResult,
   ProviderErrorCode,
   ProviderOutcome,
+  RequeueErrorCode,
   RenderedNotification,
   UserEmailReader,
 } from "./types";
@@ -23,12 +23,13 @@ const DURABLE_BACKOFF_MS = [60_000, 300_000, 1_800_000, 7_200_000, 43_200_000] a
 const RECIPIENT_MISSING_BACKOFF_MS = [3_600_000, 21_600_000, 86_400_000] as const;
 const RECIPIENT_ERROR_BACKOFF_MS = [60_000, 300_000, 1_800_000] as const;
 const MAX_ACTIVE_AGE_MS = 7 * 24 * 60 * 60 * 1000;
+const MAX_POST_PROVIDER_TRANSITIONS = 2;
+const TRANSITION_SCHEDULING_BUFFER_MS = 1_000;
 
 export interface NotificationWorkerDependencies {
-  readonly mode: DeliveryMode;
   readonly from: string;
   readonly repository: NotificationRepository;
-  readonly provider: EmailProvider | null;
+  readonly provider: EmailProvider;
   readonly renderer: NotificationRenderer;
   readonly clock: Clock;
   readonly userEmailReader: UserEmailReader;
@@ -67,8 +68,18 @@ function validEnvelope(from: string, to: string): boolean {
   return validHeader(from, 320) && validRecipient(to);
 }
 
+function requiredCallUntil(now: Date, dependencies: NotificationWorkerDependencies): number {
+  // A definitive failure may first record the provider result and then
+  // requeue, defer, or terminalize it, so budget for two durable transitions.
+  const transitionReserveMs = dependencies.repository.transitionTimeoutMs * MAX_POST_PROVIDER_TRANSITIONS
+    + TRANSITION_SCHEDULING_BUFFER_MS;
+  return now.getTime()
+    + dependencies.provider.timeoutMs
+    + Math.max(dependencies.safetyMarginMs, transitionReserveMs);
+}
+
 function hasCallBudget(now: Date, claim: Claim, dependencies: NotificationWorkerDependencies, guaranteeExpiry?: Date | null): boolean {
-  const requiredUntil = now.getTime() + (dependencies.provider?.timeoutMs ?? 0) + dependencies.safetyMarginMs;
+  const requiredUntil = requiredCallUntil(now, dependencies);
   return requiredUntil <= dependencies.invocationDeadline.getTime()
     && requiredUntil <= claim.lockedUntil.getTime()
     && (!guaranteeExpiry || requiredUntil <= guaranteeExpiry.getTime());
@@ -223,7 +234,7 @@ async function durableRequeue(
   row: NotificationRow,
   claim: Claim,
   dependencies: NotificationWorkerDependencies,
-  code: ProviderErrorCode,
+  code: RequeueErrorCode,
   delayMs?: number,
 ): Promise<ProcessResult> {
   const now = dependencies.clock.now();
@@ -303,10 +314,6 @@ export async function processNotificationClaim(
     return expireClaimed(row, claim, dependencies, "provider_idempotency_expired");
   }
 
-  if (dependencies.mode === "disabled" || !dependencies.provider || row.deliveryMode !== dependencies.mode) {
-    if (isAmbiguous(row, claim)) return deferAmbiguity(row, claim, dependencies, row.providerIdempotencyExpiresAt);
-    return release(row, claim, dependencies, { kind: "disabled" });
-  }
   const initialBoundary = await boundaryOrBudget(row, claim, dependencies);
   if (initialBoundary) return initialBoundary;
 
@@ -407,7 +414,7 @@ export async function processNotificationClaim(
     if (afterBegin >= expiry) {
       return expireClaimed(row, claim, dependencies, "provider_idempotency_expired");
     }
-    const requiredUntil = afterBegin.getTime() + provider.timeoutMs + dependencies.safetyMarginMs;
+    const requiredUntil = requiredCallUntil(afterBegin, dependencies);
     if (requiredUntil > activeBoundary.getTime()
       || !hasCallBudget(afterBegin, claim, dependencies, expiry)) {
       return deferAmbiguity(row, claim, dependencies, expiry);

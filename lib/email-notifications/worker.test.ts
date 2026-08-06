@@ -2,12 +2,10 @@ import { describe, expect, it, vi } from "vitest";
 
 vi.mock("server-only", () => ({}));
 
-import { CaptureEmailProvider } from "./provider";
 import { NotificationRepositoryError } from "./repository";
 import { processNotificationClaim } from "./worker";
 import type {
   Claim,
-  DeliveryMode,
   EmailProvider,
   FrozenEmailRequest,
   InvitationSourceReader,
@@ -15,6 +13,7 @@ import type {
   NotificationRow,
   ProviderErrorCode,
   ProviderOutcome,
+  RequeueErrorCode,
   UserEmailReader,
 } from "./types";
 
@@ -32,9 +31,7 @@ function row(overrides: Partial<NotificationRow> = {}): NotificationRow {
     recipientEmail: "person@example.com",
     templateKey: "welcome",
     locale: "en",
-    deliveryMode: "capture",
     frozenRequest: null,
-    frozenAt: null,
     status: "processing",
     providerCallPhase: "idle",
     providerCallIsAmbiguousRetry: false,
@@ -61,11 +58,13 @@ function claim(overrides: Partial<Claim> = {}): Claim {
 }
 
 class StateRepository implements NotificationRepository {
+  readonly transitionTimeoutMs = 10_000;
   current: NotificationRow;
   active = true;
   actions: string[] = [];
   nextTransitionResult: boolean | null = null;
   deferredExpiry: Date | null = null;
+  deferredReclaimAt: Date | null = null;
   transitionTimes: Array<{ action: string; at: Date }> = [];
 
   constructor(initial = row()) { this.current = initial; }
@@ -103,7 +102,6 @@ class StateRepository implements NotificationRepository {
     this.current = {
       ...this.current,
       frozenRequest: { ...request, idempotencyKey: this.current.providerIdempotencyKey },
-      frozenAt: NOW,
     };
     return true;
   }
@@ -148,7 +146,7 @@ class StateRepository implements NotificationRepository {
     if (!this.result()) return false;
     this.active = false; return true;
   }
-  async requeue(id: string, token: string, at: Date, code: ProviderErrorCode | "recipient_lookup_failed") {
+  async requeue(id: string, token: string, at: Date, code: RequeueErrorCode) {
     this.owned(id, token);
     if (this.current.providerCallPhase !== "idle") throw new Error("fake repository forbids ambiguous requeue");
     this.actions.push(`requeue:${code}`); this.transitionTimes.push({ action: `requeue:${code}`, at }); this.active = false; return this.result();
@@ -175,7 +173,9 @@ class StateRepository implements NotificationRepository {
   async deferAmbiguous(id: string, token: string, reclaimAt: Date) {
     this.owned(id, token);
     if (this.current.providerCallPhase !== "in_flight") throw new Error("fake repository requires in-flight defer");
-    this.actions.push("defer"); this.deferredExpiry = this.current.providerIdempotencyExpiresAt;
+    this.actions.push("defer");
+    this.deferredExpiry = this.current.providerIdempotencyExpiresAt;
+    this.deferredReclaimAt = reclaimAt;
     this.active = false; return this.result();
   }
 }
@@ -202,7 +202,6 @@ function setup(repository = new StateRepository(), provider: EmailProvider = scr
   const invitationSendability = vi.fn<InvitationSourceReader["getSendability"]>();
   invitationSendability.mockResolvedValue({ kind: "sendable" });
   const dependencies = {
-    mode: "capture" as DeliveryMode,
     from: "GainForest <noreply@example.com>",
     repository,
     provider,
@@ -314,12 +313,10 @@ describe("notification worker provider state machine", () => {
   it("defers uncertain transport without ordinary requeue and preserves original resumed expiry", async () => {
     const originalExpiry = new Date(NOW.getTime() + 60_000);
     const initial = row({
-      deliveryMode: "capture",
       frozenRequest: {
         from: "from@example.com", to: "person@example.com", subject: "Frozen",
         html: "Frozen html", text: "Frozen text", idempotencyKey: "source-1",
       },
-      frozenAt: NOW,
       providerCallPhase: "in_flight",
       providerCallIsAmbiguousRetry: true,
       providerIdempotencyExpiresAt: originalExpiry,
@@ -338,6 +335,8 @@ describe("notification worker provider state machine", () => {
     expect(repository.actions).toEqual(["begin", "failure:provider_5xx", "defer"]);
     expect(repository.actions).not.toContain("requeue:provider_5xx");
     expect(repository.deferredExpiry).toEqual(originalExpiry);
+    expect(repository.deferredReclaimAt!.getTime()).toBeLessThan(originalExpiry.getTime());
+    expect(repository.deferredReclaimAt!.getTime()).toBeLessThanOrEqual(NOW.getTime() + 60_000);
     expect(renderer.render).not.toHaveBeenCalled();
   });
 
@@ -348,7 +347,6 @@ describe("notification worker provider state machine", () => {
         from: "from@example.com", to: "person@example.com", subject: "Frozen",
         html: "Frozen html", text: "Frozen text", idempotencyKey: "source-1",
       },
-      frozenAt: NOW,
       providerCallPhase: "in_flight",
       providerCallIsAmbiguousRetry: true,
       providerIdempotencyExpiresAt: originalExpiry,
@@ -445,13 +443,7 @@ describe("notification worker preflight and safety", () => {
     }
   });
 
-  it("releases idle work when disabled or when the deadline/lease cannot fit a call", async () => {
-    const disabledRepository = new StateRepository();
-    const disabled = setup(disabledRepository);
-    disabled.dependencies.mode = "disabled";
-    expect((await processNotificationClaim(claim(), disabled.dependencies)).kind).toBe("disabled");
-    expect(disabledRepository.actions).toEqual(["release"]);
-
+  it("releases idle work when the deadline or lease cannot fit a call", async () => {
     const shortRepository = new StateRepository();
     const short = setup(shortRepository);
     short.dependencies.invocationDeadline = new Date(NOW.getTime() + 14_999);
@@ -459,19 +451,21 @@ describe("notification worker preflight and safety", () => {
     expect(shortRepository.actions).toEqual(["release"]);
   });
 
-  it("capture follows freeze/begin/sent, records the exact immutable request, and terminates as capture", async () => {
-    const captured: FrozenEmailRequest[] = [];
-    const provider = new CaptureEmailProvider({
-      idempotencyGuaranteeMs: 7 * 24 * 60 * 60 * 1000,
-      captureOnce: async (_key, request) => { captured.push(structuredClone(request)); return "captured" as const; },
-    });
+  it("reserves enough deadline for the repository transition after a provider call", async () => {
     const repository = new StateRepository();
-    const { dependencies } = setup(repository, provider);
+    const provider = scriptedProvider([{ kind: "sent", providerId: "must-not-send" }]);
+    const value = setup(repository, provider);
+    value.dependencies.safetyMarginMs = 0;
+    value.dependencies.invocationDeadline = new Date(
+      NOW.getTime() + provider.timeoutMs + repository.transitionTimeoutMs * 2,
+    );
 
-    expect((await processNotificationClaim(claim(), dependencies)).kind).toBe("sent");
-    expect(repository.actions).toEqual(["freeze", "begin", "sent:capture"]);
-    expect(captured).toEqual([repository.current.frozenRequest]);
+    await expect(processNotificationClaim(claim(), value.dependencies)).resolves.toEqual({
+      kind: "released_insufficient_time",
+    });
+    expect(repository.actions).toEqual(["release"]);
   });
+
 });
 
 describe("notification worker review regressions", () => {
@@ -484,7 +478,6 @@ describe("notification worker review regressions", () => {
       frozenRequest: phase === "in_flight" ? {
         from: "from@example.com", to: "person@example.com", subject: "Frozen", html: "Frozen", text: "Frozen", idempotencyKey: "source-1",
       } : null,
-      frozenAt: phase === "in_flight" ? NOW : null,
     }));
     const value = setup(repository, scriptedProvider([]));
     const result = await processNotificationClaim(claim({
@@ -500,7 +493,7 @@ describe("notification worker review regressions", () => {
     const repository = new StateRepository(row({
       createdAt: new Date(NOW.getTime() - 1_000),
       frozenRequest: { from: "from@example.com", to: "person@example.com", subject: "Frozen", html: "Frozen", text: "Frozen", idempotencyKey: "source-1" },
-      frozenAt: NOW, providerCallPhase: "in_flight", providerCallIsAmbiguousRetry: true,
+      providerCallPhase: "in_flight", providerCallIsAmbiguousRetry: true,
       providerIdempotencyExpiresAt: NOW,
     }));
     const value = setup(repository, scriptedProvider([]));
@@ -513,7 +506,7 @@ describe("notification worker review regressions", () => {
     const repository = new StateRepository(row({
       eventType: "invitation", sourceId: "invite-1",
       frozenRequest: { from: "from@example.com", to: "person@example.com", subject: "Frozen", html: "Frozen", text: "Frozen", idempotencyKey: "source-1" },
-      frozenAt: NOW, providerCallPhase: "in_flight", providerCallIsAmbiguousRetry: true,
+      providerCallPhase: "in_flight", providerCallIsAmbiguousRetry: true,
       providerIdempotencyExpiresAt: new Date(NOW.getTime() + 60_000),
     }));
     const value = setup(repository, scriptedProvider([]));
@@ -616,18 +609,6 @@ describe("notification worker review regressions", () => {
     const malformed = new StateRepository();
     vi.spyOn(malformed, "getClaimed").mockRejectedValueOnce(new NotificationRepositoryError("invalid_response"));
     await expect(processNotificationClaim(claim(), setup(malformed).dependencies)).rejects.toMatchObject({ code: "invalid_response" });
-  });
-
-  it("documents the orchestration rule by never claiming inside processing when globally disabled", async () => {
-    const repository = new StateRepository();
-    const claimDue = vi.spyOn(repository, "claimDue");
-    const claimOne = vi.spyOn(repository, "claimOne");
-    const value = setup(repository);
-    value.dependencies.mode = "disabled";
-    expect(await processNotificationClaim(claim(), value.dependencies)).toEqual({ kind: "disabled" });
-    expect(claimDue).not.toHaveBeenCalled();
-    expect(claimOne).not.toHaveBeenCalled();
-    expect(repository.actions).toEqual(["release"]);
   });
 
   it("rechecks the deadline after rendering and prevents freeze/provider start", async () => {

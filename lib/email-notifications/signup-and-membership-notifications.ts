@@ -1,5 +1,7 @@
 import "server-only";
 
+import { isValidDid } from "@atproto/syntax";
+import { z } from "zod";
 import type { NotificationConfig } from "./config";
 import type {
   Clock,
@@ -45,6 +47,13 @@ export type WelcomeEnqueueOutcome =
 
 type WelcomeEvent = "signup" | "membership";
 
+const WELCOME_PROVIDER_PREFIX = {
+  signup: "signup:",
+  membership: "organization-membership-joined:",
+} as const satisfies Record<WelcomeEvent, string>;
+const MAX_PROVIDER_KEY_LENGTH = 256;
+const EMAIL_ADDRESS_SCHEMA = z.email().min(3).max(320);
+
 function boundedIdentifier(event: WelcomeEvent, field: string, value: string, maximum = 512): string {
   if (typeof value !== "string" || value.length < 1 || value.length > maximum || value !== value.trim()) {
     throw new NotificationProducerInputError(event, field, `Supply 1 to ${maximum} characters without surrounding whitespace.`);
@@ -54,7 +63,7 @@ function boundedIdentifier(event: WelcomeEvent, field: string, value: string, ma
 
 function did(event: WelcomeEvent, field: string, value: string): string {
   const normalized = boundedIdentifier(event, field, value, 256);
-  if (!/^did:[a-z0-9]+:[A-Za-z0-9._:%-]+$/.test(normalized)) {
+  if (!isValidDid(normalized)) {
     throw new NotificationProducerInputError(event, field, "Supply a valid bounded DID.");
   }
   return normalized;
@@ -62,7 +71,7 @@ function did(event: WelcomeEvent, field: string, value: string): string {
 
 function email(event: WelcomeEvent, value: string): string {
   const normalized = typeof value === "string" ? value.trim().toLowerCase() : "";
-  if (normalized.length < 3 || normalized.length > 320 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalized)) {
+  if (!EMAIL_ADDRESS_SCHEMA.safeParse(normalized).success) {
     throw new NotificationProducerInputError(event, "email", "Supply a normalized deliverable address.");
   }
   return normalized;
@@ -92,13 +101,12 @@ function eventTime(event: WelcomeEvent, value: string | undefined, receiptTime: 
 
 async function enqueue(
   dependencies: WelcomeProducerDependencies,
-  input: Omit<NotificationEnqueueInput, "deliveryMode" | "nextAttemptAt">,
+  input: Omit<NotificationEnqueueInput, "nextAttemptAt">,
   nextAttemptAt: Date,
 ): Promise<WelcomeEnqueueOutcome> {
-  if (dependencies.config.deliveryMode === "disabled") return { kind: "disabled" };
+  if (dependencies.config.emailDisabled) return { kind: "disabled" };
   const result = await dependencies.repository.enqueue({
     ...input,
-    deliveryMode: dependencies.config.deliveryMode,
     nextAttemptAt,
   });
   return { kind: "enqueued", ...result };
@@ -108,11 +116,15 @@ export async function enqueueSignup(
   input: SignupNotificationInput,
   dependencies: WelcomeProducerDependencies,
 ): Promise<WelcomeEnqueueOutcome> {
-  if (dependencies.config.deliveryMode === "disabled" || !dependencies.config.producers.signup) {
-    return { kind: "disabled" };
-  }
+  if (dependencies.config.emailDisabled) return { kind: "disabled" };
   const receiptTime = dependencies.clock.now();
-  const eventId = boundedIdentifier("signup", "authEventId", input.authEventId);
+  const providerPrefix = WELCOME_PROVIDER_PREFIX.signup;
+  const eventId = boundedIdentifier(
+    "signup",
+    "authEventId",
+    input.authEventId,
+    MAX_PROVIDER_KEY_LENGTH - providerPrefix.length,
+  );
   const userDid = did("signup", "userDid", input.userDid);
   const payload: Json = {
     displayName: optionalText("signup", "name", input.name, 200),
@@ -128,6 +140,7 @@ export async function enqueueSignup(
     recipientEmail: email("signup", input.email),
     templateKey: "welcome-signup",
     locale: optionalText("signup", "locale", input.locale, 35),
+    providerIdempotencyKey: `${providerPrefix}${eventId}`,
   }, receiptTime);
 }
 
@@ -135,11 +148,15 @@ export async function enqueueMembershipJoined(
   input: MembershipJoinedNotificationInput,
   dependencies: WelcomeProducerDependencies,
 ): Promise<WelcomeEnqueueOutcome> {
-  if (dependencies.config.deliveryMode === "disabled" || !dependencies.config.producers.membershipJoined) {
-    return { kind: "disabled" };
-  }
+  if (dependencies.config.emailDisabled) return { kind: "disabled" };
   const receiptTime = dependencies.clock.now();
-  const eventId = boundedIdentifier("membership", "authEventId", input.authEventId);
+  const providerPrefix = WELCOME_PROVIDER_PREFIX.membership;
+  const eventId = boundedIdentifier(
+    "membership",
+    "authEventId",
+    input.authEventId,
+    MAX_PROVIDER_KEY_LENGTH - providerPrefix.length,
+  );
   const userDid = did("membership", "userDid", input.userDid);
   const organizationDid = input.organizationDid === undefined
     ? null
@@ -160,5 +177,6 @@ export async function enqueueMembershipJoined(
     recipientEmail: email("membership", input.email),
     templateKey: "welcome-membership-joined",
     locale: optionalText("membership", "locale", input.locale, 35),
+    providerIdempotencyKey: `${providerPrefix}${eventId}`,
   }, receiptTime);
 }

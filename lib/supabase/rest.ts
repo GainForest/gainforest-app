@@ -1,6 +1,7 @@
 import "server-only";
 
 const SUPABASE_REST_PATH = "/rest/v1";
+export const SUPABASE_RPC_TIMEOUT_MS = 10_000;
 
 class SupabaseRestError extends Error {
   status: number;
@@ -47,14 +48,31 @@ export async function supabaseRpc<T>(functionName: string, parameters: Record<st
     accept: "application/json",
     "content-type": "application/json",
   });
-  const response = await fetch(supabaseUrl(`/rpc/${encodeURIComponent(functionName)}`), {
-    method: "POST",
-    headers,
-    body: JSON.stringify(parameters),
-    cache: "no-store",
-  });
+  const signal = AbortSignal.timeout(SUPABASE_RPC_TIMEOUT_MS);
+  let response: Response;
+  try {
+    response = await fetch(supabaseUrl(`/rpc/${encodeURIComponent(functionName)}`), {
+      method: "POST",
+      headers,
+      body: JSON.stringify(parameters),
+      cache: "no-store",
+      signal,
+    });
+  } catch (error) {
+    if (signal.aborted) {
+      throw new SupabaseRestError("Supabase RPC timed out. Check Supabase availability and retry.", 504);
+    }
+    throw error;
+  }
   if (!response.ok) throw await parseSupabaseError(response);
-  return await response.json().catch(() => null) as T;
+  try {
+    return await response.json() as T;
+  } catch {
+    if (signal.aborted) {
+      throw new SupabaseRestError("Supabase RPC timed out. Check Supabase availability and retry.", 504);
+    }
+    return null as T;
+  }
 }
 
 export async function supabaseSelect<T>(pathAndQuery: string): Promise<T[]> {

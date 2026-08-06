@@ -3,21 +3,12 @@ import { describe, expect, it, vi } from "vitest";
 vi.mock("server-only", () => ({}));
 
 import type { NotificationConfig } from "./config";
-import { enqueueMembershipJoined, enqueueSignup, NotificationProducerInputError } from "./outbox";
+import { enqueueMembershipJoined, enqueueSignup, NotificationProducerInputError } from "./signup-and-membership-notifications";
 
 const NOW = new Date("2026-08-06T01:00:00.000Z");
 
-function config(overrides: Partial<NotificationConfig["producers"]> = {}): NotificationConfig {
-  return {
-    deliveryMode: "capture",
-    producers: {
-      signup: false,
-      membershipJoined: false,
-      invitation: false,
-      bioblitzWinner: false,
-      ...overrides,
-    },
-  };
+function config(emailDisabled = false): NotificationConfig {
+  return { emailDisabled };
 }
 
 function dependencies(notificationConfig: NotificationConfig) {
@@ -35,11 +26,8 @@ function dependencies(notificationConfig: NotificationConfig) {
 }
 
 describe("welcome notification enqueue boundaries", () => {
-  it.each([
-    ["global mode", { ...config({ signup: true }), deliveryMode: "disabled" as const }],
-    ["signup feature", config()],
-  ])("does not touch the repository when %s is disabled", async (_label, notificationConfig) => {
-    const deps = dependencies(notificationConfig);
+  it("does not touch the repository when email is disabled", async () => {
+    const deps = dependencies(config(true));
     await expect(enqueueSignup({
       authEventId: "auth-event-1",
       userDid: "did:plc:user",
@@ -50,7 +38,7 @@ describe("welcome notification enqueue boundaries", () => {
   });
 
   it("derives every immutable signup field and preserves the legacy auth event key", async () => {
-    const deps = dependencies(config({ signup: true }));
+    const deps = dependencies(config());
     await expect(enqueueSignup({
       authEventId: "auth-event-1",
       userDid: "did:plc:user",
@@ -78,13 +66,13 @@ describe("welcome notification enqueue boundaries", () => {
       recipientEmail: "user@example.com",
       templateKey: "welcome-signup",
       locale: "en-BT",
-      deliveryMode: "capture",
+      providerIdempotencyKey: "signup:auth-event-1",
       nextAttemptAt: NOW,
     });
   });
 
   it("derives membership fields without exposing arbitrary event or provider choices", async () => {
-    const deps = dependencies(config({ membershipJoined: true }));
+    const deps = dependencies(config());
     await enqueueMembershipJoined({
       authEventId: "membership-event-1",
       userDid: "did:plc:user",
@@ -109,9 +97,92 @@ describe("welcome notification enqueue boundaries", () => {
       recipientEmail: "member@example.com",
       templateKey: "welcome-membership-joined",
       locale: null,
-      deliveryMode: "capture",
+      providerIdempotencyKey: "organization-membership-joined:membership-event-1",
       nextAttemptAt: NOW,
     });
+  });
+
+  it("namespaces welcome provider keys and handles optional organization DIDs", async () => {
+    const signup = dependencies(config());
+    const membership = dependencies(config());
+    const sharedInput = {
+      authEventId: "shared-auth-event",
+      userDid: "did:plc:user",
+      email: "member@example.com",
+    };
+
+    await enqueueSignup(sharedInput, signup);
+    await enqueueMembershipJoined(sharedInput, membership);
+
+    const signupRow = signup.repository.enqueue.mock.calls[0][0];
+    const membershipRow = membership.repository.enqueue.mock.calls[0][0];
+    expect(signupRow.providerIdempotencyKey).toBe("signup:shared-auth-event");
+    expect(membershipRow.providerIdempotencyKey).toBe("organization-membership-joined:shared-auth-event");
+    expect(membershipRow.payload).toMatchObject({ organizationDid: null });
+    expect(signupRow.providerIdempotencyKey).not.toBe(membershipRow.providerIdempotencyKey);
+  });
+
+  it("rejects an invalid optional organization DID before repository access", async () => {
+    const deps = dependencies(config());
+
+    await expect(enqueueMembershipJoined({
+      authEventId: "membership-event-1",
+      userDid: "did:plc:user",
+      email: "member@example.com",
+      organizationDid: "not-a-did",
+    }, deps)).rejects.toMatchObject({
+      name: "NotificationProducerInputError",
+      field: "organizationDid",
+    });
+    expect(deps.repository.enqueue).not.toHaveBeenCalled();
+  });
+
+  it.each([
+    "did:plc2:user",
+    "did:plc:user%",
+  ])("rejects a user DID outside the ATProto DID syntax: %s", async (userDid) => {
+    const deps = dependencies(config());
+
+    await expect(enqueueSignup({
+      authEventId: "auth-event-1",
+      userDid,
+      email: "member@example.com",
+    }, deps)).rejects.toMatchObject({
+      name: "NotificationProducerInputError",
+      field: "userDid",
+    });
+    expect(deps.repository.enqueue).not.toHaveBeenCalled();
+  });
+
+  it("rejects an email address with consecutive dots before repository access", async () => {
+    const deps = dependencies(config());
+
+    await expect(enqueueSignup({
+      authEventId: "auth-event-1",
+      userDid: "did:plc:user",
+      email: "member..name@example.com",
+    }, deps)).rejects.toMatchObject({
+      name: "NotificationProducerInputError",
+      field: "email",
+    });
+    expect(deps.repository.enqueue).not.toHaveBeenCalled();
+  });
+
+  it.each([
+    ["signup", enqueueSignup, config(), 250],
+    ["membership", enqueueMembershipJoined, config(), 226],
+  ] as const)("rejects a %s auth event ID that cannot fit the namespaced provider key", async (_event, producer, notificationConfig, length) => {
+    const deps = dependencies(notificationConfig);
+
+    await expect(producer({
+      authEventId: "x".repeat(length),
+      userDid: "did:plc:user",
+      email: "member@example.com",
+    }, deps)).rejects.toMatchObject({
+      name: "NotificationProducerInputError",
+      field: "authEventId",
+    });
+    expect(deps.repository.enqueue).not.toHaveBeenCalled();
   });
 
   it.each([
@@ -122,7 +193,7 @@ describe("welcome notification enqueue boundaries", () => {
     ["locale", { locale: "x".repeat(36) }, "locale"],
     ["occurrence date", { createdAt: "not-a-date" }, "createdAt"],
   ])("rejects invalid %s before repository access", async (_label, change, field) => {
-    const deps = dependencies(config({ signup: true }));
+    const deps = dependencies(config());
     const input = {
       authEventId: "auth-event-1",
       userDid: "did:plc:user",
@@ -139,7 +210,7 @@ describe("welcome notification enqueue boundaries", () => {
   });
 
   it("uses an actionable typed error without reflecting invalid input", async () => {
-    const deps = dependencies(config({ signup: true }));
+    const deps = dependencies(config());
     const secret = "private@example.com payload-secret";
     const error = await enqueueSignup({
       authEventId: "auth-event-1",
