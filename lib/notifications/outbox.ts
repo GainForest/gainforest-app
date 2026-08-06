@@ -45,6 +45,12 @@ export type WelcomeEnqueueOutcome =
 
 type WelcomeEvent = "signup" | "membership";
 
+const WELCOME_PROVIDER_PREFIX = {
+  signup: "signup:",
+  membership: "organization-membership-joined:",
+} as const satisfies Record<WelcomeEvent, string>;
+const MAX_PROVIDER_KEY_LENGTH = 256;
+
 function boundedIdentifier(event: WelcomeEvent, field: string, value: string, maximum = 512): string {
   if (typeof value !== "string" || value.length < 1 || value.length > maximum || value !== value.trim()) {
     throw new NotificationProducerInputError(event, field, `Supply 1 to ${maximum} characters without surrounding whitespace.`);
@@ -112,7 +118,13 @@ export async function enqueueSignup(
     return { kind: "disabled" };
   }
   const receiptTime = dependencies.clock.now();
-  const eventId = boundedIdentifier("signup", "authEventId", input.authEventId);
+  const providerPrefix = WELCOME_PROVIDER_PREFIX.signup;
+  const eventId = boundedIdentifier(
+    "signup",
+    "authEventId",
+    input.authEventId,
+    MAX_PROVIDER_KEY_LENGTH - providerPrefix.length,
+  );
   const userDid = did("signup", "userDid", input.userDid);
   const payload: Json = {
     displayName: optionalText("signup", "name", input.name, 200),
@@ -128,7 +140,7 @@ export async function enqueueSignup(
     recipientEmail: email("signup", input.email),
     templateKey: "welcome-signup",
     locale: optionalText("signup", "locale", input.locale, 35),
-    providerIdempotencyKey: eventId,
+    providerIdempotencyKey: `${providerPrefix}${eventId}`,
   }, receiptTime);
 }
 
@@ -140,7 +152,13 @@ export async function enqueueMembershipJoined(
     return { kind: "disabled" };
   }
   const receiptTime = dependencies.clock.now();
-  const eventId = boundedIdentifier("membership", "authEventId", input.authEventId);
+  const providerPrefix = WELCOME_PROVIDER_PREFIX.membership;
+  const eventId = boundedIdentifier(
+    "membership",
+    "authEventId",
+    input.authEventId,
+    MAX_PROVIDER_KEY_LENGTH - providerPrefix.length,
+  );
   const userDid = did("membership", "userDid", input.userDid);
   const organizationDid = input.organizationDid === undefined
     ? null
@@ -161,6 +179,6 @@ export async function enqueueMembershipJoined(
     recipientEmail: email("membership", input.email),
     templateKey: "welcome-membership-joined",
     locale: optionalText("membership", "locale", input.locale, 35),
-    providerIdempotencyKey: eventId,
+    providerIdempotencyKey: `${providerPrefix}${eventId}`,
   }, receiptTime);
 }

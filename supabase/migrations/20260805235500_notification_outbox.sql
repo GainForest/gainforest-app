@@ -91,14 +91,16 @@ create table public.notification_outbox (
   ),
   constraint notification_outbox_provider_key_ownership check (
     redacted_at is not null or
-    (event_type in ('signup','membership_joined') and source_id is not null and provider_idempotency_key=source_id) or
+    (event_type='signup' and source_id is not null and provider_idempotency_key='signup:' || source_id) or
+    (event_type='membership_joined' and source_id is not null and provider_idempotency_key='organization-membership-joined:' || source_id) or
     (event_type in ('invitation','bioblitz_winner') and provider_idempotency_key=id::text)
   ),
   constraint notification_outbox_provider_id_bound check (provider_id is null or length(provider_id) between 1 and 256),
   constraint notification_outbox_error_code_check check (last_error_code is null or last_error_code in (
     'recipient_missing','recipient_lookup_failed','provider_5xx','provider_timeout',
     'provider_rate_limited','provider_rejected','provider_idempotency_expired',
-    'active_retention_expired','notification_invalid','invitation_not_pending','manually_suppressed'
+    'active_retention_expired','notification_invalid','invitation_not_pending','manually_suppressed',
+    'delivery_mode_mismatch'
   )),
   constraint notification_outbox_error_summary_bound check (last_error_summary is null or length(last_error_summary) between 1 and 512),
   constraint notification_outbox_recipient_contract check (
@@ -183,6 +185,7 @@ declare
   v_event_hash text;
   v_fingerprint text;
   v_provider_key text;
+  v_expected_provider_key text;
   v_existing public.notification_outbox%rowtype;
   v_id uuid;
 begin
@@ -191,7 +194,14 @@ begin
   if p_delivery_mode is null or p_delivery_mode not in ('capture','resend') then raise exception 'delivery mode must be capture or resend; disabled producers must not enqueue'; end if;
   if p_event_type in ('signup','membership_joined') then
     if p_source_id is null then raise exception 'source ID is required for welcome provider key ownership'; end if;
-    if p_provider_idempotency_key is null or p_provider_idempotency_key<>p_source_id then raise exception 'welcome provider idempotency key must equal source ID'; end if;
+    v_expected_provider_key=case p_event_type
+      when 'signup' then 'signup:' || p_source_id
+      else 'organization-membership-joined:' || p_source_id
+    end;
+    if length(v_expected_provider_key)>256 then raise exception 'welcome provider idempotency key exceeds 256 characters after event namespacing'; end if;
+    if p_provider_idempotency_key is null or p_provider_idempotency_key not in (p_source_id,v_expected_provider_key) then
+      raise exception 'welcome provider idempotency key must equal source ID or its event namespace';
+    end if;
   elsif p_provider_idempotency_key is not null then
     raise exception 'provider idempotency key must not be supplied for invitation or BioBlitz events';
   end if;
@@ -220,7 +230,7 @@ begin
   end if;
 
   v_id=pg_catalog.gen_random_uuid();
-  v_provider_key=case when p_event_type in ('signup','membership_joined') then p_source_id else v_id::text end;
+  v_provider_key=case when p_event_type in ('signup','membership_joined') then v_expected_provider_key else v_id::text end;
   v_fingerprint=extensions.notification_outbox_sha256(pg_catalog.convert_to(jsonb_build_object(
     'event_type',p_event_type,'payload',p_payload,'source_id',p_source_id,'recipient_did',p_recipient_did,
     'recipient_email',p_recipient_email,'template_key',p_template_key,'locale',p_locale,
@@ -327,7 +337,7 @@ create function public.notification_outbox_expire_claimed(p_outbox_id uuid,p_tok
 returns boolean language plpgsql security definer set search_path='' as $$
 declare v public.notification_outbox%rowtype;
 begin
-  if p_error_code not in ('active_retention_expired','provider_idempotency_expired') then raise exception 'unsupported claimed expiry code'; end if;
+  if p_error_code is null or p_error_code not in ('active_retention_expired','provider_idempotency_expired') then raise exception 'unsupported claimed expiry code'; end if;
   select * into v from public.notification_outbox
     where id=p_outbox_id and status='processing' and processing_token=p_token for update;
   if not found then return false; end if;
@@ -360,7 +370,7 @@ returns boolean language plpgsql security definer set search_path='' as $$
 declare n integer;
 begin
   if p_next_attempt_at is null or p_next_attempt_at<=clock_timestamp() or p_next_attempt_at>clock_timestamp()+interval '7 days' then raise exception 'next recipient attempt must be within seven days'; end if;
-  if p_error_code not in ('recipient_missing','recipient_lookup_failed') then raise exception 'unsupported recipient error code'; end if;
+  if p_error_code is null or p_error_code not in ('recipient_missing','recipient_lookup_failed') then raise exception 'unsupported recipient error code'; end if;
   update public.notification_outbox set status='waiting_recipient',next_attempt_at=p_next_attempt_at,last_error_code=p_error_code,
     last_error_summary=case p_error_code when 'recipient_missing' then 'Recipient email is not available' else 'Recipient lookup failed' end,
     locked_until=null,processing_token=null,claimed_from_status=null where id=p_outbox_id and status='processing' and processing_token=p_token and provider_call_phase='idle' and event_type='bioblitz_winner' and recipient_email is null;
@@ -425,7 +435,7 @@ create function public.notification_outbox_record_provider_failure(p_outbox_id u
 returns boolean language plpgsql security definer set search_path='' as $$
 declare n integer;
 begin
-  if p_error_code not in ('provider_5xx','provider_rate_limited','provider_rejected','notification_invalid') then raise exception 'unsupported provider error code'; end if;
+  if p_error_code is null or p_error_code not in ('provider_5xx','provider_rate_limited','provider_rejected','notification_invalid') then raise exception 'unsupported provider error code'; end if;
   update public.notification_outbox set
     provider_call_phase=case when provider_call_is_ambiguous_retry then 'in_flight' else 'idle' end,
     provider_call_started_at=case when provider_call_is_ambiguous_retry then provider_call_started_at else null end,
@@ -446,7 +456,7 @@ create function public.notification_outbox_terminal_provider_failure(p_outbox_id
 returns boolean language plpgsql security definer set search_path='' as $$
 declare n integer;
 begin
-  if p_error_code not in ('provider_rejected','notification_invalid') then raise exception 'unsupported permanent provider error code'; end if;
+  if p_error_code is null or p_error_code not in ('provider_rejected','notification_invalid') then raise exception 'unsupported permanent provider error code'; end if;
   update public.notification_outbox set status='dead',terminal_at=clock_timestamp(),last_error_code=p_error_code,
     last_error_summary=case p_error_code
       when 'provider_rejected' then 'Provider permanently rejected the notification'
@@ -475,7 +485,7 @@ returns boolean language plpgsql security definer set search_path='' as $$
 declare n integer; v public.notification_outbox%rowtype;
 begin
   if p_next_attempt_at is null or p_next_attempt_at<=clock_timestamp() or p_next_attempt_at>clock_timestamp()+interval '7 days' then raise exception 'next attempt must be within seven days'; end if;
-  if p_error_code not in ('provider_5xx','provider_rate_limited','provider_rejected','recipient_lookup_failed') then raise exception 'unsupported requeue error code'; end if;
+  if p_error_code is null or p_error_code not in ('provider_5xx','provider_rate_limited','provider_rejected','recipient_lookup_failed','delivery_mode_mismatch') then raise exception 'unsupported requeue error code'; end if;
   select * into v from public.notification_outbox
     where id=p_outbox_id and status='processing' and processing_token=p_token for update;
   if not found then return false; end if;
@@ -485,6 +495,7 @@ begin
       when 'provider_5xx' then 'Provider returned a retryable server error'
       when 'provider_rate_limited' then 'Provider rate limit requires a later retry'
       when 'provider_rejected' then 'Provider permanently rejected the notification'
+      when 'delivery_mode_mismatch' then 'Notification delivery mode does not match the active provider'
       else 'Recipient lookup failed'
     end,
     locked_until=null,processing_token=null,claimed_from_status=null where id=p_outbox_id and status='processing' and processing_token=p_token and provider_call_phase='idle' and recipient_email is not null;
@@ -495,7 +506,7 @@ create function public.notification_outbox_mark_dead(p_outbox_id uuid,p_token uu
 returns boolean language plpgsql security definer set search_path='' as $$
 declare n integer;
 begin
-  if p_error_code not in ('provider_rejected','provider_timeout','provider_idempotency_expired','active_retention_expired','notification_invalid') then raise exception 'unsupported terminal error code'; end if;
+  if p_error_code is null or p_error_code not in ('provider_rejected','provider_timeout','provider_idempotency_expired','active_retention_expired','notification_invalid') then raise exception 'unsupported terminal error code'; end if;
   update public.notification_outbox set status='dead',terminal_at=clock_timestamp(),last_error_code=p_error_code,
     last_error_summary=case p_error_code
       when 'provider_rejected' then 'Provider permanently rejected the notification'
@@ -512,7 +523,7 @@ create function public.notification_outbox_suppress_claimed(p_outbox_id uuid,p_t
 returns boolean language plpgsql security definer set search_path='' as $$
 declare n integer;
 begin
-  if p_error_code not in ('invitation_not_pending','manually_suppressed') then raise exception 'unsupported suppression code'; end if;
+  if p_error_code is null or p_error_code not in ('invitation_not_pending','manually_suppressed') then raise exception 'unsupported suppression code'; end if;
   update public.notification_outbox set status='suppressed',terminal_at=clock_timestamp(),redacted_at=clock_timestamp(),
     input_fingerprint_hash=null,payload=null,source_id=null,recipient_did=null,recipient_email=null,
     template_key=null,locale=null,delivery_mode=null,frozen_from=null,frozen_to=null,frozen_subject=null,

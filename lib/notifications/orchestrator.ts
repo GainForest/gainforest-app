@@ -20,7 +20,7 @@ const MAX_CONCURRENCY = 4;
 const MAX_LEASE_SECONDS = 300;
 const MAX_CLEANUP_BATCH_SIZE = 500;
 
-type OutcomeKind = ProcessResult["kind"] | "unexpectedFailure";
+type OutcomeKind = ProcessResult["kind"] | "unexpected_failure";
 
 export interface NotificationProcessor {
   (claim: Claim, invocationDeadline: Date): Promise<ProcessResult>;
@@ -115,7 +115,7 @@ function emptyOutcomes(): Record<OutcomeKind, number> {
     disabled: 0,
     released_insufficient_time: 0,
     stale_claim: 0,
-    unexpectedFailure: 0,
+    unexpected_failure: 0,
   };
 }
 
@@ -138,7 +138,6 @@ export async function processNotificationById(
   if (deliveryDisabled(dependencies.config)) return { kind: "disabled" };
   if (!hasTime(dependencies.clock, invocationDeadline, resolved.safetyMarginMs)) return { kind: "deadline" };
   const token = dependencies.tokenFactory();
-  if (deliveryDisabled(dependencies.config)) return { kind: "disabled" };
   const owned = await dependencies.repository.claimOne(outboxId, token, resolved.leaseSeconds);
   if (!owned) return { kind: "no_claim" };
   try {
@@ -183,69 +182,74 @@ export async function drainNotifications(
     stopped = "deadline";
     return finish();
   }
-  if (deliveryDisabled(dependencies.config)) return { kind: "disabled" };
-  cleanup = await dependencies.repository.cleanup(resolved.cleanupBatchSize);
+  cleanup = await dependencies.repository.cleanup(resolved.cleanupBatchSize).catch(() => noCleanup);
 
-  while (claimed < resolved.batchSize) {
-    if (deliveryDisabled(dependencies.config)) {
-      stopped = "disabled";
-      break;
-    }
-    if (!hasTime(dependencies.clock, invocationDeadline, resolved.safetyMarginMs)) {
-      stopped = "deadline";
-      break;
-    }
-    const requested = Math.min(resolved.concurrency, resolved.batchSize - claimed);
-    const batch = await dependencies.repository.claimDue(requested, resolved.leaseSeconds);
-    if (batch.length === 0) {
-      stopped = "empty";
-      break;
-    }
-    if (batch.length > requested) {
-      await Promise.all(batch.map(row => safelyReleaseIdleClaim(row, dependencies)));
-      throw new Error("Notification repository returned more claims than requested. Verify the committed claim RPC contract.");
-    }
-
-    const fresh: Claim[] = [];
-    for (const row of batch) {
-      if (seen.has(row.outboxId)) {
-        await safelyReleaseIdleClaim(row, dependencies);
-        stopped = "duplicate_claim";
-        continue;
+  let loopCompleted = false;
+  try {
+    while (claimed < resolved.batchSize) {
+      if (deliveryDisabled(dependencies.config)) {
+        stopped = "disabled";
+        break;
       }
-      seen.add(row.outboxId);
-      fresh.push(row);
-    }
-    if (fresh.length === 0) break;
-
-    const results = await Promise.all(fresh.map(async row => {
-      try {
-        return await dependencies.processor(row, invocationDeadline);
-      } catch {
-        await safelyReleaseIdleClaim(row, dependencies);
-        return null;
+      if (!hasTime(dependencies.clock, invocationDeadline, resolved.safetyMarginMs)) {
+        stopped = "deadline";
+        break;
       }
-    }));
-    claimed += fresh.length;
-
-    let insufficientTime = false;
-    for (const result of results) {
-      if (!result) {
-        outcomes.unexpectedFailure += 1;
-        continue;
+      const requested = Math.min(resolved.concurrency, resolved.batchSize - claimed);
+      const batch = await dependencies.repository.claimDue(requested, resolved.leaseSeconds);
+      if (batch.length === 0) {
+        stopped = "empty";
+        break;
       }
-      outcomes[result.kind] += 1;
-      if (result.kind === "released_insufficient_time") insufficientTime = true;
+      if (batch.length > requested) {
+        await Promise.all(batch.map(row => safelyReleaseIdleClaim(row, dependencies)));
+        throw new Error("Notification repository returned more claims than requested. Verify the committed claim RPC contract.");
+      }
+
+      const fresh: Claim[] = [];
+      for (const row of batch) {
+        if (seen.has(row.outboxId)) {
+          await safelyReleaseIdleClaim(row, dependencies);
+          stopped = "duplicate_claim";
+          continue;
+        }
+        seen.add(row.outboxId);
+        fresh.push(row);
+      }
+      if (fresh.length === 0) break;
+
+      const results = await Promise.all(fresh.map(async row => {
+        try {
+          return await dependencies.processor(row, invocationDeadline);
+        } catch {
+          await safelyReleaseIdleClaim(row, dependencies);
+          return null;
+        }
+      }));
+      claimed += fresh.length;
+
+      let insufficientTime = false;
+      for (const result of results) {
+        if (!result) {
+          outcomes.unexpected_failure += 1;
+          continue;
+        }
+        outcomes[result.kind] += 1;
+        if (result.kind === "released_insufficient_time") insufficientTime = true;
+      }
+      if (insufficientTime) {
+        stopped = "insufficient_time";
+        break;
+      }
+      if (stopped === "duplicate_claim") break;
+      if (claimed >= resolved.batchSize) {
+        stopped = "batch_limit";
+        break;
+      }
     }
-    if (insufficientTime) {
-      stopped = "insufficient_time";
-      break;
-    }
-    if (stopped === "duplicate_claim") break;
-    if (claimed >= resolved.batchSize) {
-      stopped = "batch_limit";
-      break;
-    }
+    loopCompleted = true;
+  } finally {
+    if (!loopCompleted) finish();
   }
 
   return finish();

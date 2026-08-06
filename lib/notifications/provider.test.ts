@@ -60,4 +60,14 @@ describe("capture provider idempotency", () => {
       .toEqual({ kind: "permanent", errorCode: "notification_invalid" });
     expect(sink.captured()).toEqual([request]);
   });
+
+  it("propagates unexpected sink failures so the worker can treat the outcome as uncertain", async () => {
+    const provider = new CaptureEmailProvider({
+      idempotencyGuaranteeMs: 60_000,
+      captureOnce: async () => { throw new TypeError("capture storage unavailable"); },
+    });
+
+    await expect(provider.send(request, { timeoutMs: provider.timeoutMs }))
+      .rejects.toThrow("capture storage unavailable");
+  });
 });

@@ -59,8 +59,11 @@ export class CaptureEmailProvider implements EmailProvider {
     try {
       await this.sink.captureOnce(request.idempotencyKey, request);
       return { kind: "sent", providerId: "capture" };
-    } catch {
-      return { kind: "permanent", errorCode: "notification_invalid" };
+    } catch (error) {
+      if (error instanceof CaptureSinkConflictError) {
+        return { kind: "permanent", errorCode: "notification_invalid" };
+      }
+      throw error;
     }
   }
 }

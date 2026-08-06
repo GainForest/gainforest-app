@@ -11,13 +11,14 @@ export type PreviousStatus = "waiting_recipient" | "queued" | "processing";
 
 export type RecipientErrorCode = "recipient_missing" | "recipient_lookup_failed";
 export type ProviderErrorCode = "provider_5xx" | "provider_rate_limited" | "provider_rejected" | "notification_invalid";
+export type RequeueErrorCode = ProviderErrorCode | "recipient_lookup_failed" | "delivery_mode_mismatch";
 export type TerminalErrorCode =
   | "provider_rejected"
   | "provider_timeout"
   | "provider_idempotency_expired"
   | "active_retention_expired"
   | "notification_invalid";
-export type NotificationErrorCode = RecipientErrorCode | ProviderErrorCode | TerminalErrorCode
+export type NotificationErrorCode = RecipientErrorCode | ProviderErrorCode | RequeueErrorCode | TerminalErrorCode
   | "invitation_not_pending" | "manually_suppressed";
 
 export interface Claim {
@@ -164,6 +165,8 @@ export interface NotificationOrchestrationRepository {
 }
 
 export interface NotificationRepository {
+  /** Maximum time a durable transition may wait before aborting. */
+  readonly transitionTimeoutMs: number;
   claimDue(batchSize: number, leaseSeconds: number): Promise<Claim[]>;
   claimOne(outboxId: string, token: string, leaseSeconds: number): Promise<Claim | null>;
   getClaimed(claim: Claim): Promise<NotificationRow>;
@@ -176,7 +179,7 @@ export interface NotificationRepository {
   recordProviderFailure(outboxId: string, token: string, code: ProviderErrorCode): Promise<boolean>;
   terminalProviderFailure(outboxId: string, token: string, code: "provider_rejected" | "notification_invalid"): Promise<boolean>;
   markSent(outboxId: string, token: string, providerId: string): Promise<boolean>;
-  requeue(outboxId: string, token: string, nextAttemptAt: Date, code: ProviderErrorCode | "recipient_lookup_failed"): Promise<boolean>;
+  requeue(outboxId: string, token: string, nextAttemptAt: Date, code: RequeueErrorCode): Promise<boolean>;
   markDead(outboxId: string, token: string, code: TerminalErrorCode): Promise<boolean>;
   suppressClaimed(outboxId: string, token: string, code: "invitation_not_pending" | "manually_suppressed"): Promise<boolean>;
   releaseClaim(outboxId: string, token: string): Promise<boolean>;
@@ -184,7 +187,7 @@ export interface NotificationRepository {
 
 export type ProcessResult =
   | { readonly kind: "sent" }
-  | { readonly kind: "requeued"; readonly errorCode: ProviderErrorCode | "recipient_lookup_failed" }
+  | { readonly kind: "requeued"; readonly errorCode: RequeueErrorCode }
   | { readonly kind: "waiting_recipient"; readonly errorCode: RecipientErrorCode }
   | { readonly kind: "ambiguous_deferred" }
   | { readonly kind: "dead"; readonly errorCode: TerminalErrorCode }

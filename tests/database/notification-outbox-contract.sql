@@ -66,22 +66,37 @@ truncate public.notification_outbox;
 create temp table first_enqueue as
 select * from public.notification_outbox_enqueue(
   'signup:event-1', 'signup', '{"name":"One"}'::jsonb, 'event-1', null,
-  'person@example.com', 'welcome', 'en', 'event-1', 'resend', clock_timestamp()
+  'person@example.com', 'welcome', 'en', 'signup:event-1', 'resend', clock_timestamp()
 );
 select pg_temp.assert_true(not (select duplicate from first_enqueue), 'first enqueue is not duplicate');
 select pg_temp.assert_true((select length(event_key_hash)=64 from public.notification_outbox where id=(select outbox_id from first_enqueue)), 'event hash is SHA-256 hex');
 select pg_temp.assert_true((select length(input_fingerprint_hash)=64 from public.notification_outbox where id=(select outbox_id from first_enqueue)), 'input fingerprint is stored');
-select pg_temp.assert_true((select provider_idempotency_key='event-1' from public.notification_outbox where id=(select outbox_id from first_enqueue)), 'welcome provider key preserves the immutable auth event source ID');
+select pg_temp.assert_true((select provider_idempotency_key='signup:event-1' from public.notification_outbox where id=(select outbox_id from first_enqueue)), 'signup provider key namespaces the immutable auth event source ID');
+
+create temp table membership_same_source as
+select * from public.notification_outbox_enqueue(
+  'organization-membership-joined:event-1', 'membership_joined', '{}'::jsonb, 'event-1', null,
+  'member@example.com', 'welcome-membership', 'en', 'organization-membership-joined:event-1', 'resend', clock_timestamp()
+);
+select pg_temp.assert_true(not (select duplicate from membership_same_source), 'signup and membership may share an auth event ID without a provider-key collision');
+select pg_temp.assert_true((select provider_idempotency_key='organization-membership-joined:event-1' from public.notification_outbox where id=(select outbox_id from membership_same_source)), 'membership provider key uses its event namespace');
 
 create temp table duplicate_enqueue as
 select * from public.notification_outbox_enqueue(
   'signup:event-1', 'signup', '{"name":"One"}'::jsonb, 'event-1', null,
-  'person@example.com', 'welcome', 'en', 'event-1', 'resend', clock_timestamp() + interval '1 hour'
+  'person@example.com', 'welcome', 'en', 'signup:event-1', 'resend', clock_timestamp() + interval '1 hour'
 );
 select pg_temp.assert_true((select duplicate from duplicate_enqueue), 'exact replay is duplicate');
 select pg_temp.assert_true((select outbox_id from first_enqueue)=(select outbox_id from duplicate_enqueue), 'exact replay returns same row');
+create temp table legacy_bare_key_replay as
+select * from public.notification_outbox_enqueue(
+  'signup:event-1', 'signup', '{"name":"One"}'::jsonb, 'event-1', null,
+  'person@example.com', 'welcome', 'en', 'event-1', 'resend', clock_timestamp()
+);
+select pg_temp.assert_true((select duplicate from legacy_bare_key_replay), 'legacy bare source key replays the namespaced row');
+select pg_temp.assert_true((select outbox_id from first_enqueue)=(select outbox_id from legacy_bare_key_replay), 'legacy bare key resolves to the existing namespaced row');
 select pg_temp.assert_raises(
-  $$select * from public.notification_outbox_enqueue('signup:event-1','signup','{"name":"Changed"}'::jsonb,'event-1',null,'person@example.com','welcome','en','event-1','resend',clock_timestamp())$$,
+  $$select * from public.notification_outbox_enqueue('signup:event-1','signup','{"name":"Changed"}'::jsonb,'event-1',null,'person@example.com','welcome','en','signup:event-1','resend',clock_timestamp())$$,
   'notification_outbox_idempotency_conflict', 'changed delivery input conflicts'
 );
 select pg_temp.assert_raises(
@@ -98,7 +113,7 @@ select pg_temp.assert_raises(
 );
 select pg_temp.assert_raises(
   $$select * from public.notification_outbox_enqueue('welcome-wrong-key','signup','{}'::jsonb,'auth-event',null,'person@example.com','welcome','en','other-key','resend',clock_timestamp())$$,
-  'must equal source ID', 'welcome callers cannot select a provider key distinct from the auth event ID'
+  'must equal source ID', 'welcome callers cannot select a provider key outside the auth event ID namespace'
 );
 select pg_temp.assert_raises(
   $$select * from public.notification_outbox_enqueue('welcome-missing-source','membership_joined','{}'::jsonb,null,null,'person@example.com','welcome','en',null,'resend',clock_timestamp())$$,
@@ -116,11 +131,11 @@ select * from public.notification_outbox_enqueue(
 select pg_temp.assert_true((select provider_idempotency_key=id::text from public.notification_outbox where id=(select outbox_id from generated_provider_key)), 'invitation provider key is generated from its row UUID');
 select pg_temp.assert_raises(
   $$select * from public.notification_outbox_enqueue('welcome:key-collision','signup','{}'::jsonb,'event-1',null,'other@example.com','welcome','en','event-1','resend',clock_timestamp())$$,
-  'provider', 'two rows cannot share a provider key'
+  'notification_outbox_provider_key_conflict', 'two rows cannot share a provider key'
 );
 select pg_temp.assert_raises(
   $$select * from public.notification_outbox_enqueue('bio-no-did','bioblitz_winner','{}'::jsonb,'x',null,null,'bio','en',null,'resend',clock_timestamp())$$,
-  'recipient', 'BioBlitz requires a DID'
+  'BioBlitz recipient requires a bounded DID', 'BioBlitz requires a DID'
 );
 
 -- Claims are token owned, return prior state/phase, and reject stale/cross-row tokens.
@@ -383,7 +398,6 @@ select public.notification_outbox_begin_provider_call((select id from public.not
 begin;
 create temp table in_flight_suppress as select * from public.notification_outbox_suppress_event('suppress:in-flight','invitation');
 select pg_temp.assert_true((select status='processing' and duplicate from in_flight_suppress), 'in-flight suppression returns existing processing as a typed no-op');
-select 1;
 commit;
 
 select * from public.notification_outbox_enqueue('suppress:event-claimed','invitation','{"secret":true}','invite-event-claimed',null,'event-claimed@example.com','invite','en',null,'resend',clock_timestamp());
@@ -450,12 +464,23 @@ select pg_temp.assert_raises(
   'active boundary', 'token-owned requeue rejects a timestamp beyond the row active boundary'
 );
 select pg_temp.assert_true((select status='processing' and processing_token='72400000-0000-4000-8000-000000000001' from public.notification_outbox where source_id='requeue-active-bound'), 'rejected out-of-bound requeue preserves ownership');
+select pg_temp.assert_true(
+  public.notification_outbox_requeue(
+    (select id from public.notification_outbox where source_id='requeue-active-bound'),
+    '72400000-0000-4000-8000-000000000001',
+    clock_timestamp()+interval '1 hour',
+    'delivery_mode_mismatch'
+  ),
+  'delivery-mode mismatch is durably requeued'
+);
+select pg_temp.assert_true((select status='queued' and last_error_code='delivery_mode_mismatch' and last_error_summary='Notification delivery mode does not match the active provider' from public.notification_outbox where source_id='requeue-active-bound'), 'delivery-mode mismatch stores an allowlisted operational summary');
 
 -- Remaining retention behavior uses terminal_at for redaction, created_at for
 -- cleanup, and owner-only clock changes in this disposable database.
 truncate public.notification_outbox;
 select * from public.notification_outbox_enqueue('retention:active','signup','{"private":true}','a',null,'active@example.com','welcome','en','a','resend',clock_timestamp());
-update public.notification_outbox set created_at=clock_timestamp()-interval '7 days 1 second', updated_at=clock_timestamp()-interval '7 days 1 second';
+update public.notification_outbox set created_at=clock_timestamp()-interval '7 days 1 second', updated_at=clock_timestamp()-interval '7 days 1 second'
+  where event_key_hash=encode(extensions.digest('retention:active','sha256'),'hex');
 select * from public.notification_outbox_cleanup(100);
 select pg_temp.assert_true((select status='dead' and last_error_code='active_retention_expired' and terminal_at is not null from public.notification_outbox where event_key_hash=encode(extensions.digest('retention:active','sha256'),'hex')), 'active row expires dead after seven days');
 
@@ -515,6 +540,36 @@ select pg_temp.assert_true(public.notification_outbox_mark_dead((select id from 
 select pg_temp.assert_raises(
   $$select * from public.notification_outbox_enqueue('retention:dead','invitation','{}','different',null,'different@example.com','invite','en',null,'capture',clock_timestamp())$$,
   'event type differs', 'redacted tombstone rejects a cross-type replay'
+);
+
+-- Transition error-code guards reject NULL before attempting row ownership.
+select pg_temp.assert_raises(
+  $$select public.notification_outbox_expire_claimed('00000000-0000-4000-8000-000000000001','00000000-0000-4000-8000-000000000002',null)$$,
+  'unsupported claimed expiry code', 'claimed expiry rejects a NULL error code'
+);
+select pg_temp.assert_raises(
+  $$select public.notification_outbox_wait_recipient('00000000-0000-4000-8000-000000000001','00000000-0000-4000-8000-000000000002',clock_timestamp()+interval '1 hour',null)$$,
+  'unsupported recipient error code', 'recipient wait rejects a NULL error code'
+);
+select pg_temp.assert_raises(
+  $$select public.notification_outbox_record_provider_failure('00000000-0000-4000-8000-000000000001','00000000-0000-4000-8000-000000000002',null)$$,
+  'unsupported provider error code', 'provider failure recording rejects a NULL error code'
+);
+select pg_temp.assert_raises(
+  $$select public.notification_outbox_terminal_provider_failure('00000000-0000-4000-8000-000000000001','00000000-0000-4000-8000-000000000002',null)$$,
+  'unsupported permanent provider error code', 'permanent provider failure rejects a NULL error code'
+);
+select pg_temp.assert_raises(
+  $$select public.notification_outbox_requeue('00000000-0000-4000-8000-000000000001','00000000-0000-4000-8000-000000000002',clock_timestamp()+interval '1 hour',null)$$,
+  'unsupported requeue error code', 'requeue rejects a NULL error code'
+);
+select pg_temp.assert_raises(
+  $$select public.notification_outbox_mark_dead('00000000-0000-4000-8000-000000000001','00000000-0000-4000-8000-000000000002',null)$$,
+  'unsupported terminal error code', 'terminal transition rejects a NULL error code'
+);
+select pg_temp.assert_raises(
+  $$select public.notification_outbox_suppress_claimed('00000000-0000-4000-8000-000000000001','00000000-0000-4000-8000-000000000002',null)$$,
+  'unsupported suppression code', 'claimed suppression rejects a NULL error code'
 );
 
 -- Direct invalid states and bounds are rejected by table constraints.

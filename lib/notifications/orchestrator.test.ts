@@ -3,7 +3,11 @@ import { describe, expect, it, vi } from "vitest";
 vi.mock("server-only", () => ({}));
 
 import type { NotificationConfig } from "./config";
-import { drainNotifications, processNotificationById } from "./orchestrator";
+import {
+  drainNotifications,
+  processNotificationById,
+  type NotificationOrchestratorDependencies,
+} from "./orchestrator";
 import type { Claim, ProcessResult } from "./types";
 
 const NOW = new Date("2026-08-06T01:00:00.000Z");
@@ -26,7 +30,9 @@ function claim(sequence: number, phase: Claim["resumeProviderCallPhase"] = "idle
   };
 }
 
-function dependencies(overrides: Record<string, unknown> = {}) {
+function dependencies(
+  overrides: Partial<Pick<NotificationOrchestratorDependencies, "config" | "log">> = {},
+) {
   const repository = {
     cleanup: vi.fn().mockResolvedValue({ activeExpired: 0, redacted: 0, deleted: 0 }),
     claimDue: vi.fn().mockResolvedValue([]),
@@ -40,7 +46,7 @@ function dependencies(overrides: Record<string, unknown> = {}) {
     repository,
     processor: vi.fn(async (): Promise<ProcessResult> => ({ kind: "sent" })),
     ...overrides,
-  };
+  } satisfies NotificationOrchestratorDependencies;
 }
 
 describe("processNotificationById", () => {
@@ -85,6 +91,19 @@ describe("processNotificationById", () => {
     )).resolves.toEqual({ kind: "deadline" });
     expect(deps.repository.claimOne).not.toHaveBeenCalled();
   });
+
+  it("releases an idle claim and hides detail after a processor failure", async () => {
+    const owned = claim(1);
+    const deps = dependencies();
+    deps.repository.claimOne.mockResolvedValue(owned);
+    deps.processor.mockRejectedValue(new Error("private@example.com provider body"));
+
+    const result = await processNotificationById(owned.outboxId, DEADLINE, deps);
+
+    expect(result).toEqual({ kind: "unexpected_failure" });
+    expect(deps.repository.releaseClaim).toHaveBeenCalledWith(owned.outboxId, owned.processingToken);
+    expect(JSON.stringify(result)).not.toContain("private@example.com");
+  });
 });
 
 describe("drainNotifications", () => {
@@ -121,7 +140,7 @@ describe("drainNotifications", () => {
       kind: "completed",
       claimed: 5,
       cleanup: { activeExpired: 1, redacted: 2, deleted: 3 },
-      outcomes: { sent: 5, unexpectedFailure: 0 },
+      outcomes: { sent: 5, unexpected_failure: 0 },
       stopped: "batch_limit",
     });
   });
@@ -168,11 +187,14 @@ describe("drainNotifications", () => {
   });
 
   it("stops before another claim when the invocation deadline is exhausted", async () => {
+    let time = NOW.getTime();
     const deps = dependencies();
-    const nearDeadline = new Date(DEADLINE.getTime() - 4_000);
-    const times = [NOW, NOW, NOW, nearDeadline];
-    deps.clock.now.mockImplementation(() => times.shift() ?? nearDeadline);
+    deps.clock.now.mockImplementation(() => new Date(time));
     deps.repository.claimDue.mockResolvedValueOnce([claim(1)]);
+    deps.processor.mockImplementation(async () => {
+      time += 56_000;
+      return { kind: "sent" };
+    });
 
     const result = await drainNotifications(DEADLINE, deps, { batchSize: 2, concurrency: 1 });
 
@@ -194,8 +216,66 @@ describe("drainNotifications", () => {
     expect(JSON.stringify(result)).not.toContain("private@example.com");
     expect(result).toMatchObject({
       kind: "completed",
-      outcomes: { unexpectedFailure: 2 },
+      outcomes: { unexpected_failure: 2 },
     });
+  });
+
+  it("continues delivery with a zero cleanup summary when maintenance fails", async () => {
+    const deps = dependencies();
+    deps.repository.cleanup.mockRejectedValue(new Error("cleanup unavailable"));
+    deps.repository.claimDue.mockResolvedValueOnce([claim(1)]);
+
+    const result = await drainNotifications(DEADLINE, deps, { batchSize: 1 });
+
+    expect(deps.processor).toHaveBeenCalledTimes(1);
+    expect(result).toMatchObject({
+      kind: "completed",
+      cleanup: { activeExpired: 0, redacted: 0, deleted: 0 },
+      outcomes: { sent: 1 },
+    });
+  });
+
+  it("releases and stops when the repository repeats a claim in one invocation", async () => {
+    const repeated = claim(1);
+    const deps = dependencies();
+    deps.repository.claimDue
+      .mockResolvedValueOnce([repeated])
+      .mockResolvedValueOnce([repeated]);
+
+    const result = await drainNotifications(DEADLINE, deps, { batchSize: 2, concurrency: 1 });
+
+    expect(result).toMatchObject({ kind: "completed", claimed: 1, stopped: "duplicate_claim" });
+    expect(deps.repository.releaseClaim).toHaveBeenCalledWith(repeated.outboxId, repeated.processingToken);
+  });
+
+  it("releases over-claimed rows, logs the partial summary, and rejects the broken contract", async () => {
+    const log = vi.fn();
+    const deps = dependencies({ log });
+    const overClaimed = [claim(1), claim(2)];
+    deps.repository.claimDue.mockResolvedValueOnce(overClaimed);
+
+    await expect(drainNotifications(DEADLINE, deps, { batchSize: 1, concurrency: 1 }))
+      .rejects.toThrow("more claims than requested");
+
+    expect(deps.repository.releaseClaim).toHaveBeenCalledTimes(2);
+    expect(log).toHaveBeenCalledWith(expect.objectContaining({
+      kind: "completed",
+      claimed: 0,
+      outcomes: expect.objectContaining({ unexpected_failure: 0 }),
+    }));
+  });
+
+  it("logs the partial summary before propagating claim failures", async () => {
+    const log = vi.fn();
+    const deps = dependencies({ log });
+    deps.repository.claimDue.mockRejectedValue(new Error("claim unavailable"));
+
+    await expect(drainNotifications(DEADLINE, deps)).rejects.toThrow("claim unavailable");
+    expect(log).toHaveBeenCalledWith(expect.objectContaining({
+      kind: "completed",
+      claimed: 0,
+      cleanup: { activeExpired: 0, redacted: 0, deleted: 0 },
+    }));
   });
 
   it("returns and logs aggregate counts without identifiers or notification data", async () => {

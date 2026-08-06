@@ -15,6 +15,7 @@ import type {
   NotificationRow,
   ProviderErrorCode,
   ProviderOutcome,
+  RequeueErrorCode,
   UserEmailReader,
 } from "./types";
 
@@ -61,11 +62,13 @@ function claim(overrides: Partial<Claim> = {}): Claim {
 }
 
 class StateRepository implements NotificationRepository {
+  readonly transitionTimeoutMs = 10_000;
   current: NotificationRow;
   active = true;
   actions: string[] = [];
   nextTransitionResult: boolean | null = null;
   deferredExpiry: Date | null = null;
+  deferredReclaimAt: Date | null = null;
   transitionTimes: Array<{ action: string; at: Date }> = [];
 
   constructor(initial = row()) { this.current = initial; }
@@ -148,7 +151,7 @@ class StateRepository implements NotificationRepository {
     if (!this.result()) return false;
     this.active = false; return true;
   }
-  async requeue(id: string, token: string, at: Date, code: ProviderErrorCode | "recipient_lookup_failed") {
+  async requeue(id: string, token: string, at: Date, code: RequeueErrorCode) {
     this.owned(id, token);
     if (this.current.providerCallPhase !== "idle") throw new Error("fake repository forbids ambiguous requeue");
     this.actions.push(`requeue:${code}`); this.transitionTimes.push({ action: `requeue:${code}`, at }); this.active = false; return this.result();
@@ -175,7 +178,9 @@ class StateRepository implements NotificationRepository {
   async deferAmbiguous(id: string, token: string, reclaimAt: Date) {
     this.owned(id, token);
     if (this.current.providerCallPhase !== "in_flight") throw new Error("fake repository requires in-flight defer");
-    this.actions.push("defer"); this.deferredExpiry = this.current.providerIdempotencyExpiresAt;
+    this.actions.push("defer");
+    this.deferredExpiry = this.current.providerIdempotencyExpiresAt;
+    this.deferredReclaimAt = reclaimAt;
     this.active = false; return this.result();
   }
 }
@@ -338,6 +343,8 @@ describe("notification worker provider state machine", () => {
     expect(repository.actions).toEqual(["begin", "failure:provider_5xx", "defer"]);
     expect(repository.actions).not.toContain("requeue:provider_5xx");
     expect(repository.deferredExpiry).toEqual(originalExpiry);
+    expect(repository.deferredReclaimAt!.getTime()).toBeLessThan(originalExpiry.getTime());
+    expect(repository.deferredReclaimAt!.getTime()).toBeLessThanOrEqual(NOW.getTime() + 60_000);
     expect(renderer.render).not.toHaveBeenCalled();
   });
 
@@ -457,6 +464,53 @@ describe("notification worker preflight and safety", () => {
     short.dependencies.invocationDeadline = new Date(NOW.getTime() + 14_999);
     expect((await processNotificationClaim(claim(), short.dependencies)).kind).toBe("released_insufficient_time");
     expect(shortRepository.actions).toEqual(["release"]);
+  });
+
+  it("reserves enough deadline for the repository transition after a provider call", async () => {
+    const repository = new StateRepository();
+    const provider = scriptedProvider([{ kind: "sent", providerId: "must-not-send" }]);
+    const value = setup(repository, provider);
+    value.dependencies.safetyMarginMs = 0;
+    value.dependencies.invocationDeadline = new Date(
+      NOW.getTime() + provider.timeoutMs + repository.transitionTimeoutMs * 2,
+    );
+
+    await expect(processNotificationClaim(claim(), value.dependencies)).resolves.toEqual({
+      kind: "released_insufficient_time",
+    });
+    expect(repository.actions).toEqual(["release"]);
+  });
+
+  it("durably backs off idle work created under a different delivery mode", async () => {
+    const repository = new StateRepository(row({ deliveryMode: "resend" }));
+    const value = setup(repository);
+
+    await expect(processNotificationClaim(claim(), value.dependencies)).resolves.toEqual({
+      kind: "requeued",
+      errorCode: "delivery_mode_mismatch",
+    });
+    expect(repository.actions).toEqual(["requeue:delivery_mode_mismatch"]);
+    expect(repository.transitionTimes).toEqual([{
+      action: "requeue:delivery_mode_mismatch",
+      at: new Date(NOW.getTime() + 60_000),
+    }]);
+  });
+
+  it("preserves recipient-lookup backoff before handling a delivery-mode mismatch", async () => {
+    const repository = new StateRepository(row({
+      eventType: "bioblitz_winner",
+      deliveryMode: "resend",
+      recipientDid: "did:plc:winner",
+      recipientEmail: null,
+    }));
+    const value = setup(repository);
+    value.userEmailLookup.mockResolvedValueOnce({ kind: "missing" });
+
+    await expect(processNotificationClaim(claim({ previousStatus: "waiting_recipient" }), value.dependencies)).resolves.toEqual({
+      kind: "waiting_recipient",
+      errorCode: "recipient_missing",
+    });
+    expect(repository.actions).toEqual(["wait:recipient_missing"]);
   });
 
   it("capture follows freeze/begin/sent, records the exact immutable request, and terminates as capture", async () => {

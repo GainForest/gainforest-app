@@ -1,6 +1,6 @@
 import "server-only";
 
-import { supabaseRpc, supabaseSelect } from "@/lib/supabase/rest";
+import { SUPABASE_RPC_TIMEOUT_MS, supabaseRpc, supabaseSelect } from "@/lib/supabase/rest";
 import type {
   Claim,
   FrozenEmailRequest,
@@ -14,6 +14,7 @@ import type {
   NotificationRow,
   ProviderErrorCode,
   RecipientErrorCode,
+  RequeueErrorCode,
   TerminalErrorCode,
 } from "./types";
 
@@ -151,6 +152,7 @@ function decodeRow(value: unknown): NotificationRow | null {
 }
 
 export class SupabaseNotificationRepository implements NotificationRepository, NotificationEnqueueRepository, NotificationOrchestrationRepository {
+  readonly transitionTimeoutMs = SUPABASE_RPC_TIMEOUT_MS;
   private readonly log: NonNullable<RepositoryOptions["log"]>;
 
   constructor(options: RepositoryOptions = {}) {
@@ -161,7 +163,10 @@ export class SupabaseNotificationRepository implements NotificationRepository, N
     try {
       return await work();
     } catch (error) {
-      if (error instanceof NotificationRepositoryError) throw error;
+      if (error instanceof NotificationRepositoryError) {
+        if (error.code === "invalid_response") this.log({ code: error.code, operation });
+        throw error;
+      }
       const status = object(error)?.status;
       const code: RepositoryCode = typeof status === "number" && status >= 500
         ? "repository_unavailable"
@@ -309,7 +314,7 @@ export class SupabaseNotificationRepository implements NotificationRepository, N
   markSent(outboxId: string, token: string, providerId: string) {
     return this.transition("mark_sent", "notification_outbox_mark_sent", { p_outbox_id: outboxId, p_token: token, p_provider_id: providerId });
   }
-  requeue(outboxId: string, token: string, nextAttemptAt: Date, code: ProviderErrorCode | "recipient_lookup_failed") {
+  requeue(outboxId: string, token: string, nextAttemptAt: Date, code: RequeueErrorCode) {
     return this.transition("requeue", "notification_outbox_requeue", { p_outbox_id: outboxId, p_token: token, p_next_attempt_at: nextAttemptAt.toISOString(), p_error_code: code });
   }
   markDead(outboxId: string, token: string, code: TerminalErrorCode) {

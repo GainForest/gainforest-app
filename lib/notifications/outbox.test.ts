@@ -78,7 +78,7 @@ describe("welcome notification enqueue boundaries", () => {
       recipientEmail: "user@example.com",
       templateKey: "welcome-signup",
       locale: "en-BT",
-      providerIdempotencyKey: "auth-event-1",
+      providerIdempotencyKey: "signup:auth-event-1",
       deliveryMode: "capture",
       nextAttemptAt: NOW,
     });
@@ -110,10 +110,62 @@ describe("welcome notification enqueue boundaries", () => {
       recipientEmail: "member@example.com",
       templateKey: "welcome-membership-joined",
       locale: null,
-      providerIdempotencyKey: "membership-event-1",
+      providerIdempotencyKey: "organization-membership-joined:membership-event-1",
       deliveryMode: "capture",
       nextAttemptAt: NOW,
     });
+  });
+
+  it("namespaces welcome provider keys and handles optional organization DIDs", async () => {
+    const signup = dependencies(config({ signup: true }));
+    const membership = dependencies(config({ membershipJoined: true }));
+    const sharedInput = {
+      authEventId: "shared-auth-event",
+      userDid: "did:plc:user",
+      email: "member@example.com",
+    };
+
+    await enqueueSignup(sharedInput, signup);
+    await enqueueMembershipJoined(sharedInput, membership);
+
+    const signupRow = signup.repository.enqueue.mock.calls[0][0];
+    const membershipRow = membership.repository.enqueue.mock.calls[0][0];
+    expect(signupRow.providerIdempotencyKey).toBe("signup:shared-auth-event");
+    expect(membershipRow.providerIdempotencyKey).toBe("organization-membership-joined:shared-auth-event");
+    expect(membershipRow.payload).toMatchObject({ organizationDid: null });
+    expect(signupRow.providerIdempotencyKey).not.toBe(membershipRow.providerIdempotencyKey);
+  });
+
+  it("rejects an invalid optional organization DID before repository access", async () => {
+    const deps = dependencies(config({ membershipJoined: true }));
+
+    await expect(enqueueMembershipJoined({
+      authEventId: "membership-event-1",
+      userDid: "did:plc:user",
+      email: "member@example.com",
+      organizationDid: "not-a-did",
+    }, deps)).rejects.toMatchObject({
+      name: "NotificationProducerInputError",
+      field: "organizationDid",
+    });
+    expect(deps.repository.enqueue).not.toHaveBeenCalled();
+  });
+
+  it.each([
+    ["signup", enqueueSignup, config({ signup: true }), 250],
+    ["membership", enqueueMembershipJoined, config({ membershipJoined: true }), 226],
+  ] as const)("rejects a %s auth event ID that cannot fit the namespaced provider key", async (_event, producer, notificationConfig, length) => {
+    const deps = dependencies(notificationConfig);
+
+    await expect(producer({
+      authEventId: "x".repeat(length),
+      userDid: "did:plc:user",
+      email: "member@example.com",
+    }, deps)).rejects.toMatchObject({
+      name: "NotificationProducerInputError",
+      field: "authEventId",
+    });
+    expect(deps.repository.enqueue).not.toHaveBeenCalled();
   });
 
   it.each([
