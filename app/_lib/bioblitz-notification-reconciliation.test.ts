@@ -8,12 +8,9 @@ const mocks = vi.hoisted(() => ({
 vi.mock("./bioblitz", () => ({ endedRounds: () => mocks.rounds }));
 vi.mock("@/app/internal/badges/_lib/badge-records", () => ({ fetchInternalBadgeData: mocks.fetchData }));
 vi.mock("./bioblitz-notifications", () => ({ listBioblitzNotificationSummaries: mocks.list }));
-vi.mock("@/lib/notifications/bioblitz-runtime", () => ({
+vi.mock("@/lib/email-notifications/bioblitz-runtime", () => ({
   createBioblitzProducerRuntime: () => ({
-    config: {
-      deliveryMode: "capture",
-      producers: { signup: false, membershipJoined: false, invitation: false, bioblitzWinner: mocks.enabled },
-    },
+    config: { emailDisabled: !mocks.enabled },
     enqueue: mocks.enqueue,
   }),
 }));

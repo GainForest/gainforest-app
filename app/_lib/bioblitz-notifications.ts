@@ -1,9 +1,9 @@
 import "server-only";
 
 import { createHash } from "node:crypto";
-import { createBioblitzProcessRuntime, createBioblitzProducerRuntime } from "@/lib/notifications/bioblitz-runtime";
-import type { BioblitzPrize, BioblitzWinnerInput } from "@/lib/notifications/bioblitz";
-import type { ProcessOneOutcome } from "@/lib/notifications/orchestrator";
+import { createBioblitzProcessRuntime, createBioblitzProducerRuntime } from "@/lib/email-notifications/bioblitz-runtime";
+import type { BioblitzPrize, BioblitzWinnerInput } from "@/lib/email-notifications/bioblitz";
+import type { ProcessOneOutcome } from "@/lib/email-notifications/orchestrator";
 import { supabaseRpc, supabaseSelect } from "@/lib/supabase/rest";
 
 export type BioblitzNotificationStatus =

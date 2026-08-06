@@ -19,7 +19,7 @@ vi.mock("@/app/_lib/cgs-invitations", async importOriginal => {
   const actual = await importOriginal<typeof import("@/app/_lib/cgs-invitations")>();
   return { ...actual, createGroupInvitation };
 });
-vi.mock("@/lib/notifications/invitation-runtime", () => ({
+vi.mock("@/lib/email-notifications/invitation-runtime", () => ({
   createInvitationRuntime: () => ({ process }),
 }));
 
@@ -49,8 +49,7 @@ const invitation = {
 };
 
 beforeEach(() => {
-  vi.stubEnv("EMAIL_DELIVERY_MODE", "capture");
-  vi.stubEnv("EMAIL_INVITATION_ENABLED", "true");
+  vi.stubEnv("EMAIL_DISABLED", "false");
   fetchAuthSession.mockReset();
   fetchAuthSession.mockResolvedValue({ isLoggedIn: true, did: "did:plc:owner", handle: "owner.example.com", email: "owner@example.com" });
   createGroupInvitation.mockReset();
@@ -78,17 +77,17 @@ describe("POST /api/cgs/invitations", () => {
     await expect(response.json()).resolves.toMatchObject({
       invitation: { id: invitation.id, notification: { status: "sent", retryable: false } },
     });
-    expect(createGroupInvitation).toHaveBeenCalledWith(expect.objectContaining({ deliveryMode: "capture" }));
+    expect(createGroupInvitation).toHaveBeenCalledWith(expect.objectContaining({ enqueueNotification: true }));
     expect(process).toHaveBeenCalledWith(invitation.notification.outboxId, expect.any(Date));
   });
 
-  it("still creates the invitation without delivery when its producer is disabled", async () => {
-    vi.stubEnv("EMAIL_INVITATION_ENABLED", "false");
+  it("still creates the invitation without delivery when notification email is disabled", async () => {
+    vi.stubEnv("EMAIL_DISABLED", "true");
     createGroupInvitation.mockResolvedValueOnce({ ...invitation, notification: null });
     const { POST } = await import("./route");
     const response = await POST(request());
     expect(response.status).toBe(200);
-    expect(createGroupInvitation).toHaveBeenCalledWith(expect.objectContaining({ deliveryMode: null }));
+    expect(createGroupInvitation).toHaveBeenCalledWith(expect.objectContaining({ enqueueNotification: false }));
     expect(process).not.toHaveBeenCalled();
   });
 

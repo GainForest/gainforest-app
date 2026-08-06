@@ -37,8 +37,9 @@ with expected(ordinal,column_name,column_type,not_null,default_expression) as (v
   (26,'provider_idempotency_key','text',false,null),(27,'provider_idempotency_expires_at','timestamp with time zone',false,null),
   (28,'last_error_code','text',false,null),(29,'last_error_summary','text',false,null),
   (30,'last_manual_retry_at','timestamp with time zone',false,null),(31,'manual_retry_count','integer',true,'0'),
-  (32,'terminal_at','timestamp with time zone',false,null),(33,'created_at','timestamp with time zone',true,'clock_timestamp()'),
-  (34,'updated_at','timestamp with time zone',true,'clock_timestamp()')
+  (32,'manual_handled_at','timestamp with time zone',false,null),(33,'manual_handled_by','text',false,null),
+  (34,'terminal_at','timestamp with time zone',false,null),(35,'created_at','timestamp with time zone',true,'clock_timestamp()'),
+  (36,'updated_at','timestamp with time zone',true,'clock_timestamp()')
 ), actual as (
   select a.attnum::integer,a.attname::text,pg_catalog.format_type(a.atttypid,a.atttypmod),a.attnotnull,
     pg_catalog.pg_get_expr(d.adbin,d.adrelid)
@@ -50,7 +51,7 @@ select pg_temp.assert_true(not exists(
   (select * from expected except select * from actual)
   union all
   (select * from actual except select * from expected)
-), 'table has the canonical ordered 34-column names, types, nullability, and defaults');
+), 'table has the canonical ordered 36-column names, types, nullability, and defaults');
 select pg_temp.assert_true((select relrowsecurity from pg_class where oid='public.notification_outbox'::regclass), 'RLS enabled');
 select pg_temp.assert_true(not has_table_privilege('anon','public.notification_outbox','select'), 'anon cannot select');
 select pg_temp.assert_true(not has_table_privilege('authenticated','public.notification_outbox','insert'), 'authenticated cannot insert');
@@ -70,6 +71,7 @@ with expected(signature) as (values
   ('notification_outbox_expire_claimed(uuid, uuid, text)'),
   ('notification_outbox_freeze_request(uuid, uuid, text, text, text, text, text)'),
   ('notification_outbox_guard_immutable()'),
+  ('notification_outbox_health()'),
   ('notification_outbox_mark_dead(uuid, uuid, text)'),
   ('notification_outbox_mark_sent(uuid, uuid, text)'),
   ('notification_outbox_record_provider_failure(uuid, uuid, text)'),
@@ -99,6 +101,11 @@ select pg_temp.assert_true(to_regprocedure('public.notification_outbox_suppress_
 select pg_temp.assert_true((select count(*)=1 from pg_proc p join pg_namespace n on n.oid=p.pronamespace where n.nspname='public' and p.proname='notification_outbox_suppress_event'), 'only one suppression RPC signature exists');
 select pg_temp.assert_true(not has_function_privilege('public','public.notification_outbox_suppress_event(text,text)','execute') and not has_function_privilege('anon','public.notification_outbox_suppress_event(text,text)','execute') and not has_function_privilege('authenticated','public.notification_outbox_suppress_event(text,text)','execute'), 'browser roles cannot suppress events');
 select pg_temp.assert_true(not has_function_privilege('service_role','public.notification_outbox_guard_immutable()','execute'), 'trigger function is not directly callable by service role');
+select pg_temp.assert_true(not has_function_privilege('public','public.notification_invitation_create(uuid,text,text,text,text,text,text,text,text,text,text,text,text,boolean,timestamp with time zone,timestamp with time zone)','execute') and has_function_privilege('service_role','public.notification_invitation_create(uuid,text,text,text,text,text,text,text,text,text,text,text,text,boolean,timestamp with time zone,timestamp with time zone)','execute'), 'atomic invitation creation is service-role-only');
+select pg_temp.assert_true(not has_function_privilege('authenticated','public.notification_invitation_close(uuid,text,text,text)','execute') and has_function_privilege('service_role','public.notification_invitation_close(uuid,text,text,text)','execute'), 'invitation closing is service-role-only');
+select pg_temp.assert_true(not has_function_privilege('anon','public.notification_invitation_retry(uuid)','execute') and has_function_privilege('service_role','public.notification_invitation_retry(uuid)','execute'), 'invitation retry is service-role-only');
+select pg_temp.assert_true(not has_function_privilege('authenticated','public.notification_bioblitz_mark_handled(text,text)','execute') and has_function_privilege('service_role','public.notification_bioblitz_mark_handled(text,text)','execute'), 'BioBlitz manual handling is service-role-only');
+select pg_temp.assert_true(not has_function_privilege('public','public.notification_outbox_health()','execute') and has_function_privilege('service_role','public.notification_outbox_health()','execute'), 'queue health is service-role-only');
 select pg_temp.assert_true(to_regprocedure('extensions.notification_outbox_sha256(bytea)') is not null, 'internal SHA-256 helper exists');
 select pg_temp.assert_true(not has_function_privilege('public','extensions.notification_outbox_sha256(bytea)','execute') and not has_function_privilege('anon','extensions.notification_outbox_sha256(bytea)','execute') and not has_function_privilege('authenticated','extensions.notification_outbox_sha256(bytea)','execute') and not has_function_privilege('service_role','extensions.notification_outbox_sha256(bytea)','execute'), 'internal SHA-256 helper is not directly callable by API roles');
 select pg_temp.assert_true(to_regprocedure('public.notification_outbox_wait_recipient(uuid,uuid,timestamp with time zone,text,text)') is null, 'free-form recipient error summary RPC is absent');
@@ -266,17 +273,9 @@ select pg_temp.assert_raises(
 select pg_temp.assert_true(public.notification_outbox_begin_provider_call((select outbox_id from queued_two),'40000000-0000-4000-8000-000000000001',clock_timestamp()+interval '24 hours'), 'provider call starts durably');
 select pg_temp.assert_true((select provider_call_phase='in_flight' and provider_attempt_count=1 and processing_run_count=2 from public.notification_outbox where id=(select outbox_id from queued_two)), 'provider and processing counts are separate');
 select pg_temp.assert_true(not public.notification_outbox_release_claim((select outbox_id from queued_two),'40000000-0000-4000-8000-000000000001'), 'in-flight claim cannot be released');
-select pg_temp.assert_raises(
-  format($q$select public.notification_outbox_record_provider_failure('%s','40000000-0000-4000-8000-000000000001','provider_timeout')$q$,(select outbox_id from queued_two)),
-  'unsupported provider error code', 'timeout cannot clear an ambiguous provider call'
-);
-select pg_temp.assert_true(public.notification_outbox_record_provider_failure((select outbox_id from queued_two),'40000000-0000-4000-8000-000000000001','provider_5xx'), 'authoritative response returns to idle');
+select pg_temp.assert_true(public.notification_outbox_record_provider_failure((select outbox_id from queued_two),'40000000-0000-4000-8000-000000000001','provider_timeout'), 'an authoritative HTTP 408 response returns to idle');
 select pg_temp.assert_true((select provider_call_phase='idle' and provider_idempotency_expires_at is null from public.notification_outbox where id=(select outbox_id from queued_two)), 'authoritative failure clears ambiguity state');
-select pg_temp.assert_raises(
-  format($q$select public.notification_outbox_requeue('%s','40000000-0000-4000-8000-000000000001',clock_timestamp()+interval '5 minutes','provider_timeout')$q$,(select outbox_id from queued_two)),
-  'unsupported requeue error code', 'timeout cannot use ordinary requeue'
-);
-select pg_temp.assert_true(public.notification_outbox_requeue((select outbox_id from queued_two),'40000000-0000-4000-8000-000000000001',clock_timestamp()+interval '5 minutes','provider_5xx'), 'idle work requeues');
+select pg_temp.assert_true(public.notification_outbox_requeue((select outbox_id from queued_two),'40000000-0000-4000-8000-000000000001',clock_timestamp()+interval '5 minutes','provider_timeout'), 'an authoritative HTTP 408 response can use ordinary requeue');
 
 -- Fresh authoritative permanent provider responses terminalize directly from
 -- in_flight in one token-owned transition. Resumed ambiguity is defer-only.
@@ -464,6 +463,142 @@ select public.notification_outbox_freeze_request((select id from public.notifica
 select pg_temp.assert_true(public.notification_outbox_suppress_claimed((select id from public.notification_outbox where event_key_hash=encode(extensions.digest('suppress:claimed','sha256'),'hex')),'68100000-0000-4000-8000-000000000001','manually_suppressed'), 'claimed idle suppression succeeds');
 select pg_temp.assert_true((select status='suppressed' and template_key is null and payload is null and recipient_email is null and source_id is null and provider_idempotency_key is null and frozen_subject is null and frozen_html is null and processing_token is null from public.notification_outbox where event_key_hash=encode(extensions.digest('suppress:claimed','sha256'),'hex')), 'claimed suppression clears private data and frozen content, then invalidates ownership');
 
+-- Invitation creation and notification enqueue commit atomically. Closing an
+-- invitation suppresses unsent work; manual retry is permission-ready and safe.
+truncate table public.cgs_group_invitations;
+
+create temp table invitation_created as select public.notification_invitation_create(
+  '81000000-0000-4000-8000-000000000001','did:plc:forest','invitee@example.com','member','did:plc:owner','owner.example.com','owner@example.com',
+  'Forest Circle','forest.example.com','Forest Owner','https://example.test/account/owner','https://example.test','en',true,
+  clock_timestamp(),clock_timestamp()+interval '7 days'
+) result;
+select pg_temp.assert_true((select result#>>'{invitation,id}'='81000000-0000-4000-8000-000000000001' and result#>>'{notification,status}'='queued' from invitation_created), 'atomic invitation creation returns invitation and queued notification');
+select pg_temp.assert_true((select count(*)=1 from public.cgs_group_invitations where id='81000000-0000-4000-8000-000000000001'), 'atomic invitation creation stores one invitation');
+select pg_temp.assert_true((select count(*)=1 and bool_and(event_type='invitation' and source_id='81000000-0000-4000-8000-000000000001' and recipient_email='invitee@example.com' and provider_idempotency_key=id::text) from public.notification_outbox where source_id='81000000-0000-4000-8000-000000000001'), 'atomic invitation creation stores one UUID-keyed outbox row');
+select pg_temp.assert_true((select payload->>'acceptUrl'='https://example.test/invite/81000000-0000-4000-8000-000000000001' and payload->>'organizationName'='Forest Circle' from public.notification_outbox where source_id='81000000-0000-4000-8000-000000000001'), 'invitation render input is frozen from committed identity');
+
+create temp table invitation_duplicate as select public.notification_invitation_create(
+  '81000000-0000-4000-8000-000000000099','did:plc:forest','invitee@example.com','member','did:plc:other','other.example.com','other@example.com',
+  'Changed name','changed.example.com','Changed Inviter',null,'https://other.example','pt',true,
+  clock_timestamp(),clock_timestamp()+interval '14 days'
+) result;
+select pg_temp.assert_true((select result#>>'{invitation,id}'='81000000-0000-4000-8000-000000000001' and (result#>>'{notification,duplicate}')::boolean from invitation_duplicate), 'same pending identity and role returns the original invitation and notification');
+select pg_temp.assert_true((select count(*)=1 from public.cgs_group_invitations where repo='did:plc:forest' and email='invitee@example.com'), 'duplicate invitation does not create a second row');
+select pg_temp.assert_raises(
+  $$select public.notification_invitation_create('81000000-0000-4000-8000-000000000098','did:plc:forest','invitee@example.com','admin','did:plc:owner',null,null,'Forest Circle',null,'Owner',null,'https://example.test','en',true,clock_timestamp(),clock_timestamp()+interval '7 days')$$,
+  'invitation_role_conflict', 'pending invitation role cannot be changed by replay'
+);
+
+select public.notification_invitation_create(
+  '81000000-0000-4000-8000-000000000005','did:plc:expired-org','expired@example.com','member','did:plc:owner',null,null,
+  'Expired Org',null,'Owner',null,'https://example.test','en',true,clock_timestamp()-interval '8 days',clock_timestamp()-interval '1 day'
+);
+create temp table replaced_expired_invitation as select public.notification_invitation_create(
+  '81000000-0000-4000-8000-000000000006','did:plc:expired-org','expired@example.com','admin','did:plc:owner',null,null,
+  'Expired Org',null,'Owner',null,'https://example.test','en',true,clock_timestamp(),clock_timestamp()+interval '7 days'
+) result;
+select pg_temp.assert_true((select result#>>'{invitation,id}'='81000000-0000-4000-8000-000000000006' from replaced_expired_invitation), 'expired pending identity can be replaced by a new invitation');
+select pg_temp.assert_true((select status='expired' from public.cgs_group_invitations where id='81000000-0000-4000-8000-000000000005'), 'replacement durably expires the old invitation');
+select pg_temp.assert_true((select status='suppressed' from public.notification_outbox where event_key_hash=encode(extensions.digest('organization-invite:81000000-0000-4000-8000-000000000005','sha256'),'hex')), 'replacement suppresses the expired invitation notification');
+
+select * from public.notification_outbox_enqueue(
+  'organization-invite:81000000-0000-4000-8000-000000000004','signup','{}','conflicting-source',null,
+  'conflict@example.com','welcome','en','conflicting-source',clock_timestamp()
+);
+select pg_temp.assert_raises(
+  $$select public.notification_invitation_create('81000000-0000-4000-8000-000000000004','did:plc:rollback','rollback@example.com','member','did:plc:owner',null,null,'Rollback Org',null,'Owner',null,'https://example.test','en',true,clock_timestamp(),clock_timestamp()+interval '7 days')$$,
+  'notification_outbox_idempotency_conflict', 'outbox conflict rolls invitation creation back'
+);
+select pg_temp.assert_true(not exists(select 1 from public.cgs_group_invitations where id='81000000-0000-4000-8000-000000000004'), 'failed outbox enqueue leaves no invitation');
+
+select pg_temp.assert_true((public.notification_invitation_retry('81000000-0000-4000-8000-000000000001')->>'status')='queued', 'queued invitation notification can be expedited');
+select pg_temp.assert_raises(
+  $$select public.notification_invitation_retry('81000000-0000-4000-8000-000000000001')$$,
+  'invitation_retry_cooldown', 'manual invitation retry enforces database cooldown'
+);
+create temp table invitation_canceled as select public.notification_invitation_close('81000000-0000-4000-8000-000000000001','canceled',null,null) result;
+select pg_temp.assert_true((select result#>>'{invitation,status}'='canceled' and result#>>'{notification,status}'='suppressed' from invitation_canceled), 'cancel and notification suppression commit together');
+select pg_temp.assert_true((select status='suppressed' and recipient_email is null and payload is null from public.notification_outbox where event_key_hash=encode(extensions.digest('organization-invite:81000000-0000-4000-8000-000000000001','sha256'),'hex')), 'canceled invitation redacts unsent notification');
+
+select * from public.notification_outbox_enqueue(
+  'organization-invite:81000000-0000-4000-8000-000000000007','invitation','{"invitationId":"different","invitedEmail":"wrong@example.com","role":"member"}',
+  'different',null,'wrong@example.com','organization-invitation','en',null,clock_timestamp()
+);
+select pg_temp.assert_raises(
+  $$select public.notification_invitation_create('81000000-0000-4000-8000-000000000007','did:plc:bound','bound@example.com','member','did:plc:owner',null,null,'Bound Org',null,'Owner',null,'https://example.test','en',true,clock_timestamp(),clock_timestamp()+interval '7 days')$$,
+  'notification_outbox_idempotency_conflict', 'same-type outbox conflict cannot be attached to a different invitation'
+);
+select pg_temp.assert_true(not exists(select 1 from public.cgs_group_invitations where id='81000000-0000-4000-8000-000000000007'), 'same-type outbox conflict rolls invitation creation back');
+
+create temp table disabled_invitation as select public.notification_invitation_create(
+  '81000000-0000-4000-8000-000000000008','did:plc:disabled','disabled@example.com','member','did:plc:original',null,null,
+  'Disabled Org',null,'Original Inviter',null,'https://example.test','en',false,clock_timestamp(),clock_timestamp()+interval '7 days'
+) result;
+create temp table duplicate_disabled_invitation as select public.notification_invitation_create(
+  '81000000-0000-4000-8000-000000000009','did:plc:disabled','disabled@example.com','member','did:plc:different',null,null,
+  'Changed Org',null,'Different Inviter',null,'https://other.example','pt',true,clock_timestamp(),clock_timestamp()+interval '7 days'
+) result;
+select pg_temp.assert_true((select result#>>'{invitation,id}'='81000000-0000-4000-8000-000000000008' and result->'notification'='null'::jsonb from duplicate_disabled_invitation), 'an existing disabled invitation is not retroactively emailed by a later duplicate');
+select pg_temp.assert_true(not exists(select 1 from public.notification_outbox where event_key_hash=encode(extensions.digest('organization-invite:81000000-0000-4000-8000-000000000008','sha256'),'hex')), 'disabled invitation duplicate creates no outbox row');
+
+create temp table invitation_rejected as select public.notification_invitation_create(
+  '81000000-0000-4000-8000-000000000002','did:plc:forest','rejected@example.com','member','did:plc:owner',null,null,
+  'Forest Circle',null,'Owner',null,'https://example.test','en',true,clock_timestamp(),clock_timestamp()+interval '7 days'
+) result;
+select * from public.notification_outbox_claim_one((select id from public.notification_outbox where source_id='81000000-0000-4000-8000-000000000002'),'82000000-0000-4000-8000-000000000002',60);
+select public.notification_outbox_freeze_request((select id from public.notification_outbox where source_id='81000000-0000-4000-8000-000000000002'),'82000000-0000-4000-8000-000000000002','from@example.com','rejected@example.com','Invite','Invite html','Invite text');
+select public.notification_outbox_begin_provider_call((select id from public.notification_outbox where source_id='81000000-0000-4000-8000-000000000002'),'82000000-0000-4000-8000-000000000002',clock_timestamp()+interval '1 hour');
+select public.notification_outbox_terminal_provider_failure((select id from public.notification_outbox where source_id='81000000-0000-4000-8000-000000000002'),'82000000-0000-4000-8000-000000000002','provider_rejected');
+select pg_temp.assert_true((public.notification_invitation_retry('81000000-0000-4000-8000-000000000002')->>'status')='queued', 'definitive provider rejection can be retried after operator correction');
+create temp table invitation_accepted as select public.notification_invitation_close('81000000-0000-4000-8000-000000000002','accepted','did:plc:member','rejected@example.com') result;
+select pg_temp.assert_true((select result#>>'{invitation,status}'='accepted' and result#>>'{notification,status}'='suppressed' from invitation_accepted), 'acceptance and queued-notification suppression commit together');
+
+create temp table invitation_invalid as select public.notification_invitation_create(
+  '81000000-0000-4000-8000-000000000003','did:plc:forest','invalid@example.com','member','did:plc:owner',null,null,
+  'Forest Circle',null,'Owner',null,'https://example.test','en',true,clock_timestamp(),clock_timestamp()+interval '7 days'
+) result;
+select * from public.notification_outbox_claim_one((select id from public.notification_outbox where source_id='81000000-0000-4000-8000-000000000003'),'82000000-0000-4000-8000-000000000003',60);
+select public.notification_outbox_freeze_request((select id from public.notification_outbox where source_id='81000000-0000-4000-8000-000000000003'),'82000000-0000-4000-8000-000000000003','from@example.com','invalid@example.com','Invite','Invite html','Invite text');
+select public.notification_outbox_begin_provider_call((select id from public.notification_outbox where source_id='81000000-0000-4000-8000-000000000003'),'82000000-0000-4000-8000-000000000003',clock_timestamp()+interval '1 hour');
+select public.notification_outbox_terminal_provider_failure((select id from public.notification_outbox where source_id='81000000-0000-4000-8000-000000000003'),'82000000-0000-4000-8000-000000000003','notification_invalid');
+select pg_temp.assert_raises(
+  $$select public.notification_invitation_retry('81000000-0000-4000-8000-000000000003')$$,
+  'invitation_notification_not_safely_retryable', 'invalid immutable notification cannot be manually retried'
+);
+
+-- BioBlitz manual handling suppresses future sends, records moderator handling,
+-- and refuses an in-flight provider boundary.
+select * from public.notification_outbox_enqueue(
+  'bioblitz:4:most-observations:did:plc:winner','bioblitz_winner','{"roundId":4}','bioblitz:4:most-observations','did:plc:winner',
+  null,'bioblitz-winner',null,null,clock_timestamp()
+);
+create temp table bioblitz_handled as select public.notification_bioblitz_mark_handled(
+  'bioblitz:4:most-observations:did:plc:winner','did:plc:moderator'
+) result;
+select pg_temp.assert_true((select result->>'status'='suppressed' and (result->>'handled_manually')::boolean from bioblitz_handled), 'moderator marks BioBlitz notification handled');
+select pg_temp.assert_true((select status='suppressed' and manual_handled_at is not null and manual_handled_by='did:plc:moderator' and payload is null and recipient_did is null from public.notification_outbox where event_key_hash=encode(extensions.digest('bioblitz:4:most-observations:did:plc:winner','sha256'),'hex')), 'manual handling redacts delivery data and stores the moderator audit');
+select public.notification_bioblitz_mark_handled('bioblitz:4:most-observations:did:plc:winner','did:plc:other-moderator');
+select pg_temp.assert_true((select manual_handled_by='did:plc:moderator' from public.notification_outbox where event_key_hash=encode(extensions.digest('bioblitz:4:most-observations:did:plc:winner','sha256'),'hex')), 'manual handling replay preserves the first moderator audit');
+create temp table bioblitz_handled_replay as select * from public.notification_outbox_enqueue(
+  'bioblitz:4:most-observations:did:plc:winner','bioblitz_winner','{"roundId":4}','bioblitz:4:most-observations','did:plc:winner',
+  null,'bioblitz-winner',null,null,clock_timestamp()
+);
+select pg_temp.assert_true((select status='suppressed' and duplicate from bioblitz_handled_replay), 'manual handling tombstone blocks reconciliation replay');
+
+select * from public.notification_outbox_enqueue(
+  'bioblitz:4:best-picture:did:plc:winner','bioblitz_winner','{"roundId":4}','bioblitz:4:best-picture','did:plc:winner',
+  null,'bioblitz-winner',null,null,clock_timestamp()
+);
+select * from public.notification_outbox_claim_one((select id from public.notification_outbox where source_id='bioblitz:4:best-picture'),'83000000-0000-4000-8000-000000000001',60);
+select public.notification_outbox_resolve_recipient((select id from public.notification_outbox where source_id='bioblitz:4:best-picture'),'83000000-0000-4000-8000-000000000001','winner@example.com');
+select public.notification_outbox_freeze_request((select id from public.notification_outbox where source_id='bioblitz:4:best-picture'),'83000000-0000-4000-8000-000000000001','from@example.com','winner@example.com','Winner','Winner html','Winner text');
+select public.notification_outbox_begin_provider_call((select id from public.notification_outbox where source_id='bioblitz:4:best-picture'),'83000000-0000-4000-8000-000000000001',clock_timestamp()+interval '1 hour');
+select pg_temp.assert_raises(
+  $$select public.notification_bioblitz_mark_handled('bioblitz:4:best-picture:did:plc:winner','did:plc:moderator')$$,
+  'bioblitz_notification_not_safely_suppressible', 'manual handling refuses in-flight provider work'
+);
+select pg_temp.assert_true((select manual_handled_at is null and status='processing' from public.notification_outbox where source_id='bioblitz:4:best-picture'), 'refused in-flight handling stores no false audit');
+
 -- Claim and token-owned transitions enforce retention/provider boundaries
 -- independently of cleanup while preserving unexpired live leases.
 truncate public.notification_outbox;
@@ -622,8 +757,17 @@ select pg_temp.assert_raises(
   'unsupported suppression code', 'claimed suppression rejects a NULL error code'
 );
 
+-- Queue health exposes aggregate backlog only, including oldest due age.
+truncate public.notification_outbox;
+select * from public.notification_outbox_enqueue('health:queued','signup','{}','health-q',null,'health@example.com','welcome','en','health-q',clock_timestamp());
+select * from public.notification_outbox_enqueue('health:waiting','bioblitz_winner','{}','health-w','did:plc:winner',null,'bioblitz-winner',null,null,clock_timestamp());
+update public.notification_outbox set next_attempt_at=clock_timestamp()-interval '2 minutes' where source_id='health-q';
+create temp table queue_health as select public.notification_outbox_health() result;
+select pg_temp.assert_true((select (result->>'queued')::integer=1 and (result->>'waiting_recipient')::integer=1 and (result->>'processing')::integer=0 and (result->>'dead')::integer=0 from queue_health), 'queue health returns aggregate status counts');
+select pg_temp.assert_true((select (result->>'oldest_due_age_seconds')::integer between 119 and 125 from queue_health), 'queue health returns bounded oldest due age without row data');
+
 -- Direct invalid states and bounds are rejected by table constraints.
-select pg_temp.assert_raises(format($q$update public.notification_outbox set status='unknown' where id='%s'$q$,(select id from public.notification_outbox limit 1)),'notification_outbox_status_check','unknown status rejected');
-select pg_temp.assert_raises(format($q$update public.notification_outbox set processing_run_count=-1 where id='%s'$q$,(select id from public.notification_outbox limit 1)),'notification_outbox_processing_run_count_check','negative processing count rejected');
+select pg_temp.assert_raises(format($q$update public.notification_outbox set status='unknown' where id='%s'$q$,(select id from public.notification_outbox where source_id='health-q')),'notification_outbox_status_check','unknown status rejected');
+select pg_temp.assert_raises(format($q$update public.notification_outbox set processing_run_count=-1 where id='%s'$q$,(select id from public.notification_outbox where source_id='health-q')),'notification_outbox_processing_run_count_check','negative processing count rejected');
 
 select 'notification outbox SQL contracts passed';

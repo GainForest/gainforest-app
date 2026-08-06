@@ -80,7 +80,7 @@ describe("createGroupInvitation", () => {
       cookie: "session=cookie",
       origin: "https://example.test",
       acceptLanguage: "pt-BR",
-      deliveryMode: "capture",
+      enqueueNotification: true,
     });
 
     expect(invitation.notification).toEqual({
@@ -100,7 +100,7 @@ describe("createGroupInvitation", () => {
       p_inviter_name: "Forest Owner",
       p_public_origin: "https://example.test",
       p_locale: "pt",
-      p_delivery_mode: "capture",
+      p_enqueue_notification: true,
     }));
     expect(fetchMock).not.toHaveBeenCalled();
     vi.unstubAllGlobals();
@@ -114,7 +114,7 @@ describe("createGroupInvitation", () => {
 
     await createGroupInvitation({
       repo: "did:plc:forest", email: "invitee@example.com", role: "member", session,
-      cookie: "session=cookie", origin: "https://example.test", acceptLanguage: "es", deliveryMode: null,
+      cookie: "session=cookie", origin: "https://example.test", acceptLanguage: "es", enqueueNotification: false,
     });
 
     expect(supabaseRpc).toHaveBeenCalledWith("notification_invitation_create", expect.objectContaining({
@@ -127,17 +127,17 @@ describe("createGroupInvitation", () => {
     supabaseRpc.mockResolvedValue({ invitation: rawInvitation, notification: null });
     const invitation = await createGroupInvitation({
       repo: "did:plc:forest", email: "invitee@example.com", role: "member", session,
-      cookie: "session=cookie", origin: "https://example.test", acceptLanguage: null, deliveryMode: null,
+      cookie: "session=cookie", origin: "https://example.test", acceptLanguage: null, enqueueNotification: false,
     });
     expect(invitation.notification).toBeNull();
-    expect(supabaseRpc).toHaveBeenCalledWith("notification_invitation_create", expect.objectContaining({ p_delivery_mode: null }));
+    expect(supabaseRpc).toHaveBeenCalledWith("notification_invitation_create", expect.objectContaining({ p_enqueue_notification: false }));
   });
 
   it("enforces current organization role before database mutation", async () => {
     fetchCgsMembersWithCookie.mockResolvedValue({ members: [{ did: session.did, role: "member" }] });
     await expect(createGroupInvitation({
       repo: "did:plc:forest", email: "invitee@example.com", role: "member", session,
-      cookie: "session=cookie", origin: "https://example.test", acceptLanguage: null, deliveryMode: "capture",
+      cookie: "session=cookie", origin: "https://example.test", acceptLanguage: null, enqueueNotification: true,
     })).rejects.toMatchObject({ name: "GroupInvitationError", status: 403 });
     expect(supabaseRpc).not.toHaveBeenCalled();
   });
@@ -146,7 +146,7 @@ describe("createGroupInvitation", () => {
     supabaseRpc.mockRejectedValue(new Error("invitation_role_conflict invitee@example.com private payload"));
     const error = await createGroupInvitation({
       repo: "did:plc:forest", email: "invitee@example.com", role: "admin", session,
-      cookie: "session=cookie", origin: "https://example.test", acceptLanguage: null, deliveryMode: "capture",
+      cookie: "session=cookie", origin: "https://example.test", acceptLanguage: null, enqueueNotification: true,
     }).catch((reason: unknown) => reason);
     expect(error).toBeInstanceOf(GroupInvitationError);
     expect((error as GroupInvitationError).message).toBe("Cancel the pending invitation before changing this person’s role.");

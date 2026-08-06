@@ -13,7 +13,10 @@ command -v flock >/dev/null || { echo "test:notifications:local requires flock" 
 if [[ -n "${DOCKER_HOST:-}" ]]; then
   DOCKER_ENDPOINT=$DOCKER_HOST
 else
-  DOCKER_CONTEXT_NAME=${DOCKER_CONTEXT:-$(docker context show 2>/dev/null)}
+  DOCKER_CONTEXT_NAME=${DOCKER_CONTEXT:-}
+  if [[ -z "$DOCKER_CONTEXT_NAME" ]]; then
+    DOCKER_CONTEXT_NAME=$(docker context show 2>/dev/null) || DOCKER_CONTEXT_NAME=""
+  fi
   [[ -n "$DOCKER_CONTEXT_NAME" ]] || { echo "test:notifications:local could not resolve the Docker context" >&2; exit 2; }
   DOCKER_ENDPOINT=$(docker context inspect "$DOCKER_CONTEXT_NAME" --format '{{ (index .Endpoints "docker").Host }}' 2>/dev/null) || {
     echo "test:notifications:local could not inspect Docker context '$DOCKER_CONTEXT_NAME'" >&2
@@ -77,6 +80,7 @@ flock -n 9 || {
 TMP=$(mktemp -d)
 STACK_TOUCHED=false
 APP_PID=""
+RESEND_PID=""
 cleanup() {
   local original_status=$?
   local cleanup_failed=false
@@ -95,6 +99,10 @@ cleanup() {
       cleanup_failed=true
     fi
     wait "$APP_PID" >/dev/null 2>&1
+  fi
+  if [[ -n "$RESEND_PID" ]] && kill -0 "$RESEND_PID" >/dev/null 2>&1; then
+    kill "$RESEND_PID" >/dev/null 2>&1
+    wait "$RESEND_PID" >/dev/null 2>&1 || true
   fi
   if [[ "$STACK_TOUCHED" == true && "${KEEP_NOTIFICATION_LOCAL_STACK:-0}" != 1 ]]; then
     if ! pnpm exec supabase stop --project-id "$PROJECT_ID" --no-backup >/dev/null 2>&1; then
@@ -221,6 +229,56 @@ then
   echo "test:notifications:local cannot start because 127.0.0.1:$APP_PORT is already in use" >&2
   exit 2
 fi
+
+RESEND_PORT=${NOTIFICATION_LOCAL_RESEND_PORT:-3056}
+[[ "$RESEND_PORT" =~ ^[0-9]+$ && "$RESEND_PORT" -ge 1024 && "$RESEND_PORT" -le 65535 && "$RESEND_PORT" != "$APP_PORT" ]] || {
+  echo "test:notifications:local requires a distinct unprivileged NOTIFICATION_LOCAL_RESEND_PORT" >&2
+  exit 2
+}
+RESEND_PORT="$RESEND_PORT" RESEND_CAPTURE_FILE="$TMP/resend.jsonl" node <<'NODE' >"$TMP/resend.log" 2>&1 &
+const fs = require("node:fs");
+const http = require("node:http");
+let sequence = 0;
+const server = http.createServer((request, response) => {
+  if (request.method === "GET" && request.url === "/health") {
+    response.writeHead(204).end();
+    return;
+  }
+  if (request.method !== "POST" || request.url !== "/emails"
+    || request.headers.authorization !== "Bearer local-resend-test-key"
+    || typeof request.headers["idempotency-key"] !== "string") {
+    response.writeHead(400, { "content-type": "application/json" }).end(JSON.stringify({ message: "invalid local Resend request" }));
+    return;
+  }
+  const chunks = [];
+  request.on("data", chunk => chunks.push(Buffer.from(chunk)));
+  request.on("end", () => {
+    try {
+      const body = JSON.parse(Buffer.concat(chunks).toString("utf8"));
+      fs.appendFileSync(process.env.RESEND_CAPTURE_FILE, `${JSON.stringify({
+        idempotencyKey: request.headers["idempotency-key"], body,
+      })}\n`);
+      sequence += 1;
+      response.writeHead(200, { "content-type": "application/json" }).end(JSON.stringify({ id: `local-resend-${sequence}` }));
+    } catch {
+      response.writeHead(400, { "content-type": "application/json" }).end(JSON.stringify({ message: "invalid JSON" }));
+    }
+  });
+});
+server.listen(Number(process.env.RESEND_PORT), "127.0.0.1");
+NODE
+RESEND_PID=$!
+for _ in $(seq 1 40); do
+  curl --silent --fail "http://127.0.0.1:$RESEND_PORT/health" >/dev/null && break
+  kill -0 "$RESEND_PID" >/dev/null 2>&1 || break
+  sleep 0.1
+done
+curl --silent --fail "http://127.0.0.1:$RESEND_PORT/health" >/dev/null || {
+  echo "test:notifications:local could not start the loopback Resend stub" >&2
+  cat "$TMP/resend.log" >&2
+  exit 1
+}
+
 APP_URL="http://127.0.0.1:$APP_PORT"
 WEBHOOK_SECRET="local-notification-webhook-secret"
 CRON_SECRET="local-notification-cron-secret"
@@ -228,11 +286,11 @@ SUPABASE_URL="$API_URL" \
 SUPABASE_SERVICE_ROLE_KEY="$SERVICE_ROLE_KEY" \
 NEXT_PUBLIC_AUTH_BASE_URL="http://127.0.0.1:9" \
 NEXT_PUBLIC_SITE_URL="$APP_URL" \
-EMAIL_DELIVERY_MODE=capture \
-EMAIL_SIGNUP_ENABLED=true \
-EMAIL_MEMBERSHIP_JOINED_ENABLED=true \
-EMAIL_INVITATION_ENABLED=true \
-EMAIL_BIOBLITZ_WINNER_ENABLED=false \
+EMAIL_DISABLED=false \
+RESEND_API_KEY=local-resend-test-key \
+NOTIFICATION_TEST_RESEND_API_URL="http://127.0.0.1:$RESEND_PORT/emails" \
+NOTIFICATION_TEST_SKIP_BIOBLITZ_RECONCILIATION=true \
+NODE_ENV=development \
 EMAIL_FROM="GainForest Local <notifications@example.test>" \
 WELCOME_EMAIL_WEBHOOK_SECRET="$WEBHOOK_SECRET" \
 NOTIFICATION_CRON_SECRET="$CRON_SECRET" \
@@ -278,7 +336,7 @@ node - "$TMP/welcome-first.json" <<'NODE'
 const fs = require("node:fs");
 const value = JSON.parse(fs.readFileSync(process.argv[2], "utf8"));
 if (value?.ok !== true || value?.notification?.status !== "sent" || value?.notification?.duplicate !== false) {
-  throw new Error(`first welcome event was not captured and sent: ${JSON.stringify(value)}`);
+  throw new Error(`first welcome event was not sent through the loopback provider: ${JSON.stringify(value)}`);
 }
 NODE
 
@@ -293,7 +351,7 @@ NODE
 
 WELCOME_STATE=$(psql -X -Atq "$DB_URL" -v ON_ERROR_STOP=1 -F '|' -c "
   select count(*),bool_and(status='sent'),bool_and(recipient_email='local-user@example.test'),
-    bool_and(frozen_to='local-user@example.test'),bool_and(provider_id='capture'),bool_and(provider_idempotency_key=id::text)
+    bool_and(frozen_to='local-user@example.test'),bool_and(provider_id like 'local-resend-%'),bool_and(provider_idempotency_key='signup:local-signup-1')
   from public.notification_outbox where event_type='signup' and source_id='local-signup-1';
 ")
 [[ "$WELCOME_STATE" == "1|t|t|t|t|t" ]] || {
@@ -312,7 +370,7 @@ node - "$TMP/membership.json" <<'NODE'
 const fs = require("node:fs");
 const value = JSON.parse(fs.readFileSync(process.argv[2], "utf8"));
 if (value?.ok !== true || value?.notification?.status !== "sent" || value?.notification?.duplicate !== false) {
-  throw new Error(`membership welcome event was not captured and sent: ${JSON.stringify(value)}`);
+  throw new Error(`membership welcome event was not sent through the loopback provider: ${JSON.stringify(value)}`);
 }
 NODE
 MEMBERSHIP_STATE=$(psql -X -Atq "$DB_URL" -v ON_ERROR_STOP=1 -F '|' -c "
@@ -344,7 +402,7 @@ INVITATION_BODY=$(INVITATION_ID="$INVITATION_ID" APP_URL="$APP_URL" \
     p_inviter_url: `${process.env.APP_URL}/account/local-owner.example.test`,
     p_public_origin: process.env.APP_URL,
     p_locale: "en",
-    p_delivery_mode: "capture",
+    p_enqueue_notification: true,
     p_created_at: process.env.INVITATION_CREATED_AT,
     p_expires_at: process.env.INVITATION_EXPIRES_AT,
   };
@@ -373,14 +431,14 @@ node - "$TMP/drain.json" <<'NODE'
 const fs = require("node:fs");
 const value = JSON.parse(fs.readFileSync(process.argv[2], "utf8"));
 if (value?.kind !== "completed" || (value?.outcomes?.sent ?? 0) < 1 || value?.reconciliation?.completed !== true) {
-  throw new Error(`authenticated recovery did not send queued capture work: ${JSON.stringify(value)}`);
+  throw new Error(`authenticated recovery did not send queued work through the loopback provider: ${JSON.stringify(value)}`);
 }
 NODE
 
 INVITATION_STATE=$(psql -X -Atq "$DB_URL" -v ON_ERROR_STOP=1 -F '|' -c "
   select count(*),bool_and(i.status='pending'),bool_and(n.status='sent'),
     bool_and(n.recipient_email='local-invitee@example.test'),bool_and(n.frozen_to='local-invitee@example.test'),
-    bool_and(n.frozen_subject is not null),bool_and(n.frozen_html like '%Local Forest Circle%'),bool_and(n.provider_id='capture')
+    bool_and(n.frozen_subject is not null),bool_and(n.frozen_html like '%Local Forest Circle%'),bool_and(n.provider_id like 'local-resend-%')
   from public.cgs_group_invitations i join public.notification_outbox n on n.source_id=i.id::text
   where i.id='$INVITATION_ID';
 ")
@@ -415,7 +473,6 @@ BIOBLITZ_BODY=$(BIOBLITZ_DUE_AT="$BIOBLITZ_DUE_AT" node -e '
     p_template_key: "bioblitz-winner",
     p_locale: "en",
     p_provider_idempotency_key: null,
-    p_delivery_mode: "capture",
     p_next_attempt_at: process.env.BIOBLITZ_DUE_AT,
   }));
 ')
@@ -441,14 +498,14 @@ node - "$TMP/bioblitz-drain.json" <<'NODE'
 const fs = require("node:fs");
 const value = JSON.parse(fs.readFileSync(process.argv[2], "utf8"));
 if (value?.kind !== "completed" || (value?.outcomes?.sent ?? 0) < 1) {
-  throw new Error(`BioBlitz recovery did not resolve and capture the winner email: ${JSON.stringify(value)}`);
+  throw new Error(`BioBlitz recovery did not resolve and send the winner email through the loopback provider: ${JSON.stringify(value)}`);
 }
 NODE
 
 BIOBLITZ_STATE=$(psql -X -Atq "$DB_URL" -v ON_ERROR_STOP=1 -F '|' -c "
   select count(*),bool_and(status='sent'),bool_and(recipient_did='did:plc:localwinner'),
     bool_and(recipient_email='local-winner@example.test'),bool_and(frozen_to='local-winner@example.test'),
-    bool_and(frozen_subject like '%Best picture%'),bool_and(frozen_html like '%Local Round%'),bool_and(provider_id='capture')
+    bool_and(frozen_subject like '%Best picture%'),bool_and(frozen_html like '%Local Round%'),bool_and(provider_id like 'local-resend-%')
   from public.notification_outbox where event_type='bioblitz_winner' and source_id='bioblitz:999:best-picture';
 ")
 [[ "$BIOBLITZ_STATE" == "1|t|t|t|t|t|t|t" ]] || {
@@ -474,7 +531,6 @@ MISSING_BIOBLITZ_BODY=$(MISSING_EVENT_KEY="$MISSING_EVENT_KEY" BIOBLITZ_DUE_AT="
     p_template_key: "bioblitz-winner",
     p_locale: "en",
     p_provider_idempotency_key: null,
-    p_delivery_mode: "capture",
     p_next_attempt_at: process.env.BIOBLITZ_DUE_AT,
   }));
 ')
@@ -513,7 +569,7 @@ NODE
 
 HANDLED_STATE=$(psql -X -Atq "$DB_URL" -v ON_ERROR_STOP=1 -F '|' -c "
   select count(*),bool_and(status='suppressed'),bool_and(manual_handled_by='did:plc:localmoderator'),
-    bool_and(redacted_at is not null),bool_and(recipient_did is null),bool_and(recipient_email is null)
+    bool_and(template_key is null),bool_and(recipient_did is null),bool_and(recipient_email is null)
   from public.notification_outbox where event_key_hash=extensions.notification_outbox_sha256(convert_to('$MISSING_EVENT_KEY','UTF8'));
 ")
 [[ "$HANDLED_STATE" == "1|t|t|t|t|t" ]] || {
@@ -521,4 +577,4 @@ HANDLED_STATE=$(psql -X -Atq "$DB_URL" -v ON_ERROR_STOP=1 -F '|' -c "
   exit 1
 }
 
-echo "notification local signup, membership, invitation, BioBlitz, capture, deduplication, recovery, and manual handling passed"
+echo "notification local signup, membership, invitation, BioBlitz, loopback delivery, deduplication, recovery, and manual handling passed"

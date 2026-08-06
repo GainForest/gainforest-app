@@ -8,7 +8,7 @@ export type ProviderCallPhase = "idle" | "in_flight";
 export type PreviousStatus = "waiting_recipient" | "queued" | "processing";
 
 export type RecipientErrorCode = "recipient_missing" | "recipient_lookup_failed";
-export type ProviderErrorCode = "provider_5xx" | "provider_rate_limited" | "provider_rejected" | "notification_invalid";
+export type ProviderErrorCode = "provider_5xx" | "provider_timeout" | "provider_rate_limited" | "provider_rejected" | "notification_invalid";
 export type RequeueErrorCode = Exclude<ProviderErrorCode, "notification_invalid"> | "recipient_lookup_failed";
 export type TerminalErrorCode =
   | "provider_rejected"
@@ -60,7 +60,7 @@ export interface NotificationRow {
 
 export type ProviderOutcome =
   | { readonly kind: "sent"; readonly providerId: string }
-  | { readonly kind: "transient"; readonly errorCode: "provider_5xx" | "provider_rate_limited"; readonly retryAfterMs?: number }
+  | { readonly kind: "transient"; readonly errorCode: "provider_5xx" | "provider_timeout" | "provider_rate_limited"; readonly retryAfterMs?: number }
   | { readonly kind: "permanent"; readonly errorCode: "provider_rejected" | "notification_invalid" }
   | { readonly kind: "uncertain"; readonly errorCode: "provider_timeout" };
 
@@ -137,6 +137,14 @@ export interface NotificationCleanupResult {
   readonly activeExpired: number;
   readonly redacted: number;
   readonly deleted: number;
+}
+
+export interface NotificationQueueHealth {
+  readonly waitingRecipient: number;
+  readonly queued: number;
+  readonly processing: number;
+  readonly dead: number;
+  readonly oldestDueAgeSeconds: number;
 }
 
 export interface NotificationEnqueueRepository {

@@ -29,6 +29,7 @@ describe("ResendEmailProvider", () => {
   });
 
   it.each([
+    [408, { kind: "transient", errorCode: "provider_timeout" }],
     [429, { kind: "transient", errorCode: "provider_rate_limited" }],
     [503, { kind: "transient", errorCode: "provider_5xx" }],
     [400, { kind: "permanent", errorCode: "notification_invalid" }],
@@ -81,6 +82,26 @@ describe("createEmailProvider", () => {
 
   it("creates Resend delivery when the required API key is configured", () => {
     expect(createEmailProvider({ RESEND_API_KEY: " re_test " })).toBeInstanceOf(ResendEmailProvider);
+  });
+
+  it.each([
+    ["https://api.resend.com/emails", "test"],
+    ["http://127.0.0.1:3056/emails", "production"],
+    ["not-a-url", "test"],
+  ])("rejects unsafe test provider URL %s", (url, nodeEnv) => {
+    expect(() => createEmailProvider({
+      RESEND_API_KEY: "re_test",
+      NOTIFICATION_TEST_RESEND_API_URL: url,
+      NODE_ENV: nodeEnv,
+    })).toThrow("must be a valid loopback HTTP URL and is unavailable in production");
+  });
+
+  it("accepts a loopback provider URL outside production", () => {
+    expect(createEmailProvider({
+      RESEND_API_KEY: "re_test",
+      NOTIFICATION_TEST_RESEND_API_URL: "http://127.0.0.1:3056/emails",
+      NODE_ENV: "test",
+    })).toBeInstanceOf(ResendEmailProvider);
   });
 
   it("fails before processing when enabled email has no Resend API key", () => {

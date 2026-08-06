@@ -34,7 +34,7 @@ function invalid(field: string): never {
 }
 
 export async function enqueueBioblitzWinner(input: BioblitzWinnerInput, dependencies: Dependencies): Promise<BioblitzEnqueueOutcome> {
-  if (dependencies.config.deliveryMode === "disabled" || !dependencies.config.producers.bioblitzWinner) return { kind: "disabled" };
+  if (dependencies.config.emailDisabled) return { kind: "disabled" };
   if (!Number.isInteger(input.roundId) || input.roundId < 1) invalid("roundId");
   const roundLabel = input.roundLabel.trim();
   if (!roundLabel || roundLabel.length > 100) invalid("roundLabel");
@@ -60,7 +60,7 @@ export async function enqueueBioblitzWinner(input: BioblitzWinnerInput, dependen
     recipientEmail: null,
     templateKey: "bioblitz-winner",
     locale: null,
-    deliveryMode: dependencies.config.deliveryMode,
+    providerIdempotencyKey: null,
     nextAttemptAt: dependencies.clock.now(),
   });
   return { kind: "enqueued", ...result, recipientStatus };

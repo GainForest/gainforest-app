@@ -5,8 +5,7 @@ import { getAuthBaseUrl, getAuthInternalServiceToken } from "@/app/_lib/auth";
 import { fetchCgsMembersWithCookie, type CgsServerRole } from "@/app/_lib/cgs-server";
 import { resolveGroupInvitationEmailLocale } from "@/lib/email/group-invitation-template";
 import { supabaseFilterValue, supabaseRpc, supabaseSelect } from "@/lib/supabase/rest";
-import type { ProcessOneOutcome } from "@/lib/notifications/orchestrator";
-import type { PersistedDeliveryMode } from "@/lib/notifications/types";
+import type { ProcessOneOutcome } from "@/lib/email-notifications/orchestrator";
 import type { AuthSession } from "./auth";
 
 export type GroupInvitationRole = "member" | "admin";
@@ -49,7 +48,6 @@ export function invitationNotificationAfterProcess(
       return { ...notification, status: "dead", retryable: result.result.errorCode === "provider_rejected", errorCode: result.result.errorCode };
     case "suppressed":
       return { ...notification, status: "suppressed", retryable: false };
-    case "disabled":
     case "released_insufficient_time":
       return { ...notification, status: "queued", retryable: true };
     case "stale_claim":
@@ -409,7 +407,7 @@ export async function createGroupInvitation({
   cookie,
   origin,
   acceptLanguage,
-  deliveryMode,
+  enqueueNotification,
 }: {
   repo: string;
   email: string;
@@ -418,7 +416,7 @@ export async function createGroupInvitation({
   cookie: string | null;
   origin: string;
   acceptLanguage: string | null;
-  deliveryMode: PersistedDeliveryMode | null;
+  enqueueNotification: boolean;
 }): Promise<GroupInvitation> {
   const normalizedEmail = normalizeInvitationEmail(email);
   if (!repo.trim()) throw new GroupInvitationError("Choose an organization before inviting someone.", 400);
@@ -449,7 +447,7 @@ export async function createGroupInvitation({
       p_inviter_url: inviter.url,
       p_public_origin: publicBaseUrl(origin),
       p_locale: resolveGroupInvitationEmailLocale({ acceptLanguage }),
-      p_delivery_mode: deliveryMode,
+      p_enqueue_notification: enqueueNotification,
       p_created_at: now.toISOString(),
       p_expires_at: new Date(now.getTime() + INVITE_TTL_MS).toISOString(),
     });

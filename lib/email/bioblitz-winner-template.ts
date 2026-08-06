@@ -4,7 +4,7 @@ import {
   resolvePreferredLanguageFromHeader,
   type SupportedLanguageCode,
 } from "@/lib/i18n/languages";
-import type { BioblitzPrize } from "@/lib/notifications/bioblitz";
+import type { BioblitzPrize } from "@/lib/email-notifications/bioblitz";
 
 const copy = {
   en: { subject: "You won a BioBlitz prize", heading: "You’re a BioBlitz winner", most: "Most observations", best: "Best picture", body: "Your contribution stood out in {round}.", cta: "View BioBlitz", signoff: "Thank you for documenting nature with the GainForest community." },

@@ -9,10 +9,10 @@ const DEADLINE = new Date(Date.now() + 20_000);
 afterEach(() => vi.unstubAllGlobals());
 
 describe("createWelcomeRuntime", () => {
-  it("is inert without configuration and does not touch Supabase or Resend", async () => {
+  it("is inert when email is disabled and does not touch Supabase or Resend", async () => {
     const fetchMock = vi.fn();
     vi.stubGlobal("fetch", fetchMock);
-    const runtime = createWelcomeRuntime({});
+    const runtime = createWelcomeRuntime({ EMAIL_DISABLED: "true" });
     await expect(runtime.deliver({
       type: "signup",
       authEventId: "auth-event-1",
@@ -22,13 +22,12 @@ describe("createWelcomeRuntime", () => {
     expect(fetchMock).not.toHaveBeenCalled();
   });
 
-  it("fails before repository access when resend mode lacks its API key", () => {
+  it("fails before repository access when enabled email lacks its API key", () => {
     const fetchMock = vi.fn();
     vi.stubGlobal("fetch", fetchMock);
-    expect(() => createWelcomeRuntime({
-      EMAIL_DELIVERY_MODE: "resend",
-      EMAIL_SIGNUP_ENABLED: "true",
-    })).toThrow("RESEND_API_KEY is required when EMAIL_DELIVERY_MODE=resend");
+    expect(() => createWelcomeRuntime({})).toThrow(
+      "Email delivery is enabled but RESEND_API_KEY is missing. Set RESEND_API_KEY or set EMAIL_DISABLED=true.",
+    );
     expect(fetchMock).not.toHaveBeenCalled();
   });
 });

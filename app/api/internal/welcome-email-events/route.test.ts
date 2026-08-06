@@ -1,8 +1,8 @@
 import { createHmac } from "node:crypto";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { NextRequest } from "next/server";
-import type { WelcomeNotificationInput, WelcomeNotificationOutcome } from "@/lib/notifications/welcome";
-import { NotificationRepositoryError } from "@/lib/notifications/repository";
+import type { WelcomeNotificationInput, WelcomeNotificationOutcome } from "@/lib/email-notifications/welcome";
+import { NotificationRepositoryError } from "@/lib/email-notifications/repository";
 
 vi.mock("server-only", () => ({}));
 
@@ -19,7 +19,7 @@ const defaultProfileCard = async (did: string): Promise<{ displayName: string | 
 });
 const getCertifiedProfileCard = vi.fn(defaultProfileCard);
 
-vi.mock("@/lib/notifications/welcome-runtime", () => ({
+vi.mock("@/lib/email-notifications/welcome-runtime", () => ({
   createWelcomeRuntime: () => ({ deliver }),
 }));
 

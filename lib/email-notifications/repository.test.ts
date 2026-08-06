@@ -87,6 +87,22 @@ describe("SupabaseNotificationRepository", () => {
     expect(JSON.parse(String(fetchMock.mock.calls[0][1]?.body))).toEqual({ p_batch_size: 250 });
   });
 
+  it("decodes aggregate queue health without row data", async () => {
+    fetchMock.mockResolvedValueOnce(Response.json({
+      waiting_recipient: 2,
+      queued: 3,
+      processing: 1,
+      dead: 4,
+      oldest_due_age_seconds: 125,
+    }));
+    const repository = new SupabaseNotificationRepository();
+    await expect(repository.health()).resolves.toEqual({
+      waitingRecipient: 2, queued: 3, processing: 1, dead: 4, oldestDueAgeSeconds: 125,
+    });
+    expect(fetchMock.mock.calls[0][0]).toBe("https://project.supabase.co/rest/v1/rpc/notification_outbox_health");
+    expect(fetchMock.mock.calls[0][1]?.body).toBe("{}");
+  });
+
   it("calls claim RPC with the committed signature and service-role boundary", async () => {
     fetchMock.mockResolvedValueOnce(Response.json([{
       outbox_id: rawRow.id,
@@ -213,7 +229,9 @@ describe("SupabaseNotificationRepository", () => {
 
   it("redacts idempotency conflict details from enqueue failures", async () => {
     const secret = "person@example.com payload-secret service-role-secret";
-    fetchMock.mockResolvedValueOnce(Response.json({ message: secret }, { status: 409 }));
+    fetchMock.mockResolvedValueOnce(Response.json({
+      message: `notification_outbox_idempotency_conflict: ${secret}`,
+    }, { status: 409 }));
     const log = vi.fn();
     const repository = new SupabaseNotificationRepository({ log });
 
@@ -224,13 +242,33 @@ describe("SupabaseNotificationRepository", () => {
     }).catch((reason: unknown) => reason);
 
     expect(error).toBeInstanceOf(NotificationRepositoryError);
-    expect((error as NotificationRepositoryError).code).toBe("repository_rejected");
+    expect((error as NotificationRepositoryError).code).toBe("idempotency_conflict");
     expect((error as Error).message).toBe(
-      "Notification repository operation failed (repository_rejected). Check Supabase availability and service-role configuration.",
+      "Notification repository operation failed (idempotency_conflict). Check Supabase availability and service-role configuration.",
     );
     expect((error as Error).message).not.toContain(secret);
     expect((error as Error).stack ?? "").not.toContain(secret);
-    expect(log).toHaveBeenCalledWith({ code: "repository_rejected", operation: "enqueue" });
+    expect(log).toHaveBeenCalledWith({ code: "idempotency_conflict", operation: "enqueue" });
+  });
+
+  it.each([
+    { provider_call_phase: "idle", provider_call_is_ambiguous_retry: true },
+    { provider_call_phase: "in_flight", provider_idempotency_expires_at: null },
+    {
+      provider_call_phase: "idle",
+      provider_call_is_ambiguous_retry: false,
+      provider_idempotency_expires_at: "2026-08-07T01:00:00.000Z",
+    },
+  ])("rejects an impossible provider phase returned by the database", async malformed => {
+    fetchMock.mockResolvedValueOnce(Response.json([{ ...rawRow, ...malformed }]));
+    const repository = new SupabaseNotificationRepository();
+    await expect(repository.getClaimed({
+      outboxId: rawRow.id,
+      previousStatus: "processing",
+      resumeProviderCallPhase: malformed.provider_call_phase as "idle" | "in_flight",
+      processingToken: rawRow.processing_token,
+      lockedUntil: new Date(rawRow.locked_until),
+    })).rejects.toMatchObject({ code: "invalid_response" });
   });
 
   it("redacts database response details, addresses, payloads, and credentials", async () => {

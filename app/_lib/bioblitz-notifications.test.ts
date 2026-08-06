@@ -6,7 +6,7 @@ vi.mock("server-only", () => ({}));
 const { enqueue, process, supabaseSelect, supabaseRpc } = vi.hoisted(() => ({
   enqueue: vi.fn(), process: vi.fn(), supabaseSelect: vi.fn(), supabaseRpc: vi.fn(),
 }));
-vi.mock("@/lib/notifications/bioblitz-runtime", () => ({
+vi.mock("@/lib/email-notifications/bioblitz-runtime", () => ({
   createBioblitzProducerRuntime: () => ({ enqueue }),
   createBioblitzProcessRuntime: () => ({ process }),
 }));

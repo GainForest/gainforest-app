@@ -4,7 +4,7 @@ import { randomUUID } from "node:crypto";
 import { SupabaseInvitationSourceReader } from "./invitation-source";
 import { createNotificationProcessor, processNotificationById } from "./orchestrator";
 import { ApplicationNotificationRenderer } from "./renderer";
-import { createNotificationRuntimeCore } from "./runtime";
+import { createNotificationRuntimeCore, rejectDisabledNotificationProcessing } from "./runtime";
 import type { UserEmailReader } from "./types";
 
 type Environment = Readonly<Record<string, string | undefined>>;
@@ -14,17 +14,18 @@ const unusedUserEmailReader: UserEmailReader = { lookup: async () => ({ kind: "e
 
 export function createInvitationRuntime(environment: Environment = process.env) {
   const { config, repository, provider, clock, from } = createNotificationRuntimeCore(environment);
-  const processor = createNotificationProcessor({
-    mode: config.deliveryMode,
-    from,
-    repository,
-    provider,
-    renderer: new ApplicationNotificationRenderer(),
-    clock,
-    userEmailReader: unusedUserEmailReader,
-    invitationSourceReader: new SupabaseInvitationSourceReader(),
-    safetyMarginMs: WORKER_SAFETY_MARGIN_MS,
-  });
+  const processor = provider
+    ? createNotificationProcessor({
+      from,
+      repository,
+      provider,
+      renderer: new ApplicationNotificationRenderer(),
+      clock,
+      userEmailReader: unusedUserEmailReader,
+      invitationSourceReader: new SupabaseInvitationSourceReader(),
+      safetyMarginMs: WORKER_SAFETY_MARGIN_MS,
+    })
+    : rejectDisabledNotificationProcessing;
 
   return {
     config,

@@ -3,10 +3,10 @@ import "server-only";
 import { endedRounds, type BioblitzRound } from "./bioblitz";
 import { GAINFOREST_MODERATION_REPO_DID } from "./indexer";
 import { parseRecognitionBadgeKey, recognitionKeyFromTitle } from "./recognition-badges";
-import { createBioblitzProducerRuntime } from "@/lib/notifications/bioblitz-runtime";
+import { createBioblitzProducerRuntime } from "@/lib/email-notifications/bioblitz-runtime";
 import { listBioblitzNotificationSummaries } from "./bioblitz-notifications";
 import { fetchInternalBadgeData, type InternalBadgeData } from "@/app/internal/badges/_lib/badge-records";
-import type { BioblitzPrize, BioblitzWinnerInput } from "@/lib/notifications/bioblitz";
+import type { BioblitzPrize, BioblitzWinnerInput } from "@/lib/email-notifications/bioblitz";
 
 const RECONCILIATION_AGE_MS = 90 * 24 * 60 * 60 * 1000;
 const MAX_RECONCILIATION_CANDIDATES = 20;
@@ -74,7 +74,7 @@ export async function reconcileRecentBioblitzNotifications(
   let candidates = 0;
   try {
     const producer = createBioblitzProducerRuntime();
-    if (producer.config.deliveryMode === "disabled" || !producer.config.producers.bioblitzWinner) {
+    if (producer.config.emailDisabled) {
       return { candidates: 0, completed: true };
     }
     const rounds = endedRounds();

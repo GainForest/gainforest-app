@@ -8,7 +8,7 @@ The notification outbox durably coordinates email delivery. The application writ
 
 This baseline was canonicalized before any migration-runner deployment. The existing non-production database was configured through SQL Editor, which does not add versions to `supabase_migrations.schema_migrations`. Do not rewrite this baseline after its version has been recorded. An environment that has recorded an older form must be reset or have its migration history explicitly repaired before using this migration tree.
 
-The foundation table has 34 columns, grouped by responsibility:
+The table has 36 columns, grouped by responsibility:
 
 | Responsibility | Columns |
 | --- | --- |
@@ -17,7 +17,7 @@ The foundation table has 34 columns, grouped by responsibility:
 | Frozen provider request | `frozen_from`, `frozen_to`, `frozen_subject`, `frozen_html`, `frozen_text` |
 | Queue scheduling and lease ownership | `status`, `next_attempt_at`, `processing_run_count`, `provider_attempt_count`, `locked_until`, `processing_token`, `claimed_from_status` |
 | Provider result and ambiguity safety | `provider_call_phase`, `provider_call_is_ambiguous_retry`, `provider_id`, `provider_idempotency_key`, `provider_idempotency_expires_at` |
-| Diagnostics and manual retry | `last_error_code`, `last_error_summary`, `last_manual_retry_at`, `manual_retry_count` |
+| Diagnostics and operator actions | `last_error_code`, `last_error_summary`, `last_manual_retry_at`, `manual_retry_count`, `manual_handled_at`, `manual_handled_by` |
 | Lifecycle | `terminal_at`, `created_at`, `updated_at` |
 
 ## State markers
@@ -36,6 +36,7 @@ There is intentionally no `delivery_mode`, `frozen_at`, `redacted_at`, `provider
 - `processing_run_count` increments whenever a worker successfully claims the row.
 - `provider_attempt_count` increments only when `notification_outbox_begin_provider_call` starts a provider transmission.
 - `manual_retry_count` and `last_manual_retry_at` support operator-initiated invitation retries and their cooldown.
+- `manual_handled_at` and `manual_handled_by` audit when a moderator replaces automatic BioBlitz delivery with manual follow-up.
 
 ## Mutation boundary
 
@@ -64,12 +65,45 @@ notification_outbox_enqueue(
 
 Active work expires after seven days. Sent rows clear private delivery data seven days after becoming terminal; dead rows clear it after fourteen days. Cleared terminal tombstones preserve event deduplication until cleanup deletes the row 90 days after creation.
 
-## Validation
+## Database prerequisites
 
-Run:
+The canonical migration requires these private tables in the same Supabase project:
+
+- `public.cgs_group_invitations`, defined by `docs/cgs-group-invitations.sql`;
+- `public.user_emails`, defined by `docs/user-emails.sql`.
+
+The migration checks every required prerequisite column and fails with corrective guidance when the tables are missing or incomplete. For a new environment, apply both prerequisite SQL files before `supabase/migrations/20260805235500_notification_outbox.sql`.
+
+## Local validation
 
 ```bash
 pnpm test:db
+pnpm test:notifications:local
+pnpm test:unit
+pnpm build
 ```
 
-The test starts a disposable local PostgreSQL container, applies all migrations, verifies the exact schema and RPC contract, and exercises concurrency behavior. It refuses remote Docker endpoints.
+`test:db` runs the SQL contract and concurrency races in a disposable PostgreSQL container. `test:notifications:local` starts the pinned local Supabase stack and exercises authenticated recovery, transactional invitations, BioBlitz recipient resolution, frozen delivery, and manual suppression without calling Resend or any production service. The smoke process uses production code with two non-production loopback hooks: a local Resend-compatible endpoint and an explicit bypass for authoritative BioBlitz award discovery.
+
+The full smoke test reserves local ports `54321`, `54322`, `3055`, and `3056`. Supabase publishes its API and database ports on all host interfaces, so run it only on a trusted network or behind a firewall. Set `KEEP_NOTIFICATION_LOCAL_STACK=1` to preserve the local database for inspection, `NOTIFICATION_LOCAL_APP_PORT=<port>` when `3055` is occupied, or `NOTIFICATION_LOCAL_RESEND_PORT=<port>` when `3056` is occupied.
+
+## Recovery and monitoring
+
+cron-job.org calls the recovery route every five minutes:
+
+```text
+GET https://<app-host>/api/internal/notifications/drain
+Authorization: Bearer <NOTIFICATION_CRON_SECRET>
+```
+
+`NOTIFICATION_CRON_SECRET` must contain at least 16 characters. The route rejects a missing or invalid secret before constructing the runtime, reconciles recent BioBlitz awards, runs retention cleanup, processes a bounded batch, and returns aggregate counts only.
+
+`notification_outbox_health()` reports waiting, queued, processing, and uncleared dead counts plus the oldest due age. Alert on non-2xx recovery responses, repeated incomplete reconciliation, rising dead or queued counts, and oldest due age above two recovery intervals. Responses and structured logs must not include recipients, payloads, frozen content, provider bodies, or secrets.
+
+To stop all notification email, set `EMAIL_DISABLED=true`. This prevents new enqueue operations and provider calls without deleting durable rows. Do not drop or reverse the migration while retained rows exist.
+
+Invitation creation and notification enqueue share one transaction. Email failure never removes the invitation. Eligible owners and admins can expedite a safely retryable invitation with a database-enforced cooldown. Acceptance, cancellation, and expiry suppress unsent work.
+
+BioBlitz awards succeed independently of email. When an address is unavailable, moderators are told that manual contact may be needed. Marking an award handled records the first moderator and preserves a suppression tombstone so reconciliation cannot send it later.
+
+The local database tests refuse remote Docker endpoints. Do not provide production Supabase credentials, Resend keys, or real recipient addresses to either test.

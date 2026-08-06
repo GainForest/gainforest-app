@@ -1,7 +1,7 @@
 import "server-only";
 
 import type { ProcessOneOutcome } from "./orchestrator";
-import { enqueueMembershipJoined, enqueueSignup, type WelcomeProducerDependencies } from "./outbox";
+import { enqueueMembershipJoined, enqueueSignup, type WelcomeProducerDependencies } from "./signup-and-membership-notifications";
 import type { NotificationErrorCode, OutboxStatus, ProcessResult } from "./types";
 
 export type WelcomeNotificationInput = {
@@ -54,7 +54,6 @@ function processSummary(result: ProcessResult): {
       return { status: "dead", retryable: false, errorCode: result.errorCode };
     case "suppressed":
       return { status: "suppressed", retryable: false };
-    case "disabled":
     case "released_insufficient_time":
       return { status: "queued", retryable: true };
     case "stale_claim":

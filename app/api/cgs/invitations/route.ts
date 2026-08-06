@@ -12,8 +12,8 @@ import {
   normalizeInvitationEmail,
 } from "@/app/_lib/cgs-invitations";
 import { fetchCgsMembersWithCookie } from "@/app/_lib/cgs-server";
-import { readNotificationConfig } from "@/lib/notifications/config";
-import { createInvitationRuntime } from "@/lib/notifications/invitation-runtime";
+import { readNotificationConfig } from "@/lib/email-notifications/config";
+import { createInvitationRuntime } from "@/lib/email-notifications/invitation-runtime";
 
 export const runtime = "nodejs";
 export const maxDuration = 30;
@@ -82,16 +82,7 @@ export async function POST(request: Request) {
   const origin = new URL(request.url).origin;
 
   try {
-    const notificationConfig = (() => {
-      try {
-        return readNotificationConfig();
-      } catch {
-        return { deliveryMode: "disabled" as const, producers: { signup: false, membershipJoined: false, invitation: false, bioblitzWinner: false } };
-      }
-    })();
-    const deliveryMode = notificationConfig.producers.invitation && notificationConfig.deliveryMode !== "disabled"
-      ? notificationConfig.deliveryMode
-      : null;
+    const notificationConfig = readNotificationConfig();
     let invitation = await createGroupInvitation({
       repo: parsed.data.repo.trim(),
       email: parsed.data.email,
@@ -100,7 +91,7 @@ export async function POST(request: Request) {
       cookie: getAuthForwardCookie(headerList.get("cookie")),
       origin,
       acceptLanguage: headerList.get("accept-language"),
-      deliveryMode,
+      enqueueNotification: !notificationConfig.emailDisabled,
     });
     if (invitation.notification?.status === "queued") {
       try {

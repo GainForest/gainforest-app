@@ -22,7 +22,7 @@ import {
 import { getGainForestModeratorAccess } from "@/app/internal/badges/_lib/access";
 import { fetchInternalBadgeData, type InternalBadgeData } from "@/app/internal/badges/_lib/badge-records";
 import { RecognitionMutationError, awardRecognition, type RecognitionAwardSnapshot } from "@/app/internal/badges/_lib/recognition";
-import type { BioblitzPrize, BioblitzWinnerInput } from "@/lib/notifications/bioblitz";
+import type { BioblitzPrize, BioblitzWinnerInput } from "@/lib/email-notifications/bioblitz";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;

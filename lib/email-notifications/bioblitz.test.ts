@@ -14,10 +14,7 @@ function deps(config: NotificationConfig) {
     userEmailReader: { lookup: vi.fn().mockResolvedValue({ kind: "ready", email: "winner@example.com" }) },
   };
 }
-const enabled: NotificationConfig = {
-  deliveryMode: "capture",
-  producers: { signup: false, membershipJoined: false, invitation: false, bioblitzWinner: true },
-};
+const enabled: NotificationConfig = { emailDisabled: false };
 const input = {
   roundId: 4,
   roundLabel: "Week 4",
@@ -28,7 +25,7 @@ const input = {
 
 describe("enqueueBioblitzWinner", () => {
   it("is inert before lookup and database access when disabled", async () => {
-    const dependencies = deps({ ...enabled, deliveryMode: "disabled" });
+    const dependencies = deps({ emailDisabled: true });
     await expect(enqueueBioblitzWinner(input, dependencies)).resolves.toEqual({ kind: "disabled" });
     expect(dependencies.userEmailReader.lookup).not.toHaveBeenCalled();
     expect(dependencies.repository.enqueue).not.toHaveBeenCalled();
@@ -59,7 +56,7 @@ describe("enqueueBioblitzWinner", () => {
       recipientEmail: null,
       templateKey: "bioblitz-winner",
       locale: null,
-      deliveryMode: "capture",
+      providerIdempotencyKey: null,
       nextAttemptAt: NOW,
     });
   });

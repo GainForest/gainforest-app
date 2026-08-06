@@ -11,10 +11,7 @@ const DEADLINE = new Date("2026-08-06T01:00:20.000Z");
 const OUTBOX_ID = "10000000-0000-4000-8000-000000000001";
 
 function config(): NotificationConfig {
-  return {
-    deliveryMode: "capture",
-    producers: { signup: true, membershipJoined: true, invitation: false, bioblitzWinner: false },
-  };
+  return { emailDisabled: false };
 }
 
 function dependencies() {
@@ -32,12 +29,9 @@ function dependencies() {
 }
 
 describe("deliverWelcomeNotification", () => {
-  it("returns disabled without processing when the event producer is off", async () => {
+  it("returns disabled without processing when notification email is off", async () => {
     const deps = dependencies();
-    deps.producer.config = {
-      ...deps.producer.config,
-      producers: { ...deps.producer.config.producers, signup: false },
-    };
+    deps.producer.config = { emailDisabled: true };
     await expect(deliverWelcomeNotification({
       type: "signup",
       authEventId: "auth-event-1",

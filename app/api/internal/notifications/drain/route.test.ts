@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { NextRequest } from "next/server";
-import type { DrainOutcome } from "@/lib/notifications/orchestrator";
+import type { DrainOutcome } from "@/lib/email-notifications/orchestrator";
 
 vi.mock("server-only", () => ({}));
 
@@ -15,10 +15,9 @@ const drain = vi.fn<(_deadline: Date) => Promise<DrainOutcome>>(async () => ({
     ambiguous_deferred: 0,
     dead: 0,
     suppressed: 0,
-    disabled: 0,
     released_insufficient_time: 0,
     stale_claim: 0,
-    unexpectedFailure: 0,
+    unexpected_failure: 0,
   },
   stopped: "empty" as const,
   elapsedMs: 25,
@@ -27,7 +26,7 @@ const health = vi.fn(async () => ({ waitingRecipient: 1, queued: 2, processing: 
 const createDrainRuntime = vi.fn(() => ({ drain, health }));
 const reconcileRecentBioblitzNotifications = vi.fn(async (_deadline: Date) => ({ candidates: 2, completed: true }));
 
-vi.mock("@/lib/notifications/drain-runtime", () => ({ createDrainRuntime }));
+vi.mock("@/lib/email-notifications/drain-runtime", () => ({ createDrainRuntime }));
 vi.mock("@/app/_lib/bioblitz-notification-reconciliation", () => ({ reconcileRecentBioblitzNotifications }));
 
 function request(token?: string): NextRequest {
@@ -49,6 +48,7 @@ describe("notification drain route", () => {
   });
 
   afterEach(() => {
+    vi.unstubAllEnvs();
     process.env.NOTIFICATION_CRON_SECRET = originalSecret;
   });
 
@@ -67,6 +67,28 @@ describe("notification drain route", () => {
     const response = await GET(request(token));
     expect(response.status).toBe(401);
     await expect(response.json()).resolves.toEqual({ error: "Unauthorized notification recovery request." });
+    expect(createDrainRuntime).not.toHaveBeenCalled();
+  });
+
+  it("skips external BioBlitz discovery only for the explicit non-production smoke hook", async () => {
+    vi.stubEnv("NOTIFICATION_TEST_SKIP_BIOBLITZ_RECONCILIATION", "true");
+    const { GET } = await import("./route");
+    const response = await GET(request(secret));
+    expect(response.status).toBe(200);
+    await expect(response.json()).resolves.toMatchObject({
+      reconciliation: { candidates: 0, completed: true },
+    });
+    expect(reconcileRecentBioblitzNotifications).not.toHaveBeenCalled();
+    expect(drain).toHaveBeenCalledTimes(1);
+  });
+
+  it("rejects the smoke-only reconciliation hook in production", async () => {
+    vi.stubEnv("NOTIFICATION_TEST_SKIP_BIOBLITZ_RECONCILIATION", "true");
+    vi.stubEnv("NODE_ENV", "production");
+    const { GET } = await import("./route");
+    const response = await GET(request(secret));
+    expect(response.status).toBe(503);
+    expect(reconcileRecentBioblitzNotifications).not.toHaveBeenCalled();
     expect(createDrainRuntime).not.toHaveBeenCalled();
   });
 

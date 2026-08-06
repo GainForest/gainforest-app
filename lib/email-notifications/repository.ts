@@ -10,6 +10,7 @@ import type {
   NotificationEnqueueRepository,
   NotificationEnqueueResult,
   NotificationOrchestrationRepository,
+  NotificationQueueHealth,
   NotificationRepository,
   NotificationRow,
   ProviderErrorCode,
@@ -18,9 +19,9 @@ import type {
   TerminalErrorCode,
 } from "./types";
 
-type RepositoryCode = "repository_unavailable" | "repository_rejected" | "invalid_response" | "stale_claim";
+type RepositoryCode = "repository_unavailable" | "repository_rejected" | "idempotency_conflict" | "invalid_response" | "stale_claim";
 type RepositoryOperation =
-  | "enqueue" | "cleanup" | "claim_due" | "claim_one" | "get_claimed" | "expire_claimed" | "resolve_recipient" | "wait_recipient"
+  | "enqueue" | "cleanup" | "health" | "claim_due" | "claim_one" | "get_claimed" | "expire_claimed" | "resolve_recipient" | "wait_recipient"
   | "freeze_request" | "begin_provider_call" | "defer_ambiguous" | "record_provider_failure"
   | "terminal_provider_failure" | "mark_sent" | "requeue" | "mark_dead" | "suppress_claimed" | "release_claim";
 
@@ -115,6 +116,8 @@ function decodeRow(value: unknown): NotificationRow | null {
   if (!noFrozen && !completeFrozen) return null;
   const expiresAt = item.provider_idempotency_expires_at === null ? null : date(item.provider_idempotency_expires_at);
   if (item.provider_idempotency_expires_at !== null && !expiresAt) return null;
+  if ((item.provider_call_phase === "idle" && (item.provider_call_is_ambiguous_retry || expiresAt !== null))
+    || (item.provider_call_phase === "in_flight" && expiresAt === null)) return null;
 
   return {
     id: item.id,
@@ -162,10 +165,16 @@ export class SupabaseNotificationRepository implements NotificationRepository, N
         if (error.code === "invalid_response") this.log({ code: error.code, operation });
         throw error;
       }
-      const status = object(error)?.status;
-      const code: RepositoryCode = typeof status === "number" && status >= 500
-        ? "repository_unavailable"
-        : "repository_rejected";
+      const details = object(error);
+      const status = details?.status;
+      const message = typeof details?.message === "string" ? details.message : "";
+      const code: RepositoryCode = operation === "enqueue"
+        && (message.includes("notification_outbox_idempotency_conflict")
+          || message.includes("notification_outbox_provider_key_conflict"))
+        ? "idempotency_conflict"
+        : typeof status === "number" && status >= 500
+          ? "repository_unavailable"
+          : "repository_rejected";
       this.log({ code, operation });
       throw new NotificationRepositoryError(code);
     }
@@ -229,6 +238,24 @@ export class SupabaseNotificationRepository implements NotificationRepository, N
         activeExpired: item.active_expired as number,
         redacted: item.redacted as number,
         deleted: item.deleted as number,
+      };
+    });
+  }
+
+  async health(): Promise<NotificationQueueHealth> {
+    return this.run("health", async () => {
+      const response = await supabaseRpc<unknown>("notification_outbox_health", {});
+      const item = object(response);
+      const counts = item && [item.waiting_recipient, item.queued, item.processing, item.dead, item.oldest_due_age_seconds];
+      if (!item || !counts || counts.some(value => typeof value !== "number" || !Number.isInteger(value) || value < 0)) {
+        this.invalid("Notification repository returned an invalid health response. Verify the committed health RPC signature.");
+      }
+      return {
+        waitingRecipient: item.waiting_recipient as number,
+        queued: item.queued as number,
+        processing: item.processing as number,
+        dead: item.dead as number,
+        oldestDueAgeSeconds: item.oldest_due_age_seconds as number,
       };
     });
   }

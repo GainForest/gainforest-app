@@ -8,7 +8,7 @@ import {
   retryGroupInvitation,
 } from "@/app/_lib/cgs-invitations";
 import { fetchCgsMembersWithCookie } from "@/app/_lib/cgs-server";
-import { createInvitationRuntime } from "@/lib/notifications/invitation-runtime";
+import { createInvitationRuntime } from "@/lib/email-notifications/invitation-runtime";
 
 export const runtime = "nodejs";
 export const maxDuration = 30;
