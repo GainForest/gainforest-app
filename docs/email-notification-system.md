@@ -27,12 +27,10 @@ flowchart TB
     Outbox[("notification_outbox<br/>saved email jobs and their status")]
   end
 
-  subgraph Timing["3 · Choose when to send"]
+  subgraph Timing["3 · Try the first delivery"]
     direction LR
 
-    FirstAttempt{"What started the job?"}
     TryNow["Try now<br/>wait for the first result"]
-    TryAfter["Reply first<br/>then send in the background"]
   end
 
   Account --> SaveJob
@@ -42,12 +40,8 @@ flowchart TB
   SaveJob --> Outbox
   SaveTogether --> Outbox
 
-  Outbox --> FirstAttempt
-  FirstAttempt -->|"Signup, org join, or invitation"| TryNow
-  FirstAttempt -->|"BioBlitz winner"| TryAfter
-
+  Outbox --> TryNow
   TryNow --> SendFlow["Continue with diagram 2"]
-  TryAfter --> SendFlow
 ```
 
 ### 2. How one email is sent
@@ -107,27 +101,23 @@ flowchart TB
 
   Timer["1 · Run automatically<br/>every 5 minutes"]
 
-  FindMissing["2 · Find BioBlitz awards<br/>missing an email job"]
+  Cleanup["2 · Clean up old jobs<br/>and private details"]
 
-  SaveMissing["3 · Add any missing jobs<br/>to notification_outbox"]
+  DueJobs["3 · Find existing jobs that are<br/>ready to try again"]
 
-  Cleanup["4 · Clean up old jobs<br/>and private details"]
+  SendJobs["4 · Send each due job<br/>using diagram 2"]
 
-  DueJobs["5 · Find jobs that are<br/>ready to try again"]
+  Health["5 · Report job totals only<br/>no names or email addresses"]
 
-  SendJobs["6 · Send each due job<br/>using diagram 2"]
-
-  Health["7 · Report job totals only<br/>no names or email addresses"]
-
-  Timer --> FindMissing
-  FindMissing --> SaveMissing
-  SaveMissing --> Cleanup
+  Timer --> Cleanup
   Cleanup --> DueJobs
   DueJobs --> SendJobs
   SendJobs --> Health
 
   Cleanup -.-> Retention["Stop active jobs after 7 days<br/>Clear sent details after 7 days<br/>Clear failed details after 14 days<br/>Remove records after 90 days"]
 ```
+
+The cron never discovers historical events or creates missing notification jobs. Producers create jobs only as the corresponding signup, membership, invitation, or moderator award action happens.
 
 ### 4. How manual actions work
 
@@ -147,12 +137,21 @@ flowchart TB
 
   InvitationEnds --> StopInvitation
 
-  ManualContact["3A · Moderator contacts the<br/>BioBlitz winner another way"]
+  RetryWinner["3A · Moderator retries one<br/>unprepared BioBlitz email"]
+
+  CreateWinnerJob["Create that winner's job<br/>using the recorded award"]
+
+  RetryWinner --> CreateWinnerJob
+  CreateWinnerJob --> SendAgain
+
+  ManualContact["4A · Moderator contacts the<br/>BioBlitz winner another way"]
 
   StopWinnerEmail["Stop the automatic email<br/>save who handled it"]
 
   ManualContact --> StopWinnerEmail
 ```
+
+BioBlitz email jobs are created when a moderator issues each winner badge. If setup fails, the moderator can retry that one recorded prize from the Past winners controls. There is no bulk or background reconciliation of earlier awards.
 
 ## Source of truth
 

@@ -613,8 +613,10 @@
           "lookup_failed": "Email lookup failed; try later or contact the winner manually",
           "cannot_send": "Cannot be sent automatically",
           "handled_manually": "Handled manually",
-          "not_prepared": "Not prepared; contact the winner manually",
-          "notification_setup_failed": "Email setup failed; contact the winner manually",
+          "not_prepared": "Email not prepared; retry or handle it manually",
+          "notification_setup_failed": "Email setup failed; retry or handle it manually",
+          "retry": "Retry notification",
+          "retrying": "Retrying…",
           "markHandled": "Mark handled manually",
           "marking": "Marking…"
         }

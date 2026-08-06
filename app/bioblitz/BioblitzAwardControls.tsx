@@ -14,7 +14,8 @@ import { AdminOnlyIndicator } from "../_components/AdminOnlyIndicator";
  */
 
 export type NotificationStatus = "sent" | "delayed" | "missing_email" | "lookup_failed" | "cannot_send" | "handled_manually" | "not_prepared" | "notification_setup_failed";
-export type NotificationSummary = { status: NotificationStatus; canMarkHandled: boolean };
+export type NotificationSummary = { status: NotificationStatus; canMarkHandled: boolean; canRetry: boolean };
+type AwardAction = "award" | "retry-notification" | "mark-notification-handled";
 export type RoundAwardState = {
   id: number;
   mostImages: boolean;
@@ -27,14 +28,17 @@ type AwardHook = {
   /** Null until (and unless) the viewer is confirmed as a moderator. */
   state: Map<number, RoundAwardState> | null;
   busyRound: number | null;
+  busyAction: AwardAction | null;
   error: string | null;
   award: (roundId: number) => void;
+  retryNotification: (roundId: number, prize: "most-observations" | "best-picture") => void;
   markHandled: (roundId: number, prize: "most-observations" | "best-picture") => void;
 };
 
 export function useBioblitzAwardState(): AwardHook {
   const [state, setState] = useState<Map<number, RoundAwardState> | null>(null);
   const [busyRound, setBusyRound] = useState<number | null>(null);
+  const [busyAction, setBusyAction] = useState<AwardAction | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -58,6 +62,7 @@ export function useBioblitzAwardState(): AwardHook {
 
   const award = useCallback((roundId: number) => {
     setBusyRound(roundId);
+    setBusyAction("award");
     setError(null);
     fetch("/api/internal/bioblitz-awards", {
       method: "POST",
@@ -80,11 +85,44 @@ export function useBioblitzAwardState(): AwardHook {
         });
       })
       .catch(() => setError("failed"))
-      .finally(() => setBusyRound((current) => (current === roundId ? null : current)));
+      .finally(() => {
+        setBusyRound((current) => (current === roundId ? null : current));
+        setBusyAction(null);
+      });
+  }, []);
+
+  const retryNotification = useCallback((roundId: number, prize: "most-observations" | "best-picture") => {
+    setBusyRound(roundId);
+    setBusyAction("retry-notification");
+    setError(null);
+    fetch("/api/internal/bioblitz-awards", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ action: "retry-notification", roundId, prize }),
+    }).then(async response => {
+      const data = await response.json().catch(() => null) as { notification?: NotificationSummary; error?: string } | null;
+      if (!response.ok || !data?.notification) throw new Error(data?.error);
+      setState(current => {
+        const next = new Map(current ?? []);
+        const existing = next.get(roundId);
+        if (existing) next.set(roundId, {
+          ...existing,
+          ...(prize === "most-observations"
+            ? { mostImagesNotification: data.notification }
+            : { bestPictureNotification: data.notification }),
+        });
+        return next;
+      });
+    }).catch(() => setError("failed"))
+      .finally(() => {
+        setBusyRound(current => current === roundId ? null : current);
+        setBusyAction(null);
+      });
   }, []);
 
   const markHandled = useCallback((roundId: number, prize: "most-observations" | "best-picture") => {
     setBusyRound(roundId);
+    setBusyAction("mark-notification-handled");
     setError(null);
     fetch("/api/internal/bioblitz-awards", {
       method: "POST",
@@ -105,21 +143,28 @@ export function useBioblitzAwardState(): AwardHook {
         return next;
       });
     }).catch(() => setError("failed"))
-      .finally(() => setBusyRound(current => current === roundId ? null : current));
+      .finally(() => {
+        setBusyRound(current => current === roundId ? null : current);
+        setBusyAction(null);
+      });
   }, []);
 
-  return { state, busyRound, error, award, markHandled };
+  return { state, busyRound, busyAction, error, award, retryNotification, markHandled };
 }
 
 export function BioblitzPrizeNotificationStatus({
   label,
   notification,
   busy,
+  busyAction = null,
+  onRetry,
   onMarkHandled,
 }: {
   label: string;
   notification: NotificationSummary;
   busy: boolean;
+  busyAction?: AwardAction | null;
+  onRetry: () => void;
   onMarkHandled: () => void;
 }) {
   const t = useTranslations("marketplace.bioblitz.winners.award");
@@ -130,9 +175,14 @@ export function BioblitzPrizeNotificationStatus({
         {attention ? <AlertTriangleIcon className="mr-1 inline size-3.5" aria-hidden /> : notification.status === "sent" || notification.status === "handled_manually" ? <CheckIcon className="mr-1 inline size-3.5" aria-hidden /> : <MailIcon className="mr-1 inline size-3.5" aria-hidden />}
         {label}: {t(`notification.${notification.status}`)}
       </span>
+      {notification.canRetry ? (
+        <button type="button" disabled={busy} onClick={onRetry} className="rounded-full border border-border px-2 py-0.5 font-medium text-foreground hover:bg-muted disabled:opacity-60">
+          {busy && busyAction === "retry-notification" ? t("notification.retrying") : t("notification.retry")}
+        </button>
+      ) : null}
       {notification.canMarkHandled ? (
         <button type="button" disabled={busy} onClick={onMarkHandled} className="rounded-full border border-border px-2 py-0.5 font-medium text-foreground hover:bg-muted disabled:opacity-60">
-          {busy ? t("notification.marking") : t("notification.markHandled")}
+          {busy && busyAction === "mark-notification-handled" ? t("notification.marking") : t("notification.markHandled")}
         </button>
       ) : null}
     </div>
@@ -182,6 +232,8 @@ export function RoundAwardControl({
           label={t("notification.mostObservations")}
           notification={roundState.mostImagesNotification}
           busy={busy}
+          busyAction={hook.busyAction}
+          onRetry={() => hook.retryNotification(roundId, "most-observations")}
           onMarkHandled={() => hook.markHandled(roundId, "most-observations")}
         />
       ) : null}
@@ -190,6 +242,8 @@ export function RoundAwardControl({
           label={t("notification.bestPicture")}
           notification={roundState.bestPictureNotification}
           busy={busy}
+          busyAction={hook.busyAction}
+          onRetry={() => hook.retryNotification(roundId, "best-picture")}
           onMarkHandled={() => hook.markHandled(roundId, "best-picture")}
         />
       ) : null}
