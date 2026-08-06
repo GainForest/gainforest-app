@@ -16,8 +16,9 @@ const USABLE_INVOCATION_MS = 27_000;
 
 function jsonError(error: unknown, fallback: string, status = 400) {
   const message = error instanceof GroupInvitationError ? error.message : fallback;
-  const code = error instanceof GroupInvitationError ? error.status : status;
-  return Response.json({ error: message }, { status: code, headers: { "cache-control": "no-store" } });
+  const responseStatus = error instanceof GroupInvitationError ? error.status : status;
+  const code = error instanceof GroupInvitationError ? error.code : undefined;
+  return Response.json({ error: message, ...(code ? { code } : {}) }, { status: responseStatus, headers: { "cache-control": "no-store" } });
 }
 
 export async function POST(_request: Request, { params }: { params: Promise<{ invitationId: string }> }) {
@@ -28,7 +29,7 @@ export async function POST(_request: Request, { params }: { params: Promise<{ in
 
   try {
     const invitation = await getGroupInvitation(invitationId);
-    if (!invitation) throw new GroupInvitationError("Invitation not found.", 404);
+    if (!invitation) throw new GroupInvitationError("Invitation not found.", 404, "invitation_not_found");
     const headerList = await headers();
     const cookie = getAuthForwardCookie(headerList.get("cookie"));
     if (!cookie) throw new GroupInvitationError("Please sign in and try again.", 401);

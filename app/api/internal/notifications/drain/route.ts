@@ -7,6 +7,7 @@ export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 export const maxDuration = 60;
 
+const RECONCILIATION_BUDGET_MS = 10_000;
 const USABLE_INVOCATION_MS = 55_000;
 
 function configuredSecret(): string | null {
@@ -35,7 +36,9 @@ export async function GET(request: NextRequest) {
   try {
     let reconciliation: { candidates: number; completed: boolean };
     try {
-      reconciliation = { candidates: await reconcileRecentBioblitzNotifications(), completed: true };
+      reconciliation = await reconcileRecentBioblitzNotifications(
+        new Date(invocationStartedAt + RECONCILIATION_BUDGET_MS),
+      );
     } catch {
       reconciliation = { candidates: 0, completed: false };
     }

@@ -7,7 +7,7 @@ import { SupabaseInvitationSourceReader } from "./invitation-source";
 import { createNotificationProcessor, processNotificationById } from "./orchestrator";
 import { ApplicationNotificationRenderer } from "./renderer";
 import { SupabaseNotificationRepository } from "./repository";
-import { createNotificationRuntimeCore, systemNotificationClock } from "./runtime";
+import { createNotificationRuntimeCore, rejectDisabledNotificationProcessing, systemNotificationClock } from "./runtime";
 import { SupabaseUserEmailReader } from "./user-email";
 
 type Environment = Readonly<Record<string, string | undefined>>;
@@ -41,7 +41,7 @@ export function createBioblitzProcessRuntime(environment: Environment = process.
       invitationSourceReader: new SupabaseInvitationSourceReader(),
       safetyMarginMs: WORKER_SAFETY_MARGIN_MS,
     })
-    : async () => ({ kind: "disabled" } as const);
+    : rejectDisabledNotificationProcessing;
   return {
     process: (outboxId: string, deadline: Date) => processNotificationById(outboxId, deadline, {
       config,

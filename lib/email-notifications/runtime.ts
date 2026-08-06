@@ -39,6 +39,10 @@ export interface NotificationRuntimeCore {
   readonly from: string;
 }
 
+export async function rejectDisabledNotificationProcessing(): Promise<never> {
+  throw new Error("Notification processing cannot run while EMAIL_DISABLED=true.");
+}
+
 function emailFrom(environment: Environment): string {
   const value = environment.EMAIL_FROM?.trim() || DEFAULT_EMAIL_FROM;
   if (value.length > 320 || /[\r\n\0]/.test(value)) {

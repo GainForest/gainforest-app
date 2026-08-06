@@ -4,7 +4,7 @@ import { randomUUID } from "node:crypto";
 import { SupabaseInvitationSourceReader } from "./invitation-source";
 import { createNotificationProcessor, processNotificationById } from "./orchestrator";
 import { ApplicationNotificationRenderer } from "./renderer";
-import { createNotificationRuntimeCore } from "./runtime";
+import { createNotificationRuntimeCore, rejectDisabledNotificationProcessing } from "./runtime";
 import type { UserEmailReader } from "./types";
 
 type Environment = Readonly<Record<string, string | undefined>>;
@@ -25,7 +25,7 @@ export function createInvitationRuntime(environment: Environment = process.env) 
       invitationSourceReader: new SupabaseInvitationSourceReader(),
       safetyMarginMs: WORKER_SAFETY_MARGIN_MS,
     })
-    : async () => ({ kind: "disabled" } as const);
+    : rejectDisabledNotificationProcessing;
 
   return {
     config,

@@ -9,6 +9,30 @@ import { fetchInternalBadgeData, type InternalBadgeData } from "@/app/internal/b
 import type { BioblitzPrize, BioblitzWinnerInput } from "@/lib/email-notifications/bioblitz";
 
 const RECONCILIATION_AGE_MS = 90 * 24 * 60 * 60 * 1000;
+const MAX_RECONCILIATION_CANDIDATES = 20;
+
+class ReconciliationDeadlineExceeded extends Error {
+  constructor() {
+    super("BioBlitz notification reconciliation reached its invocation deadline.");
+    this.name = "ReconciliationDeadlineExceeded";
+  }
+}
+
+async function beforeDeadline<T>(work: () => Promise<T>, deadline: Date): Promise<T> {
+  const remaining = deadline.getTime() - Date.now();
+  if (remaining <= 0) throw new ReconciliationDeadlineExceeded();
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  try {
+    return await Promise.race([
+      work(),
+      new Promise<never>((_resolve, reject) => {
+        timer = setTimeout(() => reject(new ReconciliationDeadlineExceeded()), remaining);
+      }),
+    ]);
+  } finally {
+    if (timer) clearTimeout(timer);
+  }
+}
 
 export function canonicalBioblitzAwardInputs(
   data: InternalBadgeData,
@@ -44,14 +68,31 @@ export function canonicalBioblitzAwardInputs(
   return [...inputs.entries()].filter(([source]) => !conflicts.has(source)).map(([, input]) => input);
 }
 
-export async function reconcileRecentBioblitzNotifications(): Promise<number> {
-  const rounds = endedRounds();
-  const data = await fetchInternalBadgeData(GAINFOREST_MODERATION_REPO_DID, { includeAwards: true });
-  const inputs = canonicalBioblitzAwardInputs(data, rounds);
-  const summaries = await listBioblitzNotificationSummaries(inputs);
-  const missing = inputs.filter(input => summaries.get(`bioblitz:${input.roundId}:${input.prize}`)?.status === "not_prepared");
-  if (missing.length === 0) return 0;
-  const producer = createBioblitzProducerRuntime();
-  for (const input of missing) await producer.enqueue(input);
-  return missing.length;
+export async function reconcileRecentBioblitzNotifications(
+  deadline: Date,
+): Promise<{ candidates: number; completed: boolean }> {
+  let candidates = 0;
+  try {
+    const rounds = endedRounds();
+    const data = await beforeDeadline(
+      () => fetchInternalBadgeData(GAINFOREST_MODERATION_REPO_DID, { includeAwards: true }),
+      deadline,
+    );
+    const inputs = canonicalBioblitzAwardInputs(data, rounds);
+    const summaries = await beforeDeadline(() => listBioblitzNotificationSummaries(inputs), deadline);
+    const missing = inputs.filter(input => summaries.get(`bioblitz:${input.roundId}:${input.prize}`)?.status === "not_prepared");
+    if (missing.length === 0) return { candidates: 0, completed: true };
+    const producer = createBioblitzProducerRuntime();
+    for (const input of missing.slice(0, MAX_RECONCILIATION_CANDIDATES)) {
+      if (Date.now() >= deadline.getTime()) return { candidates, completed: false };
+      // Once a database mutation starts, await its definitive result. Racing it
+      // against the deadline could let a late commit cross into queue draining.
+      await producer.enqueue(input);
+      candidates += 1;
+    }
+    return { candidates, completed: missing.length <= MAX_RECONCILIATION_CANDIDATES };
+  } catch (error) {
+    if (error instanceof ReconciliationDeadlineExceeded) return { candidates, completed: false };
+    throw error;
+  }
 }

@@ -31,6 +31,9 @@ export class ResendEmailProvider implements EmailProvider {
           ...(error.retryAfterMs === undefined ? {} : { retryAfterMs: error.retryAfterMs }),
         };
       }
+      if (error.status === 408) {
+        return { kind: "transient", errorCode: "provider_timeout" };
+      }
       if (error.status >= 500 || (error.status === 409 && error.code === "concurrent_idempotent_requests")) {
         return { kind: "transient", errorCode: "provider_5xx" };
       }
