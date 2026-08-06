@@ -183,22 +183,22 @@ describe("SupabaseNotificationRepository", () => {
     });
   });
 
-  it("decodes a complete frozen request and provider expiry", async () => {
+  it("decodes a complete frozen request and in-flight provider expiry", async () => {
     fetchMock.mockResolvedValueOnce(Response.json([{
       ...rawRow,
-      provider_call_phase: "in_flight",
       frozen_from: "GainForest <noreply@gainforest.id>",
       frozen_to: "person@example.com",
       frozen_subject: "Welcome",
       frozen_html: "<p>Welcome</p>",
       frozen_text: "Welcome",
+      provider_call_phase: "in_flight",
       provider_idempotency_expires_at: "2026-08-07 01:00:00+00",
     }]));
 
     const row = await new SupabaseNotificationRepository().getClaimed({
       outboxId: rawRow.id,
       previousStatus: "queued",
-      resumeProviderCallPhase: "idle",
+      resumeProviderCallPhase: "in_flight",
       processingToken: rawRow.processing_token,
       lockedUntil: new Date(rawRow.locked_until),
     });

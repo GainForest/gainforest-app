@@ -1,7 +1,11 @@
 import "server-only";
 
 import type { ProcessOneOutcome } from "./orchestrator";
-import { enqueueMembershipJoined, enqueueSignup, type WelcomeProducerDependencies } from "./signup-and-membership-notifications";
+import {
+  enqueueMembershipJoined,
+  enqueueSignup,
+  type WelcomeProducerDependencies,
+} from "./signup-and-membership-notifications";
 import type { NotificationErrorCode, OutboxStatus, ProcessResult } from "./types";
 
 export type WelcomeNotificationInput = {
