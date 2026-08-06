@@ -1,6 +1,158 @@
-# Notification outbox
+# Email notification system
 
 The notification outbox durably coordinates email delivery. The application writes notification intent through database RPCs, workers claim rows, render and freeze a provider request, then record a terminal or retryable outcome.
+
+## How email notifications work
+
+The diagrams below split the system into four smaller flows: creating a job, sending one email, automatic recovery, and manual actions.
+
+### 1. How an email job is created
+
+```mermaid
+flowchart TB
+
+  subgraph Triggers["1 · What starts an email"]
+    direction LR
+
+    Account["Account system reports<br/>a signup or org join"]
+    Invitation["Owner or admin<br/>sends an invitation"]
+    BioBlitz["Moderator confirms<br/>a BioBlitz winner"]
+  end
+
+  subgraph Saving["2 · Save the email job"]
+    direction TB
+
+    SaveJob["Check the details and assign<br/>a unique job ID"]
+    SaveTogether["Save the invitation and<br/>email job together"]
+    Outbox[("notification_outbox<br/>saved email jobs and their status")]
+  end
+
+  subgraph Timing["3 · Choose when to send"]
+    direction LR
+
+    FirstAttempt{"What started the job?"}
+    TryNow["Try now<br/>wait for the first result"]
+    TryAfter["Reply first<br/>then send in the background"]
+  end
+
+  Account --> SaveJob
+  BioBlitz --> SaveJob
+  Invitation --> SaveTogether
+
+  SaveJob --> Outbox
+  SaveTogether --> Outbox
+
+  Outbox --> FirstAttempt
+  FirstAttempt -->|"Signup, org join, or invitation"| TryNow
+  FirstAttempt -->|"BioBlitz winner"| TryAfter
+
+  TryNow --> SendFlow["Continue with diagram 2"]
+  TryAfter --> SendFlow
+```
+
+### 2. How one email is sent
+
+The main sending path runs downward. Problems branch off where they happen.
+
+```mermaid
+flowchart TB
+
+  Ready["1 · A saved email job<br/>is ready to send"]
+
+  Reserve["2 · Reserve the job so<br/>it cannot be sent twice"]
+
+  Check["3 · Find the email address<br/>and check the email is still needed"]
+
+  UserEmails[("user_emails<br/>saved email addresses")]
+
+  Ready --> Reserve
+  Reserve --> Check
+
+  Check -.->|"For a BioBlitz winner"| UserEmails
+
+  Check -->|"No email address yet"| Waiting["Save as waiting<br/>try again later"]
+
+  Check -->|"Invitation is no longer active"| Stopped["Save as stopped<br/>do not send"]
+
+  Check -->|"Cannot check right now"| Later["Save for automatic retry"]
+
+  Check -->|"Ready"| Build["4 · Build the email and save<br/>the exact content"]
+
+  Build --> Resend["5 · Send through Resend<br/>with a retry-safe ID"]
+
+  Resend --> Result{"6 · What happened?"}
+
+  Result -->|"Sent"| Sent["Save as sent"]
+  Sent --> Inbox["Recipient inbox"]
+
+  Result -->|"Temporary problem"| QuickRetry["Try again after<br/>0.5s and 1.5s"]
+
+  QuickRetry -->|"Try again now"| Resend
+  QuickRetry -->|"Still failing"| Later
+
+  Result -->|"Unknown if sent"| Unclear["Wait before trying again<br/>with the same email and ID"]
+
+  Unclear -->|"Still within 24 hours"| Resend
+  Unclear -->|"24 hours have passed"| Failed["Save as failed<br/>stop retrying"]
+
+  Result -->|"Permanent problem"| Failed
+```
+
+`Waiting`, `Stopped`, `Later`, `Sent`, and `Failed` are statuses saved in `notification_outbox`.
+
+### 3. How automatic recovery works
+
+```mermaid
+flowchart TB
+
+  Timer["1 · Run automatically<br/>every 5 minutes"]
+
+  FindMissing["2 · Find BioBlitz awards<br/>missing an email job"]
+
+  SaveMissing["3 · Add any missing jobs<br/>to notification_outbox"]
+
+  Cleanup["4 · Clean up old jobs<br/>and private details"]
+
+  DueJobs["5 · Find jobs that are<br/>ready to try again"]
+
+  SendJobs["6 · Send each due job<br/>using diagram 2"]
+
+  Health["7 · Report job totals only<br/>no names or email addresses"]
+
+  Timer --> FindMissing
+  FindMissing --> SaveMissing
+  SaveMissing --> Cleanup
+  Cleanup --> DueJobs
+  DueJobs --> SendJobs
+  SendJobs --> Health
+
+  Cleanup -.-> Retention["Stop active jobs after 7 days<br/>Clear sent details after 7 days<br/>Clear failed details after 14 days<br/>Remove records after 90 days"]
+```
+
+### 4. How manual actions work
+
+```mermaid
+flowchart TB
+
+  RetryInvitation["1A · Owner or admin retries<br/>an invitation email"]
+
+  SameJob["Make the same email job<br/>ready now<br/>1-minute cooldown"]
+
+  RetryInvitation --> SameJob
+  SameJob --> SendAgain["Send using diagram 2"]
+
+  InvitationEnds["2A · Invitation is accepted,<br/>canceled, or expires"]
+
+  StopInvitation["Save its unsent email<br/>as stopped"]
+
+  InvitationEnds --> StopInvitation
+
+  ManualContact["3A · Moderator contacts the<br/>BioBlitz winner another way"]
+
+  StopWinnerEmail["Stop the automatic email<br/>save who handled it"]
+
+  ManualContact --> StopWinnerEmail
+```
 
 ## Source of truth
 
