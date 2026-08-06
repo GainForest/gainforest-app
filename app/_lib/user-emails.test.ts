@@ -3,6 +3,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 const nextServer = vi.hoisted(() => ({ after: vi.fn() }));
 
 vi.mock("next/server", () => nextServer);
+vi.mock("server-only", () => ({}));
 
 import { scheduleUserEmailSync, upsertUserEmail } from "./user-emails";
 

@@ -1,3 +1,5 @@
+import "server-only";
+
 const SUPABASE_REST_PATH = "/rest/v1";
 
 class SupabaseRestError extends Error {
@@ -38,6 +40,21 @@ async function parseSupabaseError(response: Response): Promise<SupabaseRestError
 
 export function supabaseFilterValue(value: string): string {
   return encodeURIComponent(value);
+}
+
+export async function supabaseRpc<T>(functionName: string, parameters: Record<string, unknown>): Promise<T> {
+  const headers = serviceRoleHeaders({
+    accept: "application/json",
+    "content-type": "application/json",
+  });
+  const response = await fetch(supabaseUrl(`/rpc/${encodeURIComponent(functionName)}`), {
+    method: "POST",
+    headers,
+    body: JSON.stringify(parameters),
+    cache: "no-store",
+  });
+  if (!response.ok) throw await parseSupabaseError(response);
+  return await response.json().catch(() => null) as T;
 }
 
 export async function supabaseSelect<T>(pathAndQuery: string): Promise<T[]> {

@@ -4,7 +4,7 @@ import Image from "next/image";
 import { useCallback, useEffect, useMemo, useState, type FormEvent } from "react";
 import { motion } from "framer-motion";
 import { useTranslations } from "next-intl";
-import { CheckIcon, Loader2Icon, LockIcon, MailIcon, RefreshCwIcon, Trash2Icon, UsersIcon } from "lucide-react";
+import { CheckIcon, CopyIcon, Loader2Icon, LockIcon, MailIcon, RefreshCwIcon, Trash2Icon, UsersIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
@@ -14,8 +14,10 @@ import {
   addCgsMember,
   cancelCgsInvitation,
   inviteCgsMember,
+  invitationErrorTranslationKey,
   removeCgsMember,
   resolveCgsMemberIdentity,
+  retryCgsInvitationEmail,
   setCgsMemberRole,
   type CgsMember,
   type CgsPendingInvitation,
@@ -126,49 +128,67 @@ function InvitationAvatar({ email }: { email: string }) {
   );
 }
 
-function PendingInvitationRow({
+export function PendingInvitationRow({
   invitation,
   roleLabel,
   statusLabel,
   canCancel,
+  canRetry,
   isPending,
+  retryLabel,
+  copyLabel,
   cancelLabel,
+  onRetry,
+  onCopy,
   onCancel,
 }: {
   invitation: CgsPendingInvitation;
   roleLabel: string;
   statusLabel: string;
   canCancel: boolean;
+  canRetry: boolean;
   isPending: boolean;
+  retryLabel: string;
+  copyLabel: string;
   cancelLabel: string;
+  onRetry: (invitation: CgsPendingInvitation) => void;
+  onCopy: (invitation: CgsPendingInvitation) => void;
   onCancel: (invitation: CgsPendingInvitation) => void;
 }) {
   return (
-    <div className="flex items-center gap-3 rounded-xl px-3 py-3 transition-colors hover:bg-muted/40">
+    <div className="flex flex-wrap items-center gap-3 rounded-xl px-3 py-3 transition-colors hover:bg-muted/40">
       <InvitationAvatar email={invitation.email} />
-      <div className="min-w-0 flex-1">
+      <div className="min-w-48 flex-1">
         <p className="truncate text-sm font-medium text-foreground">{invitation.email}</p>
-        <p className="truncate text-xs text-muted-foreground">{statusLabel}</p>
+        <p className="text-xs text-muted-foreground">{statusLabel}</p>
       </div>
       <span className={cn("rounded-full px-2.5 py-1 text-xs font-medium capitalize", roleBadge(invitation.role))}>
         {roleLabel}
       </span>
-      {canCancel ? (
-        <Button
-          type="button"
-          variant="ghost"
-          size="icon-sm"
-          disabled={isPending}
-          onClick={() => onCancel(invitation)}
-          title={cancelLabel}
-          aria-label={cancelLabel}
-          className="text-muted-foreground hover:text-destructive"
-        >
-          <Trash2Icon />
+      <div className="flex items-center gap-1">
+        {canRetry ? (
+          <Button type="button" variant="ghost" size="sm" disabled={isPending} onClick={() => onRetry(invitation)}>
+            <RefreshCwIcon /> {retryLabel}
+          </Button>
+        ) : null}
+        <Button type="button" variant="ghost" size="sm" disabled={isPending} onClick={() => onCopy(invitation)}>
+          <CopyIcon /> {copyLabel}
         </Button>
-      ) : (
-        <span className="w-7 shrink-0" aria-hidden />
-      )}
+        {canCancel ? (
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon-sm"
+            disabled={isPending}
+            onClick={() => onCancel(invitation)}
+            title={cancelLabel}
+            aria-label={cancelLabel}
+            className="text-muted-foreground hover:text-destructive"
+          >
+            <Trash2Icon />
+          </Button>
+        ) : null}
+      </div>
     </div>
   );
 }
@@ -288,6 +308,10 @@ export function GroupMembers({
 }) {
   const dataCouncilT = useTranslations("upload.settings.dataCouncil");
   const invitationsT = useTranslations("common.groupInvitations.members");
+  const invitationMutationError = (mutationError: unknown, fallback: "sendError" | "cancelError" | "retryError") => {
+    const key = invitationErrorTranslationKey(mutationError);
+    return key ? invitationsT(key) : invitationsT(fallback);
+  };
   const dataCouncilLoadError = dataCouncilT("errors.load");
   const dataCouncilSaveError = dataCouncilT("errors.save");
   const canAddRemove = currentRole === "owner" || currentRole === "admin";
@@ -410,9 +434,13 @@ export function GroupMembers({
           const { invitation } = await inviteCgsMember(groupDid, value, nextRole);
           setPendingInvitations((current) => upsertInvitation(current, invitation));
           setMemberIdentifier("");
-          setSuccess(invitationsT("sent", { email: value }));
+          setSuccess(invitation.notification?.status === "sent"
+            ? invitationsT("sent", { email: value })
+            : invitation.notification?.status === "queued" || invitation.notification?.status === "processing"
+              ? invitationsT("createdDelayed")
+              : invitationsT("createdManual"));
         } catch (err) {
-          setError(memberErrorMessage(err, invitationsT("sendError")));
+          setError(invitationMutationError(err, "sendError"));
         }
       });
       return;
@@ -517,8 +545,51 @@ export function GroupMembers({
         setSuccess(invitationsT("canceled", { email: invitation.email }));
       } catch (err) {
         setPendingInvitations(previousInvitations);
-        setError(memberErrorMessage(err, invitationsT("cancelError")));
+        setError(invitationMutationError(err, "cancelError"));
       }
+    });
+  };
+
+  const retryInvitation = (invitation: CgsPendingInvitation) => {
+    if (!canCancelPendingInvitation(invitation) || !invitation.notification?.retryable) return;
+    runPending(async () => {
+      setError(null);
+      setSuccess(null);
+      try {
+        const { notification } = await retryCgsInvitationEmail(invitation.id);
+        setPendingInvitations(current => current.map(item => item.id === invitation.id ? { ...item, notification } : item));
+        setSuccess(notification.status === "sent" ? invitationsT("retrySent") : invitationsT("retryQueued"));
+      } catch (err) {
+        setError(invitationMutationError(err, "retryError"));
+      }
+    });
+  };
+
+  const copyInvitation = (invitation: CgsPendingInvitation) => {
+    const url = new URL(`/invite/${encodeURIComponent(invitation.id)}`, window.location.origin).toString();
+    if (!navigator.clipboard) {
+      setSuccess(null);
+      setError(invitationsT("copyError"));
+      return;
+    }
+    void navigator.clipboard.writeText(url).then(() => {
+      setError(null);
+      setSuccess(invitationsT("copied", { email: invitation.email }));
+    }).catch(() => {
+      setSuccess(null);
+      setError(invitationsT("copyError"));
+    });
+  };
+
+  const invitationStatusLabel = (invitation: CgsPendingInvitation) => {
+    const delivery = invitation.notification?.status === "sent"
+      ? invitationsT("emailSent")
+      : invitation.notification?.status === "queued" || invitation.notification?.status === "processing" || invitation.notification?.status === "waiting_recipient"
+        ? invitationsT("emailDelayed")
+        : invitationsT("emailUnavailable");
+    return invitationsT("pendingStatus", {
+      role: invitationsT(invitation.role === "admin" ? "roleAdmin" : "roleMember"),
+      delivery,
     });
   };
 
@@ -664,10 +735,15 @@ export function GroupMembers({
               key={invitation.id}
               invitation={invitation}
               roleLabel={invitationsT(invitation.role === "admin" ? "roleAdmin" : "roleMember")}
-              statusLabel={invitationsT("pendingStatus", { role: invitationsT(invitation.role === "admin" ? "roleAdmin" : "roleMember") })}
+              statusLabel={invitationStatusLabel(invitation)}
               canCancel={canCancelPendingInvitation(invitation)}
+              canRetry={canCancelPendingInvitation(invitation) && Boolean(invitation.notification?.retryable)}
               isPending={isPending}
+              retryLabel={invitationsT("retry")}
+              copyLabel={invitationsT("copyLink")}
               cancelLabel={invitationsT("cancel")}
+              onRetry={retryInvitation}
+              onCopy={copyInvitation}
               onCancel={cancelInvitation}
             />
           ))}
