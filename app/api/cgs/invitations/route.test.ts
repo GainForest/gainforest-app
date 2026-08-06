@@ -81,6 +81,20 @@ describe("POST /api/cgs/invitations", () => {
     expect(process).toHaveBeenCalledWith(invitation.notification.outboxId, expect.any(Date));
   });
 
+  it("reserves 55 seconds for immediate invitation delivery", async () => {
+    const { POST, maxDuration } = await import("./route");
+    const before = Date.now();
+    const response = await POST(request());
+    const after = Date.now();
+
+    expect(response.status).toBe(200);
+    const invocationDeadline = process.mock.calls[0]?.[1] as Date | undefined;
+    expect(invocationDeadline).toBeInstanceOf(Date);
+    expect(invocationDeadline!.getTime()).toBeGreaterThanOrEqual(before + 55_000);
+    expect(invocationDeadline!.getTime()).toBeLessThanOrEqual(after + 55_000);
+    expect(maxDuration).toBe(60);
+  });
+
   it("still creates the invitation without delivery when notification email is disabled", async () => {
     vi.stubEnv("EMAIL_DISABLED", "true");
     createGroupInvitation.mockResolvedValueOnce({ ...invitation, notification: null });
