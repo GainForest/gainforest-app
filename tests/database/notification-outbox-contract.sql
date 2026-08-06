@@ -404,13 +404,7 @@ select pg_temp.assert_true((select status='suppressed' and redacted_at is not nu
 
 -- Invitation creation and notification enqueue commit atomically. Closing an
 -- invitation suppresses unsent work; manual retry is permission-ready and safe.
-create table public.cgs_group_invitations (
-  id uuid primary key,repo text not null,email text not null,role text not null,status text not null,
-  inviter_did text not null,inviter_handle text,inviter_email text,group_name text,group_handle text,
-  created_at timestamptz not null,updated_at timestamptz not null,expires_at timestamptz not null,
-  accepted_at timestamptz,accepted_by_did text,accepted_by_email text,email_sent_at timestamptz,last_email_error text
-);
-create unique index invitation_pending_identity on public.cgs_group_invitations(repo,email) where status='pending';
+truncate table public.cgs_group_invitations;
 
 create temp table invitation_created as select public.notification_invitation_create(
   '81000000-0000-4000-8000-000000000001','did:plc:forest','invitee@example.com','member','did:plc:owner','owner.example.com','owner@example.com',

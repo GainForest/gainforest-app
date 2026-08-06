@@ -82,6 +82,32 @@ SQL
 shopt -s nullglob
 migrations=("$ROOT"/supabase/migrations/*.sql)
 ((${#migrations[@]} > 0)) || { echo "no migrations found under supabase/migrations" >&2; exit 1; }
+NOTIFICATION_MIGRATION="$ROOT/supabase/migrations/20260805235500_notification_outbox.sql"
+[[ -f "$NOTIFICATION_MIGRATION" ]] || { echo "notification outbox migration is missing" >&2; exit 1; }
+if psql -X -v ON_ERROR_STOP=1 -f "$NOTIFICATION_MIGRATION" >"$TMP/missing-prerequisites.out" 2>"$TMP/missing-prerequisites.err"; then
+  echo "notification outbox migration must fail before invitation and user-email prerequisites exist" >&2
+  exit 1
+fi
+grep -q 'notification outbox prerequisites' "$TMP/missing-prerequisites.err" || {
+  echo "notification outbox migration prerequisite failure was not actionable" >&2
+  cat "$TMP/missing-prerequisites.err" >&2
+  exit 1
+}
+
+psql -X -q -v ON_ERROR_STOP=1 -c "create table public.cgs_group_invitations(id uuid); create table public.user_emails(did text);" >/dev/null
+if psql -X -v ON_ERROR_STOP=1 -f "$NOTIFICATION_MIGRATION" >"$TMP/incomplete-prerequisites.out" 2>"$TMP/incomplete-prerequisites.err"; then
+  echo "notification outbox migration must fail when prerequisite columns are incomplete" >&2
+  exit 1
+fi
+grep -q 'notification outbox prerequisites are incomplete' "$TMP/incomplete-prerequisites.err" || {
+  echo "notification outbox incomplete-prerequisite failure was not actionable" >&2
+  cat "$TMP/incomplete-prerequisites.err" >&2
+  exit 1
+}
+psql -X -q -v ON_ERROR_STOP=1 -c "drop table public.cgs_group_invitations; drop table public.user_emails;" >/dev/null
+
+psql -X -q -v ON_ERROR_STOP=1 -f "$ROOT/docs/cgs-group-invitations.sql" >/dev/null
+psql -X -q -v ON_ERROR_STOP=1 -f "$ROOT/docs/user-emails.sql" >/dev/null
 for migration in "${migrations[@]}"; do
   echo "Applying $(basename "$migration")"
   psql -X -v ON_ERROR_STOP=1 -f "$migration" >/dev/null
@@ -94,6 +120,8 @@ psql -X -q -v ON_ERROR_STOP=1 -f "$ROOT/tests/database/notification-outbox-contr
 PUBLIC_CRYPTO_DB=notification_outbox_pgcrypto_public
 psql -X -q -v ON_ERROR_STOP=1 -d postgres -c "create database $PUBLIC_CRYPTO_DB" >/dev/null
 psql -X -q -v ON_ERROR_STOP=1 -d "$PUBLIC_CRYPTO_DB" -c "create extension pgcrypto with schema public" >/dev/null
+psql -X -q -v ON_ERROR_STOP=1 -d "$PUBLIC_CRYPTO_DB" -f "$ROOT/docs/cgs-group-invitations.sql" >/dev/null
+psql -X -q -v ON_ERROR_STOP=1 -d "$PUBLIC_CRYPTO_DB" -f "$ROOT/docs/user-emails.sql" >/dev/null
 for migration in "${migrations[@]}"; do
   echo "Applying $(basename "$migration") with pgcrypto in public"
   psql -X -v ON_ERROR_STOP=1 -d "$PUBLIC_CRYPTO_DB" -f "$migration" >/dev/null

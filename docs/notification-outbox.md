@@ -22,7 +22,7 @@ EMAIL_BIOBLITZ_WINNER_ENABLED=false
 
 ## Database prerequisites and migration order
 
-The outbox migration expects these existing private tables in the same Supabase project:
+The outbox migration requires these existing private tables in the same Supabase project and fails immediately with an actionable prerequisite error when either table or a required column is absent:
 
 - `public.cgs_group_invitations` from `docs/cgs-group-invitations.sql`;
 - `public.user_emails` from `docs/user-emails.sql`.
@@ -41,7 +41,7 @@ Do not apply this migration to a remote environment without an approved deployme
 
 ## Local validation
 
-The database contract uses a disposable local PostgreSQL container and refuses remote Docker endpoints or image pulls:
+The fast database contract uses a disposable local PostgreSQL container and refuses remote Docker endpoints or image pulls:
 
 ```bash
 pnpm test:db
@@ -50,6 +50,25 @@ pnpm build
 ```
 
 The database suite covers token ownership, concurrent claims, immutable frozen requests, provider ambiguity, invitation atomicity, cancellation/acceptance suppression, BioBlitz manual handling, retention, and aggregate health.
+
+For a full local application smoke test, run:
+
+```bash
+pnpm test:notifications:local
+```
+
+This command requires Docker, `psql`, `curl`, and `flock`. It uses the tracked Supabase CLI version and the reserved `bumicerts-notification-smoke` project ID. It refuses remote Docker, serializes runs across terminals and worktrees, starts a minimal local Supabase/PostgREST stack, applies the invitation and private-email prerequisites before the outbox migration, runs Next.js on loopback port `3055` in `capture` mode, and verifies:
+
+- browser table/RPC denial and the intended service-role privilege matrix;
+- signed signup and organization-membership webhooks;
+- complete frozen requests and exact-event deduplication;
+- transactional invitation creation and authenticated drain recovery;
+- BioBlitz private-email resolution and captured winner delivery; and
+- missing-email waiting followed by moderator manual suppression.
+
+The first run may download the pinned local Supabase Docker images. Supabase CLI 2.111 publishes its local API and database ports on all host interfaces; run this disposable stack only on a trusted network or a host firewall that blocks inbound access to ports `54321` and `54322`. Next.js itself binds only to `127.0.0.1`. The command stops Next.js and deletes only its reserved Supabase volumes on completion, and reports a failure if cleanup does not finish. Set `KEEP_NOTIFICATION_LOCAL_STACK=1` to retain the local database for inspection, or `NOTIFICATION_LOCAL_APP_PORT=<port>` if `3055` is occupied. The Next.js process still stops when retaining the database; use `pnpm exec supabase status -o env` to retrieve the local connection details.
+
+The full smoke test does not call Resend, production Supabase, the production indexer, or production auth/CGS services. Invitation and BioBlitz fixtures enter through local PostgREST RPCs because their public product routes require real authenticated CGS/moderator state. The production worker and renderer paths, invitation source check, BioBlitz recipient resolution, and authenticated drain are exercised unchanged; authoritative BioBlitz award lookup is intentionally bypassed.
 
 No test should use a production Supabase URL, production service-role key, Resend key, or real recipient.
 
