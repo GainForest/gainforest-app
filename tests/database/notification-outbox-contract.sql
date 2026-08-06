@@ -21,14 +21,75 @@ end $$;
 
 -- Schema, RLS, grants, and bounded constraints.
 select pg_temp.assert_true(to_regclass('public.notification_outbox') is not null, 'table exists');
+with expected(ordinal,column_name,column_type,not_null,default_expression) as (values
+  (1,'id','uuid',true,'gen_random_uuid()'::text),
+  (2,'event_key_hash','text',true,null),(3,'input_fingerprint_hash','text',false,null),
+  (4,'event_type','text',true,null),(5,'payload','jsonb',false,null),(6,'source_id','text',false,null),
+  (7,'recipient_did','text',false,null),(8,'recipient_email','text',false,null),
+  (9,'template_key','text',false,null),(10,'locale','text',false,null),
+  (11,'frozen_from','text',false,null),(12,'frozen_to','text',false,null),
+  (13,'frozen_subject','text',false,null),(14,'frozen_html','text',false,null),(15,'frozen_text','text',false,null),
+  (16,'status','text',true,null),(17,'next_attempt_at','timestamp with time zone',true,'clock_timestamp()'),
+  (18,'processing_run_count','integer',true,'0'),(19,'provider_attempt_count','integer',true,'0'),
+  (20,'locked_until','timestamp with time zone',false,null),(21,'processing_token','uuid',false,null),
+  (22,'claimed_from_status','text',false,null),(23,'provider_call_phase','text',true,'''idle''::text'),
+  (24,'provider_call_is_ambiguous_retry','boolean',true,'false'),(25,'provider_id','text',false,null),
+  (26,'provider_idempotency_key','text',false,null),(27,'provider_idempotency_expires_at','timestamp with time zone',false,null),
+  (28,'last_error_code','text',false,null),(29,'last_error_summary','text',false,null),
+  (30,'last_manual_retry_at','timestamp with time zone',false,null),(31,'manual_retry_count','integer',true,'0'),
+  (32,'terminal_at','timestamp with time zone',false,null),(33,'created_at','timestamp with time zone',true,'clock_timestamp()'),
+  (34,'updated_at','timestamp with time zone',true,'clock_timestamp()')
+), actual as (
+  select a.attnum::integer,a.attname::text,pg_catalog.format_type(a.atttypid,a.atttypmod),a.attnotnull,
+    pg_catalog.pg_get_expr(d.adbin,d.adrelid)
+  from pg_catalog.pg_attribute a
+  left join pg_catalog.pg_attrdef d on d.adrelid=a.attrelid and d.adnum=a.attnum
+  where a.attrelid='public.notification_outbox'::regclass and a.attnum>0 and not a.attisdropped
+)
+select pg_temp.assert_true(not exists(
+  (select * from expected except select * from actual)
+  union all
+  (select * from actual except select * from expected)
+), 'table has the canonical ordered 34-column names, types, nullability, and defaults');
 select pg_temp.assert_true((select relrowsecurity from pg_class where oid='public.notification_outbox'::regclass), 'RLS enabled');
 select pg_temp.assert_true(not has_table_privilege('anon','public.notification_outbox','select'), 'anon cannot select');
 select pg_temp.assert_true(not has_table_privilege('authenticated','public.notification_outbox','insert'), 'authenticated cannot insert');
 select pg_temp.assert_true(not has_table_privilege('service_role','public.notification_outbox','update'), 'service role cannot arbitrarily patch state');
 select pg_temp.assert_true(has_table_privilege('service_role','public.notification_outbox','select'), 'service role can inspect rows');
 select pg_temp.assert_true(not has_function_privilege('public','public.notification_outbox_claim_due(integer,integer)','execute'), 'PUBLIC cannot claim');
-select pg_temp.assert_true(to_regprocedure('public.notification_outbox_enqueue(text,text,jsonb,text,text,text,text,text,text,text,timestamptz)') is not null, 'legacy 11-argument enqueue RPC remains during the compatibility rollout');
-select pg_temp.assert_true(to_regprocedure('public.notification_outbox_enqueue(text,text,jsonb,text,text,text,text,text,text,timestamptz)') is not null, 'new 10-argument enqueue RPC exists');
+select pg_temp.assert_true(to_regprocedure('public.notification_outbox_enqueue(text,text,jsonb,text,text,text,text,text,text,text,timestamptz)') is null, 'legacy 11-argument enqueue RPC is removed');
+select pg_temp.assert_true(to_regprocedure('public.notification_outbox_enqueue(text,text,jsonb,text,text,text,text,text,text,timestamptz)') is not null, '10-argument Resend enqueue RPC exists');
+select pg_temp.assert_true((select count(*)=1 from pg_proc p join pg_namespace n on n.oid=p.pronamespace where n.nspname='public' and p.proname='notification_outbox_enqueue'), 'only one enqueue RPC signature exists');
+with expected(signature) as (values
+  ('notification_outbox_begin_provider_call(uuid, uuid, timestamp with time zone)'::text),
+  ('notification_outbox_claim_due(integer, integer)'),
+  ('notification_outbox_claim_one(uuid, uuid, integer)'),
+  ('notification_outbox_cleanup(integer)'),
+  ('notification_outbox_defer_ambiguous(uuid, uuid, timestamp with time zone)'),
+  ('notification_outbox_enqueue(text, text, jsonb, text, text, text, text, text, text, timestamp with time zone)'),
+  ('notification_outbox_expire_claimed(uuid, uuid, text)'),
+  ('notification_outbox_freeze_request(uuid, uuid, text, text, text, text, text)'),
+  ('notification_outbox_guard_immutable()'),
+  ('notification_outbox_mark_dead(uuid, uuid, text)'),
+  ('notification_outbox_mark_sent(uuid, uuid, text)'),
+  ('notification_outbox_record_provider_failure(uuid, uuid, text)'),
+  ('notification_outbox_release_claim(uuid, uuid)'),
+  ('notification_outbox_requeue(uuid, uuid, timestamp with time zone, text)'),
+  ('notification_outbox_resolve_recipient(uuid, uuid, text)'),
+  ('notification_outbox_suppress_claimed(uuid, uuid, text)'),
+  ('notification_outbox_suppress_event(text, text)'),
+  ('notification_outbox_terminal_provider_failure(uuid, uuid, text)'),
+  ('notification_outbox_wait_recipient(uuid, uuid, timestamp with time zone, text)')
+), actual as (
+  select (p.proname || '(' || pg_catalog.oidvectortypes(p.proargtypes) || ')')::text
+  from pg_catalog.pg_proc p join pg_catalog.pg_namespace n on n.oid=p.pronamespace
+  where n.nspname='public' and left(p.proname,length('notification_outbox_'))='notification_outbox_'
+)
+select pg_temp.assert_true(not exists(
+  (select * from expected except select * from actual)
+  union all
+  (select * from actual except select * from expected)
+), 'canonical outbox function family has exactly the expected signatures');
 select pg_temp.assert_true(not has_function_privilege('anon','public.notification_outbox_enqueue(text,text,jsonb,text,text,text,text,text,text,timestamptz)','execute'), 'anon cannot enqueue');
 select pg_temp.assert_true(has_function_privilege('service_role','public.notification_outbox_claim_due(integer,integer)','execute'), 'service role can claim');
 select pg_temp.assert_true(not has_function_privilege('public','public.notification_outbox_expire_claimed(uuid,uuid,text)','execute') and has_function_privilege('service_role','public.notification_outbox_expire_claimed(uuid,uuid,text)','execute'), 'claimed expiry is service-role-only');
@@ -37,6 +98,7 @@ select pg_temp.assert_true(to_regprocedure('public.notification_outbox_suppress_
 select pg_temp.assert_true(to_regprocedure('public.notification_outbox_suppress_event(text,text,text)') is null, 'mode-dependent suppression RPC is absent');
 select pg_temp.assert_true((select count(*)=1 from pg_proc p join pg_namespace n on n.oid=p.pronamespace where n.nspname='public' and p.proname='notification_outbox_suppress_event'), 'only one suppression RPC signature exists');
 select pg_temp.assert_true(not has_function_privilege('public','public.notification_outbox_suppress_event(text,text)','execute') and not has_function_privilege('anon','public.notification_outbox_suppress_event(text,text)','execute') and not has_function_privilege('authenticated','public.notification_outbox_suppress_event(text,text)','execute'), 'browser roles cannot suppress events');
+select pg_temp.assert_true(not has_function_privilege('service_role','public.notification_outbox_guard_immutable()','execute'), 'trigger function is not directly callable by service role');
 select pg_temp.assert_true(to_regprocedure('extensions.notification_outbox_sha256(bytea)') is not null, 'internal SHA-256 helper exists');
 select pg_temp.assert_true(not has_function_privilege('public','extensions.notification_outbox_sha256(bytea)','execute') and not has_function_privilege('anon','extensions.notification_outbox_sha256(bytea)','execute') and not has_function_privilege('authenticated','extensions.notification_outbox_sha256(bytea)','execute') and not has_function_privilege('service_role','extensions.notification_outbox_sha256(bytea)','execute'), 'internal SHA-256 helper is not directly callable by API roles');
 select pg_temp.assert_true(to_regprocedure('public.notification_outbox_wait_recipient(uuid,uuid,timestamp with time zone,text,text)') is null, 'free-form recipient error summary RPC is absent');
@@ -50,7 +112,7 @@ select pg_temp.assert_true((select bool_and(
   not has_function_privilege('authenticated',p.oid,'execute') and
   has_function_privilege('service_role',p.oid,'execute')
 ) from pg_proc p join pg_namespace n on n.oid=p.pronamespace
-where n.nspname='public' and p.proname like 'notification_outbox_%' and p.proname<>'notification_outbox_guard_immutable'), 'every callable outbox RPC is service-role-only');
+where n.nspname='public' and left(p.proname,length('notification_outbox_'))='notification_outbox_' and p.proname<>'notification_outbox_guard_immutable'), 'every callable outbox RPC is service-role-only');
 
 select pg_temp.assert_raises(
   $$set local role anon; select * from public.notification_outbox$$,
@@ -74,7 +136,6 @@ select pg_temp.assert_true(not (select duplicate from first_enqueue), 'first enq
 select pg_temp.assert_true((select length(event_key_hash)=64 from public.notification_outbox where id=(select outbox_id from first_enqueue)), 'event hash is SHA-256 hex');
 select pg_temp.assert_true((select length(input_fingerprint_hash)=64 from public.notification_outbox where id=(select outbox_id from first_enqueue)), 'input fingerprint is stored');
 select pg_temp.assert_true((select provider_idempotency_key='signup:event-1' from public.notification_outbox where id=(select outbox_id from first_enqueue)), 'signup provider key namespaces the immutable auth event source ID');
-select pg_temp.assert_true((select delivery_mode='resend' from public.notification_outbox where id=(select outbox_id from first_enqueue)), '10-argument compatibility enqueue always persists Resend delivery');
 
 create temp table membership_same_source as
 select * from public.notification_outbox_enqueue(
@@ -192,7 +253,7 @@ select pg_temp.assert_raises(
   format($q$select public.notification_outbox_freeze_request('%s','39000000-0000-4000-8000-000000000001','GainForest <hello@example.com>','wrong@example.com','Hello','<p>Hello</p>','Hello')$q$,(select outbox_id from queued_three)),
   'frozen destination', 'initial freeze destination must match the recipient'
 );
-select pg_temp.assert_true((select frozen_at is null and frozen_to is null and frozen_subject is null and frozen_html is null and frozen_text is null from public.notification_outbox where id=(select outbox_id from queued_three)), 'rejected initial freeze writes no frozen fields');
+select pg_temp.assert_true((select frozen_from is null and frozen_to is null and frozen_subject is null and frozen_html is null and frozen_text is null from public.notification_outbox where id=(select outbox_id from queued_three)), 'rejected initial freeze writes no frozen fields');
 select pg_temp.assert_true(public.notification_outbox_release_claim((select outbox_id from queued_three),'39000000-0000-4000-8000-000000000001'), 'initial freeze mismatch leaves the claim releasable');
 
 select * from public.notification_outbox_claim_one((select outbox_id from queued_two),'40000000-0000-4000-8000-000000000001',60);
@@ -272,9 +333,9 @@ select pg_temp.assert_true((select resume_provider_call_phase='in_flight' from s
 select pg_temp.assert_true((select provider_attempt_count=1 from public.notification_outbox where id=(select outbox_id from safe_ambiguous)), 'reclaim does not invent provider attempt');
 select pg_temp.assert_true(public.notification_outbox_begin_provider_call((select outbox_id from safe_ambiguous),'61000000-0000-4000-8000-000000000002',clock_timestamp()+interval '48 hours'), 'resumed transmission records another provider call');
 select pg_temp.assert_true((select provider_attempt_count=2 and provider_idempotency_expires_at<clock_timestamp()+interval '25 hours' and provider_call_is_ambiguous_retry from public.notification_outbox where id=(select outbox_id from safe_ambiguous)), 'resumed call is durably marked ambiguous and does not extend the original guarantee');
-create temp table resumed_original as select provider_call_started_at,ambiguous_since,provider_idempotency_expires_at from public.notification_outbox where id=(select outbox_id from safe_ambiguous);
+create temp table resumed_original as select provider_idempotency_expires_at from public.notification_outbox where id=(select outbox_id from safe_ambiguous);
 select pg_temp.assert_true(public.notification_outbox_record_provider_failure((select outbox_id from safe_ambiguous),'61000000-0000-4000-8000-000000000002','provider_5xx'), 'authoritative failure is recorded on an ambiguous retry');
-select pg_temp.assert_true((select n.provider_call_phase='in_flight' and n.provider_call_is_ambiguous_retry and n.provider_call_started_at=o.provider_call_started_at and n.ambiguous_since=o.ambiguous_since and n.provider_idempotency_expires_at=o.provider_idempotency_expires_at and n.last_error_summary='Provider returned a retryable server error' from public.notification_outbox n cross join resumed_original o where n.id=(select outbox_id from safe_ambiguous)), 'ambiguous retry failure preserves the original ambiguity window and stores only an allowlisted summary');
+select pg_temp.assert_true((select n.provider_call_phase='in_flight' and n.provider_call_is_ambiguous_retry and n.provider_idempotency_expires_at=o.provider_idempotency_expires_at and n.last_error_summary='Provider returned a retryable server error' from public.notification_outbox n cross join resumed_original o where n.id=(select outbox_id from safe_ambiguous)), 'ambiguous retry failure preserves the original idempotency boundary and stores only an allowlisted summary');
 select pg_temp.assert_true(not public.notification_outbox_requeue((select outbox_id from safe_ambiguous),'61000000-0000-4000-8000-000000000002',clock_timestamp()+interval '5 minutes','provider_5xx'), 'ambiguous retry failure cannot become ordinary queued work');
 select pg_temp.assert_true(public.notification_outbox_defer_ambiguous((select outbox_id from safe_ambiguous),'61000000-0000-4000-8000-000000000002',clock_timestamp()+interval '1 second'), 'ambiguous retry failure remains on the defer path');
 update public.notification_outbox set locked_until=clock_timestamp()-interval '2 hours',provider_idempotency_expires_at=clock_timestamp()-interval '1 hour' where id=(select outbox_id from safe_ambiguous);
@@ -286,16 +347,16 @@ select * from public.notification_outbox_enqueue('reclaim:deferred','signup','{}
 select * from public.notification_outbox_claim_one((select outbox_id from deferred_ambiguous),'61500000-0000-4000-8000-000000000001',60);
 select public.notification_outbox_freeze_request((select outbox_id from deferred_ambiguous),'61500000-0000-4000-8000-000000000001','from@example.com','deferred@example.com','Deferred','Deferred','Deferred');
 select public.notification_outbox_begin_provider_call((select outbox_id from deferred_ambiguous),'61500000-0000-4000-8000-000000000001',clock_timestamp()+interval '24 hours');
-create temp table deferred_original as select provider_call_started_at,ambiguous_since,provider_idempotency_expires_at from public.notification_outbox where id=(select outbox_id from deferred_ambiguous);
+create temp table deferred_original as select provider_idempotency_expires_at from public.notification_outbox where id=(select outbox_id from deferred_ambiguous);
 select pg_temp.assert_true(public.notification_outbox_defer_ambiguous((select outbox_id from deferred_ambiguous),'61500000-0000-4000-8000-000000000001',clock_timestamp()+interval '1 second'), 'ambiguous timeout defers under the current token');
 select pg_temp.assert_true(not public.notification_outbox_defer_ambiguous((select outbox_id from deferred_ambiguous),'61500000-0000-4000-8000-000000000001',clock_timestamp()+interval '1 second'), 'ambiguous defer invalidates the old token');
-select pg_temp.assert_true((select n.provider_call_started_at=o.provider_call_started_at and n.ambiguous_since=o.ambiguous_since and n.provider_idempotency_expires_at=o.provider_idempotency_expires_at and n.locked_until<n.provider_idempotency_expires_at from public.notification_outbox n cross join deferred_original o where n.id=(select outbox_id from deferred_ambiguous)), 'defer preserves original ambiguity timestamps and expiry');
+select pg_temp.assert_true((select n.provider_idempotency_expires_at=o.provider_idempotency_expires_at and n.locked_until<n.provider_idempotency_expires_at from public.notification_outbox n cross join deferred_original o where n.id=(select outbox_id from deferred_ambiguous)), 'defer preserves the original idempotency expiry');
 update public.notification_outbox set locked_until=clock_timestamp()-interval '1 second' where id=(select outbox_id from deferred_ambiguous);
 create temp table deferred_reclaimed as select * from public.notification_outbox_claim_one((select outbox_id from deferred_ambiguous),'61500000-0000-4000-8000-000000000002',60);
 select pg_temp.assert_true((select resume_provider_call_phase='in_flight' from deferred_reclaimed), 'deferred ambiguity reclaims inside the original guarantee');
 select pg_temp.assert_true((select provider_call_is_ambiguous_retry from public.notification_outbox where id=(select outbox_id from deferred_ambiguous)), 'single reclaim durably marks the new owner as handling an ambiguous transmission');
 select pg_temp.assert_true(public.notification_outbox_record_provider_failure((select outbox_id from deferred_ambiguous),'61500000-0000-4000-8000-000000000002','provider_5xx'), 'failure immediately after single reclaim is recorded');
-select pg_temp.assert_true((select n.provider_call_phase='in_flight' and n.provider_call_is_ambiguous_retry and n.provider_call_started_at=o.provider_call_started_at and n.ambiguous_since=o.ambiguous_since and n.provider_idempotency_expires_at=o.provider_idempotency_expires_at from public.notification_outbox n cross join deferred_original o where n.id=(select outbox_id from deferred_ambiguous)), 'failure without another begin cannot clear reclaimed ambiguity or change its original expiry');
+select pg_temp.assert_true((select n.provider_call_phase='in_flight' and n.provider_call_is_ambiguous_retry and n.provider_idempotency_expires_at=o.provider_idempotency_expires_at from public.notification_outbox n cross join deferred_original o where n.id=(select outbox_id from deferred_ambiguous)), 'failure without another begin cannot clear reclaimed ambiguity or change its original expiry');
 select pg_temp.assert_true(not public.notification_outbox_requeue((select outbox_id from deferred_ambiguous),'61500000-0000-4000-8000-000000000002',clock_timestamp()+interval '5 minutes','provider_5xx'), 'failure immediately after single reclaim cannot requeue ambiguous work');
 select pg_temp.assert_true(public.notification_outbox_defer_ambiguous((select outbox_id from deferred_ambiguous),'61500000-0000-4000-8000-000000000002',clock_timestamp()+interval '1 second'), 'failure immediately after reclaim remains deferrable');
 update public.notification_outbox set locked_until=clock_timestamp()-interval '2 hours',provider_idempotency_expires_at=clock_timestamp()-interval '1 hour' where id=(select outbox_id from deferred_ambiguous);
@@ -364,10 +425,10 @@ select pg_temp.assert_raises(
   $$select * from public.notification_outbox_suppress_event('existing:suppress',null)$$,
   'unsupported event type', 'null event type cannot suppress an existing event'
 );
-select pg_temp.assert_true((select status='queued' and redacted_at is null from public.notification_outbox where event_key_hash=encode(extensions.digest('existing:suppress','sha256'),'hex')), 'null event type leaves the existing event unchanged');
+select pg_temp.assert_true((select status='queued' and template_key is not null from public.notification_outbox where event_key_hash=encode(extensions.digest('existing:suppress','sha256'),'hex')), 'null event type leaves the existing event unchanged');
 create temp table existing_suppressed as select * from public.notification_outbox_suppress_event('existing:suppress','invitation');
 select pg_temp.assert_true((select status='suppressed' and duplicate from existing_suppressed), 'existing deterministic event is suppressed in place');
-select pg_temp.assert_true((select redacted_at is not null and payload is null and source_id is null and recipient_email is null and provider_idempotency_key is null and last_error_summary is null and not provider_call_is_ambiguous_retry from public.notification_outbox where id=(select outbox_id from existing_suppressed)), 'queued suppression immediately removes private delivery data and retry state');
+select pg_temp.assert_true((select template_key is null and payload is null and source_id is null and recipient_email is null and provider_idempotency_key is null and last_error_summary is null and not provider_call_is_ambiguous_retry from public.notification_outbox where id=(select outbox_id from existing_suppressed)), 'queued suppression immediately removes private delivery data and retry state');
 select pg_temp.assert_raises(
   $$select * from public.notification_outbox_enqueue('existing:suppress','signup','{}','other',null,'other@example.com','welcome','en','other',clock_timestamp())$$,
   'event type differs', 'suppressed tombstone rejects a cross-type replay'
@@ -394,14 +455,14 @@ select * from public.notification_outbox_claim_one((select id from public.notifi
 select public.notification_outbox_freeze_request((select id from public.notification_outbox where event_key_hash=encode(extensions.digest('suppress:event-claimed','sha256'),'hex')),'68050000-0000-4000-8000-000000000001','from@example.com','event-claimed@example.com','Private subject','Private html','Private text');
 create temp table event_claimed_suppress as select * from public.notification_outbox_suppress_event('suppress:event-claimed','invitation');
 select pg_temp.assert_true((select status='suppressed' and duplicate from event_claimed_suppress), 'event-level suppression handles an idle claimed row');
-select pg_temp.assert_true((select status='suppressed' and redacted_at is not null and payload is null and recipient_email is null and frozen_subject is null and processing_token is null and locked_until is null from public.notification_outbox where event_key_hash=encode(extensions.digest('suppress:event-claimed','sha256'),'hex')), 'event-level suppression redacts idle claimed work and invalidates its token');
+select pg_temp.assert_true((select status='suppressed' and template_key is null and payload is null and recipient_email is null and frozen_subject is null and processing_token is null and locked_until is null from public.notification_outbox where event_key_hash=encode(extensions.digest('suppress:event-claimed','sha256'),'hex')), 'event-level suppression clears idle claimed work and invalidates its token');
 select pg_temp.assert_true(not public.notification_outbox_release_claim((select id from public.notification_outbox where event_key_hash=encode(extensions.digest('suppress:event-claimed','sha256'),'hex')),'68050000-0000-4000-8000-000000000001'), 'event-level suppression invalidates the former owner token');
 
 select * from public.notification_outbox_enqueue('suppress:claimed','invitation','{"secret":true}','invite-claimed',null,'claimed@example.com','invite','en',null,clock_timestamp());
 select * from public.notification_outbox_claim_one((select id from public.notification_outbox where event_key_hash=encode(extensions.digest('suppress:claimed','sha256'),'hex')),'68100000-0000-4000-8000-000000000001',60);
 select public.notification_outbox_freeze_request((select id from public.notification_outbox where event_key_hash=encode(extensions.digest('suppress:claimed','sha256'),'hex')),'68100000-0000-4000-8000-000000000001','from@example.com','claimed@example.com','Private subject','Private html','Private text');
 select pg_temp.assert_true(public.notification_outbox_suppress_claimed((select id from public.notification_outbox where event_key_hash=encode(extensions.digest('suppress:claimed','sha256'),'hex')),'68100000-0000-4000-8000-000000000001','manually_suppressed'), 'claimed idle suppression succeeds');
-select pg_temp.assert_true((select status='suppressed' and redacted_at is not null and payload is null and recipient_email is null and source_id is null and provider_idempotency_key is null and frozen_subject is null and frozen_html is null and processing_token is null from public.notification_outbox where event_key_hash=encode(extensions.digest('suppress:claimed','sha256'),'hex')), 'claimed suppression redacts private data and frozen content, then invalidates ownership');
+select pg_temp.assert_true((select status='suppressed' and template_key is null and payload is null and recipient_email is null and source_id is null and provider_idempotency_key is null and frozen_subject is null and frozen_html is null and processing_token is null from public.notification_outbox where event_key_hash=encode(extensions.digest('suppress:claimed','sha256'),'hex')), 'claimed suppression clears private data and frozen content, then invalidates ownership');
 
 -- Claim and token-owned transitions enforce retention/provider boundaries
 -- independently of cleanup while preserving unexpired live leases.
@@ -493,17 +554,17 @@ update public.notification_outbox set terminal_at=clock_timestamp()-interval '14
 
 select * from public.notification_outbox_enqueue('retention:sent-before','signup','{"private":true}','sb',null,'sent-before@example.com','welcome','en','sb',clock_timestamp());
 update public.notification_outbox set status='sent',terminal_at=clock_timestamp()-interval '6 days 23 hours',provider_id='provider-before',
-  frozen_from='from@example.com',frozen_to='sent-before@example.com',frozen_subject='Before',frozen_html='Before',frozen_text='Before',frozen_at=clock_timestamp()-interval '6 days 23 hours'
+  frozen_from='from@example.com',frozen_to='sent-before@example.com',frozen_subject='Before',frozen_html='Before',frozen_text='Before'
   where event_key_hash=encode(extensions.digest('retention:sent-before','sha256'),'hex');
 select * from public.notification_outbox_enqueue('retention:dead-before','signup','{"private":true}','db',null,'dead-before@example.com','welcome','en','db',clock_timestamp());
 update public.notification_outbox set status='dead',terminal_at=clock_timestamp()-interval '13 days 23 hours',last_error_code='provider_rejected',last_error_summary='detail'
   where event_key_hash=encode(extensions.digest('retention:dead-before','sha256'),'hex');
 
 select * from public.notification_outbox_cleanup(100);
-select pg_temp.assert_true((select redacted_at is not null and recipient_email is null and payload is null and frozen_html is null and input_fingerprint_hash is null from public.notification_outbox where event_key_hash=encode(extensions.digest('retention:sent','sha256'),'hex')), 'sent redacts seven days from terminal');
-select pg_temp.assert_true((select redacted_at is not null and recipient_email is null and payload is null and last_error_summary is null and input_fingerprint_hash is null from public.notification_outbox where event_key_hash=encode(extensions.digest('retention:dead','sha256'),'hex')), 'dead redacts fourteen days from terminal');
-select pg_temp.assert_true((select redacted_at is null from public.notification_outbox where event_key_hash=encode(extensions.digest('retention:sent-before','sha256'),'hex')), 'sent is not redacted before seven terminal days');
-select pg_temp.assert_true((select redacted_at is null from public.notification_outbox where event_key_hash=encode(extensions.digest('retention:dead-before','sha256'),'hex')), 'dead is not redacted before fourteen terminal days');
+select pg_temp.assert_true((select template_key is null and recipient_email is null and payload is null and frozen_html is null and input_fingerprint_hash is null from public.notification_outbox where event_key_hash=encode(extensions.digest('retention:sent','sha256'),'hex')), 'sent clears private data seven days from terminal');
+select pg_temp.assert_true((select template_key is null and recipient_email is null and payload is null and last_error_summary is null and input_fingerprint_hash is null from public.notification_outbox where event_key_hash=encode(extensions.digest('retention:dead','sha256'),'hex')), 'dead clears private data fourteen days from terminal');
+select pg_temp.assert_true((select template_key is not null from public.notification_outbox where event_key_hash=encode(extensions.digest('retention:sent-before','sha256'),'hex')), 'sent retains private data before seven terminal days');
+select pg_temp.assert_true((select template_key is not null from public.notification_outbox where event_key_hash=encode(extensions.digest('retention:dead-before','sha256'),'hex')), 'dead retains private data before fourteen terminal days');
 
 -- Redacted replay must return retained row, never recreate, despite erased fingerprint.
 create temp table redacted_replay as

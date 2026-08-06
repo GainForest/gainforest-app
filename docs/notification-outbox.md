@@ -1,0 +1,75 @@
+# Notification outbox
+
+The notification outbox durably coordinates email delivery. The application writes notification intent through database RPCs, workers claim rows, render and freeze a provider request, then record a terminal or retryable outcome.
+
+## Source of truth
+
+`supabase/migrations/20260805235500_notification_outbox.sql` is the canonical schema and RPC definition. The database contract in `tests/database/notification-outbox-contract.sql` asserts the exact ordered column names, types, nullability, defaults, RPC signatures, permissions, and transition behavior.
+
+This baseline was canonicalized before any migration-runner deployment. The existing non-production database was configured through SQL Editor, which does not add versions to `supabase_migrations.schema_migrations`. Do not rewrite this baseline after its version has been recorded. An environment that has recorded an older form must be reset or have its migration history explicitly repaired before using this migration tree.
+
+The foundation table has 34 columns, grouped by responsibility:
+
+| Responsibility | Columns |
+| --- | --- |
+| Identity and deduplication | `id`, `event_key_hash`, `input_fingerprint_hash` |
+| Notification and render inputs | `event_type`, `payload`, `source_id`, `recipient_did`, `recipient_email`, `template_key`, `locale` |
+| Frozen provider request | `frozen_from`, `frozen_to`, `frozen_subject`, `frozen_html`, `frozen_text` |
+| Queue scheduling and lease ownership | `status`, `next_attempt_at`, `processing_run_count`, `provider_attempt_count`, `locked_until`, `processing_token`, `claimed_from_status` |
+| Provider result and ambiguity safety | `provider_call_phase`, `provider_call_is_ambiguous_retry`, `provider_id`, `provider_idempotency_key`, `provider_idempotency_expires_at` |
+| Diagnostics and manual retry | `last_error_code`, `last_error_summary`, `last_manual_retry_at`, `manual_retry_count` |
+| Lifecycle | `terminal_at`, `created_at`, `updated_at` |
+
+## State markers
+
+The schema derives state from fields that are required for delivery rather than storing redundant timestamps:
+
+- `frozen_from IS NOT NULL` means the provider request is frozen. The database requires all five `frozen_*` fields to be either set together or `NULL` together.
+- `template_key IS NULL` means private delivery data has been cleared from a terminal row. The private-data constraint requires all other private and retry fields to be cleared with it.
+- `provider_call_phase = 'in_flight'` means a provider call may have happened. `provider_idempotency_expires_at` is its original safety deadline.
+- `provider_call_is_ambiguous_retry` distinguishes a reclaimed, previously uncertain transmission. A retry must not extend `provider_idempotency_expires_at`.
+
+There is intentionally no `delivery_mode`, `frozen_at`, `redacted_at`, `provider_call_started_at`, or `ambiguous_since` column.
+
+## Counters
+
+- `processing_run_count` increments whenever a worker successfully claims the row.
+- `provider_attempt_count` increments only when `notification_outbox_begin_provider_call` starts a provider transmission.
+- `manual_retry_count` and `last_manual_retry_at` support operator-initiated invitation retries and their cooldown.
+
+## Mutation boundary
+
+Application code must not update outbox rows directly. `service_role` can read the table but state changes go through `notification_outbox_*` RPCs. Browser roles cannot read the table or execute its RPCs.
+
+The enqueue contract is the Resend-only 10-argument function:
+
+```sql
+notification_outbox_enqueue(
+  p_event_key text,
+  p_event_type text,
+  p_payload jsonb,
+  p_source_id text,
+  p_recipient_did text,
+  p_recipient_email text,
+  p_template_key text,
+  p_locale text,
+  p_provider_idempotency_key text,
+  p_next_attempt_at timestamptz
+)
+```
+
+`EMAIL_DISABLED` is the only email-delivery switch. When it is `true`, producers and drains do not run. Otherwise delivery uses Resend.
+
+## Retention
+
+Active work expires after seven days. Sent rows clear private delivery data seven days after becoming terminal; dead rows clear it after fourteen days. Cleared terminal tombstones preserve event deduplication until cleanup deletes the row 90 days after creation.
+
+## Validation
+
+Run:
+
+```bash
+pnpm test:db
+```
+
+The test starts a disposable local PostgreSQL container, applies all migrations, verifies the exact schema and RPC contract, and exercises concurrency behavior. It refuses remote Docker endpoints.

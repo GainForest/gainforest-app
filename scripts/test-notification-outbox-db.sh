@@ -128,7 +128,7 @@ for migration in "${migrations[@]}"; do
   echo "Applying $(basename "$migration") with pgcrypto in public"
   psql -X -v ON_ERROR_STOP=1 -d "$PUBLIC_CRYPTO_DB" -f "$migration" >/dev/null
 done
-PUBLIC_CRYPTO_ENQUEUE=$(psql -X -Atq -v ON_ERROR_STOP=1 -d "$PUBLIC_CRYPTO_DB" -c "select status || '|' || duplicate from public.notification_outbox_enqueue('public-pgcrypto:enqueue','signup','{}','public-pgcrypto-source',null,'public-pgcrypto@example.com','welcome','en','signup:public-pgcrypto-source','capture',clock_timestamp());")
+PUBLIC_CRYPTO_ENQUEUE=$(psql -X -Atq -v ON_ERROR_STOP=1 -d "$PUBLIC_CRYPTO_DB" -c "select status || '|' || duplicate from public.notification_outbox_enqueue('public-pgcrypto:enqueue','signup','{}','public-pgcrypto-source',null,'public-pgcrypto@example.com','welcome','en','signup:public-pgcrypto-source',clock_timestamp());")
 [[ "$PUBLIC_CRYPTO_ENQUEUE" == 'queued|false' || "$PUBLIC_CRYPTO_ENQUEUE" == 'queued|f' ]] || { echo "enqueue with pgcrypto in public failed: $PUBLIC_CRYPTO_ENQUEUE" >&2; exit 1; }
 
 wait_for_backend_lock() {
@@ -152,7 +152,7 @@ RACE_ID=$(psql -X -Atq -v ON_ERROR_STOP=1 <<'SQL'
 truncate public.notification_outbox;
 select outbox_id from public.notification_outbox_enqueue(
   'race:event', 'signup', '{"name":"race"}'::jsonb, 'race-source', null,
-  'race@example.com', 'race-template', 'en', 'signup:race-source', 'resend', clock_timestamp()
+  'race@example.com', 'race-template', 'en', 'signup:race-source', clock_timestamp()
 );
 SQL
 )
@@ -191,11 +191,11 @@ SKIP_LOCKED_ID=$(psql -X -Atq -v ON_ERROR_STOP=1 <<'SQL'
 truncate public.notification_outbox;
 select outbox_id from public.notification_outbox_enqueue(
   'skip-locked:held', 'signup', '{}', 'skip-locked-held', null,
-  'held@example.com', 'welcome', 'en', 'signup:skip-locked-held', 'resend', clock_timestamp()
+  'held@example.com', 'welcome', 'en', 'signup:skip-locked-held', clock_timestamp()
 );
 SQL
 )
-SKIP_AVAILABLE_ID=$(psql -X -Atq -v ON_ERROR_STOP=1 -c "select outbox_id from public.notification_outbox_enqueue('skip-locked:available','signup','{}','skip-locked-available',null,'available@example.com','welcome','en','signup:skip-locked-available','resend',clock_timestamp());")
+SKIP_AVAILABLE_ID=$(psql -X -Atq -v ON_ERROR_STOP=1 -c "select outbox_id from public.notification_outbox_enqueue('skip-locked:available','signup','{}','skip-locked-available',null,'available@example.com','welcome','en','signup:skip-locked-available',clock_timestamp());")
 cat >"$TMP/skip-locked-holder.sql" <<SQL
 begin;
 select id from public.notification_outbox where id='$SKIP_LOCKED_ID' for update;
@@ -229,7 +229,7 @@ SKIPPED_STATE=$(psql -X -Atq -F '|' -v ON_ERROR_STOP=1 -c "select status,process
 psql -X -q -v ON_ERROR_STOP=1 -c "truncate public.notification_outbox" >/dev/null
 cat >"$TMP/enqueue-racer.sql" <<SQL
 begin;
-select status,duplicate from public.notification_outbox_enqueue('race:suppress','invitation','{}','invite-race',null,'race@example.com','invite','en',null,'resend',clock_timestamp());
+select status,duplicate from public.notification_outbox_enqueue('race:suppress','invitation','{}','invite-race',null,'race@example.com','invite','en',null,clock_timestamp());
 \! touch '$TMP/enqueue-ready'
 \! while [ ! -f '$TMP/enqueue-release' ]; do sleep 0.05; done
 commit;
@@ -248,7 +248,7 @@ wait "$PID_A"; wait "$PID_B"
 CHILD_PIDS=()
 grep -q '^queued|f$' "$TMP/enqueue" || { echo "concurrent enqueue did not create the race winner" >&2; exit 1; }
 grep -q '^suppressed|t$' "$TMP/suppress" || { echo "suppression did not recover and suppress the concurrent winner" >&2; exit 1; }
-FINAL=$(psql -X -Atq -F '|' -v ON_ERROR_STOP=1 -c "select count(*),bool_and(status='suppressed' and redacted_at is not null and payload is null and recipient_email is null) from public.notification_outbox;")
+FINAL=$(psql -X -Atq -F '|' -v ON_ERROR_STOP=1 -c "select count(*),bool_and(status='suppressed' and template_key is null and payload is null and recipient_email is null) from public.notification_outbox;")
 [[ "$FINAL" == '1|t' ]] || { echo "suppress-vs-enqueue race did not retain exactly one redacted tombstone: $FINAL" >&2; exit 1; }
 
 # Suppression inserts a tombstone but remains uncommitted. The enqueue session
@@ -266,7 +266,7 @@ PID_A=$!
 CHILD_PIDS+=("$PID_A")
 for _ in $(seq 1 100); do [[ -f "$TMP/suppress-ready" ]] && break; sleep 0.02; done
 [[ -f "$TMP/suppress-ready" ]] || { echo "suppress-first race barrier did not become ready" >&2; exit 1; }
-PGAPPNAME=outbox-enqueue-second psql -X -Atq -F '|' -v ON_ERROR_STOP=1 -c "select status,duplicate from public.notification_outbox_enqueue('race:suppress-first','invitation','{\"private\":true}','invite-race-first',null,'race-first@example.com','invite','en',null,'resend',clock_timestamp());" >"$TMP/enqueue-second" &
+PGAPPNAME=outbox-enqueue-second psql -X -Atq -F '|' -v ON_ERROR_STOP=1 -c "select status,duplicate from public.notification_outbox_enqueue('race:suppress-first','invitation','{\"private\":true}','invite-race-first',null,'race-first@example.com','invite','en',null,clock_timestamp());" >"$TMP/enqueue-second" &
 PID_B=$!
 CHILD_PIDS+=("$PID_B")
 wait_for_backend_lock outbox-enqueue-second
@@ -275,7 +275,7 @@ wait "$PID_A"; wait "$PID_B"
 CHILD_PIDS=()
 grep -q '^suppressed|f$' "$TMP/suppress-first" || { echo "suppress-first racer did not create the tombstone" >&2; exit 1; }
 grep -q '^suppressed|t$' "$TMP/enqueue-second" || { echo "enqueue did not recover the concurrent suppression tombstone" >&2; exit 1; }
-FINAL=$(psql -X -Atq -F '|' -v ON_ERROR_STOP=1 -c "select count(*),bool_and(status='suppressed' and redacted_at is not null and payload is null and source_id is null and recipient_email is null and provider_idempotency_key is null) from public.notification_outbox;")
+FINAL=$(psql -X -Atq -F '|' -v ON_ERROR_STOP=1 -c "select count(*),bool_and(status='suppressed' and template_key is null and payload is null and source_id is null and recipient_email is null and provider_idempotency_key is null) from public.notification_outbox;")
 [[ "$FINAL" == '1|t' ]] || { echo "enqueue-vs-suppress-first race did not retain exactly one redacted tombstone: $FINAL" >&2; exit 1; }
 
 echo "notification outbox database contracts passed (including deterministic claim and bidirectional suppression races)"

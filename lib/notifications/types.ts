@@ -46,7 +46,6 @@ export interface NotificationRow {
   readonly templateKey: string;
   readonly locale: string | null;
   readonly frozenRequest: FrozenEmailRequest | null;
-  readonly frozenAt: Date | null;
   readonly status: "processing";
   readonly providerCallPhase: ProviderCallPhase;
   readonly providerCallIsAmbiguousRetry: boolean;

@@ -20,7 +20,6 @@ const rawRow = {
   frozen_subject: null,
   frozen_html: null,
   frozen_text: null,
-  frozen_at: null,
   status: "processing",
   provider_call_phase: "idle",
   provider_call_is_ambiguous_retry: false,

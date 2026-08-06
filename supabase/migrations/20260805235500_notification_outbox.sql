@@ -1,6 +1,7 @@
--- Private durable notification outbox foundation.
--- This additive migration intentionally does not baseline user_emails or
--- cgs_group_invitations; those remain externally managed prerequisites.
+-- Canonical private durable notification outbox schema.
+-- This migration is the source of truth for the final table and RPC surface.
+-- It intentionally does not baseline user_emails or cgs_group_invitations;
+-- those remain externally managed prerequisites.
 create schema if not exists extensions;
 create extension if not exists pgcrypto with schema extensions;
 
@@ -22,9 +23,12 @@ end $$;
 revoke all on function extensions.notification_outbox_sha256(bytea) from public,anon,authenticated,service_role;
 
 create table public.notification_outbox (
+  -- Identity and deduplication.
   id uuid primary key default pg_catalog.gen_random_uuid(),
   event_key_hash text not null,
   input_fingerprint_hash text,
+
+  -- Private notification and render inputs. template_key=NULL marks cleared data.
   event_type text not null,
   payload jsonb,
   source_id text,
@@ -32,13 +36,15 @@ create table public.notification_outbox (
   recipient_email text,
   template_key text,
   locale text,
-  delivery_mode text,
+
+  -- Immutable provider request. The five fields are always all NULL or all set.
   frozen_from text,
   frozen_to text,
   frozen_subject text,
   frozen_html text,
   frozen_text text,
-  frozen_at timestamptz,
+
+  -- Queue scheduling and lease ownership.
   status text not null,
   next_attempt_at timestamptz not null default clock_timestamp(),
   processing_run_count integer not null default 0,
@@ -46,19 +52,22 @@ create table public.notification_outbox (
   locked_until timestamptz,
   processing_token uuid,
   claimed_from_status text,
+
+  -- Provider result and ambiguous-delivery safety.
   provider_call_phase text not null default 'idle',
   provider_call_is_ambiguous_retry boolean not null default false,
-  provider_call_started_at timestamptz,
   provider_id text,
   provider_idempotency_key text,
   provider_idempotency_expires_at timestamptz,
-  ambiguous_since timestamptz,
+
+  -- Allowlisted diagnostics and operator-initiated invitation retry state.
   last_error_code text,
   last_error_summary text,
   last_manual_retry_at timestamptz,
   manual_retry_count integer not null default 0,
+
+  -- Terminal and audit timestamps.
   terminal_at timestamptz,
-  redacted_at timestamptz,
   created_at timestamptz not null default clock_timestamp(),
   updated_at timestamptz not null default clock_timestamp(),
 
@@ -66,10 +75,6 @@ create table public.notification_outbox (
   constraint notification_outbox_fingerprint_format check (input_fingerprint_hash is null or input_fingerprint_hash ~ '^[0-9a-f]{64}$'),
   constraint notification_outbox_event_type_check check (event_type in ('signup','membership_joined','invitation','bioblitz_winner')),
   constraint notification_outbox_status_check check (status in ('waiting_recipient','queued','processing','sent','suppressed','dead')),
-  constraint notification_outbox_delivery_mode_check check (
-    (redacted_at is null and delivery_mode in ('capture','resend')) or
-    (redacted_at is not null and delivery_mode is null)
-  ),
   constraint notification_outbox_provider_phase_check check (provider_call_phase in ('idle','in_flight')),
   constraint notification_outbox_processing_run_count_check check (processing_run_count >= 0),
   constraint notification_outbox_provider_attempt_count_check check (provider_attempt_count >= 0),
@@ -81,16 +86,14 @@ create table public.notification_outbox (
     (length(recipient_email) between 3 and 320 and recipient_email=lower(trim(recipient_email)) and position('@' in recipient_email)>1)
   ),
   constraint notification_outbox_template_key_bound check (
-    (redacted_at is null and template_key is not null and length(template_key) between 1 and 128) or
-    (redacted_at is not null and template_key is null)
+    template_key is null or length(template_key) between 1 and 128
   ),
   constraint notification_outbox_locale_bound check (locale is null or length(locale) between 1 and 35),
   constraint notification_outbox_provider_key_bound check (
-    (redacted_at is null and provider_idempotency_key is not null and length(provider_idempotency_key) between 1 and 256) or
-    (redacted_at is not null and provider_idempotency_key is null)
+    provider_idempotency_key is null or length(provider_idempotency_key) between 1 and 256
   ),
   constraint notification_outbox_provider_key_ownership check (
-    redacted_at is not null or
+    template_key is null or
     (event_type='signup' and source_id is not null and provider_idempotency_key='signup:' || source_id) or
     (event_type='membership_joined' and source_id is not null and provider_idempotency_key='organization-membership-joined:' || source_id) or
     (event_type in ('invitation','bioblitz_winner') and provider_idempotency_key=id::text)
@@ -99,12 +102,11 @@ create table public.notification_outbox (
   constraint notification_outbox_error_code_check check (last_error_code is null or last_error_code in (
     'recipient_missing','recipient_lookup_failed','provider_5xx','provider_timeout',
     'provider_rate_limited','provider_rejected','provider_idempotency_expired',
-    'active_retention_expired','notification_invalid','invitation_not_pending','manually_suppressed',
-    'delivery_mode_mismatch'
+    'active_retention_expired','notification_invalid','invitation_not_pending','manually_suppressed'
   )),
   constraint notification_outbox_error_summary_bound check (last_error_summary is null or length(last_error_summary) between 1 and 512),
   constraint notification_outbox_recipient_contract check (
-    redacted_at is not null or status='suppressed' or
+    template_key is null or status='suppressed' or
     (event_type='bioblitz_winner' and recipient_did is not null and (recipient_email is not null or status='waiting_recipient' or (status='processing' and claimed_from_status='waiting_recipient'))) or
     (event_type<>'bioblitz_winner' and recipient_email is not null)
   ),
@@ -113,32 +115,51 @@ create table public.notification_outbox (
     (status<>'processing' and locked_until is null and processing_token is null and claimed_from_status is null)
   ),
   constraint notification_outbox_provider_phase_contract check (
-    (provider_call_phase='idle' and not provider_call_is_ambiguous_retry and provider_call_started_at is null and provider_idempotency_expires_at is null and ambiguous_since is null) or
-    (provider_call_phase='in_flight' and status='processing' and provider_call_started_at is not null and provider_idempotency_expires_at is not null and ambiguous_since is not null)
+    (provider_call_phase='idle' and not provider_call_is_ambiguous_retry and provider_idempotency_expires_at is null) or
+    (provider_call_phase='in_flight' and status='processing' and provider_idempotency_expires_at is not null)
   ),
   constraint notification_outbox_frozen_all_or_none check (
-    (frozen_at is null and frozen_from is null and frozen_to is null and frozen_subject is null and frozen_html is null and frozen_text is null) or
-    (frozen_at is not null and frozen_from is not null and frozen_to is not null and frozen_subject is not null and frozen_html is not null and frozen_text is not null)
+    (frozen_from is null and frozen_to is null and frozen_subject is null and frozen_html is null and frozen_text is null) or
+    (frozen_from is not null and frozen_to is not null and frozen_subject is not null and frozen_html is not null and frozen_text is not null)
   ),
   constraint notification_outbox_terminal_contract check (
     (status in ('sent','suppressed','dead') and terminal_at is not null) or
     (status not in ('sent','suppressed','dead') and terminal_at is null)
   ),
   constraint notification_outbox_sent_contract check (
-    status<>'sent' or redacted_at is not null or
-    (frozen_at is not null and provider_id is not null)
+    status<>'sent' or template_key is null or
+    (frozen_from is not null and provider_id is not null)
   ),
-  constraint notification_outbox_redacted_contract check (
-    redacted_at is null or (
+  constraint notification_outbox_private_data_contract check (
+    template_key is not null or (
       status in ('sent','dead','suppressed') and input_fingerprint_hash is null and payload is null and source_id is null and
-      recipient_did is null and recipient_email is null and template_key is null and locale is null and
-      delivery_mode is null and frozen_from is null and frozen_to is null and frozen_subject is null and
-      frozen_html is null and frozen_text is null and frozen_at is null and provider_id is null and
+      recipient_did is null and recipient_email is null and locale is null and
+      frozen_from is null and frozen_to is null and frozen_subject is null and
+      frozen_html is null and frozen_text is null and provider_id is null and
       provider_idempotency_key is null and last_error_code is null and last_error_summary is null and
       processing_run_count=0 and provider_attempt_count=0 and not provider_call_is_ambiguous_retry and last_manual_retry_at is null and manual_retry_count=0
     )
   )
 );
+
+comment on table public.notification_outbox is
+  'Private durable notification delivery state. Mutate through notification_outbox_* RPCs only.';
+comment on column public.notification_outbox.template_key is
+  'Template identifier while private delivery data is retained; NULL marks cleared terminal data.';
+comment on column public.notification_outbox.frozen_from is
+  'Presence marker for the immutable provider request; all five frozen_* fields are set together.';
+comment on column public.notification_outbox.processing_run_count is
+  'Number of successful worker claims, including claims that do not call the provider.';
+comment on column public.notification_outbox.provider_attempt_count is
+  'Number of provider transmissions begun by notification_outbox_begin_provider_call.';
+comment on column public.notification_outbox.provider_call_is_ambiguous_retry is
+  'True when the current owner is retrying a call whose earlier delivery result is unknown.';
+comment on column public.notification_outbox.provider_idempotency_expires_at is
+  'Original provider idempotency deadline; ambiguous retries must not extend it.';
+comment on column public.notification_outbox.last_manual_retry_at is
+  'Most recent operator-initiated retry time, used to enforce invitation retry cooldowns.';
+comment on column public.notification_outbox.manual_retry_count is
+  'Number of operator-initiated invitation retries.';
 
 create unique index notification_outbox_event_key_unique on public.notification_outbox(event_key_hash);
 create unique index notification_outbox_provider_key_unique on public.notification_outbox(provider_idempotency_key)
@@ -157,15 +178,14 @@ returns trigger language plpgsql set search_path='' as $$
 begin
   if new.event_key_hash is distinct from old.event_key_hash
     or new.event_type is distinct from old.event_type
-    or (new.input_fingerprint_hash is distinct from old.input_fingerprint_hash and new.redacted_at is null)
-    or (new.provider_idempotency_key is distinct from old.provider_idempotency_key and new.redacted_at is null)
-    or (new.delivery_mode is distinct from old.delivery_mode and new.redacted_at is null)
-    or (old.frozen_at is not null and new.redacted_at is null and (
+    or (new.input_fingerprint_hash is distinct from old.input_fingerprint_hash and new.template_key is not null)
+    or (new.provider_idempotency_key is distinct from old.provider_idempotency_key and new.template_key is not null)
+    or (old.frozen_from is not null and new.template_key is not null and (
       new.frozen_from is distinct from old.frozen_from or new.frozen_to is distinct from old.frozen_to or
       new.frozen_subject is distinct from old.frozen_subject or new.frozen_html is distinct from old.frozen_html or
-      new.frozen_text is distinct from old.frozen_text or new.frozen_at is distinct from old.frozen_at
+      new.frozen_text is distinct from old.frozen_text
     ))
-    or (old.recipient_email is not null and new.recipient_email is distinct from old.recipient_email and new.redacted_at is null)
+    or (old.recipient_email is not null and new.recipient_email is distinct from old.recipient_email and new.template_key is not null)
   then raise exception using errcode='23514', message='notification outbox immutable delivery fields cannot change';
   end if;
   new.updated_at=clock_timestamp();
@@ -178,7 +198,7 @@ revoke all on function public.notification_outbox_guard_immutable() from public,
 create function public.notification_outbox_enqueue(
   p_event_key text, p_event_type text, p_payload jsonb, p_source_id text,
   p_recipient_did text, p_recipient_email text, p_template_key text, p_locale text,
-  p_provider_idempotency_key text, p_delivery_mode text, p_next_attempt_at timestamptz
+  p_provider_idempotency_key text, p_next_attempt_at timestamptz
 ) returns table(outbox_id uuid,status text,duplicate boolean)
 language plpgsql security definer set search_path='' as $$
 declare
@@ -191,7 +211,6 @@ declare
 begin
   if p_event_key is null or length(p_event_key) not between 1 and 512 then raise exception 'event key must contain 1 to 512 characters'; end if;
   if p_event_type is null or p_event_type not in ('signup','membership_joined','invitation','bioblitz_winner') then raise exception 'unsupported event type'; end if;
-  if p_delivery_mode is null or p_delivery_mode not in ('capture','resend') then raise exception 'delivery mode must be capture or resend; disabled producers must not enqueue'; end if;
   if p_event_type in ('signup','membership_joined') then
     if p_source_id is null then raise exception 'source ID is required for welcome provider key ownership'; end if;
     v_expected_provider_key=case p_event_type
@@ -221,9 +240,9 @@ begin
     v_fingerprint=extensions.notification_outbox_sha256(pg_catalog.convert_to(jsonb_build_object(
       'event_type',p_event_type,'payload',p_payload,'source_id',p_source_id,'recipient_did',p_recipient_did,
       'recipient_email',p_recipient_email,'template_key',p_template_key,'locale',p_locale,
-      'provider_idempotency_key',v_provider_key,'delivery_mode',p_delivery_mode
+      'provider_idempotency_key',v_provider_key
     )::text,'UTF8'));
-    if v_existing.redacted_at is not null or v_existing.status='suppressed' or v_existing.input_fingerprint_hash=v_fingerprint then
+    if v_existing.template_key is null or v_existing.status='suppressed' or v_existing.input_fingerprint_hash=v_fingerprint then
       return query select v_existing.id,v_existing.status,true; return;
     end if;
     raise exception 'notification_outbox_idempotency_conflict: event key was already used with different delivery input';
@@ -234,16 +253,16 @@ begin
   v_fingerprint=extensions.notification_outbox_sha256(pg_catalog.convert_to(jsonb_build_object(
     'event_type',p_event_type,'payload',p_payload,'source_id',p_source_id,'recipient_did',p_recipient_did,
     'recipient_email',p_recipient_email,'template_key',p_template_key,'locale',p_locale,
-    'provider_idempotency_key',v_provider_key,'delivery_mode',p_delivery_mode
+    'provider_idempotency_key',v_provider_key
   )::text,'UTF8'));
 
   begin
     insert into public.notification_outbox(
       id,event_key_hash,input_fingerprint_hash,event_type,payload,source_id,recipient_did,recipient_email,
-      template_key,locale,delivery_mode,provider_idempotency_key,status,next_attempt_at
+      template_key,locale,provider_idempotency_key,status,next_attempt_at
     ) values (
       v_id,v_event_hash,v_fingerprint,p_event_type,p_payload,p_source_id,p_recipient_did,p_recipient_email,
-      p_template_key,p_locale,p_delivery_mode,v_provider_key,
+      p_template_key,p_locale,v_provider_key,
       case when p_event_type='bioblitz_winner' and p_recipient_email is null then 'waiting_recipient' else 'queued' end,
       coalesce(p_next_attempt_at,clock_timestamp())
     );
@@ -255,9 +274,9 @@ begin
     v_fingerprint=extensions.notification_outbox_sha256(pg_catalog.convert_to(jsonb_build_object(
       'event_type',p_event_type,'payload',p_payload,'source_id',p_source_id,'recipient_did',p_recipient_did,
       'recipient_email',p_recipient_email,'template_key',p_template_key,'locale',p_locale,
-      'provider_idempotency_key',v_provider_key,'delivery_mode',p_delivery_mode
+      'provider_idempotency_key',v_provider_key
     )::text,'UTF8'));
-    if v_existing.redacted_at is not null or v_existing.status='suppressed' or v_existing.input_fingerprint_hash=v_fingerprint then
+    if v_existing.template_key is null or v_existing.status='suppressed' or v_existing.input_fingerprint_hash=v_fingerprint then
       return query select v_existing.id,v_existing.status,true; return;
     end if;
     raise exception 'notification_outbox_idempotency_conflict: event key was already used with different delivery input';
@@ -279,14 +298,14 @@ begin
   if v.created_at<=clock_timestamp()-interval '7 days' then
     update public.notification_outbox set status='dead',terminal_at=clock_timestamp(),last_error_code='active_retention_expired',
       last_error_summary='Notification exceeded the seven-day active retention limit',locked_until=null,processing_token=null,
-      claimed_from_status=null,provider_call_phase='idle',provider_call_is_ambiguous_retry=false,provider_call_started_at=null,provider_idempotency_expires_at=null,ambiguous_since=null
+      claimed_from_status=null,provider_call_phase='idle',provider_call_is_ambiguous_retry=false,provider_idempotency_expires_at=null
       where id=p_outbox_id;
     return;
   end if;
   if v.status='processing' and v.provider_call_phase='in_flight' and v.provider_idempotency_expires_at<=clock_timestamp() then
     update public.notification_outbox set status='dead',terminal_at=clock_timestamp(),last_error_code='provider_idempotency_expired',
       last_error_summary='Provider outcome remained ambiguous beyond the stored idempotency guarantee',locked_until=null,processing_token=null,
-      claimed_from_status=null,provider_call_phase='idle',provider_call_is_ambiguous_retry=false,provider_call_started_at=null,provider_idempotency_expires_at=null,ambiguous_since=null
+      claimed_from_status=null,provider_call_phase='idle',provider_call_is_ambiguous_retry=false,provider_idempotency_expires_at=null
       where id=p_outbox_id;
     return;
   end if;
@@ -314,13 +333,13 @@ begin
     if v.created_at<=clock_timestamp()-interval '7 days' then
       update public.notification_outbox set status='dead',terminal_at=clock_timestamp(),last_error_code='active_retention_expired',
         last_error_summary='Notification exceeded the seven-day active retention limit',locked_until=null,processing_token=null,
-        claimed_from_status=null,provider_call_phase='idle',provider_call_is_ambiguous_retry=false,provider_call_started_at=null,provider_idempotency_expires_at=null,ambiguous_since=null where id=v.id;
+        claimed_from_status=null,provider_call_phase='idle',provider_call_is_ambiguous_retry=false,provider_idempotency_expires_at=null where id=v.id;
       continue;
     end if;
     if v.status='processing' and v.provider_call_phase='in_flight' and v.provider_idempotency_expires_at<=clock_timestamp() then
       update public.notification_outbox set status='dead',terminal_at=clock_timestamp(),last_error_code='provider_idempotency_expired',
         last_error_summary='Provider outcome remained ambiguous beyond the stored idempotency guarantee',locked_until=null,processing_token=null,
-        claimed_from_status=null,provider_call_phase='idle',provider_call_is_ambiguous_retry=false,provider_call_started_at=null,provider_idempotency_expires_at=null,ambiguous_since=null where id=v.id;
+        claimed_from_status=null,provider_call_phase='idle',provider_call_is_ambiguous_retry=false,provider_idempotency_expires_at=null where id=v.id;
       continue;
     end if;
     v_token=pg_catalog.gen_random_uuid(); v_until=clock_timestamp()+make_interval(secs=>p_lease_seconds);
@@ -350,7 +369,7 @@ begin
       else 'Notification exceeded the seven-day active retention limit'
     end,
     locked_until=null,processing_token=null,claimed_from_status=null,provider_call_phase='idle',
-    provider_call_is_ambiguous_retry=false,provider_call_started_at=null,provider_idempotency_expires_at=null,ambiguous_since=null
+    provider_call_is_ambiguous_retry=false,provider_idempotency_expires_at=null
     where id=p_outbox_id;
   return true;
 end $$;
@@ -386,12 +405,12 @@ begin
      p_text is null or length(p_text) not between 1 and 262144 then raise exception 'complete frozen request fields are required and bounded'; end if;
   select * into v from public.notification_outbox where id=p_outbox_id and status='processing' and processing_token=p_token for update;
   if not found or v.provider_call_phase<>'idle' or v.recipient_email is null then return false; end if;
-  if v.frozen_at is not null then
+  if v.frozen_from is not null then
     if (v.frozen_from,v.frozen_to,v.frozen_subject,v.frozen_html,v.frozen_text) is distinct from (p_from,p_to,p_subject,p_html,p_text) then raise exception 'frozen request conflict: request fields cannot change'; end if;
     return true;
   end if;
   if p_to<>v.recipient_email then raise exception 'frozen destination must match resolved recipient email'; end if;
-  update public.notification_outbox set frozen_from=p_from,frozen_to=p_to,frozen_subject=p_subject,frozen_html=p_html,frozen_text=p_text,frozen_at=clock_timestamp() where id=p_outbox_id;
+  update public.notification_outbox set frozen_from=p_from,frozen_to=p_to,frozen_subject=p_subject,frozen_html=p_html,frozen_text=p_text where id=p_outbox_id;
   return true;
 end $$;
 
@@ -400,16 +419,14 @@ returns boolean language plpgsql security definer set search_path='' as $$
 declare v public.notification_outbox%rowtype;
 begin
   if p_idempotency_expires_at is null or p_idempotency_expires_at<=clock_timestamp() or p_idempotency_expires_at>clock_timestamp()+interval '7 days' then raise exception 'idempotency expiry must be in the future and no more than seven days away'; end if;
-  select * into v from public.notification_outbox where id=p_outbox_id and status='processing' and processing_token=p_token and frozen_at is not null for update;
+  select * into v from public.notification_outbox where id=p_outbox_id and status='processing' and processing_token=p_token and frozen_from is not null for update;
   if not found then return false; end if;
   if v.provider_call_phase='in_flight' and v.provider_idempotency_expires_at<=clock_timestamp() then return false; end if;
   update public.notification_outbox set provider_call_phase='in_flight',
     provider_call_is_ambiguous_retry=(v.provider_call_phase='in_flight'),
-    provider_call_started_at=case when v.provider_call_phase='in_flight' then v.provider_call_started_at else clock_timestamp() end,
     -- A resumed ambiguous call may shorten, but must never extend, the guarantee
     -- durably recorded before the call that may already have succeeded.
     provider_idempotency_expires_at=case when v.provider_call_phase='in_flight' then least(v.provider_idempotency_expires_at,p_idempotency_expires_at) else p_idempotency_expires_at end,
-    ambiguous_since=case when v.provider_call_phase='in_flight' then v.ambiguous_since else clock_timestamp() end,
     provider_attempt_count=provider_attempt_count+1 where id=p_outbox_id;
   return true;
 end $$;
@@ -438,9 +455,7 @@ begin
   if p_error_code is null or p_error_code not in ('provider_5xx','provider_rate_limited','provider_rejected','notification_invalid') then raise exception 'unsupported provider error code'; end if;
   update public.notification_outbox set
     provider_call_phase=case when provider_call_is_ambiguous_retry then 'in_flight' else 'idle' end,
-    provider_call_started_at=case when provider_call_is_ambiguous_retry then provider_call_started_at else null end,
     provider_idempotency_expires_at=case when provider_call_is_ambiguous_retry then provider_idempotency_expires_at else null end,
-    ambiguous_since=case when provider_call_is_ambiguous_retry then ambiguous_since else null end,
     last_error_code=p_error_code,
     last_error_summary=case p_error_code
       when 'provider_5xx' then 'Provider returned a retryable server error'
@@ -463,7 +478,7 @@ begin
       else 'Notification delivery input is invalid'
     end,
     locked_until=null,processing_token=null,claimed_from_status=null,provider_call_phase='idle',
-    provider_call_is_ambiguous_retry=false,provider_call_started_at=null,provider_idempotency_expires_at=null,ambiguous_since=null
+    provider_call_is_ambiguous_retry=false,provider_idempotency_expires_at=null
     where id=p_outbox_id and status='processing' and processing_token=p_token
       and provider_call_phase='in_flight' and not provider_call_is_ambiguous_retry;
   get diagnostics n=row_count; return n=1;
@@ -475,8 +490,8 @@ declare n integer;
 begin
   if p_provider_id is null or length(p_provider_id) not between 1 and 256 then raise exception 'provider ID must contain 1 to 256 characters'; end if;
   update public.notification_outbox set status='sent',provider_id=p_provider_id,terminal_at=clock_timestamp(),last_error_code=null,last_error_summary=null,
-    locked_until=null,processing_token=null,claimed_from_status=null,provider_call_phase='idle',provider_call_is_ambiguous_retry=false,provider_call_started_at=null,provider_idempotency_expires_at=null,ambiguous_since=null
-    where id=p_outbox_id and status='processing' and processing_token=p_token and provider_call_phase='in_flight' and frozen_at is not null;
+    locked_until=null,processing_token=null,claimed_from_status=null,provider_call_phase='idle',provider_call_is_ambiguous_retry=false,provider_idempotency_expires_at=null
+    where id=p_outbox_id and status='processing' and processing_token=p_token and provider_call_phase='in_flight' and frozen_from is not null;
   get diagnostics n=row_count; return n=1;
 end $$;
 
@@ -485,7 +500,7 @@ returns boolean language plpgsql security definer set search_path='' as $$
 declare n integer; v public.notification_outbox%rowtype;
 begin
   if p_next_attempt_at is null or p_next_attempt_at<=clock_timestamp() or p_next_attempt_at>clock_timestamp()+interval '7 days' then raise exception 'next attempt must be within seven days'; end if;
-  if p_error_code is null or p_error_code not in ('provider_5xx','provider_rate_limited','provider_rejected','recipient_lookup_failed','delivery_mode_mismatch') then raise exception 'unsupported requeue error code'; end if;
+  if p_error_code is null or p_error_code not in ('provider_5xx','provider_rate_limited','provider_rejected','recipient_lookup_failed') then raise exception 'unsupported requeue error code'; end if;
   select * into v from public.notification_outbox
     where id=p_outbox_id and status='processing' and processing_token=p_token for update;
   if not found then return false; end if;
@@ -495,7 +510,6 @@ begin
       when 'provider_5xx' then 'Provider returned a retryable server error'
       when 'provider_rate_limited' then 'Provider rate limit requires a later retry'
       when 'provider_rejected' then 'Provider permanently rejected the notification'
-      when 'delivery_mode_mismatch' then 'Notification delivery mode does not match the active provider'
       else 'Recipient lookup failed'
     end,
     locked_until=null,processing_token=null,claimed_from_status=null where id=p_outbox_id and status='processing' and processing_token=p_token and provider_call_phase='idle' and recipient_email is not null;
@@ -524,10 +538,10 @@ returns boolean language plpgsql security definer set search_path='' as $$
 declare n integer;
 begin
   if p_error_code is null or p_error_code not in ('invitation_not_pending','manually_suppressed') then raise exception 'unsupported suppression code'; end if;
-  update public.notification_outbox set status='suppressed',terminal_at=clock_timestamp(),redacted_at=clock_timestamp(),
+  update public.notification_outbox set status='suppressed',terminal_at=clock_timestamp(),
     input_fingerprint_hash=null,payload=null,source_id=null,recipient_did=null,recipient_email=null,
-    template_key=null,locale=null,delivery_mode=null,frozen_from=null,frozen_to=null,frozen_subject=null,
-    frozen_html=null,frozen_text=null,frozen_at=null,provider_id=null,provider_idempotency_key=null,
+    template_key=null,locale=null,frozen_from=null,frozen_to=null,frozen_subject=null,
+    frozen_html=null,frozen_text=null,provider_id=null,provider_idempotency_key=null,
     last_error_code=null,last_error_summary=null,processing_run_count=0,provider_attempt_count=0,provider_call_is_ambiguous_retry=false,
     last_manual_retry_at=null,manual_retry_count=0,locked_until=null,processing_token=null,claimed_from_status=null
     where id=p_outbox_id and status='processing' and processing_token=p_token and provider_call_phase='idle';
@@ -556,10 +570,10 @@ begin
     if found then
       if v.event_type<>p_event_type then raise exception 'notification_outbox_idempotency_conflict: event type differs'; end if;
       if v.status in ('waiting_recipient','queued') or (v.status='processing' and v.provider_call_phase='idle') then
-        update public.notification_outbox set status='suppressed',terminal_at=clock_timestamp(),redacted_at=clock_timestamp(),
+        update public.notification_outbox set status='suppressed',terminal_at=clock_timestamp(),
           input_fingerprint_hash=null,payload=null,source_id=null,recipient_did=null,recipient_email=null,
-          template_key=null,locale=null,delivery_mode=null,frozen_from=null,frozen_to=null,frozen_subject=null,
-          frozen_html=null,frozen_text=null,frozen_at=null,provider_id=null,provider_idempotency_key=null,
+          template_key=null,locale=null,frozen_from=null,frozen_to=null,frozen_subject=null,
+          frozen_html=null,frozen_text=null,provider_id=null,provider_idempotency_key=null,
           last_error_code=null,last_error_summary=null,processing_run_count=0,provider_attempt_count=0,provider_call_is_ambiguous_retry=false,
           last_manual_retry_at=null,manual_retry_count=0,locked_until=null,processing_token=null,claimed_from_status=null
           where id=v.id returning notification_outbox.status into v.status;
@@ -568,9 +582,9 @@ begin
     end if;
     v_id=pg_catalog.gen_random_uuid();
     begin
-      insert into public.notification_outbox(id,event_key_hash,input_fingerprint_hash,event_type,template_key,delivery_mode,provider_idempotency_key,status,
-        terminal_at,redacted_at,last_error_code)
-      values(v_id,v_hash,null,p_event_type,null,null,null,'suppressed',clock_timestamp(),clock_timestamp(),null);
+      insert into public.notification_outbox(id,event_key_hash,input_fingerprint_hash,event_type,template_key,provider_idempotency_key,status,
+        terminal_at,last_error_code)
+      values(v_id,v_hash,null,p_event_type,null,null,'suppressed',clock_timestamp(),null);
       return query select v_id,'suppressed'::text,false; return;
     exception when unique_violation then
       -- A concurrent enqueue or suppression owns the event hash. Retry the
@@ -589,8 +603,8 @@ begin
     not (n.status='processing' and n.locked_until>clock_timestamp()) and (
       n.created_at<=clock_timestamp()-interval '90 days' or
       (n.status in ('waiting_recipient','queued','processing') and n.created_at<=clock_timestamp()-interval '7 days') or
-      (n.status='sent' and n.redacted_at is null and n.terminal_at<=clock_timestamp()-interval '7 days') or
-      (n.status='dead' and n.redacted_at is null and n.terminal_at<=clock_timestamp()-interval '14 days')
+      (n.status='sent' and n.template_key is not null and n.terminal_at<=clock_timestamp()-interval '7 days') or
+      (n.status='dead' and n.template_key is not null and n.terminal_at<=clock_timestamp()-interval '14 days')
     ) order by n.created_at limit p_batch_size for update skip locked
   loop
     if v.created_at<=clock_timestamp()-interval '90 days' then
@@ -600,14 +614,14 @@ begin
     elsif v.status in ('waiting_recipient','queued','processing') and v.created_at<=clock_timestamp()-interval '7 days' then
       update public.notification_outbox set status='dead',terminal_at=clock_timestamp(),last_error_code='active_retention_expired',
         last_error_summary='Notification exceeded the seven-day active retention limit',locked_until=null,processing_token=null,claimed_from_status=null,
-        provider_call_phase='idle',provider_call_is_ambiguous_retry=false,provider_call_started_at=null,provider_idempotency_expires_at=null,ambiguous_since=null where id=v.id
+        provider_call_phase='idle',provider_call_is_ambiguous_retry=false,provider_idempotency_expires_at=null where id=v.id
         and not (status='processing' and locked_until>clock_timestamp());
       get diagnostics n=row_count; a=a+n;
     elsif (v.status='sent' and v.terminal_at<=clock_timestamp()-interval '7 days') or (v.status='dead' and v.terminal_at<=clock_timestamp()-interval '14 days') then
       update public.notification_outbox set input_fingerprint_hash=null,payload=null,source_id=null,recipient_did=null,recipient_email=null,
-        template_key=null,locale=null,delivery_mode=null,frozen_from=null,frozen_to=null,frozen_subject=null,frozen_html=null,frozen_text=null,frozen_at=null,
+        template_key=null,locale=null,frozen_from=null,frozen_to=null,frozen_subject=null,frozen_html=null,frozen_text=null,
         provider_id=null,provider_idempotency_key=null,last_error_code=null,last_error_summary=null,
-        processing_run_count=0,provider_attempt_count=0,provider_call_is_ambiguous_retry=false,last_manual_retry_at=null,manual_retry_count=0,redacted_at=clock_timestamp() where id=v.id
+        processing_run_count=0,provider_attempt_count=0,provider_call_is_ambiguous_retry=false,last_manual_retry_at=null,manual_retry_count=0 where id=v.id
         and not (status='processing' and locked_until>clock_timestamp());
       get diagnostics n=row_count; r=r+n;
     end if;
@@ -617,7 +631,7 @@ end $$;
 
 -- All callable state transitions are service-role-only. Keep signatures explicit
 -- so future overloads do not accidentally inherit PUBLIC execution.
-revoke all on function public.notification_outbox_enqueue(text,text,jsonb,text,text,text,text,text,text,text,timestamptz) from public,anon,authenticated;
+revoke all on function public.notification_outbox_enqueue(text,text,jsonb,text,text,text,text,text,text,timestamptz) from public,anon,authenticated;
 revoke all on function public.notification_outbox_claim_one(uuid,uuid,integer) from public,anon,authenticated;
 revoke all on function public.notification_outbox_claim_due(integer,integer) from public,anon,authenticated;
 revoke all on function public.notification_outbox_expire_claimed(uuid,uuid,text) from public,anon,authenticated;
@@ -636,7 +650,7 @@ revoke all on function public.notification_outbox_release_claim(uuid,uuid) from 
 revoke all on function public.notification_outbox_suppress_event(text,text) from public,anon,authenticated;
 revoke all on function public.notification_outbox_cleanup(integer) from public,anon,authenticated;
 
-grant execute on function public.notification_outbox_enqueue(text,text,jsonb,text,text,text,text,text,text,text,timestamptz) to service_role;
+grant execute on function public.notification_outbox_enqueue(text,text,jsonb,text,text,text,text,text,text,timestamptz) to service_role;
 grant execute on function public.notification_outbox_claim_one(uuid,uuid,integer) to service_role;
 grant execute on function public.notification_outbox_claim_due(integer,integer) to service_role;
 grant execute on function public.notification_outbox_expire_claimed(uuid,uuid,text) to service_role;

@@ -45,7 +45,7 @@ const PREVIOUS = new Set(["waiting_recipient", "queued", "processing"]);
 const PHASES = new Set(["idle", "in_flight"]);
 const ROW_SELECT = [
   "id", "event_type", "payload", "source_id", "recipient_did", "recipient_email", "template_key", "locale",
-  "frozen_from", "frozen_to", "frozen_subject", "frozen_html", "frozen_text", "frozen_at",
+  "frozen_from", "frozen_to", "frozen_subject", "frozen_html", "frozen_text",
   "status", "provider_call_phase", "provider_call_is_ambiguous_retry", "provider_idempotency_key",
   "provider_idempotency_expires_at", "processing_run_count", "provider_attempt_count", "processing_token",
   "locked_until", "created_at",
@@ -110,9 +110,8 @@ function decodeRow(value: unknown): NotificationRow | null {
   if (!lockedUntil || !createdAt) return null;
 
   const frozenValues = [item.frozen_from, item.frozen_to, item.frozen_subject, item.frozen_html, item.frozen_text];
-  const frozenAt = item.frozen_at === null ? null : date(item.frozen_at);
-  const noFrozen = item.frozen_at === null && frozenValues.every(field => field === null);
-  const completeFrozen = frozenAt !== null && frozenValues.every(field => typeof field === "string");
+  const noFrozen = frozenValues.every(field => field === null);
+  const completeFrozen = frozenValues.every(field => typeof field === "string");
   if (!noFrozen && !completeFrozen) return null;
   const expiresAt = item.provider_idempotency_expires_at === null ? null : date(item.provider_idempotency_expires_at);
   if (item.provider_idempotency_expires_at !== null && !expiresAt) return null;
@@ -134,7 +133,6 @@ function decodeRow(value: unknown): NotificationRow | null {
       text: item.frozen_text as string,
       idempotencyKey: item.provider_idempotency_key,
     } : null,
-    frozenAt,
     status: "processing",
     providerCallPhase: item.provider_call_phase as NotificationRow["providerCallPhase"],
     providerCallIsAmbiguousRetry: item.provider_call_is_ambiguous_retry,

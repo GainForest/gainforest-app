@@ -32,7 +32,6 @@ function row(overrides: Partial<NotificationRow> = {}): NotificationRow {
     templateKey: "welcome",
     locale: "en",
     frozenRequest: null,
-    frozenAt: null,
     status: "processing",
     providerCallPhase: "idle",
     providerCallIsAmbiguousRetry: false,
@@ -103,7 +102,6 @@ class StateRepository implements NotificationRepository {
     this.current = {
       ...this.current,
       frozenRequest: { ...request, idempotencyKey: this.current.providerIdempotencyKey },
-      frozenAt: NOW,
     };
     return true;
   }
@@ -319,7 +317,6 @@ describe("notification worker provider state machine", () => {
         from: "from@example.com", to: "person@example.com", subject: "Frozen",
         html: "Frozen html", text: "Frozen text", idempotencyKey: "source-1",
       },
-      frozenAt: NOW,
       providerCallPhase: "in_flight",
       providerCallIsAmbiguousRetry: true,
       providerIdempotencyExpiresAt: originalExpiry,
@@ -350,7 +347,6 @@ describe("notification worker provider state machine", () => {
         from: "from@example.com", to: "person@example.com", subject: "Frozen",
         html: "Frozen html", text: "Frozen text", idempotencyKey: "source-1",
       },
-      frozenAt: NOW,
       providerCallPhase: "in_flight",
       providerCallIsAmbiguousRetry: true,
       providerIdempotencyExpiresAt: originalExpiry,
@@ -482,7 +478,6 @@ describe("notification worker review regressions", () => {
       frozenRequest: phase === "in_flight" ? {
         from: "from@example.com", to: "person@example.com", subject: "Frozen", html: "Frozen", text: "Frozen", idempotencyKey: "source-1",
       } : null,
-      frozenAt: phase === "in_flight" ? NOW : null,
     }));
     const value = setup(repository, scriptedProvider([]));
     const result = await processNotificationClaim(claim({
@@ -498,7 +493,7 @@ describe("notification worker review regressions", () => {
     const repository = new StateRepository(row({
       createdAt: new Date(NOW.getTime() - 1_000),
       frozenRequest: { from: "from@example.com", to: "person@example.com", subject: "Frozen", html: "Frozen", text: "Frozen", idempotencyKey: "source-1" },
-      frozenAt: NOW, providerCallPhase: "in_flight", providerCallIsAmbiguousRetry: true,
+      providerCallPhase: "in_flight", providerCallIsAmbiguousRetry: true,
       providerIdempotencyExpiresAt: NOW,
     }));
     const value = setup(repository, scriptedProvider([]));
@@ -511,7 +506,7 @@ describe("notification worker review regressions", () => {
     const repository = new StateRepository(row({
       eventType: "invitation", sourceId: "invite-1",
       frozenRequest: { from: "from@example.com", to: "person@example.com", subject: "Frozen", html: "Frozen", text: "Frozen", idempotencyKey: "source-1" },
-      frozenAt: NOW, providerCallPhase: "in_flight", providerCallIsAmbiguousRetry: true,
+      providerCallPhase: "in_flight", providerCallIsAmbiguousRetry: true,
       providerIdempotencyExpiresAt: new Date(NOW.getTime() + 60_000),
     }));
     const value = setup(repository, scriptedProvider([]));
