@@ -613,8 +613,10 @@
           "lookup_failed": "Pencarian email gagal; coba nanti atau hubungi pemenang",
           "cannot_send": "Tidak dapat dikirim otomatis",
           "handled_manually": "Ditangani secara manual",
-          "not_prepared": "Belum disiapkan; hubungi pemenang secara langsung",
-          "notification_setup_failed": "Pengaturan email gagal; hubungi pemenang secara langsung",
+          "not_prepared": "Email belum disiapkan; coba lagi atau tangani secara langsung",
+          "notification_setup_failed": "Pengaturan email gagal; coba lagi atau tangani secara langsung",
+          "retry": "Coba lagi notifikasi",
+          "retrying": "Mencoba lagi…",
           "markHandled": "Tandai sudah ditangani",
           "marking": "Menandai…"
         }

@@ -45,26 +45,80 @@ beforeEach(() => {
     .mockResolvedValueOnce({ subjectDid: "did:plc:most", note: null, url: null, createdAt: "2026-08-06T01:00:00.000Z" })
     .mockResolvedValueOnce({ subjectDid: "did:plc:best", note: null, url: null, createdAt: "2026-08-06T01:00:00.000Z" });
   mocks.notify.mockReset();
-  mocks.notify.mockResolvedValue({ status: "sent", canMarkHandled: false });
+  mocks.notify.mockResolvedValue({ status: "sent", canMarkHandled: false, canRetry: false });
   mocks.fetchData.mockReset();
   mocks.fetchData.mockResolvedValue({ definitions, awards, pendingAwards: [], repoDid: "did:plc:gf" });
   mocks.list.mockReset();
   mocks.list.mockResolvedValue(new Map([
-    ["bioblitz:4:most-observations", { status: "missing_email", canMarkHandled: true }],
-    ["bioblitz:4:best-picture", { status: "sent", canMarkHandled: false }],
+    ["bioblitz:4:most-observations", { status: "missing_email", canMarkHandled: true, canRetry: false }],
+    ["bioblitz:4:best-picture", { status: "sent", canMarkHandled: false, canRetry: false }],
   ]));
   mocks.mark.mockReset();
-  mocks.mark.mockResolvedValue({ status: "handled_manually", canMarkHandled: false });
+  mocks.mark.mockResolvedValue({ status: "handled_manually", canMarkHandled: false, canRetry: false });
 });
 
 describe("BioBlitz award notifications", () => {
   it("continues the second durable award when first notification setup fails", async () => {
-    mocks.notify.mockRejectedValueOnce(new Error("notification setup failed")).mockResolvedValueOnce({ status: "sent", canMarkHandled: false });
+    mocks.notify.mockRejectedValueOnce(new Error("notification setup failed")).mockResolvedValueOnce({ status: "sent", canMarkHandled: false, canRetry: false });
     const { POST } = await import("./route");
     const response = await POST(new Request("https://example.test", { method: "POST", body: JSON.stringify({ roundId: 4 }) }));
     expect(response.status).toBe(200);
     expect(mocks.award).toHaveBeenCalledTimes(2);
     expect(mocks.notify).toHaveBeenCalledTimes(2);
+  });
+
+  it("retries only the selected canonical recorded winner notification", async () => {
+    mocks.list.mockResolvedValue(new Map([
+      ["bioblitz:4:best-picture", { status: "not_prepared", canMarkHandled: true, canRetry: true }],
+    ]));
+    const { POST } = await import("./route");
+    const response = await POST(new Request("https://example.test", { method: "POST", body: JSON.stringify({ action: "retry-notification", roundId: 4, prize: "best-picture" }) }));
+    expect(response.status).toBe(200);
+    await expect(response.json()).resolves.toMatchObject({
+      roundId: 4,
+      prize: "best-picture",
+      notification: { status: "sent", canMarkHandled: false, canRetry: false },
+    });
+    expect(mocks.award).not.toHaveBeenCalled();
+    expect(mocks.notify).toHaveBeenCalledTimes(1);
+    expect(mocks.notify).toHaveBeenCalledWith({
+      roundId: 4,
+      roundLabel: "Week 4",
+      prize: "best-picture",
+      winnerDid: "did:plc:best",
+      createdAt: "2026-08-06T01:00:00.000Z",
+    }, expect.any(Date));
+  });
+
+  it.each([
+    { status: "sent", canMarkHandled: false, canRetry: false },
+    { status: "delayed", canMarkHandled: true, canRetry: false },
+    { status: "handled_manually", canMarkHandled: false, canRetry: false },
+  ])("rejects retry for a prepared $status notification", async notification => {
+    mocks.list.mockResolvedValue(new Map([["bioblitz:4:best-picture", notification]]));
+    const { POST } = await import("./route");
+    const response = await POST(new Request("https://example.test", { method: "POST", body: JSON.stringify({ action: "retry-notification", roundId: 4, prize: "best-picture" }) }));
+    expect(response.status).toBe(409);
+    expect(mocks.award).not.toHaveBeenCalled();
+    expect(mocks.notify).not.toHaveBeenCalled();
+  });
+
+  it("rejects a non-moderator retry before reading awards or notifications", async () => {
+    mocks.getAccess.mockResolvedValue({ isLoggedIn: true, configured: true, isModerator: false, repoDid: "did:plc:gf", session: { isLoggedIn: true, did: "did:plc:member" } });
+    const { POST } = await import("./route");
+    const response = await POST(new Request("https://example.test", { method: "POST", body: JSON.stringify({ action: "retry-notification", roundId: 4, prize: "best-picture" }) }));
+    expect(response.status).toBe(403);
+    expect(mocks.fetchData).not.toHaveBeenCalled();
+    expect(mocks.list).not.toHaveBeenCalled();
+    expect(mocks.notify).not.toHaveBeenCalled();
+  });
+
+  it("rejects bulk historical notification reconciliation", async () => {
+    const { POST } = await import("./route");
+    const response = await POST(new Request("https://example.test", { method: "POST", body: JSON.stringify({ action: "reconcile" }) }));
+    expect(response.status).toBe(400);
+    expect(mocks.award).not.toHaveBeenCalled();
+    expect(mocks.notify).not.toHaveBeenCalled();
   });
 
   it("marks only the canonical recorded winner notification handled", async () => {

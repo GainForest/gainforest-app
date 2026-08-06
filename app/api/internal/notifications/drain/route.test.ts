@@ -24,10 +24,8 @@ const drain = vi.fn<(_deadline: Date) => Promise<DrainOutcome>>(async () => ({
   elapsedMs: 25,
 }));
 const createDrainRuntime = vi.fn(() => ({ drain }));
-const reconcileRecentBioblitzNotifications = vi.fn(async () => 2);
 
 vi.mock("@/lib/email-notifications/drain-runtime", () => ({ createDrainRuntime }));
-vi.mock("@/app/_lib/bioblitz-notification-reconciliation", () => ({ reconcileRecentBioblitzNotifications }));
 
 function request(token?: string): NextRequest {
   return new NextRequest("https://example.test/api/internal/notifications/drain", {
@@ -43,7 +41,6 @@ describe("notification drain route", () => {
     process.env.NOTIFICATION_CRON_SECRET = secret;
     createDrainRuntime.mockClear();
     drain.mockClear();
-    reconcileRecentBioblitzNotifications.mockClear();
   });
 
   afterEach(() => {
@@ -68,14 +65,15 @@ describe("notification drain route", () => {
     expect(createDrainRuntime).not.toHaveBeenCalled();
   });
 
-  it("runs one deadline-bounded drain and returns aggregate fields only", async () => {
+  it("drains existing work without discovering historical BioBlitz notifications", async () => {
     const { GET } = await import("./route");
     const before = Date.now();
     const response = await GET(request(secret));
     const after = Date.now();
     expect(response.status).toBe(200);
     const body = await response.json();
-    expect(body).toMatchObject({ kind: "completed", claimed: 2, outcomes: { sent: 1, requeued: 1 }, reconciliation: { candidates: 2, completed: true } });
+    expect(body).toMatchObject({ kind: "completed", claimed: 2, outcomes: { sent: 1, requeued: 1 } });
+    expect(body).not.toHaveProperty("reconciliation");
     expect(JSON.stringify(body)).not.toContain("@example.com");
     expect(drain).toHaveBeenCalledTimes(1);
     const deadline = drain.mock.calls[0][0] as Date;
