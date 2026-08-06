@@ -31,6 +31,7 @@ type RawReceiptRecord = {
     transactionId?: string;
     paymentNetwork?: string;
     donorHash?: string;
+    notes?: string;
     from?: { $type?: string; value?: string };
     for?: { uri?: string };
   };
@@ -97,6 +98,7 @@ function mapRawReceipt(record: RawReceiptRecord): FundingReceipt {
     bumicertUri,
     txHash: value.transactionId ?? null,
     paymentNetwork: value.paymentNetwork ?? null,
+    message: value.notes?.trim() || null,
     isAnonymous: true,
   };
 }

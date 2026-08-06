@@ -592,6 +592,10 @@
       "mostObservations": "Pengamatan terbanyak",
       "bestPicture": "Foto terbaik",
       "pending": "Akan diumumkan",
+      "final": "Resmi",
+      "provisional": "Sementara",
+      "finalHint": "Pemenang ini sudah dikonfirmasi dan tidak akan berubah.",
+      "provisionalHint": "Klasemen saat ini — masih bisa berubah sampai pemenang dikonfirmasi.",
       "compact": "Terbaru",
       "mostSubmitted": "Kiriman terbanyak",
       "mostLiked": "Paling disukai",
@@ -768,6 +772,7 @@
         }
       },
       "apply": "Ajukan dengan Satu Klik",
+      "applicationsUnderReview": "Pengajuan sedang ditinjau. Penerima hibah terpilih akan segera diumumkan.",
       "details": "Baca detail hibah",
       "appliedTitle": "Pengajuan terkirim",
       "appliedNote": "Pengajuan Anda untuk {project} kini telah diposting ke feed.",

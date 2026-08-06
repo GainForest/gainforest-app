@@ -20,10 +20,6 @@ export const GLOBE_TITILER_ENDPOINT = "https://t7mvfdyitg.execute-api.eu-west-3.
 export const LANDCOVER_TILES_URL =
   "https://mapproxy.terrascope.be/mapproxy/wmts/esa-worldcover-map-10m-2021-v2_map/webmercator/{z}/{x}/{y}.png";
 
-/** Ma Earth logomark, cropped into the shared small circular badge for
- *  Ma Earth–funded organizations that don't have their own avatar yet. */
-export const MA_EARTH_LOGO_URL = "/assets/media/images/badges/ma-earth-logo.webp";
-
 /** Map paint colors for the focused org's certified locations: project sites
  *  keep Green Globe's neon green, while the organization's own location (the
  *  one referenced by its certified organization profile) paints sky blue so

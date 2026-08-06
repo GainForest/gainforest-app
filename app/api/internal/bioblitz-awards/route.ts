@@ -1,6 +1,12 @@
 import { headers } from "next/headers";
 import { getAuthForwardCookie } from "@/app/_lib/auth";
-import { endedRounds, fetchRoundCollectors, fetchRoundTopLiked, type BioblitzRound } from "@/app/_lib/bioblitz";
+import {
+  endedRounds,
+  fetchRoundCollectors,
+  fetchRoundTopLiked,
+  frozenWinnersFor,
+  type BioblitzRound,
+} from "@/app/_lib/bioblitz";
 import { bioblitzBadgeKey, recognitionKeyFromTitle } from "@/app/_lib/recognition-badges";
 import { getGainForestModeratorAccess } from "@/app/internal/badges/_lib/access";
 import { fetchInternalBadgeData, type InternalBadgeData } from "@/app/internal/badges/_lib/badge-records";
@@ -13,11 +19,9 @@ export const runtime = "nodejs";
  *
  * GET  → per ended round, whether each of the two winner badges has been
  *        awarded yet (drives the "Award winner badges" button on /bioblitz).
- * POST → { roundId }: award the round's winners their badges. The winners are
- *        recomputed server-side from the same data the public page shows —
- *        most observations goes to the round's top collector, best picture to
- *        the owner of the round's most-liked photo — so nothing about the
- *        recipients is ever trusted from the request body.
+ * POST → { roundId }: snapshots the round's computed winners into durable
+ *        recognition awards. Nothing about recipients or the winning picture
+ *        is trusted from the request body.
  */
 
 type RoundAwardState = { id: number; mostImages: boolean; bestPicture: boolean };
@@ -81,36 +85,55 @@ export async function POST(request: Request) {
   const cookie = getAuthForwardCookie(headerList.get("cookie"));
 
   try {
-    // Recompute the round's winners from the live data (test/hidden accounts
-    // are already excluded by the board tally).
+    // Hand-pinned winners take precedence; only prizes without a pin are
+    // recomputed from the final board. The selected recipient and picture are
+    // then snapshotted into a durable recognition award.
+    const pinned = frozenWinnersFor(round, null);
     const [board, liked] = await Promise.all([
       // Weekly counting records are governance input to this irreversible
       // award, so this path reads them uncached and fails closed.
-      fetchRoundCollectors(round, "round", undefined, "required"),
-      fetchRoundTopLiked(round, 1),
+      pinned.mostObservations === undefined
+        ? fetchRoundCollectors(round, "round", undefined, "required")
+        : null,
+      pinned.bestPicture === undefined ? fetchRoundTopLiked(round, 1) : null,
     ]);
-    const mostObservations = board.collectors[0] ?? null;
-    const bestPicture = liked[0] ?? null;
+    const topCollector = board?.collectors[0] ?? null;
+    const mostObservations =
+      pinned.mostObservations !== undefined
+        ? pinned.mostObservations
+        : topCollector && { did: topCollector.did, count: topCollector.count as number | null };
+    const computedBestPicture = liked?.[0] ?? null;
+    const bestPicture =
+      pinned.bestPicture !== undefined
+        ? pinned.bestPicture && {
+            did: pinned.bestPicture.did,
+            winningObservationUri: round.bestPicture?.winningObservationUri,
+          }
+        : computedBestPicture
+          ? { did: computedBestPicture.record.did, winningObservationUri: computedBestPicture.record.atUri }
+          : null;
     if (!mostObservations && !bestPicture) {
       return Response.json({ error: "This round has no winners to award yet." }, { status: 409 });
     }
 
     if (mostObservations) {
+      const countNote = mostObservations.count != null ? ` (${mostObservations.count})` : "";
       await awardRecognition(
         loaded.repoDid,
         cookie,
         mostObservations.did,
         bioblitzBadgeKey("most-images", round.id),
-        `BioBlitz ${round.label} winner — most observations (${mostObservations.count}).`,
+        `BioBlitz ${round.label} winner — most observations${countNote}.`,
       );
     }
     if (bestPicture) {
       await awardRecognition(
         loaded.repoDid,
         cookie,
-        bestPicture.record.did,
+        bestPicture.did,
         bioblitzBadgeKey("best-picture", round.id),
         `BioBlitz ${round.label} winner — best picture.`,
+        bestPicture.winningObservationUri,
       );
     }
 

@@ -22,6 +22,7 @@ import { resolveSupportedLanguage } from "@/lib/i18n/languages";
 import { getCanonicalPathname, getSeoLocalizedPathnames, withLocalePrefix } from "@/lib/i18n/routing";
 import { fetchAuthSession } from "./_lib/auth-server";
 import { getRequestOrigin } from "./_lib/request-origin";
+import { scheduleUserEmailSync } from "./_lib/user-emails";
 
 const geistSans = Geist({
   subsets: ["latin"],
@@ -201,6 +202,11 @@ export default async function RootLayout({ children }: { children: React.ReactNo
     getTranslations("common.seo"),
     getTranslations("landing.nav"),
   ]);
+
+  // TODO(2026-11-01): Replace this temporary root-load backfill with an auth
+  // lifecycle sync, then remove it after confirming active-user coverage.
+  scheduleUserEmailSync(authSession);
+
   const supportedLocale = resolveSupportedLanguage(locale);
   const navigationItems = PUBLIC_NAVIGATION_ROUTES.map((item) => ({
     name: navT(item.key),

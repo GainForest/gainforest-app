@@ -6,6 +6,7 @@
 
 import { createHash, createHmac } from "node:crypto";
 import { FACILITATOR_DID } from "@/app/_lib/urls";
+import { sanitizeDonationMessage } from "@/lib/donation/message";
 import { PAYMENT_NETWORK, PAYMENT_RAIL } from "./usdc";
 
 export type DidIdentifier = `did:${string}:${string}`;
@@ -43,7 +44,17 @@ export function computeDonorHash(donorDid: string, transactionId: string): strin
 function getFacilitatorServiceHost(): string {
   const configuredHost = process.env.FACILITATOR_SERVICE_HOST?.trim().replace(/\/+$/, "");
   if (!configuredHost) throw new Error("FACILITATOR_SERVICE_HOST env var is not set");
-  return /^https?:\/\//i.test(configuredHost) ? configuredHost : `https://${configuredHost}`;
+
+  let url: URL;
+  try {
+    url = new URL(/^[a-z][a-z\d+.-]*:\/\//i.test(configuredHost) ? configuredHost : `https://${configuredHost}`);
+  } catch {
+    throw new Error("FACILITATOR_SERVICE_HOST must be a valid HTTPS URL");
+  }
+  if (url.protocol !== "https:" || !url.hostname) {
+    throw new Error("FACILITATOR_SERVICE_HOST must be a valid HTTPS URL");
+  }
+  return url.toString().replace(/\/+$/, "");
 }
 
 async function createFacilitatorSession(): Promise<string> {
@@ -57,6 +68,7 @@ async function createFacilitatorSession(): Promise<string> {
     headers: { "content-type": "application/json" },
     body: JSON.stringify({ identifier, password }),
     signal: AbortSignal.timeout(15_000),
+    redirect: "error",
   });
   const json = (await response.json().catch(() => null)) as { accessJwt?: string; message?: string } | null;
   if (!response.ok || !json?.accessJwt) throw new Error(json?.message || "Unable to prepare donation service");
@@ -95,6 +107,7 @@ async function putReceiptRecordOnce(
     },
     body: JSON.stringify({ repo, collection: RECEIPT_COLLECTION, rkey, record }),
     signal: AbortSignal.timeout(15_000),
+    redirect: "error",
   });
   const json = (await response.json().catch(() => null)) as { uri?: string; message?: string } | null;
   const expectedUri = `at://${repo}/${RECEIPT_COLLECTION}/${rkey}`;
@@ -130,8 +143,13 @@ export async function writeFundingReceipt(params: {
   receiptSubject?: { uri: string; cid: string };
   /** Owner-only tag for anonymous donations — see computeDonorHash. */
   donorHash?: string | null;
+  /** Optional short note the donor left with their gift. Stored as the
+   *  receipt's free-text `notes` and shown back to the recipient. It carries
+   *  no donor name, so an anonymous donation's message stays unattributed. */
+  message?: string | null;
 }): Promise<string | null> {
   const now = new Date().toISOString();
+  const message = sanitizeDonationMessage(params.message);
   return putReceiptRecord({
     $type: "org.hypercerts.funding.receipt",
     from: params.from,
@@ -142,7 +160,9 @@ export async function writeFundingReceipt(params: {
     paymentNetwork: PAYMENT_NETWORK,
     transactionId: params.transactionHash,
     for: params.receiptSubject,
-    notes: `${params.from.$type === "app.certified.defs#did" ? params.from.did : params.from.value} paid ${params.amount}${params.currency} using wallet`,
+    // `notes` carries the donor's own message when they left one. Leaving it
+    // blank keeps the receipt exactly as before (no synthetic note).
+    ...(message ? { notes: message } : {}),
     occurredAt: now,
     // Required by the org.hypercerts.funding.receipt lexicon. Receipts
     // without it sort last on every createdAt-ordered feed (indexer

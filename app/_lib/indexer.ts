@@ -29,10 +29,11 @@ import { hasMaEarthDonationUrl } from "./maearth-donation-data";
 
 type GqlResponse<T> = { data?: T | null; errors?: Array<{ message: string }> };
 
-export async function indexerQuery<T>(
+async function queryIndexer<T>(
   query: string,
   variables: Record<string, unknown>,
-  signal?: AbortSignal,
+  signal: AbortSignal | undefined,
+  rejectPartialErrors: boolean,
 ): Promise<T | null> {
   const res = await fetch(INDEXER_URL, {
     method: "POST",
@@ -49,10 +50,28 @@ export async function indexerQuery<T>(
   } catch {
     throw new Error(`indexer ${res.status}: non-JSON response`);
   }
-  if (json.errors?.length && !json.data) {
+  if (json.errors?.length && (rejectPartialErrors || !json.data)) {
     throw new Error(json.errors[0]?.message ?? "indexer graphql error");
   }
   return json.data ?? null;
+}
+
+/** Best-effort indexer read that permits usable partial GraphQL data. */
+export function indexerQuery<T>(
+  query: string,
+  variables: Record<string, unknown>,
+  signal?: AbortSignal,
+): Promise<T | null> {
+  return queryIndexer(query, variables, signal, false);
+}
+
+/** All-or-fail indexer read for workflows where a missing edge is unsafe. */
+export function indexerQueryStrict<T>(
+  query: string,
+  variables: Record<string, unknown>,
+  signal?: AbortSignal,
+): Promise<T | null> {
+  return queryIndexer(query, variables, signal, true);
 }
 
 type PageInfo = { hasNextPage: boolean; endCursor: string | null };
@@ -2272,15 +2291,40 @@ export type AccountSearchResult = {
   did: string;
   displayName: string;
   avatarRef: string | null;
+  /** Current handle, as seen by the indexer. Null when it can't resolve one. */
+  handle: string | null;
 };
 
-const ACCOUNT_SEARCH_QUERY = `
+// The `author { handle }` join (ActorIdentity) only exists on newer indexer
+// deployments; older ones reject the whole query over the unknown field. Probe
+// the schema once per session and drop the field where it doesn't exist, so
+// account search degrades to "no handles" instead of "no results".
+let authorIdentitySupport: Promise<boolean> | null = null;
+
+function indexerSupportsAuthorIdentity(): Promise<boolean> {
+  if (!authorIdentitySupport) {
+    authorIdentitySupport = indexerQuery<{ __type?: { name?: string | null } | null }>(
+      `query ActorIdentityProbe { __type(name: "ActorIdentity") { name } }`,
+      {},
+    )
+      .then((data) => Boolean(data?.__type?.name))
+      .catch(() => {
+        // Transient failure — forget the answer so the next call re-probes.
+        authorIdentitySupport = null;
+        return false;
+      });
+  }
+  return authorIdentitySupport;
+}
+
+const accountSearchQuery = (withHandle: boolean) => `
   query OwnerAccountSearch($first: Int!, $where: AppCertifiedActorProfileWhereInput) {
     appCertifiedActorProfile(first: $first, where: $where, sortBy: displayName, sortDirection: ASC) {
       edges {
         node {
           did
           displayName
+          ${withHandle ? "author { handle }" : ""}
           avatar { __typename ... on OrgHypercertsDefsSmallImage { image { ref } } }
         }
       }
@@ -2291,6 +2335,7 @@ const ACCOUNT_SEARCH_QUERY = `
 type RawAccountSearchNode = {
   did?: string | null;
   displayName?: string | null;
+  author?: { handle?: string | null } | null;
   avatar?: { image?: { ref?: string | null } | null } | null;
 };
 
@@ -2303,8 +2348,9 @@ export async function searchAccountsByName(
 ): Promise<AccountSearchResult[]> {
   const q = query.trim();
   if (q.length < 2) return [];
+  const withHandle = await indexerSupportsAuthorIdentity();
   const data = await indexerQuery<{ appCertifiedActorProfile?: Connection<RawAccountSearchNode> }>(
-    ACCOUNT_SEARCH_QUERY,
+    accountSearchQuery(withHandle),
     { first: Math.max(1, Math.min(limit * 3, 40)), where: { displayName: { contains: q } } },
     signal,
   );
@@ -2317,10 +2363,118 @@ export async function searchAccountsByName(
     const displayName = node?.displayName?.trim();
     if (!did || !displayName || seen.has(did) || hidden.has(did) || isLikelyTestRecordName(displayName)) continue;
     seen.add(did);
-    results.push({ did, displayName, avatarRef: normaliseRef(node?.avatar?.image?.ref) });
+    results.push({
+      did,
+      displayName,
+      avatarRef: normaliseRef(node?.avatar?.image?.ref),
+      handle: sv(node?.author?.handle),
+    });
     if (results.length >= limit) break;
   }
   return results;
+}
+
+/** An account resolved by DID rather than matched by name. */
+export type AccountCard = {
+  did: string;
+  displayName: string | null;
+  avatarRef: string | null;
+  handle: string | null;
+  /** True when the account publishes a certified organization record. */
+  isOrganization: boolean;
+};
+
+const accountsByDidsQuery = (withHandle: boolean) => `
+  query AccountsByDids($dids: [String!], $first: Int!) {
+    profiles: appCertifiedActorProfile(first: $first, where: { did: { in: $dids } }) {
+      edges {
+        node {
+          did
+          displayName
+          ${withHandle ? "author { handle }" : ""}
+          avatar { __typename ... on OrgHypercertsDefsSmallImage { image { ref } } }
+        }
+      }
+    }
+    orgs: appCertifiedActorOrganization(first: $first, where: { did: { in: $dids } }) {
+      edges {
+        node {
+          did
+          ${withHandle ? "author { handle }" : ""}
+          ${CERTIFIED_PROFILE_DATA_FIELDS}
+        }
+      }
+    }
+  }
+`;
+
+type RawAccountCardProfile = {
+  did?: string | null;
+  displayName?: string | null;
+  author?: { handle?: string | null } | null;
+  avatar?: { image?: { ref?: string | null } | null } | null;
+};
+
+type RawAccountCardOrg = {
+  did?: string | null;
+  author?: { handle?: string | null } | null;
+  certifiedProfileData?: CertifiedProfileData;
+};
+
+/**
+ * Look up accounts by DID, in one round trip: display name, avatar, current
+ * handle, and whether each is an organization.
+ *
+ * DIDs with no presence on the network (neither a certified profile nor an
+ * organization record) are simply absent from the result — which is what lets
+ * search filter an external handle match down to accounts that exist here.
+ */
+export async function fetchAccountCards(
+  dids: string[],
+  signal?: AbortSignal,
+): Promise<Map<string, AccountCard>> {
+  const cards = new Map<string, AccountCard>();
+  if (dids.length === 0) return cards;
+  const withHandle = await indexerSupportsAuthorIdentity();
+  const data = await indexerQuery<{
+    profiles?: Connection<RawAccountCardProfile>;
+    orgs?: Connection<RawAccountCardOrg>;
+  }>(
+    accountsByDidsQuery(withHandle),
+    { dids, first: Math.min(Math.max(dids.length, 1) * 2, 100) },
+    signal,
+  );
+
+  for (const edge of data?.profiles?.edges ?? []) {
+    const node = edge?.node;
+    const did = sv(node?.did);
+    if (!did) continue;
+    cards.set(did, {
+      did,
+      displayName: sv(node?.displayName),
+      avatarRef: normaliseRef(node?.avatar?.image?.ref),
+      handle: sv(node?.author?.handle),
+      isOrganization: false,
+    });
+  }
+
+  // An organization record is the deciding signal, and carries its own name /
+  // avatar for accounts that publish no separate profile record.
+  for (const edge of data?.orgs?.edges ?? []) {
+    const node = edge?.node;
+    const did = sv(node?.did);
+    if (!did) continue;
+    const existing = cards.get(did);
+    cards.set(did, {
+      did,
+      displayName: existing?.displayName ?? profileName(node?.certifiedProfileData),
+      avatarRef: existing?.avatarRef ?? profileAvatarRef(node?.certifiedProfileData),
+      handle: existing?.handle ?? sv(node?.author?.handle),
+      isOrganization: true,
+    });
+  }
+
+  return cards;
 }
 
 function mapActivity(n: RawActivity): BumicertRecord {
@@ -6656,6 +6810,26 @@ export type RecordKind = ExplorerRecord["kind"];
 // indexer's `*ByUri` field and reuse the same mappers + per-record image
 // resolution as the list fetchers. The collection in the URI selects the query.
 
+/**
+ * Read one occurrence from the indexer without resolving its media URL. Server
+ * consumers that fetch a blob themselves can use this to avoid an unpinned
+ * second PDS request.
+ */
+export async function fetchOccurrenceByUri(
+  atUri: string,
+  signal?: AbortSignal,
+): Promise<OccurrenceRecord | null> {
+  const match = atUri.match(/^at:\/\/([^/]+)\/([^/]+)\/(.+)$/);
+  if (!match || match[2] !== "app.gainforest.dwc.occurrence") return null;
+  const data = await indexerQuery<{ appGainforestDwcOccurrenceByUri?: RawOccurrence | null }>(
+    OCCURRENCE_BY_URI_QUERY,
+    { uri: atUri },
+    signal,
+  );
+  const node = data?.appGainforestDwcOccurrenceByUri;
+  return node?.did ? mapOccurrence(node) : null;
+}
+
 export async function fetchRecordByUri(
   atUri: string,
   signal?: AbortSignal,
@@ -6665,18 +6839,11 @@ export async function fetchRecordByUri(
   const collection = m[2];
 
   if (collection === "app.gainforest.dwc.occurrence") {
-    const data = await indexerQuery<{ appGainforestDwcOccurrenceByUri?: RawOccurrence | null }>(
-      OCCURRENCE_BY_URI_QUERY,
-      { uri: atUri },
-      signal,
-    );
-    const n = data?.appGainforestDwcOccurrenceByUri;
-    if (!n?.did) return null;
-    const rec = mapOccurrence(n);
-    const ref = n.imageEvidence?.file?.ref ?? n.spectrogramEvidence?.file?.ref ?? null;
-    if (ref) {
+    const rec = await fetchOccurrenceByUri(atUri, signal);
+    if (!rec) return null;
+    if (rec.imageRef) {
       try {
-        rec.imageUrl = await resolveBlobUrl(rec.did, ref, signal);
+        rec.imageUrl = await resolveBlobUrl(rec.did, rec.imageRef, signal);
       } catch {
         /* keep placeholder */
       }

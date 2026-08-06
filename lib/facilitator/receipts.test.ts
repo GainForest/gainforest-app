@@ -17,7 +17,7 @@ describe("funding receipt writes", () => {
     const expectedRkey = receiptRkeyForTransaction(TX_HASH);
     const putBodies: Array<Record<string, unknown>> = [];
     let putAttempts = 0;
-    vi.stubGlobal("fetch", vi.fn(async (input: string | URL | Request, init?: RequestInit) => {
+    const fetchMock = vi.fn(async (input: string | URL | Request, init?: RequestInit) => {
       const url = String(input);
       if (url.endsWith("/com.atproto.server.createSession")) {
         return Response.json({ accessJwt: "test-token" });
@@ -31,7 +31,8 @@ describe("funding receipt writes", () => {
         });
       }
       throw new Error(`Unexpected request: ${url}`);
-    }));
+    });
+    vi.stubGlobal("fetch", fetchMock);
 
     const uri = await writeFundingReceipt({
       from: { $type: "app.certified.defs#did", did: "did:plc:donor" },
@@ -54,5 +55,24 @@ describe("funding receipt writes", () => {
       rkey: expectedRkey,
     });
     expect(expectedRkey).toMatch(/^[234567abcdefghij][234567abcdefghijklmnopqrstuvwxyz]{12}$/);
+    for (const [, init] of fetchMock.mock.calls) {
+      expect(init?.redirect).toBe("error");
+    }
+  });
+
+  it.each(["http://pds.example.test", "ftp://pds.example.test"])("rejects non-HTTPS facilitator host %s before sending credentials", async (host) => {
+    vi.stubEnv("FACILITATOR_SERVICE_HOST", host);
+    vi.stubEnv("FACILITATOR_PASSWORD", "test-password");
+    const fetchMock = vi.fn();
+    vi.stubGlobal("fetch", fetchMock);
+
+    await expect(writeFundingReceipt({
+      from: { $type: "app.certified.defs#did", did: "did:plc:donor" },
+      to: { $type: "org.hypercerts.funding.receipt#text", value: "0x1111111111111111111111111111111111111111" },
+      amount: "25",
+      currency: "USDC",
+      transactionHash: TX_HASH,
+    })).rejects.toThrow("valid HTTPS URL");
+    expect(fetchMock).not.toHaveBeenCalled();
   });
 });

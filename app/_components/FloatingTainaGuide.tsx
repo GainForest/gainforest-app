@@ -354,6 +354,8 @@ export function FloatingTainaGuide() {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const panelBodyRef = useRef<HTMLDivElement>(null);
   const whatsNewTriggerRef = useRef<HTMLButtonElement>(null);
+  const spriteRef = useRef<HTMLDivElement>(null);
+  const restoreWhatsNewFocusRef = useRef(false);
   const whatsNewBackRef = useRef<HTMLButtonElement>(null);
   const restoreButtonRef = useRef<HTMLButtonElement>(null);
   const savedPositionRef = useRef<Position | null>(null);
@@ -477,10 +479,14 @@ export function FloatingTainaGuide() {
     if (restoreWhatsNewFocus) acknowledgeWhatsNew();
     setOpen(false);
     setView({ kind: "home" });
-    if (restoreWhatsNewFocus) {
-      window.requestAnimationFrame(() => whatsNewTriggerRef.current?.focus());
-    }
+    if (restoreWhatsNewFocus) restoreWhatsNewFocusRef.current = true;
   }, [acknowledgeWhatsNew, view.kind]);
+
+  useEffect(() => {
+    if (open || !restoreWhatsNewFocusRef.current) return;
+    restoreWhatsNewFocusRef.current = false;
+    (whatsNewTriggerRef.current ?? spriteRef.current)?.focus();
+  }, [open]);
 
   const minimizePanel = useCallback(() => {
     if (hasUnreadWhatsNew) acknowledgeWhatsNew();
@@ -1550,6 +1556,7 @@ export function FloatingTainaGuide() {
         }}
       >
         <div
+          ref={spriteRef}
           role="button"
           aria-label={t("spriteLabel")}
           aria-hidden={open && view.kind === "whatsNew"}

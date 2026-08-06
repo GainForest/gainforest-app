@@ -18,12 +18,15 @@
 import { INDEXER_URL } from "./urls";
 import { normaliseRef, resolveBlobUrl } from "./pds";
 import {
+  GAINFOREST_MODERATION_REPO_DID,
   fetchHiddenRecordUris,
   fetchPublicHiddenAccountDids,
   indexerQuery,
+  indexerQueryStrict,
   walkOccurrences,
   type OccurrenceRecord,
 } from "./indexer";
+import { parseRecognitionBadgeKey, recognitionKeyFromTitle } from "./recognition-badges";
 import { fetchEngagement } from "./feed-engagement";
 import {
   classifyBioblitzImage,
@@ -47,10 +50,12 @@ export const BIOBLITZ_PRIZES = {
 
 /** A confirmed winner of one of the round prizes. The DID is resolved to a
  *  display name in the UI, so no technical identifier is ever shown. */
-type RoundWinner = {
+export type RoundWinner = {
   did: string;
   /** Final observation count, when relevant (the "most observations" prize). */
   count?: number;
+  /** Exact winning observation, when relevant (the "best picture" prize). */
+  winningObservationUri?: string;
 };
 
 export type BioblitzRound = {
@@ -82,6 +87,11 @@ const SECOND_ROUND_START_MS = FIRST_ROUND_END_MS + 1;
  * Hand-maintained round metadata. The schedule itself continues weekly so the
  * page always has a current round; add overrides here only for special labels
  * or confirmed prize records.
+ *
+ * Pinning winners: set `mostObservations` / `bestPicture` on a round to freeze
+ * that prize by hand. A pinned value takes precedence over both the badge
+ * awards and the live recomputation (see `frozenWinnersFor`); an explicit
+ * `null` means "confirmed: no winner for this prize".
  */
 const BIOBLITZ_ROUND_OVERRIDES: Record<number, Partial<BioblitzRound>> = {
   1: {
@@ -241,12 +251,68 @@ export function countdownTo(targetIso: string, now: number = Date.now()): Countd
   return { days, hours, minutes, total };
 }
 
+// ── Late-upload guard ────────────────────────────────────────────────────────
+//
+// A record's `createdAt` is written by the client, so bulk imports and agents
+// can publish records long after a round closed with a `createdAt` dated
+// inside it — silently rewriting an ended round's standings. To keep ended
+// rounds stable, a round tally also checks *when the record was actually
+// published*, derived from its rkey:
+//   - PDS-generated rkeys are TIDs, which encode the server-side creation
+//     microtime.
+//   - This app's importers use `obs-<epoch-ms>` rkeys, minted at upload time.
+// Records published after the round's grace window are excluded from that
+// round's tally. Records whose rkey encodes no timestamp are kept — this is a
+// drift guard for honest-but-late data, not a security boundary.
+
+/** How long after a round ends a late upload still counts toward it. Covers
+ *  offline field work syncing when connectivity returns and indexer lag. */
+export const BIOBLITZ_LATE_UPLOAD_GRACE_MS = 48 * 3_600_000;
+
+const TID_CHARS = "234567abcdefghijklmnopqrstuvwxyz";
+/** 13 chars of base32-sortable; the leading char is capped because a TID's
+ *  top bit is always 0. */
+const TID_RE = /^[234567abcdefghij][234567abcdefghijklmnopqrstuvwxyz]{12}$/;
+const OBS_RKEY_RE = /^obs-(\d{10,16})(?:\D|$)/;
+
+/**
+ * Best-effort publish instant (epoch ms) encoded in a record's rkey, or null
+ * when the rkey carries no recognisable timestamp.
+ */
+export function bioblitzPublishTimeMs(rkey: string | null | undefined): number | null {
+  const key = rkey?.trim();
+  if (!key) return null;
+  if (TID_RE.test(key)) {
+    let value = 0n;
+    for (const ch of key) value = (value << 5n) | BigInt(TID_CHARS.indexOf(ch));
+    const ms = Number(value >> 10n) / 1000; // timestamp bits are microseconds
+    return Number.isFinite(ms) && ms > 0 ? ms : null;
+  }
+  const match = OBS_RKEY_RE.exec(key);
+  if (match) {
+    const ms = Number.parseInt(match[1]!, 10);
+    return Number.isFinite(ms) && ms > 0 ? ms : null;
+  }
+  return null;
+}
+
+/** True when a record may count toward a round ending at `roundEndMs`: it was
+ *  published inside the round's grace window, or its publish time is unknown. */
+export function isWithinRoundUploadWindow(
+  rkey: string | null | undefined,
+  roundEndMs: number,
+): boolean {
+  if (!Number.isFinite(roundEndMs)) return true;
+  const publishedMs = bioblitzPublishTimeMs(rkey);
+  return publishedMs === null || publishedMs <= roundEndMs + BIOBLITZ_LATE_UPLOAD_GRACE_MS;
+}
+
 // ── Live leaderboard ────────────────────────────────────────────────────────
 
 /** A collector on the round board, with everything the UI needs to render a
  *  row without a second lookup (name + avatar come from the indexer; the DID is
  *  only used internally to resolve a richer profile/avatar). */
-type RoundCollector = {
+export type RoundCollector = {
   did: string;
   count: number;
   displayName: string | null;
@@ -260,6 +326,11 @@ export type RoundImageCounts = Record<BioblitzImageCategory, number> & {
 
 export type RoundBoard = {
   collectors: RoundCollector[];
+  /**
+   * Present only for administrative reads that need to show a contributor's
+   * eligible observation count before weekly leaderboard exclusions apply.
+   */
+  unfilteredCollectors?: RoundCollector[];
   /** Total eligible wildlife + outdoor plant observations. */
   totalObservations: number;
   /** Breakdown of automatically classified image observations. */
@@ -270,6 +341,7 @@ export type RoundBoard = {
 
 type RawNode = {
   did?: string | null;
+  rkey?: string | null;
   uri?: string | null;
   createdAt?: string | null;
   occurrenceRemarks?: string | null;
@@ -297,6 +369,7 @@ const ROUND_COLLECTORS_QUERY = `
       edges {
         node {
           did
+          rkey
           uri
           createdAt
           occurrenceRemarks
@@ -322,6 +395,11 @@ const PAGE_SIZE = 1000;
  *  contributed to the challenge so far. */
 export type BoardScope = "round" | "all";
 
+type FetchRoundCollectorsOptions = {
+  /** Keep a second tally before round-specific exclusion records are applied. */
+  includeExcluded?: boolean;
+};
+
 /**
  * Tally the collectors who uploaded photo observations.
  *
@@ -335,6 +413,7 @@ export async function fetchRoundCollectors(
   scope: BoardScope = "round",
   signal?: AbortSignal,
   exclusionRead: "best-effort" | "required" = "best-effort",
+  options?: FetchRoundCollectorsOptions,
 ): Promise<RoundBoard> {
   const startMs = scope === "all" ? Number.NEGATIVE_INFINITY : Date.parse(round.start);
   const endMs = scope === "all" ? Number.POSITIVE_INFINITY : Date.parse(round.end);
@@ -361,6 +440,7 @@ export async function fetchRoundCollectors(
   const exclusions = indexBioblitzExclusions(exclusionRecords);
 
   const tally = new Map<string, RoundCollector>();
+  const unfilteredTally = options?.includeExcluded ? new Map<string, RoundCollector>() : null;
   const imageCounts: RoundImageCounts = {
     wildlife: 0,
     plant: 0,
@@ -408,11 +488,16 @@ export async function fetchRoundCollectors(
       const t = Date.parse(n.createdAt ?? "");
       if (!Number.isFinite(t) || t < startMs || t > endMs) continue;
       const observationRoundId = scope === "round" ? round.id : bioblitzRoundIdAt(t);
-      if (isAccountExcludedFromBioblitzRound(exclusions, did, observationRoundId)) continue;
+      const excluded = isAccountExcludedFromBioblitzRound(exclusions, did, observationRoundId);
+      // Backdating guard: skip records actually published well after the round.
+      if (scope === "round" && !isWithinRoundUploadWindow(n.rkey, endMs)) continue;
 
       const imageRef = normaliseRef(n.imageEvidence?.file?.ref);
       if (!imageRef) {
-        imageCounts.missingPhoto += 1;
+        // Keep the public board exactly as it was: ignored accounts do not
+        // influence any leaderboard metric. The optional admin tally only
+        // needs eligible, image-backed observations.
+        if (!excluded) imageCounts.missingPhoto += 1;
         continue;
       }
       const category = classifyBioblitzImage({
@@ -421,38 +506,51 @@ export async function fetchRoundCollectors(
         vernacularName: n.vernacularName,
         kingdom: n.kingdom,
       });
-      imageCounts[category] += 1;
+      if (!excluded) imageCounts[category] += 1;
       if (!isEligibleBioblitzCategory(category)) continue;
+
+      if (unfilteredTally) incrementRoundCollector(unfilteredTally, did, n);
+      if (excluded) continue;
+
       total += 1;
-      const existing = tally.get(did);
-      if (existing) {
-        existing.count += 1;
-        if (!existing.displayName) existing.displayName = profileName(n);
-        if (!existing.avatarRef) existing.avatarRef = profileAvatarRef(n);
-      } else {
-        tally.set(did, {
-          did,
-          count: 1,
-          displayName: profileName(n),
-          avatarRef: profileAvatarRef(n),
-        });
-      }
+      incrementRoundCollector(tally, did, n);
     }
 
     if (!conn?.pageInfo?.hasNextPage || !conn.pageInfo.endCursor) break;
     after = conn.pageInfo.endCursor;
   }
 
-  const collectors = [...tally.values()].sort(
-    (a, b) => b.count - a.count || (a.displayName ?? "").localeCompare(b.displayName ?? ""),
-  );
+  const collectors = sortRoundCollectors(tally);
 
   return {
     collectors,
+    ...(unfilteredTally ? { unfilteredCollectors: sortRoundCollectors(unfilteredTally) } : {}),
     totalObservations: total,
     imageCounts,
     collectorCount: collectors.length,
   };
+}
+
+function incrementRoundCollector(tally: Map<string, RoundCollector>, did: string, node: RawNode): void {
+  const existing = tally.get(did);
+  if (existing) {
+    existing.count += 1;
+    if (!existing.displayName) existing.displayName = profileName(node);
+    if (!existing.avatarRef) existing.avatarRef = profileAvatarRef(node);
+    return;
+  }
+  tally.set(did, {
+    did,
+    count: 1,
+    displayName: profileName(node),
+    avatarRef: profileAvatarRef(node),
+  });
+}
+
+function sortRoundCollectors(tally: Map<string, RoundCollector>): RoundCollector[] {
+  return [...tally.values()].sort(
+    (a, b) => b.count - a.count || (a.displayName ?? "").localeCompare(b.displayName ?? ""),
+  );
 }
 
 // ── Round observations (for the map) ─────────────────────────────────────────
@@ -489,6 +587,7 @@ export async function fetchRoundObservations(
       Number.isFinite(t) &&
       t >= startMs &&
       t <= endMs &&
+      isWithinRoundUploadWindow(r.rkey, endMs) &&
       isEligibleBioblitzCategory(
         classifyBioblitzImage({
           notes: r.remarks,
@@ -634,6 +733,190 @@ function normalizeOrgType(value: unknown): string | null {
   return trimmed || null;
 }
 
+// ── Frozen past winners ─────────────────────────────────────────────────────────
+//
+// Once a moderator awards a round's winner badges (see
+// app/api/internal/bioblitz-awards), those award records become the permanent
+// source of truth for that round's winners. The past-winners UI prefers, in
+// order:
+//   1. a hand-pinned winner in BIOBLITZ_ROUND_OVERRIDES,
+//   2. the badge award recorded in the moderation repo,
+//   3. (fallback only) the live recomputation — which can drift as data,
+//      likes, and moderation change after the round.
+// This keeps ended rounds stable instead of silently changing later.
+
+/** A winner frozen by a badge award or a hand-pinned override. */
+export type FrozenWinner = {
+  did: string;
+  /** Final tally captured at award time (parsed from the award note), when
+   *  known. Null when the award carries no count (e.g. best picture). */
+  count: number | null;
+};
+
+export type FrozenRoundWinners = {
+  /** `undefined` = not frozen yet (a live, provisional stand-in may be shown);
+   *  `null` = frozen with confirmed no winner. */
+  mostObservations?: FrozenWinner | null;
+  bestPicture?: FrozenWinner | null;
+};
+
+type RawWinnerBadgeDefinition = { uri?: string | null; title?: string | null };
+type RawWinnerBadgeAward = {
+  note?: string | null;
+  badge?: { uri?: string | null } | null;
+  subject?: { __typename?: string; did?: string | null } | null;
+};
+type WinnerAwardsPayload = {
+  appCertifiedBadgeDefinition?: {
+    pageInfo?: { hasNextPage?: boolean | null; endCursor?: string | null } | null;
+    edges?: Array<{ node?: RawWinnerBadgeDefinition | null } | null> | null;
+  } | null;
+  appCertifiedBadgeAward?: {
+    pageInfo?: { hasNextPage?: boolean | null; endCursor?: string | null } | null;
+    edges?: Array<{ node?: RawWinnerBadgeAward | null } | null> | null;
+  } | null;
+};
+
+const WINNER_AWARDS_QUERY = `
+  query BioblitzWinnerAwards($repo: String!, $first: Int!, $afterDefinitions: String, $afterAwards: String) {
+    appCertifiedBadgeDefinition(
+      first: $first
+      after: $afterDefinitions
+      where: { did: { eq: $repo } }
+      sortBy: createdAt
+      sortDirection: DESC
+    ) {
+      pageInfo { hasNextPage endCursor }
+      edges { node { uri title } }
+    }
+    appCertifiedBadgeAward(
+      first: $first
+      after: $afterAwards
+      where: { did: { eq: $repo } }
+      sortBy: createdAt
+      sortDirection: DESC
+    ) {
+      pageInfo { hasNextPage endCursor }
+      edges {
+        node {
+          note
+          badge { uri }
+          subject { __typename ... on AppCertifiedDefsDid { did } }
+        }
+      }
+    }
+  }
+`;
+
+/** Final tally embedded in an award note, e.g. "… most observations (12)." */
+function countFromAwardNote(note: string | null | undefined): number | null {
+  const match = /\((\d+)\)/.exec(note ?? "");
+  if (!match) return null;
+  const count = Number.parseInt(match[1]!, 10);
+  return Number.isFinite(count) && count >= 0 ? count : null;
+}
+
+/**
+ * The round winners recorded as badge awards in the GainForest moderation
+ * repo, keyed by round id. Awards are scanned newest-first; when duplicates
+ * exist, the oldest award (the original decision) wins. Returns an empty map
+ * on any error so the UI can fall back to the live computation.
+ */
+export async function fetchBioblitzWinnerAwards(
+  signal?: AbortSignal,
+): Promise<Map<number, FrozenRoundWinners>> {
+  const definitions: RawWinnerBadgeDefinition[] = [];
+  const awards: RawWinnerBadgeAward[] = [];
+  let afterDefinitions: string | null = null;
+  let afterAwards: string | null = null;
+
+  for (let page = 0; page < 10; page += 1) {
+    const collectDefinitions: boolean = page === 0 || Boolean(afterDefinitions);
+    const payload: WinnerAwardsPayload | null = await indexerQuery<WinnerAwardsPayload>(
+      WINNER_AWARDS_QUERY,
+      {
+        repo: GAINFOREST_MODERATION_REPO_DID,
+        first: 200,
+        afterDefinitions,
+        afterAwards,
+      },
+      signal,
+    ).catch(() => null);
+    if (!payload) break;
+
+    const definitionsPage: WinnerAwardsPayload["appCertifiedBadgeDefinition"] = payload.appCertifiedBadgeDefinition;
+    const awardsPage: WinnerAwardsPayload["appCertifiedBadgeAward"] = payload.appCertifiedBadgeAward;
+    if (collectDefinitions) {
+      definitions.push(
+        ...(definitionsPage?.edges ?? []).flatMap((edge): RawWinnerBadgeDefinition[] =>
+          edge?.node ? [edge.node] : [],
+        ),
+      );
+    }
+    awards.push(
+      ...(awardsPage?.edges ?? []).flatMap((edge): RawWinnerBadgeAward[] => (edge?.node ? [edge.node] : [])),
+    );
+
+    afterDefinitions =
+      collectDefinitions && definitionsPage?.pageInfo?.hasNextPage
+        ? definitionsPage.pageInfo.endCursor ?? null
+        : null;
+    afterAwards = awardsPage?.pageInfo?.hasNextPage ? awardsPage.pageInfo.endCursor ?? null : null;
+    if (!afterDefinitions && !afterAwards) break;
+  }
+
+  // Badge-definition uri -> the round-scoped BioBlitz prize it stands for.
+  const prizeByDefinition = new Map<string, { prize: "most-images" | "best-picture"; roundId: number }>();
+  for (const definition of definitions) {
+    if (!definition.uri || !definition.title) continue;
+    const key = recognitionKeyFromTitle(definition.title);
+    const parsed = key ? parseRecognitionBadgeKey(key) : null;
+    if (parsed?.family === "bioblitz" && parsed.roundId !== null) {
+      prizeByDefinition.set(definition.uri, { prize: parsed.prize, roundId: parsed.roundId });
+    }
+  }
+
+  const out = new Map<number, FrozenRoundWinners>();
+  // Iterating newest-first and overwriting means the oldest award ends up kept.
+  for (const award of awards) {
+    const badgeUri = award.badge?.uri;
+    const meta = badgeUri ? prizeByDefinition.get(badgeUri) : undefined;
+    if (!meta) continue;
+    const subject = award.subject;
+    if (subject?.__typename !== "AppCertifiedDefsDid" || !subject.did) continue;
+    const entry = out.get(meta.roundId) ?? {};
+    const winner: FrozenWinner = { did: subject.did, count: countFromAwardNote(award.note) };
+    if (meta.prize === "most-images") entry.mostObservations = winner;
+    else entry.bestPicture = winner;
+    out.set(meta.roundId, entry);
+  }
+  return out;
+}
+
+function frozenFromOverride(value: RoundWinner | null): FrozenWinner | null {
+  return value ? { did: value.did, count: value.count ?? null } : null;
+}
+
+/**
+ * Resolve a round's frozen winners: hand-pinned overrides first, then the
+ * badge awards recorded when the round was decided. A prize left `undefined`
+ * here is not yet frozen — the UI may show a live, provisional stand-in.
+ */
+export function frozenWinnersFor(
+  round: BioblitzRound,
+  awards: Map<number, FrozenRoundWinners> | null,
+): FrozenRoundWinners {
+  const awarded = awards?.get(round.id);
+  return {
+    mostObservations:
+      round.mostObservations !== undefined
+        ? frozenFromOverride(round.mostObservations)
+        : awarded?.mostObservations,
+    bestPicture:
+      round.bestPicture !== undefined ? frozenFromOverride(round.bestPicture) : awarded?.bestPicture,
+  };
+}
+
 // ── Registrants (admin review) ───────────────────────────────────────────────
 
 export type BioblitzRegistrant = {
@@ -659,6 +942,9 @@ type BioblitzRegistrantsResponse = {
     edges?: Array<{ node?: RawRegistrantNode | null } | null> | null;
   } | null;
 };
+
+const MAX_BIOBLITZ_REGISTRANT_PAGES = 25;
+const REGISTRANT_AVATAR_CONCURRENCY = 8;
 
 const REGISTRANTS_QUERY = `
   query BioblitzRegistrants($first: Int!, $after: String, $tag: String!) {
@@ -686,23 +972,49 @@ const REGISTRANTS_QUERY = `
 /**
  * Every account that registered for the BioBlitz (published a join post),
  * newest first, de-duplicated to one row per account. Scans the program-wide
- * `bioblitz` tag so it covers all rounds. Returns an empty list on any error.
+ * `bioblitz` tag so it covers all rounds. It fails rather than silently showing
+ * an incomplete roster if the bounded scan is exceeded.
  */
-export async function fetchBioblitzRegistrants(signal?: AbortSignal): Promise<BioblitzRegistrant[]> {
+export function fetchBioblitzRegistrants(signal?: AbortSignal): Promise<BioblitzRegistrant[]> {
+  return fetchBioblitzRegistrantsForTag(BIOBLITZ_TAG, signal);
+}
+
+/** Registrants who explicitly joined one BioBlitz round. */
+export function fetchBioblitzRoundRegistrants(
+  round: BioblitzRound,
+  signal?: AbortSignal,
+): Promise<BioblitzRegistrant[]> {
+  return fetchBioblitzRegistrantsForTag(bioblitzRoundTag(round), signal);
+}
+
+async function fetchBioblitzRegistrantsForTag(
+  tag: string,
+  signal?: AbortSignal,
+): Promise<BioblitzRegistrant[]> {
   const nodes: RawRegistrantNode[] = [];
+  const seenCursors = new Set<string>();
   let after: string | null = null;
 
-  for (let page = 0; page < 10; page += 1) {
-    const data: BioblitzRegistrantsResponse | null = await indexerQuery<BioblitzRegistrantsResponse>(
+  for (let page = 0; page < MAX_BIOBLITZ_REGISTRANT_PAGES; page += 1) {
+    const data: BioblitzRegistrantsResponse | null = await indexerQueryStrict<BioblitzRegistrantsResponse>(
       REGISTRANTS_QUERY,
-      { first: 100, after, tag: BIOBLITZ_TAG },
+      { first: 100, after, tag },
       signal,
-    ).catch(() => null);
-
+    );
     const connection: BioblitzRegistrantsResponse["appGainforestFeedPost"] = data?.appGainforestFeedPost;
-    nodes.push(...((connection?.edges ?? []).flatMap((edge: { node?: RawRegistrantNode | null } | null) => (edge?.node ? [edge.node] : []))));
-    after = connection?.pageInfo?.hasNextPage ? connection.pageInfo.endCursor ?? null : null;
-    if (!after) break;
+    if (!connection) throw new Error("Could not load BioBlitz registrations.");
+
+    nodes.push(...((connection.edges ?? []).flatMap((edge: { node?: RawRegistrantNode | null } | null) => (edge?.node ? [edge.node] : []))));
+    if (!connection.pageInfo?.hasNextPage) break;
+    const nextCursor: string | null = connection.pageInfo.endCursor ?? null;
+    if (!nextCursor || seenCursors.has(nextCursor)) {
+      throw new Error("Could not finish loading BioBlitz registrations.");
+    }
+    if (page === MAX_BIOBLITZ_REGISTRANT_PAGES - 1) {
+      throw new Error("This BioBlitz roster is too large to load safely.");
+    }
+    seenCursors.add(nextCursor);
+    after = nextCursor;
   }
 
   const seen = new Set<string>();
@@ -714,16 +1026,22 @@ export async function fetchBioblitzRegistrants(signal?: AbortSignal): Promise<Bi
     deduped.push(node);
   }
 
-  return Promise.all(
-    deduped.map(async (node): Promise<BioblitzRegistrant> => {
+  const registrants: BioblitzRegistrant[] = new Array(deduped.length);
+  let cursor = 0;
+  const workers = Array.from({ length: Math.min(REGISTRANT_AVATAR_CONCURRENCY, deduped.length) }, async () => {
+    while (cursor < deduped.length) {
+      const index = cursor++;
+      const node = deduped[index]!;
       const did = node.did!.trim();
       const ref = node.certifiedProfileData?.avatar?.image?.ref ?? null;
-      return {
+      registrants[index] = {
         did,
         displayName: node.certifiedProfileData?.displayName?.trim() || null,
         avatarUrl: ref ? await resolveBlobUrl(did, ref).catch(() => null) : null,
         createdAt: node.createdAt ?? "",
       };
-    }),
-  );
+    }
+  });
+  await Promise.all(workers);
+  return registrants;
 }

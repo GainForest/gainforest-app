@@ -24,18 +24,19 @@
     "trigger": "Cari",
     "open": "Buka pencarian",
     "title": "Cari GainForest",
-    "placeholder": "Cari proyek, organisasi, observasi…",
+    "placeholder": "Cari proyek, orang, organisasi, observasi…",
     "clear": "Hapus pencarian",
     "escKey": "esc",
     "kinds": {
       "cert": "Cert",
       "project": "Proyek",
+      "person": "Orang",
       "organization": "Organisasi",
       "observation": "Observasi"
     },
     "idle": {
       "headline": "Ketik untuk mencari",
-      "body": "Temukan proyek, organisasi, dan observasi."
+      "body": "Temukan proyek, orang, organisasi, dan observasi."
     },
     "noResults": {
       "headline": "Tidak ada hasil untuk “{query}”",
@@ -69,6 +70,9 @@
     "signOut": "Keluar",
     "settings": "Pengaturan",
     "organizationRole": "Organisasi · {role}",
+    "roleOwner": "Pemilik",
+    "roleAdmin": "Administrator",
+    "roleMember": "Anggota",
     "switchAccount": "Ganti akun",
     "switchAccountHint": "Unggahan dan proyek baru disimpan ke akun yang Anda pilih di sini."
   },
@@ -706,7 +710,8 @@
     "emptyHeroDescription": "Dukung sebuah proyek dan kontribusi Anda akan muncul di sini, masing-masing tertaut ke proyek yang Anda dukung.",
     "emptyHeroCta": "Jelajahi proyek",
     "anonymousNote": "Donasi anonim juga muncul di sini, tetapi hanya Anda yang dapat melihatnya — donasi itu tidak pernah ditampilkan secara publik atas nama Anda. Beberapa donasi anonim lama tidak dapat ditampilkan.",
-    "anonymousBadge": "Hanya terlihat oleh Anda"
+    "anonymousBadge": "Hanya terlihat oleh Anda",
+    "messageQuote": "Pesan donor: “{message}”"
   },
   "accountProjects": {
     "emptyEyebrow": "Belum ada proyek",
@@ -1287,11 +1292,6 @@
       "description": "Akun yang mengajukan hibah Meliarkan Kembali Web. Buka profil untuk memberikan lencana hibah.",
       "empty": "Belum ada yang mengajukan hibah."
     },
-    "bioblitz": {
-      "title": "Pendaftar BioBlitz",
-      "description": "Akun yang mendaftar BioBlitz. Buka profil untuk memberikan lencana pemenang.",
-      "empty": "Belum ada yang mendaftar BioBlitz."
-    },
     "page": {
       "title": "Admin",
       "subtitle": "Tinjau pelamar hibah dan acara, kelola akun yang ditandai, dan awasi agen Tainá."
@@ -1327,6 +1327,46 @@
       "finalized": "Ronde BioBlitz ini telah berakhir, sehingga penghitungan tidak dapat diubah lagi.",
       "add": "Perubahan penghitungan mingguan tidak dapat disimpan. Coba lagi.",
       "remove": "Akun tidak dapat dikembalikan ke papan peringkat. Coba lagi."
+    }
+  },
+  "adminBioblitzDashboard": {
+    "roundsAria": "Ronde BioBlitz",
+    "round": "Ronde {round}",
+    "status": {
+      "upcoming": "Mendatang",
+      "live": "Berlangsung",
+      "ended": "Selesai"
+    },
+    "observations": "{count, number} pengamatan",
+    "ignored": "Diabaikan",
+    "counted": "Dihitung",
+    "notCounted": "Tidak dihitung",
+    "prize": {
+      "most-observations": "Pengamatan terbanyak",
+      "best-picture": "Foto terbaik"
+    },
+    "openProfile": "Buka profil",
+    "joined": "Bergabung {date}",
+    "download": {
+      "most-observations": "Paket pengamatan terbanyak",
+      "best-picture": "Paket foto terbaik"
+    },
+    "ignore": "Abaikan",
+    "countAgain": "Hitung lagi",
+    "loading": "Memuat pendaftar BioBlitz",
+    "empty": "Belum ada pendaftar",
+    "loadError": "Ronde ini tidak dapat dimuat.",
+    "unnamed": "Akun tanpa nama",
+    "errors": {
+      "notSignedIn": "Masuk kembali untuk melanjutkan.",
+      "forbidden": "Anda tidak memiliki akses ke dasbor BioBlitz ini.",
+      "finalized": "Ronde ini sudah selesai, sehingga hitungan pengamatan tidak dapat diubah.",
+      "roundNotFound": "Ronde BioBlitz itu tidak tersedia.",
+      "winnerNotFound": "Paket pemenang ini belum tersedia.",
+      "ignore": "Perubahan hitungan pengamatan tidak dapat disimpan. Coba lagi.",
+      "restore": "Hitungan pengamatan tidak dapat dipulihkan. Coba lagi.",
+      "download": "Paket pemenang tidak dapat disiapkan. Coba lagi.",
+      "load": "Ronde ini tidak dapat dimuat. Coba lagi."
     }
   },
   "adminBlockedDomains": {
@@ -3227,10 +3267,13 @@
       "radialLabel": "Volume suara",
       "timeLabel": "Waktu (Jam)",
       "legendTitle": "Kelompok suara",
+      "legendHint": "Klik kelompok suara untuk menampilkan atau menyembunyikannya.",
+      "showAllBands": "Tampilkan semua",
       "bandsNote": "Rentang perkiraan. Suara saling tumpang tindih, dan hewan yang bersuara di tiap rentang berbeda menurut tempat.",
       "empty": "Rekaman yang dianalisis akan muncul di sini sebagai jam lanskap suara 24 jam.",
       "emptyHint": "Analisis rekaman terunggah Anda di atas untuk memulai.",
       "downloadPng": "Unduh gambar",
+      "credit": "Dibuat dengan GainForest · gainforest.app",
       "hoverHint": "Seret mengelilingi piringan untuk memperbesar waktu tersebut, dan klik sebuah waktu untuk mendengarkan. Gunakan − atau “Sepanjang hari” untuk kembali.",
       "hoverHintAllDates": "Seret mengelilingi piringan untuk memperbesar waktu tersebut, lalu pilih rekaman dari daftar untuk mendengarkan. Gunakan − atau “Sepanjang hari” untuk kembali.",
       "loadingAudio": "Memuat {name}…",

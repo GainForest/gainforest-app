@@ -9,6 +9,7 @@ import {
   BinocularsIcon,
   CheckCircle2Icon,
   ChevronRightIcon,
+  Clock3Icon,
   CirclePlusIcon,
   DatabaseIcon,
   FolderKanbanIcon,
@@ -28,7 +29,7 @@ import {
   useActiveAccountContext,
 } from "../_lib/account-switcher";
 import { createFeedPost } from "../(manage)/manage/_lib/mutations";
-import { REWILDING_GRANT_TAG } from "../_lib/grants";
+import { REWILDING_GRANT_APPLICATIONS_OPEN, REWILDING_GRANT_TAG } from "../_lib/grants";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { ModalContent, ModalDescription, ModalTitle } from "@/components/ui/modal/modal";
 import { useModal } from "@/components/ui/modal/context";
@@ -146,6 +147,7 @@ function RewildingSection({ viewerDid, signedIn }: { viewerDid: string | null; s
   }, [modal]);
 
   const openApply = useCallback(() => {
+    if (!REWILDING_GRANT_APPLICATIONS_OPEN) return;
     if (!signedIn) {
       redirectToLogin();
       return;
@@ -215,6 +217,16 @@ function RewildingSection({ viewerDid, signedIn }: { viewerDid: string | null; s
               <p className="text-sm leading-6 text-muted-foreground">{t("support")}</p>
             </div>
 
+            {!REWILDING_GRANT_APPLICATIONS_OPEN ? (
+              <div
+                className="mt-5 flex items-start gap-2.5 rounded-2xl border border-primary/20 bg-primary/5 px-4 py-3"
+                role="status"
+              >
+                <Clock3Icon className="mt-0.5 size-4 shrink-0 text-primary" />
+                <p className="text-sm leading-6 text-muted-foreground">{t("applicationsUnderReview")}</p>
+              </div>
+            ) : null}
+
             {appliedProjectTitle ? (
               <div className="mt-6 flex items-start gap-3 rounded-2xl border border-primary/30 bg-primary/5 px-4 py-4">
                 <CheckCircle2Icon className="mt-0.5 size-5 shrink-0 text-primary" />
@@ -228,7 +240,7 @@ function RewildingSection({ viewerDid, signedIn }: { viewerDid: string | null; s
             ) : null}
 
             <div className="mt-6 flex flex-wrap gap-3">
-              {appliedProjectTitle ? null : (
+              {appliedProjectTitle || !REWILDING_GRANT_APPLICATIONS_OPEN ? null : (
                 <Button type="button" size="lg" onClick={openApply}>
                   <SproutIcon />
                   {t("apply")}

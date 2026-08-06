@@ -592,6 +592,10 @@
       "mostObservations": "Most observations",
       "bestPicture": "Best picture",
       "pending": "To be announced",
+      "final": "Final",
+      "provisional": "Provisional",
+      "finalHint": "These winners are confirmed and will not change.",
+      "provisionalHint": "Current standings — they may still change until the winners are confirmed.",
       "compact": "Latest",
       "mostSubmitted": "Most submitted",
       "mostLiked": "Most liked",
@@ -768,6 +772,7 @@
         }
       },
       "apply": "One-Click Apply",
+      "applicationsUnderReview": "Applications are under review. Selected recipients will be announced soon.",
       "details": "Read grant details",
       "appliedTitle": "Application sent",
       "appliedNote": "Your application for {project} is now posted to the feed.",

@@ -406,7 +406,8 @@
       "round": "Round {round}",
       "includesMaEarth": "Total includes GainForest and Ma Earth donations.",
       "viaMaEarth": "Raised through the Ma Earth campaign.",
-      "notAccepting": "This project is not accepting donations yet. Follow {name} for updates."
+      "notAccepting": "This project is not accepting donations yet. Follow {name} for updates.",
+      "messageQuote": "Donor message: “{message}”"
     }
   },
   "create": {

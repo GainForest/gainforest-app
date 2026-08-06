@@ -592,6 +592,10 @@
       "mostObservations": "Más observaciones",
       "bestPicture": "Mejor foto",
       "pending": "Por anunciar",
+      "final": "Definitivo",
+      "provisional": "Preliminar",
+      "finalHint": "Estos ganadores están confirmados y no cambiarán.",
+      "provisionalHint": "Clasificación actual: puede cambiar hasta que se confirmen los ganadores.",
       "compact": "Recientes",
       "mostSubmitted": "Más envíos",
       "mostLiked": "Más me gusta",
@@ -768,6 +772,7 @@
         }
       },
       "apply": "Postular con un clic",
+      "applicationsUnderReview": "Las solicitudes están en revisión. Las personas seleccionadas se anunciarán pronto.",
       "details": "Leer detalles de la subvención",
       "appliedTitle": "Solicitud enviada",
       "appliedNote": "Tu solicitud para {project} ya se publicó en el feed.",

@@ -24,18 +24,19 @@
     "trigger": "Search",
     "open": "Open search",
     "title": "Search GainForest",
-    "placeholder": "Search projects, organizations, observations…",
+    "placeholder": "Search projects, people, organizations, observations…",
     "clear": "Clear search",
     "escKey": "esc",
     "kinds": {
       "cert": "Certs",
       "project": "Projects",
+      "person": "People",
       "organization": "Organizations",
       "observation": "Observations"
     },
     "idle": {
       "headline": "Type to search",
-      "body": "Find projects, organizations, and observations."
+      "body": "Find projects, people, organizations, and observations."
     },
     "noResults": {
       "headline": "No results for “{query}”",
@@ -69,6 +70,9 @@
     "signOut": "Sign out",
     "settings": "Settings",
     "organizationRole": "Organization · {role}",
+    "roleOwner": "Owner",
+    "roleAdmin": "Admin",
+    "roleMember": "Member",
     "switchAccount": "Switch account",
     "switchAccountHint": "New uploads and projects are saved to the account you choose here."
   },
@@ -706,7 +710,8 @@
     "emptyHeroDescription": "Support a project and your contributions show up here, each linked to the project you backed.",
     "emptyHeroCta": "Explore projects",
     "anonymousNote": "Anonymous donations appear here too, but only you can see them — they are never shown publicly under your name. Some older anonymous donations can’t be shown.",
-    "anonymousBadge": "Only visible to you"
+    "anonymousBadge": "Only visible to you",
+    "messageQuote": "Donor message: “{message}”"
   },
   "accountProjects": {
     "emptyEyebrow": "No projects",
@@ -1287,11 +1292,6 @@
       "description": "Accounts that applied for the Rewilding the Web grant. Open a profile to award the grant badge.",
       "empty": "No one has applied for the grant yet."
     },
-    "bioblitz": {
-      "title": "BioBlitz registrants",
-      "description": "Accounts that registered for the BioBlitz. Open a profile to award a winner badge.",
-      "empty": "No one has registered for the BioBlitz yet."
-    },
     "page": {
       "title": "Admin",
       "subtitle": "Review grant and event applicants, manage flagged accounts, and oversee Tainá agents."
@@ -1327,6 +1327,46 @@
       "finalized": "This BioBlitz round has ended, so its counting can no longer change.",
       "add": "The weekly counting change could not be saved. Please try again.",
       "remove": "The account could not be restored to the leaderboard. Please try again."
+    }
+  },
+  "adminBioblitzDashboard": {
+    "roundsAria": "BioBlitz rounds",
+    "round": "Round {round}",
+    "status": {
+      "upcoming": "Upcoming",
+      "live": "Live",
+      "ended": "Closed"
+    },
+    "observations": "{count, plural, one {# observation} other {# observations}}",
+    "ignored": "Ignored",
+    "counted": "Counted",
+    "notCounted": "Not counted",
+    "prize": {
+      "most-observations": "Most observations",
+      "best-picture": "Best picture"
+    },
+    "openProfile": "Open profile",
+    "joined": "Joined {date}",
+    "download": {
+      "most-observations": "Most-observations kit",
+      "best-picture": "Best-picture kit"
+    },
+    "ignore": "Ignore",
+    "countAgain": "Count again",
+    "loading": "Loading BioBlitz registrants",
+    "empty": "No registrants",
+    "loadError": "Couldn't load this round.",
+    "unnamed": "Unnamed account",
+    "errors": {
+      "notSignedIn": "Sign in again to continue.",
+      "forbidden": "You don't have access to this BioBlitz dashboard.",
+      "finalized": "This round is closed, so its observation count can't change.",
+      "roundNotFound": "That BioBlitz round isn't available.",
+      "winnerNotFound": "This winner package isn't available yet.",
+      "ignore": "The observation-count change couldn't be saved. Please try again.",
+      "restore": "The observation count couldn't be restored. Please try again.",
+      "download": "The winner package couldn't be prepared. Please try again.",
+      "load": "Couldn't load this round. Please try again."
     }
   },
   "adminBlockedDomains": {
@@ -3227,10 +3267,13 @@
       "radialLabel": "Loudness",
       "timeLabel": "Time (Hour)",
       "legendTitle": "Voice groups",
+      "legendHint": "Click a voice group to show or hide it.",
+      "showAllBands": "Show all",
       "bandsNote": "Indicative ranges. Voices overlap, and which animals sing where varies by place.",
       "empty": "Analyzed recordings will appear here as a 24-hour soundscape clock.",
       "emptyHint": "Analyze your uploaded recordings above to begin.",
       "downloadPng": "Download image",
+      "credit": "Made with GainForest · gainforest.app",
       "hoverHint": "Drag around the dial to zoom into those times, and click a time to listen. Use − or “Whole day” to come back out.",
       "hoverHintAllDates": "Drag around the dial to zoom into those times, then pick a recording from the list to listen. Use − or “Whole day” to come back out.",
       "loadingAudio": "Loading {name}…",

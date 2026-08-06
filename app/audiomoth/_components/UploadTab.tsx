@@ -85,6 +85,12 @@ import {
 } from "@/app/_lib/ac-audio";
 import { computeFileCid } from "@/app/_lib/audiomoth/content-cid";
 import {
+  createStallTimer,
+  FILE_READ_TIMEOUT_MS,
+  UPLOAD_STALL_TIMEOUT_MS,
+  withReadTimeout,
+} from "@/app/_lib/audiomoth/stall-timeout";
+import {
   useUploadTray,
   type UploadTarget,
   type UploadTrayJob,
@@ -354,7 +360,8 @@ export function UploadTab({
         const batch = readable.slice(i, i + BATCH);
         await Promise.all(
           batch.map(async (rec) => {
-            const cid = await computeFileCid(rec.file);
+            // A card that stops responding must not freeze the check.
+            const cid = await withReadTimeout(computeFileCid(rec.file), FILE_READ_TIMEOUT_MS, null);
             if (scanTokenRef.current !== token) return;
             const already =
               (cid !== null && keys.cids.has(cid)) ||
@@ -396,7 +403,12 @@ export function UploadTab({
     const BATCH = 8;
     for (let i = 0; i < wavs.length; i += BATCH) {
       const batch = wavs.slice(i, i + BATCH);
-      const infos = await Promise.all(batch.map((file) => readAudioMothInfo(file).catch(() => null)));
+      // One unreadable file (a sleeping card, a bad sector) used to leave the
+      // whole scan sitting at a fixed count forever; it is skipped instead and
+      // surfaced afterwards in the unreadable count.
+      const infos = await Promise.all(
+        batch.map((file) => withReadTimeout(readAudioMothInfo(file), FILE_READ_TIMEOUT_MS, null)),
+      );
       batch.forEach((file, j) => {
         scanned.push({
           id: `${file.name}-${file.size}-${file.lastModified}`,
@@ -661,22 +673,37 @@ export function UploadTab({
       new Promise((resolve, reject) => {
         const xhr = new XMLHttpRequest();
         activeXhrsRef.current.add(xhr);
+        // A dropped connection does not always raise an error: the socket can
+        // stay half-open with no further progress, leaving the transfer (and
+        // with only a couple of workers, the whole batch) pending forever.
+        // Silence for long enough is treated as a retryable network failure.
+        let stalled = false;
+        const watchdog = createStallTimer(UPLOAD_STALL_TIMEOUT_MS, () => {
+          stalled = true;
+          xhr.abort();
+        });
         xhr.open("PUT", url);
         xhr.upload.onprogress = (e) => {
+          watchdog.bump();
           if (e.lengthComputable) setRecording(rec.id, { progress: e.loaded / e.total });
         };
         xhr.onload = () => {
+          watchdog.stop();
           activeXhrsRef.current.delete(xhr);
           if (xhr.status >= 200 && xhr.status < 300) resolve();
           else reject(new Error(`storage_${xhr.status}`));
         };
         xhr.onerror = () => {
+          watchdog.stop();
           activeXhrsRef.current.delete(xhr);
           reject(new Error("storage_network"));
         };
         xhr.onabort = () => {
+          watchdog.stop();
           activeXhrsRef.current.delete(xhr);
-          reject(new Error("aborted"));
+          // Cancelling is the user's doing and must stay final; a watchdog
+          // abort is a failed transfer and should be retried.
+          reject(new Error(stalled ? "storage_network" : "aborted"));
         };
         xhr.send(rec.file);
       }),

@@ -56,6 +56,7 @@ import {
   uploadPreviewBlob,
 } from "@/app/_lib/ac-audio";
 import { computeFileCid } from "@/app/_lib/audiomoth/content-cid";
+import { createStallTimer, UPLOAD_STALL_TIMEOUT_MS } from "@/app/_lib/audiomoth/stall-timeout";
 import { planNamedUploadFolder } from "@/app/_lib/audiomoth/upload-folder";
 
 /* ------------------------------------------------------------------ */
@@ -275,11 +276,22 @@ export function UploadTrayProvider({ children }: { children: React.ReactNode }) 
       new Promise((resolve, reject) => {
         const xhr = new XMLHttpRequest();
         xhrRef.current.set(id, xhr);
+        // A half-open connection leaves the request pending with no error and
+        // no further progress, which would park the tray indefinitely.
+        let stalled = false;
+        const watchdog = createStallTimer(UPLOAD_STALL_TIMEOUT_MS, () => {
+          stalled = true;
+          xhr.abort();
+        });
         xhr.open("PUT", url);
         xhr.upload.onprogress = (e) => {
+          watchdog.bump();
           if (e.lengthComputable) patchItem(id, { progress: e.loaded / e.total });
         };
-        const finish = () => xhrRef.current.delete(id);
+        const finish = () => {
+          watchdog.stop();
+          xhrRef.current.delete(id);
+        };
         xhr.onload = () => {
           finish();
           if (xhr.status >= 200 && xhr.status < 300) resolve();
@@ -291,7 +303,9 @@ export function UploadTrayProvider({ children }: { children: React.ReactNode }) 
         };
         xhr.onabort = () => {
           finish();
-          reject(new Error("aborted"));
+          // A watchdog abort is a failed transfer and should be retried; a
+          // user cancel stays final.
+          reject(new Error(stalled ? "storage_network" : "aborted"));
         };
         xhr.send(file);
       }),

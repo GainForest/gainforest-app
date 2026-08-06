@@ -406,7 +406,8 @@
       "round": "Putaran {round}",
       "includesMaEarth": "Total mencakup donasi GainForest dan Ma Earth.",
       "viaMaEarth": "Terkumpul melalui kampanye Ma Earth.",
-      "notAccepting": "Proyek ini belum menerima donasi. Ikuti {name} untuk kabar terbaru."
+      "notAccepting": "Proyek ini belum menerima donasi. Ikuti {name} untuk kabar terbaru.",
+      "messageQuote": "Pesan donor: “{message}”"
     }
   },
   "create": {

@@ -24,18 +24,19 @@
     "trigger": "Buscar",
     "open": "Abrir búsqueda",
     "title": "Buscar en GainForest",
-    "placeholder": "Busca proyectos, organizaciones, observaciones…",
+    "placeholder": "Busca proyectos, personas, organizaciones, observaciones…",
     "clear": "Borrar búsqueda",
     "escKey": "esc",
     "kinds": {
       "cert": "Certs",
       "project": "Proyectos",
+      "person": "Personas",
       "organization": "Organizaciones",
       "observation": "Observaciones"
     },
     "idle": {
       "headline": "Escribe para buscar",
-      "body": "Encuentra proyectos, organizaciones y observaciones."
+      "body": "Encuentra proyectos, personas, organizaciones y observaciones."
     },
     "noResults": {
       "headline": "Sin resultados para «{query}»",
@@ -69,6 +70,9 @@
     "signOut": "Cerrar sesión",
     "settings": "Configuración",
     "organizationRole": "Organización · {role}",
+    "roleOwner": "Propietario",
+    "roleAdmin": "Administrador",
+    "roleMember": "Miembro",
     "switchAccount": "Cambiar de cuenta",
     "switchAccountHint": "Las nuevas subidas y proyectos se guardan en la cuenta que elijas aquí."
   },
@@ -706,7 +710,8 @@
     "emptyHeroDescription": "Apoya un proyecto y tus contribuciones aparecerán aquí, cada una enlazada al proyecto que apoyaste.",
     "emptyHeroCta": "Explorar proyectos",
     "anonymousNote": "Las donaciones anónimas también aparecen aquí, pero solo tú puedes verlas — nunca se muestran públicamente con tu nombre. Algunas donaciones anónimas antiguas no se pueden mostrar.",
-    "anonymousBadge": "Solo visible para ti"
+    "anonymousBadge": "Solo visible para ti",
+    "messageQuote": "Mensaje del donante: «{message}»"
   },
   "accountProjects": {
     "emptyEyebrow": "Sin proyectos",
@@ -1287,11 +1292,6 @@
       "description": "Cuentas que solicitaron la subvención de Resilvestrar la web. Abre un perfil para otorgar la insignia de la subvención.",
       "empty": "Nadie ha solicitado la subvención todavía."
     },
-    "bioblitz": {
-      "title": "Inscritos en BioBlitz",
-      "description": "Cuentas que se inscribieron en el BioBlitz. Abre un perfil para otorgar una insignia de ganador.",
-      "empty": "Nadie se ha inscrito en el BioBlitz todavía."
-    },
     "page": {
       "title": "Administración",
       "subtitle": "Revisa solicitantes de subvenciones y eventos, gestiona cuentas marcadas y supervisa los agentes Tainá."
@@ -1327,6 +1327,46 @@
       "finalized": "Esta ronda de BioBlitz ha finalizado, por lo que el conteo ya no puede cambiar.",
       "add": "No se pudo guardar el cambio de conteo semanal. Inténtalo de nuevo.",
       "remove": "No se pudo restaurar la cuenta en la clasificación. Inténtalo de nuevo."
+    }
+  },
+  "adminBioblitzDashboard": {
+    "roundsAria": "Rondas de BioBlitz",
+    "round": "Ronda {round}",
+    "status": {
+      "upcoming": "Próxima",
+      "live": "En curso",
+      "ended": "Finalizada"
+    },
+    "observations": "{count, plural, one {# observación} other {# observaciones}}",
+    "ignored": "Ignorada",
+    "counted": "Cuenta",
+    "notCounted": "No cuenta",
+    "prize": {
+      "most-observations": "Más observaciones",
+      "best-picture": "Mejor foto"
+    },
+    "openProfile": "Abrir perfil",
+    "joined": "Se unió el {date}",
+    "download": {
+      "most-observations": "Kit de más observaciones",
+      "best-picture": "Kit de mejor foto"
+    },
+    "ignore": "Ignorar",
+    "countAgain": "Volver a contar",
+    "loading": "Cargando inscritos de BioBlitz",
+    "empty": "No hay inscritos",
+    "loadError": "No se pudo cargar esta ronda.",
+    "unnamed": "Cuenta sin nombre",
+    "errors": {
+      "notSignedIn": "Vuelve a iniciar sesión para continuar.",
+      "forbidden": "No tienes acceso a este panel de BioBlitz.",
+      "finalized": "Esta ronda ha finalizado, por lo que el conteo no puede cambiar.",
+      "roundNotFound": "Esa ronda de BioBlitz no está disponible.",
+      "winnerNotFound": "El kit de este ganador aún no está disponible.",
+      "ignore": "No se pudo guardar el cambio de conteo. Inténtalo de nuevo.",
+      "restore": "No se pudo restaurar el conteo. Inténtalo de nuevo.",
+      "download": "No se pudo preparar el kit del ganador. Inténtalo de nuevo.",
+      "load": "No se pudo cargar esta ronda. Inténtalo de nuevo."
     }
   },
   "adminBlockedDomains": {
@@ -3227,10 +3267,13 @@
       "radialLabel": "Volumen",
       "timeLabel": "Hora del día",
       "legendTitle": "Grupos de voces",
+      "legendHint": "Haz clic en un grupo de voces para mostrarlo u ocultarlo.",
+      "showAllBands": "Mostrar todos",
       "bandsNote": "Rangos indicativos. Las voces se solapan y qué animales cantan en cada rango varía según el lugar.",
       "empty": "Las grabaciones analizadas aparecerán aquí como un reloj de paisaje sonoro de 24 horas.",
       "emptyHint": "Analiza arriba tus grabaciones subidas para empezar.",
       "downloadPng": "Descargar imagen",
+      "credit": "Hecho con GainForest · gainforest.app",
       "hoverHint": "Arrastra alrededor de la esfera para ampliar esas horas y haz clic en una hora para escuchar. Usa − o «Día completo» para volver.",
       "hoverHintAllDates": "Arrastra alrededor de la esfera para ampliar esas horas y luego elige una grabación de la lista para escuchar. Usa − o «Día completo» para volver.",
       "loadingAudio": "Cargando {name}…",

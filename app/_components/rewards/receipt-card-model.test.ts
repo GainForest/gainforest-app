@@ -12,8 +12,9 @@ function receipt(overrides: Partial<FundingReceipt> = {}): FundingReceipt {
     from: { type: "did", id: "did:plc:alice" },
     orgDid: "did:plc:forest",
     bumicertUri: "at://did:plc:forest/org.hypercerts.claim.activity/project",
-    txHash: `0x${"1".padStart(64, "0")}`,
+    txHash: `0x${"1".repeat(64)}`,
     paymentNetwork: "eip155:1",
+    message: null,
     ...overrides,
   };
 }
@@ -24,6 +25,8 @@ describe("receipt-backed card identity", () => {
     expect(isCardEligibleReceipt(receipt({ bumicertUri: null }))).toBe(false);
     expect(isCardEligibleReceipt(receipt({ from: { type: "wallet", id: "0x123" } }))).toBe(false);
     expect(isCardEligibleReceipt(receipt({ amount: 0 }))).toBe(false);
+    expect(isCardEligibleReceipt(receipt({ currency: "EUR" }))).toBe(false);
+    expect(isCardEligibleReceipt(receipt({ currency: "usdc" }))).toBe(true);
   });
 
   it("uses payment, network, and project as the stable card identity", () => {
@@ -38,7 +41,7 @@ describe("receipt-backed card identity", () => {
     });
     const distinctPayment = receipt({
       uri: "at://did:plc:facilitator/org.hypercerts.funding.receipt/b",
-      txHash: `0x${"2".padStart(64, "0")}`,
+      txHash: `0x${"2".repeat(64)}`,
       occurredAt: "2025-01-03T00:00:00.000Z",
     });
 

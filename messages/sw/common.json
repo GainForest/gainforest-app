@@ -24,18 +24,19 @@
     "trigger": "Tafuta",
     "open": "Fungua utafutaji",
     "title": "Tafuta GainForest",
-    "placeholder": "Tafuta miradi, mashirika, uchunguzi…",
+    "placeholder": "Tafuta miradi, watu, mashirika, uchunguzi…",
     "clear": "Futa utafutaji",
     "escKey": "esc",
     "kinds": {
       "cert": "Certs",
       "project": "Miradi",
+      "person": "Watu",
       "organization": "Mashirika",
       "observation": "Uchunguzi"
     },
     "idle": {
       "headline": "Andika ili kutafuta",
-      "body": "Pata miradi, mashirika na uchunguzi."
+      "body": "Pata miradi, watu, mashirika na uchunguzi."
     },
     "noResults": {
       "headline": "Hakuna matokeo ya “{query}”",
@@ -69,6 +70,9 @@
     "signOut": "Ondoka",
     "settings": "Mipangilio",
     "organizationRole": "Shirika · {role}",
+    "roleOwner": "Mmiliki",
+    "roleAdmin": "Msimamizi",
+    "roleMember": "Mwanachama",
     "switchAccount": "Badilisha akaunti",
     "switchAccountHint": "Vipakizi vipya na miradi huhifadhiwa kwenye akaunti unayochagua hapa."
   },
@@ -706,7 +710,8 @@
     "emptyHeroDescription": "Unga mkono mradi na michango yako itaonekana hapa, kila moja ikiwa na kiungo kwa mradi uliouunga mkono.",
     "emptyHeroCta": "Gundua miradi",
     "anonymousNote": "Michango isiyo na jina pia huonekana hapa, lakini ni wewe pekee unayeweza kuiona — haionyeshwi kamwe hadharani kwa jina lako. Baadhi ya michango ya zamani isiyo na jina haiwezi kuonyeshwa.",
-    "anonymousBadge": "Inaonekana kwako pekee"
+    "anonymousBadge": "Inaonekana kwako pekee",
+    "messageQuote": "Ujumbe wa mfadhili: “{message}”"
   },
   "accountProjects": {
     "emptyEyebrow": "Hakuna miradi",
@@ -1287,11 +1292,6 @@
       "description": "Akaunti zilizoomba ruzuku ya Kurudisha Uasilia kwenye Wavuti. Fungua wasifu ili kutoa beji ya ruzuku.",
       "empty": "Bado hakuna aliyeomba ruzuku."
     },
-    "bioblitz": {
-      "title": "Waliojisajili BioBlitz",
-      "description": "Akaunti zilizojisajili BioBlitz. Fungua wasifu ili kutoa beji ya mshindi.",
-      "empty": "Bado hakuna aliyejisajili BioBlitz."
-    },
     "page": {
       "title": "Msimamizi",
       "subtitle": "Kagua waombaji wa ruzuku na matukio, dhibiti akaunti zilizowekwa alama, na simamia mawakala wa Tainá."
@@ -1327,6 +1327,46 @@
       "finalized": "Raundi hii ya BioBlitz imekwisha, kwa hivyo uhesabuji hauwezi kubadilishwa tena.",
       "add": "Mabadiliko ya uhesabuji wa kila wiki hayakuweza kuhifadhiwa. Jaribu tena.",
       "remove": "Akaunti haikuweza kurudishwa kwenye msimamo. Jaribu tena."
+    }
+  },
+  "adminBioblitzDashboard": {
+    "roundsAria": "Raundi za BioBlitz",
+    "round": "Raundi {round}",
+    "status": {
+      "upcoming": "Inayokuja",
+      "live": "Inaendelea",
+      "ended": "Imefungwa"
+    },
+    "observations": "Uchunguzi {count, number}",
+    "ignored": "Imepuuzwa",
+    "counted": "Inahesabiwa",
+    "notCounted": "Hauhesabiwi",
+    "prize": {
+      "most-observations": "Uchunguzi mwingi zaidi",
+      "best-picture": "Picha bora"
+    },
+    "openProfile": "Fungua wasifu",
+    "joined": "Alijiunga {date}",
+    "download": {
+      "most-observations": "Kifurushi cha uchunguzi mwingi",
+      "best-picture": "Kifurushi cha picha bora"
+    },
+    "ignore": "Puuza",
+    "countAgain": "Hesabu tena",
+    "loading": "Inapakia waliojisajili BioBlitz",
+    "empty": "Hakuna waliojisajili",
+    "loadError": "Haikuweza kupakia raundi hii.",
+    "unnamed": "Akaunti isiyo na jina",
+    "errors": {
+      "notSignedIn": "Ingia tena ili kuendelea.",
+      "forbidden": "Huna ruhusa ya kutumia dashibodi hii ya BioBlitz.",
+      "finalized": "Raundi hii imefungwa, hivyo hesabu ya uchunguzi haiwezi kubadilika.",
+      "roundNotFound": "Raundi hiyo ya BioBlitz haipatikani.",
+      "winnerNotFound": "Kifurushi hiki cha mshindi bado hakipatikani.",
+      "ignore": "Mabadiliko ya hesabu ya uchunguzi hayakuweza kuhifadhiwa. Jaribu tena.",
+      "restore": "Hesabu ya uchunguzi haikuweza kurejeshwa. Jaribu tena.",
+      "download": "Kifurushi cha mshindi hakikuweza kutayarishwa. Jaribu tena.",
+      "load": "Haikuweza kupakia raundi hii. Jaribu tena."
     }
   },
   "adminBlockedDomains": {
@@ -3227,10 +3267,13 @@
       "radialLabel": "Kiwango cha sauti",
       "timeLabel": "Saa (Saa za siku)",
       "legendTitle": "Makundi ya sauti",
+      "legendHint": "Bofya kundi la sauti ili kulionyesha au kulificha.",
+      "showAllBands": "Onyesha yote",
       "bandsNote": "Viwango vya dalili. Sauti zinaingiliana, na wanyama wanaoimba katika kila kiwango hutofautiana kwa eneo.",
       "empty": "Rekodi zilizochambuliwa zitaonekana hapa kama saa ya mandhari ya sauti ya saa 24.",
       "emptyHint": "Chambua rekodi zako zilizopakiwa hapo juu ili kuanza.",
       "downloadPng": "Pakua picha",
+      "credit": "Imetengenezwa kwa GainForest · gainforest.app",
       "hoverHint": "Buruta kuzunguka duara ili kukuza nyakati hizo, na ubofye wakati ili kusikiliza. Tumia − au “Siku nzima” kurudi nyuma.",
       "hoverHintAllDates": "Buruta kuzunguka duara ili kukuza nyakati hizo, kisha chagua rekodi kutoka orodha ili kusikiliza. Tumia − au “Siku nzima” kurudi nyuma.",
       "loadingAudio": "Inapakia {name}…",

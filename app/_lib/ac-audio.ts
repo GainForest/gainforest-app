@@ -381,9 +381,33 @@ export function legacyRecordingKey(name: string, fileSizeBytes: number): string 
 }
 
 /**
+ * Index one ac.audio record's identity into `keys`.
+ *
+ * Records with an `originalCid` are identified by content only. The weak
+ * name+size key is indexed *solely* for records without a CID: AudioMoth
+ * filenames are timestamps and fixed-duration recordings are byte-identical
+ * in size, so two devices on the same schedule produce colliding name+size
+ * pairs. Indexing name+size for CID-bearing records made the uploader skip
+ * fresh files from a second SD card as "already uploaded".
+ */
+export function indexUploadedRecordingKeys(keys: UploadedRecordingKeys, value: unknown): void {
+  if (!isRecord(value)) return;
+  const cid = typeof value.originalCid === "string" ? value.originalCid : null;
+  if (cid) keys.cids.add(cid);
+  const metadata = isRecord(value.metadata) ? value.metadata : null;
+  if (!cid && typeof value.name === "string" && typeof metadata?.fileSizeBytes === "number") {
+    keys.legacy.add(legacyRecordingKey(value.name, metadata.fileSizeBytes));
+  }
+  if (typeof value.deploymentRef === "string") {
+    keys.countsByDeployment.set(value.deploymentRef, (keys.countsByDeployment.get(value.deploymentRef) ?? 0) + 1);
+  }
+}
+
+/**
  * Every recording identity in a repo — content CIDs where stored, plus a
- * name+size fallback for older records — so the uploader can skip files
- * whose content is already in the account before uploading anything.
+ * name+size fallback only for older records that predate CIDs — so the
+ * uploader can skip files whose content is already in the account before
+ * uploading anything.
  * Throws when the repo cannot be listed (callers then skip dedup).
  */
 export async function listUploadedRecordingKeys(did: string, signal?: AbortSignal): Promise<UploadedRecordingKeys> {
@@ -407,17 +431,7 @@ export async function listUploadedRecordingKeys(did: string, signal?: AbortSigna
       records?: Array<{ value?: unknown }>;
       cursor?: unknown;
     };
-    for (const r of data.records ?? []) {
-      if (!isRecord(r.value)) continue;
-      if (typeof r.value.originalCid === "string") keys.cids.add(r.value.originalCid);
-      const metadata = isRecord(r.value.metadata) ? r.value.metadata : null;
-      if (typeof r.value.name === "string" && typeof metadata?.fileSizeBytes === "number") {
-        keys.legacy.add(legacyRecordingKey(r.value.name, metadata.fileSizeBytes));
-      }
-      if (typeof r.value.deploymentRef === "string") {
-        keys.countsByDeployment.set(r.value.deploymentRef, (keys.countsByDeployment.get(r.value.deploymentRef) ?? 0) + 1);
-      }
-    }
+    for (const r of data.records ?? []) indexUploadedRecordingKeys(keys, r.value);
     cursor = typeof data.cursor === "string" ? data.cursor : undefined;
   } while (cursor);
 

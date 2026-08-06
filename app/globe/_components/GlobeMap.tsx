@@ -28,7 +28,6 @@ import {
   GLOBE_INITIAL_ZOOM,
   GLOBE_TITILER_ENDPOINT,
   LANDCOVER_TILES_URL,
-  MA_EARTH_LOGO_URL,
   ORG_LOCATION_COLOR,
   PROJECT_SITE_COLOR,
   globeMapStyle,
@@ -37,7 +36,6 @@ import { resolveLayerUrl } from "../_lib/layers";
 import { treeDbh, treeDetail, treeHeight, treeSpeciesName, type TreeDetail } from "../_lib/trees";
 import {
   DEFAULT_BADGE_ID,
-  MA_EARTH_BADGE_ID,
   buildCircleBadge,
   buildDefaultBadge,
   loadHtmlImage,
@@ -47,6 +45,10 @@ import type { GlobeLayer, GlobeOrganization, LngLatBounds } from "../_lib/globe-
 
 const MARKER_SOURCE = "projectMarkerSource";
 const MARKER_LAYER = "projectMarkerLayer";
+const MARKER_CLUSTER_LAYER = "projectMarkerClusters";
+const MARKER_CLUSTER_COUNT_LAYER = "projectMarkerClusterCountText";
+/** Clusters exist up to this zoom; one level deeper every pin is individual. */
+const MARKER_CLUSTER_MAX_ZOOM = 8;
 const SITES_SOURCE = "allSites";
 const SITES_FILL_LAYER = "allSitesFill";
 const SITES_OUTLINE_LAYER = "allSitesOutline";
@@ -398,11 +400,7 @@ export function GlobeMap({
         .filter((org) => typeof org.lat === "number" && typeof org.lon === "number")
         .map((org) => {
           const hasLogo = logoStatusRef.current.get(org.did) === "loaded";
-          const iconId = hasLogo
-            ? orgLogoImageId(org.did)
-            : org.maEarth
-              ? MA_EARTH_BADGE_ID
-              : DEFAULT_BADGE_ID;
+          const iconId = hasLogo ? orgLogoImageId(org.did) : DEFAULT_BADGE_ID;
           return {
             type: "Feature" as const,
             geometry: { type: "Point" as const, coordinates: [org.lon as number, org.lat as number] },
@@ -749,35 +747,76 @@ export function GlobeMap({
 
       // Organization markers: each org's own logo, cropped into a small
       // circular badge. Orgs without a resolvable avatar fall back to a
-      // GainForest mark (or a Ma Earth mark for badge holders) at the same
-      // compact size, drawn client-side so no extra pin assets are needed.
-      map.addSource(MARKER_SOURCE, { type: "geojson", data: EMPTY_FEATURE_COLLECTION });
-      Promise.all([Promise.resolve(buildDefaultBadge()), loadHtmlImage(MA_EARTH_LOGO_URL).then((img) => buildCircleBadge(img, "cover"))])
-        .then(([defaultBadge, maEarthBadge]) => {
-          if (!map.hasImage(DEFAULT_BADGE_ID)) {
-            map.addImage(DEFAULT_BADGE_ID, defaultBadge.image, { pixelRatio: defaultBadge.pixelRatio });
-          }
-          if (!map.hasImage(MA_EARTH_BADGE_ID)) {
-            map.addImage(MA_EARTH_BADGE_ID, maEarthBadge.image, { pixelRatio: maEarthBadge.pixelRatio });
-          }
-          if (!map.getLayer(MARKER_LAYER)) {
-            map.addLayer({
-              id: MARKER_LAYER,
-              type: "symbol",
-              source: MARKER_SOURCE,
-              layout: {
-                "icon-image": ["get", "iconId"],
-                "icon-size": 1,
-                "icon-allow-overlap": true,
-                "icon-anchor": "center",
-              },
-            });
-          }
-          // Any orgs whose source data was set before the layer/fallback
-          // badges existed need their iconId re-resolved now that they do.
-          setMarkerData();
-        })
-        .catch((error) => console.warn("[globe] marker badges failed", error));
+      // neutral, unbranded dot badge at the same compact size, drawn
+      // client-side so no extra pin assets are needed. In dense regions,
+      // nearby orgs merge into numbered clusters that split apart on zoom —
+      // world view shows regional counts, country level smaller groups, and
+      // past zoom ~8 every organization stands alone.
+      map.addSource(MARKER_SOURCE, {
+        type: "geojson",
+        data: EMPTY_FEATURE_COLLECTION,
+        cluster: true,
+        clusterMaxZoom: MARKER_CLUSTER_MAX_ZOOM,
+        clusterRadius: 45,
+        // Pairs stay as two pins — only three or more merge into a count.
+        clusterMinPoints: 3,
+      });
+      try {
+        const defaultBadge = buildDefaultBadge();
+        if (!map.hasImage(DEFAULT_BADGE_ID)) {
+          map.addImage(DEFAULT_BADGE_ID, defaultBadge.image, { pixelRatio: defaultBadge.pixelRatio });
+        }
+        if (!map.getLayer(MARKER_CLUSTER_LAYER)) {
+          // Cluster bubbles reuse the neutral badge palette (dark disc, thin
+          // white ring) so they read as part of the same marker system.
+          map.addLayer({
+            id: MARKER_CLUSTER_LAYER,
+            type: "circle",
+            source: MARKER_SOURCE,
+            filter: ["has", "point_count"],
+            paint: {
+              "circle-color": "#26332d",
+              "circle-radius": ["step", ["get", "point_count"], 14, 25, 18, 100, 22],
+              "circle-stroke-color": "rgba(255,255,255,0.92)",
+              "circle-stroke-width": 1.5,
+            },
+          });
+        }
+        if (!map.getLayer(MARKER_CLUSTER_COUNT_LAYER)) {
+          map.addLayer({
+            id: MARKER_CLUSTER_COUNT_LAYER,
+            type: "symbol",
+            source: MARKER_SOURCE,
+            filter: ["has", "point_count"],
+            layout: {
+              "text-field": "{point_count_abbreviated}",
+              "text-font": ["Open Sans Semibold"],
+              "text-size": 12,
+              "text-allow-overlap": true,
+            },
+            paint: { "text-color": "#ffffff" },
+          });
+        }
+        if (!map.getLayer(MARKER_LAYER)) {
+          map.addLayer({
+            id: MARKER_LAYER,
+            type: "symbol",
+            source: MARKER_SOURCE,
+            filter: ["!", ["has", "point_count"]],
+            layout: {
+              "icon-image": ["get", "iconId"],
+              "icon-size": 1,
+              "icon-allow-overlap": true,
+              "icon-anchor": "center",
+            },
+          });
+        }
+        // Any orgs whose source data was set before the layer/fallback badge
+        // existed need their iconId re-resolved now that they do.
+        setMarkerData();
+      } catch (error) {
+        console.warn("[globe] marker badges failed", error);
+      }
 
       // Hover card — only rebuilt when the hovered org changes, not on every
       // mousemove event over the same marker.
@@ -809,6 +848,26 @@ export function GlobeMap({
       map.on("mousemove", MARKER_LAYER, handleMarkerMove);
       map.on("mouseleave", MARKER_LAYER, handleMarkerLeave);
       map.on("click", MARKER_LAYER, handleMarkerClick);
+
+      // Clicking a numbered cluster zooms in just far enough to split it
+      // (same behaviour as the tree clusters).
+      map.on("mouseenter", MARKER_CLUSTER_LAYER, () => {
+        map.getCanvas().style.cursor = "pointer";
+      });
+      map.on("mouseleave", MARKER_CLUSTER_LAYER, () => {
+        map.getCanvas().style.cursor = "";
+      });
+      map.on("click", MARKER_CLUSTER_LAYER, (event: MapLayerMouseEvent) => {
+        const feature = event.features?.[0];
+        const clusterId = feature?.properties?.cluster_id;
+        const source = map.getSource(MARKER_SOURCE) as GeoJSONSource | undefined;
+        if (!source || typeof clusterId !== "number" || feature?.geometry.type !== "Point") return;
+        const center = feature.geometry.coordinates.slice(0, 2) as [number, number];
+        source
+          .getClusterExpansionZoom(clusterId)
+          .then((zoom) => map.easeTo({ center, zoom }))
+          .catch(() => undefined);
+      });
 
       setMapLoaded(true);
       loadedRef.current?.();

@@ -592,6 +592,10 @@
       "mostObservations": "Uoni mwingi zaidi",
       "bestPicture": "Picha bora",
       "pending": "Itatangazwa",
+      "final": "Rasmi",
+      "provisional": "Ya muda",
+      "finalHint": "Washindi hawa wamethibitishwa na hawatabadilika.",
+      "provisionalHint": "Msimamo wa sasa — unaweza kubadilika hadi washindi wathibitishwe.",
       "compact": "Karibuni",
       "mostSubmitted": "Zilizowasilishwa zaidi",
       "mostLiked": "Zilizopendwa zaidi",
@@ -768,6 +772,7 @@
         }
       },
       "apply": "Omba kwa Mbofyo Mmoja",
+      "applicationsUnderReview": "Maombi yanapitiwa. Waombaji watakaochaguliwa watatangazwa hivi karibuni.",
       "details": "Soma maelezo ya ruzuku",
       "appliedTitle": "Maombi yametumwa",
       "appliedNote": "Maombi yako kwa {project} sasa yamechapishwa kwenye mlisho.",

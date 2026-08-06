@@ -909,7 +909,7 @@ export function RecordDrawer({
                     {aboutT("title")}
                   </h3>
                 )}
-                <RichText blocks={detail.richBody} />
+                <RichText blocks={detail.richBody} className="mt-0" />
               </div>
             ) : (
               blurb.trim().length > 0 && (

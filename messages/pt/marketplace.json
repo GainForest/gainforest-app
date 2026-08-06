@@ -592,6 +592,10 @@
       "mostObservations": "Mais observações",
       "bestPicture": "Melhor foto",
       "pending": "A anunciar",
+      "final": "Definitivo",
+      "provisional": "Provisório",
+      "finalHint": "Estes vencedores estão confirmados e não mudarão.",
+      "provisionalHint": "Classificação atual — ainda pode mudar até que os vencedores sejam confirmados.",
       "compact": "Recentes",
       "mostSubmitted": "Mais envios",
       "mostLiked": "Mais curtidas",
@@ -768,6 +772,7 @@
         }
       },
       "apply": "Candidatar-se com um clique",
+      "applicationsUnderReview": "As candidaturas estão em análise. As pessoas selecionadas serão anunciadas em breve.",
       "details": "Ler detalhes do subsídio",
       "appliedTitle": "Candidatura enviada",
       "appliedNote": "Sua candidatura para {project} já foi publicada no feed.",
