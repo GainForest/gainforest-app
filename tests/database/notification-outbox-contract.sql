@@ -27,6 +27,8 @@ select pg_temp.assert_true(not has_table_privilege('authenticated','public.notif
 select pg_temp.assert_true(not has_table_privilege('service_role','public.notification_outbox','update'), 'service role cannot arbitrarily patch state');
 select pg_temp.assert_true(has_table_privilege('service_role','public.notification_outbox','select'), 'service role can inspect rows');
 select pg_temp.assert_true(not has_function_privilege('public','public.notification_outbox_claim_due(integer,integer)','execute'), 'PUBLIC cannot claim');
+select pg_temp.assert_true(to_regprocedure('public.notification_outbox_enqueue(text,text,jsonb,text,text,text,text,text,text,text,timestamptz)') is not null, 'legacy 11-argument enqueue RPC remains during the compatibility rollout');
+select pg_temp.assert_true(to_regprocedure('public.notification_outbox_enqueue(text,text,jsonb,text,text,text,text,text,text,timestamptz)') is not null, 'new 10-argument enqueue RPC exists');
 select pg_temp.assert_true(not has_function_privilege('anon','public.notification_outbox_enqueue(text,text,jsonb,text,text,text,text,text,text,timestamptz)','execute'), 'anon cannot enqueue');
 select pg_temp.assert_true(has_function_privilege('service_role','public.notification_outbox_claim_due(integer,integer)','execute'), 'service role can claim');
 select pg_temp.assert_true(not has_function_privilege('public','public.notification_outbox_expire_claimed(uuid,uuid,text)','execute') and has_function_privilege('service_role','public.notification_outbox_expire_claimed(uuid,uuid,text)','execute'), 'claimed expiry is service-role-only');
@@ -72,6 +74,7 @@ select pg_temp.assert_true(not (select duplicate from first_enqueue), 'first enq
 select pg_temp.assert_true((select length(event_key_hash)=64 from public.notification_outbox where id=(select outbox_id from first_enqueue)), 'event hash is SHA-256 hex');
 select pg_temp.assert_true((select length(input_fingerprint_hash)=64 from public.notification_outbox where id=(select outbox_id from first_enqueue)), 'input fingerprint is stored');
 select pg_temp.assert_true((select provider_idempotency_key='signup:event-1' from public.notification_outbox where id=(select outbox_id from first_enqueue)), 'signup provider key namespaces the immutable auth event source ID');
+select pg_temp.assert_true((select delivery_mode='resend' from public.notification_outbox where id=(select outbox_id from first_enqueue)), '10-argument compatibility enqueue always persists Resend delivery');
 
 create temp table membership_same_source as
 select * from public.notification_outbox_enqueue(
