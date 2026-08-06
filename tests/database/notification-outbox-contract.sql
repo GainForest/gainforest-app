@@ -230,6 +230,9 @@ select * from public.notification_outbox_enqueue(
 );
 select pg_temp.assert_true((select status='waiting_recipient' from public.notification_outbox where id=(select outbox_id from bio)), 'missing BioBlitz email waits');
 select * from public.notification_outbox_claim_one((select outbox_id from bio),'30000000-0000-4000-8000-000000000001',60);
+select pg_temp.assert_true(not public.notification_outbox_freeze_request((select outbox_id from bio),'30000000-0000-4000-8000-000000000001','GainForest <hello@example.com>','arbitrary@example.com','Hello','<p>Hello</p>','Hello'), 'unresolved recipient cannot freeze a request');
+select pg_temp.assert_true((select frozen_from is null and frozen_to is null and frozen_subject is null and frozen_html is null and frozen_text is null from public.notification_outbox where id=(select outbox_id from bio)), 'unresolved freeze attempt writes no frozen fields');
+select pg_temp.assert_true(not public.notification_outbox_begin_provider_call((select outbox_id from bio),'30000000-0000-4000-8000-000000000001',clock_timestamp()+interval '24 hours'), 'provider call cannot begin without a frozen request');
 select pg_temp.assert_true(public.notification_outbox_wait_recipient((select outbox_id from bio),'30000000-0000-4000-8000-000000000001',clock_timestamp()+interval '1 hour','recipient_missing'), 'recipient wait releases claim');
 select pg_temp.assert_true((select last_error_code='recipient_missing' and last_error_summary='Recipient email is not available' from public.notification_outbox where id=(select outbox_id from bio)), 'recipient wait stores an allowlisted actionable summary');
 create temp table future_claim as select * from public.notification_outbox_claim_one((select outbox_id from bio),'30000000-0000-4000-8000-000000000002',60);
