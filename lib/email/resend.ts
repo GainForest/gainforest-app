@@ -48,6 +48,7 @@ async function postJson(
       },
     }, (res) => {
       const chunks: Buffer[] = [];
+      res.on("error", reject);
       res.on("data", (chunk) => chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk)));
       res.on("end", () => {
         const raw = Buffer.concat(chunks).toString("utf8");

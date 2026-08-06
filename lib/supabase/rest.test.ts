@@ -49,4 +49,44 @@ describe("supabaseRpc", () => {
     expect((error as Error).message).toBe("Supabase RPC timed out. Check Supabase availability and retry.");
     expect((error as Error).message).not.toContain("private@example.com");
   });
+
+  it("preserves null for a malformed RPC response when the timeout has not fired", async () => {
+    const controller = new AbortController();
+    vi.spyOn(AbortSignal, "timeout").mockReturnValue(controller.signal);
+    fetchMock.mockResolvedValueOnce({
+      ok: true,
+      json: vi.fn().mockRejectedValue(new SyntaxError("Malformed JSON")),
+    } as unknown as Response);
+
+    await expect(supabaseRpc("notification_outbox_mark_sent", {})).resolves.toBeNull();
+  });
+
+  it("maps a timeout while reading the RPC response body to an availability error", async () => {
+    const controller = new AbortController();
+    vi.spyOn(AbortSignal, "timeout").mockReturnValue(controller.signal);
+    let bodyStartedResolve!: () => void;
+    const bodyStarted = new Promise<void>(resolve => {
+      bodyStartedResolve = resolve;
+    });
+    const response = {
+      ok: true,
+      json: vi.fn(() => new Promise((_resolve, reject) => {
+        bodyStartedResolve();
+        controller.signal.addEventListener("abort", () => reject(controller.signal.reason));
+      })),
+    } as unknown as Response;
+    fetchMock.mockResolvedValueOnce(response);
+
+    const pending = supabaseRpc("notification_outbox_mark_sent", {
+      p_recipient_email: "private@example.com",
+    });
+    await bodyStarted;
+    controller.abort(new DOMException("The operation timed out", "TimeoutError"));
+
+    await expect(pending).rejects.toMatchObject({
+      name: "SupabaseRestError",
+      status: 504,
+      message: "Supabase RPC timed out. Check Supabase availability and retry.",
+    });
+  });
 });

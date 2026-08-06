@@ -70,6 +70,42 @@ describe("sendResendEmail", () => {
     expect(setTimeout).toHaveBeenCalledWith(7_500, expect.any(Function));
   });
 
+  it("rejects when the response stream errors", async () => {
+    let response!: EventEmitter & {
+      statusCode: number;
+      headers: Record<string, string>;
+    };
+    requestMock.mockImplementation((_options, onResponse) => {
+      const request = new EventEmitter() as EventEmitter & {
+        setTimeout(ms: number, callback: () => void): void;
+        write(body: string): boolean;
+        end(): void;
+        destroy(error: Error): void;
+      };
+      request.setTimeout = () => undefined;
+      request.write = () => true;
+      request.destroy = (error: Error) => request.emit("error", error);
+      request.end = () => {
+        response = new EventEmitter() as typeof response;
+        response.statusCode = 200;
+        response.headers = {};
+        onResponse(response);
+      };
+      return request;
+    });
+
+    const pending = sendResendEmail({
+      apiKey: "re_explicit",
+      to: "person@example.com",
+      subject: "Subject",
+      html: "<p>Body</p>",
+    });
+    const responseError = new Error("response stream failed");
+    response.emit("error", responseError);
+
+    await expect(pending).rejects.toBe(responseError);
+  });
+
   it("returns Resend error codes and Retry-After timing to the provider adapter", async () => {
     requestMock.mockImplementation((_options, onResponse) => {
       const request = new EventEmitter() as EventEmitter & {

@@ -65,7 +65,14 @@ export async function supabaseRpc<T>(functionName: string, parameters: Record<st
     throw error;
   }
   if (!response.ok) throw await parseSupabaseError(response);
-  return await response.json().catch(() => null) as T;
+  try {
+    return await response.json() as T;
+  } catch {
+    if (signal.aborted) {
+      throw new SupabaseRestError("Supabase RPC timed out. Check Supabase availability and retry.", 504);
+    }
+    return null as T;
+  }
 }
 
 export async function supabaseSelect<T>(pathAndQuery: string): Promise<T[]> {
