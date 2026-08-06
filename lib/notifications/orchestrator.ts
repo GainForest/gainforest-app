@@ -147,6 +147,130 @@ export async function processNotificationById(
   }
 }
 
+interface DrainState {
+  readonly startedAt: Date;
+  readonly outcomes: Record<OutcomeKind, number>;
+  readonly seen: Set<string>;
+  cleanup: NotificationCleanupResult;
+  claimed: number;
+  stopped: DrainCompleted["stopped"];
+}
+
+type BatchStop = "empty" | "batch_limit" | "insufficient_time" | "duplicate_claim";
+
+function emptyCleanup(): NotificationCleanupResult {
+  return { activeExpired: 0, redacted: 0, deleted: 0 };
+}
+
+function createDrainState(startedAt: Date): DrainState {
+  return {
+    startedAt,
+    outcomes: emptyOutcomes(),
+    seen: new Set<string>(),
+    cleanup: emptyCleanup(),
+    claimed: 0,
+    stopped: "empty",
+  };
+}
+
+function finishDrain(
+  state: DrainState,
+  dependencies: NotificationOrchestratorDependencies,
+): DrainCompleted {
+  const result: DrainCompleted = {
+    kind: "completed",
+    claimed: state.claimed,
+    cleanup: state.cleanup,
+    outcomes: state.outcomes,
+    stopped: state.stopped,
+    elapsedMs: Math.max(0, dependencies.clock.now().getTime() - state.startedAt.getTime()),
+  };
+  dependencies.log?.(result);
+  return result;
+}
+
+async function filterFreshClaims(
+  batch: readonly Claim[],
+  state: DrainState,
+  dependencies: NotificationOrchestratorDependencies,
+): Promise<{ readonly claims: Claim[]; readonly duplicateFound: boolean }> {
+  const claims: Claim[] = [];
+  let duplicateFound = false;
+  for (const row of batch) {
+    if (state.seen.has(row.outboxId)) {
+      await safelyReleaseIdleClaim(row, dependencies);
+      duplicateFound = true;
+      continue;
+    }
+    state.seen.add(row.outboxId);
+    claims.push(row);
+  }
+  return { claims, duplicateFound };
+}
+
+async function processClaimBatch(
+  claims: readonly Claim[],
+  invocationDeadline: Date,
+  dependencies: NotificationOrchestratorDependencies,
+): Promise<Array<ProcessResult | null>> {
+  return Promise.all(claims.map(async claim => {
+    try {
+      return await dependencies.processor(claim, invocationDeadline);
+    } catch {
+      await safelyReleaseIdleClaim(claim, dependencies);
+      return null;
+    }
+  }));
+}
+
+function recordBatchResults(results: readonly (ProcessResult | null)[], state: DrainState): boolean {
+  let insufficientTime = false;
+  for (const result of results) {
+    if (!result) {
+      state.outcomes.unexpected_failure += 1;
+      continue;
+    }
+    state.outcomes[result.kind] += 1;
+    if (result.kind === "released_insufficient_time") insufficientTime = true;
+  }
+  return insufficientTime;
+}
+
+async function processNextDrainBatch(
+  invocationDeadline: Date,
+  dependencies: NotificationOrchestratorDependencies,
+  resolved: ResolvedOptions,
+  state: DrainState,
+): Promise<BatchStop | null> {
+  const requested = Math.min(resolved.concurrency, resolved.batchSize - state.claimed);
+  const batch = await dependencies.repository.claimDue(requested, resolved.leaseSeconds);
+  if (batch.length === 0) return "empty";
+  if (batch.length > requested) {
+    await Promise.all(batch.map(claim => safelyReleaseIdleClaim(claim, dependencies)));
+    throw new Error("Notification repository returned more claims than requested. Verify the committed claim RPC contract.");
+  }
+
+  const { claims, duplicateFound } = await filterFreshClaims(batch, state, dependencies);
+  if (claims.length === 0) return "duplicate_claim";
+
+  const results = await processClaimBatch(claims, invocationDeadline, dependencies);
+  state.claimed += claims.length;
+  if (recordBatchResults(results, state)) return "insufficient_time";
+  if (duplicateFound) return "duplicate_claim";
+  if (state.claimed >= resolved.batchSize) return "batch_limit";
+  return null;
+}
+
+function stopBeforeNextBatch(
+  invocationDeadline: Date,
+  dependencies: NotificationOrchestratorDependencies,
+  safetyMarginMs: number,
+): "disabled" | "deadline" | null {
+  if (deliveryDisabled(dependencies.config)) return "disabled";
+  if (!hasTime(dependencies.clock, invocationDeadline, safetyMarginMs)) return "deadline";
+  return null;
+}
+
 export async function drainNotifications(
   invocationDeadline: Date,
   dependencies: NotificationOrchestratorDependencies,
@@ -156,100 +280,31 @@ export async function drainNotifications(
   validDeadline(invocationDeadline);
   if (deliveryDisabled(dependencies.config)) return { kind: "disabled" };
 
-  const startedAt = dependencies.clock.now();
-  const outcomes = emptyOutcomes();
-  const noCleanup: NotificationCleanupResult = { activeExpired: 0, redacted: 0, deleted: 0 };
-  let cleanup = noCleanup;
-  let claimed = 0;
-  let stopped: DrainCompleted["stopped"] = "empty";
-  const seen = new Set<string>();
-
-  const finish = (): DrainCompleted => {
-    const result: DrainCompleted = {
-      kind: "completed",
-      claimed,
-      cleanup,
-      outcomes,
-      stopped,
-      elapsedMs: Math.max(0, dependencies.clock.now().getTime() - startedAt.getTime()),
-    };
-    dependencies.log?.(result);
-    return result;
-  };
-
+  const state = createDrainState(dependencies.clock.now());
   if (!hasTime(dependencies.clock, invocationDeadline, resolved.safetyMarginMs)) {
-    stopped = "deadline";
-    return finish();
+    state.stopped = "deadline";
+    return finishDrain(state, dependencies);
   }
-  cleanup = await dependencies.repository.cleanup(resolved.cleanupBatchSize).catch(() => noCleanup);
+  state.cleanup = await dependencies.repository.cleanup(resolved.cleanupBatchSize).catch(emptyCleanup);
 
   let loopCompleted = false;
   try {
-    while (claimed < resolved.batchSize) {
-      if (deliveryDisabled(dependencies.config)) {
-        stopped = "disabled";
+    while (state.claimed < resolved.batchSize) {
+      const earlyStop = stopBeforeNextBatch(invocationDeadline, dependencies, resolved.safetyMarginMs);
+      if (earlyStop) {
+        state.stopped = earlyStop;
         break;
       }
-      if (!hasTime(dependencies.clock, invocationDeadline, resolved.safetyMarginMs)) {
-        stopped = "deadline";
-        break;
-      }
-      const requested = Math.min(resolved.concurrency, resolved.batchSize - claimed);
-      const batch = await dependencies.repository.claimDue(requested, resolved.leaseSeconds);
-      if (batch.length === 0) {
-        stopped = "empty";
-        break;
-      }
-      if (batch.length > requested) {
-        await Promise.all(batch.map(row => safelyReleaseIdleClaim(row, dependencies)));
-        throw new Error("Notification repository returned more claims than requested. Verify the committed claim RPC contract.");
-      }
-
-      const fresh: Claim[] = [];
-      for (const row of batch) {
-        if (seen.has(row.outboxId)) {
-          await safelyReleaseIdleClaim(row, dependencies);
-          stopped = "duplicate_claim";
-          continue;
-        }
-        seen.add(row.outboxId);
-        fresh.push(row);
-      }
-      if (fresh.length === 0) break;
-
-      const results = await Promise.all(fresh.map(async row => {
-        try {
-          return await dependencies.processor(row, invocationDeadline);
-        } catch {
-          await safelyReleaseIdleClaim(row, dependencies);
-          return null;
-        }
-      }));
-      claimed += fresh.length;
-
-      let insufficientTime = false;
-      for (const result of results) {
-        if (!result) {
-          outcomes.unexpected_failure += 1;
-          continue;
-        }
-        outcomes[result.kind] += 1;
-        if (result.kind === "released_insufficient_time") insufficientTime = true;
-      }
-      if (insufficientTime) {
-        stopped = "insufficient_time";
-        break;
-      }
-      if (stopped === "duplicate_claim") break;
-      if (claimed >= resolved.batchSize) {
-        stopped = "batch_limit";
+      const batchStop = await processNextDrainBatch(invocationDeadline, dependencies, resolved, state);
+      if (batchStop) {
+        state.stopped = batchStop;
         break;
       }
     }
     loopCompleted = true;
   } finally {
-    if (!loopCompleted) finish();
+    if (!loopCompleted) finishDrain(state, dependencies);
   }
 
-  return finish();
+  return finishDrain(state, dependencies);
 }
