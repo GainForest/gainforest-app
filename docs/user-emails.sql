@@ -25,5 +25,5 @@ alter table public.user_emails enable row level security;
 
 -- The app writes with the service-role key on the server. No browser role can
 -- read or mutate private email addresses.
-revoke all on public.user_emails from public, anon, authenticated;
+revoke all on public.user_emails from public, anon, authenticated, service_role;
 grant select, insert, update on public.user_emails to service_role;

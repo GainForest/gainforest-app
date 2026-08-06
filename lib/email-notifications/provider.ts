@@ -45,6 +45,26 @@ export class ResendEmailProvider implements EmailProvider {
   }
 }
 
+function testApiUrl(environment: Environment): string | undefined {
+  const configured = environment.NOTIFICATION_TEST_RESEND_API_URL?.trim();
+  if (!configured) return undefined;
+  let url: URL;
+  try {
+    url = new URL(configured);
+  } catch {
+    throw new Error(
+      "NOTIFICATION_TEST_RESEND_API_URL must be a valid loopback HTTP URL and is unavailable in production.",
+    );
+  }
+  if (environment.NODE_ENV === "production" || url.protocol !== "http:"
+    || (url.hostname !== "127.0.0.1" && url.hostname !== "localhost")) {
+    throw new Error(
+      "NOTIFICATION_TEST_RESEND_API_URL must be a valid loopback HTTP URL and is unavailable in production.",
+    );
+  }
+  return url.toString();
+}
+
 export function createEmailProvider(environment: Environment = process.env): EmailProvider | null {
   if (readNotificationConfig(environment).emailDisabled) return null;
   const apiKey = environment.RESEND_API_KEY?.trim();
@@ -53,5 +73,6 @@ export function createEmailProvider(environment: Environment = process.env): Ema
       "Email delivery is enabled but RESEND_API_KEY is missing. Set RESEND_API_KEY or set EMAIL_DISABLED=true.",
     );
   }
-  return new ResendEmailProvider(input => sendResendEmail({ ...input, apiKey }));
+  const apiUrl = testApiUrl(environment);
+  return new ResendEmailProvider(input => sendResendEmail({ ...input, apiKey, apiUrl }));
 }
