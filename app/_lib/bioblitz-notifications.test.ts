@@ -32,7 +32,7 @@ describe("BioBlitz notification summaries", () => {
     expect(prepare).toBeTypeOf("function");
     const result = await (prepare as (value: typeof input) => Promise<unknown>)(input);
     expect(result).toEqual({
-      notification: { status: "delayed", canMarkHandled: true },
+      notification: { status: "delayed", canMarkHandled: true, canRetry: false },
       processOutboxId: "10000000-0000-4000-8000-000000000001",
     });
     expect(process).not.toHaveBeenCalled();
@@ -49,24 +49,32 @@ describe("BioBlitz notification summaries", () => {
       { roundId: 4, prize: "most-observations", winnerDid: "did:plc:most" },
       { roundId: 4, prize: "best-picture", winnerDid: "did:plc:best" },
     ]);
-    expect(summaries.get("bioblitz:4:most-observations")).toEqual({ status: "missing_email", canMarkHandled: true });
-    expect(summaries.get("bioblitz:4:best-picture")).toEqual({ status: "sent", canMarkHandled: false });
+    expect(summaries.get("bioblitz:4:most-observations")).toEqual({ status: "missing_email", canMarkHandled: true, canRetry: false });
+    expect(summaries.get("bioblitz:4:best-picture")).toEqual({ status: "sent", canMarkHandled: false, canRetry: false });
+  });
+
+  it("offers explicit retry only when no notification job was prepared", async () => {
+    supabaseSelect.mockResolvedValue([]);
+    const summaries = await listBioblitzNotificationSummaries([
+      { roundId: 4, prize: "best-picture", winnerDid: "did:plc:best" },
+    ]);
+    expect(summaries.get("bioblitz:4:best-picture")).toEqual({ status: "not_prepared", canMarkHandled: true, canRetry: true });
   });
 
   it("preserves a badge success when email is missing", async () => {
     enqueue.mockResolvedValue({ kind: "enqueued", outboxId: "id", status: "waiting_recipient", duplicate: false, recipientStatus: "missing_email" });
     process.mockResolvedValue({ kind: "processed", result: { kind: "waiting_recipient", errorCode: "recipient_missing" } });
-    await expect(notifyBioblitzWinner(input, new Date())).resolves.toEqual({ status: "missing_email", canMarkHandled: true });
+    await expect(notifyBioblitzWinner(input, new Date())).resolves.toEqual({ status: "missing_email", canMarkHandled: true, canRetry: false });
   });
 
   it("reports setup failure instead of throwing into the award flow", async () => {
     enqueue.mockRejectedValue(new Error("winner@example.com database-secret"));
-    await expect(notifyBioblitzWinner(input, new Date())).resolves.toEqual({ status: "notification_setup_failed", canMarkHandled: true });
+    await expect(notifyBioblitzWinner(input, new Date())).resolves.toEqual({ status: "notification_setup_failed", canMarkHandled: true, canRetry: true });
   });
 
   it("returns a redacted manual handling summary", async () => {
     supabaseRpc.mockResolvedValue({ outbox_id: "id", status: "suppressed" });
     await expect(markBioblitzNotificationHandled({ roundId: 4, prize: "best-picture", winnerDid: "did:plc:winner", moderatorDid: "did:plc:mod" }))
-      .resolves.toEqual({ status: "handled_manually", canMarkHandled: false });
+      .resolves.toEqual({ status: "handled_manually", canMarkHandled: false, canRetry: false });
   });
 });

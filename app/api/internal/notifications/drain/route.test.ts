@@ -24,10 +24,8 @@ const drain = vi.fn<(_deadline: Date) => Promise<DrainOutcome>>(async () => ({
 }));
 const health = vi.fn(async () => ({ waitingRecipient: 1, queued: 2, processing: 0, dead: 0, oldestDueAgeSeconds: 30 }));
 const createDrainRuntime = vi.fn(() => ({ drain, health }));
-const reconcileRecentBioblitzNotifications = vi.fn(async (_deadline: Date) => ({ candidates: 2, completed: true }));
 
 vi.mock("@/lib/email-notifications/drain-runtime", () => ({ createDrainRuntime }));
-vi.mock("@/app/_lib/bioblitz-notification-reconciliation", () => ({ reconcileRecentBioblitzNotifications }));
 
 function request(token?: string): NextRequest {
   return new NextRequest("https://example.test/api/internal/notifications/drain", {
@@ -44,7 +42,6 @@ describe("notification drain route", () => {
     createDrainRuntime.mockClear();
     drain.mockClear();
     health.mockClear();
-    reconcileRecentBioblitzNotifications.mockClear();
   });
 
   afterEach(() => {
@@ -70,29 +67,7 @@ describe("notification drain route", () => {
     expect(createDrainRuntime).not.toHaveBeenCalled();
   });
 
-  it("skips external BioBlitz discovery only for the explicit non-production smoke hook", async () => {
-    vi.stubEnv("NOTIFICATION_TEST_SKIP_BIOBLITZ_RECONCILIATION", "true");
-    const { GET } = await import("./route");
-    const response = await GET(request(secret));
-    expect(response.status).toBe(200);
-    await expect(response.json()).resolves.toMatchObject({
-      reconciliation: { candidates: 0, completed: true },
-    });
-    expect(reconcileRecentBioblitzNotifications).not.toHaveBeenCalled();
-    expect(drain).toHaveBeenCalledTimes(1);
-  });
-
-  it("rejects the smoke-only reconciliation hook in production", async () => {
-    vi.stubEnv("NOTIFICATION_TEST_SKIP_BIOBLITZ_RECONCILIATION", "true");
-    vi.stubEnv("NODE_ENV", "production");
-    const { GET } = await import("./route");
-    const response = await GET(request(secret));
-    expect(response.status).toBe(503);
-    expect(reconcileRecentBioblitzNotifications).not.toHaveBeenCalled();
-    expect(createDrainRuntime).not.toHaveBeenCalled();
-  });
-
-  it("runs one deadline-bounded drain and returns aggregate fields only", async () => {
+  it("drains existing work without discovering historical BioBlitz notifications", async () => {
     const { GET } = await import("./route");
     const before = Date.now();
     const response = await GET(request(secret));
@@ -103,14 +78,11 @@ describe("notification drain route", () => {
       kind: "completed",
       claimed: 2,
       outcomes: { sent: 1, requeued: 1 },
-      reconciliation: { candidates: 2, completed: true },
       health: { queued: 2, oldestDueAgeSeconds: 30 },
     });
+    expect(body).not.toHaveProperty("reconciliation");
     expect(JSON.stringify(body)).not.toContain("@example.com");
     expect(drain).toHaveBeenCalledTimes(1);
-    const reconciliationDeadline = reconcileRecentBioblitzNotifications.mock.calls[0][0] as Date;
-    expect(reconciliationDeadline.getTime()).toBeGreaterThanOrEqual(before + 9_000);
-    expect(reconciliationDeadline.getTime()).toBeLessThanOrEqual(after + 10_000);
     const deadline = drain.mock.calls[0][0] as Date;
     expect(deadline.getTime()).toBeGreaterThanOrEqual(before + 54_000);
     expect(deadline.getTime()).toBeLessThanOrEqual(after + 55_000);

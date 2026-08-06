@@ -1,13 +1,11 @@
 import { timingSafeEqual } from "node:crypto";
 import { NextRequest, NextResponse } from "next/server";
-import { reconcileRecentBioblitzNotifications } from "@/app/_lib/bioblitz-notification-reconciliation";
 import { createDrainRuntime } from "@/lib/email-notifications/drain-runtime";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 export const maxDuration = 60;
 
-const RECONCILIATION_BUDGET_MS = 10_000;
 const USABLE_INVOCATION_MS = 55_000;
 
 function configuredSecret(): string | null {
@@ -23,17 +21,6 @@ function authorized(request: NextRequest, secret: string): boolean {
   return supplied.length === expected.length && timingSafeEqual(supplied, expected);
 }
 
-function skipBioblitzReconciliation(environment: NodeJS.ProcessEnv = process.env): boolean {
-  const configured = environment.NOTIFICATION_TEST_SKIP_BIOBLITZ_RECONCILIATION?.trim();
-  if (!configured) return false;
-  if (configured !== "true" || environment.NODE_ENV === "production") {
-    throw new Error(
-      "NOTIFICATION_TEST_SKIP_BIOBLITZ_RECONCILIATION is test-only, must be exactly true, and is unavailable in production.",
-    );
-  }
-  return true;
-}
-
 export async function GET(request: NextRequest) {
   const invocationStartedAt = Date.now();
   const secret = configuredSecret();
@@ -45,22 +32,10 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    let reconciliation: { candidates: number; completed: boolean };
-    if (skipBioblitzReconciliation()) {
-      reconciliation = { candidates: 0, completed: true };
-    } else {
-      try {
-        reconciliation = await reconcileRecentBioblitzNotifications(
-          new Date(invocationStartedAt + RECONCILIATION_BUDGET_MS),
-        );
-      } catch {
-        reconciliation = { candidates: 0, completed: false };
-      }
-    }
     const runtime = createDrainRuntime();
     const result = await runtime.drain(new Date(invocationStartedAt + USABLE_INVOCATION_MS));
     const health = result.kind === "disabled" ? null : await runtime.health();
-    return NextResponse.json({ ...result, reconciliation, health });
+    return NextResponse.json({ ...result, health });
   } catch {
     return NextResponse.json({ error: "Notification recovery could not complete. Retry the scheduled request." }, { status: 503 });
   }

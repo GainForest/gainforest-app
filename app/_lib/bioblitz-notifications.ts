@@ -19,6 +19,7 @@ export type BioblitzNotificationStatus =
 export type BioblitzNotificationSummary = {
   status: BioblitzNotificationStatus;
   canMarkHandled: boolean;
+  canRetry: boolean;
 };
 
 export type PreparedBioblitzNotification = {
@@ -30,13 +31,13 @@ type RawRow = { event_key_hash?: unknown; status?: unknown; last_error_code?: un
 const sourceId = (roundId: number, prize: BioblitzPrize) => `bioblitz:${roundId}:${prize}`;
 
 function fromRow(row: RawRow | undefined): BioblitzNotificationSummary {
-  if (!row) return { status: "not_prepared", canMarkHandled: true };
-  if (row.status === "sent") return { status: "sent", canMarkHandled: false };
-  if (row.status === "suppressed" && typeof row.manual_handled_at === "string") return { status: "handled_manually", canMarkHandled: false };
-  if (row.status === "waiting_recipient" && row.last_error_code === "recipient_missing") return { status: "missing_email", canMarkHandled: true };
-  if (row.status === "waiting_recipient" && row.last_error_code === "recipient_lookup_failed") return { status: "lookup_failed", canMarkHandled: true };
-  if (row.status === "dead") return { status: "cannot_send", canMarkHandled: true };
-  return { status: "delayed", canMarkHandled: true };
+  if (!row) return { status: "not_prepared", canMarkHandled: true, canRetry: true };
+  if (row.status === "sent") return { status: "sent", canMarkHandled: false, canRetry: false };
+  if (row.status === "suppressed" && typeof row.manual_handled_at === "string") return { status: "handled_manually", canMarkHandled: false, canRetry: false };
+  if (row.status === "waiting_recipient" && row.last_error_code === "recipient_missing") return { status: "missing_email", canMarkHandled: true, canRetry: false };
+  if (row.status === "waiting_recipient" && row.last_error_code === "recipient_lookup_failed") return { status: "lookup_failed", canMarkHandled: true, canRetry: false };
+  if (row.status === "dead") return { status: "cannot_send", canMarkHandled: true, canRetry: false };
+  return { status: "delayed", canMarkHandled: true, canRetry: false };
 }
 
 export async function listBioblitzNotificationSummaries(
@@ -56,13 +57,13 @@ export async function listBioblitzNotificationSummaries(
 }
 
 function afterProcess(result: ProcessOneOutcome, recipientStatus: "ready" | "missing_email" | "lookup_failed"): BioblitzNotificationSummary {
-  if (result.kind !== "processed") return { status: recipientStatus === "ready" ? "delayed" : recipientStatus, canMarkHandled: true };
+  if (result.kind !== "processed") return { status: recipientStatus === "ready" ? "delayed" : recipientStatus, canMarkHandled: true, canRetry: false };
   switch (result.result.kind) {
-    case "sent": return { status: "sent", canMarkHandled: false };
-    case "waiting_recipient": return { status: result.result.errorCode === "recipient_missing" ? "missing_email" : "lookup_failed", canMarkHandled: true };
-    case "dead": return { status: "cannot_send", canMarkHandled: true };
-    case "suppressed": return { status: "handled_manually", canMarkHandled: false };
-    default: return { status: "delayed", canMarkHandled: true };
+    case "sent": return { status: "sent", canMarkHandled: false, canRetry: false };
+    case "waiting_recipient": return { status: result.result.errorCode === "recipient_missing" ? "missing_email" : "lookup_failed", canMarkHandled: true, canRetry: false };
+    case "dead": return { status: "cannot_send", canMarkHandled: true, canRetry: false };
+    case "suppressed": return { status: "handled_manually", canMarkHandled: false, canRetry: false };
+    default: return { status: "delayed", canMarkHandled: true, canRetry: false };
   }
 }
 
@@ -72,26 +73,27 @@ export async function prepareBioblitzWinnerNotification(
   try {
     const queued = await createBioblitzProducerRuntime().enqueue(input);
     if (queued.kind === "disabled") {
-      return { notification: { status: "notification_setup_failed", canMarkHandled: true }, processOutboxId: null };
+      return { notification: { status: "notification_setup_failed", canMarkHandled: true, canRetry: true }, processOutboxId: null };
     }
     if (queued.status === "sent") {
-      return { notification: { status: "sent", canMarkHandled: false }, processOutboxId: null };
+      return { notification: { status: "sent", canMarkHandled: false, canRetry: false }, processOutboxId: null };
     }
     if (queued.status === "suppressed") {
-      return { notification: { status: "handled_manually", canMarkHandled: false }, processOutboxId: null };
+      return { notification: { status: "handled_manually", canMarkHandled: false, canRetry: false }, processOutboxId: null };
     }
     if (queued.status === "dead") {
-      return { notification: { status: "cannot_send", canMarkHandled: true }, processOutboxId: null };
+      return { notification: { status: "cannot_send", canMarkHandled: true, canRetry: false }, processOutboxId: null };
     }
     return {
       notification: {
         status: queued.recipientStatus === "ready" ? "delayed" : queued.recipientStatus,
         canMarkHandled: true,
+        canRetry: false,
       },
       processOutboxId: queued.status === "queued" || queued.status === "waiting_recipient" ? queued.outboxId : null,
     };
   } catch {
-    return { notification: { status: "notification_setup_failed", canMarkHandled: true }, processOutboxId: null };
+    return { notification: { status: "notification_setup_failed", canMarkHandled: true, canRetry: true }, processOutboxId: null };
   }
 }
 
@@ -103,7 +105,7 @@ export async function processBioblitzWinnerNotification(
     const processed = await createBioblitzProcessRuntime().process(outboxId, deadline);
     return afterProcess(processed, "ready");
   } catch {
-    return { status: "delayed", canMarkHandled: true };
+    return { status: "delayed", canMarkHandled: true, canRetry: false };
   }
 }
 
@@ -126,7 +128,7 @@ export async function markBioblitzNotificationHandled(input: {
       p_moderator_did: input.moderatorDid,
     });
     if (typeof result !== "object" || result === null || (result as { status?: unknown }).status !== "suppressed") throw new Error("invalid response");
-    return { status: "handled_manually", canMarkHandled: false };
+    return { status: "handled_manually", canMarkHandled: false, canRetry: false };
   } catch {
     throw new Error("This notification could not be marked as handled. It may already be sending or sent.");
   }

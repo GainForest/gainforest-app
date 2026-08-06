@@ -289,7 +289,6 @@ NEXT_PUBLIC_SITE_URL="$APP_URL" \
 EMAIL_DISABLED=false \
 RESEND_API_KEY=local-resend-test-key \
 NOTIFICATION_TEST_RESEND_API_URL="http://127.0.0.1:$RESEND_PORT/emails" \
-NOTIFICATION_TEST_SKIP_BIOBLITZ_RECONCILIATION=true \
 NODE_ENV=development \
 EMAIL_FROM="GainForest Local <notifications@example.test>" \
 WELCOME_EMAIL_WEBHOOK_SECRET="$WEBHOOK_SECRET" \
@@ -430,7 +429,7 @@ curl --silent --show-error --fail-with-body \
 node - "$TMP/drain.json" <<'NODE'
 const fs = require("node:fs");
 const value = JSON.parse(fs.readFileSync(process.argv[2], "utf8"));
-if (value?.kind !== "completed" || (value?.outcomes?.sent ?? 0) < 1 || value?.reconciliation?.completed !== true) {
+if (value?.kind !== "completed" || (value?.outcomes?.sent ?? 0) < 1 || typeof value?.health !== "object") {
   throw new Error(`authenticated recovery did not send queued work through the loopback provider: ${JSON.stringify(value)}`);
 }
 NODE

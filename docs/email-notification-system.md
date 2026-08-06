@@ -107,27 +107,23 @@ flowchart TB
 
   Timer["1 · Run automatically<br/>every 5 minutes"]
 
-  FindMissing["2 · Find BioBlitz awards<br/>missing an email job"]
+  Cleanup["2 · Clean up old jobs<br/>and private details"]
 
-  SaveMissing["3 · Add any missing jobs<br/>to notification_outbox"]
+  DueJobs["3 · Find existing jobs that are<br/>ready to try again"]
 
-  Cleanup["4 · Clean up old jobs<br/>and private details"]
+  SendJobs["4 · Send each due job<br/>using diagram 2"]
 
-  DueJobs["5 · Find jobs that are<br/>ready to try again"]
+  Health["5 · Report job totals only<br/>no names or email addresses"]
 
-  SendJobs["6 · Send each due job<br/>using diagram 2"]
-
-  Health["7 · Report job totals only<br/>no names or email addresses"]
-
-  Timer --> FindMissing
-  FindMissing --> SaveMissing
-  SaveMissing --> Cleanup
+  Timer --> Cleanup
   Cleanup --> DueJobs
   DueJobs --> SendJobs
   SendJobs --> Health
 
   Cleanup -.-> Retention["Stop active jobs after 7 days<br/>Clear sent details after 7 days<br/>Clear failed details after 14 days<br/>Remove records after 90 days"]
 ```
+
+The cron never discovers historical events or creates missing notification jobs. Producers create jobs only as the corresponding signup, membership, invitation, or moderator award action happens.
 
 ### 4. How manual actions work
 
@@ -147,12 +143,21 @@ flowchart TB
 
   InvitationEnds --> StopInvitation
 
-  ManualContact["3A · Moderator contacts the<br/>BioBlitz winner another way"]
+  RetryWinner["3A · Moderator retries one<br/>unprepared BioBlitz email"]
+
+  CreateWinnerJob["Create that winner's job<br/>using the recorded award"]
+
+  RetryWinner --> CreateWinnerJob
+  CreateWinnerJob --> SendAgain
+
+  ManualContact["4A · Moderator contacts the<br/>BioBlitz winner another way"]
 
   StopWinnerEmail["Stop the automatic email<br/>save who handled it"]
 
   ManualContact --> StopWinnerEmail
 ```
+
+BioBlitz email jobs are created when a moderator issues each winner badge. If setup fails, the moderator can retry that one recorded prize from the Past winners controls. There is no bulk or background reconciliation of earlier awards.
 
 ## Source of truth
 
@@ -235,7 +240,7 @@ pnpm test:unit
 pnpm build
 ```
 
-`test:db` runs the SQL contract and concurrency races in a disposable PostgreSQL container. `test:notifications:local` starts the pinned local Supabase stack and exercises authenticated recovery, transactional invitations, BioBlitz recipient resolution, frozen delivery, and manual suppression without calling Resend or any production service. The smoke process uses production code with two non-production loopback hooks: a local Resend-compatible endpoint and an explicit bypass for authoritative BioBlitz award discovery.
+`test:db` runs the SQL contract and concurrency races in a disposable PostgreSQL container. `test:notifications:local` starts the pinned local Supabase stack and exercises authenticated recovery, transactional invitations, BioBlitz recipient resolution, frozen delivery, and manual suppression without calling Resend or any production service. The smoke process uses production code with a non-production local Resend-compatible endpoint.
 
 The full smoke test reserves local ports `54321`, `54322`, `3055`, and `3056`. Supabase publishes its API and database ports on all host interfaces, so run it only on a trusted network or behind a firewall. Set `KEEP_NOTIFICATION_LOCAL_STACK=1` to preserve the local database for inspection, `NOTIFICATION_LOCAL_APP_PORT=<port>` when `3055` is occupied, or `NOTIFICATION_LOCAL_RESEND_PORT=<port>` when `3056` is occupied.
 
@@ -248,14 +253,14 @@ GET https://<app-host>/api/internal/notifications/drain
 Authorization: Bearer <NOTIFICATION_CRON_SECRET>
 ```
 
-`NOTIFICATION_CRON_SECRET` must contain at least 16 characters. The route rejects a missing or invalid secret before constructing the runtime, reconciles recent BioBlitz awards, runs retention cleanup, processes a bounded batch, and returns aggregate counts only.
+`NOTIFICATION_CRON_SECRET` must contain at least 16 characters. The route rejects a missing or invalid secret before constructing the runtime, runs retention cleanup, processes a bounded batch of existing jobs, and returns aggregate counts only.
 
-`notification_outbox_health()` reports waiting, queued, processing, and uncleared dead counts plus the oldest due age. Alert on non-2xx recovery responses, repeated incomplete reconciliation, rising dead or queued counts, and oldest due age above two recovery intervals. Responses and structured logs must not include recipients, payloads, frozen content, provider bodies, or secrets.
+`notification_outbox_health()` reports waiting, queued, processing, and uncleared dead counts plus the oldest due age. Alert on non-2xx recovery responses, rising dead or queued counts, and oldest due age above two recovery intervals. Responses and structured logs must not include recipients, payloads, frozen content, provider bodies, or secrets.
 
 To stop all notification email, set `EMAIL_DISABLED=true`. This prevents new enqueue operations and provider calls without deleting durable rows. Do not drop or reverse the migration while retained rows exist.
 
 Invitation creation and notification enqueue share one transaction. Email failure never removes the invitation. Eligible owners and admins can expedite a safely retryable invitation with a database-enforced cooldown. Acceptance, cancellation, and expiry suppress unsent work.
 
-BioBlitz awards succeed independently of email. When an address is unavailable, moderators are told that manual contact may be needed. Marking an award handled records the first moderator and preserves a suppression tombstone so reconciliation cannot send it later.
+BioBlitz awards succeed independently of email. When an address is unavailable, moderators are told that manual contact may be needed. Marking an award handled records the first moderator and preserves a suppression tombstone so later retries cannot send it.
 
 The local database tests refuse remote Docker endpoints. Do not provide production Supabase credentials, Resend keys, or real recipient addresses to either test.

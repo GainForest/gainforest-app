@@ -51,23 +51,23 @@ beforeEach(() => {
     .mockResolvedValueOnce({ subjectDid: "did:plc:most", note: null, url: null, createdAt: "2026-08-06T01:00:00.000Z" })
     .mockResolvedValueOnce({ subjectDid: "did:plc:best", note: null, url: null, createdAt: "2026-08-06T01:00:00.000Z" });
   mocks.notify.mockReset();
-  mocks.notify.mockResolvedValue({ status: "sent", canMarkHandled: false });
+  mocks.notify.mockResolvedValue({ status: "sent", canMarkHandled: false, canRetry: false });
   mocks.prepare.mockReset();
   mocks.prepare
-    .mockResolvedValueOnce({ notification: { status: "delayed", canMarkHandled: true }, processOutboxId: "10000000-0000-4000-8000-000000000001" })
-    .mockResolvedValueOnce({ notification: { status: "delayed", canMarkHandled: true }, processOutboxId: "10000000-0000-4000-8000-000000000002" });
+    .mockResolvedValueOnce({ notification: { status: "delayed", canMarkHandled: true, canRetry: false }, processOutboxId: "10000000-0000-4000-8000-000000000001" })
+    .mockResolvedValueOnce({ notification: { status: "delayed", canMarkHandled: true, canRetry: false }, processOutboxId: "10000000-0000-4000-8000-000000000002" });
   mocks.process.mockReset();
-  mocks.process.mockResolvedValue({ status: "sent", canMarkHandled: false });
+  mocks.process.mockResolvedValue({ status: "sent", canMarkHandled: false, canRetry: false });
   mocks.afterCallbacks.length = 0;
   mocks.fetchData.mockReset();
   mocks.fetchData.mockResolvedValue({ definitions, awards, pendingAwards: [], repoDid: "did:plc:gf" });
   mocks.list.mockReset();
   mocks.list.mockResolvedValue(new Map([
-    ["bioblitz:4:most-observations", { status: "missing_email", canMarkHandled: true }],
-    ["bioblitz:4:best-picture", { status: "sent", canMarkHandled: false }],
+    ["bioblitz:4:most-observations", { status: "missing_email", canMarkHandled: true, canRetry: false }],
+    ["bioblitz:4:best-picture", { status: "sent", canMarkHandled: false, canRetry: false }],
   ]));
   mocks.mark.mockReset();
-  mocks.mark.mockResolvedValue({ status: "handled_manually", canMarkHandled: false });
+  mocks.mark.mockResolvedValue({ status: "handled_manually", canMarkHandled: false, canRetry: false });
 });
 
 describe("BioBlitz award notifications", () => {
@@ -97,7 +97,7 @@ describe("BioBlitz award notifications", () => {
       repoDid: "did:plc:gf",
     });
     mocks.list.mockResolvedValueOnce(new Map([
-      ["bioblitz:4:best-picture", { status: "sent", canMarkHandled: false }],
+      ["bioblitz:4:best-picture", { status: "sent", canMarkHandled: false, canRetry: false }],
     ]));
 
     const { POST } = await import("./route");
@@ -139,8 +139,8 @@ describe("BioBlitz award notifications", () => {
   it("returns the exact setup failure while preserving both durable awards", async () => {
     mocks.prepare
       .mockReset()
-      .mockResolvedValueOnce({ notification: { status: "notification_setup_failed", canMarkHandled: true }, processOutboxId: null })
-      .mockResolvedValueOnce({ notification: { status: "delayed", canMarkHandled: true }, processOutboxId: "10000000-0000-4000-8000-000000000002" });
+      .mockResolvedValueOnce({ notification: { status: "notification_setup_failed", canMarkHandled: true, canRetry: true }, processOutboxId: null })
+      .mockResolvedValueOnce({ notification: { status: "delayed", canMarkHandled: true, canRetry: false }, processOutboxId: "10000000-0000-4000-8000-000000000002" });
     const { POST } = await import("./route");
     const response = await POST(new Request("https://example.test", { method: "POST", body: JSON.stringify({ roundId: 4 }) }));
     expect(response.status).toBe(200);
@@ -148,6 +148,68 @@ describe("BioBlitz award notifications", () => {
     await expect(response.json()).resolves.toMatchObject({
       mostImagesNotification: { status: "notification_setup_failed", canMarkHandled: true },
     });
+  });
+
+  it("retries only the selected canonical recorded winner notification", async () => {
+    mocks.list.mockResolvedValue(new Map([
+      ["bioblitz:4:best-picture", { status: "not_prepared", canMarkHandled: true, canRetry: true }],
+    ]));
+    mocks.prepare
+      .mockReset()
+      .mockResolvedValue({ notification: { status: "delayed", canMarkHandled: true, canRetry: false }, processOutboxId: "10000000-0000-4000-8000-000000000003" });
+
+    const { POST } = await import("./route");
+    const response = await POST(new Request("https://example.test", { method: "POST", body: JSON.stringify({ action: "retry-notification", roundId: 4, prize: "best-picture" }) }));
+    expect(response.status).toBe(200);
+    await expect(response.json()).resolves.toMatchObject({
+      roundId: 4,
+      prize: "best-picture",
+      notification: { status: "delayed", canMarkHandled: true, canRetry: false },
+    });
+    expect(mocks.award).not.toHaveBeenCalled();
+    expect(mocks.prepare).toHaveBeenCalledTimes(1);
+    expect(mocks.prepare).toHaveBeenCalledWith({
+      roundId: 4,
+      roundLabel: "Week 4",
+      prize: "best-picture",
+      winnerDid: "did:plc:best",
+      createdAt: "2026-08-06T01:00:00.000Z",
+    });
+    expect(mocks.afterCallbacks).toHaveLength(1);
+    expect(mocks.process).not.toHaveBeenCalled();
+    await mocks.afterCallbacks[0]();
+    expect(mocks.process).toHaveBeenCalledWith("10000000-0000-4000-8000-000000000003", expect.any(Date));
+  });
+
+  it.each([
+    { status: "sent", canMarkHandled: false, canRetry: false },
+    { status: "delayed", canMarkHandled: true, canRetry: false },
+    { status: "handled_manually", canMarkHandled: false, canRetry: false },
+  ])("rejects retry for a prepared $status notification", async notification => {
+    mocks.list.mockResolvedValue(new Map([["bioblitz:4:best-picture", notification]]));
+    const { POST } = await import("./route");
+    const response = await POST(new Request("https://example.test", { method: "POST", body: JSON.stringify({ action: "retry-notification", roundId: 4, prize: "best-picture" }) }));
+    expect(response.status).toBe(409);
+    expect(mocks.award).not.toHaveBeenCalled();
+    expect(mocks.prepare).not.toHaveBeenCalled();
+  });
+
+  it("rejects a non-moderator retry before reading awards or notifications", async () => {
+    mocks.getAccess.mockResolvedValue({ isLoggedIn: true, configured: true, isModerator: false, repoDid: "did:plc:gf", session: { isLoggedIn: true, did: "did:plc:member" } });
+    const { POST } = await import("./route");
+    const response = await POST(new Request("https://example.test", { method: "POST", body: JSON.stringify({ action: "retry-notification", roundId: 4, prize: "best-picture" }) }));
+    expect(response.status).toBe(403);
+    expect(mocks.fetchData).not.toHaveBeenCalled();
+    expect(mocks.list).not.toHaveBeenCalled();
+    expect(mocks.prepare).not.toHaveBeenCalled();
+  });
+
+  it("rejects bulk historical notification reconciliation", async () => {
+    const { POST } = await import("./route");
+    const response = await POST(new Request("https://example.test", { method: "POST", body: JSON.stringify({ action: "reconcile" }) }));
+    expect(response.status).toBe(400);
+    expect(mocks.award).not.toHaveBeenCalled();
+    expect(mocks.prepare).not.toHaveBeenCalled();
   });
 
   it("marks only the canonical recorded winner notification handled", async () => {

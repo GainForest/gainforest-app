@@ -33,9 +33,9 @@ const USABLE_INVOCATION_MS = 55_000;
  *
  * GET  → per ended round, whether each of the two winner badges has been
  *        awarded yet (drives the "Award winner badges" button on /bioblitz).
- * POST → { roundId }: snapshots the round's computed winners into durable
- *        recognition awards. Nothing about recipients or the winning picture
- *        is trusted from the request body.
+ * POST → awards the round's computed winners or performs one explicit
+ *        moderator action for a recorded prize notification. Nothing about
+ *        recipients or the winning picture is trusted from the request body.
  */
 
 type RoundAwardState = {
@@ -147,36 +147,45 @@ export async function POST(request: Request): Promise<Response> {
   const rounds = endedRounds();
   const roundId = typeof body?.roundId === "number" && Number.isInteger(body.roundId) ? body.roundId : null;
   const round = roundId ? rounds.find(item => item.id === roundId) ?? null : null;
-  const action = body?.action === "reconcile" || body?.action === "mark-notification-handled" ? body.action : "award";
+  const action = body?.action === undefined
+    ? "award"
+    : body.action === "award" || body.action === "retry-notification" || body.action === "mark-notification-handled"
+      ? body.action
+      : null;
+  if (!action) {
+    return Response.json({ error: "Choose a supported BioBlitz award action." }, { status: 400 });
+  }
 
   try {
-    if (action === "reconcile") {
-      const data = await fetchInternalBadgeData(loaded.repoDid, { includeAwards: true });
-      const inputs = canonicalBioblitzAwardInputs(data, rounds);
-      const prepared = await Promise.all(inputs.map(async input => ({
-        prize: input.prize,
-        ...await prepareBioblitzWinnerNotification(input),
-      })));
-      scheduleNotificationProcessing(prepared, new Date(invocationStartedAt + USABLE_INVOCATION_MS));
-      return Response.json({ rounds: await awardStateFor(data, rounds) }, { headers: { "cache-control": "no-store" } });
-    }
-
     if (!round) {
       return Response.json({ error: "Badges can only be managed for a finished round." }, { status: 400 });
     }
 
-    if (action === "mark-notification-handled") {
-      const prize = body?.prize === "most-observations" || body?.prize === "best-picture" ? body.prize : null;
+    if (action === "retry-notification" || action === "mark-notification-handled") {
+      const prize: BioblitzPrize | null = body?.prize === "most-observations" || body?.prize === "best-picture" ? body.prize : null;
       if (!prize) return Response.json({ error: "Choose a BioBlitz prize notification." }, { status: 400 });
       const data = await fetchInternalBadgeData(loaded.repoDid, { includeAwards: true });
       const award = canonicalBioblitzAwardInputs(data, [round]).find(input => input.prize === prize);
       if (!award) return Response.json({ error: "This prize does not have a recorded winner notification." }, { status: 404 });
-      const notification = await markBioblitzNotificationHandled({
-        roundId: round.id,
-        prize,
-        winnerDid: award.winnerDid,
-        moderatorDid: loaded.moderatorDid,
-      });
+
+      let notification: BioblitzNotificationSummary;
+      if (action === "retry-notification") {
+        const summaries = await listBioblitzNotificationSummaries([award]);
+        const current = summaries.get(bioblitzNotificationSourceId(round.id, prize));
+        if (!current?.canRetry) {
+          return Response.json({ error: "This notification has already been prepared. Use its current status instead." }, { status: 409 });
+        }
+        const prepared = { prize, ...await prepareBioblitzWinnerNotification(award) };
+        scheduleNotificationProcessing([prepared], new Date(invocationStartedAt + USABLE_INVOCATION_MS));
+        notification = prepared.notification;
+      } else {
+        notification = await markBioblitzNotificationHandled({
+          roundId: round.id,
+          prize,
+          winnerDid: award.winnerDid,
+          moderatorDid: loaded.moderatorDid,
+        });
+      }
       return Response.json({ roundId: round.id, prize, notification }, { headers: { "cache-control": "no-store" } });
     }
 
