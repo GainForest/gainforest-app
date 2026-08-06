@@ -286,98 +286,152 @@ async function handleDefinitiveFailure(
   return null;
 }
 
-/**
- * Processes one already-committed claim. Orchestration must not call this when
- * globally disabled and must not reclaim an insufficient-time release again in
- * the same invocation.
- */
-export async function processNotificationClaim(
+type ClaimedRowStep =
+  | { readonly kind: "continue"; readonly row: NotificationRow }
+  | { readonly kind: "stop"; readonly result: ProcessResult };
+
+async function loadClaimedRow(
   claim: Claim,
   dependencies: NotificationWorkerDependencies,
-): Promise<ProcessResult> {
+): Promise<ClaimedRowStep> {
   let row: NotificationRow;
   try {
     row = await dependencies.repository.getClaimed(claim);
   } catch (error) {
-    if (error instanceof NotificationRepositoryError && error.code === "stale_claim") return { kind: "stale_claim" };
+    if (error instanceof NotificationRepositoryError && error.code === "stale_claim") {
+      return { kind: "stop", result: { kind: "stale_claim" } };
+    }
     throw error;
   }
 
   if (row.id !== claim.outboxId || row.processingToken !== claim.processingToken
-    || row.providerCallPhase !== claim.resumeProviderCallPhase) return { kind: "stale_claim" };
+    || row.providerCallPhase !== claim.resumeProviderCallPhase) {
+    return { kind: "stop", result: { kind: "stale_claim" } };
+  }
 
   const initialNow = dependencies.clock.now();
   if (initialNow.getTime() >= row.createdAt.getTime() + MAX_ACTIVE_AGE_MS) {
-    return expireClaimed(row, claim, dependencies, "active_retention_expired");
+    return {
+      kind: "stop",
+      result: await expireClaimed(row, claim, dependencies, "active_retention_expired"),
+    };
   }
   if (isAmbiguous(row, claim) && row.providerIdempotencyExpiresAt && initialNow >= row.providerIdempotencyExpiresAt) {
-    return expireClaimed(row, claim, dependencies, "provider_idempotency_expired");
+    return {
+      kind: "stop",
+      result: await expireClaimed(row, claim, dependencies, "provider_idempotency_expired"),
+    };
   }
 
   const initialBoundary = await boundaryOrBudget(row, claim, dependencies);
-  if (initialBoundary) return initialBoundary;
+  return initialBoundary
+    ? { kind: "stop", result: initialBoundary }
+    : { kind: "continue", row };
+}
 
-  if (row.eventType === "bioblitz_winner" && !row.recipientEmail) {
-    if (!row.recipientDid) return invalidWork(row, claim, dependencies);
-    const beforeLookup = await boundaryOrBudget(row, claim, dependencies);
-    if (beforeLookup) return beforeLookup;
-    let lookup;
-    try {
-      lookup = await dependencies.userEmailReader.lookup(row.recipientDid);
-    } catch {
-      lookup = { kind: "error" } as const;
-    }
-    const afterLookup = await boundaryOrBudget(row, claim, dependencies);
-    if (afterLookup) return afterLookup;
-    if (lookup.kind !== "ready") {
-      const code = lookup.kind === "missing" ? "recipient_missing" : "recipient_lookup_failed";
-      const values = lookup.kind === "missing" ? RECIPIENT_MISSING_BACKOFF_MS : RECIPIENT_ERROR_BACKOFF_MS;
-      return staleUnless(
-        await dependencies.repository.waitRecipient(row.id, claim.processingToken, atBackoff(dependencies.clock.now(), row, values), code),
+async function resolveClaimRecipient(
+  row: NotificationRow,
+  claim: Claim,
+  dependencies: NotificationWorkerDependencies,
+): Promise<ClaimedRowStep> {
+  if (row.eventType !== "bioblitz_winner" || row.recipientEmail) {
+    return row.recipientEmail
+      ? { kind: "continue", row }
+      : { kind: "stop", result: await invalidWork(row, claim, dependencies) };
+  }
+
+  if (!row.recipientDid) {
+    return { kind: "stop", result: await invalidWork(row, claim, dependencies) };
+  }
+  const beforeLookup = await boundaryOrBudget(row, claim, dependencies);
+  if (beforeLookup) return { kind: "stop", result: beforeLookup };
+
+  let lookup;
+  try {
+    lookup = await dependencies.userEmailReader.lookup(row.recipientDid);
+  } catch {
+    lookup = { kind: "error" } as const;
+  }
+
+  const afterLookup = await boundaryOrBudget(row, claim, dependencies);
+  if (afterLookup) return { kind: "stop", result: afterLookup };
+  if (lookup.kind !== "ready") {
+    const code = lookup.kind === "missing" ? "recipient_missing" : "recipient_lookup_failed";
+    const values = lookup.kind === "missing" ? RECIPIENT_MISSING_BACKOFF_MS : RECIPIENT_ERROR_BACKOFF_MS;
+    return {
+      kind: "stop",
+      result: await staleUnless(
+        await dependencies.repository.waitRecipient(
+          row.id,
+          claim.processingToken,
+          atBackoff(dependencies.clock.now(), row, values),
+          code,
+        ),
         { kind: "waiting_recipient", errorCode: code },
-      );
-    }
-    if (!validRecipient(lookup.email)) return invalidWork(row, claim, dependencies);
-    if (!await dependencies.repository.resolveRecipient(row.id, claim.processingToken, lookup.email)) return { kind: "stale_claim" };
-    row = { ...row, recipientEmail: lookup.email };
-    const afterResolve = await boundaryOrBudget(row, claim, dependencies);
-    if (afterResolve) return afterResolve;
-  } else if (!row.recipientEmail) {
-    return invalidWork(row, claim, dependencies);
+      ),
+    };
+  }
+  if (!validRecipient(lookup.email)) {
+    return { kind: "stop", result: await invalidWork(row, claim, dependencies) };
+  }
+  if (!await dependencies.repository.resolveRecipient(row.id, claim.processingToken, lookup.email)) {
+    return { kind: "stop", result: { kind: "stale_claim" } };
   }
 
-  if (row.eventType === "invitation") {
-    if (!row.sourceId) return invalidWork(row, claim, dependencies);
-    const beforeSource = await boundaryOrBudget(row, claim, dependencies);
-    if (beforeSource) return beforeSource;
-    let sendability;
-    try {
-      sendability = await dependencies.invitationSourceReader.getSendability(row.sourceId, dependencies.clock.now());
-    } catch {
-      sendability = { kind: "error" } as const;
-    }
-    const afterSource = await boundaryOrBudget(row, claim, dependencies);
-    if (afterSource) return afterSource;
-    if (sendability.kind !== "sendable" && isAmbiguous(row, claim)) {
-      return deferAmbiguity(row, claim, dependencies, row.providerIdempotencyExpiresAt);
-    }
-    if (sendability.kind === "error") {
-      return staleUnless(
-        await dependencies.repository.requeue(row.id, claim.processingToken, atBackoff(dependencies.clock.now(), row, RECIPIENT_ERROR_BACKOFF_MS), "recipient_lookup_failed"),
-        { kind: "requeued", errorCode: "recipient_lookup_failed" },
-      );
-    }
-    if (sendability.kind !== "sendable") {
-      return staleUnless(
-        await dependencies.repository.suppressClaimed(row.id, claim.processingToken, "invitation_not_pending"),
-        { kind: "suppressed" },
-      );
-    }
-  }
+  const resolvedRow = { ...row, recipientEmail: lookup.email };
+  const afterResolve = await boundaryOrBudget(resolvedRow, claim, dependencies);
+  return afterResolve
+    ? { kind: "stop", result: afterResolve }
+    : { kind: "continue", row: resolvedRow };
+}
 
-  const prepared = await prepareRequest(row, claim, dependencies);
-  if (!("idempotencyKey" in prepared)) return prepared;
-  const request = prepared;
+async function checkInvitationSendability(
+  row: NotificationRow,
+  claim: Claim,
+  dependencies: NotificationWorkerDependencies,
+): Promise<ProcessResult | null> {
+  if (row.eventType !== "invitation") return null;
+  if (!row.sourceId) return invalidWork(row, claim, dependencies);
+
+  const beforeSource = await boundaryOrBudget(row, claim, dependencies);
+  if (beforeSource) return beforeSource;
+  let sendability;
+  try {
+    sendability = await dependencies.invitationSourceReader.getSendability(row.sourceId, dependencies.clock.now());
+  } catch {
+    sendability = { kind: "error" } as const;
+  }
+  const afterSource = await boundaryOrBudget(row, claim, dependencies);
+  if (afterSource) return afterSource;
+  if (sendability.kind !== "sendable" && isAmbiguous(row, claim)) {
+    return deferAmbiguity(row, claim, dependencies, row.providerIdempotencyExpiresAt);
+  }
+  if (sendability.kind === "error") {
+    return staleUnless(
+      await dependencies.repository.requeue(
+        row.id,
+        claim.processingToken,
+        atBackoff(dependencies.clock.now(), row, RECIPIENT_ERROR_BACKOFF_MS),
+        "recipient_lookup_failed",
+      ),
+      { kind: "requeued", errorCode: "recipient_lookup_failed" },
+    );
+  }
+  if (sendability.kind !== "sendable") {
+    return staleUnless(
+      await dependencies.repository.suppressClaimed(row.id, claim.processingToken, "invitation_not_pending"),
+      { kind: "suppressed" },
+    );
+  }
+  return null;
+}
+
+async function deliverPreparedRequest(
+  row: NotificationRow,
+  claim: Claim,
+  dependencies: NotificationWorkerDependencies,
+  request: FrozenEmailRequest,
+): Promise<ProcessResult> {
   const provider = dependencies.provider;
   let ambiguous = isAmbiguous(row, claim);
   let expiry = row.providerIdempotencyExpiresAt;
@@ -401,7 +455,9 @@ export async function processNotificationClaim(
         ? deferAmbiguity(row, claim, dependencies, expiry)
         : release(row, claim, dependencies, { kind: "released_insufficient_time" });
     }
-    if (!await dependencies.repository.beginProviderCall(row.id, claim.processingToken, expiry)) return { kind: "stale_claim" };
+    if (!await dependencies.repository.beginProviderCall(row.id, claim.processingToken, expiry)) {
+      return { kind: "stale_claim" };
+    }
 
     // The begin transition makes the outcome potentially ambiguous. Re-read
     // time and never release or transmit if any call budget disappeared while
@@ -441,4 +497,28 @@ export async function processNotificationClaim(
   }
 
   return { kind: "stale_claim" };
+}
+
+/**
+ * Processes one already-committed claim. Orchestration must not call this when
+ * globally disabled and must not reclaim an insufficient-time release again in
+ * the same invocation.
+ */
+export async function processNotificationClaim(
+  claim: Claim,
+  dependencies: NotificationWorkerDependencies,
+): Promise<ProcessResult> {
+  const claimed = await loadClaimedRow(claim, dependencies);
+  if (claimed.kind === "stop") return claimed.result;
+
+  const recipient = await resolveClaimRecipient(claimed.row, claim, dependencies);
+  if (recipient.kind === "stop") return recipient.result;
+
+  const invitationResult = await checkInvitationSendability(recipient.row, claim, dependencies);
+  if (invitationResult) return invitationResult;
+
+  const prepared = await prepareRequest(recipient.row, claim, dependencies);
+  if (!("idempotencyKey" in prepared)) return prepared;
+
+  return deliverPreparedRequest(recipient.row, claim, dependencies, prepared);
 }

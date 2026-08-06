@@ -20,5 +20,8 @@ supabase/
 .claude/
 .pi-subagents/
 
+# Supabase CLI local state
+supabase/.branches/
+
 # Raw landing video downloads (trimmed/encoded into the same folder)
 public/assets/media/video/_raw/
