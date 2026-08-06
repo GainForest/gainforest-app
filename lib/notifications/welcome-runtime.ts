@@ -2,7 +2,7 @@ import "server-only";
 
 import { randomUUID } from "node:crypto";
 import { processNotificationById, createNotificationProcessor } from "./orchestrator";
-import { createNotificationRuntimeCore } from "./runtime";
+import { createNotificationRuntimeCore, rejectDisabledNotificationProcessing } from "./runtime";
 import type { InvitationSourceReader, UserEmailReader } from "./types";
 import { deliverWelcomeNotification, type WelcomeNotificationInput } from "./welcome";
 import { WelcomeNotificationRenderer } from "./welcome-renderer";
@@ -31,7 +31,7 @@ export function createWelcomeRuntime(environment: Environment = process.env) {
       invitationSourceReader: unusedInvitationReader,
       safetyMarginMs: WORKER_SAFETY_MARGIN_MS,
     })
-    : async () => ({ kind: "disabled" } as const);
+    : rejectDisabledNotificationProcessing;
   const producer = { config, clock, repository };
 
   return {

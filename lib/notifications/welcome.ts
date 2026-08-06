@@ -54,7 +54,6 @@ function processSummary(result: ProcessResult): {
       return { status: "dead", retryable: false, errorCode: result.errorCode };
     case "suppressed":
       return { status: "suppressed", retryable: false };
-    case "disabled":
     case "released_insufficient_time":
       return { status: "queued", retryable: true };
     case "stale_claim":

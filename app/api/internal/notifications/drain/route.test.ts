@@ -15,17 +15,16 @@ const drain = vi.fn<(_deadline: Date) => Promise<DrainOutcome>>(async () => ({
     ambiguous_deferred: 0,
     dead: 0,
     suppressed: 0,
-    disabled: 0,
     released_insufficient_time: 0,
     stale_claim: 0,
-    unexpectedFailure: 0,
+    unexpected_failure: 0,
   },
   stopped: "empty" as const,
   elapsedMs: 25,
 }));
 const health = vi.fn(async () => ({ waitingRecipient: 1, queued: 2, processing: 0, dead: 0, oldestDueAgeSeconds: 30 }));
 const createDrainRuntime = vi.fn(() => ({ drain, health }));
-const reconcileRecentBioblitzNotifications = vi.fn(async () => 2);
+const reconcileRecentBioblitzNotifications = vi.fn(async (_deadline: Date) => ({ candidates: 2, completed: true }));
 
 vi.mock("@/lib/notifications/drain-runtime", () => ({ createDrainRuntime }));
 vi.mock("@/app/_lib/bioblitz-notification-reconciliation", () => ({ reconcileRecentBioblitzNotifications }));
@@ -86,6 +85,9 @@ describe("notification drain route", () => {
     });
     expect(JSON.stringify(body)).not.toContain("@example.com");
     expect(drain).toHaveBeenCalledTimes(1);
+    const reconciliationDeadline = reconcileRecentBioblitzNotifications.mock.calls[0][0] as Date;
+    expect(reconciliationDeadline.getTime()).toBeGreaterThanOrEqual(before + 9_000);
+    expect(reconciliationDeadline.getTime()).toBeLessThanOrEqual(after + 10_000);
     const deadline = drain.mock.calls[0][0] as Date;
     expect(deadline.getTime()).toBeGreaterThanOrEqual(before + 54_000);
     expect(deadline.getTime()).toBeLessThanOrEqual(after + 55_000);

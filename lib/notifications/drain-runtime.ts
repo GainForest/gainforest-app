@@ -4,7 +4,7 @@ import { randomUUID } from "node:crypto";
 import { SupabaseInvitationSourceReader } from "./invitation-source";
 import { drainNotifications, createNotificationProcessor } from "./orchestrator";
 import { ApplicationNotificationRenderer } from "./renderer";
-import { createNotificationRuntimeCore } from "./runtime";
+import { createNotificationRuntimeCore, rejectDisabledNotificationProcessing } from "./runtime";
 import { SupabaseUserEmailReader } from "./user-email";
 
 type Environment = Readonly<Record<string, string | undefined>>;
@@ -23,7 +23,7 @@ export function createDrainRuntime(environment: Environment = process.env) {
       invitationSourceReader: new SupabaseInvitationSourceReader(),
       safetyMarginMs: WORKER_SAFETY_MARGIN_MS,
     })
-    : async () => ({ kind: "disabled" } as const);
+    : rejectDisabledNotificationProcessing;
 
   return {
     health: () => repository.health(),
