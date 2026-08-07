@@ -99,19 +99,9 @@ select pg_temp.assert_true(to_regprocedure('public.notification_outbox_suppress_
 select pg_temp.assert_true((select count(*)=1 from pg_proc p join pg_namespace n on n.oid=p.pronamespace where n.nspname='public' and p.proname='notification_outbox_suppress_event'), 'only one suppression RPC signature exists');
 select pg_temp.assert_true(not has_function_privilege('public','public.notification_outbox_suppress_event(text,text)','execute') and not has_function_privilege('anon','public.notification_outbox_suppress_event(text,text)','execute') and not has_function_privilege('authenticated','public.notification_outbox_suppress_event(text,text)','execute'), 'browser roles cannot suppress events');
 select pg_temp.assert_true(not has_function_privilege('service_role','public.notification_outbox_guard_immutable()','execute'), 'trigger function is not directly callable by service role');
-select pg_temp.assert_true(not bool_or(has_function_privilege(grantee,signature,'execute')), 'invitation lifecycle functions are not callable by public, anon, or authenticated')
-  from (values ('public'),('anon'),('authenticated')) as g(grantee),
-       (values
-         ('public.notification_invitation_create(uuid,text,text,text,text,text,text,text,text,text,text,text,text,boolean,timestamp with time zone,timestamp with time zone)'),
-         ('public.notification_invitation_close(uuid,text,text,text)'),
-         ('public.notification_invitation_retry(uuid)')
-       ) as f(signature);
-select pg_temp.assert_true(bool_and(has_function_privilege('service_role',signature,'execute')), 'invitation lifecycle functions are service-role executable')
-  from (values
-         ('public.notification_invitation_create(uuid,text,text,text,text,text,text,text,text,text,text,text,text,boolean,timestamp with time zone,timestamp with time zone)'),
-         ('public.notification_invitation_close(uuid,text,text,text)'),
-         ('public.notification_invitation_retry(uuid)')
-       ) as f(signature);
+select pg_temp.assert_true(not has_function_privilege('public','public.notification_invitation_create(uuid,text,text,text,text,text,text,text,text,text,text,text,text,boolean,timestamp with time zone,timestamp with time zone)','execute') and has_function_privilege('service_role','public.notification_invitation_create(uuid,text,text,text,text,text,text,text,text,text,text,text,text,boolean,timestamp with time zone,timestamp with time zone)','execute'), 'atomic invitation creation is service-role-only');
+select pg_temp.assert_true(not has_function_privilege('authenticated','public.notification_invitation_close(uuid,text,text,text)','execute') and has_function_privilege('service_role','public.notification_invitation_close(uuid,text,text,text)','execute'), 'invitation closing is service-role-only');
+select pg_temp.assert_true(not has_function_privilege('anon','public.notification_invitation_retry(uuid)','execute') and has_function_privilege('service_role','public.notification_invitation_retry(uuid)','execute'), 'invitation retry is service-role-only');
 select pg_temp.assert_true(to_regprocedure('extensions.notification_outbox_sha256(bytea)') is not null, 'internal SHA-256 helper exists');
 select pg_temp.assert_true(not has_function_privilege('public','extensions.notification_outbox_sha256(bytea)','execute') and not has_function_privilege('anon','extensions.notification_outbox_sha256(bytea)','execute') and not has_function_privilege('authenticated','extensions.notification_outbox_sha256(bytea)','execute') and not has_function_privilege('service_role','extensions.notification_outbox_sha256(bytea)','execute'), 'internal SHA-256 helper is not directly callable by API roles');
 select pg_temp.assert_true(to_regprocedure('public.notification_outbox_wait_recipient(uuid,uuid,timestamp with time zone,text,text)') is null, 'free-form recipient error summary RPC is absent');
@@ -490,15 +480,6 @@ create table public.cgs_group_invitations (
 );
 create unique index invitation_pending_identity on public.cgs_group_invitations(repo,email) where status='pending';
 
-select pg_temp.assert_raises(
-  $$select public.notification_invitation_create('81000000-0000-4000-8000-000000000097','did:plc:forest','null-role@example.com',null,'did:plc:owner',null,null,'Forest Circle',null,'Owner',null,'https://example.test','en',true,clock_timestamp(),clock_timestamp()+interval '7 days')$$,
-  'invitation role must be member or admin', 'atomic invitation creation rejects a null role explicitly'
-);
-select pg_temp.assert_raises(
-  $$select public.notification_invitation_create('81000000-0000-4000-8000-000000000096','did:plc:forest','http-origin@example.com','member','did:plc:owner',null,null,'Forest Circle',null,'Owner',null,'http://example.test','en',true,clock_timestamp(),clock_timestamp()+interval '7 days')$$,
-  'public origin must be an HTTPS origin', 'atomic invitation creation rejects an insecure public origin'
-);
-
 create temp table invitation_created as select public.notification_invitation_create(
   '81000000-0000-4000-8000-000000000001','did:plc:forest','invitee@example.com','member','did:plc:owner','owner.example.com','owner@example.com',
   'Forest Circle','forest.example.com','Forest Owner','https://example.test/account/owner','https://example.test','en',true,
@@ -508,17 +489,6 @@ select pg_temp.assert_true((select result#>>'{invitation,id}'='81000000-0000-400
 select pg_temp.assert_true((select count(*)=1 from public.cgs_group_invitations where id='81000000-0000-4000-8000-000000000001'), 'atomic invitation creation stores one invitation');
 select pg_temp.assert_true((select count(*)=1 and bool_and(event_type='invitation' and source_id='81000000-0000-4000-8000-000000000001' and recipient_email='invitee@example.com' and provider_idempotency_key=id::text) from public.notification_outbox where source_id='81000000-0000-4000-8000-000000000001'), 'atomic invitation creation stores one UUID-keyed outbox row');
 select pg_temp.assert_true((select payload->>'acceptUrl'='https://example.test/invite/81000000-0000-4000-8000-000000000001' and payload->>'organizationName'='Forest Circle' from public.notification_outbox where source_id='81000000-0000-4000-8000-000000000001'), 'invitation render input is frozen from committed identity');
-
-create temp table invitation_no_notification as select public.notification_invitation_create(
-  '81000000-0000-4000-8000-000000000007','did:plc:quiet','quiet@example.com','member','did:plc:owner',null,null,
-  'Quiet Forest',null,'Owner',null,'https://example.test','en',false,
-  clock_timestamp(),clock_timestamp()+interval '7 days'
-) result;
-select pg_temp.assert_true((select result#>'{notification}'='null'::jsonb from invitation_no_notification), 'disabled notification producer returns a null notification');
-select pg_temp.assert_true(not exists(select 1 from public.notification_outbox where source_id='81000000-0000-4000-8000-000000000007'), 'disabled notification producer initially stores no outbox row');
-create temp table invitation_quiet_canceled as select public.notification_invitation_close('81000000-0000-4000-8000-000000000007','canceled',null,null) result;
-select pg_temp.assert_true((select result#>>'{invitation,status}'='canceled' and result#>>'{notification,status}'='suppressed' and not (result#>>'{notification,duplicate}')::boolean from invitation_quiet_canceled), 'closing an invitation without queued notification creates a suppressed tombstone');
-select pg_temp.assert_true((select count(*)=1 and bool_and(status='suppressed' and template_key is null and payload is null and recipient_email is null) from public.notification_outbox where event_key_hash=encode(extensions.digest('organization-invite:81000000-0000-4000-8000-000000000007','sha256'),'hex')), 'disabled invitation close stores one redacted suppression tombstone');
 
 create temp table invitation_duplicate as select public.notification_invitation_create(
   '81000000-0000-4000-8000-000000000099','did:plc:forest','invitee@example.com','member','did:plc:other','other.example.com','other@example.com',

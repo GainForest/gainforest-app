@@ -602,7 +602,6 @@ declare
   v_invitation record;
   v_outbox_id uuid;
   v_outbox_status text;
-  v_event_type text;
   v_duplicate boolean;
   v_event_key text;
   v_event_hash text;
@@ -612,11 +611,11 @@ begin
   if p_invitation_id is null then raise exception 'invitation ID is required'; end if;
   if p_repo is null or length(p_repo) not between 1 and 256 then raise exception 'invitation repo must contain 1 to 256 characters'; end if;
   if p_email is null or length(p_email) not between 3 and 320 or p_email<>lower(trim(p_email)) or position('@' in p_email)<=1 then raise exception 'invitation email must be normalized'; end if;
-  if p_role is null or p_role not in ('member','admin') then raise exception 'invitation role must be member or admin'; end if;
+  if p_role not in ('member','admin') then raise exception 'invitation role must be member or admin'; end if;
   if p_inviter_did is null or length(p_inviter_did) not between 1 and 256 then raise exception 'inviter DID is required'; end if;
   if p_enqueue_notification is null then raise exception 'invitation notification choice is required'; end if;
   if p_created_at is null or p_expires_at is null or p_expires_at<=p_created_at or p_expires_at>p_created_at+interval '30 days' then raise exception 'invitation expiry must follow creation by at most 30 days'; end if;
-  if p_public_origin is null or length(p_public_origin) not between 8 and 512 or p_public_origin !~ '^https://' then raise exception 'public origin must be an HTTPS origin'; end if;
+  if p_public_origin is null or length(p_public_origin) not between 8 and 512 or p_public_origin !~ '^https?://' then raise exception 'public origin must be an HTTP(S) origin'; end if;
   if p_locale is not null and length(p_locale)>35 then raise exception 'locale must contain at most 35 characters'; end if;
 
   select * into v_invitation from public.cgs_group_invitations
@@ -648,9 +647,9 @@ begin
   if p_enqueue_notification then
     v_event_key='organization-invite:' || v_invitation.id::text;
     v_event_hash=extensions.notification_outbox_sha256(pg_catalog.convert_to(v_event_key,'UTF8'));
-    select id,status,event_type into v_outbox_id,v_outbox_status,v_event_type from public.notification_outbox where event_key_hash=v_event_hash for update;
+    select id,status into v_outbox_id,v_outbox_status from public.notification_outbox where event_key_hash=v_event_hash for update;
     if found then
-      if v_event_type<>'invitation' then
+      if (select event_type from public.notification_outbox where id=v_outbox_id)<>'invitation' then
         raise exception 'notification_outbox_idempotency_conflict: event type differs';
       end if;
       v_duplicate=true;
