@@ -232,7 +232,12 @@
       "mockCanceled": "Invitación simulada eliminada de esta vista previa."
     },
     "myCardsTitle": "Galería Mis cartas",
-    "myCardsDescription": "Previsualiza la galería de cartas coleccionadas con coleccionables de muestra."
+    "myCardsDescription": "Previsualiza la galería de cartas coleccionadas con coleccionables de muestra.",
+    "shop": {
+      "cardTitle": "Página de tienda Bumimic",
+      "cardDescription": "Previsualiza la página de próximamente para el dispositivo de GainForest con muchos sensores para monitorear la naturaleza.",
+      "mockBadge": "Vista previa · sin pago"
+    }
   },
   "myCards": {
     "eyebrow": "Coleccionables",

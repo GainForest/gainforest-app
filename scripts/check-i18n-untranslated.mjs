@@ -5,7 +5,7 @@ import ts from "typescript";
 const projectRoot = process.cwd();
 const locales = ["es", "id", "pt", "sw"];
 const allLocales = ["en", ...locales];
-const namespaces = ["root", "audiomothGuide", "bumicert", "cart", "common", "deleteAccount", "legacy", "marketplace", "modals", "privacy", "tainaGuide", "upload"];
+const namespaces = ["root", "audiomothGuide", "bumicert", "cart", "common", "deleteAccount", "legacy", "marketplace", "modals", "privacy", "shop", "tainaGuide", "upload"];
 
 const allowedExactValues = new Set([
   "",
@@ -16,6 +16,9 @@ const allowedExactValues = new Set([
   "Drone",
   "Bumicert",
   "Bumicerts",
+  "Bumimic",
+  // Spelled identically in several supported locales.
+  "Kenya",
   "Bumicerts — Bumicerts",
   "Cert",
   "Certs",

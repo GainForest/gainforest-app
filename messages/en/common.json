@@ -313,7 +313,8 @@
       "status": "Status",
       "lexicons": "Data schemas",
       "privacyPolicy": "Privacy Policy",
-      "deleteAccount": "Delete Account"
+      "deleteAccount": "Delete Account",
+      "shop": "Shop"
     }
   },
   "browseGrid": {

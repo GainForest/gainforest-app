@@ -1,0 +1,86 @@
+{
+  "meta": {
+    "title": "Bumimic — perekam terbuka untuk mendengarkan alam",
+    "description": "Perekam suara terbuka dan berbiaya rendah untuk pemantauan keanekaragaman hayati. Unit prototipe pertama tiba pada pertengahan September."
+  },
+  "hero": {
+    "title": "Bumimic",
+    "accent": "untuk mendengarkan alam",
+    "lede": "Perekam terbuka dan berbiaya rendah yang mendengarkan sebuah tempat sepanjang hari, menyimpan audionya di kartu memori, dan mengirim pemberitahuan singkat lewat radio jarak jauh.",
+    "imageAlt": "Lanskap hutan berkabut pada cahaya pertama"
+  },
+  "prototype": {
+    "title": "Belum dijual",
+    "body": "Bumimic masih berupa prototipe yang berfungsi. Unit pertama tiba pada pertengahan September untuk uji lapangan, dan rancangannya masih harus lulus pemeriksaan suara, radio, daya, serta keselamatan sebelum bisa dipesan.",
+    "action": "Tanya soal uji lapangan"
+  },
+  "capabilities": {
+    "title": "Apa yang dilakukannya",
+    "items": {
+      "record": {
+        "title": "Merekam sepanjang hari",
+        "body": "Hingga 384.000 sampel per detik pada 16 bit, dengan mode setengah laju ketika penempatan yang lebih lama lebih penting daripada frekuensi tertinggi. Audio ditulis langsung ke kartu microSD."
+      },
+      "sense": {
+        "title": "Membaca lingkungan sekitarnya",
+        "body": "Suhu, kelembapan, cahaya, tekanan udara, dan gerakan direkam bersama suaranya, sehingga setiap temuan datang lengkap dengan kondisi yang menghasilkannya."
+      },
+      "radio": {
+        "title": "Mengirim pemberitahuan singkat",
+        "body": "Temuan dan kondisi baterai dikirim lewat radio jarak jauh, jadi sebuah lokasi bisa dipantau tanpa dikunjungi. Rekamannya sendiri tetap ada di kartu."
+      },
+      "power": {
+        "title": "Berjalan dengan baterai biasa",
+        "body": "Tiga baterai AA atau AAA, dengan USB-C untuk penyiapan. Di antara perekaman, papannya dirancang hanya menarik beberapa per sejuta ampere."
+      }
+    }
+  },
+  "board": {
+    "title": "Papan prototipe",
+    "body": "Rancangannya terbuka sejak awal: skema, tata letak papan, berkas produksi, dan firmware dikembangkan secara terbuka, agar tim lapangan bisa merakit, memperbaiki, dan menyesuaikannya sendiri.",
+    "caption": "Papan prototipe Bumimic, 57 × 47 mm — sedikit lebih kecil daripada AudioMoth di kedua sisinya.",
+    "imageAlt": "Render papan rangkaian prototipe Bumimic, memperlihatkan slot microSD, modul radio, dan sensornya",
+    "repoLink": "Lihat berkas rancangan",
+    "repoPending": "Berkas rancangan akan dipublikasikan setelah prototipe melewati uji lapangan."
+  },
+  "cost": {
+    "title": "Perkiraan biayanya",
+    "board": {
+      "value": "$13–18",
+      "label": "Papan dan perakitan",
+      "note": "Elektronik dan perakitan untuk produksi sekitar 1.000 unit."
+    },
+    "unit": {
+      "value": "$20–30",
+      "label": "Unit lapangan lengkap",
+      "note": "Seluruh elektronik untuk perekam yang siap dipasang, sebelum wadah dan baterai."
+    },
+    "excludes": {
+      "title": "Tidak termasuk dalam angka tersebut",
+      "items": {
+        "microsd": "Kartu memori",
+        "antenna": "Antena",
+        "batteries": "Baterai",
+        "enclosure": "Wadah",
+        "certification": "Sertifikasi",
+        "freight": "Pengiriman",
+        "testing": "Pengujian produksi"
+      }
+    },
+    "note": "Ini perkiraan untuk perencanaan, bukan penawaran dari pemasok. Harga sebenarnya bergantung pada konfigurasi, negara tujuan pengiriman, dan penawaran produsen saat kami memesan."
+  },
+  "regions": {
+    "title": "Dibuat untuk tempat tertentu",
+    "body": "Aturan radio berbeda di setiap negara, jadi setiap unit dibuat dan diberi label sesuai tempat pemasangannya. Produksi pertama ditujukan untuk ketiga negara ini.",
+    "items": {
+      "kenya": "Kenya",
+      "brazil": "Brasil",
+      "philippines": "Filipina"
+    }
+  },
+  "cta": {
+    "title": "Tertarik dengan Bumimic?",
+    "description": "Ceritakan tentang lokasi Anda dan bagaimana Anda akan memakai perekam di sana. Kami mencari tim lapangan untuk menguji unit pertama.",
+    "contact": "Hubungi GainForest"
+  }
+}

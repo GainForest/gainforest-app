@@ -17,6 +17,7 @@ const DATA_LINKS = [
   { href: "/organizations", key: "organizations" },
   { href: "/observations", key: "observations" },
   { href: "/bioblitz", key: "bioblitz" },
+  { href: "/shop", key: "shop" },
   { href: "/docs/lexicons", key: "lexicons" },
   { href: "/globe", key: "greenGlobe" },
   { href: STATUS_URL, key: "status" },

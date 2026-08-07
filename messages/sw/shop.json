@@ -1,0 +1,86 @@
+{
+  "meta": {
+    "title": "Bumimic — kirekodi huria cha kusikiliza mazingira",
+    "description": "Kirekodi cha sauti huria na cha gharama nafuu kwa ufuatiliaji wa bioanuwai. Vifaa vya kwanza vya mfano vinawasili katikati ya Septemba."
+  },
+  "hero": {
+    "title": "Bumimic",
+    "accent": "kwa kusikiliza mazingira",
+    "lede": "Kirekodi huria na cha gharama nafuu kinachosikiliza eneo saa zote, kinaweka sauti kwenye kadi ya kumbukumbu, na kinatuma taarifa fupi kwa redio ya masafa marefu.",
+    "imageAlt": "Mandhari ya msitu wenye ukungu mwanzoni wa mwanga"
+  },
+  "prototype": {
+    "title": "Hakiuzwi bado",
+    "body": "Bumimic ni kifaa cha mfano kinachofanya kazi. Vifaa vya kwanza vinawasili katikati ya Septemba kwa majaribio ya shambani, na muundo bado unatakiwa kupita vipimo vya sauti, redio, nishati na usalama kabla mtu aweze kuagiza.",
+    "action": "Uliza kuhusu majaribio ya shambani"
+  },
+  "capabilities": {
+    "title": "Kinachofanya",
+    "items": {
+      "record": {
+        "title": "Kinarekodi saa zote",
+        "body": "Hadi sampuli 384,000 kwa sekunde kwa biti 16, na hali ya nusu kasi wakati muda mrefu shambani ni muhimu kuliko masikizo ya juu zaidi. Sauti inaandikwa moja kwa moja kwenye kadi ya microSD."
+      },
+      "sense": {
+        "title": "Kinasoma mazingira yake",
+        "body": "Joto, unyevu, mwanga, mgandamizo wa hewa na mwendo yanarekodiwa pamoja na sauti, hivyo kila kilichoonekana kinafika na hali zilizokizalisha."
+      },
+      "radio": {
+        "title": "Kinatuma taarifa fupi",
+        "body": "Yaliyoonekana na hali ya betri yanatumwa kwa redio ya masafa marefu, hivyo eneo linaweza kufuatiliwa bila kutembelewa. Rekodi zenyewe zinabaki kwenye kadi."
+      },
+      "power": {
+        "title": "Kinatumia betri za kawaida",
+        "body": "Betri tatu za AA au AAA, pamoja na USB-C kwa usanidi. Kati ya kurekodi, bodi imeundwa kutumia sehemu chache tu za milioni ya ampea."
+      }
+    }
+  },
+  "board": {
+    "title": "Bodi ya kifaa cha mfano",
+    "body": "Muundo ni huria kuanzia mwanzo: mchoro, mpangilio wa bodi, faili za uzalishaji na programu ya kifaa vinatengenezwa hadharani, ili timu za shambani ziweze kuunda, kutengeneza na kubadilisha zenyewe.",
+    "caption": "Bodi ya kifaa cha mfano cha Bumimic, 57 × 47 mm — ndogo kidogo kuliko AudioMoth kwa pande zote mbili.",
+    "imageAlt": "Mchoro wa bodi ya mzunguko ya kifaa cha mfano cha Bumimic, ikionyesha nafasi ya microSD, moduli ya redio na sensori",
+    "repoLink": "Tazama faili za muundo",
+    "repoPending": "Faili za muundo zitawekwa hadharani baada ya kifaa cha mfano kupita majaribio ya shambani."
+  },
+  "cost": {
+    "title": "Gharama tunayotarajia",
+    "board": {
+      "value": "$13–18",
+      "label": "Bodi na uunganishaji",
+      "note": "Elektroniki na uunganishaji kwa uzalishaji wa takriban vipande 1,000."
+    },
+    "unit": {
+      "value": "$20–30",
+      "label": "Kifaa kamili cha shambani",
+      "note": "Elektroniki yote ya kirekodi kilicho tayari kutumika, kabla ya kifuniko na betri."
+    },
+    "excludes": {
+      "title": "Hazijumuishwi katika takwimu hizo",
+      "items": {
+        "microsd": "Kadi ya kumbukumbu",
+        "antenna": "Antena",
+        "batteries": "Betri",
+        "enclosure": "Kifuniko",
+        "certification": "Uthibitisho",
+        "freight": "Usafirishaji",
+        "testing": "Upimaji wa uzalishaji"
+      }
+    },
+    "note": "Hizi ni makadirio ya mipango, si bei kutoka kwa wasambazaji. Bei za kweli zinategemea usanidi, nchi inakoenda, na bei watakazotoa wazalishaji tunapoagiza."
+  },
+  "regions": {
+    "title": "Kimeundwa kwa eneo maalum",
+    "body": "Kanuni za redio zinatofautiana kati ya nchi, hivyo kila kifaa kinaundwa na kuwekwa alama kwa eneo litakapotumika. Uzalishaji wa kwanza unalenga nchi hizi tatu.",
+    "items": {
+      "kenya": "Kenya",
+      "brazil": "Brazili",
+      "philippines": "Ufilipino"
+    }
+  },
+  "cta": {
+    "title": "Unavutiwa na Bumimic?",
+    "description": "Tuambie kuhusu eneo lako na jinsi utakavyotumia kirekodi hapo. Tunatafuta timu za shambani kujaribu vifaa vya kwanza.",
+    "contact": "Wasiliana na GainForest"
+  }
+}

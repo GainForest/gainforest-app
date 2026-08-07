@@ -232,7 +232,12 @@
       "mockCanceled": "Undangan contoh dihapus dari pratinjau ini."
     },
     "myCardsTitle": "Galeri Kartu Saya",
-    "myCardsDescription": "Pratinjau galeri kartu yang telah dikumpulkan dengan contoh koleksi."
+    "myCardsDescription": "Pratinjau galeri kartu yang telah dikumpulkan dengan contoh koleksi.",
+    "shop": {
+      "cardTitle": "Halaman toko Bumimic",
+      "cardDescription": "Pratinjau halaman segera hadir untuk perangkat GainForest yang kaya sensor untuk pemantauan alam.",
+      "mockBadge": "Pratinjau · tanpa pembayaran"
+    }
   },
   "myCards": {
     "eyebrow": "Koleksi",
