@@ -603,7 +603,23 @@
         "action": "Award winner badges",
         "actionMissing": "Award missing badges",
         "done": "Winner badges awarded",
-        "error": "Could not award the badges. Try again."
+        "error": "Could not update the badges or email status. Try again.",
+        "notification": {
+          "mostObservations": "Most observations email",
+          "bestPicture": "Best picture email",
+          "sent": "Sent",
+          "delayed": "Delayed — we’ll keep trying",
+          "missing_email": "No account email found; contact the winner manually",
+          "lookup_failed": "Email lookup failed; try later or contact the winner manually",
+          "cannot_send": "Cannot be sent automatically",
+          "handled_manually": "Handled manually",
+          "not_prepared": "Email not prepared; retry or handle it manually",
+          "notification_setup_failed": "Email setup failed; retry or handle it manually",
+          "retry": "Retry notification",
+          "retrying": "Retrying…",
+          "markHandled": "Mark handled manually",
+          "marking": "Marking…"
+        }
       }
     },
     "map": {

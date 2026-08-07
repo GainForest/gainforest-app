@@ -603,7 +603,23 @@
         "action": "Toa beji za washindi",
         "actionMissing": "Toa beji zilizosalia",
         "done": "Beji za washindi zimetolewa",
-        "error": "Imeshindikana kutoa beji. Jaribu tena."
+        "error": "Imeshindikana kusasisha beji au hali ya barua pepe. Jaribu tena.",
+        "notification": {
+          "mostObservations": "Barua pepe ya uchunguzi mwingi zaidi",
+          "bestPicture": "Barua pepe ya picha bora",
+          "sent": "Imetumwa",
+          "delayed": "Imechelewa — tutaendelea kujaribu",
+          "missing_email": "Hakuna barua pepe ya akaunti; wasiliana na mshindi mwenyewe",
+          "lookup_failed": "Utafutaji wa barua pepe umeshindwa; jaribu baadaye au wasiliana na mshindi",
+          "cannot_send": "Haiwezi kutumwa kiotomatiki",
+          "handled_manually": "Imeshughulikiwa mwenyewe",
+          "not_prepared": "Barua pepe haijaandaliwa; jaribu tena au ishughulikie mwenyewe",
+          "notification_setup_failed": "Mpangilio wa barua pepe umeshindwa; jaribu tena au ishughulikie mwenyewe",
+          "retry": "Jaribu arifa tena",
+          "retrying": "Inajaribu tena…",
+          "markHandled": "Weka alama kuwa imeshughulikiwa",
+          "marking": "Inaweka alama…"
+        }
       }
     },
     "map": {

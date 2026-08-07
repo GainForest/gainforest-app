@@ -205,6 +205,32 @@
         }
       }
     },
+    "bioblitzNotifications": {
+      "title": "Status email pemenang BioBlitz",
+      "description": "Baris status produksi untuk email pemenang, termasuk email akun yang hilang dan tindak lanjut manual.",
+      "mockBadge": "Mode contoh · tanpa email",
+      "mockNote": "Semua pemenang adalah data contoh. Menandai selesai hanya mengubah memori.",
+      "cardTitle": "Email pemenang BioBlitz",
+      "cardDescription": "Pratinjau setiap status pengiriman dan kontak manual untuk moderator.",
+      "fixtureLabel": "Email pemenang"
+    },
+    "invitationDelivery": {
+      "title": "Status pengiriman undangan",
+      "description": "Baris undangan tertunda produksi untuk email terkirim, tertunda, tautan manual, dan tindakan yang dibatasi peran.",
+      "mockBadge": "Mode contoh · tanpa email",
+      "mockNote": "Semua alamat adalah data contoh. Coba lagi, salin, dan batal hanya memperbarui memori tanpa memanggil layanan nyata.",
+      "cardTitle": "Pengiriman email undangan",
+      "cardDescription": "Pratinjau status, percobaan ulang aman, salin tautan, dan pembatalan undangan organisasi.",
+      "scenarios": {
+        "sent": "Pemilik · email terkirim",
+        "delayed": "Pemilik · masalah pengiriman sementara",
+        "manual": "Pemilik · bagikan tautan langsung",
+        "admin": "Undangan admin · tindakan dibatasi"
+      },
+      "mockRetried": "Percobaan ulang contoh selesai tanpa mengirim email.",
+      "mockCopied": "Tautan contoh disalin tanpa menggunakan papan klip.",
+      "mockCanceled": "Undangan contoh dihapus dari pratinjau ini."
+    },
     "myCardsTitle": "Galeri Kartu Saya",
     "myCardsDescription": "Pratinjau galeri kartu yang telah dikumpulkan dengan contoh koleksi."
   },

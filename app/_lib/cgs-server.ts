@@ -127,6 +127,31 @@ export async function fetchCgsMembersWithCookie({
   };
 }
 
+/** Resolve one member's current role across every group-service page. */
+export async function fetchCgsMemberRoleWithCookie({
+  repo,
+  cookie,
+  did,
+}: {
+  repo: string;
+  cookie: string | null;
+  did: string;
+}): Promise<CgsServerRole | null> {
+  let cursor: string | null = null;
+  const seenCursors = new Set<string>();
+  do {
+    const page = await fetchCgsMembersWithCookie({ repo, cookie, cursor, limit: 100 });
+    const role = page.members.find(member => member.did === did)?.role;
+    if (role) return role;
+
+    const next = page.cursor ?? null;
+    if (!next || seenCursors.has(next)) return null;
+    seenCursors.add(next);
+    cursor = next;
+  } while (cursor);
+  return null;
+}
+
 export async function fetchCgsMembersForRequest(repo: string): Promise<CgsMembersResponse> {
   const headerList = await headers();
   return fetchCgsMembersWithCookie({ repo, cookie: headerList.get("cookie") });

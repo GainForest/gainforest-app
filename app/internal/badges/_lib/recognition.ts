@@ -29,6 +29,13 @@ export class RecognitionMutationError extends Error {
 
 type CgsMutationResult = { uri?: string; cid?: string; error?: string; message?: string };
 
+export type RecognitionAwardSnapshot = {
+  subjectDid: string;
+  note: string | null;
+  url: string | null;
+  createdAt: string;
+};
+
 type CgsCreatePayload = {
   operation: "createRecord";
   collection: string;
@@ -83,6 +90,18 @@ function matchingAwards(data: Pick<StrictInternalBadgeData, "definitions" | "awa
   return data.awards.filter((award) => definitionUris.has(award.badge.uri));
 }
 
+function awardSnapshot(award: BadgeAwardRecord): RecognitionAwardSnapshot {
+  return { subjectDid: award.subjectDid!, note: award.note, url: award.url, createdAt: award.createdAt };
+}
+
+function existingAward(
+  data: Pick<StrictInternalBadgeData, "definitions" | "awards">,
+  key: RecognitionBadgeKey,
+  subjectDid: string,
+): BadgeAwardRecord | null {
+  return matchingAwards(data, key).find(award => award.subjectDid === subjectDid) ?? null;
+}
+
 function isSingleWinnerPrize(key: RecognitionBadgeKey): boolean {
   const parsed = parseRecognitionBadgeKey(key);
   return parsed?.family === "bioblitz" && parsed.roundId !== null;
@@ -106,10 +125,10 @@ function assertAwardCanBeCreated(
   subjectDid: string,
 ): boolean {
   const awards = matchingAwards(data, key);
-  if (awards.some((award) => award.subjectDid === subjectDid)) return false;
-  if (isSingleWinnerPrize(key) && awards.length > 0) {
+  if (isSingleWinnerPrize(key) && awards.some(award => award.subjectDid !== subjectDid)) {
     throw new RecognitionMutationError("This BioBlitz prize was already awarded to another account.", 409);
   }
+  if (awards.some(award => award.subjectDid === subjectDid)) return false;
   return true;
 }
 
@@ -165,7 +184,7 @@ export async function awardRecognition(
   key: string,
   note?: string,
   url?: string,
-): Promise<void> {
+): Promise<RecognitionAwardSnapshot> {
   if (!isRecognitionBadgeKey(key)) throw new RecognitionMutationError("Unknown badge.", 400);
   const normalizedKey = canonicalKey(key);
   const parsedKey = parseRecognitionBadgeKey(normalizedKey);
@@ -174,15 +193,21 @@ export async function awardRecognition(
   }
 
   let data = await fetchInternalBadgeDataStrict(repoDid, { includeAwards: true });
-  if (!assertAwardCanBeCreated(data, normalizedKey, subjectDid)) return;
+  if (!assertAwardCanBeCreated(data, normalizedKey, subjectDid)) {
+    return awardSnapshot(existingAward(data, normalizedKey, subjectDid)!);
+  }
   const definition = findDefinition(data.definitions, normalizedKey)
     ?? await ensureDefinition(repoDid, cookie, normalizedKey);
 
   // Read directly from the group's PDS after definition creation, so a stale
   // indexer or failed list request can never be interpreted as an empty award.
   data = await fetchInternalBadgeDataStrict(repoDid, { includeAwards: true });
-  if (!assertAwardCanBeCreated(data, normalizedKey, subjectDid)) return;
+  if (!assertAwardCanBeCreated(data, normalizedKey, subjectDid)) {
+    return awardSnapshot(existingAward(data, normalizedKey, subjectDid)!);
+  }
 
+  const createdAt = new Date().toISOString();
+  const resolvedNote = note ?? recognitionBadgeDescription(normalizedKey);
   try {
     await cgsMutate(repoDid, cookie, {
       operation: "createRecord",
@@ -192,18 +217,21 @@ export async function awardRecognition(
         $type: BADGE_AWARD_COLLECTION,
         badge: { uri: definition.uri, cid: definition.cid },
         subject: { $type: "app.certified.defs#did", did: subjectDid },
-        note: note ?? recognitionBadgeDescription(normalizedKey),
+        note: resolvedNote,
         ...(url ? { url } : {}),
-        createdAt: new Date().toISOString(),
+        createdAt,
       },
     });
   } catch (error) {
     // If another moderator won the atomic rkey claim first, recover only when
     // it awarded this same account; otherwise surface the conflicting award.
     const after = await fetchInternalBadgeDataStrict(repoDid, { includeAwards: true });
-    if (!assertAwardCanBeCreated(after, normalizedKey, subjectDid)) return;
+    if (!assertAwardCanBeCreated(after, normalizedKey, subjectDid)) {
+      return awardSnapshot(existingAward(after, normalizedKey, subjectDid)!);
+    }
     throw error;
   }
+  return { subjectDid, note: resolvedNote, url: url ?? null, createdAt };
 }
 
 /** Revoke a recognition badge from an account (idempotent). Deletes every

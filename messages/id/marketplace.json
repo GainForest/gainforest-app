@@ -603,7 +603,23 @@
         "action": "Berikan lencana pemenang",
         "actionMissing": "Berikan lencana yang tersisa",
         "done": "Lencana pemenang telah diberikan",
-        "error": "Tidak dapat memberikan lencana. Coba lagi."
+        "error": "Tidak dapat memperbarui lencana atau status email. Coba lagi.",
+        "notification": {
+          "mostObservations": "Email observasi terbanyak",
+          "bestPicture": "Email foto terbaik",
+          "sent": "Terkirim",
+          "delayed": "Tertunda — kami akan terus mencoba",
+          "missing_email": "Email akun tidak ditemukan; hubungi pemenang secara langsung",
+          "lookup_failed": "Pencarian email gagal; coba nanti atau hubungi pemenang",
+          "cannot_send": "Tidak dapat dikirim otomatis",
+          "handled_manually": "Ditangani secara manual",
+          "not_prepared": "Email belum disiapkan; coba lagi atau tangani secara langsung",
+          "notification_setup_failed": "Pengaturan email gagal; coba lagi atau tangani secara langsung",
+          "retry": "Coba lagi notifikasi",
+          "retrying": "Mencoba lagi…",
+          "markHandled": "Tandai sudah ditangani",
+          "marking": "Menandai…"
+        }
       }
     },
     "map": {

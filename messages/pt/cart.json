@@ -205,6 +205,32 @@
         }
       }
     },
+    "bioblitzNotifications": {
+      "title": "Estados do email dos vencedores do BioBlitz",
+      "description": "As linhas de estado de produção para emails de vencedores, incluindo email ausente e acompanhamento manual.",
+      "mockBadge": "Modo simulado · sem emails",
+      "mockNote": "Todos os vencedores são fictícios. Marcar como tratado altera apenas a memória.",
+      "cardTitle": "Emails dos vencedores do BioBlitz",
+      "cardDescription": "Visualize cada estado de entrega e contato manual para moderadores.",
+      "fixtureLabel": "Email do vencedor"
+    },
+    "invitationDelivery": {
+      "title": "Estados de entrega de convites",
+      "description": "A linha de convite pendente de produção para emails enviados, atrasados, links manuais e ações restritas por função.",
+      "mockBadge": "Modo simulado · sem emails",
+      "mockNote": "Todos os endereços são fictícios. Tentar novamente, copiar e cancelar atualizam apenas a memória e nunca chamam um serviço real.",
+      "cardTitle": "Entrega do email de convite",
+      "cardDescription": "Visualize o estado, a nova tentativa segura, copiar link e cancelar convites de organização.",
+      "scenarios": {
+        "sent": "Proprietário · email enviado",
+        "delayed": "Proprietário · problema temporário de entrega",
+        "manual": "Proprietário · compartilhar o link diretamente",
+        "admin": "Convite de administrador · ações restritas"
+      },
+      "mockRetried": "Nova tentativa simulada concluída sem enviar email.",
+      "mockCopied": "Link simulado copiado sem usar a área de transferência.",
+      "mockCanceled": "Convite simulado removido desta visualização."
+    },
     "myCardsTitle": "Galeria Minhas cartas",
     "myCardsDescription": "Veja uma prévia da galeria de cartas colecionadas com exemplos."
   },

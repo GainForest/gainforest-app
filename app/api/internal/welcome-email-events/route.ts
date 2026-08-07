@@ -1,19 +1,21 @@
-import { createHmac, timingSafeEqual } from "node:crypto";
+import { createHash, createHmac, timingSafeEqual } from "node:crypto";
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { getCertifiedProfileCard } from "@/app/account/_lib/account-route";
-import { sendResendEmail, EmailSendError } from "@/lib/email/resend";
-import {
-  renderWelcomeEmailTemplate,
-  resolveWelcomeEmailLocale,
-} from "@/lib/email/welcome-template";
+import { resolveWelcomeEmailLocale } from "@/lib/email/welcome-template";
+import { NotificationRepositoryError } from "@/lib/email-notifications/repository";
+import { NotificationProducerInputError } from "@/lib/email-notifications/signup-and-membership-notifications";
+import { createWelcomeRuntime } from "@/lib/email-notifications/welcome-runtime";
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
+export const maxDuration = 60;
 
 const SIGNATURE_HEADER = "x-gainforest-webhook-signature";
 const TIMESTAMP_HEADER = "x-gainforest-webhook-timestamp";
 const MAX_SIGNATURE_AGE_MS = 5 * 60 * 1000;
 const MAX_WEBHOOK_BODY_BYTES = 64 * 1024;
+const PROFILE_LOOKUP_BUDGET_MS = 3_000;
+const USABLE_INVOCATION_MS = 55_000;
 
 const welcomeUserSchema = z.object({
   did: z.string().min(1).max(256),
@@ -54,8 +56,26 @@ function requestBodyTooLarge(request: NextRequest): boolean {
   return Number.isFinite(parsed) && parsed > MAX_WEBHOOK_BODY_BYTES;
 }
 
-function bodyByteLength(value: string): number {
-  return new TextEncoder().encode(value).byteLength;
+async function readBoundedBody(request: NextRequest): Promise<string | null> {
+  if (!request.body) return "";
+  const reader = request.body.getReader();
+  const chunks: Uint8Array[] = [];
+  let total = 0;
+  try {
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      total += value.byteLength;
+      if (total > MAX_WEBHOOK_BODY_BYTES) {
+        await reader.cancel().catch(() => undefined);
+        return null;
+      }
+      chunks.push(value);
+    }
+  } finally {
+    reader.releaseLock();
+  }
+  return Buffer.concat(chunks, total).toString("utf8");
 }
 
 function normalizeSignature(value: string | null): string | null {
@@ -65,6 +85,7 @@ function normalizeSignature(value: string | null): string | null {
 }
 
 function safeCompareHex(left: string, right: string): boolean {
+  if (!/^[0-9a-f]{64}$/i.test(left) || !/^[0-9a-f]{64}$/i.test(right)) return false;
   const leftBuffer = Buffer.from(left, "hex");
   const rightBuffer = Buffer.from(right, "hex");
   return leftBuffer.length === rightBuffer.length && timingSafeEqual(leftBuffer, rightBuffer);
@@ -91,6 +112,22 @@ function verifySignature(rawBody: string, request: NextRequest, secret: string):
   }
 }
 
+function withinProfileLookupBudget<T>(work: Promise<T>, fallback: T): Promise<T> {
+  return new Promise<T>((resolve) => {
+    const timeout = setTimeout(() => resolve(fallback), PROFILE_LOOKUP_BUDGET_MS);
+    work.then(
+      (value) => {
+        clearTimeout(timeout);
+        resolve(value);
+      },
+      () => {
+        clearTimeout(timeout);
+        resolve(fallback);
+      },
+    );
+  });
+}
+
 async function organizationName(event: z.infer<typeof welcomeEventSchema>): Promise<string | undefined> {
   if (event.type !== "organization.membership.joined") return undefined;
 
@@ -110,7 +147,7 @@ function plainDisplayName(value: string | null | undefined, event: z.infer<typeo
 
   const handle = event.user.handle?.trim();
   if (handle && name.toLowerCase() === handle.toLowerCase()) return null;
-  if (name === event.user.email || name.startsWith("did:")) return null;
+  if (name.toLowerCase() === event.user.email.toLowerCase() || name.startsWith("did:")) return null;
 
   return name;
 }
@@ -127,6 +164,7 @@ async function friendlyName(event: z.infer<typeof welcomeEventSchema>): Promise<
 }
 
 export async function POST(request: NextRequest) {
+  const invocationStartedAt = Date.now();
   const secret = configuredSecret();
   if (!secret) {
     return NextResponse.json({ error: "Welcome email webhook is not configured." }, { status: 503 });
@@ -136,8 +174,8 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Welcome email event payload is too large." }, { status: 413 });
   }
 
-  const rawBody = await request.text();
-  if (bodyByteLength(rawBody) > MAX_WEBHOOK_BODY_BYTES) {
+  const rawBody = await readBoundedBody(request);
+  if (rawBody === null) {
     return NextResponse.json({ error: "Welcome email event payload is too large." }, { status: 413 });
   }
 
@@ -162,28 +200,48 @@ export async function POST(request: NextRequest) {
     explicitLocale: event.locale,
     acceptLanguage: request.headers.get("accept-language"),
   });
-  const rendered = renderWelcomeEmailTemplate({
-    variant: event.type === "organization.membership.joined" ? "organization-invite" : "direct-signup",
+  const [resolvedName, resolvedOrganizationName] = await Promise.all([
+    withinProfileLookupBudget(friendlyName(event), null),
+    withinProfileLookupBudget(organizationName(event), undefined),
+  ]);
+  const name = resolvedName ?? undefined;
+  const common = {
+    authEventId: event.eventId,
+    userDid: event.user.did,
+    email: event.user.email,
+    name,
     locale,
-    name: await friendlyName(event),
-    organizationName: await organizationName(event),
-    invitedByName: undefined,
-    invitedByEmail: undefined,
-  });
+    createdAt: event.createdAt ?? new Date(invocationStartedAt).toISOString(),
+  };
+  const input = event.type === "organization.membership.joined"
+    ? {
+      ...common,
+      type: "membership_joined" as const,
+      organizationDid: event.organization.did,
+      organizationName: resolvedOrganizationName,
+    }
+    : { ...common, type: "signup" as const };
 
   try {
-    const result = await sendResendEmail({
-      to: event.user.email,
-      subject: rendered.subject,
-      html: rendered.html,
-      text: rendered.text,
-      idempotencyKey: event.eventId,
-    });
-
-    return NextResponse.json({ ok: true, id: result.id });
+    const notification = await createWelcomeRuntime().deliver(
+      input,
+      new Date(invocationStartedAt + USABLE_INVOCATION_MS),
+    );
+    return NextResponse.json({ ok: true, notification });
   } catch (error) {
-    const status = error instanceof EmailSendError ? error.status : 502;
-    const message = error instanceof Error ? error.message : "Could not send welcome email.";
-    return NextResponse.json({ error: message }, { status });
+    if (error instanceof NotificationProducerInputError) {
+      return NextResponse.json({ error: "Invalid welcome email event payload." }, { status: 400 });
+    }
+    if (error instanceof NotificationRepositoryError && error.code === "idempotency_conflict") {
+      return NextResponse.json({
+        error: "Welcome email event ID conflicts with a previously accepted event.",
+      }, { status: 409 });
+    }
+    console.error("welcome-email-events delivery failed", {
+      eventIdHash: createHash("sha256").update(event.eventId).digest("hex").slice(0, 16),
+      eventType: event.type,
+      reason: error instanceof Error ? error.name : "unknown",
+    });
+    return NextResponse.json({ error: "Welcome email event could not be queued. Retry the signed event." }, { status: 503 });
   }
 }

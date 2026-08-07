@@ -205,6 +205,32 @@
         }
       }
     },
+    "bioblitzNotifications": {
+      "title": "Hali za barua pepe za washindi wa BioBlitz",
+      "description": "Mistari halisi ya hali ya barua pepe za washindi, ikijumuisha barua pepe inayokosekana na ufuatiliaji wa mtu.",
+      "mockBadge": "Hali ya mfano · hakuna barua pepe",
+      "mockNote": "Washindi wote ni wa mfano. Kuweka alama hubadilisha kumbukumbu pekee.",
+      "cardTitle": "Barua pepe za washindi wa BioBlitz",
+      "cardDescription": "Hakiki kila hali ya uwasilishaji na mawasiliano ya mtu kwa wasimamizi.",
+      "fixtureLabel": "Barua pepe ya mshindi"
+    },
+    "invitationDelivery": {
+      "title": "Hali za uwasilishaji wa mwaliko",
+      "description": "Mstari halisi wa mwaliko unaosubiri kwa barua pepe iliyotumwa, iliyochelewa, kiungo cha moja kwa moja na vitendo vinavyozuiwa kwa jukumu.",
+      "mockBadge": "Hali ya mfano · hakuna barua pepe",
+      "mockNote": "Anwani zote ni za mfano. Kujaribu tena, kunakili na kughairi hubadilisha kumbukumbu pekee bila kuita huduma halisi.",
+      "cardTitle": "Uwasilishaji wa barua pepe ya mwaliko",
+      "cardDescription": "Hakiki hali, jaribio salama, kunakili kiungo na kughairi mialiko ya shirika.",
+      "scenarios": {
+        "sent": "Mmiliki · barua pepe imetumwa",
+        "delayed": "Mmiliki · tatizo la muda la uwasilishaji",
+        "manual": "Mmiliki · shiriki kiungo moja kwa moja",
+        "admin": "Mwaliko wa msimamizi · vitendo vimezuiwa"
+      },
+      "mockRetried": "Jaribio la mfano limekamilika bila kutuma barua pepe.",
+      "mockCopied": "Kiungo cha mfano kimenakiliwa bila kutumia ubao wa kunakili.",
+      "mockCanceled": "Mwaliko wa mfano umeondolewa kwenye hakiki hii."
+    },
     "myCardsTitle": "Matunzio ya Kadi Zangu",
     "myCardsDescription": "Hakiki matunzio ya kadi zilizokusanywa yenye mifano ya kadi."
   },
