@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { renderWelcomeEmailTemplate, resolveWelcomeEmailLocale } from "./welcome-template";
 
 describe("resolveWelcomeEmailLocale", () => {
@@ -9,6 +9,23 @@ describe("resolveWelcomeEmailLocale", () => {
 });
 
 describe("renderWelcomeEmailTemplate", () => {
+  afterEach(() => {
+    vi.unstubAllEnvs();
+  });
+
+  it("uses the production site for default email links and assets", () => {
+    vi.stubEnv("NEXT_PUBLIC_SITE_URL", "");
+
+    const rendered = renderWelcomeEmailTemplate({
+      variant: "direct-signup",
+      locale: "en",
+      communityFormUrl: "",
+    });
+
+    expect(rendered.html).toContain("https://www.gainforest.app/assets/media/images/app-icon.png");
+    expect(rendered.html).not.toContain("certs-rewrite.gainforest.app");
+  });
+
   it("does not display inviter email when no inviter name is provided", () => {
     const rendered = renderWelcomeEmailTemplate({
       variant: "organization-invite",

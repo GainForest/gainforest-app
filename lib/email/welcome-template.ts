@@ -494,7 +494,7 @@ export function renderWelcomeEmailTemplate({
   organizationName,
   appName = "GainForest",
   logoUri,
-  siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://certs-rewrite.gainforest.app",
+  siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://www.gainforest.app",
   communityFormUrl,
   invitedByName,
 }: {
