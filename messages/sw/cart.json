@@ -232,7 +232,12 @@
       "mockCanceled": "Mwaliko wa mfano umeondolewa kwenye hakiki hii."
     },
     "myCardsTitle": "Matunzio ya Kadi Zangu",
-    "myCardsDescription": "Hakiki matunzio ya kadi zilizokusanywa yenye mifano ya kadi."
+    "myCardsDescription": "Hakiki matunzio ya kadi zilizokusanywa yenye mifano ya kadi.",
+    "shop": {
+      "cardTitle": "Ukurasa wa duka la Bumimic",
+      "cardDescription": "Hakiki ukurasa wa inakuja hivi karibuni kwa kifaa cha GainForest chenye sensori nyingi kwa ufuatiliaji wa mazingira.",
+      "mockBadge": "Hakiki · bila malipo"
+    }
   },
   "myCards": {
     "eyebrow": "Kadi za kukusanya",

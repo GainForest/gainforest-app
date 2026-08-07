@@ -1,0 +1,86 @@
+{
+  "meta": {
+    "title": "Bumimic — una grabadora abierta para escuchar la naturaleza",
+    "description": "Una grabadora acústica abierta y de bajo costo para el monitoreo de la biodiversidad. Las primeras unidades de prototipo llegan a mediados de septiembre."
+  },
+  "hero": {
+    "title": "Bumimic",
+    "accent": "para escuchar la naturaleza",
+    "lede": "Una grabadora abierta y de bajo costo que escucha un lugar a toda hora, guarda el audio en una tarjeta de memoria y envía avisos breves por radio de largo alcance.",
+    "imageAlt": "Paisaje de bosque con niebla a primera luz"
+  },
+  "prototype": {
+    "title": "Todavía no está a la venta",
+    "body": "Bumimic es un prototipo funcional. Las primeras unidades llegan a mediados de septiembre para pruebas de campo, y el diseño aún debe superar controles de sonido, radio, consumo y seguridad antes de que alguien pueda pedir una.",
+    "action": "Consultar sobre las pruebas de campo"
+  },
+  "capabilities": {
+    "title": "Qué hace",
+    "items": {
+      "record": {
+        "title": "Graba a toda hora",
+        "body": "Hasta 384.000 muestras por segundo en 16 bits, con un modo a media velocidad cuando importa más una campaña larga que las frecuencias más altas. El audio se escribe directamente en una tarjeta microSD."
+      },
+      "sense": {
+        "title": "Lee su entorno",
+        "body": "Temperatura, humedad, luz, presión del aire y movimiento se registran junto con el sonido, así cada detección llega con las condiciones que la produjeron."
+      },
+      "radio": {
+        "title": "Envía avisos breves",
+        "body": "Las detecciones y el estado de la batería viajan por radio de largo alcance, así se puede revisar un sitio sin visitarlo. Las grabaciones se quedan en la tarjeta."
+      },
+      "power": {
+        "title": "Funciona con pilas comunes",
+        "body": "Tres pilas AA o AAA, con USB-C para la configuración. Entre grabaciones, la placa está diseñada para consumir apenas unas millonésimas de amperio."
+      }
+    }
+  },
+  "board": {
+    "title": "La placa del prototipo",
+    "body": "El diseño es abierto desde el principio: el esquema, el trazado de la placa, los archivos de fabricación y el firmware se desarrollan en público, para que los equipos de campo puedan construirlo, repararlo y adaptarlo por su cuenta.",
+    "caption": "Placa del prototipo Bumimic, 57 × 47 mm: algo más pequeña que un AudioMoth en ambas direcciones.",
+    "imageAlt": "Render de la placa de circuito del prototipo Bumimic, con la ranura microSD, el módulo de radio y los sensores",
+    "repoLink": "Ver los archivos del diseño",
+    "repoPending": "Los archivos del diseño se publicarán cuando el prototipo haya pasado las pruebas de campo."
+  },
+  "cost": {
+    "title": "Cuánto esperamos que cueste",
+    "board": {
+      "value": "$13–18",
+      "label": "Placa y ensamblaje",
+      "note": "Electrónica y ensamblaje en una tirada de unas 1.000 unidades."
+    },
+    "unit": {
+      "value": "$20–30",
+      "label": "Unidad de campo completa",
+      "note": "Toda la electrónica de una grabadora lista para desplegar, antes de la carcasa y las pilas."
+    },
+    "excludes": {
+      "title": "No incluido en esas cifras",
+      "items": {
+        "microsd": "Tarjeta de memoria",
+        "antenna": "Antena",
+        "batteries": "Pilas",
+        "enclosure": "Carcasa",
+        "certification": "Certificación",
+        "freight": "Envío",
+        "testing": "Pruebas de producción"
+      }
+    },
+    "note": "Son estimaciones de planificación, no cotizaciones de proveedores. Los precios reales dependen de la configuración, del país de destino y de lo que coticen los fabricantes cuando hagamos el pedido."
+  },
+  "regions": {
+    "title": "Hecha para un lugar concreto",
+    "body": "Las normas de radio cambian de un país a otro, así que cada unidad se fabrica y se etiqueta para el lugar donde se va a desplegar. Las primeras series apuntan a estos tres.",
+    "items": {
+      "kenya": "Kenia",
+      "brazil": "Brasil",
+      "philippines": "Filipinas"
+    }
+  },
+  "cta": {
+    "title": "¿Te interesa Bumimic?",
+    "description": "Cuéntanos sobre tu sitio y cómo usarías una grabadora allí. Buscamos equipos de campo para probar las primeras unidades.",
+    "contact": "Contactar GainForest"
+  }
+}

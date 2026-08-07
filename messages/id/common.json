@@ -313,7 +313,8 @@
       "status": "Status",
       "lexicons": "Skema data",
       "privacyPolicy": "Kebijakan Privasi",
-      "deleteAccount": "Hapus Akun"
+      "deleteAccount": "Hapus Akun",
+      "shop": "Toko"
     }
   },
   "browseGrid": {

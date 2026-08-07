@@ -232,7 +232,12 @@
       "mockCanceled": "Mock invitation removed from this preview."
     },
     "myCardsTitle": "My Cards gallery",
-    "myCardsDescription": "Preview the collected-cards gallery, populated with sample collectibles."
+    "myCardsDescription": "Preview the collected-cards gallery, populated with sample collectibles.",
+    "shop": {
+      "cardTitle": "Bumimic shop page",
+      "cardDescription": "Preview the coming-soon shop page for GainForest's sensor-rich nature monitoring device.",
+      "mockBadge": "Preview · no checkout"
+    }
   },
   "myCards": {
     "eyebrow": "Collectibles",
