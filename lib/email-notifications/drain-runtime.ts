@@ -8,7 +8,7 @@ import {
   type NotificationProcessor,
 } from "./orchestrator";
 import { ApplicationNotificationRenderer } from "./renderer";
-import { createNotificationRuntimeCore } from "./runtime";
+import { createNotificationRuntimeCore, rejectDisabledNotificationProcessing } from "./runtime";
 import { SupabaseUserEmailReader } from "./user-email";
 
 type Environment = Readonly<Record<string, string | undefined>>;
@@ -27,9 +27,7 @@ export function createDrainRuntime(environment: Environment = process.env) {
       invitationSourceReader: new SupabaseInvitationSourceReader(),
       safetyMarginMs: WORKER_SAFETY_MARGIN_MS,
     })
-    : async () => {
-      throw new Error("Notification processor cannot run while email delivery is disabled.");
-    };
+    : rejectDisabledNotificationProcessing;
 
   return {
     drain: (invocationDeadline: Date) => drainNotifications(invocationDeadline, {
