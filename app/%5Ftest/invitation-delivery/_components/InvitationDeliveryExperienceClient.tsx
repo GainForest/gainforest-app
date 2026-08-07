@@ -4,7 +4,10 @@ import Link from "next/link";
 import { useState } from "react";
 import { ArrowLeftIcon, FlaskConicalIcon, ShieldCheckIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { PendingInvitationRow } from "@/app/(manage)/manage/groups/_components/GroupMembers";
+import {
+  invitationDeliveryState,
+  PendingInvitationRow,
+} from "@/app/(manage)/manage/groups/_components/GroupMembers";
 import type { CgsPendingInvitation } from "@/app/(manage)/manage/_lib/cgs";
 
 const FIXTURES: Array<{ key: "sent" | "delayed" | "manual" | "admin"; invitation: CgsPendingInvitation; canManage: boolean }> = [
@@ -54,6 +57,14 @@ const FIXTURES: Array<{ key: "sent" | "delayed" | "manual" | "admin"; invitation
   },
 ];
 
+export function InvitationActionNotice({ notice }: { notice: string | null }) {
+  return notice ? (
+    <p role="status" className="mt-6 rounded-2xl bg-emerald-500/10 px-4 py-3 text-sm text-emerald-700 dark:text-emerald-300">
+      {notice}
+    </p>
+  ) : null;
+}
+
 export function InvitationDeliveryExperienceClient() {
   const registry = useTranslations("cart.testRegistry");
   const scenario = useTranslations("cart.testRegistry.invitationDelivery");
@@ -62,9 +73,10 @@ export function InvitationDeliveryExperienceClient() {
   const [notice, setNotice] = useState<string | null>(null);
 
   const statusLabel = (invitation: CgsPendingInvitation) => {
-    const delivery = invitation.notification?.status === "sent"
+    const state = invitationDeliveryState(invitation.notification?.status);
+    const delivery = state === "sent"
       ? invitationT("emailSent")
-      : invitation.notification?.status === "queued" || invitation.notification?.status === "processing"
+      : state === "delayed"
         ? invitationT("emailDelayed")
         : invitationT("emailUnavailable");
     return invitationT("pendingStatus", { delivery });
@@ -100,7 +112,7 @@ export function InvitationDeliveryExperienceClient() {
           </div>
         </aside>
 
-        {notice ? <p className="mt-6 rounded-2xl bg-emerald-500/10 px-4 py-3 text-sm text-emerald-700 dark:text-emerald-300">{notice}</p> : null}
+        <InvitationActionNotice notice={notice} />
 
         <section className="mt-8 space-y-6">
           {fixtures.map(({ key, invitation, canManage }) => (
@@ -111,6 +123,7 @@ export function InvitationDeliveryExperienceClient() {
                 roleLabel={invitationT(invitation.role === "admin" ? "roleAdmin" : "roleMember")}
                 statusLabel={statusLabel(invitation)}
                 canCancel={canManage}
+                canCopy={canManage}
                 canRetry={canManage && Boolean(invitation.notification?.retryable)}
                 isPending={false}
                 retryLabel={invitationT("retry")}

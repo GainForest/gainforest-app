@@ -2,11 +2,11 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 vi.mock("server-only", () => ({}));
 
-const { createGroupInvitation, fetchAuthSession, process, fetchCgsMembersWithCookie } = vi.hoisted(() => ({
+const { createGroupInvitation, fetchAuthSession, processNotification, fetchCgsMemberRoleWithCookie } = vi.hoisted(() => ({
   createGroupInvitation: vi.fn(),
   fetchAuthSession: vi.fn(),
-  process: vi.fn(),
-  fetchCgsMembersWithCookie: vi.fn(),
+  processNotification: vi.fn(),
+  fetchCgsMemberRoleWithCookie: vi.fn(),
 }));
 
 vi.mock("next/headers", () => ({
@@ -14,13 +14,13 @@ vi.mock("next/headers", () => ({
 }));
 vi.mock("@/app/_lib/auth-server", () => ({ fetchAuthSession }));
 vi.mock("@/app/_lib/auth", () => ({ getAuthForwardCookie: (cookie: string | null) => cookie }));
-vi.mock("@/app/_lib/cgs-server", () => ({ fetchCgsMembersWithCookie }));
+vi.mock("@/app/_lib/cgs-server", () => ({ fetchCgsMemberRoleWithCookie }));
 vi.mock("@/app/_lib/cgs-invitations", async importOriginal => {
   const actual = await importOriginal<typeof import("@/app/_lib/cgs-invitations")>();
   return { ...actual, createGroupInvitation };
 });
 vi.mock("@/lib/email-notifications/invitation-runtime", () => ({
-  createInvitationRuntime: () => ({ process }),
+  createInvitationRuntime: () => ({ process: processNotification }),
 }));
 
 const invitation = {
@@ -54,12 +54,15 @@ beforeEach(() => {
   fetchAuthSession.mockResolvedValue({ isLoggedIn: true, did: "did:plc:owner", handle: "owner.example.com", email: "owner@example.com" });
   createGroupInvitation.mockReset();
   createGroupInvitation.mockResolvedValue(structuredClone(invitation));
-  process.mockReset();
-  process.mockResolvedValue({ kind: "processed", result: { kind: "sent" } });
-  fetchCgsMembersWithCookie.mockReset();
+  processNotification.mockReset();
+  processNotification.mockResolvedValue({ kind: "processed", result: { kind: "sent" } });
+  fetchCgsMemberRoleWithCookie.mockReset();
 });
 
-afterEach(() => vi.unstubAllEnvs());
+afterEach(() => {
+  vi.restoreAllMocks();
+  vi.unstubAllEnvs();
+});
 
 function request() {
   return new Request("https://example.test/api/cgs/invitations", {
@@ -78,7 +81,7 @@ describe("POST /api/cgs/invitations", () => {
       invitation: { id: invitation.id, notification: { status: "sent", retryable: false } },
     });
     expect(createGroupInvitation).toHaveBeenCalledWith(expect.objectContaining({ enqueueNotification: true }));
-    expect(process).toHaveBeenCalledWith(invitation.notification.outboxId, expect.any(Date));
+    expect(processNotification).toHaveBeenCalledWith(invitation.notification.outboxId, expect.any(Date));
   });
 
   it("reserves 55 seconds for immediate invitation delivery", async () => {
@@ -88,7 +91,7 @@ describe("POST /api/cgs/invitations", () => {
     const after = Date.now();
 
     expect(response.status).toBe(200);
-    const invocationDeadline = process.mock.calls[0]?.[1] as Date | undefined;
+    const invocationDeadline = processNotification.mock.calls[0]?.[1] as Date | undefined;
     expect(invocationDeadline).toBeInstanceOf(Date);
     expect(invocationDeadline!.getTime()).toBeGreaterThanOrEqual(before + 55_000);
     expect(invocationDeadline!.getTime()).toBeLessThanOrEqual(after + 55_000);
@@ -102,16 +105,23 @@ describe("POST /api/cgs/invitations", () => {
     const response = await POST(request());
     expect(response.status).toBe(200);
     expect(createGroupInvitation).toHaveBeenCalledWith(expect.objectContaining({ enqueueNotification: false }));
-    expect(process).not.toHaveBeenCalled();
+    expect(processNotification).not.toHaveBeenCalled();
   });
 
-  it("returns success with queued delivery when immediate processing cannot start", async () => {
-    process.mockRejectedValueOnce(new Error("invitee@example.com provider-secret"));
+  it("returns success and logs a redacted event when immediate processing cannot start", async () => {
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => undefined);
+    processNotification.mockRejectedValueOnce(new Error("invitee@example.com provider-secret"));
     const { POST } = await import("./route");
     const response = await POST(request());
     expect(response.status).toBe(200);
     const body = await response.text();
     expect(body).toContain('"status":"queued"');
     expect(body).not.toContain("provider-secret");
+    expect(warn).toHaveBeenCalledWith("[invitation-notifications] Inline processing deferred", {
+      outboxId: invitation.notification.outboxId,
+      reason: "inline_processing_failed",
+    });
+    expect(JSON.stringify(warn.mock.calls)).not.toContain("provider-secret");
+    expect(JSON.stringify(warn.mock.calls)).not.toContain("invitee@example.com");
   });
 });

@@ -9,7 +9,7 @@ export class ApplicationNotificationRenderer implements NotificationRenderer {
   private readonly welcome = new WelcomeNotificationRenderer();
   private readonly invitation = new InvitationNotificationRenderer();
 
-  render(row: RenderableRow): Promise<RenderedNotification> {
+  async render(row: RenderableRow): Promise<RenderedNotification> {
     if (row.eventType === "signup" || row.eventType === "membership_joined") {
       return this.welcome.render(row);
     }

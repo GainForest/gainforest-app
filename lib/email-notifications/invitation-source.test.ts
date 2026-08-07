@@ -21,11 +21,15 @@ afterEach(() => {
 
 describe("SupabaseInvitationSourceReader", () => {
   it.each([
-    [[{ status: "pending", expires_at: "2026-08-07T01:00:00.000Z" }], { kind: "sendable" }],
-    [[{ status: "pending", expires_at: "2026-08-05T01:00:00.000Z" }], { kind: "expired" }],
-    [[{ status: "accepted", expires_at: "2026-08-07T01:00:00.000Z" }], { kind: "not_pending" }],
-    [[], { kind: "not_pending" }],
-  ])("returns a redacted sendability result for source state", async (rows, expected) => {
+    ["pending", [{ status: "pending", expires_at: "2026-08-07T01:00:00.000Z" }], { kind: "sendable" }],
+    ["expired", [{ status: "pending", expires_at: "2026-08-05T01:00:00.000Z" }], { kind: "expired" }],
+    ["accepted", [{ status: "accepted", expires_at: "2026-08-07T01:00:00.000Z" }], { kind: "not_pending" }],
+    ["missing", [], { kind: "not_pending" }],
+    ["multiple rows", [
+      { status: "pending", expires_at: "2026-08-07T01:00:00.000Z" },
+      { status: "pending", expires_at: "2026-08-08T01:00:00.000Z" },
+    ], { kind: "error" }],
+  ])("returns a redacted sendability result for %s source state", async (_label, rows, expected) => {
     fetchMock.mockResolvedValueOnce(Response.json(rows));
     await expect(new SupabaseInvitationSourceReader().getSendability(
       "81000000-0000-4000-8000-000000000001",

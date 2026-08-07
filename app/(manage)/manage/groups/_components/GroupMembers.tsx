@@ -25,6 +25,15 @@ import {
 
 type RoleInput = "member" | "admin";
 type Variant = "section" | "panel";
+type InvitationNotificationStatus = NonNullable<CgsPendingInvitation["notification"]>["status"];
+
+export function invitationDeliveryState(
+  status: InvitationNotificationStatus | null | undefined,
+): "sent" | "delayed" | "unavailable" {
+  if (status === "sent") return "sent";
+  if (status === "waiting_recipient" || status === "queued" || status === "processing") return "delayed";
+  return "unavailable";
+}
 
 type DataCouncilResponse = {
   members: CgsMember[];
@@ -132,6 +141,7 @@ export function PendingInvitationRow({
   roleLabel,
   statusLabel,
   canCancel,
+  canCopy,
   canRetry,
   isPending,
   retryLabel,
@@ -145,6 +155,7 @@ export function PendingInvitationRow({
   roleLabel: string;
   statusLabel: string;
   canCancel: boolean;
+  canCopy: boolean;
   canRetry: boolean;
   isPending: boolean;
   retryLabel: string;
@@ -170,9 +181,11 @@ export function PendingInvitationRow({
             <RefreshCwIcon /> {retryLabel}
           </Button>
         ) : null}
-        <Button type="button" variant="ghost" size="sm" disabled={isPending} onClick={() => onCopy(invitation)}>
-          <CopyIcon /> {copyLabel}
-        </Button>
+        {canCopy ? (
+          <Button type="button" variant="ghost" size="sm" disabled={isPending} onClick={() => onCopy(invitation)}>
+            <CopyIcon /> {copyLabel}
+          </Button>
+        ) : null}
         {canCancel ? (
           <Button
             type="button"
@@ -429,9 +442,10 @@ export function GroupMembers({
           const { invitation } = await inviteCgsMember(groupDid, value, nextRole);
           setPendingInvitations((current) => upsertInvitation(current, invitation));
           setMemberIdentifier("");
-          setSuccess(invitation.notification?.status === "sent"
+          const delivery = invitationDeliveryState(invitation.notification?.status);
+          setSuccess(delivery === "sent"
             ? invitationsT("sent", { email: value })
-            : invitation.notification?.status === "queued" || invitation.notification?.status === "processing"
+            : delivery === "delayed"
               ? invitationsT("createdDelayed")
               : invitationsT("createdManual"));
         } catch (err) {
@@ -561,6 +575,7 @@ export function GroupMembers({
   };
 
   const copyInvitation = (invitation: CgsPendingInvitation) => {
+    if (!canCancelPendingInvitation(invitation)) return;
     const url = new URL(`/invite/${encodeURIComponent(invitation.id)}`, window.location.origin).toString();
     if (!navigator.clipboard) {
       setSuccess(null);
@@ -577,9 +592,10 @@ export function GroupMembers({
   };
 
   const invitationStatusLabel = (invitation: CgsPendingInvitation) => {
-    const delivery = invitation.notification?.status === "sent"
+    const state = invitationDeliveryState(invitation.notification?.status);
+    const delivery = state === "sent"
       ? invitationsT("emailSent")
-      : invitation.notification?.status === "queued" || invitation.notification?.status === "processing" || invitation.notification?.status === "waiting_recipient"
+      : state === "delayed"
         ? invitationsT("emailDelayed")
         : invitationsT("emailUnavailable");
     return invitationsT("pendingStatus", {
@@ -732,6 +748,7 @@ export function GroupMembers({
               roleLabel={invitationsT(invitation.role === "admin" ? "roleAdmin" : "roleMember")}
               statusLabel={invitationStatusLabel(invitation)}
               canCancel={canCancelPendingInvitation(invitation)}
+              canCopy={canCancelPendingInvitation(invitation)}
               canRetry={canCancelPendingInvitation(invitation) && Boolean(invitation.notification?.retryable)}
               isPending={isPending}
               retryLabel={invitationsT("retry")}

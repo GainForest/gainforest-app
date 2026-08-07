@@ -11,9 +11,10 @@ import {
   listPendingGroupInvitationsForRepo,
   normalizeInvitationEmail,
 } from "@/app/_lib/cgs-invitations";
-import { fetchCgsMembersWithCookie } from "@/app/_lib/cgs-server";
+import { fetchCgsMemberRoleWithCookie } from "@/app/_lib/cgs-server";
 import { readNotificationConfig } from "@/lib/email-notifications/config";
 import { createInvitationRuntime } from "@/lib/email-notifications/invitation-runtime";
+import { logInlineInvitationProcessingDeferred } from "./processing-log";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
@@ -50,8 +51,7 @@ export async function GET(request: Request) {
       const headerList = await headers();
       const cookie = getAuthForwardCookie(headerList.get("cookie"));
       if (!cookie) throw new GroupInvitationError("Please sign in and try again.", 401);
-      const memberResult = await fetchCgsMembersWithCookie({ repo, cookie, limit: 100 });
-      const actorRole = memberResult.members.find((member) => member.did === session.did)?.role ?? null;
+      const actorRole = await fetchCgsMemberRoleWithCookie({ repo, cookie, did: session.did });
       if (!canViewPendingInvitations(actorRole)) throw new GroupInvitationError("Only organization owners and admins can view pending invitations.", 403);
       const invitations = await listPendingGroupInvitationsForRepo(repo);
       return Response.json({ invitations }, { headers: { "cache-control": "no-store" } });
@@ -78,7 +78,6 @@ export async function POST(request: Request) {
   }
 
   const headerList = await headers();
-  const origin = new URL(request.url).origin;
 
   try {
     const notificationConfig = readNotificationConfig();
@@ -88,14 +87,14 @@ export async function POST(request: Request) {
       role: parsed.data.role,
       session,
       cookie: getAuthForwardCookie(headerList.get("cookie")),
-      origin,
       acceptLanguage: headerList.get("accept-language"),
       enqueueNotification: !notificationConfig.emailDisabled,
     });
     if (invitation.notification?.status === "queued") {
+      const outboxId = invitation.notification.outboxId;
       try {
         const processed = await createInvitationRuntime().process(
-          invitation.notification.outboxId,
+          outboxId,
           new Date(invocationStartedAt + USABLE_INVOCATION_MS),
         );
         invitation = {
@@ -103,6 +102,7 @@ export async function POST(request: Request) {
           notification: invitationNotificationAfterProcess(invitation.notification, processed),
         };
       } catch {
+        logInlineInvitationProcessingDeferred(outboxId);
         // The invitation and queued notification are already durable. Recovery
         // can retry without exposing provider or configuration details.
       }
