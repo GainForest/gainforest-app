@@ -33,7 +33,7 @@ vi.mock("@/app/_lib/cgs-invitations", () => ({
       : notification
   ),
 }));
-vi.mock("@/lib/email-notifications/invitation-runtime", () => ({ createInvitationRuntime: () => ({ process: processNotification }) }));
+vi.mock("@/lib/email-notifications/delivery", () => ({ createNotificationDelivery: () => ({ process: processNotification }) }));
 
 const invitationId = "81000000-0000-4000-8000-000000000001";
 const invitation = { id: invitationId, repo: "did:plc:forest", role: "member", status: "pending" };
@@ -66,7 +66,7 @@ describe("POST invitation email retry", () => {
       cookie: "session=cookie",
       did: "did:plc:admin",
     });
-    expect(processNotification).toHaveBeenCalledWith(queued.outboxId, expect.any(Date));
+    expect(processNotification).toHaveBeenCalledWith(queued.outboxId, expect.any(Date), "invitation");
   });
 
   it("returns a stable not-found code when the route preflight cannot find the invitation", async () => {
@@ -79,7 +79,7 @@ describe("POST invitation email retry", () => {
       code: "invitation_not_found",
     });
     expect(retryGroupInvitation).not.toHaveBeenCalled();
-    expect(process).not.toHaveBeenCalled();
+    expect(processNotification).not.toHaveBeenCalled();
   });
 
   it("returns a stable error code for localized retry feedback", async () => {
@@ -95,7 +95,7 @@ describe("POST invitation email retry", () => {
       error: "Please wait a minute before trying to send this email again.",
       code: "invitation_retry_cooldown",
     });
-    expect(process).not.toHaveBeenCalled();
+    expect(processNotification).not.toHaveBeenCalled();
   });
 
   it("reserves 55 seconds for immediate retry delivery", async () => {

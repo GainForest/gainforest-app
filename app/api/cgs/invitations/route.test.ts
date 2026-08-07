@@ -19,8 +19,8 @@ vi.mock("@/app/_lib/cgs-invitations", async importOriginal => {
   const actual = await importOriginal<typeof import("@/app/_lib/cgs-invitations")>();
   return { ...actual, createGroupInvitation };
 });
-vi.mock("@/lib/email-notifications/invitation-runtime", () => ({
-  createInvitationRuntime: () => ({ process: processNotification }),
+vi.mock("@/lib/email-notifications/delivery", () => ({
+  createNotificationDelivery: () => ({ process: processNotification }),
 }));
 
 const invitation = {
@@ -81,7 +81,7 @@ describe("POST /api/cgs/invitations", () => {
       invitation: { id: invitation.id, notification: { status: "sent", retryable: false } },
     });
     expect(createGroupInvitation).toHaveBeenCalledWith(expect.objectContaining({ enqueueNotification: true }));
-    expect(processNotification).toHaveBeenCalledWith(invitation.notification.outboxId, expect.any(Date));
+    expect(processNotification).toHaveBeenCalledWith(invitation.notification.outboxId, expect.any(Date), "invitation");
   });
 
   it("reserves 55 seconds for immediate invitation delivery", async () => {

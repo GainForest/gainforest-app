@@ -1,7 +1,8 @@
 import "server-only";
 
 import { createHash } from "node:crypto";
-import { createBioblitzProcessRuntime, createBioblitzProducerRuntime } from "@/lib/email-notifications/bioblitz-runtime";
+import { createBioblitzProducerRuntime } from "@/lib/email-notifications/bioblitz-runtime";
+import { createNotificationDelivery } from "@/lib/email-notifications/delivery";
 import type { BioblitzPrize, BioblitzWinnerInput } from "@/lib/email-notifications/bioblitz";
 import type { ProcessOneOutcome } from "@/lib/email-notifications/orchestrator";
 import { supabaseRpc, supabaseSelect } from "@/lib/supabase/rest";
@@ -102,7 +103,7 @@ export async function processBioblitzWinnerNotification(
   deadline: Date,
 ): Promise<BioblitzNotificationSummary> {
   try {
-    const processed = await createBioblitzProcessRuntime().process(outboxId, deadline);
+    const processed = await createNotificationDelivery().process(outboxId, deadline, "bioblitz_winner");
     return afterProcess(processed, "ready");
   } catch {
     return { status: "delayed", canMarkHandled: true, canRetry: false };

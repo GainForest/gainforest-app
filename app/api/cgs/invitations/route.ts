@@ -13,7 +13,7 @@ import {
 } from "@/app/_lib/cgs-invitations";
 import { fetchCgsMemberRoleWithCookie } from "@/app/_lib/cgs-server";
 import { readNotificationConfig } from "@/lib/email-notifications/config";
-import { createInvitationRuntime } from "@/lib/email-notifications/invitation-runtime";
+import { createNotificationDelivery } from "@/lib/email-notifications/delivery";
 import { logInlineInvitationProcessingDeferred } from "./processing-log";
 
 export const runtime = "nodejs";
@@ -94,9 +94,10 @@ export async function POST(request: Request) {
     if (invitation.notification?.status === "queued") {
       const outboxId = invitation.notification.outboxId;
       try {
-        const processed = await createInvitationRuntime().process(
+        const processed = await createNotificationDelivery().process(
           outboxId,
           new Date(invocationStartedAt + USABLE_INVOCATION_MS),
+          "invitation",
         );
         invitation = {
           ...invitation,
