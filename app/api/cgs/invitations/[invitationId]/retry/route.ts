@@ -7,8 +7,9 @@ import {
   invitationNotificationAfterProcess,
   retryGroupInvitation,
 } from "@/app/_lib/cgs-invitations";
-import { fetchCgsMembersWithCookie } from "@/app/_lib/cgs-server";
+import { fetchCgsMemberRoleWithCookie } from "@/app/_lib/cgs-server";
 import { createNotificationDelivery } from "@/lib/email-notifications/delivery";
+import { logInlineInvitationProcessingDeferred } from "../../processing-log";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
@@ -33,16 +34,21 @@ export async function POST(_request: Request, { params }: { params: Promise<{ in
     const headerList = await headers();
     const cookie = getAuthForwardCookie(headerList.get("cookie"));
     if (!cookie) throw new GroupInvitationError("Please sign in and try again.", 401);
-    const memberResult = await fetchCgsMembersWithCookie({ repo: invitation.repo, cookie, limit: 100 });
-    const actorRole = memberResult.members.find(member => member.did === session.did)?.role ?? null;
+    const actorRole = await fetchCgsMemberRoleWithCookie({
+      repo: invitation.repo,
+      cookie,
+      did: session.did,
+    });
     let notification = await retryGroupInvitation({ invitationId, actorRole });
     try {
       const processed = await createNotificationDelivery().process(
         notification.outboxId,
         new Date(invocationStartedAt + USABLE_INVOCATION_MS),
+        "invitation",
       );
       notification = invitationNotificationAfterProcess(notification, processed);
     } catch {
+      logInlineInvitationProcessingDeferred(notification.outboxId);
       // The retry schedule is already durable; cron recovery can continue it.
     }
     return Response.json({ notification }, { headers: { "cache-control": "no-store" } });

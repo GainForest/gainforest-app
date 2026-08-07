@@ -2,7 +2,7 @@ import { headers } from "next/headers";
 import { fetchAuthSession } from "@/app/_lib/auth-server";
 import { getAuthForwardCookie } from "@/app/_lib/auth";
 import { cancelGroupInvitation, getGroupInvitation, GroupInvitationError } from "@/app/_lib/cgs-invitations";
-import { fetchCgsMembersWithCookie } from "@/app/_lib/cgs-server";
+import { fetchCgsMemberRoleWithCookie } from "@/app/_lib/cgs-server";
 
 export const runtime = "nodejs";
 
@@ -26,8 +26,11 @@ export async function DELETE(_request: Request, { params }: { params: Promise<{ 
     const cookie = getAuthForwardCookie(headerList.get("cookie"));
     if (!cookie) throw new GroupInvitationError("Please sign in and try again.", 401);
 
-    const memberResult = await fetchCgsMembersWithCookie({ repo: invitation.repo, cookie, limit: 100 });
-    const actorRole = memberResult.members.find((member) => member.did === session.did)?.role ?? null;
+    const actorRole = await fetchCgsMemberRoleWithCookie({
+      repo: invitation.repo,
+      cookie,
+      did: session.did,
+    });
     const canceled = await cancelGroupInvitation({ invitationId, actorRole });
     return Response.json({ invitation: canceled }, { headers: { "cache-control": "no-store" } });
   } catch (error) {

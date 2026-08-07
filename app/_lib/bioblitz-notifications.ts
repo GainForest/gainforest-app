@@ -103,7 +103,7 @@ export async function processBioblitzWinnerNotification(
   deadline: Date,
 ): Promise<BioblitzNotificationSummary> {
   try {
-    const processed = await createNotificationDelivery().process(outboxId, deadline);
+    const processed = await createNotificationDelivery().process(outboxId, deadline, "bioblitz_winner");
     return afterProcess(processed, "ready");
   } catch {
     return { status: "delayed", canMarkHandled: true, canRetry: false };

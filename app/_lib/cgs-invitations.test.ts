@@ -2,14 +2,14 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 vi.mock("server-only", () => ({}));
 
-const { fetchCgsMembersWithCookie, getCertifiedProfileCard, supabaseRpc, supabaseSelect } = vi.hoisted(() => ({
-  fetchCgsMembersWithCookie: vi.fn(),
+const { fetchCgsMemberRoleWithCookie, getCertifiedProfileCard, supabaseRpc, supabaseSelect } = vi.hoisted(() => ({
+  fetchCgsMemberRoleWithCookie: vi.fn(),
   getCertifiedProfileCard: vi.fn(),
   supabaseRpc: vi.fn(),
   supabaseSelect: vi.fn(),
 }));
 
-vi.mock("@/app/_lib/cgs-server", () => ({ fetchCgsMembersWithCookie }));
+vi.mock("@/app/_lib/cgs-server", () => ({ fetchCgsMemberRoleWithCookie }));
 vi.mock("@/app/account/_lib/account-route", () => ({
   accountPath: (identifier: string) => `/account/${identifier}`,
   getCertifiedProfileCard,
@@ -50,18 +50,24 @@ const session = {
 };
 
 beforeEach(() => {
-  fetchCgsMembersWithCookie.mockReset();
+  vi.stubEnv("NEXT_PUBLIC_SITE_URL", "https://example.test");
+  fetchCgsMemberRoleWithCookie.mockReset();
   getCertifiedProfileCard.mockReset();
   supabaseRpc.mockReset();
   supabaseSelect.mockReset();
-  fetchCgsMembersWithCookie.mockResolvedValue({ members: [{ did: session.did, role: "owner" }] });
+  fetchCgsMemberRoleWithCookie.mockResolvedValue("owner");
   getCertifiedProfileCard.mockImplementation(async (did: string) => did === "did:plc:forest"
     ? { displayName: "Forest Circle", handle: "forest.example.com", avatarUrl: null }
     : { displayName: "Forest Owner", handle: "owner.example.com", avatarUrl: null });
   vi.spyOn(crypto, "randomUUID").mockReturnValue(invitationId);
+  vi.spyOn(console, "error").mockImplementation(() => undefined);
 });
 
-afterEach(() => vi.restoreAllMocks());
+afterEach(() => {
+  vi.restoreAllMocks();
+  vi.unstubAllEnvs();
+  vi.unstubAllGlobals();
+});
 
 describe("createGroupInvitation", () => {
   it("uses one atomic RPC and never calls the legacy direct provider", async () => {
@@ -78,7 +84,6 @@ describe("createGroupInvitation", () => {
       role: "member",
       session,
       cookie: "session=cookie",
-      origin: "https://example.test",
       acceptLanguage: "pt-BR",
       enqueueNotification: true,
     });
@@ -103,7 +108,6 @@ describe("createGroupInvitation", () => {
       p_enqueue_notification: true,
     }));
     expect(fetchMock).not.toHaveBeenCalled();
-    vi.unstubAllGlobals();
   });
 
   it("uses the localized generic inviter copy when the inviter profile is unavailable", async () => {
@@ -114,7 +118,7 @@ describe("createGroupInvitation", () => {
 
     await createGroupInvitation({
       repo: "did:plc:forest", email: "invitee@example.com", role: "member", session,
-      cookie: "session=cookie", origin: "https://example.test", acceptLanguage: "es", enqueueNotification: false,
+      cookie: "session=cookie", acceptLanguage: "es", enqueueNotification: false,
     });
 
     expect(supabaseRpc).toHaveBeenCalledWith("notification_invitation_create", expect.objectContaining({
@@ -127,17 +131,17 @@ describe("createGroupInvitation", () => {
     supabaseRpc.mockResolvedValue({ invitation: rawInvitation, notification: null });
     const invitation = await createGroupInvitation({
       repo: "did:plc:forest", email: "invitee@example.com", role: "member", session,
-      cookie: "session=cookie", origin: "https://example.test", acceptLanguage: null, enqueueNotification: false,
+      cookie: "session=cookie", acceptLanguage: null, enqueueNotification: false,
     });
     expect(invitation.notification).toBeNull();
     expect(supabaseRpc).toHaveBeenCalledWith("notification_invitation_create", expect.objectContaining({ p_enqueue_notification: false }));
   });
 
   it("enforces current organization role before database mutation", async () => {
-    fetchCgsMembersWithCookie.mockResolvedValue({ members: [{ did: session.did, role: "member" }] });
+    fetchCgsMemberRoleWithCookie.mockResolvedValue("member");
     await expect(createGroupInvitation({
       repo: "did:plc:forest", email: "invitee@example.com", role: "member", session,
-      cookie: "session=cookie", origin: "https://example.test", acceptLanguage: null, enqueueNotification: true,
+      cookie: "session=cookie", acceptLanguage: null, enqueueNotification: true,
     })).rejects.toMatchObject({ name: "GroupInvitationError", status: 403 });
     expect(supabaseRpc).not.toHaveBeenCalled();
   });
@@ -146,21 +150,84 @@ describe("createGroupInvitation", () => {
     supabaseRpc.mockRejectedValue(new Error("invitation_role_conflict invitee@example.com private payload"));
     const error = await createGroupInvitation({
       repo: "did:plc:forest", email: "invitee@example.com", role: "admin", session,
-      cookie: "session=cookie", origin: "https://example.test", acceptLanguage: null, enqueueNotification: true,
+      cookie: "session=cookie", acceptLanguage: null, enqueueNotification: true,
     }).catch((reason: unknown) => reason);
     expect(error).toBeInstanceOf(GroupInvitationError);
     expect((error as GroupInvitationError).message).toBe("Cancel the pending invitation before changing this person’s role.");
+    expect((error as GroupInvitationError).message).not.toContain("invitee@example.com");
+    expect((error as GroupInvitationError).message).not.toContain("private payload");
     expect((error as GroupInvitationError).code).toBe("invitation_role_conflict");
-    expect(JSON.stringify(error)).not.toContain("invitee@example.com");
+    expect((error as GroupInvitationError).status).toBe(409);
+  });
+
+  it.each(["", "not-a-url", "http://example.test", "https://example.test/path"])(
+    "rejects an invalid configured public site origin %j before persistence",
+    async siteUrl => {
+      vi.stubEnv("NEXT_PUBLIC_SITE_URL", siteUrl);
+      supabaseRpc.mockResolvedValue({ invitation: rawInvitation, notification: null });
+
+      await expect(createGroupInvitation({
+        repo: "did:plc:forest", email: "invitee@example.com", role: "member", session,
+        cookie: "session=cookie", acceptLanguage: null, enqueueNotification: true,
+      })).rejects.toMatchObject({
+        name: "GroupInvitationError",
+        message: "Invitation could not be saved. Please try again.",
+        status: 502,
+      });
+      expect(supabaseRpc).not.toHaveBeenCalled();
+    },
+  );
+
+  it("uses the configured public site origin", async () => {
+    vi.stubEnv("NEXT_PUBLIC_SITE_URL", "https://www.gainforest.app/");
+    supabaseRpc.mockResolvedValue({ invitation: rawInvitation, notification: null });
+
+    await createGroupInvitation({
+      repo: "did:plc:forest", email: "invitee@example.com", role: "member", session,
+      cookie: "session=cookie", acceptLanguage: null, enqueueNotification: true,
+    });
+
+    expect(supabaseRpc).toHaveBeenCalledWith("notification_invitation_create", expect.objectContaining({
+      p_inviter_url: "https://www.gainforest.app/account/owner.example.com",
+      p_public_origin: "https://www.gainforest.app",
+    }));
   });
 });
 
 describe("retryGroupInvitation", () => {
   it("checks the actor role before invoking the cooldown-protected RPC", async () => {
-    supabaseSelect
-      .mockResolvedValueOnce([rawInvitation])
-      .mockResolvedValueOnce([{ id: "10000000-0000-4000-8000-000000000001", source_id: invitationId, status: "queued" }]);
+    supabaseSelect.mockResolvedValueOnce([rawInvitation]);
     await expect(retryGroupInvitation({ invitationId, actorRole: "member" })).rejects.toMatchObject({ status: 403 });
     expect(supabaseRpc).not.toHaveBeenCalled();
+  });
+
+  it("normalizes a successful retry summary", async () => {
+    supabaseSelect.mockResolvedValueOnce([rawInvitation]);
+    supabaseRpc.mockResolvedValue({
+      outbox_id: "10000000-0000-4000-8000-000000000001",
+      status: "queued",
+      retryable: true,
+      next_attempt_at: "2026-08-06T01:05:00.000Z",
+    });
+
+    await expect(retryGroupInvitation({ invitationId, actorRole: "owner" })).resolves.toEqual({
+      outboxId: "10000000-0000-4000-8000-000000000001",
+      status: "queued",
+      retryable: true,
+      nextAttemptAt: "2026-08-06T01:05:00.000Z",
+    });
+  });
+
+  it.each([
+    ["invitation_retry_cooldown", 429],
+    ["invitation_notification_not_safely_retryable", 409],
+  ])("maps %s to status %i", async (token, status) => {
+    supabaseSelect.mockResolvedValueOnce([rawInvitation]);
+    supabaseRpc.mockRejectedValue(new Error(`${token} invitee@example.com private payload`));
+
+    const error = await retryGroupInvitation({ invitationId, actorRole: "owner" }).catch((reason: unknown) => reason);
+    expect(error).toMatchObject({ name: "GroupInvitationError", status });
+    expect((error as GroupInvitationError).message).not.toContain("invitee@example.com");
+    expect((error as GroupInvitationError).message).not.toContain("private payload");
   });
 });

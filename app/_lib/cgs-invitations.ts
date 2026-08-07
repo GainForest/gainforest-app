@@ -2,7 +2,7 @@ import "server-only";
 
 import { accountPath, getCertifiedProfileCard } from "@/app/account/_lib/account-route";
 import { getAuthBaseUrl, getAuthInternalServiceToken } from "@/app/_lib/auth";
-import { fetchCgsMembersWithCookie, type CgsServerRole } from "@/app/_lib/cgs-server";
+import { fetchCgsMemberRoleWithCookie, type CgsServerRole } from "@/app/_lib/cgs-server";
 import { resolveGroupInvitationEmailLocale } from "@/lib/email/group-invitation-template";
 import { supabaseFilterValue, supabaseRpc, supabaseSelect } from "@/lib/supabase/rest";
 import type { ProcessOneOutcome } from "@/lib/email-notifications/orchestrator";
@@ -294,17 +294,37 @@ export async function listPendingGroupInvitationsForRepo(repo: string): Promise<
   return withNotifications(normalizeInvitations(rows));
 }
 
-function publicBaseUrl(origin: string): string {
-  return (process.env.NEXT_PUBLIC_SITE_URL?.trim() || origin).replace(/\/$/, "");
+function publicBaseUrl(): string {
+  const value = process.env.NEXT_PUBLIC_SITE_URL?.trim();
+  let url: URL | null = null;
+  try {
+    url = value ? new URL(value) : null;
+  } catch {
+    // The stable configuration error below intentionally excludes the invalid value.
+  }
+  if (!url
+    || url.protocol !== "https:"
+    || url.username
+    || url.password
+    || url.pathname !== "/"
+    || url.search
+    || url.hash) {
+    console.error("[cgs-invitations] Public site URL configuration is invalid", {
+      configuration: "NEXT_PUBLIC_SITE_URL",
+      requirement: "absolute_https_origin",
+    });
+    throw new GroupInvitationError("Invitation could not be saved. Please try again.", 502);
+  }
+  return url.origin;
 }
 
-async function inviterDisplay(inviterDid: string, inviterHandle: string | null, origin: string): Promise<{ name: string | null; url: string | null }> {
+async function inviterDisplay(inviterDid: string, inviterHandle: string | null, publicOrigin: string): Promise<{ name: string | null; url: string | null }> {
   const card = await getCertifiedProfileCard(inviterDid).catch(() => null);
   const name = card?.displayName?.trim() || null;
   const identifier = inviterHandle?.trim() || card?.handle?.trim() || inviterDid;
   return {
     name,
-    url: identifier ? new URL(accountPath(identifier), publicBaseUrl(origin)).toString() : null,
+    url: identifier ? new URL(accountPath(identifier), publicOrigin).toString() : null,
   };
 }
 
@@ -316,10 +336,6 @@ async function groupDisplay(repo: string): Promise<{ name: string | null; handle
     handle: card?.handle?.trim() || null,
     avatarUrl: card?.avatarUrl?.trim() || null,
   };
-}
-
-function currentRole(members: Array<{ did: string; role: CgsServerRole }>, did: string): CgsServerRole | null {
-  return members.find((member) => member.did === did)?.role ?? null;
 }
 
 function canInvite(role: CgsServerRole | null, inviteRole: GroupInvitationRole): boolean {
@@ -405,7 +421,6 @@ export async function createGroupInvitation({
   role,
   session,
   cookie,
-  origin,
   acceptLanguage,
   enqueueNotification,
 }: {
@@ -414,7 +429,6 @@ export async function createGroupInvitation({
   role: GroupInvitationRole;
   session: Extract<AuthSession, { isLoggedIn: true }>;
   cookie: string | null;
-  origin: string;
   acceptLanguage: string | null;
   enqueueNotification: boolean;
 }): Promise<GroupInvitation> {
@@ -422,16 +436,18 @@ export async function createGroupInvitation({
   if (!repo.trim()) throw new GroupInvitationError("Choose an organization before inviting someone.", 400);
   if (!/^\S+@\S+\.\S+$/.test(normalizedEmail)) throw new GroupInvitationError("Enter a valid email address.", 400);
 
-  const memberResult = await fetchCgsMembersWithCookie({ repo, cookie, limit: 100 });
-  const actorRole = currentRole(memberResult.members, session.did);
+  const actorRole = await fetchCgsMemberRoleWithCookie({ repo, cookie, did: session.did });
   if (!canInvite(actorRole, role)) {
     throw new GroupInvitationError(role === "admin" ? "Only organization owners can invite admins." : "Only organization owners and admins can invite members.", 403);
   }
 
   const now = new Date();
   const invitationId = crypto.randomUUID();
-  const group = await groupDisplay(repo);
-  const inviter = await inviterDisplay(session.did, session.handle, origin);
+  const publicOrigin = publicBaseUrl();
+  const [group, inviter] = await Promise.all([
+    groupDisplay(repo),
+    inviterDisplay(session.did, session.handle, publicOrigin),
+  ]);
   try {
     const raw = await supabaseRpc<unknown>("notification_invitation_create", {
       p_invitation_id: invitationId,
@@ -445,7 +461,7 @@ export async function createGroupInvitation({
       p_group_handle: group.handle,
       p_inviter_name: inviter.name,
       p_inviter_url: inviter.url,
-      p_public_origin: publicBaseUrl(origin),
+      p_public_origin: publicOrigin,
       p_locale: resolveGroupInvitationEmailLocale({ acceptLanguage }),
       p_enqueue_notification: enqueueNotification,
       p_created_at: now.toISOString(),

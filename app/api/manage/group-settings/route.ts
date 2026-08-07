@@ -1,7 +1,12 @@
 import { headers } from "next/headers";
 import { getAuthForwardCookie } from "@/app/_lib/auth";
 import { fetchAuthSession } from "@/app/_lib/auth-server";
-import { fetchCgsMembersWithCookie, type CgsServerMember, type CgsServerRole } from "@/app/_lib/cgs-server";
+import {
+  fetchCgsMemberRoleWithCookie,
+  fetchCgsMembersWithCookie,
+  type CgsServerMember,
+  type CgsServerRole,
+} from "@/app/_lib/cgs-server";
 import { fetchIndexedCertifiedProfileCards, type IndexedCertifiedProfileCard } from "@/app/_lib/indexer";
 import { fetchBlueskyProfileCard } from "@/app/_lib/bluesky-profile";
 import { loadFastDataCouncilState, type DataCouncilState } from "@/app/_lib/data-council";
@@ -105,8 +110,7 @@ function buildMemberEmails({
   return memberEmails;
 }
 
-function canWriteDataCouncil(members: CgsServerMember[], userDid: string | null): boolean {
-  const role = userDid ? members.find((member) => member.did === userDid)?.role ?? null : null;
+function canWriteDataCouncil(role: CgsServerRole | null): boolean {
   return Boolean(role && BADGE_MANAGER_ROLES.has(role));
 }
 
@@ -128,8 +132,11 @@ export async function GET(request: Request) {
     const members = memberResult.members;
     const userDid = session.isLoggedIn ? session.did : null;
     const memberDids = members.map((member) => member.did);
-
-    const isMember = Boolean(userDid && members.some((member) => member.did === userDid));
+    const firstPageRole = userDid ? members.find(member => member.did === userDid)?.role ?? null : null;
+    const userRole = firstPageRole ?? (userDid && memberResult.cursor
+      ? await fetchCgsMemberRoleWithCookie({ repo, cookie, did: userDid })
+      : null);
+    const isMember = Boolean(userRole);
 
     const profilesPromise = fetchIndexedCertifiedProfileCards(memberDids).catch(() => new Map<string, IndexedCertifiedProfileCard>());
     const identitiesPromise = resolveMemberIdentities(members);
@@ -138,7 +145,7 @@ export async function GET(request: Request) {
     const acceptedEmailsPromise = isMember
       ? listAcceptedGroupInvitationEmailsForRepo(repo).catch(() => new Map<string, string>())
       : Promise.resolve(new Map<string, string>());
-    const canWrite = canWriteDataCouncil(members, userDid);
+    const canWrite = canWriteDataCouncil(userRole);
     const invitationsPromise = canWrite
       ? listPendingGroupInvitationsForRepo(repo).catch(() => [])
       : Promise.resolve([] as GroupInvitation[]);

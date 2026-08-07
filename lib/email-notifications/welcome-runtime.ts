@@ -17,7 +17,7 @@ export function createWelcomeRuntime(environment: Environment = process.env) {
       invocationDeadline,
       {
         producer,
-        processOne: delivery.process,
+        processOne: (outboxId, deadline) => delivery.process(outboxId, deadline, input.type),
       },
     ),
   };

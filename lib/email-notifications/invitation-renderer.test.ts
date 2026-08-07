@@ -42,13 +42,17 @@ describe("InvitationNotificationRenderer", () => {
   });
 
   it.each([
+    [{ ...row, eventType: "signup" }, "event type"],
+    [{ ...row, sourceId: "81000000-0000-4000-8000-000000000099" }, "source"],
     [{ ...row, templateKey: "other" }, "template"],
     [{ ...row, recipientEmail: "other@example.com" }, "recipient"],
     [{ ...row, payload: { ...row.payload as object, role: "owner" } }, "role"],
+    [{ ...row, payload: { ...row.payload as object, acceptUrl: "http://example.test/invite/id" } }, "insecure accept URL"],
     [{ ...row, payload: { invitedEmail: "private@example.com" } }, "payload"],
   ])("rejects invalid %s input with a fixed redacted error", async (invalid, _label) => {
     const error = await new InvitationNotificationRenderer().render(invalid as RenderableRow).catch((reason: unknown) => reason);
     expect((error as Error).message).toBe("Invitation notification row is invalid. Verify the transactional producer and template registry.");
-    expect(JSON.stringify(error)).not.toContain("private@example.com");
+    expect((error as Error).message).not.toContain("private@example.com");
+    expect((error as Error).stack ?? "").not.toContain("private@example.com");
   });
 });

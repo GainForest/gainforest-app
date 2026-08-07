@@ -29,11 +29,10 @@ function optionalString(value: Json | undefined, maximum: number): value is stri
   return value === undefined || value === null || (typeof value === "string" && value.length <= maximum);
 }
 
-function httpUrl(value: Json | undefined): value is string {
+function httpsUrl(value: Json | undefined): value is string {
   if (typeof value !== "string" || value.length > 1_024) return false;
   try {
-    const protocol = new URL(value).protocol;
-    return protocol === "https:" || protocol === "http:";
+    return new URL(value).protocol === "https:";
   } catch {
     return false;
   }
@@ -49,10 +48,10 @@ function decode(value: Json): InvitationPayload | null {
     || !optionalString(item.organizationName, 200)
     || !optionalString(item.inviterName, 200)
     || !optionalString(item.inviterUrl, 1_024)
-    || !(item.inviterUrl === undefined || item.inviterUrl === null || httpUrl(item.inviterUrl))
+    || !(item.inviterUrl === undefined || item.inviterUrl === null || httpsUrl(item.inviterUrl))
     || (item.role !== "member" && item.role !== "admin")
-    || !httpUrl(item.acceptUrl)
-    || !httpUrl(item.siteUrl)) return null;
+    || !httpsUrl(item.acceptUrl)
+    || !httpsUrl(item.siteUrl)) return null;
   return item as unknown as InvitationPayload;
 }
 
