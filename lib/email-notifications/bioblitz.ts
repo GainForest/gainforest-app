@@ -1,9 +1,10 @@
 import "server-only";
 
+import type { BioblitzPrize } from "@/lib/bioblitz-prizes";
 import type { NotificationConfig } from "./config";
 import type { Clock, NotificationEnqueueRepository, UserEmailReader } from "./types";
 
-export type BioblitzPrize = "most-observations" | "best-picture";
+export type { BioblitzPrize } from "@/lib/bioblitz-prizes";
 export interface BioblitzWinnerInput {
   readonly roundId: number;
   readonly roundLabel: string;
