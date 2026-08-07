@@ -42,7 +42,6 @@ export function invitationNotificationAfterProcess(
       return { ...notification, status: "dead", retryable: result.result.errorCode === "provider_rejected", errorCode: result.result.errorCode };
     case "suppressed":
       return { ...notification, status: "suppressed", retryable: false };
-    case "disabled":
     case "released_insufficient_time":
       return { ...notification, status: "queued", retryable: true };
     case "stale_claim":
