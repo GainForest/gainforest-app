@@ -40,13 +40,7 @@ import {
   isAccountExcludedFromBioblitzRound,
 } from "./bioblitz-exclusions";
 
-/** Cash prizes awarded each round, in USD. */
-export const BIOBLITZ_PRIZES = {
-  /** Collector with the most valid observations in the round. */
-  mostObservations: 40,
-  /** Judged best biodiversity photo of the round. */
-  bestPicture: 10,
-} as const;
+export { BIOBLITZ_PRIZES } from "@/lib/bioblitz-prizes";
 
 /** A confirmed winner of one of the round prizes. The DID is resolved to a
  *  display name in the UI, so no technical identifier is ever shown. */
