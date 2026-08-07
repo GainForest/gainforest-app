@@ -1,7 +1,11 @@
 import "server-only";
 
 import { randomUUID } from "node:crypto";
-import { drainNotifications, createNotificationProcessor } from "./orchestrator";
+import {
+  drainNotifications,
+  createNotificationProcessor,
+  type NotificationProcessor,
+} from "./orchestrator";
 import { createNotificationRuntimeCore } from "./runtime";
 import type { InvitationSourceReader, UserEmailReader } from "./types";
 import { WelcomeNotificationRenderer } from "./welcome-renderer";
@@ -18,7 +22,7 @@ const invitationReader: InvitationSourceReader = {
 
 export function createDrainRuntime(environment: Environment = process.env) {
   const { config, repository, provider, clock, from } = createNotificationRuntimeCore(environment);
-  const processor = provider
+  const processor: NotificationProcessor = provider
     ? createNotificationProcessor({
       from,
       repository,
@@ -29,7 +33,9 @@ export function createDrainRuntime(environment: Environment = process.env) {
       invitationSourceReader: invitationReader,
       safetyMarginMs: WORKER_SAFETY_MARGIN_MS,
     })
-    : async () => ({ kind: "disabled" } as const);
+    : async () => {
+      throw new Error("Notification processor cannot run while email delivery is disabled.");
+    };
 
   return {
     drain: (invocationDeadline: Date) => drainNotifications(invocationDeadline, {

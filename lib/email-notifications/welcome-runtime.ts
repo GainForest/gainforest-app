@@ -1,7 +1,11 @@
 import "server-only";
 
 import { randomUUID } from "node:crypto";
-import { processNotificationById, createNotificationProcessor } from "./orchestrator";
+import {
+  processNotificationById,
+  createNotificationProcessor,
+  type NotificationProcessor,
+} from "./orchestrator";
 import { createNotificationRuntimeCore } from "./runtime";
 import type { InvitationSourceReader, UserEmailReader } from "./types";
 import { deliverWelcomeNotification, type WelcomeNotificationInput } from "./welcome";
@@ -20,7 +24,7 @@ const unusedInvitationReader: InvitationSourceReader = {
 
 export function createWelcomeRuntime(environment: Environment = process.env) {
   const { config, repository, provider, clock, from } = createNotificationRuntimeCore(environment);
-  const processor = provider
+  const processor: NotificationProcessor = provider
     ? createNotificationProcessor({
       from,
       repository,
@@ -31,7 +35,9 @@ export function createWelcomeRuntime(environment: Environment = process.env) {
       invitationSourceReader: unusedInvitationReader,
       safetyMarginMs: WORKER_SAFETY_MARGIN_MS,
     })
-    : async () => ({ kind: "disabled" } as const);
+    : async () => {
+      throw new Error("Notification processor cannot run while email delivery is disabled.");
+    };
   const producer = { config, clock, repository };
 
   return {
