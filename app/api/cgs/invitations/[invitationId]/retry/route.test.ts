@@ -91,6 +91,23 @@ describe("POST invitation email retry", () => {
     expect(process).not.toHaveBeenCalled();
   });
 
+  it("reserves 55 seconds for immediate retry delivery", async () => {
+    const { POST, maxDuration } = await import("./route");
+    const before = Date.now();
+    const response = await POST(
+      new Request("https://example.test"),
+      { params: Promise.resolve({ invitationId }) },
+    );
+    const after = Date.now();
+
+    expect(response.status).toBe(200);
+    const invocationDeadline = process.mock.calls[0]?.[1] as Date | undefined;
+    expect(invocationDeadline).toBeInstanceOf(Date);
+    expect(invocationDeadline!.getTime()).toBeGreaterThanOrEqual(before + 55_000);
+    expect(invocationDeadline!.getTime()).toBeLessThanOrEqual(after + 55_000);
+    expect(maxDuration).toBe(60);
+  });
+
   it("returns the plain-language permission error without processing", async () => {
     retryGroupInvitation.mockRejectedValueOnce(new GroupInvitationError("Only organization owners and admins can retry invitation emails.", 403));
     const { POST } = await import("./route");

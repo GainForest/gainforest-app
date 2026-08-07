@@ -16,9 +16,9 @@ import { readNotificationConfig } from "@/lib/email-notifications/config";
 import { createInvitationRuntime } from "@/lib/email-notifications/invitation-runtime";
 
 export const runtime = "nodejs";
-export const maxDuration = 30;
+export const maxDuration = 60;
 
-const USABLE_INVOCATION_MS = 27_000;
+const USABLE_INVOCATION_MS = 55_000;
 
 const createInvitationSchema = z.object({
   repo: z.string().min(1),

@@ -11,8 +11,8 @@ import { fetchCgsMembersWithCookie } from "@/app/_lib/cgs-server";
 import { createInvitationRuntime } from "@/lib/email-notifications/invitation-runtime";
 
 export const runtime = "nodejs";
-export const maxDuration = 30;
-const USABLE_INVOCATION_MS = 27_000;
+export const maxDuration = 60;
+const USABLE_INVOCATION_MS = 55_000;
 
 function jsonError(error: unknown, fallback: string, status = 400) {
   const message = error instanceof GroupInvitationError ? error.message : fallback;
