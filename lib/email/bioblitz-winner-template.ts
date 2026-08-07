@@ -42,7 +42,7 @@ const copyByLocale = {
       },
       "best-picture": {
         label: "Best Picture",
-        appreciation: "Your photo stood out for the way it captured nature. Thank you for sharing it with the BioBlitz community.",
+        appreciation: "Your photo stood out for the way it captured nature. Thank you for sharing it with the GainForest community.",
       },
     },
     awardHeading: "Your award",
@@ -71,7 +71,7 @@ const copyByLocale = {
       },
       "best-picture": {
         label: "Mejor foto",
-        appreciation: "Tu foto destacó por la forma en que capturó la naturaleza. Gracias por compartirla con la comunidad de BioBlitz.",
+        appreciation: "Tu foto destacó por la forma en que capturó la naturaleza. Gracias por compartirla con la comunidad de GainForest.",
       },
     },
     awardHeading: "Tu premio",
@@ -100,7 +100,7 @@ const copyByLocale = {
       },
       "best-picture": {
         label: "Melhor foto",
-        appreciation: "Sua foto se destacou pela forma como capturou a natureza. Agradecemos por compartilhá-la com a comunidade do BioBlitz.",
+        appreciation: "Sua foto se destacou pela forma como capturou a natureza. Agradecemos por compartilhá-la com a comunidade do GainForest.",
       },
     },
     awardHeading: "Seu prêmio",
@@ -129,7 +129,7 @@ const copyByLocale = {
       },
       "best-picture": {
         label: "Picha bora",
-        appreciation: "Picha yako ilijitokeza kwa jinsi ilivyonasa mazingira. Asante kwa kuishiriki na jamii ya BioBlitz.",
+        appreciation: "Picha yako ilijitokeza kwa jinsi ilivyonasa mazingira. Asante kwa kuishiriki na jamii ya GainForest.",
       },
     },
     awardHeading: "Tuzo yako",
@@ -158,7 +158,7 @@ const copyByLocale = {
       },
       "best-picture": {
         label: "Foto terbaik",
-        appreciation: "Foto Anda menonjol karena caranya menangkap keindahan alam. Terima kasih telah membagikannya kepada komunitas BioBlitz.",
+        appreciation: "Foto Anda menonjol karena caranya menangkap keindahan alam. Terima kasih telah membagikannya kepada komunitas GainForest.",
       },
     },
     awardHeading: "Hadiah Anda",
