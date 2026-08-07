@@ -8,7 +8,9 @@ const { enqueue, process, supabaseSelect, supabaseRpc } = vi.hoisted(() => ({
 }));
 vi.mock("@/lib/email-notifications/bioblitz-runtime", () => ({
   createBioblitzProducerRuntime: () => ({ enqueue }),
-  createBioblitzProcessRuntime: () => ({ process }),
+}));
+vi.mock("@/lib/email-notifications/delivery", () => ({
+  createNotificationDelivery: () => ({ process }),
 }));
 vi.mock("@/lib/supabase/rest", () => ({ supabaseSelect, supabaseRpc }));
 

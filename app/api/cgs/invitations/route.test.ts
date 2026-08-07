@@ -19,8 +19,8 @@ vi.mock("@/app/_lib/cgs-invitations", async importOriginal => {
   const actual = await importOriginal<typeof import("@/app/_lib/cgs-invitations")>();
   return { ...actual, createGroupInvitation };
 });
-vi.mock("@/lib/email-notifications/invitation-runtime", () => ({
-  createInvitationRuntime: () => ({ process }),
+vi.mock("@/lib/email-notifications/delivery", () => ({
+  createNotificationDelivery: () => ({ process }),
 }));
 
 const invitation = {

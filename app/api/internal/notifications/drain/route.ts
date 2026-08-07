@@ -1,6 +1,6 @@
 import { timingSafeEqual } from "node:crypto";
 import { NextRequest, NextResponse } from "next/server";
-import { createDrainRuntime } from "@/lib/email-notifications/drain-runtime";
+import { createNotificationDelivery } from "@/lib/email-notifications/delivery";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -32,9 +32,9 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    const runtime = createDrainRuntime();
-    const result = await runtime.drain(new Date(invocationStartedAt + USABLE_INVOCATION_MS));
-    const health = result.kind === "disabled" ? null : await runtime.health();
+    const delivery = createNotificationDelivery();
+    const result = await delivery.drain(new Date(invocationStartedAt + USABLE_INVOCATION_MS));
+    const health = result.kind === "disabled" ? null : await delivery.health();
     return NextResponse.json({ ...result, health });
   } catch {
     return NextResponse.json({ error: "Notification recovery could not complete. Retry the scheduled request." }, { status: 503 });
