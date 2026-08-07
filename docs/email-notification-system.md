@@ -244,6 +244,29 @@ pnpm build
 
 The full smoke test reserves local ports `54321`, `54322`, `3055`, and `3056`. Supabase publishes its API and database ports on all host interfaces, so run it only on a trusted network or behind a firewall. Set `KEEP_NOTIFICATION_LOCAL_STACK=1` to preserve the local database for inspection, `NOTIFICATION_LOCAL_APP_PORT=<port>` when `3055` is occupied, or `NOTIFICATION_LOCAL_RESEND_PORT=<port>` when `3056` is occupied.
 
+## Developer email previews
+
+The repository includes safe fixture previews for every current email family. The command calls the production template functions; it does not create notification rows, invitations, badges, or user records.
+
+```bash
+# Discover templates and variants.
+pnpm email:preview --list
+
+# Write exact rendered HTML to a unique temporary file.
+pnpm email:preview bioblitz-winner --variant best-picture
+
+# Write and open a local preview.
+pnpm email:preview welcome --variant membership --locale pt --open
+
+# Deliberately send a fixture through Resend.
+pnpm email:preview bioblitz-winner --variant most-observations \
+  --send --to developer@example.com
+```
+
+Preview is always the default. Delivery requires both `--send` and `--to`, loads `RESEND_API_KEY` from `.env.local` or the shell, honors `EMAIL_DISABLED=true`, and refuses production environments. It sends directly through Resend so test fixtures never enter the durable outbox. The OTP fixture uses the production hosted template and substitutes representative auth-provider values for the preview; the real authentication provider remains responsible for OTP delivery.
+
+Use `pnpm email:preview --help` for locale, output-path, and browser-opening options. An explicit `--output` path must not already exist, which prevents the command from overwriting another file.
+
 ## Recovery and monitoring
 
 cron-job.org calls the recovery route every five minutes:

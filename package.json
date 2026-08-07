@@ -8,6 +8,7 @@
     "dev:proxy": "caddy run --config Caddyfile --watch",
     "build": "next build",
     "check:i18n": "node scripts/check-i18n-untranslated.mjs",
+    "email:preview": "node --env-file-if-exists=.env.local --import tsx scripts/email-preview.ts",
     "test:unit": "vitest run",
     "test:db": "bash scripts/test-notification-outbox-db.sh",
     "test:notifications:local": "bash scripts/test-notifications-local.sh",
@@ -62,6 +63,7 @@
     "@types/react-dom": "^19",
     "supabase": "2.111.0",
     "tailwindcss": "^4",
+    "tsx": "^4.23.1",
     "typescript": "^5",
     "vitest": "^4.1.8"
   }
