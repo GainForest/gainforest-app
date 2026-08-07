@@ -89,7 +89,8 @@ describe("deliverWelcomeNotification", () => {
     ["sent", false],
     ["dead", false],
     ["suppressed", false],
-  ] as const)("does not claim an already terminal duplicate in %s", async (status, retryable) => {
+    ["processing", true],
+  ] as const)("does not process an already durable duplicate in %s", async (status, retryable) => {
     const deps = dependencies();
     deps.producer.repository.enqueue.mockResolvedValue({ outboxId: OUTBOX_ID, status, duplicate: true });
     await expect(deliverWelcomeNotification({

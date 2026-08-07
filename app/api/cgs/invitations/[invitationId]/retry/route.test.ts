@@ -33,7 +33,7 @@ vi.mock("@/app/_lib/cgs-invitations", () => ({
       : notification
   ),
 }));
-vi.mock("@/lib/email-notifications/invitation-runtime", () => ({ createInvitationRuntime: () => ({ process }) }));
+vi.mock("@/lib/email-notifications/delivery", () => ({ createNotificationDelivery: () => ({ process }) }));
 
 const invitationId = "81000000-0000-4000-8000-000000000001";
 const invitation = { id: invitationId, repo: "did:plc:forest", role: "member", status: "pending" };

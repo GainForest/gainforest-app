@@ -62,14 +62,28 @@ describe("WelcomeNotificationRenderer", () => {
     expect(rendered.subject).toContain("Forest Circle");
   });
 
+  it("rejects DIDs that fail AT Protocol syntax validation", async () => {
+    const invalid = row({
+      payload: {
+        displayName: "Forest Member",
+        occurredAt: "2026-08-06T01:00:00.000Z",
+        userDid: "did:plc:%",
+      },
+    });
+
+    await expect(new WelcomeNotificationRenderer().render(invalid)).rejects.toThrow(
+      "Welcome notification row is invalid. Verify the event producer and template registry.",
+    );
+  });
+
   it.each([
-    [row({ templateKey: "other" }), "template"],
-    [row({ eventType: "invitation" }), "event"],
-    [row({ payload: { displayName: "private@example.com", userDid: 42 } }), "payload"],
-  ])("rejects invalid %s input with a fixed redacted error", async (invalid) => {
+    ["template", row({ templateKey: "other" })],
+    ["event", row({ eventType: "invitation" })],
+    ["payload", row({ payload: { displayName: "private@example.com", userDid: 42 } })],
+  ])("rejects invalid %s input with a fixed redacted error", async (_label, invalid) => {
     const error = await new WelcomeNotificationRenderer().render(invalid).catch((reason: unknown) => reason);
     expect(error).toBeInstanceOf(Error);
     expect((error as Error).message).toBe("Welcome notification row is invalid. Verify the event producer and template registry.");
-    expect(JSON.stringify(error)).not.toContain("private@example.com");
+    expect((error as Error).stack ?? "").not.toContain("private@example.com");
   });
 });

@@ -47,6 +47,18 @@ function dependencies(
 }
 
 describe("processNotificationById", () => {
+  it("rejects an invalid invocation deadline before token generation and repository access", async () => {
+    const deps = dependencies();
+
+    await expect(processNotificationById(
+      "10000000-0000-4000-8000-000000000001",
+      new Date("invalid"),
+      deps,
+    )).rejects.toThrow("invocation deadline");
+    expect(deps.tokenFactory).not.toHaveBeenCalled();
+    expect(deps.repository.claimOne).not.toHaveBeenCalled();
+  });
+
   it("returns before token generation and repository access when disabled", async () => {
     const deps = dependencies({ config: config(true) });
     await expect(processNotificationById("10000000-0000-4000-8000-000000000001", DEADLINE, deps)).resolves.toEqual({ kind: "disabled" });
@@ -104,6 +116,14 @@ describe("processNotificationById", () => {
 });
 
 describe("drainNotifications", () => {
+  it("rejects an invalid invocation deadline before repository access", async () => {
+    const deps = dependencies();
+
+    await expect(drainNotifications(new Date("invalid"), deps)).rejects.toThrow("invocation deadline");
+    expect(deps.repository.cleanup).not.toHaveBeenCalled();
+    expect(deps.repository.claimDue).not.toHaveBeenCalled();
+  });
+
   it("returns before cleanup and claiming when disabled", async () => {
     const deps = dependencies({ config: config(true) });
     await expect(drainNotifications(DEADLINE, deps)).resolves.toEqual({ kind: "disabled" });
@@ -296,6 +316,8 @@ describe("drainNotifications", () => {
     [{ concurrency: 5 }, "concurrency"],
     [{ leaseSeconds: 0 }, "leaseSeconds"],
     [{ cleanupBatchSize: 501 }, "cleanupBatchSize"],
+    [{ safetyMarginMs: -1 }, "safetyMarginMs"],
+    [{ safetyMarginMs: 60_001 }, "safetyMarginMs"],
   ])("rejects unsafe option %s before repository access", async (options, field) => {
     const deps = dependencies();
     await expect(drainNotifications(DEADLINE, deps, options)).rejects.toThrow(field);

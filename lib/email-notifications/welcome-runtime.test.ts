@@ -22,7 +22,7 @@ describe("createWelcomeRuntime", () => {
     expect(fetchMock).not.toHaveBeenCalled();
   });
 
-  it("fails before repository access when enabled email lacks its API key", () => {
+  it("fails without network access when enabled email lacks its API key", () => {
     const fetchMock = vi.fn();
     vi.stubGlobal("fetch", fetchMock);
     expect(() => createWelcomeRuntime({})).toThrow(

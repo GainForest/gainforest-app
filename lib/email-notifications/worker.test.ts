@@ -160,10 +160,10 @@ class StateRepository implements NotificationRepository {
     this.owned(id, token);
     this.actions.push(`expire:${code}`); this.active = false; return this.result();
   }
-  async suppressClaimed(id: string, token: string) {
+  async suppressClaimed(id: string, token: string, code: "invitation_not_pending" | "manually_suppressed") {
     this.owned(id, token);
     if (this.current.providerCallPhase !== "idle") throw new Error("fake repository forbids in-flight suppression");
-    this.actions.push("suppress"); this.active = false; return this.result();
+    this.actions.push(`suppress:${code}`); this.active = false; return this.result();
   }
   async releaseClaim(id: string, token: string) {
     this.owned(id, token);
@@ -417,6 +417,7 @@ describe("notification worker preflight and safety", () => {
     const suppressed = setup(suppressedRepository);
     suppressed.invitationSendability.mockResolvedValueOnce({ kind: "expired" });
     expect((await processNotificationClaim(claim(), suppressed.dependencies)).kind).toBe("suppressed");
+    expect(suppressedRepository.actions).toEqual(["suppress:invitation_not_pending"]);
     expect(suppressed.renderer.render).not.toHaveBeenCalled();
 
     const errorRepository = new StateRepository(row({ eventType: "invitation", sourceId: "invite-1" }));

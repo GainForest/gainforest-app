@@ -8,7 +8,7 @@ import {
   retryGroupInvitation,
 } from "@/app/_lib/cgs-invitations";
 import { fetchCgsMembersWithCookie } from "@/app/_lib/cgs-server";
-import { createInvitationRuntime } from "@/lib/email-notifications/invitation-runtime";
+import { createNotificationDelivery } from "@/lib/email-notifications/delivery";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
@@ -37,7 +37,7 @@ export async function POST(_request: Request, { params }: { params: Promise<{ in
     const actorRole = memberResult.members.find(member => member.did === session.did)?.role ?? null;
     let notification = await retryGroupInvitation({ invitationId, actorRole });
     try {
-      const processed = await createInvitationRuntime().process(
+      const processed = await createNotificationDelivery().process(
         notification.outboxId,
         new Date(invocationStartedAt + USABLE_INVOCATION_MS),
       );

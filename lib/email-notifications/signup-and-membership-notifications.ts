@@ -33,6 +33,7 @@ export interface SignupNotificationInput {
   readonly email: string;
   readonly name?: string;
   readonly locale?: string;
+  /** ISO 8601 instant with a UTC or numeric offset. Defaults to the receipt time. */
   readonly createdAt?: string;
 }
 
@@ -53,6 +54,7 @@ const WELCOME_PROVIDER_PREFIX = {
 } as const satisfies Record<WelcomeEvent, string>;
 const MAX_PROVIDER_KEY_LENGTH = 256;
 const EMAIL_ADDRESS_SCHEMA = z.email().min(3).max(320);
+const EVENT_TIMESTAMP_SCHEMA = z.iso.datetime({ offset: true });
 
 function boundedIdentifier(event: WelcomeEvent, field: string, value: string, maximum = 512): string {
   if (typeof value !== "string" || value.length < 1 || value.length > maximum || value !== value.trim()) {
@@ -89,14 +91,10 @@ function optionalText(event: WelcomeEvent, field: string, value: string | null |
 
 function eventTime(event: WelcomeEvent, value: string | undefined, receiptTime: Date): string {
   if (value === undefined) return receiptTime.toISOString();
-  if (value.length > 64) {
-    throw new NotificationProducerInputError(event, "createdAt", "Supply a valid event timestamp of at most 64 characters.");
+  if (value.length > 64 || !EVENT_TIMESTAMP_SCHEMA.safeParse(value).success) {
+    throw new NotificationProducerInputError(event, "createdAt", "Supply an ISO 8601 instant with a UTC or numeric offset, at most 64 characters.");
   }
-  const parsed = new Date(value);
-  if (Number.isNaN(parsed.getTime())) {
-    throw new NotificationProducerInputError(event, "createdAt", "Supply a valid event timestamp of at most 64 characters.");
-  }
-  return parsed.toISOString();
+  return new Date(value).toISOString();
 }
 
 async function enqueue(

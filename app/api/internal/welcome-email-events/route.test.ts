@@ -2,6 +2,7 @@ import { createHmac } from "node:crypto";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { NextRequest } from "next/server";
 import { NotificationRepositoryError } from "@/lib/email-notifications/repository";
+import { NotificationProducerInputError } from "@/lib/email-notifications/signup-and-membership-notifications";
 import type { WelcomeNotificationInput, WelcomeNotificationOutcome } from "@/lib/email-notifications/welcome";
 
 vi.mock("server-only", () => ({}));
@@ -114,6 +115,41 @@ describe("welcome email event webhook", () => {
     }, expect.any(Date));
   });
 
+  it("bounds independent profile lookups before durable delivery", async () => {
+    vi.useFakeTimers();
+    const unresolvedProfile = new Promise<{ displayName: string | null; avatarUrl: string | null }>(() => {});
+    getCertifiedProfileCard.mockImplementation(() => unresolvedProfile);
+
+    try {
+      const { POST } = await import("./route");
+      const responsePromise = POST(signedRequest({
+        type: "organization.membership.joined",
+        eventId: "organization.membershipJoined.v1:profile-timeout",
+        user: {
+          did: "did:plc:user",
+          email: "member@example.com",
+        },
+        organization: {
+          did: "did:plc:org",
+        },
+      }, secret));
+
+      await vi.advanceTimersByTimeAsync(0);
+      expect(getCertifiedProfileCard).toHaveBeenCalledTimes(2);
+      expect(deliver).not.toHaveBeenCalled();
+
+      await vi.advanceTimersByTimeAsync(3_000);
+      const response = await responsePromise;
+      expect(response.status).toBe(200);
+      expect(deliver).toHaveBeenCalledWith(expect.objectContaining({
+        name: undefined,
+        organizationName: undefined,
+      }), expect.any(Date));
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
   it("reserves 55 seconds for immediate welcome delivery", async () => {
     const { POST, maxDuration } = await import("./route");
     const before = Date.now();
@@ -191,36 +227,6 @@ describe("welcome email event webhook", () => {
     expect(deliver).toHaveBeenCalledWith(expect.objectContaining({ name: undefined }), expect.any(Date));
   });
 
-  it("bounds profile enrichment so the event becomes durable when profile services stall", async () => {
-    vi.useFakeTimers();
-    try {
-      getCertifiedProfileCard.mockImplementation(() => new Promise(resolve => {
-        setTimeout(() => resolve({ displayName: "Too Late", avatarUrl: null }), 5_000);
-      }));
-      const { POST } = await import("./route");
-      const responseOrTimeout = Promise.race([
-        POST(signedRequest({
-          type: "organization.membership.joined",
-          eventId: "organization.membershipJoined.v1:slow-profile",
-          user: { did: "did:plc:user", email: "member@example.com" },
-          organization: { did: "did:plc:org" },
-        }, secret)).then(response => ({ kind: "response" as const, response })),
-        new Promise<{ kind: "timeout" }>(resolve => setTimeout(() => resolve({ kind: "timeout" }), 2_100)),
-      ]);
-
-      await vi.advanceTimersByTimeAsync(2_100);
-      const result = await responseOrTimeout;
-      expect(result.kind).toBe("response");
-      if (result.kind === "response") expect(result.response.status).toBe(200);
-      expect(deliver).toHaveBeenCalledWith(expect.objectContaining({
-        name: undefined,
-        organizationName: undefined,
-      }), expect.any(Date));
-    } finally {
-      vi.useRealTimers();
-    }
-  });
-
   it("rejects unsupported organization event types", async () => {
     const { POST } = await import("./route");
     const response = await POST(signedRequest({
@@ -286,6 +292,20 @@ describe("welcome email event webhook", () => {
     });
   });
 
+  it("returns 400 when the producer rejects the notification input", async () => {
+    deliver.mockRejectedValueOnce(
+      new NotificationProducerInputError("signup", "userDid", "Supply a valid bounded DID."),
+    );
+    const { POST } = await import("./route");
+    const response = await POST(signedRequest({
+      type: "user.signup.completed",
+      eventId: "user.signup.completed.v1:invalid",
+      user: { did: "did:plc:user", email: "member@example.com" },
+    }, secret));
+    expect(response.status).toBe(400);
+    await expect(response.text()).resolves.not.toContain("member@example.com");
+  });
+
   it("returns a non-retryable conflict when an event ID changes identity", async () => {
     deliver.mockRejectedValueOnce(new NotificationRepositoryError("idempotency_conflict"));
     const { POST } = await import("./route");
@@ -300,18 +320,30 @@ describe("welcome email event webhook", () => {
     });
   });
 
-  it("redacts runtime failures and returns a retryable webhook response", async () => {
+  it("redacts and logs runtime failures before returning a retryable webhook response", async () => {
+    const log = vi.spyOn(console, "error").mockImplementation(() => {});
     deliver.mockRejectedValueOnce(new Error("member@example.com provider-secret"));
-    const { POST } = await import("./route");
-    const response = await POST(signedRequest({
-      type: "user.signup.completed",
-      eventId: "user.signup.completed.v1:error",
-      user: { did: "did:plc:user", email: "member@example.com" },
-    }, secret));
-    expect(response.status).toBe(503);
-    const body = await response.text();
-    expect(body).toContain("Welcome email event could not be queued");
-    expect(body).not.toContain("member@example.com");
-    expect(body).not.toContain("provider-secret");
+
+    try {
+      const { POST } = await import("./route");
+      const response = await POST(signedRequest({
+        type: "user.signup.completed",
+        eventId: "user.signup.completed.v1:private-event@example.com",
+        user: { did: "did:plc:user", email: "member@example.com" },
+      }, secret));
+      expect(response.status).toBe(503);
+      const body = await response.text();
+      expect(body).toContain("Welcome email event could not be queued");
+      expect(body).not.toContain("member@example.com");
+      expect(body).not.toContain("provider-secret");
+      expect(log).toHaveBeenCalledWith("welcome-email-events delivery failed", {
+        eventIdHash: "07b9a40e2a4af7ed",
+        eventType: "user.signup.completed",
+        reason: "Error",
+      });
+      expect(JSON.stringify(log.mock.calls)).not.toContain("private-event@example.com");
+    } finally {
+      log.mockRestore();
+    }
   });
 });

@@ -45,7 +45,7 @@ describe("welcome notification enqueue boundaries", () => {
       email: " USER@Example.com ",
       name: " River Keeper ",
       locale: "en-BT",
-      createdAt: "2026-08-06T01:00:00.000Z",
+      createdAt: "2026-08-06T07:00:00.000+06:00",
     }, deps)).resolves.toEqual({
       kind: "enqueued",
       outboxId: "10000000-0000-4000-8000-000000000001",
@@ -120,6 +120,26 @@ describe("welcome notification enqueue boundaries", () => {
     expect(membershipRow.providerIdempotencyKey).toBe("organization-membership-joined:shared-auth-event");
     expect(membershipRow.payload).toMatchObject({ organizationDid: null });
     expect(signupRow.providerIdempotencyKey).not.toBe(membershipRow.providerIdempotencyKey);
+  });
+
+  it.each([
+    ["date-only value", "2026-08-06"],
+    ["timezone-free value", "2026-08-06T01:00:00"],
+    ["implementation-defined value", "August 6, 2026 01:00:00"],
+  ])("rejects a %s for createdAt before repository access", async (_label, createdAt) => {
+    const deps = dependencies(config());
+
+    await expect(enqueueSignup({
+      authEventId: "auth-event-1",
+      userDid: "did:plc:user",
+      email: "member@example.com",
+      createdAt,
+    }, deps)).rejects.toMatchObject({
+      name: "NotificationProducerInputError",
+      field: "createdAt",
+      message: expect.stringContaining("ISO 8601 instant"),
+    });
+    expect(deps.repository.enqueue).not.toHaveBeenCalled();
   });
 
   it("rejects an invalid optional organization DID before repository access", async () => {

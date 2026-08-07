@@ -1,4 +1,4 @@
-import { createHmac, timingSafeEqual } from "node:crypto";
+import { createHash, createHmac, timingSafeEqual } from "node:crypto";
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { getCertifiedProfileCard } from "@/app/account/_lib/account-route";
@@ -14,7 +14,7 @@ const SIGNATURE_HEADER = "x-gainforest-webhook-signature";
 const TIMESTAMP_HEADER = "x-gainforest-webhook-timestamp";
 const MAX_SIGNATURE_AGE_MS = 5 * 60 * 1000;
 const MAX_WEBHOOK_BODY_BYTES = 64 * 1024;
-const PROFILE_ENRICHMENT_TIMEOUT_MS = 2_000;
+const PROFILE_LOOKUP_BUDGET_MS = 3_000;
 const USABLE_INVOCATION_MS = 55_000;
 
 const welcomeUserSchema = z.object({
@@ -112,6 +112,22 @@ function verifySignature(rawBody: string, request: NextRequest, secret: string):
   }
 }
 
+function withinProfileLookupBudget<T>(work: Promise<T>, fallback: T): Promise<T> {
+  return new Promise<T>((resolve) => {
+    const timeout = setTimeout(() => resolve(fallback), PROFILE_LOOKUP_BUDGET_MS);
+    work.then(
+      (value) => {
+        clearTimeout(timeout);
+        resolve(value);
+      },
+      () => {
+        clearTimeout(timeout);
+        resolve(fallback);
+      },
+    );
+  });
+}
+
 async function organizationName(event: z.infer<typeof welcomeEventSchema>): Promise<string | undefined> {
   if (event.type !== "organization.membership.joined") return undefined;
 
@@ -145,27 +161,6 @@ async function friendlyName(event: z.infer<typeof welcomeEventSchema>): Promise<
 
   const card = await getCertifiedProfileCard(did).catch(() => null);
   return plainDisplayName(card?.displayName, event);
-}
-
-async function boundedEnrichment(event: z.infer<typeof welcomeEventSchema>): Promise<{
-  name: string | null;
-  organizationName: string | undefined;
-}> {
-  let timer: ReturnType<typeof setTimeout> | undefined;
-  const fallback = new Promise<{ name: null; organizationName: undefined }>(resolve => {
-    timer = setTimeout(() => resolve({ name: null, organizationName: undefined }), PROFILE_ENRICHMENT_TIMEOUT_MS);
-  });
-  try {
-    return await Promise.race([
-      Promise.all([friendlyName(event), organizationName(event)]).then(([name, resolvedOrganizationName]) => ({
-        name,
-        organizationName: resolvedOrganizationName,
-      })),
-      fallback,
-    ]);
-  } finally {
-    if (timer) clearTimeout(timer);
-  }
 }
 
 export async function POST(request: NextRequest) {
@@ -205,12 +200,16 @@ export async function POST(request: NextRequest) {
     explicitLocale: event.locale,
     acceptLanguage: request.headers.get("accept-language"),
   });
-  const enrichment = await boundedEnrichment(event);
+  const [resolvedName, resolvedOrganizationName] = await Promise.all([
+    withinProfileLookupBudget(friendlyName(event), null),
+    withinProfileLookupBudget(organizationName(event), undefined),
+  ]);
+  const name = resolvedName ?? undefined;
   const common = {
     authEventId: event.eventId,
     userDid: event.user.did,
     email: event.user.email,
-    name: enrichment.name ?? undefined,
+    name,
     locale,
     createdAt: event.createdAt ?? new Date(invocationStartedAt).toISOString(),
   };
@@ -219,7 +218,7 @@ export async function POST(request: NextRequest) {
       ...common,
       type: "membership_joined" as const,
       organizationDid: event.organization.did,
-      organizationName: enrichment.organizationName,
+      organizationName: resolvedOrganizationName,
     }
     : { ...common, type: "signup" as const };
 
@@ -238,6 +237,11 @@ export async function POST(request: NextRequest) {
         error: "Welcome email event ID conflicts with a previously accepted event.",
       }, { status: 409 });
     }
+    console.error("welcome-email-events delivery failed", {
+      eventIdHash: createHash("sha256").update(event.eventId).digest("hex").slice(0, 16),
+      eventType: event.type,
+      reason: error instanceof Error ? error.name : "unknown",
+    });
     return NextResponse.json({ error: "Welcome email event could not be queued. Retry the signed event." }, { status: 503 });
   }
 }

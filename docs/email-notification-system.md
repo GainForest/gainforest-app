@@ -27,12 +27,10 @@ flowchart TB
     Outbox[("notification_outbox<br/>saved email jobs and their status")]
   end
 
-  subgraph Timing["3 · Choose when to send"]
+  subgraph Timing["3 · Try the first delivery"]
     direction LR
 
-    FirstAttempt{"What started the job?"}
     TryNow["Try now<br/>wait for the first result"]
-    TryAfter["Reply first<br/>then send in the background"]
   end
 
   Account --> SaveJob
@@ -42,12 +40,8 @@ flowchart TB
   SaveJob --> Outbox
   SaveTogether --> Outbox
 
-  Outbox --> FirstAttempt
-  FirstAttempt -->|"Signup, org join, or invitation"| TryNow
-  FirstAttempt -->|"BioBlitz winner"| TryAfter
-
+  Outbox --> TryNow
   TryNow --> SendFlow["Continue with diagram 2"]
-  TryAfter --> SendFlow
 ```
 
 ### 2. How one email is sent

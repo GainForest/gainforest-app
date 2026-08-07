@@ -23,9 +23,9 @@ const drain = vi.fn<(_deadline: Date) => Promise<DrainOutcome>>(async () => ({
   elapsedMs: 25,
 }));
 const health = vi.fn(async () => ({ waitingRecipient: 1, queued: 2, processing: 0, dead: 0, oldestDueAgeSeconds: 30 }));
-const createDrainRuntime = vi.fn(() => ({ drain, health }));
+const createNotificationDelivery = vi.fn(() => ({ drain, health }));
 
-vi.mock("@/lib/email-notifications/drain-runtime", () => ({ createDrainRuntime }));
+vi.mock("@/lib/email-notifications/delivery", () => ({ createNotificationDelivery }));
 
 function request(token?: string): NextRequest {
   return new NextRequest("https://example.test/api/internal/notifications/drain", {
@@ -39,13 +39,12 @@ describe("notification drain route", () => {
 
   beforeEach(() => {
     process.env.NOTIFICATION_CRON_SECRET = secret;
-    createDrainRuntime.mockClear();
+    createNotificationDelivery.mockClear();
     drain.mockClear();
     health.mockClear();
   });
 
   afterEach(() => {
-    vi.unstubAllEnvs();
     process.env.NOTIFICATION_CRON_SECRET = originalSecret;
   });
 
@@ -56,7 +55,7 @@ describe("notification drain route", () => {
     const response = await GET(request(secret));
     expect(response.status).toBe(503);
     await expect(response.json()).resolves.toEqual({ error: "Notification recovery is not configured." });
-    expect(createDrainRuntime).not.toHaveBeenCalled();
+    expect(createNotificationDelivery).not.toHaveBeenCalled();
   });
 
   it.each([undefined, "wrong-token"])("rejects a missing or incorrect bearer token", async token => {
@@ -64,7 +63,7 @@ describe("notification drain route", () => {
     const response = await GET(request(token));
     expect(response.status).toBe(401);
     await expect(response.json()).resolves.toEqual({ error: "Unauthorized notification recovery request." });
-    expect(createDrainRuntime).not.toHaveBeenCalled();
+    expect(createNotificationDelivery).not.toHaveBeenCalled();
   });
 
   it("drains existing work without discovering historical BioBlitz notifications", async () => {

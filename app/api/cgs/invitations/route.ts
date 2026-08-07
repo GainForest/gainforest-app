@@ -13,7 +13,7 @@ import {
 } from "@/app/_lib/cgs-invitations";
 import { fetchCgsMembersWithCookie } from "@/app/_lib/cgs-server";
 import { readNotificationConfig } from "@/lib/email-notifications/config";
-import { createInvitationRuntime } from "@/lib/email-notifications/invitation-runtime";
+import { createNotificationDelivery } from "@/lib/email-notifications/delivery";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
@@ -95,7 +95,7 @@ export async function POST(request: Request) {
     });
     if (invitation.notification?.status === "queued") {
       try {
-        const processed = await createInvitationRuntime().process(
+        const processed = await createNotificationDelivery().process(
           invitation.notification.outboxId,
           new Date(invocationStartedAt + USABLE_INVOCATION_MS),
         );

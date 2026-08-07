@@ -1,5 +1,6 @@
 import "server-only";
 
+import { isValidDid } from "@atproto/syntax";
 import { renderWelcomeEmailTemplate, resolveWelcomeEmailLocale } from "@/lib/email/welcome-template";
 import type { Json, NotificationRenderer, RenderableRow, RenderedNotification } from "./types";
 
@@ -26,7 +27,7 @@ function optionalBoundedString(value: Json | undefined, maximum: number): value 
 function validDid(value: Json | undefined): value is string {
   return typeof value === "string"
     && value.length <= 256
-    && /^did:[a-z0-9]+:[A-Za-z0-9._:%-]+$/.test(value);
+    && isValidDid(value);
 }
 
 function payload(value: Json): WelcomePayload | null {
