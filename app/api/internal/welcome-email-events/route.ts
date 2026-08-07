@@ -1,4 +1,4 @@
-import { createHmac, timingSafeEqual } from "node:crypto";
+import { createHash, createHmac, timingSafeEqual } from "node:crypto";
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { getCertifiedProfileCard } from "@/app/account/_lib/account-route";
@@ -13,6 +13,7 @@ const SIGNATURE_HEADER = "x-gainforest-webhook-signature";
 const TIMESTAMP_HEADER = "x-gainforest-webhook-timestamp";
 const MAX_SIGNATURE_AGE_MS = 5 * 60 * 1000;
 const MAX_WEBHOOK_BODY_BYTES = 64 * 1024;
+const PROFILE_LOOKUP_BUDGET_MS = 3_000;
 const USABLE_INVOCATION_MS = 55_000;
 
 const welcomeUserSchema = z.object({
@@ -91,6 +92,22 @@ function verifySignature(rawBody: string, request: NextRequest, secret: string):
   }
 }
 
+function withinProfileLookupBudget<T>(work: Promise<T>, fallback: T): Promise<T> {
+  return new Promise<T>((resolve) => {
+    const timeout = setTimeout(() => resolve(fallback), PROFILE_LOOKUP_BUDGET_MS);
+    work.then(
+      (value) => {
+        clearTimeout(timeout);
+        resolve(value);
+      },
+      () => {
+        clearTimeout(timeout);
+        resolve(fallback);
+      },
+    );
+  });
+}
+
 async function organizationName(event: z.infer<typeof welcomeEventSchema>): Promise<string | undefined> {
   if (event.type !== "organization.membership.joined") return undefined;
 
@@ -163,7 +180,11 @@ export async function POST(request: NextRequest) {
     explicitLocale: event.locale,
     acceptLanguage: request.headers.get("accept-language"),
   });
-  const name = await friendlyName(event) ?? undefined;
+  const [resolvedName, resolvedOrganizationName] = await Promise.all([
+    withinProfileLookupBudget(friendlyName(event), null),
+    withinProfileLookupBudget(organizationName(event), undefined),
+  ]);
+  const name = resolvedName ?? undefined;
   const common = {
     authEventId: event.eventId,
     userDid: event.user.did,
@@ -177,7 +198,7 @@ export async function POST(request: NextRequest) {
       ...common,
       type: "membership_joined" as const,
       organizationDid: event.organization.did,
-      organizationName: await organizationName(event),
+      organizationName: resolvedOrganizationName,
     }
     : { ...common, type: "signup" as const };
 
@@ -191,6 +212,11 @@ export async function POST(request: NextRequest) {
     if (error instanceof NotificationProducerInputError) {
       return NextResponse.json({ error: "Invalid welcome email event payload." }, { status: 400 });
     }
+    console.error("welcome-email-events delivery failed", {
+      eventIdHash: createHash("sha256").update(event.eventId).digest("hex").slice(0, 16),
+      eventType: event.type,
+      reason: error instanceof Error ? error.name : "unknown",
+    });
     return NextResponse.json({ error: "Welcome email event could not be queued. Retry the signed event." }, { status: 503 });
   }
 }
