@@ -100,6 +100,7 @@ export function ProjectShowcaseCard({
   featured = false,
   featureBusy = false,
   onToggleFeatured,
+  className,
 }: {
   record: ProjectRecord;
   priority: boolean;
@@ -110,6 +111,8 @@ export function ProjectShowcaseCard({
   featured?: boolean;
   featureBusy?: boolean;
   onToggleFeatured?: (record: ProjectRecord) => void;
+  /** Extra classes on the outer wrapper — lets carousels size/snap the card. */
+  className?: string;
 }) {
   const t = useTranslations("marketplace.projects.card");
   const ownerFilterT = useTranslations("marketplace.ownerFilter");
@@ -198,7 +201,7 @@ export function ProjectShowcaseCard({
   };
 
   return (
-    <div style={{ perspective: 1400 }} className="h-full animate-in" data-testid="project-showcase-card">
+    <div style={{ perspective: 1400 }} className={cn("h-full animate-in", className)} data-testid="project-showcase-card">
       <motion.a
         ref={cardRef}
         href={href}
