@@ -1147,6 +1147,7 @@
       "action": "Explore project",
       "previous": "Previous featured projects",
       "next": "Next featured projects",
+      "goTo": "Go to {title}",
       "manage": {
         "add": "Feature this project",
         "remove": "Remove from featured projects",

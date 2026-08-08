@@ -101,6 +101,8 @@ export function ProjectShowcaseCard({
   featureBusy = false,
   onToggleFeatured,
   className,
+  isActive = true,
+  frozen = false,
 }: {
   record: ProjectRecord;
   priority: boolean;
@@ -113,6 +115,11 @@ export function ProjectShowcaseCard({
   onToggleFeatured?: (record: ProjectRecord) => void;
   /** Extra classes on the outer wrapper — lets carousels size/snap the card. */
   className?: string;
+  /** Side-preview cards in the coverflow are inert + untilted. */
+  isActive?: boolean;
+  /** True while the coverflow is being dragged: hover zoom, tilt and glare
+   * are suspended so the photo moves rigidly with the card. */
+  frozen?: boolean;
 }) {
   const t = useTranslations("marketplace.projects.card");
   const ownerFilterT = useTranslations("marketplace.ownerFilter");
@@ -160,7 +167,7 @@ export function ProjectShowcaseCard({
 
   function onPointerMove(event: ReactPointerEvent<HTMLAnchorElement>) {
     const el = cardRef.current;
-    if (!el || reduceMotion || departing || event.pointerType !== "mouse") return;
+    if (!el || reduceMotion || departing || frozen || !isActive || event.pointerType !== "mouse") return;
     const rect = el.getBoundingClientRect();
     const px = (event.clientX - rect.left) / rect.width - 0.5;
     const py = (event.clientY - rect.top) / rect.height - 0.5;
@@ -176,9 +183,10 @@ export function ProjectShowcaseCard({
     glareYRaw.set(35);
   }
   useEffect(() => {
-    if (departing) resetTilt();
+    // Flatten any in-flight tilt the moment a drag or navigation starts.
+    if (departing || frozen) resetTilt();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [departing]);
+  }, [departing, frozen]);
 
   const handleNavigate = (event: ReactMouseEvent<HTMLAnchorElement>) => {
     // Let modified clicks (new tab, download…) behave like a normal link.
@@ -208,10 +216,12 @@ export function ProjectShowcaseCard({
         onClick={handleNavigate}
         onPointerMove={onPointerMove}
         onPointerLeave={resetTilt}
-        whileHover={reduceMotion || departing ? undefined : { scale: 1.02 }}
-        whileTap={reduceMotion || departing ? undefined : { scale: 0.99 }}
+        whileHover={reduceMotion || departing || frozen || !isActive ? undefined : { scale: 1.02 }}
+        whileTap={reduceMotion || departing || frozen || !isActive ? undefined : { scale: 0.99 }}
         transition={{ type: "spring", ...SPRING }}
         aria-label={t("open", { title: record.title })}
+        tabIndex={isActive ? undefined : -1}
+        aria-hidden={!isActive}
         className="group relative block aspect-[5/8] h-full w-full cursor-pointer rounded-[20px] text-left shadow-[0_22px_44px_-22px_rgba(0,0,0,0.45),0_10px_18px_-12px_rgba(0,0,0,0.35)] outline-none focus-visible:ring-2 focus-visible:ring-primary/70 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
         style={{
           rotateX,
@@ -234,7 +244,7 @@ export function ProjectShowcaseCard({
               onError={() => setImgError(true)}
               className={cn(
                 "object-cover",
-                !reduceMotion && "transition-transform duration-700 ease-out group-hover:scale-[1.06]",
+                !reduceMotion && !frozen && "transition-transform duration-700 ease-out group-hover:scale-[1.06]",
               )}
             />
           ) : (
@@ -251,7 +261,7 @@ export function ProjectShowcaseCard({
         </span>
 
         {/* Pointer glare (not part of the shared element) */}
-        {!reduceMotion ? (
+        {!reduceMotion && !frozen ? (
           <motion.span
             aria-hidden
             className="pointer-events-none absolute inset-0 block rounded-[20px] opacity-0 transition-opacity duration-300 group-hover:opacity-100"

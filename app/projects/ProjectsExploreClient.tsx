@@ -3,8 +3,6 @@
 import Image from "next/image";
 import {
   ArrowRightIcon,
-  ChevronLeftIcon,
-  ChevronRightIcon,
   CloudSunIcon,
   DropletsIcon,
   FolderKanbanIcon,
@@ -32,6 +30,7 @@ import { AutoLoadMoreButton } from "../_components/AutoLoadMoreButton";
 import { SortSection } from "../_components/AllFiltersPopover";
 import { ProjectListItem, ProjectListHeader } from "../_components/ProjectListItem";
 import { ProjectShowcaseCard } from "./_components/ProjectShowcaseCard";
+import { ProjectCoverflow } from "./_components/ProjectCoverflow";
 import { OwnerFilterBanner, OwnerFilterButton, useOwnerFilter } from "../_components/OwnerFilter";
 import { RecordDrawer } from "../_components/RecordDrawer";
 import { RecordMap } from "../_components/RecordMap";
@@ -671,13 +670,6 @@ function FeaturedProjects({
   onToggleFeatured: (record: ProjectRecord) => void;
 }) {
   const t = useTranslations("marketplace.projects.featured");
-  const carouselRef = useRef<HTMLDivElement | null>(null);
-  const showArrows = records.length > 3;
-  const scrollCarousel = (direction: -1 | 1) => {
-    const node = carouselRef.current;
-    if (!node) return;
-    node.scrollBy({ left: direction * node.clientWidth * 0.9, behavior: "smooth" });
-  };
 
   return (
     <section aria-labelledby="featured-projects-heading" className="mt-14 sm:mt-16">
@@ -686,29 +678,15 @@ function FeaturedProjects({
           <p className="text-xs font-semibold uppercase tracking-[0.14em] text-primary">{t("eyebrow")}</p>
           <h2 id="featured-projects-heading" className="mt-1 text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">{t("title")}</h2>
         </div>
-        <div className="flex items-end gap-3">
-          <p className="max-w-md text-sm leading-6 text-muted-foreground">{t("description")}</p>
-          {showArrows ? (
-            <div className="flex shrink-0 gap-2">
-              <button type="button" onClick={() => scrollCarousel(-1)} aria-label={t("previous")} className="grid h-9 w-9 place-items-center rounded-full border border-border bg-background text-foreground transition hover:border-primary/30 hover:text-primary">
-                <ChevronLeftIcon className="h-4 w-4" aria-hidden />
-              </button>
-              <button type="button" onClick={() => scrollCarousel(1)} aria-label={t("next")} className="grid h-9 w-9 place-items-center rounded-full border border-border bg-background text-foreground transition hover:border-primary/30 hover:text-primary">
-                <ChevronRightIcon className="h-4 w-4" aria-hidden />
-              </button>
-            </div>
-          ) : null}
-        </div>
+        <p className="max-w-md text-sm leading-6 text-muted-foreground">{t("description")}</p>
       </div>
-      {/* Same showcase card as the catalog grid, in a snap carousel — slightly
-          larger than the grid so the featured stories read as the headliners. */}
-      <div
-        ref={carouselRef}
-        className="-mx-1 flex snap-x snap-mandatory gap-4 overflow-x-auto px-1 pb-4 pt-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
-      >
-        {records.map((record, index) => (
+      {/* Same showcase card as the catalog grid, staged in a draggable 3D
+          coverflow — the active story front and center, its neighbours tilted
+          back at the sides. */}
+      <ProjectCoverflow
+        records={records}
+        renderCard={(record, index, isActive, frozen) => (
           <ProjectShowcaseCard
-            key={record.id}
             record={record}
             priority={index < 3}
             index={index}
@@ -718,10 +696,11 @@ function FeaturedProjects({
             featured
             featureBusy={featureBusyUri === record.atUri}
             onToggleFeatured={onToggleFeatured}
-            className="w-[70%] shrink-0 snap-start xs:w-[240px] sm:w-[260px] lg:w-[280px]"
+            isActive={isActive}
+            frozen={frozen}
           />
-        ))}
-      </div>
+        )}
+      />
     </section>
   );
 }

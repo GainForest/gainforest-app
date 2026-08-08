@@ -1147,6 +1147,7 @@
       "action": "Explorar proyecto",
       "previous": "Proyectos destacados anteriores",
       "next": "Siguientes proyectos destacados",
+      "goTo": "Ir a {title}",
       "manage": {
         "add": "Destacar este proyecto",
         "remove": "Quitar de proyectos destacados",

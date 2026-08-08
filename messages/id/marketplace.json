@@ -1147,6 +1147,7 @@
       "action": "Jelajahi proyek",
       "previous": "Proyek unggulan sebelumnya",
       "next": "Proyek unggulan berikutnya",
+      "goTo": "Buka {title}",
       "manage": {
         "add": "Jadikan proyek unggulan",
         "remove": "Hapus dari proyek unggulan",
