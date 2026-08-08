@@ -1225,7 +1225,8 @@
       "donationWays": "{count} ways",
       "maEarth": "Ma Earth",
       "round": "Round {round}",
-      "byDonors": "by {donors, plural, one {# donor} other {# donors}}"
+      "byDonors": "by {donors, plural, one {# donor} other {# donors}}",
+      "view": "View project"
     },
     "actions": {
       "clearAll": "Clear all"

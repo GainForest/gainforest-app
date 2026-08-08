@@ -1225,7 +1225,8 @@
       "donationWays": "{count} cara",
       "maEarth": "Ma Earth",
       "round": "Putaran {round}",
-      "byDonors": "dari {donors, plural, other {# donatur}}"
+      "byDonors": "dari {donors, plural, other {# donatur}}",
+      "view": "Lihat proyek"
     },
     "actions": {
       "clearAll": "Hapus semua"

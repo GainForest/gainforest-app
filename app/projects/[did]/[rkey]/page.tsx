@@ -7,6 +7,7 @@ import { ArrowLeftIcon, ArrowUpRightIcon, FolderKanbanIcon } from "lucide-react"
 import { fetchRecordByUri, fetchRecordDetail, isAccountPubliclyListed, type RecordDetail } from "../../../_lib/indexer";
 import { NOINDEX_ROBOTS } from "../../../_lib/seo-metadata";
 import { getPdsRecord, isPdsBlobUrl } from "../../../_lib/pds";
+import { projectMediaTransitionStyle } from "../../../_lib/view-transition";
 import { RichText } from "../../../_components/RichText";
 import { AutoRefresh } from "./_components/AutoRefresh";
 import { getAccountRouteData, readAccountRouteParams } from "../../../account/_lib/account-route";
@@ -311,7 +312,13 @@ async function ProjectFallback({
 
         <div className="mt-8 grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1fr)_360px]">
           <div className="min-w-0">
-            <div className="relative aspect-[16/10] w-full overflow-hidden rounded-2xl border border-border-soft bg-muted">
+            <div
+              className="relative aspect-[16/10] w-full overflow-hidden rounded-2xl border border-border-soft bg-muted"
+              // Morph target for the explore card's photo during the
+              // card → project page view transition (see globals.css).
+              data-vt-project-media=""
+              style={projectMediaTransitionStyle(did, rkey)}
+            >
               {record.imageUrl ? (
                 <Image
                   src={record.imageUrl}

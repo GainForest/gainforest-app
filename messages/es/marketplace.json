@@ -1225,7 +1225,8 @@
       "donationWays": "{count} formas",
       "maEarth": "Ma Earth",
       "round": "Ronda {round}",
-      "byDonors": "de {donors, plural, one {# donante} other {# donantes}}"
+      "byDonors": "de {donors, plural, one {# donante} other {# donantes}}",
+      "view": "Ver proyecto"
     },
     "actions": {
       "clearAll": "Borrar todo"

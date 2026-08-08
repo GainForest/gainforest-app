@@ -1225,7 +1225,8 @@
       "donationWays": "Njia {count}",
       "maEarth": "Ma Earth",
       "round": "Raundi {round}",
-      "byDonors": "kutoka kwa {donors, plural, one {mchangiaji #} other {wachangiaji #}}"
+      "byDonors": "kutoka kwa {donors, plural, one {mchangiaji #} other {wachangiaji #}}",
+      "view": "Tazama mradi"
     },
     "actions": {
       "clearAll": "Futa yote"
