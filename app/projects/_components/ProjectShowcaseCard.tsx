@@ -209,7 +209,7 @@ export function ProjectShowcaseCard({
   };
 
   return (
-    <div style={{ perspective: 1400 }} className={cn("h-full animate-in", className)} data-testid="project-showcase-card">
+    <div style={{ perspective: 1400 }} className={cn("@container h-full animate-in", className)} data-testid="project-showcase-card">
       <motion.a
         ref={cardRef}
         href={href}
@@ -295,7 +295,7 @@ export function ProjectShowcaseCard({
                   }
                 : {})}
               className={cn(
-                "inline-flex min-w-0 max-w-[65%] items-center gap-1.5 rounded-full border border-white/20 bg-black/30 py-0.5 pl-0.5 pr-2 text-[10px] font-medium text-white/90 backdrop-blur-md",
+                "inline-flex min-w-0 max-w-[65%] items-center gap-1.5 rounded-full border border-white/20 bg-black/30 py-0.5 pl-0.5 pr-2 text-[10px] font-medium text-white/90 backdrop-blur-md @max-[12rem]:pr-0.5",
                 canFilterOwner && "cursor-pointer transition-colors hover:bg-black/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70",
               )}
             >
@@ -305,7 +305,9 @@ export function ProjectShowcaseCard({
                 label={ownerName}
                 className="h-4.5 w-4.5 shrink-0 ring-1 ring-white/40"
               />
-              <span className="min-w-0 truncate">{ownerName}</span>
+              {/* On very narrow cards (2-up phone grid) the avatar alone
+                  carries the identity — the name would just truncate away. */}
+              <span className="min-w-0 truncate @max-[12rem]:hidden">{ownerName}</span>
             </span>
 
             <span className="flex shrink-0 flex-col items-end gap-1.5">
@@ -361,7 +363,7 @@ export function ProjectShowcaseCard({
                 {place}
               </span>
             ) : null}
-            <span className="line-clamp-2 font-instrument text-[19px] italic leading-[1.08] text-white [text-shadow:0_1px_3px_rgba(0,0,0,0.5)]">
+            <span className="line-clamp-2 font-instrument text-[19px] italic leading-[1.08] text-white [text-shadow:0_1px_3px_rgba(0,0,0,0.5)] @max-[12rem]:text-[16px]">
               {record.title}
             </span>
             {record.shortDescription ? (
@@ -389,7 +391,7 @@ export function ProjectShowcaseCard({
               </span>
             ) : null}
 
-            <span className="mt-3 block w-full rounded-full bg-white py-2 text-center text-[12px] font-medium tracking-wide text-neutral-900 transition group-hover:bg-white/90">
+            <span className="mt-3 block w-full rounded-full bg-white py-2 text-center text-[12px] font-medium tracking-wide text-neutral-900 transition group-hover:bg-white/90 @max-[12rem]:py-1.5 @max-[12rem]:text-[11px]">
               {t("view")}
             </span>
           </span>

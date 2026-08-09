@@ -99,9 +99,13 @@ export function ProjectCoverflow({
       const w = el.clientWidth;
       if (w <= 0) return;
       // The side cards translate by ±62% / ±112%, so the visible stack is
-      // about 2.2 card-widths wide. Fit that (plus arrow gutters on sm+).
-      const arrowReserve = window.innerWidth >= 640 ? 88 : 16;
-      const fit = Math.max(MIN_CARD_W, Math.min(MAX_CARD_W, Math.floor((w - arrowReserve) / 1.7)));
+      // about 2.2 card-widths wide. Fit that (plus arrow gutters) on sm+;
+      // on phones let the active card take most of the width instead — the
+      // side previews just peek from the clipped edges.
+      const isPhone = window.innerWidth < 640;
+      const arrowReserve = isPhone ? 16 : 88;
+      const divisor = isPhone ? 1.35 : 1.7;
+      const fit = Math.max(MIN_CARD_W, Math.min(MAX_CARD_W, Math.floor((w - arrowReserve) / divisor)));
       setCardWidth(fit);
     };
     measure();

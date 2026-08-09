@@ -168,6 +168,16 @@ html {
   scroll-behavior: smooth;
 }
 
+/* Mobile browsers otherwise allow a loose horizontal rubber-band when
+   decorative absolutely-positioned art (hero backdrops, coverflow side
+   cards, floating chat bubbles) pokes past the viewport edge. `clip` — not
+   `hidden` — forbids horizontal panning without creating a scroll container,
+   so vertical scrolling and position: sticky are unaffected. */
+html,
+body {
+  overflow-x: clip;
+}
+
 html,
 body {
   background: var(--background);
