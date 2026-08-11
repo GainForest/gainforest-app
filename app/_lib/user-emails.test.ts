@@ -29,6 +29,7 @@ describe("upsertUserEmail", () => {
     await upsertUserEmail({
       did: "did:plc:alice",
       email: "  Alice@Example.COM  ",
+      handle: "  Alice.GainForest.App  ",
     });
 
     expect(fetchMock).toHaveBeenCalledOnce();
@@ -41,6 +42,13 @@ describe("upsertUserEmail", () => {
     expect(headers.get("authorization")).toBe("Bearer service-role-secret");
     expect(headers.get("content-type")).toBe("application/json");
     expect(headers.get("prefer")).toBe("resolution=merge-duplicates,return=minimal");
+    expect(init?.body).toBe(JSON.stringify({ did: "did:plc:alice", email: "alice@example.com", handle: "alice.gainforest.app" }));
+  });
+
+  it("omits handle from the payload when not provided", async () => {
+    await upsertUserEmail({ did: "did:plc:alice", email: "alice@example.com" });
+
+    const [, init] = fetchMock.mock.calls[0];
     expect(init?.body).toBe(JSON.stringify({ did: "did:plc:alice", email: "alice@example.com" }));
   });
 
