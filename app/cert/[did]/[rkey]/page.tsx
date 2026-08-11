@@ -55,6 +55,7 @@ import {
   type TimelineAttachmentItem,
 } from "../../../_lib/indexer";
 import { isPdsBlobUrl } from "../../../_lib/pds";
+import { projectMediaTransitionStyle } from "../../../_lib/view-transition";
 import { NOINDEX_ROBOTS } from "../../../_lib/seo-metadata";
 import { blockExplorerUrl, INDEXER_URL, localBumicertHref, localProjectHref } from "../../../_lib/urls";
 import { getRequestOrigin } from "../../../_lib/request-origin";
@@ -858,7 +859,14 @@ export async function ProjectDetailView({
                 {/* Cover media sits inside the content column so the donation
                     sidebar aligns next to it instead of below a full-width banner. */}
                 {record.imageUrl ? (
-                  <div className="relative aspect-[16/10] w-full overflow-hidden rounded-2xl border border-border bg-muted">
+                  <div
+                    className="relative aspect-[16/10] w-full overflow-hidden rounded-2xl border border-border bg-muted"
+                    // Morph target for the explore card's photo during the
+                    // card → project page view transition (see globals.css).
+                    {...(projectRkey
+                      ? { "data-vt-project-media": "", style: projectMediaTransitionStyle(record.did, projectRkey) }
+                      : {})}
+                  >
                     <Image
                       src={record.imageUrl}
                       alt={record.title}

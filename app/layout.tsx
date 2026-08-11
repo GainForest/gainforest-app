@@ -16,6 +16,7 @@ import { UploadTrayProvider } from "./_components/upload-tray/upload-tray-contex
 import { isAudioMothUploadTrayFlagEnabled } from "./_lib/audiomoth/feature-flags";
 import { LinkPrefetcher } from "./_components/LinkPrefetcher";
 import { RouteChangeIndicator } from "./_components/RouteChangeIndicator";
+import { ViewTransitionNavigationSync } from "./_components/ViewTransitionRouter";
 import { ModalHost, ModalProvider } from "@/components/ui/modal/context";
 import { WagmiProvider } from "@/components/providers/WagmiProvider";
 import { resolveSupportedLanguage } from "@/lib/i18n/languages";
@@ -230,6 +231,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           <Suspense fallback={null}>
             <RouteChangeIndicator />
             <LinkPrefetcher />
+            <ViewTransitionNavigationSync />
           </Suspense>
           <NuqsAdapter>
             <WagmiProvider>

@@ -13,11 +13,15 @@
 create table if not exists public.user_emails (
   did text primary key,
   email text not null,
+  handle text,
   created_at timestamptz not null default now(),
 
   constraint user_emails_did_format check (did like 'did:%'),
   constraint user_emails_normalized_email check (
     email <> '' and email = lower(trim(email))
+  ),
+  constraint user_emails_normalized_handle check (
+    handle is null or (handle <> '' and handle = lower(trim(handle)))
   )
 );
 

@@ -168,6 +168,16 @@ html {
   scroll-behavior: smooth;
 }
 
+/* Mobile browsers otherwise allow a loose horizontal rubber-band when
+   decorative absolutely-positioned art (hero backdrops, coverflow side
+   cards, floating chat bubbles) pokes past the viewport edge. `clip` — not
+   `hidden` — forbids horizontal panning without creating a scroll container,
+   so vertical scrolling and position: sticky are unaffected. */
+html,
+body {
+  overflow-x: clip;
+}
+
 html,
 body {
   background: var(--background);
@@ -197,20 +207,55 @@ body {
   pointer-events: none !important;
 }
 
-::view-transition-group(root),
-::view-transition-old(root),
-::view-transition-new(root) {
+/* Theme-toggle ripple. Scoped under `html.vt-theme-ripple` (set by the
+   ThemeToggle for the duration of its transition) so these rules never leak
+   into navigation view transitions, which would clip the incoming page to an
+   invisible 0px circle. */
+html.vt-theme-ripple::view-transition-group(root),
+html.vt-theme-ripple::view-transition-old(root),
+html.vt-theme-ripple::view-transition-new(root) {
   animation: none;
   mix-blend-mode: normal;
 }
-::view-transition-old(root) {
+html.vt-theme-ripple::view-transition-old(root) {
   z-index: 1;
 }
-::view-transition-new(root) {
+html.vt-theme-ripple::view-transition-new(root) {
   z-index: 2;
   clip-path: circle(
     0px at var(--theme-ripple-x, 0px) var(--theme-ripple-y, 0px)
   );
+}
+
+/* Cross-route view transitions (project card → project page). `html.vt-nav`
+   is set by useViewTransitionNavigate for the duration of the flight. The
+   detail hero opts into the shared morph only while a navigation transition
+   is running, so the theme ripple never sees stray named elements. */
+html.vt-nav [data-vt-project-media] {
+  view-transition-name: var(--vt-project-media);
+  view-transition-class: project-media;
+}
+html.vt-nav::view-transition-old(root),
+html.vt-nav::view-transition-new(root) {
+  animation-duration: 0.32s;
+}
+/* The flying photo: cover-fit both snapshots so the portrait card photo
+   morphs into the wide hero without stretching. */
+html.vt-nav::view-transition-group(.project-media) {
+  animation-duration: 0.42s;
+  animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+}
+html.vt-nav::view-transition-image-pair(.project-media) {
+  isolation: auto;
+}
+html.vt-nav::view-transition-old(.project-media),
+html.vt-nav::view-transition-new(.project-media) {
+  animation: none;
+  mix-blend-mode: normal;
+  height: 100%;
+  width: 100%;
+  object-fit: cover;
+  overflow: clip;
 }
 
 @media (prefers-reduced-motion: reduce) {

@@ -3,8 +3,6 @@
 import Image from "next/image";
 import {
   ArrowRightIcon,
-  ChevronLeftIcon,
-  ChevronRightIcon,
   CloudSunIcon,
   DropletsIcon,
   FolderKanbanIcon,
@@ -22,18 +20,17 @@ import {
   TreePineIcon,
   UsersRoundIcon,
 } from "lucide-react";
-import { memo, useCallback, useDeferredValue, useEffect, useMemo, useRef, useState, type KeyboardEvent as ReactKeyboardEvent, type MouseEvent as ReactMouseEvent } from "react";
+import { memo, useCallback, useDeferredValue, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
 import { parseAsString, parseAsStringEnum, useQueryState } from "nuqs";
-import { BumicertOwnerAvatar } from "@/components/bumicert/BumicertOwnerAvatar";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { AutoLoadMoreButton } from "../_components/AutoLoadMoreButton";
 import { SortSection } from "../_components/AllFiltersPopover";
-import { ProjectScopeTags } from "../_components/ProjectScopeTags";
-import { ProjectEvidence } from "../_components/ProjectEvidence";
 import { ProjectListItem, ProjectListHeader } from "../_components/ProjectListItem";
+import { ProjectShowcaseCard } from "./_components/ProjectShowcaseCard";
+import { ProjectCoverflow } from "./_components/ProjectCoverflow";
 import { OwnerFilterBanner, OwnerFilterButton, useOwnerFilter } from "../_components/OwnerFilter";
 import { RecordDrawer } from "../_components/RecordDrawer";
 import { RecordMap } from "../_components/RecordMap";
@@ -568,7 +565,8 @@ export function ProjectsExploreClient({
           {showExploreHome && featuredRecords.length > 0 ? (
             <FeaturedProjects
               records={featuredRecords}
-              onOpen={openRecord}
+              donationSummaries={donationSummaries}
+              onFilterOwner={setOwnerDid}
               canManageFeatured={canManageFeatured}
               featureBusyUri={featureBusyUri}
               onToggleFeatured={toggleFeatured}
@@ -658,25 +656,20 @@ function HeroBackdrop() {
 
 function FeaturedProjects({
   records,
-  onOpen,
+  donationSummaries,
+  onFilterOwner,
   canManageFeatured,
   featureBusyUri,
   onToggleFeatured,
 }: {
   records: ProjectRecord[];
-  onOpen: (record: ProjectRecord) => void;
+  donationSummaries: Record<string, ProjectDonationSummary>;
+  onFilterOwner: (did: string) => void;
   canManageFeatured: boolean;
   featureBusyUri: string | null;
   onToggleFeatured: (record: ProjectRecord) => void;
 }) {
   const t = useTranslations("marketplace.projects.featured");
-  const carouselRef = useRef<HTMLDivElement | null>(null);
-  const isCarousel = records.length > 3;
-  const scrollCarousel = (direction: -1 | 1) => {
-    const node = carouselRef.current;
-    if (!node) return;
-    node.scrollBy({ left: direction * node.clientWidth * 0.9, behavior: "smooth" });
-  };
 
   return (
     <section aria-labelledby="featured-projects-heading" className="mt-14 sm:mt-16">
@@ -685,120 +678,30 @@ function FeaturedProjects({
           <p className="text-xs font-semibold uppercase tracking-[0.14em] text-primary">{t("eyebrow")}</p>
           <h2 id="featured-projects-heading" className="mt-1 text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">{t("title")}</h2>
         </div>
-        <div className="flex items-end gap-3">
-          <p className="max-w-md text-sm leading-6 text-muted-foreground">{t("description")}</p>
-          {isCarousel ? (
-            <div className="flex shrink-0 gap-2">
-              <button type="button" onClick={() => scrollCarousel(-1)} aria-label={t("previous")} className="grid h-9 w-9 place-items-center rounded-full border border-border bg-background text-foreground transition hover:border-primary/30 hover:text-primary">
-                <ChevronLeftIcon className="h-4 w-4" aria-hidden />
-              </button>
-              <button type="button" onClick={() => scrollCarousel(1)} aria-label={t("next")} className="grid h-9 w-9 place-items-center rounded-full border border-border bg-background text-foreground transition hover:border-primary/30 hover:text-primary">
-                <ChevronRightIcon className="h-4 w-4" aria-hidden />
-              </button>
-            </div>
-          ) : null}
-        </div>
+        <p className="max-w-md text-sm leading-6 text-muted-foreground">{t("description")}</p>
       </div>
-      <div
-        ref={carouselRef}
-        className={cn(
-          isCarousel
-            ? "flex snap-x snap-mandatory gap-4 overflow-x-auto pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
-            : "grid gap-4 md:grid-cols-3",
-        )}
-      >
-        {records.map((record) => (
-          <FeaturedProjectCard
-            key={record.id}
+      {/* Same showcase card as the catalog grid, staged in a draggable 3D
+          coverflow — the active story front and center, its neighbours tilted
+          back at the sides. */}
+      <ProjectCoverflow
+        records={records}
+        renderCard={(record, index, isActive, frozen) => (
+          <ProjectShowcaseCard
             record={record}
-            onOpen={onOpen}
-            className={isCarousel ? "w-[86%] shrink-0 snap-start sm:w-[calc((100%-1rem)/2)] lg:w-[calc((100%-2rem)/3)]" : undefined}
+            priority={index < 3}
+            index={index}
+            onFilterOwner={onFilterOwner}
+            donationSummary={donationSummaries[record.atUri]}
             canManageFeatured={canManageFeatured}
+            featured
             featureBusy={featureBusyUri === record.atUri}
             onToggleFeatured={onToggleFeatured}
+            isActive={isActive}
+            frozen={frozen}
           />
-        ))}
-      </div>
-    </section>
-  );
-}
-
-function FeaturedProjectCard({
-  record,
-  onOpen,
-  className,
-  canManageFeatured,
-  featureBusy,
-  onToggleFeatured,
-}: {
-  record: ProjectRecord;
-  onOpen: (record: ProjectRecord) => void;
-  className?: string;
-  canManageFeatured: boolean;
-  featureBusy: boolean;
-  onToggleFeatured: (record: ProjectRecord) => void;
-}) {
-  const t = useTranslations("marketplace.projects.featured");
-  const cardT = useTranslations("marketplace.projects.card");
-  const [imgError, setImgError] = useState(false);
-  const place = countryName(record.country);
-  return (
-    <button
-      type="button"
-      onClick={() => onOpen(record)}
-      aria-label={cardT("open", { title: record.title })}
-      className={cn(
-        "group flex h-full min-w-0 flex-col overflow-hidden rounded-[1.5rem] border border-border/70 bg-card text-left shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:border-primary/25 hover:shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60",
-        className,
-      )}
-    >
-      <span className="relative block aspect-[16/8] w-full overflow-hidden bg-muted">
-        {record.imageUrl && !imgError ? (
-          <Image src={record.imageUrl} alt="" fill sizes="(min-width: 768px) 33vw, 86vw" unoptimized={!isPdsBlobUrl(record.imageUrl)} onError={() => setImgError(true)} className="object-cover transition-transform duration-700 group-hover:scale-[1.04]" />
-        ) : (
-          <span className="grid h-full place-items-center bg-primary/8 text-primary/40"><FolderKanbanIcon className="h-10 w-10" aria-hidden /></span>
         )}
-        <span className="absolute left-3 top-3 inline-flex items-center gap-1.5 rounded-full bg-background/92 px-3 py-1.5 text-xs font-semibold text-primary shadow-sm backdrop-blur">
-          <LeafIcon className="h-3.5 w-3.5" aria-hidden />
-          {t("badge")}
-        </span>
-        {canManageFeatured ? (
-          <span
-            role="button"
-            tabIndex={featureBusy ? -1 : 0}
-            aria-label={t("manage.remove")}
-            aria-disabled={featureBusy}
-            title={t("manage.remove")}
-            onClick={(event) => {
-              event.stopPropagation();
-              if (!featureBusy) onToggleFeatured(record);
-            }}
-            onKeyDown={(event) => {
-              if ((event.key === "Enter" || event.key === " ") && !featureBusy) {
-                event.preventDefault();
-                event.stopPropagation();
-                onToggleFeatured(record);
-              }
-            }}
-            className="absolute right-3 top-3 grid h-9 w-9 cursor-pointer place-items-center rounded-full border border-amber-400/50 bg-background/92 text-amber-500 shadow-sm backdrop-blur transition hover:scale-105 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60"
-          >
-            {featureBusy ? <Loader2Icon className="h-4 w-4 animate-spin" aria-hidden /> : <StarIcon className="h-4 w-4 fill-current" aria-hidden />}
-          </span>
-        ) : null}
-      </span>
-
-      <span className="flex flex-1 flex-col p-4">
-        <span className="flex min-w-0 flex-wrap items-center gap-2 text-xs font-medium text-muted-foreground">
-          {place ? <span className="inline-flex items-center gap-1"><MapPinIcon className="h-3.5 w-3.5" aria-hidden />{place}</span> : null}
-          {record.creatorName ? <span className="truncate">{record.creatorName}</span> : null}
-        </span>
-        <span className="mt-2 line-clamp-2 font-instrument text-2xl italic leading-tight text-foreground">{record.title}</span>
-        {record.shortDescription ? <span className="mt-2 line-clamp-2 text-sm leading-5 text-muted-foreground">{record.shortDescription}</span> : null}
-        <span className="mt-auto inline-flex items-center gap-2 pt-4 text-sm font-semibold text-primary">
-          {t("action")} <ArrowRightIcon className="h-4 w-4 transition-transform group-hover:translate-x-1" aria-hidden />
-        </span>
-      </span>
-    </button>
+      />
+    </section>
   );
 }
 
@@ -931,14 +834,13 @@ const ProjectGrid = memo(function ProjectGrid({
   }
 
   return (
-    <div className="mt-5 grid grid-cols-1 items-stretch gap-5 sm:grid-cols-[repeat(auto-fill,minmax(300px,1fr))] lg:gap-6">
+    <div className="mt-5 grid grid-cols-2 items-stretch gap-3 sm:grid-cols-[repeat(auto-fill,minmax(200px,1fr))] sm:gap-4 lg:gap-5">
       {records.map((record, index) => (
-        <ProjectCard
+        <ProjectShowcaseCard
           key={record.id}
           record={record}
           priority={index < 6}
           index={index}
-          onOpen={onOpen}
           onFilterOwner={onFilterOwner}
           donationSummary={donationSummaries[record.atUri]}
           canManageFeatured={canManageFeatured}
@@ -982,210 +884,19 @@ const ProjectList = memo(function ProjectList({
 function ProjectGridSkeleton() {
   const t = useTranslations("marketplace.projects.card");
   return (
-    <div className="mt-5 grid grid-cols-1 items-stretch gap-5 sm:grid-cols-[repeat(auto-fill,minmax(300px,1fr))] lg:gap-6" aria-label={t("loading")}>
+    <div className="mt-5 grid grid-cols-2 items-stretch gap-3 sm:grid-cols-[repeat(auto-fill,minmax(200px,1fr))] sm:gap-4 lg:gap-5" aria-label={t("loading")}>
       {Array.from({ length: 12 }).map((_, index) => (
-        <div key={index} className="overflow-hidden rounded-3xl border border-border bg-card">
-          <Skeleton className="aspect-[16/10] rounded-none" />
-          <div className="space-y-3 p-4">
-            <Skeleton className="h-6 w-3/4 rounded-full" />
-            <Skeleton className="h-4 w-full rounded-full" />
-            <Skeleton className="h-4 w-2/3 rounded-full" />
-            <div className="flex gap-2 pt-2">
-              <Skeleton className="h-7 w-24 rounded-full" />
-              <Skeleton className="h-7 w-20 rounded-full" />
-            </div>
+        <div key={index} className="relative aspect-[5/8] overflow-hidden rounded-[20px] border border-border bg-card">
+          <Skeleton className="absolute inset-0 rounded-none" />
+          <div className="absolute inset-x-3 bottom-3 space-y-2">
+            <Skeleton className="h-5 w-3/4 rounded-full" />
+            <Skeleton className="h-3.5 w-full rounded-full" />
+            <Skeleton className="h-3.5 w-2/3 rounded-full" />
+            <Skeleton className="h-8 w-full rounded-full" />
           </div>
         </div>
       ))}
     </div>
-  );
-}
-
-function ProjectCard({
-  record,
-  priority,
-  index,
-  onOpen,
-  onFilterOwner,
-  donationSummary,
-  canManageFeatured = false,
-  featured = false,
-  featureBusy = false,
-  onToggleFeatured,
-}: {
-  record: ProjectRecord;
-  priority: boolean;
-  index: number;
-  onOpen: (record: ProjectRecord) => void;
-  onFilterOwner?: (did: string) => void;
-  donationSummary?: ProjectDonationSummary;
-  canManageFeatured?: boolean;
-  featured?: boolean;
-  featureBusy?: boolean;
-  onToggleFeatured?: (record: ProjectRecord) => void;
-}) {
-  const t = useTranslations("marketplace.projects.card");
-  const ownerFilterT = useTranslations("marketplace.ownerFilter");
-  const featuredT = useTranslations("marketplace.projects.featured.manage");
-  const [imgError, setImgError] = useState(false);
-  const hasImage = Boolean(record.imageUrl) && !imgError;
-  const ownerName = record.creatorName ?? t("projectSteward");
-  const canFilterOwner = Boolean(onFilterOwner) && Boolean(record.did);
-  const place = countryName(record.country);
-  const maEarthRounds = donationSummary?.maEarth?.rounds ?? [];
-  const acceptsGainForestDonations = Boolean(
-    donationSummary?.gainforestDonation || record.donationSources?.gainforest,
-  );
-
-  return (
-    <button type="button" onClick={() => onOpen(record)} className="group flex h-full flex-col overflow-hidden rounded-3xl border border-border bg-card text-left shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60 animate-in" style={{ animationDelay: `${Math.min(index, 10) * 35}ms` }}>
-      <div className="relative aspect-[16/10] overflow-hidden bg-muted">
-        {hasImage ? (
-          <Image
-            src={record.imageUrl!}
-            alt={record.title}
-            fill
-            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 320px"
-            priority={priority}
-            fetchPriority={priority ? "high" : "auto"}
-            unoptimized={!isPdsBlobUrl(record.imageUrl)}
-            onError={() => setImgError(true)}
-            className="object-cover transition-transform duration-500 group-hover:scale-105"
-          />
-        ) : (
-          <div className="grid h-full place-items-center bg-primary/8 text-primary/50">
-            <FolderKanbanIcon className="h-12 w-12" />
-          </div>
-        )}
-        {acceptsGainForestDonations ? (
-          <span className="absolute right-3 top-3 z-10 inline-flex items-center gap-1.5 whitespace-nowrap rounded-full bg-background/85 py-1 pl-1.5 pr-3 text-xs font-semibold text-foreground shadow-lg backdrop-blur-lg">
-            <Image src="/assets/media/images/gainforest-logo.svg" width={16} height={16} alt="" className="h-4 w-4 shrink-0 object-contain" />
-            {t("gainforestBadge")}
-          </span>
-        ) : null}
-        {maEarthRounds.length > 0 ? (
-          <span className={`absolute right-3 z-10 rounded-full bg-foreground px-3 py-1 text-xs font-semibold text-background shadow-lg ${acceptsGainForestDonations ? "bottom-3" : "top-3"}`}>
-            {t("round", { round: maEarthRounds[maEarthRounds.length - 1]! })}
-          </span>
-        ) : !acceptsGainForestDonations && (donationSummary?.acceptsDonations || record.acceptsDonations) ? (
-          <span className="absolute right-3 top-3 z-10 rounded-full bg-primary px-3 py-1 text-xs font-semibold text-primary-foreground shadow-lg">
-            {t("donate")}
-          </span>
-        ) : null}
-        {canManageFeatured ? (
-          <span
-            role="button"
-            tabIndex={featureBusy ? -1 : 0}
-            aria-pressed={featured}
-            aria-disabled={featureBusy}
-            aria-label={featured ? featuredT("remove") : featuredT("add")}
-            title={featured ? featuredT("remove") : featuredT("add")}
-            onClick={(event) => {
-              event.stopPropagation();
-              if (!featureBusy) onToggleFeatured?.(record);
-            }}
-            onKeyDown={(event) => {
-              if ((event.key === "Enter" || event.key === " ") && !featureBusy) {
-                event.preventDefault();
-                event.stopPropagation();
-                onToggleFeatured?.(record);
-              }
-            }}
-            className={cn(
-              "absolute bottom-3 left-3 z-20 grid h-10 w-10 cursor-pointer place-items-center rounded-full border border-white/35 bg-background/90 text-muted-foreground shadow-lg backdrop-blur transition hover:scale-105 hover:text-amber-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60",
-              featured && "border-amber-300 bg-amber-50 text-amber-500 dark:bg-amber-950",
-              featureBusy && "cursor-wait opacity-70",
-            )}
-          >
-            {featureBusy ? <Loader2Icon className="h-4 w-4 animate-spin" aria-hidden /> : <StarIcon className={cn("h-4.5 w-4.5", featured && "fill-current")} aria-hidden />}
-          </span>
-        ) : null}
-        <span
-          {...(canFilterOwner
-            ? {
-                role: "button" as const,
-                tabIndex: 0,
-                "aria-label": ownerFilterT("filterByThis"),
-                title: ownerFilterT("filterByThis"),
-                onClick: (event: ReactMouseEvent) => {
-                  event.stopPropagation();
-                  onFilterOwner?.(record.did);
-                },
-                onKeyDown: (event: ReactKeyboardEvent) => {
-                  if (event.key === "Enter" || event.key === " ") {
-                    event.preventDefault();
-                    event.stopPropagation();
-                    onFilterOwner?.(record.did);
-                  }
-                },
-              }
-            : {})}
-          className={cn(
-            "absolute left-3 top-3 z-10 flex max-w-[calc(100%-1.5rem)] items-center gap-1.5 overflow-hidden rounded-full bg-background/75 p-1 pr-3 shadow-lg backdrop-blur-lg",
-            canFilterOwner && "cursor-pointer transition-colors hover:bg-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60",
-          )}
-        >
-          <BumicertOwnerAvatar did={record.did} avatarRef={record.creatorAvatarRef} label={ownerName} className="h-7 w-7 shrink-0 shadow-sm" />
-          <span className="min-w-0 truncate text-xs font-medium text-foreground">
-            {ownerName}
-          </span>
-        </span>
-      </div>
-
-      <div className="flex flex-1 flex-col p-4">
-        <div className="flex-1">
-          <h2 className="line-clamp-2 font-instrument text-2xl italic leading-tight text-foreground">{record.title}</h2>
-          {record.shortDescription ? (
-            <p className="mt-2 line-clamp-3 text-sm leading-relaxed text-muted-foreground">{record.shortDescription}</p>
-          ) : null}
-        </div>
-
-        {(record.scopeTags?.length ?? 0) > 0 || place || record.evidence ? (
-          <div className="mt-4 space-y-2 border-t border-border/70 pt-3">
-            {(record.scopeTags?.length ?? 0) > 0 || place ? (
-              <div className="flex flex-wrap gap-2 text-xs text-muted-foreground">
-                <ProjectScopeTags tags={record.scopeTags ?? []} />
-                {place ? (
-                  <span className="inline-flex items-center gap-1.5 rounded-full bg-secondary px-2.5 py-1 text-secondary-foreground">
-                    <MapPinIcon className="h-3.5 w-3.5" />
-                    {place}
-                  </span>
-                ) : null}
-              </div>
-            ) : null}
-            <ProjectEvidence evidence={record.evidence} />
-          </div>
-        ) : null}
-
-        <ProjectDonationMini summary={donationSummary} acceptsDonations={record.acceptsDonations === true} />
-      </div>
-    </button>
-  );
-}
-
-/**
- * Ma Earth-style donation line: a quiet single line with the amount in bold
- * and the donor count muted. No progress bar — projects here have no funding
- * goal, so a bar length would be arbitrary decoration pretending to be data.
- */
-function ProjectDonationMini({ summary, acceptsDonations }: { summary?: ProjectDonationSummary; acceptsDonations: boolean }) {
-  const t = useTranslations("marketplace.projects.card");
-  if (!summary && !acceptsDonations) return null;
-  const totalUsd = summary?.totalUsd ?? 0;
-  const donorCount = summary?.donorCount ?? 0;
-  const hasAmount = totalUsd > 0 && donorCount > 0;
-
-  return (
-    <p className="mt-4 flex min-w-0 items-baseline gap-1.5 text-sm">
-      {hasAmount ? (
-        <>
-          <span className="shrink-0 font-semibold text-foreground">{formatCompactUsd(totalUsd)}</span>
-          <span className="truncate text-muted-foreground">{t("byDonors", { donors: donorCount })}</span>
-        </>
-      ) : (
-        <span className="truncate text-muted-foreground">{t("openForSupport")}</span>
-      )}
-    </p>
   );
 }
 

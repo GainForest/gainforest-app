@@ -5,6 +5,7 @@ import type { AuthSession } from "./auth";
 export type UserEmail = {
   did: string;
   email: string;
+  handle?: string;
 };
 
 export async function upsertUserEmail(input: UserEmail): Promise<void> {
@@ -14,6 +15,7 @@ export async function upsertUserEmail(input: UserEmail): Promise<void> {
       {
         did: input.did.trim(),
         email: input.email.trim().toLowerCase(),
+        ...(input.handle ? { handle: input.handle.trim().toLowerCase() } : {}),
       },
       "did",
     );
@@ -33,11 +35,11 @@ export async function upsertUserEmail(input: UserEmail): Promise<void> {
 
 export function scheduleUserEmailSync(session: AuthSession): void {
   if (!session.isLoggedIn || !session.email) return;
-  const { did, email } = session;
+  const { did, handle, email } = session;
 
   after(async () => {
     try {
-      await upsertUserEmail({ did, email });
+      await upsertUserEmail({ did, handle, email });
     } catch {
       console.error(
         "User email synchronization failed; it will be retried on a later full app load. Verify the user_emails table and Supabase service-role configuration.",

@@ -1147,6 +1147,7 @@
       "action": "Gundua mradi",
       "previous": "Miradi teule iliyotangulia",
       "next": "Miradi teule inayofuata",
+      "goTo": "Nenda kwa {title}",
       "manage": {
         "add": "Teua mradi huu",
         "remove": "Ondoa kwenye miradi teule",
@@ -1225,7 +1226,8 @@
       "donationWays": "Njia {count}",
       "maEarth": "Ma Earth",
       "round": "Raundi {round}",
-      "byDonors": "kutoka kwa {donors, plural, one {mchangiaji #} other {wachangiaji #}}"
+      "byDonors": "kutoka kwa {donors, plural, one {mchangiaji #} other {wachangiaji #}}",
+      "view": "Tazama mradi"
     },
     "actions": {
       "clearAll": "Futa yote"

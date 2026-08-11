@@ -1147,6 +1147,7 @@
       "action": "Explorar proyecto",
       "previous": "Proyectos destacados anteriores",
       "next": "Siguientes proyectos destacados",
+      "goTo": "Ir a {title}",
       "manage": {
         "add": "Destacar este proyecto",
         "remove": "Quitar de proyectos destacados",
@@ -1225,7 +1226,8 @@
       "donationWays": "{count} formas",
       "maEarth": "Ma Earth",
       "round": "Ronda {round}",
-      "byDonors": "de {donors, plural, one {# donante} other {# donantes}}"
+      "byDonors": "de {donors, plural, one {# donante} other {# donantes}}",
+      "view": "Ver proyecto"
     },
     "actions": {
       "clearAll": "Borrar todo"

@@ -1147,6 +1147,7 @@
       "action": "Explore project",
       "previous": "Previous featured projects",
       "next": "Next featured projects",
+      "goTo": "Go to {title}",
       "manage": {
         "add": "Feature this project",
         "remove": "Remove from featured projects",
@@ -1225,7 +1226,8 @@
       "donationWays": "{count} ways",
       "maEarth": "Ma Earth",
       "round": "Round {round}",
-      "byDonors": "by {donors, plural, one {# donor} other {# donors}}"
+      "byDonors": "by {donors, plural, one {# donor} other {# donors}}",
+      "view": "View project"
     },
     "actions": {
       "clearAll": "Clear all"

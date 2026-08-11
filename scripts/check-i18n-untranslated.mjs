@@ -5,7 +5,7 @@ import ts from "typescript";
 const projectRoot = process.cwd();
 const locales = ["es", "id", "pt", "sw"];
 const allLocales = ["en", ...locales];
-const namespaces = ["root", "audiomothGuide", "bumicert", "cart", "common", "deleteAccount", "legacy", "marketplace", "modals", "privacy", "tainaGuide", "upload"];
+const namespaces = ["root", "audiomothGuide", "bumicert", "cart", "changelog", "common", "deleteAccount", "legacy", "marketplace", "modals", "privacy", "tainaGuide", "upload"];
 
 const allowedExactValues = new Set([
   "",
@@ -94,12 +94,26 @@ const allowedExactValues = new Set([
   "online",
   "Tainá",
   "Tainá — GainForest",
+  "iNaturalist",
+  "Bluesky",
+  "Instagram",
+  "Etherscan",
+  "Starlink",
+  "Raspberry Pi",
+  // Same word in the flagged locales (loanwords).
+  "Sensor",
+  "Laptop",
+  // Example placeholder device name shown in a form field.
+  "AudioMoth #14",
+  "GainForest — {name}",
+  "GainForest — {org}",
   "Bumi",
   "Pteronotus parnellii",
   "survey-2024-amazon-site-a",
   "night-recording, tropical-forest",
   "Green Globe —",
   "GainForest v",
+  "GainForest v{version}",
   "GainForest e.V.",
   "Schwandenacker 35, 8052 Zurich, Switzerland",
   "team@gainforest.net",

@@ -17,7 +17,7 @@ const RIPPLE_DURATION_MS = 1200;
 const STORAGE_KEY = "bumicerts-theme";
 
 type DocWithViewTransitions = Document & {
-  startViewTransition?: (updateCallback: () => void) => { ready: Promise<void> };
+  startViewTransition?: (updateCallback: () => void) => { ready: Promise<void>; finished: Promise<void> };
 };
 
 function getEventOrigin(event: MouseEvent<HTMLButtonElement>) {
@@ -43,8 +43,15 @@ function runThemeTransition(origin: { originX: number; originY: number }, update
 
   document.documentElement.style.setProperty("--theme-ripple-x", `${origin.originX}px`);
   document.documentElement.style.setProperty("--theme-ripple-y", `${origin.originY}px`);
+  // Scopes the ripple's ::view-transition rules (globals.css) to this
+  // transition so they never clip a navigation view transition.
+  document.documentElement.classList.add("vt-theme-ripple");
 
   const transition = doc.startViewTransition(updateTheme);
+
+  transition.finished
+    .catch(() => {})
+    .then(() => document.documentElement.classList.remove("vt-theme-ripple"));
 
   transition.ready.then(() => {
     document.documentElement.animate(
