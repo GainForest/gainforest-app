@@ -1,5 +1,4 @@
 import {
-  AudioLinesIcon,
   BinocularsIcon,
   BotIcon,
   Building2Icon,
@@ -139,14 +138,9 @@ export const NAV_ITEMS: NavSection[] = [
         href: "/labeler",
         pathCheck: { startsWith: "/labeler" },
       },
-      {
-        kind: "leaf",
-        id: "audiomoth",
-        text: "AudioMoth",
-        Icon: AudioLinesIcon,
-        href: "/audiomoth",
-        pathCheck: { startsWith: "/audiomoth" },
-      },
+      // AudioMoth is no longer a sidebar destination: audio records live under
+      // Observations (/observations/audio), device setup under
+      // /observations/devices. AI keeps only Taína and the Labeler.
     ],
   },
 ];

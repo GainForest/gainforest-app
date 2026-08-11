@@ -184,7 +184,7 @@ export function IdentificationsClient({ sessionDid }: { sessionDid: string | nul
           </div>
         </div>
         <div className="flex flex-wrap items-center gap-2">
-          <Button asChild variant="outline" size="sm"><Link href="/audiomoth?tab=label"><TagsIcon className="size-4" />{t("openLabeller")}</Link></Button>
+          <Button asChild variant="outline" size="sm"><Link href="/observations/audio?tab=label"><TagsIcon className="size-4" />{t("openLabeller")}</Link></Button>
           <Button variant="outline" size="sm" disabled={total === 0} onClick={exportAll}><DownloadIcon className="size-4" />{t("export")}</Button>
           <Button variant="ghost" size="sm" onClick={() => void load()}><RefreshCwIcon className="size-4" />{t("refresh")}</Button>
         </div>
@@ -220,7 +220,7 @@ export function IdentificationsClient({ sessionDid }: { sessionDid: string | nul
           <h2 className="mt-4 text-lg font-medium text-foreground">{t("emptyTitle")}</h2>
           <p className="mx-auto mt-2 max-w-lg text-sm leading-6 text-muted-foreground">{t("emptyBody")}</p>
           <div className="mt-5 flex justify-center">
-            <Button asChild><Link href="/audiomoth?tab=label"><TagsIcon className="size-4" />{t("openLabeller")}</Link></Button>
+            <Button asChild><Link href="/observations/audio?tab=label"><TagsIcon className="size-4" />{t("openLabeller")}</Link></Button>
           </div>
         </div>
       ) : shown.length === 0 ? (

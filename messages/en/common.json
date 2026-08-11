@@ -1779,7 +1779,22 @@
     "previewLoading": "Loading preview…",
     "previewFailed": "This file couldn't be previewed."
   },
+  "observationsHub": {
+    "ariaLabel": "Observation types",
+    "photos": "Photos",
+    "audio": "Audio",
+    "devices": "Devices"
+  },
   "audiomoth": {
+    "audioHub": {
+      "title": "Audio",
+      "subtitle": "Upload recordings from an AudioMoth SD card, organise them into deployments and label what you hear — audio observations live here.",
+      "metaTitle": "Audio observations",
+      "metaDescription": "Upload AudioMoth recordings, manage deployments, label species and explore soundscapes inside Observations."
+    },
+    "devicesHub": {
+      "title": "Devices"
+    },
     "meta": {
       "title": "AudioMoth recorder setup",
       "description": "Set the clock, configure recording schedules and update firmware on your AudioMoth acoustic recorder, straight from the browser."

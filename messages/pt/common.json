@@ -1779,7 +1779,22 @@
     "previewLoading": "Carregando pré-visualização…",
     "previewFailed": "Não foi possível pré-visualizar este arquivo."
   },
+  "observationsHub": {
+    "ariaLabel": "Tipos de observação",
+    "photos": "Fotos",
+    "audio": "Áudio",
+    "devices": "Dispositivos"
+  },
   "audiomoth": {
+    "audioHub": {
+      "title": "Áudio",
+      "subtitle": "Envie gravações do cartão SD de um AudioMoth, organize-as em implantações e rotule o que você ouve — as observações de áudio vivem aqui.",
+      "metaTitle": "Observações de áudio",
+      "metaDescription": "Envie gravações do AudioMoth, gerencie implantações, rotule espécies e explore paisagens sonoras dentro de Observações."
+    },
+    "devicesHub": {
+      "title": "Dispositivos"
+    },
     "meta": {
       "title": "Configuração do gravador AudioMoth",
       "description": "Acerte o relógio, configure os horários de gravação e atualize o firmware do seu gravador acústico AudioMoth, direto do navegador."

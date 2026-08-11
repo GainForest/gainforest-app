@@ -91,6 +91,21 @@ import { SoundscapeClient } from "@/app/soundscape/_components/SoundscapeClient"
 
 type MainTabId = "setup" | "deployments" | "upload" | "label" | "identifications" | "soundscape";
 
+/** Which Observations surface hosts this client: `audio` shows the recording
+ *  tabs (deployments, upload, label, identifications, soundscape), `devices`
+ *  shows only the USB setup tool. The old standalone AudioMoth page carried
+ *  both; they now live as separate tabs of the Observations hub. */
+export type AudioMothSurface = "audio" | "devices";
+
+const AUDIO_MAIN_TAB_IDS = ["deployments", "upload", "label", "identifications", "soundscape"] as const;
+
+function resolveMainTab(tab: string | null, surface: AudioMothSurface): MainTabId {
+  if (surface === "devices") return "setup";
+  return (AUDIO_MAIN_TAB_IDS as readonly string[]).includes(tab ?? "")
+    ? (tab as MainTabId)
+    : "deployments";
+}
+
 type TabId = "device" | "configure" | "firmware";
 
 interface DeviceInfo {
@@ -308,11 +323,18 @@ function InfoRow({ label, value, dimmed }: { label: string; value: string; dimme
 export function AudioMothClient({
   sessionDid,
   useUploadTray = false,
+  surface = "audio",
+  mediaTabs,
 }: {
   sessionDid: string | null;
   /** Release switch: hand uploads to the background tray instead of the
    *  page's own full-screen progress flow. Off until the tray is finished. */
   useUploadTray?: boolean;
+  /** Which Observations tab hosts this render — see {@link AudioMothSurface}. */
+  surface?: AudioMothSurface;
+  /** The Photos | Audio | Devices tab bar, rendered above the surface's own
+   *  tabs so all Observations media surfaces share one switcher. */
+  mediaTabs?: ReactNode;
 }) {
   const t = useTranslations("common.audiomoth");
   const identificationsT = useTranslations("common.identifications");
@@ -324,16 +346,17 @@ export function AudioMothClient({
   const [reading, setReading] = useState<LiveReading | null>(null);
   const router = useRouter();
   const searchParams = useSearchParams();
-  const [mainTab, setMainTab] = useState<MainTabId>(() => {
-    const tab = searchParams.get("tab");
-    if (tab === "soundscape" || tab === "label" || tab === "identifications") return tab;
-    return tab === "deployments" || tab === "upload" ? tab : "setup";
-  });
+  const [mainTab, setMainTab] = useState<MainTabId>(() => resolveMainTab(searchParams.get("tab"), surface));
+  // Links elsewhere in the app point at `/observations/audio?tab=…`; when one
+  // of them lands on this already-mounted page, follow the query change.
+  useEffect(() => {
+    setMainTab(resolveMainTab(searchParams.get("tab"), surface));
+  }, [searchParams, surface]);
   const mainTabNavRef = useRef<HTMLElement>(null);
   const selectMainTab = useCallback((id: MainTabId) => {
     setMainTab(id);
     const params = new URLSearchParams(searchParams.toString());
-    if (id === "setup") params.delete("tab");
+    if (id === "deployments" || id === "setup") params.delete("tab");
     else params.set("tab", id);
     router.replace(params.size > 0 ? `?${params.toString()}` : "?", { scroll: false });
   }, [router, searchParams]);
@@ -821,12 +844,13 @@ export function AudioMothClient({
     { id: "configure", label: t("tabs.configure"), Icon: SlidersHorizontalIcon },
   ];
 
+  // The Devices surface has a single job (USB setup) so it renders no tab
+  // bar of its own; the Audio surface carries the recording workflow tabs.
   const mainTabs: Array<{
     id: MainTabId;
     label: string;
     Icon: typeof ClockIcon;
   }> = [
-    { id: "setup", label: t("mainTabs.setup"), Icon: WrenchIcon },
     { id: "deployments", label: t("mainTabs.deployments"), Icon: MapPinIcon },
     { id: "upload", label: t("mainTabs.upload"), Icon: HardDriveUploadIcon },
     { id: "label", label: t("mainTabs.label"), Icon: TagsIcon },
@@ -840,19 +864,25 @@ export function AudioMothClient({
         compact
         lightSrc="/images/explore/explore-hero-light@2x.webp"
         darkSrc="/images/explore/explore-hero-dark@2x.webp"
-        title={t("title")}
+        title={surface === "devices" ? t("devicesHub.title") : t("audioHub.title")}
         lede={
-          mainTab === "label"
-            ? t("label.subtitle")
-            : mainTab === "identifications"
-              ? identificationsT("subtitle")
-              : mainTab === "soundscape"
-                ? soundscapeT("hero.description")
-                : t("subtitle")
+          surface === "devices"
+            ? t("subtitle")
+            : mainTab === "label"
+              ? t("label.subtitle")
+              : mainTab === "identifications"
+                ? identificationsT("subtitle")
+                : mainTab === "soundscape"
+                  ? soundscapeT("hero.description")
+                  : t("audioHub.subtitle")
         }
       />
       <div className="mx-auto flex w-full max-w-7xl flex-col gap-6 px-4 sm:px-6">
-      {/* Setup (this device over USB) vs Deployment (field events) */}
+      {/* Photos | Audio | Devices — shared across the Observations surfaces */}
+      {mediaTabs}
+
+      {/* Recording workflow tabs (Audio surface only) */}
+      {surface === "audio" && (
       <nav
         ref={mainTabNavRef}
         className="flex w-full max-w-full gap-1 self-start overflow-x-auto overscroll-x-contain rounded-full border border-border bg-card/70 p-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden lg:w-auto lg:overflow-visible"
@@ -875,6 +905,7 @@ export function AudioMothClient({
           </button>
         ))}
       </nav>
+      )}
 
       {mainTab === "deployments" && <DeploymentsTab sessionDid={sessionDid} />}
 

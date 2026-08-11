@@ -359,7 +359,7 @@ export function LabelTab({ sessionDid }: { sessionDid: string | null }) {
         <h2 className="mt-4 text-lg font-medium text-foreground">{t("noRecordingsTitle")}</h2>
         <p className="mx-auto mt-2 max-w-lg text-sm leading-6 text-muted-foreground">{workspaceError ?? t("noRecordingsBody")}</p>
         <div className="mt-5 flex flex-wrap justify-center gap-2">
-          <Button asChild><Link href="/audiomoth?tab=upload"><UploadIcon className="size-4" />{t("uploadFirst")}</Link></Button>
+          <Button asChild><Link href="/observations/audio?tab=upload"><UploadIcon className="size-4" />{t("uploadFirst")}</Link></Button>
           <Button variant="outline" onClick={() => void loadWorkspace()}><RefreshCwIcon className="size-4" />{t("refresh")}</Button>
         </div>
       </div>
@@ -377,7 +377,7 @@ export function LabelTab({ sessionDid }: { sessionDid: string | null }) {
           </div>
         </div>
         <div className="flex flex-wrap items-center gap-2">
-          <Button asChild variant="outline" size="sm"><Link href="/audiomoth?tab=upload"><UploadIcon className="size-4" />{t("addFiles")}</Link></Button>
+          <Button asChild variant="outline" size="sm"><Link href="/observations/audio?tab=upload"><UploadIcon className="size-4" />{t("addFiles")}</Link></Button>
           <Button variant="outline" size="sm" disabled={occurrences.length === 0} onClick={exportLabels}><DownloadIcon className="size-4" />{t("export")}</Button>
           <Button variant="ghost" size="sm" onClick={() => void loadWorkspace()}><RefreshCwIcon className="size-4" />{t("refresh")}</Button>
         </div>

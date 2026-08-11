@@ -1779,7 +1779,22 @@
     "previewLoading": "Memuat pratinjau…",
     "previewFailed": "File ini tidak bisa dipratinjau."
   },
+  "observationsHub": {
+    "ariaLabel": "Jenis observasi",
+    "photos": "Foto",
+    "audio": "Audio",
+    "devices": "Perangkat"
+  },
   "audiomoth": {
+    "audioHub": {
+      "title": "Audio",
+      "subtitle": "Unggah rekaman dari kartu SD AudioMoth, susun ke dalam penempatan, dan beri label pada apa yang Anda dengar — observasi audio ada di sini.",
+      "metaTitle": "Observasi audio",
+      "metaDescription": "Unggah rekaman AudioMoth, kelola penempatan, beri label spesies, dan jelajahi lanskap suara di dalam Observasi."
+    },
+    "devicesHub": {
+      "title": "Perangkat"
+    },
     "meta": {
       "title": "Pengaturan perekam AudioMoth",
       "description": "Atur jam, konfigurasikan jadwal perekaman, dan perbarui firmware perekam akustik AudioMoth Anda, langsung dari peramban."

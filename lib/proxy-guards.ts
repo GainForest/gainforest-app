@@ -49,6 +49,9 @@ const RECORD_KEY_ROUTE_SEGMENT_PATTERN = /^[A-Za-z0-9._:~-]+$/;
 
 const PROXY_BYPASS_PREFIXES = ["/api/"] as const;
 const ACCOUNT_ID_ROUTES = ["account", "cert", "bumicert", "projects", "observations"] as const;
+// Static children of /observations (the Audio and Devices media tabs) that
+// share the route prefix with /observations/<did>/<rkey> record details.
+const OBSERVATIONS_STATIC_CHILDREN = ["audio", "devices"] as const;
 const RECORD_DETAIL_ROUTES = ["cert", "bumicert", "projects", "observations"] as const;
 
 type ProxyBlockReason =
@@ -139,6 +142,14 @@ function getInvalidPathReason(pathname: string): Exclude<
   const [route, accountId, recordRkey] = segments;
 
   if (!route || !ACCOUNT_ID_ROUTES.some((accountRoute) => accountRoute === route)) {
+    return null;
+  }
+
+  if (
+    route === "observations" &&
+    accountId &&
+    OBSERVATIONS_STATIC_CHILDREN.some((child) => child === accountId)
+  ) {
     return null;
   }
 

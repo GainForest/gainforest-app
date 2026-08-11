@@ -9,10 +9,10 @@ export async function generateMetadata(): Promise<Metadata> {
   return {
     title: t("title"),
     description: t("description"),
-    alternates: { canonical: "/audiomoth?tab=identifications" },
+    alternates: { canonical: "/observations/audio?tab=identifications" },
   };
 }
 
 export default async function IdentificationsPage() {
-  redirect("/audiomoth?tab=identifications");
+  redirect("/observations/audio?tab=identifications");
 }

@@ -6,5 +6,5 @@ import { permanentRedirect } from "next/navigation";
  * AudioMoth page re-checks admin access before it shows the tab.
  */
 export default function SoundscapePage() {
-  permanentRedirect("/audiomoth?tab=soundscape");
+  permanentRedirect("/observations/audio?tab=soundscape");
 }

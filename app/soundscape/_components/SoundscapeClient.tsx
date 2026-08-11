@@ -954,7 +954,7 @@ export function SoundscapeClient({ sessionDid }: { sessionDid: string | null }) 
         </p>
         <div className="mt-5 flex flex-wrap justify-center gap-2">
           <Button asChild>
-            <Link href="/audiomoth?tab=upload">
+            <Link href="/observations/audio?tab=upload">
               <UploadIcon className="size-4" />
               {t("library.goToUpload")}
             </Link>

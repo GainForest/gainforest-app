@@ -33,7 +33,7 @@ export function DeploymentDetailActions({
     setDeleting(true);
     try {
       await deleteDeploymentEvent(event);
-      router.push("/audiomoth?tab=deployments");
+      router.push("/observations/audio?tab=deployments");
       router.refresh();
     } catch (err) {
       setError(err instanceof Error && err.message ? err.message : t("deleteFailed"));

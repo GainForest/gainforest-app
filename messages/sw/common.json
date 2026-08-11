@@ -1779,7 +1779,22 @@
     "previewLoading": "Inapakia hakikisho…",
     "previewFailed": "Faili hii haikuweza kuonyeshwa."
   },
+  "observationsHub": {
+    "ariaLabel": "Aina za uchunguzi",
+    "photos": "Picha",
+    "audio": "Sauti",
+    "devices": "Vifaa"
+  },
   "audiomoth": {
+    "audioHub": {
+      "title": "Sauti",
+      "subtitle": "Pakia rekodi kutoka kadi ya SD ya AudioMoth, zipange katika usambazaji na uweke lebo unachosikia — uchunguzi wa sauti unaishi hapa.",
+      "metaTitle": "Uchunguzi wa sauti",
+      "metaDescription": "Pakia rekodi za AudioMoth, dhibiti usambazaji, weka lebo spishi na uchunguze mandhari ya sauti ndani ya Uchunguzi."
+    },
+    "devicesHub": {
+      "title": "Vifaa"
+    },
     "meta": {
       "title": "Usanidi wa kinasa AudioMoth",
       "description": "Weka saa, sanidi ratiba za kurekodi na usasishe firmware ya kinasa sauti chako cha AudioMoth, moja kwa moja kutoka kwenye kivinjari."

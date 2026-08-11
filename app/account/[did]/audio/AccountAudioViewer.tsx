@@ -479,7 +479,7 @@ export function AccountAudioViewer({
           </div>
         ) : showUploadCta ? (
           <Button asChild size="sm">
-            <Link href="/audiomoth?tab=upload">
+            <Link href="/observations/audio?tab=upload">
               <UploadIcon className="size-4" />
               {t("uploadCta")}
             </Link>
@@ -515,7 +515,7 @@ export function AccountAudioViewer({
           <p className="mx-auto mt-1.5 max-w-[440px] text-sm text-muted-foreground">{t("accountEmptyBody")}</p>
           {showUploadCta ? (
             <Button asChild size="sm" className="mt-5">
-              <Link href="/audiomoth?tab=upload">
+              <Link href="/observations/audio?tab=upload">
                 <UploadIcon className="size-4" />
                 {t("uploadCta")}
               </Link>

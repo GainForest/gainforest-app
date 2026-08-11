@@ -226,6 +226,7 @@ export function RecordExplorer({
   enableCompactObservationCards = false,
   defaultCardDensity = "comfortable",
   onEmptyStateChange,
+  underHero,
 }: {
   kind: RecordKind;
   initialPage?: InitialExplorerPage;
@@ -275,6 +276,9 @@ export function RecordExplorer({
   /** Fires with true once the explorer has loaded and holds zero records (no
    *  data at all), false otherwise. Lets a parent collapse its own chrome. */
   onEmptyStateChange?: (isEmpty: boolean) => void;
+  /** Rendered directly below the hero, above stats and toolbar — e.g. the
+   *  Observations hub's Photos | Audio | Devices media tab bar. */
+  underHero?: ReactNode;
 }) {
   const meta = KIND_META[kind];
   const exploreT = useTranslations("marketplace.explore");
@@ -680,6 +684,8 @@ export function RecordExplorer({
           compact
         />
       )}
+
+      {underHero && <div className="relative z-10 mx-auto mt-6 max-w-6xl px-6">{underHero}</div>}
 
       <div className="relative z-10 mx-auto max-w-6xl px-6">
         {/* Stats overview — only embedded account/manage views show summaries here. */}
