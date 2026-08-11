@@ -53,8 +53,10 @@ export function tierForAmount(amountUsd: number): Tier {
 export type RewardCard = {
   /** Deterministic identity derived from the funding receipt/payment. */
   id: string;
-  /** Kept explicit so the visual model cannot silently mix card types. */
-  variant: "project";
+  /** Kept explicit so the visual model cannot silently mix card types.
+   *  "project" honours a project donation; "person" honours a direct gift
+   *  to another account (e.g. a prize payout or peer support). */
+  variant: "project" | "person";
   /** Donation lines represented on this card (one for a project, all for the total). */
   lines: RewardLine[];
   /** Amount shown on the card, in USD. */

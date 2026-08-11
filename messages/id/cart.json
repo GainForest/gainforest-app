@@ -105,6 +105,7 @@
     "reward": {
       "eyebrow": "Koleksi terbuka",
       "guardianOf": "Penjaga",
+      "personEyebrow": "Untuk mendukung",
       "contributed": "Disumbangkan",
       "moreProjects": "{count, plural, other {# proyek lainnya}}",
       "mint": "Nomor {mint}",
@@ -250,8 +251,11 @@
     "partialBody": "Beberapa catatan donasi atau detail proyek tidak dapat dimuat. Bumicerts yang ditampilkan telah diverifikasi, tetapi koleksi Anda mungkin belum lengkap.",
     "fallbackProject": "Proyek yang didukung",
     "fallbackOrganization": "Tim proyek",
+    "fallbackRecipient": "Anggota komunitas",
+    "fallbackPersonContext": "Dukungan langsung",
     "verifiedDonation": "Donasi terverifikasi",
     "viewProject": "Lihat proyek",
+    "viewProfile": "Lihat profil",
     "viewPayment": "Lihat pembayaran"
   }
 }

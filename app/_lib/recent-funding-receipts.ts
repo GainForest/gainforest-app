@@ -8,6 +8,7 @@ export const MAX_RECENT_RECEIPTS = 20;
 
 type RawReceiptValue = {
   from?: { $type?: string; did?: string; value?: string };
+  to?: { $type?: string; did?: string; value?: string };
   amount?: string;
   currency?: string;
   occurredAt?: string;
@@ -40,6 +41,14 @@ function receiptRkey(uri: string): string | null {
   }
 }
 
+function receiptRecipient(
+  to: RawReceiptValue["to"],
+): FundingReceipt["to"] {
+  if (to?.$type === "app.certified.defs#did" && to.did) return { type: "did", id: to.did };
+  if (to?.value) return { type: "wallet", id: to.value };
+  return null;
+}
+
 function orgDidFromSubject(uri: string | undefined): string | null {
   const match = uri?.match(/^at:\/\/(did:[a-z0-9]+:[a-z0-9]+)\/org\.hypercerts\.claim\.activity\/.+$/i);
   return match?.[1] ?? null;
@@ -69,6 +78,7 @@ function ownedProjectReceipt(
     occurredAt: value.occurredAt ?? value.createdAt ?? null,
     createdAt: value.createdAt ?? null,
     from: { type: "did", id: ownerDid },
+    to: receiptRecipient(value.to),
     orgDid,
     bumicertUri: subjectUri,
     txHash: value.transactionId ?? null,

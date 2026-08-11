@@ -105,6 +105,7 @@
     "reward": {
       "eyebrow": "Colecionável desbloqueado",
       "guardianOf": "Guardião de",
+      "personEyebrow": "Em apoio a",
       "contributed": "Contribuído",
       "moreProjects": "{count, plural, one {# projeto a mais} other {# projetos a mais}}",
       "mint": "N.º {mint}",
@@ -250,8 +251,11 @@
     "partialBody": "Alguns registros de doação ou detalhes de projetos não puderam ser carregados. Os Bumicerts exibidos são verificados, mas sua coleção pode estar incompleta.",
     "fallbackProject": "Projeto apoiado",
     "fallbackOrganization": "Equipe do projeto",
+    "fallbackRecipient": "Uma pessoa da comunidade",
+    "fallbackPersonContext": "Apoio direto",
     "verifiedDonation": "Doação verificada",
     "viewProject": "Ver projeto",
+    "viewProfile": "Ver perfil",
     "viewPayment": "Ver pagamento"
   }
 }

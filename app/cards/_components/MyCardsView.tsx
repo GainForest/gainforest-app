@@ -104,6 +104,7 @@ export function MyCardsView({
                   <DonationRewardCard
                     lines={card.lines}
                     totalUsd={card.totalUsd}
+                    variant={card.variant}
                     animateEntrance={false}
                   />
                   <div className="mt-3 rounded-2xl border border-border-soft bg-surface/80 px-4 py-3 text-xs">
@@ -114,11 +115,16 @@ export function MyCardsView({
                       </span>
                       {earnedLabel ? <span className="text-muted-foreground">{earnedLabel}</span> : null}
                     </div>
-                    {card.projectHref || card.paymentHref ? (
+                    {card.projectHref || card.personHref || card.paymentHref ? (
                       <div className="mt-2 flex flex-wrap gap-x-4 gap-y-2 border-t border-border-soft pt-2">
                         {card.projectHref ? (
                           <Link href={card.projectHref} className="font-medium text-foreground hover:text-primary">
                             {t("viewProject")}
+                          </Link>
+                        ) : null}
+                        {card.personHref ? (
+                          <Link href={card.personHref} className="font-medium text-foreground hover:text-primary">
+                            {t("viewProfile")}
                           </Link>
                         ) : null}
                         {card.paymentHref ? (
