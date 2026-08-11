@@ -108,7 +108,7 @@
       "contributed": "Umechangia",
       "moreProjects": "{count, plural, one {mradi # zaidi} other {miradi # zaidi}}",
       "mint": "Na. {mint}",
-      "verified": "Imethibitishwa mtandaoni",
+      "verified": "Imethibitishwa kwenye blockchain",
       "tiltHint": "Sogeza kishale juu ya Bumicert ili kunasa mwanga",
       "tiers": {
         "seedling": {
