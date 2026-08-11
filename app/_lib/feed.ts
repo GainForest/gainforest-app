@@ -29,7 +29,7 @@ import { LEGACY_BROAD_VERNACULARS, parseAudioSegmentDynamicProperties } from "./
 import { getAddress } from "viem";
 import { getTipWalletAddress } from "@/lib/facilitator/tip";
 import { fetchPinnedPostUris } from "./feed-pins";
-import { fetchHiddenRecordUris, fetchPublicHiddenAccountDids, indexerQuery } from "./indexer";
+import { fetchAccountCards, fetchHiddenRecordUris, fetchPublicHiddenAccountDids, indexerQuery } from "./indexer";
 import { mentionCandidatesFromFacets, type MentionCandidate, type RawIndexedFacet } from "./mentions";
 import { normaliseRef } from "./pds";
 import { FACILITATOR_DID, accountHref, localBumicertHref, localObservationHref, localProjectHref } from "./urls";
@@ -901,21 +901,24 @@ async function resolveProjectsForCertUris(certUris: string[]): Promise<Map<strin
   return out;
 }
 
-/** The receiving side of a receipt, for direct (no funded Cert) donations. */
-type DonationRecipient = { did: string | null; wallet: string | null };
+/** One side of a receipt (`from` / `to`) as recorded: an account DID, a bare
+ *  wallet address, or neither. */
+type DonationParty = { did: string | null; wallet: string | null };
 
-/** Map donation receipts to rows WITHOUT resolving their funded project yet —
- *  the cert→project lookup is deferred until after the page is sliced, so we
- *  only resolve the donations that actually surface. Returns side maps from
- *  row id to the funded Cert URI and to the raw recipient (`to` DID or wallet)
- *  for that later enrichment. */
+/** Map donation receipts to rows WITHOUT resolving their funded project or the
+ *  donor/recipient identities yet — those lookups are deferred until after the
+ *  page is sliced, so we only resolve the donations that actually surface.
+ *  Returns side maps from row id to the funded Cert URI and to the raw donor
+ *  (`from`) and recipient (`to`) sides for that later enrichment. */
 function mapDonations(nodes: RawReceipt[]): {
   items: ActivityFeedItem[];
   certUriById: Map<string, string>;
-  recipientById: Map<string, DonationRecipient>;
+  recipientById: Map<string, DonationParty>;
+  donorById: Map<string, DonationParty>;
 } {
   const certUriById = new Map<string, string>();
-  const recipientById = new Map<string, DonationRecipient>();
+  const recipientById = new Map<string, DonationParty>();
+  const donorById = new Map<string, DonationParty>();
   const items = nodes.map((n): ActivityFeedItem => {
     const certUri = n.for?.uri ?? null;
     if (certUri) certUriById.set(n.uri, certUri);
@@ -928,6 +931,7 @@ function mapDonations(nodes: RawReceipt[]): {
     const fallbackHref = certRef ? localBumicertHref(certRef.did, certRef.rkey) : "/feed";
     const donorWallet = n.from?.__typename === "OrgHypercertsFundingReceiptText" ? n.from.value ?? null : null;
     const donorDid = n.from?.__typename === "AppCertifiedDefsDid" ? n.from.did ?? null : null;
+    if (donorWallet || donorDid) donorById.set(n.uri, { did: donorDid, wallet: donorWallet });
     const currency = (n.currency ?? "USD").toUpperCase();
     const amount = safeAmount(n.amount);
     return {
@@ -949,10 +953,10 @@ function mapDonations(nodes: RawReceipt[]): {
       currency,
     };
   });
-  return { items, certUriById, recipientById };
+  return { items, certUriById, recipientById, donorById };
 }
 
-// ── Direct-donation recipient resolution (wallet/DID → account name) ───────
+// ── Donation identity resolution (wallet/DID → account name) ──────────────
 
 const LINKED_WALLETS_BY_ADDRESS_QUERY = `
   query LinkedWalletsByAddress($addresses: [String!]) {
@@ -961,14 +965,6 @@ const LINKED_WALLETS_BY_ADDRESS_QUERY = `
     }
     appCertifiedLinkEvm(first: 100, where: { address: { in: $addresses } }) {
       edges { node { did address } }
-    }
-  }
-`;
-
-const PROFILE_NAMES_BY_DID_QUERY = `
-  query RecipientProfiles($dids: [String!]) {
-    appCertifiedActorProfile(first: 100, where: { did: { in: $dids } }) {
-      edges { node { did displayName } }
     }
   }
 `;
@@ -1007,32 +1003,23 @@ async function resolveWalletOwners(wallets: Set<string>): Promise<Map<string, st
   return out;
 }
 
-/** Fetch display names for account DIDs. Returns DID → non-empty name. */
-async function resolveProfileNames(dids: Set<string>): Promise<Map<string, string>> {
-  const out = new Map<string, string>();
-  if (dids.size === 0) return out;
-  const data = await indexerQuery<{
-    appCertifiedActorProfile?: { edges?: Array<{ node?: { did?: string | null; displayName?: string | null } | null } | null> | null } | null;
-  }>(PROFILE_NAMES_BY_DID_QUERY, { dids: [...dids] }).catch(() => null);
-  for (const edge of data?.appCertifiedActorProfile?.edges ?? []) {
-    const node = edge?.node;
-    const name = node?.displayName?.trim();
-    if (node?.did && name && !out.has(node.did)) out.set(node.did, name);
-  }
-  return out;
-}
-
 /** Resolve funded projects for the donation rows that made it into the page and
- *  patch their link + target label in place. Rows without a funded Cert are
- *  direct donations (e.g. wallet tips): their `to` side is resolved to a real
- *  account/org name instead — a DID recipient via its profile, a wallet
- *  recipient via the linked-wallet records, and the GainForest tip wallet
- *  (gainforest.eth, which has no linked-wallet record) by matching the
- *  resolved tip address. */
+ *  patch their link + target label in place, then put a real person/organization
+ *  behind each row instead of an identifier.
+ *
+ *  The donor (`from`) is named for EVERY donation row — receipts live in the
+ *  facilitator's repo, so unlike other feed rows they carry no author profile
+ *  and the name has to be looked up here, or the row would fall back to a raw
+ *  DID. Rows without a funded Cert are direct donations (e.g. wallet tips):
+ *  their `to` side is named the same way. Either side resolves via its account
+ *  DID, via the linked-wallet records when only a wallet address was recorded,
+ *  and — for the GainForest tip wallet (gainforest.eth, which has no
+ *  linked-wallet record) — by matching the resolved tip address. */
 async function enrichDonations(
   pageItems: ActivityFeedItem[],
   certUriById: Map<string, string>,
-  recipientById: Map<string, DonationRecipient>,
+  recipientById: Map<string, DonationParty>,
+  donorById: Map<string, DonationParty>,
 ): Promise<void> {
   const certUris = pageItems
     .filter((it) => it.kind === "donation")
@@ -1052,42 +1039,73 @@ async function enrichDonations(
     }
   }
 
-  // Direct donations: no funded Cert resolved, but the receipt names a
-  // recipient (`to` DID or wallet).
-  const direct = pageItems.filter(
-    (it) => it.kind === "donation" && !it.targetTitle && recipientById.has(it.id),
-  );
-  if (direct.length === 0) return;
+  // Donors are named on every donation row; recipients only on direct
+  // donations (no funded Cert resolved) where the receipt names a `to` side.
+  const donations = pageItems.filter((it) => it.kind === "donation");
+  const direct = donations.filter((it) => !it.targetTitle && recipientById.has(it.id));
+  if (donations.length === 0) return;
 
+  // One wallet reverse-lookup for both sides of every row on the page.
   const wallets = new Set<string>();
+  for (const it of donations) {
+    const wallet = donorById.get(it.id)?.wallet;
+    if (wallet) wallets.add(wallet);
+  }
+  let recipientWallets = false;
   for (const it of direct) {
     const wallet = recipientById.get(it.id)?.wallet;
-    if (wallet) wallets.add(wallet);
+    if (wallet) {
+      wallets.add(wallet);
+      recipientWallets = true;
+    }
   }
   const [didByWallet, tipWallet] = await Promise.all([
     resolveWalletOwners(wallets),
-    wallets.size > 0 ? getTipWalletAddress().catch(() => null) : Promise.resolve(null),
+    recipientWallets ? getTipWalletAddress().catch(() => null) : Promise.resolve(null),
   ]);
 
-  const recipientDidFor = (it: ActivityFeedItem): string | null => {
-    const recipient = recipientById.get(it.id);
-    if (!recipient) return null;
-    if (recipient.did) return recipient.did;
-    return recipient.wallet ? didByWallet.get(recipient.wallet.toLowerCase()) ?? null : null;
+  const didFor = (party: DonationParty | undefined): string | null => {
+    if (!party) return null;
+    if (party.did) return party.did;
+    return party.wallet ? didByWallet.get(party.wallet.toLowerCase()) ?? null : null;
   };
 
+  // One profile lookup for both sides too. `fetchAccountCards` also covers
+  // organizations, which publish their name on the organization record rather
+  // than a profile record.
   const dids = new Set<string>();
-  for (const it of direct) {
-    const did = recipientDidFor(it);
+  for (const it of donations) {
+    const did = didFor(donorById.get(it.id));
     if (did) dids.add(did);
   }
-  const nameByDid = await resolveProfileNames(dids);
+  for (const it of direct) {
+    const did = didFor(recipientById.get(it.id));
+    if (did) dids.add(did);
+  }
+  const cards =
+    dids.size > 0
+      ? await fetchAccountCards([...dids]).catch(() => new Map<string, { displayName: string | null; avatarRef: string | null }>())
+      : new Map<string, { displayName: string | null; avatarRef: string | null }>();
+
+  // Donor → the row's actor (name + avatar), like every other feed row's author.
+  for (const it of donations) {
+    const did = didFor(donorById.get(it.id));
+    if (!did) continue;
+    const card = cards.get(did);
+    const name = card?.displayName?.trim() || null;
+    if (!name) continue; // no plain-language name — keep the anonymous heart badge
+    it.actorDid = did;
+    it.actorName = name;
+    it.actorAvatarRef = card?.avatarRef ?? null;
+    // The wallet caption only stood in for a missing name.
+    if (donorById.get(it.id)?.wallet) it.text = null;
+  }
 
   const tip = tipWallet?.toLowerCase() ?? null;
   for (const it of direct) {
-    const did = recipientDidFor(it);
+    const did = didFor(recipientById.get(it.id));
     if (did) {
-      const name = nameByDid.get(did);
+      const name = cards.get(did)?.displayName?.trim();
       if (!name) continue; // no plain-language name to show — leave the row as-is
       it.targetTitle = name;
       it.targetHref = accountHref(did);
@@ -1424,7 +1442,7 @@ async function buildFeedPageUncached(
     repostNodes.push(...q);
   }
 
-  const { items: donationItems, certUriById, recipientById } = mapDonations(receiptNodes);
+  const { items: donationItems, certUriById, recipientById, donorById } = mapDonations(receiptNodes);
 
   // Accounts a GainForest steward flagged as "test", and accounts hosted on a
   // blocked server address, are hidden from the feed — every row owned by such
@@ -1475,7 +1493,7 @@ async function buildFeedPageUncached(
       const skipPage = await buildBurstSkipPage(ordered, firstObsIdx, burstActor, cursor);
       if (skipPage) {
         skipPage.items = await resolveReshares(skipPage.items, hidden, hiddenRecords);
-        await enrichDonations(skipPage.items, certUriById, recipientById);
+        await enrichDonations(skipPage.items, certUriById, recipientById, donorById);
         return skipPage;
       }
     }
@@ -1486,7 +1504,7 @@ async function buildFeedPageUncached(
   // gone/hidden is consumed (dropped from the page) without stalling paging.
   const last = sliced[sliced.length - 1];
   const pageItems = await resolveReshares(sliced, hidden, hiddenRecords);
-  await enrichDonations(pageItems, certUriById, recipientById);
+  await enrichDonations(pageItems, certUriById, recipientById, donorById);
   // A stream that returned a full batch may still have older rows we haven't
   // reached (tracked as `fetchedFull` during the per-chunk union above);
   // combined with leftover eligible overflow, that's "more to load".

@@ -934,7 +934,11 @@ function DonationRow({
   onModerated?: (uri: string) => void;
 }) {
   const t = useTranslations("common.feed");
-  const donorLabel = item.actorName?.trim() || (item.actorDid ? shortDid(item.actorDid) : t("anonymous"));
+  // Donors are named by `enrichDonations`; when the donation carries no account
+  // we can name (a bare wallet, or an account with no display name), the row
+  // stays plainly anonymous rather than showing a raw identifier.
+  const donorName = item.actorName?.trim() || null;
+  const donorLabel = donorName ?? t("anonymous");
   const amountLabel =
     item.amount != null
       ? item.currency === "USD"
@@ -945,8 +949,8 @@ function DonationRow({
   return (
     <li className="relative">
       <div className="group flex gap-3 rounded-2xl px-3 pb-1.5 pt-3.5 transition-colors hover:bg-muted/40">
-        {/* Donor avatar when they have an account, else a quiet heart badge. */}
-        {item.actorDid ? (
+        {/* Donor avatar when they have a named account, else a quiet heart badge. */}
+        {donorName ? (
           <FeedAvatar item={item} />
         ) : (
           <span className="mt-0.5 grid size-10 shrink-0 place-items-center rounded-full bg-primary/10 text-primary">
