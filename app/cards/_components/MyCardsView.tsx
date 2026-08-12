@@ -4,15 +4,20 @@
  * server route; this component only renders production states and fixtures. */
 
 import { motion, useReducedMotion } from "framer-motion";
-import { AlertTriangleIcon, BadgeCheckIcon, ExternalLinkIcon, SparklesIcon } from "lucide-react";
+import { AlertTriangleIcon, ArrowUpRightIcon, Share2Icon, SparklesIcon } from "lucide-react";
 import Link from "next/link";
-import { useFormatter, useTranslations } from "next-intl";
+import { useTranslations } from "next-intl";
+import { useMemo, useState } from "react";
 import { AuthButton } from "@/app/_components/AuthFlow";
 import type { EarnedCard } from "@/app/_components/rewards/earned-card";
 import { DonationRewardCard } from "@/app/checkout/_components/DonationRewardCard";
+import { tierForAmount, type Tier } from "@/app/checkout/_components/reward-model";
 import { Button } from "@/components/ui/button";
 
 type CardsStatus = "ready" | "signedOut" | "unavailable";
+type SortOrder = "newest" | "oldest";
+
+type TierFilter = "all" | Tier["key"];
 
 export function MyCardsView({
   cards,
@@ -24,26 +29,52 @@ export function MyCardsView({
   partial?: boolean;
 }) {
   const t = useTranslations("cart.myCards");
-  const format = useFormatter();
   const reduceMotion = useReducedMotion();
+  const [tierFilter, setTierFilter] = useState<TierFilter>("all");
+  const [sortOrder, setSortOrder] = useState<SortOrder>("newest");
+  const cardsByTier = useMemo(() => cards.reduce<Record<Tier["key"], number>>(
+    (counts, card) => {
+      counts[tierForAmount(card.totalUsd).key] += 1;
+      return counts;
+    },
+    { seedling: 0, sapling: 0, grove: 0, canopy: 0, oldGrowth: 0 },
+  ), [cards]);
+  const visibleCards = useMemo(() => cards
+    .filter((card) => tierFilter === "all" || tierForAmount(card.totalUsd).key === tierFilter)
+    .toSorted((a, b) => {
+      const aTime = a.earnedAt ? Date.parse(a.earnedAt) : 0;
+      const bTime = b.earnedAt ? Date.parse(b.earnedAt) : 0;
+      return sortOrder === "newest" ? bTime - aTime : aTime - bTime;
+    }), [cards, sortOrder, tierFilter]);
+  const shareCard = async (card: EarnedCard) => {
+    const href = card.projectHref ?? card.personHref ?? "/cards";
+    const url = new URL(href, window.location.origin).toString();
+    const shareData = { title: t("shareCard"), text: t("shareCardText"), url };
+
+    if (navigator.share) {
+      await navigator.share(shareData);
+      return;
+    }
+    await navigator.clipboard?.writeText(url);
+  };
+
+  const filters: Array<{ key: TierFilter; count: number; label: string }> = [
+    { key: "all", count: cards.length, label: t("filterAll", { count: cards.length }) },
+    ...(["seedling", "sapling", "grove", "canopy", "oldGrowth"] as const)
+      .filter((tier) => cardsByTier[tier] > 0)
+      .map((tier) => ({
+        key: tier,
+        count: cardsByTier[tier],
+        label: t("filterTier", { tier: t(`tiers.${tier}`), count: cardsByTier[tier] }),
+      })),
+  ];
 
   return (
     <div className="min-h-full px-4 py-8 sm:px-6 sm:py-12">
-      <div className="mx-auto max-w-6xl">
-        <div className="flex items-center gap-2 text-primary">
-          <SparklesIcon className="size-5" aria-hidden />
-          <span className="text-xs font-semibold uppercase tracking-[0.18em]">{t("eyebrow")}</span>
-        </div>
-        <div className="mt-3 flex flex-wrap items-end justify-between gap-3">
-          <div>
-            <h1 className="text-3xl font-semibold tracking-tight text-foreground sm:text-5xl">{t("title")}</h1>
-            <p className="mt-3 max-w-2xl text-sm leading-6 text-muted-foreground sm:text-base">{t("description")}</p>
-          </div>
-          {cards.length > 0 ? (
-            <span className="rounded-full bg-primary/10 px-3 py-1 text-sm font-semibold text-primary">
-              {t("count", { count: cards.length })}
-            </span>
-          ) : null}
+      <div className="mx-auto max-w-7xl">
+        <div>
+          <h1 className="font-instrument text-4xl italic leading-none text-foreground sm:text-5xl">{t("title")}</h1>
+          <p className="mt-3 max-w-xl text-sm leading-6 text-muted-foreground sm:text-base">{t("description")}</p>
         </div>
 
         {partial ? (
@@ -85,12 +116,40 @@ export function MyCardsView({
             </Button>
           </div>
         ) : (
-          <div className="mt-10 grid justify-items-center gap-x-8 gap-y-12 sm:grid-cols-2 lg:grid-cols-3">
-            {cards.map((card, i) => {
-              const earnedAt = card.earnedAt ? new Date(card.earnedAt) : null;
-              const earnedLabel = earnedAt && !Number.isNaN(earnedAt.getTime())
-                ? format.dateTime(earnedAt, { dateStyle: "medium" })
-                : null;
+          <>
+            <div className="mt-8 border-b border-border-soft pb-4">
+              <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                <div className="flex flex-wrap gap-2" role="tablist" aria-label={t("filterLabel")}>
+                  {filters.map((filter) => (
+                    <button
+                      key={filter.key}
+                      type="button"
+                      role="tab"
+                      aria-selected={tierFilter === filter.key}
+                      onClick={() => setTierFilter(filter.key)}
+                      className={tierFilter === filter.key
+                        ? "rounded-full bg-primary px-3.5 py-2 text-xs font-semibold text-primary-foreground"
+                        : "rounded-full px-3.5 py-2 text-xs font-semibold text-foreground transition-colors hover:bg-muted"}
+                    >
+                      {filter.label}
+                    </button>
+                  ))}
+                </div>
+                <label className="sr-only" htmlFor="cards-sort">{t("sortLabel")}</label>
+                <select
+                  id="cards-sort"
+                  value={sortOrder}
+                  onChange={(event) => setSortOrder(event.target.value as SortOrder)}
+                  className="h-10 rounded-xl border border-border bg-background px-3 text-sm text-foreground shadow-sm outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                >
+                  <option value="newest">{t("newestFirst")}</option>
+                  <option value="oldest">{t("oldestFirst")}</option>
+                </select>
+              </div>
+            </div>
+            <div className="mt-8 grid grid-cols-[repeat(auto-fit,minmax(min(100%,15.75rem),1fr))] justify-items-center gap-x-6 gap-y-8">
+            {visibleCards.map((card, i) => {
+              const viewHref = card.projectHref ?? card.personHref ?? card.paymentHref ?? "/cards";
               return (
                 <motion.article
                   key={card.id}
@@ -99,52 +158,37 @@ export function MyCardsView({
                   viewport={{ once: true, margin: "-40px" }}
                   transition={reduceMotion ? { duration: 0 } : { type: "spring", stiffness: 90, damping: 15, delay: Math.min(i, 5) * 0.08 }}
                   style={{ transformStyle: "preserve-3d" }}
-                  className="w-[21rem] max-w-full"
+                  className="w-full max-w-[15.75rem]"
                 >
                   <DonationRewardCard
                     lines={card.lines}
                     totalUsd={card.totalUsd}
                     variant={card.variant}
                     animateEntrance={false}
-                  />
-                  <div className="mt-3 rounded-2xl border border-border-soft bg-surface/80 px-4 py-3 text-xs">
-                    <div className="flex items-center justify-between gap-3">
-                      <span className="inline-flex items-center gap-1.5 font-semibold text-primary">
-                        <BadgeCheckIcon className="size-4" aria-hidden />
-                        {t("verifiedDonation")}
-                      </span>
-                      {earnedLabel ? <span className="text-muted-foreground">{earnedLabel}</span> : null}
-                    </div>
-                    {card.projectHref || card.personHref || card.paymentHref ? (
-                      <div className="mt-2 flex flex-wrap gap-x-4 gap-y-2 border-t border-border-soft pt-2">
-                        {card.projectHref ? (
-                          <Link href={card.projectHref} className="font-medium text-foreground hover:text-primary">
-                            {t("viewProject")}
-                          </Link>
-                        ) : null}
-                        {card.personHref ? (
-                          <Link href={card.personHref} className="font-medium text-foreground hover:text-primary">
-                            {t("viewProfile")}
-                          </Link>
-                        ) : null}
-                        {card.paymentHref ? (
+                    actions={(
+                      <div className="grid grid-cols-2 gap-2">
+                        <Button type="button" variant="secondary" size="sm" onClick={() => void shareCard(card)}>
+                          <Share2Icon aria-hidden />
+                          {t("shareCard")}
+                        </Button>
+                        <Button asChild size="sm">
                           <Link
-                            href={card.paymentHref}
-                            target="_blank"
-                            rel="noreferrer"
-                            className="inline-flex items-center gap-1 font-medium text-foreground hover:text-primary"
+                            href={viewHref}
+                            target={card.paymentHref === viewHref ? "_blank" : undefined}
+                            rel={card.paymentHref === viewHref ? "noreferrer" : undefined}
                           >
-                            {t("viewPayment")}
-                            <ExternalLinkIcon className="size-3" aria-hidden />
+                            {t("viewCard")}
+                            <ArrowUpRightIcon aria-hidden />
                           </Link>
-                        ) : null}
+                        </Button>
                       </div>
-                    ) : null}
-                  </div>
+                    )}
+                  />
                 </motion.article>
               );
             })}
-          </div>
+            </div>
+          </>
         )}
       </div>
     </div>

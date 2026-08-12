@@ -3,12 +3,9 @@
 import Image from "next/image";
 import { motion } from "framer-motion";
 import { useEffect, useRef, useState } from "react";
+import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
 import { BumicertOwnerAvatar } from "./BumicertOwnerAvatar";
-
-function resolveImageSrc(coverImage: File | string): string {
-  return typeof coverImage === "string" ? coverImage : URL.createObjectURL(coverImage);
-}
 
 export const cardVariants = {
   hidden: {
@@ -71,7 +68,21 @@ export function BumicertCardVisual({
   description,
   className,
 }: BumicertCardVisualProps) {
-  const imageSrc = coverImage ? resolveImageSrc(coverImage) : null;
+  const t = useTranslations("bumicert.card");
+  const [filePreviewUrl, setFilePreviewUrl] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!coverImage || typeof coverImage === "string") {
+      setFilePreviewUrl(null);
+      return;
+    }
+
+    const url = URL.createObjectURL(coverImage);
+    setFilePreviewUrl(url);
+    return () => URL.revokeObjectURL(url);
+  }, [coverImage]);
+
+  const imageSrc = typeof coverImage === "string" ? coverImage : filePreviewUrl;
   const normalizedObjectives = objectives.filter(
     (objective): objective is string =>
       typeof objective === "string" && objective.trim().length > 0,
@@ -96,7 +107,7 @@ export function BumicertCardVisual({
             className="object-cover scale-110 group-hover:scale-100 transition-all duration-300"
           />
         ) : (
-          <div className="absolute inset-0 bg-muted" aria-label="Missing image" />
+          <div className="absolute inset-0 bg-muted" aria-hidden />
         )}
       </div>
       <div className="relative px-4 py-3 -mt-6 z-1 flex-1 flex flex-col justify-between">
@@ -111,7 +122,7 @@ export function BumicertCardVisual({
             </p>
           )}
         </div>
-        {normalizedObjectives.length > 0 && <OneLineTextPillRow items={normalizedObjectives} />}
+        {normalizedObjectives.length > 0 && <OneLineTextPillRow items={normalizedObjectives} t={t} />}
       </div>
 
       <div className="absolute top-2 left-2 bg-background/70 rounded-full p-1 backdrop-blur-lg shadow-lg flex items-center gap-1 min-w-0">
@@ -124,11 +135,10 @@ export function BumicertCardVisual({
         />
         <motion.span
           variants={orgLabelTextVariants}
-          className="text-xs font-medium text-foreground text-shadow-md whitespace-nowrap overflow-hidden"
+          className="max-w-48 truncate text-xs font-medium text-foreground text-shadow-md"
+          title={organizationName}
         >
-          {organizationName.length > 22
-            ? organizationName.slice(0, 20) + "..."
-            : organizationName}
+          {organizationName}
         </motion.span>
       </div>
     </motion.div>
@@ -137,7 +147,13 @@ export function BumicertCardVisual({
 
 const PILL_GAP_PX = 8;
 
-function OneLineTextPillRow({ items }: { items: string[] }) {
+function OneLineTextPillRow({
+  items,
+  t,
+}: {
+  items: string[];
+  t: ReturnType<typeof useTranslations<"bumicert.card">>;
+}) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const itemRefs = useRef<Array<HTMLSpanElement | null>>([]);
   const moreRefs = useRef<Array<HTMLSpanElement | null>>([]);
@@ -184,7 +200,7 @@ function OneLineTextPillRow({ items }: { items: string[] }) {
         {items.slice(0, visibleCount).map((item, index) => (
           <TextPill key={`${item}-${index}`} text={item} />
         ))}
-        {hiddenCount > 0 && <TextPill text={`+${hiddenCount}`} emphasis ariaLabel={`${hiddenCount} more objective${hiddenCount === 1 ? "" : "s"}`} />}
+        {hiddenCount > 0 && <TextPill text={`+${hiddenCount}`} emphasis ariaLabel={t("moreObjectives", { count: hiddenCount })} />}
       </div>
 
       <div aria-hidden className="invisible pointer-events-none absolute left-0 top-0 flex flex-nowrap items-center gap-2">
@@ -215,7 +231,7 @@ function OneLineTextPillRow({ items }: { items: string[] }) {
   );
 }
 
-function TextPill({
+export function TextPill({
   text,
   emphasis = false,
   ariaLabel,
@@ -229,13 +245,13 @@ function TextPill({
   return (
     <span
       ref={measureRef}
-      aria-label={ariaLabel}
       className={cn(
         "inline-flex h-7 max-w-[11rem] shrink-0 items-center rounded-full bg-muted px-2.5 text-sm font-medium",
         emphasis ? "text-foreground" : "text-muted-foreground",
       )}
     >
-      <span className="truncate">{text}</span>
+      <span className="truncate" aria-hidden={ariaLabel ? true : undefined}>{text}</span>
+      {ariaLabel ? <span className="sr-only">{ariaLabel}</span> : null}
     </span>
   );
 }

@@ -233,13 +233,30 @@
       "mockCanceled": "Mock invitation removed from this preview."
     },
     "myCardsTitle": "My Bumicerts gallery",
-    "myCardsDescription": "Preview the collected Bumicerts gallery, populated with sample collectibles."
+    "myCardsDescription": "Preview the collected Bumicerts gallery, populated with sample collectibles.",
+    "testBadge": "TEST",
+    "mockRecipient": "Sample recipient",
+    "mockRecipientContext": "BioBlitz winner"
   },
   "myCards": {
     "eyebrow": "Collectibles",
     "title": "My Bumicerts",
     "description": "Every Bumicert comes from a verified project donation receipt linked to your account.",
     "count": "{count, plural, one {# Bumicert} other {# Bumicerts}}",
+    "filterLabel": "Filter Bumicerts by tier",
+    "filterAll": "All {count}",
+    "filterTier": "{tier} {count}",
+    "sortLabel": "Sort Bumicerts",
+    "newestFirst": "Newest first",
+    "oldestFirst": "Oldest first",
+    "verifiedOn": "Verified {date}",
+    "tiers": {
+      "seedling": "Seedling",
+      "sapling": "Sapling",
+      "grove": "Grove",
+      "canopy": "Canopy",
+      "oldGrowth": "Old-Growth"
+    },
     "emptyTitle": "No Bumicerts yet",
     "emptyBody": "Donate to a project while signed in and showing your name to earn your first Bumicert.",
     "browseProjects": "Browse projects",
@@ -256,6 +273,9 @@
     "verifiedDonation": "Verified donation",
     "viewProject": "View project",
     "viewProfile": "View profile",
-    "viewPayment": "View payment"
+    "viewPayment": "View payment",
+    "shareCard": "Share",
+    "shareCardText": "Share this card",
+    "viewCard": "View"
   }
 }

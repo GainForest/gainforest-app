@@ -10,9 +10,7 @@ Always add or update translations for new or changed user-facing UI copy. Keep s
 When adding any feature that creates, updates, deletes, or changes membership/roles, gate the available actions by the user’s current role before they can trigger them. Disable or hide unavailable options up front and use plain-language explanations.
 
 ## UI experience registry (`/_test`)
-`/_test` is the public, unindexed index of safely previewable product flows; each experience lives on its own `/_test/...` subroute. **Developers and AI agents must render the production components themselves.** Never create a mock-only copy of production markup, styling, or interaction logic. Mock only fixture data, persistence, workflow navigation, and external side effects through explicit component adapters. When a production flow gains a new side effect, update its mock adapter in the same change so the registry can never call a live mutation, payment, wallet, or publishing service. Any UI or UX change must affect the mock and real experience in the same manner because both use the same component.
-
-The route is public but blocked from indexing; that is not authentication. Never put secrets, privileged controls, or real personal data in the registry. See `app/%5Ftest/README.md` (`%5Ftest` maps to `/_test` because literal underscore folders are private in the Next.js App Router).
+`/_test` contains only explicitly requested, public-safe previews. When changing a flow that already has a preview there, use the production component and mock only fixture data and external side effects; never let the preview call live mutations, payments, wallets, or publishing services. Do not add a preview unless requested. See `app/%5Ftest/README.md`.
 
 ## Pull request screenshots
 For every pull request, include at least one before-and-after screenshot in the PR description. Do not commit screenshots or other PR-review media to this repository; upload them outside the codebase and embed or link them from the PR description.

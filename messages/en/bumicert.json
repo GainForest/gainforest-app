@@ -410,6 +410,13 @@
       "messageQuote": "Donor message: “{message}”"
     }
   },
+  "card": {
+    "projectSteward": "Project steward",
+    "projectPlaces": "{count, plural, =1 {1 project place} other {# project places}}",
+    "contributors": "{count, plural, =1 {1 contributor named} other {# contributors named}}",
+    "projectDates": "Project dates added",
+    "moreObjectives": "{count, plural, =1 {1 more objective} other {# more objectives}}"
+  },
   "create": {
     "actions": {
       "createBumicert": "Create a Cert"

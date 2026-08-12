@@ -410,6 +410,13 @@
       "messageQuote": "Pesan donor: “{message}”"
     }
   },
+  "card": {
+    "projectSteward": "Pengelola proyek",
+    "projectPlaces": "{count, plural, =1 {1 lokasi proyek} other {# lokasi proyek}}",
+    "contributors": "{count, plural, =1 {1 kontributor disebutkan} other {# kontributor disebutkan}}",
+    "projectDates": "Tanggal proyek ditambahkan",
+    "moreObjectives": "{count, plural, =1 {1 tujuan lainnya} other {# tujuan lainnya}}"
+  },
   "create": {
     "actions": {
       "createBumicert": "Buat sertifikat"

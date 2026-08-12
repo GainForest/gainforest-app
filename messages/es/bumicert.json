@@ -410,6 +410,13 @@
       "messageQuote": "Mensaje del donante: «{message}»"
     }
   },
+  "card": {
+    "projectSteward": "Responsable del proyecto",
+    "projectPlaces": "{count, plural, =1 {1 lugar del proyecto} other {# lugares del proyecto}}",
+    "contributors": "{count, plural, =1 {1 colaborador mencionado} other {# colaboradores mencionados}}",
+    "projectDates": "Fechas del proyecto añadidas",
+    "moreObjectives": "{count, plural, =1 {1 objetivo más} other {# objetivos más}}"
+  },
   "create": {
     "actions": {
       "createBumicert": "Cree un certificado"

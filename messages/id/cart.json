@@ -233,13 +233,30 @@
       "mockCanceled": "Undangan contoh dihapus dari pratinjau ini."
     },
     "myCardsTitle": "Galeri Bumicerts Saya",
-    "myCardsDescription": "Pratinjau galeri Bumicerts yang telah dikumpulkan dengan contoh koleksi."
+    "myCardsDescription": "Pratinjau galeri Bumicerts yang telah dikumpulkan dengan contoh koleksi.",
+    "testBadge": "UJI",
+    "mockRecipient": "Penerima contoh",
+    "mockRecipientContext": "Pemenang BioBlitz"
   },
   "myCards": {
     "eyebrow": "Koleksi",
     "title": "Bumicerts Saya",
     "description": "Setiap Bumicert berasal dari tanda terima donasi proyek terverifikasi yang terhubung ke akun Anda.",
     "count": "{count, plural, one {# Bumicert} other {# Bumicerts}}",
+    "filterLabel": "Filter Bumicert berdasarkan tingkat",
+    "filterAll": "Semua {count}",
+    "filterTier": "{tier}: {count}",
+    "sortLabel": "Urutkan Bumicert",
+    "newestFirst": "Terbaru dahulu",
+    "oldestFirst": "Terlama dahulu",
+    "verifiedOn": "Terverifikasi {date}",
+    "tiers": {
+      "seedling": "Tunas",
+      "sapling": "Semai",
+      "grove": "Rumpun",
+      "canopy": "Kanopi",
+      "oldGrowth": "Hutan Tua"
+    },
     "emptyTitle": "Belum ada Bumicerts",
     "emptyBody": "Berdonasilah ke proyek saat masuk dan menampilkan nama Anda untuk mendapatkan Bumicert pertama.",
     "browseProjects": "Jelajahi proyek",
@@ -256,6 +273,9 @@
     "verifiedDonation": "Donasi terverifikasi",
     "viewProject": "Lihat proyek",
     "viewProfile": "Lihat profil",
-    "viewPayment": "Lihat pembayaran"
+    "viewPayment": "Lihat pembayaran",
+    "shareCard": "Bagikan",
+    "shareCardText": "Bagikan kartu ini",
+    "viewCard": "Lihat"
   }
 }

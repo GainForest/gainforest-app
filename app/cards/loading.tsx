@@ -9,7 +9,7 @@ export default function MyCardsLoading() {
           {[0, 1, 2].map((key) => (
             <div
               key={key}
-              className="aspect-[63/88] w-[21rem] max-w-full animate-pulse rounded-[1.7rem] bg-muted"
+              className="aspect-[63/88] w-[15.75rem] max-w-full animate-pulse rounded-[1.3rem] bg-muted"
             />
           ))}
         </div>
