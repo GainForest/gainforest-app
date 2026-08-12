@@ -853,12 +853,7 @@
           "description": "Ruzuku yako ya Rewilding the Web: hatua inayofuata, maendeleo na hatua muhimu."
         },
         "untitled": "Ruzuku yako",
-        "amount": "Ruzuku ya ${amount}",
-        "documents": {
-          "title": "Nyaraka za ruzuku",
-          "download": "Pakua",
-          "note": "Nyaraka kama mkataba wako wa ruzuku uliotiwa saini, zilizoongezwa na GainForest."
-        }
+        "amount": "Ruzuku ya ${amount}"
       },
       "recorders": {
         "navLabel": "Vinasa sauti vyangu",

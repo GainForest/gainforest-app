@@ -853,12 +853,7 @@
           "description": "Your Rewilding the Web grant: next step, progress and milestones."
         },
         "untitled": "Your grant",
-        "amount": "${amount} grant",
-        "documents": {
-          "title": "Grant documents",
-          "download": "Download",
-          "note": "Documents like your signed grant contract, added by GainForest."
-        }
+        "amount": "${amount} grant"
       },
       "recorders": {
         "navLabel": "My recorders",

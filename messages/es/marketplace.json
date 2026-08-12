@@ -853,12 +853,7 @@
           "description": "Tu subvención Rewilding the Web: siguiente paso, progreso e hitos."
         },
         "untitled": "Tu subvención",
-        "amount": "Subvención de ${amount}",
-        "documents": {
-          "title": "Documentos de la subvención",
-          "download": "Descargar",
-          "note": "Documentos como tu contrato de subvención firmado, añadidos por GainForest."
-        }
+        "amount": "Subvención de ${amount}"
       },
       "recorders": {
         "navLabel": "Mis grabadoras",

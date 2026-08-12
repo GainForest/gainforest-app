@@ -43,7 +43,7 @@ export default async function AdminPeoplePage({
 
   return (
     <>
-      <AdminPageHeader Icon={UsersIcon} title={t("pages.people.title")} subtitle={t("pages.people.subtitle")} />
+      <AdminPageHeader Icon={UsersIcon} title={t("pages.people.title")} subtitle={t("pages.people.subtitle")} backLabel={t("pages.hub.title")} />
       <AdminSectionTabs
         ariaLabel={t("ariaLabel")}
         initialTab={tab}

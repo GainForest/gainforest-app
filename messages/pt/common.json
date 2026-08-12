@@ -92,8 +92,7 @@
       "explore": "EXPLORAR",
       "funding": "FINANCIAMENTO",
       "manage": "GERENCIAR",
-      "ai": "AI",
-      "admin": "ADMINISTRAÇÃO"
+      "ai": "AI"
     },
     "items": {
       "bumicerts": "certificados",
@@ -127,11 +126,7 @@
       "audiomoth": "AudioMoth",
       "identifications": "Identificações",
       "myGrant": "Meu subsídio",
-      "myRecorders": "Meus gravadores",
-      "adminGrants": "Candidaturas a subsídios",
-      "adminPeople": "Pessoas",
-      "adminTrust": "Confiança e segurança",
-      "adminData": "Dados e dinheiro"
+      "myRecorders": "Meus gravadores"
     },
     "prompts": {
       "signInDescription": "Entre para gerenciar sua conta e conteúdo.",
@@ -1332,13 +1327,17 @@
       "confirmedAt": "Confirmado {date}",
       "error": "Não foi possível salvar. Tente novamente.",
       "documentsTitle": "Documentos",
+      "documentsPrivateNote": "Somente a equipe de administração da GainForest pode vê-los. Ficam guardados de forma privada, não têm link para compartilhar e ainda não aparecem para o beneficiário.",
       "documentsEmpty": "Nenhum documento enviado ainda.",
+      "open": "Abrir",
+      "opening": "Abrindo…",
       "uploadTitleLabel": "Nome do documento",
       "uploadTitlePlaceholder": "ex.: Contrato do subsídio",
       "uploadFileLabel": "Escolher arquivo",
       "upload": "Enviar",
       "uploading": "Enviando…",
-      "uploadHint": "PDF, imagem ou documento do Word, até 3 MB.",
+      "uploadHint": "PDF, imagem ou documento do Word, até 3 MB. Mantido privado para a equipe de administração.",
+      "storageUnavailable": "O armazenamento de arquivos não está configurado nesta implantação, então ainda não é possível enviar documentos aqui.",
       "fileTooLarge": "Esse arquivo tem mais de 3 MB.",
       "fileTypeUnsupported": "Só é possível enviar PDF, imagens ou documentos do Word.",
       "delete": "Excluir {title}",
@@ -1346,6 +1345,10 @@
       "openProfile": "Abrir perfil"
     },
     "pages": {
+      "hub": {
+        "title": "Administração",
+        "subtitle": "Revise candidatos a bolsas e eventos, gerencie contas sinalizadas e supervisione os agentes Tainá."
+      },
       "grants": {
         "title": "Gestão de subsídios",
         "subtitle": "Analise as candidaturas ao subsídio e conduza as rodadas semanais do BioBlitz."

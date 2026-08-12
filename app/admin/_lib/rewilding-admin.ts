@@ -3,23 +3,24 @@ import { fetchGrantApplicants } from "@/app/_lib/grants";
 import {
   fetchIndexedCertifiedProfileCards,
   fetchRecognitionBadgesForDids,
-  GAINFOREST_MODERATION_REPO_DID,
 } from "@/app/_lib/indexer";
-import { resolveBlobUrl } from "@/app/_lib/pds";
 import {
   REWILDING_MILESTONES,
   effectiveRewildingMilestones,
-  fetchRewildingDocuments,
   fetchRewildingMilestones,
-  type RewildingDocumentRecord,
   type RewildingMilestoneId,
 } from "@/app/_lib/rewilding-milestones";
+import { listRewildingDocuments } from "./rewilding-documents";
 
 /**
  * Row assembly for the admin panel's "Rewilding the Web" section: one row per
  * grantee (everyone who applied for the grant, plus anyone who already has
- * milestone or document records), each carrying the current milestone states
+ * milestone records or documents), each carrying the current milestone states
  * and uploaded grant documents.
+ *
+ * Documents are private: rows carry only their metadata, never a URL. The
+ * file itself is fetched through the admin-gated download route, which mints
+ * a short-lived link on demand.
  */
 
 export type RewildingAdminMilestone = {
@@ -34,13 +35,11 @@ export type RewildingAdminMilestone = {
 };
 
 export type RewildingAdminDocument = {
-  rkey: string;
+  id: string;
   title: string;
   fileName: string;
-  /** Public getBlob URL on the moderation account's PDS. */
-  url: string | null;
-  mimeType: string | null;
-  createdAt: string;
+  sizeBytes: number;
+  uploadedAt: string;
 };
 
 export type RewildingAdminGrantee = {
@@ -55,23 +54,12 @@ export type RewildingAdminGrantee = {
   documents: RewildingAdminDocument[];
 };
 
-async function toAdminDocument(record: RewildingDocumentRecord): Promise<RewildingAdminDocument> {
-  return {
-    rkey: record.rkey,
-    title: record.title,
-    fileName: record.fileName,
-    url: await resolveBlobUrl(GAINFOREST_MODERATION_REPO_DID, record.fileCid).catch(() => null),
-    mimeType: record.fileMimeType,
-    createdAt: record.createdAt,
-  };
-}
-
 /** One row per grantee: badge holders first, then newest applicants. */
 export async function fetchRewildingAdminGrantees(): Promise<RewildingAdminGrantee[]> {
   const [applicants, milestoneRecords, documentRecords] = await Promise.all([
     fetchGrantApplicants().catch(() => []),
     fetchRewildingMilestones().catch(() => []),
-    fetchRewildingDocuments().catch(() => []),
+    listRewildingDocuments().catch(() => []),
   ]);
 
   const currentMilestones = effectiveRewildingMilestones(milestoneRecords);
@@ -115,9 +103,15 @@ export async function fetchRewildingAdminGrantees(): Promise<RewildingAdminGrant
           doneStates.set(record.milestoneId, { done: record.done, createdAt: record.createdAt });
         }
       }
-      const documents = await Promise.all(
-        documentRecords.filter((record) => record.subjectDid === did).map(toAdminDocument),
-      );
+      const documents: RewildingAdminDocument[] = documentRecords
+        .filter((record) => record.subjectDid === did)
+        .map((record) => ({
+          id: record.id,
+          title: record.title,
+          fileName: record.fileName,
+          sizeBytes: record.sizeBytes,
+          uploadedAt: record.uploadedAt,
+        }));
       return {
         did,
         displayName: applicant?.displayName ?? profile?.displayName ?? null,

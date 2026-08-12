@@ -92,8 +92,7 @@
       "explore": "JELAJAHI",
       "funding": "PENDANAAN",
       "manage": "KELOLA",
-      "ai": "AI",
-      "admin": "ADMINISTRASI"
+      "ai": "AI"
     },
     "items": {
       "bumicerts": "sertifikat",
@@ -127,11 +126,7 @@
       "audiomoth": "AudioMoth",
       "identifications": "Identifikasi",
       "myGrant": "Hibah saya",
-      "myRecorders": "Perekam saya",
-      "adminGrants": "Pengajuan hibah",
-      "adminPeople": "Orang",
-      "adminTrust": "Kepercayaan & keamanan",
-      "adminData": "Data & keuangan"
+      "myRecorders": "Perekam saya"
     },
     "prompts": {
       "signInDescription": "Masuk untuk mengelola akun dan konten Anda.",
@@ -1332,13 +1327,17 @@
       "confirmedAt": "Dikonfirmasi {date}",
       "error": "Gagal menyimpan. Coba lagi.",
       "documentsTitle": "Dokumen",
+      "documentsPrivateNote": "Hanya tim admin GainForest yang dapat melihatnya. Dokumen disimpan secara privat, tidak punya tautan berbagi, dan belum terlihat oleh penerima hibah.",
       "documentsEmpty": "Belum ada dokumen yang diunggah.",
+      "open": "Buka",
+      "opening": "Membuka…",
       "uploadTitleLabel": "Nama dokumen",
       "uploadTitlePlaceholder": "mis. Kontrak hibah",
       "uploadFileLabel": "Pilih berkas",
       "upload": "Unggah",
       "uploading": "Mengunggah…",
-      "uploadHint": "PDF, gambar, atau dokumen Word, maksimal 3 MB.",
+      "uploadHint": "PDF, gambar, atau dokumen Word, maksimal 3 MB. Tetap privat untuk tim admin.",
+      "storageUnavailable": "Penyimpanan berkas belum disiapkan di penerapan ini, jadi dokumen belum dapat diunggah di sini.",
       "fileTooLarge": "Berkas itu lebih besar dari 3 MB.",
       "fileTypeUnsupported": "Hanya PDF, gambar, atau dokumen Word yang dapat diunggah.",
       "delete": "Hapus {title}",
@@ -1346,6 +1345,10 @@
       "openProfile": "Buka profil"
     },
     "pages": {
+      "hub": {
+        "title": "Admin",
+        "subtitle": "Tinjau pelamar hibah dan acara, kelola akun yang ditandai, dan awasi agen Tainá."
+      },
       "grants": {
         "title": "Pengelolaan hibah",
         "subtitle": "Tinjau pemohon hibah dan jalankan ronde BioBlitz mingguan."

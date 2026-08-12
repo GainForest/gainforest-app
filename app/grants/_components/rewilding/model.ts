@@ -59,20 +59,6 @@ export type GrantMilestone = {
   isRecorderInventory?: boolean;
 };
 
-/** A grant document (the signed contract etc.) GainForest uploaded for this
- *  grantee from the admin panel. Read-only on the grantee's side. */
-export type GrantDocument = {
-  id: string;
-  /** Display name, e.g. "Grant contract". */
-  title: string;
-  /** Original file name, e.g. "contract-signed.pdf". */
-  fileName: string;
-  /** Public download URL, when the file blob resolved. */
-  url: string | null;
-  /** ISO timestamp of the upload. */
-  uploadedAt: string;
-};
-
 export type GrantOverview = {
   /** Project title, e.g. "Sounds of the Savannah". Null until a grant record
    *  names it — the view shows a generic heading rather than inventing one. */

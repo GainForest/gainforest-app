@@ -6,25 +6,26 @@
  * milestones (M1–M4) gating three payment tranches of a USD 1,000 grant, and
  * a 7,000-minute recording target per community toward the Klarna KPI.
  *
- * Milestone states and grant documents are real: GainForest confirms
- * milestones and uploads documents (the signed contract etc.) from the admin
+ * Milestone states are real: GainForest confirms milestones from the admin
  * panel's "Rewilding the Web" section, and this page reads them back for the
  * signed-in grantee. Recording stats and recorders still have no backing
  * records, so those figures start at zero; when they land, replace their
  * fetchers and drop `REWILDING_DASHBOARD_USES_PLACEHOLDER_DATA`.
+ *
+ * Grant documents are intentionally absent here. They are private to the
+ * admin group for now (private object storage, no public URL), so nothing on
+ * this page can surface them until we decide how a grantee should see their
+ * own contract.
  */
 
-import { GAINFOREST_MODERATION_REPO_DID } from "@/app/_lib/indexer";
-import { resolveBlobUrl } from "@/app/_lib/pds";
 import {
   REWILDING_AUDIO_TARGET_MINUTES,
   REWILDING_GRANT_AMOUNT_USD,
   REWILDING_MILESTONES,
   doneRewildingMilestoneIds,
-  fetchRewildingDocuments,
   fetchRewildingMilestones,
 } from "@/app/_lib/rewilding-milestones";
-import type { GrantDocument, GrantOverview, Recorder } from "../_components/rewilding/model";
+import type { GrantOverview, Recorder } from "../_components/rewilding/model";
 
 /** True while the recording stats below are stand-ins rather than read from
  *  records. The page shell uses it to tell the viewer what they are seeing. */
@@ -63,22 +64,6 @@ export async function fetchGrantOverview(viewerDid: string | null): Promise<Gran
       ...(definition.isRecorderInventory ? { isRecorderInventory: true } : {}),
     })),
   };
-}
-
-/** The grant documents GainForest uploaded for this grantee, newest first. */
-export async function fetchGrantDocuments(viewerDid: string | null): Promise<GrantDocument[]> {
-  if (!viewerDid) return [];
-  const records = await fetchRewildingDocuments().catch(() => []);
-  const own = records.filter((record) => record.subjectDid === viewerDid);
-  return Promise.all(
-    own.map(async (record) => ({
-      id: record.rkey,
-      title: record.title,
-      fileName: record.fileName,
-      url: await resolveBlobUrl(GAINFOREST_MODERATION_REPO_DID, record.fileCid).catch(() => null),
-      uploadedAt: record.createdAt,
-    })),
-  );
 }
 
 export async function fetchRecorders(): Promise<Recorder[]> {

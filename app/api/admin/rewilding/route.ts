@@ -1,26 +1,31 @@
 import { headers } from "next/headers";
 import { getAuthForwardCookie } from "@/app/_lib/auth";
 import { getGainForestModeratorAccess } from "@/app/internal/badges/_lib/access";
-import { resolveBlobUrl } from "@/app/_lib/pds";
-import { GAINFOREST_MODERATION_REPO_DID } from "@/app/_lib/indexer";
 import {
-  addRewildingDocument,
-  removeRewildingDocument,
   RewildingMutationError,
   setRewildingMilestone,
 } from "@/app/admin/_lib/rewilding-mutations";
+import {
+  addRewildingDocument,
+  removeRewildingDocument,
+  RewildingDocumentError,
+} from "@/app/admin/_lib/rewilding-documents";
 
 export const runtime = "nodejs";
 
 /**
  * Admin mutations for the "Rewilding the Web" panel. Gated to GainForest
- * admin-group members; every write lands in the moderation repo through CGS
- * with the acting admin's own session, so the audit trail names them.
+ * admin-group members.
+ *
+ * Milestone confirmations are public records in the moderation repo, written
+ * through CGS with the acting admin's own session so the audit trail names
+ * them. Grant documents are private and go to object storage instead — they
+ * are contracts, and nothing about them is world-readable.
  *
  * POST body is a tagged union:
  *   { action: "setMilestone", subjectDid, milestoneId, done }
  *   { action: "addDocument", subjectDid, title, fileName, mimeType, dataBase64 }
- *   { action: "deleteDocument", rkey }
+ *   { action: "deleteDocument", id }
  */
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -41,11 +46,10 @@ export async function POST(request: Request) {
   const body = await request.json().catch(() => null);
   if (!isRecord(body)) return Response.json({ error: "invalid_request" }, { status: 400 });
 
-  const headerList = await headers();
-  const cookie = getAuthForwardCookie(headerList.get("cookie"));
-
   try {
     if (body.action === "setMilestone") {
+      const headerList = await headers();
+      const cookie = getAuthForwardCookie(headerList.get("cookie"));
       const milestone = await setRewildingMilestone(
         access.repoDid,
         cookie,
@@ -57,26 +61,23 @@ export async function POST(request: Request) {
     }
 
     if (body.action === "addDocument") {
-      const document = await addRewildingDocument(access.repoDid, cookie, {
+      const document = await addRewildingDocument({
         subjectDid: str(body.subjectDid),
         title: str(body.title),
         fileName: str(body.fileName),
         mimeType: str(body.mimeType),
         dataBase64: str(body.dataBase64),
+        uploadedByDid: access.session.isLoggedIn ? access.session.did : null,
       });
-      const url = await resolveBlobUrl(GAINFOREST_MODERATION_REPO_DID, document.fileCid).catch(
-        () => null,
-      );
       // Shape matches RewildingAdminDocument, what the panel renders.
       return Response.json(
         {
           document: {
-            rkey: document.rkey,
+            id: document.id,
             title: document.title,
             fileName: document.fileName,
-            url,
-            mimeType: document.fileMimeType,
-            createdAt: document.createdAt,
+            sizeBytes: document.sizeBytes,
+            uploadedAt: document.uploadedAt,
           },
         },
         { headers: { "cache-control": "no-store" } },
@@ -84,14 +85,17 @@ export async function POST(request: Request) {
     }
 
     if (body.action === "deleteDocument") {
-      await removeRewildingDocument(access.repoDid, cookie, str(body.rkey));
+      await removeRewildingDocument(str(body.id));
       return Response.json({ ok: true }, { headers: { "cache-control": "no-store" } });
     }
 
     return Response.json({ error: "invalid_request" }, { status: 400 });
   } catch (error) {
-    const status = error instanceof RewildingMutationError ? error.status : 500;
-    const code = error instanceof RewildingMutationError ? error.code : "save_failed";
-    return Response.json({ error: code }, { status });
+    const known = error instanceof RewildingMutationError || error instanceof RewildingDocumentError;
+    if (!known) console.error("[rewilding] admin mutation failed", error);
+    return Response.json(
+      { error: known ? error.code : "save_failed" },
+      { status: known ? error.status : 500 },
+    );
   }
 }

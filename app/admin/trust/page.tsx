@@ -45,7 +45,7 @@ export default async function AdminTrustPage({
 
   return (
     <>
-      <AdminPageHeader Icon={ShieldCheckIcon} title={t("pages.trust.title")} subtitle={t("pages.trust.subtitle")} />
+      <AdminPageHeader Icon={ShieldCheckIcon} title={t("pages.trust.title")} subtitle={t("pages.trust.subtitle")} backLabel={t("pages.hub.title")} />
       <AdminSectionTabs
         ariaLabel={t("ariaLabel")}
         initialTab={tab}

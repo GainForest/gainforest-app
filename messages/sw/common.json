@@ -92,8 +92,7 @@
       "explore": "GUNDUA",
       "funding": "UFADHILI",
       "manage": "SIMAMIA",
-      "ai": "AI",
-      "admin": "MSIMAMIZI"
+      "ai": "AI"
     },
     "items": {
       "bumicerts": "vyeti",
@@ -127,11 +126,7 @@
       "audiomoth": "AudioMoth",
       "identifications": "Vitambulisho",
       "myGrant": "Ruzuku yangu",
-      "myRecorders": "Vinasa sauti vyangu",
-      "adminGrants": "Maombi ya ruzuku",
-      "adminPeople": "Watu",
-      "adminTrust": "Uaminifu na usalama",
-      "adminData": "Data na fedha"
+      "myRecorders": "Vinasa sauti vyangu"
     },
     "prompts": {
       "signInDescription": "Ingia ili kusimamia akaunti na maudhui yako.",
@@ -1332,13 +1327,17 @@
       "confirmedAt": "Imethibitishwa {date}",
       "error": "Haikuhifadhika. Jaribu tena.",
       "documentsTitle": "Nyaraka",
+      "documentsPrivateNote": "Ni timu ya wasimamizi wa GainForest pekee inayoweza kuziona. Zimehifadhiwa kwa faragha, hazina kiungo cha kushiriki, na mpokeaji bado haziòni.",
       "documentsEmpty": "Hakuna nyaraka zilizopakiwa bado.",
+      "open": "Fungua",
+      "opening": "Inafungua…",
       "uploadTitleLabel": "Jina la waraka",
       "uploadTitlePlaceholder": "mf. Mkataba wa ruzuku",
       "uploadFileLabel": "Chagua faili",
       "upload": "Pakia",
       "uploading": "Inapakia…",
-      "uploadHint": "PDF, picha au hati ya Word, hadi MB 3.",
+      "uploadHint": "PDF, picha au hati ya Word, hadi MB 3. Huhifadhiwa kwa faragha kwa timu ya wasimamizi.",
+      "storageUnavailable": "Hifadhi ya faili haijawekwa kwenye usakinishaji huu, kwa hivyo nyaraka haziwezi kupakiwa hapa bado.",
       "fileTooLarge": "Faili hiyo ni kubwa kuliko MB 3.",
       "fileTypeUnsupported": "PDF, picha au hati za Word pekee ndizo zinaweza kupakiwa.",
       "delete": "Futa {title}",
@@ -1346,6 +1345,10 @@
       "openProfile": "Fungua wasifu"
     },
     "pages": {
+      "hub": {
+        "title": "Msimamizi",
+        "subtitle": "Kagua waombaji wa ruzuku na matukio, dhibiti akaunti zilizowekwa alama, na simamia mawakala wa Tainá."
+      },
       "grants": {
         "title": "Usimamizi wa ruzuku",
         "subtitle": "Kagua waombaji wa ruzuku na uendeshe raundi za kila wiki za BioBlitz."

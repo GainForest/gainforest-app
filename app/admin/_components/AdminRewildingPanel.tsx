@@ -3,7 +3,7 @@
 import { useRef, useState } from "react";
 import Link from "next/link";
 import { useFormatter, useTranslations } from "next-intl";
-import { CheckIcon, ChevronDownIcon, FileTextIcon, Trash2Icon, UploadIcon } from "lucide-react";
+import { CheckIcon, ChevronDownIcon, FileTextIcon, LockIcon, Trash2Icon, UploadIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { formatRelative } from "@/app/_lib/format";
 import { accountPath } from "@/app/account/_lib/account-route";
@@ -19,6 +19,10 @@ import { AdminAvatar, AdminEmptyState } from "./AdminPanel";
  * checklist (marking one done is GainForest's confirmation — it releases the
  * matching payment tranche) and the grant documents (contract etc.) uploaded
  * right here. All writes go through /api/admin/rewilding.
+ *
+ * Documents are private to the admin group: they are stored outside the
+ * public repo and have no shareable URL, so opening one asks the server for a
+ * link that expires within minutes.
  */
 
 const MAX_FILE_BYTES = 3 * 1024 * 1024;
@@ -47,19 +51,36 @@ function toBase64(bytes: Uint8Array): string {
   return btoa(binary);
 }
 
-export function AdminRewildingPanel({ grantees }: { grantees: RewildingAdminGrantee[] }) {
+export function AdminRewildingPanel({
+  grantees,
+  documentStorageConfigured,
+}: {
+  grantees: RewildingAdminGrantee[];
+  /** False when this deployment has no private storage for documents. */
+  documentStorageConfigured: boolean;
+}) {
   const t = useTranslations("common.adminModeration.rewilding");
   if (grantees.length === 0) return <AdminEmptyState>{t("empty")}</AdminEmptyState>;
   return (
     <ul className="flex flex-col gap-3">
       {grantees.map((grantee) => (
-        <GranteeCard key={grantee.did} grantee={grantee} />
+        <GranteeCard
+          key={grantee.did}
+          grantee={grantee}
+          documentStorageConfigured={documentStorageConfigured}
+        />
       ))}
     </ul>
   );
 }
 
-function GranteeCard({ grantee }: { grantee: RewildingAdminGrantee }) {
+function GranteeCard({
+  grantee,
+  documentStorageConfigured,
+}: {
+  grantee: RewildingAdminGrantee;
+  documentStorageConfigured: boolean;
+}) {
   const t = useTranslations("common.adminModeration.rewilding");
   const [open, setOpen] = useState(grantee.hasGrantBadge);
   const [milestones, setMilestones] = useState(grantee.milestones);
@@ -123,17 +144,25 @@ function GranteeCard({ grantee }: { grantee: RewildingAdminGrantee }) {
           </section>
 
           <section className="flex flex-col gap-2">
-            <h4 className="text-xs font-semibold uppercase tracking-[0.08em] text-muted-foreground">
+            <h4 className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-[0.08em] text-muted-foreground">
+              <LockIcon className="size-3" aria-hidden />
               {t("documentsTitle")}
             </h4>
+            <p className="text-[11px] leading-5 text-muted-foreground">{t("documentsPrivateNote")}</p>
             <DocumentList
               documents={documents}
-              onDeleted={(rkey) => setDocuments((current) => current.filter((entry) => entry.rkey !== rkey))}
+              onDeleted={(id) => setDocuments((current) => current.filter((entry) => entry.id !== id))}
             />
-            <DocumentUploadForm
-              subjectDid={grantee.did}
-              onUploaded={(document) => setDocuments((current) => [document, ...current])}
-            />
+            {documentStorageConfigured ? (
+              <DocumentUploadForm
+                subjectDid={grantee.did}
+                onUploaded={(document) => setDocuments((current) => [document, ...current])}
+              />
+            ) : (
+              <p className="rounded-xl border border-dashed border-border p-3 text-[11px] text-muted-foreground">
+                {t("storageUnavailable")}
+              </p>
+            )}
           </section>
 
           <Link
@@ -239,26 +268,26 @@ function DocumentList({
   onDeleted,
 }: {
   documents: RewildingAdminDocument[];
-  onDeleted: (rkey: string) => void;
+  onDeleted: (id: string) => void;
 }) {
   const t = useTranslations("common.adminModeration.rewilding");
-  const [pendingRkey, setPendingRkey] = useState<string | null>(null);
+  const [pendingId, setPendingId] = useState<string | null>(null);
 
   if (documents.length === 0) {
     return <p className="text-xs text-muted-foreground">{t("documentsEmpty")}</p>;
   }
 
   const remove = async (document: RewildingAdminDocument) => {
-    if (pendingRkey) return;
+    if (pendingId) return;
     if (!window.confirm(t("deleteConfirm", { title: document.title }))) return;
-    setPendingRkey(document.rkey);
+    setPendingId(document.id);
     try {
-      await postAction({ action: "deleteDocument", rkey: document.rkey });
-      onDeleted(document.rkey);
+      await postAction({ action: "deleteDocument", id: document.id });
+      onDeleted(document.id);
     } catch {
       window.alert(t("error"));
     } finally {
-      setPendingRkey(null);
+      setPendingId(null);
     }
   };
 
@@ -266,32 +295,22 @@ function DocumentList({
     <ul className="flex flex-col gap-1.5">
       {documents.map((document) => (
         <li
-          key={document.rkey}
+          key={document.id}
           className="flex items-center gap-2.5 rounded-xl border border-border px-3 py-2"
         >
           <FileTextIcon className="size-4 shrink-0 text-muted-foreground" aria-hidden />
           <span className="flex min-w-0 flex-1 flex-col">
-            {document.url ? (
-              <a
-                href={document.url}
-                target="_blank"
-                rel="noreferrer"
-                className="truncate text-sm font-medium text-primary hover:underline"
-              >
-                {document.title}
-              </a>
-            ) : (
-              <span className="truncate text-sm font-medium text-foreground">{document.title}</span>
-            )}
+            <span className="truncate text-sm font-medium text-foreground">{document.title}</span>
             <span className="truncate text-[11px] text-muted-foreground">
               {document.fileName}
-              {document.createdAt ? ` · ${formatRelative(document.createdAt)}` : null}
+              {document.uploadedAt ? ` · ${formatRelative(document.uploadedAt)}` : null}
             </span>
           </span>
+          <DocumentOpenButton document={document} />
           <button
             type="button"
             onClick={() => remove(document)}
-            disabled={pendingRkey === document.rkey}
+            disabled={pendingId === document.id}
             aria-label={t("delete", { title: document.title })}
             className="shrink-0 rounded-full p-1.5 text-muted-foreground transition-colors hover:bg-muted hover:text-destructive disabled:pointer-events-none disabled:opacity-50"
           >
@@ -300,6 +319,39 @@ function DocumentList({
         </li>
       ))}
     </ul>
+  );
+}
+
+/** Documents have no public URL — open one by asking the server for a link
+ *  that expires within minutes, then following it. */
+function DocumentOpenButton({ document }: { document: RewildingAdminDocument }) {
+  const t = useTranslations("common.adminModeration.rewilding");
+  const [pending, setPending] = useState(false);
+
+  const open = async () => {
+    if (pending) return;
+    setPending(true);
+    try {
+      const response = await fetch(`/api/admin/rewilding/documents/${document.id}`);
+      const json = (await response.json().catch(() => null)) as { url?: string } | null;
+      if (!response.ok || !json?.url) throw new Error("link_failed");
+      window.open(json.url, "_blank", "noopener,noreferrer");
+    } catch {
+      window.alert(t("error"));
+    } finally {
+      setPending(false);
+    }
+  };
+
+  return (
+    <button
+      type="button"
+      onClick={open}
+      disabled={pending}
+      className="shrink-0 rounded-full border border-border bg-background px-3 py-1.5 text-xs font-semibold text-foreground shadow-sm transition-colors hover:bg-muted disabled:pointer-events-none disabled:opacity-50"
+    >
+      {pending ? t("opening") : t("open")}
+    </button>
   );
 }
 

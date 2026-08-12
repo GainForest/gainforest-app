@@ -853,12 +853,7 @@
           "description": "Seu subsídio Rewilding the Web: próximo passo, progresso e marcos."
         },
         "untitled": "Seu subsídio",
-        "amount": "Subsídio de ${amount}",
-        "documents": {
-          "title": "Documentos do subsídio",
-          "download": "Baixar",
-          "note": "Documentos como o seu contrato de subsídio assinado, adicionados pela GainForest."
-        }
+        "amount": "Subsídio de ${amount}"
       },
       "recorders": {
         "navLabel": "Meus gravadores",

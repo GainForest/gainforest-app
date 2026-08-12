@@ -175,6 +175,18 @@ export async function putJson(config: S3Config, key: string, value: unknown): Pr
   if (!response.ok) throw new Error(`putJson ${key} failed (${response.status})`);
 }
 
+/** Store raw bytes server-side. Only for small objects — large uploads must
+ *  use the presigned multipart path so they never cross the Next.js server. */
+export async function putObject(
+  config: S3Config,
+  key: string,
+  body: Buffer,
+  contentType: string,
+): Promise<void> {
+  const response = await s3Fetch(config, "PUT", key, {}, body, { "content-type": contentType });
+  if (!response.ok) throw new Error(`putObject ${key} failed (${response.status})`);
+}
+
 export async function getJson<T>(config: S3Config, key: string): Promise<T | null> {
   const response = await s3Fetch(config, "GET", key);
   if (response.status === 404) return null;

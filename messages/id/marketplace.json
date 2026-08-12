@@ -853,12 +853,7 @@
           "description": "Hibah Rewilding the Web Anda: langkah berikutnya, kemajuan, dan tonggak pencapaian."
         },
         "untitled": "Hibah Anda",
-        "amount": "Hibah ${amount}",
-        "documents": {
-          "title": "Dokumen hibah",
-          "download": "Unduh",
-          "note": "Dokumen seperti kontrak hibah Anda yang sudah ditandatangani, ditambahkan oleh GainForest."
-        }
+        "amount": "Hibah ${amount}"
       },
       "recorders": {
         "navLabel": "Perekam saya",

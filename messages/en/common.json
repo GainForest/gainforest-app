@@ -92,8 +92,7 @@
       "explore": "EXPLORE",
       "funding": "FUNDING",
       "manage": "MANAGE",
-      "ai": "AI",
-      "admin": "ADMIN"
+      "ai": "AI"
     },
     "items": {
       "bumicerts": "Certs",
@@ -127,11 +126,7 @@
       "audiomoth": "AudioMoth",
       "identifications": "Identifications",
       "myGrant": "My grant",
-      "myRecorders": "My recorders",
-      "adminGrants": "Grant applications",
-      "adminPeople": "People",
-      "adminTrust": "Trust & safety",
-      "adminData": "Data & money"
+      "myRecorders": "My recorders"
     },
     "prompts": {
       "signInDescription": "Sign in to manage your account and content.",
@@ -1332,13 +1327,17 @@
       "confirmedAt": "Confirmed {date}",
       "error": "That didn't save. Try again.",
       "documentsTitle": "Documents",
+      "documentsPrivateNote": "Only the GainForest admin team can see these. They are stored privately, have no shareable link, and are not visible to the grantee yet.",
       "documentsEmpty": "No documents uploaded yet.",
+      "open": "Open",
+      "opening": "Opening…",
       "uploadTitleLabel": "Document name",
       "uploadTitlePlaceholder": "e.g. Grant contract",
       "uploadFileLabel": "Choose a file",
       "upload": "Upload",
       "uploading": "Uploading…",
-      "uploadHint": "PDF, image or Word document, up to 3 MB.",
+      "uploadHint": "PDF, image or Word document, up to 3 MB. Kept private to the admin team.",
+      "storageUnavailable": "File storage isn't set up on this deployment, so documents can't be uploaded here yet.",
       "fileTooLarge": "That file is larger than 3 MB.",
       "fileTypeUnsupported": "Only PDF, image or Word documents can be uploaded.",
       "delete": "Delete {title}",
@@ -1346,6 +1345,10 @@
       "openProfile": "Open profile"
     },
     "pages": {
+      "hub": {
+        "title": "Admin",
+        "subtitle": "Review grant and event applicants, manage flagged accounts, and oversee Tainá agents."
+      },
       "grants": {
         "title": "Grant management",
         "subtitle": "Review grant applicants and run the weekly BioBlitz rounds."

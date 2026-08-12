@@ -37,7 +37,7 @@ export default async function AdminDataPage({
 
   return (
     <>
-      <AdminPageHeader Icon={DatabaseIcon} title={t("pages.data.title")} subtitle={t("pages.data.subtitle")} />
+      <AdminPageHeader Icon={DatabaseIcon} title={t("pages.data.title")} subtitle={t("pages.data.subtitle")} backLabel={t("pages.hub.title")} />
       <AdminSectionTabs
         ariaLabel={t("ariaLabel")}
         initialTab={tab}

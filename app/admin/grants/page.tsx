@@ -8,6 +8,7 @@ import { bioblitzRounds } from "@/app/_lib/bioblitz";
 import { fetchBioblitzExclusionRows } from "@/app/internal/badges/_lib/bioblitz-exclusion-mutations";
 import { loadBioblitzAdminRound } from "../_lib/bioblitz-dashboard";
 import { fetchRewildingAdminGrantees } from "../_lib/rewilding-admin";
+import { isRewildingDocumentStorageConfigured } from "../_lib/rewilding-documents";
 import { AdminPageHeader } from "../_components/AdminPageHeader";
 import { AdminPanel } from "../_components/AdminPanel";
 import { AdminSectionTabs } from "../_components/AdminSectionTabs";
@@ -48,7 +49,7 @@ export default async function AdminGrantsPage({
 
   return (
     <>
-      <AdminPageHeader Icon={SproutIcon} title={t("pages.grants.title")} subtitle={t("pages.grants.subtitle")} />
+      <AdminPageHeader Icon={SproutIcon} title={t("pages.grants.title")} subtitle={t("pages.grants.subtitle")} backLabel={t("pages.hub.title")} />
       <AdminSectionTabs
         ariaLabel={t("ariaLabel")}
         initialTab={tab}
@@ -85,7 +86,10 @@ export default async function AdminGrantsPage({
                 count={rewildingGrantees.length}
                 footer={t("rewilding.footer")}
               >
-                <AdminRewildingPanel grantees={rewildingGrantees} />
+                <AdminRewildingPanel
+            grantees={rewildingGrantees}
+            documentStorageConfigured={isRewildingDocumentStorageConfigured()}
+          />
               </AdminPanel>
             ),
           },

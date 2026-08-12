@@ -1,14 +1,16 @@
 /**
- * Rewilding the Web grant state: milestone confirmations and grant documents.
+ * Rewilding the Web grant state: milestone confirmations.
  *
- * Both live in the GainForest moderation account's repo, written through the
+ * These live in the GainForest moderation account's repo, written through the
  * CGS mutation proxy by admin-group members from the admin panel — a grantee
- * never writes these. Milestones follow the same append-only event model as
- * BioBlitz exclusions (`app.gainforest.bioblitz.exclusion`): the newest event
- * per grantee + milestone wins, so any group member can reverse another
- * member's confirmation without deleting their record. Documents (the signed
- * grant contract etc.) are one record per uploaded file, with the file itself
- * stored as a blob on the moderation account's PDS.
+ * never writes them. They follow the same append-only event model as BioBlitz
+ * exclusions (`app.gainforest.bioblitz.exclusion`): the newest event per
+ * grantee + milestone wins, so any group member can reverse another member's
+ * confirmation without deleting their record.
+ *
+ * Grant documents are deliberately NOT here. Everything in this repo is
+ * world-readable, and a grant contract is private — those live in private
+ * object storage instead (app/admin/_lib/rewilding-documents.ts).
  *
  * The program structure (M1–M4 gating three payment tranches of a USD 1,000
  * grant) mirrors the Rewilding the Web Program Handbook (Linear doc
@@ -21,8 +23,6 @@ import { resolvePdsHost } from "./pds";
 
 /** Milestone confirmation events. Written from the admin panel only. */
 export const REWILDING_MILESTONE_COLLECTION = "app.gainforest.rewilding.milestone";
-/** Grant documents (contract etc.). Written from the admin panel only. */
-export const REWILDING_DOCUMENT_COLLECTION = "app.gainforest.rewilding.document";
 
 /** Program constants from the handbook. */
 export const REWILDING_GRANT_AMOUNT_USD = 1000;
@@ -88,7 +88,6 @@ export const REWILDING_MILESTONES: readonly RewildingMilestoneDefinition[] = [
 ];
 
 const MILESTONE_CACHE_KEY = "rewilding-milestones:v1";
-const DOCUMENT_CACHE_KEY = "rewilding-documents:v1";
 const CACHE_MS = 30_000;
 
 export type RewildingMilestoneRecord = {
@@ -98,20 +97,6 @@ export type RewildingMilestoneRecord = {
   milestoneId: RewildingMilestoneId;
   /** False is an append-only reopen event created by another steward. */
   done: boolean;
-  createdAt: string;
-};
-
-export type RewildingDocumentRecord = {
-  rkey: string;
-  uri: string;
-  subjectDid: string;
-  /** Human name shown in lists, e.g. "Grant contract". */
-  title: string;
-  /** Original file name, e.g. "contract-signed.pdf". */
-  fileName: string;
-  /** CID of the file blob on the moderation account's PDS. */
-  fileCid: string;
-  fileMimeType: string | null;
   createdAt: string;
 };
 
@@ -148,41 +133,6 @@ export function parseRewildingMilestoneRecord(entry: unknown): RewildingMileston
     subjectDid,
     milestoneId,
     done: typeof value.done === "boolean" ? value.done : true,
-    createdAt,
-  };
-}
-
-/** Extract the blob CID from a PDS-serialised blob ref (`{ ref: { $link } }`). */
-function blobCidFrom(value: unknown): { cid: string; mimeType: string | null } | null {
-  if (!isRecord(value)) return null;
-  const ref = value.ref;
-  const cid =
-    typeof ref === "string" ? ref : isRecord(ref) && typeof ref.$link === "string" ? ref.$link : null;
-  if (!cid) return null;
-  return { cid, mimeType: typeof value.mimeType === "string" ? value.mimeType : null };
-}
-
-/** Parse one public PDS document record, ignoring malformed values. */
-export function parseRewildingDocumentRecord(entry: unknown): RewildingDocumentRecord | null {
-  if (!isRecord(entry)) return null;
-  const uri = nonEmptyString(entry.uri);
-  const value = entry.value;
-  if (!uri || !isRecord(value)) return null;
-
-  const subjectDid = nonEmptyString(value.subject);
-  const title = nonEmptyString(value.title);
-  const createdAt = nonEmptyString(value.createdAt);
-  const file = blobCidFrom(value.file);
-  if (!subjectDid?.startsWith("did:") || !title || !createdAt || !file) return null;
-
-  return {
-    rkey: uri.split("/").pop() ?? "",
-    uri,
-    subjectDid,
-    title,
-    fileName: nonEmptyString(value.fileName) ?? title,
-    fileCid: file.cid,
-    fileMimeType: file.mimeType,
     createdAt,
   };
 }
@@ -234,32 +184,13 @@ export async function fetchRewildingMilestoneRecords(
     .sort((a, b) => b.createdAt.localeCompare(a.createdAt) || b.uri.localeCompare(a.uri));
 }
 
-/** Read every grant document record from the moderation account's PDS. */
-export async function fetchRewildingDocumentRecords(
-  repoDid: string = GAINFOREST_MODERATION_REPO_DID,
-  signal?: AbortSignal,
-): Promise<RewildingDocumentRecord[]> {
-  const entries = await listModerationRecords(repoDid, REWILDING_DOCUMENT_COLLECTION, signal);
-  return entries
-    .flatMap((entry) => {
-      const record = parseRewildingDocumentRecord(entry);
-      return record ? [record] : [];
-    })
-    .sort((a, b) => b.createdAt.localeCompare(a.createdAt) || b.uri.localeCompare(a.uri));
-}
-
-/** Briefly cached reads for page renders. */
+/** Briefly cached read for page renders. */
 export function fetchRewildingMilestones(signal?: AbortSignal): Promise<RewildingMilestoneRecord[]> {
   return cachedAsync(MILESTONE_CACHE_KEY, CACHE_MS, () => fetchRewildingMilestoneRecords(), signal);
 }
 
-export function fetchRewildingDocuments(signal?: AbortSignal): Promise<RewildingDocumentRecord[]> {
-  return cachedAsync(DOCUMENT_CACHE_KEY, CACHE_MS, () => fetchRewildingDocumentRecords(), signal);
-}
-
-export function invalidateRewildingCaches(): void {
+export function invalidateRewildingMilestonesCache(): void {
   invalidateCachedAsyncByPrefix(MILESTONE_CACHE_KEY);
-  invalidateCachedAsyncByPrefix(DOCUMENT_CACHE_KEY);
 }
 
 /**

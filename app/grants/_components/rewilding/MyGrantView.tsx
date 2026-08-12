@@ -1,34 +1,29 @@
 "use client";
 
-import { ArrowRightIcon, CheckIcon, FileTextIcon } from "lucide-react";
+import { ArrowRightIcon, CheckIcon } from "lucide-react";
 import { useFormatter, useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
-import { formatRelative } from "@/app/_lib/format";
-import type { GrantDocument, GrantMilestone, GrantOverview, Recorder } from "./model";
+import type { GrantMilestone, GrantOverview, Recorder } from "./model";
 import { countByOrigin } from "./model";
 import { Sparkline } from "./Sparkline";
 
 /**
  * "My grant" — the Rewilding the Web grantee's overview page: the one next
- * step, the headline numbers, the milestone list and the grant documents.
- * Pure view: all data arrives via props so the same component renders against
- * live data or fixtures.
+ * step, the headline numbers and the milestone list. Pure view: all data
+ * arrives via props so the same component renders against live data or
+ * fixtures.
  *
  * Milestones gate the grant's payment tranches, so the grantee cannot mark
  * one done here — GainForest confirms milestones from the admin panel, and
- * this page only reflects that state. Documents (the signed contract etc.)
- * are likewise uploaded by GainForest and read-only here.
+ * this page only reflects that state.
  */
 export function MyGrantView({
   overview,
   recorders,
-  documents = [],
   onOpenRecorders,
 }: {
   overview: GrantOverview;
   recorders: readonly Recorder[];
-  /** Grant documents GainForest uploaded for this grantee. */
-  documents?: readonly GrantDocument[];
   /** Navigate to the "My recorders" page (next-step CTA + deployment milestone). */
   onOpenRecorders: () => void;
 }) {
@@ -138,39 +133,6 @@ export function MyGrantView({
         )}
       </section>
 
-      {documents.length > 0 ? (
-        <section className="flex flex-col gap-3 rounded-2xl border border-border bg-surface p-4">
-          <h3 className="text-sm font-semibold text-foreground">{t("grant.documents.title")}</h3>
-          <ul className="flex flex-col gap-1.5">
-            {documents.map((document) => (
-              <li
-                key={document.id}
-                className="flex items-center gap-2.5 rounded-xl border border-border bg-background px-3 py-2.5"
-              >
-                <FileTextIcon className="size-4 shrink-0 text-muted-foreground" aria-hidden />
-                <span className="flex min-w-0 flex-1 flex-col">
-                  <span className="truncate text-sm font-medium text-foreground">{document.title}</span>
-                  <span className="truncate text-[11px] text-muted-foreground">
-                    {document.fileName}
-                    {document.uploadedAt ? ` · ${formatRelative(document.uploadedAt)}` : null}
-                  </span>
-                </span>
-                {document.url ? (
-                  <a
-                    href={document.url}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="shrink-0 rounded-full border border-border bg-background px-3 py-1.5 text-xs font-semibold text-foreground shadow-sm transition-colors hover:bg-muted"
-                  >
-                    {t("grant.documents.download")}
-                  </a>
-                ) : null}
-              </li>
-            ))}
-          </ul>
-          <p className="text-xs leading-5 text-muted-foreground">{t("grant.documents.note")}</p>
-        </section>
-      ) : null}
     </div>
   );
 }

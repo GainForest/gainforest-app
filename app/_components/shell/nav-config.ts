@@ -3,17 +3,14 @@ import {
   BinocularsIcon,
   BotIcon,
   Building2Icon,
-  DatabaseIcon,
   EarthIcon,
   FolderKanbanIcon,
   HeartHandshakeIcon,
   LeafIcon,
   MicroscopeIcon,
   NewspaperIcon,
-  ShieldCheckIcon,
   SproutIcon,
   TargetIcon,
-  UsersIcon,
 } from "lucide-react";
 
 export type NavLeaf = {
@@ -171,51 +168,8 @@ export const NAV_ITEMS: NavSection[] = [
       // /observations/devices. AI keeps only Taína and the Labeler.
     ],
   },
-  {
-    // The old /admin tab bar is now one page per job, linked from here. Every
-    // entry is admin-only and each route re-checks access server-side.
-    kind: "section",
-    id: "admin",
-    text: "ADMIN",
-    items: [
-      {
-        kind: "leaf",
-        id: "adminGrants",
-        text: "Grants",
-        Icon: SproutIcon,
-        href: "/admin/grants",
-        pathCheck: { startsWith: "/admin/grants" },
-        adminOnly: true,
-      },
-      {
-        kind: "leaf",
-        id: "adminPeople",
-        text: "People",
-        Icon: UsersIcon,
-        href: "/admin/people",
-        pathCheck: { startsWith: "/admin/people" },
-        adminOnly: true,
-      },
-      {
-        kind: "leaf",
-        id: "adminTrust",
-        text: "Trust & safety",
-        Icon: ShieldCheckIcon,
-        href: "/admin/trust",
-        pathCheck: { startsWith: "/admin/trust" },
-        adminOnly: true,
-      },
-      {
-        kind: "leaf",
-        id: "adminData",
-        text: "Data & money",
-        Icon: DatabaseIcon,
-        href: "/admin/data",
-        pathCheck: { startsWith: "/admin/data" },
-        adminOnly: true,
-      },
-    ],
-  },
+  // Admin has no sidebar section on purpose: it is a staff area, reached from
+  // the account menu's Admin link, and /admin groups its pages into cards.
 ];
 
 export function isLeafActive(pathCheck: { equals?: string; startsWith?: string }, pathname: string): boolean {
