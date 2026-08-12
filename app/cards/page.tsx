@@ -34,6 +34,8 @@ export default async function MyCardsPage({ searchParams }: { searchParams: Card
     const result = await fetchEarnedCards(authSession.did, recentReceiptUris, {
       projectTitle: t("fallbackProject"),
       organizationName: t("fallbackOrganization"),
+      recipientName: t("fallbackRecipient"),
+      personContext: t("fallbackPersonContext"),
     });
     return <MyCardsView cards={result.cards} status="ready" partial={result.partial} />;
   } catch (error) {

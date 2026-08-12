@@ -19,6 +19,8 @@ export type FundingReceipt = {
   occurredAt: string | null;
   createdAt: string | null;
   from: DonorRef;
+  /** Recipient of the funds, when the receipt names one (DID or wallet). */
+  to?: DonorRef;
   orgDid: string | null;
   bumicertUri: string | null;
   txHash: string | null;
@@ -50,6 +52,11 @@ const RECEIPTS_QUERY = `
             ... on OrgHypercertsFundingReceiptText { value }
             ... on AppCertifiedDefsDid { did }
           }
+          to {
+            __typename
+            ... on OrgHypercertsFundingReceiptText { value }
+            ... on AppCertifiedDefsDid { did }
+          }
           for { uri }
         }
       }
@@ -72,6 +79,7 @@ type RawReceipt = {
   paymentNetwork?: string | null;
   notes?: string | null;
   from?: RawFrom;
+  to?: RawFrom;
   certifiedProfileData?: { displayName?: string | null } | null;
   for?: { uri?: string | null } | null;
 };
@@ -112,6 +120,7 @@ function mapReceipt(node: RawReceipt): FundingReceipt {
     occurredAt: node.occurredAt ?? node.createdAt ?? null,
     createdAt: node.createdAt ?? null,
     from: extractDonor(node.from ?? null),
+    to: extractDonor(node.to ?? null),
     orgDid: orgDidFromUri(bumicertUri),
     bumicertUri,
     txHash: node.transactionId ?? null,
@@ -167,7 +176,6 @@ const DONOR_RECEIPTS_QUERY = `
       where: {
         did: { eq: $repoDid }
         from: { did: { eq: $donorDid } }
-        for: { isNull: false }
       }
       first: $first
       after: $after
@@ -179,6 +187,11 @@ const DONOR_RECEIPTS_QUERY = `
         node {
           uri createdAt occurredAt amount currency transactionId paymentNetwork notes
           from {
+            __typename
+            ... on OrgHypercertsFundingReceiptText { value }
+            ... on AppCertifiedDefsDid { did }
+          }
+          to {
             __typename
             ... on OrgHypercertsFundingReceiptText { value }
             ... on AppCertifiedDefsDid { did }

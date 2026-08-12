@@ -105,6 +105,7 @@
     "reward": {
       "eyebrow": "Collectible unlocked",
       "guardianOf": "Guardian of",
+      "personEyebrow": "In support of",
       "contributed": "Contributed",
       "moreProjects": "{count, plural, one {# more project} other {# more projects}}",
       "mint": "No. {mint}",
@@ -264,8 +265,11 @@
     "partialBody": "Some donation records or project details could not be loaded. The Bumicerts shown here are verified, but your collection may be incomplete.",
     "fallbackProject": "Supported project",
     "fallbackOrganization": "Project team",
+    "fallbackRecipient": "A community member",
+    "fallbackPersonContext": "Direct support",
     "verifiedDonation": "Verified donation",
     "viewProject": "View project",
+    "viewProfile": "View profile",
     "viewPayment": "View payment"
   }
 }

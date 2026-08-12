@@ -155,6 +155,7 @@ export function MyCardsView({
                   <DonationRewardCard
                     lines={card.lines}
                     totalUsd={card.totalUsd}
+                    variant={card.variant}
                     animateEntrance={false}
                   />
                   <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-2 px-1 text-xs">
@@ -165,6 +166,11 @@ export function MyCardsView({
                     {card.projectHref ? (
                       <Link href={card.projectHref} className="font-semibold text-primary hover:underline">
                         {t("viewProject")}
+                      </Link>
+                    ) : null}
+                    {card.personHref ? (
+                      <Link href={card.personHref} className="font-semibold text-primary hover:underline">
+                        {t("viewProfile")}
                       </Link>
                     ) : null}
                     {card.paymentHref ? (

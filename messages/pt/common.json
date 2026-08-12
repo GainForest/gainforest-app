@@ -124,7 +124,9 @@
       "labeler": "Identificação",
       "globe": "Globo",
       "audiomoth": "AudioMoth",
-      "identifications": "Identificações"
+      "identifications": "Identificações",
+      "myGrant": "Meu subsídio",
+      "myRecorders": "Meus gravadores"
     },
     "prompts": {
       "signInDescription": "Entre para gerenciar sua conta e conteúdo.",

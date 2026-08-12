@@ -6,6 +6,7 @@ vi.mock("server-only", () => ({}));
 const fetchFundingReceiptsByDonorDid = vi.fn();
 const fetchRecentOwnedFundingReceipts = vi.fn();
 const fetchRecordByUri = vi.fn();
+const fetchAccountCards = vi.fn();
 
 vi.mock("@/app/_lib/dashboard", () => ({
   fetchFundingReceiptsByDonorDid: (...args: unknown[]) => fetchFundingReceiptsByDonorDid(...args),
@@ -16,12 +17,21 @@ vi.mock("@/app/_lib/recent-funding-receipts", () => ({
 }));
 vi.mock("@/app/_lib/indexer", () => ({
   fetchRecordByUri: (...args: unknown[]) => fetchRecordByUri(...args),
+  fetchAccountCards: (...args: unknown[]) => fetchAccountCards(...args),
+}));
+vi.mock("@/app/_lib/pds", () => ({
+  resolveBlobUrl: vi.fn(async () => null),
 }));
 
 const { fetchEarnedCards } = await import("./receipt-cards");
 
 const OWNER = "did:plc:alice";
-const FALLBACK = { projectTitle: "Unnamed project", organizationName: "Unnamed organization" };
+const FALLBACK = {
+  projectTitle: "Unnamed project",
+  organizationName: "Unnamed organization",
+  recipientName: "A community member",
+  personContext: "Direct support",
+};
 
 function receipt(index: number, overrides: Partial<FundingReceipt> = {}): FundingReceipt {
   return {
@@ -44,8 +54,10 @@ function stubReceipts(receipts: FundingReceipt[]) {
   fetchFundingReceiptsByDonorDid.mockReset();
   fetchRecentOwnedFundingReceipts.mockReset();
   fetchRecordByUri.mockReset();
+  fetchAccountCards.mockReset();
   fetchFundingReceiptsByDonorDid.mockResolvedValue(receipts);
   fetchRecentOwnedFundingReceipts.mockResolvedValue({ receipts: [], partial: false });
+  fetchAccountCards.mockResolvedValue(new Map());
 }
 
 describe("fetchEarnedCards", () => {
@@ -118,5 +130,64 @@ describe("fetchEarnedCards", () => {
 
     expect(result.cards).toHaveLength(1);
     expect(result.cards[0]?.receiptUri).toBe(ownerReceipt.uri);
+  });
+
+  it("builds a person card for a direct gift to another account", async () => {
+    const payout = receipt(1, {
+      bumicertUri: null,
+      orgDid: null,
+      to: { type: "did", id: "did:plc:winner" },
+      message: "Bioblitz Winner",
+      amount: 49,
+    });
+    stubReceipts([payout]);
+    fetchRecordByUri.mockResolvedValue(null);
+    fetchAccountCards.mockResolvedValue(
+      new Map([[
+        "did:plc:winner",
+        { did: "did:plc:winner", displayName: "Amara Okafor", avatarRef: null, handle: "amara.example", isOrganization: false },
+      ]]),
+    );
+
+    const result = await fetchEarnedCards(OWNER, [], FALLBACK);
+
+    expect(result.partial).toBe(false);
+    expect(result.cards).toHaveLength(1);
+    const card = result.cards[0]!;
+    expect(card.variant).toBe("person");
+    expect(card.personHref).toBe("/account/did%3Aplc%3Awinner");
+    expect(card.projectHref).toBeNull();
+    expect(card.lines[0]?.title).toBe("Amara Okafor");
+    expect(card.lines[0]?.orgName).toBe("Bioblitz Winner");
+    expect(fetchRecordByUri).not.toHaveBeenCalled();
+  });
+
+  it("falls back to neutral person labels when the profile lookup fails", async () => {
+    const payout = receipt(1, {
+      bumicertUri: null,
+      orgDid: null,
+      to: { type: "did", id: "did:plc:winner" },
+      message: null,
+    });
+    stubReceipts([payout]);
+    fetchAccountCards.mockRejectedValue(new Error("indexer down"));
+
+    const result = await fetchEarnedCards(OWNER, [], FALLBACK);
+
+    expect(result.partial).toBe(true);
+    expect(result.cards[0]?.variant).toBe("person");
+    expect(result.cards[0]?.lines[0]?.title).toBe("A community member");
+    expect(result.cards[0]?.lines[0]?.orgName).toBe("Direct support");
+  });
+
+  it("never turns a wallet-only payout or a self-payment into a card", async () => {
+    stubReceipts([
+      receipt(1, { bumicertUri: null, orgDid: null, to: { type: "wallet", id: "0x9f6d" } }),
+      receipt(2, { bumicertUri: null, orgDid: null, to: { type: "did", id: OWNER } }),
+    ]);
+
+    const result = await fetchEarnedCards(OWNER, [], FALLBACK);
+
+    expect(result.cards).toHaveLength(0);
   });
 });

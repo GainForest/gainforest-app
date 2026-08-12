@@ -105,6 +105,7 @@
     "reward": {
       "eyebrow": "Mkusanyiko umefunguliwa",
       "guardianOf": "Mlinzi wa",
+      "personEyebrow": "Kwa kumsaidia",
       "contributed": "Umechangia",
       "moreProjects": "{count, plural, one {mradi # zaidi} other {miradi # zaidi}}",
       "mint": "Na. {mint}",
@@ -264,8 +265,11 @@
     "partialBody": "Baadhi ya rekodi za michango au maelezo ya miradi hayakuweza kupakiwa. Bumicerts zinazoonyeshwa zimethibitishwa, lakini mkusanyiko wako unaweza kutokamilika.",
     "fallbackProject": "Mradi uliosaidiwa",
     "fallbackOrganization": "Timu ya mradi",
+    "fallbackRecipient": "Mwanajamii",
+    "fallbackPersonContext": "Msaada wa moja kwa moja",
     "verifiedDonation": "Mchango uliothibitishwa",
     "viewProject": "Tazama mradi",
+    "viewProfile": "Tazama wasifu",
     "viewPayment": "Tazama malipo"
   }
 }

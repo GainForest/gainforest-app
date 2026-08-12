@@ -820,6 +820,97 @@
       "description": "Raundi ya ufadhili ya Ma Earth inayoungwa mkono na jamii inatumia ufadhili wa mraba: michango mingi midogo hulinganishwa na kukuzwa zaidi ya michango michache mikubwa. Maombi yamefungwa na raundi sasa inaendelea — vinjari miradi inayoshiriki na uiunge mkono.",
       "browseProjects": "Vinjari miradi katika raundi hii",
       "logoAlt": "Ma Earth"
+    },
+    "rewildingDashboard": {
+      "grant": {
+        "navLabel": "Ruzuku yangu",
+        "nextStepEyebrow": "Hatua inayofuata",
+        "dueBy": "ifikapo {date}",
+        "openRecorders": "Ongeza vinasa sauti",
+        "statsLabel": "Maendeleo ya ruzuku",
+        "stats": {
+          "audioUploaded": "Sauti zilizopakiwa",
+          "audioValue": "dakika {minutes}",
+          "recorders": "Vinasa sauti",
+          "recordersYours": "{count} vyako",
+          "recordersShipped": "{count} vimetumwa",
+          "speciesTagged": "Spishi zilizowekewa lebo"
+        },
+        "milestones": {
+          "title": "Hatua muhimu za ruzuku",
+          "progress": "{done} kati ya {total}",
+          "viewRecorders": "Fungua orodha",
+          "notStarted": "Haijaanza",
+          "empty": "Bado hakuna hatua muhimu. Zitaonekana hapa mara ruzuku yako itakapowekwa."
+        },
+        "metadata": {
+          "title": "Ruzuku yangu",
+          "description": "Ruzuku yako ya Rewilding the Web: hatua inayofuata, maendeleo na hatua muhimu."
+        },
+        "untitled": "Ruzuku yako"
+      },
+      "recorders": {
+        "navLabel": "Vinasa sauti vyangu",
+        "title": "Vinasa sauti vyangu",
+        "add": "Ongeza kinasa sauti",
+        "addShort": "Ongeza",
+        "filtersLabel": "Chuja vinasa sauti kwa asili",
+        "filters": {
+          "all": "Vyote {count}",
+          "owned": "Vyako {count}",
+          "shipped": "Kutoka GainForest {count}"
+        },
+        "origin": {
+          "owned": "chako",
+          "shipped": "kutoka GainForest"
+        },
+        "status": {
+          "recording": "Kinarekodi",
+          "idle": "Hakijawekwa",
+          "arriving": "Kinawasili ~{date}",
+          "inTransit": "Njiani",
+          "requested": "Kinaagizwa"
+        },
+        "emptyFilter": "Hakuna kinasa sauti kinacholingana na kichujio hiki bado.",
+        "unknownPrompt": "Una kinasa sauti tusichokifahamu? Kiongeze hapa.",
+        "metadata": {
+          "title": "Vinasa sauti vyangu",
+          "description": "Vinasa sauti vyote vya ruzuku yako ya Rewilding the Web na kila kimoja kilikotoka."
+        },
+        "empty": "Bado hakuna vinasa sauti.",
+        "addNotBuilt": "Kuongeza vinasa sauti bado hakujajengwa — kutawezeshwa mara tutakapoweza kuvihifadhi kwenye akaunti yako."
+      },
+      "addForm": {
+        "title": "Ongeza kinasa sauti",
+        "close": "Funga",
+        "originLegend": "Kinatoka wapi",
+        "originOwned": "Tayari ninacho",
+        "originOwnedHint": "Sajili kinasa sauti ulicho nacho.",
+        "originRequest": "Nitumieni kimoja",
+        "originRequestHint": "Omba GainForest ikutumie kimoja.",
+        "deviceType": "Aina ya kifaa",
+        "deviceOther": "Kinasa sauti kingine…",
+        "deviceOtherLabel": "Jina la kifaa",
+        "deviceOtherPlaceholder": "Chapa na modeli ya kifaa",
+        "quantity": "Vingapi",
+        "condition": "Hali",
+        "conditionOptions": {
+          "fieldWorking": "Kinafanya kazi, kiko uwandani",
+          "working": "Kinafanya kazi, hakijawekwa",
+          "needsRepair": "Kinahitaji matengenezo"
+        },
+        "requestNote": "Tunathibitisha idadi kulingana na ruzuku yako kabla ya kutuma.",
+        "location": "Mahali kinaposikiliza",
+        "locationPlaceholder": "Jina la eneo au alama",
+        "mapComingSoon": "Kichaguzi cha eneo kwenye ramani kinakuja hivi karibuni",
+        "save": "Hifadhi kinasa sauti",
+        "saveRequest": "Omba kutumiwa",
+        "milestoneNote": "Kinahesabika kwenye hatua yako ya orodha ya vifaa."
+      },
+      "shell": {
+        "eyebrow": "Rewilding the Web · onyesho la awali la msimamizi",
+        "placeholderNotice": "Hakuna kilicho kwenye ukurasa huu kilichounganishwa na kumbukumbu halisi bado, kwa hivyo kila takwimu inaonyesha sifuri. Ni onyesho la mpangilio, si ruzuku ya mtu yeyote."
+      }
     }
   },
   "account": {

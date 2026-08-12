@@ -124,7 +124,9 @@
       "labeler": "Uwekaji lebo",
       "globe": "Dunia",
       "audiomoth": "AudioMoth",
-      "identifications": "Vitambulisho"
+      "identifications": "Vitambulisho",
+      "myGrant": "Ruzuku yangu",
+      "myRecorders": "Vinasa sauti vyangu"
     },
     "prompts": {
       "signInDescription": "Ingia ili kusimamia akaunti na maudhui yako.",

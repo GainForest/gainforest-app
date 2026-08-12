@@ -820,6 +820,97 @@
       "description": "La ronda de financiación respaldada por la comunidad de Ma Earth usa financiación cuadrática: muchas donaciones pequeñas se igualan y amplifican más que unas pocas grandes. Las postulaciones han cerrado y la ronda ya está en marcha: explora los proyectos que participan y apóyalos.",
       "browseProjects": "Explora los proyectos de esta ronda",
       "logoAlt": "Ma Earth"
+    },
+    "rewildingDashboard": {
+      "grant": {
+        "navLabel": "Mi subvención",
+        "nextStepEyebrow": "Siguiente paso",
+        "dueBy": "vence {date}",
+        "openRecorders": "Añadir grabadoras",
+        "statsLabel": "Progreso de la subvención",
+        "stats": {
+          "audioUploaded": "Audio subido",
+          "audioValue": "{minutes} min",
+          "recorders": "Grabadoras",
+          "recordersYours": "{count} tuyas",
+          "recordersShipped": "{count} enviadas",
+          "speciesTagged": "Especies etiquetadas"
+        },
+        "milestones": {
+          "title": "Hitos de la subvención",
+          "progress": "{done} de {total}",
+          "viewRecorders": "Abrir inventario",
+          "notStarted": "Sin empezar",
+          "empty": "Aún no hay hitos. Aparecerán aquí cuando se configure tu subvención."
+        },
+        "metadata": {
+          "title": "Mi subvención",
+          "description": "Tu subvención Rewilding the Web: siguiente paso, progreso e hitos."
+        },
+        "untitled": "Tu subvención"
+      },
+      "recorders": {
+        "navLabel": "Mis grabadoras",
+        "title": "Mis grabadoras",
+        "add": "Añadir una grabadora",
+        "addShort": "Añadir",
+        "filtersLabel": "Filtrar grabadoras por origen",
+        "filters": {
+          "all": "Todas {count}",
+          "owned": "Tuyas {count}",
+          "shipped": "De GainForest {count}"
+        },
+        "origin": {
+          "owned": "tuya",
+          "shipped": "de GainForest"
+        },
+        "status": {
+          "recording": "Grabando",
+          "idle": "Sin desplegar",
+          "arriving": "Llega ~{date}",
+          "inTransit": "En camino",
+          "requested": "En pedido"
+        },
+        "emptyFilter": "Ninguna grabadora coincide con este filtro todavía.",
+        "unknownPrompt": "¿Tienes una grabadora que no conocemos? Añádela aquí.",
+        "metadata": {
+          "title": "Mis grabadoras",
+          "description": "Todas las grabadoras de tu subvención Rewilding the Web y de dónde viene cada una."
+        },
+        "empty": "Aún no hay grabadoras.",
+        "addNotBuilt": "Añadir grabadoras todavía no está desarrollado; se activará cuando podamos guardarlas en tu cuenta."
+      },
+      "addForm": {
+        "title": "Añadir una grabadora",
+        "close": "Cerrar",
+        "originLegend": "De dónde viene",
+        "originOwned": "Ya la tengo",
+        "originOwnedHint": "Registra una grabadora que ya posees.",
+        "originRequest": "Envíenme una",
+        "originRequestHint": "Pide a GainForest que te envíe una.",
+        "deviceType": "Tipo de dispositivo",
+        "deviceOther": "Otra grabadora…",
+        "deviceOtherLabel": "Nombre del dispositivo",
+        "deviceOtherPlaceholder": "Marca y modelo del dispositivo",
+        "quantity": "Cuántas",
+        "condition": "Estado",
+        "conditionOptions": {
+          "fieldWorking": "Funciona, en el campo",
+          "working": "Funciona, sin desplegar",
+          "needsRepair": "Necesita reparación"
+        },
+        "requestNote": "Confirmamos las cantidades con tu subvención antes del envío.",
+        "location": "Dónde escucha",
+        "locationPlaceholder": "Nombre del sitio o punto de referencia",
+        "mapComingSoon": "Selector de ubicación en el mapa próximamente",
+        "save": "Guardar grabadora",
+        "saveRequest": "Solicitar envío",
+        "milestoneNote": "Cuenta para tu hito de inventario."
+      },
+      "shell": {
+        "eyebrow": "Rewilding the Web · vista previa de administración",
+        "placeholderNotice": "Nada en esta página está conectado a registros reales todavía, así que todas las cifras muestran cero. Es una vista previa del diseño, no la subvención de nadie."
+      }
     }
   },
   "account": {

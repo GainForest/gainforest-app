@@ -124,7 +124,9 @@
       "labeler": "Etiquetado",
       "globe": "Globo",
       "audiomoth": "AudioMoth",
-      "identifications": "Identificaciones"
+      "identifications": "Identificaciones",
+      "myGrant": "Mi subvención",
+      "myRecorders": "Mis grabadoras"
     },
     "prompts": {
       "signInDescription": "Inicia sesión para gestionar tu cuenta y contenido.",

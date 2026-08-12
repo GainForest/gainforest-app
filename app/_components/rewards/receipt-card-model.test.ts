@@ -1,6 +1,11 @@
 import { describe, expect, it } from "vitest";
 import type { FundingReceipt } from "@/app/_lib/dashboard";
-import { dedupeCardReceipts, fundingReceiptCardIdentity, isCardEligibleReceipt } from "./receipt-card-model";
+import {
+  dedupeCardReceipts,
+  fundingReceiptCardIdentity,
+  isCardEligibleReceipt,
+  receiptCardVariant,
+} from "./receipt-card-model";
 
 function receipt(overrides: Partial<FundingReceipt> = {}): FundingReceipt {
   return {
@@ -32,6 +37,36 @@ describe("receipt-backed card identity", () => {
   it("uses payment, network, and project as the stable card identity", () => {
     expect(fundingReceiptCardIdentity(receipt())).toContain("eip155:1");
     expect(fundingReceiptCardIdentity(receipt())).toContain("org.hypercerts.claim.activity/project");
+  });
+
+  it("earns a person card for a direct gift to another account", () => {
+    const payout = receipt({ bumicertUri: null, to: { type: "did", id: "did:plc:winner" } });
+    expect(receiptCardVariant(payout)).toBe("person");
+    expect(isCardEligibleReceipt(payout)).toBe(true);
+    expect(fundingReceiptCardIdentity(payout)).toContain("person:did:plc:winner");
+  });
+
+  it("prefers the project variant when a receipt names both a project and a recipient", () => {
+    expect(receiptCardVariant(receipt({ to: { type: "did", id: "did:plc:winner" } }))).toBe("project");
+  });
+
+  it("refuses person cards for wallet recipients, self-payments, and bad amounts", () => {
+    const base = { bumicertUri: null } as const;
+    // A tip pays a wallet, so it never becomes a collectible.
+    expect(receiptCardVariant(receipt({ ...base, to: { type: "wallet", id: "0x9f6d" } }))).toBeNull();
+    expect(receiptCardVariant(receipt({ ...base, to: null }))).toBeNull();
+    expect(receiptCardVariant(receipt({ ...base, to: { type: "did", id: "did:plc:alice" } }))).toBeNull();
+    expect(receiptCardVariant(receipt({ ...base, to: { type: "did", id: "did:plc:winner" }, amount: 0 }))).toBeNull();
+    expect(receiptCardVariant(receipt({ ...base, to: { type: "did", id: "did:plc:winner" }, currency: "EUR" }))).toBeNull();
+    expect(
+      receiptCardVariant(receipt({ ...base, to: { type: "did", id: "did:plc:winner" }, from: { type: "wallet", id: "0x1" } })),
+    ).toBeNull();
+  });
+
+  it("keeps two gifts to different people on the same payment apart", () => {
+    const toA = receipt({ uri: "at://f/r/a", bumicertUri: null, to: { type: "did", id: "did:plc:a" } });
+    const toB = receipt({ uri: "at://f/r/b", bumicertUri: null, to: { type: "did", id: "did:plc:b" } });
+    expect(dedupeCardReceipts([toA, toB])).toHaveLength(2);
   });
 
   it("collapses duplicate receipt records for the same project payment", () => {
