@@ -820,6 +820,80 @@
       "description": "Ma Earth's community-backed funding round uses quadratic funding: many smaller donations are matched and amplified more than a few large ones. Applications have closed and the round is now live — browse the projects taking part and support them.",
       "browseProjects": "Browse projects in this round",
       "logoAlt": "Ma Earth"
+    },
+    "rewildingDashboard": {
+      "grant": {
+        "navLabel": "My grant",
+        "nextStepEyebrow": "Next step",
+        "dueBy": "due {date}",
+        "openRecorders": "Add recorders",
+        "statsLabel": "Grant progress",
+        "stats": {
+          "audioUploaded": "Audio uploaded",
+          "audioValue": "{minutes} min",
+          "recorders": "Recorders",
+          "recordersYours": "{count} yours",
+          "recordersShipped": "{count} shipped",
+          "speciesTagged": "Species tagged"
+        },
+        "milestones": {
+          "title": "Grant milestones",
+          "progress": "{done} of {total}",
+          "viewRecorders": "Open inventory"
+        }
+      },
+      "recorders": {
+        "navLabel": "My recorders",
+        "title": "My recorders",
+        "add": "Add a recorder",
+        "addShort": "Add",
+        "filtersLabel": "Filter recorders by origin",
+        "filters": {
+          "all": "All {count}",
+          "owned": "Yours {count}",
+          "shipped": "From GainForest {count}"
+        },
+        "origin": {
+          "owned": "yours",
+          "shipped": "from GainForest"
+        },
+        "status": {
+          "recording": "Recording",
+          "idle": "Not deployed",
+          "arriving": "Arriving ~{date}",
+          "inTransit": "In transit",
+          "requested": "Ordering"
+        },
+        "emptyFilter": "No recorders match this filter yet.",
+        "unknownPrompt": "Have a recorder we don't know about? Add it here."
+      },
+      "addForm": {
+        "title": "Add a recorder",
+        "close": "Close",
+        "originLegend": "Where is it from",
+        "originOwned": "I already have it",
+        "originOwnedHint": "Register a recorder you own.",
+        "originRequest": "Send me one",
+        "originRequestHint": "Ask GainForest to ship one to you.",
+        "deviceType": "Device type",
+        "deviceOther": "Other recorder…",
+        "deviceOtherLabel": "Device name",
+        "deviceOtherPlaceholder": "Device make and model",
+        "quantity": "How many",
+        "condition": "Condition",
+        "conditionOptions": {
+          "fieldWorking": "Working, in the field",
+          "working": "Working, not deployed",
+          "needsRepair": "Needs repair"
+        },
+        "requestNote": "We confirm quantities against your grant before shipping.",
+        "location": "Where it listens",
+        "locationPlaceholder": "Site name or landmark",
+        "mapComingSoon": "Map pin picker coming soon",
+        "save": "Save recorder",
+        "saveRequest": "Request shipment",
+        "milestoneNote": "Counts toward your inventory milestone."
+      }
     }
   },
   "account": {

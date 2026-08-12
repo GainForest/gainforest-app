@@ -820,6 +820,80 @@
       "description": "A rodada de financiamento apoiada pela comunidade da Ma Earth usa financiamento quadrático: muitas doações menores são equiparadas e amplificadas mais do que algumas grandes. As candidaturas foram encerradas e a rodada já está em andamento — explore os projetos participantes e apoie-os.",
       "browseProjects": "Explore os projetos desta rodada",
       "logoAlt": "Ma Earth"
+    },
+    "rewildingDashboard": {
+      "grant": {
+        "navLabel": "Meu subsídio",
+        "nextStepEyebrow": "Próximo passo",
+        "dueBy": "até {date}",
+        "openRecorders": "Adicionar gravadores",
+        "statsLabel": "Progresso do subsídio",
+        "stats": {
+          "audioUploaded": "Áudio enviado",
+          "audioValue": "{minutes} min",
+          "recorders": "Gravadores",
+          "recordersYours": "{count} seus",
+          "recordersShipped": "{count} enviados",
+          "speciesTagged": "Espécies marcadas"
+        },
+        "milestones": {
+          "title": "Marcos do subsídio",
+          "progress": "{done} de {total}",
+          "viewRecorders": "Abrir inventário"
+        }
+      },
+      "recorders": {
+        "navLabel": "Meus gravadores",
+        "title": "Meus gravadores",
+        "add": "Adicionar um gravador",
+        "addShort": "Adicionar",
+        "filtersLabel": "Filtrar gravadores por origem",
+        "filters": {
+          "all": "Todos {count}",
+          "owned": "Seus {count}",
+          "shipped": "Da GainForest {count}"
+        },
+        "origin": {
+          "owned": "seu",
+          "shipped": "da GainForest"
+        },
+        "status": {
+          "recording": "Gravando",
+          "idle": "Não implantado",
+          "arriving": "Chega ~{date}",
+          "inTransit": "A caminho",
+          "requested": "Em pedido"
+        },
+        "emptyFilter": "Nenhum gravador corresponde a este filtro ainda.",
+        "unknownPrompt": "Tem um gravador que não conhecemos? Adicione-o aqui."
+      },
+      "addForm": {
+        "title": "Adicionar um gravador",
+        "close": "Fechar",
+        "originLegend": "De onde ele vem",
+        "originOwned": "Já tenho um",
+        "originOwnedHint": "Registre um gravador que você possui.",
+        "originRequest": "Enviem um para mim",
+        "originRequestHint": "Peça à GainForest para enviar um até você.",
+        "deviceType": "Tipo de dispositivo",
+        "deviceOther": "Outro gravador…",
+        "deviceOtherLabel": "Nome do dispositivo",
+        "deviceOtherPlaceholder": "Marca e modelo do dispositivo",
+        "quantity": "Quantos",
+        "condition": "Condição",
+        "conditionOptions": {
+          "fieldWorking": "Funcionando, em campo",
+          "working": "Funcionando, não implantado",
+          "needsRepair": "Precisa de reparo"
+        },
+        "requestNote": "Confirmamos as quantidades com seu subsídio antes do envio.",
+        "location": "Onde ele escuta",
+        "locationPlaceholder": "Nome do local ou ponto de referência",
+        "mapComingSoon": "Seletor de local no mapa em breve",
+        "save": "Salvar gravador",
+        "saveRequest": "Solicitar envio",
+        "milestoneNote": "Conta para o seu marco de inventário."
+      }
     }
   },
   "account": {
