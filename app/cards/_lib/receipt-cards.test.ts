@@ -85,23 +85,27 @@ describe("fetchEarnedCards", () => {
     expect(result.partial).toBe(true);
   });
 
-  it("links cards to their Cert when project metadata is unavailable", async () => {
-    const fundingReceipt = receipt(1);
+  it("links cards to the receipt Cert when project metadata is unavailable", async () => {
+    const fundingReceipt = receipt(1, {
+      bumicertUri: "at://did:plc:forest/org.hypercerts.claim.activity/receipt-cert-rkey",
+    });
     stubReceipts([fundingReceipt]);
     fetchRecordByUri.mockResolvedValue(null);
 
     const result = await fetchEarnedCards(OWNER, [], FALLBACK);
 
-    expect(result.cards[0]?.projectHref).toBe("/cert/did%3Aplc%3Aforest/project-1");
+    expect(result.cards[0]?.projectHref).toBe("/cert/did%3Aplc%3Aforest/receipt-cert-rkey");
   });
 
-  it("keeps the Cert route for indexed records so it can resolve a parent project", async () => {
-    const fundingReceipt = receipt(1);
+  it("uses the indexed Cert key rather than the receipt URI key", async () => {
+    const fundingReceipt = receipt(1, {
+      bumicertUri: "at://did:plc:forest/org.hypercerts.claim.activity/receipt-cert-rkey",
+    });
     stubReceipts([fundingReceipt]);
     fetchRecordByUri.mockResolvedValue({
       kind: "bumicert",
       did: "did:plc:forest",
-      rkey: "project-1",
+      rkey: "indexed-cert-rkey",
       title: "Forest restoration",
       creatorName: "Forest collective",
       imageUrl: null,
@@ -109,7 +113,7 @@ describe("fetchEarnedCards", () => {
 
     const result = await fetchEarnedCards(OWNER, [], FALLBACK);
 
-    expect(result.cards[0]?.projectHref).toBe("/cert/did%3Aplc%3Aforest/project-1");
+    expect(result.cards[0]?.projectHref).toBe("/cert/did%3Aplc%3Aforest/indexed-cert-rkey");
   });
 
   it("filters to the owner before deduplicating same-payment receipts", async () => {

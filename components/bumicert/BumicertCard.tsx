@@ -231,7 +231,7 @@ function OneLineTextPillRow({
   );
 }
 
-function TextPill({
+export function TextPill({
   text,
   emphasis = false,
   ariaLabel,
@@ -245,13 +245,13 @@ function TextPill({
   return (
     <span
       ref={measureRef}
-      aria-label={ariaLabel}
       className={cn(
         "inline-flex h-7 max-w-[11rem] shrink-0 items-center rounded-full bg-muted px-2.5 text-sm font-medium",
         emphasis ? "text-foreground" : "text-muted-foreground",
       )}
     >
-      <span className="truncate">{text}</span>
+      <span className="truncate" aria-hidden={ariaLabel ? true : undefined}>{text}</span>
+      {ariaLabel ? <span className="sr-only">{ariaLabel}</span> : null}
     </span>
   );
 }
