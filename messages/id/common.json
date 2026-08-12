@@ -3808,5 +3808,25 @@
     "menuOrganizationSubtitle": "Akun bersama organisasi",
     "organizationsLabel": "Organisasi Anda",
     "switchHint": "Ganti akun yang Anda gunakan untuk menerbitkan"
+  },
+  "rewildingProgram": {
+    "milestones": {
+      "m1": {
+        "title": "Kontrak ditandatangani",
+        "description": "Perjanjian berlaku; pembayaran pertama dicairkan."
+      },
+      "m2": {
+        "title": "AudioMoth dipasang",
+        "description": "Sensor dipasang di lapangan dan aktif merekam."
+      },
+      "m3": {
+        "title": "Data pertama diunggah",
+        "description": "Rekaman diunggah ke GainForest.app."
+      },
+      "m4": {
+        "title": "Proyek selesai",
+        "description": "Data diberi label dan setidaknya satu pembaruan publik telah diposting di Bumicerts."
+      }
+    }
   }
 }

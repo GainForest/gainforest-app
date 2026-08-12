@@ -168,6 +168,9 @@ function MilestoneRow({
   onOpenRecorders: () => void;
 }) {
   const t = useTranslations("marketplace.grants.rewildingDashboard.grant.milestones");
+  // Each milestone's name and description are program copy, translated per
+  // locale and keyed by milestone id.
+  const program = useTranslations("common.rewildingProgram.milestones");
   const format = useFormatter();
 
   return (
@@ -198,7 +201,7 @@ function MilestoneRow({
               milestone.state === "done" ? "text-muted-foreground" : "text-foreground",
             )}
           >
-            {milestone.title}
+            {program(`${milestone.id}.title`)}
           </span>
           {milestone.payout ? (
             <span className="rounded-full border border-border px-2 py-px text-[10px] font-medium text-muted-foreground">
@@ -209,7 +212,9 @@ function MilestoneRow({
             </span>
           ) : null}
         </div>
-        <p className="mt-0.5 text-xs leading-5 text-muted-foreground">{milestone.description}</p>
+        <p className="mt-0.5 text-xs leading-5 text-muted-foreground">
+          {program(`${milestone.id}.description`)}
+        </p>
         {milestone.isRecorderInventory && milestone.state !== "done" ? (
           <button
             type="button"

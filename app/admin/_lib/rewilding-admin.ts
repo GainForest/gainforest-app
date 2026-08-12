@@ -24,10 +24,10 @@ import { listRewildingDocuments } from "./rewilding-documents";
  */
 
 export type RewildingAdminMilestone = {
+  /** Program milestone id ("m1"…"m4"). Also the key its name is looked up
+   *  under in `common.rewildingProgram.milestones`. */
   id: RewildingMilestoneId;
   code: string;
-  title: string;
-  description: string;
   payout: { tranche: number; amountUsd: number } | null;
   done: boolean;
   /** When the current state was set, when any event exists. */
@@ -121,8 +121,6 @@ export async function fetchRewildingAdminGrantees(): Promise<RewildingAdminGrant
         milestones: REWILDING_MILESTONES.map((definition) => ({
           id: definition.id,
           code: definition.code,
-          title: definition.title,
-          description: definition.description,
           payout: definition.payout ?? null,
           done: doneStates.get(definition.id)?.done ?? false,
           updatedAt: doneStates.get(definition.id)?.createdAt ?? null,

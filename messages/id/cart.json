@@ -233,20 +233,7 @@
       "mockCanceled": "Undangan contoh dihapus dari pratinjau ini."
     },
     "myCardsTitle": "Galeri Bumicerts Saya",
-    "myCardsDescription": "Pratinjau galeri Bumicerts yang telah dikumpulkan dengan contoh koleksi.",
-    "rewildingMilestones": {
-      "title": "Tonggak hibah Rewilding",
-      "description": "Daftar tonggak hanya-baca milik penerima hibah di samping daftar admin yang mengonfirmasinya.",
-      "mockBadge": "Mode tiruan · tanpa penulisan",
-      "mockNote": "Penerima hibah dan hibahnya adalah data tiruan. Mengonfirmasi tonggak, mengunggah dokumen, atau membukanya hanya mengubah memori — tidak ada yang disimpan, diunggah, atau ditautkan.",
-      "cardTitle": "Tonggak hibah Rewilding",
-      "cardDescription": "Bandingkan apa yang dilihat penerima hibah dengan apa yang dapat dikonfirmasi admin.",
-      "granteeTitle": "Yang dilihat penerima hibah",
-      "granteeDescription": "Hanya baca. Penerima hibah tidak dapat menandai tonggak selesai — baris ini hanya menunjukkan apakah GainForest sudah mengonfirmasinya.",
-      "adminTitle": "Yang dilihat admin GainForest",
-      "adminDescription": "Tonggak yang sama, dengan kontrol konfirmasi dan buka kembali, ditambah dokumen hibah yang privat.",
-      "openedNote": "Di panel sebenarnya ini akan membuka “{title}” lewat tautan yang kedaluwarsa dalam hitungan menit."
-    }
+    "myCardsDescription": "Pratinjau galeri Bumicerts yang telah dikumpulkan dengan contoh koleksi."
   },
   "myCards": {
     "eyebrow": "Koleksi",

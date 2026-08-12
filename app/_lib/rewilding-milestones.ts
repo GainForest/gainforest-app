@@ -40,8 +40,6 @@ export type RewildingMilestoneDefinition = {
   id: RewildingMilestoneId;
   /** Short program code, e.g. "M2". Shown as-is; not translated. */
   code: string;
-  title: string;
-  description: string;
   /** The payment tranche this milestone releases, when it gates one. M3 shares
    *  M2's tranche, so M2 carries no payout of its own. */
   payout?: { tranche: number; amountUsd: number };
@@ -50,41 +48,22 @@ export type RewildingMilestoneDefinition = {
 };
 
 /**
- * The four contract milestones, verbatim from the Program Handbook. Titles and
- * descriptions are program copy every grantee sees in their contract, so they
- * are data, not UI strings to translate ad hoc.
+ * The four contract milestones from the Program Handbook — the structure
+ * only. Each milestone's name and description is UI copy and lives in
+ * messages under `common.rewildingProgram.milestones.<id>`, so a grantee
+ * reads their contract steps in their own language.
  */
 export const REWILDING_MILESTONES: readonly RewildingMilestoneDefinition[] = [
-  {
-    id: "m1",
-    code: "M1",
-    title: "Contract signed",
-    description: "Agreement in place; first payment released.",
-    payout: { tranche: 1, amountUsd: 333 },
-  },
-  {
-    id: "m2",
-    code: "M2",
-    title: "AudioMoth deployed",
-    description: "Sensors placed in the field and actively recording.",
-    isRecorderInventory: true,
-  },
+  { id: "m1", code: "M1", payout: { tranche: 1, amountUsd: 333 } },
+  { id: "m2", code: "M2", isRecorderInventory: true },
   {
     id: "m3",
     code: "M3",
-    title: "First data uploaded",
-    description: "Recordings uploaded to GainForest.app.",
     // Tranche 2 releases when M2 *and* M3 are confirmed — the handbook hangs
     // the payout on the pair, so it is shown on the later of the two.
     payout: { tranche: 2, amountUsd: 333 },
   },
-  {
-    id: "m4",
-    code: "M4",
-    title: "Project complete",
-    description: "Data labelled and at least one public update posted on Bumicerts.",
-    payout: { tranche: 3, amountUsd: 334 },
-  },
+  { id: "m4", code: "M4", payout: { tranche: 3, amountUsd: 334 } },
 ];
 
 const MILESTONE_CACHE_KEY = "rewilding-milestones:v1";

@@ -46,11 +46,11 @@ export type GrantMilestoneState =
   | "done";
 
 export type GrantMilestone = {
+  /** Program milestone id ("m1"…"m4"). Also the key its name and description
+   *  are looked up under in `common.rewildingProgram.milestones`. */
   id: string;
   /** Short program code, e.g. "M2". Shown as-is; not translated. */
   code: string;
-  title: string;
-  description: string;
   state: GrantMilestoneState;
   /** The payment tranche this milestone releases, when it gates one. M3 shares
    *  M2's tranche, so it carries no payout of its own. */

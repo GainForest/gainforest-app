@@ -3808,5 +3808,25 @@
     "menuOrganizationSubtitle": "Akaunti ya pamoja ya shirika",
     "organizationsLabel": "Mashirika yako",
     "switchHint": "Badilisha akaunti unayochapisha nayo"
+  },
+  "rewildingProgram": {
+    "milestones": {
+      "m1": {
+        "title": "Mkataba umetiwa saini",
+        "description": "Makubaliano yapo; malipo ya kwanza yametolewa."
+      },
+      "m2": {
+        "title": "AudioMoth imesimikwa",
+        "description": "Vitambuzi vimewekwa shambani na vinarekodi."
+      },
+      "m3": {
+        "title": "Data ya kwanza imepakiwa",
+        "description": "Rekodi zimepakiwa kwenye GainForest.app."
+      },
+      "m4": {
+        "title": "Mradi umekamilika",
+        "description": "Data imewekwa lebo na angalau sasisho moja la umma limechapishwa kwenye Bumicerts."
+      }
+    }
   }
 }

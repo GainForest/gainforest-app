@@ -57,8 +57,6 @@ export async function fetchGrantOverview(viewerDid: string | null): Promise<Gran
     milestones: REWILDING_MILESTONES.map((definition) => ({
       id: definition.id,
       code: definition.code,
-      title: definition.title,
-      description: definition.description,
       state: done.has(definition.id) ? "done" : "todo",
       ...(definition.payout ? { payout: definition.payout } : {}),
       ...(definition.isRecorderInventory ? { isRecorderInventory: true } : {}),

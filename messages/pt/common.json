@@ -3808,5 +3808,25 @@
     "menuOrganizationSubtitle": "Conta compartilhada da organização",
     "organizationsLabel": "Suas organizações",
     "switchHint": "Mude com qual conta você publica"
+  },
+  "rewildingProgram": {
+    "milestones": {
+      "m1": {
+        "title": "Contrato assinado",
+        "description": "Acordo em vigor; primeiro pagamento liberado."
+      },
+      "m2": {
+        "title": "AudioMoth instalado",
+        "description": "Sensores instalados em campo e gravando ativamente."
+      },
+      "m3": {
+        "title": "Primeiros dados enviados",
+        "description": "Gravações enviadas para o GainForest.app."
+      },
+      "m4": {
+        "title": "Projeto concluído",
+        "description": "Dados rotulados e pelo menos uma atualização pública publicada no Bumicerts."
+      }
+    }
   }
 }
