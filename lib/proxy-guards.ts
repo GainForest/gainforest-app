@@ -49,6 +49,7 @@ const RECORD_KEY_ROUTE_SEGMENT_PATTERN = /^[A-Za-z0-9._:~-]+$/;
 
 const PROXY_BYPASS_PREFIXES = ["/api/"] as const;
 const ACCOUNT_ID_ROUTES = ["account", "cert", "bumicert", "projects", "observations"] as const;
+const ACCOUNT_STATIC_CHILDREN = ["wallet"] as const;
 const RECORD_DETAIL_ROUTES = ["cert", "bumicert", "projects", "observations"] as const;
 
 type ProxyBlockReason =
@@ -142,6 +143,13 @@ function getInvalidPathReason(pathname: string): Exclude<
     return null;
   }
 
+  if (
+    route === "account" &&
+    accountId &&
+    ACCOUNT_STATIC_CHILDREN.some((child) => child === accountId)
+  ) {
+    return null;
+  }
   if (accountId) {
     const segment = safeDecodePathSegment(accountId);
 

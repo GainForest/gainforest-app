@@ -133,6 +133,24 @@ describe("getProxyBlockResult", () => {
     ).toBeNull();
   });
 
+  it("allows the signed-in account wallet shortcut", () => {
+    expect(
+      getProxyBlockResult({
+        method: "GET",
+        pathname: "/account/wallet",
+        userAgent: "Mozilla/5.0",
+      }),
+    ).toBeNull();
+
+    expect(
+      getProxyBlockResult({
+        method: "HEAD",
+        pathname: "/es/account/wallet",
+        userAgent: "Mozilla/5.0",
+      }),
+    ).toBeNull();
+  });
+
   it("rejects malformed record keys", () => {
     expect(
       getProxyBlockResult({
