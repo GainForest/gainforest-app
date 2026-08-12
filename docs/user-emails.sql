@@ -2,13 +2,12 @@
 -- Run in the same Supabase project configured by SUPABASE_URL and
 -- SUPABASE_SERVICE_ROLE_KEY. Email addresses are never exposed to browsers.
 --
--- Temporary backfill lifecycle (review by 2026-11-01):
--- 1. Add a permanent auth-lifecycle sync for new users and email changes.
--- 2. Compare that auth source's active DIDs with this table and confirm recent
---    root-load backfills are no longer finding missing users.
--- 3. Remove scheduleUserEmailSync from app/layout.tsx and delete its helper,
---    tests, and shared upsert utility if nothing else uses them. Keep this table
---    and its data for the permanent sync.
+-- Presence also marks that a portable DID has previously used GainForest. On a
+-- full authenticated app load, the server checks for the DID before upserting
+-- its current email and handle. A missing DID creates the general welcome-email
+-- job; an existing DID only refreshes contact data. The lookup and enqueue are
+-- intentionally separate application operations, so an enqueue failure after a
+-- successful first insert can leave that user without a welcome email.
 
 create table if not exists public.user_emails (
   did text primary key,
