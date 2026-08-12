@@ -232,7 +232,15 @@
       "mockCanceled": "Mwaliko wa mfano umeondolewa kwenye hakiki hii."
     },
     "myCardsTitle": "Matunzio ya Bumicerts Zangu",
-    "myCardsDescription": "Hakiki matunzio ya Bumicerts zilizokusanywa yenye mifano ya Bumicerts."
+    "myCardsDescription": "Hakiki matunzio ya Bumicerts zilizokusanywa yenye mifano ya Bumicerts.",
+    "rewildingDashboard": {
+      "cardTitle": "Dashibodi ya mnufaika wa Rewilding",
+      "cardDescription": "Pitia muhtasari wa ruzuku na orodha ya vinasa sauti ya mnufaika wa Rewilding the Web ukitumia data salama za mfano.",
+      "title": "Dashibodi ya mnufaika wa Rewilding",
+      "description": "Kurasa zote mbili za dashibodi ya mnufaika — muhtasari wa ruzuku na orodha ya vinasa sauti — zinaonyeshwa kwa data za mfano. Kusajili au kuomba kinasa sauti kunasasisha hali ya mfano pekee; hakuna kinachotumwa wala kuchapishwa.",
+      "mockBadge": "Hali ya mfano · hakuna kuchapisha",
+      "pagesLabel": "Kurasa za dashibodi"
+    }
   },
   "myCards": {
     "eyebrow": "Bumicerts za kukusanya",

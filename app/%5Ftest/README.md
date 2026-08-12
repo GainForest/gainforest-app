@@ -34,3 +34,7 @@ The first registered experience lives at `/_test/donation-flow` and stages the r
 ## BioBlitz notification experience
 
 `/_test/bioblitz-notifications` renders the production moderator status row for sent, delayed, missing-email, lookup-failure, and setup-failure states. **Mark handled manually** updates fixture state only; it never reads awards, writes the outbox, or contacts a winner.
+
+## Rewilding grantee dashboard experience
+
+`/_test/rewilding-dashboard` renders the production Rewilding the Web grantee dashboard from `app/grants/_components/rewilding/` — `MyGrantView` (grant overview: next step, stats with Bumiscan-style sparklines, milestones) and `MyRecordersView` (recorder inventory split into the grantee's own devices vs GainForest shipments) with the `AddRecorderForm` panel. Registering or requesting a recorder appends fixture rows, completes the mock inventory milestone, and clears the mock next step; nothing is written to a PDS, indexer, or shipping service. The add affordances demonstrate the `canAddRecorders` role gate, which a live route must derive from the viewer's session.

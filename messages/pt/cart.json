@@ -232,7 +232,15 @@
       "mockCanceled": "Convite simulado removido desta visualização."
     },
     "myCardsTitle": "Galeria dos Meus Bumicerts",
-    "myCardsDescription": "Veja uma prévia da galeria de Bumicerts colecionados com exemplos."
+    "myCardsDescription": "Veja uma prévia da galeria de Bumicerts colecionados com exemplos.",
+    "rewildingDashboard": {
+      "cardTitle": "Painel do beneficiário Rewilding",
+      "cardDescription": "Percorra o resumo do subsídio e o inventário de gravadores do beneficiário do Rewilding the Web com dados fictícios seguros.",
+      "title": "Painel do beneficiário Rewilding",
+      "description": "As duas páginas do painel do beneficiário — o resumo do subsídio e o inventário de gravadores — renderizadas com dados fictícios. Registrar ou solicitar um gravador atualiza apenas o estado simulado; nada é enviado nem publicado.",
+      "mockBadge": "Modo simulado · sem publicação",
+      "pagesLabel": "Páginas do painel"
+    }
   },
   "myCards": {
     "eyebrow": "Colecionáveis",

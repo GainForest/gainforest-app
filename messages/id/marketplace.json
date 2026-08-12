@@ -820,6 +820,80 @@
       "description": "Putaran pendanaan Ma Earth yang didukung komunitas menggunakan pendanaan kuadratik: banyak donasi kecil disepadankan dan diperkuat lebih dari sedikit donasi besar. Pendaftaran telah ditutup dan putaran kini sedang berlangsung — jelajahi proyek yang ikut serta dan dukung mereka.",
       "browseProjects": "Jelajahi proyek di putaran ini",
       "logoAlt": "Ma Earth"
+    },
+    "rewildingDashboard": {
+      "grant": {
+        "navLabel": "Hibah saya",
+        "nextStepEyebrow": "Langkah berikutnya",
+        "dueBy": "tenggat {date}",
+        "openRecorders": "Tambah perekam",
+        "statsLabel": "Kemajuan hibah",
+        "stats": {
+          "audioUploaded": "Audio terunggah",
+          "audioValue": "{minutes} mnt",
+          "recorders": "Perekam",
+          "recordersYours": "{count} milik Anda",
+          "recordersShipped": "{count} dikirim",
+          "speciesTagged": "Spesies tertandai"
+        },
+        "milestones": {
+          "title": "Tonggak hibah",
+          "progress": "{done} dari {total}",
+          "viewRecorders": "Buka inventaris"
+        }
+      },
+      "recorders": {
+        "navLabel": "Perekam saya",
+        "title": "Perekam saya",
+        "add": "Tambah perekam",
+        "addShort": "Tambah",
+        "filtersLabel": "Saring perekam menurut asal",
+        "filters": {
+          "all": "Semua {count}",
+          "owned": "Milik Anda {count}",
+          "shipped": "Dari GainForest {count}"
+        },
+        "origin": {
+          "owned": "milik Anda",
+          "shipped": "dari GainForest"
+        },
+        "status": {
+          "recording": "Merekam",
+          "idle": "Belum dipasang",
+          "arriving": "Tiba ~{date}",
+          "inTransit": "Dalam perjalanan",
+          "requested": "Sedang dipesan"
+        },
+        "emptyFilter": "Belum ada perekam yang cocok dengan filter ini.",
+        "unknownPrompt": "Punya perekam yang belum kami ketahui? Tambahkan di sini."
+      },
+      "addForm": {
+        "title": "Tambah perekam",
+        "close": "Tutup",
+        "originLegend": "Dari mana asalnya",
+        "originOwned": "Saya sudah punya",
+        "originOwnedHint": "Daftarkan perekam milik Anda.",
+        "originRequest": "Kirimkan satu",
+        "originRequestHint": "Minta GainForest mengirimkannya kepada Anda.",
+        "deviceType": "Jenis perangkat",
+        "deviceOther": "Perekam lain…",
+        "deviceOtherLabel": "Nama perangkat",
+        "deviceOtherPlaceholder": "Merek dan model perangkat",
+        "quantity": "Berapa banyak",
+        "condition": "Kondisi",
+        "conditionOptions": {
+          "fieldWorking": "Berfungsi, di lapangan",
+          "working": "Berfungsi, belum dipasang",
+          "needsRepair": "Perlu perbaikan"
+        },
+        "requestNote": "Kami mengonfirmasi jumlahnya dengan hibah Anda sebelum pengiriman.",
+        "location": "Tempat ia mendengarkan",
+        "locationPlaceholder": "Nama lokasi atau penanda",
+        "mapComingSoon": "Pemilih titik peta segera hadir",
+        "save": "Simpan perekam",
+        "saveRequest": "Ajukan pengiriman",
+        "milestoneNote": "Dihitung untuk tonggak inventaris Anda."
+      }
     }
   },
   "account": {

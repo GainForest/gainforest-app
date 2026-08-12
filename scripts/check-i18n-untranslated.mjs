@@ -118,6 +118,8 @@ const allowedExactValues = new Set([
   "Schwandenacker 35, 8052 Zurich, Switzerland",
   "team@gainforest.net",
   "{balance} USDC",
+  // "min" is the same minutes abbreviation in the flagged locales.
+  "{minutes} min",
   "{lat}, {lng}",
   "{count, number}",
   "{count, plural, one {# Bumicert} other {# Bumicerts}}",
