@@ -1313,7 +1313,7 @@
     },
     "rewilding": {
       "title": "Resilvestrar la web",
-      "description": "Los diez cupos del programa. Añadir una organización a un cupo la admite en la subvención: desde entonces su cuenta puede abrir su propio panel de hitos. Marcar un hito como hecho es la confirmación de GainForest: libera la parte del pago correspondiente.",
+      "description": "Los diez cupos del programa. Añadir una organización a un cupo la admite en la subvención: desde entonces la organización y sus integrantes pueden abrir su panel de hitos. Marcar un hito como hecho es la confirmación de GainForest: libera la parte del pago correspondiente.",
       "footer": "Los cambios de hitos y los documentos aparecen de inmediato en la página de subvención del beneficiario.",
       "unnamedGrantee": "Cuenta sin nombre",
       "granteeBadge": "Insignia de subvención",
@@ -1344,7 +1344,7 @@
       "openProfile": "Abrir perfil",
       "slotOpen": "Cupo {number} · libre",
       "addTitle": "Añadir una organización",
-      "addHint": "Busca una cuenta para ocupar este cupo. Al añadirla se abre su panel de hitos.",
+      "addHint": "Busca una cuenta para ocupar este cupo. Al añadirla, la organización y sus integrantes acceden al panel de hitos.",
       "searchPlaceholder": "Buscar cuentas por nombre…",
       "searching": "Buscando…",
       "searchEmpty": "Ninguna cuenta coincide con “{query}”.",
@@ -1354,7 +1354,7 @@
       "slotsFull": "Los diez cupos están ocupados. Quita una organización antes de añadir otra.",
       "remove": "Quitar de la subvención",
       "removing": "Quitando…",
-      "removeConfirm": "¿Quitar a “{name}” de la subvención? Sus hitos y documentos se conservan, pero pierde el acceso a su panel de subvención y el cupo queda libre."
+      "removeConfirm": "¿Quitar a “{name}” de la subvención? Los hitos y documentos se conservan, pero la organización y sus integrantes pierden el acceso al panel de la subvención y el cupo queda libre."
     },
     "pages": {
       "hub": {

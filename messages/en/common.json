@@ -1313,7 +1313,7 @@
     },
     "rewilding": {
       "title": "Rewilding the Web",
-      "description": "The program's ten slots. Adding an organization to a slot admits them to the grant — from then on their account can open its own milestone dashboard. Marking a milestone done is GainForest's confirmation — it releases the matching payment tranche.",
+      "description": "The program's ten slots. Adding an organization to a slot admits it to the grant — from then on the organization and its members can open its milestone dashboard. Marking a milestone done is GainForest's confirmation — it releases the matching payment tranche.",
       "footer": "Milestone changes and documents show up on the grantee's grant page right away.",
       "unnamedGrantee": "Unnamed account",
       "granteeBadge": "Grant badge",
@@ -1344,7 +1344,7 @@
       "openProfile": "Open profile",
       "slotOpen": "Slot {number} · open",
       "addTitle": "Add an organization",
-      "addHint": "Search for an account to fill this slot. Adding it opens their milestone dashboard.",
+      "addHint": "Search for an account to fill this slot. Adding it opens the milestone dashboard for the organization and its members.",
       "searchPlaceholder": "Search accounts by name…",
       "searching": "Searching…",
       "searchEmpty": "No accounts match “{query}”.",
@@ -1354,7 +1354,7 @@
       "slotsFull": "All ten slots are taken. Remove an organization before adding another.",
       "remove": "Remove from the grant",
       "removing": "Removing…",
-      "removeConfirm": "Remove “{name}” from the grant? Their milestones and documents are kept, but they lose access to their grant dashboard and the slot opens up."
+      "removeConfirm": "Remove “{name}” from the grant? Milestones and documents are kept, but the organization and its members lose access to the grant dashboard and the slot opens up."
     },
     "pages": {
       "hub": {

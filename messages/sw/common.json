@@ -1313,7 +1313,7 @@
     },
     "rewilding": {
       "title": "Kurudisha Uasilia kwenye Wavuti",
-      "description": "Nafasi kumi za programu. Kuongeza shirika kwenye nafasi kunalikubali kwenye ruzuku — tangu hapo akaunti yake inaweza kufungua dashibodi yake ya hatua muhimu. Kuweka hatua kama imekamilika ni uthibitisho wa GainForest — hufungua awamu ya malipo husika.",
+      "description": "Nafasi kumi za programu. Kuongeza shirika kwenye nafasi kunalikubali kwenye ruzuku — tangu hapo shirika na wanachama wake wanaweza kufungua dashibodi yake ya hatua muhimu. Kuweka hatua kama imekamilika ni uthibitisho wa GainForest — hufungua awamu ya malipo husika.",
       "footer": "Mabadiliko ya hatua muhimu na nyaraka huonekana mara moja kwenye ukurasa wa ruzuku wa mpokeaji.",
       "unnamedGrantee": "Akaunti isiyo na jina",
       "granteeBadge": "Beji ya ruzuku",
@@ -1344,7 +1344,7 @@
       "openProfile": "Fungua wasifu",
       "slotOpen": "Nafasi {number} · wazi",
       "addTitle": "Ongeza shirika",
-      "addHint": "Tafuta akaunti ya kujaza nafasi hii. Kuiongeza hufungua dashibodi yao ya hatua muhimu.",
+      "addHint": "Tafuta akaunti ya kujaza nafasi hii. Kuiongeza hufungua dashibodi ya hatua muhimu kwa shirika na wanachama wake.",
       "searchPlaceholder": "Tafuta akaunti kwa jina…",
       "searching": "Inatafuta…",
       "searchEmpty": "Hakuna akaunti inayolingana na “{query}”.",
@@ -1354,7 +1354,7 @@
       "slotsFull": "Nafasi zote kumi zimejaa. Ondoa shirika moja kabla ya kuongeza jingine.",
       "remove": "Ondoa kwenye ruzuku",
       "removing": "Inaondoa…",
-      "removeConfirm": "Ondoa “{name}” kwenye ruzuku? Hatua muhimu na nyaraka zao zinabaki, lakini wanapoteza ufikiaji wa dashibodi yao ya ruzuku na nafasi inakuwa wazi."
+      "removeConfirm": "Ondoa “{name}” kwenye ruzuku? Hatua muhimu na nyaraka zinabaki, lakini shirika na wanachama wake wanapoteza ufikiaji wa dashibodi ya ruzuku na nafasi inakuwa wazi."
     },
     "pages": {
       "hub": {

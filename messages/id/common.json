@@ -1313,7 +1313,7 @@
     },
     "rewilding": {
       "title": "Meliarkan Kembali Web",
-      "description": "Sepuluh slot program. Menambahkan organisasi ke sebuah slot berarti menerimanya ke dalam hibah — sejak itu akunnya dapat membuka dasbor tonggaknya sendiri. Menandai tonggak selesai adalah konfirmasi GainForest — itu mencairkan tahap pembayaran terkait.",
+      "description": "Sepuluh slot program. Menambahkan organisasi ke sebuah slot berarti menerimanya ke dalam hibah — sejak itu organisasi beserta anggotanya dapat membuka dasbor tonggaknya. Menandai tonggak selesai adalah konfirmasi GainForest — itu mencairkan tahap pembayaran terkait.",
       "footer": "Perubahan tonggak dan dokumen langsung terlihat di halaman hibah penerima.",
       "unnamedGrantee": "Akun tanpa nama",
       "granteeBadge": "Lencana hibah",
@@ -1344,7 +1344,7 @@
       "openProfile": "Buka profil",
       "slotOpen": "Slot {number} · kosong",
       "addTitle": "Tambahkan organisasi",
-      "addHint": "Cari akun untuk mengisi slot ini. Menambahkannya membuka dasbor tonggak mereka.",
+      "addHint": "Cari akun untuk mengisi slot ini. Menambahkannya membuka dasbor tonggak bagi organisasi dan para anggotanya.",
       "searchPlaceholder": "Cari akun berdasarkan nama…",
       "searching": "Mencari…",
       "searchEmpty": "Tidak ada akun yang cocok dengan “{query}”.",
@@ -1354,7 +1354,7 @@
       "slotsFull": "Kesepuluh slot sudah terisi. Keluarkan satu organisasi sebelum menambahkan yang lain.",
       "remove": "Keluarkan dari hibah",
       "removing": "Mengeluarkan…",
-      "removeConfirm": "Keluarkan “{name}” dari hibah? Tonggak dan dokumennya tetap tersimpan, tetapi mereka kehilangan akses ke dasbor hibahnya dan slot menjadi kosong."
+      "removeConfirm": "Keluarkan “{name}” dari hibah? Tonggak dan dokumen tetap tersimpan, tetapi organisasi beserta anggotanya kehilangan akses ke dasbor hibah dan slot menjadi kosong."
     },
     "pages": {
       "hub": {
