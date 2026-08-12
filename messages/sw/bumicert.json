@@ -410,6 +410,13 @@
       "messageQuote": "Ujumbe wa mfadhili: “{message}”"
     }
   },
+  "card": {
+    "projectSteward": "Msimamizi wa mradi",
+    "projectPlaces": "{count, plural, =1 {eneo 1 la mradi} other {maeneo # ya mradi}}",
+    "contributors": "{count, plural, =1 {mchangiaji 1 aliyetajwa} other {wachangiaji # waliotajwa}}",
+    "projectDates": "Tarehe za mradi zimeongezwa",
+    "moreObjectives": "{count, plural, =1 {lengo 1 zaidi} other {malengo # zaidi}}"
+  },
   "create": {
     "actions": {
       "createBumicert": "Unda cheti"

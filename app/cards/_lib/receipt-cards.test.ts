@@ -73,6 +73,33 @@ describe("fetchEarnedCards", () => {
     expect(result.partial).toBe(true);
   });
 
+  it("links cards to their Cert when project metadata is unavailable", async () => {
+    const fundingReceipt = receipt(1);
+    stubReceipts([fundingReceipt]);
+    fetchRecordByUri.mockResolvedValue(null);
+
+    const result = await fetchEarnedCards(OWNER, [], FALLBACK);
+
+    expect(result.cards[0]?.projectHref).toBe("/cert/did%3Aplc%3Aforest/project-1");
+  });
+
+  it("keeps the Cert route for indexed records so it can resolve a parent project", async () => {
+    const fundingReceipt = receipt(1);
+    stubReceipts([fundingReceipt]);
+    fetchRecordByUri.mockResolvedValue({
+      kind: "bumicert",
+      did: "did:plc:forest",
+      rkey: "project-1",
+      title: "Forest restoration",
+      creatorName: "Forest collective",
+      imageUrl: null,
+    });
+
+    const result = await fetchEarnedCards(OWNER, [], FALLBACK);
+
+    expect(result.cards[0]?.projectHref).toBe("/cert/did%3Aplc%3Aforest/project-1");
+  });
+
   it("filters to the owner before deduplicating same-payment receipts", async () => {
     const ownerReceipt = receipt(2, {
       uri: "at://did:plc:facilitator/org.hypercerts.funding.receipt/z-owner",

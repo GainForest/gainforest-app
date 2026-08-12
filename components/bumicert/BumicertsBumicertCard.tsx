@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { motion } from "framer-motion";
 import { CalendarDaysIcon, MapPinIcon, UsersIcon } from "lucide-react";
 import { isPdsBlobUrl } from "@/app/_lib/pds";
@@ -54,7 +54,9 @@ export function BumicertsBumicertCard({
   priority?: boolean;
   className?: string;
 }) {
+  const t = useTranslations("bumicert.card");
   const workScopeT = useTranslations("common.workScopes");
+  const locale = useLocale();
   const workScopeLabels: WorkScopeLabels = {
     reforestation: workScopeT("reforestation"),
     forest_protection: workScopeT("forestProtection"),
@@ -63,8 +65,8 @@ export function BumicertsBumicertCard({
     carbon_removal: workScopeT("carbonRemoval"),
     restoration_maintenance: workScopeT("restorationMaintenance"),
   };
-  const { scopeItems, iconItems } = buildPillRows(record, workScopeLabels);
-  const organizationName = record.creatorName ?? "Project steward";
+  const { scopeItems, iconItems } = buildPillRows(record, workScopeLabels, t, locale);
+  const organizationName = record.creatorName?.trim() || t("projectSteward");
   const hasImage = Boolean(record.imageUrl);
 
   return (
@@ -89,7 +91,7 @@ export function BumicertsBumicertCard({
             className="scale-110 object-cover transition-all duration-300 group-hover:scale-100"
           />
         ) : (
-          <div className="absolute inset-0 bg-muted" aria-label="Missing image" />
+          <div className="absolute inset-0 bg-muted" aria-hidden />
         )}
       </div>
 
@@ -127,7 +129,12 @@ export function BumicertsBumicertCard({
   );
 }
 
-function buildPillRows(record: BumicertsBumicertCardRecord, workScopeLabels: WorkScopeLabels): {
+function buildPillRows(
+  record: BumicertsBumicertCardRecord,
+  workScopeLabels: WorkScopeLabels,
+  t: ReturnType<typeof useTranslations<"bumicert.card">>,
+  locale: string,
+): {
   scopeItems: BumicertCardPill[];
   iconItems: BumicertCardPill[];
 } {
@@ -144,10 +151,10 @@ function buildPillRows(record: BumicertsBumicertCardRecord, workScopeLabels: Wor
       content: (
         <>
           <MapPinIcon className="h-3.5 w-3.5" aria-hidden />
-          <span>{formatCompactCount(record.locationCount)}</span>
+          <span>{formatCompactCount(record.locationCount, locale)}</span>
         </>
       ),
-      ariaLabel: `${record.locationCount} project place${record.locationCount === 1 ? "" : "s"}`,
+      ariaLabel: t("projectPlaces", { count: record.locationCount }),
     });
   }
 
@@ -157,10 +164,10 @@ function buildPillRows(record: BumicertsBumicertCardRecord, workScopeLabels: Wor
       content: (
         <>
           <UsersIcon className="h-3.5 w-3.5" aria-hidden />
-          <span>{formatCompactCount(record.contributorCount)}</span>
+          <span>{formatCompactCount(record.contributorCount, locale)}</span>
         </>
       ),
-      ariaLabel: `${record.contributorCount} ${record.contributorCount === 1 ? "person" : "people"} named`,
+      ariaLabel: t("contributors", { count: record.contributorCount }),
     });
   }
 
@@ -168,13 +175,13 @@ function buildPillRows(record: BumicertsBumicertCardRecord, workScopeLabels: Wor
     iconItems.push({
       key: "dates",
       content: <CalendarDaysIcon className="h-3.5 w-3.5" aria-hidden />,
-      ariaLabel: "Project dates added",
+      ariaLabel: t("projectDates"),
     });
   }
 
   return { scopeItems, iconItems };
 }
 
-function formatCompactCount(value: number): string {
-  return new Intl.NumberFormat("en", { notation: value >= 10000 ? "compact" : "standard" }).format(value);
+function formatCompactCount(value: number, locale: string): string {
+  return new Intl.NumberFormat(locale, { notation: value >= 10000 ? "compact" : "standard" }).format(value);
 }

@@ -59,6 +59,8 @@ async function cardsFromReceipts(
       totalUsd: receipt.amount,
       receiptUri: receipt.uri,
       earnedAt: occurredAt,
+      // Cert records can belong to a project whose record key is different.
+      // The Cert route resolves that relationship and redirects when applicable.
       projectHref: project
         ? localBumicertHref(project.did, project.rkey)
         : projectRouteFromUri(receipt.bumicertUri),
