@@ -34,3 +34,9 @@ The first registered experience lives at `/_test/donation-flow` and stages the r
 ## BioBlitz notification experience
 
 `/_test/bioblitz-notifications` renders the production moderator status row for sent, delayed, missing-email, lookup-failure, and setup-failure states. **Mark handled manually** updates fixture state only; it never reads awards, writes the outbox, or contacts a winner.
+
+## Rewilding grant milestone experience
+
+`/_test/rewilding-milestones` renders both milestone surfaces together: the production `MyGrantView` as a grantee sees it (read-only — a grantee cannot confirm a milestone) and the production `AdminRewildingPanel` as a GainForest admin sees it (confirm, reopen, and the private grant documents).
+
+The panel takes a `RewildingAdminActions` adapter, defaulting to the live `/api/admin/rewilding` writers. The registry passes fixture writers, so confirming a milestone, uploading a document, or opening one edits memory only — it never writes a milestone record, never uploads a file to object storage, and never mints a document link.

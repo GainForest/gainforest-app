@@ -233,7 +233,20 @@
       "mockCanceled": "Invitación simulada eliminada de esta vista previa."
     },
     "myCardsTitle": "Galería de Mis Bumicerts",
-    "myCardsDescription": "Previsualiza la galería de Bumicerts coleccionados con coleccionables de muestra."
+    "myCardsDescription": "Previsualiza la galería de Bumicerts coleccionados con coleccionables de muestra.",
+    "rewildingMilestones": {
+      "title": "Hitos de la subvención Rewilding",
+      "description": "La lista de hitos de solo lectura del beneficiario junto a la lista de administración que los confirma.",
+      "mockBadge": "Modo simulado · sin escrituras",
+      "mockNote": "El beneficiario y la subvención son ficticios. Confirmar un hito, subir un documento o abrirlo solo cambia la memoria: nada se guarda, se sube ni se enlaza.",
+      "cardTitle": "Hitos de la subvención Rewilding",
+      "cardDescription": "Compara lo que ve un beneficiario con lo que puede confirmar una administración.",
+      "granteeTitle": "Lo que ve el beneficiario",
+      "granteeDescription": "Solo lectura. Un beneficiario no puede marcar un hito como hecho: la fila solo muestra si GainForest lo confirmó.",
+      "adminTitle": "Lo que ve una administración de GainForest",
+      "adminDescription": "Los mismos hitos, con los controles para confirmar y reabrir, más los documentos privados de la subvención.",
+      "openedNote": "En el panel real esto abriría “{title}” con un enlace que caduca en minutos."
+    }
   },
   "myCards": {
     "eyebrow": "Coleccionables",

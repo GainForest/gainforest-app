@@ -233,7 +233,20 @@
       "mockCanceled": "Mwaliko wa mfano umeondolewa kwenye hakiki hii."
     },
     "myCardsTitle": "Matunzio ya Bumicerts Zangu",
-    "myCardsDescription": "Hakiki matunzio ya Bumicerts zilizokusanywa yenye mifano ya Bumicerts."
+    "myCardsDescription": "Hakiki matunzio ya Bumicerts zilizokusanywa yenye mifano ya Bumicerts.",
+    "rewildingMilestones": {
+      "title": "Hatua muhimu za ruzuku ya Rewilding",
+      "description": "Orodha ya hatua muhimu ya kusoma tu ya mpokeaji kando ya orodha ya msimamizi inayozithibitisha.",
+      "mockBadge": "Hali ya kuigiza · hakuna kuandika",
+      "mockNote": "Mpokeaji na ruzuku ni data ya kuigiza. Kuthibitisha hatua, kupakia waraka, au kuufungua hubadilisha kumbukumbu pekee — hakuna kinachohifadhiwa, kupakiwa, wala kuunganishwa.",
+      "cardTitle": "Hatua muhimu za ruzuku ya Rewilding",
+      "cardDescription": "Linganisha anachokiona mpokeaji na anachoweza kuthibitisha msimamizi.",
+      "granteeTitle": "Anachokiona mpokeaji",
+      "granteeDescription": "Kusoma tu. Mpokeaji hawezi kuweka hatua kuwa imekamilika — safu huonyesha tu iwapo GainForest imethibitisha.",
+      "adminTitle": "Anachokiona msimamizi wa GainForest",
+      "adminDescription": "Hatua zilezile, pamoja na vidhibiti vya kuthibitisha na kufungua tena, na nyaraka za ruzuku za faragha.",
+      "openedNote": "Kwenye paneli halisi hii ingefungua “{title}” kupitia kiungo kinachoisha muda baada ya dakika chache."
+    }
   },
   "myCards": {
     "eyebrow": "Bumicerts za kukusanya",

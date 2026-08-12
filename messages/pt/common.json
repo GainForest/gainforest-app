@@ -1318,7 +1318,7 @@
       "empty": "Ainda não há beneficiários. Eles aparecem aqui quando alguém se candidata ao subsídio ou um subsídio é configurado.",
       "unnamedGrantee": "Conta sem nome",
       "granteeBadge": "Selo do subsídio",
-      "summary": "{done} de {total} marcos confirmados · {documents} documentos",
+      "summary": "{done} de {total} marcos confirmados · {documents, plural, =0 {sem documentos} one {# documento} other {# documentos}}",
       "milestonesTitle": "Marcos",
       "payout": "Libera ${amount} · pagamento {tranche}",
       "markDone": "Marcar como concluído",

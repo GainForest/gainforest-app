@@ -233,7 +233,20 @@
       "mockCanceled": "Mock invitation removed from this preview."
     },
     "myCardsTitle": "My Bumicerts gallery",
-    "myCardsDescription": "Preview the collected Bumicerts gallery, populated with sample collectibles."
+    "myCardsDescription": "Preview the collected Bumicerts gallery, populated with sample collectibles.",
+    "rewildingMilestones": {
+      "title": "Rewilding grant milestones",
+      "description": "The grantee's read-only milestone list next to the admin checklist that confirms them.",
+      "mockBadge": "Mock mode · no writes",
+      "mockNote": "The grantee and the grant are fixtures. Confirming a milestone, uploading a document, or opening one changes memory only — nothing is saved, uploaded, or linked.",
+      "cardTitle": "Rewilding grant milestones",
+      "cardDescription": "Compare what a grantee sees with what an admin can confirm.",
+      "granteeTitle": "What the grantee sees",
+      "granteeDescription": "Read-only. A grantee cannot mark a milestone done — the row only shows whether GainForest confirmed it.",
+      "adminTitle": "What a GainForest admin sees",
+      "adminDescription": "The same milestones, with the confirm and reopen controls, plus the private grant documents.",
+      "openedNote": "In the real panel this would open “{title}” through a link that expires in minutes."
+    }
   },
   "myCards": {
     "eyebrow": "Collectibles",

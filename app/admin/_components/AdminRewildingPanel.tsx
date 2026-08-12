@@ -23,11 +23,32 @@ import { AdminAvatar, AdminEmptyState } from "./AdminPanel";
  * Documents are private to the admin group: they are stored outside the
  * public repo and have no shareable URL, so opening one asks the server for a
  * link that expires within minutes.
+ *
+ * Every side effect goes through the `actions` adapter, which defaults to the
+ * live API. The /_test registry renders this same component with a fixture
+ * adapter so a preview can never confirm a milestone or upload a contract.
  */
 
 const MAX_FILE_BYTES = 3 * 1024 * 1024;
 const ACCEPTED_FILE_TYPES =
   ".pdf,.jpg,.jpeg,.png,.webp,.doc,.docx,.odt,application/pdf,image/jpeg,image/png,image/webp";
+
+export type NewRewildingDocumentInput = {
+  subjectDid: string;
+  title: string;
+  fileName: string;
+  mimeType: string;
+  dataBase64: string;
+};
+
+/** The panel's external side effects, injectable so previews stay inert. */
+export type RewildingAdminActions = {
+  setMilestone: (subjectDid: string, milestoneId: string, done: boolean) => Promise<void>;
+  addDocument: (input: NewRewildingDocumentInput) => Promise<RewildingAdminDocument>;
+  deleteDocument: (id: string) => Promise<void>;
+  /** Fetch a short-lived link and open the file. */
+  openDocument: (document: RewildingAdminDocument) => Promise<void>;
+};
 
 async function postAction(body: Record<string, unknown>): Promise<Record<string, unknown>> {
   const response = await fetch("/api/admin/rewilding", {
@@ -42,6 +63,26 @@ async function postAction(body: Record<string, unknown>): Promise<Record<string,
   return json;
 }
 
+/** The real writers: /api/admin/rewilding, moderator-gated server-side. */
+export const liveRewildingAdminActions: RewildingAdminActions = {
+  async setMilestone(subjectDid, milestoneId, done) {
+    await postAction({ action: "setMilestone", subjectDid, milestoneId, done });
+  },
+  async addDocument(input) {
+    const result = await postAction({ action: "addDocument", ...input });
+    return result.document as RewildingAdminDocument;
+  },
+  async deleteDocument(id) {
+    await postAction({ action: "deleteDocument", id });
+  },
+  async openDocument(document) {
+    const response = await fetch(`/api/admin/rewilding/documents/${document.id}`);
+    const json = (await response.json().catch(() => null)) as { url?: string } | null;
+    if (!response.ok || !json?.url) throw new Error("link_failed");
+    window.open(json.url, "_blank", "noopener,noreferrer");
+  },
+};
+
 function toBase64(bytes: Uint8Array): string {
   let binary = "";
   const CHUNK = 0x8000;
@@ -54,10 +95,14 @@ function toBase64(bytes: Uint8Array): string {
 export function AdminRewildingPanel({
   grantees,
   documentStorageConfigured,
+  actions = liveRewildingAdminActions,
 }: {
   grantees: RewildingAdminGrantee[];
   /** False when this deployment has no private storage for documents. */
   documentStorageConfigured: boolean;
+  /** Side-effect adapter. Defaults to the live API; the /_test registry
+   *  passes fixture writers so a preview never mutates anything. */
+  actions?: RewildingAdminActions;
 }) {
   const t = useTranslations("common.adminModeration.rewilding");
   if (grantees.length === 0) return <AdminEmptyState>{t("empty")}</AdminEmptyState>;
@@ -68,6 +113,7 @@ export function AdminRewildingPanel({
           key={grantee.did}
           grantee={grantee}
           documentStorageConfigured={documentStorageConfigured}
+          actions={actions}
         />
       ))}
     </ul>
@@ -77,9 +123,11 @@ export function AdminRewildingPanel({
 function GranteeCard({
   grantee,
   documentStorageConfigured,
+  actions,
 }: {
   grantee: RewildingAdminGrantee;
   documentStorageConfigured: boolean;
+  actions: RewildingAdminActions;
 }) {
   const t = useTranslations("common.adminModeration.rewilding");
   const [open, setOpen] = useState(grantee.hasGrantBadge);
@@ -133,6 +181,7 @@ function GranteeCard({
                   key={milestone.id}
                   subjectDid={grantee.did}
                   milestone={milestone}
+                  actions={actions}
                   onChanged={(next) =>
                     setMilestones((current) =>
                       current.map((entry) => (entry.id === next.id ? next : entry)),
@@ -151,11 +200,13 @@ function GranteeCard({
             <p className="text-[11px] leading-5 text-muted-foreground">{t("documentsPrivateNote")}</p>
             <DocumentList
               documents={documents}
+              actions={actions}
               onDeleted={(id) => setDocuments((current) => current.filter((entry) => entry.id !== id))}
             />
             {documentStorageConfigured ? (
               <DocumentUploadForm
                 subjectDid={grantee.did}
+                actions={actions}
                 onUploaded={(document) => setDocuments((current) => [document, ...current])}
               />
             ) : (
@@ -180,10 +231,12 @@ function GranteeCard({
 function MilestoneRow({
   subjectDid,
   milestone,
+  actions,
   onChanged,
 }: {
   subjectDid: string;
   milestone: RewildingAdminMilestone;
+  actions: RewildingAdminActions;
   onChanged: (milestone: RewildingAdminMilestone) => void;
 }) {
   const t = useTranslations("common.adminModeration.rewilding");
@@ -196,12 +249,7 @@ function MilestoneRow({
     setPending(true);
     setFailed(false);
     try {
-      await postAction({
-        action: "setMilestone",
-        subjectDid,
-        milestoneId: milestone.id,
-        done: !milestone.done,
-      });
+      await actions.setMilestone(subjectDid, milestone.id, !milestone.done);
       onChanged({ ...milestone, done: !milestone.done, updatedAt: new Date().toISOString() });
     } catch {
       setFailed(true);
@@ -265,9 +313,11 @@ function MilestoneRow({
 
 function DocumentList({
   documents,
+  actions,
   onDeleted,
 }: {
   documents: RewildingAdminDocument[];
+  actions: RewildingAdminActions;
   onDeleted: (id: string) => void;
 }) {
   const t = useTranslations("common.adminModeration.rewilding");
@@ -282,7 +332,7 @@ function DocumentList({
     if (!window.confirm(t("deleteConfirm", { title: document.title }))) return;
     setPendingId(document.id);
     try {
-      await postAction({ action: "deleteDocument", id: document.id });
+      await actions.deleteDocument(document.id);
       onDeleted(document.id);
     } catch {
       window.alert(t("error"));
@@ -306,7 +356,7 @@ function DocumentList({
               {document.uploadedAt ? ` · ${formatRelative(document.uploadedAt)}` : null}
             </span>
           </span>
-          <DocumentOpenButton document={document} />
+          <DocumentOpenButton document={document} actions={actions} />
           <button
             type="button"
             onClick={() => remove(document)}
@@ -324,7 +374,13 @@ function DocumentList({
 
 /** Documents have no public URL — open one by asking the server for a link
  *  that expires within minutes, then following it. */
-function DocumentOpenButton({ document }: { document: RewildingAdminDocument }) {
+function DocumentOpenButton({
+  document,
+  actions,
+}: {
+  document: RewildingAdminDocument;
+  actions: RewildingAdminActions;
+}) {
   const t = useTranslations("common.adminModeration.rewilding");
   const [pending, setPending] = useState(false);
 
@@ -332,10 +388,7 @@ function DocumentOpenButton({ document }: { document: RewildingAdminDocument }) 
     if (pending) return;
     setPending(true);
     try {
-      const response = await fetch(`/api/admin/rewilding/documents/${document.id}`);
-      const json = (await response.json().catch(() => null)) as { url?: string } | null;
-      if (!response.ok || !json?.url) throw new Error("link_failed");
-      window.open(json.url, "_blank", "noopener,noreferrer");
+      await actions.openDocument(document);
     } catch {
       window.alert(t("error"));
     } finally {
@@ -357,9 +410,11 @@ function DocumentOpenButton({ document }: { document: RewildingAdminDocument }) 
 
 function DocumentUploadForm({
   subjectDid,
+  actions,
   onUploaded,
 }: {
   subjectDid: string;
+  actions: RewildingAdminActions;
   onUploaded: (document: RewildingAdminDocument) => void;
 }) {
   const t = useTranslations("common.adminModeration.rewilding");
@@ -389,15 +444,13 @@ function DocumentUploadForm({
     setError(null);
     try {
       const bytes = new Uint8Array(await file.arrayBuffer());
-      const result = await postAction({
-        action: "addDocument",
+      const document = await actions.addDocument({
         subjectDid,
         title: title.trim(),
         fileName: file.name,
         mimeType: file.type || "application/pdf",
         dataBase64: toBase64(bytes),
       });
-      const document = result.document as RewildingAdminDocument;
       onUploaded(document);
       setTitle("");
       setFile(null);

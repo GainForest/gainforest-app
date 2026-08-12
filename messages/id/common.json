@@ -1318,7 +1318,7 @@
       "empty": "Belum ada penerima hibah. Mereka muncul di sini setelah seseorang mendaftar hibah atau hibah disiapkan.",
       "unnamedGrantee": "Akun tanpa nama",
       "granteeBadge": "Lencana hibah",
-      "summary": "{done} dari {total} tonggak dikonfirmasi · {documents} dokumen",
+      "summary": "{done} dari {total} tonggak dikonfirmasi · {documents, plural, =0 {tanpa dokumen} other {# dokumen}}",
       "milestonesTitle": "Tonggak",
       "payout": "Mencairkan ${amount} · pembayaran {tranche}",
       "markDone": "Tandai selesai",

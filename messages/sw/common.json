@@ -1318,7 +1318,7 @@
       "empty": "Hakuna wapokeaji bado. Wataonekana hapa mtu anapoomba ruzuku au ruzuku inapoandaliwa.",
       "unnamedGrantee": "Akaunti isiyo na jina",
       "granteeBadge": "Beji ya ruzuku",
-      "summary": "Hatua {done} kati ya {total} zimethibitishwa · nyaraka {documents}",
+      "summary": "Hatua {done} kati ya {total} zimethibitishwa · {documents, plural, =0 {hakuna nyaraka} one {waraka #} other {nyaraka #}}",
       "milestonesTitle": "Hatua muhimu",
       "payout": "Hufungua ${amount} · malipo {tranche}",
       "markDone": "Weka kama imekamilika",

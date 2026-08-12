@@ -233,7 +233,20 @@
       "mockCanceled": "Convite simulado removido desta visualização."
     },
     "myCardsTitle": "Galeria dos Meus Bumicerts",
-    "myCardsDescription": "Veja uma prévia da galeria de Bumicerts colecionados com exemplos."
+    "myCardsDescription": "Veja uma prévia da galeria de Bumicerts colecionados com exemplos.",
+    "rewildingMilestones": {
+      "title": "Marcos do subsídio Rewilding",
+      "description": "A lista de marcos somente leitura do beneficiário ao lado da lista de administração que os confirma.",
+      "mockBadge": "Modo simulado · sem gravações",
+      "mockNote": "O beneficiário e o subsídio são fictícios. Confirmar um marco, enviar um documento ou abri-lo altera apenas a memória — nada é salvo, enviado ou vinculado.",
+      "cardTitle": "Marcos do subsídio Rewilding",
+      "cardDescription": "Compare o que um beneficiário vê com o que uma administração pode confirmar.",
+      "granteeTitle": "O que o beneficiário vê",
+      "granteeDescription": "Somente leitura. Um beneficiário não pode marcar um marco como concluído — a linha só mostra se a GainForest confirmou.",
+      "adminTitle": "O que uma administração da GainForest vê",
+      "adminDescription": "Os mesmos marcos, com os controles de confirmar e reabrir, além dos documentos privados do subsídio.",
+      "openedNote": "No painel real isso abriria “{title}” por um link que expira em minutos."
+    }
   },
   "myCards": {
     "eyebrow": "Colecionáveis",

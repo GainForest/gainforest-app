@@ -1318,7 +1318,7 @@
       "empty": "No grantees yet. They appear here once someone applies for the grant or a grant is set up.",
       "unnamedGrantee": "Unnamed account",
       "granteeBadge": "Grant badge",
-      "summary": "{done} of {total} milestones confirmed · {documents} documents",
+      "summary": "{done} of {total} milestones confirmed · {documents, plural, =0 {no documents} one {# document} other {# documents}}",
       "milestonesTitle": "Milestones",
       "payout": "Releases ${amount} · payment {tranche}",
       "markDone": "Mark as done",

@@ -1318,7 +1318,7 @@
       "empty": "Todavía no hay beneficiarios. Aparecerán aquí cuando alguien solicite la subvención o se configure una.",
       "unnamedGrantee": "Cuenta sin nombre",
       "granteeBadge": "Insignia de subvención",
-      "summary": "{done} de {total} hitos confirmados · {documents} documentos",
+      "summary": "{done} de {total} hitos confirmados · {documents, plural, =0 {sin documentos} one {# documento} other {# documentos}}",
       "milestonesTitle": "Hitos",
       "payout": "Libera ${amount} · pago {tranche}",
       "markDone": "Marcar como hecho",
