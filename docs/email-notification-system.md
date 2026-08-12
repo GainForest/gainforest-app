@@ -14,7 +14,7 @@ flowchart TB
   subgraph Triggers["1 · What starts an email"]
     direction LR
 
-    FirstUse["Signed-in app load finds<br/>a new DID in GainForest"]
+    FirstUse["Signed-in app load finds<br/>a DID absent from user_emails"]
     Membership["Account system reports<br/>an organization join"]
     Invitation["Owner or admin<br/>sends an invitation"]
     BioBlitz["Moderator confirms<br/>a BioBlitz winner"]
