@@ -1,9 +1,21 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 const nextServer = vi.hoisted(() => ({ after: vi.fn() }));
+const welcomeRuntime = vi.hoisted(() => ({
+  deliver: vi.fn(async () => ({
+    kind: "durable" as const,
+    outboxId: "10000000-0000-4000-8000-000000000001",
+    status: "sent" as const,
+    duplicate: false,
+    retryable: false,
+  })),
+}));
 
 vi.mock("next/server", () => nextServer);
 vi.mock("server-only", () => ({}));
+vi.mock("@/lib/email-notifications/welcome-runtime", () => ({
+  createWelcomeRuntime: () => welcomeRuntime,
+}));
 
 import { scheduleUserEmailSync, upsertUserEmail } from "./user-emails";
 
@@ -14,8 +26,9 @@ beforeEach(() => {
   vi.stubEnv("SUPABASE_SERVICE_ROLE_KEY", "service-role-secret");
   vi.stubGlobal("fetch", fetchMock);
   fetchMock.mockReset();
-  fetchMock.mockResolvedValue(new Response(null, { status: 204 }));
+  fetchMock.mockImplementation(async () => new Response(null, { status: 204 }));
   nextServer.after.mockReset();
+  welcomeRuntime.deliver.mockClear();
 });
 
 afterEach(() => {
@@ -25,17 +38,22 @@ afterEach(() => {
 });
 
 describe("upsertUserEmail", () => {
-  it("normalizes and upserts the DID-to-email mapping without returning rows", async () => {
-    await upsertUserEmail({
+  it("reports first GainForest use when the DID is absent, then normalizes and upserts the email", async () => {
+    const result = await upsertUserEmail({
       did: "did:plc:alice",
       email: "  Alice@Example.COM  ",
       handle: "  Alice.GainForest.App  ",
     });
 
-    expect(fetchMock).toHaveBeenCalledOnce();
-    const [url, init] = fetchMock.mock.calls[0];
-    const headers = new Headers(init?.headers);
+    expect(result).toEqual({ firstUse: true });
+    expect(fetchMock).toHaveBeenCalledTimes(2);
 
+    const [lookupUrl, lookupInit] = fetchMock.mock.calls[0];
+    expect(lookupUrl).toBe("https://project.supabase.co/rest/v1/user_emails?select=did&did=eq.did%3Aplc%3Aalice&limit=1");
+    expect(lookupInit?.method).toBeUndefined();
+
+    const [url, init] = fetchMock.mock.calls[1];
+    const headers = new Headers(init?.headers);
     expect(url).toBe("https://project.supabase.co/rest/v1/user_emails?on_conflict=did");
     expect(init?.method).toBe("POST");
     expect(headers.get("apikey")).toBe("service-role-secret");
@@ -45,10 +63,27 @@ describe("upsertUserEmail", () => {
     expect(init?.body).toBe(JSON.stringify({ did: "did:plc:alice", email: "alice@example.com", handle: "alice.gainforest.app" }));
   });
 
+  it("reports a returning GainForest user when the DID already exists and still refreshes their email", async () => {
+    fetchMock
+      .mockResolvedValueOnce(Response.json([{ did: "did:plc:alice" }]))
+      .mockResolvedValueOnce(new Response(null, { status: 204 }));
+
+    await expect(upsertUserEmail({
+      did: "did:plc:alice",
+      email: "new@example.com",
+    })).resolves.toEqual({ firstUse: false });
+
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+    expect(fetchMock.mock.calls[1]?.[1]?.body).toBe(JSON.stringify({
+      did: "did:plc:alice",
+      email: "new@example.com",
+    }));
+  });
+
   it("omits handle from the payload when not provided", async () => {
     await upsertUserEmail({ did: "did:plc:alice", email: "alice@example.com" });
 
-    const [, init] = fetchMock.mock.calls[0];
+    const [, init] = fetchMock.mock.calls[1];
     expect(init?.body).toBe(JSON.stringify({ did: "did:plc:alice", email: "alice@example.com" }));
   });
 
@@ -75,13 +110,13 @@ describe("upsertUserEmail", () => {
 });
 
 describe("scheduleUserEmailSync", () => {
-  it("schedules the upsert after the response for a session containing an email", async () => {
+  it("enqueues the welcome email after the first authenticated GainForest load", async () => {
     scheduleUserEmailSync({
       isLoggedIn: true,
       did: "did:plc:alice",
       handle: "alice.gainforest.app",
       email: "alice@example.com",
-    });
+    }, "pt");
 
     expect(nextServer.after).toHaveBeenCalledOnce();
     expect(fetchMock).not.toHaveBeenCalled();
@@ -89,7 +124,33 @@ describe("scheduleUserEmailSync", () => {
     const callback = nextServer.after.mock.calls[0][0];
     await callback();
 
-    expect(fetchMock).toHaveBeenCalledOnce();
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+    expect(welcomeRuntime.deliver).toHaveBeenCalledWith({
+      type: "signup",
+      authEventId: "gainforest.first-use.v1:a304c5c525080ebfa7b6205c6c31508ce8f769fc129576e170dcb27172ff6fb4",
+      userDid: "did:plc:alice",
+      email: "alice@example.com",
+      locale: "pt",
+    }, expect.any(Date));
+  });
+
+  it("only refreshes the email for a returning GainForest user", async () => {
+    fetchMock
+      .mockResolvedValueOnce(Response.json([{ did: "did:plc:alice" }]))
+      .mockResolvedValueOnce(new Response(null, { status: 204 }));
+
+    scheduleUserEmailSync({
+      isLoggedIn: true,
+      did: "did:plc:alice",
+      handle: "alice.gainforest.app",
+      email: "alice@example.com",
+    }, "en");
+
+    const callback = nextServer.after.mock.calls[0][0];
+    await callback();
+
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+    expect(welcomeRuntime.deliver).not.toHaveBeenCalled();
   });
 
   it("does not schedule database work without a signed-in session email", () => {
@@ -119,7 +180,7 @@ describe("scheduleUserEmailSync", () => {
     const callback = nextServer.after.mock.calls[0][0];
     await expect(callback()).resolves.toBeUndefined();
     expect(consoleError).toHaveBeenCalledWith(
-      "User email synchronization failed; it will be retried on a later full app load. Verify the user_emails table and Supabase service-role configuration.",
+      "User email synchronization or first-use welcome setup failed. It will be retried only if the DID was not saved; verify Supabase and notification configuration.",
     );
   });
 });
