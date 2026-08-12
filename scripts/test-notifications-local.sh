@@ -334,8 +334,8 @@ send_welcome "$TMP/welcome-first.json"
 node - "$TMP/welcome-first.json" <<'NODE'
 const fs = require("node:fs");
 const value = JSON.parse(fs.readFileSync(process.argv[2], "utf8"));
-if (value?.ok !== true || value?.notification?.status !== "sent" || value?.notification?.duplicate !== false) {
-  throw new Error(`first welcome event was not sent through the loopback provider: ${JSON.stringify(value)}`);
+if (value?.ok !== true || value?.ignored !== true || value?.reason !== "signup_welcome_uses_first_app_session") {
+  throw new Error(`legacy signup webhook was not accepted as a no-op: ${JSON.stringify(value)}`);
 }
 NODE
 
@@ -343,18 +343,16 @@ send_welcome "$TMP/welcome-duplicate.json"
 node - "$TMP/welcome-duplicate.json" <<'NODE'
 const fs = require("node:fs");
 const value = JSON.parse(fs.readFileSync(process.argv[2], "utf8"));
-if (value?.ok !== true || value?.notification?.status !== "sent" || value?.notification?.duplicate !== true) {
-  throw new Error(`duplicate welcome event did not return the original sent row: ${JSON.stringify(value)}`);
+if (value?.ok !== true || value?.ignored !== true || value?.reason !== "signup_welcome_uses_first_app_session") {
+  throw new Error(`duplicate legacy signup webhook was not accepted as a no-op: ${JSON.stringify(value)}`);
 }
 NODE
 
-WELCOME_STATE=$(psql -X -Atq "$DB_URL" -v ON_ERROR_STOP=1 -F '|' -c "
-  select count(*),bool_and(status='sent'),bool_and(recipient_email='local-user@example.test'),
-    bool_and(frozen_to='local-user@example.test'),bool_and(provider_id like 'local-resend-%'),bool_and(provider_idempotency_key='signup:local-signup-1')
-  from public.notification_outbox where event_type='signup' and source_id='local-signup-1';
+WELCOME_STATE=$(psql -X -Atq "$DB_URL" -v ON_ERROR_STOP=1 -c "
+  select count(*) from public.notification_outbox where event_type='signup' and source_id='local-signup-1';
 ")
-[[ "$WELCOME_STATE" == "1|t|t|t|t|t" ]] || {
-  echo "test:notifications:local welcome persistence assertion failed: $WELCOME_STATE" >&2
+[[ "$WELCOME_STATE" == "0" ]] || {
+  echo "test:notifications:local legacy signup webhook unexpectedly created a notification: $WELCOME_STATE" >&2
   exit 1
 }
 
