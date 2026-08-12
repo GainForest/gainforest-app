@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import type { GrantOverview, Recorder } from "./model";
+import type { GrantDocument, GrantOverview, Recorder } from "./model";
 import { MyGrantView } from "./MyGrantView";
 
 /** Route-level wrapper: turns the view's "open my recorders" callback into a
@@ -9,20 +9,19 @@ import { MyGrantView } from "./MyGrantView";
 export function MyGrantPageClient({
   overview,
   recorders,
-  markMilestoneDisabledNote,
+  documents,
 }: {
   overview: GrantOverview;
   recorders: Recorder[];
-  /** Why milestone check-off is greyed out (nothing persists a claim yet). */
-  markMilestoneDisabledNote?: string;
+  documents: GrantDocument[];
 }) {
   const router = useRouter();
   return (
     <MyGrantView
       overview={overview}
       recorders={recorders}
+      documents={documents}
       onOpenRecorders={() => router.push("/grants/my-recorders")}
-      markMilestoneDisabledNote={markMilestoneDisabledNote}
     />
   );
 }

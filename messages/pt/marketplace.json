@@ -843,19 +843,22 @@
           "viewRecorders": "Abrir inventário",
           "notStarted": "Não iniciado",
           "empty": "Ainda não há marcos. Eles aparecem aqui depois que seu subsídio for configurado.",
-          "markDone": "Marcar como concluído",
-          "awaitingReview": "Aguardando revisão",
           "confirmed": "Confirmado",
           "payout": "Libera ${amount} · pagamento {tranche}",
-          "reviewNote": "Marcar um marco como concluído o envia à GainForest para revisão; cada marco confirmado libera a próxima parte do seu subsídio.",
-          "markNotBuilt": "Marcar marcos ainda não foi desenvolvido; será ativado quando pudermos salvar seu progresso."
+          "reviewNote": "A GainForest confirma cada marco — cada marco confirmado libera a próxima parte do seu subsídio.",
+          "pending": "Não confirmado"
         },
         "metadata": {
           "title": "Meu subsídio",
           "description": "Seu subsídio Rewilding the Web: próximo passo, progresso e marcos."
         },
         "untitled": "Seu subsídio",
-        "amount": "Subsídio de ${amount}"
+        "amount": "Subsídio de ${amount}",
+        "documents": {
+          "title": "Documentos do subsídio",
+          "download": "Baixar",
+          "note": "Documentos como o seu contrato de subsídio assinado, adicionados pela GainForest."
+        }
       },
       "recorders": {
         "navLabel": "Meus gravadores",
@@ -917,7 +920,7 @@
       },
       "shell": {
         "eyebrow": "Rewilding the Web · prévia de administração",
-        "placeholderNotice": "Nada nesta página está conectado a registros reais ainda, portanto todos os números mostram zero. É uma prévia do layout, não o subsídio de ninguém."
+        "placeholderNotice": "As estatísticas de gravação desta página ainda não estão conectadas a registros reais, por isso esses números marcam zero. Os marcos e os documentos do subsídio já são reais."
       }
     }
   },

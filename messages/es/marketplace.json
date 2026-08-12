@@ -843,19 +843,22 @@
           "viewRecorders": "Abrir inventario",
           "notStarted": "Sin empezar",
           "empty": "Aún no hay hitos. Aparecerán aquí cuando se configure tu subvención.",
-          "markDone": "Marcar como hecho",
-          "awaitingReview": "En revisión",
           "confirmed": "Confirmado",
           "payout": "Libera ${amount} · pago {tranche}",
-          "reviewNote": "Marcar un hito como hecho lo envía a GainForest para su revisión; cada hito confirmado libera la siguiente parte de tu subvención.",
-          "markNotBuilt": "Marcar hitos todavía no está desarrollado; se activará cuando podamos guardar tu progreso."
+          "reviewNote": "GainForest confirma cada hito: cada hito confirmado libera la siguiente parte de tu subvención.",
+          "pending": "Sin confirmar"
         },
         "metadata": {
           "title": "Mi subvención",
           "description": "Tu subvención Rewilding the Web: siguiente paso, progreso e hitos."
         },
         "untitled": "Tu subvención",
-        "amount": "Subvención de ${amount}"
+        "amount": "Subvención de ${amount}",
+        "documents": {
+          "title": "Documentos de la subvención",
+          "download": "Descargar",
+          "note": "Documentos como tu contrato de subvención firmado, añadidos por GainForest."
+        }
       },
       "recorders": {
         "navLabel": "Mis grabadoras",
@@ -917,7 +920,7 @@
       },
       "shell": {
         "eyebrow": "Rewilding the Web · vista previa de administración",
-        "placeholderNotice": "Nada en esta página está conectado a registros reales todavía, así que todas las cifras muestran cero. Es una vista previa del diseño, no la subvención de nadie."
+        "placeholderNotice": "Las estadísticas de grabación de esta página aún no están conectadas a registros reales, por eso esas cifras marcan cero. Los hitos y los documentos de la subvención sí son reales."
       }
     }
   },

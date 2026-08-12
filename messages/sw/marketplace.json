@@ -843,19 +843,22 @@
           "viewRecorders": "Fungua orodha",
           "notStarted": "Haijaanza",
           "empty": "Bado hakuna hatua muhimu. Zitaonekana hapa mara ruzuku yako itakapowekwa.",
-          "markDone": "Weka alama imekamilika",
-          "awaitingReview": "Inasubiri ukaguzi",
           "confirmed": "Imethibitishwa",
           "payout": "Hutoa ${amount} · malipo ya {tranche}",
-          "reviewNote": "Kuweka alama hatua muhimu imekamilika kunaituma GainForest kwa ukaguzi; kila hatua iliyothibitishwa hutoa sehemu inayofuata ya ruzuku yako.",
-          "markNotBuilt": "Kuweka alama hatua muhimu bado hakujajengwa; kutawezeshwa mara tutakapoweza kuhifadhi maendeleo yako."
+          "reviewNote": "GainForest huthibitisha kila hatua muhimu — kila hatua iliyothibitishwa hufungua sehemu inayofuata ya ruzuku yako.",
+          "pending": "Haijathibitishwa"
         },
         "metadata": {
           "title": "Ruzuku yangu",
           "description": "Ruzuku yako ya Rewilding the Web: hatua inayofuata, maendeleo na hatua muhimu."
         },
         "untitled": "Ruzuku yako",
-        "amount": "Ruzuku ya ${amount}"
+        "amount": "Ruzuku ya ${amount}",
+        "documents": {
+          "title": "Nyaraka za ruzuku",
+          "download": "Pakua",
+          "note": "Nyaraka kama mkataba wako wa ruzuku uliotiwa saini, zilizoongezwa na GainForest."
+        }
       },
       "recorders": {
         "navLabel": "Vinasa sauti vyangu",
@@ -917,7 +920,7 @@
       },
       "shell": {
         "eyebrow": "Rewilding the Web · onyesho la awali la msimamizi",
-        "placeholderNotice": "Hakuna kilicho kwenye ukurasa huu kilichounganishwa na kumbukumbu halisi bado, kwa hivyo kila takwimu inaonyesha sifuri. Ni onyesho la mpangilio, si ruzuku ya mtu yeyote."
+        "placeholderNotice": "Takwimu za kurekodi kwenye ukurasa huu bado hazijaunganishwa na rekodi halisi, kwa hivyo tarakimu hizo zinasoma sifuri. Hatua muhimu na nyaraka za ruzuku ni halisi."
       }
     }
   },

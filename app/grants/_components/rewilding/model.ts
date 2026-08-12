@@ -35,15 +35,13 @@ export type Recorder = {
 };
 
 /**
- * Milestones gate the grant's payment tranches, so a grantee saying "done"
- * is a claim, not a completion: GainForest confirms it before the money moves.
- * The three states mirror that — nothing jumps straight from todo to done.
+ * Milestones gate the grant's payment tranches, so only GainForest may mark
+ * one done — that happens in the admin panel's "Rewilding the Web" section,
+ * never from this dashboard. The grantee's view is read-only.
  */
 export type GrantMilestoneState =
-  /** Not claimed yet. */
+  /** Not confirmed yet. */
   | "todo"
-  /** The grantee marked it done; GainForest has not confirmed it. */
-  | "awaitingReview"
   /** Confirmed by GainForest. The tranche it gates can be released. */
   | "done";
 
@@ -59,6 +57,20 @@ export type GrantMilestone = {
   payout?: { tranche: number; amountUsd: number };
   /** Milestones about the devices link through to the "My recorders" page. */
   isRecorderInventory?: boolean;
+};
+
+/** A grant document (the signed contract etc.) GainForest uploaded for this
+ *  grantee from the admin panel. Read-only on the grantee's side. */
+export type GrantDocument = {
+  id: string;
+  /** Display name, e.g. "Grant contract". */
+  title: string;
+  /** Original file name, e.g. "contract-signed.pdf". */
+  fileName: string;
+  /** Public download URL, when the file blob resolved. */
+  url: string | null;
+  /** ISO timestamp of the upload. */
+  uploadedAt: string;
 };
 
 export type GrantOverview = {

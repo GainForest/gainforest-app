@@ -843,19 +843,22 @@
           "viewRecorders": "Open inventory",
           "notStarted": "Not started",
           "empty": "No milestones yet. They appear here once your grant is set up.",
-          "markDone": "Mark as done",
-          "awaitingReview": "Waiting for review",
           "confirmed": "Confirmed",
           "payout": "Releases ${amount} · payment {tranche}",
-          "reviewNote": "Marking a milestone as done sends it to GainForest for review — each confirmed milestone releases the next part of your grant.",
-          "markNotBuilt": "Marking milestones isn't built yet; it turns on once we can save your progress."
+          "reviewNote": "GainForest confirms each milestone — every confirmed milestone releases the next part of your grant.",
+          "pending": "Not confirmed"
         },
         "metadata": {
           "title": "My grant",
           "description": "Your Rewilding the Web grant: next step, progress and milestones."
         },
         "untitled": "Your grant",
-        "amount": "${amount} grant"
+        "amount": "${amount} grant",
+        "documents": {
+          "title": "Grant documents",
+          "download": "Download",
+          "note": "Documents like your signed grant contract, added by GainForest."
+        }
       },
       "recorders": {
         "navLabel": "My recorders",
@@ -917,7 +920,7 @@
       },
       "shell": {
         "eyebrow": "Rewilding the Web · admin preview",
-        "placeholderNotice": "Nothing on this page is connected to real records yet, so every figure reads zero. It is a preview of the layout, not anyone's grant."
+        "placeholderNotice": "Recording stats on this page aren't connected to real records yet, so those figures read zero. Milestones and grant documents are live."
       }
     }
   },

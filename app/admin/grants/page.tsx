@@ -1,17 +1,19 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
-import { LeafIcon, SproutIcon } from "lucide-react";
+import { LeafIcon, SproutIcon, TreesIcon } from "lucide-react";
 import { getGainForestModeratorAccess } from "@/app/internal/badges/_lib/access";
 import { fetchGrantApplicants } from "@/app/_lib/grants";
 import { bioblitzRounds } from "@/app/_lib/bioblitz";
 import { fetchBioblitzExclusionRows } from "@/app/internal/badges/_lib/bioblitz-exclusion-mutations";
 import { loadBioblitzAdminRound } from "../_lib/bioblitz-dashboard";
+import { fetchRewildingAdminGrantees } from "../_lib/rewilding-admin";
 import { AdminPageHeader } from "../_components/AdminPageHeader";
 import { AdminPanel } from "../_components/AdminPanel";
 import { AdminSectionTabs } from "../_components/AdminSectionTabs";
 import { AdminGrantApplicantsList } from "../_components/AdminGrantApplicantsList";
 import { AdminBioblitzDashboard } from "../_components/AdminBioblitzDashboard";
+import { AdminRewildingPanel } from "../_components/AdminRewildingPanel";
 
 export const metadata: Metadata = {
   title: "Grants · Admin",
@@ -19,8 +21,9 @@ export const metadata: Metadata = {
 };
 
 /**
- * Grant management: who applied for the Rewilding the Web grant, and the
- * BioBlitz round dashboard that picks the weekly winners.
+ * Grant management: who applied for the Rewilding the Web grant, each
+ * grantee's milestone confirmations and grant documents, and the BioBlitz
+ * round dashboard that picks the weekly winners.
  */
 export default async function AdminGrantsPage({
   searchParams,
@@ -35,9 +38,10 @@ export default async function AdminGrantsPage({
   const adminBioblitzRounds = bioblitzRounds(now, 0);
   const defaultBioblitzRoundId = adminBioblitzRounds.at(-1)?.id ?? 1;
 
-  const [{ tab }, grantApplicants, initialBioblitzData, bioblitzExclusions] = await Promise.all([
+  const [{ tab }, grantApplicants, rewildingGrantees, initialBioblitzData, bioblitzExclusions] = await Promise.all([
     searchParams,
     fetchGrantApplicants().catch(() => []),
+    fetchRewildingAdminGrantees().catch(() => []),
     loadBioblitzAdminRound(defaultBioblitzRoundId, now, moderator.repoDid).catch(() => null),
     fetchBioblitzExclusionRows().catch(() => null),
   ]);
@@ -63,6 +67,25 @@ export default async function AdminGrantsPage({
                 footer={t("awardHint")}
               >
                 <AdminGrantApplicantsList applicants={grantApplicants} />
+              </AdminPanel>
+            ),
+          },
+          {
+            // Trees rather than a leaf: BioBlitz already owns the leaf in this
+            // same pill bar, and two identical icons side by side read as a bug.
+            id: "rewilding",
+            label: t("rewilding.title"),
+            icon: <TreesIcon className="size-4" />,
+            count: rewildingGrantees.length,
+            content: (
+              <AdminPanel
+                Icon={TreesIcon}
+                title={t("rewilding.title")}
+                description={t("rewilding.description")}
+                count={rewildingGrantees.length}
+                footer={t("rewilding.footer")}
+              >
+                <AdminRewildingPanel grantees={rewildingGrantees} />
               </AdminPanel>
             ),
           },

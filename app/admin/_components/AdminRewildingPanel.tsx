@@ -1,0 +1,400 @@
+"use client";
+
+import { useRef, useState } from "react";
+import Link from "next/link";
+import { useFormatter, useTranslations } from "next-intl";
+import { CheckIcon, ChevronDownIcon, FileTextIcon, Trash2Icon, UploadIcon } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { formatRelative } from "@/app/_lib/format";
+import { accountPath } from "@/app/account/_lib/account-route";
+import type {
+  RewildingAdminDocument,
+  RewildingAdminGrantee,
+  RewildingAdminMilestone,
+} from "../_lib/rewilding-admin";
+import { AdminAvatar, AdminEmptyState } from "./AdminPanel";
+
+/**
+ * "Rewilding the Web" admin section: per grantee, the contract milestone
+ * checklist (marking one done is GainForest's confirmation — it releases the
+ * matching payment tranche) and the grant documents (contract etc.) uploaded
+ * right here. All writes go through /api/admin/rewilding.
+ */
+
+const MAX_FILE_BYTES = 3 * 1024 * 1024;
+const ACCEPTED_FILE_TYPES =
+  ".pdf,.jpg,.jpeg,.png,.webp,.doc,.docx,.odt,application/pdf,image/jpeg,image/png,image/webp";
+
+async function postAction(body: Record<string, unknown>): Promise<Record<string, unknown>> {
+  const response = await fetch("/api/admin/rewilding", {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify(body),
+  });
+  const json = (await response.json().catch(() => null)) as Record<string, unknown> | null;
+  if (!response.ok || !json || typeof json.error === "string") {
+    throw new Error(typeof json?.error === "string" ? json.error : "save_failed");
+  }
+  return json;
+}
+
+function toBase64(bytes: Uint8Array): string {
+  let binary = "";
+  const CHUNK = 0x8000;
+  for (let i = 0; i < bytes.length; i += CHUNK) {
+    binary += String.fromCharCode(...bytes.subarray(i, i + CHUNK));
+  }
+  return btoa(binary);
+}
+
+export function AdminRewildingPanel({ grantees }: { grantees: RewildingAdminGrantee[] }) {
+  const t = useTranslations("common.adminModeration.rewilding");
+  if (grantees.length === 0) return <AdminEmptyState>{t("empty")}</AdminEmptyState>;
+  return (
+    <ul className="flex flex-col gap-3">
+      {grantees.map((grantee) => (
+        <GranteeCard key={grantee.did} grantee={grantee} />
+      ))}
+    </ul>
+  );
+}
+
+function GranteeCard({ grantee }: { grantee: RewildingAdminGrantee }) {
+  const t = useTranslations("common.adminModeration.rewilding");
+  const [open, setOpen] = useState(grantee.hasGrantBadge);
+  const [milestones, setMilestones] = useState(grantee.milestones);
+  const [documents, setDocuments] = useState(grantee.documents);
+  const doneCount = milestones.filter((milestone) => milestone.done).length;
+
+  return (
+    <li className="overflow-hidden rounded-2xl border border-border bg-background">
+      <button
+        type="button"
+        onClick={() => setOpen((value) => !value)}
+        aria-expanded={open}
+        className="flex w-full items-center gap-3 px-3.5 py-3 text-left transition-colors hover:bg-muted/40"
+      >
+        <AdminAvatar url={grantee.avatarUrl} />
+        <span className="flex min-w-0 flex-1 flex-col">
+          <span className="flex flex-wrap items-center gap-2">
+            <span className="truncate font-medium text-foreground">
+              {grantee.displayName || t("unnamedGrantee")}
+            </span>
+            {grantee.hasGrantBadge ? (
+              <span className="rounded-full border border-primary/40 px-2 py-px text-[10px] font-medium text-primary">
+                {t("granteeBadge")}
+              </span>
+            ) : null}
+          </span>
+          <span className="text-xs text-muted-foreground">
+            {t("summary", { done: doneCount, total: milestones.length, documents: documents.length })}
+          </span>
+        </span>
+        <ChevronDownIcon
+          className={cn("size-4 shrink-0 text-muted-foreground transition-transform", open && "rotate-180")}
+          aria-hidden
+        />
+      </button>
+
+      {open ? (
+        <div className="flex flex-col gap-4 border-t border-border/70 px-3.5 py-4">
+          {grantee.applicationText ? (
+            <p className="line-clamp-3 text-xs leading-5 text-muted-foreground">{grantee.applicationText}</p>
+          ) : null}
+
+          <section className="flex flex-col gap-2">
+            <h4 className="text-xs font-semibold uppercase tracking-[0.08em] text-muted-foreground">
+              {t("milestonesTitle")}
+            </h4>
+            <ol className="flex flex-col gap-1.5">
+              {milestones.map((milestone) => (
+                <MilestoneRow
+                  key={milestone.id}
+                  subjectDid={grantee.did}
+                  milestone={milestone}
+                  onChanged={(next) =>
+                    setMilestones((current) =>
+                      current.map((entry) => (entry.id === next.id ? next : entry)),
+                    )
+                  }
+                />
+              ))}
+            </ol>
+          </section>
+
+          <section className="flex flex-col gap-2">
+            <h4 className="text-xs font-semibold uppercase tracking-[0.08em] text-muted-foreground">
+              {t("documentsTitle")}
+            </h4>
+            <DocumentList
+              documents={documents}
+              onDeleted={(rkey) => setDocuments((current) => current.filter((entry) => entry.rkey !== rkey))}
+            />
+            <DocumentUploadForm
+              subjectDid={grantee.did}
+              onUploaded={(document) => setDocuments((current) => [document, ...current])}
+            />
+          </section>
+
+          <Link
+            href={accountPath(grantee.did)}
+            className="self-start text-xs font-medium text-primary hover:underline"
+          >
+            {t("openProfile")}
+          </Link>
+        </div>
+      ) : null}
+    </li>
+  );
+}
+
+function MilestoneRow({
+  subjectDid,
+  milestone,
+  onChanged,
+}: {
+  subjectDid: string;
+  milestone: RewildingAdminMilestone;
+  onChanged: (milestone: RewildingAdminMilestone) => void;
+}) {
+  const t = useTranslations("common.adminModeration.rewilding");
+  const format = useFormatter();
+  const [pending, setPending] = useState(false);
+  const [failed, setFailed] = useState(false);
+
+  const toggle = async () => {
+    if (pending) return;
+    setPending(true);
+    setFailed(false);
+    try {
+      await postAction({
+        action: "setMilestone",
+        subjectDid,
+        milestoneId: milestone.id,
+        done: !milestone.done,
+      });
+      onChanged({ ...milestone, done: !milestone.done, updatedAt: new Date().toISOString() });
+    } catch {
+      setFailed(true);
+    } finally {
+      setPending(false);
+    }
+  };
+
+  return (
+    <li
+      className={cn(
+        "flex flex-wrap items-center gap-2.5 rounded-xl border border-border px-3 py-2.5",
+        milestone.done && "border-primary/30 bg-primary/[0.04]",
+      )}
+    >
+      <span
+        aria-hidden
+        className={cn(
+          "grid size-4.5 shrink-0 place-items-center rounded-md border",
+          milestone.done ? "border-primary bg-primary text-primary-foreground" : "border-border bg-background",
+        )}
+      >
+        {milestone.done ? <CheckIcon className="size-3" /> : null}
+      </span>
+      <span className="flex min-w-0 flex-1 flex-col">
+        <span className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
+          <span className="font-mono text-[10px] font-semibold text-muted-foreground">{milestone.code}</span>
+          <span className="text-sm font-medium text-foreground">{milestone.title}</span>
+          {milestone.payout ? (
+            <span className="rounded-full border border-border px-2 py-px text-[10px] font-medium text-muted-foreground">
+              {t("payout", {
+                amount: format.number(milestone.payout.amountUsd),
+                tranche: milestone.payout.tranche,
+              })}
+            </span>
+          ) : null}
+        </span>
+        {milestone.done && milestone.updatedAt ? (
+          <span className="text-[11px] text-muted-foreground">
+            {t("confirmedAt", { date: formatRelative(milestone.updatedAt) })}
+          </span>
+        ) : null}
+        {failed ? <span className="text-[11px] text-destructive">{t("error")}</span> : null}
+      </span>
+      <button
+        type="button"
+        onClick={toggle}
+        disabled={pending}
+        className={cn(
+          "shrink-0 rounded-full border px-3 py-1.5 text-xs font-semibold shadow-sm transition-colors disabled:pointer-events-none disabled:opacity-50",
+          milestone.done
+            ? "border-border bg-background text-muted-foreground hover:bg-muted"
+            : "border-primary/40 bg-primary text-primary-foreground hover:bg-primary/90",
+        )}
+      >
+        {pending ? t("saving") : milestone.done ? t("reopen") : t("markDone")}
+      </button>
+    </li>
+  );
+}
+
+function DocumentList({
+  documents,
+  onDeleted,
+}: {
+  documents: RewildingAdminDocument[];
+  onDeleted: (rkey: string) => void;
+}) {
+  const t = useTranslations("common.adminModeration.rewilding");
+  const [pendingRkey, setPendingRkey] = useState<string | null>(null);
+
+  if (documents.length === 0) {
+    return <p className="text-xs text-muted-foreground">{t("documentsEmpty")}</p>;
+  }
+
+  const remove = async (document: RewildingAdminDocument) => {
+    if (pendingRkey) return;
+    if (!window.confirm(t("deleteConfirm", { title: document.title }))) return;
+    setPendingRkey(document.rkey);
+    try {
+      await postAction({ action: "deleteDocument", rkey: document.rkey });
+      onDeleted(document.rkey);
+    } catch {
+      window.alert(t("error"));
+    } finally {
+      setPendingRkey(null);
+    }
+  };
+
+  return (
+    <ul className="flex flex-col gap-1.5">
+      {documents.map((document) => (
+        <li
+          key={document.rkey}
+          className="flex items-center gap-2.5 rounded-xl border border-border px-3 py-2"
+        >
+          <FileTextIcon className="size-4 shrink-0 text-muted-foreground" aria-hidden />
+          <span className="flex min-w-0 flex-1 flex-col">
+            {document.url ? (
+              <a
+                href={document.url}
+                target="_blank"
+                rel="noreferrer"
+                className="truncate text-sm font-medium text-primary hover:underline"
+              >
+                {document.title}
+              </a>
+            ) : (
+              <span className="truncate text-sm font-medium text-foreground">{document.title}</span>
+            )}
+            <span className="truncate text-[11px] text-muted-foreground">
+              {document.fileName}
+              {document.createdAt ? ` · ${formatRelative(document.createdAt)}` : null}
+            </span>
+          </span>
+          <button
+            type="button"
+            onClick={() => remove(document)}
+            disabled={pendingRkey === document.rkey}
+            aria-label={t("delete", { title: document.title })}
+            className="shrink-0 rounded-full p-1.5 text-muted-foreground transition-colors hover:bg-muted hover:text-destructive disabled:pointer-events-none disabled:opacity-50"
+          >
+            <Trash2Icon className="size-3.5" aria-hidden />
+          </button>
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+function DocumentUploadForm({
+  subjectDid,
+  onUploaded,
+}: {
+  subjectDid: string;
+  onUploaded: (document: RewildingAdminDocument) => void;
+}) {
+  const t = useTranslations("common.adminModeration.rewilding");
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [title, setTitle] = useState("");
+  const [file, setFile] = useState<File | null>(null);
+  const [pending, setPending] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const handleFileChange = (next: File | null) => {
+    setError(null);
+    setFile(next);
+    if (next && !title.trim()) {
+      // Default the display name to the file name, minus its extension.
+      setTitle(next.name.replace(/\.[^.]+$/, ""));
+    }
+  };
+
+  const submit = async (event: React.FormEvent) => {
+    event.preventDefault();
+    if (pending || !file || !title.trim()) return;
+    if (file.size > MAX_FILE_BYTES) {
+      setError(t("fileTooLarge"));
+      return;
+    }
+    setPending(true);
+    setError(null);
+    try {
+      const bytes = new Uint8Array(await file.arrayBuffer());
+      const result = await postAction({
+        action: "addDocument",
+        subjectDid,
+        title: title.trim(),
+        fileName: file.name,
+        mimeType: file.type || "application/pdf",
+        dataBase64: toBase64(bytes),
+      });
+      const document = result.document as RewildingAdminDocument;
+      onUploaded(document);
+      setTitle("");
+      setFile(null);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    } catch (cause) {
+      const code = cause instanceof Error ? cause.message : "save_failed";
+      setError(
+        code === "file_too_large"
+          ? t("fileTooLarge")
+          : code === "file_type_unsupported"
+            ? t("fileTypeUnsupported")
+            : t("error"),
+      );
+    } finally {
+      setPending(false);
+    }
+  };
+
+  return (
+    <form onSubmit={submit} className="flex flex-col gap-2 rounded-xl border border-dashed border-border p-3">
+      <div className="flex flex-col gap-2 sm:flex-row">
+        <input
+          type="text"
+          value={title}
+          onChange={(event) => setTitle(event.target.value)}
+          placeholder={t("uploadTitlePlaceholder")}
+          aria-label={t("uploadTitleLabel")}
+          maxLength={200}
+          className="h-9 min-w-0 flex-1 rounded-lg border border-border bg-background px-3 text-sm text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+        />
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept={ACCEPTED_FILE_TYPES}
+          onChange={(event) => handleFileChange(event.target.files?.[0] ?? null)}
+          aria-label={t("uploadFileLabel")}
+          className="h-9 min-w-0 flex-1 rounded-lg border border-border bg-background px-2 py-1.5 text-xs text-muted-foreground file:mr-2 file:rounded-md file:border-0 file:bg-muted file:px-2.5 file:py-1 file:text-xs file:font-medium file:text-foreground"
+        />
+        <button
+          type="submit"
+          disabled={pending || !file || !title.trim()}
+          className="inline-flex h-9 shrink-0 items-center justify-center gap-1.5 rounded-lg border border-border bg-background px-3.5 text-xs font-semibold text-foreground shadow-sm transition-colors hover:bg-muted disabled:pointer-events-none disabled:opacity-50"
+        >
+          <UploadIcon className="size-3.5" aria-hidden />
+          {pending ? t("uploading") : t("upload")}
+        </button>
+      </div>
+      <p className="text-[11px] text-muted-foreground">{t("uploadHint")}</p>
+      {error ? <p className="text-[11px] text-destructive">{error}</p> : null}
+    </form>
+  );
+}
