@@ -196,6 +196,14 @@ export async function POST(request: NextRequest) {
   }
 
   const event = parsed.data;
+  if (event.type === "user.signup.completed") {
+    return NextResponse.json({
+      ok: true,
+      ignored: true,
+      reason: "signup_welcome_uses_first_app_session",
+    });
+  }
+
   const locale = resolveWelcomeEmailLocale({
     explicitLocale: event.locale,
     acceptLanguage: request.headers.get("accept-language"),
@@ -213,14 +221,12 @@ export async function POST(request: NextRequest) {
     locale,
     createdAt: event.createdAt ?? new Date(invocationStartedAt).toISOString(),
   };
-  const input = event.type === "organization.membership.joined"
-    ? {
-      ...common,
-      type: "membership_joined" as const,
-      organizationDid: event.organization.did,
-      organizationName: resolvedOrganizationName,
-    }
-    : { ...common, type: "signup" as const };
+  const input = {
+    ...common,
+    type: "membership_joined" as const,
+    organizationDid: event.organization.did,
+    organizationName: resolvedOrganizationName,
+  };
 
   try {
     const notification = await createWelcomeRuntime().deliver(

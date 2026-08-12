@@ -14,7 +14,8 @@ flowchart TB
   subgraph Triggers["1 · What starts an email"]
     direction LR
 
-    Account["Account system reports<br/>a signup or org join"]
+    FirstUse["Signed-in app load finds<br/>a DID absent from user_emails"]
+    Membership["Account system reports<br/>an organization join"]
     Invitation["Owner or admin<br/>sends an invitation"]
     BioBlitz["Moderator confirms<br/>a BioBlitz winner"]
   end
@@ -33,7 +34,8 @@ flowchart TB
     TryNow["Try now<br/>wait for the first result"]
   end
 
-  Account --> SaveJob
+  FirstUse --> SaveJob
+  Membership --> SaveJob
   BioBlitz --> SaveJob
   Invitation --> SaveTogether
 
@@ -117,7 +119,7 @@ flowchart TB
   Cleanup -.-> Retention["Stop active jobs after 7 days<br/>Clear sent details after 7 days<br/>Clear failed details after 14 days<br/>Remove records after 90 days"]
 ```
 
-The cron never discovers historical events or creates missing notification jobs. Producers create jobs only as the corresponding signup, membership, invitation, or moderator award action happens.
+The cron never discovers historical events or creates missing notification jobs. The general welcome producer runs after an authenticated app load only when the session DID is absent from `user_emails`; account age and PDS do not affect eligibility. Membership, invitation, and moderator award producers create jobs only when their corresponding actions happen.
 
 ### 4. How manual actions work
 
