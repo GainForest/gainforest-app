@@ -11,9 +11,11 @@ import {
   ChevronLeftIcon,
   LeafIcon,
   LayoutGridIcon,
+  LockIcon,
   PlusIcon,
   SparkleIcon,
   UserIcon,
+  UsersIcon,
 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import packageJson from "@/package.json";
@@ -240,22 +242,37 @@ function ExploreNav({ sessionDid }: { sessionDid: string | null }) {
 
   /**
    * Why an entry is not public, from this viewer's side. Restricted entries
-   * always wear the padlock — without it an admin cannot tell a private view
-   * from a public one — but the wording has to match who is looking: a
-   * grantee seeing their own grant is not an admin.
+   * always carry a marker — without one a private view is indistinguishable
+   * from a public one — but both the icon and the wording have to match who
+   * is looking: a grantee seeing their own grant is not an admin, and a view
+   * shared with a whole organization is not the same as an admin console.
    */
-  const restrictionLabel = (item: NavLeaf): string | undefined => {
-    if (item.adminOnly) return adminOnlyT("label");
+  const restrictionFor = (item: NavLeaf): { label: string; Icon: typeof LockIcon } | undefined => {
+    if (item.adminOnly) return { label: adminOnlyT("label"), Icon: LockIcon };
     if (item.rewildingGranteeOnly) {
-      return isRewildingGrantee ? grantOnlyT("label") : adminOnlyT("label");
+      return isRewildingGrantee
+        ? { label: grantOnlyT("label"), Icon: UsersIcon }
+        : { label: adminOnlyT("label"), Icon: LockIcon };
     }
     return undefined;
   };
 
-  const renderSections = (items: typeof sections, showSectionLabels: boolean) =>
+  // A section with both everyday and specialist entries (FUNDING has both)
+  // is already labelled above the fold, so the "More" block must not repeat
+  // the heading — two FUNDING headers read as a mistake, not as structure.
+  const primaryLabelledIds = new Set(primarySections.map((section) => section.id));
+
+  const renderSections = (
+    items: typeof sections,
+    showSectionLabels: boolean,
+    /** Drop headings already shown in the primary block above. */
+    skipDuplicateLabels = false,
+  ) =>
     items.map((section, sectionIndex) => (
       <div key={section.id} className="flex flex-col gap-0.5">
-        {showSectionLabels && !collapsed ? (
+        {showSectionLabels &&
+        !(skipDuplicateLabels && primaryLabelledIds.has(section.id)) &&
+        !collapsed ? (
           <p className="px-2.5 pb-1 pt-1 text-[10px] font-medium uppercase tracking-[0.12em] text-muted-foreground">
             {sectionsT(section.id)}
           </p>
@@ -268,7 +285,7 @@ function ExploreNav({ sessionDid }: { sessionDid: string | null }) {
             return (
               <NavLeafRow
                 key={item.id}
-                item={{ ...item, text: t(item.id), restrictedLabel: restrictionLabel(item) }}
+                item={{ ...item, text: t(item.id), restriction: restrictionFor(item) }}
                 isActive={isLeafActive(item.pathCheck, pathname)}
                 index={leafIndex}
               />
@@ -308,7 +325,7 @@ function ExploreNav({ sessionDid }: { sessionDid: string | null }) {
             </SidebarTooltip>
           ) : (
             <>
-              <div className="flex flex-col gap-2">{renderSections(secondarySections, true)}</div>
+              <div className="flex flex-col gap-2">{renderSections(secondarySections, true, true)}</div>
               <SidebarTooltip label={sidebarT("hideMore")}>
                 <button
                   type="button"
@@ -381,8 +398,8 @@ function SidebarHeader() {
 
 /** A nav row, plus the resolved label + restriction marker for this viewer. */
 type NavLeafView = NavLeaf & {
-  /** Set when this entry is not public: says who may see it. */
-  restrictedLabel?: string;
+  /** Set when this entry is not public: icon + label saying who may see it. */
+  restriction?: { label: string; Icon: typeof LockIcon };
 };
 
 function NavLeafRow({ item, isActive, index, paired = false }: { item: NavLeafView; isActive: boolean; index: number; paired?: boolean }) {
@@ -428,9 +445,10 @@ function NavLeafRow({ item, isActive, index, paired = false }: { item: NavLeafVi
               <item.Icon className="h-4 w-4 shrink-0" />
             </span>
             {collapsed ? null : <span className="flex-1 text-left">{item.text}</span>}
-            {item.restrictedLabel ? (
+            {item.restriction ? (
               <RestrictedIndicator
-                label={item.restrictedLabel}
+                label={item.restriction.label}
+                Icon={item.restriction.Icon}
                 className={collapsed ? "absolute right-1 top-1" : undefined}
               />
             ) : null}
