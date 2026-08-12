@@ -234,7 +234,9 @@
     },
     "myCardsTitle": "Galeria dos Meus Bumicerts",
     "myCardsDescription": "Veja uma prévia da galeria de Bumicerts colecionados com exemplos.",
-    "testBadge": "TESTE"
+    "testBadge": "TESTE",
+    "mockRecipient": "Pessoa de exemplo",
+    "mockRecipientContext": "Vencedor do BioBlitz"
   },
   "myCards": {
     "eyebrow": "Colecionáveis",
@@ -249,11 +251,11 @@
     "oldestFirst": "Mais antigos primeiro",
     "verifiedOn": "Verificado em {date}",
     "tiers": {
-      "seedling": "Muda",
-      "sapling": "Jovem",
+      "seedling": "Broto",
+      "sapling": "Muda",
       "grove": "Bosque",
-      "canopy": "Dossel",
-      "oldGrowth": "Floresta antiga"
+      "canopy": "Copa",
+      "oldGrowth": "Floresta Antiga"
     },
     "emptyTitle": "Ainda não há Bumicerts",
     "emptyBody": "Doe para um projeto com a sessão iniciada e mostrando seu nome para ganhar seu primeiro Bumicert.",

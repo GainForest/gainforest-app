@@ -16,34 +16,31 @@ const MOCK_LINES: RewardLine[] = [
   { kind: "tip", title: "GainForest tip", orgName: "GainForest", amountUsd: 12, image: null },
 ];
 
-// A direct gift to another account (e.g. a prize payout) earns a person card.
-const MOCK_PERSON_CARD: EarnedCard = {
-  id: "at://did:plc:test/org.hypercerts.funding.receipt/4",
-  variant: "person",
-  totalUsd: 49,
-  lines: [
-    { kind: "donation", title: "Amara Okafor", orgName: "Bioblitz winner", amountUsd: 49, image: null, receiptUri: "at://did:plc:test/org.hypercerts.funding.receipt/4", cardEligible: true, txHash: `0x${"4".padStart(64, "0")}` },
-  ],
-  receiptUri: "at://did:plc:test/org.hypercerts.funding.receipt/4",
-  earnedAt: new Date(Date.UTC(2024, 6, 8)).toISOString(),
-  projectHref: null,
-  personHref: "/leaderboard",
-  paymentHref: null,
-};
-
-const MOCK_CARDS: EarnedCard[] = [
-  ...buildRewardCards(MOCK_LINES).map((card, index) => ({
-    ...card,
-    receiptUri: card.lines[0]!.receiptUri!,
-    earnedAt: new Date(Date.UTC(2024, 6, 4 + index)).toISOString(),
-    projectHref: "/projects",
-    paymentHref: null,
-  })),
-  MOCK_PERSON_CARD,
-];
-
 export function MyCardsExperienceClient() {
   const t = useTranslations("cart.testRegistry");
+  const mockPersonCard: EarnedCard = {
+    id: "at://did:plc:test/org.hypercerts.funding.receipt/4",
+    variant: "person",
+    totalUsd: 49,
+    lines: [
+      { kind: "donation", title: t("mockRecipient"), orgName: t("mockRecipientContext"), amountUsd: 49, image: null, receiptUri: "at://did:plc:test/org.hypercerts.funding.receipt/4", cardEligible: true, txHash: `0x${"4".padStart(64, "0")}` },
+    ],
+    receiptUri: "at://did:plc:test/org.hypercerts.funding.receipt/4",
+    earnedAt: new Date(Date.UTC(2024, 6, 8)).toISOString(),
+    projectHref: null,
+    personHref: "/leaderboard",
+    paymentHref: null,
+  };
+  const mockCards: EarnedCard[] = [
+    ...buildRewardCards(MOCK_LINES).map((card, index) => ({
+      ...card,
+      receiptUri: card.lines[0]!.receiptUri!,
+      earnedAt: new Date(Date.UTC(2024, 6, 4 + index)).toISOString(),
+      projectHref: "/projects",
+      paymentHref: null,
+    })),
+    mockPersonCard,
+  ];
 
   return (
     <main className="min-h-screen bg-background">
@@ -59,7 +56,7 @@ export function MyCardsExperienceClient() {
           </div>
         </div>
       </div>
-      <MyCardsView cards={MOCK_CARDS} />
+      <MyCardsView cards={mockCards} />
     </main>
   );
 }

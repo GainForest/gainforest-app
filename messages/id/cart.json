@@ -234,7 +234,9 @@
     },
     "myCardsTitle": "Galeri Bumicerts Saya",
     "myCardsDescription": "Pratinjau galeri Bumicerts yang telah dikumpulkan dengan contoh koleksi.",
-    "testBadge": "UJI"
+    "testBadge": "UJI",
+    "mockRecipient": "Penerima contoh",
+    "mockRecipientContext": "Pemenang BioBlitz"
   },
   "myCards": {
     "eyebrow": "Koleksi",
@@ -249,11 +251,11 @@
     "oldestFirst": "Terlama dahulu",
     "verifiedOn": "Terverifikasi {date}",
     "tiers": {
-      "seedling": "Semai",
-      "sapling": "Pancang",
+      "seedling": "Tunas",
+      "sapling": "Semai",
       "grove": "Rumpun",
       "canopy": "Kanopi",
-      "oldGrowth": "Hutan tua"
+      "oldGrowth": "Hutan Tua"
     },
     "emptyTitle": "Belum ada Bumicerts",
     "emptyBody": "Berdonasilah ke proyek saat masuk dan menampilkan nama Anda untuk mendapatkan Bumicert pertama.",

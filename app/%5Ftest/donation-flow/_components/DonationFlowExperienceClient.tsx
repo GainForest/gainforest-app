@@ -62,7 +62,13 @@ function DonationExperience({ onReset }: { onReset: () => void }) {
   }, [stage]);
 
   return (
-    <div ref={stageRegionRef} tabIndex={-1} className="outline-none">
+    <div
+      ref={stageRegionRef}
+      tabIndex={-1}
+      role="region"
+      aria-label={t(`stage.${stage}`)}
+      className="focus:outline-2 focus:outline-primary focus:outline-offset-2"
+    >
       {stage === "project" ? (
         <div className="mx-auto grid max-w-4xl gap-8 px-4 py-10 md:grid-cols-[minmax(0,1fr)_22rem] md:items-center md:px-6 md:py-14">
           <div className="max-w-xl">

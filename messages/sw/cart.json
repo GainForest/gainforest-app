@@ -234,7 +234,9 @@
     },
     "myCardsTitle": "Matunzio ya Bumicerts Zangu",
     "myCardsDescription": "Hakiki matunzio ya Bumicerts zilizokusanywa yenye mifano ya Bumicerts.",
-    "testBadge": "JARIBIO"
+    "testBadge": "JARIBIO",
+    "mockRecipient": "Mpokeaji wa mfano",
+    "mockRecipientContext": "Mshindi wa BioBlitz"
   },
   "myCards": {
     "eyebrow": "Bumicerts za kukusanya",
@@ -250,10 +252,10 @@
     "verifiedOn": "Imethibitishwa {date}",
     "tiers": {
       "seedling": "Mche",
-      "sapling": "Mti mchanga",
+      "sapling": "Mmea",
       "grove": "Kichaka",
-      "canopy": "Mwavuli wa msitu",
-      "oldGrowth": "Msitu wa kale"
+      "canopy": "Dari",
+      "oldGrowth": "Msitu wa Kale"
     },
     "emptyTitle": "Bado hakuna Bumicerts",
     "emptyBody": "Changia mradi ukiwa umeingia na ukionyesha jina lako ili kupata Bumicert yako ya kwanza.",

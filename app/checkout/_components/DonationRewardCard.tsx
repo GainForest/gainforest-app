@@ -126,7 +126,7 @@ export function DonationRewardCard({
             {/* Bold gradient rim. */}
             <div
               aria-hidden
-              className="absolute inset-0 rounded-[1.7rem]"
+              className="absolute inset-0 rounded-[1.3rem]"
               style={{ background: `linear-gradient(145deg, ${tier.foil})` }}
             />
 

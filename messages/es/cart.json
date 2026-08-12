@@ -234,7 +234,9 @@
     },
     "myCardsTitle": "Galería de Mis Bumicerts",
     "myCardsDescription": "Previsualiza la galería de Bumicerts coleccionados con coleccionables de muestra.",
-    "testBadge": "PRUEBA"
+    "testBadge": "PRUEBA",
+    "mockRecipient": "Persona de ejemplo",
+    "mockRecipientContext": "Ganador de BioBlitz"
   },
   "myCards": {
     "eyebrow": "Coleccionables",
