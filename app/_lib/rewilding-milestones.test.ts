@@ -5,6 +5,11 @@ import idCommon from "@/messages/id/common.json";
 import ptCommon from "@/messages/pt/common.json";
 import swCommon from "@/messages/sw/common.json";
 import {
+  effectiveRewildingGrantees,
+  parseRewildingGranteeRecord,
+  type RewildingGranteeRecord,
+} from "./rewilding-grantees";
+import {
   REWILDING_MILESTONES,
   doneRewildingMilestoneIds,
   effectiveRewildingMilestones,
@@ -149,5 +154,73 @@ describe("parseRewildingMilestoneRecord", () => {
     expect(
       parseRewildingMilestoneRecord({ uri, value: { subject: GRANTEE_A, milestoneId: "m1" } }),
     ).toBeNull();
+  });
+});
+
+describe("effectiveRewildingGrantees", () => {
+  const enrollment = (
+    subjectDid: string,
+    rkey: string,
+    active: boolean,
+    createdAt: string,
+  ): RewildingGranteeRecord => ({
+    rkey,
+    uri: `at://did:plc:moderation/app.gainforest.rewilding.grantee/${rkey}`,
+    subjectDid,
+    active,
+    createdAt,
+  });
+
+  it("keeps slot order: first accepted organization first", () => {
+    const records = [
+      enrollment(GRANTEE_B, "b1", true, "2026-02-01T00:00:00.000Z"),
+      enrollment(GRANTEE_A, "a1", true, "2026-01-01T00:00:00.000Z"),
+    ];
+
+    expect(effectiveRewildingGrantees(records).map((r) => r.subjectDid)).toEqual([
+      GRANTEE_A,
+      GRANTEE_B,
+    ]);
+  });
+
+  it("removal frees the slot; re-adding takes a new one at the end", () => {
+    const records = [
+      enrollment(GRANTEE_A, "a1", true, "2026-01-01T00:00:00.000Z"),
+      enrollment(GRANTEE_B, "b1", true, "2026-01-02T00:00:00.000Z"),
+      // A is removed, then accepted again after B.
+      enrollment(GRANTEE_A, "a2", false, "2026-01-03T00:00:00.000Z"),
+      enrollment(GRANTEE_A, "a3", true, "2026-01-04T00:00:00.000Z"),
+    ];
+
+    const current = effectiveRewildingGrantees(records);
+    expect(current.map((r) => r.subjectDid)).toEqual([GRANTEE_B, GRANTEE_A]);
+  });
+
+  it("a removed organization holds no slot", () => {
+    const records = [
+      enrollment(GRANTEE_A, "a1", true, "2026-01-01T00:00:00.000Z"),
+      enrollment(GRANTEE_A, "a2", false, "2026-01-02T00:00:00.000Z"),
+    ];
+
+    expect(effectiveRewildingGrantees(records)).toHaveLength(0);
+  });
+});
+
+describe("parseRewildingGranteeRecord", () => {
+  const uri = "at://did:plc:moderation/app.gainforest.rewilding.grantee/abc";
+
+  it("reads a well-formed enrollment", () => {
+    const parsed = parseRewildingGranteeRecord({
+      uri,
+      value: { subject: GRANTEE_A, active: true, createdAt: "2026-01-01T00:00:00.000Z" },
+    });
+    expect(parsed).toMatchObject({ rkey: "abc", subjectDid: GRANTEE_A, active: true });
+  });
+
+  it("rejects records without a DID subject or timestamp", () => {
+    expect(
+      parseRewildingGranteeRecord({ uri, value: { subject: "someone", createdAt: "2026-01-01T00:00:00.000Z" } }),
+    ).toBeNull();
+    expect(parseRewildingGranteeRecord({ uri, value: { subject: GRANTEE_A } })).toBeNull();
   });
 });

@@ -31,6 +31,7 @@ import {
 import { AdminOnlyIndicator } from "../AdminOnlyIndicator";
 import { SignInPrompt } from "../AuthFlow";
 import { NAV_ITEMS, isLeafActive, type NavLeaf } from "./nav-config";
+import { useIsRewildingGrantee } from "./use-rewilding-grantee";
 import { useCanonicalPathname } from "./paths";
 import { SidebarCollapsedProvider, SidebarTooltip, useSidebarCollapsed } from "./sidebar-context";
 import { AddObservationsButton, CreateProjectButton, useActiveContextHasProjects } from "./context-actions";
@@ -196,12 +197,20 @@ function ExploreNav({ sessionDid }: { sessionDid: string | null }) {
   // the routes themselves re-check access server-side.
   const { groups } = useAccountList(sessionDid);
   const isModerator = groups.some((group) => group.groupDid === GAINFOREST_MODERATION_REPO_DID);
+  // Organizations enrolled in a Rewilding grant slot see the grantee
+  // dashboard entries; moderators see them too, as a preview.
+  const isRewildingGrantee = useIsRewildingGrantee(sessionDid);
   const sections = NAV_ITEMS.map((section) => ({
     ...section,
     // Organizations are already reached through profiles and the account
     // switcher; repeating the directory here adds noise without helping the
     // everyday Feed → Projects → Observations flow.
-    items: section.items.filter((item) => item.id !== "organizations" && (!item.adminOnly || isModerator)),
+    items: section.items.filter(
+      (item) =>
+        item.id !== "organizations" &&
+        (!item.adminOnly || isModerator) &&
+        (!item.rewildingGranteeOnly || isModerator || isRewildingGrantee),
+    ),
   })).filter((section) => section.items.length > 0);
 
   // Keep the everyday path short for new visitors. Specialist destinations

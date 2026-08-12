@@ -1313,9 +1313,8 @@
     },
     "rewilding": {
       "title": "Kurudisha Uasilia kwenye Wavuti",
-      "description": "Hatua muhimu za mkataba na nyaraka za ruzuku za kila mpokeaji. Kuweka hatua kama imekamilika ni uthibitisho wa GainForest — hufungua awamu ya malipo husika.",
+      "description": "Nafasi kumi za programu. Kuongeza shirika kwenye nafasi kunalikubali kwenye ruzuku — tangu hapo akaunti yake inaweza kufungua dashibodi yake ya hatua muhimu. Kuweka hatua kama imekamilika ni uthibitisho wa GainForest — hufungua awamu ya malipo husika.",
       "footer": "Mabadiliko ya hatua muhimu na nyaraka huonekana mara moja kwenye ukurasa wa ruzuku wa mpokeaji.",
-      "empty": "Hakuna wapokeaji bado. Wataonekana hapa mtu anapoomba ruzuku au ruzuku inapoandaliwa.",
       "unnamedGrantee": "Akaunti isiyo na jina",
       "granteeBadge": "Beji ya ruzuku",
       "summary": "Hatua {done} kati ya {total} zimethibitishwa · {documents, plural, =0 {hakuna nyaraka} one {waraka #} other {nyaraka #}}",
@@ -1342,7 +1341,20 @@
       "fileTypeUnsupported": "PDF, picha au hati za Word pekee ndizo zinaweza kupakiwa.",
       "delete": "Futa {title}",
       "deleteConfirm": "Futa “{title}”? Mpokeaji hataiona tena.",
-      "openProfile": "Fungua wasifu"
+      "openProfile": "Fungua wasifu",
+      "slotOpen": "Nafasi {number} · wazi",
+      "addTitle": "Ongeza shirika",
+      "addHint": "Tafuta akaunti ya kujaza nafasi hii. Kuiongeza hufungua dashibodi yao ya hatua muhimu.",
+      "searchPlaceholder": "Tafuta akaunti kwa jina…",
+      "searching": "Inatafuta…",
+      "searchEmpty": "Hakuna akaunti inayolingana na “{query}”.",
+      "alreadyEnrolled": "Tayari yumo kwenye ruzuku",
+      "add": "Ongeza",
+      "adding": "Inaongeza…",
+      "slotsFull": "Nafasi zote kumi zimejaa. Ondoa shirika moja kabla ya kuongeza jingine.",
+      "remove": "Ondoa kwenye ruzuku",
+      "removing": "Inaondoa…",
+      "removeConfirm": "Ondoa “{name}” kwenye ruzuku? Hatua muhimu na nyaraka zao zinabaki, lakini wanapoteza ufikiaji wa dashibodi yao ya ruzuku na nafasi inakuwa wazi."
     },
     "pages": {
       "hub": {

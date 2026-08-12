@@ -1313,9 +1313,8 @@
     },
     "rewilding": {
       "title": "Rewilding the Web",
-      "description": "Each grantee's contract milestones and grant documents. Marking a milestone done is GainForest's confirmation — it releases the matching payment tranche.",
+      "description": "The program's ten slots. Adding an organization to a slot admits them to the grant — from then on their account can open its own milestone dashboard. Marking a milestone done is GainForest's confirmation — it releases the matching payment tranche.",
       "footer": "Milestone changes and documents show up on the grantee's grant page right away.",
-      "empty": "No grantees yet. They appear here once someone applies for the grant or a grant is set up.",
       "unnamedGrantee": "Unnamed account",
       "granteeBadge": "Grant badge",
       "summary": "{done} of {total} milestones confirmed · {documents, plural, =0 {no documents} one {# document} other {# documents}}",
@@ -1342,7 +1341,20 @@
       "fileTypeUnsupported": "Only PDF, image or Word documents can be uploaded.",
       "delete": "Delete {title}",
       "deleteConfirm": "Delete “{title}”? The grantee will no longer see it.",
-      "openProfile": "Open profile"
+      "openProfile": "Open profile",
+      "slotOpen": "Slot {number} · open",
+      "addTitle": "Add an organization",
+      "addHint": "Search for an account to fill this slot. Adding it opens their milestone dashboard.",
+      "searchPlaceholder": "Search accounts by name…",
+      "searching": "Searching…",
+      "searchEmpty": "No accounts match “{query}”.",
+      "alreadyEnrolled": "Already in the grant",
+      "add": "Add",
+      "adding": "Adding…",
+      "slotsFull": "All ten slots are taken. Remove an organization before adding another.",
+      "remove": "Remove from the grant",
+      "removing": "Removing…",
+      "removeConfirm": "Remove “{name}” from the grant? Their milestones and documents are kept, but they lose access to their grant dashboard and the slot opens up."
     },
     "pages": {
       "hub": {

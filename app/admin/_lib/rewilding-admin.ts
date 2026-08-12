@@ -10,13 +10,18 @@ import {
   fetchRewildingMilestones,
   type RewildingMilestoneId,
 } from "@/app/_lib/rewilding-milestones";
+import {
+  effectiveRewildingGrantees,
+  fetchRewildingGrantees,
+} from "@/app/_lib/rewilding-grantees";
 import { listRewildingDocuments } from "./rewilding-documents";
 
 /**
  * Row assembly for the admin panel's "Rewilding the Web" section: one row per
- * grantee (everyone who applied for the grant, plus anyone who already has
- * milestone records or documents), each carrying the current milestone states
- * and uploaded grant documents.
+ * enrolled organization, in slot order (first accepted first), each carrying
+ * the current milestone states and uploaded grant documents. Only explicitly
+ * enrolled organizations appear — applying for the grant puts someone in the
+ * applicants list, not in a slot.
  *
  * Documents are private: rows carry only their metadata, never a URL. The
  * file itself is fetched through the admin-gated download route, which mints
@@ -50,12 +55,18 @@ export type RewildingAdminGrantee = {
   hasGrantBadge: boolean;
   /** The application post text, when the grantee applied through the feed. */
   applicationText: string | null;
+  /** When this organization was accepted into its slot. */
+  enrolledAt: string;
   milestones: RewildingAdminMilestone[];
   documents: RewildingAdminDocument[];
 };
 
-/** One row per grantee: badge holders first, then newest applicants. */
+/** One row per enrolled organization, in slot order. */
 export async function fetchRewildingAdminGrantees(): Promise<RewildingAdminGrantee[]> {
+  const enrollmentRecords = await fetchRewildingGrantees().catch(() => []);
+  const enrolled = effectiveRewildingGrantees(enrollmentRecords);
+  if (enrolled.length === 0) return [];
+
   const [applicants, milestoneRecords, documentRecords] = await Promise.all([
     fetchGrantApplicants().catch(() => []),
     fetchRewildingMilestones().catch(() => []),
@@ -63,24 +74,8 @@ export async function fetchRewildingAdminGrantees(): Promise<RewildingAdminGrant
   ]);
 
   const currentMilestones = effectiveRewildingMilestones(milestoneRecords);
-
-  // Applicants plus any DID that already has grant records — a grantee may
-  // have been onboarded without an application post.
-  const dids: string[] = [];
-  const seen = new Set<string>();
-  for (const applicant of applicants) {
-    if (!seen.has(applicant.did)) {
-      seen.add(applicant.did);
-      dids.push(applicant.did);
-    }
-  }
-  for (const record of [...currentMilestones, ...documentRecords]) {
-    if (!seen.has(record.subjectDid)) {
-      seen.add(record.subjectDid);
-      dids.push(record.subjectDid);
-    }
-  }
-  if (dids.length === 0) return [];
+  const dids = enrolled.map((record) => record.subjectDid);
+  const enrolledAtByDid = new Map(enrolled.map((record) => [record.subjectDid, record.createdAt]));
 
   const applicantByDid = new Map(applicants.map((applicant) => [applicant.did, applicant]));
   const extraDids = dids.filter((did) => !applicantByDid.has(did));
@@ -118,6 +113,7 @@ export async function fetchRewildingAdminGrantees(): Promise<RewildingAdminGrant
         avatarUrl: applicant?.avatarUrl ?? profile?.avatarUrl ?? null,
         hasGrantBadge: badges.get(did)?.has("rewilding-grant") ?? false,
         applicationText: applicant?.applicationText || null,
+        enrolledAt: enrolledAtByDid.get(did) ?? "",
         milestones: REWILDING_MILESTONES.map((definition) => ({
           id: definition.id,
           code: definition.code,
@@ -130,10 +126,6 @@ export async function fetchRewildingAdminGrantees(): Promise<RewildingAdminGrant
     }),
   );
 
-  // Badge holders (actual grantees) first, then by name for a stable list.
-  return rows.sort(
-    (a, b) =>
-      Number(b.hasGrantBadge) - Number(a.hasGrantBadge) ||
-      (a.displayName ?? "").localeCompare(b.displayName ?? "", undefined, { sensitivity: "base" }),
-  );
+  // Slot order: the first organization accepted holds the first slot.
+  return rows.sort((a, b) => a.enrolledAt.localeCompare(b.enrolledAt) || a.did.localeCompare(b.did));
 }

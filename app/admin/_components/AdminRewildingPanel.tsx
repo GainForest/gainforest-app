@@ -1,28 +1,44 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useFormatter, useTranslations } from "next-intl";
-import { CheckIcon, ChevronDownIcon, FileTextIcon, LockIcon, Trash2Icon, UploadIcon } from "lucide-react";
+import {
+  CheckIcon,
+  ChevronDownIcon,
+  FileTextIcon,
+  LockIcon,
+  SearchIcon,
+  Trash2Icon,
+  UploadIcon,
+  UserRoundPlusIcon,
+} from "lucide-react";
 import { cn } from "@/lib/utils";
 import { formatRelative } from "@/app/_lib/format";
+import { REWILDING_GRANT_SLOTS } from "@/app/_lib/rewilding-grantees";
 import { accountPath } from "@/app/account/_lib/account-route";
 import type {
   RewildingAdminDocument,
   RewildingAdminGrantee,
   RewildingAdminMilestone,
 } from "../_lib/rewilding-admin";
-import { AdminAvatar, AdminEmptyState } from "./AdminPanel";
+import { AdminAvatar } from "./AdminPanel";
 
 /**
- * "Rewilding the Web" admin section: per grantee, the contract milestone
- * checklist (marking one done is GainForest's confirmation — it releases the
- * matching payment tranche) and the grant documents (contract etc.) uploaded
- * right here. All writes go through /api/admin/rewilding.
+ * "Rewilding the Web" admin section: the program's ten slots.
+ *
+ * A slot is either held by an enrolled organization or open. Enrolling an
+ * organization (search by name, add) is what admits them to the program —
+ * from that moment their account can open the grantee dashboard at
+ * /grants/my-grant. Each filled slot expands into the contract milestone
+ * checklist (marking one done is GainForest's confirmation — it releases
+ * the matching payment tranche) and the private grant documents.
+ * All writes go through /api/admin/rewilding.
  *
  * Documents are private to the admin group: they are stored outside the
- * public repo and have no shareable URL, so opening one asks the server for a
- * link that expires within minutes.
+ * public repo and have no shareable URL, so opening one asks the server for
+ * a link that expires within minutes.
  */
 
 const MAX_FILE_BYTES = 3 * 1024 * 1024;
@@ -60,29 +76,189 @@ export function AdminRewildingPanel({
   documentStorageConfigured: boolean;
 }) {
   const t = useTranslations("common.adminModeration.rewilding");
-  if (grantees.length === 0) return <AdminEmptyState>{t("empty")}</AdminEmptyState>;
+  const openSlots = Math.max(0, REWILDING_GRANT_SLOTS - grantees.length);
+
   return (
     <ul className="flex flex-col gap-3">
-      {grantees.map((grantee) => (
+      {grantees.map((grantee, index) => (
         <GranteeCard
           key={grantee.did}
           grantee={grantee}
+          slotNumber={index + 1}
           documentStorageConfigured={documentStorageConfigured}
         />
       ))}
+      {openSlots > 0 ? <AddGranteeSlot slotNumber={grantees.length + 1} /> : null}
+      {Array.from({ length: Math.max(0, openSlots - 1) }, (_, index) => {
+        const slotNumber = grantees.length + 2 + index;
+        return (
+          <li
+            key={`open-${slotNumber}`}
+            className="flex items-center gap-3 rounded-2xl border border-dashed border-border px-3.5 py-3 text-sm text-muted-foreground/70"
+          >
+            <span className="grid size-10 shrink-0 place-items-center rounded-full border border-dashed border-border text-[11px] font-semibold">
+              {slotNumber}
+            </span>
+            {t("slotOpen", { number: slotNumber })}
+          </li>
+        );
+      })}
     </ul>
+  );
+}
+
+type GranteeSearchResult = {
+  did: string;
+  displayName: string;
+  handle: string | null;
+  avatarUrl: string | null;
+  alreadyEnrolled: boolean;
+};
+
+/**
+ * The next open slot: search certified profiles by name and enroll one into
+ * the program. Enrollment is what unlocks the grantee dashboard for that
+ * account, so this is the program's front door — the server re-checks the
+ * ten-slot cap on every add.
+ */
+function AddGranteeSlot({ slotNumber }: { slotNumber: number }) {
+  const t = useTranslations("common.adminModeration.rewilding");
+  const router = useRouter();
+  const [query, setQuery] = useState("");
+  const [results, setResults] = useState<GranteeSearchResult[] | null>(null);
+  const [searching, setSearching] = useState(false);
+  const [addingDid, setAddingDid] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  // Debounced name search against the moderator-gated endpoint.
+  useEffect(() => {
+    const q = query.trim();
+    if (q.length < 2) {
+      setResults(null);
+      setSearching(false);
+      return;
+    }
+    setSearching(true);
+    const controller = new AbortController();
+    const timer = setTimeout(async () => {
+      try {
+        const response = await fetch(
+          `/api/admin/rewilding/search?q=${encodeURIComponent(q)}`,
+          { signal: controller.signal },
+        );
+        const json = (await response.json().catch(() => null)) as
+          | { results?: GranteeSearchResult[] }
+          | null;
+        if (!response.ok) throw new Error("search_failed");
+        setResults(json?.results ?? []);
+      } catch (cause) {
+        if (!(cause instanceof DOMException && cause.name === "AbortError")) setResults([]);
+      } finally {
+        if (!controller.signal.aborted) setSearching(false);
+      }
+    }, 300);
+    return () => {
+      controller.abort();
+      clearTimeout(timer);
+    };
+  }, [query]);
+
+  const add = async (result: GranteeSearchResult) => {
+    if (addingDid) return;
+    setAddingDid(result.did);
+    setError(null);
+    try {
+      await postAction({ action: "addGrantee", subjectDid: result.did });
+      setQuery("");
+      setResults(null);
+      // The row needs the server-side joins (milestones, badge, application
+      // text), so re-render the page from the loader instead of guessing.
+      router.refresh();
+    } catch (cause) {
+      const code = cause instanceof Error ? cause.message : "save_failed";
+      setError(code === "slots_full" ? t("slotsFull") : t("error"));
+    } finally {
+      setAddingDid(null);
+    }
+  };
+
+  return (
+    <li className="flex flex-col gap-2.5 rounded-2xl border border-dashed border-primary/40 bg-primary/[0.03] px-3.5 py-3">
+      <div className="flex items-center gap-3">
+        <span className="grid size-10 shrink-0 place-items-center rounded-full border border-dashed border-primary/40 text-[11px] font-semibold text-primary">
+          {slotNumber}
+        </span>
+        <div className="flex min-w-0 flex-1 flex-col">
+          <span className="flex items-center gap-1.5 text-sm font-medium text-foreground">
+            <UserRoundPlusIcon className="size-3.5 text-primary" aria-hidden />
+            {t("addTitle")}
+          </span>
+          <span className="text-xs text-muted-foreground">{t("addHint")}</span>
+        </div>
+      </div>
+
+      <div className="relative">
+        <SearchIcon className="pointer-events-none absolute left-3 top-1/2 size-3.5 -translate-y-1/2 text-muted-foreground" aria-hidden />
+        <input
+          type="search"
+          value={query}
+          onChange={(event) => setQuery(event.target.value)}
+          placeholder={t("searchPlaceholder")}
+          aria-label={t("addTitle")}
+          className="h-9 w-full rounded-lg border border-border bg-background pl-9 pr-3 text-sm text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+        />
+      </div>
+
+      {searching ? (
+        <p className="text-xs text-muted-foreground">{t("searching")}</p>
+      ) : results !== null && results.length === 0 ? (
+        <p className="text-xs text-muted-foreground">{t("searchEmpty", { query: query.trim() })}</p>
+      ) : results !== null ? (
+        <ul className="flex flex-col divide-y divide-border/60 overflow-hidden rounded-xl border border-border bg-background">
+          {results.map((result) => (
+            <li key={result.did} className="flex items-center gap-2.5 px-3 py-2">
+              <AdminAvatar url={result.avatarUrl} />
+              <span className="flex min-w-0 flex-1 flex-col">
+                <span className="truncate text-sm font-medium text-foreground">{result.displayName}</span>
+                {result.handle ? (
+                  <span className="truncate text-[11px] text-muted-foreground">@{result.handle}</span>
+                ) : null}
+              </span>
+              {result.alreadyEnrolled ? (
+                <span className="shrink-0 rounded-full border border-border px-2.5 py-1 text-[11px] font-medium text-muted-foreground">
+                  {t("alreadyEnrolled")}
+                </span>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => add(result)}
+                  disabled={addingDid !== null}
+                  className="shrink-0 rounded-full border border-primary/40 bg-primary px-3 py-1.5 text-xs font-semibold text-primary-foreground shadow-sm transition-colors hover:bg-primary/90 disabled:pointer-events-none disabled:opacity-50"
+                >
+                  {addingDid === result.did ? t("adding") : t("add")}
+                </button>
+              )}
+            </li>
+          ))}
+        </ul>
+      ) : null}
+
+      {error ? <p className="text-xs text-destructive">{error}</p> : null}
+    </li>
   );
 }
 
 function GranteeCard({
   grantee,
+  slotNumber,
   documentStorageConfigured,
 }: {
   grantee: RewildingAdminGrantee;
+  slotNumber: number;
   documentStorageConfigured: boolean;
 }) {
   const t = useTranslations("common.adminModeration.rewilding");
-  const [open, setOpen] = useState(grantee.hasGrantBadge);
+  const [open, setOpen] = useState(false);
   const [milestones, setMilestones] = useState(grantee.milestones);
   const [documents, setDocuments] = useState(grantee.documents);
   const doneCount = milestones.filter((milestone) => milestone.done).length;
@@ -95,6 +271,9 @@ function GranteeCard({
         aria-expanded={open}
         className="flex w-full items-center gap-3 px-3.5 py-3 text-left transition-colors hover:bg-muted/40"
       >
+        <span className="grid size-5 shrink-0 place-items-center self-center rounded-full bg-muted text-[10px] font-semibold tabular-nums text-muted-foreground">
+          {slotNumber}
+        </span>
         <AdminAvatar url={grantee.avatarUrl} />
         <span className="flex min-w-0 flex-1 flex-col">
           <span className="flex flex-wrap items-center gap-2">
@@ -165,15 +344,52 @@ function GranteeCard({
             )}
           </section>
 
-          <Link
-            href={accountPath(grantee.did)}
-            className="self-start text-xs font-medium text-primary hover:underline"
-          >
-            {t("openProfile")}
-          </Link>
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <Link
+              href={accountPath(grantee.did)}
+              className="text-xs font-medium text-primary hover:underline"
+            >
+              {t("openProfile")}
+            </Link>
+            <RemoveGranteeButton grantee={grantee} />
+          </div>
         </div>
       ) : null}
     </li>
+  );
+}
+
+/** Frees the slot. Milestones and documents are kept — removal only takes
+ *  away dashboard access and the seat, and it can be reversed by re-adding. */
+function RemoveGranteeButton({ grantee }: { grantee: RewildingAdminGrantee }) {
+  const t = useTranslations("common.adminModeration.rewilding");
+  const router = useRouter();
+  const [pending, setPending] = useState(false);
+
+  const remove = async () => {
+    if (pending) return;
+    const name = grantee.displayName || t("unnamedGrantee");
+    if (!window.confirm(t("removeConfirm", { name }))) return;
+    setPending(true);
+    try {
+      await postAction({ action: "removeGrantee", subjectDid: grantee.did });
+      router.refresh();
+    } catch {
+      window.alert(t("error"));
+    } finally {
+      setPending(false);
+    }
+  };
+
+  return (
+    <button
+      type="button"
+      onClick={remove}
+      disabled={pending}
+      className="text-xs font-medium text-muted-foreground transition-colors hover:text-destructive disabled:pointer-events-none disabled:opacity-50"
+    >
+      {pending ? t("removing") : t("remove")}
+    </button>
   );
 }
 

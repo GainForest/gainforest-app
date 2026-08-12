@@ -915,7 +915,8 @@
       },
       "shell": {
         "eyebrow": "Rewilding the Web · onyesho la awali la msimamizi",
-        "placeholderNotice": "Takwimu za kurekodi kwenye ukurasa huu bado hazijaunganishwa na rekodi halisi, kwa hivyo tarakimu hizo zinasoma sifuri. Hatua muhimu na nyaraka za ruzuku ni halisi."
+        "placeholderNotice": "Takwimu za kurekodi kwenye ukurasa huu bado hazijaunganishwa na rekodi halisi, kwa hivyo tarakimu hizo zinasoma sifuri. Hatua muhimu na nyaraka za ruzuku ni halisi.",
+        "granteeEyebrow": "Kurudisha Uasilia kwenye Wavuti"
       }
     }
   },

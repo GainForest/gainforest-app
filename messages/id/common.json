@@ -1313,9 +1313,8 @@
     },
     "rewilding": {
       "title": "Meliarkan Kembali Web",
-      "description": "Tonggak kontrak dan dokumen hibah setiap penerima. Menandai tonggak selesai adalah konfirmasi GainForest — itu mencairkan tahap pembayaran terkait.",
+      "description": "Sepuluh slot program. Menambahkan organisasi ke sebuah slot berarti menerimanya ke dalam hibah — sejak itu akunnya dapat membuka dasbor tonggaknya sendiri. Menandai tonggak selesai adalah konfirmasi GainForest — itu mencairkan tahap pembayaran terkait.",
       "footer": "Perubahan tonggak dan dokumen langsung terlihat di halaman hibah penerima.",
-      "empty": "Belum ada penerima hibah. Mereka muncul di sini setelah seseorang mendaftar hibah atau hibah disiapkan.",
       "unnamedGrantee": "Akun tanpa nama",
       "granteeBadge": "Lencana hibah",
       "summary": "{done} dari {total} tonggak dikonfirmasi · {documents, plural, =0 {tanpa dokumen} other {# dokumen}}",
@@ -1342,7 +1341,20 @@
       "fileTypeUnsupported": "Hanya PDF, gambar, atau dokumen Word yang dapat diunggah.",
       "delete": "Hapus {title}",
       "deleteConfirm": "Hapus “{title}”? Penerima tidak akan melihatnya lagi.",
-      "openProfile": "Buka profil"
+      "openProfile": "Buka profil",
+      "slotOpen": "Slot {number} · kosong",
+      "addTitle": "Tambahkan organisasi",
+      "addHint": "Cari akun untuk mengisi slot ini. Menambahkannya membuka dasbor tonggak mereka.",
+      "searchPlaceholder": "Cari akun berdasarkan nama…",
+      "searching": "Mencari…",
+      "searchEmpty": "Tidak ada akun yang cocok dengan “{query}”.",
+      "alreadyEnrolled": "Sudah dalam hibah",
+      "add": "Tambah",
+      "adding": "Menambahkan…",
+      "slotsFull": "Kesepuluh slot sudah terisi. Keluarkan satu organisasi sebelum menambahkan yang lain.",
+      "remove": "Keluarkan dari hibah",
+      "removing": "Mengeluarkan…",
+      "removeConfirm": "Keluarkan “{name}” dari hibah? Tonggak dan dokumennya tetap tersimpan, tetapi mereka kehilangan akses ke dasbor hibahnya dan slot menjadi kosong."
     },
     "pages": {
       "hub": {

@@ -915,7 +915,8 @@
       },
       "shell": {
         "eyebrow": "Rewilding the Web · pratinjau admin",
-        "placeholderNotice": "Statistik perekaman di halaman ini belum terhubung ke catatan nyata, jadi angka itu masih nol. Tonggak dan dokumen hibah sudah aktif."
+        "placeholderNotice": "Statistik perekaman di halaman ini belum terhubung ke catatan nyata, jadi angka itu masih nol. Tonggak dan dokumen hibah sudah aktif.",
+        "granteeEyebrow": "Meliarkan Kembali Web"
       }
     }
   },

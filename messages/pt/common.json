@@ -1313,9 +1313,8 @@
     },
     "rewilding": {
       "title": "Resselvagem da web",
-      "description": "Os marcos do contrato e os documentos de cada beneficiário. Marcar um marco como concluído é a confirmação da GainForest — isso libera a parcela de pagamento correspondente.",
+      "description": "As dez vagas do programa. Adicionar uma organização a uma vaga a admite no subsídio — a partir daí a conta dela pode abrir o próprio painel de marcos. Marcar um marco como concluído é a confirmação da GainForest — isso libera a parcela de pagamento correspondente.",
       "footer": "Alterações de marcos e documentos aparecem imediatamente na página do subsídio do beneficiário.",
-      "empty": "Ainda não há beneficiários. Eles aparecem aqui quando alguém se candidata ao subsídio ou um subsídio é configurado.",
       "unnamedGrantee": "Conta sem nome",
       "granteeBadge": "Selo do subsídio",
       "summary": "{done} de {total} marcos confirmados · {documents, plural, =0 {sem documentos} one {# documento} other {# documentos}}",
@@ -1342,7 +1341,20 @@
       "fileTypeUnsupported": "Só é possível enviar PDF, imagens ou documentos do Word.",
       "delete": "Excluir {title}",
       "deleteConfirm": "Excluir “{title}”? O beneficiário deixará de vê-lo.",
-      "openProfile": "Abrir perfil"
+      "openProfile": "Abrir perfil",
+      "slotOpen": "Vaga {number} · aberta",
+      "addTitle": "Adicionar uma organização",
+      "addHint": "Busque uma conta para ocupar esta vaga. Adicioná-la abre o painel de marcos dela.",
+      "searchPlaceholder": "Buscar contas por nome…",
+      "searching": "Buscando…",
+      "searchEmpty": "Nenhuma conta corresponde a “{query}”.",
+      "alreadyEnrolled": "Já está no subsídio",
+      "add": "Adicionar",
+      "adding": "Adicionando…",
+      "slotsFull": "As dez vagas estão ocupadas. Remova uma organização antes de adicionar outra.",
+      "remove": "Remover do subsídio",
+      "removing": "Removendo…",
+      "removeConfirm": "Remover “{name}” do subsídio? Os marcos e documentos são mantidos, mas a organização perde o acesso ao painel do subsídio e a vaga fica aberta."
     },
     "pages": {
       "hub": {

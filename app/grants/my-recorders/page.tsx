@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
-import { getGainForestModeratorAccess } from "@/app/internal/badges/_lib/access";
+import { getRewildingDashboardAccess } from "../_lib/rewilding-access";
 import { fetchRecorders } from "../_lib/rewilding-grant";
 import { MyRecordersView } from "../_components/rewilding/MyRecordersView";
 import { RewildingPageShell } from "../_components/rewilding/RewildingPageShell";
@@ -16,8 +16,8 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 /**
- * "My recorders" — the grantee's device inventory, admin-gated like the grant
- * overview.
+ * "My recorders" — the grantee's device inventory, gated like the grant
+ * overview: enrolled grantees plus GainForest admins as a preview.
  *
  * Adding a recorder renders greyed out: there is no record type to write a
  * recorder to yet, so a working Save button would silently discard what the
@@ -27,8 +27,8 @@ export async function generateMetadata(): Promise<Metadata> {
  * lands and it enables itself; `AddRecorderForm` is already wired to it.
  */
 export default async function MyRecordersPage() {
-  const moderator = await getGainForestModeratorAccess().catch(() => null);
-  if (!moderator?.isModerator) {
+  const access = await getRewildingDashboardAccess();
+  if (!access.allowed) {
     notFound();
   }
 
@@ -36,7 +36,7 @@ export default async function MyRecordersPage() {
   const recorders = await fetchRecorders();
 
   return (
-    <RewildingPageShell>
+    <RewildingPageShell isAdminPreview={access.isAdminPreview}>
       <MyRecordersView recorders={recorders} canAddRecorders addDisabledNote={t("addNotBuilt")} />
     </RewildingPageShell>
   );

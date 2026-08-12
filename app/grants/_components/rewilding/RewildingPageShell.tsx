@@ -5,18 +5,28 @@ import { AdminOnlyIndicator } from "@/app/_components/AdminOnlyIndicator";
 import { REWILDING_DASHBOARD_USES_PLACEHOLDER_DATA } from "../../_lib/rewilding-grant";
 
 /**
- * Shared chrome for the two Rewilding dashboard routes. Both are admin-gated
- * and both currently render placeholder data, so the shell states that plainly
- * rather than letting an admin mistake the numbers for a real grant's.
+ * Shared chrome for the two Rewilding dashboard routes.
+ *
+ * An enrolled grantee sees their own dashboard, plainly headed. An admin sees
+ * the same pages as a preview and the shell says so — the eyebrow carries the
+ * admin marker so a preview is never mistaken for a real grant's state. The
+ * recording stats are placeholder either way, and the notice states that.
  */
-export async function RewildingPageShell({ children }: { children: React.ReactNode }) {
+export async function RewildingPageShell({
+  children,
+  isAdminPreview,
+}: {
+  children: React.ReactNode;
+  /** True when the viewer is an admin previewing, not an enrolled grantee. */
+  isAdminPreview: boolean;
+}) {
   const t = await getTranslations("marketplace.grants.rewildingDashboard.shell");
 
   return (
     <Container className="flex flex-col gap-4 py-6">
       <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">
-        <AdminOnlyIndicator />
-        {t("eyebrow")}
+        {isAdminPreview ? <AdminOnlyIndicator /> : null}
+        {isAdminPreview ? t("eyebrow") : t("granteeEyebrow")}
       </div>
 
       {REWILDING_DASHBOARD_USES_PLACEHOLDER_DATA ? (

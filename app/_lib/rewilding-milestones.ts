@@ -116,8 +116,9 @@ export function parseRewildingMilestoneRecord(entry: unknown): RewildingMileston
   };
 }
 
-/** Page through a collection on the moderation account's PDS. */
-async function listModerationRecords(
+/** Page through a collection on the moderation account's PDS. Shared with
+ *  the other Rewilding record types (grantee enrollment). */
+export async function listModerationRecords(
   repoDid: string,
   collection: string,
   signal?: AbortSignal,

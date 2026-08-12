@@ -1313,9 +1313,8 @@
     },
     "rewilding": {
       "title": "Resilvestrar la web",
-      "description": "Los hitos del contrato y los documentos de cada beneficiario. Marcar un hito como hecho es la confirmación de GainForest: libera la parte del pago correspondiente.",
+      "description": "Los diez cupos del programa. Añadir una organización a un cupo la admite en la subvención: desde entonces su cuenta puede abrir su propio panel de hitos. Marcar un hito como hecho es la confirmación de GainForest: libera la parte del pago correspondiente.",
       "footer": "Los cambios de hitos y los documentos aparecen de inmediato en la página de subvención del beneficiario.",
-      "empty": "Todavía no hay beneficiarios. Aparecerán aquí cuando alguien solicite la subvención o se configure una.",
       "unnamedGrantee": "Cuenta sin nombre",
       "granteeBadge": "Insignia de subvención",
       "summary": "{done} de {total} hitos confirmados · {documents, plural, =0 {sin documentos} one {# documento} other {# documentos}}",
@@ -1342,7 +1341,20 @@
       "fileTypeUnsupported": "Solo se pueden subir PDF, imágenes o documentos de Word.",
       "delete": "Eliminar {title}",
       "deleteConfirm": "¿Eliminar “{title}”? El beneficiario dejará de verlo.",
-      "openProfile": "Abrir perfil"
+      "openProfile": "Abrir perfil",
+      "slotOpen": "Cupo {number} · libre",
+      "addTitle": "Añadir una organización",
+      "addHint": "Busca una cuenta para ocupar este cupo. Al añadirla se abre su panel de hitos.",
+      "searchPlaceholder": "Buscar cuentas por nombre…",
+      "searching": "Buscando…",
+      "searchEmpty": "Ninguna cuenta coincide con “{query}”.",
+      "alreadyEnrolled": "Ya está en la subvención",
+      "add": "Añadir",
+      "adding": "Añadiendo…",
+      "slotsFull": "Los diez cupos están ocupados. Quita una organización antes de añadir otra.",
+      "remove": "Quitar de la subvención",
+      "removing": "Quitando…",
+      "removeConfirm": "¿Quitar a “{name}” de la subvención? Sus hitos y documentos se conservan, pero pierde el acceso a su panel de subvención y el cupo queda libre."
     },
     "pages": {
       "hub": {

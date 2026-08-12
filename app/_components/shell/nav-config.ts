@@ -27,6 +27,10 @@ export type NavLeaf = {
   /** Only shown to GainForest admin-group members (any role). The route
    *  itself must re-check access server-side — hiding the item is cosmetic. */
   adminOnly?: boolean;
+  /** Shown to organizations enrolled in a Rewilding grant slot, and to
+   *  GainForest admins (who can preview the dashboard). Cosmetic, like
+   *  adminOnly — the routes re-check server-side. */
+  rewildingGranteeOnly?: boolean;
 };
 
 export type NavSection = {
@@ -119,9 +123,10 @@ export const NAV_ITEMS: NavSection[] = [
         // own their own rows below, so they must not light this one up.
         pathCheck: { equals: "/grants" },
       },
-      // The Rewilding the Web grantee dashboard. Admin-only while it is
-      // unreleased and rendering placeholder data; the routes re-check access
-      // server-side, so hiding these rows is only cosmetic.
+      // The Rewilding the Web grantee dashboard: shown to the organizations
+      // enrolled in one of the program's ten slots, and to GainForest admins
+      // as a preview. The routes re-check access server-side, so hiding
+      // these rows is only cosmetic.
       {
         kind: "leaf",
         id: "myGrant",
@@ -129,7 +134,7 @@ export const NAV_ITEMS: NavSection[] = [
         Icon: TargetIcon,
         href: "/grants/my-grant",
         pathCheck: { startsWith: "/grants/my-grant" },
-        adminOnly: true,
+        rewildingGranteeOnly: true,
       },
       {
         kind: "leaf",
@@ -138,7 +143,7 @@ export const NAV_ITEMS: NavSection[] = [
         Icon: AudioLinesIcon,
         href: "/grants/my-recorders",
         pathCheck: { startsWith: "/grants/my-recorders" },
-        adminOnly: true,
+        rewildingGranteeOnly: true,
       },
     ],
   },

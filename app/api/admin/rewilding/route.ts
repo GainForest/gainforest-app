@@ -3,6 +3,7 @@ import { getAuthForwardCookie } from "@/app/_lib/auth";
 import { getGainForestModeratorAccess } from "@/app/internal/badges/_lib/access";
 import {
   RewildingMutationError,
+  setRewildingGrantee,
   setRewildingMilestone,
 } from "@/app/admin/_lib/rewilding-mutations";
 import {
@@ -23,6 +24,8 @@ export const runtime = "nodejs";
  * are contracts, and nothing about them is world-readable.
  *
  * POST body is a tagged union:
+ *   { action: "addGrantee", subjectDid }     — refused once all 10 slots are taken
+ *   { action: "removeGrantee", subjectDid }
  *   { action: "setMilestone", subjectDid, milestoneId, done }
  *   { action: "addDocument", subjectDid, title, fileName, mimeType, dataBase64 }
  *   { action: "deleteDocument", id }
@@ -47,6 +50,18 @@ export async function POST(request: Request) {
   if (!isRecord(body)) return Response.json({ error: "invalid_request" }, { status: 400 });
 
   try {
+    if (body.action === "addGrantee" || body.action === "removeGrantee") {
+      const headerList = await headers();
+      const cookie = getAuthForwardCookie(headerList.get("cookie"));
+      const grantee = await setRewildingGrantee(
+        access.repoDid,
+        cookie,
+        str(body.subjectDid),
+        body.action === "addGrantee",
+      );
+      return Response.json({ grantee }, { headers: { "cache-control": "no-store" } });
+    }
+
     if (body.action === "setMilestone") {
       const headerList = await headers();
       const cookie = getAuthForwardCookie(headerList.get("cookie"));
