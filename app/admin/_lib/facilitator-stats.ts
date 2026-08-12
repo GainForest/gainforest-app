@@ -1,7 +1,7 @@
 import "server-only";
 
 /**
- * Facilitator wallet stats for the /admin dashboard.
+ * Facilitator wallet stats for the /admin/data page.
  *
  * The facilitator is the platform wallet that submits every donation's
  * `transferWithAuthorization` to USDC on Ethereum mainnet (paying the gas)

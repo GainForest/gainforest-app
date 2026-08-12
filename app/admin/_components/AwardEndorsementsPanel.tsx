@@ -16,7 +16,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import type { AwardEndorsementsData, EndorsementAwardRow } from "../_lib/award-endorsements";
-import { AdminAvatar, AdminEmptyState } from "./AdminModerationDashboard";
+import { AdminAvatar, AdminEmptyState } from "./AdminPanel";
 
 const BADGE_AWARD_COLLECTION = "app.certified.badge.award";
 
@@ -25,7 +25,7 @@ type RecipientResult =
   | { kind: "did"; did: string; handle: string | null; displayName: string | null; avatarUrl: string | null };
 
 /**
- * The /admin "Award endorsements" tab body: GainForest org admins endorse
+ * The /admin/people "Award endorsements" panel: GainForest org admins endorse
  * other organizations by signing an `app.certified.badge.award` (endorsement
  * badge) in the GainForest repo. Reads and writes go through the internal
  * badge API routes, which are gated to owners/admins of the GainForest org —

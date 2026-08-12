@@ -92,7 +92,8 @@
       "explore": "EXPLORAR",
       "funding": "FINANCIACIÓN",
       "manage": "GESTIONAR",
-      "ai": "AI"
+      "ai": "AI",
+      "admin": "ADMINISTRACIÓN"
     },
     "items": {
       "bumicerts": "certificados",
@@ -126,7 +127,11 @@
       "audiomoth": "AudioMoth",
       "identifications": "Identificaciones",
       "myGrant": "Mi subvención",
-      "myRecorders": "Mis grabadoras"
+      "myRecorders": "Mis grabadoras",
+      "adminGrants": "Solicitudes de subvención",
+      "adminPeople": "Personas",
+      "adminTrust": "Confianza y seguridad",
+      "adminData": "Datos y dinero"
     },
     "prompts": {
       "signInDescription": "Inicia sesión para gestionar tu cuenta y contenido.",
@@ -1292,18 +1297,6 @@
     "badges": "Insignias de reconocimiento"
   },
   "adminModeration": {
-    "ariaLabel": "Vistas de moderación",
-    "tabs": {
-      "taina": "Agentes Tainá",
-      "grants": "Solicitantes de subvención",
-      "bioblitz": "BioBlitz",
-      "testAccounts": "Cuentas de prueba",
-      "endorsers": "Avaladores",
-      "awardEndorsements": "Otorgar respaldos",
-      "facilitator": "Billetera facilitadora",
-      "dataJobs": "Lotes de datos",
-      "blockedDomains": "Direcciones bloqueadas"
-    },
     "unnamed": "Cuenta sin nombre",
     "awardHint": "Abre un perfil para otorgar una insignia.",
     "grants": {
@@ -1311,9 +1304,23 @@
       "description": "Cuentas que solicitaron la subvención de Resilvestrar la web. Abre un perfil para otorgar la insignia de la subvención.",
       "empty": "Nadie ha solicitado la subvención todavía."
     },
-    "page": {
-      "title": "Administración",
-      "subtitle": "Revisa solicitantes de subvenciones y eventos, gestiona cuentas marcadas y supervisa los agentes Tainá."
+    "pages": {
+      "grants": {
+        "title": "Gestión de subvenciones",
+        "subtitle": "Revisa a quienes solicitan subvenciones y gestiona las rondas semanales de BioBlitz."
+      },
+      "people": {
+        "title": "Personas",
+        "subtitle": "Quienes usan un asistente de campo Tainá, las organizaciones que pueden avalar cuentas y las insignias que otorga GainForest."
+      },
+      "trust": {
+        "title": "Confianza y seguridad",
+        "subtitle": "Cuentas y registros marcados como de prueba, y las direcciones bloqueadas para registrarse."
+      },
+      "data": {
+        "title": "Datos y dinero",
+        "subtitle": "Lotes de datos de socios y la billetera facilitadora."
+      }
     }
   },
   "adminBioblitzExclusions": {

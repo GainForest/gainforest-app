@@ -10,7 +10,7 @@ import { accountPath } from "@/app/account/_lib/account-route";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
-import { AdminAvatar, AdminEmptyState } from "./AdminModerationDashboard";
+import { AdminAvatar, AdminEmptyState } from "./AdminPanel";
 
 /** A runtime resident enriched server-side with the owner's profile card. */
 export type AdminTainaRow = TainaAdminResident & {

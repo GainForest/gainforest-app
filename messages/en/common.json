@@ -92,7 +92,8 @@
       "explore": "EXPLORE",
       "funding": "FUNDING",
       "manage": "MANAGE",
-      "ai": "AI"
+      "ai": "AI",
+      "admin": "ADMIN"
     },
     "items": {
       "bumicerts": "Certs",
@@ -126,7 +127,11 @@
       "audiomoth": "AudioMoth",
       "identifications": "Identifications",
       "myGrant": "My grant",
-      "myRecorders": "My recorders"
+      "myRecorders": "My recorders",
+      "adminGrants": "Grant applications",
+      "adminPeople": "People",
+      "adminTrust": "Trust & safety",
+      "adminData": "Data & money"
     },
     "prompts": {
       "signInDescription": "Sign in to manage your account and content.",
@@ -1292,18 +1297,6 @@
     "badges": "Recognition badges"
   },
   "adminModeration": {
-    "ariaLabel": "Moderation views",
-    "tabs": {
-      "taina": "Tainá agents",
-      "grants": "Grant applicants",
-      "bioblitz": "BioBlitz",
-      "testAccounts": "Test accounts",
-      "endorsers": "Endorsers",
-      "awardEndorsements": "Award endorsements",
-      "facilitator": "Facilitator wallet",
-      "dataJobs": "Data batches",
-      "blockedDomains": "Blocked addresses"
-    },
     "unnamed": "Unnamed account",
     "awardHint": "Open a profile to award a badge.",
     "grants": {
@@ -1311,9 +1304,23 @@
       "description": "Accounts that applied for the Rewilding the Web grant. Open a profile to award the grant badge.",
       "empty": "No one has applied for the grant yet."
     },
-    "page": {
-      "title": "Admin",
-      "subtitle": "Review grant and event applicants, manage flagged accounts, and oversee Tainá agents."
+    "pages": {
+      "grants": {
+        "title": "Grant management",
+        "subtitle": "Review grant applicants and run the weekly BioBlitz rounds."
+      },
+      "people": {
+        "title": "People",
+        "subtitle": "Everyone running a Tainá field assistant, the organizations that can endorse accounts, and the badges GainForest awards."
+      },
+      "trust": {
+        "title": "Trust & safety",
+        "subtitle": "Accounts and records flagged as tests, and the addresses blocked from signing up."
+      },
+      "data": {
+        "title": "Data & money",
+        "subtitle": "Partner data batches and the facilitator wallet."
+      }
     }
   },
   "adminBioblitzExclusions": {

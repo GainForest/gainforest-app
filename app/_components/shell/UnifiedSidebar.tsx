@@ -206,7 +206,21 @@ function ExploreNav({ sessionDid }: { sessionDid: string | null }) {
 
   // Keep the everyday path short for new visitors. Specialist destinations
   // remain one click away and open automatically whenever one is active.
-  const primaryIds = new Set(["feed", "projects", "observations", "globe", "bioblitz", "donations", "grants"]);
+  // Admin entries stay primary too: moderators work out of them daily, and
+  // they are only ever rendered for admin-group members.
+  const primaryIds = new Set([
+    "feed",
+    "projects",
+    "observations",
+    "globe",
+    "bioblitz",
+    "donations",
+    "grants",
+    "adminGrants",
+    "adminPeople",
+    "adminTrust",
+    "adminData",
+  ]);
   const primarySections = sections
     .map((section) => ({ ...section, items: section.items.filter((item) => primaryIds.has(item.id)) }))
     .filter((section) => section.items.length > 0);

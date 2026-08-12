@@ -21,7 +21,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
-import { AdminAvatar, AdminEmptyState } from "./AdminModerationDashboard";
+import { AdminAvatar, AdminEmptyState } from "./AdminPanel";
 
 /** A job enriched server-side with the submitter's profile card. */
 export type AdminDataJobRow = DataJob & {

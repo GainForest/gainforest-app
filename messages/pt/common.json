@@ -92,7 +92,8 @@
       "explore": "EXPLORAR",
       "funding": "FINANCIAMENTO",
       "manage": "GERENCIAR",
-      "ai": "AI"
+      "ai": "AI",
+      "admin": "ADMINISTRAÇÃO"
     },
     "items": {
       "bumicerts": "certificados",
@@ -126,7 +127,11 @@
       "audiomoth": "AudioMoth",
       "identifications": "Identificações",
       "myGrant": "Meu subsídio",
-      "myRecorders": "Meus gravadores"
+      "myRecorders": "Meus gravadores",
+      "adminGrants": "Candidaturas a subsídios",
+      "adminPeople": "Pessoas",
+      "adminTrust": "Confiança e segurança",
+      "adminData": "Dados e dinheiro"
     },
     "prompts": {
       "signInDescription": "Entre para gerenciar sua conta e conteúdo.",
@@ -1292,18 +1297,6 @@
     "badges": "Selos de reconhecimento"
   },
   "adminModeration": {
-    "ariaLabel": "Visualizações de moderação",
-    "tabs": {
-      "taina": "Agentes Tainá",
-      "grants": "Candidatos ao subsídio",
-      "bioblitz": "BioBlitz",
-      "testAccounts": "Contas de teste",
-      "endorsers": "Apoiadores",
-      "awardEndorsements": "Conceder endossos",
-      "facilitator": "Carteira facilitadora",
-      "dataJobs": "Lotes de dados",
-      "blockedDomains": "Endereços bloqueados"
-    },
     "unnamed": "Conta sem nome",
     "awardHint": "Abra um perfil para conceder um selo.",
     "grants": {
@@ -1311,9 +1304,23 @@
       "description": "Contas que se candidataram ao subsídio de Resselvagem da web. Abra um perfil para conceder o selo do subsídio.",
       "empty": "Ninguém se candidatou ao subsídio ainda."
     },
-    "page": {
-      "title": "Administração",
-      "subtitle": "Revise candidatos a bolsas e eventos, gerencie contas sinalizadas e supervisione os agentes Tainá."
+    "pages": {
+      "grants": {
+        "title": "Gestão de subsídios",
+        "subtitle": "Analise as candidaturas ao subsídio e conduza as rodadas semanais do BioBlitz."
+      },
+      "people": {
+        "title": "Pessoas",
+        "subtitle": "Quem usa um assistente de campo Tainá, as organizações que podem endossar contas e os selos concedidos pela GainForest."
+      },
+      "trust": {
+        "title": "Confiança e segurança",
+        "subtitle": "Contas e registros sinalizados como de teste e os endereços bloqueados para cadastro."
+      },
+      "data": {
+        "title": "Dados e dinheiro",
+        "subtitle": "Lotes de dados de parceiros e a carteira facilitadora."
+      }
     }
   },
   "adminBioblitzExclusions": {

@@ -92,7 +92,8 @@
       "explore": "GUNDUA",
       "funding": "UFADHILI",
       "manage": "SIMAMIA",
-      "ai": "AI"
+      "ai": "AI",
+      "admin": "MSIMAMIZI"
     },
     "items": {
       "bumicerts": "vyeti",
@@ -126,7 +127,11 @@
       "audiomoth": "AudioMoth",
       "identifications": "Vitambulisho",
       "myGrant": "Ruzuku yangu",
-      "myRecorders": "Vinasa sauti vyangu"
+      "myRecorders": "Vinasa sauti vyangu",
+      "adminGrants": "Maombi ya ruzuku",
+      "adminPeople": "Watu",
+      "adminTrust": "Uaminifu na usalama",
+      "adminData": "Data na fedha"
     },
     "prompts": {
       "signInDescription": "Ingia ili kusimamia akaunti na maudhui yako.",
@@ -1292,18 +1297,6 @@
     "badges": "Beji za kutambua"
   },
   "adminModeration": {
-    "ariaLabel": "Mwonekano wa usimamizi",
-    "tabs": {
-      "taina": "Mawakala wa Tainá",
-      "grants": "Waombaji wa ruzuku",
-      "bioblitz": "BioBlitz",
-      "testAccounts": "Akaunti za majaribio",
-      "endorsers": "Wadhamini",
-      "awardEndorsements": "Toa idhini",
-      "facilitator": "Pochi ya uwezeshaji",
-      "dataJobs": "Makundi ya data",
-      "blockedDomains": "Anwani zilizozuiwa"
-    },
     "unnamed": "Akaunti isiyo na jina",
     "awardHint": "Fungua wasifu ili kutoa beji.",
     "grants": {
@@ -1311,9 +1304,23 @@
       "description": "Akaunti zilizoomba ruzuku ya Kurudisha Uasilia kwenye Wavuti. Fungua wasifu ili kutoa beji ya ruzuku.",
       "empty": "Bado hakuna aliyeomba ruzuku."
     },
-    "page": {
-      "title": "Msimamizi",
-      "subtitle": "Kagua waombaji wa ruzuku na matukio, dhibiti akaunti zilizowekwa alama, na simamia mawakala wa Tainá."
+    "pages": {
+      "grants": {
+        "title": "Usimamizi wa ruzuku",
+        "subtitle": "Kagua waombaji wa ruzuku na uendeshe raundi za kila wiki za BioBlitz."
+      },
+      "people": {
+        "title": "Watu",
+        "subtitle": "Kila mtu anayetumia msaidizi wa uwandani Tainá, mashirika yanayoweza kudhamini akaunti, na beji zinazotolewa na GainForest."
+      },
+      "trust": {
+        "title": "Uaminifu na usalama",
+        "subtitle": "Akaunti na rekodi zilizowekwa alama ya majaribio, na anwani zilizozuiwa kujisajili."
+      },
+      "data": {
+        "title": "Data na fedha",
+        "subtitle": "Makundi ya data ya washirika na pochi ya uwezeshaji."
+      }
     }
   },
   "adminBioblitzExclusions": {
