@@ -118,7 +118,7 @@ export function DonationRewardCard({
         >
           <motion.div
             style={effectsOn ? { rotateX, rotateY } : undefined}
-            className="relative aspect-[63/88] w-[21rem] max-w-[84vw] rounded-[1.7rem] p-[3px] shadow-[0_40px_80px_-24px_rgba(0,0,0,0.7)]"
+            className="relative aspect-[63/88] w-[15.75rem] max-w-[84vw] rounded-[1.3rem] p-0.5 shadow-[0_30px_60px_-18px_rgba(0,0,0,0.7)]"
           >
             {/* Bold gradient rim. */}
             <div
@@ -127,7 +127,7 @@ export function DonationRewardCard({
               style={{ background: `linear-gradient(145deg, ${tier.foil})` }}
             />
 
-            <div className="relative size-full overflow-hidden rounded-[1.5rem] bg-black">
+            <div className="relative size-full overflow-hidden rounded-[1.15rem] bg-black">
               {/* Full-bleed artwork. */}
               {featured.image ? (
                 // eslint-disable-next-line @next/next/no-img-element
@@ -188,33 +188,33 @@ export function DonationRewardCard({
               ) : null}
 
               {/* ── Content ─────────────────────────────────────────────── */}
-              <div className="absolute inset-0 flex flex-col justify-between p-5">
+              <div className="absolute inset-0 flex flex-col justify-between p-4">
                 {/* Tier identity, top. */}
                 <div className="flex items-center gap-2">
-                  <span className="size-2 rounded-full bg-white shadow-[0_0_12px_rgba(255,255,255,0.9)]" aria-hidden />
-                  <span className="text-[11px] font-bold uppercase tracking-[0.38em] text-white/90">
+                  <span className="size-1.5 rounded-full bg-white shadow-[0_0_9px_rgba(255,255,255,0.9)]" aria-hidden />
+                  <span className="text-[9px] font-bold uppercase tracking-[0.32em] text-white/90">
                     {tierName}
                   </span>
                 </div>
 
                 {/* Hero, bottom. */}
                 <div>
-                  <p className="text-[10px] font-semibold uppercase tracking-[0.32em] text-white/55">
+                  <p className="text-[8px] font-semibold uppercase tracking-[0.28em] text-white/55">
                     {eyebrow}
                   </p>
-                  <h3 className="mt-1 font-instrument text-[2.1rem] italic leading-[1.05] text-white drop-shadow-[0_2px_12px_rgba(0,0,0,0.6)]">
+                  <h3 className="mt-1 font-instrument text-[1.6rem] italic leading-[1.05] text-white drop-shadow-[0_2px_9px_rgba(0,0,0,0.6)]">
                     {heroTitle}
                   </h3>
-                  <p className="mt-1.5 truncate text-xs font-medium text-white/70">
+                  <p className="mt-1 truncate text-[10px] font-medium text-white/70">
                     {subtitle}
                   </p>
 
-                  <div className="mt-4 h-px w-full bg-white/20" />
+                  <div className="mt-3 h-px w-full bg-white/20" />
 
-                  <p className="mt-3 text-[10px] font-semibold uppercase tracking-[0.32em] text-white/55">
+                  <p className="mt-2 text-[8px] font-semibold uppercase tracking-[0.28em] text-white/55">
                     {t("contributed")}
                   </p>
-                  <p className="font-instrument text-[3.6rem] italic leading-[0.95] text-white drop-shadow-[0_3px_18px_rgba(0,0,0,0.7)]">
+                  <p className="font-instrument text-[2.7rem] italic leading-[0.95] text-white drop-shadow-[0_3px_14px_rgba(0,0,0,0.7)]">
                     {amount}
                   </p>
                 </div>
