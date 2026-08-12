@@ -232,15 +232,7 @@
       "mockCanceled": "Mock invitation removed from this preview."
     },
     "myCardsTitle": "My Bumicerts gallery",
-    "myCardsDescription": "Preview the collected Bumicerts gallery, populated with sample collectibles.",
-    "rewildingDashboard": {
-      "cardTitle": "Rewilding grantee dashboard",
-      "cardDescription": "Walk the Rewilding the Web grantee's grant overview and recorder inventory with safe fixture data.",
-      "title": "Rewilding grantee dashboard",
-      "description": "Both grantee dashboard pages — the grant overview and the recorder inventory — rendered from fixtures. Registering or requesting a recorder updates mock state only; nothing is shipped or published.",
-      "mockBadge": "Mock mode · no publishing",
-      "pagesLabel": "Dashboard pages"
-    }
+    "myCardsDescription": "Preview the collected Bumicerts gallery, populated with sample collectibles."
   },
   "myCards": {
     "eyebrow": "Collectibles",

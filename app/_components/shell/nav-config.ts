@@ -1,4 +1,5 @@
 import {
+  AudioLinesIcon,
   BinocularsIcon,
   BotIcon,
   Building2Icon,
@@ -9,6 +10,7 @@ import {
   MicroscopeIcon,
   NewspaperIcon,
   SproutIcon,
+  TargetIcon,
 } from "lucide-react";
 
 export type NavLeaf = {
@@ -113,7 +115,30 @@ export const NAV_ITEMS: NavSection[] = [
         text: "Grants",
         Icon: SproutIcon,
         href: "/grants",
-        pathCheck: { startsWith: "/grants" },
+        // Exact match: the Rewilding grantee pages live under /grants/* and
+        // own their own rows below, so they must not light this one up.
+        pathCheck: { equals: "/grants" },
+      },
+      // The Rewilding the Web grantee dashboard. Admin-only while it is
+      // unreleased and rendering placeholder data; the routes re-check access
+      // server-side, so hiding these rows is only cosmetic.
+      {
+        kind: "leaf",
+        id: "myGrant",
+        text: "My grant",
+        Icon: TargetIcon,
+        href: "/grants/my-grant",
+        pathCheck: { startsWith: "/grants/my-grant" },
+        adminOnly: true,
+      },
+      {
+        kind: "leaf",
+        id: "myRecorders",
+        text: "My recorders",
+        Icon: AudioLinesIcon,
+        href: "/grants/my-recorders",
+        pathCheck: { startsWith: "/grants/my-recorders" },
+        adminOnly: true,
       },
     ],
   },

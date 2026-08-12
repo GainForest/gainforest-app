@@ -840,6 +840,10 @@
           "title": "Grant milestones",
           "progress": "{done} of {total}",
           "viewRecorders": "Open inventory"
+        },
+        "metadata": {
+          "title": "My grant",
+          "description": "Your Rewilding the Web grant: next step, progress and milestones."
         }
       },
       "recorders": {
@@ -865,7 +869,12 @@
           "requested": "Ordering"
         },
         "emptyFilter": "No recorders match this filter yet.",
-        "unknownPrompt": "Have a recorder we don't know about? Add it here."
+        "unknownPrompt": "Have a recorder we don't know about? Add it here.",
+        "metadata": {
+          "title": "My recorders",
+          "description": "Every recorder on your Rewilding the Web grant, and where each one came from."
+        },
+        "addComingSoon": "Registering your own recorders turns on once we can save them to your account. For now this list is read-only."
       },
       "addForm": {
         "title": "Add a recorder",
@@ -893,6 +902,10 @@
         "save": "Save recorder",
         "saveRequest": "Request shipment",
         "milestoneNote": "Counts toward your inventory milestone."
+      },
+      "shell": {
+        "eyebrow": "Rewilding the Web · admin preview",
+        "placeholderNotice": "These numbers are placeholders. Recorders and grant progress are not read from real records yet, so treat this page as a preview of the layout rather than anyone's actual grant."
       }
     }
   },

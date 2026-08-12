@@ -840,6 +840,10 @@
           "title": "Hatua muhimu za ruzuku",
           "progress": "{done} kati ya {total}",
           "viewRecorders": "Fungua orodha"
+        },
+        "metadata": {
+          "title": "Ruzuku yangu",
+          "description": "Ruzuku yako ya Rewilding the Web: hatua inayofuata, maendeleo na hatua muhimu."
         }
       },
       "recorders": {
@@ -865,7 +869,12 @@
           "requested": "Kinaagizwa"
         },
         "emptyFilter": "Hakuna kinasa sauti kinacholingana na kichujio hiki bado.",
-        "unknownPrompt": "Una kinasa sauti tusichokifahamu? Kiongeze hapa."
+        "unknownPrompt": "Una kinasa sauti tusichokifahamu? Kiongeze hapa.",
+        "metadata": {
+          "title": "Vinasa sauti vyangu",
+          "description": "Vinasa sauti vyote vya ruzuku yako ya Rewilding the Web na kila kimoja kilikotoka."
+        },
+        "addComingSoon": "Kusajili vinasa sauti vyako mwenyewe kutawezeshwa mara tutakapoweza kuvihifadhi kwenye akaunti yako. Kwa sasa orodha hii ni ya kusoma tu."
       },
       "addForm": {
         "title": "Ongeza kinasa sauti",
@@ -893,6 +902,10 @@
         "save": "Hifadhi kinasa sauti",
         "saveRequest": "Omba kutumiwa",
         "milestoneNote": "Kinahesabika kwenye hatua yako ya orodha ya vifaa."
+      },
+      "shell": {
+        "eyebrow": "Rewilding the Web · onyesho la awali la msimamizi",
+        "placeholderNotice": "Takwimu hizi ni za mfano. Vinasa sauti na maendeleo ya ruzuku bado havisomwi kutoka kumbukumbu halisi, kwa hivyo ichukulie kurasa hii kama onyesho la mpangilio, si ruzuku halisi ya mtu."
       }
     }
   },

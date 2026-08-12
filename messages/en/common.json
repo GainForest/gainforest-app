@@ -124,7 +124,9 @@
       "labeler": "Labeler",
       "globe": "Globe",
       "audiomoth": "AudioMoth",
-      "identifications": "Identifications"
+      "identifications": "Identifications",
+      "myGrant": "My grant",
+      "myRecorders": "My recorders"
     },
     "prompts": {
       "signInDescription": "Sign in to manage your account and content.",

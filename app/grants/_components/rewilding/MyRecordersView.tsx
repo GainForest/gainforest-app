@@ -24,11 +24,16 @@ export function MyRecordersView({
   recorders,
   canAddRecorders = false,
   onAddRecorder,
+  addUnavailableNote,
 }: {
   recorders: readonly Recorder[];
   /** Whether the viewer may register/request recorders on this grant. */
   canAddRecorders?: boolean;
   onAddRecorder?: (input: NewRecorderInput) => void | Promise<void>;
+  /** Plain-language reason shown in place of the add affordances when adding
+   *  is unavailable — either the viewer's role or, for now, the missing
+   *  persistence layer. Omit to simply hide them. */
+  addUnavailableNote?: string;
 }) {
   const t = useTranslations("marketplace.grants.rewildingDashboard");
   const [filter, setFilter] = useState<OriginFilter>("all");
@@ -111,6 +116,10 @@ export function MyRecordersView({
             {t("recorders.addShort")}
           </span>
         </button>
+      ) : addUnavailableNote ? (
+        <p className="rounded-2xl border-[1.5px] border-dashed border-border px-4 py-3 text-sm leading-6 text-muted-foreground">
+          {addUnavailableNote}
+        </p>
       ) : null}
 
       {showAdd ? (

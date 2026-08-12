@@ -232,15 +232,7 @@
       "mockCanceled": "Undangan contoh dihapus dari pratinjau ini."
     },
     "myCardsTitle": "Galeri Bumicerts Saya",
-    "myCardsDescription": "Pratinjau galeri Bumicerts yang telah dikumpulkan dengan contoh koleksi.",
-    "rewildingDashboard": {
-      "cardTitle": "Dasbor penerima hibah Rewilding",
-      "cardDescription": "Telusuri ringkasan hibah dan inventaris perekam milik penerima hibah Rewilding the Web dengan data contoh yang aman.",
-      "title": "Dasbor penerima hibah Rewilding",
-      "description": "Kedua halaman dasbor penerima hibah — ringkasan hibah dan inventaris perekam — dirender dari data contoh. Mendaftarkan atau meminta perekam hanya memperbarui status tiruan; tidak ada yang dikirim atau dipublikasikan.",
-      "mockBadge": "Mode tiruan · tanpa publikasi",
-      "pagesLabel": "Halaman dasbor"
-    }
+    "myCardsDescription": "Pratinjau galeri Bumicerts yang telah dikumpulkan dengan contoh koleksi."
   },
   "myCards": {
     "eyebrow": "Koleksi",
