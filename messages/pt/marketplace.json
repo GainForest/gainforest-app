@@ -840,6 +840,10 @@
           "title": "Marcos do subsídio",
           "progress": "{done} de {total}",
           "viewRecorders": "Abrir inventário"
+        },
+        "metadata": {
+          "title": "Meu subsídio",
+          "description": "Seu subsídio Rewilding the Web: próximo passo, progresso e marcos."
         }
       },
       "recorders": {
@@ -865,7 +869,12 @@
           "requested": "Em pedido"
         },
         "emptyFilter": "Nenhum gravador corresponde a este filtro ainda.",
-        "unknownPrompt": "Tem um gravador que não conhecemos? Adicione-o aqui."
+        "unknownPrompt": "Tem um gravador que não conhecemos? Adicione-o aqui.",
+        "metadata": {
+          "title": "Meus gravadores",
+          "description": "Todos os gravadores do seu subsídio Rewilding the Web e de onde cada um veio."
+        },
+        "addComingSoon": "Registrar seus próprios gravadores será ativado quando pudermos salvá-los na sua conta. Por enquanto esta lista é somente leitura."
       },
       "addForm": {
         "title": "Adicionar um gravador",
@@ -893,6 +902,10 @@
         "save": "Salvar gravador",
         "saveRequest": "Solicitar envio",
         "milestoneNote": "Conta para o seu marco de inventário."
+      },
+      "shell": {
+        "eyebrow": "Rewilding the Web · prévia de administração",
+        "placeholderNotice": "Estes números são fictícios. Os gravadores e o progresso do subsídio ainda não são lidos de registros reais, portanto trate esta página como uma prévia do layout e não como o subsídio real de alguém."
       }
     }
   },

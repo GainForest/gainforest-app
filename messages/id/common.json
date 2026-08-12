@@ -124,7 +124,9 @@
       "labeler": "Pelabel",
       "globe": "Bola Dunia",
       "audiomoth": "AudioMoth",
-      "identifications": "Identifikasi"
+      "identifications": "Identifikasi",
+      "myGrant": "Hibah saya",
+      "myRecorders": "Perekam saya"
     },
     "prompts": {
       "signInDescription": "Masuk untuk mengelola akun dan konten Anda.",

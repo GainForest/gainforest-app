@@ -840,6 +840,10 @@
           "title": "Tonggak hibah",
           "progress": "{done} dari {total}",
           "viewRecorders": "Buka inventaris"
+        },
+        "metadata": {
+          "title": "Hibah saya",
+          "description": "Hibah Rewilding the Web Anda: langkah berikutnya, kemajuan, dan tonggak pencapaian."
         }
       },
       "recorders": {
@@ -865,7 +869,12 @@
           "requested": "Sedang dipesan"
         },
         "emptyFilter": "Belum ada perekam yang cocok dengan filter ini.",
-        "unknownPrompt": "Punya perekam yang belum kami ketahui? Tambahkan di sini."
+        "unknownPrompt": "Punya perekam yang belum kami ketahui? Tambahkan di sini.",
+        "metadata": {
+          "title": "Perekam saya",
+          "description": "Semua perekam pada hibah Rewilding the Web Anda dan asal masing-masing."
+        },
+        "addComingSoon": "Pendaftaran perekam milik Anda sendiri akan aktif setelah kami dapat menyimpannya ke akun Anda. Untuk saat ini daftar ini hanya bisa dibaca."
       },
       "addForm": {
         "title": "Tambah perekam",
@@ -893,6 +902,10 @@
         "save": "Simpan perekam",
         "saveRequest": "Ajukan pengiriman",
         "milestoneNote": "Dihitung untuk tonggak inventaris Anda."
+      },
+      "shell": {
+        "eyebrow": "Rewilding the Web · pratinjau admin",
+        "placeholderNotice": "Angka-angka ini hanya contoh. Perekam dan kemajuan hibah belum dibaca dari catatan sungguhan, jadi anggap halaman ini sebagai pratinjau tata letak, bukan hibah asli milik seseorang."
       }
     }
   },
