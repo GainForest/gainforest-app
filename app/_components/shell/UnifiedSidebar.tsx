@@ -28,7 +28,7 @@ import {
   useAccountList,
   useActiveAccountContext,
 } from "../../_lib/account-switcher";
-import { AdminOnlyIndicator } from "../AdminOnlyIndicator";
+import { RestrictedIndicator } from "../AdminOnlyIndicator";
 import { SignInPrompt } from "../AuthFlow";
 import { NAV_ITEMS, isLeafActive, type NavLeaf } from "./nav-config";
 import { useIsRewildingGrantee } from "./use-rewilding-grantee";
@@ -189,6 +189,8 @@ function ExploreNav({ sessionDid }: { sessionDid: string | null }) {
   const t = useTranslations("common.sidebar.items");
   const sidebarT = useTranslations("common.sidebar");
   const sectionsT = useTranslations("common.sidebar.sections");
+  const adminOnlyT = useTranslations("common.adminOnly");
+  const grantOnlyT = useTranslations("common.grantOnly");
   const collapsed = useSidebarCollapsed();
   const [moreOpen, setMoreOpen] = useState(false);
 
@@ -236,6 +238,20 @@ function ExploreNav({ sessionDid }: { sessionDid: string | null }) {
   const showMore = moreOpen;
   let leafIndex = 0;
 
+  /**
+   * Why an entry is not public, from this viewer's side. Restricted entries
+   * always wear the padlock — without it an admin cannot tell a private view
+   * from a public one — but the wording has to match who is looking: a
+   * grantee seeing their own grant is not an admin.
+   */
+  const restrictionLabel = (item: NavLeaf): string | undefined => {
+    if (item.adminOnly) return adminOnlyT("label");
+    if (item.rewildingGranteeOnly) {
+      return isRewildingGrantee ? grantOnlyT("label") : adminOnlyT("label");
+    }
+    return undefined;
+  };
+
   const renderSections = (items: typeof sections, showSectionLabels: boolean) =>
     items.map((section, sectionIndex) => (
       <div key={section.id} className="flex flex-col gap-0.5">
@@ -252,7 +268,7 @@ function ExploreNav({ sessionDid }: { sessionDid: string | null }) {
             return (
               <NavLeafRow
                 key={item.id}
-                item={{ ...item, text: t(item.id) }}
+                item={{ ...item, text: t(item.id), restrictedLabel: restrictionLabel(item) }}
                 isActive={isLeafActive(item.pathCheck, pathname)}
                 index={leafIndex}
               />
@@ -363,7 +379,13 @@ function SidebarHeader() {
   );
 }
 
-function NavLeafRow({ item, isActive, index, paired = false }: { item: NavLeaf; isActive: boolean; index: number; paired?: boolean }) {
+/** A nav row, plus the resolved label + restriction marker for this viewer. */
+type NavLeafView = NavLeaf & {
+  /** Set when this entry is not public: says who may see it. */
+  restrictedLabel?: string;
+};
+
+function NavLeafRow({ item, isActive, index, paired = false }: { item: NavLeafView; isActive: boolean; index: number; paired?: boolean }) {
   const collapsed = useSidebarCollapsed();
   const showConnector = paired && !collapsed;
   return (
@@ -406,8 +428,11 @@ function NavLeafRow({ item, isActive, index, paired = false }: { item: NavLeaf; 
               <item.Icon className="h-4 w-4 shrink-0" />
             </span>
             {collapsed ? null : <span className="flex-1 text-left">{item.text}</span>}
-            {item.adminOnly ? (
-              <AdminOnlyIndicator className={collapsed ? "absolute right-1 top-1" : undefined} />
+            {item.restrictedLabel ? (
+              <RestrictedIndicator
+                label={item.restrictedLabel}
+                className={collapsed ? "absolute right-1 top-1" : undefined}
+              />
             ) : null}
           </motion.div>
         </Link>

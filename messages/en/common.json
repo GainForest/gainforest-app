@@ -11,6 +11,9 @@
   "adminOnly": {
     "label": "Admin only"
   },
+  "grantOnly": {
+    "label": "Grant members only"
+  },
   "navigation": {
     "navigation": "Navigation",
     "openNavigation": "Open navigation",

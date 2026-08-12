@@ -11,6 +11,9 @@
   "adminOnly": {
     "label": "Solo administradores"
   },
+  "grantOnly": {
+    "label": "Solo miembros de la subvención"
+  },
   "navigation": {
     "navigation": "Navegación",
     "openNavigation": "Abrir navegación",

@@ -11,6 +11,9 @@
   "adminOnly": {
     "label": "Khusus admin"
   },
+  "grantOnly": {
+    "label": "Hanya anggota hibah"
+  },
   "navigation": {
     "navigation": "Navigasi",
     "openNavigation": "Buka navigasi",

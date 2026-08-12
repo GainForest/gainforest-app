@@ -11,6 +11,9 @@
   "adminOnly": {
     "label": "Somente administradores"
   },
+  "grantOnly": {
+    "label": "Somente integrantes do subsídio"
+  },
   "navigation": {
     "navigation": "Navegação",
     "openNavigation": "Abrir navegação",

@@ -11,6 +11,9 @@
   "adminOnly": {
     "label": "Wasimamizi pekee"
   },
+  "grantOnly": {
+    "label": "Wanachama wa ruzuku pekee"
+  },
   "navigation": {
     "navigation": "Urambazaji",
     "openNavigation": "Fungua urambazaji",
