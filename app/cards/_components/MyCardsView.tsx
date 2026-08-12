@@ -136,7 +136,7 @@ export function MyCardsView({
                 </select>
               </div>
             </div>
-            <div className="mt-8 grid justify-items-center gap-x-8 gap-y-10 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            <div className="mt-8 grid grid-cols-[repeat(auto-fit,minmax(min(100%,21rem),1fr))] justify-items-center gap-x-8 gap-y-10">
             {visibleCards.map((card, i) => {
               const earnedAt = card.earnedAt ? new Date(card.earnedAt) : null;
               const earnedLabel = earnedAt && !Number.isNaN(earnedAt.getTime())
@@ -150,7 +150,7 @@ export function MyCardsView({
                   viewport={{ once: true, margin: "-40px" }}
                   transition={reduceMotion ? { duration: 0 } : { type: "spring", stiffness: 90, damping: 15, delay: Math.min(i, 5) * 0.08 }}
                   style={{ transformStyle: "preserve-3d" }}
-                  className="w-[21rem] max-w-full"
+                  className="w-full max-w-[21rem]"
                 >
                   <DonationRewardCard
                     lines={card.lines}
