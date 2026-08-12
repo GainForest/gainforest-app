@@ -1297,6 +1297,18 @@
     "badges": "Insignias de reconocimiento"
   },
   "adminModeration": {
+    "ariaLabel": "Vistas de moderación",
+    "tabs": {
+      "taina": "Agentes Tainá",
+      "grants": "Solicitantes de subvención",
+      "bioblitz": "BioBlitz",
+      "testAccounts": "Cuentas de prueba",
+      "endorsers": "Avaladores",
+      "awardEndorsements": "Otorgar respaldos",
+      "facilitator": "Billetera facilitadora",
+      "dataJobs": "Lotes de datos",
+      "blockedDomains": "Direcciones bloqueadas"
+    },
     "unnamed": "Cuenta sin nombre",
     "awardHint": "Abre un perfil para otorgar una insignia.",
     "grants": {

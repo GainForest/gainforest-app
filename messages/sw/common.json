@@ -1297,6 +1297,18 @@
     "badges": "Beji za kutambua"
   },
   "adminModeration": {
+    "ariaLabel": "Mwonekano wa usimamizi",
+    "tabs": {
+      "taina": "Mawakala wa Tainá",
+      "grants": "Waombaji wa ruzuku",
+      "bioblitz": "BioBlitz",
+      "testAccounts": "Akaunti za majaribio",
+      "endorsers": "Wadhamini",
+      "awardEndorsements": "Toa idhini",
+      "facilitator": "Pochi ya uwezeshaji",
+      "dataJobs": "Makundi ya data",
+      "blockedDomains": "Anwani zilizozuiwa"
+    },
     "unnamed": "Akaunti isiyo na jina",
     "awardHint": "Fungua wasifu ili kutoa beji.",
     "grants": {

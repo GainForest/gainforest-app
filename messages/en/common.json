@@ -1297,6 +1297,18 @@
     "badges": "Recognition badges"
   },
   "adminModeration": {
+    "ariaLabel": "Moderation views",
+    "tabs": {
+      "taina": "Tainá agents",
+      "grants": "Grant applicants",
+      "bioblitz": "BioBlitz",
+      "testAccounts": "Test accounts",
+      "endorsers": "Endorsers",
+      "awardEndorsements": "Award endorsements",
+      "facilitator": "Facilitator wallet",
+      "dataJobs": "Data batches",
+      "blockedDomains": "Blocked addresses"
+    },
     "unnamed": "Unnamed account",
     "awardHint": "Open a profile to award a badge.",
     "grants": {

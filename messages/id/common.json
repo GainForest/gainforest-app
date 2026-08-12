@@ -1297,6 +1297,18 @@
     "badges": "Lencana penghargaan"
   },
   "adminModeration": {
+    "ariaLabel": "Tampilan moderasi",
+    "tabs": {
+      "taina": "Agen Tainá",
+      "grants": "Pemohon hibah",
+      "bioblitz": "BioBlitz",
+      "testAccounts": "Akun uji coba",
+      "endorsers": "Pendukung",
+      "awardEndorsements": "Berikan dukungan",
+      "facilitator": "Dompet fasilitator",
+      "dataJobs": "Batch data",
+      "blockedDomains": "Alamat diblokir"
+    },
     "unnamed": "Akun tanpa nama",
     "awardHint": "Buka profil untuk memberikan lencana.",
     "grants": {

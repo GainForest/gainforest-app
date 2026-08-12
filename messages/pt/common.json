@@ -1297,6 +1297,18 @@
     "badges": "Selos de reconhecimento"
   },
   "adminModeration": {
+    "ariaLabel": "Visualizações de moderação",
+    "tabs": {
+      "taina": "Agentes Tainá",
+      "grants": "Candidatos ao subsídio",
+      "bioblitz": "BioBlitz",
+      "testAccounts": "Contas de teste",
+      "endorsers": "Apoiadores",
+      "awardEndorsements": "Conceder endossos",
+      "facilitator": "Carteira facilitadora",
+      "dataJobs": "Lotes de dados",
+      "blockedDomains": "Endereços bloqueados"
+    },
     "unnamed": "Conta sem nome",
     "awardHint": "Abra um perfil para conceder um selo.",
     "grants": {

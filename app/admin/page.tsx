@@ -7,9 +7,9 @@ export const metadata: Metadata = {
 };
 
 /**
- * /admin used to be one page with a tab bar; each area is now its own page,
- * reached from the sidebar's ADMIN section. Old `?tab=…` links still land on
- * the page that now holds that view.
+ * /admin used to be one page with nine tabs; the tabs are now split across
+ * four pages reached from the sidebar's ADMIN section, each keeping its own
+ * pill bar. Old `?tab=…` links still land on the exact view they named.
  */
 const TAB_REDIRECTS: Record<string, string> = {
   grants: "/admin/grants",
@@ -30,5 +30,8 @@ export default async function AdminPage({
 }) {
   // Access is gated by app/admin/layout.tsx, which every admin route shares.
   const { tab } = await searchParams;
-  redirect((tab && TAB_REDIRECTS[tab]) || "/admin/grants");
+  const page = tab ? TAB_REDIRECTS[tab] : undefined;
+  // Carry the tab through so an old link opens the panel it named, not just
+  // the page that now holds it.
+  redirect(page ? `${page}?tab=${tab}` : "/admin/grants");
 }
