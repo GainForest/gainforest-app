@@ -233,7 +233,8 @@
       "mockCanceled": "Mwaliko wa mfano umeondolewa kwenye hakiki hii."
     },
     "myCardsTitle": "Matunzio ya Bumicerts Zangu",
-    "myCardsDescription": "Hakiki matunzio ya Bumicerts zilizokusanywa yenye mifano ya Bumicerts."
+    "myCardsDescription": "Hakiki matunzio ya Bumicerts zilizokusanywa yenye mifano ya Bumicerts.",
+    "testBadge": "JARIBIO"
   },
   "myCards": {
     "eyebrow": "Bumicerts za kukusanya",

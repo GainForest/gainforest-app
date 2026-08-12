@@ -233,7 +233,8 @@
       "mockCanceled": "Mock invitation removed from this preview."
     },
     "myCardsTitle": "My Bumicerts gallery",
-    "myCardsDescription": "Preview the collected Bumicerts gallery, populated with sample collectibles."
+    "myCardsDescription": "Preview the collected Bumicerts gallery, populated with sample collectibles.",
+    "testBadge": "TEST"
   },
   "myCards": {
     "eyebrow": "Collectibles",

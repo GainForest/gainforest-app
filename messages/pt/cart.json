@@ -233,7 +233,8 @@
       "mockCanceled": "Convite simulado removido desta visualização."
     },
     "myCardsTitle": "Galeria dos Meus Bumicerts",
-    "myCardsDescription": "Veja uma prévia da galeria de Bumicerts colecionados com exemplos."
+    "myCardsDescription": "Veja uma prévia da galeria de Bumicerts colecionados com exemplos.",
+    "testBadge": "TESTE"
   },
   "myCards": {
     "eyebrow": "Colecionáveis",
