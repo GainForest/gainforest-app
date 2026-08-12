@@ -4,9 +4,9 @@
  * server route; this component only renders production states and fixtures. */
 
 import { motion, useReducedMotion } from "framer-motion";
-import { AlertTriangleIcon, BadgeCheckIcon, ExternalLinkIcon, SparklesIcon } from "lucide-react";
+import { AlertTriangleIcon, ArrowUpRightIcon, Share2Icon, SparklesIcon } from "lucide-react";
 import Link from "next/link";
-import { useFormatter, useTranslations } from "next-intl";
+import { useTranslations } from "next-intl";
 import { useMemo, useState } from "react";
 import { AuthButton } from "@/app/_components/AuthFlow";
 import type { EarnedCard } from "@/app/_components/rewards/earned-card";
@@ -29,7 +29,6 @@ export function MyCardsView({
   partial?: boolean;
 }) {
   const t = useTranslations("cart.myCards");
-  const format = useFormatter();
   const reduceMotion = useReducedMotion();
   const [tierFilter, setTierFilter] = useState<TierFilter>("all");
   const [sortOrder, setSortOrder] = useState<SortOrder>("newest");
@@ -47,6 +46,18 @@ export function MyCardsView({
       const bTime = b.earnedAt ? Date.parse(b.earnedAt) : 0;
       return sortOrder === "newest" ? bTime - aTime : aTime - bTime;
     }), [cards, sortOrder, tierFilter]);
+  const shareCard = async (card: EarnedCard) => {
+    const href = card.projectHref ?? card.personHref ?? "/cards";
+    const url = new URL(href, window.location.origin).toString();
+    const shareData = { title: t("shareCard"), text: t("shareCardText"), url };
+
+    if (navigator.share) {
+      await navigator.share(shareData);
+      return;
+    }
+    await navigator.clipboard?.writeText(url);
+  };
+
   const filters: Array<{ key: TierFilter; count: number; label: string }> = [
     { key: "all", count: cards.length, label: t("filterAll", { count: cards.length }) },
     ...(["seedling", "sapling", "grove", "canopy", "oldGrowth"] as const)
@@ -138,10 +149,7 @@ export function MyCardsView({
             </div>
             <div className="mt-8 grid grid-cols-[repeat(auto-fit,minmax(min(100%,15.75rem),1fr))] justify-items-center gap-x-6 gap-y-8">
             {visibleCards.map((card, i) => {
-              const earnedAt = card.earnedAt ? new Date(card.earnedAt) : null;
-              const earnedLabel = earnedAt && !Number.isNaN(earnedAt.getTime())
-                ? format.dateTime(earnedAt, { dateStyle: "medium" })
-                : null;
+              const viewHref = card.projectHref ?? card.personHref ?? card.paymentHref ?? "/cards";
               return (
                 <motion.article
                   key={card.id}
@@ -157,34 +165,25 @@ export function MyCardsView({
                     totalUsd={card.totalUsd}
                     variant={card.variant}
                     animateEntrance={false}
+                    actions={(
+                      <div className="grid grid-cols-2 gap-2">
+                        <Button type="button" variant="secondary" size="sm" onClick={() => void shareCard(card)}>
+                          <Share2Icon aria-hidden />
+                          {t("shareCard")}
+                        </Button>
+                        <Button asChild size="sm">
+                          <Link
+                            href={viewHref}
+                            target={card.paymentHref === viewHref ? "_blank" : undefined}
+                            rel={card.paymentHref === viewHref ? "noreferrer" : undefined}
+                          >
+                            {t("viewCard")}
+                            <ArrowUpRightIcon aria-hidden />
+                          </Link>
+                        </Button>
+                      </div>
+                    )}
                   />
-                  <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-2 px-1 text-xs">
-                    <span className="inline-flex items-center gap-1.5 text-muted-foreground">
-                      <BadgeCheckIcon className="size-4 text-primary" aria-hidden />
-                      {earnedLabel ? t("verifiedOn", { date: earnedLabel }) : t("verifiedDonation")}
-                    </span>
-                    {card.projectHref ? (
-                      <Link href={card.projectHref} className="font-semibold text-primary hover:underline">
-                        {t("viewProject")}
-                      </Link>
-                    ) : null}
-                    {card.personHref ? (
-                      <Link href={card.personHref} className="font-semibold text-primary hover:underline">
-                        {t("viewProfile")}
-                      </Link>
-                    ) : null}
-                    {card.paymentHref ? (
-                      <Link
-                        href={card.paymentHref}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="inline-flex items-center gap-1 font-semibold text-primary hover:underline"
-                      >
-                        {t("viewPayment")}
-                        <ExternalLinkIcon className="size-3" aria-hidden />
-                      </Link>
-                    ) : null}
-                  </div>
                 </motion.article>
               );
             })}

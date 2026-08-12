@@ -273,6 +273,9 @@
     "verifiedDonation": "Donación verificada",
     "viewProject": "Ver proyecto",
     "viewProfile": "Ver perfil",
-    "viewPayment": "Ver pago"
+    "viewPayment": "Ver pago",
+    "shareCard": "Compartir",
+    "shareCardText": "Comparte esta tarjeta",
+    "viewCard": "Ver"
   }
 }

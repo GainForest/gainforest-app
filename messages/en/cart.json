@@ -273,6 +273,9 @@
     "verifiedDonation": "Verified donation",
     "viewProject": "View project",
     "viewProfile": "View profile",
-    "viewPayment": "View payment"
+    "viewPayment": "View payment",
+    "shareCard": "Share",
+    "shareCardText": "Share this card",
+    "viewCard": "View"
   }
 }

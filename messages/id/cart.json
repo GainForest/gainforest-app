@@ -273,6 +273,9 @@
     "verifiedDonation": "Donasi terverifikasi",
     "viewProject": "Lihat proyek",
     "viewProfile": "Lihat profil",
-    "viewPayment": "Lihat pembayaran"
+    "viewPayment": "Lihat pembayaran",
+    "shareCard": "Bagikan",
+    "shareCardText": "Bagikan kartu ini",
+    "viewCard": "Lihat"
   }
 }

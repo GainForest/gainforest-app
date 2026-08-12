@@ -15,7 +15,7 @@
  * in together.
  */
 
-import { useEffect, useMemo, useRef } from "react";
+import { type ReactNode, useEffect, useMemo, useRef } from "react";
 import {
   motion,
   useMotionTemplate,
@@ -35,6 +35,7 @@ export function DonationRewardCard({
   animateEntrance = true,
   overall = false,
   interactive = true,
+  actions,
 }: {
   lines: RewardLine[];
   /** Total contributed across every settled line, in USD. */
@@ -47,6 +48,8 @@ export function DonationRewardCard({
   overall?: boolean;
   /** Track the pointer for tilt + foil. Disable for background/stacked cards. */
   interactive?: boolean;
+  /** Optional actions rendered in the card's lower section. */
+  actions?: ReactNode;
 }) {
   const t = useTranslations("cart.checkoutPage.reward");
   const format = useFormatter();
@@ -121,16 +124,16 @@ export function DonationRewardCard({
         >
           <motion.div
             style={effectsOn ? { rotateX, rotateY } : undefined}
-            className="relative aspect-[63/88] w-[15.75rem] max-w-[84vw] rounded-[1.3rem] p-0.5 shadow-[0_30px_60px_-18px_rgba(0,0,0,0.7)]"
+            className="relative aspect-[63/88] w-[15.75rem] max-w-[84vw] rounded-[2rem] p-0.5 shadow-[0_30px_60px_-18px_rgba(0,0,0,0.7)]"
           >
             {/* Bold gradient rim. */}
             <div
               aria-hidden
-              className="absolute inset-0 rounded-[1.3rem]"
+              className="absolute inset-0 rounded-[2rem]"
               style={{ background: `linear-gradient(145deg, ${tier.foil})` }}
             />
 
-            <div className="relative size-full overflow-hidden rounded-[1.15rem] bg-black">
+            <div className="relative size-full overflow-hidden rounded-[1.85rem] bg-black">
               {/* Full-bleed artwork. */}
               {featured.image ? (
                 // eslint-disable-next-line @next/next/no-img-element
@@ -214,12 +217,10 @@ export function DonationRewardCard({
 
                   <div className="mt-3 h-px w-full bg-white/20" />
 
-                  <p className="mt-2 text-[8px] font-semibold uppercase tracking-[0.28em] text-white/55">
-                    {t("contributed")}
-                  </p>
-                  <p className="font-instrument text-[2.7rem] italic leading-[0.95] text-white drop-shadow-[0_3px_14px_rgba(0,0,0,0.7)]">
+                  <p className="mt-3 font-instrument text-[2.7rem] italic leading-[0.95] text-white drop-shadow-[0_3px_14px_rgba(0,0,0,0.7)]">
                     {amount}
                   </p>
+                  {actions ? <div className="mt-5">{actions}</div> : null}
                 </div>
               </div>
             </div>
