@@ -21,8 +21,14 @@ import { cachedAsync, invalidateCachedAsyncByPrefix } from "./async-cache";
 import { GAINFOREST_MODERATION_REPO_DID } from "./moderation-repo";
 import { resolvePdsHost } from "./pds";
 
-/** Milestone confirmation events. Written from the admin panel only. */
-export const REWILDING_MILESTONE_COLLECTION = "app.gainforest.rewilding.milestone";
+/**
+ * Milestone confirmation events. Written from the admin panel only.
+ *
+ * Namespaced `app.gainforest.grant.<program>.<record>`: GainForest grants
+ * first, the program second, so a future program gets its own branch instead
+ * of another top-level name.
+ */
+export const REWILDING_MILESTONE_COLLECTION = "app.gainforest.grant.rewilding.milestone";
 
 /** Program constants from the handbook. */
 export const REWILDING_GRANT_AMOUNT_USD = 1000;

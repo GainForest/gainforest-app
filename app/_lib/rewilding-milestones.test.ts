@@ -29,7 +29,7 @@ function event(
 ): RewildingMilestoneRecord {
   return {
     rkey,
-    uri: `at://did:plc:moderation/app.gainforest.rewilding.milestone/${rkey}`,
+    uri: `at://did:plc:moderation/app.gainforest.grant.rewilding.milestone/${rkey}`,
     subjectDid,
     milestoneId,
     done,
@@ -114,7 +114,7 @@ describe("effectiveRewildingMilestones", () => {
 });
 
 describe("parseRewildingMilestoneRecord", () => {
-  const uri = "at://did:plc:moderation/app.gainforest.rewilding.milestone/abc";
+  const uri = "at://did:plc:moderation/app.gainforest.grant.rewilding.milestone/abc";
 
   it("reads a well-formed record", () => {
     const parsed = parseRewildingMilestoneRecord({
@@ -165,7 +165,7 @@ describe("effectiveRewildingGrantees", () => {
     createdAt: string,
   ): RewildingGranteeRecord => ({
     rkey,
-    uri: `at://did:plc:moderation/app.gainforest.rewilding.grantee/${rkey}`,
+    uri: `at://did:plc:moderation/app.gainforest.grant.rewilding.enrollment/${rkey}`,
     subjectDid,
     active,
     createdAt,
@@ -207,7 +207,7 @@ describe("effectiveRewildingGrantees", () => {
 });
 
 describe("parseRewildingGranteeRecord", () => {
-  const uri = "at://did:plc:moderation/app.gainforest.rewilding.grantee/abc";
+  const uri = "at://did:plc:moderation/app.gainforest.grant.rewilding.enrollment/abc";
 
   it("reads a well-formed enrollment", () => {
     const parsed = parseRewildingGranteeRecord({

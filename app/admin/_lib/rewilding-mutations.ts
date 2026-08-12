@@ -10,7 +10,7 @@ import {
   type RewildingMilestoneRecord,
 } from "@/app/_lib/rewilding-milestones";
 import {
-  REWILDING_GRANTEE_COLLECTION,
+  REWILDING_ENROLLMENT_COLLECTION,
   REWILDING_GRANT_SLOTS,
   effectiveRewildingGrantees,
   fetchRewildingGranteeRecords,
@@ -154,9 +154,9 @@ export async function setRewildingGrantee(
   const createdAt = new Date().toISOString();
   const created = await cgsMutate(repoDid, cookie, {
     operation: "createRecord",
-    collection: REWILDING_GRANTEE_COLLECTION,
+    collection: REWILDING_ENROLLMENT_COLLECTION,
     record: {
-      $type: REWILDING_GRANTEE_COLLECTION,
+      $type: REWILDING_ENROLLMENT_COLLECTION,
       subject: did,
       active,
       createdAt,

@@ -18,8 +18,14 @@ import { cachedAsync, invalidateCachedAsyncByPrefix } from "./async-cache";
 import { GAINFOREST_MODERATION_REPO_DID } from "./moderation-repo";
 import { listModerationRecords } from "./rewilding-milestones";
 
-/** Enrollment events. Written from the admin panel only. */
-export const REWILDING_GRANTEE_COLLECTION = "app.gainforest.rewilding.grantee";
+/**
+ * Enrollment events. Written from the admin panel only.
+ *
+ * Namespaced `app.gainforest.grant.<program>.<record>`: GainForest grants
+ * first, the program second, so a future program gets its own branch instead
+ * of another top-level name.
+ */
+export const REWILDING_ENROLLMENT_COLLECTION = "app.gainforest.grant.rewilding.enrollment";
 
 /** The program's capacity: ten organizations, per the Program Handbook. */
 export const REWILDING_GRANT_SLOTS = 10;
@@ -69,7 +75,7 @@ export async function fetchRewildingGranteeRecords(
   repoDid: string = GAINFOREST_MODERATION_REPO_DID,
   signal?: AbortSignal,
 ): Promise<RewildingGranteeRecord[]> {
-  const entries = await listModerationRecords(repoDid, REWILDING_GRANTEE_COLLECTION, signal);
+  const entries = await listModerationRecords(repoDid, REWILDING_ENROLLMENT_COLLECTION, signal);
   return entries
     .flatMap((entry) => {
       const record = parseRewildingGranteeRecord(entry);
