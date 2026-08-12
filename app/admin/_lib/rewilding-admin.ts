@@ -4,6 +4,7 @@ import {
   fetchIndexedCertifiedProfileCards,
   fetchRecognitionBadgesForDids,
 } from "@/app/_lib/indexer";
+import { resolveDidHandle } from "@/app/_lib/pds";
 import {
   REWILDING_MILESTONES,
   effectiveRewildingMilestones,
@@ -50,6 +51,9 @@ export type RewildingAdminDocument = {
 export type RewildingAdminGrantee = {
   did: string;
   displayName: string | null;
+  /** Handle of the enrolled account. Display names are not unique, so this is
+   *  how an admin tells which account holds the slot. */
+  handle: string | null;
   avatarUrl: string | null;
   /** Holds the steward-awarded "Rewilding grant" recognition badge. */
   hasGrantBadge: boolean;
@@ -107,9 +111,11 @@ export async function fetchRewildingAdminGrantees(): Promise<RewildingAdminGrant
           sizeBytes: record.sizeBytes,
           uploadedAt: record.uploadedAt,
         }));
+      const handle = await resolveDidHandle(did).catch(() => null);
       return {
         did,
         displayName: applicant?.displayName ?? profile?.displayName ?? null,
+        handle,
         avatarUrl: applicant?.avatarUrl ?? profile?.avatarUrl ?? null,
         hasGrantBadge: badges.get(did)?.has("rewilding-grant") ?? false,
         applicationText: applicant?.applicationText || null,

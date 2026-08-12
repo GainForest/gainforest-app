@@ -58,6 +58,12 @@ async function postAction(body: Record<string, unknown>): Promise<Record<string,
   return json;
 }
 
+/** Last resort when an account has no resolvable handle: enough of the DID to
+ *  tell two same-named accounts apart. */
+function shortDid(did: string): string {
+  return did.length > 18 ? `${did.slice(0, 12)}…${did.slice(-6)}` : did;
+}
+
 function toBase64(bytes: Uint8Array): string {
   let binary = "";
   const CHUNK = 0x8000;
@@ -220,9 +226,11 @@ function AddGranteeSlot({ slotNumber }: { slotNumber: number }) {
               <AdminAvatar url={result.avatarUrl} />
               <span className="flex min-w-0 flex-1 flex-col">
                 <span className="truncate text-sm font-medium text-foreground">{result.displayName}</span>
-                {result.handle ? (
-                  <span className="truncate text-[11px] text-muted-foreground">@{result.handle}</span>
-                ) : null}
+                {/* Several accounts share a display name — the handle is the
+                    only thing distinguishing them in this list. */}
+                <span className="truncate text-[11px] text-muted-foreground">
+                  {result.handle ? `@${result.handle}` : shortDid(result.did)}
+                </span>
               </span>
               {result.alreadyEnrolled ? (
                 <span className="shrink-0 rounded-full border border-border px-2.5 py-1 text-[11px] font-medium text-muted-foreground">
@@ -280,6 +288,11 @@ function GranteeCard({
             <span className="truncate font-medium text-foreground">
               {grantee.displayName || t("unnamedGrantee")}
             </span>
+            {/* Display names repeat across accounts, so the handle is what
+                identifies which one holds this slot. */}
+            {grantee.handle ? (
+              <span className="truncate text-xs text-muted-foreground">@{grantee.handle}</span>
+            ) : null}
             {grantee.hasGrantBadge ? (
               <span className="rounded-full border border-primary/40 px-2 py-px text-[10px] font-medium text-primary">
                 {t("granteeBadge")}

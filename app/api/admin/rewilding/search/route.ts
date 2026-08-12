@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { getGainForestModeratorAccess } from "@/app/internal/badges/_lib/access";
 import { searchAccountsByName } from "@/app/_lib/indexer";
-import { resolveBlobUrl } from "@/app/_lib/pds";
+import { resolveBlobUrl, resolveDidHandle } from "@/app/_lib/pds";
 import {
   effectiveRewildingGrantees,
   fetchRewildingGrantees,
@@ -15,6 +15,12 @@ export const dynamic = "force-dynamic";
  * Rewilding grant slot. Moderator-gated. Searches certified profiles by
  * display name and flags accounts that already hold a slot, so the picker
  * can show them as taken instead of failing on submit.
+ *
+ * Every result carries a handle. Display names are not unique — a search for
+ * "GainForest" returns half a dozen — so without one an admin cannot tell
+ * which account they are about to admit to a grant. The indexer's handle is
+ * used when it has one, falling back to the account's DID document, which is
+ * authoritative and always available.
  */
 export async function GET(request: Request) {
   const access = await getGainForestModeratorAccess().catch(() => null);
@@ -34,15 +40,19 @@ export async function GET(request: Request) {
     );
 
     const results = await Promise.all(
-      matches.map(async (match) => ({
-        did: match.did,
-        displayName: match.displayName,
-        handle: match.handle,
-        avatarUrl: match.avatarRef
-          ? await resolveBlobUrl(match.did, match.avatarRef).catch(() => null)
-          : null,
-        alreadyEnrolled: enrolled.has(match.did),
-      })),
+      matches.map(async (match) => {
+        const [handle, avatarUrl] = await Promise.all([
+          match.handle ?? resolveDidHandle(match.did).catch(() => null),
+          match.avatarRef ? resolveBlobUrl(match.did, match.avatarRef).catch(() => null) : null,
+        ]);
+        return {
+          did: match.did,
+          displayName: match.displayName,
+          handle,
+          avatarUrl,
+          alreadyEnrolled: enrolled.has(match.did),
+        };
+      }),
     );
     return NextResponse.json({ results }, { headers: { "cache-control": "no-store" } });
   } catch (error) {
