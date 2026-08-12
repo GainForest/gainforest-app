@@ -839,12 +839,15 @@
         "milestones": {
           "title": "Hitos de la subvención",
           "progress": "{done} de {total}",
-          "viewRecorders": "Abrir inventario"
+          "viewRecorders": "Abrir inventario",
+          "notStarted": "Sin empezar",
+          "empty": "Aún no hay hitos. Aparecerán aquí cuando se configure tu subvención."
         },
         "metadata": {
           "title": "Mi subvención",
           "description": "Tu subvención Rewilding the Web: siguiente paso, progreso e hitos."
-        }
+        },
+        "untitled": "Tu subvención"
       },
       "recorders": {
         "navLabel": "Mis grabadoras",
@@ -874,7 +877,8 @@
           "title": "Mis grabadoras",
           "description": "Todas las grabadoras de tu subvención Rewilding the Web y de dónde viene cada una."
         },
-        "addComingSoon": "Registrar tus propias grabadoras se activará cuando podamos guardarlas en tu cuenta. Por ahora esta lista es de solo lectura."
+        "empty": "Aún no hay grabadoras.",
+        "addNotBuilt": "Añadir grabadoras todavía no está desarrollado; se activará cuando podamos guardarlas en tu cuenta."
       },
       "addForm": {
         "title": "Añadir una grabadora",
@@ -905,7 +909,7 @@
       },
       "shell": {
         "eyebrow": "Rewilding the Web · vista previa de administración",
-        "placeholderNotice": "Estas cifras son de ejemplo. Las grabadoras y el progreso de la subvención aún no se leen de registros reales, así que trata esta página como una vista previa del diseño y no como la subvención real de alguien."
+        "placeholderNotice": "Nada en esta página está conectado a registros reales todavía, así que todas las cifras muestran cero. Es una vista previa del diseño, no la subvención de nadie."
       }
     }
   },

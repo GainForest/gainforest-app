@@ -19,12 +19,12 @@ export async function generateMetadata(): Promise<Metadata> {
  * "My recorders" — the grantee's device inventory, admin-gated like the grant
  * overview.
  *
- * Adding a recorder is deliberately switched off: there is no record type to
- * write a recorder to yet, so offering a Save button would silently discard
- * what the user typed. `addUnavailableNote` explains that in plain language
- * instead. Flip `canAddRecorders` on (from the viewer's role) and pass an
- * `onAddRecorder` writer once persistence lands — `AddRecorderForm` is already
- * wired to it.
+ * Adding a recorder renders greyed out: there is no record type to write a
+ * recorder to yet, so a working Save button would silently discard what the
+ * user typed. The affordance still shows — with `addDisabledNote` saying the
+ * feature is not built — so the page reads as unfinished rather than as if
+ * the button were missing. Pass an `onAddRecorder` writer once persistence
+ * lands and it enables itself; `AddRecorderForm` is already wired to it.
  */
 export default async function MyRecordersPage() {
   const moderator = await getGainForestModeratorAccess().catch(() => null);
@@ -37,7 +37,7 @@ export default async function MyRecordersPage() {
 
   return (
     <RewildingPageShell>
-      <MyRecordersView recorders={recorders} canAddRecorders={false} addUnavailableNote={t("addComingSoon")} />
+      <MyRecordersView recorders={recorders} canAddRecorders addDisabledNote={t("addNotBuilt")} />
     </RewildingPageShell>
   );
 }

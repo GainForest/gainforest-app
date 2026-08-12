@@ -839,12 +839,15 @@
         "milestones": {
           "title": "Hatua muhimu za ruzuku",
           "progress": "{done} kati ya {total}",
-          "viewRecorders": "Fungua orodha"
+          "viewRecorders": "Fungua orodha",
+          "notStarted": "Haijaanza",
+          "empty": "Bado hakuna hatua muhimu. Zitaonekana hapa mara ruzuku yako itakapowekwa."
         },
         "metadata": {
           "title": "Ruzuku yangu",
           "description": "Ruzuku yako ya Rewilding the Web: hatua inayofuata, maendeleo na hatua muhimu."
-        }
+        },
+        "untitled": "Ruzuku yako"
       },
       "recorders": {
         "navLabel": "Vinasa sauti vyangu",
@@ -874,7 +877,8 @@
           "title": "Vinasa sauti vyangu",
           "description": "Vinasa sauti vyote vya ruzuku yako ya Rewilding the Web na kila kimoja kilikotoka."
         },
-        "addComingSoon": "Kusajili vinasa sauti vyako mwenyewe kutawezeshwa mara tutakapoweza kuvihifadhi kwenye akaunti yako. Kwa sasa orodha hii ni ya kusoma tu."
+        "empty": "Bado hakuna vinasa sauti.",
+        "addNotBuilt": "Kuongeza vinasa sauti bado hakujajengwa — kutawezeshwa mara tutakapoweza kuvihifadhi kwenye akaunti yako."
       },
       "addForm": {
         "title": "Ongeza kinasa sauti",
@@ -905,7 +909,7 @@
       },
       "shell": {
         "eyebrow": "Rewilding the Web · onyesho la awali la msimamizi",
-        "placeholderNotice": "Takwimu hizi ni za mfano. Vinasa sauti na maendeleo ya ruzuku bado havisomwi kutoka kumbukumbu halisi, kwa hivyo ichukulie kurasa hii kama onyesho la mpangilio, si ruzuku halisi ya mtu."
+        "placeholderNotice": "Hakuna kilicho kwenye ukurasa huu kilichounganishwa na kumbukumbu halisi bado, kwa hivyo kila takwimu inaonyesha sifuri. Ni onyesho la mpangilio, si ruzuku ya mtu yeyote."
       }
     }
   },

@@ -24,16 +24,17 @@ export function MyRecordersView({
   recorders,
   canAddRecorders = false,
   onAddRecorder,
-  addUnavailableNote,
+  addDisabledNote,
 }: {
   recorders: readonly Recorder[];
-  /** Whether the viewer may register/request recorders on this grant. */
+  /** Whether the viewer's role permits registering recorders. False hides the
+   *  add affordances outright — a role that cannot add should not see them. */
   canAddRecorders?: boolean;
   onAddRecorder?: (input: NewRecorderInput) => void | Promise<void>;
-  /** Plain-language reason shown in place of the add affordances when adding
-   *  is unavailable — either the viewer's role or, for now, the missing
-   *  persistence layer. Omit to simply hide them. */
-  addUnavailableNote?: string;
+  /** Set when the viewer *may* add but the feature itself is not finished.
+   *  The affordances still render, greyed out, with this sentence explaining
+   *  why — clearer than silently hiding a button that is supposed to exist. */
+  addDisabledNote?: string;
 }) {
   const t = useTranslations("marketplace.grants.rewildingDashboard");
   const [filter, setFilter] = useState<OriginFilter>("all");
@@ -44,7 +45,8 @@ export function MyRecordersView({
 
   const counts = countByOrigin(recorders);
   const visible = filter === "all" ? recorders : recorders.filter((r) => r.origin === filter);
-  const showAdd = canAddRecorders && Boolean(onAddRecorder);
+  const addDisabled = Boolean(addDisabledNote) || !onAddRecorder;
+  const showAdd = canAddRecorders;
 
   const openAddPanel = () => {
     setFormGeneration((generation) => generation + 1);
@@ -67,7 +69,9 @@ export function MyRecordersView({
           <button
             type="button"
             onClick={openAddPanel}
-            className="inline-flex items-center gap-1.5 rounded-full border border-border bg-background px-4 py-2 text-xs font-semibold text-foreground shadow-sm transition-colors hover:bg-muted"
+            disabled={addDisabled}
+            title={addDisabledNote}
+            className="inline-flex items-center gap-1.5 rounded-full border border-border bg-background px-4 py-2 text-xs font-semibold text-foreground shadow-sm transition-colors hover:bg-muted disabled:pointer-events-none disabled:opacity-50"
           >
             <PlusIcon className="size-3.5" aria-hidden />
             {t("recorders.add")}
@@ -99,7 +103,7 @@ export function MyRecordersView({
         ))}
         {visible.length === 0 ? (
           <li className="rounded-2xl border border-border bg-surface px-4 py-6 text-center text-sm text-muted-foreground">
-            {t("recorders.emptyFilter")}
+            {recorders.length === 0 ? t("recorders.empty") : t("recorders.emptyFilter")}
           </li>
         ) : null}
       </ul>
@@ -108,21 +112,25 @@ export function MyRecordersView({
         <button
           type="button"
           onClick={openAddPanel}
-          className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border-[1.5px] border-dashed border-border px-4 py-3 text-left transition-colors hover:border-primary/40 hover:bg-primary/[0.04]"
+          disabled={addDisabled}
+          className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border-[1.5px] border-dashed border-border px-4 py-3 text-left transition-colors enabled:hover:border-primary/40 enabled:hover:bg-primary/[0.04] disabled:cursor-not-allowed"
         >
-          <span className="text-sm text-muted-foreground">{t("recorders.unknownPrompt")}</span>
-          <span className="inline-flex items-center gap-1 rounded-full bg-muted px-3.5 py-1.5 text-xs font-semibold text-foreground">
+          <span className={cn("text-sm", addDisabled ? "text-muted-foreground/70" : "text-muted-foreground")}>
+            {addDisabled && addDisabledNote ? addDisabledNote : t("recorders.unknownPrompt")}
+          </span>
+          <span
+            className={cn(
+              "inline-flex items-center gap-1 rounded-full bg-muted px-3.5 py-1.5 text-xs font-semibold text-foreground",
+              addDisabled && "opacity-50",
+            )}
+          >
             <PlusIcon className="size-3" aria-hidden />
             {t("recorders.addShort")}
           </span>
         </button>
-      ) : addUnavailableNote ? (
-        <p className="rounded-2xl border-[1.5px] border-dashed border-border px-4 py-3 text-sm leading-6 text-muted-foreground">
-          {addUnavailableNote}
-        </p>
       ) : null}
 
-      {showAdd ? (
+      {showAdd && !addDisabled ? (
         <ModalPortal id={modalId}>
           {/* Plain wrapper (not ModalContent): content renders through the portal in
               the caller's tree, so the built-in DialogClose cannot reach the Radix

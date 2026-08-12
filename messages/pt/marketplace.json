@@ -839,12 +839,15 @@
         "milestones": {
           "title": "Marcos do subsídio",
           "progress": "{done} de {total}",
-          "viewRecorders": "Abrir inventário"
+          "viewRecorders": "Abrir inventário",
+          "notStarted": "Não iniciado",
+          "empty": "Ainda não há marcos. Eles aparecem aqui depois que seu subsídio for configurado."
         },
         "metadata": {
           "title": "Meu subsídio",
           "description": "Seu subsídio Rewilding the Web: próximo passo, progresso e marcos."
-        }
+        },
+        "untitled": "Seu subsídio"
       },
       "recorders": {
         "navLabel": "Meus gravadores",
@@ -874,7 +877,8 @@
           "title": "Meus gravadores",
           "description": "Todos os gravadores do seu subsídio Rewilding the Web e de onde cada um veio."
         },
-        "addComingSoon": "Registrar seus próprios gravadores será ativado quando pudermos salvá-los na sua conta. Por enquanto esta lista é somente leitura."
+        "empty": "Ainda não há gravadores.",
+        "addNotBuilt": "Adicionar gravadores ainda não foi desenvolvido; será ativado quando pudermos salvá-los na sua conta."
       },
       "addForm": {
         "title": "Adicionar um gravador",
@@ -905,7 +909,7 @@
       },
       "shell": {
         "eyebrow": "Rewilding the Web · prévia de administração",
-        "placeholderNotice": "Estes números são fictícios. Os gravadores e o progresso do subsídio ainda não são lidos de registros reais, portanto trate esta página como uma prévia do layout e não como o subsídio real de alguém."
+        "placeholderNotice": "Nada nesta página está conectado a registros reais ainda, portanto todos os números mostram zero. É uma prévia do layout, não o subsídio de ninguém."
       }
     }
   },

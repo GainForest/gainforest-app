@@ -31,10 +31,14 @@ export function MyGrantView({
   return (
     <div className="flex flex-col gap-4">
       <header className="flex flex-wrap items-center justify-between gap-2">
-        <h2 className="text-xl font-semibold tracking-tight text-foreground">{overview.projectName}</h2>
-        <span className="rounded-full border border-border px-3 py-1 text-xs font-medium text-muted-foreground">
-          {overview.granteeLabel}
-        </span>
+        <h2 className="text-xl font-semibold tracking-tight text-foreground">
+          {overview.projectName ?? t("grant.untitled")}
+        </h2>
+        {overview.granteeLabel ? (
+          <span className="rounded-full border border-border px-3 py-1 text-xs font-medium text-muted-foreground">
+            {overview.granteeLabel}
+          </span>
+        ) : null}
       </header>
 
       {overview.nextStep ? (
@@ -88,15 +92,25 @@ export function MyGrantView({
       <section className="flex flex-col gap-3 rounded-2xl border border-border bg-surface p-4">
         <div className="flex items-baseline justify-between gap-3">
           <h3 className="text-sm font-semibold text-foreground">{t("grant.milestones.title")}</h3>
-          <span className="rounded-full border border-border px-2.5 py-0.5 text-[11px] font-medium text-muted-foreground">
-            {t("grant.milestones.progress", { done: doneCount, total: overview.milestones.length })}
-          </span>
+          {overview.milestones.length > 0 ? (
+            <span className="rounded-full border border-border px-2.5 py-0.5 text-[11px] font-medium text-muted-foreground">
+              {t("grant.milestones.progress", { done: doneCount, total: overview.milestones.length })}
+            </span>
+          ) : (
+            <span className="rounded-full border border-border px-2.5 py-0.5 text-[11px] font-medium text-muted-foreground">
+              {t("grant.milestones.notStarted")}
+            </span>
+          )}
         </div>
-        <ol className="flex flex-col gap-2.5">
-          {overview.milestones.map((milestone) => (
-            <MilestoneRow key={milestone.id} milestone={milestone} onOpenRecorders={onOpenRecorders} />
-          ))}
-        </ol>
+        {overview.milestones.length > 0 ? (
+          <ol className="flex flex-col gap-2.5">
+            {overview.milestones.map((milestone) => (
+              <MilestoneRow key={milestone.id} milestone={milestone} onOpenRecorders={onOpenRecorders} />
+            ))}
+          </ol>
+        ) : (
+          <p className="text-sm leading-6 text-muted-foreground">{t("grant.milestones.empty")}</p>
+        )}
       </section>
     </div>
   );

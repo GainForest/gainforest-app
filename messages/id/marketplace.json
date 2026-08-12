@@ -839,12 +839,15 @@
         "milestones": {
           "title": "Tonggak hibah",
           "progress": "{done} dari {total}",
-          "viewRecorders": "Buka inventaris"
+          "viewRecorders": "Buka inventaris",
+          "notStarted": "Belum dimulai",
+          "empty": "Belum ada tonggak pencapaian. Semuanya muncul di sini setelah hibah Anda disiapkan."
         },
         "metadata": {
           "title": "Hibah saya",
           "description": "Hibah Rewilding the Web Anda: langkah berikutnya, kemajuan, dan tonggak pencapaian."
-        }
+        },
+        "untitled": "Hibah Anda"
       },
       "recorders": {
         "navLabel": "Perekam saya",
@@ -874,7 +877,8 @@
           "title": "Perekam saya",
           "description": "Semua perekam pada hibah Rewilding the Web Anda dan asal masing-masing."
         },
-        "addComingSoon": "Pendaftaran perekam milik Anda sendiri akan aktif setelah kami dapat menyimpannya ke akun Anda. Untuk saat ini daftar ini hanya bisa dibaca."
+        "empty": "Belum ada perekam.",
+        "addNotBuilt": "Penambahan perekam belum dibuat — fitur ini aktif setelah kami dapat menyimpannya ke akun Anda."
       },
       "addForm": {
         "title": "Tambah perekam",
@@ -905,7 +909,7 @@
       },
       "shell": {
         "eyebrow": "Rewilding the Web · pratinjau admin",
-        "placeholderNotice": "Angka-angka ini hanya contoh. Perekam dan kemajuan hibah belum dibaca dari catatan sungguhan, jadi anggap halaman ini sebagai pratinjau tata letak, bukan hibah asli milik seseorang."
+        "placeholderNotice": "Belum ada bagian halaman ini yang terhubung ke catatan sungguhan, jadi semua angka menunjukkan nol. Ini pratinjau tata letak, bukan hibah milik siapa pun."
       }
     }
   },

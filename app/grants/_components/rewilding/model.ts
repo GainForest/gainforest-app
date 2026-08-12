@@ -45,10 +45,11 @@ export type GrantMilestone = {
 };
 
 export type GrantOverview = {
-  /** Project title, e.g. "Sounds of the Savannah". */
-  projectName: string;
-  /** Grantee label chip, e.g. "SORALO · Kenya". */
-  granteeLabel: string;
+  /** Project title, e.g. "Sounds of the Savannah". Null until a grant record
+   *  names it — the view shows a generic heading rather than inventing one. */
+  projectName: string | null;
+  /** Grantee label chip, e.g. "SORALO · Kenya". Null when unknown. */
+  granteeLabel: string | null;
   /** The single next thing to do, or null when the grantee is all caught up. */
   nextStep: { title: string; dueDate?: string } | null;
   audioMinutes: number;
