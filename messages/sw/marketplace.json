@@ -834,20 +834,28 @@
           "recorders": "Vinasa sauti",
           "recordersYours": "{count} vyako",
           "recordersShipped": "{count} vimetumwa",
-          "speciesTagged": "Spishi zilizowekewa lebo"
+          "speciesTagged": "Spishi zilizowekewa lebo",
+          "audioTarget": "Lengo: dakika {target}"
         },
         "milestones": {
           "title": "Hatua muhimu za ruzuku",
-          "progress": "{done} kati ya {total}",
+          "progress": "{done} kati ya {total} zimethibitishwa",
           "viewRecorders": "Fungua orodha",
           "notStarted": "Haijaanza",
-          "empty": "Bado hakuna hatua muhimu. Zitaonekana hapa mara ruzuku yako itakapowekwa."
+          "empty": "Bado hakuna hatua muhimu. Zitaonekana hapa mara ruzuku yako itakapowekwa.",
+          "markDone": "Weka alama imekamilika",
+          "awaitingReview": "Inasubiri ukaguzi",
+          "confirmed": "Imethibitishwa",
+          "payout": "Hutoa ${amount} · malipo ya {tranche}",
+          "reviewNote": "Kuweka alama hatua muhimu imekamilika kunaituma GainForest kwa ukaguzi; kila hatua iliyothibitishwa hutoa sehemu inayofuata ya ruzuku yako.",
+          "markNotBuilt": "Kuweka alama hatua muhimu bado hakujajengwa; kutawezeshwa mara tutakapoweza kuhifadhi maendeleo yako."
         },
         "metadata": {
           "title": "Ruzuku yangu",
           "description": "Ruzuku yako ya Rewilding the Web: hatua inayofuata, maendeleo na hatua muhimu."
         },
-        "untitled": "Ruzuku yako"
+        "untitled": "Ruzuku yako",
+        "amount": "Ruzuku ya ${amount}"
       },
       "recorders": {
         "navLabel": "Vinasa sauti vyangu",

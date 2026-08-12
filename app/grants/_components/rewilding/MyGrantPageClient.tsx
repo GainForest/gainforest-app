@@ -9,9 +9,12 @@ import { MyGrantView } from "./MyGrantView";
 export function MyGrantPageClient({
   overview,
   recorders,
+  markMilestoneDisabledNote,
 }: {
   overview: GrantOverview;
   recorders: Recorder[];
+  /** Why milestone check-off is greyed out (nothing persists a claim yet). */
+  markMilestoneDisabledNote?: string;
 }) {
   const router = useRouter();
   return (
@@ -19,6 +22,7 @@ export function MyGrantPageClient({
       overview={overview}
       recorders={recorders}
       onOpenRecorders={() => router.push("/grants/my-recorders")}
+      markMilestoneDisabledNote={markMilestoneDisabledNote}
     />
   );
 }

@@ -34,13 +34,30 @@ export type Recorder = {
   weeklyMinutes: number[];
 };
 
-export type GrantMilestoneState = "done" | "active" | "todo";
+/**
+ * Milestones gate the grant's payment tranches, so a grantee saying "done"
+ * is a claim, not a completion: GainForest confirms it before the money moves.
+ * The three states mirror that — nothing jumps straight from todo to done.
+ */
+export type GrantMilestoneState =
+  /** Not claimed yet. */
+  | "todo"
+  /** The grantee marked it done; GainForest has not confirmed it. */
+  | "awaitingReview"
+  /** Confirmed by GainForest. The tranche it gates can be released. */
+  | "done";
 
 export type GrantMilestone = {
   id: string;
+  /** Short program code, e.g. "M2". Shown as-is; not translated. */
+  code: string;
   title: string;
+  description: string;
   state: GrantMilestoneState;
-  /** The recorder-inventory milestone links through to the "My recorders" page. */
+  /** The payment tranche this milestone releases, when it gates one. M3 shares
+   *  M2's tranche, so it carries no payout of its own. */
+  payout?: { tranche: number; amountUsd: number };
+  /** Milestones about the devices link through to the "My recorders" page. */
   isRecorderInventory?: boolean;
 };
 
@@ -53,6 +70,10 @@ export type GrantOverview = {
   /** The single next thing to do, or null when the grantee is all caught up. */
   nextStep: { title: string; dueDate?: string } | null;
   audioMinutes: number;
+  /** Per-community recording target for the program, in minutes. */
+  audioTargetMinutes: number;
+  /** Total grant value in USD. */
+  grantAmountUsd: number;
   /** Cumulative uploaded minutes over recent weeks (oldest → newest), for the sparkline. */
   audioTrend: number[];
   speciesCount: number;

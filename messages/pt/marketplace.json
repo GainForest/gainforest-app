@@ -834,20 +834,28 @@
           "recorders": "Gravadores",
           "recordersYours": "{count} seus",
           "recordersShipped": "{count} enviados",
-          "speciesTagged": "Espécies marcadas"
+          "speciesTagged": "Espécies marcadas",
+          "audioTarget": "Meta: {target} min"
         },
         "milestones": {
           "title": "Marcos do subsídio",
-          "progress": "{done} de {total}",
+          "progress": "{done} de {total} confirmados",
           "viewRecorders": "Abrir inventário",
           "notStarted": "Não iniciado",
-          "empty": "Ainda não há marcos. Eles aparecem aqui depois que seu subsídio for configurado."
+          "empty": "Ainda não há marcos. Eles aparecem aqui depois que seu subsídio for configurado.",
+          "markDone": "Marcar como concluído",
+          "awaitingReview": "Aguardando revisão",
+          "confirmed": "Confirmado",
+          "payout": "Libera ${amount} · pagamento {tranche}",
+          "reviewNote": "Marcar um marco como concluído o envia à GainForest para revisão; cada marco confirmado libera a próxima parte do seu subsídio.",
+          "markNotBuilt": "Marcar marcos ainda não foi desenvolvido; será ativado quando pudermos salvar seu progresso."
         },
         "metadata": {
           "title": "Meu subsídio",
           "description": "Seu subsídio Rewilding the Web: próximo passo, progresso e marcos."
         },
-        "untitled": "Seu subsídio"
+        "untitled": "Seu subsídio",
+        "amount": "Subsídio de ${amount}"
       },
       "recorders": {
         "navLabel": "Meus gravadores",

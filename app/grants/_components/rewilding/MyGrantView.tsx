@@ -1,6 +1,7 @@
 "use client";
 
-import { ArrowRightIcon, CheckIcon } from "lucide-react";
+import { useState } from "react";
+import { ArrowRightIcon, CheckIcon, ClockIcon } from "lucide-react";
 import { useFormatter, useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
 import type { GrantMilestone, GrantOverview, Recorder } from "./model";
@@ -9,24 +10,37 @@ import { Sparkline } from "./Sparkline";
 
 /**
  * "My grant" — the Rewilding the Web grantee's overview page: the one next
- * step, the headline numbers, and the milestone list. Pure view: all data and
- * navigation arrive via props so the `/_test` registry can drive it with
- * fixtures while a live route drives it with indexer data.
+ * step, the headline numbers, and the milestone check-off list. Pure view:
+ * all data and the milestone writer arrive via props so the same component
+ * renders against live data or fixtures.
+ *
+ * Milestones gate the grant's payment tranches, so checking one off is a
+ * claim, not a completion — the row moves to "waiting for review" and only
+ * GainForest's confirmation moves it to done. The view never pretends
+ * otherwise.
  */
 export function MyGrantView({
   overview,
   recorders,
   onOpenRecorders,
+  onMarkMilestoneDone,
+  markMilestoneDisabledNote,
 }: {
   overview: GrantOverview;
   recorders: readonly Recorder[];
-  /** Navigate to the "My recorders" page (next-step CTA + inventory milestone). */
+  /** Navigate to the "My recorders" page (next-step CTA + deployment milestone). */
   onOpenRecorders: () => void;
+  /** Claim a milestone as done (moves it to awaiting review). Omit when the
+   *  viewer may not claim milestones at all. */
+  onMarkMilestoneDone?: (milestoneId: string) => void | Promise<void>;
+  /** Set when claiming exists as an affordance but is not functional yet —
+   *  the buttons render greyed out with this sentence explaining why. */
+  markMilestoneDisabledNote?: string;
 }) {
   const t = useTranslations("marketplace.grants.rewildingDashboard");
   const format = useFormatter();
   const originCounts = countByOrigin(recorders);
-  const doneCount = overview.milestones.filter((m) => m.state === "done").length;
+  const confirmedCount = overview.milestones.filter((m) => m.state === "done").length;
 
   return (
     <div className="flex flex-col gap-4">
@@ -34,11 +48,16 @@ export function MyGrantView({
         <h2 className="text-xl font-semibold tracking-tight text-foreground">
           {overview.projectName ?? t("grant.untitled")}
         </h2>
-        {overview.granteeLabel ? (
+        <div className="flex items-center gap-1.5">
           <span className="rounded-full border border-border px-3 py-1 text-xs font-medium text-muted-foreground">
-            {overview.granteeLabel}
+            {t("grant.amount", { amount: format.number(overview.grantAmountUsd) })}
           </span>
-        ) : null}
+          {overview.granteeLabel ? (
+            <span className="rounded-full border border-border px-3 py-1 text-xs font-medium text-muted-foreground">
+              {overview.granteeLabel}
+            </span>
+          ) : null}
+        </div>
       </header>
 
       {overview.nextStep ? (
@@ -71,7 +90,19 @@ export function MyGrantView({
           label={t("grant.stats.audioUploaded")}
           value={t("grant.stats.audioValue", { minutes: format.number(overview.audioMinutes) })}
           trend={overview.audioTrend}
-        />
+        >
+          <div className="mt-2 flex flex-col gap-1">
+            <div className="h-1.5 w-full overflow-hidden rounded-full bg-muted" aria-hidden>
+              <div
+                className="h-full rounded-full bg-primary transition-[width]"
+                style={{ width: `${Math.min(100, (overview.audioMinutes / Math.max(1, overview.audioTargetMinutes)) * 100)}%` }}
+              />
+            </div>
+            <span className="text-[10px] font-medium text-muted-foreground">
+              {t("grant.stats.audioTarget", { target: format.number(overview.audioTargetMinutes) })}
+            </span>
+          </div>
+        </StatCard>
         <StatCard label={t("grant.stats.recorders")} value={format.number(recorders.length)}>
           <div className="mt-2 flex flex-wrap gap-1.5">
             <span className="rounded-full border border-primary/40 px-2 py-0.5 text-[10px] font-medium text-primary">
@@ -92,22 +123,30 @@ export function MyGrantView({
       <section className="flex flex-col gap-3 rounded-2xl border border-border bg-surface p-4">
         <div className="flex items-baseline justify-between gap-3">
           <h3 className="text-sm font-semibold text-foreground">{t("grant.milestones.title")}</h3>
-          {overview.milestones.length > 0 ? (
-            <span className="rounded-full border border-border px-2.5 py-0.5 text-[11px] font-medium text-muted-foreground">
-              {t("grant.milestones.progress", { done: doneCount, total: overview.milestones.length })}
-            </span>
-          ) : (
-            <span className="rounded-full border border-border px-2.5 py-0.5 text-[11px] font-medium text-muted-foreground">
-              {t("grant.milestones.notStarted")}
-            </span>
-          )}
+          <span className="rounded-full border border-border px-2.5 py-0.5 text-[11px] font-medium text-muted-foreground">
+            {overview.milestones.length > 0
+              ? t("grant.milestones.progress", { done: confirmedCount, total: overview.milestones.length })
+              : t("grant.milestones.notStarted")}
+          </span>
         </div>
         {overview.milestones.length > 0 ? (
-          <ol className="flex flex-col gap-2.5">
-            {overview.milestones.map((milestone) => (
-              <MilestoneRow key={milestone.id} milestone={milestone} onOpenRecorders={onOpenRecorders} />
-            ))}
-          </ol>
+          <>
+            <ol className="flex flex-col gap-2">
+              {overview.milestones.map((milestone) => (
+                <MilestoneRow
+                  key={milestone.id}
+                  milestone={milestone}
+                  onOpenRecorders={onOpenRecorders}
+                  onMarkDone={onMarkMilestoneDone}
+                  markDisabledNote={markMilestoneDisabledNote}
+                />
+              ))}
+            </ol>
+            <p className="text-xs leading-5 text-muted-foreground">
+              {t("grant.milestones.reviewNote")}
+              {markMilestoneDisabledNote ? ` ${markMilestoneDisabledNote}` : null}
+            </p>
+          </>
         ) : (
           <p className="text-sm leading-6 text-muted-foreground">{t("grant.milestones.empty")}</p>
         )}
@@ -129,12 +168,12 @@ function StatCard({
 }) {
   return (
     <div className="flex items-end justify-between gap-3 rounded-2xl border border-border bg-surface p-4">
-      <div className="min-w-0">
+      <div className="min-w-0 flex-1">
         <div className="text-[10px] font-semibold uppercase tracking-[0.08em] text-muted-foreground">{label}</div>
         <div className="mt-1 text-2xl font-semibold tracking-tight text-foreground">{value}</div>
         {children}
       </div>
-      {trend ? <Sparkline values={trend} className="h-9 w-20 shrink-0" /> : null}
+      {trend && trend.length > 1 ? <Sparkline values={trend} className="h-9 w-20 shrink-0" /> : null}
     </div>
   );
 }
@@ -142,61 +181,103 @@ function StatCard({
 function MilestoneRow({
   milestone,
   onOpenRecorders,
+  onMarkDone,
+  markDisabledNote,
 }: {
   milestone: GrantMilestone;
   onOpenRecorders: () => void;
+  onMarkDone?: (milestoneId: string) => void | Promise<void>;
+  markDisabledNote?: string;
 }) {
-  const t = useTranslations("marketplace.grants.rewildingDashboard");
-  const marker = (
-    <span
-      aria-hidden
-      className={cn(
-        "grid size-4 shrink-0 place-items-center rounded border",
-        milestone.state === "done"
-          ? "border-primary bg-primary text-primary-foreground"
-          : milestone.state === "active"
-            ? "border-amber-500 bg-amber-500/10"
-            : "border-border bg-background",
-      )}
-    >
-      {milestone.state === "done" ? <CheckIcon className="size-3" /> : null}
-    </span>
-  );
+  const t = useTranslations("marketplace.grants.rewildingDashboard.grant.milestones");
+  const format = useFormatter();
+  const [claiming, setClaiming] = useState(false);
 
-  // The recorder-inventory milestone is the doorway to the "My recorders"
-  // page, so the whole row is a link-style button while it is open.
-  if (milestone.isRecorderInventory && milestone.state !== "done") {
-    return (
-      <li>
-        <button
-          type="button"
-          onClick={onOpenRecorders}
-          className="group flex w-full items-center gap-2.5 rounded-lg text-left"
-        >
-          {marker}
-          <span className="min-w-0 flex-1 truncate text-sm text-foreground underline-offset-4 group-hover:underline">
-            {milestone.title}
-          </span>
-          <span className="inline-flex shrink-0 items-center gap-1 text-xs font-medium text-primary">
-            {t("grant.milestones.viewRecorders")}
-            <ArrowRightIcon className="size-3 transition-transform group-hover:translate-x-0.5" aria-hidden />
-          </span>
-        </button>
-      </li>
-    );
-  }
+  const handleMarkDone = async () => {
+    if (!onMarkDone || claiming) return;
+    setClaiming(true);
+    try {
+      await onMarkDone(milestone.id);
+    } finally {
+      setClaiming(false);
+    }
+  };
 
   return (
-    <li className="flex items-center gap-2.5">
-      {marker}
+    <li
+      className={cn(
+        "flex flex-wrap items-center gap-3 rounded-xl border border-border bg-background px-3.5 py-3",
+        milestone.state === "done" && "border-primary/30 bg-primary/[0.04]",
+        milestone.state === "awaitingReview" && "border-amber-500/30 bg-amber-500/[0.06]",
+      )}
+    >
       <span
+        aria-hidden
         className={cn(
-          "min-w-0 flex-1 truncate text-sm",
-          milestone.state === "done" ? "text-muted-foreground" : "text-foreground",
+          "grid size-5 shrink-0 place-items-center rounded-md border",
+          milestone.state === "done"
+            ? "border-primary bg-primary text-primary-foreground"
+            : milestone.state === "awaitingReview"
+              ? "border-amber-500 bg-amber-500/10 text-amber-700 dark:text-amber-400"
+              : "border-border bg-background",
         )}
       >
-        {milestone.title}
+        {milestone.state === "done" ? <CheckIcon className="size-3.5" /> : null}
+        {milestone.state === "awaitingReview" ? <ClockIcon className="size-3" /> : null}
       </span>
+
+      <div className="min-w-0 flex-1">
+        <div className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
+          <span className="font-mono text-[10px] font-semibold text-muted-foreground">{milestone.code}</span>
+          <span
+            className={cn(
+              "text-sm font-medium",
+              milestone.state === "done" ? "text-muted-foreground" : "text-foreground",
+            )}
+          >
+            {milestone.title}
+          </span>
+          {milestone.payout ? (
+            <span className="rounded-full border border-border px-2 py-px text-[10px] font-medium text-muted-foreground">
+              {t("payout", {
+                amount: format.number(milestone.payout.amountUsd),
+                tranche: milestone.payout.tranche,
+              })}
+            </span>
+          ) : null}
+        </div>
+        <p className="mt-0.5 text-xs leading-5 text-muted-foreground">{milestone.description}</p>
+        {milestone.isRecorderInventory && milestone.state !== "done" ? (
+          <button
+            type="button"
+            onClick={onOpenRecorders}
+            className="group mt-1 inline-flex items-center gap-1 text-xs font-medium text-primary"
+          >
+            {t("viewRecorders")}
+            <ArrowRightIcon className="size-3 transition-transform group-hover:translate-x-0.5" aria-hidden />
+          </button>
+        ) : null}
+      </div>
+
+      {milestone.state === "todo" ? (
+        <button
+          type="button"
+          onClick={handleMarkDone}
+          disabled={!onMarkDone || Boolean(markDisabledNote) || claiming}
+          title={markDisabledNote}
+          className="shrink-0 rounded-full border border-border bg-background px-3.5 py-1.5 text-xs font-semibold text-foreground shadow-sm transition-colors hover:bg-muted disabled:pointer-events-none disabled:opacity-50"
+        >
+          {t("markDone")}
+        </button>
+      ) : milestone.state === "awaitingReview" ? (
+        <span className="shrink-0 rounded-full border border-amber-500/40 px-3 py-1 text-[11px] font-medium text-amber-700 dark:text-amber-400">
+          {t("awaitingReview")}
+        </span>
+      ) : (
+        <span className="shrink-0 rounded-full border border-primary/40 px-3 py-1 text-[11px] font-medium text-primary">
+          {t("confirmed")}
+        </span>
+      )}
     </li>
   );
 }

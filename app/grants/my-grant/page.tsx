@@ -28,11 +28,19 @@ export default async function MyGrantPage() {
     notFound();
   }
 
+  const t = await getTranslations("marketplace.grants.rewildingDashboard.grant.milestones");
   const [overview, recorders] = await Promise.all([fetchGrantOverview(), fetchRecorders()]);
 
   return (
     <RewildingPageShell>
-      <MyGrantPageClient overview={overview} recorders={recorders} />
+      {/* Check-off is greyed out, not hidden: there is nowhere to persist a
+          claim yet, and a working button that forgets on reload would be worse
+          than one that says so. */}
+      <MyGrantPageClient
+        overview={overview}
+        recorders={recorders}
+        markMilestoneDisabledNote={t("markNotBuilt")}
+      />
     </RewildingPageShell>
   );
 }

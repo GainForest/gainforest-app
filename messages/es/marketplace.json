@@ -834,20 +834,28 @@
           "recorders": "Grabadoras",
           "recordersYours": "{count} tuyas",
           "recordersShipped": "{count} enviadas",
-          "speciesTagged": "Especies etiquetadas"
+          "speciesTagged": "Especies etiquetadas",
+          "audioTarget": "Meta: {target} min"
         },
         "milestones": {
           "title": "Hitos de la subvención",
-          "progress": "{done} de {total}",
+          "progress": "{done} de {total} confirmados",
           "viewRecorders": "Abrir inventario",
           "notStarted": "Sin empezar",
-          "empty": "Aún no hay hitos. Aparecerán aquí cuando se configure tu subvención."
+          "empty": "Aún no hay hitos. Aparecerán aquí cuando se configure tu subvención.",
+          "markDone": "Marcar como hecho",
+          "awaitingReview": "En revisión",
+          "confirmed": "Confirmado",
+          "payout": "Libera ${amount} · pago {tranche}",
+          "reviewNote": "Marcar un hito como hecho lo envía a GainForest para su revisión; cada hito confirmado libera la siguiente parte de tu subvención.",
+          "markNotBuilt": "Marcar hitos todavía no está desarrollado; se activará cuando podamos guardar tu progreso."
         },
         "metadata": {
           "title": "Mi subvención",
           "description": "Tu subvención Rewilding the Web: siguiente paso, progreso e hitos."
         },
-        "untitled": "Tu subvención"
+        "untitled": "Tu subvención",
+        "amount": "Subvención de ${amount}"
       },
       "recorders": {
         "navLabel": "Mis grabadoras",

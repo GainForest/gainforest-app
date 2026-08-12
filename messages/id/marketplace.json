@@ -834,20 +834,28 @@
           "recorders": "Perekam",
           "recordersYours": "{count} milik Anda",
           "recordersShipped": "{count} dikirim",
-          "speciesTagged": "Spesies tertandai"
+          "speciesTagged": "Spesies tertandai",
+          "audioTarget": "Target {target} mnt"
         },
         "milestones": {
           "title": "Tonggak hibah",
-          "progress": "{done} dari {total}",
+          "progress": "{done} dari {total} terkonfirmasi",
           "viewRecorders": "Buka inventaris",
           "notStarted": "Belum dimulai",
-          "empty": "Belum ada tonggak pencapaian. Semuanya muncul di sini setelah hibah Anda disiapkan."
+          "empty": "Belum ada tonggak pencapaian. Semuanya muncul di sini setelah hibah Anda disiapkan.",
+          "markDone": "Tandai selesai",
+          "awaitingReview": "Menunggu tinjauan",
+          "confirmed": "Terkonfirmasi",
+          "payout": "Mencairkan ${amount} · pembayaran {tranche}",
+          "reviewNote": "Menandai tonggak sebagai selesai mengirimkannya ke GainForest untuk ditinjau; setiap tonggak yang terkonfirmasi mencairkan bagian hibah Anda berikutnya.",
+          "markNotBuilt": "Penandaan tonggak belum dibuat; fitur ini aktif setelah kami dapat menyimpan kemajuan Anda."
         },
         "metadata": {
           "title": "Hibah saya",
           "description": "Hibah Rewilding the Web Anda: langkah berikutnya, kemajuan, dan tonggak pencapaian."
         },
-        "untitled": "Hibah Anda"
+        "untitled": "Hibah Anda",
+        "amount": "Hibah ${amount}"
       },
       "recorders": {
         "navLabel": "Perekam saya",
