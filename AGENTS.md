@@ -14,6 +14,9 @@ When adding any feature that creates, updates, deletes, or changes membership/ro
 
 The route is public but blocked from indexing; that is not authentication. Never put secrets, privileged controls, or real personal data in the registry. See `app/%5Ftest/README.md` (`%5Ftest` maps to `/_test` because literal underscore folders are private in the Next.js App Router).
 
+## Pull request screenshots
+For every pull request, include at least one before-and-after screenshot in the PR description. Do not commit screenshots or other PR-review media to this repository; upload them outside the codebase and embed or link them from the PR description.
+
 ## E2E test runs
 When a user asks to run the full E2E suite, run it. The suite intentionally creates disposable accounts and organizations, and teardown is responsible for deleting them. Do not avoid a requested full E2E run because it uses disposable accounts; instead, watch cleanup output and report any teardown failure clearly.
 
