@@ -1316,7 +1316,7 @@
     },
     "rewilding": {
       "title": "Kurudisha Uasilia kwenye Wavuti",
-      "description": "Nafasi kumi za programu. Kuongeza shirika kwenye nafasi kunalikubali kwenye ruzuku — tangu hapo shirika na wanachama wake wanaweza kufungua dashibodi yake ya hatua muhimu. Kuweka hatua kama imekamilika ni uthibitisho wa GainForest — hufungua awamu ya malipo husika.",
+      "description": "Nafasi kumi za programu. Nafasi inaweza kushikwa na mtu mmoja au kikundi. Kuongeza akaunti kunaikubali kwenye ruzuku — tangu hapo mpokeaji wa ruzuku, na wanachama kama ni kikundi, anaweza kufungua dashibodi yake ya hatua muhimu. Kuweka alama hatua imekamilika ni uthibitisho wa GainForest — hutoa malipo yanayolingana.",
       "footer": "Mabadiliko ya hatua muhimu na nyaraka huonekana mara moja kwenye ukurasa wa ruzuku wa mpokeaji.",
       "unnamedGrantee": "Akaunti isiyo na jina",
       "granteeBadge": "Beji ya ruzuku",
@@ -1346,18 +1346,18 @@
       "deleteConfirm": "Futa “{title}”? Mpokeaji hataiona tena.",
       "openProfile": "Fungua wasifu",
       "slotOpen": "Nafasi {number} · wazi",
-      "addTitle": "Ongeza shirika",
-      "addHint": "Tafuta akaunti ya kujaza nafasi hii. Kuiongeza hufungua dashibodi ya hatua muhimu kwa shirika na wanachama wake.",
+      "addTitle": "Ongeza mpokeaji wa ruzuku",
+      "addHint": "Tafuta mtu au kikundi cha kujaza nafasi hii. Ukiongeza, dashibodi ya hatua muhimu inafunguka kwa akaunti hiyo na wanachama wake.",
       "searchPlaceholder": "Tafuta akaunti kwa jina…",
       "searching": "Inatafuta…",
       "searchEmpty": "Hakuna akaunti inayolingana na “{query}”.",
       "alreadyEnrolled": "Tayari yumo kwenye ruzuku",
       "add": "Ongeza",
       "adding": "Inaongeza…",
-      "slotsFull": "Nafasi zote kumi zimejaa. Ondoa shirika moja kabla ya kuongeza jingine.",
+      "slotsFull": "Nafasi zote kumi zimejaa. Ondoa mpokeaji mmoja kabla ya kuongeza mwingine.",
       "remove": "Ondoa kwenye ruzuku",
       "removing": "Inaondoa…",
-      "removeConfirm": "Ondoa “{name}” kwenye ruzuku? Hatua muhimu na nyaraka zinabaki, lakini shirika na wanachama wake wanapoteza ufikiaji wa dashibodi ya ruzuku na nafasi inakuwa wazi."
+      "removeConfirm": "Ondoa “{name}” kwenye ruzuku? Hatua muhimu na nyaraka zinabaki, lakini akaunti hiyo inapoteza ufikiaji wa dashibodi ya ruzuku na nafasi inafunguka."
     },
     "pages": {
       "hub": {

@@ -1316,7 +1316,7 @@
     },
     "rewilding": {
       "title": "Resilvestrar la web",
-      "description": "Los diez cupos del programa. Añadir una organización a un cupo la admite en la subvención: desde entonces la organización y sus integrantes pueden abrir su panel de hitos. Marcar un hito como hecho es la confirmación de GainForest: libera la parte del pago correspondiente.",
+      "description": "Las diez plazas del programa. Una plaza puede estar a nombre de una persona o de un grupo. Añadir una cuenta la admite en la subvención: desde entonces, quien recibe la subvención —y los miembros, si es un grupo— puede abrir su panel de hitos. Marcar un hito como hecho es la confirmación de GainForest: libera el pago correspondiente.",
       "footer": "Los cambios de hitos y los documentos aparecen de inmediato en la página de subvención del beneficiario.",
       "unnamedGrantee": "Cuenta sin nombre",
       "granteeBadge": "Insignia de subvención",
@@ -1346,18 +1346,18 @@
       "deleteConfirm": "¿Eliminar “{title}”? El beneficiario dejará de verlo.",
       "openProfile": "Abrir perfil",
       "slotOpen": "Cupo {number} · libre",
-      "addTitle": "Añadir una organización",
-      "addHint": "Busca una cuenta para ocupar este cupo. Al añadirla, la organización y sus integrantes acceden al panel de hitos.",
+      "addTitle": "Añadir a quien recibe la subvención",
+      "addHint": "Busca una persona o un grupo para ocupar esta plaza. Al añadirlo se abre el panel de hitos para esa cuenta y sus miembros.",
       "searchPlaceholder": "Buscar cuentas por nombre…",
       "searching": "Buscando…",
       "searchEmpty": "Ninguna cuenta coincide con “{query}”.",
       "alreadyEnrolled": "Ya está en la subvención",
       "add": "Añadir",
       "adding": "Añadiendo…",
-      "slotsFull": "Los diez cupos están ocupados. Quita una organización antes de añadir otra.",
+      "slotsFull": "Las diez plazas están ocupadas. Quita a alguien antes de añadir a otra persona o grupo.",
       "remove": "Quitar de la subvención",
       "removing": "Quitando…",
-      "removeConfirm": "¿Quitar a “{name}” de la subvención? Los hitos y documentos se conservan, pero la organización y sus integrantes pierden el acceso al panel de la subvención y el cupo queda libre."
+      "removeConfirm": "¿Quitar a «{name}» de la subvención? Se conservan los hitos y los documentos, pero esa cuenta pierde el acceso al panel de la subvención y la plaza queda libre."
     },
     "pages": {
       "hub": {

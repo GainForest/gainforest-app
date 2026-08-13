@@ -10,28 +10,32 @@ import { getGainForestModeratorAccess } from "@/app/internal/badges/_lib/access"
  * Who may open the Rewilding grantee dashboard (/grants/my-grant and
  * /grants/my-recorders), and whose grant they see.
  *
- * Grant slots are held by organizations (CGS group accounts), but people sign
- * in as themselves — so access flows through membership: a member of an
- * enrolled organization sees that organization's grant. An account that is
- * itself enrolled sees its own. GainForest admins can preview, marked as
- * such. Enrollment wins over admin: an admin who belongs to an enrolled
- * organization sees the real grant, not a preview.
+ * A grant slot can be held by a person or by an organization (a CGS group
+ * account). An account that is itself enrolled sees its own grant — that is
+ * the whole story for an individual grantee. For an organization, people sign
+ * in as themselves, so access also flows through membership: a member of an
+ * enrolled organization sees that organization's grant. GainForest admins can
+ * preview, marked as such. Enrollment wins over admin: an admin who is
+ * enrolled, or who belongs to an enrolled organization, sees the real grant
+ * rather than a preview.
  */
 
 /** The grant the signed-in viewer belongs to, when there is one. */
 export type ViewerGrant = {
-  /** The enrolled account whose grant this is — the organization's DID when
-   *  the viewer is a member, the viewer's own DID when directly enrolled. */
+  /** The enrolled account whose grant this is — the viewer's own DID when
+   *  they hold the grant themselves, the organization's DID when they reach
+   *  it as a member. */
   grantDid: string;
-  /** The organization's name, when viewing through a membership. Shown so a
-   *  member knows whose grant they are looking at. */
+  /** The organization's name, when viewing through a membership. Null for an
+   *  individual grantee, who needs no reminder whose grant it is. */
   grantLabel: string | null;
 };
 
 /**
- * Resolve the viewer's grant: their own enrollment first, then the first
- * organization they belong to that holds a slot. Null when neither applies
- * (or nobody is signed in). Fails closed on any error.
+ * Resolve the viewer's grant: their own enrollment first — covering an
+ * individual grantee — then the first organization they belong to that holds
+ * a slot. Null when neither applies (or nobody is signed in). Fails closed on
+ * any error.
  */
 export async function resolveViewerGrant(): Promise<ViewerGrant | null> {
   const session = await fetchAuthSession().catch(() => null);
@@ -60,7 +64,8 @@ export type RewildingDashboardAccess = {
   /** The account whose grant state the pages should load. In an admin
    *  preview this is the admin's own DID (usually an empty grant). */
   grantDid: string | null;
-  /** Organization name chip, when viewing a grant through membership. */
+  /** Organization name chip, when viewing a grant through membership. Null
+   *  for an individual grantee. */
   grantLabel: string | null;
 };
 

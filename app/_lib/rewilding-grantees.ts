@@ -1,9 +1,11 @@
 /**
  * Rewilding the Web grantee enrollment.
  *
- * The program accepts exactly ten organizations. Which ones are in is an
- * explicit decision a GainForest admin makes in the admin panel — not
- * something inferred from applications or badges. Each decision is an
+ * The program accepts exactly ten grantees. A slot can be held by a person or
+ * by an organization — both are just accounts here, and nothing in this
+ * module distinguishes them. Which ones are in is an explicit decision a
+ * GainForest admin makes in the admin panel — not something inferred from
+ * applications or badges. Each decision is an
  * append-only event in the moderation repo (`active: true` enrolls,
  * `active: false` removes), newest per subject wins, same model as milestone
  * confirmations: any admin can reverse another's decision without deleting
@@ -27,7 +29,7 @@ import { listModerationRecords } from "./rewilding-milestones";
  */
 export const REWILDING_ENROLLMENT_COLLECTION = "app.gainforest.grant.rewilding.enrollment";
 
-/** The program's capacity: ten organizations, per the Program Handbook. */
+/** The program's capacity: ten grantees, per the Program Handbook. */
 export const REWILDING_GRANT_SLOTS = 10;
 
 const GRANTEE_CACHE_KEY = "rewilding-grantees:v1";
@@ -94,9 +96,9 @@ export function invalidateRewildingGranteesCache(): void {
 }
 
 /**
- * The organizations currently in the program: newest event per subject wins,
- * only active enrollments, oldest enrollment first (slot order — the first
- * organization accepted holds slot 1).
+ * The grantees currently in the program: newest event per subject wins, only
+ * active enrollments, oldest enrollment first (slot order — the first
+ * account accepted holds slot 1).
  */
 export function effectiveRewildingGrantees(
   records: readonly RewildingGranteeRecord[],

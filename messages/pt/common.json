@@ -1316,7 +1316,7 @@
     },
     "rewilding": {
       "title": "Resselvagem da web",
-      "description": "As dez vagas do programa. Adicionar uma organização a uma vaga a admite no subsídio — a partir daí a organização e seus integrantes podem abrir o painel de marcos dela. Marcar um marco como concluído é a confirmação da GainForest — isso libera a parcela de pagamento correspondente.",
+      "description": "As dez vagas do programa. Uma vaga pode ser de uma pessoa ou de um grupo. Adicionar uma conta a admite no subsídio — a partir daí, quem recebe o subsídio, e os membros se for um grupo, pode abrir seu painel de marcos. Marcar um marco como concluído é a confirmação da GainForest — libera o pagamento correspondente.",
       "footer": "Alterações de marcos e documentos aparecem imediatamente na página do subsídio do beneficiário.",
       "unnamedGrantee": "Conta sem nome",
       "granteeBadge": "Selo do subsídio",
@@ -1346,18 +1346,18 @@
       "deleteConfirm": "Excluir “{title}”? O beneficiário deixará de vê-lo.",
       "openProfile": "Abrir perfil",
       "slotOpen": "Vaga {number} · aberta",
-      "addTitle": "Adicionar uma organização",
-      "addHint": "Busque uma conta para ocupar esta vaga. Adicioná-la abre o painel de marcos para a organização e seus integrantes.",
+      "addTitle": "Adicionar quem recebe o subsídio",
+      "addHint": "Procure uma pessoa ou grupo para preencher esta vaga. Ao adicionar, o painel de marcos abre para essa conta e seus membros.",
       "searchPlaceholder": "Buscar contas por nome…",
       "searching": "Buscando…",
       "searchEmpty": "Nenhuma conta corresponde a “{query}”.",
       "alreadyEnrolled": "Já está no subsídio",
       "add": "Adicionar",
       "adding": "Adicionando…",
-      "slotsFull": "As dez vagas estão ocupadas. Remova uma organização antes de adicionar outra.",
+      "slotsFull": "As dez vagas estão ocupadas. Remova alguém antes de adicionar outra pessoa ou grupo.",
       "remove": "Remover do subsídio",
       "removing": "Removendo…",
-      "removeConfirm": "Remover “{name}” do subsídio? Os marcos e documentos são mantidos, mas a organização e seus integrantes perdem o acesso ao painel do subsídio e a vaga fica aberta."
+      "removeConfirm": "Remover “{name}” do subsídio? Os marcos e documentos são mantidos, mas essa conta perde o acesso ao painel do subsídio e a vaga fica livre."
     },
     "pages": {
       "hub": {

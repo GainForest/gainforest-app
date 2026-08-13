@@ -1316,7 +1316,7 @@
     },
     "rewilding": {
       "title": "Meliarkan Kembali Web",
-      "description": "Sepuluh slot program. Menambahkan organisasi ke sebuah slot berarti menerimanya ke dalam hibah — sejak itu organisasi beserta anggotanya dapat membuka dasbor tonggaknya. Menandai tonggak selesai adalah konfirmasi GainForest — itu mencairkan tahap pembayaran terkait.",
+      "description": "Sepuluh slot program. Satu slot bisa dipegang oleh perorangan atau grup. Menambahkan akun berarti menerimanya ke dalam hibah — sejak itu penerima hibah, dan anggotanya jika berupa grup, dapat membuka dasbor tonggaknya. Menandai tonggak selesai adalah konfirmasi GainForest — itu mencairkan pembayaran terkait.",
       "footer": "Perubahan tonggak dan dokumen langsung terlihat di halaman hibah penerima.",
       "unnamedGrantee": "Akun tanpa nama",
       "granteeBadge": "Lencana hibah",
@@ -1346,18 +1346,18 @@
       "deleteConfirm": "Hapus “{title}”? Penerima tidak akan melihatnya lagi.",
       "openProfile": "Buka profil",
       "slotOpen": "Slot {number} · kosong",
-      "addTitle": "Tambahkan organisasi",
-      "addHint": "Cari akun untuk mengisi slot ini. Menambahkannya membuka dasbor tonggak bagi organisasi dan para anggotanya.",
+      "addTitle": "Tambahkan penerima hibah",
+      "addHint": "Cari perorangan atau grup untuk mengisi slot ini. Menambahkannya membuka dasbor tonggak bagi akun tersebut dan anggotanya.",
       "searchPlaceholder": "Cari akun berdasarkan nama…",
       "searching": "Mencari…",
       "searchEmpty": "Tidak ada akun yang cocok dengan “{query}”.",
       "alreadyEnrolled": "Sudah dalam hibah",
       "add": "Tambah",
       "adding": "Menambahkan…",
-      "slotsFull": "Kesepuluh slot sudah terisi. Keluarkan satu organisasi sebelum menambahkan yang lain.",
+      "slotsFull": "Kesepuluh slot sudah terisi. Hapus satu penerima sebelum menambahkan yang lain.",
       "remove": "Keluarkan dari hibah",
       "removing": "Mengeluarkan…",
-      "removeConfirm": "Keluarkan “{name}” dari hibah? Tonggak dan dokumen tetap tersimpan, tetapi organisasi beserta anggotanya kehilangan akses ke dasbor hibah dan slot menjadi kosong."
+      "removeConfirm": "Hapus “{name}” dari hibah? Tonggak dan dokumen tetap disimpan, tetapi akun itu kehilangan akses ke dasbor hibah dan slotnya terbuka."
     },
     "pages": {
       "hub": {
