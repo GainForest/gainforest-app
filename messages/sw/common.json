@@ -2175,7 +2175,12 @@
       "equipmentUsedLabel": "AudioMoth iliyotumika",
       "protocolLabel": "Itifaki",
       "recordedByLabel": "Kimerekodiwa na",
-      "viewEquipment": "Ona vifaa vyao"
+      "viewEquipment": "Ona vifaa vyao",
+      "attachWaiting": "{count, plural, one {Rekodi # inapakiwa chinichini — itaambatishwa kwa usambazaji utakaounda.} other {Rekodi # zinapakiwa chinichini — zitaambatishwa kwa usambazaji utakaounda.}}",
+      "attaching": "Inaambatisha {count, plural, one {rekodi #} other {rekodi #}} kwa usambazaji mpya…",
+      "attachDone": "{count, plural, one {Rekodi # imeambatishwa kwa usambazaji mpya.} other {Rekodi # zimeambatishwa kwa usambazaji mpya.}}",
+      "attachPartial": "{moved} zimeambatishwa · {failed} hazikuweza kuhamishwa — zinabaki kwenye folda ya kadi.",
+      "attachFailed": "Kundi halikuweza kuambatishwa — rekodi zinabaki kwenye folda ya kadi."
     },
     "upload": {
       "intro": "Ingiza kadi ya SD ya AudioMoth kisha uichague hapa chini. Rekodi zinatambuliwa kwa kitambulisho cha uwekaji kilichowekwa kwenye kila faili, zinahifadhiwa salama kwenye hifadhi ya kumbukumbu na kuandikwa kwenye akaunti yako.",

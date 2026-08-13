@@ -13,7 +13,6 @@ import { AccountDrawerProvider } from "./_components/AccountDrawer";
 import { AppCartProvider } from "./_components/cart/AppCartProvider";
 import { UploadTray } from "./_components/upload-tray/UploadTray";
 import { UploadTrayProvider } from "./_components/upload-tray/upload-tray-context";
-import { isAudioMothUploadTrayFlagEnabled } from "./_lib/audiomoth/feature-flags";
 import { LinkPrefetcher } from "./_components/LinkPrefetcher";
 import { RouteChangeIndicator } from "./_components/RouteChangeIndicator";
 import { ViewTransitionNavigationSync } from "./_components/ViewTransitionRouter";
@@ -240,13 +239,15 @@ export default async function RootLayout({ children }: { children: React.ReactNo
                   <AppCartProvider>
                     {/* Recording uploads run above the router so they keep
                         going while people navigate the app; the tray is the
-                        visible part of that queue. The provider always mounts
-                        (the Upload tab reads its context either way) but the
-                        panel itself only renders behind the release flag, so
-                        with the flag off there is no tray in the DOM at all. */}
+                        visible part of that queue. Both always mount — the
+                        panel renders nothing while the queue is empty — so
+                        the "Add observations" modal's audio branch can hand
+                        batches over from anywhere. AUDIOMOTH_UPLOAD_TRAY_ENABLED
+                        now only governs whether the AudioMoth Upload tab has
+                        migrated from its full-page flow to this queue. */}
                     <UploadTrayProvider>
                       <ChromeGate authSession={authSession}>{children}</ChromeGate>
-                      {isAudioMothUploadTrayFlagEnabled() ? <UploadTray /> : null}
+                      <UploadTray />
                     </UploadTrayProvider>
                     {/* The modal chrome mounts at the bottom of the provider
                         tree so inline modal content pushed via pushModal keeps

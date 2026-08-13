@@ -7,7 +7,9 @@
  * `deploymentRef` back to the ac.deployment the recording came from.
  *
  * Reads are public straight from the owner's PDS; writes go through the
- * session-gated `/api/manage/proxy` mutation route.
+ * session-gated `/api/manage/proxy` mutation route — into the signed-in
+ * user's repo by default, or an organization's repo when a `repo` option
+ * is given (the proxy checks group membership).
  */
 
 import { resolvePdsHost } from "./pds";
@@ -56,6 +58,14 @@ export type AcAudioDraft = {
 
 type MutationResult = { uri: string; cid: string };
 
+/** Write target: the signed-in account by default, an organization's repo when given. */
+export type AcAudioWriteOptions = { repo?: string | null };
+
+function scopedRepo(options?: AcAudioWriteOptions): { repo?: string } {
+  const repo = options?.repo?.trim();
+  return repo ? { repo } : {};
+}
+
 async function postMutation<T>(body: Record<string, unknown>, fallbackMessage: string): Promise<T> {
   const res = await fetch("/api/manage/proxy", {
     method: "POST",
@@ -85,9 +95,13 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 }
 
 /** Upload a small preview WAV as a PDS blob; returns the blob ref. */
-export async function uploadPreviewBlob(bytes: Uint8Array, mimeType = "audio/wav"): Promise<UploadedBlobRef> {
+export async function uploadPreviewBlob(
+  bytes: Uint8Array,
+  mimeType = "audio/wav",
+  options?: AcAudioWriteOptions,
+): Promise<UploadedBlobRef> {
   const result = await postMutation<unknown>(
-    { operation: "uploadBlob", blobData: toBase64(bytes), blobMimeType: mimeType },
+    { operation: "uploadBlob", blobData: toBase64(bytes), blobMimeType: mimeType, ...scopedRepo(options) },
     "The audio preview could not be uploaded.",
   );
   const raw = isRecord(result) && isRecord(result.blob) ? result.blob : result;
@@ -126,14 +140,47 @@ export function buildAcAudioRecord(draft: AcAudioDraft): Record<string, unknown>
   return record;
 }
 
-export async function createAcAudioRecord(draft: AcAudioDraft): Promise<MutationResult> {
+export async function createAcAudioRecord(
+  draft: AcAudioDraft,
+  options?: AcAudioWriteOptions,
+): Promise<MutationResult> {
   return postMutation<MutationResult>(
     {
       operation: "createRecord",
       collection: AC_AUDIO_COLLECTION,
       record: buildAcAudioRecord(draft),
+      ...scopedRepo(options),
     },
     "The recording could not be saved.",
+  );
+}
+
+/**
+ * Re-point one already-written recording at a different `ac.deployment` by
+ * rkey — the tray uses this to attach a batch to a deployment created after
+ * the upload started. The stored record is read back and written whole with
+ * only `deploymentRef` changed, like {@link moveRecordings}.
+ */
+export async function updateRecordingDeployment(
+  rkey: string,
+  deploymentRef: string,
+  options?: AcAudioWriteOptions,
+): Promise<void> {
+  const scope = scopedRepo(options);
+  const current = await postMutation<{ cid: string; record: Record<string, unknown> }>(
+    { operation: "getRecord", collection: AC_AUDIO_COLLECTION, rkey, ...scope },
+    "The recording could not be read.",
+  );
+  await postMutation<MutationResult>(
+    {
+      operation: "putRecord",
+      collection: AC_AUDIO_COLLECTION,
+      rkey,
+      swapRecord: current.cid,
+      record: { ...current.record, deploymentRef },
+      ...scope,
+    },
+    "The recording could not be moved.",
   );
 }
 

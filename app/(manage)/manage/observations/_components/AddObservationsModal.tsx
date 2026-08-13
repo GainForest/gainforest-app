@@ -2,12 +2,14 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { Fragment, useCallback, useEffect, useId, useRef, useState, type ChangeEvent, type DragEvent, type KeyboardEvent } from "react";
-import { useTranslations } from "next-intl";
+import { useRouter } from "next/navigation";
+import { Fragment, useCallback, useEffect, useId, useMemo, useRef, useState, type ChangeEvent, type DragEvent, type KeyboardEvent } from "react";
+import { useFormatter, useTranslations } from "next-intl";
 import {
   AlertTriangleIcon,
   ArchiveIcon,
   ArrowLeftIcon,
+  AudioLinesIcon,
   CameraIcon,
   CheckCircle2Icon,
   CircleHelpIcon,
@@ -90,6 +92,42 @@ import {
   radiusForArea,
   type FuzzyAreaId,
 } from "./fuzzy-location";
+import {
+  useUploadTrayOptional,
+  type UploadTarget,
+  type UploadTrayJob,
+} from "@/app/_components/upload-tray/upload-tray-context";
+import { readAudioMothInfo } from "@/app/_lib/audiomoth/wav-metadata";
+import { FILE_READ_TIMEOUT_MS, withReadTimeout } from "@/app/_lib/audiomoth/stall-timeout";
+import {
+  collectDroppedFiles,
+  dropContainsDirectory,
+  droppedFolderName,
+} from "@/app/_lib/audiomoth/dropped-files";
+import { listAcDeployments, type AcDeploymentItem } from "@/app/_lib/ac-deployment";
+import { listDeploymentEvents, type DeploymentEventItem } from "@/app/_lib/deployment-events";
+import { createEquipment, listEquipment } from "@/app/_lib/equipment";
+import {
+  legacyRecordingKey,
+  listUploadedRecordingKeys,
+  type UploadedRecordingKeys,
+} from "@/app/_lib/ac-audio";
+import { computeFileCid } from "@/app/_lib/audiomoth/content-cid";
+import {
+  AUDIO_EVENT_SELECTION_PREFIX,
+  deviceChipLabel,
+  deviceNeedsDeployment,
+  formatRecordingBytes,
+  formatSampleRates,
+  NEW_AUDIO_FOLDER,
+  planAudioUploadGroups,
+  quickRecordingTime,
+  splitObservationFiles,
+  summarizeAudioBatch,
+  unregisteredDeviceIds,
+  uploadableRecordings,
+  type QuickRecording,
+} from "./observation-audio";
 
 // Keep one quick-add session light; the rich bulk panel handles big imports.
 const MAX_PHOTOS = 100;
@@ -108,6 +146,9 @@ const ANALYZE_ATTEMPTS = 2;
 // so it only ever trips on a genuine hang, never on a slow-but-working call.
 const ANALYZE_TIMEOUT_MS = 75_000;
 const UNIDENTIFIED = "unidentified organism";
+// WAV headers are read a few files at a time so a whole-card drop (a thousand
+// recordings) stays responsive while its summary fills in.
+const AUDIO_SCAN_BATCH = 8;
 
 type ItemStatus = "identifying" | "ready" | "uploading" | "uploaded" | "error";
 
@@ -321,7 +362,16 @@ export function AddObservationsModal({
   onBack?: () => void;
 }) {
   const t = useTranslations("upload.observations.quickAdd");
+  const format = useFormatter();
+  const router = useRouter();
   const modal = useModal();
+  // Audio branch (design 1d): the same drop zone accepts a whole AudioMoth SD
+  // card; recordings are handed to the app-wide background upload tray, which
+  // is always mounted in the root layout. Needs a session (recordings are
+  // saved to the "Uploading for" account's repo) and the tray context — a
+  // render outside the provider (tests, isolated stories) stays photo-only.
+  const uploadTray = useUploadTrayOptional();
+  const audioEnabled = uploadTray !== null && Boolean(sessionDid);
   // Switches the modal between the photo quick-add flow and the CSV importer
   // reachable from the "More ways" menu.
   const [mode, setMode] = useState<"photos" | "csv">("photos");
@@ -365,6 +415,35 @@ export function AddObservationsModal({
   // actually has projects — zero extra chrome otherwise.
   const [projects, setProjects] = useState<QuickProject[]>([]);
   const [selectedProjectUri, setSelectedProjectUri] = useState<string>("");
+
+  // ── Audio branch state ── recordings waiting in the modal, the card folder
+  // name they came from, and the account context (folders, chime deployments,
+  // equipment registry) loaded lazily the first time audio lands.
+  const [recordings, setRecordings] = useState<QuickRecording[]>([]);
+  const [audioScan, setAudioScan] = useState<{ done: number; total: number } | null>(null);
+  const [cardName, setCardName] = useState("");
+  /** Folder picker value: "" = automatic, NEW_AUDIO_FOLDER, or a folder AT-URI. */
+  const [audioFolderSelection, setAudioFolderSelection] = useState("");
+  /** How many recordings the last submit handed to the background tray. */
+  const [audioHandedOff, setAudioHandedOff] = useState(0);
+  const [audioFolders, setAudioFolders] = useState<AcDeploymentItem[] | null>(null);
+  const [chimeEvents, setChimeEvents] = useState<DeploymentEventItem[] | null>(null);
+  const [equipment, setEquipment] = useState<{ assetId: string; name: string }[] | null>(null);
+  /** Already-uploaded check over the batch — same shape as the Upload tab's. */
+  const [audioDedup, setAudioDedup] = useState<{ state: "checking" | "done"; skipped: number } | null>(null);
+  const recordingsRef = useRef<QuickRecording[]>([]);
+  const folderPickInputRef = useRef<HTMLInputElement | null>(null);
+  /** Bumped when the audio batch is removed, so a mid-flight scan stops writing. */
+  const audioScanTokenRef = useRef(0);
+  const audioScanCountsRef = useRef({ done: 0, total: 0 });
+  /** Bumped per dedup run so an outdated check stops writing state. */
+  const audioDedupTokenRef = useRef(0);
+  /** Uploaded-recording identity keys per destination repo, one fetch each. */
+  const dedupKeysRef = useRef(new Map<string, Promise<UploadedRecordingKeys>>());
+  /** Which account's audio context (folders/chimes/equipment) is loaded. */
+  const audioContextDidRef = useRef<string | null>(null);
+  /** The current "Uploading for" DID, for callbacks that outlive a render. */
+  const targetDidRef = useRef(initialTarget.did);
 
   // "Uploading for": the account these observations land in. Seeded from the
   // caller's target (usually the active-account context) and switchable inline
@@ -448,6 +527,334 @@ export function AddObservationsModal({
   useEffect(() => {
     itemsRef.current = items;
   }, [items]);
+
+  useEffect(() => {
+    recordingsRef.current = recordings;
+  }, [recordings]);
+
+  useEffect(() => {
+    targetDidRef.current = target.did;
+  }, [target.did]);
+
+  const hasAudio = recordings.length > 0 || audioScan !== null;
+
+  /**
+   * The Upload tab's already-uploaded check, ported: hash each readable file
+   * (content CID with a legacy name+size fallback) and compare against what
+   * the destination account already holds, marking matches skipped before
+   * anything is uploaded. Re-run whenever "Uploading for" changes — a card
+   * already in one account may be new to another. Failures degrade to a
+   * normal upload, exactly like the tab.
+   */
+  const runAudioDedup = useCallback(async (did: string) => {
+    const token = ++audioDedupTokenRef.current;
+    const readable = recordingsRef.current.filter((rec) => rec.info);
+    if (readable.length === 0) {
+      setAudioDedup(null);
+      return;
+    }
+    setAudioDedup({ state: "checking", skipped: 0 });
+    let keys: UploadedRecordingKeys;
+    try {
+      const cached = dedupKeysRef.current.get(did) ?? listUploadedRecordingKeys(did);
+      dedupKeysRef.current.set(did, cached);
+      keys = await cached;
+    } catch {
+      // The account couldn't be checked — proceed as a normal upload.
+      dedupKeysRef.current.delete(did);
+      if (audioDedupTokenRef.current === token) setAudioDedup(null);
+      return;
+    }
+    if (audioDedupTokenRef.current !== token) return;
+
+    let skipped = 0;
+    const BATCH = 4;
+    for (let i = 0; i < readable.length; i += BATCH) {
+      const batch = readable.slice(i, i + BATCH);
+      const updates = await Promise.all(
+        batch.map(async (rec) => {
+          // A card that stops responding must not freeze the check; hashes
+          // computed for an earlier account are reused as-is.
+          const cid =
+            rec.cid !== undefined
+              ? rec.cid
+              : await withReadTimeout(computeFileCid(rec.file), FILE_READ_TIMEOUT_MS, null);
+          const already =
+            (cid !== null && keys.cids.has(cid)) ||
+            keys.legacy.has(legacyRecordingKey(rec.file.name, rec.file.size));
+          if (already) skipped += 1;
+          return { id: rec.id, cid, skipped: already };
+        }),
+      );
+      if (audioDedupTokenRef.current !== token) return;
+      setRecordings((current) =>
+        current.map((rec) => {
+          const update = updates.find((candidate) => candidate.id === rec.id);
+          return update ? { ...rec, cid: update.cid, skipped: update.skipped } : rec;
+        }),
+      );
+      setAudioDedup({ state: "checking", skipped });
+    }
+    setAudioDedup({ state: "done", skipped });
+  }, []);
+
+  // Load the audio context (existing folders, chime deployments, equipment
+  // registry) from the "Uploading for" account the first time recordings
+  // land, and again whenever that account changes — the whole audio batch
+  // (records, blobs, deployments, registry) lands in that account's repo.
+  // All three loads are best-effort: a failure just means no match, and the
+  // batch still uploads into a new folder named after the card.
+  useEffect(() => {
+    if (!audioEnabled || !hasAudio || audioContextDidRef.current === target.did) return;
+    const contextDid = target.did;
+    audioContextDidRef.current = contextDid;
+    setAudioFolders(null);
+    setChimeEvents(null);
+    setEquipment(null);
+    // Folder URIs from another account are meaningless here.
+    setAudioFolderSelection("");
+    const keep = <T,>(apply: (value: T) => void) => (value: T) => {
+      if (audioContextDidRef.current === contextDid) apply(value);
+    };
+    void listAcDeployments(contextDid)
+      .then(keep(setAudioFolders))
+      .catch(keep(() => setAudioFolders([])));
+    void listDeploymentEvents(contextDid)
+      .then(keep(setChimeEvents))
+      .catch(keep(() => setChimeEvents([])));
+    void listEquipment(contextDid)
+      .then(keep((listed) => setEquipment(listed.map((item) => ({ assetId: item.assetId, name: item.name })))))
+      .catch(keep(() => setEquipment([])));
+    // What counts as "already uploaded" is per-account too.
+    void runAudioDedup(contextDid);
+  }, [audioEnabled, hasAudio, runAudioDedup, target.did]);
+
+  // ── Audio derived state ── the card summary chip, the per-chime upload
+  // groups and the devices that are not in the equipment registry yet.
+  const audioSummary = useMemo(() => summarizeAudioBatch(recordings), [recordings]);
+  const equipmentAssetIds = useMemo(
+    () => (equipment ? equipment.map((item) => item.assetId) : null),
+    [equipment],
+  );
+  const newDeviceIds = useMemo(
+    () => unregisteredDeviceIds(audioSummary.deviceIds, equipmentAssetIds),
+    [audioSummary.deviceIds, equipmentAssetIds],
+  );
+  // The device chip: the registered equipment name when the unit is known,
+  // otherwise a short ID tail — it only exists once audio lands.
+  const deviceChips = useMemo(
+    () =>
+      audioSummary.deviceIds.map((id) => {
+        const registered = equipment?.find(
+          (item) => item.assetId.trim().toUpperCase() === id.toUpperCase(),
+        );
+        return {
+          id,
+          label: registered?.name ?? deviceChipLabel(id),
+          isNew: !registered && equipment !== null,
+        };
+      }),
+    [audioSummary.deviceIds, equipment],
+  );
+  const audioFallbackFolderName = t("audio.defaultFolderName", {
+    date: format.dateTime(audioSummary.earliest ?? new Date(), { dateStyle: "medium" }),
+  });
+  // The batch split into upload groups, exactly like the Upload tab: chime
+  // matches always file under their deployment; the picker governs the rest.
+  const audioPlanned = useMemo(
+    () =>
+      planAudioUploadGroups({
+        recordings,
+        events: chimeEvents,
+        selection: audioFolderSelection,
+        folders: audioFolders ?? [],
+        cardName,
+        fallbackName: audioFallbackFolderName,
+      }),
+    [audioFallbackFolderName, audioFolderSelection, audioFolders, cardName, chimeEvents, recordings],
+  );
+  // Where the picker-governed pool goes when left on "automatic".
+  const audioAutoPlanned = useMemo(
+    () =>
+      planAudioUploadGroups({
+        recordings,
+        events: chimeEvents,
+        selection: "",
+        folders: audioFolders ?? [],
+        cardName,
+        fallbackName: audioFallbackFolderName,
+      }),
+    [audioFallbackFolderName, audioFolders, cardName, chimeEvents, recordings],
+  );
+  /** Recordings that will actually upload (readable, not already uploaded). */
+  const audioUploadableCount = useMemo(() => uploadableRecordings(recordings).length, [recordings]);
+
+  /** Parse WAV headers a few at a time, appending each batch as it is read. */
+  const addRecordings = useCallback(async (wavs: File[]) => {
+    const token = audioScanTokenRef.current;
+    const known = new Set(recordingsRef.current.map((rec) => rec.id));
+    const fresh: { id: string; file: File }[] = [];
+    // Chronological like the Upload tab — AudioMoth names are timestamps.
+    for (const file of [...wavs].sort((a, b) => a.name.localeCompare(b.name))) {
+      const id = `${file.name}-${file.size}-${file.lastModified}`;
+      if (known.has(id)) continue;
+      known.add(id);
+      fresh.push({ id, file });
+    }
+    if (fresh.length === 0) return;
+    setOutcome(null);
+    setAudioHandedOff(0);
+    const counts = audioScanCountsRef.current;
+    counts.total += fresh.length;
+    setAudioScan({ done: counts.done, total: counts.total });
+    for (let i = 0; i < fresh.length; i += AUDIO_SCAN_BATCH) {
+      const batch = fresh.slice(i, i + AUDIO_SCAN_BATCH);
+      // One unreadable file (a sleeping card, a bad sector) must not stall the
+      // scan — it is skipped and surfaced in the unreadable count instead.
+      const infos = await Promise.all(
+        batch.map(({ file }) => withReadTimeout(readAudioMothInfo(file), FILE_READ_TIMEOUT_MS, null)),
+      );
+      if (audioScanTokenRef.current !== token) return; // batch removed mid-scan
+      setRecordings((current) => [
+        ...current,
+        ...batch.map(({ id, file }, index) => ({ id, file, info: infos[index] ?? null })),
+      ]);
+      counts.done += batch.length;
+      if (counts.done >= counts.total) {
+        counts.done = 0;
+        counts.total = 0;
+        setAudioScan(null);
+      } else {
+        setAudioScan({ done: counts.done, total: counts.total });
+      }
+    }
+    // The whole card is read — check it against what the destination account
+    // already holds (the last overlapping drop to finish kicks it off).
+    if (audioScanTokenRef.current === token && audioScanCountsRef.current.total === 0) {
+      void runAudioDedup(targetDidRef.current);
+    }
+  }, [runAudioDedup]);
+
+  /** Drop the waiting audio batch (nothing has uploaded yet). */
+  const removeAudioBatch = useCallback(() => {
+    audioScanTokenRef.current += 1;
+    audioDedupTokenRef.current += 1;
+    audioScanCountsRef.current = { done: 0, total: 0 };
+    setRecordings([]);
+    setAudioScan(null);
+    setAudioDedup(null);
+    setCardName("");
+    setAudioFolderSelection("");
+  }, []);
+
+  /**
+   * Hand the audio batch to the background upload tray: resolve the folder
+   * choice into an upload target, silently register unknown devices in the
+   * "Uploading for" account's equipment registry, and enqueue one job per
+   * readable recording — records, blobs and any created deployment all land
+   * in that account's repo. The tray keeps transferring after the modal
+   * closes. Returns the batch handle for later attachment.
+   */
+  const handOffAudioBatch = useCallback((): { count: number; batchKey: string | null } => {
+    if (!audioEnabled || !uploadTray || !sessionDid) return { count: 0, batchKey: null };
+    // Records land in the org's repo when uploading for one — same rule as
+    // the photo observations above.
+    const repoDid = target.kind === "group" ? target.did : null;
+    // Group per chime like the Upload tab: matched chimes go to their own
+    // deployments, the picker-governed pool to its folder or event.
+    const planned = planAudioUploadGroups({
+      recordings: recordingsRef.current,
+      events: chimeEvents,
+      selection: audioFolderSelection,
+      folders: audioFolders ?? [],
+      cardName,
+      fallbackName: audioFallbackFolderName,
+    });
+    if (planned.groups.length === 0) return { count: 0, batchKey: null };
+    const summary = summarizeAudioBatch(recordingsRef.current);
+    // "We'll add it when this upload starts": unknown devices join the
+    // account's equipment registry silently, best-effort — a failed write
+    // never blocks the recordings themselves.
+    for (const id of unregisteredDeviceIds(summary.deviceIds, equipmentAssetIds)) {
+      void createEquipment(
+        {
+          assetId: id,
+          name: `AudioMoth ${id.slice(-4)}`,
+          category: "audiomoth",
+          status: "storage",
+          acquiredAt: new Date().toISOString().slice(0, 10),
+          notes: t("audio.equipmentNote"),
+        },
+        repoDid ? { repo: repoDid } : undefined,
+      ).catch(() => {});
+    }
+    const batchKey = crypto.randomUUID();
+    const jobs: UploadTrayJob[] = [];
+    for (const group of planned.groups) {
+      const uploadTarget: UploadTarget =
+        group.plan.kind === "event"
+          ? { kind: "event", event: group.plan.event }
+          : group.plan.kind === "existing"
+            ? { kind: "existing", uri: group.plan.uri }
+            : { kind: "named", name: group.plan.name, deployedAt: group.plan.deployedAt };
+      for (const rec of group.recordings) {
+        jobs.push({
+          id: `${batchKey}:${rec.id}`,
+          file: rec.file,
+          info: rec.info!,
+          recordedAt: quickRecordingTime(rec).toISOString(),
+          // Hash from the dedup check rides along so the tray never re-reads.
+          cid: rec.cid,
+          deploymentId: rec.info!.deploymentId ?? undefined,
+          repoDid,
+          batchKey,
+          target: uploadTarget,
+          makePreviews: true,
+        });
+      }
+    }
+    uploadTray.enqueue(sessionDid, jobs);
+    audioScanTokenRef.current += 1;
+    audioDedupTokenRef.current += 1;
+    audioScanCountsRef.current = { done: 0, total: 0 };
+    setRecordings([]);
+    setAudioScan(null);
+    setAudioDedup(null);
+    setCardName("");
+    setAudioFolderSelection("");
+    setAudioHandedOff(jobs.length);
+    return { count: jobs.length, batchKey };
+  }, [
+    audioEnabled,
+    audioFallbackFolderName,
+    audioFolderSelection,
+    audioFolders,
+    cardName,
+    chimeEvents,
+    equipmentAssetIds,
+    sessionDid,
+    t,
+    target,
+    uploadTray,
+  ]);
+
+  /**
+   * "Set one up ↗" (design 1d, fourth panel): start the upload right away —
+   * bandwidth is the bottleneck, not the form — then leave for the
+   * deployments tab carrying the batch handle. The batch attaches to the
+   * deployment the moment it is created there; until then it sits in a
+   * folder named after the card, so nothing is ever stranded.
+   */
+  const setUpDeploymentAndGo = useCallback(() => {
+    const { count, batchKey } = handOffAudioBatch();
+    onClose();
+    const params = new URLSearchParams({ tab: "deployments" });
+    if (batchKey && count > 0) {
+      params.set("attachBatch", batchKey);
+      params.set("attachCount", String(count));
+    }
+    router.push(`/observations/audio?${params.toString()}`);
+  }, [handOffAudioBatch, onClose, router]);
 
   // Point the shared occurrence mutations at the right repo (the org for a
   // group context, the signed-in user otherwise) for the lifetime of the modal.
@@ -652,13 +1059,19 @@ export function AddObservationsModal({
   }, []);
 
   const addFiles = useCallback(
-    async (fileList: FileList | File[] | null) => {
+    async (fileList: FileList | File[] | null, folderName = "") => {
       if (disabledReason) {
         setError(disabledReason);
         return;
       }
       setOutcome(null);
-      const imageFiles = Array.from(fileList ?? []).filter((file) => file.type.startsWith("image/"));
+      // One zone, the files decide: images join the photo cards, WAVs join the
+      // audio batch. A photo-only upload never sees the audio branch at all.
+      const { images: imageFiles, wavs } = splitObservationFiles(Array.from(fileList ?? []));
+      if (audioEnabled && wavs.length > 0) {
+        if (folderName) setCardName((current) => (current.trim() ? current : folderName));
+        void addRecordings(wavs);
+      }
       if (imageFiles.length === 0) return;
 
       const counts = prepareCountsRef.current;
@@ -738,11 +1151,21 @@ export function AddObservationsModal({
         ),
       );
     },
-    [analyzeItem, disabledReason, requestDeviceLocation, t],
+    [addRecordings, analyzeItem, audioEnabled, disabledReason, requestDeviceLocation, t],
   );
 
   function onInputChange(event: ChangeEvent<HTMLInputElement>) {
     void addFiles(event.target.files);
+    event.currentTarget.value = "";
+  }
+
+  // "Choose a card folder": a webkitdirectory input hands over every file in
+  // the folder; the card's name comes from the first relative path segment.
+  function onFolderInputChange(event: ChangeEvent<HTMLInputElement>) {
+    const files = Array.from(event.target.files ?? []);
+    const relative = (files[0] as { webkitRelativePath?: string } | undefined)?.webkitRelativePath ?? "";
+    const folderName = relative.includes("/") ? relative.split("/")[0]! : "";
+    void addFiles(files, folderName);
     event.currentTarget.value = "";
   }
 
@@ -775,6 +1198,14 @@ export function AddObservationsModal({
     dragDepth.current = 0;
     setIsDragging(false);
     if (!dragHasFiles(event)) return;
+    const droppedItems = event.dataTransfer.items;
+    // A whole SD card dragged from the file manager arrives as a directory
+    // entry — walk it (entries must be grabbed before the drop event settles).
+    if (audioEnabled && droppedItems && dropContainsDirectory(droppedItems)) {
+      const folderName = droppedFolderName(droppedItems);
+      void collectDroppedFiles(droppedItems).then((files) => addFiles(files, folderName));
+      return;
+    }
     void addFiles(event.dataTransfer.files);
   }
 
@@ -966,8 +1397,17 @@ export function AddObservationsModal({
       return;
     }
     const queue = quickGroups(itemsRef.current).filter(canSubmitGroup);
+    // Recordings go first: they are handed to the background tray in one
+    // synchronous step, so the bytes start moving before (and independently
+    // of) the photo observations below.
+    const handedOff = handOffAudioBatch().count;
     if (queue.length === 0) {
-      setError(t("nothingToSubmit"));
+      if (handedOff > 0) {
+        setError(null);
+        setOutcome({ added: 0, failed: 0 });
+      } else {
+        setError(t("nothingToSubmit"));
+      }
       return;
     }
     const trimmedBatchStory = batchStory.trim().slice(0, BATCH_STORY_MAX);
@@ -1039,6 +1479,38 @@ export function AddObservationsModal({
     );
   }
 
+  // Audio-only outcome — the whole submit was a hand-off to the background
+  // tray: nothing failed, nothing was created here; the recordings keep
+  // uploading while the uploader browses.
+  if (outcome !== null && outcome.added === 0 && outcome.failed === 0) {
+    return (
+      <ModalContent className="space-y-5" dismissible={false}>
+        <div className="flex flex-col items-center gap-3 py-4 text-center">
+          <span className="grid size-14 place-items-center rounded-2xl bg-primary/10 text-primary ring-1 ring-primary/15">
+            <AudioLinesIcon className="size-7" />
+          </span>
+          <div>
+            <ModalTitle>{t("audio.handedOffTitle", { count: audioHandedOff })}</ModalTitle>
+            <ModalDescription className="mt-1">{t("audio.handedOffBody")}</ModalDescription>
+          </div>
+        </div>
+        <div className="flex flex-col gap-2 sm:flex-row sm:justify-center">
+          <Button variant="outline" onClick={() => setOutcome(null)}>
+            {t("audio.handedOffAddMore")}
+          </Button>
+          <Button
+            onClick={() => {
+              uploadTray?.setExpanded(true);
+              onClose();
+            }}
+          >
+            {t("audio.handedOffView")}
+          </Button>
+        </div>
+      </ModalContent>
+    );
+  }
+
   // Outcome screen — the batch finished; nothing navigates on its own. Say
   // what happened (all in, or how many failed) and let the uploader decide:
   // stay to add or fix more, or go to the account's observations.
@@ -1069,6 +1541,11 @@ export function AddObservationsModal({
                 ? t("doneAccount", { name: accountName })
                 : t("partialBody", { failed: outcome.failed })}
             </ModalDescription>
+            {audioHandedOff > 0 ? (
+              <p className="mt-2 text-sm text-muted-foreground">
+                {t("audio.backgroundNote", { count: audioHandedOff })}
+              </p>
+            ) : null}
           </div>
         </div>
         <div className="flex flex-col gap-2 sm:flex-row sm:justify-center">
@@ -1099,7 +1576,32 @@ export function AddObservationsModal({
     );
   }
 
-  const showEmptyState = items.length === 0;
+  const showEmptyState = items.length === 0 && !hasAudio;
+
+  // "1,204 WAV · 6.2 GB · 48 kHz · 12–26 Jun" — the card summary chip.
+  const audioSummaryLine = [
+    t("audio.summary", {
+      count: audioSummary.count,
+      size: formatRecordingBytes(audioSummary.totalBytes),
+    }),
+    formatSampleRates(audioSummary.sampleRatesHz),
+    audioSummary.earliest && audioSummary.latest
+      ? format.dateTimeRange(audioSummary.earliest, audioSummary.latest, { day: "numeric", month: "short" })
+      : null,
+  ]
+    .filter(Boolean)
+    .join(" · ");
+  // The folder picker's "automatic" row says where the picker-governed pool
+  // will actually go (chime-matched groups are filed on their own).
+  const audioAutoPlan = audioAutoPlanned.unmatchedPlan;
+  const audioAutoLabel =
+    audioAutoPlan === null
+      ? ""
+      : audioAutoPlan.kind === "event"
+        ? t("audio.folderAutoMatched", { name: audioAutoPlan.event.locality ?? audioAutoPlan.event.eventID })
+        : audioAutoPlan.kind === "existing"
+          ? audioAutoPlan.name
+          : t("audio.folderNew", { name: audioAutoPlan.name });
 
   return (
     // flex (not space-y) so child margins can't collapse into the dialog's
@@ -1167,10 +1669,12 @@ export function AddObservationsModal({
             </Button>
           </div>
         </div>
-        <ModalDescription className="mt-1">{t("description")}</ModalDescription>
+        <ModalDescription className="mt-1">
+          {audioEnabled ? t("audio.description") : t("description")}
+        </ModalDescription>
       </ModalHeader>
 
-      {!showEmptyState ? (
+      {items.length > 0 ? (
         <div className="rounded-2xl border border-border bg-muted/30 p-3">
           <label htmlFor={batchStoryId} className="text-sm font-medium text-foreground">
             {t("batchStoryLabel")}
@@ -1214,10 +1718,14 @@ export function AddObservationsModal({
             <div>
               <p className="font-instrument text-xl font-medium italic tracking-[-0.02em] text-foreground">
                 {/* Touch devices can't drag & drop files, so swap the invitation. */}
-                <span className="[@media(pointer:coarse)]:hidden">{t("dropTitle")}</span>
+                <span className="[@media(pointer:coarse)]:hidden">
+                  {audioEnabled ? t("audio.dropTitle") : t("dropTitle")}
+                </span>
                 <span className="hidden [@media(pointer:coarse)]:inline">{t("dropTitleTouch")}</span>
               </p>
-              <p className="mt-1 text-xs leading-5 text-muted-foreground">{t("dropHint", { max: MAX_PHOTOS })}</p>
+              <p className="mt-1 text-xs leading-5 text-muted-foreground">
+                {audioEnabled ? t("audio.dropHint", { max: MAX_PHOTOS }) : t("dropHint", { max: MAX_PHOTOS })}
+              </p>
             </div>
             <div className="flex w-full flex-col items-stretch justify-center gap-2 sm:w-auto sm:flex-row sm:items-center">
               {/* Field-friendly shortcut straight into the camera; touch-only. */}
@@ -1239,8 +1747,23 @@ export function AddObservationsModal({
                 disabled={Boolean(disabledReason) || isPreparing}
                 title={disabledReason ?? undefined}
               >
-                {t("choose")}
+                {audioEnabled ? t("audio.chooseFiles") : t("choose")}
               </Button>
+              {/* A whole card at once — folder picking needs a real file
+                  manager, so the button stays off coarse-pointer devices. */}
+              {audioEnabled ? (
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="rounded-full [@media(pointer:coarse)]:hidden"
+                  onClick={() => folderPickInputRef.current?.click()}
+                  disabled={Boolean(disabledReason) || isPreparing}
+                  title={disabledReason ?? undefined}
+                >
+                  <FolderOpenIcon className="size-4" />
+                  {t("audio.chooseFolder")}
+                </Button>
+              ) : null}
             </div>
           </div>
         ) : (
@@ -1345,7 +1868,181 @@ export function AddObservationsModal({
         )}
       </div>
 
-      <input ref={fileInputRef} type="file" accept="image/*" multiple className="hidden" onChange={onInputChange} />
+      {/* The device chip and its folder row exist only once audio lands — a
+          photo upload never sees the word "device" (design 1d). */}
+      {audioEnabled && hasAudio ? (
+        <div className="space-y-3 rounded-2xl border border-border bg-muted/30 p-3">
+          <div className="flex items-start justify-between gap-3">
+            <div className="flex min-w-0 items-start gap-3">
+              <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-primary/10 text-primary">
+                <AudioLinesIcon className="size-4.5" />
+              </span>
+              <div className="min-w-0">
+                <p className="truncate text-sm font-medium text-foreground">
+                  {cardName.trim() || t("audio.batchTitle")}
+                </p>
+                <p className="mt-0.5 text-xs leading-5 text-muted-foreground">{audioSummaryLine}</p>
+                {audioSummary.unreadable > 0 ? (
+                  <p className="mt-0.5 text-xs leading-5 text-amber-600 dark:text-amber-400">
+                    {t("audio.unreadable", { count: audioSummary.unreadable })}
+                  </p>
+                ) : null}
+              </div>
+            </div>
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon-sm"
+              className="shrink-0 rounded-full"
+              onClick={removeAudioBatch}
+              disabled={isSubmitting}
+              aria-label={t("audio.remove")}
+              title={t("audio.remove")}
+            >
+              <XIcon className="size-4" />
+            </Button>
+          </div>
+          {audioScan ? (
+            <QuickProgress
+              label={t("audio.readingProgress", { done: audioScan.done, total: audioScan.total })}
+              done={audioScan.done}
+              total={audioScan.total}
+            />
+          ) : null}
+          {audioDedup && (audioDedup.state === "checking" || audioDedup.skipped > 0) ? (
+            <p className="flex items-center gap-2 text-xs leading-5 text-muted-foreground">
+              {audioDedup.state === "checking" ? (
+                <Loader2Icon className="size-3.5 shrink-0 animate-spin text-primary" />
+              ) : (
+                <CheckCircle2Icon className="size-3.5 shrink-0" />
+              )}
+              {audioDedup.state === "checking"
+                ? t("audio.dedupChecking")
+                : t("audio.dedupSkipped", { count: audioDedup.skipped })}
+            </p>
+          ) : null}
+          {deviceChips.length > 0 ? (
+            <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-2 border-t border-border/60 pt-3">
+              <span className="text-sm text-muted-foreground">{t("audio.recordingFromLabel")}</span>
+              <span className="flex flex-wrap items-center gap-1.5">
+                {deviceChips.map((chip) => (
+                  <span
+                    key={chip.id}
+                    className="inline-flex items-center gap-1.5 rounded-full border border-border bg-background px-2.5 py-1 text-xs font-medium text-foreground"
+                  >
+                    {chip.label}
+                    {chip.isNew ? (
+                      <span className="rounded-full bg-primary/10 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-primary">
+                        {t("audio.deviceNew")}
+                      </span>
+                    ) : null}
+                  </span>
+                ))}
+              </span>
+            </div>
+          ) : null}
+          {/* Chime-matched recordings are filed under their own deployments,
+              exactly like the Upload tab — the picker cannot override them. */}
+          {audioPlanned.matchedCount > 0 ? (
+            <p className="flex items-center gap-2 border-t border-border/60 pt-3 text-xs leading-5 text-muted-foreground">
+              <CheckCircle2Icon className="size-3.5 shrink-0 text-primary" />
+              {t("audio.matchedCount", { count: audioPlanned.matchedCount })}
+            </p>
+          ) : null}
+          {/* The folder/deployment picker governs only the unmatched pool. */}
+          {audioPlanned.unmatchedCount > 0 ? (
+            <div className="flex flex-col gap-1.5 border-t border-border/60 pt-3 sm:flex-row sm:items-center sm:justify-between">
+              <span className="text-sm text-muted-foreground">{t("audio.folderLabel")}</span>
+              <Select
+                value={audioFolderSelection || "auto"}
+                onValueChange={(value) => setAudioFolderSelection(value === "auto" ? "" : value)}
+                disabled={isSubmitting}
+              >
+                <SelectTrigger className="h-8 w-full sm:w-64" aria-label={t("audio.folderLabel")}>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="auto">{audioAutoLabel}</SelectItem>
+                  {(audioFolders ?? []).map((folder) => (
+                    <SelectItem key={folder.uri} value={folder.uri}>
+                      {folder.name}
+                    </SelectItem>
+                  ))}
+                  {/* Manual assignment to a deployment event — the Upload
+                      tab's "assign to deployment" select, folded in here. */}
+                  {(chimeEvents ?? []).map((chimeEvent) => (
+                    <SelectItem
+                      key={chimeEvent.uri}
+                      value={`${AUDIO_EVENT_SELECTION_PREFIX}${chimeEvent.uri}`}
+                    >
+                      {t("audio.eventOption", { name: chimeEvent.locality ?? chimeEvent.eventID })}
+                    </SelectItem>
+                  ))}
+                  {audioAutoPlan?.kind !== "named" ? (
+                    <SelectItem value={NEW_AUDIO_FOLDER}>
+                      {t("audio.folderNew", { name: cardName.trim() || audioFallbackFolderName })}
+                    </SelectItem>
+                  ) : null}
+                </SelectContent>
+              </Select>
+            </div>
+          ) : null}
+          {newDeviceIds.length > 0 ? (
+            <p className="text-xs leading-5 text-muted-foreground">
+              {t("audio.newDeviceNote", {
+                device: newDeviceIds.map((id) => deviceChipLabel(id)).join(", "),
+              })}
+            </p>
+          ) : null}
+          {deviceNeedsDeployment(audioSummary, audioFolders, audioPlanned.matchedCount > 0) ? (
+            <p className="text-xs leading-5 text-muted-foreground">
+              {t("audio.noDeployments")}{" "}
+              <button
+                type="button"
+                onClick={setUpDeploymentAndGo}
+                disabled={
+                  isSubmitting ||
+                  audioScan !== null ||
+                  audioDedup?.state === "checking" ||
+                  audioUploadableCount === 0
+                }
+                className="font-medium text-primary underline underline-offset-2 disabled:opacity-50"
+              >
+                {t("audio.setUpDeployment")}
+              </button>
+            </p>
+          ) : null}
+        </div>
+      ) : null}
+
+      {/* A batch already handed to the background tray keeps a visible pill
+          here — nothing uploads silently, nothing is stranded. */}
+      {audioHandedOff > 0 && !hasAudio ? (
+        <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-2 rounded-2xl border border-border bg-muted/30 px-3 py-2.5">
+          <p className="flex min-w-0 items-center gap-2 text-sm text-muted-foreground">
+            <AudioLinesIcon className="size-4 shrink-0 text-primary" />
+            {t("audio.backgroundNote", { count: audioHandedOff })}
+          </p>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            className="rounded-full"
+            onClick={() => uploadTray?.setExpanded(true)}
+          >
+            {t("audio.viewTray")}
+          </Button>
+        </div>
+      ) : null}
+
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept={audioEnabled ? "image/*,.wav,audio/wav,audio/x-wav" : "image/*"}
+        multiple
+        className="hidden"
+        onChange={onInputChange}
+      />
       <input
         ref={cameraInputRef}
         type="file"
@@ -1354,8 +2051,18 @@ export function AddObservationsModal({
         className="hidden"
         onChange={onInputChange}
       />
+      {audioEnabled ? (
+        <input
+          ref={folderPickInputRef}
+          type="file"
+          multiple
+          className="hidden"
+          onChange={onFolderInputChange}
+          {...({ webkitdirectory: "" } as Record<string, string>)}
+        />
+      ) : null}
 
-      {!showEmptyState && !projectRef && projects.length > 0 ? (
+      {items.length > 0 && !projectRef && projects.length > 0 ? (
         <div className="flex flex-col gap-2 rounded-2xl border border-border bg-muted/30 p-3 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex min-w-0 items-start gap-3">
             <FolderOpenIcon className="mt-0.5 size-4 shrink-0 text-primary" />
@@ -1384,7 +2091,7 @@ export function AddObservationsModal({
         </div>
       ) : null}
 
-      {!showEmptyState ? (
+      {items.length > 0 ? (
         <div className="rounded-2xl border border-border bg-muted/30 p-3">
           <label className="flex cursor-pointer items-start gap-3">
             <Checkbox
@@ -1451,14 +2158,35 @@ export function AddObservationsModal({
             />
           ) : null}
           <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between sm:gap-3">
-            <p className="text-sm text-muted-foreground">{t("readyCount", { count: submittableCount })}</p>
+            <p className="text-sm text-muted-foreground">
+              {[
+                items.length > 0 || audioUploadableCount === 0
+                  ? t("readyCount", { count: submittableCount })
+                  : null,
+                audioUploadableCount > 0 ? t("audio.readyCount", { count: audioUploadableCount }) : null,
+              ]
+                .filter(Boolean)
+                .join(" · ")}
+            </p>
             <Button
               onClick={submit}
-              disabled={submittableCount === 0 || isSubmitting || Boolean(disabledReason)}
+              disabled={
+                (submittableCount === 0 && audioUploadableCount === 0) ||
+                audioScan !== null ||
+                audioDedup?.state === "checking" ||
+                isSubmitting ||
+                Boolean(disabledReason)
+              }
               className="w-full sm:w-auto"
             >
               {isSubmitting ? <Loader2Icon className="size-4 animate-spin" /> : null}
-              {isSubmitting ? t("submitting") : t("submit", { count: submittableCount })}
+              {isSubmitting
+                ? t("submitting")
+                : submittableCount === 0 && audioUploadableCount > 0
+                  ? t("audio.submitOnly", { count: audioUploadableCount })
+                  : submittableCount === 0 && audioSummary.count > 0 && audioDedup?.state === "done"
+                    ? t("audio.allUploaded")
+                    : t("submit", { count: submittableCount })}
             </Button>
           </div>
         </div>

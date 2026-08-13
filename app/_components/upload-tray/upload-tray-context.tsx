@@ -53,6 +53,7 @@ import {
 import {
   createAcAudioRecord,
   listUploadedRecordingNames,
+  updateRecordingDeployment,
   uploadPreviewBlob,
 } from "@/app/_lib/ac-audio";
 import { computeFileCid } from "@/app/_lib/audiomoth/content-cid";
@@ -80,6 +81,8 @@ export interface UploadTrayItem {
   status: UploadTrayStatus;
   /** 0–1, the storage transfer only. */
   progress: number;
+  /** Groups rows enqueued together, for batch-level surfaces (attach flow). */
+  batchKey?: string;
   error?: string;
   retryAttempt?: number;
   retryMax?: number;
@@ -104,6 +107,18 @@ export interface UploadTrayJob {
   cid?: string | null;
   /** Acoustic-chime deployment ID, which namespaces the storage key. */
   deploymentId?: string;
+  /**
+   * Repo the `ac.audio` record, its preview blobs and any created
+   * `ac.deployment` land in — an organization's DID when uploading for an
+   * org, otherwise absent (the signed-in user's own repo).
+   */
+  repoDid?: string | null;
+  /**
+   * Opaque batch handle. Jobs sharing one can be retargeted together later
+   * via {@link UploadTrayApi.retargetBatch} — the "set one up ↗" flow keeps
+   * the bytes moving while the deployment is created elsewhere.
+   */
+  batchKey?: string;
   target: UploadTarget;
   makePreviews: boolean;
 }
@@ -120,6 +135,15 @@ export interface UploadTrayApi {
   cancelAll: () => void;
   /** Clear a finished tray (all done / nothing left to do). */
   dismiss: () => void;
+  /**
+   * Point every job of a batch — queued, running and already saved — at a
+   * different deployment. Records written before the call are re-pointed
+   * one by one; everything still in flight saves against the new target.
+   * Returns how many already-saved records were moved / could not be moved.
+   */
+  retargetBatch: (batchKey: string, target: UploadTarget) => Promise<{ moved: number; failed: number }>;
+  /** Live counts + repo for a batch, or null when the tray doesn't know it. */
+  batchInfo: (batchKey: string) => { repoDid: string | null; pending: number; total: number } | null;
   expanded: boolean;
   setExpanded: (value: boolean) => void;
 }
@@ -156,11 +180,18 @@ export function UploadTrayProvider({ children }: { children: React.ReactNode }) 
   const statusRef = useRef(new Map<string, UploadTrayStatus>());
   const xhrRef = useRef(new Map<string, XMLHttpRequest>());
   const abortRef = useRef(new Map<string, AbortController>());
-  /** ac.deployment URI per target key — created once, reused by every file. */
+  /** ac.deployment URI per owner+target key — created once, reused by every file. */
   const deploymentRef = useRef(new Map<string, Promise<string | null>>());
   /** Recording names already in each deployment, so a re-read card is skipped. */
   const existingNamesRef = useRef(new Map<string, Promise<Set<string>>>());
-  const acDeploymentsRef = useRef<AcDeploymentItem[] | null>(null);
+  /** Folder lists per owner repo (an org uploads into its own folder set). */
+  const acDeploymentsRef = useRef(new Map<string, AcDeploymentItem[]>());
+  /** Session + repo per batch, so a retarget can resolve without a live job. */
+  const batchMetaRef = useRef(new Map<string, { sessionDid: string; repoDid: string | null }>());
+  /** Saved records per batch (rkey + the deployment they were filed under). */
+  const completedByBatchRef = useRef(new Map<string, Array<{ rkey: string; deploymentUri: string | null }>>());
+  /** Replacement target per batch — wins over each job's original target. */
+  const retargetRef = useRef(new Map<string, UploadTarget>());
 
   const patchItem = useCallback((id: string, patch: Partial<UploadTrayItem>) => {
     if (patch.status) statusRef.current.set(id, patch.status);
@@ -169,67 +200,105 @@ export function UploadTrayProvider({ children }: { children: React.ReactNode }) 
 
   /* ---------------- deployment resolution ---------------- */
 
-  const targetKey = useCallback((target: UploadTarget): string => {
-    if (target.kind === "event") return `event:${target.event.uri}`;
-    if (target.kind === "existing") return `existing:${target.uri}`;
-    if (target.kind === "named") return `named:${target.name}`;
-    return "none";
+  /** The repo a job's records live in (the org's when uploading for one). */
+  const jobOwnerDid = useCallback(
+    (scope: { sessionDid: string; repoDid?: string | null }): string =>
+      scope.repoDid?.trim() || scope.sessionDid,
+    [],
+  );
+
+  /** Proxy write option — only group repos are passed through. */
+  const jobRepoOption = useCallback(
+    (scope: { sessionDid: string; repoDid?: string | null }): { repo?: string } => {
+      const repo = scope.repoDid?.trim();
+      return repo && repo !== scope.sessionDid ? { repo } : {};
+    },
+    [],
+  );
+
+  const targetKey = useCallback((target: UploadTarget, ownerDid: string): string => {
+    if (target.kind === "event") return `${ownerDid}|event:${target.event.uri}`;
+    if (target.kind === "existing") return `${ownerDid}|existing:${target.uri}`;
+    if (target.kind === "named") return `${ownerDid}|named:${target.name}`;
+    return `${ownerDid}|none`;
+  }, []);
+
+  /** A batch retarget replaces every job's original filing target. */
+  const effectiveTarget = useCallback((job: InternalJob): UploadTarget => {
+    if (job.batchKey) {
+      const replacement = retargetRef.current.get(job.batchKey);
+      if (replacement) return replacement;
+    }
+    return job.target;
   }, []);
 
   /**
-   * The `ac.deployment` a file belongs to. Resolution is memoised as a
+   * The `ac.deployment` a target resolves to. Resolution is memoised as a
    * promise so the two upload workers racing on the first file of a batch
    * cannot create the same deployment twice.
    */
-  const resolveDeployment = useCallback(
-    (job: InternalJob): Promise<string | null> => {
-      const key = targetKey(job.target);
+  const resolveTarget = useCallback(
+    (
+      target: UploadTarget,
+      scope: { sessionDid: string; repoDid?: string | null },
+    ): Promise<string | null> => {
+      const ownerDid = jobOwnerDid(scope);
+      const key = targetKey(target, ownerDid);
       const cached = deploymentRef.current.get(key);
       if (cached) return cached;
 
       const loadFolders = async (): Promise<AcDeploymentItem[]> => {
-        if (!acDeploymentsRef.current) {
-          acDeploymentsRef.current = await listAcDeployments(job.sessionDid).catch(() => []);
-        }
-        return acDeploymentsRef.current;
+        const cachedFolders = acDeploymentsRef.current.get(ownerDid);
+        if (cachedFolders) return cachedFolders;
+        const loaded = await listAcDeployments(ownerDid).catch(() => []);
+        acDeploymentsRef.current.set(ownerDid, loaded);
+        return loaded;
       };
 
+      const repoOption = jobRepoOption(scope);
+
       const pending = (async (): Promise<string | null> => {
-        if (job.target.kind === "none") return null;
-        if (job.target.kind === "existing") return job.target.uri;
-        if (job.target.kind === "named") {
+        if (target.kind === "none") return null;
+        if (target.kind === "existing") return target.uri;
+        if (target.kind === "named") {
           // An upload resumed by re-reading the same card offers the same
           // folder name — those recordings belong in the folder that already
           // exists, not in a second one beside it.
-          const plan = planNamedUploadFolder(await loadFolders(), job.target.name);
+          const plan = planNamedUploadFolder(await loadFolders(), target.name);
           if (plan.action === "none") return null;
           if (plan.action === "reuse") return plan.uri;
           try {
-            const created = await createAcDeployment({
-              name: plan.name,
-              deployedAt: new Date(job.target.deployedAt),
-              remarks: t("groupRemarks"),
-            });
-            acDeploymentsRef.current = null;
+            const created = await createAcDeployment(
+              {
+                name: plan.name,
+                deployedAt: new Date(target.deployedAt),
+                remarks: t("groupRemarks"),
+              },
+              repoOption,
+            );
+            acDeploymentsRef.current.delete(ownerDid);
             return created.uri;
           } catch {
             return null;
           }
         }
 
-        const event = job.target.event;
+        const event = target.event;
         const existing = (await loadFolders()).find((d) => d.eventRef === event.uri);
         if (existing) return existing.uri;
         try {
-          const created = await createAcDeployment({
-            name: event.locality ?? `AudioMoth ${event.eventID}`,
-            deployedAt: new Date(event.eventDate),
-            lat: event.decimalLatitude ? Number(event.decimalLatitude) : undefined,
-            lon: event.decimalLongitude ? Number(event.decimalLongitude) : undefined,
-            eventUri: event.uri,
-            remarks: t("deploymentFallback"),
-          });
-          acDeploymentsRef.current = null;
+          const created = await createAcDeployment(
+            {
+              name: event.locality ?? `AudioMoth ${event.eventID}`,
+              deployedAt: new Date(event.eventDate),
+              lat: event.decimalLatitude ? Number(event.decimalLatitude) : undefined,
+              lon: event.decimalLongitude ? Number(event.decimalLongitude) : undefined,
+              eventUri: event.uri,
+              remarks: t("deploymentFallback"),
+            },
+            repoOption,
+          );
+          acDeploymentsRef.current.delete(ownerDid);
           return created.uri;
         } catch {
           return null;
@@ -239,7 +308,7 @@ export function UploadTrayProvider({ children }: { children: React.ReactNode }) 
       deploymentRef.current.set(key, pending);
       return pending;
     },
-    [t, targetKey],
+    [jobOwnerDid, jobRepoOption, t, targetKey],
   );
 
   const resolveExistingNames = useCallback(
@@ -321,13 +390,14 @@ export function UploadTrayProvider({ children }: { children: React.ReactNode }) 
       let phase: "transfer" | "saving" = "transfer";
 
       try {
-        const deploymentUri = await resolveDeployment(job);
+        const resolvedTarget = effectiveTarget(job);
+        const deploymentUri = await resolveTarget(resolvedTarget, job);
         if (controller.signal.aborted) throw new Error("aborted");
 
         // A card re-read after a partial upload: anything already filed under
         // this deployment is left alone rather than uploaded twice.
         if (deploymentUri) {
-          const existing = await resolveExistingNames(job.sessionDid, deploymentUri);
+          const existing = await resolveExistingNames(jobOwnerDid(job), deploymentUri);
           if (existing.has(job.file.name)) {
             patchItem(id, { status: "done", progress: 1, error: undefined });
             return;
@@ -378,41 +448,74 @@ export function UploadTrayProvider({ children }: { children: React.ReactNode }) 
         phase = "saving";
         patchItem(id, { status: "saving", progress: 1, retryAttempt: undefined, retryMax: undefined });
 
+        const repoOption = jobRepoOption(job);
         let previewBlob = null;
         let spectrogramBlob = null;
         if (job.makePreviews) {
           try {
             const samples = await extractPreviewSamples(job.file, job.info);
             if (samples) {
-              previewBlob = await uploadPreviewBlob(encodeWav(samples, PREVIEW_SAMPLE_RATE));
+              previewBlob = await uploadPreviewBlob(encodeWav(samples, PREVIEW_SAMPLE_RATE), "audio/wav", repoOption);
               const png = await renderSpectrogramPng(samples);
-              if (png) spectrogramBlob = await uploadPreviewBlob(png, "image/png");
+              if (png) spectrogramBlob = await uploadPreviewBlob(png, "image/png", repoOption);
             }
           } catch {
             /* preview + spectrogram are best-effort — the archival copy is already safe */
           }
         }
 
+        // A retarget can land while the bytes were transferring — re-resolve
+        // just before the record is written so the batch attaches to the
+        // deployment created mid-flight instead of the original fallback.
+        let recordDeploymentUri = deploymentUri;
+        const latestTarget = effectiveTarget(job);
+        if (targetKey(latestTarget, jobOwnerDid(job)) !== targetKey(resolvedTarget, jobOwnerDid(job))) {
+          recordDeploymentUri = await resolveTarget(latestTarget, job);
+        }
+
         const originalCid = job.cid ?? (await computeFileCid(job.file)) ?? undefined;
-        await createAcAudioRecord({
-          name: job.file.name,
-          originalCid,
-          metadata: {
-            codec: "PCM",
-            channels: job.info.channels,
-            duration: job.info.durationSeconds.toFixed(1),
-            sampleRate: job.info.sampleRate,
-            recordedAt: job.recordedAt,
-            bitDepth: job.info.bitsPerSample,
-            fileFormat: "WAV",
-            fileSizeBytes: job.file.size,
+        const saved = await createAcAudioRecord(
+          {
+            name: job.file.name,
+            originalCid,
+            metadata: {
+              codec: "PCM",
+              channels: job.info.channels,
+              duration: job.info.durationSeconds.toFixed(1),
+              sampleRate: job.info.sampleRate,
+              recordedAt: job.recordedAt,
+              bitDepth: job.info.bitsPerSample,
+              fileFormat: "WAV",
+              fileSizeBytes: job.file.size,
+            },
+            previewBlob,
+            spectrogramBlob,
+            accessUri: `${window.location.origin}/api/audiomoth/recordings?key=${encodeURIComponent(upload.key)}`,
+            deploymentRef: recordDeploymentUri ?? undefined,
+            tags: ["audiomoth", "passive-acoustic-monitoring"],
           },
-          previewBlob,
-          spectrogramBlob,
-          accessUri: `${window.location.origin}/api/audiomoth/recordings?key=${encodeURIComponent(upload.key)}`,
-          deploymentRef: deploymentUri ?? undefined,
-          tags: ["audiomoth", "passive-acoustic-monitoring"],
-        });
+          repoOption,
+        );
+
+        // Remember what was written where, so a later retarget can re-point
+        // this record even though it is already saved.
+        if (job.batchKey) {
+          const rkey = saved.uri.split("/").pop() ?? "";
+          const done = completedByBatchRef.current.get(job.batchKey) ?? [];
+          done.push({ rkey, deploymentUri: recordDeploymentUri });
+          completedByBatchRef.current.set(job.batchKey, done);
+
+          // Close the race the other way too: a retarget that landed between
+          // the re-resolve above and the save re-points the fresh record now.
+          const finalTarget = effectiveTarget(job);
+          if (targetKey(finalTarget, jobOwnerDid(job)) !== targetKey(latestTarget, jobOwnerDid(job))) {
+            const finalUri = await resolveTarget(finalTarget, job);
+            if (finalUri && finalUri !== recordDeploymentUri) {
+              await updateRecordingDeployment(rkey, finalUri, repoOption).catch(() => {});
+              done[done.length - 1] = { rkey, deploymentUri: finalUri };
+            }
+          }
+        }
 
         // Cancelling can't interrupt the record write, so a file cancelled
         // during the save is simply gone from the tray by now.
@@ -441,7 +544,7 @@ export function UploadTrayProvider({ children }: { children: React.ReactNode }) 
         xhrRef.current.delete(id);
       }
     },
-    [describeError, patchItem, putToStorage, resolveDeployment, resolveExistingNames, t],
+    [describeError, effectiveTarget, jobOwnerDid, jobRepoOption, patchItem, putToStorage, resolveTarget, resolveExistingNames, t, targetKey],
   );
 
   /* ---------------- scheduler ---------------- */
@@ -476,12 +579,16 @@ export function UploadTrayProvider({ children }: { children: React.ReactNode }) 
         jobsRef.current.set(job.id, { ...job, sessionDid });
         orderRef.current.push(job.id);
         statusRef.current.set(job.id, "queued");
+        if (job.batchKey && !batchMetaRef.current.has(job.batchKey)) {
+          batchMetaRef.current.set(job.batchKey, { sessionDid, repoDid: job.repoDid?.trim() || null });
+        }
         added.push({
           id: job.id,
           name: job.file.name,
           sizeBytes: job.file.size,
           status: "queued",
           progress: 0,
+          batchKey: job.batchKey,
         });
       }
       if (added.length === 0) return;
@@ -565,8 +672,69 @@ export function UploadTrayProvider({ children }: { children: React.ReactNode }) 
     }
     deploymentRef.current.clear();
     existingNamesRef.current.clear();
+    batchMetaRef.current.clear();
+    completedByBatchRef.current.clear();
+    retargetRef.current.clear();
     setItems([]);
   }, [forget, stop]);
+
+  /* ---------------- batch retargeting (attach-later) ---------------- */
+
+  /**
+   * "The batch attaches the moment the deployment exists": every job of the
+   * batch that hasn't saved yet now files under the new target, and records
+   * already written are re-pointed one at a time — one failure costs one
+   * recording, not the batch.
+   */
+  const retargetBatch = useCallback(
+    async (batchKey: string, target: UploadTarget): Promise<{ moved: number; failed: number }> => {
+      const meta = batchMetaRef.current.get(batchKey);
+      if (!meta) return { moved: 0, failed: 0 };
+      retargetRef.current.set(batchKey, target);
+
+      const destination = await resolveTarget(target, meta);
+      if (!destination) return { moved: 0, failed: 0 };
+
+      const repoOption = jobRepoOption(meta);
+      const done = completedByBatchRef.current.get(batchKey) ?? [];
+      let moved = 0;
+      let failed = 0;
+      for (const record of done) {
+        if (record.deploymentUri === destination) {
+          moved += 1;
+          continue;
+        }
+        try {
+          await updateRecordingDeployment(record.rkey, destination, repoOption);
+          record.deploymentUri = destination;
+          moved += 1;
+        } catch {
+          failed += 1;
+        }
+      }
+      // The destination gained recordings — a stale dedup set must not skip
+      // legitimately new files from a card read later.
+      existingNamesRef.current.delete(destination);
+      return { moved, failed };
+    },
+    [jobRepoOption, resolveTarget],
+  );
+
+  const batchInfo = useCallback(
+    (batchKey: string): { repoDid: string | null; pending: number; total: number } | null => {
+      const meta = batchMetaRef.current.get(batchKey);
+      if (!meta) return null;
+      let pending = 0;
+      let total = 0;
+      for (const item of items) {
+        if (item.batchKey !== batchKey) continue;
+        total += 1;
+        if (item.status !== "done") pending += 1;
+      }
+      return { repoDid: meta.repoDid, pending, total };
+    },
+    [items],
+  );
 
   const busy = useMemo(() => items.some((item) => item.status !== "done"), [items]);
 
@@ -592,10 +760,12 @@ export function UploadTrayProvider({ children }: { children: React.ReactNode }) 
       cancelItem,
       cancelAll,
       dismiss,
+      retargetBatch,
+      batchInfo,
       expanded,
       setExpanded,
     }),
-    [busy, cancelAll, cancelItem, dismiss, enqueue, expanded, items, pauseItem, resumeItem, retryItem],
+    [batchInfo, busy, cancelAll, cancelItem, dismiss, enqueue, expanded, items, pauseItem, resumeItem, retargetBatch, retryItem],
   );
 
   return <UploadTrayContext.Provider value={value}>{children}</UploadTrayContext.Provider>;

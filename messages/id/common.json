@@ -2175,7 +2175,12 @@
       "equipmentUsedLabel": "AudioMoth yang digunakan",
       "protocolLabel": "Protokol",
       "recordedByLabel": "Dicatat oleh",
-      "viewEquipment": "Lihat peralatan mereka"
+      "viewEquipment": "Lihat peralatan mereka",
+      "attachWaiting": "{count, plural, other {# rekaman sedang diunggah di latar belakang — akan melekat ke penempatan yang Anda buat.}}",
+      "attaching": "Melekatkan {count, plural, other {# rekaman}} ke penempatan baru…",
+      "attachDone": "{count, plural, other {# rekaman dilekatkan ke penempatan baru.}}",
+      "attachPartial": "{moved} dilekatkan · {failed} tidak dapat dipindahkan — tetap di folder kartu.",
+      "attachFailed": "Batch tidak dapat dilekatkan — rekaman tetap berada di folder kartu."
     },
     "upload": {
       "intro": "Masukkan kartu SD AudioMoth dan pilih di bawah. Rekaman dikenali dari ID penempatan yang tertanam di setiap berkas, disimpan aman di penyimpanan arsip, dan dicatat ke akun Anda.",

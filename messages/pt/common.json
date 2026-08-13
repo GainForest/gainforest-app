@@ -2175,7 +2175,12 @@
       "equipmentUsedLabel": "AudioMoth utilizado",
       "protocolLabel": "Protocolo",
       "recordedByLabel": "Registrado por",
-      "viewEquipment": "Ver os equipamentos"
+      "viewEquipment": "Ver os equipamentos",
+      "attachWaiting": "{count, plural, one {# gravação está sendo enviada em segundo plano — ela será anexada à implantação que você criar.} other {# gravações estão sendo enviadas em segundo plano — elas serão anexadas à implantação que você criar.}}",
+      "attaching": "Anexando {count, plural, one {# gravação} other {# gravações}} à nova implantação…",
+      "attachDone": "{count, plural, one {# gravação anexada à nova implantação.} other {# gravações anexadas à nova implantação.}}",
+      "attachPartial": "{moved} anexadas · {failed} não puderam ser movidas — elas ficam na pasta do cartão.",
+      "attachFailed": "O lote não pôde ser anexado — as gravações ficam na pasta do cartão."
     },
     "upload": {
       "intro": "Insira o cartão SD de um AudioMoth e escolha-o abaixo. As gravações são reconhecidas pelo ID de implantação embutido em cada arquivo, mantidas em armazenamento de arquivo seguro e salvas na sua conta.",
