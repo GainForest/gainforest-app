@@ -124,6 +124,8 @@ const allowedExactValues = new Set([
   "{count, number}",
   "{count, plural, one {# Bumicert} other {# Bumicerts}}",
   "{count, plural, one {# Cert} other {# Certs}}",
+  // Language-neutral card summary: a count, the WAV format name and a size.
+  "{count, number} WAV · {size}",
 ]);
 
 const allowedPathPatterns = [

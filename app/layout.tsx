@@ -244,7 +244,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
                         (the Upload tab reads its context either way) but the
                         panel itself only renders behind the release flag, so
                         with the flag off there is no tray in the DOM at all. */}
-                    <UploadTrayProvider>
+                    <UploadTrayProvider uiEnabled={isAudioMothUploadTrayFlagEnabled()}>
                       <ChromeGate authSession={authSession}>{children}</ChromeGate>
                       {isAudioMothUploadTrayFlagEnabled() ? <UploadTray /> : null}
                     </UploadTrayProvider>

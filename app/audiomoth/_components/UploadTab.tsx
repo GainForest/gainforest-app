@@ -90,6 +90,7 @@ import {
   UPLOAD_STALL_TIMEOUT_MS,
   withReadTimeout,
 } from "@/app/_lib/audiomoth/stall-timeout";
+import { collectDroppedFiles, isHiddenName } from "@/app/_lib/audiomoth/dropped-files";
 import {
   useUploadTray,
   type UploadTarget,
@@ -147,56 +148,6 @@ function recordingTime(rec: ScannedRecording): Date {
 
 function isWavName(name: string): boolean {
   return /\.wav$/i.test(name) && !name.startsWith("._") && !name.startsWith(".");
-}
-
-/** Hidden/system entries (SD cards carry .Spotlight-V100, .Trashes, …). */
-function isHiddenName(name: string | undefined): boolean {
-  return !!name && name.startsWith(".");
-}
-
-/**
- * Recursively collect files from a drag-and-dropped directory entry.
- * Hidden/system folders are skipped and unreadable entries are ignored —
- * FAT-formatted SD cards are full of both.
- */
-async function collectDroppedFiles(items: DataTransferItemList, onProgress?: (count: number) => void): Promise<File[]> {
-  const out: File[] = [];
-
-  async function walkEntry(entry: unknown): Promise<void> {
-    const e = entry as {
-      name?: string;
-      isFile?: boolean;
-      isDirectory?: boolean;
-      file?: (cb: (f: File) => void, err: (e: unknown) => void) => void;
-      createReader?: () => { readEntries: (cb: (entries: unknown[]) => void, err: (e: unknown) => void) => void };
-    };
-    if (isHiddenName(e?.name)) return;
-    if (e?.isFile && e.file) {
-      const file = await new Promise<File | null>((resolve) => e.file!(resolve, () => resolve(null)));
-      if (file) {
-        out.push(file);
-        if (out.length % 50 === 0) onProgress?.(out.length);
-      }
-    } else if (e?.isDirectory && e.createReader) {
-      const reader = e.createReader();
-      // readEntries returns batches; keep reading until empty
-      for (;;) {
-        const batch = await new Promise<unknown[]>((resolve) => reader.readEntries(resolve, () => resolve([])));
-        if (batch.length === 0) break;
-        for (const child of batch) await walkEntry(child).catch(() => undefined);
-      }
-    }
-  }
-
-  const entries: unknown[] = [];
-  for (let i = 0; i < items.length; i += 1) {
-    const item = items[i];
-    const entry = (item as unknown as { webkitGetAsEntry?: () => unknown }).webkitGetAsEntry?.();
-    if (entry) entries.push(entry);
-  }
-  for (const entry of entries) await walkEntry(entry).catch(() => undefined);
-  onProgress?.(out.length);
-  return out;
 }
 
 /* ------------------------------------------------------------------ */
