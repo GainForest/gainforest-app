@@ -65,6 +65,7 @@ import {
   useAccountList,
   useActiveAccountContext,
 } from "@/app/_lib/account-switcher";
+import { useViewer } from "@/app/_lib/viewer";
 import { canCreateRecord } from "../../_lib/cgs-permissions";
 import {
   cleanFileName,
@@ -93,7 +94,7 @@ import {
   type FuzzyAreaId,
 } from "./fuzzy-location";
 import {
-  useUploadTrayOptional,
+  useUploadTray,
   type UploadTarget,
   type UploadTrayJob,
 } from "@/app/_components/upload-tray/upload-tray-context";
@@ -333,8 +334,7 @@ export function AddObservationsModal({
   target: initialTarget,
   projectRef,
   projectSiteRef = null,
-  sessionDid = null,
-  allowAccountSwitch = false,
+  sessionDid: sessionDidProp = null,
   onViewObservations,
   onClose,
   onBack,
@@ -345,12 +345,10 @@ export function AddObservationsModal({
   /** The pinned project's mapped site, so sightings added from a project page
    *  carry the same site link as ones filed through the project picker. */
   projectSiteRef?: string | null;
-  /** Signed-in user's DID. Required for the "Uploading for" account picker. */
+  /** Signed-in user's DID. Optional — callers that already know it can pass it
+   *  to skip the session lookup; otherwise it is resolved from the viewer
+   *  store, so every entry point gets the same fully-featured flow. */
   sessionDid?: string | null;
-  /** Opt-in "Uploading for" selector so a multi-org user can retarget the
-   *  upload without leaving the flow. Only the generic quick-add turns this on;
-   *  a project- or account-scoped page keeps its target locked. */
-  allowAccountSwitch?: boolean;
   /** Navigate to the observations list (called after a successful add). Receives
    *  the account the batch actually landed in — which may differ from the
    *  target the modal opened with if the uploader switched "Uploading for" —
@@ -365,13 +363,16 @@ export function AddObservationsModal({
   const format = useFormatter();
   const router = useRouter();
   const modal = useModal();
+  // Every entry point into this flow is the same modal: photos and whole
+  // recorder cards, filed under whichever account the uploader picks. Callers
+  // may pass the session DID they already have; otherwise it comes from the
+  // shared viewer store so no parent has to thread it down.
+  const viewer = useViewer();
+  const sessionDid = sessionDidProp ?? viewer.sessionDid;
   // Audio branch (design 1d): the same drop zone accepts a whole AudioMoth SD
   // card; recordings are handed to the app-wide background upload tray, which
-  // is always mounted in the root layout. Needs a session (recordings are
-  // saved to the "Uploading for" account's repo) and the tray context — a
-  // render outside the provider (tests, isolated stories) stays photo-only.
-  const uploadTray = useUploadTrayOptional();
-  const audioEnabled = uploadTray !== null && Boolean(sessionDid);
+  // is always mounted in the root layout.
+  const uploadTray = useUploadTray();
   // Switches the modal between the photo quick-add flow and the CSV importer
   // reachable from the "More ways" menu.
   const [mode, setMode] = useState<"photos" | "csv">("photos");
@@ -447,7 +448,7 @@ export function AddObservationsModal({
 
   // "Uploading for": the account these observations land in. Seeded from the
   // caller's target (usually the active-account context) and switchable inline
-  // when allowAccountSwitch is on and the user belongs to organizations.
+  // when the user belongs to organizations.
   const [activeTarget, setActiveTarget] = useState<ManageTarget>(initialTarget);
   const target = activeTarget;
   // Re-seed if the caller hands us a different account (a fresh open() reuses
@@ -461,13 +462,12 @@ export function AddObservationsModal({
     }
   }, [initialTarget]);
 
-  const { personal, groups: accountGroups } = useAccountList(allowAccountSwitch ? sessionDid : null);
+  const { personal, groups: accountGroups } = useAccountList(sessionDid);
   const [, setActiveContext] = useActiveAccountContext(sessionDid ?? "");
-  // The picker only earns its place for a multi-org user in the generic
-  // quick-add flow — a single-account user (and any project-pinned open) sees
-  // no extra chrome.
-  const showAccountPicker =
-    allowAccountSwitch && Boolean(sessionDid) && !projectRef && accountGroups.length > 0;
+  // The picker only earns its place for a multi-org user — a single-account
+  // user (and any project-pinned open, where the project fixes the account)
+  // sees no extra chrome.
+  const showAccountPicker = Boolean(sessionDid) && !projectRef && accountGroups.length > 0;
 
   // Switch which account the batch is filed under, and remember it for the
   // session so subsequent uploads default to the same place.
@@ -605,7 +605,7 @@ export function AddObservationsModal({
   // All three loads are best-effort: a failure just means no match, and the
   // batch still uploads into a new folder named after the card.
   useEffect(() => {
-    if (!audioEnabled || !hasAudio || audioContextDidRef.current === target.did) return;
+    if (!hasAudio || audioContextDidRef.current === target.did) return;
     const contextDid = target.did;
     audioContextDidRef.current = contextDid;
     setAudioFolders(null);
@@ -627,7 +627,7 @@ export function AddObservationsModal({
       .catch(keep(() => setEquipment([])));
     // What counts as "already uploaded" is per-account too.
     void runAudioDedup(contextDid);
-  }, [audioEnabled, hasAudio, runAudioDedup, target.did]);
+  }, [hasAudio, runAudioDedup, target.did]);
 
   // ── Audio derived state ── the card summary chip, the per-chime upload
   // groups and the devices that are not in the equipment registry yet.
@@ -756,7 +756,7 @@ export function AddObservationsModal({
    * closes. Returns the batch handle for later attachment.
    */
   const handOffAudioBatch = useCallback((): { count: number; batchKey: string | null } => {
-    if (!audioEnabled || !uploadTray || !sessionDid) return { count: 0, batchKey: null };
+    if (!sessionDid) return { count: 0, batchKey: null };
     // Records land in the org's repo when uploading for one — same rule as
     // the photo observations above.
     const repoDid = target.kind === "group" ? target.did : null;
@@ -825,7 +825,6 @@ export function AddObservationsModal({
     setAudioHandedOff(jobs.length);
     return { count: jobs.length, batchKey };
   }, [
-    audioEnabled,
     audioFallbackFolderName,
     audioFolderSelection,
     audioFolders,
@@ -1068,7 +1067,7 @@ export function AddObservationsModal({
       // One zone, the files decide: images join the photo cards, WAVs join the
       // audio batch. A photo-only upload never sees the audio branch at all.
       const { images: imageFiles, wavs } = splitObservationFiles(Array.from(fileList ?? []));
-      if (audioEnabled && wavs.length > 0) {
+      if (wavs.length > 0) {
         if (folderName) setCardName((current) => (current.trim() ? current : folderName));
         void addRecordings(wavs);
       }
@@ -1151,7 +1150,7 @@ export function AddObservationsModal({
         ),
       );
     },
-    [addRecordings, analyzeItem, audioEnabled, disabledReason, requestDeviceLocation, t],
+    [addRecordings, analyzeItem, disabledReason, requestDeviceLocation, t],
   );
 
   function onInputChange(event: ChangeEvent<HTMLInputElement>) {
@@ -1201,7 +1200,7 @@ export function AddObservationsModal({
     const droppedItems = event.dataTransfer.items;
     // A whole SD card dragged from the file manager arrives as a directory
     // entry — walk it (entries must be grabbed before the drop event settles).
-    if (audioEnabled && droppedItems && dropContainsDirectory(droppedItems)) {
+    if (droppedItems && dropContainsDirectory(droppedItems)) {
       const folderName = droppedFolderName(droppedItems);
       void collectDroppedFiles(droppedItems).then((files) => addFiles(files, folderName));
       return;
@@ -1669,9 +1668,7 @@ export function AddObservationsModal({
             </Button>
           </div>
         </div>
-        <ModalDescription className="mt-1">
-          {audioEnabled ? t("audio.description") : t("description")}
-        </ModalDescription>
+        <ModalDescription className="mt-1">{t("description")}</ModalDescription>
       </ModalHeader>
 
       {items.length > 0 ? (
@@ -1718,13 +1715,11 @@ export function AddObservationsModal({
             <div>
               <p className="font-instrument text-xl font-medium italic tracking-[-0.02em] text-foreground">
                 {/* Touch devices can't drag & drop files, so swap the invitation. */}
-                <span className="[@media(pointer:coarse)]:hidden">
-                  {audioEnabled ? t("audio.dropTitle") : t("dropTitle")}
-                </span>
+                <span className="[@media(pointer:coarse)]:hidden">{t("dropTitle")}</span>
                 <span className="hidden [@media(pointer:coarse)]:inline">{t("dropTitleTouch")}</span>
               </p>
               <p className="mt-1 text-xs leading-5 text-muted-foreground">
-                {audioEnabled ? t("audio.dropHint", { max: MAX_PHOTOS }) : t("dropHint", { max: MAX_PHOTOS })}
+                {t("dropHint", { max: MAX_PHOTOS })}
               </p>
             </div>
             <div className="flex w-full flex-col items-stretch justify-center gap-2 sm:w-auto sm:flex-row sm:items-center">
@@ -1747,23 +1742,21 @@ export function AddObservationsModal({
                 disabled={Boolean(disabledReason) || isPreparing}
                 title={disabledReason ?? undefined}
               >
-                {audioEnabled ? t("audio.chooseFiles") : t("choose")}
+                {t("choose")}
               </Button>
               {/* A whole card at once — folder picking needs a real file
                   manager, so the button stays off coarse-pointer devices. */}
-              {audioEnabled ? (
-                <Button
-                  type="button"
-                  variant="outline"
-                  className="rounded-full [@media(pointer:coarse)]:hidden"
-                  onClick={() => folderPickInputRef.current?.click()}
-                  disabled={Boolean(disabledReason) || isPreparing}
-                  title={disabledReason ?? undefined}
-                >
-                  <FolderOpenIcon className="size-4" />
-                  {t("audio.chooseFolder")}
-                </Button>
-              ) : null}
+              <Button
+                type="button"
+                variant="outline"
+                className="rounded-full [@media(pointer:coarse)]:hidden"
+                onClick={() => folderPickInputRef.current?.click()}
+                disabled={Boolean(disabledReason) || isPreparing}
+                title={disabledReason ?? undefined}
+              >
+                <FolderOpenIcon className="size-4" />
+                {t("chooseFolder")}
+              </Button>
             </div>
           </div>
         ) : (
@@ -1870,7 +1863,7 @@ export function AddObservationsModal({
 
       {/* The device chip and its folder row exist only once audio lands — a
           photo upload never sees the word "device" (design 1d). */}
-      {audioEnabled && hasAudio ? (
+      {hasAudio ? (
         <div className="space-y-3 rounded-2xl border border-border bg-muted/30 p-3">
           <div className="flex items-start justify-between gap-3">
             <div className="flex min-w-0 items-start gap-3">
@@ -2038,7 +2031,7 @@ export function AddObservationsModal({
       <input
         ref={fileInputRef}
         type="file"
-        accept={audioEnabled ? "image/*,.wav,audio/wav,audio/x-wav" : "image/*"}
+        accept="image/*,.wav,audio/wav,audio/x-wav"
         multiple
         className="hidden"
         onChange={onInputChange}
@@ -2051,16 +2044,14 @@ export function AddObservationsModal({
         className="hidden"
         onChange={onInputChange}
       />
-      {audioEnabled ? (
-        <input
-          ref={folderPickInputRef}
-          type="file"
-          multiple
-          className="hidden"
-          onChange={onFolderInputChange}
-          {...({ webkitdirectory: "" } as Record<string, string>)}
-        />
-      ) : null}
+      <input
+        ref={folderPickInputRef}
+        type="file"
+        multiple
+        className="hidden"
+        onChange={onFolderInputChange}
+        {...({ webkitdirectory: "" } as Record<string, string>)}
+      />
 
       {items.length > 0 && !projectRef && projects.length > 0 ? (
         <div className="flex flex-col gap-2 rounded-2xl border border-border bg-muted/30 p-3 sm:flex-row sm:items-center sm:justify-between">

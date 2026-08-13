@@ -40,7 +40,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea";
 import { useModal } from "@/components/ui/modal/context";
 import QuickTooltip from "@/components/ui/quick-tooltip";
-import { manageApiHref, type ManageTarget } from "@/lib/links";
+import { groupManageBasePath, manageApiHref, manageHref, type ManageTarget } from "@/lib/links";
 import { cn } from "@/lib/utils";
 import { ManageConfirmModal } from "../../_components/ManageConfirmModal";
 import { canCreateRecord, canDeleteRecord, canUpdateRecord } from "../../_lib/cgs-permissions";
@@ -748,9 +748,9 @@ export function ObservationsClient({
   }
 
   // The primary "Add observation" affordances (the grid tile and the empty
-  // state) open the quick iNaturalist-style modal — the same one the sidebar
-  // uses. The richer in-page bulk panel (mode=add) stays reachable from the
-  // unified Add data drop zone.
+  // state) open the same add-observations modal as the sidebar and the feed —
+  // one flow everywhere, photos and recorder cards alike. The richer in-page
+  // bulk panel (mode=add) stays reachable from the unified Add data drop zone.
   const openAddObservations = useCallback(() => {
     if (createPermission.reason) return;
     const close = () => {
@@ -768,8 +768,20 @@ export function ObservationsClient({
             projectRef={activeProject?.projectUri ?? null}
             projectSiteRef={project?.siteUri ?? null}
             onClose={close}
-            onViewObservations={() => {
+            onViewObservations={(uploadedTarget) => {
               close();
+              // The uploader can retarget the batch mid-flow ("Uploading for"),
+              // so send them to that account's list rather than refreshing a
+              // page the observations didn't land on.
+              if (uploadedTarget.did !== target.did) {
+                router.push(
+                  manageHref(
+                    { basePath: groupManageBasePath(uploadedTarget.identifier) },
+                    "observations",
+                  ),
+                );
+                return;
+              }
               router.refresh();
             }}
           />
