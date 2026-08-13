@@ -59,6 +59,40 @@ export type GrantMilestone = {
   isRecorderInventory?: boolean;
 };
 
+/** A daily cumulative series: ISO days (oldest → newest) and the value at the
+ *  end of each. Minutes of audio, for the pace chart. */
+export type AudioSeries = {
+  /** ISO dates (YYYY-MM-DD), oldest → newest. */
+  days: string[];
+  /** Cumulative value at the end of each day. Same length as `days`. */
+  values: number[];
+};
+
+/**
+ * Where a grantee stands against the recording target and the grant
+ * deadline: what has actually been uploaded, against the straight line from
+ * the grant start to the target on the closing date.
+ */
+export type AudioPace = {
+  /** "active" while the grant is running, "met" once the target is reached,
+   *  "closed" when the deadline passed without hitting it. */
+  status: "active" | "met" | "closed";
+  targetMinutes: number;
+  /** Minutes still to record; 0 once the target is met. */
+  remainingMinutes: number;
+  /** Whole days left until the deadline, floored at 0. */
+  daysRemaining: number;
+  /** Minutes/day needed from today on to still hit the target. Null unless
+   *  the grant is active. */
+  requiredPerDay: number | null;
+  /** Minutes/day achieved since the grant started. */
+  actualPerDay: number;
+  /** Where the current pace lands by the deadline. */
+  projectedMinutes: number;
+  /** Minutes ahead (+) or behind (−) the straight line to target as of today. */
+  deltaVsPace: number;
+};
+
 export type GrantOverview = {
   /** Project title, e.g. "Sounds of the Savannah". Null until a grant record
    *  names it — the view shows a generic heading rather than inventing one. */
@@ -70,6 +104,16 @@ export type GrantOverview = {
   audioMinutes: number;
   /** Per-community recording target for the program, in minutes. */
   audioTargetMinutes: number;
+  /** ISO date the recording target must be met by — the grant's closing date. */
+  audioDeadline: string;
+  /** Progress against the target and the deadline. Null when the grant has no
+   *  known start (an admin preview, say), so the view simply omits the pace. */
+  audioPace: AudioPace | null;
+  /** ISO date the grant clock started for this account (its enrollment day).
+   *  Null when unknown — the pace chart is then omitted. */
+  audioGrantStart: string | null;
+  /** Daily cumulative uploaded minutes, backing the pace chart. */
+  audioSeries: AudioSeries | null;
   /** Total grant value in USD. */
   grantAmountUsd: number;
   /** Cumulative uploaded minutes over recent weeks (oldest → newest), for the sparkline. */

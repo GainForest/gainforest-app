@@ -835,7 +835,11 @@
           "recordersYours": "{count} seus",
           "recordersShipped": "{count} enviados",
           "speciesTagged": "Espécies marcadas",
-          "audioTarget": "Meta: {target} min"
+          "audioTargetBy": "Meta de {target} min até {date}",
+          "audioBehindPace": "{minutes} min atrás do ritmo · faltam {days} dias",
+          "audioAheadPace": "{minutes} min à frente do ritmo · faltam {days} dias",
+          "audioTargetMet": "Meta atingida",
+          "audioGrantClosed": "Período do subsídio encerrado"
         },
         "milestones": {
           "title": "Marcos do subsídio",
@@ -853,7 +857,37 @@
           "description": "Seu subsídio Rewilding the Web: próximo passo, progresso e marcos."
         },
         "untitled": "Seu subsídio",
-        "amount": "Subsídio de ${amount}"
+        "amount": "Subsídio de ${amount}",
+        "pace": {
+          "title": "Áudio enviado frente ao ritmo necessário",
+          "summary": "{current} de {target} min de meta · ritmo para alcançá-la até {date}",
+          "rangeLabel": "Escolha um período",
+          "ranges": {
+            "1w": "Semana",
+            "1m": "Mês",
+            "6m": "6 meses",
+            "all": "Desde o subsídio"
+          },
+          "phrases": {
+            "1w": "esta semana",
+            "1m": "este mês",
+            "6m": "nos últimos 6 meses",
+            "all": "desde o início do seu subsídio"
+          },
+          "vsPaceNeeded": "frente ao ritmo necessário · {range}",
+          "behindPhrase": "atrás do ritmo necessário {phrase}",
+          "aheadPhrase": "à frente do ritmo necessário {phrase}",
+          "actual": "real",
+          "needed": "necessário",
+          "perDay": "{rate}/dia",
+          "rates": "{actual} real · {needed} necessário",
+          "legendActual": "Real",
+          "legendNeeded": "Ritmo necessário",
+          "focus": "{minutes} min em {date}",
+          "overallBehind": "No total {minutes} min atrás do ritmo de todo o subsídio",
+          "overallAhead": "No total {minutes} min à frente do ritmo de todo o subsídio",
+          "overallMet": "Meta de gravação atingida"
+        }
       },
       "recorders": {
         "navLabel": "Meus gravadores",

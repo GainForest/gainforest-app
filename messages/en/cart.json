@@ -233,7 +233,31 @@
       "mockCanceled": "Mock invitation removed from this preview."
     },
     "myCardsTitle": "My Bumicerts gallery",
-    "myCardsDescription": "Preview the collected Bumicerts gallery, populated with sample collectibles."
+    "myCardsDescription": "Preview the collected Bumicerts gallery, populated with sample collectibles.",
+    "rewildingDashboard": {
+      "title": "Rewilding grant dashboard",
+      "description": "The My grant overview and its audio pace chart, in each state the recording target can be in.",
+      "safetyNote": "Fixture grant data only. This route never reads the indexer, a viewer's enrollment, or milestone confirmations, and nothing here can change a grant.",
+      "behind": {
+        "title": "Behind the pace needed",
+        "description": "A few minutes a day — roughly where a grantee starting out sits against the 7,000-minute target."
+      },
+      "ahead": {
+        "title": "Ahead of the pace needed",
+        "description": "Uploads running past the line the grant needs."
+      },
+      "met": {
+        "title": "Target met",
+        "description": "The recording target is reached, so the chart stops asking for a pace."
+      },
+      "noAudio": {
+        "title": "No audio yet",
+        "description": "Nothing uploaded, so the pace chart is omitted rather than drawn empty."
+      },
+      "mockBadge": "Mock data",
+      "cardTitle": "Rewilding grant dashboard",
+      "cardDescription": "My grant with its audio pace chart, behind and ahead of the target."
+    }
   },
   "myCards": {
     "eyebrow": "Collectibles",

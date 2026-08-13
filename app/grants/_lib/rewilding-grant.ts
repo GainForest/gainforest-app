@@ -24,11 +24,16 @@
 import {
   REWILDING_AUDIO_TARGET_MINUTES,
   REWILDING_GRANT_AMOUNT_USD,
+  REWILDING_GRANT_END_ISO,
   REWILDING_MILESTONES,
   doneRewildingMilestoneIds,
   fetchRewildingMilestones,
 } from "@/app/_lib/rewilding-milestones";
-import { EMPTY_AUDIO_STATS, fetchGranteeAudioStats } from "./rewilding-audio";
+import {
+  effectiveRewildingGrantees,
+  fetchRewildingGrantees,
+} from "@/app/_lib/rewilding-grantees";
+import { EMPTY_AUDIO_STATS, buildAudioPace, fetchGranteeAudioStats } from "./rewilding-audio";
 import type { GrantOverview, Recorder } from "../_components/rewilding/model";
 
 /** True while the recorder and species stats below are stand-ins rather than
@@ -36,7 +41,21 @@ import type { GrantOverview, Recorder } from "../_components/rewilding/model";
  *  seeing. Audio-upload figures are already live. */
 export const REWILDING_DASHBOARD_USES_PLACEHOLDER_DATA = true;
 
-export { REWILDING_AUDIO_TARGET_MINUTES, REWILDING_GRANT_AMOUNT_USD };
+export { REWILDING_AUDIO_TARGET_MINUTES, REWILDING_GRANT_AMOUNT_USD, REWILDING_GRANT_END_ISO };
+
+/**
+ * When this account's grant clock started: the day GainForest enrolled them
+ * in a slot. Pace is measured from there rather than from a single
+ * program-wide date, because organizations join at different times and a
+ * grantee should be judged against the time they have actually had.
+ */
+async function fetchGrantStartMs(did: string): Promise<number | null> {
+  const records = await fetchRewildingGrantees().catch(() => []);
+  const enrollment = effectiveRewildingGrantees(records).find((record) => record.subjectDid === did);
+  if (!enrollment) return null;
+  const ms = Date.parse(enrollment.createdAt);
+  return Number.isNaN(ms) ? null : ms;
+}
 
 /**
  * The grant overview for one grantee. Milestone states come from the
@@ -46,11 +65,24 @@ export { REWILDING_AUDIO_TARGET_MINUTES, REWILDING_GRANT_AMOUNT_USD };
 export async function fetchGrantOverview(viewerDid: string | null): Promise<GrantOverview> {
   // Audio figures degrade to zero on indexer failure rather than breaking the
   // page — milestones are the load-bearing content here.
-  const [milestoneRecords, audio] = await Promise.all([
+  const [milestoneRecords, audio, startMs] = await Promise.all([
     viewerDid ? fetchRewildingMilestones().catch(() => []) : Promise.resolve([]),
     viewerDid ? fetchGranteeAudioStats(viewerDid).catch(() => EMPTY_AUDIO_STATS) : Promise.resolve(EMPTY_AUDIO_STATS),
+    viewerDid ? fetchGrantStartMs(viewerDid).catch(() => null) : Promise.resolve(null),
   ]);
   const done = viewerDid ? doneRewildingMilestoneIds(milestoneRecords, viewerDid) : new Set<string>();
+
+  // Without an enrollment date there is no grant clock to measure against, so
+  // the view omits the pace rather than inventing a start.
+  const audioPace =
+    startMs === null
+      ? null
+      : buildAudioPace({
+          audioMinutes: audio.audioMinutes,
+          targetMinutes: REWILDING_AUDIO_TARGET_MINUTES,
+          startMs,
+          endMs: Date.parse(REWILDING_GRANT_END_ISO),
+        });
 
   return {
     // Unknown until a grant record exists — the view falls back to a generic
@@ -61,6 +93,10 @@ export async function fetchGrantOverview(viewerDid: string | null): Promise<Gran
     audioMinutes: audio.audioMinutes,
     audioTrend: audio.audioTrend,
     audioTargetMinutes: REWILDING_AUDIO_TARGET_MINUTES,
+    audioDeadline: REWILDING_GRANT_END_ISO,
+    audioPace,
+    audioGrantStart: startMs === null ? null : new Date(startMs).toISOString(),
+    audioSeries: audio.audioSeries,
     grantAmountUsd: REWILDING_GRANT_AMOUNT_USD,
     speciesCount: 0,
     speciesTrend: [],

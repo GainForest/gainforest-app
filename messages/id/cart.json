@@ -233,7 +233,31 @@
       "mockCanceled": "Undangan contoh dihapus dari pratinjau ini."
     },
     "myCardsTitle": "Galeri Bumicerts Saya",
-    "myCardsDescription": "Pratinjau galeri Bumicerts yang telah dikumpulkan dengan contoh koleksi."
+    "myCardsDescription": "Pratinjau galeri Bumicerts yang telah dikumpulkan dengan contoh koleksi.",
+    "rewildingDashboard": {
+      "title": "Dasbor hibah Rewilding",
+      "description": "Ikhtisar Hibah saya dan grafik laju audionya, dalam setiap keadaan target perekaman.",
+      "safetyNote": "Hanya data contoh. Rute ini tidak pernah membaca pengindeks, pendaftaran pengunjung, atau konfirmasi tonggak, dan tidak ada di sini yang dapat mengubah hibah.",
+      "behind": {
+        "title": "Di belakang laju yang dibutuhkan",
+        "description": "Beberapa menit sehari — kira-kira posisi penerima baru terhadap target 7.000 menit."
+      },
+      "ahead": {
+        "title": "Di depan laju yang dibutuhkan",
+        "description": "Unggahan melampaui garis yang dibutuhkan hibah."
+      },
+      "met": {
+        "title": "Target tercapai",
+        "description": "Target perekaman tercapai, jadi grafik berhenti meminta laju."
+      },
+      "noAudio": {
+        "title": "Belum ada audio",
+        "description": "Belum ada yang diunggah, jadi grafik laju dihilangkan alih-alih digambar kosong."
+      },
+      "mockBadge": "Data contoh",
+      "cardTitle": "Dasbor hibah Rewilding",
+      "cardDescription": "Hibah saya dengan grafik laju audionya, di belakang dan di depan target."
+    }
   },
   "myCards": {
     "eyebrow": "Koleksi",

@@ -835,7 +835,11 @@
           "recordersYours": "{count} vyako",
           "recordersShipped": "{count} vimetumwa",
           "speciesTagged": "Spishi zilizowekewa lebo",
-          "audioTarget": "Lengo: dakika {target}"
+          "audioTargetBy": "Lengo la dakika {target} ifikapo {date}",
+          "audioBehindPace": "Dakika {minutes} nyuma ya mwendo · siku {days} zimebaki",
+          "audioAheadPace": "Dakika {minutes} mbele ya mwendo · siku {days} zimebaki",
+          "audioTargetMet": "Lengo limefikiwa",
+          "audioGrantClosed": "Kipindi cha ruzuku kimefungwa"
         },
         "milestones": {
           "title": "Hatua muhimu za ruzuku",
@@ -853,7 +857,37 @@
           "description": "Ruzuku yako ya Rewilding the Web: hatua inayofuata, maendeleo na hatua muhimu."
         },
         "untitled": "Ruzuku yako",
-        "amount": "Ruzuku ya ${amount}"
+        "amount": "Ruzuku ya ${amount}",
+        "pace": {
+          "title": "Sauti zilizopakiwa dhidi ya mwendo unaohitajika",
+          "summary": "Dakika {current} kati ya lengo la {target} · mwendo wa kulifikia ifikapo {date}",
+          "rangeLabel": "Chagua kipindi",
+          "ranges": {
+            "1w": "Wiki",
+            "1m": "Mwezi",
+            "6m": "Miezi 6",
+            "all": "Tangu ruzuku"
+          },
+          "phrases": {
+            "1w": "wiki hii",
+            "1m": "mwezi huu",
+            "6m": "katika miezi 6 iliyopita",
+            "all": "tangu ruzuku yako ianze"
+          },
+          "vsPaceNeeded": "dhidi ya mwendo unaohitajika · {range}",
+          "behindPhrase": "nyuma ya mwendo unaohitajika {phrase}",
+          "aheadPhrase": "mbele ya mwendo unaohitajika {phrase}",
+          "actual": "halisi",
+          "needed": "inahitajika",
+          "perDay": "{rate}/siku",
+          "rates": "{actual} halisi · {needed} inahitajika",
+          "legendActual": "Halisi",
+          "legendNeeded": "Mwendo unaohitajika",
+          "focus": "Dakika {minutes} tarehe {date}",
+          "overallBehind": "Kwa jumla dakika {minutes} nyuma ya mwendo wa ruzuku nzima",
+          "overallAhead": "Kwa jumla dakika {minutes} mbele ya mwendo wa ruzuku nzima",
+          "overallMet": "Lengo la kurekodi limefikiwa"
+        }
       },
       "recorders": {
         "navLabel": "Vinasa sauti vyangu",

@@ -835,7 +835,11 @@
           "recordersYours": "{count} milik Anda",
           "recordersShipped": "{count} dikirim",
           "speciesTagged": "Spesies tertandai",
-          "audioTarget": "Target {target} mnt"
+          "audioTargetBy": "Target {target} mnt pada {date}",
+          "audioBehindPace": "{minutes} mnt di belakang laju · {days} hari lagi",
+          "audioAheadPace": "{minutes} mnt di depan laju · {days} hari lagi",
+          "audioTargetMet": "Target tercapai",
+          "audioGrantClosed": "Periode hibah ditutup"
         },
         "milestones": {
           "title": "Tonggak hibah",
@@ -853,7 +857,37 @@
           "description": "Hibah Rewilding the Web Anda: langkah berikutnya, kemajuan, dan tonggak pencapaian."
         },
         "untitled": "Hibah Anda",
-        "amount": "Hibah ${amount}"
+        "amount": "Hibah ${amount}",
+        "pace": {
+          "title": "Audio terunggah vs laju yang dibutuhkan",
+          "summary": "{current} dari target {target} mnt · laju untuk mencapainya pada {date}",
+          "rangeLabel": "Pilih periode",
+          "ranges": {
+            "1w": "Minggu",
+            "1m": "Bulan",
+            "6m": "6 bulan",
+            "all": "Sejak hibah"
+          },
+          "phrases": {
+            "1w": "minggu ini",
+            "1m": "bulan ini",
+            "6m": "dalam 6 bulan terakhir",
+            "all": "sejak hibah Anda dimulai"
+          },
+          "vsPaceNeeded": "vs laju yang dibutuhkan · {range}",
+          "behindPhrase": "di belakang laju yang dibutuhkan {phrase}",
+          "aheadPhrase": "di depan laju yang dibutuhkan {phrase}",
+          "actual": "aktual",
+          "needed": "dibutuhkan",
+          "perDay": "{rate}/hari",
+          "rates": "{actual} aktual · {needed} dibutuhkan",
+          "legendActual": "Aktual",
+          "legendNeeded": "Laju dibutuhkan",
+          "focus": "{minutes} mnt pada {date}",
+          "overallBehind": "Secara keseluruhan {minutes} mnt di belakang laju seluruh hibah",
+          "overallAhead": "Secara keseluruhan {minutes} mnt di depan laju seluruh hibah",
+          "overallMet": "Target perekaman tercapai"
+        }
       },
       "recorders": {
         "navLabel": "Perekam saya",

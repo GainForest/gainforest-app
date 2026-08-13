@@ -5,6 +5,7 @@ import { useFormatter, useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
 import type { GrantMilestone, GrantOverview, Recorder } from "./model";
 import { countByOrigin } from "./model";
+import { AudioPaceChart } from "./AudioPaceChart";
 import { Sparkline } from "./Sparkline";
 
 /**
@@ -81,17 +82,7 @@ export function MyGrantView({
           value={t("grant.stats.audioValue", { minutes: format.number(overview.audioMinutes) })}
           trend={overview.audioTrend}
         >
-          <div className="mt-2 flex flex-col gap-1">
-            <div className="h-1.5 w-full overflow-hidden rounded-full bg-muted" aria-hidden>
-              <div
-                className="h-full rounded-full bg-primary transition-[width]"
-                style={{ width: `${Math.min(100, (overview.audioMinutes / Math.max(1, overview.audioTargetMinutes)) * 100)}%` }}
-              />
-            </div>
-            <span className="text-[10px] font-medium text-muted-foreground">
-              {t("grant.stats.audioTarget", { target: format.number(overview.audioTargetMinutes) })}
-            </span>
-          </div>
+          <AudioTargetBar overview={overview} />
         </StatCard>
         <StatCard label={t("grant.stats.recorders")} value={format.number(recorders.length)}>
           <div className="mt-2 flex flex-wrap gap-1.5">
@@ -109,6 +100,19 @@ export function MyGrantView({
           trend={overview.speciesTrend}
         />
       </section>
+
+      {/* Pace against the recording target. Needs a grant clock and at least
+          one upload to plot; without either there is nothing to compare. */}
+      {overview.audioSeries && overview.audioPace && overview.audioGrantStart ? (
+        <AudioPaceChart
+          series={overview.audioSeries}
+          pace={overview.audioPace}
+          grantStart={overview.audioGrantStart}
+          deadline={overview.audioDeadline}
+          targetMinutes={overview.audioTargetMinutes}
+          currentMinutes={overview.audioMinutes}
+        />
+      ) : null}
 
       <section className="flex flex-col gap-3 rounded-2xl border border-border bg-surface p-4">
         <div className="flex items-baseline justify-between gap-3">
@@ -133,6 +137,79 @@ export function MyGrantView({
         )}
       </section>
 
+    </div>
+  );
+}
+
+/**
+ * Progress toward the recording target, with the grant's closing date and
+ * the pace it implies. The notch on the bar marks where a grantee on a
+ * straight line to target would be today, so being behind is visible at a
+ * glance rather than only in the number.
+ */
+function AudioTargetBar({ overview }: { overview: GrantOverview }) {
+  const t = useTranslations("marketplace.grants.rewildingDashboard.grant.stats");
+  const format = useFormatter();
+  const { audioMinutes, audioTargetMinutes, audioDeadline, audioPace } = overview;
+
+  const pct = (minutes: number) =>
+    Math.min(100, Math.max(0, (minutes / Math.max(1, audioTargetMinutes)) * 100));
+  // Where the straight line to target sits today: actual minus how far off it
+  // the grantee is.
+  const expectedMinutes = audioPace ? audioMinutes - audioPace.deltaVsPace : null;
+  const behind = audioPace ? audioPace.deltaVsPace < 0 : false;
+
+  // A calendar date, not a moment: formatted in UTC so the 30 Nov deadline
+  // does not read as 1 December for viewers east of UTC.
+  const deadlineLabel = format.dateTime(new Date(audioDeadline), {
+    day: "numeric",
+    month: "short",
+    timeZone: "UTC",
+  });
+
+  return (
+    <div className="mt-2 flex flex-col gap-1">
+      <div className="relative h-1.5 w-full overflow-hidden rounded-full bg-muted" aria-hidden>
+        <div
+          className="h-full rounded-full bg-primary transition-[width]"
+          style={{ width: `${pct(audioMinutes)}%` }}
+        />
+        {expectedMinutes !== null && audioPace?.status === "active" ? (
+          <span
+            className="absolute top-0 h-full w-0.5 -translate-x-1/2 rounded-full bg-amber-500"
+            style={{ left: `${pct(expectedMinutes)}%` }}
+          />
+        ) : null}
+      </div>
+
+      <span className="text-[10px] font-medium text-muted-foreground">
+        {t("audioTargetBy", {
+          target: format.number(audioTargetMinutes),
+          date: deadlineLabel,
+        })}
+      </span>
+
+      {audioPace ? (
+        <span
+          className={cn(
+            "text-[10px] font-medium",
+            audioPace.status === "met"
+              ? "text-primary"
+              : behind
+                ? "text-amber-700 dark:text-amber-400"
+                : "text-muted-foreground",
+          )}
+        >
+          {audioPace.status === "met"
+            ? t("audioTargetMet")
+            : audioPace.status === "closed"
+              ? t("audioGrantClosed")
+              : t(behind ? "audioBehindPace" : "audioAheadPace", {
+                  minutes: format.number(Math.abs(audioPace.deltaVsPace)),
+                  days: audioPace.daysRemaining,
+                })}
+        </span>
+      ) : null}
     </div>
   );
 }

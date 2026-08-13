@@ -1,5 +1,12 @@
 import { describe, expect, it } from "vitest";
-import { buildAudioStats, EMPTY_AUDIO_STATS, type AudioUploadEvent } from "./rewilding-audio";
+import {
+  buildAudioPace,
+  buildAudioSeries,
+  buildAudioStats,
+  EMPTY_AUDIO_STATS,
+  type AudioUploadEvent,
+} from "./rewilding-audio";
+import { REWILDING_GRANT_END_ISO } from "@/app/_lib/rewilding-milestones";
 
 const DAY_MS = 86_400_000;
 const WEEK_MS = 7 * DAY_MS;
@@ -59,5 +66,118 @@ describe("buildAudioStats", () => {
     const stats = buildAudioStats([{ t: NOW - WEEK_MS, seconds: 600 }], NOW);
     expect(stats.audioTrend.at(-2)).toBe(10);
     expect(stats.audioTrend.at(-3)).toBe(0);
+  });
+});
+
+describe("buildAudioSeries", () => {
+  it("is null without any audio", () => {
+    expect(buildAudioSeries([], NOW)).toBeNull();
+    expect(buildAudioSeries([upload(1, 0)], NOW)).toBeNull();
+  });
+
+  it("runs from the first upload through today", () => {
+    const series = buildAudioSeries([upload(3, 600)], NOW)!;
+    expect(series.days[0]).toBe("2026-08-10");
+    expect(series.days.at(-1)).toBe("2026-08-13");
+    expect(series.days).toHaveLength(4);
+  });
+
+  it("accumulates minutes and never decreases", () => {
+    const series = buildAudioSeries([upload(3, 600), upload(1, 300)], NOW)!;
+    expect(series.values[0]).toBeCloseTo(10, 5);
+    expect(series.values.at(-1)).toBeCloseTo(15, 5);
+    for (let i = 1; i < series.values.length; i += 1) {
+      expect(series.values[i]).toBeGreaterThanOrEqual(series.values[i - 1]!);
+    }
+  });
+
+  it("keeps days and values the same length", () => {
+    const series = buildAudioSeries([upload(40, 600), upload(2, 120)], NOW)!;
+    expect(series.days).toHaveLength(series.values.length);
+  });
+
+  it("flattens through a stretch with no uploads", () => {
+    // One upload 5 days ago, nothing since: the tail holds its value.
+    const series = buildAudioSeries([upload(5, 1_200)], NOW)!;
+    expect(series.values.at(-1)).toBeCloseTo(20, 5);
+    expect(series.values.at(-1)).toBeCloseTo(series.values.at(-2)!, 5);
+  });
+
+  it("ends the series at the headline total", () => {
+    const events = [upload(30, 3_000), upload(9, 1_200), upload(1, 900)];
+    const stats = buildAudioStats(events, NOW);
+    expect(Math.round(stats.audioSeries!.values.at(-1)!)).toBe(stats.audioMinutes);
+  });
+});
+
+describe("buildAudioPace", () => {
+  const START = Date.parse("2026-06-01T00:00:00.000Z");
+  const END = Date.parse("2026-11-30T23:59:59.999Z");
+  const TARGET = 7_000;
+
+  const pace = (audioMinutes: number, now = NOW) =>
+    buildAudioPace({ audioMinutes, targetMinutes: TARGET, startMs: START, endMs: END, now });
+
+  it("reports days left until the grant closes", () => {
+    // 13 Aug → 30 Nov 2026.
+    expect(pace(100).daysRemaining).toBe(109);
+  });
+
+  it("is behind when uploads trail the straight line to target", () => {
+    const result = pace(292);
+    expect(result.status).toBe("active");
+    // ~40% of the window elapsed, so ~2,800 minutes were due by now.
+    expect(result.deltaVsPace).toBeLessThan(-2_000);
+  });
+
+  it("is ahead when uploads run past the straight line", () => {
+    expect(pace(5_000).deltaVsPace).toBeGreaterThan(0);
+  });
+
+  it("asks for the remaining minutes spread over the days left", () => {
+    const result = pace(1_000);
+    expect(result.remainingMinutes).toBe(6_000);
+    // 6,000 minutes over ~109 days.
+    expect(result.requiredPerDay).toBeCloseTo(6_000 / (result.daysRemaining + 1), 0);
+  });
+
+  it("marks the target met and stops asking for a pace", () => {
+    const result = pace(7_200);
+    expect(result.status).toBe("met");
+    expect(result.remainingMinutes).toBe(0);
+    expect(result.requiredPerDay).toBeNull();
+  });
+
+  it("closes once the deadline passes without the target", () => {
+    const result = pace(500, Date.parse("2026-12-01T12:00:00.000Z"));
+    expect(result.status).toBe("closed");
+    expect(result.daysRemaining).toBe(0);
+    expect(result.requiredPerDay).toBeNull();
+  });
+
+  it("projects where the current pace lands by the deadline", () => {
+    // 730 minutes over 73.5 elapsed days ≈ 9.9/day, with ~109 days left.
+    const result = pace(730);
+    expect(result.actualPerDay).toBeCloseTo(9.93, 1);
+    expect(result.projectedMinutes).toBeGreaterThan(1_700);
+    expect(result.projectedMinutes).toBeLessThan(1_950);
+  });
+
+  it("does not blow up on a grant that just started", () => {
+    const result = buildAudioPace({
+      audioMinutes: 0,
+      targetMinutes: TARGET,
+      startMs: NOW,
+      endMs: END,
+      now: NOW,
+    });
+    expect(Number.isFinite(result.actualPerDay)).toBe(true);
+    expect(result.actualPerDay).toBe(0);
+    expect(result.deltaVsPace).toBe(0);
+  });
+
+  it("uses the program deadline constant", () => {
+    expect(REWILDING_GRANT_END_ISO).toBe("2026-11-30T23:59:59.999Z");
+    expect(new Date(REWILDING_GRANT_END_ISO).getUTCMonth()).toBe(10);
   });
 });

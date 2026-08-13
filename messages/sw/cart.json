@@ -233,7 +233,31 @@
       "mockCanceled": "Mwaliko wa mfano umeondolewa kwenye hakiki hii."
     },
     "myCardsTitle": "Matunzio ya Bumicerts Zangu",
-    "myCardsDescription": "Hakiki matunzio ya Bumicerts zilizokusanywa yenye mifano ya Bumicerts."
+    "myCardsDescription": "Hakiki matunzio ya Bumicerts zilizokusanywa yenye mifano ya Bumicerts.",
+    "rewildingDashboard": {
+      "title": "Dashibodi ya ruzuku ya Rewilding",
+      "description": "Muhtasari wa Ruzuku yangu na chati yake ya mwendo wa sauti, katika kila hali ambayo lengo la kurekodi linaweza kuwa.",
+      "safetyNote": "Data ya majaribio pekee. Njia hii kamwe haisomi kiashiria, usajili wa mtazamaji, wala uthibitisho wa hatua muhimu, na hakuna kitu hapa kinachoweza kubadilisha ruzuku.",
+      "behind": {
+        "title": "Nyuma ya mwendo unaohitajika",
+        "description": "Dakika chache kwa siku — takriban mahali alipo mwanzilishi dhidi ya lengo la dakika 7,000."
+      },
+      "ahead": {
+        "title": "Mbele ya mwendo unaohitajika",
+        "description": "Upakiaji unaozidi mstari ambao ruzuku inahitaji."
+      },
+      "met": {
+        "title": "Lengo limefikiwa",
+        "description": "Lengo la kurekodi limefikiwa, hivyo chati inaacha kuomba mwendo."
+      },
+      "noAudio": {
+        "title": "Bado hakuna sauti",
+        "description": "Hakuna kilichopakiwa, hivyo chati ya mwendo inaachwa badala ya kuchorwa tupu."
+      },
+      "mockBadge": "Data ya majaribio",
+      "cardTitle": "Dashibodi ya ruzuku ya Rewilding",
+      "cardDescription": "Ruzuku yangu na chati yake ya mwendo wa sauti, nyuma na mbele ya lengo."
+    }
   },
   "myCards": {
     "eyebrow": "Bumicerts za kukusanya",

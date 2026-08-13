@@ -835,7 +835,11 @@
           "recordersYours": "{count} tuyas",
           "recordersShipped": "{count} enviadas",
           "speciesTagged": "Especies etiquetadas",
-          "audioTarget": "Meta: {target} min"
+          "audioTargetBy": "Meta de {target} min para el {date}",
+          "audioBehindPace": "{minutes} min por detrás del ritmo · quedan {days} días",
+          "audioAheadPace": "{minutes} min por delante del ritmo · quedan {days} días",
+          "audioTargetMet": "Meta alcanzada",
+          "audioGrantClosed": "Periodo de la subvención cerrado"
         },
         "milestones": {
           "title": "Hitos de la subvención",
@@ -853,7 +857,37 @@
           "description": "Tu subvención Rewilding the Web: siguiente paso, progreso e hitos."
         },
         "untitled": "Tu subvención",
-        "amount": "Subvención de ${amount}"
+        "amount": "Subvención de ${amount}",
+        "pace": {
+          "title": "Audio subido frente al ritmo necesario",
+          "summary": "{current} de {target} min objetivo · ritmo para lograrlo antes de {date}",
+          "rangeLabel": "Elige un periodo",
+          "ranges": {
+            "1w": "Semana",
+            "1m": "Mes",
+            "6m": "6 meses",
+            "all": "Desde la subvención"
+          },
+          "phrases": {
+            "1w": "esta semana",
+            "1m": "este mes",
+            "6m": "en los últimos 6 meses",
+            "all": "desde que empezó tu subvención"
+          },
+          "vsPaceNeeded": "frente al ritmo necesario · {range}",
+          "behindPhrase": "por detrás del ritmo necesario {phrase}",
+          "aheadPhrase": "por delante del ritmo necesario {phrase}",
+          "actual": "real",
+          "needed": "necesario",
+          "perDay": "{rate}/día",
+          "rates": "{actual} real · {needed} necesario",
+          "legendActual": "Real",
+          "legendNeeded": "Ritmo necesario",
+          "focus": "{minutes} min el {date}",
+          "overallBehind": "En total {minutes} min por detrás del ritmo de toda la subvención",
+          "overallAhead": "En total {minutes} min por delante del ritmo de toda la subvención",
+          "overallMet": "Meta de grabación alcanzada"
+        }
       },
       "recorders": {
         "navLabel": "Mis grabadoras",

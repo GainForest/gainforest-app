@@ -835,7 +835,11 @@
           "recordersYours": "{count} yours",
           "recordersShipped": "{count} shipped",
           "speciesTagged": "Species tagged",
-          "audioTarget": "Target {target} min"
+          "audioTargetBy": "Target {target} min by {date}",
+          "audioBehindPace": "{minutes} min behind pace · {days} days left",
+          "audioAheadPace": "{minutes} min ahead of pace · {days} days left",
+          "audioTargetMet": "Target met",
+          "audioGrantClosed": "Grant period closed"
         },
         "milestones": {
           "title": "Grant milestones",
@@ -853,7 +857,37 @@
           "description": "Your Rewilding the Web grant: next step, progress and milestones."
         },
         "untitled": "Your grant",
-        "amount": "${amount} grant"
+        "amount": "${amount} grant",
+        "pace": {
+          "title": "Audio uploaded vs pace needed",
+          "summary": "{current} of {target} min target · pace to hit it by {date}",
+          "rangeLabel": "Choose a period",
+          "ranges": {
+            "1w": "Week",
+            "1m": "Month",
+            "6m": "6 months",
+            "all": "Since grant"
+          },
+          "phrases": {
+            "1w": "this week",
+            "1m": "this month",
+            "6m": "over the last 6 months",
+            "all": "since your grant began"
+          },
+          "vsPaceNeeded": "vs pace needed · {range}",
+          "behindPhrase": "behind the pace needed {phrase}",
+          "aheadPhrase": "ahead of the pace needed {phrase}",
+          "actual": "actual",
+          "needed": "needed",
+          "perDay": "{rate}/day",
+          "rates": "{actual} actual · {needed} needed",
+          "legendActual": "Actual",
+          "legendNeeded": "Pace needed",
+          "focus": "{minutes} min on {date}",
+          "overallBehind": "Overall behind by {minutes} min vs full-grant pace",
+          "overallAhead": "Overall ahead by {minutes} min vs full-grant pace",
+          "overallMet": "Recording target met"
+        }
       },
       "recorders": {
         "navLabel": "My recorders",

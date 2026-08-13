@@ -11,6 +11,7 @@
 
 import { INDEXER_URL } from "@/app/_lib/urls";
 import { cachedAsync } from "@/app/_lib/async-cache";
+import type { AudioPace, AudioSeries } from "../_components/rewilding/model";
 
 export type GranteeAudioStats = {
   /** Total minutes of audio uploaded by the account, rounded. */
@@ -19,9 +20,15 @@ export type GranteeAudioStats = {
    *  week boundaries (oldest → newest), for the sparkline. Empty when there
    *  is no audio at all. */
   audioTrend: number[];
+  /** Daily cumulative minutes backing the pace chart. Null with no audio. */
+  audioSeries: AudioSeries | null;
 };
 
-export const EMPTY_AUDIO_STATS: GranteeAudioStats = { audioMinutes: 0, audioTrend: [] };
+export const EMPTY_AUDIO_STATS: GranteeAudioStats = {
+  audioMinutes: 0,
+  audioTrend: [],
+  audioSeries: null,
+};
 
 /** One upload, reduced to what the stats need. */
 export type AudioUploadEvent = {
@@ -31,9 +38,13 @@ export type AudioUploadEvent = {
   seconds: number;
 };
 
-const WEEK_MS = 7 * 86_400_000;
+const DAY_MS = 86_400_000;
+const WEEK_MS = 7 * DAY_MS;
 /** How many weekly points the sparkline gets. */
 const TREND_WEEKS = 12;
+
+/** Axis cap for {@link buildAudioSeries} — comfortably longer than any grant. */
+const MAX_SERIES_DAYS = 1200;
 
 const PAGE_SIZE = 1000;
 /** Safety cap: at most this many pages per account (10,000 recordings). An
@@ -45,8 +56,44 @@ const CACHE_PREFIX = "rewilding-audio:v1:";
 const CACHE_MS = 5 * 60_000;
 
 /**
- * Fold upload events into the headline number and the weekly cumulative
- * trend. Pure — exported for tests.
+ * Cumulative uploaded minutes at the end of each UTC day, from the first
+ * upload through today — the shape the pace chart plots against the line it
+ * needs to be on. The axis runs to today even when nothing was uploaded
+ * recently, so a stalled grant visibly flattens instead of stopping short.
+ *
+ * Pure — exported for tests.
+ */
+export function buildAudioSeries(
+  events: readonly AudioUploadEvent[],
+  now: number = Date.now(),
+): AudioSeries | null {
+  const valid = events.filter((event) => Number.isFinite(event.t) && event.seconds > 0);
+  if (valid.length === 0) return null;
+
+  const startDay = Math.floor(Math.min(...valid.map((event) => event.t)) / DAY_MS) * DAY_MS;
+  const endDay = Math.floor(now / DAY_MS) * DAY_MS;
+
+  const sorted = [...valid].sort((a, b) => a.t - b.t);
+  const days: string[] = [];
+  const values: number[] = [];
+  let index = 0;
+  let seconds = 0;
+  // Cap the axis so a very old first upload cannot build an unbounded array.
+  for (let day = startDay; day <= endDay && days.length < MAX_SERIES_DAYS; day += DAY_MS) {
+    const cutoff = day + DAY_MS;
+    while (index < sorted.length && sorted[index]!.t < cutoff) {
+      seconds += sorted[index]!.seconds;
+      index += 1;
+    }
+    days.push(new Date(day).toISOString().slice(0, 10));
+    values.push(seconds / 60);
+  }
+  return { days, values };
+}
+
+/**
+ * Fold upload events into the headline number, the weekly cumulative trend
+ * and the daily series. Pure — exported for tests.
  */
 export function buildAudioStats(events: readonly AudioUploadEvent[], now: number = Date.now()): GranteeAudioStats {
   const totalSeconds = events.reduce((sum, event) => sum + Math.max(0, event.seconds), 0);
@@ -64,7 +111,63 @@ export function buildAudioStats(events: readonly AudioUploadEvent[], now: number
     audioTrend.push(Math.round(seconds / 60));
   }
 
-  return { audioMinutes: Math.round(totalSeconds / 60), audioTrend };
+  return {
+    audioMinutes: Math.round(totalSeconds / 60),
+    audioTrend,
+    audioSeries: buildAudioSeries(events, now),
+  };
+}
+
+/**
+ * Compare uploaded minutes against the straight line from the grant start to
+ * the target on the deadline. Pure — exported for tests.
+ */
+export function buildAudioPace({
+  audioMinutes,
+  targetMinutes,
+  startMs,
+  endMs,
+  now = Date.now(),
+}: {
+  audioMinutes: number;
+  targetMinutes: number;
+  startMs: number;
+  endMs: number;
+  now?: number;
+}): AudioPace {
+  const remainingMinutes = Math.max(0, targetMinutes - audioMinutes);
+  const msRemaining = Math.max(0, endMs - now);
+  const daysRemaining = Math.floor(msRemaining / DAY_MS);
+
+  // Elapsed days are floored at a fraction of a day so a grant that started
+  // moments ago does not report an infinite pace.
+  const elapsedDays = Math.max(msRemaining > 0 ? 0.5 : 1, (now - startMs) / DAY_MS);
+  const actualPerDay = audioMinutes / elapsedDays;
+
+  const status = audioMinutes >= targetMinutes ? "met" : msRemaining <= 0 ? "closed" : "active";
+
+  // Days left counted from the real remaining time, not whole days, so the
+  // required pace does not jump the moment a day boundary passes.
+  const daysLeftExact = msRemaining / DAY_MS;
+  const requiredPerDay = status === "active" ? remainingMinutes / Math.max(daysLeftExact, 1 / 24) : null;
+
+  const projectedMinutes = Math.round(audioMinutes + actualPerDay * daysLeftExact);
+
+  // Where a grantee on a straight line to target would be today.
+  const totalMs = Math.max(1, endMs - startMs);
+  const progress = Math.min(1, Math.max(0, (now - startMs) / totalMs));
+  const expectedToday = targetMinutes * progress;
+
+  return {
+    status,
+    targetMinutes,
+    remainingMinutes,
+    daysRemaining,
+    requiredPerDay,
+    actualPerDay,
+    projectedMinutes,
+    deltaVsPace: Math.round(audioMinutes - expectedToday),
+  };
 }
 
 const AUDIO_PAGE_QUERY = `query GranteeAudio($did: String!, $first: Int!, $after: String) {

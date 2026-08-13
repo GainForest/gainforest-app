@@ -233,7 +233,31 @@
       "mockCanceled": "Convite simulado removido desta visualização."
     },
     "myCardsTitle": "Galeria dos Meus Bumicerts",
-    "myCardsDescription": "Veja uma prévia da galeria de Bumicerts colecionados com exemplos."
+    "myCardsDescription": "Veja uma prévia da galeria de Bumicerts colecionados com exemplos.",
+    "rewildingDashboard": {
+      "title": "Painel do subsídio Rewilding",
+      "description": "A visão Meu subsídio e seu gráfico de ritmo de áudio, em cada estado possível da meta de gravação.",
+      "safetyNote": "Apenas dados de teste. Esta rota nunca lê o indexador, a inscrição de quem visita ou as confirmações de marcos, e nada aqui pode alterar um subsídio.",
+      "behind": {
+        "title": "Atrás do ritmo necessário",
+        "description": "Alguns minutos por dia — aproximadamente onde fica quem está começando frente à meta de 7.000 minutos."
+      },
+      "ahead": {
+        "title": "À frente do ritmo necessário",
+        "description": "Envios que superam a linha que o subsídio exige."
+      },
+      "met": {
+        "title": "Meta atingida",
+        "description": "A meta de gravação foi alcançada, então o gráfico para de pedir um ritmo."
+      },
+      "noAudio": {
+        "title": "Ainda sem áudio",
+        "description": "Nada enviado, então o gráfico de ritmo é omitido em vez de desenhado vazio."
+      },
+      "mockBadge": "Dados de teste",
+      "cardTitle": "Painel do subsídio Rewilding",
+      "cardDescription": "Meu subsídio com seu gráfico de ritmo de áudio, atrás e à frente da meta."
+    }
   },
   "myCards": {
     "eyebrow": "Colecionáveis",

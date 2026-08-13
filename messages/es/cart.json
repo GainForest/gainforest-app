@@ -233,7 +233,31 @@
       "mockCanceled": "Invitación simulada eliminada de esta vista previa."
     },
     "myCardsTitle": "Galería de Mis Bumicerts",
-    "myCardsDescription": "Previsualiza la galería de Bumicerts coleccionados con coleccionables de muestra."
+    "myCardsDescription": "Previsualiza la galería de Bumicerts coleccionados con coleccionables de muestra.",
+    "rewildingDashboard": {
+      "title": "Panel de la subvención Rewilding",
+      "description": "La vista Mi subvención y su gráfico de ritmo de audio, en cada estado posible de la meta de grabación.",
+      "safetyNote": "Solo datos de prueba. Esta ruta nunca lee el indexador, la inscripción de quien la visita ni las confirmaciones de hitos, y nada aquí puede cambiar una subvención.",
+      "behind": {
+        "title": "Por detrás del ritmo necesario",
+        "description": "Unos pocos minutos al día: aproximadamente donde está quien empieza frente a la meta de 7.000 minutos."
+      },
+      "ahead": {
+        "title": "Por delante del ritmo necesario",
+        "description": "Subidas que superan la línea que la subvención necesita."
+      },
+      "met": {
+        "title": "Meta alcanzada",
+        "description": "La meta de grabación está lograda, así que el gráfico deja de pedir un ritmo."
+      },
+      "noAudio": {
+        "title": "Aún sin audio",
+        "description": "No se ha subido nada, así que el gráfico de ritmo se omite en vez de dibujarse vacío."
+      },
+      "mockBadge": "Datos de prueba",
+      "cardTitle": "Panel de la subvención Rewilding",
+      "cardDescription": "Mi subvención con su gráfico de ritmo de audio, por detrás y por delante de la meta."
+    }
   },
   "myCards": {
     "eyebrow": "Coleccionables",
