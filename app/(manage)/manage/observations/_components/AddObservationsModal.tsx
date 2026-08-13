@@ -108,17 +108,24 @@ import { listAcDeployments, type AcDeploymentItem } from "@/app/_lib/ac-deployme
 import { listDeploymentEvents, type DeploymentEventItem } from "@/app/_lib/deployment-events";
 import { createEquipment, listEquipment } from "@/app/_lib/equipment";
 import {
+  legacyRecordingKey,
+  listUploadedRecordingKeys,
+  type UploadedRecordingKeys,
+} from "@/app/_lib/ac-audio";
+import { computeFileCid } from "@/app/_lib/audiomoth/content-cid";
+import {
+  AUDIO_EVENT_SELECTION_PREFIX,
   deviceChipLabel,
   deviceNeedsDeployment,
   formatRecordingBytes,
   formatSampleRates,
-  matchChimeDeployment,
   NEW_AUDIO_FOLDER,
+  planAudioUploadGroups,
   quickRecordingTime,
-  resolveAudioTarget,
   splitObservationFiles,
   summarizeAudioBatch,
   unregisteredDeviceIds,
+  uploadableRecordings,
   type QuickRecording,
 } from "./observation-audio";
 
@@ -422,13 +429,21 @@ export function AddObservationsModal({
   const [audioFolders, setAudioFolders] = useState<AcDeploymentItem[] | null>(null);
   const [chimeEvents, setChimeEvents] = useState<DeploymentEventItem[] | null>(null);
   const [equipment, setEquipment] = useState<{ assetId: string; name: string }[] | null>(null);
+  /** Already-uploaded check over the batch — same shape as the Upload tab's. */
+  const [audioDedup, setAudioDedup] = useState<{ state: "checking" | "done"; skipped: number } | null>(null);
   const recordingsRef = useRef<QuickRecording[]>([]);
   const folderPickInputRef = useRef<HTMLInputElement | null>(null);
   /** Bumped when the audio batch is removed, so a mid-flight scan stops writing. */
   const audioScanTokenRef = useRef(0);
   const audioScanCountsRef = useRef({ done: 0, total: 0 });
+  /** Bumped per dedup run so an outdated check stops writing state. */
+  const audioDedupTokenRef = useRef(0);
+  /** Uploaded-recording identity keys per destination repo, one fetch each. */
+  const dedupKeysRef = useRef(new Map<string, Promise<UploadedRecordingKeys>>());
   /** Which account's audio context (folders/chimes/equipment) is loaded. */
   const audioContextDidRef = useRef<string | null>(null);
+  /** The current "Uploading for" DID, for callbacks that outlive a render. */
+  const targetDidRef = useRef(initialTarget.did);
 
   // "Uploading for": the account these observations land in. Seeded from the
   // caller's target (usually the active-account context) and switchable inline
@@ -517,7 +532,71 @@ export function AddObservationsModal({
     recordingsRef.current = recordings;
   }, [recordings]);
 
+  useEffect(() => {
+    targetDidRef.current = target.did;
+  }, [target.did]);
+
   const hasAudio = recordings.length > 0 || audioScan !== null;
+
+  /**
+   * The Upload tab's already-uploaded check, ported: hash each readable file
+   * (content CID with a legacy name+size fallback) and compare against what
+   * the destination account already holds, marking matches skipped before
+   * anything is uploaded. Re-run whenever "Uploading for" changes — a card
+   * already in one account may be new to another. Failures degrade to a
+   * normal upload, exactly like the tab.
+   */
+  const runAudioDedup = useCallback(async (did: string) => {
+    const token = ++audioDedupTokenRef.current;
+    const readable = recordingsRef.current.filter((rec) => rec.info);
+    if (readable.length === 0) {
+      setAudioDedup(null);
+      return;
+    }
+    setAudioDedup({ state: "checking", skipped: 0 });
+    let keys: UploadedRecordingKeys;
+    try {
+      const cached = dedupKeysRef.current.get(did) ?? listUploadedRecordingKeys(did);
+      dedupKeysRef.current.set(did, cached);
+      keys = await cached;
+    } catch {
+      // The account couldn't be checked — proceed as a normal upload.
+      dedupKeysRef.current.delete(did);
+      if (audioDedupTokenRef.current === token) setAudioDedup(null);
+      return;
+    }
+    if (audioDedupTokenRef.current !== token) return;
+
+    let skipped = 0;
+    const BATCH = 4;
+    for (let i = 0; i < readable.length; i += BATCH) {
+      const batch = readable.slice(i, i + BATCH);
+      const updates = await Promise.all(
+        batch.map(async (rec) => {
+          // A card that stops responding must not freeze the check; hashes
+          // computed for an earlier account are reused as-is.
+          const cid =
+            rec.cid !== undefined
+              ? rec.cid
+              : await withReadTimeout(computeFileCid(rec.file), FILE_READ_TIMEOUT_MS, null);
+          const already =
+            (cid !== null && keys.cids.has(cid)) ||
+            keys.legacy.has(legacyRecordingKey(rec.file.name, rec.file.size));
+          if (already) skipped += 1;
+          return { id: rec.id, cid, skipped: already };
+        }),
+      );
+      if (audioDedupTokenRef.current !== token) return;
+      setRecordings((current) =>
+        current.map((rec) => {
+          const update = updates.find((candidate) => candidate.id === rec.id);
+          return update ? { ...rec, cid: update.cid, skipped: update.skipped } : rec;
+        }),
+      );
+      setAudioDedup({ state: "checking", skipped });
+    }
+    setAudioDedup({ state: "done", skipped });
+  }, []);
 
   // Load the audio context (existing folders, chime deployments, equipment
   // registry) from the "Uploading for" account the first time recordings
@@ -546,15 +625,13 @@ export function AddObservationsModal({
     void listEquipment(contextDid)
       .then(keep((listed) => setEquipment(listed.map((item) => ({ assetId: item.assetId, name: item.name })))))
       .catch(keep(() => setEquipment([])));
-  }, [audioEnabled, hasAudio, target.did]);
+    // What counts as "already uploaded" is per-account too.
+    void runAudioDedup(contextDid);
+  }, [audioEnabled, hasAudio, runAudioDedup, target.did]);
 
-  // ── Audio derived state ── the card summary chip, the chime-matched
-  // deployment and the devices that are not in the equipment registry yet.
+  // ── Audio derived state ── the card summary chip, the per-chime upload
+  // groups and the devices that are not in the equipment registry yet.
   const audioSummary = useMemo(() => summarizeAudioBatch(recordings), [recordings]);
-  const matchedChimeEvent = useMemo(
-    () => matchChimeDeployment(audioSummary, chimeEvents),
-    [audioSummary, chimeEvents],
-  );
   const equipmentAssetIds = useMemo(
     () => (equipment ? equipment.map((item) => item.assetId) : null),
     [equipment],
@@ -582,26 +659,43 @@ export function AddObservationsModal({
   const audioFallbackFolderName = t("audio.defaultFolderName", {
     date: format.dateTime(audioSummary.earliest ?? new Date(), { dateStyle: "medium" }),
   });
-  // Where the batch goes when the folder picker is left on "automatic".
-  const audioAutoPlan = useMemo(
+  // The batch split into upload groups, exactly like the Upload tab: chime
+  // matches always file under their deployment; the picker governs the rest.
+  const audioPlanned = useMemo(
     () =>
-      resolveAudioTarget({
-        summary: audioSummary,
-        matchedEvent: matchedChimeEvent,
+      planAudioUploadGroups({
+        recordings,
+        events: chimeEvents,
+        selection: audioFolderSelection,
+        folders: audioFolders ?? [],
+        cardName,
+        fallbackName: audioFallbackFolderName,
+      }),
+    [audioFallbackFolderName, audioFolderSelection, audioFolders, cardName, chimeEvents, recordings],
+  );
+  // Where the picker-governed pool goes when left on "automatic".
+  const audioAutoPlanned = useMemo(
+    () =>
+      planAudioUploadGroups({
+        recordings,
+        events: chimeEvents,
         selection: "",
         folders: audioFolders ?? [],
         cardName,
         fallbackName: audioFallbackFolderName,
       }),
-    [audioFallbackFolderName, audioFolders, audioSummary, cardName, matchedChimeEvent],
+    [audioFallbackFolderName, audioFolders, cardName, chimeEvents, recordings],
   );
+  /** Recordings that will actually upload (readable, not already uploaded). */
+  const audioUploadableCount = useMemo(() => uploadableRecordings(recordings).length, [recordings]);
 
   /** Parse WAV headers a few at a time, appending each batch as it is read. */
   const addRecordings = useCallback(async (wavs: File[]) => {
     const token = audioScanTokenRef.current;
     const known = new Set(recordingsRef.current.map((rec) => rec.id));
     const fresh: { id: string; file: File }[] = [];
-    for (const file of wavs) {
+    // Chronological like the Upload tab — AudioMoth names are timestamps.
+    for (const file of [...wavs].sort((a, b) => a.name.localeCompare(b.name))) {
       const id = `${file.name}-${file.size}-${file.lastModified}`;
       if (known.has(id)) continue;
       known.add(id);
@@ -634,14 +728,21 @@ export function AddObservationsModal({
         setAudioScan({ done: counts.done, total: counts.total });
       }
     }
-  }, []);
+    // The whole card is read — check it against what the destination account
+    // already holds (the last overlapping drop to finish kicks it off).
+    if (audioScanTokenRef.current === token && audioScanCountsRef.current.total === 0) {
+      void runAudioDedup(targetDidRef.current);
+    }
+  }, [runAudioDedup]);
 
   /** Drop the waiting audio batch (nothing has uploaded yet). */
   const removeAudioBatch = useCallback(() => {
     audioScanTokenRef.current += 1;
+    audioDedupTokenRef.current += 1;
     audioScanCountsRef.current = { done: 0, total: 0 };
     setRecordings([]);
     setAudioScan(null);
+    setAudioDedup(null);
     setCardName("");
     setAudioFolderSelection("");
   }, []);
@@ -656,26 +757,21 @@ export function AddObservationsModal({
    */
   const handOffAudioBatch = useCallback((): { count: number; batchKey: string | null } => {
     if (!audioEnabled || !uploadTray || !sessionDid) return { count: 0, batchKey: null };
-    const readable = recordingsRef.current.filter((rec) => rec.info);
-    if (readable.length === 0) return { count: 0, batchKey: null };
     // Records land in the org's repo when uploading for one — same rule as
     // the photo observations above.
     const repoDid = target.kind === "group" ? target.did : null;
-    const summary = summarizeAudioBatch(recordingsRef.current);
-    const plan = resolveAudioTarget({
-      summary,
-      matchedEvent: matchedChimeEvent,
+    // Group per chime like the Upload tab: matched chimes go to their own
+    // deployments, the picker-governed pool to its folder or event.
+    const planned = planAudioUploadGroups({
+      recordings: recordingsRef.current,
+      events: chimeEvents,
       selection: audioFolderSelection,
       folders: audioFolders ?? [],
       cardName,
       fallbackName: audioFallbackFolderName,
     });
-    const uploadTarget: UploadTarget =
-      plan.kind === "event"
-        ? { kind: "event", event: plan.event }
-        : plan.kind === "existing"
-          ? { kind: "existing", uri: plan.uri }
-          : { kind: "named", name: plan.name, deployedAt: plan.deployedAt };
+    if (planned.groups.length === 0) return { count: 0, batchKey: null };
+    const summary = summarizeAudioBatch(recordingsRef.current);
     // "We'll add it when this upload starts": unknown devices join the
     // account's equipment registry silently, best-effort — a failed write
     // never blocks the recordings themselves.
@@ -693,22 +789,37 @@ export function AddObservationsModal({
       ).catch(() => {});
     }
     const batchKey = crypto.randomUUID();
-    const jobs: UploadTrayJob[] = readable.map((rec) => ({
-      id: `${batchKey}:${rec.id}`,
-      file: rec.file,
-      info: rec.info!,
-      recordedAt: quickRecordingTime(rec).toISOString(),
-      deploymentId: rec.info!.deploymentId ?? undefined,
-      repoDid,
-      batchKey,
-      target: uploadTarget,
-      makePreviews: true,
-    }));
+    const jobs: UploadTrayJob[] = [];
+    for (const group of planned.groups) {
+      const uploadTarget: UploadTarget =
+        group.plan.kind === "event"
+          ? { kind: "event", event: group.plan.event }
+          : group.plan.kind === "existing"
+            ? { kind: "existing", uri: group.plan.uri }
+            : { kind: "named", name: group.plan.name, deployedAt: group.plan.deployedAt };
+      for (const rec of group.recordings) {
+        jobs.push({
+          id: `${batchKey}:${rec.id}`,
+          file: rec.file,
+          info: rec.info!,
+          recordedAt: quickRecordingTime(rec).toISOString(),
+          // Hash from the dedup check rides along so the tray never re-reads.
+          cid: rec.cid,
+          deploymentId: rec.info!.deploymentId ?? undefined,
+          repoDid,
+          batchKey,
+          target: uploadTarget,
+          makePreviews: true,
+        });
+      }
+    }
     uploadTray.enqueue(sessionDid, jobs);
     audioScanTokenRef.current += 1;
+    audioDedupTokenRef.current += 1;
     audioScanCountsRef.current = { done: 0, total: 0 };
     setRecordings([]);
     setAudioScan(null);
+    setAudioDedup(null);
     setCardName("");
     setAudioFolderSelection("");
     setAudioHandedOff(jobs.length);
@@ -719,8 +830,8 @@ export function AddObservationsModal({
     audioFolderSelection,
     audioFolders,
     cardName,
+    chimeEvents,
     equipmentAssetIds,
-    matchedChimeEvent,
     sessionDid,
     t,
     target,
@@ -1480,13 +1591,17 @@ export function AddObservationsModal({
   ]
     .filter(Boolean)
     .join(" · ");
-  // The folder picker's "automatic" row says where the batch will actually go.
+  // The folder picker's "automatic" row says where the picker-governed pool
+  // will actually go (chime-matched groups are filed on their own).
+  const audioAutoPlan = audioAutoPlanned.unmatchedPlan;
   const audioAutoLabel =
-    audioAutoPlan.kind === "event"
-      ? t("audio.folderAutoMatched", { name: audioAutoPlan.event.locality ?? audioAutoPlan.event.eventID })
-      : audioAutoPlan.kind === "existing"
-        ? audioAutoPlan.name
-        : t("audio.folderNew", { name: audioAutoPlan.name });
+    audioAutoPlan === null
+      ? ""
+      : audioAutoPlan.kind === "event"
+        ? t("audio.folderAutoMatched", { name: audioAutoPlan.event.locality ?? audioAutoPlan.event.eventID })
+        : audioAutoPlan.kind === "existing"
+          ? audioAutoPlan.name
+          : t("audio.folderNew", { name: audioAutoPlan.name });
 
   return (
     // flex (not space-y) so child margins can't collapse into the dialog's
@@ -1794,6 +1909,18 @@ export function AddObservationsModal({
               total={audioScan.total}
             />
           ) : null}
+          {audioDedup && (audioDedup.state === "checking" || audioDedup.skipped > 0) ? (
+            <p className="flex items-center gap-2 text-xs leading-5 text-muted-foreground">
+              {audioDedup.state === "checking" ? (
+                <Loader2Icon className="size-3.5 shrink-0 animate-spin text-primary" />
+              ) : (
+                <CheckCircle2Icon className="size-3.5 shrink-0" />
+              )}
+              {audioDedup.state === "checking"
+                ? t("audio.dedupChecking")
+                : t("audio.dedupSkipped", { count: audioDedup.skipped })}
+            </p>
+          ) : null}
           {deviceChips.length > 0 ? (
             <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-2 border-t border-border/60 pt-3">
               <span className="text-sm text-muted-foreground">{t("audio.recordingFromLabel")}</span>
@@ -1814,7 +1941,16 @@ export function AddObservationsModal({
               </span>
             </div>
           ) : null}
-          {audioSummary.count > 0 ? (
+          {/* Chime-matched recordings are filed under their own deployments,
+              exactly like the Upload tab — the picker cannot override them. */}
+          {audioPlanned.matchedCount > 0 ? (
+            <p className="flex items-center gap-2 border-t border-border/60 pt-3 text-xs leading-5 text-muted-foreground">
+              <CheckCircle2Icon className="size-3.5 shrink-0 text-primary" />
+              {t("audio.matchedCount", { count: audioPlanned.matchedCount })}
+            </p>
+          ) : null}
+          {/* The folder/deployment picker governs only the unmatched pool. */}
+          {audioPlanned.unmatchedCount > 0 ? (
             <div className="flex flex-col gap-1.5 border-t border-border/60 pt-3 sm:flex-row sm:items-center sm:justify-between">
               <span className="text-sm text-muted-foreground">{t("audio.folderLabel")}</span>
               <Select
@@ -1832,7 +1968,17 @@ export function AddObservationsModal({
                       {folder.name}
                     </SelectItem>
                   ))}
-                  {audioAutoPlan.kind !== "named" ? (
+                  {/* Manual assignment to a deployment event — the Upload
+                      tab's "assign to deployment" select, folded in here. */}
+                  {(chimeEvents ?? []).map((chimeEvent) => (
+                    <SelectItem
+                      key={chimeEvent.uri}
+                      value={`${AUDIO_EVENT_SELECTION_PREFIX}${chimeEvent.uri}`}
+                    >
+                      {t("audio.eventOption", { name: chimeEvent.locality ?? chimeEvent.eventID })}
+                    </SelectItem>
+                  ))}
+                  {audioAutoPlan?.kind !== "named" ? (
                     <SelectItem value={NEW_AUDIO_FOLDER}>
                       {t("audio.folderNew", { name: cardName.trim() || audioFallbackFolderName })}
                     </SelectItem>
@@ -1848,13 +1994,18 @@ export function AddObservationsModal({
               })}
             </p>
           ) : null}
-          {deviceNeedsDeployment(audioSummary, audioFolders, matchedChimeEvent) ? (
+          {deviceNeedsDeployment(audioSummary, audioFolders, audioPlanned.matchedCount > 0) ? (
             <p className="text-xs leading-5 text-muted-foreground">
               {t("audio.noDeployments")}{" "}
               <button
                 type="button"
                 onClick={setUpDeploymentAndGo}
-                disabled={isSubmitting || audioScan !== null || audioSummary.count === 0}
+                disabled={
+                  isSubmitting ||
+                  audioScan !== null ||
+                  audioDedup?.state === "checking" ||
+                  audioUploadableCount === 0
+                }
                 className="font-medium text-primary underline underline-offset-2 disabled:opacity-50"
               >
                 {t("audio.setUpDeployment")}
@@ -2009,10 +2160,10 @@ export function AddObservationsModal({
           <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between sm:gap-3">
             <p className="text-sm text-muted-foreground">
               {[
-                items.length > 0 || audioSummary.count === 0
+                items.length > 0 || audioUploadableCount === 0
                   ? t("readyCount", { count: submittableCount })
                   : null,
-                audioSummary.count > 0 ? t("audio.readyCount", { count: audioSummary.count }) : null,
+                audioUploadableCount > 0 ? t("audio.readyCount", { count: audioUploadableCount }) : null,
               ]
                 .filter(Boolean)
                 .join(" · ")}
@@ -2020,8 +2171,9 @@ export function AddObservationsModal({
             <Button
               onClick={submit}
               disabled={
-                (submittableCount === 0 && audioSummary.count === 0) ||
+                (submittableCount === 0 && audioUploadableCount === 0) ||
                 audioScan !== null ||
+                audioDedup?.state === "checking" ||
                 isSubmitting ||
                 Boolean(disabledReason)
               }
@@ -2030,9 +2182,11 @@ export function AddObservationsModal({
               {isSubmitting ? <Loader2Icon className="size-4 animate-spin" /> : null}
               {isSubmitting
                 ? t("submitting")
-                : submittableCount === 0 && audioSummary.count > 0
-                  ? t("audio.submitOnly", { count: audioSummary.count })
-                  : t("submit", { count: submittableCount })}
+                : submittableCount === 0 && audioUploadableCount > 0
+                  ? t("audio.submitOnly", { count: audioUploadableCount })
+                  : submittableCount === 0 && audioSummary.count > 0 && audioDedup?.state === "done"
+                    ? t("audio.allUploaded")
+                    : t("submit", { count: submittableCount })}
             </Button>
           </div>
         </div>

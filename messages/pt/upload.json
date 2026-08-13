@@ -771,7 +771,12 @@
         "handedOffBody": "Elas continuam sendo enviadas em segundo plano enquanto você navega. Você pode fechar isto — o progresso fica no painel de envios.",
         "handedOffAddMore": "Adicionar mais",
         "handedOffView": "Ver progresso",
-        "equipmentNote": "Registrado automaticamente quando suas gravações foram enviadas por Adicionar observações."
+        "equipmentNote": "Registrado automaticamente quando suas gravações foram enviadas por Adicionar observações.",
+        "dedupChecking": "Verificando gravações que já estão nesta conta…",
+        "dedupSkipped": "{count, plural, one {# gravação já está nesta conta — ignorada} other {# gravações já estão nesta conta — ignoradas}}",
+        "allUploaded": "Tudo neste cartão já foi enviado",
+        "matchedCount": "{count, plural, one {# gravação correspondeu à sua implantação a partir do cartão} other {# gravações corresponderam às suas implantações a partir do cartão}}",
+        "eventOption": "Implantação · {name}"
       }
     },
     "csvUpload": {

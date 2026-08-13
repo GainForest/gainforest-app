@@ -771,7 +771,12 @@
         "handedOffBody": "Rekaman terus diunggah di latar belakang selagi Anda menjelajah. Anda bisa menutup ini — progresnya ada di panel unggahan.",
         "handedOffAddMore": "Tambah lagi",
         "handedOffView": "Lihat progres",
-        "equipmentNote": "Didaftarkan otomatis saat rekamannya diunggah melalui Tambah pengamatan."
+        "equipmentNote": "Didaftarkan otomatis saat rekamannya diunggah melalui Tambah pengamatan.",
+        "dedupChecking": "Memeriksa rekaman yang sudah ada di akun ini…",
+        "dedupSkipped": "{count, plural, other {# rekaman sudah ada di akun ini — dilewati}}",
+        "allUploaded": "Semua isi kartu ini sudah diunggah",
+        "matchedCount": "{count, plural, other {# rekaman cocok dengan penempatannya dari kartu}}",
+        "eventOption": "Penempatan · {name}"
       }
     },
     "csvUpload": {

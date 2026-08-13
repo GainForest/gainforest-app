@@ -771,7 +771,12 @@
         "handedOffBody": "They keep uploading in the background while you browse. You can close this — progress lives in the upload panel.",
         "handedOffAddMore": "Add more",
         "handedOffView": "View progress",
-        "equipmentNote": "Registered automatically when its recordings were uploaded through Add observations."
+        "equipmentNote": "Registered automatically when its recordings were uploaded through Add observations.",
+        "dedupChecking": "Checking for recordings already in this account…",
+        "dedupSkipped": "{count, plural, one {# recording is already in this account — skipped} other {# recordings are already in this account — skipped}}",
+        "allUploaded": "Everything on this card is already uploaded",
+        "matchedCount": "{count, plural, one {# recording matched its deployment from the card} other {# recordings matched their deployments from the card}}",
+        "eventOption": "Deployment · {name}"
       }
     },
     "csvUpload": {

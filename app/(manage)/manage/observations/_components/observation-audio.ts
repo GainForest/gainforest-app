@@ -20,6 +20,10 @@ export type QuickRecording = {
   id: string;
   file: File;
   info: AudioMothRecordingInfo | null;
+  /** Content CID — undefined until hashed, null when the file can't be read. */
+  cid?: string | null;
+  /** Already in the destination account (by content or legacy name+size). */
+  skipped?: boolean;
 };
 
 /** A recording file by name: `.wav`, not a hidden/AppleDouble sidecar. */
@@ -124,22 +128,7 @@ export function deviceChipLabel(deviceId: string): string {
   return `AM-${deviceId.slice(-8).toUpperCase()}`;
 }
 
-/**
- * The deployment event matched by acoustic chime, when every readable
- * recording agrees on one chime ID that maps to a known deployment. A card
- * with mixed or missing chimes gets no automatic match — the folder picker
- * takes over.
- */
-export function matchChimeDeployment(
-  summary: AudioBatchSummary,
-  events: DeploymentEventItem[] | null,
-): DeploymentEventItem | null {
-  if (!events || summary.chimeIds.length !== 1) return null;
-  const chime = summary.chimeIds[0]!.toLowerCase();
-  return events.find((event) => event.eventID.toLowerCase() === chime) ?? null;
-}
-
-/** Where the audio batch is headed — mirrors the tray's UploadTarget. */
+/** Where a group of recordings is headed — mirrors the tray's UploadTarget. */
 export type AudioTargetPlan =
   | { kind: "event"; event: DeploymentEventItem }
   | { kind: "existing"; uri: string; name: string }
@@ -148,50 +137,123 @@ export type AudioTargetPlan =
 /** Sentinel value for the folder picker's "new folder from this card" row. */
 export const NEW_AUDIO_FOLDER = "__new__";
 
+/** Picker value for assigning unmatched recordings to a deployment event. */
+export const AUDIO_EVENT_SELECTION_PREFIX = "event:";
+
+/** Recordings that will actually upload: readable and not already uploaded. */
+export function uploadableRecordings(recordings: QuickRecording[]): QuickRecording[] {
+  return recordings.filter((rec) => rec.info && !rec.skipped);
+}
+
+export type PlannedAudioGroups = {
+  /** One entry per upload target, exactly like the Upload tab's hand-off. */
+  groups: { plan: AudioTargetPlan; recordings: QuickRecording[] }[];
+  /** Recordings whose chime matched a deployment — filed there, always. */
+  matchedCount: number;
+  /** Recordings governed by the folder picker. */
+  unmatchedCount: number;
+  /** Where the picker-governed pool goes, or null when everything matched. */
+  unmatchedPlan: AudioTargetPlan | null;
+};
+
 /**
- * Resolve the folder picker's selection into an upload target:
- *
- *  - a chime-matched deployment wins when the user left the picker alone,
- *  - an explicitly selected folder is used as-is,
- *  - otherwise a new folder named after the card (falling back to a dated
- *    default) is created on the fly by the tray — reusing an existing
- *    folder of the same name, so a re-read card never forks a duplicate.
+ * Split the batch into upload groups the same way the AudioMoth Upload tab
+ * does (`handOffToTray`): recordings are grouped by the acoustic-chime ID in
+ * their headers, a group whose chime maps to a known deployment always files
+ * under that deployment — the folder picker cannot override it — and
+ * everything else (unknown chime, or no chime at all) follows the picker:
+ * a chosen deployment event, a chosen folder, or a folder named after the
+ * card (reusing an existing folder of that name, so a re-read card never
+ * forks a duplicate).
  */
-export function resolveAudioTarget({
-  summary,
-  matchedEvent,
+export function planAudioUploadGroups({
+  recordings,
+  events,
   selection,
   folders,
   cardName,
   fallbackName,
 }: {
-  summary: AudioBatchSummary;
-  matchedEvent: DeploymentEventItem | null;
-  /** Folder picker value: "" (auto), NEW_AUDIO_FOLDER, or a folder AT-URI. */
+  recordings: QuickRecording[];
+  events: DeploymentEventItem[] | null;
+  /**
+   * Folder picker value: "" (automatic), NEW_AUDIO_FOLDER, a folder AT-URI,
+   * or `event:<at-uri>` for a manually assigned deployment event.
+   */
   selection: string;
   folders: (UploadFolderOption & { name: string })[];
   /** The dropped card folder's name, when the drop carried one. */
   cardName: string;
   /** Localised default folder name when the card has none, e.g. "Recordings 12 Jun 2026". */
   fallbackName: string;
-}): AudioTargetPlan {
-  if (selection && selection !== NEW_AUDIO_FOLDER) {
-    const folder = folders.find((candidate) => candidate.uri === selection);
-    if (folder) return { kind: "existing", uri: folder.uri, name: folder.name };
+}): PlannedAudioGroups {
+  const uploadable = uploadableRecordings(recordings);
+
+  // Group by chime ID, preserving first-seen order like the Upload tab.
+  const byChime = new Map<string, QuickRecording[]>();
+  for (const rec of uploadable) {
+    const key = rec.info!.deploymentId ?? "";
+    const list = byChime.get(key) ?? [];
+    list.push(rec);
+    byChime.set(key, list);
   }
-  if (!selection && matchedEvent) return { kind: "event", event: matchedEvent };
-  const name = cardName.trim() || fallbackName;
-  // The tray re-checks by name before creating, but resolving here too keeps
-  // the modal's preview label honest when the folder already exists.
-  const existing = findUploadFolderByName(folders, name);
-  if (existing) return { kind: "existing", uri: existing.uri, name };
-  const deployedAt = (summary.earliest ?? new Date()).toISOString();
-  return { kind: "named", name, deployedAt };
+
+  const matchFor = (chime: string): DeploymentEventItem | null =>
+    events?.find((event) => event.eventID.toLowerCase() === chime.toLowerCase()) ?? null;
+
+  const groups: PlannedAudioGroups["groups"] = [];
+  const unmatched: QuickRecording[] = [];
+  let matchedCount = 0;
+
+  // A manually assigned event applies to the picker-governed pool, mirroring
+  // the Upload tab's manual "assign to deployment" select.
+  const manualEvent = selection.startsWith(AUDIO_EVENT_SELECTION_PREFIX)
+    ? (events?.find((event) => event.uri === selection.slice(AUDIO_EVENT_SELECTION_PREFIX.length)) ?? null)
+    : null;
+
+  for (const [chime, groupRecordings] of byChime) {
+    const event = chime ? matchFor(chime) : null;
+    if (event) {
+      groups.push({ plan: { kind: "event", event }, recordings: groupRecordings });
+      matchedCount += groupRecordings.length;
+    } else {
+      unmatched.push(...groupRecordings);
+    }
+  }
+
+  let unmatchedPlan: AudioTargetPlan | null = null;
+  if (unmatched.length > 0) {
+    if (manualEvent) {
+      unmatchedPlan = { kind: "event", event: manualEvent };
+    } else if (
+      selection &&
+      selection !== NEW_AUDIO_FOLDER &&
+      !selection.startsWith(AUDIO_EVENT_SELECTION_PREFIX)
+    ) {
+      const folder = folders.find((candidate) => candidate.uri === selection);
+      if (folder) unmatchedPlan = { kind: "existing", uri: folder.uri, name: folder.name };
+    }
+    if (!unmatchedPlan) {
+      const name = cardName.trim() || fallbackName;
+      // The tray re-checks by name before creating, but resolving here too
+      // keeps the modal's preview label honest when the folder exists.
+      const existing = findUploadFolderByName(folders, name);
+      if (existing) {
+        unmatchedPlan = { kind: "existing", uri: existing.uri, name };
+      } else {
+        const times = unmatched.map((rec) => quickRecordingTime(rec).getTime());
+        unmatchedPlan = { kind: "named", name, deployedAt: new Date(Math.min(...times)).toISOString() };
+      }
+    }
+    groups.push({ plan: unmatchedPlan, recordings: unmatched });
+  }
+
+  return { groups, matchedCount, unmatchedCount: unmatched.length, unmatchedPlan };
 }
 
 /**
  * True when the card's device has no deployment to attach to — the "set one
- * up ↗" flow's trigger. A chime match settles it; otherwise the account's
+ * up ↗" flow's trigger. Any chime match settles it; otherwise the account's
  * folders are checked against the card's device IDs (folders record the
  * unit's serial). With no folders at all the answer is always yes; with
  * folders but anonymous headers we can't tell, so the picker takes over.
@@ -199,9 +261,9 @@ export function resolveAudioTarget({
 export function deviceNeedsDeployment(
   summary: AudioBatchSummary,
   folders: { deviceSerialNumber?: string }[] | null,
-  matchedEvent: DeploymentEventItem | null,
+  hasChimeMatch: boolean,
 ): boolean {
-  if (matchedEvent || summary.count === 0 || folders === null) return false;
+  if (hasChimeMatch || summary.count === 0 || folders === null) return false;
   if (folders.length === 0) return true;
   if (summary.deviceIds.length === 0) return false;
   const ids = new Set(summary.deviceIds.map((id) => id.trim().toUpperCase()));

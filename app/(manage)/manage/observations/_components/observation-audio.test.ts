@@ -3,18 +3,19 @@ import { describe, expect, it } from "vitest";
 import type { AudioMothRecordingInfo } from "@/app/_lib/audiomoth/wav-metadata";
 import type { DeploymentEventItem } from "@/app/_lib/deployment-events";
 import {
+  AUDIO_EVENT_SELECTION_PREFIX,
   deviceChipLabel,
   deviceNeedsDeployment,
   formatRecordingBytes,
   formatSampleRates,
   isWavCandidate,
-  matchChimeDeployment,
   NEW_AUDIO_FOLDER,
+  planAudioUploadGroups,
   quickRecordingTime,
-  resolveAudioTarget,
   splitObservationFiles,
   summarizeAudioBatch,
   unregisteredDeviceIds,
+  uploadableRecordings,
   type QuickRecording,
 } from "./observation-audio";
 
@@ -155,95 +156,106 @@ describe("formatting", () => {
   });
 });
 
-describe("matchChimeDeployment", () => {
-  it("matches when the whole card agrees on one known chime", () => {
-    const summary = summarizeAudioBatch([
-      makeRecording("a.wav", makeInfo({ deploymentId: "0FE081F80FE081F8".toLowerCase() })),
-    ]);
-    expect(matchChimeDeployment(summary, [event])).toBe(event);
-  });
-
-  it("returns null for unknown, mixed or missing chimes", () => {
-    const unknown = summarizeAudioBatch([makeRecording("a.wav", makeInfo({ deploymentId: "beefbeefbeefbeef" }))]);
-    expect(matchChimeDeployment(unknown, [event])).toBeNull();
-    const missing = summarizeAudioBatch([makeRecording("a.wav", makeInfo())]);
-    expect(matchChimeDeployment(missing, [event])).toBeNull();
-    const mixed = summarizeAudioBatch([
-      makeRecording("a.wav", makeInfo({ deploymentId: "0fe081f80fe081f8" })),
-      makeRecording("b.wav", makeInfo({ deploymentId: "beefbeefbeefbeef" })),
-    ]);
-    expect(matchChimeDeployment(mixed, [event])).toBeNull();
-    expect(matchChimeDeployment(unknown, null)).toBeNull();
+describe("uploadableRecordings", () => {
+  it("excludes unreadable and already-uploaded recordings", () => {
+    const list = [
+      makeRecording("a.wav", makeInfo()),
+      { ...makeRecording("b.wav", makeInfo()), skipped: true },
+      makeRecording("broken.wav", null),
+    ];
+    expect(uploadableRecordings(list).map((rec) => rec.id)).toEqual(["a.wav"]);
   });
 });
 
-describe("resolveAudioTarget", () => {
+describe("planAudioUploadGroups", () => {
   const folders = [
     { uri: "at://did:plc:x/app.gainforest.ac.deployment/1", name: "Ridge trail" },
     { uri: "at://did:plc:x/app.gainforest.ac.deployment/2", name: "River bank" },
   ];
-  const summary = summarizeAudioBatch([makeRecording("a.wav", makeInfo())]);
+  const base = {
+    events: [event],
+    selection: "",
+    folders,
+    cardName: "AUDIOMOTH_SD",
+    fallbackName: "Recordings",
+  };
 
-  it("uses an explicitly selected folder", () => {
-    const plan = resolveAudioTarget({
-      summary,
-      matchedEvent: event,
-      selection: folders[1]!.uri,
-      folders,
-      cardName: "AUDIOMOTH_SD",
-      fallbackName: "Recordings",
-    });
-    expect(plan).toEqual({ kind: "existing", uri: folders[1]!.uri, name: "River bank" });
+  it("always files a chime-matched group under its deployment, even with a folder picked", () => {
+    const matched = makeRecording("a.wav", makeInfo({ deploymentId: "0FE081F80FE081F8".toLowerCase() }));
+    const plan = planAudioUploadGroups({ ...base, recordings: [matched], selection: folders[1]!.uri });
+    expect(plan.groups).toEqual([{ plan: { kind: "event", event }, recordings: [matched] }]);
+    expect(plan.matchedCount).toBe(1);
+    expect(plan.unmatchedCount).toBe(0);
+    expect(plan.unmatchedPlan).toBeNull();
   });
 
-  it("prefers the chime-matched deployment when the picker was left alone", () => {
-    const plan = resolveAudioTarget({
-      summary,
-      matchedEvent: event,
-      selection: "",
-      folders,
-      cardName: "AUDIOMOTH_SD",
-      fallbackName: "Recordings",
-    });
-    expect(plan).toEqual({ kind: "event", event });
-  });
-
-  it("names a new folder after the card, falling back to the default", () => {
-    const fromCard = resolveAudioTarget({
-      summary,
-      matchedEvent: null,
-      selection: NEW_AUDIO_FOLDER,
-      folders,
-      cardName: "AUDIOMOTH_SD",
-      fallbackName: "Recordings",
-    });
-    expect(fromCard).toEqual({
+  it("splits a mixed card: matched chime → its event, the rest → the folder pool", () => {
+    const matched = makeRecording("a.wav", makeInfo({ deploymentId: "0fe081f80fe081f8" }));
+    const unknownChime = makeRecording("b.wav", makeInfo({ deploymentId: "beefbeefbeefbeef" }));
+    const noChime = makeRecording("c.wav", makeInfo());
+    const plan = planAudioUploadGroups({ ...base, recordings: [matched, unknownChime, noChime] });
+    expect(plan.matchedCount).toBe(1);
+    expect(plan.unmatchedCount).toBe(2);
+    expect(plan.groups).toHaveLength(2);
+    expect(plan.groups[0]!.plan).toEqual({ kind: "event", event });
+    expect(plan.groups[1]!.recordings.map((rec) => rec.id)).toEqual(["b.wav", "c.wav"]);
+    expect(plan.unmatchedPlan).toEqual({
       kind: "named",
       name: "AUDIOMOTH_SD",
       deployedAt: "2026-06-12T06:00:00.000Z",
     });
-    const fallback = resolveAudioTarget({
-      summary,
-      matchedEvent: null,
-      selection: "",
-      folders,
-      cardName: "  ",
-      fallbackName: "Recordings",
-    });
-    expect(fallback.kind).toBe("named");
-    expect((fallback as { name: string }).name).toBe("Recordings");
   });
 
-  it("reuses an existing folder whose name matches the card", () => {
-    const plan = resolveAudioTarget({
-      summary,
-      matchedEvent: null,
-      selection: "",
-      folders,
-      cardName: "ridge trail",
-      fallbackName: "Recordings",
+  it("routes the unmatched pool to a manually assigned deployment event", () => {
+    const noChime = makeRecording("a.wav", makeInfo());
+    const plan = planAudioUploadGroups({
+      ...base,
+      recordings: [noChime],
+      selection: `${AUDIO_EVENT_SELECTION_PREFIX}${event.uri}`,
     });
-    expect(plan).toEqual({ kind: "existing", uri: folders[0]!.uri, name: "ridge trail" });
+    expect(plan.unmatchedPlan).toEqual({ kind: "event", event });
+  });
+
+  it("routes the unmatched pool to an explicitly selected folder", () => {
+    const plan = planAudioUploadGroups({
+      ...base,
+      recordings: [makeRecording("a.wav", makeInfo())],
+      selection: folders[1]!.uri,
+    });
+    expect(plan.unmatchedPlan).toEqual({ kind: "existing", uri: folders[1]!.uri, name: "River bank" });
+  });
+
+  it("falls back to a folder named after the card, reusing one of the same name", () => {
+    const fallback = planAudioUploadGroups({
+      ...base,
+      recordings: [makeRecording("a.wav", makeInfo())],
+      cardName: "  ",
+      selection: NEW_AUDIO_FOLDER,
+    });
+    expect(fallback.unmatchedPlan).toEqual({
+      kind: "named",
+      name: "Recordings",
+      deployedAt: "2026-06-12T06:00:00.000Z",
+    });
+    const reused = planAudioUploadGroups({
+      ...base,
+      recordings: [makeRecording("a.wav", makeInfo())],
+      cardName: "ridge trail",
+    });
+    expect(reused.unmatchedPlan).toEqual({ kind: "existing", uri: folders[0]!.uri, name: "ridge trail" });
+  });
+
+  it("ignores skipped and unreadable recordings entirely", () => {
+    const plan = planAudioUploadGroups({
+      ...base,
+      recordings: [
+        { ...makeRecording("a.wav", makeInfo({ deploymentId: "0fe081f80fe081f8" })), skipped: true },
+        makeRecording("broken.wav", null),
+      ],
+    });
+    expect(plan.groups).toHaveLength(0);
+    expect(plan.matchedCount).toBe(0);
+    expect(plan.unmatchedCount).toBe(0);
   });
 });
 
@@ -251,24 +263,24 @@ describe("deviceNeedsDeployment", () => {
   const summary = summarizeAudioBatch([makeRecording("a.wav", makeInfo())]);
 
   it("is settled by a chime match", () => {
-    expect(deviceNeedsDeployment(summary, [], event)).toBe(false);
+    expect(deviceNeedsDeployment(summary, [], true)).toBe(false);
   });
 
   it("is true with no folders at all", () => {
-    expect(deviceNeedsDeployment(summary, [], null)).toBe(true);
+    expect(deviceNeedsDeployment(summary, [], false)).toBe(true);
   });
 
   it("matches folders by the device serial, case-insensitively", () => {
-    expect(deviceNeedsDeployment(summary, [{ deviceSerialNumber: "24f3190361da539a" }], null)).toBe(false);
-    expect(deviceNeedsDeployment(summary, [{ deviceSerialNumber: "AAAAAAAAAAAAAAAA" }], null)).toBe(true);
+    expect(deviceNeedsDeployment(summary, [{ deviceSerialNumber: "24f3190361da539a" }], false)).toBe(false);
+    expect(deviceNeedsDeployment(summary, [{ deviceSerialNumber: "AAAAAAAAAAAAAAAA" }], false)).toBe(true);
   });
 
   it("stays quiet while folders are unknown, headers are anonymous, or the batch is empty", () => {
-    expect(deviceNeedsDeployment(summary, null, null)).toBe(false);
+    expect(deviceNeedsDeployment(summary, null, false)).toBe(false);
     const anonymous = summarizeAudioBatch([makeRecording("a.wav", makeInfo({ deviceId: null }))]);
-    expect(deviceNeedsDeployment(anonymous, [{ deviceSerialNumber: "X" }], null)).toBe(false);
+    expect(deviceNeedsDeployment(anonymous, [{ deviceSerialNumber: "X" }], false)).toBe(false);
     const empty = summarizeAudioBatch([makeRecording("broken.wav", null)]);
-    expect(deviceNeedsDeployment(empty, [], null)).toBe(false);
+    expect(deviceNeedsDeployment(empty, [], false)).toBe(false);
   });
 });
 
