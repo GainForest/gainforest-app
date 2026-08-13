@@ -124,14 +124,6 @@ export interface UploadTrayJob {
 }
 
 export interface UploadTrayApi {
-  /**
-   * The AUDIOMOTH_UPLOAD_TRAY_ENABLED release switch, as seen by the root
-   * layout. Surfaces that would enqueue background uploads from outside the
-   * AudioMoth page (the quick "Add observations" modal's audio branch) stay
-   * photo-only while this is off, because a hidden tray would mean invisible
-   * transfers.
-   */
-  uiEnabled: boolean;
   items: UploadTrayItem[];
   /** Something is still queued, transferring or paused. */
   busy: boolean;
@@ -171,14 +163,7 @@ function isRunning(status: UploadTrayStatus | undefined): boolean {
 
 type InternalJob = UploadTrayJob & { sessionDid: string };
 
-export function UploadTrayProvider({
-  children,
-  uiEnabled = false,
-}: {
-  children: React.ReactNode;
-  /** Whether the visible tray panel is rendered — see {@link UploadTrayApi.uiEnabled}. */
-  uiEnabled?: boolean;
-}) {
+export function UploadTrayProvider({ children }: { children: React.ReactNode }) {
   const t = useTranslations("common.audiomoth.upload");
 
   const [items, setItems] = useState<UploadTrayItem[]>([]);
@@ -766,7 +751,6 @@ export function UploadTrayProvider({
 
   const value = useMemo<UploadTrayApi>(
     () => ({
-      uiEnabled,
       items,
       busy,
       enqueue,
@@ -781,7 +765,7 @@ export function UploadTrayProvider({
       expanded,
       setExpanded,
     }),
-    [batchInfo, busy, cancelAll, cancelItem, dismiss, enqueue, expanded, items, pauseItem, resumeItem, retargetBatch, retryItem, uiEnabled],
+    [batchInfo, busy, cancelAll, cancelItem, dismiss, enqueue, expanded, items, pauseItem, resumeItem, retargetBatch, retryItem],
   );
 
   return <UploadTrayContext.Provider value={value}>{children}</UploadTrayContext.Provider>;

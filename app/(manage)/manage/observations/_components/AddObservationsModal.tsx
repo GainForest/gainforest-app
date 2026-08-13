@@ -366,12 +366,12 @@ export function AddObservationsModal({
   const router = useRouter();
   const modal = useModal();
   // Audio branch (design 1d): the same drop zone accepts a whole AudioMoth SD
-  // card; recordings are handed to the app-wide background upload tray. Only
-  // live when the tray's release flag is on — a hidden tray would mean
-  // invisible transfers — and when someone is signed in (recordings are saved
-  // to the signed-in account's own audio library).
+  // card; recordings are handed to the app-wide background upload tray, which
+  // is always mounted in the root layout. Needs a session (recordings are
+  // saved to the "Uploading for" account's repo) and the tray context — a
+  // render outside the provider (tests, isolated stories) stays photo-only.
   const uploadTray = useUploadTrayOptional();
-  const audioEnabled = Boolean(uploadTray?.uiEnabled) && Boolean(sessionDid);
+  const audioEnabled = uploadTray !== null && Boolean(sessionDid);
   // Switches the modal between the photo quick-add flow and the CSV importer
   // reachable from the "More ways" menu.
   const [mode, setMode] = useState<"photos" | "csv">("photos");
