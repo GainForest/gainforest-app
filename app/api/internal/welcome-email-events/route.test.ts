@@ -72,6 +72,27 @@ describe("welcome email event webhook", () => {
     process.env.WELCOME_EMAIL_WEBHOOK_SECRET = originalSecret;
   });
 
+  it("accepts legacy signup events without delivering because first app use owns the welcome email", async () => {
+    const { POST } = await import("./route");
+    const response = await POST(signedRequest({
+      type: "user.signup.completed",
+      eventId: "signup.completed.v1:did:plc:user",
+      user: {
+        did: "did:plc:user",
+        email: "member@example.com",
+      },
+    }, secret));
+
+    expect(response.status).toBe(200);
+    await expect(response.json()).resolves.toEqual({
+      ok: true,
+      ignored: true,
+      reason: "signup_welcome_uses_first_app_session",
+    });
+    expect(getCertifiedProfileCard).not.toHaveBeenCalled();
+    expect(deliver).not.toHaveBeenCalled();
+  });
+
   it("accepts organization.membership.joined and durably delegates the stable auth event", async () => {
     const { POST } = await import("./route");
     const response = await POST(signedRequest({
@@ -154,12 +175,13 @@ describe("welcome email event webhook", () => {
     const { POST, maxDuration } = await import("./route");
     const before = Date.now();
     const response = await POST(signedRequest({
-      type: "user.signup.completed",
-      eventId: "user.signup.completed.v1:delivery-budget",
+      type: "organization.membership.joined",
+      eventId: "organization.membershipJoined.v1:delivery-budget",
       user: {
         did: "did:plc:user",
         email: "member@example.com",
       },
+      organization: { did: "did:plc:org" },
     }, secret));
     const after = Date.now();
 
@@ -175,8 +197,8 @@ describe("welcome email event webhook", () => {
     getCertifiedProfileCard.mockResolvedValueOnce({ displayName: null, avatarUrl: null });
     const { POST } = await import("./route");
     const response = await POST(signedRequest({
-      type: "user.signup.completed",
-      eventId: "user.signup.completed.v1:test",
+      type: "organization.membership.joined",
+      eventId: "organization.membershipJoined.v1:greeting-test",
       createdAt: new Date().toISOString(),
       locale: "en",
       user: {
@@ -184,6 +206,7 @@ describe("welcome email event webhook", () => {
         handle: "forest-steward.example.com",
         email: "member@example.com",
       },
+      organization: { did: "did:plc:org" },
     }, secret));
 
     expect(response.status).toBe(200);
@@ -194,8 +217,8 @@ describe("welcome email event webhook", () => {
     getCertifiedProfileCard.mockResolvedValueOnce({ displayName: null, avatarUrl: null });
     const { POST } = await import("./route");
     const response = await POST(signedRequest({
-      type: "user.signup.completed",
-      eventId: "user.signup.completed.v1:handle-name-test",
+      type: "organization.membership.joined",
+      eventId: "organization.membershipJoined.v1:handle-name-test",
       createdAt: new Date().toISOString(),
       locale: "en",
       user: {
@@ -204,6 +227,7 @@ describe("welcome email event webhook", () => {
         name: "forest-steward.example.com",
         email: "member@example.com",
       },
+      organization: { did: "did:plc:org" },
     }, secret));
 
     expect(response.status).toBe(200);
@@ -214,13 +238,14 @@ describe("welcome email event webhook", () => {
     getCertifiedProfileCard.mockResolvedValueOnce({ displayName: null, avatarUrl: null });
     const { POST } = await import("./route");
     const response = await POST(signedRequest({
-      type: "user.signup.completed",
-      eventId: "user.signup.completed.v1:email-name-test",
+      type: "organization.membership.joined",
+      eventId: "organization.membershipJoined.v1:email-name-test",
       user: {
         did: "did:plc:user",
         name: "Member@Example.com",
         email: "member@example.com",
       },
+      organization: { did: "did:plc:org" },
     }, secret));
 
     expect(response.status).toBe(200);
@@ -281,9 +306,10 @@ describe("welcome email event webhook", () => {
     });
     const { POST } = await import("./route");
     const response = await POST(signedRequest({
-      type: "user.signup.completed",
-      eventId: "user.signup.completed.v1:queued",
+      type: "organization.membership.joined",
+      eventId: "organization.membershipJoined.v1:queued",
       user: { did: "did:plc:user", email: "member@example.com" },
+      organization: { did: "did:plc:org" },
     }, secret));
     expect(response.status).toBe(200);
     await expect(response.json()).resolves.toMatchObject({
@@ -298,9 +324,10 @@ describe("welcome email event webhook", () => {
     );
     const { POST } = await import("./route");
     const response = await POST(signedRequest({
-      type: "user.signup.completed",
-      eventId: "user.signup.completed.v1:invalid",
+      type: "organization.membership.joined",
+      eventId: "organization.membershipJoined.v1:invalid",
       user: { did: "did:plc:user", email: "member@example.com" },
+      organization: { did: "did:plc:org" },
     }, secret));
     expect(response.status).toBe(400);
     await expect(response.text()).resolves.not.toContain("member@example.com");
@@ -310,9 +337,10 @@ describe("welcome email event webhook", () => {
     deliver.mockRejectedValueOnce(new NotificationRepositoryError("idempotency_conflict"));
     const { POST } = await import("./route");
     const response = await POST(signedRequest({
-      type: "user.signup.completed",
-      eventId: "user.signup.completed.v1:conflict",
+      type: "organization.membership.joined",
+      eventId: "organization.membershipJoined.v1:conflict",
       user: { did: "did:plc:user", email: "member@example.com" },
+      organization: { did: "did:plc:org" },
     }, secret));
     expect(response.status).toBe(409);
     await expect(response.json()).resolves.toEqual({
@@ -327,9 +355,10 @@ describe("welcome email event webhook", () => {
     try {
       const { POST } = await import("./route");
       const response = await POST(signedRequest({
-        type: "user.signup.completed",
+        type: "organization.membership.joined",
         eventId: "user.signup.completed.v1:private-event@example.com",
         user: { did: "did:plc:user", email: "member@example.com" },
+        organization: { did: "did:plc:org" },
       }, secret));
       expect(response.status).toBe(503);
       const body = await response.text();
@@ -338,7 +367,7 @@ describe("welcome email event webhook", () => {
       expect(body).not.toContain("provider-secret");
       expect(log).toHaveBeenCalledWith("welcome-email-events delivery failed", {
         eventIdHash: "07b9a40e2a4af7ed",
-        eventType: "user.signup.completed",
+        eventType: "organization.membership.joined",
         reason: "Error",
       });
       expect(JSON.stringify(log.mock.calls)).not.toContain("private-event@example.com");

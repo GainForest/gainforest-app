@@ -203,11 +203,11 @@ export default async function RootLayout({ children }: { children: React.ReactNo
     getTranslations("landing.nav"),
   ]);
 
-  // TODO(2026-11-01): Replace this temporary root-load backfill with an auth
-  // lifecycle sync, then remove it after confirming active-user coverage.
-  scheduleUserEmailSync(authSession);
-
   const supportedLocale = resolveSupportedLanguage(locale);
+  // A DID's first successful email sync marks its first authenticated use of
+  // GainForest. Existing identities remain portable regardless of account age.
+  scheduleUserEmailSync(authSession, supportedLocale);
+
   const navigationItems = PUBLIC_NAVIGATION_ROUTES.map((item) => ({
     name: navT(item.key),
     url: new URL(withLocalePrefix(item.pathname, supportedLocale), origin).toString(),
