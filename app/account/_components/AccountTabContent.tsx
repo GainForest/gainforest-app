@@ -301,15 +301,24 @@ export async function AccountHomeTabContent({ account }: { account: AccountRoute
 // of at-a-glance stat tiles that link into each tab, and a slim share card.
 // Replaces the bulky right-hand sidebar that used to crowd the Certs page.
 export async function AccountOverviewTabContent({ account, did }: { account: AccountRouteData; did: string }) {
-  const [tabsT, shareT, locale, projects, receipts, observationSummary] = await Promise.all([
+  const [tabsT, shareT, locale, projects, receipts, observationSummary, session] = await Promise.all([
     getTranslations("common.accountTabs"),
     getTranslations("marketplace.account.sidebar"),
     getLocale(),
     fetchProjectsByDid(did, 1000).then((page) => page.records).catch(() => []),
     fetchReceipts().catch(() => []),
     fetchObservationSummaryByDid(did).catch(() => null),
+    fetchAuthSession().catch(() => ({ isLoggedIn: false }) as AuthSession),
   ]);
-  const donationCount = receipts.filter((receipt) => receipt.from?.type === "did" && receipt.from.id === did).length;
+  // The Donations tab shows the owner their own anonymous donations (matched
+  // server-side via their donor hash), so the at-a-glance tile must count them
+  // too — otherwise a donor who just gave anonymously lands on "0 Donations".
+  // Owner-only: the public still sees only publicly attributed receipts.
+  const viewerIsOwner = session.isLoggedIn && session.did === did;
+  const anonymousDonations = viewerIsOwner ? await fetchOwnAnonymousReceipts(did).catch(() => []) : [];
+  const donationCount =
+    receipts.filter((receipt) => receipt.from?.type === "did" && receipt.from.id === did).length +
+    anonymousDonations.length;
   const hasAbout = Boolean(account.detail?.richBody?.length || account.detail?.blurb);
 
   // Keep in step with ACCOUNT_OVERVIEW_FOLDER_IDS — the loading placeholder
