@@ -33,9 +33,10 @@ export const REWILDING_MILESTONE_COLLECTION = "app.gainforest.grant.rewilding.mi
 /** Program constants from the handbook. */
 export const REWILDING_GRANT_AMOUNT_USD = 1000;
 export const REWILDING_AUDIO_TARGET_MINUTES = 7000;
-/** The grant period closes at the end of November 2026 — the date the
- *  recording target has to be met by, so it sets the pace a grantee needs to
- *  keep. Inclusive of the whole final day. */
+/** The grant period runs September to the end of November 2026. Together
+ *  these set the pace a grantee needs to keep: the recording target has to be
+ *  met inside this window. The end is inclusive of the whole final day. */
+export const REWILDING_GRANT_START_ISO = "2026-09-01T00:00:00.000Z";
 export const REWILDING_GRANT_END_ISO = "2026-11-30T23:59:59.999Z";
 
 export type RewildingMilestoneId = "m1" | "m2" | "m3" | "m4";

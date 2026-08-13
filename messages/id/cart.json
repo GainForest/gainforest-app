@@ -256,7 +256,11 @@
       },
       "mockBadge": "Data contoh",
       "cardTitle": "Dasbor hibah Rewilding",
-      "cardDescription": "Hibah saya dengan grafik laju audionya, di belakang dan di depan target."
+      "cardDescription": "Hibah saya dengan grafik laju audionya, di belakang dan di depan target.",
+      "upcoming": {
+        "title": "Sebelum hibah dimulai",
+        "description": "Periode belum dimulai, jadi tidak ada penilaian laju maupun grafik — hanya kapan dimulai dan apa yang akan dibutuhkan."
+      }
     }
   },
   "myCards": {

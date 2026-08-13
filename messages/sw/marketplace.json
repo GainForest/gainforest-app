@@ -839,7 +839,8 @@
           "audioBehindPace": "Dakika {minutes} nyuma ya mwendo · siku {days} zimebaki",
           "audioAheadPace": "Dakika {minutes} mbele ya mwendo · siku {days} zimebaki",
           "audioTargetMet": "Lengo limefikiwa",
-          "audioGrantClosed": "Kipindi cha ruzuku kimefungwa"
+          "audioGrantClosed": "Kipindi cha ruzuku kimefungwa",
+          "audioStartsIn": "Inaanza baada ya siku {days} · dakika {rate}/siku zinahitajika"
         },
         "milestones": {
           "title": "Hatua muhimu za ruzuku",

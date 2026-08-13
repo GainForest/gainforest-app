@@ -101,9 +101,13 @@ export function MyGrantView({
         />
       </section>
 
-      {/* Pace against the recording target. Needs a grant clock and at least
-          one upload to plot; without either there is nothing to compare. */}
-      {overview.audioSeries && overview.audioPace && overview.audioGrantStart ? (
+      {/* Pace against the recording target. Needs at least one upload to plot
+          and a window that has actually opened — before the grant starts there
+          is no elapsed time to chart a pace over. */}
+      {overview.audioSeries &&
+      overview.audioPace &&
+      overview.audioGrantStart &&
+      overview.audioPace.status !== "upcoming" ? (
         <AudioPaceChart
           series={overview.audioSeries}
           pace={overview.audioPace}
@@ -195,7 +199,7 @@ function AudioTargetBar({ overview }: { overview: GrantOverview }) {
             "text-[10px] font-medium",
             audioPace.status === "met"
               ? "text-primary"
-              : behind
+              : audioPace.status === "active" && behind
                 ? "text-amber-700 dark:text-amber-400"
                 : "text-muted-foreground",
           )}
@@ -204,10 +208,17 @@ function AudioTargetBar({ overview }: { overview: GrantOverview }) {
             ? t("audioTargetMet")
             : audioPace.status === "closed"
               ? t("audioGrantClosed")
-              : t(behind ? "audioBehindPace" : "audioAheadPace", {
-                  minutes: format.number(Math.abs(audioPace.deltaVsPace)),
-                  days: audioPace.daysRemaining,
-                })}
+              : audioPace.status === "upcoming"
+                ? // Nobody is behind before the window opens — state when it
+                  // does and the pace it will ask for.
+                  t("audioStartsIn", {
+                    days: audioPace.daysUntilStart,
+                    rate: format.number(Math.round(audioPace.requiredPerDay ?? 0)),
+                  })
+                : t(behind ? "audioBehindPace" : "audioAheadPace", {
+                    minutes: format.number(Math.abs(audioPace.deltaVsPace)),
+                    days: audioPace.daysRemaining,
+                  })}
         </span>
       ) : null}
     </div>

@@ -256,7 +256,11 @@
       },
       "mockBadge": "Dados de teste",
       "cardTitle": "Painel do subsídio Rewilding",
-      "cardDescription": "Meu subsídio com seu gráfico de ritmo de áudio, atrás e à frente da meta."
+      "cardDescription": "Meu subsídio com seu gráfico de ritmo de áudio, atrás e à frente da meta.",
+      "upcoming": {
+        "title": "Antes de o subsídio começar",
+        "description": "O período ainda não começou, então não há veredito de ritmo nem gráfico — apenas quando começa e o que vai exigir."
+      }
     }
   },
   "myCards": {

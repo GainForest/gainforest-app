@@ -256,7 +256,11 @@
       },
       "mockBadge": "Mock data",
       "cardTitle": "Rewilding grant dashboard",
-      "cardDescription": "My grant with its audio pace chart, behind and ahead of the target."
+      "cardDescription": "My grant with its audio pace chart, behind and ahead of the target.",
+      "upcoming": {
+        "title": "Before the grant opens",
+        "description": "The window has not started, so there is no pace verdict and no chart — just when it begins and what it will ask for."
+      }
     }
   },
   "myCards": {

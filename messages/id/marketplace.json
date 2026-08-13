@@ -839,7 +839,8 @@
           "audioBehindPace": "{minutes} mnt di belakang laju · {days} hari lagi",
           "audioAheadPace": "{minutes} mnt di depan laju · {days} hari lagi",
           "audioTargetMet": "Target tercapai",
-          "audioGrantClosed": "Periode hibah ditutup"
+          "audioGrantClosed": "Periode hibah ditutup",
+          "audioStartsIn": "Dimulai dalam {days} hari · butuh {rate} mnt/hari"
         },
         "milestones": {
           "title": "Tonggak hibah",

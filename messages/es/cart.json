@@ -256,7 +256,11 @@
       },
       "mockBadge": "Datos de prueba",
       "cardTitle": "Panel de la subvención Rewilding",
-      "cardDescription": "Mi subvención con su gráfico de ritmo de audio, por detrás y por delante de la meta."
+      "cardDescription": "Mi subvención con su gráfico de ritmo de audio, por detrás y por delante de la meta.",
+      "upcoming": {
+        "title": "Antes de que empiece la subvención",
+        "description": "El periodo aún no ha comenzado, así que no hay veredicto de ritmo ni gráfico: solo cuándo empieza y qué pedirá."
+      }
     }
   },
   "myCards": {

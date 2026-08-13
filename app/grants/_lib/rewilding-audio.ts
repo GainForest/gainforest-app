@@ -120,7 +120,11 @@ export function buildAudioStats(events: readonly AudioUploadEvent[], now: number
 
 /**
  * Compare uploaded minutes against the straight line from the grant start to
- * the target on the deadline. Pure — exported for tests.
+ * the target on the deadline.
+ *
+ * Before the window opens there is nothing to be behind: the grant reports
+ * the pace it will demand across the whole period and no ahead/behind
+ * verdict. Pure — exported for tests.
  */
 export function buildAudioPace({
   audioMinutes,
@@ -138,22 +142,43 @@ export function buildAudioPace({
   const remainingMinutes = Math.max(0, targetMinutes - audioMinutes);
   const msRemaining = Math.max(0, endMs - now);
   const daysRemaining = Math.floor(msRemaining / DAY_MS);
+  const msUntilStart = Math.max(0, startMs - now);
+  const daysUntilStart = Math.ceil(msUntilStart / DAY_MS);
+  const notStarted = msUntilStart > 0;
 
-  // Elapsed days are floored at a fraction of a day so a grant that started
-  // moments ago does not report an infinite pace.
-  const elapsedDays = Math.max(msRemaining > 0 ? 0.5 : 1, (now - startMs) / DAY_MS);
-  const actualPerDay = audioMinutes / elapsedDays;
+  const status =
+    audioMinutes >= targetMinutes
+      ? "met"
+      : notStarted
+        ? "upcoming"
+        : msRemaining <= 0
+          ? "closed"
+          : "active";
 
-  const status = audioMinutes >= targetMinutes ? "met" : msRemaining <= 0 ? "closed" : "active";
+  // Only time inside the grant window counts toward the achieved pace, so a
+  // grant that has not opened reports no rate rather than dividing by a
+  // negative elapsed time.
+  const elapsedDays = notStarted ? 0 : Math.max(msRemaining > 0 ? 0.5 : 1, (now - startMs) / DAY_MS);
+  const actualPerDay = notStarted ? 0 : audioMinutes / elapsedDays;
 
   // Days left counted from the real remaining time, not whole days, so the
-  // required pace does not jump the moment a day boundary passes.
+  // required pace does not jump the moment a day boundary passes. Before the
+  // grant opens the target is spread across the whole window instead.
+  const windowDays = Math.max(1 / 24, (endMs - startMs) / DAY_MS);
   const daysLeftExact = msRemaining / DAY_MS;
-  const requiredPerDay = status === "active" ? remainingMinutes / Math.max(daysLeftExact, 1 / 24) : null;
+  const requiredPerDay =
+    status === "active"
+      ? remainingMinutes / Math.max(daysLeftExact, 1 / 24)
+      : status === "upcoming"
+        ? targetMinutes / windowDays
+        : null;
 
-  const projectedMinutes = Math.round(audioMinutes + actualPerDay * daysLeftExact);
+  const projectedMinutes = notStarted
+    ? audioMinutes
+    : Math.round(audioMinutes + actualPerDay * daysLeftExact);
 
-  // Where a grantee on a straight line to target would be today.
+  // Where a grantee on a straight line to target would be today. Flat at zero
+  // until the window opens.
   const totalMs = Math.max(1, endMs - startMs);
   const progress = Math.min(1, Math.max(0, (now - startMs) / totalMs));
   const expectedToday = targetMinutes * progress;
@@ -163,10 +188,11 @@ export function buildAudioPace({
     targetMinutes,
     remainingMinutes,
     daysRemaining,
+    daysUntilStart,
     requiredPerDay,
     actualPerDay,
     projectedMinutes,
-    deltaVsPace: Math.round(audioMinutes - expectedToday),
+    deltaVsPace: notStarted ? 0 : Math.round(audioMinutes - expectedToday),
   };
 }
 

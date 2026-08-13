@@ -839,7 +839,8 @@
           "audioBehindPace": "{minutes} min por detrás del ritmo · quedan {days} días",
           "audioAheadPace": "{minutes} min por delante del ritmo · quedan {days} días",
           "audioTargetMet": "Meta alcanzada",
-          "audioGrantClosed": "Periodo de la subvención cerrado"
+          "audioGrantClosed": "Periodo de la subvención cerrado",
+          "audioStartsIn": "Empieza en {days} días · se necesitan {rate} min/día"
         },
         "milestones": {
           "title": "Hitos de la subvención",

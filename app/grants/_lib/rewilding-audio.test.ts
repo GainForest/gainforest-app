@@ -6,7 +6,10 @@ import {
   EMPTY_AUDIO_STATS,
   type AudioUploadEvent,
 } from "./rewilding-audio";
-import { REWILDING_GRANT_END_ISO } from "@/app/_lib/rewilding-milestones";
+import {
+  REWILDING_GRANT_END_ISO,
+  REWILDING_GRANT_START_ISO,
+} from "@/app/_lib/rewilding-milestones";
 
 const DAY_MS = 86_400_000;
 const WEEK_MS = 7 * DAY_MS;
@@ -111,23 +114,32 @@ describe("buildAudioSeries", () => {
 });
 
 describe("buildAudioPace", () => {
-  const START = Date.parse("2026-06-01T00:00:00.000Z");
-  const END = Date.parse("2026-11-30T23:59:59.999Z");
+  const START = Date.parse(REWILDING_GRANT_START_ISO);
+  const END = Date.parse(REWILDING_GRANT_END_ISO);
   const TARGET = 7_000;
+  /** Mid-grant: 15 October 2026. */
+  const MID = Date.parse("2026-10-15T12:00:00.000Z");
 
-  const pace = (audioMinutes: number, now = NOW) =>
+  const pace = (audioMinutes: number, now = MID) =>
     buildAudioPace({ audioMinutes, targetMinutes: TARGET, startMs: START, endMs: END, now });
 
+  it("uses the program window constants", () => {
+    expect(REWILDING_GRANT_START_ISO).toBe("2026-09-01T00:00:00.000Z");
+    expect(REWILDING_GRANT_END_ISO).toBe("2026-11-30T23:59:59.999Z");
+    // September through November inclusive.
+    expect(Math.round((END - START) / 86_400_000)).toBe(91);
+  });
+
   it("reports days left until the grant closes", () => {
-    // 13 Aug → 30 Nov 2026.
-    expect(pace(100).daysRemaining).toBe(109);
+    // 15 Oct → 30 Nov 2026.
+    expect(pace(100).daysRemaining).toBe(46);
   });
 
   it("is behind when uploads trail the straight line to target", () => {
     const result = pace(292);
     expect(result.status).toBe("active");
-    // ~40% of the window elapsed, so ~2,800 minutes were due by now.
-    expect(result.deltaVsPace).toBeLessThan(-2_000);
+    // ~49% of the window elapsed, so ~3,400 minutes were due by now.
+    expect(result.deltaVsPace).toBeLessThan(-3_000);
   });
 
   it("is ahead when uploads run past the straight line", () => {
@@ -137,8 +149,8 @@ describe("buildAudioPace", () => {
   it("asks for the remaining minutes spread over the days left", () => {
     const result = pace(1_000);
     expect(result.remainingMinutes).toBe(6_000);
-    // 6,000 minutes over ~109 days.
-    expect(result.requiredPerDay).toBeCloseTo(6_000 / (result.daysRemaining + 1), 0);
+    // 6,000 minutes over ~46 days.
+    expect(result.requiredPerDay).toBeCloseTo(6_000 / (result.daysRemaining + 0.5), 0);
   });
 
   it("marks the target met and stops asking for a pace", () => {
@@ -156,28 +168,54 @@ describe("buildAudioPace", () => {
   });
 
   it("projects where the current pace lands by the deadline", () => {
-    // 730 minutes over 73.5 elapsed days ≈ 9.9/day, with ~109 days left.
-    const result = pace(730);
-    expect(result.actualPerDay).toBeCloseTo(9.93, 1);
-    expect(result.projectedMinutes).toBeGreaterThan(1_700);
-    expect(result.projectedMinutes).toBeLessThan(1_950);
+    // 440 minutes over 44.5 elapsed days ≈ 9.9/day, with ~46 days left.
+    const result = pace(440);
+    expect(result.actualPerDay).toBeCloseTo(9.89, 1);
+    expect(result.projectedMinutes).toBeGreaterThan(850);
+    expect(result.projectedMinutes).toBeLessThan(950);
+  });
+
+  describe("before the grant opens", () => {
+    // 13 August 2026 — the window has not started.
+    const upcoming = (audioMinutes: number) => pace(audioMinutes, NOW);
+
+    it("is upcoming rather than behind", () => {
+      const result = upcoming(292);
+      expect(result.status).toBe("upcoming");
+      // Nobody can be behind a pace that has not started.
+      expect(result.deltaVsPace).toBe(0);
+    });
+
+    it("counts the days until it opens", () => {
+      expect(upcoming(0).daysUntilStart).toBe(19);
+    });
+
+    it("quotes the pace the whole window will demand", () => {
+      // 7,000 minutes across 91 days.
+      expect(upcoming(0).requiredPerDay).toBeCloseTo(7_000 / 91, 1);
+    });
+
+    it("claims no achieved rate for time outside the window", () => {
+      const result = upcoming(292);
+      expect(result.actualPerDay).toBe(0);
+      expect(result.projectedMinutes).toBe(292);
+    });
+
+    it("reports no days until start once the grant is running", () => {
+      expect(pace(100).daysUntilStart).toBe(0);
+    });
   });
 
   it("does not blow up on a grant that just started", () => {
     const result = buildAudioPace({
       audioMinutes: 0,
       targetMinutes: TARGET,
-      startMs: NOW,
+      startMs: START,
       endMs: END,
-      now: NOW,
+      now: START,
     });
     expect(Number.isFinite(result.actualPerDay)).toBe(true);
     expect(result.actualPerDay).toBe(0);
     expect(result.deltaVsPace).toBe(0);
-  });
-
-  it("uses the program deadline constant", () => {
-    expect(REWILDING_GRANT_END_ISO).toBe("2026-11-30T23:59:59.999Z");
-    expect(new Date(REWILDING_GRANT_END_ISO).getUTCMonth()).toBe(10);
   });
 });

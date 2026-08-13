@@ -74,16 +74,19 @@ export type AudioSeries = {
  * the grant start to the target on the closing date.
  */
 export type AudioPace = {
-  /** "active" while the grant is running, "met" once the target is reached,
-   *  "closed" when the deadline passed without hitting it. */
-  status: "active" | "met" | "closed";
+  /** "upcoming" before the grant period opens, "active" while it runs, "met"
+   *  once the target is reached, "closed" when the window shut without it. */
+  status: "upcoming" | "active" | "met" | "closed";
   targetMinutes: number;
   /** Minutes still to record; 0 once the target is met. */
   remainingMinutes: number;
   /** Whole days left until the deadline, floored at 0. */
   daysRemaining: number;
-  /** Minutes/day needed from today on to still hit the target. Null unless
-   *  the grant is active. */
+  /** Whole days until the grant period opens; 0 once it has. */
+  daysUntilStart: number;
+  /** Minutes/day needed to hit the target: spread across the days left once
+   *  the grant is running, or across the whole window before it opens. Null
+   *  once the target is met or the window has closed. */
   requiredPerDay: number | null;
   /** Minutes/day achieved since the grant started. */
   actualPerDay: number;

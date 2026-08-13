@@ -839,7 +839,8 @@
           "audioBehindPace": "{minutes} min behind pace · {days} days left",
           "audioAheadPace": "{minutes} min ahead of pace · {days} days left",
           "audioTargetMet": "Target met",
-          "audioGrantClosed": "Grant period closed"
+          "audioGrantClosed": "Grant period closed",
+          "audioStartsIn": "Starts in {days} days · {rate} min/day needed"
         },
         "milestones": {
           "title": "Grant milestones",

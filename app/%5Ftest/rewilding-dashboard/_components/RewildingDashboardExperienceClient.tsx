@@ -10,6 +10,7 @@ import {
   REWILDING_AUDIO_TARGET_MINUTES,
   REWILDING_GRANT_AMOUNT_USD,
   REWILDING_GRANT_END_ISO,
+  REWILDING_GRANT_START_ISO,
 } from "@/app/_lib/rewilding-milestones";
 
 /**
@@ -22,26 +23,30 @@ import {
  * Nothing on this route reads the indexer or a viewer's enrollment.
  */
 
-const GRANT_START = "2026-06-01T00:00:00.000Z";
-/** The fixture "today" — the last day the series carries data. */
-const LAST_DAY = Date.parse("2026-08-13T12:00:00.000Z");
+const GRANT_START = REWILDING_GRANT_START_ISO;
+/** The fixture "today": mid-grant, so the pace chart has a window to draw.
+ *  Fixed rather than taken from the clock so the scenarios never drift. */
+const LAST_DAY = Date.parse("2026-10-15T12:00:00.000Z");
+/** A date before the window opens, for the not-yet-started scenario. */
+const BEFORE_START = Date.parse("2026-08-13T12:00:00.000Z");
 const DAY_MS = 86_400_000;
 
-/** One upload per day at a steady rate, from the grant start to the fixture's
- *  today. Deterministic, so the scenarios never drift. */
-function dailyUploads(minutesPerDay: number) {
-  const start = Date.parse(GRANT_START);
+/** One upload per day at a steady rate over a span. */
+function dailyUploads(minutesPerDay: number, from: number, to: number) {
   const events: { t: number; seconds: number }[] = [];
-  for (let t = start; t <= LAST_DAY; t += DAY_MS) {
+  for (let t = from; t <= to; t += DAY_MS) {
     events.push({ t, seconds: minutesPerDay * 60 });
   }
   return events;
 }
 
-function scenario(minutesPerDay: number): GrantOverview {
-  const events = dailyUploads(minutesPerDay);
+function scenario(minutesPerDay: number, now: number = LAST_DAY): GrantOverview {
+  // Before the window opens the only uploads are earlier ones, so the fixture
+  // records them over the fortnight leading up to "now".
+  const from = now < Date.parse(GRANT_START) ? now - 13 * DAY_MS : Date.parse(GRANT_START);
+  const events = dailyUploads(minutesPerDay, from, now);
   const totalMinutes = Math.round(events.reduce((sum, e) => sum + e.seconds, 0) / 60);
-  const series = buildAudioSeries(events, LAST_DAY);
+  const series = buildAudioSeries(events, now);
 
   return {
     projectName: null,
@@ -58,7 +63,7 @@ function scenario(minutesPerDay: number): GrantOverview {
       targetMinutes: REWILDING_AUDIO_TARGET_MINUTES,
       startMs: Date.parse(GRANT_START),
       endMs: Date.parse(REWILDING_GRANT_END_ISO),
-      now: LAST_DAY,
+      now,
     }),
     grantAmountUsd: REWILDING_GRANT_AMOUNT_USD,
     speciesCount: 0,
@@ -72,12 +77,14 @@ function scenario(minutesPerDay: number): GrantOverview {
   };
 }
 
-/** Roughly the real-world figure today: a few minutes a day, far off pace. */
+/** Before the window opens: no pace verdict and no chart. */
+const UPCOMING = scenario(20, BEFORE_START);
+/** A few minutes a day — far off the pace the window demands. */
 const BEHIND = scenario(4);
 /** Comfortably past the line the grant needs. */
-const AHEAD = scenario(45);
+const AHEAD = scenario(90);
 /** Target already met — the chart stops asking for a pace. */
-const MET = scenario(100);
+const MET = scenario(200);
 /** No uploads at all: the chart is omitted rather than drawn empty. */
 const NO_AUDIO: GrantOverview = {
   ...scenario(0),
@@ -86,6 +93,7 @@ const NO_AUDIO: GrantOverview = {
 };
 
 const SCENARIOS = [
+  { key: "upcoming", overview: UPCOMING },
   { key: "behind", overview: BEHIND },
   { key: "ahead", overview: AHEAD },
   { key: "met", overview: MET },

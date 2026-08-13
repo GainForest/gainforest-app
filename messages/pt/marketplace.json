@@ -839,7 +839,8 @@
           "audioBehindPace": "{minutes} min atrás do ritmo · faltam {days} dias",
           "audioAheadPace": "{minutes} min à frente do ritmo · faltam {days} dias",
           "audioTargetMet": "Meta atingida",
-          "audioGrantClosed": "Período do subsídio encerrado"
+          "audioGrantClosed": "Período do subsídio encerrado",
+          "audioStartsIn": "Começa em {days} dias · são necessários {rate} min/dia"
         },
         "milestones": {
           "title": "Marcos do subsídio",

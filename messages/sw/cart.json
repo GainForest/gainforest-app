@@ -256,7 +256,11 @@
       },
       "mockBadge": "Data ya majaribio",
       "cardTitle": "Dashibodi ya ruzuku ya Rewilding",
-      "cardDescription": "Ruzuku yangu na chati yake ya mwendo wa sauti, nyuma na mbele ya lengo."
+      "cardDescription": "Ruzuku yangu na chati yake ya mwendo wa sauti, nyuma na mbele ya lengo.",
+      "upcoming": {
+        "title": "Kabla ruzuku haijaanza",
+        "description": "Kipindi bado hakijaanza, hivyo hakuna hukumu ya mwendo wala chati — ni lini kinaanza na kitahitaji nini tu."
+      }
     }
   },
   "myCards": {
