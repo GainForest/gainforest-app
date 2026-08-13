@@ -322,14 +322,10 @@ function InfoRow({ label, value, dimmed }: { label: string; value: string; dimme
 
 export function AudioMothClient({
   sessionDid,
-  useUploadTray = false,
   surface = "audio",
   mediaTabs,
 }: {
   sessionDid: string | null;
-  /** Release switch: hand uploads to the background tray instead of the
-   *  page's own full-screen progress flow. Off until the tray is finished. */
-  useUploadTray?: boolean;
   /** Which Observations tab hosts this render — see {@link AudioMothSurface}. */
   surface?: AudioMothSurface;
   /** The Photos | Audio | Devices tab bar, rendered above the surface's own
@@ -909,7 +905,7 @@ export function AudioMothClient({
 
       {mainTab === "deployments" && <DeploymentsTab sessionDid={sessionDid} />}
 
-      {mainTab === "upload" && <UploadTab sessionDid={sessionDid} useTray={useUploadTray} />}
+      {mainTab === "upload" && <UploadTab sessionDid={sessionDid} />}
 
       {mainTab === "label" && <LabelTab sessionDid={sessionDid} />}
 
