@@ -10,7 +10,8 @@ import { REWILDING_DASHBOARD_USES_PLACEHOLDER_DATA } from "../../_lib/rewilding-
  * An enrolled grantee sees their own dashboard, plainly headed. An admin sees
  * the same pages as a preview and the shell says so — the eyebrow carries the
  * admin marker so a preview is never mistaken for a real grant's state. The
- * recording stats are placeholder either way, and the notice states that.
+ * recorder and species stats are placeholder either way, and the notice
+ * states that.
  */
 export async function RewildingPageShell({
   children,

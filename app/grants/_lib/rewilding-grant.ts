@@ -8,9 +8,12 @@
  *
  * Milestone states are real: GainForest confirms milestones from the admin
  * panel's "Rewilding the Web" section, and this page reads them back for the
- * signed-in grantee. Recording stats and recorders still have no backing
- * records, so those figures start at zero; when they land, replace their
- * fetchers and drop `REWILDING_DASHBOARD_USES_PLACEHOLDER_DATA`.
+ * signed-in grantee. The "Audio uploaded" stat is real too: it counts the
+ * grant account's `app.gainforest.ac.audio` records from the hyperindex (see
+ * `rewilding-audio.ts`), the same records Bumiscan's Klarna scorecard tracks.
+ * Recorders and species still have no backing records, so those figures start
+ * at zero; when they land, replace their fetchers and drop
+ * `REWILDING_DASHBOARD_USES_PLACEHOLDER_DATA`.
  *
  * Grant documents are intentionally absent here. They are private to the
  * admin group for now (private object storage, no public URL), so nothing on
@@ -25,10 +28,12 @@ import {
   doneRewildingMilestoneIds,
   fetchRewildingMilestones,
 } from "@/app/_lib/rewilding-milestones";
+import { EMPTY_AUDIO_STATS, fetchGranteeAudioStats } from "./rewilding-audio";
 import type { GrantOverview, Recorder } from "../_components/rewilding/model";
 
-/** True while the recording stats below are stand-ins rather than read from
- *  records. The page shell uses it to tell the viewer what they are seeing. */
+/** True while the recorder and species stats below are stand-ins rather than
+ *  read from records. The page shell uses it to tell the viewer what they are
+ *  seeing. Audio-upload figures are already live. */
 export const REWILDING_DASHBOARD_USES_PLACEHOLDER_DATA = true;
 
 export { REWILDING_AUDIO_TARGET_MINUTES, REWILDING_GRANT_AMOUNT_USD };
@@ -39,7 +44,12 @@ export { REWILDING_AUDIO_TARGET_MINUTES, REWILDING_GRANT_AMOUNT_USD };
  * simply sees every milestone still to do.
  */
 export async function fetchGrantOverview(viewerDid: string | null): Promise<GrantOverview> {
-  const milestoneRecords = viewerDid ? await fetchRewildingMilestones().catch(() => []) : [];
+  // Audio figures degrade to zero on indexer failure rather than breaking the
+  // page — milestones are the load-bearing content here.
+  const [milestoneRecords, audio] = await Promise.all([
+    viewerDid ? fetchRewildingMilestones().catch(() => []) : Promise.resolve([]),
+    viewerDid ? fetchGranteeAudioStats(viewerDid).catch(() => EMPTY_AUDIO_STATS) : Promise.resolve(EMPTY_AUDIO_STATS),
+  ]);
   const done = viewerDid ? doneRewildingMilestoneIds(milestoneRecords, viewerDid) : new Set<string>();
 
   return {
@@ -48,8 +58,8 @@ export async function fetchGrantOverview(viewerDid: string | null): Promise<Gran
     projectName: null,
     granteeLabel: null,
     nextStep: null,
-    audioMinutes: 0,
-    audioTrend: [],
+    audioMinutes: audio.audioMinutes,
+    audioTrend: audio.audioTrend,
     audioTargetMinutes: REWILDING_AUDIO_TARGET_MINUTES,
     grantAmountUsd: REWILDING_GRANT_AMOUNT_USD,
     speciesCount: 0,

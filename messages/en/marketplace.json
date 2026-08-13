@@ -915,7 +915,7 @@
       },
       "shell": {
         "eyebrow": "Rewilding the Web · admin preview",
-        "placeholderNotice": "Recording stats on this page aren't connected to real records yet, so those figures read zero. Milestones and grant documents are live.",
+        "placeholderNotice": "Recorder and species figures on this page aren't connected to real records yet, so they read zero. Audio uploaded, milestones and grant documents are live.",
         "granteeEyebrow": "Rewilding the Web"
       }
     }
