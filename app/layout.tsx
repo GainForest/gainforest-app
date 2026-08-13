@@ -241,10 +241,8 @@ export default async function RootLayout({ children }: { children: React.ReactNo
                         going while people navigate the app; the tray is the
                         visible part of that queue. Both always mount — the
                         panel renders nothing while the queue is empty — so
-                        the "Add observations" modal's audio branch can hand
-                        batches over from anywhere. AUDIOMOTH_UPLOAD_TRAY_ENABLED
-                        now only governs whether the AudioMoth Upload tab has
-                        migrated from its full-page flow to this queue. */}
+                        both the "Add observations" modal and the AudioMoth
+                        Upload tab can hand batches over from anywhere. */}
                     <UploadTrayProvider>
                       <ChromeGate authSession={authSession}>{children}</ChromeGate>
                       <UploadTray />

@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 import { fetchAuthSession } from "@/app/_lib/auth-server";
 import { AudioMothClient } from "@/app/audiomoth/_components/AudioMothClient";
-import { isAudioMothUploadTrayFlagEnabled } from "@/app/_lib/audiomoth/feature-flags";
 import { ObservationsMediaTabs } from "../_components/ObservationsMediaTabs";
 
 export const dynamic = "force-dynamic";
@@ -31,7 +30,6 @@ export default async function ObservationsAudioPage() {
       <AudioMothClient
         surface="audio"
         sessionDid={session.isLoggedIn ? session.did : null}
-        useUploadTray={isAudioMothUploadTrayFlagEnabled()}
         mediaTabs={<ObservationsMediaTabs active="audio" />}
       />
     </main>
