@@ -2175,7 +2175,12 @@
       "equipmentUsedLabel": "AudioMoth utilizado",
       "protocolLabel": "Protocolo",
       "recordedByLabel": "Registrado por",
-      "viewEquipment": "Ver sus equipos"
+      "viewEquipment": "Ver sus equipos",
+      "attachWaiting": "{count, plural, one {# grabación se está subiendo en segundo plano — se adjuntará al despliegue que crees.} other {# grabaciones se están subiendo en segundo plano — se adjuntarán al despliegue que crees.}}",
+      "attaching": "Adjuntando {count, plural, one {# grabación} other {# grabaciones}} al nuevo despliegue…",
+      "attachDone": "{count, plural, one {# grabación adjuntada al nuevo despliegue.} other {# grabaciones adjuntadas al nuevo despliegue.}}",
+      "attachPartial": "{moved} adjuntadas · {failed} no se pudieron mover — se quedan en la carpeta de la tarjeta.",
+      "attachFailed": "No se pudo adjuntar el lote — las grabaciones se quedan en la carpeta de la tarjeta."
     },
     "upload": {
       "intro": "Inserta la tarjeta SD de un AudioMoth y elígela abajo. Las grabaciones se reconocen por el ID de despliegue incluido en cada archivo, se guardan en un almacenamiento de archivo seguro y se registran en tu cuenta.",

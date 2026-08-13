@@ -4,6 +4,7 @@ import type { AudioMothRecordingInfo } from "@/app/_lib/audiomoth/wav-metadata";
 import type { DeploymentEventItem } from "@/app/_lib/deployment-events";
 import {
   deviceChipLabel,
+  deviceNeedsDeployment,
   formatRecordingBytes,
   formatSampleRates,
   isWavCandidate,
@@ -243,6 +244,31 @@ describe("resolveAudioTarget", () => {
       fallbackName: "Recordings",
     });
     expect(plan).toEqual({ kind: "existing", uri: folders[0]!.uri, name: "ridge trail" });
+  });
+});
+
+describe("deviceNeedsDeployment", () => {
+  const summary = summarizeAudioBatch([makeRecording("a.wav", makeInfo())]);
+
+  it("is settled by a chime match", () => {
+    expect(deviceNeedsDeployment(summary, [], event)).toBe(false);
+  });
+
+  it("is true with no folders at all", () => {
+    expect(deviceNeedsDeployment(summary, [], null)).toBe(true);
+  });
+
+  it("matches folders by the device serial, case-insensitively", () => {
+    expect(deviceNeedsDeployment(summary, [{ deviceSerialNumber: "24f3190361da539a" }], null)).toBe(false);
+    expect(deviceNeedsDeployment(summary, [{ deviceSerialNumber: "AAAAAAAAAAAAAAAA" }], null)).toBe(true);
+  });
+
+  it("stays quiet while folders are unknown, headers are anonymous, or the batch is empty", () => {
+    expect(deviceNeedsDeployment(summary, null, null)).toBe(false);
+    const anonymous = summarizeAudioBatch([makeRecording("a.wav", makeInfo({ deviceId: null }))]);
+    expect(deviceNeedsDeployment(anonymous, [{ deviceSerialNumber: "X" }], null)).toBe(false);
+    const empty = summarizeAudioBatch([makeRecording("broken.wav", null)]);
+    expect(deviceNeedsDeployment(empty, [], null)).toBe(false);
   });
 });
 

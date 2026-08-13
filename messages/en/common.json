@@ -2175,7 +2175,12 @@
       "equipmentUsedLabel": "AudioMoth used",
       "protocolLabel": "Protocol",
       "recordedByLabel": "Recorded by",
-      "viewEquipment": "View their equipment"
+      "viewEquipment": "View their equipment",
+      "attachWaiting": "{count, plural, one {# recording is uploading in the background — it will attach to the deployment you create.} other {# recordings are uploading in the background — they'll attach to the deployment you create.}}",
+      "attaching": "Attaching {count, plural, one {# recording} other {# recordings}} to the new deployment…",
+      "attachDone": "{count, plural, one {# recording attached to the new deployment.} other {# recordings attached to the new deployment.}}",
+      "attachPartial": "{moved} attached · {failed} couldn't be moved — they stay in the card's folder.",
+      "attachFailed": "The batch couldn't be attached — the recordings stay in the card's folder."
     },
     "upload": {
       "intro": "Insert an AudioMoth SD card and choose it below. Recordings are recognised by the deployment ID embedded in each file, kept safe in archival storage and saved to your account.",

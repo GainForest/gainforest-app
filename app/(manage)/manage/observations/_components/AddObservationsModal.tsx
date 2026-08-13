@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Fragment, useCallback, useEffect, useId, useMemo, useRef, useState, type ChangeEvent, type DragEvent, type KeyboardEvent } from "react";
 import { useFormatter, useTranslations } from "next-intl";
 import {
@@ -108,6 +109,7 @@ import { listDeploymentEvents, type DeploymentEventItem } from "@/app/_lib/deplo
 import { createEquipment, listEquipment } from "@/app/_lib/equipment";
 import {
   deviceChipLabel,
+  deviceNeedsDeployment,
   formatRecordingBytes,
   formatSampleRates,
   matchChimeDeployment,
@@ -354,6 +356,7 @@ export function AddObservationsModal({
 }) {
   const t = useTranslations("upload.observations.quickAdd");
   const format = useFormatter();
+  const router = useRouter();
   const modal = useModal();
   // Audio branch (design 1d): the same drop zone accepts a whole AudioMoth SD
   // card; recordings are handed to the app-wide background upload tray. Only
@@ -424,8 +427,8 @@ export function AddObservationsModal({
   /** Bumped when the audio batch is removed, so a mid-flight scan stops writing. */
   const audioScanTokenRef = useRef(0);
   const audioScanCountsRef = useRef({ done: 0, total: 0 });
-  /** The account context loads once per modal session. */
-  const audioContextLoadedRef = useRef(false);
+  /** Which account's audio context (folders/chimes/equipment) is loaded. */
+  const audioContextDidRef = useRef<string | null>(null);
 
   // "Uploading for": the account these observations land in. Seeded from the
   // caller's target (usually the active-account context) and switchable inline
@@ -517,22 +520,33 @@ export function AddObservationsModal({
   const hasAudio = recordings.length > 0 || audioScan !== null;
 
   // Load the audio context (existing folders, chime deployments, equipment
-  // registry) the first time recordings land. All three are best-effort: a
-  // failed load just means no match — the batch still uploads into a new
-  // folder named after the card.
+  // registry) from the "Uploading for" account the first time recordings
+  // land, and again whenever that account changes — the whole audio batch
+  // (records, blobs, deployments, registry) lands in that account's repo.
+  // All three loads are best-effort: a failure just means no match, and the
+  // batch still uploads into a new folder named after the card.
   useEffect(() => {
-    if (!audioEnabled || !sessionDid || !hasAudio || audioContextLoadedRef.current) return;
-    audioContextLoadedRef.current = true;
-    void listAcDeployments(sessionDid)
-      .then(setAudioFolders)
-      .catch(() => setAudioFolders([]));
-    void listDeploymentEvents(sessionDid)
-      .then(setChimeEvents)
-      .catch(() => setChimeEvents([]));
-    void listEquipment(sessionDid)
-      .then((listed) => setEquipment(listed.map((item) => ({ assetId: item.assetId, name: item.name }))))
-      .catch(() => setEquipment([]));
-  }, [audioEnabled, hasAudio, sessionDid]);
+    if (!audioEnabled || !hasAudio || audioContextDidRef.current === target.did) return;
+    const contextDid = target.did;
+    audioContextDidRef.current = contextDid;
+    setAudioFolders(null);
+    setChimeEvents(null);
+    setEquipment(null);
+    // Folder URIs from another account are meaningless here.
+    setAudioFolderSelection("");
+    const keep = <T,>(apply: (value: T) => void) => (value: T) => {
+      if (audioContextDidRef.current === contextDid) apply(value);
+    };
+    void listAcDeployments(contextDid)
+      .then(keep(setAudioFolders))
+      .catch(keep(() => setAudioFolders([])));
+    void listDeploymentEvents(contextDid)
+      .then(keep(setChimeEvents))
+      .catch(keep(() => setChimeEvents([])));
+    void listEquipment(contextDid)
+      .then(keep((listed) => setEquipment(listed.map((item) => ({ assetId: item.assetId, name: item.name })))))
+      .catch(keep(() => setEquipment([])));
+  }, [audioEnabled, hasAudio, target.did]);
 
   // ── Audio derived state ── the card summary chip, the chime-matched
   // deployment and the devices that are not in the equipment registry yet.
@@ -635,14 +649,18 @@ export function AddObservationsModal({
   /**
    * Hand the audio batch to the background upload tray: resolve the folder
    * choice into an upload target, silently register unknown devices in the
-   * equipment registry, and enqueue one job per readable recording. The tray
-   * keeps transferring after the modal closes. Returns how many were handed
-   * over.
+   * "Uploading for" account's equipment registry, and enqueue one job per
+   * readable recording — records, blobs and any created deployment all land
+   * in that account's repo. The tray keeps transferring after the modal
+   * closes. Returns the batch handle for later attachment.
    */
-  const handOffAudioBatch = useCallback((): number => {
-    if (!audioEnabled || !uploadTray || !sessionDid) return 0;
+  const handOffAudioBatch = useCallback((): { count: number; batchKey: string | null } => {
+    if (!audioEnabled || !uploadTray || !sessionDid) return { count: 0, batchKey: null };
     const readable = recordingsRef.current.filter((rec) => rec.info);
-    if (readable.length === 0) return 0;
+    if (readable.length === 0) return { count: 0, batchKey: null };
+    // Records land in the org's repo when uploading for one — same rule as
+    // the photo observations above.
+    const repoDid = target.kind === "group" ? target.did : null;
     const summary = summarizeAudioBatch(recordingsRef.current);
     const plan = resolveAudioTarget({
       summary,
@@ -652,33 +670,38 @@ export function AddObservationsModal({
       cardName,
       fallbackName: audioFallbackFolderName,
     });
-    const target: UploadTarget =
+    const uploadTarget: UploadTarget =
       plan.kind === "event"
         ? { kind: "event", event: plan.event }
         : plan.kind === "existing"
           ? { kind: "existing", uri: plan.uri }
           : { kind: "named", name: plan.name, deployedAt: plan.deployedAt };
     // "We'll add it when this upload starts": unknown devices join the
-    // equipment registry silently, best-effort — a failed write never blocks
-    // the recordings themselves.
+    // account's equipment registry silently, best-effort — a failed write
+    // never blocks the recordings themselves.
     for (const id of unregisteredDeviceIds(summary.deviceIds, equipmentAssetIds)) {
-      void createEquipment({
-        assetId: id,
-        name: `AudioMoth ${id.slice(-4)}`,
-        category: "audiomoth",
-        status: "storage",
-        acquiredAt: new Date().toISOString().slice(0, 10),
-        notes: t("audio.equipmentNote"),
-      }).catch(() => {});
+      void createEquipment(
+        {
+          assetId: id,
+          name: `AudioMoth ${id.slice(-4)}`,
+          category: "audiomoth",
+          status: "storage",
+          acquiredAt: new Date().toISOString().slice(0, 10),
+          notes: t("audio.equipmentNote"),
+        },
+        repoDid ? { repo: repoDid } : undefined,
+      ).catch(() => {});
     }
-    const batch = crypto.randomUUID();
+    const batchKey = crypto.randomUUID();
     const jobs: UploadTrayJob[] = readable.map((rec) => ({
-      id: `${batch}:${rec.id}`,
+      id: `${batchKey}:${rec.id}`,
       file: rec.file,
       info: rec.info!,
       recordedAt: quickRecordingTime(rec).toISOString(),
       deploymentId: rec.info!.deploymentId ?? undefined,
-      target,
+      repoDid,
+      batchKey,
+      target: uploadTarget,
       makePreviews: true,
     }));
     uploadTray.enqueue(sessionDid, jobs);
@@ -689,7 +712,7 @@ export function AddObservationsModal({
     setCardName("");
     setAudioFolderSelection("");
     setAudioHandedOff(jobs.length);
-    return jobs.length;
+    return { count: jobs.length, batchKey };
   }, [
     audioEnabled,
     audioFallbackFolderName,
@@ -700,8 +723,27 @@ export function AddObservationsModal({
     matchedChimeEvent,
     sessionDid,
     t,
+    target,
     uploadTray,
   ]);
+
+  /**
+   * "Set one up ↗" (design 1d, fourth panel): start the upload right away —
+   * bandwidth is the bottleneck, not the form — then leave for the
+   * deployments tab carrying the batch handle. The batch attaches to the
+   * deployment the moment it is created there; until then it sits in a
+   * folder named after the card, so nothing is ever stranded.
+   */
+  const setUpDeploymentAndGo = useCallback(() => {
+    const { count, batchKey } = handOffAudioBatch();
+    onClose();
+    const params = new URLSearchParams({ tab: "deployments" });
+    if (batchKey && count > 0) {
+      params.set("attachBatch", batchKey);
+      params.set("attachCount", String(count));
+    }
+    router.push(`/observations/audio?${params.toString()}`);
+  }, [handOffAudioBatch, onClose, router]);
 
   // Point the shared occurrence mutations at the right repo (the org for a
   // group context, the signed-in user otherwise) for the lifetime of the modal.
@@ -1247,7 +1289,7 @@ export function AddObservationsModal({
     // Recordings go first: they are handed to the background tray in one
     // synchronous step, so the bytes start moving before (and independently
     // of) the photo observations below.
-    const handedOff = handOffAudioBatch();
+    const handedOff = handOffAudioBatch().count;
     if (queue.length === 0) {
       if (handedOff > 0) {
         setError(null);
@@ -1806,20 +1848,18 @@ export function AddObservationsModal({
               })}
             </p>
           ) : null}
-          {audioFolders !== null && audioFolders.length === 0 && !matchedChimeEvent ? (
+          {deviceNeedsDeployment(audioSummary, audioFolders, matchedChimeEvent) ? (
             <p className="text-xs leading-5 text-muted-foreground">
               {t("audio.noDeployments")}{" "}
-              <Link
-                href="/observations/audio?tab=deployments"
-                onClick={onClose}
-                className="font-medium text-primary underline underline-offset-2"
+              <button
+                type="button"
+                onClick={setUpDeploymentAndGo}
+                disabled={isSubmitting || audioScan !== null || audioSummary.count === 0}
+                className="font-medium text-primary underline underline-offset-2 disabled:opacity-50"
               >
                 {t("audio.setUpDeployment")}
-              </Link>
+              </button>
             </p>
-          ) : null}
-          {target.kind === "group" ? (
-            <p className="text-xs leading-5 text-muted-foreground">{t("audio.personalLibraryNote")}</p>
           ) : null}
         </div>
       ) : null}

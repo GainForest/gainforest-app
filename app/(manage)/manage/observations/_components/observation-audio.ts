@@ -190,6 +190,27 @@ export function resolveAudioTarget({
 }
 
 /**
+ * True when the card's device has no deployment to attach to — the "set one
+ * up ↗" flow's trigger. A chime match settles it; otherwise the account's
+ * folders are checked against the card's device IDs (folders record the
+ * unit's serial). With no folders at all the answer is always yes; with
+ * folders but anonymous headers we can't tell, so the picker takes over.
+ */
+export function deviceNeedsDeployment(
+  summary: AudioBatchSummary,
+  folders: { deviceSerialNumber?: string }[] | null,
+  matchedEvent: DeploymentEventItem | null,
+): boolean {
+  if (matchedEvent || summary.count === 0 || folders === null) return false;
+  if (folders.length === 0) return true;
+  if (summary.deviceIds.length === 0) return false;
+  const ids = new Set(summary.deviceIds.map((id) => id.trim().toUpperCase()));
+  return !folders.some(
+    (folder) => folder.deviceSerialNumber && ids.has(folder.deviceSerialNumber.trim().toUpperCase()),
+  );
+}
+
+/**
  * Device IDs from the card that are not in the equipment registry yet.
  * Matching follows the registry convention: `assetId` carries the 16-hex
  * AudioMoth ID, compared case-insensitively.
