@@ -1,86 +1,117 @@
 {
   "meta": {
     "title": "Bumimic — una grabadora abierta para escuchar la naturaleza",
-    "description": "Una grabadora acústica abierta y de bajo costo para el monitoreo de la biodiversidad. Las primeras unidades de prototipo llegan a mediados de septiembre."
+    "description": "Una grabadora acústica de bolsillo que escucha por encima de la audición humana, registra el clima y dura meses con tres pilas AA."
   },
   "hero": {
-    "title": "Bumimic",
-    "accent": "para escuchar la naturaleza",
-    "lede": "Una grabadora abierta y de bajo costo que escucha un lugar a toda hora, guarda el audio en una tarjeta de memoria y envía avisos breves por radio de largo alcance.",
-    "imageAlt": "Paisaje de bosque con niebla a primera luz"
-  },
-  "prototype": {
-    "title": "Todavía no está a la venta",
-    "body": "Bumimic es un prototipo funcional. Las primeras unidades llegan a mediados de septiembre para pruebas de campo, y el diseño aún debe superar controles de sonido, radio, consumo y seguridad antes de que alguien pueda pedir una.",
-    "action": "Consultar sobre las pruebas de campo"
-  },
-  "capabilities": {
-    "title": "Qué hace",
-    "items": {
-      "record": {
-        "title": "Graba a toda hora",
-        "body": "Hasta 384.000 muestras por segundo en 16 bits, con un modo a media velocidad cuando importa más una campaña larga que las frecuencias más altas. El audio se escribe directamente en una tarjeta microSD."
-      },
-      "sense": {
-        "title": "Lee su entorno",
-        "body": "Temperatura, humedad, luz, presión del aire y movimiento se registran junto con el sonido, así cada detección llega con las condiciones que la produjeron."
-      },
-      "radio": {
-        "title": "Envía avisos breves",
-        "body": "Las detecciones y el estado de la batería viajan por radio de largo alcance, así se puede revisar un sitio sin visitarlo. Las grabaciones se quedan en la tarjeta."
-      },
-      "power": {
-        "title": "Funciona con pilas comunes",
-        "body": "Tres pilas AA o AAA, con USB-C para la configuración. Entre grabaciones, la placa está diseñada para consumir apenas unas millonésimas de amperio."
-      }
-    }
+    "title": "Escucha lo que",
+    "accent": "la naturaleza",
+    "titleEnd": "está diciendo",
+    "lede": "Una grabadora de bolsillo que escucha por encima del rango de audición humana, registra el clima a su alrededor y dura meses con tres pilas AA.",
+    "preOrder": "Pre-ordenar",
+    "hearSample": "Escuchar una muestra",
+    "tagline": "Ensamblada y probada. Hardware abierto. Envío desde Zurich."
   },
   "board": {
-    "title": "La placa del prototipo",
-    "body": "El diseño es abierto desde el principio: el esquema, el trazado de la placa, los archivos de fabricación y el firmware se desarrollan en público, para que los equipos de campo puedan construirlo, repararlo y adaptarlo por su cuenta.",
-    "caption": "Placa del prototipo Bumimic, 57 × 47 mm: algo más pequeña que un AudioMoth en ambas direcciones.",
-    "imageAlt": "Render de la placa de circuito del prototipo Bumimic, con la ranura microSD, el módulo de radio y los sensores",
-    "repoLink": "Ver los archivos del diseño",
-    "repoPending": "Los archivos del diseño se publicarán cuando el prototipo haya pasado las pruebas de campo."
+    "imageAlt": "Render de la placa de circuito del prototipo Bumimic, mostrando la ranura microSD, el módulo de radio y los sensores",
+    "caption": "Render de la placa — board-v0.3, vista superior sobre blanco"
   },
-  "cost": {
-    "title": "Cuánto esperamos que cueste",
-    "board": {
-      "value": "$13–18",
-      "label": "Placa y ensamblaje",
-      "note": "Electrónica y ensamblaje en una tirada de unas 1.000 unidades."
+  "features": {
+    "ultrasonic": {
+      "title": "Escucha hasta 192 kHz",
+      "body": "El audio ultrasónico se escribe directamente en una tarjeta microSD, según un horario que configures o cuando se active un disparador. Las grabaciones nunca salen de tus manos."
     },
-    "unit": {
-      "value": "$20–30",
-      "label": "Unidad de campo completa",
-      "note": "Toda la electrónica de una grabadora lista para desplegar, antes de la carcasa y las pilas."
+    "sensors": {
+      "title": "Lee el clima a su alrededor",
+      "body": "Temperatura, humedad, luz, presión y movimiento se registran junto al audio, así cada detección llega con las condiciones que la produjeron."
     },
-    "excludes": {
-      "title": "No incluido en esas cifras",
-      "items": {
-        "microsd": "Tarjeta de memoria",
-        "antenna": "Antena",
-        "batteries": "Pilas",
-        "enclosure": "Carcasa",
-        "certification": "Certificación",
-        "freight": "Envío",
-        "testing": "Pruebas de producción"
-      }
+    "alerts": {
+      "title": "Te avisa cuando algo pasa",
+      "body": "Las alertas de eventos viajan por LoRaWAN a quien esté monitoreando el sitio. Solo viaja la alerta — el audio se queda en la tarjeta hasta que lo recojas."
     },
-    "note": "Son estimaciones de planificación, no cotizaciones de proveedores. Los precios reales dependen de la configuración, del país de destino y de lo que coticen los fabricantes cuando hagamos el pedido."
-  },
-  "regions": {
-    "title": "Hecha para un lugar concreto",
-    "body": "Las normas de radio cambian de un país a otro, así que cada unidad se fabrica y se etiqueta para el lugar donde se va a desplegar. Las primeras series apuntan a estos tres.",
-    "items": {
-      "kenya": "Kenia",
-      "brazil": "Brasil",
-      "philippines": "Filipinas"
+    "battery": {
+      "title": "Déjala afuera",
+      "body": "Pocos microamperios en reposo y tres pilas AA para alimentarse. Los despliegues se miden en meses, y cualquier tienda que venda pilas puede mantenerla funcionando."
     }
   },
-  "cta": {
-    "title": "¿Te interesa Bumimic?",
-    "description": "Cuéntanos sobre tu sitio y cómo usarías una grabadora allí. Buscamos equipos de campo para probar las primeras unidades.",
-    "contact": "Contactar GainForest"
+  "specs": {
+    "boardCaption": "Detalle de la placa — micrófono, sensores, microSD, radio"
+  },
+  "quickSpecs": {
+    "0": {
+      "title": "Micrófono ultrasónico",
+      "body": "Ajustado para murciélagos e insectos, no para habla."
+    },
+    "1": {
+      "title": "Cinco sensores",
+      "body": "Temperatura, humedad, luz, presión, movimiento."
+    },
+    "2": {
+      "title": "Radio LoRaWAN",
+      "body": "Configuración regional para Kenia, Brasil, Filipinas."
+    },
+    "3": {
+      "title": "Almacenamiento microSD",
+      "body": "Hasta 512 GB de grabaciones en una sola tarjeta."
+    }
+  },
+  "order": {
+    "title": "Configura tu pedido",
+    "subtitle": "Cada opción del pedido está aquí — la versión regional de radio, una carcasa si quieres, y a dónde se envía.",
+    "region": {
+      "label": "Versión regional",
+      "note": "La configuración de radio se fija en fabricación, así que elige el país donde vivirá el dispositivo."
+    },
+    "addons": {
+      "label": "Accesorios — elige cualquiera, o ninguno",
+      "waterproof": "Carcasa impermeable",
+      "printed": "Carcasa impresa en 3D",
+      "note": "La carcasa impermeable está sellada para despliegues en temporada húmeda; la impresa es más ligera y sus archivos son abiertos, así que puedes imprimir la tuya. Los precios de accesorios son provisionales."
+    },
+    "shipTo": {
+      "label": "Enviar a",
+      "placeholder": "Selecciona un país"
+    },
+    "units": {
+      "label": "Unidades",
+      "decrease": "Disminuir cantidad",
+      "increase": "Aumentar cantidad"
+    },
+    "total": "Total",
+    "preOrder": "Pre-ordenar"
+  },
+  "specifications": {
+    "title": "Especificaciones",
+    "subtitle": "Los números, para quienes los necesitan. Todo aquí es del prototipo actual y puede cambiar antes de la primera producción.",
+    "items": {
+      "audio": {
+        "title": "Audio",
+        "content": "Captura ultrasónica hasta 192 kHz, 16 bits, escrita a microSD. Grabación continua, programada o por disparador."
+      },
+      "sensors": {
+        "title": "Sensores",
+        "content": "Temperatura, humedad, luz, presión y movimiento. Cada detección llega con las condiciones que la produjeron."
+      },
+      "power": {
+        "title": "Energía",
+        "content": "Tres pilas AA o AAA con USB-C para configuración. Pocos microamperios en reposo significa despliegues de meses."
+      },
+      "radio": {
+        "title": "Radio y versiones regionales",
+        "content": "Radio LoRaWAN ajustada para cada región: Kenia (EU868), Brasil (AU915), Filipinas (AS923). La configuración de radio se fija en fabricación."
+      },
+      "size": {
+        "title": "Tamaño y carcasa",
+        "content": "Placa de 57 × 47 mm, cuatro capas — ligeramente más pequeña que un AudioMoth en ambas direcciones. Carcasa impermeable o impresa en 3D opcional."
+      },
+      "open": {
+        "title": "Hardware abierto",
+        "content": "Esquema, diseño de placa, archivos de fabricación y firmware son todos desarrollados en público. Constrúyelo, repáralo y adáptalo tú mismo."
+      }
+    }
+  },
+  "stickyBar": {
+    "boardOnly": "solo placa",
+    "preOrder": "Pre-ordenar"
   }
 }

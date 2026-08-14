@@ -1,86 +1,117 @@
 {
   "meta": {
     "title": "Bumimic — an open recorder for listening to nature",
-    "description": "A low-cost, open acoustic recorder for biodiversity monitoring. The first prototype units arrive in mid-September."
+    "description": "A pocket-sized acoustic recorder that listens above human hearing, logs the weather, and keeps going for months on three AA cells."
   },
   "hero": {
-    "title": "Bumimic",
-    "accent": "for listening to nature",
-    "lede": "A low-cost, open recorder that listens to a place around the clock, keeps the audio on a memory card, and sends short alerts back over long-range radio.",
-    "imageAlt": "Misty forest landscape at first light"
-  },
-  "prototype": {
-    "title": "Not for sale yet",
-    "body": "Bumimic is a working prototype. The first units arrive in mid-September for field testing, and the design still has to pass sound, radio, power and safety checks before anyone can order one.",
-    "action": "Ask about field testing"
-  },
-  "capabilities": {
-    "title": "What it does",
-    "items": {
-      "record": {
-        "title": "Records around the clock",
-        "body": "Up to 384,000 samples a second in 16-bit, with a half-rate mode when a longer deployment matters more than the highest frequencies. Audio is written straight to a microSD card."
-      },
-      "sense": {
-        "title": "Reads its surroundings",
-        "body": "Temperature, humidity, light, air pressure and movement are recorded alongside the sound, so every detection arrives with the conditions that produced it."
-      },
-      "radio": {
-        "title": "Sends short alerts home",
-        "body": "Detections and battery health travel back over long-range radio, so a site can be checked without visiting it. The recordings themselves stay on the card."
-      },
-      "power": {
-        "title": "Runs on ordinary batteries",
-        "body": "Three AA or AAA cells, with USB-C for setup. Between recordings the board is designed to draw only a few millionths of an amp."
-      }
-    }
+    "title": "Hear what",
+    "accent": "nature",
+    "titleEnd": "is saying",
+    "lede": "A pocket-sized recorder that listens above the range of human hearing, logs the weather around it, and keeps going for months on three AA cells.",
+    "preOrder": "Pre-order",
+    "hearSample": "Hear a sample",
+    "tagline": "Assembled and tested. Open hardware. Ships from Zurich."
   },
   "board": {
-    "title": "The prototype board",
-    "body": "The design is open from the start: schematic, board layout, manufacturing files and firmware are all developed in public so field teams can build, repair and adapt it themselves.",
-    "caption": "Bumimic prototype board, 57 × 47 mm — slightly smaller than an AudioMoth in both directions.",
     "imageAlt": "Render of the Bumimic prototype circuit board, showing the microSD slot, radio module and sensors",
-    "repoLink": "View the design files",
-    "repoPending": "The design files will be published once the prototype has been through field testing."
+    "caption": "Board render — board-v0.3, top-down on white"
   },
-  "cost": {
-    "title": "What we expect it to cost",
-    "board": {
-      "value": "$13–18",
-      "label": "Board and assembly",
-      "note": "Electronics and assembly at a run of about 1,000 units."
+  "features": {
+    "ultrasonic": {
+      "title": "Listens up to 192 kHz",
+      "body": "Ultrasonic audio is written straight to a microSD card, on a schedule you set or whenever a trigger fires. The recordings never leave your hands."
     },
-    "unit": {
-      "value": "$20–30",
-      "label": "Complete field unit",
-      "note": "All the electronics for a deployable recorder, before enclosure and batteries."
+    "sensors": {
+      "title": "Reads the weather around it",
+      "body": "Temperature, humidity, light, pressure and movement are logged beside the audio, so a sighting arrives with the conditions that produced it."
     },
-    "excludes": {
-      "title": "Not included in those figures",
-      "items": {
-        "microsd": "Memory card",
-        "antenna": "Antenna",
-        "batteries": "Batteries",
-        "enclosure": "Enclosure",
-        "certification": "Certification",
-        "freight": "Shipping",
-        "testing": "Production testing"
-      }
+    "alerts": {
+      "title": "Tells you when something happens",
+      "body": "Event alerts travel over LoRaWAN to whoever is watching the site. Only the alert travels — the audio stays on the card until you collect it."
     },
-    "note": "These are planning estimates, not supplier quotes. Real prices depend on the configuration, the country it ships to, and what manufacturers quote when we order."
-  },
-  "regions": {
-    "title": "Built for a specific place",
-    "body": "Radio rules differ from country to country, so each unit is built and labelled for where it will be deployed. The first builds target these three.",
-    "items": {
-      "kenya": "Kenya",
-      "brazil": "Brazil",
-      "philippines": "Philippines"
+    "battery": {
+      "title": "Leave it out there",
+      "body": "A few microamps at rest and three AA cells to draw from. Deployments are measured in months, and any shop that sells batteries can keep one running."
     }
   },
-  "cta": {
-    "title": "Interested in Bumimic?",
-    "description": "Tell us about your site and how you would use a recorder there. We are looking for field teams to test the first units with.",
-    "contact": "Contact GainForest"
+  "specs": {
+    "boardCaption": "Board detail — mic, sensors, microSD, radio"
+  },
+  "quickSpecs": {
+    "0": {
+      "title": "Ultrasonic microphone",
+      "body": "Tuned for bats and insects, not speech."
+    },
+    "1": {
+      "title": "Five sensors",
+      "body": "Temperature, humidity, light, pressure, motion."
+    },
+    "2": {
+      "title": "LoRaWAN radio",
+      "body": "Regional settings for Kenya, Brazil, Philippines."
+    },
+    "3": {
+      "title": "microSD storage",
+      "body": "Up to 512 GB of recordings on a single card."
+    }
+  },
+  "order": {
+    "title": "Configure your order",
+    "subtitle": "Every choice for the order sits here — the regional radio build, a case if you want one, and where it ships.",
+    "region": {
+      "label": "Regional build",
+      "note": "Radio settings are fixed at build time, so pick the country the device will live in."
+    },
+    "addons": {
+      "label": "Add-ons — pick any, or none",
+      "waterproof": "Waterproof case",
+      "printed": "3D-printed case",
+      "note": "The waterproof case is sealed for wet-season deployment; the printed case is lighter and its files are open, so you can print your own. Accessory prices are provisional."
+    },
+    "shipTo": {
+      "label": "Ship to",
+      "placeholder": "Select a country"
+    },
+    "units": {
+      "label": "Units",
+      "decrease": "Decrease quantity",
+      "increase": "Increase quantity"
+    },
+    "total": "Total",
+    "preOrder": "Pre-order"
+  },
+  "specifications": {
+    "title": "Specifications",
+    "subtitle": "The numbers, for the people who need them. Everything here is from the current prototype and may change before the first production run.",
+    "items": {
+      "audio": {
+        "title": "Audio",
+        "content": "Ultrasonic capture to 192 kHz sample rate, 16-bit, written to microSD. Continuous, scheduled or trigger-based recording."
+      },
+      "sensors": {
+        "title": "Sensors",
+        "content": "Temperature, humidity, light, pressure and movement. Every detection arrives with the conditions that produced it."
+      },
+      "power": {
+        "title": "Power",
+        "content": "Three AA or AAA cells with USB-C for setup. A few microamps at rest means deployments measured in months."
+      },
+      "radio": {
+        "title": "Radio and regional builds",
+        "content": "LoRaWAN radio tuned for each region: Kenya (EU868), Brazil (AU915), Philippines (AS923). Radio settings are fixed at build time."
+      },
+      "size": {
+        "title": "Size and enclosure",
+        "content": "57 × 47 mm board, four-layer — slightly smaller than an AudioMoth in both directions. Optional waterproof or 3D-printed case."
+      },
+      "open": {
+        "title": "Open hardware",
+        "content": "Schematic, board layout, manufacturing files and firmware are all developed in public. Build, repair and adapt it yourself."
+      }
+    }
+  },
+  "stickyBar": {
+    "boardOnly": "board only",
+    "preOrder": "Pre-order"
   }
 }

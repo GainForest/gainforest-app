@@ -1,86 +1,117 @@
 {
   "meta": {
     "title": "Bumimic — kirekodi huria cha kusikiliza mazingira",
-    "description": "Kirekodi cha sauti huria na cha gharama nafuu kwa ufuatiliaji wa bioanuwai. Vifaa vya kwanza vya mfano vinawasili katikati ya Septemba."
+    "description": "Kirekodi cha sauti cha mfukoni kinachosikiliza juu ya uwezo wa binadamu, kinarekodia hali ya hewa, na kinaendelea miezi kwa betri tatu za AA."
   },
   "hero": {
-    "title": "Bumimic",
-    "accent": "kwa kusikiliza mazingira",
-    "lede": "Kirekodi huria na cha gharama nafuu kinachosikiliza eneo saa zote, kinaweka sauti kwenye kadi ya kumbukumbu, na kinatuma taarifa fupi kwa redio ya masafa marefu.",
-    "imageAlt": "Mandhari ya msitu wenye ukungu mwanzoni wa mwanga"
-  },
-  "prototype": {
-    "title": "Hakiuzwi bado",
-    "body": "Bumimic ni kifaa cha mfano kinachofanya kazi. Vifaa vya kwanza vinawasili katikati ya Septemba kwa majaribio ya shambani, na muundo bado unatakiwa kupita vipimo vya sauti, redio, nishati na usalama kabla mtu aweze kuagiza.",
-    "action": "Uliza kuhusu majaribio ya shambani"
-  },
-  "capabilities": {
-    "title": "Kinachofanya",
-    "items": {
-      "record": {
-        "title": "Kinarekodi saa zote",
-        "body": "Hadi sampuli 384,000 kwa sekunde kwa biti 16, na hali ya nusu kasi wakati muda mrefu shambani ni muhimu kuliko masikizo ya juu zaidi. Sauti inaandikwa moja kwa moja kwenye kadi ya microSD."
-      },
-      "sense": {
-        "title": "Kinasoma mazingira yake",
-        "body": "Joto, unyevu, mwanga, mgandamizo wa hewa na mwendo yanarekodiwa pamoja na sauti, hivyo kila kilichoonekana kinafika na hali zilizokizalisha."
-      },
-      "radio": {
-        "title": "Kinatuma taarifa fupi",
-        "body": "Yaliyoonekana na hali ya betri yanatumwa kwa redio ya masafa marefu, hivyo eneo linaweza kufuatiliwa bila kutembelewa. Rekodi zenyewe zinabaki kwenye kadi."
-      },
-      "power": {
-        "title": "Kinatumia betri za kawaida",
-        "body": "Betri tatu za AA au AAA, pamoja na USB-C kwa usanidi. Kati ya kurekodi, bodi imeundwa kutumia sehemu chache tu za milioni ya ampea."
-      }
-    }
+    "title": "Sikiliza",
+    "accent": "mazingira",
+    "titleEnd": "yanasema nini",
+    "lede": "Kirekodi cha mfukoni kinachosikiliza juu ya uwezo wa kusikia wa binadamu, kinarekodia hali ya hewa inayokizunguka, na kinaendelea miezi kwa betri tatu za AA.",
+    "preOrder": "Agiza mapema",
+    "hearSample": "Sikiliza sampuli",
+    "tagline": "Kimeunganishwa na kujaribiwa. Vifaa huria. Kinatumwa kutoka Zurich."
   },
   "board": {
-    "title": "Bodi ya kifaa cha mfano",
-    "body": "Muundo ni huria kuanzia mwanzo: mchoro, mpangilio wa bodi, faili za uzalishaji na programu ya kifaa vinatengenezwa hadharani, ili timu za shambani ziweze kuunda, kutengeneza na kubadilisha zenyewe.",
-    "caption": "Bodi ya kifaa cha mfano cha Bumimic, 57 × 47 mm — ndogo kidogo kuliko AudioMoth kwa pande zote mbili.",
-    "imageAlt": "Mchoro wa bodi ya mzunguko ya kifaa cha mfano cha Bumimic, ikionyesha nafasi ya microSD, moduli ya redio na sensori",
-    "repoLink": "Tazama faili za muundo",
-    "repoPending": "Faili za muundo zitawekwa hadharani baada ya kifaa cha mfano kupita majaribio ya shambani."
+    "imageAlt": "Mchoro wa bodi ya mzunguko wa mfano wa Bumimic, ikionyesha nafasi ya microSD, moduli ya radio, na sensori",
+    "caption": "Mchoro wa bodi — board-v0.3, mtazamo wa juu kwenye nyeupe"
   },
-  "cost": {
-    "title": "Gharama tunayotarajia",
-    "board": {
-      "value": "$13–18",
-      "label": "Bodi na uunganishaji",
-      "note": "Elektroniki na uunganishaji kwa uzalishaji wa takriban vipande 1,000."
+  "features": {
+    "ultrasonic": {
+      "title": "Inasikiliza hadi 192 kHz",
+      "body": "Sauti ya ultrasonic inaandikwa moja kwa moja kwenye kadi ya microSD, kwa ratiba unayoweka au wakati kichocheo kinapowaka. Rekodi hazitoki mikononi mwako."
     },
-    "unit": {
-      "value": "$20–30",
-      "label": "Kifaa kamili cha shambani",
-      "note": "Elektroniki yote ya kirekodi kilicho tayari kutumika, kabla ya kifuniko na betri."
+    "sensors": {
+      "title": "Inasoma hali ya hewa inayoizunguka",
+      "body": "Joto, unyevu, mwanga, shinikizo, na mwendo vinarekodiwa pamoja na sauti, kwa hivyo kila kilichoonekana kinafika na hali zilizokizalisha."
     },
-    "excludes": {
-      "title": "Hazijumuishwi katika takwimu hizo",
-      "items": {
-        "microsd": "Kadi ya kumbukumbu",
-        "antenna": "Antena",
-        "batteries": "Betri",
-        "enclosure": "Kifuniko",
-        "certification": "Uthibitisho",
-        "freight": "Usafirishaji",
-        "testing": "Upimaji wa uzalishaji"
-      }
+    "alerts": {
+      "title": "Inakuambia wakati kitu kinapotokea",
+      "body": "Tahadhari za matukio zinasafiri kupitia LoRaWAN kwa yeyote anayefuatilia eneo. Tahadhari tu ndiyo inasafiri — sauti inabaki kwenye kadi hadi uichukue."
     },
-    "note": "Hizi ni makadirio ya mipango, si bei kutoka kwa wasambazaji. Bei za kweli zinategemea usanidi, nchi inakoenda, na bei watakazotoa wazalishaji tunapoagiza."
-  },
-  "regions": {
-    "title": "Kimeundwa kwa eneo maalum",
-    "body": "Kanuni za redio zinatofautiana kati ya nchi, hivyo kila kifaa kinaundwa na kuwekwa alama kwa eneo litakapotumika. Uzalishaji wa kwanza unalenga nchi hizi tatu.",
-    "items": {
-      "kenya": "Kenya",
-      "brazil": "Brazili",
-      "philippines": "Ufilipino"
+    "battery": {
+      "title": "Iache nje",
+      "body": "Mikroampea chache wakati wa kupumzika na betri tatu za AA kutoa nguvu. Uwekaji unapimwa kwa miezi, na duka lolote linalouza betri linaweza kuiendesha."
     }
   },
-  "cta": {
-    "title": "Unavutiwa na Bumimic?",
-    "description": "Tuambie kuhusu eneo lako na jinsi utakavyotumia kirekodi hapo. Tunatafuta timu za shambani kujaribu vifaa vya kwanza.",
-    "contact": "Wasiliana na GainForest"
+  "specs": {
+    "boardCaption": "Maelezo ya bodi — kipaza sauti, sensori, microSD, radio"
+  },
+  "quickSpecs": {
+    "0": {
+      "title": "Kipaza sauti cha ultrasonic",
+      "body": "Kimerekebishwa kwa popo na wadudu, si kwa usemi."
+    },
+    "1": {
+      "title": "Sensori tano",
+      "body": "Joto, unyevu, mwanga, shinikizo, mwendo."
+    },
+    "2": {
+      "title": "Radio ya LoRaWAN",
+      "body": "Mipangilio ya kikanda kwa Kenya, Brazili, Ufilipino."
+    },
+    "3": {
+      "title": "Hifadhi ya microSD",
+      "body": "Hadi GB 512 za rekodi kwenye kadi moja."
+    }
+  },
+  "order": {
+    "title": "Sanidi agizo lako",
+    "subtitle": "Kila chaguo la agizo lipo hapa — toleo la radio la kikanda, kasha ukitaka, na linakoenda.",
+    "region": {
+      "label": "Toleo la kikanda",
+      "note": "Mipangilio ya radio imewekwa wakati wa ujenzi, kwa hivyo chagua nchi ambayo kifaa kitaishi."
+    },
+    "addons": {
+      "label": "Viongezeo — chagua vyovyote, au hakuna",
+      "waterproof": "Kasha kisichopitisha maji",
+      "printed": "Kasha lililochapishwa 3D",
+      "note": "Kasha kisichopitisha maji kimefungwa kwa uwekaji wa msimu wa mvua; kilichochapishwa ni chepesi na faili zake ni huria, kwa hivyo unaweza kuchapisha yako. Bei za vifaa ni za muda."
+    },
+    "shipTo": {
+      "label": "Tuma kwa",
+      "placeholder": "Chagua nchi"
+    },
+    "units": {
+      "label": "Vipande",
+      "decrease": "Punguza kiasi",
+      "increase": "Ongeza kiasi"
+    },
+    "total": "Jumla",
+    "preOrder": "Agiza mapema"
+  },
+  "specifications": {
+    "title": "Vipimo",
+    "subtitle": "Nambari, kwa watu wanaozihitaji. Kila kitu hapa ni kutoka kwa mfano wa sasa na kinaweza kubadilika kabla ya uzalishaji wa kwanza.",
+    "items": {
+      "audio": {
+        "title": "Sauti",
+        "content": "Unasaji wa ultrasonic hadi 192 kHz, biti 16, imeandikwa kwenye microSD. Kurekodi kunaendelea, imepangwa, au kulingana na kichocheo."
+      },
+      "sensors": {
+        "title": "Sensori",
+        "content": "Joto, unyevu, mwanga, shinikizo, na mwendo. Kila kilichoonekana kinafika na hali zilizokizalisha."
+      },
+      "power": {
+        "title": "Nguvu",
+        "content": "Betri tatu za AA au AAA na USB-C kwa usanidi. Mikroampea chache wakati wa kupumzika inamaanisha uwekaji wa miezi."
+      },
+      "radio": {
+        "title": "Radio na toleo za kikanda",
+        "content": "Radio ya LoRaWAN imerekebishwa kwa kila eneo: Kenya (EU868), Brazili (AU915), Ufilipino (AS923). Mipangilio ya radio imewekwa wakati wa ujenzi."
+      },
+      "size": {
+        "title": "Ukubwa na kasha",
+        "content": "Bodi ya 57 × 47 mm, tabaka nne — ndogo kidogo kuliko AudioMoth kwa pande zote mbili. Kasha kisichopitisha maji au kilichochapishwa 3D ni hiari."
+      },
+      "open": {
+        "title": "Vifaa huria",
+        "content": "Mchoro, mpangilio wa bodi, faili za uzalishaji, na firmware vyote vinatengenezwa hadharani. Jenga, tengeneza, na rekebisha mwenyewe."
+      }
+    }
+  },
+  "stickyBar": {
+    "boardOnly": "bodi tu",
+    "preOrder": "Agiza mapema"
   }
 }
