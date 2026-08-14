@@ -652,7 +652,7 @@
   "observations": {
     "quickAdd": {
       "title": "Add observations",
-      "description": "Photos, or a whole card from a recorder.",
+      "description": "An observation is what you saw or heard in nature, with where and when. Add photos, or all the recordings from an AudioMoth card.",
       "close": "Close",
       "back": "Back",
       "uploadingForLabel": "Uploading for",

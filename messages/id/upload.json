@@ -652,7 +652,7 @@
   "observations": {
     "quickAdd": {
       "title": "Tambah observasi",
-      "description": "Foto, atau seluruh kartu dari perekam.",
+      "description": "Observasi adalah apa yang Anda lihat atau dengar di alam, beserta di mana dan kapan. Tambahkan foto, atau semua rekaman dari kartu AudioMoth.",
       "close": "Tutup",
       "back": "Kembali",
       "uploadingForLabel": "Mengunggah untuk",

@@ -652,7 +652,7 @@
   "observations": {
     "quickAdd": {
       "title": "Ongeza uchunguzi",
-      "description": "Picha, au kadi nzima kutoka kwenye kinasa sauti.",
+      "description": "Uchunguzi ni ulichokiona au kukisikia katika maumbile, pamoja na mahali na wakati. Ongeza picha, au rekodi zote kutoka kadi ya AudioMoth.",
       "close": "Funga",
       "back": "Rudi",
       "uploadingForLabel": "Inapakia kwa",

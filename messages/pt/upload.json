@@ -652,7 +652,7 @@
   "observations": {
     "quickAdd": {
       "title": "Adicionar observações",
-      "description": "Fotos, ou um cartão inteiro de um gravador.",
+      "description": "Uma observação é o que você viu ou ouviu na natureza, com onde e quando. Adicione fotos, ou todas as gravações de um cartão de AudioMoth.",
       "close": "Fechar",
       "back": "Voltar",
       "uploadingForLabel": "Enviando para",
