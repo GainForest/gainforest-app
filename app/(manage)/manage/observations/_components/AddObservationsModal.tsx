@@ -118,6 +118,7 @@ import {
   AUDIO_EVENT_SELECTION_PREFIX,
   deviceChipLabel,
   deviceNeedsDeployment,
+  dragPayloadRejected,
   formatRecordingBytes,
   formatSampleRates,
   NEW_AUDIO_FOLDER,
@@ -1225,13 +1226,15 @@ export function AddObservationsModal({
     if (!dragHasFiles(event)) return;
     event.preventDefault();
     dragDepth.current += 1;
-    setIsDragging(true);
+    // A payload with nothing usable in it (say, a lone mp3 or a video) is
+    // refused outright: no highlight, and dragover marks it not-allowed.
+    if (!dragPayloadRejected(event.dataTransfer?.items)) setIsDragging(true);
   }
 
   function onDragOver(event: DragEvent<HTMLDivElement>) {
     if (!dragHasFiles(event)) return;
     event.preventDefault();
-    event.dataTransfer.dropEffect = "copy";
+    event.dataTransfer.dropEffect = dragPayloadRejected(event.dataTransfer.items) ? "none" : "copy";
   }
 
   function onDragLeave(event: DragEvent<HTMLDivElement>) {
@@ -1246,6 +1249,9 @@ export function AddObservationsModal({
     dragDepth.current = 0;
     setIsDragging(false);
     if (!dragHasFiles(event)) return;
+    // dropEffect "none" already blocks these drops; guard for browsers that
+    // fire the drop event anyway.
+    if (dragPayloadRejected(event.dataTransfer.items)) return;
     const droppedItems = event.dataTransfer.items;
     // A whole SD card dragged from the file manager arrives as a directory
     // entry — walk it (entries must be grabbed before the drop event settles).

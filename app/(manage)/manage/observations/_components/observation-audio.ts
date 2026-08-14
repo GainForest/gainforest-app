@@ -46,6 +46,32 @@ export function splitObservationFiles(files: File[]): { images: File[]; wavs: Fi
   return { images, wavs };
 }
 
+/** MIME types WAV files travel under; many systems leave the type empty. */
+const WAV_MIME_TYPES = new Set(["audio/wav", "audio/x-wav", "audio/wave", "audio/vnd.wave"]);
+
+/**
+ * True when a drag payload holds files and none of them could possibly be
+ * used here — every one carries a known MIME type that is neither an image
+ * nor WAV audio (a voice memo, a video, a spreadsheet). The drop zone then
+ * refuses the drop outright (not-allowed cursor) instead of swallowing the
+ * files. Items with an empty type stay droppable: a directory (a whole SD
+ * card) and a file the OS didn't tag both look like that mid-drag, and
+ * filenames can't be read until the drop lands.
+ */
+export function dragPayloadRejected(
+  items: ArrayLike<{ kind: string; type: string }> | null | undefined,
+): boolean {
+  let fileCount = 0;
+  for (let i = 0; i < (items?.length ?? 0); i += 1) {
+    const item = items![i]!;
+    if (item.kind !== "file") continue;
+    fileCount += 1;
+    const type = item.type.toLowerCase();
+    if (!type || type.startsWith("image/") || WAV_MIME_TYPES.has(type)) return false;
+  }
+  return fileCount > 0;
+}
+
 /** Recording time: header timestamp → filename pattern → file mtime. */
 export function quickRecordingTime(rec: QuickRecording): Date {
   if (rec.info?.recordedAt) return rec.info.recordedAt;
