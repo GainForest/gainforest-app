@@ -1,10 +1,11 @@
 "use client";
 
 /**
- * Client-side helper for publish mutations routed through
- * /api/manage/proxy for personal repo writes, or /api/cgs/mutation for
- * organization-owned writes. Server routes forward to the configured auth
- * service.
+ * Client-side helper for publish mutations. Every write — personal or
+ * organization-owned — goes through /api/manage/proxy so app-level rules
+ * (tree date validation, the site-deletion reference guard, …) apply the
+ * same way regardless of who owns the repo. The proxy forwards to the
+ * configured auth service, which enforces sessions and org roles.
  */
 
 import { formatCgsErrorMessage } from "@/app/_lib/cgs-errors";
@@ -151,7 +152,6 @@ type CreateMultimediaFromUrlInput = CreateMultimediaInput & {
 
 const MULTIMEDIA_COLLECTION = "app.gainforest.ac.multimedia";
 const MUTATION_TIMEOUT_MS = 45_000;
-const DIRECT_CGS_OPERATIONS = new Set<MutationPayload["operation"]>(["createRecord", "putRecord", "deleteRecord", "uploadBlob"]);
 
 async function readProxyResponse(res: Response): Promise<unknown> {
   const text = await res.text();
@@ -167,10 +167,9 @@ async function callProxy<T>(payload: MutationPayload): Promise<T> {
   const controller = new AbortController();
   const timeout = window.setTimeout(() => controller.abort(), MUTATION_TIMEOUT_MS);
   const isGroupScoped = "repo" in payload && typeof payload.repo === "string" && payload.repo.length > 0;
-  const useDirectCgs = isGroupScoped && DIRECT_CGS_OPERATIONS.has(payload.operation);
 
   try {
-    const res = await fetch(useDirectCgs ? "/api/cgs/mutation" : "/api/manage/proxy", {
+    const res = await fetch("/api/manage/proxy", {
       method: "POST",
       headers: { "content-type": "application/json" },
       body: JSON.stringify(payload),
