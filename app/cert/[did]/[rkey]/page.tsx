@@ -54,7 +54,7 @@ import {
   type RecordDetail,
   type TimelineAttachmentItem,
 } from "../../../_lib/indexer";
-import { isPdsBlobUrl } from "../../../_lib/pds";
+import { dropDeletedRecordUris, isPdsBlobUrl, listPdsRecordUris } from "../../../_lib/pds";
 import { projectMediaTransitionStyle } from "../../../_lib/view-transition";
 import { NOINDEX_ROBOTS } from "../../../_lib/seo-metadata";
 import { blockExplorerUrl, INDEXER_URL, localBumicertHref, localProjectHref } from "../../../_lib/urls";
@@ -1299,7 +1299,42 @@ export async function loadBumicertRouteData(
   ]);
 
   if (!record || record.kind !== "bumicert") return null;
-  return { record, detail, owner, fundingConfig, authSession, routeIdentifier: requestedIdentifier, urlIdentifier: owner.urlIdentifier };
+  // A Cert's `locations` strongRefs can outlive their targets (deleting a
+  // site doesn't rewrite the Certs that point at it). Keep only the places
+  // that still exist so the sidebar map, Places count, and Places tab never
+  // render a dangling ref (which shows up as an "Unable to preview" map).
+  let locationUris = await dropDeletedRecordUris(record.locationUris);
+  if (locationUris.length === 0 && record.locationUris.length > 0) {
+    // Every place this Cert linked has been deleted — the org rebuilt its
+    // site library and the strongrefs went stale. Fall back to the org's
+    // live site records so the map still shows where the work happens.
+    locationUris = await listPdsRecordUris(record.did, "app.certified.location").catch(() => []);
+  }
+  const hasDanglingLocations =
+    locationUris.length !== record.locationUris.length ||
+    locationUris.some((uri, index) => uri !== record.locationUris[index]);
+  const liveRecord = hasDanglingLocations
+    ? { ...record, locationUris, locationCount: locationUris.length }
+    : record;
+  // The detail's "Claim" section repeats the place count ("Project places") —
+  // keep it in step with the filtered list.
+  const liveDetail =
+    hasDanglingLocations && detail
+      ? {
+          ...detail,
+          sections: detail.sections.map((section) => ({
+            ...section,
+            fields: section.fields.flatMap((f) =>
+              f.label !== "Project places"
+                ? [f]
+                : locationUris.length > 0
+                  ? [{ ...f, value: formatNumber(locationUris.length) }]
+                  : [],
+            ),
+          })),
+        }
+      : detail;
+  return { record: liveRecord, detail: liveDetail, owner, fundingConfig, authSession, routeIdentifier: requestedIdentifier, urlIdentifier: owner.urlIdentifier };
 }
 
 async function fetchBumicertFundingConfig(did: string, rkey: string): Promise<BumicertFundingConfig> {

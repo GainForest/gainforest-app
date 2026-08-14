@@ -220,6 +220,74 @@ export async function getPdsRecord(
 }
 
 /**
+ * Drop AT-URIs whose records have been deleted from their owner's PDS.
+ *
+ * A record that links other records by strongRef (e.g. a Cert's `locations`)
+ * can outlive its targets — deleting a linked record does not rewrite the
+ * documents that point at it. Rendering such a dangling ref produces broken
+ * embeds (the sidebar map iframes `locations[0]` and shows "Unable to
+ * preview" when that record is gone).
+ *
+ * Fail-open by design: a URI is only dropped when its PDS positively answers
+ * `RecordNotFound`. Network failures, unreachable PDS hosts, and other errors
+ * keep the URI, so a PDS outage never makes existing places disappear.
+ */
+export async function dropDeletedRecordUris(
+  uris: string[],
+  signal?: AbortSignal,
+): Promise<string[]> {
+  if (uris.length === 0) return uris;
+  const checked = await Promise.all(
+    uris.map(async (uri) => {
+      const parts = parseAtUri(uri);
+      if (!parts) return uri;
+      const host = await resolvePdsHost(parts.did, signal).catch(() => null);
+      if (!host) return uri;
+      const params = new URLSearchParams({
+        repo: parts.did,
+        collection: parts.collection,
+        rkey: parts.rkey,
+      });
+      const res = await fetch(
+        `https://${host}/xrpc/com.atproto.repo.getRecord?${params.toString()}`,
+        { signal, cache: "no-store" },
+      ).catch(() => null);
+      if (!res || res.ok) return uri;
+      const payload = (await res.json().catch(() => null)) as { error?: unknown } | null;
+      return payload?.error === "RecordNotFound" ? null : uri;
+    }),
+  );
+  return checked.filter((uri): uri is string => uri !== null);
+}
+
+/**
+ * List the AT-URIs a repo currently holds in one collection, straight from
+ * the owner's PDS. Unlike stored strongrefs (which can dangle after the
+ * target is deleted), a live listing can never reference a missing record —
+ * it is the authoritative "what does this account have right now" source.
+ * Returns [] when the PDS can't be reached.
+ */
+export async function listPdsRecordUris(
+  did: string,
+  collection: string,
+  signal?: AbortSignal,
+): Promise<string[]> {
+  const host = await resolvePdsHost(did, signal);
+  if (!host) return [];
+  const params = new URLSearchParams({ repo: did, collection, limit: "100" });
+  const res = await fetch(
+    `https://${host}/xrpc/com.atproto.repo.listRecords?${params.toString()}`,
+    { signal, cache: "no-store" },
+  ).catch(() => null);
+  if (!res?.ok) return [];
+  const payload = (await res.json().catch(() => null)) as { records?: unknown } | null;
+  const records = Array.isArray(payload?.records) ? payload.records : [];
+  return records
+    .map((record) => (record as { uri?: unknown })?.uri)
+    .filter((uri): uri is string => typeof uri === "string" && uri.length > 0);
+}
+
+/**
  * The collections a repo actually holds records in.
  *
  * A repo only lists a collection once something has been written to it, so
