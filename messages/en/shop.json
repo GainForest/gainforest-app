@@ -1,0 +1,86 @@
+{
+  "meta": {
+    "title": "Bumimic — an open recorder for listening to nature",
+    "description": "A low-cost, open acoustic recorder for biodiversity monitoring. The first prototype units arrive in mid-September."
+  },
+  "hero": {
+    "title": "Bumimic",
+    "accent": "for listening to nature",
+    "lede": "A low-cost, open recorder that listens to a place around the clock, keeps the audio on a memory card, and sends short alerts back over long-range radio.",
+    "imageAlt": "Misty forest landscape at first light"
+  },
+  "prototype": {
+    "title": "Not for sale yet",
+    "body": "Bumimic is a working prototype. The first units arrive in mid-September for field testing, and the design still has to pass sound, radio, power and safety checks before anyone can order one.",
+    "action": "Ask about field testing"
+  },
+  "capabilities": {
+    "title": "What it does",
+    "items": {
+      "record": {
+        "title": "Records around the clock",
+        "body": "Up to 384,000 samples a second in 16-bit, with a half-rate mode when a longer deployment matters more than the highest frequencies. Audio is written straight to a microSD card."
+      },
+      "sense": {
+        "title": "Reads its surroundings",
+        "body": "Temperature, humidity, light, air pressure and movement are recorded alongside the sound, so every detection arrives with the conditions that produced it."
+      },
+      "radio": {
+        "title": "Sends short alerts home",
+        "body": "Detections and battery health travel back over long-range radio, so a site can be checked without visiting it. The recordings themselves stay on the card."
+      },
+      "power": {
+        "title": "Runs on ordinary batteries",
+        "body": "Three AA or AAA cells, with USB-C for setup. Between recordings the board is designed to draw only a few millionths of an amp."
+      }
+    }
+  },
+  "board": {
+    "title": "The prototype board",
+    "body": "The design is open from the start: schematic, board layout, manufacturing files and firmware are all developed in public so field teams can build, repair and adapt it themselves.",
+    "caption": "Bumimic prototype board, 57 × 47 mm — slightly smaller than an AudioMoth in both directions.",
+    "imageAlt": "Render of the Bumimic prototype circuit board, showing the microSD slot, radio module and sensors",
+    "repoLink": "View the design files",
+    "repoPending": "The design files will be published once the prototype has been through field testing."
+  },
+  "cost": {
+    "title": "What we expect it to cost",
+    "board": {
+      "value": "$13–18",
+      "label": "Board and assembly",
+      "note": "Electronics and assembly at a run of about 1,000 units."
+    },
+    "unit": {
+      "value": "$20–30",
+      "label": "Complete field unit",
+      "note": "All the electronics for a deployable recorder, before enclosure and batteries."
+    },
+    "excludes": {
+      "title": "Not included in those figures",
+      "items": {
+        "microsd": "Memory card",
+        "antenna": "Antenna",
+        "batteries": "Batteries",
+        "enclosure": "Enclosure",
+        "certification": "Certification",
+        "freight": "Shipping",
+        "testing": "Production testing"
+      }
+    },
+    "note": "These are planning estimates, not supplier quotes. Real prices depend on the configuration, the country it ships to, and what manufacturers quote when we order."
+  },
+  "regions": {
+    "title": "Built for a specific place",
+    "body": "Radio rules differ from country to country, so each unit is built and labelled for where it will be deployed. The first builds target these three.",
+    "items": {
+      "kenya": "Kenya",
+      "brazil": "Brazil",
+      "philippines": "Philippines"
+    }
+  },
+  "cta": {
+    "title": "Interested in Bumimic?",
+    "description": "Tell us about your site and how you would use a recorder there. We are looking for field teams to test the first units with.",
+    "contact": "Contact GainForest"
+  }
+}

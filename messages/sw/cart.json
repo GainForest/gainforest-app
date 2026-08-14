@@ -234,6 +234,13 @@
     },
     "myCardsTitle": "Matunzio ya Bumicerts Zangu",
     "myCardsDescription": "Hakiki matunzio ya Bumicerts zilizokusanywa yenye mifano ya Bumicerts.",
+    "shop": {
+      "title": "Ukurasa wa duka (Bumimic)",
+      "description": "Ukurasa wa bidhaa ya Bumimic, kirekodi cha sauti huria na cha gharama nafuu.",
+      "mockBadge": "Ukurasa tuli",
+      "cardTitle": "Ukurasa wa duka la Bumimic",
+      "cardDescription": "Onyesho la ukurasa wa bidhaa kwa mfano wa kirekodi cha sauti cha Bumimic."
+    },
     "rewildingDashboard": {
       "title": "Dashibodi ya ruzuku ya Rewilding",
       "description": "Muhtasari wa Ruzuku yangu na chati yake ya mwendo wa sauti, katika kila hali ambayo lengo la kurekodi linaweza kuwa.",

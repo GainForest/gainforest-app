@@ -234,6 +234,13 @@
     },
     "myCardsTitle": "Galeri Bumicerts Saya",
     "myCardsDescription": "Pratinjau galeri Bumicerts yang telah dikumpulkan dengan contoh koleksi.",
+    "shop": {
+      "title": "Halaman toko (Bumimic)",
+      "description": "Halaman produk Bumimic, perekam akustik terbuka dan berbiaya rendah.",
+      "mockBadge": "Halaman statis",
+      "cardTitle": "Halaman toko Bumimic",
+      "cardDescription": "Pratinjau halaman produk untuk prototipe perekam akustik Bumimic."
+    },
     "rewildingDashboard": {
       "title": "Dasbor hibah Rewilding",
       "description": "Ikhtisar Hibah saya dan grafik laju audionya, dalam setiap keadaan target perekaman.",

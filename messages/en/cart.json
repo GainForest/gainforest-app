@@ -234,6 +234,13 @@
     },
     "myCardsTitle": "My Bumicerts gallery",
     "myCardsDescription": "Preview the collected Bumicerts gallery, populated with sample collectibles.",
+    "shop": {
+      "title": "Shop page (Bumimic)",
+      "description": "The product page for Bumimic, a low-cost open acoustic recorder.",
+      "mockBadge": "Static page",
+      "cardTitle": "Bumimic shop page",
+      "cardDescription": "Preview the product page for the Bumimic acoustic recorder prototype."
+    },
     "rewildingDashboard": {
       "title": "Rewilding grant dashboard",
       "description": "The My grant overview and its audio pace chart, in each state the recording target can be in.",
