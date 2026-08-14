@@ -1858,7 +1858,12 @@
       "title": "Audio",
       "subtitle": "Upload recordings from an AudioMoth SD card, organise them into deployments and label what you hear — audio observations live here.",
       "metaTitle": "Audio observations",
-      "metaDescription": "Upload AudioMoth recordings, manage deployments, label species and explore soundscapes inside Observations."
+      "metaDescription": "Upload AudioMoth recordings, manage deployments, label species and explore soundscapes inside Observations.",
+      "librarySubtitle": "Every folder and recording you have uploaded, in one place — play them, move them between folders, rename or delete them."
+    },
+    "library": {
+      "signInTitle": "Sign in to see your files",
+      "signInBody": "Your uploaded recordings and folders show up here once you are signed in."
     },
     "devicesHub": {
       "title": "Devices"
@@ -2032,6 +2037,7 @@
       "setup": "Setup",
       "deployments": "Deployment",
       "upload": "Upload",
+      "library": "Files",
       "label": "Label",
       "identifications": "Identifications",
       "soundscape": "Soundscape"

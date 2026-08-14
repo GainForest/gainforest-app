@@ -1858,7 +1858,12 @@
       "title": "Audio",
       "subtitle": "Unggah rekaman dari kartu SD AudioMoth, susun ke dalam penempatan, dan beri label pada apa yang Anda dengar — observasi audio ada di sini.",
       "metaTitle": "Observasi audio",
-      "metaDescription": "Unggah rekaman AudioMoth, kelola penempatan, beri label spesies, dan jelajahi lanskap suara di dalam Observasi."
+      "metaDescription": "Unggah rekaman AudioMoth, kelola penempatan, beri label spesies, dan jelajahi lanskap suara di dalam Observasi.",
+      "librarySubtitle": "Semua folder dan rekaman yang telah Anda unggah, di satu tempat — putar, pindahkan antar folder, ganti nama, atau hapus."
+    },
+    "library": {
+      "signInTitle": "Masuk untuk melihat berkas Anda",
+      "signInBody": "Rekaman dan folder yang Anda unggah akan muncul di sini setelah Anda masuk."
     },
     "devicesHub": {
       "title": "Perangkat"
@@ -2032,6 +2037,7 @@
       "setup": "Penyiapan",
       "deployments": "Penempatan",
       "upload": "Unggah",
+      "library": "Berkas",
       "label": "Beri label",
       "identifications": "Identifikasi",
       "soundscape": "Lanskap suara"

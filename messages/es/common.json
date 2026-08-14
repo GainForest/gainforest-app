@@ -1858,7 +1858,12 @@
       "title": "Audio",
       "subtitle": "Sube grabaciones desde la tarjeta SD de un AudioMoth, organízalas en despliegues y etiqueta lo que escuchas: las observaciones de audio viven aquí.",
       "metaTitle": "Observaciones de audio",
-      "metaDescription": "Sube grabaciones de AudioMoth, gestiona despliegues, etiqueta especies y explora paisajes sonoros dentro de Observaciones."
+      "metaDescription": "Sube grabaciones de AudioMoth, gestiona despliegues, etiqueta especies y explora paisajes sonoros dentro de Observaciones.",
+      "librarySubtitle": "Todas las carpetas y grabaciones que has subido, en un solo lugar: reprodúcelas, muévelas entre carpetas, renómbralas o elimínalas."
+    },
+    "library": {
+      "signInTitle": "Inicia sesión para ver tus archivos",
+      "signInBody": "Tus grabaciones y carpetas subidas aparecerán aquí cuando inicies sesión."
     },
     "devicesHub": {
       "title": "Dispositivos"
@@ -2032,6 +2037,7 @@
       "setup": "Configuración",
       "deployments": "Despliegue",
       "upload": "Subir",
+      "library": "Archivos",
       "label": "Etiquetar",
       "identifications": "Identificaciones",
       "soundscape": "Paisaje sonoro"

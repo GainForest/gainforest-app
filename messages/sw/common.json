@@ -1858,7 +1858,12 @@
       "title": "Sauti",
       "subtitle": "Pakia rekodi kutoka kadi ya SD ya AudioMoth, zipange katika usambazaji na uweke lebo unachosikia — uchunguzi wa sauti unaishi hapa.",
       "metaTitle": "Uchunguzi wa sauti",
-      "metaDescription": "Pakia rekodi za AudioMoth, dhibiti usambazaji, weka lebo spishi na uchunguze mandhari ya sauti ndani ya Uchunguzi."
+      "metaDescription": "Pakia rekodi za AudioMoth, dhibiti usambazaji, weka lebo spishi na uchunguze mandhari ya sauti ndani ya Uchunguzi.",
+      "librarySubtitle": "Folda na rekodi zote ulizopakia, mahali pamoja — zicheze, zihamishe kati ya folda, zibadilishe jina au uzifute."
+    },
+    "library": {
+      "signInTitle": "Ingia ili kuona faili zako",
+      "signInBody": "Rekodi na folda ulizopakia zitaonekana hapa baada ya kuingia."
     },
     "devicesHub": {
       "title": "Vifaa"
@@ -2032,6 +2037,7 @@
       "setup": "Usanidi",
       "deployments": "Usambazaji",
       "upload": "Pakia",
+      "library": "Faili",
       "label": "Weka lebo",
       "identifications": "Vitambulisho",
       "soundscape": "Mandhari ya sauti"

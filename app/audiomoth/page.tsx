@@ -8,7 +8,7 @@ export const dynamic = "force-dynamic";
  * the USB setup tool to /observations/devices. This route only keeps old
  * links (and bookmarks) working.
  */
-const AUDIO_TABS = new Set(["deployments", "upload", "label", "identifications", "soundscape"]);
+const AUDIO_TABS = new Set(["deployments", "upload", "library", "label", "identifications", "soundscape"]);
 
 export default async function AudioMothPage({
   searchParams,

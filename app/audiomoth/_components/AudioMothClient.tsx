@@ -21,6 +21,7 @@ import {
   CpuIcon,
   DownloadIcon,
   FingerprintIcon,
+  FolderOpenIcon,
   HardDriveUploadIcon,
   InfoIcon,
   ListChecksIcon,
@@ -82,6 +83,7 @@ import { createEquipment, equipmentDetailPath, listEquipment, updateEquipment, t
 import { loadAppliedConfig, mergeSetupNotes, saveAppliedConfig, SETUP_NOTES_HEADER } from "@/app/_lib/audiomoth/setup-store";
 import { DeploymentsTab } from "./DeploymentsTab";
 import { UploadTab } from "./UploadTab";
+import { LibraryTab } from "./LibraryTab";
 import { LabelTab } from "./LabelTab";
 import { IdentificationsClient } from "@/app/identifications/_components/IdentificationsClient";
 import { SoundscapeClient } from "@/app/soundscape/_components/SoundscapeClient";
@@ -90,7 +92,7 @@ import { SoundscapeClient } from "@/app/soundscape/_components/SoundscapeClient"
 /* Types                                                               */
 /* ------------------------------------------------------------------ */
 
-type MainTabId = "setup" | "deployments" | "upload" | "label" | "identifications" | "soundscape";
+type MainTabId = "setup" | "deployments" | "upload" | "library" | "label" | "identifications" | "soundscape";
 
 /** Which Observations surface hosts this client: `audio` shows the recording
  *  tabs (deployments, upload, label, identifications, soundscape), `devices`
@@ -98,7 +100,7 @@ type MainTabId = "setup" | "deployments" | "upload" | "label" | "identifications
  *  both; they now live as separate tabs of the Observations hub. */
 export type AudioMothSurface = "audio" | "devices";
 
-const AUDIO_MAIN_TAB_IDS = ["deployments", "upload", "label", "identifications", "soundscape"] as const;
+const AUDIO_MAIN_TAB_IDS = ["deployments", "upload", "library", "label", "identifications", "soundscape"] as const;
 
 function resolveMainTab(tab: string | null, surface: AudioMothSurface): MainTabId {
   if (surface === "devices") return "setup";
@@ -865,6 +867,7 @@ export function AudioMothClient({
   }> = [
     { id: "deployments", label: t("mainTabs.deployments"), Icon: MapPinIcon },
     { id: "upload", label: t("mainTabs.upload"), Icon: HardDriveUploadIcon },
+    { id: "library", label: t("mainTabs.library"), Icon: FolderOpenIcon },
     { id: "label", label: t("mainTabs.label"), Icon: TagsIcon },
     { id: "identifications", label: t("mainTabs.identifications"), Icon: ListChecksIcon },
     { id: "soundscape", label: t("mainTabs.soundscape"), Icon: AudioWaveformIcon },
@@ -880,13 +883,15 @@ export function AudioMothClient({
         lede={
           surface === "devices"
             ? t("subtitle")
-            : mainTab === "label"
-              ? t("label.subtitle")
-              : mainTab === "identifications"
-                ? identificationsT("subtitle")
-                : mainTab === "soundscape"
-                  ? soundscapeT("hero.description")
-                  : t("audioHub.subtitle")
+            : mainTab === "library"
+              ? t("audioHub.librarySubtitle")
+              : mainTab === "label"
+                ? t("label.subtitle")
+                : mainTab === "identifications"
+                  ? identificationsT("subtitle")
+                  : mainTab === "soundscape"
+                    ? soundscapeT("hero.description")
+                    : t("audioHub.subtitle")
         }
       />
       <div className="mx-auto flex w-full max-w-7xl flex-col gap-6 px-4 sm:px-6">
@@ -922,6 +927,8 @@ export function AudioMothClient({
       {mainTab === "deployments" && <DeploymentsTab sessionDid={sessionDid} />}
 
       {mainTab === "upload" && <UploadTab sessionDid={sessionDid} />}
+
+      {mainTab === "library" && <LibraryTab sessionDid={sessionDid} />}
 
       {mainTab === "label" && <LabelTab sessionDid={sessionDid} />}
 

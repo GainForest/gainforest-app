@@ -1858,7 +1858,12 @@
       "title": "Áudio",
       "subtitle": "Envie gravações do cartão SD de um AudioMoth, organize-as em implantações e rotule o que você ouve — as observações de áudio vivem aqui.",
       "metaTitle": "Observações de áudio",
-      "metaDescription": "Envie gravações do AudioMoth, gerencie implantações, rotule espécies e explore paisagens sonoras dentro de Observações."
+      "metaDescription": "Envie gravações do AudioMoth, gerencie implantações, rotule espécies e explore paisagens sonoras dentro de Observações.",
+      "librarySubtitle": "Todas as pastas e gravações que você enviou, em um só lugar — reproduza, mova entre pastas, renomeie ou exclua."
+    },
+    "library": {
+      "signInTitle": "Entre para ver seus arquivos",
+      "signInBody": "Suas gravações e pastas enviadas aparecerão aqui quando você entrar."
     },
     "devicesHub": {
       "title": "Dispositivos"
@@ -2032,6 +2037,7 @@
       "setup": "Configuração",
       "deployments": "Implantação",
       "upload": "Enviar",
+      "library": "Arquivos",
       "label": "Rotular",
       "identifications": "Identificações",
       "soundscape": "Paisagem sonora"

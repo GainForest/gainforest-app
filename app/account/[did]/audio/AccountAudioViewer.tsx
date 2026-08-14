@@ -123,6 +123,7 @@ export function AccountAudioViewer({
   showUploadCta,
   canDelete = false,
   mutationRepo = null,
+  embedded = false,
 }: {
   did: string;
   /** Whether to offer the personal SD-card upload flow (personal repos only). */
@@ -131,6 +132,9 @@ export function AccountAudioViewer({
   canDelete?: boolean;
   /** Group repo DID for mutations, when the profile is an organization. */
   mutationRepo?: string | null;
+  /** Drop the page container chrome when hosted inside another surface
+   *  (the Audio hub's Files tab), which brings its own width and padding. */
+  embedded?: boolean;
 }) {
   const t = useTranslations("common.audiomoth.recordings");
   const tFolders = useTranslations("common.recordingFolders");
@@ -442,7 +446,7 @@ export function AccountAudioViewer({
   const selectedCount = selectedUris.size;
 
   return (
-    <Container className="pt-4 pb-10">
+    <Container className={embedded ? "max-w-none p-0" : "pt-4 pb-10"}>
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <h1 className="font-instrument text-2xl font-medium italic tracking-[-0.03em] text-foreground sm:text-3xl">
