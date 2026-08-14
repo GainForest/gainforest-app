@@ -374,7 +374,8 @@
       "published": "Publicado",
       "firstSiteBoundary": "Primer límite del sitio",
       "firstSiteBoundaryMap": "Mapa del primer límite del sitio",
-      "contributors": "Colaboradores"
+      "contributors": "Colaboradores",
+      "noLocationSet": "Sin ubicación establecida"
     },
     "headerTabs": {
       "overview": "Resumen",

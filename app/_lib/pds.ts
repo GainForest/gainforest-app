@@ -261,33 +261,6 @@ export async function dropDeletedRecordUris(
 }
 
 /**
- * List the AT-URIs a repo currently holds in one collection, straight from
- * the owner's PDS. Unlike stored strongrefs (which can dangle after the
- * target is deleted), a live listing can never reference a missing record —
- * it is the authoritative "what does this account have right now" source.
- * Returns [] when the PDS can't be reached.
- */
-export async function listPdsRecordUris(
-  did: string,
-  collection: string,
-  signal?: AbortSignal,
-): Promise<string[]> {
-  const host = await resolvePdsHost(did, signal);
-  if (!host) return [];
-  const params = new URLSearchParams({ repo: did, collection, limit: "100" });
-  const res = await fetch(
-    `https://${host}/xrpc/com.atproto.repo.listRecords?${params.toString()}`,
-    { signal, cache: "no-store" },
-  ).catch(() => null);
-  if (!res?.ok) return [];
-  const payload = (await res.json().catch(() => null)) as { records?: unknown } | null;
-  const records = Array.isArray(payload?.records) ? payload.records : [];
-  return records
-    .map((record) => (record as { uri?: unknown })?.uri)
-    .filter((uri): uri is string => typeof uri === "string" && uri.length > 0);
-}
-
-/**
  * The collections a repo actually holds records in.
  *
  * A repo only lists a collection once something has been written to it, so

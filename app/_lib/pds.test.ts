@@ -66,36 +66,3 @@ describe("dropDeletedRecordUris", () => {
   });
 });
 
-describe("listPdsRecordUris", () => {
-  afterEach(() => {
-    vi.unstubAllGlobals();
-  });
-
-  it("lists the record uris in a collection", async () => {
-    const { listPdsRecordUris } = await load();
-    vi.stubGlobal(
-      "fetch",
-      vi.fn(async () =>
-        jsonResponse(200, {
-          records: [
-            { uri: uri("one"), cid: "bafy...", value: {} },
-            { uri: uri("two"), cid: "bafy...", value: {} },
-            { cid: "bafy...", value: {} }, // malformed entry without uri
-          ],
-        }),
-      ),
-    );
-    expect(await listPdsRecordUris(DID, "app.certified.location")).toEqual([uri("one"), uri("two")]);
-  });
-
-  it("returns [] when the PDS can't be reached or answers badly", async () => {
-    const { listPdsRecordUris } = await load();
-    vi.stubGlobal("fetch", vi.fn(async () => {
-      throw new Error("network down");
-    }));
-    expect(await listPdsRecordUris(DID, "app.certified.location")).toEqual([]);
-
-    vi.stubGlobal("fetch", vi.fn(async () => jsonResponse(500, { error: "InternalServerError" })));
-    expect(await listPdsRecordUris(DID, "app.certified.location")).toEqual([]);
-  });
-});

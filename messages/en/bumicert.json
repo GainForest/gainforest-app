@@ -374,7 +374,8 @@
       "published": "Published",
       "firstSiteBoundary": "First site boundary",
       "firstSiteBoundaryMap": "First site boundary map",
-      "contributors": "Contributors"
+      "contributors": "Contributors",
+      "noLocationSet": "No location set"
     },
     "headerTabs": {
       "overview": "Overview",
