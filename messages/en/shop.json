@@ -12,6 +12,10 @@
     "hearSample": "Hear a sample",
     "tagline": "Assembled and tested. Open hardware. Ships from Zurich."
   },
+  "forest": {
+    "title": "Most of a forest's voice is a frequency you'll never hear",
+    "body": "Bats, katydids and much of insect life communicate in ultrasound. Counting them has meant equipment a field team can only afford a handful of — so most sites go unlistened."
+  },
   "board": {
     "imageAlt": "Render of the Bumimic prototype circuit board, showing the microSD slot, radio module and sensors",
     "caption": "Board render — board-v0.3, top-down on white"

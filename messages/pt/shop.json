@@ -12,6 +12,14 @@
     "hearSample": "Ouvir uma amostra",
     "tagline": "Montado e testado. Hardware aberto. Enviado de Zurique."
   },
+  "forest": {
+    "title": "La mayor parte de la voz de un bosque es una frecuencia que nunca escucharás",
+    "body": "Los murciélagos, los grillos de arbusto y gran parte de la vida de los insectos se comunican en ultrasonido. Contarlos ha significado equipos que un equipo de campo solo puede permitirse unos pocos — así que la mayoría de los sitios quedan sin escuchar."
+  },
+  "forest": {
+    "title": "A maior parte da voz de uma floresta é uma frequência que você nunca vai ouvir",
+    "body": "Morcegos, grilos e grande parte da vida dos insetos se comunicam em ultrassom. Contá-los tem significado equipamentos que uma equipe de campo só pode pagar alguns — então a maioria dos locais fica sem ser ouvida."
+  },
   "board": {
     "imageAlt": "Render da placa de circuito do protótipo Bumimic, mostrando o slot microSD, o módulo de rádio e os sensores",
     "caption": "Render da placa — board-v0.3, vista superior em branco"

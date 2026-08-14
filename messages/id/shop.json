@@ -12,6 +12,14 @@
     "hearSample": "Dengar sampel",
     "tagline": "Dirakit dan diuji. Hardware terbuka. Dikirim dari Zurich."
   },
+  "forest": {
+    "title": "La mayor parte de la voz de un bosque es una frecuencia que nunca escucharás",
+    "body": "Los murciélagos, los grillos de arbusto y gran parte de la vida de los insectos se comunican en ultrasonido. Contarlos ha significado equipos que un equipo de campo solo puede permitirse unos pocos — así que la mayoría de los sitios quedan sin escuchar."
+  },
+  "forest": {
+    "title": "Sebagian besar suara hutan adalah frekuensi yang tidak akan pernah kamu dengar",
+    "body": "Kelelawar, belalang, dan sebagian besar kehidupan serangga berkomunikasi dalam ultrasonik. Menghitungnya berarti peralatan yang hanya bisa dibeli beberapa oleh tim lapangan — jadi sebagian besar lokasi tidak terdengar."
+  },
   "board": {
     "imageAlt": "Render papan sirkuit prototipe Bumimic, menunjukkan slot microSD, modul radio, dan sensor",
     "caption": "Render papan — board-v0.3, tampak atas pada latar putih"

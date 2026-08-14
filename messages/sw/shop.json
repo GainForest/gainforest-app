@@ -12,6 +12,14 @@
     "hearSample": "Sikiliza sampuli",
     "tagline": "Kimeunganishwa na kujaribiwa. Vifaa huria. Kinatumwa kutoka Zurich."
   },
+  "forest": {
+    "title": "La mayor parte de la voz de un bosque es una frecuencia que nunca escucharás",
+    "body": "Los murciélagos, los grillos de arbusto y gran parte de la vida de los insectos se comunican en ultrasonido. Contarlos ha significado equipos que un equipo de campo solo puede permitirse unos pocos — así que la mayoría de los sitios quedan sin escuchar."
+  },
+  "forest": {
+    "title": "Sehemu kubwa ya sauti ya msitu ni masafa ambayo hutawahi kusikia",
+    "body": "Popo, panzi, na sehemu kubwa ya maisha ya wadudu huwasiliana kwa ultrasonic. Kuwahesabu kumemaanisha vifaa ambavyo timu ya shambani inaweza kumudu vichache tu — kwa hivyo maeneo mengi hayasikilizwi."
+  },
   "board": {
     "imageAlt": "Mchoro wa bodi ya mzunguko wa mfano wa Bumimic, ikionyesha nafasi ya microSD, moduli ya radio, na sensori",
     "caption": "Mchoro wa bodi — board-v0.3, mtazamo wa juu kwenye nyeupe"
