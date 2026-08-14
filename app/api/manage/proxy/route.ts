@@ -7,6 +7,15 @@ import { resolveGroupManageTarget } from "@/app/_lib/manage-server";
 import { TREE_FUTURE_DATE_ERROR, isTreeDateInFuture } from "@/app/_lib/tree-date-validation";
 import { resolvePdsHost } from "@/app/_lib/pds";
 import { transformPhotoUrl } from "@/app/(manage)/manage/_lib/upload/url-transforms";
+import {
+  SITE_CERT_COLLECTION,
+  SITE_DEFAULT_POINTER_COLLECTION,
+  SITE_ORG_PROFILE_COLLECTION,
+  SITE_PROJECT_COLLECTION,
+  scanSiteReferences,
+  siteInUseMessage,
+  type SiteReferenceCleanup,
+} from "./site-references";
 
 export const runtime = "nodejs";
 
@@ -981,6 +990,92 @@ async function listRepoRecords(options: {
     )),
     cursor: typeof payload.cursor === "string" ? payload.cursor : undefined,
   };
+}
+
+async function listAllRepoRecords(did: string, collection: string): Promise<{ uri: string; value: unknown }[]> {
+  const all: { uri: string; value: unknown }[] = [];
+  let cursor: string | undefined;
+  do {
+    const page = await listRepoRecords({ did, collection, cursor });
+    all.push(...page.records);
+    cursor = page.cursor;
+  } while (cursor);
+  return all;
+}
+
+async function getRepoRecordSnapshotOrNull(
+  did: string,
+  collection: string,
+  rkey: string,
+): Promise<{ rkey: string; value: unknown } | null> {
+  const result = await fetchRepoRecord({
+    did,
+    collection,
+    rkey,
+    missingMessage: "Record not found.",
+  }).catch(() => null);
+  return result ? { rkey, value: result.record } : null;
+}
+
+/**
+ * Delete a site (app.certified.location) without leaving broken links behind.
+ *
+ * A site a Cert points at can't be deleted — the deletion is refused with a
+ * plain-language explanation naming the Cert(s). Soft pointers (the org
+ * profile's location, a project's location, the default-site pointer) are
+ * dropped right after a successful delete, so no record keeps referencing a
+ * site that no longer exists.
+ */
+async function deleteCertifiedLocationRecord(
+  body: Extract<MutationBody, { operation: "deleteRecord" }>,
+  targetDid: string,
+  cookie: string | null,
+): Promise<Response> {
+  const repo = body.repo?.trim() || targetDid;
+  const siteUri = `at://${repo}/${CERTIFIED_LOCATION_COLLECTION}/${body.rkey}`;
+
+  let scan: ReturnType<typeof scanSiteReferences>;
+  try {
+    const [certs, projects, orgProfile, defaultSitePointer] = await Promise.all([
+      listAllRepoRecords(repo, SITE_CERT_COLLECTION),
+      listAllRepoRecords(repo, SITE_PROJECT_COLLECTION),
+      getRepoRecordSnapshotOrNull(repo, SITE_ORG_PROFILE_COLLECTION, "self"),
+      getRepoRecordSnapshotOrNull(repo, SITE_DEFAULT_POINTER_COLLECTION, "self"),
+    ]);
+    scan = scanSiteReferences(siteUri, { certs, projects, orgProfile, defaultSitePointer });
+  } catch {
+    // Fail closed: if we can't verify the site is unused we don't delete it,
+    // otherwise a Cert could silently lose its mapped place.
+    return Response.json(
+      { error: "We couldn't check whether this site is still in use. Please try again." },
+      { status: 502 },
+    );
+  }
+
+  if (scan.blockingCertTitles.length > 0) {
+    return Response.json({ error: siteInUseMessage(scan.blockingCertTitles) }, { status: 409 });
+  }
+
+  const response = await forwardMutationResponse(body, targetDid, cookie);
+  if (response.ok && scan.cleanups.length > 0) {
+    // The site is gone — drop the pointers that referenced it. Best-effort:
+    // the public pages tolerate a dangling soft pointer (they show "no
+    // location set"), so a failed cleanup never blocks the delete.
+    await Promise.allSettled(scan.cleanups.map((cleanup) => runSiteReferenceCleanup(cleanup, body.repo, targetDid, cookie)));
+  }
+  return response;
+}
+
+function runSiteReferenceCleanup(
+  cleanup: SiteReferenceCleanup,
+  repo: string | undefined,
+  targetDid: string,
+  cookie: string | null,
+): Promise<unknown> {
+  const base = cleanup.kind === "putRecord"
+    ? { operation: "putRecord" as const, collection: cleanup.collection, rkey: cleanup.rkey, record: cleanup.record }
+    : { operation: "deleteRecord" as const, collection: cleanup.collection, rkey: cleanup.rkey };
+  return executeForwardableMutation({ ...base, ...scopedRepo(repo) }, targetDid, cookie, "Could not update a record that referenced this site.");
 }
 
 async function countDatasetOccurrences(options: { did: string; datasetUri: string }): Promise<number> {
@@ -2590,6 +2685,10 @@ export async function POST(request: Request) {
     } catch (error) {
       return Response.json({ error: error instanceof Error ? error.message : "Photo could not be saved." }, { status: 502 });
     }
+  }
+
+  if (body.operation === "deleteRecord" && body.collection === CERTIFIED_LOCATION_COLLECTION) {
+    return deleteCertifiedLocationRecord(body, targetDid, cookie);
   }
 
   return forwardMutationResponse(body, targetDid, cookie);
