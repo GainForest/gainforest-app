@@ -2035,9 +2035,9 @@
     },
     "mainTabs": {
       "setup": "Configuración",
+      "library": "Mi audio",
       "deployments": "Despliegue",
       "upload": "Subir",
-      "library": "Archivos",
       "label": "Etiquetar",
       "identifications": "Identificaciones",
       "soundscape": "Paisaje sonoro"

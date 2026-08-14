@@ -2035,9 +2035,9 @@
     },
     "mainTabs": {
       "setup": "Setup",
+      "library": "My audio",
       "deployments": "Deployment",
       "upload": "Upload",
-      "library": "Files",
       "label": "Label",
       "identifications": "Identifications",
       "soundscape": "Soundscape"

@@ -92,7 +92,7 @@ import { SoundscapeClient } from "@/app/soundscape/_components/SoundscapeClient"
 /* Types                                                               */
 /* ------------------------------------------------------------------ */
 
-type MainTabId = "setup" | "deployments" | "upload" | "library" | "label" | "identifications" | "soundscape";
+type MainTabId = "setup" | "library" | "deployments" | "upload" | "label" | "identifications" | "soundscape";
 
 /** Which Observations surface hosts this client: `audio` shows the recording
  *  tabs (deployments, upload, label, identifications, soundscape), `devices`
@@ -100,13 +100,16 @@ type MainTabId = "setup" | "deployments" | "upload" | "library" | "label" | "ide
  *  both; they now live as separate tabs of the Observations hub. */
 export type AudioMothSurface = "audio" | "devices";
 
-const AUDIO_MAIN_TAB_IDS = ["deployments", "upload", "library", "label", "identifications", "soundscape"] as const;
+const AUDIO_MAIN_TAB_IDS = ["library", "deployments", "upload", "label", "identifications", "soundscape"] as const;
+
+/** The tab the Audio hub opens on: "what have I got?" before "what can I do?". */
+const DEFAULT_AUDIO_TAB: MainTabId = "library";
 
 function resolveMainTab(tab: string | null, surface: AudioMothSurface): MainTabId {
   if (surface === "devices") return "setup";
   return (AUDIO_MAIN_TAB_IDS as readonly string[]).includes(tab ?? "")
     ? (tab as MainTabId)
-    : "deployments";
+    : DEFAULT_AUDIO_TAB;
 }
 
 type TabId = "device" | "configure" | "firmware";
@@ -359,7 +362,8 @@ export function AudioMothClient({
   const selectMainTab = useCallback((id: MainTabId) => {
     setMainTab(id);
     const params = new URLSearchParams(searchParams.toString());
-    if (id === "deployments" || id === "setup") params.delete("tab");
+    // The landing tab needs no query param; every other tab is addressable.
+    if (id === DEFAULT_AUDIO_TAB || id === "setup") params.delete("tab");
     else params.set("tab", id);
     router.replace(params.size > 0 ? `?${params.toString()}` : "?", { scroll: false });
   }, [router, searchParams]);
@@ -865,9 +869,9 @@ export function AudioMothClient({
     label: string;
     Icon: typeof ClockIcon;
   }> = [
+    { id: "library", label: t("mainTabs.library"), Icon: FolderOpenIcon },
     { id: "deployments", label: t("mainTabs.deployments"), Icon: MapPinIcon },
     { id: "upload", label: t("mainTabs.upload"), Icon: HardDriveUploadIcon },
-    { id: "library", label: t("mainTabs.library"), Icon: FolderOpenIcon },
     { id: "label", label: t("mainTabs.label"), Icon: TagsIcon },
     { id: "identifications", label: t("mainTabs.identifications"), Icon: ListChecksIcon },
     { id: "soundscape", label: t("mainTabs.soundscape"), Icon: AudioWaveformIcon },
@@ -924,11 +928,11 @@ export function AudioMothClient({
       </nav>
       )}
 
+      {mainTab === "library" && <LibraryTab sessionDid={sessionDid} />}
+
       {mainTab === "deployments" && <DeploymentsTab sessionDid={sessionDid} />}
 
       {mainTab === "upload" && <UploadTab sessionDid={sessionDid} />}
-
-      {mainTab === "library" && <LibraryTab sessionDid={sessionDid} />}
 
       {mainTab === "label" && <LabelTab sessionDid={sessionDid} />}
 

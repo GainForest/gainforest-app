@@ -2035,9 +2035,9 @@
     },
     "mainTabs": {
       "setup": "Penyiapan",
+      "library": "Audio saya",
       "deployments": "Penempatan",
       "upload": "Unggah",
-      "library": "Berkas",
       "label": "Beri label",
       "identifications": "Identifikasi",
       "soundscape": "Lanskap suara"

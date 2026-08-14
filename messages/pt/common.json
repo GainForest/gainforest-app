@@ -2035,9 +2035,9 @@
     },
     "mainTabs": {
       "setup": "Configuração",
+      "library": "Meu áudio",
       "deployments": "Implantação",
       "upload": "Enviar",
-      "library": "Arquivos",
       "label": "Rotular",
       "identifications": "Identificações",
       "soundscape": "Paisagem sonora"
