@@ -373,7 +373,9 @@ function CreateDeploymentDialog({
   const [lat, setLat] = useState("");
   const [lon, setLon] = useState("");
   const [locating, setLocating] = useState(false);
-  const { equipment, ownerProfiles } = useMyAudioMoths(sessionDid);
+  // Offer the recorders of the repo this deployment will be created into —
+  // the organization's when acting as one, the user's own otherwise.
+  const { equipment } = useMyAudioMoths(repoDid ?? sessionDid);
   const [equipmentUri, setEquipmentUri] = useState<string>("none");
   const [stage, setStage] = useState<CreateStage>("form");
   const [replaying, setReplaying] = useState(false);
@@ -637,7 +639,7 @@ function CreateDeploymentDialog({
                     <SelectItem value="none">{t("equipmentNone")}</SelectItem>
                     {(equipment ?? []).map((item) => (
                       <SelectItem key={item.uri} value={item.uri}>
-                        {audioMothOptionLabel(item, sessionDid, ownerProfiles)}
+                        {audioMothOptionLabel(item)}
                       </SelectItem>
                     ))}
                   </SelectContent>
