@@ -449,14 +449,24 @@ export function AccountAudioViewer({
     <Container className={embedded ? "max-w-none p-0" : "pt-4 pb-10"}>
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h1 className="font-instrument text-2xl font-medium italic tracking-[-0.03em] text-foreground sm:text-3xl">
-            {t("title")}
-            {total > 0 ? (
-              <span className="ml-2.5 align-middle font-sans text-sm font-normal not-italic tracking-normal text-muted-foreground">
-                {t("groupCount", { count: total })}
-              </span>
-            ) : null}
-          </h1>
+          {embedded ? (
+            /* Hosted under the Audio hub's own heading and a tab already named
+               "Recordings": repeating the word adds nothing, and a second h1
+               under the hero's would break the page's heading order. The count
+               alone still anchors the row the selection toolbar replaces. */
+            total > 0 ? (
+              <h2 className="text-sm text-muted-foreground">{t("groupCount", { count: total })}</h2>
+            ) : null
+          ) : (
+            <h1 className="font-instrument text-2xl font-medium italic tracking-[-0.03em] text-foreground sm:text-3xl">
+              {t("title")}
+              {total > 0 ? (
+                <span className="ml-2.5 align-middle font-sans text-sm font-normal not-italic tracking-normal text-muted-foreground">
+                  {t("groupCount", { count: total })}
+                </span>
+              ) : null}
+            </h1>
+          )}
         </div>
         {selectedCount > 0 ? (
           /* Drive-style selection toolbar — replaces the header actions. */
