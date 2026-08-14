@@ -1053,6 +1053,8 @@
       "goToOrganization": "Fungua shirika",
       "errorTitle": "Haikuwezekana kukubali mwaliko",
       "acceptError": "Haikuwezekana kukubali mwaliko.",
+      "membershipOutcomeUnknown": "Hatukuweza kuthibitisha kama umejiunga. Tafadhali jaribu tena.",
+      "acceptanceIncomplete": "Umejiunga na shirika, lakini hatukuweza kukamilisha mwaliko. Tafadhali jaribu tena.",
       "tryAgain": "Jaribu tena",
       "notFoundTitle": "Mwaliko haukupatikana",
       "notFoundDescription": "Kiungo hiki cha mwaliko si halali au kimeondolewa.",

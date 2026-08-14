@@ -20,7 +20,7 @@ vi.mock("@/lib/supabase/rest", () => ({
   supabaseSelect,
 }));
 
-import { createGroupInvitation, GroupInvitationError, retryGroupInvitation } from "./cgs-invitations";
+import { acceptGroupInvitation, createGroupInvitation, GroupInvitationError, retryGroupInvitation } from "./cgs-invitations";
 
 const invitationId = "81000000-0000-4000-8000-000000000001";
 const rawInvitation = {
@@ -35,7 +35,7 @@ const rawInvitation = {
   group_name: "Forest Circle",
   group_handle: "forest.example.com",
   created_at: "2026-08-06T01:00:00.000Z",
-  expires_at: "2026-08-13T01:00:00.000Z",
+  expires_at: "2099-08-13T01:00:00.000Z",
   accepted_at: null,
   accepted_by_did: null,
   accepted_by_email: null,
@@ -61,6 +61,7 @@ beforeEach(() => {
     : { displayName: "Forest Owner", handle: "owner.example.com", avatarUrl: null });
   vi.spyOn(crypto, "randomUUID").mockReturnValue(invitationId);
   vi.spyOn(console, "error").mockImplementation(() => undefined);
+  vi.spyOn(console, "warn").mockImplementation(() => undefined);
 });
 
 afterEach(() => {
@@ -191,6 +192,201 @@ describe("createGroupInvitation", () => {
       p_inviter_url: "https://www.gainforest.app/account/owner.example.com",
       p_public_origin: "https://www.gainforest.app",
     }));
+  });
+});
+
+describe("acceptGroupInvitation", () => {
+  const inviteeSession = {
+    isLoggedIn: true as const,
+    did: "did:plc:member",
+    handle: "member.example.com",
+    email: "invitee@example.com",
+  };
+
+  it("adds the member, then marks the invitation accepted", async () => {
+    supabaseSelect.mockResolvedValueOnce([rawInvitation]);
+    supabaseRpc.mockResolvedValueOnce({
+      invitation: {
+        ...rawInvitation,
+        status: "accepted",
+        accepted_at: "2026-08-06T01:05:00.000Z",
+        accepted_by_did: inviteeSession.did,
+        accepted_by_email: inviteeSession.email,
+      },
+      notification: {
+        outbox_id: "10000000-0000-4000-8000-000000000002",
+        status: "suppressed",
+        duplicate: false,
+      },
+    });
+    const fetchMock = vi.fn().mockResolvedValue(new Response(JSON.stringify({
+      ok: true,
+      memberDid: inviteeSession.did,
+      role: rawInvitation.role,
+      alreadyMember: false,
+    }), {
+      status: 200,
+      headers: { "content-type": "application/json" },
+    }));
+    vi.stubGlobal("fetch", fetchMock);
+    vi.stubEnv("NEXT_PUBLIC_AUTH_BASE_URL", "https://auth.example.test");
+    vi.stubEnv("AUTH_INTERNAL_SERVICE_TOKEN", "internal-secret");
+
+    const invitation = await acceptGroupInvitation({ invitationId, session: inviteeSession });
+
+    expect(fetchMock).toHaveBeenCalledWith(new URL("https://auth.example.test/api/internal/cgs/member-add"), expect.objectContaining({
+      method: "POST",
+      body: JSON.stringify({
+        actorDid: rawInvitation.inviter_did,
+        repo: rawInvitation.repo,
+        memberDid: inviteeSession.did,
+        role: rawInvitation.role,
+      }),
+      signal: expect.any(AbortSignal),
+    }));
+    expect(supabaseRpc).toHaveBeenCalledOnce();
+    expect(supabaseRpc).toHaveBeenCalledWith("notification_invitation_close", {
+      p_invitation_id: invitationId,
+      p_status: "accepted",
+      p_accepted_by_did: inviteeSession.did,
+      p_accepted_by_email: inviteeSession.email,
+    });
+    expect(invitation).toMatchObject({ status: "accepted" });
+  });
+
+  it("leaves the invitation pending when member creation fails", async () => {
+    supabaseSelect.mockResolvedValueOnce([rawInvitation]);
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(new Response(JSON.stringify({
+      error: "CGS rejected the membership mutation",
+      code: "membership_rejected",
+    }), {
+      status: 502,
+      headers: { "content-type": "application/json" },
+    })));
+    vi.stubEnv("NEXT_PUBLIC_AUTH_BASE_URL", "https://auth.example.test");
+    vi.stubEnv("AUTH_INTERNAL_SERVICE_TOKEN", "internal-secret");
+
+    await expect(acceptGroupInvitation({ invitationId, session: inviteeSession }))
+      .rejects.toMatchObject({ status: 502 });
+
+    expect(supabaseRpc).not.toHaveBeenCalled();
+  });
+
+  it("accepts a retry when auth confirms the membership already exists", async () => {
+    supabaseSelect.mockResolvedValueOnce([rawInvitation]);
+    supabaseRpc.mockResolvedValueOnce({
+      invitation: {
+        ...rawInvitation,
+        status: "accepted",
+        accepted_at: "2026-08-06T01:05:00.000Z",
+        accepted_by_did: inviteeSession.did,
+        accepted_by_email: inviteeSession.email,
+      },
+      notification: null,
+    });
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(new Response(JSON.stringify({
+      ok: true,
+      memberDid: inviteeSession.did,
+      role: "member",
+      alreadyMember: true,
+    }), {
+      status: 200,
+      headers: { "content-type": "application/json" },
+    })));
+    vi.stubEnv("NEXT_PUBLIC_AUTH_BASE_URL", "https://auth.example.test");
+    vi.stubEnv("AUTH_INTERNAL_SERVICE_TOKEN", "internal-secret");
+
+    const invitation = await acceptGroupInvitation({ invitationId, session: inviteeSession });
+
+    expect(invitation).toMatchObject({ status: "accepted" });
+    expect(supabaseRpc).toHaveBeenCalledOnce();
+  });
+
+  it.each([
+    [{ ok: true }, "missing result fields"],
+    [{ ok: true, memberDid: "did:plc:other", role: "member", alreadyMember: false }, "wrong member"],
+    [{ ok: true, memberDid: inviteeSession.did, role: "admin", alreadyMember: false }, "wrong role"],
+    [{ ok: true, memberDid: inviteeSession.did, role: "member", alreadyMember: "false" }, "non-boolean membership state"],
+  ])("does not accept when a 2xx auth response has %s", async (payload, _reason) => {
+    supabaseSelect.mockResolvedValueOnce([rawInvitation]);
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(new Response(JSON.stringify(payload), {
+      status: 200,
+      headers: { "content-type": "application/json" },
+    })));
+    vi.stubEnv("NEXT_PUBLIC_AUTH_BASE_URL", "https://auth.example.test");
+    vi.stubEnv("AUTH_INTERNAL_SERVICE_TOKEN", "internal-secret");
+
+    await expect(acceptGroupInvitation({ invitationId, session: inviteeSession }))
+      .rejects.toMatchObject({ status: 503, code: "membership_outcome_unknown" });
+
+    expect(supabaseRpc).not.toHaveBeenCalled();
+  });
+
+  it("returns a stable translated error code when finalization fails after member creation", async () => {
+    supabaseSelect.mockResolvedValueOnce([rawInvitation]);
+    supabaseRpc.mockRejectedValueOnce(new Error("database unavailable private details"));
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(new Response(JSON.stringify({
+      ok: true,
+      memberDid: inviteeSession.did,
+      role: "member",
+      alreadyMember: false,
+    }), {
+      status: 200,
+      headers: { "content-type": "application/json" },
+    })));
+    vi.stubEnv("NEXT_PUBLIC_AUTH_BASE_URL", "https://auth.example.test");
+    vi.stubEnv("AUTH_INTERNAL_SERVICE_TOKEN", "internal-secret");
+
+    await expect(acceptGroupInvitation({ invitationId, session: inviteeSession }))
+      .rejects.toMatchObject({ status: 502, code: "invitation_acceptance_incomplete" });
+  });
+
+  it("leaves the invitation pending when the app loses the auth response", async () => {
+    supabaseSelect.mockResolvedValueOnce([rawInvitation]);
+    vi.stubGlobal("fetch", vi.fn().mockRejectedValue(new Error("socket closed")));
+    vi.stubEnv("NEXT_PUBLIC_AUTH_BASE_URL", "https://auth.example.test");
+    vi.stubEnv("AUTH_INTERNAL_SERVICE_TOKEN", "internal-secret");
+
+    await expect(acceptGroupInvitation({ invitationId, session: inviteeSession }))
+      .rejects.toMatchObject({ status: 503, code: "membership_outcome_unknown" });
+
+    expect(supabaseRpc).not.toHaveBeenCalled();
+  });
+
+  it("leaves the invitation pending when auth cannot determine whether CGS committed", async () => {
+    supabaseSelect.mockResolvedValueOnce([rawInvitation]);
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(new Response(JSON.stringify({
+      error: "Could not confirm whether the member was added. Retry the same invitation.",
+      code: "membership_outcome_unknown",
+    }), {
+      status: 503,
+      headers: { "content-type": "application/json" },
+    })));
+    vi.stubEnv("NEXT_PUBLIC_AUTH_BASE_URL", "https://auth.example.test");
+    vi.stubEnv("AUTH_INTERNAL_SERVICE_TOKEN", "internal-secret");
+
+    await expect(acceptGroupInvitation({ invitationId, session: inviteeSession }))
+      .rejects.toMatchObject({ status: 503, code: "membership_outcome_unknown" });
+
+    expect(supabaseRpc).not.toHaveBeenCalled();
+  });
+
+  it("recovers an already accepted invitation without adding the member again", async () => {
+    supabaseSelect.mockResolvedValueOnce([{
+      ...rawInvitation,
+      status: "accepted",
+      accepted_at: "2026-08-06T01:05:00.000Z",
+      accepted_by_did: inviteeSession.did,
+      accepted_by_email: inviteeSession.email,
+    }]);
+    const fetchMock = vi.fn();
+    vi.stubGlobal("fetch", fetchMock);
+
+    const invitation = await acceptGroupInvitation({ invitationId, session: inviteeSession });
+
+    expect(fetchMock).not.toHaveBeenCalled();
+    expect(supabaseRpc).not.toHaveBeenCalled();
+    expect(invitation).toMatchObject({ status: "accepted" });
   });
 });
 

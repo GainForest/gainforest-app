@@ -11,6 +11,21 @@ import type { GroupInvitation } from "@/app/_lib/cgs-invitations";
 import { InviteScene, type InviteOrg } from "./InviteScene";
 
 type AcceptStatus = "idle" | "accepting" | "accepted" | "error";
+type InvitationAcceptErrorKey =
+  | "membershipOutcomeUnknown"
+  | "acceptanceIncomplete"
+  | "acceptError";
+
+export function invitationAcceptErrorKey(code: string | undefined): InvitationAcceptErrorKey {
+  switch (code) {
+    case "membership_outcome_unknown":
+      return "membershipOutcomeUnknown";
+    case "invitation_acceptance_incomplete":
+      return "acceptanceIncomplete";
+    default:
+      return "acceptError";
+  }
+}
 
 export function InvitationAcceptClient({
   invitation,
@@ -40,8 +55,11 @@ export function InvitationAcceptClient({
           headers: { "content-type": "application/json" },
           cache: "no-store",
         });
-        const data = await response.json().catch(() => null) as { error?: string } | null;
-        if (!response.ok || data?.error) throw new Error(data?.error ?? t("acceptError"));
+        const data = await response.json().catch(() => null) as { error?: string; code?: string } | null;
+        if (!response.ok || data?.error) {
+          const translatedKey = invitationAcceptErrorKey(data?.code);
+          throw new Error(translatedKey === "acceptError" && data?.error ? data.error : t(translatedKey));
+        }
         if (active) setStatus("accepted");
       } catch (err) {
         if (!active) return;

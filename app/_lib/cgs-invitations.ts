@@ -13,6 +13,8 @@ export type GroupInvitationErrorCode =
   | "invitation_role_conflict"
   | "invitation_retry_cooldown"
   | "invitation_notification_not_safely_retryable"
+  | "invitation_acceptance_incomplete"
+  | "membership_outcome_unknown"
   | "invitation_not_found"
   | "invitation_not_pending";
 type GroupInvitationStatus = "pending" | "accepted" | "canceled" | "expired";
@@ -78,6 +80,7 @@ export type GroupInvitation = {
 
 const TABLE = "cgs_group_invitations";
 const INVITE_TTL_MS = 7 * 24 * 60 * 60 * 1000;
+const MEMBER_ADD_TIMEOUT_MS = 45_000;
 
 const INVITATION_SELECT = [
   "id",
@@ -354,30 +357,66 @@ async function addMemberViaAuthService(invitation: GroupInvitation, memberDid: s
   const internalKey = getAuthInternalServiceToken();
   if (!internalKey) throw new GroupInvitationError("We couldn’t add you to the organization right now. Please try again later.", 500);
 
-  const response = await fetch(new URL("/api/internal/cgs/member-add", getAuthBaseUrl()), {
-    method: "POST",
-    headers: {
-      authorization: `Bearer ${internalKey}`,
-      "content-type": "application/json",
-    },
-    body: JSON.stringify({
-      actorDid: invitation.inviterDid,
-      repo: invitation.repo,
-      memberDid,
-      role: invitation.role,
-    }),
-    cache: "no-store",
-  });
-  const data = await response.json().catch(() => null) as { message?: string; error?: string } | null;
-  if (!response.ok || data?.error) {
-    const upstreamMessage = data?.message ?? data?.error ?? `Auth service returned ${response.status || "an error"}`;
+  let response: Response;
+  try {
+    response = await fetch(new URL("/api/internal/cgs/member-add", getAuthBaseUrl()), {
+      method: "POST",
+      headers: {
+        authorization: `Bearer ${internalKey}`,
+        "content-type": "application/json",
+      },
+      body: JSON.stringify({
+        actorDid: invitation.inviterDid,
+        repo: invitation.repo,
+        memberDid,
+        role: invitation.role,
+      }),
+      cache: "no-store",
+      signal: AbortSignal.timeout(MEMBER_ADD_TIMEOUT_MS),
+    });
+  } catch {
+    throw new GroupInvitationError(
+      "We couldn’t confirm whether you were added. Please retry this invitation.",
+      503,
+      "membership_outcome_unknown",
+    );
+  }
+  const data = await response.json().catch(() => null) as {
+    ok?: unknown;
+    memberDid?: unknown;
+    role?: unknown;
+    alreadyMember?: unknown;
+    message?: unknown;
+    error?: unknown;
+    code?: unknown;
+  } | null;
+  const validSuccess = response.ok
+    && data?.ok === true
+    && data.memberDid === memberDid
+    && data.role === invitation.role
+    && typeof data.alreadyMember === "boolean";
+  if (!validSuccess) {
     console.warn("[cgs-invitations] Auth service member-add failed", {
       status: response.status || null,
       invitationId: invitation.id,
       repo: invitation.repo,
-      upstreamMessage,
+      code: typeof data?.code === "string" ? data.code : null,
     });
-    throw new GroupInvitationError("We couldn’t add you to the organization right now. Please try again later.", 502);
+    if (response.ok || data?.code === "membership_outcome_unknown") {
+      throw new GroupInvitationError(
+        "We couldn’t confirm whether you were added. Please retry this invitation.",
+        503,
+        "membership_outcome_unknown",
+      );
+    }
+    if (data?.code !== "membership_rejected") {
+      throw new GroupInvitationError(
+        "We couldn’t confirm whether you were added. Please retry this invitation.",
+        503,
+        "membership_outcome_unknown",
+      );
+    }
+    throw new GroupInvitationError("We couldn’t add you to the organization right now. Please try again later.", response.status || 502);
   }
 }
 
@@ -394,7 +433,7 @@ function mutationResult(value: unknown): { invitation: GroupInvitation; notifica
   return { invitation: { ...invitation, notification }, notification };
 }
 
-function knownRpcError(error: unknown, operation: "create" | "close" | "retry"): GroupInvitationError {
+function knownRpcError(error: unknown, operation: "create" | "accept_complete" | "close" | "retry"): GroupInvitationError {
   const message = error instanceof Error ? error.message : "";
   if (message.includes("invitation_role_conflict")) {
     return new GroupInvitationError("Cancel the pending invitation before changing this person’s role.", 409, "invitation_role_conflict");
@@ -409,10 +448,13 @@ function knownRpcError(error: unknown, operation: "create" | "close" | "retry"):
   if (message.includes("invitation_not_pending")) return new GroupInvitationError("This invitation is no longer pending.", 409, "invitation_not_pending");
   const fallback = operation === "create"
     ? "Invitation could not be saved. Please try again."
-    : operation === "retry"
-      ? "The email could not be queued again. Please try later."
-      : "The invitation could not be updated. Please try again.";
-  return new GroupInvitationError(fallback, 502);
+    : operation === "accept_complete"
+      ? "We added you to the organization, but couldn’t finish the invitation right now. Please try again."
+      : operation === "retry"
+        ? "The email could not be queued again. Please try later."
+        : "The invitation could not be updated. Please try again.";
+  const code = operation === "accept_complete" ? "invitation_acceptance_incomplete" : undefined;
+  return new GroupInvitationError(fallback, 502, code);
 }
 
 export async function createGroupInvitation({
@@ -481,6 +523,7 @@ async function closeInvitation(
   status: "accepted" | "canceled" | "expired",
   acceptedByDid: string | null = null,
   acceptedByEmail: string | null = null,
+  operation: "close" | "accept_complete" = "close",
 ): Promise<GroupInvitation> {
   try {
     const result = mutationResult(await supabaseRpc<unknown>("notification_invitation_close", {
@@ -493,7 +536,7 @@ async function closeInvitation(
     return result.invitation;
   } catch (error) {
     if (error instanceof GroupInvitationError) throw error;
-    throw knownRpcError(error, "close");
+    throw knownRpcError(error, operation);
   }
 }
 
@@ -543,11 +586,6 @@ export async function acceptGroupInvitation({
 }): Promise<GroupInvitation> {
   const invitation = await getGroupInvitation(invitationId);
   if (!invitation) throw new GroupInvitationError("Invitation not found.", 404, "invitation_not_found");
-  if (invitation.status !== "pending") throw new GroupInvitationError("This invitation is no longer pending.", 409, "invitation_not_pending");
-  if (new Date(invitation.expiresAt).getTime() < Date.now()) {
-    await closeInvitation(invitation.id, "expired").catch(() => undefined);
-    throw new GroupInvitationError("This invitation has expired.", 410);
-  }
 
   const sessionEmail = session.email ? normalizeInvitationEmail(session.email) : "";
   if (!sessionEmail) throw new GroupInvitationError("Your signed-in account does not have an email address available.", 403);
@@ -555,6 +593,20 @@ export async function acceptGroupInvitation({
     throw new GroupInvitationError("Sign in with the email address that received this invitation.", 403);
   }
 
+  if (invitation.status === "accepted") {
+    if (invitation.acceptedByDid !== session.did || invitation.acceptedByEmail !== sessionEmail) {
+      throw new GroupInvitationError("This invitation is no longer pending.", 409, "invitation_not_pending");
+    }
+    return invitation;
+  }
+  if (invitation.status !== "pending") {
+    throw new GroupInvitationError("This invitation is no longer pending.", 409, "invitation_not_pending");
+  }
+  if (new Date(invitation.expiresAt).getTime() < Date.now()) {
+    await closeInvitation(invitation.id, "expired").catch(() => undefined);
+    throw new GroupInvitationError("This invitation has expired.", 410);
+  }
+
   await addMemberViaAuthService(invitation, session.did);
-  return closeInvitation(invitation.id, "accepted", session.did, sessionEmail);
+  return closeInvitation(invitation.id, "accepted", session.did, sessionEmail, "accept_complete");
 }

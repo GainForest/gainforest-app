@@ -356,7 +356,7 @@ WELCOME_STATE=$(psql -X -Atq "$DB_URL" -v ON_ERROR_STOP=1 -c "
   exit 1
 }
 
-WELCOME_BODY='{"type":"organization.membership.joined","eventId":"local-membership-1","createdAt":"2026-08-06T01:01:00.000Z","locale":"en","user":{"did":"did:plc:localmember","email":"local-member@example.test","name":"Local Member"},"organization":{"did":"did:plc:localgroup","name":"Local Forest Circle"}}'
+WELCOME_BODY='{"type":"organization.membership.joined","eventId":"local-creator-membership-1","createdAt":"2026-08-06T01:01:00.000Z","locale":"en","user":{"did":"did:plc:localcreator","email":"local-creator@example.test","name":"Local Creator"},"organization":{"did":"did:plc:localgroup","name":"Local Forest Circle"}}'
 WEBHOOK_SIGNATURE=$(WEBHOOK_BODY="$WELCOME_BODY" WEBHOOK_TIMESTAMP="$WEBHOOK_TIMESTAMP" WEBHOOK_SECRET="$WEBHOOK_SECRET" node -e '
   const { createHmac } = require("node:crypto");
   process.stdout.write(createHmac("sha256", process.env.WEBHOOK_SECRET)
@@ -366,17 +366,17 @@ send_welcome "$TMP/membership.json"
 node - "$TMP/membership.json" <<'NODE'
 const fs = require("node:fs");
 const value = JSON.parse(fs.readFileSync(process.argv[2], "utf8"));
-if (value?.ok !== true || value?.notification?.status !== "sent" || value?.notification?.duplicate !== false) {
-  throw new Error(`membership welcome event was not sent through the loopback provider: ${JSON.stringify(value)}`);
+if (value?.ok !== true || value?.ignored !== true || value?.reason !== "membership_welcome_uses_invitation_acceptance") {
+  throw new Error(`legacy membership event was not accepted as a no-op: ${JSON.stringify(value)}`);
 }
 NODE
 MEMBERSHIP_STATE=$(psql -X -Atq "$DB_URL" -v ON_ERROR_STOP=1 -F '|' -c "
   select count(*),bool_and(status='sent'),bool_and(template_key='welcome-membership-joined'),
     bool_and(frozen_to='local-member@example.test'),bool_and(frozen_html like '%Local Forest Circle%')
-  from public.notification_outbox where event_type='membership_joined' and source_id='local-membership-1';
+  from public.notification_outbox where event_type='membership_joined';
 ")
-[[ "$MEMBERSHIP_STATE" == "1|t|t|t|t" ]] || {
-  echo "test:notifications:local membership persistence assertion failed: $MEMBERSHIP_STATE" >&2
+[[ "$MEMBERSHIP_STATE" == "0||||" ]] || {
+  echo "test:notifications:local unmatched membership assertion failed: $MEMBERSHIP_STATE" >&2
   exit 1
 }
 
@@ -441,6 +441,78 @@ INVITATION_STATE=$(psql -X -Atq "$DB_URL" -v ON_ERROR_STOP=1 -F '|' -c "
 ")
 [[ "$INVITATION_STATE" == "1|t|t|t|t|t|t|t" ]] || {
   echo "test:notifications:local invitation recovery assertion failed: $INVITATION_STATE" >&2
+  exit 1
+}
+
+curl --silent --show-error --fail-with-body --request POST \
+  --header "apikey: $SERVICE_ROLE_KEY" --header "authorization: Bearer $SERVICE_ROLE_KEY" \
+  --header 'content-type: application/json' \
+  --data "{\"p_invitation_id\":\"$INVITATION_ID\",\"p_status\":\"accepted\",\"p_accepted_by_did\":\"did:plc:localmember\",\"p_accepted_by_email\":\"local-invitee@example.test\"}" \
+  "$API_URL/rest/v1/rpc/notification_invitation_close" >"$TMP/invitation-accepted.json"
+
+JOINED_SOURCE_ID="invitation.accepted.v1:$INVITATION_ID"
+JOINED_EVENT_KEY="organization-membership-joined:$JOINED_SOURCE_ID"
+JOINED_BODY=$(JOINED_SOURCE_ID="$JOINED_SOURCE_ID" JOINED_EVENT_KEY="$JOINED_EVENT_KEY" node -e '
+  process.stdout.write(JSON.stringify({
+    p_event_key: process.env.JOINED_EVENT_KEY,
+    p_event_type: "membership_joined",
+    p_payload: {
+      displayName: null,
+      occurredAt: new Date().toISOString(),
+      organizationDid: "did:plc:localgroup",
+      organizationName: "Local Forest Circle",
+      userDid: "did:plc:localmember",
+    },
+    p_source_id: process.env.JOINED_SOURCE_ID,
+    p_recipient_did: "did:plc:localmember",
+    p_recipient_email: "local-invitee@example.test",
+    p_template_key: "welcome-membership-joined",
+    p_locale: "en",
+    p_provider_idempotency_key: process.env.JOINED_EVENT_KEY,
+    p_next_attempt_at: new Date().toISOString(),
+  }));
+')
+curl --silent --show-error --fail-with-body --request POST \
+  --header "apikey: $SERVICE_ROLE_KEY" --header "authorization: Bearer $SERVICE_ROLE_KEY" \
+  --header 'content-type: application/json' --data "$JOINED_BODY" \
+  "$API_URL/rest/v1/rpc/notification_outbox_enqueue" >"$TMP/joined-enqueue.json"
+curl --silent --show-error --fail-with-body --request POST \
+  --header "apikey: $SERVICE_ROLE_KEY" --header "authorization: Bearer $SERVICE_ROLE_KEY" \
+  --header 'content-type: application/json' --data "$JOINED_BODY" \
+  "$API_URL/rest/v1/rpc/notification_outbox_enqueue" >"$TMP/joined-enqueue-duplicate.json"
+node - "$TMP/joined-enqueue-duplicate.json" <<'NODE'
+const fs = require("node:fs");
+const response = JSON.parse(fs.readFileSync(process.argv[2], "utf8"));
+const value = Array.isArray(response) ? response[0] : response;
+if (value?.duplicate !== true || value?.status !== "queued") {
+  throw new Error(`duplicate invitation acceptance did not reuse queued work: ${JSON.stringify(response)}`);
+}
+NODE
+
+JOINED_QUEUED=$(psql -X -Atq "$DB_URL" -v ON_ERROR_STOP=1 -F '|' -c "
+  select count(*),bool_and(status='queued'),
+    bool_and(source_id='invitation.accepted.v1:$INVITATION_ID'),
+    bool_and(provider_idempotency_key='organization-membership-joined:invitation.accepted.v1:$INVITATION_ID')
+  from public.notification_outbox where event_type='membership_joined';
+")
+[[ "$JOINED_QUEUED" == "1|t|t|t" ]] || {
+  echo "test:notifications:local invitation acceptance enqueue assertion failed: $JOINED_QUEUED" >&2
+  exit 1
+}
+
+curl --silent --show-error --fail-with-body \
+  --header "authorization: Bearer $CRON_SECRET" \
+  "$APP_URL/api/internal/notifications/drain" >"$TMP/joined-drain-first.json"
+curl --silent --show-error --fail-with-body \
+  --header "authorization: Bearer $CRON_SECRET" \
+  "$APP_URL/api/internal/notifications/drain" >"$TMP/joined-drain-second.json"
+JOINED_SENT=$(psql -X -Atq "$DB_URL" -v ON_ERROR_STOP=1 -F '|' -c "
+  select count(*),bool_and(status='sent'),bool_and(provider_attempt_count=1),
+    bool_and(source_id='invitation.accepted.v1:$INVITATION_ID')
+  from public.notification_outbox where event_type='membership_joined';
+")
+[[ "$JOINED_SENT" == "1|t|t|t" ]] || {
+  echo "test:notifications:local joined-email exactly-once drain assertion failed: $JOINED_SENT" >&2
   exit 1
 }
 

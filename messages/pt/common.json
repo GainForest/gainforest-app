@@ -1053,6 +1053,8 @@
       "goToOrganization": "Abrir organização",
       "errorTitle": "Não foi possível aceitar o convite",
       "acceptError": "Não foi possível aceitar o convite.",
+      "membershipOutcomeUnknown": "Não foi possível confirmar se você entrou. Tente novamente.",
+      "acceptanceIncomplete": "Você entrou na organização, mas não foi possível concluir o convite. Tente novamente.",
       "tryAgain": "Tentar novamente",
       "notFoundTitle": "Convite não encontrado",
       "notFoundDescription": "Este link de convite não é válido ou foi removido.",

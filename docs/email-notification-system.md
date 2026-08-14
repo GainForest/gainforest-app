@@ -15,8 +15,8 @@ flowchart TB
     direction LR
 
     FirstUse["Signed-in app load finds<br/>a DID absent from user_emails"]
-    Membership["Account system reports<br/>an organization join"]
     Invitation["Owner or admin<br/>sends an invitation"]
+    Acceptance["Invited person<br/>accepts and joins"]
     BioBlitz["Moderator confirms<br/>a BioBlitz winner"]
   end
 
@@ -25,6 +25,7 @@ flowchart TB
 
     SaveJob["Check the details and assign<br/>a unique job ID"]
     SaveTogether["Save the invitation and<br/>email job together"]
+    AcceptThenSave["Mark the invitation accepted,<br/>then save the joined email"]
     Outbox[("notification_outbox<br/>saved email jobs and their status")]
   end
 
@@ -35,12 +36,13 @@ flowchart TB
   end
 
   FirstUse --> SaveJob
-  Membership --> SaveJob
   BioBlitz --> SaveJob
   Invitation --> SaveTogether
+  Acceptance --> AcceptThenSave
 
   SaveJob --> Outbox
   SaveTogether --> Outbox
+  AcceptThenSave --> Outbox
 
   Outbox --> TryNow
   TryNow --> SendFlow["Continue with diagram 2"]
@@ -119,7 +121,7 @@ flowchart TB
   Cleanup -.-> Retention["Stop active jobs after 7 days<br/>Clear sent details after 7 days<br/>Clear failed details after 14 days<br/>Remove records after 90 days"]
 ```
 
-The cron never discovers historical events or creates missing notification jobs. The general welcome producer runs after an authenticated app load only when the session DID is absent from `user_emails`; account age and PDS do not affect eligibility. Membership, invitation, and moderator award producers create jobs only when their corresponding actions happen.
+The cron never discovers historical events or creates missing notification jobs. The general welcome producer runs after an authenticated app load only when the session DID is absent from `user_emails`; account age and PDS do not affect eligibility. Invitation creation, invitation acceptance, and moderator award producers create jobs only when their corresponding actions happen. Signed legacy signup and membership events are no-ops, so reading an organization membership list creates no email work.
 
 ### 4. How manual actions work
 
@@ -225,7 +227,13 @@ The canonical migration requires these private tables in the same Supabase proje
 - `public.cgs_group_invitations`, defined by `docs/cgs-group-invitations.sql`;
 - `public.user_emails`, defined by `docs/user-emails.sql`.
 
-The migration checks every required prerequisite column and fails with corrective guidance when the tables are missing or incomplete. For a new environment, apply both prerequisite SQL files before `supabase/migrations/20260805235500_notification_outbox.sql`.
+The base migration checks every required prerequisite column and fails with corrective guidance when the tables are missing or incomplete. For a new environment, apply both prerequisite SQL files before the migrations in `supabase/migrations/` in timestamp order.
+
+## Invitation-acceptance rollout
+
+Deploy the auth-service member-add reconciliation behavior before this app change. The app then adds or confirms membership, marks the invitation accepted, and calls the existing welcome-notification runtime with the stable ID `invitation.accepted.v1:<invitation-id>`. Retrying the acceptance safely reuses the same outbox row and provider key.
+
+Signed legacy signup and membership events are accepted as no-ops. After the new app is serving traffic, deploy the auth-service change that makes `GET /api/cgs/groups` read-only. An old app instance accepting an invitation during the rolling window can miss the joined email; membership acceptance itself still succeeds.
 
 ## Local validation
 
@@ -255,7 +263,7 @@ Authorization: Bearer <NOTIFICATION_CRON_SECRET>
 
 To stop all notification email, set `EMAIL_DISABLED=true`. This prevents new enqueue operations and provider calls without deleting durable rows. Do not drop or reverse the migration while retained rows exist.
 
-Invitation creation and notification enqueue share one transaction. Email failure never removes the invitation. Eligible owners and admins can expedite a safely retryable invitation with a database-enforced cooldown. Acceptance, cancellation, and expiry suppress unsent work.
+Invitation creation and notification enqueue share one transaction. Email failure never removes the invitation. Eligible owners and admins can expedite a safely retryable invitation with a database-enforced cooldown. Acceptance first asks the auth service to add or confirm the member, then marks the invitation accepted and calls the existing welcome-notification runtime. A 2xx member-add response is trusted only when it confirms the requested DID and role and includes a boolean existing-membership result. If the response is lost or the joined email cannot be queued, retrying is safe: member-add reconciles the existing role, accepted invitations skip member-add, and the invitation-derived notification ID prevents duplicate email.
 
 BioBlitz awards succeed independently of email. When an address is unavailable, moderators are told that manual contact may be needed. Marking an award handled records the first moderator and preserves a suppression tombstone so it cannot be sent later.
 

@@ -1053,6 +1053,8 @@
       "goToOrganization": "Buka organisasi",
       "errorTitle": "Tidak dapat menerima undangan",
       "acceptError": "Tidak dapat menerima undangan.",
+      "membershipOutcomeUnknown": "Kami tidak dapat mengonfirmasi apakah Anda sudah bergabung. Coba lagi.",
+      "acceptanceIncomplete": "Anda telah bergabung dengan organisasi, tetapi kami tidak dapat menyelesaikan undangan. Coba lagi.",
       "tryAgain": "Coba lagi",
       "notFoundTitle": "Undangan tidak ditemukan",
       "notFoundDescription": "Tautan undangan ini tidak valid atau telah dihapus.",

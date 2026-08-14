@@ -1053,6 +1053,8 @@
       "goToOrganization": "Open organization",
       "errorTitle": "Could not accept invitation",
       "acceptError": "Could not accept invitation.",
+      "membershipOutcomeUnknown": "We couldn’t confirm whether you joined. Please try again.",
+      "acceptanceIncomplete": "You joined the organization, but we couldn’t finish the invitation. Please try again.",
       "tryAgain": "Try again",
       "notFoundTitle": "Invitation not found",
       "notFoundDescription": "This invitation link is not valid or has been removed.",
