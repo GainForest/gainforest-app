@@ -173,10 +173,21 @@ export function ShopClient() {
               Hear what{" "}
               <span className="relative text-primary">
                 nature
-                <span
-                  className="absolute -bottom-0.5 left-0 h-0.5 w-full rounded-full bg-primary/40"
+                <svg
+                  className="absolute -bottom-1 left-0 w-full"
+                  viewBox="0 0 100 8"
+                  preserveAspectRatio="none"
                   aria-hidden="true"
-                />
+                >
+                  <path
+                    d="M0 4 Q10 0, 20 4 T40 4 T60 4 T80 4 T100 4"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="3"
+                    strokeLinecap="round"
+                    className="text-primary/50"
+                  />
+                </svg>
               </span>{" "}
               is saying
             </h1>
@@ -590,8 +601,7 @@ export function ShopClient() {
         </div>
       </div>
 
-      {/* Bottom padding for sticky bar */}
-      <div className="h-20" aria-hidden="true" />
+
     </div>
   );
 }
