@@ -32,7 +32,9 @@ export function DeploymentDetailActions({
     setError(null);
     setDeleting(true);
     try {
-      await deleteDeploymentEvent(event);
+      // An event outside the signed-in repo lives in an organization's —
+      // delete it there (CGS checks membership server-side).
+      await deleteDeploymentEvent(event, event.did !== sessionDid ? { repo: event.did } : undefined);
       router.push("/observations/audio?tab=deployments");
       router.refresh();
     } catch (err) {

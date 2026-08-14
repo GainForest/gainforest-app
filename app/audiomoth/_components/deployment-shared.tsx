@@ -146,13 +146,19 @@ export function EditDeploymentDialog({
     const edit: DeploymentEventEdit = { siteName, equipment: equipmentLink };
     setSaving(true);
     try {
-      const { cid } = await updateDeploymentEvent(event, edit);
+      // A record outside the signed-in repo lives in an organization's —
+      // write it there (CGS checks membership server-side).
+      const { cid } = await updateDeploymentEvent(
+        event,
+        edit,
+        event.did !== sessionDid ? { repo: event.did } : undefined,
+      );
       onUpdated(applyDeploymentEdit(event, edit, cid));
     } catch (err) {
       setError(err instanceof Error && err.message ? err.message : t("updateFailed"));
       setSaving(false);
     }
-  }, [currentUri, equipment, equipmentUri, event, onUpdated, siteName, t]);
+  }, [currentUri, equipment, equipmentUri, event, onUpdated, sessionDid, siteName, t]);
 
   return (
     <div className="fixed inset-0 z-[110] flex items-center justify-center p-4" role="dialog" aria-modal="true">

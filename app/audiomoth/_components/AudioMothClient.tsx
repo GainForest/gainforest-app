@@ -77,6 +77,7 @@ import {
   type FlashProgress,
 } from "@/app/_lib/audiomoth/flash";
 import Link from "next/link";
+import { useActingRepo } from "@/app/_lib/account-switcher";
 import { createEquipment, equipmentDetailPath, listEquipment, updateEquipment, type EquipmentItem } from "@/app/_lib/equipment";
 import { loadAppliedConfig, mergeSetupNotes, saveAppliedConfig, SETUP_NOTES_HEADER } from "@/app/_lib/audiomoth/setup-store";
 import { DeploymentsTab } from "./DeploymentsTab";
@@ -335,6 +336,10 @@ export function AudioMothClient({
   const t = useTranslations("common.audiomoth");
   const identificationsT = useTranslations("common.identifications");
   const soundscapeT = useTranslations("common.soundscape");
+  /* The acting account — the user's own, or the organization they switched
+     into. A connected AudioMoth is checked against, and registered in, that
+     account's equipment inventory. */
+  const acting = useActingRepo(sessionDid);
 
   const [supported, setSupported] = useState<boolean | null>(null);
   const [device, setDevice] = useState<AudioMothDevice | null>(null);
@@ -531,7 +536,8 @@ export function AudioMothClient({
   /* ---------------- equipment registration ---------------- */
 
   useEffect(() => {
-    if (!info || !sessionDid) {
+    const actingDid = acting.did;
+    if (!info || !actingDid) {
       setEquipmentStatus({ status: "unknown" });
       return;
     }
@@ -542,7 +548,7 @@ export function AudioMothClient({
 
     (async () => {
       try {
-        const items = await listEquipment(sessionDid);
+        const items = await listEquipment(actingDid);
         if (cancelled) return;
         const existing = items.find((item) => item.assetId.trim().toUpperCase() === info.id.toUpperCase());
         setEquipmentStatus(existing ? { status: "registered", item: existing } : { status: "unregistered" });
@@ -554,7 +560,7 @@ export function AudioMothClient({
     return () => {
       cancelled = true;
     };
-  }, [info, sessionDid, recheckCounter]);
+  }, [info, acting.did, recheckCounter]);
 
   /** Compose the auto-generated notes block written into equipment records. */
   const composeNotesBlock = useCallback(
@@ -595,21 +601,24 @@ export function AudioMothClient({
         /* battery is nice-to-have */
       }
       const name = `AudioMoth ${info.id.slice(-4)}`;
-      await createEquipment({
-        assetId: info.id,
-        name,
-        category: "audiomoth",
-        status: "storage",
-        acquiredAt: new Date().toISOString().slice(0, 10),
-        notes: composeNotesBlock(info, battery, null),
-      });
+      await createEquipment(
+        {
+          assetId: info.id,
+          name,
+          category: "audiomoth",
+          status: "storage",
+          acquiredAt: new Date().toISOString().slice(0, 10),
+          notes: composeNotesBlock(info, battery, null),
+        },
+        acting.repo ? { repo: acting.repo } : undefined,
+      );
       requestSetupRecheck();
     } catch {
       /* the status chip simply stays on "save" — the user can retry */
     } finally {
       setSavingEquipment(false);
     }
-  }, [composeNotesBlock, device, info, requestSetupRecheck, sessionDid]);
+  }, [acting.repo, composeNotesBlock, device, info, requestSetupRecheck, sessionDid]);
 
   /* ---------------- auto-setup wizard ---------------- */
 
@@ -789,34 +798,41 @@ export function AudioMothClient({
         const now = new Date();
         const notesBlock = composeNotesBlock(workingInfo, battery, now);
 
-        const items = await listEquipment(sessionDid);
+        const items = await listEquipment(acting.did ?? sessionDid);
         const deviceId = workingInfo.id;
         const existing = items.find((item) => item.assetId.trim().toUpperCase() === deviceId.toUpperCase());
 
         if (existing) {
           /* Refresh the setup block in the notes, keeping handwritten notes intact */
-          await updateEquipment(existing, {
-            assetId: existing.assetId,
-            name: existing.name,
-            category: existing.category,
-            status: existing.status,
-            currentOwner: existing.currentOwner,
-            projectSite: existing.projectSite,
-            geo: existing.geo,
-            acquiredAt: existing.acquiredAt,
-            notes: mergeSetupNotes(existing.notes, notesBlock),
-          });
+          await updateEquipment(
+            existing,
+            {
+              assetId: existing.assetId,
+              name: existing.name,
+              category: existing.category,
+              status: existing.status,
+              currentOwner: existing.currentOwner,
+              projectSite: existing.projectSite,
+              geo: existing.geo,
+              acquiredAt: existing.acquiredAt,
+              notes: mergeSetupNotes(existing.notes, notesBlock),
+            },
+            existing.did !== sessionDid ? { repo: existing.did } : undefined,
+          );
           setStep("equipment", { status: "done", detail: t("autoSetup.equipmentUpdated", { name: existing.name }) });
         } else {
           const name = `AudioMoth ${deviceId.slice(-4)}`;
-          await createEquipment({
-            assetId: deviceId,
-            name,
-            category: "audiomoth",
-            status: "storage",
-            acquiredAt: now.toISOString().slice(0, 10),
-            notes: notesBlock,
-          });
+          await createEquipment(
+            {
+              assetId: deviceId,
+              name,
+              category: "audiomoth",
+              status: "storage",
+              acquiredAt: now.toISOString().slice(0, 10),
+              notes: notesBlock,
+            },
+            acting.repo ? { repo: acting.repo } : undefined,
+          );
           setStep("equipment", { status: "done", detail: t("autoSetup.equipmentSaved", { name }) });
         }
       }
@@ -826,7 +842,7 @@ export function AudioMothClient({
     }
 
     finish(false);
-  }, [adoptDevice, composeNotesBlock, device, info, requestSetupRecheck, sessionDid, t]);
+  }, [acting.did, acting.repo, adoptDevice, composeNotesBlock, device, info, requestSetupRecheck, sessionDid, t]);
 
   const closeWizard = useCallback(() => {
     setWizard((current) => (current?.running ? current : null));

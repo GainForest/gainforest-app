@@ -64,6 +64,7 @@ import {
   listUploadedRecordingKeys,
   type UploadedRecordingKeys,
 } from "@/app/_lib/ac-audio";
+import { useActingRepo } from "@/app/_lib/account-switcher";
 import { computeFileCid } from "@/app/_lib/audiomoth/content-cid";
 import { FILE_READ_TIMEOUT_MS, withReadTimeout } from "@/app/_lib/audiomoth/stall-timeout";
 import { collectDroppedFiles, isHiddenName } from "@/app/_lib/audiomoth/dropped-files";
@@ -131,6 +132,12 @@ function isWavName(name: string): boolean {
 export function UploadTab({ sessionDid }: { sessionDid: string | null }) {
   const t = useTranslations("common.audiomoth.upload");
   const tray = useUploadTray();
+  /* The acting account — the user's own, or the organization they switched
+     into. Deployment matching, folders and the already-uploaded check all
+     read that repo, and every job is targeted at it so the recordings land
+     where the rest of the tabs will look for them. */
+  const acting = useActingRepo(sessionDid);
+  const actingDid = acting.did;
 
   const [stage, setStage] = useState<Stage>("pick");
   const [recordings, setRecordings] = useState<ScannedRecording[]>([]);
@@ -172,13 +179,13 @@ export function UploadTab({ sessionDid }: { sessionDid: string | null }) {
   /* ---------------- deployments for matching ---------------- */
 
   useEffect(() => {
-    if (!sessionDid) return;
+    if (!actingDid) return;
     const ctrl = new AbortController();
-    listDeploymentEvents(sessionDid, ctrl.signal)
+    listDeploymentEvents(actingDid, ctrl.signal)
       .then((list) => setEvents(list))
       .catch(() => setEvents([]));
     return () => ctrl.abort();
-  }, [sessionDid]);
+  }, [actingDid]);
 
   /* ---------------- folders to upload into ---------------- */
 
@@ -189,9 +196,9 @@ export function UploadTab({ sessionDid }: { sessionDid: string | null }) {
    */
   const loadFolders = useCallback(
     async (signal?: AbortSignal) => {
-      if (!sessionDid) return;
+      if (!actingDid) return;
       try {
-        const list = await listAcDeployments(sessionDid, signal);
+        const list = await listAcDeployments(actingDid, signal);
         if (signal?.aborted) return;
         acDeploymentsRef.current = list;
         setFolders(list);
@@ -199,7 +206,7 @@ export function UploadTab({ sessionDid }: { sessionDid: string | null }) {
         if (!signal?.aborted) setFolders([]);
       }
     },
-    [sessionDid],
+    [actingDid],
   );
 
   useEffect(() => {
@@ -249,14 +256,14 @@ export function UploadTab({ sessionDid }: { sessionDid: string | null }) {
    */
   const checkAlreadyUploaded = useCallback(
     async (scanned: ScannedRecording[], token: number) => {
-      if (!sessionDid) return;
+      if (!actingDid) return;
       const readable = scanned.filter((r) => r.info);
       if (readable.length === 0) return;
       setDedup({ state: "checking", skipped: 0 });
 
       let keys: UploadedRecordingKeys;
       try {
-        keys = await listUploadedRecordingKeys(sessionDid);
+        keys = await listUploadedRecordingKeys(actingDid);
       } catch {
         // The account couldn't be checked — proceed as a normal upload.
         if (scanTokenRef.current === token) setDedup(null);
@@ -286,7 +293,7 @@ export function UploadTab({ sessionDid }: { sessionDid: string | null }) {
       }
       setDedup({ state: "done", skipped });
     },
-    [sessionDid, setRecording],
+    [actingDid, setRecording],
   );
 
   const scanFiles = useCallback(async (files: File[], folderName = "") => {
@@ -527,6 +534,7 @@ export function UploadTab({ sessionDid }: { sessionDid: string | null }) {
           recordedAt: recordingTime(rec).toISOString(),
           cid: rec.cid,
           deploymentId: deploymentId || undefined,
+          repoDid: acting.repo ?? null,
           target,
           makePreviews,
         });
@@ -550,6 +558,7 @@ export function UploadTab({ sessionDid }: { sessionDid: string | null }) {
     void loadFolders();
     return true;
   }, [
+    acting.repo,
     activeFolderMode,
     groups,
     loadFolders,

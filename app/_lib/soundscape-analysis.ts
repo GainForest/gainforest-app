@@ -4,7 +4,8 @@
  * Reads are public, straight from the owner's PDS, so any device — or anyone
  * looking at a shared library — gets the clock without re-downloading and
  * re-analyzing multi-gigabyte originals. Writes go through the session-gated
- * mutation proxy, into the signed-in account's own repo.
+ * mutation proxy, into the acting account's repo — the signed-in user's own,
+ * or an organization's when acting as one.
  */
 
 import {
@@ -55,14 +56,17 @@ export async function listStoredAnalyses(
 }
 
 /**
- * Store one recording's analysis in the signed-in account's repo, under the
+ * Store one recording's analysis in the acting account's repo, under the
  * same rkey as the recording it describes — so re-analyzing overwrites rather
  * than piling up duplicates.
  */
 export async function saveStoredAnalysis(input: {
   rkey: string;
   record: Record<string, unknown>;
+  /** Group repo DID when acting as an organization; the signed-in account's
+   *  own repo when omitted. */
+  repo?: string;
 }): Promise<void> {
   const { putRecord } = await import("@/app/(manage)/manage/_lib/mutations");
-  await putRecord(SOUNDSCAPE_ANALYSIS_COLLECTION, input.rkey, input.record);
+  await putRecord(SOUNDSCAPE_ANALYSIS_COLLECTION, input.rkey, input.record, input.repo ? { repo: input.repo } : undefined);
 }

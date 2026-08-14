@@ -46,6 +46,7 @@ import {
   type DeploymentEventItem,
 } from "@/app/_lib/deployment-events";
 import { createAcDeployment } from "@/app/_lib/ac-deployment";
+import { useActingRepo } from "@/app/_lib/account-switcher";
 import { useUploadTrayOptional } from "@/app/_components/upload-tray/upload-tray-context";
 import { loadAppliedConfig } from "@/app/_lib/audiomoth/setup-store";
 import { equipmentDetailPath } from "@/app/_lib/equipment";
@@ -61,6 +62,10 @@ type AttachState =
 
 export function DeploymentsTab({ sessionDid }: { sessionDid: string | null }) {
   const t = useTranslations("common.audiomoth.deployments");
+  /* The acting account — the user's own, or the organization they switched
+     into. The list reads that repo and new deployments are written to it. */
+  const acting = useActingRepo(sessionDid);
+  const actingDid = acting.did;
 
   const [events, setEvents] = useState<DeploymentEventItem[] | null>(null);
   const [loadError, setLoadError] = useState(false);
@@ -97,10 +102,10 @@ export function DeploymentsTab({ sessionDid }: { sessionDid: string | null }) {
 
   const reload = useCallback(
     async (signal?: AbortSignal) => {
-      if (!sessionDid) return;
+      if (!actingDid) return;
       setLoadError(false);
       try {
-        const list = await listDeploymentEvents(sessionDid, signal);
+        const list = await listDeploymentEvents(actingDid, signal);
         if (!signal?.aborted) setEvents(list);
       } catch (err) {
         if (signal?.aborted || (err as Error).name === "AbortError") return;
@@ -108,15 +113,16 @@ export function DeploymentsTab({ sessionDid }: { sessionDid: string | null }) {
         setLoadError(true);
       }
     },
-    [sessionDid],
+    [actingDid],
   );
 
   useEffect(() => {
-    if (!sessionDid) return;
+    if (!actingDid) return;
+    setEvents(null);
     const ctrl = new AbortController();
     void reload(ctrl.signal);
     return () => ctrl.abort();
-  }, [reload, sessionDid]);
+  }, [reload, actingDid]);
 
   if (!sessionDid) {
     return (
@@ -180,6 +186,7 @@ export function DeploymentsTab({ sessionDid }: { sessionDid: string | null }) {
             <DeploymentRow
               key={event.uri}
               event={event}
+              writeRepo={acting.repo ?? null}
               onEdit={() => setEditing(event)}
               onDeleted={() => {
                 setEvents((current) => current?.filter((e) => e.uri !== event.uri) ?? null);
@@ -205,7 +212,7 @@ export function DeploymentsTab({ sessionDid }: { sessionDid: string | null }) {
       {creating ? (
         <CreateDeploymentDialog
           sessionDid={sessionDid}
-          companionRepoDid={showAttachPill ? (attachInfo?.repoDid ?? null) : null}
+          repoDid={showAttachPill && attachInfo?.repoDid ? attachInfo.repoDid : (acting.repo ?? null)}
           onClose={() => setCreating(false)}
           onCreated={(created) => {
             void reload();
@@ -223,10 +230,13 @@ export function DeploymentsTab({ sessionDid }: { sessionDid: string | null }) {
 
 function DeploymentRow({
   event,
+  writeRepo,
   onEdit,
   onDeleted,
 }: {
   event: DeploymentEventItem;
+  /** Group repo DID the listed events live in, when acting as an org. */
+  writeRepo: string | null;
   onEdit: () => void;
   onDeleted: () => void;
 }) {
@@ -255,14 +265,14 @@ function DeploymentRow({
     setError(null);
     setDeleting(true);
     try {
-      await deleteDeploymentEvent(event);
+      await deleteDeploymentEvent(event, writeRepo ? { repo: writeRepo } : undefined);
       onDeleted();
     } catch (err) {
       setError(err instanceof Error && err.message ? err.message : t("deleteFailed"));
       setDeleting(false);
       setConfirming(false);
     }
-  }, [event, onDeleted, t]);
+  }, [event, onDeleted, t, writeRepo]);
 
   return (
     <li className="rounded-2xl border border-border bg-card/90 px-4 py-3.5">
@@ -340,17 +350,18 @@ type CreateStage = "form" | "playing" | "done";
 
 function CreateDeploymentDialog({
   sessionDid,
-  companionRepoDid = null,
+  repoDid = null,
   onClose,
   onCreated,
 }: {
   sessionDid: string;
   /**
-   * Repo the companion `ac.deployment` should live in — an organization's
-   * DID when a pending attach-batch was uploaded for one, so the batch and
-   * its deployment end up in the same repo. Null = the signed-in user's own.
+   * Repo the deployment event and its companion `ac.deployment` land in —
+   * an organization's DID when acting as one (or when a pending attach-batch
+   * was uploaded for one, so the batch and its deployment end up in the same
+   * repo). Null = the signed-in user's own.
    */
-  companionRepoDid?: string | null;
+  repoDid?: string | null;
   onClose: () => void;
   /** Reports the companion recorder-deployment record, when it could be saved. */
   onCreated: (created: { acDeploymentUri: string | null }) => void;
@@ -444,16 +455,19 @@ function CreateDeploymentDialog({
       const now = new Date();
       const id = deploymentId.trim().toLowerCase();
       // Save first — even if the speaker fails, the generated ID is preserved.
-      const eventResult = await createDeploymentEvent({
-        deploymentIdHex: id,
-        siteName,
-        lat: coords.lat,
-        lon: coords.lon,
-        deployedAt: now,
-        equipment: selectedEquipment
-          ? { name: selectedEquipment.name, assetId: selectedEquipment.assetId, uri: selectedEquipment.uri }
-          : null,
-      });
+      const eventResult = await createDeploymentEvent(
+        {
+          deploymentIdHex: id,
+          siteName,
+          lat: coords.lat,
+          lon: coords.lon,
+          deployedAt: now,
+          equipment: selectedEquipment
+            ? { name: selectedEquipment.name, assetId: selectedEquipment.assetId, uri: selectedEquipment.uri }
+            : null,
+        },
+        repoDid ? { repo: repoDid } : undefined,
+      );
       // Companion recorder-deployment record (ac.deployment) carrying the
       // device configuration this browser last wrote to the unit. Best
       // effort — the chime event above is the source of truth for the ID.
@@ -475,7 +489,7 @@ function CreateDeploymentDialog({
             firmwareVersion: applied?.firmwareVersion ?? null,
             remarks: `Chime deployment ID ${id}.`,
           },
-          companionRepoDid ? { repo: companionRepoDid } : undefined,
+          repoDid ? { repo: repoDid } : undefined,
         );
         acDeploymentUri = acResult.uri;
       } catch (acError) {
@@ -490,7 +504,7 @@ function CreateDeploymentDialog({
       setStage("form");
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps -- parseCoords reads lat/lon state
-  }, [companionRepoDid, deploymentId, lat, lon, onCreated, selectedEquipment, siteName, t]);
+  }, [deploymentId, lat, lon, onCreated, repoDid, selectedEquipment, siteName, t]);
 
   /** Replay the chime for the current moment (the record stays as saved). */
   const replay = useCallback(async () => {

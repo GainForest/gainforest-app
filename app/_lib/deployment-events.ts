@@ -148,7 +148,11 @@ export async function listDeploymentEvents(
   return items;
 }
 
-// ── Write (through the session-gated manage proxy, own repo only) ──────────
+// ── Write (through the session-gated manage proxy; the signed-in repo by
+// default, an organization's repo when a `repo` option is given) ──────────
+
+/** Write target: the signed-in account by default, an organization's repo when given. */
+export type DeploymentEventWriteOptions = { repo?: string | null };
 
 type MutationResult = { uri: string; cid: string };
 
@@ -280,6 +284,7 @@ export function applyDeploymentEdit(
 export async function updateDeploymentEvent(
   item: DeploymentEventItem,
   edit: DeploymentEventEdit,
+  options?: DeploymentEventWriteOptions,
 ): Promise<MutationResult> {
   return postMutation<MutationResult>(
     {
@@ -288,28 +293,37 @@ export async function updateDeploymentEvent(
       rkey: item.rkey,
       swapRecord: item.cid,
       record: buildUpdatedDeploymentEventRecord(item, edit),
+      ...(options?.repo ? { repo: options.repo } : {}),
     },
     "Could not update the deployment.",
   );
 }
 
-export async function createDeploymentEvent(draft: DeploymentEventDraft): Promise<MutationResult> {
+export async function createDeploymentEvent(
+  draft: DeploymentEventDraft,
+  options?: DeploymentEventWriteOptions,
+): Promise<MutationResult> {
   return postMutation<MutationResult>(
     {
       operation: "createRecord",
       collection: DWC_EVENT_COLLECTION,
       record: buildDeploymentEventRecord(draft),
+      ...(options?.repo ? { repo: options.repo } : {}),
     },
     "Could not save the deployment.",
   );
 }
 
-export async function deleteDeploymentEvent(item: DeploymentEventItem): Promise<void> {
+export async function deleteDeploymentEvent(
+  item: DeploymentEventItem,
+  options?: DeploymentEventWriteOptions,
+): Promise<void> {
   await postMutation<{ success?: boolean }>(
     {
       operation: "deleteRecord",
       collection: DWC_EVENT_COLLECTION,
       rkey: item.rkey,
+      ...(options?.repo ? { repo: options.repo } : {}),
     },
     "Could not delete the deployment.",
   );

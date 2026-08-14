@@ -13,7 +13,7 @@
 // hand-rolled localStorage + event store below — it's synchronous,
 // cross-tab-synced UI state, not server data.
 
-import { useEffect, useRef, useSyncExternalStore } from "react";
+import { useEffect, useMemo, useRef, useSyncExternalStore } from "react";
 import { useQuery, useQueryClient, type QueryClient } from "@tanstack/react-query";
 import { ACTIVE_MANAGE_CONTEXT_KEY, accountIdentifierFromPath } from "@/lib/links";
 import type { CgsGroupMembership } from "@/app/(manage)/manage/_lib/cgs";
@@ -322,6 +322,27 @@ export function useActiveAccountContext(
   // rememberActiveContext is a stable module-level reference, so consumers can
   // safely list it in effect dependencies without re-running every render.
   return [active, rememberActiveContext];
+}
+
+/**
+ * The repo the signed-in user is currently acting as: their own account, or
+ * the organization they have switched into with the account switcher.
+ *
+ * `did` is the repo to read from (null when signed out). `repo` is what the
+ * mutation helpers expect: the group DID when acting as an organization,
+ * undefined when acting personally — so reads and writes always target the
+ * same repo. Membership is enforced server-side by the CGS mutation route,
+ * so a stale group context fails the write rather than leaking anywhere.
+ */
+export function useActingRepo(sessionDid: string | null): { did: string | null; repo: string | undefined } {
+  const [activeContext] = useActiveAccountContext(sessionDid ?? "");
+  return useMemo(() => {
+    if (!sessionDid) return { did: null, repo: undefined };
+    if (activeContext.type === "group" && activeContext.did) {
+      return { did: activeContext.did, repo: activeContext.did };
+    }
+    return { did: sessionDid, repo: undefined };
+  }, [activeContext.did, activeContext.type, sessionDid]);
 }
 
 export function useAccountPathContextSync(options: {

@@ -359,13 +359,16 @@ export async function createEquipment(
 export async function updateEquipment(
   item: EquipmentItem,
   draft: EquipmentDraft,
+  options?: EquipmentWriteOptions,
 ): Promise<MutationResult> {
+  const repo = options?.repo?.trim();
   return postMutation<MutationResult>({
     operation: "putRecord",
     collection: EQUIPMENT_COLLECTION,
     rkey: item.rkey,
     swapRecord: item.cid,
     record: buildEquipmentRecord(draft, { createdAt: item.createdAt }),
+    ...(repo ? { repo } : {}),
   }, "Could not save equipment.");
 }
 
