@@ -381,7 +381,8 @@
     "title": "Select country",
     "description": "Choose the country connected to this record.",
     "searchPlaceholder": "Search countries",
-    "done": "Done"
+    "done": "Done",
+    "clear": "Clear"
   },
   "orgWallet": {
     "title": "Organization wallet",

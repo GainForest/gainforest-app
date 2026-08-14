@@ -166,6 +166,10 @@ function accountCaughtUpWithOptimisticSave(account: AccountRouteData, pending: P
       case "website":
         return canonicalUrl(current.website) === canonicalUrl(pending.state.website);
       case "country":
+        // Clearing the location removes the org's location record reference
+        // entirely — wait until both the derived country and the referenced
+        // record's name are gone from the account payload.
+        if (!pending.state.country.trim()) return current.country === "" && account.locationName === null;
         return current.country.toUpperCase() === pending.state.country.toUpperCase();
       case "startDate":
       case "visibility":
@@ -301,6 +305,7 @@ function EditableHero({
   account,
   settingsHref,
   viewPublicHref,
+  locationName,
   editState,
   inlineField,
   isSaving,
@@ -323,6 +328,9 @@ function EditableHero({
   account: AccountRouteData;
   settingsHref: string;
   viewPublicHref: string | null;
+  /** Name of the org's referenced location record, shown when no country
+   *  can be derived from it (null while a location edit is in flight). */
+  locationName: string | null;
   memberships: AccountOrganization[];
   editState: HeroEditState;
   inlineField: InlineField;
@@ -364,7 +372,10 @@ function EditableHero({
   const isOrg = account.kind === "organization";
   const resolvedWebsite = editState.website;
   const resolvedCountry = editState.country;
+  // The location chip prefers the derived country (flag + localized name);
+  // otherwise it falls back to the referenced location record's own name.
   const countryLabel = resolvedCountry ? countryName(resolvedCountry) : null;
+  const locationLabel = countryLabel ?? locationName;
   const flag = resolvedCountry ? countryFlag(resolvedCountry) : "";
   const sinceDate = formatSinceDate(editState.startDate);
 
@@ -505,9 +516,9 @@ function EditableHero({
             </FactChip>
           ) : null}
           {isOrg ? (
-            <FactChip onClick={onEditCountry} disabled={!canEdit} title={editDisabledReason ?? undefined} empty={!countryLabel}>
+            <FactChip onClick={onEditCountry} disabled={!canEdit} title={editDisabledReason ?? undefined} empty={!locationLabel}>
               {flag ? <span className="text-sm leading-none" aria-hidden="true">{flag}</span> : <MapPinIcon className="size-3.5 opacity-70" aria-hidden />}
-              {countryLabel ?? t("hero.addCountry")}
+              {locationLabel ?? t("hero.addLocation")}
             </FactChip>
           ) : null}
           {isOrg ? (
@@ -872,7 +883,14 @@ export function EditableAccountHeader({
 
   const openCountryModal = () => openDashboardModal(
     "manage-country-editor",
-    <CountrySelectorModal initialCountryCode={editCountry} onCountryChange={(country) => void saveChanges({ country })} />,
+    <CountrySelectorModal
+      initialCountryCode={editCountry}
+      onCountryChange={(country) => void saveChanges({ country })}
+      // Offer "remove" whenever a location is set — whether it was picked as
+      // a country here or references any other location record.
+      onClear={editCountry.trim() || account.locationName ? () => void saveChanges({ country: "" }) : undefined}
+      clearLabel={t("modals.removeLocation")}
+    />,
   );
 
   const openWebsiteModal = () => openDashboardModal(
@@ -906,6 +924,9 @@ export function EditableAccountHeader({
         account={account}
         settingsHref={settingsHref}
         viewPublicHref={viewPublicHref}
+        // While a location set/clear is saving, the stale record name must not
+        // resurface — the in-flight country in editState is authoritative.
+        locationName={pendingOptimisticSave?.fields.includes("country") ? null : account.locationName}
         memberships={memberships}
         editState={editState}
         inlineField={inlineField}

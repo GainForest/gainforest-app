@@ -13,6 +13,7 @@ import {
   CopyIcon,
   EarthIcon,
   GlobeIcon,
+  MapPinIcon,
   PencilIcon,
   Share2Icon,
 } from "lucide-react";
@@ -80,9 +81,13 @@ export function AccountHero({
 
   const initial = account.displayName.charAt(0).toUpperCase();
   const sinceDate = formatSinceDate(account.kind === "organization" ? account.foundedDate ?? account.createdAt : account.createdAt);
+  // The organization's location is the certified location record it
+  // references: shown as a country (with flag) when its coordinates resolve
+  // to one, otherwise by the record's own name.
   const country = account.country ? formatCountry(account.country) : null;
+  const locationLabel = country ?? account.locationName;
   const orgType = account.kind === "organization" ? account.orgType ?? account.summary.certOrgType : null;
-  const hasFacts = Boolean(sinceDate.state === "valid" || country || orgType);
+  const hasFacts = Boolean(sinceDate.state === "valid" || locationLabel || orgType);
 
   useEffect(() => {
     let cancelled = false;
@@ -273,7 +278,12 @@ export function AccountHero({
                     {orgType}
                   </span>
                 ) : null}
-                {country ? <span className="inline-flex items-center gap-1.5">{country}</span> : null}
+                {locationLabel ? (
+                  <span className="inline-flex items-center gap-1.5">
+                    {country ? null : <MapPinIcon className="size-3.5 opacity-70" aria-hidden />}
+                    {locationLabel}
+                  </span>
+                ) : null}
                 {sinceDate.state === "valid" ? (
                   <span className="inline-flex items-center gap-1.5">
                     <CalendarIcon className="size-3.5 opacity-70" aria-hidden />

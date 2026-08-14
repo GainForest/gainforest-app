@@ -3,6 +3,16 @@ import { resolvePdsHost } from "./pds";
 
 export type CertifiedLocationLike = {
   location?: unknown;
+  name?: unknown;
+};
+
+/** What the org's referenced location record tells us for display: the
+ *  record's own name plus the country its coordinates resolve to (when they
+ *  sit exactly on a country centroid — i.e. the record was created by our
+ *  country picker). */
+export type CertifiedLocationSummary = {
+  name: string | null;
+  country: CountryCode | null;
 };
 
 const COORDINATE_EPSILON = 0.000001;
@@ -50,7 +60,9 @@ export function countryCodeFromCertifiedLocation(locationRecord: CertifiedLocati
   return coordinates ? countryCodeFromCoordinates(coordinates.latitude, coordinates.longitude) : null;
 }
 
-export async function fetchCertifiedLocationCountryCode(uri: string | null | undefined, signal?: AbortSignal): Promise<CountryCode | null> {
+/** Read the location record an organization references and summarize it for
+ *  display. Null when the URI is missing, malformed, or the record is gone. */
+export async function fetchCertifiedLocationSummary(uri: string | null | undefined, signal?: AbortSignal): Promise<CertifiedLocationSummary | null> {
   if (!uri) return null;
   const parsed = parseAtUri(uri);
   if (!parsed || parsed.collection !== "app.certified.location") return null;
@@ -63,6 +75,8 @@ export async function fetchCertifiedLocationCountryCode(uri: string | null | und
   if (!response.ok) return null;
 
   const data = (await response.json().catch(() => null)) as { value?: CertifiedLocationLike } | null;
-  return countryCodeFromCertifiedLocation(data?.value);
+  if (!data?.value) return null;
+  const name = typeof data.value.name === "string" && data.value.name.trim() ? data.value.name.trim() : null;
+  return { name, country: countryCodeFromCertifiedLocation(data.value) };
 }
 

@@ -1156,7 +1156,7 @@
       "expandBio": "Show full bio",
       "collapseBio": "Collapse bio",
       "addType": "Add type",
-      "addCountry": "Add country",
+      "addLocation": "Add location",
       "sinceDate": "Since {date}",
       "invalidDate": "Invalid date",
       "addStartDate": "Add start date",
@@ -1188,7 +1188,8 @@
       "logoDescription": "Choose a square logo for this profile.",
       "photoDescription": "Choose a square photo for this profile.",
       "editCoverImage": "Edit cover image",
-      "coverDescription": "Choose a wide banner image for the top of your profile."
+      "coverDescription": "Choose a wide banner image for the top of your profile.",
+      "removeLocation": "Remove location"
     },
     "organizations": {
       "fallbackName": "Organization account",

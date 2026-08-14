@@ -1156,7 +1156,7 @@
       "expandBio": "Onyesha wasifu kamili",
       "collapseBio": "Kunja wasifu",
       "addType": "Ongeza aina",
-      "addCountry": "Ongeza nchi",
+      "addLocation": "Ongeza mahali",
       "sinceDate": "Tangu {date}",
       "invalidDate": "Tarehe si sahihi",
       "addStartDate": "Ongeza tarehe ya kuanza",
@@ -1188,7 +1188,8 @@
       "logoDescription": "Chagua nembo ya mraba kwa wasifu huu.",
       "photoDescription": "Chagua picha ya mraba kwa wasifu huu.",
       "editCoverImage": "Hariri picha ya jalada",
-      "coverDescription": "Chagua picha pana kwa sehemu ya juu ya wasifu wako."
+      "coverDescription": "Chagua picha pana kwa sehemu ya juu ya wasifu wako.",
+      "removeLocation": "Ondoa mahali"
     },
     "organizations": {
       "fallbackName": "Akaunti ya shirika",

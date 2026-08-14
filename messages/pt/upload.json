@@ -1156,7 +1156,7 @@
       "expandBio": "Mostrar biografia completa",
       "collapseBio": "Recolher biografia",
       "addType": "Adicionar tipo",
-      "addCountry": "Adicionar país",
+      "addLocation": "Adicionar localização",
       "sinceDate": "Desde {date}",
       "invalidDate": "Data inválida",
       "addStartDate": "Adicionar data de início",
@@ -1188,7 +1188,8 @@
       "logoDescription": "Escolha um logotipo quadrado para este perfil.",
       "photoDescription": "Escolha uma foto quadrada para este perfil.",
       "editCoverImage": "Editar imagem de capa",
-      "coverDescription": "Escolha uma imagem ampla para o topo do seu perfil."
+      "coverDescription": "Escolha uma imagem ampla para o topo do seu perfil.",
+      "removeLocation": "Remover localização"
     },
     "organizations": {
       "fallbackName": "Conta de organização",

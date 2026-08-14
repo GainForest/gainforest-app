@@ -8,7 +8,7 @@ import {
 } from "../../_lib/indexer";
 import { shortDid } from "../../_lib/format";
 import { preferredDidIdentifier } from "../../_lib/urls";
-import { fetchCertifiedLocationCountryCode } from "../../_lib/country-location";
+import { fetchCertifiedLocationSummary } from "../../_lib/country-location";
 import { resolveBlobUrl, resolveDidHandle, resolvePdsHost } from "../../_lib/pds";
 
 export type AccountKind = "organization" | "user";
@@ -25,6 +25,9 @@ export type AccountRouteData = {
   longDescription: string | null;
   website: string | null;
   country: string | null;
+  /** Name of the location record the org references ("where the org is
+   *  based") — the display value when the country can't be derived. */
+  locationName: string | null;
   createdAt: string | null;
   foundedDate: string | null;
   visibility: "Public" | "Unlisted" | null;
@@ -47,6 +50,7 @@ type DirectCertifiedProfile = {
 
 type DirectCertifiedOrganization = {
   country: string | null;
+  locationName: string | null;
   foundedDate: string | null;
   visibility: "Public" | "Unlisted" | null;
   createdAt: string | null;
@@ -213,6 +217,7 @@ export const getAccountRouteData = cache(async (
     bio: null,
     website: null,
     country: null,
+    locationName: null,
     createdAt: null,
     foundedDate: null,
     visibility: null,
@@ -231,6 +236,7 @@ export const getAccountRouteData = cache(async (
     bio: directCertifiedProfile?.description ?? baseSummary.bio ?? null,
     website: directCertifiedProfile?.website ?? baseSummary.website ?? null,
     country: directCertifiedOrganization ? directCertifiedOrganization.country : baseSummary.country ?? null,
+    locationName: directCertifiedOrganization ? directCertifiedOrganization.locationName : baseSummary.locationName ?? null,
     createdAt: directCertifiedOrganization?.createdAt ?? directCertifiedProfile?.createdAt ?? baseSummary.createdAt ?? null,
     foundedDate: directCertifiedOrganization?.foundedDate ?? baseSummary.foundedDate ?? null,
     visibility: directCertifiedOrganization?.visibility ?? baseSummary.visibility ?? null,
@@ -255,6 +261,7 @@ export const getAccountRouteData = cache(async (
     longDescription: directCertifiedOrganization?.longDescription ?? null,
     website: summary.website,
     country: summary.country,
+    locationName: summary.locationName,
     createdAt: summary.createdAt,
     foundedDate: summary.foundedDate,
     visibility: summary.visibility,
@@ -409,8 +416,10 @@ async function fetchDirectCertifiedOrganization(did: string): Promise<DirectCert
       ? (value.longDescription as { value: string }).value.trim() || null
       : null
     : null;
+  const locationSummary = await fetchCertifiedLocationSummary(locationUri);
   return {
-    country: await fetchCertifiedLocationCountryCode(locationUri),
+    country: locationSummary?.country ?? null,
+    locationName: locationSummary?.name ?? null,
     foundedDate: typeof value.foundedDate === "string" ? value.foundedDate : null,
     visibility: rawVisibility === "unlisted" || rawVisibility === "Unlisted" ? "Unlisted" : rawVisibility ? "Public" : null,
     createdAt: typeof value.createdAt === "string" ? value.createdAt : null,

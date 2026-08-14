@@ -1156,7 +1156,7 @@
       "expandBio": "Tampilkan bio lengkap",
       "collapseBio": "Ciutkan bio",
       "addType": "Tambahkan jenis",
-      "addCountry": "Tambahkan negara",
+      "addLocation": "Tambahkan lokasi",
       "sinceDate": "Sejak {date}",
       "invalidDate": "Tanggal tidak valid",
       "addStartDate": "Tambahkan tanggal mulai",
@@ -1188,7 +1188,8 @@
       "logoDescription": "Pilih logo persegi untuk profil ini.",
       "photoDescription": "Pilih foto persegi untuk profil ini.",
       "editCoverImage": "Edit gambar sampul",
-      "coverDescription": "Pilih gambar lebar untuk bagian atas profil Anda."
+      "coverDescription": "Pilih gambar lebar untuk bagian atas profil Anda.",
+      "removeLocation": "Hapus lokasi"
     },
     "organizations": {
       "fallbackName": "Akun organisasi",

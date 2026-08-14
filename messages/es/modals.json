@@ -381,7 +381,8 @@
     "title": "Seleccionar país",
     "description": "Elige el país conectado con este registro.",
     "searchPlaceholder": "Buscar países",
-    "done": "Listo"
+    "done": "Listo",
+    "clear": "Quitar"
   },
   "orgWallet": {
     "title": "Billetera de la organización",
