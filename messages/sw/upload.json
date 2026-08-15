@@ -1237,6 +1237,7 @@
       "longitude": "Longitudo",
       "invalidCoordinates": "Latitudo lazima iwe kati ya -90 na 90, longitudo kati ya -180 na 180.",
       "dragHint": "Buruta alama ili kurekebisha mahali.",
+      "countryHint": "Huchapishwa kama nchi nzima. Tafuta mahali ili kuwa mahususi zaidi.",
       "approximateLabel": "Shiriki mahali pa makadirio tu",
       "approximateHint": "Huchapisha eneo la ~{radius} km badala ya nukta kamili.",
       "approximateHintWithLabel": "Huchapisha eneo la ~{radius} km badala ya nukta kamili, likionyeshwa kama “{label}”.",

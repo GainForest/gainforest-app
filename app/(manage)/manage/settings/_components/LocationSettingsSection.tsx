@@ -14,7 +14,7 @@ import { Loader2Icon, MapPinIcon, PencilIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useModal } from "@/components/ui/modal/context";
 import { countryFlag } from "@/app/_lib/format";
-import { getCountry } from "@/app/_lib/countries";
+import { countryCodeFromLocationLabel, getCountry } from "@/app/_lib/countries";
 import {
   displayLocationFromChoice,
   saveOrganizationLocation,
@@ -27,6 +27,14 @@ function countryName(code: string): string {
   return getCountry(code)?.name ?? code;
 }
 
+type SavedLocation = {
+  name: string | null;
+  country: string | null;
+  latitude?: number | null;
+  longitude?: number | null;
+  approximate?: boolean;
+};
+
 export function LocationSettingsSection({
   target,
   initial,
@@ -34,20 +42,24 @@ export function LocationSettingsSection({
 }: {
   target: ManageTarget;
   /** The saved location, as the account data reads it. */
-  initial: { name: string | null; country: string | null };
+  initial: SavedLocation;
   /** Set when the viewer may not edit the account — disables the control. */
   disabledReason: string | null;
 }) {
   const t = useTranslations("common.settings.location");
   const modal = useModal();
   const router = useRouter();
-  const [current, setCurrent] = useState<{ name: string | null; country: string | null }>(initial);
+  const [current, setCurrent] = useState<SavedLocation>(initial);
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // A place name like "Zurich, Switzerland" earns its country's flag too.
+  const placeFlag = getCountry(countryCodeFromLocationLabel(current.name))?.emoji;
   const label = current.country
     ? `${countryFlag(current.country)} ${countryName(current.country)}`.trim()
-    : current.name;
+    : current.name
+      ? `${placeFlag ?? ""} ${current.name}`.trim()
+      : null;
 
   const save = async (choice: OrgLocationChoice | null) => {
     setIsSaving(true);
@@ -55,7 +67,16 @@ export function LocationSettingsSection({
     const writeOptions = target.kind === "group" ? { repo: target.did } : undefined;
     try {
       await saveOrganizationLocation(target.did, choice, writeOptions);
-      setCurrent(choice ? displayLocationFromChoice(choice) : { name: null, country: null });
+      setCurrent(
+        choice
+          ? {
+              ...displayLocationFromChoice(choice),
+              latitude: choice.place.latitude,
+              longitude: choice.place.longitude,
+              approximate: choice.approximate,
+            }
+          : { name: null, country: null },
+      );
       router.refresh();
     } catch (err) {
       setError(err instanceof Error ? err.message : t("saveError"));
@@ -70,7 +91,18 @@ export function LocationSettingsSection({
         id: LocationEditorModalId,
         content: (
           <LocationEditorModal
-            current={label ? { name: label, countryCode: current.country } : null}
+            current={
+              label
+                ? {
+                    // The clean record name — the flag stays on the settings row.
+                    name: current.country ? countryName(current.country) : current.name,
+                    countryCode: current.country,
+                    latitude: current.latitude ?? null,
+                    longitude: current.longitude ?? null,
+                    approximate: current.approximate ?? false,
+                  }
+                : null
+            }
             onConfirm={(choice) => void save(choice)}
           />
         ),

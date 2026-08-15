@@ -13,7 +13,7 @@
  * record update) stays with the caller, like every other hero editor.
  */
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import maplibregl from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
 import { Loader2Icon, MapPinIcon, SearchIcon } from "lucide-react";
@@ -28,7 +28,7 @@ import {
   ModalTitle,
 } from "@/components/ui/modal/modal";
 import { useModal } from "@/components/ui/modal/context";
-import { countryFlag } from "@/app/_lib/format";
+import { countryCodeFromLocationLabel, getCountry } from "@/app/_lib/countries";
 import {
   APPROXIMATE_CIRCLE_RADIUS_KM,
   circlePolygonFeature,
@@ -42,8 +42,20 @@ export const LocationEditorModalId = "location-editor";
 const SEARCH_DEBOUNCE_MS = 300;
 
 type LocationEditorModalProps = {
-  /** The currently saved location, for the header + the Remove action. */
-  current: { name: string | null; countryCode: string | null } | null;
+  /** The currently saved location, for the header, the Remove action, and
+   *  seeding the map. For an approximate location the coordinates are the
+   *  published circle's center — shown as context, never re-saved as-is. */
+  current: {
+    name: string | null;
+    countryCode: string | null;
+    latitude?: number | null;
+    longitude?: number | null;
+    approximate?: boolean;
+    /** True when the location hasn't been published yet (e.g. a pick made
+     *  while creating the organization) — its exact point stays editable
+     *  even when marked approximate. */
+    draft?: boolean;
+  } | null;
   /** Called with the steward's choice; null means "remove the location". */
   onConfirm: (choice: OrgLocationChoice | null) => void;
 };
@@ -91,19 +103,26 @@ async function reverseGeocode(latitude: number, longitude: number): Promise<Geoc
   }
 }
 
-/** Satellite preview: pin for exact locations, ~10 km circle for approximate. */
+/** Satellite preview: pin for exact locations, ~10 km circle for approximate.
+ *  With no selection yet, `seed` shows the currently saved area as context. */
 function LocationPreviewMap({
   place,
   approximate,
+  seed,
   onDragged,
 }: {
   place: GeocodedPlace | null;
   approximate: boolean;
+  /** The saved approximate circle's center, shown until a new pick is made. */
+  seed: { latitude: number; longitude: number } | null;
   onDragged: (latitude: number, longitude: number) => void;
 }) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<maplibregl.Map | null>(null);
   const markerRef = useRef<maplibregl.Marker | null>(null);
+  // Which kind of marker is currently on the map, so it can be rebuilt when
+  // the pick changes between a country (flag, fixed) and a point (pin, draggable).
+  const markerModeRef = useRef<"country" | "point" | null>(null);
   const onDraggedRef = useRef(onDragged);
   onDraggedRef.current = onDragged;
 
@@ -158,11 +177,14 @@ function LocationPreviewMap({
     const map = mapRef.current;
     if (!map) return;
 
+    // The circle marks whichever approximate area applies right now: the new
+    // pick when there is one, otherwise the saved area shown as context.
+    const circleCenter = place && approximate ? place : !place && seed ? seed : null;
     const applyCircle = () => {
       const source = map.getSource("approx-circle") as maplibregl.GeoJSONSource | undefined;
       source?.setData(
-        place && approximate
-          ? circlePolygonFeature(place.latitude, place.longitude)
+        circleCenter
+          ? circlePolygonFeature(circleCenter.latitude, circleCenter.longitude)
           : { type: "FeatureCollection", features: [] },
       );
     };
@@ -172,28 +194,52 @@ function LocationPreviewMap({
     if (!place) {
       markerRef.current?.remove();
       markerRef.current = null;
+      markerModeRef.current = null;
+      if (seed) map.flyTo({ center: [seed.longitude, seed.latitude], zoom: 8, duration: 800 });
       return;
     }
 
+    // A whole country is an area, not an address: mark it with its flag and
+    // don't offer a drag handle that would imply a precise spot.
+    const isWholeCountry = place.kind === "country" && !approximate;
+    const mode: "country" | "point" = isWholeCountry ? "country" : "point";
+    if (markerRef.current && markerModeRef.current !== mode) {
+      markerRef.current.remove();
+      markerRef.current = null;
+    }
+
     if (!markerRef.current) {
-      const marker = new maplibregl.Marker({ color: "#38BDF8", draggable: true })
-        .setLngLat([place.longitude, place.latitude])
-        .addTo(map);
-      marker.on("dragend", () => {
-        const { lat, lng } = marker.getLngLat();
-        onDraggedRef.current(lat, lng);
-      });
+      const flag = isWholeCountry ? getCountry(place.countryCode)?.emoji ?? null : null;
+      let marker: maplibregl.Marker;
+      if (flag) {
+        const element = document.createElement("div");
+        element.textContent = flag;
+        element.style.fontSize = "30px";
+        element.style.lineHeight = "1";
+        element.style.filter = "drop-shadow(0 2px 4px rgba(0,0,0,.5))";
+        marker = new maplibregl.Marker({ element });
+      } else {
+        marker = new maplibregl.Marker({ color: "#38BDF8", draggable: !isWholeCountry });
+      }
+      marker.setLngLat([place.longitude, place.latitude]).addTo(map);
+      if (!isWholeCountry) {
+        marker.on("dragend", () => {
+          const { lat, lng } = marker.getLngLat();
+          onDraggedRef.current(lat, lng);
+        });
+      }
       markerRef.current = marker;
     } else {
       markerRef.current.setLngLat([place.longitude, place.latitude]);
     }
+    markerModeRef.current = mode;
 
     map.flyTo({
       center: [place.longitude, place.latitude],
       zoom: approximate ? 8 : place.kind === "country" ? 4 : 10,
       duration: 800,
     });
-  }, [place, approximate]);
+  }, [place, approximate, seed]);
 
   return <div ref={containerRef} className="h-52 w-full overflow-hidden rounded-xl border border-border" />;
 }
@@ -202,15 +248,51 @@ export function LocationEditorModal({ current, onConfirm }: LocationEditorModalP
   const t = useTranslations("upload.dashboardClient.locationEditor");
   const { stack, popModal, hide } = useModal();
 
+  // Seed the editor with the saved location so the map opens on it. An exact
+  // point becomes the working selection (drag to adjust); an approximate one
+  // is context only — re-saving its published center as a fresh pick would
+  // offset the offset and drift the circle away from the true spot.
+  const hasSavedCoordinates =
+    typeof current?.latitude === "number" && typeof current?.longitude === "number";
+  const seededSelection: GeocodedPlace | null = useMemo(
+    () =>
+      current && hasSavedCoordinates && (!current.approximate || current.draft)
+        ? {
+            name: current.name ?? `${current.latitude!.toFixed(5)}, ${current.longitude!.toFixed(5)}`,
+            latitude: current.latitude!,
+            longitude: current.longitude!,
+            countryCode: current.countryCode,
+            region: null,
+            // Recovered from the saved name so "share only an approximate
+            // location" on the seeded pick can still publish a coarse label.
+            country: getCountry(current.countryCode ?? countryCodeFromLocationLabel(current.name))?.name ?? null,
+            kind: current.countryCode ? "country" : "place",
+          }
+        : null,
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- `current` is fixed for the life of the modal
+    [],
+  );
+  const approximateSeed = useMemo(
+    () =>
+      current && hasSavedCoordinates && current.approximate && !current.draft
+        ? { latitude: current.latitude!, longitude: current.longitude! }
+        : null,
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- `current` is fixed for the life of the modal
+    [],
+  );
+
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<GeocodedPlace[]>([]);
   const [searching, setSearching] = useState(false);
   const [searchError, setSearchError] = useState(false);
-  const [selected, setSelected] = useState<GeocodedPlace | null>(null);
+  const [selected, setSelected] = useState<GeocodedPlace | null>(seededSelection);
   const [manualMode, setManualMode] = useState(false);
   const [latDraft, setLatDraft] = useState("");
   const [lonDraft, setLonDraft] = useState("");
-  const [approximate, setApproximate] = useState(false);
+  const [approximate, setApproximate] = useState(Boolean(current?.approximate));
+  // Save stays disabled until something actually changes — blindly re-saving
+  // the seeded location would only mint duplicate records.
+  const [dirty, setDirty] = useState(false);
   // Guards against a slow reverse-geocode overwriting a newer drag/entry.
   const reverseRequestId = useRef(0);
 
@@ -253,6 +335,10 @@ export function LocationEditorModal({ current, onConfirm }: LocationEditorModalP
 
   const pickResult = (place: GeocodedPlace) => {
     setSelected(place);
+    setDirty(true);
+    // A country is already as coarse as it gets; a ~10 km circle inside it
+    // would publish less truth, not more.
+    if (place.kind === "country") setApproximate(false);
     setResults([]);
     setQuery("");
   };
@@ -271,6 +357,7 @@ export function LocationEditorModal({ current, onConfirm }: LocationEditorModalP
       kind: "place",
     };
     setSelected(base);
+    setDirty(true);
     const requestId = ++reverseRequestId.current;
     const resolved = await reverseGeocode(latitude, longitude);
     if (requestId !== reverseRequestId.current || !resolved) return;
@@ -299,6 +386,8 @@ export function LocationEditorModal({ current, onConfirm }: LocationEditorModalP
   })();
 
   const approximateLabel = selected ? coarsePlaceLabel(selected) : null;
+  const selectedIsWholeCountry = selected?.kind === "country" && !approximate;
+  const selectedFlag = getCountry(selected?.countryCode)?.emoji ?? null;
 
   const handleSave = () => {
     if (!selected) return;
@@ -348,8 +437,8 @@ export function LocationEditorModal({ current, onConfirm }: LocationEditorModalP
                       onClick={() => pickResult(place)}
                       className="flex w-full items-start gap-2 rounded-lg px-3 py-2 text-left text-sm transition-colors hover:bg-muted"
                     >
-                      {place.kind === "country" && place.countryCode ? (
-                        <span className="mt-0.5 text-base leading-none" aria-hidden>{countryFlag(place.countryCode)}</span>
+                      {place.kind === "country" && getCountry(place.countryCode) ? (
+                        <span className="mt-0.5 text-base leading-none" aria-hidden>{getCountry(place.countryCode)!.emoji}</span>
                       ) : (
                         <MapPinIcon className="mt-0.5 size-4 shrink-0 text-muted-foreground" aria-hidden />
                       )}
@@ -407,7 +496,11 @@ export function LocationEditorModal({ current, onConfirm }: LocationEditorModalP
 
         {selected ? (
           <p className="flex items-start gap-1.5 text-sm text-foreground">
-            <MapPinIcon className="mt-0.5 size-4 shrink-0 text-muted-foreground" aria-hidden />
+            {selectedIsWholeCountry && selectedFlag ? (
+              <span className="mt-0.5 text-base leading-none" aria-hidden>{selectedFlag}</span>
+            ) : (
+              <MapPinIcon className="mt-0.5 size-4 shrink-0 text-muted-foreground" aria-hidden />
+            )}
             <span className="min-w-0 break-words">{selected.name}</span>
           </p>
         ) : null}
@@ -415,15 +508,29 @@ export function LocationEditorModal({ current, onConfirm }: LocationEditorModalP
         <LocationPreviewMap
           place={selected}
           approximate={approximate}
+          seed={approximateSeed}
           onDragged={(latitude, longitude) => void adoptCoordinates(latitude, longitude)}
         />
-        {selected ? <p className="text-xs text-muted-foreground">{t("dragHint")}</p> : null}
+        {selected ? (
+          <p className="text-xs text-muted-foreground">
+            {selectedIsWholeCountry ? t("countryHint") : t("dragHint")}
+          </p>
+        ) : null}
 
-        <label className="flex cursor-pointer items-start gap-2.5 rounded-xl border border-border bg-muted/40 p-3">
+        {/* "Approximate" only means something for a point — a country is
+            already the coarsest a location gets. */}
+        <label
+          className={`flex cursor-pointer items-start gap-2.5 rounded-xl border border-border bg-muted/40 p-3 ${
+            selectedIsWholeCountry ? "hidden" : ""
+          }`}
+        >
           <input
             type="checkbox"
             checked={approximate}
-            onChange={(e) => setApproximate(e.target.checked)}
+            onChange={(e) => {
+              setApproximate(e.target.checked);
+              if (selected) setDirty(true);
+            }}
             className="mt-0.5 accent-[var(--primary)]"
           />
           <span className="min-w-0 text-sm">
@@ -445,7 +552,7 @@ export function LocationEditorModal({ current, onConfirm }: LocationEditorModalP
         ) : (
           <span />
         )}
-        <Button onClick={handleSave} disabled={!selected}>
+        <Button onClick={handleSave} disabled={!selected || !dirty}>
           {t("save")}
         </Button>
       </ModalFooter>

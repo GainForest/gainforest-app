@@ -29,7 +29,6 @@ import {
   InputGroupInput,
 } from "@/components/ui/input-group";
 import { useModal } from "@/components/ui/modal/context";
-import { countryFlag } from "@/app/_lib/format";
 import { cn } from "@/lib/utils";
 import { putRecord, uploadBlob } from "../_lib/mutations";
 import { registerCgsGroup } from "../_lib/cgs";
@@ -327,6 +326,10 @@ function OrganizationSetupDetailsPanel({
       ? countryName(display.country)
       : display.name
     : null;
+  // The flag: from the pick's own country code — places included.
+  const locationFlag = location?.place.countryCode
+    ? getCountry(location.place.countryCode)?.emoji ?? null
+    : null;
 
   const handleOpenLocationEditor = () => {
     modal.pushModal(
@@ -334,7 +337,20 @@ function OrganizationSetupDetailsPanel({
         id: LocationEditorModalId,
         content: (
           <LocationEditorModal
-            current={locationLabel ? { name: locationLabel, countryCode: display?.country || null } : null}
+            current={
+              locationLabel && location
+                ? {
+                    name: location.place.name,
+                    countryCode: display?.country || null,
+                    latitude: location.place.latitude,
+                    longitude: location.place.longitude,
+                    approximate: location.approximate,
+                    // Nothing is published during creation, so the exact
+                    // point stays editable even when marked approximate.
+                    draft: true,
+                  }
+                : null
+            }
             onConfirm={onLocationChange}
           />
         ),
@@ -361,8 +377,8 @@ function OrganizationSetupDetailsPanel({
                   <MapPinHouseIcon className="size-3" />
                   <span>{locationT("basedIn")}</span>
                 </span>
-                {display?.country ? (
-                  <span className="absolute top-0 right-2 text-2xl">{countryFlag(display.country)}</span>
+                {locationFlag ? (
+                  <span className="absolute top-0 right-2 text-2xl">{locationFlag}</span>
                 ) : null}
                 <span className="text-sm font-medium">
                   {locationLabel.length > 22

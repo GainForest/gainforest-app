@@ -30,6 +30,7 @@ import { AccountMemberships } from "@/app/account/_components/AccountMemberships
 import { AccountWalletSupport } from "@/app/account/_components/AccountWalletSupport";
 import { ExpandableBio } from "@/app/account/_components/ExpandableBio";
 import { countryFlag } from "@/app/_lib/format";
+import { countryCodeFromLocationLabel, getCountry } from "@/app/_lib/countries";
 import { resolvePdsHost } from "@/app/_lib/pds";
 import { putRecord, uploadBlob } from "../_lib/mutations";
 import { createOrgLocationStrongRef, displayLocationFromChoice, type OrgLocationChoice } from "../_lib/org-location";
@@ -98,6 +99,11 @@ export type HeroLocationState = {
   name: string | null;
   /** ISO-2 code when the location is a picked country (drives the flag). */
   country: string;
+  /** Saved coordinates, so the editor can open on the spot. For an
+   *  approximate location: the published circle's center. */
+  latitude?: number | null;
+  longitude?: number | null;
+  approximate?: boolean;
   /** A freshly picked location, consumed by the save; absent otherwise. */
   pendingChoice?: OrgLocationChoice | null;
 };
@@ -140,7 +146,13 @@ function heroStateFromAccount(account: AccountRouteData): HeroEditState {
     description: account.description ?? "",
     longDescription: account.longDescription ?? "",
     website: account.website ?? "",
-    location: { name: account.locationName, country: account.country ?? "" },
+    location: {
+      name: account.locationName,
+      country: account.country ?? "",
+      latitude: account.locationLatitude,
+      longitude: account.locationLongitude,
+      approximate: account.locationApproximate,
+    },
     startDate: startDateInputValue(account.foundedDate),
     visibility: visibilityInputValue(account.visibility),
     orgType: account.orgType ?? "",
@@ -382,7 +394,10 @@ function EditableHero({
   // otherwise it falls back to the referenced location record's own name.
   const countryLabel = editState.location.country ? countryName(editState.location.country) : null;
   const locationLabel = countryLabel ?? editState.location.name;
-  const flag = editState.location.country ? countryFlag(editState.location.country) : "";
+  // A place name like "Zurich, Switzerland" earns its country's flag too.
+  const flag = editState.location.country
+    ? countryFlag(editState.location.country)
+    : getCountry(countryCodeFromLocationLabel(editState.location.name))?.emoji ?? "";
   const sinceDate = formatSinceDate(editState.startDate);
 
   return (
@@ -848,7 +863,7 @@ export function EditableAccountHeader({
 
       setPendingOptimisticSave({
         // The pending pick has been published; only its display state remains.
-        state: { ...next, location: { name: next.location.name, country: next.location.country } },
+        state: { ...next, location: { ...next.location, pendingChoice: undefined } },
         fields: optimisticFieldsForSave(overrides),
         previousAvatarUrl: account.avatarUrl,
         previousCoverUrl: account.coverUrl,
@@ -895,6 +910,9 @@ export function EditableAccountHeader({
           ? {
               name: editLocation.country ? countryName(editLocation.country) : editLocation.name,
               countryCode: editLocation.country || null,
+              latitude: editLocation.latitude ?? null,
+              longitude: editLocation.longitude ?? null,
+              approximate: editLocation.approximate ?? false,
             }
           : null
       }
@@ -904,8 +922,17 @@ export function EditableAccountHeader({
           return;
         }
         // Show the published label immediately; the pick itself rides along
-        // and is turned into a location record by the save.
-        void saveChanges({ location: { ...displayLocationFromChoice(choice), pendingChoice: choice } });
+        // and is turned into a location record by the save. Coordinates come
+        // from the pick so reopening the editor lands on the new spot.
+        void saveChanges({
+          location: {
+            ...displayLocationFromChoice(choice),
+            latitude: choice.place.latitude,
+            longitude: choice.place.longitude,
+            approximate: choice.approximate,
+            pendingChoice: choice,
+          },
+        });
       }}
     />,
   );

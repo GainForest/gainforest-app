@@ -310,7 +310,13 @@ export async function SettingsSection({ target }: { target: ManageTarget }) {
   const locationSection = (
     <LocationSettingsSection
       target={target}
-      initial={{ name: account.locationName, country: account.country }}
+      initial={{
+        name: account.locationName,
+        country: account.country,
+        latitude: account.locationLatitude,
+        longitude: account.locationLongitude,
+        approximate: account.locationApproximate,
+      }}
       disabledReason={profileEditPermission.reason}
     />
   );

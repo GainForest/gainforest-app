@@ -1237,6 +1237,7 @@
       "longitude": "Longitude",
       "invalidCoordinates": "A latitude deve estar entre -90 e 90, e a longitude entre -180 e 180.",
       "dragHint": "Arraste o marcador para ajustar a localização.",
+      "countryHint": "Publicado como o país inteiro. Busque um lugar para ser mais preciso.",
       "approximateLabel": "Compartilhar apenas uma localização aproximada",
       "approximateHint": "Publica uma área de ~{radius} km em vez do ponto exato.",
       "approximateHintWithLabel": "Publica uma área de ~{radius} km em vez do ponto exato, exibida como “{label}”.",

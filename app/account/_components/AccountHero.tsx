@@ -22,6 +22,7 @@ import type { AccountOrganization } from "./AccountOrganizationsGrid";
 import { AccountMemberships } from "./AccountMemberships";
 import { AccountWalletSupport } from "./AccountWalletSupport";
 import { formatCountry } from "../../_lib/format";
+import { countryCodeFromLocationLabel, getCountry } from "../../_lib/countries";
 import { SocialGlyph } from "@/app/_components/SocialIcon";
 import { TrustedByBadges } from "@/app/_components/TrustedByBadges";
 import { AccountAwards } from "./AccountAwards";
@@ -86,6 +87,8 @@ export function AccountHero({
   // to one, otherwise by the record's own name.
   const country = account.country ? formatCountry(account.country) : null;
   const locationLabel = country ?? account.locationName;
+  // A place name like "Zurich, Switzerland" earns its country's flag too.
+  const locationFlag = country ? null : getCountry(countryCodeFromLocationLabel(account.locationName))?.emoji ?? null;
   const orgType = account.kind === "organization" ? account.orgType ?? account.summary.certOrgType : null;
   const hasFacts = Boolean(sinceDate.state === "valid" || locationLabel || orgType);
 
@@ -280,7 +283,11 @@ export function AccountHero({
                 ) : null}
                 {locationLabel ? (
                   <span className="inline-flex items-center gap-1.5">
-                    {country ? null : <MapPinIcon className="size-3.5 opacity-70" aria-hidden />}
+                    {country ? null : locationFlag ? (
+                      <span className="leading-none" aria-hidden>{locationFlag}</span>
+                    ) : (
+                      <MapPinIcon className="size-3.5 opacity-70" aria-hidden />
+                    )}
                     {locationLabel}
                   </span>
                 ) : null}

@@ -1237,6 +1237,7 @@
       "longitude": "Bujur",
       "invalidCoordinates": "Lintang harus antara -90 dan 90, bujur antara -180 dan 180.",
       "dragHint": "Seret penanda untuk menyetel lokasi.",
+      "countryHint": "Dipublikasikan sebagai seluruh negara. Cari tempat untuk lebih tepat.",
       "approximateLabel": "Bagikan lokasi perkiraan saja",
       "approximateHint": "Menerbitkan area ~{radius} km alih-alih titik persis.",
       "approximateHintWithLabel": "Menerbitkan area ~{radius} km alih-alih titik persis, ditampilkan sebagai “{label}”.",

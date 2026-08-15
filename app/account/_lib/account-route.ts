@@ -28,6 +28,11 @@ export type AccountRouteData = {
   /** Name of the location record the org references ("where the org is
    *  based") — the display value when the country can't be derived. */
   locationName: string | null;
+  /** The saved location's coordinates — for an approximate location, the
+   *  published circle's center. Null when the record has none we can read. */
+  locationLatitude: number | null;
+  locationLongitude: number | null;
+  locationApproximate: boolean;
   createdAt: string | null;
   foundedDate: string | null;
   visibility: "Public" | "Unlisted" | null;
@@ -51,6 +56,9 @@ type DirectCertifiedProfile = {
 type DirectCertifiedOrganization = {
   country: string | null;
   locationName: string | null;
+  locationLatitude: number | null;
+  locationLongitude: number | null;
+  locationApproximate: boolean;
   foundedDate: string | null;
   visibility: "Public" | "Unlisted" | null;
   createdAt: string | null;
@@ -262,6 +270,9 @@ export const getAccountRouteData = cache(async (
     website: summary.website,
     country: summary.country,
     locationName: summary.locationName,
+    locationLatitude: directCertifiedOrganization?.locationLatitude ?? null,
+    locationLongitude: directCertifiedOrganization?.locationLongitude ?? null,
+    locationApproximate: directCertifiedOrganization?.locationApproximate ?? false,
     createdAt: summary.createdAt,
     foundedDate: summary.foundedDate,
     visibility: summary.visibility,
@@ -420,6 +431,9 @@ async function fetchDirectCertifiedOrganization(did: string): Promise<DirectCert
   return {
     country: locationSummary?.country ?? null,
     locationName: locationSummary?.name ?? null,
+    locationLatitude: locationSummary?.latitude ?? null,
+    locationLongitude: locationSummary?.longitude ?? null,
+    locationApproximate: locationSummary?.approximate ?? false,
     foundedDate: typeof value.foundedDate === "string" ? value.foundedDate : null,
     visibility: rawVisibility === "unlisted" || rawVisibility === "Unlisted" ? "Unlisted" : rawVisibility ? "Public" : null,
     createdAt: typeof value.createdAt === "string" ? value.createdAt : null,

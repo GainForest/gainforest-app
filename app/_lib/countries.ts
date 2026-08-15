@@ -1853,3 +1853,30 @@ export function getCountry(code: string | null | undefined): Country | null {
   return countries[code.trim().toUpperCase() as CountryCode] ?? null;
 }
 
+const countryCodeByLowerName = new Map<string, CountryCode>(
+  countryEntries.map(([code, country]) => [country.name.toLowerCase(), code]),
+);
+
+/** Names the geocoder uses that differ from our list's spelling. */
+const COUNTRY_NAME_ALIASES: Record<string, CountryCode> = {
+  "united states of america": "US",
+  "czechia": "CZ",
+  "türkiye": "TR",
+  "the netherlands": "NL",
+};
+
+/**
+ * Derive the country a location label is in from its trailing segment —
+ * "Zurich, Switzerland" → CH, "Sabah, Malaysia" → MY, "Switzerland" → CH.
+ *
+ * Display-only enrichment for location names this app publishes (which end
+ * with the geocoder's country name). Unknown suffixes return null; callers
+ * fall back to a neutral icon, never a wrong flag.
+ */
+export function countryCodeFromLocationLabel(label: string | null | undefined): CountryCode | null {
+  if (!label) return null;
+  const lastSegment = label.split(",").at(-1)?.trim().toLowerCase();
+  if (!lastSegment) return null;
+  return countryCodeByLowerName.get(lastSegment) ?? COUNTRY_NAME_ALIASES[lastSegment] ?? null;
+}
+
