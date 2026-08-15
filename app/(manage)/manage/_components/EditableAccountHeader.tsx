@@ -32,7 +32,7 @@ import { ExpandableBio } from "@/app/account/_components/ExpandableBio";
 import { countryFlag } from "@/app/_lib/format";
 import { resolvePdsHost } from "@/app/_lib/pds";
 import { putRecord, uploadBlob } from "../_lib/mutations";
-import { createCountryLocationStrongRef, normalizeCountryCode } from "../_lib/country-location";
+import { createOrgLocationStrongRef, displayLocationFromChoice, type OrgLocationChoice } from "../_lib/org-location";
 import { canEditGroupProfile } from "../_lib/cgs-permissions";
 import { useModal } from "@/components/ui/modal/context";
 import {
@@ -42,7 +42,7 @@ import {
   VisibilitySelectorModal,
   WebsiteEditorModal,
 } from "../_modals/DashboardEditModals";
-import CountrySelectorModal from "@/components/modals/country-selector";
+import { LocationEditorModal, LocationEditorModalId } from "../_modals/LocationEditorModal";
 import { ImageEditorModal } from "@/components/modals/image-editor";
 import { SocialGlyph } from "@/app/_components/SocialIcon";
 import { FollowStats } from "@/app/_components/FollowButton";
@@ -92,12 +92,22 @@ async function fetchExistingSelfRecord(repo: string, collection: string): Promis
     : {};
 }
 
+/** The hero's view of the org's declared location. */
+export type HeroLocationState = {
+  /** Display label — the referenced location record's name. */
+  name: string | null;
+  /** ISO-2 code when the location is a picked country (drives the flag). */
+  country: string;
+  /** A freshly picked location, consumed by the save; absent otherwise. */
+  pendingChoice?: OrgLocationChoice | null;
+};
+
 export type HeroEditState = {
   displayName: string;
   description: string;
   longDescription: string;
   website: string;
-  country: string;
+  location: HeroLocationState;
   startDate: string;
   visibility: "Public" | "Unlisted";
   orgType: string;
@@ -130,7 +140,7 @@ function heroStateFromAccount(account: AccountRouteData): HeroEditState {
     description: account.description ?? "",
     longDescription: account.longDescription ?? "",
     website: account.website ?? "",
-    country: account.country ?? "",
+    location: { name: account.locationName, country: account.country ?? "" },
     startDate: startDateInputValue(account.foundedDate),
     visibility: visibilityInputValue(account.visibility),
     orgType: account.orgType ?? "",
@@ -165,12 +175,13 @@ function accountCaughtUpWithOptimisticSave(account: AccountRouteData, pending: P
         return canonicalText(current[field]) === canonicalText(pending.state[field]);
       case "website":
         return canonicalUrl(current.website) === canonicalUrl(pending.state.website);
-      case "country":
-        // Clearing the location removes the org's location record reference
-        // entirely — wait until both the derived country and the referenced
-        // record's name are gone from the account payload.
-        if (!pending.state.country.trim()) return current.country === "" && account.locationName === null;
-        return current.country.toUpperCase() === pending.state.country.toUpperCase();
+      case "location":
+        // Wait until both the record name and the derived country the account
+        // reads back match what the save published (both empty after a clear).
+        return (
+          canonicalText(current.location.name ?? "") === canonicalText(pending.state.location.name ?? "") &&
+          current.location.country.toUpperCase() === pending.state.location.country.toUpperCase()
+        );
       case "startDate":
       case "visibility":
         return current[field] === pending.state[field];
@@ -305,7 +316,6 @@ function EditableHero({
   account,
   settingsHref,
   viewPublicHref,
-  locationName,
   editState,
   inlineField,
   isSaving,
@@ -316,7 +326,7 @@ function EditableHero({
   onCancelInline,
   onEditLogo,
   onEditCover,
-  onEditCountry,
+  onEditLocation,
   onEditWebsite,
   onEditStartDate,
   onEditVisibility,
@@ -328,9 +338,6 @@ function EditableHero({
   account: AccountRouteData;
   settingsHref: string;
   viewPublicHref: string | null;
-  /** Name of the org's referenced location record, shown when no country
-   *  can be derived from it (null while a location edit is in flight). */
-  locationName: string | null;
   memberships: AccountOrganization[];
   editState: HeroEditState;
   inlineField: InlineField;
@@ -342,7 +349,7 @@ function EditableHero({
   onCancelInline: () => void;
   onEditLogo: () => void;
   onEditCover: () => void;
-  onEditCountry: () => void;
+  onEditLocation: () => void;
   onEditWebsite: () => void;
   onEditStartDate: () => void;
   onEditVisibility: () => void;
@@ -371,12 +378,11 @@ function EditableHero({
 
   const isOrg = account.kind === "organization";
   const resolvedWebsite = editState.website;
-  const resolvedCountry = editState.country;
   // The location chip prefers the derived country (flag + localized name);
   // otherwise it falls back to the referenced location record's own name.
-  const countryLabel = resolvedCountry ? countryName(resolvedCountry) : null;
-  const locationLabel = countryLabel ?? locationName;
-  const flag = resolvedCountry ? countryFlag(resolvedCountry) : "";
+  const countryLabel = editState.location.country ? countryName(editState.location.country) : null;
+  const locationLabel = countryLabel ?? editState.location.name;
+  const flag = editState.location.country ? countryFlag(editState.location.country) : "";
   const sinceDate = formatSinceDate(editState.startDate);
 
   return (
@@ -516,7 +522,7 @@ function EditableHero({
             </FactChip>
           ) : null}
           {isOrg ? (
-            <FactChip onClick={onEditCountry} disabled={!canEdit} title={editDisabledReason ?? undefined} empty={!locationLabel}>
+            <FactChip onClick={onEditLocation} disabled={!canEdit} title={editDisabledReason ?? undefined} empty={!locationLabel}>
               {flag ? <span className="text-sm leading-none" aria-hidden="true">{flag}</span> : <MapPinIcon className="size-3.5 opacity-70" aria-hidden />}
               {locationLabel ?? t("hero.addLocation")}
             </FactChip>
@@ -654,7 +660,7 @@ export function EditableAccountHeader({
   const [editDescription, setEditDescription] = useState(accountState.description);
   const [editLongDescription, setEditLongDescription] = useState(accountState.longDescription);
   const [editWebsite, setEditWebsite] = useState(accountState.website);
-  const [editCountry, setEditCountry] = useState(accountState.country);
+  const [editLocation, setEditLocation] = useState<HeroLocationState>(accountState.location);
   const [editStartDate, setEditStartDate] = useState(accountState.startDate);
   const [editVisibility, setEditVisibility] = useState<"Public" | "Unlisted">(accountState.visibility);
   const [editOrgType, setEditOrgType] = useState(accountState.orgType);
@@ -675,7 +681,7 @@ export function EditableAccountHeader({
     description: editDescription,
     longDescription: editLongDescription,
     website: editWebsite,
-    country: editCountry,
+    location: editLocation,
     startDate: editStartDate,
     visibility: editVisibility,
     orgType: editOrgType,
@@ -689,7 +695,7 @@ export function EditableAccountHeader({
     setEditDescription(next.description);
     setEditLongDescription(next.longDescription);
     setEditWebsite(next.website);
-    setEditCountry(next.country);
+    setEditLocation(next.location);
     setEditStartDate(next.startDate);
     setEditVisibility(next.visibility);
     setEditOrgType(next.orgType);
@@ -725,7 +731,6 @@ export function EditableAccountHeader({
       case "description": setEditDescription(value); break;
       case "longDescription": setEditLongDescription(value); break;
       case "website": setEditWebsite(value); break;
-      case "country": setEditCountry(value); break;
       case "startDate": setEditStartDate(value); break;
       case "visibility": setEditVisibility(value as "Public" | "Unlisted"); break;
       case "orgType": setEditOrgType(value); break;
@@ -745,10 +750,6 @@ export function EditableAccountHeader({
     }
     if (!isValidWebsite(next.website)) {
       setSaveError(t("errors.invalidWebsite"));
-      return;
-    }
-    if (account.kind === "organization" && next.country.trim() && !normalizeCountryCode(next.country)) {
-      setSaveError(t("errors.invalidCountry"));
       return;
     }
 
@@ -799,7 +800,7 @@ export function EditableAccountHeader({
       }
 
       const shouldWriteOrg = account.kind === "organization" && (
-        "country" in overrides || "startDate" in overrides || "visibility" in overrides ||
+        "location" in overrides || "startDate" in overrides || "visibility" in overrides ||
         "orgType" in overrides || "socials" in overrides || "longDescription" in overrides
       );
       if (shouldWriteOrg) {
@@ -812,9 +813,13 @@ export function EditableAccountHeader({
           createdAt: typeof existingOrg.createdAt === "string" ? existingOrg.createdAt : account.createdAt ?? new Date().toISOString(),
           visibility: next.visibility === "Unlisted" ? "unlisted" : "public",
         };
-        if ("country" in overrides) {
-          if (next.country.trim()) orgRecord.location = await createCountryLocationStrongRef(next.country, writeOptions);
-          else delete orgRecord.location;
+        if ("location" in overrides) {
+          if (next.location.pendingChoice) {
+            // A fresh pick: mint its location record, then reference it.
+            orgRecord.location = await createOrgLocationStrongRef(next.location.pendingChoice, writeOptions);
+          } else if (!next.location.name && !next.location.country) {
+            delete orgRecord.location;
+          }
         }
         if ("startDate" in overrides) {
           if (next.startDate.trim()) orgRecord.foundedDate = `${next.startDate.trim()}T00:00:00.000Z`;
@@ -842,7 +847,8 @@ export function EditableAccountHeader({
       }
 
       setPendingOptimisticSave({
-        state: next,
+        // The pending pick has been published; only its display state remains.
+        state: { ...next, location: { name: next.location.name, country: next.location.country } },
         fields: optimisticFieldsForSave(overrides),
         previousAvatarUrl: account.avatarUrl,
         previousCoverUrl: account.coverUrl,
@@ -881,15 +887,26 @@ export function EditableAccountHeader({
     />,
   );
 
-  const openCountryModal = () => openDashboardModal(
-    "manage-country-editor",
-    <CountrySelectorModal
-      initialCountryCode={editCountry}
-      onCountryChange={(country) => void saveChanges({ country })}
-      // Offer "remove" whenever a location is set — whether it was picked as
-      // a country here or references any other location record.
-      onClear={editCountry.trim() || account.locationName ? () => void saveChanges({ country: "" }) : undefined}
-      clearLabel={t("modals.removeLocation")}
+  const openLocationModal = () => openDashboardModal(
+    LocationEditorModalId,
+    <LocationEditorModal
+      current={
+        editLocation.name || editLocation.country
+          ? {
+              name: editLocation.country ? countryName(editLocation.country) : editLocation.name,
+              countryCode: editLocation.country || null,
+            }
+          : null
+      }
+      onConfirm={(choice) => {
+        if (!choice) {
+          void saveChanges({ location: { name: null, country: "" } });
+          return;
+        }
+        // Show the published label immediately; the pick itself rides along
+        // and is turned into a location record by the save.
+        void saveChanges({ location: { ...displayLocationFromChoice(choice), pendingChoice: choice } });
+      }}
     />,
   );
 
@@ -924,9 +941,6 @@ export function EditableAccountHeader({
         account={account}
         settingsHref={settingsHref}
         viewPublicHref={viewPublicHref}
-        // While a location set/clear is saving, the stale record name must not
-        // resurface — the in-flight country in editState is authoritative.
-        locationName={pendingOptimisticSave?.fields.includes("country") ? null : account.locationName}
         memberships={memberships}
         editState={editState}
         inlineField={inlineField}
@@ -938,7 +952,7 @@ export function EditableAccountHeader({
         onCancelInline={resetState}
         onEditLogo={openLogoModal}
         onEditCover={openCoverModal}
-        onEditCountry={openCountryModal}
+        onEditLocation={openLocationModal}
         onEditWebsite={openWebsiteModal}
         onEditStartDate={openStartDateModal}
         onEditVisibility={openVisibilityModal}

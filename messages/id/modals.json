@@ -381,8 +381,7 @@
     "title": "Pilih negara",
     "description": "Pilih negara yang terhubung dengan catatan ini.",
     "searchPlaceholder": "Cari negara",
-    "done": "Selesai",
-    "clear": "Hapus"
+    "done": "Selesai"
   },
   "orgWallet": {
     "title": "Dompet organisasi",

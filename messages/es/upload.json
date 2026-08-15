@@ -1179,7 +1179,6 @@
     "errors": {
       "nameRequired": "Añade un nombre antes de guardar.",
       "invalidWebsite": "Introduce una dirección web válida.",
-      "invalidCountry": "Elige un país de la lista.",
       "saveFailed": "No se pudo guardar. Inténtalo de nuevo."
     },
     "modals": {
@@ -1188,8 +1187,7 @@
       "logoDescription": "Elige un logo cuadrado para este perfil.",
       "photoDescription": "Elige una foto cuadrada para este perfil.",
       "editCoverImage": "Editar imagen de portada",
-      "coverDescription": "Elige una imagen panorámica para la parte superior de tu perfil.",
-      "removeLocation": "Quitar ubicación"
+      "coverDescription": "Elige una imagen panorámica para la parte superior de tu perfil."
     },
     "organizations": {
       "fallbackName": "Cuenta de organización",
@@ -1225,6 +1223,25 @@
           "alt": "Cascada en un bosque tropical"
         }
       }
+    },
+    "locationEditor": {
+      "title": "Ubicación de la organización",
+      "description": "Muestra dónde tiene su sede tu organización.",
+      "descriptionWithCurrent": "Actualmente: {location}.",
+      "searchPlaceholder": "Busca un lugar…",
+      "noResults": "No se encontraron lugares.",
+      "searchUnavailable": "La búsqueda de lugares no está disponible en este momento.",
+      "enterCoordinates": "Introducir coordenadas",
+      "searchInstead": "Buscar un lugar",
+      "latitude": "Latitud",
+      "longitude": "Longitud",
+      "invalidCoordinates": "La latitud debe estar entre -90 y 90, y la longitud entre -180 y 180.",
+      "dragHint": "Arrastra el marcador para ajustar la ubicación.",
+      "approximateLabel": "Compartir solo una ubicación aproximada",
+      "approximateHint": "Publica un área de ~{radius} km en lugar del punto exacto, con un nombre a nivel de región.",
+      "approximateHintWithLabel": "Publica un área de ~{radius} km en lugar del punto exacto, mostrada como “{label}”.",
+      "remove": "Quitar ubicación",
+      "save": "Guardar ubicación"
     }
   },
   "dashboardModals": {

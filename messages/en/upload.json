@@ -1179,7 +1179,6 @@
     "errors": {
       "nameRequired": "Add a name before saving.",
       "invalidWebsite": "Enter a valid website address.",
-      "invalidCountry": "Choose a country from the list.",
       "saveFailed": "Failed to save. Please try again."
     },
     "modals": {
@@ -1188,8 +1187,7 @@
       "logoDescription": "Choose a square logo for this profile.",
       "photoDescription": "Choose a square photo for this profile.",
       "editCoverImage": "Edit cover image",
-      "coverDescription": "Choose a wide banner image for the top of your profile.",
-      "removeLocation": "Remove location"
+      "coverDescription": "Choose a wide banner image for the top of your profile."
     },
     "organizations": {
       "fallbackName": "Organization account",
@@ -1225,6 +1223,25 @@
           "alt": "Waterfall in a tropical forest"
         }
       }
+    },
+    "locationEditor": {
+      "title": "Organization location",
+      "description": "Show where your organization is based.",
+      "descriptionWithCurrent": "Currently set to {location}.",
+      "searchPlaceholder": "Search for a place…",
+      "noResults": "No places found.",
+      "searchUnavailable": "Place search is unavailable right now.",
+      "enterCoordinates": "Enter coordinates instead",
+      "searchInstead": "Search for a place instead",
+      "latitude": "Latitude",
+      "longitude": "Longitude",
+      "invalidCoordinates": "Latitude must be between -90 and 90, longitude between -180 and 180.",
+      "dragHint": "Drag the pin to fine-tune the location.",
+      "approximateLabel": "Share only an approximate location",
+      "approximateHint": "Publishes a ~{radius} km area instead of the exact point, under a region-level name.",
+      "approximateHintWithLabel": "Publishes a ~{radius} km area instead of the exact point, shown as “{label}”.",
+      "remove": "Remove location",
+      "save": "Save location"
     }
   },
   "dashboardModals": {

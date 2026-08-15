@@ -1179,7 +1179,6 @@
     "errors": {
       "nameRequired": "Adicione um nome antes de salvar.",
       "invalidWebsite": "Insira um endereço de site válido.",
-      "invalidCountry": "Escolha um país na lista.",
       "saveFailed": "Não foi possível salvar. Tente novamente."
     },
     "modals": {
@@ -1188,8 +1187,7 @@
       "logoDescription": "Escolha um logotipo quadrado para este perfil.",
       "photoDescription": "Escolha uma foto quadrada para este perfil.",
       "editCoverImage": "Editar imagem de capa",
-      "coverDescription": "Escolha uma imagem ampla para o topo do seu perfil.",
-      "removeLocation": "Remover localização"
+      "coverDescription": "Escolha uma imagem ampla para o topo do seu perfil."
     },
     "organizations": {
       "fallbackName": "Conta de organização",
@@ -1225,6 +1223,25 @@
           "alt": "Cachoeira em uma floresta tropical"
         }
       }
+    },
+    "locationEditor": {
+      "title": "Localização da organização",
+      "description": "Mostre onde a sua organização está sediada.",
+      "descriptionWithCurrent": "Atualmente: {location}.",
+      "searchPlaceholder": "Pesquise um lugar…",
+      "noResults": "Nenhum lugar encontrado.",
+      "searchUnavailable": "A pesquisa de lugares está indisponível no momento.",
+      "enterCoordinates": "Inserir coordenadas",
+      "searchInstead": "Pesquisar um lugar",
+      "latitude": "Latitude",
+      "longitude": "Longitude",
+      "invalidCoordinates": "A latitude deve estar entre -90 e 90, e a longitude entre -180 e 180.",
+      "dragHint": "Arraste o marcador para ajustar a localização.",
+      "approximateLabel": "Compartilhar apenas uma localização aproximada",
+      "approximateHint": "Publica uma área de ~{radius} km em vez do ponto exato, com um nome em nível de região.",
+      "approximateHintWithLabel": "Publica uma área de ~{radius} km em vez do ponto exato, exibida como “{label}”.",
+      "remove": "Remover localização",
+      "save": "Salvar localização"
     }
   },
   "dashboardModals": {

@@ -1179,7 +1179,6 @@
     "errors": {
       "nameRequired": "Tambahkan nama sebelum menyimpan.",
       "invalidWebsite": "Masukkan alamat situs web yang valid.",
-      "invalidCountry": "Pilih negara dari daftar.",
       "saveFailed": "Gagal menyimpan. Coba lagi."
     },
     "modals": {
@@ -1188,8 +1187,7 @@
       "logoDescription": "Pilih logo persegi untuk profil ini.",
       "photoDescription": "Pilih foto persegi untuk profil ini.",
       "editCoverImage": "Edit gambar sampul",
-      "coverDescription": "Pilih gambar lebar untuk bagian atas profil Anda.",
-      "removeLocation": "Hapus lokasi"
+      "coverDescription": "Pilih gambar lebar untuk bagian atas profil Anda."
     },
     "organizations": {
       "fallbackName": "Akun organisasi",
@@ -1225,6 +1223,25 @@
           "alt": "Air terjun di hutan tropis"
         }
       }
+    },
+    "locationEditor": {
+      "title": "Lokasi organisasi",
+      "description": "Tunjukkan di mana organisasi Anda berbasis.",
+      "descriptionWithCurrent": "Saat ini: {location}.",
+      "searchPlaceholder": "Cari tempat…",
+      "noResults": "Tempat tidak ditemukan.",
+      "searchUnavailable": "Pencarian tempat sedang tidak tersedia.",
+      "enterCoordinates": "Masukkan koordinat saja",
+      "searchInstead": "Cari tempat saja",
+      "latitude": "Lintang",
+      "longitude": "Bujur",
+      "invalidCoordinates": "Lintang harus antara -90 dan 90, bujur antara -180 dan 180.",
+      "dragHint": "Seret penanda untuk menyetel lokasi.",
+      "approximateLabel": "Bagikan lokasi perkiraan saja",
+      "approximateHint": "Menerbitkan area ~{radius} km alih-alih titik persis, dengan nama tingkat wilayah.",
+      "approximateHintWithLabel": "Menerbitkan area ~{radius} km alih-alih titik persis, ditampilkan sebagai “{label}”.",
+      "remove": "Hapus lokasi",
+      "save": "Simpan lokasi"
     }
   },
   "dashboardModals": {

@@ -1179,7 +1179,6 @@
     "errors": {
       "nameRequired": "Ongeza jina kabla ya kuhifadhi.",
       "invalidWebsite": "Weka anwani halali ya tovuti.",
-      "invalidCountry": "Chagua nchi kutoka kwenye orodha.",
       "saveFailed": "Imeshindikana kuhifadhi. Jaribu tena."
     },
     "modals": {
@@ -1188,8 +1187,7 @@
       "logoDescription": "Chagua nembo ya mraba kwa wasifu huu.",
       "photoDescription": "Chagua picha ya mraba kwa wasifu huu.",
       "editCoverImage": "Hariri picha ya jalada",
-      "coverDescription": "Chagua picha pana kwa sehemu ya juu ya wasifu wako.",
-      "removeLocation": "Ondoa mahali"
+      "coverDescription": "Chagua picha pana kwa sehemu ya juu ya wasifu wako."
     },
     "organizations": {
       "fallbackName": "Akaunti ya shirika",
@@ -1225,6 +1223,25 @@
           "alt": "Maporomoko ya maji katika msitu wa tropiki"
         }
       }
+    },
+    "locationEditor": {
+      "title": "Mahali pa shirika",
+      "description": "Onyesha mahali shirika lako lilipo.",
+      "descriptionWithCurrent": "Kwa sasa: {location}.",
+      "searchPlaceholder": "Tafuta mahali…",
+      "noResults": "Hakuna mahali palipopatikana.",
+      "searchUnavailable": "Utafutaji wa mahali haupatikani kwa sasa.",
+      "enterCoordinates": "Weka kuratibu badala yake",
+      "searchInstead": "Tafuta mahali badala yake",
+      "latitude": "Latitudo",
+      "longitude": "Longitudo",
+      "invalidCoordinates": "Latitudo lazima iwe kati ya -90 na 90, longitudo kati ya -180 na 180.",
+      "dragHint": "Buruta alama ili kurekebisha mahali.",
+      "approximateLabel": "Shiriki mahali pa makadirio tu",
+      "approximateHint": "Huchapisha eneo la ~{radius} km badala ya nukta kamili, kwa jina la ngazi ya mkoa.",
+      "approximateHintWithLabel": "Huchapisha eneo la ~{radius} km badala ya nukta kamili, likionyeshwa kama “{label}”.",
+      "remove": "Ondoa mahali",
+      "save": "Hifadhi mahali"
     }
   },
   "dashboardModals": {

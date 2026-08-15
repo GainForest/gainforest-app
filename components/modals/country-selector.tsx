@@ -18,15 +18,9 @@ const allCountries = Object.entries(countries);
 const CountrySelectorModal = ({
   initialCountryCode,
   onCountryChange,
-  onClear,
-  clearLabel,
 }: {
   initialCountryCode: string;
   onCountryChange: (country: string) => void;
-  /** When provided, the modal offers a button that clears the current value
-   *  (e.g. "Remove location") instead of picking a country. */
-  onClear?: () => void;
-  clearLabel?: string;
 }) => {
   const t = useTranslations("modals.countrySelector");
   const [countryCode, setCountryCode] = useState(initialCountryCode);
@@ -36,7 +30,8 @@ const CountrySelectorModal = ({
   const isDrawer = useIsDrawer();
   const selectedCountryRef = useRef<HTMLButtonElement>(null);
 
-  const close = () => {
+  const handleDone = (country: string) => {
+    onCountryChange(country);
     if (stack.length === 1) {
       hide().then(() => {
         popModal();
@@ -44,16 +39,6 @@ const CountrySelectorModal = ({
     } else {
       popModal();
     }
-  };
-
-  const handleDone = (country: string) => {
-    onCountryChange(country);
-    close();
-  };
-
-  const handleClear = () => {
-    onClear?.();
-    close();
   };
 
   const [searchText, setSearchText] = useState("");
@@ -114,14 +99,7 @@ const CountrySelectorModal = ({
         )}
       </div>
 
-      <ModalFooter className="mt-4 flex justify-between gap-2">
-        {onClear ? (
-          <Button variant="ghost" className="text-muted-foreground" onClick={handleClear}>
-            {clearLabel ?? t("clear")}
-          </Button>
-        ) : (
-          <span />
-        )}
+      <ModalFooter className="mt-4 flex justify-end">
         <Button onClick={() => handleDone(countryCode)}>{t("done")}</Button>
       </ModalFooter>
     </ModalContent>
