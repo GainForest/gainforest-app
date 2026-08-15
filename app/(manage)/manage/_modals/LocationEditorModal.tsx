@@ -252,15 +252,23 @@ export function LocationEditorModal({ current, onConfirm }: LocationEditorModalP
   // point becomes the working selection (drag to adjust); an approximate one
   // is context only — re-saving its published center as a fresh pick would
   // offset the offset and drift the circle away from the true spot.
-  const hasSavedCoordinates =
-    typeof current?.latitude === "number" && typeof current?.longitude === "number";
+  // A saved country stores no coordinates — a country is an area, not a
+  // point. The flag marker's position is this editor's own convention: the
+  // country table's centroid, looked up at render time, never published.
+  const conventionCoordinates =
+    current && typeof current.latitude !== "number" && current.countryCode
+      ? getCountry(current.countryCode)?.coordinates ?? null
+      : null;
+  const seedLatitude = typeof current?.latitude === "number" ? current.latitude : conventionCoordinates?.latitude;
+  const seedLongitude = typeof current?.longitude === "number" ? current.longitude : conventionCoordinates?.longitude;
+  const hasSavedCoordinates = typeof seedLatitude === "number" && typeof seedLongitude === "number";
   const seededSelection: GeocodedPlace | null = useMemo(
     () =>
       current && hasSavedCoordinates && (!current.approximate || current.draft)
         ? {
-            name: current.name ?? `${current.latitude!.toFixed(5)}, ${current.longitude!.toFixed(5)}`,
-            latitude: current.latitude!,
-            longitude: current.longitude!,
+            name: current.name ?? `${seedLatitude!.toFixed(5)}, ${seedLongitude!.toFixed(5)}`,
+            latitude: seedLatitude!,
+            longitude: seedLongitude!,
             countryCode: current.countryCode,
             region: null,
             // Recovered from the saved name so "share only an approximate
@@ -275,7 +283,7 @@ export function LocationEditorModal({ current, onConfirm }: LocationEditorModalP
   const approximateSeed = useMemo(
     () =>
       current && hasSavedCoordinates && current.approximate && !current.draft
-        ? { latitude: current.latitude!, longitude: current.longitude! }
+        ? { latitude: seedLatitude!, longitude: seedLongitude! }
         : null,
     // eslint-disable-next-line react-hooks/exhaustive-deps -- `current` is fixed for the life of the modal
     [],
