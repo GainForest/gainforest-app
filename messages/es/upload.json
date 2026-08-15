@@ -1301,6 +1301,11 @@
       "description": "Déjalo en blanco y crearemos una dirección de recuperación a partir del correo de tu cuenta.",
       "placeholder": "recuperacion@ejemplo.com",
       "invalid": "Introduce un correo válido."
+    },
+    "location": {
+      "label": "Ubicación",
+      "basedIn": "Con sede en",
+      "empty": "Definir una ubicación"
     }
   }
 }

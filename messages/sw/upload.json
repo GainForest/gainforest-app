@@ -1301,6 +1301,11 @@
       "description": "Acha tupu na tutaunda anwani ya kurejesha kutoka barua pepe ya akaunti yako.",
       "placeholder": "rejesha@example.com",
       "invalid": "Weka barua pepe halali."
+    },
+    "location": {
+      "label": "Mahali",
+      "basedIn": "Iko",
+      "empty": "Weka mahali"
     }
   }
 }

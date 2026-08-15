@@ -377,12 +377,6 @@
     "loading": "Inapakia...",
     "done": "Tayari"
   },
-  "countrySelector": {
-    "title": "Chagua nchi",
-    "description": "Chagua nchi inayohusiana na rekodi hii.",
-    "searchPlaceholder": "Tafuta nchi",
-    "done": "Imekamilika"
-  },
   "orgWallet": {
     "title": "Pochi ya shirika",
     "description": "Pochi moja ya pamoja kwa shirika lako, inayolindwa na funguo za siri za wanachama",

@@ -1,6 +1,6 @@
 "use client";
 
-import { countries, getCountry, type CountryCode } from "@/app/_lib/countries";
+import { getCountry } from "@/app/_lib/countries";
 import { createRecord } from "./mutations";
 
 const COUNTRY_LOCATION_SRS = "http://www.opengis.net/def/crs/OGC/1.3/CRS84";
@@ -25,9 +25,4 @@ export async function createCountryLocationStrongRef(
     name: country.name,
     createdAt: new Date().toISOString(),
   }, undefined, options);
-}
-
-export function normalizeCountryCode(value: string): CountryCode | null {
-  const code = value.trim().toUpperCase() as CountryCode;
-  return countries[code] ? code : null;
 }

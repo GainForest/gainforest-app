@@ -1301,6 +1301,11 @@
       "description": "Leave this blank and we’ll create a recovery address from your account email.",
       "placeholder": "recovery@example.com",
       "invalid": "Enter a valid email address."
+    },
+    "location": {
+      "label": "Location",
+      "basedIn": "Based in",
+      "empty": "Set a location"
     }
   }
 }

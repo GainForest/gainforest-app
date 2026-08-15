@@ -33,9 +33,14 @@ import { countryFlag } from "@/app/_lib/format";
 import { cn } from "@/lib/utils";
 import { putRecord, uploadBlob } from "../_lib/mutations";
 import { registerCgsGroup } from "../_lib/cgs";
-import { createCountryLocationStrongRef } from "../_lib/country-location";
+import {
+  createOrgLocationStrongRef,
+  displayLocationFromChoice,
+  type OrgLocationChoice,
+} from "../_lib/org-location";
+import { getCountry } from "@/app/_lib/countries";
 import { ImageEditorModal } from "@/components/modals/image-editor";
-import CountrySelectorModal from "@/components/modals/country-selector";
+import { LocationEditorModal, LocationEditorModalId } from "../_modals/LocationEditorModal";
 import type { ManageMode } from "./manageDashboardMode";
 import { HeaderContent } from "@/app/_components/HeaderSlots";
 
@@ -62,6 +67,24 @@ function countryName(code: string): string {
   } catch {
     return code;
   }
+}
+
+/** A whole-country location choice, as prefill (Brandfetch) produces it. */
+function countryLocationChoice(code: string): OrgLocationChoice | null {
+  const country = getCountry(code);
+  if (!country) return null;
+  return {
+    place: {
+      name: country.name,
+      latitude: country.coordinates.latitude,
+      longitude: country.coordinates.longitude,
+      countryCode: code.toUpperCase(),
+      region: null,
+      country: country.name,
+      kind: "country",
+    },
+    approximate: false,
+  };
 }
 
 function extractDomain(url: string): string | null {
@@ -255,7 +278,7 @@ function OnboardingMediaField({
 // ── Organization details step ───────────────────────────────────────────────
 
 function OrganizationSetupDetailsPanel({
-  country,
+  location,
   startDate,
   longDescription,
   recoveryEmail,
@@ -267,13 +290,13 @@ function OrganizationSetupDetailsPanel({
   submitLabel,
   submitError,
   onBack,
-  onCountryChange,
+  onLocationChange,
   onStartDateChange,
   onLongDescriptionChange,
   onRecoveryEmailChange,
   onAdvancedValueChange,
 }: {
-  country: string;
+  location: OrgLocationChoice | null;
   startDate: string;
   longDescription: string;
   recoveryEmail: string;
@@ -285,7 +308,7 @@ function OrganizationSetupDetailsPanel({
   submitLabel: string;
   submitError: string | null;
   onBack: () => void;
-  onCountryChange: (value: string) => void;
+  onLocationChange: (choice: OrgLocationChoice | null) => void;
   onStartDateChange: (value: string) => void;
   onLongDescriptionChange: (value: string) => void;
   onRecoveryEmailChange: (value: string) => void;
@@ -293,17 +316,28 @@ function OrganizationSetupDetailsPanel({
 }) {
   const modal = useModal();
   const recoveryT = useTranslations("upload.accountSetup.recoveryEmail");
+  const locationT = useTranslations("upload.accountSetup.location");
   const selectedDate = useMemo(
     () => (startDate ? parseISO(startDate) : undefined),
     [startDate],
   );
-  const selectedCountryName = country ? countryName(country) : null;
+  const display = location ? displayLocationFromChoice(location) : null;
+  const locationLabel = display
+    ? display.country
+      ? countryName(display.country)
+      : display.name
+    : null;
 
-  const handleOpenCountrySelector = () => {
+  const handleOpenLocationEditor = () => {
     modal.pushModal(
       {
-        id: "onboarding-country-selector",
-        content: <CountrySelectorModal initialCountryCode={country ?? ""} onCountryChange={onCountryChange} />,
+        id: LocationEditorModalId,
+        content: (
+          <LocationEditorModal
+            current={locationLabel ? { name: locationLabel, countryCode: display?.country || null } : null}
+            onConfirm={onLocationChange}
+          />
+        ),
       },
       true,
     );
@@ -314,29 +348,31 @@ function OrganizationSetupDetailsPanel({
     <section className="space-y-5">
       <div className="grid grid-cols-2 gap-2">
         <div className="flex flex-col">
-          <label className="text-sm font-medium text-foreground">Country</label>
+          <label className="text-sm font-medium text-foreground">{locationT("label")}</label>
 
           <button
             type="button"
             className="relative min-h-[72px] rounded-2xl border-2 border-dashed bg-background px-2 py-1 text-left hover:bg-muted"
-            onClick={handleOpenCountrySelector}
+            onClick={handleOpenLocationEditor}
           >
-            {selectedCountryName ? (
+            {locationLabel ? (
               <div className="flex h-full flex-col justify-between items-start">
                 <span className="flex items-center gap-1 text-sm text-muted-foreground">
                   <MapPinHouseIcon className="size-3" />
-                  <span>Based in</span>
+                  <span>{locationT("basedIn")}</span>
                 </span>
-                <span className="absolute top-0 right-2 text-2xl">{countryFlag(country)}</span>
+                {display?.country ? (
+                  <span className="absolute top-0 right-2 text-2xl">{countryFlag(display.country)}</span>
+                ) : null}
                 <span className="text-sm font-medium">
-                  {selectedCountryName.length > 22
-                    ? `${selectedCountryName.slice(0, 20)}...`
-                    : selectedCountryName}
+                  {locationLabel.length > 22
+                    ? `${locationLabel.slice(0, 20)}...`
+                    : locationLabel}
                 </span>
               </div>
             ) : (
               <span className="flex h-full items-center justify-center text-center text-sm text-muted-foreground">
-                Select a Country
+                {locationT("empty")}
               </span>
             )}
           </button>
@@ -478,7 +514,7 @@ function AccountSetupForm({
   const [displayName, setDisplayName] = useState("");
   const [shortDescription, setShortDescription] = useState("");
   const [website, setWebsite] = useState("");
-  const [country, setCountry] = useState("");
+  const [locationChoice, setLocationChoice] = useState<OrgLocationChoice | null>(null);
   const [startDate, setStartDate] = useState("");
   const [longDescription, setLongDescription] = useState("");
   const [primaryImage, setPrimaryImage] = useState<File | undefined>();
@@ -545,7 +581,7 @@ function AccountSetupForm({
     !isFetchingBrandInfo;
   const hasSuccessfulPrefill = brandfetchFeedback?.tone === "success";
   const isOrganizationOptionalStepEmpty =
-    country.trim().length === 0 &&
+    locationChoice === null &&
     startDate.length === 0 &&
     longDescription.trim().length === 0 &&
     organizationRecoveryEmail.trim().length === 0;
@@ -595,7 +631,8 @@ function AccountSetupForm({
         setLongDescription(brandInfo.description);
       }
       if (brandInfo.countryCode && /^[A-Za-z]{2}$/.test(brandInfo.countryCode)) {
-        setCountry(brandInfo.countryCode.toUpperCase());
+        const choice = countryLocationChoice(brandInfo.countryCode);
+        if (choice) setLocationChoice(choice);
       }
       if (brandInfo.foundedYear) setStartDate(`${brandInfo.foundedYear}-01-01`);
       if (brandInfo.logoUrl) {
@@ -677,7 +714,9 @@ function AccountSetupForm({
           visibility: "public",
           createdAt: new Date().toISOString(),
         };
-        if (country.trim()) orgRecord.location = await createCountryLocationStrongRef(country, writeOptions);
+        if (locationChoice) {
+          orgRecord.location = await createOrgLocationStrongRef(locationChoice, writeOptions);
+        }
         if (startDate) orgRecord.foundedDate = `${startDate}T00:00:00.000Z`;
         if (longDescription.trim()) {
           orgRecord.longDescription = {
@@ -706,7 +745,7 @@ function AccountSetupForm({
     }
   }, [
     bannerImage,
-    country,
+    locationChoice,
     displayName,
     fieldErrors,
     isOrganizationDetailsStep,
@@ -888,7 +927,7 @@ function AccountSetupForm({
             >
               {isOrganizationDetailsStep ? (
                 <OrganizationSetupDetailsPanel
-                  country={country}
+                  location={locationChoice}
                   startDate={startDate}
                   longDescription={longDescription}
                   recoveryEmail={organizationRecoveryEmail}
@@ -903,7 +942,7 @@ function AccountSetupForm({
                     setStepDirection(-1);
                     setOnboardingStep(0);
                   }}
-                  onCountryChange={setCountry}
+                  onLocationChange={setLocationChoice}
                   onStartDateChange={setStartDate}
                   onLongDescriptionChange={setLongDescription}
                   onRecoveryEmailChange={(value) => {

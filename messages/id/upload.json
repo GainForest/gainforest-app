@@ -1301,6 +1301,11 @@
       "description": "Biarkan kosong dan kami akan membuat alamat pemulihan dari email akun Anda.",
       "placeholder": "pemulihan@example.com",
       "invalid": "Masukkan alamat email yang valid."
+    },
+    "location": {
+      "label": "Lokasi",
+      "basedIn": "Berbasis di",
+      "empty": "Atur lokasi"
     }
   }
 }
