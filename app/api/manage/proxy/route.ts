@@ -25,6 +25,7 @@ import {
   lexBlobRef,
   LOCATION_COLLECTION,
   ORG_COLLECTION,
+  ownedLocationRkey,
   type OrgLocationChoiceInput,
 } from "./org-location-records";
 import { fuzzCoordinateForDid } from "@/app/_lib/org-location-fuzz";
@@ -820,6 +821,13 @@ async function fetchRepoRecord(options: {
  *   4. read-merge the organization record and repoint it (unless mintOnly —
  *      the creation flow writes its own organization record)
  *
+ * A failed save leaves nothing stranded (ECO-882): if the organization
+ * record can't be read or repointed after step 3, the location just
+ * published is taken back, so either the new location is in use or it is
+ * gone. On success, the location the save replaced is removed too — after
+ * confirming nothing else (a Cert place, a project location, the
+ * default-site pointer) still uses it.
+ *
  * Group access is already enforced by resolveMutationTarget; each write
  * forwards through the same auth-service path as every other mutation.
  */
@@ -898,9 +906,18 @@ async function saveOrgLocationComposite(
     existingCid = found.cid;
   } catch (error) {
     if (!(error instanceof TreeGroupUnavailableError)) {
-      throw new Error("The organization record could not be read, so nothing was changed. Please try again.");
+      const tookBack = await takeBackMintedLocation(locationRef?.uri ?? null, body.repo, did, cookie);
+      throw new Error(
+        tookBack
+          ? "The organization record could not be read, so nothing was changed. Please try again."
+          : "The location was published but the profile could not be updated. Please try again.",
+      );
     }
   }
+
+  const previousLocationUri =
+    isRecord(existing.location) && typeof existing.location.uri === "string" ? existing.location.uri : null;
+
   const orgRecord: Record<string, unknown> = {
     ...existing,
     $type: ORG_COLLECTION,
@@ -911,21 +928,124 @@ async function saveOrgLocationComposite(
 
   // Compare-and-swap on the record we read: a concurrent edit fails the
   // write instead of being silently overwritten.
-  await executeForwardableMutation(
-    {
-      operation: "putRecord",
-      collection: ORG_COLLECTION,
-      rkey: "self",
-      record: orgRecord,
-      ...(existingCid ? { swapRecord: existingCid } : {}),
-      ...repoScope,
-    },
-    did,
-    cookie,
-    "The location was published but the profile could not be updated. Please try again.",
-  );
+  try {
+    await executeForwardableMutation(
+      {
+        operation: "putRecord",
+        collection: ORG_COLLECTION,
+        rkey: "self",
+        record: orgRecord,
+        ...(existingCid ? { swapRecord: existingCid } : {}),
+        ...repoScope,
+      },
+      did,
+      cookie,
+      "The location could not be saved. Please try again.",
+    );
+  } catch (error) {
+    // Take back the location we just published so a failed save leaves
+    // nothing stranded: either the new location is in use, or it is gone.
+    if (locationRef) {
+      const tookBack = await takeBackMintedLocation(locationRef.uri, body.repo, did, cookie);
+      throw new Error(
+        tookBack
+          ? "The location could not be saved, so nothing was changed. Please try again."
+          : "The location was published but the profile could not be updated. Please try again.",
+      );
+    }
+    throw error;
+  }
+
+  // The profile now points at the new location (or none). Remove the one it
+  // replaced so replaced locations no longer pile up — unless something else
+  // still uses it.
+  if (previousLocationUri && previousLocationUri !== locationRef?.uri) {
+    await removeReplacedLocation({ previousLocationUri, repo: body.repo, did, cookie, newOrgRecord: orgRecord });
+  }
 
   return locationRef ?? { uri: null, cid: null };
+}
+
+/**
+ * Delete a location record this save minted but could not put into use.
+ * Returns true when the record is confirmed gone (or there was nothing to
+ * take back), so the caller can honestly say "nothing was changed".
+ */
+async function takeBackMintedLocation(
+  locationUri: string | null,
+  repo: string | undefined,
+  did: string,
+  cookie: string | null,
+): Promise<boolean> {
+  if (!locationUri) return true;
+  const rkey = ownedLocationRkey(locationUri, repo?.trim() || did);
+  if (!rkey) return false;
+  try {
+    await executeForwardableMutation(
+      { operation: "deleteRecord", collection: LOCATION_COLLECTION, rkey, ...scopedRepo(repo) },
+      did,
+      cookie,
+      "Could not take back the published location.",
+    );
+    return true;
+  } catch (error) {
+    console.error("[proxy/saveOrgLocation] could not take back the published location", locationUri, error);
+    return false;
+  }
+}
+
+/**
+ * After a successful repoint, remove the location record the save replaced.
+ * Only after confirming nothing else uses it: a Cert listing it as a place,
+ * a project pointing at it, or the default-site pointer — the Sites page
+ * manages the same kind of record (ECO-882). Fails closed (an unverifiable
+ * record is kept) and best-effort: the save already succeeded, so a leftover
+ * record is logged, never surfaced as a failure.
+ */
+async function removeReplacedLocation(options: {
+  previousLocationUri: string;
+  repo: string | undefined;
+  did: string;
+  cookie: string | null;
+  newOrgRecord: Record<string, unknown>;
+}): Promise<void> {
+  const { previousLocationUri, did, cookie, newOrgRecord } = options;
+  const repo = options.repo?.trim() || did;
+  const rkey = ownedLocationRkey(previousLocationUri, repo);
+  if (!rkey) return;
+
+  try {
+    const [certs, projects, defaultSitePointer] = await Promise.all([
+      listAllRepoRecords(repo, SITE_CERT_COLLECTION),
+      listAllRepoRecords(repo, SITE_PROJECT_COLLECTION),
+      getRepoRecordSnapshotOrNull(repo, SITE_DEFAULT_POINTER_COLLECTION, "self"),
+    ]);
+    const scan = scanSiteReferences(previousLocationUri, {
+      certs,
+      projects,
+      // The organization record was just rewritten to point elsewhere; scan
+      // the version we wrote instead of re-reading it.
+      orgProfile: { rkey: "self", value: newOrgRecord },
+      defaultSitePointer,
+    });
+    if (scan.blockingCertTitles.length > 0 || scan.cleanups.length > 0) return; // still in use — keep it
+  } catch (error) {
+    console.error(
+      "[proxy/saveOrgLocation] could not check whether the replaced location is still in use; keeping it",
+      previousLocationUri,
+      error,
+    );
+    return;
+  }
+
+  await executeForwardableMutation(
+    { operation: "deleteRecord", collection: LOCATION_COLLECTION, rkey, ...scopedRepo(options.repo) },
+    did,
+    cookie,
+    "Could not remove the replaced location.",
+  ).catch((error) => {
+    console.error("[proxy/saveOrgLocation] could not remove the replaced location", previousLocationUri, error);
+  });
 }
 
 async function getDatasetRecordFromPds(did: string, rkey: string): Promise<DatasetRecordResult> {

@@ -6,6 +6,7 @@ import {
   exactLocationRecord,
   isOrgLocationChoiceInput,
   lexBlobRef,
+  ownedLocationRkey,
   type OrgLocationChoiceInput,
 } from "./org-location-records";
 import { polygonRingCenter } from "@/app/_lib/country-location";
@@ -80,6 +81,23 @@ describe("approximate records", () => {
     // The coarse label, never the searched name.
     expect(record.name).toBe("Zurich, Switzerland");
     expect(JSON.stringify(record)).not.toContain("47.3769");
+  });
+});
+
+describe("ownedLocationRkey", () => {
+  const repo = "did:plc:abc123";
+
+  it("extracts the rkey of a location record in the given repo", () => {
+    expect(ownedLocationRkey(`at://${repo}/app.certified.location/3kabc`, repo)).toBe("3kabc");
+  });
+
+  it("refuses records in another repo, another collection, or malformed URIs", () => {
+    expect(ownedLocationRkey("at://did:plc:other/app.certified.location/3kabc", repo)).toBeNull();
+    expect(ownedLocationRkey(`at://${repo}/app.certified.actor.organization/self`, repo)).toBeNull();
+    expect(ownedLocationRkey(`at://${repo}/app.certified.location/`, repo)).toBeNull();
+    expect(ownedLocationRkey(`at://${repo}/app.certified.location/a/b`, repo)).toBeNull();
+    expect(ownedLocationRkey(null, repo)).toBeNull();
+    expect(ownedLocationRkey(undefined, repo)).toBeNull();
   });
 });
 

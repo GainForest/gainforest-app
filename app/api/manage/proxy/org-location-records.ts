@@ -114,6 +114,18 @@ export function approximateLocationRecord(
   };
 }
 
+/** The rkey of a location record owned by `repo`, or null when the URI is
+ *  malformed or points into a different repo. Used to take back a location
+ *  this save just minted, and to remove the location a save replaced —
+ *  never a record in someone else's repo. */
+export function ownedLocationRkey(uri: string | null | undefined, repo: string): string | null {
+  if (!uri || !repo) return null;
+  const prefix = `at://${repo}/${LOCATION_COLLECTION}/`;
+  if (!uri.startsWith(prefix)) return null;
+  const rkey = uri.slice(prefix.length);
+  return rkey && !rkey.includes("/") ? rkey : null;
+}
+
 /** Normalize an upload response into the lexicon's blob ref shape. The auth
  *  service returns either the blob object itself or `{ blob }`. */
 export function lexBlobRef(uploaded: unknown, fallbackSize: number): Record<string, unknown> | null {
