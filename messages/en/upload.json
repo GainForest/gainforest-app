@@ -1227,6 +1227,8 @@
     "locationEditor": {
       "title": "Organization location",
       "description": "Show where your organization is based.",
+      "titlePersonal": "Your location",
+      "descriptionPersonal": "Show where you are based.",
       "descriptionWithCurrent": "Currently set to {location}.",
       "searchPlaceholder": "Search for a place…",
       "noResults": "No places found.",

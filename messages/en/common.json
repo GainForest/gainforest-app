@@ -269,6 +269,10 @@
         "title": "Account",
         "description": "Username and sign-in security"
       },
+      "profile": {
+        "title": "Public profile",
+        "description": "What your public page shows"
+      },
       "connections": {
         "title": "Connections",
         "description": "Social accounts and external services"
@@ -281,6 +285,13 @@
         "title": "Advanced",
         "description": "Account data and deletion"
       }
+    },
+    "location": {
+      "title": "Location",
+      "description": "Where this account is based, shown on the public profile.",
+      "notSet": "No location set",
+      "edit": "Edit",
+      "saveError": "Could not save the location. Please try again."
     }
   },
   "bumicertCard": {

@@ -269,6 +269,10 @@
         "title": "Akun",
         "description": "Nama pengguna dan keamanan masuk"
       },
+      "profile": {
+        "title": "Profil publik",
+        "description": "Apa yang ditampilkan halaman publik Anda"
+      },
       "connections": {
         "title": "Koneksi",
         "description": "Akun sosial dan layanan eksternal"
@@ -281,6 +285,13 @@
         "title": "Lanjutan",
         "description": "Data akun dan penghapusan"
       }
+    },
+    "location": {
+      "title": "Lokasi",
+      "description": "Tempat akun ini berbasis, ditampilkan di profil publik.",
+      "notSet": "Lokasi belum diatur",
+      "edit": "Ubah",
+      "saveError": "Tidak dapat menyimpan lokasi. Silakan coba lagi."
     }
   },
   "bumicertCard": {

@@ -18,7 +18,7 @@ import {
 import { BumicertTimeline } from "@/app/cert/[did]/[rkey]/_components/timeline/BumicertTimeline";
 import { getEntriesForActivity } from "@/app/cert/[did]/[rkey]/_components/timeline/attachmentSubjects";
 import { resolveTimelineReferences } from "@/app/cert/[did]/[rkey]/_components/timeline/timelineReferenceResolver";
-import { canCreateRecord, canDeleteRecord } from "./_lib/cgs-permissions";
+import { canCreateRecord, canDeleteRecord, canEditGroupProfile } from "./_lib/cgs-permissions";
 import { manageHref, profileBasePath } from "@/lib/links";
 import { ProjectSitesManagerClient } from "./projects/[rkey]/sites/_components/ProjectSitesManagerClient";
 import { droneAppHref } from "@/app/_lib/urls";
@@ -35,6 +35,7 @@ import Container from "@/components/ui/container";
 import { ManageOverview } from "./_components/ManageOverview";
 import { ManageDashboard } from "./_components/ManageDashboard";
 import { INaturalistSettingsSection } from "./settings/_components/INaturalistSettingsSection";
+import { LocationSettingsSection } from "./settings/_components/LocationSettingsSection";
 import type { CgsRole } from "./_lib/cgs";
 import { ManageProjectsClient } from "./projects/_components/ManageProjectsClient";
 import { ProjectGalleryManagerClient } from "./projects/[rkey]/gallery/_components/ProjectGalleryManagerClient";
@@ -296,9 +297,23 @@ export async function NewBumicertSection({ target, searchParams }: { target: Man
 
 export async function SettingsSection({ target }: { target: ManageTarget }) {
   const t = await getTranslations("upload.settings");
-  const managedProjects = await fetchProjectsByDid(target.did, 500).then((page) => page.records).catch(() => []);
+  const [managedProjects, account] = await Promise.all([
+    fetchProjectsByDid(target.did, 500).then((page) => page.records).catch(() => []),
+    getAccountRouteData(target.did, target.identifier),
+  ]);
   const inaturalistProjects = managedProjects.map((project) => ({ projectUri: project.atUri, title: project.title }));
   const createPermission = canCreateRecord(target);
+  // The account's declared location — the same control as the profile hero's
+  // location chip, surfaced here because this is where people look for it.
+  const profileEditPermission = canEditGroupProfile(target);
+  const locationSection = (
+    <LocationSettingsSection
+      target={target}
+      accountKind={account.kind}
+      initial={{ name: account.locationName, country: account.country }}
+      disabledReason={profileEditPermission.reason}
+    />
+  );
   if (target.kind === "group") {
     // Members + Data Council live on the profile's Members tab; repeating them
     // here made Settings a duplicate of that tab. Organization settings now
@@ -321,6 +336,7 @@ export async function SettingsSection({ target }: { target: ManageTarget }) {
         </div>
         <OrganizationSettingsSections
           agentKeysHint={t("orgAgentKeysHint")}
+          location={locationSection}
           integrations={<INaturalistSettingsSection target={target} projects={inaturalistProjects} disabledReason={createPermission.reason} />}
         />
       </Container>
@@ -343,6 +359,7 @@ export async function SettingsSection({ target }: { target: ManageTarget }) {
         <AccountSettingsSections
           did={target.did}
           handle={currentHandle}
+          location={locationSection}
           integrations={<INaturalistSettingsSection target={target} projects={inaturalistProjects} disabledReason={createPermission.reason} />}
         />
       </div>

@@ -269,6 +269,10 @@
         "title": "Conta",
         "description": "Nome de usuário e segurança de acesso"
       },
+      "profile": {
+        "title": "Perfil público",
+        "description": "O que sua página pública mostra"
+      },
       "connections": {
         "title": "Conexões",
         "description": "Contas sociais e serviços externos"
@@ -281,6 +285,13 @@
         "title": "Avançado",
         "description": "Dados da conta e exclusão"
       }
+    },
+    "location": {
+      "title": "Localização",
+      "description": "Onde esta conta está sediada; exibida no perfil público.",
+      "notSet": "Nenhuma localização definida",
+      "edit": "Editar",
+      "saveError": "Não foi possível salvar a localização. Tente novamente."
     }
   },
   "bumicertCard": {

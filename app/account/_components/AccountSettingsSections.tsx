@@ -1230,11 +1230,14 @@ export function AccountSettingsSections({
   did,
   handle,
   integrations,
+  location,
 }: {
   did: string;
   handle?: string | null;
   /** Extra integration sections (e.g. iNaturalist), grouped with Bluesky. */
   integrations?: React.ReactNode;
+  /** The account's declared-location editor (shared with organizations). */
+  location?: React.ReactNode;
 }) {
   const t = useTranslations("common.settings.groups");
   return (
@@ -1243,6 +1246,11 @@ export function AccountSettingsSections({
         {handle ? <HandleSection did={did} handle={handle} /> : null}
         <PasswordSection did={did} />
       </SettingsGroup>
+      {location ? (
+        <SettingsGroup value="profile" title={t("profile.title")} description={t("profile.description")}>
+          {location}
+        </SettingsGroup>
+      ) : null}
       <SettingsGroup value="connections" title={t("connections.title")} description={t("connections.description")}>
         <BlueskySection did={did} />
         {integrations}
@@ -1264,13 +1272,21 @@ export function AccountSettingsSections({
 export function OrganizationSettingsSections({
   integrations,
   agentKeysHint,
+  location,
 }: {
   integrations: React.ReactNode;
   agentKeysHint: string;
+  /** The organization's declared-location editor. */
+  location?: React.ReactNode;
 }) {
   const t = useTranslations("common.settings.groups");
   return (
-    <Accordion type="multiple" className="space-y-3">
+    <Accordion type="multiple" defaultValue={location ? ["profile"] : []} className="space-y-3">
+      {location ? (
+        <SettingsGroup value="profile" title={t("profile.title")} description={t("profile.description")}>
+          {location}
+        </SettingsGroup>
+      ) : null}
       <SettingsGroup value="agents" title={t("agents.title")} description={t("agents.description")}>
         <div className="space-y-3">
           <p className="text-sm text-muted-foreground">{agentKeysHint}</p>

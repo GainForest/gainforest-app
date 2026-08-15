@@ -269,6 +269,10 @@
         "title": "Akaunti",
         "description": "Jina la mtumiaji na usalama wa kuingia"
       },
+      "profile": {
+        "title": "Wasifu wa umma",
+        "description": "Kinachoonyeshwa kwenye ukurasa wako wa umma"
+      },
       "connections": {
         "title": "Miunganisho",
         "description": "Akaunti za kijamii na huduma za nje"
@@ -281,6 +285,13 @@
         "title": "Mipangilio ya juu",
         "description": "Data ya akaunti na ufutaji"
       }
+    },
+    "location": {
+      "title": "Mahali",
+      "description": "Mahali akaunti hii ilipo, huonyeshwa kwenye wasifu wa umma.",
+      "notSet": "Mahali hapajawekwa",
+      "edit": "Badilisha",
+      "saveError": "Imeshindwa kuhifadhi mahali. Tafadhali jaribu tena."
     }
   },
   "bumicertCard": {
