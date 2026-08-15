@@ -303,13 +303,13 @@ export async function SettingsSection({ target }: { target: ManageTarget }) {
   ]);
   const inaturalistProjects = managedProjects.map((project) => ({ projectUri: project.atUri, title: project.title }));
   const createPermission = canCreateRecord(target);
-  // The account's declared location — the same control as the profile hero's
-  // location chip, surfaced here because this is where people look for it.
+  // The organization's declared location — the same control as the profile
+  // hero's location chip, surfaced here because this is where people look for
+  // it. Organizations only; people have no location field yet (ECO-878).
   const profileEditPermission = canEditGroupProfile(target);
   const locationSection = (
     <LocationSettingsSection
       target={target}
-      accountKind={account.kind}
       initial={{ name: account.locationName, country: account.country }}
       disabledReason={profileEditPermission.reason}
     />
@@ -359,7 +359,6 @@ export async function SettingsSection({ target }: { target: ManageTarget }) {
         <AccountSettingsSections
           did={target.did}
           handle={currentHandle}
-          location={locationSection}
           integrations={<INaturalistSettingsSection target={target} projects={inaturalistProjects} disabledReason={createPermission.reason} />}
         />
       </div>

@@ -32,7 +32,7 @@ import { ExpandableBio } from "@/app/account/_components/ExpandableBio";
 import { countryFlag } from "@/app/_lib/format";
 import { resolvePdsHost } from "@/app/_lib/pds";
 import { putRecord, uploadBlob } from "../_lib/mutations";
-import { createOrgLocationStrongRef, displayLocationFromChoice, savePersonalLocation, type OrgLocationChoice } from "../_lib/org-location";
+import { createOrgLocationStrongRef, displayLocationFromChoice, type OrgLocationChoice } from "../_lib/org-location";
 import { canEditGroupProfile } from "../_lib/cgs-permissions";
 import { useModal } from "@/components/ui/modal/context";
 import {
@@ -521,12 +521,12 @@ function EditableHero({
               {editState.orgType.trim() || t("hero.addType")}
             </FactChip>
           ) : null}
-          {/* Location applies to people and organizations alike — people store
-              it on their own companion record rather than an org record. */}
-          <FactChip onClick={onEditLocation} disabled={!canEdit} title={editDisabledReason ?? undefined} empty={!locationLabel}>
-            {flag ? <span className="text-sm leading-none" aria-hidden="true">{flag}</span> : <MapPinIcon className="size-3.5 opacity-70" aria-hidden />}
-            {locationLabel ?? t("hero.addLocation")}
-          </FactChip>
+          {isOrg ? (
+            <FactChip onClick={onEditLocation} disabled={!canEdit} title={editDisabledReason ?? undefined} empty={!locationLabel}>
+              {flag ? <span className="text-sm leading-none" aria-hidden="true">{flag}</span> : <MapPinIcon className="size-3.5 opacity-70" aria-hidden />}
+              {locationLabel ?? t("hero.addLocation")}
+            </FactChip>
+          ) : null}
           {isOrg ? (
             <FactChip onClick={onEditStartDate} disabled={!canEdit} title={editDisabledReason ?? undefined} empty={sinceDate.state === "empty"}>
               <CalendarIcon className="size-3.5 opacity-70" aria-hidden />
@@ -799,11 +799,6 @@ export function EditableAccountHeader({
         await putRecord("app.certified.actor.profile", "self", certifiedProfileRecord, writeOptions);
       }
 
-      // A person's location lives on its own record, not the org record.
-      if (account.kind !== "organization" && "location" in overrides) {
-        await savePersonalLocation(next.location.pendingChoice ?? null, writeOptions);
-      }
-
       const shouldWriteOrg = account.kind === "organization" && (
         "location" in overrides || "startDate" in overrides || "visibility" in overrides ||
         "orgType" in overrides || "socials" in overrides || "longDescription" in overrides
@@ -895,7 +890,6 @@ export function EditableAccountHeader({
   const openLocationModal = () => openDashboardModal(
     LocationEditorModalId,
     <LocationEditorModal
-      accountKind={account.kind === "organization" ? "organization" : "user"}
       current={
         editLocation.name || editLocation.country
           ? {

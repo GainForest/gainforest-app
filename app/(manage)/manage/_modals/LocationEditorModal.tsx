@@ -46,8 +46,6 @@ type LocationEditorModalProps = {
   current: { name: string | null; countryCode: string | null } | null;
   /** Called with the steward's choice; null means "remove the location". */
   onConfirm: (choice: OrgLocationChoice | null) => void;
-  /** Wording: an organization's location or a person's own. */
-  accountKind?: "organization" | "user";
 };
 
 /** Wire shape of `/api/geocode` results (shared with the observations picker). */
@@ -200,7 +198,7 @@ function LocationPreviewMap({
   return <div ref={containerRef} className="h-52 w-full overflow-hidden rounded-xl border border-border" />;
 }
 
-export function LocationEditorModal({ current, onConfirm, accountKind = "organization" }: LocationEditorModalProps) {
+export function LocationEditorModal({ current, onConfirm }: LocationEditorModalProps) {
   const t = useTranslations("upload.dashboardClient.locationEditor");
   const { stack, popModal, hide } = useModal();
 
@@ -316,13 +314,11 @@ export function LocationEditorModal({ current, onConfirm, accountKind = "organiz
   return (
     <ModalContent>
       <ModalHeader>
-        <ModalTitle>{accountKind === "user" ? t("titlePersonal") : t("title")}</ModalTitle>
+        <ModalTitle>{t("title")}</ModalTitle>
         <ModalDescription>
           {current?.name
             ? t("descriptionWithCurrent", { location: current.name })
-            : accountKind === "user"
-              ? t("descriptionPersonal")
-              : t("description")}
+            : t("description")}
         </ModalDescription>
       </ModalHeader>
 

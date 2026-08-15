@@ -25,16 +25,13 @@ import {
   publishedLocationName,
   type OrgLocationChoice,
 } from "@/app/_lib/org-location-geometry";
-import { createRecord, deleteRecord, putRecord, uploadBlob } from "./mutations";
+import { createRecord, putRecord, uploadBlob } from "./mutations";
 import { createCountryLocationStrongRef } from "./country-location";
 import { resolvePdsHost } from "@/app/_lib/pds";
 
 export type { GeocodedPlace, OrgLocationChoice } from "@/app/_lib/org-location-geometry";
 
 const COUNTRY_LOCATION_SRS = "http://www.opengis.net/def/crs/OGC/1.3/CRS84";
-
-/** Where a personal account's declared location lives (rkey `self`). */
-export const PERSONAL_LOCATION_COLLECTION = "app.gainforest.actor.location";
 const ORG_RECORD_COLLECTION = "app.certified.actor.organization";
 
 /**
@@ -87,30 +84,6 @@ export async function saveOrganizationLocation(
   if (choice) record.location = await createOrgLocationStrongRef(choice, options);
   else delete record.location;
   await putRecord(ORG_RECORD_COLLECTION, "self", record, options);
-}
-
-/**
- * Save (or clear, with `null`) a personal account's declared location — the
- * `app.gainforest.actor.location/self` companion record. People have no
- * organization record, and writing one would misclassify them as an org.
- */
-export async function savePersonalLocation(
-  choice: OrgLocationChoice | null,
-  options?: { repo?: string },
-): Promise<void> {
-  if (!choice) {
-    await deleteRecord(PERSONAL_LOCATION_COLLECTION, "self", options).catch((error) => {
-      // Clearing an already-clear location is not an error.
-      if (!(error instanceof Error) || !/not found|could not locate/i.test(error.message)) throw error;
-    });
-    return;
-  }
-  const location = await createOrgLocationStrongRef(choice, options);
-  await putRecord(PERSONAL_LOCATION_COLLECTION, "self", {
-    $type: PERSONAL_LOCATION_COLLECTION,
-    location,
-    createdAt: new Date().toISOString(),
-  }, options);
 }
 
 /** Ask the server for the keyed offset of an approximate location. */

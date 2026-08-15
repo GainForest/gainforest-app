@@ -1,10 +1,10 @@
 "use client";
 
 /**
- * Settings-page entry for an account's declared location — the same control
- * as the profile hero's location chip, surfaced where the ticket expects it.
- * Works for organizations (location on the org record) and personal accounts
- * (location on `app.gainforest.actor.location/self`) alike.
+ * Settings-page entry for an organization's declared location — the same
+ * control as the profile hero's location chip, surfaced where the ticket
+ * expects it. Organizations only: people have no location field yet (the
+ * shared profile lexicon has no slot for one — see ECO-878).
  */
 
 import { useState } from "react";
@@ -18,7 +18,6 @@ import { getCountry } from "@/app/_lib/countries";
 import {
   displayLocationFromChoice,
   saveOrganizationLocation,
-  savePersonalLocation,
   type OrgLocationChoice,
 } from "../../_lib/org-location";
 import { LocationEditorModal, LocationEditorModalId } from "../../_modals/LocationEditorModal";
@@ -30,12 +29,10 @@ function countryName(code: string): string {
 
 export function LocationSettingsSection({
   target,
-  accountKind,
   initial,
   disabledReason,
 }: {
   target: ManageTarget;
-  accountKind: "organization" | "user";
   /** The saved location, as the account data reads it. */
   initial: { name: string | null; country: string | null };
   /** Set when the viewer may not edit the account — disables the control. */
@@ -57,11 +54,7 @@ export function LocationSettingsSection({
     setError(null);
     const writeOptions = target.kind === "group" ? { repo: target.did } : undefined;
     try {
-      if (accountKind === "organization") {
-        await saveOrganizationLocation(target.did, choice, writeOptions);
-      } else {
-        await savePersonalLocation(choice, writeOptions);
-      }
+      await saveOrganizationLocation(target.did, choice, writeOptions);
       setCurrent(choice ? displayLocationFromChoice(choice) : { name: null, country: null });
       router.refresh();
     } catch (err) {
@@ -77,7 +70,6 @@ export function LocationSettingsSection({
         id: LocationEditorModalId,
         content: (
           <LocationEditorModal
-            accountKind={accountKind === "organization" ? "organization" : "user"}
             current={label ? { name: label, countryCode: current.country } : null}
             onConfirm={(choice) => void save(choice)}
           />

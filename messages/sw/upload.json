@@ -1227,8 +1227,6 @@
     "locationEditor": {
       "title": "Mahali pa shirika",
       "description": "Onyesha mahali shirika lako lilipo.",
-      "titlePersonal": "Mahali pako",
-      "descriptionPersonal": "Onyesha mahali ulipo.",
       "descriptionWithCurrent": "Kwa sasa: {location}.",
       "searchPlaceholder": "Tafuta mahali…",
       "noResults": "Hakuna mahali palipopatikana.",

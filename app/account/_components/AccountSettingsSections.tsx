@@ -1230,14 +1230,11 @@ export function AccountSettingsSections({
   did,
   handle,
   integrations,
-  location,
 }: {
   did: string;
   handle?: string | null;
   /** Extra integration sections (e.g. iNaturalist), grouped with Bluesky. */
   integrations?: React.ReactNode;
-  /** The account's declared-location editor (shared with organizations). */
-  location?: React.ReactNode;
 }) {
   const t = useTranslations("common.settings.groups");
   return (
@@ -1246,11 +1243,6 @@ export function AccountSettingsSections({
         {handle ? <HandleSection did={did} handle={handle} /> : null}
         <PasswordSection did={did} />
       </SettingsGroup>
-      {location ? (
-        <SettingsGroup value="profile" title={t("profile.title")} description={t("profile.description")}>
-          {location}
-        </SettingsGroup>
-      ) : null}
       <SettingsGroup value="connections" title={t("connections.title")} description={t("connections.description")}>
         <BlueskySection did={did} />
         {integrations}

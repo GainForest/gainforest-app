@@ -129,18 +129,3 @@ pieces, none of which is in this folder yet:
 3. **UI (this repo).** Add like + reply affordances to `FeedClient.tsx` (and the
    record detail drawers) plus a post composer, with translations for every new
    string in all configured languages (per `AGENTS.md`).
-
-## Personal location (`app.gainforest.actor.location`)
-
-Organizations declare where they are based via the `location` strongRef on
-`app.certified.actor.organization`. People have no equivalent — the certified
-profile lexicon has no location field, and writing an organization record for
-a person would flip their account kind to "organization" across the app. So a
-personal account's declared location lives in this singleton (rkey `self`): a
-strongRef to an `app.certified.location` record in the same repo, exactly like
-the org field. The referenced record may be an exact point, a country
-centroid, or — when the person chose "share only an approximate location" — a
-~10 km circle around a deliberately offset point (see the org-location fuzzing
-notes in `app/_lib/org-location-fuzz.ts`). Read straight from the PDS in
-`app/account/_lib/account-route.ts`, not indexed. Deleting the record clears
-the location.

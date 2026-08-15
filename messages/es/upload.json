@@ -1227,8 +1227,6 @@
     "locationEditor": {
       "title": "Ubicación de la organización",
       "description": "Muestra dónde tiene su sede tu organización.",
-      "titlePersonal": "Tu ubicación",
-      "descriptionPersonal": "Muestra dónde te encuentras.",
       "descriptionWithCurrent": "Actualmente: {location}.",
       "searchPlaceholder": "Busca un lugar…",
       "noResults": "No se encontraron lugares.",

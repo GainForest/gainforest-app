@@ -200,14 +200,13 @@ export const getAccountRouteData = cache(async (
   did: string,
   urlIdentifier = did,
 ): Promise<AccountRouteData> => {
-  const [summaryResult, directCertifiedProfile, directCertifiedOrganization, directPersonalLocation] = await Promise.all([
+  const [summaryResult, directCertifiedProfile, directCertifiedOrganization] = await Promise.all([
     fetchAccountSummary(did).catch((error) => {
       console.warn("[account] Failed to read indexer account summary", did, error);
       return null;
     }),
     fetchDirectCertifiedProfile(did).catch(() => null),
     fetchDirectCertifiedOrganization(did).catch(() => null),
-    fetchDirectPersonalLocation(did).catch(() => null),
   ]);
 
   const fallbackSummary: AccountSummary = {
@@ -236,14 +235,8 @@ export const getAccountRouteData = cache(async (
     avatarUrl: directCertifiedProfile?.avatarUrl ?? baseSummary.avatarUrl ?? null,
     bio: directCertifiedProfile?.description ?? baseSummary.bio ?? null,
     website: directCertifiedProfile?.website ?? baseSummary.website ?? null,
-    // Organizations declare their location on the org record; people on
-    // app.gainforest.actor.location. The org record wins when both exist.
-    country: directCertifiedOrganization
-      ? directCertifiedOrganization.country
-      : directPersonalLocation?.country ?? baseSummary.country ?? null,
-    locationName: directCertifiedOrganization
-      ? directCertifiedOrganization.locationName
-      : directPersonalLocation?.locationName ?? baseSummary.locationName ?? null,
+    country: directCertifiedOrganization ? directCertifiedOrganization.country : baseSummary.country ?? null,
+    locationName: directCertifiedOrganization ? directCertifiedOrganization.locationName : baseSummary.locationName ?? null,
     createdAt: directCertifiedOrganization?.createdAt ?? directCertifiedProfile?.createdAt ?? baseSummary.createdAt ?? null,
     foundedDate: directCertifiedOrganization?.foundedDate ?? baseSummary.foundedDate ?? null,
     visibility: directCertifiedOrganization?.visibility ?? baseSummary.visibility ?? null,
@@ -400,22 +393,6 @@ function blobRef(value: unknown): string | null {
     return typeof link === "string" ? link : null;
   }
   return null;
-}
-
-/** A personal account's declared location — the `app.certified.location`
- *  record referenced by `app.gainforest.actor.location/self`. People have no
- *  organization record, so their location lives in this small companion
- *  record instead. */
-async function fetchDirectPersonalLocation(did: string): Promise<{ country: string | null; locationName: string | null } | null> {
-  const value = await fetchDirectRecordValue(did, "app.gainforest.actor.location");
-  if (!value) return null;
-  const location = value.location;
-  const locationUri = typeof location === "object" && location !== null && "uri" in location
-    ? typeof location.uri === "string" ? location.uri : null
-    : null;
-  const summary = await fetchCertifiedLocationSummary(locationUri);
-  if (!summary) return null;
-  return { country: summary.country ?? null, locationName: summary.name ?? null };
 }
 
 async function fetchDirectCertifiedOrganization(did: string): Promise<DirectCertifiedOrganization | null> {

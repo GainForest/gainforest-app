@@ -1227,8 +1227,6 @@
     "locationEditor": {
       "title": "Lokasi organisasi",
       "description": "Tunjukkan di mana organisasi Anda berbasis.",
-      "titlePersonal": "Lokasi Anda",
-      "descriptionPersonal": "Tunjukkan di mana Anda berbasis.",
       "descriptionWithCurrent": "Saat ini: {location}.",
       "searchPlaceholder": "Cari tempat…",
       "noResults": "Tempat tidak ditemukan.",
