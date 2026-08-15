@@ -1,10 +1,8 @@
 import { describe, expect, it } from "vitest";
 import {
-  APPROXIMATE_FUZZ_DEGREES,
   circlePolygonFeature,
   clipLocationName,
   coarsePlaceLabel,
-  fuzzCoordinate,
   publishedLocationName,
   type OrgLocationChoice,
 } from "./org-location-geometry";
@@ -28,24 +26,6 @@ const place = (over: Partial<OrgLocationChoice["place"]> = {}): OrgLocationChoic
   country: "Thailand",
   kind: "place",
   ...over,
-});
-
-describe("fuzzCoordinate", () => {
-  it("stays within the advertised per-axis offset", () => {
-    for (let i = 0; i < 200; i++) {
-      const out = fuzzCoordinate(17.8807, 102.734);
-      expect(Math.abs(out.latitude - 17.8807)).toBeLessThanOrEqual(APPROXIMATE_FUZZ_DEGREES);
-      expect(Math.abs(out.longitude - 102.734)).toBeLessThanOrEqual(APPROXIMATE_FUZZ_DEGREES);
-    }
-  });
-
-  it("clamps latitude and wraps longitude at the antimeridian", () => {
-    const nearPole = fuzzCoordinate(89.99, 0, () => 1);
-    expect(nearPole.latitude).toBeLessThanOrEqual(90);
-    const nearWrap = fuzzCoordinate(0, 179.95, () => 1);
-    expect(nearWrap.longitude).toBeGreaterThanOrEqual(-180);
-    expect(nearWrap.longitude).toBeLessThanOrEqual(180);
-  });
 });
 
 describe("circlePolygonFeature", () => {

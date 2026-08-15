@@ -7,6 +7,9 @@
  * carries a ~10 km circle around the offset point, with a name coarsened to
  * region/country. This mirrors how Ma Earth publishes approximate sites, so
  * records from either app read the same way.
+ *
+ * The offset itself lives in `org-location-fuzz.ts` — it is keyed on a
+ * server-held secret and so cannot run here.
  */
 
 /** Per-axis offset applied to an approximate location, in degrees (~11 km). */
@@ -58,24 +61,6 @@ export function clipLocationName(name: string): string {
   return points.length <= LOCATION_NAME_MAX_GRAPHEMES
     ? trimmed
     : points.slice(0, LOCATION_NAME_MAX_GRAPHEMES - 1).join("").trimEnd() + "…";
-}
-
-/**
- * Offset a coordinate by an unpredictable amount up to ±APPROXIMATE_FUZZ_DEGREES
- * per axis. The precise input never leaves the browser — only the offset point
- * (wrapped in a circle) is published.
- */
-export function fuzzCoordinate(
-  latitude: number,
-  longitude: number,
-  random: () => number = Math.random,
-): { latitude: number; longitude: number } {
-  const offset = () => (random() * 2 - 1) * APPROXIMATE_FUZZ_DEGREES;
-  const lat = Math.max(-90, Math.min(90, latitude + offset()));
-  let lon = longitude + offset();
-  if (lon > 180) lon -= 360;
-  if (lon < -180) lon += 360;
-  return { latitude: lat, longitude: lon };
 }
 
 /**

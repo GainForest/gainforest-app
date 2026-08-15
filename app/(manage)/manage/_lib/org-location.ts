@@ -11,13 +11,17 @@
  *                              published as a ~10 km circle (GeoJSON blob,
  *                              like project sites) under a coarse
  *                              region/country name — the precise point and
- *                              the searched name never leave the browser
+ *                              the searched name are never published
+ *
+ * The offset for an approximate location is computed by the server
+ * (`/api/manage/org-location`), keyed on a secret, so that saving the same
+ * location twice publishes the same circle. A fresh random offset per save
+ * would let anyone average the published circles back to the true point.
  */
 
 import { getCountry } from "@/app/_lib/countries";
 import {
   circlePolygonFeature,
-  fuzzCoordinate,
   publishedLocationName,
   type OrgLocationChoice,
 } from "@/app/_lib/org-location-geometry";
@@ -46,6 +50,26 @@ export function displayLocationFromChoice(choice: OrgLocationChoice): {
 
 function isRecordObject(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null;
+}
+
+/** Ask the server for the keyed offset of an approximate location. */
+async function fetchFuzzedCoordinate(
+  latitude: number,
+  longitude: number,
+  repo?: string,
+): Promise<{ latitude: number; longitude: number }> {
+  const response = await fetch("/api/manage/org-location", {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({ latitude, longitude, ...(repo ? { repo } : {}) }),
+  });
+  const data = (await response.json().catch(() => null)) as
+    | { latitude?: number; longitude?: number; error?: string }
+    | null;
+  if (!response.ok || typeof data?.latitude !== "number" || typeof data?.longitude !== "number") {
+    throw new Error(data?.error ?? "Could not save an approximate location. Please try again.");
+  }
+  return { latitude: data.latitude, longitude: data.longitude };
 }
 
 function toLexBlobRef(uploaded: { ref?: unknown; mimeType?: unknown; size?: unknown; blob?: unknown }, fallbackSize: number) {
@@ -94,8 +118,9 @@ export async function createOrgLocationStrongRef(
     }, undefined, options);
   }
 
-  // Approximate: offset the point, publish only a circle around the offset.
-  const fuzzed = fuzzCoordinate(place.latitude, place.longitude);
+  // Approximate: offset the point server-side, publish only a circle around
+  // the offset. Failing here must not fall back to the exact coordinate.
+  const fuzzed = await fetchFuzzedCoordinate(place.latitude, place.longitude, options?.repo);
   const feature = circlePolygonFeature(fuzzed.latitude, fuzzed.longitude);
   const payload = JSON.stringify(feature);
   const file = new File([payload], "approximate-location.geojson", { type: "application/geo+json" });
