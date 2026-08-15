@@ -82,6 +82,20 @@ export type DeleteTreeGroupCascadeResult = {
   errors: string[];
 };
 
+/** Wire shape of a location pick for the proxy's saveOrgLocation composite. */
+export type SaveOrgLocationChoice = {
+  place: {
+    name: string;
+    latitude: number;
+    longitude: number;
+    countryCode: string | null;
+    region: string | null;
+    country: string | null;
+    kind: "country" | "place";
+  };
+  approximate: boolean;
+};
+
 type MutationPayload = GroupScoped & (
   | { operation: "createRecord"; collection: string; rkey?: string; record: Record<string, unknown> }
   | { operation: "putRecord"; collection: string; rkey: string; record: Record<string, unknown>; swapRecord?: string }
@@ -102,6 +116,7 @@ type MutationPayload = GroupScoped & (
   | { operation: "deleteAccountDataChunk" }
   | { operation: "detachOccurrenceFromDataset"; rkey: string }
   | { operation: "attachExistingOccurrences"; datasetRkey: string; occurrenceRkeys: string[] }
+  | { operation: "saveOrgLocation"; choice: SaveOrgLocationChoice | null; mintOnly?: boolean }
   | {
       operation: "appendExistingDataset";
       datasetRkey: string;
@@ -230,6 +245,21 @@ export async function putRecord(
 
 export async function deleteRecord(collection: string, rkey: string, options?: { repo?: string }): Promise<void> {
   await callProxy({ operation: "deleteRecord", collection, rkey, ...(options?.repo ? { repo: options.repo } : {}) });
+}
+
+/** The whole location save as one server-side request — see the proxy's
+ *  saveOrgLocation composite. mintOnly returns the record ref without
+ *  touching the organization record. */
+export async function saveOrgLocationViaProxy(
+  choice: SaveOrgLocationChoice | null,
+  options?: { repo?: string; mintOnly?: boolean },
+): Promise<{ uri: string | null; cid: string | null }> {
+  return callProxy({
+    operation: "saveOrgLocation",
+    choice,
+    ...(options?.mintOnly ? { mintOnly: true } : {}),
+    ...(options?.repo ? { repo: options.repo } : {}),
+  });
 }
 
 // ── Account data deletion (settings → danger zone) ───────────────────────

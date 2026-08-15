@@ -1242,7 +1242,9 @@
       "approximateHint": "Menerbitkan area ~{radius} km alih-alih titik persis.",
       "approximateHintWithLabel": "Menerbitkan area ~{radius} km alih-alih titik persis, ditampilkan sebagai “{label}”.",
       "remove": "Hapus lokasi",
-      "save": "Simpan lokasi"
+      "save": "Simpan lokasi",
+      "savingLocation": "Menyimpan lokasi…",
+      "saveFailed": "Tidak dapat menyimpan lokasi. Silakan coba lagi."
     }
   },
   "dashboardModals": {

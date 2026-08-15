@@ -51,7 +51,6 @@ export function LocationSettingsSection({
   const router = useRouter();
   const [current, setCurrent] = useState<SavedLocation>(initial);
   const [isSaving, setIsSaving] = useState(false);
-  const [error, setError] = useState<string | null>(null);
 
   // A place name like "Zurich, Switzerland" earns its country's flag too.
   const placeFlag = getCountry(countryCodeFromLocationLabel(current.name))?.emoji;
@@ -61,12 +60,13 @@ export function LocationSettingsSection({
       ? `${placeFlag ?? ""} ${current.name}`.trim()
       : null;
 
+  // Errors propagate to the location editor, which stays open on failure —
+  // it owns the saving display, so it owns the failure display too.
   const save = async (choice: OrgLocationChoice | null) => {
     setIsSaving(true);
-    setError(null);
     const writeOptions = target.kind === "group" ? { repo: target.did } : undefined;
     try {
-      await saveOrganizationLocation(target.did, choice, writeOptions);
+      await saveOrganizationLocation(choice, writeOptions);
       setCurrent(
         choice
           ? {
@@ -78,8 +78,6 @@ export function LocationSettingsSection({
           : { name: null, country: null },
       );
       router.refresh();
-    } catch (err) {
-      setError(err instanceof Error ? err.message : t("saveError"));
     } finally {
       setIsSaving(false);
     }
@@ -103,7 +101,7 @@ export function LocationSettingsSection({
                   }
                 : null
             }
-            onConfirm={(choice) => void save(choice)}
+            onConfirm={(choice) => save(choice)}
           />
         ),
       },
@@ -128,7 +126,6 @@ export function LocationSettingsSection({
               </p>
               <p className="mt-1 text-xs text-muted-foreground">{t("description")}</p>
               {disabledReason ? <p className="mt-1 text-xs text-muted-foreground">{disabledReason}</p> : null}
-              {error ? <p className="mt-1 text-xs text-destructive">{error}</p> : null}
             </div>
             <Button size="sm" variant="ghost" onClick={openEditor} disabled={isSaving || Boolean(disabledReason)} className="shrink-0">
               {isSaving ? <Loader2Icon className="h-3.5 w-3.5 animate-spin" /> : <PencilIcon className="h-3.5 w-3.5" />}

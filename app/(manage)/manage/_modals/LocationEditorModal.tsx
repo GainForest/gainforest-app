@@ -37,6 +37,7 @@ import {
   type OrgLocationChoice,
 } from "@/app/_lib/org-location-geometry";
 
+
 export const LocationEditorModalId = "location-editor";
 
 const SEARCH_DEBOUNCE_MS = 300;
@@ -56,8 +57,12 @@ type LocationEditorModalProps = {
      *  even when marked approximate. */
     draft?: boolean;
   } | null;
-  /** Called with the steward's choice; null means "remove the location". */
-  onConfirm: (choice: OrgLocationChoice | null) => void;
+  /** Called with the steward's choice; null means "remove the location".
+   *  Return a promise and the modal stays open and locked until the save
+   *  lands, showing the failure right here if it doesn't. A void return
+   *  closes immediately (used by the creation flow, where the pick is local
+   *  state until the final step). */
+  onConfirm: (choice: OrgLocationChoice | null) => void | Promise<void>;
 };
 
 /** Wire shape of `/api/geocode` results (shared with the observations picker). */
@@ -301,6 +306,10 @@ export function LocationEditorModal({ current, onConfirm }: LocationEditorModalP
   // Save stays disabled until something actually changes — blindly re-saving
   // the seeded location would only mint duplicate records.
   const [dirty, setDirty] = useState(false);
+  // The save is one server-side request; while it runs the modal stays
+  // open and locked so the result is always seen.
+  const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
   // Guards against a slow reverse-geocode overwriting a newer drag/entry.
   const reverseRequestId = useRef(0);
 
@@ -397,19 +406,35 @@ export function LocationEditorModal({ current, onConfirm }: LocationEditorModalP
   const selectedIsWholeCountry = selected?.kind === "country" && !approximate;
   const selectedFlag = getCountry(selected?.countryCode)?.emoji ?? null;
 
+  const runConfirm = (choice: OrgLocationChoice | null) => {
+    setSaveError(null);
+    const result = onConfirm(choice);
+    if (!result || typeof result.then !== "function") {
+      // Synchronous caller (creation flow): nothing is being published.
+      close();
+      return;
+    }
+    setSaving(true);
+    result
+      .then(() => close())
+      .catch((error: unknown) => {
+        setSaving(false);
+        setSaveError(error instanceof Error ? error.message : t("saveFailed"));
+      });
+  };
+
   const handleSave = () => {
-    if (!selected) return;
-    onConfirm({ place: selected, approximate });
-    close();
+    if (!selected || saving) return;
+    runConfirm({ place: selected, approximate });
   };
 
   const handleRemove = () => {
-    onConfirm(null);
-    close();
+    if (saving) return;
+    runConfirm(null);
   };
 
   return (
-    <ModalContent>
+    <ModalContent dismissible={!saving}>
       <ModalHeader>
         <ModalTitle>{t("title")}</ModalTitle>
         <ModalDescription>
@@ -552,15 +577,28 @@ export function LocationEditorModal({ current, onConfirm }: LocationEditorModalP
         </label>
       </div>
 
+      {/* One server-side request does the whole save; the modal stays locked
+          until it lands so the result — either way — is always seen. */}
+      {saving ? (
+        <div className="mt-4">
+          <div className="h-1.5 w-full overflow-hidden rounded-full bg-muted">
+            <div className="h-full w-full origin-left animate-pulse rounded-full bg-[var(--primary)]" />
+          </div>
+          <p className="mt-1.5 text-xs text-muted-foreground" aria-live="polite">{t("savingLocation")}</p>
+        </div>
+      ) : null}
+      {saveError ? <p className="mt-3 text-sm text-destructive">{saveError}</p> : null}
+
       <ModalFooter className="mt-4 flex-row items-center justify-between gap-2">
         {current ? (
-          <Button variant="ghost" className="text-muted-foreground" onClick={handleRemove}>
+          <Button variant="ghost" className="text-muted-foreground" onClick={handleRemove} disabled={saving}>
             {t("remove")}
           </Button>
         ) : (
           <span />
         )}
-        <Button onClick={handleSave} disabled={!selected || !dirty}>
+        <Button onClick={handleSave} disabled={!selected || !dirty || saving}>
+          {saving ? <Loader2Icon className="size-4 animate-spin" aria-hidden /> : null}
           {t("save")}
         </Button>
       </ModalFooter>

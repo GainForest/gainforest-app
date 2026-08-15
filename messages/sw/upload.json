@@ -1242,7 +1242,9 @@
       "approximateHint": "Huchapisha eneo la ~{radius} km badala ya nukta kamili.",
       "approximateHintWithLabel": "Huchapisha eneo la ~{radius} km badala ya nukta kamili, likionyeshwa kama “{label}”.",
       "remove": "Ondoa mahali",
-      "save": "Hifadhi mahali"
+      "save": "Hifadhi mahali",
+      "savingLocation": "Inahifadhi mahali…",
+      "saveFailed": "Imeshindwa kuhifadhi mahali. Tafadhali jaribu tena."
     }
   },
   "dashboardModals": {

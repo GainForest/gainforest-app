@@ -1242,7 +1242,9 @@
       "approximateHint": "Publishes a ~{radius} km area instead of the exact point.",
       "approximateHintWithLabel": "Publishes a ~{radius} km area instead of the exact point, shown as “{label}”.",
       "remove": "Remove location",
-      "save": "Save location"
+      "save": "Save location",
+      "savingLocation": "Saving the location…",
+      "saveFailed": "Could not save the location. Please try again."
     }
   },
   "dashboardModals": {

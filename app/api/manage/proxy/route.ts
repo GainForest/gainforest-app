@@ -16,6 +16,18 @@ import {
   siteInUseMessage,
   type SiteReferenceCleanup,
 } from "./site-references";
+import {
+  approximateCirclePayload,
+  approximateLocationRecord,
+  countryLocationRecord,
+  exactLocationRecord,
+  isOrgLocationChoiceInput,
+  lexBlobRef,
+  LOCATION_COLLECTION,
+  ORG_COLLECTION,
+  type OrgLocationChoiceInput,
+} from "./org-location-records";
+import { fuzzCoordinateForDid } from "@/app/_lib/org-location-fuzz";
 
 export const runtime = "nodejs";
 
@@ -120,6 +132,14 @@ type MutationBody = GroupScoped & (
       subjectPart: string;
       caption?: string;
     }
+  | {
+      operation: "saveOrgLocation";
+      /** The steward's pick; null removes the declared location. */
+      choice: OrgLocationChoiceInput | null;
+      /** Mint and return the location record only, without touching the
+       *  organization record — the creation flow writes that itself. */
+      mintOnly?: boolean;
+    }
 );
 
 type ForwardableMutationBody = Exclude<
@@ -141,6 +161,7 @@ type ForwardableMutationBody = Exclude<
   | { operation: "appendExistingDataset" }
   | { operation: "accountDataSummary" }
   | { operation: "deleteAccountDataChunk" }
+  | { operation: "saveOrgLocation" }
 >;
 type PdsSession = { did: string; accessJwt: string };
 type DatasetRecordResult = { uri: string; cid: string; rkey: string; record: Record<string, unknown> };
@@ -594,6 +615,10 @@ function isMutationBody(value: unknown): value is MutationBody {
       isOptionalString(body.caption)
     );
   }
+  if (body.operation === "saveOrgLocation") {
+    if (body.choice === null) return body.mintOnly !== true; // nothing to mint
+    return isOrgLocationChoiceInput(body.choice) && (body.mintOnly === undefined || typeof body.mintOnly === "boolean");
+  }
   return false;
 }
 
@@ -779,6 +804,128 @@ async function fetchRepoRecord(options: {
   }
 
   return { uri: payload.uri, cid: payload.cid, rkey, record: payload.value };
+}
+
+/**
+ * The whole location save as ONE request, so a closed tab or navigation on
+ * the client can no longer strand it halfway (a Bern record with no pointer
+ * to it — see ECO-879/ECO-882). Once this request reaches the server, every
+ * step runs to completion here:
+ *
+ *   1. build the location record — fuzzing an approximate pick with the
+ *      server-held secret directly, so the exact point never round-trips
+ *      back through the browser
+ *   2. upload the circle blob (approximate only)
+ *   3. create the location record
+ *   4. read-merge the organization record and repoint it (unless mintOnly —
+ *      the creation flow writes its own organization record)
+ *
+ * Group access is already enforced by resolveMutationTarget; each write
+ * forwards through the same auth-service path as every other mutation.
+ */
+async function saveOrgLocationComposite(
+  body: Extract<MutationBody, { operation: "saveOrgLocation" }>,
+  did: string,
+  cookie: string | null,
+): Promise<{ uri: string | null; cid: string | null }> {
+  const repoScope = body.repo ? { repo: body.repo } : {};
+  let locationRef: { uri: string; cid: string } | null = null;
+
+  if (body.choice) {
+    const choice = body.choice;
+    let record: Record<string, unknown> | null;
+
+    if (choice.place.kind === "country" && !choice.approximate && choice.place.countryCode) {
+      record = countryLocationRecord(choice.place.countryCode);
+      if (!record) throw new Error("Choose a country from the list.");
+    } else if (!choice.approximate) {
+      record = exactLocationRecord(choice);
+    } else {
+      // The exact point is fuzzed here and discarded — never stored, never
+      // published. Failing must not fall back to the exact coordinate, and
+      // the failure detail (it names server configuration) stays in the log.
+      let fuzzed: { latitude: number; longitude: number };
+      try {
+        fuzzed = fuzzCoordinateForDid(did, choice.place.latitude, choice.place.longitude);
+      } catch (error) {
+        console.error("[proxy/saveOrgLocation] fuzzing unavailable", error);
+        throw new Error("Approximate locations are unavailable right now. Please try again later.");
+      }
+      const payload = approximateCirclePayload(fuzzed);
+      const uploaded = await executeForwardableMutation<Record<string, unknown>>(
+        {
+          operation: "uploadBlob",
+          blobData: Buffer.from(payload, "utf8").toString("base64"),
+          blobMimeType: "application/geo+json",
+          ...repoScope,
+        },
+        did,
+        cookie,
+        "Could not upload the approximate area.",
+      );
+      const blobRef = lexBlobRef(uploaded, payload.length);
+      if (!blobRef) throw new Error("Could not upload the approximate area.");
+      record = approximateLocationRecord(choice, blobRef);
+    }
+
+    const created = await executeForwardableMutation<{ uri?: unknown; cid?: unknown }>(
+      { operation: "createRecord", collection: LOCATION_COLLECTION, record, ...repoScope },
+      did,
+      cookie,
+      "Could not publish the location.",
+    );
+    if (typeof created.uri !== "string" || typeof created.cid !== "string") {
+      throw new Error("Could not publish the location.");
+    }
+    locationRef = { uri: created.uri, cid: created.cid };
+
+    if (body.mintOnly) return locationRef;
+  }
+
+  // Read-merge so only `location` changes. A genuinely missing record means
+  // "start fresh"; any OTHER read failure must abort — writing a record
+  // merged from an empty read would wipe every other organization field.
+  let existing: Record<string, unknown> = {};
+  let existingCid: string | null = null;
+  try {
+    const found = await fetchRepoRecord({
+      did,
+      collection: ORG_COLLECTION,
+      rkey: "self",
+      missingMessage: "missing",
+    });
+    existing = found.record;
+    existingCid = found.cid;
+  } catch (error) {
+    if (!(error instanceof TreeGroupUnavailableError)) {
+      throw new Error("The organization record could not be read, so nothing was changed. Please try again.");
+    }
+  }
+  const orgRecord: Record<string, unknown> = {
+    ...existing,
+    $type: ORG_COLLECTION,
+    createdAt: typeof existing.createdAt === "string" ? existing.createdAt : new Date().toISOString(),
+  };
+  if (locationRef) orgRecord.location = locationRef;
+  else delete orgRecord.location;
+
+  // Compare-and-swap on the record we read: a concurrent edit fails the
+  // write instead of being silently overwritten.
+  await executeForwardableMutation(
+    {
+      operation: "putRecord",
+      collection: ORG_COLLECTION,
+      rkey: "self",
+      record: orgRecord,
+      ...(existingCid ? { swapRecord: existingCid } : {}),
+      ...repoScope,
+    },
+    did,
+    cookie,
+    "The location was published but the profile could not be updated. Please try again.",
+  );
+
+  return locationRef ?? { uri: null, cid: null };
 }
 
 async function getDatasetRecordFromPds(did: string, rkey: string): Promise<DatasetRecordResult> {
@@ -2607,6 +2754,15 @@ export async function POST(request: Request) {
       return Response.json(result);
     } catch (error) {
       return Response.json({ error: error instanceof Error ? error.message : "Tree could not be saved." }, { status: 502 });
+    }
+  }
+
+  if (body.operation === "saveOrgLocation") {
+    try {
+      const result = await saveOrgLocationComposite(body, targetDid, cookie);
+      return Response.json(result);
+    } catch (error) {
+      return Response.json({ error: error instanceof Error ? error.message : "The location could not be saved." }, { status: 502 });
     }
   }
 

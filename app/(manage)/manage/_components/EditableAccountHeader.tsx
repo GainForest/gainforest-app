@@ -33,7 +33,11 @@ import { countryFlag } from "@/app/_lib/format";
 import { countryCodeFromLocationLabel, getCountry } from "@/app/_lib/countries";
 import { resolvePdsHost } from "@/app/_lib/pds";
 import { putRecord, uploadBlob } from "../_lib/mutations";
-import { createOrgLocationStrongRef, displayLocationFromChoice, type OrgLocationChoice } from "../_lib/org-location";
+import {
+  displayLocationFromChoice,
+  saveOrganizationLocation,
+  type OrgLocationChoice,
+} from "../_lib/org-location";
 import { canEditGroupProfile } from "../_lib/cgs-permissions";
 import { useModal } from "@/components/ui/modal/context";
 import {
@@ -752,20 +756,25 @@ export function EditableAccountHeader({
     }
   };
 
-  const saveChanges = async (overrides: Partial<HeroEditState> = {}) => {
-    if (isSaving) return;
+  /** Returns the failure message, or null on success, so callers that own a
+   *  richer surface (the location editor's progress view) can show it there.
+   *  The hero's own saveError state is set either way. */
+  const saveChanges = async (
+    overrides: Partial<HeroEditState> = {},
+  ): Promise<string | null> => {
+    if (isSaving) return t("errors.saveFailed");
     if (!profileEditPermission.allowed) {
       setSaveError(profileEditPermission.reason);
-      return;
+      return profileEditPermission.reason ?? t("errors.saveFailed");
     }
     const next: HeroEditState = { ...editState, ...overrides };
     if (!next.displayName.trim()) {
       setSaveError(t("errors.nameRequired"));
-      return;
+      return t("errors.nameRequired");
     }
     if (!isValidWebsite(next.website)) {
       setSaveError(t("errors.invalidWebsite"));
-      return;
+      return t("errors.invalidWebsite");
     }
 
     setIsSaving(true);
@@ -814,8 +823,19 @@ export function EditableAccountHeader({
         await putRecord("app.certified.actor.profile", "self", certifiedProfileRecord, writeOptions);
       }
 
+      // A location save is a server-side composite: the proxy mints the
+      // location record and repoints the org record in ONE request, so a
+      // closed tab can't strand it halfway (ECO-882 has the history).
+      if (account.kind === "organization" && "location" in overrides) {
+        if (next.location.pendingChoice) {
+          await saveOrganizationLocation(next.location.pendingChoice, writeOptions);
+        } else if (!next.location.name && !next.location.country) {
+          await saveOrganizationLocation(null, writeOptions);
+        }
+      }
+
       const shouldWriteOrg = account.kind === "organization" && (
-        "location" in overrides || "startDate" in overrides || "visibility" in overrides ||
+        "startDate" in overrides || "visibility" in overrides ||
         "orgType" in overrides || "socials" in overrides || "longDescription" in overrides
       );
       if (shouldWriteOrg) {
@@ -828,14 +848,6 @@ export function EditableAccountHeader({
           createdAt: typeof existingOrg.createdAt === "string" ? existingOrg.createdAt : account.createdAt ?? new Date().toISOString(),
           visibility: next.visibility === "Unlisted" ? "unlisted" : "public",
         };
-        if ("location" in overrides) {
-          if (next.location.pendingChoice) {
-            // A fresh pick: mint its location record, then reference it.
-            orgRecord.location = await createOrgLocationStrongRef(next.location.pendingChoice, writeOptions);
-          } else if (!next.location.name && !next.location.country) {
-            delete orgRecord.location;
-          }
-        }
         if ("startDate" in overrides) {
           if (next.startDate.trim()) orgRecord.foundedDate = `${next.startDate.trim()}T00:00:00.000Z`;
           else delete orgRecord.foundedDate;
@@ -870,8 +882,11 @@ export function EditableAccountHeader({
       });
       setInlineField(null);
       router.refresh();
+      return null;
     } catch (err) {
-      setSaveError(err instanceof Error ? err.message : t("errors.saveFailed"));
+      const message = err instanceof Error ? err.message : t("errors.saveFailed");
+      setSaveError(message);
+      return message;
     } finally {
       setIsSaving(false);
     }
@@ -916,23 +931,22 @@ export function EditableAccountHeader({
             }
           : null
       }
-      onConfirm={(choice) => {
-        if (!choice) {
-          void saveChanges({ location: { name: null, country: "" } });
-          return;
-        }
-        // Show the published label immediately; the pick itself rides along
-        // and is turned into a location record by the save. Coordinates come
-        // from the pick so reopening the editor lands on the new spot.
-        void saveChanges({
-          location: {
-            ...displayLocationFromChoice(choice),
-            latitude: choice.place.latitude,
-            longitude: choice.place.longitude,
-            approximate: choice.approximate,
-            pendingChoice: choice,
-          },
-        });
+      onConfirm={async (choice) => {
+        // Await the save so the editor stays open, locked, and surfaces the
+        // failure — a fire-and-forget here is how a half-saved location
+        // (record written, org never repointed) used to happen.
+        const message = choice
+          ? await saveChanges({
+              location: {
+                ...displayLocationFromChoice(choice),
+                latitude: choice.place.latitude,
+                longitude: choice.place.longitude,
+                approximate: choice.approximate,
+                pendingChoice: choice,
+              },
+            })
+          : await saveChanges({ location: { name: null, country: "" } });
+        if (message) throw new Error(message);
       }}
     />,
   );
