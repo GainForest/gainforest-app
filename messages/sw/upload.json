@@ -1240,7 +1240,7 @@
       "invalidCoordinates": "Latitudo lazima iwe kati ya -90 na 90, longitudo kati ya -180 na 180.",
       "dragHint": "Buruta alama ili kurekebisha mahali.",
       "approximateLabel": "Shiriki mahali pa makadirio tu",
-      "approximateHint": "Huchapisha eneo la ~{radius} km badala ya nukta kamili, kwa jina la ngazi ya mkoa.",
+      "approximateHint": "Huchapisha eneo la ~{radius} km badala ya nukta kamili.",
       "approximateHintWithLabel": "Huchapisha eneo la ~{radius} km badala ya nukta kamili, likionyeshwa kama “{label}”.",
       "remove": "Ondoa mahali",
       "save": "Hifadhi mahali"
