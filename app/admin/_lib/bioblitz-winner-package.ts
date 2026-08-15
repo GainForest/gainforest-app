@@ -84,7 +84,7 @@ export type BioblitzWinnerPackage = {
 };
 
 export function winnerPackageFolderName(roundId: number, prize: BioblitzWinnerPrize): string {
-  const category = prize === "most-observations" ? "Most Observations" : "Best Picture";
+  const category = prize === "most-observations" ? "Highest Points" : "Best Picture";
   return `Round ${roundId} ${category} Winner`;
 }
 
@@ -499,10 +499,10 @@ export function buildWinnerInfoMarkdown({
   observations: Array<Pick<IncludedObservation, "record" | "likeCount" | "filename">>;
   skipped: string[];
 }): string {
-  const category = prize === "most-observations" ? "Most Observations" : "Best Picture";
+  const category = prize === "most-observations" ? "Highest Points" : "Best Picture";
   const winnerName = winner.displayName?.trim() || "Unnamed account";
   const performance = prize === "most-observations"
-    ? `Eligible observations: ${winner.observationCount}`
+    ? `Final score: ${winner.observationCount}`
     : `Likes on winning picture: ${winner.winningLikeCount ?? "Not available"}`;
   const lines = [
     `# Round ${round.id} ${category} Winner`,

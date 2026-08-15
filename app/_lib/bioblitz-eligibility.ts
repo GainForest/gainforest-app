@@ -69,6 +69,44 @@ export function isEligibleBioblitzCategory(category: BioblitzImageCategory): boo
   return category === "wildlife" || category === "plant";
 }
 
+// ── Points scoring ───────────────────────────────────────────────────────────
+//
+// The round leaderboard ranks collectors by points, not raw counts, so a
+// stream of easy plant photos cannot outrank a smaller set of harder wildlife
+// shots. Eligibility is unchanged — only eligible observations score at all.
+
+/** Points for an eligible outdoor plant photo. */
+export const BIOBLITZ_PLANT_POINTS = 1;
+/** Points for an eligible wildlife (animal) photo. */
+export const BIOBLITZ_WILDLIFE_POINTS = 2;
+/** Bonus when the observation carries a real species label. */
+export const BIOBLITZ_LABEL_BONUS_POINTS = 0.5;
+
+/** Placeholder "names" that do not count as identifying the species. */
+const UNIDENTIFIED_LABEL = /^(?:unidentified|unknown|unidentifiable|n\/?a|none)\b/i;
+
+/** True when the observation names its species (scientific or vernacular)
+ *  with something other than an "unidentified"-style placeholder. */
+export function hasBioblitzSpeciesLabel(input: BioblitzDescriptionInput): boolean {
+  for (const value of [input.scientificName, input.vernacularName]) {
+    const label = value?.trim();
+    if (label && !UNIDENTIFIED_LABEL.test(label)) return true;
+  }
+  return false;
+}
+
+/**
+ * Points one observation contributes to its collector's round score:
+ * 1 per plant photo, 2 per animal photo, +0.5 when the species is labeled.
+ * Ineligible observations score 0.
+ */
+export function bioblitzObservationPoints(input: BioblitzDescriptionInput): number {
+  const category = classifyBioblitzImage(input);
+  if (!isEligibleBioblitzCategory(category)) return 0;
+  const base = category === "wildlife" ? BIOBLITZ_WILDLIFE_POINTS : BIOBLITZ_PLANT_POINTS;
+  return base + (hasBioblitzSpeciesLabel(input) ? BIOBLITZ_LABEL_BONUS_POINTS : 0);
+}
+
 export function isEligibleBioblitzDescription(input: BioblitzDescriptionInput): boolean {
   return isEligibleBioblitzCategory(classifyBioblitzImage(input));
 }

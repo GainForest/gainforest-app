@@ -3,8 +3,11 @@
  *
  * The challenge runs in fixed rounds (a calendar week each). Two prizes are
  * awarded every round:
- *   - "Most observations" — the collector with the most valid nature sightings
- *     uploaded inside the round window.
+ *   - "Highest points" — the collector with the highest score across their
+ *     valid nature sightings uploaded inside the round window. Each eligible
+ *     plant photo earns 1 point, each eligible animal photo earns 2 points,
+ *     and either earns +0.5 when the species is labeled (not unidentified).
+ *     Eligibility itself is unchanged — see bioblitz-eligibility.ts.
  *   - "Best picture" — a judged pick of the most compelling biodiversity photo
  *     (decided by hand once the round closes).
  *
@@ -29,6 +32,7 @@ import {
 import { parseRecognitionBadgeKey, recognitionKeyFromTitle } from "./recognition-badges";
 import { fetchEngagement } from "./feed-engagement";
 import {
+  bioblitzObservationPoints,
   classifyBioblitzImage,
   isEligibleBioblitzCategory,
   type BioblitzImageCategory,
@@ -46,7 +50,7 @@ export { BIOBLITZ_PRIZES } from "@/lib/bioblitz-prizes";
  *  display name in the UI, so no technical identifier is ever shown. */
 export type RoundWinner = {
   did: string;
-  /** Final observation count, when relevant (the "most observations" prize). */
+  /** Final points score, when relevant (the "highest points" prize). */
   count?: number;
   /** Exact winning observation, when relevant (the "best picture" prize). */
   winningObservationUri?: string;
@@ -308,7 +312,11 @@ export function isWithinRoundUploadWindow(
  *  only used internally to resolve a richer profile/avatar). */
 export type RoundCollector = {
   did: string;
+  /** Number of eligible observations — kept for context on the board. */
   count: number;
+  /** Round score: 1 pt per plant photo, 2 per animal photo, +0.5 per labeled
+   *  species. This is what the leaderboard ranks by. */
+  points: number;
   displayName: string | null;
   avatarRef: string | null;
 };
@@ -327,6 +335,8 @@ export type RoundBoard = {
   unfilteredCollectors?: RoundCollector[];
   /** Total eligible wildlife + outdoor plant observations. */
   totalObservations: number;
+  /** Total points scored across all eligible observations. */
+  totalPoints: number;
   /** Breakdown of automatically classified image observations. */
   imageCounts: RoundImageCounts;
   /** Distinct collectors who uploaded at least one eligible observation. */
@@ -445,6 +455,7 @@ export async function fetchRoundCollectors(
     missingPhoto: 0,
   };
   let total = 0;
+  let totalPoints = 0;
   let after: string | null = null;
 
   for (let page = 0; page < MAX_PAGES; page++) {
@@ -494,20 +505,23 @@ export async function fetchRoundCollectors(
         if (!excluded) imageCounts.missingPhoto += 1;
         continue;
       }
-      const category = classifyBioblitzImage({
+      const description = {
         notes: n.occurrenceRemarks?.trim() || n.fieldNotes?.trim() || null,
         scientificName: n.scientificName,
         vernacularName: n.vernacularName,
         kingdom: n.kingdom,
-      });
+      };
+      const category = classifyBioblitzImage(description);
       if (!excluded) imageCounts[category] += 1;
       if (!isEligibleBioblitzCategory(category)) continue;
 
-      if (unfilteredTally) incrementRoundCollector(unfilteredTally, did, n);
+      const points = bioblitzObservationPoints(description);
+      if (unfilteredTally) incrementRoundCollector(unfilteredTally, did, n, points);
       if (excluded) continue;
 
       total += 1;
-      incrementRoundCollector(tally, did, n);
+      totalPoints += points;
+      incrementRoundCollector(tally, did, n, points);
     }
 
     if (!conn?.pageInfo?.hasNextPage || !conn.pageInfo.endCursor) break;
@@ -520,15 +534,22 @@ export async function fetchRoundCollectors(
     collectors,
     ...(unfilteredTally ? { unfilteredCollectors: sortRoundCollectors(unfilteredTally) } : {}),
     totalObservations: total,
+    totalPoints,
     imageCounts,
     collectorCount: collectors.length,
   };
 }
 
-function incrementRoundCollector(tally: Map<string, RoundCollector>, did: string, node: RawNode): void {
+function incrementRoundCollector(
+  tally: Map<string, RoundCollector>,
+  did: string,
+  node: RawNode,
+  points: number,
+): void {
   const existing = tally.get(did);
   if (existing) {
     existing.count += 1;
+    existing.points += points;
     if (!existing.displayName) existing.displayName = profileName(node);
     if (!existing.avatarRef) existing.avatarRef = profileAvatarRef(node);
     return;
@@ -536,14 +557,19 @@ function incrementRoundCollector(tally: Map<string, RoundCollector>, did: string
   tally.set(did, {
     did,
     count: 1,
+    points,
     displayName: profileName(node),
     avatarRef: profileAvatarRef(node),
   });
 }
 
+/** Rank by points; ties break by observation count, then by name. */
 function sortRoundCollectors(tally: Map<string, RoundCollector>): RoundCollector[] {
   return [...tally.values()].sort(
-    (a, b) => b.count - a.count || (a.displayName ?? "").localeCompare(b.displayName ?? ""),
+    (a, b) =>
+      b.points - a.points ||
+      b.count - a.count ||
+      (a.displayName ?? "").localeCompare(b.displayName ?? ""),
   );
 }
 
@@ -743,7 +769,9 @@ function normalizeOrgType(value: unknown): string | null {
 export type FrozenWinner = {
   did: string;
   /** Final tally captured at award time (parsed from the award note), when
-   *  known. Null when the award carries no count (e.g. best picture). */
+   *  known — a points score under the current rules, an observation count for
+   *  rounds awarded before points existed. Null when the award carries no
+   *  tally (e.g. best picture). */
   count: number | null;
 };
 
@@ -802,11 +830,12 @@ const WINNER_AWARDS_QUERY = `
   }
 `;
 
-/** Final tally embedded in an award note, e.g. "… most observations (12)." */
+/** Final tally embedded in an award note, e.g. "… highest points (12.5)." or
+ *  a legacy "… most observations (12)." */
 function countFromAwardNote(note: string | null | undefined): number | null {
-  const match = /\((\d+)\)/.exec(note ?? "");
+  const match = /\((\d+(?:\.\d+)?)\)/.exec(note ?? "");
   if (!match) return null;
-  const count = Number.parseInt(match[1]!, 10);
+  const count = Number.parseFloat(match[1]!);
   return Number.isFinite(count) && count >= 0 ? count : null;
 }
 

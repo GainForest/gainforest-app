@@ -200,9 +200,11 @@ export async function POST(request: Request): Promise<Response> {
       pinned.bestPicture === undefined ? fetchRoundTopLiked(round, 1) : null,
     ]);
     const topCollector = board?.collectors[0] ?? null;
+    // The board is ranked by points (1 per plant photo, 2 per animal photo,
+    // +0.5 per labeled species), so the top collector is the points winner.
     const mostObservations = pinned.mostObservations !== undefined
       ? pinned.mostObservations
-      : topCollector && { did: topCollector.did, count: topCollector.count as number | null };
+      : topCollector && { did: topCollector.did, count: topCollector.points as number | null };
     const computedBestPicture = liked?.[0] ?? null;
     const bestPicture = pinned.bestPicture !== undefined
       ? pinned.bestPicture && { did: pinned.bestPicture.did, winningObservationUri: round.bestPicture?.winningObservationUri }
@@ -218,7 +220,7 @@ export async function POST(request: Request): Promise<Response> {
         const countNote = mostObservations.count != null ? ` (${mostObservations.count})` : "";
         const award = await awardRecognition(
           loaded.repoDid, cookie, mostObservations.did, bioblitzBadgeKey("most-images", round.id),
-          `BioBlitz ${round.label} winner — most observations${countNote}.`,
+          `BioBlitz ${round.label} winner — highest points${countNote}.`,
         );
         notificationInputs.push(notificationInput(round, "most-observations", award));
       } catch (error) {

@@ -116,6 +116,7 @@ export async function loadBioblitzAdminRound(
       () => new Map<string, { displayName: string | null; avatarUrl: string | null }>(),
     );
   const rawCountByDid = new Map(rawCollectors.map((collector) => [collector.did, collector.count]));
+  const rawPointsByDid = new Map(rawCollectors.map((collector) => [collector.did, collector.points]));
   const rows = new Map<string, BioblitzAdminRegistrant>(
     registrants.map((registrant) => [
       registrant.did,
@@ -125,6 +126,7 @@ export async function loadBioblitzAdminRound(
         avatarUrl: registrant.avatarUrl,
         registeredAt: registrant.createdAt || null,
         observationCount: rawCountByDid.get(registrant.did) ?? 0,
+        points: rawPointsByDid.get(registrant.did) ?? 0,
         wins: [],
         availablePackages: [],
       },
@@ -143,7 +145,10 @@ export async function loadBioblitzAdminRound(
         existing.displayName = collector?.displayName ?? profile?.displayName ?? null;
       }
       if (!existing.avatarUrl) existing.avatarUrl = profile?.avatarUrl ?? null;
-      if (collector) existing.observationCount = collector.count;
+      if (collector) {
+        existing.observationCount = collector.count;
+        existing.points = collector.points;
+      }
       continue;
     }
     rows.set(exclusion.subjectDid, {
@@ -152,6 +157,7 @@ export async function loadBioblitzAdminRound(
       avatarUrl: profile?.avatarUrl ?? null,
       registeredAt: null,
       observationCount: collector?.count ?? 0,
+      points: collector?.points ?? 0,
       wins: [],
       availablePackages: [],
     });
@@ -167,13 +173,15 @@ export async function loadBioblitzAdminRound(
       displayName: winner.displayName ?? profile?.displayName ?? null,
       avatarUrl: profile?.avatarUrl ?? null,
       registeredAt: null,
-      observationCount: winner.observationCount ?? rawCountByDid.get(winner.did) ?? winner.collector?.count ?? 0,
+      observationCount: rawCountByDid.get(winner.did) ?? winner.collector?.count ?? 0,
+      // The confirmed prize tally (a points score under the current rules) is
+      // only a fallback when the live board no longer knows this account.
+      points: rawPointsByDid.get(winner.did) ?? winner.collector?.points ?? winner.observationCount ?? 0,
       wins: [],
       availablePackages: [],
     };
     if (!next.displayName) next.displayName = winner.displayName ?? profile?.displayName ?? null;
     if (!next.avatarUrl) next.avatarUrl = profile?.avatarUrl ?? null;
-    if (winner.observationCount !== undefined) next.observationCount = winner.observationCount;
     if (!next.wins.includes(winner.prize)) next.wins.push(winner.prize);
     if (winner.packageAvailable && !next.availablePackages.includes(winner.prize)) {
       next.availablePackages.push(winner.prize);
@@ -187,6 +195,8 @@ export async function loadBioblitzAdminRound(
     registrants: [...rows.values()].sort((a, b) => {
       const winnerDifference = Number(b.wins.length > 0) - Number(a.wins.length > 0);
       if (winnerDifference) return winnerDifference;
+      const pointsDifference = b.points - a.points;
+      if (pointsDifference) return pointsDifference;
       const observationDifference = b.observationCount - a.observationCount;
       if (observationDifference) return observationDifference;
       return (a.displayName ?? "").localeCompare(b.displayName ?? "", undefined, { sensitivity: "base" });

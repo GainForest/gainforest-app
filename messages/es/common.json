@@ -1281,9 +1281,9 @@
         "description": "Recibió una subvención de Resilvestrar la web."
       },
       "bioblitz-most-images": {
-        "label": "BioBlitz — más observaciones",
-        "labelWithRound": "BioBlitz {roundName} — más observaciones",
-        "description": "Ganó una ronda de BioBlitz por la mayor cantidad de observaciones."
+        "label": "BioBlitz — mayor puntuación",
+        "labelWithRound": "BioBlitz {roundName} — mayor puntuación",
+        "description": "Ganó una ronda de BioBlitz con la mayor puntuación."
       },
       "bioblitz-best-picture": {
         "label": "BioBlitz — mejor foto",
@@ -1434,17 +1434,18 @@
       "ended": "Finalizada"
     },
     "observations": "{count, plural, one {# observación} other {# observaciones}}",
+    "points": "{points, plural, one {# punto} other {# puntos}}",
     "ignored": "Ignorada",
     "counted": "Cuenta",
     "notCounted": "No cuenta",
     "prize": {
-      "most-observations": "Más observaciones",
+      "most-observations": "Mayor puntuación",
       "best-picture": "Mejor foto"
     },
     "openProfile": "Abrir perfil",
     "joined": "Se unió el {date}",
     "download": {
-      "most-observations": "Kit de más observaciones",
+      "most-observations": "Kit de mayor puntuación",
       "best-picture": "Kit de mejor foto"
     },
     "ignore": "Ignorar",

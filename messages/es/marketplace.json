@@ -281,7 +281,7 @@
       "eyebrow": "Reto BioBlitz Semanal",
       "titlePrefix": "Reto",
       "titleEmphasis": "BioBlitz",
-      "description": "Una carrera semanal y amistosa para registrar biodiversidad al aire libre. Añade observaciones con tus propias fotos subidas. Las personas y las plantas en maceta no cuentan.",
+      "description": "Una carrera semanal y amistosa para registrar biodiversidad al aire libre con tus propias fotos subidas. Las fotos de animales valen 2 puntos, las de plantas 1 punto, y nombrar la especie suma 0,5 puntos extra. Las personas y las plantas en maceta no cuentan.",
       "program": "Parte del programa Klarna AI for Climate Resilience, con GainForest."
     },
     "rsvp": {
@@ -340,7 +340,7 @@
           "winners": {
             "title": "4. Selección de ganadores",
             "paragraphs": {
-              "p1": "El premio a Más observaciones se basa en el mayor número de observaciones válidas durante la ronda. El premio a Mejor foto se selecciona con los criterios descritos en la página de BioBlitz, incluida la calidad de la imagen, el tema y la participación de la comunidad cuando corresponda.",
+              "p1": "El premio a la Mayor puntuación se basa en la puntuación total más alta de observaciones válidas durante la ronda: cada foto válida de animal vale 2 puntos, cada foto válida de planta vale 1 punto, y cualquiera suma 0,5 puntos extra cuando la especie está identificada en lugar de quedar sin identificar. El premio a Mejor foto se selecciona con los criterios descritos en la página de BioBlitz, incluida la calidad de la imagen, el tema y la participación de la comunidad cuando corresponda.",
               "p2": "GainForest puede revisar entradas, resolver empates, corregir errores de conteo y descalificar entradas no válidas. Las decisiones son definitivas en la medida permitida por la ley."
             }
           },
@@ -501,8 +501,8 @@
       "title": "Premios en cada ronda",
       "badgeNote": "Además, una insignia permanente de ganador en tu perfil.",
       "mostObservations": {
-        "title": "Más observaciones",
-        "blurb": "Para quien registre más avistamientos válidos en la ronda."
+        "title": "Mayor puntuación",
+        "blurb": "Para quien logre la mayor puntuación en la ronda: 2 puntos por foto de animal, 1 por foto de planta y +0,5 si nombras la especie."
       },
       "bestPicture": {
         "title": "Mejor foto",
@@ -522,7 +522,7 @@
         },
         "review": {
           "title": "Revisa el nombre de la especie",
-          "blurb": "Confirma o corrige el nombre sugerido: tu conocimiento importa."
+          "blurb": "Confirma o corrige el nombre sugerido: una especie identificada suma 0,5 puntos extra."
         }
       },
       "proof": {
@@ -535,16 +535,18 @@
     "board": {
       "title": "Tabla de esta ronda",
       "live": "En vivo",
-      "subtitleLive": "Quién lidera ahora mismo con observaciones fotográficas válidas.",
+      "subtitleLive": "Quién lidera en puntos ahora mismo con observaciones fotográficas válidas.",
       "subtitleEnded": "Clasificación final de esta ronda.",
       "subtitleUpcoming": "Sé la primera persona en la tabla cuando abra la ronda.",
-      "subtitleAll": "Quienes tienen más observaciones fotográficas válidas en todo el reto.",
+      "subtitleAll": "Las mayores puntuaciones de todo el reto.",
       "scope": {
         "round": "Esta ronda",
         "all": "Histórico"
       },
       "leader": "En cabeza",
       "observations": "{count, plural, one {# observación} other {# observaciones}}",
+      "points": "{points} ptos",
+      "pointsFull": "{points, plural, one {# punto} other {# puntos}}",
       "openCollector": "Abrir el perfil en una pestaña nueva",
       "rankAriaLabel": "Puesto {rank}",
       "org": {
@@ -563,6 +565,8 @@
       "stats": {
         "observations": "Observaciones esta ronda",
         "observationsAll": "Observaciones (histórico)",
+        "points": "Puntos esta ronda",
+        "pointsAll": "Puntos (histórico)",
         "collectors": "Participantes",
         "timeLeft": "Tiempo restante"
       },
@@ -574,7 +578,7 @@
         "people": "Personas",
         "potted": "Plantas en maceta",
         "other": "Otras excluidas",
-        "explainer": "Solo cuentan las observaciones claras de fauna o plantas al aire libre con una foto subida directamente. Se excluyen personas, plantas en maceta o de interior, sujetos poco claros y observaciones sin una foto subida."
+        "explainer": "Solo cuentan las observaciones claras de fauna o plantas al aire libre con una foto subida directamente. Se excluyen personas, plantas en maceta o de interior, sujetos poco claros y observaciones sin una foto subida. Cada foto de animal vale 2 puntos, cada foto de planta 1 punto, y nombrar la especie suma 0,5 puntos."
       },
       "empty": {
         "title": "Aún no hay avistamientos",
@@ -589,7 +593,7 @@
     "winners": {
       "title": "Ganadores anteriores",
       "description": "Un registro permanente de los campeones de cada ronda.",
-      "mostObservations": "Más observaciones",
+      "mostObservations": "Mayor puntuación",
       "bestPicture": "Mejor foto",
       "pending": "Por anunciar",
       "final": "Definitivo",
@@ -597,7 +601,7 @@
       "finalHint": "Estos ganadores están confirmados y no cambiarán.",
       "provisionalHint": "Clasificación actual: puede cambiar hasta que se confirmen los ganadores.",
       "compact": "Recientes",
-      "mostSubmitted": "Más envíos",
+      "mostSubmitted": "Mayor puntuación",
       "mostLiked": "Más me gusta",
       "award": {
         "action": "Otorgar insignias a los ganadores",
@@ -605,7 +609,7 @@
         "done": "Insignias de ganadores otorgadas",
         "error": "No se pudieron actualizar las insignias o el estado del correo. Inténtalo de nuevo.",
         "notification": {
-          "mostObservations": "Correo de más observaciones",
+          "mostObservations": "Correo de mayor puntuación",
           "bestPicture": "Correo de mejor foto",
           "sent": "Enviado",
           "delayed": "Retrasado; seguiremos intentándolo",

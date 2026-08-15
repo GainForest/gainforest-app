@@ -37,7 +37,7 @@ const copyByLocale = {
     confirmation: "We’re happy to confirm that you won “{prize}” in BioBlitz {round}.",
     prizes: {
       "most-observations": {
-        label: "Most Observations",
+        label: "Highest Points",
         appreciation: "Thank you for the time and care you put into documenting nature. Your observations help make local biodiversity more visible and useful.",
       },
       "best-picture": {
@@ -66,7 +66,7 @@ const copyByLocale = {
     confirmation: "Nos alegra confirmar que ganaste “{prize}” en BioBlitz {round}.",
     prizes: {
       "most-observations": {
-        label: "Más observaciones",
+        label: "Mayor puntuación",
         appreciation: "Gracias por el tiempo y el cuidado que dedicaste a documentar la naturaleza. Tus observaciones ayudan a que la biodiversidad local sea más visible y útil.",
       },
       "best-picture": {
@@ -95,7 +95,7 @@ const copyByLocale = {
     confirmation: "Temos o prazer de confirmar que você ganhou “{prize}” no BioBlitz {round}.",
     prizes: {
       "most-observations": {
-        label: "Mais observações",
+        label: "Maior pontuação",
         appreciation: "Agradecemos o tempo e o cuidado que você dedicou a documentar a natureza. Suas observações ajudam a tornar a biodiversidade local mais visível e útil.",
       },
       "best-picture": {
@@ -124,7 +124,7 @@ const copyByLocale = {
     confirmation: "Tunafurahi kuthibitisha kwamba umeshinda “{prize}” katika BioBlitz {round}.",
     prizes: {
       "most-observations": {
-        label: "Uchunguzi mwingi zaidi",
+        label: "Pointi za juu zaidi",
         appreciation: "Asante kwa muda na umakini uliotumia kurekodi mazingira. Uchunguzi wako husaidia kufanya bayoanuwai ya eneo lako ionekane na itumike zaidi.",
       },
       "best-picture": {
@@ -153,7 +153,7 @@ const copyByLocale = {
     confirmation: "Kami senang mengonfirmasi bahwa Anda memenangkan “{prize}” di BioBlitz {round}.",
     prizes: {
       "most-observations": {
-        label: "Observasi terbanyak",
+        label: "Poin tertinggi",
         appreciation: "Terima kasih atas waktu dan perhatian yang Anda berikan untuk mendokumentasikan alam. Observasi Anda membantu membuat keanekaragaman hayati setempat lebih terlihat dan bermanfaat.",
       },
       "best-picture": {

@@ -5,9 +5,9 @@ describe("renderBioblitzWinnerEmail", () => {
   it.each([
     {
       prize: "most-observations" as const,
-      category: "Most Observations",
+      category: "Highest Points",
       amount: "$40 USD",
-      subject: "Congrats! You won “Most Observations” in BioBlitz Week 6 🎉",
+      subject: "Congrats! You won “Highest Points” in BioBlitz Week 6 🎉",
     },
     {
       prize: "best-picture" as const,

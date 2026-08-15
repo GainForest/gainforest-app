@@ -227,7 +227,7 @@ export function BioblitzClient() {
                   did: topCollector.did,
                   name: topCollector.displayName,
                   avatarRef: topCollector.avatarRef,
-                  count: topCollector.count,
+                  count: topCollector.points,
                 };
           const mostLiked: WinnerAccount | null =
             frozen.bestPicture !== undefined
@@ -633,7 +633,7 @@ function PastWinners({
                   winner={summary.mostSubmitted}
                   countLabel={
                     summary.mostSubmitted && summary.mostSubmitted.count != null
-                      ? boardT("observations", { count: summary.mostSubmitted.count })
+                      ? boardT("pointsFull", { points: summary.mostSubmitted.count })
                       : null
                   }
                   pending={summaries == null ? "…" : t("pending")}
@@ -855,10 +855,15 @@ function Board({
 
   const stats: { label: string; value: string; icon: ReactNode; accent?: boolean }[] = [
     {
+      label: scope === "all" ? t("stats.pointsAll") : t("stats.points"),
+      value: board ? formatNumber(board.totalPoints) : "—",
+      icon: <TrophyIcon />,
+      accent: true,
+    },
+    {
       label: scope === "all" ? t("stats.observationsAll") : t("stats.observations"),
       value: board ? formatNumber(board.totalObservations) : "—",
       icon: <BinocularsIcon />,
-      accent: true,
     },
     {
       label: t("stats.collectors"),
@@ -885,7 +890,7 @@ function Board({
         </div>
         <p className="mt-1 text-xs text-muted-foreground">{subtitle}</p>
 
-        <div className="mt-3 grid grid-cols-3 gap-2">
+        <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-4">
           {stats.map((stat) => (
             <div
               key={stat.label}
@@ -923,6 +928,7 @@ function Board({
                     name={collector.displayName}
                     avatarRef={collector.avatarRef}
                     count={collector.count}
+                    points={collector.points}
                     org={orgs.get(collector.did)}
                     awards={awards.get(collector.did)}
                   />
@@ -996,6 +1002,7 @@ function CollectorRow({
   name,
   avatarRef,
   count,
+  points,
   org,
   awards,
 }: {
@@ -1005,6 +1012,7 @@ function CollectorRow({
   name: string | null;
   avatarRef: string | null;
   count: number;
+  points: number;
   org?: CollectorOrg;
   awards?: string[];
 }) {
@@ -1038,7 +1046,12 @@ function CollectorRow({
         </div>
 
         <span className="shrink-0 text-right">
-          <span className="font-instrument block text-sm italic leading-none tabular-nums text-primary">{formatNumber(count)}</span>
+          <span className="font-instrument block text-sm italic leading-none tabular-nums text-primary">
+            {t("points", { points: formatNumber(points) })}
+          </span>
+          <span className="mt-0.5 block text-[10px] leading-none tabular-nums text-muted-foreground">
+            {t("observations", { count })}
+          </span>
         </span>
 
         <ChevronRightIcon

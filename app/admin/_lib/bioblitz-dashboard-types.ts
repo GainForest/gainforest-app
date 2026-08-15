@@ -8,6 +8,9 @@ export type BioblitzAdminRegistrant = {
   registeredAt: string | null;
   /** Eligible photo observations in the round before a weekly count exclusion. */
   observationCount: number;
+  /** Round score before a weekly count exclusion — 1 pt per plant photo,
+   *  2 per animal photo, +0.5 per labeled species. */
+  points: number;
   wins: BioblitzWinnerPrize[];
   /** Exports are omitted when an older award did not preserve its winning image. */
   availablePackages: BioblitzWinnerPrize[];

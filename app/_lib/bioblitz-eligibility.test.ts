@@ -1,6 +1,8 @@
 import { describe, expect, it } from "vitest";
 import {
+  bioblitzObservationPoints,
   classifyBioblitzImage,
+  hasBioblitzSpeciesLabel,
   isEligibleBioblitzCategory,
   isEligibleBioblitzDescription,
 } from "./bioblitz-eligibility";
@@ -48,5 +50,44 @@ describe("BioBlitz image eligibility", () => {
   it("keeps unclear images off the automatic leaderboard", () => {
     expect(classifyBioblitzImage({ notes: null })).toBe("unclassified");
     expect(isEligibleBioblitzDescription({ notes: null })).toBe(false);
+  });
+});
+
+describe("BioBlitz points scoring", () => {
+  const WILDLIFE_NOTES = "A Collared Kingfisher is perched on a branch.";
+  const PLANT_NOTES = "A dense mangrove forest with numerous prop roots above the water.";
+
+  it("scores 2 points for an unlabeled animal photo and 1 for an unlabeled plant photo", () => {
+    expect(bioblitzObservationPoints({ notes: WILDLIFE_NOTES })).toBe(2);
+    expect(bioblitzObservationPoints({ notes: PLANT_NOTES })).toBe(1);
+  });
+
+  it("adds the 0.5 label bonus when the species is named", () => {
+    expect(
+      bioblitzObservationPoints({ notes: WILDLIFE_NOTES, scientificName: "Todiramphus chloris" }),
+    ).toBe(2.5);
+    expect(bioblitzObservationPoints({ notes: PLANT_NOTES, vernacularName: "Red mangrove" })).toBe(1.5);
+  });
+
+  it("gives no bonus for unidentified-style placeholder labels", () => {
+    expect(hasBioblitzSpeciesLabel({ scientificName: "Unidentified" })).toBe(false);
+    expect(hasBioblitzSpeciesLabel({ vernacularName: "unknown bird" })).toBe(false);
+    expect(hasBioblitzSpeciesLabel({ scientificName: "  " })).toBe(false);
+    expect(hasBioblitzSpeciesLabel({})).toBe(false);
+    expect(bioblitzObservationPoints({ notes: WILDLIFE_NOTES, scientificName: "Unidentified" })).toBe(2);
+  });
+
+  it("accepts a real label in either name field", () => {
+    expect(hasBioblitzSpeciesLabel({ scientificName: "Unidentified", vernacularName: "Scarlet macaw" })).toBe(true);
+  });
+
+  it("scores 0 for ineligible observations even when labeled", () => {
+    expect(
+      bioblitzObservationPoints({
+        notes: "A succulent plant in a black pot with soil.",
+        scientificName: "Echeveria elegans",
+      }),
+    ).toBe(0);
+    expect(bioblitzObservationPoints({ notes: null })).toBe(0);
   });
 });

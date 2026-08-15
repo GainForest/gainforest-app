@@ -1281,9 +1281,9 @@
         "description": "Alipokea ruzuku ya Kurudisha Uasilia kwenye Wavuti."
       },
       "bioblitz-most-images": {
-        "label": "BioBlitz — uchunguzi mwingi zaidi",
-        "labelWithRound": "BioBlitz {roundName} — uchunguzi mwingi zaidi",
-        "description": "Alishinda raundi ya BioBlitz kwa uchunguzi mwingi zaidi."
+        "label": "BioBlitz — pointi za juu zaidi",
+        "labelWithRound": "BioBlitz {roundName} — pointi za juu zaidi",
+        "description": "Alishinda raundi ya BioBlitz kwa pointi za juu zaidi."
       },
       "bioblitz-best-picture": {
         "label": "BioBlitz — picha bora",
@@ -1434,17 +1434,18 @@
       "ended": "Imefungwa"
     },
     "observations": "Uchunguzi {count, number}",
+    "points": "pointi {points}",
     "ignored": "Imepuuzwa",
     "counted": "Inahesabiwa",
     "notCounted": "Hauhesabiwi",
     "prize": {
-      "most-observations": "Uchunguzi mwingi zaidi",
+      "most-observations": "Pointi za juu zaidi",
       "best-picture": "Picha bora"
     },
     "openProfile": "Fungua wasifu",
     "joined": "Alijiunga {date}",
     "download": {
-      "most-observations": "Kifurushi cha uchunguzi mwingi",
+      "most-observations": "Kifurushi cha pointi za juu zaidi",
       "best-picture": "Kifurushi cha picha bora"
     },
     "ignore": "Puuza",

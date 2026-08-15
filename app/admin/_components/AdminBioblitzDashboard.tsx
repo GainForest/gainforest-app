@@ -322,6 +322,8 @@ export function AdminBioblitzDashboard({
                         ) : null}
                       </span>
                       <span className="mt-1 flex items-center gap-1.5 text-xs tabular-nums text-muted-foreground">
+                        <span>{t("points", { points: registrant.points })}</span>
+                        <span aria-hidden>·</span>
                         <span>{t("observations", { count: registrant.observationCount })}</span>
                         {ignored ? <span aria-hidden>·</span> : null}
                         {ignored ? <span>{t("notCounted")}</span> : null}

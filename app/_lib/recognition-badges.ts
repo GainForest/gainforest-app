@@ -99,14 +99,14 @@ export function recognitionBadgeDescription(key: string): string {
   if (parsed?.family === "bioblitz") {
     const round = parsed.roundId !== null ? ` (${bioblitzRoundName(parsed.roundId)})` : "";
     return parsed.prize === "most-images"
-      ? `BioBlitz winner — most observations uploaded in a round${round}.`
+      ? `BioBlitz winner — highest points score in a round${round}.`
       : `BioBlitz winner — best biodiversity picture of a round${round}.`;
   }
   return "GainForest recognition badge.";
 }
 
 /** Display order: manual badges first, then BioBlitz wins newest round first
- *  (most observations before best picture within a round). */
+ *  (highest points before best picture within a round). */
 export function compareRecognitionBadgeKeys(a: string, b: string): number {
   const pa = parseRecognitionBadgeKey(a);
   const pb = parseRecognitionBadgeKey(b);
