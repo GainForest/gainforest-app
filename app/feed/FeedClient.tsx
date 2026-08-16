@@ -698,7 +698,16 @@ function FeedRow({
 
   return (
     <li className="relative">
-      <div className="group flex gap-3 rounded-2xl px-3 pb-1.5 pt-3.5 transition-colors hover:bg-muted/40">
+      <div
+        className={cn(
+          "group flex gap-3 rounded-2xl px-3 pb-1.5 pt-3.5 transition-colors",
+          // Pinned posts get a very light green wash so they stand out at the
+          // top of the feed without competing with the row's own content.
+          item.pinned
+            ? "bg-emerald-500/[0.04] hover:bg-emerald-500/[0.07]"
+            : "hover:bg-muted/40",
+        )}
+      >
         {/* Avatar */}
         <Link href={item.href} className="shrink-0">
           <FeedAvatar item={item} />
