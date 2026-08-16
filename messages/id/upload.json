@@ -1093,7 +1093,7 @@
   },
   "settings": {
     "organizationTitle": "Pengaturan organisasi",
-    "organizationDescription": "Hubungkan agen AI dan kelola perangkat untuk organisasi ini.",
+    "organizationDescription": "Kelola orang, profil, dan perangkat untuk organisasi ini.",
     "personalTitle": "Pengaturan",
     "personalDescription": "Kelola tautan akun, keamanan, dan alat ekspor.",
     "dataCouncil": {
@@ -1122,8 +1122,6 @@
       },
       "addLabel": "Tambahkan ke Dewan Data"
     },
-    "membersMoved": "Anggota, peran, dan Dewan Data ada di tab Anggota.",
-    "openMembers": "Buka Anggota",
     "orgAgentKeysHint": "Kunci bersifat pribadi: kunci yang Anda buat di sini milik akun Anda dan memungkinkan agen AI Anda bekerja di organisasi ini melalui keanggotaan Anda. Jika Anda keluar dari organisasi, kunci Anda kehilangan akses tersebut."
   },
   "dashboardClient": {

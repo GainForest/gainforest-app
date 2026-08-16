@@ -273,6 +273,10 @@
         "title": "Public profile",
         "description": "What your public page shows"
       },
+      "members": {
+        "title": "Members",
+        "description": "People, roles, and the Data Council"
+      },
       "connections": {
         "title": "Connections",
         "description": "Social accounts and external services"
@@ -1004,6 +1008,7 @@
       "inputPlaceholder": "Email or Bluesky handle",
       "inputAria": "Member email or Bluesky handle",
       "invite": "Invite",
+      "refresh": "Refresh",
       "ownerHelp": "Enter an email to send an invite, or a Bluesky handle to add someone right away.",
       "adminHelp": "Add regular members by Bluesky handle, or invite them by email. Ask an owner to add another admin.",
       "locked": "Only owners and admins can invite or remove members.",

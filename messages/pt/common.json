@@ -273,6 +273,10 @@
         "title": "Perfil público",
         "description": "O que sua página pública mostra"
       },
+      "members": {
+        "title": "Membros",
+        "description": "Pessoas, funções e o Conselho de Dados"
+      },
       "connections": {
         "title": "Conexões",
         "description": "Contas sociais e serviços externos"
@@ -1004,6 +1008,7 @@
       "inputPlaceholder": "Email ou usuário do Bluesky",
       "inputAria": "Email ou usuário do Bluesky do membro",
       "invite": "Convidar",
+      "refresh": "Atualizar",
       "ownerHelp": "Insira um email para enviar um convite, ou um usuário do Bluesky para adicionar alguém na hora.",
       "adminHelp": "Adicione membros comuns pelo usuário do Bluesky, ou convide-os por email. Peça a um proprietário para adicionar outro administrador.",
       "locked": "Somente proprietários e administradores podem convidar ou remover membros.",

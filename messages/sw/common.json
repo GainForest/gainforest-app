@@ -273,6 +273,10 @@
         "title": "Wasifu wa umma",
         "description": "Kinachoonyeshwa kwenye ukurasa wako wa umma"
       },
+      "members": {
+        "title": "Wanachama",
+        "description": "Watu, majukumu, na Baraza la Data"
+      },
       "connections": {
         "title": "Miunganisho",
         "description": "Akaunti za kijamii na huduma za nje"
@@ -1004,6 +1008,7 @@
       "inputPlaceholder": "Barua pepe au kitambulisho cha Bluesky",
       "inputAria": "Barua pepe au kitambulisho cha Bluesky cha mwanachama",
       "invite": "Alika",
+      "refresh": "Onyesha upya",
       "ownerHelp": "Weka barua pepe kutuma mwaliko, au kitambulisho cha Bluesky kumuongeza mtu papo hapo.",
       "adminHelp": "Ongeza wanachama wa kawaida kwa kitambulisho cha Bluesky, au waalike kwa barua pepe. Mwombe mmiliki kumuongeza msimamizi mwingine.",
       "locked": "Wamiliki na wasimamizi pekee wanaweza kualika au kuondoa wanachama.",

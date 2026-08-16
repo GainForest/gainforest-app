@@ -25,7 +25,7 @@ import {
 } from "../../_lib/cgs";
 
 type RoleInput = "member" | "admin";
-type Variant = "section" | "panel";
+type Variant = "section" | "panel" | "settings";
 type InvitationNotificationStatus = NonNullable<CgsPendingInvitation["notification"]>["status"];
 
 export function invitationDeliveryState(
@@ -769,6 +769,36 @@ export function GroupMembers({
     </div>
   );
 
+  // Rendered inside the Organization settings accordion, which already titles
+  // the group "Members" — so this variant drops the heading and only keeps the
+  // count plus a refresh control.
+  if (variant === "settings") {
+    return (
+      <div>
+        <div className="flex items-center justify-between gap-3">
+          <p className="text-sm text-muted-foreground">
+            {canSetRoles
+              ? invitationsT("ownerDescription")
+              : canAddRemove
+                ? invitationsT("adminDescription")
+                : invitationsT("viewerDescription")}
+          </p>
+          <Button type="button" variant="ghost" size="sm" className="shrink-0" onClick={refresh} disabled={isPending}>
+            {isPending ? <Loader2Icon className="animate-spin" /> : <RefreshCwIcon />}
+            {invitationsT("refresh")}
+          </Button>
+        </div>
+        <div className="mt-4 space-y-3">
+          {addForm}
+          {dataCouncilNotice}
+          {successBanner}
+          {errorBanner}
+          {list}
+        </div>
+      </div>
+    );
+  }
+
   if (variant === "section") {
     return (
       <motion.section
@@ -783,7 +813,7 @@ export function GroupMembers({
           </div>
           <Button type="button" variant="ghost" size="sm" onClick={refresh} disabled={isPending}>
             {isPending ? <Loader2Icon className="animate-spin" /> : <RefreshCwIcon />}
-            Refresh
+            {invitationsT("refresh")}
           </Button>
         </div>
         <div className="mt-4 space-y-3">
@@ -822,7 +852,7 @@ export function GroupMembers({
         </div>
         <Button type="button" variant="secondary" size="sm" onClick={refresh} disabled={isPending}>
           {isPending ? <Loader2Icon className="animate-spin" /> : <RefreshCwIcon />}
-          Refresh
+          {invitationsT("refresh")}
         </Button>
       </div>
       <div className="mt-5 space-y-3">

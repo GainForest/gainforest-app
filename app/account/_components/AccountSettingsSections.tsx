@@ -1265,15 +1265,28 @@ export function OrganizationSettingsSections({
   integrations,
   agentKeysHint,
   location,
+  members,
 }: {
   integrations: React.ReactNode;
   agentKeysHint: string;
   /** The organization's declared-location editor. */
   location?: React.ReactNode;
+  /** Members, roles, and the Data Council — the org's governance controls.
+   *  They live here rather than on a separate tab so everything an organization
+   *  is administered with sits on one page. */
+  members?: React.ReactNode;
 }) {
   const t = useTranslations("common.settings.groups");
+  const defaultOpen = [members ? "members" : null, location ? "profile" : null].filter(
+    (value): value is string => value !== null,
+  );
   return (
-    <Accordion type="multiple" defaultValue={location ? ["profile"] : []} className="space-y-3">
+    <Accordion type="multiple" defaultValue={defaultOpen} className="space-y-3">
+      {members ? (
+        <SettingsGroup value="members" title={t("members.title")} description={t("members.description")}>
+          {members}
+        </SettingsGroup>
+      ) : null}
       {location ? (
         <SettingsGroup value="profile" title={t("profile.title")} description={t("profile.description")}>
           {location}

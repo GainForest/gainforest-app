@@ -1093,7 +1093,7 @@
   },
   "settings": {
     "organizationTitle": "Mipangilio ya shirika",
-    "organizationDescription": "Unganisha mawakala wa AI na simamia zana za shirika hili.",
+    "organizationDescription": "Simamia watu, wasifu na zana za shirika hili.",
     "personalTitle": "Mipangilio",
     "personalDescription": "Dhibiti viungo vya akaunti, usalama na zana za kuhamisha data.",
     "dataCouncil": {
@@ -1122,8 +1122,6 @@
       },
       "addLabel": "Ongeza kwenye Baraza la Data"
     },
-    "membersMoved": "Wanachama, majukumu na Baraza la Data vipo kwenye kichupo cha Wanachama.",
-    "openMembers": "Fungua Wanachama",
     "orgAgentKeysHint": "Funguo ni za binafsi: funguo unayotengeneza hapa ni ya akaunti yako na inamruhusu wakala wako wa AI kufanya kazi katika shirika hili kupitia uanachama wako. Ukiondoka kwenye shirika, funguo zako zinapoteza ufikiaji huo."
   },
   "dashboardClient": {

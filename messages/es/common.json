@@ -273,6 +273,10 @@
         "title": "Perfil público",
         "description": "Lo que muestra tu página pública"
       },
+      "members": {
+        "title": "Miembros",
+        "description": "Personas, roles y el Consejo de Datos"
+      },
       "connections": {
         "title": "Conexiones",
         "description": "Cuentas sociales y servicios externos"
@@ -1004,6 +1008,7 @@
       "inputPlaceholder": "Correo o usuario de Bluesky",
       "inputAria": "Correo o usuario de Bluesky del miembro",
       "invite": "Invitar",
+      "refresh": "Actualizar",
       "ownerHelp": "Ingresa un correo para enviar una invitación, o un usuario de Bluesky para agregar a alguien de inmediato.",
       "adminHelp": "Agrega miembros normales por usuario de Bluesky, o invítalos por correo. Pide a una persona propietaria que agregue a otro administrador.",
       "locked": "Solo propietarios y administradores pueden invitar o quitar miembros.",

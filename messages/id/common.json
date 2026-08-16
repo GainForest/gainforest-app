@@ -273,6 +273,10 @@
         "title": "Profil publik",
         "description": "Apa yang ditampilkan halaman publik Anda"
       },
+      "members": {
+        "title": "Anggota",
+        "description": "Orang, peran, dan Dewan Data"
+      },
       "connections": {
         "title": "Koneksi",
         "description": "Akun sosial dan layanan eksternal"
@@ -1004,6 +1008,7 @@
       "inputPlaceholder": "Email atau handle Bluesky",
       "inputAria": "Email atau handle Bluesky anggota",
       "invite": "Undang",
+      "refresh": "Muat ulang",
       "ownerHelp": "Masukkan email untuk mengirim undangan, atau handle Bluesky untuk langsung menambahkan seseorang.",
       "adminHelp": "Tambahkan anggota biasa lewat handle Bluesky, atau undang mereka lewat email. Minta pemilik menambahkan administrator lain.",
       "locked": "Hanya pemilik dan admin yang dapat mengundang atau menghapus anggota.",

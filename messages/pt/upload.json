@@ -1093,7 +1093,7 @@
   },
   "settings": {
     "organizationTitle": "Configurações da organização",
-    "organizationDescription": "Conecte agentes de IA e gerencie as ferramentas desta organização.",
+    "organizationDescription": "Gerencie as pessoas, o perfil e as ferramentas desta organização.",
     "personalTitle": "Configurações",
     "personalDescription": "Gerencie links da conta, segurança e ferramentas de exportação.",
     "dataCouncil": {
@@ -1122,8 +1122,6 @@
       },
       "addLabel": "Adicionar ao Conselho de Dados"
     },
-    "membersMoved": "Membros, funções e o Conselho de Dados ficam na aba Membros.",
-    "openMembers": "Abrir Membros",
     "orgAgentKeysHint": "As chaves são pessoais: uma chave criada aqui pertence à sua conta e permite que seu agente de IA trabalhe nesta organização por meio da sua participação. Se você sair da organização, suas chaves perdem esse acesso."
   },
   "dashboardClient": {
