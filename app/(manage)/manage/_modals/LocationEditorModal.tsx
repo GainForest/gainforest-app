@@ -125,9 +125,11 @@ function LocationPreviewMap({
   const containerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<maplibregl.Map | null>(null);
   const markerRef = useRef<maplibregl.Marker | null>(null);
-  // Which kind of marker is currently on the map, so it can be rebuilt when
-  // the pick changes between a country (flag, fixed) and a point (pin, draggable).
-  const markerModeRef = useRef<"country" | "point" | null>(null);
+  // Identity of the marker currently on the map — "point" for the draggable
+  // pin, or the flag emoji for a country — so it can be rebuilt whenever the
+  // pick changes between a country (flag, fixed) and a point (pin, draggable),
+  // or between two different countries (the flag element isn't reusable).
+  const markerKeyRef = useRef<string | null>(null);
   const onDraggedRef = useRef(onDragged);
   onDraggedRef.current = onDragged;
 
@@ -199,7 +201,7 @@ function LocationPreviewMap({
     if (!place) {
       markerRef.current?.remove();
       markerRef.current = null;
-      markerModeRef.current = null;
+      markerKeyRef.current = null;
       if (seed) map.flyTo({ center: [seed.longitude, seed.latitude], zoom: 8, duration: 800 });
       return;
     }
@@ -207,14 +209,14 @@ function LocationPreviewMap({
     // A whole country is an area, not an address: mark it with its flag and
     // don't offer a drag handle that would imply a precise spot.
     const isWholeCountry = place.kind === "country" && !approximate;
-    const mode: "country" | "point" = isWholeCountry ? "country" : "point";
-    if (markerRef.current && markerModeRef.current !== mode) {
+    const flag = isWholeCountry ? getCountry(place.countryCode)?.emoji ?? null : null;
+    const markerKey = flag ?? (isWholeCountry ? "country-pin" : "point");
+    if (markerRef.current && markerKeyRef.current !== markerKey) {
       markerRef.current.remove();
       markerRef.current = null;
     }
 
     if (!markerRef.current) {
-      const flag = isWholeCountry ? getCountry(place.countryCode)?.emoji ?? null : null;
       let marker: maplibregl.Marker;
       if (flag) {
         const element = document.createElement("div");
@@ -237,7 +239,7 @@ function LocationPreviewMap({
     } else {
       markerRef.current.setLngLat([place.longitude, place.latitude]);
     }
-    markerModeRef.current = mode;
+    markerKeyRef.current = markerKey;
 
     map.flyTo({
       center: [place.longitude, place.latitude],
