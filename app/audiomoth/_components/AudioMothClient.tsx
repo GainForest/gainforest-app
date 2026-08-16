@@ -38,6 +38,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { PictureHero } from "@/app/_components/PictureHero";
+import { AudioScopePills } from "@/app/observations/audio/_components/AudioScopePills";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -889,6 +890,7 @@ export function AudioMothClient({
         lightSrc="/images/explore/explore-hero-light@2x.webp"
         darkSrc="/images/explore/explore-hero-dark@2x.webp"
         title={t("audioHub.title")}
+        actions={<AudioScopePills active="yours" />}
         lede={
           mainTab === "setup"
             ? t("subtitle")

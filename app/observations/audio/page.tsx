@@ -1,12 +1,11 @@
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
-import Link from "next/link";
-import { FolderOpenIcon } from "lucide-react";
 import { fetchAuthSession } from "@/app/_lib/auth-server";
 import { AudioMothClient } from "@/app/audiomoth/_components/AudioMothClient";
 import { PictureHero } from "@/app/_components/PictureHero";
 import { listNetworkSoundscapes } from "@/app/_lib/soundscape-explore";
 import { ObservationsMediaTabs } from "../_components/ObservationsMediaTabs";
+import { AudioScopePills } from "./_components/AudioScopePills";
 import { SoundscapeExploreGallery } from "./_components/SoundscapeExploreGallery";
 
 export const dynamic = "force-dynamic";
@@ -30,7 +29,8 @@ const WORKFLOW_TABS = new Set([
  * about the finished 24-hour portraits, not individual unlabeled recordings.
  * The personal recording workflow — library, deployments, SD-card upload,
  * labelling, identifications, the soundscape workbench and USB device setup
- * — lives behind `?tab=…`, reached from the "Your recordings" pill.
+ * — lives behind `?tab=…`, reached from the hero's "Your recordings" pill
+ * (its twin, "Public", leads back here).
  */
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations("common.audiomoth.audioHub");
@@ -76,18 +76,10 @@ export default async function ObservationsAudioPage({
         darkSrc="/images/explore/explore-hero-dark@2x.webp"
         title={t("soundscapesTitle")}
         lede={t("soundscapesLede")}
+        actions={<AudioScopePills active="public" />}
       />
       <div className="mx-auto flex w-full max-w-7xl flex-col gap-6 px-4 sm:px-6">
-        <div className="flex flex-wrap items-center gap-3">
-          <ObservationsMediaTabs active="audio" />
-          <Link
-            href="/observations/audio?tab=library"
-            className="flex items-center gap-2 rounded-full border border-border bg-card/70 px-4 py-2.5 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
-          >
-            <FolderOpenIcon className="size-4" />
-            {t("yourRecordings")}
-          </Link>
-        </div>
+        <ObservationsMediaTabs active="audio" />
         <SoundscapeExploreGallery items={soundscapes} />
       </div>
     </main>
