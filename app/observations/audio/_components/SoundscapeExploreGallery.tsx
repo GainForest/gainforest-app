@@ -17,6 +17,11 @@
  * day. One shared voice-group key sits at the foot of the page rather than
  * repeating beside every dial.
  *
+ * Projects that have uploaded recordings without publishing a soundscape yet
+ * take their place in the very same list, in the same chronological order —
+ * a project is not a lesser entry for having raw material instead of a
+ * finished dial, and a visitor scanning the page should meet both.
+ *
  * Owner attribution resolves lazily client-side through the same batched
  * profile cache the feed uses (did-profile.ts), so the server payload stays
  * just the soundscape records themselves.
@@ -31,11 +36,13 @@ import { Button } from "@/components/ui/button";
 import { monogram, resolveDidProfile, type DidProfile } from "@/app/_lib/did-profile";
 import { isPdsBlobUrl } from "@/app/_lib/pds";
 import { accountHref } from "@/app/_lib/urls";
+import type { AudioProject } from "@/app/_lib/audio-projects";
 import type { NetworkSoundscape } from "@/app/_lib/soundscape-explore";
 import { CARD_BAND_COLORS, SoundscapeCard } from "@/app/soundscape/_components/SoundscapeCard";
 import { FREQUENCY_BANDS, formatBandRange } from "@/lib/soundscape/analysis";
 import { soundscapeDates, soundscapeHref } from "@/lib/soundscape/record";
 import { cn } from "@/lib/utils";
+import { AudioUploadGroup } from "./AudioUploadGroup";
 
 /** Cards shown per project before "Show N more from this project". */
 const INITIAL_VISIBLE = 4;
@@ -78,6 +85,18 @@ function formatWhen(ms: number, locale: string): string | null {
   return rtf.format(Math.round(diff / day), "day");
 }
 
+/** When a project last added recordings. Uploads carry no recorded date of
+ *  their own, so both sort keys read the same moment for them. */
+function uploadedMs(item: AudioProject): number {
+  return Math.max(
+    0,
+    ...item.uploads.map((upload) => {
+      const time = upload.createdAt ? Date.parse(upload.createdAt) : Number.NaN;
+      return Number.isNaN(time) ? 0 : time;
+    }),
+  );
+}
+
 type ProjectGroup = {
   did: string;
   /** This project's soundscapes, newest first by the active sort key. */
@@ -88,6 +107,12 @@ type ProjectGroup = {
   /** The group's newest moment under the active sort key — orders sections. */
   latest: number;
 };
+
+/** One entry in the flow: a project's published soundscapes, or a project's
+ *  uploaded recordings. Both are ordered by the same clock. */
+type GalleryEntry =
+  | { kind: "soundscapes"; key: string; latest: number; group: ProjectGroup }
+  | { kind: "uploads"; key: string; latest: number; audio: AudioProject };
 
 function SelectPill({
   value,
@@ -117,7 +142,14 @@ function SelectPill({
   );
 }
 
-export function SoundscapeExploreGallery({ items }: { items: NetworkSoundscape[] }) {
+export function SoundscapeExploreGallery({
+  items,
+  audioProjects = [],
+}: {
+  items: NetworkSoundscape[];
+  /** Projects with recordings but no soundscape yet, listed alongside. */
+  audioProjects?: AudioProject[];
+}) {
   const t = useTranslations("common.audiomoth.audioHub");
   const soundscapeT = useTranslations("common.soundscape");
   const locale = useLocale();
@@ -143,16 +175,22 @@ export function SoundscapeExploreGallery({ items }: { items: NetworkSoundscape[]
     };
   }, [dids]);
 
-  const projectOptions = useMemo(
-    () =>
-      dids
-        .map((did) => {
-          const profile = profiles[did];
-          return { did, name: profile?.displayName ?? profile?.handle ?? `…${did.slice(-6)}` };
-        })
-        .sort((a, b) => a.name.localeCompare(b.name)),
-    [dids, profiles],
-  );
+  const projectOptions = useMemo(() => {
+    const names = new Map<string, string>();
+    for (const did of dids) {
+      const profile = profiles[did];
+      names.set(did, profile?.displayName ?? profile?.handle ?? `…${did.slice(-6)}`);
+    }
+    // Projects that have only uploaded recordings belong in the filter too;
+    // their name came resolved from the server.
+    for (const item of audioProjects) {
+      const did = item.project.did;
+      if (!names.has(did)) names.set(did, item.organizationName ?? `…${did.slice(-6)}`);
+    }
+    return [...names.entries()]
+      .map(([did, name]) => ({ did, name }))
+      .sort((a, b) => a.name.localeCompare(b.name));
+  }, [audioProjects, dids, profiles]);
 
   const groups = useMemo<ProjectGroup[]>(() => {
     const needle = query.trim().toLowerCase();
@@ -192,6 +230,27 @@ export function SoundscapeExploreGallery({ items }: { items: NetworkSoundscape[]
       .sort((a, b) => b.latest - a.latest);
   }, [items, now, profiles, projectFilter, query, sort]);
 
+  /** Soundscape groups and upload groups, interleaved newest-first. */
+  const entries = useMemo<GalleryEntry[]>(() => {
+    const needle = query.trim().toLowerCase();
+    const uploadEntries: GalleryEntry[] = audioProjects.flatMap((audio) => {
+      if (projectFilter !== "all" && audio.project.did !== projectFilter) return [];
+      if (needle) {
+        const haystack = [audio.project.title, audio.project.shortDescription, audio.organizationName]
+          .filter(Boolean)
+          .join(" ")
+          .toLowerCase();
+        if (!haystack.includes(needle)) return [];
+      }
+      return [{ kind: "uploads", key: audio.project.atUri, latest: uploadedMs(audio), audio }];
+    });
+
+    return [
+      ...groups.map((group): GalleryEntry => ({ kind: "soundscapes", key: group.did, latest: group.latest, group })),
+      ...uploadEntries,
+    ].sort((a, b) => b.latest - a.latest);
+  }, [audioProjects, groups, projectFilter, query]);
+
   /** The shared key can only quote one frequency ceiling; use the one most of
    *  the gallery was published with (AudioMoth's usual 48 kHz sampling gives
    *  24 kHz). A card with a different ceiling still tells its exact story on
@@ -221,7 +280,7 @@ export function SoundscapeExploreGallery({ items }: { items: NetworkSoundscape[]
     });
   }, []);
 
-  if (items.length === 0) {
+  if (items.length === 0 && audioProjects.length === 0) {
     return (
       <div className="rounded-3xl border border-dashed border-border bg-muted/30 px-6 py-14 text-center">
         <WavesIcon className="mx-auto size-8 text-muted-foreground" aria-hidden />
@@ -270,7 +329,7 @@ export function SoundscapeExploreGallery({ items }: { items: NetworkSoundscape[]
         </SelectPill>
       </div>
 
-      {groups.length === 0 ? (
+      {entries.length === 0 ? (
         <div className="rounded-3xl border border-dashed border-border bg-muted/30 px-6 py-12 text-center">
           <p className="text-sm text-muted-foreground">{t("noMatches")}</p>
           <Button
@@ -285,7 +344,12 @@ export function SoundscapeExploreGallery({ items }: { items: NetworkSoundscape[]
           </Button>
         </div>
       ) : (
-        groups.map((group) => {
+        entries.map((entry) => {
+          if (entry.kind === "uploads") {
+            return <AudioUploadGroup key={entry.key} item={entry.audio} />;
+          }
+
+          const group = entry.group;
           const profile = profiles[group.did];
           const name = profile?.displayName ?? profile?.handle ?? null;
           const href = accountHref(profile?.handle ?? group.did);
@@ -296,7 +360,7 @@ export function SoundscapeExploreGallery({ items }: { items: NetworkSoundscape[]
           const lastPublishedLabel = formatWhen(group.lastPublished, locale);
 
           return (
-            <section key={group.did} className="flex flex-col gap-4 border-t border-border/60 pt-6">
+            <section key={entry.key} className="flex flex-col gap-4 border-t border-border/60 pt-6">
               {/* Project header: who recorded these, and where to hear more */}
               <div className="flex flex-wrap items-center gap-x-4 gap-y-3">
                 <Link

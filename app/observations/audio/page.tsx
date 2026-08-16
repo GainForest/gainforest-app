@@ -8,7 +8,6 @@ import { listNetworkSoundscapes } from "@/app/_lib/soundscape-explore";
 import { ObservationsMediaTabs } from "../_components/ObservationsMediaTabs";
 import { AudioScopePills } from "./_components/AudioScopePills";
 import { SoundscapeExploreGallery } from "./_components/SoundscapeExploreGallery";
-import { UploadedAudioProjects } from "./_components/UploadedAudioProjects";
 
 export const dynamic = "force-dynamic";
 
@@ -85,8 +84,7 @@ export default async function ObservationsAudioPage({
         <ObservationsMediaTabs active="audio" />
       </div>
       <div className="relative z-10 mx-auto max-w-6xl px-6">
-        <SoundscapeExploreGallery items={soundscapes} />
-        <UploadedAudioProjects items={uploadedProjects} />
+        <SoundscapeExploreGallery items={soundscapes} audioProjects={uploadedProjects} />
       </div>
     </main>
   );
