@@ -1277,19 +1277,22 @@ export function OrganizationSettingsSections({
   members?: React.ReactNode;
 }) {
   const t = useTranslations("common.settings.groups");
-  const defaultOpen = [members ? "members" : null, location ? "profile" : null].filter(
-    (value): value is string => value !== null,
-  );
   return (
-    <Accordion type="multiple" defaultValue={defaultOpen} className="space-y-3">
-      {members ? (
-        <SettingsGroup value="members" title={t("members.title")} description={t("members.description")}>
-          {members}
-        </SettingsGroup>
-      ) : null}
-      {location ? (
+    <Accordion type="multiple" defaultValue={[]} className="space-y-3">
+      {location || members ? (
         <SettingsGroup value="profile" title={t("profile.title")} description={t("profile.description")}>
-          {location}
+          <div className="space-y-6">
+            {location}
+            {members ? (
+              <div className="border-t border-border/60 pt-5">
+                <div className="mb-4">
+                  <h2 className="text-sm font-medium text-foreground">{t("members.title")}</h2>
+                  <p className="mt-0.5 text-xs leading-5 text-muted-foreground">{t("members.description")}</p>
+                </div>
+                {members}
+              </div>
+            ) : null}
+          </div>
         </SettingsGroup>
       ) : null}
       <SettingsGroup value="agents" title={t("agents.title")} description={t("agents.description")}>
