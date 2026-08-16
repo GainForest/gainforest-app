@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Audio soundscape layout preview</title>
+    <style>
+      html,
+      body,
+      iframe {
+        width: 100%;
+        height: 100%;
+        margin: 0;
+        border: 0;
+      }
+
+      body {
+        overflow: hidden;
+        background: #f8f8f6;
+        font-family: system-ui, sans-serif;
+      }
+
+      .fallback {
+        display: grid;
+        height: 100%;
+        place-items: center;
+        padding: 2rem;
+        box-sizing: border-box;
+        color: #24332b;
+        text-align: center;
+      }
+
+      .fallback a {
+        color: #2f7658;
+      }
+    </style>
+  </head>
+  <body>
+    <iframe
+      title="GainForest public soundscapes layout"
+      src="http://127.0.0.1:3040/en/observations/audio"
+    ></iframe>
+
+    <noscript>
+      <div class="fallback">
+        <p>
+          Start the local app with <code>pnpm dev</code>, then open
+          <a href="http://127.0.0.1:3040/en/observations/audio">
+            the public soundscapes page
+          </a>.
+        </p>
+      </div>
+    </noscript>
+  </body>
+</html>
