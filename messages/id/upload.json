@@ -1228,7 +1228,7 @@
       "title": "Lokasi organisasi",
       "description": "Tunjukkan di mana organisasi Anda berbasis.",
       "descriptionWithCurrent": "Saat ini: {location}.",
-      "searchPlaceholder": "Cari tempat…",
+      "searchPlaceholder": "Cari alamat, kota, atau negara",
       "noResults": "Tempat tidak ditemukan.",
       "searchUnavailable": "Pencarian tempat sedang tidak tersedia.",
       "enterCoordinates": "Masukkan koordinat saja",

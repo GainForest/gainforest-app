@@ -1228,7 +1228,7 @@
       "title": "Ubicación de la organización",
       "description": "Muestra dónde tiene su sede tu organización.",
       "descriptionWithCurrent": "Actualmente: {location}.",
-      "searchPlaceholder": "Busca un lugar…",
+      "searchPlaceholder": "Busca una dirección, ciudad o país",
       "noResults": "No se encontraron lugares.",
       "searchUnavailable": "La búsqueda de lugares no está disponible en este momento.",
       "enterCoordinates": "Introducir coordenadas",

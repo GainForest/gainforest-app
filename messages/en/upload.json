@@ -1228,7 +1228,7 @@
       "title": "Organization location",
       "description": "Show where your organization is based.",
       "descriptionWithCurrent": "Currently set to {location}.",
-      "searchPlaceholder": "Search for a place…",
+      "searchPlaceholder": "Search for an address, city or country",
       "noResults": "No places found.",
       "searchUnavailable": "Place search is unavailable right now.",
       "enterCoordinates": "Enter coordinates instead",
