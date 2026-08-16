@@ -3,10 +3,12 @@ import { getTranslations } from "next-intl/server";
 import { fetchAuthSession } from "@/app/_lib/auth-server";
 import { AudioMothClient } from "@/app/audiomoth/_components/AudioMothClient";
 import { PictureHero } from "@/app/_components/PictureHero";
+import { listNetworkAudioProjects } from "@/app/_lib/audio-projects";
 import { listNetworkSoundscapes } from "@/app/_lib/soundscape-explore";
 import { ObservationsMediaTabs } from "../_components/ObservationsMediaTabs";
 import { AudioScopePills } from "./_components/AudioScopePills";
 import { SoundscapeExploreGallery } from "./_components/SoundscapeExploreGallery";
+import { UploadedAudioProjects } from "./_components/UploadedAudioProjects";
 
 export const dynamic = "force-dynamic";
 
@@ -63,9 +65,10 @@ export default async function ObservationsAudioPage({
     );
   }
 
-  const [t, soundscapes] = await Promise.all([
+  const [t, soundscapes, uploadedProjects] = await Promise.all([
     getTranslations("common.audiomoth.audioHub"),
     listNetworkSoundscapes().catch(() => []),
+    listNetworkAudioProjects().catch(() => []),
   ]);
 
   return (
@@ -83,6 +86,7 @@ export default async function ObservationsAudioPage({
       </div>
       <div className="relative z-10 mx-auto max-w-6xl px-6">
         <SoundscapeExploreGallery items={soundscapes} />
+        <UploadedAudioProjects items={uploadedProjects} />
       </div>
     </main>
   );

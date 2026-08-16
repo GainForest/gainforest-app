@@ -1905,7 +1905,15 @@
       "showFewer": "Tampilkan lebih sedikit",
       "voiceKeyTitle": "Legenda kelompok suara",
       "noMatches": "Tidak ada lanskap suara yang cocok dengan filter ini.",
-      "clearFilters": "Hapus filter"
+      "clearFilters": "Hapus filter",
+      "uploadedProjectsEyebrow": "Rekaman lapangan",
+      "uploadedProjectsTitle": "Proyek dengan rekaman",
+      "uploadedProjectsLede": "Jelajahi proyek yang telah membagikan rekaman lapangan tetapi belum menerbitkan lanskap suara.",
+      "uploadedProjectMeta": "{project} · {recorders, plural, one {# perekam} other {# perekam}} · {recordings, number} rekaman diunggah",
+      "recordingsUploaded": "{count, number} rekaman diunggah",
+      "recorderFallback": "Perekam lapangan",
+      "browseRecordings": "Jelajahi rekaman",
+      "unknownOrganization": "Pengelola proyek"
     },
     "library": {
       "signInTitle": "Masuk untuk melihat berkas Anda",

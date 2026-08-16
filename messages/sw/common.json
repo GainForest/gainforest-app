@@ -1905,7 +1905,15 @@
       "showFewer": "Onyesha chache",
       "voiceKeyTitle": "Ufunguo wa makundi ya sauti",
       "noMatches": "Hakuna mandhari ya sauti inayolingana na vichujio hivi.",
-      "clearFilters": "Futa vichujio"
+      "clearFilters": "Futa vichujio",
+      "uploadedProjectsEyebrow": "Rekodi za uwandani",
+      "uploadedProjectsTitle": "Miradi yenye rekodi",
+      "uploadedProjectsLede": "Vinjari miradi iliyoshiriki rekodi za uwandani lakini bado haijachapisha mandhari ya sauti.",
+      "uploadedProjectMeta": "{project} · {recorders, plural, one {# kinasa} other {# vinasa}} · rekodi {recordings, number} zimepakiwa",
+      "recordingsUploaded": "Rekodi {count, number} zimepakiwa",
+      "recorderFallback": "Kinasa cha uwandani",
+      "browseRecordings": "Vinjari rekodi",
+      "unknownOrganization": "Msimamizi wa mradi"
     },
     "library": {
       "signInTitle": "Ingia ili kuona faili zako",

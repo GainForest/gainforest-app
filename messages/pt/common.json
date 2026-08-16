@@ -1905,7 +1905,15 @@
       "showFewer": "Mostrar menos",
       "voiceKeyTitle": "Legenda dos grupos de vozes",
       "noMatches": "Nenhuma paisagem sonora corresponde a estes filtros.",
-      "clearFilters": "Limpar filtros"
+      "clearFilters": "Limpar filtros",
+      "uploadedProjectsEyebrow": "Gravações de campo",
+      "uploadedProjectsTitle": "Projetos com gravações",
+      "uploadedProjectsLede": "Explore projetos que compartilharam gravações de campo, mas ainda não publicaram uma paisagem sonora.",
+      "uploadedProjectMeta": "{project} · {recorders, plural, one {# gravador} other {# gravadores}} · {recordings, number} gravações enviadas",
+      "recordingsUploaded": "{count, number} gravações enviadas",
+      "recorderFallback": "Gravador de campo",
+      "browseRecordings": "Explorar gravações",
+      "unknownOrganization": "Responsável pelo projeto"
     },
     "library": {
       "signInTitle": "Entre para ver seus arquivos",

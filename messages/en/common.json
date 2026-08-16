@@ -1905,7 +1905,15 @@
       "showFewer": "Show fewer",
       "voiceKeyTitle": "Voice group key",
       "noMatches": "No soundscapes match these filters.",
-      "clearFilters": "Clear filters"
+      "clearFilters": "Clear filters",
+      "uploadedProjectsEyebrow": "Field recordings",
+      "uploadedProjectsTitle": "Projects with recordings",
+      "uploadedProjectsLede": "Browse projects that have shared field recordings but have not published a soundscape yet.",
+      "uploadedProjectMeta": "{project} · {recorders, plural, one {# recorder} other {# recorders}} · {recordings, number} recordings uploaded",
+      "recordingsUploaded": "{count, number} recordings uploaded",
+      "recorderFallback": "Field recorder",
+      "browseRecordings": "Browse recordings",
+      "unknownOrganization": "Project steward"
     },
     "library": {
       "signInTitle": "Sign in to see your files",
