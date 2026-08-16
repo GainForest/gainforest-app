@@ -1279,20 +1279,14 @@ export function OrganizationSettingsSections({
   const t = useTranslations("common.settings.groups");
   return (
     <Accordion type="multiple" defaultValue={[]} className="space-y-3">
-      {location || members ? (
+      {location ? (
         <SettingsGroup value="profile" title={t("profile.title")} description={t("profile.description")}>
-          <div className="space-y-6">
-            {location}
-            {members ? (
-              <div className="border-t border-border/60 pt-5">
-                <div className="mb-4">
-                  <h2 className="text-sm font-medium text-foreground">{t("members.title")}</h2>
-                  <p className="mt-0.5 text-xs leading-5 text-muted-foreground">{t("members.description")}</p>
-                </div>
-                {members}
-              </div>
-            ) : null}
-          </div>
+          {location}
+        </SettingsGroup>
+      ) : null}
+      {members ? (
+        <SettingsGroup value="members" title={t("members.title")} description={t("members.description")}>
+          {members}
         </SettingsGroup>
       ) : null}
       <SettingsGroup value="agents" title={t("agents.title")} description={t("agents.description")}>
