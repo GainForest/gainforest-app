@@ -237,7 +237,7 @@ export function SoundscapeExploreGallery({ items }: { items: NetworkSoundscape[]
   }
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="mt-5 flex flex-col gap-6">
       {/* Search · project filter · sort */}
       <div className="flex flex-wrap items-center gap-3">
         <div className="relative flex h-10 min-w-52 flex-1 basis-64 items-center rounded-full border border-input bg-background/50 shadow-xs backdrop-blur transition-[color,box-shadow] focus-within:border-ring focus-within:ring-[3px] focus-within:ring-ring/50">

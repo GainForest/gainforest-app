@@ -905,35 +905,35 @@ export function AudioMothClient({
                     : t("audioHub.subtitle")
         }
       />
-      <div className="mx-auto flex w-full max-w-7xl flex-col gap-6 px-4 sm:px-6">
       {/* Photos | Audio — shared across the Observations surfaces */}
-      {mediaTabs}
+      {mediaTabs ? <div className="relative z-10 mx-auto mt-6 max-w-6xl px-6">{mediaTabs}</div> : null}
 
       {/* Personal recording workflow tabs */}
-      <nav
-        ref={mainTabNavRef}
-        className="flex w-full max-w-full gap-1 self-start overflow-x-auto overscroll-x-contain rounded-full border border-border bg-card/70 p-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden lg:w-auto lg:overflow-visible"
-        aria-label={t("title")}
-      >
-        {mainTabs.map(({ id, label, Icon }) => (
-          <button
-            key={id}
-            type="button"
-            data-main-tab={id}
-            onClick={() => selectMainTab(id)}
-            className={cn(
-              "flex shrink-0 items-center justify-center gap-2 whitespace-nowrap rounded-full px-3 py-2 text-sm font-medium transition-colors lg:px-4",
-              mainTab === id ? "bg-primary text-primary-foreground shadow-sm" : "text-muted-foreground hover:text-foreground",
-            )}
-            aria-current={mainTab === id ? "page" : undefined}
-          >
-            <Icon className="size-4" />
-            {label}
-          </button>
-        ))}
-      </nav>
+      <div className="relative z-10 mx-auto max-w-6xl px-6">
+        <nav
+          ref={mainTabNavRef}
+          className="mt-5 flex w-full max-w-full gap-1 self-start overflow-x-auto overscroll-x-contain rounded-full border border-border bg-card/70 p-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden lg:w-auto lg:overflow-visible"
+          aria-label={t("title")}
+        >
+          {mainTabs.map(({ id, label, Icon }) => (
+            <button
+              key={id}
+              type="button"
+              data-main-tab={id}
+              onClick={() => selectMainTab(id)}
+              className={cn(
+                "flex shrink-0 items-center justify-center gap-2 whitespace-nowrap rounded-full px-3 py-2 text-sm font-medium transition-colors lg:px-4",
+                mainTab === id ? "bg-primary text-primary-foreground shadow-sm" : "text-muted-foreground hover:text-foreground",
+              )}
+              aria-current={mainTab === id ? "page" : undefined}
+            >
+              <Icon className="size-4" />
+              {label}
+            </button>
+          ))}
+        </nav>
 
-      {mainTab === "library" && <LibraryTab sessionDid={sessionDid} />}
+        {mainTab === "library" && <LibraryTab sessionDid={sessionDid} />}
 
       {mainTab === "deployments" && <DeploymentsTab sessionDid={sessionDid} />}
 

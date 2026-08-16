@@ -54,7 +54,7 @@ export default async function ObservationsAudioPage({
     const session = await fetchAuthSession().catch(() => ({ isLoggedIn: false as const }));
 
     return (
-      <main className="-mt-14 bg-background pb-20">
+      <main className="-mt-14 bg-background pb-20 md:pb-28">
         <AudioMothClient
           sessionDid={session.isLoggedIn ? session.did : null}
           mediaTabs={<ObservationsMediaTabs active="audio" />}
@@ -69,7 +69,7 @@ export default async function ObservationsAudioPage({
   ]);
 
   return (
-    <main className="-mt-14 bg-background pb-20">
+    <main className="-mt-14 bg-background pb-20 md:pb-28">
       <PictureHero
         compact
         lightSrc="/images/explore/explore-hero-light@2x.webp"
@@ -78,8 +78,10 @@ export default async function ObservationsAudioPage({
         lede={t("soundscapesLede")}
         actions={<AudioScopePills active="public" />}
       />
-      <div className="mx-auto flex w-full max-w-7xl flex-col gap-6 px-4 sm:px-6">
+      <div className="relative z-10 mx-auto mt-6 max-w-6xl px-6">
         <ObservationsMediaTabs active="audio" />
+      </div>
+      <div className="relative z-10 mx-auto max-w-6xl px-6">
         <SoundscapeExploreGallery items={soundscapes} />
       </div>
     </main>
