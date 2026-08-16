@@ -1,16 +1,36 @@
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
+import Link from "next/link";
+import { FolderOpenIcon } from "lucide-react";
 import { fetchAuthSession } from "@/app/_lib/auth-server";
 import { AudioMothClient } from "@/app/audiomoth/_components/AudioMothClient";
+import { PictureHero } from "@/app/_components/PictureHero";
+import { listNetworkSoundscapes } from "@/app/_lib/soundscape-explore";
 import { ObservationsMediaTabs } from "../_components/ObservationsMediaTabs";
+import { SoundscapeExploreGallery } from "./_components/SoundscapeExploreGallery";
 
 export const dynamic = "force-dynamic";
 
+/** The personal recording workflow tabs hosted by AudioMothClient. Without a
+ *  `?tab=` the page shows the network-wide soundscape gallery instead —
+ *  finished, listenable portraits rather than raw WAV files. */
+const WORKFLOW_TABS = new Set([
+  "library",
+  "deployments",
+  "upload",
+  "label",
+  "identifications",
+  "soundscape",
+  "setup",
+]);
+
 /**
- * Audio tab of the Observations hub. Hosts the recording workflow that used
- * to live on the standalone AudioMoth page: deployments, SD-card upload,
- * labelling, identifications and the soundscape view. The USB device setup
- * tool lives next door on /observations/devices.
+ * Audio tab of the Observations hub. The default view is a gallery of every
+ * soundscape published on GainForest — visitors browsing the network care
+ * about the finished 24-hour portraits, not individual unlabeled recordings.
+ * The personal recording workflow — library, deployments, SD-card upload,
+ * labelling, identifications, the soundscape workbench and USB device setup
+ * — lives behind `?tab=…`, reached from the "Your recordings" pill.
  */
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations("common.audiomoth.audioHub");
@@ -22,16 +42,54 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
-export default async function ObservationsAudioPage() {
-  const session = await fetchAuthSession().catch(() => ({ isLoggedIn: false as const }));
+export default async function ObservationsAudioPage({
+  searchParams,
+}: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}) {
+  const params = await searchParams;
+  const tab = typeof params.tab === "string" ? params.tab : undefined;
+
+  if (tab && WORKFLOW_TABS.has(tab)) {
+    const session = await fetchAuthSession().catch(() => ({ isLoggedIn: false as const }));
+
+    return (
+      <main className="-mt-14 bg-background pb-20">
+        <AudioMothClient
+          sessionDid={session.isLoggedIn ? session.did : null}
+          mediaTabs={<ObservationsMediaTabs active="audio" />}
+        />
+      </main>
+    );
+  }
+
+  const [t, soundscapes] = await Promise.all([
+    getTranslations("common.audiomoth.audioHub"),
+    listNetworkSoundscapes().catch(() => []),
+  ]);
 
   return (
     <main className="-mt-14 bg-background pb-20">
-      <AudioMothClient
-        surface="audio"
-        sessionDid={session.isLoggedIn ? session.did : null}
-        mediaTabs={<ObservationsMediaTabs active="audio" />}
+      <PictureHero
+        compact
+        lightSrc="/images/explore/explore-hero-light@2x.webp"
+        darkSrc="/images/explore/explore-hero-dark@2x.webp"
+        title={t("soundscapesTitle")}
+        lede={t("soundscapesLede")}
       />
+      <div className="mx-auto flex w-full max-w-7xl flex-col gap-6 px-4 sm:px-6">
+        <div className="flex flex-wrap items-center gap-3">
+          <ObservationsMediaTabs active="audio" />
+          <Link
+            href="/observations/audio?tab=library"
+            className="flex items-center gap-2 rounded-full border border-border bg-card/70 px-4 py-2.5 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
+          >
+            <FolderOpenIcon className="size-4" />
+            {t("yourRecordings")}
+          </Link>
+        </div>
+        <SoundscapeExploreGallery items={soundscapes} />
+      </div>
     </main>
   );
 }

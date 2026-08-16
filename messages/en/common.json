@@ -1874,8 +1874,7 @@
   "observationsHub": {
     "ariaLabel": "Observation types",
     "photos": "Photos",
-    "audio": "Audio",
-    "devices": "Devices"
+    "audio": "Audio"
   },
   "audiomoth": {
     "audioHub": {
@@ -1883,7 +1882,13 @@
       "subtitle": "Upload recordings from an AudioMoth SD card, organise them into deployments and label what you hear — audio observations live here.",
       "metaTitle": "Audio observations",
       "metaDescription": "Upload AudioMoth recordings, manage deployments, label species and explore soundscapes inside Observations.",
-      "librarySubtitle": "Every folder and recording you have uploaded, in one place — play them, move them between folders, rename or delete them."
+      "librarySubtitle": "Every folder and recording you have uploaded, in one place — play them, move them between folders, rename or delete them.",
+      "yourRecordings": "Your recordings",
+      "soundscapesTitle": "Soundscapes",
+      "soundscapesLede": "24-hour sound portraits from recorders in the field across GainForest. Tap a clock to hear a place at that time of day.",
+      "soundscapesEmptyTitle": "No soundscapes published yet",
+      "soundscapesEmptyBody": "When someone turns their field recordings into a soundscape and publishes it, it will appear here for everyone to listen to.",
+      "soundscapesEmptyCta": "Build one from your recordings"
     },
     "library": {
       "signInTitle": "Sign in to see your files",

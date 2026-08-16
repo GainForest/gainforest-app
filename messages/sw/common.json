@@ -1874,8 +1874,7 @@
   "observationsHub": {
     "ariaLabel": "Aina za uchunguzi",
     "photos": "Picha",
-    "audio": "Sauti",
-    "devices": "Vifaa"
+    "audio": "Sauti"
   },
   "audiomoth": {
     "audioHub": {
@@ -1883,7 +1882,13 @@
       "subtitle": "Pakia rekodi kutoka kadi ya SD ya AudioMoth, zipange katika usambazaji na uweke lebo unachosikia — uchunguzi wa sauti unaishi hapa.",
       "metaTitle": "Uchunguzi wa sauti",
       "metaDescription": "Pakia rekodi za AudioMoth, dhibiti usambazaji, weka lebo spishi na uchunguze mandhari ya sauti ndani ya Uchunguzi.",
-      "librarySubtitle": "Folda na rekodi zote ulizopakia, mahali pamoja — zicheze, zihamishe kati ya folda, zibadilishe jina au uzifute."
+      "librarySubtitle": "Folda na rekodi zote ulizopakia, mahali pamoja — zicheze, zihamishe kati ya folda, zibadilishe jina au uzifute.",
+      "yourRecordings": "Rekodi zako",
+      "soundscapesTitle": "Mandhari ya sauti",
+      "soundscapesLede": "Picha za sauti za saa 24 kutoka kwa virekodi vilivyoko uwandani kote GainForest. Gusa saa ili usikie mahali wakati huo wa siku.",
+      "soundscapesEmptyTitle": "Hakuna mandhari ya sauti yaliyochapishwa bado",
+      "soundscapesEmptyBody": "Mtu akigeuza rekodi zake za uwandani kuwa mandhari ya sauti na kuyachapisha, yataonekana hapa ili kila mtu ayasikilize.",
+      "soundscapesEmptyCta": "Tengeneza kutoka rekodi zako"
     },
     "library": {
       "signInTitle": "Ingia ili kuona faili zako",

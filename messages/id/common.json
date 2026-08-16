@@ -1874,8 +1874,7 @@
   "observationsHub": {
     "ariaLabel": "Jenis observasi",
     "photos": "Foto",
-    "audio": "Audio",
-    "devices": "Perangkat"
+    "audio": "Audio"
   },
   "audiomoth": {
     "audioHub": {
@@ -1883,7 +1882,13 @@
       "subtitle": "Unggah rekaman dari kartu SD AudioMoth, susun ke dalam penempatan, dan beri label pada apa yang Anda dengar — observasi audio ada di sini.",
       "metaTitle": "Observasi audio",
       "metaDescription": "Unggah rekaman AudioMoth, kelola penempatan, beri label spesies, dan jelajahi lanskap suara di dalam Observasi.",
-      "librarySubtitle": "Semua folder dan rekaman yang telah Anda unggah, di satu tempat — putar, pindahkan antar folder, ganti nama, atau hapus."
+      "librarySubtitle": "Semua folder dan rekaman yang telah Anda unggah, di satu tempat — putar, pindahkan antar folder, ganti nama, atau hapus.",
+      "yourRecordings": "Rekaman Anda",
+      "soundscapesTitle": "Lanskap suara",
+      "soundscapesLede": "Potret suara 24 jam dari perekam di lapangan di seluruh GainForest. Ketuk jam untuk mendengar suatu tempat pada waktu itu.",
+      "soundscapesEmptyTitle": "Belum ada lanskap suara yang diterbitkan",
+      "soundscapesEmptyBody": "Saat seseorang mengubah rekaman lapangannya menjadi lanskap suara dan menerbitkannya, hasilnya akan muncul di sini untuk didengarkan semua orang.",
+      "soundscapesEmptyCta": "Buat dari rekaman Anda"
     },
     "library": {
       "signInTitle": "Masuk untuk melihat berkas Anda",

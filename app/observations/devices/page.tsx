@@ -1,37 +1,14 @@
-import type { Metadata } from "next";
-import { getTranslations } from "next-intl/server";
-import { fetchAuthSession } from "@/app/_lib/auth-server";
-import { AudioMothClient } from "@/app/audiomoth/_components/AudioMothClient";
-import { ObservationsMediaTabs } from "../_components/ObservationsMediaTabs";
-
-export const dynamic = "force-dynamic";
+import { permanentRedirect } from "next/navigation";
 
 /**
- * Devices tab of the Observations hub: the browser-based AudioMoth setup
- * tool (clock, recording configuration, firmware) that used to be the
- * standalone AudioMoth page's Setup tab. Recording workflows live on the
- * Audio tab at /observations/audio.
+ * Device setup is no longer a peer of Photos and Audio.
+ *
+ * Those two are *explore* surfaces — they show what the whole network has
+ * shared. The AudioMoth setup tool drives your own hardware over USB, so it
+ * belongs with the rest of the personal recording workflow and now lives on
+ * the Audio hub's Devices tab. This route only keeps old links and bookmarks
+ * working.
  */
-export async function generateMetadata(): Promise<Metadata> {
-  const t = await getTranslations("common.audiomoth.meta");
-
-  return {
-    title: t("title"),
-    description: t("description"),
-    alternates: { canonical: "/observations/devices" },
-  };
-}
-
-export default async function ObservationsDevicesPage() {
-  const session = await fetchAuthSession().catch(() => ({ isLoggedIn: false as const }));
-
-  return (
-    <main className="-mt-14 bg-background pb-20">
-      <AudioMothClient
-        surface="devices"
-        sessionDid={session.isLoggedIn ? session.did : null}
-        mediaTabs={<ObservationsMediaTabs active="devices" />}
-      />
-    </main>
-  );
+export default function ObservationsDevicesPage(): never {
+  permanentRedirect("/observations/audio?tab=setup");
 }

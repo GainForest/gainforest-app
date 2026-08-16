@@ -1,20 +1,22 @@
 "use client";
 
 /**
- * Media tab bar for the Observations hub: Photos | Audio | Devices.
+ * Media tab bar for the Observations hub: Photos | Audio.
  *
  * Audio is a different medium, not a different job — so it lives as a tab
- * inside Observations rather than a separate sidebar destination. Devices is
- * a third tab because hardware is the only genuinely new object. Each tab is
- * a plain link between the three Observations surfaces; no state is shared.
+ * inside Observations rather than a separate sidebar destination. Both tabs
+ * are *explore* surfaces: they show what the whole network has shared. Device
+ * setup is not one of those — it drives your own hardware over USB — so it
+ * lives with the rest of the personal recording workflow, on the Audio hub's
+ * Devices tab (`/observations/audio?tab=setup`).
  */
 
 import Link from "next/link";
 import { useTranslations } from "next-intl";
-import { AudioLinesIcon, ImageIcon, RadioReceiverIcon } from "lucide-react";
+import { AudioLinesIcon, ImageIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-export type ObservationsMediaTabId = "photos" | "audio" | "devices";
+export type ObservationsMediaTabId = "photos" | "audio";
 
 const TABS: Array<{
   id: ObservationsMediaTabId;
@@ -23,7 +25,6 @@ const TABS: Array<{
 }> = [
   { id: "photos", href: "/observations", Icon: ImageIcon },
   { id: "audio", href: "/observations/audio", Icon: AudioLinesIcon },
-  { id: "devices", href: "/observations/devices", Icon: RadioReceiverIcon },
 ];
 
 export function ObservationsMediaTabs({ active }: { active: ObservationsMediaTabId }) {

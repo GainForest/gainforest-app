@@ -1874,8 +1874,7 @@
   "observationsHub": {
     "ariaLabel": "Tipos de observación",
     "photos": "Fotos",
-    "audio": "Audio",
-    "devices": "Dispositivos"
+    "audio": "Audio"
   },
   "audiomoth": {
     "audioHub": {
@@ -1883,7 +1882,13 @@
       "subtitle": "Sube grabaciones desde la tarjeta SD de un AudioMoth, organízalas en despliegues y etiqueta lo que escuchas: las observaciones de audio viven aquí.",
       "metaTitle": "Observaciones de audio",
       "metaDescription": "Sube grabaciones de AudioMoth, gestiona despliegues, etiqueta especies y explora paisajes sonoros dentro de Observaciones.",
-      "librarySubtitle": "Todas las carpetas y grabaciones que has subido, en un solo lugar: reprodúcelas, muévelas entre carpetas, renómbralas o elimínalas."
+      "librarySubtitle": "Todas las carpetas y grabaciones que has subido, en un solo lugar: reprodúcelas, muévelas entre carpetas, renómbralas o elimínalas.",
+      "yourRecordings": "Tus grabaciones",
+      "soundscapesTitle": "Paisajes sonoros",
+      "soundscapesLede": "Retratos sonoros de 24 horas desde grabadoras en el campo por todo GainForest. Toca un reloj para escuchar un lugar a esa hora del día.",
+      "soundscapesEmptyTitle": "Aún no hay paisajes sonoros publicados",
+      "soundscapesEmptyBody": "Cuando alguien convierta sus grabaciones de campo en un paisaje sonoro y lo publique, aparecerá aquí para que cualquiera pueda escucharlo.",
+      "soundscapesEmptyCta": "Crea uno con tus grabaciones"
     },
     "library": {
       "signInTitle": "Inicia sesión para ver tus archivos",

@@ -1874,8 +1874,7 @@
   "observationsHub": {
     "ariaLabel": "Tipos de observação",
     "photos": "Fotos",
-    "audio": "Áudio",
-    "devices": "Dispositivos"
+    "audio": "Áudio"
   },
   "audiomoth": {
     "audioHub": {
@@ -1883,7 +1882,13 @@
       "subtitle": "Envie gravações do cartão SD de um AudioMoth, organize-as em implantações e rotule o que você ouve — as observações de áudio vivem aqui.",
       "metaTitle": "Observações de áudio",
       "metaDescription": "Envie gravações do AudioMoth, gerencie implantações, rotule espécies e explore paisagens sonoras dentro de Observações.",
-      "librarySubtitle": "Todas as pastas e gravações que você enviou, em um só lugar — reproduza, mova entre pastas, renomeie ou exclua."
+      "librarySubtitle": "Todas as pastas e gravações que você enviou, em um só lugar — reproduza, mova entre pastas, renomeie ou exclua.",
+      "yourRecordings": "Suas gravações",
+      "soundscapesTitle": "Paisagens sonoras",
+      "soundscapesLede": "Retratos sonoros de 24 horas de gravadores em campo por todo o GainForest. Toque em um relógio para ouvir um lugar naquela hora do dia.",
+      "soundscapesEmptyTitle": "Nenhuma paisagem sonora publicada ainda",
+      "soundscapesEmptyBody": "Quando alguém transformar suas gravações de campo em uma paisagem sonora e publicá-la, ela aparecerá aqui para todos ouvirem.",
+      "soundscapesEmptyCta": "Crie uma com suas gravações"
     },
     "library": {
       "signInTitle": "Entre para ver seus arquivos",
