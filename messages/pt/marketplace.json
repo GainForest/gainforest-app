@@ -281,7 +281,7 @@
       "eyebrow": "Desafio BioBlitz Semanal",
       "titlePrefix": "Desafio",
       "titleEmphasis": "BioBlitz",
-      "description": "Uma corrida semanal e amistosa para registrar a biodiversidade ao ar livre com suas próprias fotos enviadas. Fotos de animais valem 2 pontos, fotos de plantas 1 ponto, e nomear a espécie soma 0,5 ponto extra. Pessoas e plantas em vasos não contam.",
+      "description": "Uma corrida semanal e amistosa para registrar a biodiversidade ao ar livre com suas próprias fotos enviadas. A partir da Rodada 8, fotos de animais valem 2 pontos, fotos de plantas 1 ponto, e nomear a espécie soma 0,5 ponto extra. Pessoas e plantas em vasos não contam.",
       "program": "Parte do programa Klarna AI for Climate Resilience, com a GainForest."
     },
     "rsvp": {
@@ -340,7 +340,7 @@
           "winners": {
             "title": "4. Seleção de vencedores",
             "paragraphs": {
-              "p1": "O prêmio de Maior pontuação se baseia na maior pontuação total de observações válidas durante a rodada: cada foto válida de animal vale 2 pontos, cada foto válida de planta vale 1 ponto, e qualquer uma soma 0,5 ponto extra quando a espécie está identificada em vez de ficar sem identificação. O prêmio de Melhor foto é escolhido pelos critérios descritos na página do BioBlitz, incluindo qualidade da imagem, tema e envolvimento da comunidade quando relevante.",
+              "p1": "A partir da Rodada 8, o prêmio de Maior pontuação se baseia na maior pontuação total de observações válidas durante a rodada: cada foto válida de animal vale 2 pontos, cada foto válida de planta vale 1 ponto, e qualquer uma soma 0,5 ponto extra quando a espécie está identificada em vez de ficar sem identificação. Em rodadas anteriores, esse prêmio se baseava no maior número de observações válidas. O prêmio de Melhor foto é escolhido pelos critérios descritos na página do BioBlitz, incluindo qualidade da imagem, tema e envolvimento da comunidade quando relevante.",
               "p2": "A GainForest pode revisar envios, resolver empates, corrigir erros de contagem e desclassificar inscrições inválidas. As decisões são finais na medida permitida por lei."
             }
           },
@@ -501,6 +501,10 @@
       "title": "Prêmios a cada rodada",
       "badgeNote": "Além de um selo permanente de vencedor no seu perfil.",
       "mostObservations": {
+        "title": "Mais observações",
+        "blurb": "Para quem registrar mais avistamentos válidos na rodada."
+      },
+      "highestPoints": {
         "title": "Maior pontuação",
         "blurb": "Para quem alcançar a maior pontuação na rodada: 2 pontos por foto de animal, 1 por foto de planta e +0,5 ao nomear a espécie."
       },
@@ -522,7 +526,7 @@
         },
         "review": {
           "title": "Confira o nome da espécie",
-          "blurb": "Confirme ou corrija o nome sugerido: uma espécie identificada soma 0,5 ponto extra."
+          "blurb": "Confirme ou corrija o nome sugerido: a partir da Rodada 8, uma espécie nomeada soma 0,5 ponto extra."
         }
       },
       "proof": {
@@ -535,10 +539,11 @@
     "board": {
       "title": "Ranking desta rodada",
       "live": "Ao vivo",
-      "subtitleLive": "Quem está liderando em pontos agora com observações fotográficas válidas.",
+      "subtitleLive": "Quem está liderando agora com observações fotográficas válidas.",
+      "subtitleLivePoints": "Quem está liderando em pontos agora com observações fotográficas válidas.",
       "subtitleEnded": "Classificação final desta rodada.",
       "subtitleUpcoming": "Seja o primeiro no ranking quando a rodada abrir.",
-      "subtitleAll": "As maiores pontuações de todo o desafio.",
+      "subtitleAll": "Quem tem mais observações fotográficas válidas em todo o desafio.",
       "scope": {
         "round": "Esta rodada",
         "all": "Histórico"
@@ -565,8 +570,9 @@
       "stats": {
         "observations": "Observações nesta rodada",
         "observationsAll": "Observações (histórico)",
-        "points": "Pontos nesta rodada",
-        "pointsAll": "Pontos (histórico)",
+        "animals": "Animais",
+        "plants": "Plantas",
+        "named": "Espécies nomeadas",
         "collectors": "Participantes",
         "timeLeft": "Tempo restante"
       },
@@ -578,7 +584,7 @@
         "people": "Pessoas",
         "potted": "Plantas em vasos",
         "other": "Outras excluídas",
-        "explainer": "Só contam observações claras de vida silvestre ou plantas ao ar livre com uma foto enviada diretamente. Pessoas, plantas em vasos ou de interior, temas incertos e observações sem foto enviada são excluídos. Cada foto de animal vale 2 pontos, cada foto de planta 1 ponto, e nomear a espécie soma 0,5 ponto."
+        "explainer": "Só contam observações claras de vida silvestre ou plantas ao ar livre com uma foto enviada diretamente. Pessoas, plantas em vasos ou de interior, temas incertos e observações sem foto enviada são excluídos."
       },
       "empty": {
         "title": "Ainda sem avistamentos",
@@ -588,12 +594,31 @@
         "title": "Não foi possível carregar o ranking",
         "description": "Tente novamente em instantes."
       },
-      "cta": "Adicionar suas observações"
+      "cta": "Adicionar suas observações",
+      "pointsGuide": {
+        "title": "Como os pontos são calculados",
+        "animalValue": "2 pts.",
+        "animalLabel": "Por foto de animal",
+        "plantValue": "1 pt.",
+        "plantLabel": "Por foto de planta",
+        "namedValue": "+0,5 pt.",
+        "namedLabel": "Espécie nomeada",
+        "note": "Os pontos começaram na Rodada 8. O total é: fotos de animais × 2, mais fotos de plantas × 1, mais 0,5 por cada espécie nomeada. Toque em uma linha do quadro para ver o cálculo daquela pessoa."
+      },
+      "breakdown": {
+        "toggle": "Como os pontos foram calculados",
+        "animals": "{count, plural, one {# foto de animal} other {# fotos de animais}} × 2",
+        "plants": "{count, plural, one {# foto de planta} other {# fotos de plantas}} × 1",
+        "labeled": "{count, plural, one {# espécie nomeada} other {# espécies nomeadas}} × 0,5",
+        "ineligible": "{count, plural, one {# foto não qualificou} other {# fotos não qualificaram}}",
+        "total": "Total de pontos",
+        "profile": "Abrir perfil"
+      }
     },
     "winners": {
       "title": "Vencedores anteriores",
       "description": "Um registro permanente dos campeões de cada rodada.",
-      "mostObservations": "Maior pontuação",
+      "mostObservations": "Mais observações",
       "bestPicture": "Melhor foto",
       "pending": "A anunciar",
       "final": "Definitivo",
@@ -601,7 +626,11 @@
       "finalHint": "Estes vencedores estão confirmados e não mudarão.",
       "provisionalHint": "Classificação atual — ainda pode mudar até que os vencedores sejam confirmados.",
       "compact": "Recentes",
-      "mostSubmitted": "Maior pontuação",
+      "newer": "Rodadas recentes",
+      "older": "Rodadas anteriores",
+      "page": "{page} de {total}",
+      "mostSubmitted": "Mais envios",
+      "highestPoints": "Maior pontuação",
       "mostLiked": "Mais curtidas",
       "award": {
         "action": "Conceder selos aos vencedores",
@@ -609,7 +638,8 @@
         "done": "Selos dos vencedores concedidos",
         "error": "Não foi possível atualizar os selos ou o estado do email. Tente novamente.",
         "notification": {
-          "mostObservations": "Email de maior pontuação",
+          "mostObservations": "Email de mais observações",
+          "highestPoints": "Email de maior pontuação",
           "bestPicture": "Email de melhor foto",
           "sent": "Enviado",
           "delayed": "Atrasado — continuaremos tentando",

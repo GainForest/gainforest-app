@@ -1281,6 +1281,11 @@
         "description": "Received a Rewilding the Web grant."
       },
       "bioblitz-most-images": {
+        "label": "BioBlitz — most observations",
+        "labelWithRound": "BioBlitz {roundName} — most observations",
+        "description": "Won a BioBlitz round for the most observations."
+      },
+      "bioblitz-most-images-points": {
         "label": "BioBlitz — highest points",
         "labelWithRound": "BioBlitz {roundName} — highest points",
         "description": "Won a BioBlitz round with the highest points score."
@@ -1439,13 +1444,15 @@
     "counted": "Counted",
     "notCounted": "Not counted",
     "prize": {
-      "most-observations": "Highest points",
+      "most-observations": "Most observations",
+      "highest-points": "Highest points",
       "best-picture": "Best picture"
     },
     "openProfile": "Open profile",
     "joined": "Joined {date}",
     "download": {
-      "most-observations": "Highest-points kit",
+      "most-observations": "Most-observations kit",
+      "highest-points": "Highest-points kit",
       "best-picture": "Best-picture kit"
     },
     "ignore": "Ignore",

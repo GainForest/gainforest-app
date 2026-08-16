@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useMemo, useState, type ReactNode } from "react";
+import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { motion } from "framer-motion";
 import {
@@ -11,12 +11,16 @@ import {
   Building2Icon,
   CalendarClockIcon,
   CameraIcon,
+  ChevronLeftIcon,
   ChevronRightIcon,
   ClockIcon,
   CrownIcon,
+  LeafIcon,
   MapPinnedIcon,
+  PawPrintIcon,
   MessagesSquareIcon,
   ScanSearchIcon,
+  TagIcon,
   TrophyIcon,
   UploadIcon,
   UsersRoundIcon,
@@ -36,6 +40,7 @@ import {
   BIOBLITZ_LINKS,
   BIOBLITZ_PRIZES,
   bioblitzRounds,
+  bioblitzRoundUsesPoints,
   countdownTo,
   endedRounds,
   featuredRound,
@@ -49,6 +54,7 @@ import {
   type BoardScope,
   type CollectorOrg,
   type RoundBoard,
+  type RoundCollectorBreakdown,
   type RoundStatus,
 } from "../_lib/bioblitz";
 
@@ -60,6 +66,8 @@ const IMG_SIZES = "(min-width: 768px) calc(100vw - 15rem), 100vw";
 const BOARD_LIMIT = 12;
 /** How many rows the single-screen board shows before it clips. */
 const DISPLAY_LIMIT = 8;
+/** Past-winner rounds shown per page of the compact winners card. */
+const WINNERS_PAGE_SIZE = 4;
 
 /** Org-type tokens we have a friendly translated label for; anything else
  *  falls back to the generic "Organization" label. */
@@ -126,9 +134,22 @@ export function BioblitzClient() {
   // Recognition awards (previous BioBlitz wins, grants) per collector account,
   // shown as small emblems on the board rows. Same progressive pattern.
   const [awards, setAwards] = useState<Map<string, string[]>>(new Map());
-  const pastRounds = useMemo(() => endedRounds(snapshotNow).slice(0, 4), [snapshotNow]);
+  // Every finished round is browsable, newest first, a page at a time — the
+  // card stays compact no matter how many rounds the challenge accumulates.
+  const allPastRounds = useMemo(() => endedRounds(snapshotNow), [snapshotNow]);
+  const [winnersPage, setWinnersPage] = useState(0);
+  const winnersPageCount = Math.max(1, Math.ceil(allPastRounds.length / WINNERS_PAGE_SIZE));
+  useEffect(() => {
+    if (winnersPage > 0 && winnersPage >= winnersPageCount) setWinnersPage(winnersPageCount - 1);
+  }, [winnersPage, winnersPageCount]);
+  const pastRounds = useMemo(
+    () => allPastRounds.slice(winnersPage * WINNERS_PAGE_SIZE, (winnersPage + 1) * WINNERS_PAGE_SIZE),
+    [allPastRounds, winnersPage],
+  );
   const pastRoundsKey = pastRounds.map((item) => item.id).join(",");
   const [pastWinners, setPastWinners] = useState<PastRoundSummary[] | null>(null);
+  /** Finalised summaries never change, so paging back to them is instant. */
+  const winnerSummaryCache = useRef(new Map<number, PastRoundSummary>());
 
   // Reset to the loading state whenever the active round or scope changes.
   useEffect(() => {
@@ -194,6 +215,11 @@ export function BioblitzClient() {
       setPastWinners([]);
       return;
     }
+    const cache = winnerSummaryCache.current;
+    if (pastRounds.every((item) => cache.has(item.id))) {
+      setPastWinners(pastRounds.map((item) => cache.get(item.id)!));
+      return;
+    }
     const controller = new AbortController();
     let cancelled = false;
     setPastWinners(null);
@@ -204,6 +230,8 @@ export function BioblitzClient() {
       const awards = await fetchBioblitzWinnerAwards(controller.signal).catch(() => null);
       return Promise.all(
         pastRounds.map(async (pastRound): Promise<PastRoundSummary> => {
+          const cached = cache.get(pastRound.id);
+          if (cached) return cached;
           const frozen = frozenWinnersFor(pastRound, awards);
           const needBoard = frozen.mostObservations === undefined;
           const needLiked = frozen.bestPicture === undefined;
@@ -227,7 +255,10 @@ export function BioblitzClient() {
                   did: topCollector.did,
                   name: topCollector.displayName,
                   avatarRef: topCollector.avatarRef,
-                  count: topCollector.points,
+                  // The board is already ranked by the round's own rule.
+                  count: bioblitzRoundUsesPoints(pastRound.id)
+                    ? topCollector.points
+                    : topCollector.count,
                 };
           const mostLiked: WinnerAccount | null =
             frozen.bestPicture !== undefined
@@ -243,12 +274,14 @@ export function BioblitzClient() {
                   avatarRef: topLiked.record.creatorAvatarRef,
                   count: topLiked.likeCount,
                 };
-          return {
+          const summary: PastRoundSummary = {
             round: pastRound,
             mostSubmitted,
             mostLiked,
             final: frozen.mostObservations !== undefined && frozen.bestPicture !== undefined,
           };
+          if (summary.final) cache.set(pastRound.id, summary);
+          return summary;
         }),
       );
     })()
@@ -285,8 +318,14 @@ export function BioblitzClient() {
 
         <div className="grid flex-1 gap-4 lg:min-h-[34rem] lg:grid-cols-[minmax(0,5fr)_1px_minmax(0,7fr)]">
           <div className="flex flex-col gap-4 lg:min-h-0">
-            <Prizes />
-            <PastWinners rounds={pastRounds} summaries={pastWinners} />
+            <Prizes round={round} />
+            <PastWinners
+              rounds={pastRounds}
+              summaries={pastWinners}
+              page={winnersPage}
+              pageCount={winnersPageCount}
+              onPage={setWinnersPage}
+            />
             <Separator />
             <HowItWorks />
             <Separator />
@@ -520,9 +559,12 @@ function RoundNavigator({
 
 // ── Prizes ───────────────────────────────────────────────────────────────────
 
-function Prizes() {
+function Prizes({ round }: { round: BioblitzRound }) {
   const t = useTranslations("marketplace.bioblitz.prizes");
   const locale = useLocale();
+  // The board prize is round-versioned: points from Round 8, raw observation
+  // count before that. Show the rule that applies to the selected round.
+  const usesPoints = bioblitzRoundUsesPoints(round.id);
   return (
     <FadeIn delay={0.05}>
       <Card>
@@ -532,7 +574,7 @@ function Prizes() {
             featured
             amount={formatPrize(BIOBLITZ_PRIZES.mostObservations, locale)}
             icon={<TrophyIcon />}
-            title={t("mostObservations.title")}
+            title={usesPoints ? t("highestPoints.title") : t("mostObservations.title")}
           />
           <PrizeTile
             amount={formatPrize(BIOBLITZ_PRIZES.bestPicture, locale)}
@@ -582,9 +624,15 @@ function PrizeTile({
 function PastWinners({
   rounds,
   summaries,
+  page,
+  pageCount,
+  onPage,
 }: {
   rounds: BioblitzRound[];
   summaries: PastRoundSummary[] | null;
+  page: number;
+  pageCount: number;
+  onPage: (page: number) => void;
 }) {
   const t = useTranslations("marketplace.bioblitz.winners");
   const boardT = useTranslations("marketplace.bioblitz.board");
@@ -601,9 +649,35 @@ function PastWinners({
       <Card>
         <div className="mb-2 flex items-center justify-between gap-2">
           <SectionTitle icon={<CrownIcon />} title={t("title")} />
-          <span className="rounded-full bg-foreground/5 px-2 py-1 text-[10px] font-medium text-muted-foreground">
-            {t("compact")}
-          </span>
+          {pageCount > 1 ? (
+            <span className="flex items-center gap-1 rounded-full bg-foreground/5 px-1 py-0.5">
+              <button
+                type="button"
+                onClick={() => onPage(Math.max(0, page - 1))}
+                disabled={page === 0}
+                aria-label={t("newer")}
+                className="flex size-5 items-center justify-center rounded-full text-muted-foreground transition-colors hover:text-foreground disabled:opacity-30 disabled:hover:text-muted-foreground"
+              >
+                <ChevronLeftIcon className="size-3.5" aria-hidden />
+              </button>
+              <span className="text-[10px] font-medium tabular-nums text-muted-foreground">
+                {t("page", { page: page + 1, total: pageCount })}
+              </span>
+              <button
+                type="button"
+                onClick={() => onPage(Math.min(pageCount - 1, page + 1))}
+                disabled={page >= pageCount - 1}
+                aria-label={t("older")}
+                className="flex size-5 items-center justify-center rounded-full text-muted-foreground transition-colors hover:text-foreground disabled:opacity-30 disabled:hover:text-muted-foreground"
+              >
+                <ChevronRightIcon className="size-3.5" aria-hidden />
+              </button>
+            </span>
+          ) : (
+            <span className="rounded-full bg-foreground/5 px-2 py-1 text-[10px] font-medium text-muted-foreground">
+              {t("compact")}
+            </span>
+          )}
         </div>
         <ul className="space-y-1.5">
           {rows.map((summary) => (
@@ -629,11 +703,15 @@ function PastWinners({
               <div className="mt-1.5 grid gap-1 text-[11px] sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2">
                 <WinnerPill
                   icon={<TrophyIcon />}
-                  label={t("mostSubmitted")}
+                  label={
+                    bioblitzRoundUsesPoints(summary.round.id) ? t("highestPoints") : t("mostSubmitted")
+                  }
                   winner={summary.mostSubmitted}
                   countLabel={
                     summary.mostSubmitted && summary.mostSubmitted.count != null
-                      ? boardT("pointsFull", { points: summary.mostSubmitted.count })
+                      ? bioblitzRoundUsesPoints(summary.round.id)
+                        ? boardT("pointsFull", { points: summary.mostSubmitted.count })
+                        : boardT("observations", { count: summary.mostSubmitted.count })
                       : null
                   }
                   pending={summaries == null ? "…" : t("pending")}
@@ -838,6 +916,9 @@ function Board({
   onScope: (scope: BoardScope) => void;
 }) {
   const t = useTranslations("marketplace.bioblitz.board");
+  // Points only rank round boards from Round 8 onward; earlier rounds and the
+  // all-time view keep the original observation-count format.
+  const pointsEra = scope === "round" && bioblitzRoundUsesPoints(round.id);
   const subtitle =
     scope === "all"
       ? t("subtitleAll")
@@ -845,7 +926,9 @@ function Board({
         ? t("subtitleEnded")
         : status === "upcoming"
           ? t("subtitleUpcoming")
-          : t("subtitleLive");
+          : pointsEra
+            ? t("subtitleLivePoints")
+            : t("subtitleLive");
 
   const timeLeft = useMemo(() => {
     if (now == null || status === "ended") return "—";
@@ -855,15 +938,25 @@ function Board({
 
   const stats: { label: string; value: string; icon: ReactNode; accent?: boolean }[] = [
     {
-      label: scope === "all" ? t("stats.pointsAll") : t("stats.points"),
-      value: board ? formatNumber(board.totalPoints) : "—",
-      icon: <TrophyIcon />,
-      accent: true,
-    },
-    {
       label: scope === "all" ? t("stats.observationsAll") : t("stats.observations"),
       value: board ? formatNumber(board.totalObservations) : "—",
       icon: <BinocularsIcon />,
+      accent: true,
+    },
+    {
+      label: t("stats.animals"),
+      value: board ? formatNumber(board.imageCounts.wildlife) : "—",
+      icon: <PawPrintIcon />,
+    },
+    {
+      label: t("stats.plants"),
+      value: board ? formatNumber(board.imageCounts.plant) : "—",
+      icon: <LeafIcon />,
+    },
+    {
+      label: t("stats.named"),
+      value: board ? formatNumber(board.labeledObservations) : "—",
+      icon: <TagIcon />,
     },
     {
       label: t("stats.collectors"),
@@ -890,7 +983,7 @@ function Board({
         </div>
         <p className="mt-1 text-xs text-muted-foreground">{subtitle}</p>
 
-        <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-4">
+        <div className="mt-3 grid grid-cols-3 gap-2">
           {stats.map((stat) => (
             <div
               key={stat.label}
@@ -912,6 +1005,7 @@ function Board({
         </div>
 
         {board ? <EligibilityBreakdown board={board} /> : null}
+        {pointsEra ? <PointsGuide /> : null}
 
         <div className="mt-3 min-h-0 flex-1 overflow-y-auto pr-1">
           {board ? (
@@ -929,6 +1023,8 @@ function Board({
                     avatarRef={collector.avatarRef}
                     count={collector.count}
                     points={collector.points}
+                    breakdown={collector.breakdown}
+                    mode={pointsEra ? "points" : "observations"}
                     org={orgs.get(collector.did)}
                     awards={awards.get(collector.did)}
                   />
@@ -984,6 +1080,34 @@ function EligibilityBreakdown({ board }: { board: RoundBoard }) {
   );
 }
 
+/** Plain-language scoring legend shown under the screening panel so anyone
+ *  can verify the board's maths at a glance (points-era rounds only). */
+function PointsGuide() {
+  const t = useTranslations("marketplace.bioblitz.board.pointsGuide");
+  const rows = [
+    { key: "animal", icon: <PawPrintIcon /> },
+    { key: "plant", icon: <LeafIcon /> },
+    { key: "named", icon: <TagIcon /> },
+  ] as const;
+  return (
+    <div className="mt-2 rounded-2xl border border-primary/15 bg-primary/5 p-2.5">
+      <p className="text-[11px] font-semibold text-foreground">{t("title")}</p>
+      <div className="mt-2 grid grid-cols-3 gap-1">
+        {rows.map((row) => (
+          <div key={row.key} className="rounded-xl bg-background/70 px-1.5 py-1.5 text-center">
+            <span className="mx-auto flex size-5 items-center justify-center text-primary [&_svg]:size-3.5">
+              {row.icon}
+            </span>
+            <div className="mt-0.5 text-sm font-semibold tabular-nums text-primary">{t(`${row.key}Value`)}</div>
+            <div className="text-[9px] font-medium leading-tight text-muted-foreground">{t(`${row.key}Label`)}</div>
+          </div>
+        ))}
+      </div>
+      <p className="mt-2 text-[10px] leading-snug text-muted-foreground">{t("note")}</p>
+    </div>
+  );
+}
+
 const RANK_TIERS: Record<number, string> = {
   2: "bg-slate-400/25 text-slate-600 dark:text-slate-300",
   3: "bg-orange-400/20 text-orange-700 dark:text-orange-300",
@@ -1003,6 +1127,8 @@ function CollectorRow({
   avatarRef,
   count,
   points,
+  breakdown,
+  mode,
   org,
   awards,
 }: {
@@ -1013,52 +1139,138 @@ function CollectorRow({
   avatarRef: string | null;
   count: number;
   points: number;
+  breakdown: RoundCollectorBreakdown;
+  /** "points" rows expand into a score breakdown; "observations" rows keep
+   *  the original pre-points format and link straight to the profile. */
+  mode: "observations" | "points";
   org?: CollectorOrg;
   awards?: string[];
 }) {
   const t = useTranslations("marketplace.bioblitz.board");
-  return (
-    <li>
-      <PreferredAccountLink
-        did={did}
-        target="_blank"
-        rel="noopener noreferrer"
-        aria-label={t("openCollector")}
-        className={`group flex items-center gap-3 rounded-2xl border-[3px] bg-background px-3 py-2 text-foreground transition-colors duration-200 hover:bg-background/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring [&_.truncate]:text-foreground/85 ${
-          TOP_ROW_BORDERS[rank] ?? "border-transparent"
+  const [open, setOpen] = useState(false);
+
+  const rowBody = (
+    <>
+      <span
+        aria-label={t("rankAriaLabel", { rank })}
+        className={`flex size-7 shrink-0 items-center justify-center rounded-full text-xs font-bold tabular-nums ${
+          leader ? "bg-primary/15 text-primary" : RANK_TIERS[rank] ?? "bg-foreground/10 text-muted-foreground"
         }`}
       >
-        <span
-          aria-label={t("rankAriaLabel", { rank })}
-          className={`flex size-7 shrink-0 items-center justify-center rounded-full text-xs font-bold tabular-nums ${
-            leader ? "bg-primary/15 text-primary" : RANK_TIERS[rank] ?? "bg-foreground/10 text-muted-foreground"
+        {leader ? <CrownIcon className="size-3.5" aria-hidden /> : rank}
+      </span>
+
+      <div className="min-w-0 flex-1">
+        <span className="flex min-w-0 items-center gap-1.5 text-lg font-medium text-foreground">
+          <AuthorInline did={did} nameOverride={name} avatarRefOverride={avatarRef} />
+          {awards && awards.length > 0 ? <AwardEmblems badges={awards} size="sm" /> : null}
+        </span>
+        <OrgLabel org={org} />
+      </div>
+
+      <span className="shrink-0 text-right">
+        {mode === "points" ? (
+          <>
+            <span className="font-instrument block text-sm italic leading-none tabular-nums text-primary">
+              {t("points", { points: formatNumber(points) })}
+            </span>
+            <span className="mt-0.5 block text-[10px] leading-none tabular-nums text-muted-foreground">
+              {t("observations", { count })}
+            </span>
+          </>
+        ) : (
+          <span className="font-instrument block text-sm italic leading-none tabular-nums text-primary">
+            {formatNumber(count)}
+          </span>
+        )}
+      </span>
+    </>
+  );
+
+  if (mode === "observations") {
+    return (
+      <li>
+        <PreferredAccountLink
+          did={did}
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label={t("openCollector")}
+          className={`group flex items-center gap-3 rounded-2xl border-[3px] bg-background px-3 py-2 text-foreground transition-colors duration-200 hover:bg-background/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring [&_.truncate]:text-foreground/85 ${
+            TOP_ROW_BORDERS[rank] ?? "border-transparent"
           }`}
         >
-          {leader ? <CrownIcon className="size-3.5" aria-hidden /> : rank}
-        </span>
+          {rowBody}
+          <ChevronRightIcon
+            aria-hidden
+            className="size-4 shrink-0 text-muted-foreground/40 transition-transform duration-200 group-hover:translate-x-0.5 group-hover:text-primary"
+          />
+        </PreferredAccountLink>
+      </li>
+    );
+  }
 
-        <div className="min-w-0 flex-1">
-          <span className="flex min-w-0 items-center gap-1.5 text-lg font-medium text-foreground">
-            <AuthorInline did={did} nameOverride={name} avatarRefOverride={avatarRef} />
-            {awards && awards.length > 0 ? <AwardEmblems badges={awards} size="sm" /> : null}
-          </span>
-          <OrgLabel org={org} />
-        </div>
+  // Points contributions mirror the scoring rule exactly:
+  // animals × 2 + plants × 1 + named species × 0.5.
+  const lines = [
+    { key: "animals", count: breakdown.wildlife, pts: breakdown.wildlife * 2 },
+    { key: "plants", count: breakdown.plant, pts: breakdown.plant },
+    { key: "labeled", count: breakdown.labeled, pts: breakdown.labeled * 0.5 },
+  ] as const;
 
-        <span className="shrink-0 text-right">
-          <span className="font-instrument block text-sm italic leading-none tabular-nums text-primary">
-            {t("points", { points: formatNumber(points) })}
-          </span>
-          <span className="mt-0.5 block text-[10px] leading-none tabular-nums text-muted-foreground">
-            {t("observations", { count })}
-          </span>
-        </span>
-
+  return (
+    <li
+      className={`rounded-2xl border-[3px] bg-background ${TOP_ROW_BORDERS[rank] ?? "border-transparent"}`}
+    >
+      <button
+        type="button"
+        onClick={() => setOpen((value) => !value)}
+        aria-expanded={open}
+        title={t("breakdown.toggle")}
+        className="group flex w-full items-center gap-3 rounded-2xl px-3 py-2 text-left text-foreground transition-colors duration-200 hover:bg-foreground/[0.03] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring [&_.truncate]:text-foreground/85"
+      >
+        {rowBody}
         <ChevronRightIcon
           aria-hidden
-          className="size-4 shrink-0 text-muted-foreground/40 transition-transform duration-200 group-hover:translate-x-0.5 group-hover:text-primary"
+          className={`size-4 shrink-0 text-muted-foreground/40 transition-transform duration-200 group-hover:text-primary ${
+            open ? "rotate-90 text-primary" : ""
+          }`}
         />
-      </PreferredAccountLink>
+      </button>
+      {open ? (
+        <div className="mx-3 mb-2.5 rounded-xl bg-foreground/5 px-3 py-2">
+          <dl className="space-y-1 text-[11px]">
+            {lines.map((line) => (
+              <div key={line.key} className="flex items-center justify-between gap-2">
+                <dt className="text-muted-foreground">{t(`breakdown.${line.key}`, { count: line.count })}</dt>
+                <dd className="font-medium tabular-nums text-foreground">+{formatNumber(line.pts)}</dd>
+              </div>
+            ))}
+            {breakdown.ineligible > 0 ? (
+              <div className="flex items-center justify-between gap-2">
+                <dt className="text-muted-foreground">
+                  {t("breakdown.ineligible", { count: breakdown.ineligible })}
+                </dt>
+                <dd className="tabular-nums text-muted-foreground">+0</dd>
+              </div>
+            ) : null}
+            <div className="flex items-center justify-between gap-2 border-t border-border/60 pt-1">
+              <dt className="font-semibold text-foreground">{t("breakdown.total")}</dt>
+              <dd className="font-semibold tabular-nums text-primary">
+                {t("points", { points: formatNumber(points) })}
+              </dd>
+            </div>
+          </dl>
+          <PreferredAccountLink
+            did={did}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="mt-2 inline-flex items-center gap-1 text-[11px] font-medium text-primary underline-offset-4 hover:underline"
+          >
+            {t("breakdown.profile")}
+            <ChevronRightIcon className="size-3" aria-hidden />
+          </PreferredAccountLink>
+        </div>
+      ) : null}
     </li>
   );
 }

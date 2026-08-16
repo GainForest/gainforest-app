@@ -2,6 +2,7 @@ import "server-only";
 
 import {
   bioblitzRounds,
+  bioblitzRoundUsesPoints,
   fetchBioblitzRoundRegistrants,
   fetchRoundCollectors,
   roundStatus,
@@ -195,10 +196,11 @@ export async function loadBioblitzAdminRound(
     registrants: [...rows.values()].sort((a, b) => {
       const winnerDifference = Number(b.wins.length > 0) - Number(a.wins.length > 0);
       if (winnerDifference) return winnerDifference;
-      const pointsDifference = b.points - a.points;
-      if (pointsDifference) return pointsDifference;
-      const observationDifference = b.observationCount - a.observationCount;
-      if (observationDifference) return observationDifference;
+      // Match the public board's ranking rule for this round's era.
+      const primary = bioblitzRoundUsesPoints(round.id)
+        ? b.points - a.points || b.observationCount - a.observationCount
+        : b.observationCount - a.observationCount || b.points - a.points;
+      if (primary) return primary;
       return (a.displayName ?? "").localeCompare(b.displayName ?? "", undefined, { sensitivity: "base" });
     }),
   };

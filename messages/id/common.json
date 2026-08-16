@@ -1281,6 +1281,11 @@
         "description": "Menerima hibah Meliarkan Kembali Web."
       },
       "bioblitz-most-images": {
+        "label": "BioBlitz — observasi terbanyak",
+        "labelWithRound": "BioBlitz {roundName} — observasi terbanyak",
+        "description": "Memenangkan ronde BioBlitz untuk observasi terbanyak."
+      },
+      "bioblitz-most-images-points": {
         "label": "BioBlitz — poin tertinggi",
         "labelWithRound": "BioBlitz {roundName} — poin tertinggi",
         "description": "Memenangkan ronde BioBlitz dengan poin tertinggi."
@@ -1439,13 +1444,15 @@
     "counted": "Dihitung",
     "notCounted": "Tidak dihitung",
     "prize": {
-      "most-observations": "Poin tertinggi",
+      "most-observations": "Pengamatan terbanyak",
+      "highest-points": "Poin tertinggi",
       "best-picture": "Foto terbaik"
     },
     "openProfile": "Buka profil",
     "joined": "Bergabung {date}",
     "download": {
-      "most-observations": "Paket poin tertinggi",
+      "most-observations": "Paket pengamatan terbanyak",
+      "highest-points": "Paket poin tertinggi",
       "best-picture": "Paket foto terbaik"
     },
     "ignore": "Abaikan",

@@ -65,7 +65,9 @@ export function classifyBioblitzImage(input: BioblitzDescriptionInput): Bioblitz
   return "unclassified";
 }
 
-export function isEligibleBioblitzCategory(category: BioblitzImageCategory): boolean {
+export function isEligibleBioblitzCategory(
+  category: BioblitzImageCategory,
+): category is "wildlife" | "plant" {
   return category === "wildlife" || category === "plant";
 }
 

@@ -24,6 +24,7 @@ const {
 vi.mock("server-only", () => ({}));
 vi.mock("@/app/_lib/bioblitz", () => ({
   bioblitzRounds,
+  bioblitzRoundUsesPoints: (roundId: number) => roundId >= 8,
   fetchBioblitzRoundRegistrants,
   fetchRoundCollectors,
   roundStatus,

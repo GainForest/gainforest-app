@@ -14,7 +14,7 @@ import {
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
 import { accountPath } from "@/app/account/_lib/account-route";
-import { roundStatus, type BioblitzRound } from "@/app/_lib/bioblitz";
+import { bioblitzRoundUsesPoints, roundStatus, type BioblitzRound } from "@/app/_lib/bioblitz";
 import type { BioblitzExclusionAdminRow } from "@/app/_lib/bioblitz-exclusions";
 import type {
   BioblitzAdminRegistrant,
@@ -313,7 +313,14 @@ export function AdminBioblitzDashboard({
                     <span className="min-w-0 flex-1">
                       <span className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1">
                         <span className="max-w-full truncate text-base font-medium tracking-[-0.01em] text-foreground">{name}</span>
-                        {registrant.wins.map((prize) => <WinnerPill key={prize} prize={prize} t={t} />)}
+                        {registrant.wins.map((prize) => (
+                          <WinnerPill
+                            key={prize}
+                            prize={prize}
+                            usesPoints={bioblitzRoundUsesPoints(selectedRoundId)}
+                            t={t}
+                          />
+                        ))}
                         {ignored ? (
                           <span className="inline-flex items-center gap-1 rounded-full border border-amber-500/25 bg-transparent px-2 py-0.5 text-[10px] font-semibold text-amber-700 dark:text-amber-300">
                             <EyeOffIcon className="size-3" aria-hidden />
@@ -322,8 +329,12 @@ export function AdminBioblitzDashboard({
                         ) : null}
                       </span>
                       <span className="mt-1 flex items-center gap-1.5 text-xs tabular-nums text-muted-foreground">
-                        <span>{t("points", { points: registrant.points })}</span>
-                        <span aria-hidden>·</span>
+                        {bioblitzRoundUsesPoints(selectedRoundId) ? (
+                          <>
+                            <span>{t("points", { points: registrant.points })}</span>
+                            <span aria-hidden>·</span>
+                          </>
+                        ) : null}
                         <span>{t("observations", { count: registrant.observationCount })}</span>
                         {ignored ? <span aria-hidden>·</span> : null}
                         {ignored ? <span>{t("notCounted")}</span> : null}
@@ -356,7 +367,11 @@ export function AdminBioblitzDashboard({
                             onClick={() => downloadWinnerPackage(prize, registrant.did)}
                           >
                             {downloading ? <Loader2Icon className="size-3.5 animate-spin" aria-hidden /> : <DownloadIcon className="size-3.5" aria-hidden />}
-                            {t(`download.${prize}`)}
+                            {t(
+                              prize === "most-observations" && bioblitzRoundUsesPoints(selectedRoundId)
+                                ? "download.highest-points"
+                                : `download.${prize}`,
+                            )}
                           </Button>
                         ) : null;
                       })}
@@ -414,14 +429,17 @@ function initialsForName(name: string): string {
 
 function WinnerPill({
   prize,
+  usesPoints,
   t,
 }: {
   prize: BioblitzWinnerPrize;
+  /** The board prize is named after the rule its round was played under. */
+  usesPoints: boolean;
   t: ReturnType<typeof useTranslations<"common.adminBioblitzDashboard">>;
 }) {
   return (
     <span className="inline-flex items-center rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-semibold text-primary">
-      {t(`prize.${prize}`)}
+      {t(prize === "most-observations" && usesPoints ? "prize.highest-points" : `prize.${prize}`)}
     </span>
   );
 }

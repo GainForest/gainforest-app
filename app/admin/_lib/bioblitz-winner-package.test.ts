@@ -24,6 +24,8 @@ const OBSERVATION = {
 describe("BioBlitz winner packages", () => {
   it("uses clear, marketing-ready archive filenames and root folders", () => {
     expect(winnerPackageFolderName(12, "most-observations")).toBe("Round 12 Highest Points Winner");
+    // Rounds before the points era keep their original prize name.
+    expect(winnerPackageFolderName(3, "most-observations")).toBe("Round 3 Most Observations Winner");
     expect(winnerPackageFolderName(12, "best-picture")).toBe("Round 12 Best Picture Winner");
     expect(winnerPackageFilename(12, "most-observations")).toBe("Round 12 Highest Points Winner.zip");
     expect(winnerPackageFilename(12, "best-picture")).toBe("Round 12 Best Picture Winner.zip");

@@ -3,11 +3,12 @@
  *
  * The challenge runs in fixed rounds (a calendar week each). Two prizes are
  * awarded every round:
- *   - "Highest points" — the collector with the highest score across their
- *     valid nature sightings uploaded inside the round window. Each eligible
- *     plant photo earns 1 point, each eligible animal photo earns 2 points,
- *     and either earns +0.5 when the species is labeled (not unidentified).
- *     Eligibility itself is unchanged — see bioblitz-eligibility.ts.
+ *   - The board prize. From round BIOBLITZ_POINTS_FROM_ROUND onward this is
+ *     "Highest points": each eligible plant photo earns 1 point, each eligible
+ *     animal photo earns 2 points, and either earns +0.5 when the species is
+ *     labeled (not unidentified). Rounds before that keep their original
+ *     "Most observations" format (ranked by raw count). Eligibility is the
+ *     same in both eras — see bioblitz-eligibility.ts.
  *   - "Best picture" — a judged pick of the most compelling biodiversity photo
  *     (decided by hand once the round closes).
  *
@@ -34,9 +35,11 @@ import { fetchEngagement } from "./feed-engagement";
 import {
   bioblitzObservationPoints,
   classifyBioblitzImage,
+  hasBioblitzSpeciesLabel,
   isEligibleBioblitzCategory,
   type BioblitzImageCategory,
 } from "./bioblitz-eligibility";
+import { bioblitzRoundUsesPoints } from "@/lib/bioblitz-prizes";
 import {
   fetchBioblitzExclusions,
   fetchBioblitzExclusionsStrict,
@@ -44,7 +47,11 @@ import {
   isAccountExcludedFromBioblitzRound,
 } from "./bioblitz-exclusions";
 
-export { BIOBLITZ_PRIZES } from "@/lib/bioblitz-prizes";
+export {
+  BIOBLITZ_PRIZES,
+  BIOBLITZ_POINTS_FROM_ROUND,
+  bioblitzRoundUsesPoints,
+} from "@/lib/bioblitz-prizes";
 
 /** A confirmed winner of one of the round prizes. The DID is resolved to a
  *  display name in the UI, so no technical identifier is ever shown. */
@@ -310,16 +317,33 @@ export function isWithinRoundUploadWindow(
 /** A collector on the round board, with everything the UI needs to render a
  *  row without a second lookup (name + avatar come from the indexer; the DID is
  *  only used internally to resolve a richer profile/avatar). */
+/** How one collector's tally breaks down — the numbers behind their score. */
+export type RoundCollectorBreakdown = {
+  /** Eligible animal photos (2 pts each in the points era). */
+  wildlife: number;
+  /** Eligible outdoor plant photos (1 pt each in the points era). */
+  plant: number;
+  /** Eligible photos whose species is labeled (+0.5 each in the points era). */
+  labeled: number;
+  /** This collector's image observations that did not qualify. */
+  ineligible: number;
+};
+
 export type RoundCollector = {
   did: string;
-  /** Number of eligible observations — kept for context on the board. */
+  /** Number of eligible observations — the ranking metric before the points
+   *  era, kept for context afterwards. */
   count: number;
   /** Round score: 1 pt per plant photo, 2 per animal photo, +0.5 per labeled
-   *  species. This is what the leaderboard ranks by. */
+   *  species. The ranking metric from BIOBLITZ_POINTS_FROM_ROUND onward. */
   points: number;
+  breakdown: RoundCollectorBreakdown;
   displayName: string | null;
   avatarRef: string | null;
 };
+
+/** Which metric a board is ranked (and displayed) by. */
+export type BoardRanking = "observations" | "points";
 
 export type RoundImageCounts = Record<BioblitzImageCategory, number> & {
   /** Non-null imageEvidence wrappers that did not contain a usable blob ref. */
@@ -337,6 +361,11 @@ export type RoundBoard = {
   totalObservations: number;
   /** Total points scored across all eligible observations. */
   totalPoints: number;
+  /** Eligible observations whose species is labeled (not unidentified). */
+  labeledObservations: number;
+  /** "points" for round boards from BIOBLITZ_POINTS_FROM_ROUND onward;
+   *  "observations" for earlier rounds and the all-time view. */
+  ranking: BoardRanking;
   /** Breakdown of automatically classified image observations. */
   imageCounts: RoundImageCounts;
   /** Distinct collectors who uploaded at least one eligible observation. */
@@ -443,8 +472,16 @@ export async function fetchRoundCollectors(
   ]);
   const exclusions = indexBioblitzExclusions(exclusionRecords);
 
+  // Ended and early rounds keep their original "most observations" ranking;
+  // the all-time view also stays count-based because it spans both eras.
+  const ranking: BoardRanking =
+    scope === "round" && bioblitzRoundUsesPoints(round.id) ? "points" : "observations";
+
   const tally = new Map<string, RoundCollector>();
   const unfilteredTally = options?.includeExcluded ? new Map<string, RoundCollector>() : null;
+  /** Disqualified image observations per collector, merged into the breakdown
+   *  of collectors who made the board. */
+  const ineligibleByDid = new Map<string, number>();
   const imageCounts: RoundImageCounts = {
     wildlife: 0,
     plant: 0,
@@ -456,6 +493,7 @@ export async function fetchRoundCollectors(
   };
   let total = 0;
   let totalPoints = 0;
+  let labeledTotal = 0;
   let after: string | null = null;
 
   for (let page = 0; page < MAX_PAGES; page++) {
@@ -502,7 +540,10 @@ export async function fetchRoundCollectors(
         // Keep the public board exactly as it was: ignored accounts do not
         // influence any leaderboard metric. The optional admin tally only
         // needs eligible, image-backed observations.
-        if (!excluded) imageCounts.missingPhoto += 1;
+        if (!excluded) {
+          imageCounts.missingPhoto += 1;
+          ineligibleByDid.set(did, (ineligibleByDid.get(did) ?? 0) + 1);
+        }
         continue;
       }
       const description = {
@@ -513,28 +554,42 @@ export async function fetchRoundCollectors(
       };
       const category = classifyBioblitzImage(description);
       if (!excluded) imageCounts[category] += 1;
-      if (!isEligibleBioblitzCategory(category)) continue;
+      if (!isEligibleBioblitzCategory(category)) {
+        if (!excluded) ineligibleByDid.set(did, (ineligibleByDid.get(did) ?? 0) + 1);
+        continue;
+      }
 
+      const labeled = hasBioblitzSpeciesLabel(description);
       const points = bioblitzObservationPoints(description);
-      if (unfilteredTally) incrementRoundCollector(unfilteredTally, did, n, points);
+      if (unfilteredTally) incrementRoundCollector(unfilteredTally, did, n, points, category, labeled);
       if (excluded) continue;
 
       total += 1;
       totalPoints += points;
-      incrementRoundCollector(tally, did, n, points);
+      if (labeled) labeledTotal += 1;
+      incrementRoundCollector(tally, did, n, points, category, labeled);
     }
 
     if (!conn?.pageInfo?.hasNextPage || !conn.pageInfo.endCursor) break;
     after = conn.pageInfo.endCursor;
   }
 
-  const collectors = sortRoundCollectors(tally);
+  for (const [did, ineligible] of ineligibleByDid) {
+    const entry = tally.get(did);
+    if (entry) entry.breakdown.ineligible = ineligible;
+    const unfilteredEntry = unfilteredTally?.get(did);
+    if (unfilteredEntry) unfilteredEntry.breakdown.ineligible = ineligible;
+  }
+
+  const collectors = sortRoundCollectors(tally, ranking);
 
   return {
     collectors,
-    ...(unfilteredTally ? { unfilteredCollectors: sortRoundCollectors(unfilteredTally) } : {}),
+    ...(unfilteredTally ? { unfilteredCollectors: sortRoundCollectors(unfilteredTally, ranking) } : {}),
     totalObservations: total,
     totalPoints,
+    labeledObservations: labeledTotal,
+    ranking,
     imageCounts,
     collectorCount: collectors.length,
   };
@@ -545,11 +600,15 @@ function incrementRoundCollector(
   did: string,
   node: RawNode,
   points: number,
+  category: "wildlife" | "plant",
+  labeled: boolean,
 ): void {
   const existing = tally.get(did);
   if (existing) {
     existing.count += 1;
     existing.points += points;
+    existing.breakdown[category] += 1;
+    if (labeled) existing.breakdown.labeled += 1;
     if (!existing.displayName) existing.displayName = profileName(node);
     if (!existing.avatarRef) existing.avatarRef = profileAvatarRef(node);
     return;
@@ -558,19 +617,27 @@ function incrementRoundCollector(
     did,
     count: 1,
     points,
+    breakdown: {
+      wildlife: category === "wildlife" ? 1 : 0,
+      plant: category === "plant" ? 1 : 0,
+      labeled: labeled ? 1 : 0,
+      ineligible: 0,
+    },
     displayName: profileName(node),
     avatarRef: profileAvatarRef(node),
   });
 }
 
-/** Rank by points; ties break by observation count, then by name. */
-function sortRoundCollectors(tally: Map<string, RoundCollector>): RoundCollector[] {
-  return [...tally.values()].sort(
-    (a, b) =>
-      b.points - a.points ||
-      b.count - a.count ||
-      (a.displayName ?? "").localeCompare(b.displayName ?? ""),
-  );
+/** Rank by the board's metric; ties break by the other metric, then name. */
+function sortRoundCollectors(
+  tally: Map<string, RoundCollector>,
+  ranking: BoardRanking,
+): RoundCollector[] {
+  return [...tally.values()].sort((a, b) => {
+    const primary = ranking === "points" ? b.points - a.points : b.count - a.count;
+    const secondary = ranking === "points" ? b.count - a.count : b.points - a.points;
+    return primary || secondary || (a.displayName ?? "").localeCompare(b.displayName ?? "");
+  });
 }
 
 // ── Round observations (for the map) ─────────────────────────────────────────

@@ -1,7 +1,9 @@
 import { describe, expect, it } from "vitest";
 import {
   BIOBLITZ_LATE_UPLOAD_GRACE_MS,
+  BIOBLITZ_POINTS_FROM_ROUND,
   bioblitzPublishTimeMs,
+  bioblitzRoundUsesPoints,
   frozenWinnersFor,
   isWithinRoundUploadWindow,
   type BioblitzRound,
@@ -24,6 +26,16 @@ function encodeTid(ms: number): string {
   for (let i = 12; i >= 0; i -= 1) out += TID_CHARS[Number((value >> BigInt(i * 5)) & 31n)]!;
   return out;
 }
+
+describe("bioblitzRoundUsesPoints", () => {
+  it("keeps every round before the points era in the old format", () => {
+    for (let roundId = 1; roundId < BIOBLITZ_POINTS_FROM_ROUND; roundId += 1) {
+      expect(bioblitzRoundUsesPoints(roundId)).toBe(false);
+    }
+    expect(bioblitzRoundUsesPoints(BIOBLITZ_POINTS_FROM_ROUND)).toBe(true);
+    expect(bioblitzRoundUsesPoints(BIOBLITZ_POINTS_FROM_ROUND + 5)).toBe(true);
+  });
+});
 
 describe("bioblitzPublishTimeMs", () => {
   it("round-trips a synthetic TID rkey", () => {

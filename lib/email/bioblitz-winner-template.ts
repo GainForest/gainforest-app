@@ -4,7 +4,7 @@ import {
   resolvePreferredLanguageFromHeader,
   type SupportedLanguageCode,
 } from "@/lib/i18n/languages";
-import { BIOBLITZ_PRIZES, type BioblitzPrize } from "@/lib/bioblitz-prizes";
+import { BIOBLITZ_PRIZES, bioblitzRoundUsesPoints, type BioblitzPrize } from "@/lib/bioblitz-prizes";
 
 const SUPPORT_EMAIL = "fatin@gainforest.net";
 
@@ -13,7 +13,7 @@ type WinnerCopy = {
   preheader: string;
   heading: string;
   confirmation: string;
-  prizes: Record<BioblitzPrize, { label: string; appreciation: string }>;
+  prizes: Record<BioblitzPrize, { label: string; legacyLabel?: string; appreciation: string }>;
   awardHeading: string;
   categoryLabel: string;
   paymentLabel: string;
@@ -29,7 +29,7 @@ type WinnerCopy = {
   footer: string;
 };
 
-const copyByLocale = {
+const copyByLocale: Record<SupportedLanguageCode, WinnerCopy> = {
   en: {
     subject: "Congrats! You won “{prize}” in BioBlitz {round} 🎉",
     preheader: "Your {amount} award details and how to receive your payment.",
@@ -38,6 +38,7 @@ const copyByLocale = {
     prizes: {
       "most-observations": {
         label: "Highest Points",
+        legacyLabel: "Most Observations",
         appreciation: "Thank you for the time and care you put into documenting nature. Your observations help make local biodiversity more visible and useful.",
       },
       "best-picture": {
@@ -67,6 +68,7 @@ const copyByLocale = {
     prizes: {
       "most-observations": {
         label: "Mayor puntuación",
+        legacyLabel: "Más observaciones",
         appreciation: "Gracias por el tiempo y el cuidado que dedicaste a documentar la naturaleza. Tus observaciones ayudan a que la biodiversidad local sea más visible y útil.",
       },
       "best-picture": {
@@ -96,6 +98,7 @@ const copyByLocale = {
     prizes: {
       "most-observations": {
         label: "Maior pontuação",
+        legacyLabel: "Mais observações",
         appreciation: "Agradecemos o tempo e o cuidado que você dedicou a documentar a natureza. Suas observações ajudam a tornar a biodiversidade local mais visível e útil.",
       },
       "best-picture": {
@@ -125,6 +128,7 @@ const copyByLocale = {
     prizes: {
       "most-observations": {
         label: "Pointi za juu zaidi",
+        legacyLabel: "Uchunguzi mwingi zaidi",
         appreciation: "Asante kwa muda na umakini uliotumia kurekodi mazingira. Uchunguzi wako husaidia kufanya bayoanuwai ya eneo lako ionekane na itumike zaidi.",
       },
       "best-picture": {
@@ -154,6 +158,7 @@ const copyByLocale = {
     prizes: {
       "most-observations": {
         label: "Poin tertinggi",
+        legacyLabel: "Observasi terbanyak",
         appreciation: "Terima kasih atas waktu dan perhatian yang Anda berikan untuk mendokumentasikan alam. Observasi Anda membantu membuat keanekaragaman hayati setempat lebih terlihat dan bermanfaat.",
       },
       "best-picture": {
@@ -175,7 +180,7 @@ const copyByLocale = {
     teamName: "Tim GainForest",
     footer: "Anda menerima email ini karena memenangkan hadiah BioBlitz di GainForest.",
   },
-} satisfies Record<SupportedLanguageCode, WinnerCopy>;
+};
 
 function escapeHtml(value: string): string {
   return value
@@ -216,15 +221,21 @@ export function renderBioblitzWinnerEmail({
   locale = DEFAULT_LANGUAGE,
   roundLabel,
   prize,
+  roundId,
   siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://www.gainforest.app",
 }: {
   locale?: SupportedLanguageCode;
   roundLabel: string;
   prize: BioblitzPrize;
+  /** When known, rounds before the points era use the original prize name. */
+  roundId?: number;
   siteUrl?: string;
 }) {
   const copy = copyByLocale[locale];
-  const prizeCopy = copy.prizes[prize];
+  const baseCopy = copy.prizes[prize];
+  const legacyRound = roundId !== undefined && !bioblitzRoundUsesPoints(roundId);
+  const prizeCopy =
+    legacyRound && baseCopy.legacyLabel ? { ...baseCopy, label: baseCopy.legacyLabel } : baseCopy;
   const amount = prize === "most-observations" ? BIOBLITZ_PRIZES.mostObservations : BIOBLITZ_PRIZES.bestPicture;
   const paymentAmount = `$${amount} USD`;
   const values = { amount: paymentAmount, email: SUPPORT_EMAIL, prize: prizeCopy.label, round: roundLabel };

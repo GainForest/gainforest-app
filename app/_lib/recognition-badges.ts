@@ -16,6 +16,8 @@
  * and the award controls.
  */
 
+import { bioblitzRoundUsesPoints } from "@/lib/bioblitz-prizes";
+
 /** Badges a steward can still toggle by hand on a profile. */
 export const MANUAL_RECOGNITION_BADGE_KEYS = ["rewilding-grant"] as const;
 
@@ -98,9 +100,14 @@ export function recognitionBadgeDescription(key: string): string {
   }
   if (parsed?.family === "bioblitz") {
     const round = parsed.roundId !== null ? ` (${bioblitzRoundName(parsed.roundId)})` : "";
-    return parsed.prize === "most-images"
+    if (parsed.prize === "best-picture") {
+      return `BioBlitz winner — best biodiversity picture of a round${round}.`;
+    }
+    // The board prize changed rules at BIOBLITZ_POINTS_FROM_ROUND; describe
+    // each badge with the rule its round was actually played under.
+    return parsed.roundId !== null && bioblitzRoundUsesPoints(parsed.roundId)
       ? `BioBlitz winner — highest points score in a round${round}.`
-      : `BioBlitz winner — best biodiversity picture of a round${round}.`;
+      : `BioBlitz winner — most observations uploaded in a round${round}.`;
   }
   return "GainForest recognition badge.";
 }

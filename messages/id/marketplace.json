@@ -281,7 +281,7 @@
       "eyebrow": "Tantangan BioBlitz Mingguan",
       "titlePrefix": "Tantangan",
       "titleEmphasis": "BioBlitz",
-      "description": "Lomba mingguan yang menyenangkan untuk mencatat keanekaragaman hayati di luar ruangan dengan foto yang kamu unggah sendiri. Foto hewan bernilai 2 poin, foto tanaman 1 poin, dan menamai spesies menambah 0,5 poin ekstra. Orang dan tanaman dalam pot tidak dihitung.",
+      "description": "Lomba mingguan yang menyenangkan untuk mencatat keanekaragaman hayati di luar ruangan dengan foto yang kamu unggah sendiri. Mulai Ronde 8, foto hewan bernilai 2 poin, foto tanaman 1 poin, dan menamai spesies menambah 0,5 poin ekstra. Orang dan tanaman dalam pot tidak dihitung.",
       "program": "Bagian dari program Klarna AI for Climate Resilience, bersama GainForest."
     },
     "rsvp": {
@@ -340,7 +340,7 @@
           "winners": {
             "title": "4. Pemilihan pemenang",
             "paragraphs": {
-              "p1": "Hadiah Poin Tertinggi didasarkan pada skor total tertinggi dari pengamatan valid selama ronde: setiap foto hewan yang valid bernilai 2 poin, setiap foto tanaman yang valid bernilai 1 poin, dan keduanya mendapat 0,5 poin ekstra jika spesiesnya teridentifikasi, bukan dibiarkan tanpa identifikasi. Hadiah Foto Terbaik dipilih berdasarkan kriteria di halaman BioBlitz, termasuk kualitas gambar, subjek, dan keterlibatan komunitas jika relevan.",
+              "p1": "Mulai Ronde 8, hadiah Poin Tertinggi didasarkan pada skor total tertinggi dari pengamatan valid selama ronde: setiap foto hewan yang valid bernilai 2 poin, setiap foto tanaman yang valid bernilai 1 poin, dan keduanya mendapat 0,5 poin ekstra jika spesiesnya teridentifikasi, bukan dibiarkan tanpa identifikasi. Pada ronde-ronde sebelumnya, hadiah ini didasarkan pada jumlah pengamatan valid tertinggi. Hadiah Foto Terbaik dipilih berdasarkan kriteria di halaman BioBlitz, termasuk kualitas gambar, subjek, dan keterlibatan komunitas jika relevan.",
               "p2": "GainForest dapat meninjau kiriman, menyelesaikan hasil seri, memperbaiki kesalahan hitung, dan mendiskualifikasi kiriman yang tidak valid. Keputusan bersifat final sejauh diizinkan oleh hukum."
             }
           },
@@ -501,6 +501,10 @@
       "title": "Hadiah setiap ronde",
       "badgeNote": "Plus lencana pemenang permanen di profilmu.",
       "mostObservations": {
+        "title": "Pengamatan terbanyak",
+        "blurb": "Untuk pengumpul dengan pengamatan valid terbanyak dalam ronde."
+      },
+      "highestPoints": {
         "title": "Poin tertinggi",
         "blurb": "Untuk pengumpul dengan skor tertinggi dalam ronde: 2 poin per foto hewan, 1 per foto tanaman, +0,5 jika spesies dinamai."
       },
@@ -522,7 +526,7 @@
         },
         "review": {
           "title": "Periksa nama spesies",
-          "blurb": "Konfirmasi atau perbaiki nama yang disarankan — spesies yang dinamai mendapat 0,5 poin ekstra."
+          "blurb": "Konfirmasi atau perbaiki nama yang disarankan — mulai Ronde 8, spesies yang dinamai mendapat 0,5 poin ekstra."
         }
       },
       "proof": {
@@ -535,10 +539,11 @@
     "board": {
       "title": "Papan ronde ini",
       "live": "Langsung",
-      "subtitleLive": "Siapa yang memimpin poin dengan pengamatan foto yang valid saat ini.",
+      "subtitleLive": "Siapa yang memimpin dengan pengamatan foto yang valid saat ini.",
+      "subtitleLivePoints": "Siapa yang memimpin poin dengan pengamatan foto yang valid saat ini.",
       "subtitleEnded": "Klasemen akhir ronde ini.",
       "subtitleUpcoming": "Jadilah yang pertama di papan saat ronde dibuka.",
-      "subtitleAll": "Total poin tertinggi sepanjang tantangan.",
+      "subtitleAll": "Pengamatan foto valid terbanyak sepanjang tantangan.",
       "scope": {
         "round": "Ronde ini",
         "all": "Sepanjang waktu"
@@ -565,8 +570,9 @@
       "stats": {
         "observations": "Pengamatan ronde ini",
         "observationsAll": "Pengamatan (sepanjang waktu)",
-        "points": "Poin ronde ini",
-        "pointsAll": "Poin (sepanjang waktu)",
+        "animals": "Hewan",
+        "plants": "Tanaman",
+        "named": "Spesies dinamai",
         "collectors": "Pengumpul",
         "timeLeft": "Sisa waktu"
       },
@@ -578,7 +584,7 @@
         "people": "Orang",
         "potted": "Tanaman dalam pot",
         "other": "Lainnya dikecualikan",
-        "explainer": "Hanya pengamatan jelas tentang satwa liar atau tanaman luar ruangan dengan foto yang diunggah langsung yang dihitung. Orang, tanaman dalam pot atau di dalam ruangan, subjek yang tidak jelas, dan pengamatan tanpa foto unggahan dikecualikan. Setiap foto hewan bernilai 2 poin, setiap foto tanaman 1 poin, dan menamai spesies menambah 0,5 poin."
+        "explainer": "Hanya pengamatan jelas tentang satwa liar atau tanaman luar ruangan dengan foto yang diunggah langsung yang dihitung. Orang, tanaman dalam pot atau di dalam ruangan, subjek yang tidak jelas, dan pengamatan tanpa foto unggahan dikecualikan."
       },
       "empty": {
         "title": "Belum ada pengamatan",
@@ -588,12 +594,31 @@
         "title": "Tidak dapat memuat papan",
         "description": "Coba lagi sebentar lagi."
       },
-      "cta": "Tambahkan pengamatanmu"
+      "cta": "Tambahkan pengamatanmu",
+      "pointsGuide": {
+        "title": "Cara poin dihitung",
+        "animalValue": "2 poin",
+        "animalLabel": "Per foto hewan",
+        "plantValue": "1 poin",
+        "plantLabel": "Per foto tanaman",
+        "namedValue": "+0,5 poin",
+        "namedLabel": "Spesies dinamai",
+        "note": "Poin dimulai pada Ronde 8. Total seorang pengumpul adalah foto hewan × 2, ditambah foto tanaman × 1, ditambah 0,5 untuk setiap spesies yang dinamai. Ketuk sebuah baris di papan untuk melihat perhitungannya."
+      },
+      "breakdown": {
+        "toggle": "Cara poin dihitung",
+        "animals": "{count, plural, other {# foto hewan}} × 2",
+        "plants": "{count, plural, other {# foto tanaman}} × 1",
+        "labeled": "{count, plural, other {# spesies dinamai}} × 0,5",
+        "ineligible": "{count, plural, other {# foto tidak memenuhi syarat}}",
+        "total": "Total poin",
+        "profile": "Buka profil"
+      }
     },
     "winners": {
       "title": "Pemenang sebelumnya",
       "description": "Catatan permanen para juara setiap ronde.",
-      "mostObservations": "Poin tertinggi",
+      "mostObservations": "Pengamatan terbanyak",
       "bestPicture": "Foto terbaik",
       "pending": "Akan diumumkan",
       "final": "Resmi",
@@ -601,7 +626,11 @@
       "finalHint": "Pemenang ini sudah dikonfirmasi dan tidak akan berubah.",
       "provisionalHint": "Klasemen saat ini — masih bisa berubah sampai pemenang dikonfirmasi.",
       "compact": "Terbaru",
-      "mostSubmitted": "Poin tertinggi",
+      "newer": "Ronde lebih baru",
+      "older": "Ronde lebih lama",
+      "page": "{page} dari {total}",
+      "mostSubmitted": "Kiriman terbanyak",
+      "highestPoints": "Poin tertinggi",
       "mostLiked": "Paling disukai",
       "award": {
         "action": "Berikan lencana pemenang",
@@ -609,7 +638,8 @@
         "done": "Lencana pemenang telah diberikan",
         "error": "Tidak dapat memperbarui lencana atau status email. Coba lagi.",
         "notification": {
-          "mostObservations": "Email poin tertinggi",
+          "mostObservations": "Email observasi terbanyak",
+          "highestPoints": "Email poin tertinggi",
           "bestPicture": "Email foto terbaik",
           "sent": "Terkirim",
           "delayed": "Tertunda — kami akan terus mencoba",

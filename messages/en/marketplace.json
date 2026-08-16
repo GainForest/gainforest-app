@@ -281,7 +281,7 @@
       "eyebrow": "Weekly BioBlitz Challenge",
       "titlePrefix": "BioBlitz",
       "titleEmphasis": "Challenge",
-      "description": "A friendly weekly race to record outdoor biodiversity with your own uploaded photos. Animal photos earn 2 points, plant photos 1 point, and naming the species adds an extra 0.5. People and potted plants do not count.",
+      "description": "A friendly weekly race to record outdoor biodiversity with your own uploaded photos. From Round 8, animal photos earn 2 points, plant photos 1 point, and naming the species adds an extra 0.5. People and potted plants do not count.",
       "program": "Part of the Klarna AI for Climate Resilience program, with GainForest."
     },
     "rsvp": {
@@ -340,7 +340,7 @@
           "winners": {
             "title": "4. Winner selection",
             "paragraphs": {
-              "p1": "The Highest Points prize is based on the highest total score of valid observations during the round: each valid animal photo earns 2 points, each valid plant photo earns 1 point, and either earns an extra 0.5 points when the species is identified rather than left unidentified. The Best Picture prize is selected using the criteria described on the BioBlitz page, including image quality, subject, and community engagement where relevant.",
+              "p1": "From Round 8 onward, the Highest Points prize is based on the highest total score of valid observations during the round: each valid animal photo earns 2 points, each valid plant photo earns 1 point, and either earns an extra 0.5 points when the species is identified rather than left unidentified. In earlier rounds, this prize was based on the highest number of valid observations. The Best Picture prize is selected using the criteria described on the BioBlitz page, including image quality, subject, and community engagement where relevant.",
               "p2": "GainForest may review entries, resolve ties, correct counting errors, and disqualify invalid entries. Decisions are final to the extent permitted by law."
             }
           },
@@ -501,6 +501,10 @@
       "title": "Prizes every round",
       "badgeNote": "Plus a permanent winner badge on your profile.",
       "mostObservations": {
+        "title": "Most observations",
+        "blurb": "For the collector with the most valid sightings in the round."
+      },
+      "highestPoints": {
         "title": "Highest points",
         "blurb": "For the collector with the highest score in the round: 2 points per animal photo, 1 per plant photo, +0.5 when the species is named."
       },
@@ -522,7 +526,7 @@
         },
         "review": {
           "title": "Check the species name",
-          "blurb": "Confirm or correct the suggested name — a named species earns an extra 0.5 points."
+          "blurb": "Confirm or correct the suggested name — from Round 8, a named species earns an extra 0.5 points."
         }
       },
       "proof": {
@@ -535,10 +539,11 @@
     "board": {
       "title": "This round's board",
       "live": "Live",
-      "subtitleLive": "Who is leading on points with eligible photo observations right now.",
+      "subtitleLive": "Who is leading with eligible photo observations right now.",
+      "subtitleLivePoints": "Who is leading on points with eligible photo observations right now.",
       "subtitleEnded": "Final standings for this round.",
       "subtitleUpcoming": "Be the first to get on the board when the round opens.",
-      "subtitleAll": "The highest point totals across the challenge.",
+      "subtitleAll": "The most eligible photo observations across the challenge.",
       "scope": {
         "round": "This round",
         "all": "All time"
@@ -565,8 +570,9 @@
       "stats": {
         "observations": "Observations this round",
         "observationsAll": "Observations (all time)",
-        "points": "Points this round",
-        "pointsAll": "Points (all time)",
+        "animals": "Animals",
+        "plants": "Plants",
+        "named": "Named species",
         "collectors": "Collectors",
         "timeLeft": "Time left"
       },
@@ -578,7 +584,7 @@
         "people": "People",
         "potted": "Potted plants",
         "other": "Other excluded",
-        "explainer": "Only clear outdoor wildlife and plant observations with a directly uploaded photo count. People, potted or indoor plants, unclear subjects, and observations without an uploaded photo are excluded. Each animal photo earns 2 points, each plant photo 1 point, and naming the species adds 0.5 points."
+        "explainer": "Only clear outdoor wildlife and plant observations with a directly uploaded photo count. People, potted or indoor plants, unclear subjects, and observations without an uploaded photo are excluded."
       },
       "empty": {
         "title": "No sightings yet",
@@ -588,12 +594,31 @@
         "title": "Could not load the board",
         "description": "Please try again in a moment."
       },
-      "cta": "Add your observations"
+      "cta": "Add your observations",
+      "pointsGuide": {
+        "title": "How points are scored",
+        "animalValue": "2 pts",
+        "animalLabel": "Per animal photo",
+        "plantValue": "1 pt",
+        "plantLabel": "Per plant photo",
+        "namedValue": "+0.5 pts",
+        "namedLabel": "Species named",
+        "note": "Points started in Round 8. A collector's total is their animal photos × 2, plus plant photos × 1, plus 0.5 for every named species. Tap a row on the board to see the maths for that collector."
+      },
+      "breakdown": {
+        "toggle": "How the points were calculated",
+        "animals": "{count, plural, one {# animal photo} other {# animal photos}} × 2",
+        "plants": "{count, plural, one {# plant photo} other {# plant photos}} × 1",
+        "labeled": "{count, plural, one {# named species} other {# named species}} × 0.5",
+        "ineligible": "{count, plural, one {# photo didn't qualify} other {# photos didn't qualify}}",
+        "total": "Total points",
+        "profile": "Open profile"
+      }
     },
     "winners": {
       "title": "Past winners",
       "description": "A permanent record of every round's champions.",
-      "mostObservations": "Highest points",
+      "mostObservations": "Most observations",
       "bestPicture": "Best picture",
       "pending": "To be announced",
       "final": "Final",
@@ -601,7 +626,11 @@
       "finalHint": "These winners are confirmed and will not change.",
       "provisionalHint": "Current standings — they may still change until the winners are confirmed.",
       "compact": "Latest",
-      "mostSubmitted": "Highest points",
+      "newer": "Newer rounds",
+      "older": "Older rounds",
+      "page": "{page} of {total}",
+      "mostSubmitted": "Most submitted",
+      "highestPoints": "Highest points",
       "mostLiked": "Most liked",
       "award": {
         "action": "Award winner badges",
@@ -609,7 +638,8 @@
         "done": "Winner badges awarded",
         "error": "Could not update the badges or email status. Try again.",
         "notification": {
-          "mostObservations": "Highest points email",
+          "mostObservations": "Most observations email",
+          "highestPoints": "Highest points email",
           "bestPicture": "Best picture email",
           "sent": "Sent",
           "delayed": "Delayed — we’ll keep trying",
