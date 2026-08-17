@@ -6,6 +6,9 @@ Avoid adding new jargon or protocol details to the UI. Do not show handles, DIDs
 ## Translations
 Always add or update translations for new or changed user-facing UI copy. Keep support for all configured languages in sync, and avoid introducing hardcoded English strings in components, metadata, placeholders, labels, buttons, aria text, or validation messages.
 
+## Email template explorer
+Whenever an email template is added or changed, inform the user that they also need to update the [email template explorer](https://gainforest-app-email-explorer.vercel.app/emails). The explorer is maintained separately and provides template previews plus architecture flow charts; agents should not imply that they can update it from this repository.
+
 ## Mutation permissions
 When adding any feature that creates, updates, deletes, or changes membership/roles, gate the available actions by the user’s current role before they can trigger them. Disable or hide unavailable options up front and use plain-language explanations.
 

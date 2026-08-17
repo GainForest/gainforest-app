@@ -115,6 +115,12 @@ Vercel** or production can't reach the runtime.
 [Flue](https://flueframework.com). The agent internals, data flows, and deploy
 notes live in that repo's `AGENTS.md`.
 
+## Email templates
+
+Whenever an email template is added or changed, update the separately maintained
+[email template explorer](https://gainforest-app-email-explorer.vercel.app/emails)
+as well. It shows how templates look and includes architecture flow charts.
+
 ## AudioMoth spectrogram occurrences
 
 The AudioMoth labelling workspace treats every confirmed time/frequency box as
