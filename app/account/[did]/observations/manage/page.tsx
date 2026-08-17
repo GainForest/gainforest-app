@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { resolveAccountManageAccess } from "@/app/_lib/manage-server";
 import { getGainForestModeratorAccess } from "@/app/internal/badges/_lib/access";
+import Container from "@/components/ui/container";
 import { ObservationsSection, TreesSection } from "@/app/(manage)/manage/_sections";
 import { ObservationsSubNav } from "../../../_components/ObservationsSubNav";
 import {
@@ -65,12 +66,16 @@ export default async function AccountObservationsManagePage({
   const layerParam = (await searchParams).layer;
   const showMeasurements = (Array.isArray(layerParam) ? layerParam[0] : layerParam) === "measurements";
 
+  // This page stands alone — AccountChrome drops the profile hero and tab bar
+  // for it, because user management is moving onto its own pages rather than
+  // living inside the profile. It starts at the title, so it brings the
+  // Container framing the chrome would otherwise provide.
   return (
-    <>
+    <Container className="pt-6 pb-8">
       {/* The measurements layer carries its own heading, so only the sightings
           view names the page. */}
       {showMeasurements ? null : (
-        <div className="mt-4">
+        <div>
           <h1 className="font-instrument text-2xl font-light italic tracking-[-0.03em] text-foreground sm:text-3xl">
             {t("title")}
           </h1>
@@ -82,6 +87,6 @@ export default async function AccountObservationsManagePage({
         photosHref={accountObservationsManagePath(account.urlIdentifier)}
       />
       {showMeasurements ? <TreesSection target={access.target} /> : <ObservationsSection target={access.target} />}
-    </>
+    </Container>
   );
 }
