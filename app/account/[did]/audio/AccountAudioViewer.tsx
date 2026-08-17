@@ -21,6 +21,7 @@ import Link from "next/link";
 import {
   ArrowUpRightIcon,
   AudioLinesIcon,
+  ChevronDownIcon,
   FolderInputIcon,
   FolderKanbanIcon,
   Loader2Icon,
@@ -41,6 +42,13 @@ import {
   ContextMenuSeparator,
   ContextMenuTrigger,
 } from "@/components/ui/context-menu";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { ModalContent, ModalDescription, ModalFooter, ModalHeader, ModalTitle } from "@/components/ui/modal/modal";
 import { useModal } from "@/components/ui/modal/context";
 import { resolvePdsHost } from "@/app/_lib/pds";
@@ -689,22 +697,42 @@ export function AccountAudioViewer({
                       </Link>
                     ) : null}
                     {canDelete && (folder || group.event) ? (
-                      <Button type="button" variant="ghost" size="sm" onClick={() => renameDeployment(group)}>
-                        <PencilIcon className="size-4" />
-                        {tFolders("renameAction")}
-                      </Button>
-                    ) : null}
-                    {canDelete && folder ? (
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="sm"
-                        className="text-destructive hover:bg-destructive/10 hover:text-destructive"
-                        onClick={() => confirmDeleteFolder(group)}
-                      >
-                        <Trash2Icon className="size-4" />
-                        {tFolders("deleteAction")}
-                      </Button>
+                      /* Every folder action in one always-visible menu — the
+                         right-click context menu below offers the same, but
+                         only for those who think to try it. */
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button type="button" variant="ghost" size="sm">
+                            <PencilIcon className="size-4" />
+                            {tFolders("editAction")}
+                            <ChevronDownIcon className="size-3.5 text-muted-foreground" aria-hidden />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          {folder ? (
+                            <DropdownMenuItem onSelect={() => addFolderToProject(group)}>
+                              <FolderKanbanIcon />
+                              {tFolders("addToProject.action")}
+                            </DropdownMenuItem>
+                          ) : null}
+                          <DropdownMenuItem onSelect={() => renameDeployment(group)}>
+                            <PencilIcon />
+                            {tFolders("renameAction")}
+                          </DropdownMenuItem>
+                          {folder ? (
+                            <>
+                              <DropdownMenuSeparator />
+                              <DropdownMenuItem
+                                variant="destructive"
+                                onSelect={() => confirmDeleteFolder(group)}
+                              >
+                                <Trash2Icon />
+                                {tFolders("deleteAction")}
+                              </DropdownMenuItem>
+                            </>
+                          ) : null}
+                        </DropdownMenuContent>
+                      </DropdownMenu>
                     ) : null}
                   </div>
                 </div>
@@ -726,8 +754,8 @@ export function AccountAudioViewer({
                 </div>
               </section>
             );
-            // Owners and org admins get a right-click menu on the folder —
-            // the same actions as the header buttons, plus "Add to project".
+            // Owners and org admins also get a right-click menu on the
+            // folder — the same actions as the header's Edit menu.
             if (!canDelete || !folder) {
               return <div key={group.key || "other"}>{section}</div>;
             }

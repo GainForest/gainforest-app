@@ -3561,6 +3561,7 @@
     }
   },
   "recordingFolders": {
+    "editAction": "Ubah",
     "renameAction": "Ganti nama",
     "deleteAction": "Hapus",
     "emptyFolder": "Belum ada rekaman di penempatan ini.",

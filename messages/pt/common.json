@@ -3561,6 +3561,7 @@
     }
   },
   "recordingFolders": {
+    "editAction": "Editar",
     "renameAction": "Renomear",
     "deleteAction": "Excluir",
     "emptyFolder": "Ainda não há gravações nesta implantação.",

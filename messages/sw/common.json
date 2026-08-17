@@ -3561,6 +3561,7 @@
     }
   },
   "recordingFolders": {
+    "editAction": "Hariri",
     "renameAction": "Badilisha jina",
     "deleteAction": "Futa",
     "emptyFolder": "Bado hakuna rekodi katika uwekaji huu.",

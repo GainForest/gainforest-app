@@ -3561,6 +3561,7 @@
     }
   },
   "recordingFolders": {
+    "editAction": "Editar",
     "renameAction": "Renombrar",
     "deleteAction": "Eliminar",
     "emptyFolder": "Todavía no hay grabaciones en este despliegue.",
