@@ -12,7 +12,7 @@
  * is given (the proxy checks group membership).
  */
 
-import { resolvePdsHost } from "./pds";
+import { resolvePdsHost, getPdsRecord, parseAtUri } from "./pds";
 
 export const AC_AUDIO_COLLECTION = "app.gainforest.ac.audio";
 
@@ -322,6 +322,24 @@ async function listAcAudioItems(
 /** Every ac.audio record in a repo, oldest first. */
 export async function listAllRecordings(did: string, signal?: AbortSignal): Promise<AcAudioListItem[]> {
   return listAcAudioItems(did, () => true, signal);
+}
+
+/**
+ * Read one recording by its AT-URI, straight from the owner's PDS. A public,
+ * CORS-open read (same trust model as blob fetching), so it works for
+ * signed-out visitors — used to hydrate a published soundscape's source
+ * recordings, which store only a pointer back to their ac.audio record.
+ * Returns null when the record can't be reached or isn't a usable recording.
+ */
+export async function fetchRecordingByUri(
+  uri: string,
+  signal?: AbortSignal,
+): Promise<AcAudioListItem | null> {
+  const parts = parseAtUri(uri);
+  if (!parts || parts.collection !== AC_AUDIO_COLLECTION) return null;
+  const record = await getPdsRecord(parts.did, AC_AUDIO_COLLECTION, parts.rkey, signal);
+  if (!record) return null;
+  return parseAcAudioListItem(parts.did, { uri: record.uri, cid: record.cid ?? "", value: record.value });
 }
 
 /** All ac.audio records linked to a deployment, oldest first (chronological). */

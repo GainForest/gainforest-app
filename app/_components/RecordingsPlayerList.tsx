@@ -14,6 +14,7 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { cn } from "@/lib/utils";
 import { pdsBlobUrl, type AcAudioListItem } from "@/app/_lib/ac-audio";
+import { pauseOtherAudio, registerAudioElement } from "@/app/_lib/audio-coordinator";
 
 const PAGE_SIZE = 20;
 
@@ -48,6 +49,7 @@ export function RecordingsPlayerList({
   selectable = false,
   selectedUris,
   onToggleSelect,
+  onPlay,
 }: {
   did: string;
   host: string | null;
@@ -61,6 +63,9 @@ export function RecordingsPlayerList({
   selectable?: boolean;
   selectedUris?: ReadonlySet<string>;
   onToggleSelect?: (item: AcAudioListItem, shiftKey?: boolean) => void;
+  /** Called when a row starts playing, so a sibling player (e.g. a soundscape
+   *  dial) can clear its own "now playing" state. */
+  onPlay?: () => void;
 }) {
   const t = useTranslations("common.audiomoth.recordings");
 
@@ -70,13 +75,18 @@ export function RecordingsPlayerList({
   const [position, setPosition] = useState(0);
   const [trackDuration, setTrackDuration] = useState(0);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  /* True while a pause we caused ourselves (stopping, or switching tracks) is
+     in flight, so it isn't mistaken for another player taking over. */
+  const selfPauseRef = useRef(false);
 
   /* Cap the list to MAX_VISIBLE_ROWS rows and scroll the rest. The row height
      is measured so the cap stays exact if the card layout ever changes. */
   const listRef = useRef<HTMLUListElement | null>(null);
   const [maxHeight, setMaxHeight] = useState(() => rowsCapPx(ESTIMATED_ROW_PX));
 
-  /* Single shared audio element */
+  /* Single shared audio element, registered with the page-wide coordinator so
+     starting a row stops any other player (a soundscape dial, a feed clip) and
+     vice versa — only one recording is ever audible at once. */
   useEffect(() => {
     const audio = new Audio();
     audioRef.current = audio;
@@ -84,19 +94,33 @@ export function RecordingsPlayerList({
     const onMeta = () => setTrackDuration(Number.isFinite(audio.duration) ? audio.duration : 0);
     const onEnded = () => setPlayingUri(null);
     const onWaiting = () => setBuffering(true);
-    const onPlaying = () => setBuffering(false);
+    const onPlaying = () => {
+      selfPauseRef.current = false;
+      setBuffering(false);
+    };
+    // A pause we didn't initiate means another player took over; drop this
+    // row's playing state so it doesn't sit highlighted with no sound.
+    const onPause = () => {
+      if (selfPauseRef.current) return;
+      setPlayingUri(null);
+      setBuffering(false);
+    };
     audio.addEventListener("timeupdate", onTime);
     audio.addEventListener("loadedmetadata", onMeta);
     audio.addEventListener("ended", onEnded);
     audio.addEventListener("waiting", onWaiting);
     audio.addEventListener("playing", onPlaying);
+    audio.addEventListener("pause", onPause);
+    const unregister = registerAudioElement(audio);
     return () => {
+      audio.removeEventListener("pause", onPause);
       audio.pause();
       audio.removeEventListener("timeupdate", onTime);
       audio.removeEventListener("loadedmetadata", onMeta);
       audio.removeEventListener("ended", onEnded);
       audio.removeEventListener("waiting", onWaiting);
       audio.removeEventListener("playing", onPlaying);
+      unregister();
       audioRef.current = null;
     };
   }, []);
@@ -106,18 +130,27 @@ export function RecordingsPlayerList({
       const audio = audioRef.current;
       if (!audio || !host || !item.previewCid) return;
       if (playingUri === item.uri) {
+        selfPauseRef.current = true;
         audio.pause();
         setPlayingUri(null);
         return;
+      }
+      // Interrupting a track already playing here: flag that pause as ours.
+      if (!audio.paused) {
+        selfPauseRef.current = true;
+        audio.pause();
       }
       setPosition(0);
       setTrackDuration(0);
       setBuffering(true);
       audio.src = pdsBlobUrl(host, did, item.previewCid);
+      // Stop anything else playing on the page (a soundscape dial, a feed clip).
+      pauseOtherAudio(audio);
+      onPlay?.();
       void audio.play().catch(() => setBuffering(false));
       setPlayingUri(item.uri);
     },
-    [did, host, playingUri],
+    [did, host, playingUri, onPlay],
   );
 
   const seek = useCallback(
