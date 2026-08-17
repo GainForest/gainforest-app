@@ -885,7 +885,9 @@
           "confirmed": "Imethibitishwa",
           "payout": "Hutoa ${amount} · malipo ya {tranche}",
           "reviewNote": "GainForest huthibitisha kila hatua muhimu — kila hatua iliyothibitishwa hufungua sehemu inayofuata ya ruzuku yako.",
-          "pending": "Haijathibitishwa"
+          "pending": "Haijathibitishwa",
+          "dueOn": "Ifikapo {date}",
+          "overdue": "Ilipaswa kufika {date}"
         },
         "metadata": {
           "title": "Ruzuku yangu",

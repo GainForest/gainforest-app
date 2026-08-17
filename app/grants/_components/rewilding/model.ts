@@ -46,11 +46,18 @@ export type GrantMilestoneState =
   | "done";
 
 export type GrantMilestone = {
-  /** Program milestone id ("m1"…"m4"). Also the key its name and description
-   *  are looked up under in `common.rewildingProgram.milestones`. */
+  /** Program milestone id ("m1"…"m4") whose name and description are looked
+   *  up in `common.rewildingProgram.milestones`, or a custom milestone id. */
   id: string;
-  /** Short program code, e.g. "M2". Shown as-is; not translated. */
-  code: string;
+  /** Short program code, e.g. "M2". Shown as-is; not translated. Custom
+   *  milestones have none. */
+  code: string | null;
+  /** Name of a custom milestone, written by the grant team for this grantee.
+   *  Null for program milestones, whose names come from translated copy. */
+  title?: string | null;
+  /** Calendar date (YYYY-MM-DD) this milestone is due, when the grant team
+   *  set one for this grantee. */
+  dueDate?: string | null;
   state: GrantMilestoneState;
   /** The payment tranche this milestone releases, when it gates one. M3 shares
    *  M2's tranche, so it carries no payout of its own. */
@@ -143,6 +150,15 @@ export type NewRecorderInput = {
 export const RECORDER_DEVICE_TYPES = ["AudioMoth 1.2.0", "HydroMoth", "Song Meter Micro"] as const;
 
 export const RECORDER_CONDITIONS: readonly RecorderCondition[] = ["fieldWorking", "working", "needsRepair"];
+
+/**
+ * Whether a milestone due date has passed. Due dates are calendar dates
+ * compared in UTC — the same convention the grant deadline uses — so a
+ * milestone flips to overdue at the same moment for every viewer.
+ */
+export function isDueDatePast(dueDate: string, now: Date = new Date()): boolean {
+  return dueDate < now.toISOString().slice(0, 10);
+}
 
 export function countByOrigin(recorders: readonly Recorder[]): { owned: number; gainforest: number } {
   let owned = 0;

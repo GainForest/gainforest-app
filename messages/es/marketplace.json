@@ -885,7 +885,9 @@
           "confirmed": "Confirmado",
           "payout": "Libera ${amount} · pago {tranche}",
           "reviewNote": "GainForest confirma cada hito: cada hito confirmado libera la siguiente parte de tu subvención.",
-          "pending": "Sin confirmar"
+          "pending": "Sin confirmar",
+          "dueOn": "Vence {date}",
+          "overdue": "Venció {date}"
         },
         "metadata": {
           "title": "Mi subvención",

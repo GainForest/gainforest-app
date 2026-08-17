@@ -5,6 +5,7 @@ import {
   RewildingMutationError,
   setRewildingGrantee,
   setRewildingMilestone,
+  setRewildingMilestonePlan,
 } from "@/app/admin/_lib/rewilding-mutations";
 import {
   addRewildingDocument,
@@ -27,6 +28,9 @@ export const runtime = "nodejs";
  *   { action: "addGrantee", subjectDid }     — refused once all 10 slots are taken
  *   { action: "removeGrantee", subjectDid }
  *   { action: "setMilestone", subjectDid, milestoneId, done }
+ *   { action: "setMilestonePlan", subjectDid, milestoneId?, title?, dueDate?, removed? }
+ *       — omit milestoneId to add a custom milestone; program milestones
+ *         accept only a due date; removed retires a custom milestone
  *   { action: "addDocument", subjectDid, title, fileName, mimeType, dataBase64 }
  *   { action: "deleteDocument", id }
  */
@@ -73,6 +77,28 @@ export async function POST(request: Request) {
         body.done === true,
       );
       return Response.json({ milestone }, { headers: { "cache-control": "no-store" } });
+    }
+
+    if (body.action === "setMilestonePlan") {
+      const headerList = await headers();
+      const cookie = getAuthForwardCookie(headerList.get("cookie"));
+      const plan = await setRewildingMilestonePlan(access.repoDid, cookie, str(body.subjectDid), {
+        milestoneId: typeof body.milestoneId === "string" ? body.milestoneId : null,
+        title: typeof body.title === "string" ? body.title : null,
+        dueDate: typeof body.dueDate === "string" && body.dueDate ? body.dueDate : null,
+        removed: body.removed === true,
+      });
+      return Response.json(
+        {
+          plan: {
+            milestoneId: plan.milestoneId,
+            title: plan.title,
+            dueDate: plan.dueDate,
+            removed: plan.removed,
+          },
+        },
+        { headers: { "cache-control": "no-store" } },
+      );
     }
 
     if (body.action === "addDocument") {

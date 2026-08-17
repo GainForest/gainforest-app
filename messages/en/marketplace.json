@@ -885,7 +885,9 @@
           "confirmed": "Confirmed",
           "payout": "Releases ${amount} · payment {tranche}",
           "reviewNote": "GainForest confirms each milestone — every confirmed milestone releases the next part of your grant.",
-          "pending": "Not confirmed"
+          "pending": "Not confirmed",
+          "dueOn": "Due {date}",
+          "overdue": "Was due {date}"
         },
         "metadata": {
           "title": "My grant",

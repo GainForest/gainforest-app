@@ -1409,7 +1409,21 @@
       "slotsFull": "Nafasi zote kumi zimejaa. Ondoa mpokeaji mmoja kabla ya kuongeza mwingine.",
       "remove": "Ondoa kwenye ruzuku",
       "removing": "Inaondoa…",
-      "removeConfirm": "Ondoa “{name}” kwenye ruzuku? Hatua muhimu na nyaraka zinabaki, lakini akaunti hiyo inapoteza ufikiaji wa dashibodi ya ruzuku na nafasi inafunguka."
+      "removeConfirm": "Ondoa “{name}” kwenye ruzuku? Hatua muhimu na nyaraka zinabaki, lakini akaunti hiyo inapoteza ufikiaji wa dashibodi ya ruzuku na nafasi inafunguka.",
+      "dueDateLabel": "Tarehe ya mwisho ya {title}",
+      "overdue": "Imechelewa",
+      "customMilestone": "Maalum",
+      "milestoneNameLabel": "Jina la hatua",
+      "milestoneNamePlaceholder": "k.m. Kikao cha mafunzo ya jamii",
+      "addMilestone": "Ongeza hatua",
+      "addingMilestone": "Inaongeza…",
+      "addMilestoneDueLabel": "Tarehe ya mwisho",
+      "addMilestoneHint": "Huongeza hatua kwa mpokeaji huyu pekee, yenye jina lake na tarehe ya mwisho ya hiari. Mpokeaji huiona mara moja kwenye ukurasa wa ruzuku yake.",
+      "renameMilestone": "Badilisha jina la {title}",
+      "renameSave": "Hifadhi",
+      "renameCancel": "Ghairi",
+      "removeMilestone": "Ondoa {title}",
+      "removeMilestoneConfirm": "Ondoa “{title}” kwenye hatua za mpokeaji huyu? Mpokeaji hataiona tena."
     },
     "pages": {
       "hub": {

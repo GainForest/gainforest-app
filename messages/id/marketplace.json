@@ -885,7 +885,9 @@
           "confirmed": "Terkonfirmasi",
           "payout": "Mencairkan ${amount} · pembayaran {tranche}",
           "reviewNote": "GainForest mengonfirmasi setiap tonggak — setiap tonggak yang dikonfirmasi mencairkan bagian hibah berikutnya.",
-          "pending": "Belum dikonfirmasi"
+          "pending": "Belum dikonfirmasi",
+          "dueOn": "Tenggat {date}",
+          "overdue": "Lewat tenggat {date}"
         },
         "metadata": {
           "title": "Hibah saya",

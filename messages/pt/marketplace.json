@@ -885,7 +885,9 @@
           "confirmed": "Confirmado",
           "payout": "Libera ${amount} · pagamento {tranche}",
           "reviewNote": "A GainForest confirma cada marco — cada marco confirmado libera a próxima parte do seu subsídio.",
-          "pending": "Não confirmado"
+          "pending": "Não confirmado",
+          "dueOn": "Até {date}",
+          "overdue": "Venceu {date}"
         },
         "metadata": {
           "title": "Meu subsídio",

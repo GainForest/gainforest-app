@@ -4,7 +4,7 @@ import { ArrowRightIcon, CheckIcon } from "lucide-react";
 import { useFormatter, useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
 import type { GrantMilestone, GrantOverview, Recorder } from "./model";
-import { countByOrigin } from "./model";
+import { countByOrigin, isDueDatePast } from "./model";
 import { AudioPaceChart } from "./AudioPaceChart";
 import { Sparkline } from "./Sparkline";
 
@@ -245,6 +245,20 @@ function StatCard({
   );
 }
 
+/** Milestone due dates are calendar dates: formatted in UTC — like the grant
+ *  deadline — so the named day never shifts with the viewer's timezone. The
+ *  year appears only when it isn't the current one. */
+function formatDueDate(format: ReturnType<typeof useFormatter>, dueDate: string): string {
+  const date = new Date(`${dueDate}T00:00:00.000Z`);
+  const sameYear = dueDate.slice(0, 4) === new Date().toISOString().slice(0, 4);
+  return format.dateTime(date, {
+    day: "numeric",
+    month: "short",
+    ...(sameYear ? {} : { year: "numeric" }),
+    timeZone: "UTC",
+  });
+}
+
 function MilestoneRow({
   milestone,
   onOpenRecorders,
@@ -253,10 +267,13 @@ function MilestoneRow({
   onOpenRecorders: () => void;
 }) {
   const t = useTranslations("marketplace.grants.rewildingDashboard.grant.milestones");
-  // Each milestone's name and description are program copy, translated per
-  // locale and keyed by milestone id.
+  // Program milestones carry no title of their own — their name and
+  // description are translated copy keyed by milestone id. Custom milestones
+  // carry the name the grant team wrote for this grantee.
   const program = useTranslations("common.rewildingProgram.milestones");
   const format = useFormatter();
+  const overdue =
+    milestone.state !== "done" && !!milestone.dueDate && isDueDatePast(milestone.dueDate);
 
   return (
     <li
@@ -279,15 +296,31 @@ function MilestoneRow({
 
       <div className="min-w-0 flex-1">
         <div className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
-          <span className="font-mono text-[10px] font-semibold text-muted-foreground">{milestone.code}</span>
+          {milestone.code ? (
+            <span className="font-mono text-[10px] font-semibold text-muted-foreground">{milestone.code}</span>
+          ) : null}
           <span
             className={cn(
               "text-sm font-medium",
               milestone.state === "done" ? "text-muted-foreground" : "text-foreground",
             )}
           >
-            {program(`${milestone.id}.title`)}
+            {milestone.title ?? program(`${milestone.id}.title`)}
           </span>
+          {milestone.dueDate ? (
+            <span
+              className={cn(
+                "rounded-full border px-2 py-px text-[10px] font-medium",
+                overdue
+                  ? "border-amber-500/40 bg-amber-500/10 text-amber-700 dark:text-amber-400"
+                  : "border-border text-muted-foreground",
+              )}
+            >
+              {overdue
+                ? t("overdue", { date: formatDueDate(format, milestone.dueDate) })
+                : t("dueOn", { date: formatDueDate(format, milestone.dueDate) })}
+            </span>
+          ) : null}
           {milestone.payout ? (
             <span className="rounded-full border border-border px-2 py-px text-[10px] font-medium text-muted-foreground">
               {t("payout", {
@@ -297,9 +330,11 @@ function MilestoneRow({
             </span>
           ) : null}
         </div>
-        <p className="mt-0.5 text-xs leading-5 text-muted-foreground">
-          {program(`${milestone.id}.description`)}
-        </p>
+        {milestone.title ? null : (
+          <p className="mt-0.5 text-xs leading-5 text-muted-foreground">
+            {program(`${milestone.id}.description`)}
+          </p>
+        )}
         {milestone.isRecorderInventory && milestone.state !== "done" ? (
           <button
             type="button"

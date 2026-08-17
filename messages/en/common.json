@@ -1409,7 +1409,21 @@
       "slotsFull": "All ten slots are taken. Remove a grantee before adding another.",
       "remove": "Remove from the grant",
       "removing": "Removing…",
-      "removeConfirm": "Remove “{name}” from the grant? Milestones and documents are kept, but the grantee loses access to the grant dashboard and the slot opens up."
+      "removeConfirm": "Remove “{name}” from the grant? Milestones and documents are kept, but the grantee loses access to the grant dashboard and the slot opens up.",
+      "dueDateLabel": "Due date for {title}",
+      "overdue": "Overdue",
+      "customMilestone": "Custom",
+      "milestoneNameLabel": "Milestone name",
+      "milestoneNamePlaceholder": "e.g. Community training session",
+      "addMilestone": "Add milestone",
+      "addingMilestone": "Adding…",
+      "addMilestoneDueLabel": "Due date",
+      "addMilestoneHint": "Adds a step for this grantee only, with its own name and optional due date. The grantee sees it on their grant page right away.",
+      "renameMilestone": "Rename {title}",
+      "renameSave": "Save",
+      "renameCancel": "Cancel",
+      "removeMilestone": "Remove {title}",
+      "removeMilestoneConfirm": "Remove “{title}” from this grantee's milestones? The grantee will no longer see it."
     },
     "pages": {
       "hub": {

@@ -1409,7 +1409,21 @@
       "slotsFull": "Las diez plazas están ocupadas. Quita a alguien antes de añadir a otra persona o grupo.",
       "remove": "Quitar de la subvención",
       "removing": "Quitando…",
-      "removeConfirm": "¿Quitar a «{name}» de la subvención? Se conservan los hitos y los documentos, pero esa cuenta pierde el acceso al panel de la subvención y la plaza queda libre."
+      "removeConfirm": "¿Quitar a «{name}» de la subvención? Se conservan los hitos y los documentos, pero esa cuenta pierde el acceso al panel de la subvención y la plaza queda libre.",
+      "dueDateLabel": "Fecha límite de {title}",
+      "overdue": "Vencido",
+      "customMilestone": "Personalizado",
+      "milestoneNameLabel": "Nombre del hito",
+      "milestoneNamePlaceholder": "p. ej. Taller de formación comunitaria",
+      "addMilestone": "Añadir hito",
+      "addingMilestone": "Añadiendo…",
+      "addMilestoneDueLabel": "Fecha límite",
+      "addMilestoneHint": "Añade un paso solo para este beneficiario, con su propio nombre y una fecha límite opcional. El beneficiario lo ve de inmediato en su página de la subvención.",
+      "renameMilestone": "Renombrar {title}",
+      "renameSave": "Guardar",
+      "renameCancel": "Cancelar",
+      "removeMilestone": "Quitar {title}",
+      "removeMilestoneConfirm": "¿Quitar «{title}» de los hitos de este beneficiario? El beneficiario dejará de verlo."
     },
     "pages": {
       "hub": {

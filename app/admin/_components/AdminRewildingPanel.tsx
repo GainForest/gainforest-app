@@ -8,7 +8,9 @@ import {
   CheckIcon,
   ChevronDownIcon,
   FileTextIcon,
+  ListPlusIcon,
   LockIcon,
+  PencilIcon,
   SearchIcon,
   Trash2Icon,
   UploadIcon,
@@ -17,6 +19,7 @@ import {
 import { cn } from "@/lib/utils";
 import { formatRelative } from "@/app/_lib/format";
 import { REWILDING_GRANT_SLOTS } from "@/app/_lib/rewilding-grantees";
+import { isDueDatePast } from "@/app/grants/_components/rewilding/model";
 import { accountPath } from "@/app/account/_lib/account-route";
 import type {
   RewildingAdminDocument,
@@ -35,6 +38,11 @@ import { AdminAvatar } from "./AdminPanel";
  * checklist (marking one done is GainForest's confirmation — it releases
  * the matching payment tranche) and the private grant documents.
  * All writes go through /api/admin/rewilding.
+ *
+ * Milestones are per grantee: every row takes its own due date, and beyond
+ * the shared program milestones an admin can add, rename and remove custom
+ * milestones that exist for this grantee only. The grantee sees the same
+ * plan — names, due dates, overdue state — on their grant page.
  *
  * Documents are private to the admin group: they are stored outside the
  * public repo and have no shareable URL, so opening one asks the server for
@@ -330,9 +338,16 @@ function GranteeCard({
                       current.map((entry) => (entry.id === next.id ? next : entry)),
                     )
                   }
+                  onRemoved={(id) =>
+                    setMilestones((current) => current.filter((entry) => entry.id !== id))
+                  }
                 />
               ))}
             </ol>
+            <AddMilestoneForm
+              subjectDid={grantee.did}
+              onAdded={(milestone) => setMilestones((current) => [...current, milestone])}
+            />
           </section>
 
           <section className="flex flex-col gap-2">
@@ -410,17 +425,27 @@ function MilestoneRow({
   subjectDid,
   milestone,
   onChanged,
+  onRemoved,
 }: {
   subjectDid: string;
   milestone: RewildingAdminMilestone;
   onChanged: (milestone: RewildingAdminMilestone) => void;
+  /** A custom milestone was removed from this grantee's plan. */
+  onRemoved: (id: string) => void;
 }) {
   const t = useTranslations("common.adminModeration.rewilding");
-  // Milestone names are program copy shared with the grantee's own page.
+  // Program milestone names are shared translated copy; custom milestones
+  // carry the name the admin wrote for this grantee.
   const program = useTranslations("common.rewildingProgram.milestones");
   const format = useFormatter();
   const [pending, setPending] = useState(false);
+  const [planPending, setPlanPending] = useState(false);
+  const [renaming, setRenaming] = useState(false);
+  const [titleDraft, setTitleDraft] = useState(milestone.title ?? "");
   const [failed, setFailed] = useState(false);
+
+  const name = milestone.title ?? (milestone.isCustom ? "" : program(`${milestone.id}.title`));
+  const overdue = !milestone.done && !!milestone.dueDate && isDueDatePast(milestone.dueDate);
 
   const toggle = async () => {
     if (pending) return;
@@ -441,6 +466,53 @@ function MilestoneRow({
     }
   };
 
+  /** Write this milestone's plan (due date and, for custom ones, the name).
+   *  Every event carries the full state, so the call always sends both. */
+  const savePlan = async (next: { dueDate: string | null; title?: string }) => {
+    if (planPending) return;
+    setPlanPending(true);
+    setFailed(false);
+    try {
+      const title = next.title ?? milestone.title ?? undefined;
+      await postAction({
+        action: "setMilestonePlan",
+        subjectDid,
+        milestoneId: milestone.id,
+        ...(milestone.isCustom && title ? { title } : {}),
+        dueDate: next.dueDate ?? "",
+      });
+      onChanged({
+        ...milestone,
+        dueDate: next.dueDate,
+        title: milestone.isCustom ? (next.title ?? milestone.title) : null,
+      });
+      setRenaming(false);
+    } catch {
+      setFailed(true);
+    } finally {
+      setPlanPending(false);
+    }
+  };
+
+  const remove = async () => {
+    if (planPending) return;
+    if (!window.confirm(t("removeMilestoneConfirm", { title: name }))) return;
+    setPlanPending(true);
+    setFailed(false);
+    try {
+      await postAction({
+        action: "setMilestonePlan",
+        subjectDid,
+        milestoneId: milestone.id,
+        removed: true,
+      });
+      onRemoved(milestone.id);
+    } catch {
+      setFailed(true);
+      setPlanPending(false);
+    }
+  };
+
   return (
     <li
       className={cn(
@@ -457,21 +529,69 @@ function MilestoneRow({
       >
         {milestone.done ? <CheckIcon className="size-3" /> : null}
       </span>
-      <span className="flex min-w-0 flex-1 flex-col">
-        <span className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
-          <span className="font-mono text-[10px] font-semibold text-muted-foreground">{milestone.code}</span>
-          <span className="text-sm font-medium text-foreground">
-            {program(`${milestone.id}.title`)}
+      <span className="flex min-w-0 flex-1 flex-col gap-0.5">
+        {renaming ? (
+          <form
+            onSubmit={(event) => {
+              event.preventDefault();
+              const title = titleDraft.trim();
+              if (title) void savePlan({ dueDate: milestone.dueDate, title });
+            }}
+            className="flex flex-wrap items-center gap-1.5"
+          >
+            <input
+              type="text"
+              value={titleDraft}
+              onChange={(event) => setTitleDraft(event.target.value)}
+              aria-label={t("milestoneNameLabel")}
+              maxLength={200}
+              autoFocus
+              className="h-8 min-w-0 flex-1 rounded-lg border border-border bg-background px-2.5 text-sm text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            />
+            <button
+              type="submit"
+              disabled={planPending || !titleDraft.trim()}
+              className="shrink-0 rounded-full border border-primary/40 bg-primary px-3 py-1 text-xs font-semibold text-primary-foreground shadow-sm transition-colors hover:bg-primary/90 disabled:pointer-events-none disabled:opacity-50"
+            >
+              {planPending ? t("saving") : t("renameSave")}
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setRenaming(false);
+                setTitleDraft(milestone.title ?? "");
+              }}
+              className="shrink-0 rounded-full border border-border bg-background px-3 py-1 text-xs font-medium text-muted-foreground transition-colors hover:bg-muted"
+            >
+              {t("renameCancel")}
+            </button>
+          </form>
+        ) : (
+          <span className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
+            {milestone.code ? (
+              <span className="font-mono text-[10px] font-semibold text-muted-foreground">{milestone.code}</span>
+            ) : null}
+            <span className="text-sm font-medium text-foreground">{name}</span>
+            {milestone.isCustom ? (
+              <span className="rounded-full border border-border px-2 py-px text-[10px] font-medium text-muted-foreground">
+                {t("customMilestone")}
+              </span>
+            ) : null}
+            {overdue ? (
+              <span className="rounded-full border border-amber-500/40 bg-amber-500/10 px-2 py-px text-[10px] font-medium text-amber-700 dark:text-amber-400">
+                {t("overdue")}
+              </span>
+            ) : null}
+            {milestone.payout ? (
+              <span className="rounded-full border border-border px-2 py-px text-[10px] font-medium text-muted-foreground">
+                {t("payout", {
+                  amount: format.number(milestone.payout.amountUsd),
+                  tranche: milestone.payout.tranche,
+                })}
+              </span>
+            ) : null}
           </span>
-          {milestone.payout ? (
-            <span className="rounded-full border border-border px-2 py-px text-[10px] font-medium text-muted-foreground">
-              {t("payout", {
-                amount: format.number(milestone.payout.amountUsd),
-                tranche: milestone.payout.tranche,
-              })}
-            </span>
-          ) : null}
-        </span>
+        )}
         {milestone.done && milestone.updatedAt ? (
           <span className="text-[11px] text-muted-foreground">
             {t("confirmedAt", { date: formatRelative(milestone.updatedAt) })}
@@ -479,20 +599,140 @@ function MilestoneRow({
         ) : null}
         {failed ? <span className="text-[11px] text-destructive">{t("error")}</span> : null}
       </span>
-      <button
-        type="button"
-        onClick={toggle}
-        disabled={pending}
-        className={cn(
-          "shrink-0 rounded-full border px-3 py-1.5 text-xs font-semibold shadow-sm transition-colors disabled:pointer-events-none disabled:opacity-50",
-          milestone.done
-            ? "border-border bg-background text-muted-foreground hover:bg-muted"
-            : "border-primary/40 bg-primary text-primary-foreground hover:bg-primary/90",
-        )}
-      >
-        {pending ? t("saving") : milestone.done ? t("reopen") : t("markDone")}
-      </button>
+      <span className="flex shrink-0 items-center gap-1.5">
+        <input
+          type="date"
+          value={milestone.dueDate ?? ""}
+          onChange={(event) => void savePlan({ dueDate: event.target.value || null })}
+          disabled={planPending}
+          aria-label={t("dueDateLabel", { title: name })}
+          className="h-8 rounded-lg border border-border bg-background px-2 text-xs text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-50"
+        />
+        {milestone.isCustom ? (
+          <>
+            <button
+              type="button"
+              onClick={() => {
+                setTitleDraft(milestone.title ?? "");
+                setRenaming((value) => !value);
+              }}
+              disabled={planPending}
+              aria-label={t("renameMilestone", { title: name })}
+              className="rounded-full p-1.5 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground disabled:pointer-events-none disabled:opacity-50"
+            >
+              <PencilIcon className="size-3.5" aria-hidden />
+            </button>
+            <button
+              type="button"
+              onClick={remove}
+              disabled={planPending}
+              aria-label={t("removeMilestone", { title: name })}
+              className="rounded-full p-1.5 text-muted-foreground transition-colors hover:bg-muted hover:text-destructive disabled:pointer-events-none disabled:opacity-50"
+            >
+              <Trash2Icon className="size-3.5" aria-hidden />
+            </button>
+          </>
+        ) : null}
+        <button
+          type="button"
+          onClick={toggle}
+          disabled={pending}
+          className={cn(
+            "shrink-0 rounded-full border px-3 py-1.5 text-xs font-semibold shadow-sm transition-colors disabled:pointer-events-none disabled:opacity-50",
+            milestone.done
+              ? "border-border bg-background text-muted-foreground hover:bg-muted"
+              : "border-primary/40 bg-primary text-primary-foreground hover:bg-primary/90",
+          )}
+        >
+          {pending ? t("saving") : milestone.done ? t("reopen") : t("markDone")}
+        </button>
+      </span>
     </li>
+  );
+}
+
+/**
+ * Adds a milestone that exists for this grantee only — a named step with an
+ * optional due date. It behaves like any other milestone afterwards:
+ * confirmable, datable, renamable, removable.
+ */
+function AddMilestoneForm({
+  subjectDid,
+  onAdded,
+}: {
+  subjectDid: string;
+  onAdded: (milestone: RewildingAdminMilestone) => void;
+}) {
+  const t = useTranslations("common.adminModeration.rewilding");
+  const [title, setTitle] = useState("");
+  const [dueDate, setDueDate] = useState("");
+  const [pending, setPending] = useState(false);
+  const [failed, setFailed] = useState(false);
+
+  const submit = async (event: React.FormEvent) => {
+    event.preventDefault();
+    const trimmed = title.trim();
+    if (pending || !trimmed) return;
+    setPending(true);
+    setFailed(false);
+    try {
+      const result = await postAction({
+        action: "setMilestonePlan",
+        subjectDid,
+        title: trimmed,
+        dueDate,
+      });
+      const plan = result.plan as { milestoneId: string; title: string | null; dueDate: string | null };
+      onAdded({
+        id: plan.milestoneId,
+        code: null,
+        title: plan.title ?? trimmed,
+        dueDate: plan.dueDate,
+        isCustom: true,
+        payout: null,
+        done: false,
+        updatedAt: null,
+      });
+      setTitle("");
+      setDueDate("");
+    } catch {
+      setFailed(true);
+    } finally {
+      setPending(false);
+    }
+  };
+
+  return (
+    <form onSubmit={submit} className="flex flex-col gap-1.5 rounded-xl border border-dashed border-border p-2.5">
+      <div className="flex flex-wrap items-center gap-1.5">
+        <input
+          type="text"
+          value={title}
+          onChange={(event) => setTitle(event.target.value)}
+          placeholder={t("milestoneNamePlaceholder")}
+          aria-label={t("milestoneNameLabel")}
+          maxLength={200}
+          className="h-8 min-w-0 flex-1 basis-40 rounded-lg border border-border bg-background px-2.5 text-sm text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+        />
+        <input
+          type="date"
+          value={dueDate}
+          onChange={(event) => setDueDate(event.target.value)}
+          aria-label={t("addMilestoneDueLabel")}
+          className="h-8 rounded-lg border border-border bg-background px-2 text-xs text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+        />
+        <button
+          type="submit"
+          disabled={pending || !title.trim()}
+          className="inline-flex h-8 shrink-0 items-center gap-1.5 rounded-lg border border-border bg-background px-3 text-xs font-semibold text-foreground shadow-sm transition-colors hover:bg-muted disabled:pointer-events-none disabled:opacity-50"
+        >
+          <ListPlusIcon className="size-3.5" aria-hidden />
+          {pending ? t("addingMilestone") : t("addMilestone")}
+        </button>
+      </div>
+      <p className="text-[11px] text-muted-foreground">{t("addMilestoneHint")}</p>
+      {failed ? <p className="text-[11px] text-destructive">{t("error")}</p> : null}
+    </form>
   );
 }
 

@@ -1409,7 +1409,21 @@
       "slotsFull": "Kesepuluh slot sudah terisi. Hapus satu penerima sebelum menambahkan yang lain.",
       "remove": "Keluarkan dari hibah",
       "removing": "Mengeluarkan…",
-      "removeConfirm": "Hapus “{name}” dari hibah? Tonggak dan dokumen tetap disimpan, tetapi akun itu kehilangan akses ke dasbor hibah dan slotnya terbuka."
+      "removeConfirm": "Hapus “{name}” dari hibah? Tonggak dan dokumen tetap disimpan, tetapi akun itu kehilangan akses ke dasbor hibah dan slotnya terbuka.",
+      "dueDateLabel": "Tenggat untuk {title}",
+      "overdue": "Lewat tenggat",
+      "customMilestone": "Khusus",
+      "milestoneNameLabel": "Nama tonggak",
+      "milestoneNamePlaceholder": "mis. Sesi pelatihan komunitas",
+      "addMilestone": "Tambah tonggak",
+      "addingMilestone": "Menambahkan…",
+      "addMilestoneDueLabel": "Tenggat",
+      "addMilestoneHint": "Menambahkan langkah khusus untuk penerima ini, dengan namanya sendiri dan tenggat opsional. Penerima langsung melihatnya di halaman hibahnya.",
+      "renameMilestone": "Ubah nama {title}",
+      "renameSave": "Simpan",
+      "renameCancel": "Batal",
+      "removeMilestone": "Hapus {title}",
+      "removeMilestoneConfirm": "Hapus “{title}” dari tonggak penerima ini? Penerima tidak akan melihatnya lagi."
     },
     "pages": {
       "hub": {

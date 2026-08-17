@@ -1409,7 +1409,21 @@
       "slotsFull": "As dez vagas estão ocupadas. Remova alguém antes de adicionar outra pessoa ou grupo.",
       "remove": "Remover do subsídio",
       "removing": "Removendo…",
-      "removeConfirm": "Remover “{name}” do subsídio? Os marcos e documentos são mantidos, mas essa conta perde o acesso ao painel do subsídio e a vaga fica livre."
+      "removeConfirm": "Remover “{name}” do subsídio? Os marcos e documentos são mantidos, mas essa conta perde o acesso ao painel do subsídio e a vaga fica livre.",
+      "dueDateLabel": "Prazo de {title}",
+      "overdue": "Atrasado",
+      "customMilestone": "Personalizado",
+      "milestoneNameLabel": "Nome do marco",
+      "milestoneNamePlaceholder": "ex.: Oficina de formação comunitária",
+      "addMilestone": "Adicionar marco",
+      "addingMilestone": "Adicionando…",
+      "addMilestoneDueLabel": "Prazo",
+      "addMilestoneHint": "Adiciona uma etapa só para este beneficiário, com nome próprio e prazo opcional. O beneficiário a vê imediatamente na página do subsídio.",
+      "renameMilestone": "Renomear {title}",
+      "renameSave": "Salvar",
+      "renameCancel": "Cancelar",
+      "removeMilestone": "Remover {title}",
+      "removeMilestoneConfirm": "Remover “{title}” dos marcos deste beneficiário? O beneficiário deixará de vê-lo."
     },
     "pages": {
       "hub": {
