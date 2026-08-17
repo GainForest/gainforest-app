@@ -4,8 +4,9 @@
  * A recorder folder that has no soundscape yet.
  *
  * There is nothing to draw for it, so it stays a compact line rather than a
- * tall card holding an empty dial: what was uploaded, when it was recorded,
- * and a way to go listen.
+ * tall card holding an empty dial. It names the folder rather than counting
+ * its files: the project row above already carries the totals, and which
+ * recorder this is cannot be read anywhere else.
  */
 
 import Link from "next/link";
@@ -31,8 +32,8 @@ export function AudioRecordingSlot({ upload }: { upload: AudioProjectUpload }) {
         </span>
       </div>
       <div className="mt-1.5 flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
-        <p className="min-w-0 text-base font-medium text-foreground">
-          {t("recordingsUploaded", { count: upload.recordingCount })}
+        <p className="min-w-0 truncate text-base font-medium text-foreground">
+          {upload.recorderName?.trim() || t("recorderFallback")}
         </p>
         <Button asChild variant="outline" size="sm" className="shrink-0 rounded-full">
           <Link href={accountAudioPath(upload.did)}>

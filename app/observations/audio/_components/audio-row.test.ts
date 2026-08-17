@@ -7,8 +7,8 @@ import {
   displaySoundscapeTitle,
   sharesFolder,
   rowSlots,
+  rowTotals,
   slotDateKeys,
-  soundscapeOnlyTotals,
   uploadForSoundscape,
 } from "./audio-row";
 
@@ -146,7 +146,7 @@ describe("countForSoundscape", () => {
   });
 });
 
-describe("soundscapeOnlyTotals", () => {
+describe("rowTotals", () => {
   const withFolder = (ref: string | null, sources: number, uri: string) =>
     makeSoundscape({
       uri,
@@ -165,30 +165,41 @@ describe("soundscapeOnlyTotals", () => {
 
   it("counts one folder once, however many soundscapes came from it", () => {
     // A day and the whole week from the same recorder is still one recorder.
-    const totals = soundscapeOnlyTotals([
-      withFolder(FOLDER_A, 264, "a"),
-      withFolder(FOLDER_A, 378, "b"),
-    ]);
+    const totals = rowTotals([withFolder(FOLDER_A, 264, "a"), withFolder(FOLDER_A, 378, "b")], []);
     expect(totals.recorderCount).toBe(1);
     expect(totals.recordingCount).toBe(378);
   });
 
   it("adds distinct folders together", () => {
-    const totals = soundscapeOnlyTotals([
-      withFolder(FOLDER_A, 264, "a"),
-      withFolder(FOLDER_B, 78, "b"),
-    ]);
+    const totals = rowTotals([withFolder(FOLDER_A, 264, "a"), withFolder(FOLDER_B, 78, "b")], []);
     expect(totals.recorderCount).toBe(2);
     expect(totals.recordingCount).toBe(342);
   });
 
   it("never claims more recorders than it can prove", () => {
-    const totals = soundscapeOnlyTotals([
-      withFolder(null, 264, "a"),
-      withFolder(null, 378, "b"),
-    ]);
+    const totals = rowTotals([withFolder(null, 264, "a"), withFolder(null, 378, "b")], []);
     expect(totals.recorderCount).toBe(1);
     expect(totals.recordingCount).toBe(378);
+  });
+
+  it("counts a recorder that is only visible as a published soundscape", () => {
+    // The row used to report just the uploaded folder, so a project whose
+    // second recorder had a dial but no upload attachment undercounted.
+    const totals = rowTotals(
+      [withFolder(FOLDER_B, 193, "b")],
+      [makeUpload({ deploymentRef: FOLDER_A, recordingCount: 78 })],
+    );
+    expect(totals.recorderCount).toBe(2);
+    expect(totals.recordingCount).toBe(271);
+  });
+
+  it("trusts the folder's own total over a soundscape's sample of it", () => {
+    const totals = rowTotals(
+      [withFolder(FOLDER_A, 193, "a")],
+      [makeUpload({ deploymentRef: FOLDER_A, recordingCount: 929 })],
+    );
+    expect(totals.recorderCount).toBe(1);
+    expect(totals.recordingCount).toBe(929);
   });
 });
 

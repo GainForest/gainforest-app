@@ -22,8 +22,8 @@ import {
   publishedMs,
   recordedMs,
   rowSlots,
+  rowTotals,
   sharesFolder,
-  soundscapeOnlyTotals,
   uploadedMs,
 } from "./audio-row";
 import { CARD_BAND_COLORS } from "@/app/soundscape/_components/SoundscapeCard";
@@ -182,13 +182,12 @@ export function SoundscapeExploreGallery({
         row.latestRecorded,
         ...row.uploads.map((upload) => dateKeysMs(upload.recordedDates)),
       );
-      // A row known only through its soundscapes still has to state totals,
-      // and one folder must not be counted once per soundscape built from it.
-      if (row.uploads.length === 0 && row.soundscapes.length > 0) {
-        const totals = soundscapeOnlyTotals(row.soundscapes);
-        row.recorderCount = totals.recorderCount;
-        row.recordingCount = totals.recordingCount;
-      }
+      // Totals are recomputed per folder rather than trusted from the upload
+      // side alone, so a recorder visible only as a published soundscape is
+      // still counted.
+      const totals = rowTotals(row.soundscapes, row.uploads);
+      row.recorderCount = totals.recorderCount;
+      row.recordingCount = totals.recordingCount;
     }
 
     return [...byProject.values()];

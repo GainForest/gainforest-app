@@ -87,29 +87,43 @@ export function countForSoundscape(
 }
 
 /**
- * Totals for a row we only know through its published soundscapes.
+ * A project row's totals: how many recorder folders it has, and how many files
+ * they hold between them.
  *
- * Several soundscapes can be built from one folder (a single day, then the
- * whole week), so counting per soundscape would report one recorder as many
- * and add its files up repeatedly. Group by folder, take the largest reading
- * each folder gives, and only then add up.
+ * Counted per folder rather than per record, because both sides can name the
+ * same folder more than once — several soundscapes are often built from one
+ * folder (a single day, then the whole week), and a folder can be uploaded to
+ * across several sessions. Counting per record would report one recorder as
+ * many and add its files up repeatedly.
+ *
+ * Folders reached only through a soundscape count too: a project whose second
+ * recorder is visible only as a published dial still has two recorders.
  */
-export function soundscapeOnlyTotals(items: NetworkSoundscape[]): {
-  recorderCount: number;
-  recordingCount: number;
-} {
+export function rowTotals(
+  soundscapes: NetworkSoundscape[],
+  uploads: AudioProjectUpload[],
+): { recorderCount: number; recordingCount: number } {
   const byFolder = new Map<string, number>();
-  let knownFolders = 0;
-  for (const item of items) {
-    if (item.deploymentRef) knownFolders += byFolder.has(item.deploymentRef) ? 0 : 1;
-    // An unresolved folder can't be proven distinct, so it shares one bucket
-    // rather than inflating the recorder count.
+  const knownFromUpload = new Set<string>();
+
+  for (const upload of uploads) {
+    const key = upload.deploymentRef ?? `upload:${upload.id}`;
+    knownFromUpload.add(key);
+    byFolder.set(key, Math.max(byFolder.get(key) ?? 0, upload.recordingCount));
+  }
+
+  for (const item of soundscapes) {
+    // A folder with an upload already reports its true size; a soundscape only
+    // knows the recordings it was built from, which may be a sample of them.
+    if (item.deploymentRef && knownFromUpload.has(item.deploymentRef)) continue;
+    // An unresolved folder can't be proven distinct, so every one of them
+    // shares a single bucket rather than inflating the recorder count.
     const key = item.deploymentRef ?? "unknown-folder";
     byFolder.set(key, Math.max(byFolder.get(key) ?? 0, item.soundscape.sources.length));
   }
+
   return {
-    // At least one recorder must exist for a soundscape to have been built.
-    recorderCount: Math.max(1, knownFolders),
+    recorderCount: byFolder.size,
     recordingCount: [...byFolder.values()].reduce((total, count) => total + count, 0),
   };
 }
