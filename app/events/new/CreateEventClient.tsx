@@ -13,6 +13,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { cn } from "@/lib/utils";
 import { createEvent, type EventFormInput } from "../_lib/mutations";
 import { guessTimezone, localInputToIso, toLocalInputValue } from "../_lib/format";
@@ -116,24 +123,26 @@ export function CreateEventClient({ session }: { session: AuthSession }) {
   const showVirtual = mode !== "inperson";
 
   return (
-    <div className="mx-auto flex max-w-xl flex-col gap-6">
-      <h1 className="text-2xl font-bold">{t("create.title")}</h1>
+    <div className="mx-auto flex max-w-3xl flex-col gap-6">
+      <h1 className="font-instrument text-3xl font-light italic tracking-[-0.02em] text-foreground md:text-4xl">
+        {t("create.title")}
+      </h1>
 
       {hostOptions.length > 1 ? (
         <div className="flex flex-col gap-1.5">
           <Label htmlFor="event-host">{t("create.hostAs")}</Label>
-          <select
-            id="event-host"
-            value={hostDid}
-            onChange={(e) => setHostDid(e.target.value)}
-            className="h-9 rounded-md border border-input bg-background px-3 text-sm"
-          >
-            {hostOptions.map((o) => (
-              <option key={o.did} value={o.did}>
-                {o.label}
-              </option>
-            ))}
-          </select>
+          <Select value={hostDid} onValueChange={(v) => setHostDid(v)}>
+            <SelectTrigger id="event-host" className="w-full sm:max-w-xs">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {hostOptions.map((o) => (
+                <SelectItem key={o.did} value={o.did}>
+                  {o.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
       ) : null}
 
@@ -150,14 +159,14 @@ export function CreateEventClient({ session }: { session: AuthSession }) {
 
       <div className="flex flex-col gap-1.5">
         <Label>{t("create.type.label")}</Label>
-        <div className="inline-flex rounded-full border border-border p-1">
+        <div className="inline-flex h-10 w-fit items-center rounded-full border border-border bg-background/50 p-0.5">
           {MODES.map((m) => (
             <button
               key={m}
               type="button"
               onClick={() => setMode(m)}
               className={cn(
-                "rounded-full px-4 py-1.5 text-sm font-medium transition-colors",
+                "inline-flex h-9 items-center gap-1.5 rounded-full px-4 text-sm font-medium transition-colors",
                 mode === m ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground",
               )}
             >
@@ -231,21 +240,24 @@ export function CreateEventClient({ session }: { session: AuthSession }) {
         {advancedOpen ? (
           <div className="flex flex-col gap-3 border-t border-border p-4">
             <Label>{t("create.visibility.label")}</Label>
-            {(["public", "unlisted"] as const).map((v) => (
-              <label key={v} className="flex cursor-pointer items-start gap-2 text-sm">
-                <input
-                  type="radio"
-                  name="visibility"
-                  checked={visibility === v}
-                  onChange={() => setVisibility(v)}
-                  className="mt-0.5"
-                />
-                <span>
-                  <span className="font-medium">{t(`create.visibility.${v}`)}</span>
-                  <span className="block text-xs text-muted-foreground">{t(`create.visibility.${v}Hint`)}</span>
-                </span>
-              </label>
-            ))}
+            <div className="inline-flex h-10 w-fit items-center rounded-full border border-border bg-background/50 p-0.5">
+              {(["public", "unlisted"] as const).map((v) => (
+                <button
+                  key={v}
+                  type="button"
+                  onClick={() => setVisibility(v)}
+                  className={cn(
+                    "inline-flex h-9 items-center rounded-full px-4 text-sm font-medium transition-colors",
+                    visibility === v
+                      ? "bg-primary text-primary-foreground"
+                      : "text-muted-foreground hover:text-foreground",
+                  )}
+                >
+                  {t(`create.visibility.${v}`)}
+                </button>
+              ))}
+            </div>
+            <p className="text-xs text-muted-foreground">{t(`create.visibility.${visibility}Hint`)}</p>
           </div>
         ) : null}
       </div>

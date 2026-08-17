@@ -33,7 +33,7 @@ export function EventCard({
   return (
     <Link
       href={eventHref(event.did, event.rkey)}
-      className="group flex gap-4 rounded-2xl border border-border bg-background p-3 transition-colors hover:bg-muted"
+      className="group flex gap-4 rounded-3xl border border-border bg-card p-3 shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60"
     >
       <div className="relative size-20 shrink-0 overflow-hidden rounded-xl bg-gradient-to-br from-primary/30 to-primary/10">
         {event.thumbnailUrl ? (

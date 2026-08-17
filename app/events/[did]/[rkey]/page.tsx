@@ -52,7 +52,7 @@ export default async function EventDetailPage({ params }: { params: Promise<Para
 
   return (
     <Container className="py-8">
-      <div className="mx-auto flex max-w-2xl flex-col gap-6">
+      <div className="mx-auto flex max-w-3xl flex-col gap-6">
         <div className="relative aspect-[2/1] w-full overflow-hidden rounded-2xl bg-gradient-to-br from-primary/30 to-primary/10">
           {event.thumbnailUrl ? (
             // eslint-disable-next-line @next/next/no-img-element
@@ -77,7 +77,9 @@ export default async function EventDetailPage({ params }: { params: Promise<Para
               </span>
             ) : null}
           </div>
-          <h1 className="text-3xl font-bold">{event.name}</h1>
+          <h1 className="font-instrument text-3xl font-light italic leading-[1.1] tracking-[-0.02em] text-foreground md:text-4xl">
+            {event.name}
+          </h1>
           <p className="text-muted-foreground">
             {when.dateLabel}
             {when.timeLabel ? ` · ${when.timeLabel}` : ""}
@@ -105,7 +107,7 @@ export default async function EventDetailPage({ params }: { params: Promise<Para
 
         {event.description ? (
           <div className="flex flex-col gap-2">
-            <h2 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+            <h2 className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
               {t("detail.about")}
             </h2>
             <p className="whitespace-pre-wrap text-foreground">{event.description}</p>
@@ -113,7 +115,7 @@ export default async function EventDetailPage({ params }: { params: Promise<Para
         ) : null}
 
         <div className="flex flex-col gap-2">
-          <h2 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+          <h2 className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
             {t("detail.hostedBy")}
           </h2>
           <Link href={accountHref(host.handle ?? host.did)} className="flex w-fit items-center gap-2 hover:underline">
@@ -129,7 +131,7 @@ export default async function EventDetailPage({ params }: { params: Promise<Para
 
         {event.links.length ? (
           <div className="flex flex-col gap-2">
-            <h2 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+            <h2 className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
               {t("detail.links")}
             </h2>
             <ul className="flex flex-col gap-1">

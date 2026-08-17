@@ -14,14 +14,21 @@ export async function AccountEventsTabContent({ account, did }: { account: Accou
   return (
     <section className="flex flex-col gap-6 py-6">
       {events.length === 0 ? (
-        <div className="rounded-2xl border border-dashed border-border p-8 text-center text-muted-foreground">
-          {t("discovery.empty")}
+        <div className="flex flex-col items-center justify-center rounded-3xl border border-dashed border-border px-8 py-16 text-center">
+          <p
+            className="max-w-sm text-lg text-foreground/60"
+            style={{ fontFamily: "var(--font-instrument-serif-var)", fontStyle: "italic" }}
+          >
+            {t("discovery.empty")}
+          </p>
         </div>
       ) : (
         <>
           {upcoming.length ? (
             <div className="flex flex-col gap-3">
-              <h2 className="text-sm font-semibold">{t("discovery.upcoming")}</h2>
+              <h2 className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
+                {t("discovery.upcoming")}
+              </h2>
               {upcoming.map((e) => (
                 <EventCard key={e.uri} event={e} live={bucketForEvent(e, now) === "live"} liveLabel={t("detail.live")} />
               ))}
@@ -29,7 +36,9 @@ export async function AccountEventsTabContent({ account, did }: { account: Accou
           ) : null}
           {past.length ? (
             <div className="flex flex-col gap-3">
-              <h2 className="text-sm font-semibold text-muted-foreground">{t("discovery.past")}</h2>
+              <h2 className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
+                {t("discovery.past")}
+              </h2>
               {past.map((e) => (
                 <EventCard key={e.uri} event={e} />
               ))}

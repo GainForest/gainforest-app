@@ -113,13 +113,13 @@ export function EventsDiscoveryClient({ sessionDid }: { sessionDid: string | nul
   return (
     <div className="flex flex-col gap-6">
       {sessionDid ? (
-        <div className="inline-flex w-fit rounded-full border border-border p-1">
+        <div className="inline-flex h-10 w-fit items-center rounded-full border border-border bg-background/50 p-0.5">
           {(["all", "mine"] as const).map((value) => (
             <button
               key={value}
               onClick={() => setTab(value)}
               className={cn(
-                "rounded-full px-4 py-1.5 text-sm font-medium transition-colors",
+                "inline-flex h-9 items-center gap-1.5 rounded-full px-3 text-sm font-medium transition-colors",
                 tab === value ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground",
               )}
             >
@@ -132,15 +132,20 @@ export function EventsDiscoveryClient({ sessionDid }: { sessionDid: string | nul
       {loading ? (
         <div className="flex flex-col gap-3">
           {[0, 1, 2].map((i) => (
-            <div key={i} className="h-24 animate-pulse rounded-2xl bg-muted" />
+            <div key={i} className="h-24 animate-pulse rounded-3xl bg-muted" />
           ))}
         </div>
       ) : visible.length === 0 ? (
-        <div className="rounded-2xl border border-dashed border-border p-8 text-center">
-          <p className="text-muted-foreground">{tab === "mine" ? t("discovery.emptyMine") : t("discovery.empty")}</p>
+        <div className="flex flex-col items-center justify-center rounded-3xl border border-dashed border-border px-8 py-16 text-center">
+          <p
+            className="max-w-sm text-lg text-foreground/60"
+            style={{ fontFamily: "var(--font-instrument-serif-var)", fontStyle: "italic" }}
+          >
+            {tab === "mine" ? t("discovery.emptyMine") : t("discovery.empty")}
+          </p>
           {sessionDid ? (
-            <Link href="/events/new" className="mt-2 inline-block text-sm font-medium text-primary hover:underline">
-              {t("discovery.createFirst")}
+            <Link href="/events/new" className="mt-3 inline-flex items-center gap-1 text-sm font-medium text-primary hover:underline">
+              + {t("discovery.createFirst")}
             </Link>
           ) : null}
         </div>
@@ -148,7 +153,9 @@ export function EventsDiscoveryClient({ sessionDid }: { sessionDid: string | nul
         <>
           {live.length ? (
             <section className="flex flex-col gap-3">
-              <h2 className="text-sm font-semibold">{t("discovery.happeningNow")}</h2>
+              <h2 className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
+                {t("discovery.happeningNow")}
+              </h2>
               {live.map((e) => (
                 <EventCard key={e.uri} event={e} host={profiles.get(e.did)} live liveLabel={t("detail.live")} />
               ))}
@@ -156,7 +163,9 @@ export function EventsDiscoveryClient({ sessionDid }: { sessionDid: string | nul
           ) : null}
           {upcoming.length ? (
             <section className="flex flex-col gap-3">
-              <h2 className="text-sm font-semibold">{t("discovery.upcoming")}</h2>
+              <h2 className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
+                {t("discovery.upcoming")}
+              </h2>
               {upcoming.map((e) => (
                 <EventCard key={e.uri} event={e} host={profiles.get(e.did)} />
               ))}

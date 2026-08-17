@@ -15,11 +15,13 @@ export default async function EventsPage() {
   const [t, session] = await Promise.all([getTranslations("events"), fetchAuthSession()]);
   return (
     <Container className="py-8">
-      <div className="mx-auto flex max-w-2xl flex-col gap-6">
+      <div className="mx-auto flex max-w-3xl flex-col gap-6">
         <div className="flex items-center justify-between gap-4">
           <div>
-            <h1 className="text-2xl font-bold">{t("discovery.title")}</h1>
-            <p className="text-sm text-muted-foreground">{t("discovery.subtitle")}</p>
+            <h1 className="font-instrument text-3xl font-light italic tracking-[-0.02em] text-foreground md:text-4xl">
+              {t("discovery.title")}
+            </h1>
+            <p className="mt-1 text-sm text-muted-foreground">{t("discovery.subtitle")}</p>
           </div>
           {session.isLoggedIn ? (
             <Link
