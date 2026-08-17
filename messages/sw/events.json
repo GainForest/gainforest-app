@@ -99,5 +99,19 @@
     "cancel": "Ghairi",
     "deleting": "Inafuta…",
     "error": "Hitilafu imetokea. Tafadhali jaribu tena."
+  },
+  "form": {
+    "newTitle": "Tukio jipya",
+    "editTitle": "Hariri tukio",
+    "starts": "Huanza",
+    "ends": "Huisha",
+    "addCover": "Ongeza picha ya jalada",
+    "coverAria": "Ongeza au badilisha picha ya jalada",
+    "save": "Hifadhi mabadiliko",
+    "saving": "Inahifadhi…"
+  },
+  "edit": {
+    "label": "Hariri",
+    "notAllowed": "Huna ruhusa ya kuhariri tukio hili."
   }
 }

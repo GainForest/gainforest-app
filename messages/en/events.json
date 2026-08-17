@@ -99,5 +99,19 @@
     "cancel": "Cancel",
     "deleting": "Deleting…",
     "error": "Something went wrong. Please try again."
+  },
+  "form": {
+    "newTitle": "New event",
+    "editTitle": "Edit event",
+    "starts": "Starts",
+    "ends": "Ends",
+    "addCover": "Add cover image",
+    "coverAria": "Add or change the cover image",
+    "save": "Save changes",
+    "saving": "Saving…"
+  },
+  "edit": {
+    "label": "Edit",
+    "notAllowed": "You don't have permission to edit this event."
   }
 }

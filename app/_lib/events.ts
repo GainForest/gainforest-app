@@ -60,6 +60,8 @@ export type CommunityEvent = {
   links: EventLink[];
   /** Resolved thumbnail blob URL, if any. */
   thumbnailUrl: string | null;
+  /** Raw thumbnail blob descriptor (to preserve the cover when editing). */
+  thumbnailBlob: { ref: unknown; mimeType: string; size: number } | null;
   /** Whether the host opted this into public discovery. */
   showInDiscovery: boolean;
   createdAt: string | null;
@@ -138,6 +140,23 @@ function readThumbnailRef(value: Record<string, unknown>): string | null {
   return normaliseRef(typeof ref === "string" ? ref : null);
 }
 
+/** The raw thumbnail blob descriptor `{ ref, mimeType, size }`, kept verbatim so
+ *  an edit can re-write the same cover without re-uploading it. */
+function readThumbnailBlob(value: Record<string, unknown>): { ref: unknown; mimeType: string; size: number } | null {
+  const media = Array.isArray(value.media) ? value.media : [];
+  const pick = media.find(
+    (m) => m && typeof m === "object" && (m as Record<string, unknown>).role === "thumbnail",
+  ) as Record<string, unknown> | undefined;
+  const entry = (pick ?? media[0]) as Record<string, unknown> | undefined;
+  const content = entry && typeof entry === "object" ? (entry.content as Record<string, unknown>) : undefined;
+  if (!content || typeof content !== "object" || content.ref === undefined || content.ref === null) return null;
+  return {
+    ref: content.ref,
+    mimeType: typeof content.mimeType === "string" ? content.mimeType : "image/jpeg",
+    size: typeof content.size === "number" ? content.size : 0,
+  };
+}
+
 // ── parse a raw PDS record into a CommunityEvent (async: resolves the thumbnail blob URL)
 export async function parseEventRecord(
   record: PdsRecord,
@@ -170,6 +189,7 @@ export async function parseEventRecord(
     location: readLocation(value),
     links: readLinks(value),
     thumbnailUrl,
+    thumbnailBlob: readThumbnailBlob(value),
     showInDiscovery: preferences.showInDiscovery !== false,
     createdAt: str(value.createdAt),
   };

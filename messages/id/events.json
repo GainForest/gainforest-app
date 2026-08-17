@@ -99,5 +99,19 @@
     "cancel": "Batal",
     "deleting": "Menghapus…",
     "error": "Terjadi kesalahan. Silakan coba lagi."
+  },
+  "form": {
+    "newTitle": "Acara baru",
+    "editTitle": "Edit acara",
+    "starts": "Mulai",
+    "ends": "Selesai",
+    "addCover": "Tambahkan gambar sampul",
+    "coverAria": "Tambah atau ubah gambar sampul",
+    "save": "Simpan perubahan",
+    "saving": "Menyimpan…"
+  },
+  "edit": {
+    "label": "Edit",
+    "notAllowed": "Anda tidak memiliki izin untuk mengedit acara ini."
   }
 }

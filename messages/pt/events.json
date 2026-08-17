@@ -99,5 +99,19 @@
     "cancel": "Cancelar",
     "deleting": "Excluindo…",
     "error": "Algo deu errado. Tente novamente."
+  },
+  "form": {
+    "newTitle": "Novo evento",
+    "editTitle": "Editar evento",
+    "starts": "Começa",
+    "ends": "Termina",
+    "addCover": "Adicionar imagem de capa",
+    "coverAria": "Adicionar ou alterar a imagem de capa",
+    "save": "Salvar alterações",
+    "saving": "Salvando…"
+  },
+  "edit": {
+    "label": "Editar",
+    "notAllowed": "Você não tem permissão para editar este evento."
   }
 }
