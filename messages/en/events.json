@@ -5,10 +5,12 @@
     "create": "Create event",
     "tabAll": "All",
     "tabMine": "My events",
+    "tabEnrolled": "Enrolled",
     "happeningNow": "Happening now",
     "upcoming": "Upcoming",
     "empty": "No events yet. Be the first to host one.",
     "emptyMine": "You're not hosting or attending any events yet.",
+    "emptyEnrolled": "You haven't enrolled in any events yet.",
     "createFirst": "Create your first event",
     "past": "Past"
   },

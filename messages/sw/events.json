@@ -5,10 +5,12 @@
     "create": "Unda tukio",
     "tabAll": "Yote",
     "tabMine": "Matukio yangu",
+    "tabEnrolled": "Nimejiandikisha",
     "happeningNow": "Yanayoendelea sasa",
     "upcoming": "Yajayo",
     "empty": "Bado hakuna matukio. Kuwa wa kwanza kuandaa moja.",
     "emptyMine": "Bado hujaandaa au kuhudhuria tukio lolote.",
+    "emptyEnrolled": "Bado hujajiandikisha kwenye tukio lolote.",
     "createFirst": "Unda tukio lako la kwanza",
     "past": "Yaliyopita"
   },

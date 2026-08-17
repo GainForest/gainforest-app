@@ -19,7 +19,7 @@ import {
 import { cn } from "@/lib/utils";
 import { EventCard } from "./EventCard";
 
-type Tab = "all" | "mine";
+type Tab = "all" | "mine" | "enrolled";
 
 async function readFollows(did: string, signal?: AbortSignal): Promise<string[]> {
   const records = await listLatestPdsRecords(did, "app.bsky.graph.follow", 100, signal).catch(() => []);
@@ -37,6 +37,7 @@ export function EventsDiscoveryClient({ sessionDid }: { sessionDid: string | nul
   const [events, setEvents] = useState<CommunityEvent[]>([]);
   const [profiles, setProfiles] = useState<Map<string, ProfileLite>>(new Map());
   const [myUris, setMyUris] = useState<Set<string>>(new Set());
+  const [enrolledUris, setEnrolledUris] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(true);
   const [tab, setTab] = useState<Tab>("all");
 
@@ -51,6 +52,7 @@ export function EventsDiscoveryClient({ sessionDid }: { sessionDid: string | nul
       setLoading(true);
       const hostDids = new Set<string>(EVENT_DISCOVERY_SEED_DIDS);
       const mine = new Set<string>();
+      const enrolled = new Set<string>();
 
       if (sessionDid) {
         hostDids.add(sessionDid);
@@ -76,6 +78,7 @@ export function EventsDiscoveryClient({ sessionDid }: { sessionDid: string | nul
         const fetched = await Promise.all(
           active.map(async (r) => {
             mine.add(r.subjectUri);
+            enrolled.add(r.subjectUri);
             if (byUri.has(r.subjectUri)) return null;
             const parts = parseAtUri(r.subjectUri);
             if (!parts) return null;
@@ -95,6 +98,7 @@ export function EventsDiscoveryClient({ sessionDid }: { sessionDid: string | nul
       setEvents(all);
       setProfiles(hostProfiles);
       setMyUris(mine);
+      setEnrolledUris(enrolled);
       setLoading(false);
     }
 
@@ -105,16 +109,18 @@ export function EventsDiscoveryClient({ sessionDid }: { sessionDid: string | nul
     };
   }, [sessionDid, orgDids]);
 
-  const visible = tab === "mine" ? events.filter((e) => myUris.has(e.uri)) : events;
+  const visible =
+    tab === "mine" ? events.filter((e) => myUris.has(e.uri)) : tab === "enrolled" ? events.filter((e) => enrolledUris.has(e.uri)) : events;
   const now = Date.now();
   const live = visible.filter((e) => bucketForEvent(e, now) === "live");
   const upcoming = visible.filter((e) => bucketForEvent(e, now) === "upcoming");
+  const past = visible.filter((e) => bucketForEvent(e, now) === "past").sort((a, b) => -sortByStartAsc(a, b));
 
   return (
     <div className="flex flex-col gap-6">
       {sessionDid ? (
         <div className="inline-flex items-center gap-1">
-          {(["all", "mine"] as const).map((value) => (
+          {(["all", "mine", "enrolled"] as const).map((value) => (
             <button
               key={value}
               onClick={() => setTab(value)}
@@ -123,7 +129,7 @@ export function EventsDiscoveryClient({ sessionDid }: { sessionDid: string | nul
                 tab === value ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground",
               )}
             >
-              {value === "all" ? t("discovery.tabAll") : t("discovery.tabMine")}
+              {value === "all" ? t("discovery.tabAll") : value === "mine" ? t("discovery.tabMine") : t("discovery.tabEnrolled")}
             </button>
           ))}
         </div>
@@ -141,9 +147,9 @@ export function EventsDiscoveryClient({ sessionDid }: { sessionDid: string | nul
             className="max-w-sm text-lg text-foreground/60"
             style={{ fontFamily: "var(--font-instrument-serif-var)", fontStyle: "italic" }}
           >
-            {tab === "mine" ? t("discovery.emptyMine") : t("discovery.empty")}
+            {tab === "mine" ? t("discovery.emptyMine") : tab === "enrolled" ? t("discovery.emptyEnrolled") : t("discovery.empty")}
           </p>
-          {sessionDid ? (
+          {sessionDid && tab !== "enrolled" ? (
             <Link href="/events/new" className="mt-3 inline-flex items-center gap-1 text-sm font-medium text-primary hover:underline">
               + {t("discovery.createFirst")}
             </Link>
@@ -170,6 +176,18 @@ export function EventsDiscoveryClient({ sessionDid }: { sessionDid: string | nul
               </h2>
               <ul className="divide-y divide-border">
                 {upcoming.map((e) => (
+                  <EventCard key={e.uri} event={e} host={profiles.get(e.did)} />
+                ))}
+              </ul>
+            </section>
+          ) : null}
+          {past.length && tab !== "all" ? (
+            <section className="flex flex-col gap-2">
+              <h2 className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
+                {t("discovery.past")}
+              </h2>
+              <ul className="divide-y divide-border">
+                {past.map((e) => (
                   <EventCard key={e.uri} event={e} host={profiles.get(e.did)} />
                 ))}
               </ul>

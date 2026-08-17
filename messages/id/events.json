@@ -5,10 +5,12 @@
     "create": "Buat acara",
     "tabAll": "Semua",
     "tabMine": "Acara saya",
+    "tabEnrolled": "Terdaftar",
     "happeningNow": "Sedang berlangsung",
     "upcoming": "Akan datang",
     "empty": "Belum ada acara. Jadilah yang pertama membuatnya.",
     "emptyMine": "Anda belum menyelenggarakan atau menghadiri acara apa pun.",
+    "emptyEnrolled": "Anda belum mendaftar ke acara apa pun.",
     "createFirst": "Buat acara pertama Anda",
     "past": "Selesai"
   },

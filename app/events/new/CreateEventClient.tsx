@@ -130,9 +130,9 @@ export function CreateEventClient({ session }: { session: AuthSession }) {
         {t("create.title")}
       </h1>
 
-      <div className="divide-y divide-border pt-6">
+      <div className="flex flex-col gap-6 pt-6">
         {/* 1 · Event name — big, label-less, borderless; priority by size */}
-        <div className="py-3">
+        <div>
           <input
             value={name}
             onChange={(e) => setName(e.target.value)}
@@ -144,19 +144,19 @@ export function CreateEventClient({ session }: { session: AuthSession }) {
         </div>
 
         {/* 2 · About */}
-        <div className="py-3">
+        <div>
           <Textarea
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             placeholder={t("create.description.placeholder")}
             aria-label={t("create.description.label")}
             rows={3}
-            className="resize-none border-0 bg-transparent p-0 text-base text-foreground shadow-none outline-none placeholder:text-muted-foreground/50"
+            className="resize-none"
           />
         </div>
 
         {/* 3 · Date selection */}
-        <div className="flex flex-col gap-3 py-3">
+        <div className="flex flex-col gap-3">
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             <div className="flex flex-col gap-1.5">
               <Label htmlFor="event-start">{t("create.start")}</Label>
@@ -171,7 +171,7 @@ export function CreateEventClient({ session }: { session: AuthSession }) {
         </div>
 
         {/* 4 · Type / Location / Link — clubbed, spread evenly */}
-        <div className={cn("grid grid-cols-1 gap-3 py-3", groupColumns === 3 ? "sm:grid-cols-3" : "sm:grid-cols-2")}>
+        <div className={cn("grid grid-cols-1 gap-3", groupColumns === 3 ? "sm:grid-cols-3" : "sm:grid-cols-2")}>
           <div className="flex flex-col gap-1.5">
             <Label>{t("create.type.label")}</Label>
             <Select value={mode} onValueChange={(v) => setMode(v as EventMode)}>
@@ -214,7 +214,7 @@ export function CreateEventClient({ session }: { session: AuthSession }) {
         </div>
 
         {/* 5 · Advanced options (visibility) — borderless disclosure */}
-        <div className="py-3">
+        <div>
           <button
             type="button"
             onClick={() => setAdvancedOpen((v) => !v)}
@@ -246,7 +246,7 @@ export function CreateEventClient({ session }: { session: AuthSession }) {
         </div>
 
         {/* 6 · Publish row — host-as inline on the left, Publish on the right */}
-        <div className="flex flex-wrap items-center justify-between gap-3 py-6">
+        <div className="flex flex-wrap items-center justify-between gap-3">
           {hostOptions.length > 1 ? (
             <div className="flex items-center gap-2">
               <span className="text-sm text-muted-foreground">{t("create.hostAs")}</span>

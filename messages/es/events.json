@@ -5,10 +5,12 @@
     "create": "Crear evento",
     "tabAll": "Todos",
     "tabMine": "Mis eventos",
+    "tabEnrolled": "Inscrito",
     "happeningNow": "Sucediendo ahora",
     "upcoming": "Próximos",
     "empty": "Aún no hay eventos. Sé el primero en organizar uno.",
     "emptyMine": "Todavía no organizas ni asistes a ningún evento.",
+    "emptyEnrolled": "Aún no te has inscrito en ningún evento.",
     "createFirst": "Crea tu primer evento",
     "past": "Pasados"
   },
