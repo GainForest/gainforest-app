@@ -18,6 +18,7 @@ import {
   PencilIcon,
   PinIcon,
   PinOffIcon,
+  RadioIcon,
   RefreshCwIcon,
   Repeat2Icon,
   UserIcon,
@@ -47,6 +48,7 @@ import { fetchBlueskyPostLinks } from "../_lib/bluesky-crosspost";
 import { buildCommentTree, type CommentTreeNode } from "../_lib/feed-engagement";
 import { formatCompact, formatCompactUsd, formatRelative } from "../_lib/format";
 import { FeedAudioClip } from "./FeedAudioClip";
+import { FeedAudioUploadCard } from "./FeedAudioUploadCard";
 import { FeedSoundscapeCard } from "./FeedSoundscapeCard";
 import { extractSoundscapeLink } from "@/lib/soundscape/record";
 import { FeedImageLightbox } from "./FeedImageLightbox";
@@ -123,6 +125,7 @@ const FILTERS: { key: Filter; Icon: typeof NewspaperIcon; authOnly?: boolean; ad
   { key: "post", Icon: MegaphoneIcon },
   { key: "project", Icon: FolderKanbanIcon },
   { key: "observation", Icon: BinocularsIcon },
+  { key: "audio", Icon: RadioIcon },
   { key: "organization", Icon: Building2Icon },
   { key: "donation", Icon: HeartHandshakeIcon, adminOnly: true },
 ];
@@ -826,6 +829,9 @@ function FeedRow({
             {/* Bioacoustic sighting — spectrogram of the labelled section with
                 in-place playback of that sound. */}
             {item.bioacoustics ? <FeedAudioClip clip={item.bioacoustics} /> : null}
+
+            {/* Uploaded recorder folder — what landed, and a way in to hear it. */}
+            {item.audioUpload ? <FeedAudioUploadCard upload={item.audioUpload} /> : null}
 
             {/* Shared soundscape — the 24-hour clock, playable in place. */}
             {sharedSoundscape ? (
@@ -1593,6 +1599,8 @@ function KindIcon({ kind, className }: { kind: ActivityFeedKind; className?: str
       return <HeartHandshakeIcon className={className} />;
     case "post":
       return <MegaphoneIcon className={className} />;
+    case "audio":
+      return <RadioIcon className={className} />;
   }
 }
 
