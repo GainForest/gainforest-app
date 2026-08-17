@@ -125,16 +125,12 @@ export function RenameFolderModal({
 export function SetDeploymentLocationModal({
   name,
   initial,
-  hasChime,
   onSave,
 }: {
   /** The deployment's display name, for the dialog copy. */
   name: string;
   /** The currently stored coordinates, when the deployment has any. */
   initial: { lat: number; lon: number } | null;
-  /** Whether a chime event stands behind the deployment — its stored
-   *  location is overridden too, so the dialog says so. */
-  hasChime: boolean;
   /** Persists the override; rejects with a message worth showing. */
   onSave: (location: { lat: number; lon: number }) => Promise<void>;
 }) {
@@ -142,7 +138,7 @@ export function SetDeploymentLocationModal({
   return (
     <LocationEditorModal
       title={t("locationTitle")}
-      description={`${t("locationBody", { name })}${hasChime ? ` ${t("locationChimeNote")}` : ""}`}
+      description={t("locationBody", { name })}
       pointOnly
       current={
         initial

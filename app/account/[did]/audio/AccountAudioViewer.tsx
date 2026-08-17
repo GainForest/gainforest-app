@@ -451,7 +451,6 @@ export function AccountAudioViewer({
             <SetDeploymentLocationModal
               name={group.name}
               initial={group.coords}
-              hasChime={Boolean(event)}
               onSave={async (location) => {
                 const updated = await setDeploymentLocation({ folder: deployment, event }, location, {
                   repo: mutationRepo,
