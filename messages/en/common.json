@@ -1418,12 +1418,15 @@
       "addMilestone": "Add milestone",
       "addingMilestone": "Adding…",
       "addMilestoneDueLabel": "Due date",
-      "addMilestoneHint": "Adds a step for this grantee only, with its own name and optional due date. The grantee sees it on their grant page right away.",
-      "renameMilestone": "Rename {title}",
-      "renameSave": "Save",
-      "renameCancel": "Cancel",
+      "addMilestoneHint": "Adds a step for this grantee only, with its own name, description and due date. The grantee sees it on their grant page right away.",
       "removeMilestone": "Remove {title}",
-      "removeMilestoneConfirm": "Remove “{title}” from this grantee's milestones? The grantee will no longer see it."
+      "removeMilestoneConfirm": "Remove “{title}” from this grantee's milestones? The grantee will no longer see it.",
+      "editMilestone": "Edit {title}",
+      "editSave": "Save",
+      "editCancel": "Cancel",
+      "milestoneDescriptionLabel": "Milestone description",
+      "milestoneDescriptionPlaceholder": "Describe what this step involves (optional)",
+      "programCopyHint": "Leave the name or description blank to use the program's standard wording."
     },
     "pages": {
       "hub": {

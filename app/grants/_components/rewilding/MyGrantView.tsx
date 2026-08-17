@@ -274,6 +274,11 @@ function MilestoneRow({
   const format = useFormatter();
   const overdue =
     milestone.state !== "done" && !!milestone.dueDate && isDueDatePast(milestone.dueDate);
+  // The grant team's wording wins; program milestones fall back to the
+  // translated program copy. Custom milestones have no copy to fall back to.
+  const title = milestone.title ?? (milestone.isCustom ? "" : program(`${milestone.id}.title`));
+  const description =
+    milestone.description ?? (milestone.isCustom ? null : program(`${milestone.id}.description`));
 
   return (
     <li
@@ -296,16 +301,14 @@ function MilestoneRow({
 
       <div className="min-w-0 flex-1">
         <div className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
-          {milestone.code ? (
-            <span className="font-mono text-[10px] font-semibold text-muted-foreground">{milestone.code}</span>
-          ) : null}
+          <span className="font-mono text-[10px] font-semibold text-muted-foreground">{milestone.code}</span>
           <span
             className={cn(
               "text-sm font-medium",
               milestone.state === "done" ? "text-muted-foreground" : "text-foreground",
             )}
           >
-            {milestone.title ?? program(`${milestone.id}.title`)}
+            {title}
           </span>
           {milestone.dueDate ? (
             <span
@@ -330,11 +333,9 @@ function MilestoneRow({
             </span>
           ) : null}
         </div>
-        {milestone.title ? null : (
-          <p className="mt-0.5 text-xs leading-5 text-muted-foreground">
-            {program(`${milestone.id}.description`)}
-          </p>
-        )}
+        {description ? (
+          <p className="mt-0.5 text-xs leading-5 text-muted-foreground">{description}</p>
+        ) : null}
         {milestone.isRecorderInventory && milestone.state !== "done" ? (
           <button
             type="button"

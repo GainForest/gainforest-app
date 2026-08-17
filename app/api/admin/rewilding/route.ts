@@ -28,9 +28,10 @@ export const runtime = "nodejs";
  *   { action: "addGrantee", subjectDid }     — refused once all 10 slots are taken
  *   { action: "removeGrantee", subjectDid }
  *   { action: "setMilestone", subjectDid, milestoneId, done }
- *   { action: "setMilestonePlan", subjectDid, milestoneId?, title?, dueDate?, removed? }
- *       — omit milestoneId to add a custom milestone; program milestones
- *         accept only a due date; removed retires a custom milestone
+ *   { action: "setMilestonePlan", subjectDid, milestoneId?, title?, description?, dueDate?, removed? }
+ *       — omit milestoneId to add a custom milestone; on program milestones a
+ *         blank title/description falls back to the program copy; removed
+ *         retires a custom milestone
  *   { action: "addDocument", subjectDid, title, fileName, mimeType, dataBase64 }
  *   { action: "deleteDocument", id }
  */
@@ -85,6 +86,7 @@ export async function POST(request: Request) {
       const plan = await setRewildingMilestonePlan(access.repoDid, cookie, str(body.subjectDid), {
         milestoneId: typeof body.milestoneId === "string" ? body.milestoneId : null,
         title: typeof body.title === "string" ? body.title : null,
+        description: typeof body.description === "string" ? body.description : null,
         dueDate: typeof body.dueDate === "string" && body.dueDate ? body.dueDate : null,
         removed: body.removed === true,
       });
@@ -93,6 +95,7 @@ export async function POST(request: Request) {
           plan: {
             milestoneId: plan.milestoneId,
             title: plan.title,
+            description: plan.description,
             dueDate: plan.dueDate,
             removed: plan.removed,
           },

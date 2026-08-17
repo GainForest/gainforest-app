@@ -140,12 +140,17 @@ export async function setRewildingMilestone(
 }
 
 const MILESTONE_TITLE_MAX_CHARS = 200;
+const MILESTONE_DESCRIPTION_MAX_CHARS = 2000;
 
 export type RewildingMilestonePlanInput = {
   /** Omit to add a new custom milestone (the id is generated here). */
   milestoneId?: string | null;
-  /** Custom milestone name. Ignored for program milestones. */
+  /** Milestone name. For a program milestone an override of the program
+   *  copy — empty clears it back to the standard wording. Required for a
+   *  custom milestone (unless removing it). */
   title?: string | null;
+  /** Milestone description; same override/fallback rule as `title`. */
+  description?: string | null;
   /** Calendar date (YYYY-MM-DD) or null/omitted for no due date. */
   dueDate?: string | null;
   /** True retires a custom milestone. Refused for program milestones. */
@@ -153,10 +158,11 @@ export type RewildingMilestonePlanInput = {
 };
 
 /**
- * Write one grantee's plan for one milestone: the due date on a program
- * milestone, or a custom milestone's name + due date (or its removal).
- * Append-only and idempotent — each event carries the milestone's full plan
- * state, and nothing is written when the effective state already matches.
+ * Write one grantee's plan for one milestone: the name, description and due
+ * date on any milestone (program milestones fall back to program copy where
+ * blank), or a custom milestone's creation or removal. Append-only and
+ * idempotent — each event carries the milestone's full plan state, and
+ * nothing is written when the effective state already matches.
  */
 export async function setRewildingMilestonePlan(
   repoDid: string,
@@ -180,15 +186,22 @@ export async function setRewildingMilestonePlan(
     throw new RewildingMutationError("invalid_request", 400);
   }
   // Program milestones are the contract's shared structure — a grantee's plan
-  // can date them, never delete them.
+  // can rename, describe and date them, never delete them.
   const removed = input.removed === true;
   if (isProgram && removed) throw new RewildingMutationError("invalid_request", 400);
 
-  const title = isProgram ? null : (input.title ?? "").trim() || null;
-  if (!isProgram && !removed) {
-    if (!title || title.length > MILESTONE_TITLE_MAX_CHARS) {
-      throw new RewildingMutationError("invalid_request", 400);
-    }
+  const title = (input.title ?? "").trim() || null;
+  const description = (input.description ?? "").trim() || null;
+  if (title && title.length > MILESTONE_TITLE_MAX_CHARS) {
+    throw new RewildingMutationError("invalid_request", 400);
+  }
+  if (description && description.length > MILESTONE_DESCRIPTION_MAX_CHARS) {
+    throw new RewildingMutationError("invalid_request", 400);
+  }
+  // A custom milestone must carry a name (program milestones fall back to
+  // program copy, custom ones have nothing to fall back to).
+  if (!isProgram && !removed && !title) {
+    throw new RewildingMutationError("invalid_request", 400);
   }
 
   const existing = await fetchRewildingMilestonePlanRecords(repoDid);
@@ -206,21 +219,21 @@ export async function setRewildingMilestonePlan(
     const current = effectiveRewildingMilestonePlans(existing).find(
       (record) => record.subjectDid === did && record.milestoneId === milestoneId,
     );
-    const matchesAlready = isProgram
-      ? (current?.dueDate ?? null) === dueDate
-      : current !== undefined &&
-        current.removed === removed &&
-        (current.dueDate ?? null) === dueDate &&
-        (removed || current.title === title);
+    const matchesAlready =
+      current !== undefined &&
+      current.removed === removed &&
+      (current.dueDate ?? null) === dueDate &&
+      (removed || (current.title === title && current.description === description));
     if (matchesAlready && current) return current;
-    // A program milestone with no plan yet and no due date to set: nothing to write.
-    if (isProgram && !current && dueDate === null) {
+    // A program milestone with no plan yet and nothing to set: nothing to write.
+    if (isProgram && !current && dueDate === null && title === null && description === null) {
       return {
         rkey: "",
         uri: "",
         subjectDid: did,
         milestoneId,
         title: null,
+        description: null,
         dueDate: null,
         removed: false,
         createdAt: new Date().toISOString(),
@@ -237,6 +250,7 @@ export async function setRewildingMilestonePlan(
       subject: did,
       milestoneId,
       ...(title ? { title } : {}),
+      ...(description ? { description } : {}),
       ...(dueDate ? { dueDate } : {}),
       ...(removed ? { removed: true } : {}),
       createdAt,
@@ -251,6 +265,7 @@ export async function setRewildingMilestonePlan(
     subjectDid: did,
     milestoneId,
     title,
+    description,
     dueDate,
     removed,
     createdAt,

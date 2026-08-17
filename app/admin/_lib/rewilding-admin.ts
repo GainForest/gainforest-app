@@ -33,10 +33,13 @@ export type RewildingAdminMilestone = {
   /** Program milestone id ("m1"…"m4", named in translated copy under
    *  `common.rewildingProgram.milestones`) or a custom milestone id. */
   id: string;
-  /** Short program code ("M1"…). Custom milestones have none. */
-  code: string | null;
-  /** Admin-written name for a custom milestone; null for program milestones. */
+  /** Short code: "M1"…"M4" for program milestones, "M5"+ for custom ones. */
+  code: string;
+  /** Admin-written name: override for a program milestone (null falls back
+   *  to program copy), the name itself for a custom one. */
   title: string | null;
+  /** Admin-written description; same fallback rule as `title`. */
+  description: string | null;
   /** Calendar date (YYYY-MM-DD) this milestone is due for this grantee. */
   dueDate: string | null;
   isCustom: boolean;
@@ -131,6 +134,7 @@ export async function fetchRewildingAdminGrantees(): Promise<RewildingAdminGrant
           id: resolved.id,
           code: resolved.code,
           title: resolved.title,
+          description: resolved.description,
           dueDate: resolved.dueDate,
           isCustom: resolved.isCustom,
           payout: resolved.payout,

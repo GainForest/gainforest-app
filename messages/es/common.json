@@ -1418,12 +1418,15 @@
       "addMilestone": "Añadir hito",
       "addingMilestone": "Añadiendo…",
       "addMilestoneDueLabel": "Fecha límite",
-      "addMilestoneHint": "Añade un paso solo para este beneficiario, con su propio nombre y una fecha límite opcional. El beneficiario lo ve de inmediato en su página de la subvención.",
-      "renameMilestone": "Renombrar {title}",
-      "renameSave": "Guardar",
-      "renameCancel": "Cancelar",
+      "addMilestoneHint": "Añade un paso solo para este beneficiario, con su propio nombre, descripción y fecha límite. El beneficiario lo ve de inmediato en su página de la subvención.",
       "removeMilestone": "Quitar {title}",
-      "removeMilestoneConfirm": "¿Quitar «{title}» de los hitos de este beneficiario? El beneficiario dejará de verlo."
+      "removeMilestoneConfirm": "¿Quitar «{title}» de los hitos de este beneficiario? El beneficiario dejará de verlo.",
+      "editMilestone": "Editar {title}",
+      "editSave": "Guardar",
+      "editCancel": "Cancelar",
+      "milestoneDescriptionLabel": "Descripción del hito",
+      "milestoneDescriptionPlaceholder": "Describe en qué consiste este paso (opcional)",
+      "programCopyHint": "Deja el nombre o la descripción en blanco para usar el texto estándar del programa."
     },
     "pages": {
       "hub": {

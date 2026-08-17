@@ -70,13 +70,22 @@ function scenario(minutesPerDay: number, now: number = LAST_DAY): GrantOverview 
     speciesTrend: [],
     // Due dates and the custom milestone mirror what an admin can now set per
     // grantee. M2's date is fixed in the past so the overdue chip always
-    // shows; the custom row carries its own (admin-written) name, no code.
+    // shows; the custom row carries its own (admin-written) name and
+    // description and continues the numbering after the program milestones.
     milestones: [
       { id: "m1", code: "M1", state: "done", dueDate: "2026-09-08", payout: { tranche: 1, amountUsd: 333 } },
       { id: "m2", code: "M2", state: "todo", dueDate: "2026-08-01", isRecorderInventory: true },
       { id: "m3", code: "M3", state: "todo", dueDate: "2026-10-20", payout: { tranche: 2, amountUsd: 333 } },
       { id: "m4", code: "M4", state: "todo", payout: { tranche: 3, amountUsd: 334 } },
-      { id: "cpreview1", code: null, title: "Community training session", state: "todo", dueDate: "2026-11-10" },
+      {
+        id: "cpreview1",
+        code: "M5",
+        title: "Community training session",
+        description: "Half-day session with local rangers on deploying recorders and uploading data.",
+        isCustom: true,
+        state: "todo",
+        dueDate: "2026-11-10",
+      },
     ],
   };
 }

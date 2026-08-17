@@ -92,6 +92,8 @@ export async function fetchGrantOverview(viewerDid: string | null): Promise<Gran
       id: resolved.id,
       code: resolved.code,
       ...(resolved.title ? { title: resolved.title } : {}),
+      ...(resolved.description ? { description: resolved.description } : {}),
+      ...(resolved.isCustom ? { isCustom: true } : {}),
       ...(resolved.dueDate ? { dueDate: resolved.dueDate } : {}),
       state: done.has(resolved.id) ? "done" : "todo",
       ...(resolved.payout ? { payout: resolved.payout } : {}),

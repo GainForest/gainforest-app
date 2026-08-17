@@ -31,10 +31,13 @@ import { resolvePdsHost } from "./pds";
 export const REWILDING_MILESTONE_COLLECTION = "app.gainforest.grant.rewilding.milestone";
 
 /**
- * Per-grantee milestone plan events: a due date set on a program milestone,
- * or a custom milestone an admin added for one grantee only. Written from the
- * admin panel only; newest event per grantee + milestone wins, and a
- * `removed: true` event retires a custom milestone without deleting history.
+ * Per-grantee milestone plan events: a due date, name or description set on
+ * a program milestone, or a custom milestone an admin added for one grantee
+ * only. Written from the admin panel only; newest event per grantee +
+ * milestone wins, and a `removed: true` event retires a custom milestone
+ * without deleting history. A program milestone with no override falls back
+ * to the translated program copy, so an untouched plan reads exactly like
+ * the handbook.
  */
 export const REWILDING_MILESTONE_PLAN_COLLECTION = "app.gainforest.grant.rewilding.milestonePlan";
 
@@ -262,11 +265,14 @@ export type RewildingMilestonePlanRecord = {
   rkey: string;
   uri: string;
   subjectDid: string;
-  /** A program milestone id (due-date override) or a custom milestone id. */
+  /** A program milestone id or a custom milestone id. */
   milestoneId: string;
-  /** Custom milestones carry their admin-written name; program milestones
-   *  keep theirs in translated UI copy, so it is null here. */
+  /** Admin-written name. For a program milestone this is a per-grantee
+   *  override of the translated program copy; null falls back to it. For a
+   *  custom milestone it is the name itself. */
   title: string | null;
+  /** Admin-written description; same fallback rule as `title`. */
+  description: string | null;
   /** Calendar date (YYYY-MM-DD) the milestone is due, or null for none. */
   dueDate: string | null;
   /** True retires a custom milestone (append-only tombstone). */
@@ -290,7 +296,8 @@ export function parseRewildingMilestonePlanRecord(
     return null;
   }
   // A custom milestone without a name cannot be rendered; only its
-  // tombstone may omit the title.
+  // tombstone may omit the title. Program milestones fall back to program
+  // copy, so an absent title is fine there.
   const title = nonEmptyString(value.title);
   const removed = value.removed === true;
   if (isCustomRewildingMilestoneId(milestoneId) && !title && !removed) return null;
@@ -300,7 +307,8 @@ export function parseRewildingMilestonePlanRecord(
     uri,
     subjectDid,
     milestoneId,
-    title: isCustomRewildingMilestoneId(milestoneId) ? title : null,
+    title,
+    description: nonEmptyString(value.description),
     dueDate: isRewildingDueDate(value.dueDate) ? value.dueDate : null,
     removed,
     createdAt,
@@ -362,11 +370,14 @@ export function effectiveRewildingMilestonePlans(
  */
 export type ResolvedRewildingMilestone = {
   id: string;
-  /** Short program code ("M1"…). Custom milestones have none. */
-  code: string | null;
-  /** Admin-written name for a custom milestone; null for program milestones,
-   *  whose names live in translated UI copy under their id. */
+  /** Short code shown on the row. Program milestones keep "M1"…"M4"; custom
+   *  milestones continue the numbering ("M5", "M6", …) in plan order. */
+  code: string;
+  /** Admin-written name: an override for a program milestone (null falls
+   *  back to translated program copy), the name itself for a custom one. */
   title: string | null;
+  /** Admin-written description; same fallback rule as `title`. */
+  description: string | null;
   /** Calendar date (YYYY-MM-DD) this milestone is due, or null. */
   dueDate: string | null;
   isCustom: boolean;
@@ -386,7 +397,8 @@ export function resolveRewildingMilestonePlan(
   const program: ResolvedRewildingMilestone[] = REWILDING_MILESTONES.map((definition) => ({
     id: definition.id,
     code: definition.code,
-    title: null,
+    title: byId.get(definition.id)?.title ?? null,
+    description: byId.get(definition.id)?.description ?? null,
     dueDate: byId.get(definition.id)?.dueDate ?? null,
     isCustom: false,
     payout: definition.payout ?? null,
@@ -409,10 +421,13 @@ export function resolveRewildingMilestonePlan(
       const bFirst = firstSeen.get(b.milestoneId) ?? b.createdAt;
       return aFirst.localeCompare(bFirst) || a.milestoneId.localeCompare(b.milestoneId);
     })
-    .map((record) => ({
+    .map((record, index) => ({
       id: record.milestoneId,
-      code: null,
+      // Numbering continues after the program milestones and reflects the
+      // current plan: removing a custom milestone renumbers the ones after it.
+      code: `M${program.length + index + 1}`,
       title: record.title,
+      description: record.description,
       dueDate: record.dueDate,
       isCustom: true,
       payout: null,

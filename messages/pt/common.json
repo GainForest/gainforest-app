@@ -1418,12 +1418,15 @@
       "addMilestone": "Adicionar marco",
       "addingMilestone": "Adicionando…",
       "addMilestoneDueLabel": "Prazo",
-      "addMilestoneHint": "Adiciona uma etapa só para este beneficiário, com nome próprio e prazo opcional. O beneficiário a vê imediatamente na página do subsídio.",
-      "renameMilestone": "Renomear {title}",
-      "renameSave": "Salvar",
-      "renameCancel": "Cancelar",
+      "addMilestoneHint": "Adiciona uma etapa só para este beneficiário, com nome, descrição e prazo próprios. O beneficiário a vê imediatamente na página do subsídio.",
       "removeMilestone": "Remover {title}",
-      "removeMilestoneConfirm": "Remover “{title}” dos marcos deste beneficiário? O beneficiário deixará de vê-lo."
+      "removeMilestoneConfirm": "Remover “{title}” dos marcos deste beneficiário? O beneficiário deixará de vê-lo.",
+      "editMilestone": "Editar {title}",
+      "editSave": "Salvar",
+      "editCancel": "Cancelar",
+      "milestoneDescriptionLabel": "Descrição do marco",
+      "milestoneDescriptionPlaceholder": "Descreva o que esta etapa envolve (opcional)",
+      "programCopyHint": "Deixe o nome ou a descrição em branco para usar o texto padrão do programa."
     },
     "pages": {
       "hub": {

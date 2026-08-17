@@ -49,12 +49,18 @@ export type GrantMilestone = {
   /** Program milestone id ("m1"…"m4") whose name and description are looked
    *  up in `common.rewildingProgram.milestones`, or a custom milestone id. */
   id: string;
-  /** Short program code, e.g. "M2". Shown as-is; not translated. Custom
-   *  milestones have none. */
-  code: string | null;
-  /** Name of a custom milestone, written by the grant team for this grantee.
-   *  Null for program milestones, whose names come from translated copy. */
+  /** Short code, e.g. "M2". Shown as-is; not translated. Custom milestones
+   *  continue the numbering ("M5", "M6", …). */
+  code: string;
+  /** Name written by the grant team for this grantee. On a program milestone
+   *  it overrides the translated copy; null falls back to it. On a custom
+   *  milestone it is the name itself. */
   title?: string | null;
+  /** Description written by the grant team; same fallback rule as `title`. */
+  description?: string | null;
+  /** True for milestones the grant team added for this grantee only — they
+   *  have no translated program copy to fall back to. */
+  isCustom?: boolean;
   /** Calendar date (YYYY-MM-DD) this milestone is due, when the grant team
    *  set one for this grantee. */
   dueDate?: string | null;

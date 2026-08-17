@@ -1418,12 +1418,15 @@
       "addMilestone": "Ongeza hatua",
       "addingMilestone": "Inaongeza…",
       "addMilestoneDueLabel": "Tarehe ya mwisho",
-      "addMilestoneHint": "Huongeza hatua kwa mpokeaji huyu pekee, yenye jina lake na tarehe ya mwisho ya hiari. Mpokeaji huiona mara moja kwenye ukurasa wa ruzuku yake.",
-      "renameMilestone": "Badilisha jina la {title}",
-      "renameSave": "Hifadhi",
-      "renameCancel": "Ghairi",
+      "addMilestoneHint": "Huongeza hatua kwa mpokeaji huyu pekee, yenye jina, maelezo na tarehe ya mwisho yake. Mpokeaji huiona mara moja kwenye ukurasa wa ruzuku yake.",
       "removeMilestone": "Ondoa {title}",
-      "removeMilestoneConfirm": "Ondoa “{title}” kwenye hatua za mpokeaji huyu? Mpokeaji hataiona tena."
+      "removeMilestoneConfirm": "Ondoa “{title}” kwenye hatua za mpokeaji huyu? Mpokeaji hataiona tena.",
+      "editMilestone": "Hariri {title}",
+      "editSave": "Hifadhi",
+      "editCancel": "Ghairi",
+      "milestoneDescriptionLabel": "Maelezo ya hatua",
+      "milestoneDescriptionPlaceholder": "Eleza hatua hii inahusu nini (hiari)",
+      "programCopyHint": "Acha jina au maelezo wazi ili kutumia maneno ya kawaida ya programu."
     },
     "pages": {
       "hub": {

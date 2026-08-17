@@ -1418,12 +1418,15 @@
       "addMilestone": "Tambah tonggak",
       "addingMilestone": "Menambahkan…",
       "addMilestoneDueLabel": "Tenggat",
-      "addMilestoneHint": "Menambahkan langkah khusus untuk penerima ini, dengan namanya sendiri dan tenggat opsional. Penerima langsung melihatnya di halaman hibahnya.",
-      "renameMilestone": "Ubah nama {title}",
-      "renameSave": "Simpan",
-      "renameCancel": "Batal",
+      "addMilestoneHint": "Menambahkan langkah khusus untuk penerima ini, dengan nama, deskripsi, dan tenggatnya sendiri. Penerima langsung melihatnya di halaman hibahnya.",
       "removeMilestone": "Hapus {title}",
-      "removeMilestoneConfirm": "Hapus “{title}” dari tonggak penerima ini? Penerima tidak akan melihatnya lagi."
+      "removeMilestoneConfirm": "Hapus “{title}” dari tonggak penerima ini? Penerima tidak akan melihatnya lagi.",
+      "editMilestone": "Ubah {title}",
+      "editSave": "Simpan",
+      "editCancel": "Batal",
+      "milestoneDescriptionLabel": "Deskripsi tonggak",
+      "milestoneDescriptionPlaceholder": "Jelaskan apa yang dicakup langkah ini (opsional)",
+      "programCopyHint": "Biarkan nama atau deskripsi kosong untuk memakai teks standar program."
     },
     "pages": {
       "hub": {
