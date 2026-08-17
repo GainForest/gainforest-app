@@ -566,6 +566,10 @@ export function AccountAudioViewer({
      selection toolbar needs somewhere to stand. The empty state below keeps
      its own upload CTA either way. */
   const showHeaderRow = !embedded || selectedCount > 0;
+  /* The embedded Recordings tab already has the overview-card gap. When the
+     selection toolbar appears, don't add a second large gap before the first
+     deployment card; the standalone profile viewer keeps its original space. */
+  const contentMargin = showHeaderRow && !embedded ? "mt-6" : undefined;
 
   return (
     <Container className={embedded ? "max-w-none p-0" : "pt-4 pb-10"}>
@@ -625,19 +629,19 @@ export function AccountAudioViewer({
       ) : null}
 
       {loading ? (
-        <div className={cn("flex flex-col gap-2", showHeaderRow && "mt-6")}>
+        <div className={cn("flex flex-col gap-2", contentMargin)}>
           {Array.from({ length: 4 }).map((_, i) => (
             <div key={i} className="h-16 animate-pulse rounded-2xl bg-muted" />
           ))}
         </div>
       ) : loadError ? (
-        <p className={cn("rounded-2xl border border-border bg-card/90 px-5 py-8 text-center text-sm text-muted-foreground", showHeaderRow && "mt-6")}>
+        <p className={cn("rounded-2xl border border-border bg-card/90 px-5 py-8 text-center text-sm text-muted-foreground", contentMargin)}>
           {t("loadError")}
         </p>
       ) : groups.length === 0 ? (
         /* Nothing at all — an owner whose only folders are empty still sees
            them below, so they can be cleaned up. */
-        <div className={cn("rounded-3xl border border-dashed border-border bg-muted/30 px-6 py-14 text-center", showHeaderRow && "mt-6")}>
+        <div className={cn("rounded-3xl border border-dashed border-border bg-muted/30 px-6 py-14 text-center", contentMargin)}>
           <span className="mx-auto grid h-12 w-12 place-items-center rounded-full bg-primary/10 text-primary">
             <AudioLinesIcon className="size-6" />
           </span>
@@ -653,7 +657,7 @@ export function AccountAudioViewer({
           ) : null}
         </div>
       ) : (
-        <div className={cn("flex flex-col gap-4", showHeaderRow && "mt-6")}>
+        <div className={cn("flex flex-col gap-4", contentMargin)}>
           {groups.map((group) => {
             const folder = group.deployment;
             const section = (
