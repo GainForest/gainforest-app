@@ -467,5 +467,11 @@
     "onchainManageHint": "Pochi hii inatumika kwenye blockchain, kwa hivyo mabadiliko ya funguo za siri yanarekodiwa kwenye mnyororo na yanahitaji idhini za kawaida. GainForest inalipia ada ya mtandao.",
     "thresholdOnchainHint": "Ni funguo ngapi za siri zinazopaswa kuidhinisha kila uhamisho. Badiliko hili linarekodiwa kwenye blockchain — anwani ya pochi haibadiliki.",
     "manageForbidden": "Ni mmiliki wa shirika au msimamizi pekee anayeweza kufanya badiliko hili."
+  },
+  "countrySelector": {
+    "title": "Chagua nchi",
+    "description": "Chagua nchi inayohusiana na rekodi hii.",
+    "searchPlaceholder": "Tafuta nchi",
+    "done": "Imekamilika"
   }
 }

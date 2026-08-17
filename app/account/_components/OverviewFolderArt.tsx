@@ -93,12 +93,5 @@ export const OVERVIEW_FOLDER_ART: Record<string, ReactNode> = {
   ),
 };
 
-/**
- * Folder ids the personal account Overview renders, in order — kept next to the
- * art so the loading placeholder shows exactly the tiles that will arrive.
- * Mirrors `folderTiles` in {@link AccountOverviewTabContent}.
- */
-export const ACCOUNT_OVERVIEW_FOLDER_IDS = ["projects", "observations", "donations"] as const;
-
 /** Folder ids the manage dashboard renders — mirrors `buildTiles` in {@link ManageOverview}. */
 export const MANAGE_OVERVIEW_FOLDER_IDS = ["projects", "observations", "sites", "trees", "audio"] as const;

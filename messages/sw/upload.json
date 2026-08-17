@@ -1159,6 +1159,7 @@
       "invalidDate": "Tarehe si sahihi",
       "addStartDate": "Ongeza tarehe ya kuanza",
       "addWebsite": "Ongeza tovuti",
+      "editWebsite": "Hariri tovuti",
       "addSocialLinks": "Ongeza viungo vya kijamii",
       "openSocialLink": "Fungua {link}",
       "viewPublicPage": "Tazama ukurasa wa umma",
@@ -1167,17 +1168,23 @@
       "copied": "Imenakiliwa",
       "copyProfileLink": "Nakili kiungo cha wasifu",
       "accountDetails": "Maelezo ya akaunti",
+      "aboutName": "Kuhusu {name}",
+      "typeLabel": "Aina",
+      "countryLabel": "Nchi",
+      "joinedLabel": "Alijiunga",
       "showAccountDetails": "Onyesha maelezo ya akaunti",
       "hideAccountDetails": "Ficha maelezo ya akaunti",
       "did": "DID",
       "wallet": "Pochi ya EVM",
       "copyDid": "Nakili DID",
-      "copyWallet": "Nakili anwani ya pochi"
+      "copyWallet": "Nakili anwani ya pochi",
+      "addCountry": "Ongeza nchi"
     },
     "errors": {
       "nameRequired": "Ongeza jina kabla ya kuhifadhi.",
       "invalidWebsite": "Weka anwani halali ya tovuti.",
-      "saveFailed": "Imeshindikana kuhifadhi. Jaribu tena."
+      "saveFailed": "Imeshindikana kuhifadhi. Jaribu tena.",
+      "invalidCountry": "Chagua nchi kutoka kwenye orodha."
     },
     "modals": {
       "editLogo": "Hariri nembo",

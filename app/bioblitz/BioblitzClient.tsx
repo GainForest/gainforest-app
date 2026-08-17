@@ -335,11 +335,11 @@ export function BioblitzClient() {
   }, [pastRoundsKey]);
 
   return (
-    <>
-      <section className="relative -mt-14 flex min-h-[100dvh] shrink-0 flex-col overflow-hidden lg:min-h-[100dvh]">
+    <div className="min-w-0">
+      <section className="relative -mt-14 flex min-h-[100dvh] min-w-0 shrink-0 flex-col overflow-hidden lg:min-h-[100dvh]">
         <BackgroundWash />
 
-        <div className="relative z-10 mx-auto flex w-full max-w-6xl flex-1 flex-col gap-5 px-4 pb-4 pt-[calc(3.5rem+0.75rem)] sm:px-6">
+        <div className="relative z-10 mx-auto flex min-w-0 w-full max-w-6xl flex-1 flex-col gap-5 px-3 pb-4 pt-[calc(3.5rem+0.75rem)] sm:px-5 lg:px-8">
           <HeroBand round={round} status={status} />
 
           <RoundNavigator
@@ -354,8 +354,8 @@ export function BioblitzClient() {
 
           <ProofNote />
 
-          <div className="grid flex-1 gap-4 lg:min-h-[34rem] lg:grid-cols-[minmax(0,5fr)_1px_minmax(0,7fr)]">
-            <div className="flex flex-col gap-4 lg:min-h-0">
+          <div className="grid min-w-0 flex-1 gap-4 lg:min-h-[34rem] lg:grid-cols-[minmax(0,5fr)_1px_minmax(0,7fr)]">
+            <div className="flex min-w-0 flex-col gap-4 lg:min-h-0">
               <Prizes round={round} />
               <PastWinners
                 rounds={pastRounds}
@@ -372,7 +372,7 @@ export function BioblitzClient() {
 
             <Separator orientation="vertical" className="hidden lg:block" />
 
-            <div className="lg:min-h-0">
+            <div className="min-w-0 lg:min-h-0">
               <Board
                 round={round}
                 status={status}
@@ -394,7 +394,7 @@ export function BioblitzClient() {
       <BioblitzBestPicture round={round} />
 
       <BioblitzObservationsMap round={round} />
-    </>
+    </div>
   );
 }
 

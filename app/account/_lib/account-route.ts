@@ -2,8 +2,10 @@ import { cache } from "react";
 import { notFound } from "next/navigation";
 import {
   fetchAccountSummary,
+  fetchProjectsByDid,
   fetchRecordDetail,
   type AccountSummary,
+  type ProjectRecord,
   type RecordDetail,
 } from "../../_lib/indexer";
 import { shortDid } from "../../_lib/format";
@@ -283,6 +285,17 @@ export const getAccountRouteData = cache(async (
     detail,
   };
 });
+
+/**
+ * Every project an account runs, memoized per request. The tab bar's count and
+ * the Overview's project list both need the same list, and the indexer read is
+ * the most expensive part of the page — so they share one fetch.
+ */
+export const getAccountProjects = cache(async (did: string): Promise<ProjectRecord[]> =>
+  fetchProjectsByDid(did, 1000)
+    .then((page) => page.records)
+    .catch(() => []),
+);
 
 /**
  * Slim profile card for a DID: profile copy + avatar read straight from

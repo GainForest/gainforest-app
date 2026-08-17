@@ -467,5 +467,11 @@
     "onchainManageHint": "Dompet ini aktif di blockchain, jadi perubahan kunci sandi dicatat di rantai dan membutuhkan persetujuan seperti biasa. GainForest menanggung biaya jaringan.",
     "thresholdOnchainHint": "Berapa banyak kunci sandi yang harus menyetujui setiap transfer. Perubahan ini dicatat di blockchain — alamat dompet tetap sama.",
     "manageForbidden": "Hanya pemilik organisasi atau admin yang dapat melakukan perubahan ini."
+  },
+  "countrySelector": {
+    "title": "Pilih negara",
+    "description": "Pilih negara yang terhubung dengan catatan ini.",
+    "searchPlaceholder": "Cari negara",
+    "done": "Selesai"
   }
 }

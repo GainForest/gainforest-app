@@ -19,13 +19,13 @@ import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import { Loader2Icon } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { ControlledModal } from "@/components/ui/modal/controlled-modal";
 import {
-  Dialog,
-  DialogDescription,
-  DialogFooter,
-  DialogPlaceholder,
-  DialogTitle,
-} from "@/components/ui/modal/dialog";
+  ModalContent,
+  ModalDescription,
+  ModalFooter,
+  ModalTitle,
+} from "@/components/ui/modal/modal";
 import { BlueskyIcon } from "./BlueskyIcon";
 
 export function BlueskyConsentModal({
@@ -62,30 +62,32 @@ export function BlueskyConsentModal({
   };
 
   return (
-    <Dialog open={open} onOpenChange={(next) => !busy && onOpenChange(next)}>
-      <DialogPlaceholder dialogWidth="max-w-md">
+    <ControlledModal
+      open={open}
+      onOpenChange={(next) => !busy && onOpenChange(next)}
+      dialogWidth="max-w-md"
+    >
+      <ModalContent dismissible={!busy} className="space-y-4">
         <div className="space-y-2">
-          <DialogTitle className="flex items-center gap-2">
+          <ModalTitle className="flex items-center gap-2 pr-10">
             <BlueskyIcon className="size-5 shrink-0 text-[#1185fe]" />
             {t("title")}
-          </DialogTitle>
-          <DialogDescription asChild>
-            <div className="space-y-2.5">
-              <p>{t("body")}</p>
-              <p>{t("discovery")}</p>
-              {/* Definite copy only when we KNOW the profile is missing;
-                  conditional copy while the check is unresolved. */}
-              {needsProfile === true ? (
-                <p>{t("profileNote")}</p>
-              ) : needsProfile === null ? (
-                <p>{t("profileNoteMaybe")}</p>
-              ) : null}
-              <p className="text-xs text-muted-foreground/80">{t("optOutNote")}</p>
-            </div>
-          </DialogDescription>
+          </ModalTitle>
+          <ModalDescription className="space-y-2.5">
+            <span className="block">{t("body")}</span>
+            <span className="block">{t("discovery")}</span>
+            {/* Definite copy only when we KNOW the profile is missing;
+                conditional copy while the check is unresolved. */}
+            {needsProfile === true ? (
+              <span className="block">{t("profileNote")}</span>
+            ) : needsProfile === null ? (
+              <span className="block">{t("profileNoteMaybe")}</span>
+            ) : null}
+            <span className="block text-xs text-muted-foreground/80">{t("optOutNote")}</span>
+          </ModalDescription>
         </div>
         {error ? <p className="text-sm text-destructive">{error}</p> : null}
-        <DialogFooter className="sm:flex-row sm:justify-end">
+        <ModalFooter className="sm:flex-row sm:justify-end">
           <Button type="button" variant="outline" onClick={() => onOpenChange(false)} disabled={busy}>
             {t("cancel")}
           </Button>
@@ -93,8 +95,8 @@ export function BlueskyConsentModal({
             {busy ? <Loader2Icon className="h-3.5 w-3.5 animate-spin" /> : null}
             {t("confirm")}
           </Button>
-        </DialogFooter>
-      </DialogPlaceholder>
-    </Dialog>
+        </ModalFooter>
+      </ModalContent>
+    </ControlledModal>
   );
 }

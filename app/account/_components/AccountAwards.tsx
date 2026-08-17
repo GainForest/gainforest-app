@@ -109,7 +109,7 @@ export function displayAwardKeys(keys: Iterable<string>): string[] {
  * it in without plumbing. A profile can hold several BioBlitz wins at once.
  * Renders nothing while loading or when there are no awards.
  */
-export function AccountAwards({ did, className = "" }: { did: string; className?: string }) {
+export function AccountAwards({ did, className = "", hideLabel = false }: { did: string; className?: string; hideLabel?: boolean }) {
   const t = useTranslations("common.recognition");
   const [badges, setBadges] = useState<string[]>([]);
 
@@ -142,7 +142,7 @@ export function AccountAwards({ did, className = "" }: { did: string; className?
       className={`flex min-w-0 items-center gap-2 text-sm font-medium text-muted-foreground ${className}`}
       aria-label={t("aria", { names })}
     >
-      <span className="shrink-0 whitespace-nowrap leading-none">{t("awardsLabel")}</span>
+      {hideLabel ? null : <span className="shrink-0 whitespace-nowrap leading-none">{t("awardsLabel")}</span>}
       <AwardEmblems badges={badges} size="md" />
     </span>
   );

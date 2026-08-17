@@ -1,21 +1,46 @@
 import { Skeleton } from "@/components/ui/skeleton";
-import { ACCOUNT_OVERVIEW_FOLDER_IDS, OVERVIEW_FOLDER_ART } from "./OverviewFolderArt";
+import { OVERVIEW_FOLDER_ART } from "./OverviewFolderArt";
 
 /**
- * Loading placeholder that mirrors the card-style account hero shared by
- * {@link AccountHero} and {@link EditableHero}: a cover band with its corner
- * controls, an overlapping round avatar, the identity column (name, bio,
- * follower counts, quiet facts) and the row of action pills.
+ * Loading placeholder for the identity header shared by every account tab:
+ * photo, name, the facts line, and the Follow + share actions.
  *
  * Two rules run through every placeholder in this file:
  *
- * 1. Only paint what has a fixed size — the cover, the avatar, buttons. Copy
- *    that comes from the account (its name, bio, counts) is left unpainted, so
- *    no grey bar ever morphs into text of a different length.
- * 2. Reserve that copy's space anyway. The heights below track the real hero's
- *    type scale, and the identity column is what drives the hero's height (it
- *    is taller than the 96px avatar), so every line has to be accounted for or
- *    the page jumps when the hero paints.
+ * 1. Only paint what has a fixed size — photos, buttons. Copy that comes from
+ *    the account (its name, facts, counts) is left unpainted, so no grey bar
+ *    ever morphs into text of a different length.
+ * 2. Reserve that copy's space anyway. The heights below track the real type
+ *    scale, so the page doesn't jump when the header paints.
+ */
+export function AccountProfileHeroSkeleton() {
+  return (
+    <section className="grid grid-cols-[auto_minmax(0,1fr)] items-center gap-x-4 pt-1 sm:flex sm:items-start sm:gap-5">
+      <Skeleton className="col-start-1 row-start-1 size-14 shrink-0 rounded-2xl sm:order-1 sm:size-[68px]" />
+      <div className="col-span-2 row-start-2 mt-3 min-w-0 sm:order-2 sm:mt-0 sm:flex-1">
+        {/* Display name — text-[1.75rem]/text-4xl at leading-[1.15]. */}
+        <div className="h-8 sm:h-[42px]" />
+        {/* Facts line, then the row of quiet links. */}
+        <div className="mt-1.5 h-5" />
+        <div className="mt-2 h-5" />
+      </div>
+      <div className="col-start-2 row-start-1 justify-self-end sm:order-3 sm:ml-auto sm:shrink-0">
+        <div className="flex justify-end gap-2">
+          <Skeleton className="h-9 w-[104px] rounded-full" />
+          <Skeleton className="size-9 rounded-full" />
+        </div>
+        {/* The live follower row sits directly below these actions. */}
+        <div className="mt-2 h-5" />
+      </div>
+    </section>
+  );
+}
+
+/**
+ * Loading placeholder that mirrors the card-style editable hero on the manage
+ * surfaces ({@link EditableHero}): a cover band with its corner controls, an
+ * overlapping round avatar, the identity column (name, bio, follower counts,
+ * quiet facts) and the row of action pills.
  */
 export function AccountHeroSkeleton() {
   return (
@@ -59,21 +84,20 @@ export function AccountHeroSkeleton() {
 /**
  * Loading placeholder for {@link AccountTabBar}: the three universal
  * destinations (Overview, Projects, Observations) plus the "More" menu that
- * holds everything else — icon, label, and its chevron.
+ * holds everything else. Widths track the real labels so the row doesn't
+ * reflow when it paints; the per-tab counts arrive later and are left blank.
  */
 export function AccountTabsSkeleton() {
   return (
-    <div className="mt-3">
+    <div className="mt-5">
       <div className="-mx-4 overflow-x-auto px-4 scrollbar-hidden">
-        <div className="flex min-w-max items-end gap-1 border-b border-border">
-          {["w-14", "w-14", "w-[86px]"].map((width, index) => (
-            <div key={index} className="flex items-center gap-1.5 px-3 py-2.5">
-              <Skeleton className="size-3.5 rounded-sm" />
+        <div className="flex min-w-max items-end gap-5 border-b border-border">
+          {["w-16", "w-14", "w-[86px]"].map((width, index) => (
+            <div key={index} className="pb-2.5 pt-1">
               <Skeleton className={`h-5 ${width}`} />
             </div>
           ))}
-          <div className="flex items-center gap-1.5 px-3 py-2.5">
-            <Skeleton className="size-3.5 rounded-sm" />
+          <div className="flex items-center gap-1 pb-2.5 pt-1">
             <Skeleton className="h-5 w-9" />
             <Skeleton className="size-3.5 rounded-sm" />
           </div>
@@ -119,11 +143,7 @@ function OverviewFolderSkeleton({ id }: { id: string }) {
  * of the tiles the surface actually renders, in order, so the placeholder shows
  * the same number of folders with the same art.
  */
-export function OverviewFoldersSkeleton({
-  ids = ACCOUNT_OVERVIEW_FOLDER_IDS,
-}: {
-  ids?: readonly string[];
-}) {
+export function OverviewFoldersSkeleton({ ids }: { ids: readonly string[] }) {
   return (
     <div className="grid grid-cols-2 gap-x-3 gap-y-3 sm:grid-cols-3 lg:grid-cols-4">
       {ids.map((id) => (
@@ -134,23 +154,68 @@ export function OverviewFoldersSkeleton({
 }
 
 /**
- * Loading placeholder for the default account overview tab: the folder-tile
- * grid followed by the share-profile card. Shared by the account section's
- * full-shell loading and the per-tab page loading so the two transitions line
- * up without a jump. (The optional About blurb above the grid is left out — it
- * only renders for profiles carrying a detail record.)
+ * Loading placeholder for the account Overview, mirroring its reading order:
+ * About and the projects up top, the record stream below, and the side rail
+ * beside them. Shared by the account section's full-shell loading and the
+ * per-tab page loading so the two transitions line up without a jump. Only the
+ * fixed-size shapes are painted — the support tile, the project thumbnails —
+ * while account copy just holds its space.
  */
 export function AccountOverviewContentSkeleton() {
   return (
-    <div className="space-y-5 py-2">
-      <OverviewFoldersSkeleton />
-      <section className="rounded-2xl border border-border bg-card/80 p-4 sm:flex sm:items-center sm:justify-between sm:gap-4">
-        <div className="min-w-0">
-          <Skeleton className="h-5 w-36 max-w-full" />
-          <Skeleton className="mt-0.5 h-[23px] w-72 max-w-full" />
+    <div className="mt-8 grid gap-10 xl:grid-cols-[minmax(0,1fr)_20rem] xl:items-start xl:gap-x-12 xl:gap-y-10 2xl:grid-cols-[minmax(0,1fr)_22rem]">
+      <div className="min-w-0 space-y-10 xl:col-start-1 xl:row-start-1 [&>*+*]:border-t [&>*+*]:border-border/60 [&>*+*]:pt-10">
+        {/* About — a heading and a few lines of the account's own words. */}
+        <div>
+          <Skeleton className="h-6 w-24" />
+          <div className="mt-3 h-24 max-w-3xl" />
         </div>
-        <div className="mt-3 shrink-0 sm:mt-0">
-          <Skeleton className="h-8 w-[132px] rounded-full" />
+        {/* Projects — two columns of thumbnail + title + place. */}
+        <div>
+          <Skeleton className="h-6 w-24" />
+          <div className="mt-4 grid gap-3 sm:grid-cols-2">
+            {Array.from({ length: 2 }).map((_, index) => (
+              <div key={index} className="flex gap-3 rounded-2xl border border-border/60 bg-card/40 p-3">
+                <Skeleton className="size-16 shrink-0 rounded-xl" />
+                <div className="min-w-0 flex-1">
+                  <div className="h-5" />
+                  <div className="mt-0.5 h-4" />
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      <aside className="min-w-0 border-t border-border/60 pt-10 xl:col-start-2 xl:row-start-1 xl:row-span-2 xl:border-t-0 xl:pt-0">
+        <Skeleton className="h-6 w-28" />
+        {/* At a glance starts with a deliberately wider support tile, then fills
+            remaining space with the responsive detail grid. */}
+        <div className="mt-4 grid grid-cols-[repeat(auto-fit,minmax(min(100%,8.5rem),1fr))] gap-2">
+          <Skeleton className="col-span-2 h-20 rounded-2xl" />
+          {Array.from({ length: 6 }).map((_, index) => (
+            <Skeleton key={index} className="h-20 rounded-2xl" />
+          ))}
+        </div>
+      </aside>
+
+      <section className="min-w-0 border-t border-border/60 pt-10 xl:col-start-1 xl:row-start-2">
+        <Skeleton className="h-6 w-36" />
+        <div className="mt-4">
+          {Array.from({ length: 4 }).map((_, index) => (
+            <div key={index} className="flex flex-col gap-1.5 border-b border-border/60 py-5 sm:flex-row sm:gap-6">
+              {/* Relative date + record kind. */}
+              <div className="sm:w-28 sm:shrink-0">
+                <div className="h-5" />
+                <div className="mt-0.5 h-4" />
+              </div>
+              {/* Headline + a line of context. */}
+              <div className="min-w-0 flex-1">
+                <div className="h-6" />
+                <div className="mt-1 h-5" />
+              </div>
+            </div>
+          ))}
         </div>
       </section>
     </div>

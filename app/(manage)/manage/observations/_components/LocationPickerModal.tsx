@@ -387,7 +387,7 @@ export function LocationPickerModal({ initial, defaultCenter, onSelect }: Locati
   }, [picked, onSelect, closeModal]);
 
   return (
-    <ModalContent className="space-y-4" dismissible={false}>
+    <ModalContent className="space-y-4" showCloseButton={false}>
       <ModalHeader>
         <div className="flex items-start justify-between gap-3">
           <ModalTitle>{t("title")}</ModalTitle>

@@ -10,20 +10,21 @@ import { useCart } from "./CartProvider";
 export function CartHeaderButton() {
   const t = useTranslations("cart.header");
   const { hydrated, count } = useCart();
-  const showBadge = hydrated && count > 0;
+
+  // An empty cart is not a destination users need in persistent chrome. Once
+  // something is added, the shortcut and count appear immediately.
+  if (!hydrated || count === 0) return null;
 
   return (
     <Button asChild variant="ghost" size="icon" className="relative" aria-label={t("openCart", { count })}>
       <Link href="/cart">
         <ShoppingCartIcon />
-        {showBadge ? (
-          <span
-            aria-hidden
-            className="absolute -right-0.5 -top-0.5 grid min-w-4 place-items-center rounded-full bg-primary px-1 text-[10px] font-semibold leading-4 text-primary-foreground"
-          >
-            {count > 9 ? "9+" : count}
-          </span>
-        ) : null}
+        <span
+          aria-hidden
+          className="absolute -right-0.5 -top-0.5 grid min-w-4 place-items-center rounded-full bg-primary px-1 text-[10px] font-semibold leading-4 text-primary-foreground"
+        >
+          {count > 9 ? "9+" : count}
+        </span>
       </Link>
     </Button>
   );

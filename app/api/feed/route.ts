@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
-import { buildActivityFeed, fetchViewerFollowingDids, type ActivityFeedFilter } from "@/app/_lib/feed";
+import { buildAccountActivityFeed, buildActivityFeed, fetchViewerFollowingDids, type ActivityFeedFilter } from "@/app/_lib/feed";
 import { fetchAuthSession } from "@/app/_lib/auth-server";
 
 export const runtime = "nodejs";
@@ -23,6 +23,7 @@ function parseFilter(value: string | null): ActivityFeedFilter {
 /**
  * GET /api/feed?cursor=<opaque>&kind=<all|project|observation|organization|donation|post|audio>
  * GET /api/feed?cursor=<opaque>&scope=following
+ * GET /api/feed?cursor=<opaque>&scope=account&did=<did>
  *
  * Returns one page of the global, newest-first activity feed (projects, nature
  * sightings, organizations, posts, uploaded recorder folders, and donations —
@@ -33,6 +34,9 @@ function parseFilter(value: string | null): ActivityFeedFilter {
  * signed-in viewer follows (atproto query-on-read): the viewer is resolved from
  * the session, their follow set is fetched once, and the record streams are
  * filtered to those authors. A signed-out request returns an empty page.
+ *
+ * With `scope=account&did=…` the feed is narrowed to the records that one
+ * account published — the stream shown on its public profile Overview.
  */
 export async function GET(request: NextRequest) {
   try {
@@ -51,6 +55,17 @@ export async function GET(request: NextRequest) {
       const page = await buildActivityFeed(cursor, "all", { dids, viewerDid: session.did });
       // A following feed is per-viewer, so it must never be shared in a CDN cache.
       return NextResponse.json(page, { headers: { "cache-control": "private, no-store" } });
+    }
+
+    if (scope === "account") {
+      const did = request.nextUrl.searchParams.get("did")?.trim() ?? "";
+      if (!did.startsWith("did:")) {
+        return NextResponse.json({ error: "A did is required" }, { status: 400 });
+      }
+      const page = await buildAccountActivityFeed(did, cursor);
+      return NextResponse.json(page, {
+        headers: { "cache-control": "public, s-maxage=60, stale-while-revalidate=300" },
+      });
     }
 
     const filter = parseFilter(request.nextUrl.searchParams.get("kind"));

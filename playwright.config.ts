@@ -93,6 +93,11 @@ export default defineConfig({
       use: { ...desktopChrome },
     },
     {
+      name: "ui-regressions",
+      testMatch: /ui-regressions\.spec\.ts/,
+      use: { ...desktopChrome },
+    },
+    {
       name: "auth.setup",
       testMatch: /auth\.setup\.ts/,
     },

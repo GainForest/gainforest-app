@@ -1159,6 +1159,7 @@
       "invalidDate": "Tanggal tidak valid",
       "addStartDate": "Tambahkan tanggal mulai",
       "addWebsite": "Tambahkan situs web",
+      "editWebsite": "Edit situs web",
       "addSocialLinks": "Tambahkan tautan sosial",
       "openSocialLink": "Buka {link}",
       "viewPublicPage": "Lihat halaman publik",
@@ -1167,17 +1168,23 @@
       "copied": "Tersalin",
       "copyProfileLink": "Salin tautan profil",
       "accountDetails": "Detail akun",
+      "aboutName": "Tentang {name}",
+      "typeLabel": "Jenis",
+      "countryLabel": "Negara",
+      "joinedLabel": "Bergabung",
       "showAccountDetails": "Tampilkan detail akun",
       "hideAccountDetails": "Sembunyikan detail akun",
       "did": "DID",
       "wallet": "Dompet EVM",
       "copyDid": "Salin DID",
-      "copyWallet": "Salin alamat dompet"
+      "copyWallet": "Salin alamat dompet",
+      "addCountry": "Tambahkan negara"
     },
     "errors": {
       "nameRequired": "Tambahkan nama sebelum menyimpan.",
       "invalidWebsite": "Masukkan alamat situs web yang valid.",
-      "saveFailed": "Gagal menyimpan. Coba lagi."
+      "saveFailed": "Gagal menyimpan. Coba lagi.",
+      "invalidCountry": "Pilih negara dari daftar."
     },
     "modals": {
       "editLogo": "Ubah logo",
