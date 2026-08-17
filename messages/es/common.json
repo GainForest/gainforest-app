@@ -1012,6 +1012,7 @@
     "recordKind": {
       "project": "Proyecto",
       "observation": "Avistamiento",
+      "audio": "Grabación",
       "organization": "Organización",
       "post": "Novedad",
       "donation": "Donación"

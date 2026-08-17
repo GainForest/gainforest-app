@@ -1012,6 +1012,7 @@
     "recordKind": {
       "project": "Project",
       "observation": "Nature sighting",
+      "audio": "Recording",
       "organization": "Organization",
       "post": "Update",
       "donation": "Donation"

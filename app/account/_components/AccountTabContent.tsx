@@ -7,7 +7,7 @@ import { AccountGalleryClient } from "./AccountGalleryClient";
 import type { GalleryProjectOption } from "./AccountGalleryUploader";
 import { InlineCardGridSkeleton } from "../../_components/PageLoadingSkeletons";
 import { RecordExplorer } from "../../_components/RecordExplorer";
-import { AccountAboutSection } from "./AccountAboutSection";
+import { AccountAboutSection, accountHasAboutContent } from "./AccountAboutSection";
 import { AccountActivityFeed } from "./AccountActivityFeed";
 import { AccountBumicertsGrid } from "./AccountBumicertsGrid";
 import { AccountOverviewSidebar } from "./AccountOverviewSidebar";
@@ -30,6 +30,7 @@ import { getEntriesForActivities } from "@/app/cert/[did]/[rkey]/_components/tim
 import { resolveTimelineReferences } from "@/app/cert/[did]/[rkey]/_components/timeline/timelineReferenceResolver";
 import { ProjectTimelineReadonly } from "@/app/projects/[did]/[rkey]/_components/ProjectTimelineReadonly";
 import { getAccountProjects, type AccountRouteData } from "../_lib/account-route";
+import { cn } from "@/lib/utils";
 
 type ManageAction = {
   href: string;
@@ -163,6 +164,12 @@ export async function AccountOverviewContent({ account, did }: { account: Accoun
   ]);
   const memberships = await loadAccountMemberships(account, session);
 
+  // A profile with neither an About nor any projects has nothing for the story
+  // column, so we drop that column entirely and let Recent activity sit
+  // directly beside the rail — otherwise the empty column leaves a tall gap
+  // above Recent activity on wide screens.
+  const hasStory = projects.length > 0 || (await accountHasAboutContent(account));
+
   const received = receipts.filter((receipt) => receipt.orgDid === did);
   const receivedUsd = received.reduce((total, receipt) => total + (receipt.amount || 0), 0);
   const supporters = new Set(received.map((receipt) => receipt.from?.id).filter(Boolean)).size;
@@ -180,13 +187,16 @@ export async function AccountOverviewContent({ account, did }: { account: Accoun
     // `lg` a 20rem rail would squeeze the story into a column too narrow to read
     // project titles in.
     <div className="mt-8 grid gap-10 xl:grid-cols-[minmax(0,1fr)_20rem] xl:items-start xl:gap-x-12 xl:gap-y-10 2xl:grid-cols-[minmax(0,1fr)_22rem]">
-      {/* Every section after the first opens with a hairline, so About and the
-          project list read as two blocks instead of one long run of text. The
-          first needs none: the tab bar already draws a rule right above it. */}
-      <div className="min-w-0 space-y-10 org-animate org-fade-in-up xl:col-start-1 xl:row-start-1 [&>*+*]:border-t [&>*+*]:border-border/60 [&>*+*]:pt-10">
-        <AccountAboutSection account={account} />
-        <AccountProjectsSection account={account} projects={projects} />
-      </div>
+      {/* One consistent vertical rhythm down the story column: About (a filled
+          panel), the project list, then the record stream all sit a single
+          `space-y`/`gap-y` apart with no hairlines between them, so the gaps
+          never look doubled or uneven. */}
+      {hasStory ? (
+        <div className="min-w-0 space-y-10 org-animate org-fade-in-up xl:col-start-1 xl:row-start-1">
+          <AccountAboutSection account={account} />
+          <AccountProjectsSection account={account} projects={projects} />
+        </div>
+      ) : null}
 
       {/* Stacked, the rail is just the next section down, so it takes the same
           opening rule; beside the story it needs none. */}
@@ -205,7 +215,16 @@ export async function AccountOverviewContent({ account, did }: { account: Accoun
         />
       </aside>
 
-      <section className="min-w-0 border-t border-border/60 pt-10 xl:col-start-1 xl:row-start-2">
+      <section
+        className={cn(
+          // Stacked (mobile), each section opens with a hairline to separate it
+          // from the rail above; beside the story on wide screens the grid's
+          // row gap does the separating, so the divider and extra padding drop
+          // away to keep the spacing even.
+          "min-w-0 border-t border-border/60 pt-10 xl:col-start-1 xl:border-t-0 xl:pt-0",
+          hasStory ? "xl:row-start-2" : "xl:row-start-1",
+        )}
+      >
         <AccountSectionHeading>{activityT("recentActivity")}</AccountSectionHeading>
         <div className="mt-4">
           <AccountActivityFeed did={did} />

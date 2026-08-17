@@ -1012,6 +1012,7 @@
     "recordKind": {
       "project": "Proyek",
       "observation": "Pengamatan alam",
+      "audio": "Rekaman",
       "organization": "Organisasi",
       "post": "Kabar",
       "donation": "Donasi"

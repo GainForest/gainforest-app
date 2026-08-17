@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { accountStatTiles, shouldSpanLastTileOnDesktop, type AccountStatCounts } from "./AccountStatList";
+import { accountStatTiles, type AccountStatCounts } from "./AccountStatList";
 
 const counts: AccountStatCounts = {
   observations: 1_284,
@@ -24,12 +24,5 @@ describe("accountStatTiles", () => {
     expect(tiles).toHaveLength(3);
     expect(tiles.find((tile) => tile.id === "donations")).toBeUndefined();
     expect(tiles.at(-1)).toEqual({ id: "supporters", count: 9, href: null });
-  });
-});
-
-describe("shouldSpanLastTileOnDesktop", () => {
-  it("fills only an orphaned first-column tile in the right rail", () => {
-    expect(shouldSpanLastTileOnDesktop(5)).toBe(true);
-    expect(shouldSpanLastTileOnDesktop(4)).toBe(false);
   });
 });

@@ -61,18 +61,16 @@ test("account headers stay compact while Overview owns profile details", async (
   const profilePanel = page.locator("[data-account-overview-panel]");
   await expect(profilePanel).toBeVisible();
   const atAGlance = profilePanel.locator("[data-account-stat-tiles]");
-  const atAGlanceHeading = atAGlance.getByRole("heading", { name: /at a glance/i });
-  await expect(atAGlanceHeading).toBeVisible();
-  await expect(atAGlanceHeading).toHaveClass(/font-instrument/);
-  await expect(atAGlanceHeading).toHaveClass(/italic/);
+  // The details no longer carry their own heading — they read as a quiet list.
+  await expect(atAGlance.getByRole("heading", { name: /at a glance/i })).toHaveCount(0);
   await expect(atAGlance.locator("[data-account-overview-bio]")).toBeVisible();
-  // Support is a two-column tile within At a glance whenever this account can
-  // receive support; it is never an unrelated rail block.
+  // Support is the one tile within the overview; it is never an unrelated rail block.
   await expect(profilePanel.locator(":scope > [data-account-overview-support]")).toHaveCount(0);
-  await expect(atAGlance.locator("[data-account-stat-tile]")).toHaveCount(3);
-  await expect(atAGlance.locator("[data-account-stat-tile] svg")).toHaveCount(3);
-  await expect(atAGlance.locator('[data-account-stat-tile="bumicerts"]')).toHaveCount(0);
-  await expect(atAGlance.locator('[data-account-stat-tile="supporters"]')).toBeVisible();
+  // Everything else renders as key/value rows separated by hairlines.
+  await expect(atAGlance.locator("[data-account-overview-row='observations']")).toBeVisible();
+  await expect(atAGlance.locator("[data-account-overview-row='projects']")).toBeVisible();
+  await expect(atAGlance.locator("[data-account-overview-row='supporters']")).toBeVisible();
+  await expect(atAGlance.locator('[data-account-overview-row="donations"]')).toHaveCount(0);
   await expect(atAGlance.locator('[data-account-overview-tile="website"]')).toHaveCount(0);
 
   // Audience counts belong immediately below Follow + share — not in the rail's
@@ -107,37 +105,13 @@ test("account Overview stacks its supporting rail before the wide desktop layout
     expect(railBox!.y).toBeGreaterThan(projectsBox!.y);
 
     // Below the wide two-column breakpoint, the supporting rail occupies the
-    // same content line as Projects. Its available-width grid must align to
-    // that section and fit more than two stats across when the space permits.
+    // same content line as Projects. Its rows must lay out label-left,
+    // value-right across the rail.
     if (width === 1172) {
-      const statTiles = profilePanel.locator("[data-account-stat-tile]");
-      await expect(statTiles).toHaveCount(3);
-      await expect(statTiles.nth(0)).toHaveClass(/justify-between/);
-      await expect(statTiles.nth(0)).toHaveClass(/bg-muted/);
-      await expect(statTiles.nth(0)).not.toHaveClass(/(?:border|shadow)/);
-      await expect(statTiles.nth(0).locator(".font-instrument")).toHaveClass(/italic/);
-      await expect(statTiles.nth(0).locator("svg")).toHaveClass(/size-16/);
-      await expect(statTiles.nth(0).locator("svg")).toHaveClass(/text-primary/);
-      await expect(statTiles.nth(0).locator("svg")).toHaveClass(/opacity-10/);
-      await expect(statTiles.nth(0).locator("svg")).toHaveClass(/-bottom-3/);
-      await expect(statTiles.nth(0).locator("svg")).toHaveClass(/-left-3/);
-      await expect(statTiles.nth(0).locator("svg")).not.toHaveClass(/rotate/);
-      await expect(statTiles.nth(0).getByText("Observations", { exact: true })).toHaveClass(/text-left/);
-      await expect(statTiles.nth(0).locator(".font-instrument")).toHaveClass(/text-right/);
-      await expect(profilePanel.locator('[data-account-stat-tile="donations"]')).toHaveCount(0);
-      const [firstTile, secondTile, thirdTile] = await Promise.all([
-        statTiles.nth(0).boundingBox(),
-        statTiles.nth(1).boundingBox(),
-        statTiles.nth(2).boundingBox(),
-      ]);
-      expect(firstTile).not.toBeNull();
-      expect(secondTile).not.toBeNull();
-      expect(thirdTile).not.toBeNull();
-      expect(secondTile!.y).toBe(firstTile!.y);
-      expect(thirdTile!.y).toBe(firstTile!.y);
-      expect(firstTile!.x).toBeGreaterThanOrEqual(railBox!.x);
-      expect(firstTile!.x - railBox!.x).toBeLessThanOrEqual(2);
-      expect(Math.abs(projectsBox!.x - firstTile!.x)).toBeLessThanOrEqual(2);
+      const rows = profilePanel.locator("[data-account-overview-row]");
+      await expect(rows.first()).toBeVisible();
+      await expect(rows.first()).toHaveClass(/justify-between/);
+      await expect(profilePanel.locator('[data-account-overview-row="donations"]')).toHaveCount(0);
     }
 
     const dimensions = await page.evaluate(() => ({

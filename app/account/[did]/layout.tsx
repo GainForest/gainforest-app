@@ -230,19 +230,21 @@ export default async function AccountLayout({
         <AccountChrome
           hero={
             <>
-              {canEditProfile && target ? (
-                <EditableAccountHeader
-                  account={account}
-                  writeRepoDid={target.kind === "group" ? target.did : undefined}
-                  groupRole={groupRole}
-                  settingsHref={accountSettingsPath(account.urlIdentifier)}
-                  viewPublicHref={null}
-                  showAbout={false}
-                  variant="compact"
-                />
-              ) : (
-                <AccountProfileHero account={account} />
-              )}
+              <div className="rounded-2xl bg-muted px-4 py-5 sm:px-6">
+                {canEditProfile && target ? (
+                  <EditableAccountHeader
+                    account={account}
+                    writeRepoDid={target.kind === "group" ? target.did : undefined}
+                    groupRole={groupRole}
+                    settingsHref={accountSettingsPath(account.urlIdentifier)}
+                    viewPublicHref={null}
+                    showAbout={false}
+                    variant="compact"
+                  />
+                ) : (
+                  <AccountProfileHero account={account} />
+                )}
+              </div>
               {/* Steward panel sits between the profile header and the tab bar so
                   it reads as a tool for this profile without pushing it down. */}
               {moderator?.isModerator && testAccountFlagged !== null ? (
