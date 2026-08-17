@@ -515,9 +515,9 @@
   "audioManage": {
     "metaTitle": "Gestionar grabaciones — {name}",
     "title": "Gestionar grabaciones",
-    "description": "Sube, renombra y elimina las grabaciones de campo guardadas en este perfil.",
+    "description": "Sube, etiqueta y organiza las grabaciones de campo guardadas en este perfil.",
     "rowTitle": "Gestionar grabaciones",
-    "rowDescription": "Sube, renombra y elimina las grabaciones de este perfil."
+    "rowDescription": "Sube, etiqueta y organiza las grabaciones de este perfil."
   },
   "equipment": {
     "metadataTitle": "Equipos — {name}",

@@ -515,9 +515,9 @@
   "audioManage": {
     "metaTitle": "Simamia rekodi — {name}",
     "title": "Simamia rekodi",
-    "description": "Pakia, badilisha majina na futa rekodi za uwandani zilizohifadhiwa kwenye wasifu huu.",
+    "description": "Pakia, weka lebo na panga rekodi za uwandani zilizohifadhiwa kwenye wasifu huu.",
     "rowTitle": "Simamia rekodi",
-    "rowDescription": "Pakia, badilisha majina na futa rekodi kwenye wasifu huu."
+    "rowDescription": "Pakia, weka lebo na panga rekodi kwenye wasifu huu."
   },
   "equipment": {
     "metadataTitle": "Vifaa — {name}",

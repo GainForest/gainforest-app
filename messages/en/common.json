@@ -515,9 +515,9 @@
   "audioManage": {
     "metaTitle": "Manage recordings — {name}",
     "title": "Manage recordings",
-    "description": "Upload, rename and delete the field recordings saved to this profile.",
+    "description": "Upload, label and organize the field recordings saved to this profile.",
     "rowTitle": "Manage recordings",
-    "rowDescription": "Upload, rename and delete the recordings on this profile."
+    "rowDescription": "Upload, label and organize the recordings on this profile."
   },
   "equipment": {
     "metadataTitle": "Equipment — {name}",

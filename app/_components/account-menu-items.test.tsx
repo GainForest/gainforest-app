@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { AUDIO_WORKSPACE_HREF, buildAccountSubItems } from "./account-menu-items";
+import { buildAccountSubItems } from "./account-menu-items";
 
 const labels = {
   profile: "View profile",
@@ -19,13 +19,15 @@ function rowsFor(identifier: string, showAudio: boolean, showManage = showAudio)
 
 describe("buildAccountSubItems", () => {
   it("offers the audio workspace under every account the viewer can switch to", () => {
-    // A person plus the organizations they belong to.
+    // A person plus the organizations they belong to. Each row points at that
+    // account's own audio manage page — the workspace acts on the account the
+    // row sits under.
     const accounts = ["sharfy.gainforest.app", "gainforest.org", "did:plc:someorg"];
 
     for (const identifier of accounts) {
       const audio = rowsFor(identifier, true).find((item) => item.key === "audio");
       expect(audio, `no audio row for ${identifier}`).toBeDefined();
-      expect(audio?.href).toBe(AUDIO_WORKSPACE_HREF);
+      expect(audio?.href).toBe(`/account/${encodeURIComponent(identifier)}/audio/manage`);
     }
   });
 
@@ -83,9 +85,7 @@ describe("buildAccountSubItems", () => {
     const mine = rowsFor("sharfy.gainforest.app", true);
     const theirs = rowsFor("gainforest.org", true);
 
-    // The audio workspace is deliberately shared (it follows the account
-    // context); every account-scoped row must differ.
-    for (const key of ["profile", "observations", "manage", "projects", "settings"]) {
+    for (const key of ["profile", "observations", "manage", "audio", "projects", "settings"]) {
       const a = mine.find((item) => item.key === key)?.href;
       const b = theirs.find((item) => item.key === key)?.href;
       expect(a, key).not.toBe(b);

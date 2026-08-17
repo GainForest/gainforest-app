@@ -7,21 +7,13 @@ import {
   UserIcon,
 } from "lucide-react";
 import {
+  accountAudioManagePath,
   accountObservationsManagePath,
   accountObservationsPath,
   accountPath,
   accountProjectsPath,
   accountSettingsPath,
 } from "@/app/account/_lib/account-route";
-
-/**
- * "Your recordings" — the personal audio workspace (library, deployments,
- * upload, labelling, soundscape). Unlike its neighbours this is not an
- * /account/<id>/… route: the workspace reads the acting repo from the account
- * context, which the menu writes before the link navigates. So one URL serves
- * whichever account the row sits under.
- */
-export const AUDIO_WORKSPACE_HREF = "/observations/audio?tab=library";
 
 export type MenuSubItem = {
   key: string;
@@ -90,16 +82,16 @@ export function buildAccountSubItems({
           },
         ]
       : []),
-    // Straight into the recording workspace (library first), which is where
-    // uploading, labelling and building a soundscape all live. Buried four
-    // clicks deep otherwise, so it earns its own row next to Observations.
+    // The recording workspace — library, deployments, upload, labelling,
+    // identifications, soundscape, device setup — hosted on this account's own
+    // audio manage page, so the row acts on the account it sits under.
     // Admin-only while the workspace is still being worked on.
     ...(showAudio
       ? [
           {
             key: "audio",
             label: labels.audio,
-            href: AUDIO_WORKSPACE_HREF,
+            href: accountAudioManagePath(identifier),
             icon: <AudioLinesIcon className="h-3.5 w-3.5" />,
             adminOnly: true,
           },

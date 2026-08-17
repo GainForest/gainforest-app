@@ -515,9 +515,9 @@
   "audioManage": {
     "metaTitle": "Kelola rekaman — {name}",
     "title": "Kelola rekaman",
-    "description": "Unggah, ubah nama, dan hapus rekaman lapangan yang tersimpan di profil ini.",
+    "description": "Unggah, beri label, dan atur rekaman lapangan yang tersimpan di profil ini.",
     "rowTitle": "Kelola rekaman",
-    "rowDescription": "Unggah, ubah nama, dan hapus rekaman di profil ini."
+    "rowDescription": "Unggah, beri label, dan atur rekaman di profil ini."
   },
   "equipment": {
     "metadataTitle": "Peralatan — {name}",

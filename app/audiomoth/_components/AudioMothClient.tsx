@@ -337,11 +337,16 @@ function InfoRow({ label, value, dimmed }: { label: string; value: string; dimme
 export function AudioMothClient({
   sessionDid,
   mediaTabs,
+  showHero = true,
 }: {
   sessionDid: string | null;
   /** The Photos | Audio tab bar, rendered above the workflow tabs so every
    *  Observations media surface shares one switcher. */
   mediaTabs?: ReactNode;
+  /** Drop the explore hero when the workspace is hosted inside another
+   *  surface (the account's audio manage page), which brings its own
+   *  heading. */
+  showHero?: boolean;
 }) {
   const t = useTranslations("common.audiomoth");
   const identificationsT = useTranslations("common.identifications");
@@ -885,26 +890,28 @@ export function AudioMothClient({
 
   return (
     <div>
-      <PictureHero
-        compact
-        lightSrc="/images/explore/explore-hero-light@2x.webp"
-        darkSrc="/images/explore/explore-hero-dark@2x.webp"
-        title={t("audioHub.title")}
-        actions={<AudioScopePills active="yours" />}
-        lede={
-          mainTab === "setup"
-            ? t("subtitle")
-            : mainTab === "library"
-              ? t("audioHub.librarySubtitle")
-              : mainTab === "label"
-                ? t("label.subtitle")
-                : mainTab === "identifications"
-                  ? identificationsT("subtitle")
-                  : mainTab === "soundscape"
-                    ? soundscapeT("hero.description")
-                    : t("audioHub.subtitle")
-        }
-      />
+      {showHero ? (
+        <PictureHero
+          compact
+          lightSrc="/images/explore/explore-hero-light@2x.webp"
+          darkSrc="/images/explore/explore-hero-dark@2x.webp"
+          title={t("audioHub.title")}
+          actions={<AudioScopePills active="yours" />}
+          lede={
+            mainTab === "setup"
+              ? t("subtitle")
+              : mainTab === "library"
+                ? t("audioHub.librarySubtitle")
+                : mainTab === "label"
+                  ? t("label.subtitle")
+                  : mainTab === "identifications"
+                    ? identificationsT("subtitle")
+                    : mainTab === "soundscape"
+                      ? soundscapeT("hero.description")
+                      : t("audioHub.subtitle")
+          }
+        />
+      ) : null}
       {/* Photos | Audio — shared across the Observations surfaces */}
       {mediaTabs ? <div className="relative z-10 mx-auto mt-6 max-w-6xl px-6">{mediaTabs}</div> : null}
 
