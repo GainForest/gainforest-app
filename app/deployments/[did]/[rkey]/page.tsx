@@ -13,6 +13,7 @@ import {
   RouteIcon,
 } from "lucide-react";
 import { fetchAuthSession } from "@/app/_lib/auth-server";
+import { fetchUserCgsGroups } from "@/app/_lib/manage-server";
 import { formatDate, shortDid } from "@/app/_lib/format";
 import { getDeploymentEvent, linkedEquipmentUri, parseAtUri } from "@/app/_lib/deployment-events";
 import { equipmentDetailPath } from "@/app/_lib/equipment";
@@ -65,6 +66,16 @@ export default async function DeploymentDetailPage({ params }: { params: Deploym
   ]);
   const viewerDid = session.isLoggedIn ? session.did : null;
   const isOwner = viewerDid === item.did;
+  // An organization's deployment is managed by its members, same as on the
+  // Deployments tab. The group service only reports the signed-in viewer's
+  // own memberships, so this stays private and fails closed.
+  const memberOfOwner =
+    !isOwner && viewerDid
+      ? await fetchUserCgsGroups()
+          .then((groups) => groups.some((group) => group.groupDid === item.did))
+          .catch(() => false)
+      : false;
+  const canManage = isOwner || memberOfOwner;
   const ownerName = ownerProfile?.displayName?.trim() || shortDid(item.did);
   const name = item.locality ?? t("untitled");
 
@@ -78,7 +89,7 @@ export default async function DeploymentDetailPage({ params }: { params: Deploym
   return (
     <main className="mx-auto w-full max-w-3xl px-6 pb-20 pt-8 md:pt-12">
       <Link
-        href="/audiomoth?tab=deployments"
+        href="/observations/audio?tab=deployments"
         className="inline-flex items-center gap-1.5 text-[13px] font-medium text-muted-foreground transition-colors hover:text-foreground"
       >
         <ArrowLeftIcon className="h-3.5 w-3.5" aria-hidden />
@@ -95,7 +106,7 @@ export default async function DeploymentDetailPage({ params }: { params: Deploym
             <p className="mt-0.5 font-mono text-xs text-muted-foreground">{item.eventID}</p>
           </div>
         </div>
-        {isOwner && viewerDid ? <DeploymentDetailActions event={item} sessionDid={viewerDid} /> : null}
+        {canManage && viewerDid ? <DeploymentDetailActions event={item} sessionDid={viewerDid} /> : null}
       </header>
 
       {hasCoords ? (
@@ -148,16 +159,16 @@ export default async function DeploymentDetailPage({ params }: { params: Deploym
         </dl>
       </section>
 
-      <DeploymentRecordings did={item.did} eventUri={item.uri} isOwner={isOwner} />
+      <DeploymentRecordings did={item.did} eventUri={item.uri} isOwner={canManage} />
 
       <section className="mt-4 rounded-2xl border border-border bg-card/90 p-5 sm:p-6">
         <p className="text-[11px] font-medium uppercase tracking-[0.12em] text-muted-foreground">
           {t("recordedByLabel")}
         </p>
-        {/* Visitors go to the recorder owner's public profile; the owner-only
-            equipment registry is linked only when the viewer is the owner. */}
+        {/* Visitors go to the recorder owner's public profile; the equipment
+            registry is linked for the owner and their organization's members. */}
         <Link
-          href={isOwner ? accountEquipmentPath(item.did) : accountPath(item.did)}
+          href={canManage ? accountEquipmentPath(item.did) : accountPath(item.did)}
           className="group mt-3 flex items-center gap-3"
         >
           <span className="relative h-10 w-10 shrink-0 overflow-hidden rounded-full border border-border bg-muted">
@@ -175,7 +186,7 @@ export default async function DeploymentDetailPage({ params }: { params: Deploym
               {ownerName}
             </span>
             <span className="mt-0.5 inline-flex items-center gap-1 text-xs text-muted-foreground">
-              {isOwner ? t("viewEquipment") : tProfile("viewProfile")}
+              {canManage ? t("viewEquipment") : tProfile("viewProfile")}
               <ArrowUpRightIcon className="h-3 w-3" aria-hidden />
             </span>
           </span>

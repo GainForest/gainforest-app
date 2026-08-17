@@ -11,6 +11,9 @@
   "adminOnly": {
     "label": "Wasimamizi pekee"
   },
+  "grantOnly": {
+    "label": "Wanachama wa ruzuku pekee"
+  },
   "navigation": {
     "navigation": "Urambazaji",
     "openNavigation": "Fungua urambazaji",
@@ -124,7 +127,9 @@
       "labeler": "Uwekaji lebo",
       "globe": "Dunia",
       "audiomoth": "AudioMoth",
-      "identifications": "Vitambulisho"
+      "identifications": "Vitambulisho",
+      "myGrant": "Ruzuku yangu",
+      "myRecorders": "Vinasa sauti vyangu"
     },
     "prompts": {
       "signInDescription": "Ingia ili kusimamia akaunti na maudhui yako.",
@@ -163,7 +168,7 @@
       "admin": "Msimamizi",
       "personalAccount": "Akaunti binafsi",
       "organizationAccount": "Akaunti ya shirika",
-      "myCards": "Kadi Zangu"
+      "myCards": "Bumicerts Zangu"
     },
     "more": "Zaidi",
     "hideMore": "Ficha"
@@ -264,6 +269,14 @@
         "title": "Akaunti",
         "description": "Jina la mtumiaji na usalama wa kuingia"
       },
+      "profile": {
+        "title": "Wasifu wa umma",
+        "description": "Kinachoonyeshwa kwenye ukurasa wako wa umma"
+      },
+      "members": {
+        "title": "Wanachama",
+        "description": "Watu, majukumu, na Baraza la Data"
+      },
       "connections": {
         "title": "Miunganisho",
         "description": "Akaunti za kijamii na huduma za nje"
@@ -276,6 +289,13 @@
         "title": "Mipangilio ya juu",
         "description": "Data ya akaunti na ufutaji"
       }
+    },
+    "location": {
+      "title": "Mahali",
+      "description": "Mahali akaunti hii ilipo, huonyeshwa kwenye wasifu wa umma.",
+      "notSet": "Mahali hapajawekwa",
+      "edit": "Badilisha",
+      "saveError": "Imeshindwa kuhifadhi mahali. Tafadhali jaribu tena."
     }
   },
   "bumicertCard": {
@@ -988,6 +1008,7 @@
       "inputPlaceholder": "Barua pepe au kitambulisho cha Bluesky",
       "inputAria": "Barua pepe au kitambulisho cha Bluesky cha mwanachama",
       "invite": "Alika",
+      "refresh": "Onyesha upya",
       "ownerHelp": "Weka barua pepe kutuma mwaliko, au kitambulisho cha Bluesky kumuongeza mtu papo hapo.",
       "adminHelp": "Ongeza wanachama wa kawaida kwa kitambulisho cha Bluesky, au waalike kwa barua pepe. Mwombe mmiliki kumuongeza msimamizi mwingine.",
       "locked": "Wamiliki na wasimamizi pekee wanaweza kualika au kuondoa wanachama.",
@@ -1093,6 +1114,7 @@
       "following": "Unaofuata",
       "project": "Miradi",
       "observation": "Maonevu",
+      "audio": "Rekodi",
       "organization": "Mashirika",
       "donation": "Michango",
       "post": "Machapisho"
@@ -1102,7 +1124,8 @@
       "observation": "ameshiriki onevu la asili",
       "organization": "amesajili shirika",
       "donation": "ametoa mchango",
-      "post": "alishiriki taarifa"
+      "post": "alishiriki taarifa",
+      "audio": "amepakia rekodi za uwandani"
     },
     "to": "kwa",
     "anonymous": "Mtu fulani",
@@ -1124,6 +1147,11 @@
       "likesAcross": "{count, plural, one {imependwa mara # kwenye maonevu haya} other {imependwa mara # kwenye maonevu haya}}",
       "commentsHeading": "Maoni kuhusu maonevu haya",
       "commentOn": "kwenye {species}"
+    },
+    "audioUpload": {
+      "recordings": "{count, plural, one {Rekodi # imepakiwa} other {Rekodi # zimepakiwa}}",
+      "browse": "Vinjari rekodi",
+      "recorderFallback": "Kinasa cha uwandani"
     },
     "profileCard": {
       "unnamed": "Akaunti isiyo na jina",
@@ -1269,6 +1297,11 @@
         "labelWithRound": "BioBlitz {roundName} — uchunguzi mwingi zaidi",
         "description": "Alishinda raundi ya BioBlitz kwa uchunguzi mwingi zaidi."
       },
+      "bioblitz-most-images-points": {
+        "label": "BioBlitz — pointi za juu zaidi",
+        "labelWithRound": "BioBlitz {roundName} — pointi za juu zaidi",
+        "description": "Alishinda raundi ya BioBlitz kwa pointi za juu zaidi."
+      },
       "bioblitz-best-picture": {
         "label": "BioBlitz — picha bora",
         "labelWithRound": "BioBlitz {roundName} — picha bora",
@@ -1309,9 +1342,72 @@
       "description": "Akaunti zilizoomba ruzuku ya Kurudisha Uasilia kwenye Wavuti. Fungua wasifu ili kutoa beji ya ruzuku.",
       "empty": "Bado hakuna aliyeomba ruzuku."
     },
-    "page": {
-      "title": "Msimamizi",
-      "subtitle": "Kagua waombaji wa ruzuku na matukio, dhibiti akaunti zilizowekwa alama, na simamia mawakala wa Tainá."
+    "rewilding": {
+      "title": "Kurudisha Uasilia kwenye Wavuti",
+      "description": "Nafasi kumi za programu. Nafasi inaweza kushikwa na mtu mmoja au kikundi. Kuongeza akaunti kunaikubali kwenye ruzuku — tangu hapo mpokeaji wa ruzuku, na wanachama kama ni kikundi, anaweza kufungua dashibodi yake ya hatua muhimu. Kuweka alama hatua imekamilika ni uthibitisho wa GainForest — hutoa malipo yanayolingana.",
+      "footer": "Mabadiliko ya hatua muhimu na nyaraka huonekana mara moja kwenye ukurasa wa ruzuku wa mpokeaji.",
+      "unnamedGrantee": "Akaunti isiyo na jina",
+      "granteeBadge": "Beji ya ruzuku",
+      "summary": "Hatua {done} kati ya {total} zimethibitishwa · {documents, plural, =0 {hakuna nyaraka} one {waraka #} other {nyaraka #}}",
+      "milestonesTitle": "Hatua muhimu",
+      "payout": "Hufungua ${amount} · malipo {tranche}",
+      "markDone": "Weka kama imekamilika",
+      "reopen": "Fungua tena",
+      "saving": "Inahifadhi…",
+      "confirmedAt": "Imethibitishwa {date}",
+      "error": "Haikuhifadhika. Jaribu tena.",
+      "documentsTitle": "Nyaraka",
+      "documentsPrivateNote": "Ni timu ya wasimamizi wa GainForest pekee inayoweza kuziona. Zimehifadhiwa kwa faragha, hazina kiungo cha kushiriki, na mpokeaji bado haziòni.",
+      "documentsEmpty": "Hakuna nyaraka zilizopakiwa bado.",
+      "open": "Fungua",
+      "opening": "Inafungua…",
+      "uploadTitleLabel": "Jina la waraka",
+      "uploadTitlePlaceholder": "mf. Mkataba wa ruzuku",
+      "uploadFileLabel": "Chagua faili",
+      "upload": "Pakia",
+      "uploading": "Inapakia…",
+      "uploadHint": "PDF, picha au hati ya Word, hadi MB 3. Huhifadhiwa kwa faragha kwa timu ya wasimamizi.",
+      "storageUnavailable": "Hifadhi ya faili haijawekwa kwenye usakinishaji huu, kwa hivyo nyaraka haziwezi kupakiwa hapa bado.",
+      "fileTooLarge": "Faili hiyo ni kubwa kuliko MB 3.",
+      "fileTypeUnsupported": "PDF, picha au hati za Word pekee ndizo zinaweza kupakiwa.",
+      "delete": "Futa {title}",
+      "deleteConfirm": "Futa “{title}”? Mpokeaji hataiona tena.",
+      "openProfile": "Fungua wasifu",
+      "slotOpen": "Nafasi {number} · wazi",
+      "addTitle": "Ongeza mpokeaji wa ruzuku",
+      "addHint": "Tafuta mtu au kikundi cha kujaza nafasi hii. Ukiongeza, dashibodi ya hatua muhimu inafunguka kwa akaunti hiyo na wanachama wake.",
+      "searchPlaceholder": "Tafuta akaunti kwa jina…",
+      "searching": "Inatafuta…",
+      "searchEmpty": "Hakuna akaunti inayolingana na “{query}”.",
+      "alreadyEnrolled": "Tayari yumo kwenye ruzuku",
+      "add": "Ongeza",
+      "adding": "Inaongeza…",
+      "slotsFull": "Nafasi zote kumi zimejaa. Ondoa mpokeaji mmoja kabla ya kuongeza mwingine.",
+      "remove": "Ondoa kwenye ruzuku",
+      "removing": "Inaondoa…",
+      "removeConfirm": "Ondoa “{name}” kwenye ruzuku? Hatua muhimu na nyaraka zinabaki, lakini akaunti hiyo inapoteza ufikiaji wa dashibodi ya ruzuku na nafasi inafunguka."
+    },
+    "pages": {
+      "hub": {
+        "title": "Msimamizi",
+        "subtitle": "Kagua waombaji wa ruzuku na matukio, dhibiti akaunti zilizowekwa alama, na simamia mawakala wa Tainá."
+      },
+      "grants": {
+        "title": "Usimamizi wa ruzuku",
+        "subtitle": "Kagua waombaji wa ruzuku na uendeshe raundi za kila wiki za BioBlitz."
+      },
+      "people": {
+        "title": "Watu",
+        "subtitle": "Kila mtu anayetumia msaidizi wa uwandani Tainá, mashirika yanayoweza kudhamini akaunti, na beji zinazotolewa na GainForest."
+      },
+      "trust": {
+        "title": "Uaminifu na usalama",
+        "subtitle": "Akaunti na rekodi zilizowekwa alama ya majaribio, na anwani zilizozuiwa kujisajili."
+      },
+      "data": {
+        "title": "Data na fedha",
+        "subtitle": "Makundi ya data ya washirika na pochi ya uwezeshaji."
+      }
     }
   },
   "adminBioblitzExclusions": {
@@ -1355,17 +1451,20 @@
       "ended": "Imefungwa"
     },
     "observations": "Uchunguzi {count, number}",
+    "points": "pointi {points}",
     "ignored": "Imepuuzwa",
     "counted": "Inahesabiwa",
     "notCounted": "Hauhesabiwi",
     "prize": {
       "most-observations": "Uchunguzi mwingi zaidi",
+      "highest-points": "Pointi za juu zaidi",
       "best-picture": "Picha bora"
     },
     "openProfile": "Fungua wasifu",
     "joined": "Alijiunga {date}",
     "download": {
       "most-observations": "Kifurushi cha uchunguzi mwingi",
+      "highest-points": "Kifurushi cha pointi za juu zaidi",
       "best-picture": "Kifurushi cha picha bora"
     },
     "ignore": "Puuza",
@@ -1779,7 +1878,56 @@
     "previewLoading": "Inapakia hakikisho…",
     "previewFailed": "Faili hii haikuweza kuonyeshwa."
   },
+  "observationsHub": {
+    "ariaLabel": "Aina za uchunguzi",
+    "photos": "Picha",
+    "audio": "Sauti"
+  },
   "audiomoth": {
+    "audioHub": {
+      "title": "Sauti",
+      "subtitle": "Pakia rekodi kutoka kadi ya SD ya AudioMoth, zipange katika usambazaji na uweke lebo unachosikia — uchunguzi wa sauti unaishi hapa.",
+      "metaTitle": "Uchunguzi wa sauti",
+      "metaDescription": "Pakia rekodi za AudioMoth, dhibiti usambazaji, weka lebo spishi na uchunguze mandhari ya sauti ndani ya Uchunguzi.",
+      "librarySubtitle": "Folda na rekodi zote ulizopakia, mahali pamoja — zicheze, zihamishe kati ya folda, zibadilishe jina au uzifute.",
+      "yourRecordings": "Rekodi zako",
+      "soundscapesTitle": "Sauti",
+      "soundscapesLede": "Rekodi za uwandani na picha za sauti za saa 24 kutoka kwa virekodi kote GainForest. Gusa saa ili usikie mahali wakati huo wa siku.",
+      "soundscapesEmptyTitle": "Hakuna sauti iliyochapishwa bado",
+      "soundscapesEmptyBody": "Mtu akipakia rekodi za uwandani, au kuzigeuza kuwa mandhari ya sauti, zitaonekana hapa ili kila mtu azisikilize.",
+      "soundscapesEmptyCta": "Tengeneza kutoka rekodi zako",
+      "publicPill": "Ya umma",
+      "searchPlaceholder": "Tafuta miradi au mandhari za sauti",
+      "allProjects": "Miradi yote",
+      "filterByProject": "Chuja kwa mradi",
+      "sortBy": "Panga miradi",
+      "sortRecentlyAdded": "Iliyoongezwa hivi karibuni",
+      "sortRecentlyRecorded": "Iliyorekodiwa hivi karibuni",
+      "openProject": "Fungua mradi",
+      "openAccount": "Fungua wasifu",
+      "noProject": "(bila mradi)",
+      "projectMeta": "{project} · {recorders, plural, one {# kinasa} other {# vinasa}} · rekodi {recordings, number}",
+      "soundscapeSlot": "Mandhari ya sauti",
+      "recordingsSlot": "Rekodi",
+      "recorderFallback": "Kinasa cha uwandani",
+      "slotRecordings": "rekodi {count, number}",
+      "soundscapeFallback": "Mandhari ya sauti",
+      "dateUnavailable": "Tarehe haipatikani",
+      "showMoreFromProject": "{count, plural, one {Onyesha # zaidi kutoka mradi huu} other {Onyesha # zaidi kutoka mradi huu}}",
+      "showFewer": "Onyesha chache",
+      "voiceKeyTitle": "Ufunguo wa makundi ya sauti",
+      "noMatches": "Hakuna mradi unaolingana na vichujio hivi.",
+      "clearFilters": "Futa vichujio",
+      "browseRecordings": "Vinjari rekodi",
+      "unknownOrganization": "Msimamizi wa mradi"
+    },
+    "library": {
+      "signInTitle": "Ingia ili kuona faili zako",
+      "signInBody": "Rekodi na folda ulizopakia zitaonekana hapa baada ya kuingia."
+    },
+    "devicesHub": {
+      "title": "Vifaa"
+    },
     "meta": {
       "title": "Usanidi wa kinasa AudioMoth",
       "description": "Weka saa, sanidi ratiba za kurekodi na usasishe firmware ya kinasa sauti chako cha AudioMoth, moja kwa moja kutoka kwenye kivinjari."
@@ -1947,6 +2095,7 @@
     },
     "mainTabs": {
       "setup": "Usanidi",
+      "library": "Rekodi",
       "deployments": "Usambazaji",
       "upload": "Pakia",
       "label": "Weka lebo",
@@ -2092,7 +2241,12 @@
       "equipmentUsedLabel": "AudioMoth iliyotumika",
       "protocolLabel": "Itifaki",
       "recordedByLabel": "Kimerekodiwa na",
-      "viewEquipment": "Ona vifaa vyao"
+      "viewEquipment": "Ona vifaa vyao",
+      "attachWaiting": "{count, plural, one {Rekodi # inapakiwa chinichini — itaambatishwa kwa usambazaji utakaounda.} other {Rekodi # zinapakiwa chinichini — zitaambatishwa kwa usambazaji utakaounda.}}",
+      "attaching": "Inaambatisha {count, plural, one {rekodi #} other {rekodi #}} kwa usambazaji mpya…",
+      "attachDone": "{count, plural, one {Rekodi # imeambatishwa kwa usambazaji mpya.} other {Rekodi # zimeambatishwa kwa usambazaji mpya.}}",
+      "attachPartial": "{moved} zimeambatishwa · {failed} hazikuweza kuhamishwa — zinabaki kwenye folda ya kadi.",
+      "attachFailed": "Kundi halikuweza kuambatishwa — rekodi zinabaki kwenye folda ya kadi."
     },
     "upload": {
       "intro": "Ingiza kadi ya SD ya AudioMoth kisha uichague hapa chini. Rekodi zinatambuliwa kwa kitambulisho cha uwekaji kilichowekwa kwenye kila faili, zinahifadhiwa salama kwenye hifadhi ya kumbukumbu na kuandikwa kwenye akaunti yako.",
@@ -2123,13 +2277,9 @@
       "previewToggle": "Hifadhi vionjo vinavyochezeka",
       "previewHint": "Inaongeza kionjo kidogo na spektrogramu ya kila rekodi kwenye akaunti yako ili iweze kuchezwa na kuonekana popote.",
       "uploadButton": "Pakia rekodi {count}",
-      "uploadingButton": "Inapakia… {done} kati ya {total} zimekamilika",
       "cancel": "Ghairi",
       "doneTitle": "Upakiaji umekamilika",
-      "doneWithErrors": "Imekamilika na makosa {count}",
       "doneBody": "Rekodi {count} zimepakiwa. {skipped} zilikuwepo tayari na zilirukwa.",
-      "uploadMore": "Pakia kadi nyingine",
-      "retryFailed": "Jaribu tena faili zilizoshindwa ({count})",
       "statusSkipped": "Imeshapakiwa",
       "statusRetrying": "Inajaribu tena {attempt} kati ya {max}…",
       "dedupChecking": "Inakagua ni rekodi zipi tayari zipo kwenye akaunti yako…",
@@ -2142,7 +2292,6 @@
       "errorStorageRejected": "Hatukuweza kupokea faili hii. Tafadhali jaribu tena.",
       "errorSaveConnection": "Faili ilitumwa, lakini intaneti ilikatika kabla hatujamaliza. Gusa “Jaribu tena faili zilizoshindwa”.",
       "errorSaveFailed": "Faili ilipakiwa, lakini haikuweza kuhifadhiwa kwenye akaunti yako. Tafadhali jaribu tena.",
-      "errorOffline": "Hakuna muunganisho wa intaneti. Kagua Wi-Fi yako kisha ujaribu tena.",
       "deploymentFallback": "Imeundwa kiotomatiki wakati wa kupakia rekodi za kadi ya SD.",
       "groupNameLabel": "Ipe jina upakiaji huu",
       "groupNameHelp": "Rekodi hizi zitawekwa pamoja chini ya jina hili kwenye wasifu wako, ili uzipate baadaye.",
@@ -3740,5 +3889,25 @@
     "menuOrganizationSubtitle": "Akaunti ya pamoja ya shirika",
     "organizationsLabel": "Mashirika yako",
     "switchHint": "Badilisha akaunti unayochapisha nayo"
+  },
+  "rewildingProgram": {
+    "milestones": {
+      "m1": {
+        "title": "Mkataba umetiwa saini",
+        "description": "Makubaliano yapo; malipo ya kwanza yametolewa."
+      },
+      "m2": {
+        "title": "AudioMoth imesimikwa",
+        "description": "Vitambuzi vimewekwa shambani na vinarekodi."
+      },
+      "m3": {
+        "title": "Data ya kwanza imepakiwa",
+        "description": "Rekodi zimepakiwa kwenye GainForest.app."
+      },
+      "m4": {
+        "title": "Mradi umekamilika",
+        "description": "Data imewekwa lebo na angalau sasisho moja la umma limechapishwa kwenye Bumicerts."
+      }
+    }
   }
 }

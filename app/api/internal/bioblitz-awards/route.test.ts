@@ -10,6 +10,7 @@ vi.mock("next/server", () => ({ after: (callback: () => Promise<unknown>) => moc
 vi.mock("@/app/_lib/auth", () => ({ getAuthForwardCookie: (value: string | null) => value }));
 vi.mock("@/app/internal/badges/_lib/access", () => ({ getGainForestModeratorAccess: mocks.getAccess }));
 vi.mock("@/app/_lib/bioblitz", () => ({
+  bioblitzRoundUsesPoints: (roundId: number) => roundId >= 8,
   endedRounds: () => [{ id: 4, label: "Week 4" }],
   frozenWinnersFor: () => mocks.frozenWinners(),
   fetchRoundCollectors: vi.fn(),

@@ -7,17 +7,15 @@
  * firmware is matched against the user's `dwc.event` deployments, so the
  * card is recognised the moment it is read.
  *
- * Upload pipeline per file (never through the Next.js server):
+ * This tab reads the card, matches deployments and checks what the account
+ * already holds; the transfer itself belongs to the app-wide background
+ * upload tray, which keeps going while people browse. Per file the tray
+ * runs the same pipeline this tab used to run inline (never through the
+ * Next.js server):
  *   1. presigned PUT — the full WAV goes browser → object storage
  *   2. a compact 8 kHz preview is encoded locally → PDS blob
  *   3. an `ac.audio` record links preview + archival copy to the
  *      `ac.deployment` (created on the fly from the matched event if needed)
- *
- * Behind AUDIOMOTH_UPLOAD_TRAY_ENABLED (`useTray`) that pipeline moves out of
- * this tab entirely: the batch is handed to the app-wide background upload
- * tray, which keeps transferring while people browse. Both paths share the
- * card reading, deployment matching and already-uploaded check above; only
- * the confirm step differs. The flag is off until the tray is finished.
  */
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -26,12 +24,10 @@ import { AnimatePresence, motion } from "framer-motion";
 import {
   AudioLinesIcon,
   CheckIcon,
-  CircleAlertIcon,
   FolderOpenIcon,
   HardDriveIcon,
   Loader2Icon,
   MapPinIcon,
-  RotateCcwIcon,
   SkipForwardIcon,
   UploadIcon,
   XIcon,
@@ -43,13 +39,9 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
 import {
-  encodeWav,
-  extractPreviewSamples,
-  PREVIEW_SAMPLE_RATE,
   readAudioMothInfo,
   type AudioMothRecordingInfo,
 } from "@/app/_lib/audiomoth/wav-metadata";
-import { renderSpectrogramPng } from "@/app/_lib/audiomoth/spectrogram";
 import {
   activeUploadFolderMode,
   findUploadFolderByName,
@@ -58,38 +50,24 @@ import {
   type UploadFolderMode,
 } from "@/app/_lib/audiomoth/upload-folder";
 import { UploadFolderPicker } from "./UploadFolderPicker";
-import {
-  AUDIO_UPLOAD_MAX_ATTEMPTS,
-  isNetworkFetchError,
-  isRetryableStorageError,
-  isUploadAbortError,
-  storageStatusFromError,
-  withUploadRetries,
-} from "@/app/_lib/audiomoth/upload-retry";
+import { AUDIO_UPLOAD_MAX_ATTEMPTS } from "@/app/_lib/audiomoth/upload-retry";
 import {
   listDeploymentEvents,
   type DeploymentEventItem,
 } from "@/app/_lib/deployment-events";
 import {
-  createAcDeployment,
   listAcDeployments,
   type AcDeploymentItem,
 } from "@/app/_lib/ac-deployment";
 import {
-  createAcAudioRecord,
   legacyRecordingKey,
   listUploadedRecordingKeys,
-  listUploadedRecordingNames,
-  uploadPreviewBlob,
   type UploadedRecordingKeys,
 } from "@/app/_lib/ac-audio";
+import { useActingRepo } from "@/app/_lib/account-switcher";
 import { computeFileCid } from "@/app/_lib/audiomoth/content-cid";
-import {
-  createStallTimer,
-  FILE_READ_TIMEOUT_MS,
-  UPLOAD_STALL_TIMEOUT_MS,
-  withReadTimeout,
-} from "@/app/_lib/audiomoth/stall-timeout";
+import { FILE_READ_TIMEOUT_MS, withReadTimeout } from "@/app/_lib/audiomoth/stall-timeout";
+import { collectDroppedFiles, isHiddenName } from "@/app/_lib/audiomoth/dropped-files";
 import {
   useUploadTray,
   type UploadTarget,
@@ -100,7 +78,7 @@ import {
 /* Types                                                               */
 /* ------------------------------------------------------------------ */
 
-type Stage = "pick" | "scanning" | "review" | "uploading" | "done";
+type Stage = "pick" | "scanning" | "review";
 
 type FileStatus = "queued" | "skipped" | "uploading" | "retrying" | "saving" | "done" | "error";
 
@@ -118,8 +96,6 @@ interface ScannedRecording {
   error?: string;
 }
 
-const CONCURRENCY = 2;
-const PRESIGN_CHUNK = 50;
 const LIST_RENDER_CAP = 120;
 
 function formatBytes(bytes: number): string {
@@ -149,70 +125,19 @@ function isWavName(name: string): boolean {
   return /\.wav$/i.test(name) && !name.startsWith("._") && !name.startsWith(".");
 }
 
-/** Hidden/system entries (SD cards carry .Spotlight-V100, .Trashes, …). */
-function isHiddenName(name: string | undefined): boolean {
-  return !!name && name.startsWith(".");
-}
-
-/**
- * Recursively collect files from a drag-and-dropped directory entry.
- * Hidden/system folders are skipped and unreadable entries are ignored —
- * FAT-formatted SD cards are full of both.
- */
-async function collectDroppedFiles(items: DataTransferItemList, onProgress?: (count: number) => void): Promise<File[]> {
-  const out: File[] = [];
-
-  async function walkEntry(entry: unknown): Promise<void> {
-    const e = entry as {
-      name?: string;
-      isFile?: boolean;
-      isDirectory?: boolean;
-      file?: (cb: (f: File) => void, err: (e: unknown) => void) => void;
-      createReader?: () => { readEntries: (cb: (entries: unknown[]) => void, err: (e: unknown) => void) => void };
-    };
-    if (isHiddenName(e?.name)) return;
-    if (e?.isFile && e.file) {
-      const file = await new Promise<File | null>((resolve) => e.file!(resolve, () => resolve(null)));
-      if (file) {
-        out.push(file);
-        if (out.length % 50 === 0) onProgress?.(out.length);
-      }
-    } else if (e?.isDirectory && e.createReader) {
-      const reader = e.createReader();
-      // readEntries returns batches; keep reading until empty
-      for (;;) {
-        const batch = await new Promise<unknown[]>((resolve) => reader.readEntries(resolve, () => resolve([])));
-        if (batch.length === 0) break;
-        for (const child of batch) await walkEntry(child).catch(() => undefined);
-      }
-    }
-  }
-
-  const entries: unknown[] = [];
-  for (let i = 0; i < items.length; i += 1) {
-    const item = items[i];
-    const entry = (item as unknown as { webkitGetAsEntry?: () => unknown }).webkitGetAsEntry?.();
-    if (entry) entries.push(entry);
-  }
-  for (const entry of entries) await walkEntry(entry).catch(() => undefined);
-  onProgress?.(out.length);
-  return out;
-}
-
 /* ------------------------------------------------------------------ */
 /* Component                                                           */
 /* ------------------------------------------------------------------ */
 
-export function UploadTab({
-  sessionDid,
-  useTray = false,
-}: {
-  sessionDid: string | null;
-  /** Release switch — see AUDIOMOTH_UPLOAD_TRAY_ENABLED. */
-  useTray?: boolean;
-}) {
+export function UploadTab({ sessionDid }: { sessionDid: string | null }) {
   const t = useTranslations("common.audiomoth.upload");
   const tray = useUploadTray();
+  /* The acting account — the user's own, or the organization they switched
+     into. Deployment matching, folders and the already-uploaded check all
+     read that repo, and every job is targeted at it so the recordings land
+     where the rest of the tabs will look for them. */
+  const acting = useActingRepo(sessionDid);
+  const actingDid = acting.did;
 
   const [stage, setStage] = useState<Stage>("pick");
   const [recordings, setRecordings] = useState<ScannedRecording[]>([]);
@@ -224,8 +149,6 @@ export function UploadTab({
   const [makePreviews, setMakePreviews] = useState(true);
   const [globalError, setGlobalError] = useState<string | null>(null);
   const [dragging, setDragging] = useState(false);
-  const [uploadedBytes, setUploadedBytes] = useState(0);
-  const [activeUploadIds, setActiveUploadIds] = useState<string[]>([]);
   /** User-editable group name for recordings without a matched deployment. */
   const [uploadName, setUploadName] = useState("");
   /** Folders (ac.deployments) already in the account, for "add to existing". */
@@ -245,29 +168,24 @@ export function UploadTab({
 
   const folderInputRef = useRef<HTMLInputElement | null>(null);
   const filesInputRef = useRef<HTMLInputElement | null>(null);
-  const cancelRef = useRef(false);
   /** Bumped on every new scan/reset so stale dedup checks stop writing state. */
   const scanTokenRef = useRef(0);
   /** Keeps tray IDs unique when the same card is read twice in one session. */
   const batchRef = useRef(0);
-  const activeXhrsRef = useRef(new Set<XMLHttpRequest>());
-  const retryAbortRef = useRef<AbortController | null>(null);
   const acDeploymentsRef = useRef<AcDeploymentItem[] | null>(null);
-  /** ac.deployment created for this named upload — reused across retries. */
-  const namedDeploymentRef = useRef<string | null>(null);
   /** Scan whose folder was already matched by name, so it happens once. */
   const folderMatchTokenRef = useRef(-1);
 
   /* ---------------- deployments for matching ---------------- */
 
   useEffect(() => {
-    if (!sessionDid) return;
+    if (!actingDid) return;
     const ctrl = new AbortController();
-    listDeploymentEvents(sessionDid, ctrl.signal)
+    listDeploymentEvents(actingDid, ctrl.signal)
       .then((list) => setEvents(list))
       .catch(() => setEvents([]));
     return () => ctrl.abort();
-  }, [sessionDid]);
+  }, [actingDid]);
 
   /* ---------------- folders to upload into ---------------- */
 
@@ -278,9 +196,9 @@ export function UploadTab({
    */
   const loadFolders = useCallback(
     async (signal?: AbortSignal) => {
-      if (!sessionDid) return;
+      if (!actingDid) return;
       try {
-        const list = await listAcDeployments(sessionDid, signal);
+        const list = await listAcDeployments(actingDid, signal);
         if (signal?.aborted) return;
         acDeploymentsRef.current = list;
         setFolders(list);
@@ -288,7 +206,7 @@ export function UploadTab({
         if (!signal?.aborted) setFolders([]);
       }
     },
-    [sessionDid],
+    [actingDid],
   );
 
   useEffect(() => {
@@ -338,14 +256,14 @@ export function UploadTab({
    */
   const checkAlreadyUploaded = useCallback(
     async (scanned: ScannedRecording[], token: number) => {
-      if (!sessionDid) return;
+      if (!actingDid) return;
       const readable = scanned.filter((r) => r.info);
       if (readable.length === 0) return;
       setDedup({ state: "checking", skipped: 0 });
 
       let keys: UploadedRecordingKeys;
       try {
-        keys = await listUploadedRecordingKeys(sessionDid);
+        keys = await listUploadedRecordingKeys(actingDid);
       } catch {
         // The account couldn't be checked — proceed as a normal upload.
         if (scanTokenRef.current === token) setDedup(null);
@@ -375,7 +293,7 @@ export function UploadTab({
       }
       setDedup({ state: "done", skipped });
     },
-    [sessionDid, setRecording],
+    [actingDid, setRecording],
   );
 
   const scanFiles = useCallback(async (files: File[], folderName = "") => {
@@ -384,12 +302,10 @@ export function UploadTab({
     setDiscovered(null);
     setGlobalError(null);
     setRecordings([]);
-    setUploadedBytes(0);
     setUploadName(folderName.trim());
     setSelectedFolderUri("");
     setFolderQuery("");
     setFolderResumed(false);
-    namedDeploymentRef.current = null;
     setDedup(null);
     setHandedOff(0);
     if (wavs.length === 0) {
@@ -578,138 +494,6 @@ export function UploadTab({
     };
   }, [recordings]);
 
-  /* ---------------- upload pipeline ---------------- */
-
-  /** Find or create the ac.deployment for a matched chime event. */
-  const resolveAcDeployment = useCallback(
-    async (event: DeploymentEventItem): Promise<string | null> => {
-      if (!sessionDid) return null;
-      if (!acDeploymentsRef.current) {
-        acDeploymentsRef.current = await listAcDeployments(sessionDid).catch(() => []);
-      }
-      const existing = acDeploymentsRef.current.find((d) => d.eventRef === event.uri);
-      if (existing) return existing.uri;
-      try {
-        const created = await createAcDeployment({
-          name: event.locality ?? `AudioMoth ${event.eventID}`,
-          deployedAt: new Date(event.eventDate),
-          lat: event.decimalLatitude ? Number(event.decimalLatitude) : undefined,
-          lon: event.decimalLongitude ? Number(event.decimalLongitude) : undefined,
-          eventUri: event.uri,
-          remarks: t("deploymentFallback"),
-        });
-        acDeploymentsRef.current = null; // refresh next time
-        return created.uri;
-      } catch {
-        return null;
-      }
-    },
-    [sessionDid, t],
-  );
-
-  /**
-   * The folder this upload's unmatched recordings go into: either the
-   * existing ac.deployment the user picked, or one carrying the name they
-   * typed — created on first use and reused for every file (and across
-   * retries), so the profile's audio page groups them together.
-   */
-  const resolveGroupDeployment = useCallback(async (): Promise<string | null> => {
-    // Picked an existing folder: it is the target for the whole batch, no
-    // record is created and retries keep landing in the same place.
-    if (activeFolderMode === "existing") return selectedFolderUri || null;
-    if (namedDeploymentRef.current) return namedDeploymentRef.current;
-    const name = uploadName.trim();
-    if (!name) return null;
-    try {
-      // A folder with this name already exists (an interrupted upload read the
-      // same card again): add to it rather than splitting the site in two.
-      if (!acDeploymentsRef.current && sessionDid) {
-        acDeploymentsRef.current = await listAcDeployments(sessionDid).catch(() => []);
-      }
-      const plan = planNamedUploadFolder(acDeploymentsRef.current ?? [], name);
-      if (plan.action === "none") return null;
-      if (plan.action === "reuse") {
-        namedDeploymentRef.current = plan.uri;
-        return plan.uri;
-      }
-      const readable = recordings.filter((r) => r.info);
-      const earliest = readable.length
-        ? new Date(Math.min(...readable.map((r) => recordingTime(r).getTime())))
-        : new Date();
-      const created = await createAcDeployment({
-        name,
-        deployedAt: earliest,
-        remarks: t("groupRemarks"),
-      });
-      namedDeploymentRef.current = created.uri;
-      acDeploymentsRef.current = null; // refresh next time
-      return created.uri;
-    } catch {
-      return null;
-    }
-  }, [activeFolderMode, recordings, selectedFolderUri, sessionDid, t, uploadName]);
-
-  /**
-   * Plain-language error per failure point: the storage transfer (connection
-   * dropped vs. storage refused) or the account save after a successful
-   * transfer (connection dropped vs. server error).
-   */
-  const describeUploadError = useCallback(
-    (err: unknown, phase: "transfer" | "saving"): string => {
-      if (phase === "saving") {
-        return isNetworkFetchError(err) ? t("errorSaveConnection") : t("errorSaveFailed");
-      }
-      if (storageStatusFromError(err) !== null) return t("errorStorageRejected");
-      if ((err instanceof Error && err.message === "storage_network") || isNetworkFetchError(err)) {
-        return t("errorConnection");
-      }
-      return t("uploadFailed");
-    },
-    [t],
-  );
-
-  const putToStorage = useCallback(
-    (rec: ScannedRecording, url: string): Promise<void> =>
-      new Promise((resolve, reject) => {
-        const xhr = new XMLHttpRequest();
-        activeXhrsRef.current.add(xhr);
-        // A dropped connection does not always raise an error: the socket can
-        // stay half-open with no further progress, leaving the transfer (and
-        // with only a couple of workers, the whole batch) pending forever.
-        // Silence for long enough is treated as a retryable network failure.
-        let stalled = false;
-        const watchdog = createStallTimer(UPLOAD_STALL_TIMEOUT_MS, () => {
-          stalled = true;
-          xhr.abort();
-        });
-        xhr.open("PUT", url);
-        xhr.upload.onprogress = (e) => {
-          watchdog.bump();
-          if (e.lengthComputable) setRecording(rec.id, { progress: e.loaded / e.total });
-        };
-        xhr.onload = () => {
-          watchdog.stop();
-          activeXhrsRef.current.delete(xhr);
-          if (xhr.status >= 200 && xhr.status < 300) resolve();
-          else reject(new Error(`storage_${xhr.status}`));
-        };
-        xhr.onerror = () => {
-          watchdog.stop();
-          activeXhrsRef.current.delete(xhr);
-          reject(new Error("storage_network"));
-        };
-        xhr.onabort = () => {
-          watchdog.stop();
-          activeXhrsRef.current.delete(xhr);
-          // Cancelling is the user's doing and must stay final; a watchdog
-          // abort is a failed transfer and should be retried.
-          reject(new Error(stalled ? "storage_network" : "aborted"));
-        };
-        xhr.send(rec.file);
-      }),
-    [setRecording],
-  );
-
   /**
    * Tray path: build one job per recording, hand the batch over and drop back
    * to the picker — the transfer carries on in the tray while the user works.
@@ -750,6 +534,7 @@ export function UploadTab({
           recordedAt: recordingTime(rec).toISOString(),
           cid: rec.cid,
           deploymentId: deploymentId || undefined,
+          repoDid: acting.repo ?? null,
           target,
           makePreviews,
         });
@@ -773,6 +558,7 @@ export function UploadTab({
     void loadFolders();
     return true;
   }, [
+    acting.repo,
     activeFolderMode,
     groups,
     loadFolders,
@@ -785,220 +571,11 @@ export function UploadTab({
     uploadName,
   ]);
 
-  const startUpload = useCallback(async () => {
+  /** Hand the batch to the background tray. */
+  const startUpload = useCallback(() => {
     if (!sessionDid) return;
-    if (useTray) {
-      handOffToTray();
-      return;
-    }
-    const candidates = [...groups.values()]
-      .flat()
-      .filter((rec) => rec.status === "queued" || rec.status === "error");
-    if (candidates.length === 0) return;
-
-    const targetIds = new Set(candidates.map((rec) => rec.id));
-    const retryController = new AbortController();
-    retryAbortRef.current?.abort();
-    retryAbortRef.current = retryController;
-    setActiveUploadIds([...targetIds]);
-    setRecordings((current) =>
-      current.map((rec) =>
-        targetIds.has(rec.id)
-          ? { ...rec, status: "queued", progress: 0, retryAttempt: undefined, retryMax: undefined, error: undefined }
-          : rec,
-      ),
-    );
-    setGlobalError(null);
-    setStage("uploading");
-    cancelRef.current = false;
-    setUploadedBytes(0);
-
-    type Job = { rec: ScannedRecording; key: string; url: string; deploymentRef: string | null };
-    const jobs: Job[] = [];
-
-    try {
-      for (const [deploymentId, groupFiles] of groups) {
-        if (cancelRef.current) break;
-        const event = deploymentId ? matchFor(deploymentId) : manualEvent;
-        const deploymentRef = event ? await resolveAcDeployment(event) : await resolveGroupDeployment();
-
-        // Skip files already uploaded for this deployment (re-inserted card or
-        // a save whose response was lost before a manual retry).
-        let existingNames = new Set<string>();
-        if (deploymentRef) {
-          existingNames = await listUploadedRecordingNames(sessionDid, deploymentRef).catch(() => new Set<string>());
-        }
-
-        const pending = groupFiles.filter((rec) => {
-          if (!targetIds.has(rec.id)) return false;
-          if (rec.status === "skipped") return false; // already in the account (content match)
-          if (existingNames.has(rec.file.name)) {
-            setRecording(rec.id, { status: "skipped" });
-            return false;
-          }
-          return true;
-        });
-
-        // Presign in chunks — direct browser→bucket PUTs.
-        for (let i = 0; i < pending.length; i += PRESIGN_CHUNK) {
-          const chunk = pending.slice(i, i + PRESIGN_CHUNK);
-          const res = await fetch("/api/audiomoth/recordings", {
-            method: "POST",
-            headers: { "content-type": "application/json" },
-            body: JSON.stringify({
-              deploymentId: deploymentId || undefined,
-              files: chunk.map((rec) => ({ name: rec.file.name, sizeBytes: rec.file.size })),
-            }),
-            signal: retryController.signal,
-          });
-          const json = (await res.json().catch(() => null)) as {
-            error?: string;
-            uploads?: Array<{ name: string; key?: string; url?: string; error?: string }>;
-          } | null;
-          if (!res.ok || !json?.uploads) {
-            throw new Error(json?.error === "not_configured" ? "not_configured" : "presign_failed");
-          }
-          chunk.forEach((rec, j) => {
-            const upload = json.uploads![j];
-            if (upload?.key && upload.url) {
-              jobs.push({ rec, key: upload.key, url: upload.url, deploymentRef });
-            } else {
-              setRecording(rec.id, { status: "error", error: t("uploadFailed") });
-            }
-          });
-        }
-      }
-    } catch (err) {
-      if (!isUploadAbortError(err)) {
-        setGlobalError(
-          err instanceof Error && err.message === "not_configured"
-            ? t("notConfigured")
-            : isNetworkFetchError(err)
-              ? t("errorOffline")
-              : t("uploadFailed"),
-        );
-      }
-      setStage("review");
-      if (retryAbortRef.current === retryController) retryAbortRef.current = null;
-      return;
-    }
-
-    const queue = [...jobs];
-    const worker = async () => {
-      for (;;) {
-        if (cancelRef.current) return;
-        const job = queue.shift();
-        if (!job) return;
-        const { rec, key, url, deploymentRef } = job;
-        let phase: "transfer" | "saving" = "transfer";
-        try {
-          await withUploadRetries(
-            async (attempt) => {
-              if (cancelRef.current) throw new Error("aborted");
-              setRecording(rec.id, {
-                status: "uploading",
-                progress: 0,
-                retryAttempt: attempt,
-                retryMax: AUDIO_UPLOAD_MAX_ATTEMPTS,
-                error: undefined,
-              });
-              await putToStorage(rec, url);
-            },
-            {
-              shouldRetry: isRetryableStorageError,
-              signal: retryController.signal,
-              onRetry: ({ nextAttempt, maxAttempts }) => {
-                setRecording(rec.id, {
-                  status: "retrying",
-                  progress: 0,
-                  retryAttempt: nextAttempt,
-                  retryMax: maxAttempts,
-                });
-              },
-            },
-          );
-          phase = "saving";
-          setRecording(rec.id, { status: "saving", progress: 1, retryAttempt: undefined, retryMax: undefined });
-
-          let previewBlob = null;
-          let spectrogramBlob = null;
-          if (makePreviews && rec.info) {
-            try {
-              const samples = await extractPreviewSamples(rec.file, rec.info);
-              if (samples) {
-                previewBlob = await uploadPreviewBlob(encodeWav(samples, PREVIEW_SAMPLE_RATE));
-                const png = await renderSpectrogramPng(samples);
-                if (png) spectrogramBlob = await uploadPreviewBlob(png, "image/png");
-              }
-            } catch {
-              /* preview + spectrogram are best-effort — the archival copy is already safe */
-            }
-          }
-
-          const info = rec.info!;
-          const originalCid = rec.cid ?? (await computeFileCid(rec.file)) ?? undefined;
-          await createAcAudioRecord({
-            name: rec.file.name,
-            originalCid,
-            metadata: {
-              codec: "PCM",
-              channels: info.channels,
-              duration: info.durationSeconds.toFixed(1),
-              sampleRate: info.sampleRate,
-              recordedAt: recordingTime(rec).toISOString(),
-              bitDepth: info.bitsPerSample,
-              fileFormat: "WAV",
-              fileSizeBytes: rec.file.size,
-            },
-            previewBlob,
-            spectrogramBlob,
-            accessUri: `${window.location.origin}/api/audiomoth/recordings?key=${encodeURIComponent(key)}`,
-            deploymentRef: deploymentRef ?? undefined,
-            tags: ["audiomoth", "passive-acoustic-monitoring"],
-          });
-
-          setRecording(rec.id, {
-            status: "done",
-            retryAttempt: undefined,
-            retryMax: undefined,
-            error: undefined,
-          });
-          setUploadedBytes((current) => current + rec.file.size);
-        } catch (err) {
-          if (isUploadAbortError(err)) {
-            setRecording(rec.id, {
-              status: "queued",
-              progress: 0,
-              retryAttempt: undefined,
-              retryMax: undefined,
-            });
-            return;
-          }
-          setRecording(rec.id, {
-            status: "error",
-            retryAttempt: undefined,
-            retryMax: undefined,
-            error: describeUploadError(err, phase),
-          });
-        }
-      }
-    };
-
-    await Promise.all(Array.from({ length: CONCURRENCY }, worker));
-    if (retryAbortRef.current === retryController) retryAbortRef.current = null;
-    if (!cancelRef.current) setStage("done");
-    // A new folder may have been created for this batch — offer it next time.
-    void loadFolders();
-  }, [describeUploadError, groups, handOffToTray, loadFolders, makePreviews, manualEvent, matchFor, putToStorage, resolveAcDeployment, resolveGroupDeployment, sessionDid, setRecording, t, useTray]);
-
-  const cancelUpload = useCallback(() => {
-    cancelRef.current = true;
-    retryAbortRef.current?.abort();
-    retryAbortRef.current = null;
-    for (const xhr of activeXhrsRef.current) xhr.abort();
-    activeXhrsRef.current.clear();
-    setStage("review");
-  }, []);
+    handOffToTray();
+  }, [handOffToTray, sessionDid]);
 
   const reset = useCallback(() => {
     scanTokenRef.current += 1;
@@ -1010,7 +587,6 @@ export function UploadTab({
     setSelectedFolderUri("");
     setFolderQuery("");
     setFolderResumed(false);
-    namedDeploymentRef.current = null;
     setDedup(null);
     setHandedOff(0);
   }, []);
@@ -1026,15 +602,8 @@ export function UploadTab({
     );
   }
 
-  const doneCount = recordings.filter((r) => r.status === "done").length;
-  const errorCount = recordings.filter((r) => r.status === "error").length;
   const skippedCount = recordings.filter((r) => r.status === "skipped").length;
-  const activeUploadIdSet = new Set(activeUploadIds);
-  const activeUploadFiles = recordings.filter((r) => activeUploadIdSet.has(r.id) && r.status !== "skipped");
-  const activeDoneCount = activeUploadFiles.filter((r) => r.status === "done").length;
-  const uploadableBytes = activeUploadFiles.reduce((sum, r) => sum + r.file.size, 0);
   const uploadableCount = stats.count - skippedCount;
-  const overallProgress = uploadableBytes > 0 ? Math.min(1, uploadedBytes / uploadableBytes) : 0;
 
   return (
     <div className="flex flex-col gap-4">
@@ -1069,7 +638,7 @@ export function UploadTab({
       />
 
       {/* Tray path: the batch is the tray's job now — this is the receipt. */}
-      {useTray && stage === "pick" && handedOff > 0 ? (
+      {stage === "pick" && handedOff > 0 ? (
         <div className="flex items-start gap-2.5 rounded-2xl border border-primary/25 bg-primary/[0.06] px-4 py-3">
           <CheckIcon className="mt-0.5 size-4 shrink-0 text-primary" />
           <p className="text-sm text-foreground">
@@ -1171,7 +740,7 @@ export function UploadTab({
           </motion.div>
         )}
 
-        {(stage === "review" || stage === "uploading" || stage === "done") && (
+        {stage === "review" && (
           <motion.div
             key="review"
             initial={{ opacity: 0, y: 8 }}
@@ -1374,62 +943,6 @@ export function UploadTab({
                   </div>
                 )}
 
-                {stage === "uploading" && (
-                  <div className="sticky bottom-3 flex items-center gap-4 rounded-2xl border border-border bg-background/95 px-4 py-3.5 shadow-lg backdrop-blur-xl">
-                    <Loader2Icon className="size-4.5 shrink-0 animate-spin text-primary" />
-                    <div className="min-w-0 flex-1">
-                      <div className="flex items-baseline justify-between gap-3">
-                        <p className="truncate text-sm font-medium text-foreground">
-                          {t("uploadingButton", { done: activeDoneCount, total: activeUploadFiles.length })}
-                        </p>
-                        <p className="shrink-0 text-xs text-muted-foreground">
-                          {formatBytes(uploadedBytes)} / {formatBytes(uploadableBytes)}
-                        </p>
-                      </div>
-                      <div className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-muted">
-                        <div
-                          className="h-full rounded-full bg-primary transition-[width]"
-                          style={{ width: `${overallProgress * 100}%` }}
-                        />
-                      </div>
-                    </div>
-                    <Button variant="outline" size="sm" onClick={cancelUpload}>
-                      {t("cancel")}
-                    </Button>
-                  </div>
-                )}
-
-                {stage === "done" && (
-                  <div className="flex flex-col items-center gap-3 rounded-2xl border border-border bg-card/90 px-5 py-8 text-center">
-                    <span
-                      className={cn(
-                        "grid h-12 w-12 place-items-center rounded-full",
-                        errorCount === 0 ? "bg-primary/10 text-primary" : "bg-amber-500/10 text-amber-600",
-                      )}
-                    >
-                      {errorCount === 0 ? <CheckIcon className="size-6" /> : <CircleAlertIcon className="size-6" />}
-                    </span>
-                    <div>
-                      <p className="text-base font-medium text-foreground">
-                        {errorCount === 0 ? t("doneTitle") : t("doneWithErrors", { count: errorCount })}
-                      </p>
-                      <p className="mx-auto mt-1 max-w-[420px] text-sm text-muted-foreground">
-                        {t("doneBody", { count: doneCount, skipped: skippedCount })}
-                      </p>
-                    </div>
-                    <div className="flex flex-wrap items-center justify-center gap-2">
-                      {errorCount > 0 ? (
-                        <Button size="sm" onClick={() => void startUpload()}>
-                          <RotateCcwIcon className="size-4" />
-                          {t("retryFailed", { count: errorCount })}
-                        </Button>
-                      ) : null}
-                      <Button variant="outline" size="sm" onClick={reset}>
-                        {t("uploadMore")}
-                      </Button>
-                    </div>
-                  </div>
-                )}
               </>
             )}
           </motion.div>

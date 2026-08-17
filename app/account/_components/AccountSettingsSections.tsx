@@ -1264,13 +1264,31 @@ export function AccountSettingsSections({
 export function OrganizationSettingsSections({
   integrations,
   agentKeysHint,
+  location,
+  members,
 }: {
   integrations: React.ReactNode;
   agentKeysHint: string;
+  /** The organization's declared-location editor. */
+  location?: React.ReactNode;
+  /** Members, roles, and the Data Council — the org's governance controls.
+   *  They live here rather than on a separate tab so everything an organization
+   *  is administered with sits on one page. */
+  members?: React.ReactNode;
 }) {
   const t = useTranslations("common.settings.groups");
   return (
-    <Accordion type="multiple" className="space-y-3">
+    <Accordion type="multiple" defaultValue={[]} className="space-y-3">
+      {location ? (
+        <SettingsGroup value="profile" title={t("profile.title")} description={t("profile.description")}>
+          {location}
+        </SettingsGroup>
+      ) : null}
+      {members ? (
+        <SettingsGroup value="members" title={t("members.title")} description={t("members.description")}>
+          {members}
+        </SettingsGroup>
+      ) : null}
       <SettingsGroup value="agents" title={t("agents.title")} description={t("agents.description")}>
         <div className="space-y-3">
           <p className="text-sm text-muted-foreground">{agentKeysHint}</p>

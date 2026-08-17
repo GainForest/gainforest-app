@@ -74,7 +74,7 @@ export default async function PublishedSoundscapePage({ params }: { params: Soun
     <main className="min-h-screen bg-background pb-20">
       <div className="mx-auto max-w-5xl px-6 py-8 lg:px-8">
         <Link
-          href="/audiomoth?tab=soundscape"
+          href="/observations/audio?tab=soundscape"
           className="inline-flex items-center gap-1.5 text-[13px] font-medium text-muted-foreground transition-colors hover:text-foreground"
         >
           <ArrowLeftIcon className="h-3.5 w-3.5" aria-hidden />

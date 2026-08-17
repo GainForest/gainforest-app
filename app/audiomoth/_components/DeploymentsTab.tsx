@@ -12,7 +12,9 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import {
+  AudioLinesIcon,
   CheckIcon,
   CopyIcon,
   Loader2Icon,
@@ -44,25 +46,66 @@ import {
   type DeploymentEventItem,
 } from "@/app/_lib/deployment-events";
 import { createAcDeployment } from "@/app/_lib/ac-deployment";
+import { useActingRepo } from "@/app/_lib/account-switcher";
+import { useUploadTrayOptional } from "@/app/_components/upload-tray/upload-tray-context";
 import { loadAppliedConfig } from "@/app/_lib/audiomoth/setup-store";
 import { equipmentDetailPath } from "@/app/_lib/equipment";
 import { formatRelative } from "@/app/_lib/format";
 import { EditDeploymentDialog, audioMothOptionLabel, useMyAudioMoths } from "./deployment-shared";
 
+/** Where the "set one up ↗" hand-off from the Add observations modal stands. */
+type AttachState =
+  | { phase: "waiting" }
+  | { phase: "attaching" }
+  | { phase: "done"; moved: number; failed: number }
+  | { phase: "failed" };
+
 export function DeploymentsTab({ sessionDid }: { sessionDid: string | null }) {
   const t = useTranslations("common.audiomoth.deployments");
+  /* The acting account — the user's own, or the organization they switched
+     into. The list reads that repo and new deployments are written to it. */
+  const acting = useActingRepo(sessionDid);
+  const actingDid = acting.did;
 
   const [events, setEvents] = useState<DeploymentEventItem[] | null>(null);
   const [loadError, setLoadError] = useState(false);
   const [creating, setCreating] = useState(false);
   const [editing, setEditing] = useState<DeploymentEventItem | null>(null);
 
+  // "Set one up ↗" from the Add observations modal: the batch is already
+  // uploading in the background tray; it attaches to the deployment created
+  // here the moment it exists.
+  const searchParams = useSearchParams();
+  const uploadTray = useUploadTrayOptional();
+  const attachBatchKey = searchParams.get("attachBatch");
+  const attachCountParam = Number(searchParams.get("attachCount") ?? "");
+  const [attachState, setAttachState] = useState<AttachState>({ phase: "waiting" });
+  const attachInfo = attachBatchKey ? (uploadTray?.batchInfo(attachBatchKey) ?? null) : null;
+  // The tray forgets a batch on dismiss/reload; the count in the URL keeps
+  // the pill honest until the deployment is created.
+  const attachTotal = attachInfo?.total || (Number.isFinite(attachCountParam) ? attachCountParam : 0);
+  const showAttachPill = Boolean(attachBatchKey) && attachTotal > 0;
+
+  /** The dialog created its companion ac.deployment — attach the batch to it. */
+  const attachBatchTo = useCallback(
+    (acDeploymentUri: string | null) => {
+      if (!attachBatchKey || !uploadTray || !acDeploymentUri) return;
+      if (attachState.phase === "attaching" || attachState.phase === "done") return;
+      setAttachState({ phase: "attaching" });
+      uploadTray
+        .retargetBatch(attachBatchKey, { kind: "existing", uri: acDeploymentUri })
+        .then(({ moved, failed }) => setAttachState({ phase: "done", moved, failed }))
+        .catch(() => setAttachState({ phase: "failed" }));
+    },
+    [attachBatchKey, attachState.phase, uploadTray],
+  );
+
   const reload = useCallback(
     async (signal?: AbortSignal) => {
-      if (!sessionDid) return;
+      if (!actingDid) return;
       setLoadError(false);
       try {
-        const list = await listDeploymentEvents(sessionDid, signal);
+        const list = await listDeploymentEvents(actingDid, signal);
         if (!signal?.aborted) setEvents(list);
       } catch (err) {
         if (signal?.aborted || (err as Error).name === "AbortError") return;
@@ -70,15 +113,16 @@ export function DeploymentsTab({ sessionDid }: { sessionDid: string | null }) {
         setLoadError(true);
       }
     },
-    [sessionDid],
+    [actingDid],
   );
 
   useEffect(() => {
-    if (!sessionDid) return;
+    if (!actingDid) return;
+    setEvents(null);
     const ctrl = new AbortController();
     void reload(ctrl.signal);
     return () => ctrl.abort();
-  }, [reload, sessionDid]);
+  }, [reload, actingDid]);
 
   if (!sessionDid) {
     return (
@@ -91,6 +135,37 @@ export function DeploymentsTab({ sessionDid }: { sessionDid: string | null }) {
 
   return (
     <div className="flex flex-col gap-4">
+      {showAttachPill ? (
+        <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-2 rounded-2xl border border-primary/25 bg-primary/[0.06] px-4 py-3">
+          <p className="flex min-w-0 items-center gap-2.5 text-sm text-foreground">
+            {attachState.phase === "attaching" ? (
+              <Loader2Icon className="size-4 shrink-0 animate-spin text-primary" />
+            ) : attachState.phase === "done" ? (
+              <CheckIcon className="size-4 shrink-0 text-primary" />
+            ) : (
+              <AudioLinesIcon className="size-4 shrink-0 text-primary" />
+            )}
+            <span>
+              {attachState.phase === "done"
+                ? attachState.failed > 0
+                  ? t("attachPartial", { moved: attachState.moved, failed: attachState.failed })
+                  : t("attachDone", { count: attachTotal })
+                : attachState.phase === "attaching"
+                  ? t("attaching", { count: attachTotal })
+                  : attachState.phase === "failed"
+                    ? t("attachFailed")
+                    : t("attachWaiting", { count: attachTotal })}
+            </span>
+          </p>
+          {attachState.phase === "waiting" || attachState.phase === "failed" ? (
+            <Button size="sm" variant="outline" className="rounded-full" onClick={() => setCreating(true)}>
+              <PlusIcon className="size-4" />
+              {t("createButton")}
+            </Button>
+          ) : null}
+        </div>
+      ) : null}
+
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <p className="max-w-prose text-sm text-muted-foreground">{t("intro")}</p>
         <Button size="sm" onClick={() => setCreating(true)} className="shrink-0">
@@ -111,6 +186,7 @@ export function DeploymentsTab({ sessionDid }: { sessionDid: string | null }) {
             <DeploymentRow
               key={event.uri}
               event={event}
+              writeRepo={acting.repo ?? null}
               onEdit={() => setEditing(event)}
               onDeleted={() => {
                 setEvents((current) => current?.filter((e) => e.uri !== event.uri) ?? null);
@@ -136,8 +212,12 @@ export function DeploymentsTab({ sessionDid }: { sessionDid: string | null }) {
       {creating ? (
         <CreateDeploymentDialog
           sessionDid={sessionDid}
+          repoDid={showAttachPill && attachInfo?.repoDid ? attachInfo.repoDid : (acting.repo ?? null)}
           onClose={() => setCreating(false)}
-          onCreated={() => void reload()}
+          onCreated={(created) => {
+            void reload();
+            if (showAttachPill) attachBatchTo(created.acDeploymentUri);
+          }}
         />
       ) : null}
     </div>
@@ -150,10 +230,13 @@ export function DeploymentsTab({ sessionDid }: { sessionDid: string | null }) {
 
 function DeploymentRow({
   event,
+  writeRepo,
   onEdit,
   onDeleted,
 }: {
   event: DeploymentEventItem;
+  /** Group repo DID the listed events live in, when acting as an org. */
+  writeRepo: string | null;
   onEdit: () => void;
   onDeleted: () => void;
 }) {
@@ -182,14 +265,14 @@ function DeploymentRow({
     setError(null);
     setDeleting(true);
     try {
-      await deleteDeploymentEvent(event);
+      await deleteDeploymentEvent(event, writeRepo ? { repo: writeRepo } : undefined);
       onDeleted();
     } catch (err) {
       setError(err instanceof Error && err.message ? err.message : t("deleteFailed"));
       setDeleting(false);
       setConfirming(false);
     }
-  }, [event, onDeleted, t]);
+  }, [event, onDeleted, t, writeRepo]);
 
   return (
     <li className="rounded-2xl border border-border bg-card/90 px-4 py-3.5">
@@ -267,12 +350,21 @@ type CreateStage = "form" | "playing" | "done";
 
 function CreateDeploymentDialog({
   sessionDid,
+  repoDid = null,
   onClose,
   onCreated,
 }: {
   sessionDid: string;
+  /**
+   * Repo the deployment event and its companion `ac.deployment` land in —
+   * an organization's DID when acting as one (or when a pending attach-batch
+   * was uploaded for one, so the batch and its deployment end up in the same
+   * repo). Null = the signed-in user's own.
+   */
+  repoDid?: string | null;
   onClose: () => void;
-  onCreated: () => void;
+  /** Reports the companion recorder-deployment record, when it could be saved. */
+  onCreated: (created: { acDeploymentUri: string | null }) => void;
 }) {
   const t = useTranslations("common.audiomoth.deployments");
 
@@ -281,7 +373,9 @@ function CreateDeploymentDialog({
   const [lat, setLat] = useState("");
   const [lon, setLon] = useState("");
   const [locating, setLocating] = useState(false);
-  const { equipment, ownerProfiles } = useMyAudioMoths(sessionDid);
+  // Offer the recorders of the repo this deployment will be created into —
+  // the organization's when acting as one, the user's own otherwise.
+  const { equipment } = useMyAudioMoths(repoDid ?? sessionDid);
   const [equipmentUri, setEquipmentUri] = useState<string>("none");
   const [stage, setStage] = useState<CreateStage>("form");
   const [replaying, setReplaying] = useState(false);
@@ -363,38 +457,47 @@ function CreateDeploymentDialog({
       const now = new Date();
       const id = deploymentId.trim().toLowerCase();
       // Save first — even if the speaker fails, the generated ID is preserved.
-      const eventResult = await createDeploymentEvent({
-        deploymentIdHex: id,
-        siteName,
-        lat: coords.lat,
-        lon: coords.lon,
-        deployedAt: now,
-        equipment: selectedEquipment
-          ? { name: selectedEquipment.name, assetId: selectedEquipment.assetId, uri: selectedEquipment.uri }
-          : null,
-      });
-      // Companion recorder-deployment record (ac.deployment) carrying the
-      // device configuration this browser last wrote to the unit. Best
-      // effort — the chime event above is the source of truth for the ID.
-      try {
-        const applied = selectedEquipment ? loadAppliedConfig(selectedEquipment.assetId) : null;
-        await createAcDeployment({
-          name: siteName.trim() || `AudioMoth ${id}`,
-          deployedAt: now,
+      const eventResult = await createDeploymentEvent(
+        {
+          deploymentIdHex: id,
+          siteName,
           lat: coords.lat,
           lon: coords.lon,
-          eventUri: eventResult.uri,
+          deployedAt: now,
           equipment: selectedEquipment
             ? { name: selectedEquipment.name, assetId: selectedEquipment.assetId, uri: selectedEquipment.uri }
             : null,
-          config: applied?.config ?? null,
-          firmwareVersion: applied?.firmwareVersion ?? null,
-          remarks: `Chime deployment ID ${id}.`,
-        });
+        },
+        repoDid ? { repo: repoDid } : undefined,
+      );
+      // Companion recorder-deployment record (ac.deployment) carrying the
+      // device configuration this browser last wrote to the unit. Best
+      // effort — the chime event above is the source of truth for the ID.
+      // A pending attach-batch grabs this record's URI the moment it exists.
+      let acDeploymentUri: string | null = null;
+      try {
+        const applied = selectedEquipment ? loadAppliedConfig(selectedEquipment.assetId) : null;
+        const acResult = await createAcDeployment(
+          {
+            name: siteName.trim() || `AudioMoth ${id}`,
+            deployedAt: now,
+            lat: coords.lat,
+            lon: coords.lon,
+            eventUri: eventResult.uri,
+            equipment: selectedEquipment
+              ? { name: selectedEquipment.name, assetId: selectedEquipment.assetId, uri: selectedEquipment.uri }
+              : null,
+            config: applied?.config ?? null,
+            firmwareVersion: applied?.firmwareVersion ?? null,
+            remarks: `Chime deployment ID ${id}.`,
+          },
+          repoDid ? { repo: repoDid } : undefined,
+        );
+        acDeploymentUri = acResult.uri;
       } catch (acError) {
         console.warn("ac.deployment companion record could not be saved", acError);
       }
-      onCreated();
+      onCreated({ acDeploymentUri });
       const samples = generateChime(Math.floor(now.getTime() / 1000), coords.lat, coords.lon, id);
       await playChime(samples);
       setStage("done");
@@ -403,7 +506,7 @@ function CreateDeploymentDialog({
       setStage("form");
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps -- parseCoords reads lat/lon state
-  }, [deploymentId, lat, lon, onCreated, selectedEquipment, siteName, t]);
+  }, [deploymentId, lat, lon, onCreated, repoDid, selectedEquipment, siteName, t]);
 
   /** Replay the chime for the current moment (the record stays as saved). */
   const replay = useCallback(async () => {
@@ -536,7 +639,7 @@ function CreateDeploymentDialog({
                     <SelectItem value="none">{t("equipmentNone")}</SelectItem>
                     {(equipment ?? []).map((item) => (
                       <SelectItem key={item.uri} value={item.uri}>
-                        {audioMothOptionLabel(item, sessionDid, ownerProfiles)}
+                        {audioMothOptionLabel(item)}
                       </SelectItem>
                     ))}
                   </SelectContent>

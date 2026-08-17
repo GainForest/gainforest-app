@@ -226,6 +226,7 @@ export function RecordExplorer({
   enableCompactObservationCards = false,
   defaultCardDensity = "comfortable",
   onEmptyStateChange,
+  underHero,
 }: {
   kind: RecordKind;
   initialPage?: InitialExplorerPage;
@@ -275,6 +276,9 @@ export function RecordExplorer({
   /** Fires with true once the explorer has loaded and holds zero records (no
    *  data at all), false otherwise. Lets a parent collapse its own chrome. */
   onEmptyStateChange?: (isEmpty: boolean) => void;
+  /** Rendered directly below the hero, above stats and toolbar — e.g. the
+   *  Observations hub's Photos | Audio | Devices media tab bar. */
+  underHero?: ReactNode;
 }) {
   const meta = KIND_META[kind];
   const exploreT = useTranslations("marketplace.explore");
@@ -339,7 +343,7 @@ export function RecordExplorer({
     // Seeded once at mount (useState initializer below); the panel remounts when
     // returning from add mode, so a changing `extraInitialRecords` is picked up then.
   }, [initialPage, extraInitialRecords]);
-  const shouldLoadFromUrl = Boolean(query.trim()) || sort !== "newest" || (kind === "occurrence" && occMedia !== defaultOccurrenceMedia) || (kind === "site" && siteSource !== "both");
+  const shouldLoadFromUrl = Boolean(query.trim()) || sort !== "newest" || (kind === "occurrence" && occMedia !== defaultOccurrenceMedia) || (kind === "site" && siteSource !== "both") || Boolean(ownerFilterActive && ownerFilterDid);
 
   const [records, setRecords] = useState<ExplorerRecord[]>(shouldLoadFromUrl ? [] : initialRecords);
   const [cursor, setCursor] = useState<string | null>(shouldLoadFromUrl ? null : initialPage?.cursor ?? null);
@@ -572,7 +576,7 @@ export function RecordExplorer({
     setCursor(null);
     setHasMore(true);
     setPhase("idle");
-  }, [deferredQuery, hydrated, occMedia, siteSource, sort, badgeFilters]);
+  }, [deferredQuery, hydrated, occMedia, ownerDid, siteSource, sort, badgeFilters]);
 
   // First load (once hydrated) and any time a filter reset drops us back to
   // idle, kick off a walk. Gated on `hydrated` so the URL's filter params are
@@ -639,7 +643,7 @@ export function RecordExplorer({
 
   useEffect(() => {
     setCardLimit(INITIAL_CARD_LIMIT);
-  }, [deferredQuery, kind, occCategory, occMedia, siteSource, sort, badgeFilters, view, cardDensity]);
+  }, [deferredQuery, kind, occCategory, occMedia, ownerDid, siteSource, sort, badgeFilters, view, cardDensity]);
   // Embedded account/manage explorers keep compact loaded-record summaries.
   const stats = useMemo(
     () => shouldShowStatsOverview ? (kind === "occurrence" && !ownerDid && occurrenceStats ? computeOccurrenceTotalStats(occurrenceStats, records) : computeStats(records, kind)) : [],
@@ -680,6 +684,8 @@ export function RecordExplorer({
           compact
         />
       )}
+
+      {underHero && <div className="relative z-10 mx-auto mt-6 max-w-6xl px-6">{underHero}</div>}
 
       <div className="relative z-10 mx-auto max-w-6xl px-6">
         {/* Stats overview — only embedded account/manage views show summaries here. */}

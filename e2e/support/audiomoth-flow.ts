@@ -140,7 +140,7 @@ export async function scanSdCardFiles(
     { name: "20240415_190500.WAV", comment: "19:05:00 15/04/2024" },
   ];
 
-  await page.goto("/audiomoth?tab=upload", { waitUntil: "domcontentloaded" });
+  await page.goto("/observations/audio?tab=upload", { waitUntil: "domcontentloaded" });
   await expect(page.getByRole("button", { name: /choose sd card or folder/i })).toBeVisible({ timeout: 60_000 });
   await screenshotStep(page, testInfo, "audiomoth-upload-pick");
 

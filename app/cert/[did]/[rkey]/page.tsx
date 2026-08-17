@@ -54,7 +54,7 @@ import {
   type RecordDetail,
   type TimelineAttachmentItem,
 } from "../../../_lib/indexer";
-import { isPdsBlobUrl } from "../../../_lib/pds";
+import { dropDeletedRecordUris, isPdsBlobUrl } from "../../../_lib/pds";
 import { projectMediaTransitionStyle } from "../../../_lib/view-transition";
 import { NOINDEX_ROBOTS } from "../../../_lib/seo-metadata";
 import { blockExplorerUrl, INDEXER_URL, localBumicertHref, localProjectHref } from "../../../_lib/urls";
@@ -580,6 +580,7 @@ export async function ProjectDetailView({
   projectDatasetUris,
   projectDetail,
   projectRkey,
+  projectLocationUri,
   engagementSubjectUri,
 }: {
   routeData: RouteData;
@@ -599,6 +600,11 @@ export async function ProjectDetailView({
   projectDetail?: Pick<RecordDetail, "blurb" | "richBody"> | null;
   /** Project (collection) rkey, so deleting removes the project, not the Cert. */
   projectRkey?: string;
+  /** The project's own location (already checked to exist), when this view
+   *  renders a project page. The sidebar map always shows the location of the
+   *  entity being viewed: a project page shows the project's place (null →
+   *  "No location set"), a standalone Cert page shows the Cert's places. */
+  projectLocationUri?: string | null;
   /** When set, render the feed's like + comment bar for this record URI under
    *  the hero (the project page passes its collection URI so the count matches
    *  the activity feed). Omitted on standalone Cert pages. */
@@ -1042,7 +1048,7 @@ export async function ProjectDetailView({
                       detail={detail}
                       workScopeLabels={workScopeLabels}
                       period={period}
-                      mapLocationUri={hasPlaces ? record.locationUris[0] : null}
+                      mapLocationUri={projectLocationUri !== undefined ? projectLocationUri : hasPlaces ? record.locationUris[0] : null}
                       recentUpdates={recentUpdates}
                       placesHref={placesHref}
                       updatesHref={updatesHref}
@@ -1061,7 +1067,7 @@ export async function ProjectDetailView({
 /** Rich at-a-glance block injected under the project sidebar cover image: key
  *  facts, a mini boundary map, and the latest updates — each linking to the
  *  matching inline section. */
-function ProjectSidebarExtras({
+async function ProjectSidebarExtras({
   record,
   detail,
   workScopeLabels,
@@ -1080,6 +1086,7 @@ function ProjectSidebarExtras({
   placesHref: string;
   updatesHref: string;
 }) {
+  const noLocationLabel = (await getTranslations("bumicert.detail.overview"))("noLocationSet");
   const facts: Array<{ label: string; value: string }> = [];
   if (period) facts.push({ label: "Active", value: period });
   if (record.locationUris.length > 0) facts.push({ label: "Places", value: formatNumber(record.locationUris.length) });
@@ -1127,26 +1134,30 @@ function ProjectSidebarExtras({
         </>
       ) : null}
 
-      {mapLocationUri ? (
-        <>
-          {lead()}
-          <div className="space-y-2.5">
-            <div className="flex items-center justify-between gap-2">
-              <h3 className="text-xs font-semibold uppercase tracking-[0.14em] text-foreground">Map</h3>
-              <Link href={placesHref} className="text-xs font-medium text-primary transition-colors hover:underline">View places</Link>
-            </div>
-            <Link href={placesHref} className="group relative block overflow-hidden rounded-2xl border border-border" aria-label="View places">
-              <iframe
-                src={polygonsViewHref(mapLocationUri)}
-                className="pointer-events-none h-44 w-full border-0"
-                loading="lazy"
-                title="Site boundary map"
-              />
-              <span aria-hidden className="absolute inset-0 transition-colors group-hover:bg-primary/[0.06]" />
-            </Link>
-          </div>
-        </>
-      ) : null}
+      {lead()}
+      <div className="space-y-2.5">
+        <div className="flex items-center justify-between gap-2">
+          <h3 className="text-xs font-semibold uppercase tracking-[0.14em] text-foreground">Map</h3>
+          {mapLocationUri ? (
+            <Link href={placesHref} className="text-xs font-medium text-primary transition-colors hover:underline">View places</Link>
+          ) : null}
+        </div>
+        {mapLocationUri ? (
+          <Link href={placesHref} className="group relative block overflow-hidden rounded-2xl border border-border" aria-label="View places">
+            <iframe
+              src={polygonsViewHref(mapLocationUri)}
+              className="pointer-events-none h-44 w-full border-0"
+              loading="lazy"
+              title="Site boundary map"
+            />
+            <span aria-hidden className="absolute inset-0 transition-colors group-hover:bg-primary/[0.06]" />
+          </Link>
+        ) : (
+          <p className="rounded-2xl border border-dashed border-border-soft bg-surface px-4 py-6 text-center text-[13px] text-muted-foreground">
+            {noLocationLabel}
+          </p>
+        )}
+      </div>
 
       {recentUpdates.length > 0 ? (
         <>
@@ -1299,7 +1310,36 @@ export async function loadBumicertRouteData(
   ]);
 
   if (!record || record.kind !== "bumicert") return null;
-  return { record, detail, owner, fundingConfig, authSession, routeIdentifier: requestedIdentifier, urlIdentifier: owner.urlIdentifier };
+  // A Cert's `locations` strongRefs can outlive their targets (deleting a
+  // site doesn't rewrite the Certs that point at it). Keep only the places
+  // that still exist so the sidebar map, Places count, and Places tab never
+  // render a dangling ref (which shows up as an "Unable to preview" map).
+  // A deleted place is treated as if it never existed: the refs are dropped
+  // and the page shows its normal "no location set" states instead.
+  const locationUris = await dropDeletedRecordUris(record.locationUris);
+  const hasDanglingLocations = locationUris.length !== record.locationUris.length;
+  const liveRecord = hasDanglingLocations
+    ? { ...record, locationUris, locationCount: locationUris.length }
+    : record;
+  // The detail's "Claim" section repeats the place count ("Project places") —
+  // keep it in step with the filtered list.
+  const liveDetail =
+    hasDanglingLocations && detail
+      ? {
+          ...detail,
+          sections: detail.sections.map((section) => ({
+            ...section,
+            fields: section.fields.flatMap((f) =>
+              f.label !== "Project places"
+                ? [f]
+                : locationUris.length > 0
+                  ? [{ ...f, value: formatNumber(locationUris.length) }]
+                  : [],
+            ),
+          })),
+        }
+      : detail;
+  return { record: liveRecord, detail: liveDetail, owner, fundingConfig, authSession, routeIdentifier: requestedIdentifier, urlIdentifier: owner.urlIdentifier };
 }
 
 async function fetchBumicertFundingConfig(did: string, rkey: string): Promise<BumicertFundingConfig> {

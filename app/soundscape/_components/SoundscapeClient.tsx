@@ -1,7 +1,11 @@
 "use client";
 
 /**
- * Soundscape clock built from the user's already-uploaded recordings.
+ * Soundscape clock built from the acting account's already-uploaded
+ * recordings — the signed-in user's own, or the organization they have
+ * switched into with the header's account switcher. Reads list that repo and
+ * every write (stored analyses, folder renames, deletions, published
+ * soundscapes) targets the same repo.
  *
  * The library is the account's `ac.audio` records, grouped by the folder
  * each recording was uploaded into (its `deploymentRef` — every folder is an
@@ -184,6 +188,13 @@ export function SoundscapeClient({ sessionDid }: { sessionDid: string | null }) 
   const audioSourceRef = useRef<AudioBufferSourceNode | null>(null);
   const playTokenRef = useRef(0);
 
+  /* The account this library belongs to: the signed-in user's own repo, or
+     the organization's when they have switched into one. `shareTarget.repo`
+     is the group DID in that case (undefined when acting personally), and
+     doubles as the write target for every mutation below. */
+  const shareTarget = useShareTarget(sessionDid);
+  const libraryDid = sessionDid ? (shareTarget.repo ?? sessionDid) : null;
+
   const allRecordings = useMemo<LibraryRecording[]>(() => {
     return (recordings ?? []).map((item) => {
       const time = wallClockFromIso(item.recordedAt);
@@ -260,9 +271,20 @@ export function SoundscapeClient({ sessionDid }: { sessionDid: string | null }) 
     });
   }, []);
 
-  /* Load the account's uploaded recordings and seed results from the cache. */
+  /* Switching accounts mid-visit is a different library: drop the folder
+     selection (and its date filter and zoom) carried over from the previous
+     account, exactly as if a new folder had been picked. */
+  const libraryDidRef = useRef(libraryDid);
   useEffect(() => {
-    if (!sessionDid) return;
+    if (libraryDidRef.current === libraryDid) return;
+    libraryDidRef.current = libraryDid;
+    selectGroup(null);
+  }, [libraryDid, selectGroup]);
+
+  /* Load the acting account's uploaded recordings and seed results from the
+     cache. */
+  useEffect(() => {
+    if (!libraryDid) return;
     let cancelled = false;
     const controller = new AbortController();
     setRecordings(null);
@@ -274,11 +296,11 @@ export function SoundscapeClient({ sessionDid }: { sessionDid: string | null }) 
            they are fetched alongside the library rather than after it. A repo
            that has never been analyzed simply yields none. */
         const [items, stored, deploymentItems] = await Promise.all([
-          listAllRecordings(sessionDid, controller.signal),
-          listStoredAnalyses(sessionDid, controller.signal).catch(() => new Map()),
+          listAllRecordings(libraryDid, controller.signal),
+          listStoredAnalyses(libraryDid, controller.signal).catch(() => new Map()),
           // Folder names are presentation only — recordings still group by
           // their deploymentRef when this fails.
-          listAcDeployments(sessionDid, controller.signal).catch(() => [] as AcDeploymentItem[]),
+          listAcDeployments(libraryDid, controller.signal).catch(() => [] as AcDeploymentItem[]),
         ]);
         if (cancelled) return;
         const cache = cacheRef.current ?? loadPmnCache();
@@ -311,7 +333,7 @@ export function SoundscapeClient({ sessionDid }: { sessionDid: string | null }) 
       cancelled = true;
       controller.abort();
     };
-  }, [sessionDid, reloadCounter]);
+  }, [libraryDid, reloadCounter]);
 
   /* Sequential analysis queue: download + analyze one recording at a time;
      each settled state update re-triggers this effect for the next one.
@@ -344,6 +366,7 @@ export function SoundscapeClient({ sessionDid }: { sessionDid: string | null }) 
         void saveStoredAnalysis({
           rkey,
           record: buildAnalysisRecord({ audioUri: uri, audioCid: cid, sampleRate, bands: pmnPerBand, spectrum }),
+          ...(shareTarget.repo ? { repo: shareTarget.repo } : {}),
         }).catch(() => {});
         update = { status: "done", pmn: pmnPerBand };
       } catch (error) {
@@ -367,7 +390,7 @@ export function SoundscapeClient({ sessionDid }: { sessionDid: string | null }) 
       processingRef.current = false;
       setResults((current) => ({ ...current, [uri]: update }));
     })();
-  }, [library, paused, results]);
+  }, [library, paused, results, shareTarget.repo]);
 
   /* Pause stops the queue at the current recording. The download is the long
      pole, so it is aborted outright; analysis that already started is cheap
@@ -710,7 +733,6 @@ export function SoundscapeClient({ sessionDid }: { sessionDid: string | null }) 
      reading the same soundscape, so they deliberately don't change what is
      shared: a reader gets the whole thing and explores it themselves. */
   const modal = useModal();
-  const shareTarget = useShareTarget(sessionDid);
   const publishSoundscape = useSoundscapePublisher(shareTarget);
 
   const shareInput = useMemo<SoundscapePublishInput | null>(() => {
@@ -791,7 +813,11 @@ export function SoundscapeClient({ sessionDid }: { sessionDid: string | null }) 
           <RenameFolderModal
             currentName={folder.name}
             onSave={async (name) => {
-              const { cid } = await updateAcDeployment(folder, { name });
+              const { cid } = await updateAcDeployment(
+                folder,
+                { name },
+                shareTarget.repo ? { repo: shareTarget.repo } : undefined,
+              );
               const updated = applyAcDeploymentEdit(folder, { name }, cid);
               setDeployments((current) =>
                 current.map((item) => (item.uri === updated.uri ? updated : item)),
@@ -803,7 +829,7 @@ export function SoundscapeClient({ sessionDid }: { sessionDid: string | null }) 
       true,
     );
     void modal.show();
-  }, [modal, selectedDeployment]);
+  }, [modal, selectedDeployment, shareTarget.repo]);
 
   const deleteFolder = useCallback(() => {
     const folder = selectedDeployment;
@@ -828,6 +854,7 @@ export function SoundscapeClient({ sessionDid }: { sessionDid: string | null }) 
               const { deleted, failed } = await deleteRecordings({
                 items: inFolder,
                 survivors,
+                ...(shareTarget.repo ? { repo: shareTarget.repo } : {}),
                 onProgress,
               });
               if (deleted.size > 0) {
@@ -837,7 +864,7 @@ export function SoundscapeClient({ sessionDid }: { sessionDid: string | null }) 
                  recordings still point at it would strand them in the group
                  the picker labels "Removed folder". */
               if (failed.size > 0) throw new Error(tFolders("deletePartial", { count: failed.size }));
-              await deleteAcDeployment(folder);
+              await deleteAcDeployment(folder, shareTarget.repo ? { repo: shareTarget.repo } : undefined);
               setDeployments((current) => current.filter((item) => item.uri !== folder.uri));
               selectGroup(null);
             }}
@@ -847,7 +874,7 @@ export function SoundscapeClient({ sessionDid }: { sessionDid: string | null }) 
       true,
     );
     void modal.show();
-  }, [allRecordings, modal, pauseAnalysis, selectGroup, selectedDeployment, tFolders]);
+  }, [allRecordings, modal, pauseAnalysis, selectGroup, selectedDeployment, shareTarget.repo, tFolders]);
 
   const downloadPng = useCallback(async () => {
     const svg = chartRef.current?.querySelector<SVGSVGElement>("svg[data-soundscape-clock]");
@@ -954,7 +981,7 @@ export function SoundscapeClient({ sessionDid }: { sessionDid: string | null }) 
         </p>
         <div className="mt-5 flex flex-wrap justify-center gap-2">
           <Button asChild>
-            <Link href="/audiomoth?tab=upload">
+            <Link href="/observations/audio?tab=upload">
               <UploadIcon className="size-4" />
               {t("library.goToUpload")}
             </Link>

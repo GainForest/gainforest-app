@@ -374,7 +374,8 @@
       "published": "Imechapishwa",
       "firstSiteBoundary": "Mpaka wa kwanza wa tovuti",
       "firstSiteBoundaryMap": "Ramani ya mpaka wa kwanza wa tovuti",
-      "contributors": "Wachangiaji"
+      "contributors": "Wachangiaji",
+      "noLocationSet": "Hakuna eneo lililowekwa"
     },
     "headerTabs": {
       "overview": "Muhtasari",

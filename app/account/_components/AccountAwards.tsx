@@ -9,6 +9,7 @@ import {
   parseRecognitionBadgeKey,
 } from "@/app/_lib/recognition-badges";
 import { fetchRecognitionBadgesForDid } from "@/app/_lib/indexer";
+import { bioblitzRoundUsesPoints } from "@/lib/bioblitz-prizes";
 import { recognitionBadgeIcon } from "./RecognitionBadges";
 
 type Translator = (key: string, values?: Record<string, string | number>) => string;
@@ -18,7 +19,11 @@ function awardLabelFor(key: string, t: Translator): string {
   const parsed = parseRecognitionBadgeKey(key);
   if (parsed?.family === "manual") return t(`badges.${parsed.key}.label`);
   if (parsed?.family === "bioblitz") {
-    const base = `badges.bioblitz-${parsed.prize}`;
+    // The board prize was renamed when the points era began; each badge keeps
+    // the name of the rule its round was actually played under.
+    const pointsEra =
+      parsed.prize === "most-images" && parsed.roundId !== null && bioblitzRoundUsesPoints(parsed.roundId);
+    const base = pointsEra ? "badges.bioblitz-most-images-points" : `badges.bioblitz-${parsed.prize}`;
     if (parsed.roundId === null) return t(`${base}.label`);
     const roundName =
       parsed.roundId === 1

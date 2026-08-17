@@ -12,10 +12,21 @@ Whenever an email template is added or changed, inform the user that they also n
 ## Mutation permissions
 When adding any feature that creates, updates, deletes, or changes membership/roles, gate the available actions by the user’s current role before they can trigger them. Disable or hide unavailable options up front and use plain-language explanations.
 
+## Personal and organization accounts behave identically
+A feature must behave the same whether a record belongs to someone's personal account or to an organization. Never branch product behavior on who owns the repo.
+
+- **All record writes go through `/api/manage/proxy`.** `callProxy` (`app/(manage)/manage/_lib/mutations.ts`) sends every create/put/delete/uploadBlob there, personal or organization-owned. Never shortcut organization writes to `/api/cgs/mutation`: that route forwards without inspecting the body, so any rule living in the proxy would silently apply to personal accounts only. This has already regressed twice — the tree future-date check and the site-deletion guard both skipped organizations.
+- **`/api/cgs/mutation` is for group lifecycle only** — registering an organization, adding/removing members, setting roles (`app/(manage)/manage/_lib/cgs.ts`). Never record writes.
+- **App-level rules belong in the proxy**, not in a client component or a single route, so both ownership models inherit them. Example: a site cannot be deleted while a Cert still lists it as a place, and the org/project/default-site pointers are dropped after a successful delete (`app/api/manage/proxy/site-references.ts`).
+- Routing organization writes through the proxy costs one extra hop and nothing else: the proxy resolves org membership (403 for non-members) and forwards to the same auth-service endpoint, so permissions and results are unchanged.
+
 ## UI experience registry (`/_test`)
 `/_test` is the public, unindexed index of safely previewable product flows; each experience lives on its own `/_test/...` subroute. **Developers and AI agents must render the production components themselves.** Never create a mock-only copy of production markup, styling, or interaction logic. Mock only fixture data, persistence, workflow navigation, and external side effects through explicit component adapters. When a production flow gains a new side effect, update its mock adapter in the same change so the registry can never call a live mutation, payment, wallet, or publishing service. Any UI or UX change must affect the mock and real experience in the same manner because both use the same component.
 
 The route is public but blocked from indexing; that is not authentication. Never put secrets, privileged controls, or real personal data in the registry. See `app/%5Ftest/README.md` (`%5Ftest` maps to `/_test` because literal underscore folders are private in the Next.js App Router).
+
+## Pull request screenshots
+For every pull request, include at least one before-and-after screenshot in the PR description. Do not commit screenshots or other PR-review media to this repository; upload them outside the codebase and embed or link them from the PR description.
 
 ## E2E test runs
 When a user asks to run the full E2E suite, run it. The suite intentionally creates disposable accounts and organizations, and teardown is responsible for deleting them. Do not avoid a requested full E2E run because it uses disposable accounts; instead, watch cleanup output and report any teardown failure clearly.

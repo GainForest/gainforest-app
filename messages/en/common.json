@@ -11,6 +11,9 @@
   "adminOnly": {
     "label": "Admin only"
   },
+  "grantOnly": {
+    "label": "Grant members only"
+  },
   "navigation": {
     "navigation": "Navigation",
     "openNavigation": "Open navigation",
@@ -124,7 +127,9 @@
       "labeler": "Labeler",
       "globe": "Globe",
       "audiomoth": "AudioMoth",
-      "identifications": "Identifications"
+      "identifications": "Identifications",
+      "myGrant": "My grant",
+      "myRecorders": "My recorders"
     },
     "prompts": {
       "signInDescription": "Sign in to manage your account and content.",
@@ -163,7 +168,7 @@
       "admin": "Admin",
       "personalAccount": "Personal account",
       "organizationAccount": "Organization account",
-      "myCards": "My Cards"
+      "myCards": "My Bumicerts"
     },
     "more": "More",
     "hideMore": "Hide"
@@ -264,6 +269,14 @@
         "title": "Account",
         "description": "Username and sign-in security"
       },
+      "profile": {
+        "title": "Public profile",
+        "description": "What your public page shows"
+      },
+      "members": {
+        "title": "Members",
+        "description": "People, roles, and the Data Council"
+      },
       "connections": {
         "title": "Connections",
         "description": "Social accounts and external services"
@@ -276,6 +289,13 @@
         "title": "Advanced",
         "description": "Account data and deletion"
       }
+    },
+    "location": {
+      "title": "Location",
+      "description": "Where this account is based, shown on the public profile.",
+      "notSet": "No location set",
+      "edit": "Edit",
+      "saveError": "Could not save the location. Please try again."
     }
   },
   "bumicertCard": {
@@ -988,6 +1008,7 @@
       "inputPlaceholder": "Email or Bluesky handle",
       "inputAria": "Member email or Bluesky handle",
       "invite": "Invite",
+      "refresh": "Refresh",
       "ownerHelp": "Enter an email to send an invite, or a Bluesky handle to add someone right away.",
       "adminHelp": "Add regular members by Bluesky handle, or invite them by email. Ask an owner to add another admin.",
       "locked": "Only owners and admins can invite or remove members.",
@@ -1093,6 +1114,7 @@
       "following": "Following",
       "project": "Projects",
       "observation": "Sightings",
+      "audio": "Recordings",
       "organization": "Organizations",
       "donation": "Donations",
       "post": "Posts"
@@ -1102,7 +1124,8 @@
       "observation": "shared a nature sighting",
       "organization": "registered an organization",
       "donation": "made a donation",
-      "post": "shared an update"
+      "post": "shared an update",
+      "audio": "uploaded field recordings"
     },
     "to": "to",
     "anonymous": "Someone",
@@ -1124,6 +1147,11 @@
       "likesAcross": "{count, plural, one {# like across these sightings} other {# likes across these sightings}}",
       "commentsHeading": "Comments on these sightings",
       "commentOn": "on {species}"
+    },
+    "audioUpload": {
+      "recordings": "{count, plural, one {# recording uploaded} other {# recordings uploaded}}",
+      "browse": "Browse recordings",
+      "recorderFallback": "Field recorder"
     },
     "profileCard": {
       "unnamed": "Unnamed account",
@@ -1269,6 +1297,11 @@
         "labelWithRound": "BioBlitz {roundName} — most observations",
         "description": "Won a BioBlitz round for the most observations."
       },
+      "bioblitz-most-images-points": {
+        "label": "BioBlitz — highest points",
+        "labelWithRound": "BioBlitz {roundName} — highest points",
+        "description": "Won a BioBlitz round with the highest points score."
+      },
       "bioblitz-best-picture": {
         "label": "BioBlitz — best picture",
         "labelWithRound": "BioBlitz {roundName} — best picture",
@@ -1309,9 +1342,72 @@
       "description": "Accounts that applied for the Rewilding the Web grant. Open a profile to award the grant badge.",
       "empty": "No one has applied for the grant yet."
     },
-    "page": {
-      "title": "Admin",
-      "subtitle": "Review grant and event applicants, manage flagged accounts, and oversee Tainá agents."
+    "rewilding": {
+      "title": "Rewilding the Web",
+      "description": "The program's ten slots. A slot can be held by a person or a group. Adding an account admits it to the grant — from then on the grantee, and any members if it's a group, can open its milestone dashboard. Marking a milestone done is GainForest's confirmation — it releases the matching payment tranche.",
+      "footer": "Milestone changes and documents show up on the grantee's grant page right away.",
+      "unnamedGrantee": "Unnamed account",
+      "granteeBadge": "Grant badge",
+      "summary": "{done} of {total} milestones confirmed · {documents, plural, =0 {no documents} one {# document} other {# documents}}",
+      "milestonesTitle": "Milestones",
+      "payout": "Releases ${amount} · payment {tranche}",
+      "markDone": "Mark as done",
+      "reopen": "Reopen",
+      "saving": "Saving…",
+      "confirmedAt": "Confirmed {date}",
+      "error": "That didn't save. Try again.",
+      "documentsTitle": "Documents",
+      "documentsPrivateNote": "Only the GainForest admin team can see these. They are stored privately, have no shareable link, and are not visible to the grantee yet.",
+      "documentsEmpty": "No documents uploaded yet.",
+      "open": "Open",
+      "opening": "Opening…",
+      "uploadTitleLabel": "Document name",
+      "uploadTitlePlaceholder": "e.g. Grant contract",
+      "uploadFileLabel": "Choose a file",
+      "upload": "Upload",
+      "uploading": "Uploading…",
+      "uploadHint": "PDF, image or Word document, up to 3 MB. Kept private to the admin team.",
+      "storageUnavailable": "File storage isn't set up on this deployment, so documents can't be uploaded here yet.",
+      "fileTooLarge": "That file is larger than 3 MB.",
+      "fileTypeUnsupported": "Only PDF, image or Word documents can be uploaded.",
+      "delete": "Delete {title}",
+      "deleteConfirm": "Delete “{title}”? The grantee will no longer see it.",
+      "openProfile": "Open profile",
+      "slotOpen": "Slot {number} · open",
+      "addTitle": "Add a grantee",
+      "addHint": "Search for a person or group to fill this slot. Adding it opens the milestone dashboard for the grantee and any members.",
+      "searchPlaceholder": "Search accounts by name…",
+      "searching": "Searching…",
+      "searchEmpty": "No accounts match “{query}”.",
+      "alreadyEnrolled": "Already in the grant",
+      "add": "Add",
+      "adding": "Adding…",
+      "slotsFull": "All ten slots are taken. Remove a grantee before adding another.",
+      "remove": "Remove from the grant",
+      "removing": "Removing…",
+      "removeConfirm": "Remove “{name}” from the grant? Milestones and documents are kept, but the grantee loses access to the grant dashboard and the slot opens up."
+    },
+    "pages": {
+      "hub": {
+        "title": "Admin",
+        "subtitle": "Review grant and event applicants, manage flagged accounts, and oversee Tainá agents."
+      },
+      "grants": {
+        "title": "Grant management",
+        "subtitle": "Review grant applicants and run the weekly BioBlitz rounds."
+      },
+      "people": {
+        "title": "People",
+        "subtitle": "Everyone running a Tainá field assistant, the organizations that can endorse accounts, and the badges GainForest awards."
+      },
+      "trust": {
+        "title": "Trust & safety",
+        "subtitle": "Accounts and records flagged as tests, and the addresses blocked from signing up."
+      },
+      "data": {
+        "title": "Data & money",
+        "subtitle": "Partner data batches and the facilitator wallet."
+      }
     }
   },
   "adminBioblitzExclusions": {
@@ -1355,17 +1451,20 @@
       "ended": "Closed"
     },
     "observations": "{count, plural, one {# observation} other {# observations}}",
+    "points": "{points, plural, one {# point} other {# points}}",
     "ignored": "Ignored",
     "counted": "Counted",
     "notCounted": "Not counted",
     "prize": {
       "most-observations": "Most observations",
+      "highest-points": "Highest points",
       "best-picture": "Best picture"
     },
     "openProfile": "Open profile",
     "joined": "Joined {date}",
     "download": {
       "most-observations": "Most-observations kit",
+      "highest-points": "Highest-points kit",
       "best-picture": "Best-picture kit"
     },
     "ignore": "Ignore",
@@ -1779,7 +1878,56 @@
     "previewLoading": "Loading preview…",
     "previewFailed": "This file couldn't be previewed."
   },
+  "observationsHub": {
+    "ariaLabel": "Observation types",
+    "photos": "Photos",
+    "audio": "Audio"
+  },
   "audiomoth": {
+    "audioHub": {
+      "title": "Audio",
+      "subtitle": "Upload recordings from an AudioMoth SD card, organise them into deployments and label what you hear — audio observations live here.",
+      "metaTitle": "Audio observations",
+      "metaDescription": "Upload AudioMoth recordings, manage deployments, label species and explore soundscapes inside Observations.",
+      "librarySubtitle": "Every folder and recording you have uploaded, in one place — play them, move them between folders, rename or delete them.",
+      "yourRecordings": "Your recordings",
+      "soundscapesTitle": "Audio",
+      "soundscapesLede": "Field recordings and 24-hour sound portraits from recorders across GainForest. Tap a clock to hear a place at that time of day.",
+      "soundscapesEmptyTitle": "No audio published yet",
+      "soundscapesEmptyBody": "When someone uploads field recordings, or turns them into a soundscape, they will appear here for everyone to listen to.",
+      "soundscapesEmptyCta": "Build one from your recordings",
+      "publicPill": "Public",
+      "searchPlaceholder": "Search projects or soundscapes",
+      "allProjects": "All projects",
+      "filterByProject": "Filter by project",
+      "sortBy": "Sort projects",
+      "sortRecentlyAdded": "Recently added",
+      "sortRecentlyRecorded": "Recently recorded",
+      "openProject": "Open project",
+      "openAccount": "Open profile",
+      "noProject": "(no project)",
+      "projectMeta": "{project} · {recorders, plural, one {# recorder} other {# recorders}} · {recordings, number} recordings",
+      "soundscapeSlot": "Soundscape",
+      "recordingsSlot": "Recordings",
+      "recorderFallback": "Field recorder",
+      "slotRecordings": "{count, number} recordings",
+      "soundscapeFallback": "Soundscape",
+      "dateUnavailable": "Date unavailable",
+      "showMoreFromProject": "{count, plural, one {Show # more from this project} other {Show # more from this project}}",
+      "showFewer": "Show fewer",
+      "voiceKeyTitle": "Voice group key",
+      "noMatches": "No projects match these filters.",
+      "clearFilters": "Clear filters",
+      "browseRecordings": "Browse recordings",
+      "unknownOrganization": "Project steward"
+    },
+    "library": {
+      "signInTitle": "Sign in to see your files",
+      "signInBody": "Your uploaded recordings and folders show up here once you are signed in."
+    },
+    "devicesHub": {
+      "title": "Devices"
+    },
     "meta": {
       "title": "AudioMoth recorder setup",
       "description": "Set the clock, configure recording schedules and update firmware on your AudioMoth acoustic recorder, straight from the browser."
@@ -1947,6 +2095,7 @@
     },
     "mainTabs": {
       "setup": "Setup",
+      "library": "Recordings",
       "deployments": "Deployment",
       "upload": "Upload",
       "label": "Label",
@@ -2092,7 +2241,12 @@
       "equipmentUsedLabel": "AudioMoth used",
       "protocolLabel": "Protocol",
       "recordedByLabel": "Recorded by",
-      "viewEquipment": "View their equipment"
+      "viewEquipment": "View their equipment",
+      "attachWaiting": "{count, plural, one {# recording is uploading in the background — it will attach to the deployment you create.} other {# recordings are uploading in the background — they'll attach to the deployment you create.}}",
+      "attaching": "Attaching {count, plural, one {# recording} other {# recordings}} to the new deployment…",
+      "attachDone": "{count, plural, one {# recording attached to the new deployment.} other {# recordings attached to the new deployment.}}",
+      "attachPartial": "{moved} attached · {failed} couldn't be moved — they stay in the card's folder.",
+      "attachFailed": "The batch couldn't be attached — the recordings stay in the card's folder."
     },
     "upload": {
       "intro": "Insert an AudioMoth SD card and choose it below. Recordings are recognised by the deployment ID embedded in each file, kept safe in archival storage and saved to your account.",
@@ -2123,13 +2277,9 @@
       "previewToggle": "Save playable previews",
       "previewHint": "Adds a small preview and a spectrogram of each recording to your account so it can be played and seen anywhere.",
       "uploadButton": "Upload {count} recordings",
-      "uploadingButton": "Uploading… {done} of {total} done",
       "cancel": "Cancel",
       "doneTitle": "Upload complete",
-      "doneWithErrors": "Finished with {count} errors",
       "doneBody": "{count} recordings uploaded. {skipped} already existed and were skipped.",
-      "uploadMore": "Upload another card",
-      "retryFailed": "Retry failed files ({count})",
       "statusSkipped": "Already uploaded",
       "statusRetrying": "Retrying {attempt} of {max}…",
       "dedupChecking": "Checking which recordings are already in your account…",
@@ -2142,7 +2292,6 @@
       "errorStorageRejected": "We couldn't take this file right now. Please try again.",
       "errorSaveConnection": "The file was sent, but the internet stopped before we could finish. Tap “Retry failed files”.",
       "errorSaveFailed": "The file was uploaded, but it could not be saved to your account. Please retry.",
-      "errorOffline": "No internet connection. Check your Wi-Fi and try again.",
       "deploymentFallback": "Created automatically when uploading SD card recordings.",
       "groupNameLabel": "Name this upload",
       "groupNameHelp": "These recordings will be grouped under this name on your profile, so you can find them later.",
@@ -3740,5 +3889,25 @@
     "menuOrganizationSubtitle": "Shared organization account",
     "organizationsLabel": "Your organizations",
     "switchHint": "Change who you're publishing as"
+  },
+  "rewildingProgram": {
+    "milestones": {
+      "m1": {
+        "title": "Contract signed",
+        "description": "Agreement in place; first payment released."
+      },
+      "m2": {
+        "title": "AudioMoth deployed",
+        "description": "Sensors placed in the field and actively recording."
+      },
+      "m3": {
+        "title": "First data uploaded",
+        "description": "Recordings uploaded to GainForest.app."
+      },
+      "m4": {
+        "title": "Project complete",
+        "description": "Data labelled and at least one public update posted on Bumicerts."
+      }
+    }
   }
 }

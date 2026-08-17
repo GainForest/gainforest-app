@@ -377,12 +377,6 @@
     "loading": "Loading...",
     "done": "Done"
   },
-  "countrySelector": {
-    "title": "Select country",
-    "description": "Choose the country connected to this record.",
-    "searchPlaceholder": "Search countries",
-    "done": "Done"
-  },
   "orgWallet": {
     "title": "Organization wallet",
     "description": "One shared wallet for your organization, secured by member passkeys",

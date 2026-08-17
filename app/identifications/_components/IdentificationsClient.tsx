@@ -37,6 +37,7 @@ import {
   type AudioOccurrenceItem,
 } from "@/app/_lib/audiomoth/occurrences";
 import { listAllRecordings } from "@/app/_lib/ac-audio";
+import { useActingRepo } from "@/app/_lib/account-switcher";
 
 const CATEGORY_META: Record<AudioLabelCategory, { chip: string; Icon: typeof BirdIcon }> = {
   bird: { chip: "bg-emerald-500/12 text-emerald-700 dark:text-emerald-300", Icon: BirdIcon },
@@ -78,15 +79,19 @@ export function IdentificationsClient({ sessionDid }: { sessionDid: string | nul
   const [error, setError] = useState<string | null>(null);
   const [query, setQuery] = useState("");
   const [activeCategory, setActiveCategory] = useState<AudioLabelCategory | "all">("all");
+  /* The acting account — the user's own, or the organization they switched
+     into — whose identifications this tab lists. */
+  const acting = useActingRepo(sessionDid);
 
   const load = useCallback(async (signal?: AbortSignal) => {
-    if (!sessionDid) return;
+    const did = acting.did;
+    if (!did) return;
     setError(null);
     setOccurrences(null);
     try {
       const [items, recordings] = await Promise.all([
-        listAllAudioOccurrences(sessionDid, signal),
-        listAllRecordings(sessionDid, signal).catch(() => []),
+        listAllAudioOccurrences(did, signal),
+        listAllRecordings(did, signal).catch(() => []),
       ]);
       if (signal?.aborted) return;
       setRecordingNames(Object.fromEntries(recordings.map((recording) => [recording.uri, recording.name])));
@@ -96,7 +101,7 @@ export function IdentificationsClient({ sessionDid }: { sessionDid: string | nul
       setOccurrences([]);
       setError(t("loadFailed"));
     }
-  }, [sessionDid, t]);
+  }, [acting.did, t]);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -184,7 +189,7 @@ export function IdentificationsClient({ sessionDid }: { sessionDid: string | nul
           </div>
         </div>
         <div className="flex flex-wrap items-center gap-2">
-          <Button asChild variant="outline" size="sm"><Link href="/audiomoth?tab=label"><TagsIcon className="size-4" />{t("openLabeller")}</Link></Button>
+          <Button asChild variant="outline" size="sm"><Link href="/observations/audio?tab=label"><TagsIcon className="size-4" />{t("openLabeller")}</Link></Button>
           <Button variant="outline" size="sm" disabled={total === 0} onClick={exportAll}><DownloadIcon className="size-4" />{t("export")}</Button>
           <Button variant="ghost" size="sm" onClick={() => void load()}><RefreshCwIcon className="size-4" />{t("refresh")}</Button>
         </div>
@@ -220,7 +225,7 @@ export function IdentificationsClient({ sessionDid }: { sessionDid: string | nul
           <h2 className="mt-4 text-lg font-medium text-foreground">{t("emptyTitle")}</h2>
           <p className="mx-auto mt-2 max-w-lg text-sm leading-6 text-muted-foreground">{t("emptyBody")}</p>
           <div className="mt-5 flex justify-center">
-            <Button asChild><Link href="/audiomoth?tab=label"><TagsIcon className="size-4" />{t("openLabeller")}</Link></Button>
+            <Button asChild><Link href="/observations/audio?tab=label"><TagsIcon className="size-4" />{t("openLabeller")}</Link></Button>
           </div>
         </div>
       ) : shown.length === 0 ? (

@@ -115,7 +115,6 @@ export function useAddObservations(
         <AddObservationsModalLazy
           target={state.target}
           sessionDid={sessionDid}
-          allowAccountSwitch
           onClose={closeModal}
           onBack={onBack}
           onViewObservations={(uploadedTarget) => {

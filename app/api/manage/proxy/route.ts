@@ -7,6 +7,28 @@ import { resolveGroupManageTarget } from "@/app/_lib/manage-server";
 import { TREE_FUTURE_DATE_ERROR, isTreeDateInFuture } from "@/app/_lib/tree-date-validation";
 import { resolvePdsHost } from "@/app/_lib/pds";
 import { transformPhotoUrl } from "@/app/(manage)/manage/_lib/upload/url-transforms";
+import {
+  SITE_CERT_COLLECTION,
+  SITE_DEFAULT_POINTER_COLLECTION,
+  SITE_ORG_PROFILE_COLLECTION,
+  SITE_PROJECT_COLLECTION,
+  scanSiteReferences,
+  siteInUseMessage,
+  type SiteReferenceCleanup,
+} from "./site-references";
+import {
+  approximateCirclePayload,
+  approximateLocationRecord,
+  countryLocationRecord,
+  exactLocationRecord,
+  isOrgLocationChoiceInput,
+  lexBlobRef,
+  LOCATION_COLLECTION,
+  ORG_COLLECTION,
+  ownedLocationRkey,
+  type OrgLocationChoiceInput,
+} from "./org-location-records";
+import { fuzzCoordinateForDid } from "@/app/_lib/org-location-fuzz";
 
 export const runtime = "nodejs";
 
@@ -111,6 +133,14 @@ type MutationBody = GroupScoped & (
       subjectPart: string;
       caption?: string;
     }
+  | {
+      operation: "saveOrgLocation";
+      /** The steward's pick; null removes the declared location. */
+      choice: OrgLocationChoiceInput | null;
+      /** Mint and return the location record only, without touching the
+       *  organization record — the creation flow writes that itself. */
+      mintOnly?: boolean;
+    }
 );
 
 type ForwardableMutationBody = Exclude<
@@ -132,6 +162,7 @@ type ForwardableMutationBody = Exclude<
   | { operation: "appendExistingDataset" }
   | { operation: "accountDataSummary" }
   | { operation: "deleteAccountDataChunk" }
+  | { operation: "saveOrgLocation" }
 >;
 type PdsSession = { did: string; accessJwt: string };
 type DatasetRecordResult = { uri: string; cid: string; rkey: string; record: Record<string, unknown> };
@@ -585,6 +616,10 @@ function isMutationBody(value: unknown): value is MutationBody {
       isOptionalString(body.caption)
     );
   }
+  if (body.operation === "saveOrgLocation") {
+    if (body.choice === null) return body.mintOnly !== true; // nothing to mint
+    return isOrgLocationChoiceInput(body.choice) && (body.mintOnly === undefined || typeof body.mintOnly === "boolean");
+  }
   return false;
 }
 
@@ -770,6 +805,247 @@ async function fetchRepoRecord(options: {
   }
 
   return { uri: payload.uri, cid: payload.cid, rkey, record: payload.value };
+}
+
+/**
+ * The whole location save as ONE request, so a closed tab or navigation on
+ * the client can no longer strand it halfway (a Bern record with no pointer
+ * to it — see ECO-879/ECO-882). Once this request reaches the server, every
+ * step runs to completion here:
+ *
+ *   1. build the location record — fuzzing an approximate pick with the
+ *      server-held secret directly, so the exact point never round-trips
+ *      back through the browser
+ *   2. upload the circle blob (approximate only)
+ *   3. create the location record
+ *   4. read-merge the organization record and repoint it (unless mintOnly —
+ *      the creation flow writes its own organization record)
+ *
+ * A failed save leaves nothing stranded (ECO-882): if the organization
+ * record can't be read or repointed after step 3, the location just
+ * published is taken back, so either the new location is in use or it is
+ * gone. On success, the location the save replaced is removed too — after
+ * confirming nothing else (a Cert place, a project location, the
+ * default-site pointer) still uses it.
+ *
+ * Group access is already enforced by resolveMutationTarget; each write
+ * forwards through the same auth-service path as every other mutation.
+ */
+async function saveOrgLocationComposite(
+  body: Extract<MutationBody, { operation: "saveOrgLocation" }>,
+  did: string,
+  cookie: string | null,
+): Promise<{ uri: string | null; cid: string | null }> {
+  const repoScope = body.repo ? { repo: body.repo } : {};
+  let locationRef: { uri: string; cid: string } | null = null;
+
+  if (body.choice) {
+    const choice = body.choice;
+    let record: Record<string, unknown> | null;
+
+    if (choice.place.kind === "country" && !choice.approximate && choice.place.countryCode) {
+      record = countryLocationRecord(choice.place.countryCode);
+      if (!record) throw new Error("Choose a country from the list.");
+    } else if (!choice.approximate) {
+      record = exactLocationRecord(choice);
+    } else {
+      // The exact point is fuzzed here and discarded — never stored, never
+      // published. Failing must not fall back to the exact coordinate, and
+      // the failure detail (it names server configuration) stays in the log.
+      let fuzzed: { latitude: number; longitude: number };
+      try {
+        fuzzed = fuzzCoordinateForDid(did, choice.place.latitude, choice.place.longitude);
+      } catch (error) {
+        console.error("[proxy/saveOrgLocation] fuzzing unavailable", error);
+        throw new Error("Approximate locations are unavailable right now. Please try again later.");
+      }
+      const payload = approximateCirclePayload(fuzzed);
+      const uploaded = await executeForwardableMutation<Record<string, unknown>>(
+        {
+          operation: "uploadBlob",
+          blobData: Buffer.from(payload, "utf8").toString("base64"),
+          blobMimeType: "application/geo+json",
+          ...repoScope,
+        },
+        did,
+        cookie,
+        "Could not upload the approximate area.",
+      );
+      const blobRef = lexBlobRef(uploaded, payload.length);
+      if (!blobRef) throw new Error("Could not upload the approximate area.");
+      record = approximateLocationRecord(choice, blobRef);
+    }
+
+    const created = await executeForwardableMutation<{ uri?: unknown; cid?: unknown }>(
+      { operation: "createRecord", collection: LOCATION_COLLECTION, record, ...repoScope },
+      did,
+      cookie,
+      "Could not publish the location.",
+    );
+    if (typeof created.uri !== "string" || typeof created.cid !== "string") {
+      throw new Error("Could not publish the location.");
+    }
+    locationRef = { uri: created.uri, cid: created.cid };
+
+    if (body.mintOnly) return locationRef;
+  }
+
+  // Read-merge so only `location` changes. A genuinely missing record means
+  // "start fresh"; any OTHER read failure must abort — writing a record
+  // merged from an empty read would wipe every other organization field.
+  let existing: Record<string, unknown> = {};
+  let existingCid: string | null = null;
+  try {
+    const found = await fetchRepoRecord({
+      did,
+      collection: ORG_COLLECTION,
+      rkey: "self",
+      missingMessage: "missing",
+    });
+    existing = found.record;
+    existingCid = found.cid;
+  } catch (error) {
+    if (!(error instanceof TreeGroupUnavailableError)) {
+      const tookBack = await takeBackMintedLocation(locationRef?.uri ?? null, body.repo, did, cookie);
+      throw new Error(
+        tookBack
+          ? "The organization record could not be read, so nothing was changed. Please try again."
+          : "The location was published but the profile could not be updated. Please try again.",
+      );
+    }
+  }
+
+  const previousLocationUri =
+    isRecord(existing.location) && typeof existing.location.uri === "string" ? existing.location.uri : null;
+
+  const orgRecord: Record<string, unknown> = {
+    ...existing,
+    $type: ORG_COLLECTION,
+    createdAt: typeof existing.createdAt === "string" ? existing.createdAt : new Date().toISOString(),
+  };
+  if (locationRef) orgRecord.location = locationRef;
+  else delete orgRecord.location;
+
+  // Compare-and-swap on the record we read: a concurrent edit fails the
+  // write instead of being silently overwritten.
+  try {
+    await executeForwardableMutation(
+      {
+        operation: "putRecord",
+        collection: ORG_COLLECTION,
+        rkey: "self",
+        record: orgRecord,
+        ...(existingCid ? { swapRecord: existingCid } : {}),
+        ...repoScope,
+      },
+      did,
+      cookie,
+      "The location could not be saved. Please try again.",
+    );
+  } catch (error) {
+    // Take back the location we just published so a failed save leaves
+    // nothing stranded: either the new location is in use, or it is gone.
+    if (locationRef) {
+      const tookBack = await takeBackMintedLocation(locationRef.uri, body.repo, did, cookie);
+      throw new Error(
+        tookBack
+          ? "The location could not be saved, so nothing was changed. Please try again."
+          : "The location was published but the profile could not be updated. Please try again.",
+      );
+    }
+    throw error;
+  }
+
+  // The profile now points at the new location (or none). Remove the one it
+  // replaced so replaced locations no longer pile up — unless something else
+  // still uses it.
+  if (previousLocationUri && previousLocationUri !== locationRef?.uri) {
+    await removeReplacedLocation({ previousLocationUri, repo: body.repo, did, cookie, newOrgRecord: orgRecord });
+  }
+
+  return locationRef ?? { uri: null, cid: null };
+}
+
+/**
+ * Delete a location record this save minted but could not put into use.
+ * Returns true when the record is confirmed gone (or there was nothing to
+ * take back), so the caller can honestly say "nothing was changed".
+ */
+async function takeBackMintedLocation(
+  locationUri: string | null,
+  repo: string | undefined,
+  did: string,
+  cookie: string | null,
+): Promise<boolean> {
+  if (!locationUri) return true;
+  const rkey = ownedLocationRkey(locationUri, repo?.trim() || did);
+  if (!rkey) return false;
+  try {
+    await executeForwardableMutation(
+      { operation: "deleteRecord", collection: LOCATION_COLLECTION, rkey, ...scopedRepo(repo) },
+      did,
+      cookie,
+      "Could not take back the published location.",
+    );
+    return true;
+  } catch (error) {
+    console.error("[proxy/saveOrgLocation] could not take back the published location", locationUri, error);
+    return false;
+  }
+}
+
+/**
+ * After a successful repoint, remove the location record the save replaced.
+ * Only after confirming nothing else uses it: a Cert listing it as a place,
+ * a project pointing at it, or the default-site pointer — the Sites page
+ * manages the same kind of record (ECO-882). Fails closed (an unverifiable
+ * record is kept) and best-effort: the save already succeeded, so a leftover
+ * record is logged, never surfaced as a failure.
+ */
+async function removeReplacedLocation(options: {
+  previousLocationUri: string;
+  repo: string | undefined;
+  did: string;
+  cookie: string | null;
+  newOrgRecord: Record<string, unknown>;
+}): Promise<void> {
+  const { previousLocationUri, did, cookie, newOrgRecord } = options;
+  const repo = options.repo?.trim() || did;
+  const rkey = ownedLocationRkey(previousLocationUri, repo);
+  if (!rkey) return;
+
+  try {
+    const [certs, projects, defaultSitePointer] = await Promise.all([
+      listAllRepoRecords(repo, SITE_CERT_COLLECTION),
+      listAllRepoRecords(repo, SITE_PROJECT_COLLECTION),
+      getRepoRecordSnapshotOrNull(repo, SITE_DEFAULT_POINTER_COLLECTION, "self"),
+    ]);
+    const scan = scanSiteReferences(previousLocationUri, {
+      certs,
+      projects,
+      // The organization record was just rewritten to point elsewhere; scan
+      // the version we wrote instead of re-reading it.
+      orgProfile: { rkey: "self", value: newOrgRecord },
+      defaultSitePointer,
+    });
+    if (scan.blockingCertTitles.length > 0 || scan.cleanups.length > 0) return; // still in use — keep it
+  } catch (error) {
+    console.error(
+      "[proxy/saveOrgLocation] could not check whether the replaced location is still in use; keeping it",
+      previousLocationUri,
+      error,
+    );
+    return;
+  }
+
+  await executeForwardableMutation(
+    { operation: "deleteRecord", collection: LOCATION_COLLECTION, rkey, ...scopedRepo(options.repo) },
+    did,
+    cookie,
+    "Could not remove the replaced location.",
+  ).catch((error) => {
+    console.error("[proxy/saveOrgLocation] could not remove the replaced location", previousLocationUri, error);
+  });
 }
 
 async function getDatasetRecordFromPds(did: string, rkey: string): Promise<DatasetRecordResult> {
@@ -981,6 +1257,92 @@ async function listRepoRecords(options: {
     )),
     cursor: typeof payload.cursor === "string" ? payload.cursor : undefined,
   };
+}
+
+async function listAllRepoRecords(did: string, collection: string): Promise<{ uri: string; value: unknown }[]> {
+  const all: { uri: string; value: unknown }[] = [];
+  let cursor: string | undefined;
+  do {
+    const page = await listRepoRecords({ did, collection, cursor });
+    all.push(...page.records);
+    cursor = page.cursor;
+  } while (cursor);
+  return all;
+}
+
+async function getRepoRecordSnapshotOrNull(
+  did: string,
+  collection: string,
+  rkey: string,
+): Promise<{ rkey: string; value: unknown } | null> {
+  const result = await fetchRepoRecord({
+    did,
+    collection,
+    rkey,
+    missingMessage: "Record not found.",
+  }).catch(() => null);
+  return result ? { rkey, value: result.record } : null;
+}
+
+/**
+ * Delete a site (app.certified.location) without leaving broken links behind.
+ *
+ * A site a Cert points at can't be deleted — the deletion is refused with a
+ * plain-language explanation naming the Cert(s). Soft pointers (the org
+ * profile's location, a project's location, the default-site pointer) are
+ * dropped right after a successful delete, so no record keeps referencing a
+ * site that no longer exists.
+ */
+async function deleteCertifiedLocationRecord(
+  body: Extract<MutationBody, { operation: "deleteRecord" }>,
+  targetDid: string,
+  cookie: string | null,
+): Promise<Response> {
+  const repo = body.repo?.trim() || targetDid;
+  const siteUri = `at://${repo}/${CERTIFIED_LOCATION_COLLECTION}/${body.rkey}`;
+
+  let scan: ReturnType<typeof scanSiteReferences>;
+  try {
+    const [certs, projects, orgProfile, defaultSitePointer] = await Promise.all([
+      listAllRepoRecords(repo, SITE_CERT_COLLECTION),
+      listAllRepoRecords(repo, SITE_PROJECT_COLLECTION),
+      getRepoRecordSnapshotOrNull(repo, SITE_ORG_PROFILE_COLLECTION, "self"),
+      getRepoRecordSnapshotOrNull(repo, SITE_DEFAULT_POINTER_COLLECTION, "self"),
+    ]);
+    scan = scanSiteReferences(siteUri, { certs, projects, orgProfile, defaultSitePointer });
+  } catch {
+    // Fail closed: if we can't verify the site is unused we don't delete it,
+    // otherwise a Cert could silently lose its mapped place.
+    return Response.json(
+      { error: "We couldn't check whether this site is still in use. Please try again." },
+      { status: 502 },
+    );
+  }
+
+  if (scan.blockingCertTitles.length > 0) {
+    return Response.json({ error: siteInUseMessage(scan.blockingCertTitles) }, { status: 409 });
+  }
+
+  const response = await forwardMutationResponse(body, targetDid, cookie);
+  if (response.ok && scan.cleanups.length > 0) {
+    // The site is gone — drop the pointers that referenced it. Best-effort:
+    // the public pages tolerate a dangling soft pointer (they show "no
+    // location set"), so a failed cleanup never blocks the delete.
+    await Promise.allSettled(scan.cleanups.map((cleanup) => runSiteReferenceCleanup(cleanup, body.repo, targetDid, cookie)));
+  }
+  return response;
+}
+
+function runSiteReferenceCleanup(
+  cleanup: SiteReferenceCleanup,
+  repo: string | undefined,
+  targetDid: string,
+  cookie: string | null,
+): Promise<unknown> {
+  const base = cleanup.kind === "putRecord"
+    ? { operation: "putRecord" as const, collection: cleanup.collection, rkey: cleanup.rkey, record: cleanup.record }
+    : { operation: "deleteRecord" as const, collection: cleanup.collection, rkey: cleanup.rkey };
+  return executeForwardableMutation({ ...base, ...scopedRepo(repo) }, targetDid, cookie, "Could not update a record that referenced this site.");
 }
 
 async function countDatasetOccurrences(options: { did: string; datasetUri: string }): Promise<number> {
@@ -2515,6 +2877,15 @@ export async function POST(request: Request) {
     }
   }
 
+  if (body.operation === "saveOrgLocation") {
+    try {
+      const result = await saveOrgLocationComposite(body, targetDid, cookie);
+      return Response.json(result);
+    } catch (error) {
+      return Response.json({ error: error instanceof Error ? error.message : "The location could not be saved." }, { status: 502 });
+    }
+  }
+
   if (body.operation === "updateMultimedia") {
     try {
       const result = await updateMultimediaByRkey(body, targetDid, cookie);
@@ -2590,6 +2961,10 @@ export async function POST(request: Request) {
     } catch (error) {
       return Response.json({ error: error instanceof Error ? error.message : "Photo could not be saved." }, { status: 502 });
     }
+  }
+
+  if (body.operation === "deleteRecord" && body.collection === CERTIFIED_LOCATION_COLLECTION) {
+    return deleteCertifiedLocationRecord(body, targetDid, cookie);
   }
 
   return forwardMutationResponse(body, targetDid, cookie);

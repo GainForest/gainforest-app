@@ -281,7 +281,7 @@
       "eyebrow": "Weekly BioBlitz Challenge",
       "titlePrefix": "BioBlitz",
       "titleEmphasis": "Challenge",
-      "description": "A friendly weekly race to record outdoor biodiversity. Add observations with your own uploaded photos. People and potted plants do not count.",
+      "description": "A friendly weekly race to record outdoor biodiversity with your own uploaded photos. From Round 8, animal photos earn 2 points, plant photos 1 point, and naming the species adds an extra 0.5. People and potted plants do not count.",
       "program": "Part of the Klarna AI for Climate Resilience program, with GainForest."
     },
     "rsvp": {
@@ -340,7 +340,7 @@
           "winners": {
             "title": "4. Winner selection",
             "paragraphs": {
-              "p1": "The Most Observations prize is based on the highest number of valid observations during the round. The Best Picture prize is selected using the criteria described on the BioBlitz page, including image quality, subject, and community engagement where relevant.",
+              "p1": "From Round 8 onward, the Highest Points prize is based on the highest total score of valid observations during the round: each valid animal photo earns 2 points, each valid plant photo earns 1 point, and either earns an extra 0.5 points when the species is identified rather than left unidentified. In earlier rounds, this prize was based on the highest number of valid observations. The Best Picture prize is selected using the criteria described on the BioBlitz page, including image quality, subject, and community engagement where relevant.",
               "p2": "GainForest may review entries, resolve ties, correct counting errors, and disqualify invalid entries. Decisions are final to the extent permitted by law."
             }
           },
@@ -504,6 +504,10 @@
         "title": "Most observations",
         "blurb": "For the collector with the most valid sightings in the round."
       },
+      "highestPoints": {
+        "title": "Highest points",
+        "blurb": "For the collector with the highest score in the round: 2 points per animal photo, 1 per plant photo, +0.5 when the species is named."
+      },
       "bestPicture": {
         "title": "Best picture",
         "blurb": "For the most striking nature photo of the week, picked by the team."
@@ -522,7 +526,7 @@
         },
         "review": {
           "title": "Check the species name",
-          "blurb": "Confirm or correct the suggested name — your knowledge matters."
+          "blurb": "Confirm or correct the suggested name — from Round 8, a named species earns an extra 0.5 points."
         }
       },
       "proof": {
@@ -536,6 +540,7 @@
       "title": "This round's board",
       "live": "Live",
       "subtitleLive": "Who is leading with eligible photo observations right now.",
+      "subtitleLivePoints": "Who is leading on points with eligible photo observations right now.",
       "subtitleEnded": "Final standings for this round.",
       "subtitleUpcoming": "Be the first to get on the board when the round opens.",
       "subtitleAll": "The most eligible photo observations across the challenge.",
@@ -545,6 +550,8 @@
       },
       "leader": "In the lead",
       "observations": "{count, plural, one {# observation} other {# observations}}",
+      "points": "{points} pts",
+      "pointsFull": "{points, plural, one {# point} other {# points}}",
       "openCollector": "Open collector profile in a new tab",
       "rankAriaLabel": "Rank {rank}",
       "org": {
@@ -563,6 +570,9 @@
       "stats": {
         "observations": "Observations this round",
         "observationsAll": "Observations (all time)",
+        "animals": "Animals",
+        "plants": "Plants",
+        "named": "Named species",
         "collectors": "Collectors",
         "timeLeft": "Time left"
       },
@@ -584,7 +594,26 @@
         "title": "Could not load the board",
         "description": "Please try again in a moment."
       },
-      "cta": "Add your observations"
+      "cta": "Add your observations",
+      "pointsGuide": {
+        "title": "How points are scored",
+        "animalValue": "2 pts",
+        "animalLabel": "Per animal photo",
+        "plantValue": "1 pt",
+        "plantLabel": "Per plant photo",
+        "namedValue": "+0.5 pts",
+        "namedLabel": "Species named",
+        "note": "Points started in Round 8. A collector's total is their animal photos × 2, plus plant photos × 1, plus 0.5 for every named species. Tap a row on the board to see the maths for that collector."
+      },
+      "breakdown": {
+        "toggle": "How the points were calculated",
+        "animals": "{count, plural, one {# animal photo} other {# animal photos}} × 2",
+        "plants": "{count, plural, one {# plant photo} other {# plant photos}} × 1",
+        "labeled": "{count, plural, one {# named species} other {# named species}} × 0.5",
+        "ineligible": "{count, plural, one {# photo didn't qualify} other {# photos didn't qualify}}",
+        "total": "Total points",
+        "profile": "Open profile"
+      }
     },
     "winners": {
       "title": "Past winners",
@@ -597,7 +626,11 @@
       "finalHint": "These winners are confirmed and will not change.",
       "provisionalHint": "Current standings — they may still change until the winners are confirmed.",
       "compact": "Latest",
+      "newer": "Newer rounds",
+      "older": "Older rounds",
+      "page": "{page} of {total}",
       "mostSubmitted": "Most submitted",
+      "highestPoints": "Highest points",
       "mostLiked": "Most liked",
       "award": {
         "action": "Award winner badges",
@@ -606,6 +639,7 @@
         "error": "Could not update the badges or email status. Try again.",
         "notification": {
           "mostObservations": "Most observations email",
+          "highestPoints": "Highest points email",
           "bestPicture": "Best picture email",
           "sent": "Sent",
           "delayed": "Delayed — we’ll keep trying",
@@ -820,6 +854,139 @@
       "description": "Ma Earth's community-backed funding round uses quadratic funding: many smaller donations are matched and amplified more than a few large ones. Applications have closed and the round is now live — browse the projects taking part and support them.",
       "browseProjects": "Browse projects in this round",
       "logoAlt": "Ma Earth"
+    },
+    "rewildingDashboard": {
+      "grant": {
+        "navLabel": "My grant",
+        "nextStepEyebrow": "Next step",
+        "dueBy": "due {date}",
+        "openRecorders": "Add recorders",
+        "statsLabel": "Grant progress",
+        "stats": {
+          "audioUploaded": "Audio uploaded",
+          "audioValue": "{minutes} min",
+          "recorders": "Recorders",
+          "recordersYours": "{count} yours",
+          "recordersShipped": "{count} shipped",
+          "speciesTagged": "Species tagged",
+          "audioTargetBy": "Target {target} min by {date}",
+          "audioBehindPace": "{minutes} min behind pace · {days} days left",
+          "audioAheadPace": "{minutes} min ahead of pace · {days} days left",
+          "audioTargetMet": "Target met",
+          "audioGrantClosed": "Grant period closed",
+          "audioStartsIn": "Starts in {days} days · {rate} min/day needed"
+        },
+        "milestones": {
+          "title": "Grant milestones",
+          "progress": "{done} of {total} confirmed",
+          "viewRecorders": "Open inventory",
+          "notStarted": "Not started",
+          "empty": "No milestones yet. They appear here once your grant is set up.",
+          "confirmed": "Confirmed",
+          "payout": "Releases ${amount} · payment {tranche}",
+          "reviewNote": "GainForest confirms each milestone — every confirmed milestone releases the next part of your grant.",
+          "pending": "Not confirmed"
+        },
+        "metadata": {
+          "title": "My grant",
+          "description": "Your Rewilding the Web grant: next step, progress and milestones."
+        },
+        "untitled": "Your grant",
+        "amount": "${amount} grant",
+        "pace": {
+          "title": "Audio uploaded vs pace needed",
+          "summary": "{current} of {target} min target · pace to hit it by {date}",
+          "rangeLabel": "Choose a period",
+          "ranges": {
+            "1w": "Week",
+            "1m": "Month",
+            "6m": "6 months",
+            "all": "Since grant"
+          },
+          "phrases": {
+            "1w": "this week",
+            "1m": "this month",
+            "6m": "over the last 6 months",
+            "all": "since your grant began"
+          },
+          "vsPaceNeeded": "vs pace needed · {range}",
+          "behindPhrase": "behind the pace needed {phrase}",
+          "aheadPhrase": "ahead of the pace needed {phrase}",
+          "actual": "actual",
+          "needed": "needed",
+          "perDay": "{rate}/day",
+          "rates": "{actual} actual · {needed} needed",
+          "legendActual": "Actual",
+          "legendNeeded": "Pace needed",
+          "focus": "{minutes} min on {date}",
+          "overallBehind": "Overall behind by {minutes} min vs full-grant pace",
+          "overallAhead": "Overall ahead by {minutes} min vs full-grant pace",
+          "overallMet": "Recording target met"
+        }
+      },
+      "recorders": {
+        "navLabel": "My recorders",
+        "title": "My recorders",
+        "add": "Add a recorder",
+        "addShort": "Add",
+        "filtersLabel": "Filter recorders by origin",
+        "filters": {
+          "all": "All {count}",
+          "owned": "Yours {count}",
+          "shipped": "From GainForest {count}"
+        },
+        "origin": {
+          "owned": "yours",
+          "shipped": "from GainForest"
+        },
+        "status": {
+          "recording": "Recording",
+          "idle": "Not deployed",
+          "arriving": "Arriving ~{date}",
+          "inTransit": "In transit",
+          "requested": "Ordering"
+        },
+        "emptyFilter": "No recorders match this filter yet.",
+        "unknownPrompt": "Have a recorder we don't know about? Add it here.",
+        "metadata": {
+          "title": "My recorders",
+          "description": "Every recorder on your Rewilding the Web grant, and where each one came from."
+        },
+        "empty": "No recorders yet.",
+        "addNotBuilt": "Adding recorders isn't built yet — it turns on once we can save them to your account."
+      },
+      "addForm": {
+        "title": "Add a recorder",
+        "close": "Close",
+        "originLegend": "Where is it from",
+        "originOwned": "I already have it",
+        "originOwnedHint": "Register a recorder you own.",
+        "originRequest": "Send me one",
+        "originRequestHint": "Ask GainForest to ship one to you.",
+        "deviceType": "Device type",
+        "deviceOther": "Other recorder…",
+        "deviceOtherLabel": "Device name",
+        "deviceOtherPlaceholder": "Device make and model",
+        "quantity": "How many",
+        "condition": "Condition",
+        "conditionOptions": {
+          "fieldWorking": "Working, in the field",
+          "working": "Working, not deployed",
+          "needsRepair": "Needs repair"
+        },
+        "requestNote": "We confirm quantities against your grant before shipping.",
+        "location": "Where it listens",
+        "locationPlaceholder": "Site name or landmark",
+        "mapComingSoon": "Map pin picker coming soon",
+        "save": "Save recorder",
+        "saveRequest": "Request shipment",
+        "milestoneNote": "Counts toward your inventory milestone."
+      },
+      "shell": {
+        "eyebrow": "Rewilding the Web · admin preview",
+        "placeholderNotice": "Recorder and species figures on this page aren't connected to real records yet, so they read zero. Audio uploaded, milestones and grant documents are live.",
+        "granteeEyebrow": "Rewilding the Web"
+      }
     }
   },
   "account": {

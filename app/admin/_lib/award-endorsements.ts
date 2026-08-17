@@ -7,7 +7,7 @@ import {
 } from "@/app/internal/badges/_lib/badge-records";
 
 /**
- * Data for the /admin "Award endorsements" tab.
+ * Data for the /admin/people "Award endorsements" panel.
  *
  * An endorsement is an `app.certified.badge.award` the GainForest org signs in
  * its own repo against a badge definition typed `endorsement`. The award's

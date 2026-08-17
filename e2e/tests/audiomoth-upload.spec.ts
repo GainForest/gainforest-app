@@ -92,7 +92,7 @@ test("resuming an interrupted card upload reuses the same folder", async ({ page
   writeWav("20240416_190500.WAV", "19:05:00 16/04/2024");
 
   const scanCardFolder = async () => {
-    await page.goto("/audiomoth?tab=upload", { waitUntil: "domcontentloaded" });
+    await page.goto("/observations/audio?tab=upload", { waitUntil: "domcontentloaded" });
     await expect(page.getByRole("button", { name: /choose sd card or folder/i })).toBeVisible({ timeout: 60_000 });
     await page.locator("input[webkitdirectory]").setInputFiles(cardDir);
     // No chime match → the folder question must appear.

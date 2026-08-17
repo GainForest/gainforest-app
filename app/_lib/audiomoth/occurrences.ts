@@ -316,10 +316,18 @@ async function postMutation<T>(body: Record<string, unknown>, fallbackMessage: s
   return json;
 }
 
-export async function createAudioOccurrence(draft: AudioOccurrenceDraft): Promise<AudioOccurrenceItem> {
+export async function createAudioOccurrence(
+  draft: AudioOccurrenceDraft,
+  options?: { repo?: string | null },
+): Promise<AudioOccurrenceItem> {
   const record = buildAudioOccurrenceRecord(draft);
   const result = await postMutation<MutationResult>(
-    { operation: "createRecord", collection: OCCURRENCE_COLLECTION, record },
+    {
+      operation: "createRecord",
+      collection: OCCURRENCE_COLLECTION,
+      record,
+      ...(options?.repo ? { repo: options.repo } : {}),
+    },
     "The occurrence could not be saved.",
   );
   return parseAudioOccurrenceItem({ uri: result.uri, cid: result.cid, value: record }, draft.source.uri)!;
@@ -328,10 +336,18 @@ export async function createAudioOccurrence(draft: AudioOccurrenceDraft): Promis
 export async function updateAudioOccurrence(
   item: AudioOccurrenceItem,
   draft: AudioOccurrenceDraft,
+  options?: { repo?: string | null },
 ): Promise<AudioOccurrenceItem> {
   const record = buildAudioOccurrenceRecord(draft, item.record);
   const result = await postMutation<MutationResult>(
-    { operation: "putRecord", collection: OCCURRENCE_COLLECTION, rkey: item.rkey, record, swapRecord: item.cid },
+    {
+      operation: "putRecord",
+      collection: OCCURRENCE_COLLECTION,
+      rkey: item.rkey,
+      record,
+      swapRecord: item.cid,
+      ...(options?.repo ? { repo: options.repo } : {}),
+    },
     "The occurrence could not be updated.",
   );
   return parseAudioOccurrenceItem({ uri: result.uri, cid: result.cid, value: record }, draft.source.uri)!;

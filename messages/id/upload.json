@@ -652,15 +652,16 @@
   "observations": {
     "quickAdd": {
       "title": "Tambah observasi",
-      "description": "Jatuhkan foto dan kami bantu mengenali isinya.",
+      "description": "Observasi adalah apa yang Anda lihat atau dengar di alam, beserta di mana dan kapan. Tambahkan foto, atau semua rekaman dari kartu AudioMoth.",
       "close": "Tutup",
       "back": "Kembali",
       "uploadingForLabel": "Mengunggah untuk",
       "uploadingForHint": "Pilih akun tempat observasi ini berada.",
       "uploadingForPersonal": "Akun pribadi",
-      "dropTitle": "Seret & lepas foto Anda",
-      "dropHint": "JPG, PNG atau HEIC · hingga {max} foto",
-      "choose": "Pilih foto",
+      "dropTitle": "Seret & lepas, atau telusuri",
+      "dropHint": "JPG, PNG, HEIC · WAV dari kartu SD AudioMoth · hingga {max} foto",
+      "choose": "Pilih berkas",
+      "chooseFolder": "Pilih folder kartu",
       "addMore": "Tambah foto lagi",
       "tooMany": "Anda dapat menambahkan hingga {max} foto sekaligus.",
       "identifying": "Mengidentifikasi…",
@@ -742,7 +743,35 @@
       "takePhoto": "Ambil foto",
       "combineWithAbove": "Gabungkan dengan yang di atas",
       "dragMergeHintTouch": "Ketuk ikon pisah pada foto untuk memisahkannya.",
-      "submitDataBatch": "Kirim batch zip besar"
+      "submitDataBatch": "Kirim batch zip besar",
+      "audio": {
+        "batchTitle": "Rekaman dari kartu",
+        "summary": "{count, number} WAV · {size}",
+        "readingProgress": "Membaca header WAV — {done} dari {total}…",
+        "unreadable": "{count, plural, other {# berkas tidak dapat dibaca sebagai rekaman AudioMoth}}",
+        "remove": "Hapus rekaman",
+        "recordingFromLabel": "Direkam dengan",
+        "deviceNew": "baru",
+        "newDeviceNote": "{device} belum ada di daftar peralatan Anda — kami akan menambahkannya saat unggahan ini dimulai.",
+        "folderLabel": "Folder rekaman",
+        "folderAutoMatched": "{name} — dikenali dari kartu",
+        "folderNew": "Folder baru · {name}",
+        "noDeployments": "Perangkat ini belum punya penempatan — batch akan terus diunggah dan melekat ke penempatan yang Anda buat.",
+        "setUpDeployment": "Siapkan satu ↗",
+        "defaultFolderName": "Rekaman {date}",
+        "readyCount": "{count, plural, other {# rekaman siap diunggah}}",
+        "submitOnly": "{count, plural, other {Unggah # rekaman}}",
+        "backgroundNote": "{count, plural, other {# rekaman sedang diunggah di latar belakang}}",
+        "viewTray": "Lihat",
+        "handedOffTitle": "{count, plural, other {# rekaman sedang diunggah}}",
+        "handedOffBody": "Rekaman terus diunggah di latar belakang selagi Anda menjelajah. Pantau progresnya kapan saja di panel unggahan.",
+        "equipmentNote": "Didaftarkan otomatis saat rekamannya diunggah melalui Tambah pengamatan.",
+        "dedupChecking": "Memeriksa rekaman yang sudah ada di akun ini…",
+        "dedupSkipped": "{count, plural, other {# rekaman sudah ada di akun ini — dilewati}}",
+        "allUploaded": "Semua isi kartu ini sudah diunggah",
+        "matchedCount": "{count, plural, other {# rekaman cocok dengan penempatannya dari kartu}}",
+        "eventOption": "Penempatan · {name}"
+      }
     },
     "csvUpload": {
       "title": "Unggah data CSV",
@@ -1064,7 +1093,7 @@
   },
   "settings": {
     "organizationTitle": "Pengaturan organisasi",
-    "organizationDescription": "Hubungkan agen AI dan kelola perangkat untuk organisasi ini.",
+    "organizationDescription": "Kelola orang, profil, dan perangkat untuk organisasi ini.",
     "personalTitle": "Pengaturan",
     "personalDescription": "Kelola tautan akun, keamanan, dan alat ekspor.",
     "dataCouncil": {
@@ -1093,8 +1122,6 @@
       },
       "addLabel": "Tambahkan ke Dewan Data"
     },
-    "membersMoved": "Anggota, peran, dan Dewan Data ada di tab Anggota.",
-    "openMembers": "Buka Anggota",
     "orgAgentKeysHint": "Kunci bersifat pribadi: kunci yang Anda buat di sini milik akun Anda dan memungkinkan agen AI Anda bekerja di organisasi ini melalui keanggotaan Anda. Jika Anda keluar dari organisasi, kunci Anda kehilangan akses tersebut."
   },
   "dashboardClient": {
@@ -1127,7 +1154,7 @@
       "expandBio": "Tampilkan bio lengkap",
       "collapseBio": "Ciutkan bio",
       "addType": "Tambahkan jenis",
-      "addCountry": "Tambahkan negara",
+      "addLocation": "Tambahkan lokasi",
       "sinceDate": "Sejak {date}",
       "invalidDate": "Tanggal tidak valid",
       "addStartDate": "Tambahkan tanggal mulai",
@@ -1150,7 +1177,6 @@
     "errors": {
       "nameRequired": "Tambahkan nama sebelum menyimpan.",
       "invalidWebsite": "Masukkan alamat situs web yang valid.",
-      "invalidCountry": "Pilih negara dari daftar.",
       "saveFailed": "Gagal menyimpan. Coba lagi."
     },
     "modals": {
@@ -1195,6 +1221,28 @@
           "alt": "Air terjun di hutan tropis"
         }
       }
+    },
+    "locationEditor": {
+      "title": "Lokasi organisasi",
+      "description": "Tunjukkan di mana organisasi Anda berbasis.",
+      "descriptionWithCurrent": "Saat ini: {location}.",
+      "searchPlaceholder": "Cari alamat, kota, atau negara",
+      "noResults": "Tempat tidak ditemukan.",
+      "searchUnavailable": "Pencarian tempat sedang tidak tersedia.",
+      "enterCoordinates": "Masukkan koordinat saja",
+      "searchInstead": "Cari tempat saja",
+      "latitude": "Lintang",
+      "longitude": "Bujur",
+      "invalidCoordinates": "Lintang harus antara -90 dan 90, bujur antara -180 dan 180.",
+      "dragHint": "Seret penanda untuk menyetel lokasi.",
+      "countryHint": "Dipublikasikan sebagai seluruh negara. Cari tempat untuk lebih tepat.",
+      "approximateLabel": "Bagikan lokasi perkiraan saja",
+      "approximateHint": "Menerbitkan area ~{radius} km alih-alih titik persis.",
+      "approximateHintWithLabel": "Menerbitkan area ~{radius} km alih-alih titik persis, ditampilkan sebagai “{label}”.",
+      "remove": "Hapus lokasi",
+      "save": "Simpan lokasi",
+      "savingLocation": "Menyimpan lokasi…",
+      "saveFailed": "Tidak dapat menyimpan lokasi. Silakan coba lagi."
     }
   },
   "dashboardModals": {
@@ -1254,6 +1302,11 @@
       "description": "Biarkan kosong dan kami akan membuat alamat pemulihan dari email akun Anda.",
       "placeholder": "pemulihan@example.com",
       "invalid": "Masukkan alamat email yang valid."
+    },
+    "location": {
+      "label": "Lokasi",
+      "basedIn": "Berbasis di",
+      "empty": "Atur lokasi"
     }
   }
 }

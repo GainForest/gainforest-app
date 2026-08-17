@@ -7,6 +7,7 @@ import { getRequestOrigin } from "../_lib/request-origin";
 import { walkOccurrences, type OccurrenceRecord } from "../_lib/indexer";
 import { localObservationHref } from "../_lib/urls";
 import { RecordExplorer } from "../_components/RecordExplorer";
+import { ObservationsMediaTabs } from "./_components/ObservationsMediaTabs";
 
 export const revalidate = 86400;
 
@@ -97,7 +98,12 @@ export default async function ObservationsPage() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(itemListJsonLd) }}
       />
       <Suspense fallback={<ExploreGridPageSkeleton />}>
-        <RecordExplorer kind="occurrence" enableOwnerFilter initialPage={initialPage} />
+        <RecordExplorer
+          kind="occurrence"
+          enableOwnerFilter
+          initialPage={initialPage}
+          underHero={<ObservationsMediaTabs active="photos" />}
+        />
       </Suspense>
     </>
   );

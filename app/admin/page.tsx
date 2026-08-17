@@ -1,195 +1,102 @@
 import type { Metadata } from "next";
-import { notFound } from "next/navigation";
+import Link from "next/link";
+import { redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
-import { ShieldCheckIcon } from "lucide-react";
-import Container from "@/components/ui/container";
-import { AdminOnlyIndicator } from "@/app/_components/AdminOnlyIndicator";
-import { getGainForestModeratorAccess, getInternalBadgeAccess } from "@/app/internal/badges/_lib/access";
-import { fetchFlaggedTestAccounts } from "@/app/internal/badges/_lib/test-accounts";
-import { fetchFlaggedTestRecords } from "@/app/internal/badges/_lib/test-records";
-import { fetchGrantApplicants } from "@/app/_lib/grants";
-import { bioblitzRounds } from "@/app/_lib/bioblitz";
-import { fetchTainaAdminResidents } from "@/app/_lib/taina-agent";
-import { hasStoredAgentKey, isDataJobsConfigured, listAllJobs, toPublicJob } from "@/app/_lib/data-jobs";
-import { fetchIndexedCertifiedProfileCards } from "@/app/_lib/indexer";
-import { BUILTIN_ENDORSERS, fetchEndorserRecords } from "@/app/_lib/endorsers";
-import { fetchEndorsementAwarding, type AwardEndorsementsData } from "./_lib/award-endorsements";
-import { fetchFacilitatorStats, type FacilitatorStats } from "./_lib/facilitator-stats";
-import { loadBioblitzAdminRound } from "./_lib/bioblitz-dashboard";
-import { fetchBioblitzExclusionRows } from "@/app/internal/badges/_lib/bioblitz-exclusion-mutations";
-import {
-  fetchBlockedDomainRows,
-  fetchBuiltinBlockedDomainRows,
-} from "@/app/internal/badges/_lib/blocked-domain-mutations";
-import { AdminModerationDashboard, type AdminTab } from "./_components/AdminModerationDashboard";
-import type { AdminTainaRow } from "./_components/AdminTainaPanel";
-import type { AdminDataJobRow } from "./_components/AdminDataJobsPanel";
+import { ChevronRightIcon, DatabaseIcon, ShieldCheckIcon, SproutIcon, UsersIcon } from "lucide-react";
+import { AdminPageHeader } from "./_components/AdminPageHeader";
 
 export const metadata: Metadata = {
   title: "Admin",
   robots: { index: false, follow: false },
 };
 
-const TABS: AdminTab[] = ["taina", "dataJobs", "grants", "bioblitz", "testAccounts", "blockedDomains", "endorsers", "awardEndorsements", "facilitator"];
-
-const EMPTY_FACILITATOR_STATS: FacilitatorStats = {
-  address: null,
-  txCount: null,
-  ethBalance: null,
-  receiptCount: null,
-  usdVolume: null,
+/**
+ * Old `?tab=…` links from when /admin was a single nine-tab page. Each one
+ * still opens the exact panel it named, on the page that now holds it.
+ */
+const TAB_REDIRECTS: Record<string, string> = {
+  grants: "/admin/grants",
+  rewilding: "/admin/grants",
+  bioblitz: "/admin/grants",
+  taina: "/admin/people",
+  endorsers: "/admin/people",
+  awardEndorsements: "/admin/people",
+  testAccounts: "/admin/trust",
+  blockedDomains: "/admin/trust",
+  dataJobs: "/admin/data",
+  facilitator: "/admin/data",
 };
 
 /**
- * The Tainá roster for the admin panel: runtime data (bot, last used, credit
- * spend) enriched with each owner's display name + avatar. `null` signals the
- * runtime is unreachable — distinct from "nobody has a Tainá yet".
+ * The admin home: four cards, one per area, each listing the panels it holds.
+ * Admin isn't in the sidebar — it's staff-only and reached from the account
+ * menu — so this hub is what makes every area one click away.
+ *
+ * Deliberately loads nothing: the areas fetch their own data (a Tainá runtime
+ * call, an S3 listing, a wallet read), and pulling all of that just to render
+ * a menu is what made the old single page slow.
  */
-async function loadTainaRows(): Promise<{ rows: AdminTainaRow[]; allowanceUsd: number } | null> {
-  try {
-    const { residents, allowanceUsd } = await fetchTainaAdminResidents();
-    const cards = await fetchIndexedCertifiedProfileCards(residents.map((r) => r.did)).catch(
-      () => new Map<string, { displayName: string | null; avatarUrl: string | null }>(),
-    );
-    const rows = residents
-      .map((resident) => ({
-        ...resident,
-        displayName: cards.get(resident.did)?.displayName ?? null,
-        avatarUrl: cards.get(resident.did)?.avatarUrl ?? null,
-      }))
-      // Most recently active first; never-used agents sink to the bottom.
-      .sort((a, b) =>
-        (b.lastUsedAt ?? b.provisionedAt).localeCompare(a.lastUsedAt ?? a.provisionedAt),
-      );
-    return { rows, allowanceUsd };
-  } catch {
-    return null;
-  }
-}
-
-/**
- * Partner data batches for the admin panel: every job in the ingest bucket,
- * enriched with the submitter's display name + avatar and whether their
- * publish-on-behalf agent key is still stored. `null` signals storage is
- * unconfigured or unreachable — distinct from "no batches yet".
- */
-async function loadDataJobRows(): Promise<AdminDataJobRow[] | null> {
-  if (!isDataJobsConfigured()) return null;
-  try {
-    const jobs = await listAllJobs();
-    const cards = await fetchIndexedCertifiedProfileCards(jobs.map((job) => job.did)).catch(
-      () => new Map<string, { displayName: string | null; avatarUrl: string | null }>(),
-    );
-    const keyByDid = new Map<string, boolean>();
-    await Promise.all(
-      [...new Set(jobs.map((job) => job.did))].map(async (did) => {
-        keyByDid.set(did, await hasStoredAgentKey(did).catch(() => false));
-      }),
-    );
-    return jobs.map((job) => ({
-      ...toPublicJob(job, keyByDid.get(job.did) ?? false),
-      displayName: cards.get(job.did)?.displayName ?? null,
-      avatarUrl: cards.get(job.did)?.avatarUrl ?? null,
-    }));
-  } catch {
-    return null;
-  }
-}
-
-/**
- * The "Award endorsements" tab needs more than moderator access: the awards
- * are signed by the GainForest org itself, so the viewer must be an
- * owner/admin of that org (checked again server-side by the internal badge
- * API on every write). Everyone else gets `allowed: false` and a notice.
- */
-async function loadAwardEndorsements(): Promise<AwardEndorsementsData> {
-  const access = await getInternalBadgeAccess().catch(() => null);
-  if (!access?.allowed || !access.repoDid) return { allowed: false, definitions: [], awards: [] };
-  const { definitions, awards } = await fetchEndorsementAwarding(access.repoDid).catch(
-    () => ({ definitions: [], awards: [] }),
-  );
-  return { allowed: true, definitions, awards };
-}
-
 export default async function AdminPage({
   searchParams,
 }: {
   searchParams: Promise<{ tab?: string }>;
 }) {
-  // Standalone moderation panel, gated to members of the admin group (any role).
-  const moderator = await getGainForestModeratorAccess().catch(() => null);
-  if (!moderator?.isModerator) {
-    notFound();
-  }
+  // Access is gated once in app/admin/layout.tsx, which wraps every admin route.
+  const { tab } = await searchParams;
+  const legacy = tab ? TAB_REDIRECTS[tab] : undefined;
+  if (legacy) redirect(`${legacy}?tab=${tab}`);
 
   const t = await getTranslations("common.adminModeration");
-  const now = Date.now();
-  const adminBioblitzRounds = bioblitzRounds(now, 0);
-  const defaultBioblitzRoundId = adminBioblitzRounds.at(-1)?.id ?? 1;
-  const [
-    { tab },
-    testAccounts,
-    testRecords,
-    grantApplicants,
-    initialBioblitzData,
-    bioblitzExclusions,
-    builtinBlockedDomains,
-    blockedDomains,
-    taina,
-    dataJobRows,
-    endorsers,
-    awardEndorsements,
-    facilitatorStats,
-  ] = await Promise.all([
-    searchParams,
-    fetchFlaggedTestAccounts().catch(() => []),
-    moderator.repoDid ? fetchFlaggedTestRecords(moderator.repoDid).catch(() => []) : Promise.resolve([]),
-    fetchGrantApplicants().catch(() => []),
-    loadBioblitzAdminRound(defaultBioblitzRoundId, now, moderator.repoDid).catch(() => null),
-    fetchBioblitzExclusionRows().catch(() => null),
-    fetchBuiltinBlockedDomainRows().catch(() => []),
-    fetchBlockedDomainRows().catch(() => null),
-    loadTainaRows(),
-    loadDataJobRows(),
-    moderator.repoDid ? fetchEndorserRecords(moderator.repoDid).catch(() => []) : Promise.resolve([]),
-    loadAwardEndorsements(),
-    fetchFacilitatorStats().catch(() => EMPTY_FACILITATOR_STATS),
-  ]);
 
-  const initialTab: AdminTab = TABS.includes(tab as AdminTab) ? (tab as AdminTab) : "taina";
+  const areas = [
+    {
+      href: "/admin/grants",
+      Icon: SproutIcon,
+      title: t("pages.grants.title"),
+      items: [t("tabs.grants"), t("rewilding.title"), t("tabs.bioblitz")],
+    },
+    {
+      href: "/admin/people",
+      Icon: UsersIcon,
+      title: t("pages.people.title"),
+      items: [t("tabs.taina"), t("tabs.endorsers"), t("tabs.awardEndorsements")],
+    },
+    {
+      href: "/admin/trust",
+      Icon: ShieldCheckIcon,
+      title: t("pages.trust.title"),
+      items: [t("tabs.testAccounts"), t("tabs.blockedDomains")],
+    },
+    {
+      href: "/admin/data",
+      Icon: DatabaseIcon,
+      title: t("pages.data.title"),
+      items: [t("tabs.dataJobs"), t("tabs.facilitator")],
+    },
+  ];
 
   return (
-    <Container className="pt-4 pb-8">
-      <header className="mb-6">
-        <div className="flex items-center gap-2">
-          <ShieldCheckIcon className="size-5 text-muted-foreground" />
-          <h1 className="font-instrument text-3xl font-light italic tracking-[-0.04em]">{t("page.title")}</h1>
-          <AdminOnlyIndicator className="text-muted-foreground" />
-        </div>
-        <p className="mt-2 max-w-prose text-sm leading-6 text-muted-foreground">{t("page.subtitle")}</p>
-      </header>
-      <AdminModerationDashboard
-        initialTab={initialTab}
-        testAccounts={testAccounts}
-        testRecords={testRecords}
-        grantApplicants={grantApplicants}
-        bioblitzRegistrantCount={initialBioblitzData?.registrants.length ?? 0}
-        initialBioblitzData={initialBioblitzData}
-        bioblitzExclusions={bioblitzExclusions}
-        bioblitzRounds={adminBioblitzRounds}
-        defaultBioblitzRoundId={defaultBioblitzRoundId}
-        canManageBioblitz={moderator.isModerator}
-        builtinBlockedDomains={builtinBlockedDomains}
-        blockedDomains={blockedDomains}
-        canManageBlockedDomains={moderator.isModerator}
-        tainaRows={taina?.rows ?? null}
-        tainaAllowanceUsd={taina?.allowanceUsd ?? 25}
-        dataJobRows={dataJobRows}
-        builtinEndorsers={BUILTIN_ENDORSERS}
-        endorsers={endorsers}
-        awardEndorsements={awardEndorsements}
-        facilitatorStats={facilitatorStats}
-      />
-    </Container>
+    <>
+      <AdminPageHeader Icon={ShieldCheckIcon} title={t("pages.hub.title")} subtitle={t("pages.hub.subtitle")} />
+      <ul className="grid gap-4 sm:grid-cols-2">
+        {areas.map((area) => (
+          <li key={area.href}>
+            <Link
+              href={area.href}
+              className="group flex h-full flex-col rounded-3xl border border-border bg-card/90 p-5 shadow-sm backdrop-blur-sm transition-colors hover:border-primary/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            >
+              <span className="flex items-center gap-2.5">
+                <span className="flex size-8 shrink-0 items-center justify-center rounded-full border border-primary/15 bg-primary/[0.08] text-primary">
+                  <area.Icon className="size-4" />
+                </span>
+                <span className="text-base font-semibold text-foreground">{area.title}</span>
+                <ChevronRightIcon className="ml-auto size-4 text-muted-foreground transition-transform group-hover:translate-x-0.5" />
+              </span>
+              <span className="mt-2 text-sm leading-6 text-muted-foreground">{area.items.join(" · ")}</span>
+            </Link>
+          </li>
+        ))}
+      </ul>
+    </>
   );
 }

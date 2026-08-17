@@ -20,67 +20,43 @@ import {
   type DeploymentEventEdit,
   type DeploymentEventItem,
 } from "@/app/_lib/deployment-events";
-import { type EquipmentItem } from "@/app/_lib/equipment";
-import { resolveDidProfile, type DidProfile } from "@/app/_lib/did-profile";
-import { formatRelative, shortDid } from "@/app/_lib/format";
-
-/** Your AudioMoths, aggregated across every organization you belong to. */
-export async function fetchMyAudioMoths(signal?: AbortSignal): Promise<EquipmentItem[]> {
-  const res = await fetch("/api/audiomoth/equipment", { signal, cache: "no-store" });
-  if (!res.ok) throw new Error(`Could not load equipment (${res.status}).`);
-  const data = (await res.json()) as { equipment?: EquipmentItem[] };
-  return Array.isArray(data.equipment) ? data.equipment : [];
-}
+import { listEquipment, type EquipmentItem } from "@/app/_lib/equipment";
+import { formatRelative } from "@/app/_lib/format";
 
 /**
- * Load the viewer's AudioMoths (org-wide) plus the display names of any units
- * held by teammates, so the picker can disambiguate whose unit is whose.
+ * The AudioMoths registered in one account's equipment list — the repo a
+ * deployment is created into or lives in. Like the rest of the audio surface,
+ * the picker follows the account being acted for rather than aggregating
+ * every organization the viewer belongs to: acting as an organization offers
+ * the organization's recorders, acting personally offers your own.
  */
-export function useMyAudioMoths(sessionDid: string): {
-  equipment: EquipmentItem[] | null;
-  ownerProfiles: Record<string, DidProfile>;
-} {
+export function useMyAudioMoths(did: string | null): { equipment: EquipmentItem[] | null } {
   const [equipment, setEquipment] = useState<EquipmentItem[] | null>(null);
-  const [ownerProfiles, setOwnerProfiles] = useState<Record<string, DidProfile>>({});
 
   useEffect(() => {
+    if (!did) {
+      setEquipment([]);
+      return;
+    }
+    setEquipment(null);
     const ctrl = new AbortController();
-    fetchMyAudioMoths(ctrl.signal)
+    listEquipment(did, ctrl.signal)
       .then((items) => {
-        if (ctrl.signal.aborted) return;
-        setEquipment(items);
-        const others = [...new Set(items.map((item) => item.did))].filter((did) => did !== sessionDid);
-        for (const did of others) {
-          resolveDidProfile(did)
-            .then((profile) => {
-              if (!ctrl.signal.aborted) {
-                setOwnerProfiles((prev) => (prev[did] ? prev : { ...prev, [did]: profile }));
-              }
-            })
-            .catch(() => {});
-        }
+        if (!ctrl.signal.aborted) setEquipment(items.filter((item) => item.category === "audiomoth"));
       })
       .catch(() => {
         if (!ctrl.signal.aborted) setEquipment([]);
       });
     return () => ctrl.abort();
-  }, [sessionDid]);
+  }, [did]);
 
-  return { equipment, ownerProfiles };
+  return { equipment };
 }
 
-/** Label for one AudioMoth in the picker, suffixed with the owner when it
- *  belongs to a teammate/organization rather than the viewer. */
-export function audioMothOptionLabel(
-  item: EquipmentItem,
-  sessionDid: string,
-  ownerProfiles: Record<string, DidProfile>,
-): string {
-  const base = item.assetId ? `${item.name} (${item.assetId})` : item.name;
-  if (item.did === sessionDid) return base;
-  const owner =
-    ownerProfiles[item.did]?.displayName || ownerProfiles[item.did]?.handle || shortDid(item.did);
-  return `${base} \u2014 ${owner}`;
+/** Label for one AudioMoth in the picker. The list is always one account's
+ *  own units, so no owner suffix is needed. */
+export function audioMothOptionLabel(item: EquipmentItem): string {
+  return item.assetId ? `${item.name} (${item.assetId})` : item.name;
 }
 
 /**
@@ -100,7 +76,9 @@ export function EditDeploymentDialog({
   onUpdated: (updated: DeploymentEventItem) => void;
 }) {
   const t = useTranslations("common.audiomoth.deployments");
-  const { equipment, ownerProfiles } = useMyAudioMoths(sessionDid);
+  // The picker lists the units of the repo the deployment lives in — the
+  // org's when editing an org deployment, the owner's own otherwise.
+  const { equipment } = useMyAudioMoths(event.did);
 
   const currentUri = linkedEquipmentUri(event.eventRemarks);
   const [siteName, setSiteName] = useState(event.locality ?? "");
@@ -146,13 +124,19 @@ export function EditDeploymentDialog({
     const edit: DeploymentEventEdit = { siteName, equipment: equipmentLink };
     setSaving(true);
     try {
-      const { cid } = await updateDeploymentEvent(event, edit);
+      // A record outside the signed-in repo lives in an organization's —
+      // write it there (CGS checks membership server-side).
+      const { cid } = await updateDeploymentEvent(
+        event,
+        edit,
+        event.did !== sessionDid ? { repo: event.did } : undefined,
+      );
       onUpdated(applyDeploymentEdit(event, edit, cid));
     } catch (err) {
       setError(err instanceof Error && err.message ? err.message : t("updateFailed"));
       setSaving(false);
     }
-  }, [currentUri, equipment, equipmentUri, event, onUpdated, siteName, t]);
+  }, [currentUri, equipment, equipmentUri, event, onUpdated, sessionDid, siteName, t]);
 
   return (
     <div className="fixed inset-0 z-[110] flex items-center justify-center p-4" role="dialog" aria-modal="true">
@@ -192,7 +176,7 @@ export function EditDeploymentDialog({
                 ) : null}
                 {(equipment ?? []).map((item) => (
                   <SelectItem key={item.uri} value={item.uri}>
-                    {audioMothOptionLabel(item, sessionDid, ownerProfiles)}
+                    {audioMothOptionLabel(item)}
                   </SelectItem>
                 ))}
               </SelectContent>

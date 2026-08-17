@@ -10,6 +10,7 @@ import {
   MicroscopeIcon,
   NewspaperIcon,
   SproutIcon,
+  TargetIcon,
 } from "lucide-react";
 
 export type NavLeaf = {
@@ -26,6 +27,10 @@ export type NavLeaf = {
   /** Only shown to GainForest admin-group members (any role). The route
    *  itself must re-check access server-side — hiding the item is cosmetic. */
   adminOnly?: boolean;
+  /** Shown to organizations enrolled in a Rewilding grant slot, and to
+   *  GainForest admins (who can preview the dashboard). Cosmetic, like
+   *  adminOnly — the routes re-check server-side. */
+  rewildingGranteeOnly?: boolean;
 };
 
 export type NavSection = {
@@ -114,7 +119,31 @@ export const NAV_ITEMS: NavSection[] = [
         text: "Grants",
         Icon: SproutIcon,
         href: "/grants",
-        pathCheck: { startsWith: "/grants" },
+        // Exact match: the Rewilding grantee pages live under /grants/* and
+        // own their own rows below, so they must not light this one up.
+        pathCheck: { equals: "/grants" },
+      },
+      // The Rewilding the Web grantee dashboard: shown to the organizations
+      // enrolled in one of the program's ten slots, and to GainForest admins
+      // as a preview. The routes re-check access server-side, so hiding
+      // these rows is only cosmetic.
+      {
+        kind: "leaf",
+        id: "myGrant",
+        text: "My grant",
+        Icon: TargetIcon,
+        href: "/grants/my-grant",
+        pathCheck: { startsWith: "/grants/my-grant" },
+        rewildingGranteeOnly: true,
+      },
+      {
+        kind: "leaf",
+        id: "myRecorders",
+        text: "My recorders",
+        Icon: AudioLinesIcon,
+        href: "/grants/my-recorders",
+        pathCheck: { startsWith: "/grants/my-recorders" },
+        rewildingGranteeOnly: true,
       },
     ],
   },
@@ -139,16 +168,13 @@ export const NAV_ITEMS: NavSection[] = [
         href: "/labeler",
         pathCheck: { startsWith: "/labeler" },
       },
-      {
-        kind: "leaf",
-        id: "audiomoth",
-        text: "AudioMoth",
-        Icon: AudioLinesIcon,
-        href: "/audiomoth",
-        pathCheck: { startsWith: "/audiomoth" },
-      },
+      // AudioMoth is no longer a sidebar destination: audio records live under
+      // Observations (/observations/audio), device setup under
+      // /observations/devices. AI keeps only Taína and the Labeler.
     ],
   },
+  // Admin has no sidebar section on purpose: it is a staff area, reached from
+  // the account menu's Admin link, and /admin groups its pages into cards.
 ];
 
 export function isLeafActive(pathCheck: { equals?: string; startsWith?: string }, pathname: string): boolean {

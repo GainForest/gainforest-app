@@ -5,9 +5,9 @@ describe("renderBioblitzWinnerEmail", () => {
   it.each([
     {
       prize: "most-observations" as const,
-      category: "Most Observations",
+      category: "Highest Points",
       amount: "$40 USD",
-      subject: "Congrats! You won “Most Observations” in BioBlitz Week 6 🎉",
+      subject: "Congrats! You won “Highest Points” in BioBlitz Week 6 🎉",
     },
     {
       prize: "best-picture" as const,
@@ -35,6 +35,23 @@ describe("renderBioblitzWinnerEmail", () => {
     }
     expect(rendered.text).toContain("Create your wallet: https://gainforest.example/account/wallet");
     expect(rendered.html).toContain('href="mailto:fatin@gainforest.net"');
+  });
+
+  it("names the board prize after the rule its round was played under", () => {
+    const render = (roundId?: number) =>
+      renderBioblitzWinnerEmail({
+        locale: "en",
+        roundLabel: "Week 6",
+        prize: "most-observations",
+        roundId,
+        siteUrl: "https://gainforest.example",
+      });
+
+    // Rounds before the points era keep the original prize name.
+    expect(render(3).subject).toBe("Congrats! You won “Most Observations” in BioBlitz Week 6 🎉");
+    // Points-era rounds — and calls without a round — use the current name.
+    expect(render(8).subject).toBe("Congrats! You won “Highest Points” in BioBlitz Week 6 🎉");
+    expect(render(undefined).subject).toBe("Congrats! You won “Highest Points” in BioBlitz Week 6 🎉");
   });
 
   it.each([

@@ -39,7 +39,7 @@ export function AdminTestAccountsList({ accounts: initial }: { accounts: Flagged
   }
 
   // Heading, count and description come from the AdminPanel shell that wraps
-  // this list on /admin — the component renders just the rows.
+  // this list on /admin/trust — the component renders just the rows.
   return (
     <section>
       {error ? (

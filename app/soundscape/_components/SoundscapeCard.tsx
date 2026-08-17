@@ -31,8 +31,10 @@ import {
 } from "@/lib/soundscape/record";
 import { cn } from "@/lib/utils";
 
-/** Muted band palette for the card (the explorer keeps the vivid figures). */
-const CARD_BAND_COLORS = ["#4a6b8a", "#4a7a5a", "#c9a227", "#b05a4a", "#7a6aab"] as const;
+/** Muted band palette for the card (the explorer keeps the vivid figures).
+ *  Exported so the explore gallery's shared voice-group key can swatch with
+ *  the exact colours the dials use. */
+export const CARD_BAND_COLORS = ["#4a6b8a", "#4a7a5a", "#c9a227", "#b05a4a", "#7a6aab"] as const;
 
 const SIZE = 320;
 const CENTER = SIZE / 2;
@@ -56,11 +58,25 @@ export function SoundscapeCard({
   soundscape,
   href,
   className,
+  legend = true,
+  showHeader = true,
+  showFooter = true,
+  compact = false,
 }: {
   soundscape: PublishedSoundscape;
   /** Permalink of the published soundscape (the "open" link target). */
   href: string;
   className?: string;
+  /** Show the in-card band legend. The explore gallery passes false and
+   *  draws one shared voice-group key for the whole page instead, so a grid
+   *  of dials doesn't repeat the same five lines beside every card. */
+  legend?: boolean;
+  /** The project-row slot supplies its own header and title. */
+  showHeader?: boolean;
+  /** The project-row slot supplies its own single action. */
+  showFooter?: boolean;
+  /** Remove the card chrome when it is nested inside a project slot. */
+  compact?: boolean;
 }) {
   const t = useTranslations("common.soundscape");
   const locale = useLocale();
@@ -206,7 +222,14 @@ export function SoundscapeCard({
   ];
 
   return (
-    <div className={cn("overflow-hidden rounded-xl border border-border/60 bg-background", className)}>
+    <div
+      className={cn(
+        compact
+          ? "overflow-visible rounded-none border-0 bg-transparent"
+          : "overflow-hidden rounded-xl border border-border/60 bg-background",
+        className,
+      )}
+    >
       <audio
         ref={audioRef}
         preload="none"
@@ -222,12 +245,14 @@ export function SoundscapeCard({
       />
 
       {/* Header */}
-      <div className="flex items-baseline gap-3 px-4 pt-3.5 sm:px-5">
-        <span className="font-instrument text-xl italic tracking-[-0.01em] text-foreground">
-          {t("card.title")}
-        </span>
-        <span className="font-mono text-[12.5px] text-muted-foreground">{dateLabel}</span>
-      </div>
+      {showHeader ? (
+        <div className="flex items-baseline gap-3 px-4 pt-3.5 sm:px-5">
+          <span className="font-instrument text-xl italic tracking-[-0.01em] text-foreground">
+            {t("card.title")}
+          </span>
+          <span className="font-mono text-[12.5px] text-muted-foreground">{dateLabel}</span>
+        </div>
+      ) : null}
 
       {/* Dial + legend */}
       <div className="flex flex-wrap items-center gap-x-2 gap-y-0 px-2 sm:px-4">
@@ -236,7 +261,10 @@ export function SoundscapeCard({
           role="img"
           aria-label={t("card.dialAria")}
           onClick={handleDialClick}
-          className="min-w-0 flex-1 basis-64 cursor-pointer select-none"
+          className={cn(
+            "min-w-0 cursor-pointer select-none",
+            legend ? "flex-1 basis-64" : cn("mx-auto w-full", compact ? "max-w-[300px]" : "max-w-[380px]"),
+          )}
         >
           {/* Grid: outer circle + dotted rings */}
           <circle cx={CENTER} cy={CENTER} r={OUTER} fill="none" stroke="currentColor" strokeOpacity={0.18} className="text-muted-foreground" />
@@ -299,26 +327,28 @@ export function SoundscapeCard({
           ) : null}
         </svg>
 
-        <ul className="shrink-0 basis-40 space-y-2.5 px-2 py-3">
-          <li className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
-            {t("chart.legendTitle")}
-          </li>
-          {FREQUENCY_BANDS.map((band, index) => (
-            <li key={band.id} className="flex items-start gap-2.5">
-              <span
-                aria-hidden
-                className="mt-[7px] inline-block h-[2.5px] w-5 shrink-0 rounded-full"
-                style={{ backgroundColor: CARD_BAND_COLORS[index] }}
-              />
-              <span className="min-w-0 leading-tight">
-                <span className="block text-[13.5px] text-foreground">{t(`bands.${band.labelKey}`)}</span>
-                <span className="block font-mono text-[11.5px] text-muted-foreground">
-                  {formatBandRange(band, soundscape.ceilingHz)}
-                </span>
-              </span>
+        {legend ? (
+          <ul className="shrink-0 basis-40 space-y-2.5 px-2 py-3">
+            <li className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
+              {t("chart.legendTitle")}
             </li>
-          ))}
-        </ul>
+            {FREQUENCY_BANDS.map((band, index) => (
+              <li key={band.id} className="flex items-start gap-2.5">
+                <span
+                  aria-hidden
+                  className="mt-[7px] inline-block h-[2.5px] w-5 shrink-0 rounded-full"
+                  style={{ backgroundColor: CARD_BAND_COLORS[index] }}
+                />
+                <span className="min-w-0 leading-tight">
+                  <span className="block text-[13.5px] text-foreground">{t(`bands.${band.labelKey}`)}</span>
+                  <span className="block font-mono text-[11.5px] text-muted-foreground">
+                    {formatBandRange(band, soundscape.ceilingHz)}
+                  </span>
+                </span>
+              </li>
+            ))}
+          </ul>
+        ) : null}
       </div>
 
       {/* Player bar */}
@@ -354,19 +384,21 @@ export function SoundscapeCard({
       </div>
 
       {/* Footer */}
-      <div className="flex items-center justify-between gap-2 border-t border-border/60 px-4 py-2.5 sm:px-5">
-        <span className="font-mono text-[12.5px] text-muted-foreground">
-          {t("zoom.recordingsCount", { count: soundscape.sources.length })}
-        </span>
-        <Link
-          href={href}
-          onClick={(event) => event.stopPropagation()}
-          className="inline-flex items-center gap-1.5 text-[13.5px] font-medium text-primary hover:underline"
-        >
-          {t("published.openFull")}
-          <ArrowUpRightIcon className="size-3.5" />
-        </Link>
-      </div>
+      {showFooter ? (
+        <div className="flex items-center justify-between gap-2 border-t border-border/60 px-4 py-2.5 sm:px-5">
+          <span className="font-mono text-[12.5px] text-muted-foreground">
+            {t("zoom.recordingsCount", { count: soundscape.sources.length })}
+          </span>
+          <Link
+            href={href}
+            onClick={(event) => event.stopPropagation()}
+            className="inline-flex items-center gap-1.5 text-[13.5px] font-medium text-primary hover:underline"
+          >
+            {t("published.openFull")}
+            <ArrowUpRightIcon className="size-3.5" />
+          </Link>
+        </div>
+      ) : null}
     </div>
   );
 }

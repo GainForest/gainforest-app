@@ -60,6 +60,7 @@ import {
 import { colorForSpectrogram, computeSpectrogram } from "@/app/_lib/audiomoth/spectrogram";
 import { listAllRecordings, pdsBlobUrl, type AcAudioListItem } from "@/app/_lib/ac-audio";
 import { listAcDeployments, type AcDeploymentItem } from "@/app/_lib/ac-deployment";
+import { useActingRepo } from "@/app/_lib/account-switcher";
 import { resolvePdsHost } from "@/app/_lib/pds";
 
 const MAX_SPECTROGRAM_COLUMNS = 1_100;
@@ -156,17 +157,23 @@ export function LabelTab({ sessionDid }: { sessionDid: string | null }) {
   const [editingUri, setEditingUri] = useState<string | null>(null);
   const [mutationPending, setMutationPending] = useState(false);
   const [mutationError, setMutationError] = useState<string | null>(null);
+  /* The acting account — the user's own, or the organization they switched
+     into. Recordings and occurrences are read from that repo, and every
+     label written here lands in the same repo. */
+  const acting = useActingRepo(sessionDid);
+  const actingDid = acting.did;
+  const writeOptions = acting.repo ? { repo: acting.repo } : undefined;
 
   const loadWorkspace = useCallback(async () => {
-    if (!sessionDid) return;
+    if (!actingDid) return;
     setWorkspaceError(null);
     setRecordings(null);
     const controller = new AbortController();
     try {
       const [nextRecordings, nextDeployments, nextHost] = await Promise.all([
-        listAllRecordings(sessionDid, controller.signal),
-        listAcDeployments(sessionDid, controller.signal),
-        resolvePdsHost(sessionDid, controller.signal),
+        listAllRecordings(actingDid, controller.signal),
+        listAcDeployments(actingDid, controller.signal),
+        resolvePdsHost(actingDid, controller.signal),
       ]);
       setRecordings(nextRecordings);
       setDeployments(nextDeployments);
@@ -181,7 +188,7 @@ export function LabelTab({ sessionDid }: { sessionDid: string | null }) {
       setWorkspaceError(t("loadFailed"));
     }
     return () => controller.abort();
-  }, [sessionDid, t]);
+  }, [actingDid, t]);
 
   useEffect(() => {
     void loadWorkspace();
@@ -213,11 +220,11 @@ export function LabelTab({ sessionDid }: { sessionDid: string | null }) {
   }, []);
 
   const loadOccurrences = useCallback(async (recording: AcAudioListItem) => {
-    if (!sessionDid) return;
+    if (!actingDid) return;
     setLoadingOccurrences(true);
     setMutationError(null);
     try {
-      const items = await listAudioOccurrences(sessionDid, recording.uri);
+      const items = await listAudioOccurrences(actingDid, recording.uri);
       setOccurrences(items);
       setOccurrenceCounts((current) => ({ ...current, [recording.uri]: items.length }));
     } catch {
@@ -226,7 +233,7 @@ export function LabelTab({ sessionDid }: { sessionDid: string | null }) {
     } finally {
       setLoadingOccurrences(false);
     }
-  }, [sessionDid, t]);
+  }, [actingDid, t]);
 
   useEffect(() => {
     setReady(null);
@@ -276,8 +283,8 @@ export function LabelTab({ sessionDid }: { sessionDid: string | null }) {
       };
       const existing = occurrences.find((item) => item.uri === editingUri);
       const saved = existing
-        ? await updateAudioOccurrence(existing, draft)
-        : await createAudioOccurrence(draft);
+        ? await updateAudioOccurrence(existing, draft, writeOptions)
+        : await createAudioOccurrence(draft, writeOptions);
       setOccurrences((current) => [...current.filter((item) => item.uri !== saved.uri), saved].sort((a, b) => a.bounds.startTimeSeconds - b.bounds.startTimeSeconds));
       setOccurrenceCounts((current) => ({ ...current, [occurrenceSource.uri]: existing ? current[occurrenceSource.uri] ?? occurrences.length : (current[occurrenceSource.uri] ?? occurrences.length) + 1 }));
       startFreshLabel(null);
@@ -294,7 +301,7 @@ export function LabelTab({ sessionDid }: { sessionDid: string | null }) {
     setMutationPending(true);
     setMutationError(null);
     try {
-      await deleteAudioOccurrence(item);
+      await deleteAudioOccurrence(item, writeOptions);
       setOccurrences((current) => current.filter((candidate) => candidate.uri !== item.uri));
       if (selectedRecording) {
         setOccurrenceCounts((current) => ({ ...current, [selectedRecording.uri]: Math.max(0, (current[selectedRecording.uri] ?? occurrences.length) - 1) }));
@@ -359,7 +366,7 @@ export function LabelTab({ sessionDid }: { sessionDid: string | null }) {
         <h2 className="mt-4 text-lg font-medium text-foreground">{t("noRecordingsTitle")}</h2>
         <p className="mx-auto mt-2 max-w-lg text-sm leading-6 text-muted-foreground">{workspaceError ?? t("noRecordingsBody")}</p>
         <div className="mt-5 flex flex-wrap justify-center gap-2">
-          <Button asChild><Link href="/audiomoth?tab=upload"><UploadIcon className="size-4" />{t("uploadFirst")}</Link></Button>
+          <Button asChild><Link href="/observations/audio?tab=upload"><UploadIcon className="size-4" />{t("uploadFirst")}</Link></Button>
           <Button variant="outline" onClick={() => void loadWorkspace()}><RefreshCwIcon className="size-4" />{t("refresh")}</Button>
         </div>
       </div>
@@ -377,7 +384,7 @@ export function LabelTab({ sessionDid }: { sessionDid: string | null }) {
           </div>
         </div>
         <div className="flex flex-wrap items-center gap-2">
-          <Button asChild variant="outline" size="sm"><Link href="/audiomoth?tab=upload"><UploadIcon className="size-4" />{t("addFiles")}</Link></Button>
+          <Button asChild variant="outline" size="sm"><Link href="/observations/audio?tab=upload"><UploadIcon className="size-4" />{t("addFiles")}</Link></Button>
           <Button variant="outline" size="sm" disabled={occurrences.length === 0} onClick={exportLabels}><DownloadIcon className="size-4" />{t("export")}</Button>
           <Button variant="ghost" size="sm" onClick={() => void loadWorkspace()}><RefreshCwIcon className="size-4" />{t("refresh")}</Button>
         </div>

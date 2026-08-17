@@ -652,15 +652,16 @@
   "observations": {
     "quickAdd": {
       "title": "Agregar observaciones",
-      "description": "Suelta fotos y te ayudamos a identificar lo que aparece en ellas.",
+      "description": "Una observación es lo que viste o escuchaste en la naturaleza, con dónde y cuándo. Añade fotos, o todas las grabaciones de una tarjeta de AudioMoth.",
       "close": "Cerrar",
       "back": "Atrás",
       "uploadingForLabel": "Subiendo para",
       "uploadingForHint": "Elige a qué cuenta pertenecen estas observaciones.",
       "uploadingForPersonal": "Cuenta personal",
-      "dropTitle": "Arrastra y suelta tus fotos",
-      "dropHint": "JPG, PNG o HEIC · hasta {max} fotos",
-      "choose": "Elegir fotos",
+      "dropTitle": "Arrastra y suelta, o explora",
+      "dropHint": "JPG, PNG, HEIC · WAV de una tarjeta SD de AudioMoth · hasta {max} fotos",
+      "choose": "Elegir archivos",
+      "chooseFolder": "Elegir una carpeta de tarjeta",
       "addMore": "Agregar más fotos",
       "tooMany": "Puedes agregar hasta {max} fotos a la vez.",
       "identifying": "Identificando…",
@@ -742,7 +743,35 @@
       "takePhoto": "Tomar una foto",
       "combineWithAbove": "Combinar con la de arriba",
       "dragMergeHintTouch": "Toca el icono de separar en una foto para sacarla.",
-      "submitDataBatch": "Enviar un lote zip grande"
+      "submitDataBatch": "Enviar un lote zip grande",
+      "audio": {
+        "batchTitle": "Grabaciones de una tarjeta",
+        "summary": "{count, number} WAV · {size}",
+        "readingProgress": "Leyendo encabezados WAV — {done} de {total}…",
+        "unreadable": "{count, plural, one {# archivo no se pudo leer como grabación de AudioMoth} other {# archivos no se pudieron leer como grabaciones de AudioMoth}}",
+        "remove": "Quitar grabaciones",
+        "recordingFromLabel": "Grabado con",
+        "deviceNew": "nuevo",
+        "newDeviceNote": "{device} aún no está en tu registro de equipos — lo añadiremos cuando empiece esta subida.",
+        "folderLabel": "Carpeta de grabaciones",
+        "folderAutoMatched": "{name} — detectado desde la tarjeta",
+        "folderNew": "Nueva carpeta · {name}",
+        "noDeployments": "Este dispositivo no tiene despliegues — el lote seguirá subiéndose y se adjuntará al que crees.",
+        "setUpDeployment": "Configura uno ↗",
+        "defaultFolderName": "Grabaciones {date}",
+        "readyCount": "{count, plural, one {# grabación para subir} other {# grabaciones para subir}}",
+        "submitOnly": "{count, plural, one {Subir # grabación} other {Subir # grabaciones}}",
+        "backgroundNote": "{count, plural, one {# grabación subiéndose en segundo plano} other {# grabaciones subiéndose en segundo plano}}",
+        "viewTray": "Ver",
+        "handedOffTitle": "{count, plural, one {# grabación se está subiendo} other {# grabaciones se están subiendo}}",
+        "handedOffBody": "Siguen subiéndose en segundo plano mientras navegas. Consulta el progreso cuando quieras en el panel de subidas.",
+        "equipmentNote": "Registrado automáticamente al subir sus grabaciones desde Añadir observaciones.",
+        "dedupChecking": "Comprobando si hay grabaciones ya en esta cuenta…",
+        "dedupSkipped": "{count, plural, one {# grabación ya está en esta cuenta — omitida} other {# grabaciones ya están en esta cuenta — omitidas}}",
+        "allUploaded": "Todo lo de esta tarjeta ya está subido",
+        "matchedCount": "{count, plural, one {# grabación coincidió con su despliegue desde la tarjeta} other {# grabaciones coincidieron con sus despliegues desde la tarjeta}}",
+        "eventOption": "Despliegue · {name}"
+      }
     },
     "csvUpload": {
       "title": "Subir datos CSV",
@@ -1064,7 +1093,7 @@
   },
   "settings": {
     "organizationTitle": "Configuración de la organización",
-    "organizationDescription": "Conecta agentes de IA y gestiona las herramientas de esta organización.",
+    "organizationDescription": "Gestiona las personas, el perfil y las herramientas de esta organización.",
     "personalTitle": "Configuración",
     "personalDescription": "Gestiona enlaces de cuenta, seguridad y herramientas de exportación.",
     "dataCouncil": {
@@ -1093,8 +1122,6 @@
       },
       "addLabel": "Añadir al Consejo de Datos"
     },
-    "membersMoved": "Los miembros, los roles y el Consejo de Datos están en la pestaña Miembros.",
-    "openMembers": "Abrir Miembros",
     "orgAgentKeysHint": "Las claves son personales: una clave creada aquí pertenece a tu cuenta y permite que tu agente de IA trabaje en esta organización a través de tu membresía. Si dejas la organización, tus claves pierden ese acceso."
   },
   "dashboardClient": {
@@ -1127,7 +1154,7 @@
       "expandBio": "Mostrar biografía completa",
       "collapseBio": "Contraer biografía",
       "addType": "Añadir tipo",
-      "addCountry": "Añadir país",
+      "addLocation": "Añadir ubicación",
       "sinceDate": "Desde {date}",
       "invalidDate": "Fecha no válida",
       "addStartDate": "Añadir fecha de inicio",
@@ -1150,7 +1177,6 @@
     "errors": {
       "nameRequired": "Añade un nombre antes de guardar.",
       "invalidWebsite": "Introduce una dirección web válida.",
-      "invalidCountry": "Elige un país de la lista.",
       "saveFailed": "No se pudo guardar. Inténtalo de nuevo."
     },
     "modals": {
@@ -1195,6 +1221,28 @@
           "alt": "Cascada en un bosque tropical"
         }
       }
+    },
+    "locationEditor": {
+      "title": "Ubicación de la organización",
+      "description": "Muestra dónde tiene su sede tu organización.",
+      "descriptionWithCurrent": "Actualmente: {location}.",
+      "searchPlaceholder": "Busca una dirección, ciudad o país",
+      "noResults": "No se encontraron lugares.",
+      "searchUnavailable": "La búsqueda de lugares no está disponible en este momento.",
+      "enterCoordinates": "Introducir coordenadas",
+      "searchInstead": "Buscar un lugar",
+      "latitude": "Latitud",
+      "longitude": "Longitud",
+      "invalidCoordinates": "La latitud debe estar entre -90 y 90, y la longitud entre -180 y 180.",
+      "dragHint": "Arrastra el marcador para ajustar la ubicación.",
+      "countryHint": "Se publica como el país entero. Busca un lugar para mayor precisión.",
+      "approximateLabel": "Compartir solo una ubicación aproximada",
+      "approximateHint": "Publica un área de ~{radius} km en lugar del punto exacto.",
+      "approximateHintWithLabel": "Publica un área de ~{radius} km en lugar del punto exacto, mostrada como “{label}”.",
+      "remove": "Quitar ubicación",
+      "save": "Guardar ubicación",
+      "savingLocation": "Guardando la ubicación…",
+      "saveFailed": "No se pudo guardar la ubicación. Inténtalo de nuevo."
     }
   },
   "dashboardModals": {
@@ -1254,6 +1302,11 @@
       "description": "Déjalo en blanco y crearemos una dirección de recuperación a partir del correo de tu cuenta.",
       "placeholder": "recuperacion@ejemplo.com",
       "invalid": "Introduce un correo válido."
+    },
+    "location": {
+      "label": "Ubicación",
+      "basedIn": "Con sede en",
+      "empty": "Definir una ubicación"
     }
   }
 }

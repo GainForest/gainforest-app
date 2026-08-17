@@ -28,6 +28,7 @@ export class BioblitzNotificationRenderer implements NotificationRenderer {
       locale: resolveBioblitzWinnerLocale({ explicitLocale: row.locale }),
       roundLabel,
       prize: prize as BioblitzPrize,
+      roundId,
     });
   }
 }

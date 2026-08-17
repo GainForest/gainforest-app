@@ -281,7 +281,7 @@
       "eyebrow": "Tantangan BioBlitz Mingguan",
       "titlePrefix": "Tantangan",
       "titleEmphasis": "BioBlitz",
-      "description": "Lomba mingguan yang menyenangkan untuk mencatat keanekaragaman hayati di luar ruangan. Tambahkan pengamatan dengan foto yang kamu unggah sendiri. Orang dan tanaman dalam pot tidak dihitung.",
+      "description": "Lomba mingguan yang menyenangkan untuk mencatat keanekaragaman hayati di luar ruangan dengan foto yang kamu unggah sendiri. Mulai Ronde 8, foto hewan bernilai 2 poin, foto tanaman 1 poin, dan menamai spesies menambah 0,5 poin ekstra. Orang dan tanaman dalam pot tidak dihitung.",
       "program": "Bagian dari program Klarna AI for Climate Resilience, bersama GainForest."
     },
     "rsvp": {
@@ -340,7 +340,7 @@
           "winners": {
             "title": "4. Pemilihan pemenang",
             "paragraphs": {
-              "p1": "Hadiah Pengamatan Terbanyak didasarkan pada jumlah pengamatan valid tertinggi selama ronde. Hadiah Foto Terbaik dipilih berdasarkan kriteria di halaman BioBlitz, termasuk kualitas gambar, subjek, dan keterlibatan komunitas jika relevan.",
+              "p1": "Mulai Ronde 8, hadiah Poin Tertinggi didasarkan pada skor total tertinggi dari pengamatan valid selama ronde: setiap foto hewan yang valid bernilai 2 poin, setiap foto tanaman yang valid bernilai 1 poin, dan keduanya mendapat 0,5 poin ekstra jika spesiesnya teridentifikasi, bukan dibiarkan tanpa identifikasi. Pada ronde-ronde sebelumnya, hadiah ini didasarkan pada jumlah pengamatan valid tertinggi. Hadiah Foto Terbaik dipilih berdasarkan kriteria di halaman BioBlitz, termasuk kualitas gambar, subjek, dan keterlibatan komunitas jika relevan.",
               "p2": "GainForest dapat meninjau kiriman, menyelesaikan hasil seri, memperbaiki kesalahan hitung, dan mendiskualifikasi kiriman yang tidak valid. Keputusan bersifat final sejauh diizinkan oleh hukum."
             }
           },
@@ -504,6 +504,10 @@
         "title": "Pengamatan terbanyak",
         "blurb": "Untuk pengumpul dengan pengamatan valid terbanyak dalam ronde."
       },
+      "highestPoints": {
+        "title": "Poin tertinggi",
+        "blurb": "Untuk pengumpul dengan skor tertinggi dalam ronde: 2 poin per foto hewan, 1 per foto tanaman, +0,5 jika spesies dinamai."
+      },
       "bestPicture": {
         "title": "Foto terbaik",
         "blurb": "Untuk foto alam paling memukau minggu ini, dipilih oleh tim."
@@ -522,7 +526,7 @@
         },
         "review": {
           "title": "Periksa nama spesies",
-          "blurb": "Konfirmasi atau perbaiki nama yang disarankan — pengetahuanmu penting."
+          "blurb": "Konfirmasi atau perbaiki nama yang disarankan — mulai Ronde 8, spesies yang dinamai mendapat 0,5 poin ekstra."
         }
       },
       "proof": {
@@ -536,6 +540,7 @@
       "title": "Papan ronde ini",
       "live": "Langsung",
       "subtitleLive": "Siapa yang memimpin dengan pengamatan foto yang valid saat ini.",
+      "subtitleLivePoints": "Siapa yang memimpin poin dengan pengamatan foto yang valid saat ini.",
       "subtitleEnded": "Klasemen akhir ronde ini.",
       "subtitleUpcoming": "Jadilah yang pertama di papan saat ronde dibuka.",
       "subtitleAll": "Pengamatan foto valid terbanyak sepanjang tantangan.",
@@ -545,6 +550,8 @@
       },
       "leader": "Memimpin",
       "observations": "{count, plural, one {# pengamatan} other {# pengamatan}}",
+      "points": "{points} poin",
+      "pointsFull": "{points, plural, other {# poin}}",
       "openCollector": "Buka profil pengumpul di tab baru",
       "rankAriaLabel": "Peringkat {rank}",
       "org": {
@@ -563,6 +570,9 @@
       "stats": {
         "observations": "Pengamatan ronde ini",
         "observationsAll": "Pengamatan (sepanjang waktu)",
+        "animals": "Hewan",
+        "plants": "Tanaman",
+        "named": "Spesies dinamai",
         "collectors": "Pengumpul",
         "timeLeft": "Sisa waktu"
       },
@@ -584,7 +594,26 @@
         "title": "Tidak dapat memuat papan",
         "description": "Coba lagi sebentar lagi."
       },
-      "cta": "Tambahkan pengamatanmu"
+      "cta": "Tambahkan pengamatanmu",
+      "pointsGuide": {
+        "title": "Cara poin dihitung",
+        "animalValue": "2 poin",
+        "animalLabel": "Per foto hewan",
+        "plantValue": "1 poin",
+        "plantLabel": "Per foto tanaman",
+        "namedValue": "+0,5 poin",
+        "namedLabel": "Spesies dinamai",
+        "note": "Poin dimulai pada Ronde 8. Total seorang pengumpul adalah foto hewan × 2, ditambah foto tanaman × 1, ditambah 0,5 untuk setiap spesies yang dinamai. Ketuk sebuah baris di papan untuk melihat perhitungannya."
+      },
+      "breakdown": {
+        "toggle": "Cara poin dihitung",
+        "animals": "{count, plural, other {# foto hewan}} × 2",
+        "plants": "{count, plural, other {# foto tanaman}} × 1",
+        "labeled": "{count, plural, other {# spesies dinamai}} × 0,5",
+        "ineligible": "{count, plural, other {# foto tidak memenuhi syarat}}",
+        "total": "Total poin",
+        "profile": "Buka profil"
+      }
     },
     "winners": {
       "title": "Pemenang sebelumnya",
@@ -597,7 +626,11 @@
       "finalHint": "Pemenang ini sudah dikonfirmasi dan tidak akan berubah.",
       "provisionalHint": "Klasemen saat ini — masih bisa berubah sampai pemenang dikonfirmasi.",
       "compact": "Terbaru",
+      "newer": "Ronde lebih baru",
+      "older": "Ronde lebih lama",
+      "page": "{page} dari {total}",
       "mostSubmitted": "Kiriman terbanyak",
+      "highestPoints": "Poin tertinggi",
       "mostLiked": "Paling disukai",
       "award": {
         "action": "Berikan lencana pemenang",
@@ -606,6 +639,7 @@
         "error": "Tidak dapat memperbarui lencana atau status email. Coba lagi.",
         "notification": {
           "mostObservations": "Email observasi terbanyak",
+          "highestPoints": "Email poin tertinggi",
           "bestPicture": "Email foto terbaik",
           "sent": "Terkirim",
           "delayed": "Tertunda — kami akan terus mencoba",
@@ -820,6 +854,139 @@
       "description": "Putaran pendanaan Ma Earth yang didukung komunitas menggunakan pendanaan kuadratik: banyak donasi kecil disepadankan dan diperkuat lebih dari sedikit donasi besar. Pendaftaran telah ditutup dan putaran kini sedang berlangsung — jelajahi proyek yang ikut serta dan dukung mereka.",
       "browseProjects": "Jelajahi proyek di putaran ini",
       "logoAlt": "Ma Earth"
+    },
+    "rewildingDashboard": {
+      "grant": {
+        "navLabel": "Hibah saya",
+        "nextStepEyebrow": "Langkah berikutnya",
+        "dueBy": "tenggat {date}",
+        "openRecorders": "Tambah perekam",
+        "statsLabel": "Kemajuan hibah",
+        "stats": {
+          "audioUploaded": "Audio terunggah",
+          "audioValue": "{minutes} mnt",
+          "recorders": "Perekam",
+          "recordersYours": "{count} milik Anda",
+          "recordersShipped": "{count} dikirim",
+          "speciesTagged": "Spesies tertandai",
+          "audioTargetBy": "Target {target} mnt pada {date}",
+          "audioBehindPace": "{minutes} mnt di belakang laju · {days} hari lagi",
+          "audioAheadPace": "{minutes} mnt di depan laju · {days} hari lagi",
+          "audioTargetMet": "Target tercapai",
+          "audioGrantClosed": "Periode hibah ditutup",
+          "audioStartsIn": "Dimulai dalam {days} hari · butuh {rate} mnt/hari"
+        },
+        "milestones": {
+          "title": "Tonggak hibah",
+          "progress": "{done} dari {total} terkonfirmasi",
+          "viewRecorders": "Buka inventaris",
+          "notStarted": "Belum dimulai",
+          "empty": "Belum ada tonggak pencapaian. Semuanya muncul di sini setelah hibah Anda disiapkan.",
+          "confirmed": "Terkonfirmasi",
+          "payout": "Mencairkan ${amount} · pembayaran {tranche}",
+          "reviewNote": "GainForest mengonfirmasi setiap tonggak — setiap tonggak yang dikonfirmasi mencairkan bagian hibah berikutnya.",
+          "pending": "Belum dikonfirmasi"
+        },
+        "metadata": {
+          "title": "Hibah saya",
+          "description": "Hibah Rewilding the Web Anda: langkah berikutnya, kemajuan, dan tonggak pencapaian."
+        },
+        "untitled": "Hibah Anda",
+        "amount": "Hibah ${amount}",
+        "pace": {
+          "title": "Audio terunggah vs laju yang dibutuhkan",
+          "summary": "{current} dari target {target} mnt · laju untuk mencapainya pada {date}",
+          "rangeLabel": "Pilih periode",
+          "ranges": {
+            "1w": "Minggu",
+            "1m": "Bulan",
+            "6m": "6 bulan",
+            "all": "Sejak hibah"
+          },
+          "phrases": {
+            "1w": "minggu ini",
+            "1m": "bulan ini",
+            "6m": "dalam 6 bulan terakhir",
+            "all": "sejak hibah Anda dimulai"
+          },
+          "vsPaceNeeded": "vs laju yang dibutuhkan · {range}",
+          "behindPhrase": "di belakang laju yang dibutuhkan {phrase}",
+          "aheadPhrase": "di depan laju yang dibutuhkan {phrase}",
+          "actual": "aktual",
+          "needed": "dibutuhkan",
+          "perDay": "{rate}/hari",
+          "rates": "{actual} aktual · {needed} dibutuhkan",
+          "legendActual": "Aktual",
+          "legendNeeded": "Laju dibutuhkan",
+          "focus": "{minutes} mnt pada {date}",
+          "overallBehind": "Secara keseluruhan {minutes} mnt di belakang laju seluruh hibah",
+          "overallAhead": "Secara keseluruhan {minutes} mnt di depan laju seluruh hibah",
+          "overallMet": "Target perekaman tercapai"
+        }
+      },
+      "recorders": {
+        "navLabel": "Perekam saya",
+        "title": "Perekam saya",
+        "add": "Tambah perekam",
+        "addShort": "Tambah",
+        "filtersLabel": "Saring perekam menurut asal",
+        "filters": {
+          "all": "Semua {count}",
+          "owned": "Milik Anda {count}",
+          "shipped": "Dari GainForest {count}"
+        },
+        "origin": {
+          "owned": "milik Anda",
+          "shipped": "dari GainForest"
+        },
+        "status": {
+          "recording": "Merekam",
+          "idle": "Belum dipasang",
+          "arriving": "Tiba ~{date}",
+          "inTransit": "Dalam perjalanan",
+          "requested": "Sedang dipesan"
+        },
+        "emptyFilter": "Belum ada perekam yang cocok dengan filter ini.",
+        "unknownPrompt": "Punya perekam yang belum kami ketahui? Tambahkan di sini.",
+        "metadata": {
+          "title": "Perekam saya",
+          "description": "Semua perekam pada hibah Rewilding the Web Anda dan asal masing-masing."
+        },
+        "empty": "Belum ada perekam.",
+        "addNotBuilt": "Penambahan perekam belum dibuat — fitur ini aktif setelah kami dapat menyimpannya ke akun Anda."
+      },
+      "addForm": {
+        "title": "Tambah perekam",
+        "close": "Tutup",
+        "originLegend": "Dari mana asalnya",
+        "originOwned": "Saya sudah punya",
+        "originOwnedHint": "Daftarkan perekam milik Anda.",
+        "originRequest": "Kirimkan satu",
+        "originRequestHint": "Minta GainForest mengirimkannya kepada Anda.",
+        "deviceType": "Jenis perangkat",
+        "deviceOther": "Perekam lain…",
+        "deviceOtherLabel": "Nama perangkat",
+        "deviceOtherPlaceholder": "Merek dan model perangkat",
+        "quantity": "Berapa banyak",
+        "condition": "Kondisi",
+        "conditionOptions": {
+          "fieldWorking": "Berfungsi, di lapangan",
+          "working": "Berfungsi, belum dipasang",
+          "needsRepair": "Perlu perbaikan"
+        },
+        "requestNote": "Kami mengonfirmasi jumlahnya dengan hibah Anda sebelum pengiriman.",
+        "location": "Tempat ia mendengarkan",
+        "locationPlaceholder": "Nama lokasi atau penanda",
+        "mapComingSoon": "Pemilih titik peta segera hadir",
+        "save": "Simpan perekam",
+        "saveRequest": "Ajukan pengiriman",
+        "milestoneNote": "Dihitung untuk tonggak inventaris Anda."
+      },
+      "shell": {
+        "eyebrow": "Rewilding the Web · pratinjau admin",
+        "placeholderNotice": "Angka perekam dan spesies di halaman ini belum terhubung ke catatan nyata, jadi masih nol. Audio terunggah, tonggak, dan dokumen hibah sudah aktif.",
+        "granteeEyebrow": "Meliarkan Kembali Web"
+      }
     }
   },
   "account": {

@@ -281,7 +281,7 @@
       "eyebrow": "Desafio BioBlitz Semanal",
       "titlePrefix": "Desafio",
       "titleEmphasis": "BioBlitz",
-      "description": "Uma corrida semanal e amistosa para registrar a biodiversidade ao ar livre. Adicione observações com suas próprias fotos enviadas. Pessoas e plantas em vasos não contam.",
+      "description": "Uma corrida semanal e amistosa para registrar a biodiversidade ao ar livre com suas próprias fotos enviadas. A partir da Rodada 8, fotos de animais valem 2 pontos, fotos de plantas 1 ponto, e nomear a espécie soma 0,5 ponto extra. Pessoas e plantas em vasos não contam.",
       "program": "Parte do programa Klarna AI for Climate Resilience, com a GainForest."
     },
     "rsvp": {
@@ -340,7 +340,7 @@
           "winners": {
             "title": "4. Seleção de vencedores",
             "paragraphs": {
-              "p1": "O prêmio de Mais observações se baseia no maior número de observações válidas durante a rodada. O prêmio de Melhor foto é escolhido pelos critérios descritos na página do BioBlitz, incluindo qualidade da imagem, tema e envolvimento da comunidade quando relevante.",
+              "p1": "A partir da Rodada 8, o prêmio de Maior pontuação se baseia na maior pontuação total de observações válidas durante a rodada: cada foto válida de animal vale 2 pontos, cada foto válida de planta vale 1 ponto, e qualquer uma soma 0,5 ponto extra quando a espécie está identificada em vez de ficar sem identificação. Em rodadas anteriores, esse prêmio se baseava no maior número de observações válidas. O prêmio de Melhor foto é escolhido pelos critérios descritos na página do BioBlitz, incluindo qualidade da imagem, tema e envolvimento da comunidade quando relevante.",
               "p2": "A GainForest pode revisar envios, resolver empates, corrigir erros de contagem e desclassificar inscrições inválidas. As decisões são finais na medida permitida por lei."
             }
           },
@@ -504,6 +504,10 @@
         "title": "Mais observações",
         "blurb": "Para quem registrar mais avistamentos válidos na rodada."
       },
+      "highestPoints": {
+        "title": "Maior pontuação",
+        "blurb": "Para quem alcançar a maior pontuação na rodada: 2 pontos por foto de animal, 1 por foto de planta e +0,5 ao nomear a espécie."
+      },
       "bestPicture": {
         "title": "Melhor foto",
         "blurb": "Para a foto de natureza mais marcante da semana, escolhida pela equipe."
@@ -522,7 +526,7 @@
         },
         "review": {
           "title": "Confira o nome da espécie",
-          "blurb": "Confirme ou corrija o nome sugerido: seu conhecimento importa."
+          "blurb": "Confirme ou corrija o nome sugerido: a partir da Rodada 8, uma espécie nomeada soma 0,5 ponto extra."
         }
       },
       "proof": {
@@ -536,6 +540,7 @@
       "title": "Ranking desta rodada",
       "live": "Ao vivo",
       "subtitleLive": "Quem está liderando agora com observações fotográficas válidas.",
+      "subtitleLivePoints": "Quem está liderando em pontos agora com observações fotográficas válidas.",
       "subtitleEnded": "Classificação final desta rodada.",
       "subtitleUpcoming": "Seja o primeiro no ranking quando a rodada abrir.",
       "subtitleAll": "Quem tem mais observações fotográficas válidas em todo o desafio.",
@@ -545,6 +550,8 @@
       },
       "leader": "Na liderança",
       "observations": "{count, plural, one {# observação} other {# observações}}",
+      "points": "{points} pts.",
+      "pointsFull": "{points, plural, one {# ponto} other {# pontos}}",
       "openCollector": "Abrir o perfil em uma nova aba",
       "rankAriaLabel": "Posição {rank}",
       "org": {
@@ -563,6 +570,9 @@
       "stats": {
         "observations": "Observações nesta rodada",
         "observationsAll": "Observações (histórico)",
+        "animals": "Animais",
+        "plants": "Plantas",
+        "named": "Espécies nomeadas",
         "collectors": "Participantes",
         "timeLeft": "Tempo restante"
       },
@@ -584,7 +594,26 @@
         "title": "Não foi possível carregar o ranking",
         "description": "Tente novamente em instantes."
       },
-      "cta": "Adicionar suas observações"
+      "cta": "Adicionar suas observações",
+      "pointsGuide": {
+        "title": "Como os pontos são calculados",
+        "animalValue": "2 pts.",
+        "animalLabel": "Por foto de animal",
+        "plantValue": "1 pt.",
+        "plantLabel": "Por foto de planta",
+        "namedValue": "+0,5 pt.",
+        "namedLabel": "Espécie nomeada",
+        "note": "Os pontos começaram na Rodada 8. O total é: fotos de animais × 2, mais fotos de plantas × 1, mais 0,5 por cada espécie nomeada. Toque em uma linha do quadro para ver o cálculo daquela pessoa."
+      },
+      "breakdown": {
+        "toggle": "Como os pontos foram calculados",
+        "animals": "{count, plural, one {# foto de animal} other {# fotos de animais}} × 2",
+        "plants": "{count, plural, one {# foto de planta} other {# fotos de plantas}} × 1",
+        "labeled": "{count, plural, one {# espécie nomeada} other {# espécies nomeadas}} × 0,5",
+        "ineligible": "{count, plural, one {# foto não qualificou} other {# fotos não qualificaram}}",
+        "total": "Total de pontos",
+        "profile": "Abrir perfil"
+      }
     },
     "winners": {
       "title": "Vencedores anteriores",
@@ -597,7 +626,11 @@
       "finalHint": "Estes vencedores estão confirmados e não mudarão.",
       "provisionalHint": "Classificação atual — ainda pode mudar até que os vencedores sejam confirmados.",
       "compact": "Recentes",
+      "newer": "Rodadas recentes",
+      "older": "Rodadas anteriores",
+      "page": "{page} de {total}",
       "mostSubmitted": "Mais envios",
+      "highestPoints": "Maior pontuação",
       "mostLiked": "Mais curtidas",
       "award": {
         "action": "Conceder selos aos vencedores",
@@ -606,6 +639,7 @@
         "error": "Não foi possível atualizar os selos ou o estado do email. Tente novamente.",
         "notification": {
           "mostObservations": "Email de mais observações",
+          "highestPoints": "Email de maior pontuação",
           "bestPicture": "Email de melhor foto",
           "sent": "Enviado",
           "delayed": "Atrasado — continuaremos tentando",
@@ -820,6 +854,139 @@
       "description": "A rodada de financiamento apoiada pela comunidade da Ma Earth usa financiamento quadrático: muitas doações menores são equiparadas e amplificadas mais do que algumas grandes. As candidaturas foram encerradas e a rodada já está em andamento — explore os projetos participantes e apoie-os.",
       "browseProjects": "Explore os projetos desta rodada",
       "logoAlt": "Ma Earth"
+    },
+    "rewildingDashboard": {
+      "grant": {
+        "navLabel": "Meu subsídio",
+        "nextStepEyebrow": "Próximo passo",
+        "dueBy": "até {date}",
+        "openRecorders": "Adicionar gravadores",
+        "statsLabel": "Progresso do subsídio",
+        "stats": {
+          "audioUploaded": "Áudio enviado",
+          "audioValue": "{minutes} min",
+          "recorders": "Gravadores",
+          "recordersYours": "{count} seus",
+          "recordersShipped": "{count} enviados",
+          "speciesTagged": "Espécies marcadas",
+          "audioTargetBy": "Meta de {target} min até {date}",
+          "audioBehindPace": "{minutes} min atrás do ritmo · faltam {days} dias",
+          "audioAheadPace": "{minutes} min à frente do ritmo · faltam {days} dias",
+          "audioTargetMet": "Meta atingida",
+          "audioGrantClosed": "Período do subsídio encerrado",
+          "audioStartsIn": "Começa em {days} dias · são necessários {rate} min/dia"
+        },
+        "milestones": {
+          "title": "Marcos do subsídio",
+          "progress": "{done} de {total} confirmados",
+          "viewRecorders": "Abrir inventário",
+          "notStarted": "Não iniciado",
+          "empty": "Ainda não há marcos. Eles aparecem aqui depois que seu subsídio for configurado.",
+          "confirmed": "Confirmado",
+          "payout": "Libera ${amount} · pagamento {tranche}",
+          "reviewNote": "A GainForest confirma cada marco — cada marco confirmado libera a próxima parte do seu subsídio.",
+          "pending": "Não confirmado"
+        },
+        "metadata": {
+          "title": "Meu subsídio",
+          "description": "Seu subsídio Rewilding the Web: próximo passo, progresso e marcos."
+        },
+        "untitled": "Seu subsídio",
+        "amount": "Subsídio de ${amount}",
+        "pace": {
+          "title": "Áudio enviado frente ao ritmo necessário",
+          "summary": "{current} de {target} min de meta · ritmo para alcançá-la até {date}",
+          "rangeLabel": "Escolha um período",
+          "ranges": {
+            "1w": "Semana",
+            "1m": "Mês",
+            "6m": "6 meses",
+            "all": "Desde o subsídio"
+          },
+          "phrases": {
+            "1w": "esta semana",
+            "1m": "este mês",
+            "6m": "nos últimos 6 meses",
+            "all": "desde o início do seu subsídio"
+          },
+          "vsPaceNeeded": "frente ao ritmo necessário · {range}",
+          "behindPhrase": "atrás do ritmo necessário {phrase}",
+          "aheadPhrase": "à frente do ritmo necessário {phrase}",
+          "actual": "real",
+          "needed": "necessário",
+          "perDay": "{rate}/dia",
+          "rates": "{actual} real · {needed} necessário",
+          "legendActual": "Real",
+          "legendNeeded": "Ritmo necessário",
+          "focus": "{minutes} min em {date}",
+          "overallBehind": "No total {minutes} min atrás do ritmo de todo o subsídio",
+          "overallAhead": "No total {minutes} min à frente do ritmo de todo o subsídio",
+          "overallMet": "Meta de gravação atingida"
+        }
+      },
+      "recorders": {
+        "navLabel": "Meus gravadores",
+        "title": "Meus gravadores",
+        "add": "Adicionar um gravador",
+        "addShort": "Adicionar",
+        "filtersLabel": "Filtrar gravadores por origem",
+        "filters": {
+          "all": "Todos {count}",
+          "owned": "Seus {count}",
+          "shipped": "Da GainForest {count}"
+        },
+        "origin": {
+          "owned": "seu",
+          "shipped": "da GainForest"
+        },
+        "status": {
+          "recording": "Gravando",
+          "idle": "Não implantado",
+          "arriving": "Chega ~{date}",
+          "inTransit": "A caminho",
+          "requested": "Em pedido"
+        },
+        "emptyFilter": "Nenhum gravador corresponde a este filtro ainda.",
+        "unknownPrompt": "Tem um gravador que não conhecemos? Adicione-o aqui.",
+        "metadata": {
+          "title": "Meus gravadores",
+          "description": "Todos os gravadores do seu subsídio Rewilding the Web e de onde cada um veio."
+        },
+        "empty": "Ainda não há gravadores.",
+        "addNotBuilt": "Adicionar gravadores ainda não foi desenvolvido; será ativado quando pudermos salvá-los na sua conta."
+      },
+      "addForm": {
+        "title": "Adicionar um gravador",
+        "close": "Fechar",
+        "originLegend": "De onde ele vem",
+        "originOwned": "Já tenho um",
+        "originOwnedHint": "Registre um gravador que você possui.",
+        "originRequest": "Enviem um para mim",
+        "originRequestHint": "Peça à GainForest para enviar um até você.",
+        "deviceType": "Tipo de dispositivo",
+        "deviceOther": "Outro gravador…",
+        "deviceOtherLabel": "Nome do dispositivo",
+        "deviceOtherPlaceholder": "Marca e modelo do dispositivo",
+        "quantity": "Quantos",
+        "condition": "Condição",
+        "conditionOptions": {
+          "fieldWorking": "Funcionando, em campo",
+          "working": "Funcionando, não implantado",
+          "needsRepair": "Precisa de reparo"
+        },
+        "requestNote": "Confirmamos as quantidades com seu subsídio antes do envio.",
+        "location": "Onde ele escuta",
+        "locationPlaceholder": "Nome do local ou ponto de referência",
+        "mapComingSoon": "Seletor de local no mapa em breve",
+        "save": "Salvar gravador",
+        "saveRequest": "Solicitar envio",
+        "milestoneNote": "Conta para o seu marco de inventário."
+      },
+      "shell": {
+        "eyebrow": "Rewilding the Web · prévia de administração",
+        "placeholderNotice": "Os números de gravadores e espécies desta página ainda não estão conectados a registros reais, por isso marcam zero. O áudio enviado, os marcos e os documentos do subsídio já são reais.",
+        "granteeEyebrow": "Resselvagem da web"
+      }
     }
   },
   "account": {

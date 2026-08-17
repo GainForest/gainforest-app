@@ -133,6 +133,24 @@ describe("getProxyBlockResult", () => {
     ).toBeNull();
   });
 
+  it("allows the Observations hub's static media tabs", () => {
+    expect(
+      getProxyBlockResult({
+        method: "GET",
+        pathname: "/observations/audio",
+        userAgent: "Mozilla/5.0",
+      }),
+    ).toBeNull();
+
+    expect(
+      getProxyBlockResult({
+        method: "GET",
+        pathname: "/es/observations/devices",
+        userAgent: "Mozilla/5.0",
+      }),
+    ).toBeNull();
+  });
+
   it("allows the signed-in account wallet shortcut", () => {
     expect(
       getProxyBlockResult({

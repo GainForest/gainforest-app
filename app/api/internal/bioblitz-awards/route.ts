@@ -2,6 +2,7 @@ import { headers } from "next/headers";
 import { after } from "next/server";
 import { getAuthForwardCookie } from "@/app/_lib/auth";
 import {
+  bioblitzRoundUsesPoints,
   endedRounds,
   fetchRoundCollectors,
   fetchRoundTopLiked,
@@ -200,9 +201,15 @@ export async function POST(request: Request): Promise<Response> {
       pinned.bestPicture === undefined ? fetchRoundTopLiked(round, 1) : null,
     ]);
     const topCollector = board?.collectors[0] ?? null;
+    // The board is ranked by the round's own rule — points from Round 8,
+    // raw observation count before — so the frozen tally follows the rule too.
+    const usesPoints = bioblitzRoundUsesPoints(round.id);
     const mostObservations = pinned.mostObservations !== undefined
       ? pinned.mostObservations
-      : topCollector && { did: topCollector.did, count: topCollector.count as number | null };
+      : topCollector && {
+          did: topCollector.did,
+          count: (usesPoints ? topCollector.points : topCollector.count) as number | null,
+        };
     const computedBestPicture = liked?.[0] ?? null;
     const bestPicture = pinned.bestPicture !== undefined
       ? pinned.bestPicture && { did: pinned.bestPicture.did, winningObservationUri: round.bestPicture?.winningObservationUri }
@@ -218,7 +225,7 @@ export async function POST(request: Request): Promise<Response> {
         const countNote = mostObservations.count != null ? ` (${mostObservations.count})` : "";
         const award = await awardRecognition(
           loaded.repoDid, cookie, mostObservations.did, bioblitzBadgeKey("most-images", round.id),
-          `BioBlitz ${round.label} winner — most observations${countNote}.`,
+          `BioBlitz ${round.label} winner — ${usesPoints ? "highest points" : "most observations"}${countNote}.`,
         );
         notificationInputs.push(notificationInput(round, "most-observations", award));
       } catch (error) {

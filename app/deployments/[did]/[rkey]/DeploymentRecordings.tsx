@@ -70,7 +70,7 @@ export function DeploymentRecordings({
         </p>
         {isOwner ? (
           <Link
-            href="/audiomoth?tab=upload"
+            href="/observations/audio?tab=upload"
             className="inline-flex items-center gap-1.5 text-xs font-medium text-primary underline-offset-2 hover:underline"
           >
             <UploadIcon className="h-3.5 w-3.5" aria-hidden />

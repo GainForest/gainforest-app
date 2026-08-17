@@ -9,7 +9,7 @@ import { formatCgsErrorMessage } from "@/app/_lib/cgs-errors";
 import { formatRelative } from "@/app/_lib/format";
 import { Button } from "@/components/ui/button";
 import type { FlaggedTestRecord } from "@/app/internal/badges/_lib/test-records";
-import { AdminAvatar, AdminEmptyState } from "./AdminModerationDashboard";
+import { AdminAvatar, AdminEmptyState } from "./AdminPanel";
 
 /** The individual posts / observations / other records admins hid from the
  *  public feed and catalogs, with a one-click way to make them visible again. */

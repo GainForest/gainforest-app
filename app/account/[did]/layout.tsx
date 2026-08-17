@@ -217,7 +217,6 @@ export default async function AccountLayout({
               did={account.urlIdentifier}
               accountKind={account.kind}
               includeSettings={canManage}
-              showOrgData={canManage}
               // Tainá is a personal Telegram assistant, so its dashboard tab
               // only appears to the signed-in owner of this profile. Ownership
               // (session DID === account DID) is the whole gate: it can only

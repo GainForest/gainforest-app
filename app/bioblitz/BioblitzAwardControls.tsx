@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import { AlertTriangleIcon, BadgeCheckIcon, CheckIcon, Loader2Icon, MailIcon, MedalIcon } from "lucide-react";
 import { AdminOnlyIndicator } from "../_components/AdminOnlyIndicator";
+import { bioblitzRoundUsesPoints } from "../_lib/bioblitz";
 
 /**
  * Moderator-only "Award winner badges" control shown per finished round in the
@@ -229,7 +230,11 @@ export function RoundAwardControl({
       )}
       {roundState.mostImages && roundState.mostImagesNotification ? (
         <BioblitzPrizeNotificationStatus
-          label={t("notification.mostObservations")}
+          label={t(
+            bioblitzRoundUsesPoints(roundId)
+              ? "notification.highestPoints"
+              : "notification.mostObservations",
+          )}
           notification={roundState.mostImagesNotification}
           busy={busy}
           busyAction={hook.busyAction}

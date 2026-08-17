@@ -11,6 +11,9 @@
   "adminOnly": {
     "label": "Somente administradores"
   },
+  "grantOnly": {
+    "label": "Somente integrantes do subsídio"
+  },
   "navigation": {
     "navigation": "Navegação",
     "openNavigation": "Abrir navegação",
@@ -124,7 +127,9 @@
       "labeler": "Identificação",
       "globe": "Globo",
       "audiomoth": "AudioMoth",
-      "identifications": "Identificações"
+      "identifications": "Identificações",
+      "myGrant": "Meu subsídio",
+      "myRecorders": "Meus gravadores"
     },
     "prompts": {
       "signInDescription": "Entre para gerenciar sua conta e conteúdo.",
@@ -163,7 +168,7 @@
       "admin": "Administração",
       "personalAccount": "Conta pessoal",
       "organizationAccount": "Conta de organização",
-      "myCards": "Minhas cartas"
+      "myCards": "Meus Bumicerts"
     },
     "more": "Mais",
     "hideMore": "Ocultar"
@@ -264,6 +269,14 @@
         "title": "Conta",
         "description": "Nome de usuário e segurança de acesso"
       },
+      "profile": {
+        "title": "Perfil público",
+        "description": "O que sua página pública mostra"
+      },
+      "members": {
+        "title": "Membros",
+        "description": "Pessoas, funções e o Conselho de Dados"
+      },
       "connections": {
         "title": "Conexões",
         "description": "Contas sociais e serviços externos"
@@ -276,6 +289,13 @@
         "title": "Avançado",
         "description": "Dados da conta e exclusão"
       }
+    },
+    "location": {
+      "title": "Localização",
+      "description": "Onde esta conta está sediada; exibida no perfil público.",
+      "notSet": "Nenhuma localização definida",
+      "edit": "Editar",
+      "saveError": "Não foi possível salvar a localização. Tente novamente."
     }
   },
   "bumicertCard": {
@@ -988,6 +1008,7 @@
       "inputPlaceholder": "Email ou usuário do Bluesky",
       "inputAria": "Email ou usuário do Bluesky do membro",
       "invite": "Convidar",
+      "refresh": "Atualizar",
       "ownerHelp": "Insira um email para enviar um convite, ou um usuário do Bluesky para adicionar alguém na hora.",
       "adminHelp": "Adicione membros comuns pelo usuário do Bluesky, ou convide-os por email. Peça a um proprietário para adicionar outro administrador.",
       "locked": "Somente proprietários e administradores podem convidar ou remover membros.",
@@ -1093,6 +1114,7 @@
       "following": "Seguindo",
       "project": "Projetos",
       "observation": "Avistamentos",
+      "audio": "Gravações",
       "organization": "Organizações",
       "donation": "Doações",
       "post": "Publicações"
@@ -1102,7 +1124,8 @@
       "observation": "compartilhou um avistamento",
       "organization": "registrou uma organização",
       "donation": "fez uma doação",
-      "post": "compartilhou uma novidade"
+      "post": "compartilhou uma novidade",
+      "audio": "enviou gravações de campo"
     },
     "to": "para",
     "anonymous": "Alguém",
@@ -1124,6 +1147,11 @@
       "likesAcross": "{count, plural, one {# curtida nestes avistamentos} other {# curtidas nestes avistamentos}}",
       "commentsHeading": "Comentários sobre estes avistamentos",
       "commentOn": "em {species}"
+    },
+    "audioUpload": {
+      "recordings": "{count, plural, one {# gravação enviada} other {# gravações enviadas}}",
+      "browse": "Explorar gravações",
+      "recorderFallback": "Gravador de campo"
     },
     "profileCard": {
       "unnamed": "Conta sem nome",
@@ -1269,6 +1297,11 @@
         "labelWithRound": "BioBlitz {roundName} — mais observações",
         "description": "Venceu uma rodada do BioBlitz por mais observações."
       },
+      "bioblitz-most-images-points": {
+        "label": "BioBlitz — maior pontuação",
+        "labelWithRound": "BioBlitz {roundName} — maior pontuação",
+        "description": "Venceu uma rodada do BioBlitz com a maior pontuação."
+      },
       "bioblitz-best-picture": {
         "label": "BioBlitz — melhor foto",
         "labelWithRound": "BioBlitz {roundName} — melhor foto",
@@ -1309,9 +1342,72 @@
       "description": "Contas que se candidataram ao subsídio de Resselvagem da web. Abra um perfil para conceder o selo do subsídio.",
       "empty": "Ninguém se candidatou ao subsídio ainda."
     },
-    "page": {
-      "title": "Administração",
-      "subtitle": "Revise candidatos a bolsas e eventos, gerencie contas sinalizadas e supervisione os agentes Tainá."
+    "rewilding": {
+      "title": "Resselvagem da web",
+      "description": "As dez vagas do programa. Uma vaga pode ser de uma pessoa ou de um grupo. Adicionar uma conta a admite no subsídio — a partir daí, quem recebe o subsídio, e os membros se for um grupo, pode abrir seu painel de marcos. Marcar um marco como concluído é a confirmação da GainForest — libera o pagamento correspondente.",
+      "footer": "Alterações de marcos e documentos aparecem imediatamente na página do subsídio do beneficiário.",
+      "unnamedGrantee": "Conta sem nome",
+      "granteeBadge": "Selo do subsídio",
+      "summary": "{done} de {total} marcos confirmados · {documents, plural, =0 {sem documentos} one {# documento} other {# documentos}}",
+      "milestonesTitle": "Marcos",
+      "payout": "Libera ${amount} · pagamento {tranche}",
+      "markDone": "Marcar como concluído",
+      "reopen": "Reabrir",
+      "saving": "Salvando…",
+      "confirmedAt": "Confirmado {date}",
+      "error": "Não foi possível salvar. Tente novamente.",
+      "documentsTitle": "Documentos",
+      "documentsPrivateNote": "Somente a equipe de administração da GainForest pode vê-los. Ficam guardados de forma privada, não têm link para compartilhar e ainda não aparecem para o beneficiário.",
+      "documentsEmpty": "Nenhum documento enviado ainda.",
+      "open": "Abrir",
+      "opening": "Abrindo…",
+      "uploadTitleLabel": "Nome do documento",
+      "uploadTitlePlaceholder": "ex.: Contrato do subsídio",
+      "uploadFileLabel": "Escolher arquivo",
+      "upload": "Enviar",
+      "uploading": "Enviando…",
+      "uploadHint": "PDF, imagem ou documento do Word, até 3 MB. Mantido privado para a equipe de administração.",
+      "storageUnavailable": "O armazenamento de arquivos não está configurado nesta implantação, então ainda não é possível enviar documentos aqui.",
+      "fileTooLarge": "Esse arquivo tem mais de 3 MB.",
+      "fileTypeUnsupported": "Só é possível enviar PDF, imagens ou documentos do Word.",
+      "delete": "Excluir {title}",
+      "deleteConfirm": "Excluir “{title}”? O beneficiário deixará de vê-lo.",
+      "openProfile": "Abrir perfil",
+      "slotOpen": "Vaga {number} · aberta",
+      "addTitle": "Adicionar quem recebe o subsídio",
+      "addHint": "Procure uma pessoa ou grupo para preencher esta vaga. Ao adicionar, o painel de marcos abre para essa conta e seus membros.",
+      "searchPlaceholder": "Buscar contas por nome…",
+      "searching": "Buscando…",
+      "searchEmpty": "Nenhuma conta corresponde a “{query}”.",
+      "alreadyEnrolled": "Já está no subsídio",
+      "add": "Adicionar",
+      "adding": "Adicionando…",
+      "slotsFull": "As dez vagas estão ocupadas. Remova alguém antes de adicionar outra pessoa ou grupo.",
+      "remove": "Remover do subsídio",
+      "removing": "Removendo…",
+      "removeConfirm": "Remover “{name}” do subsídio? Os marcos e documentos são mantidos, mas essa conta perde o acesso ao painel do subsídio e a vaga fica livre."
+    },
+    "pages": {
+      "hub": {
+        "title": "Administração",
+        "subtitle": "Revise candidatos a bolsas e eventos, gerencie contas sinalizadas e supervisione os agentes Tainá."
+      },
+      "grants": {
+        "title": "Gestão de subsídios",
+        "subtitle": "Analise as candidaturas ao subsídio e conduza as rodadas semanais do BioBlitz."
+      },
+      "people": {
+        "title": "Pessoas",
+        "subtitle": "Quem usa um assistente de campo Tainá, as organizações que podem endossar contas e os selos concedidos pela GainForest."
+      },
+      "trust": {
+        "title": "Confiança e segurança",
+        "subtitle": "Contas e registros sinalizados como de teste e os endereços bloqueados para cadastro."
+      },
+      "data": {
+        "title": "Dados e dinheiro",
+        "subtitle": "Lotes de dados de parceiros e a carteira facilitadora."
+      }
     }
   },
   "adminBioblitzExclusions": {
@@ -1355,17 +1451,20 @@
       "ended": "Terminada"
     },
     "observations": "{count, plural, one {# observação} other {# observações}}",
+    "points": "{points, plural, one {# ponto} other {# pontos}}",
     "ignored": "Ignorada",
     "counted": "Conta",
     "notCounted": "Não conta",
     "prize": {
       "most-observations": "Mais observações",
+      "highest-points": "Maior pontuação",
       "best-picture": "Melhor foto"
     },
     "openProfile": "Abrir perfil",
     "joined": "Entrou em {date}",
     "download": {
       "most-observations": "Kit de mais observações",
+      "highest-points": "Kit de maior pontuação",
       "best-picture": "Kit de melhor foto"
     },
     "ignore": "Ignorar",
@@ -1779,7 +1878,56 @@
     "previewLoading": "Carregando pré-visualização…",
     "previewFailed": "Não foi possível pré-visualizar este arquivo."
   },
+  "observationsHub": {
+    "ariaLabel": "Tipos de observação",
+    "photos": "Fotos",
+    "audio": "Áudio"
+  },
   "audiomoth": {
+    "audioHub": {
+      "title": "Áudio",
+      "subtitle": "Envie gravações do cartão SD de um AudioMoth, organize-as em implantações e rotule o que você ouve — as observações de áudio vivem aqui.",
+      "metaTitle": "Observações de áudio",
+      "metaDescription": "Envie gravações do AudioMoth, gerencie implantações, rotule espécies e explore paisagens sonoras dentro de Observações.",
+      "librarySubtitle": "Todas as pastas e gravações que você enviou, em um só lugar — reproduza, mova entre pastas, renomeie ou exclua.",
+      "yourRecordings": "Suas gravações",
+      "soundscapesTitle": "Áudio",
+      "soundscapesLede": "Gravações de campo e retratos sonoros de 24 horas de gravadores por todo o GainForest. Toque em um relógio para ouvir um lugar naquela hora do dia.",
+      "soundscapesEmptyTitle": "Nenhum áudio publicado ainda",
+      "soundscapesEmptyBody": "Quando alguém enviar gravações de campo, ou transformá-las em uma paisagem sonora, elas aparecerão aqui para todos ouvirem.",
+      "soundscapesEmptyCta": "Crie uma com suas gravações",
+      "publicPill": "Público",
+      "searchPlaceholder": "Pesquisar projetos ou paisagens sonoras",
+      "allProjects": "Todos os projetos",
+      "filterByProject": "Filtrar por projeto",
+      "sortBy": "Ordenar projetos",
+      "sortRecentlyAdded": "Adicionados recentemente",
+      "sortRecentlyRecorded": "Gravados recentemente",
+      "openProject": "Abrir projeto",
+      "openAccount": "Abrir perfil",
+      "noProject": "(sem projeto)",
+      "projectMeta": "{project} · {recorders, plural, one {# gravador} other {# gravadores}} · {recordings, number} gravações",
+      "soundscapeSlot": "Paisagem sonora",
+      "recordingsSlot": "Gravações",
+      "recorderFallback": "Gravador de campo",
+      "slotRecordings": "{count, number} gravações",
+      "soundscapeFallback": "Paisagem sonora",
+      "dateUnavailable": "Data indisponível",
+      "showMoreFromProject": "{count, plural, one {Mostrar mais # deste projeto} other {Mostrar mais # deste projeto}}",
+      "showFewer": "Mostrar menos",
+      "voiceKeyTitle": "Legenda dos grupos de vozes",
+      "noMatches": "Nenhum projeto corresponde a estes filtros.",
+      "clearFilters": "Limpar filtros",
+      "browseRecordings": "Explorar gravações",
+      "unknownOrganization": "Responsável pelo projeto"
+    },
+    "library": {
+      "signInTitle": "Entre para ver seus arquivos",
+      "signInBody": "Suas gravações e pastas enviadas aparecerão aqui quando você entrar."
+    },
+    "devicesHub": {
+      "title": "Dispositivos"
+    },
     "meta": {
       "title": "Configuração do gravador AudioMoth",
       "description": "Acerte o relógio, configure os horários de gravação e atualize o firmware do seu gravador acústico AudioMoth, direto do navegador."
@@ -1947,6 +2095,7 @@
     },
     "mainTabs": {
       "setup": "Configuração",
+      "library": "Gravações",
       "deployments": "Implantação",
       "upload": "Enviar",
       "label": "Rotular",
@@ -2092,7 +2241,12 @@
       "equipmentUsedLabel": "AudioMoth utilizado",
       "protocolLabel": "Protocolo",
       "recordedByLabel": "Registrado por",
-      "viewEquipment": "Ver os equipamentos"
+      "viewEquipment": "Ver os equipamentos",
+      "attachWaiting": "{count, plural, one {# gravação está sendo enviada em segundo plano — ela será anexada à implantação que você criar.} other {# gravações estão sendo enviadas em segundo plano — elas serão anexadas à implantação que você criar.}}",
+      "attaching": "Anexando {count, plural, one {# gravação} other {# gravações}} à nova implantação…",
+      "attachDone": "{count, plural, one {# gravação anexada à nova implantação.} other {# gravações anexadas à nova implantação.}}",
+      "attachPartial": "{moved} anexadas · {failed} não puderam ser movidas — elas ficam na pasta do cartão.",
+      "attachFailed": "O lote não pôde ser anexado — as gravações ficam na pasta do cartão."
     },
     "upload": {
       "intro": "Insira o cartão SD de um AudioMoth e escolha-o abaixo. As gravações são reconhecidas pelo ID de implantação embutido em cada arquivo, mantidas em armazenamento de arquivo seguro e salvas na sua conta.",
@@ -2123,13 +2277,9 @@
       "previewToggle": "Salvar prévias reproduzíveis",
       "previewHint": "Adiciona uma pequena prévia e um espectrograma de cada gravação à sua conta para poder ser reproduzida e vista em qualquer lugar.",
       "uploadButton": "Enviar {count} gravações",
-      "uploadingButton": "Enviando… {done} de {total} concluídas",
       "cancel": "Cancelar",
       "doneTitle": "Envio concluído",
-      "doneWithErrors": "Concluído com {count} erros",
       "doneBody": "{count} gravações enviadas. {skipped} já existiam e foram ignoradas.",
-      "uploadMore": "Enviar outro cartão",
-      "retryFailed": "Tentar novamente os arquivos com falha ({count})",
       "statusSkipped": "Já enviada",
       "statusRetrying": "Tentando novamente {attempt} de {max}…",
       "dedupChecking": "Verificando quais gravações já estão na sua conta…",
@@ -2142,7 +2292,6 @@
       "errorStorageRejected": "Não conseguimos receber este arquivo. Tente novamente.",
       "errorSaveConnection": "O arquivo foi enviado, mas a internet caiu antes de terminarmos. Toque em “Tentar novamente os arquivos com falha”.",
       "errorSaveFailed": "O arquivo foi enviado, mas não pôde ser salvo na sua conta. Tente novamente.",
-      "errorOffline": "Sem conexão com a internet. Verifique seu Wi-Fi e tente novamente.",
       "deploymentFallback": "Criado automaticamente ao enviar gravações do cartão SD.",
       "groupNameLabel": "Dê um nome a este envio",
       "groupNameHelp": "Estas gravações serão agrupadas com este nome no seu perfil, para você encontrá-las depois.",
@@ -3740,5 +3889,25 @@
     "menuOrganizationSubtitle": "Conta compartilhada da organização",
     "organizationsLabel": "Suas organizações",
     "switchHint": "Mude com qual conta você publica"
+  },
+  "rewildingProgram": {
+    "milestones": {
+      "m1": {
+        "title": "Contrato assinado",
+        "description": "Acordo em vigor; primeiro pagamento liberado."
+      },
+      "m2": {
+        "title": "AudioMoth instalado",
+        "description": "Sensores instalados em campo e gravando ativamente."
+      },
+      "m3": {
+        "title": "Primeiros dados enviados",
+        "description": "Gravações enviadas para o GainForest.app."
+      },
+      "m4": {
+        "title": "Projeto concluído",
+        "description": "Dados rotulados e pelo menos uma atualização pública publicada no Bumicerts."
+      }
+    }
   }
 }

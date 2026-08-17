@@ -11,6 +11,9 @@
   "adminOnly": {
     "label": "Khusus admin"
   },
+  "grantOnly": {
+    "label": "Hanya anggota hibah"
+  },
   "navigation": {
     "navigation": "Navigasi",
     "openNavigation": "Buka navigasi",
@@ -124,7 +127,9 @@
       "labeler": "Pelabel",
       "globe": "Bola Dunia",
       "audiomoth": "AudioMoth",
-      "identifications": "Identifikasi"
+      "identifications": "Identifikasi",
+      "myGrant": "Hibah saya",
+      "myRecorders": "Perekam saya"
     },
     "prompts": {
       "signInDescription": "Masuk untuk mengelola akun dan konten Anda.",
@@ -163,7 +168,7 @@
       "admin": "Admin",
       "personalAccount": "Akun pribadi",
       "organizationAccount": "Akun organisasi",
-      "myCards": "Kartu Saya"
+      "myCards": "Bumicerts Saya"
     },
     "more": "Lainnya",
     "hideMore": "Sembunyikan"
@@ -264,6 +269,14 @@
         "title": "Akun",
         "description": "Nama pengguna dan keamanan masuk"
       },
+      "profile": {
+        "title": "Profil publik",
+        "description": "Apa yang ditampilkan halaman publik Anda"
+      },
+      "members": {
+        "title": "Anggota",
+        "description": "Orang, peran, dan Dewan Data"
+      },
       "connections": {
         "title": "Koneksi",
         "description": "Akun sosial dan layanan eksternal"
@@ -276,6 +289,13 @@
         "title": "Lanjutan",
         "description": "Data akun dan penghapusan"
       }
+    },
+    "location": {
+      "title": "Lokasi",
+      "description": "Tempat akun ini berbasis, ditampilkan di profil publik.",
+      "notSet": "Lokasi belum diatur",
+      "edit": "Ubah",
+      "saveError": "Tidak dapat menyimpan lokasi. Silakan coba lagi."
     }
   },
   "bumicertCard": {
@@ -988,6 +1008,7 @@
       "inputPlaceholder": "Email atau handle Bluesky",
       "inputAria": "Email atau handle Bluesky anggota",
       "invite": "Undang",
+      "refresh": "Muat ulang",
       "ownerHelp": "Masukkan email untuk mengirim undangan, atau handle Bluesky untuk langsung menambahkan seseorang.",
       "adminHelp": "Tambahkan anggota biasa lewat handle Bluesky, atau undang mereka lewat email. Minta pemilik menambahkan administrator lain.",
       "locked": "Hanya pemilik dan admin yang dapat mengundang atau menghapus anggota.",
@@ -1093,6 +1114,7 @@
       "following": "Mengikuti",
       "project": "Proyek",
       "observation": "Pengamatan",
+      "audio": "Rekaman",
       "organization": "Organisasi",
       "donation": "Donasi",
       "post": "Postingan"
@@ -1102,7 +1124,8 @@
       "observation": "berbagi pengamatan alam",
       "organization": "mendaftarkan organisasi",
       "donation": "memberi donasi",
-      "post": "membagikan kabar"
+      "post": "membagikan kabar",
+      "audio": "mengunggah rekaman lapangan"
     },
     "to": "untuk",
     "anonymous": "Seseorang",
@@ -1124,6 +1147,11 @@
       "likesAcross": "{count, plural, other {# suka pada pengamatan ini}}",
       "commentsHeading": "Komentar pada pengamatan ini",
       "commentOn": "pada {species}"
+    },
+    "audioUpload": {
+      "recordings": "{count, plural, one {# rekaman diunggah} other {# rekaman diunggah}}",
+      "browse": "Jelajahi rekaman",
+      "recorderFallback": "Perekam lapangan"
     },
     "profileCard": {
       "unnamed": "Akun tanpa nama",
@@ -1269,6 +1297,11 @@
         "labelWithRound": "BioBlitz {roundName} — observasi terbanyak",
         "description": "Memenangkan ronde BioBlitz untuk observasi terbanyak."
       },
+      "bioblitz-most-images-points": {
+        "label": "BioBlitz — poin tertinggi",
+        "labelWithRound": "BioBlitz {roundName} — poin tertinggi",
+        "description": "Memenangkan ronde BioBlitz dengan poin tertinggi."
+      },
       "bioblitz-best-picture": {
         "label": "BioBlitz — foto terbaik",
         "labelWithRound": "BioBlitz {roundName} — foto terbaik",
@@ -1309,9 +1342,72 @@
       "description": "Akun yang mengajukan hibah Meliarkan Kembali Web. Buka profil untuk memberikan lencana hibah.",
       "empty": "Belum ada yang mengajukan hibah."
     },
-    "page": {
-      "title": "Admin",
-      "subtitle": "Tinjau pelamar hibah dan acara, kelola akun yang ditandai, dan awasi agen Tainá."
+    "rewilding": {
+      "title": "Meliarkan Kembali Web",
+      "description": "Sepuluh slot program. Satu slot bisa dipegang oleh perorangan atau grup. Menambahkan akun berarti menerimanya ke dalam hibah — sejak itu penerima hibah, dan anggotanya jika berupa grup, dapat membuka dasbor tonggaknya. Menandai tonggak selesai adalah konfirmasi GainForest — itu mencairkan pembayaran terkait.",
+      "footer": "Perubahan tonggak dan dokumen langsung terlihat di halaman hibah penerima.",
+      "unnamedGrantee": "Akun tanpa nama",
+      "granteeBadge": "Lencana hibah",
+      "summary": "{done} dari {total} tonggak dikonfirmasi · {documents, plural, =0 {tanpa dokumen} other {# dokumen}}",
+      "milestonesTitle": "Tonggak",
+      "payout": "Mencairkan ${amount} · pembayaran {tranche}",
+      "markDone": "Tandai selesai",
+      "reopen": "Buka kembali",
+      "saving": "Menyimpan…",
+      "confirmedAt": "Dikonfirmasi {date}",
+      "error": "Gagal menyimpan. Coba lagi.",
+      "documentsTitle": "Dokumen",
+      "documentsPrivateNote": "Hanya tim admin GainForest yang dapat melihatnya. Dokumen disimpan secara privat, tidak punya tautan berbagi, dan belum terlihat oleh penerima hibah.",
+      "documentsEmpty": "Belum ada dokumen yang diunggah.",
+      "open": "Buka",
+      "opening": "Membuka…",
+      "uploadTitleLabel": "Nama dokumen",
+      "uploadTitlePlaceholder": "mis. Kontrak hibah",
+      "uploadFileLabel": "Pilih berkas",
+      "upload": "Unggah",
+      "uploading": "Mengunggah…",
+      "uploadHint": "PDF, gambar, atau dokumen Word, maksimal 3 MB. Tetap privat untuk tim admin.",
+      "storageUnavailable": "Penyimpanan berkas belum disiapkan di penerapan ini, jadi dokumen belum dapat diunggah di sini.",
+      "fileTooLarge": "Berkas itu lebih besar dari 3 MB.",
+      "fileTypeUnsupported": "Hanya PDF, gambar, atau dokumen Word yang dapat diunggah.",
+      "delete": "Hapus {title}",
+      "deleteConfirm": "Hapus “{title}”? Penerima tidak akan melihatnya lagi.",
+      "openProfile": "Buka profil",
+      "slotOpen": "Slot {number} · kosong",
+      "addTitle": "Tambahkan penerima hibah",
+      "addHint": "Cari perorangan atau grup untuk mengisi slot ini. Menambahkannya membuka dasbor tonggak bagi akun tersebut dan anggotanya.",
+      "searchPlaceholder": "Cari akun berdasarkan nama…",
+      "searching": "Mencari…",
+      "searchEmpty": "Tidak ada akun yang cocok dengan “{query}”.",
+      "alreadyEnrolled": "Sudah dalam hibah",
+      "add": "Tambah",
+      "adding": "Menambahkan…",
+      "slotsFull": "Kesepuluh slot sudah terisi. Hapus satu penerima sebelum menambahkan yang lain.",
+      "remove": "Keluarkan dari hibah",
+      "removing": "Mengeluarkan…",
+      "removeConfirm": "Hapus “{name}” dari hibah? Tonggak dan dokumen tetap disimpan, tetapi akun itu kehilangan akses ke dasbor hibah dan slotnya terbuka."
+    },
+    "pages": {
+      "hub": {
+        "title": "Admin",
+        "subtitle": "Tinjau pelamar hibah dan acara, kelola akun yang ditandai, dan awasi agen Tainá."
+      },
+      "grants": {
+        "title": "Pengelolaan hibah",
+        "subtitle": "Tinjau pemohon hibah dan jalankan ronde BioBlitz mingguan."
+      },
+      "people": {
+        "title": "Orang",
+        "subtitle": "Semua orang yang menjalankan asisten lapangan Tainá, organisasi yang dapat mendukung akun, dan lencana yang diberikan GainForest."
+      },
+      "trust": {
+        "title": "Kepercayaan & keamanan",
+        "subtitle": "Akun dan catatan yang ditandai sebagai uji coba, serta alamat yang diblokir untuk mendaftar."
+      },
+      "data": {
+        "title": "Data & keuangan",
+        "subtitle": "Batch data mitra dan dompet fasilitator."
+      }
     }
   },
   "adminBioblitzExclusions": {
@@ -1355,17 +1451,20 @@
       "ended": "Selesai"
     },
     "observations": "{count, number} pengamatan",
+    "points": "{points, plural, other {# poin}}",
     "ignored": "Diabaikan",
     "counted": "Dihitung",
     "notCounted": "Tidak dihitung",
     "prize": {
       "most-observations": "Pengamatan terbanyak",
+      "highest-points": "Poin tertinggi",
       "best-picture": "Foto terbaik"
     },
     "openProfile": "Buka profil",
     "joined": "Bergabung {date}",
     "download": {
       "most-observations": "Paket pengamatan terbanyak",
+      "highest-points": "Paket poin tertinggi",
       "best-picture": "Paket foto terbaik"
     },
     "ignore": "Abaikan",
@@ -1779,7 +1878,56 @@
     "previewLoading": "Memuat pratinjau…",
     "previewFailed": "File ini tidak bisa dipratinjau."
   },
+  "observationsHub": {
+    "ariaLabel": "Jenis observasi",
+    "photos": "Foto",
+    "audio": "Audio"
+  },
   "audiomoth": {
+    "audioHub": {
+      "title": "Audio",
+      "subtitle": "Unggah rekaman dari kartu SD AudioMoth, susun ke dalam penempatan, dan beri label pada apa yang Anda dengar — observasi audio ada di sini.",
+      "metaTitle": "Observasi audio",
+      "metaDescription": "Unggah rekaman AudioMoth, kelola penempatan, beri label spesies, dan jelajahi lanskap suara di dalam Observasi.",
+      "librarySubtitle": "Semua folder dan rekaman yang telah Anda unggah, di satu tempat — putar, pindahkan antar folder, ganti nama, atau hapus.",
+      "yourRecordings": "Rekaman Anda",
+      "soundscapesTitle": "Audio",
+      "soundscapesLede": "Rekaman lapangan dan potret suara 24 jam dari perekam di seluruh GainForest. Ketuk jam untuk mendengar suatu tempat pada waktu itu.",
+      "soundscapesEmptyTitle": "Belum ada audio yang diterbitkan",
+      "soundscapesEmptyBody": "Saat seseorang mengunggah rekaman lapangan, atau mengubahnya menjadi lanskap suara, semuanya akan muncul di sini untuk didengarkan semua orang.",
+      "soundscapesEmptyCta": "Buat dari rekaman Anda",
+      "publicPill": "Publik",
+      "searchPlaceholder": "Cari proyek atau lanskap suara",
+      "allProjects": "Semua proyek",
+      "filterByProject": "Saring menurut proyek",
+      "sortBy": "Urutkan proyek",
+      "sortRecentlyAdded": "Baru ditambahkan",
+      "sortRecentlyRecorded": "Baru direkam",
+      "openProject": "Buka proyek",
+      "openAccount": "Buka profil",
+      "noProject": "(tanpa proyek)",
+      "projectMeta": "{project} · {recorders, plural, other {# perekam}} · {recordings, number} rekaman",
+      "soundscapeSlot": "Lanskap suara",
+      "recordingsSlot": "Rekaman",
+      "recorderFallback": "Perekam lapangan",
+      "slotRecordings": "{count, number} rekaman",
+      "soundscapeFallback": "Lanskap suara",
+      "dateUnavailable": "Tanggal tidak tersedia",
+      "showMoreFromProject": "{count, plural, other {Tampilkan # lagi dari proyek ini}}",
+      "showFewer": "Tampilkan lebih sedikit",
+      "voiceKeyTitle": "Legenda kelompok suara",
+      "noMatches": "Tidak ada proyek yang cocok dengan filter ini.",
+      "clearFilters": "Hapus filter",
+      "browseRecordings": "Jelajahi rekaman",
+      "unknownOrganization": "Pengelola proyek"
+    },
+    "library": {
+      "signInTitle": "Masuk untuk melihat berkas Anda",
+      "signInBody": "Rekaman dan folder yang Anda unggah akan muncul di sini setelah Anda masuk."
+    },
+    "devicesHub": {
+      "title": "Perangkat"
+    },
     "meta": {
       "title": "Pengaturan perekam AudioMoth",
       "description": "Atur jam, konfigurasikan jadwal perekaman, dan perbarui firmware perekam akustik AudioMoth Anda, langsung dari peramban."
@@ -1947,6 +2095,7 @@
     },
     "mainTabs": {
       "setup": "Penyiapan",
+      "library": "Rekaman",
       "deployments": "Penempatan",
       "upload": "Unggah",
       "label": "Beri label",
@@ -2092,7 +2241,12 @@
       "equipmentUsedLabel": "AudioMoth yang digunakan",
       "protocolLabel": "Protokol",
       "recordedByLabel": "Dicatat oleh",
-      "viewEquipment": "Lihat peralatan mereka"
+      "viewEquipment": "Lihat peralatan mereka",
+      "attachWaiting": "{count, plural, other {# rekaman sedang diunggah di latar belakang — akan melekat ke penempatan yang Anda buat.}}",
+      "attaching": "Melekatkan {count, plural, other {# rekaman}} ke penempatan baru…",
+      "attachDone": "{count, plural, other {# rekaman dilekatkan ke penempatan baru.}}",
+      "attachPartial": "{moved} dilekatkan · {failed} tidak dapat dipindahkan — tetap di folder kartu.",
+      "attachFailed": "Batch tidak dapat dilekatkan — rekaman tetap berada di folder kartu."
     },
     "upload": {
       "intro": "Masukkan kartu SD AudioMoth dan pilih di bawah. Rekaman dikenali dari ID penempatan yang tertanam di setiap berkas, disimpan aman di penyimpanan arsip, dan dicatat ke akun Anda.",
@@ -2123,13 +2277,9 @@
       "previewToggle": "Simpan pratinjau yang dapat diputar",
       "previewHint": "Menambahkan pratinjau kecil dan spektrogram dari setiap rekaman ke akun Anda agar dapat diputar dan dilihat di mana saja.",
       "uploadButton": "Unggah {count} rekaman",
-      "uploadingButton": "Mengunggah… {done} dari {total} selesai",
       "cancel": "Batal",
       "doneTitle": "Unggahan selesai",
-      "doneWithErrors": "Selesai dengan {count} kesalahan",
       "doneBody": "{count} rekaman terunggah. {skipped} sudah ada dan dilewati.",
-      "uploadMore": "Unggah kartu lain",
-      "retryFailed": "Coba lagi file yang gagal ({count})",
       "statusSkipped": "Sudah diunggah",
       "statusRetrying": "Mencoba lagi {attempt} dari {max}…",
       "dedupChecking": "Memeriksa rekaman mana yang sudah ada di akun Anda…",
@@ -2142,7 +2292,6 @@
       "errorStorageRejected": "Kami tidak dapat menerima file ini. Silakan coba lagi.",
       "errorSaveConnection": "File sudah terkirim, tetapi internet terputus sebelum kami selesai. Ketuk “Coba lagi file yang gagal”.",
       "errorSaveFailed": "File sudah terunggah, tetapi tidak dapat disimpan ke akun Anda. Silakan coba lagi.",
-      "errorOffline": "Tidak ada koneksi internet. Periksa Wi-Fi Anda dan coba lagi.",
       "deploymentFallback": "Dibuat otomatis saat mengunggah rekaman kartu SD.",
       "groupNameLabel": "Beri nama unggahan ini",
       "groupNameHelp": "Rekaman ini akan dikelompokkan dengan nama ini di profil Anda, agar mudah ditemukan nanti.",
@@ -3740,5 +3889,25 @@
     "menuOrganizationSubtitle": "Akun bersama organisasi",
     "organizationsLabel": "Organisasi Anda",
     "switchHint": "Ganti akun yang Anda gunakan untuk menerbitkan"
+  },
+  "rewildingProgram": {
+    "milestones": {
+      "m1": {
+        "title": "Kontrak ditandatangani",
+        "description": "Perjanjian berlaku; pembayaran pertama dicairkan."
+      },
+      "m2": {
+        "title": "AudioMoth dipasang",
+        "description": "Sensor dipasang di lapangan dan aktif merekam."
+      },
+      "m3": {
+        "title": "Data pertama diunggah",
+        "description": "Rekaman diunggah ke GainForest.app."
+      },
+      "m4": {
+        "title": "Proyek selesai",
+        "description": "Data diberi label dan setidaknya satu pembaruan publik telah diposting di Bumicerts."
+      }
+    }
   }
 }

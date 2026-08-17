@@ -377,12 +377,6 @@
     "loading": "Carregando...",
     "done": "Concluído"
   },
-  "countrySelector": {
-    "title": "Selecionar país",
-    "description": "Escolha o país conectado a este registro.",
-    "searchPlaceholder": "Buscar países",
-    "done": "Concluir"
-  },
   "orgWallet": {
     "title": "Carteira da organização",
     "description": "Uma carteira compartilhada para a sua organização, protegida pelas chaves de acesso dos membros",

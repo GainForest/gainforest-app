@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { indexerQuery } from "../../../_lib/indexer";
 import { countryCodeFromCertifiedLocation } from "../../../_lib/country-location";
+import { getCountry } from "../../../_lib/countries";
 import { resolvePdsHost } from "../../../_lib/pds";
 import { geojsonBounds } from "../../../globe/_lib/data";
 import { chunk, fetchGlobeRoster } from "../_roster";
@@ -77,12 +78,18 @@ function pointFromDeclaredLocation(text: string): Point | null {
 
 type ResolvedLocation = { point: Point | null; country: string | null };
 
-/** Pin + country from one declared location value: the country is recognised
- *  when the coordinate matches the country the org picked from the list. */
+/** Pin + country from one declared location value. A `country-code` record
+ *  names its country outright and stores no coordinate — the pin drawn for it
+ *  is this renderer's convention, the country table's centroid. A legacy
+ *  coordinate resolves to a country only when it matches a centroid the
+ *  country picker once published. */
 function resolvedFromLocationText(text: string): ResolvedLocation {
+  const country = countryCodeFromCertifiedLocation({ location: { string: text } });
+  const declaredPoint = pointFromDeclaredLocation(text);
+  const centroid = country ? getCountry(country)?.coordinates : null;
   return {
-    point: pointFromDeclaredLocation(text),
-    country: countryCodeFromCertifiedLocation({ location: { string: text } }),
+    point: declaredPoint ?? (centroid ? { lon: centroid.longitude, lat: centroid.latitude } : null),
+    country,
   };
 }
 

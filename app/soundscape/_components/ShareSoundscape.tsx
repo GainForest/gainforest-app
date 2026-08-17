@@ -30,7 +30,7 @@ import { ModalContent, ModalDescription, ModalTitle } from "@/components/ui/moda
 import { manageApiHref } from "@/lib/links";
 import { cn } from "@/lib/utils";
 import { createFeedPost } from "@/app/(manage)/manage/_lib/mutations";
-import { useAccountList, useActiveAccountContext } from "@/app/_lib/account-switcher";
+import { useActingRepo } from "@/app/_lib/account-switcher";
 import { createSoundscapeRecord } from "@/app/_lib/soundscape-record";
 import { resolveStrongRef } from "@/app/_lib/pds";
 import { createContextAttachment } from "@/app/cert/[did]/[rkey]/_components/timeline/contextAttachmentMutations";
@@ -61,19 +61,14 @@ export type ShareTarget = {
  * lists that account's projects.
  */
 export function useShareTarget(sessionDid: string | null): ShareTarget {
-  const { groups } = useAccountList(sessionDid);
-  const [activeContext] = useActiveAccountContext(sessionDid ?? "");
+  const acting = useActingRepo(sessionDid);
 
   return useMemo(() => {
     if (!sessionDid) return { repo: undefined, apiTarget: null };
-    if (activeContext.type === "group" && activeContext.did) {
-      const known = groups.some((entry) => entry.groupDid === activeContext.did);
-      if (known || activeContext.did) {
-        return { repo: activeContext.did, apiTarget: { kind: "group" as const, did: activeContext.did } };
-      }
-    }
-    return { repo: undefined, apiTarget: { kind: "personal" as const, did: sessionDid } };
-  }, [activeContext.did, activeContext.type, groups, sessionDid]);
+    return acting.repo
+      ? { repo: acting.repo, apiTarget: { kind: "group" as const, did: acting.repo } }
+      : { repo: undefined, apiTarget: { kind: "personal" as const, did: sessionDid } };
+  }, [acting.repo, sessionDid]);
 }
 
 export type SoundscapePublishInput = {

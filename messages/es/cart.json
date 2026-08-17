@@ -98,18 +98,19 @@
     "messagePlaceholder": "Añade un mensaje (opcional)…",
     "messageAnonymousNote": "Tu mensaje no se mostrará con tu nombre.",
     "tipNone": "Sin propina",
-    "cardsPreviewTitle": "Cartas que recibirás",
-    "cardsUnavailableNote": "Las cartas solo están disponibles para donaciones a proyectos elegibles. Esta compra no incluye ninguna.",
-    "cardsCheckingNote": "Comprobando qué donaciones otorgarán cartas…",
-    "receiptIssue": "Tu pago se completó, pero no se pudieron crear uno o más registros públicos de donación. Esas donaciones no aparecerán en Mis cartas.",
+    "cardsPreviewTitle": "Bumicerts que recibirás",
+    "cardsUnavailableNote": "Los Bumicerts solo están disponibles para donaciones a proyectos elegibles. Esta compra no incluye ninguno.",
+    "cardsCheckingNote": "Comprobando qué donaciones otorgarán Bumicerts…",
+    "receiptIssue": "Tu pago se completó, pero no se pudieron crear uno o más registros públicos de donación. Esas donaciones no aparecerán en Mis Bumicerts.",
     "reward": {
       "eyebrow": "Coleccionable desbloqueado",
       "guardianOf": "Guardián de",
+      "personEyebrow": "En apoyo de",
       "contributed": "Contribuido",
       "moreProjects": "{count, plural, one {# proyecto más} other {# proyectos más}}",
       "mint": "N.º {mint}",
       "verified": "Verificado en la cadena",
-      "tiltHint": "Mueve el cursor sobre la carta para captar la luz",
+      "tiltHint": "Mueve el cursor sobre el Bumicert para captar la luz",
       "tiers": {
         "seedling": {
           "name": "Brote",
@@ -137,13 +138,13 @@
       "overallSubtitle": "{count, plural, one {# proyecto apoyado} other {# proyectos apoyados}}",
       "collect": "Coleccionar",
       "collectAll": "Coleccionar todo ({count})",
-      "prevCard": "Carta anterior",
-      "nextCard": "Carta siguiente",
-      "deckHint": "Desliza para ver tus coleccionables",
-      "cardPosition": "Carta {current} de {total}",
+      "prevCard": "Bumicert anterior",
+      "nextCard": "Bumicert siguiente",
+      "deckHint": "Desliza para ver tus Bumicerts",
+      "cardPosition": "Bumicert {current} de {total}",
       "collectedTitle": "¡Todo coleccionado!",
-      "collectedBody": "Tus cartas verificadas están listas en Mis cartas.",
-      "viewMyCards": "Ver Mis cartas"
+      "collectedBody": "Tus Bumicerts verificados están listos en Mis Bumicerts.",
+      "viewMyCards": "Ver Mis Bumicerts"
     }
   },
   "testRegistry": {
@@ -233,27 +234,58 @@
       "mockCopied": "Enlace simulado copiado sin usar el portapapeles.",
       "mockCanceled": "Invitación simulada eliminada de esta vista previa."
     },
-    "myCardsTitle": "Galería Mis cartas",
-    "myCardsDescription": "Previsualiza la galería de cartas coleccionadas con coleccionables de muestra."
+    "myCardsTitle": "Galería de Mis Bumicerts",
+    "myCardsDescription": "Previsualiza la galería de Bumicerts coleccionados con coleccionables de muestra.",
+    "rewildingDashboard": {
+      "title": "Panel de la subvención Rewilding",
+      "description": "La vista Mi subvención y su gráfico de ritmo de audio, en cada estado posible de la meta de grabación.",
+      "safetyNote": "Solo datos de prueba. Esta ruta nunca lee el indexador, la inscripción de quien la visita ni las confirmaciones de hitos, y nada aquí puede cambiar una subvención.",
+      "behind": {
+        "title": "Por detrás del ritmo necesario",
+        "description": "Unos pocos minutos al día: aproximadamente donde está quien empieza frente a la meta de 7.000 minutos."
+      },
+      "ahead": {
+        "title": "Por delante del ritmo necesario",
+        "description": "Subidas que superan la línea que la subvención necesita."
+      },
+      "met": {
+        "title": "Meta alcanzada",
+        "description": "La meta de grabación está lograda, así que el gráfico deja de pedir un ritmo."
+      },
+      "noAudio": {
+        "title": "Aún sin audio",
+        "description": "No se ha subido nada, así que el gráfico de ritmo se omite en vez de dibujarse vacío."
+      },
+      "mockBadge": "Datos de prueba",
+      "cardTitle": "Panel de la subvención Rewilding",
+      "cardDescription": "Mi subvención con su gráfico de ritmo de audio, por detrás y por delante de la meta.",
+      "upcoming": {
+        "title": "Antes de que empiece la subvención",
+        "description": "El periodo aún no ha comenzado, así que no hay veredicto de ritmo ni gráfico: solo cuándo empieza y qué pedirá."
+      }
+    }
   },
   "myCards": {
     "eyebrow": "Coleccionables",
-    "title": "Mis cartas",
-    "description": "Cada carta proviene de un recibo de donación verificado vinculado a tu cuenta.",
-    "count": "{count, plural, one {# carta} other {# cartas}}",
-    "emptyTitle": "Aún no hay cartas",
-    "emptyBody": "Dona a un proyecto con la sesión iniciada y mostrando tu nombre para ganar tu primera carta.",
+    "title": "Mis Bumicerts",
+    "description": "Cada Bumicert proviene de un recibo de donación verificado vinculado a tu cuenta.",
+    "count": "{count, plural, one {# Bumicert} other {# Bumicerts}}",
+    "emptyTitle": "Aún no hay Bumicerts",
+    "emptyBody": "Dona a un proyecto con la sesión iniciada y mostrando tu nombre para ganar tu primer Bumicert.",
     "browseProjects": "Explorar proyectos",
-    "signedOutTitle": "Inicia sesión para ver tus cartas",
-    "signedOutBody": "Las cartas se vinculan a tu cuenta para que sigan disponibles en otros navegadores y dispositivos.",
-    "unavailableTitle": "No se pudieron cargar tus cartas",
-    "unavailableBody": "Tus registros de donación están seguros. Intenta cargar tus cartas de nuevo.",
+    "signedOutTitle": "Inicia sesión para ver tus Bumicerts",
+    "signedOutBody": "Los Bumicerts se vinculan a tu cuenta para que sigan disponibles en otros navegadores y dispositivos.",
+    "unavailableTitle": "No se pudieron cargar tus Bumicerts",
+    "unavailableBody": "Tus registros de donación están seguros. Intenta cargar tus Bumicerts de nuevo.",
     "tryAgain": "Intentar de nuevo",
-    "partialBody": "No se pudieron cargar algunos registros de donación o detalles de proyectos. Las cartas mostradas están verificadas, pero tu colección podría estar incompleta.",
+    "partialBody": "No se pudieron cargar algunos registros de donación o detalles de proyectos. Los Bumicerts mostrados están verificados, pero tu colección podría estar incompleta.",
     "fallbackProject": "Proyecto apoyado",
     "fallbackOrganization": "Equipo del proyecto",
+    "fallbackRecipient": "Una persona de la comunidad",
+    "fallbackPersonContext": "Apoyo directo",
     "verifiedDonation": "Donación verificada",
     "viewProject": "Ver proyecto",
+    "viewProfile": "Ver perfil",
     "viewPayment": "Ver pago"
   }
 }

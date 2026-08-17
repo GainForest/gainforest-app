@@ -31,6 +31,7 @@ export type { RewardLine } from "./reward-model";
 export function DonationRewardCard({
   lines,
   totalUsd,
+  variant = "project",
   animateEntrance = true,
   overall = false,
   interactive = true,
@@ -38,6 +39,8 @@ export function DonationRewardCard({
   lines: RewardLine[];
   /** Total contributed across every settled line, in USD. */
   totalUsd: number;
+  /** "project" honours a project donation; "person" a direct gift to an account. */
+  variant?: "project" | "person";
   /** Deal the card in on mount. Disable when a parent controls the entrance. */
   animateEntrance?: boolean;
   /** Render as the "overall" summary of a multi-project checkout. */
@@ -100,7 +103,7 @@ export function DonationRewardCard({
 
   const tierName = t(`tiers.${tier.key}.name`);
   const amount = format.number(totalUsd, { style: "currency", currency: "USD" });
-  const eyebrow = overall ? t("overallEyebrow") : t("guardianOf");
+  const eyebrow = overall ? t("overallEyebrow") : variant === "person" ? t("personEyebrow") : t("guardianOf");
   const heroTitle = overall ? t("overallTitle") : featured.title;
   const subtitle = overall
     ? t("overallSubtitle", { count: donationLines.length })

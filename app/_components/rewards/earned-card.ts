@@ -5,6 +5,8 @@ export type EarnedCard = RewardCard & {
   receiptUri: string;
   earnedAt: string | null;
   projectHref: string | null;
+  /** Account page of the person honoured by a "person" card. */
+  personHref?: string | null;
   paymentHref: string | null;
 };
 

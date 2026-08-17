@@ -25,8 +25,8 @@ export default async function AccountObservationsPage({
   const { did, urlIdentifier } = await readAccountRouteParams(params);
   const account = await getAccountRouteData(did, urlIdentifier);
 
-  // Measurements / Audio / Drone are private layers, so only show the secondary
-  // nav to the owner / organization manager.
+  // Manage access only gates the private measurements layer — the secondary
+  // nav itself (Photos / Audio) is public.
   const access = await resolveAccountManageAccess(account.urlIdentifier).catch(() => null);
   const canManage = access?.status === "allowed";
 
@@ -37,7 +37,7 @@ export default async function AccountObservationsPage({
 
   return (
     <>
-      <ObservationsSubNav identifier={account.urlIdentifier} showPrivate={canManage} />
+      <ObservationsSubNav identifier={account.urlIdentifier} />
       {showMeasurements && access?.status === "allowed" ? (
         <TreesSection target={access.target} />
       ) : (

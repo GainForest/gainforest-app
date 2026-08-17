@@ -374,7 +374,8 @@
       "published": "Diterbitkan",
       "firstSiteBoundary": "Batas situs pertama",
       "firstSiteBoundaryMap": "Peta batas situs pertama",
-      "contributors": "Kontributor"
+      "contributors": "Kontributor",
+      "noLocationSet": "Lokasi belum diatur"
     },
     "headerTabs": {
       "overview": "Ringkasan",
