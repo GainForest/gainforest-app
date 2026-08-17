@@ -6,13 +6,13 @@ import { getGainForestModeratorAccess } from "@/app/internal/badges/_lib/access"
 import { AudioSection } from "@/app/(manage)/manage/_sections";
 import { AudioMothClient } from "@/app/audiomoth/_components/AudioMothClient";
 import Container from "@/components/ui/container";
-import { ObservationsSubNav } from "../../../_components/ObservationsSubNav";
+import { ObservationsSubNav } from "@/app/account/_components/ObservationsSubNav";
 import {
   accountAudioManagePath,
   accountObservationsManagePath,
   getAccountRouteData,
   readAccountRouteParams,
-} from "../../../_lib/account-route";
+} from "@/app/account/_lib/account-route";
 
 export async function generateMetadata({ params }: { params: Promise<{ did: string }> }): Promise<Metadata> {
   const { did, urlIdentifier } = await readAccountRouteParams(params);
@@ -33,7 +33,8 @@ export async function generateMetadata({ params }: { params: Promise<{ did: stri
  * identifications, the soundscape workbench and USB device setup), extracted from the audio hub so
  * that all management happens here. The twin of the observations workspace,
  * reached from the Audio pill beside it, and like it standing alone:
- * AccountChrome passes it through without the profile hero and tabs.
+ * The route sits outside the profile segment, so it renders without the
+ * profile hero and tabs from the first server paint.
  *
  * The workspace acts on the account named in the URL: the account context
  * syncs itself to /account/<id>/… routes, and the gate below guarantees the

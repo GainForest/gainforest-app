@@ -6,14 +6,14 @@ import { resolveAccountManageAccess } from "@/app/_lib/manage-server";
 import { getGainForestModeratorAccess } from "@/app/internal/badges/_lib/access";
 import Container from "@/components/ui/container";
 import { ObservationsSection, TreesSection } from "@/app/(manage)/manage/_sections";
-import { ObservationsSubNav } from "../../../_components/ObservationsSubNav";
-import { ObservationsWorkspaceContentSkeleton } from "../../../_components/ManageWorkspaceSkeletons";
+import { ObservationsSubNav } from "@/app/account/_components/ObservationsSubNav";
+import { ObservationsWorkspaceContentSkeleton } from "@/app/account/_components/ManageWorkspaceSkeletons";
 import {
   accountAudioManagePath,
   accountObservationsManagePath,
   getAccountRouteData,
   readAccountRouteParams,
-} from "../../../_lib/account-route";
+} from "@/app/account/_lib/account-route";
 
 export async function generateMetadata({ params }: { params: Promise<{ did: string }> }): Promise<Metadata> {
   const { did, urlIdentifier } = await readAccountRouteParams(params);
@@ -69,10 +69,9 @@ export default async function AccountObservationsManagePage({
   const layerParam = (await searchParams).layer;
   const showMeasurements = (Array.isArray(layerParam) ? layerParam[0] : layerParam) === "measurements";
 
-  // This page stands alone — AccountChrome drops the profile hero and tab bar
-  // for it, because user management is moving onto its own pages rather than
-  // living inside the profile. It starts at the title, so it brings the
-  // Container framing the chrome would otherwise provide.
+  // This page stands alone outside the profile segment, so it starts at its
+  // own title and brings the Container framing the profile chrome would have
+  // provided.
   return (
     <Container className="pt-6 pb-8">
       {/* The measurements layer carries its own heading, so only the sightings
