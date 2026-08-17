@@ -2225,6 +2225,8 @@
     },
     "deployments": {
       "intro": "Penempatan mencatat di mana dan kapan sebuah AudioMoth dipasang di lapangan. Masing-masing memutar nada akustik yang mengatur jam, lokasi, dan ID penempatan perekam.",
+      "sectionTitle": "Penempatan",
+      "deploymentCount": "{count, plural, other {# penempatan}}",
       "createButton": "Buat penempatan",
       "untitled": "Penempatan tanpa nama",
       "delete": "Hapus penempatan",

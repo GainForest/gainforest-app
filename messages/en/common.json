@@ -2225,6 +2225,8 @@
     },
     "deployments": {
       "intro": "Deployments record where and when an AudioMoth was placed in the field. Each one plays an acoustic chime that sets the recorder's clock, location and deployment ID.",
+      "sectionTitle": "Deployments",
+      "deploymentCount": "{count, plural, one {# deployment} other {# deployments}}",
       "createButton": "Create deployment",
       "untitled": "Unnamed deployment",
       "delete": "Delete deployment",

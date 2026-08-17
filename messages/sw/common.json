@@ -2225,6 +2225,8 @@
     },
     "deployments": {
       "intro": "Usambazaji hurekodi mahali na wakati AudioMoth ilipowekwa uwandani. Kila mmoja hucheza mlio wa akustika unaoweka saa, mahali na kitambulisho cha usambazaji cha kinasa sauti.",
+      "sectionTitle": "Usambazaji",
+      "deploymentCount": "{count, plural, one {usambazaji #} other {usambazaji #}}",
       "createButton": "Unda usambazaji",
       "untitled": "Usambazaji usio na jina",
       "delete": "Futa usambazaji",

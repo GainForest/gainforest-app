@@ -2225,6 +2225,8 @@
     },
     "deployments": {
       "intro": "As implantações registram onde e quando um AudioMoth foi colocado em campo. Cada uma reproduz um sinal acústico que ajusta o relógio, a localização e o ID de implantação do gravador.",
+      "sectionTitle": "Implantações",
+      "deploymentCount": "{count, plural, one {# implantação} other {# implantações}}",
       "createButton": "Criar implantação",
       "untitled": "Implantação sem nome",
       "delete": "Excluir implantação",

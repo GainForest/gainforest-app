@@ -20,10 +20,11 @@
  * admin (the same rule the profile page resolves server-side).
  */
 
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
+import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { AudioLinesIcon, CheckIcon, Loader2Icon, PlusIcon } from "lucide-react";
+import { AudioLinesIcon, CheckIcon, Loader2Icon, PlusIcon, UploadIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { canDeleteRecord } from "@/app/(manage)/manage/_lib/cgs-permissions";
 import {
@@ -45,6 +46,7 @@ type AttachState =
 export function LibraryTab({ sessionDid }: { sessionDid: string | null }) {
   const t = useTranslations("common.audiomoth.library");
   const tDeployments = useTranslations("common.audiomoth.deployments");
+  const tRecordings = useTranslations("common.audiomoth.recordings");
   const acting = useActingRepo(sessionDid);
   const [activeContext] = useActiveAccountContext(sessionDid ?? "");
   const { groups } = useAccountList(sessionDid);
@@ -53,6 +55,12 @@ export function LibraryTab({ sessionDid }: { sessionDid: string | null }) {
   /* Bumped when a deployment is created here, so the viewer refetches and
      the new (still empty) deployment appears in the list right away. */
   const [refreshToken, setRefreshToken] = useState(0);
+
+  /* Counts for the overview card's header, reported by the viewer below
+     once its listing loads. Cleared on account switches so one account's
+     numbers never sit above another account's list. */
+  const [stats, setStats] = useState<{ deploymentCount: number; recordingCount: number } | null>(null);
+  useEffect(() => setStats(null), [acting.did]);
 
   // "Set one up ↗" from the Add observations modal: the batch is already
   // uploading in the background tray; it attaches to the deployment created
@@ -136,15 +144,43 @@ export function LibraryTab({ sessionDid }: { sessionDid: string | null }) {
         </div>
       ) : null}
 
-      {/* The chime flow lives beside the listing it feeds: a deployment made
-          here appears below as an empty folder awaiting its first card. */}
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-        <p className="max-w-prose text-sm text-muted-foreground">{tDeployments("intro")}</p>
-        <Button size="sm" onClick={() => setCreating(true)} className="shrink-0">
-          <PlusIcon className="size-4" />
-          {tDeployments("createButton")}
-        </Button>
-      </div>
+      {/* Deployments overview — the same card language as the folder
+          sections below it, so the chime flow reads as part of the listing
+          it feeds: a deployment made here appears below as an empty folder
+          awaiting its first card. */}
+      <section className="rounded-2xl border border-border bg-card/90 p-5 sm:p-6">
+        <div className="flex flex-wrap items-start justify-between gap-x-4 gap-y-3">
+          <div className="min-w-0">
+            <h2 className="flex flex-wrap items-baseline gap-x-2.5 gap-y-0.5 text-base font-medium text-foreground">
+              {tDeployments("sectionTitle")}
+              {stats ? (
+                <span className="text-sm font-normal text-muted-foreground">
+                  {tDeployments("deploymentCount", { count: stats.deploymentCount })}
+                  {" · "}
+                  {tRecordings("groupCount", { count: stats.recordingCount })}
+                </span>
+              ) : null}
+            </h2>
+            <p className="mt-1.5 max-w-prose text-sm leading-6 text-muted-foreground">{tDeployments("intro")}</p>
+          </div>
+          <div className="flex shrink-0 flex-wrap items-center gap-2">
+            {/* The personal SD-card upload flow — organizations upload through
+                the Add observations modal instead. */}
+            {!isGroup ? (
+              <Button asChild variant="outline" size="sm">
+                <Link href="/observations/audio?tab=upload">
+                  <UploadIcon className="size-4" />
+                  {tRecordings("uploadCta")}
+                </Link>
+              </Button>
+            ) : null}
+            <Button size="sm" onClick={() => setCreating(true)}>
+              <PlusIcon className="size-4" />
+              {tDeployments("createButton")}
+            </Button>
+          </div>
+        </div>
+      </section>
 
       <AccountAudioViewer
         /* Switching accounts (or creating a deployment) resets selection and
@@ -157,6 +193,7 @@ export function LibraryTab({ sessionDid }: { sessionDid: string | null }) {
         /* Deployments are created right here, so every empty one must show —
            even for org members whose role hides the clean-up actions. */
         showEmptyDeployments
+        onStats={setStats}
         embedded
       />
 

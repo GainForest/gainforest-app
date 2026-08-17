@@ -91,12 +91,15 @@ export function AudioManageLoadingSkeleton() {
             <Skeleton key={index} className="h-9 w-28 shrink-0 rounded-full" />
           ))}
         </div>
-        {/* Deployment rows — same shape AccountAudioViewer pulses while its
-            listing loads. */}
-        <div className="mt-6 flex flex-col gap-2">
-          {Array.from({ length: 4 }).map((_, index) => (
-            <Skeleton key={index} className="h-16 rounded-2xl" />
-          ))}
+        {/* Deployments overview card, then the folder rows AccountAudioViewer
+            pulses while its listing loads. */}
+        <div className="mt-6 flex flex-col gap-4">
+          <Skeleton className="h-28 rounded-2xl" />
+          <div className="flex flex-col gap-2">
+            {Array.from({ length: 4 }).map((_, index) => (
+              <Skeleton key={index} className="h-16 rounded-2xl" />
+            ))}
+          </div>
         </div>
       </div>
     </div>

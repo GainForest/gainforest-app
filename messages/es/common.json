@@ -2225,6 +2225,8 @@
     },
     "deployments": {
       "intro": "Los despliegues registran dónde y cuándo se colocó un AudioMoth en el campo. Cada uno reproduce un tono acústico que ajusta el reloj, la ubicación y el ID de despliegue del grabador.",
+      "sectionTitle": "Despliegues",
+      "deploymentCount": "{count, plural, one {# despliegue} other {# despliegues}}",
       "createButton": "Crear despliegue",
       "untitled": "Despliegue sin nombre",
       "delete": "Eliminar despliegue",

@@ -33,6 +33,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Container from "@/components/ui/container";
+import { cn } from "@/lib/utils";
 import {
   ContextMenu,
   ContextMenuContent,
@@ -151,6 +152,7 @@ export function AccountAudioViewer({
   mutationRepo = null,
   embedded = false,
   showEmptyDeployments,
+  onStats,
 }: {
   did: string;
   /** Whether to offer the personal SD-card upload flow (personal repos only). */
@@ -167,6 +169,10 @@ export function AccountAudioViewer({
    *  — while the Audio hub's Recordings tab always shows them: deployments
    *  are created there, and a fresh chime starts with no recordings. */
   showEmptyDeployments?: boolean;
+  /** Reports the listed deployment and recording counts once loaded, so an
+   *  embedding surface (the hub's Deployments overview card) can show them
+   *  in its own header instead of this component repeating them. */
+  onStats?: (stats: { deploymentCount: number; recordingCount: number }) => void;
 }) {
   const t = useTranslations("common.audiomoth.recordings");
   const tFolders = useTranslations("common.recordingFolders");
@@ -546,19 +552,27 @@ export function AccountAudioViewer({
   const total = recordings?.length ?? 0;
   const selectedCount = selectedUris.size;
 
+  /* The counts the header (or the embedding card) speaks of: deployments as
+     listed — including empty ones when they are shown — and every recording,
+     grouped or not. */
+  const deploymentCount = useMemo(() => groups.filter((group) => group.key).length, [groups]);
+  useEffect(() => {
+    if (loading || loadError) return;
+    onStats?.({ deploymentCount, recordingCount: total });
+  }, [deploymentCount, loadError, loading, onStats, total]);
+
+  /* Embedded, the host surface owns the headline, counts and CTAs (the
+     hub's Deployments overview card), so this row only appears when the
+     selection toolbar needs somewhere to stand. The empty state below keeps
+     its own upload CTA either way. */
+  const showHeaderRow = !embedded || selectedCount > 0;
+
   return (
     <Container className={embedded ? "max-w-none p-0" : "pt-4 pb-10"}>
+      {showHeaderRow ? (
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          {embedded ? (
-            /* Hosted under the Audio hub's own heading and a tab already named
-               "Recordings": repeating the word adds nothing, and a second h1
-               under the hero's would break the page's heading order. The count
-               alone still anchors the row the selection toolbar replaces. */
-            total > 0 ? (
-              <h2 className="text-sm text-muted-foreground">{t("groupCount", { count: total })}</h2>
-            ) : null
-          ) : (
+          {embedded ? null : (
             <h1 className="font-instrument text-2xl font-medium italic tracking-[-0.03em] text-foreground sm:text-3xl">
               {t("title")}
               {total > 0 ? (
@@ -592,7 +606,7 @@ export function AccountAudioViewer({
               {t("deleteSelected")}
             </Button>
           </div>
-        ) : showUploadCta ? (
+        ) : showUploadCta && !embedded ? (
           <Button asChild size="sm">
             <Link href="/observations/audio?tab=upload">
               <UploadIcon className="size-4" />
@@ -601,6 +615,7 @@ export function AccountAudioViewer({
           </Button>
         ) : null}
       </div>
+      ) : null}
 
       {deleteError ? (
         <p className="mt-3 flex items-center gap-1.5 rounded-lg bg-warn/10 px-3 py-2 text-xs font-medium text-foreground/75">
@@ -610,19 +625,19 @@ export function AccountAudioViewer({
       ) : null}
 
       {loading ? (
-        <div className="mt-6 flex flex-col gap-2">
+        <div className={cn("flex flex-col gap-2", showHeaderRow && "mt-6")}>
           {Array.from({ length: 4 }).map((_, i) => (
             <div key={i} className="h-16 animate-pulse rounded-2xl bg-muted" />
           ))}
         </div>
       ) : loadError ? (
-        <p className="mt-6 rounded-2xl border border-border bg-card/90 px-5 py-8 text-center text-sm text-muted-foreground">
+        <p className={cn("rounded-2xl border border-border bg-card/90 px-5 py-8 text-center text-sm text-muted-foreground", showHeaderRow && "mt-6")}>
           {t("loadError")}
         </p>
       ) : groups.length === 0 ? (
         /* Nothing at all — an owner whose only folders are empty still sees
            them below, so they can be cleaned up. */
-        <div className="mt-6 rounded-3xl border border-dashed border-border bg-muted/30 px-6 py-14 text-center">
+        <div className={cn("rounded-3xl border border-dashed border-border bg-muted/30 px-6 py-14 text-center", showHeaderRow && "mt-6")}>
           <span className="mx-auto grid h-12 w-12 place-items-center rounded-full bg-primary/10 text-primary">
             <AudioLinesIcon className="size-6" />
           </span>
@@ -638,7 +653,7 @@ export function AccountAudioViewer({
           ) : null}
         </div>
       ) : (
-        <div className="mt-6 flex flex-col gap-4">
+        <div className={cn("flex flex-col gap-4", showHeaderRow && "mt-6")}>
           {groups.map((group) => {
             const folder = group.deployment;
             const section = (
