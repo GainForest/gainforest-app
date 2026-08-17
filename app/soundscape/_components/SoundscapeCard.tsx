@@ -26,6 +26,7 @@ import { formatMinuteOfDay } from "@/lib/soundscape/audiomoth";
 import { cardOutline, formatCardDateRange, nearestSource } from "@/lib/soundscape/card";
 import {
   soundscapeDates,
+  soundscapeDeploymentName,
   type PublishedSoundscape,
   type SoundscapeSource,
 } from "@/lib/soundscape/record";
@@ -90,6 +91,12 @@ export function SoundscapeCard({
   const outline = useMemo(() => cardOutline(soundscape.sources, bandCount), [bandCount, soundscape.sources]);
   const dates = useMemo(() => soundscapeDates(soundscape.sources), [soundscape.sources]);
   const dateLabel = useMemo(() => formatCardDateRange(dates, locale), [dates, locale]);
+  // Prefer the recorder/deployment name the soundscape was built from over the
+  // generic "Soundscape" word — it tells one dial from another at a glance.
+  const heading = useMemo(
+    () => soundscapeDeploymentName(soundscape.title) ?? t("card.title"),
+    [soundscape.title, t],
+  );
 
   const maxValue = useMemo(() => {
     let max = 0;
@@ -248,7 +255,7 @@ export function SoundscapeCard({
       {showHeader ? (
         <div className="flex items-baseline gap-3 px-4 pt-3.5 sm:px-5">
           <span className="font-instrument text-xl italic tracking-[-0.01em] text-foreground">
-            {t("card.title")}
+            {heading}
           </span>
           <span className="font-mono text-[12.5px] text-muted-foreground">{dateLabel}</span>
         </div>
