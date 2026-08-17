@@ -100,7 +100,7 @@ export default async function EventDetailPage({ params }: { params: Promise<Para
         <a
           href={icsHref}
           download={icsFile}
-          className="inline-flex w-fit items-center gap-2 rounded-full border border-border px-4 py-2 text-sm font-medium hover:bg-muted"
+          className="inline-flex w-fit items-center gap-2 text-sm font-medium text-primary hover:underline"
         >
           <CalendarPlusIcon className="size-4" /> {t("detail.addToCalendar")}
         </a>

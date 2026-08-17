@@ -75,7 +75,7 @@ export function RsvpControls({ event, sessionDid }: { event: EventRef; sessionDi
   }
 
   return (
-    <div className="flex flex-col gap-3 rounded-2xl border border-border p-4">
+    <div className="flex flex-col gap-3">
       <div className="flex gap-2">
         <Button
           onClick={() => choose("going")}
@@ -101,13 +101,13 @@ export function RsvpControls({ event, sessionDid }: { event: EventRef; sessionDi
       {error ? <p className="text-sm text-destructive">{error}</p> : null}
 
       {confirmFor ? (
-        <div className="flex items-center justify-between rounded-xl bg-muted px-3 py-2">
+        <div className="flex flex-wrap items-center justify-between gap-2">
           <span className="text-sm font-medium">
             {confirmFor === "going" ? t("rsvp.confirmGoing") : t("rsvp.confirmInterested")}
           </span>
           <button
             onClick={copyLink}
-            className="inline-flex items-center gap-1 text-sm text-primary hover:underline"
+            className="inline-flex items-center gap-1 text-sm font-medium text-primary hover:underline"
           >
             <LinkIcon className="size-3.5" />
             {copied ? t("rsvp.copied") : t("rsvp.copyLink")}

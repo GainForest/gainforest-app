@@ -121,126 +121,110 @@ export function CreateEventClient({ session }: { session: AuthSession }) {
 
   const showLocation = mode !== "virtual";
   const showVirtual = mode !== "inperson";
+  // Type + the visible ones among Location / Link, spread evenly across a row.
+  const groupColumns = 1 + (showLocation ? 1 : 0) + (showVirtual ? 1 : 0);
 
   return (
-    <div className="mx-auto flex max-w-3xl flex-col gap-6">
+    <div className="mx-auto flex max-w-3xl flex-col">
       <h1 className="font-instrument text-3xl font-light italic tracking-[-0.02em] text-foreground md:text-4xl">
         {t("create.title")}
       </h1>
 
-      {hostOptions.length > 1 ? (
-        <div className="flex flex-col gap-1.5">
-          <Label htmlFor="event-host">{t("create.hostAs")}</Label>
-          <Select value={hostDid} onValueChange={(v) => setHostDid(v)}>
-            <SelectTrigger id="event-host" className="w-full sm:max-w-xs">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {hostOptions.map((o) => (
-                <SelectItem key={o.did} value={o.did}>
-                  {o.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-      ) : null}
-
-      <div className="flex flex-col gap-1.5">
-        <Label htmlFor="event-name">{t("create.name.label")}</Label>
-        <Input
-          id="event-name"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          placeholder={t("create.name.placeholder")}
-          autoFocus
-        />
-      </div>
-
-      <div className="flex flex-col gap-1.5">
-        <Label>{t("create.type.label")}</Label>
-        <div className="inline-flex h-10 w-fit items-center rounded-full border border-border bg-background/50 p-0.5">
-          {MODES.map((m) => (
-            <button
-              key={m}
-              type="button"
-              onClick={() => setMode(m)}
-              className={cn(
-                "inline-flex h-9 items-center gap-1.5 rounded-full px-4 text-sm font-medium transition-colors",
-                mode === m ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground",
-              )}
-            >
-              {modeLabel[m]}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-        <div className="flex flex-col gap-1.5">
-          <Label htmlFor="event-start">{t("create.start")}</Label>
-          <Input
-            id="event-start"
-            type="datetime-local"
-            value={start}
-            onChange={(e) => onStartChange(e.target.value)}
+      <div className="divide-y divide-border pt-6">
+        {/* 1 · Event name — big, label-less, borderless; priority by size */}
+        <div className="py-3">
+          <input
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            placeholder={t("create.name.placeholder")}
+            aria-label={t("create.name.label")}
+            autoFocus
+            className="w-full bg-transparent font-instrument text-4xl font-light italic tracking-[-0.02em] text-foreground outline-none placeholder:text-muted-foreground/40 sm:text-5xl"
           />
         </div>
-        <div className="flex flex-col gap-1.5">
-          <Label htmlFor="event-end">{t("create.end")}</Label>
-          <Input id="event-end" type="datetime-local" value={end} onChange={(e) => setEnd(e.target.value)} />
-        </div>
-      </div>
-      <p className="-mt-3 text-xs text-muted-foreground">{t("create.timezoneNote", { timezone })}</p>
 
-      {showLocation ? (
-        <div className="flex flex-col gap-1.5">
-          <Label htmlFor="event-location">{t("create.location.label")}</Label>
-          <Input
-            id="event-location"
-            value={location}
-            onChange={(e) => setLocation(e.target.value)}
-            placeholder={t("create.location.placeholder")}
+        {/* 2 · About */}
+        <div className="py-3">
+          <Textarea
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            placeholder={t("create.description.placeholder")}
+            aria-label={t("create.description.label")}
+            rows={3}
+            className="resize-none border-0 bg-transparent p-0 text-base text-foreground shadow-none outline-none placeholder:text-muted-foreground/50"
           />
         </div>
-      ) : null}
 
-      {showVirtual ? (
-        <div className="flex flex-col gap-1.5">
-          <Label htmlFor="event-virtual">{t("create.virtual.label")}</Label>
-          <Input
-            id="event-virtual"
-            value={virtualUrl}
-            onChange={(e) => setVirtualUrl(e.target.value)}
-            placeholder={t("create.virtual.placeholder")}
-          />
+        {/* 3 · Date selection */}
+        <div className="flex flex-col gap-3 py-3">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+            <div className="flex flex-col gap-1.5">
+              <Label htmlFor="event-start">{t("create.start")}</Label>
+              <Input id="event-start" type="datetime-local" value={start} onChange={(e) => onStartChange(e.target.value)} />
+            </div>
+            <div className="flex flex-col gap-1.5">
+              <Label htmlFor="event-end">{t("create.end")}</Label>
+              <Input id="event-end" type="datetime-local" value={end} onChange={(e) => setEnd(e.target.value)} />
+            </div>
+          </div>
+          <p className="text-xs text-muted-foreground">{t("create.timezoneNote", { timezone })}</p>
         </div>
-      ) : null}
 
-      <div className="flex flex-col gap-1.5">
-        <Label htmlFor="event-description">{t("create.description.label")}</Label>
-        <Textarea
-          id="event-description"
-          value={description}
-          onChange={(e) => setDescription(e.target.value)}
-          placeholder={t("create.description.placeholder")}
-          rows={4}
-        />
-      </div>
+        {/* 4 · Type / Location / Link — clubbed, spread evenly */}
+        <div className={cn("grid grid-cols-1 gap-3 py-3", groupColumns === 3 ? "sm:grid-cols-3" : "sm:grid-cols-2")}>
+          <div className="flex flex-col gap-1.5">
+            <Label>{t("create.type.label")}</Label>
+            <Select value={mode} onValueChange={(v) => setMode(v as EventMode)}>
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {MODES.map((m) => (
+                  <SelectItem key={m} value={m}>
+                    {modeLabel[m]}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
 
-      <div className="rounded-xl border border-border">
-        <button
-          type="button"
-          onClick={() => setAdvancedOpen((v) => !v)}
-          className="flex w-full items-center justify-between px-4 py-3 text-sm font-medium"
-        >
-          {t("create.advanced")}
-          <ChevronDownIcon className={cn("size-4 transition-transform", advancedOpen && "rotate-180")} />
-        </button>
-        {advancedOpen ? (
-          <div className="flex flex-col gap-3 border-t border-border p-4">
-            <Label>{t("create.visibility.label")}</Label>
-            <div className="inline-flex h-10 w-fit items-center rounded-full border border-border bg-background/50 p-0.5">
+          {showLocation ? (
+            <div className="flex flex-col gap-1.5">
+              <Label htmlFor="event-location">{t("create.location.label")}</Label>
+              <Input
+                id="event-location"
+                value={location}
+                onChange={(e) => setLocation(e.target.value)}
+                placeholder={t("create.location.placeholder")}
+              />
+            </div>
+          ) : null}
+
+          {showVirtual ? (
+            <div className="flex flex-col gap-1.5">
+              <Label htmlFor="event-virtual">{t("create.virtual.label")}</Label>
+              <Input
+                id="event-virtual"
+                value={virtualUrl}
+                onChange={(e) => setVirtualUrl(e.target.value)}
+                placeholder={t("create.virtual.placeholder")}
+              />
+            </div>
+          ) : null}
+        </div>
+
+        {/* 5 · Advanced options (visibility) — borderless disclosure */}
+        <div className="py-3">
+          <button
+            type="button"
+            onClick={() => setAdvancedOpen((v) => !v)}
+            className="inline-flex items-center gap-1 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
+          >
+            {t("create.advanced")}
+            <ChevronDownIcon className={cn("size-4 transition-transform", advancedOpen && "rotate-180")} />
+          </button>
+          {advancedOpen ? (
+            <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2">
               {(["public", "unlisted"] as const).map((v) => (
                 <button
                   key={v}
@@ -256,17 +240,39 @@ export function CreateEventClient({ session }: { session: AuthSession }) {
                   {t(`create.visibility.${v}`)}
                 </button>
               ))}
+              <p className="text-xs text-muted-foreground">{t(`create.visibility.${visibility}Hint`)}</p>
             </div>
-            <p className="text-xs text-muted-foreground">{t(`create.visibility.${visibility}Hint`)}</p>
+          ) : null}
+        </div>
+
+        {/* 6 · Publish row — host-as inline on the left, Publish on the right */}
+        <div className="flex flex-wrap items-center justify-between gap-3 py-6">
+          {hostOptions.length > 1 ? (
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-muted-foreground">{t("create.hostAs")}</span>
+              <Select value={hostDid} onValueChange={(v) => setHostDid(v)}>
+                <SelectTrigger className="w-52">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {hostOptions.map((o) => (
+                    <SelectItem key={o.did} value={o.did}>
+                      {o.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          ) : null}
+
+          <div className="flex flex-col items-end gap-2">
+            {error ? <p className="text-sm text-destructive">{error}</p> : null}
+            <Button onClick={onSubmit} disabled={submitting || !name.trim()} size="lg" className={cn(!(hostOptions.length > 1) && "ml-auto")}>
+              {submitting ? t("create.submitting") : t("create.submit")}
+            </Button>
           </div>
-        ) : null}
+        </div>
       </div>
-
-      {error ? <p className="text-sm text-destructive">{error}</p> : null}
-
-      <Button onClick={onSubmit} disabled={submitting || !name.trim()} size="lg">
-        {submitting ? t("create.submitting") : t("create.submit")}
-      </Button>
     </div>
   );
 }

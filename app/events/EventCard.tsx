@@ -13,6 +13,8 @@ function LiveBadge({ label }: { label: string }) {
   );
 }
 
+/** A single, borderless event row. Parent lists separate rows with dividers
+ *  (divide-y divide-border) — the golden rule: no bordered/shadowed boxes. */
 export function EventCard({
   event,
   host,
@@ -31,37 +33,39 @@ export function EventCard({
   const secondary = event.mode === "virtual" ? modes.virtual : event.location ?? modes[event.mode];
 
   return (
-    <Link
-      href={eventHref(event.did, event.rkey)}
-      className="group flex gap-4 rounded-3xl border border-border bg-card p-3 shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60"
-    >
-      <div className="relative size-20 shrink-0 overflow-hidden rounded-xl bg-gradient-to-br from-primary/30 to-primary/10">
-        {event.thumbnailUrl ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img src={event.thumbnailUrl} alt="" className="size-full object-cover" loading="lazy" />
-        ) : (
-          <div className="flex size-full items-center justify-center text-primary/50">
-            <CalendarIcon className="size-7" />
-          </div>
-        )}
-      </div>
-      <div className="flex min-w-0 flex-col justify-center gap-1">
-        <div className="flex items-center gap-2 text-xs text-muted-foreground">
-          <span>{when.dateLabel}</span>
-          {when.timeLabel ? <span>· {when.timeLabel}</span> : null}
-          {live ? <LiveBadge label={liveLabel} /> : null}
-        </div>
-        <h3 className="truncate font-semibold text-foreground">{event.name}</h3>
-        <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-          {event.mode === "virtual" ? (
-            <VideoIcon className="size-3.5 shrink-0" />
+    <li>
+      <Link
+        href={eventHref(event.did, event.rkey)}
+        className="group -mx-3 flex gap-4 rounded-lg px-3 py-3 transition-colors hover:bg-muted/60"
+      >
+        <div className="relative size-16 shrink-0 overflow-hidden rounded-xl bg-gradient-to-br from-primary/30 to-primary/10">
+          {event.thumbnailUrl ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={event.thumbnailUrl} alt="" className="size-full object-cover" loading="lazy" />
           ) : (
-            <MapPinIcon className="size-3.5 shrink-0" />
+            <div className="flex size-full items-center justify-center text-primary/50">
+              <CalendarIcon className="size-6" />
+            </div>
           )}
-          <span className="truncate">{secondary}</span>
-          {host ? <span className="truncate">· {profileLabel(host)}</span> : null}
         </div>
-      </div>
-    </Link>
+        <div className="flex min-w-0 flex-1 flex-col justify-center gap-1">
+          <div className="flex items-center gap-2 text-xs text-muted-foreground">
+            <span>{when.dateLabel}</span>
+            {when.timeLabel ? <span>· {when.timeLabel}</span> : null}
+            {live ? <LiveBadge label={liveLabel} /> : null}
+          </div>
+          <h3 className="truncate font-semibold text-foreground">{event.name}</h3>
+          <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+            {event.mode === "virtual" ? (
+              <VideoIcon className="size-3.5 shrink-0" />
+            ) : (
+              <MapPinIcon className="size-3.5 shrink-0" />
+            )}
+            <span className="truncate">{secondary}</span>
+            {host ? <span className="truncate">· {profileLabel(host)}</span> : null}
+          </div>
+        </div>
+      </Link>
+    </li>
   );
 }
