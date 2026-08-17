@@ -261,6 +261,20 @@
         "title": "Antes de o subsídio começar",
         "description": "O período ainda não começou, então o gráfico apresenta cada envio como vantagem inicial — a linha exigida fica plana até ele abrir."
       }
+    },
+    "communityEvents": {
+      "title": "Eventos comunitários",
+      "description": "A descoberta de eventos, a página do evento e o formulário de organização de produção com dados de exemplo — confirmar, listas de espera, publicar e cancelar funcionam em memória.",
+      "cardTitle": "Eventos comunitários",
+      "cardDescription": "Explore, confirme presença, entre numa lista de espera e organize um evento — componentes de produção com dados em memória, incluindo um modo sem sessão.",
+      "mockBadge": "Modo de teste · sem gravações",
+      "eyebrow": "Registro de experiências de UI",
+      "tabDiscovery": "Descoberta",
+      "tabDetail": "Página do evento",
+      "tabHost": "Formulário de organização",
+      "signedInToggle": "Com sessão",
+      "signInPrompt": "Esta ação pediria para entrar. Ative “Com sessão” para simular uma sessão.",
+      "dismiss": "Dispensar"
     }
   },
   "myCards": {

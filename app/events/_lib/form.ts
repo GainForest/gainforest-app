@@ -1,0 +1,133 @@
+/**
+ * Host-form state: everything the one-page "Host an event" form edits, in
+ * plain strings so it can round-trip through localStorage drafts unchanged.
+ * Converting to the interoperable wire record happens in actions.ts.
+ */
+
+import type { CommunityEvent, EventAgendaItem, EventMode } from "@/app/_lib/community-events";
+
+export type EventFormState = {
+  name: string;
+  /** YYYY-MM-DD (the date input's value). */
+  date: string;
+  /** HH:MM local. */
+  startTime: string;
+  /** HH:MM local, may be empty. */
+  endTime: string;
+  mode: EventMode;
+  placeName: string;
+  locality: string;
+  country: string;
+  onlineUrl: string;
+  description: string;
+  /** Cover photo as a data URL so drafts survive reloads. */
+  coverDataUrl: string | null;
+  /** Cover already stored on the record being edited (keep unless replaced). */
+  existingCoverRef: string | null;
+  agenda: EventAgendaItem[];
+  capacity: string;
+  themeTag: string;
+  meetingNote: string;
+  goodToKnow: string;
+  supportKinds: string[];
+  supportAmount: string;
+  supportCurrency: string;
+  supportNote: string;
+  guidelinesAccepted: boolean;
+};
+
+export const SUPPORT_KIND_KEYS = ["travel", "food", "printing"] as const;
+export const SUPPORT_CURRENCIES = ["USD", "GBP", "EUR", "BRL", "IDR", "KES"] as const;
+
+export function emptyEventForm(): EventFormState {
+  return {
+    name: "",
+    date: "",
+    startTime: "",
+    endTime: "",
+    mode: "inperson",
+    placeName: "",
+    locality: "",
+    country: "",
+    onlineUrl: "",
+    description: "",
+    coverDataUrl: null,
+    existingCoverRef: null,
+    agenda: [],
+    capacity: "",
+    themeTag: "",
+    meetingNote: "",
+    goodToKnow: "",
+    supportKinds: [],
+    supportAmount: "",
+    supportCurrency: "USD",
+    supportNote: "",
+    guidelinesAccepted: false,
+  };
+}
+
+/** Prefill the form from a published event (the organizer's Edit flow). */
+export function eventToForm(event: CommunityEvent): EventFormState {
+  const start = event.startsAt ? new Date(event.startsAt) : null;
+  const end = event.endsAt ? new Date(event.endsAt) : null;
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return {
+    ...emptyEventForm(),
+    name: event.name,
+    date: start ? `${start.getFullYear()}-${pad(start.getMonth() + 1)}-${pad(start.getDate())}` : "",
+    startTime: start ? `${pad(start.getHours())}:${pad(start.getMinutes())}` : "",
+    endTime: end ? `${pad(end.getHours())}:${pad(end.getMinutes())}` : "",
+    mode: event.mode,
+    placeName: event.locationName ?? "",
+    locality: event.locality ?? "",
+    country: event.country ?? "",
+    onlineUrl: event.onlineUrl ?? "",
+    description: event.description ?? "",
+    existingCoverRef: event.coverRef,
+    agenda: event.agenda,
+    capacity: event.capacity !== null ? String(event.capacity) : "",
+    themeTag: event.themeTag ?? "",
+    meetingNote: event.meetingNote ?? "",
+    goodToKnow: event.goodToKnow ?? "",
+    supportKinds: event.support?.kinds ?? [],
+    supportAmount: event.support?.amount !== null && event.support !== null ? String(event.support.amount) : "",
+    supportCurrency: event.support?.currency ?? "USD",
+    supportNote: event.support?.note ?? "",
+    guidelinesAccepted: true,
+  };
+}
+
+/** Translation keys under events.host.errors — never raw English. */
+export type EventFormErrorKey = "nameMissing" | "dateMissing" | "datePassed" | "startMissing" | "placeMissing" | "onlineUrlMissing";
+
+export type EventFormErrors = Partial<Record<"name" | "date" | "start" | "place" | "onlineUrl", EventFormErrorKey>>;
+
+/** Validation runs once, on Publish — only the required basics can block. */
+export function validateEventForm(form: EventFormState, nowMs: number): EventFormErrors {
+  const errors: EventFormErrors = {};
+  if (!form.name.trim()) errors.name = "nameMissing";
+
+  if (!form.date) {
+    errors.date = "dateMissing";
+  } else {
+    const startOfToday = new Date(nowMs);
+    startOfToday.setHours(0, 0, 0, 0);
+    const picked = new Date(`${form.date}T00:00:00`);
+    if (Number.isFinite(picked.getTime()) && picked.getTime() < startOfToday.getTime()) {
+      errors.date = "datePassed";
+    }
+  }
+
+  if (!form.startTime) errors.start = "startMissing";
+
+  if (form.mode !== "virtual" && !form.placeName.trim()) errors.place = "placeMissing";
+  if (form.mode !== "inperson" && !form.onlineUrl.trim()) errors.onlineUrl = "onlineUrlMissing";
+  return errors;
+}
+
+/** Local wall-clock date+time → ISO instant (the host's own timezone). */
+export function formDateTimeToIso(date: string, time: string): string | null {
+  if (!date || !time) return null;
+  const value = new Date(`${date}T${time}`);
+  return Number.isFinite(value.getTime()) ? value.toISOString() : null;
+}

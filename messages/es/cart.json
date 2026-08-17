@@ -261,6 +261,20 @@
         "title": "Antes de que empiece la subvención",
         "description": "El periodo aún no ha comenzado, así que el gráfico presenta cada subida como ventaja inicial: la línea requerida sigue plana hasta que abra."
       }
+    },
+    "communityEvents": {
+      "title": "Eventos comunitarios",
+      "description": "El descubrimiento de eventos, la página del evento y el formulario de organización de producción con datos de prueba — confirmar, listas de espera, publicar y cancelar funcionan en memoria.",
+      "cardTitle": "Eventos comunitarios",
+      "cardDescription": "Explora, confirma, únete a una lista de espera y organiza un evento — componentes de producción con datos en memoria, incluido un modo sin sesión.",
+      "mockBadge": "Modo de prueba · sin escrituras",
+      "eyebrow": "Registro de experiencias de UI",
+      "tabDiscovery": "Descubrimiento",
+      "tabDetail": "Página del evento",
+      "tabHost": "Formulario de organización",
+      "signedInToggle": "Con sesión",
+      "signInPrompt": "Esta acción pediría iniciar sesión. Activa “Con sesión” para simular una sesión.",
+      "dismiss": "Descartar"
     }
   },
   "myCards": {

@@ -261,6 +261,20 @@
         "title": "Before the grant opens",
         "description": "The window has not started, so the chart presents every upload as a head start — the required line stays flat until it opens."
       }
+    },
+    "communityEvents": {
+      "title": "Community events",
+      "description": "The production events discovery, event page and host form on fixture data — RSVP, waitlists, publishing and cancelling all work in memory.",
+      "cardTitle": "Community events",
+      "cardDescription": "Browse, RSVP, join a waitlist, and host an event — production components on in-memory fixtures, with a signed-out mode.",
+      "mockBadge": "Mock mode · no writes",
+      "eyebrow": "UI experience registry",
+      "tabDiscovery": "Discovery",
+      "tabDetail": "Event page",
+      "tabHost": "Host form",
+      "signedInToggle": "Signed in",
+      "signInPrompt": "This action would ask you to sign in. Toggle “Signed in” to simulate a session.",
+      "dismiss": "Dismiss"
     }
   },
   "myCards": {

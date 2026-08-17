@@ -261,6 +261,20 @@
         "title": "Sebelum hibah dimulai",
         "description": "Periode belum dimulai, jadi grafik menampilkan setiap unggahan sebagai keunggulan awal — garis yang dibutuhkan tetap datar sampai dibuka."
       }
+    },
+    "communityEvents": {
+      "title": "Acara komunitas",
+      "description": "Penemuan acara, halaman acara, dan formulir penyelenggara produksi dengan data contoh — daftar hadir, daftar tunggu, penerbitan, dan pembatalan semuanya bekerja di memori.",
+      "cardTitle": "Acara komunitas",
+      "cardDescription": "Jelajahi, daftar hadir, masuk daftar tunggu, dan adakan acara — komponen produksi dengan data di memori, termasuk mode tanpa masuk.",
+      "mockBadge": "Mode uji · tanpa penulisan",
+      "eyebrow": "Registri pengalaman UI",
+      "tabDiscovery": "Penemuan",
+      "tabDetail": "Halaman acara",
+      "tabHost": "Formulir penyelenggara",
+      "signedInToggle": "Sudah masuk",
+      "signInPrompt": "Tindakan ini akan meminta masuk. Aktifkan “Sudah masuk” untuk mensimulasikan sesi.",
+      "dismiss": "Tutup"
     }
   },
   "myCards": {
