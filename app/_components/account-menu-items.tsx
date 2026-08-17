@@ -1,5 +1,4 @@
 import {
-  AudioLinesIcon,
   BinocularsIcon,
   FolderKanbanIcon,
   SettingsIcon,
@@ -7,7 +6,6 @@ import {
   UserIcon,
 } from "lucide-react";
 import {
-  accountAudioManagePath,
   accountObservationsManagePath,
   accountObservationsPath,
   accountPath,
@@ -29,7 +27,6 @@ export type AccountSubItemLabels = {
   profile: string;
   observations: string;
   manage: string;
-  audio: string;
   projects: string;
   settings: string;
 };
@@ -39,19 +36,17 @@ export type AccountSubItemLabels = {
  *
  * Built once per account — the personal one and every organization — so each
  * account offers the same destinations, pointing at its own records. Whether
- * the audio workspace is offered is a property of the *viewer*, not of the
+ * the manage surface is offered is a property of the *viewer*, not of the
  * account: an admin sees the row under all of their accounts, everyone else
  * sees it under none.
  */
 export function buildAccountSubItems({
   identifier,
   labels,
-  showAudio,
   showManage,
 }: {
   identifier: string;
   labels: AccountSubItemLabels;
-  showAudio: boolean;
   showManage: boolean;
 }): MenuSubItem[] {
   return [
@@ -67,10 +62,10 @@ export function buildAccountSubItems({
       href: accountObservationsPath(identifier),
       icon: <BinocularsIcon className="h-3.5 w-3.5" />,
     },
-    // The dedicated surface for working on this account's sightings — adding,
-    // editing and grouping them — rather than the profile tab that shows them.
-    // Admin-only while it is still being worked on, like the audio workspace
-    // below; the page re-checks access on its own.
+    // The dedicated surface for working on this account's records — sightings
+    // and the audio workspace alike — rather than the profile tab that shows
+    // them. Admin-only while it is still being worked on; the page re-checks
+    // access on its own.
     ...(showManage
       ? [
           {
@@ -78,21 +73,6 @@ export function buildAccountSubItems({
             label: labels.manage,
             href: accountObservationsManagePath(identifier),
             icon: <SlidersHorizontalIcon className="h-3.5 w-3.5" />,
-            adminOnly: true,
-          },
-        ]
-      : []),
-    // The recording workspace — library, deployments, upload, labelling,
-    // identifications, soundscape, device setup — hosted on this account's own
-    // audio manage page, so the row acts on the account it sits under.
-    // Admin-only while the workspace is still being worked on.
-    ...(showAudio
-      ? [
-          {
-            key: "audio",
-            label: labels.audio,
-            href: accountAudioManagePath(identifier),
-            icon: <AudioLinesIcon className="h-3.5 w-3.5" />,
             adminOnly: true,
           },
         ]

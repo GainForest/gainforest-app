@@ -741,13 +741,11 @@ function AuthenticatedMenu({
   const buildSubItems = (identifier: string): MenuSubItem[] =>
     buildAccountSubItems({
       identifier,
-      showAudio: isModerator,
       showManage: isModerator,
       labels: {
         profile: sidebarT("profileRow.viewProfile"),
         observations: sidebarItemsT("observations"),
         manage: sidebarT("tabs.manage"),
-        audio: sidebarItemsT("audio"),
         projects: sidebarItemsT("projects"),
         settings: authT("settings"),
       },
