@@ -821,6 +821,7 @@ export function AccountAudioViewer({
                       did={did}
                       host={host}
                       items={group.items}
+                      location={group.coords ? { ...group.coords, label: group.name } : null}
                       selectable={canDelete}
                       selectedUris={selectedUris}
                       onToggleSelect={toggleSelect}

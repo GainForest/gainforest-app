@@ -11,9 +11,25 @@ import { useEffect, useRef, useState } from "react";
 import type { Map as LeafletMap, Marker, TileLayer } from "leaflet";
 import { MapPinIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
+import { cn } from "@/lib/utils";
 import { mapTileUrl } from "@/app/_lib/coords";
 
-export function DeploymentLocationMap({ lat, lon, label }: { lat: number; lon: number; label?: string }) {
+export function DeploymentLocationMap({
+  lat,
+  lon,
+  label,
+  className,
+  heightClass = "h-64",
+}: {
+  lat: number;
+  lon: number;
+  label?: string;
+  /** Extra classes for the outer card — e.g. to match a neighbouring panel's radius/border. */
+  className?: string;
+  /** Height of the map canvas. Defaults to the roomy detail-page size; pass a
+   *  shorter one where the map is a compact aside beside another panel. */
+  heightClass?: string;
+}) {
   const t = useTranslations("common.audiomoth.deployments");
   const elRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<LeafletMap | null>(null);
@@ -83,14 +99,14 @@ export function DeploymentLocationMap({ lat, lon, label }: { lat: number; lon: n
   }, []);
 
   return (
-    <section className="overflow-hidden rounded-2xl border border-border bg-foreground/[0.04]">
+    <section className={cn("overflow-hidden rounded-2xl border border-border bg-foreground/[0.04]", className)}>
       <div className="flex items-center gap-2 px-4 py-3 text-[13px] font-medium text-foreground/75">
         <MapPinIcon className="h-4 w-4 text-primary" aria-hidden />
         {t("mapTitle")}
       </div>
       <div
         ref={elRef}
-        className="h-64 w-full border-t border-border bg-muted/40"
+        className={cn("w-full border-t border-border bg-muted/40", heightClass)}
         style={{ zIndex: 0 }}
         aria-label={t("mapTitle")}
       />

@@ -19,7 +19,7 @@ import { getDeploymentEvent, linkedEquipmentUri, parseAtUri } from "@/app/_lib/d
 import { equipmentDetailPath } from "@/app/_lib/equipment";
 import { getCertifiedProfileCard } from "@/app/account/_lib/account-route";
 import { accountEquipmentPath, accountPath } from "@/app/account/_lib/account-route";
-import { DeploymentLocationMap } from "./DeploymentLocationMap";
+import { DeploymentLocationMap } from "@/app/_components/DeploymentLocationMap";
 import { DeploymentDetailActions } from "./DeploymentDetailActions";
 import { DeploymentRecordings } from "./DeploymentRecordings";
 
