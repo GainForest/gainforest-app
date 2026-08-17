@@ -110,6 +110,7 @@ import {
 import { isOutstanding, isRetryable, type AnalysisState, type AnalysisStatus } from "@/lib/soundscape/queue";
 import { cn } from "@/lib/utils";
 import { BAND_COLORS, SoundscapeClock } from "./SoundscapeClock";
+import { useSoundscapePlayback } from "./useSoundscapePlayback";
 
 /** One uploaded recording with everything the clock needs precomputed. */
 type LibraryRecording = {
@@ -141,22 +142,6 @@ type RecordingGroup = {
 const ZOOM_STEP = 1.6;
 
 type AnalyzedLibraryRecording = LibraryRecording & { time: WallClockTime; pmn: number[] };
-
-type PlayerState = {
-  uri: string;
-  minuteOfDay: number;
-  name: string;
-  status: "loading" | "playing";
-};
-
-/**
- * Browsers cap AudioBuffer sample rates well below AudioMoth's ultrasonic
- * modes (up to 384 kHz), so recordings above this rate are decimated with a
- * boxcar average before playback. Ultrasound isn't audible anyway — this only
- * affects the preview player, never the analysis.
- */
-const MAX_PLAYBACK_SAMPLE_RATE = 96_000;
-const DECIMATION_TARGET_RATE = 48_000;
 
 function formatDuration(seconds: number | null): string | null {
   if (seconds === null || !Number.isFinite(seconds)) return null;
@@ -192,11 +177,18 @@ export function SoundscapeClient({ sessionDid }: { sessionDid: string | null }) 
   const abortRef = useRef<AbortController | null>(null);
   const cacheRef = useRef<PmnCache | null>(null);
   const chartRef = useRef<HTMLDivElement>(null);
-  const [player, setPlayer] = useState<PlayerState | null>(null);
-  const [playbackFailed, setPlaybackFailed] = useState(false);
-  const audioContextRef = useRef<AudioContext | null>(null);
-  const audioSourceRef = useRef<AudioBufferSourceNode | null>(null);
-  const playTokenRef = useRef(0);
+  /* Playback is the one shared soundscape player: it resolves each recording
+     to its compact PDS preview blob (the archival original only as a fallback)
+     and plays it through a single <audio> element, one recording at a time
+     across the whole page. Aliased to the names this workbench has always
+     used so the rest of the component reads unchanged. */
+  const {
+    audioProps,
+    player,
+    failed: playbackFailed,
+    stop: stopPlayback,
+    toggle: togglePlayback,
+  } = useSoundscapePlayback();
 
   /* The account this library belongs to: the signed-in user's own repo, or
      the organization's when they have switched into one. `shareTarget.repo`
@@ -535,101 +527,27 @@ export function SoundscapeClient({ sessionDid }: { sessionDid: string | null }) 
     setZoom(FULL_DAY_WINDOW);
   }, [selectedDate]);
 
-  const stopPlayback = useCallback(() => {
-    playTokenRef.current++;
-    try {
-      audioSourceRef.current?.stop();
-    } catch {
-      // Source may have already ended.
-    }
-    audioSourceRef.current = null;
-    setPlayer(null);
-  }, []);
-
   // Stop if the playing recording disappears (date filter / library refresh).
   const playableUris = useMemo(
     () => new Set(analyzedRecordings.map((entry) => entry.item.uri)),
     [analyzedRecordings],
   );
   useEffect(() => {
-    if (player && !playableUris.has(player.uri)) stopPlayback();
+    if (player && !playableUris.has(player.audioUri)) stopPlayback();
   }, [playableUris, player, stopPlayback]);
 
-  // Tear down audio on unmount.
-  useEffect(() => {
-    return () => {
-      playTokenRef.current++;
-      try {
-        audioSourceRef.current?.stop();
-      } catch {
-        // Ignore.
-      }
-      void audioContextRef.current?.close().catch(() => {});
-    };
-  }, []);
-
-  /** Plays one specific recording (or stops it if it is the one playing). */
+  /** Plays one specific recording (or stops it if it is the one playing). The
+   *  shared player resolves the recording's preview blob from the owner's PDS,
+   *  so a click is audible with nothing else downloaded. */
   const playRecording = useCallback(
     (entry: AnalyzedLibraryRecording) => {
-      if (!entry.item.accessUri) return;
-      if (player?.uri === entry.item.uri) {
-        stopPlayback();
-        return;
-      }
-      stopPlayback();
-      setPlaybackFailed(false);
-      const token = ++playTokenRef.current;
-      const accessUri = entry.item.accessUri;
-      const minuteOfDay = wallClockMinuteOfDay(entry.time);
-      setPlayer({ uri: entry.item.uri, minuteOfDay, name: entry.item.name, status: "loading" });
-      void (async () => {
-        try {
-          const response = await fetch(accessUri);
-          if (!response.ok) throw new Error("download_failed");
-          const buffer = await response.arrayBuffer();
-          const wav = openWav(buffer);
-          let samples = new Float32Array(wav.totalSamples);
-          wav.readWindow(0, samples);
-          let sampleRate = wav.sampleRate;
-          if (sampleRate > MAX_PLAYBACK_SAMPLE_RATE) {
-            const factor = Math.ceil(sampleRate / DECIMATION_TARGET_RATE);
-            const length = Math.floor(samples.length / factor);
-            const decimated = new Float32Array(length);
-            for (let i = 0; i < length; i++) {
-              let sum = 0;
-              for (let j = 0; j < factor; j++) sum += samples[i * factor + j];
-              decimated[i] = sum / factor;
-            }
-            samples = decimated;
-            sampleRate = sampleRate / factor;
-          }
-          if (token !== playTokenRef.current) return;
-          const context = (audioContextRef.current ??= new AudioContext());
-          await context.resume();
-          if (token !== playTokenRef.current) return;
-          const audioBuffer = context.createBuffer(1, samples.length, sampleRate);
-          audioBuffer.getChannelData(0).set(samples);
-          const source = context.createBufferSource();
-          source.buffer = audioBuffer;
-          source.connect(context.destination);
-          source.onended = () => {
-            if (token === playTokenRef.current) {
-              audioSourceRef.current = null;
-              setPlayer(null);
-            }
-          };
-          audioSourceRef.current = source;
-          source.start();
-          setPlayer((current) => (current?.uri === entry.item.uri ? { ...current, status: "playing" } : current));
-        } catch {
-          if (token === playTokenRef.current) {
-            setPlayer(null);
-            setPlaybackFailed(true);
-          }
-        }
-      })();
+      togglePlayback({
+        audioUri: entry.item.uri,
+        minuteOfDay: wallClockMinuteOfDay(entry.time),
+        name: entry.item.name,
+      });
     },
-    [player, stopPlayback],
+    [togglePlayback],
   );
 
   /* Across several days one dial minute holds one recording per day, so a
@@ -1068,6 +986,10 @@ export function SoundscapeClient({ sessionDid }: { sessionDid: string | null }) 
 
   return (
     <div className="flex flex-col gap-8">
+      {/* One hidden <audio> element drives playback for the whole workbench —
+          the dial and the zoomed-in list share it, so only one recording ever
+          plays at a time. */}
+      <audio {...audioProps} />
       {/* Folder picker: a soundscape is built per folder (ac.deployment),
           never from the whole account at once. */}
       {groups.length > 1 || selectedDeployment ? (
@@ -1403,7 +1325,7 @@ export function SoundscapeClient({ sessionDid }: { sessionDid: string | null }) 
                 ) : (
                   <ul className="max-h-64 divide-y overflow-y-auto">
                     {recordingsInView.map((entry) => {
-                      const isPlaying = player?.uri === entry.item.uri;
+                      const isPlaying = player?.audioUri === entry.item.uri;
                       return (
                         <li key={entry.item.uri}>
                           <button

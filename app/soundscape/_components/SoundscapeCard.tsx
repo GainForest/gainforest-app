@@ -16,11 +16,9 @@
  */
 
 import Link from "next/link";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useMemo } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { ArrowUpRightIcon, Loader2Icon, PauseIcon, PlayIcon } from "lucide-react";
-import { registerAudioElement, playExclusiveAudio } from "@/app/_lib/audio-coordinator";
-import { resolvePlayableRecording } from "@/app/_lib/soundscape-record";
 import { FREQUENCY_BANDS, formatBandRange } from "@/lib/soundscape/analysis";
 import { formatMinuteOfDay } from "@/lib/soundscape/audiomoth";
 import { cardOutline, formatCardDateRange, nearestSource } from "@/lib/soundscape/card";
@@ -31,6 +29,7 @@ import {
   type SoundscapeSource,
 } from "@/lib/soundscape/record";
 import { cn } from "@/lib/utils";
+import { useSoundscapePlayback } from "./useSoundscapePlayback";
 
 /** Muted band palette for the card (the explorer keeps the vivid figures).
  *  Exported so the explore gallery's shared voice-group key can swatch with
@@ -48,12 +47,6 @@ function polar(minuteOfDay: number, radius: number): { x: number; y: number } {
   const angle = (minuteOfDay / 1440) * 2 * Math.PI;
   return { x: CENTER + radius * Math.cos(angle), y: CENTER + radius * Math.sin(angle) };
 }
-
-type PlayerState = {
-  audioUri: string;
-  minuteOfDay: number;
-  status: "loading" | "playing" | "paused";
-};
 
 export function SoundscapeCard({
   soundscape,
@@ -81,11 +74,9 @@ export function SoundscapeCard({
 }) {
   const t = useTranslations("common.soundscape");
   const locale = useLocale();
-  const audioRef = useRef<HTMLAudioElement | null>(null);
-  const playTokenRef = useRef(0);
-  const [player, setPlayer] = useState<PlayerState | null>(null);
-  const [progress, setProgress] = useState(0);
-  const [failed, setFailed] = useState(false);
+  /* The one shared soundscape player — preview-blob-first, one recording at a
+     time across the page. The card keeps its own play/pause bar on top of it. */
+  const { audioProps, player, failed, progress, play, stop, pause, resume } = useSoundscapePlayback();
 
   const bandCount = FREQUENCY_BANDS.length;
   const outline = useMemo(() => cardOutline(soundscape.sources, bandCount), [bandCount, soundscape.sources]);
@@ -120,73 +111,15 @@ export function SoundscapeCard({
     });
   }, [maxValue, outline]);
 
-  useEffect(() => {
-    const element = audioRef.current;
-    if (!element) return;
-    return registerAudioElement(element);
-  }, []);
-
-  const stop = useCallback(() => {
-    playTokenRef.current++;
-    const element = audioRef.current;
-    if (element) {
-      element.pause();
-      element.removeAttribute("src");
-      element.load();
-    }
-    setPlayer(null);
-    setProgress(0);
-  }, []);
-
-  useEffect(() => stop, [stop]);
-
-  const play = useCallback(
-    (source: SoundscapeSource) => {
-      stop();
-      setFailed(false);
-      const token = ++playTokenRef.current;
-      setPlayer({ audioUri: source.audioUri, minuteOfDay: source.minuteOfDay, status: "loading" });
-      void (async () => {
-        const playable = await resolvePlayableRecording(source.audioUri).catch(() => null);
-        if (token !== playTokenRef.current) return;
-        const element = audioRef.current;
-        if (!playable || !element) {
-          setPlayer(null);
-          setFailed(true);
-          return;
-        }
-        for (const url of playable.urls) {
-          element.src = url;
-          try {
-            await playExclusiveAudio(element);
-            if (token !== playTokenRef.current) return;
-            setPlayer((current) =>
-              current?.audioUri === source.audioUri ? { ...current, status: "playing" } : current,
-            );
-            return;
-          } catch {
-            if (token !== playTokenRef.current) return;
-          }
-        }
-        setPlayer(null);
-        setFailed(true);
-      })();
-    },
-    [stop],
-  );
-
   /** The player button: pause what's playing, resume what's paused, or start
    *  with the loudest moment of the whole soundscape. */
   const togglePlay = useCallback(() => {
-    const element = audioRef.current;
-    if (player?.status === "playing" && element) {
-      element.pause();
-      setPlayer({ ...player, status: "paused" });
+    if (player?.status === "playing") {
+      pause();
       return;
     }
-    if (player?.status === "paused" && element) {
-      void playExclusiveAudio(element).catch(() => setFailed(true));
-      setPlayer({ ...player, status: "playing" });
+    if (player?.status === "paused") {
+      resume();
       return;
     }
     if (player?.status === "loading") return;
@@ -200,7 +133,7 @@ export function SoundscapeCard({
       }
     }
     if (loudest) play(loudest);
-  }, [play, player, soundscape.sources]);
+  }, [pause, play, player, resume, soundscape.sources]);
 
   /** Tap anywhere on the ring: play the recording closest to that time. */
   const handleDialClick = useCallback(
@@ -237,19 +170,7 @@ export function SoundscapeCard({
         className,
       )}
     >
-      <audio
-        ref={audioRef}
-        preload="none"
-        className="hidden"
-        onEnded={() => {
-          setPlayer(null);
-          setProgress(0);
-        }}
-        onTimeUpdate={(event) => {
-          const element = event.currentTarget;
-          setProgress(element.duration > 0 ? element.currentTime / element.duration : 0);
-        }}
-      />
+      <audio {...audioProps} />
 
       {/* Header */}
       {showHeader ? (

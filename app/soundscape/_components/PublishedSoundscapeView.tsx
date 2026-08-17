@@ -13,7 +13,7 @@
  * Nothing is downloaded until somebody asks to listen.
  */
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
 import {
   AlertTriangleIcon,
@@ -32,7 +32,6 @@ import {
   soundscapePoints,
   sourceForMinute,
   type PublishedSoundscape,
-  type SoundscapeSource,
 } from "@/lib/soundscape/record";
 import {
   FULL_DAY_WINDOW,
@@ -45,20 +44,12 @@ import {
   formatWindowMinute,
   type TimeWindow,
 } from "@/lib/soundscape/zoom";
-import { resolvePlayableRecording } from "@/app/_lib/soundscape-record";
-import { registerAudioElement, playExclusiveAudio } from "@/app/_lib/audio-coordinator";
 import { cn } from "@/lib/utils";
 import { BAND_COLORS, SoundscapeClock } from "./SoundscapeClock";
+import { useSoundscapePlayback } from "./useSoundscapePlayback";
 
 /** One notch of the zoom buttons — matches the workbench dial. */
 const ZOOM_STEP = 1.6;
-
-type PlayerState = {
-  audioUri: string;
-  minuteOfDay: number;
-  name: string;
-  status: "loading" | "playing";
-};
 
 export function PublishedSoundscapeView({
   soundscape,
@@ -70,10 +61,16 @@ export function PublishedSoundscapeView({
   const t = useTranslations("common.soundscape");
   const [zoom, setZoom] = useState<TimeWindow>(FULL_DAY_WINDOW);
   const [visibleBands, setVisibleBands] = useState<boolean[]>(() => soundscape.bands.map(() => true));
-  const [player, setPlayer] = useState<PlayerState | null>(null);
-  const [playbackFailed, setPlaybackFailed] = useState(false);
-  const audioRef = useRef<HTMLAudioElement | null>(null);
-  const playTokenRef = useRef(0);
+  /* Playback is the one shared soundscape player: preview-blob-first, one
+     recording at a time across the page. Aliased to the names this view has
+     always used so the rest of the component reads unchanged. */
+  const {
+    audioProps,
+    player,
+    failed: playbackFailed,
+    stop: stopPlayback,
+    toggle: playSource,
+  } = useSoundscapePlayback();
 
   const points = useMemo(() => soundscapePoints(soundscape.sources), [soundscape.sources]);
   const dateRange = useMemo(() => formatSoundscapeDateRange(soundscape.sources), [soundscape.sources]);
@@ -101,74 +98,6 @@ export function PublishedSoundscapeView({
   const bandLabels = useMemo(
     () => FREQUENCY_BANDS.map((band, index) => `${t(`bands.${band.labelKey}`)} \u00b7 ${bandRanges[index]}`),
     [bandRanges, t],
-  );
-
-  /* One shared <audio> element, registered with the page-wide coordinator so
-     starting a recording here stops whatever else was playing. */
-  useEffect(() => {
-    const element = audioRef.current;
-    if (!element) return;
-    return registerAudioElement(element);
-  }, []);
-
-  const stopPlayback = useCallback(() => {
-    playTokenRef.current++;
-    const element = audioRef.current;
-    if (element) {
-      element.pause();
-      element.removeAttribute("src");
-      element.load();
-    }
-    setPlayer(null);
-  }, []);
-
-  useEffect(() => stopPlayback, [stopPlayback]);
-
-  const playSource = useCallback(
-    (source: SoundscapeSource) => {
-      if (player?.audioUri === source.audioUri) {
-        stopPlayback();
-        return;
-      }
-      stopPlayback();
-      setPlaybackFailed(false);
-      const token = ++playTokenRef.current;
-      setPlayer({
-        audioUri: source.audioUri,
-        minuteOfDay: source.minuteOfDay,
-        name: source.name,
-        status: "loading",
-      });
-      void (async () => {
-        const playable = await resolvePlayableRecording(source.audioUri).catch(() => null);
-        if (token !== playTokenRef.current) return;
-        const element = audioRef.current;
-        if (!playable || !element) {
-          setPlayer(null);
-          setPlaybackFailed(true);
-          return;
-        }
-        // Try each candidate URL in turn: the compact preview blob first, the
-        // archival original as a fallback for recordings uploaded before
-        // previews were generated.
-        for (const url of playable.urls) {
-          element.src = url;
-          try {
-            await playExclusiveAudio(element);
-            if (token !== playTokenRef.current) return;
-            setPlayer((current) =>
-              current?.audioUri === source.audioUri ? { ...current, status: "playing" } : current,
-            );
-            return;
-          } catch {
-            if (token !== playTokenRef.current) return;
-          }
-        }
-        setPlayer(null);
-        setPlaybackFailed(true);
-      })();
-    },
-    [player, stopPlayback],
   );
 
   const handlePointClick = useCallback(
@@ -221,7 +150,7 @@ export function PublishedSoundscapeView({
 
   return (
     <div className={cn("flex flex-col gap-4", className)}>
-      <audio ref={audioRef} preload="none" className="hidden" onEnded={() => setPlayer(null)} />
+      <audio {...audioProps} />
 
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="min-w-0">
