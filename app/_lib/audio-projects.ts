@@ -1,13 +1,11 @@
 /**
- * Public projects with uploaded audio that have not yet published a
- * soundscape.
+ * Public projects with audio evidence for the Audio explore page.
  *
- * Audio recordings live in an account's repo, while a project points at them
- * through an `org.hypercerts.context.attachment` on its timeline. The
- * attachment contains a sample of the recordings and the upload count in its
- * description. Reading that relationship, rather than treating every audio
- * owner as one project, keeps accounts with several projects attributed
- * correctly.
+ * Audio recordings and published soundscapes live in an account's repo, while
+ * a project points at them through `org.hypercerts.context.attachment` records
+ * on its timeline. The attachments contain recording samples and counts, so
+ * this module keeps the project relationship intact while shaping both media
+ * kinds into the same row-level data model.
  */
 
 import { cachedAsync } from "./async-cache";
@@ -60,6 +58,7 @@ type RawAudioSample = {
   deploymentRef?: string | null;
   siteRef?: string | null;
   recordedBy?: string | null;
+  metadata?: { recordedAt?: string | null } | null;
 };
 
 type RawDeployment = {
@@ -70,7 +69,7 @@ type RawDeployment = {
   siteRef?: string | null;
 };
 
-type AudioProjectUpload = {
+export type AudioProjectUpload = {
   id: string;
   did: string;
   title: string | null;
@@ -78,17 +77,23 @@ type AudioProjectUpload = {
   recorderName: string | null;
   siteName: string | null;
   createdAt: string | null;
+  /** The sample of recording URIs carried by the timeline attachment. */
+  recordingUris: string[];
+  /** Distinct recording dates in this folder, earliest first. */
+  recordedDates: string[];
 };
 
-/** A project card and the recorder folders that make up its upload. */
+/** A project row and the recorder folders that make up its audio evidence. */
 export type AudioProject = {
   project: ProjectRecord;
-  /** The account that recorded it — the row's heading and logo. */
+  /** The account that recorded it — the row's organization line and fallback logo. */
   organizationName: string | null;
   organizationAvatarUrl: string | null;
   recorderCount: number;
   recordingCount: number;
   uploads: AudioProjectUpload[];
+  /** Published soundscape record URIs attached to this project. */
+  soundscapeUris: string[];
 };
 
 function attachmentQuery(kind: AttachmentKind): string {
@@ -155,6 +160,21 @@ function audioUris(attachment: RawAttachment): string[] {
     if (!item?.uri || !item.uri.startsWith("at://")) return [];
     return parseAtUri(item.uri)?.collection === "app.gainforest.ac.audio" ? [item.uri] : [];
   });
+}
+
+function soundscapeUris(attachment: RawAttachment): string[] {
+  return (attachment.content ?? []).flatMap((item) => {
+    if (!item?.uri || !item.uri.startsWith("at://")) return [];
+    return parseAtUri(item.uri)?.collection === "app.gainforest.ac.soundscape" ? [item.uri] : [];
+  });
+}
+
+function dateKey(value: string | null | undefined): string | null {
+  if (!value) return null;
+  const direct = value.match(/^(\d{4}-\d{2}-\d{2})/);
+  if (direct?.[1]) return direct[1];
+  const time = Date.parse(value);
+  return Number.isNaN(time) ? null : new Date(time).toISOString().slice(0, 10);
 }
 
 function collectionSubject(attachment: RawAttachment): string | null {
@@ -261,7 +281,7 @@ async function fetchAudioSamples(
     const batch = uniqueUris.slice(offset, offset + AUDIO_SAMPLE_BATCH_SIZE);
     const selections = batch.map(
       (uri, index) => `a${index}: appGainforestAcAudioByUri(uri: ${JSON.stringify(uri)}) {
-        did uri name deploymentRef siteRef recordedBy
+        did uri name deploymentRef siteRef recordedBy metadata { recordedAt }
       }`,
     );
     const data = await indexerQuery<Record<string, RawAudioSample | null>>(
@@ -330,6 +350,59 @@ async function countByDeployment(
   return typeof count === "number" && Number.isSafeInteger(count) && count >= 0 ? count : null;
 }
 
+async function fetchDeploymentRecordedDates(
+  deploymentRef: string,
+  signal?: AbortSignal,
+): Promise<string[]> {
+  const dates = new Set<string>();
+  let after: string | null = null;
+
+  for (let page = 0; page < MAX_ATTACHMENT_PAGES; page += 1) {
+    const data: {
+      appGainforestAcAudio?: {
+        pageInfo?: { hasNextPage?: boolean | null; endCursor?: string | null } | null;
+        edges?: Array<{
+          node?: { metadata?: { recordedAt?: string | null } | null } | null;
+        } | null> | null;
+      };
+    } | null = await indexerQuery<{
+      appGainforestAcAudio?: {
+        pageInfo?: { hasNextPage?: boolean | null; endCursor?: string | null } | null;
+        edges?: Array<{
+          node?: { metadata?: { recordedAt?: string | null } | null } | null;
+        } | null> | null;
+      };
+    }>(
+      `query AudioProjectDeploymentDates($deploymentRef: String!, $after: String) {
+        appGainforestAcAudio(
+          first: ${INDEXER_PAGE_SIZE}
+          after: $after
+          where: { deploymentRef: { eq: $deploymentRef } }
+          sortBy: createdAt
+          sortDirection: DESC
+        ) {
+          pageInfo { hasNextPage endCursor }
+          edges { node { metadata { recordedAt } } }
+        }
+      }`,
+      { deploymentRef, after },
+      signal,
+    ).catch(() => null);
+
+    for (const edge of data?.appGainforestAcAudio?.edges ?? []) {
+      const key = dateKey(edge?.node?.metadata?.recordedAt);
+      if (key) dates.add(key);
+    }
+
+    const pageInfo: { hasNextPage?: boolean | null; endCursor?: string | null } | null | undefined =
+      data?.appGainforestAcAudio?.pageInfo;
+    if (!pageInfo?.hasNextPage || !pageInfo.endCursor) break;
+    after = pageInfo.endCursor;
+  }
+
+  return [...dates].sort();
+}
+
 function maxCreatedAt(uploads: AudioProjectUpload[]): number {
   return Math.max(
     0,
@@ -368,15 +441,23 @@ async function listNetworkAudioProjectsUncached(signal?: AbortSignal): Promise<A
     signal,
   );
 
-  const soundscapeProjectUris = new Set(
-    visibleSoundscapeAttachments
-      .map((attachment) => projectForAttachment(attachment, lookup))
-      .filter((project): project is ProjectRecord => {
-        if (!project) return false;
-        return !hiddenDids.has(project.did) && !hiddenUris.has(project.atUri);
-      })
-      .map((project) => project.atUri),
-  );
+  /** Keep the project relationship for published soundscapes as well as raw
+   * uploads. A project can have both; hiding its uploads when it has a
+   * soundscape was the source of the two different card shapes. */
+  const soundscapesByProject = new Map<string, { project: ProjectRecord; uris: string[] }>();
+  for (const attachment of visibleSoundscapeAttachments) {
+    const project = projectForAttachment(attachment, lookup);
+    const uris = soundscapeUris(attachment).filter((uri) => !hiddenUris.has(uri));
+    if (
+      !project ||
+      hiddenDids.has(project.did) ||
+      hiddenUris.has(project.atUri) ||
+      uris.length === 0
+    ) continue;
+    const current = soundscapesByProject.get(project.atUri);
+    if (current) current.uris.push(...uris);
+    else soundscapesByProject.set(project.atUri, { project, uris });
+  }
 
   const candidateUploads = visibleAudioAttachments.flatMap((attachment) => {
     const project = projectForAttachment(attachment, lookup);
@@ -385,12 +466,11 @@ async function listNetworkAudioProjectsUncached(signal?: AbortSignal): Promise<A
       !project ||
       hiddenDids.has(project.did) ||
       hiddenUris.has(project.atUri) ||
-      soundscapeProjectUris.has(project.atUri) ||
       recordings.length === 0
     ) return [];
     return [{ attachment, project, recordings }];
   });
-  if (candidateUploads.length === 0) return [];
+  if (candidateUploads.length === 0 && soundscapesByProject.size === 0) return [];
 
   const samples = await fetchAudioSamples(
     candidateUploads.map((candidate) => candidate.recordings[0]!),
@@ -430,6 +510,29 @@ async function listNetworkAudioProjectsUncached(signal?: AbortSignal): Promise<A
     }),
   );
 
+  // A timeline attachment has a useful total but not the recording date range
+  // shown in the slot header. Scan each deployment once; the indexer page is
+  // capped and paginated so large recorder folders stay bounded.
+  const recordedDatesByDeployment = new Map<string, Promise<string[]>>();
+  const datesForDeployment = (deploymentRef: string): Promise<string[]> => {
+    const existing = recordedDatesByDeployment.get(deploymentRef);
+    if (existing) return existing;
+    const promise = fetchDeploymentRecordedDates(deploymentRef, signal);
+    recordedDatesByDeployment.set(deploymentRef, promise);
+    return promise;
+  };
+  const recordedDates = await Promise.all(
+    uploadDrafts.map(async (draft) => {
+      const deploymentRef = draft.sample?.deploymentRef;
+      if (deploymentRef) {
+        const dates = await datesForDeployment(deploymentRef);
+        if (dates.length > 0) return dates;
+      }
+      const sampleDate = dateKey(draft.sample?.metadata?.recordedAt);
+      return sampleDate ? [sampleDate] : [];
+    }),
+  );
+
   const locationUris = new Set<string>();
   for (const draft of uploadDrafts) {
     const siteRef = draft.sample?.siteRef ?? draft.deployment?.siteRef ?? draft.candidate.project.locationUri;
@@ -445,11 +548,15 @@ async function listNetworkAudioProjectsUncached(signal?: AbortSignal): Promise<A
   );
 
   const grouped = new Map<string, { project: ProjectRecord; uploads: AudioProjectUpload[] }>();
+  for (const { project } of soundscapesByProject.values()) {
+    grouped.set(project.atUri, { project, uploads: [] });
+  }
   uploadDrafts.forEach((draft, index) => {
     const { candidate, sample, sampleDid, deployment, parsedCount } = draft;
     const count = parsedCount ?? missingCounts[index] ?? candidate.recordings.length;
     if (count <= 0) return;
     const siteUri = sample?.siteRef ?? deployment?.siteRef ?? candidate.project.locationUri;
+    const current = grouped.get(candidate.project.atUri);
     const upload: AudioProjectUpload = {
       id: candidate.attachment.uri!,
       did: sampleDid,
@@ -458,8 +565,9 @@ async function listNetworkAudioProjectsUncached(signal?: AbortSignal): Promise<A
       recorderName: deployment?.name?.trim() || candidate.attachment.title?.trim() || deployment?.deviceModel?.trim() || null,
       siteName: siteUri ? locationNames.get(siteUri) ?? null : null,
       createdAt: candidate.attachment.createdAt ?? null,
+      recordingUris: candidate.recordings,
+      recordedDates: recordedDates[index] ?? [],
     };
-    const current = grouped.get(candidate.project.atUri);
     if (current) current.uploads.push(upload);
     else grouped.set(candidate.project.atUri, { project: candidate.project, uploads: [upload] });
   });
@@ -490,12 +598,13 @@ async function listNetworkAudioProjectsUncached(signal?: AbortSignal): Promise<A
           const right = b.createdAt ? Date.parse(b.createdAt) : 0;
           return right - left;
         }),
+        soundscapeUris: [...new Set(soundscapesByProject.get(project.atUri)?.uris ?? [])],
       };
     }),
   );
 
   return projects
-    .filter((item) => item.recordingCount > 0)
+    .filter((item) => item.recordingCount > 0 || item.soundscapeUris.length > 0)
     .sort((a, b) => maxCreatedAt(b.uploads) - maxCreatedAt(a.uploads));
 }
 

@@ -13,7 +13,7 @@
  */
 
 import { cachedAsync } from "./async-cache";
-import { fetchHiddenRecordUris, fetchPublicHiddenAccountDids } from "./indexer";
+import { fetchHiddenRecordUris, fetchPublicHiddenAccountDids, indexerQuery } from "./indexer";
 import { listLatestPdsRecords, parseAtUri } from "./pds";
 import { hasPublishedSoundscapes } from "./soundscape-record";
 import { INDEXER_URL } from "./urls";
@@ -29,6 +29,8 @@ export type NetworkSoundscape = {
   did: string;
   rkey: string;
   soundscape: PublishedSoundscape;
+  /** Best-effort recorder/folder name for projects without a raw upload slot. */
+  recorderName?: string | null;
 };
 
 /** The gallery shows the newest few; a soundscape record can run to a few
@@ -111,6 +113,51 @@ async function collectAudioOwnerDids(signal?: AbortSignal): Promise<Set<string>>
   return dids;
 }
 
+type SoundscapeAudioRef = { deploymentRef?: string | null } | null;
+type SoundscapeDeployment = { name?: string | null; deviceModel?: string | null } | null;
+
+/** Resolve one recorder label per published soundscape. Raw upload attachments
+ * are not guaranteed to exist for every project, but a soundscape still points
+ * at its source audio record, which points at the deployment folder. */
+async function addRecorderNames(
+  items: NetworkSoundscape[],
+  signal?: AbortSignal,
+): Promise<NetworkSoundscape[]> {
+  const sources = items.map((item) => item.soundscape.sources[0]?.audioUri ?? null);
+  const audioSelections = sources.flatMap((uri, index) =>
+    uri ? [`a${index}: appGainforestAcAudioByUri(uri: ${JSON.stringify(uri)}) { deploymentRef }`] : [],
+  );
+  if (audioSelections.length === 0) return items;
+
+  const audioData = await indexerQuery<Record<string, SoundscapeAudioRef>>(
+    `query SoundscapeRecorderAudio {\n${audioSelections.join("\n")}\n}`,
+    {},
+    signal,
+  ).catch(() => null);
+  if (!audioData) return items;
+
+  const deploymentRefs = sources.map((_, index) => audioData[`a${index}`]?.deploymentRef ?? null);
+  const deploymentSelections = deploymentRefs.flatMap((uri, index) =>
+    uri
+      ? [`d${index}: appGainforestAcDeploymentByUri(uri: ${JSON.stringify(uri)}) { name deviceModel }`]
+      : [],
+  );
+  if (deploymentSelections.length === 0) return items;
+
+  const deploymentData = await indexerQuery<Record<string, SoundscapeDeployment>>(
+    `query SoundscapeRecorderDeployments {\n${deploymentSelections.join("\n")}\n}`,
+    {},
+    signal,
+  ).catch(() => null);
+  if (!deploymentData) return items;
+
+  return items.map((item, index) => {
+    const deployment = deploymentData[`d${index}`];
+    const recorderName = deployment?.name?.trim() || deployment?.deviceModel?.trim() || null;
+    return recorderName ? { ...item, recorderName } : item;
+  });
+}
+
 async function listNetworkSoundscapesUncached(signal?: AbortSignal): Promise<NetworkSoundscape[]> {
   const [candidates, hiddenDids, hiddenUris] = await Promise.all([
     collectAudioOwnerDids(signal),
@@ -144,10 +191,12 @@ async function listNetworkSoundscapesUncached(signal?: AbortSignal): Promise<Net
     return Number.isNaN(time) ? 0 : time;
   };
 
-  return perPublisher
+  const published = perPublisher
     .flat()
     .sort((a, b) => publishedAt(b) - publishedAt(a))
     .slice(0, MAX_NETWORK_SOUNDSCAPES);
+
+  return addRecorderNames(published, signal);
 }
 
 /** Every published soundscape on the network, newest first (cached briefly —

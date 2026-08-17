@@ -59,6 +59,9 @@ export function SoundscapeCard({
   href,
   className,
   legend = true,
+  showHeader = true,
+  showFooter = true,
+  compact = false,
 }: {
   soundscape: PublishedSoundscape;
   /** Permalink of the published soundscape (the "open" link target). */
@@ -68,6 +71,12 @@ export function SoundscapeCard({
    *  draws one shared voice-group key for the whole page instead, so a grid
    *  of dials doesn't repeat the same five lines beside every card. */
   legend?: boolean;
+  /** The project-row slot supplies its own header and title. */
+  showHeader?: boolean;
+  /** The project-row slot supplies its own single action. */
+  showFooter?: boolean;
+  /** Remove the card chrome when it is nested inside a project slot. */
+  compact?: boolean;
 }) {
   const t = useTranslations("common.soundscape");
   const locale = useLocale();
@@ -213,7 +222,14 @@ export function SoundscapeCard({
   ];
 
   return (
-    <div className={cn("overflow-hidden rounded-xl border border-border/60 bg-background", className)}>
+    <div
+      className={cn(
+        compact
+          ? "overflow-visible rounded-none border-0 bg-transparent"
+          : "overflow-hidden rounded-xl border border-border/60 bg-background",
+        className,
+      )}
+    >
       <audio
         ref={audioRef}
         preload="none"
@@ -229,12 +245,14 @@ export function SoundscapeCard({
       />
 
       {/* Header */}
-      <div className="flex items-baseline gap-3 px-4 pt-3.5 sm:px-5">
-        <span className="font-instrument text-xl italic tracking-[-0.01em] text-foreground">
-          {t("card.title")}
-        </span>
-        <span className="font-mono text-[12.5px] text-muted-foreground">{dateLabel}</span>
-      </div>
+      {showHeader ? (
+        <div className="flex items-baseline gap-3 px-4 pt-3.5 sm:px-5">
+          <span className="font-instrument text-xl italic tracking-[-0.01em] text-foreground">
+            {t("card.title")}
+          </span>
+          <span className="font-mono text-[12.5px] text-muted-foreground">{dateLabel}</span>
+        </div>
+      ) : null}
 
       {/* Dial + legend */}
       <div className="flex flex-wrap items-center gap-x-2 gap-y-0 px-2 sm:px-4">
@@ -245,7 +263,7 @@ export function SoundscapeCard({
           onClick={handleDialClick}
           className={cn(
             "min-w-0 cursor-pointer select-none",
-            legend ? "flex-1 basis-64" : "mx-auto w-full max-w-[380px]",
+            legend ? "flex-1 basis-64" : cn("mx-auto w-full", compact ? "max-w-[300px]" : "max-w-[380px]"),
           )}
         >
           {/* Grid: outer circle + dotted rings */}
@@ -366,19 +384,21 @@ export function SoundscapeCard({
       </div>
 
       {/* Footer */}
-      <div className="flex items-center justify-between gap-2 border-t border-border/60 px-4 py-2.5 sm:px-5">
-        <span className="font-mono text-[12.5px] text-muted-foreground">
-          {t("zoom.recordingsCount", { count: soundscape.sources.length })}
-        </span>
-        <Link
-          href={href}
-          onClick={(event) => event.stopPropagation()}
-          className="inline-flex items-center gap-1.5 text-[13.5px] font-medium text-primary hover:underline"
-        >
-          {t("published.openFull")}
-          <ArrowUpRightIcon className="size-3.5" />
-        </Link>
-      </div>
+      {showFooter ? (
+        <div className="flex items-center justify-between gap-2 border-t border-border/60 px-4 py-2.5 sm:px-5">
+          <span className="font-mono text-[12.5px] text-muted-foreground">
+            {t("zoom.recordingsCount", { count: soundscape.sources.length })}
+          </span>
+          <Link
+            href={href}
+            onClick={(event) => event.stopPropagation()}
+            className="inline-flex items-center gap-1.5 text-[13.5px] font-medium text-primary hover:underline"
+          >
+            {t("published.openFull")}
+            <ArrowUpRightIcon className="size-3.5" />
+          </Link>
+        </div>
+      ) : null}
     </div>
   );
 }
