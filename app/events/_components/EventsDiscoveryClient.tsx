@@ -14,6 +14,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import {
   deriveEventCrowd,
+  eventStartMs,
   hostEventHref,
   isEventCancelled,
   isEventFinished,
@@ -166,7 +167,16 @@ export function EventsDiscoveryClient({ adapter = liveEventsAdapter }: { adapter
     if (sort === "newest") {
       return [...list].sort((a, b) => (b.createdAt || "").localeCompare(a.createdAt || ""));
     }
-    return list;
+    // "Soonest first" sorts here, not in the adapter, so every data source
+    // (live indexer, /_test fixtures) renders the same chronological order.
+    return [...list].sort((a, b) => {
+      const aStart = eventStartMs(a);
+      const bStart = eventStartMs(b);
+      if (aStart === null && bStart === null) return 0;
+      if (aStart === null) return 1;
+      if (bStart === null) return -1;
+      return aStart - bStart;
+    });
   }, [upcoming, query, placeFilter, formatFilter, dateFilter, sort, cards]);
 
   const hasActiveFilters = Boolean(query.trim() || placeFilter.trim() || dateFilter !== "any" || formatFilter !== "all");
@@ -270,7 +280,7 @@ export function EventsDiscoveryClient({ adapter = liveEventsAdapter }: { adapter
             className="w-full rounded-full border border-border bg-surface py-2.5 pl-10 pr-4 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none"
           />
         </label>
-        <div className="flex max-w-full items-center gap-2 overflow-x-auto pb-0.5">
+        <div className="flex max-w-full flex-wrap items-center gap-2">
           <select
             value={dateFilter}
             onChange={(e) => setDateFilter(e.target.value as DateFilter)}
@@ -343,7 +353,7 @@ export function EventsDiscoveryClient({ adapter = liveEventsAdapter }: { adapter
       ) : null}
 
       {loading ? (
-        <div className="mt-6 grid gap-4 md:grid-cols-2">
+        <div className="mt-6 grid grid-cols-1 gap-4 md:grid-cols-2">
           {Array.from({ length: 6 }).map((_, i) => (
             <EventCardSkeleton key={i} />
           ))}
@@ -412,7 +422,7 @@ export function EventsDiscoveryClient({ adapter = liveEventsAdapter }: { adapter
                 <h2 className="text-lg font-semibold text-foreground">{t("featuredTitle")}</h2>
                 <span className="text-xs text-muted-foreground">{t("featuredNote")}</span>
               </div>
-              <div className="mt-3 grid gap-4 lg:grid-cols-2">
+              <div className="mt-3 grid grid-cols-1 gap-4 lg:grid-cols-2">
                 {featured.map((event) => (
                   <FeaturedEventCard key={event.uri} data={cardDataFor(event)} busy={busyUri === event.uri} onRsvp={() => void handleRsvp(event)} />
                 ))}
@@ -422,7 +432,7 @@ export function EventsDiscoveryClient({ adapter = liveEventsAdapter }: { adapter
 
           <section className="mt-7">
             {featured.length > 0 ? <h2 className="text-lg font-semibold text-foreground">{t("upcomingTitle")}</h2> : null}
-            <div className="mt-3 grid gap-4 md:grid-cols-2">
+            <div className="mt-3 grid grid-cols-1 gap-4 md:grid-cols-2">
               {listEvents.slice(0, visibleCount).map((event) => (
                 <EventListCard key={event.uri} data={cardDataFor(event)} busy={busyUri === event.uri} onRsvp={() => void handleRsvp(event)} />
               ))}

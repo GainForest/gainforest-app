@@ -487,7 +487,7 @@ export function EventDetailClient({
                 ) : null}
               </div>
               {showAllAttendees ? (
-                <ul className="mt-3 grid gap-2 sm:grid-cols-2">
+                <ul className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2">
                   {attendance.dids.map((attendee) => (
                     <li key={attendee} className="flex items-center gap-2.5 rounded-2xl border border-border-soft bg-surface px-3 py-2">
                       <AvatarFace card={cards.get(attendee) ?? null} className="size-7" />
