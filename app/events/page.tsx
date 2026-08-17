@@ -3,7 +3,6 @@ import Link from "next/link";
 import { getTranslations } from "next-intl/server";
 import { PlusIcon } from "lucide-react";
 import Container from "@/components/ui/container";
-import { buttonVariants } from "@/components/ui/button";
 import { fetchAuthSession } from "@/app/_lib/auth-server";
 import { EventsDiscoveryClient } from "./EventsDiscoveryClient";
 
@@ -23,7 +22,10 @@ export default async function EventsPage() {
             <p className="text-sm text-muted-foreground">{t("discovery.subtitle")}</p>
           </div>
           {session.isLoggedIn ? (
-            <Link href="/events/new" className={buttonVariants({ size: "sm" })}>
+            <Link
+              href="/events/new"
+              className="inline-flex h-9 items-center justify-center gap-2 whitespace-nowrap rounded-full bg-primary px-4 text-sm font-medium text-primary-foreground shadow transition-colors hover:bg-primary/90"
+            >
               <PlusIcon className="size-4" /> {t("discovery.create")}
             </Link>
           ) : null}
