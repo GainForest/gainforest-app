@@ -57,7 +57,15 @@
     "submit": "Publicar evento",
     "submitting": "Publicando…",
     "nameRequired": "Añade un nombre para publicar.",
-    "error": "Algo salió mal. Inténtalo de nuevo."
+    "error": "Algo salió mal. Inténtalo de nuevo.",
+    "cover": {
+      "label": "Imagen de portada",
+      "add": "Añadir imagen de portada",
+      "change": "Cambiar imagen de portada",
+      "remove": "Quitar",
+      "previewAlt": "Vista previa de portada",
+      "tooLarge": "Esa imagen supera los 10 MB. Elige una más pequeña."
+    }
   },
   "detail": {
     "live": "En vivo",
@@ -83,5 +91,13 @@
   "nav": {
     "label": "Eventos"
   },
-  "profileTab": "Eventos"
+  "profileTab": "Eventos",
+  "delete": {
+    "label": "Eliminar evento",
+    "confirm": "¿Eliminar este evento?",
+    "confirmAction": "Eliminar",
+    "cancel": "Cancelar",
+    "deleting": "Eliminando…",
+    "error": "Algo salió mal. Inténtalo de nuevo."
+  }
 }

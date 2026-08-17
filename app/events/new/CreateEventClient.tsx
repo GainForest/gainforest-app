@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
@@ -22,6 +22,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
+import { uploadBlob } from "@/app/(manage)/manage/_lib/mutations";
 import { createEvent, type EventFormInput } from "../_lib/mutations";
 import { guessTimezone, localInputToIso, toLocalInputValue } from "../_lib/format";
 
@@ -71,6 +72,9 @@ export function CreateEventClient({ session }: { session: AuthSession }) {
   const [advancedOpen, setAdvancedOpen] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [coverFile, setCoverFile] = useState<File | null>(null);
+  const [coverPreview, setCoverPreview] = useState<string | null>(null);
+  const coverInputRef = useRef<HTMLInputElement>(null);
 
   const timezone = guessTimezone();
   const modeLabel: Record<EventMode, string> = {
@@ -92,6 +96,23 @@ export function CreateEventClient({ session }: { session: AuthSession }) {
     }
   }
 
+  function onCoverFileChange(file: File | undefined) {
+    if (!file) return;
+    if (file.size > 10 * 1024 * 1024) {
+      setError(t("create.cover.tooLarge"));
+      return;
+    }
+    setCoverFile(file);
+    setCoverPreview(URL.createObjectURL(file));
+    setError(null);
+  }
+
+  function removeCover() {
+    setCoverFile(null);
+    setCoverPreview(null);
+    if (coverInputRef.current) coverInputRef.current.value = "";
+  }
+
   async function onSubmit() {
     setError(null);
     if (!name.trim()) {
@@ -99,6 +120,11 @@ export function CreateEventClient({ session }: { session: AuthSession }) {
       return;
     }
     const selected = hostOptions.find((o) => o.did === hostDid) ?? hostOptions[0];
+    let cover: { ref: unknown; mimeType: string; size: number } | null = null;
+    if (coverFile) {
+      const uploaded = await uploadBlob(coverFile, selected?.repo ? { repo: selected.repo } : undefined);
+      cover = { ref: uploaded.ref, mimeType: uploaded.mimeType, size: uploaded.size };
+    }
     const input: EventFormInput = {
       name,
       description,
@@ -109,6 +135,7 @@ export function CreateEventClient({ session }: { session: AuthSession }) {
       location: mode === "virtual" ? null : location,
       virtualUrl: mode === "inperson" ? null : virtualUrl,
       visibility,
+      cover,
     };
     setSubmitting(true);
     try {
@@ -234,23 +261,63 @@ export function CreateEventClient({ session }: { session: AuthSession }) {
             <ChevronDownIcon className={cn("size-4 transition-transform", advancedOpen && "rotate-180")} />
           </button>
           {advancedOpen ? (
-            <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2">
-              {(["public", "unlisted"] as const).map((v) => (
-                <button
-                  key={v}
-                  type="button"
-                  onClick={() => setVisibility(v)}
-                  className={cn(
-                    "inline-flex h-9 items-center rounded-full px-4 text-sm font-medium transition-colors",
-                    visibility === v
-                      ? "bg-primary text-primary-foreground"
-                      : "text-muted-foreground hover:text-foreground",
-                  )}
-                >
-                  {t(`create.visibility.${v}`)}
-                </button>
-              ))}
-              <p className="text-xs text-muted-foreground">{t(`create.visibility.${visibility}Hint`)}</p>
+            <div className="mt-3 flex flex-col gap-4">
+              <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+                {(["public", "unlisted"] as const).map((v) => (
+                  <button
+                    key={v}
+                    type="button"
+                    onClick={() => setVisibility(v)}
+                    className={cn(
+                      "inline-flex h-9 items-center rounded-full px-4 text-sm font-medium transition-colors",
+                      visibility === v
+                        ? "bg-primary text-primary-foreground"
+                        : "text-muted-foreground hover:text-foreground",
+                    )}
+                  >
+                    {t(`create.visibility.${v}`)}
+                  </button>
+                ))}
+                <p className="text-xs text-muted-foreground">{t(`create.visibility.${visibility}Hint`)}</p>
+              </div>
+
+              <div className="flex flex-col gap-2">
+                <span className="text-sm font-medium text-foreground">{t("create.cover.label")}</span>
+                <div className="flex items-center gap-3">
+                  {coverPreview ? (
+                    <div className="relative overflow-hidden rounded-lg bg-gradient-to-br from-primary/30 to-primary/10">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src={coverPreview} alt={t("create.cover.previewAlt")} className="h-20 w-32 object-cover" />
+                    </div>
+                  ) : null}
+                  <div className="flex items-center gap-2">
+                    <input
+                      ref={coverInputRef}
+                      type="file"
+                      accept="image/*"
+                      className="sr-only"
+                      aria-label={t("create.cover.add")}
+                      onChange={(e) => onCoverFileChange(e.target.files?.[0])}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => coverInputRef.current?.click()}
+                      className="inline-flex items-center gap-1 text-sm font-medium text-primary hover:underline"
+                    >
+                      {coverPreview ? t("create.cover.change") : t("create.cover.add")}
+                    </button>
+                    {coverPreview ? (
+                      <button
+                        type="button"
+                        onClick={removeCover}
+                        className="text-sm text-muted-foreground hover:text-foreground"
+                      >
+                        {t("create.cover.remove")}
+                      </button>
+                    ) : null}
+                  </div>
+                </div>
+              </div>
             </div>
           ) : null}
         </div>

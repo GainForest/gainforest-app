@@ -36,6 +36,8 @@ export type EventFormInput = {
   links?: Array<{ uri: string; name?: string }>;
   /** Public appears in discovery; unlisted is link-only. */
   visibility: "public" | "unlisted";
+  /** Optional uploaded cover image (lexicon blob). */
+  cover?: { ref: unknown; mimeType: string; size: number } | null;
 };
 
 function origin(): string {
@@ -76,6 +78,13 @@ export function buildEventRecord(input: EventFormInput): Record<string, unknown>
     if (uri) uris.push({ uri, ...(link.name?.trim() ? { name: link.name.trim() } : {}) });
   }
   if (uris.length) record.uris = uris;
+
+  // Optional cover image.
+  if (input.cover?.ref) {
+    record.media = [
+      { role: "thumbnail", content: { $type: "blob", ref: input.cover.ref, mimeType: input.cover.mimeType, size: input.cover.size } },
+    ];
+  }
 
   return record;
 }

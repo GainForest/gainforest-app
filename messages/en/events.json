@@ -57,7 +57,15 @@
     "submit": "Publish event",
     "submitting": "Publishing…",
     "nameRequired": "Add an event name to publish.",
-    "error": "Something went wrong. Please try again."
+    "error": "Something went wrong. Please try again.",
+    "cover": {
+      "label": "Cover image",
+      "add": "Add cover image",
+      "change": "Change cover image",
+      "remove": "Remove",
+      "previewAlt": "Cover preview",
+      "tooLarge": "That image is larger than 10 MB. Please choose a smaller one."
+    }
   },
   "detail": {
     "live": "Live",
@@ -83,5 +91,13 @@
   "nav": {
     "label": "Events"
   },
-  "profileTab": "Events"
+  "profileTab": "Events",
+  "delete": {
+    "label": "Delete event",
+    "confirm": "Delete this event?",
+    "confirmAction": "Delete",
+    "cancel": "Cancel",
+    "deleting": "Deleting…",
+    "error": "Something went wrong. Please try again."
+  }
 }

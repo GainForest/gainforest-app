@@ -57,7 +57,15 @@
     "submit": "Chapisha tukio",
     "submitting": "Inachapisha…",
     "nameRequired": "Ongeza jina la tukio ili kuchapisha.",
-    "error": "Hitilafu imetokea. Tafadhali jaribu tena."
+    "error": "Hitilafu imetokea. Tafadhali jaribu tena.",
+    "cover": {
+      "label": "Picha ya jalada",
+      "add": "Ongeza picha ya jalada",
+      "change": "Badilisha picha ya jalada",
+      "remove": "Ondoa",
+      "previewAlt": "Muhtasari wa jalada",
+      "tooLarge": "Picha hiyo ni kubwa kuliko MB 10. Chagua ndogo zaidi."
+    }
   },
   "detail": {
     "live": "Moja kwa moja",
@@ -83,5 +91,13 @@
   "nav": {
     "label": "Matukio"
   },
-  "profileTab": "Matukio"
+  "profileTab": "Matukio",
+  "delete": {
+    "label": "Futa tukio",
+    "confirm": "Futa tukio hili?",
+    "confirmAction": "Futa",
+    "cancel": "Ghairi",
+    "deleting": "Inafuta…",
+    "error": "Hitilafu imetokea. Tafadhali jaribu tena."
+  }
 }

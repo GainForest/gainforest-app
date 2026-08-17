@@ -17,6 +17,7 @@ import {
 import { fetchAuthSession } from "@/app/_lib/auth-server";
 import { formatEventWhen, modeLabels } from "../../_lib/format";
 import { RsvpControls } from "./RsvpControls";
+import { DeleteEventButton } from "./DeleteEventButton";
 
 type Params = { did: string; rkey: string };
 
@@ -128,6 +129,8 @@ export default async function EventDetailPage({ params }: { params: Promise<Para
             <span className="font-medium">{profileLabel(host)}</span>
           </Link>
         </div>
+
+        <DeleteEventButton eventDid={event.did} rkey={event.rkey} sessionDid={session.isLoggedIn ? session.did : null} />
 
         {event.links.length ? (
           <div className="flex flex-col gap-2">

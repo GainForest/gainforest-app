@@ -57,7 +57,15 @@
     "submit": "Terbitkan acara",
     "submitting": "Menerbitkan…",
     "nameRequired": "Tambahkan nama acara untuk menerbitkan.",
-    "error": "Terjadi kesalahan. Silakan coba lagi."
+    "error": "Terjadi kesalahan. Silakan coba lagi.",
+    "cover": {
+      "label": "Gambar sampul",
+      "add": "Tambahkan gambar sampul",
+      "change": "Ubah gambar sampul",
+      "remove": "Hapus",
+      "previewAlt": "Pratinjau sampul",
+      "tooLarge": "Gambar itu lebih besar dari 10 MB. Pilih yang lebih kecil."
+    }
   },
   "detail": {
     "live": "Langsung",
@@ -83,5 +91,13 @@
   "nav": {
     "label": "Acara"
   },
-  "profileTab": "Acara"
+  "profileTab": "Acara",
+  "delete": {
+    "label": "Hapus acara",
+    "confirm": "Hapus acara ini?",
+    "confirmAction": "Hapus",
+    "cancel": "Batal",
+    "deleting": "Menghapus…",
+    "error": "Terjadi kesalahan. Silakan coba lagi."
+  }
 }
