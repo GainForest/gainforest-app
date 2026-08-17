@@ -36,12 +36,57 @@ import {
   type EventFormState,
 } from "../_lib/form";
 
-type SectionKey = "description" | "agenda" | "capacity";
+type SectionKey = "cover" | "agenda" | "capacity";
 type FieldKey = "name" | "date" | "start" | "place" | "onlineUrl" | "guidelines";
 
 const inputClass =
   "w-full rounded-2xl border border-border bg-surface px-3.5 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none";
 const inputErrorClass = "border-destructive bg-destructive/5";
+
+/** A borderless textarea that grows with its content. The title and about use
+ *  it so the form reads like the published event and you write straight over
+ *  the placeholder, in place, instead of filling a boxed field. */
+function AutoGrowTextarea({
+  value,
+  onChange,
+  placeholder,
+  className,
+  ariaLabel,
+  id,
+  rows = 1,
+}: {
+  value: string;
+  onChange: (event: React.ChangeEvent<HTMLTextAreaElement>) => void;
+  placeholder: string;
+  className: string;
+  ariaLabel: string;
+  id?: string;
+  rows?: number;
+}) {
+  const ref = useRef<HTMLTextAreaElement | null>(null);
+  const grow = (el: HTMLTextAreaElement | null) => {
+    if (!el) return;
+    el.style.height = "auto";
+    el.style.height = `${el.scrollHeight}px`;
+  };
+  // Re-fit when the value changes from outside typing (draft restore, edit mode).
+  useEffect(() => {
+    grow(ref.current);
+  }, [value]);
+  return (
+    <textarea
+      id={id}
+      ref={ref}
+      rows={rows}
+      value={value}
+      onChange={onChange}
+      onInput={(event) => grow(event.currentTarget)}
+      placeholder={placeholder}
+      aria-label={ariaLabel}
+      className={className}
+    />
+  );
+}
 
 export function HostEventClient({ adapter = liveEventsAdapter }: { adapter?: EventsAdapter }) {
   const t = useTranslations("events.host");
@@ -78,7 +123,7 @@ export function HostEventClient({ adapter = liveEventsAdapter }: { adapter?: Eve
         setEditingEvent(event);
         setForm(eventToForm(event));
         const open = new Set<SectionKey>();
-        if (event.description || event.coverRef) open.add("description");
+        if (event.coverRef) open.add("cover");
         if (event.agenda.length > 0) open.add("agenda");
         if (event.capacity !== null) open.add("capacity");
         setOpenSections(open);
@@ -93,7 +138,7 @@ export function HostEventClient({ adapter = liveEventsAdapter }: { adapter?: Eve
       setForm(draft.form);
       setDraftSavedAt(draft.savedAt);
       const open = new Set<SectionKey>();
-      if (draft.form.description || draft.form.coverDataUrl) open.add("description");
+      if (draft.form.coverDataUrl) open.add("cover");
       if (draft.form.agenda.length > 0) open.add("agenda");
       if (draft.form.capacity) open.add("capacity");
       setOpenSections(open);
@@ -135,7 +180,7 @@ export function HostEventClient({ adapter = liveEventsAdapter }: { adapter?: Eve
         next.delete(key);
         return next;
       });
-      if (key === "description") update({ description: "", coverDataUrl: null, existingCoverRef: null });
+      if (key === "cover") update({ coverDataUrl: null, existingCoverRef: null });
       if (key === "agenda") update({ agenda: [] });
       if (key === "capacity") update({ capacity: "" });
     },
@@ -330,28 +375,26 @@ export function HostEventClient({ adapter = liveEventsAdapter }: { adapter?: Eve
             </div>
           ) : null}
 
-          {/* The basics — the whole required form. */}
+          {/* Title — a big heading you type straight over the placeholder, so
+              the form reads like the event you're about to publish. */}
+          <div ref={(el) => void (fieldRefs.current.name = el)}>
+            <AutoGrowTextarea
+              id="event-name"
+              value={form.name}
+              onChange={(e) => update({ name: e.target.value })}
+              placeholder={t("namePlaceholder")}
+              ariaLabel={t("nameLabel")}
+              className="w-full resize-none overflow-hidden border-0 bg-transparent p-0 text-3xl font-bold leading-tight tracking-tight text-foreground outline-none placeholder:text-muted-foreground/40 focus:outline-none focus:ring-0 sm:text-4xl"
+            />
+            {fieldError("name")}
+          </div>
+
+          {/* The basics — the essentials. */}
           <section>
             <h2 className="text-lg font-semibold text-foreground">{t("basicsTitle")}</h2>
             <p className="mt-1 text-sm text-muted-foreground">{t("basicsIntro")}</p>
 
             <div className="mt-4 space-y-4">
-              <div ref={(el) => void (fieldRefs.current.name = el)}>
-                <label className="mb-1.5 block text-sm font-medium text-foreground" htmlFor="event-name">
-                  {t("nameLabel")}
-                  {mark("required")}
-                </label>
-                <input
-                  id="event-name"
-                  type="text"
-                  value={form.name}
-                  onChange={(e) => update({ name: e.target.value })}
-                  placeholder={t("namePlaceholder")}
-                  className={`${inputClass} ${errors.name ? inputErrorClass : ""}`}
-                />
-                {fieldError("name")}
-              </div>
-
               <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
                 <div className="col-span-2" ref={(el) => void (fieldRefs.current.date = el)}>
                   <label className="mb-1.5 block text-sm font-medium text-foreground" htmlFor="event-date">
@@ -476,50 +519,54 @@ export function HostEventClient({ adapter = liveEventsAdapter }: { adapter?: Eve
             </div>
           </section>
 
+          {/* About — always visible, written in place like the published page. */}
+          <section>
+            <h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">{t("aboutLabel")}</h2>
+            <AutoGrowTextarea
+              value={form.description}
+              onChange={(e) => update({ description: e.target.value })}
+              placeholder={t("descriptionPlaceholder")}
+              ariaLabel={t("aboutLabel")}
+              rows={2}
+              className="mt-2 w-full resize-none overflow-hidden border-0 bg-transparent p-0 text-base leading-7 text-foreground outline-none placeholder:text-muted-foreground/50 focus:outline-none focus:ring-0"
+            />
+          </section>
+
           {/* Optional extras — folded away, clearly optional. */}
           <section>
             <h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">{t("addMore")}</h2>
             <div className="mt-3 space-y-3">
               {sectionCard(
-                "description",
-                t("sections.description.title"),
-                t("sections.description.hint"),
-                <>
-                  <textarea
-                    value={form.description}
-                    onChange={(e) => update({ description: e.target.value })}
-                    placeholder={t("descriptionPlaceholder")}
-                    rows={4}
-                    className={inputClass}
-                  />
-                  {form.coverDataUrl || form.existingCoverRef ? (
-                    <div className="flex items-center gap-3">
-                      {form.coverDataUrl ? (
-                        // eslint-disable-next-line @next/next/no-img-element -- local data URL preview.
-                        <img src={form.coverDataUrl} alt="" className="h-20 w-32 rounded-xl border border-border-soft object-cover" />
-                      ) : (
-                        <span className="grid h-20 w-32 place-items-center rounded-xl border border-border-soft bg-surface-sunken text-xs text-muted-foreground">
-                          <ImageIcon className="size-5" aria-hidden />
-                        </span>
-                      )}
-                      <button
-                        type="button"
-                        onClick={() => update({ coverDataUrl: null, existingCoverRef: null })}
-                        className="text-xs font-medium text-muted-foreground underline underline-offset-4 hover:text-foreground"
-                      >
-                        {t("coverRemove")}
-                      </button>
-                    </div>
-                  ) : (
-                    <label className="grid h-24 cursor-pointer place-items-center rounded-2xl border border-dashed border-border bg-surface-sunken text-xs text-muted-foreground transition-colors hover:border-primary/50">
-                      <span className="inline-flex items-center gap-1.5">
-                        <ImageIcon className="size-4" aria-hidden />
-                        {t("coverDrop")}
+                "cover",
+                t("sections.cover.title"),
+                t("sections.cover.hint"),
+                form.coverDataUrl || form.existingCoverRef ? (
+                  <div className="flex items-center gap-3">
+                    {form.coverDataUrl ? (
+                      // eslint-disable-next-line @next/next/no-img-element -- local data URL preview.
+                      <img src={form.coverDataUrl} alt="" className="h-20 w-32 rounded-xl border border-border-soft object-cover" />
+                    ) : (
+                      <span className="grid h-20 w-32 place-items-center rounded-xl border border-border-soft bg-surface-sunken text-xs text-muted-foreground">
+                        <ImageIcon className="size-5" aria-hidden />
                       </span>
-                      <input type="file" accept="image/*" className="sr-only" onChange={(e) => handleCover(e.target.files?.[0] ?? null)} />
-                    </label>
-                  )}
-                </>,
+                    )}
+                    <button
+                      type="button"
+                      onClick={() => update({ coverDataUrl: null, existingCoverRef: null })}
+                      className="text-xs font-medium text-muted-foreground underline underline-offset-4 hover:text-foreground"
+                    >
+                      {t("coverRemove")}
+                    </button>
+                  </div>
+                ) : (
+                  <label className="grid h-24 cursor-pointer place-items-center rounded-2xl border border-dashed border-border bg-surface-sunken text-xs text-muted-foreground transition-colors hover:border-primary/50">
+                    <span className="inline-flex items-center gap-1.5">
+                      <ImageIcon className="size-4" aria-hidden />
+                      {t("coverDrop")}
+                    </span>
+                    <input type="file" accept="image/*" className="sr-only" onChange={(e) => handleCover(e.target.files?.[0] ?? null)} />
+                  </label>
+                ),
               )}
 
               {sectionCard(

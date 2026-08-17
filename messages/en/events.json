@@ -125,7 +125,8 @@
     "requiredMark": "Required",
     "optionalMark": "Optional",
     "nameLabel": "What are you calling it?",
-    "namePlaceholder": "Dawn Bird Count at Marsh Lane",
+    "namePlaceholder": "Name your event",
+    "aboutLabel": "About",
     "dateLabel": "Date",
     "startLabel": "Start",
     "endLabel": "End",
@@ -142,9 +143,9 @@
     "addMore": "Add more (optional)",
     "remove": "Remove",
     "sections": {
-      "description": {
-        "title": "Description & cover photo",
-        "hint": "Tell people what to expect"
+      "cover": {
+        "title": "Cover photo",
+        "hint": "A photo for the top of your event"
       },
       "agenda": {
         "title": "Agenda / what to expect",

@@ -125,7 +125,8 @@
     "requiredMark": "Obrigatório",
     "optionalMark": "Opcional",
     "nameLabel": "Como você vai chamá-lo?",
-    "namePlaceholder": "Contagem de aves ao amanhecer em Marsh Lane",
+    "namePlaceholder": "Dê um nome ao seu evento",
+    "aboutLabel": "Sobre",
     "dateLabel": "Data",
     "startLabel": "Início",
     "endLabel": "Fim",
@@ -142,9 +143,9 @@
     "addMore": "Adicionar mais (opcional)",
     "remove": "Remover",
     "sections": {
-      "description": {
-        "title": "Descrição e foto de capa",
-        "hint": "Conte às pessoas o que esperar"
+      "cover": {
+        "title": "Foto de capa",
+        "hint": "Uma foto para o topo do seu evento"
       },
       "agenda": {
         "title": "Programação / o que esperar",

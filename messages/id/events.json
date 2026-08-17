@@ -125,7 +125,8 @@
     "requiredMark": "Wajib",
     "optionalMark": "Opsional",
     "nameLabel": "Apa nama acaranya?",
-    "namePlaceholder": "Hitung Burung Fajar di Marsh Lane",
+    "namePlaceholder": "Beri nama acara Anda",
+    "aboutLabel": "Tentang",
     "dateLabel": "Tanggal",
     "startLabel": "Mulai",
     "endLabel": "Selesai",
@@ -142,9 +143,9 @@
     "addMore": "Tambahkan lagi (opsional)",
     "remove": "Hapus",
     "sections": {
-      "description": {
-        "title": "Deskripsi & foto sampul",
-        "hint": "Ceritakan apa yang akan terjadi"
+      "cover": {
+        "title": "Foto sampul",
+        "hint": "Foto untuk bagian atas acara Anda"
       },
       "agenda": {
         "title": "Agenda / apa yang akan terjadi",

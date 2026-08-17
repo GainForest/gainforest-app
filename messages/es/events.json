@@ -125,7 +125,8 @@
     "requiredMark": "Obligatorio",
     "optionalMark": "Opcional",
     "nameLabel": "¿Cómo lo vas a llamar?",
-    "namePlaceholder": "Conteo de aves al amanecer en Marsh Lane",
+    "namePlaceholder": "Nombra tu evento",
+    "aboutLabel": "Acerca de",
     "dateLabel": "Fecha",
     "startLabel": "Inicio",
     "endLabel": "Fin",
@@ -142,9 +143,9 @@
     "addMore": "Añadir más (opcional)",
     "remove": "Quitar",
     "sections": {
-      "description": {
-        "title": "Descripción y foto de portada",
-        "hint": "Cuenta a la gente qué esperar"
+      "cover": {
+        "title": "Foto de portada",
+        "hint": "Una foto para la parte superior de tu evento"
       },
       "agenda": {
         "title": "Agenda / qué esperar",

@@ -125,7 +125,8 @@
     "requiredMark": "Lazima",
     "optionalMark": "Hiari",
     "nameLabel": "Utaliita nini?",
-    "namePlaceholder": "Hesabu ya Ndege Alfajiri huko Marsh Lane",
+    "namePlaceholder": "Ipe jina tukio lako",
+    "aboutLabel": "Kuhusu",
     "dateLabel": "Tarehe",
     "startLabel": "Kuanza",
     "endLabel": "Kumaliza",
@@ -142,9 +143,9 @@
     "addMore": "Ongeza zaidi (hiari)",
     "remove": "Ondoa",
     "sections": {
-      "description": {
-        "title": "Maelezo na picha ya jalada",
-        "hint": "Waambie watu cha kutarajia"
+      "cover": {
+        "title": "Picha ya jalada",
+        "hint": "Picha ya juu ya tukio lako"
       },
       "agenda": {
         "title": "Ratiba / cha kutarajia",
