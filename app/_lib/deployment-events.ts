@@ -230,8 +230,9 @@ function stripEquipmentRemark(remarks: string | undefined): string {
 export type DeploymentEventEdit = {
   siteName?: string;
   equipment?: { name: string; assetId: string; uri: string } | null;
-  /** Manual location override; when absent the stored coordinates carry over. */
-  location?: { lat: number; lon: number };
+  /** Manual location override; null clears the stored coordinates, while an
+   *  absent value carries them over. */
+  location?: { lat: number; lon: number } | null;
 };
 
 function equipmentUsedLabel(equipment: DeploymentEventEdit["equipment"]): string {
@@ -263,7 +264,7 @@ export function buildUpdatedDeploymentEventRecord(
   if (edit.location) {
     record.decimalLatitude = edit.location.lat.toFixed(6);
     record.decimalLongitude = edit.location.lon.toFixed(6);
-  } else {
+  } else if (edit.location === undefined) {
     if (item.decimalLatitude) record.decimalLatitude = item.decimalLatitude;
     if (item.decimalLongitude) record.decimalLongitude = item.decimalLongitude;
   }
@@ -287,7 +288,12 @@ export function applyDeploymentEdit(
   cid: string,
 ): DeploymentEventItem {
   const record = buildUpdatedDeploymentEventRecord(item, edit);
-  return { ...item, ...record, uri: item.uri, rkey: item.rkey, did: item.did, cid };
+  const next = { ...item, ...record, uri: item.uri, rkey: item.rkey, did: item.did, cid };
+  if (edit.location === null) {
+    delete next.decimalLatitude;
+    delete next.decimalLongitude;
+  }
+  return next;
 }
 
 export async function updateDeploymentEvent(

@@ -1,7 +1,11 @@
 import { describe, expect, it } from "vitest";
 
-import type { AcDeploymentItem } from "./ac-deployment";
-import type { DeploymentEventItem } from "./deployment-events";
+import { applyAcDeploymentEdit, buildUpdatedAcDeploymentRecord, type AcDeploymentItem } from "./ac-deployment";
+import {
+  applyDeploymentEdit,
+  buildUpdatedDeploymentEventRecord,
+  type DeploymentEventItem,
+} from "./deployment-events";
 import {
   chimeDeploymentName,
   eventRenameEdit,
@@ -145,6 +149,40 @@ describe("isChimeEventUri", () => {
     expect(isChimeEventUri(eventUri("e1"))).toBe(true);
     expect(isChimeEventUri(folderUri("f1"))).toBe(false);
     expect(isChimeEventUri("not-a-uri")).toBe(false);
+  });
+});
+
+describe("clearing deployment locations", () => {
+  it("removes coordinates from a folder record and its local state", () => {
+    const folder = makeFolder({
+      uri: folderUri("f1"),
+      decimalLatitude: "-3.131630",
+      decimalLongitude: "-59.982500",
+    });
+
+    const record = buildUpdatedAcDeploymentRecord(folder, { location: null });
+    const applied = applyAcDeploymentEdit(folder, { location: null }, "cid-cleared");
+
+    expect(record.decimalLatitude).toBeUndefined();
+    expect(record.decimalLongitude).toBeUndefined();
+    expect(applied.decimalLatitude).toBeUndefined();
+    expect(applied.decimalLongitude).toBeUndefined();
+  });
+
+  it("removes coordinates from a chime event and its local state", () => {
+    const event = makeEvent({
+      uri: eventUri("e1"),
+      decimalLatitude: "-3.131630",
+      decimalLongitude: "-59.982500",
+    });
+
+    const record = buildUpdatedDeploymentEventRecord(event, { location: null });
+    const applied = applyDeploymentEdit(event, { location: null }, "cid-cleared");
+
+    expect(record.decimalLatitude).toBeUndefined();
+    expect(record.decimalLongitude).toBeUndefined();
+    expect(applied.decimalLatitude).toBeUndefined();
+    expect(applied.decimalLongitude).toBeUndefined();
   });
 });
 

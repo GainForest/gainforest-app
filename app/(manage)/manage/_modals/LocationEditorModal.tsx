@@ -71,10 +71,13 @@ type LocationEditorModalProps = {
    *    the country's center instead of a flagged area — the thing being
    *    placed stood at one spot, so every pick must carry exact
    *    coordinates;
-   *  - the Remove action is hidden — a measurement is set or corrected,
-   *    never "removed" — so `onConfirm` is always called with a choice.
+   *  - the Remove action is hidden unless `allowRemove` is set — a measurement
+   *    is normally set or corrected, but callers that support clearing can
+   *    opt into it explicitly.
    */
   pointOnly?: boolean;
+  /** Show the existing saved-location removal action even in exact-point mode. */
+  allowRemove?: boolean;
   /** Called with the steward's choice; null means "remove the location".
    *  Return a promise and the modal stays open and locked until the save
    *  lands, showing the failure right here if it doesn't. A void return
@@ -269,7 +272,14 @@ function LocationPreviewMap({
   return <div ref={containerRef} className="h-52 w-full overflow-hidden rounded-xl border border-border" />;
 }
 
-export function LocationEditorModal({ current, title, description, pointOnly = false, onConfirm }: LocationEditorModalProps) {
+export function LocationEditorModal({
+  current,
+  title,
+  description,
+  pointOnly = false,
+  allowRemove = false,
+  onConfirm,
+}: LocationEditorModalProps) {
   const t = useTranslations("upload.dashboardClient.locationEditor");
   const { stack, popModal, hide } = useModal();
 
@@ -616,7 +626,7 @@ export function LocationEditorModal({ current, title, description, pointOnly = f
       {saveError ? <p className="mt-3 text-sm text-destructive">{saveError}</p> : null}
 
       <ModalFooter className="mt-4 flex-row items-center justify-between gap-2">
-        {current && !pointOnly ? (
+        {current && (!pointOnly || allowRemove) ? (
           <Button variant="ghost" className="text-muted-foreground" onClick={handleRemove} disabled={saving}>
             {t("remove")}
           </Button>

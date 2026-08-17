@@ -119,8 +119,8 @@ export function RenameFolderModal({
  * A thin skin over the one location editor the app already has (the
  * organization-location modal): search for the place, enter coordinates by
  * hand, drag the pin to fine-tune. Deployment coordinates are a measurement,
- * so the editor runs in exact-point mode — no "approximate location"
- * fuzzing, no Remove, and every pick carries exact coordinates.
+ * so the editor runs in exact-point mode — no "approximate location" fuzzing
+ * — while still allowing the owner to remove an existing location.
  */
 export function SetDeploymentLocationModal({
   name,
@@ -131,8 +131,8 @@ export function SetDeploymentLocationModal({
   name: string;
   /** The currently stored coordinates, when the deployment has any. */
   initial: { lat: number; lon: number } | null;
-  /** Persists the override; rejects with a message worth showing. */
-  onSave: (location: { lat: number; lon: number }) => Promise<void>;
+  /** Persists the override or removes it when passed null. */
+  onSave: (location: { lat: number; lon: number } | null) => Promise<void>;
 }) {
   const t = useTranslations("common.recordingFolders");
   return (
@@ -140,6 +140,7 @@ export function SetDeploymentLocationModal({
       title={t("locationTitle")}
       description={t("locationBody", { name })}
       pointOnly
+      allowRemove
       current={
         initial
           ? {
@@ -151,8 +152,10 @@ export function SetDeploymentLocationModal({
           : null
       }
       onConfirm={async (choice) => {
-        // pointOnly never confirms with null (Remove is hidden).
-        if (!choice) return;
+        if (!choice) {
+          await onSave(null);
+          return;
+        }
         await onSave({ lat: choice.place.latitude, lon: choice.place.longitude });
       }}
     />

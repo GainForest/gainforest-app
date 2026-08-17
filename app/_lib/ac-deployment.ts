@@ -254,8 +254,9 @@ export type AcDeploymentEdit = {
    *  soundscape's title all read. */
   name?: string;
   /** Manual location override — where the recorder actually stood. Uploaded
-   *  SD-card folders carry no coordinates until their owner sets them. */
-  location?: { lat: number; lon: number };
+   *  SD-card folders carry no coordinates until their owner sets them; null
+   *  explicitly clears a previously saved location. */
+  location?: { lat: number; lon: number } | null;
 };
 
 /**
@@ -273,6 +274,9 @@ export function buildUpdatedAcDeploymentRecord(
   if (edit.location) {
     next.decimalLatitude = edit.location.lat.toFixed(6);
     next.decimalLongitude = edit.location.lon.toFixed(6);
+  } else if (edit.location === null) {
+    delete next.decimalLatitude;
+    delete next.decimalLongitude;
   }
   return next;
 }
@@ -282,10 +286,15 @@ export function applyAcDeploymentEdit(
   edit: AcDeploymentEdit,
   cid: string,
 ): AcDeploymentItem {
-  return { ...item, ...buildUpdatedAcDeploymentRecord(item, edit), cid };
+  const next = { ...item, ...buildUpdatedAcDeploymentRecord(item, edit), cid };
+  if (edit.location === null) {
+    delete next.decimalLatitude;
+    delete next.decimalLongitude;
+  }
+  return next;
 }
 
-/** Update a folder of recordings (rename, or a manual location override).
+/** Update a folder of recordings (rename, location override, or location clear).
  *  The recordings themselves never move. */
 export async function updateAcDeployment(
   item: AcDeploymentItem,

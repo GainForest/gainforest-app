@@ -163,7 +163,7 @@ export function eventRenameEdit(event: DeploymentEventItem, name: string): Deplo
  *  and equipment link are carried over explicitly, like a rename. */
 function eventLocationEdit(
   event: DeploymentEventItem,
-  location: { lat: number; lon: number },
+  location: { lat: number; lon: number } | null,
 ): DeploymentEventEdit {
   const equipmentUri = linkedEquipmentUri(event.eventRemarks);
   return {
@@ -176,10 +176,10 @@ function eventLocationEdit(
 }
 
 /**
- * Manually override where a deployment stood — the fix for folders that came
- * in by uploading past SD-card audio, which carry no coordinates at all.
+ * Set or clear where a deployment stood — the fix for folders that came in by
+ * uploading past SD-card audio, which carry no coordinates at all.
  *
- * One deployment, one location: the override is written to every record
+ * One deployment, one location: the change is written to every record
  * standing behind it, so the audio library, the labeling flow and the
  * deployment detail page's map all agree. The folder record is the primary
  * write when one exists (recordings and labels read it); the chime event is
@@ -188,7 +188,7 @@ function eventLocationEdit(
  */
 export async function setDeploymentLocation(
   deployment: { folder: AcDeploymentItem | null; event: DeploymentEventItem | null },
-  location: { lat: number; lon: number },
+  location: { lat: number; lon: number } | null,
   options?: RenameOptions,
 ): Promise<{ folder: AcDeploymentItem | null; event: DeploymentEventItem | null }> {
   const { folder, event } = deployment;
