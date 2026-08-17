@@ -17,22 +17,42 @@ import { SoundscapeCard } from "@/app/soundscape/_components/SoundscapeCard";
 import { parseSoundscapeHref, type PublishedSoundscape } from "@/lib/soundscape/record";
 import type { TimelinePreviewPayload } from "../../../shared/timelineFeedViewModel";
 
+// Published soundscapes are immutable, so a record fetched once is good for the
+// whole session. This module-level cache makes switching between an entry's
+// soundscape tiles instant; paired with the stable renderer key, the previous
+// dial stays on screen while an uncached one loads instead of flashing a spinner.
+const soundscapeCache = new Map<string, PublishedSoundscape>();
+
 export function SoundscapePreviewRenderer({ preview }: { preview: TimelinePreviewPayload }) {
   const t = useTranslations("common.soundscape.published");
   const target = parseSoundscapeHref(preview.href);
-  const [soundscape, setSoundscape] = useState<PublishedSoundscape | null | undefined>(undefined);
+  const cacheKey = target ? `${target.did}/${target.rkey}` : null;
+  const [soundscape, setSoundscape] = useState<PublishedSoundscape | null | undefined>(
+    () => (cacheKey ? soundscapeCache.get(cacheKey) ?? undefined : null),
+  );
 
   useEffect(() => {
     if (!target) {
       setSoundscape(null);
       return;
     }
+    const key = `${target.did}/${target.rkey}`;
+    const cached = soundscapeCache.get(key);
+    if (cached) {
+      // Already loaded this session — swap in instantly, no fetch, no flash.
+      setSoundscape(cached);
+      return;
+    }
+    // Leave whatever is on screen (the previous dial, or the first-load spinner)
+    // in place while the new record loads, so switching tiles never blanks.
     const controller = new AbortController();
-    setSoundscape(undefined);
     fetchPublishedSoundscape(target.did, target.rkey, controller.signal)
-      .then((next) => setSoundscape(next))
+      .then((next) => {
+        if (next) soundscapeCache.set(key, next);
+        setSoundscape(next);
+      })
       .catch((error) => {
-        if ((error as Error).name !== "AbortError") setSoundscape(null);
+        if ((error as Error).name !== "AbortError") setSoundscape((current) => current ?? null);
       });
     return () => controller.abort();
   }, [target?.did, target?.rkey]); // eslint-disable-line react-hooks/exhaustive-deps
