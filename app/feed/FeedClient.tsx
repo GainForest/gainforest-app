@@ -698,11 +698,13 @@ function FeedRow({
 
   return (
     <li className="relative">
+      {/* The treatment wraps the whole row — the content *and* its action
+          bar — so a pinned post reads as one block that ends just above the
+          feed separator. Every row carries the 1px box so pinning one never
+          shifts the feed by a pixel; only the colour differs. */}
       <div
         className={cn(
-          // Every row carries the 1px box so pinning one doesn't shift the
-          // feed by a pixel; only the colour differs between the two branches.
-          "group flex gap-3 rounded-2xl border px-3 pb-1.5 pt-3.5 transition-colors",
+          "rounded-2xl border transition-colors",
           // Pinned posts wear the muted highlight treatment: a barely-there
           // fill plus the rail that actually carries the "pinned" read. Both
           // invert in dark mode, so this stays legible there.
@@ -711,176 +713,178 @@ function FeedRow({
             : "border-transparent hover:bg-muted/40",
         )}
       >
-        {/* Avatar */}
-        <Link href={item.href} className="shrink-0">
-          <FeedAvatar item={item} />
-        </Link>
+        <div className="group flex gap-3 px-3 pb-1.5 pt-3.5">
+          {/* Avatar */}
+          <Link href={item.href} className="shrink-0">
+            <FeedAvatar item={item} />
+          </Link>
 
-        {/* Content */}
-        <div className="min-w-0 flex-1">
-          {/* Reshare attribution — who resurfaced this record (Bluesky's
-              "Reposted by X" header); the row below is the original. */}
-          {item.reshare ? (
-            <p className="mb-1 flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
-              <Repeat2Icon className="size-3.5 shrink-0 text-emerald-600 dark:text-emerald-400" />
+          {/* Content */}
+          <div className="min-w-0 flex-1">
+            {/* Reshare attribution — who resurfaced this record (Bluesky's
+                "Reposted by X" header); the row below is the original. */}
+            {item.reshare ? (
+              <p className="mb-1 flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
+                <Repeat2Icon className="size-3.5 shrink-0 text-emerald-600 dark:text-emerald-400" />
+                <AccountHoverCard
+                  did={item.reshare.did}
+                  name={item.reshare.name}
+                  avatarRef={item.reshare.avatarRef}
+                  triggerClassName="min-w-0"
+                >
+                  <span className="block truncate hover:underline">
+                    {t("actions.resharedBy", { name: item.reshare.name ?? shortDid(item.reshare.did) })}
+                  </span>
+                </AccountHoverCard>
+              </p>
+            ) : null}
+            {/* Pinned chip — a steward pinned this post to the top of the feed. */}
+            {item.pinned ? (
+              <p className="mb-1 flex items-center gap-1 text-[11px] font-medium uppercase tracking-wide text-primary">
+                <PinIcon className="size-3" />
+                {t("pinnedLabel")}
+              </p>
+            ) : null}
+
+            {/* Text opens the record detail (or, for posts, expands the text in
+                place); photo and quick-like remain separate controls below. */}
+            <RowTextWrapper
+              isPost={isPost}
+              href={item.href}
+              expanded={postExpanded}
+              onToggle={() => setPostExpanded((v) => !v)}
+            >
+            {/* Author line */}
+            <div className="flex items-center gap-1.5 text-sm">
               <AccountHoverCard
-                did={item.reshare.did}
-                name={item.reshare.name}
-                avatarRef={item.reshare.avatarRef}
+                did={item.actorDid}
+                name={item.actorName}
+                avatarRef={item.actorAvatarRef}
                 triggerClassName="min-w-0"
               >
-                <span className="block truncate hover:underline">
-                  {t("actions.resharedBy", { name: item.reshare.name ?? shortDid(item.reshare.did) })}
+                <span className="block truncate font-medium text-foreground hover:underline">
+                  {item.actorName || item.actorDid ? item.actorName ?? shortDid(item.actorDid) : t("anonymous")}
                 </span>
               </AccountHoverCard>
-            </p>
-          ) : null}
-          {/* Pinned chip — a steward pinned this post to the top of the feed. */}
-          {item.pinned ? (
-            <p className="mb-1 flex items-center gap-1 text-[11px] font-medium uppercase tracking-wide text-primary">
-              <PinIcon className="size-3" />
-              {t("pinnedLabel")}
-            </p>
-          ) : null}
-
-          {/* Text opens the record detail (or, for posts, expands the text in
-              place); photo and quick-like remain separate controls below. */}
-          <RowTextWrapper
-            isPost={isPost}
-            href={item.href}
-            expanded={postExpanded}
-            onToggle={() => setPostExpanded((v) => !v)}
-          >
-          {/* Author line */}
-          <div className="flex items-center gap-1.5 text-sm">
-            <AccountHoverCard
-              did={item.actorDid}
-              name={item.actorName}
-              avatarRef={item.actorAvatarRef}
-              triggerClassName="min-w-0"
-            >
-              <span className="block truncate font-medium text-foreground hover:underline">
-                {item.actorName || item.actorDid ? item.actorName ?? shortDid(item.actorDid) : t("anonymous")}
+              <span className="text-muted-foreground/60">·</span>
+              <span className="shrink-0 text-xs text-muted-foreground/80" title={fullDate(item.createdAt)}>
+                {formatRelative(item.createdAt)}
               </span>
-            </AccountHoverCard>
-            <span className="text-muted-foreground/60">·</span>
-            <span className="shrink-0 text-xs text-muted-foreground/80" title={fullDate(item.createdAt)}>
-              {formatRelative(item.createdAt)}
-            </span>
+            </div>
+
+            {/* Verb line */}
+            <p className="mt-0.5 flex items-center gap-1.5 text-xs text-muted-foreground">
+              <KindIcon kind={item.kind} className="size-3.5 shrink-0 text-primary/70" />
+              <span className="truncate">{verb}</span>
+            </p>
+
+            {/* Headline */}
+            {item.title ? (
+              <p className="mt-1.5 line-clamp-2 text-[15px] font-medium leading-snug text-foreground">
+                {item.title}
+              </p>
+            ) : null}
+
+            {/* Body text — expandable, so a long update can be read in place. */}
+            {bodyText ? (
+              <ExpandableBody
+                text={bodyText}
+                mentions={bodyMentions}
+                expanded={isPost ? postExpanded : undefined}
+                onToggle={isPost ? () => setPostExpanded((v) => !v) : undefined}
+              />
+            ) : null}
+
+            </RowTextWrapper>
+
+            {/* Cover image — the image itself opens the in-feed lightbox while
+                the separate corner heart likes it immediately. Keeping them as
+                sibling buttons avoids nested interactive controls. */}
+            {hasImage(item) ? (
+              <div className="relative mt-2 overflow-hidden rounded-xl border border-border/60">
+                <button
+                  type="button"
+                  aria-label={t("actions.openImage")}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    onOpenImage(item);
+                  }}
+                  className="block w-full cursor-zoom-in text-left"
+                >
+                  <FeedImage item={item} />
+                </button>
+                <QuickLikeButton
+                  subjectUri={subjectUri}
+                  signedIn={signedIn}
+                  interactions={interactions}
+                  className="absolute bottom-2 right-2"
+                />
+              </div>
+            ) : null}
+
+            {/* Bioacoustic sighting — spectrogram of the labelled section with
+                in-place playback of that sound. */}
+            {item.bioacoustics ? <FeedAudioClip clip={item.bioacoustics} /> : null}
+
+            {/* Shared soundscape — the 24-hour clock, playable in place. */}
+            {sharedSoundscape ? (
+              <FeedSoundscapeCard did={sharedSoundscape.did} rkey={sharedSoundscape.rkey} />
+            ) : null}
           </div>
 
-          {/* Verb line */}
-          <p className="mt-0.5 flex items-center gap-1.5 text-xs text-muted-foreground">
-            <KindIcon kind={item.kind} className="size-3.5 shrink-0 text-primary/70" />
-            <span className="truncate">{verb}</span>
-          </p>
-
-          {/* Headline */}
-          {item.title ? (
-            <p className="mt-1.5 line-clamp-2 text-[15px] font-medium leading-snug text-foreground">
-              {item.title}
-            </p>
-          ) : null}
-
-          {/* Body text — expandable, so a long update can be read in place. */}
-          {bodyText ? (
-            <ExpandableBody
-              text={bodyText}
-              mentions={bodyMentions}
-              expanded={isPost ? postExpanded : undefined}
-              onToggle={isPost ? () => setPostExpanded((v) => !v) : undefined}
-            />
-          ) : null}
-
-          </RowTextWrapper>
-
-          {/* Cover image — the image itself opens the in-feed lightbox while
-              the separate corner heart likes it immediately. Keeping them as
-              sibling buttons avoids nested interactive controls. */}
-          {hasImage(item) ? (
-            <div className="relative mt-2 overflow-hidden rounded-xl border border-border/60">
-              <button
-                type="button"
-                aria-label={t("actions.openImage")}
-                onClick={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  onOpenImage(item);
-                }}
-                className="block w-full cursor-zoom-in text-left"
-              >
-                <FeedImage item={item} />
-              </button>
-              <QuickLikeButton
-                subjectUri={subjectUri}
-                signedIn={signedIn}
-                interactions={interactions}
-                className="absolute bottom-2 right-2"
-              />
-            </div>
-          ) : null}
-
-          {/* Bioacoustic sighting — spectrogram of the labelled section with
-              in-place playback of that sound. */}
-          {item.bioacoustics ? <FeedAudioClip clip={item.bioacoustics} /> : null}
-
-          {/* Shared soundscape — the 24-hour clock, playable in place. */}
-          {sharedSoundscape ? (
-            <FeedSoundscapeCard did={sharedSoundscape.did} rkey={sharedSoundscape.rkey} />
-          ) : null}
         </div>
 
-      </div>
-
-      {/* Like + comment, aligned under the row content (outside the link). */}
-      <div className="pb-2 pl-16 pr-3">
-        <FeedActionBar
-          subjectUri={subjectUri}
-          signedIn={signedIn}
-          interactions={interactions}
-          extraActions={
-            isAdmin && onModerated && item.id.startsWith("at://") ? (
-              <ModeratorHideButton subjectUri={item.id} onHidden={() => onModerated(item.id)} />
-            ) : null
-          }
-        />
-        {bskyUrl ? <BlueskyPostLink href={bskyUrl} /> : null}
-        {canEditPost ? (
-          editing ? (
-            <InlineEditor
-              initial={bodyText ?? ""}
-              initialMentions={bodyMentions}
-              max={300}
-              onSave={async (text, mentions) => {
-                // The author edits the caption they can see; the shared
-                // soundscape's link is put back so the post keeps its dial.
-                const saved = sharedSoundscape ? `${text}\n${sharedSoundscape.link}` : text;
-                await interactions.editPost(item.id, saved, mentions);
-                setOverrideText(saved);
-                setOverrideMentions(mentions);
-              }}
-              onCancel={() => setEditing(false)}
-            />
-          ) : (
-            <div className="mt-1 flex items-center gap-1">
-              <button
-                type="button"
-                onClick={() => setEditing(true)}
-                className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-              >
-                <PencilIcon className="size-3" />
-                {t("actions.edit")}
-              </button>
-              <DeleteButton onDelete={() => interactions.deletePost(item.id)} />
+        {/* Like + comment, aligned under the row content (outside the link). */}
+        <div className="pb-2 pl-16 pr-3">
+          <FeedActionBar
+            subjectUri={subjectUri}
+            signedIn={signedIn}
+            interactions={interactions}
+            extraActions={
+              isAdmin && onModerated && item.id.startsWith("at://") ? (
+                <ModeratorHideButton subjectUri={item.id} onHidden={() => onModerated(item.id)} />
+              ) : null
+            }
+          />
+          {bskyUrl ? <BlueskyPostLink href={bskyUrl} /> : null}
+          {canEditPost ? (
+            editing ? (
+              <InlineEditor
+                initial={bodyText ?? ""}
+                initialMentions={bodyMentions}
+                max={300}
+                onSave={async (text, mentions) => {
+                  // The author edits the caption they can see; the shared
+                  // soundscape's link is put back so the post keeps its dial.
+                  const saved = sharedSoundscape ? `${text}\n${sharedSoundscape.link}` : text;
+                  await interactions.editPost(item.id, saved, mentions);
+                  setOverrideText(saved);
+                  setOverrideMentions(mentions);
+                }}
+                onCancel={() => setEditing(false)}
+              />
+            ) : (
+              <div className="mt-1 flex items-center gap-1">
+                <button
+                  type="button"
+                  onClick={() => setEditing(true)}
+                  className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+                >
+                  <PencilIcon className="size-3" />
+                  {t("actions.edit")}
+                </button>
+                <DeleteButton onDelete={() => interactions.deletePost(item.id)} />
+              </div>
+            )
+          ) : null}
+          {/* Admin-only: pin / unpin this post to the top of the feed. */}
+          {isAdmin && onTogglePin && item.kind === "post" && !item.reshare ? (
+            <div className="mt-1">
+              <PinToggleButton pinned={Boolean(item.pinned)} onToggle={() => onTogglePin(item)} />
             </div>
-          )
-        ) : null}
-        {/* Admin-only: pin / unpin this post to the top of the feed. */}
-        {isAdmin && onTogglePin && item.kind === "post" && !item.reshare ? (
-          <div className="mt-1">
-            <PinToggleButton pinned={Boolean(item.pinned)} onToggle={() => onTogglePin(item)} />
-          </div>
-        ) : null}
+          ) : null}
+        </div>
       </div>
     </li>
   );
