@@ -46,6 +46,7 @@ type TrustedByBadgesProps = {
   iconClassName?: string;
   size?: keyof typeof ICON_SIZE_CLASS;
   variant?: "default" | "compact" | "plain";
+  hideLabel?: boolean;
 };
 
 export function TrustedByBadges({
@@ -55,6 +56,7 @@ export function TrustedByBadges({
   iconClassName = "",
   size,
   variant = "default",
+  hideLabel = false,
 }: TrustedByBadgesProps) {
   const t = useTranslations("common.trust");
   const [endorsements, setEndorsements] = useState<TrustedByEndorsement[]>([]);
@@ -127,7 +129,7 @@ export function TrustedByBadges({
       aria-label={t("aria", { names })}
     >
       {isPlain ? null : <BadgeCheckIcon className={`${checkIconClass} shrink-0 text-primary`} aria-hidden />}
-      <span className={`shrink-0 whitespace-nowrap leading-none ${labelClassName}`}>{t("trustedBy")}</span>
+      {hideLabel ? null : <span className={`shrink-0 whitespace-nowrap leading-none ${labelClassName}`}>{t("trustedBy")}</span>}
       <span className="inline-flex shrink-0 items-center -space-x-1">
         {endorsements.map((endorsement) => {
           const label = labelFor(endorsement);

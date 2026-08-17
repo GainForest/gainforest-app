@@ -1,13 +1,14 @@
 "use client";
 
 /**
- * The Posts / Replies / Likes views for an account, over the GainForest feed
- * lexicons. A segmented toggle switches between the three (each its own route),
- * and the active list pages from the indexer (cursor + auto-load).
+ * Public profile activity (Posts / Replies) plus the private Likes view, over
+ * the GainForest feed lexicons. The public toggle never links to Likes; only
+ * the server-gated `/likes` route renders its private third option.
  *
  *   - Posts   : the account's top-level feed posts, with like + comment counts
  *   - Replies : the account's replies, linking to what they replied to
- *   - Likes   : the records the account liked, linking to each
+ *   - Likes   : the records the account liked, visible only to its owner or an
+ *               organization member
  */
 
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -41,10 +42,13 @@ export function ProfileActivity({
   did,
   identifier,
   active,
+  showLikes = false,
 }: {
   did: string;
   identifier: string;
   active: Tab;
+  /** Set only by the server-gated Likes page — never expose it on public tabs. */
+  showLikes?: boolean;
 }) {
   const t = useTranslations("common.activity");
   return (
@@ -52,7 +56,7 @@ export function ProfileActivity({
       <div className="mb-5 inline-flex rounded-full border border-border bg-card p-1">
         <ToggleLink href={accountPostsPath(identifier)} active={active === "posts"} label={t("postsTab")} />
         <ToggleLink href={accountRepliesPath(identifier)} active={active === "replies"} label={t("repliesTab")} />
-        <ToggleLink href={accountLikesPath(identifier)} active={active === "likes"} label={t("likesTab")} />
+        {showLikes ? <ToggleLink href={accountLikesPath(identifier)} active={active === "likes"} label={t("likesTab")} /> : null}
       </div>
 
       {active === "likes" ? (

@@ -58,9 +58,9 @@ export function BioblitzBestPicture({ round }: { round: BioblitzRound }) {
   }).format(BIOBLITZ_PRIZES.bestPicture);
 
   return (
-    <section>
+    <section className="min-w-0 max-w-full">
       <div aria-hidden className="mx-auto h-px w-full max-w-6xl bg-border/60" />
-      <div className="mx-auto w-full max-w-6xl px-4 py-10 sm:px-6">
+      <div className="mx-auto min-w-0 w-full max-w-6xl px-3 py-10 sm:px-5 lg:px-8">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div>
             <div className="flex items-start gap-2">

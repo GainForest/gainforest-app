@@ -191,10 +191,10 @@ export function ShellHeader({
           </div>
 
           {/* Right slot */}
-          <div className="flex items-center gap-3 shrink-0">
+          <div className="flex shrink-0 items-center gap-2 sm:gap-3">
             {/* Everything but the account button dissolves during a collect. */}
             <motion.div
-              className="flex items-center gap-3"
+              className="flex items-center gap-2 sm:gap-3"
               animate={collecting ? { opacity: 0, scale: 0.82, filter: "blur(8px)" } : { opacity: 1, scale: 1, filter: "blur(0px)" }}
               transition={{ type: "spring", stiffness: 90, damping: 22, mass: 1 }}
               style={{ pointerEvents: collecting ? "none" : "auto" }}
@@ -209,6 +209,7 @@ export function ShellHeader({
                     animate={{ opacity: 1, x: 0 }}
                     exit={{ opacity: 0, x: 4 }}
                     transition={{ duration: 0.2, ease: [0.25, 0.1, 0.25, 1] }}
+                    className={cn(!rightContent && routeActions && "hidden sm:block")}
                   >
                     <ChromeErrorBoundary name="header-right-slot">{rightContent ?? routeActions}</ChromeErrorBoundary>
                   </motion.div>

@@ -28,16 +28,23 @@ import type { AccountOrganization } from "@/app/account/_components/AccountOrgan
 import { AccountAwards } from "@/app/account/_components/AccountAwards";
 import { AccountMemberships } from "@/app/account/_components/AccountMemberships";
 import { AccountWalletSupport } from "@/app/account/_components/AccountWalletSupport";
+import {
+  AccountHeroActions,
+  AccountHeroFrame,
+  AccountHeroMeta,
+  AccountHeroName,
+  AccountHeroTrustedBy,
+  AccountHeroWebsite,
+  HERO_AVATAR_CLASS,
+  displayOrgType,
+  splitAccountLinks,
+} from "@/app/account/_components/AccountProfileHero";
+import { AccountStatList, type AccountStatCounts } from "@/app/account/_components/AccountStatList";
 import { ExpandableBio } from "@/app/account/_components/ExpandableBio";
 import { countryFlag } from "@/app/_lib/format";
-import { countryCodeFromLocationLabel, getCountry } from "@/app/_lib/countries";
 import { resolvePdsHost } from "@/app/_lib/pds";
 import { putRecord, uploadBlob } from "../_lib/mutations";
-import {
-  displayLocationFromChoice,
-  saveOrganizationLocation,
-  type OrgLocationChoice,
-} from "../_lib/org-location";
+import { createCountryLocationStrongRef, normalizeCountryCode } from "../_lib/country-location";
 import { canEditGroupProfile } from "../_lib/cgs-permissions";
 import { useModal } from "@/components/ui/modal/context";
 import {
@@ -47,7 +54,7 @@ import {
   VisibilitySelectorModal,
   WebsiteEditorModal,
 } from "../_modals/DashboardEditModals";
-import { LocationEditorModal, LocationEditorModalId } from "../_modals/LocationEditorModal";
+import CountrySelectorModal from "@/components/modals/country-selector";
 import { ImageEditorModal } from "@/components/modals/image-editor";
 import { SocialGlyph } from "@/app/_components/SocialIcon";
 import { FollowStats } from "@/app/_components/FollowButton";
@@ -97,27 +104,12 @@ async function fetchExistingSelfRecord(repo: string, collection: string): Promis
     : {};
 }
 
-/** The hero's view of the org's declared location. */
-export type HeroLocationState = {
-  /** Display label — the referenced location record's name. */
-  name: string | null;
-  /** ISO-2 code when the location is a picked country (drives the flag). */
-  country: string;
-  /** Saved coordinates, so the editor can open on the spot. For an
-   *  approximate location: the published circle's center. */
-  latitude?: number | null;
-  longitude?: number | null;
-  approximate?: boolean;
-  /** A freshly picked location, consumed by the save; absent otherwise. */
-  pendingChoice?: OrgLocationChoice | null;
-};
-
 export type HeroEditState = {
   displayName: string;
   description: string;
   longDescription: string;
   website: string;
-  location: HeroLocationState;
+  country: string;
   startDate: string;
   visibility: "Public" | "Unlisted";
   orgType: string;
@@ -150,13 +142,7 @@ function heroStateFromAccount(account: AccountRouteData): HeroEditState {
     description: account.description ?? "",
     longDescription: account.longDescription ?? "",
     website: account.website ?? "",
-    location: {
-      name: account.locationName,
-      country: account.country ?? "",
-      latitude: account.locationLatitude,
-      longitude: account.locationLongitude,
-      approximate: account.locationApproximate,
-    },
+    country: account.country ?? "",
     startDate: startDateInputValue(account.foundedDate),
     visibility: visibilityInputValue(account.visibility),
     orgType: account.orgType ?? "",
@@ -191,13 +177,8 @@ function accountCaughtUpWithOptimisticSave(account: AccountRouteData, pending: P
         return canonicalText(current[field]) === canonicalText(pending.state[field]);
       case "website":
         return canonicalUrl(current.website) === canonicalUrl(pending.state.website);
-      case "location":
-        // Wait until both the record name and the derived country the account
-        // reads back match what the save published (both empty after a clear).
-        return (
-          canonicalText(current.location.name ?? "") === canonicalText(pending.state.location.name ?? "") &&
-          current.location.country.toUpperCase() === pending.state.location.country.toUpperCase()
-        );
+      case "country":
+        return current.country.toUpperCase() === pending.state.country.toUpperCase();
       case "startDate":
       case "visibility":
         return current[field] === pending.state[field];
@@ -256,6 +237,196 @@ function InlineEditActions({
         <XIcon /> {t("actions.cancel")}
       </Button>
     </span>
+  );
+}
+
+/**
+ * The owner's version of the public account header: the same photo, name and
+ * facts line every visitor sees, with each field opening its editor in place.
+ * It renders through the shared hero shell so an owner's profile never looks
+ * different from the page other people see.
+ */
+function EditableCompactHero({
+  account,
+  editState,
+  inlineField,
+  isSaving,
+  saveError,
+  onChange,
+  onEdit,
+  onSave,
+  onCancel,
+  onEditLogo,
+  onEditCountry,
+  onEditOrgType,
+  onEditWebsite,
+  editDisabledReason = null,
+}: {
+  account: AccountRouteData;
+  editState: HeroEditState;
+  inlineField: InlineField;
+  isSaving: boolean;
+  saveError: string | null;
+  onChange: (field: "displayName" | "description", value: string) => void;
+  onEdit: () => void;
+  onSave: () => void;
+  onCancel: () => void;
+  onEditLogo: () => void;
+  onEditCountry: () => void;
+  onEditOrgType: () => void;
+  onEditWebsite: () => void;
+  editDisabledReason?: string | null;
+}) {
+  const t = useTranslations("upload.dashboardClient");
+
+  const logoObjectUrl = useMemo(
+    () => (editState.logoFile ? URL.createObjectURL(editState.logoFile) : null),
+    [editState.logoFile],
+  );
+  useEffect(() => () => {
+    if (logoObjectUrl) URL.revokeObjectURL(logoObjectUrl);
+  }, [logoObjectUrl]);
+
+  const logoUrl = logoObjectUrl ?? account.avatarUrl;
+  const editing = inlineField === "profile";
+  const canEdit = !editDisabledReason;
+  const initial = (editState.displayName || account.displayName).charAt(0).toUpperCase();
+  const isOrg = account.kind === "organization";
+  const countryLabel = editState.country ? countryName(editState.country) : null;
+  const flag = editState.country ? countryFlag(editState.country) : "";
+  const profileLinks = splitAccountLinks(editState.website, editState.socials);
+  const website = profileLinks.website;
+
+  return (
+    <div data-account-hero-editor>
+      <AccountHeroFrame
+        avatar={
+          <button
+            type="button"
+            onClick={canEdit ? onEditLogo : undefined}
+            disabled={!canEdit || isSaving}
+            title={editDisabledReason ?? undefined}
+            className={cn(
+              HERO_AVATAR_CLASS,
+              "group/avatar focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:cursor-not-allowed",
+            )}
+            aria-label={logoUrl
+              ? isOrg ? t("hero.changeLogo") : t("hero.changePhoto")
+              : isOrg ? t("hero.addLogo") : t("hero.addPhoto")}
+          >
+            {logoUrl ? (
+              <Image src={logoUrl} alt="" fill unoptimized sizes="68px" className="object-cover" />
+            ) : (
+              <span className="grid size-full place-items-center text-lg font-semibold text-muted-foreground">
+                {initial}
+              </span>
+            )}
+            <span className="absolute inset-0 grid place-items-center bg-black/0 opacity-0 transition-all group-hover/avatar:bg-black/35 group-hover/avatar:opacity-100 group-focus-visible/avatar:bg-black/35 group-focus-visible/avatar:opacity-100">
+              <ImagePlusIcon className="size-4 text-white drop-shadow" aria-hidden />
+            </span>
+          </button>
+        }
+        actions={editing ? null : <AccountHeroActions account={account} />}
+        actionFooter={
+          editing ? null : (
+            <FollowStats
+              targetDid={account.did}
+              identifier={account.urlIdentifier}
+              className="max-w-full justify-end text-right"
+            />
+          )
+        }
+      >
+        {editing ? (
+          <div className="min-w-0 space-y-2">
+            <h1 className="sr-only">{editState.displayName || account.displayName}</h1>
+            <input
+              type="text"
+              value={editState.displayName}
+              onChange={(event) => onChange("displayName", event.target.value)}
+              placeholder={isOrg ? t("hero.organizationName") : t("hero.displayName")}
+              aria-label={isOrg ? t("hero.organizationName") : t("hero.displayName")}
+              className="w-full border-b border-border/60 bg-transparent font-instrument text-[1.75rem] font-light italic leading-[1.15] text-foreground outline-none transition-colors placeholder:text-foreground/40 focus:border-primary sm:text-4xl"
+              autoFocus
+            />
+            <textarea
+              value={editState.description}
+              onChange={(event) => onChange("description", event.target.value)}
+              placeholder={t("hero.shortBioPlaceholder")}
+              aria-label={t("hero.shortBioPlaceholder")}
+              rows={2}
+              className="w-full resize-none border-b border-border/60 bg-transparent text-sm leading-6 text-muted-foreground outline-none transition-colors field-sizing-content placeholder:text-muted-foreground/60 focus:border-primary"
+            />
+            <InlineEditActions isSaving={isSaving} onSave={onSave} onCancel={onCancel} />
+          </div>
+        ) : (
+          <>
+            <div className="flex min-w-0 items-start gap-1.5">
+              <AccountHeroName className="min-w-0 break-words">
+                {editState.displayName || account.displayName}
+              </AccountHeroName>
+              {canEdit ? (
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon-sm"
+                  onClick={onEdit}
+                  disabled={isSaving}
+                  aria-label={t("hero.editProfileAria")}
+                  className="mt-1 shrink-0"
+                >
+                  <PencilIcon />
+                </Button>
+              ) : null}
+            </div>
+            {/* Editable facts sit in the same line as the public header's, just
+                pulled left so the chip padding keeps the text aligned. */}
+            <AccountHeroMeta className="-ml-2 mt-0.5 gap-x-0">
+              {isOrg ? (
+                <FactChip onClick={onEditOrgType} disabled={!canEdit} title={editDisabledReason ?? undefined} empty={!editState.orgType.trim()}>
+                  {displayOrgType(editState.orgType) ?? t("hero.addType")}
+                </FactChip>
+              ) : null}
+              {isOrg ? (
+                <FactChip onClick={onEditCountry} disabled={!canEdit} title={editDisabledReason ?? undefined} empty={!countryLabel}>
+                  {flag ? <span className="text-sm leading-none" aria-hidden="true">{flag}</span> : null}
+                  {countryLabel ?? t("hero.addCountry")}
+                </FactChip>
+              ) : null}
+            </AccountHeroMeta>
+            {website || canEdit ? (
+              <div className="mt-2 flex min-w-0 items-center gap-1">
+                <AccountHeroWebsite website={website} className="mt-0" />
+                {canEdit ? (
+                  <button
+                    type="button"
+                    onClick={onEditWebsite}
+                    disabled={isSaving}
+                    title={editDisabledReason ?? undefined}
+                    aria-label={website ? t("hero.editWebsite") : t("hero.addWebsite")}
+                    className={cn(
+                      "shrink-0 rounded-full text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary disabled:cursor-not-allowed disabled:opacity-60",
+                      website ? "grid size-7 place-items-center" : "inline-flex h-7 items-center gap-1.5 px-2 text-xs",
+                    )}
+                  >
+                    {website ? (
+                      <PencilIcon className="size-3.5" aria-hidden />
+                    ) : (
+                      <>
+                        <GlobeIcon className="size-3.5" aria-hidden />
+                        {t("hero.addWebsite")}
+                      </>
+                    )}
+                  </button>
+                ) : null}
+              </div>
+            ) : null}
+            <AccountHeroTrustedBy did={account.did} className="mt-2" />
+          </>
+        )}
+        {saveError ? <p className="mt-2 text-xs text-destructive">{saveError}</p> : null}
+      </AccountHeroFrame>
+    </div>
   );
 }
 
@@ -328,6 +499,70 @@ function AboutSection({
   );
 }
 
+function EditableOverview({
+  account,
+  counts,
+  support,
+  editState,
+  inlineField,
+  isSaving,
+  saveError,
+  onChange,
+  onEditBio,
+  onSaveBio,
+  onCancelBio,
+  onEditStartDate,
+  onEditVisibility,
+  onEditSocials,
+}: {
+  account: AccountRouteData;
+  counts: AccountStatCounts;
+  support?: React.ReactNode;
+  editState: HeroEditState;
+  inlineField: InlineField;
+  isSaving: boolean;
+  saveError: string | null;
+  onChange: (field: "description", value: string) => void;
+  onEditBio: () => void;
+  onSaveBio: () => void;
+  onCancelBio: () => void;
+  onEditStartDate: () => void;
+  onEditVisibility: () => void;
+  onEditSocials: () => void;
+}) {
+  const t = useTranslations("upload.dashboardClient");
+  const editingBio = inlineField === "profile";
+
+  return (
+    <AccountStatList
+      account={account}
+      counts={counts}
+      support={support}
+      editActions={{
+        onEditBio,
+        onEditStartDate: account.kind === "organization" ? onEditStartDate : undefined,
+        onEditSocials: account.kind === "organization" ? onEditSocials : undefined,
+        onEditVisibility: account.kind === "organization" ? onEditVisibility : undefined,
+      }}
+      bioEditor={editingBio ? (
+        <div className="space-y-2">
+          <textarea
+            value={editState.description}
+            onChange={(event) => onChange("description", event.target.value)}
+            placeholder={t("hero.shortBioPlaceholder")}
+            aria-label={t("hero.shortBioPlaceholder")}
+            rows={3}
+            className="w-full resize-none rounded-xl border border-border/60 bg-transparent p-3 text-sm leading-6 text-foreground outline-none transition-colors field-sizing-content placeholder:text-muted-foreground/60 focus:border-primary"
+            autoFocus
+          />
+          <InlineEditActions isSaving={isSaving} onSave={onSaveBio} onCancel={onCancelBio} />
+          {saveError ? <p className="text-sm text-destructive">{saveError}</p> : null}
+        </div>
+      ) : undefined}
+    />
+  );
+}
+
 function EditableHero({
   account,
   settingsHref,
@@ -342,7 +577,7 @@ function EditableHero({
   onCancelInline,
   onEditLogo,
   onEditCover,
-  onEditLocation,
+  onEditCountry,
   onEditWebsite,
   onEditStartDate,
   onEditVisibility,
@@ -365,7 +600,7 @@ function EditableHero({
   onCancelInline: () => void;
   onEditLogo: () => void;
   onEditCover: () => void;
-  onEditLocation: () => void;
+  onEditCountry: () => void;
   onEditWebsite: () => void;
   onEditStartDate: () => void;
   onEditVisibility: () => void;
@@ -394,14 +629,9 @@ function EditableHero({
 
   const isOrg = account.kind === "organization";
   const resolvedWebsite = editState.website;
-  // The location chip prefers the derived country (flag + localized name);
-  // otherwise it falls back to the referenced location record's own name.
-  const countryLabel = editState.location.country ? countryName(editState.location.country) : null;
-  const locationLabel = countryLabel ?? editState.location.name;
-  // A place name like "Zurich, Switzerland" earns its country's flag too.
-  const flag = editState.location.country
-    ? countryFlag(editState.location.country)
-    : getCountry(countryCodeFromLocationLabel(editState.location.name))?.emoji ?? "";
+  const resolvedCountry = editState.country;
+  const countryLabel = resolvedCountry ? countryName(resolvedCountry) : null;
+  const flag = resolvedCountry ? countryFlag(resolvedCountry) : "";
   const sinceDate = formatSinceDate(editState.startDate);
 
   return (
@@ -541,9 +771,9 @@ function EditableHero({
             </FactChip>
           ) : null}
           {isOrg ? (
-            <FactChip onClick={onEditLocation} disabled={!canEdit} title={editDisabledReason ?? undefined} empty={!locationLabel}>
+            <FactChip onClick={onEditCountry} disabled={!canEdit} title={editDisabledReason ?? undefined} empty={!countryLabel}>
               {flag ? <span className="text-sm leading-none" aria-hidden="true">{flag}</span> : <MapPinIcon className="size-3.5 opacity-70" aria-hidden />}
-              {locationLabel ?? t("hero.addLocation")}
+              {countryLabel ?? t("hero.addCountry")}
             </FactChip>
           ) : null}
           {isOrg ? (
@@ -611,12 +841,14 @@ function FactChip({
   title,
   empty = false,
   children,
+  "aria-label": ariaLabel,
 }: {
   onClick?: () => void;
   disabled?: boolean;
   title?: string;
   empty?: boolean;
   children: React.ReactNode;
+  "aria-label"?: string;
 }) {
   return (
     <button
@@ -624,6 +856,7 @@ function FactChip({
       onClick={onClick}
       disabled={disabled}
       title={title}
+      aria-label={ariaLabel}
       className={cn(
         "group inline-flex h-8 items-center gap-1.5 rounded-full px-3 text-[13px] transition-colors disabled:cursor-not-allowed disabled:opacity-60",
         empty
@@ -652,6 +885,9 @@ export function EditableAccountHeader({
   viewPublicHref,
   showAbout = true,
   memberships = [],
+  overviewCounts,
+  overviewSupport,
+  variant = "full",
 }: {
   account: AccountRouteData;
   /** When editing an org repo, the group DID writes are routed to. */
@@ -663,12 +899,23 @@ export function EditableAccountHeader({
   viewPublicHref: string | null;
   /** Organizations this person belongs to, shown as a "Member of…" hero row. */
   memberships?: AccountOrganization[];
+  /** Counts rendered by the authorized Overview details editor. */
+  overviewCounts?: AccountStatCounts;
+  /** Wallet support content grouped with the editable At a glance section. */
+  overviewSupport?: React.ReactNode;
   /**
    * Whether to render the organization About section beneath the hero. The
    * dashboard shows it inline; the profile renders About in its Overview tab
    * instead, so it passes false to avoid a duplicate.
    */
   showAbout?: boolean;
+  /**
+   * `compact` — the identity header shared by every account tab.
+   * `about` — just the organization's About text, for the Overview sidebar.
+   * `overview` — editable profile details in the public Overview grid.
+   * `full` — cover, identity and facts, for the manage surfaces.
+   */
+  variant?: "full" | "compact" | "about" | "overview";
 }) {
   const router = useRouter();
   const modal = useModal();
@@ -679,7 +926,7 @@ export function EditableAccountHeader({
   const [editDescription, setEditDescription] = useState(accountState.description);
   const [editLongDescription, setEditLongDescription] = useState(accountState.longDescription);
   const [editWebsite, setEditWebsite] = useState(accountState.website);
-  const [editLocation, setEditLocation] = useState<HeroLocationState>(accountState.location);
+  const [editCountry, setEditCountry] = useState(accountState.country);
   const [editStartDate, setEditStartDate] = useState(accountState.startDate);
   const [editVisibility, setEditVisibility] = useState<"Public" | "Unlisted">(accountState.visibility);
   const [editOrgType, setEditOrgType] = useState(accountState.orgType);
@@ -700,7 +947,7 @@ export function EditableAccountHeader({
     description: editDescription,
     longDescription: editLongDescription,
     website: editWebsite,
-    location: editLocation,
+    country: editCountry,
     startDate: editStartDate,
     visibility: editVisibility,
     orgType: editOrgType,
@@ -714,7 +961,7 @@ export function EditableAccountHeader({
     setEditDescription(next.description);
     setEditLongDescription(next.longDescription);
     setEditWebsite(next.website);
-    setEditLocation(next.location);
+    setEditCountry(next.country);
     setEditStartDate(next.startDate);
     setEditVisibility(next.visibility);
     setEditOrgType(next.orgType);
@@ -750,31 +997,31 @@ export function EditableAccountHeader({
       case "description": setEditDescription(value); break;
       case "longDescription": setEditLongDescription(value); break;
       case "website": setEditWebsite(value); break;
+      case "country": setEditCountry(value); break;
       case "startDate": setEditStartDate(value); break;
       case "visibility": setEditVisibility(value as "Public" | "Unlisted"); break;
       case "orgType": setEditOrgType(value); break;
     }
   };
 
-  /** Returns the failure message, or null on success, so callers that own a
-   *  richer surface (the location editor's progress view) can show it there.
-   *  The hero's own saveError state is set either way. */
-  const saveChanges = async (
-    overrides: Partial<HeroEditState> = {},
-  ): Promise<string | null> => {
-    if (isSaving) return t("errors.saveFailed");
+  const saveChanges = async (overrides: Partial<HeroEditState> = {}) => {
+    if (isSaving) return;
     if (!profileEditPermission.allowed) {
       setSaveError(profileEditPermission.reason);
-      return profileEditPermission.reason ?? t("errors.saveFailed");
+      return;
     }
     const next: HeroEditState = { ...editState, ...overrides };
     if (!next.displayName.trim()) {
       setSaveError(t("errors.nameRequired"));
-      return t("errors.nameRequired");
+      return;
     }
     if (!isValidWebsite(next.website)) {
       setSaveError(t("errors.invalidWebsite"));
-      return t("errors.invalidWebsite");
+      return;
+    }
+    if (account.kind === "organization" && next.country.trim() && !normalizeCountryCode(next.country)) {
+      setSaveError(t("errors.invalidCountry"));
+      return;
     }
 
     setIsSaving(true);
@@ -823,19 +1070,8 @@ export function EditableAccountHeader({
         await putRecord("app.certified.actor.profile", "self", certifiedProfileRecord, writeOptions);
       }
 
-      // A location save is a server-side composite: the proxy mints the
-      // location record and repoints the org record in ONE request, so a
-      // closed tab can't strand it halfway (ECO-882 has the history).
-      if (account.kind === "organization" && "location" in overrides) {
-        if (next.location.pendingChoice) {
-          await saveOrganizationLocation(next.location.pendingChoice, writeOptions);
-        } else if (!next.location.name && !next.location.country) {
-          await saveOrganizationLocation(null, writeOptions);
-        }
-      }
-
       const shouldWriteOrg = account.kind === "organization" && (
-        "startDate" in overrides || "visibility" in overrides ||
+        "country" in overrides || "startDate" in overrides || "visibility" in overrides ||
         "orgType" in overrides || "socials" in overrides || "longDescription" in overrides
       );
       if (shouldWriteOrg) {
@@ -848,6 +1084,10 @@ export function EditableAccountHeader({
           createdAt: typeof existingOrg.createdAt === "string" ? existingOrg.createdAt : account.createdAt ?? new Date().toISOString(),
           visibility: next.visibility === "Unlisted" ? "unlisted" : "public",
         };
+        if ("country" in overrides) {
+          if (next.country.trim()) orgRecord.location = await createCountryLocationStrongRef(next.country, writeOptions);
+          else delete orgRecord.location;
+        }
         if ("startDate" in overrides) {
           if (next.startDate.trim()) orgRecord.foundedDate = `${next.startDate.trim()}T00:00:00.000Z`;
           else delete orgRecord.foundedDate;
@@ -874,19 +1114,15 @@ export function EditableAccountHeader({
       }
 
       setPendingOptimisticSave({
-        // The pending pick has been published; only its display state remains.
-        state: { ...next, location: { ...next.location, pendingChoice: undefined } },
+        state: next,
         fields: optimisticFieldsForSave(overrides),
         previousAvatarUrl: account.avatarUrl,
         previousCoverUrl: account.coverUrl,
       });
       setInlineField(null);
       router.refresh();
-      return null;
     } catch (err) {
-      const message = err instanceof Error ? err.message : t("errors.saveFailed");
-      setSaveError(message);
-      return message;
+      setSaveError(err instanceof Error ? err.message : t("errors.saveFailed"));
     } finally {
       setIsSaving(false);
     }
@@ -917,38 +1153,9 @@ export function EditableAccountHeader({
     />,
   );
 
-  const openLocationModal = () => openDashboardModal(
-    LocationEditorModalId,
-    <LocationEditorModal
-      current={
-        editLocation.name || editLocation.country
-          ? {
-              name: editLocation.country ? countryName(editLocation.country) : editLocation.name,
-              countryCode: editLocation.country || null,
-              latitude: editLocation.latitude ?? null,
-              longitude: editLocation.longitude ?? null,
-              approximate: editLocation.approximate ?? false,
-            }
-          : null
-      }
-      onConfirm={async (choice) => {
-        // Await the save so the editor stays open, locked, and surfaces the
-        // failure — a fire-and-forget here is how a half-saved location
-        // (record written, org never repointed) used to happen.
-        const message = choice
-          ? await saveChanges({
-              location: {
-                ...displayLocationFromChoice(choice),
-                latitude: choice.place.latitude,
-                longitude: choice.place.longitude,
-                approximate: choice.approximate,
-                pendingChoice: choice,
-              },
-            })
-          : await saveChanges({ location: { name: null, country: "" } });
-        if (message) throw new Error(message);
-      }}
-    />,
+  const openCountryModal = () => openDashboardModal(
+    "manage-country-editor",
+    <CountrySelectorModal initialCountryCode={editCountry} onCountryChange={(country) => void saveChanges({ country })} />,
   );
 
   const openWebsiteModal = () => openDashboardModal(
@@ -976,6 +1183,76 @@ export function EditableAccountHeader({
     <SocialLinksEditorModal current={editSocials} onConfirm={(socials) => void saveChanges({ socials })} />,
   );
 
+  // The Overview sidebar renders the About text on its own; it reuses this
+  // component (rather than duplicating the record write) purely for the editor.
+  if (variant === "about") {
+    return (
+      <AboutSection
+        value={editLongDescription}
+        draft={editLongDescription}
+        isEditing={inlineField === "about"}
+        isSaving={isSaving}
+        saveError={inlineField === "about" ? saveError : null}
+        onEdit={() => { setSaveError(null); setInlineField("about"); }}
+        onChange={setEditLongDescription}
+        onSave={() => void saveChanges({ longDescription: editLongDescription })}
+        onCancel={() => { setEditLongDescription((pendingOptimisticSave?.state ?? accountState).longDescription); setSaveError(null); setInlineField(null); }}
+        editDisabledReason={profileEditPermission.reason}
+      />
+    );
+  }
+
+  if (variant === "overview") {
+    if (!overviewCounts) return null;
+
+    return (
+      <EditableOverview
+        account={account}
+        counts={overviewCounts}
+        support={overviewSupport}
+        editState={editState}
+        inlineField={inlineField}
+        isSaving={isSaving}
+        saveError={saveError}
+        onChange={(field, value) => handleChange(field, value)}
+        onEditBio={() => { setSaveError(null); setInlineField("profile"); }}
+        onSaveBio={() => void saveChanges({ description: editDescription })}
+        onCancelBio={() => {
+          setEditDescription((pendingOptimisticSave?.state ?? accountState).description);
+          setSaveError(null);
+          setInlineField(null);
+        }}
+        onEditStartDate={openStartDateModal}
+        onEditVisibility={openVisibilityModal}
+        onEditSocials={openSocialsModal}
+      />
+    );
+  }
+
+  if (variant === "compact") {
+    return (
+      <EditableCompactHero
+        account={account}
+        editState={editState}
+        inlineField={inlineField}
+        isSaving={isSaving}
+        saveError={saveError}
+        onChange={(field, value) => handleChange(field, value)}
+        onEdit={() => {
+          setSaveError(null);
+          setInlineField("profile");
+        }}
+        onSave={() => void saveChanges()}
+        onCancel={resetState}
+        onEditLogo={openLogoModal}
+        onEditCountry={openCountryModal}
+        onEditOrgType={openOrgTypeModal}
+        onEditWebsite={openWebsiteModal}
+        editDisabledReason={profileEditPermission.reason}
+      />
+    );
+  }
+
   return (
     <div className="space-y-6">
       <EditableHero
@@ -993,7 +1270,7 @@ export function EditableAccountHeader({
         onCancelInline={resetState}
         onEditLogo={openLogoModal}
         onEditCover={openCoverModal}
-        onEditLocation={openLocationModal}
+        onEditCountry={openCountryModal}
         onEditWebsite={openWebsiteModal}
         onEditStartDate={openStartDateModal}
         onEditVisibility={openVisibilityModal}

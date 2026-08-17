@@ -9,10 +9,8 @@ import {
   Building2Icon,
   ChevronDownIcon,
   ChevronLeftIcon,
-  LeafIcon,
   LayoutGridIcon,
   LockIcon,
-  PlusIcon,
   SparkleIcon,
   UserIcon,
   UsersIcon,
@@ -36,7 +34,7 @@ import { NAV_ITEMS, isLeafActive, type NavLeaf } from "./nav-config";
 import { useIsRewildingGrantee } from "./use-rewilding-grantee";
 import { useCanonicalPathname } from "./paths";
 import { SidebarCollapsedProvider, SidebarTooltip, useSidebarCollapsed } from "./sidebar-context";
-import { AddObservationsButton, CreateProjectButton, useActiveContextHasProjects } from "./context-actions";
+import { AddObservationsButton } from "./context-actions";
 import { ThemeToggle } from "./ThemeToggle";
 
 const APP_VERSION = packageJson.version;
@@ -79,10 +77,7 @@ export function UnifiedSidebar({
 
         <div className="mt-auto flex flex-col gap-3 pt-4">
           {authSession?.isLoggedIn ? (
-            <>
-              <BumicertCreationCard sessionDid={authSession.did} />
-              <AddObservationsCard sessionDid={authSession.did} />
-            </>
+            <AddObservationsCard sessionDid={authSession.did} />
           ) : (
             <SignInPrompt collapsed={collapsed} />
           )}
@@ -456,77 +451,6 @@ function NavLeafRow({ item, isActive, index, paired = false }: { item: NavLeafVi
         </Link>
       </SidebarTooltip>
     </motion.li>
-  );
-}
-
-function BumicertCreationCard({ sessionDid }: { sessionDid: string }) {
-  const t = useTranslations("common.sidebar.creationCard");
-  const collapsed = useSidebarCollapsed();
-  const hasProjects = useActiveContextHasProjects(sessionDid);
-
-  // Hide the create-project CTA once this account already has a project.
-  if (hasProjects) return null;
-
-  if (collapsed) {
-    return (
-      <SidebarTooltip label={t("createProject")}>
-        <span className="mx-auto flex w-fit">
-          <CreateProjectButton
-            sessionDid={sessionDid}
-            className={cn(
-              buttonVariants({ variant: "outline", size: "icon" }),
-              "bg-background hover:bg-primary hover:text-primary-foreground",
-            )}
-          >
-            <PlusIcon />
-            <span className="sr-only">{t("createProject")}</span>
-          </CreateProjectButton>
-        </span>
-      </SidebarTooltip>
-    );
-  }
-
-  return (
-    <div className="group flex flex-col w-full h-20 border border-border bg-background rounded-2xl p-1">
-      <div className="flex-1 relative">
-        <SparkleIcon
-          className="absolute bottom-2 left-4 size-6 rotate-30 opacity-50 group-hover:opacity-30 group-hover:scale-130 text-primary transition-all duration-300 animate-spin-slow"
-          fill="currentcolor"
-          strokeWidth={0}
-        />
-        <SparkleIcon
-          className="absolute bottom-1 left-12 size-3 rotate-60 opacity-30 group-hover:opacity-50 group-hover:scale-130 text-primary transition-all duration-300 animate-spin-slow"
-          fill="currentcolor"
-          strokeWidth={0}
-        />
-        <SparkleIcon
-          className="absolute bottom-2 right-2 size-6 rotate-60 opacity-50 group-hover:opacity-30 group-hover:scale-130 text-primary transition-all duration-300 animate-spin-slow"
-          fill="currentcolor"
-          strokeWidth={0}
-        />
-        <SparkleIcon
-          className="absolute bottom-1 right-10 size-3 rotate-30 opacity-30 group-hover:opacity-50 group-hover:scale-130 text-primary transition-all duration-300 animate-spin-slow"
-          fill="currentcolor"
-          strokeWidth={0}
-        />
-        <div className="absolute z-1 -bottom-4 left-1/2 -translate-x-1/2 scale-100 group-hover:scale-120 -rotate-12 group-hover:-rotate-30 transition-transform bg-background/50 backdrop-blur-lg border border-border shadow-xl rounded-xl h-20 w-16 p-1 flex flex-col gap-1">
-          <div className="w-full h-10 bg-primary/20 rounded-lg flex items-center justify-center">
-            <LeafIcon className="text-primary size-6 opacity-80" />
-          </div>
-          <div className="bg-muted h-2 rounded-lg w-8" />
-          <div className="bg-muted h-2 rounded-lg w-full" />
-        </div>
-      </div>
-      <CreateProjectButton
-        sessionDid={sessionDid}
-        className={cn(
-          buttonVariants({ variant: "outline", size: "sm" }),
-          "relative z-2 w-full bg-background hover:bg-primary hover:text-primary-foreground",
-        )}
-      >
-        <PlusIcon /> {t("createProject")}
-      </CreateProjectButton>
-    </div>
   );
 }
 

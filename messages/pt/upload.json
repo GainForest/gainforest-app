@@ -1159,6 +1159,7 @@
       "invalidDate": "Data inválida",
       "addStartDate": "Adicionar data de início",
       "addWebsite": "Adicionar site",
+      "editWebsite": "Editar site",
       "addSocialLinks": "Adicionar links sociais",
       "openSocialLink": "Abrir {link}",
       "viewPublicPage": "Ver página pública",
@@ -1167,17 +1168,23 @@
       "copied": "Copiado",
       "copyProfileLink": "Copiar link do perfil",
       "accountDetails": "Detalhes da conta",
+      "aboutName": "Sobre {name}",
+      "typeLabel": "Tipo",
+      "countryLabel": "País",
+      "joinedLabel": "Entrou em",
       "showAccountDetails": "Mostrar detalhes da conta",
       "hideAccountDetails": "Ocultar detalhes da conta",
       "did": "DID",
       "wallet": "Carteira EVM",
       "copyDid": "Copiar DID",
-      "copyWallet": "Copiar endereço da carteira"
+      "copyWallet": "Copiar endereço da carteira",
+      "addCountry": "Adicionar país"
     },
     "errors": {
       "nameRequired": "Adicione um nome antes de salvar.",
       "invalidWebsite": "Insira um endereço de site válido.",
-      "saveFailed": "Não foi possível salvar. Tente novamente."
+      "saveFailed": "Não foi possível salvar. Tente novamente.",
+      "invalidCountry": "Escolha um país na lista."
     },
     "modals": {
       "editLogo": "Editar logotipo",

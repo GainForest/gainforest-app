@@ -151,10 +151,11 @@ export interface ActivityFeedItem {
 /** Which kinds the feed should include: a single kind, or the unified merge. */
 export type ActivityFeedFilter = ActivityFeedKind | "all";
 
-/** Restrict the feed to records authored by accounts the viewer follows
- *  (atproto-style query-on-read). `dids` is the followed-account set; `viewerDid`
- *  scopes the in-process cache so one viewer's following page can't be served to
- *  another. */
+/** Restrict the feed to records authored by a known set of accounts
+ *  (atproto-style query-on-read). `dids` is the author set — the accounts the
+ *  viewer follows for the Following tab, or a single account for a profile's own
+ *  activity; `viewerDid` scopes the in-process cache so one viewer's page can't
+ *  be served to another. */
 export interface FollowingScope {
   dids: string[];
   viewerDid: string;
@@ -1567,6 +1568,10 @@ async function buildFeedPageUncached(
     (item) =>
       item.createdAt &&
       (filter === "all" || item.kind === filter) &&
+      // Donation rows are donor-keyed on the facilitator repo, so an
+      // author-scoped feed never wants them — but the stream is still fetched
+      // at the floor of 1, so drop those rows here too.
+      (!isFollowing || item.kind !== "donation") &&
       !hidden.has(item.actorDid) &&
       !hiddenRecords.has(item.id),
   );
@@ -1636,4 +1641,22 @@ export async function buildActivityFeed(
     const page = await buildFeedPageUncached(cursor, filter, following ?? null);
     return applyPinnedPost(page, cursor, filter, following ?? null);
   });
+}
+
+/**
+ * Build one page of a single account's own activity — the records it published,
+ * newest first. Powers the record stream on an account's Overview.
+ *
+ * It reuses the author-scoped feed machinery (the same query-on-read filter as
+ * the Following tab, narrowed to one account) so a profile row reads exactly
+ * like the same record in the global feed. Donations are donor-keyed on the
+ * facilitator repo rather than authored by the account, so — as with a following
+ * feed — they're left out here; an account's giving and receiving live on its
+ * Donations tab and support card instead.
+ */
+export async function buildAccountActivityFeed(
+  did: string,
+  rawCursor?: string | null,
+): Promise<ActivityFeedPage> {
+  return buildActivityFeed(rawCursor, "all", { dids: [did], viewerDid: `account:${did}` });
 }

@@ -3,14 +3,14 @@
 import { AlertTriangleIcon, Loader2Icon } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
+import { ControlledModal } from "@/components/ui/modal/controlled-modal";
 import {
-  Dialog,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogPlaceholder,
-  DialogTitle,
-} from "@/components/ui/modal/dialog";
+  ModalContent,
+  ModalDescription,
+  ModalFooter,
+  ModalHeader,
+  ModalTitle,
+} from "@/components/ui/modal/modal";
 
 export function TimelineDeleteConfirm({
   open,
@@ -30,20 +30,22 @@ export function TimelineDeleteConfirm({
   const t = useTranslations("bumicert.detail.timelineEntry.deleteConfirm");
 
   return (
-    <Dialog
+    <ControlledModal
       open={open}
       onOpenChange={(nextOpen) => {
         if (!nextOpen && !isDeleting) onCancel();
       }}
+      dialogWidth="max-w-md"
+      role="alertdialog"
     >
-      <DialogPlaceholder role="alertdialog" dialogWidth="max-w-md">
-        <DialogHeader>
+      <ModalContent dismissible={!isDeleting} className="space-y-4">
+        <ModalHeader>
           <div className="mb-1 flex h-10 w-10 items-center justify-center rounded-full bg-destructive/10 text-destructive">
             <AlertTriangleIcon className="h-5 w-5" />
           </div>
-          <DialogTitle>{t("title")}</DialogTitle>
-          <DialogDescription>{t("body", { title })}</DialogDescription>
-        </DialogHeader>
+          <ModalTitle className="pr-10">{t("title")}</ModalTitle>
+          <ModalDescription>{t("body", { title })}</ModalDescription>
+        </ModalHeader>
 
         {error ? (
           <p
@@ -54,7 +56,7 @@ export function TimelineDeleteConfirm({
           </p>
         ) : null}
 
-        <DialogFooter className="sm:flex-row sm:justify-end">
+        <ModalFooter className="sm:flex-row sm:justify-end">
           <Button type="button" variant="ghost" onClick={onCancel} disabled={isDeleting}>
             {t("cancel")}
           </Button>
@@ -62,8 +64,8 @@ export function TimelineDeleteConfirm({
             {isDeleting ? <Loader2Icon className="animate-spin" /> : null}
             {isDeleting ? t("removing") : t("remove")}
           </Button>
-        </DialogFooter>
-      </DialogPlaceholder>
-    </Dialog>
+        </ModalFooter>
+      </ModalContent>
+    </ControlledModal>
   );
 }

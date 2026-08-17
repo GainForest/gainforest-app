@@ -467,5 +467,11 @@
     "onchainManageHint": "Esta carteira está ativa na blockchain, então as mudanças de chaves de acesso são registradas na cadeia e precisam das aprovações habituais. A GainForest cobre a taxa de rede.",
     "thresholdOnchainHint": "Quantas chaves de acesso devem aprovar cada transferência. Essa mudança é registrada na blockchain — o endereço da carteira não muda.",
     "manageForbidden": "Somente o proprietário da organização ou um administrador pode fazer essa mudança."
+  },
+  "countrySelector": {
+    "title": "Selecionar país",
+    "description": "Escolha o país conectado a este registro.",
+    "searchPlaceholder": "Buscar países",
+    "done": "Concluir"
   }
 }

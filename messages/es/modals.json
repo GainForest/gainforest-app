@@ -467,5 +467,11 @@
     "onchainManageHint": "Esta billetera está activa en la blockchain, así que los cambios de llaves de acceso se registran en la cadena y necesitan las aprobaciones habituales. GainForest cubre la comisión de red.",
     "thresholdOnchainHint": "Cuántas llaves de acceso deben aprobar cada transferencia. Este cambio se registra en la blockchain: la dirección de la billetera no cambia.",
     "manageForbidden": "Solo el propietario de la organización o un administrador puede hacer este cambio."
+  },
+  "countrySelector": {
+    "title": "Seleccionar país",
+    "description": "Elige el país conectado con este registro.",
+    "searchPlaceholder": "Buscar países",
+    "done": "Listo"
   }
 }

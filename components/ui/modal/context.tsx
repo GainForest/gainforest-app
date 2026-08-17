@@ -1,5 +1,5 @@
 "use client";
-import { createContext, useCallback, useContext, useMemo, useState } from "react";
+import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { debug } from "@/lib/logger";
 import {
@@ -52,6 +52,10 @@ export type ModalVariant = {
    * larger screens (the dialog keeps its dialogWidth there).
    */
   fullscreenOnMobile?: boolean;
+  /** Semantic role for destructive confirmations and other alert dialogs. */
+  role?: "dialog" | "alertdialog";
+  /** Receives native overlay, Escape, or swipe visibility changes. */
+  onOpenChange?: (open: boolean) => void;
 };
 
 type ModalMode = "dialog" | "drawer";
@@ -65,6 +69,8 @@ type ModalContextType = {
   stack: Array<string>;
   pushModal: (variant: ModalVariant, replaceAll?: boolean) => void;
   popModal: () => void;
+  /** Dismiss the active modal, optionally only when its id matches. */
+  dismiss: (id?: string) => void;
   clear: () => void;
 };
 
@@ -103,6 +109,7 @@ const ModalStack = ({
   dismissible,
   dialogWidth,
   dialogFullscreen,
+  role,
 }: {
   mode: ModalMode | null;
   children: React.ReactNode;
@@ -111,12 +118,14 @@ const ModalStack = ({
   onOpenChange: (open: boolean) => void;
   dialogWidth: string;
   dialogFullscreen: boolean;
+  role?: "dialog" | "alertdialog";
 }) => {
   if (mode === "dialog") {
     debug.log("dismissible", dismissible);
     return (
       <Dialog open={isOpen} onOpenChange={onOpenChange}>
         <DialogPlaceholder
+          role={role}
           dialogWidth={dialogWidth}
           fullscreen={dialogFullscreen}
           onEscapeKeyDown={(e) => {
@@ -151,7 +160,7 @@ const ModalStack = ({
         dismissible={dismissible}
         repositionInputs={false}
       >
-        <DrawerPlaceholder dismissible={dismissible}>
+        <DrawerPlaceholder role={role} dismissible={dismissible}>
           {children}
         </DrawerPlaceholder>
       </Drawer>
@@ -164,6 +173,49 @@ export const ModalProvider = ({ children }: { children: React.ReactNode }) => {
   const [modalIdStack, setModalIdStack] = useState<string[]>([]);
   const [modalStack, setModalStack] = useState<ModalVariant[]>([]);
   const [isOpen, setIsOpen] = useState(false);
+  const dismissalTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const dismissingModalIdRef = useRef<string | null>(null);
+  const focusRestoreTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const focusReturnRef = useRef<HTMLElement | null>(null);
+  const modalIdStackRef = useRef(modalIdStack);
+  const modalStackRef = useRef(modalStack);
+  modalIdStackRef.current = modalIdStack;
+  modalStackRef.current = modalStack;
+
+  const cancelScheduledDismissal = useCallback(() => {
+    if (dismissalTimerRef.current !== null) {
+      clearTimeout(dismissalTimerRef.current);
+      dismissalTimerRef.current = null;
+    }
+    dismissingModalIdRef.current = null;
+  }, []);
+
+  const cancelFocusRestore = useCallback(() => {
+    if (focusRestoreTimerRef.current !== null) {
+      clearTimeout(focusRestoreTimerRef.current);
+      focusRestoreTimerRef.current = null;
+    }
+  }, []);
+
+  const scheduleFocusRestore = useCallback(() => {
+    const target = focusReturnRef.current;
+    focusReturnRef.current = null;
+    if (!target) return;
+
+    cancelFocusRestore();
+    focusRestoreTimerRef.current = setTimeout(() => {
+      focusRestoreTimerRef.current = null;
+      if (target.isConnected) target.focus();
+    }, STACK_UPDATE_TRANSITION_DURATION);
+  }, [cancelFocusRestore]);
+
+  useEffect(
+    () => () => {
+      cancelScheduledDismissal();
+      cancelFocusRestore();
+    },
+    [cancelFocusRestore, cancelScheduledDismissal],
+  );
   const smQueryMatches = useMediaQuery(
     `(min-width: ${SMALL_SCREEN_BREAKPOINT})`
   );
@@ -198,31 +250,38 @@ export const ModalProvider = ({ children }: { children: React.ReactNode }) => {
   // useModal consumer (and re-fire their `modal`-dependent effects) on any
   // modal state change.
   const show = useCallback(() => {
+    cancelScheduledDismissal();
+    cancelFocusRestore();
+    if (focusReturnRef.current === null && document.activeElement instanceof HTMLElement) {
+      focusReturnRef.current = document.activeElement;
+    }
     setIsOpen(true);
     return new Promise<void>((res) => {
       setTimeout(() => {
         res();
       }, VISIBILITY_TRANSITION_DURATION);
     });
-  }, []);
+  }, [cancelFocusRestore, cancelScheduledDismissal]);
 
   const hide = useCallback(() => {
     setIsOpen(false);
     return new Promise<void>((res) => {
       setTimeout(() => {
+        if (modalIdStackRef.current.length <= 1) scheduleFocusRestore();
         res();
       }, VISIBILITY_TRANSITION_DURATION);
     });
-  }, []);
+  }, [scheduleFocusRestore]);
 
   const onVisibilityChange = useCallback((open: boolean) => {
     setIsOpen(open);
   }, []);
 
   const pushModal = useCallback((variant: ModalVariant, replaceAll?: boolean) => {
+    cancelScheduledDismissal();
     setModalIdStack((prev) => [...(replaceAll ? [] : prev), variant.id]);
     setModalStack((prev) => [...(replaceAll ? [] : prev), variant]);
-  }, []);
+  }, [cancelScheduledDismissal]);
 
   const popModal = useCallback(() => {
     setModalIdStack((prev) => prev.slice(0, -1));
@@ -230,13 +289,47 @@ export const ModalProvider = ({ children }: { children: React.ReactNode }) => {
   }, []);
 
   const clear = useCallback(() => {
+    cancelScheduledDismissal();
     setModalIdStack([]);
     setModalStack([]);
-  }, []);
+  }, [cancelScheduledDismissal]);
+
+  const dismiss = useCallback((expectedId?: string) => {
+    const currentStack = modalStackRef.current;
+    const activeModal = currentStack.at(-1);
+    if (!activeModal || (expectedId && activeModal.id !== expectedId)) return;
+    if (dismissingModalIdRef.current === activeModal.id && dismissalTimerRef.current !== null) return;
+
+    const dismissedId = activeModal.id;
+    const revealPrevious = currentStack.length > 1;
+    cancelScheduledDismissal();
+    dismissingModalIdRef.current = dismissedId;
+    setIsOpen(false);
+
+    dismissalTimerRef.current = setTimeout(() => {
+      dismissalTimerRef.current = null;
+      dismissingModalIdRef.current = null;
+      setModalIdStack((current) =>
+        current.at(-1) === dismissedId ? current.slice(0, -1) : current,
+      );
+      setModalStack((current) =>
+        current.at(-1)?.id === dismissedId ? current.slice(0, -1) : current,
+      );
+      if (revealPrevious) setIsOpen(true);
+      else scheduleFocusRestore();
+    }, VISIBILITY_TRANSITION_DURATION);
+
+    activeModal.onOpenChange?.(false);
+  }, [cancelScheduledDismissal, scheduleFocusRestore]);
 
   const handleOpenChange = useCallback((open: boolean) => {
-    setIsOpen(open);
-  }, []);
+    if (open) {
+      cancelScheduledDismissal();
+      setIsOpen(true);
+      return;
+    }
+    dismiss();
+  }, [cancelScheduledDismissal, dismiss]);
 
   const contextValue = useMemo(
     () => ({
@@ -248,9 +341,10 @@ export const ModalProvider = ({ children }: { children: React.ReactNode }) => {
       stack: modalIdStack,
       pushModal,
       popModal,
+      dismiss,
       clear,
     }),
-    [show, hide, onVisibilityChange, isOpen, mode, modalIdStack, pushModal, popModal, clear],
+    [show, hide, onVisibilityChange, isOpen, mode, modalIdStack, pushModal, popModal, dismiss, clear],
   );
 
   const internals = useMemo<ModalInternals>(
@@ -301,6 +395,7 @@ export const ModalHost = () => {
         dismissible={modalInfo.dismissible}
         dialogWidth={activeDialogWidth}
         dialogFullscreen={dialogFullscreen}
+        role={modalStack.at(-1)?.role}
       >
         <VisuallyHidden.Root>
           {mode === "dialog" ? (

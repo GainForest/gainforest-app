@@ -43,6 +43,7 @@ const useCurrentModalInfo = (modalStackDependency: readonly unknown[]) => {
 
   useEffect(() => {
     let timeoutId: ReturnType<typeof setTimeout> | null = null;
+    let observer: MutationObserver | null = null;
 
     const syncModalInfo = () => {
       const nextModalInfo = readCurrentModalInfo();
@@ -54,13 +55,27 @@ const useCurrentModalInfo = (modalStackDependency: readonly unknown[]) => {
       });
     };
 
+    const currentModal = document.querySelector("[data-current-modal]");
+    if (currentModal) {
+      observer = new MutationObserver(syncModalInfo);
+      observer.observe(currentModal, {
+        attributes: true,
+        attributeFilter: ["data-modal-dismissible"],
+        childList: true,
+        characterData: true,
+        subtree: true,
+      });
+    }
+
     syncModalInfo();
+    // Call-site portals can mount one frame after their target. The observer
+    // catches subsequent content and busy-state changes; this retry covers the
+    // initial portal hand-off.
     timeoutId = setTimeout(syncModalInfo, 100);
 
     return () => {
-      if (timeoutId !== null) {
-        clearTimeout(timeoutId);
-      }
+      observer?.disconnect();
+      if (timeoutId !== null) clearTimeout(timeoutId);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [modalStackDependency]);

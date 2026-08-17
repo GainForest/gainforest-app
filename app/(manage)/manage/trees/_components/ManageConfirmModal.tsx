@@ -3,13 +3,13 @@
 import { useEffect, useState, type ReactNode } from "react";
 import { Loader2Icon } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { ControlledModal } from "@/components/ui/modal/controlled-modal";
 import {
-  Dialog,
-  DialogDescription,
-  DialogFooter,
-  DialogPlaceholder,
-  DialogTitle,
-} from "@/components/ui/modal/dialog";
+  ModalContent,
+  ModalDescription,
+  ModalFooter,
+  ModalTitle,
+} from "@/components/ui/modal/modal";
 
 type ManageConfirmModalProps = {
   open: boolean;
@@ -53,20 +53,22 @@ export function ManageConfirmModal({
   };
 
   return (
-    <Dialog open={open} onOpenChange={(nextOpen) => !isPending && onOpenChange(nextOpen)}>
-      <DialogPlaceholder dialogWidth="max-w-md">
+    <ControlledModal
+      open={open}
+      onOpenChange={(nextOpen) => !isPending && onOpenChange(nextOpen)}
+      dialogWidth="max-w-md"
+    >
+      <ModalContent dismissible={!isPending} className="space-y-4">
         <div className="space-y-2">
-          <DialogTitle>{title}</DialogTitle>
+          <ModalTitle className="pr-10">{title}</ModalTitle>
           {typeof description === "string" ? (
-            <DialogDescription>{description}</DialogDescription>
+            <ModalDescription>{description}</ModalDescription>
           ) : (
-            <DialogDescription asChild>
-              <div>{description}</div>
-            </DialogDescription>
+            <div data-modal-description className="text-sm text-muted-foreground">{description}</div>
           )}
         </div>
         {error ? <p className="text-sm text-destructive">{error}</p> : null}
-        <DialogFooter className="sm:flex-row sm:justify-end">
+        <ModalFooter className="sm:flex-row sm:justify-end">
           <Button type="button" variant="outline" onClick={() => onOpenChange(false)} disabled={isPending}>
             {cancelLabel}
           </Button>
@@ -74,8 +76,8 @@ export function ManageConfirmModal({
             {isPending ? <Loader2Icon className="h-3.5 w-3.5 animate-spin" /> : null}
             {confirmLabel}
           </Button>
-        </DialogFooter>
-      </DialogPlaceholder>
-    </Dialog>
+        </ModalFooter>
+      </ModalContent>
+    </ControlledModal>
   );
 }

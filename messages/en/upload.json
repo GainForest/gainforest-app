@@ -1159,6 +1159,7 @@
       "invalidDate": "Invalid date",
       "addStartDate": "Add start date",
       "addWebsite": "Add website",
+      "editWebsite": "Edit website",
       "addSocialLinks": "Add social links",
       "openSocialLink": "Open {link}",
       "viewPublicPage": "View public page",
@@ -1167,17 +1168,23 @@
       "copied": "Copied",
       "copyProfileLink": "Copy profile link",
       "accountDetails": "Account details",
+      "aboutName": "About {name}",
+      "typeLabel": "Type",
+      "countryLabel": "Country",
+      "joinedLabel": "Joined",
       "showAccountDetails": "Show account details",
       "hideAccountDetails": "Hide account details",
       "did": "DID",
       "wallet": "EVM wallet",
       "copyDid": "Copy DID",
-      "copyWallet": "Copy wallet address"
+      "copyWallet": "Copy wallet address",
+      "addCountry": "Add country"
     },
     "errors": {
       "nameRequired": "Add a name before saving.",
       "invalidWebsite": "Enter a valid website address.",
-      "saveFailed": "Failed to save. Please try again."
+      "saveFailed": "Failed to save. Please try again.",
+      "invalidCountry": "Choose a country from the list."
     },
     "modals": {
       "editLogo": "Edit logo",
