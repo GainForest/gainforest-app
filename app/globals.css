@@ -36,6 +36,22 @@
   --accent: oklch(0.97 0.0209 147.64);
   --accent-foreground: oklch(0.3 0.04 157);
 
+  /* Muted highlight ramp — the low end of the one green ramp (sage hue 157),
+     for surfaces that mark a row without competing with its content:
+     whisper = unread row, highlight = pinned card. The ramp *inverts* in dark
+     rather than mirroring (see .dark) — a 0.99 tint would be a white slab on
+     near-black. */
+  --whisper: oklch(0.99 0.006 157.12);
+  --highlight: oklch(0.975 0.012 157.12);
+
+  /* The pinned-card treatment, assembled from the ramp. Light takes the
+     whisper step, dark takes highlight (see .dark) — the fill alone is only
+     ~1.03:1 against the page, so the rail is what actually carries the
+     "pinned" read. */
+  --pinned: var(--whisper);
+  --pinned-hover: var(--highlight);
+  --pinned-border: oklch(0.905 0.017 157.12);
+
   --destructive: oklch(0.577 0.245 27.325);
   --destructive-foreground: oklch(0.985 0 0);
 
@@ -86,6 +102,17 @@
   --accent: oklch(0.2 0.02 157);
   --accent-foreground: oklch(0.75 0.08 157);
 
+  /* Inverted, not mirrored: both lift *up* off the 0.12 card by 2-4 points of
+     lightness instead of sinking toward white. */
+  --whisper: oklch(0.145 0.008 157.12);
+  --highlight: oklch(0.165 0.016 157.12);
+
+  /* Dark starts a rung higher (highlight, not whisper) and leans harder on the
+     rail, because a 1px hairline at 8% white is nearly invisible here. */
+  --pinned: var(--highlight);
+  --pinned-hover: var(--accent);
+  --pinned-border: oklch(0.345 0.043 157.12);
+
   --destructive: oklch(0.65 0.22 27.325);
   --destructive-foreground: oklch(0.08 0 0);
 
@@ -131,6 +158,11 @@
   --color-muted-foreground: var(--muted-foreground);
   --color-accent: var(--accent);
   --color-accent-foreground: var(--accent-foreground);
+  --color-whisper: var(--whisper);
+  --color-highlight: var(--highlight);
+  --color-pinned: var(--pinned);
+  --color-pinned-hover: var(--pinned-hover);
+  --color-pinned-border: var(--pinned-border);
   --color-destructive: var(--destructive);
   --color-destructive-foreground: var(--destructive-foreground);
   --color-border: var(--border);

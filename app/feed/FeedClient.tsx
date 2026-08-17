@@ -700,12 +700,15 @@ function FeedRow({
     <li className="relative">
       <div
         className={cn(
-          "group flex gap-3 rounded-2xl px-3 pb-1.5 pt-3.5 transition-colors",
-          // Pinned posts get a very light green wash so they stand out at the
-          // top of the feed without competing with the row's own content.
+          // Every row carries the 1px box so pinning one doesn't shift the
+          // feed by a pixel; only the colour differs between the two branches.
+          "group flex gap-3 rounded-2xl border px-3 pb-1.5 pt-3.5 transition-colors",
+          // Pinned posts wear the muted highlight treatment: a barely-there
+          // fill plus the rail that actually carries the "pinned" read. Both
+          // invert in dark mode, so this stays legible there.
           item.pinned
-            ? "bg-emerald-500/[0.04] hover:bg-emerald-500/[0.07]"
-            : "hover:bg-muted/40",
+            ? "border-pinned-border bg-pinned hover:bg-pinned-hover"
+            : "border-transparent hover:bg-muted/40",
         )}
       >
         {/* Avatar */}
