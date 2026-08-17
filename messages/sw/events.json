@@ -16,6 +16,7 @@
   },
   "create": {
     "title": "Unda tukio",
+    "backToEvents": "Rudi kwenye matukio",
     "signInRequired": "Ingia ili kuunda tukio.",
     "hostAs": "Andaa kama",
     "hostPersonal": "Wewe",

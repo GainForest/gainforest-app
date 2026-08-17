@@ -16,6 +16,7 @@
   },
   "create": {
     "title": "Criar evento",
+    "backToEvents": "Voltar aos eventos",
     "signInRequired": "Entre para criar um evento.",
     "hostAs": "Organizar como",
     "hostPersonal": "Você",

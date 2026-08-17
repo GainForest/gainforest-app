@@ -16,6 +16,7 @@
   },
   "create": {
     "title": "Buat acara",
+    "backToEvents": "Kembali ke acara",
     "signInRequired": "Masuk untuk membuat acara.",
     "hostAs": "Selenggarakan sebagai",
     "hostPersonal": "Anda",

@@ -1,9 +1,10 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { ChevronDownIcon } from "lucide-react";
+import { ChevronDownIcon, ChevronLeftIcon } from "lucide-react";
 import type { AuthSession } from "@/app/_lib/auth";
 import { useAccountList } from "@/app/_lib/account-switcher";
 import { canCreateRecord } from "@/app/(manage)/manage/_lib/cgs-permissions";
@@ -126,9 +127,18 @@ export function CreateEventClient({ session }: { session: AuthSession }) {
 
   return (
     <div className="mx-auto flex max-w-3xl flex-col">
-      <h1 className="font-instrument text-3xl font-light italic tracking-[-0.02em] text-foreground md:text-4xl">
-        {t("create.title")}
-      </h1>
+      <div className="flex items-center gap-1">
+        <Link
+          href="/events"
+          aria-label={t("create.backToEvents")}
+          className="-ml-1.5 inline-flex size-9 shrink-0 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-muted/60 hover:text-foreground"
+        >
+          <ChevronLeftIcon className="size-5" />
+        </Link>
+        <h1 className="font-instrument text-3xl font-light italic tracking-[-0.02em] text-foreground md:text-4xl">
+          {t("create.title")}
+        </h1>
+      </div>
 
       <div className="flex flex-col gap-6 pt-6">
         {/* 1 · Event name — big, label-less, borderless; priority by size */}

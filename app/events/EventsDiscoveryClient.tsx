@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
+import { CalendarDaysIcon } from "lucide-react";
 import { useAccountList } from "@/app/_lib/account-switcher";
 import { listLatestPdsRecords, parseAtUri } from "@/app/_lib/pds";
 import {
@@ -115,6 +116,9 @@ export function EventsDiscoveryClient({ sessionDid }: { sessionDid: string | nul
   const live = visible.filter((e) => bucketForEvent(e, now) === "live");
   const upcoming = visible.filter((e) => bucketForEvent(e, now) === "upcoming");
   const past = visible.filter((e) => bucketForEvent(e, now) === "past").sort((a, b) => -sortByStartAsc(a, b));
+  // "All" stays a what's-happening feed (live + upcoming); past events only
+  // surface under My events / Enrolled. Renderable = what the current tab shows.
+  const renderable = live.length + upcoming.length + (tab === "all" ? 0 : past.length);
 
   return (
     <div className="flex flex-col gap-6">
@@ -141,10 +145,11 @@ export function EventsDiscoveryClient({ sessionDid }: { sessionDid: string | nul
             <div key={i} className="h-20 animate-pulse bg-muted/60" />
           ))}
         </div>
-      ) : visible.length === 0 ? (
-        <div className="flex flex-col items-center justify-center px-8 py-16 text-center">
+      ) : renderable === 0 ? (
+        <div className="flex flex-col items-center justify-center rounded-3xl border border-dashed border-border px-8 py-16 text-center">
+          <CalendarDaysIcon className="size-8 text-muted-foreground/40" aria-hidden />
           <p
-            className="max-w-sm text-lg text-foreground/60"
+            className="mx-auto mt-3 max-w-sm text-lg text-foreground/60"
             style={{ fontFamily: "var(--font-instrument-serif-var)", fontStyle: "italic" }}
           >
             {tab === "mine" ? t("discovery.emptyMine") : tab === "enrolled" ? t("discovery.emptyEnrolled") : t("discovery.empty")}
