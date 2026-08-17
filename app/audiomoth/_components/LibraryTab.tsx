@@ -112,7 +112,7 @@ export function LibraryTab({ sessionDid }: { sessionDid: string | null }) {
   }
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="mt-6 flex flex-col gap-6">
       {showAttachPill ? (
         <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-2 rounded-2xl border border-primary/25 bg-primary/[0.06] px-4 py-3">
           <p className="flex min-w-0 items-center gap-2.5 text-sm text-foreground">
