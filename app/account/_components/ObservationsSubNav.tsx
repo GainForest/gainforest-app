@@ -29,12 +29,15 @@ interface SubTab {
 export function ObservationsSubNav({
   identifier,
   photosHref,
+  audioHref,
 }: {
   identifier: string;
-  /** Where the Photos pill leads. The manage page passes its own address so
-   *  the pill keeps you on the surface you're already using instead of
-   *  dropping you onto the public tab. */
+  /** Where the Photos pill leads. The manage pages pass their own addresses so
+   *  the pills move between working surfaces instead of dropping you back onto
+   *  the public profile tabs. */
   photosHref?: string;
+  /** Where the Audio pill leads. Same reasoning as `photosHref`. */
+  audioHref?: string;
 }) {
   const t = useTranslations("common.accountTabs");
   const pathname = stripLocaleFromPathname(usePathname() ?? "/");
@@ -42,7 +45,7 @@ export function ObservationsSubNav({
 
   const tabs: SubTab[] = [
     { labelKey: "photos", href: observationsHref, icon: ImageIcon },
-    { labelKey: "audio", href: accountAudioPath(identifier), icon: MicIcon },
+    { labelKey: "audio", href: audioHref ?? accountAudioPath(identifier), icon: MicIcon },
   ];
 
   function isActive(tab: SubTab): boolean {

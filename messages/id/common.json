@@ -512,6 +512,13 @@
     "rowTitle": "Kelola observasi",
     "rowDescription": "Tambah, ubah, dan kelompokkan pengamatan di profil ini."
   },
+  "audioManage": {
+    "metaTitle": "Kelola rekaman — {name}",
+    "title": "Kelola rekaman",
+    "description": "Unggah, ubah nama, dan hapus rekaman lapangan yang tersimpan di profil ini.",
+    "rowTitle": "Kelola rekaman",
+    "rowDescription": "Unggah, ubah nama, dan hapus rekaman di profil ini."
+  },
   "equipment": {
     "metadataTitle": "Peralatan — {name}",
     "personalIntro": "Peralatan lapangan yang terdaftar di profil ini — setiap unit dengan pemegang, lokasi, dan statusnya saat ini.",

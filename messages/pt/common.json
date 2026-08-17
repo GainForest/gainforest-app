@@ -512,6 +512,13 @@
     "rowTitle": "Gerenciar observações",
     "rowDescription": "Adicione, edite e agrupe os avistamentos deste perfil."
   },
+  "audioManage": {
+    "metaTitle": "Gerenciar gravações — {name}",
+    "title": "Gerenciar gravações",
+    "description": "Envie, renomeie e exclua as gravações de campo salvas neste perfil.",
+    "rowTitle": "Gerenciar gravações",
+    "rowDescription": "Envie, renomeie e exclua as gravações deste perfil."
+  },
   "equipment": {
     "metadataTitle": "Equipamentos — {name}",
     "personalIntro": "Equipamentos de campo registrados neste perfil — cada unidade com seu portador atual, local e estado.",

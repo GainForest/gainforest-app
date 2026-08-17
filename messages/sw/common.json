@@ -512,6 +512,13 @@
     "rowTitle": "Simamia uchunguzi",
     "rowDescription": "Ongeza, hariri na panga uonaji kwenye wasifu huu."
   },
+  "audioManage": {
+    "metaTitle": "Simamia rekodi — {name}",
+    "title": "Simamia rekodi",
+    "description": "Pakia, badilisha majina na futa rekodi za uwandani zilizohifadhiwa kwenye wasifu huu.",
+    "rowTitle": "Simamia rekodi",
+    "rowDescription": "Pakia, badilisha majina na futa rekodi kwenye wasifu huu."
+  },
   "equipment": {
     "metadataTitle": "Vifaa — {name}",
     "personalIntro": "Vifaa vya kazi ya uwandani vilivyosajiliwa kwenye wasifu huu — kila kifaa na mshikaji wake wa sasa, eneo na hali yake.",

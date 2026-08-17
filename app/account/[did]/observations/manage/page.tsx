@@ -7,6 +7,7 @@ import Container from "@/components/ui/container";
 import { ObservationsSection, TreesSection } from "@/app/(manage)/manage/_sections";
 import { ObservationsSubNav } from "../../../_components/ObservationsSubNav";
 import {
+  accountAudioManagePath,
   accountObservationsManagePath,
   getAccountRouteData,
   readAccountRouteParams,
@@ -85,6 +86,7 @@ export default async function AccountObservationsManagePage({
       <ObservationsSubNav
         identifier={account.urlIdentifier}
         photosHref={accountObservationsManagePath(account.urlIdentifier)}
+        audioHref={accountAudioManagePath(account.urlIdentifier)}
       />
       {showMeasurements ? <TreesSection target={access.target} /> : <ObservationsSection target={access.target} />}
     </Container>

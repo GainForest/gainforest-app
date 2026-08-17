@@ -512,6 +512,13 @@
     "rowTitle": "Manage observations",
     "rowDescription": "Add, edit and group the sightings on this profile."
   },
+  "audioManage": {
+    "metaTitle": "Manage recordings — {name}",
+    "title": "Manage recordings",
+    "description": "Upload, rename and delete the field recordings saved to this profile.",
+    "rowTitle": "Manage recordings",
+    "rowDescription": "Upload, rename and delete the recordings on this profile."
+  },
   "equipment": {
     "metadataTitle": "Equipment — {name}",
     "personalIntro": "Field equipment registered on this profile — each unit with its current holder, site and status.",

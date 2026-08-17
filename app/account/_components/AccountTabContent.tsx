@@ -5,6 +5,7 @@ import { notFound } from "next/navigation";
 import { BadgeCheckIcon, ChevronRightIcon } from "lucide-react";
 import { getLocale, getTranslations } from "next-intl/server";
 import { AccountGalleryClient } from "./AccountGalleryClient";
+import { ManageActionRow, type ManageAction } from "./ManageActionRow";
 import type { GalleryProjectOption } from "./AccountGalleryUploader";
 import { canCreateRecord } from "../../(manage)/manage/_lib/cgs-permissions";
 import { RichText } from "../../_components/RichText";
@@ -33,29 +34,6 @@ import { resolveTimelineReferences } from "@/app/cert/[did]/[rkey]/_components/t
 import { ProjectTimelineReadonly } from "@/app/projects/[did]/[rkey]/_components/ProjectTimelineReadonly";
 import type { AccountRouteData } from "../_lib/account-route";
 import { accountDonationsPath, accountObservationsManagePath, accountObservationsPath, accountPath, accountProjectsPath } from "../_lib/account-route";
-
-type ManageAction = {
-  href: string;
-  label: string;
-  description: string;
-};
-
-function ManageActionRow({ action }: { action?: ManageAction | null }) {
-  if (!action) return null;
-
-  return (
-    <Link
-      href={action.href}
-      className="mt-6 flex items-center justify-between gap-4 rounded-2xl border border-border/70 bg-muted/50 px-4 py-3 text-sm transition-colors hover:bg-muted"
-    >
-      <span className="min-w-0">
-        <span className="block font-medium text-foreground">{action.label}</span>
-        <span className="mt-0.5 block text-muted-foreground">{action.description}</span>
-      </span>
-      <ChevronRightIcon className="h-4 w-4 shrink-0 text-muted-foreground" />
-    </Link>
-  );
-}
 
 function DataCouncilAvatar({ member }: { member: PublicDataCouncilMember }) {
   const mono = monogram(member.displayName?.trim() || "Member", member.did);

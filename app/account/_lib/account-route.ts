@@ -173,6 +173,15 @@ export function accountAudioPath(didOrHandle: string): string {
   return `${accountPath(didOrHandle)}/audio`;
 }
 
+/**
+ * Where the account's own recordings are managed — uploading, renaming,
+ * deleting. Stands alongside the observations workspace; the profile's Audio
+ * tab is the listening view of the same recordings.
+ */
+export function accountAudioManagePath(didOrHandle: string): string {
+  return `${accountAudioPath(didOrHandle)}/manage`;
+}
+
 export function accountDronePath(didOrHandle: string): string {
   return `${accountPath(didOrHandle)}/drone`;
 }
