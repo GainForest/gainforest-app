@@ -1904,6 +1904,8 @@
       "sortRecentlyAdded": "Baru ditambahkan",
       "sortRecentlyRecorded": "Baru direkam",
       "openProject": "Buka proyek",
+      "openAccount": "Buka profil",
+      "noProject": "(tanpa proyek)",
       "projectMeta": "{project} · {recorders, plural, other {# perekam}} · {recordings, number} rekaman",
       "soundscapeSlot": "Lanskap suara",
       "recordingsSlot": "Rekaman",

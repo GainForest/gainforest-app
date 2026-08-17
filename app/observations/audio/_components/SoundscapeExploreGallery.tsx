@@ -12,7 +12,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
 import { ChevronDownIcon, SearchIcon, WavesIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import type { AudioProject } from "@/app/_lib/audio-projects";
+import type { AudioProject, UnattachedAudioAccount } from "@/app/_lib/audio-projects";
 import { resolveDidProfile, type DidProfile } from "@/app/_lib/did-profile";
 import type { NetworkSoundscape } from "@/app/_lib/soundscape-explore";
 import { AudioProjectRow, type AudioRow } from "./AudioProjectRow";
@@ -93,10 +93,13 @@ function createProjectRow(
 export function SoundscapeExploreGallery({
   items,
   audioProjects = [],
+  unattachedAccounts = [],
 }: {
   items: NetworkSoundscape[];
   /** Projects with public audio evidence, including projects that also have a soundscape. */
   audioProjects?: AudioProject[];
+  /** Accounts with uploaded folders that no project points at — "(no project)" rows. */
+  unattachedAccounts?: UnattachedAudioAccount[];
 }) {
   const t = useTranslations("common.audiomoth.audioHub");
   const soundscapeT = useTranslations("common.soundscape");
@@ -107,8 +110,14 @@ export function SoundscapeExploreGallery({
   const [expanded, setExpanded] = useState<Set<string>>(() => new Set());
 
   const dids = useMemo(
-    () => [...new Set([...items.map((item) => item.did), ...audioProjects.map((item) => item.project.did)])],
-    [audioProjects, items],
+    () => [
+      ...new Set([
+        ...items.map((item) => item.did),
+        ...audioProjects.map((item) => item.project.did),
+        ...unattachedAccounts.map((account) => account.did),
+      ]),
+    ],
+    [audioProjects, items, unattachedAccounts],
   );
   const [profiles, setProfiles] = useState<Record<string, DidProfile>>({});
 
@@ -176,6 +185,33 @@ export function SoundscapeExploreGallery({
       }
     }
 
+    // Folders nobody attached to a project join their owner's account row —
+    // the same row a project-less soundscape lives in, so a dial published
+    // from such a folder pairs with it instead of standing beside a twin.
+    // A folder whose dial hangs in a project row is already represented
+    // there; giving it a second, "(no project)" slot would double it.
+    const projectLinkedRefs = new Set(
+      items.flatMap((item) =>
+        item.deploymentRef && (soundscapeProjects.get(item.uri) ?? []).length > 0
+          ? [item.deploymentRef]
+          : [],
+      ),
+    );
+    for (const account of unattachedAccounts) {
+      const uploads = account.uploads.filter(
+        (upload) => !upload.deploymentRef || !projectLinkedRefs.has(upload.deploymentRef),
+      );
+      if (uploads.length === 0) continue;
+      const key = `account:${account.did}`;
+      const existing = byProject.get(key);
+      const row = existing ?? createProjectRow(key, null, profiles[account.did]);
+      if (!existing) byProject.set(key, row);
+      row.ownerDid = row.ownerDid || account.did;
+      row.ownerName = row.ownerName ?? account.organizationName;
+      row.ownerAvatar = row.ownerAvatar ?? account.organizationAvatarUrl;
+      row.uploads = [...row.uploads, ...uploads];
+    }
+
     for (const row of byProject.values()) {
       row.latestAdded = Math.max(row.latestAdded, ...row.uploads.map(uploadedMs));
       row.latestRecorded = Math.max(
@@ -191,7 +227,7 @@ export function SoundscapeExploreGallery({
     }
 
     return [...byProject.values()];
-  }, [audioProjects, items, profiles]);
+  }, [audioProjects, items, profiles, unattachedAccounts]);
 
   const projectOptions = useMemo(
     () =>
@@ -256,7 +292,7 @@ export function SoundscapeExploreGallery({
     });
   }, []);
 
-  if (items.length === 0 && audioProjects.length === 0) {
+  if (items.length === 0 && audioProjects.length === 0 && unattachedAccounts.length === 0) {
     return (
       <div className="rounded-3xl border border-dashed border-border bg-muted/30 px-6 py-14 text-center">
         <WavesIcon className="mx-auto size-8 text-muted-foreground" aria-hidden />

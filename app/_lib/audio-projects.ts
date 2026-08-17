@@ -22,9 +22,14 @@ import {
 import { parseAtUri, resolveBlobUrl } from "./pds";
 
 const AUDIO_PROJECTS_CACHE_KEY = "audio-projects:uploaded-without-soundscape";
+const UNATTACHED_FOLDERS_CACHE_KEY = "audio-projects:unattached-folders";
 const AUDIO_PROJECTS_CACHE_TTL_MS = 5 * 60_000;
 const INDEXER_PAGE_SIZE = 1000;
 const MAX_ATTACHMENT_PAGES = 50;
+/** Ceiling on the recordings sweep behind the unattached-folder rows: 20
+ *  pages ≈ 20k recordings. Past that the oldest folders fall off the page
+ *  rather than the cost growing without bound. */
+const MAX_RECORDING_SWEEP_PAGES = 20;
 const AUDIO_SAMPLE_BATCH_SIZE = 40;
 
 type AttachmentKind = "audio" | "soundscape";
@@ -87,6 +92,17 @@ export type AudioProjectUpload = {
   recordingUris: string[];
   /** Distinct recording dates in this folder, earliest first. */
   recordedDates: string[];
+};
+
+/** One account's recorder folders that aren't attached to any project — the
+ *  page's "(no project)" rows. Same slot shape as a project's uploads, so the
+ *  gallery draws both with one component. */
+export type UnattachedAudioAccount = {
+  did: string;
+  organizationName: string | null;
+  organizationAvatarUrl: string | null;
+  /** One upload per folder, newest first. */
+  uploads: AudioProjectUpload[];
 };
 
 /** A project row and the recorder folders that make up its audio evidence. */
@@ -646,6 +662,243 @@ export async function listNetworkAudioProjects(signal?: AbortSignal): Promise<Au
     AUDIO_PROJECTS_CACHE_KEY,
     AUDIO_PROJECTS_CACHE_TTL_MS,
     () => listNetworkAudioProjectsUncached(),
+    signal,
+  );
+}
+
+// ── Folders never attached to a project ─────────────────────────────
+//
+// Everything above starts from a project attachment, so a folder somebody
+// uploaded into but never attached to a project is invisible to it. These
+// folders are read the other way round — from the recordings themselves — and
+// grouped per owner into "(no project)" rows. The recording count is counted
+// live rather than parsed from an attachment note, since there is none.
+
+/** The slice of an `ac.audio` record the unattached sweep reads. */
+export type SweptRecording = {
+  did?: string | null;
+  deploymentRef?: string | null;
+  createdAt?: string | null;
+  metadata?: { recordedAt?: string | null } | null;
+};
+
+/** The slice of an `ac.deployment` folder the grouping needs. */
+export type SweptFolder = {
+  did?: string | null;
+  uri?: string | null;
+  name?: string | null;
+  deviceModel?: string | null;
+  siteRef?: string | null;
+};
+
+/**
+ * Group recordings into one upload slot per folder, dropping everything that
+ * is already represented on the page or moderated away. Pure — the network
+ * inputs arrive resolved.
+ *
+ * Skipped on purpose:
+ *  - records with no folder: a slot stands for a recorder folder, and the odd
+ *    folder-less record can already surface as project evidence;
+ *  - folders in `attachedDeploymentRefs`: their project row shows them;
+ *  - hidden folders and folders of hidden accounts.
+ */
+export function collectUnattachedFolders(input: {
+  recordings: readonly SweptRecording[];
+  folders: ReadonlyMap<string, SweptFolder>;
+  attachedDeploymentRefs: ReadonlySet<string>;
+  hiddenDids: ReadonlySet<string>;
+  hiddenRecordUris: ReadonlySet<string>;
+}): Map<string, AudioProjectUpload[]> {
+  type Bucket = { count: number; newest: string | null; dates: Set<string> };
+  const buckets = new Map<string, Bucket>();
+
+  for (const recording of input.recordings) {
+    const ref = recording.deploymentRef?.startsWith("at://") ? recording.deploymentRef : null;
+    if (!ref) continue;
+    if (input.attachedDeploymentRefs.has(ref) || input.hiddenRecordUris.has(ref)) continue;
+    const bucket = buckets.get(ref) ?? { count: 0, newest: null, dates: new Set<string>() };
+    bucket.count += 1;
+    if (recording.createdAt && (!bucket.newest || recording.createdAt > bucket.newest)) {
+      bucket.newest = recording.createdAt;
+    }
+    const recorded = dateKey(recording.metadata?.recordedAt);
+    if (recorded) bucket.dates.add(recorded);
+    buckets.set(ref, bucket);
+  }
+
+  const byOwner = new Map<string, AudioProjectUpload[]>();
+  for (const [ref, bucket] of buckets) {
+    const folder = input.folders.get(ref);
+    const ownerDid = folder?.did ?? parseAtUri(ref)?.did ?? null;
+    if (!ownerDid || input.hiddenDids.has(ownerDid)) continue;
+    const uploads = byOwner.get(ownerDid) ?? [];
+    uploads.push({
+      id: ref,
+      did: ownerDid,
+      deploymentRef: ref,
+      title: folder?.name?.trim() || null,
+      recordingCount: bucket.count,
+      recorderName: folder?.name?.trim() || folder?.deviceModel?.trim() || null,
+      siteName: null,
+      createdAt: bucket.newest,
+      recordingUris: [],
+      recordedDates: [...bucket.dates].sort(),
+    });
+    byOwner.set(ownerDid, uploads);
+  }
+
+  for (const uploads of byOwner.values()) {
+    uploads.sort((a, b) => {
+      const left = a.createdAt ? Date.parse(a.createdAt) : 0;
+      const right = b.createdAt ? Date.parse(b.createdAt) : 0;
+      return right - left;
+    });
+  }
+  return byOwner;
+}
+
+async function sweepAllRecordings(signal?: AbortSignal): Promise<SweptRecording[]> {
+  const all: SweptRecording[] = [];
+  let after: string | null = null;
+
+  for (let page = 0; page < MAX_RECORDING_SWEEP_PAGES; page += 1) {
+    const data: {
+      appGainforestAcAudio?: {
+        pageInfo?: { hasNextPage?: boolean | null; endCursor?: string | null } | null;
+        edges?: Array<{ node?: SweptRecording | null } | null> | null;
+      } | null;
+    } | null = await indexerQuery<{
+      appGainforestAcAudio?: {
+        pageInfo?: { hasNextPage?: boolean | null; endCursor?: string | null } | null;
+        edges?: Array<{ node?: SweptRecording | null } | null> | null;
+      } | null;
+    }>(
+      `query UnattachedAudioSweep($after: String) {
+        appGainforestAcAudio(
+          first: ${INDEXER_PAGE_SIZE}
+          after: $after
+          sortBy: createdAt
+          sortDirection: DESC
+        ) {
+          pageInfo { hasNextPage endCursor }
+          edges { node { did deploymentRef createdAt metadata { recordedAt } } }
+        }
+      }`,
+      { after },
+      signal,
+    ).catch(() => null);
+    if (!data) break;
+
+    for (const edge of data.appGainforestAcAudio?.edges ?? []) {
+      if (edge?.node?.did) all.push(edge.node);
+    }
+
+    const pageInfo: { hasNextPage?: boolean | null; endCursor?: string | null } | null | undefined =
+      data.appGainforestAcAudio?.pageInfo;
+    if (!pageInfo?.hasNextPage || !pageInfo.endCursor) break;
+    after = pageInfo.endCursor;
+  }
+
+  return all;
+}
+
+async function fetchAllFolders(signal?: AbortSignal): Promise<Map<string, SweptFolder>> {
+  const data = await indexerQuery<{
+    appGainforestAcDeployment?: {
+      edges?: Array<{ node?: SweptFolder | null } | null> | null;
+    } | null;
+  }>(
+    `query UnattachedAudioFolders {
+      appGainforestAcDeployment(first: ${INDEXER_PAGE_SIZE}, sortBy: createdAt, sortDirection: DESC) {
+        edges { node { did uri name deviceModel siteRef } }
+      }
+    }`,
+    {},
+    signal,
+  ).catch(() => null);
+
+  const byUri = new Map<string, SweptFolder>();
+  for (const edge of data?.appGainforestAcDeployment?.edges ?? []) {
+    const folder = edge?.node;
+    if (folder?.uri) byUri.set(folder.uri, folder);
+  }
+  return byUri;
+}
+
+async function listUnattachedAudioAccountsUncached(
+  signal?: AbortSignal,
+): Promise<UnattachedAudioAccount[]> {
+  const [attached, recordings, folders, hiddenDids, hiddenUris] = await Promise.all([
+    listNetworkAudioProjects(signal).catch(() => [] as AudioProject[]),
+    sweepAllRecordings(signal),
+    fetchAllFolders(signal),
+    fetchPublicHiddenAccountDids(signal).catch(() => new Set<string>()),
+    fetchHiddenRecordUris(signal).catch(() => new Set<string>()),
+  ]);
+
+  const attachedDeploymentRefs = new Set(
+    attached.flatMap((project) =>
+      project.uploads.flatMap((upload) => (upload.deploymentRef ? [upload.deploymentRef] : [])),
+    ),
+  );
+
+  const byOwner = collectUnattachedFolders({
+    recordings,
+    folders,
+    attachedDeploymentRefs,
+    hiddenDids,
+    hiddenRecordUris: hiddenUris,
+  });
+  if (byOwner.size === 0) return [];
+
+  // Site names for the search haystack — same lookup the attached slots use.
+  const siteRefs = new Set<string>();
+  for (const uploads of byOwner.values()) {
+    for (const upload of uploads) {
+      const siteRef = upload.deploymentRef ? folders.get(upload.deploymentRef)?.siteRef : null;
+      if (siteRef) siteRefs.add(siteRef);
+    }
+  }
+  const locationResults = await Promise.all(
+    [...siteRefs].map(async (uri) =>
+      [uri, await fetchTimelineLocationByUri(uri, signal).catch(() => null)] as const,
+    ),
+  );
+  const locationNames = new Map(
+    locationResults.flatMap(([uri, location]) =>
+      location?.record.name ? [[uri, location.record.name] as const] : [],
+    ),
+  );
+  for (const uploads of byOwner.values()) {
+    for (const upload of uploads) {
+      const siteRef = upload.deploymentRef ? folders.get(upload.deploymentRef)?.siteRef : null;
+      if (siteRef) upload.siteName = locationNames.get(siteRef) ?? null;
+    }
+  }
+
+  const profileCards = await fetchIndexedCertifiedProfileCards([...byOwner.keys()], signal).catch(
+    () => new Map<string, { displayName: string | null; avatarUrl: string | null }>(),
+  );
+
+  return [...byOwner.entries()]
+    .map(([did, uploads]) => ({
+      did,
+      organizationName: profileCards.get(did)?.displayName ?? null,
+      organizationAvatarUrl: profileCards.get(did)?.avatarUrl ?? null,
+      uploads,
+    }))
+    .sort((a, b) => maxCreatedAt(b.uploads) - maxCreatedAt(a.uploads));
+}
+
+/** Accounts with recorder folders that aren't attached to any project, newest
+ *  upload first — the Audio explore page's "(no project)" rows. */
+export async function listUnattachedAudioAccounts(
+  signal?: AbortSignal,
+): Promise<UnattachedAudioAccount[]> {
+  return cachedAsync(
+    UNATTACHED_FOLDERS_CACHE_KEY,
+    AUDIO_PROJECTS_CACHE_TTL_MS,
+    () => listUnattachedAudioAccountsUncached(),
     signal,
   );
 }

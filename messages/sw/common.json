@@ -1904,6 +1904,8 @@
       "sortRecentlyAdded": "Iliyoongezwa hivi karibuni",
       "sortRecentlyRecorded": "Iliyorekodiwa hivi karibuni",
       "openProject": "Fungua mradi",
+      "openAccount": "Fungua wasifu",
+      "noProject": "(bila mradi)",
       "projectMeta": "{project} · {recorders, plural, one {# kinasa} other {# vinasa}} · rekodi {recordings, number}",
       "soundscapeSlot": "Mandhari ya sauti",
       "recordingsSlot": "Rekodi",

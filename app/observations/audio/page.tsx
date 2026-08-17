@@ -3,7 +3,7 @@ import { getTranslations } from "next-intl/server";
 import { fetchAuthSession } from "@/app/_lib/auth-server";
 import { AudioMothClient } from "@/app/audiomoth/_components/AudioMothClient";
 import { PictureHero } from "@/app/_components/PictureHero";
-import { listNetworkAudioProjects } from "@/app/_lib/audio-projects";
+import { listNetworkAudioProjects, listUnattachedAudioAccounts } from "@/app/_lib/audio-projects";
 import { listNetworkSoundscapes } from "@/app/_lib/soundscape-explore";
 import { ObservationsMediaTabs } from "../_components/ObservationsMediaTabs";
 import { AudioScopePills } from "./_components/AudioScopePills";
@@ -69,6 +69,9 @@ export default async function ObservationsAudioPage({
     listNetworkSoundscapes().catch(() => []),
     listNetworkAudioProjects().catch(() => []),
   ]);
+  // Folders uploaded into but never attached to a project — the "(no project)"
+  // rows. Fetched after the projects so its cache can subtract their folders.
+  const unattachedAccounts = await listUnattachedAudioAccounts().catch(() => []);
 
   return (
     <main className="-mt-14 bg-background pb-20 md:pb-28">
@@ -84,7 +87,11 @@ export default async function ObservationsAudioPage({
         <ObservationsMediaTabs active="audio" />
       </div>
       <div className="relative z-10 mx-auto max-w-6xl px-6">
-        <SoundscapeExploreGallery items={soundscapes} audioProjects={uploadedProjects} />
+        <SoundscapeExploreGallery
+          items={soundscapes}
+          audioProjects={uploadedProjects}
+          unattachedAccounts={unattachedAccounts}
+        />
       </div>
     </main>
   );

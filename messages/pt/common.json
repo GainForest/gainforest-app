@@ -1904,6 +1904,8 @@
       "sortRecentlyAdded": "Adicionados recentemente",
       "sortRecentlyRecorded": "Gravados recentemente",
       "openProject": "Abrir projeto",
+      "openAccount": "Abrir perfil",
+      "noProject": "(sem projeto)",
       "projectMeta": "{project} · {recorders, plural, one {# gravador} other {# gravadores}} · {recordings, number} gravações",
       "soundscapeSlot": "Paisagem sonora",
       "recordingsSlot": "Gravações",

@@ -105,7 +105,9 @@ export function AudioProjectRow({
 }) {
   const t = useTranslations("common.audiomoth.audioHub");
   const organization = row.ownerName ?? t("unknownOrganization");
-  const projectTitle = row.project?.title ?? row.fallbackTitle ?? t("soundscapeFallback");
+  // A row without a project record says so — a soundscape's own title is not
+  // a project name, so it never stands in for one here.
+  const projectTitle = row.project?.title ?? t("noProject");
   const organizationHref = accountHref(row.ownerDid);
   const projectHref = row.project
     ? localProjectHref(row.project.did, row.project.rkey)
@@ -155,7 +157,7 @@ export function AudioProjectRow({
         </div>
         <Button asChild variant="outline" size="sm" className="rounded-full">
           <Link href={projectHref}>
-            {t("openProject")}
+            {row.project ? t("openProject") : t("openAccount")}
             <ArrowUpRightIcon className="size-3.5" aria-hidden />
           </Link>
         </Button>
