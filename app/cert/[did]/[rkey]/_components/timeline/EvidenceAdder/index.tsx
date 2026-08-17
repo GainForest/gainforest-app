@@ -475,15 +475,19 @@ export function EvidenceAdder({
               ))}
             </div>
           </TooltipProvider>
-          <Button
-            type="button"
-            onClick={postTextUpdate}
-            disabled={isSubmitting || !createPermission.allowed || !leafletDocumentHasText(richText.document)}
-            className="w-full sm:w-fit"
-          >
-            {isSubmitting ? <Loader2Icon className="h-4 w-4 animate-spin" /> : null}
-            {evidenceT("postUpdate")}
-          </Button>
+          {/* While a picker is open it owns the submit button, so hide this one
+              to avoid two "Post update" buttons competing. */}
+          {activeTab === null ? (
+            <Button
+              type="button"
+              onClick={postTextUpdate}
+              disabled={isSubmitting || !createPermission.allowed || !leafletDocumentHasText(richText.document)}
+              className="w-full sm:w-fit"
+            >
+              {isSubmitting ? <Loader2Icon className="h-4 w-4 animate-spin" /> : null}
+              {evidenceT("postUpdate")}
+            </Button>
+          ) : null}
         </div>
         <AnimatePresence initial={false} mode="wait">
           {activeTab ? (
