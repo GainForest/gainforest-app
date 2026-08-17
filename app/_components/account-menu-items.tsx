@@ -3,9 +3,11 @@ import {
   BinocularsIcon,
   FolderKanbanIcon,
   SettingsIcon,
+  SlidersHorizontalIcon,
   UserIcon,
 } from "lucide-react";
 import {
+  accountObservationsManagePath,
   accountObservationsPath,
   accountPath,
   accountProjectsPath,
@@ -34,6 +36,7 @@ export type MenuSubItem = {
 export type AccountSubItemLabels = {
   profile: string;
   observations: string;
+  manage: string;
   audio: string;
   projects: string;
   settings: string;
@@ -52,10 +55,12 @@ export function buildAccountSubItems({
   identifier,
   labels,
   showAudio,
+  showManage,
 }: {
   identifier: string;
   labels: AccountSubItemLabels;
   showAudio: boolean;
+  showManage: boolean;
 }): MenuSubItem[] {
   return [
     {
@@ -70,6 +75,21 @@ export function buildAccountSubItems({
       href: accountObservationsPath(identifier),
       icon: <BinocularsIcon className="h-3.5 w-3.5" />,
     },
+    // The dedicated surface for working on this account's sightings — adding,
+    // editing and grouping them — rather than the profile tab that shows them.
+    // Admin-only while it is still being worked on, like the audio workspace
+    // below; the page re-checks access on its own.
+    ...(showManage
+      ? [
+          {
+            key: "manage",
+            label: labels.manage,
+            href: accountObservationsManagePath(identifier),
+            icon: <SlidersHorizontalIcon className="h-3.5 w-3.5" />,
+            adminOnly: true,
+          },
+        ]
+      : []),
     // Straight into the recording workspace (library first), which is where
     // uploading, labelling and building a soundscape all live. Buried four
     // clicks deep otherwise, so it earns its own row next to Observations.

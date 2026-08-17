@@ -505,6 +505,11 @@
     "equipment": "Equipment",
     "more": "More"
   },
+  "observationsManage": {
+    "metaTitle": "Manage observations — {name}",
+    "title": "Manage observations",
+    "description": "Add, edit and group the nature sightings saved to this profile."
+  },
   "equipment": {
     "metadataTitle": "Equipment — {name}",
     "personalIntro": "Field equipment registered on this profile — each unit with its current holder, site and status.",

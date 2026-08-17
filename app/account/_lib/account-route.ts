@@ -111,6 +111,16 @@ export function accountObservationsPath(didOrHandle: string): string {
   return `${accountPath(didOrHandle)}/observations`;
 }
 
+/**
+ * Where the account's own sightings are managed — adding, editing, grouping.
+ * The profile's Observations tab is the public view of the same records, so
+ * managing them gets its own address instead of the tab quietly turning into an
+ * editor for whoever happens to own it.
+ */
+export function accountObservationsManagePath(didOrHandle: string): string {
+  return `${accountObservationsPath(didOrHandle)}/manage`;
+}
+
 export function accountFollowersPath(didOrHandle: string): string {
   return `${accountPath(didOrHandle)}/followers`;
 }

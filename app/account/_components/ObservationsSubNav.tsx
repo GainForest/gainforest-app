@@ -26,10 +26,19 @@ interface SubTab {
  * tabs are public — recordings live in public repos and the audio explore page
  * links every visitor to them — so the nav is the same for everyone.
  */
-export function ObservationsSubNav({ identifier }: { identifier: string }) {
+export function ObservationsSubNav({
+  identifier,
+  photosHref,
+}: {
+  identifier: string;
+  /** Where the Photos pill leads. The manage page passes its own address so
+   *  the pill keeps you on the surface you're already using instead of
+   *  dropping you onto the public tab. */
+  photosHref?: string;
+}) {
   const t = useTranslations("common.accountTabs");
   const pathname = stripLocaleFromPathname(usePathname() ?? "/");
-  const observationsHref = accountObservationsPath(identifier);
+  const observationsHref = photosHref ?? accountObservationsPath(identifier);
 
   const tabs: SubTab[] = [
     { labelKey: "photos", href: observationsHref, icon: ImageIcon },

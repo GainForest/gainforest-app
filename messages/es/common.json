@@ -505,6 +505,11 @@
     "equipment": "Equipos",
     "more": "Más"
   },
+  "observationsManage": {
+    "metaTitle": "Gestionar observaciones — {name}",
+    "title": "Gestionar observaciones",
+    "description": "Añade, edita y agrupa los avistamientos de naturaleza guardados en este perfil."
+  },
   "equipment": {
     "metadataTitle": "Equipos — {name}",
     "personalIntro": "Equipos de campo registrados en este perfil — cada unidad con su portador actual, sitio y estado.",

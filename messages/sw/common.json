@@ -505,6 +505,11 @@
     "equipment": "Vifaa",
     "more": "Zaidi"
   },
+  "observationsManage": {
+    "metaTitle": "Simamia uchunguzi — {name}",
+    "title": "Simamia uchunguzi",
+    "description": "Ongeza, hariri na panga uonaji wa asili uliohifadhiwa kwenye wasifu huu."
+  },
   "equipment": {
     "metadataTitle": "Vifaa — {name}",
     "personalIntro": "Vifaa vya kazi ya uwandani vilivyosajiliwa kwenye wasifu huu — kila kifaa na mshikaji wake wa sasa, eneo na hali yake.",

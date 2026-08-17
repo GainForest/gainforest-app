@@ -5,14 +5,16 @@ import { AUDIO_WORKSPACE_HREF, buildAccountSubItems } from "./account-menu-items
 const labels = {
   profile: "View profile",
   observations: "Observations",
+  manage: "Manage",
   audio: "Audio",
   projects: "Projects",
   settings: "Settings",
 };
 
-/** The switcher builds one of these per account the viewer can switch to. */
-function rowsFor(identifier: string, showAudio: boolean) {
-  return buildAccountSubItems({ identifier, labels, showAudio });
+/** The switcher builds one of these per account the viewer can switch to. The
+ *  restricted rows (manage, audio) follow the same admin flag in the app. */
+function rowsFor(identifier: string, showAudio: boolean, showManage = showAudio) {
+  return buildAccountSubItems({ identifier, labels, showAudio, showManage });
 }
 
 describe("buildAccountSubItems", () => {
@@ -42,10 +44,29 @@ describe("buildAccountSubItems", () => {
     expect(rowsFor("gainforest.org", true).map((item) => item.key)).toEqual([
       "profile",
       "observations",
+      "manage",
       "audio",
       "projects",
       "settings",
     ]);
+  });
+
+  it("offers the manage surface under every account the viewer can switch to", () => {
+    for (const identifier of ["sharfy.gainforest.app", "gainforest.org", "did:plc:someorg"]) {
+      const manage = rowsFor(identifier, true).find((item) => item.key === "manage");
+      expect(manage, `no manage row for ${identifier}`).toBeDefined();
+      expect(manage?.href).toBe(`/account/${encodeURIComponent(identifier)}/observations/manage`);
+    }
+  });
+
+  it("withholds the manage surface from viewers who are not admins", () => {
+    for (const identifier of ["sharfy.gainforest.app", "gainforest.org"]) {
+      expect(rowsFor(identifier, false).map((item) => item.key)).not.toContain("manage");
+    }
+  });
+
+  it("marks the manage row as restricted so it never looks public", () => {
+    expect(rowsFor("gainforest.org", true).find((item) => item.key === "manage")?.adminOnly).toBe(true);
   });
 
   it("points every other row at the account it belongs to", () => {
@@ -64,7 +85,7 @@ describe("buildAccountSubItems", () => {
 
     // The audio workspace is deliberately shared (it follows the account
     // context); every account-scoped row must differ.
-    for (const key of ["profile", "observations", "projects", "settings"]) {
+    for (const key of ["profile", "observations", "manage", "projects", "settings"]) {
       const a = mine.find((item) => item.key === key)?.href;
       const b = theirs.find((item) => item.key === key)?.href;
       expect(a, key).not.toBe(b);
