@@ -88,6 +88,10 @@ export const NAV_ITEMS: NavSection[] = [
         Icon: CalendarDaysIcon,
         href: "/events",
         pathCheck: { startsWith: "/events" },
+        // Community Events is in staff preview: only GainForest admins see
+        // it while the team decides on the open questions (ECO-904). The
+        // routes re-check access server-side — hiding the item is cosmetic.
+        adminOnly: true,
       },
       {
         kind: "leaf",
