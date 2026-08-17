@@ -73,8 +73,12 @@ export function ObservationsManageLoadingSkeleton() {
 
 /**
  * The audio workspace body: the recording workflow tab bar (library,
- * deployments, upload, label, identifications, soundscape, devices) and a
- * deployment card. Widths mirror the workspace sections (max-w-6xl px-6).
+ * deployments, upload, label, identifications, soundscape, devices), then the
+ * library's own loading rows. The row block copies AccountAudioViewer's
+ * in-flight state exactly (four h-16 rounded rows), so the route skeleton, the
+ * viewer's own loading state and the settled deployment list line up instead
+ * of the page changing shape twice. Widths mirror the workspace sections
+ * (max-w-6xl px-6).
  */
 export function AudioManageLoadingSkeleton() {
   return (
@@ -87,29 +91,12 @@ export function AudioManageLoadingSkeleton() {
             <Skeleton key={index} className="h-9 w-28 shrink-0 rounded-full" />
           ))}
         </div>
-        {/* Deployment card: header row, then calendar + recording list */}
-        <div className="mt-6 rounded-3xl border border-border bg-card p-5">
-          <div className="flex items-center justify-between gap-3">
-            <div className="flex items-center gap-3">
-              <Skeleton className="size-10 rounded-full" />
-              <div>
-                <Skeleton className="h-5 w-40 rounded-full" />
-                <Skeleton className="mt-1.5 h-4 w-56 rounded-full" />
-              </div>
-            </div>
-            <div className="flex gap-2">
-              <Skeleton className="h-9 w-24 rounded-full" />
-              <Skeleton className="h-9 w-20 rounded-full" />
-            </div>
-          </div>
-          <div className="mt-5 grid gap-6 lg:grid-cols-[340px_minmax(0,1fr)]">
-            <Skeleton className="h-72 rounded-2xl" />
-            <div className="space-y-3">
-              {Array.from({ length: 4 }).map((_, index) => (
-                <Skeleton key={index} className="h-24 rounded-2xl" />
-              ))}
-            </div>
-          </div>
+        {/* Deployment rows — same shape AccountAudioViewer pulses while its
+            listing loads. */}
+        <div className="mt-6 flex flex-col gap-2">
+          {Array.from({ length: 4 }).map((_, index) => (
+            <Skeleton key={index} className="h-16 rounded-2xl" />
+          ))}
         </div>
       </div>
     </div>
