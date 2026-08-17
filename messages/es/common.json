@@ -508,7 +508,9 @@
   "observationsManage": {
     "metaTitle": "Gestionar observaciones — {name}",
     "title": "Gestionar observaciones",
-    "description": "Añade, edita y agrupa los avistamientos de naturaleza guardados en este perfil."
+    "description": "Añade, edita y agrupa los avistamientos de naturaleza guardados en este perfil.",
+    "rowTitle": "Gestionar observaciones",
+    "rowDescription": "Añade, edita y agrupa los avistamientos de este perfil."
   },
   "equipment": {
     "metadataTitle": "Equipos — {name}",

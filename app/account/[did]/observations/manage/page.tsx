@@ -28,14 +28,14 @@ export async function generateMetadata({ params }: { params: Promise<{ did: stri
 
 /**
  * Where an account's sightings are managed — added, edited, grouped and
- * attached to projects. The profile's Observations tab still carries this same
- * surface for stewards; this dedicated page is where it is being moved to.
+ * attached to projects.
  *
- * Restricted to GainForest admins while it is still being worked on — the same
- * footing as the audio workspace — so the account menu only offers it to them.
- * Two gates apply: the viewer must be an admin, and must also be able to manage
- * this account (its owner, or a member of the organization). Everyone else gets
- * the not-found page.
+ * The tab/manage split is staged, on the same footing as the audio workspace:
+ * for GainForest admins the profile's Observations tab shows the public view
+ * and this page carries the tools; every other steward still has the inline
+ * editor on the tab until this page opens up. Two gates apply here: the viewer
+ * must be an admin, and must also be able to manage this account (its owner,
+ * or a member of the organization). Everyone else gets the not-found page.
  *
  * Personal accounts and organizations behave identically — the resolved target
  * decides which repo is written to, nothing else changes.

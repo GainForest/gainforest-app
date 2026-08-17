@@ -508,7 +508,9 @@
   "observationsManage": {
     "metaTitle": "Manage observations — {name}",
     "title": "Manage observations",
-    "description": "Add, edit and group the nature sightings saved to this profile."
+    "description": "Add, edit and group the nature sightings saved to this profile.",
+    "rowTitle": "Manage observations",
+    "rowDescription": "Add, edit and group the sightings on this profile."
   },
   "equipment": {
     "metadataTitle": "Equipment — {name}",

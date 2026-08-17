@@ -32,7 +32,7 @@ import { getEntriesForActivities } from "@/app/cert/[did]/[rkey]/_components/tim
 import { resolveTimelineReferences } from "@/app/cert/[did]/[rkey]/_components/timeline/timelineReferenceResolver";
 import { ProjectTimelineReadonly } from "@/app/projects/[did]/[rkey]/_components/ProjectTimelineReadonly";
 import type { AccountRouteData } from "../_lib/account-route";
-import { accountDonationsPath, accountObservationsPath, accountPath, accountProjectsPath } from "../_lib/account-route";
+import { accountDonationsPath, accountObservationsManagePath, accountObservationsPath, accountPath, accountProjectsPath } from "../_lib/account-route";
 
 type ManageAction = {
   href: string;
@@ -438,16 +438,42 @@ export async function AccountDonationsTabContent({ account, did }: { account: Ac
 // tab — the same surface as the old /manage URL — so they never need to leave
 // for a separate manage page. Anyone without manage access sees the read-only
 // public view instead.
-export async function AccountObservationsTabContent({ account, did }: { account: AccountRouteData; did: string }) {
+//
+// `publicViewOnly` is the staged tab/manage split: the page passes it for
+// viewers whose tools live on the dedicated manage page (GainForest admins for
+// now). They get the same public view as any visitor, plus a signpost row
+// across to the manage page.
+export async function AccountObservationsTabContent({
+  account,
+  did,
+  publicViewOnly = false,
+}: {
+  account: AccountRouteData;
+  did: string;
+  publicViewOnly?: boolean;
+}) {
   const access = await resolveAccountManageAccess(account.urlIdentifier).catch(() => null);
-  if (access?.status === "allowed") {
+  if (access?.status === "allowed" && !publicViewOnly) {
     return <ObservationsSection target={access.target} />;
   }
 
+  let manageAction: ManageAction | null = null;
+  if (access?.status === "allowed") {
+    const t = await getTranslations("common.observationsManage");
+    manageAction = {
+      href: accountObservationsManagePath(account.urlIdentifier),
+      label: t("rowTitle"),
+      description: t("rowDescription"),
+    };
+  }
+
   return (
-    <Suspense fallback={<InlineCardGridSkeleton />}>
-      <RecordExplorer kind="occurrence" ownerDid={did} showHero={false} hideOccurrenceFilters defaultOccurrenceMedia="all" />
-    </Suspense>
+    <>
+      <ManageActionRow action={manageAction} />
+      <Suspense fallback={<InlineCardGridSkeleton />}>
+        <RecordExplorer kind="occurrence" ownerDid={did} showHero={false} hideOccurrenceFilters defaultOccurrenceMedia="all" />
+      </Suspense>
+    </>
   );
 }
 

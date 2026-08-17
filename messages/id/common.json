@@ -508,7 +508,9 @@
   "observationsManage": {
     "metaTitle": "Kelola observasi — {name}",
     "title": "Kelola observasi",
-    "description": "Tambah, ubah, dan kelompokkan pengamatan alam yang tersimpan di profil ini."
+    "description": "Tambah, ubah, dan kelompokkan pengamatan alam yang tersimpan di profil ini.",
+    "rowTitle": "Kelola observasi",
+    "rowDescription": "Tambah, ubah, dan kelompokkan pengamatan di profil ini."
   },
   "equipment": {
     "metadataTitle": "Peralatan — {name}",

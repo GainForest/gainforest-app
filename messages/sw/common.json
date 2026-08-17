@@ -508,7 +508,9 @@
   "observationsManage": {
     "metaTitle": "Simamia uchunguzi — {name}",
     "title": "Simamia uchunguzi",
-    "description": "Ongeza, hariri na panga uonaji wa asili uliohifadhiwa kwenye wasifu huu."
+    "description": "Ongeza, hariri na panga uonaji wa asili uliohifadhiwa kwenye wasifu huu.",
+    "rowTitle": "Simamia uchunguzi",
+    "rowDescription": "Ongeza, hariri na panga uonaji kwenye wasifu huu."
   },
   "equipment": {
     "metadataTitle": "Vifaa — {name}",
