@@ -148,6 +148,7 @@ export function AccountAudioViewer({
   canDelete = false,
   mutationRepo = null,
   embedded = false,
+  showEmptyDeployments,
 }: {
   did: string;
   /** Whether to offer the personal SD-card upload flow (personal repos only). */
@@ -159,6 +160,11 @@ export function AccountAudioViewer({
   /** Drop the page container chrome when hosted inside another surface
    *  (the Audio hub's Files tab), which brings its own width and padding. */
   embedded?: boolean;
+  /** Also list deployments that hold no recordings yet. Defaults to
+   *  `canDelete` — owners see their empty folders so they can clean them up
+   *  — while the Audio hub's Recordings tab always shows them: deployments
+   *  are created there, and a fresh chime starts with no recordings. */
+  showEmptyDeployments?: boolean;
 }) {
   const t = useTranslations("common.audiomoth.recordings");
   const tFolders = useTranslations("common.recordingFolders");
@@ -485,10 +491,11 @@ export function AccountAudioViewer({
     return () => ctrl.abort();
   }, [did]);
 
+  const includeEmpty = showEmptyDeployments ?? canDelete;
   const groups = useMemo(
     () =>
-      deployments && recordings ? groupRecordings(deployments, events ?? [], recordings, canDelete) : [],
-    [canDelete, deployments, events, recordings],
+      deployments && recordings ? groupRecordings(deployments, events ?? [], recordings, includeEmpty) : [],
+    [includeEmpty, deployments, events, recordings],
   );
 
   /** Every recording's URI in on-screen order, for shift-click ranges. */

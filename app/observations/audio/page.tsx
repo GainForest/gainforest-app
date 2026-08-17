@@ -13,7 +13,9 @@ export const dynamic = "force-dynamic";
 
 /** The personal recording workflow tabs hosted by AudioMothClient. Without a
  *  `?tab=` the page shows the network-wide soundscape gallery instead —
- *  finished, listenable portraits rather than raw WAV files. */
+ *  finished, listenable portraits rather than raw WAV files. "deployments"
+ *  is no longer a tab of its own (it merged into the Recordings tab) but
+ *  old links carrying it must still land in the workflow view. */
 const WORKFLOW_TABS = new Set([
   "library",
   "deployments",
@@ -28,9 +30,9 @@ const WORKFLOW_TABS = new Set([
  * Audio tab of the Observations hub. The default view is a gallery of every
  * soundscape published on GainForest — visitors browsing the network care
  * about the finished 24-hour portraits, not individual unlabeled recordings.
- * The personal recording workflow — library, deployments, SD-card upload,
- * labelling, identifications, the soundscape workbench and USB device setup
- * — lives behind `?tab=…`, reached from the hero's "Your recordings" pill
+ * The personal recording workflow — recordings and their deployments,
+ * SD-card upload, labelling, identifications, the soundscape workbench and
+ * USB device setup — lives behind `?tab=…`, reached from the hero's "Your recordings" pill
  * (its twin, "Public", leads back here).
  */
 export async function generateMetadata(): Promise<Metadata> {

@@ -87,7 +87,7 @@ export function AudioManageLoadingSkeleton() {
         <WorkspaceHeaderSkeleton />
         {/* Workflow tab bar */}
         <div className="mt-5 flex w-full max-w-full gap-1 overflow-hidden rounded-full border border-border bg-card/70 p-1 lg:w-auto lg:self-start">
-          {Array.from({ length: 7 }).map((_, index) => (
+          {Array.from({ length: 6 }).map((_, index) => (
             <Skeleton key={index} className="h-9 w-28 shrink-0 rounded-full" />
           ))}
         </div>

@@ -888,15 +888,16 @@ export function AddObservationsModal({
   /**
    * "Set one up ↗" (design 1d, fourth panel): start the upload right away —
    * bandwidth is the bottleneck, not the form — then leave for the
-   * deployments tab carrying the batch handle. The batch attaches to the
-   * deployment the moment it is created there; until then it sits in a
-   * folder named after the card, so nothing is ever stranded.
+   * Recordings tab (where deployments are created) carrying the batch
+   * handle. The batch attaches to the deployment the moment it is created
+   * there; until then it sits in a folder named after the card, so nothing
+   * is ever stranded.
    */
   const setUpDeploymentAndGo = useCallback(
     (cardKey: string) => {
       const { cardBatches } = handOffAudioBatch();
       onClose();
-      const params = new URLSearchParams({ tab: "deployments" });
+      const params = new URLSearchParams({ tab: "library" });
       // The whole staging hands off, but only the card whose "set one up"
       // link was clicked rides along for attachment.
       const mine = cardBatches.find((batch) => batch.cardKey === cardKey) ?? cardBatches[0];

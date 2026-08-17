@@ -27,7 +27,6 @@ import {
   ListChecksIcon,
   Loader2Icon,
   TagsIcon,
-  MapPinIcon,
   MinusIcon,
   PlugZapIcon,
   SlidersHorizontalIcon,
@@ -82,7 +81,6 @@ import Link from "next/link";
 import { useActingRepo } from "@/app/_lib/account-switcher";
 import { createEquipment, equipmentDetailPath, listEquipment, updateEquipment, type EquipmentItem } from "@/app/_lib/equipment";
 import { loadAppliedConfig, mergeSetupNotes, saveAppliedConfig, SETUP_NOTES_HEADER } from "@/app/_lib/audiomoth/setup-store";
-import { DeploymentsTab } from "./DeploymentsTab";
 import { UploadTab } from "./UploadTab";
 import { LibraryTab } from "./LibraryTab";
 import { LabelTab } from "./LabelTab";
@@ -93,11 +91,10 @@ import { SoundscapeClient } from "@/app/soundscape/_components/SoundscapeClient"
 /* Types                                                               */
 /* ------------------------------------------------------------------ */
 
-type MainTabId = "setup" | "library" | "deployments" | "upload" | "label" | "identifications" | "soundscape";
+type MainTabId = "setup" | "library" | "upload" | "label" | "identifications" | "soundscape";
 
 const AUDIO_MAIN_TAB_IDS = [
   "library",
-  "deployments",
   "upload",
   "label",
   "identifications",
@@ -115,6 +112,10 @@ const AUDIO_MAIN_TAB_IDS = [
 const DEFAULT_AUDIO_TAB: MainTabId = "library";
 
 function resolveMainTab(tab: string | null): MainTabId {
+  // The Deployment tab merged into Recordings — deployments are the folders
+  // that view groups recordings by, and new ones are created there. Old
+  // links keep landing on the merged view.
+  if (tab === "deployments") return "library";
   return (AUDIO_MAIN_TAB_IDS as readonly string[]).includes(tab ?? "")
     ? (tab as MainTabId)
     : DEFAULT_AUDIO_TAB;
@@ -880,7 +881,6 @@ export function AudioMothClient({
     Icon: typeof ClockIcon;
   }> = [
     { id: "library", label: t("mainTabs.library"), Icon: FolderOpenIcon },
-    { id: "deployments", label: t("mainTabs.deployments"), Icon: MapPinIcon },
     { id: "upload", label: t("mainTabs.upload"), Icon: HardDriveUploadIcon },
     { id: "label", label: t("mainTabs.label"), Icon: TagsIcon },
     { id: "identifications", label: t("mainTabs.identifications"), Icon: ListChecksIcon },
@@ -941,8 +941,6 @@ export function AudioMothClient({
         </nav>
 
         {mainTab === "library" && <LibraryTab sessionDid={sessionDid} />}
-
-      {mainTab === "deployments" && <DeploymentsTab sessionDid={sessionDid} />}
 
       {mainTab === "upload" && <UploadTab sessionDid={sessionDid} />}
 

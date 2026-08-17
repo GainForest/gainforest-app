@@ -29,8 +29,8 @@ export async function generateMetadata({ params }: { params: Promise<{ did: stri
 
 /**
  * Where an account's recordings are managed — the full recording workflow
- * (library, deployments, SD-card upload, labelling, identifications, the
- * soundscape workbench and USB device setup), extracted from the audio hub so
+ * (the library with its deployments, SD-card upload, labelling,
+ * identifications, the soundscape workbench and USB device setup), extracted from the audio hub so
  * that all management happens here. The twin of the observations workspace,
  * reached from the Audio pill beside it, and like it standing alone:
  * AccountChrome passes it through without the profile hero and tabs.

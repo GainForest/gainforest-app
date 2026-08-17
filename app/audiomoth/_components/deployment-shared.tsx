@@ -1,27 +1,47 @@
 "use client";
 
 /**
- * Shared bits for editing AudioMoth deployments: the org-wide AudioMoth
- * picker (used by both the create and edit dialogs) and the edit dialog
- * itself (used by the Deployment tab list and the deployment detail page).
+ * Shared bits for AudioMoth deployment dialogs: the org-wide AudioMoth
+ * picker, the create dialog (used by the Recordings tab, where — like the
+ * GainForest Android app — it generates the acoustic chime for the chosen
+ * location and plays it against the AudioMoth's microphone) and the edit
+ * dialog (used by the deployment detail page).
  */
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
-import { Loader2Icon, XIcon } from "lucide-react";
+import Link from "next/link";
+import {
+  CheckIcon,
+  Loader2Icon,
+  LocateFixedIcon,
+  RefreshCwIcon,
+  Volume2Icon,
+  XIcon,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { cn } from "@/lib/utils";
+import {
+  generateChime,
+  isValidDeploymentId,
+  playChime,
+  randomDeploymentIdHex,
+} from "@/app/_lib/audiomoth/chime";
 import {
   applyDeploymentEdit,
+  createDeploymentEvent,
   linkedEquipmentUri,
   updateDeploymentEvent,
   type DeploymentEventEdit,
   type DeploymentEventItem,
 } from "@/app/_lib/deployment-events";
+import { createAcDeployment } from "@/app/_lib/ac-deployment";
 import { renameCompanionFolder } from "@/app/_lib/unified-deployments";
-import { listEquipment, type EquipmentItem } from "@/app/_lib/equipment";
+import { loadAppliedConfig } from "@/app/_lib/audiomoth/setup-store";
+import { equipmentDetailPath, listEquipment, type EquipmentItem } from "@/app/_lib/equipment";
 import { formatRelative } from "@/app/_lib/format";
 
 /**
@@ -58,6 +78,353 @@ export function useMyAudioMoths(did: string | null): { equipment: EquipmentItem[
  *  own units, so no owner suffix is needed. */
 export function audioMothOptionLabel(item: EquipmentItem): string {
   return item.assetId ? `${item.name} (${item.assetId})` : item.name;
+}
+
+/* ------------------------------------------------------------------ */
+/* Create deployment dialog                                            */
+/* ------------------------------------------------------------------ */
+
+type CreateStage = "form" | "playing" | "done";
+
+export function CreateDeploymentDialog({
+  sessionDid,
+  repoDid = null,
+  onClose,
+  onCreated,
+}: {
+  sessionDid: string;
+  /**
+   * Repo the deployment event and its companion `ac.deployment` land in —
+   * an organization's DID when acting as one (or when a pending attach-batch
+   * was uploaded for one, so the batch and its deployment end up in the same
+   * repo). Null = the signed-in user's own.
+   */
+  repoDid?: string | null;
+  onClose: () => void;
+  /** Reports the companion recorder-deployment record, when it could be saved. */
+  onCreated: (created: { acDeploymentUri: string | null }) => void;
+}) {
+  const t = useTranslations("common.audiomoth.deployments");
+
+  const [siteName, setSiteName] = useState("");
+  const [deploymentId, setDeploymentId] = useState(() => randomDeploymentIdHex());
+  const [lat, setLat] = useState("");
+  const [lon, setLon] = useState("");
+  const [locating, setLocating] = useState(false);
+  // Offer the recorders of the repo this deployment will be created into —
+  // the organization's when acting as one, the user's own otherwise.
+  const { equipment } = useMyAudioMoths(repoDid ?? sessionDid);
+  const [equipmentUri, setEquipmentUri] = useState<string>("none");
+  const [stage, setStage] = useState<CreateStage>("form");
+  const [replaying, setReplaying] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const busy = stage === "playing" || replaying;
+
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape" && !busy) onClose();
+    };
+    document.addEventListener("keydown", onKey);
+    const original = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.removeEventListener("keydown", onKey);
+      document.body.style.overflow = original;
+    };
+  }, [busy, onClose]);
+
+  const selectedEquipment = useMemo(
+    () => equipment?.find((item) => item.uri === equipmentUri) ?? null,
+    [equipment, equipmentUri],
+  );
+
+  const useCurrentLocation = useCallback(() => {
+    if (!navigator.geolocation) {
+      setError(t("locationUnavailable"));
+      return;
+    }
+    setLocating(true);
+    setError(null);
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        setLat(position.coords.latitude.toFixed(6));
+        setLon(position.coords.longitude.toFixed(6));
+        setLocating(false);
+      },
+      () => {
+        setError(t("locationUnavailable"));
+        setLocating(false);
+      },
+      { enableHighAccuracy: true, timeout: 15000 },
+    );
+  }, [t]);
+
+  function parseCoords(): { lat: number; lon: number } | null {
+    const latN = Number(lat.trim());
+    const lonN = Number(lon.trim());
+    if (
+      !lat.trim() ||
+      !lon.trim() ||
+      !Number.isFinite(latN) ||
+      !Number.isFinite(lonN) ||
+      latN < -90 ||
+      latN > 90 ||
+      lonN < -180 ||
+      lonN > 180
+    ) {
+      return null;
+    }
+    return { lat: latN, lon: lonN };
+  }
+
+  /** Validate → save the event record → play the chime. */
+  const createAndPlay = useCallback(async () => {
+    setError(null);
+    if (!isValidDeploymentId(deploymentId)) {
+      setError(t("invalidId"));
+      return;
+    }
+    const coords = parseCoords();
+    if (!coords) {
+      setError(t("invalidCoordinates"));
+      return;
+    }
+    setStage("playing");
+    try {
+      const now = new Date();
+      const id = deploymentId.trim().toLowerCase();
+      // Save first — even if the speaker fails, the generated ID is preserved.
+      const eventResult = await createDeploymentEvent(
+        {
+          deploymentIdHex: id,
+          siteName,
+          lat: coords.lat,
+          lon: coords.lon,
+          deployedAt: now,
+          equipment: selectedEquipment
+            ? { name: selectedEquipment.name, assetId: selectedEquipment.assetId, uri: selectedEquipment.uri }
+            : null,
+        },
+        repoDid ? { repo: repoDid } : undefined,
+      );
+      // Companion recorder-deployment record (ac.deployment) carrying the
+      // device configuration this browser last wrote to the unit. Best
+      // effort — the chime event above is the source of truth for the ID.
+      // A pending attach-batch grabs this record's URI the moment it exists.
+      let acDeploymentUri: string | null = null;
+      try {
+        const applied = selectedEquipment ? loadAppliedConfig(selectedEquipment.assetId) : null;
+        const acResult = await createAcDeployment(
+          {
+            name: siteName.trim() || `AudioMoth ${id}`,
+            deployedAt: now,
+            lat: coords.lat,
+            lon: coords.lon,
+            eventUri: eventResult.uri,
+            equipment: selectedEquipment
+              ? { name: selectedEquipment.name, assetId: selectedEquipment.assetId, uri: selectedEquipment.uri }
+              : null,
+            config: applied?.config ?? null,
+            firmwareVersion: applied?.firmwareVersion ?? null,
+            remarks: `Chime deployment ID ${id}.`,
+          },
+          repoDid ? { repo: repoDid } : undefined,
+        );
+        acDeploymentUri = acResult.uri;
+      } catch (acError) {
+        console.warn("ac.deployment companion record could not be saved", acError);
+      }
+      onCreated({ acDeploymentUri });
+      const samples = generateChime(Math.floor(now.getTime() / 1000), coords.lat, coords.lon, id);
+      await playChime(samples);
+      setStage("done");
+    } catch (err) {
+      setError(err instanceof Error && err.message ? err.message : t("createFailed"));
+      setStage("form");
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- parseCoords reads lat/lon state
+  }, [deploymentId, lat, lon, onCreated, repoDid, selectedEquipment, siteName, t]);
+
+  /** Replay the chime for the current moment (the record stays as saved). */
+  const replay = useCallback(async () => {
+    const coords = parseCoords();
+    if (!coords) return;
+    setReplaying(true);
+    setError(null);
+    try {
+      const samples = generateChime(
+        Math.floor(Date.now() / 1000),
+        coords.lat,
+        coords.lon,
+        deploymentId.trim().toLowerCase(),
+      );
+      await playChime(samples);
+    } catch {
+      setError(t("playFailed"));
+    } finally {
+      setReplaying(false);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- parseCoords reads lat/lon state
+  }, [deploymentId, lat, lon, t]);
+
+  return (
+    <div className="fixed inset-0 z-[110] flex items-center justify-center p-4" role="dialog" aria-modal="true">
+      <div className="absolute inset-0 bg-foreground/30 backdrop-blur-[2px]" onClick={() => !busy && onClose()} />
+      <div className="relative flex max-h-full w-full max-w-md flex-col overflow-y-auto rounded-3xl border border-border bg-background shadow-2xl">
+        <div className="sticky top-0 z-10 flex items-center justify-between gap-3 border-b border-border bg-background/95 px-5 py-4 backdrop-blur-xl">
+          <h2 className="text-lg font-semibold text-foreground">{t("createTitle")}</h2>
+          <Button variant="ghost" size="icon-sm" onClick={() => !busy && onClose()} aria-label={t("close")}>
+            <XIcon />
+          </Button>
+        </div>
+
+        {stage === "done" ? (
+          <div className="flex flex-col items-center gap-4 px-5 py-10 text-center">
+            <span className="grid h-12 w-12 place-items-center rounded-full bg-primary/10 text-primary">
+              <CheckIcon className="size-6" />
+            </span>
+            <div>
+              <p className="text-base font-medium text-foreground">{t("doneTitle")}</p>
+              <p className="mx-auto mt-1 max-w-[340px] text-sm text-muted-foreground">{t("doneBody")}</p>
+            </div>
+            {error ? <p className="text-sm text-destructive">{error}</p> : null}
+            <div className="flex items-center gap-2">
+              <Button variant="outline" size="sm" onClick={replay} disabled={replaying}>
+                {replaying ? <Loader2Icon className="size-4 animate-spin" /> : <Volume2Icon className="size-4" />}
+                {t("playAgain")}
+              </Button>
+              <Button size="sm" onClick={onClose}>
+                {t("done")}
+              </Button>
+            </div>
+          </div>
+        ) : (
+          <>
+            <div className="flex flex-col gap-4 px-5 py-5">
+              <p className="text-sm text-muted-foreground">{t("createIntro")}</p>
+
+              <div className="flex flex-col gap-1.5">
+                <Label htmlFor="deploy-site-name">{t("siteNameLabel")}</Label>
+                <Input
+                  id="deploy-site-name"
+                  value={siteName}
+                  onChange={(e) => setSiteName(e.target.value)}
+                  placeholder={t("siteNamePlaceholder")}
+                  disabled={busy}
+                />
+              </div>
+
+              <div className="flex flex-col gap-1.5">
+                <Label htmlFor="deploy-id">{t("deploymentIdLabel")}</Label>
+                <div className="flex items-center gap-2">
+                  <Input
+                    id="deploy-id"
+                    value={deploymentId}
+                    onChange={(e) => setDeploymentId(e.target.value)}
+                    className="font-mono"
+                    disabled={busy}
+                  />
+                  <Button
+                    variant="outline"
+                    size="icon-sm"
+                    onClick={() => setDeploymentId(randomDeploymentIdHex())}
+                    aria-label={t("newId")}
+                    disabled={busy}
+                  >
+                    <RefreshCwIcon className="size-4" />
+                  </Button>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div className="flex flex-col gap-1.5">
+                  <Label htmlFor="deploy-lat">{t("latitudeLabel")}</Label>
+                  <Input
+                    id="deploy-lat"
+                    value={lat}
+                    onChange={(e) => setLat(e.target.value)}
+                    placeholder="-1.234567"
+                    className="font-mono"
+                    disabled={busy}
+                  />
+                </div>
+                <div className="flex flex-col gap-1.5">
+                  <Label htmlFor="deploy-lon">{t("longitudeLabel")}</Label>
+                  <Input
+                    id="deploy-lon"
+                    value={lon}
+                    onChange={(e) => setLon(e.target.value)}
+                    placeholder="-77.891234"
+                    className="font-mono"
+                    disabled={busy}
+                  />
+                </div>
+              </div>
+
+              <Button variant="outline" size="sm" onClick={useCurrentLocation} disabled={busy || locating}>
+                {locating ? <Loader2Icon className="size-4 animate-spin" /> : <LocateFixedIcon className="size-4" />}
+                {t("useLocation")}
+              </Button>
+
+              <div className="flex flex-col gap-1.5">
+                <Label htmlFor="deploy-equipment">{t("equipmentLabel")}</Label>
+                <Select value={equipmentUri} onValueChange={setEquipmentUri} disabled={busy}>
+                  <SelectTrigger id="deploy-equipment">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">{t("equipmentNone")}</SelectItem>
+                    {(equipment ?? []).map((item) => (
+                      <SelectItem key={item.uri} value={item.uri}>
+                        {audioMothOptionLabel(item)}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <p className="text-xs text-muted-foreground">
+                  {equipment !== null && equipment.length === 0 ? t("equipmentEmpty") : t("equipmentHint")}
+                </p>
+              </div>
+
+              {selectedEquipment ? (
+                <p className="text-xs text-muted-foreground">
+                  <Link
+                    href={equipmentDetailPath(selectedEquipment.did, selectedEquipment.rkey)}
+                    className="underline underline-offset-2 hover:text-foreground"
+                  >
+                    {t("viewSelectedEquipment")}
+                  </Link>
+                </p>
+              ) : null}
+
+              {error ? (
+                <p className="rounded-xl bg-destructive/10 px-3.5 py-2.5 text-sm text-destructive">{error}</p>
+              ) : null}
+
+              <p className={cn("text-xs text-muted-foreground", stage === "playing" && "text-primary")}>
+                {stage === "playing" ? t("playing") : t("chimeHint")}
+              </p>
+            </div>
+
+            <div className="sticky bottom-0 mt-auto flex items-center justify-end gap-2 border-t border-border bg-background/95 px-5 py-4 backdrop-blur-xl">
+              <Button variant="outline" size="sm" onClick={() => !busy && onClose()} disabled={busy}>
+                {t("cancel")}
+              </Button>
+              <Button size="sm" onClick={createAndPlay} disabled={busy}>
+                {stage === "playing" ? (
+                  <Loader2Icon className="size-4 animate-spin" />
+                ) : (
+                  <Volume2Icon className="size-4" />
+                )}
+                {stage === "playing" ? t("playing") : t("playAndSave")}
+              </Button>
+            </div>
+          </>
+        )}
+      </div>
+    </div>
+  );
 }
 
 /**
