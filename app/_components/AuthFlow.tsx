@@ -586,6 +586,9 @@ type MenuSubItem = {
   label: string;
   href: string;
   icon: React.ReactNode;
+  /** Restricted to GainForest admins, and marked as such. Hiding the row is
+   *  cosmetic — the destination re-checks access on its own. */
+  adminOnly?: boolean;
 };
 
 type MenuAccount = {
@@ -670,6 +673,7 @@ function AccountBlock({
                 >
                   <span className="shrink-0 text-muted-foreground/80">{item.icon}</span>
                   {item.label}
+                  {item.adminOnly ? <AdminOnlyIndicator className="ml-auto" /> : null}
                 </Link>
               ))}
             </div>
@@ -763,7 +767,16 @@ function AuthenticatedMenu({
     // Straight into the recording workspace (library first), which is where
     // uploading, labelling and building a soundscape all live. Buried four
     // clicks deep otherwise, so it earns its own row next to Observations.
-    { key: "audio", label: sidebarItemsT("audio"), href: AUDIO_WORKSPACE_HREF, icon: <AudioLinesIcon className="h-3.5 w-3.5" /> },
+    // Admin-only while the workspace is still being worked on.
+    ...(isModerator
+      ? [{
+          key: "audio",
+          label: sidebarItemsT("audio"),
+          href: AUDIO_WORKSPACE_HREF,
+          icon: <AudioLinesIcon className="h-3.5 w-3.5" />,
+          adminOnly: true,
+        }]
+      : []),
     { key: "projects", label: sidebarItemsT("projects"), href: accountProjectsPath(identifier), icon: <FolderKanbanIcon className="h-3.5 w-3.5" /> },
     { key: "settings", label: authT("settings"), href: accountSettingsPath(identifier), icon: <SettingsIcon className="h-3.5 w-3.5" /> },
   ];
