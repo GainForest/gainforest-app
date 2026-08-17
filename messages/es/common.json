@@ -3389,6 +3389,10 @@
     "allUploaded": "{count} subidas · {size}"
   },
   "soundscape": {
+    "autoPublish": {
+      "note": "El paisaje sonoro de esta carpeta está publicado en el perfil y se actualiza a medida que continúa el análisis.",
+      "view": "Abrirlo"
+    },
     "meta": {
       "title": "Paisaje sonoro",
       "description": "Crea un reloj de paisaje sonoro de 24 horas a partir de las grabaciones de audio ya subidas a tu cuenta."

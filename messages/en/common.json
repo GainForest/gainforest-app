@@ -3389,6 +3389,10 @@
     "allUploaded": "All {count} uploaded · {size}"
   },
   "soundscape": {
+    "autoPublish": {
+      "note": "This folder's soundscape is published on the profile and updates as analysis continues.",
+      "view": "Open it"
+    },
     "meta": {
       "title": "Soundscape",
       "description": "Build a 24-hour soundscape clock from the audio recordings already uploaded to your account."

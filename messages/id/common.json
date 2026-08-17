@@ -3389,6 +3389,10 @@
     "allUploaded": "{count} terunggah · {size}"
   },
   "soundscape": {
+    "autoPublish": {
+      "note": "Lanskap suara folder ini sudah diterbitkan di profil dan diperbarui seiring analisis berlanjut.",
+      "view": "Buka"
+    },
     "meta": {
       "title": "Lanskap suara",
       "description": "Buat jam lanskap suara 24 jam dari rekaman audio yang sudah diunggah ke akun Anda."

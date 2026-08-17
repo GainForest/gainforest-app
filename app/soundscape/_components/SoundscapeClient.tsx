@@ -17,6 +17,13 @@
  * through the PMN pipeline, and the five per-band maxima are cached locally
  * by record CID — so returning to this tab redraws the clock without
  * re-downloading.
+ *
+ * Analysis is publication: every folder with analyzed recordings has a
+ * living `ac.soundscape` record, kept at the folder's own rkey and updated
+ * as analysis progresses (see useAutoPublishSoundscapes) — a half-analyzed
+ * folder is already listenable on the profile, and finishing the run extends
+ * the same record. Sharing no longer creates a copy: the feed post and the
+ * project attachment point at the living record.
  */
 
 import {
@@ -88,7 +95,10 @@ import {
   type TimeWindow,
 } from "@/lib/soundscape/zoom";
 import { loadPmnCache, savePmnCache, toCacheEntry, type PmnCache } from "@/lib/soundscape/pmn-cache";
-import type { SoundscapeSource } from "@/lib/soundscape/record";
+import { rkeyOfUri, type AutoDraft, type AutoPublishEntry } from "@/lib/soundscape/auto-publish";
+import { soundscapeHref, type SoundscapeSource } from "@/lib/soundscape/record";
+import { deleteSoundscapeRecord } from "@/app/_lib/soundscape-record";
+import { useAutoPublishSoundscapes } from "./useAutoPublishSoundscapes";
 import { useModal } from "@/components/ui/modal/context";
 import {
   AddSoundscapeToProjectModal,
@@ -727,11 +737,59 @@ export function SoundscapeClient({ sessionDid }: { sessionDid: string | null }) 
     [bandRanges, t],
   );
 
+  /* ── Auto-publish ────────────────────────────────────────────────────────
+     Analyzed means published. Every folder's analyzed recordings — not just
+     the selected folder's — feed the living records, so opening this tab on a
+     library analyzed long ago (or in another browser) publishes it too. */
+  const autoEntries = useMemo<AutoPublishEntry[]>(
+    () =>
+      allRecordings.flatMap((entry) => {
+        const state = results[entry.item.uri];
+        if (!entry.time || state?.status !== "done" || !state.pmn) return [];
+        return [
+          {
+            audioUri: entry.item.uri,
+            name: entry.item.name,
+            deploymentRef: entry.item.deploymentRef,
+            date: wallClockDateKey(entry.time),
+            minuteOfDay: wallClockMinuteOfDay(entry.time),
+            pmn: state.pmn,
+            sampleRate: entry.item.sampleRate,
+          },
+        ];
+      }),
+    [allRecordings, results],
+  );
+
+  const autoTitleFor = useCallback(
+    (draft: AutoDraft) => t("share.recordTitleNamed", { name: draft.folderName, dates: draft.dateLabel }),
+    [t],
+  );
+
+  const { publishedRkeys } = useAutoPublishSoundscapes({
+    enabled: Boolean(sessionDid),
+    libraryDid,
+    repo: shareTarget.repo,
+    entries: autoEntries,
+    folders: deployments,
+    analysisRunning: running,
+    titleFor: autoTitleFor,
+  });
+
+  /** The selected folder's living record, once it is confirmed live. */
+  const publishedSelectedHref = useMemo(() => {
+    if (!libraryDid || !selectedDeployment) return null;
+    const rkey = rkeyOfUri(selectedDeployment.uri);
+    return rkey && publishedRkeys.has(rkey) ? soundscapeHref(libraryDid, rkey) : null;
+  }, [libraryDid, publishedRkeys, selectedDeployment]);
+
   /* ── Sharing ────────────────────────────────────────────────────────────
      What is on the dial right now — the analyzed recordings of the selected
      day(s) — is what gets published. Zoom and hidden bands are ways of
      reading the same soundscape, so they deliberately don't change what is
-     shared: a reader gets the whole thing and explores it themselves. */
+     shared: a reader gets the whole thing and explores it themselves.
+     Sharing the whole folder reuses its living record (the same one the
+     auto-publisher maintains); a single-day share is its own snapshot. */
   const modal = useModal();
   const publishSoundscape = useSoundscapePublisher(shareTarget);
 
@@ -744,6 +802,8 @@ export function SoundscapeClient({ sessionDid }: { sessionDid: string | null }) 
       minuteOfDay: wallClockMinuteOfDay(entry.time),
       pmn: entry.pmn,
     }));
+    const folderRkey =
+      selectedDate === ALL_DATES && selectedDeployment ? rkeyOfUri(selectedDeployment.uri) : null;
     return {
       title:
         selectedGroup !== UNASSIGNED_GROUP && selectedGroupName
@@ -751,8 +811,9 @@ export function SoundscapeClient({ sessionDid }: { sessionDid: string | null }) 
           : t("share.recordTitle", { dates: chartDateLabel }),
       ceilingHz,
       sources,
+      ...(folderRkey ? { rkey: folderRkey } : {}),
     };
-  }, [analyzedRecordings, ceilingHz, chartDateLabel, selectedGroup, selectedGroupName, t]);
+  }, [analyzedRecordings, ceilingHz, chartDateLabel, selectedDate, selectedDeployment, selectedGroup, selectedGroupName, t]);
 
   const closeShareModal = useCallback(() => {
     void modal.hide().then(() => modal.clear());
@@ -865,6 +926,16 @@ export function SoundscapeClient({ sessionDid }: { sessionDid: string | null }) 
                  the picker labels "Removed folder". */
               if (failed.size > 0) throw new Error(tFolders("deletePartial", { count: failed.size }));
               await deleteAcDeployment(folder, shareTarget.repo ? { repo: shareTarget.repo } : undefined);
+              /* The folder's living soundscape would otherwise keep drawing a
+                 dial whose recordings are gone. Best effort — it may never
+                 have been published. */
+              const soundscapeRkey = rkeyOfUri(folder.uri);
+              if (soundscapeRkey) {
+                void deleteSoundscapeRecord(
+                  soundscapeRkey,
+                  shareTarget.repo ? { repo: shareTarget.repo } : undefined,
+                ).catch(() => {});
+              }
               setDeployments((current) => current.filter((item) => item.uri !== folder.uri));
               selectGroup(null);
             }}
@@ -1153,6 +1224,15 @@ export function SoundscapeClient({ sessionDid }: { sessionDid: string | null }) 
             <p className="mt-0.5 text-xs text-muted-foreground">
               {canPlayFromDial ? t("chart.hoverHint") : t("chart.hoverHintAllDates")}
             </p>
+            {publishedSelectedHref ? (
+              <p className="mt-1.5 flex flex-wrap items-center gap-1.5 text-xs text-muted-foreground">
+                <CheckIcon className="size-3.5 text-primary" />
+                {t("autoPublish.note")}
+                <Link href={publishedSelectedHref} className="font-medium text-primary underline-offset-2 hover:underline">
+                  {t("autoPublish.view")}
+                </Link>
+              </p>
+            ) : null}
             {player ? (
               <p className="mt-1.5 flex items-center gap-2 text-xs text-primary">
                 {player.status === "loading" ? (

@@ -66,6 +66,8 @@ import {
 } from "@/app/_lib/unified-deployments";
 import { listAllRecordings, moveRecordings, type AcAudioListItem } from "@/app/_lib/ac-audio";
 import { countIdentificationsOn, deleteRecordings } from "@/app/_lib/ac-audio-delete";
+import { deleteSoundscapeRecord } from "@/app/_lib/soundscape-record";
+import { rkeyOfUri } from "@/lib/soundscape/auto-publish";
 import {
   DeleteFolderModal,
   MoveRecordingsModal,
@@ -419,6 +421,16 @@ export function AccountAudioViewer({
                 }
                 if (failed.size > 0) throw new Error(tFolders("deletePartial", { count: failed.size }));
                 await deleteAcDeployment(deployment, { repo: mutationRepo });
+                /* The folder's auto-published soundscape (kept at the folder's
+                   own rkey) would otherwise survive its recordings. Best
+                   effort — it may never have existed. */
+                const soundscapeRkey = rkeyOfUri(deployment.uri);
+                if (soundscapeRkey) {
+                  void deleteSoundscapeRecord(
+                    soundscapeRkey,
+                    mutationRepo ? { repo: mutationRepo } : undefined,
+                  ).catch(() => {});
+                }
                 setDeployments((current) => current?.filter((item) => item.uri !== deployment.uri) ?? current);
               }}
             />

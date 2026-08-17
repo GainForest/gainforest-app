@@ -3389,6 +3389,10 @@
     "allUploaded": "{count} enviadas · {size}"
   },
   "soundscape": {
+    "autoPublish": {
+      "note": "A paisagem sonora desta pasta está publicada no perfil e é atualizada conforme a análise continua.",
+      "view": "Abrir"
+    },
     "meta": {
       "title": "Paisagem sonora",
       "description": "Crie um relógio de paisagem sonora de 24 horas a partir das gravações de áudio já enviadas para a sua conta."

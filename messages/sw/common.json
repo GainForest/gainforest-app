@@ -3389,6 +3389,10 @@
     "allUploaded": "{count} zimepakiwa · {size}"
   },
   "soundscape": {
+    "autoPublish": {
+      "note": "Mandhari ya sauti ya folda hii imechapishwa kwenye wasifu na husasishwa kadri uchambuzi unavyoendelea.",
+      "view": "Ifungue"
+    },
     "meta": {
       "title": "Mandhari ya sauti",
       "description": "Unda saa ya mandhari ya sauti ya saa 24 kutokana na rekodi za sauti zilizopakiwa tayari kwenye akaunti yako."
