@@ -43,6 +43,31 @@ export function uploadForSoundscape(
   return uploads.find((upload) => upload.deploymentRef === ref) ?? null;
 }
 
+/** A soundscape paired with the folder it was built from, when that folder's
+ *  upload is known. */
+export type SoundscapeSlot = { item: NetworkSoundscape; upload: AudioProjectUpload | null };
+
+/** What a project row draws: finished dials, then the folders still waiting
+ *  for one. A folder that already has a soundscape is shown as that
+ *  soundscape, so it never appears twice in the same row. */
+export type RowSlots = { soundscapes: SoundscapeSlot[]; recordings: AudioProjectUpload[] };
+
+export function rowSlots(
+  soundscapes: NetworkSoundscape[],
+  uploads: AudioProjectUpload[],
+): RowSlots {
+  const paired = soundscapes.map((item) => ({ item, upload: uploadForSoundscape(item, uploads) }));
+  const covered = new Set(
+    paired.flatMap((slot) => (slot.upload?.deploymentRef ? [slot.upload.deploymentRef] : [])),
+  );
+  return {
+    soundscapes: paired,
+    recordings: uploads.filter(
+      (upload) => !upload.deploymentRef || !covered.has(upload.deploymentRef),
+    ),
+  };
+}
+
 /** True when this soundscape and this upload describe the same folder. */
 export function sharesFolder(item: NetworkSoundscape, upload: AudioProjectUpload): boolean {
   return Boolean(item.deploymentRef) && item.deploymentRef === upload.deploymentRef;

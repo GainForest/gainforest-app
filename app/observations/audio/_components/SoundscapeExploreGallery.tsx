@@ -15,15 +15,15 @@ import { Button } from "@/components/ui/button";
 import type { AudioProject } from "@/app/_lib/audio-projects";
 import { resolveDidProfile, type DidProfile } from "@/app/_lib/did-profile";
 import type { NetworkSoundscape } from "@/app/_lib/soundscape-explore";
-import { AudioProjectRow, type AudioProjectSlot, type AudioRow } from "./AudioProjectRow";
+import { AudioProjectRow, type AudioRow } from "./AudioProjectRow";
 import {
   dateKeysMs,
   displaySoundscapeTitle,
   publishedMs,
   recordedMs,
+  rowSlots,
   sharesFolder,
   soundscapeOnlyTotals,
-  uploadForSoundscape,
   uploadedMs,
 } from "./audio-row";
 import { CARD_BAND_COLORS } from "@/app/soundscape/_components/SoundscapeCard";
@@ -31,6 +31,9 @@ import { FREQUENCY_BANDS, formatBandRange } from "@/lib/soundscape/analysis";
 import { cn } from "@/lib/utils";
 
 type SortKey = "added" | "recorded";
+
+/** Dials shown per project before "Show N more from this project". */
+const VISIBLE_SOUNDSCAPES = 4;
 
 function SelectPill({
   value,
@@ -85,27 +88,6 @@ function createProjectRow(
     latestAdded: 0,
     latestRecorded: 0,
   };
-}
-
-/** A folder that already has a soundscape is shown as that soundscape, so it
- *  never appears twice in one row. */
-function slotsForRow(row: AudioRow): AudioProjectSlot[] {
-  const soundscapeSlots = row.soundscapes.map((item): AudioProjectSlot => ({
-    kind: "soundscape",
-    item,
-    upload: uploadForSoundscape(item, row.uploads),
-  }));
-  const covered = new Set(
-    soundscapeSlots.flatMap((slot) =>
-      slot.kind === "soundscape" && slot.upload?.deploymentRef ? [slot.upload.deploymentRef] : [],
-    ),
-  );
-  return [
-    ...soundscapeSlots,
-    ...row.uploads
-      .filter((upload) => !upload.deploymentRef || !covered.has(upload.deploymentRef))
-      .map((upload): AudioProjectSlot => ({ kind: "recordings", upload })),
-  ];
 }
 
 export function SoundscapeExploreGallery({
@@ -339,15 +321,17 @@ export function SoundscapeExploreGallery({
         </div>
       ) : (
         rows.map((row) => {
-          const allSlots = slotsForRow(row);
+          const slots = rowSlots(row.soundscapes, row.uploads);
           const isExpanded = expanded.has(row.key);
-          const visibleSlots = isExpanded ? allSlots : allSlots.slice(0, 4);
+          // Only the dials are capped; a folder without one is a single line.
+          const visible = isExpanded ? slots.soundscapes : slots.soundscapes.slice(0, VISIBLE_SOUNDSCAPES);
           return (
             <AudioProjectRow
               key={row.key}
               row={row}
-              slots={visibleSlots}
-              hiddenCount={allSlots.length - visibleSlots.length}
+              soundscapes={visible}
+              recordings={slots.recordings}
+              hiddenCount={slots.soundscapes.length - visible.length}
               expanded={isExpanded}
               onToggle={() => toggleExpanded(row.key)}
             />

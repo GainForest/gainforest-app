@@ -6,6 +6,7 @@ import {
   countForSoundscape,
   displaySoundscapeTitle,
   sharesFolder,
+  rowSlots,
   slotDateKeys,
   soundscapeOnlyTotals,
   uploadForSoundscape,
@@ -105,6 +106,29 @@ describe("sharesFolder", () => {
 
   it("is false when either side has no folder", () => {
     expect(sharesFolder(makeSoundscape({ deploymentRef: null }), makeUpload({ deploymentRef: null }))).toBe(false);
+  });
+});
+
+describe("rowSlots", () => {
+  it("shows a folder as its soundscape rather than twice", () => {
+    const upload = makeUpload({ deploymentRef: FOLDER_B });
+    const slots = rowSlots([makeSoundscape()], [upload]);
+    expect(slots.soundscapes).toHaveLength(1);
+    expect(slots.soundscapes[0]!.upload).toBe(upload);
+    expect(slots.recordings).toEqual([]);
+  });
+
+  it("keeps folders that have no soundscape as their own entries", () => {
+    const withSoundscape = makeUpload({ id: "b", deploymentRef: FOLDER_B });
+    const waiting = makeUpload({ id: "a", deploymentRef: FOLDER_A });
+    const slots = rowSlots([makeSoundscape()], [withSoundscape, waiting]);
+    expect(slots.soundscapes).toHaveLength(1);
+    expect(slots.recordings).toEqual([waiting]);
+  });
+
+  it("keeps a folderless upload rather than assuming it is covered", () => {
+    const unknown = makeUpload({ deploymentRef: null });
+    expect(rowSlots([makeSoundscape()], [unknown]).recordings).toEqual([unknown]);
   });
 });
 

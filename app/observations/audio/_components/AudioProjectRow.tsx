@@ -23,7 +23,7 @@ import { SoundscapeCard } from "@/app/soundscape/_components/SoundscapeCard";
 import { formatCardDateRange } from "@/lib/soundscape/card";
 import { soundscapeDates, soundscapeHref } from "@/lib/soundscape/record";
 import { AudioRecordingSlot } from "./AudioRecordingSlot";
-import { countForSoundscape, displaySoundscapeTitle } from "./audio-row";
+import { countForSoundscape, displaySoundscapeTitle, type SoundscapeSlot as SoundscapeSlotData } from "./audio-row";
 
 /** One project's audio, as the explore page reads it. */
 export type AudioRow = {
@@ -40,10 +40,6 @@ export type AudioRow = {
   uploads: AudioProjectUpload[];
   soundscapes: NetworkSoundscape[];
 };
-
-export type AudioProjectSlot =
-  | { kind: "soundscape"; item: NetworkSoundscape; upload: AudioProjectUpload | null }
-  | { kind: "recordings"; upload: AudioProjectUpload };
 
 function SoundscapeSlot({
   item,
@@ -94,13 +90,15 @@ function SoundscapeSlot({
 
 export function AudioProjectRow({
   row,
-  slots,
+  soundscapes,
+  recordings,
   hiddenCount,
   expanded,
   onToggle,
 }: {
   row: AudioRow;
-  slots: AudioProjectSlot[];
+  soundscapes: SoundscapeSlotData[];
+  recordings: AudioProjectUpload[];
   hiddenCount: number;
   expanded: boolean;
   onToggle: () => void;
@@ -163,15 +161,22 @@ export function AudioProjectRow({
         </Button>
       </div>
 
-      <div className="grid items-stretch gap-4 lg:grid-cols-2">
-        {slots.map((slot) =>
-          slot.kind === "soundscape" ? (
+      {soundscapes.length > 0 ? (
+        <div className="grid items-stretch gap-4 lg:grid-cols-2">
+          {soundscapes.map((slot) => (
             <SoundscapeSlot key={slot.item.uri} item={slot.item} upload={slot.upload} />
-          ) : (
-            <AudioRecordingSlot key={slot.upload.id} upload={slot.upload} />
-          ),
-        )}
-      </div>
+          ))}
+        </div>
+      ) : null}
+
+      {/* Folders still waiting for a soundscape stay compact lines. */}
+      {recordings.length > 0 ? (
+        <div className="flex flex-col gap-2">
+          {recordings.map((upload) => (
+            <AudioRecordingSlot key={upload.id} upload={upload} />
+          ))}
+        </div>
+      ) : null}
 
       {hiddenCount > 0 || expanded ? (
         <button
