@@ -17,6 +17,24 @@ import { pdsBlobUrl, type AcAudioListItem } from "@/app/_lib/ac-audio";
 
 const PAGE_SIZE = 20;
 
+/**
+ * The list is capped to this many rows tall; a day can hold hundreds of
+ * clips, so beyond this the rows scroll inside a fixed viewport instead of
+ * stretching the page and pushing the calendar and hour bars out of view.
+ */
+const MAX_VISIBLE_ROWS = 5;
+/** Matches the `gap-1.5` (0.375rem) between rows. */
+const ROW_GAP_PX = 6;
+/** A row's height before it's measured, so the initial cap doesn't jump. */
+const ESTIMATED_ROW_PX = 108;
+/** Sliver of the next row left peeking under the cut, hinting it scrolls. */
+const ROW_PEEK_PX = 18;
+
+/** Pixel height that shows exactly MAX_VISIBLE_ROWS rows, plus a peek. */
+function rowsCapPx(rowPx: number): number {
+  return rowPx * MAX_VISIBLE_ROWS + ROW_GAP_PX * (MAX_VISIBLE_ROWS - 1) + ROW_PEEK_PX;
+}
+
 function formatClock(seconds: number): string {
   const m = Math.floor(seconds / 60);
   const s = Math.floor(seconds % 60);
@@ -52,6 +70,11 @@ export function RecordingsPlayerList({
   const [position, setPosition] = useState(0);
   const [trackDuration, setTrackDuration] = useState(0);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+
+  /* Cap the list to MAX_VISIBLE_ROWS rows and scroll the rest. The row height
+     is measured so the cap stays exact if the card layout ever changes. */
+  const listRef = useRef<HTMLUListElement | null>(null);
+  const [maxHeight, setMaxHeight] = useState(() => rowsCapPx(ESTIMATED_ROW_PX));
 
   /* Single shared audio element */
   useEffect(() => {
@@ -108,9 +131,20 @@ export function RecordingsPlayerList({
 
   const shown = useMemo(() => items.slice(0, visible), [items, visible]);
 
+  /* Measure a real row once it's on screen so the cap matches its height. */
+  useEffect(() => {
+    const first = listRef.current?.firstElementChild as HTMLElement | null;
+    if (!first) return;
+    const measure = () => setMaxHeight(rowsCapPx(first.offsetHeight));
+    measure();
+    const observer = new ResizeObserver(measure);
+    observer.observe(first);
+    return () => observer.disconnect();
+  }, [shown.length]);
+
   return (
     <>
-      <ul className="flex flex-col gap-1.5">
+      <ul ref={listRef} className="flex flex-col gap-1.5 overflow-y-auto pr-1" style={{ maxHeight }}>
         {shown.map((item) => {
           const playing = playingUri === item.uri;
           const progress = playing && trackDuration > 0 ? position / trackDuration : 0;
