@@ -769,8 +769,7 @@
         "dedupChecking": "Inakagua rekodi zilizopo tayari kwenye akaunti hii…",
         "dedupSkipped": "{count, plural, one {Rekodi # tayari ipo kwenye akaunti hii — imerukwa} other {Rekodi # tayari zipo kwenye akaunti hii — zimerukwa}}",
         "allUploaded": "Kila kitu kwenye kadi hii tayari kimepakiwa",
-        "matchedCount": "{count, plural, one {Rekodi # ililingana na usambazaji wake kutoka kwenye kadi} other {Rekodi # zililingana na usambazaji wake kutoka kwenye kadi}}",
-        "eventOption": "Usambazaji · {name}"
+        "matchedCount": "{count, plural, one {Rekodi # ililingana na usambazaji wake kutoka kwenye kadi} other {Rekodi # zililingana na usambazaji wake kutoka kwenye kadi}}"
       }
     },
     "csvUpload": {

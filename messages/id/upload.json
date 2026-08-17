@@ -769,8 +769,7 @@
         "dedupChecking": "Memeriksa rekaman yang sudah ada di akun ini…",
         "dedupSkipped": "{count, plural, other {# rekaman sudah ada di akun ini — dilewati}}",
         "allUploaded": "Semua isi kartu ini sudah diunggah",
-        "matchedCount": "{count, plural, other {# rekaman cocok dengan penempatannya dari kartu}}",
-        "eventOption": "Penempatan · {name}"
+        "matchedCount": "{count, plural, other {# rekaman cocok dengan penempatannya dari kartu}}"
       }
     },
     "csvUpload": {

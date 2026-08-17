@@ -2284,8 +2284,6 @@
       "unmatchedTitle": "Implantação não encontrada na sua conta",
       "noIdTitle": "Estas gravações não têm ID de implantação",
       "groupCount": "{count} gravações",
-      "assignLabel": "Vincular a uma implantação (opcional)",
-      "assignNone": "Sem implantação",
       "unreadable": "{count} arquivos não puderam ser lidos como gravações WAV e serão ignorados.",
       "moreFiles": "…e mais {count} gravações",
       "previewToggle": "Salvar prévias reproduzíveis",

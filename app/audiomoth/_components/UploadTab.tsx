@@ -35,8 +35,6 @@ import {
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
 import {
   readAudioMothInfo,
@@ -59,6 +57,11 @@ import {
   listAcDeployments,
   type AcDeploymentItem,
 } from "@/app/_lib/ac-deployment";
+import {
+  chimeDeploymentName,
+  isChimeEventUri,
+  unifyDeployments,
+} from "@/app/_lib/unified-deployments";
 import {
   legacyRecordingKey,
   listUploadedRecordingKeys,
@@ -145,7 +148,6 @@ export function UploadTab({ sessionDid }: { sessionDid: string | null }) {
   /** Files discovered so far while still walking the card (null = parsing). */
   const [discovered, setDiscovered] = useState<number | null>(null);
   const [events, setEvents] = useState<DeploymentEventItem[] | null>(null);
-  const [manualEventUri, setManualEventUri] = useState<string>("none");
   const [makePreviews, setMakePreviews] = useState(true);
   const [globalError, setGlobalError] = useState<string | null>(null);
   const [dragging, setDragging] = useState(false);
@@ -216,22 +218,33 @@ export function UploadTab({ sessionDid }: { sessionDid: string | null }) {
   }, [loadFolders]);
 
   /**
+   * Every deployment exactly once — the folders recordings are filed under
+   * and the chime deployments nothing has been uploaded to yet, joined so
+   * neither kind is offered twice. Null while either list is still loading.
+   */
+  const unified = useMemo(
+    () => (folders === null || events === null ? null : unifyDeployments(folders, events)),
+    [events, folders],
+  );
+
+  /**
    * Resuming an interrupted upload: the same card is read again, so its name
-   * already belongs to a folder in the account. That folder is selected for
-   * the user instead of offering to start a second one with the same name —
-   * the rest of the card joins the recordings that made it the first time.
+   * already belongs to a deployment in the account. That deployment is
+   * selected for the user instead of offering to start a second one with the
+   * same name — the rest of the card joins the recordings that made it the
+   * first time.
    */
   useEffect(() => {
     const token = scanTokenRef.current;
     if (folderMatchTokenRef.current === token) return; // matched, or the user has chosen
-    if (!folders || !uploadName.trim()) return;
+    if (!unified || !uploadName.trim()) return;
     folderMatchTokenRef.current = token;
-    const match = findUploadFolderByName(folders, uploadName);
+    const match = findUploadFolderByName(unified, uploadName);
     if (!match) return;
     setFolderMode("existing");
     setSelectedFolderUri(match.uri);
     setFolderResumed(true);
-  }, [folders, uploadName]);
+  }, [unified, uploadName]);
 
   /**
    * The moment the user touches the folder controls the choice is theirs —
@@ -452,25 +465,20 @@ export function UploadTab({ sessionDid }: { sessionDid: string | null }) {
     [events],
   );
 
-  const manualEvent = useMemo(
-    () => events?.find((e) => e.uri === manualEventUri) ?? null,
-    [events, manualEventUri],
-  );
-
   /**
    * True when at least one group of recordings would otherwise land in
-   * "Other recordings": no chime match and no manually linked deployment.
-   * Those files get grouped under a new named deployment instead.
+   * "Other recordings": recordings whose chime the account doesn't know, or
+   * with no chime at all. The deployment picker governs where those go.
    */
   const needsName = useMemo(
-    () => [...groups.keys()].some((deploymentId) => (deploymentId ? !matchFor(deploymentId) : !manualEvent)),
-    [groups, manualEvent, matchFor],
+    () => [...groups.keys()].some((deploymentId) => !deploymentId || !matchFor(deploymentId)),
+    [groups, matchFor],
   );
 
-  /* ---------------- folder choice ---------------- */
+  /* ---------------- deployment choice ---------------- */
 
-  /** With no folders yet there is nothing to choose from — name a new one. */
-  const activeFolderMode = activeUploadFolderMode(folderMode, folders?.length ?? 0);
+  /** With no deployments yet there is nothing to choose from — name a new one. */
+  const activeFolderMode = activeUploadFolderMode(folderMode, unified?.length ?? 0);
 
   /** Everything the batch needs before it can start. */
   const folderChosen = isUploadFolderChosen({
@@ -506,24 +514,43 @@ export function UploadTab({ sessionDid }: { sessionDid: string | null }) {
     const jobs: UploadTrayJob[] = [];
 
     for (const [deploymentId, groupFiles] of groups) {
-      const event = deploymentId ? matchFor(deploymentId) : manualEvent;
+      const event = deploymentId ? matchFor(deploymentId) : null;
       const pending = groupFiles.filter(
         (rec) => rec.info && (rec.status === "queued" || rec.status === "error"),
       );
       if (pending.length === 0) continue;
 
-      // Recordings with no matched deployment are grouped under the name the
-      // user gave this upload, so they stay findable on their profile.
+      // Recordings with no matched deployment follow the picker: a
+      // deployment the account already has (started by an upload or set up
+      // with the chime), or a new one named for this upload.
       let target: UploadTarget = { kind: "none" };
       if (event) {
         target = { kind: "event", event };
       } else if (activeFolderMode === "existing" && selectedFolderUri) {
-        target = { kind: "existing", uri: selectedFolderUri };
+        // A chime deployment nothing has been uploaded to yet is picked by
+        // its event URI — filing under it creates the folder record.
+        const chime = isChimeEventUri(selectedFolderUri)
+          ? (events ?? []).find((item) => item.uri === selectedFolderUri)
+          : undefined;
+        target = chime
+          ? { kind: "event", event: chime }
+          : { kind: "existing", uri: selectedFolderUri };
       } else if (activeFolderMode === "new" && uploadName.trim()) {
+        const name = uploadName.trim();
         // The tray resolves a named target to an existing folder of that name
-        // before creating one, so a resumed card never forks a new folder.
-        const earliest = new Date(Math.min(...pending.map((rec) => recordingTime(rec).getTime())));
-        target = { kind: "named", name: uploadName.trim(), deployedAt: earliest.toISOString() };
+        // before creating one, so a resumed card never forks a new folder. A
+        // chime deployment already carrying the name is the same deployment
+        // too — the recordings join it rather than forking a twin.
+        const chimeByName = findUploadFolderByName(
+          (events ?? []).map((item) => ({ uri: item.uri, name: chimeDeploymentName(item), event: item })),
+          name,
+        );
+        if (!findUploadFolderByName(folders ?? [], name) && chimeByName) {
+          target = { kind: "event", event: chimeByName.event };
+        } else {
+          const earliest = new Date(Math.min(...pending.map((rec) => recordingTime(rec).getTime())));
+          target = { kind: "named", name, deployedAt: earliest.toISOString() };
+        }
       }
 
       for (const rec of pending) {
@@ -547,7 +574,6 @@ export function UploadTab({ sessionDid }: { sessionDid: string | null }) {
     scanTokenRef.current += 1;
     setRecordings([]);
     setStage("pick");
-    setManualEventUri("none");
     setGlobalError(null);
     setUploadName("");
     setSelectedFolderUri("");
@@ -560,10 +586,11 @@ export function UploadTab({ sessionDid }: { sessionDid: string | null }) {
   }, [
     acting.repo,
     activeFolderMode,
+    events,
+    folders,
     groups,
     loadFolders,
     makePreviews,
-    manualEvent,
     matchFor,
     selectedFolderUri,
     sessionDid,
@@ -581,7 +608,6 @@ export function UploadTab({ sessionDid }: { sessionDid: string | null }) {
     scanTokenRef.current += 1;
     setRecordings([]);
     setStage("pick");
-    setManualEventUri("none");
     setGlobalError(null);
     setUploadName("");
     setSelectedFolderUri("");
@@ -821,24 +847,6 @@ export function UploadTab({ sessionDid }: { sessionDid: string | null }) {
                           </div>
                         </div>
 
-                        {!deploymentId && (events?.length ?? 0) > 0 && (
-                          <div className="flex flex-col gap-1.5 sm:w-64">
-                            <Label className="text-xs text-muted-foreground">{t("assignLabel")}</Label>
-                            <Select value={manualEventUri} onValueChange={setManualEventUri} disabled={stage !== "review"}>
-                              <SelectTrigger className="h-9">
-                                <SelectValue />
-                              </SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value="none">{t("assignNone")}</SelectItem>
-                                {(events ?? []).map((e) => (
-                                  <SelectItem key={e.uri} value={e.uri}>
-                                    {e.locality ?? e.eventID}
-                                  </SelectItem>
-                                ))}
-                              </SelectContent>
-                            </Select>
-                          </div>
-                        )}
                       </div>
                     );
                   })}
@@ -885,7 +893,13 @@ export function UploadTab({ sessionDid }: { sessionDid: string | null }) {
                     has, or start a new one. */}
                 {stage === "review" && needsName && (
                   <UploadFolderPicker
-                    folders={folders}
+                    folders={
+                      unified?.map((deployment) => ({
+                        uri: deployment.uri,
+                        name: deployment.name,
+                        deployedAt: deployment.deployedAt ?? undefined,
+                      })) ?? null
+                    }
                     counts={folderCounts}
                     mode={folderMode}
                     onModeChange={(mode) => {

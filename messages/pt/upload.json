@@ -769,8 +769,7 @@
         "dedupChecking": "Verificando gravações que já estão nesta conta…",
         "dedupSkipped": "{count, plural, one {# gravação já está nesta conta — ignorada} other {# gravações já estão nesta conta — ignoradas}}",
         "allUploaded": "Tudo neste cartão já foi enviado",
-        "matchedCount": "{count, plural, one {# gravação correspondeu à sua implantação a partir do cartão} other {# gravações corresponderam às suas implantações a partir do cartão}}",
-        "eventOption": "Implantação · {name}"
+        "matchedCount": "{count, plural, one {# gravação correspondeu à sua implantação a partir do cartão} other {# gravações corresponderam às suas implantações a partir do cartão}}"
       }
     },
     "csvUpload": {

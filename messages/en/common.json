@@ -2284,8 +2284,6 @@
       "unmatchedTitle": "Deployment not found in your account",
       "noIdTitle": "No deployment ID in these recordings",
       "groupCount": "{count} recordings",
-      "assignLabel": "Link to a deployment (optional)",
-      "assignNone": "No deployment",
       "unreadable": "{count} files could not be read as WAV recordings and will be skipped.",
       "moreFiles": "…and {count} more recordings",
       "previewToggle": "Save playable previews",

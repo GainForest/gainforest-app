@@ -20,6 +20,7 @@ import {
   type DeploymentEventEdit,
   type DeploymentEventItem,
 } from "@/app/_lib/deployment-events";
+import { renameCompanionFolder } from "@/app/_lib/unified-deployments";
 import { listEquipment, type EquipmentItem } from "@/app/_lib/equipment";
 import { formatRelative } from "@/app/_lib/format";
 
@@ -126,11 +127,18 @@ export function EditDeploymentDialog({
     try {
       // A record outside the signed-in repo lives in an organization's —
       // write it there (CGS checks membership server-side).
-      const { cid } = await updateDeploymentEvent(
-        event,
-        edit,
-        event.did !== sessionDid ? { repo: event.did } : undefined,
-      );
+      const repoOption = event.did !== sessionDid ? { repo: event.did } : undefined;
+      const { cid } = await updateDeploymentEvent(event, edit, repoOption);
+      // One deployment, one name: the folder its recordings are filed under
+      // gets the same name, so the audio library and the upload picker never
+      // show a stale one. Best-effort — the next rename re-syncs the pair.
+      if (siteName.trim() && siteName.trim() !== (event.locality ?? "")) {
+        try {
+          await renameCompanionFolder(event, siteName.trim(), repoOption);
+        } catch (syncError) {
+          console.warn("[deployments] folder rename sync failed", syncError);
+        }
+      }
       onUpdated(applyDeploymentEdit(event, edit, cid));
     } catch (err) {
       setError(err instanceof Error && err.message ? err.message : t("updateFailed"));

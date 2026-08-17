@@ -2284,8 +2284,6 @@
       "unmatchedTitle": "Despliegue no encontrado en tu cuenta",
       "noIdTitle": "Estas grabaciones no tienen ID de despliegue",
       "groupCount": "{count} grabaciones",
-      "assignLabel": "Vincular a un despliegue (opcional)",
-      "assignNone": "Sin despliegue",
       "unreadable": "{count} archivos no se pudieron leer como grabaciones WAV y se omitirán.",
       "moreFiles": "…y {count} grabaciones más",
       "previewToggle": "Guardar vistas previas reproducibles",

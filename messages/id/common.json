@@ -2284,8 +2284,6 @@
       "unmatchedTitle": "Penempatan tidak ditemukan di akun Anda",
       "noIdTitle": "Rekaman ini tidak memiliki ID penempatan",
       "groupCount": "{count} rekaman",
-      "assignLabel": "Tautkan ke penempatan (opsional)",
-      "assignNone": "Tanpa penempatan",
       "unreadable": "{count} berkas tidak dapat dibaca sebagai rekaman WAV dan akan dilewati.",
       "moreFiles": "…dan {count} rekaman lainnya",
       "previewToggle": "Simpan pratinjau yang dapat diputar",

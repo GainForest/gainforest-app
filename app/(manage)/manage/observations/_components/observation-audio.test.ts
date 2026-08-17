@@ -273,6 +273,23 @@ describe("planAudioUploadGroups", () => {
     expect(reused.unmatchedPlan).toEqual({ kind: "existing", uri: folders[0]!.uri, name: "ridge trail" });
   });
 
+  it("joins a chime deployment whose name matches the card, instead of forking a twin", () => {
+    const chimeOnly: DeploymentEventItem = {
+      ...event,
+      locality: "Cloud forest",
+      eventID: "beadbeadbeadbead",
+      uri: "at://did:plc:x/app.gainforest.dwc.event/2",
+      rkey: "2",
+    };
+    const plan = planAudioUploadGroups({
+      ...base,
+      events: [event, chimeOnly],
+      recordings: [makeRecording("a.wav", makeInfo())],
+      cardName: "cloud forest",
+    });
+    expect(plan.unmatchedPlan).toEqual({ kind: "event", event: chimeOnly });
+  });
+
   it("ignores skipped and unreadable recordings entirely", () => {
     const plan = planAudioUploadGroups({
       ...base,

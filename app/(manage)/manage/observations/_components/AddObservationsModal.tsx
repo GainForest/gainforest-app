@@ -107,6 +107,7 @@ import {
 } from "@/app/_lib/audiomoth/dropped-files";
 import { listAcDeployments, type AcDeploymentItem } from "@/app/_lib/ac-deployment";
 import { listDeploymentEvents, type DeploymentEventItem } from "@/app/_lib/deployment-events";
+import { chimeDeploymentName, unifyDeployments } from "@/app/_lib/unified-deployments";
 import { createEquipment, listEquipment } from "@/app/_lib/equipment";
 import {
   legacyRecordingKey,
@@ -2191,6 +2192,13 @@ function AudioCardPanel({
       }),
     [card.name, card.recordings, chimeEvents, fallbackName, folders],
   );
+  // Each deployment exactly once, however it was created: a folder and its
+  // chime are one row, and a chime nothing has been uploaded to yet is a row
+  // of its own. Null while either list is still loading.
+  const unified = useMemo(
+    () => (folders === null || chimeEvents === null ? null : unifyDeployments(folders, chimeEvents)),
+    [chimeEvents, folders],
+  );
   const equipmentAssetIds = equipment ? equipment.map((item) => item.assetId) : null;
   const newDeviceIds = unregisteredDeviceIds(summary.deviceIds, equipmentAssetIds);
   // The device chip: the registered equipment name when the unit is known,
@@ -2220,7 +2228,7 @@ function AudioCardPanel({
     autoPlan === null
       ? ""
       : autoPlan.kind === "event"
-        ? t("audio.folderAutoMatched", { name: autoPlan.event.locality ?? autoPlan.event.eventID })
+        ? t("audio.folderAutoMatched", { name: chimeDeploymentName(autoPlan.event) })
         : autoPlan.kind === "existing"
           ? autoPlan.name
           : t("audio.folderNew", { name: autoPlan.name });
@@ -2300,19 +2308,18 @@ function AudioCardPanel({
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="auto">{autoLabel}</SelectItem>
-              {(folders ?? []).map((folder) => (
-                <SelectItem key={folder.uri} value={folder.uri}>
-                  {folder.name}
-                </SelectItem>
-              ))}
-              {/* Manual assignment to a deployment event — the Upload
-                  tab's "assign to deployment" select, folded in here. */}
-              {(chimeEvents ?? []).map((chimeEvent) => (
+              {/* Every deployment exactly once, by name — one set up with the
+                  chime files the same way as one started by an upload. */}
+              {(unified ?? []).map((deployment) => (
                 <SelectItem
-                  key={chimeEvent.uri}
-                  value={`${AUDIO_EVENT_SELECTION_PREFIX}${chimeEvent.uri}`}
+                  key={deployment.uri}
+                  value={
+                    deployment.folder
+                      ? deployment.uri
+                      : `${AUDIO_EVENT_SELECTION_PREFIX}${deployment.uri}`
+                  }
                 >
-                  {t("audio.eventOption", { name: chimeEvent.locality ?? chimeEvent.eventID })}
+                  {deployment.name}
                 </SelectItem>
               ))}
               {autoPlan?.kind !== "named" ? (
@@ -2331,7 +2338,13 @@ function AudioCardPanel({
           })}
         </p>
       ) : null}
-      {deviceNeedsDeployment(summary, folders, planned.matchedCount > 0) ? (
+      {deviceNeedsDeployment(
+        summary,
+        unified === null
+          ? null
+          : unified.map((deployment) => ({ deviceSerialNumber: deployment.folder?.deviceSerialNumber })),
+        planned.matchedCount > 0,
+      ) ? (
         <p className="text-xs leading-5 text-muted-foreground">
           {t("audio.noDeployments")}{" "}
           <button
