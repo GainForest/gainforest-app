@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import { notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { resolveAccountManageAccess } from "@/app/_lib/manage-server";
@@ -6,6 +7,7 @@ import { getGainForestModeratorAccess } from "@/app/internal/badges/_lib/access"
 import Container from "@/components/ui/container";
 import { ObservationsSection, TreesSection } from "@/app/(manage)/manage/_sections";
 import { ObservationsSubNav } from "../../../_components/ObservationsSubNav";
+import { ObservationsWorkspaceContentSkeleton } from "../../../_components/ManageWorkspaceSkeletons";
 import {
   accountAudioManagePath,
   accountObservationsManagePath,
@@ -88,7 +90,16 @@ export default async function AccountObservationsManagePage({
         photosHref={accountObservationsManagePath(account.urlIdentifier)}
         audioHref={accountAudioManagePath(account.urlIdentifier)}
       />
-      {showMeasurements ? <TreesSection target={access.target} /> : <ObservationsSection target={access.target} />}
+      {showMeasurements ? (
+        <TreesSection target={access.target} />
+      ) : (
+        // The section reads the first page of sightings server-side; Suspense
+        // lets the title and pills paint immediately while the grid streams
+        // in, replacing the same skeleton the route-level loading file shows.
+        <Suspense fallback={<ObservationsWorkspaceContentSkeleton />}>
+          <ObservationsSection target={access.target} />
+        </Suspense>
+      )}
     </Container>
   );
 }
