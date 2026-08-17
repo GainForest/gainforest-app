@@ -152,10 +152,6 @@
         "title": "Limitar o número de pessoas",
         "hint": "Desativado — qualquer pessoa pode vir",
         "waitlistNote": "Inscrições extras entram numa lista de espera."
-      },
-      "support": {
-        "title": "Pedir apoio para o encontro",
-        "hint": "Solicite uma pequena ajuda com os custos"
       }
     },
     "descriptionPlaceholder": "Algumas frases. O que vão fazer, para quem é, o que levar.",
@@ -164,18 +160,6 @@
     "agendaTime": "Hora",
     "agendaWhat": "O que acontece",
     "agendaAdd": "Adicionar uma linha",
-    "supportNotice": {
-      "title": "Isto é um pedido, não uma promessa",
-      "body": "Uma pessoa da GainForest lê cada pedido. Há um valor limitado por mês, então alguns não são financiados. Seu evento acontece de qualquer forma, e avisamos antes da data."
-    },
-    "supportKinds": {
-      "travel": "Transporte para quem não conseguiria vir de outra forma",
-      "food": "Comida e bebida",
-      "printing": "Impressões, mapas ou placas"
-    },
-    "amountLabel": "Valor",
-    "currencyLabel": "Moeda",
-    "supportNotePlaceholder": "Para que é?",
     "themeTagLabel": "Uma etiqueta curta (opcional)",
     "themeTagPlaceholder": "Iniciantes bem-vindos",
     "meetingNoteLabel": "Ponto de encontro exato (mostrado após a confirmação)",
@@ -204,10 +188,7 @@
       "copyLink": "Copiar link",
       "copied": "Copiado",
       "viewEvent": "Ver meu evento",
-      "invite": "Convidar pessoas",
-      "supportSentTitle": "Seu pedido de apoio foi enviado",
-      "supportSentBody": "Responderemos sobre os {amount} antes de {date}. Seu evento continua no ar seja qual for a resposta.",
-      "supportSentBodyNoAmount": "Responderemos antes da data do evento. Seu evento continua no ar seja qual for a resposta."
+      "invite": "Convidar pessoas"
     }
   }
 }

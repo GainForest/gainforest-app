@@ -152,10 +152,6 @@
         "title": "Weka kikomo cha idadi ya watu",
         "hint": "Imezimwa — yeyote anaweza kuja",
         "waitlistNote": "Waliojisajili zaidi wanaingia kwenye orodha ya kusubiri."
-      },
-      "support": {
-        "title": "Omba msaada wa mkutano",
-        "hint": "Omba msaada kidogo wa gharama"
       }
     },
     "descriptionPlaceholder": "Sentensi chache. Mtakachofanya, ni kwa ajili ya nani, cha kubeba.",
@@ -164,18 +160,6 @@
     "agendaTime": "Saa",
     "agendaWhat": "Kinachotokea",
     "agendaAdd": "Ongeza mstari",
-    "supportNotice": {
-      "title": "Hili ni ombi, si ahadi",
-      "body": "Mtu wa GainForest anasoma kila ombi. Kuna kiasi kidogo kila mwezi, hivyo mengine hayafadhiliwi. Tukio lako linaendelea vyovyote vile, na tunakujulisha kabla ya tarehe."
-    },
-    "supportKinds": {
-      "travel": "Usafiri kwa watu ambao wasingeweza kuja vinginevyo",
-      "food": "Chakula na vinywaji",
-      "printing": "Uchapishaji, ramani au mabango"
-    },
-    "amountLabel": "Kiasi",
-    "currencyLabel": "Sarafu",
-    "supportNotePlaceholder": "Ni kwa ajili ya nini?",
     "themeTagLabel": "Lebo moja fupi (hiari)",
     "themeTagPlaceholder": "Wanaoanza wanakaribishwa",
     "meetingNoteLabel": "Mahali kamili pa kukutana (huonyeshwa baada ya kuthibitisha)",
@@ -204,10 +188,7 @@
       "copyLink": "Nakili kiungo",
       "copied": "Imenakiliwa",
       "viewEvent": "Tazama tukio langu",
-      "invite": "Karibisha watu",
-      "supportSentTitle": "Ombi lako la msaada limetumwa",
-      "supportSentBody": "Tutajibu kuhusu {amount} kabla ya {date}. Tukio lako linabaki hewani jibu liwe lolote.",
-      "supportSentBodyNoAmount": "Tutajibu kabla ya tarehe ya tukio. Tukio lako linabaki hewani jibu liwe lolote."
+      "invite": "Karibisha watu"
     }
   }
 }

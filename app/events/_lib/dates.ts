@@ -64,10 +64,3 @@ export function earliestMonthLabel(events: CommunityEvent[], locale: string): st
   return null;
 }
 
-/** Support-request reply-by line: a week before the start. */
-export function supportReplyByLabel(event: { startsAt: string | null }, locale: string): string | null {
-  const start = parse(event.startsAt);
-  if (!start) return null;
-  const replyBy = new Date(start.getTime() - 7 * 24 * 60 * 60 * 1000);
-  return new Intl.DateTimeFormat(locale, { day: "numeric", month: "long" }).format(replyBy);
-}

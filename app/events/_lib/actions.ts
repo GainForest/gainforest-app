@@ -65,7 +65,6 @@ function formToDraftRecord(form: EventFormState, eventPageUrl: string | null, co
   const startsAt = formDateTimeToIso(form.date, form.startTime);
   const endsAt = form.endTime ? formDateTimeToIso(form.date, form.endTime) : null;
   const capacity = form.capacity.trim() ? Math.max(1, Math.floor(Number(form.capacity))) : null;
-  const amount = form.supportAmount.trim() ? Number(form.supportAmount) : null;
   return {
     name: form.name,
     description: form.description.trim() || null,
@@ -84,15 +83,6 @@ function formToDraftRecord(form: EventFormState, eventPageUrl: string | null, co
     themeTag: form.themeTag.trim() || null,
     goodToKnow: form.goodToKnow.trim() || null,
     meetingNote: form.meetingNote.trim() || null,
-    support:
-      form.supportKinds.length > 0 || (amount !== null && Number.isFinite(amount) && amount > 0)
-        ? {
-            kinds: form.supportKinds,
-            amount: amount !== null && Number.isFinite(amount) && amount > 0 ? amount : null,
-            currency: form.supportCurrency,
-            note: form.supportNote.trim() || null,
-          }
-        : null,
   };
 }
 

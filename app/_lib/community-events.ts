@@ -9,7 +9,7 @@
  * an event a known host created on Smoke Signal shows up here too.
  *
  * GainForest-only niceties the community lexicon has no field for (capacity,
- * cover photo, agenda, a meetup-support request…) ride along under ONE
+ * cover photo, agenda, a meeting note…) ride along under ONE
  * namespaced extension key — `app.gainforest.event` — which other consumers
  * ignore, per the protocol's unknown-field tolerance. Nothing in the
  * extension is required to render the event.
@@ -71,14 +71,6 @@ export type EventStatus = keyof typeof EVENT_STATUS_VALUES;
 
 export type EventAgendaItem = { time: string; text: string };
 
-export type EventSupportRequest = {
-  /** Machine keys: travel | food | printing | other. */
-  kinds: string[];
-  amount: number | null;
-  currency: string;
-  note: string | null;
-};
-
 /** Parsed, serializable community event — tolerant of records written by
  *  other apps (Smoke Signal events have no extension and may omit endsAt). */
 export type CommunityEvent = {
@@ -112,7 +104,6 @@ export type CommunityEvent = {
   goodToKnow: string | null;
   /** Exact meeting point, surfaced only after the viewer RSVPs. */
   meetingNote: string | null;
-  support: EventSupportRequest | null;
 };
 
 export type EventAttendance = {
@@ -204,21 +195,6 @@ function parseAgenda(value: unknown): EventAgendaItem[] {
   return items.slice(0, 20);
 }
 
-function parseSupport(value: unknown): EventSupportRequest | null {
-  if (!isRecord(value)) return null;
-  const kinds = Array.isArray(value.kinds)
-    ? value.kinds.map((k) => str(k)).filter((k): k is string => Boolean(k))
-    : [];
-  const amount = num(value.amount);
-  if (kinds.length === 0 && amount === null) return null;
-  return {
-    kinds,
-    amount,
-    currency: str(value.currency) ?? "USD",
-    note: str(value.note),
-  };
-}
-
 /** Parse a raw `community.lexicon.calendar.event` record value. Returns null
  *  when the value has no usable name (the only required display field). */
 export function parseCommunityEvent(uri: string, value: unknown): CommunityEvent | null {
@@ -283,7 +259,6 @@ export function parseCommunityEvent(uri: string, value: unknown): CommunityEvent
     themeTag: str(ext.themeTag),
     goodToKnow: str(ext.goodToKnow),
     meetingNote: str(ext.meetingNote),
-    support: parseSupport(ext.support),
   };
 }
 
@@ -589,7 +564,6 @@ export type CommunityEventDraftRecord = {
   themeTag: string | null;
   goodToKnow: string | null;
   meetingNote: string | null;
-  support: EventSupportRequest | null;
 };
 
 /** Compose the wire record: community lexicon fields first, GainForest extras
@@ -634,14 +608,6 @@ export function buildCommunityEventRecord(
   if (draft.themeTag) extension.themeTag = draft.themeTag;
   if (draft.goodToKnow) extension.goodToKnow = draft.goodToKnow;
   if (draft.meetingNote) extension.meetingNote = draft.meetingNote;
-  if (draft.support && (draft.support.kinds.length > 0 || draft.support.amount !== null)) {
-    extension.support = {
-      kinds: draft.support.kinds,
-      ...(draft.support.amount !== null ? { amount: draft.support.amount } : {}),
-      currency: draft.support.currency,
-      ...(draft.support.note ? { note: draft.support.note } : {}),
-    };
-  }
 
   const record: Record<string, unknown> = {
     $type: CALENDAR_EVENT_COLLECTION,

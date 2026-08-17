@@ -152,10 +152,6 @@
         "title": "Batasi jumlah orang",
         "hint": "Nonaktif — siapa pun boleh datang",
         "waitlistNote": "Pendaftar tambahan masuk daftar tunggu."
-      },
-      "support": {
-        "title": "Minta dukungan pertemuan",
-        "hint": "Minta sedikit bantuan biaya"
       }
     },
     "descriptionPlaceholder": "Beberapa kalimat. Apa yang akan dilakukan, untuk siapa, apa yang perlu dibawa.",
@@ -164,18 +160,6 @@
     "agendaTime": "Waktu",
     "agendaWhat": "Apa yang terjadi",
     "agendaAdd": "Tambah baris",
-    "supportNotice": {
-      "title": "Ini permintaan, bukan janji",
-      "body": "Seseorang di GainForest membaca setiap permintaan. Jumlahnya terbatas tiap bulan, jadi sebagian tidak didanai. Acaramu tetap berjalan apa pun hasilnya, dan kami memberi tahu sebelum tanggalnya."
-    },
-    "supportKinds": {
-      "travel": "Transportasi untuk orang yang tidak bisa datang tanpanya",
-      "food": "Makanan dan minuman",
-      "printing": "Cetakan, peta, atau penunjuk"
-    },
-    "amountLabel": "Jumlah",
-    "currencyLabel": "Mata uang",
-    "supportNotePlaceholder": "Untuk apa?",
     "themeTagLabel": "Satu label singkat (opsional)",
     "themeTagPlaceholder": "Pemula dipersilakan",
     "meetingNoteLabel": "Titik kumpul persis (ditampilkan setelah mendaftar)",
@@ -204,10 +188,7 @@
       "copyLink": "Salin tautan",
       "copied": "Tersalin",
       "viewEvent": "Lihat acara saya",
-      "invite": "Undang orang",
-      "supportSentTitle": "Permintaan dukunganmu telah dikirim",
-      "supportSentBody": "Kami akan menjawab soal {amount} sebelum {date}. Acaramu tetap tayang apa pun jawabannya.",
-      "supportSentBodyNoAmount": "Kami akan menjawab sebelum tanggal acara. Acaramu tetap tayang apa pun jawabannya."
+      "invite": "Undang orang"
     }
   }
 }

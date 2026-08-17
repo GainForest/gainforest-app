@@ -152,10 +152,6 @@
         "title": "Limit the number of people",
         "hint": "Off — anyone can come",
         "waitlistNote": "Extra sign-ups join a waitlist."
-      },
-      "support": {
-        "title": "Ask for meetup support",
-        "hint": "Request a little help with costs"
       }
     },
     "descriptionPlaceholder": "A few sentences. What you'll do, who it's for, what to bring.",
@@ -164,18 +160,6 @@
     "agendaTime": "Time",
     "agendaWhat": "What happens",
     "agendaAdd": "Add a line",
-    "supportNotice": {
-      "title": "This is a request, not a promise",
-      "body": "A person at GainForest reads every request. There is a limited amount each month, so some are not funded. Your event goes ahead either way, and we tell you before the date."
-    },
-    "supportKinds": {
-      "travel": "Travel for people who could not otherwise come",
-      "food": "Food and drink",
-      "printing": "Printing, maps or signs"
-    },
-    "amountLabel": "Amount",
-    "currencyLabel": "Currency",
-    "supportNotePlaceholder": "What is it for?",
     "themeTagLabel": "One short tag (optional)",
     "themeTagPlaceholder": "Beginners welcome",
     "meetingNoteLabel": "Exact meeting point (shown after RSVP)",
@@ -204,10 +188,7 @@
       "copyLink": "Copy link",
       "copied": "Copied",
       "viewEvent": "View my event",
-      "invite": "Invite people",
-      "supportSentTitle": "Your support request has been sent",
-      "supportSentBody": "We will reply about the {amount} before {date}. Your event stays live whatever the answer.",
-      "supportSentBodyNoAmount": "We will reply before the event date. Your event stays live whatever the answer."
+      "invite": "Invite people"
     }
   }
 }

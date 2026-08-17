@@ -29,15 +29,8 @@ export type EventFormState = {
   themeTag: string;
   meetingNote: string;
   goodToKnow: string;
-  supportKinds: string[];
-  supportAmount: string;
-  supportCurrency: string;
-  supportNote: string;
   guidelinesAccepted: boolean;
 };
-
-export const SUPPORT_KIND_KEYS = ["travel", "food", "printing"] as const;
-export const SUPPORT_CURRENCIES = ["USD", "GBP", "EUR", "BRL", "IDR", "KES"] as const;
 
 export function emptyEventForm(): EventFormState {
   return {
@@ -58,10 +51,6 @@ export function emptyEventForm(): EventFormState {
     themeTag: "",
     meetingNote: "",
     goodToKnow: "",
-    supportKinds: [],
-    supportAmount: "",
-    supportCurrency: "USD",
-    supportNote: "",
     guidelinesAccepted: false,
   };
 }
@@ -89,10 +78,6 @@ export function eventToForm(event: CommunityEvent): EventFormState {
     themeTag: event.themeTag ?? "",
     meetingNote: event.meetingNote ?? "",
     goodToKnow: event.goodToKnow ?? "",
-    supportKinds: event.support?.kinds ?? [],
-    supportAmount: event.support?.amount !== null && event.support !== null ? String(event.support.amount) : "",
-    supportCurrency: event.support?.currency ?? "USD",
-    supportNote: event.support?.note ?? "",
     guidelinesAccepted: true,
   };
 }

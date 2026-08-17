@@ -196,7 +196,6 @@ export function CommunityEventsExperienceClient() {
           themeTag: form.themeTag.trim() || null,
           goodToKnow: form.goodToKnow.trim() || null,
           meetingNote: form.meetingNote.trim() || null,
-          support: null,
         });
         const created = parseCommunityEvent(`at://${MOCK_VIEWER_DID}/${CALENDAR_EVENT_COLLECTION}/${rkey}`, record);
         if (created) setStore((prev) => ({ events: [...prev.events, created], rsvps: prev.rsvps }));
@@ -223,7 +222,6 @@ export function CommunityEventsExperienceClient() {
               themeTag: form.themeTag.trim() || null,
               goodToKnow: form.goodToKnow.trim() || null,
               meetingNote: form.meetingNote.trim() || null,
-              support: null,
             },
             { existingCreatedAt: event.createdAt },
           );

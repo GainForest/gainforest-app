@@ -3,8 +3,7 @@
 /**
  * /events/host — the one-page host form. Three required basics (name,
  * date/time, format+place) publish a simple event on their own; description
- * & cover, agenda, capacity and the meetup-support request are one-tap
- * expanders that open in place. The draft autosaves from the first keystroke
+ * & cover, agenda and capacity are one-tap expanders that open in place. The draft autosaves from the first keystroke
  * ("Draft saved" in the header); validation runs once, on Publish, with a
  * plain-language summary and per-field messages; publishing swaps the page
  * for the "Your event is live" confirmation. `?edit=<rkey>` loads the
@@ -18,30 +17,26 @@ import {
   CheckIcon,
   CopyIcon,
   ImageIcon,
-  InfoIcon,
   MapPinIcon,
   PlusIcon,
   XIcon,
 } from "lucide-react";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { countryEntries } from "@/app/_lib/countries";
 import { eventHref, type CommunityEvent, type EventMode } from "@/app/_lib/community-events";
 import { useViewer } from "@/app/_lib/viewer";
 import { liveEventsAdapter, type EventsAdapter } from "../_lib/adapter";
 import { clearEventDraft, draftHasContent, loadEventDraft, saveEventDraft } from "../_lib/draft";
-import { supportReplyByLabel } from "../_lib/dates";
 import {
   emptyEventForm,
   eventToForm,
-  SUPPORT_CURRENCIES,
-  SUPPORT_KIND_KEYS,
   validateEventForm,
   type EventFormErrors,
   type EventFormState,
 } from "../_lib/form";
 
-type SectionKey = "description" | "agenda" | "capacity" | "support";
+type SectionKey = "description" | "agenda" | "capacity";
 type FieldKey = "name" | "date" | "start" | "place" | "onlineUrl";
 
 const inputClass =
@@ -86,7 +81,6 @@ export function HostEventClient({ adapter = liveEventsAdapter }: { adapter?: Eve
         if (event.description || event.coverRef) open.add("description");
         if (event.agenda.length > 0) open.add("agenda");
         if (event.capacity !== null) open.add("capacity");
-        if (event.support) open.add("support");
         setOpenSections(open);
         setHydrated(true);
       });
@@ -102,7 +96,6 @@ export function HostEventClient({ adapter = liveEventsAdapter }: { adapter?: Eve
       if (draft.form.description || draft.form.coverDataUrl) open.add("description");
       if (draft.form.agenda.length > 0) open.add("agenda");
       if (draft.form.capacity) open.add("capacity");
-      if (draft.form.supportKinds.length > 0 || draft.form.supportAmount) open.add("support");
       setOpenSections(open);
     }
     setHydrated(true);
@@ -145,7 +138,6 @@ export function HostEventClient({ adapter = liveEventsAdapter }: { adapter?: Eve
       if (key === "description") update({ description: "", coverDataUrl: null, existingCoverRef: null });
       if (key === "agenda") update({ agenda: [] });
       if (key === "capacity") update({ capacity: "" });
-      if (key === "support") update({ supportKinds: [], supportAmount: "", supportNote: "" });
     },
     [update],
   );
@@ -202,16 +194,6 @@ export function HostEventClient({ adapter = liveEventsAdapter }: { adapter?: Eve
     setDraftSavedAt(new Date().toISOString());
   }, [form]);
 
-  const supportAmountLabel = useMemo(() => {
-    const amount = Number(form.supportAmount);
-    if (!Number.isFinite(amount) || amount <= 0) return null;
-    try {
-      return new Intl.NumberFormat(locale, { style: "currency", currency: form.supportCurrency, maximumFractionDigits: 0 }).format(amount);
-    } catch {
-      return `${form.supportAmount} ${form.supportCurrency}`;
-    }
-  }, [form.supportAmount, form.supportCurrency, locale]);
-
   // Bring the confirmation into view — the app shell scrolls an inner
   // container, so window.scrollTo would miss.
   useEffect(() => {
@@ -221,9 +203,6 @@ export function HostEventClient({ adapter = liveEventsAdapter }: { adapter?: Eve
   // ── Published confirmation ───────────────────────────────────────────────
   if (published) {
     const pageUrl = `${typeof window !== "undefined" ? window.location.origin : ""}${eventHref(published.did, published.rkey)}`;
-    const startsAtIso = form.date && form.startTime ? new Date(`${form.date}T${form.startTime}`).toISOString() : null;
-    const replyBy = supportReplyByLabel({ startsAt: startsAtIso }, locale);
-    const hasSupport = form.supportKinds.length > 0 || Number(form.supportAmount) > 0;
     return (
       <main ref={confirmationRef} className="mx-auto w-full max-w-xl scroll-mt-20 px-4 py-12 sm:px-6">
         <div className="rounded-[2rem] border border-border-soft bg-surface p-8 text-center shadow-sm">
@@ -265,20 +244,6 @@ export function HostEventClient({ adapter = liveEventsAdapter }: { adapter?: Eve
               {t("confirm.invite")}
             </button>
           </div>
-
-          {hasSupport ? (
-            <div className="mt-6 rounded-2xl bg-surface-sunken p-4 text-left">
-              <p className="inline-flex items-center gap-1.5 text-sm font-semibold text-foreground">
-                <InfoIcon className="size-4" aria-hidden />
-                {t("confirm.supportSentTitle")}
-              </p>
-              <p className="mt-1 text-sm leading-6 text-muted-foreground">
-                {supportAmountLabel && replyBy
-                  ? t("confirm.supportSentBody", { amount: supportAmountLabel, date: replyBy })
-                  : t("confirm.supportSentBodyNoAmount")}
-              </p>
-            </div>
-          ) : null}
         </div>
       </main>
     );
@@ -599,75 +564,6 @@ export function HostEventClient({ adapter = liveEventsAdapter }: { adapter?: Eve
                   />
                   <span className="text-sm text-muted-foreground">{t("sections.capacity.waitlistNote")}</span>
                 </div>,
-              )}
-
-              {sectionCard(
-                "support",
-                t("sections.support.title"),
-                t("sections.support.hint"),
-                <>
-                  {/* The full "not a promise" notice — never shortened. */}
-                  <div className="rounded-2xl bg-surface-sunken p-3.5">
-                    <p className="inline-flex items-center gap-1.5 text-sm font-semibold text-foreground">
-                      <InfoIcon className="size-4" aria-hidden />
-                      {t("supportNotice.title")}
-                    </p>
-                    <p className="mt-1 text-xs leading-5 text-muted-foreground">{t("supportNotice.body")}</p>
-                  </div>
-                  <div className="space-y-2">
-                    {SUPPORT_KIND_KEYS.map((kind) => {
-                      const checked = form.supportKinds.includes(kind);
-                      return (
-                        <label
-                          key={kind}
-                          className={`flex cursor-pointer items-center gap-2.5 rounded-2xl border px-3.5 py-2.5 text-sm transition-colors ${
-                            checked ? "border-primary bg-primary/5 text-foreground" : "border-border text-foreground hover:border-primary/40"
-                          }`}
-                        >
-                          <input
-                            type="checkbox"
-                            checked={checked}
-                            onChange={() =>
-                              update({ supportKinds: checked ? form.supportKinds.filter((k) => k !== kind) : [...form.supportKinds, kind] })
-                            }
-                            className="size-4 accent-[var(--primary)]"
-                          />
-                          {t(`supportKinds.${kind}`)}
-                        </label>
-                      );
-                    })}
-                  </div>
-                  <div className="flex gap-3">
-                    <input
-                      type="number"
-                      min={0}
-                      value={form.supportAmount}
-                      onChange={(e) => update({ supportAmount: e.target.value })}
-                      placeholder="45"
-                      aria-label={t("amountLabel")}
-                      className={`${inputClass} w-28`}
-                    />
-                    <select
-                      value={form.supportCurrency}
-                      onChange={(e) => update({ supportCurrency: e.target.value })}
-                      aria-label={t("currencyLabel")}
-                      className={`${inputClass} w-28`}
-                    >
-                      {SUPPORT_CURRENCIES.map((currency) => (
-                        <option key={currency} value={currency}>
-                          {currency}
-                        </option>
-                      ))}
-                    </select>
-                    <input
-                      type="text"
-                      value={form.supportNote}
-                      onChange={(e) => update({ supportNote: e.target.value })}
-                      placeholder={t("supportNotePlaceholder")}
-                      className={inputClass}
-                    />
-                  </div>
-                </>,
               )}
             </div>
           </section>
