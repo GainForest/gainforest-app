@@ -2239,7 +2239,7 @@
       "siteNameLabel": "Site name (optional)",
       "siteNamePlaceholder": "River trail, plot 3…",
       "deploymentIdLabel": "Deployment ID",
-      "newId": "Generate a new ID",
+      "deploymentIdHint": "Generated automatically for this deployment.",
       "latitudeLabel": "Latitude",
       "longitudeLabel": "Longitude",
       "useLocation": "Use my current location",

@@ -15,7 +15,6 @@ import {
   CheckIcon,
   Loader2Icon,
   LocateFixedIcon,
-  RefreshCwIcon,
   Volume2Icon,
   XIcon,
 } from "lucide-react";
@@ -107,7 +106,7 @@ export function CreateDeploymentDialog({
   const t = useTranslations("common.audiomoth.deployments");
 
   const [siteName, setSiteName] = useState("");
-  const [deploymentId, setDeploymentId] = useState(() => randomDeploymentIdHex());
+  const [deploymentId] = useState(() => randomDeploymentIdHex());
   const [lat, setLat] = useState("");
   const [lon, setLon] = useState("");
   const [locating, setLocating] = useState(false);
@@ -317,24 +316,15 @@ export function CreateDeploymentDialog({
 
               <div className="flex flex-col gap-1.5">
                 <Label htmlFor="deploy-id">{t("deploymentIdLabel")}</Label>
-                <div className="flex items-center gap-2">
-                  <Input
-                    id="deploy-id"
-                    value={deploymentId}
-                    onChange={(e) => setDeploymentId(e.target.value)}
-                    className="font-mono"
-                    disabled={busy}
-                  />
-                  <Button
-                    variant="outline"
-                    size="icon-sm"
-                    onClick={() => setDeploymentId(randomDeploymentIdHex())}
-                    aria-label={t("newId")}
-                    disabled={busy}
-                  >
-                    <RefreshCwIcon className="size-4" />
-                  </Button>
-                </div>
+                <Input
+                  id="deploy-id"
+                  value={deploymentId}
+                  readOnly
+                  aria-readonly
+                  tabIndex={-1}
+                  className="cursor-default bg-muted/40 font-mono text-muted-foreground"
+                />
+                <p className="text-xs text-muted-foreground">{t("deploymentIdHint")}</p>
               </div>
 
               <div className="grid grid-cols-2 gap-3">
