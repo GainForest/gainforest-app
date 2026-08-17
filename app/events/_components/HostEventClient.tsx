@@ -37,7 +37,7 @@ import {
 } from "../_lib/form";
 
 type SectionKey = "description" | "agenda" | "capacity";
-type FieldKey = "name" | "date" | "start" | "place" | "onlineUrl";
+type FieldKey = "name" | "date" | "start" | "place" | "onlineUrl" | "guidelines";
 
 const inputClass =
   "w-full rounded-2xl border border-border bg-surface px-3.5 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none";
@@ -290,6 +290,14 @@ export function HostEventClient({ adapter = liveEventsAdapter }: { adapter?: Eve
       </p>
     ) : null;
 
+  /** "Required" / "Optional" marker after a field label — so nobody has to
+   *  guess which is which. */
+  const mark = (kind: "required" | "optional") => (
+    <span className="ml-1.5 text-xs font-normal text-muted-foreground">
+      {kind === "required" ? t("requiredMark") : t("optionalMark")}
+    </span>
+  );
+
   return (
     <main className="mx-auto w-full max-w-xl px-4 pb-16 pt-6 sm:px-6">
       <div className="flex items-center justify-between gap-3">
@@ -332,6 +340,7 @@ export function HostEventClient({ adapter = liveEventsAdapter }: { adapter?: Eve
               <div ref={(el) => void (fieldRefs.current.name = el)}>
                 <label className="mb-1.5 block text-sm font-medium text-foreground" htmlFor="event-name">
                   {t("nameLabel")}
+                  {mark("required")}
                 </label>
                 <input
                   id="event-name"
@@ -348,6 +357,7 @@ export function HostEventClient({ adapter = liveEventsAdapter }: { adapter?: Eve
                 <div className="col-span-2" ref={(el) => void (fieldRefs.current.date = el)}>
                   <label className="mb-1.5 block text-sm font-medium text-foreground" htmlFor="event-date">
                     {t("dateLabel")}
+                    {mark("required")}
                   </label>
                   <input
                     id="event-date"
@@ -361,6 +371,7 @@ export function HostEventClient({ adapter = liveEventsAdapter }: { adapter?: Eve
                 <div ref={(el) => void (fieldRefs.current.start = el)}>
                   <label className="mb-1.5 block text-sm font-medium text-foreground" htmlFor="event-start">
                     {t("startLabel")}
+                    {mark("required")}
                   </label>
                   <input
                     id="event-start"
@@ -374,6 +385,7 @@ export function HostEventClient({ adapter = liveEventsAdapter }: { adapter?: Eve
                 <div>
                   <label className="mb-1.5 block text-sm font-medium text-foreground" htmlFor="event-end">
                     {t("endLabel")}
+                    {mark("optional")}
                   </label>
                   <input id="event-end" type="time" value={form.endTime} onChange={(e) => update({ endTime: e.target.value })} className={inputClass} />
                 </div>
@@ -402,6 +414,7 @@ export function HostEventClient({ adapter = liveEventsAdapter }: { adapter?: Eve
                 <div ref={(el) => void (fieldRefs.current.place = el)}>
                   <label className="mb-1.5 block text-sm font-medium text-foreground" htmlFor="event-place">
                     {t("whereLabel")}
+                    {mark("required")}
                   </label>
                   <input
                     id="event-place"
@@ -416,12 +429,14 @@ export function HostEventClient({ adapter = liveEventsAdapter }: { adapter?: Eve
                     <div>
                       <label className="mb-1.5 block text-xs font-medium text-muted-foreground" htmlFor="event-locality">
                         {t("localityLabel")}
+                        {mark("optional")}
                       </label>
                       <input id="event-locality" type="text" value={form.locality} onChange={(e) => update({ locality: e.target.value })} className={inputClass} />
                     </div>
                     <div>
                       <label className="mb-1.5 block text-xs font-medium text-muted-foreground" htmlFor="event-country">
                         {t("countryLabel")}
+                        {mark("optional")}
                       </label>
                       <select id="event-country" value={form.country} onChange={(e) => update({ country: e.target.value })} className={inputClass}>
                         <option value="">—</option>
@@ -446,6 +461,7 @@ export function HostEventClient({ adapter = liveEventsAdapter }: { adapter?: Eve
                 <div ref={(el) => void (fieldRefs.current.onlineUrl = el)}>
                   <label className="mb-1.5 block text-sm font-medium text-foreground" htmlFor="event-online-url">
                     {t("onlineUrlLabel")}
+                    {mark("required")}
                   </label>
                   <input
                     id="event-online-url"
@@ -573,6 +589,7 @@ export function HostEventClient({ adapter = liveEventsAdapter }: { adapter?: Eve
             <div>
               <label className="mb-1.5 block text-sm font-medium text-foreground" htmlFor="event-tag">
                 {t("themeTagLabel")}
+                {mark("optional")}
               </label>
               <input id="event-tag" type="text" value={form.themeTag} onChange={(e) => update({ themeTag: e.target.value })} placeholder={t("themeTagPlaceholder")} className={inputClass} />
             </div>
@@ -580,6 +597,7 @@ export function HostEventClient({ adapter = liveEventsAdapter }: { adapter?: Eve
               <div>
                 <label className="mb-1.5 block text-sm font-medium text-foreground" htmlFor="event-meeting-note">
                   {t("meetingNoteLabel")}
+                  {mark("optional")}
                 </label>
                 <input
                   id="event-meeting-note"
@@ -594,6 +612,7 @@ export function HostEventClient({ adapter = liveEventsAdapter }: { adapter?: Eve
             <div>
               <label className="mb-1.5 block text-sm font-medium text-foreground" htmlFor="event-good-to-know">
                 {t("goodToKnowLabel")}
+                {mark("optional")}
               </label>
               <input
                 id="event-good-to-know"
@@ -606,17 +625,28 @@ export function HostEventClient({ adapter = liveEventsAdapter }: { adapter?: Eve
             </div>
           </section>
 
-          {/* Guidelines gate + publish, always at the foot of the page. */}
+          {/* Guidelines confirmation + publish, always at the foot of the
+              page. Publish stays clickable when the box is unticked — the
+              validation message under the box explains what's missing,
+              instead of a dead-looking button explaining nothing. */}
           <section className="space-y-4 border-t border-border-soft pt-5">
-            <label className="flex cursor-pointer items-start gap-2.5 text-sm text-foreground">
-              <input
-                type="checkbox"
-                checked={form.guidelinesAccepted}
-                onChange={(e) => update({ guidelinesAccepted: e.target.checked })}
-                className="mt-0.5 size-4 accent-[var(--primary)]"
-              />
-              {t("guidelines")}
-            </label>
+            <div ref={(el) => void (fieldRefs.current.guidelines = el)}>
+              <label className="flex cursor-pointer items-start gap-2.5 text-sm text-foreground">
+                <input
+                  type="checkbox"
+                  checked={form.guidelinesAccepted}
+                  onChange={(e) => {
+                    update({ guidelinesAccepted: e.target.checked });
+                    // Ticking the box is the whole fix — clear its message
+                    // immediately instead of waiting for the next Publish.
+                    if (e.target.checked) setErrors((prev) => ({ ...prev, guidelines: undefined }));
+                  }}
+                  className="mt-0.5 size-4 accent-[var(--primary)]"
+                />
+                {t("guidelines")}
+              </label>
+              {fieldError("guidelines")}
+            </div>
             {publishError ? (
               <p className="rounded-2xl border border-destructive/30 bg-destructive/10 px-4 py-2.5 text-sm text-destructive" role="alert">
                 {t("publishFailed")}
@@ -630,7 +660,7 @@ export function HostEventClient({ adapter = liveEventsAdapter }: { adapter?: Eve
               ) : null}
               <button
                 type="submit"
-                disabled={!form.guidelinesAccepted || publishing}
+                disabled={publishing}
                 className="inline-flex items-center gap-2 rounded-full bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary-dark disabled:cursor-not-allowed disabled:opacity-50"
               >
                 {publishing ? (

@@ -122,6 +122,8 @@
     "close": "Fechar",
     "basicsTitle": "O básico",
     "basicsIntro": "Só estas três coisas e você pode publicar. Todo o resto é opcional.",
+    "requiredMark": "Obrigatório",
+    "optionalMark": "Opcional",
     "nameLabel": "Como você vai chamá-lo?",
     "namePlaceholder": "Contagem de aves ao amanhecer em Marsh Lane",
     "dateLabel": "Data",
@@ -160,11 +162,11 @@
     "agendaTime": "Hora",
     "agendaWhat": "O que acontece",
     "agendaAdd": "Adicionar uma linha",
-    "themeTagLabel": "Uma etiqueta curta (opcional)",
+    "themeTagLabel": "Uma etiqueta curta",
     "themeTagPlaceholder": "Iniciantes bem-vindos",
     "meetingNoteLabel": "Ponto de encontro exato (mostrado após a confirmação)",
     "meetingNotePlaceholder": "Estacionamento de Marsh Lane, junto ao quadro de avisos",
-    "goodToKnowLabel": "Bom saber (opcional)",
+    "goodToKnowLabel": "Bom saber",
     "goodToKnowPlaceholder": "Participação gratuita · Crianças bem-vindas com um adulto",
     "guidelines": "Li as diretrizes da comunidade e vou cuidar de todas as pessoas que vierem.",
     "saveDraft": "Salvar como rascunho",
@@ -180,7 +182,8 @@
       "datePassed": "Esta data já passou. Escolha hoje ou uma data futura.",
       "startMissing": "Escolha um horário de início.",
       "placeMissing": "Diga onde as pessoas se encontram.",
-      "onlineUrlMissing": "Adicione um link para as pessoas entrarem."
+      "onlineUrlMissing": "Adicione um link para as pessoas entrarem.",
+      "guidelinesMissing": "Marque a caixa para confirmar que leu as diretrizes da comunidade."
     },
     "confirm": {
       "title": "Seu evento está no ar",

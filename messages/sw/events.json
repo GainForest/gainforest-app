@@ -122,6 +122,8 @@
     "close": "Funga",
     "basicsTitle": "Mambo ya msingi",
     "basicsIntro": "Mambo haya matatu tu na unaweza kuchapisha. Mengine yote ni ya hiari.",
+    "requiredMark": "Lazima",
+    "optionalMark": "Hiari",
     "nameLabel": "Utaliita nini?",
     "namePlaceholder": "Hesabu ya Ndege Alfajiri huko Marsh Lane",
     "dateLabel": "Tarehe",
@@ -160,11 +162,11 @@
     "agendaTime": "Saa",
     "agendaWhat": "Kinachotokea",
     "agendaAdd": "Ongeza mstari",
-    "themeTagLabel": "Lebo moja fupi (hiari)",
+    "themeTagLabel": "Lebo moja fupi",
     "themeTagPlaceholder": "Wanaoanza wanakaribishwa",
     "meetingNoteLabel": "Mahali kamili pa kukutana (huonyeshwa baada ya kuthibitisha)",
     "meetingNotePlaceholder": "Maegesho ya Marsh Lane, karibu na ubao wa matangazo",
-    "goodToKnowLabel": "Vizuri kujua (hiari)",
+    "goodToKnowLabel": "Vizuri kujua",
     "goodToKnowPlaceholder": "Kuhudhuria ni bure · Watoto wanakaribishwa na mtu mzima",
     "guidelines": "Nimesoma miongozo ya jamii na nitawatunza wote watakaokuja.",
     "saveDraft": "Hifadhi kama rasimu",
@@ -180,7 +182,8 @@
       "datePassed": "Tarehe hii imeshapita. Chagua leo au baadaye.",
       "startMissing": "Chagua saa ya kuanza.",
       "placeMissing": "Sema watu wanakutana wapi.",
-      "onlineUrlMissing": "Ongeza kiungo watu wanachoweza kujiunga nacho."
+      "onlineUrlMissing": "Ongeza kiungo watu wanachoweza kujiunga nacho.",
+      "guidelinesMissing": "Weka alama kwenye kisanduku kuthibitisha umesoma miongozo ya jamii."
     },
     "confirm": {
       "title": "Tukio lako liko hewani",

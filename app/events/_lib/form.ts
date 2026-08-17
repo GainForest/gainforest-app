@@ -83,11 +83,21 @@ export function eventToForm(event: CommunityEvent): EventFormState {
 }
 
 /** Translation keys under events.host.errors — never raw English. */
-export type EventFormErrorKey = "nameMissing" | "dateMissing" | "datePassed" | "startMissing" | "placeMissing" | "onlineUrlMissing";
+export type EventFormErrorKey =
+  | "nameMissing"
+  | "dateMissing"
+  | "datePassed"
+  | "startMissing"
+  | "placeMissing"
+  | "onlineUrlMissing"
+  | "guidelinesMissing";
 
-export type EventFormErrors = Partial<Record<"name" | "date" | "start" | "place" | "onlineUrl", EventFormErrorKey>>;
+export type EventFormErrors = Partial<Record<"name" | "date" | "start" | "place" | "onlineUrl" | "guidelines", EventFormErrorKey>>;
 
-/** Validation runs once, on Publish — only the required basics can block. */
+/** Validation runs once, on Publish — only the required basics (and the
+ *  guidelines tick) can block. The Publish button itself is never disabled
+ *  for an unticked box: a dead-looking button explains nothing, a message
+ *  under the box does. */
 export function validateEventForm(form: EventFormState, nowMs: number): EventFormErrors {
   const errors: EventFormErrors = {};
   if (!form.name.trim()) errors.name = "nameMissing";
@@ -107,6 +117,7 @@ export function validateEventForm(form: EventFormState, nowMs: number): EventFor
 
   if (form.mode !== "virtual" && !form.placeName.trim()) errors.place = "placeMissing";
   if (form.mode !== "inperson" && !form.onlineUrl.trim()) errors.onlineUrl = "onlineUrlMissing";
+  if (!form.guidelinesAccepted) errors.guidelines = "guidelinesMissing";
   return errors;
 }
 

@@ -122,6 +122,8 @@
     "close": "Close",
     "basicsTitle": "The basics",
     "basicsIntro": "Just these three things and you can publish. Everything below is optional.",
+    "requiredMark": "Required",
+    "optionalMark": "Optional",
     "nameLabel": "What are you calling it?",
     "namePlaceholder": "Dawn Bird Count at Marsh Lane",
     "dateLabel": "Date",
@@ -160,11 +162,11 @@
     "agendaTime": "Time",
     "agendaWhat": "What happens",
     "agendaAdd": "Add a line",
-    "themeTagLabel": "One short tag (optional)",
+    "themeTagLabel": "One short tag",
     "themeTagPlaceholder": "Beginners welcome",
     "meetingNoteLabel": "Exact meeting point (shown after RSVP)",
     "meetingNotePlaceholder": "Marsh Lane car park, by the noticeboard",
-    "goodToKnowLabel": "Good to know (optional)",
+    "goodToKnowLabel": "Good to know",
     "goodToKnowPlaceholder": "Free to attend · Children welcome with an adult",
     "guidelines": "I have read the community guidelines and I will look after everyone who comes.",
     "saveDraft": "Save as draft",
@@ -180,7 +182,8 @@
       "datePassed": "This date has passed. Pick today or later.",
       "startMissing": "Pick a start time.",
       "placeMissing": "Say where people meet.",
-      "onlineUrlMissing": "Add a link people can join."
+      "onlineUrlMissing": "Add a link people can join.",
+      "guidelinesMissing": "Tick the box to confirm you have read the community guidelines."
     },
     "confirm": {
       "title": "Your event is live",

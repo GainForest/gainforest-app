@@ -122,6 +122,8 @@
     "close": "Tutup",
     "basicsTitle": "Hal dasar",
     "basicsIntro": "Cukup tiga hal ini dan kamu bisa menerbitkan. Semua yang di bawah bersifat opsional.",
+    "requiredMark": "Wajib",
+    "optionalMark": "Opsional",
     "nameLabel": "Apa nama acaranya?",
     "namePlaceholder": "Hitung Burung Fajar di Marsh Lane",
     "dateLabel": "Tanggal",
@@ -160,11 +162,11 @@
     "agendaTime": "Waktu",
     "agendaWhat": "Apa yang terjadi",
     "agendaAdd": "Tambah baris",
-    "themeTagLabel": "Satu label singkat (opsional)",
+    "themeTagLabel": "Satu label singkat",
     "themeTagPlaceholder": "Pemula dipersilakan",
     "meetingNoteLabel": "Titik kumpul persis (ditampilkan setelah mendaftar)",
     "meetingNotePlaceholder": "Parkiran Marsh Lane, dekat papan pengumuman",
-    "goodToKnowLabel": "Perlu diketahui (opsional)",
+    "goodToKnowLabel": "Perlu diketahui",
     "goodToKnowPlaceholder": "Gratis untuk hadir · Anak-anak boleh datang dengan orang dewasa",
     "guidelines": "Saya telah membaca pedoman komunitas dan akan menjaga semua yang datang.",
     "saveDraft": "Simpan sebagai draf",
@@ -180,7 +182,8 @@
       "datePassed": "Tanggal ini sudah lewat. Pilih hari ini atau setelahnya.",
       "startMissing": "Pilih waktu mulai.",
       "placeMissing": "Sebutkan di mana orang bertemu.",
-      "onlineUrlMissing": "Tambahkan tautan yang bisa diikuti orang."
+      "onlineUrlMissing": "Tambahkan tautan yang bisa diikuti orang.",
+      "guidelinesMissing": "Centang kotak untuk mengonfirmasi kamu telah membaca pedoman komunitas."
     },
     "confirm": {
       "title": "Acaramu sudah tayang",
