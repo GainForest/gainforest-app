@@ -2239,7 +2239,7 @@
       "siteNameLabel": "Nama lokasi (opsional)",
       "siteNamePlaceholder": "Jalur sungai, petak 3…",
       "deploymentIdLabel": "ID penempatan",
-      "newId": "Buat ID baru",
+      "deploymentIdHint": "Dibuat otomatis untuk penempatan ini.",
       "latitudeLabel": "Lintang",
       "longitudeLabel": "Bujur",
       "useLocation": "Gunakan lokasi saya saat ini",

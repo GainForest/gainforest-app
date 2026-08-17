@@ -2239,7 +2239,7 @@
       "siteNameLabel": "Nombre del sitio (opcional)",
       "siteNamePlaceholder": "Sendero del río, parcela 3…",
       "deploymentIdLabel": "ID de despliegue",
-      "newId": "Generar un nuevo ID",
+      "deploymentIdHint": "Se genera automáticamente para este despliegue.",
       "latitudeLabel": "Latitud",
       "longitudeLabel": "Longitud",
       "useLocation": "Usar mi ubicación actual",

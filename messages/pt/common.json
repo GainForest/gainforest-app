@@ -2239,7 +2239,7 @@
       "siteNameLabel": "Nome do local (opcional)",
       "siteNamePlaceholder": "Trilha do rio, parcela 3…",
       "deploymentIdLabel": "ID de implantação",
-      "newId": "Gerar um novo ID",
+      "deploymentIdHint": "Gerado automaticamente para esta implantação.",
       "latitudeLabel": "Latitude",
       "longitudeLabel": "Longitude",
       "useLocation": "Usar minha localização atual",

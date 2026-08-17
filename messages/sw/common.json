@@ -2239,7 +2239,7 @@
       "siteNameLabel": "Jina la eneo (hiari)",
       "siteNamePlaceholder": "Njia ya mto, shamba 3…",
       "deploymentIdLabel": "Kitambulisho cha usambazaji",
-      "newId": "Tengeneza kitambulisho kipya",
+      "deploymentIdHint": "Hutengenezwa kiotomatiki kwa usambazaji huu.",
       "latitudeLabel": "Latitudo",
       "longitudeLabel": "Longitudo",
       "useLocation": "Tumia mahali nilipo sasa",
