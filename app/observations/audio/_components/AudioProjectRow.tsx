@@ -134,20 +134,21 @@ export function AudioProjectRow({
   onToggle: () => void;
 }) {
   const t = useTranslations("common.audiomoth.audioHub");
-  const projectTitle = row.project?.title ?? row.fallbackTitle ?? t("soundscapeFallback");
   const organization = row.ownerName ?? t("unknownOrganization");
+  const projectTitle = row.project?.title ?? row.fallbackTitle ?? t("soundscapeFallback");
+  const organizationHref = accountHref(row.ownerDid);
   const projectHref = row.project
     ? localProjectHref(row.project.did, row.project.rkey)
-    : accountHref(row.ownerDid);
-  const logo = row.projectImage ?? row.ownerAvatar;
-  const mono = monogram(projectTitle, row.ownerDid);
+    : organizationHref;
+  const logo = row.ownerAvatar ?? row.projectImage;
+  const mono = monogram(organization, row.ownerDid);
 
   return (
     <section className="flex flex-col gap-4 border-t border-border/60 pt-6">
       <div className="flex flex-wrap items-center gap-x-4 gap-y-3">
         <Link
           href={projectHref}
-          aria-label={projectTitle}
+          aria-label={organization}
           className="relative size-11 shrink-0 overflow-hidden rounded-xl border border-border bg-muted"
         >
           {logo ? (
@@ -170,13 +171,13 @@ export function AudioProjectRow({
         </Link>
         <div className="min-w-0 flex-1">
           <h2 className="min-w-0 truncate text-lg font-medium text-foreground">
-            <Link href={projectHref} className="hover:underline">
-              {projectTitle}
+            <Link href={organizationHref} className="hover:underline">
+              {organization}
             </Link>
           </h2>
           <p className="mt-0.5 truncate text-[13px] text-muted-foreground">
             {t("projectMeta", {
-              organization,
+              project: projectTitle,
               recorders: row.recorderCount,
               recordings: row.recordingCount,
             })}
