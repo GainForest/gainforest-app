@@ -204,8 +204,8 @@ export function HostEventClient({ adapter = liveEventsAdapter }: { adapter?: Eve
   if (published) {
     const pageUrl = `${typeof window !== "undefined" ? window.location.origin : ""}${eventHref(published.did, published.rkey)}`;
     return (
-      <main ref={confirmationRef} className="mx-auto w-full max-w-xl scroll-mt-20 px-4 py-12 sm:px-6">
-        <div className="rounded-[2rem] border border-border-soft bg-surface p-8 text-center shadow-sm">
+      <main ref={confirmationRef} className="mx-auto w-full max-w-5xl scroll-mt-20 px-4 py-12 sm:px-6">
+        <div className="mx-auto max-w-xl rounded-3xl border border-border-soft bg-surface p-8 text-center shadow-sm">
           <div className="mx-auto grid size-14 place-items-center rounded-full bg-primary text-primary-foreground">
             <CheckIcon className="size-7" aria-hidden />
           </div>
@@ -299,15 +299,12 @@ export function HostEventClient({ adapter = liveEventsAdapter }: { adapter?: Eve
   );
 
   return (
-    <main className="mx-auto w-full max-w-xl px-4 pb-16 pt-6 sm:px-6">
+    <main className="mx-auto w-full max-w-5xl px-4 pb-16 pt-6 sm:px-6">
       <div className="flex items-center justify-between gap-3">
         <h1 className="text-xl font-semibold text-foreground">{isEditing ? t("editTitle") : t("title")}</h1>
-        <div className="flex items-center gap-3 text-sm text-muted-foreground">
-          {!isEditing && draftSavedAt ? <span>{t("draftSaved")}</span> : null}
-          <Link href={isEditing && editingEvent ? eventHref(editingEvent.did, editingEvent.rkey) : "/events"} className="font-medium text-foreground hover:text-primary">
-            {t("close")}
-          </Link>
-        </div>
+        <Link href={isEditing && editingEvent ? eventHref(editingEvent.did, editingEvent.rkey) : "/events"} className="text-sm font-medium text-foreground hover:text-primary">
+          {t("close")}
+        </Link>
       </div>
 
       {!hydrated ? (
@@ -318,12 +315,14 @@ export function HostEventClient({ adapter = liveEventsAdapter }: { adapter?: Eve
         </div>
       ) : (
         <form
-          className="mt-6 space-y-6"
+          className="mt-6"
           onSubmit={(e) => {
             e.preventDefault();
             void handlePublish();
           }}
         >
+          <div className="flex flex-col gap-8 lg:flex-row">
+            <div className="min-w-0 flex-1 space-y-6">
           {errorCount > 0 ? (
             <div className="rounded-2xl border border-destructive/30 bg-destructive/10 px-4 py-3" role="alert">
               <p className="text-sm font-semibold text-destructive">{t("errors.summary")}</p>
@@ -625,55 +624,63 @@ export function HostEventClient({ adapter = liveEventsAdapter }: { adapter?: Eve
             </div>
           </section>
 
-          {/* Guidelines confirmation + publish, always at the foot of the
-              page. Publish stays clickable when the box is unticked — the
-              validation message under the box explains what's missing,
-              instead of a dead-looking button explaining nothing. */}
-          <section className="space-y-4 border-t border-border-soft pt-5">
-            <div ref={(el) => void (fieldRefs.current.guidelines = el)}>
-              <label className="flex cursor-pointer items-start gap-2.5 text-sm text-foreground">
-                <input
-                  type="checkbox"
-                  checked={form.guidelinesAccepted}
-                  onChange={(e) => {
-                    update({ guidelinesAccepted: e.target.checked });
-                    // Ticking the box is the whole fix — clear its message
-                    // immediately instead of waiting for the next Publish.
-                    if (e.target.checked) setErrors((prev) => ({ ...prev, guidelines: undefined }));
-                  }}
-                  className="mt-0.5 size-4 accent-[var(--primary)]"
-                />
-                {t("guidelines")}
-              </label>
-              {fieldError("guidelines")}
             </div>
-            {publishError ? (
-              <p className="rounded-2xl border border-destructive/30 bg-destructive/10 px-4 py-2.5 text-sm text-destructive" role="alert">
-                {t("publishFailed")}
-              </p>
-            ) : null}
-            <div className="flex flex-wrap items-center justify-end gap-2">
-              {!isEditing ? (
-                <button type="button" onClick={handleSaveDraft} className="rounded-full border border-border px-4 py-2.5 text-sm font-semibold text-foreground hover:border-primary/50">
-                  {t("saveDraft")}
-                </button>
-              ) : null}
-              <button
-                type="submit"
-                disabled={publishing}
-                className="inline-flex items-center gap-2 rounded-full bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary-dark disabled:cursor-not-allowed disabled:opacity-50"
-              >
-                {publishing ? (
-                  t("publishing")
-                ) : (
-                  <>
-                    <CheckCircle2Icon className="size-4" aria-hidden />
-                    {isEditing ? t("saveChanges") : t("publish")}
-                  </>
-                )}
-              </button>
-            </div>
-          </section>
+
+            {/* The publish box — a sticky action rail on wide screens, and
+                the foot of the form on a phone. Publish stays clickable when
+                the box is unticked: the validation message under it explains
+                what's missing, instead of a dead-looking button. */}
+            <aside className="w-full lg:w-80 lg:shrink-0">
+              <div className="space-y-4 rounded-3xl border border-border-soft bg-surface p-5 shadow-sm lg:sticky lg:top-20">
+                {!isEditing && draftSavedAt ? (
+                  <p className="text-xs font-medium text-muted-foreground">{t("draftSaved")}</p>
+                ) : null}
+                <div ref={(el) => void (fieldRefs.current.guidelines = el)}>
+                  <label className="flex cursor-pointer items-start gap-2.5 text-sm text-foreground">
+                    <input
+                      type="checkbox"
+                      checked={form.guidelinesAccepted}
+                      onChange={(e) => {
+                        update({ guidelinesAccepted: e.target.checked });
+                        // Ticking the box is the whole fix — clear its message
+                        // immediately instead of waiting for the next Publish.
+                        if (e.target.checked) setErrors((prev) => ({ ...prev, guidelines: undefined }));
+                      }}
+                      className="mt-0.5 size-4 accent-[var(--primary)]"
+                    />
+                    {t("guidelines")}
+                  </label>
+                  {fieldError("guidelines")}
+                </div>
+                {publishError ? (
+                  <p className="rounded-2xl border border-destructive/30 bg-destructive/10 px-4 py-2.5 text-sm text-destructive" role="alert">
+                    {t("publishFailed")}
+                  </p>
+                ) : null}
+                <div className="flex flex-col gap-2">
+                  <button
+                    type="submit"
+                    disabled={publishing}
+                    className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary-dark disabled:cursor-not-allowed disabled:opacity-50"
+                  >
+                    {publishing ? (
+                      t("publishing")
+                    ) : (
+                      <>
+                        <CheckCircle2Icon className="size-4" aria-hidden />
+                        {isEditing ? t("saveChanges") : t("publish")}
+                      </>
+                    )}
+                  </button>
+                  {!isEditing ? (
+                    <button type="button" onClick={handleSaveDraft} className="w-full rounded-full border border-border px-4 py-2.5 text-sm font-semibold text-foreground hover:border-primary/50">
+                      {t("saveDraft")}
+                    </button>
+                  ) : null}
+                </div>
+              </div>
+            </aside>
+          </div>
         </form>
       )}
     </main>

@@ -360,7 +360,7 @@ export function EventsDiscoveryClient({ adapter = liveEventsAdapter }: { adapter
         </div>
       ) : upcoming.length === 0 ? (
         /* Empty state B — a supply problem: become a host, or look online. */
-        <div className="mt-8 rounded-[2rem] border border-border-soft bg-surface px-6 py-14 text-center">
+        <div className="mt-8 rounded-3xl border border-border-soft bg-surface px-6 py-14 text-center">
           <div className="mx-auto grid size-14 place-items-center rounded-2xl bg-primary/10 text-primary">
             <CalendarPlusIcon className="size-7" aria-hidden />
           </div>
@@ -398,7 +398,7 @@ export function EventsDiscoveryClient({ adapter = liveEventsAdapter }: { adapter
               {t("emptyFiltered.clearAll")}
             </button>
           </div>
-          <div className="mt-4 rounded-[2rem] border border-border-soft bg-surface px-6 py-14 text-center">
+          <div className="mt-4 rounded-3xl border border-border-soft bg-surface px-6 py-14 text-center">
             <div className="mx-auto grid size-14 place-items-center rounded-2xl bg-muted text-muted-foreground">
               <SearchIcon className="size-7" aria-hidden />
             </div>

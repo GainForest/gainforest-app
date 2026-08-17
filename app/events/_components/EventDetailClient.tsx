@@ -399,7 +399,7 @@ export function EventDetailClient({
   );
 
   return (
-    <main className="mx-auto w-full max-w-5xl px-4 pb-28 pt-5 sm:px-6 lg:pb-16">
+    <main className="mx-auto w-full max-w-5xl px-4 pb-28 pt-6 sm:px-6 lg:pb-16">
       <Link href="/events" className="inline-flex items-center gap-1.5 text-sm font-medium text-muted-foreground hover:text-foreground">
         <ArrowLeftIcon className="size-4" aria-hidden />
         {t("back")}
