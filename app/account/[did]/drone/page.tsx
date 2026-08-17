@@ -14,7 +14,7 @@ export default async function AccountDronePage({ params }: { params: Promise<{ d
 
   return (
     <>
-      <ObservationsSubNav identifier={account.urlIdentifier} showPrivate />
+      <ObservationsSubNav identifier={account.urlIdentifier} />
       <OrgManageTabContent identifier={account.urlIdentifier} tab="drone" />
     </>
   );
