@@ -72,8 +72,14 @@ type RawDeployment = {
 export type AudioProjectUpload = {
   id: string;
   did: string;
+  /** The `ac.deployment` folder this slot stands for. One folder is one
+   *  deployment, so this is the slot's identity and the key a soundscape is
+   *  matched on. */
+  deploymentRef: string | null;
   title: string | null;
+  /** How many files the folder holds. */
   recordingCount: number;
+  /** Folder name. Not shown — kept so search can find a project by it. */
   recorderName: string | null;
   siteName: string | null;
   createdAt: string | null;
@@ -89,6 +95,7 @@ export type AudioProject = {
   /** The account that recorded it — the row's organization line and fallback logo. */
   organizationName: string | null;
   organizationAvatarUrl: string | null;
+  /** Distinct recorder folders — one folder is one deployment. */
   recorderCount: number;
   recordingCount: number;
   uploads: AudioProjectUpload[];
@@ -547,29 +554,52 @@ async function listNetworkAudioProjectsUncached(signal?: AbortSignal): Promise<A
     ),
   );
 
-  const grouped = new Map<string, { project: ProjectRecord; uploads: AudioProjectUpload[] }>();
+  // One folder is one deployment, so a folder gets exactly one slot even when
+  // it was filled by several upload sessions. Keying by `deploymentRef` also
+  // stops the folder total being added to the project total twice.
+  const grouped = new Map<string, { project: ProjectRecord; uploads: Map<string, AudioProjectUpload> }>();
   for (const { project } of soundscapesByProject.values()) {
-    grouped.set(project.atUri, { project, uploads: [] });
+    grouped.set(project.atUri, { project, uploads: new Map() });
   }
   uploadDrafts.forEach((draft, index) => {
     const { candidate, sample, sampleDid, deployment, parsedCount } = draft;
     const count = parsedCount ?? missingCounts[index] ?? candidate.recordings.length;
     if (count <= 0) return;
     const siteUri = sample?.siteRef ?? deployment?.siteRef ?? candidate.project.locationUri;
-    const current = grouped.get(candidate.project.atUri);
-    const upload: AudioProjectUpload = {
-      id: candidate.attachment.uri!,
+    const deploymentRef = sample?.deploymentRef?.trim() || null;
+    const slotKey = deploymentRef ?? candidate.attachment.uri!;
+
+    let entry = grouped.get(candidate.project.atUri);
+    if (!entry) {
+      entry = { project: candidate.project, uploads: new Map() };
+      grouped.set(candidate.project.atUri, entry);
+    }
+
+    const existing = entry.uploads.get(slotKey);
+    const createdAt = [candidate.attachment.createdAt ?? null, existing?.createdAt ?? null]
+      .filter((value): value is string => Boolean(value))
+      .sort()
+      .pop() ?? null;
+
+    entry.uploads.set(slotKey, {
+      id: existing?.id ?? candidate.attachment.uri!,
       did: sampleDid,
-      title: candidate.attachment.title?.trim() || null,
-      recordingCount: count,
-      recorderName: deployment?.name?.trim() || candidate.attachment.title?.trim() || deployment?.deviceModel?.trim() || null,
-      siteName: siteUri ? locationNames.get(siteUri) ?? null : null,
-      createdAt: candidate.attachment.createdAt ?? null,
-      recordingUris: candidate.recordings,
-      recordedDates: recordedDates[index] ?? [],
-    };
-    if (current) current.uploads.push(upload);
-    else grouped.set(candidate.project.atUri, { project: candidate.project, uploads: [upload] });
+      deploymentRef,
+      title: candidate.attachment.title?.trim() || existing?.title || null,
+      // Every attachment for a folder reports that folder's total, so the
+      // largest reading is the folder size — never the sum.
+      recordingCount: Math.max(count, existing?.recordingCount ?? 0),
+      recorderName:
+        deployment?.name?.trim() ||
+        candidate.attachment.title?.trim() ||
+        deployment?.deviceModel?.trim() ||
+        existing?.recorderName ||
+        null,
+      siteName: (siteUri ? locationNames.get(siteUri) ?? null : null) ?? existing?.siteName ?? null,
+      createdAt,
+      recordingUris: [...new Set([...(existing?.recordingUris ?? []), ...candidate.recordings])],
+      recordedDates: [...new Set([...(existing?.recordedDates ?? []), ...(recordedDates[index] ?? [])])].sort(),
+    });
   });
 
   // The row is headed by the account that recorded it, so resolve each one's
@@ -580,7 +610,8 @@ async function listNetworkAudioProjectsUncached(signal?: AbortSignal): Promise<A
   );
 
   const projects = await Promise.all(
-    [...grouped.values()].map(async ({ project, uploads }) => {
+    [...grouped.values()].map(async ({ project, uploads: uploadsByFolder }) => {
+      const uploads = [...uploadsByFolder.values()];
       const card = profileCards.get(project.did);
       const organizationAvatarUrl =
         card?.avatarUrl ??
@@ -591,6 +622,7 @@ async function listNetworkAudioProjectsUncached(signal?: AbortSignal): Promise<A
         project,
         organizationName: card?.displayName ?? project.creatorName ?? null,
         organizationAvatarUrl,
+        // One slot per folder, so the slot count is the recorder count.
         recorderCount: uploads.length,
         recordingCount: uploads.reduce((sum, upload) => sum + upload.recordingCount, 0),
         uploads: [...uploads].sort((a, b) => {

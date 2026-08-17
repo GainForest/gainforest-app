@@ -2,8 +2,10 @@
 
 /**
  * The one shared project-row schema for the public audio explore page.
- * Project identity lives in the row header; each slot owns one kind of audio,
- * its date, its recorder/count and its one action.
+ *
+ * The row header owns project identity and the project's totals. Each slot
+ * owns exactly one folder: its kind, the days it covers, how many files it
+ * holds and one way in. Nothing is stated at both levels.
  */
 
 import Image from "next/image";
@@ -20,11 +22,14 @@ import type { NetworkSoundscape } from "@/app/_lib/soundscape-explore";
 import { SoundscapeCard } from "@/app/soundscape/_components/SoundscapeCard";
 import { formatCardDateRange } from "@/lib/soundscape/card";
 import { soundscapeDates, soundscapeHref } from "@/lib/soundscape/record";
-import { AudioRecordingSlot } from "./AudioUploadGroup";
+import { AudioRecordingSlot } from "./AudioRecordingSlot";
+import { countForSoundscape, displaySoundscapeTitle } from "./audio-row";
 
-export type AudioProjectRow = {
+/** One project's audio, as the explore page reads it. */
+export type AudioRow = {
   key: string;
   project: ProjectRecord | null;
+  /** Stands in for the project name when a soundscape has no project record. */
   fallbackTitle: string | null;
   ownerDid: string;
   ownerName: string | null;
@@ -40,38 +45,6 @@ export type AudioProjectSlot =
   | { kind: "soundscape"; item: NetworkSoundscape; upload: AudioProjectUpload | null }
   | { kind: "recordings"; upload: AudioProjectUpload };
 
-function recorderName(
-  upload: AudioProjectUpload | null,
-  soundscape: NetworkSoundscape | null,
-  fallback: string,
-): string {
-  return upload?.recorderName?.trim() || soundscape?.recorderName?.trim() || fallback;
-}
-
-function countForSoundscape(item: NetworkSoundscape, upload: AudioProjectUpload | null): number {
-  return upload?.recordingCount || item.soundscape.sources.length;
-}
-
-/** Older publish defaults put the recorder name and ISO date in the title.
- * Those facts now have dedicated fields in the slot, so keep only the title
- * when displaying a generated title. Custom titles without a date are left
- * untouched. */
-function displaySoundscapeTitle(value: string, fallback: string): string {
-  const title = value.trim();
-  if (!title) return fallback;
-  const withoutDate = title.replace(
-    /\s*[·•]\s*\d{4}-\d{2}-\d{2}(?:\s*[–-]\s*\d{4}-\d{2}-\d{2})?\s*$/,
-    "",
-  );
-  if (withoutDate === title) return title;
-  const parts = withoutDate.split(/\s*[·•]\s*/).map((part) => part.trim()).filter(Boolean);
-  return parts[0] ?? fallback;
-}
-
-function dateLabel(dates: string[], locale: string, fallback: string): string {
-  return dates.length > 0 ? formatCardDateRange(dates, locale) : fallback;
-}
-
 function SoundscapeSlot({
   item,
   upload,
@@ -82,34 +55,33 @@ function SoundscapeSlot({
   const t = useTranslations("common.audiomoth.audioHub");
   const locale = useLocale();
   const title = displaySoundscapeTitle(item.soundscape.title, t("soundscapeFallback"));
-  const recorder = recorderName(upload, item, t("recorderFallback"));
-  const count = countForSoundscape(item, upload);
   const dates = soundscapeDates(item.soundscape.sources);
+  const href = soundscapeHref(item.did, item.rkey);
 
   return (
     <article className="flex min-h-[390px] min-w-0 flex-col overflow-hidden rounded-xl border-2 border-foreground bg-background p-3 sm:p-4">
       <div className="flex items-baseline justify-between gap-3 font-mono text-[11px] font-semibold uppercase tracking-[0.13em] text-muted-foreground">
         <span>{t("soundscapeSlot")}</span>
         <span className="shrink-0 normal-case tracking-normal">
-          {dateLabel(dates, locale, t("dateUnavailable"))}
+          {dates.length > 0 ? formatCardDateRange(dates, locale) : t("dateUnavailable")}
         </span>
       </div>
 
-      <div className="mt-3 flex min-w-0 items-center gap-2">
-        <h3 className="min-w-0 truncate text-base font-medium text-foreground">
-          <Link href={soundscapeHref(item.did, item.rkey)} className="hover:underline">
-            {title}
-          </Link>
-        </h3>
-      </div>
+      <h3 className="mt-3 min-w-0 truncate text-base font-medium text-foreground">
+        <Link href={href} className="hover:underline">
+          {title}
+        </Link>
+      </h3>
       <p className="mt-2 flex min-w-0 items-center gap-1.5 truncate font-mono text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">
         <RadioIcon className="size-3.5 shrink-0" aria-hidden />
-        <span className="truncate">{t("slotMeta", { recorder, count })}</span>
+        <span className="truncate">
+          {t("slotRecordings", { count: countForSoundscape(item, upload) })}
+        </span>
       </p>
 
       <SoundscapeCard
         soundscape={item.soundscape}
-        href={soundscapeHref(item.did, item.rkey)}
+        href={href}
         legend={false}
         showHeader={false}
         showFooter={false}
@@ -127,7 +99,7 @@ export function AudioProjectRow({
   expanded,
   onToggle,
 }: {
-  row: AudioProjectRow;
+  row: AudioRow;
   slots: AudioProjectSlot[];
   hiddenCount: number;
   expanded: boolean;
@@ -147,7 +119,7 @@ export function AudioProjectRow({
     <section className="flex flex-col gap-4 border-t border-border/60 pt-6">
       <div className="flex flex-wrap items-center gap-x-4 gap-y-3">
         <Link
-          href={projectHref}
+          href={organizationHref}
           aria-label={organization}
           className="relative size-11 shrink-0 overflow-hidden rounded-xl border border-border bg-muted"
         >

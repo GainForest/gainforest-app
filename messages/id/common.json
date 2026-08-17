@@ -1908,7 +1908,7 @@
       "recordingsSlot": "Rekaman",
       "noSoundscapeYet": "Belum ada lanskap suara",
       "awaitingFullDay": "Menunggu satu hari penuh",
-      "slotMeta": "{recorder} · {count, number} rekaman",
+      "slotRecordings": "{count, number} rekaman",
       "soundscapeFallback": "Lanskap suara",
       "dateUnavailable": "Tanggal tidak tersedia",
       "showMoreFromProject": "{count, plural, other {Tampilkan # lagi dari proyek ini}}",
@@ -1916,7 +1916,6 @@
       "voiceKeyTitle": "Legenda kelompok suara",
       "noMatches": "Tidak ada proyek yang cocok dengan filter ini.",
       "clearFilters": "Hapus filter",
-      "recorderFallback": "Perekam lapangan",
       "browseRecordings": "Jelajahi rekaman",
       "unknownOrganization": "Pengelola proyek"
     },

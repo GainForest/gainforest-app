@@ -1908,7 +1908,7 @@
       "recordingsSlot": "Gravações",
       "noSoundscapeYet": "Nenhuma paisagem sonora ainda",
       "awaitingFullDay": "Aguardando um dia inteiro",
-      "slotMeta": "{recorder} · {count, number} gravações",
+      "slotRecordings": "{count, number} gravações",
       "soundscapeFallback": "Paisagem sonora",
       "dateUnavailable": "Data indisponível",
       "showMoreFromProject": "{count, plural, one {Mostrar mais # deste projeto} other {Mostrar mais # deste projeto}}",
@@ -1916,7 +1916,6 @@
       "voiceKeyTitle": "Legenda dos grupos de vozes",
       "noMatches": "Nenhum projeto corresponde a estes filtros.",
       "clearFilters": "Limpar filtros",
-      "recorderFallback": "Gravador de campo",
       "browseRecordings": "Explorar gravações",
       "unknownOrganization": "Responsável pelo projeto"
     },

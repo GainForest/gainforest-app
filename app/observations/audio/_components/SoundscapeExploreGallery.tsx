@@ -3,8 +3,8 @@
 /**
  * Public audio explore. Every result is rendered as a project row with the
  * same header and the same slot schema, whether the project has a published
- * soundscape, raw recordings, or both. The row owns project identity; a slot
- * owns its kind, date, recorder/count and action.
+ * soundscape, raw recordings, or both. The row owns project identity and its
+ * totals; a slot owns one folder's kind, date, size and action.
  */
 
 import Link from "next/link";
@@ -12,43 +12,25 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
 import { ChevronDownIcon, SearchIcon, WavesIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import type { AudioProject, AudioProjectUpload } from "@/app/_lib/audio-projects";
+import type { AudioProject } from "@/app/_lib/audio-projects";
 import { resolveDidProfile, type DidProfile } from "@/app/_lib/did-profile";
 import type { NetworkSoundscape } from "@/app/_lib/soundscape-explore";
-import { AudioProjectRow, type AudioProjectRow as AudioProjectRowData, type AudioProjectSlot } from "./AudioProjectRow";
+import { AudioProjectRow, type AudioProjectSlot, type AudioRow } from "./AudioProjectRow";
+import {
+  dateKeysMs,
+  displaySoundscapeTitle,
+  publishedMs,
+  recordedMs,
+  sharesFolder,
+  soundscapeOnlyTotals,
+  uploadForSoundscape,
+  uploadedMs,
+} from "./audio-row";
 import { CARD_BAND_COLORS } from "@/app/soundscape/_components/SoundscapeCard";
 import { FREQUENCY_BANDS, formatBandRange } from "@/lib/soundscape/analysis";
-import { soundscapeDates } from "@/lib/soundscape/record";
 import { cn } from "@/lib/utils";
 
 type SortKey = "added" | "recorded";
-
-function publishedMs(item: NetworkSoundscape): number {
-  const time = Date.parse(item.soundscape.createdAt ?? "");
-  return Number.isNaN(time) ? 0 : time;
-}
-
-function recordedMs(item: NetworkSoundscape): number {
-  const dates = soundscapeDates(item.soundscape.sources);
-  const last = dates[dates.length - 1];
-  const time = last ? Date.parse(`${last}T12:00:00`) : Number.NaN;
-  return Number.isNaN(time) ? 0 : time;
-}
-
-function uploadedMs(item: AudioProjectUpload): number {
-  const time = item.createdAt ? Date.parse(item.createdAt) : Number.NaN;
-  return Number.isNaN(time) ? 0 : time;
-}
-
-function dateKeysMs(dates: string[]): number {
-  return Math.max(
-    0,
-    ...dates.map((date) => {
-      const time = Date.parse(`${date}T12:00:00`);
-      return Number.isNaN(time) ? 0 : time;
-    }),
-  );
-}
 
 function SelectPill({
   value,
@@ -78,7 +60,7 @@ function SelectPill({
   );
 }
 
-type SortableProjectRow = AudioProjectRowData & {
+type SortableProjectRow = AudioRow & {
   latestAdded: number;
   latestRecorded: number;
 };
@@ -105,27 +87,24 @@ function createProjectRow(
   };
 }
 
-function matchingUpload(item: NetworkSoundscape, uploads: AudioProjectUpload[]): AudioProjectUpload | null {
-  const sourceUris = new Set(item.soundscape.sources.map((source) => source.audioUri));
-  return (
-    uploads.find((upload) => upload.recordingUris.some((uri) => sourceUris.has(uri))) ??
-    (uploads.length === 1 ? uploads[0] : null)
+/** A folder that already has a soundscape is shown as that soundscape, so it
+ *  never appears twice in one row. */
+function slotsForRow(row: AudioRow): AudioProjectSlot[] {
+  const soundscapeSlots = row.soundscapes.map((item): AudioProjectSlot => ({
+    kind: "soundscape",
+    item,
+    upload: uploadForSoundscape(item, row.uploads),
+  }));
+  const covered = new Set(
+    soundscapeSlots.flatMap((slot) =>
+      slot.kind === "soundscape" && slot.upload?.deploymentRef ? [slot.upload.deploymentRef] : [],
+    ),
   );
-}
-
-function hasSourceMatch(item: NetworkSoundscape, upload: AudioProjectUpload): boolean {
-  const sourceUris = new Set(item.soundscape.sources.map((source) => source.audioUri));
-  return upload.recordingUris.some((uri) => sourceUris.has(uri));
-}
-
-function slotsForRow(row: AudioProjectRowData): AudioProjectSlot[] {
   return [
-    ...row.soundscapes.map((item): AudioProjectSlot => ({
-      kind: "soundscape",
-      item,
-      upload: matchingUpload(item, row.uploads),
-    })),
-    ...row.uploads.map((upload): AudioProjectSlot => ({ kind: "recordings", upload })),
+    ...soundscapeSlots,
+    ...row.uploads
+      .filter((upload) => !upload.deploymentRef || !covered.has(upload.deploymentRef))
+      .map((upload): AudioProjectSlot => ({ kind: "recordings", upload })),
   ];
 }
 
@@ -181,11 +160,9 @@ export function SoundscapeExploreGallery({
       row.soundscapes.push(item);
       row.latestAdded = Math.max(row.latestAdded, publishedMs(item));
       row.latestRecorded = Math.max(row.latestRecorded, recordedMs(item));
-      if (row.recorderCount === 0) row.recorderCount = 1;
-      if (row.recordingCount === 0) {
-        row.recordingCount = item.soundscape.sources.length;
+      if (!row.fallbackTitle) {
+        row.fallbackTitle = displaySoundscapeTitle(item.soundscape.title, "") || null;
       }
-      if (!row.fallbackTitle) row.fallbackTitle = item.soundscape.title || null;
     };
 
     for (const item of items) {
@@ -197,7 +174,7 @@ export function SoundscapeExploreGallery({
       if (linked.length === 0) {
         linked = audioProjects.filter((audio) =>
           audio.project.did === item.did &&
-          audio.uploads.some((upload) => hasSourceMatch(item, upload)),
+          audio.uploads.some((upload) => sharesFolder(item, upload)),
         );
       }
 
@@ -223,12 +200,12 @@ export function SoundscapeExploreGallery({
         row.latestRecorded,
         ...row.uploads.map((upload) => dateKeysMs(upload.recordedDates)),
       );
+      // A row known only through its soundscapes still has to state totals,
+      // and one folder must not be counted once per soundscape built from it.
       if (row.uploads.length === 0 && row.soundscapes.length > 0) {
-        row.recorderCount = Math.max(1, row.soundscapes.length);
-        row.recordingCount = row.soundscapes.reduce(
-          (total, item) => total + item.soundscape.sources.length,
-          0,
-        );
+        const totals = soundscapeOnlyTotals(row.soundscapes);
+        row.recorderCount = totals.recorderCount;
+        row.recordingCount = totals.recordingCount;
       }
     }
 
@@ -240,7 +217,8 @@ export function SoundscapeExploreGallery({
       allRows
         .map((row) => ({
           key: row.key,
-          name: row.project?.title ?? row.fallbackTitle ?? row.ownerName ?? t("soundscapeFallback"),
+          // Rows are titled by organization, so the filter reads the same way.
+          name: row.ownerName ?? row.project?.title ?? row.fallbackTitle ?? t("unknownOrganization"),
         }))
         .sort((a, b) => a.name.localeCompare(b.name)),
     [allRows, t],
@@ -268,7 +246,7 @@ export function SoundscapeExploreGallery({
       .sort((a, b) => {
         const left = sort === "added" ? a.latestAdded : a.latestRecorded;
         const right = sort === "added" ? b.latestAdded : b.latestRecorded;
-        return right - left || (a.project?.title ?? a.fallbackTitle ?? "").localeCompare(b.project?.title ?? b.fallbackTitle ?? "");
+        return right - left || (a.ownerName ?? "").localeCompare(b.ownerName ?? "");
       });
   }, [allRows, projectFilter, query, sort]);
 

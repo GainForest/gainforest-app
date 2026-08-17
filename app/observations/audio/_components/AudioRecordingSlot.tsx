@@ -1,6 +1,6 @@
 "use client";
 
-/** One raw recorder folder in a project row. */
+/** One recorder folder in a project row, before it has a soundscape. */
 
 import Link from "next/link";
 import { ArrowUpRightIcon, RadioIcon } from "lucide-react";
@@ -9,24 +9,20 @@ import { Button } from "@/components/ui/button";
 import { accountAudioPath } from "@/app/account/_lib/account-route";
 import type { AudioProjectUpload } from "@/app/_lib/audio-projects";
 import { formatCardDateRange } from "@/lib/soundscape/card";
-
-function fallbackDateKeys(upload: AudioProjectUpload): string[] {
-  if (upload.recordedDates.length > 0) return upload.recordedDates;
-  const key = upload.createdAt?.match(/^(\d{4}-\d{2}-\d{2})/)?.[1];
-  return key ? [key] : [];
-}
+import { slotDateKeys } from "./audio-row";
 
 export function AudioRecordingSlot({ upload }: { upload: AudioProjectUpload }) {
   const t = useTranslations("common.audiomoth.audioHub");
   const locale = useLocale();
-  const dateLabel = formatCardDateRange(fallbackDateKeys(upload), locale);
-  const recorder = upload.recorderName?.trim() || t("recorderFallback");
+  const dates = slotDateKeys(upload);
 
   return (
     <article className="flex min-h-[390px] min-w-0 flex-col rounded-xl border border-dashed border-border bg-background p-4 sm:p-5">
       <div className="flex items-baseline justify-between gap-3 font-mono text-[11px] font-semibold uppercase tracking-[0.13em] text-muted-foreground">
         <span>{t("recordingsSlot")}</span>
-        <span className="shrink-0 normal-case tracking-normal">{dateLabel || t("dateUnavailable")}</span>
+        <span className="shrink-0 normal-case tracking-normal">
+          {dates.length > 0 ? formatCardDateRange(dates, locale) : t("dateUnavailable")}
+        </span>
       </div>
 
       <div className="flex flex-1 flex-col justify-between pt-5">
@@ -34,7 +30,7 @@ export function AudioRecordingSlot({ upload }: { upload: AudioProjectUpload }) {
           <h3 className="text-base font-medium text-foreground">{t("noSoundscapeYet")}</h3>
           <p className="mt-2 flex min-w-0 items-center gap-1.5 truncate font-mono text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">
             <RadioIcon className="size-3.5 shrink-0" aria-hidden />
-            <span className="truncate">{t("slotMeta", { recorder, count: upload.recordingCount })}</span>
+            <span className="truncate">{t("slotRecordings", { count: upload.recordingCount })}</span>
           </p>
         </div>
 

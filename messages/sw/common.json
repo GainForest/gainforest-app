@@ -1908,7 +1908,7 @@
       "recordingsSlot": "Rekodi",
       "noSoundscapeYet": "Bado hakuna mandhari ya sauti",
       "awaitingFullDay": "Inasubiri siku nzima",
-      "slotMeta": "{recorder} · rekodi {count, number}",
+      "slotRecordings": "rekodi {count, number}",
       "soundscapeFallback": "Mandhari ya sauti",
       "dateUnavailable": "Tarehe haipatikani",
       "showMoreFromProject": "{count, plural, one {Onyesha # zaidi kutoka mradi huu} other {Onyesha # zaidi kutoka mradi huu}}",
@@ -1916,7 +1916,6 @@
       "voiceKeyTitle": "Ufunguo wa makundi ya sauti",
       "noMatches": "Hakuna mradi unaolingana na vichujio hivi.",
       "clearFilters": "Futa vichujio",
-      "recorderFallback": "Kinasa cha uwandani",
       "browseRecordings": "Vinjari rekodi",
       "unknownOrganization": "Msimamizi wa mradi"
     },

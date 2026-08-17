@@ -1908,7 +1908,7 @@
       "recordingsSlot": "Recordings",
       "noSoundscapeYet": "No soundscape yet",
       "awaitingFullDay": "Awaiting a full day",
-      "slotMeta": "{recorder} · {count, number} recordings",
+      "slotRecordings": "{count, number} recordings",
       "soundscapeFallback": "Soundscape",
       "dateUnavailable": "Date unavailable",
       "showMoreFromProject": "{count, plural, one {Show # more from this project} other {Show # more from this project}}",
@@ -1916,7 +1916,6 @@
       "voiceKeyTitle": "Voice group key",
       "noMatches": "No projects match these filters.",
       "clearFilters": "Clear filters",
-      "recorderFallback": "Field recorder",
       "browseRecordings": "Browse recordings",
       "unknownOrganization": "Project steward"
     },
