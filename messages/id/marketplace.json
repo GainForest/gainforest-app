@@ -901,7 +901,8 @@
             "1w": "Minggu",
             "1m": "Bulan",
             "6m": "6 bulan",
-            "all": "Sejak hibah"
+            "all": "Sejak hibah",
+            "allUpcoming": "Semua unggahan"
           },
           "phrases": {
             "1w": "minggu ini",
@@ -912,6 +913,10 @@
           "vsPaceNeeded": "vs laju yang dibutuhkan · {range}",
           "behindPhrase": "di belakang laju yang dibutuhkan {phrase}",
           "aheadPhrase": "di depan laju yang dibutuhkan {phrase}",
+          "upcomingEyebrow": "keunggulan awal · {range}",
+          "upcomingPhrase": "terkumpul sebelum jendela hibah dibuka {date}",
+          "upcomingNeeded": "0 dibutuhkan sampai {date}",
+          "upcomingRates": "{actual} aktual · {needed} dibutuhkan mulai {date}",
           "actual": "aktual",
           "needed": "dibutuhkan",
           "perDay": "{rate}/hari",
@@ -921,6 +926,7 @@
           "focus": "{minutes} mnt pada {date}",
           "overallBehind": "Secara keseluruhan {minutes} mnt di belakang laju seluruh hibah",
           "overallAhead": "Secara keseluruhan {minutes} mnt di depan laju seluruh hibah",
+          "overallUpcoming": "Jendela hibah dibuka {date} · setiap menit sejauh ini adalah keunggulan awal",
           "overallMet": "Target perekaman tercapai"
         }
       },

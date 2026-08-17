@@ -901,7 +901,8 @@
             "1w": "Week",
             "1m": "Month",
             "6m": "6 months",
-            "all": "Since grant"
+            "all": "Since grant",
+            "allUpcoming": "All uploads"
           },
           "phrases": {
             "1w": "this week",
@@ -912,6 +913,10 @@
           "vsPaceNeeded": "vs pace needed · {range}",
           "behindPhrase": "behind the pace needed {phrase}",
           "aheadPhrase": "ahead of the pace needed {phrase}",
+          "upcomingEyebrow": "head start · {range}",
+          "upcomingPhrase": "banked before the grant window opens {date}",
+          "upcomingNeeded": "0 needed until {date}",
+          "upcomingRates": "{actual} actual · {needed} needed from {date}",
           "actual": "actual",
           "needed": "needed",
           "perDay": "{rate}/day",
@@ -921,6 +926,7 @@
           "focus": "{minutes} min on {date}",
           "overallBehind": "Overall behind by {minutes} min vs full-grant pace",
           "overallAhead": "Overall ahead by {minutes} min vs full-grant pace",
+          "overallUpcoming": "Grant window opens {date} · every minute so far is a head start",
           "overallMet": "Recording target met"
         }
       },

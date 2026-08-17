@@ -101,13 +101,10 @@ export function MyGrantView({
         />
       </section>
 
-      {/* Pace against the recording target. Needs at least one upload to plot
-          and a window that has actually opened — before the grant starts there
-          is no elapsed time to chart a pace over. */}
-      {overview.audioSeries &&
-      overview.audioPace &&
-      overview.audioGrantStart &&
-      overview.audioPace.status !== "upcoming" ? (
+      {/* Pace against the recording target. Needs at least one upload to plot;
+          before the window opens the chart still draws, presenting uploads as
+          a head start rather than a pace verdict. */}
+      {overview.audioSeries && overview.audioPace && overview.audioGrantStart ? (
         <AudioPaceChart
           series={overview.audioSeries}
           pace={overview.audioPace}

@@ -259,7 +259,7 @@
       "cardDescription": "Mi subvención con su gráfico de ritmo de audio, por detrás y por delante de la meta.",
       "upcoming": {
         "title": "Antes de que empiece la subvención",
-        "description": "El periodo aún no ha comenzado, así que no hay veredicto de ritmo ni gráfico: solo cuándo empieza y qué pedirá."
+        "description": "El periodo aún no ha comenzado, así que el gráfico presenta cada subida como ventaja inicial: la línea requerida sigue plana hasta que abra."
       }
     }
   },

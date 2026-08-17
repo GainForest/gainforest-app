@@ -901,7 +901,8 @@
             "1w": "Semana",
             "1m": "Mês",
             "6m": "6 meses",
-            "all": "Desde o subsídio"
+            "all": "Desde o subsídio",
+            "allUpcoming": "Todos os envios"
           },
           "phrases": {
             "1w": "esta semana",
@@ -912,6 +913,10 @@
           "vsPaceNeeded": "frente ao ritmo necessário · {range}",
           "behindPhrase": "atrás do ritmo necessário {phrase}",
           "aheadPhrase": "à frente do ritmo necessário {phrase}",
+          "upcomingEyebrow": "vantagem inicial · {range}",
+          "upcomingPhrase": "acumulados antes de a janela do subsídio abrir em {date}",
+          "upcomingNeeded": "0 necessários até {date}",
+          "upcomingRates": "{actual} real · {needed} necessário a partir de {date}",
           "actual": "real",
           "needed": "necessário",
           "perDay": "{rate}/dia",
@@ -921,6 +926,7 @@
           "focus": "{minutes} min em {date}",
           "overallBehind": "No total {minutes} min atrás do ritmo de todo o subsídio",
           "overallAhead": "No total {minutes} min à frente do ritmo de todo o subsídio",
+          "overallUpcoming": "A janela do subsídio abre em {date} · cada minuto até agora é vantagem",
           "overallMet": "Meta de gravação atingida"
         }
       },

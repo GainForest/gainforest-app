@@ -259,7 +259,7 @@
       "cardDescription": "Hibah saya dengan grafik laju audionya, di belakang dan di depan target.",
       "upcoming": {
         "title": "Sebelum hibah dimulai",
-        "description": "Periode belum dimulai, jadi tidak ada penilaian laju maupun grafik — hanya kapan dimulai dan apa yang akan dibutuhkan."
+        "description": "Periode belum dimulai, jadi grafik menampilkan setiap unggahan sebagai keunggulan awal — garis yang dibutuhkan tetap datar sampai dibuka."
       }
     }
   },

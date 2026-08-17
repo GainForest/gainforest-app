@@ -901,7 +901,8 @@
             "1w": "Semana",
             "1m": "Mes",
             "6m": "6 meses",
-            "all": "Desde la subvención"
+            "all": "Desde la subvención",
+            "allUpcoming": "Todas las subidas"
           },
           "phrases": {
             "1w": "esta semana",
@@ -912,6 +913,10 @@
           "vsPaceNeeded": "frente al ritmo necesario · {range}",
           "behindPhrase": "por detrás del ritmo necesario {phrase}",
           "aheadPhrase": "por delante del ritmo necesario {phrase}",
+          "upcomingEyebrow": "ventaja inicial · {range}",
+          "upcomingPhrase": "acumulados antes de que la ventana de la subvención abra el {date}",
+          "upcomingNeeded": "0 necesarios hasta el {date}",
+          "upcomingRates": "{actual} real · {needed} necesario desde el {date}",
           "actual": "real",
           "needed": "necesario",
           "perDay": "{rate}/día",
@@ -921,6 +926,7 @@
           "focus": "{minutes} min el {date}",
           "overallBehind": "En total {minutes} min por detrás del ritmo de toda la subvención",
           "overallAhead": "En total {minutes} min por delante del ritmo de toda la subvención",
+          "overallUpcoming": "La ventana de la subvención abre el {date} · cada minuto ya subido es ventaja",
           "overallMet": "Meta de grabación alcanzada"
         }
       },

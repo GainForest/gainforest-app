@@ -259,7 +259,7 @@
       "cardDescription": "My grant with its audio pace chart, behind and ahead of the target.",
       "upcoming": {
         "title": "Before the grant opens",
-        "description": "The window has not started, so there is no pace verdict and no chart — just when it begins and what it will ask for."
+        "description": "The window has not started, so the chart presents every upload as a head start — the required line stays flat until it opens."
       }
     }
   },

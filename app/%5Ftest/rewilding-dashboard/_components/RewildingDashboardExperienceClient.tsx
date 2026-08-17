@@ -77,7 +77,8 @@ function scenario(minutesPerDay: number, now: number = LAST_DAY): GrantOverview 
   };
 }
 
-/** Before the window opens: no pace verdict and no chart. */
+/** Before the window opens: the chart draws the uploads as a head start,
+ *  with the required line flat at zero — never a pace verdict. */
 const UPCOMING = scenario(20, BEFORE_START);
 /** A few minutes a day — far off the pace the window demands. */
 const BEHIND = scenario(4);
