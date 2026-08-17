@@ -26,6 +26,7 @@ import {
   type UploadFolderOptionItem,
 } from "@/app/audiomoth/_components/UploadFolderPicker";
 import { activeUploadFolderMode, type UploadFolderMode } from "@/app/_lib/audiomoth/upload-folder";
+import { LocationEditorModal } from "@/app/(manage)/manage/_modals/LocationEditorModal";
 
 const FOLDER_NAME_MAX = 120;
 
@@ -107,6 +108,58 @@ export function RenameFolderModal({
         </Button>
       </ModalFooter>
     </ModalContent>
+  );
+}
+
+/**
+ * Set or correct where a deployment's recorder stood — the manual override
+ * for deployments that came in by uploading past SD-card audio, which the
+ * chime flow never asked coordinates for.
+ *
+ * A thin skin over the one location editor the app already has (the
+ * organization-location modal): search for the place, enter coordinates by
+ * hand, drag the pin to fine-tune. Deployment coordinates are a measurement,
+ * so the editor runs in exact-point mode — no "approximate location"
+ * fuzzing, no Remove, and every pick carries exact coordinates.
+ */
+export function SetDeploymentLocationModal({
+  name,
+  initial,
+  hasChime,
+  onSave,
+}: {
+  /** The deployment's display name, for the dialog copy. */
+  name: string;
+  /** The currently stored coordinates, when the deployment has any. */
+  initial: { lat: number; lon: number } | null;
+  /** Whether a chime event stands behind the deployment — its stored
+   *  location is overridden too, so the dialog says so. */
+  hasChime: boolean;
+  /** Persists the override; rejects with a message worth showing. */
+  onSave: (location: { lat: number; lon: number }) => Promise<void>;
+}) {
+  const t = useTranslations("common.recordingFolders");
+  return (
+    <LocationEditorModal
+      title={t("locationTitle")}
+      description={`${t("locationBody", { name })}${hasChime ? ` ${t("locationChimeNote")}` : ""}`}
+      pointOnly
+      current={
+        initial
+          ? {
+              name: `${initial.lat.toFixed(5)}, ${initial.lon.toFixed(5)}`,
+              countryCode: null,
+              latitude: initial.lat,
+              longitude: initial.lon,
+            }
+          : null
+      }
+      onConfirm={async (choice) => {
+        // pointOnly never confirms with null (Remove is hidden).
+        if (!choice) return;
+        await onSave({ lat: choice.place.latitude, lon: choice.place.longitude });
+      }}
+    />
   );
 }
 

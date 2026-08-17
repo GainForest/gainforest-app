@@ -71,6 +71,7 @@ import {
   eventRenameEdit,
   isChimeEventUri,
   renameLinkedEvent,
+  setDeploymentLocation,
   unifyDeployments,
 } from "@/app/_lib/unified-deployments";
 import { listAllRecordings, moveRecordings, type AcAudioListItem } from "@/app/_lib/ac-audio";
@@ -81,6 +82,7 @@ import {
   DeleteFolderModal,
   MoveRecordingsModal,
   RenameFolderModal,
+  SetDeploymentLocationModal,
 } from "@/app/_components/RecordingFolderModals";
 import { AddDeploymentToProjectModal } from "@/app/_components/AddDeploymentToProjectModal";
 import { formatDate } from "@/app/_lib/format";
@@ -90,6 +92,9 @@ type DeploymentGroup = {
   key: string;
   name: string;
   deployedAt: string | null;
+  /** Where the recorder stood — the folder's coordinates, falling back to
+   *  the chime's. Null until someone sets them. */
+  coords: { lat: number; lon: number } | null;
   /** The record recordings are filed under — absent for a chime nobody has
    *  uploaded to yet, and for the "other recordings" group. */
   deployment: AcDeploymentItem | null;
@@ -99,6 +104,20 @@ type DeploymentGroup = {
   detailPath: string | null;
   items: AcAudioListItem[];
 };
+
+/** A deployment's stored coordinates — the folder record's, falling back to
+ *  the chime event's — as numbers, when both parse. */
+function deploymentCoords(
+  deployment: AcDeploymentItem | null,
+  event: DeploymentEventItem | null,
+): { lat: number; lon: number } | null {
+  const latRaw = deployment?.decimalLatitude ?? event?.decimalLatitude;
+  const lonRaw = deployment?.decimalLongitude ?? event?.decimalLongitude;
+  if (!latRaw || !lonRaw) return null;
+  const lat = Number(latRaw);
+  const lon = Number(lonRaw);
+  return Number.isFinite(lat) && Number.isFinite(lon) ? { lat, lon } : null;
+}
 
 function groupRecordings(
   deployments: AcDeploymentItem[],
@@ -131,6 +150,7 @@ function groupRecordings(
       key: unified.uri,
       name: unified.name,
       deployedAt: unified.deployedAt,
+      coords: deploymentCoords(unified.folder, unified.event),
       deployment: unified.folder,
       event: unified.event,
       detailPath: unified.detailPath,
@@ -144,6 +164,7 @@ function groupRecordings(
       key: "",
       name: "",
       deployedAt: null,
+      coords: null,
       deployment: null,
       event: null,
       detailPath: null,
@@ -398,6 +419,53 @@ export function AccountAudioViewer({
                   const updated = applyDeploymentEdit(event, edit, cid);
                   setEvents((current) =>
                     current?.map((item) => (item.uri === updated.uri ? updated : item)) ?? current,
+                  );
+                }
+              }}
+            />
+          ),
+        },
+        true,
+      );
+      void modal.show();
+    },
+    [modal, mutationRepo],
+  );
+
+  /**
+   * Manual location override: set or correct where the recorder stood.
+   * Deployments created by uploading past SD-card audio carry no coordinates
+   * at all — the chime flow asks up front, an upload never does — so this is
+   * the only way theirs can ever be filled in. The override lands on every
+   * record standing behind the deployment, so the labeling flow, the forms
+   * and a chime's detail-page map all follow.
+   */
+  const setLocationFor = useCallback(
+    (group: DeploymentGroup) => {
+      const { deployment, event } = group;
+      if (!deployment && !event) return;
+      modal.pushModal(
+        {
+          id: "set-deployment-location",
+          content: (
+            <SetDeploymentLocationModal
+              name={group.name}
+              initial={group.coords}
+              hasChime={Boolean(event)}
+              onSave={async (location) => {
+                const updated = await setDeploymentLocation({ folder: deployment, event }, location, {
+                  repo: mutationRepo,
+                });
+                if (updated.folder) {
+                  const folder = updated.folder;
+                  setDeployments((current) =>
+                    current?.map((item) => (item.uri === folder.uri ? folder : item)) ?? current,
+                  );
+                }
+                if (updated.event) {
+                  const changedEvent = updated.event;
+                  setEvents((current) =>
+                    current?.map((item) => (item.uri === changedEvent.uri ? changedEvent : item)) ?? current,
                   );
                 }
               }}
@@ -680,13 +748,17 @@ export function AccountAudioViewer({
                         {group.key ? group.name : t("otherGroup")}
                       </h2>
                       <p className="text-xs text-muted-foreground">
-                        {[group.deployedAt ? formatDate(group.deployedAt) : null, t("groupCount", { count: group.items.length })]
+                        {[
+                          group.deployedAt ? formatDate(group.deployedAt) : null,
+                          t("groupCount", { count: group.items.length }),
+                          group.coords ? `${group.coords.lat.toFixed(5)}, ${group.coords.lon.toFixed(5)}` : null,
+                        ]
                           .filter(Boolean)
                           .join(" · ")}
                       </p>
                     </div>
                   </div>
-                  <div className="flex shrink-0 items-center gap-1">
+                  <div className="flex flex-wrap items-center justify-end gap-1">
                     {group.detailPath ? (
                       <Link
                         href={group.detailPath}
@@ -715,6 +787,10 @@ export function AccountAudioViewer({
                               {tFolders("addToProject.action")}
                             </DropdownMenuItem>
                           ) : null}
+                          <DropdownMenuItem onSelect={() => setLocationFor(group)}>
+                            <MapPinIcon />
+                            {tFolders(group.coords ? "editLocationAction" : "locationAction")}
+                          </DropdownMenuItem>
                           <DropdownMenuItem onSelect={() => renameDeployment(group)}>
                             <PencilIcon />
                             {tFolders("renameAction")}
@@ -766,6 +842,10 @@ export function AccountAudioViewer({
                   <ContextMenuItem onSelect={() => addFolderToProject(group)}>
                     <FolderKanbanIcon />
                     {tFolders("addToProject.action")}
+                  </ContextMenuItem>
+                  <ContextMenuItem onSelect={() => setLocationFor(group)}>
+                    <MapPinIcon />
+                    {tFolders(group.coords ? "editLocationAction" : "locationAction")}
                   </ContextMenuItem>
                   <ContextMenuItem onSelect={() => renameDeployment(group)}>
                     <PencilIcon />

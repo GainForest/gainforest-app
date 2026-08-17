@@ -22,6 +22,7 @@
  */
 
 import {
+  applyAcDeploymentEdit,
   listAcDeployments,
   updateAcDeployment,
   type AcDeploymentDraft,
@@ -156,6 +157,63 @@ export function eventRenameEdit(event: DeploymentEventItem, name: string): Deplo
       ? { name: event.equipmentUsed ?? "AudioMoth", assetId: "", uri: equipmentUri }
       : null,
   };
+}
+
+/** The edit that overrides a chime event's location and nothing else — name
+ *  and equipment link are carried over explicitly, like a rename. */
+function eventLocationEdit(
+  event: DeploymentEventItem,
+  location: { lat: number; lon: number },
+): DeploymentEventEdit {
+  const equipmentUri = linkedEquipmentUri(event.eventRemarks);
+  return {
+    siteName: event.locality ?? "",
+    equipment: equipmentUri
+      ? { name: event.equipmentUsed ?? "AudioMoth", assetId: "", uri: equipmentUri }
+      : null,
+    location,
+  };
+}
+
+/**
+ * Manually override where a deployment stood — the fix for folders that came
+ * in by uploading past SD-card audio, which carry no coordinates at all.
+ *
+ * One deployment, one location: the override is written to every record
+ * standing behind it, so the audio library, the labeling flow and the
+ * deployment detail page's map all agree. The folder record is the primary
+ * write when one exists (recordings and labels read it); the chime event is
+ * then synced best-effort, same as a rename — a chime-only deployment writes
+ * the event directly instead.
+ */
+export async function setDeploymentLocation(
+  deployment: { folder: AcDeploymentItem | null; event: DeploymentEventItem | null },
+  location: { lat: number; lon: number },
+  options?: RenameOptions,
+): Promise<{ folder: AcDeploymentItem | null; event: DeploymentEventItem | null }> {
+  const { folder, event } = deployment;
+  let updatedFolder: AcDeploymentItem | null = null;
+  let updatedEvent: DeploymentEventItem | null = null;
+
+  if (folder) {
+    const { cid } = await updateAcDeployment(folder, { location }, options);
+    updatedFolder = applyAcDeploymentEdit(folder, { location }, cid);
+    if (event && folder.eventRef === event.uri) {
+      try {
+        const edit = eventLocationEdit(event, location);
+        const { cid: eventCid } = await updateDeploymentEvent(event, edit, options);
+        updatedEvent = applyDeploymentEdit(event, edit, eventCid);
+      } catch (syncError) {
+        console.warn("[deployments] chime location sync failed", syncError);
+      }
+    }
+  } else if (event) {
+    const edit = eventLocationEdit(event, location);
+    const { cid } = await updateDeploymentEvent(event, edit, options);
+    updatedEvent = applyDeploymentEdit(event, edit, cid);
+  }
+
+  return { folder: updatedFolder, event: updatedEvent };
 }
 
 /** Write target: the signed-in account by default, an organization's repo when given. */

@@ -224,11 +224,14 @@ function stripEquipmentRemark(remarks: string | undefined): string {
   return (remarks ?? "").replace(/\s*Equipment record:\s*at:\/\/\S+/g, "").trim();
 }
 
-/** The only two fields a deployment lets you change after the chime: the site
- *  name and the linked AudioMoth. Everything else is fixed to the chime. */
+/** What a deployment lets you change after the chime: the site name, the
+ *  linked AudioMoth, and — as an explicit manual override — the recorded
+ *  location. The chime's ID and date stay fixed. */
 export type DeploymentEventEdit = {
   siteName?: string;
   equipment?: { name: string; assetId: string; uri: string } | null;
+  /** Manual location override; when absent the stored coordinates carry over. */
+  location?: { lat: number; lon: number };
 };
 
 function equipmentUsedLabel(equipment: DeploymentEventEdit["equipment"]): string {
@@ -238,10 +241,11 @@ function equipmentUsedLabel(equipment: DeploymentEventEdit["equipment"]): string
 }
 
 /**
- * Rebuild an event record changing only the name (`locality`) and the linked
- * equipment (`equipmentUsed` + the `Equipment record:` remark). The chime
- * identity — eventID, eventDate, coordinates, protocol — is carried over
- * untouched from the stored record.
+ * Rebuild an event record changing only the name (`locality`), the linked
+ * equipment (`equipmentUsed` + the `Equipment record:` remark) and — when the
+ * edit carries one — the manually overridden coordinates. The chime identity
+ * — eventID, eventDate, protocol — is carried over untouched from the stored
+ * record.
  */
 export function buildUpdatedDeploymentEventRecord(
   item: DeploymentEventItem,
@@ -256,8 +260,13 @@ export function buildUpdatedDeploymentEventRecord(
     equipmentUsed: equipmentUsedLabel(edit.equipment),
     createdAt: item.createdAt,
   };
-  if (item.decimalLatitude) record.decimalLatitude = item.decimalLatitude;
-  if (item.decimalLongitude) record.decimalLongitude = item.decimalLongitude;
+  if (edit.location) {
+    record.decimalLatitude = edit.location.lat.toFixed(6);
+    record.decimalLongitude = edit.location.lon.toFixed(6);
+  } else {
+    if (item.decimalLatitude) record.decimalLatitude = item.decimalLatitude;
+    if (item.decimalLongitude) record.decimalLongitude = item.decimalLongitude;
+  }
   const site = edit.siteName?.trim();
   if (site) record.locality = site;
   const remarks = [

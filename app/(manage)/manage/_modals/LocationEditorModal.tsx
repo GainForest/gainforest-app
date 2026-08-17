@@ -57,6 +57,24 @@ type LocationEditorModalProps = {
      *  even when marked approximate. */
     draft?: boolean;
   } | null;
+  /** Override the header copy when the editor stands for something other
+   *  than an organization's declared location (a recorder deployment). */
+  title?: string;
+  description?: string;
+  /**
+   * Exact-point mode, for callers whose location is a measurement rather
+   * than a declared, name-first place — e.g. where a recorder stood:
+   *
+   *  - the "approximate location" option is hidden — fuzzing a measurement
+   *    would corrupt it;
+   *  - a whole-country search result becomes an ordinary draggable pin at
+   *    the country's center instead of a flagged area — the thing being
+   *    placed stood at one spot, so every pick must carry exact
+   *    coordinates;
+   *  - the Remove action is hidden — a measurement is set or corrected,
+   *    never "removed" — so `onConfirm` is always called with a choice.
+   */
+  pointOnly?: boolean;
   /** Called with the steward's choice; null means "remove the location".
    *  Return a promise and the modal stays open and locked until the save
    *  lands, showing the failure right here if it doesn't. A void return
@@ -251,7 +269,7 @@ function LocationPreviewMap({
   return <div ref={containerRef} className="h-52 w-full overflow-hidden rounded-xl border border-border" />;
 }
 
-export function LocationEditorModal({ current, onConfirm }: LocationEditorModalProps) {
+export function LocationEditorModal({ current, title, description, pointOnly = false, onConfirm }: LocationEditorModalProps) {
   const t = useTranslations("upload.dashboardClient.locationEditor");
   const { stack, popModal, hide } = useModal();
 
@@ -304,7 +322,7 @@ export function LocationEditorModal({ current, onConfirm }: LocationEditorModalP
   const [manualMode, setManualMode] = useState(false);
   const [latDraft, setLatDraft] = useState("");
   const [lonDraft, setLonDraft] = useState("");
-  const [approximate, setApproximate] = useState(Boolean(current?.approximate));
+  const [approximate, setApproximate] = useState(!pointOnly && Boolean(current?.approximate));
   // Save stays disabled until something actually changes — blindly re-saving
   // the seeded location would only mint duplicate records.
   const [dirty, setDirty] = useState(false);
@@ -353,11 +371,13 @@ export function LocationEditorModal({ current, onConfirm }: LocationEditorModalP
   }, [hide, popModal, stack.length]);
 
   const pickResult = (place: GeocodedPlace) => {
-    setSelected(place);
+    // Placing an exact point: a country result is only a coarse starting
+    // spot, so it lands as a normal draggable pin at the country's center.
+    setSelected(pointOnly && place.kind === "country" ? { ...place, kind: "place" } : place);
     setDirty(true);
     // A country is already as coarse as it gets; a ~10 km circle inside it
     // would publish less truth, not more.
-    if (place.kind === "country") setApproximate(false);
+    if (!pointOnly && place.kind === "country") setApproximate(false);
     setResults([]);
     setQuery("");
   };
@@ -438,11 +458,12 @@ export function LocationEditorModal({ current, onConfirm }: LocationEditorModalP
   return (
     <ModalContent dismissible={!saving}>
       <ModalHeader>
-        <ModalTitle>{t("title")}</ModalTitle>
+        <ModalTitle>{title ?? t("title")}</ModalTitle>
         <ModalDescription>
-          {current?.name
-            ? t("descriptionWithCurrent", { location: current.name })
-            : t("description")}
+          {description ??
+            (current?.name
+              ? t("descriptionWithCurrent", { location: current.name })
+              : t("description"))}
         </ModalDescription>
       </ModalHeader>
 
@@ -552,8 +573,10 @@ export function LocationEditorModal({ current, onConfirm }: LocationEditorModalP
           </p>
         ) : null}
 
-        {/* "Approximate" only means something for a point — a country is
-            already the coarsest a location gets. */}
+        {/* "Approximate" only means something for a declared point — a country
+            is already the coarsest a location gets, and an exact-point caller
+            (a recorder's position) must never fuzz its measurement. */}
+        {pointOnly ? null : (
         <label
           className={`flex cursor-pointer items-start gap-2.5 rounded-xl border border-border bg-muted/40 p-3 ${
             selectedIsWholeCountry ? "hidden" : ""
@@ -577,6 +600,7 @@ export function LocationEditorModal({ current, onConfirm }: LocationEditorModalP
             </span>
           </span>
         </label>
+        )}
       </div>
 
       {/* One server-side request does the whole save; the modal stays locked
@@ -592,7 +616,7 @@ export function LocationEditorModal({ current, onConfirm }: LocationEditorModalP
       {saveError ? <p className="mt-3 text-sm text-destructive">{saveError}</p> : null}
 
       <ModalFooter className="mt-4 flex-row items-center justify-between gap-2">
-        {current ? (
+        {current && !pointOnly ? (
           <Button variant="ghost" className="text-muted-foreground" onClick={handleRemove} disabled={saving}>
             {t("remove")}
           </Button>
