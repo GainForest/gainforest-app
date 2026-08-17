@@ -212,6 +212,7 @@ function ExploreNav({ sessionDid }: { sessionDid: string | null }) {
     items: section.items.filter(
       (item) =>
         item.id !== "organizations" &&
+        !item.hidden &&
         (!item.adminOnly || isModerator) &&
         (!item.rewildingGranteeOnly || isModerator || isRewildingGrantee),
     ),
