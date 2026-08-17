@@ -129,7 +129,8 @@
       "audiomoth": "AudioMoth",
       "identifications": "Identifications",
       "myGrant": "My grant",
-      "myRecorders": "My recorders"
+      "myRecorders": "My recorders",
+      "events": "Events"
     },
     "prompts": {
       "signInDescription": "Sign in to manage your account and content.",
@@ -503,7 +504,8 @@
     "wallet": "Wallet",
     "endorsementsGiven": "Endorsements",
     "equipment": "Equipment",
-    "more": "More"
+    "more": "More",
+    "events": "Events"
   },
   "observationsManage": {
     "metaTitle": "Manage observations — {name}",

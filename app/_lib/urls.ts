@@ -114,6 +114,16 @@ export function accountHref(didOrHandle: string): string {
   return `/account/${encodeURIComponent(didOrHandle)}`;
 }
 
+/** The community events discovery route. */
+export function eventsHref(): string {
+  return "/events";
+}
+
+/** Build a community event detail page URL from a DID/handle + rkey. */
+export function eventHref(didOrHandle: string, rkey: string): string {
+  return `/events/${encodeURIComponent(didOrHandle)}/${encodeURIComponent(rkey)}`;
+}
+
 /** Build a dedicated nature-sighting (occurrence) detail page URL in this app
  *  from a DID/handle + rkey. */
 export function localObservationHref(didOrHandle: string, rkey: string): string {

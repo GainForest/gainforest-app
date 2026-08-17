@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { usePathname, useSearchParams } from "next/navigation";
-import { BadgeCheckIcon, BinocularsIcon, BotIcon, ChevronDownIcon, FolderKanbanIcon, HeartHandshakeIcon, HomeIcon, ImageIcon, LayoutGridIcon, MessageSquareTextIcon, SettingsIcon, WalletIcon, WrenchIcon } from "lucide-react";
+import { BadgeCheckIcon, BinocularsIcon, BotIcon, CalendarDaysIcon, ChevronDownIcon, FolderKanbanIcon, HeartHandshakeIcon, HomeIcon, ImageIcon, LayoutGridIcon, MessageSquareTextIcon, SettingsIcon, WalletIcon, WrenchIcon } from "lucide-react";
 import { stripLocaleFromPathname } from "@/lib/i18n/routing";
 import { cn } from "@/lib/utils";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
@@ -12,6 +12,7 @@ import {
   accountAttachmentsPath,
   accountEndorsementsGivenPath,
   accountEquipmentPath,
+  accountEventsPath,
   accountAudioPath,
   accountBumicertsPath,
   accountDonationsPath,
@@ -29,7 +30,7 @@ import {
   accountWalletPath,
 } from "../_lib/account-route";
 
-type TabLabelKey = "home" | "overview" | "bumicerts" | "projects" | "donationHistory" | "observations" | "posts" | "timeline" | "gallery" | "filesAndPhotos" | "settings" | "sites" | "audio" | "drone" | "trees" | "taina" | "endorsementsGiven" | "equipment" | "wallet";
+type TabLabelKey = "home" | "overview" | "bumicerts" | "projects" | "events" | "donationHistory" | "observations" | "posts" | "timeline" | "gallery" | "filesAndPhotos" | "settings" | "sites" | "audio" | "drone" | "trees" | "taina" | "endorsementsGiven" | "equipment" | "wallet";
 
 interface Tab {
   labelKey: TabLabelKey;
@@ -51,6 +52,7 @@ type TabPaths = {
   home: string;
   bumicerts: string;
   projects: string;
+  events: string;
   donations: string;
   activity: string;
   gallery: string;
@@ -63,6 +65,7 @@ function buildTabPaths(did: string, scope: AccountTabBarScope, manageBasePath = 
       home: `${manageBasePath}?tab=home`,
       bumicerts: `${manageBasePath}?tab=bumicerts`,
       projects: `${manageBasePath}/projects`,
+      events: accountEventsPath(did),
       donations: `${manageBasePath}?tab=donations`,
       activity: `${manageBasePath}?tab=observations`,
       gallery: `${manageBasePath}?tab=gallery`,
@@ -74,6 +77,7 @@ function buildTabPaths(did: string, scope: AccountTabBarScope, manageBasePath = 
     home: accountPath(did),
     bumicerts: accountBumicertsPath(did),
     projects: accountProjectsPath(did),
+    events: accountEventsPath(did),
     donations: accountDonationsPath(did),
     activity: accountObservationsPath(did),
     gallery: accountGalleryPath(did),
@@ -124,6 +128,14 @@ function buildTabs(
     icon: MessageSquareTextIcon,
     exact: false,
     matchPaths: [accountRepliesPath(did), accountLikesPath(did)],
+  };
+  // Community events hosted by this account. Public, so it appears on the
+  // profile for everyone.
+  const eventsTab: Tab = {
+    labelKey: "events",
+    href: paths.events,
+    icon: CalendarDaysIcon,
+    exact: false,
   };
   // Organizations this org has publicly endorsed. Only shown when it has given
   // at least one endorsement (resolved server-side into `showEndorsementsGiven`).
@@ -183,9 +195,10 @@ function buildTabs(
             exact: false,
             matchPaths: [accountAttachmentsPath(did)],
           },
+          eventsTab,
           donationsTab,
         ]
-      : [projectsTab, observationsTab, donationsTab];
+      : [projectsTab, observationsTab, eventsTab, donationsTab];
     if (scope === "account" && showEquipment) tabs.push(equipmentTab);
     return appendExtras(tabs);
   }
@@ -211,6 +224,7 @@ function buildTabs(
       // Trees / Audio / Drone are sub-views of Observations now.
       matchPaths: scope === "account" ? [accountTreesPath(did), accountAudioPath(did), accountDronePath(did)] : undefined,
     },
+    eventsTab,
   ];
   // Members, roles and the Data Council are part of Settings now, so managers
   // administer an organization from one page instead of two tabs. Trees, Audio

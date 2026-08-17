@@ -1,0 +1,84 @@
+{
+  "discovery": {
+    "title": "Acara komunitas",
+    "subtitle": "Pertemuan, meetup, dan momen dari komunitas.",
+    "create": "Buat acara",
+    "tabAll": "Semua",
+    "tabMine": "Acara saya",
+    "happeningNow": "Sedang berlangsung",
+    "upcoming": "Akan datang",
+    "empty": "Belum ada acara. Jadilah yang pertama membuatnya.",
+    "emptyMine": "Anda belum menyelenggarakan atau menghadiri acara apa pun.",
+    "createFirst": "Buat acara pertama Anda",
+    "past": "Selesai"
+  },
+  "create": {
+    "title": "Buat acara",
+    "signInRequired": "Masuk untuk membuat acara.",
+    "hostAs": "Selenggarakan sebagai",
+    "hostPersonal": "Anda",
+    "hostOrg": "Organisasi",
+    "name": {
+      "label": "Nama acara",
+      "placeholder": "Nama acara"
+    },
+    "type": {
+      "label": "Tipe",
+      "inperson": "Tatap muka",
+      "virtual": "Virtual",
+      "hybrid": "Hibrida"
+    },
+    "start": "Mulai",
+    "end": "Selesai",
+    "timezoneNote": "Waktu dalam zona waktu lokal Anda ({timezone}).",
+    "location": {
+      "label": "Lokasi",
+      "placeholder": "Tambahkan lokasi"
+    },
+    "virtual": {
+      "label": "Tautan bergabung",
+      "placeholder": "https://…"
+    },
+    "description": {
+      "label": "Tentang",
+      "placeholder": "Tentang apa acara ini?"
+    },
+    "advanced": "Opsi lanjutan",
+    "visibility": {
+      "label": "Visibilitas",
+      "public": "Publik",
+      "publicHint": "Siapa saja dapat menemukannya di penemuan.",
+      "unlisted": "Tidak terdaftar",
+      "unlistedHint": "Hanya orang dengan tautan yang dapat melihatnya."
+    },
+    "submit": "Terbitkan acara",
+    "submitting": "Menerbitkan…",
+    "nameRequired": "Tambahkan nama acara untuk menerbitkan.",
+    "error": "Terjadi kesalahan. Silakan coba lagi."
+  },
+  "detail": {
+    "live": "Langsung",
+    "cancelled": "Dibatalkan",
+    "addToCalendar": "Tambahkan ke kalender",
+    "about": "Tentang",
+    "hostedBy": "Diselenggarakan oleh",
+    "links": "Tautan"
+  },
+  "rsvp": {
+    "signInRequired": "Masuk untuk RSVP.",
+    "going": "Hadir",
+    "goingAction": "Hadir",
+    "interested": "Tertarik",
+    "interestedAction": "Tertarik",
+    "tapToRemove": "Ketuk pilihan Anda lagi untuk menghapusnya.",
+    "confirmGoing": "Anda akan hadir!",
+    "confirmInterested": "Anda tertarik!",
+    "copyLink": "Salin tautan",
+    "copied": "Tersalin",
+    "error": "Terjadi kesalahan. Silakan coba lagi."
+  },
+  "nav": {
+    "label": "Acara"
+  },
+  "profileTab": "Acara"
+}

@@ -129,7 +129,8 @@
       "audiomoth": "AudioMoth",
       "identifications": "Vitambulisho",
       "myGrant": "Ruzuku yangu",
-      "myRecorders": "Vinasa sauti vyangu"
+      "myRecorders": "Vinasa sauti vyangu",
+      "events": "Matukio"
     },
     "prompts": {
       "signInDescription": "Ingia ili kusimamia akaunti na maudhui yako.",
@@ -503,7 +504,8 @@
     "wallet": "Pochi",
     "endorsementsGiven": "Idhini",
     "equipment": "Vifaa",
-    "more": "Zaidi"
+    "more": "Zaidi",
+    "events": "Matukio"
   },
   "observationsManage": {
     "metaTitle": "Simamia uchunguzi — {name}",

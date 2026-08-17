@@ -219,7 +219,7 @@ function ExploreNav({ sessionDid }: { sessionDid: string | null }) {
 
   // Keep the everyday path short for new visitors. Specialist destinations
   // remain one click away and open automatically whenever one is active.
-  const primaryIds = new Set(["feed", "projects", "observations", "globe", "bioblitz", "donations", "grants"]);
+  const primaryIds = new Set(["feed", "projects", "observations", "events", "globe", "bioblitz", "donations", "grants"]);
   const primarySections = sections
     .map((section) => ({ ...section, items: section.items.filter((item) => primaryIds.has(item.id)) }))
     .filter((section) => section.items.length > 0);

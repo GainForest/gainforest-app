@@ -129,7 +129,8 @@
       "audiomoth": "AudioMoth",
       "identifications": "Identificações",
       "myGrant": "Meu subsídio",
-      "myRecorders": "Meus gravadores"
+      "myRecorders": "Meus gravadores",
+      "events": "Eventos"
     },
     "prompts": {
       "signInDescription": "Entre para gerenciar sua conta e conteúdo.",
@@ -503,7 +504,8 @@
     "wallet": "Carteira",
     "endorsementsGiven": "Endossos",
     "equipment": "Equipamentos",
-    "more": "Mais"
+    "more": "Mais",
+    "events": "Eventos"
   },
   "observationsManage": {
     "metaTitle": "Gerenciar observações — {name}",
