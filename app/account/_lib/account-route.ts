@@ -153,6 +153,10 @@ export function accountProjectsPath(didOrHandle: string): string {
   return `${accountPath(didOrHandle)}/projects`;
 }
 
+export function accountEventsPath(didOrHandle: string): string {
+  return `${accountPath(didOrHandle)}/events`;
+}
+
 export function accountGalleryPath(didOrHandle: string): string {
   return `${accountPath(didOrHandle)}/gallery`;
 }

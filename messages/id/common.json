@@ -129,7 +129,8 @@
       "audiomoth": "AudioMoth",
       "identifications": "Identifikasi",
       "myGrant": "Hibah saya",
-      "myRecorders": "Perekam saya"
+      "myRecorders": "Perekam saya",
+      "events": "Acara"
     },
     "prompts": {
       "signInDescription": "Masuk untuk mengelola akun dan konten Anda.",
@@ -503,7 +504,8 @@
     "wallet": "Dompet",
     "endorsementsGiven": "Dukungan",
     "equipment": "Peralatan",
-    "more": "Lainnya"
+    "more": "Lainnya",
+    "events": "Acara"
   },
   "accountAudio": {
     "viewsAria": "Tampilan audio",

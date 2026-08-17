@@ -3,6 +3,7 @@ import {
   BinocularsIcon,
   BotIcon,
   Building2Icon,
+  CalendarDaysIcon,
   EarthIcon,
   FolderKanbanIcon,
   HeartHandshakeIcon,
@@ -79,6 +80,14 @@ export const NAV_ITEMS: NavSection[] = [
         Icon: BinocularsIcon,
         href: "/observations",
         pathCheck: { startsWith: "/observations" },
+      },
+      {
+        kind: "leaf",
+        id: "events",
+        text: "Events",
+        Icon: CalendarDaysIcon,
+        href: "/events",
+        pathCheck: { startsWith: "/events" },
       },
       {
         kind: "leaf",

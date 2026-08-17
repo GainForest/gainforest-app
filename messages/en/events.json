@@ -1,0 +1,87 @@
+{
+  "discovery": {
+    "title": "Community events",
+    "subtitle": "Gatherings, meetups and moments from the community.",
+    "create": "Create event",
+    "tabAll": "All",
+    "tabMine": "My events",
+    "tabEnrolled": "Enrolled",
+    "happeningNow": "Happening now",
+    "upcoming": "Upcoming",
+    "empty": "No events yet. Be the first to host one.",
+    "emptyMine": "You're not hosting or attending any events yet.",
+    "emptyEnrolled": "You haven't enrolled in any events yet.",
+    "createFirst": "Create your first event",
+    "past": "Past"
+  },
+  "create": {
+    "title": "Create event",
+    "backToEvents": "Back to events",
+    "signInRequired": "Sign in to create an event.",
+    "hostAs": "Host as",
+    "hostPersonal": "You",
+    "hostOrg": "Organization",
+    "name": {
+      "label": "Event name",
+      "placeholder": "Event name"
+    },
+    "type": {
+      "label": "Type",
+      "inperson": "In person",
+      "virtual": "Virtual",
+      "hybrid": "Hybrid"
+    },
+    "start": "Start",
+    "end": "End",
+    "timezoneNote": "Times are in your local timezone ({timezone}).",
+    "location": {
+      "label": "Location",
+      "placeholder": "Add a location"
+    },
+    "virtual": {
+      "label": "Join link",
+      "placeholder": "https://…"
+    },
+    "description": {
+      "label": "About",
+      "placeholder": "What's this event about?"
+    },
+    "advanced": "Advanced options",
+    "visibility": {
+      "label": "Visibility",
+      "public": "Public",
+      "publicHint": "Anyone can find it in discovery.",
+      "unlisted": "Unlisted",
+      "unlistedHint": "Only people with the link can see it."
+    },
+    "submit": "Publish event",
+    "submitting": "Publishing…",
+    "nameRequired": "Add an event name to publish.",
+    "error": "Something went wrong. Please try again."
+  },
+  "detail": {
+    "live": "Live",
+    "cancelled": "Cancelled",
+    "addToCalendar": "Add to calendar",
+    "about": "About",
+    "hostedBy": "Hosted by",
+    "links": "Links"
+  },
+  "rsvp": {
+    "signInRequired": "Sign in to RSVP.",
+    "going": "Going",
+    "goingAction": "Going",
+    "interested": "Interested",
+    "interestedAction": "Interested",
+    "tapToRemove": "Tap your choice again to remove it.",
+    "confirmGoing": "You're going!",
+    "confirmInterested": "You're interested!",
+    "copyLink": "Copy link",
+    "copied": "Copied",
+    "error": "Something went wrong. Please try again."
+  },
+  "nav": {
+    "label": "Events"
+  },
+  "profileTab": "Events"
+}

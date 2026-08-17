@@ -1,0 +1,87 @@
+{
+  "discovery": {
+    "title": "Eventos de la comunidad",
+    "subtitle": "Encuentros, quedadas y momentos de la comunidad.",
+    "create": "Crear evento",
+    "tabAll": "Todos",
+    "tabMine": "Mis eventos",
+    "tabEnrolled": "Inscrito",
+    "happeningNow": "Sucediendo ahora",
+    "upcoming": "Próximos",
+    "empty": "Aún no hay eventos. Sé el primero en organizar uno.",
+    "emptyMine": "Todavía no organizas ni asistes a ningún evento.",
+    "emptyEnrolled": "Aún no te has inscrito en ningún evento.",
+    "createFirst": "Crea tu primer evento",
+    "past": "Pasados"
+  },
+  "create": {
+    "title": "Crear evento",
+    "backToEvents": "Volver a los eventos",
+    "signInRequired": "Inicia sesión para crear un evento.",
+    "hostAs": "Organizar como",
+    "hostPersonal": "Tú",
+    "hostOrg": "Organización",
+    "name": {
+      "label": "Nombre del evento",
+      "placeholder": "Nombre del evento"
+    },
+    "type": {
+      "label": "Tipo",
+      "inperson": "Presencial",
+      "virtual": "Virtual",
+      "hybrid": "Híbrido"
+    },
+    "start": "Inicio",
+    "end": "Fin",
+    "timezoneNote": "Las horas están en tu zona horaria local ({timezone}).",
+    "location": {
+      "label": "Ubicación",
+      "placeholder": "Añade una ubicación"
+    },
+    "virtual": {
+      "label": "Enlace de acceso",
+      "placeholder": "https://…"
+    },
+    "description": {
+      "label": "Acerca de",
+      "placeholder": "¿De qué trata este evento?"
+    },
+    "advanced": "Opciones avanzadas",
+    "visibility": {
+      "label": "Visibilidad",
+      "public": "Público",
+      "publicHint": "Cualquiera puede encontrarlo en descubrir.",
+      "unlisted": "No listado",
+      "unlistedHint": "Solo quienes tengan el enlace pueden verlo."
+    },
+    "submit": "Publicar evento",
+    "submitting": "Publicando…",
+    "nameRequired": "Añade un nombre para publicar.",
+    "error": "Algo salió mal. Inténtalo de nuevo."
+  },
+  "detail": {
+    "live": "En vivo",
+    "cancelled": "Cancelado",
+    "addToCalendar": "Añadir al calendario",
+    "about": "Acerca de",
+    "hostedBy": "Organizado por",
+    "links": "Enlaces"
+  },
+  "rsvp": {
+    "signInRequired": "Inicia sesión para confirmar asistencia.",
+    "going": "Asistiré",
+    "goingAction": "Asistiré",
+    "interested": "Me interesa",
+    "interestedAction": "Me interesa",
+    "tapToRemove": "Toca tu elección otra vez para quitarla.",
+    "confirmGoing": "¡Vas a asistir!",
+    "confirmInterested": "¡Te interesa!",
+    "copyLink": "Copiar enlace",
+    "copied": "Copiado",
+    "error": "Algo salió mal. Inténtalo de nuevo."
+  },
+  "nav": {
+    "label": "Eventos"
+  },
+  "profileTab": "Eventos"
+}

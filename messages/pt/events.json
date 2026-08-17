@@ -1,0 +1,87 @@
+{
+  "discovery": {
+    "title": "Eventos da comunidade",
+    "subtitle": "Encontros, meetups e momentos da comunidade.",
+    "create": "Criar evento",
+    "tabAll": "Todos",
+    "tabMine": "Meus eventos",
+    "tabEnrolled": "Inscrito",
+    "happeningNow": "Acontecendo agora",
+    "upcoming": "Próximos",
+    "empty": "Ainda não há eventos. Seja o primeiro a organizar um.",
+    "emptyMine": "Você ainda não organiza nem participa de eventos.",
+    "emptyEnrolled": "Você ainda não se inscreveu em nenhum evento.",
+    "createFirst": "Crie seu primeiro evento",
+    "past": "Passados"
+  },
+  "create": {
+    "title": "Criar evento",
+    "backToEvents": "Voltar aos eventos",
+    "signInRequired": "Entre para criar um evento.",
+    "hostAs": "Organizar como",
+    "hostPersonal": "Você",
+    "hostOrg": "Organização",
+    "name": {
+      "label": "Nome do evento",
+      "placeholder": "Nome do evento"
+    },
+    "type": {
+      "label": "Tipo",
+      "inperson": "Presencial",
+      "virtual": "Virtual",
+      "hybrid": "Híbrido"
+    },
+    "start": "Início",
+    "end": "Fim",
+    "timezoneNote": "Os horários estão no seu fuso horário local ({timezone}).",
+    "location": {
+      "label": "Local",
+      "placeholder": "Adicione um local"
+    },
+    "virtual": {
+      "label": "Link de acesso",
+      "placeholder": "https://…"
+    },
+    "description": {
+      "label": "Sobre",
+      "placeholder": "Sobre o que é este evento?"
+    },
+    "advanced": "Opções avançadas",
+    "visibility": {
+      "label": "Visibilidade",
+      "public": "Público",
+      "publicHint": "Qualquer pessoa pode encontrá-lo na descoberta.",
+      "unlisted": "Não listado",
+      "unlistedHint": "Apenas quem tem o link pode ver."
+    },
+    "submit": "Publicar evento",
+    "submitting": "Publicando…",
+    "nameRequired": "Adicione um nome para publicar.",
+    "error": "Algo deu errado. Tente novamente."
+  },
+  "detail": {
+    "live": "Ao vivo",
+    "cancelled": "Cancelado",
+    "addToCalendar": "Adicionar ao calendário",
+    "about": "Sobre",
+    "hostedBy": "Organizado por",
+    "links": "Links"
+  },
+  "rsvp": {
+    "signInRequired": "Entre para confirmar presença.",
+    "going": "Vou",
+    "goingAction": "Vou",
+    "interested": "Tenho interesse",
+    "interestedAction": "Tenho interesse",
+    "tapToRemove": "Toque na sua escolha novamente para remover.",
+    "confirmGoing": "Você vai!",
+    "confirmInterested": "Você tem interesse!",
+    "copyLink": "Copiar link",
+    "copied": "Copiado",
+    "error": "Algo deu errado. Tente novamente."
+  },
+  "nav": {
+    "label": "Eventos"
+  },
+  "profileTab": "Eventos"
+}

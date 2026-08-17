@@ -129,7 +129,8 @@
       "audiomoth": "AudioMoth",
       "identifications": "Identificaciones",
       "myGrant": "Mi subvención",
-      "myRecorders": "Mis grabadoras"
+      "myRecorders": "Mis grabadoras",
+      "events": "Eventos"
     },
     "prompts": {
       "signInDescription": "Inicia sesión para gestionar tu cuenta y contenido.",
@@ -503,7 +504,8 @@
     "wallet": "Billetera",
     "endorsementsGiven": "Respaldos",
     "equipment": "Equipos",
-    "more": "Más"
+    "more": "Más",
+    "events": "Eventos"
   },
   "accountAudio": {
     "viewsAria": "Vistas de audio",
