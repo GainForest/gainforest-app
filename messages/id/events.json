@@ -73,7 +73,9 @@
     "addToCalendar": "Tambahkan ke kalender",
     "about": "Tentang",
     "hostedBy": "Diselenggarakan oleh",
-    "links": "Tautan"
+    "links": "Tautan",
+    "share": "Bagikan",
+    "linkCopied": "Tautan disalin"
   },
   "rsvp": {
     "signInRequired": "Masuk untuk RSVP.",

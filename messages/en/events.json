@@ -73,7 +73,9 @@
     "addToCalendar": "Add to calendar",
     "about": "About",
     "hostedBy": "Hosted by",
-    "links": "Links"
+    "links": "Links",
+    "share": "Share",
+    "linkCopied": "Link copied"
   },
   "rsvp": {
     "signInRequired": "Sign in to RSVP.",

@@ -1,4 +1,7 @@
+"use client";
+
 import Link from "next/link";
+import { motion, useReducedMotion } from "framer-motion";
 import { CalendarIcon, MapPinIcon, VideoIcon } from "lucide-react";
 import { eventHref } from "@/app/_lib/urls";
 import { type CommunityEvent, type ProfileLite, profileLabel } from "@/app/_lib/events";
@@ -31,9 +34,15 @@ export function EventCard({
   const when = formatEventWhen(event, locale);
   const modes = modeLabels();
   const secondary = event.mode === "virtual" ? modes.virtual : event.location ?? modes[event.mode];
+  const reduce = useReducedMotion();
 
   return (
-    <li>
+    <motion.li
+      initial={reduce ? false : { opacity: 0, y: 8 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: "-40px" }}
+      transition={{ duration: 0.3, ease: "easeOut" }}
+    >
       <Link
         href={eventHref(event.did, event.rkey)}
         className="group -mx-3 flex gap-4 rounded-lg px-3 py-3 transition-colors hover:bg-muted/60"
@@ -66,6 +75,6 @@ export function EventCard({
           </div>
         </div>
       </Link>
-    </li>
+    </motion.li>
   );
 }

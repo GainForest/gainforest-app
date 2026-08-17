@@ -73,7 +73,9 @@
     "addToCalendar": "Añadir al calendario",
     "about": "Acerca de",
     "hostedBy": "Organizado por",
-    "links": "Enlaces"
+    "links": "Enlaces",
+    "share": "Compartir",
+    "linkCopied": "Enlace copiado"
   },
   "rsvp": {
     "signInRequired": "Inicia sesión para confirmar asistencia.",

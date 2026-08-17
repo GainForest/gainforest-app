@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
+import { AnimatePresence, motion } from "framer-motion";
 import { CheckIcon, LinkIcon, StarIcon } from "lucide-react";
 import { listRsvpsForDid, type RsvpStatus } from "@/app/_lib/events";
 import { Button } from "@/components/ui/button";
@@ -100,20 +101,28 @@ export function RsvpControls({ event, sessionDid }: { event: EventRef; sessionDi
       ) : null}
       {error ? <p className="text-sm text-destructive">{error}</p> : null}
 
-      {confirmFor ? (
-        <div className="flex flex-wrap items-center justify-between gap-2">
-          <span className="text-sm font-medium">
-            {confirmFor === "going" ? t("rsvp.confirmGoing") : t("rsvp.confirmInterested")}
-          </span>
-          <button
-            onClick={copyLink}
-            className="inline-flex items-center gap-1 text-sm font-medium text-primary hover:underline"
+      <AnimatePresence>
+        {confirmFor ? (
+          <motion.div
+            initial={{ opacity: 0, y: -6 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -6 }}
+            transition={{ duration: 0.2 }}
+            className="flex flex-wrap items-center justify-between gap-2"
           >
-            <LinkIcon className="size-3.5" />
-            {copied ? t("rsvp.copied") : t("rsvp.copyLink")}
-          </button>
-        </div>
-      ) : null}
+            <span className="text-sm font-medium">
+              {confirmFor === "going" ? t("rsvp.confirmGoing") : t("rsvp.confirmInterested")}
+            </span>
+            <button
+              onClick={copyLink}
+              className="inline-flex items-center gap-1 text-sm font-medium text-primary hover:underline"
+            >
+              <LinkIcon className="size-3.5" />
+              {copied ? t("rsvp.copied") : t("rsvp.copyLink")}
+            </button>
+          </motion.div>
+        ) : null}
+      </AnimatePresence>
     </div>
   );
 }

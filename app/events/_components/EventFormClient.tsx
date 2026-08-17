@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { CalendarIcon, ChevronDownIcon, ChevronLeftIcon, ImagePlusIcon } from "lucide-react";
+import { motion, useReducedMotion } from "framer-motion";
 import type { AuthSession } from "@/app/_lib/auth";
 import { useAccountList } from "@/app/_lib/account-switcher";
 import { canCreateRecord, canDeleteRecord } from "@/app/(manage)/manage/_lib/cgs-permissions";
@@ -80,6 +81,7 @@ function DateChip({ label, value, onChange }: { label: string; value: string; on
 export function EventFormClient({ session, existing }: { session: AuthSession; existing?: CommunityEvent | null }) {
   const t = useTranslations("events");
   const router = useRouter();
+  const reduce = useReducedMotion();
   const sessionDid = session.isLoggedIn ? session.did : null;
   const { personal, groups } = useAccountList(sessionDid);
   const isEdit = Boolean(existing);
@@ -217,22 +219,20 @@ export function EventFormClient({ session, existing }: { session: AuthSession; e
   return (
     <div className="mx-auto flex max-w-3xl flex-col gap-4">
       {/* Hero card — its background is the cover; click any empty area to set/replace it. */}
-      <div className="relative aspect-[16/9] w-full overflow-hidden rounded-3xl">
+      <motion.div
+        initial={reduce ? false : { opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.35, ease: "easeOut" }}
+        onClick={() => coverInputRef.current?.click()}
+        className="group relative aspect-[5/2] min-h-[200px] w-full cursor-pointer overflow-hidden rounded-3xl"
+      >
         {coverPreview ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img src={coverPreview} alt="" className="absolute inset-0 size-full object-cover" />
         ) : (
           <div className="absolute inset-0 bg-gradient-to-br from-primary/50 to-primary/20" />
         )}
-        <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/70 via-black/25 to-black/40" />
-
-        {/* Background click target for adding/replacing the image */}
-        <button
-          type="button"
-          onClick={() => coverInputRef.current?.click()}
-          aria-label={t("form.coverAria")}
-          className="absolute inset-0 cursor-pointer"
-        />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/25 to-black/40" />
         <input
           ref={coverInputRef}
           type="file"
@@ -241,67 +241,75 @@ export function EventFormClient({ session, existing }: { session: AuthSession; e
           onChange={(e) => onCoverFileChange(e.target.files?.[0])}
         />
         {!coverPreview ? (
-          <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
-            <span className="inline-flex items-center gap-2 text-sm font-medium text-white/80">
+          <div className="absolute inset-0 flex items-center justify-center">
+            <span className="inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1.5 text-sm font-medium text-white/85 backdrop-blur transition-colors group-hover:bg-white/20">
               <ImagePlusIcon className="size-5" /> {t("form.addCover")}
             </span>
           </div>
         ) : null}
 
-        {/* Content layer (transparent to clicks except its interactive children) */}
-        <div className="pointer-events-none relative flex h-full flex-col justify-between p-5">
+        <div className="relative flex h-full flex-col justify-between p-5">
           <div className="flex items-start justify-between gap-3">
             <Link
               href="/events"
-              className="pointer-events-auto inline-flex items-center gap-1 text-white/90 transition-colors hover:text-white"
+              onClick={(e) => e.stopPropagation()}
+              className="inline-flex items-center gap-1 text-white/90 transition-colors hover:text-white"
             >
               <ChevronLeftIcon className="size-5" />
               <span className="text-sm font-medium">{isEdit ? t("form.editTitle") : t("form.newTitle")}</span>
             </Link>
 
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <button
-                  type="button"
-                  className="pointer-events-auto inline-flex items-center gap-1 rounded-full bg-white/15 px-3 py-1.5 text-sm font-medium text-white backdrop-blur transition-colors hover:bg-white/25"
-                >
-                  {t(`create.visibility.${visibility}`)}
-                  <ChevronDownIcon className="size-4" />
-                </button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuRadioGroup value={visibility} onValueChange={(v) => setVisibility(v as "public" | "unlisted")}>
-                  {(["public", "unlisted"] as const).map((v) => (
-                    <DropdownMenuRadioItem key={v} value={v} className="flex-col items-start gap-0.5">
-                      <span className="font-medium">{t(`create.visibility.${v}`)}</span>
-                      <span className="text-xs text-muted-foreground">{t(`create.visibility.${v}Hint`)}</span>
-                    </DropdownMenuRadioItem>
-                  ))}
-                </DropdownMenuRadioGroup>
-              </DropdownMenuContent>
-            </DropdownMenu>
+            <div onClick={(e) => e.stopPropagation()}>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button
+                    type="button"
+                    className="inline-flex items-center gap-1 rounded-full bg-white/15 px-3 py-1.5 text-sm font-medium text-white backdrop-blur transition-colors hover:bg-white/25"
+                  >
+                    {t(`create.visibility.${visibility}`)}
+                    <ChevronDownIcon className="size-4" />
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuRadioGroup value={visibility} onValueChange={(v) => setVisibility(v as "public" | "unlisted")}>
+                    {(["public", "unlisted"] as const).map((v) => (
+                      <DropdownMenuRadioItem key={v} value={v} className="flex-col items-start gap-0.5">
+                        <span className="font-medium">{t(`create.visibility.${v}`)}</span>
+                        <span className="text-xs text-muted-foreground">{t(`create.visibility.${v}Hint`)}</span>
+                      </DropdownMenuRadioItem>
+                    ))}
+                  </DropdownMenuRadioGroup>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
           </div>
 
           <div className="flex flex-col gap-2">
             <input
               value={name}
               onChange={(e) => setName(e.target.value)}
+              onClick={(e) => e.stopPropagation()}
               placeholder={t("create.name.placeholder")}
               aria-label={t("create.name.label")}
               autoFocus={!isEdit}
-              className="pointer-events-auto w-full bg-transparent font-instrument text-3xl font-light italic tracking-[-0.02em] text-white outline-none placeholder:text-white/50 md:text-4xl"
+              className="w-full bg-transparent font-instrument text-3xl font-light italic tracking-[-0.02em] text-white outline-none placeholder:text-white/50 md:text-4xl"
             />
-            <div className="flex flex-wrap items-center gap-2">
+            <div className="flex flex-wrap items-center gap-2" onClick={(e) => e.stopPropagation()}>
               <DateChip label={t("form.starts")} value={start} onChange={onStartChange} />
               <DateChip label={t("form.ends")} value={end} onChange={setEnd} />
             </div>
           </div>
         </div>
-      </div>
+      </motion.div>
       <p className="px-1 text-xs text-muted-foreground">{t("create.timezoneNote", { timezone })}</p>
 
       {/* Body */}
-      <div className="flex flex-col gap-6 pt-2">
+      <motion.div
+        initial={reduce ? false : { opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.35, ease: "easeOut", delay: 0.08 }}
+        className="flex flex-col gap-6 pt-2"
+      >
         <Textarea
           value={description}
           onChange={(e) => setDescription(e.target.value)}
@@ -385,7 +393,7 @@ export function EventFormClient({ session, existing }: { session: AuthSession; e
             </Button>
           </div>
         </div>
-      </div>
+      </motion.div>
     </div>
   );
 }

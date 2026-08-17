@@ -73,7 +73,9 @@
     "addToCalendar": "Ongeza kwenye kalenda",
     "about": "Kuhusu",
     "hostedBy": "Imeandaliwa na",
-    "links": "Viungo"
+    "links": "Viungo",
+    "share": "Shiriki",
+    "linkCopied": "Kiungo kimenakiliwa"
   },
   "rsvp": {
     "signInRequired": "Ingia ili ku-RSVP.",
