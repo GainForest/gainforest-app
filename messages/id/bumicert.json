@@ -59,6 +59,7 @@
       "title": "Tambahkan pembaruan",
       "composerDescription": "Tulis pembaruan singkat. Lampirkan suara, observasi, pohon, atau berkas jika membantu.",
       "captionPlaceholder": "Bagikan pembaruan proyek singkat. Anda dapat memposting teks saja atau melampirkan bukti di bawah.",
+      "titlePlaceholder": "Judul (opsional)",
       "editor": {
         "bold": "Tebal",
         "italic": "Miring",

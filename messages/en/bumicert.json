@@ -59,6 +59,7 @@
       "title": "Add update",
       "composerDescription": "Write a short update. Attach sounds, observations, trees, or files if they help.",
       "captionPlaceholder": "Share a quick project update. You can post text only or attach evidence below.",
+      "titlePlaceholder": "Title (optional)",
       "editor": {
         "bold": "Bold",
         "italic": "Italic",

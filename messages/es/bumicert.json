@@ -59,6 +59,7 @@
       "title": "Agregar actualización",
       "composerDescription": "Escriba una breve actualización. Adjunte sonidos, observaciones, árboles o archivos si ayudan.",
       "captionPlaceholder": "Comparta una actualización rápida del proyecto. Puede publicar solo texto o adjuntar evidencia abajo.",
+      "titlePlaceholder": "Título (opcional)",
       "editor": {
         "bold": "Negrita",
         "italic": "Cursiva",

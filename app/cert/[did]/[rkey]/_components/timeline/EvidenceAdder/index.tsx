@@ -106,6 +106,9 @@ export function EvidenceAdder({
   // is uncontrolled, so bumping `editorKey` is how a posted draft is cleared.
   const [richText, setRichText] = useState<RichTextValue>(EMPTY_RICH_TEXT_VALUE);
   const [editorKey, setEditorKey] = useState(0);
+  // The update's title is asked for, never inferred from the body. Blank
+  // falls back to a generic label — body text is never copied into it.
+  const [title, setTitle] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [sourceState, setSourceState] = useState<{
@@ -235,13 +238,6 @@ export function EvidenceAdder({
     }
   }
 
-  function titleFromCaption(value: string): string {
-    // First line only: with rich text the caption may start with a heading,
-    // and gluing the whole body into the title reads like a paragraph.
-    const singleLine = (value.trim().split("\n")[0] ?? "").trim().replace(/\s+/g, " ");
-    if (!singleLine) return evidenceT("updateTitleFallback");
-    return singleLine.length > 80 ? `${singleLine.slice(0, 77)}…` : singleLine;
-  }
 
   async function submitDrafts(
     drafts: AttachmentDraft | AttachmentDraft[],
@@ -308,12 +304,13 @@ export function EvidenceAdder({
   function clearCaption() {
     setRichText(EMPTY_RICH_TEXT_VALUE);
     setEditorKey((value) => value + 1);
+    setTitle("");
   }
 
   function postTextUpdate() {
     if (!leafletDocumentHasText(richText.document)) return;
     submitDrafts({
-      title: titleFromCaption(richText.plaintext),
+      title: captionTitle ?? evidenceT("updateTitleFallback"),
       contentType: "update",
       contents: [],
       textDocument: richText.document,
@@ -326,7 +323,7 @@ export function EvidenceAdder({
   const activeConfig = activeTab ? EVIDENCE_TABS.find((tab) => tab.id === activeTab)! : null;
   const caption = richText.plaintext;
   const captionDocument = richText.document;
-  const captionTitle = caption.trim() ? titleFromCaption(caption) : null;
+  const captionTitle = title.trim().replace(/\s+/g, " ") || null;
   const activeSources = sourceState.data;
 
   function renderAttachmentPanel() {
@@ -438,6 +435,16 @@ export function EvidenceAdder({
         transition={{ duration: 0.22, ease: [0.25, 0.1, 0.25, 1] }}
         className="overflow-hidden rounded-xl border border-input bg-background shadow-xs focus-within:border-ring focus-within:ring-[3px] focus-within:ring-ring/50"
       >
+        <input
+          type="text"
+          value={title}
+          onChange={(event) => setTitle(event.target.value)}
+          disabled={isSubmitting || !createPermission.allowed}
+          placeholder={evidenceT("titlePlaceholder")}
+          aria-label={evidenceT("titlePlaceholder")}
+          maxLength={256}
+          className="w-full border-b border-border/60 bg-transparent px-3 py-2.5 text-base font-medium text-foreground outline-none placeholder:font-normal placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
+        />
         <RichTextEditor
           key={editorKey}
           labels={editorLabels}
