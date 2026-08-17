@@ -9,6 +9,7 @@
  */
 
 import { cachedAsync } from "./async-cache";
+import { listAudioFolderTotals, type AudioFolderTotal } from "./audio-upload-days";
 import {
   fetchHiddenRecordUris,
   fetchIndexedCertifiedProfileCards,
@@ -26,10 +27,6 @@ const UNATTACHED_FOLDERS_CACHE_KEY = "audio-projects:unattached-folders";
 const AUDIO_PROJECTS_CACHE_TTL_MS = 5 * 60_000;
 const INDEXER_PAGE_SIZE = 1000;
 const MAX_ATTACHMENT_PAGES = 50;
-/** Ceiling on the recordings sweep behind the unattached-folder rows: 20
- *  pages ≈ 20k recordings. Past that the oldest folders fall off the page
- *  rather than the cost growing without bound. */
-const MAX_RECORDING_SWEEP_PAGES = 20;
 const AUDIO_SAMPLE_BATCH_SIZE = 40;
 
 type AttachmentKind = "audio" | "soundscape";
@@ -353,79 +350,6 @@ async function fetchDeploymentsByDid(
   return deployments;
 }
 
-async function countByDeployment(
-  deploymentRef: string,
-  signal?: AbortSignal,
-): Promise<number | null> {
-  const data = await indexerQuery<{
-    appGainforestAcAudio?: { totalCount?: number | null } | null;
-  }>(
-    `query AudioProjectDeploymentCount($deploymentRef: String!) {
-      appGainforestAcAudio(
-        first: 0
-        where: { deploymentRef: { eq: $deploymentRef } }
-      ) { totalCount }
-    }`,
-    { deploymentRef },
-    signal,
-  ).catch(() => null);
-  const count = data?.appGainforestAcAudio?.totalCount;
-  return typeof count === "number" && Number.isSafeInteger(count) && count >= 0 ? count : null;
-}
-
-async function fetchDeploymentRecordedDates(
-  deploymentRef: string,
-  signal?: AbortSignal,
-): Promise<string[]> {
-  const dates = new Set<string>();
-  let after: string | null = null;
-
-  for (let page = 0; page < MAX_ATTACHMENT_PAGES; page += 1) {
-    const data: {
-      appGainforestAcAudio?: {
-        pageInfo?: { hasNextPage?: boolean | null; endCursor?: string | null } | null;
-        edges?: Array<{
-          node?: { metadata?: { recordedAt?: string | null } | null } | null;
-        } | null> | null;
-      };
-    } | null = await indexerQuery<{
-      appGainforestAcAudio?: {
-        pageInfo?: { hasNextPage?: boolean | null; endCursor?: string | null } | null;
-        edges?: Array<{
-          node?: { metadata?: { recordedAt?: string | null } | null } | null;
-        } | null> | null;
-      };
-    }>(
-      `query AudioProjectDeploymentDates($deploymentRef: String!, $after: String) {
-        appGainforestAcAudio(
-          first: ${INDEXER_PAGE_SIZE}
-          after: $after
-          where: { deploymentRef: { eq: $deploymentRef } }
-          sortBy: createdAt
-          sortDirection: DESC
-        ) {
-          pageInfo { hasNextPage endCursor }
-          edges { node { metadata { recordedAt } } }
-        }
-      }`,
-      { deploymentRef, after },
-      signal,
-    ).catch(() => null);
-
-    for (const edge of data?.appGainforestAcAudio?.edges ?? []) {
-      const key = dateKey(edge?.node?.metadata?.recordedAt);
-      if (key) dates.add(key);
-    }
-
-    const pageInfo: { hasNextPage?: boolean | null; endCursor?: string | null } | null | undefined =
-      data?.appGainforestAcAudio?.pageInfo;
-    if (!pageInfo?.hasNextPage || !pageInfo.endCursor) break;
-    after = pageInfo.endCursor;
-  }
-
-  return [...dates].sort();
-}
-
 function maxCreatedAt(uploads: AudioProjectUpload[]): number {
   return Math.max(
     0,
@@ -526,35 +450,23 @@ async function listNetworkAudioProjectsUncached(signal?: AbortSignal): Promise<A
     };
   });
 
-  const missingCounts = await Promise.all(
-    uploadDrafts.map(async (draft) => {
-      if (draft.parsedCount !== null || !draft.sample?.deploymentRef) return null;
-      return countByDeployment(draft.sample.deploymentRef, signal);
-    }),
+  // The folder's real size and its recording dates both come from the shared
+  // sweep of the recordings. An attachment's note states a count too, but it
+  // was written once, when the folder was attached, and says nothing about
+  // what has been uploaded since — so it is only a fallback for a folder the
+  // sweep can't resolve.
+  const folderTotals = await listAudioFolderTotals(signal).catch(
+    () => new Map<string, AudioFolderTotal>(),
   );
+  const totalFor = (draft: { sample?: RawAudioSample }): AudioFolderTotal | undefined =>
+    draft.sample?.deploymentRef ? folderTotals.get(draft.sample.deploymentRef) : undefined;
 
-  // A timeline attachment has a useful total but not the recording date range
-  // shown in the slot header. Scan each deployment once; the indexer page is
-  // capped and paginated so large recorder folders stay bounded.
-  const recordedDatesByDeployment = new Map<string, Promise<string[]>>();
-  const datesForDeployment = (deploymentRef: string): Promise<string[]> => {
-    const existing = recordedDatesByDeployment.get(deploymentRef);
-    if (existing) return existing;
-    const promise = fetchDeploymentRecordedDates(deploymentRef, signal);
-    recordedDatesByDeployment.set(deploymentRef, promise);
-    return promise;
-  };
-  const recordedDates = await Promise.all(
-    uploadDrafts.map(async (draft) => {
-      const deploymentRef = draft.sample?.deploymentRef;
-      if (deploymentRef) {
-        const dates = await datesForDeployment(deploymentRef);
-        if (dates.length > 0) return dates;
-      }
-      const sampleDate = dateKey(draft.sample?.metadata?.recordedAt);
-      return sampleDate ? [sampleDate] : [];
-    }),
-  );
+  const recordedDates = uploadDrafts.map((draft) => {
+    const dates = totalFor(draft)?.recordedDates ?? [];
+    if (dates.length > 0) return dates;
+    const sampleDate = dateKey(draft.sample?.metadata?.recordedAt);
+    return sampleDate ? [sampleDate] : [];
+  });
 
   const locationUris = new Set<string>();
   for (const draft of uploadDrafts) {
@@ -579,7 +491,7 @@ async function listNetworkAudioProjectsUncached(signal?: AbortSignal): Promise<A
   }
   uploadDrafts.forEach((draft, index) => {
     const { candidate, sample, sampleDid, deployment, parsedCount } = draft;
-    const count = parsedCount ?? missingCounts[index] ?? candidate.recordings.length;
+    const count = totalFor(draft)?.recordingCount ?? parsedCount ?? candidate.recordings.length;
     if (count <= 0) return;
     const siteUri = sample?.siteRef ?? deployment?.siteRef ?? candidate.project.locationUri;
     const deploymentRef = sample?.deploymentRef?.trim() || null;
@@ -674,75 +586,43 @@ export async function listNetworkAudioProjects(signal?: AbortSignal): Promise<Au
 // grouped per owner into "(no project)" rows. The recording count is counted
 // live rather than parsed from an attachment note, since there is none.
 
-/** The slice of an `ac.audio` record the unattached sweep reads. */
-export type SweptRecording = {
-  did?: string | null;
-  deploymentRef?: string | null;
-  createdAt?: string | null;
-  metadata?: { recordedAt?: string | null } | null;
-};
-
-/** The slice of an `ac.deployment` folder the grouping needs. */
-export type SweptFolder = {
-  did?: string | null;
-  uri?: string | null;
-  name?: string | null;
-  deviceModel?: string | null;
-  siteRef?: string | null;
-};
-
 /**
- * Group recordings into one upload slot per folder, dropping everything that
- * is already represented on the page or moderated away. Pure — the network
- * inputs arrive resolved.
+ * Turn folder totals into upload slots grouped per owner, dropping everything
+ * already represented on the page or moderated away. Pure.
  *
  * Skipped on purpose:
- *  - records with no folder: a slot stands for a recorder folder, and the odd
- *    folder-less record can already surface as project evidence;
  *  - folders in `attachedDeploymentRefs`: their project row shows them;
  *  - hidden folders and folders of hidden accounts.
+ *
+ * Recordings that sit in no folder never reach here — a slot stands for a
+ * recorder folder, and the odd folder-less record can already surface as
+ * project evidence.
  */
 export function collectUnattachedFolders(input: {
-  recordings: readonly SweptRecording[];
-  folders: ReadonlyMap<string, SweptFolder>;
+  folderTotals: ReadonlyMap<string, AudioFolderTotal>;
   attachedDeploymentRefs: ReadonlySet<string>;
   hiddenDids: ReadonlySet<string>;
   hiddenRecordUris: ReadonlySet<string>;
 }): Map<string, AudioProjectUpload[]> {
-  type Bucket = { count: number; newest: string | null; dates: Set<string> };
-  const buckets = new Map<string, Bucket>();
-
-  for (const recording of input.recordings) {
-    const ref = recording.deploymentRef?.startsWith("at://") ? recording.deploymentRef : null;
-    if (!ref) continue;
-    if (input.attachedDeploymentRefs.has(ref) || input.hiddenRecordUris.has(ref)) continue;
-    const bucket = buckets.get(ref) ?? { count: 0, newest: null, dates: new Set<string>() };
-    bucket.count += 1;
-    if (recording.createdAt && (!bucket.newest || recording.createdAt > bucket.newest)) {
-      bucket.newest = recording.createdAt;
-    }
-    const recorded = dateKey(recording.metadata?.recordedAt);
-    if (recorded) bucket.dates.add(recorded);
-    buckets.set(ref, bucket);
-  }
-
   const byOwner = new Map<string, AudioProjectUpload[]>();
-  for (const [ref, bucket] of buckets) {
-    const folder = input.folders.get(ref);
-    const ownerDid = folder?.did ?? parseAtUri(ref)?.did ?? null;
+
+  for (const [ref, total] of input.folderTotals) {
+    if (input.attachedDeploymentRefs.has(ref) || input.hiddenRecordUris.has(ref)) continue;
+    if (total.recordingCount <= 0) continue;
+    const ownerDid = total.did || parseAtUri(ref)?.did || null;
     if (!ownerDid || input.hiddenDids.has(ownerDid)) continue;
     const uploads = byOwner.get(ownerDid) ?? [];
     uploads.push({
       id: ref,
       did: ownerDid,
       deploymentRef: ref,
-      title: folder?.name?.trim() || null,
-      recordingCount: bucket.count,
-      recorderName: folder?.name?.trim() || folder?.deviceModel?.trim() || null,
+      title: total.name,
+      recordingCount: total.recordingCount,
+      recorderName: total.name ?? total.deviceModel,
       siteName: null,
-      createdAt: bucket.newest,
+      createdAt: total.uploadedAt,
       recordingUris: [],
-      recordedDates: [...bucket.dates].sort(),
+      recordedDates: total.recordedDates,
     });
     byOwner.set(ownerDid, uploads);
   }
@@ -757,81 +637,12 @@ export function collectUnattachedFolders(input: {
   return byOwner;
 }
 
-async function sweepAllRecordings(signal?: AbortSignal): Promise<SweptRecording[]> {
-  const all: SweptRecording[] = [];
-  let after: string | null = null;
-
-  for (let page = 0; page < MAX_RECORDING_SWEEP_PAGES; page += 1) {
-    const data: {
-      appGainforestAcAudio?: {
-        pageInfo?: { hasNextPage?: boolean | null; endCursor?: string | null } | null;
-        edges?: Array<{ node?: SweptRecording | null } | null> | null;
-      } | null;
-    } | null = await indexerQuery<{
-      appGainforestAcAudio?: {
-        pageInfo?: { hasNextPage?: boolean | null; endCursor?: string | null } | null;
-        edges?: Array<{ node?: SweptRecording | null } | null> | null;
-      } | null;
-    }>(
-      `query UnattachedAudioSweep($after: String) {
-        appGainforestAcAudio(
-          first: ${INDEXER_PAGE_SIZE}
-          after: $after
-          sortBy: createdAt
-          sortDirection: DESC
-        ) {
-          pageInfo { hasNextPage endCursor }
-          edges { node { did deploymentRef createdAt metadata { recordedAt } } }
-        }
-      }`,
-      { after },
-      signal,
-    ).catch(() => null);
-    if (!data) break;
-
-    for (const edge of data.appGainforestAcAudio?.edges ?? []) {
-      if (edge?.node?.did) all.push(edge.node);
-    }
-
-    const pageInfo: { hasNextPage?: boolean | null; endCursor?: string | null } | null | undefined =
-      data.appGainforestAcAudio?.pageInfo;
-    if (!pageInfo?.hasNextPage || !pageInfo.endCursor) break;
-    after = pageInfo.endCursor;
-  }
-
-  return all;
-}
-
-async function fetchAllFolders(signal?: AbortSignal): Promise<Map<string, SweptFolder>> {
-  const data = await indexerQuery<{
-    appGainforestAcDeployment?: {
-      edges?: Array<{ node?: SweptFolder | null } | null> | null;
-    } | null;
-  }>(
-    `query UnattachedAudioFolders {
-      appGainforestAcDeployment(first: ${INDEXER_PAGE_SIZE}, sortBy: createdAt, sortDirection: DESC) {
-        edges { node { did uri name deviceModel siteRef } }
-      }
-    }`,
-    {},
-    signal,
-  ).catch(() => null);
-
-  const byUri = new Map<string, SweptFolder>();
-  for (const edge of data?.appGainforestAcDeployment?.edges ?? []) {
-    const folder = edge?.node;
-    if (folder?.uri) byUri.set(folder.uri, folder);
-  }
-  return byUri;
-}
-
 async function listUnattachedAudioAccountsUncached(
   signal?: AbortSignal,
 ): Promise<UnattachedAudioAccount[]> {
-  const [attached, recordings, folders, hiddenDids, hiddenUris] = await Promise.all([
+  const [attached, folderTotals, hiddenDids, hiddenUris] = await Promise.all([
     listNetworkAudioProjects(signal).catch(() => [] as AudioProject[]),
-    sweepAllRecordings(signal),
-    fetchAllFolders(signal),
+    listAudioFolderTotals(signal).catch(() => new Map<string, AudioFolderTotal>()),
     fetchPublicHiddenAccountDids(signal).catch(() => new Set<string>()),
     fetchHiddenRecordUris(signal).catch(() => new Set<string>()),
   ]);
@@ -843,8 +654,7 @@ async function listUnattachedAudioAccountsUncached(
   );
 
   const byOwner = collectUnattachedFolders({
-    recordings,
-    folders,
+    folderTotals,
     attachedDeploymentRefs,
     hiddenDids,
     hiddenRecordUris: hiddenUris,
@@ -855,7 +665,7 @@ async function listUnattachedAudioAccountsUncached(
   const siteRefs = new Set<string>();
   for (const uploads of byOwner.values()) {
     for (const upload of uploads) {
-      const siteRef = upload.deploymentRef ? folders.get(upload.deploymentRef)?.siteRef : null;
+      const siteRef = upload.deploymentRef ? folderTotals.get(upload.deploymentRef)?.siteRef : null;
       if (siteRef) siteRefs.add(siteRef);
     }
   }
@@ -871,7 +681,7 @@ async function listUnattachedAudioAccountsUncached(
   );
   for (const uploads of byOwner.values()) {
     for (const upload of uploads) {
-      const siteRef = upload.deploymentRef ? folders.get(upload.deploymentRef)?.siteRef : null;
+      const siteRef = upload.deploymentRef ? folderTotals.get(upload.deploymentRef)?.siteRef : null;
       if (siteRef) upload.siteName = locationNames.get(siteRef) ?? null;
     }
   }

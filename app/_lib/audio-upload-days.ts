@@ -26,7 +26,7 @@
 import { cachedAsync } from "./async-cache";
 import { indexerQuery } from "./indexer";
 
-const CACHE_KEY = "audio-upload-days";
+const SWEEP_CACHE_KEY = "audio-recordings-sweep";
 /** Matches the feed's own page cache, so a fresh upload shows up as quickly
  *  as any other new record without re-sweeping per page. */
 const CACHE_TTL_MS = 60_000;
@@ -55,11 +55,31 @@ export interface AudioUploadDay {
   eventRef: string | null;
 }
 
+/** What one folder holds in total — the honest size of a recorder folder,
+ *  counted from the recordings rather than read off anything written about
+ *  them. Shared by every surface that has to state a folder's size. */
+export interface AudioFolderTotal {
+  folderUri: string;
+  /** Owner of the folder — the folder record's repo when it is known. */
+  did: string;
+  /** Recordings in the folder right now. */
+  recordingCount: number;
+  /** Newest upload into the folder, ISO. */
+  uploadedAt: string | null;
+  /** Distinct days the recordings were *recorded* on, earliest first. */
+  recordedDates: string[];
+  name: string | null;
+  deviceModel: string | null;
+  siteRef: string | null;
+  eventRef: string | null;
+}
+
 export type RawRecording = {
   did?: string | null;
   uri?: string | null;
   deploymentRef?: string | null;
   createdAt?: string | null;
+  metadata?: { recordedAt?: string | null } | null;
 };
 
 export type RawFolder = {
@@ -67,6 +87,7 @@ export type RawFolder = {
   uri?: string | null;
   name?: string | null;
   deviceModel?: string | null;
+  siteRef?: string | null;
   eventRef?: string | null;
 };
 
@@ -79,7 +100,7 @@ const RECORDINGS_QUERY = `
       sortDirection: DESC
     ) {
       pageInfo { hasNextPage endCursor }
-      edges { node { did uri deploymentRef createdAt } }
+      edges { node { did uri deploymentRef createdAt metadata { recordedAt } } }
     }
   }
 `;
@@ -87,7 +108,7 @@ const RECORDINGS_QUERY = `
 const FOLDERS_QUERY = `
   query AudioUploadDayFolders {
     appGainforestAcDeployment(first: ${PAGE_SIZE}, sortBy: createdAt, sortDirection: DESC) {
-      edges { node { did uri name deviceModel eventRef } }
+      edges { node { did uri name deviceModel siteRef eventRef } }
     }
   }
 `;
@@ -199,14 +220,89 @@ export function groupRecordingsByUploadDay(
     .sort((a, b) => (a.createdAt < b.createdAt ? 1 : a.createdAt > b.createdAt ? -1 : 0));
 }
 
-async function listAudioUploadDaysUncached(signal?: AbortSignal): Promise<AudioUploadDay[]> {
-  const [recordings, folders] = await Promise.all([sweepRecordings(signal), listFolders(signal)]);
+/**
+ * Total up each folder from the same recordings. Pure.
+ *
+ * This is the one place a folder's size is decided. Anything written *about* a
+ * folder — an attachment note, say — is a snapshot of the moment it was
+ * written and goes stale the next time somebody uploads; the recordings
+ * themselves cannot.
+ */
+export function collectFolderTotals(
+  recordings: readonly RawRecording[],
+  folders: ReadonlyMap<string, RawFolder>,
+): Map<string, AudioFolderTotal> {
+  type Bucket = { count: number; uploadedAt: string | null; recorded: Set<string> };
+  const buckets = new Map<string, Bucket>();
+
+  for (const recording of recordings) {
+    const ref = recording.deploymentRef?.startsWith("at://") ? recording.deploymentRef : null;
+    if (!ref || !recording.createdAt) continue;
+    const bucket = buckets.get(ref) ?? { count: 0, uploadedAt: null, recorded: new Set<string>() };
+    bucket.count += 1;
+    if (!bucket.uploadedAt || recording.createdAt > bucket.uploadedAt) {
+      bucket.uploadedAt = recording.createdAt;
+    }
+    const recorded = dayKey(recording.metadata?.recordedAt);
+    if (recorded) bucket.recorded.add(recorded);
+    buckets.set(ref, bucket);
+  }
+
+  const totals = new Map<string, AudioFolderTotal>();
+  for (const [ref, bucket] of buckets) {
+    const folder = folders.get(ref);
+    totals.set(ref, {
+      folderUri: ref,
+      did: folder?.did ?? parseRepo(ref) ?? "",
+      recordingCount: bucket.count,
+      uploadedAt: bucket.uploadedAt,
+      recordedDates: [...bucket.recorded].sort(),
+      name: folder?.name?.trim() || null,
+      deviceModel: folder?.deviceModel?.trim() || null,
+      siteRef: folder?.siteRef ?? null,
+      eventRef: folder?.eventRef?.startsWith("at://") ? folder.eventRef : null,
+    });
+  }
+  return totals;
+}
+
+/** Repo DID of an `at://` URI. */
+function parseRepo(uri: string): string | null {
+  return uri.match(/^at:\/\/([^/]+)\//)?.[1] ?? null;
+}
+
+type AudioSweep = { recordings: RawRecording[]; folders: Map<string, RawFolder> };
+
+/**
+ * One walk of every recording plus every folder record, cached.
+ *
+ * Both views below are derived from this, so the feed's upload rows and the
+ * Audio page's folder sizes cost a single sweep between them rather than one
+ * each — and can never disagree about how many recordings a folder holds.
+ */
+async function sweepAudio(signal?: AbortSignal): Promise<AudioSweep> {
+  return cachedAsync(
+    SWEEP_CACHE_KEY,
+    CACHE_TTL_MS,
+    async () => {
+      const [recordings, folders] = await Promise.all([sweepRecordings(), listFolders()]);
+      return { recordings, folders };
+    },
+    signal,
+  );
+}
+
+/** Every folder-day of uploading on the network, newest first. */
+export async function listAudioUploadDays(signal?: AbortSignal): Promise<AudioUploadDay[]> {
+  const { recordings, folders } = await sweepAudio(signal);
   if (recordings.length === 0) return [];
   return groupRecordingsByUploadDay(recordings, folders);
 }
 
-/** Every folder-day of uploading on the network, newest first. Cached, since
- *  the whole list is rebuilt by one sweep and read by every feed page. */
-export async function listAudioUploadDays(signal?: AbortSignal): Promise<AudioUploadDay[]> {
-  return cachedAsync(CACHE_KEY, CACHE_TTL_MS, () => listAudioUploadDaysUncached(), signal);
+/** How many recordings each folder holds right now, keyed by folder AT-URI. */
+export async function listAudioFolderTotals(
+  signal?: AbortSignal,
+): Promise<Map<string, AudioFolderTotal>> {
+  const { recordings, folders } = await sweepAudio(signal);
+  return collectFolderTotals(recordings, folders);
 }

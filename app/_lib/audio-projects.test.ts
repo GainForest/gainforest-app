@@ -1,29 +1,33 @@
 import { describe, expect, it } from "vitest";
 
-import {
-  collectUnattachedFolders,
-  parseUploadedRecordingCount,
-  type SweptFolder,
-  type SweptRecording,
-} from "./audio-projects";
+import { collectUnattachedFolders, parseUploadedRecordingCount } from "./audio-projects";
+import type { AudioFolderTotal } from "./audio-upload-days";
 
 const OWNER = "did:plc:owner";
-const OTHER = "did:plc:other";
 const FOLDER_A = `at://${OWNER}/app.gainforest.ac.deployment/folder-a`;
 const FOLDER_B = `at://${OWNER}/app.gainforest.ac.deployment/folder-b`;
 
-function folders(...entries: SweptFolder[]): Map<string, SweptFolder> {
-  return new Map(entries.map((folder) => [folder.uri!, folder]));
+function total(overrides: Partial<AudioFolderTotal> & { folderUri: string }): AudioFolderTotal {
+  return {
+    did: OWNER,
+    recordingCount: 1,
+    uploadedAt: "2026-08-01T10:00:00.000Z",
+    recordedDates: [],
+    name: null,
+    deviceModel: null,
+    siteRef: null,
+    eventRef: null,
+    ...overrides,
+  };
 }
 
-function recording(overrides: Partial<SweptRecording>): SweptRecording {
-  return { did: OWNER, deploymentRef: FOLDER_A, createdAt: "2026-08-01T10:00:00.000Z", ...overrides };
+function totals(...entries: AudioFolderTotal[]): Map<string, AudioFolderTotal> {
+  return new Map(entries.map((entry) => [entry.folderUri, entry]));
 }
 
 function collect(input: Partial<Parameters<typeof collectUnattachedFolders>[0]>) {
   return collectUnattachedFolders({
-    recordings: [],
-    folders: new Map(),
+    folderTotals: new Map(),
     attachedDeploymentRefs: new Set(),
     hiddenDids: new Set(),
     hiddenRecordUris: new Set(),
@@ -32,66 +36,68 @@ function collect(input: Partial<Parameters<typeof collectUnattachedFolders>[0]>)
 }
 
 describe("collectUnattachedFolders", () => {
-  const folderA: SweptFolder = { did: OWNER, uri: FOLDER_A, name: "INN2-004" };
-
-  it("groups an owner's recordings into one slot per folder", () => {
+  it("turns each folder into one slot, newest upload first", () => {
     const byOwner = collect({
-      recordings: [
-        recording({ createdAt: "2026-08-01T10:00:00.000Z", metadata: { recordedAt: "2026-07-30T05:00:00Z" } }),
-        recording({ createdAt: "2026-08-02T09:00:00.000Z", metadata: { recordedAt: "2026-07-31T05:00:00Z" } }),
-        recording({ deploymentRef: FOLDER_B, createdAt: "2026-08-03T08:00:00.000Z" }),
-      ],
-      folders: folders(folderA, { did: OWNER, uri: FOLDER_B, deviceModel: "AudioMoth" }),
+      folderTotals: totals(
+        total({
+          folderUri: FOLDER_A,
+          name: "INN2-004",
+          recordingCount: 2,
+          uploadedAt: "2026-08-02T09:00:00.000Z",
+          recordedDates: ["2026-07-30", "2026-07-31"],
+        }),
+        total({
+          folderUri: FOLDER_B,
+          deviceModel: "AudioMoth",
+          recordingCount: 5,
+          uploadedAt: "2026-08-03T08:00:00.000Z",
+        }),
+      ),
     });
 
     const uploads = byOwner.get(OWNER)!;
-    expect(uploads).toHaveLength(2);
-    // Newest folder first.
-    expect(uploads[0].deploymentRef).toBe(FOLDER_B);
+    expect(uploads.map((upload) => upload.deploymentRef)).toEqual([FOLDER_B, FOLDER_A]);
     expect(uploads[0].recorderName).toBe("AudioMoth");
     expect(uploads[1].recorderName).toBe("INN2-004");
     expect(uploads[1].recordingCount).toBe(2);
-    expect(uploads[1].createdAt).toBe("2026-08-02T09:00:00.000Z");
     expect(uploads[1].recordedDates).toEqual(["2026-07-30", "2026-07-31"]);
   });
 
   it("drops folders a project already shows", () => {
     const byOwner = collect({
-      recordings: [recording({}), recording({ deploymentRef: FOLDER_B })],
-      folders: folders(folderA, { did: OWNER, uri: FOLDER_B }),
+      folderTotals: totals(total({ folderUri: FOLDER_A }), total({ folderUri: FOLDER_B })),
       attachedDeploymentRefs: new Set([FOLDER_A]),
     });
 
     expect(byOwner.get(OWNER)!.map((upload) => upload.deploymentRef)).toEqual([FOLDER_B]);
   });
 
-  it("skips recordings that sit in no folder", () => {
-    expect(collect({ recordings: [recording({ deploymentRef: null })] }).size).toBe(0);
-  });
-
-  it("attributes a folder to its owner, not the recording's repo", () => {
-    const byOwner = collect({
-      recordings: [recording({ did: OTHER })],
-      folders: folders(folderA),
-    });
-
-    expect([...byOwner.keys()]).toEqual([OWNER]);
+  it("drops an empty folder", () => {
+    expect(collect({ folderTotals: totals(total({ folderUri: FOLDER_A, recordingCount: 0 })) }).size).toBe(0);
   });
 
   it("honours moderation on the folder and on the account", () => {
-    expect(
-      collect({ recordings: [recording({})], folders: folders(folderA), hiddenRecordUris: new Set([FOLDER_A]) }).size,
-    ).toBe(0);
-    expect(
-      collect({ recordings: [recording({})], folders: folders(folderA), hiddenDids: new Set([OWNER]) }).size,
-    ).toBe(0);
+    const folderTotals = totals(total({ folderUri: FOLDER_A }));
+    expect(collect({ folderTotals, hiddenRecordUris: new Set([FOLDER_A]) }).size).toBe(0);
+    expect(collect({ folderTotals, hiddenDids: new Set([OWNER]) }).size).toBe(0);
   });
 
-  it("keeps a folder whose deployment record is unknown, keyed by the ref's repo", () => {
-    const byOwner = collect({ recordings: [recording({})] });
-    const uploads = byOwner.get(OWNER)!;
-    expect(uploads).toHaveLength(1);
-    expect(uploads[0].recorderName).toBeNull();
+  it("falls back to the folder ref's repo when the folder record is unknown", () => {
+    const byOwner = collect({ folderTotals: totals(total({ folderUri: FOLDER_A, did: "" })) });
+    expect([...byOwner.keys()]).toEqual([OWNER]);
+    expect(byOwner.get(OWNER)![0].recorderName).toBeNull();
+  });
+
+  it("groups folders under each owner separately", () => {
+    const other = "did:plc:other";
+    const byOwner = collect({
+      folderTotals: totals(
+        total({ folderUri: FOLDER_A }),
+        total({ folderUri: `at://${other}/app.gainforest.ac.deployment/x`, did: other }),
+      ),
+    });
+
+    expect([...byOwner.keys()].sort()).toEqual([other, OWNER].sort());
   });
 });
 
