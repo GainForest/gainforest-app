@@ -4,7 +4,7 @@ import { useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { CalendarIcon, ChevronDownIcon, ChevronLeftIcon, ImagePlusIcon } from "lucide-react";
+import { CalendarIcon, ChevronDownIcon, ChevronLeftIcon, ImagePlusIcon, PlusIcon, XIcon } from "lucide-react";
 import { motion, useReducedMotion } from "framer-motion";
 import type { AuthSession } from "@/app/_lib/auth";
 import { useAccountList } from "@/app/_lib/account-switcher";
@@ -110,7 +110,11 @@ export function EventFormClient({ session, existing }: { session: AuthSession; e
   const [start, setStart] = useState(isoToLocalInput(existing?.startsAt ?? null) ?? initial.start);
   const [end, setEnd] = useState(isoToLocalInput(existing?.endsAt ?? null) ?? initial.end);
   const [location, setLocation] = useState(existing?.location ?? "");
-  const [virtualUrl, setVirtualUrl] = useState(existing?.links?.[0]?.uri ?? "");
+  const existingLinks = existing?.links ?? [];
+  const [virtualUrl, setVirtualUrl] = useState(existingLinks.find((l) => l.name === "Join link")?.uri ?? "");
+  const [links, setLinks] = useState<Array<{ name: string; url: string }>>(
+    existingLinks.filter((l) => l.name !== "Join link").map((l) => ({ name: l.name ?? "", url: l.uri })),
+  );
   const [description, setDescription] = useState(existing?.description ?? "");
   const [visibility, setVisibility] = useState<"public" | "unlisted">(
     existing ? (existing.showInDiscovery ? "public" : "unlisted") : "public",
@@ -194,6 +198,7 @@ export function EventFormClient({ session, existing }: { session: AuthSession; e
         timezone,
         location: mode === "virtual" ? null : location,
         virtualUrl: mode === "inperson" ? null : virtualUrl,
+        links: links.filter((l) => l.url.trim()).map((l) => ({ uri: l.url.trim(), name: l.name.trim() || undefined })),
         visibility,
         cover,
       };
@@ -359,6 +364,46 @@ export function EventFormClient({ session, existing }: { session: AuthSession; e
               />
             </div>
           ) : null}
+        </div>
+
+        {/* Any number of extra links (the lexicon stores these in `uris`). */}
+        <div className="flex flex-col gap-2">
+          <div className="flex items-center justify-between">
+            <Label>{t("links.label")}</Label>
+            <button
+              type="button"
+              onClick={() => setLinks((l) => [...l, { name: "", url: "" }])}
+              className="inline-flex items-center gap-1 text-sm font-medium text-primary hover:underline"
+            >
+              <PlusIcon className="size-4" /> {t("links.add")}
+            </button>
+          </div>
+          {links.map((link, i) => (
+            <div key={i} className="flex items-center gap-2">
+              <Input
+                value={link.name}
+                onChange={(e) => setLinks((l) => l.map((x, j) => (j === i ? { ...x, name: e.target.value } : x)))}
+                placeholder={t("links.namePlaceholder")}
+                className="w-1/3"
+                aria-label={t("links.namePlaceholder")}
+              />
+              <Input
+                value={link.url}
+                onChange={(e) => setLinks((l) => l.map((x, j) => (j === i ? { ...x, url: e.target.value } : x)))}
+                placeholder={t("links.urlPlaceholder")}
+                className="flex-1"
+                aria-label={t("links.urlPlaceholder")}
+              />
+              <button
+                type="button"
+                onClick={() => setLinks((l) => l.filter((_, j) => j !== i))}
+                aria-label={t("links.remove")}
+                className="shrink-0 text-muted-foreground transition-colors hover:text-destructive"
+              >
+                <XIcon className="size-4" />
+              </button>
+            </div>
+          ))}
         </div>
 
         <div className="flex flex-wrap items-center justify-between gap-3">

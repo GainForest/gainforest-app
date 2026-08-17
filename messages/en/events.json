@@ -12,7 +12,13 @@
     "emptyMine": "You're not hosting or attending any events yet.",
     "emptyEnrolled": "You haven't enrolled in any events yet.",
     "createFirst": "Create your first event",
-    "past": "Past"
+    "past": "Past",
+    "typeAll": "All types",
+    "sortSoonest": "Soonest",
+    "sortRecent": "Recently added",
+    "sortAz": "A–Z",
+    "noMatches": "No events match your filters.",
+    "clearFilters": "Clear filters"
   },
   "create": {
     "title": "Create event",
@@ -88,7 +94,9 @@
     "confirmInterested": "You're interested!",
     "copyLink": "Copy link",
     "copied": "Copied",
-    "error": "Something went wrong. Please try again."
+    "error": "Something went wrong. Please try again.",
+    "goingCount": "{count} going",
+    "interestedCount": "{count} interested"
   },
   "nav": {
     "label": "Events"
@@ -115,5 +123,12 @@
   "edit": {
     "label": "Edit",
     "notAllowed": "You don't have permission to edit this event."
+  },
+  "links": {
+    "label": "Links",
+    "add": "Add link",
+    "namePlaceholder": "Label (optional)",
+    "urlPlaceholder": "https://…",
+    "remove": "Remove link"
   }
 }

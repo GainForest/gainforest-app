@@ -12,7 +12,13 @@
     "emptyMine": "Anda belum menyelenggarakan atau menghadiri acara apa pun.",
     "emptyEnrolled": "Anda belum mendaftar ke acara apa pun.",
     "createFirst": "Buat acara pertama Anda",
-    "past": "Selesai"
+    "past": "Selesai",
+    "typeAll": "Semua tipe",
+    "sortSoonest": "Terdekat",
+    "sortRecent": "Baru ditambahkan",
+    "sortAz": "A–Z",
+    "noMatches": "Tidak ada acara yang cocok dengan filter Anda.",
+    "clearFilters": "Hapus filter"
   },
   "create": {
     "title": "Buat acara",
@@ -88,7 +94,9 @@
     "confirmInterested": "Anda tertarik!",
     "copyLink": "Salin tautan",
     "copied": "Tersalin",
-    "error": "Terjadi kesalahan. Silakan coba lagi."
+    "error": "Terjadi kesalahan. Silakan coba lagi.",
+    "goingCount": "{count} hadir",
+    "interestedCount": "{count} tertarik"
   },
   "nav": {
     "label": "Acara"
@@ -115,5 +123,12 @@
   "edit": {
     "label": "Edit",
     "notAllowed": "Anda tidak memiliki izin untuk mengedit acara ini."
+  },
+  "links": {
+    "label": "Tautan",
+    "add": "Tambah tautan",
+    "namePlaceholder": "Label (opsional)",
+    "urlPlaceholder": "https://…",
+    "remove": "Hapus tautan"
   }
 }

@@ -255,6 +255,18 @@ export async function listRsvpsForDid(did: string, signal?: AbortSignal): Promis
   return rsvps;
 }
 
+/** The DIDs an account follows (`app.bsky.graph.follow`). Used to widen the
+ *  attendee set we can see RSVPs from, since there is no global index. */
+export async function listFollowDids(did: string, limit = 100, signal?: AbortSignal): Promise<string[]> {
+  const records = await listLatestPdsRecords(did, "app.bsky.graph.follow", limit, signal).catch(() => []);
+  const dids: string[] = [];
+  for (const record of records) {
+    const subject = record.value.subject;
+    if (typeof subject === "string" && subject.startsWith("did:")) dids.push(subject);
+  }
+  return dids;
+}
+
 /** RSVPs across a set of attendee repos, keyed by the event they point at. */
 export async function collectRsvpsForEvent(
   eventUri: string,

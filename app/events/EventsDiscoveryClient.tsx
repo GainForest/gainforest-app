@@ -3,34 +3,50 @@
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
-import { CalendarDaysIcon } from "lucide-react";
+import { CalendarDaysIcon, ChevronDownIcon, ListFilterIcon, ArrowUpDownIcon } from "lucide-react";
 import { useAccountList } from "@/app/_lib/account-switcher";
-import { listLatestPdsRecords, parseAtUri } from "@/app/_lib/pds";
+import { parseAtUri } from "@/app/_lib/pds";
 import {
   EVENT_DISCOVERY_SEED_DIDS,
   bucketForEvent,
   getEvent,
   listEventsForDids,
+  listFollowDids,
   listRsvpsForDid,
   resolveProfiles,
   sortByStartAsc,
   type CommunityEvent,
+  type EventMode,
   type ProfileLite,
 } from "@/app/_lib/events";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
 import { EventCard } from "./EventCard";
 
 type Tab = "all" | "mine" | "enrolled";
+type TypeFilter = "all" | EventMode;
+type SortBy = "soon" | "recent" | "az";
 
-async function readFollows(did: string, signal?: AbortSignal): Promise<string[]> {
-  const records = await listLatestPdsRecords(did, "app.bsky.graph.follow", 100, signal).catch(() => []);
-  const dids: string[] = [];
-  for (const record of records) {
-    const subject = record.value.subject;
-    if (typeof subject === "string" && subject.startsWith("did:")) dids.push(subject);
+function sortEvents(list: CommunityEvent[], sortBy: SortBy): CommunityEvent[] {
+  const arr = [...list];
+  if (sortBy === "recent") {
+    arr.sort((a, b) => (b.createdAt ? Date.parse(b.createdAt) : 0) - (a.createdAt ? Date.parse(a.createdAt) : 0));
+  } else if (sortBy === "az") {
+    arr.sort((a, b) => a.name.localeCompare(b.name));
+  } else {
+    arr.sort(sortByStartAsc);
   }
-  return dids;
+  return arr;
 }
+
+const chipTrigger =
+  "inline-flex h-9 items-center gap-1.5 rounded-full bg-muted px-3 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground";
 
 export function EventsDiscoveryClient({ sessionDid }: { sessionDid: string | null }) {
   const t = useTranslations("events");
@@ -41,6 +57,8 @@ export function EventsDiscoveryClient({ sessionDid }: { sessionDid: string | nul
   const [enrolledUris, setEnrolledUris] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(true);
   const [tab, setTab] = useState<Tab>("all");
+  const [typeFilter, setTypeFilter] = useState<TypeFilter>("all");
+  const [sortBy, setSortBy] = useState<SortBy>("soon");
 
   const orgDids = useMemo(() => groups.map((g) => g.groupDid), [groups]);
 
@@ -58,21 +76,16 @@ export function EventsDiscoveryClient({ sessionDid }: { sessionDid: string | nul
       if (sessionDid) {
         hostDids.add(sessionDid);
         for (const did of orgDids) hostDids.add(did);
-        const follows = await readFollows(sessionDid, signal);
-        for (const did of follows) hostDids.add(did);
+        for (const did of await listFollowDids(sessionDid, 100, signal)) hostDids.add(did);
       }
 
-      // Events hosted by any source repo.
       const hosted = await listEventsForDids(Array.from(hostDids), signal).catch(() => []);
       const byUri = new Map<string, CommunityEvent>();
       for (const e of hosted) byUri.set(e.uri, e);
-
-      // My own hosted events are "mine".
       for (const e of hosted) {
         if (sessionDid && (e.did === sessionDid || orgDids.includes(e.did))) mine.add(e.uri);
       }
 
-      // Events I've RSVP'd to (fetch each subject event, even if not in the host set).
       if (sessionDid) {
         const rsvps = await listRsvpsForDid(sessionDid, signal).catch(() => []);
         const active = rsvps.filter((r) => r.status !== "notgoing");
@@ -89,11 +102,8 @@ export function EventsDiscoveryClient({ sessionDid }: { sessionDid: string | nul
         for (const e of fetched) if (e) byUri.set(e.uri, e);
       }
 
-      const all = Array.from(byUri.values()).sort(sortByStartAsc);
-      const hostProfiles = await resolveProfiles(
-        all.map((e) => e.did),
-        signal,
-      ).catch(() => new Map<string, ProfileLite>());
+      const all = Array.from(byUri.values());
+      const hostProfiles = await resolveProfiles(all.map((e) => e.did), signal).catch(() => new Map<string, ProfileLite>());
 
       if (cancelled) return;
       setEvents(all);
@@ -110,34 +120,88 @@ export function EventsDiscoveryClient({ sessionDid }: { sessionDid: string | nul
     };
   }, [sessionDid, orgDids]);
 
-  const visible =
-    tab === "mine" ? events.filter((e) => myUris.has(e.uri)) : tab === "enrolled" ? events.filter((e) => enrolledUris.has(e.uri)) : events;
+  const tabbed =
+    tab === "mine"
+      ? events.filter((e) => myUris.has(e.uri))
+      : tab === "enrolled"
+        ? events.filter((e) => enrolledUris.has(e.uri))
+        : events;
+  const typed = typeFilter === "all" ? tabbed : tabbed.filter((e) => e.mode === typeFilter);
+
   const now = Date.now();
-  const live = visible.filter((e) => bucketForEvent(e, now) === "live");
-  const upcoming = visible.filter((e) => bucketForEvent(e, now) === "upcoming");
-  const past = visible.filter((e) => bucketForEvent(e, now) === "past").sort((a, b) => -sortByStartAsc(a, b));
-  // "All" stays a what's-happening feed (live + upcoming); past events only
-  // surface under My events / Enrolled. Renderable = what the current tab shows.
+  const live = sortEvents(typed.filter((e) => bucketForEvent(e, now) === "live"), sortBy);
+  const upcoming = sortEvents(typed.filter((e) => bucketForEvent(e, now) === "upcoming"), sortBy);
+  const past = typed.filter((e) => bucketForEvent(e, now) === "past").sort((a, b) => -sortByStartAsc(a, b));
   const renderable = live.length + upcoming.length + (tab === "all" ? 0 : past.length);
+  const filtersActive = typeFilter !== "all";
+
+  const typeLabel = (v: TypeFilter) =>
+    v === "all" ? t("discovery.typeAll") : t(`create.type.${v}`);
+  const sortLabel = (v: SortBy) =>
+    v === "soon" ? t("discovery.sortSoonest") : v === "recent" ? t("discovery.sortRecent") : t("discovery.sortAz");
 
   return (
     <div className="flex flex-col gap-6">
-      {sessionDid ? (
-        <div className="inline-flex items-center gap-1">
-          {(["all", "mine", "enrolled"] as const).map((value) => (
-            <button
-              key={value}
-              onClick={() => setTab(value)}
-              className={cn(
-                "inline-flex h-9 items-center rounded-full px-4 text-sm font-medium transition-colors",
-                tab === value ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground",
-              )}
-            >
-              {value === "all" ? t("discovery.tabAll") : value === "mine" ? t("discovery.tabMine") : t("discovery.tabEnrolled")}
-            </button>
-          ))}
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        {sessionDid ? (
+          <div className="inline-flex items-center gap-1">
+            {(["all", "mine", "enrolled"] as const).map((value) => (
+              <button
+                key={value}
+                onClick={() => setTab(value)}
+                className={cn(
+                  "inline-flex h-9 items-center rounded-full px-4 text-sm font-medium transition-colors",
+                  tab === value ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground",
+                )}
+              >
+                {value === "all" ? t("discovery.tabAll") : value === "mine" ? t("discovery.tabMine") : t("discovery.tabEnrolled")}
+              </button>
+            ))}
+          </div>
+        ) : (
+          <span />
+        )}
+
+        <div className="flex items-center gap-2">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button className={chipTrigger}>
+                <ListFilterIcon className="size-4" />
+                {typeLabel(typeFilter)}
+                <ChevronDownIcon className="size-3.5" />
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuRadioGroup value={typeFilter} onValueChange={(v) => setTypeFilter(v as TypeFilter)}>
+                {(["all", "inperson", "virtual", "hybrid"] as const).map((v) => (
+                  <DropdownMenuRadioItem key={v} value={v}>
+                    {typeLabel(v)}
+                  </DropdownMenuRadioItem>
+                ))}
+              </DropdownMenuRadioGroup>
+            </DropdownMenuContent>
+          </DropdownMenu>
+
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button className={chipTrigger}>
+                <ArrowUpDownIcon className="size-4" />
+                {sortLabel(sortBy)}
+                <ChevronDownIcon className="size-3.5" />
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuRadioGroup value={sortBy} onValueChange={(v) => setSortBy(v as SortBy)}>
+                {(["soon", "recent", "az"] as const).map((v) => (
+                  <DropdownMenuRadioItem key={v} value={v}>
+                    {sortLabel(v)}
+                  </DropdownMenuRadioItem>
+                ))}
+              </DropdownMenuRadioGroup>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
-      ) : null}
+      </div>
 
       {loading ? (
         <div className="flex flex-col">
@@ -152,9 +216,22 @@ export function EventsDiscoveryClient({ sessionDid }: { sessionDid: string | nul
             className="mx-auto mt-3 max-w-sm text-lg text-foreground/60"
             style={{ fontFamily: "var(--font-instrument-serif-var)", fontStyle: "italic" }}
           >
-            {tab === "mine" ? t("discovery.emptyMine") : tab === "enrolled" ? t("discovery.emptyEnrolled") : t("discovery.empty")}
+            {filtersActive
+              ? t("discovery.noMatches")
+              : tab === "mine"
+                ? t("discovery.emptyMine")
+                : tab === "enrolled"
+                  ? t("discovery.emptyEnrolled")
+                  : t("discovery.empty")}
           </p>
-          {sessionDid && tab !== "enrolled" ? (
+          {filtersActive ? (
+            <button
+              onClick={() => setTypeFilter("all")}
+              className="mt-3 inline-flex items-center gap-1 text-sm font-medium text-primary hover:underline"
+            >
+              {t("discovery.clearFilters")}
+            </button>
+          ) : sessionDid && tab !== "enrolled" ? (
             <Link href="/events/new" className="mt-3 inline-flex items-center gap-1 text-sm font-medium text-primary hover:underline">
               + {t("discovery.createFirst")}
             </Link>

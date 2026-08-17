@@ -12,7 +12,13 @@
     "emptyMine": "Bado hujaandaa au kuhudhuria tukio lolote.",
     "emptyEnrolled": "Bado hujajiandikisha kwenye tukio lolote.",
     "createFirst": "Unda tukio lako la kwanza",
-    "past": "Yaliyopita"
+    "past": "Yaliyopita",
+    "typeAll": "Aina zote",
+    "sortSoonest": "Yanayokaribia",
+    "sortRecent": "Yaliyoongezwa hivi karibuni",
+    "sortAz": "A–Z",
+    "noMatches": "Hakuna tukio linalolingana na vichujio vyako.",
+    "clearFilters": "Futa vichujio"
   },
   "create": {
     "title": "Unda tukio",
@@ -88,7 +94,9 @@
     "confirmInterested": "Una nia!",
     "copyLink": "Nakili kiungo",
     "copied": "Imenakiliwa",
-    "error": "Hitilafu imetokea. Tafadhali jaribu tena."
+    "error": "Hitilafu imetokea. Tafadhali jaribu tena.",
+    "goingCount": "{count} watahudhuria",
+    "interestedCount": "{count} wana nia"
   },
   "nav": {
     "label": "Matukio"
@@ -115,5 +123,12 @@
   "edit": {
     "label": "Hariri",
     "notAllowed": "Huna ruhusa ya kuhariri tukio hili."
+  },
+  "links": {
+    "label": "Viungo",
+    "add": "Ongeza kiungo",
+    "namePlaceholder": "Lebo (hiari)",
+    "urlPlaceholder": "https://…",
+    "remove": "Ondoa kiungo"
   }
 }

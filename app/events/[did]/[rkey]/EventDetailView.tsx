@@ -21,6 +21,7 @@ import {
 } from "@/app/_lib/events";
 import { modeLabels } from "../../_lib/format";
 import { RsvpControls } from "./RsvpControls";
+import { RsvpSummary } from "./RsvpSummary";
 import { EventHeroActions } from "./EventHeroActions";
 
 const chipClass =
@@ -122,8 +123,9 @@ export function EventDetailView({
         </motion.p>
       ) : null}
 
-      <motion.div variants={item}>
+      <motion.div variants={item} className="flex flex-col gap-3">
         <RsvpControls event={{ uri: event.uri, cid: event.cid, name: event.name }} sessionDid={sessionDid} />
+        <RsvpSummary eventUri={event.uri} hostDid={event.did} sessionDid={sessionDid} />
       </motion.div>
 
       <motion.a
