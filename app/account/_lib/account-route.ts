@@ -182,6 +182,14 @@ export function accountAudioManagePath(didOrHandle: string): string {
   return `${accountAudioPath(didOrHandle)}/manage`;
 }
 
+/**
+ * The Audio tab's Soundscapes view — the account's published 24-hour sound
+ * portraits, standing beside the raw recordings at the tab's own address.
+ */
+export function accountAudioSoundscapesPath(didOrHandle: string): string {
+  return `${accountAudioPath(didOrHandle)}/soundscapes`;
+}
+
 export function accountDronePath(didOrHandle: string): string {
   return `${accountPath(didOrHandle)}/drone`;
 }

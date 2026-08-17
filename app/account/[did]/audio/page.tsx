@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { resolveAccountManageAccess } from "@/app/_lib/manage-server";
 import { getGainForestModeratorAccess } from "@/app/internal/badges/_lib/access";
+import { AudioSubTabs } from "../../_components/AudioSubTabs";
 import { ObservationsSubNav } from "../../_components/ObservationsSubNav";
 import { ManageActionRow } from "../../_components/ManageActionRow";
 import {
@@ -25,9 +26,10 @@ type PageProps = {
 };
 
 /**
- * The profile's Audio tab. The default view is a simple player gallery of
- * the account's recordings grouped by deployment (see AccountAudioViewer) —
- * uploading and deployment editing live on the AudioMoth page, so nothing
+ * The profile's Audio tab. It opens on Recordings — a simple player gallery
+ * of the account's recordings grouped by deployment (see AccountAudioViewer)
+ * — with the account's published soundscapes a sub-tab away (./soundscapes).
+ * Uploading and deployment editing live on the AudioMoth page, so nothing
  * here duplicates them. The page is public: recordings live in public repos
  * and the audio explore page links every visitor here, so anyone gets the
  * read-only gallery. Owners and organization managers additionally get
@@ -78,6 +80,7 @@ export default async function AccountAudioPage({ params, searchParams }: PagePro
         <AudioSection target={target} />
       ) : (
         <>
+          <AudioSubTabs identifier={account.urlIdentifier} active="recordings" />
           <ManageActionRow action={manageAction} />
           <AccountAudioViewer
             did={account.did}

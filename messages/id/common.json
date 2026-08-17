@@ -505,6 +505,16 @@
     "equipment": "Peralatan",
     "more": "Lainnya"
   },
+  "accountAudio": {
+    "viewsAria": "Tampilan audio",
+    "recordings": "Rekaman",
+    "soundscapes": "Lanskap suara",
+    "soundscapesCount": "{count, plural, other {# lanskap suara}}",
+    "soundscapesLoadError": "Lanskap suara tidak dapat dimuat saat ini.",
+    "soundscapesEmptyTitle": "Belum ada lanskap suara",
+    "soundscapesEmptyBody": "Lanskap suara mengubah rekaman lapangan menjadi potret suara 24 jam. Saat profil ini menerbitkan satu, lanskap itu akan muncul di sini untuk didengarkan semua orang.",
+    "soundscapesBuildCta": "Buat dari rekaman Anda"
+  },
   "observationsManage": {
     "metaTitle": "Kelola observasi — {name}",
     "title": "Kelola observasi",

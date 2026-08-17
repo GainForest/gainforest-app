@@ -505,6 +505,16 @@
     "equipment": "Equipamentos",
     "more": "Mais"
   },
+  "accountAudio": {
+    "viewsAria": "Vistas de áudio",
+    "recordings": "Gravações",
+    "soundscapes": "Paisagens sonoras",
+    "soundscapesCount": "{count, plural, one {# paisagem sonora} other {# paisagens sonoras}}",
+    "soundscapesLoadError": "As paisagens sonoras não puderam ser carregadas agora.",
+    "soundscapesEmptyTitle": "Ainda não há paisagens sonoras",
+    "soundscapesEmptyBody": "Uma paisagem sonora transforma gravações de campo em um retrato sonoro de 24 horas. Quando este perfil publicar uma, ela aparecerá aqui para todos ouvirem.",
+    "soundscapesBuildCta": "Crie uma com suas gravações"
+  },
   "observationsManage": {
     "metaTitle": "Gerenciar observações — {name}",
     "title": "Gerenciar observações",

@@ -505,6 +505,16 @@
     "equipment": "Vifaa",
     "more": "Zaidi"
   },
+  "accountAudio": {
+    "viewsAria": "Mionekano ya sauti",
+    "recordings": "Rekodi",
+    "soundscapes": "Mandhari za sauti",
+    "soundscapesCount": "{count, plural, one {mandhari ya sauti #} other {mandhari za sauti #}}",
+    "soundscapesLoadError": "Mandhari za sauti hazikuweza kupakiwa kwa sasa.",
+    "soundscapesEmptyTitle": "Bado hakuna mandhari za sauti",
+    "soundscapesEmptyBody": "Mandhari ya sauti hugeuza rekodi za uwandani kuwa picha ya sauti ya saa 24. Wasifu huu ukichapisha moja, itaonekana hapa ili kila mtu aisikilize.",
+    "soundscapesBuildCta": "Tengeneza kutoka rekodi zako"
+  },
   "observationsManage": {
     "metaTitle": "Simamia uchunguzi — {name}",
     "title": "Simamia uchunguzi",

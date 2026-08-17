@@ -505,6 +505,16 @@
     "equipment": "Equipment",
     "more": "More"
   },
+  "accountAudio": {
+    "viewsAria": "Audio views",
+    "recordings": "Recordings",
+    "soundscapes": "Soundscapes",
+    "soundscapesCount": "{count, plural, one {# soundscape} other {# soundscapes}}",
+    "soundscapesLoadError": "Soundscapes couldn't be loaded right now.",
+    "soundscapesEmptyTitle": "No soundscapes yet",
+    "soundscapesEmptyBody": "A soundscape turns field recordings into a 24-hour sound portrait. When this profile publishes one, it will appear here for everyone to listen to.",
+    "soundscapesBuildCta": "Build one from your recordings"
+  },
   "observationsManage": {
     "metaTitle": "Manage observations — {name}",
     "title": "Manage observations",
