@@ -1,6 +1,7 @@
 "use client";
 
 import { useId, useState } from "react";
+import type { LeafletLinearDocument } from "@/app/_lib/leaflet-richtext";
 import { PaperclipIcon, XIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
@@ -29,11 +30,13 @@ const FILE_CONTENT_TYPE_OPTIONS = getFilePickerEvidenceContentTypeOptions();
 
 export function FileEvidencePicker({
   caption,
+  captionDocument,
   captionTitle,
   isSubmitting,
   submitDrafts,
 }: {
   caption: string;
+  captionDocument: LeafletLinearDocument | null;
   captionTitle: string | null;
   isSubmitting: boolean;
   submitDrafts: EvidenceSubmitter;
@@ -108,6 +111,7 @@ export function FileEvidencePicker({
     contentType: selectedContentType,
     contents: [...files, ...links],
     note: caption,
+    textDocument: captionDocument,
   };
 
   return (

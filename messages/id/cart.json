@@ -176,6 +176,26 @@
       "cart": "Keranjang",
       "checkout": "Pembayaran"
     },
+    "projectUpdates": {
+      "title": "Penyusun pembaruan proyek",
+      "description": "Editor WYSIWYG untuk menulis pembaruan proyek, dan linimasa yang menampilkannya — persis seperti di halaman Cert.",
+      "mockNote": "Memposting pembaruan menerbitkan catatan di akun sungguhan, jadi pratinjau ini tidak pernah melakukannya. Pembaruan yang ditulis di sini menjalankan penyusun, validasi, dan tampilan linimasa produksi, tetapi tetap di halaman ini dan hilang saat dimuat ulang.",
+      "mockBadge": "Mode uji · tidak ada yang diterbitkan",
+      "cardTitle": "Pembaruan proyek",
+      "cardDescription": "Tulis pembaruan berformat — tebal, judul, daftar, kutipan, tautan — dan lihat tampilannya di linimasa.",
+      "composerLabel": "Tulis pembaruan",
+      "timelineLabel": "Pembaruan yang diterbitkan",
+      "seedTitle": "Minggu ketiga penanaman — laporan tajuk",
+      "seedHeading": "Laporan pembibitan",
+      "seedIntro": "Minggu ini tim lapangan menanam",
+      "seedIntroBold": "1.200 bibit",
+      "seedIntroTail": "di lokasi restorasi utara.",
+      "seedListOne": "Tingkat kelangsungan hidup bertahan di 94%",
+      "seedListTwo": "Dua relawan komunitas baru bergabung",
+      "seedQuote": "Hutan kembali lebih cepat dari yang kami duga.",
+      "seedPlainTitle": "Hujan datang lebih awal",
+      "seedPlainBody": "Pembaruan teks biasa singkat yang ditulis sebelum ada pemformatan. Harus tampil tanpa perubahan."
+    },
     "projectVisibility": {
       "title": "Kartu visibilitas proyek",
       "description": "Kartu di Kelola → Proyek yang memberi tahu akun apa yang bersifat publik dan apakah akun tampil di halaman jelajah, dalam setiap keadaannya.",

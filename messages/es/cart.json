@@ -176,6 +176,26 @@
       "cart": "Carrito",
       "checkout": "Pago"
     },
+    "projectUpdates": {
+      "title": "Compositor de actualizaciones del proyecto",
+      "description": "El editor WYSIWYG para escribir actualizaciones del proyecto, y la línea de tiempo que las muestra, exactamente como aparecen en la página de un Cert.",
+      "mockNote": "Publicar una actualización crea un registro en una cuenta real, así que esta vista previa nunca lo hace. Las actualizaciones escritas aquí usan el compositor, la validación y la línea de tiempo de producción, pero se quedan en esta página y desaparecen al recargar.",
+      "mockBadge": "Modo de prueba · nada se publica",
+      "cardTitle": "Actualizaciones del proyecto",
+      "cardDescription": "Escriba una actualización con formato (negrita, títulos, listas, citas, enlaces) y véala en la línea de tiempo.",
+      "composerLabel": "Escribir una actualización",
+      "timelineLabel": "Actualizaciones publicadas",
+      "seedTitle": "Tercera semana de plantación: informe del dosel",
+      "seedHeading": "Informe del vivero",
+      "seedIntro": "Esta semana el equipo de campo plantó",
+      "seedIntroBold": "1.200 plántulas",
+      "seedIntroTail": "en el sitio de restauración del norte.",
+      "seedListOne": "La tasa de supervivencia se mantiene en 94%",
+      "seedListTwo": "Se sumaron dos nuevos voluntarios de la comunidad",
+      "seedQuote": "El bosque está volviendo más rápido de lo que cualquiera esperaba.",
+      "seedPlainTitle": "Las lluvias llegaron temprano",
+      "seedPlainBody": "Actualización breve en texto plano escrita antes de que existiera el formato. Debe mostrarse sin cambios."
+    },
     "projectVisibility": {
       "title": "Tarjeta de visibilidad del proyecto",
       "description": "La tarjeta de Gestionar → Proyectos que indica a una cuenta qué es público y si aparece en las páginas de exploración, en cada uno de sus estados.",

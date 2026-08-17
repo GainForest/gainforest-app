@@ -74,4 +74,91 @@ describe("timeline optional note", () => {
     ]);
     expect(hasTimelineOptionalNote({ $type: "pub.leaflet.pages.linearDocument", blocks: [] })).toBe(false);
   });
+
+  it("styles canonical Leaflet facet features the WYSIWYG composer writes", () => {
+    const blocks = getTimelineOptionalNoteBlocks({
+      $type: "pub.leaflet.pages.linearDocument",
+      blocks: [
+        {
+          $type: "pub.leaflet.pages.linearDocument#block",
+          block: {
+            $type: "pub.leaflet.blocks.text",
+            plaintext: "Bold link here",
+            facets: [
+              {
+                index: { byteStart: 0, byteEnd: 4 },
+                features: [
+                  { $type: "pub.leaflet.richtext.facet#bold" },
+                  { $type: "pub.leaflet.richtext.facet#italic" },
+                ],
+              },
+              {
+                index: { byteStart: 5, byteEnd: 9 },
+                features: [
+                  { $type: "pub.leaflet.richtext.facet#link", uri: "https://example.org/" },
+                  { $type: "pub.leaflet.richtext.facet#underline" },
+                ],
+              },
+              {
+                index: { byteStart: 10, byteEnd: 14 },
+                features: [
+                  { $type: "pub.leaflet.richtext.facet#strikethrough" },
+                  { $type: "pub.leaflet.richtext.facet#code" },
+                ],
+              },
+            ],
+          },
+        },
+      ],
+    });
+
+    expect(blocks).toEqual([
+      {
+        type: "paragraph",
+        align: null,
+        spans: [
+          { text: "Bold", bold: true, italic: true },
+          { text: " " },
+          { text: "link", href: "https://example.org/", underline: true },
+          { text: " " },
+          { text: "here", strike: true, code: true },
+        ],
+      },
+    ]);
+  });
+
+  it("flattens nested list items from raw records", () => {
+    const blocks = getTimelineOptionalNoteBlocks({
+      $type: "pub.leaflet.pages.linearDocument",
+      blocks: [
+        {
+          $type: "pub.leaflet.pages.linearDocument#block",
+          block: {
+            $type: "pub.leaflet.blocks.unorderedList",
+            children: [
+              { content: { $type: "pub.leaflet.blocks.text", plaintext: "Planted saplings" } },
+              {
+                content: { $type: "pub.leaflet.blocks.text", plaintext: "Watered nursery" },
+                children: [
+                  { content: { $type: "pub.leaflet.blocks.text", plaintext: "Twice a day" } },
+                ],
+              },
+            ],
+          },
+        },
+      ],
+    });
+
+    expect(blocks).toEqual([
+      {
+        type: "list",
+        ordered: false,
+        items: [
+          [{ text: "Planted saplings" }],
+          [{ text: "Watered nursery" }],
+          [{ text: "Twice a day" }],
+        ],
+      },
+    ]);
+  });
 });

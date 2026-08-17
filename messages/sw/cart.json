@@ -176,6 +176,26 @@
       "cart": "Kikapu",
       "checkout": "Malipo"
     },
+    "projectUpdates": {
+      "title": "Kitunga cha masasisho ya mradi",
+      "description": "Kihariri cha WYSIWYG cha kuandika masasisho ya mradi, na ratiba inayoyaonyesha — sawasawa na yanavyoonekana kwenye ukurasa wa Cert.",
+      "mockNote": "Kuchapisha sasisho huweka rekodi kwenye akaunti halisi, kwa hivyo onyesho hili la awali halifanyi hivyo kamwe. Masasisho yaliyoandikwa hapa hutumia kitunga, uthibitishaji na ratiba za uzalishaji, lakini hubaki kwenye ukurasa huu na hupotea ukipakia upya.",
+      "mockBadge": "Hali ya majaribio · hakuna kinachochapishwa",
+      "cardTitle": "Masasisho ya mradi",
+      "cardDescription": "Andika sasisho lenye muundo — herufi nzito, vichwa, orodha, nukuu, viungo — kisha ulione kwenye ratiba.",
+      "composerLabel": "Andika sasisho",
+      "timelineLabel": "Masasisho yaliyochapishwa",
+      "seedTitle": "Wiki ya tatu ya upandaji — ripoti ya mwavuli wa miti",
+      "seedHeading": "Ripoti ya kitalu",
+      "seedIntro": "Wiki hii timu ya uwandani ilipanda",
+      "seedIntroBold": "miche 1,200",
+      "seedIntroTail": "katika eneo la urejeshaji la kaskazini.",
+      "seedListOne": "Kiwango cha kuishi kimebaki 94%",
+      "seedListTwo": "Wajitolea wapya wawili wa jamii walijiunga",
+      "seedQuote": "Msitu unarudi haraka kuliko yeyote kati yetu alivyotarajia.",
+      "seedPlainTitle": "Mvua zilifika mapema",
+      "seedPlainBody": "Sasisho fupi la maandishi wazi lililoandikwa kabla ya muundo kuwepo. Lazima lionekane bila mabadiliko."
+    },
     "projectVisibility": {
       "title": "Kadi ya mwonekano wa mradi",
       "description": "Kadi iliyo kwenye Dhibiti → Miradi inayoieleza akaunti kilicho cha hadhara na kama inaonyeshwa kwenye kurasa za uchunguzi, katika kila hali yake.",

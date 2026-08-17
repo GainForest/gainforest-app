@@ -176,6 +176,26 @@
       "cart": "Cart",
       "checkout": "Checkout"
     },
+    "projectUpdates": {
+      "title": "Project update composer",
+      "description": "The WYSIWYG editor used to write project updates, and the timeline that renders them — exactly as they appear on a Cert page.",
+      "mockNote": "Posting an update publishes a record on a real account, so this preview never does. Updates written here run the production composer, validation, and timeline display, but stay on this page and disappear on reload.",
+      "mockBadge": "Mock mode · nothing is published",
+      "cardTitle": "Project updates",
+      "cardDescription": "Write a formatted update — bold, headings, lists, quotes, links — and see it rendered on the timeline.",
+      "composerLabel": "Write an update",
+      "timelineLabel": "Published updates",
+      "seedTitle": "Planting week three — canopy update",
+      "seedHeading": "Nursery report",
+      "seedIntro": "This week the field team planted",
+      "seedIntroBold": "1,200 saplings",
+      "seedIntroTail": "across the northern restoration site.",
+      "seedListOne": "Survival rate holding at 94%",
+      "seedListTwo": "Two new community volunteers joined",
+      "seedQuote": "The forest is coming back faster than any of us expected.",
+      "seedPlainTitle": "Rains arrived early",
+      "seedPlainBody": "Short plain-text update written before formatting existed. It must render unchanged."
+    },
     "projectVisibility": {
       "title": "Project visibility card",
       "description": "The card on Manage → Projects that tells an account what is public and whether it shows on the explore pages, in each state it can be in.",

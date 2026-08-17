@@ -15,6 +15,7 @@
  */
 
 import { useEffect, useState } from "react";
+import type { LeafletLinearDocument } from "@/app/_lib/leaflet-richtext";
 import { Loader2Icon, MusicIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
 import {
@@ -31,12 +32,14 @@ import type { EvidenceSubmitter } from "./types";
 export function SoundscapeEvidencePicker({
   organizationDid,
   caption,
+  captionDocument,
   captionTitle,
   isSubmitting,
   submitDrafts,
 }: {
   organizationDid: string;
   caption: string;
+  captionDocument: LeafletLinearDocument | null;
   captionTitle: string | null;
   isSubmitting: boolean;
   submitDrafts: EvidenceSubmitter;
@@ -106,6 +109,7 @@ export function SoundscapeEvidencePicker({
     contentType: SOUNDSCAPE_ATTACHMENT_CONTENT_TYPE,
     contents: Array.from(selected),
     note: caption,
+    textDocument: captionDocument,
   };
 
   return (

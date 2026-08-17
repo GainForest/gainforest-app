@@ -5,6 +5,7 @@ import { MicIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
 import type { ManagedAudio } from "@/app/_lib/indexer";
 import { formatDate } from "@/app/_lib/format";
+import type { LeafletLinearDocument } from "@/app/_lib/leaflet-richtext";
 import type { AttachmentDraft } from "../contextAttachmentMutations";
 import { CheckRow } from "./CheckRow";
 import { ListLayout, ManageLink, PickerEmpty } from "./ListHelpers";
@@ -14,12 +15,14 @@ import type { EvidenceSubmitter } from "./types";
 export function AudioEvidencePicker({
   data,
   caption,
+  captionDocument,
   captionTitle,
   isSubmitting,
   submitDrafts,
 }: {
   data: ManagedAudio[];
   caption: string;
+  captionDocument: LeafletLinearDocument | null;
   captionTitle: string | null;
   isSubmitting: boolean;
   submitDrafts: EvidenceSubmitter;
@@ -46,6 +49,7 @@ export function AudioEvidencePicker({
     contentType: "audio",
     contents: Array.from(selected),
     note: caption,
+    textDocument: captionDocument,
   };
 
   return (

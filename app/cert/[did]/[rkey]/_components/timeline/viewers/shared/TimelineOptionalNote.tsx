@@ -84,13 +84,13 @@ function Block({ block }: { block: TimelineOptionalNoteBlock }) {
     }
     case "paragraph":
       return (
-        <p className={alignmentClassName(block.align)}>
+        <p className={cn("whitespace-pre-wrap", alignmentClassName(block.align))}>
           <Spans spans={block.spans} />
         </p>
       );
     case "blockquote":
       return (
-        <blockquote className={cn("border-l-2 border-primary/40 pl-3 italic text-foreground/70", alignmentClassName(block.align))}>
+        <blockquote className={cn("whitespace-pre-wrap border-l-2 border-primary/40 pl-3 italic text-foreground/70", alignmentClassName(block.align))}>
           <Spans spans={block.spans} />
         </blockquote>
       );
