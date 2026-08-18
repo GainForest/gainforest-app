@@ -36,6 +36,7 @@ export default async function MyCardsPage({ searchParams }: { searchParams: Card
       organizationName: t("fallbackOrganization"),
       recipientName: t("fallbackRecipient"),
       personContext: t("fallbackPersonContext"),
+      accountName: t("fallbackAccount"),
     });
     return <MyCardsView cards={result.cards} status="ready" partial={result.partial} />;
   } catch (error) {
