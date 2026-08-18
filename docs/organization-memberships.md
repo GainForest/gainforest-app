@@ -14,7 +14,9 @@ After a full authenticated app load, Next.js schedules synchronization with `aft
 
 A failed, empty, malformed, or incomplete CGS roster is never stored. One organization's failure does not block another organization from synchronizing.
 
-The projection is eventually consistent. Existing organizations are backfilled when a current member next loads GainForest. A removed member remains active in the projection until another current member causes that organization's roster to refresh. Do not use this table as an authorization authority; permission checks must continue to use CGS.
+After GainForest successfully creates an organization, adds or removes a member, changes a role, or accepts an email invitation, it also schedules a forced refresh of that one organization's complete roster. This runs after the response so a projection outage never turns a successful CGS mutation into a failed user action. The forced refresh bypasses the 30-minute interval.
+
+The projection is still eventually consistent. Existing organizations are backfilled when a current member next loads GainForest, including CGS changes made outside GainForest or a failed forced refresh. A person who removes themselves can no longer read that organization's roster, so that case refreshes when another current member loads GainForest. Do not use this table as an authorization authority; permission checks must continue to use CGS.
 
 ## Stored state
 
@@ -33,10 +35,11 @@ The table has RLS enabled and is not available to browser roles. The service rol
 
 ## Database installation
 
-The canonical schema and RPC are in:
+The schema and its follow-up RPC repair are in:
 
 ```text
 supabase/migrations/20260817143000_organization_memberships.sql
+supabase/migrations/20260818140000_fix_organization_memberships_coalesce.sql
 ```
 
-Apply the migration to each Supabase environment before deploying application code that schedules membership synchronization. The database contract is in `tests/database/organization-memberships-contract.sql` and runs as part of `pnpm test:db`.
+Apply both migrations to each Supabase environment before deploying application code that schedules membership synchronization. The database contract is in `tests/database/organization-memberships-contract.sql` and runs as part of `pnpm test:db`.

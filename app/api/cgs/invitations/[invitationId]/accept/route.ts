@@ -1,5 +1,7 @@
+import { headers } from "next/headers";
 import { fetchAuthSession } from "@/app/_lib/auth-server";
 import { acceptGroupInvitation, GroupInvitationError } from "@/app/_lib/cgs-invitations";
+import { scheduleOrganizationRosterSync } from "@/app/_lib/organization-memberships";
 
 export const runtime = "nodejs";
 
@@ -17,6 +19,8 @@ export async function POST(_request: Request, { params }: { params: Promise<{ in
 
   try {
     const invitation = await acceptGroupInvitation({ invitationId, session });
+    const headerList = await headers();
+    scheduleOrganizationRosterSync(invitation.repo, headerList.get("cookie"));
     return Response.json({ invitation }, { headers: { "cache-control": "no-store" } });
   } catch (error) {
     return jsonError(error, "Could not accept invitation.", 502);
