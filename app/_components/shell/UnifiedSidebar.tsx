@@ -13,6 +13,7 @@ import {
   LayoutGridIcon,
   LockIcon,
   PlusIcon,
+  SlidersHorizontalIcon,
   SparkleIcon,
   UserIcon,
   UsersIcon,
@@ -23,6 +24,7 @@ import { Button, buttonVariants } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 import { LanguageSelector } from "@/components/i18n/LanguageSelector";
+import { accountObservationsManagePath } from "@/app/account/_lib/account-route";
 import type { AuthSession } from "../../_lib/auth";
 import { GAINFOREST_MODERATION_REPO_DID } from "../../_lib/indexer";
 import {
@@ -73,6 +75,7 @@ export function UnifiedSidebar({
 
       <div className={cn("flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto pt-3", collapsed ? "overflow-x-hidden" : "pr-1")}>
         {authSession?.isLoggedIn ? <SidebarProfileRow did={authSession.did} /> : null}
+        {authSession?.isLoggedIn ? <SidebarManageSection did={authSession.did} /> : null}
         <LayoutGroup id="unified-sidebar-nav">
           <ExploreNav sessionDid={authSession?.isLoggedIn ? authSession.did : null} />
         </LayoutGroup>
@@ -183,6 +186,69 @@ function SidebarProfileRow({ did }: { did: string }) {
         )}
       </Link>
     </SidebarTooltip>
+  );
+}
+
+/**
+ * The "Your work" section: the account-specific management surface, lifted out
+ * of the account switcher menu so it sits with the rest of the navigation.
+ * It reflects whichever account is active in the switcher (personal or an
+ * organization) and points at that account's own manage page.
+ *
+ * Restricted to GainForest admins for now, on the same footing as the manage
+ * page itself — the row carries the lock marker so it never reads as public,
+ * and the page re-checks access server-side regardless.
+ */
+function SidebarManageSection({ did }: { did: string }) {
+  const sectionsT = useTranslations("common.sidebar.sections");
+  const sidebarT = useTranslations("common.sidebar");
+  const adminOnlyT = useTranslations("common.adminOnly");
+  const collapsed = useSidebarCollapsed();
+  const pathname = useCanonicalPathname();
+  const { personal, groups } = useAccountList(did);
+  const [activeContext] = useActiveAccountContext(did);
+
+  // Same admin detection as the account menu and ExploreNav: membership of the
+  // GainForest admin group, any role. Cosmetic — the manage page re-checks.
+  const isModerator = groups.some((group) => group.groupDid === GAINFOREST_MODERATION_REPO_DID);
+  if (!isModerator) return null;
+
+  // Mirror the switcher's active account so "Manage" always acts on the account
+  // whose records the user is currently working in.
+  const activeGroup =
+    activeContext.type === "group"
+      ? groups.find((group) => group.groupDid === activeContext.did) ?? null
+      : null;
+  const identifier = activeGroup ? switcherGroupIdentifier(activeGroup) : personal?.handle?.trim() || did;
+
+  const href = accountObservationsManagePath(identifier);
+  // Any of the account's management surfaces (observations, audio, or the
+  // legacy manage home) light this row up — they are one destination here.
+  const isActive = /\/account\/[^/]+\/(observations\/manage|audio\/manage|manage)(\/|$)/.test(pathname);
+
+  const item: NavLeafView = {
+    kind: "leaf",
+    id: "manage",
+    text: sidebarT("tabs.manage"),
+    Icon: SlidersHorizontalIcon,
+    href,
+    pathCheck: {},
+    restriction: { label: adminOnlyT("label"), Icon: LockIcon },
+  };
+
+  return (
+    <div className="flex flex-col gap-0.5">
+      {collapsed ? (
+        <div aria-hidden className="mx-auto my-1 h-px w-6 rounded-full bg-border" />
+      ) : (
+        <p className="px-2.5 pb-1 pt-1 text-[10px] font-medium uppercase tracking-[0.12em] text-muted-foreground">
+          {sectionsT("yourWork")}
+        </p>
+      )}
+      <ul className="flex flex-col gap-0.5">
+        <NavLeafRow item={item} isActive={isActive} index={1} />
+      </ul>
+    </div>
   );
 }
 

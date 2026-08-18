@@ -648,7 +648,6 @@ function AccountBlock({
                 >
                   <span className="shrink-0 text-muted-foreground/80">{item.icon}</span>
                   {item.label}
-                  {item.adminOnly ? <AdminOnlyIndicator className="ml-auto" /> : null}
                 </Link>
               ))}
             </div>
@@ -740,16 +739,15 @@ function AuthenticatedMenu({
       ? activeContext.did
       : session.did;
 
-  // Every account in the switcher gets the same rows, pointing at its own
-  // records — so a person and each of their organizations offer one shape.
+  // Every account in the switcher gets the same profile and content rows,
+  // pointing at its own records. Account management is available from the
+  // sidebar, so it does not need to be repeated under every account here.
   const buildSubItems = (identifier: string): MenuSubItem[] =>
     buildAccountSubItems({
       identifier,
-      showManage: isModerator,
       labels: {
         profile: sidebarT("profileRow.viewProfile"),
         observations: sidebarItemsT("observations"),
-        manage: sidebarT("tabs.manage"),
         projects: sidebarItemsT("projects"),
         settings: authT("settings"),
       },
