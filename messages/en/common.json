@@ -2137,7 +2137,7 @@
     },
     "mainTabs": {
       "setup": "Setup",
-      "library": "Recordings",
+      "library": "Deployments",
       "upload": "Upload",
       "label": "Label",
       "identifications": "Identifications",
