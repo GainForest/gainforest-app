@@ -120,10 +120,6 @@
     "editTitle": "Hariri tukio",
     "draftSaved": "Rasimu imehifadhiwa",
     "close": "Funga",
-    "basicsTitle": "Mambo ya msingi",
-    "basicsIntro": "Mambo haya matatu tu na unaweza kuchapisha. Mengine yote ni ya hiari.",
-    "requiredMark": "Lazima",
-    "optionalMark": "Hiari",
     "nameLabel": "Utaliita nini?",
     "namePlaceholder": "Ipe jina tukio lako",
     "aboutLabel": "Kuhusu",
@@ -138,31 +134,23 @@
     "wherePlaceholder": "Maegesho ya Marsh Lane, Ardhioevu ya Ipswich",
     "localityLabel": "Mji au eneo",
     "countryLabel": "Nchi",
-    "mapHint": "Alama inaonekana unapoandika",
     "onlineUrlLabel": "Watu wanajiunga wapi mtandaoni?",
-    "addMore": "Ongeza zaidi (hiari)",
     "remove": "Ondoa",
     "sections": {
-      "cover": {
-        "title": "Picha ya jalada",
-        "hint": "Picha ya juu ya tukio lako"
-      },
-      "agenda": {
-        "title": "Ratiba / cha kutarajia",
-        "hint": "Orodha rahisi ya saa kwa saa"
-      },
       "capacity": {
         "title": "Weka kikomo cha idadi ya watu",
-        "hint": "Imezimwa — yeyote anaweza kuja",
         "waitlistNote": "Waliojisajili zaidi wanaingia kwenye orodha ya kusubiri."
       }
     },
+    "capacityPlaceholder": "Bila kikomo",
     "descriptionPlaceholder": "Sentensi chache. Mtakachofanya, ni kwa ajili ya nani, cha kubeba.",
-    "coverDrop": "Ongeza picha ya jalada (hiari)",
     "coverRemove": "Ondoa picha",
+    "coverAdd": "Ongeza picha ya jalada",
+    "coverChange": "Badilisha picha ya jalada",
     "agendaTime": "Saa",
     "agendaWhat": "Kinachotokea",
     "agendaAdd": "Ongeza mstari",
+    "you": "Wewe",
     "themeTagLabel": "Lebo moja fupi",
     "themeTagPlaceholder": "Wanaoanza wanakaribishwa",
     "meetingNoteLabel": "Mahali kamili pa kukutana (huonyeshwa baada ya kuthibitisha)",
@@ -177,7 +165,6 @@
     "publishFailed": "Hatukuweza kuchapisha tukio lako. Tafadhali jaribu tena.",
     "errors": {
       "summary": "Kuna mambo machache ya kurekebisha kabla ya kuchapisha",
-      "summaryHint": "Yamewekwa alama hapa chini.",
       "nameMissing": "Lipe tukio lako jina.",
       "dateMissing": "Chagua tarehe.",
       "datePassed": "Tarehe hii imeshapita. Chagua leo au baadaye.",

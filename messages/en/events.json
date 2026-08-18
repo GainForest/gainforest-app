@@ -120,10 +120,6 @@
     "editTitle": "Edit event",
     "draftSaved": "Draft saved",
     "close": "Close",
-    "basicsTitle": "The basics",
-    "basicsIntro": "Just these three things and you can publish. Everything below is optional.",
-    "requiredMark": "Required",
-    "optionalMark": "Optional",
     "nameLabel": "What are you calling it?",
     "namePlaceholder": "Name your event",
     "aboutLabel": "About",
@@ -138,31 +134,23 @@
     "wherePlaceholder": "Marsh Lane car park, Ipswich Wetlands",
     "localityLabel": "Town or area",
     "countryLabel": "Country",
-    "mapHint": "Pin drops as you type",
     "onlineUrlLabel": "Where do people join online?",
-    "addMore": "Add more (optional)",
     "remove": "Remove",
     "sections": {
-      "cover": {
-        "title": "Cover photo",
-        "hint": "A photo for the top of your event"
-      },
-      "agenda": {
-        "title": "Agenda / what to expect",
-        "hint": "A simple time-by-time list"
-      },
       "capacity": {
         "title": "Limit the number of people",
-        "hint": "Off — anyone can come",
         "waitlistNote": "Extra sign-ups join a waitlist."
       }
     },
+    "capacityPlaceholder": "No limit",
     "descriptionPlaceholder": "A few sentences. What you'll do, who it's for, what to bring.",
-    "coverDrop": "Add a cover photo (optional)",
     "coverRemove": "Remove photo",
+    "coverAdd": "Add a cover photo",
+    "coverChange": "Change cover photo",
     "agendaTime": "Time",
     "agendaWhat": "What happens",
     "agendaAdd": "Add a line",
+    "you": "You",
     "themeTagLabel": "One short tag",
     "themeTagPlaceholder": "Beginners welcome",
     "meetingNoteLabel": "Exact meeting point (shown after RSVP)",
@@ -177,7 +165,6 @@
     "publishFailed": "We could not publish your event. Please try again.",
     "errors": {
       "summary": "A couple of things need fixing before this goes live",
-      "summaryHint": "They are marked below.",
       "nameMissing": "Give your event a name.",
       "dateMissing": "Pick a date.",
       "datePassed": "This date has passed. Pick today or later.",

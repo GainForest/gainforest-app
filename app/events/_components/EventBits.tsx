@@ -2,7 +2,8 @@
 
 /**
  * Small shared pieces for the Events surfaces: attendee face stacks, the
- * per-state RSVP trailing control, and the loading skeleton card.
+ * per-state RSVP trailing control, the loading skeleton card, and the
+ * deterministic cover placeholder every surface without a photo shares.
  */
 
 import { CheckIcon } from "lucide-react";
@@ -13,6 +14,52 @@ import type { ViewerRsvpState } from "@/app/_lib/community-events";
 export function initialOf(name: string | null | undefined): string {
   const trimmed = (name ?? "").trim();
   return trimmed ? trimmed.slice(0, 1).toUpperCase() : "•";
+}
+
+/** Soft nature tones the generated covers draw from — the fixed-palette
+ *  approach of atmo-events' marble avatars, in GainForest greens. */
+const COVER_TONES = ["#87a878", "#5c8d76", "#a7c4a0", "#6d9f93", "#d9c8a9", "#9bbfa8", "#7fb069", "#c2d6c4"];
+
+function hashSeed(seed: string): number {
+  let hash = 0;
+  for (let i = 0; i < seed.length; i += 1) hash = (hash * 31 + seed.charCodeAt(i)) >>> 0;
+  return hash;
+}
+
+/**
+ * The event's generated cover: a deterministic gradient from the record key,
+ * so an event without a photo still has a face — and the editor previews the
+ * exact art the published page will show. Children render centered on top.
+ */
+export function CoverArt({
+  seed,
+  className = "",
+  children,
+}: {
+  seed: string;
+  className?: string;
+  children?: React.ReactNode;
+}) {
+  const hash = hashSeed(seed || "event");
+  const a = COVER_TONES[hash % COVER_TONES.length];
+  const b = COVER_TONES[(hash >> 3) % COVER_TONES.length];
+  const c = COVER_TONES[(hash >> 7) % COVER_TONES.length];
+  return (
+    <div
+      aria-hidden={children ? undefined : true}
+      className={`grid place-items-center ${className}`}
+      style={{
+        background: [
+          `radial-gradient(at ${20 + (hash % 30)}% ${15 + ((hash >> 2) % 25)}%, ${a} 0%, transparent 55%)`,
+          `radial-gradient(at ${70 + ((hash >> 4) % 25)}% ${(hash >> 6) % 30}%, ${b} 0%, transparent 60%)`,
+          `radial-gradient(at ${40 + ((hash >> 8) % 40)}% ${75 + ((hash >> 5) % 20)}%, ${c} 0%, transparent 60%)`,
+          `linear-gradient(135deg, ${b}, ${c})`,
+        ].join(", "),
+      }}
+    >
+      {children}
+    </div>
+  );
 }
 
 export function AvatarFace({
