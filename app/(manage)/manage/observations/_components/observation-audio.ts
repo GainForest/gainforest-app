@@ -14,6 +14,7 @@ import type { AudioMothRecordingInfo } from "@/app/_lib/audiomoth/wav-metadata";
 import type { DeploymentEventItem } from "@/app/_lib/deployment-events";
 import type { UploadFolderOption } from "@/app/_lib/audiomoth/upload-folder";
 import { findUploadFolderByName } from "@/app/_lib/audiomoth/upload-folder";
+import { chimeDeploymentName } from "@/app/_lib/unified-deployments";
 
 /** One WAV waiting in the modal, with its parsed header (null = unreadable). */
 export type QuickRecording = {
@@ -44,6 +45,32 @@ export function splitObservationFiles(files: File[]): { images: File[]; wavs: Fi
     else if (isWavCandidate(file.name)) wavs.push(file);
   }
   return { images, wavs };
+}
+
+/** MIME types WAV files travel under; many systems leave the type empty. */
+const WAV_MIME_TYPES = new Set(["audio/wav", "audio/x-wav", "audio/wave", "audio/vnd.wave"]);
+
+/**
+ * True when a drag payload holds files and none of them could possibly be
+ * used here — every one carries a known MIME type that is neither an image
+ * nor WAV audio (a voice memo, a video, a spreadsheet). The drop zone then
+ * refuses the drop outright (not-allowed cursor) instead of swallowing the
+ * files. Items with an empty type stay droppable: a directory (a whole SD
+ * card) and a file the OS didn't tag both look like that mid-drag, and
+ * filenames can't be read until the drop lands.
+ */
+export function dragPayloadRejected(
+  items: ArrayLike<{ kind: string; type: string }> | null | undefined,
+): boolean {
+  let fileCount = 0;
+  for (let i = 0; i < (items?.length ?? 0); i += 1) {
+    const item = items![i]!;
+    if (item.kind !== "file") continue;
+    fileCount += 1;
+    const type = item.type.toLowerCase();
+    if (!type || type.startsWith("image/") || WAV_MIME_TYPES.has(type)) return false;
+  }
+  return fileCount > 0;
 }
 
 /** Recording time: header timestamp → filename pattern → file mtime. */
@@ -241,8 +268,19 @@ export function planAudioUploadGroups({
       if (existing) {
         unmatchedPlan = { kind: "existing", uri: existing.uri, name };
       } else {
-        const times = unmatched.map((rec) => quickRecordingTime(rec).getTime());
-        unmatchedPlan = { kind: "named", name, deployedAt: new Date(Math.min(...times)).toISOString() };
+        // A chime deployment already carrying this name is the same
+        // deployment — the recordings join it instead of forking a
+        // second one with the same name beside it.
+        const chime = findUploadFolderByName(
+          (events ?? []).map((event) => ({ uri: event.uri, name: chimeDeploymentName(event), event })),
+          name,
+        );
+        if (chime) {
+          unmatchedPlan = { kind: "event", event: chime.event };
+        } else {
+          const times = unmatched.map((rec) => quickRecordingTime(rec).getTime());
+          unmatchedPlan = { kind: "named", name, deployedAt: new Date(Math.min(...times)).toISOString() };
+        }
       }
     }
     groups.push({ plan: unmatchedPlan, recordings: unmatched });

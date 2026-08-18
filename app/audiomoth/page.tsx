@@ -4,11 +4,11 @@ export const dynamic = "force-dynamic";
 
 /**
  * AudioMoth is no longer a standalone destination: audio is a record type
- * inside Observations. The recording tabs moved to /observations/audio and
- * the USB setup tool to /observations/devices. This route only keeps old
- * links (and bookmarks) working.
+ * inside Observations. Every recording workflow tab — including the USB
+ * device setup tool — now lives on /observations/audio behind `?tab=`. This
+ * route only keeps old links (and bookmarks) working.
  */
-const AUDIO_TABS = new Set(["deployments", "upload", "label", "identifications", "soundscape"]);
+const AUDIO_TABS = new Set(["deployments", "upload", "library", "label", "identifications", "soundscape", "setup"]);
 
 export default async function AudioMothPage({
   searchParams,
@@ -20,5 +20,5 @@ export default async function AudioMothPage({
   if (tab && AUDIO_TABS.has(tab)) {
     redirect(`/observations/audio?tab=${encodeURIComponent(tab)}`);
   }
-  redirect("/observations/devices");
+  redirect("/observations/audio?tab=setup");
 }

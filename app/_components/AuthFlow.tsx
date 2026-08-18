@@ -6,18 +6,15 @@ import { usePathname, useRouter } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
 import {
   ArrowRightIcon,
-  BinocularsIcon,
   CheckIcon,
   ChevronDownIcon,
   ChevronRightIcon,
-  FolderKanbanIcon,
   Loader2,
   LockIcon,
   LockOpenIcon,
   LogOutIcon,
   MailIcon,
   PlusIcon,
-  SettingsIcon,
   SparklesIcon,
   UserIcon,
   Building2Icon,
@@ -34,12 +31,8 @@ import { useTranslations } from "next-intl";
 import type { CgsGroupMembership } from "@/app/(manage)/manage/_lib/cgs";
 import { accountIdentifierFromManagePath, type ManageAccountKind } from "@/lib/links";
 import { stripLocaleFromPathname } from "@/lib/i18n/routing";
-import {
-  accountObservationsPath,
-  accountPath,
-  accountProjectsPath,
-  accountSettingsPath,
-} from "@/app/account/_lib/account-route";
+import { accountPath } from "@/app/account/_lib/account-route";
+import { buildAccountSubItems, type MenuSubItem } from "./account-menu-items";
 import { GAINFOREST_MODERATION_REPO_DID } from "@/app/_lib/indexer";
 import { AdminOnlyIndicator } from "./AdminOnlyIndicator";
 import {
@@ -573,13 +566,6 @@ function AccountDot({
   );
 }
 
-type MenuSubItem = {
-  key: string;
-  label: string;
-  href: string;
-  icon: React.ReactNode;
-};
-
 type MenuAccount = {
   key: string;
   kind: "personal" | "group";
@@ -662,6 +648,7 @@ function AccountBlock({
                 >
                   <span className="shrink-0 text-muted-foreground/80">{item.icon}</span>
                   {item.label}
+                  {item.adminOnly ? <AdminOnlyIndicator className="ml-auto" /> : null}
                 </Link>
               ))}
             </div>
@@ -749,12 +736,20 @@ function AuthenticatedMenu({
       ? activeContext.did
       : session.did;
 
-  const buildSubItems = (identifier: string): MenuSubItem[] => [
-    { key: "profile", label: sidebarT("profileRow.viewProfile"), href: accountPath(identifier), icon: <UserIcon className="h-3.5 w-3.5" /> },
-    { key: "observations", label: sidebarItemsT("observations"), href: accountObservationsPath(identifier), icon: <BinocularsIcon className="h-3.5 w-3.5" /> },
-    { key: "projects", label: sidebarItemsT("projects"), href: accountProjectsPath(identifier), icon: <FolderKanbanIcon className="h-3.5 w-3.5" /> },
-    { key: "settings", label: authT("settings"), href: accountSettingsPath(identifier), icon: <SettingsIcon className="h-3.5 w-3.5" /> },
-  ];
+  // Every account in the switcher gets the same rows, pointing at its own
+  // records — so a person and each of their organizations offer one shape.
+  const buildSubItems = (identifier: string): MenuSubItem[] =>
+    buildAccountSubItems({
+      identifier,
+      showManage: isModerator,
+      labels: {
+        profile: sidebarT("profileRow.viewProfile"),
+        observations: sidebarItemsT("observations"),
+        manage: sidebarT("tabs.manage"),
+        projects: sidebarItemsT("projects"),
+        settings: authT("settings"),
+      },
+    });
 
   const accounts: MenuAccount[] = [
     {

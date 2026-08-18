@@ -3,6 +3,7 @@ import {
   BinocularsIcon,
   BotIcon,
   Building2Icon,
+  CalendarDaysIcon,
   EarthIcon,
   FolderKanbanIcon,
   HeartHandshakeIcon,
@@ -27,6 +28,10 @@ export type NavLeaf = {
   /** Only shown to GainForest admin-group members (any role). The route
    *  itself must re-check access server-side — hiding the item is cosmetic. */
   adminOnly?: boolean;
+  /** Temporarily removed from the sidebar for everyone (even admins) while a
+   *  section is still being finished. Cosmetic only — the route keeps its own
+   *  server-side gate; flip this off to bring the entry back. */
+  hidden?: boolean;
   /** Shown to organizations enrolled in a Rewilding grant slot, and to
    *  GainForest admins (who can preview the dashboard). Cosmetic, like
    *  adminOnly — the routes re-check server-side. */
@@ -79,6 +84,21 @@ export const NAV_ITEMS: NavSection[] = [
         Icon: BinocularsIcon,
         href: "/observations",
         pathCheck: { startsWith: "/observations" },
+      },
+      {
+        kind: "leaf",
+        id: "events",
+        text: "Events",
+        Icon: CalendarDaysIcon,
+        href: "/events",
+        pathCheck: { startsWith: "/events" },
+        // Community Events is in staff preview. For now the sidebar entry is
+        // hidden for everyone (ECO-921) while the section is finished; the
+        // routes still re-check access server-side, so admins can reach the
+        // pages directly and everyone else gets a 404. adminOnly is kept so
+        // removing `hidden` restores the admins-only preview (ECO-904).
+        adminOnly: true,
+        hidden: true,
       },
       {
         kind: "leaf",

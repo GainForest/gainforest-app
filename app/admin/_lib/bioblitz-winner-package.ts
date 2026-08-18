@@ -4,6 +4,7 @@ import { isIP } from "node:net";
 import type { IncomingMessage } from "node:http";
 import { BlobWriter, TextReader, Uint8ArrayReader, ZipWriter, configure } from "@zip.js/zip.js";
 import {
+  bioblitzRoundUsesPoints,
   endedRounds,
   fetchRoundCollectors,
   type BioblitzRound,
@@ -84,8 +85,14 @@ export type BioblitzWinnerPackage = {
 };
 
 export function winnerPackageFolderName(roundId: number, prize: BioblitzWinnerPrize): string {
-  const category = prize === "most-observations" ? "Most Observations" : "Best Picture";
+  const category = boardPrizeName(roundId, prize);
   return `Round ${roundId} ${category} Winner`;
+}
+
+/** The board prize's name under the rule its round was played with. */
+function boardPrizeName(roundId: number, prize: BioblitzWinnerPrize): string {
+  if (prize === "best-picture") return "Best Picture";
+  return bioblitzRoundUsesPoints(roundId) ? "Highest Points" : "Most Observations";
 }
 
 export function winnerPackageFilename(roundId: number, prize: BioblitzWinnerPrize): string {
@@ -499,10 +506,10 @@ export function buildWinnerInfoMarkdown({
   observations: Array<Pick<IncludedObservation, "record" | "likeCount" | "filename">>;
   skipped: string[];
 }): string {
-  const category = prize === "most-observations" ? "Most Observations" : "Best Picture";
+  const category = boardPrizeName(round.id, prize);
   const winnerName = winner.displayName?.trim() || "Unnamed account";
   const performance = prize === "most-observations"
-    ? `Eligible observations: ${winner.observationCount}`
+    ? `${bioblitzRoundUsesPoints(round.id) ? "Final score" : "Eligible observations"}: ${winner.observationCount}`
     : `Likes on winning picture: ${winner.winningLikeCount ?? "Not available"}`;
   const lines = [
     `# Round ${round.id} ${category} Winner`,

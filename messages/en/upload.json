@@ -652,7 +652,7 @@
   "observations": {
     "quickAdd": {
       "title": "Add observations",
-      "description": "Photos, or a whole card from a recorder.",
+      "description": "An observation is what you saw or heard in nature, with where and when. Add photos, or all the recordings from an AudioMoth card.",
       "close": "Close",
       "back": "Back",
       "uploadingForLabel": "Uploading for",
@@ -753,9 +753,9 @@
         "recordingFromLabel": "Recording from",
         "deviceNew": "new",
         "newDeviceNote": "{device} isn't in your equipment registry yet — we'll add it when this upload starts.",
-        "folderLabel": "Recordings folder",
+        "folderLabel": "Deployment",
         "folderAutoMatched": "{name} — matched from the card",
-        "folderNew": "New folder · {name}",
+        "folderNew": "Add deployment · {name}",
         "noDeployments": "No deployments for this device — the batch will keep uploading and attach to the one you create.",
         "setUpDeployment": "Set one up ↗",
         "defaultFolderName": "Recordings {date}",
@@ -764,15 +764,12 @@
         "backgroundNote": "{count, plural, one {# recording uploading in the background} other {# recordings uploading in the background}}",
         "viewTray": "View",
         "handedOffTitle": "{count, plural, one {# recording is uploading} other {# recordings are uploading}}",
-        "handedOffBody": "They keep uploading in the background while you browse. You can close this — progress lives in the upload panel.",
-        "handedOffAddMore": "Add more",
-        "handedOffView": "View progress",
+        "handedOffBody": "They keep uploading in the background while you browse. Track progress any time in the upload panel.",
         "equipmentNote": "Registered automatically when its recordings were uploaded through Add observations.",
         "dedupChecking": "Checking for recordings already in this account…",
         "dedupSkipped": "{count, plural, one {# recording is already in this account — skipped} other {# recordings are already in this account — skipped}}",
         "allUploaded": "Everything on this card is already uploaded",
-        "matchedCount": "{count, plural, one {# recording matched its deployment from the card} other {# recordings matched their deployments from the card}}",
-        "eventOption": "Deployment · {name}"
+        "matchedCount": "{count, plural, one {# recording matched its deployment from the card} other {# recordings matched their deployments from the card}}"
       }
     },
     "csvUpload": {
@@ -1095,7 +1092,7 @@
   },
   "settings": {
     "organizationTitle": "Organization settings",
-    "organizationDescription": "Connect AI agents and manage tools for this organization.",
+    "organizationDescription": "Manage the people, profile and tools for this organization.",
     "personalTitle": "Settings",
     "personalDescription": "Manage account links, security, and export tools.",
     "dataCouncil": {
@@ -1124,8 +1121,6 @@
       },
       "addLabel": "Add to data council"
     },
-    "membersMoved": "Members, roles, and the Data Council live in the Members tab.",
-    "openMembers": "Open Members",
     "orgAgentKeysHint": "Keys are personal: a key you create here belongs to your account and lets your AI agent work on this organization through your membership. If you leave the organization, your keys lose that access."
   },
   "dashboardClient": {
@@ -1158,7 +1153,7 @@
       "expandBio": "Show full bio",
       "collapseBio": "Collapse bio",
       "addType": "Add type",
-      "addCountry": "Add country",
+      "addLocation": "Add location",
       "sinceDate": "Since {date}",
       "invalidDate": "Invalid date",
       "addStartDate": "Add start date",
@@ -1181,7 +1176,6 @@
     "errors": {
       "nameRequired": "Add a name before saving.",
       "invalidWebsite": "Enter a valid website address.",
-      "invalidCountry": "Choose a country from the list.",
       "saveFailed": "Failed to save. Please try again."
     },
     "modals": {
@@ -1226,6 +1220,28 @@
           "alt": "Waterfall in a tropical forest"
         }
       }
+    },
+    "locationEditor": {
+      "title": "Organization location",
+      "description": "Show where your organization is based.",
+      "descriptionWithCurrent": "Currently set to {location}.",
+      "searchPlaceholder": "Search for an address, city or country",
+      "noResults": "No places found.",
+      "searchUnavailable": "Place search is unavailable right now.",
+      "enterCoordinates": "Enter coordinates instead",
+      "searchInstead": "Search for a place instead",
+      "latitude": "Latitude",
+      "longitude": "Longitude",
+      "invalidCoordinates": "Latitude must be between -90 and 90, longitude between -180 and 180.",
+      "dragHint": "Drag the pin to fine-tune the location.",
+      "countryHint": "Published as the whole country. Search for a place to be more precise.",
+      "approximateLabel": "Share only an approximate location",
+      "approximateHint": "Publishes a ~{radius} km area instead of the exact point.",
+      "approximateHintWithLabel": "Publishes a ~{radius} km area instead of the exact point, shown as “{label}”.",
+      "remove": "Remove location",
+      "save": "Save location",
+      "savingLocation": "Saving the location…",
+      "saveFailed": "Could not save the location. Please try again."
     }
   },
   "dashboardModals": {
@@ -1285,6 +1301,11 @@
       "description": "Leave this blank and we’ll create a recovery address from your account email.",
       "placeholder": "recovery@example.com",
       "invalid": "Enter a valid email address."
+    },
+    "location": {
+      "label": "Location",
+      "basedIn": "Based in",
+      "empty": "Set a location"
     }
   }
 }

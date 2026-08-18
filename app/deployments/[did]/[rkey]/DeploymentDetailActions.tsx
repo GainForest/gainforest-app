@@ -3,7 +3,7 @@
 /**
  * Owner-only actions on the deployment detail page: edit (name + linked
  * AudioMoth) and delete. Edit refreshes the server page; delete returns to
- * the AudioMoth Deployment tab.
+ * the Audio hub's Recordings tab, where deployments live.
  */
 
 import { useState } from "react";
@@ -32,8 +32,10 @@ export function DeploymentDetailActions({
     setError(null);
     setDeleting(true);
     try {
-      await deleteDeploymentEvent(event);
-      router.push("/observations/audio?tab=deployments");
+      // An event outside the signed-in repo lives in an organization's —
+      // delete it there (CGS checks membership server-side).
+      await deleteDeploymentEvent(event, event.did !== sessionDid ? { repo: event.did } : undefined);
+      router.push("/observations/audio?tab=library");
       router.refresh();
     } catch (err) {
       setError(err instanceof Error && err.message ? err.message : t("deleteFailed"));

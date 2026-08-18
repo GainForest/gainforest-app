@@ -377,12 +377,6 @@
     "loading": "Cargando...",
     "done": "Listo"
   },
-  "countrySelector": {
-    "title": "Seleccionar país",
-    "description": "Elige el país conectado con este registro.",
-    "searchPlaceholder": "Buscar países",
-    "done": "Listo"
-  },
   "orgWallet": {
     "title": "Billetera de la organización",
     "description": "Una billetera compartida para tu organización, protegida por las llaves de acceso de sus miembros",

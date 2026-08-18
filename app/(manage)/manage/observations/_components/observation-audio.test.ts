@@ -6,6 +6,7 @@ import {
   AUDIO_EVENT_SELECTION_PREFIX,
   deviceChipLabel,
   deviceNeedsDeployment,
+  dragPayloadRejected,
   formatRecordingBytes,
   formatSampleRates,
   isWavCandidate,
@@ -84,6 +85,33 @@ describe("splitObservationFiles", () => {
     ]);
     expect(images.map((f) => f.name)).toEqual(["a.jpg"]);
     expect(wavs.map((f) => f.name)).toEqual(["b.WAV"]);
+  });
+});
+
+describe("dragPayloadRejected", () => {
+  const item = (type: string, kind = "file") => ({ kind, type });
+
+  it("refuses a payload where every file is a known unusable type", () => {
+    expect(dragPayloadRejected([item("audio/mpeg")])).toBe(true);
+    expect(dragPayloadRejected([item("video/mp4"), item("text/csv")])).toBe(true);
+    expect(dragPayloadRejected([item("application/pdf")])).toBe(true);
+  });
+
+  it("allows any payload with at least one image or WAV", () => {
+    expect(dragPayloadRejected([item("image/jpeg"), item("video/mp4")])).toBe(false);
+    expect(dragPayloadRejected([item("audio/wav")])).toBe(false);
+    expect(dragPayloadRejected([item("audio/x-wav"), item("audio/mpeg")])).toBe(false);
+  });
+
+  it("allows untyped items — a directory or an untagged file looks like that mid-drag", () => {
+    expect(dragPayloadRejected([item("")])).toBe(false);
+    expect(dragPayloadRejected([item(""), item("video/mp4")])).toBe(false);
+  });
+
+  it("never refuses a payload without file items", () => {
+    expect(dragPayloadRejected([item("text/plain", "string")])).toBe(false);
+    expect(dragPayloadRejected([])).toBe(false);
+    expect(dragPayloadRejected(null)).toBe(false);
   });
 });
 
@@ -243,6 +271,23 @@ describe("planAudioUploadGroups", () => {
       cardName: "ridge trail",
     });
     expect(reused.unmatchedPlan).toEqual({ kind: "existing", uri: folders[0]!.uri, name: "ridge trail" });
+  });
+
+  it("joins a chime deployment whose name matches the card, instead of forking a twin", () => {
+    const chimeOnly: DeploymentEventItem = {
+      ...event,
+      locality: "Cloud forest",
+      eventID: "beadbeadbeadbead",
+      uri: "at://did:plc:x/app.gainforest.dwc.event/2",
+      rkey: "2",
+    };
+    const plan = planAudioUploadGroups({
+      ...base,
+      events: [event, chimeOnly],
+      recordings: [makeRecording("a.wav", makeInfo())],
+      cardName: "cloud forest",
+    });
+    expect(plan.unmatchedPlan).toEqual({ kind: "event", event: chimeOnly });
   });
 
   it("ignores skipped and unreadable recordings entirely", () => {

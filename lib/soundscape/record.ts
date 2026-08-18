@@ -166,6 +166,22 @@ export function soundscapeDates(sources: SoundscapeSource[]): string[] {
   return [...new Set(sources.map((source) => source.date))].sort();
 }
 
+/**
+ * The recorder/deployment name a soundscape was built from, recovered from its
+ * generated title. Titles are always app-written as `{Prefix} · {name} · {dates}`
+ * (from a named folder) or `{Prefix} · {dates}` (no folder). The localized
+ * prefix word and the date format vary, but the `·` separator is constant
+ * across every locale, so the name is simply the middle segment. Returns null
+ * when the title carries no name — the caller then keeps the generic heading.
+ */
+export function soundscapeDeploymentName(title: string | null | undefined): string | null {
+  if (!title) return null;
+  const parts = title.split("\u00b7").map((part) => part.trim()).filter(Boolean);
+  if (parts.length < 3) return null;
+  const name = parts.slice(1, -1).join(" \u00b7 ").trim();
+  return name || null;
+}
+
 /** `2026-03-14` or `2026-03-14 – 2026-03-16`; empty when there are no dates. */
 export function formatDateRange(dates: string[]): string {
   if (dates.length === 0) return "";

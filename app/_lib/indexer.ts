@@ -18,7 +18,7 @@ import { GAINFOREST_MODERATION_REPO_DID } from "./moderation-repo";
 import { recognitionKeyFromTitle } from "./recognition-badges";
 import { PUBLIC_EXPLORE_CACHE_TTL_MS, publicExploreCache } from "./public-explore-cache";
 import { INDEXER_URL } from "./urls";
-import { countryCodeFromCertifiedLocation, fetchCertifiedLocationCountryCode, type CertifiedLocationLike } from "./country-location";
+import { countryCodeFromCertifiedLocation, fetchCertifiedLocationSummary, type CertifiedLocationLike } from "./country-location";
 import { blobUrl, resolveBlobUrl, resolvePdsHost, normaliseRef } from "./pds";
 import { fetchEndorserRecords } from "./endorsers";
 import { asNumber, formatNumber, formatDate, formatDateTime, formatCountry } from "./format";
@@ -7636,7 +7636,7 @@ type CertOrgDetailNode = {
   } | null;
 };
 
-function buildCertOrgDetail(d: CertOrgDetailNode, createdAt: string | null, country: string | null): RecordDetail {
+function buildCertOrgDetail(d: CertOrgDetailNode, createdAt: string | null, location: { name: string | null; country: string | null } | null): RecordDetail {
   const org = d.org ?? {};
   const profile = d.profile ?? {};
   const types = (org.organizationType ?? [])
@@ -7648,7 +7648,10 @@ function buildCertOrgDetail(d: CertOrgDetailNode, createdAt: string | null, coun
   const sections = [
     section("Organization", [
       field("Type", types.join(", ") || null, true),
-      field("Country", country ? formatCountry(country) : null),
+      // The org's location is the certified location record it references —
+      // shown as a country when the coordinates resolve to one, otherwise by
+      // the record's own name.
+      field("Location", location?.country ? formatCountry(location.country) : location?.name ?? null),
       field("Founded", sv(org.foundedDate) ? formatDate(sv(org.foundedDate)!) : null),
       field("Visibility", sv(org.visibility) ? cap(sv(org.visibility)!) : null),
       field("Created", createdAt ? formatDateTime(createdAt) : null, true),
@@ -7742,11 +7745,11 @@ export async function fetchRecordDetail(
     ]);
     if (!data?.org) return null;
     const locationUri = directOrg ? directOrg.locationUri : sv(data.org.location?.uri) ?? null;
-    const country = await fetchCertifiedLocationCountryCode(locationUri, signal).catch(() => null);
+    const location = await fetchCertifiedLocationSummary(locationUri, signal).catch(() => null);
     return buildCertOrgDetail(
       data,
       sv(data.org.createdAt) ?? directOrg?.createdAt ?? null,
-      country,
+      location,
     );
   }
   return null;
@@ -7770,6 +7773,9 @@ export type AccountSummary = {
   bio: string | null;
   website: string | null;
   country: string | null;
+  /** Name of the certified location record the org references ("where the
+   *  org is based") — shown when the coordinates don't resolve to a country. */
+  locationName: string | null;
   /** Repo (DID) creation time from the PLC audit log. */
   createdAt: string | null;
   /** Organization founding/start date when available. */
@@ -7889,7 +7895,7 @@ export async function fetchAccountSummary(
 
   const rawVisibility = sv(certOrg?.visibility);
   const locationUri = directCertOrg ? directCertOrg.locationUri : sv(certOrg?.location?.uri) ?? null;
-  const country = await fetchCertifiedLocationCountryCode(locationUri, signal).catch(() => null);
+  const location = await fetchCertifiedLocationSummary(locationUri, signal).catch(() => null);
 
   return {
     did,
@@ -7898,7 +7904,8 @@ export async function fetchAccountSummary(
     avatarUrl,
     bio: sv(profile?.description) ?? null,
     website: sv(profile?.website) ?? null,
-    country,
+    country: location?.country ?? null,
+    locationName: location?.name ?? null,
     createdAt: sv(plc.createdAt) ?? sv(certOrg?.createdAt) ?? directCertOrg?.createdAt ?? null,
     foundedDate: sv(certOrg?.foundedDate) ?? directCertOrg?.foundedDate ?? null,
     visibility: rawVisibility === "unlisted" || rawVisibility === "Unlisted" ? "Unlisted" : rawVisibility ? "Public" : directCertOrg?.visibility === "unlisted" ? "Unlisted" : directCertOrg?.visibility ? "Public" : null,

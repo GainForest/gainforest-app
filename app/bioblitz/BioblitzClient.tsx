@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useMemo, useState, type ReactNode } from "react";
+import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { motion } from "framer-motion";
 import {
@@ -11,24 +11,34 @@ import {
   Building2Icon,
   CalendarClockIcon,
   CameraIcon,
+  ChevronLeftIcon,
   ChevronRightIcon,
   ClockIcon,
   CrownIcon,
+  LeafIcon,
   MapPinnedIcon,
+  PawPrintIcon,
   MessagesSquareIcon,
   ScanSearchIcon,
+  TagIcon,
   TrophyIcon,
   UploadIcon,
   UsersRoundIcon,
 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { BioblitzGallery } from "./BioblitzGallery";
-import { RoundAwardControl, useBioblitzAwardState } from "./BioblitzAwardControls";
+import {
+  RoundAwardControl,
+  useBioblitzAwardState,
+} from "./BioblitzAwardControls";
 import { BioblitzBestPicture } from "./BioblitzBestPicture";
 import { BioblitzObservationsMap } from "./BioblitzObservationsMap";
 import { RegisterButton } from "./BioblitzRegister";
 import { AuthorInline } from "../_components/AuthorChip";
-import { AwardEmblems, displayAwardKeys } from "../account/_components/AccountAwards";
+import {
+  AwardEmblems,
+  displayAwardKeys,
+} from "../account/_components/AccountAwards";
 import { fetchRecognitionBadgesForDids } from "../_lib/indexer";
 import { PreferredAccountLink } from "../_components/PreferredLinks";
 import { formatNumber } from "../_lib/format";
@@ -36,6 +46,7 @@ import {
   BIOBLITZ_LINKS,
   BIOBLITZ_PRIZES,
   bioblitzRounds,
+  bioblitzRoundUsesPoints,
   countdownTo,
   endedRounds,
   featuredRound,
@@ -49,6 +60,7 @@ import {
   type BoardScope,
   type CollectorOrg,
   type RoundBoard,
+  type RoundCollectorBreakdown,
   type RoundStatus,
 } from "../_lib/bioblitz";
 
@@ -60,6 +72,8 @@ const IMG_SIZES = "(min-width: 768px) calc(100vw - 15rem), 100vw";
 const BOARD_LIMIT = 12;
 /** How many rows the single-screen board shows before it clips. */
 const DISPLAY_LIMIT = 8;
+/** Past-winner rounds shown per page of the compact winners card. */
+const WINNERS_PAGE_SIZE = 4;
 
 /** Org-type tokens we have a friendly translated label for; anything else
  *  falls back to the generic "Organization" label. */
@@ -104,12 +118,17 @@ export function BioblitzClient() {
   const currentRound = useMemo(() => featuredRound(snapshotNow), [snapshotNow]);
   const [selectedRoundId, setSelectedRoundId] = useState<number | null>(null);
   const round = useMemo(
-    () => rounds.find((item) => item.id === (selectedRoundId ?? currentRound.id)) ?? currentRound,
+    () =>
+      rounds.find((item) => item.id === (selectedRoundId ?? currentRound.id)) ??
+      currentRound,
     [rounds, selectedRoundId, currentRound],
   );
 
   useEffect(() => {
-    if (selectedRoundId != null && !rounds.some((item) => item.id === selectedRoundId)) {
+    if (
+      selectedRoundId != null &&
+      !rounds.some((item) => item.id === selectedRoundId)
+    ) {
       setSelectedRoundId(null);
     }
   }, [rounds, selectedRoundId]);
@@ -126,9 +145,32 @@ export function BioblitzClient() {
   // Recognition awards (previous BioBlitz wins, grants) per collector account,
   // shown as small emblems on the board rows. Same progressive pattern.
   const [awards, setAwards] = useState<Map<string, string[]>>(new Map());
-  const pastRounds = useMemo(() => endedRounds(snapshotNow).slice(0, 4), [snapshotNow]);
+  // Every finished round is browsable, newest first, a page at a time — the
+  // card stays compact no matter how many rounds the challenge accumulates.
+  const allPastRounds = useMemo(() => endedRounds(snapshotNow), [snapshotNow]);
+  const [winnersPage, setWinnersPage] = useState(0);
+  const winnersPageCount = Math.max(
+    1,
+    Math.ceil(allPastRounds.length / WINNERS_PAGE_SIZE),
+  );
+  useEffect(() => {
+    if (winnersPage > 0 && winnersPage >= winnersPageCount)
+      setWinnersPage(winnersPageCount - 1);
+  }, [winnersPage, winnersPageCount]);
+  const pastRounds = useMemo(
+    () =>
+      allPastRounds.slice(
+        winnersPage * WINNERS_PAGE_SIZE,
+        (winnersPage + 1) * WINNERS_PAGE_SIZE,
+      ),
+    [allPastRounds, winnersPage],
+  );
   const pastRoundsKey = pastRounds.map((item) => item.id).join(",");
-  const [pastWinners, setPastWinners] = useState<PastRoundSummary[] | null>(null);
+  const [pastWinners, setPastWinners] = useState<PastRoundSummary[] | null>(
+    null,
+  );
+  /** Finalised summaries never change, so paging back to them is instant. */
+  const winnerSummaryCache = useRef(new Map<number, PastRoundSummary>());
 
   // Reset to the loading state whenever the active round or scope changes.
   useEffect(() => {
@@ -153,7 +195,9 @@ export function BioblitzClient() {
     fetchRecognitionBadgesForDids(dids, ctrl.signal)
       .then((map) => {
         if (cancelled) return;
-        setAwards(new Map([...map].map(([did, keys]) => [did, displayAwardKeys(keys)])));
+        setAwards(
+          new Map([...map].map(([did, keys]) => [did, displayAwardKeys(keys)])),
+        );
       })
       .catch(() => {});
     return () => {
@@ -194,6 +238,11 @@ export function BioblitzClient() {
       setPastWinners([]);
       return;
     }
+    const cache = winnerSummaryCache.current;
+    if (pastRounds.every((item) => cache.has(item.id))) {
+      setPastWinners(pastRounds.map((item) => cache.get(item.id)!));
+      return;
+    }
     const controller = new AbortController();
     let cancelled = false;
     setPastWinners(null);
@@ -201,17 +250,29 @@ export function BioblitzClient() {
       // Awarded winner badges (and hand-pinned overrides) freeze a past round's
       // winners permanently. Only prizes that are not frozen yet fall back to
       // the live recomputation — which can still drift until they are awarded.
-      const awards = await fetchBioblitzWinnerAwards(controller.signal).catch(() => null);
+      const awards = await fetchBioblitzWinnerAwards(controller.signal).catch(
+        () => null,
+      );
       return Promise.all(
         pastRounds.map(async (pastRound): Promise<PastRoundSummary> => {
+          const cached = cache.get(pastRound.id);
+          if (cached) return cached;
           const frozen = frozenWinnersFor(pastRound, awards);
           const needBoard = frozen.mostObservations === undefined;
           const needLiked = frozen.bestPicture === undefined;
           const [pastBoard, liked] = await Promise.all([
             needBoard
-              ? fetchRoundCollectors(pastRound, "round", controller.signal).catch(() => null)
+              ? fetchRoundCollectors(
+                  pastRound,
+                  "round",
+                  controller.signal,
+                ).catch(() => null)
               : null,
-            needLiked ? fetchRoundTopLiked(pastRound, 1, controller.signal).catch(() => []) : [],
+            needLiked
+              ? fetchRoundTopLiked(pastRound, 1, controller.signal).catch(
+                  () => [],
+                )
+              : [],
           ]);
           const topCollector = pastBoard?.collectors[0] ?? null;
           const topLiked = liked?.[0] ?? null;
@@ -227,7 +288,10 @@ export function BioblitzClient() {
                   did: topCollector.did,
                   name: topCollector.displayName,
                   avatarRef: topCollector.avatarRef,
-                  count: topCollector.count,
+                  // The board is already ranked by the round's own rule.
+                  count: bioblitzRoundUsesPoints(pastRound.id)
+                    ? topCollector.points
+                    : topCollector.count,
                 };
           const mostLiked: WinnerAccount | null =
             frozen.bestPicture !== undefined
@@ -243,12 +307,16 @@ export function BioblitzClient() {
                   avatarRef: topLiked.record.creatorAvatarRef,
                   count: topLiked.likeCount,
                 };
-          return {
+          const summary: PastRoundSummary = {
             round: pastRound,
             mostSubmitted,
             mostLiked,
-            final: frozen.mostObservations !== undefined && frozen.bestPicture !== undefined,
+            final:
+              frozen.mostObservations !== undefined &&
+              frozen.bestPicture !== undefined,
           };
+          if (summary.final) cache.set(pastRound.id, summary);
+          return summary;
         }),
       );
     })()
@@ -256,7 +324,8 @@ export function BioblitzClient() {
         if (!cancelled && result) setPastWinners(result);
       })
       .catch((err) => {
-        if ((err as Error).name !== "AbortError" && !cancelled) setPastWinners([]);
+        if ((err as Error).name !== "AbortError" && !cancelled)
+          setPastWinners([]);
       });
     return () => {
       cancelled = true;
@@ -267,50 +336,58 @@ export function BioblitzClient() {
 
   return (
     <>
-    <section className="relative -mt-14 flex min-h-[100dvh] shrink-0 flex-col overflow-hidden lg:min-h-[100dvh]">
-      <BackgroundWash />
+      <section className="relative -mt-14 flex min-h-[100dvh] shrink-0 flex-col overflow-hidden lg:min-h-[100dvh]">
+        <BackgroundWash />
 
-      <div className="relative z-10 mx-auto flex w-full max-w-6xl flex-1 flex-col gap-5 px-4 pb-4 pt-[calc(3.5rem+0.75rem)] sm:px-6">
-        <HeroBand round={round} status={status} />
+        <div className="relative z-10 mx-auto flex w-full max-w-6xl flex-1 flex-col gap-5 px-4 pb-4 pt-[calc(3.5rem+0.75rem)] sm:px-6">
+          <HeroBand round={round} status={status} />
 
-        <RoundNavigator
-          rounds={rounds}
-          selectedId={round.id}
-          currentId={currentRound.id}
-          now={snapshotNow}
-          onSelect={(id) => setSelectedRoundId(id === currentRound.id ? null : id)}
-        />
+          <RoundNavigator
+            rounds={rounds}
+            selectedId={round.id}
+            currentId={currentRound.id}
+            now={snapshotNow}
+            onSelect={(id) =>
+              setSelectedRoundId(id === currentRound.id ? null : id)
+            }
+          />
 
-        <ProofNote />
+          <ProofNote />
 
-        <div className="grid flex-1 gap-4 lg:min-h-[34rem] lg:grid-cols-[minmax(0,5fr)_1px_minmax(0,7fr)]">
-          <div className="flex flex-col gap-4 lg:min-h-0">
-            <Prizes />
-            <PastWinners rounds={pastRounds} summaries={pastWinners} />
-            <Separator />
-            <HowItWorks />
-            <Separator />
-            <CtaBlock />
-          </div>
+          <div className="grid flex-1 gap-4 lg:min-h-[34rem] lg:grid-cols-[minmax(0,5fr)_1px_minmax(0,7fr)]">
+            <div className="flex flex-col gap-4 lg:min-h-0">
+              <Prizes round={round} />
+              <PastWinners
+                rounds={pastRounds}
+                summaries={pastWinners}
+                page={winnersPage}
+                pageCount={winnersPageCount}
+                onPage={setWinnersPage}
+              />
+              <Separator />
+              <HowItWorks />
+              <Separator />
+              <CtaBlock />
+            </div>
 
-          <Separator orientation="vertical" className="hidden lg:block" />
+            <Separator orientation="vertical" className="hidden lg:block" />
 
-          <div className="lg:min-h-0">
-            <Board
-              round={round}
-              status={status}
-              board={board}
-              orgs={orgs}
-              awards={awards}
-              error={error}
-              now={now}
-              scope={scope}
-              onScope={setScope}
-            />
+            <div className="lg:min-h-0">
+              <Board
+                round={round}
+                status={status}
+                board={board}
+                orgs={orgs}
+                awards={awards}
+                error={error}
+                now={now}
+                scope={scope}
+                onScope={setScope}
+              />
+            </div>
           </div>
         </div>
-      </div>
-    </section>
+      </section>
 
       <BioblitzGallery round={round} />
 
@@ -324,7 +401,10 @@ export function BioblitzClient() {
 /** A faint nature wash at the top of the page — atmosphere without height. */
 function BackgroundWash() {
   return (
-    <div aria-hidden className="pointer-events-none absolute inset-x-0 top-0 h-64 overflow-hidden opacity-60">
+    <div
+      aria-hidden
+      className="pointer-events-none absolute inset-x-0 top-0 h-64 overflow-hidden opacity-60"
+    >
       <Image
         src="/assets/media/images/observations/observations-hero-light@2x.webp"
         alt=""
@@ -370,7 +450,13 @@ function FadeIn({
   );
 }
 
-function Card({ children, className }: { children: ReactNode; className?: string }) {
+function Card({
+  children,
+  className,
+}: {
+  children: ReactNode;
+  className?: string;
+}) {
   return <div className={className}>{children}</div>;
 }
 
@@ -392,8 +478,12 @@ function Separator({
 function SectionTitle({ icon, title }: { icon: ReactNode; title: string }) {
   return (
     <div className="flex items-center gap-2">
-      <span className="flex size-5 items-center justify-center text-primary [&_svg]:size-4">{icon}</span>
-      <h2 className="font-instrument text-xl font-light italic leading-none text-foreground">{title}</h2>
+      <span className="flex size-5 items-center justify-center text-primary [&_svg]:size-4">
+        {icon}
+      </span>
+      <h2 className="font-instrument text-xl font-light italic leading-none text-foreground">
+        {title}
+      </h2>
     </div>
   );
 }
@@ -415,9 +505,12 @@ function HeroBand({
     <FadeIn className="flex flex-col gap-5 px-1 py-4 md:flex-row md:items-center md:justify-between md:gap-10">
       <div className="min-w-0">
         <h1 className="font-instrument text-3xl font-light italic leading-[0.95] tracking-[-0.02em] text-foreground sm:text-4xl">
-          {t("hero.titlePrefix")} <span className="text-primary">{t("hero.titleEmphasis")}</span>
+          {t("hero.titlePrefix")}{" "}
+          <span className="text-primary">{t("hero.titleEmphasis")}</span>
         </h1>
-        <p className="mt-2 max-w-md text-sm leading-snug text-muted-foreground">{t("hero.description")}</p>
+        <p className="mt-2 max-w-md text-sm leading-snug text-muted-foreground">
+          {t("hero.description")}
+        </p>
         <div className="mt-3">
           <StatusChip status={status} />
         </div>
@@ -425,9 +518,13 @@ function HeroBand({
 
       <div className="flex shrink-0 flex-col items-start gap-3 md:items-end">
         <div className="flex flex-wrap items-center gap-2">
-          <span className="font-instrument text-lg italic leading-none text-foreground">{round.label}</span>
+          <span className="font-instrument text-lg italic leading-none text-foreground">
+            {round.label}
+          </span>
         </div>
-        <span className="text-[11px] tabular-nums text-muted-foreground">{dates}</span>
+        <span className="text-[11px] tabular-nums text-muted-foreground">
+          {dates}
+        </span>
         <RegisterButton round={round} status={status} />
       </div>
     </FadeIn>
@@ -442,7 +539,9 @@ function StatusChip({ status }: { status: RoundStatus }) {
     ended: "bg-foreground/10 text-muted-foreground",
   };
   return (
-    <span className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold ${styles[status]}`}>
+    <span
+      className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold ${styles[status]}`}
+    >
       {status === "live" ? (
         <span aria-hidden className="relative flex size-2">
           <span className="absolute inline-flex size-2 animate-ping rounded-full bg-current opacity-60" />
@@ -470,7 +569,10 @@ function RoundNavigator({
   const t = useTranslations("marketplace.bioblitz.rounds");
   const statusT = useTranslations("marketplace.bioblitz.status");
   const locale = useLocale();
-  const newestFirst = useMemo(() => [...rounds].sort((a, b) => b.id - a.id), [rounds]);
+  const newestFirst = useMemo(
+    () => [...rounds].sort((a, b) => b.id - a.id),
+    [rounds],
+  );
 
   return (
     <FadeIn delay={0.03} className="-mt-2">
@@ -520,9 +622,12 @@ function RoundNavigator({
 
 // ── Prizes ───────────────────────────────────────────────────────────────────
 
-function Prizes() {
+function Prizes({ round }: { round: BioblitzRound }) {
   const t = useTranslations("marketplace.bioblitz.prizes");
   const locale = useLocale();
+  // The board prize is round-versioned: points from Round 8, raw observation
+  // count before that. Show the rule that applies to the selected round.
+  const usesPoints = bioblitzRoundUsesPoints(round.id);
   return (
     <FadeIn delay={0.05}>
       <Card>
@@ -532,7 +637,11 @@ function Prizes() {
             featured
             amount={formatPrize(BIOBLITZ_PRIZES.mostObservations, locale)}
             icon={<TrophyIcon />}
-            title={t("mostObservations.title")}
+            title={
+              usesPoints
+                ? t("highestPoints.title")
+                : t("mostObservations.title")
+            }
           />
           <PrizeTile
             amount={formatPrize(BIOBLITZ_PRIZES.bestPicture, locale)}
@@ -541,7 +650,10 @@ function Prizes() {
           />
         </div>
         <p className="mt-3 flex items-center gap-1.5 text-xs text-muted-foreground">
-          <BadgeCheckIcon className="size-3.5 shrink-0 text-primary" aria-hidden />
+          <BadgeCheckIcon
+            className="size-3.5 shrink-0 text-primary"
+            aria-hidden
+          />
           {t("badgeNote")}
         </p>
       </Card>
@@ -563,7 +675,9 @@ function PrizeTile({
   return (
     <div
       className={`flex flex-col items-center gap-1 rounded-2xl px-3 py-3 text-center ${
-        featured ? "bg-gradient-to-b from-primary/[0.16] via-primary/[0.05] to-transparent" : "bg-foreground/5"
+        featured
+          ? "bg-gradient-to-b from-primary/[0.16] via-primary/[0.05] to-transparent"
+          : "bg-foreground/5"
       }`}
     >
       <span
@@ -573,7 +687,9 @@ function PrizeTile({
       >
         {icon}
       </span>
-      <span className="font-instrument text-3xl italic leading-none text-primary">{amount}</span>
+      <span className="font-instrument text-3xl italic leading-none text-primary">
+        {amount}
+      </span>
       <span className="text-xs font-semibold text-foreground">{title}</span>
     </div>
   );
@@ -582,9 +698,15 @@ function PrizeTile({
 function PastWinners({
   rounds,
   summaries,
+  page,
+  pageCount,
+  onPage,
 }: {
   rounds: BioblitzRound[];
   summaries: PastRoundSummary[] | null;
+  page: number;
+  pageCount: number;
+  onPage: (page: number) => void;
 }) {
   const t = useTranslations("marketplace.bioblitz.winners");
   const boardT = useTranslations("marketplace.bioblitz.board");
@@ -594,28 +716,69 @@ function PastWinners({
   const awardHook = useBioblitzAwardState();
   if (rounds.length === 0) return null;
   const rows: PastRoundSummary[] =
-    summaries ?? rounds.map((round) => ({ round, mostSubmitted: null, mostLiked: null, final: false }));
+    summaries ??
+    rounds.map((round) => ({
+      round,
+      mostSubmitted: null,
+      mostLiked: null,
+      final: false,
+    }));
 
   return (
     <FadeIn delay={0.08}>
       <Card>
         <div className="mb-2 flex items-center justify-between gap-2">
           <SectionTitle icon={<CrownIcon />} title={t("title")} />
-          <span className="rounded-full bg-foreground/5 px-2 py-1 text-[10px] font-medium text-muted-foreground">
-            {t("compact")}
-          </span>
+          {pageCount > 1 ? (
+            <span className="flex items-center gap-1 rounded-full bg-foreground/5 px-1 py-0.5">
+              <button
+                type="button"
+                onClick={() => onPage(Math.max(0, page - 1))}
+                disabled={page === 0}
+                aria-label={t("newer")}
+                className="flex size-5 items-center justify-center rounded-full text-muted-foreground transition-colors hover:text-foreground disabled:opacity-30 disabled:hover:text-muted-foreground"
+              >
+                <ChevronLeftIcon className="size-3.5" aria-hidden />
+              </button>
+              <span className="text-[10px] font-medium tabular-nums text-muted-foreground">
+                {t("page", { page: page + 1, total: pageCount })}
+              </span>
+              <button
+                type="button"
+                onClick={() => onPage(Math.min(pageCount - 1, page + 1))}
+                disabled={page >= pageCount - 1}
+                aria-label={t("older")}
+                className="flex size-5 items-center justify-center rounded-full text-muted-foreground transition-colors hover:text-foreground disabled:opacity-30 disabled:hover:text-muted-foreground"
+              >
+                <ChevronRightIcon className="size-3.5" aria-hidden />
+              </button>
+            </span>
+          ) : (
+            <span className="rounded-full bg-foreground/5 px-2 py-1 text-[10px] font-medium text-muted-foreground">
+              {t("compact")}
+            </span>
+          )}
         </div>
         <ul className="space-y-1.5">
           {rows.map((summary) => (
-            <li key={summary.round.id} className="rounded-2xl bg-foreground/5 px-3 py-2">
+            <li
+              key={summary.round.id}
+              className="rounded-2xl bg-foreground/5 px-3 py-2"
+            >
               <div className="flex items-center justify-between gap-2">
                 <span className="flex min-w-0 items-center gap-1.5">
-                  <span className="truncate text-xs font-semibold text-foreground">{summary.round.label}</span>
+                  <span className="truncate text-xs font-semibold text-foreground">
+                    {summary.round.label}
+                  </span>
                   {summaries != null ? (
                     <span
-                      title={summary.final ? t("finalHint") : t("provisionalHint")}
+                      title={
+                        summary.final ? t("finalHint") : t("provisionalHint")
+                      }
                       className={`shrink-0 rounded-full px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-[0.08em] ${
-                        summary.final ? "bg-primary/10 text-primary" : "bg-foreground/10 text-muted-foreground"
+                        summary.final
+                          ? "bg-primary/10 text-primary"
+                          : "bg-foreground/10 text-muted-foreground"
                       }`}
                     >
                       {summary.final ? t("final") : t("provisional")}
@@ -623,17 +786,31 @@ function PastWinners({
                   ) : null}
                 </span>
                 <span className="shrink-0 text-[10px] tabular-nums text-muted-foreground">
-                  {formatDateRange(summary.round.start, summary.round.end, locale)}
+                  {formatDateRange(
+                    summary.round.start,
+                    summary.round.end,
+                    locale,
+                  )}
                 </span>
               </div>
               <div className="mt-1.5 grid gap-1 text-[11px] sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2">
                 <WinnerPill
                   icon={<TrophyIcon />}
-                  label={t("mostSubmitted")}
+                  label={
+                    bioblitzRoundUsesPoints(summary.round.id)
+                      ? t("highestPoints")
+                      : t("mostSubmitted")
+                  }
                   winner={summary.mostSubmitted}
                   countLabel={
                     summary.mostSubmitted && summary.mostSubmitted.count != null
-                      ? boardT("observations", { count: summary.mostSubmitted.count })
+                      ? bioblitzRoundUsesPoints(summary.round.id)
+                        ? boardT("pointsFull", {
+                            points: summary.mostSubmitted.count,
+                          })
+                        : boardT("observations", {
+                            count: summary.mostSubmitted.count,
+                          })
                       : null
                   }
                   pending={summaries == null ? "…" : t("pending")}
@@ -685,12 +862,22 @@ function WinnerPill({
       {winner ? (
         <div className="mt-1 flex min-w-0 items-center justify-between gap-2">
           <span className="min-w-0 flex-1 truncate font-medium text-foreground">
-            <AuthorInline did={winner.did} nameOverride={winner.name} avatarRefOverride={winner.avatarRef} />
+            <AuthorInline
+              did={winner.did}
+              nameOverride={winner.name}
+              avatarRefOverride={winner.avatarRef}
+            />
           </span>
-          {countLabel ? <span className="shrink-0 text-[10px] text-muted-foreground">{countLabel}</span> : null}
+          {countLabel ? (
+            <span className="shrink-0 text-[10px] text-muted-foreground">
+              {countLabel}
+            </span>
+          ) : null}
         </div>
       ) : (
-        <div className="mt-1 text-xs font-medium text-muted-foreground">{pending}</div>
+        <div className="mt-1 text-xs font-medium text-muted-foreground">
+          {pending}
+        </div>
       )}
     </div>
   );
@@ -716,7 +903,8 @@ function HowItWorks() {
                 {step.icon}
               </span>
               <span className="text-sm font-medium text-foreground">
-                <span className="text-muted-foreground">{index + 1}.</span> {t(`steps.${step.key}.title`)}
+                <span className="text-muted-foreground">{index + 1}.</span>{" "}
+                {t(`steps.${step.key}.title`)}
               </span>
             </li>
           ))}
@@ -733,10 +921,18 @@ function ProofNote() {
   return (
     <FadeIn delay={0.05}>
       <div className="rounded-2xl border border-primary/15 bg-primary/5 p-4 sm:p-5">
-        <h2 className="text-base font-semibold text-foreground sm:text-lg">{t("title")}</h2>
-        <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{t("intro")}</p>
-        <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{t("uses")}</p>
-        <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{t("outro")}</p>
+        <h2 className="text-base font-semibold text-foreground sm:text-lg">
+          {t("title")}
+        </h2>
+        <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+          {t("intro")}
+        </p>
+        <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+          {t("uses")}
+        </p>
+        <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+          {t("outro")}
+        </p>
       </div>
     </FadeIn>
   );
@@ -754,7 +950,10 @@ function CtaBlock() {
         className="group inline-flex items-center justify-center gap-2 rounded-full bg-primary px-5 py-2 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary-dark"
       >
         {t("board.cta")}
-        <ChevronRightIcon className="size-4 transition-transform duration-200 group-hover:translate-x-0.5" aria-hidden />
+        <ChevronRightIcon
+          className="size-4 transition-transform duration-200 group-hover:translate-x-0.5"
+          aria-hidden
+        />
       </Link>
       <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted-foreground">
         <a
@@ -776,7 +975,9 @@ function CtaBlock() {
           {tHelp("community")}
         </a>
       </div>
-      <p className="text-[11px] leading-snug text-muted-foreground/70">{t("hero.program")}</p>
+      <p className="text-[11px] leading-snug text-muted-foreground/70">
+        {t("hero.program")}
+      </p>
     </FadeIn>
   );
 }
@@ -838,6 +1039,9 @@ function Board({
   onScope: (scope: BoardScope) => void;
 }) {
   const t = useTranslations("marketplace.bioblitz.board");
+  // Points only rank round boards from Round 8 onward; earlier rounds and the
+  // all-time view keep the original observation-count format.
+  const pointsEra = scope === "round" && bioblitzRoundUsesPoints(round.id);
   const subtitle =
     scope === "all"
       ? t("subtitleAll")
@@ -845,20 +1049,46 @@ function Board({
         ? t("subtitleEnded")
         : status === "upcoming"
           ? t("subtitleUpcoming")
-          : t("subtitleLive");
+          : pointsEra
+            ? t("subtitleLivePoints")
+            : t("subtitleLive");
 
   const timeLeft = useMemo(() => {
     if (now == null || status === "ended") return "—";
-    const { days, hours } = countdownTo(status === "upcoming" ? round.start : round.end, now);
+    const { days, hours } = countdownTo(
+      status === "upcoming" ? round.start : round.end,
+      now,
+    );
     return days > 0 ? `${days}d ${hours}h` : `${hours}h`;
   }, [now, status, round]);
 
-  const stats: { label: string; value: string; icon: ReactNode; accent?: boolean }[] = [
+  const stats: {
+    label: string;
+    value: string;
+    icon: ReactNode;
+    accent?: boolean;
+  }[] = [
     {
-      label: scope === "all" ? t("stats.observationsAll") : t("stats.observations"),
+      label:
+        scope === "all" ? t("stats.observationsAll") : t("stats.observations"),
       value: board ? formatNumber(board.totalObservations) : "—",
       icon: <BinocularsIcon />,
       accent: true,
+    },
+    {
+      label: t("stats.animals"),
+      value: board ? formatNumber(board.imageCounts.wildlife) : "—",
+      icon: <PawPrintIcon />,
+    },
+    {
+      label: t("stats.plants"),
+      value: board ? formatNumber(board.imageCounts.plant) : "—",
+      icon: <LeafIcon />,
+    },
+    {
+      label: t("stats.named"),
+      value: board ? formatNumber(board.labeledObservations) : "—",
+      icon: <TagIcon />,
     },
     {
       label: t("stats.collectors"),
@@ -879,39 +1109,52 @@ function Board({
       <Card className="flex h-full min-h-0 flex-col">
         <div className="flex items-center justify-between gap-3">
           <div className="flex items-center gap-2">
-            <h2 className="font-instrument text-xl italic leading-none text-foreground">{t("title")}</h2>
+            <h2 className="font-instrument text-xl italic leading-none text-foreground">
+              {t("title")}
+            </h2>
           </div>
           <ScopeToggle scope={scope} onScope={onScope} />
         </div>
         <p className="mt-1 text-xs text-muted-foreground">{subtitle}</p>
 
-        <div className="mt-3 grid grid-cols-3 gap-2">
+        <div className="mt-3 grid grid-cols-6 gap-1">
           {stats.map((stat) => (
             <div
               key={stat.label}
-              className={`flex flex-col items-center gap-1 rounded-2xl px-3 py-3 text-center ${
-                stat.accent ? "bg-gradient-to-b from-primary/[0.16] via-primary/[0.05] to-transparent" : "bg-foreground/5"
+              className={`flex flex-col items-center gap-1 rounded-xl px-1 py-2 text-center ${
+                stat.accent
+                  ? "bg-gradient-to-b from-primary/[0.16] via-primary/[0.05] to-transparent"
+                  : "bg-foreground/5"
               }`}
             >
               <span
-                className={`flex size-8 items-center justify-center rounded-xl text-primary [&_svg]:size-4 ${
+                className={`flex size-6 items-center justify-center rounded-lg text-primary [&_svg]:size-3.5 ${
                   stat.accent ? "bg-primary/15" : "bg-primary/10"
                 }`}
               >
                 {stat.icon}
               </span>
-              <div className="font-instrument text-2xl italic leading-none tabular-nums text-primary">{stat.value}</div>
-              <div className="text-[10px] font-semibold leading-tight text-foreground">{stat.label}</div>
+              <div className="font-instrument text-xl italic leading-none tabular-nums text-primary">
+                {stat.value}
+              </div>
+              <div className="text-[9px] font-semibold leading-tight text-foreground">
+                {stat.label}
+              </div>
             </div>
           ))}
         </div>
 
         {board ? <EligibilityBreakdown board={board} /> : null}
+        {pointsEra ? <PointsGuide /> : null}
 
         <div className="mt-3 min-h-0 flex-1 overflow-y-auto pr-1">
           {board ? (
             collectors.length === 0 ? (
-              <BoardMessage icon={<BinocularsIcon />} title={t("empty.title")} description={t("empty.description")} />
+              <BoardMessage
+                icon={<BinocularsIcon />}
+                title={t("empty.title")}
+                description={t("empty.description")}
+              />
             ) : (
               <ul className="flex flex-col gap-1.5 rounded-2xl bg-muted p-2">
                 {collectors.map((collector, index) => (
@@ -923,6 +1166,9 @@ function Board({
                     name={collector.displayName}
                     avatarRef={collector.avatarRef}
                     count={collector.count}
+                    points={collector.points}
+                    breakdown={collector.breakdown}
+                    mode={pointsEra ? "points" : "observations"}
                     org={orgs.get(collector.did)}
                     awards={awards.get(collector.did)}
                   />
@@ -930,7 +1176,11 @@ function Board({
               </ul>
             )
           ) : error ? (
-            <BoardMessage icon={<TrophyIcon />} title={t("error.title")} description={t("error.description")} />
+            <BoardMessage
+              icon={<TrophyIcon />}
+              title={t("error.title")}
+              description={t("error.description")}
+            />
           ) : (
             <BoardSkeleton />
           )}
@@ -950,15 +1200,23 @@ function EligibilityBreakdown({ board }: { board: RoundBoard }) {
     { key: "wildlife", value: board.imageCounts.wildlife, eligible: true },
     { key: "plants", value: board.imageCounts.plant, eligible: true },
     { key: "people", value: board.imageCounts.person, eligible: false },
-    { key: "potted", value: board.imageCounts["potted-plant"], eligible: false },
+    {
+      key: "potted",
+      value: board.imageCounts["potted-plant"],
+      eligible: false,
+    },
     { key: "other", value: otherExcluded, eligible: false },
   ] as const;
 
   return (
     <div className="mt-3 rounded-2xl border border-border/70 bg-foreground/[0.025] p-2.5">
       <div className="flex items-center justify-between gap-2">
-        <p className="text-[11px] font-semibold text-foreground">{t("title")}</p>
-        <p className="text-[10px] font-medium text-primary">{t("eligibleOnly")}</p>
+        <p className="text-[11px] font-semibold text-foreground">
+          {t("title")}
+        </p>
+        <p className="text-[10px] font-medium text-primary">
+          {t("eligibleOnly")}
+        </p>
       </div>
       <div className="mt-2 grid grid-cols-5 gap-1">
         {items.map((item) => (
@@ -966,14 +1224,57 @@ function EligibilityBreakdown({ board }: { board: RoundBoard }) {
             key={item.key}
             className={`rounded-xl px-1.5 py-1.5 text-center ${item.eligible ? "bg-primary/10" : "bg-foreground/5"}`}
           >
-            <div className={`text-sm font-semibold tabular-nums ${item.eligible ? "text-primary" : "text-muted-foreground"}`}>
+            <div
+              className={`text-sm font-semibold tabular-nums ${item.eligible ? "text-primary" : "text-muted-foreground"}`}
+            >
               {formatNumber(item.value)}
             </div>
-            <div className="text-[9px] font-medium leading-tight text-muted-foreground">{t(item.key)}</div>
+            <div className="text-[9px] font-medium leading-tight text-muted-foreground">
+              {t(item.key)}
+            </div>
           </div>
         ))}
       </div>
-      <p className="mt-2 text-[10px] leading-snug text-muted-foreground">{t("explainer")}</p>
+      <p className="mt-2 text-[10px] leading-snug text-muted-foreground">
+        {t("explainer")}
+      </p>
+    </div>
+  );
+}
+
+/** Plain-language scoring legend shown under the screening panel so anyone
+ *  can verify the board's maths at a glance (points-era rounds only). */
+function PointsGuide() {
+  const t = useTranslations("marketplace.bioblitz.board.pointsGuide");
+  const rows = [
+    { key: "animal", icon: <PawPrintIcon /> },
+    { key: "plant", icon: <LeafIcon /> },
+    { key: "named", icon: <TagIcon /> },
+  ] as const;
+  return (
+    <div className="mt-2 rounded-2xl border border-primary/15 bg-primary/5 p-2.5">
+      <p className="text-[11px] font-semibold text-foreground">{t("title")}</p>
+      <div className="mt-2 grid grid-cols-3 gap-1">
+        {rows.map((row) => (
+          <div
+            key={row.key}
+            className="rounded-xl bg-background/70 px-1.5 py-1.5 text-center"
+          >
+            <span className="mx-auto flex size-5 items-center justify-center text-primary [&_svg]:size-3.5">
+              {row.icon}
+            </span>
+            <div className="mt-0.5 text-sm font-semibold tabular-nums text-primary">
+              {t(`${row.key}Value`)}
+            </div>
+            <div className="text-[9px] font-medium leading-tight text-muted-foreground">
+              {t(`${row.key}Label`)}
+            </div>
+          </div>
+        ))}
+      </div>
+      <p className="mt-2 text-[10px] leading-snug text-muted-foreground">
+        {t("note")}
+      </p>
     </div>
   );
 }
@@ -996,6 +1297,9 @@ function CollectorRow({
   name,
   avatarRef,
   count,
+  points,
+  breakdown,
+  mode,
   org,
   awards,
 }: {
@@ -1005,47 +1309,156 @@ function CollectorRow({
   name: string | null;
   avatarRef: string | null;
   count: number;
+  points: number;
+  breakdown: RoundCollectorBreakdown;
+  /** "points" rows expand into a score breakdown; "observations" rows keep
+   *  the original pre-points format and link straight to the profile. */
+  mode: "observations" | "points";
   org?: CollectorOrg;
   awards?: string[];
 }) {
   const t = useTranslations("marketplace.bioblitz.board");
-  return (
-    <li>
-      <PreferredAccountLink
-        did={did}
-        target="_blank"
-        rel="noopener noreferrer"
-        aria-label={t("openCollector")}
-        className={`group flex items-center gap-3 rounded-2xl border-[3px] bg-background px-3 py-2 text-foreground transition-colors duration-200 hover:bg-background/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring [&_.truncate]:text-foreground/85 ${
-          TOP_ROW_BORDERS[rank] ?? "border-transparent"
+  const [open, setOpen] = useState(false);
+
+  const rowBody = (
+    <>
+      <span
+        aria-label={t("rankAriaLabel", { rank })}
+        className={`flex size-7 shrink-0 items-center justify-center rounded-full text-xs font-bold tabular-nums ${
+          leader
+            ? "bg-primary/15 text-primary"
+            : (RANK_TIERS[rank] ?? "bg-foreground/10 text-muted-foreground")
         }`}
       >
-        <span
-          aria-label={t("rankAriaLabel", { rank })}
-          className={`flex size-7 shrink-0 items-center justify-center rounded-full text-xs font-bold tabular-nums ${
-            leader ? "bg-primary/15 text-primary" : RANK_TIERS[rank] ?? "bg-foreground/10 text-muted-foreground"
+        {leader ? <CrownIcon className="size-3.5" aria-hidden /> : rank}
+      </span>
+
+      <div className="min-w-0 flex-1">
+        <span className="flex min-w-0 items-center gap-1.5 text-lg font-medium text-foreground">
+          <AuthorInline
+            did={did}
+            nameOverride={name}
+            avatarRefOverride={avatarRef}
+          />
+          {awards && awards.length > 0 ? (
+            <AwardEmblems badges={awards} size="sm" />
+          ) : null}
+        </span>
+        <OrgLabel org={org} />
+      </div>
+
+      <span className="shrink-0 text-right">
+        {mode === "points" ? (
+          <>
+            <span className="font-instrument block text-sm italic leading-none tabular-nums text-primary">
+              {t("points", { points: formatNumber(points) })}
+            </span>
+            <span className="mt-0.5 block text-[10px] leading-none tabular-nums text-muted-foreground">
+              {t("observations", { count })}
+            </span>
+          </>
+        ) : (
+          <span className="font-instrument block text-sm italic leading-none tabular-nums text-primary">
+            {formatNumber(count)}
+          </span>
+        )}
+      </span>
+    </>
+  );
+
+  if (mode === "observations") {
+    return (
+      <li>
+        <PreferredAccountLink
+          did={did}
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label={t("openCollector")}
+          className={`group flex items-center gap-3 rounded-2xl border-[3px] bg-background px-3 py-2 text-foreground transition-colors duration-200 hover:bg-background/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring [&_.truncate]:text-foreground/85 ${
+            TOP_ROW_BORDERS[rank] ?? "border-transparent"
           }`}
         >
-          {leader ? <CrownIcon className="size-3.5" aria-hidden /> : rank}
-        </span>
+          {rowBody}
+          <ChevronRightIcon
+            aria-hidden
+            className="size-4 shrink-0 text-muted-foreground/40 transition-transform duration-200 group-hover:translate-x-0.5 group-hover:text-primary"
+          />
+        </PreferredAccountLink>
+      </li>
+    );
+  }
 
-        <div className="min-w-0 flex-1">
-          <span className="flex min-w-0 items-center gap-1.5 text-lg font-medium text-foreground">
-            <AuthorInline did={did} nameOverride={name} avatarRefOverride={avatarRef} />
-            {awards && awards.length > 0 ? <AwardEmblems badges={awards} size="sm" /> : null}
-          </span>
-          <OrgLabel org={org} />
-        </div>
+  // Points contributions mirror the scoring rule exactly:
+  // animals × 2 + plants × 1 + named species × 0.5.
+  const lines = [
+    { key: "animals", count: breakdown.wildlife, pts: breakdown.wildlife * 2 },
+    { key: "plants", count: breakdown.plant, pts: breakdown.plant },
+    { key: "labeled", count: breakdown.labeled, pts: breakdown.labeled * 0.5 },
+  ] as const;
 
-        <span className="shrink-0 text-right">
-          <span className="font-instrument block text-sm italic leading-none tabular-nums text-primary">{formatNumber(count)}</span>
-        </span>
-
+  return (
+    <li
+      className={`rounded-2xl border-[3px] bg-background ${TOP_ROW_BORDERS[rank] ?? "border-transparent"}`}
+    >
+      <button
+        type="button"
+        onClick={() => setOpen((value) => !value)}
+        aria-expanded={open}
+        title={t("breakdown.toggle")}
+        className="group flex w-full items-center gap-3 rounded-2xl px-3 py-2 text-left text-foreground transition-colors duration-200 hover:bg-foreground/[0.03] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring [&_.truncate]:text-foreground/85"
+      >
+        {rowBody}
         <ChevronRightIcon
           aria-hidden
-          className="size-4 shrink-0 text-muted-foreground/40 transition-transform duration-200 group-hover:translate-x-0.5 group-hover:text-primary"
+          className={`size-4 shrink-0 text-muted-foreground/40 transition-transform duration-200 group-hover:text-primary ${
+            open ? "rotate-90 text-primary" : ""
+          }`}
         />
-      </PreferredAccountLink>
+      </button>
+      {open ? (
+        <div className="mx-3 mb-2.5 rounded-xl bg-foreground/5 px-3 py-2">
+          <dl className="space-y-1 text-[11px]">
+            {lines.map((line) => (
+              <div
+                key={line.key}
+                className="flex items-center justify-between gap-2"
+              >
+                <dt className="text-muted-foreground">
+                  {t(`breakdown.${line.key}`, { count: line.count })}
+                </dt>
+                <dd className="font-medium tabular-nums text-foreground">
+                  +{formatNumber(line.pts)}
+                </dd>
+              </div>
+            ))}
+            {breakdown.ineligible > 0 ? (
+              <div className="flex items-center justify-between gap-2">
+                <dt className="text-muted-foreground">
+                  {t("breakdown.ineligible", { count: breakdown.ineligible })}
+                </dt>
+                <dd className="tabular-nums text-muted-foreground">+0</dd>
+              </div>
+            ) : null}
+            <div className="flex items-center justify-between gap-2 border-t border-border/60 pt-1">
+              <dt className="font-semibold text-foreground">
+                {t("breakdown.total")}
+              </dt>
+              <dd className="font-semibold tabular-nums text-primary">
+                {t("points", { points: formatNumber(points) })}
+              </dd>
+            </div>
+          </dl>
+          <PreferredAccountLink
+            did={did}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="mt-2 inline-flex items-center gap-1 text-[11px] font-medium text-primary underline-offset-4 hover:underline"
+          >
+            {t("breakdown.profile")}
+            <ChevronRightIcon className="size-3" aria-hidden />
+          </PreferredAccountLink>
+        </div>
+      ) : null}
     </li>
   );
 }
@@ -1054,10 +1467,16 @@ function CollectorRow({
 function OrgLabel({ org }: { org?: CollectorOrg }) {
   const t = useTranslations("marketplace.bioblitz.board.org");
   if (!org || !org.isOrganization) {
-    return <span className="mt-0.5 inline-flex text-[11px] font-medium leading-none text-muted-foreground">{t("account")}</span>;
+    return (
+      <span className="mt-0.5 inline-flex text-[11px] font-medium leading-none text-muted-foreground">
+        {t("account")}
+      </span>
+    );
   }
   const typeLabel =
-    org.orgType && KNOWN_ORG_TYPES.has(org.orgType) ? t(`types.${org.orgType}`) : t("label");
+    org.orgType && KNOWN_ORG_TYPES.has(org.orgType)
+      ? t(`types.${org.orgType}`)
+      : t("label");
   const parts = [typeLabel];
   if (org.memberCount > 0) parts.push(t("members", { count: org.memberCount }));
   return (
@@ -1072,7 +1491,10 @@ function BoardSkeleton() {
   return (
     <ul className="flex flex-col gap-1.5">
       {Array.from({ length: 6 }).map((_, index) => (
-        <li key={index} className="flex items-center gap-3 rounded-2xl bg-foreground/5 px-3 py-2.5">
+        <li
+          key={index}
+          className="flex items-center gap-3 rounded-2xl bg-foreground/5 px-3 py-2.5"
+        >
           <Skeleton className="size-7 shrink-0 rounded-full" />
           <div className="min-w-0 flex-1">
             <Skeleton className="h-4 w-36 max-w-full" />
@@ -1098,7 +1520,9 @@ function BoardMessage({
       <div className="flex size-12 items-center justify-center rounded-full bg-primary/10 text-primary [&_svg]:size-6 [&_svg]:opacity-60">
         {icon}
       </div>
-      <p className="font-instrument text-2xl font-light italic text-foreground">{title}</p>
+      <p className="font-instrument text-2xl font-light italic text-foreground">
+        {title}
+      </p>
       <p className="max-w-xs text-sm text-muted-foreground">{description}</p>
     </div>
   );
@@ -1114,7 +1538,11 @@ function formatPrize(amount: number, locale: string): string {
   }).format(amount);
 }
 
-function formatDateRange(startIso: string, endIso: string, locale: string): string {
+function formatDateRange(
+  startIso: string,
+  endIso: string,
+  locale: string,
+): string {
   const start = new Date(startIso);
   const end = new Date(endIso);
   if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) return "";

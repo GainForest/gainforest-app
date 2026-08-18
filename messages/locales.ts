@@ -16,6 +16,11 @@ import enPrivacy from "./en/privacy.json";
 import enChangelog from "./en/changelog.json";
 import enTainaGuide from "./en/tainaGuide.json";
 import enShop from "./en/shop.json";
+import enEvents from "./en/events.json";
+import esEvents from "./es/events.json";
+import ptEvents from "./pt/events.json";
+import swEvents from "./sw/events.json";
+import idEvents from "./id/events.json";
 import esAudioMothGuide from "./es/audiomothGuide.json";
 import esBumicert from "./es/bumicert.json";
 import esCart from "./es/cart.json";
@@ -86,6 +91,7 @@ export const messagesByLocale = {
     changelog: enChangelog,
     tainaGuide: enTainaGuide,
     shop: enShop,
+    events: enEvents,
   },
   es: {
     ...esLanding,
@@ -102,6 +108,7 @@ export const messagesByLocale = {
     changelog: esChangelog,
     tainaGuide: esTainaGuide,
     shop: esShop,
+    events: esEvents,
   },
   pt: {
     ...ptLanding,
@@ -118,6 +125,7 @@ export const messagesByLocale = {
     changelog: ptChangelog,
     tainaGuide: ptTainaGuide,
     shop: ptShop,
+    events: ptEvents,
   },
   sw: {
     ...swLanding,
@@ -134,6 +142,7 @@ export const messagesByLocale = {
     changelog: swChangelog,
     tainaGuide: swTainaGuide,
     shop: swShop,
+    events: swEvents,
   },
   id: {
     ...idLanding,
@@ -150,5 +159,6 @@ export const messagesByLocale = {
     changelog: idChangelog,
     tainaGuide: idTainaGuide,
     shop: idShop,
+    events: idEvents,
   },
 } satisfies Record<SupportedLanguageCode, object>;

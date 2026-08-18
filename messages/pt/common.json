@@ -110,6 +110,7 @@
       "settings": "Configurações",
       "projects": "Projetos",
       "observations": "Observações",
+      "events": "Eventos",
       "donations": "Doações",
       "grants": "Subsídios",
       "organizationHome": "Início da organização",
@@ -269,6 +270,14 @@
         "title": "Conta",
         "description": "Nome de usuário e segurança de acesso"
       },
+      "profile": {
+        "title": "Perfil público",
+        "description": "O que sua página pública mostra"
+      },
+      "members": {
+        "title": "Membros",
+        "description": "Pessoas, funções e o Conselho de Dados"
+      },
       "connections": {
         "title": "Conexões",
         "description": "Contas sociais e serviços externos"
@@ -281,6 +290,13 @@
         "title": "Avançado",
         "description": "Dados da conta e exclusão"
       }
+    },
+    "location": {
+      "title": "Localização",
+      "description": "Onde esta conta está sediada; exibida no perfil público.",
+      "notSet": "Nenhuma localização definida",
+      "edit": "Editar",
+      "saveError": "Não foi possível salvar a localização. Tente novamente."
     }
   },
   "bumicertCard": {
@@ -489,6 +505,30 @@
     "endorsementsGiven": "Endossos",
     "equipment": "Equipamentos",
     "more": "Mais"
+  },
+  "accountAudio": {
+    "viewsAria": "Vistas de áudio",
+    "recordings": "Gravações",
+    "soundscapes": "Paisagens sonoras",
+    "soundscapesCount": "{count, plural, one {# paisagem sonora} other {# paisagens sonoras}}",
+    "soundscapesLoadError": "As paisagens sonoras não puderam ser carregadas agora.",
+    "soundscapesEmptyTitle": "Ainda não há paisagens sonoras",
+    "soundscapesEmptyBody": "Uma paisagem sonora transforma gravações de campo em um retrato sonoro de 24 horas. Quando este perfil publicar uma, ela aparecerá aqui para todos ouvirem.",
+    "soundscapesBuildCta": "Crie uma com suas gravações"
+  },
+  "observationsManage": {
+    "metaTitle": "Gerenciar observações — {name}",
+    "title": "Gerenciar observações",
+    "description": "Adicione, edite e agrupe os avistamentos da natureza salvos neste perfil.",
+    "rowTitle": "Gerenciar observações",
+    "rowDescription": "Adicione, edite e agrupe os avistamentos deste perfil."
+  },
+  "audioManage": {
+    "metaTitle": "Gerenciar gravações — {name}",
+    "title": "Gerenciar gravações",
+    "description": "Envie, rotule e organize as gravações de campo salvas neste perfil.",
+    "rowTitle": "Gerenciar gravações",
+    "rowDescription": "Envie, rotule e organize as gravações deste perfil."
   },
   "equipment": {
     "metadataTitle": "Equipamentos — {name}",
@@ -993,6 +1033,7 @@
       "inputPlaceholder": "Email ou usuário do Bluesky",
       "inputAria": "Email ou usuário do Bluesky do membro",
       "invite": "Convidar",
+      "refresh": "Atualizar",
       "ownerHelp": "Insira um email para enviar um convite, ou um usuário do Bluesky para adicionar alguém na hora.",
       "adminHelp": "Adicione membros comuns pelo usuário do Bluesky, ou convide-os por email. Peça a um proprietário para adicionar outro administrador.",
       "locked": "Somente proprietários e administradores podem convidar ou remover membros.",
@@ -1098,6 +1139,7 @@
       "following": "Seguindo",
       "project": "Projetos",
       "observation": "Avistamentos",
+      "audio": "Gravações",
       "organization": "Organizações",
       "donation": "Doações",
       "post": "Publicações"
@@ -1107,7 +1149,8 @@
       "observation": "compartilhou um avistamento",
       "organization": "registrou uma organização",
       "donation": "fez uma doação",
-      "post": "compartilhou uma novidade"
+      "post": "compartilhou uma novidade",
+      "audio": "enviou gravações de campo"
     },
     "to": "para",
     "anonymous": "Alguém",
@@ -1129,6 +1172,11 @@
       "likesAcross": "{count, plural, one {# curtida nestes avistamentos} other {# curtidas nestes avistamentos}}",
       "commentsHeading": "Comentários sobre estes avistamentos",
       "commentOn": "em {species}"
+    },
+    "audioUpload": {
+      "recordings": "{count, plural, one {# gravação enviada} other {# gravações enviadas}}",
+      "browse": "Explorar gravações",
+      "recorderFallback": "Gravador de campo"
     },
     "profileCard": {
       "unnamed": "Conta sem nome",
@@ -1274,6 +1322,11 @@
         "labelWithRound": "BioBlitz {roundName} — mais observações",
         "description": "Venceu uma rodada do BioBlitz por mais observações."
       },
+      "bioblitz-most-images-points": {
+        "label": "BioBlitz — maior pontuação",
+        "labelWithRound": "BioBlitz {roundName} — maior pontuação",
+        "description": "Venceu uma rodada do BioBlitz com a maior pontuação."
+      },
       "bioblitz-best-picture": {
         "label": "BioBlitz — melhor foto",
         "labelWithRound": "BioBlitz {roundName} — melhor foto",
@@ -1357,7 +1410,24 @@
       "slotsFull": "As dez vagas estão ocupadas. Remova alguém antes de adicionar outra pessoa ou grupo.",
       "remove": "Remover do subsídio",
       "removing": "Removendo…",
-      "removeConfirm": "Remover “{name}” do subsídio? Os marcos e documentos são mantidos, mas essa conta perde o acesso ao painel do subsídio e a vaga fica livre."
+      "removeConfirm": "Remover “{name}” do subsídio? Os marcos e documentos são mantidos, mas essa conta perde o acesso ao painel do subsídio e a vaga fica livre.",
+      "dueDateLabel": "Prazo de {title}",
+      "overdue": "Atrasado",
+      "customMilestone": "Personalizado",
+      "milestoneNameLabel": "Nome do marco",
+      "milestoneNamePlaceholder": "ex.: Oficina de formação comunitária",
+      "addMilestone": "Adicionar marco",
+      "addingMilestone": "Adicionando…",
+      "addMilestoneDueLabel": "Prazo",
+      "addMilestoneHint": "Adiciona uma etapa só para este beneficiário, com nome, descrição e prazo próprios. O beneficiário a vê imediatamente na página do subsídio.",
+      "removeMilestone": "Remover {title}",
+      "removeMilestoneConfirm": "Remover “{title}” dos marcos deste beneficiário? O beneficiário deixará de vê-lo.",
+      "editMilestone": "Editar {title}",
+      "editSave": "Salvar",
+      "editCancel": "Cancelar",
+      "milestoneDescriptionLabel": "Descrição do marco",
+      "milestoneDescriptionPlaceholder": "Descreva o que esta etapa envolve (opcional)",
+      "programCopyHint": "Deixe o nome ou a descrição em branco para usar o texto padrão do programa."
     },
     "pages": {
       "hub": {
@@ -1423,17 +1493,20 @@
       "ended": "Terminada"
     },
     "observations": "{count, plural, one {# observação} other {# observações}}",
+    "points": "{points, plural, one {# ponto} other {# pontos}}",
     "ignored": "Ignorada",
     "counted": "Conta",
     "notCounted": "Não conta",
     "prize": {
       "most-observations": "Mais observações",
+      "highest-points": "Maior pontuação",
       "best-picture": "Melhor foto"
     },
     "openProfile": "Abrir perfil",
     "joined": "Entrou em {date}",
     "download": {
       "most-observations": "Kit de mais observações",
+      "highest-points": "Kit de maior pontuação",
       "best-picture": "Kit de melhor foto"
     },
     "ignore": "Ignorar",
@@ -1850,15 +1923,49 @@
   "observationsHub": {
     "ariaLabel": "Tipos de observação",
     "photos": "Fotos",
-    "audio": "Áudio",
-    "devices": "Dispositivos"
+    "audio": "Áudio"
   },
   "audiomoth": {
     "audioHub": {
       "title": "Áudio",
       "subtitle": "Envie gravações do cartão SD de um AudioMoth, organize-as em implantações e rotule o que você ouve — as observações de áudio vivem aqui.",
       "metaTitle": "Observações de áudio",
-      "metaDescription": "Envie gravações do AudioMoth, gerencie implantações, rotule espécies e explore paisagens sonoras dentro de Observações."
+      "metaDescription": "Envie gravações do AudioMoth, gerencie implantações, rotule espécies e explore paisagens sonoras dentro de Observações.",
+      "librarySubtitle": "Todas as implantações e gravações que você enviou, em um só lugar — reproduza, mova entre implantações, renomeie ou exclua.",
+      "yourRecordings": "Suas gravações",
+      "soundscapesTitle": "Áudio",
+      "soundscapesLede": "Gravações de campo e retratos sonoros de 24 horas de gravadores por todo o GainForest. Toque em um relógio para ouvir um lugar naquela hora do dia.",
+      "soundscapesEmptyTitle": "Nenhum áudio publicado ainda",
+      "soundscapesEmptyBody": "Quando alguém enviar gravações de campo, ou transformá-las em uma paisagem sonora, elas aparecerão aqui para todos ouvirem.",
+      "soundscapesEmptyCta": "Crie uma com suas gravações",
+      "publicPill": "Público",
+      "searchPlaceholder": "Pesquisar projetos ou paisagens sonoras",
+      "allProjects": "Todos os projetos",
+      "filterByProject": "Filtrar por projeto",
+      "sortBy": "Ordenar projetos",
+      "sortRecentlyAdded": "Adicionados recentemente",
+      "sortRecentlyRecorded": "Gravados recentemente",
+      "openProject": "Abrir projeto",
+      "openAccount": "Abrir perfil",
+      "noProject": "(sem projeto)",
+      "projectMeta": "{project} · {recorders, plural, one {# gravador} other {# gravadores}} · {recordings, number} gravações",
+      "soundscapeSlot": "Paisagem sonora",
+      "recordingsSlot": "Gravações",
+      "recorderFallback": "Gravador de campo",
+      "slotRecordings": "{count, number} gravações",
+      "soundscapeFallback": "Paisagem sonora",
+      "dateUnavailable": "Data indisponível",
+      "showMoreFromProject": "{count, plural, one {Mostrar mais # deste projeto} other {Mostrar mais # deste projeto}}",
+      "showFewer": "Mostrar menos",
+      "voiceKeyTitle": "Legenda dos grupos de vozes",
+      "noMatches": "Nenhum projeto corresponde a estes filtros.",
+      "clearFilters": "Limpar filtros",
+      "browseRecordings": "Explorar gravações",
+      "unknownOrganization": "Responsável pelo projeto"
+    },
+    "library": {
+      "signInTitle": "Entre para ver seus arquivos",
+      "signInBody": "Suas gravações e implantações enviadas aparecerão aqui quando você entrar."
     },
     "devicesHub": {
       "title": "Dispositivos"
@@ -2030,7 +2137,7 @@
     },
     "mainTabs": {
       "setup": "Configuração",
-      "deployments": "Implantação",
+      "library": "Gravações",
       "upload": "Enviar",
       "label": "Rotular",
       "identifications": "Identificações",
@@ -2119,15 +2226,10 @@
     },
     "deployments": {
       "intro": "As implantações registram onde e quando um AudioMoth foi colocado em campo. Cada uma reproduz um sinal acústico que ajusta o relógio, a localização e o ID de implantação do gravador.",
+      "sectionTitle": "Implantações",
+      "deploymentCount": "{count, plural, one {# implantação} other {# implantações}}",
       "createButton": "Criar implantação",
-      "signInTitle": "Entre para ver suas implantações",
-      "signInBody": "Suas implantações são salvas na sua conta. Entre para criá-las e gerenciá-las.",
-      "loadErrorTitle": "Não foi possível carregar as implantações",
-      "loadError": "Algo deu errado ao carregar suas implantações. Tente novamente.",
-      "emptyTitle": "Ainda não há implantações",
-      "emptyBody": "Crie sua primeira implantação para configurar um AudioMoth em campo com o sinal acústico.",
       "untitled": "Implantação sem nome",
-      "copyId": "Copiar ID de implantação",
       "delete": "Excluir implantação",
       "confirmDelete": "Confirmar exclusão",
       "cancel": "Cancelar",
@@ -2137,7 +2239,7 @@
       "siteNameLabel": "Nome do local (opcional)",
       "siteNamePlaceholder": "Trilha do rio, parcela 3…",
       "deploymentIdLabel": "ID de implantação",
-      "newId": "Gerar um novo ID",
+      "deploymentIdHint": "Gerado automaticamente para esta implantação.",
       "latitudeLabel": "Latitude",
       "longitudeLabel": "Longitude",
       "useLocation": "Usar minha localização atual",
@@ -2170,7 +2272,7 @@
       "deployedLabel": "Implantado",
       "equipmentLinked": "Unidade vinculada",
       "metadataTitle": "{name} — Implantação",
-      "detailBack": "Voltar às implantações",
+      "detailBack": "Voltar às gravações",
       "mapTitle": "Local da implantação",
       "equipmentUsedLabel": "AudioMoth utilizado",
       "protocolLabel": "Protocolo",
@@ -2179,8 +2281,8 @@
       "attachWaiting": "{count, plural, one {# gravação está sendo enviada em segundo plano — ela será anexada à implantação que você criar.} other {# gravações estão sendo enviadas em segundo plano — elas serão anexadas à implantação que você criar.}}",
       "attaching": "Anexando {count, plural, one {# gravação} other {# gravações}} à nova implantação…",
       "attachDone": "{count, plural, one {# gravação anexada à nova implantação.} other {# gravações anexadas à nova implantação.}}",
-      "attachPartial": "{moved} anexadas · {failed} não puderam ser movidas — elas ficam na pasta do cartão.",
-      "attachFailed": "O lote não pôde ser anexado — as gravações ficam na pasta do cartão."
+      "attachPartial": "{moved} anexadas · {failed} não puderam ser movidas — elas ficam na implantação do cartão.",
+      "attachFailed": "O lote não pôde ser anexado — as gravações ficam na implantação do cartão."
     },
     "upload": {
       "intro": "Insira o cartão SD de um AudioMoth e escolha-o abaixo. As gravações são reconhecidas pelo ID de implantação embutido em cada arquivo, mantidas em armazenamento de arquivo seguro e salvas na sua conta.",
@@ -2204,8 +2306,6 @@
       "unmatchedTitle": "Implantação não encontrada na sua conta",
       "noIdTitle": "Estas gravações não têm ID de implantação",
       "groupCount": "{count} gravações",
-      "assignLabel": "Vincular a uma implantação (opcional)",
-      "assignNone": "Sem implantação",
       "unreadable": "{count} arquivos não puderam ser lidos como gravações WAV e serão ignorados.",
       "moreFiles": "…e mais {count} gravações",
       "previewToggle": "Salvar prévias reproduzíveis",
@@ -2227,19 +2327,19 @@
       "errorSaveConnection": "O arquivo foi enviado, mas a internet caiu antes de terminarmos. Toque em “Tentar novamente os arquivos com falha”.",
       "errorSaveFailed": "O arquivo foi enviado, mas não pôde ser salvo na sua conta. Tente novamente.",
       "deploymentFallback": "Criado automaticamente ao enviar gravações do cartão SD.",
-      "groupNameLabel": "Dê um nome a este envio",
-      "groupNameHelp": "Estas gravações serão agrupadas com este nome no seu perfil, para você encontrá-las depois.",
+      "groupNameLabel": "Dê um nome a esta implantação",
+      "groupNameHelp": "Dê o nome da implantação de onde vieram estas gravações. Uma saída antiga também serve. Elas serão agrupadas com este nome no seu perfil para você encontrá-las depois.",
       "groupNamePlaceholder": "ex.: Borda da floresta — abril 2024",
-      "groupNameRequired": "Primeiro dê um nome a este envio.",
+      "groupNameRequired": "Primeiro dê um nome a esta implantação.",
       "folderTitle": "Onde estas gravações devem ficar?",
-      "folderExistingHelp": "Adicione-as a uma pasta que você já tem, para que tudo deste local fique junto.",
-      "folderResumedHelp": "Você já tem uma pasta com este nome, então estas gravações vão para ela em vez de começar uma nova.",
-      "folderExistingAction": "Escolher uma pasta existente",
-      "folderNewAction": "Nova pasta",
-      "folderSearchPlaceholder": "Busque nas suas pastas",
-      "folderNoMatch": "Nenhuma pasta corresponde à sua busca.",
-      "folderRequired": "Escolha uma pasta primeiro.",
-      "folderLoading": "Carregando suas pastas…",
+      "folderExistingHelp": "Adicione-as a uma implantação que você já tem, para que tudo deste local fique junto.",
+      "folderResumedHelp": "Você já tem uma implantação com este nome, então estas gravações vão para ela em vez de começar uma nova.",
+      "folderExistingAction": "Escolher uma implantação existente",
+      "folderNewAction": "Adicionar implantação",
+      "folderSearchPlaceholder": "Busque nas suas implantações",
+      "folderNoMatch": "Nenhuma implantação corresponde à sua busca.",
+      "folderRequired": "Escolha uma implantação primeiro.",
+      "folderLoading": "Carregando suas implantações…",
       "groupRemarks": "Criado ao enviar uma pasta de gravações.",
       "discovering": "Procurando gravações… {count} arquivos encontrados",
       "readFailed": "O cartão SD não pôde ser lido. Remova e insira novamente, depois tente de novo — ou arraste a pasta para esta página.",
@@ -3309,6 +3409,10 @@
     "allUploaded": "{count} enviadas · {size}"
   },
   "soundscape": {
+    "autoPublish": {
+      "note": "A paisagem sonora desta pasta está publicada no perfil e é atualizada conforme a análise continua.",
+      "view": "Abrir"
+    },
     "meta": {
       "title": "Paisagem sonora",
       "description": "Crie um relógio de paisagem sonora de 24 horas a partir das gravações de áudio já enviadas para a sua conta."
@@ -3347,12 +3451,12 @@
       "tooShort": "Curta demais para ser analisada (precisa de pelo menos {seconds} segundos)"
     },
     "groups": {
-      "title": "Pastas",
-      "hint": "Cada paisagem sonora é criada a partir de uma pasta de gravações — escolha a pasta com que trabalhar.",
-      "hintSingle": "Esta paisagem sonora é criada a partir da sua única pasta de gravações.",
+      "title": "Implantações",
+      "hint": "Cada paisagem sonora é criada a partir de uma implantação de gravações — escolha a implantação com que trabalhar.",
+      "hintSingle": "Esta paisagem sonora é criada a partir da sua única implantação de gravações.",
       "chip": "{name} · {count, plural, one {# gravação} other {# gravações}}",
-      "unassigned": "Sem pasta",
-      "unknown": "Pasta removida"
+      "unassigned": "Sem implantação",
+      "unknown": "Implantação removida"
     },
     "bands": {
       "rumble": "Ronco",
@@ -3457,38 +3561,43 @@
     }
   },
   "recordingFolders": {
+    "editAction": "Editar",
     "renameAction": "Renomear",
     "deleteAction": "Excluir",
-    "emptyFolder": "Ainda não há gravações nesta pasta.",
+    "emptyFolder": "Ainda não há gravações nesta implantação.",
     "moveAction": "Mover",
     "moveTitle": "Mover {count, plural, one {# gravação} other {# gravações}}",
-    "moveBody": "Escolha a pasta à qual estas gravações pertencem. Mover não muda mais nada — o áudio, sua análise e o que já foi compartilhado permanecem como estão.",
+    "moveBody": "Escolha a implantação à qual estas gravações pertencem. Mover não muda mais nada — o áudio, sua análise e o que já foi compartilhado permanecem como estão.",
     "moveProgress": "Movendo… {done} de {total}",
     "movePartial": "{count, plural, one {# gravação não pôde ser movida} other {# gravações não puderam ser movidas}}. Tente novamente.",
     "moveFailed": "Não foi possível mover as gravações. Tente novamente.",
-    "newFolderRemarks": "Criada ao mover gravações para uma nova pasta.",
-    "renameTitle": "Renomear pasta",
-    "renameBody": "Apenas o nome da pasta muda — as gravações dentro dela ficam onde estão, assim como tudo o que já foi compartilhado a partir delas.",
-    "nameLabel": "Nome da pasta",
+    "newFolderRemarks": "Criada ao mover gravações para uma nova implantação.",
+    "renameTitle": "Renomear implantação",
+    "renameBody": "Apenas o nome da implantação muda — as gravações dentro dela ficam onde estão, assim como tudo o que já foi compartilhado a partir delas.",
+    "nameLabel": "Nome da implantação",
     "namePlaceholder": "ex.: Margem do rio, estação seca",
-    "nameRequired": "Dê um nome à pasta.",
+    "nameRequired": "Dê um nome à implantação.",
     "save": "Salvar",
     "saving": "Salvando…",
     "cancel": "Cancelar",
-    "renameFailed": "Não foi possível renomear a pasta. Tente novamente.",
+    "renameFailed": "Não foi possível renomear a implantação. Tente novamente.",
+    "locationAction": "Definir localização",
+    "editLocationAction": "Editar localização",
+    "locationTitle": "Definir a localização da implantação",
+    "locationBody": "Onde “{name}” foi implantado?",
     "deleteTitle": "Excluir “{name}”?",
-    "deleteBody": "{count, plural, =0 {A pasta será excluída permanentemente. Isso não pode ser desfeito.} one {A pasta e a # gravação nela serão excluídas permanentemente — o arquivo original arquivado, a prévia reproduzível, o espectrograma, a análise e todas as identificações marcadas nela também são apagados. Isso não pode ser desfeito.} other {A pasta e as # gravações nela serão excluídas permanentemente — os arquivos originais arquivados, as prévias reproduzíveis, os espectrogramas, as análises e todas as identificações marcadas nelas também são apagados. Isso não pode ser desfeito.}}",
+    "deleteBody": "{count, plural, =0 {A implantação será excluída permanentemente. Isso não pode ser desfeito.} one {A implantação e a # gravação nela serão excluídas permanentemente — o arquivo original arquivado, a prévia reproduzível, o espectrograma, a análise e todas as identificações marcadas nela também são apagados. Isso não pode ser desfeito.} other {A implantação e as # gravações nela serão excluídas permanentemente — os arquivos originais arquivados, as prévias reproduzíveis, os espectrogramas, as análises e todas as identificações marcadas nelas também são apagados. Isso não pode ser desfeito.}}",
     "identificationsIncluded": "{count, plural, one {Isso inclui # identificação salva, que também será excluída.} other {Isso inclui # identificações salvas, que também serão excluídas.}}",
     "deleteProgress": "Excluindo… {done} de {total}",
-    "deletePartial": "{count, plural, one {# gravação não pôde ser excluída} other {# gravações não puderam ser excluídas}}, então a pasta foi mantida. Tente novamente.",
-    "deleteFailed": "Não foi possível excluir a pasta. Tente novamente.",
+    "deletePartial": "{count, plural, one {# gravação não pôde ser excluída} other {# gravações não puderam ser excluídas}}, então a implantação foi mantida. Tente novamente.",
+    "deleteFailed": "Não foi possível excluir a implantação. Tente novamente.",
     "addToProject": {
       "action": "Adicionar a um projeto",
       "title": "Adicionar “{name}” a um projeto",
-      "body": "A pasta entra na linha do tempo de evidências do projeto — as gravações ficam exatamente onde estão.",
+      "body": "A implantação entra na linha do tempo de evidências do projeto — as gravações ficam exatamente onde estão.",
       "noteLabel": "Nota (opcional)",
       "notePlaceholder": "O que estas gravações mostram?",
-      "defaultNote": "{count, plural, =0 {Uma pasta de gravador.} one {Uma pasta de gravador com # gravação.} other {Uma pasta de gravador com # gravações.}}",
+      "defaultNote": "{count, plural, =0 {Uma implantação de gravador.} one {Uma implantação de gravador com # gravação.} other {Uma implantação de gravador com # gravações.}}",
       "untitledProject": "Projeto sem título",
       "loading": "Carregando seus projetos…",
       "loadError": "Não foi possível carregar seus projetos. Tente novamente em instantes.",
@@ -3505,7 +3614,7 @@
       "viewProject": "Abrir o projeto",
       "close": "Fechar",
       "cancel": "Cancelar",
-      "failed": "Não foi possível adicionar a pasta. Tente novamente."
+      "failed": "Não foi possível adicionar a implantação. Tente novamente."
     }
   },
   "hypercerts": {

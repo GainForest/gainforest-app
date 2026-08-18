@@ -21,12 +21,12 @@ import {
   CpuIcon,
   DownloadIcon,
   FingerprintIcon,
+  FolderOpenIcon,
   HardDriveUploadIcon,
   InfoIcon,
   ListChecksIcon,
   Loader2Icon,
   TagsIcon,
-  MapPinIcon,
   MinusIcon,
   PlugZapIcon,
   SlidersHorizontalIcon,
@@ -37,6 +37,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { PictureHero } from "@/app/_components/PictureHero";
+import { AudioScopePills } from "@/app/observations/audio/_components/AudioScopePills";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -77,10 +78,11 @@ import {
   type FlashProgress,
 } from "@/app/_lib/audiomoth/flash";
 import Link from "next/link";
+import { useActingRepo } from "@/app/_lib/account-switcher";
 import { createEquipment, equipmentDetailPath, listEquipment, updateEquipment, type EquipmentItem } from "@/app/_lib/equipment";
 import { loadAppliedConfig, mergeSetupNotes, saveAppliedConfig, SETUP_NOTES_HEADER } from "@/app/_lib/audiomoth/setup-store";
-import { DeploymentsTab } from "./DeploymentsTab";
 import { UploadTab } from "./UploadTab";
+import { LibraryTab } from "./LibraryTab";
 import { LabelTab } from "./LabelTab";
 import { IdentificationsClient } from "@/app/identifications/_components/IdentificationsClient";
 import { SoundscapeClient } from "@/app/soundscape/_components/SoundscapeClient";
@@ -89,21 +91,34 @@ import { SoundscapeClient } from "@/app/soundscape/_components/SoundscapeClient"
 /* Types                                                               */
 /* ------------------------------------------------------------------ */
 
-type MainTabId = "setup" | "deployments" | "upload" | "label" | "identifications" | "soundscape";
+type MainTabId = "setup" | "library" | "upload" | "label" | "identifications" | "soundscape";
 
-/** Which Observations surface hosts this client: `audio` shows the recording
- *  tabs (deployments, upload, label, identifications, soundscape), `devices`
- *  shows only the USB setup tool. The old standalone AudioMoth page carried
- *  both; they now live as separate tabs of the Observations hub. */
-export type AudioMothSurface = "audio" | "devices";
+const AUDIO_MAIN_TAB_IDS = [
+  "library",
+  "upload",
+  "label",
+  "identifications",
+  "soundscape",
+  // Device setup is part of the personal recording workflow, not an explore
+  // surface: it drives your own hardware over USB. It used to be a peer of
+  // Photos and Audio in the media tab bar, which put a private tool next to
+  // two "browse what the network shared" views.
+  "setup",
+] as const;
 
-const AUDIO_MAIN_TAB_IDS = ["deployments", "upload", "label", "identifications", "soundscape"] as const;
+/** The workflow tab used when an unknown `?tab=` value slips through. The
+ *  bare /observations/audio URL (no tab) belongs to the network-wide
+ *  soundscape gallery, so every workflow tab keeps its query param. */
+const DEFAULT_AUDIO_TAB: MainTabId = "library";
 
-function resolveMainTab(tab: string | null, surface: AudioMothSurface): MainTabId {
-  if (surface === "devices") return "setup";
+function resolveMainTab(tab: string | null): MainTabId {
+  // The Deployment tab merged into Recordings — deployments are the folders
+  // that view groups recordings by, and new ones are created there. Old
+  // links keep landing on the merged view.
+  if (tab === "deployments") return "library";
   return (AUDIO_MAIN_TAB_IDS as readonly string[]).includes(tab ?? "")
     ? (tab as MainTabId)
-    : "deployments";
+    : DEFAULT_AUDIO_TAB;
 }
 
 type TabId = "device" | "configure" | "firmware";
@@ -322,19 +337,25 @@ function InfoRow({ label, value, dimmed }: { label: string; value: string; dimme
 
 export function AudioMothClient({
   sessionDid,
-  surface = "audio",
   mediaTabs,
+  showHero = true,
 }: {
   sessionDid: string | null;
-  /** Which Observations tab hosts this render — see {@link AudioMothSurface}. */
-  surface?: AudioMothSurface;
-  /** The Photos | Audio | Devices tab bar, rendered above the surface's own
-   *  tabs so all Observations media surfaces share one switcher. */
+  /** The Photos | Audio tab bar, rendered above the workflow tabs so every
+   *  Observations media surface shares one switcher. */
   mediaTabs?: ReactNode;
+  /** Drop the explore hero when the workspace is hosted inside another
+   *  surface (the account's audio manage page), which brings its own
+   *  heading. */
+  showHero?: boolean;
 }) {
   const t = useTranslations("common.audiomoth");
   const identificationsT = useTranslations("common.identifications");
   const soundscapeT = useTranslations("common.soundscape");
+  /* The acting account — the user's own, or the organization they switched
+     into. A connected AudioMoth is checked against, and registered in, that
+     account's equipment inventory. */
+  const acting = useActingRepo(sessionDid);
 
   const [supported, setSupported] = useState<boolean | null>(null);
   const [device, setDevice] = useState<AudioMothDevice | null>(null);
@@ -342,19 +363,20 @@ export function AudioMothClient({
   const [reading, setReading] = useState<LiveReading | null>(null);
   const router = useRouter();
   const searchParams = useSearchParams();
-  const [mainTab, setMainTab] = useState<MainTabId>(() => resolveMainTab(searchParams.get("tab"), surface));
+  const [mainTab, setMainTab] = useState<MainTabId>(() => resolveMainTab(searchParams.get("tab")));
   // Links elsewhere in the app point at `/observations/audio?tab=…`; when one
   // of them lands on this already-mounted page, follow the query change.
   useEffect(() => {
-    setMainTab(resolveMainTab(searchParams.get("tab"), surface));
-  }, [searchParams, surface]);
+    setMainTab(resolveMainTab(searchParams.get("tab")));
+  }, [searchParams]);
   const mainTabNavRef = useRef<HTMLElement>(null);
   const selectMainTab = useCallback((id: MainTabId) => {
     setMainTab(id);
     const params = new URLSearchParams(searchParams.toString());
-    if (id === "deployments" || id === "setup") params.delete("tab");
-    else params.set("tab", id);
-    router.replace(params.size > 0 ? `?${params.toString()}` : "?", { scroll: false });
+    // Every workflow tab keeps its query param — the bare URL (no tab) shows
+    // the network-wide soundscape gallery, not this workflow.
+    params.set("tab", id);
+    router.replace(`?${params.toString()}`, { scroll: false });
   }, [router, searchParams]);
 
   // Keep the selected item in view when the compact tab bar scrolls on phones
@@ -531,7 +553,8 @@ export function AudioMothClient({
   /* ---------------- equipment registration ---------------- */
 
   useEffect(() => {
-    if (!info || !sessionDid) {
+    const actingDid = acting.did;
+    if (!info || !actingDid) {
       setEquipmentStatus({ status: "unknown" });
       return;
     }
@@ -542,7 +565,7 @@ export function AudioMothClient({
 
     (async () => {
       try {
-        const items = await listEquipment(sessionDid);
+        const items = await listEquipment(actingDid);
         if (cancelled) return;
         const existing = items.find((item) => item.assetId.trim().toUpperCase() === info.id.toUpperCase());
         setEquipmentStatus(existing ? { status: "registered", item: existing } : { status: "unregistered" });
@@ -554,7 +577,7 @@ export function AudioMothClient({
     return () => {
       cancelled = true;
     };
-  }, [info, sessionDid, recheckCounter]);
+  }, [info, acting.did, recheckCounter]);
 
   /** Compose the auto-generated notes block written into equipment records. */
   const composeNotesBlock = useCallback(
@@ -595,21 +618,24 @@ export function AudioMothClient({
         /* battery is nice-to-have */
       }
       const name = `AudioMoth ${info.id.slice(-4)}`;
-      await createEquipment({
-        assetId: info.id,
-        name,
-        category: "audiomoth",
-        status: "storage",
-        acquiredAt: new Date().toISOString().slice(0, 10),
-        notes: composeNotesBlock(info, battery, null),
-      });
+      await createEquipment(
+        {
+          assetId: info.id,
+          name,
+          category: "audiomoth",
+          status: "storage",
+          acquiredAt: new Date().toISOString().slice(0, 10),
+          notes: composeNotesBlock(info, battery, null),
+        },
+        acting.repo ? { repo: acting.repo } : undefined,
+      );
       requestSetupRecheck();
     } catch {
       /* the status chip simply stays on "save" — the user can retry */
     } finally {
       setSavingEquipment(false);
     }
-  }, [composeNotesBlock, device, info, requestSetupRecheck, sessionDid]);
+  }, [acting.repo, composeNotesBlock, device, info, requestSetupRecheck, sessionDid]);
 
   /* ---------------- auto-setup wizard ---------------- */
 
@@ -789,34 +815,41 @@ export function AudioMothClient({
         const now = new Date();
         const notesBlock = composeNotesBlock(workingInfo, battery, now);
 
-        const items = await listEquipment(sessionDid);
+        const items = await listEquipment(acting.did ?? sessionDid);
         const deviceId = workingInfo.id;
         const existing = items.find((item) => item.assetId.trim().toUpperCase() === deviceId.toUpperCase());
 
         if (existing) {
           /* Refresh the setup block in the notes, keeping handwritten notes intact */
-          await updateEquipment(existing, {
-            assetId: existing.assetId,
-            name: existing.name,
-            category: existing.category,
-            status: existing.status,
-            currentOwner: existing.currentOwner,
-            projectSite: existing.projectSite,
-            geo: existing.geo,
-            acquiredAt: existing.acquiredAt,
-            notes: mergeSetupNotes(existing.notes, notesBlock),
-          });
+          await updateEquipment(
+            existing,
+            {
+              assetId: existing.assetId,
+              name: existing.name,
+              category: existing.category,
+              status: existing.status,
+              currentOwner: existing.currentOwner,
+              projectSite: existing.projectSite,
+              geo: existing.geo,
+              acquiredAt: existing.acquiredAt,
+              notes: mergeSetupNotes(existing.notes, notesBlock),
+            },
+            existing.did !== sessionDid ? { repo: existing.did } : undefined,
+          );
           setStep("equipment", { status: "done", detail: t("autoSetup.equipmentUpdated", { name: existing.name }) });
         } else {
           const name = `AudioMoth ${deviceId.slice(-4)}`;
-          await createEquipment({
-            assetId: deviceId,
-            name,
-            category: "audiomoth",
-            status: "storage",
-            acquiredAt: now.toISOString().slice(0, 10),
-            notes: notesBlock,
-          });
+          await createEquipment(
+            {
+              assetId: deviceId,
+              name,
+              category: "audiomoth",
+              status: "storage",
+              acquiredAt: now.toISOString().slice(0, 10),
+              notes: notesBlock,
+            },
+            acting.repo ? { repo: acting.repo } : undefined,
+          );
           setStep("equipment", { status: "done", detail: t("autoSetup.equipmentSaved", { name }) });
         }
       }
@@ -826,7 +859,7 @@ export function AudioMothClient({
     }
 
     finish(false);
-  }, [adoptDevice, composeNotesBlock, device, info, requestSetupRecheck, sessionDid, t]);
+  }, [acting.did, acting.repo, adoptDevice, composeNotesBlock, device, info, requestSetupRecheck, sessionDid, t]);
 
   const closeWizard = useCallback(() => {
     setWizard((current) => (current?.running ? current : null));
@@ -847,63 +880,67 @@ export function AudioMothClient({
     label: string;
     Icon: typeof ClockIcon;
   }> = [
-    { id: "deployments", label: t("mainTabs.deployments"), Icon: MapPinIcon },
+    { id: "library", label: t("mainTabs.library"), Icon: FolderOpenIcon },
     { id: "upload", label: t("mainTabs.upload"), Icon: HardDriveUploadIcon },
     { id: "label", label: t("mainTabs.label"), Icon: TagsIcon },
     { id: "identifications", label: t("mainTabs.identifications"), Icon: ListChecksIcon },
     { id: "soundscape", label: t("mainTabs.soundscape"), Icon: AudioWaveformIcon },
+    { id: "setup", label: t("devicesHub.title"), Icon: UsbIcon },
   ];
 
   return (
     <div>
-      <PictureHero
-        compact
-        lightSrc="/images/explore/explore-hero-light@2x.webp"
-        darkSrc="/images/explore/explore-hero-dark@2x.webp"
-        title={surface === "devices" ? t("devicesHub.title") : t("audioHub.title")}
-        lede={
-          surface === "devices"
-            ? t("subtitle")
-            : mainTab === "label"
-              ? t("label.subtitle")
-              : mainTab === "identifications"
-                ? identificationsT("subtitle")
-                : mainTab === "soundscape"
-                  ? soundscapeT("hero.description")
-                  : t("audioHub.subtitle")
-        }
-      />
-      <div className="mx-auto flex w-full max-w-7xl flex-col gap-6 px-4 sm:px-6">
-      {/* Photos | Audio | Devices — shared across the Observations surfaces */}
-      {mediaTabs}
+      {showHero ? (
+        <PictureHero
+          compact
+          lightSrc="/images/explore/explore-hero-light@2x.webp"
+          darkSrc="/images/explore/explore-hero-dark@2x.webp"
+          title={t("audioHub.title")}
+          actions={<AudioScopePills active="yours" />}
+          lede={
+            mainTab === "setup"
+              ? t("subtitle")
+              : mainTab === "library"
+                ? t("audioHub.librarySubtitle")
+                : mainTab === "label"
+                  ? t("label.subtitle")
+                  : mainTab === "identifications"
+                    ? identificationsT("subtitle")
+                    : mainTab === "soundscape"
+                      ? soundscapeT("hero.description")
+                      : t("audioHub.subtitle")
+          }
+        />
+      ) : null}
+      {/* Photos | Audio — shared across the Observations surfaces */}
+      {mediaTabs ? <div className="relative z-10 mx-auto mt-6 max-w-6xl px-6">{mediaTabs}</div> : null}
 
-      {/* Recording workflow tabs (Audio surface only) */}
-      {surface === "audio" && (
-      <nav
-        ref={mainTabNavRef}
-        className="flex w-full max-w-full gap-1 self-start overflow-x-auto overscroll-x-contain rounded-full border border-border bg-card/70 p-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden lg:w-auto lg:overflow-visible"
-        aria-label={t("title")}
-      >
-        {mainTabs.map(({ id, label, Icon }) => (
-          <button
-            key={id}
-            type="button"
-            data-main-tab={id}
-            onClick={() => selectMainTab(id)}
-            className={cn(
-              "flex shrink-0 items-center justify-center gap-2 whitespace-nowrap rounded-full px-3 py-2 text-sm font-medium transition-colors lg:px-4",
-              mainTab === id ? "bg-primary text-primary-foreground shadow-sm" : "text-muted-foreground hover:text-foreground",
-            )}
-            aria-current={mainTab === id ? "page" : undefined}
-          >
-            <Icon className="size-4" />
-            {label}
-          </button>
-        ))}
-      </nav>
-      )}
+      {/* Personal recording workflow tabs */}
+      <div className="relative z-10 mx-auto max-w-6xl px-6">
+        <nav
+          ref={mainTabNavRef}
+          className="mt-5 flex w-full max-w-full gap-1 self-start overflow-x-auto overscroll-x-contain rounded-full border border-border bg-card/70 p-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden lg:w-auto lg:overflow-visible"
+          aria-label={t("title")}
+        >
+          {mainTabs.map(({ id, label, Icon }) => (
+            <button
+              key={id}
+              type="button"
+              data-main-tab={id}
+              onClick={() => selectMainTab(id)}
+              className={cn(
+                "flex shrink-0 items-center justify-center gap-2 whitespace-nowrap rounded-full px-3 py-2 text-sm font-medium transition-colors lg:px-4",
+                mainTab === id ? "bg-primary text-primary-foreground shadow-sm" : "text-muted-foreground hover:text-foreground",
+              )}
+              aria-current={mainTab === id ? "page" : undefined}
+            >
+              <Icon className="size-4" />
+              {label}
+            </button>
+          ))}
+        </nav>
 
-      {mainTab === "deployments" && <DeploymentsTab sessionDid={sessionDid} />}
+        {mainTab === "library" && <LibraryTab sessionDid={sessionDid} />}
 
       {mainTab === "upload" && <UploadTab sessionDid={sessionDid} />}
 

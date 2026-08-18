@@ -148,7 +148,11 @@ export async function listDeploymentEvents(
   return items;
 }
 
-// ── Write (through the session-gated manage proxy, own repo only) ──────────
+// ── Write (through the session-gated manage proxy; the signed-in repo by
+// default, an organization's repo when a `repo` option is given) ──────────
+
+/** Write target: the signed-in account by default, an organization's repo when given. */
+export type DeploymentEventWriteOptions = { repo?: string | null };
 
 type MutationResult = { uri: string; cid: string };
 
@@ -220,11 +224,15 @@ function stripEquipmentRemark(remarks: string | undefined): string {
   return (remarks ?? "").replace(/\s*Equipment record:\s*at:\/\/\S+/g, "").trim();
 }
 
-/** The only two fields a deployment lets you change after the chime: the site
- *  name and the linked AudioMoth. Everything else is fixed to the chime. */
+/** What a deployment lets you change after the chime: the site name, the
+ *  linked AudioMoth, and — as an explicit manual override — the recorded
+ *  location. The chime's ID and date stay fixed. */
 export type DeploymentEventEdit = {
   siteName?: string;
   equipment?: { name: string; assetId: string; uri: string } | null;
+  /** Manual location override; null clears the stored coordinates, while an
+   *  absent value carries them over. */
+  location?: { lat: number; lon: number } | null;
 };
 
 function equipmentUsedLabel(equipment: DeploymentEventEdit["equipment"]): string {
@@ -234,10 +242,11 @@ function equipmentUsedLabel(equipment: DeploymentEventEdit["equipment"]): string
 }
 
 /**
- * Rebuild an event record changing only the name (`locality`) and the linked
- * equipment (`equipmentUsed` + the `Equipment record:` remark). The chime
- * identity — eventID, eventDate, coordinates, protocol — is carried over
- * untouched from the stored record.
+ * Rebuild an event record changing only the name (`locality`), the linked
+ * equipment (`equipmentUsed` + the `Equipment record:` remark) and — when the
+ * edit carries one — the manually overridden coordinates. The chime identity
+ * — eventID, eventDate, protocol — is carried over untouched from the stored
+ * record.
  */
 export function buildUpdatedDeploymentEventRecord(
   item: DeploymentEventItem,
@@ -252,8 +261,13 @@ export function buildUpdatedDeploymentEventRecord(
     equipmentUsed: equipmentUsedLabel(edit.equipment),
     createdAt: item.createdAt,
   };
-  if (item.decimalLatitude) record.decimalLatitude = item.decimalLatitude;
-  if (item.decimalLongitude) record.decimalLongitude = item.decimalLongitude;
+  if (edit.location) {
+    record.decimalLatitude = edit.location.lat.toFixed(6);
+    record.decimalLongitude = edit.location.lon.toFixed(6);
+  } else if (edit.location === undefined) {
+    if (item.decimalLatitude) record.decimalLatitude = item.decimalLatitude;
+    if (item.decimalLongitude) record.decimalLongitude = item.decimalLongitude;
+  }
   const site = edit.siteName?.trim();
   if (site) record.locality = site;
   const remarks = [
@@ -274,12 +288,18 @@ export function applyDeploymentEdit(
   cid: string,
 ): DeploymentEventItem {
   const record = buildUpdatedDeploymentEventRecord(item, edit);
-  return { ...item, ...record, uri: item.uri, rkey: item.rkey, did: item.did, cid };
+  const next = { ...item, ...record, uri: item.uri, rkey: item.rkey, did: item.did, cid };
+  if (edit.location === null) {
+    delete next.decimalLatitude;
+    delete next.decimalLongitude;
+  }
+  return next;
 }
 
 export async function updateDeploymentEvent(
   item: DeploymentEventItem,
   edit: DeploymentEventEdit,
+  options?: DeploymentEventWriteOptions,
 ): Promise<MutationResult> {
   return postMutation<MutationResult>(
     {
@@ -288,28 +308,37 @@ export async function updateDeploymentEvent(
       rkey: item.rkey,
       swapRecord: item.cid,
       record: buildUpdatedDeploymentEventRecord(item, edit),
+      ...(options?.repo ? { repo: options.repo } : {}),
     },
     "Could not update the deployment.",
   );
 }
 
-export async function createDeploymentEvent(draft: DeploymentEventDraft): Promise<MutationResult> {
+export async function createDeploymentEvent(
+  draft: DeploymentEventDraft,
+  options?: DeploymentEventWriteOptions,
+): Promise<MutationResult> {
   return postMutation<MutationResult>(
     {
       operation: "createRecord",
       collection: DWC_EVENT_COLLECTION,
       record: buildDeploymentEventRecord(draft),
+      ...(options?.repo ? { repo: options.repo } : {}),
     },
     "Could not save the deployment.",
   );
 }
 
-export async function deleteDeploymentEvent(item: DeploymentEventItem): Promise<void> {
+export async function deleteDeploymentEvent(
+  item: DeploymentEventItem,
+  options?: DeploymentEventWriteOptions,
+): Promise<void> {
   await postMutation<{ success?: boolean }>(
     {
       operation: "deleteRecord",
       collection: DWC_EVENT_COLLECTION,
       rkey: item.rkey,
+      ...(options?.repo ? { repo: options.repo } : {}),
     },
     "Could not delete the deployment.",
   );

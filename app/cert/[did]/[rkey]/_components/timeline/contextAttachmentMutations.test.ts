@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import type { LeafletLinearDocument } from "@/app/_lib/leaflet-richtext";
 import {
   ATTACHMENT_COLLECTION,
   ATTACHMENT_MAX_FILE_BYTES,
@@ -108,6 +109,77 @@ describe("context attachment mutation helpers", () => {
         },
       ],
     });
+  });
+
+  it("stores the WYSIWYG document as the description, formatting intact", () => {
+    const textDocument: LeafletLinearDocument = {
+      $type: "pub.leaflet.pages.linearDocument",
+      blocks: [
+        {
+          $type: "pub.leaflet.pages.linearDocument#block",
+          block: { $type: "pub.leaflet.blocks.header", level: 2, plaintext: "Planting week" },
+        },
+        {
+          $type: "pub.leaflet.pages.linearDocument#block",
+          block: {
+            $type: "pub.leaflet.blocks.text",
+            plaintext: "All 50 saplings survived.",
+            facets: [
+              {
+                index: { byteStart: 4, byteEnd: 6 },
+                features: [{ $type: "pub.leaflet.richtext.facet#bold" }],
+              },
+            ],
+          },
+        },
+        {
+          $type: "pub.leaflet.pages.linearDocument#block",
+          block: {
+            $type: "pub.leaflet.blocks.unorderedList",
+            children: [
+              { content: { $type: "pub.leaflet.blocks.text", plaintext: "Watered daily" } },
+            ],
+          },
+        },
+      ],
+    };
+
+    const record = buildStubContextAttachmentRecord({
+      draft: draft({
+        title: "Planting week",
+        contentType: "update",
+        contents: [],
+        contextualSubjects: [],
+        note: "plain fallback that must lose",
+        textDocument,
+      }),
+      activitySubject,
+      createdAt: "2026-01-02T03:04:05.000Z",
+    });
+
+    expect(record.description).toEqual(textDocument);
+  });
+
+  it("treats a whitespace-only WYSIWYG document as empty", () => {
+    expect(() =>
+      buildStubContextAttachmentRecord({
+        draft: draft({
+          contentType: "update",
+          contents: [],
+          contextualSubjects: [],
+          textDocument: {
+            $type: "pub.leaflet.pages.linearDocument",
+            blocks: [
+              {
+                $type: "pub.leaflet.pages.linearDocument#block",
+                block: { $type: "pub.leaflet.blocks.text", plaintext: "   " },
+              },
+            ],
+          },
+        }),
+        activitySubject,
+      }),
+    ).toThrow(new AttachmentMutationInputError("empty-content"));
   });
 
   it("blocks drafts with neither content items nor a text body", () => {

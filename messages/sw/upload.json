@@ -652,7 +652,7 @@
   "observations": {
     "quickAdd": {
       "title": "Ongeza uchunguzi",
-      "description": "Picha, au kadi nzima kutoka kwenye kinasa sauti.",
+      "description": "Uchunguzi ni ulichokiona au kukisikia katika maumbile, pamoja na mahali na wakati. Ongeza picha, au rekodi zote kutoka kadi ya AudioMoth.",
       "close": "Funga",
       "back": "Rudi",
       "uploadingForLabel": "Inapakia kwa",
@@ -753,9 +753,9 @@
         "recordingFromLabel": "Imerekodiwa na",
         "deviceNew": "mpya",
         "newDeviceNote": "{device} bado haipo kwenye orodha yako ya vifaa — tutaiongeza upakiaji huu utakapoanza.",
-        "folderLabel": "Folda ya rekodi",
+        "folderLabel": "Uwekaji",
         "folderAutoMatched": "{name} — imetambuliwa kutoka kwenye kadi",
-        "folderNew": "Folda mpya · {name}",
+        "folderNew": "Ongeza uwekaji · {name}",
         "noDeployments": "Kifaa hiki hakina usambazaji — kundi litaendelea kupakiwa na kuambatishwa kwa ule utakaounda.",
         "setUpDeployment": "Weka mmoja ↗",
         "defaultFolderName": "Rekodi {date}",
@@ -764,15 +764,12 @@
         "backgroundNote": "{count, plural, one {Rekodi # inapakiwa chinichini} other {Rekodi # zinapakiwa chinichini}}",
         "viewTray": "Tazama",
         "handedOffTitle": "{count, plural, one {Rekodi # inapakiwa} other {Rekodi # zinapakiwa}}",
-        "handedOffBody": "Zinaendelea kupakiwa chinichini unapovinjari. Unaweza kufunga hii — maendeleo yako kwenye paneli ya upakiaji.",
-        "handedOffAddMore": "Ongeza zaidi",
-        "handedOffView": "Tazama maendeleo",
+        "handedOffBody": "Zinaendelea kupakiwa chinichini unapovinjari. Fuatilia maendeleo wakati wowote kwenye paneli ya upakiaji.",
         "equipmentNote": "Imesajiliwa kiotomatiki rekodi zake zilipopakiwa kupitia Ongeza uchunguzi.",
         "dedupChecking": "Inakagua rekodi zilizopo tayari kwenye akaunti hii…",
         "dedupSkipped": "{count, plural, one {Rekodi # tayari ipo kwenye akaunti hii — imerukwa} other {Rekodi # tayari zipo kwenye akaunti hii — zimerukwa}}",
         "allUploaded": "Kila kitu kwenye kadi hii tayari kimepakiwa",
-        "matchedCount": "{count, plural, one {Rekodi # ililingana na usambazaji wake kutoka kwenye kadi} other {Rekodi # zililingana na usambazaji wake kutoka kwenye kadi}}",
-        "eventOption": "Usambazaji · {name}"
+        "matchedCount": "{count, plural, one {Rekodi # ililingana na usambazaji wake kutoka kwenye kadi} other {Rekodi # zililingana na usambazaji wake kutoka kwenye kadi}}"
       }
     },
     "csvUpload": {
@@ -1095,7 +1092,7 @@
   },
   "settings": {
     "organizationTitle": "Mipangilio ya shirika",
-    "organizationDescription": "Unganisha mawakala wa AI na simamia zana za shirika hili.",
+    "organizationDescription": "Simamia watu, wasifu na zana za shirika hili.",
     "personalTitle": "Mipangilio",
     "personalDescription": "Dhibiti viungo vya akaunti, usalama na zana za kuhamisha data.",
     "dataCouncil": {
@@ -1124,8 +1121,6 @@
       },
       "addLabel": "Ongeza kwenye Baraza la Data"
     },
-    "membersMoved": "Wanachama, majukumu na Baraza la Data vipo kwenye kichupo cha Wanachama.",
-    "openMembers": "Fungua Wanachama",
     "orgAgentKeysHint": "Funguo ni za binafsi: funguo unayotengeneza hapa ni ya akaunti yako na inamruhusu wakala wako wa AI kufanya kazi katika shirika hili kupitia uanachama wako. Ukiondoka kwenye shirika, funguo zako zinapoteza ufikiaji huo."
   },
   "dashboardClient": {
@@ -1158,7 +1153,7 @@
       "expandBio": "Onyesha wasifu kamili",
       "collapseBio": "Kunja wasifu",
       "addType": "Ongeza aina",
-      "addCountry": "Ongeza nchi",
+      "addLocation": "Ongeza mahali",
       "sinceDate": "Tangu {date}",
       "invalidDate": "Tarehe si sahihi",
       "addStartDate": "Ongeza tarehe ya kuanza",
@@ -1181,7 +1176,6 @@
     "errors": {
       "nameRequired": "Ongeza jina kabla ya kuhifadhi.",
       "invalidWebsite": "Weka anwani halali ya tovuti.",
-      "invalidCountry": "Chagua nchi kutoka kwenye orodha.",
       "saveFailed": "Imeshindikana kuhifadhi. Jaribu tena."
     },
     "modals": {
@@ -1226,6 +1220,28 @@
           "alt": "Maporomoko ya maji katika msitu wa tropiki"
         }
       }
+    },
+    "locationEditor": {
+      "title": "Mahali pa shirika",
+      "description": "Onyesha mahali shirika lako lilipo.",
+      "descriptionWithCurrent": "Kwa sasa: {location}.",
+      "searchPlaceholder": "Tafuta anwani, mji, au nchi",
+      "noResults": "Hakuna mahali palipopatikana.",
+      "searchUnavailable": "Utafutaji wa mahali haupatikani kwa sasa.",
+      "enterCoordinates": "Weka kuratibu badala yake",
+      "searchInstead": "Tafuta mahali badala yake",
+      "latitude": "Latitudo",
+      "longitude": "Longitudo",
+      "invalidCoordinates": "Latitudo lazima iwe kati ya -90 na 90, longitudo kati ya -180 na 180.",
+      "dragHint": "Buruta alama ili kurekebisha mahali.",
+      "countryHint": "Huchapishwa kama nchi nzima. Tafuta mahali ili kuwa mahususi zaidi.",
+      "approximateLabel": "Shiriki mahali pa makadirio tu",
+      "approximateHint": "Huchapisha eneo la ~{radius} km badala ya nukta kamili.",
+      "approximateHintWithLabel": "Huchapisha eneo la ~{radius} km badala ya nukta kamili, likionyeshwa kama “{label}”.",
+      "remove": "Ondoa mahali",
+      "save": "Hifadhi mahali",
+      "savingLocation": "Inahifadhi mahali…",
+      "saveFailed": "Imeshindwa kuhifadhi mahali. Tafadhali jaribu tena."
     }
   },
   "dashboardModals": {
@@ -1285,6 +1301,11 @@
       "description": "Acha tupu na tutaunda anwani ya kurejesha kutoka barua pepe ya akaunti yako.",
       "placeholder": "rejesha@example.com",
       "invalid": "Weka barua pepe halali."
+    },
+    "location": {
+      "label": "Mahali",
+      "basedIn": "Iko",
+      "empty": "Weka mahali"
     }
   }
 }

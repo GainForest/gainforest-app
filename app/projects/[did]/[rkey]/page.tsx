@@ -6,7 +6,7 @@ import { getTranslations } from "next-intl/server";
 import { ArrowLeftIcon, ArrowUpRightIcon, FolderKanbanIcon } from "lucide-react";
 import { fetchRecordByUri, fetchRecordDetail, isAccountPubliclyListed, type RecordDetail } from "../../../_lib/indexer";
 import { NOINDEX_ROBOTS } from "../../../_lib/seo-metadata";
-import { getPdsRecord, isPdsBlobUrl } from "../../../_lib/pds";
+import { dropDeletedRecordUris, getPdsRecord, isPdsBlobUrl } from "../../../_lib/pds";
 import { projectMediaTransitionStyle } from "../../../_lib/view-transition";
 import { RichText } from "../../../_components/RichText";
 import { AutoRefresh } from "./_components/AutoRefresh";
@@ -209,10 +209,13 @@ export default async function ProjectDetailPage({
   const certUri = record.bumicertUris[0] ?? null;
   if (certUri) {
     const certRkey = rkeyFromUri(certUri);
-    const [routeData, origin, projectDetail] = await Promise.all([
+    const [routeData, origin, projectDetail, liveProjectLocationUris] = await Promise.all([
       certRkey ? loadBumicertRouteData(did, certRkey, urlIdentifier) : Promise.resolve(null),
       getRequestOrigin(),
       loadProjectStory(did, rkey, record.atUri),
+      // The sidebar map shows the PROJECT's own place — not the Cert's — and a
+      // deleted place is treated as if it never existed ("No location set").
+      dropDeletedRecordUris(record.locationUri ? [record.locationUri] : []),
     ]);
 
     if (routeData) {
@@ -244,6 +247,7 @@ export default async function ProjectDetailPage({
             // are the project's evidence too.
             projectDatasetUris={record.datasetUris}
             projectDetail={projectDetail}
+            projectLocationUri={liveProjectLocationUris[0] ?? null}
             // Like + comment target the project (collection) record, so the count
             // matches the activity feed (which folds Certs into their project).
             engagementSubjectUri={record.atUri}

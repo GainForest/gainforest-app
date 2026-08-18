@@ -281,7 +281,7 @@
       "eyebrow": "Changamoto ya BioBlitz ya Wiki",
       "titlePrefix": "Changamoto ya",
       "titleEmphasis": "BioBlitz",
-      "description": "Mashindano ya kirafiki ya kila wiki ya kurekodi bioanuwai ya nje. Ongeza uchunguzi wenye picha ulizopakia mwenyewe. Watu na mimea ya vyungu hazihesabiki.",
+      "description": "Mashindano ya kirafiki ya kila wiki ya kurekodi bioanuwai ya nje kwa picha ulizopakia mwenyewe. Kuanzia Raundi 8, picha za wanyama zina pointi 2, picha za mimea pointi 1, na kutaja spishi kunaongeza pointi 0.5 za ziada. Watu na mimea ya vyungu hazihesabiki.",
       "program": "Sehemu ya programu ya Klarna AI for Climate Resilience, pamoja na GainForest."
     },
     "rsvp": {
@@ -340,7 +340,7 @@
           "winners": {
             "title": "4. Uchaguzi wa washindi",
             "paragraphs": {
-              "p1": "Zawadi ya Uchunguzi Mwingi Zaidi inategemea idadi kubwa zaidi ya uchunguzi halali katika raundi. Zawadi ya Picha Bora inachaguliwa kwa vigezo vilivyoelezwa kwenye ukurasa wa BioBlitz, ikiwemo ubora wa picha, mada na ushiriki wa jamii inapofaa.",
+              "p1": "Kuanzia Raundi 8, Zawadi ya Pointi za Juu Zaidi inategemea jumla ya alama za juu zaidi za uchunguzi halali katika raundi: kila picha halali ya mnyama ina pointi 2, kila picha halali ya mmea ina pointi 1, na yoyote hupata pointi 0.5 za ziada wakati spishi imetambuliwa badala ya kuachwa bila kutambuliwa. Katika raundi za awali, zawadi hii ilitegemea idadi kubwa zaidi ya uchunguzi halali. Zawadi ya Picha Bora inachaguliwa kwa vigezo vilivyoelezwa kwenye ukurasa wa BioBlitz, ikiwemo ubora wa picha, mada na ushiriki wa jamii inapofaa.",
               "p2": "GainForest inaweza kukagua mawasilisho, kutatua sare, kurekebisha makosa ya kuhesabu na kuondoa mawasilisho yasiyo halali. Maamuzi ni ya mwisho kwa kiwango kinachoruhusiwa na sheria."
             }
           },
@@ -504,6 +504,10 @@
         "title": "Uoni mwingi zaidi",
         "blurb": "Kwa mkusanyaji mwenye uoni halali mwingi zaidi katika raundi."
       },
+      "highestPoints": {
+        "title": "Pointi za juu zaidi",
+        "blurb": "Kwa mkusanyaji mwenye alama za juu zaidi katika raundi: pointi 2 kwa picha ya mnyama, 1 kwa picha ya mmea, +0.5 ukitaja spishi."
+      },
       "bestPicture": {
         "title": "Picha bora",
         "blurb": "Kwa picha ya asili inayovutia zaidi ya wiki, iliyochaguliwa na timu."
@@ -522,7 +526,7 @@
         },
         "review": {
           "title": "Angalia jina la spishi",
-          "blurb": "Thibitisha au sahihisha jina lililopendekezwa — maarifa yako ni muhimu."
+          "blurb": "Thibitisha au sahihisha jina lililopendekezwa — kuanzia Raundi 8, spishi iliyotajwa hupata pointi 0.5 za ziada."
         }
       },
       "proof": {
@@ -536,6 +540,7 @@
       "title": "Ubao wa raundi hii",
       "live": "Moja kwa moja",
       "subtitleLive": "Nani anaongoza kwa uchunguzi halali wenye picha sasa hivi.",
+      "subtitleLivePoints": "Nani anaongoza kwa pointi kwa uchunguzi halali wenye picha sasa hivi.",
       "subtitleEnded": "Matokeo ya mwisho ya raundi hii.",
       "subtitleUpcoming": "Kuwa wa kwanza kwenye ubao raundi itakapoanza.",
       "subtitleAll": "Uchunguzi halali wenye picha mwingi zaidi katika changamoto nzima.",
@@ -545,6 +550,8 @@
       },
       "leader": "Anaongoza",
       "observations": "{count, plural, one {# uoni} other {# uoni}}",
+      "points": "pointi {points}",
+      "pointsFull": "pointi {points}",
       "openCollector": "Fungua wasifu wa mkusanyaji katika kichupo kipya",
       "rankAriaLabel": "Nafasi ya {rank}",
       "org": {
@@ -563,6 +570,9 @@
       "stats": {
         "observations": "Uoni katika raundi hii",
         "observationsAll": "Uoni (wakati wote)",
+        "animals": "Wanyama",
+        "plants": "Mimea",
+        "named": "Spishi zilizotajwa",
         "collectors": "Wakusanyaji",
         "timeLeft": "Muda uliosalia"
       },
@@ -584,7 +594,26 @@
         "title": "Haikuweza kupakia ubao",
         "description": "Tafadhali jaribu tena baada ya muda mfupi."
       },
-      "cta": "Ongeza uoni wako"
+      "cta": "Ongeza uoni wako",
+      "pointsGuide": {
+        "title": "Jinsi pointi zinavyokokotolewa",
+        "animalValue": "pointi 2",
+        "animalLabel": "Kwa picha ya mnyama",
+        "plantValue": "pointi 1",
+        "plantLabel": "Kwa picha ya mmea",
+        "namedValue": "+pointi 0.5",
+        "namedLabel": "Spishi imetajwa",
+        "note": "Pointi zilianza katika Raundi 8. Jumla ya mkusanyaji ni picha za wanyama × 2, pamoja na picha za mimea × 1, pamoja na 0.5 kwa kila spishi iliyotajwa. Gusa safu kwenye ubao kuona hesabu ya mkusanyaji huyo."
+      },
+      "breakdown": {
+        "toggle": "Jinsi pointi zilivyokokotolewa",
+        "animals": "{count, plural, one {picha # ya mnyama} other {picha # za wanyama}} × 2",
+        "plants": "{count, plural, one {picha # ya mmea} other {picha # za mimea}} × 1",
+        "labeled": "{count, plural, one {spishi # iliyotajwa} other {spishi # zilizotajwa}} × 0.5",
+        "ineligible": "{count, plural, one {picha # haikufuzu} other {picha # hazikufuzu}}",
+        "total": "Jumla ya pointi",
+        "profile": "Fungua wasifu"
+      }
     },
     "winners": {
       "title": "Washindi waliopita",
@@ -597,7 +626,11 @@
       "finalHint": "Washindi hawa wamethibitishwa na hawatabadilika.",
       "provisionalHint": "Msimamo wa sasa — unaweza kubadilika hadi washindi wathibitishwe.",
       "compact": "Karibuni",
+      "newer": "Raundi mpya zaidi",
+      "older": "Raundi za zamani",
+      "page": "{page} kati ya {total}",
       "mostSubmitted": "Zilizowasilishwa zaidi",
+      "highestPoints": "Pointi za juu zaidi",
       "mostLiked": "Zilizopendwa zaidi",
       "award": {
         "action": "Toa beji za washindi",
@@ -606,6 +639,7 @@
         "error": "Imeshindikana kusasisha beji au hali ya barua pepe. Jaribu tena.",
         "notification": {
           "mostObservations": "Barua pepe ya uchunguzi mwingi zaidi",
+          "highestPoints": "Barua pepe ya pointi za juu zaidi",
           "bestPicture": "Barua pepe ya picha bora",
           "sent": "Imetumwa",
           "delayed": "Imechelewa — tutaendelea kujaribu",
@@ -851,7 +885,9 @@
           "confirmed": "Imethibitishwa",
           "payout": "Hutoa ${amount} · malipo ya {tranche}",
           "reviewNote": "GainForest huthibitisha kila hatua muhimu — kila hatua iliyothibitishwa hufungua sehemu inayofuata ya ruzuku yako.",
-          "pending": "Haijathibitishwa"
+          "pending": "Haijathibitishwa",
+          "dueOn": "Ifikapo {date}",
+          "overdue": "Ilipaswa kufika {date}"
         },
         "metadata": {
           "title": "Ruzuku yangu",
@@ -867,7 +903,8 @@
             "1w": "Wiki",
             "1m": "Mwezi",
             "6m": "Miezi 6",
-            "all": "Tangu ruzuku"
+            "all": "Tangu ruzuku",
+            "allUpcoming": "Upakiaji wote"
           },
           "phrases": {
             "1w": "wiki hii",
@@ -878,6 +915,10 @@
           "vsPaceNeeded": "dhidi ya mwendo unaohitajika · {range}",
           "behindPhrase": "nyuma ya mwendo unaohitajika {phrase}",
           "aheadPhrase": "mbele ya mwendo unaohitajika {phrase}",
+          "upcomingEyebrow": "mwanzo mzuri · {range}",
+          "upcomingPhrase": "zilizohifadhiwa kabla ya dirisha la ruzuku kufunguliwa tarehe {date}",
+          "upcomingNeeded": "0 inahitajika hadi tarehe {date}",
+          "upcomingRates": "{actual} halisi · {needed} inahitajika kuanzia tarehe {date}",
           "actual": "halisi",
           "needed": "inahitajika",
           "perDay": "{rate}/siku",
@@ -887,6 +928,7 @@
           "focus": "Dakika {minutes} tarehe {date}",
           "overallBehind": "Kwa jumla dakika {minutes} nyuma ya mwendo wa ruzuku nzima",
           "overallAhead": "Kwa jumla dakika {minutes} mbele ya mwendo wa ruzuku nzima",
+          "overallUpcoming": "Dirisha la ruzuku linafunguliwa tarehe {date} · kila dakika hadi sasa ni mwanzo mzuri",
           "overallMet": "Lengo la kurekodi limefikiwa"
         }
       },

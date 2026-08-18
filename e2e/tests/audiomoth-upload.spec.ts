@@ -110,7 +110,7 @@ test("resuming an interrupted card upload reuses the same folder", async ({ page
   try {
     // ── First attempt: name a new folder for the card. ──
     await scanCardFolder();
-    const newFolderButton = page.getByRole("button", { name: /new folder/i });
+    const newFolderButton = page.getByRole("button", { name: /add a deployment/i });
     if (await newFolderButton.isVisible().catch(() => false)) await newFolderButton.click();
     await expect(page.locator("#upload-group-name")).toHaveValue(folderName);
     await screenshotStep(page, testInfo, "audiomoth-resume-first-scan");
@@ -136,7 +136,7 @@ test("resuming an interrupted card upload reuses the same folder", async ({ page
 
     // The picker recognises the card and selects the existing folder — the
     // user is told the recordings will join it, not start a duplicate.
-    await expect(page.getByText(/you already have a folder with this name/i)).toBeVisible({ timeout: 30_000 });
+    await expect(page.getByText(/you already have a deployment with this name/i)).toBeVisible({ timeout: 30_000 });
     await expect(page.locator('button[aria-pressed="true"]')).toContainText(folderName);
     await screenshotStep(page, testInfo, "audiomoth-resume-preselected");
 

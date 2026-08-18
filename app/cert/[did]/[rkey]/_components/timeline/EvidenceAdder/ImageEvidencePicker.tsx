@@ -1,6 +1,7 @@
 "use client";
 
 import { useId, useState, type DragEvent } from "react";
+import type { LeafletLinearDocument } from "@/app/_lib/leaflet-richtext";
 import { ImageIcon, XIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
@@ -15,11 +16,13 @@ import type { EvidenceSubmitter } from "./types";
 
 export function ImageEvidencePicker({
   caption,
+  captionDocument,
   captionTitle,
   isSubmitting,
   submitDrafts,
 }: {
   caption: string;
+  captionDocument: LeafletLinearDocument | null;
   captionTitle: string | null;
   isSubmitting: boolean;
   submitDrafts: EvidenceSubmitter;
@@ -58,6 +61,7 @@ export function ImageEvidencePicker({
     contentType: "photo",
     contents: files,
     note: caption,
+    textDocument: captionDocument,
   };
 
   return (

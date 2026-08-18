@@ -110,6 +110,7 @@
       "settings": "Settings",
       "projects": "Projects",
       "observations": "Observations",
+      "events": "Events",
       "donations": "Donations",
       "grants": "Grants",
       "organizationHome": "Organization Home",
@@ -269,6 +270,14 @@
         "title": "Account",
         "description": "Username and sign-in security"
       },
+      "profile": {
+        "title": "Public profile",
+        "description": "What your public page shows"
+      },
+      "members": {
+        "title": "Members",
+        "description": "People, roles, and the Data Council"
+      },
       "connections": {
         "title": "Connections",
         "description": "Social accounts and external services"
@@ -281,6 +290,13 @@
         "title": "Advanced",
         "description": "Account data and deletion"
       }
+    },
+    "location": {
+      "title": "Location",
+      "description": "Where this account is based, shown on the public profile.",
+      "notSet": "No location set",
+      "edit": "Edit",
+      "saveError": "Could not save the location. Please try again."
     }
   },
   "bumicertCard": {
@@ -489,6 +505,30 @@
     "endorsementsGiven": "Endorsements",
     "equipment": "Equipment",
     "more": "More"
+  },
+  "accountAudio": {
+    "viewsAria": "Audio views",
+    "recordings": "Recordings",
+    "soundscapes": "Soundscapes",
+    "soundscapesCount": "{count, plural, one {# soundscape} other {# soundscapes}}",
+    "soundscapesLoadError": "Soundscapes couldn't be loaded right now.",
+    "soundscapesEmptyTitle": "No soundscapes yet",
+    "soundscapesEmptyBody": "A soundscape turns field recordings into a 24-hour sound portrait. When this profile publishes one, it will appear here for everyone to listen to.",
+    "soundscapesBuildCta": "Build one from your recordings"
+  },
+  "observationsManage": {
+    "metaTitle": "Manage observations — {name}",
+    "title": "Manage observations",
+    "description": "Add, edit and group the nature sightings saved to this profile.",
+    "rowTitle": "Manage observations",
+    "rowDescription": "Add, edit and group the sightings on this profile."
+  },
+  "audioManage": {
+    "metaTitle": "Manage recordings — {name}",
+    "title": "Manage recordings",
+    "description": "Upload, label and organize the field recordings saved to this profile.",
+    "rowTitle": "Manage recordings",
+    "rowDescription": "Upload, label and organize the recordings on this profile."
   },
   "equipment": {
     "metadataTitle": "Equipment — {name}",
@@ -993,6 +1033,7 @@
       "inputPlaceholder": "Email or Bluesky handle",
       "inputAria": "Member email or Bluesky handle",
       "invite": "Invite",
+      "refresh": "Refresh",
       "ownerHelp": "Enter an email to send an invite, or a Bluesky handle to add someone right away.",
       "adminHelp": "Add regular members by Bluesky handle, or invite them by email. Ask an owner to add another admin.",
       "locked": "Only owners and admins can invite or remove members.",
@@ -1098,6 +1139,7 @@
       "following": "Following",
       "project": "Projects",
       "observation": "Sightings",
+      "audio": "Recordings",
       "organization": "Organizations",
       "donation": "Donations",
       "post": "Posts"
@@ -1107,7 +1149,8 @@
       "observation": "shared a nature sighting",
       "organization": "registered an organization",
       "donation": "made a donation",
-      "post": "shared an update"
+      "post": "shared an update",
+      "audio": "uploaded field recordings"
     },
     "to": "to",
     "anonymous": "Someone",
@@ -1129,6 +1172,11 @@
       "likesAcross": "{count, plural, one {# like across these sightings} other {# likes across these sightings}}",
       "commentsHeading": "Comments on these sightings",
       "commentOn": "on {species}"
+    },
+    "audioUpload": {
+      "recordings": "{count, plural, one {# recording uploaded} other {# recordings uploaded}}",
+      "browse": "Browse recordings",
+      "recorderFallback": "Field recorder"
     },
     "profileCard": {
       "unnamed": "Unnamed account",
@@ -1274,6 +1322,11 @@
         "labelWithRound": "BioBlitz {roundName} — most observations",
         "description": "Won a BioBlitz round for the most observations."
       },
+      "bioblitz-most-images-points": {
+        "label": "BioBlitz — highest points",
+        "labelWithRound": "BioBlitz {roundName} — highest points",
+        "description": "Won a BioBlitz round with the highest points score."
+      },
       "bioblitz-best-picture": {
         "label": "BioBlitz — best picture",
         "labelWithRound": "BioBlitz {roundName} — best picture",
@@ -1357,7 +1410,24 @@
       "slotsFull": "All ten slots are taken. Remove a grantee before adding another.",
       "remove": "Remove from the grant",
       "removing": "Removing…",
-      "removeConfirm": "Remove “{name}” from the grant? Milestones and documents are kept, but the grantee loses access to the grant dashboard and the slot opens up."
+      "removeConfirm": "Remove “{name}” from the grant? Milestones and documents are kept, but the grantee loses access to the grant dashboard and the slot opens up.",
+      "dueDateLabel": "Due date for {title}",
+      "overdue": "Overdue",
+      "customMilestone": "Custom",
+      "milestoneNameLabel": "Milestone name",
+      "milestoneNamePlaceholder": "e.g. Community training session",
+      "addMilestone": "Add milestone",
+      "addingMilestone": "Adding…",
+      "addMilestoneDueLabel": "Due date",
+      "addMilestoneHint": "Adds a step for this grantee only, with its own name, description and due date. The grantee sees it on their grant page right away.",
+      "removeMilestone": "Remove {title}",
+      "removeMilestoneConfirm": "Remove “{title}” from this grantee's milestones? The grantee will no longer see it.",
+      "editMilestone": "Edit {title}",
+      "editSave": "Save",
+      "editCancel": "Cancel",
+      "milestoneDescriptionLabel": "Milestone description",
+      "milestoneDescriptionPlaceholder": "Describe what this step involves (optional)",
+      "programCopyHint": "Leave the name or description blank to use the program's standard wording."
     },
     "pages": {
       "hub": {
@@ -1423,17 +1493,20 @@
       "ended": "Closed"
     },
     "observations": "{count, plural, one {# observation} other {# observations}}",
+    "points": "{points, plural, one {# point} other {# points}}",
     "ignored": "Ignored",
     "counted": "Counted",
     "notCounted": "Not counted",
     "prize": {
       "most-observations": "Most observations",
+      "highest-points": "Highest points",
       "best-picture": "Best picture"
     },
     "openProfile": "Open profile",
     "joined": "Joined {date}",
     "download": {
       "most-observations": "Most-observations kit",
+      "highest-points": "Highest-points kit",
       "best-picture": "Best-picture kit"
     },
     "ignore": "Ignore",
@@ -1850,15 +1923,49 @@
   "observationsHub": {
     "ariaLabel": "Observation types",
     "photos": "Photos",
-    "audio": "Audio",
-    "devices": "Devices"
+    "audio": "Audio"
   },
   "audiomoth": {
     "audioHub": {
       "title": "Audio",
       "subtitle": "Upload recordings from an AudioMoth SD card, organise them into deployments and label what you hear — audio observations live here.",
       "metaTitle": "Audio observations",
-      "metaDescription": "Upload AudioMoth recordings, manage deployments, label species and explore soundscapes inside Observations."
+      "metaDescription": "Upload AudioMoth recordings, manage deployments, label species and explore soundscapes inside Observations.",
+      "librarySubtitle": "Every deployment and recording you have uploaded, in one place — play them, move them between deployments, rename or delete them.",
+      "yourRecordings": "Your recordings",
+      "soundscapesTitle": "Audio",
+      "soundscapesLede": "Field recordings and 24-hour sound portraits from recorders across GainForest. Tap a clock to hear a place at that time of day.",
+      "soundscapesEmptyTitle": "No audio published yet",
+      "soundscapesEmptyBody": "When someone uploads field recordings, or turns them into a soundscape, they will appear here for everyone to listen to.",
+      "soundscapesEmptyCta": "Build one from your recordings",
+      "publicPill": "Public",
+      "searchPlaceholder": "Search projects or soundscapes",
+      "allProjects": "All projects",
+      "filterByProject": "Filter by project",
+      "sortBy": "Sort projects",
+      "sortRecentlyAdded": "Recently added",
+      "sortRecentlyRecorded": "Recently recorded",
+      "openProject": "Open project",
+      "openAccount": "Open profile",
+      "noProject": "(no project)",
+      "projectMeta": "{project} · {recorders, plural, one {# recorder} other {# recorders}} · {recordings, number} recordings",
+      "soundscapeSlot": "Soundscape",
+      "recordingsSlot": "Recordings",
+      "recorderFallback": "Field recorder",
+      "slotRecordings": "{count, number} recordings",
+      "soundscapeFallback": "Soundscape",
+      "dateUnavailable": "Date unavailable",
+      "showMoreFromProject": "{count, plural, one {Show # more from this project} other {Show # more from this project}}",
+      "showFewer": "Show fewer",
+      "voiceKeyTitle": "Voice group key",
+      "noMatches": "No projects match these filters.",
+      "clearFilters": "Clear filters",
+      "browseRecordings": "Browse recordings",
+      "unknownOrganization": "Project steward"
+    },
+    "library": {
+      "signInTitle": "Sign in to see your files",
+      "signInBody": "Your uploaded recordings and deployments show up here once you are signed in."
     },
     "devicesHub": {
       "title": "Devices"
@@ -2030,7 +2137,7 @@
     },
     "mainTabs": {
       "setup": "Setup",
-      "deployments": "Deployment",
+      "library": "Recordings",
       "upload": "Upload",
       "label": "Label",
       "identifications": "Identifications",
@@ -2119,15 +2226,10 @@
     },
     "deployments": {
       "intro": "Deployments record where and when an AudioMoth was placed in the field. Each one plays an acoustic chime that sets the recorder's clock, location and deployment ID.",
+      "sectionTitle": "Deployments",
+      "deploymentCount": "{count, plural, one {# deployment} other {# deployments}}",
       "createButton": "Create deployment",
-      "signInTitle": "Sign in to see your deployments",
-      "signInBody": "Your deployments are saved to your account. Sign in to create and manage them.",
-      "loadErrorTitle": "Deployments could not be loaded",
-      "loadError": "Something went wrong while loading your deployments. Please try again.",
-      "emptyTitle": "No deployments yet",
-      "emptyBody": "Create your first deployment to set up an AudioMoth in the field with the acoustic chime.",
       "untitled": "Unnamed deployment",
-      "copyId": "Copy deployment ID",
       "delete": "Delete deployment",
       "confirmDelete": "Confirm delete",
       "cancel": "Cancel",
@@ -2137,7 +2239,7 @@
       "siteNameLabel": "Site name (optional)",
       "siteNamePlaceholder": "River trail, plot 3…",
       "deploymentIdLabel": "Deployment ID",
-      "newId": "Generate a new ID",
+      "deploymentIdHint": "Generated automatically for this deployment.",
       "latitudeLabel": "Latitude",
       "longitudeLabel": "Longitude",
       "useLocation": "Use my current location",
@@ -2170,7 +2272,7 @@
       "deployedLabel": "Deployed",
       "equipmentLinked": "Linked unit",
       "metadataTitle": "{name} — Deployment",
-      "detailBack": "Back to deployments",
+      "detailBack": "Back to recordings",
       "mapTitle": "Deployment location",
       "equipmentUsedLabel": "AudioMoth used",
       "protocolLabel": "Protocol",
@@ -2179,8 +2281,8 @@
       "attachWaiting": "{count, plural, one {# recording is uploading in the background — it will attach to the deployment you create.} other {# recordings are uploading in the background — they'll attach to the deployment you create.}}",
       "attaching": "Attaching {count, plural, one {# recording} other {# recordings}} to the new deployment…",
       "attachDone": "{count, plural, one {# recording attached to the new deployment.} other {# recordings attached to the new deployment.}}",
-      "attachPartial": "{moved} attached · {failed} couldn't be moved — they stay in the card's folder.",
-      "attachFailed": "The batch couldn't be attached — the recordings stay in the card's folder."
+      "attachPartial": "{moved} attached · {failed} couldn't be moved — they stay in the card's deployment.",
+      "attachFailed": "The batch couldn't be attached — the recordings stay in the card's deployment."
     },
     "upload": {
       "intro": "Insert an AudioMoth SD card and choose it below. Recordings are recognised by the deployment ID embedded in each file, kept safe in archival storage and saved to your account.",
@@ -2204,8 +2306,6 @@
       "unmatchedTitle": "Deployment not found in your account",
       "noIdTitle": "No deployment ID in these recordings",
       "groupCount": "{count} recordings",
-      "assignLabel": "Link to a deployment (optional)",
-      "assignNone": "No deployment",
       "unreadable": "{count} files could not be read as WAV recordings and will be skipped.",
       "moreFiles": "…and {count} more recordings",
       "previewToggle": "Save playable previews",
@@ -2227,19 +2327,19 @@
       "errorSaveConnection": "The file was sent, but the internet stopped before we could finish. Tap “Retry failed files”.",
       "errorSaveFailed": "The file was uploaded, but it could not be saved to your account. Please retry.",
       "deploymentFallback": "Created automatically when uploading SD card recordings.",
-      "groupNameLabel": "Name this upload",
-      "groupNameHelp": "These recordings will be grouped under this name on your profile, so you can find them later.",
+      "groupNameLabel": "Name this deployment",
+      "groupNameHelp": "Name the deployment these recordings came from. A past trip is fine. They'll be grouped under this name on your profile so you can find them later.",
       "groupNamePlaceholder": "e.g. Forest edge — April 2024",
-      "groupNameRequired": "Give this upload a name first.",
+      "groupNameRequired": "Give this deployment a name first.",
       "folderTitle": "Where should these recordings go?",
-      "folderExistingHelp": "Add them to a folder you already have, so everything from this site stays together.",
-      "folderResumedHelp": "You already have a folder with this name, so these recordings will join it instead of starting a new one.",
-      "folderExistingAction": "Choose an existing folder",
-      "folderNewAction": "New folder",
-      "folderSearchPlaceholder": "Search your folders",
-      "folderNoMatch": "No folders match your search.",
-      "folderRequired": "Choose a folder first.",
-      "folderLoading": "Loading your folders…",
+      "folderExistingHelp": "Add them to a deployment you already have, so everything from this site stays together.",
+      "folderResumedHelp": "You already have a deployment with this name, so these recordings will join it instead of starting a new one.",
+      "folderExistingAction": "Choose an existing deployment",
+      "folderNewAction": "Add a deployment",
+      "folderSearchPlaceholder": "Search your deployments",
+      "folderNoMatch": "No deployments match your search.",
+      "folderRequired": "Choose a deployment first.",
+      "folderLoading": "Loading your deployments…",
       "groupRemarks": "Created when uploading a folder of recordings.",
       "discovering": "Looking for recordings… {count} files found",
       "readFailed": "The SD card could not be read. Remove and re-insert it, then try again — or drag the folder onto this page instead.",
@@ -3309,6 +3409,10 @@
     "allUploaded": "All {count} uploaded · {size}"
   },
   "soundscape": {
+    "autoPublish": {
+      "note": "This folder's soundscape is published on the profile and updates as analysis continues.",
+      "view": "Open it"
+    },
     "meta": {
       "title": "Soundscape",
       "description": "Build a 24-hour soundscape clock from the audio recordings already uploaded to your account."
@@ -3347,12 +3451,12 @@
       "tooShort": "Too short to analyze (needs at least {seconds} seconds)"
     },
     "groups": {
-      "title": "Folders",
-      "hint": "Each soundscape is built from one folder of recordings — pick the folder to work on.",
-      "hintSingle": "This soundscape is built from your one folder of recordings.",
+      "title": "Deployments",
+      "hint": "Each soundscape is built from one deployment of recordings — pick the deployment to work on.",
+      "hintSingle": "This soundscape is built from your one deployment of recordings.",
       "chip": "{name} · {count, plural, one {# recording} other {# recordings}}",
-      "unassigned": "Not in a folder",
-      "unknown": "Removed folder"
+      "unassigned": "Not in a deployment",
+      "unknown": "Removed deployment"
     },
     "bands": {
       "rumble": "Rumble",
@@ -3457,38 +3561,43 @@
     }
   },
   "recordingFolders": {
+    "editAction": "Edit",
     "renameAction": "Rename",
     "deleteAction": "Delete",
-    "emptyFolder": "No recordings in this folder yet.",
+    "emptyFolder": "No recordings in this deployment yet.",
     "moveAction": "Move",
     "moveTitle": "Move {count, plural, one {# recording} other {# recordings}}",
-    "moveBody": "Pick the folder these recordings belong in. Moving changes nothing else about them — the audio, its analysis and anything already shared stay as they are.",
+    "moveBody": "Pick the deployment these recordings belong in. Moving changes nothing else about them — the audio, its analysis and anything already shared stay as they are.",
     "moveProgress": "Moving… {done} of {total}",
     "movePartial": "{count, plural, one {# recording} other {# recordings}} could not be moved. Please try again.",
     "moveFailed": "The recordings could not be moved. Please try again.",
-    "newFolderRemarks": "Created when moving recordings into a new folder.",
-    "renameTitle": "Rename folder",
-    "renameBody": "Only the folder's name changes — the recordings in it stay where they are, and so does anything already shared from them.",
-    "nameLabel": "Folder name",
+    "newFolderRemarks": "Created when moving recordings into a new deployment.",
+    "renameTitle": "Rename deployment",
+    "renameBody": "Only the deployment's name changes — the recordings in it stay where they are, and so does anything already shared from them.",
+    "nameLabel": "Deployment name",
     "namePlaceholder": "e.g. Riverbank, dry season",
-    "nameRequired": "Give the folder a name.",
+    "nameRequired": "Give the deployment a name.",
     "save": "Save",
     "saving": "Saving…",
     "cancel": "Cancel",
-    "renameFailed": "The folder could not be renamed. Please try again.",
+    "renameFailed": "The deployment could not be renamed. Please try again.",
+    "locationAction": "Set location",
+    "editLocationAction": "Edit location",
+    "locationTitle": "Set deployment location",
+    "locationBody": "Where was “{name}” deployed?",
     "deleteTitle": "Delete “{name}”?",
-    "deleteBody": "{count, plural, =0 {The folder is permanently deleted. This cannot be undone.} one {The folder and the # recording in it are permanently deleted — the archived original file, playable preview, spectrogram, analysis and every identification drawn on it go too. This cannot be undone.} other {The folder and the # recordings in it are permanently deleted — the archived original files, playable previews, spectrograms, analyses and every identification drawn on them go too. This cannot be undone.}}",
+    "deleteBody": "{count, plural, =0 {The deployment is permanently deleted. This cannot be undone.} one {The deployment and the # recording in it are permanently deleted — the archived original file, playable preview, spectrogram, analysis and every identification drawn on it go too. This cannot be undone.} other {The deployment and the # recordings in it are permanently deleted — the archived original files, playable previews, spectrograms, analyses and every identification drawn on them go too. This cannot be undone.}}",
     "identificationsIncluded": "{count, plural, one {This includes # saved identification, which will be deleted as well.} other {This includes # saved identifications, which will be deleted as well.}}",
     "deleteProgress": "Deleting… {done} of {total}",
-    "deletePartial": "{count, plural, one {# recording} other {# recordings}} could not be deleted, so the folder was kept. Please try again.",
-    "deleteFailed": "The folder could not be deleted. Please try again.",
+    "deletePartial": "{count, plural, one {# recording} other {# recordings}} could not be deleted, so the deployment was kept. Please try again.",
+    "deleteFailed": "The deployment could not be deleted. Please try again.",
     "addToProject": {
       "action": "Add to project",
       "title": "Add “{name}” to a project",
-      "body": "The folder joins the project's evidence timeline — its recordings stay exactly where they are.",
+      "body": "The deployment joins the project's evidence timeline — its recordings stay exactly where they are.",
       "noteLabel": "Note (optional)",
       "notePlaceholder": "What do these recordings show?",
-      "defaultNote": "{count, plural, =0 {A recorder folder.} one {A recorder folder with # recording.} other {A recorder folder with # recordings.}}",
+      "defaultNote": "{count, plural, =0 {A recorder deployment.} one {A recorder deployment with # recording.} other {A recorder deployment with # recordings.}}",
       "untitledProject": "Untitled project",
       "loading": "Loading your projects…",
       "loadError": "Your projects couldn't be loaded. Try again in a moment.",
@@ -3505,7 +3614,7 @@
       "viewProject": "Open the project",
       "close": "Close",
       "cancel": "Cancel",
-      "failed": "The folder could not be added. Please try again."
+      "failed": "The deployment could not be added. Please try again."
     }
   },
   "hypercerts": {

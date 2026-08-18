@@ -6,20 +6,28 @@ import { fetchAuthSession } from "@/app/_lib/auth-server";
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-const FILTERS: ActivityFeedFilter[] = ["all", "project", "observation", "organization", "donation", "post"];
+const FILTERS: ActivityFeedFilter[] = [
+  "all",
+  "project",
+  "observation",
+  "organization",
+  "donation",
+  "post",
+  "audio",
+];
 
 function parseFilter(value: string | null): ActivityFeedFilter {
   return value && (FILTERS as string[]).includes(value) ? (value as ActivityFeedFilter) : "all";
 }
 
 /**
- * GET /api/feed?cursor=<opaque>&kind=<all|project|observation|organization|donation|post>
+ * GET /api/feed?cursor=<opaque>&kind=<all|project|observation|organization|donation|post|audio>
  * GET /api/feed?cursor=<opaque>&scope=following
  *
  * Returns one page of the global, newest-first activity feed (projects, nature
- * sightings, organizations, posts, and donations — Certs are folded into
- * projects). Rows are ordered purely by recency across all kinds; `cursor`
- * walks strictly older rows for "load more".
+ * sightings, organizations, posts, uploaded recorder folders, and donations —
+ * Certs are folded into projects). Rows are ordered purely by recency across
+ * all kinds; `cursor` walks strictly older rows for "load more".
  *
  * With `scope=following` the feed is scoped to records authored by accounts the
  * signed-in viewer follows (atproto query-on-read): the viewer is resolved from

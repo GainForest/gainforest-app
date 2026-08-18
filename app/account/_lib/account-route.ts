@@ -8,7 +8,7 @@ import {
 } from "../../_lib/indexer";
 import { shortDid } from "../../_lib/format";
 import { preferredDidIdentifier } from "../../_lib/urls";
-import { fetchCertifiedLocationCountryCode } from "../../_lib/country-location";
+import { fetchCertifiedLocationSummary } from "../../_lib/country-location";
 import { resolveBlobUrl, resolveDidHandle, resolvePdsHost } from "../../_lib/pds";
 
 export type AccountKind = "organization" | "user";
@@ -25,6 +25,14 @@ export type AccountRouteData = {
   longDescription: string | null;
   website: string | null;
   country: string | null;
+  /** Name of the location record the org references ("where the org is
+   *  based") — the display value when the country can't be derived. */
+  locationName: string | null;
+  /** The saved location's coordinates — for an approximate location, the
+   *  published circle's center. Null when the record has none we can read. */
+  locationLatitude: number | null;
+  locationLongitude: number | null;
+  locationApproximate: boolean;
   createdAt: string | null;
   foundedDate: string | null;
   visibility: "Public" | "Unlisted" | null;
@@ -47,6 +55,10 @@ type DirectCertifiedProfile = {
 
 type DirectCertifiedOrganization = {
   country: string | null;
+  locationName: string | null;
+  locationLatitude: number | null;
+  locationLongitude: number | null;
+  locationApproximate: boolean;
   foundedDate: string | null;
   visibility: "Public" | "Unlisted" | null;
   createdAt: string | null;
@@ -99,6 +111,16 @@ export function accountObservationsPath(didOrHandle: string): string {
   return `${accountPath(didOrHandle)}/observations`;
 }
 
+/**
+ * Where the account's own sightings are managed — adding, editing, grouping.
+ * The profile's Observations tab is the public view of the same records, so
+ * managing them gets its own address instead of the tab quietly turning into an
+ * editor for whoever happens to own it.
+ */
+export function accountObservationsManagePath(didOrHandle: string): string {
+  return `${accountObservationsPath(didOrHandle)}/manage`;
+}
+
 export function accountFollowersPath(didOrHandle: string): string {
   return `${accountPath(didOrHandle)}/followers`;
 }
@@ -149,6 +171,23 @@ export function accountSitesPath(didOrHandle: string): string {
 
 export function accountAudioPath(didOrHandle: string): string {
   return `${accountPath(didOrHandle)}/audio`;
+}
+
+/**
+ * Where the account's own recordings are managed — uploading, renaming,
+ * deleting. Stands alongside the observations workspace; the profile's Audio
+ * tab is the listening view of the same recordings.
+ */
+export function accountAudioManagePath(didOrHandle: string): string {
+  return `${accountAudioPath(didOrHandle)}/manage`;
+}
+
+/**
+ * The Audio tab's Soundscapes view — the account's published 24-hour sound
+ * portraits, standing beside the raw recordings at the tab's own address.
+ */
+export function accountAudioSoundscapesPath(didOrHandle: string): string {
+  return `${accountAudioPath(didOrHandle)}/soundscapes`;
 }
 
 export function accountDronePath(didOrHandle: string): string {
@@ -213,6 +252,7 @@ export const getAccountRouteData = cache(async (
     bio: null,
     website: null,
     country: null,
+    locationName: null,
     createdAt: null,
     foundedDate: null,
     visibility: null,
@@ -231,6 +271,7 @@ export const getAccountRouteData = cache(async (
     bio: directCertifiedProfile?.description ?? baseSummary.bio ?? null,
     website: directCertifiedProfile?.website ?? baseSummary.website ?? null,
     country: directCertifiedOrganization ? directCertifiedOrganization.country : baseSummary.country ?? null,
+    locationName: directCertifiedOrganization ? directCertifiedOrganization.locationName : baseSummary.locationName ?? null,
     createdAt: directCertifiedOrganization?.createdAt ?? directCertifiedProfile?.createdAt ?? baseSummary.createdAt ?? null,
     foundedDate: directCertifiedOrganization?.foundedDate ?? baseSummary.foundedDate ?? null,
     visibility: directCertifiedOrganization?.visibility ?? baseSummary.visibility ?? null,
@@ -255,6 +296,10 @@ export const getAccountRouteData = cache(async (
     longDescription: directCertifiedOrganization?.longDescription ?? null,
     website: summary.website,
     country: summary.country,
+    locationName: summary.locationName,
+    locationLatitude: directCertifiedOrganization?.locationLatitude ?? null,
+    locationLongitude: directCertifiedOrganization?.locationLongitude ?? null,
+    locationApproximate: directCertifiedOrganization?.locationApproximate ?? false,
     createdAt: summary.createdAt,
     foundedDate: summary.foundedDate,
     visibility: summary.visibility,
@@ -409,8 +454,13 @@ async function fetchDirectCertifiedOrganization(did: string): Promise<DirectCert
       ? (value.longDescription as { value: string }).value.trim() || null
       : null
     : null;
+  const locationSummary = await fetchCertifiedLocationSummary(locationUri);
   return {
-    country: await fetchCertifiedLocationCountryCode(locationUri),
+    country: locationSummary?.country ?? null,
+    locationName: locationSummary?.name ?? null,
+    locationLatitude: locationSummary?.latitude ?? null,
+    locationLongitude: locationSummary?.longitude ?? null,
+    locationApproximate: locationSummary?.approximate ?? false,
     foundedDate: typeof value.foundedDate === "string" ? value.foundedDate : null,
     visibility: rawVisibility === "unlisted" || rawVisibility === "Unlisted" ? "Unlisted" : rawVisibility ? "Public" : null,
     createdAt: typeof value.createdAt === "string" ? value.createdAt : null,

@@ -11,6 +11,12 @@
  * timeline. The record is published once per analysis: sharing the same
  * soundscape to the feed and then to two projects writes one soundscape and
  * three pointers at it, not four copies of the data.
+ *
+ * A whole folder already *has* a record — the living one the workbench
+ * auto-publishes at the folder's own rkey (lib/soundscape/auto-publish.ts).
+ * Sharing that names the rkey on the input, and publishing becomes an update
+ * of the living record instead of a copy beside it. Only a single-day share
+ * — a deliberate excerpt — still mints a record of its own.
  */
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -30,8 +36,12 @@ import { ModalContent, ModalDescription, ModalTitle } from "@/components/ui/moda
 import { manageApiHref } from "@/lib/links";
 import { cn } from "@/lib/utils";
 import { createFeedPost } from "@/app/(manage)/manage/_lib/mutations";
-import { useAccountList, useActiveAccountContext } from "@/app/_lib/account-switcher";
-import { createSoundscapeRecord } from "@/app/_lib/soundscape-record";
+import { useActingRepo } from "@/app/_lib/account-switcher";
+import {
+  createSoundscapeRecord,
+  fetchPublishedSoundscape,
+  putSoundscapeRecord,
+} from "@/app/_lib/soundscape-record";
 import { resolveStrongRef } from "@/app/_lib/pds";
 import { createContextAttachment } from "@/app/cert/[did]/[rkey]/_components/timeline/contextAttachmentMutations";
 import {
@@ -61,25 +71,23 @@ export type ShareTarget = {
  * lists that account's projects.
  */
 export function useShareTarget(sessionDid: string | null): ShareTarget {
-  const { groups } = useAccountList(sessionDid);
-  const [activeContext] = useActiveAccountContext(sessionDid ?? "");
+  const acting = useActingRepo(sessionDid);
 
   return useMemo(() => {
     if (!sessionDid) return { repo: undefined, apiTarget: null };
-    if (activeContext.type === "group" && activeContext.did) {
-      const known = groups.some((entry) => entry.groupDid === activeContext.did);
-      if (known || activeContext.did) {
-        return { repo: activeContext.did, apiTarget: { kind: "group" as const, did: activeContext.did } };
-      }
-    }
-    return { repo: undefined, apiTarget: { kind: "personal" as const, did: sessionDid } };
-  }, [activeContext.did, activeContext.type, groups, sessionDid]);
+    return acting.repo
+      ? { repo: acting.repo, apiTarget: { kind: "group" as const, did: acting.repo } }
+      : { repo: undefined, apiTarget: { kind: "personal" as const, did: sessionDid } };
+  }, [acting.repo, sessionDid]);
 }
 
 export type SoundscapePublishInput = {
   title: string;
   ceilingHz: number;
   sources: SoundscapeSource[];
+  /** Fixed rkey of the folder's living record, when the share covers the
+   *  whole folder — publishing then updates that record in place. */
+  rkey?: string;
 };
 
 type PublishedRef = { uri: string; did: string; rkey: string; cid: string; signature: string };
@@ -106,18 +114,37 @@ export function useSoundscapePublisher(target: ShareTarget) {
       const signature = signatureOf(input);
       const cached = publishedRef.current;
       if (cached && cached.signature === signature) return cached;
-      const draft: SoundscapeDraft = {
-        title: input.title,
-        note,
-        ceilingHz: input.ceilingHz,
-        sources: input.sources,
-      };
-      const created = await createSoundscapeRecord(draft, target.repo ? { repo: target.repo } : undefined);
-      const next: PublishedRef = { ...created, signature };
+      const options = target.repo ? { repo: target.repo } : undefined;
+      let published: Omit<PublishedRef, "signature">;
+      if (input.rkey) {
+        /* The folder's living record. A caption becomes its note; without
+           one, whatever note it already carries is kept — an empty share
+           must not erase the author's earlier words. */
+        let keepNote = note;
+        if (keepNote === undefined && target.apiTarget) {
+          keepNote =
+            (await fetchPublishedSoundscape(target.apiTarget.did, input.rkey).catch(() => null))?.note ??
+            undefined;
+        }
+        published = await putSoundscapeRecord(
+          input.rkey,
+          { title: input.title, note: keepNote, ceilingHz: input.ceilingHz, sources: input.sources },
+          options,
+        );
+      } else {
+        const draft: SoundscapeDraft = {
+          title: input.title,
+          note,
+          ceilingHz: input.ceilingHz,
+          sources: input.sources,
+        };
+        published = await createSoundscapeRecord(draft, options);
+      }
+      const next: PublishedRef = { ...published, signature };
       publishedRef.current = next;
       return next;
     },
-    [target.repo],
+    [target.apiTarget, target.repo],
   );
 }
 

@@ -59,6 +59,23 @@
       "title": "Ongeza sasisho",
       "composerDescription": "Andika sasisho fupi. Ambatisha sauti, uchunguzi, miti au faili ikiwa zitasaidia.",
       "captionPlaceholder": "Shiriki sasisho fupi la mradi. Unaweza kuchapisha maandishi pekee au kuambatisha ushahidi hapa chini.",
+      "titlePlaceholder": "Kichwa (hiari)",
+      "editor": {
+        "bold": "Herufi nzito",
+        "italic": "Mlazo",
+        "underline": "Kupigia mstari",
+        "strikethrough": "Kufuta kwa mstari",
+        "heading": "Kichwa",
+        "subheading": "Kichwa kidogo",
+        "quote": "Nukuu",
+        "bulletedList": "Orodha ya vitone",
+        "numberedList": "Orodha ya nambari",
+        "addLink": "Ongeza kiungo",
+        "removeLink": "Ondoa kiungo",
+        "linkUrlPlaceholder": "https://example.org",
+        "applyLink": "Tumia",
+        "cancelLink": "Ghairi"
+      },
       "attachLabel": "Ambatisha ushahidi wa hiari:",
       "attachingType": "Inaambatisha {type}",
       "postUpdate": "Chapisha sasisho",
@@ -374,7 +391,8 @@
       "published": "Imechapishwa",
       "firstSiteBoundary": "Mpaka wa kwanza wa tovuti",
       "firstSiteBoundaryMap": "Ramani ya mpaka wa kwanza wa tovuti",
-      "contributors": "Wachangiaji"
+      "contributors": "Wachangiaji",
+      "noLocationSet": "Hakuna eneo lililowekwa"
     },
     "headerTabs": {
       "overview": "Muhtasari",

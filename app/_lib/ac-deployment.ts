@@ -252,20 +252,33 @@ export async function deleteAcDeployment(item: AcDeploymentItem, options?: Deplo
 export type AcDeploymentEdit = {
   /** The folder's display name — what the picker, the profile and a published
    *  soundscape's title all read. */
-  name: string;
+  name?: string;
+  /** Manual location override — where the recorder actually stood. Uploaded
+   *  SD-card folders carry no coordinates until their owner sets them; null
+   *  explicitly clears a previously saved location. */
+  location?: { lat: number; lon: number } | null;
 };
 
 /**
  * The stored record with the edit applied. Everything else — the recorder,
- * its schedule, where and when it was deployed — is measurement, not naming,
- * and is carried over untouched.
+ * its schedule, when it was deployed — is measurement, not naming, and is
+ * carried over untouched.
  */
 export function buildUpdatedAcDeploymentRecord(
   item: AcDeploymentItem,
   edit: AcDeploymentEdit,
 ): AcDeploymentRecord {
   const { uri: _uri, rkey: _rkey, cid: _cid, did: _did, ...record } = item;
-  return { ...record, name: edit.name.trim() };
+  const next: AcDeploymentRecord = { ...record };
+  if (edit.name !== undefined) next.name = edit.name.trim();
+  if (edit.location) {
+    next.decimalLatitude = edit.location.lat.toFixed(6);
+    next.decimalLongitude = edit.location.lon.toFixed(6);
+  } else if (edit.location === null) {
+    delete next.decimalLatitude;
+    delete next.decimalLongitude;
+  }
+  return next;
 }
 
 export function applyAcDeploymentEdit(
@@ -273,10 +286,16 @@ export function applyAcDeploymentEdit(
   edit: AcDeploymentEdit,
   cid: string,
 ): AcDeploymentItem {
-  return { ...item, ...buildUpdatedAcDeploymentRecord(item, edit), cid };
+  const next = { ...item, ...buildUpdatedAcDeploymentRecord(item, edit), cid };
+  if (edit.location === null) {
+    delete next.decimalLatitude;
+    delete next.decimalLongitude;
+  }
+  return next;
 }
 
-/** Rename a folder of recordings. The recordings themselves never move. */
+/** Update a folder of recordings (rename, location override, or location clear).
+ *  The recordings themselves never move. */
 export async function updateAcDeployment(
   item: AcDeploymentItem,
   edit: AcDeploymentEdit,
@@ -291,6 +310,6 @@ export async function updateAcDeployment(
       record: buildUpdatedAcDeploymentRecord(item, edit),
       ...(options?.repo ? { repo: options.repo } : {}),
     },
-    "Could not rename the folder.",
+    "Could not update the deployment.",
   );
 }

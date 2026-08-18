@@ -204,6 +204,6 @@ export function buildGuideKnowledge(): string {
     "### Upload & manage observations",
     "'Add observations' (sidebar or profile) → drop in up to 50 photos → AI suggests the species → check name/date/location, optionally link to a project → 'Add'. Manage later in profile → Observations: search, group into datasets, select & delete, card/list/map views.",
     "### BioBlitz challenge",
-    "Sidebar → BioBlitz → 'Register to take part' (one click, needed for prize tracking) → photograph any living thing during the weekly round and upload as observations → prizes for most observations and best picture, plus a permanent winner badge. Observations stay in the user's account as reusable evidence.",
+    "Sidebar → BioBlitz → 'Register to take part' (one click, needed for prize tracking) → photograph any living thing during the weekly round and upload as observations → prizes for the highest points (2 points per animal photo, 1 per plant photo, +0.5 when the species is named) and best picture, plus a permanent winner badge. Observations stay in the user's account as reusable evidence.",
   ].join("\n");
 }

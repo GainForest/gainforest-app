@@ -24,6 +24,7 @@ const {
 vi.mock("server-only", () => ({}));
 vi.mock("@/app/_lib/bioblitz", () => ({
   bioblitzRounds,
+  bioblitzRoundUsesPoints: (roundId: number) => roundId >= 8,
   fetchBioblitzRoundRegistrants,
   fetchRoundCollectors,
   roundStatus,
@@ -61,12 +62,13 @@ describe("BioBlitz admin roster", () => {
       },
     ]);
     fetchRoundCollectors.mockResolvedValue({
-      collectors: [{ did: REGISTERED_DID, count: 4, displayName: "Registered observer", avatarRef: null }],
+      collectors: [{ did: REGISTERED_DID, count: 4, points: 7.5, displayName: "Registered observer", avatarRef: null }],
       unfilteredCollectors: [
-        { did: BEES_DID, count: 486, displayName: "Bees and Trees", avatarRef: null },
-        { did: REGISTERED_DID, count: 4, displayName: "Registered observer", avatarRef: null },
+        { did: BEES_DID, count: 486, points: 486, displayName: "Bees and Trees", avatarRef: null },
+        { did: REGISTERED_DID, count: 4, points: 7.5, displayName: "Registered observer", avatarRef: null },
       ],
       totalObservations: 4,
+      totalPoints: 7.5,
       imageCounts: {},
       collectorCount: 1,
     });
@@ -110,6 +112,7 @@ describe("BioBlitz admin roster", () => {
         avatarUrl: "https://example.com/bees.jpg",
         registeredAt: null,
         observationCount: 486,
+        points: 486,
         wins: [],
         availablePackages: [],
       },
@@ -119,6 +122,7 @@ describe("BioBlitz admin roster", () => {
         avatarUrl: null,
         registeredAt: "2026-07-25T12:00:00.000Z",
         observationCount: 4,
+        points: 7.5,
         wins: [],
         availablePackages: [],
       },

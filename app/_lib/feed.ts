@@ -2,11 +2,13 @@
  * Activity feed — server-side assembly of a global, Bluesky-style "everything
  * happening on GainForest" timeline for the new /feed sidebar tab.
  *
- * Merges four public record streams into one newest-first stream:
+ * Merges the public record streams into one newest-first stream:
  *   - projects      (org.hypercerts.collection, type "project")
  *   - observations  (app.gainforest.dwc.occurrence)
  *   - organizations (app.certified.actor.organization)
  *   - donations     (org.hypercerts.fundingReceipt — completed USD/USDC gifts)
+ *   - audio uploads (app.gainforest.ac.audio, grouped per folder per day —
+ *                    one row per bout of uploading, project-attached or not)
  *
  * Certs (org.hypercerts.claim.activity) are deliberately folded into projects
  * rather than shown as their own rows — a project owns exactly one Cert and is
@@ -23,8 +25,11 @@
  * others (independent per-stream cursors would interleave out of order).
  */
 
+import { accountAudioPath } from "@/app/account/_lib/account-route";
 import { cachedAsync } from "./async-cache";
+import { listAudioUploadDays, type AudioUploadDay } from "./audio-upload-days";
 import type { AudioLabelCategory } from "./audiomoth/labels";
+import { deploymentDetailPath } from "./deployment-events";
 import { LEGACY_BROAD_VERNACULARS, parseAudioSegmentDynamicProperties } from "./audiomoth/occurrences";
 import { getAddress } from "viem";
 import { getTipWalletAddress } from "@/lib/facilitator/tip";
@@ -46,7 +51,8 @@ export type ActivityFeedKind =
   | "observation"
   | "organization"
   | "donation"
-  | "post";
+  | "post"
+  | "audio";
 
 /** The labelled section of an AudioMoth recording a bioacoustic sighting
  *  points at — everything the feed needs to preview the spectrogram box and
@@ -61,6 +67,20 @@ export interface FeedBioacousticsClip {
   endTimeSeconds: number;
   minFrequencyHz: number;
   maxFrequencyHz: number;
+}
+
+/** A bout of uploading — what one person put into one recorder folder on one
+ *  day: how many recordings landed, what recorded them, and where to go and
+ *  hear them. The same card the Audio explore page shows for an upload, drawn
+ *  inside its feed row. */
+export interface FeedAudioUpload {
+  /** Recordings uploaded to this folder that day — an exact count, not the
+   *  folder's running total. */
+  recordingCount: number;
+  /** The recorder / folder name ("INN2-004"), when the upload named one. */
+  recorderName: string | null;
+  /** Where the recordings live — the "browse recordings" target. */
+  browseHref: string;
 }
 
 /** Normalized, serializable feed row — ready to ship to the client. */
@@ -103,6 +123,8 @@ export interface ActivityFeedItem {
   /** Observations only: the labelled audio segment behind a bioacoustic
    *  sighting, so the feed can preview its spectrogram and play the sound. */
   bioacoustics?: FeedBioacousticsClip | null;
+  /** Audio uploads only: the recorder folder this row announces. */
+  audioUpload?: FeedAudioUpload | null;
   /** Observations only, set on the sampled rows of a server-collapsed burst:
    *  how many sightings the burst holds from the collapse point down (counted
    *  for free by the burst scan; includes the sampled rows themselves). Rows
@@ -627,6 +649,67 @@ function mapPosts(nodes: RawPost[]): ActivityFeedItem[] {
     amount: null,
     currency: null,
   }));
+}
+
+// ── Audio uploads (one row per folder per day of uploading) ─────────────
+//
+// Neither of the records an upload writes is the event itself: the folder
+// (`ac.deployment`) is created once, up front — making a folder isn't news —
+// and a single `ac.audio` is far too fine-grained, since one SD card is
+// hundreds of them. `listAudioUploadDays` buckets the recordings by (folder,
+// day) so a row means "this person put N recordings into this folder that
+// day": emptying a card twice a month is two rows, and 1,000 recordings in an
+// afternoon is one.
+//
+// The buckets arrive as a complete in-memory list, each carrying the real
+// timestamp of its newest recording, so they merge and page exactly like a
+// record stream — which is why they're built once and cached rather than
+// queried per page: an aggregate can't be filtered by the feed's cursor.
+
+/** Where "browse recordings" goes: the folder's own deployment page when it
+ *  came from a chime deployment, else the owner's audio tab, which lists the
+ *  same recordings grouped by folder. */
+function audioBrowseHref(day: AudioUploadDay): string {
+  const event = day.eventRef ? parseAtUriFull(day.eventRef) : null;
+  return event ? deploymentDetailPath(event.did, event.rkey) : accountAudioPath(day.did);
+}
+
+function mapAudioUploadDays(
+  days: readonly AudioUploadDay[],
+  profiles: ReadonlyMap<string, { displayName: string | null; avatarRef: string | null }>,
+  hiddenRecords: ReadonlySet<string>,
+): ActivityFeedItem[] {
+  const items: ActivityFeedItem[] = [];
+  for (const day of days) {
+    // Hiding the folder hides every day it uploaded on — the row's own id is
+    // synthetic (folder + day), so moderation is checked against the record.
+    if (day.folderUri && hiddenRecords.has(day.folderUri)) continue;
+    const profile = profiles.get(day.did);
+    const href = audioBrowseHref(day);
+    items.push({
+      id: day.id,
+      kind: "audio",
+      createdAt: day.createdAt,
+      actorDid: day.did,
+      actorName: profile?.displayName ?? null,
+      actorAvatarRef: profile?.avatarRef ?? null,
+      title: null,
+      text: null,
+      href,
+      imageUrl: null,
+      imageRef: null,
+      targetTitle: null,
+      targetHref: null,
+      amount: null,
+      currency: null,
+      audioUpload: {
+        recordingCount: day.recordingCount,
+        recorderName: day.recorderName,
+        browseHref: href,
+      },
+    });
+  }
+  return items;
 }
 
 // ── Reshares (app.gainforest.feed.repost → Bluesky's `reasonRepost` rows) ────
@@ -1444,6 +1527,21 @@ async function buildFeedPageUncached(
 
   const { items: donationItems, certUriById, recipientById, donorById } = mapDonations(receiptNodes);
 
+  // Upload days are derived, not streamed: one cached sweep serves every page,
+  // and only the days this feed can show are kept. A following feed keeps the
+  // uploads of accounts the viewer follows.
+  const followedDids = isFollowing ? new Set(following.dids) : null;
+  const audioDays = wants("audio")
+    ? (await listAudioUploadDays().catch(() => [] as AudioUploadDay[])).filter(
+        (day) => !followedDids || followedDids.has(day.did),
+      )
+    : [];
+  const audioProfiles = audioDays.length > 0
+    ? await fetchAccountCards([...new Set(audioDays.map((day) => day.did))]).catch(
+        () => new Map<string, { displayName: string | null; avatarRef: string | null }>(),
+      )
+    : new Map<string, { displayName: string | null; avatarRef: string | null }>();
+
   // Accounts a GainForest steward flagged as "test", and accounts hosted on a
   // blocked server address, are hidden from the feed — every row owned by such
   // a DID is dropped before the merge. Individual records flagged as test
@@ -1462,6 +1560,7 @@ async function buildFeedPageUncached(
     ...mapOccurrences(occurrenceNodes),
     ...mapOrganizations(orgNodes),
     ...mapPosts(postNodes),
+    ...mapAudioUploadDays(audioDays, audioProfiles, hiddenRecords),
     ...donationItems,
     ...(wantsReshare ? mapReposts(repostNodes) : []),
   ].filter(

@@ -34,3 +34,11 @@ The first registered experience lives at `/_test/donation-flow` and stages the r
 ## BioBlitz notification experience
 
 `/_test/bioblitz-notifications` renders the production moderator status row for sent, delayed, missing-email, lookup-failure, and setup-failure states. **Mark handled manually** updates fixture state only; it never reads awards, writes the outbox, or contacts a winner.
+
+## Community events experience
+
+`/_test/community-events` renders the production Events surfaces — `EventsDiscoveryClient`, `EventDetailClient`, and `HostEventClient` — behind a fixture `EventsAdapter`. RSVP, waitlist promotion (a full event with a queue is included), publishing, editing, and host-cancelling all mutate in-memory fixtures only; the adapter never touches the indexer, a PDS, the manage proxy, or blob upload, and its sign-in hand-off shows an inline notice instead of redirecting. A "Signed in" toggle simulates the signed-out RSVP prompt. Card links point at the real `/events` routes (fixtures only exist inside the experience), so the tab bar at the top is the supported way to move between the mock views.
+
+## Project updates experience
+
+`/_test/project-updates` renders the production update composer (`EvidenceAdder`, including the WYSIWYG editor) and the production read-only timeline (`ProjectTimelineReadonly`) against a fixture activity. Posting runs the real draft validation and record building, but the composer's `createAttachment` seam is a local mock: the resulting `pub.leaflet.pages.linearDocument` record only feeds the on-page timeline state and disappears on reload. No record, blob, or account is ever touched.

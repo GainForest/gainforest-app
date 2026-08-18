@@ -13,6 +13,7 @@ import {
   CopyIcon,
   EarthIcon,
   GlobeIcon,
+  MapPinIcon,
   PencilIcon,
   Share2Icon,
 } from "lucide-react";
@@ -21,6 +22,7 @@ import type { AccountOrganization } from "./AccountOrganizationsGrid";
 import { AccountMemberships } from "./AccountMemberships";
 import { AccountWalletSupport } from "./AccountWalletSupport";
 import { formatCountry } from "../../_lib/format";
+import { countryCodeFromLocationLabel, getCountry } from "../../_lib/countries";
 import { SocialGlyph } from "@/app/_components/SocialIcon";
 import { TrustedByBadges } from "@/app/_components/TrustedByBadges";
 import { AccountAwards } from "./AccountAwards";
@@ -80,9 +82,15 @@ export function AccountHero({
 
   const initial = account.displayName.charAt(0).toUpperCase();
   const sinceDate = formatSinceDate(account.kind === "organization" ? account.foundedDate ?? account.createdAt : account.createdAt);
+  // The organization's location is the certified location record it
+  // references: shown as a country (with flag) when its coordinates resolve
+  // to one, otherwise by the record's own name.
   const country = account.country ? formatCountry(account.country) : null;
+  const locationLabel = country ?? account.locationName;
+  // A place name like "Zurich, Switzerland" earns its country's flag too.
+  const locationFlag = country ? null : getCountry(countryCodeFromLocationLabel(account.locationName))?.emoji ?? null;
   const orgType = account.kind === "organization" ? account.orgType ?? account.summary.certOrgType : null;
-  const hasFacts = Boolean(sinceDate.state === "valid" || country || orgType);
+  const hasFacts = Boolean(sinceDate.state === "valid" || locationLabel || orgType);
 
   useEffect(() => {
     let cancelled = false;
@@ -273,7 +281,16 @@ export function AccountHero({
                     {orgType}
                   </span>
                 ) : null}
-                {country ? <span className="inline-flex items-center gap-1.5">{country}</span> : null}
+                {locationLabel ? (
+                  <span className="inline-flex items-center gap-1.5">
+                    {country ? null : locationFlag ? (
+                      <span className="leading-none" aria-hidden>{locationFlag}</span>
+                    ) : (
+                      <MapPinIcon className="size-3.5 opacity-70" aria-hidden />
+                    )}
+                    {locationLabel}
+                  </span>
+                ) : null}
                 {sinceDate.state === "valid" ? (
                   <span className="inline-flex items-center gap-1.5">
                     <CalendarIcon className="size-3.5 opacity-70" aria-hidden />

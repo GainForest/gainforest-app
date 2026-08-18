@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { usePathname, useSearchParams } from "next/navigation";
-import { BadgeCheckIcon, BinocularsIcon, BotIcon, ChevronDownIcon, FolderKanbanIcon, HeartHandshakeIcon, HomeIcon, ImageIcon, LayoutGridIcon, MessageSquareTextIcon, SettingsIcon, UsersIcon, WalletIcon, WrenchIcon } from "lucide-react";
+import { BadgeCheckIcon, BinocularsIcon, BotIcon, ChevronDownIcon, FolderKanbanIcon, HeartHandshakeIcon, HomeIcon, ImageIcon, LayoutGridIcon, MessageSquareTextIcon, SettingsIcon, WalletIcon, WrenchIcon } from "lucide-react";
 import { stripLocaleFromPathname } from "@/lib/i18n/routing";
 import { cn } from "@/lib/utils";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
@@ -18,7 +18,6 @@ import {
   accountDronePath,
   accountGalleryPath,
   accountLikesPath,
-  accountMembersPath,
   accountObservationsPath,
   accountPath,
   accountPostsPath,
@@ -30,7 +29,7 @@ import {
   accountWalletPath,
 } from "../_lib/account-route";
 
-type TabLabelKey = "home" | "overview" | "bumicerts" | "projects" | "donationHistory" | "observations" | "posts" | "timeline" | "gallery" | "filesAndPhotos" | "settings" | "sites" | "audio" | "drone" | "trees" | "members" | "taina" | "endorsementsGiven" | "equipment" | "wallet";
+type TabLabelKey = "home" | "overview" | "bumicerts" | "projects" | "donationHistory" | "observations" | "posts" | "timeline" | "gallery" | "filesAndPhotos" | "settings" | "sites" | "audio" | "drone" | "trees" | "taina" | "endorsementsGiven" | "equipment" | "wallet";
 
 interface Tab {
   labelKey: TabLabelKey;
@@ -87,7 +86,6 @@ function buildTabs(
   accountKind: AccountTabBarKind,
   scope: AccountTabBarScope,
   includeSettings: boolean,
-  showOrgData: boolean,
   includeTaina: boolean,
   showEndorsementsGiven: boolean,
   showEquipment: boolean,
@@ -214,16 +212,12 @@ function buildTabs(
       matchPaths: scope === "account" ? [accountTreesPath(did), accountAudioPath(did), accountDronePath(did)] : undefined,
     },
   ];
-  // Members stay an organization-only governance surface, shown to managers on
-  // the profile. Trees, Audio and Drone are reached through the Observations
-  // sub-nav. Sites and Timeline now live on each project, not the profile.
+  // Members, roles and the Data Council are part of Settings now, so managers
+  // administer an organization from one page instead of two tabs. Trees, Audio
+  // and Drone are reached through the Observations sub-nav. Sites and Timeline
+  // now live on each project, not the profile.
   if (scope === "account") {
     tabs.push(postsTab);
-  }
-  if (scope === "account" && showOrgData) {
-    tabs.push(
-      { labelKey: "members", href: accountMembersPath(did), icon: UsersIcon, exact: false },
-    );
   }
   if (scope === "account" && showEquipment) {
     tabs.push(equipmentTab);
@@ -242,7 +236,6 @@ interface OrgTabBarProps {
   accountKind?: AccountKind;
   scope?: AccountTabBarScope;
   includeSettings?: boolean;
-  showOrgData?: boolean;
   includeTaina?: boolean;
   showEndorsementsGiven?: boolean;
   showEquipment?: boolean;
@@ -255,7 +248,6 @@ export function AccountTabBar({
   accountKind = "organization",
   scope = "account",
   includeSettings = false,
-  showOrgData = false,
   includeTaina = false,
   showEndorsementsGiven = false,
   showEquipment = false,
@@ -265,7 +257,7 @@ export function AccountTabBar({
   const t = useTranslations("common.accountTabs");
   const pathname = stripLocaleFromPathname(usePathname() ?? "/");
   const searchParams = useSearchParams();
-  const tabs = buildTabs(did, accountKind, scope, includeSettings, showOrgData, includeTaina, showEndorsementsGiven, showEquipment, includeWallet, manageBasePath);
+  const tabs = buildTabs(did, accountKind, scope, includeSettings, includeTaina, showEndorsementsGiven, showEquipment, includeWallet, manageBasePath);
 
   function isActive(tab: Tab): boolean {
     if (scope === "manage") {

@@ -18,7 +18,7 @@ import {
 import { BumicertTimeline } from "@/app/cert/[did]/[rkey]/_components/timeline/BumicertTimeline";
 import { getEntriesForActivity } from "@/app/cert/[did]/[rkey]/_components/timeline/attachmentSubjects";
 import { resolveTimelineReferences } from "@/app/cert/[did]/[rkey]/_components/timeline/timelineReferenceResolver";
-import { canCreateRecord, canDeleteRecord } from "./_lib/cgs-permissions";
+import { canCreateRecord, canDeleteRecord, canEditGroupProfile } from "./_lib/cgs-permissions";
 import { manageHref, profileBasePath } from "@/lib/links";
 import { ProjectSitesManagerClient } from "./projects/[rkey]/sites/_components/ProjectSitesManagerClient";
 import { droneAppHref } from "@/app/_lib/urls";
@@ -29,12 +29,12 @@ import { Button } from "@/components/ui/button";
 import { getAccountRouteData } from "@/app/account/_lib/account-route";
 import { fetchAuthSession } from "@/app/_lib/auth-server";
 import { AccountSettingsSections, OrganizationSettingsSections } from "@/app/account/_components/AccountSettingsSections";
-import { accountMembersPath } from "@/app/account/_lib/account-route";
-import { UsersIcon } from "lucide-react";
+import { GroupMembers } from "./groups/_components/GroupMembers";
 import Container from "@/components/ui/container";
 import { ManageOverview } from "./_components/ManageOverview";
 import { ManageDashboard } from "./_components/ManageDashboard";
 import { INaturalistSettingsSection } from "./settings/_components/INaturalistSettingsSection";
+import { LocationSettingsSection } from "./settings/_components/LocationSettingsSection";
 import type { CgsRole } from "./_lib/cgs";
 import { ManageProjectsClient } from "./projects/_components/ManageProjectsClient";
 import { ProjectGalleryManagerClient } from "./projects/[rkey]/gallery/_components/ProjectGalleryManagerClient";
@@ -296,31 +296,55 @@ export async function NewBumicertSection({ target, searchParams }: { target: Man
 
 export async function SettingsSection({ target }: { target: ManageTarget }) {
   const t = await getTranslations("upload.settings");
-  const managedProjects = await fetchProjectsByDid(target.did, 500).then((page) => page.records).catch(() => []);
+  const [managedProjects, account] = await Promise.all([
+    fetchProjectsByDid(target.did, 500).then((page) => page.records).catch(() => []),
+    getAccountRouteData(target.did, target.identifier),
+  ]);
   const inaturalistProjects = managedProjects.map((project) => ({ projectUri: project.atUri, title: project.title }));
   const createPermission = canCreateRecord(target);
+  // The organization's declared location — the same control as the profile
+  // hero's location chip, surfaced here because this is where people look for
+  // it. Organizations only; people have no location field yet (ECO-878).
+  const profileEditPermission = canEditGroupProfile(target);
+  const locationSection = (
+    <LocationSettingsSection
+      target={target}
+      initial={{
+        name: account.locationName,
+        country: account.country,
+        latitude: account.locationLatitude,
+        longitude: account.locationLongitude,
+        approximate: account.locationApproximate,
+      }}
+      disabledReason={profileEditPermission.reason}
+    />
+  );
   if (target.kind === "group") {
-    // Members + Data Council live on the profile's Members tab; repeating them
-    // here made Settings a duplicate of that tab. Organization settings now
-    // carry the org-level tools instead — starting with AI agent keys — and
-    // link to Members for governance.
+    // Everything an organization is administered with lives on this one page:
+    // members, roles and the Data Council alongside the profile, agent keys and
+    // integrations. They used to sit on a separate Members tab, which split
+    // administration across two surfaces for no benefit.
+    const role: CgsRole = target.role === "owner" ? "owner" : target.role === "admin" ? "admin" : "member";
+    const session = await fetchAuthSession();
+    const currentUserDid = target.currentUserDid ?? (session.isLoggedIn ? session.did : null);
     return (
       <Container className="pt-4 pb-8">
         <div className="mb-6">
           <h1 className="font-instrument text-3xl font-light italic leading-tight tracking-[-0.02em] text-foreground">{t("organizationTitle")}</h1>
           <p className="mt-1 text-sm text-muted-foreground">{t("organizationDescription")}</p>
         </div>
-        <div className="mb-8 flex flex-col gap-3 rounded-2xl border border-border bg-background/70 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
-          <div className="flex min-w-0 items-start gap-3">
-            <UsersIcon className="mt-0.5 h-5 w-5 shrink-0 text-muted-foreground" />
-            <p className="text-sm text-muted-foreground">{t("membersMoved")}</p>
-          </div>
-          <Button asChild variant="outline" size="sm" className="shrink-0">
-            <Link href={accountMembersPath(target.identifier || target.did)}>{t("openMembers")}</Link>
-          </Button>
-        </div>
         <OrganizationSettingsSections
           agentKeysHint={t("orgAgentKeysHint")}
+          location={locationSection}
+          members={
+            <GroupMembers
+              groupDid={target.did}
+              currentRole={role}
+              currentUserDid={currentUserDid}
+              variant="settings"
+              showDataCouncil
+            />
+          }
           integrations={<INaturalistSettingsSection target={target} projects={inaturalistProjects} disabledReason={createPermission.reason} />}
         />
       </Container>

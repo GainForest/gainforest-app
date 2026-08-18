@@ -21,6 +21,7 @@ import Link from "next/link";
 import {
   ArrowUpRightIcon,
   AudioLinesIcon,
+  ChevronDownIcon,
   FolderInputIcon,
   FolderKanbanIcon,
   Loader2Icon,
@@ -33,6 +34,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Container from "@/components/ui/container";
+import { cn } from "@/lib/utils";
 import {
   ContextMenu,
   ContextMenuContent,
@@ -40,6 +42,13 @@ import {
   ContextMenuSeparator,
   ContextMenuTrigger,
 } from "@/components/ui/context-menu";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { ModalContent, ModalDescription, ModalFooter, ModalHeader, ModalTitle } from "@/components/ui/modal/modal";
 import { useModal } from "@/components/ui/modal/context";
 import { resolvePdsHost } from "@/app/_lib/pds";
@@ -51,15 +60,31 @@ import {
   updateAcDeployment,
   type AcDeploymentItem,
 } from "@/app/_lib/ac-deployment";
+import {
+  applyDeploymentEdit,
+  listDeploymentEvents,
+  updateDeploymentEvent,
+  type DeploymentEventItem,
+} from "@/app/_lib/deployment-events";
+import {
+  companionFolderDraft,
+  eventRenameEdit,
+  isChimeEventUri,
+  renameLinkedEvent,
+  setDeploymentLocation,
+  unifyDeployments,
+} from "@/app/_lib/unified-deployments";
 import { listAllRecordings, moveRecordings, type AcAudioListItem } from "@/app/_lib/ac-audio";
 import { countIdentificationsOn, deleteRecordings } from "@/app/_lib/ac-audio-delete";
+import { deleteSoundscapeRecord } from "@/app/_lib/soundscape-record";
+import { rkeyOfUri } from "@/lib/soundscape/auto-publish";
 import {
   DeleteFolderModal,
   MoveRecordingsModal,
   RenameFolderModal,
+  SetDeploymentLocationModal,
 } from "@/app/_components/RecordingFolderModals";
 import { AddDeploymentToProjectModal } from "@/app/_components/AddDeploymentToProjectModal";
-import { deploymentDetailPath, parseAtUri } from "@/app/_lib/deployment-events";
 import { formatDate } from "@/app/_lib/format";
 import { RecordingsExplorer } from "@/app/_components/RecordingsExplorer";
 
@@ -67,21 +92,42 @@ type DeploymentGroup = {
   key: string;
   name: string;
   deployedAt: string | null;
-  /** The folder's own record — absent for the "other recordings" group. */
+  /** Where the recorder stood — the folder's coordinates, falling back to
+   *  the chime's. Null until someone sets them. */
+  coords: { lat: number; lon: number } | null;
+  /** The record recordings are filed under — absent for a chime nobody has
+   *  uploaded to yet, and for the "other recordings" group. */
   deployment: AcDeploymentItem | null;
+  /** The chime played in the field, when the deployment has one. */
+  event: DeploymentEventItem | null;
   /** Local path of the deployment's detail page, when it has a chime event. */
   detailPath: string | null;
   items: AcAudioListItem[];
 };
 
+/** A deployment's stored coordinates — the folder record's, falling back to
+ *  the chime event's — as numbers, when both parse. */
+function deploymentCoords(
+  deployment: AcDeploymentItem | null,
+  event: DeploymentEventItem | null,
+): { lat: number; lon: number } | null {
+  const latRaw = deployment?.decimalLatitude ?? event?.decimalLatitude;
+  const lonRaw = deployment?.decimalLongitude ?? event?.decimalLongitude;
+  if (!latRaw || !lonRaw) return null;
+  const lat = Number(latRaw);
+  const lon = Number(lonRaw);
+  return Number.isFinite(lat) && Number.isFinite(lon) ? { lat, lon } : null;
+}
+
 function groupRecordings(
   deployments: AcDeploymentItem[],
+  events: DeploymentEventItem[],
   recordings: AcAudioListItem[],
   /**
-   * Show folders that hold no recordings. Only the owner sees these: an
-   * upload that failed after naming its folder leaves one behind, and it
-   * would otherwise be invisible here while still cluttering the folder
-   * picker on the next upload — with nowhere to delete it.
+   * Show deployments that hold no recordings — folders left behind by a
+   * failed upload, and chime deployments waiting for their first card. Only
+   * the owner sees these: they would otherwise be invisible here while
+   * still appearing in the destination picker on the next upload.
    */
   includeEmpty: boolean,
 ): DeploymentGroup[] {
@@ -94,26 +140,36 @@ function groupRecordings(
     grouped.set(key, list);
   }
 
+  // Each deployment exactly once: a folder and its chime are one row, and a
+  // chime with no folder yet is a row of its own (empty until an upload).
   const groups: DeploymentGroup[] = [];
-  for (const deployment of deployments) {
-    const items = grouped.get(deployment.uri) ?? [];
+  for (const unified of unifyDeployments(deployments, events)) {
+    const items = unified.folder ? (grouped.get(unified.folder.uri) ?? []) : [];
     if (items.length === 0 && !includeEmpty) continue;
-    const eventParts = deployment.eventRef ? parseAtUri(deployment.eventRef) : null;
     groups.push({
-      key: deployment.uri,
-      name: deployment.name,
-      deployedAt: deployment.deployedAt ?? null,
-      deployment,
-      detailPath: eventParts ? deploymentDetailPath(eventParts.did, eventParts.rkey) : null,
+      key: unified.uri,
+      name: unified.name,
+      deployedAt: unified.deployedAt,
+      coords: deploymentCoords(unified.folder, unified.event),
+      deployment: unified.folder,
+      event: unified.event,
+      detailPath: unified.detailPath,
       items,
     });
   }
-  // Newest deployment first.
-  groups.sort((a, b) => (b.deployedAt ?? "").localeCompare(a.deployedAt ?? ""));
 
   const ungrouped = grouped.get("");
   if (ungrouped?.length) {
-    groups.push({ key: "", name: "", deployedAt: null, deployment: null, detailPath: null, items: ungrouped });
+    groups.push({
+      key: "",
+      name: "",
+      deployedAt: null,
+      coords: null,
+      deployment: null,
+      event: null,
+      detailPath: null,
+      items: ungrouped,
+    });
   }
   return groups;
 }
@@ -123,6 +179,9 @@ export function AccountAudioViewer({
   showUploadCta,
   canDelete = false,
   mutationRepo = null,
+  embedded = false,
+  showEmptyDeployments,
+  onStats,
 }: {
   did: string;
   /** Whether to offer the personal SD-card upload flow (personal repos only). */
@@ -131,6 +190,18 @@ export function AccountAudioViewer({
   canDelete?: boolean;
   /** Group repo DID for mutations, when the profile is an organization. */
   mutationRepo?: string | null;
+  /** Drop the page container chrome when hosted inside another surface
+   *  (the Audio hub's Files tab), which brings its own width and padding. */
+  embedded?: boolean;
+  /** Also list deployments that hold no recordings yet. Defaults to
+   *  `canDelete` — owners see their empty folders so they can clean them up
+   *  — while the Audio hub's Recordings tab always shows them: deployments
+   *  are created there, and a fresh chime starts with no recordings. */
+  showEmptyDeployments?: boolean;
+  /** Reports the listed deployment and recording counts once loaded, so an
+   *  embedding surface (the hub's Deployments overview card) can show them
+   *  in its own header instead of this component repeating them. */
+  onStats?: (stats: { deploymentCount: number; recordingCount: number }) => void;
 }) {
   const t = useTranslations("common.audiomoth.recordings");
   const tFolders = useTranslations("common.recordingFolders");
@@ -138,6 +209,7 @@ export function AccountAudioViewer({
 
   const [host, setHost] = useState<string | null>(null);
   const [deployments, setDeployments] = useState<AcDeploymentItem[] | null>(null);
+  const [events, setEvents] = useState<DeploymentEventItem[] | null>(null);
   const [recordings, setRecordings] = useState<AcAudioListItem[] | null>(null);
   const [loadError, setLoadError] = useState(false);
 
@@ -201,6 +273,15 @@ export function AccountAudioViewer({
     for (const item of recordings ?? []) {
       if (item.deploymentRef) counts.set(item.deploymentRef, (counts.get(item.deploymentRef) ?? 0) + 1);
     }
+    // The move picker offers every deployment exactly once — including chime
+    // deployments nothing has been uploaded to yet.
+    const moveTargets = deployments
+      ? unifyDeployments(deployments, events ?? []).map((unified) => ({
+          uri: unified.uri,
+          name: unified.name,
+          deployedAt: unified.deployedAt ?? undefined,
+        }))
+      : null;
     modal.pushModal(
       {
         id: "move-recordings",
@@ -208,11 +289,24 @@ export function AccountAudioViewer({
         content: (
           <MoveRecordingsModal
             count={items.length}
-            folders={deployments}
+            folders={moveTargets}
             counts={counts}
             onMove={async (target, onProgress) => {
               let deploymentRef: string;
-              if (target.kind === "existing") {
+              if (target.kind === "existing" && isChimeEventUri(target.uri)) {
+                /* Moving into a chime deployment nobody has uploaded to yet:
+                   its folder record is created now, linked to the chime, and
+                   the recordings are filed under it. */
+                const event = (events ?? []).find((item) => item.uri === target.uri);
+                if (!event) throw new Error(tFolders("moveFailed"));
+                const created = await createAcDeployment(
+                  companionFolderDraft(event, tFolders("newFolderRemarks")),
+                  { repo: mutationRepo },
+                );
+                deploymentRef = created.uri;
+                const refreshed = await listAcDeployments(did).catch(() => null);
+                if (refreshed) setDeployments(refreshed);
+              } else if (target.kind === "existing") {
                 deploymentRef = target.uri;
               } else {
                 /* A folder named here is dated by the recordings going into
@@ -257,7 +351,7 @@ export function AccountAudioViewer({
       true,
     );
     void modal.show();
-  }, [clearSelection, deployments, did, modal, mutationRepo, recordings, selectedUris, tFolders]);
+  }, [clearSelection, deployments, did, events, modal, mutationRepo, recordings, selectedUris, tFolders]);
 
   const confirmDelete = useCallback(() => {
     const count = selectedUris.size;
@@ -280,23 +374,99 @@ export function AccountAudioViewer({
   }, [modal, performDelete, recordings, selectedUris]);
 
   /* ── Folder rename / delete (owner or org admin) ────────────────────────
-   * A folder is named while an SD card uploads, so its name is the thing most
-   * often worth fixing. Deleting takes the recordings filed in it with it —
-   * an empty folder record left behind would only strand them. */
-  const renameFolder = useCallback(
-    (deployment: AcDeploymentItem) => {
+   * A deployment is named while an SD card uploads, so its name is the thing
+   * most often worth fixing. One deployment can stand on two records — the
+   * folder recordings are filed under and the chime played in the field — so
+   * a rename writes the same name to both; a chime nobody has uploaded to
+   * yet has only its event record to rename. Deleting takes the recordings
+   * filed in it with it — an empty folder record left behind would only
+   * strand them. */
+  const renameDeployment = useCallback(
+    (group: DeploymentGroup) => {
+      const { deployment, event } = group;
+      if (!deployment && !event) return;
       modal.pushModal(
         {
           id: "rename-recording-folder",
           content: (
             <RenameFolderModal
-              currentName={deployment.name}
+              currentName={group.name}
               onSave={async (name) => {
-                const { cid } = await updateAcDeployment(deployment, { name }, { repo: mutationRepo });
-                const updated = applyAcDeploymentEdit(deployment, { name }, cid);
-                setDeployments((current) =>
-                  current?.map((item) => (item.uri === updated.uri ? updated : item)) ?? current,
-                );
+                if (deployment) {
+                  const { cid } = await updateAcDeployment(deployment, { name }, { repo: mutationRepo });
+                  const updated = applyAcDeploymentEdit(deployment, { name }, cid);
+                  setDeployments((current) =>
+                    current?.map((item) => (item.uri === updated.uri ? updated : item)) ?? current,
+                  );
+                  // The same name goes to the chime, so the Deployments tab
+                  // never shows a stale one. Best-effort — the rename above
+                  // already stands, and the next rename re-syncs the pair.
+                  try {
+                    const syncedEvent = await renameLinkedEvent(deployment, event, name, {
+                      repo: mutationRepo,
+                    });
+                    if (syncedEvent) {
+                      setEvents((current) =>
+                        current?.map((item) => (item.uri === syncedEvent.uri ? syncedEvent : item)) ?? current,
+                      );
+                    }
+                  } catch (syncError) {
+                    console.warn("[audio-library] chime rename sync failed", syncError);
+                  }
+                } else if (event) {
+                  const edit = eventRenameEdit(event, name);
+                  const { cid } = await updateDeploymentEvent(event, edit, { repo: mutationRepo });
+                  const updated = applyDeploymentEdit(event, edit, cid);
+                  setEvents((current) =>
+                    current?.map((item) => (item.uri === updated.uri ? updated : item)) ?? current,
+                  );
+                }
+              }}
+            />
+          ),
+        },
+        true,
+      );
+      void modal.show();
+    },
+    [modal, mutationRepo],
+  );
+
+  /**
+   * Manual location override: set or correct where the recorder stood.
+   * Deployments created by uploading past SD-card audio carry no coordinates
+   * at all — the chime flow asks up front, an upload never does — so this is
+   * the only way theirs can ever be filled in. The override lands on every
+   * record standing behind the deployment, so the labeling flow, the forms
+   * and a chime's detail-page map all follow.
+   */
+  const setLocationFor = useCallback(
+    (group: DeploymentGroup) => {
+      const { deployment, event } = group;
+      if (!deployment && !event) return;
+      modal.pushModal(
+        {
+          id: "set-deployment-location",
+          content: (
+            <SetDeploymentLocationModal
+              name={group.name}
+              initial={group.coords}
+              onSave={async (location) => {
+                const updated = await setDeploymentLocation({ folder: deployment, event }, location, {
+                  repo: mutationRepo,
+                });
+                if (updated.folder) {
+                  const folder = updated.folder;
+                  setDeployments((current) =>
+                    current?.map((item) => (item.uri === folder.uri ? folder : item)) ?? current,
+                  );
+                }
+                if (updated.event) {
+                  const changedEvent = updated.event;
+                  setEvents((current) =>
+                    current?.map((item) => (item.uri === changedEvent.uri ? changedEvent : item)) ?? current,
+                  );
+                }
               }}
             />
           ),
@@ -332,6 +502,16 @@ export function AccountAudioViewer({
                 }
                 if (failed.size > 0) throw new Error(tFolders("deletePartial", { count: failed.size }));
                 await deleteAcDeployment(deployment, { repo: mutationRepo });
+                /* The folder's auto-published soundscape (kept at the folder's
+                   own rkey) would otherwise survive its recordings. Best
+                   effort — it may never have existed. */
+                const soundscapeRkey = rkeyOfUri(deployment.uri);
+                if (soundscapeRkey) {
+                  void deleteSoundscapeRecord(
+                    soundscapeRkey,
+                    mutationRepo ? { repo: mutationRepo } : undefined,
+                  ).catch(() => {});
+                }
                 setDeployments((current) => current?.filter((item) => item.uri !== deployment.uri) ?? current);
               }}
             />
@@ -380,14 +560,18 @@ export function AccountAudioViewer({
     const ctrl = new AbortController();
     (async () => {
       try {
-        const [pdsHost, deps, recs] = await Promise.all([
+        const [pdsHost, deps, evts, recs] = await Promise.all([
           resolvePdsHost(did, ctrl.signal),
           listAcDeployments(did, ctrl.signal),
+          // Chime deployments are additive — losing them must not hide the
+          // uploaded recordings.
+          listDeploymentEvents(did, ctrl.signal).catch(() => [] as DeploymentEventItem[]),
           listAllRecordings(did, ctrl.signal),
         ]);
         if (ctrl.signal.aborted) return;
         setHost(pdsHost);
         setDeployments(deps);
+        setEvents(evts);
         setRecordings(recs);
       } catch {
         if (!ctrl.signal.aborted) {
@@ -400,9 +584,11 @@ export function AccountAudioViewer({
     return () => ctrl.abort();
   }, [did]);
 
+  const includeEmpty = showEmptyDeployments ?? canDelete;
   const groups = useMemo(
-    () => (deployments && recordings ? groupRecordings(deployments, recordings, canDelete) : []),
-    [canDelete, deployments, recordings],
+    () =>
+      deployments && recordings ? groupRecordings(deployments, events ?? [], recordings, includeEmpty) : [],
+    [includeEmpty, deployments, events, recordings],
   );
 
   /** Every recording's URI in on-screen order, for shift-click ranges. */
@@ -441,18 +627,40 @@ export function AccountAudioViewer({
   const total = recordings?.length ?? 0;
   const selectedCount = selectedUris.size;
 
+  /* The counts the header (or the embedding card) speaks of: deployments as
+     listed — including empty ones when they are shown — and every recording,
+     grouped or not. */
+  const deploymentCount = useMemo(() => groups.filter((group) => group.key).length, [groups]);
+  useEffect(() => {
+    if (loading || loadError) return;
+    onStats?.({ deploymentCount, recordingCount: total });
+  }, [deploymentCount, loadError, loading, onStats, total]);
+
+  /* Embedded, the host surface owns the headline, counts and CTAs (the
+     hub's Deployments overview card), so this row only appears when the
+     selection toolbar needs somewhere to stand. The empty state below keeps
+     its own upload CTA either way. */
+  const showHeaderRow = !embedded || selectedCount > 0;
+  /* The embedded Recordings tab already has the overview-card gap. When the
+     selection toolbar appears, don't add a second large gap before the first
+     deployment card; the standalone profile viewer keeps its original space. */
+  const contentMargin = showHeaderRow && !embedded ? "mt-6" : undefined;
+
   return (
-    <Container className="pt-4 pb-10">
+    <Container className={embedded ? "max-w-none p-0" : "pt-4 pb-10"}>
+      {showHeaderRow ? (
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h1 className="font-instrument text-2xl font-medium italic tracking-[-0.03em] text-foreground sm:text-3xl">
-            {t("title")}
-            {total > 0 ? (
-              <span className="ml-2.5 align-middle font-sans text-sm font-normal not-italic tracking-normal text-muted-foreground">
-                {t("groupCount", { count: total })}
-              </span>
-            ) : null}
-          </h1>
+          {embedded ? null : (
+            <h1 className="font-instrument text-2xl font-medium italic tracking-[-0.03em] text-foreground sm:text-3xl">
+              {t("title")}
+              {total > 0 ? (
+                <span className="ml-2.5 align-middle font-sans text-sm font-normal not-italic tracking-normal text-muted-foreground">
+                  {t("groupCount", { count: total })}
+                </span>
+              ) : null}
+            </h1>
+          )}
         </div>
         {selectedCount > 0 ? (
           /* Drive-style selection toolbar — replaces the header actions. */
@@ -477,7 +685,7 @@ export function AccountAudioViewer({
               {t("deleteSelected")}
             </Button>
           </div>
-        ) : showUploadCta ? (
+        ) : showUploadCta && !embedded ? (
           <Button asChild size="sm">
             <Link href="/observations/audio?tab=upload">
               <UploadIcon className="size-4" />
@@ -486,6 +694,7 @@ export function AccountAudioViewer({
           </Button>
         ) : null}
       </div>
+      ) : null}
 
       {deleteError ? (
         <p className="mt-3 flex items-center gap-1.5 rounded-lg bg-warn/10 px-3 py-2 text-xs font-medium text-foreground/75">
@@ -495,19 +704,19 @@ export function AccountAudioViewer({
       ) : null}
 
       {loading ? (
-        <div className="mt-6 flex flex-col gap-2">
+        <div className={cn("flex flex-col gap-2", contentMargin)}>
           {Array.from({ length: 4 }).map((_, i) => (
             <div key={i} className="h-16 animate-pulse rounded-2xl bg-muted" />
           ))}
         </div>
       ) : loadError ? (
-        <p className="mt-6 rounded-2xl border border-border bg-card/90 px-5 py-8 text-center text-sm text-muted-foreground">
+        <p className={cn("rounded-2xl border border-border bg-card/90 px-5 py-8 text-center text-sm text-muted-foreground", contentMargin)}>
           {t("loadError")}
         </p>
       ) : groups.length === 0 ? (
         /* Nothing at all — an owner whose only folders are empty still sees
            them below, so they can be cleaned up. */
-        <div className="mt-6 rounded-3xl border border-dashed border-border bg-muted/30 px-6 py-14 text-center">
+        <div className={cn("rounded-3xl border border-dashed border-border bg-muted/30 px-6 py-14 text-center", contentMargin)}>
           <span className="mx-auto grid h-12 w-12 place-items-center rounded-full bg-primary/10 text-primary">
             <AudioLinesIcon className="size-6" />
           </span>
@@ -523,7 +732,7 @@ export function AccountAudioViewer({
           ) : null}
         </div>
       ) : (
-        <div className="mt-6 flex flex-col gap-4">
+        <div className={cn("flex flex-col gap-4", contentMargin)}>
           {groups.map((group) => {
             const folder = group.deployment;
             const section = (
@@ -538,13 +747,17 @@ export function AccountAudioViewer({
                         {group.key ? group.name : t("otherGroup")}
                       </h2>
                       <p className="text-xs text-muted-foreground">
-                        {[group.deployedAt ? formatDate(group.deployedAt) : null, t("groupCount", { count: group.items.length })]
+                        {[
+                          group.deployedAt ? formatDate(group.deployedAt) : null,
+                          t("groupCount", { count: group.items.length }),
+                          group.coords ? `${group.coords.lat.toFixed(5)}, ${group.coords.lon.toFixed(5)}` : null,
+                        ]
                           .filter(Boolean)
                           .join(" · ")}
                       </p>
                     </div>
                   </div>
-                  <div className="flex shrink-0 items-center gap-1">
+                  <div className="flex flex-wrap items-center justify-end gap-1">
                     {group.detailPath ? (
                       <Link
                         href={group.detailPath}
@@ -554,23 +767,47 @@ export function AccountAudioViewer({
                         <ArrowUpRightIcon className="size-3" aria-hidden />
                       </Link>
                     ) : null}
-                    {canDelete && folder ? (
-                      <>
-                        <Button type="button" variant="ghost" size="sm" onClick={() => renameFolder(folder)}>
-                          <PencilIcon className="size-4" />
-                          {tFolders("renameAction")}
-                        </Button>
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="sm"
-                          className="text-destructive hover:bg-destructive/10 hover:text-destructive"
-                          onClick={() => confirmDeleteFolder(group)}
-                        >
-                          <Trash2Icon className="size-4" />
-                          {tFolders("deleteAction")}
-                        </Button>
-                      </>
+                    {canDelete && (folder || group.event) ? (
+                      /* Every folder action in one always-visible menu — the
+                         right-click context menu below offers the same, but
+                         only for those who think to try it. */
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button type="button" variant="ghost" size="sm">
+                            <PencilIcon className="size-4" />
+                            {tFolders("editAction")}
+                            <ChevronDownIcon className="size-3.5 text-muted-foreground" aria-hidden />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          {folder ? (
+                            <DropdownMenuItem onSelect={() => addFolderToProject(group)}>
+                              <FolderKanbanIcon />
+                              {tFolders("addToProject.action")}
+                            </DropdownMenuItem>
+                          ) : null}
+                          <DropdownMenuItem onSelect={() => setLocationFor(group)}>
+                            <MapPinIcon />
+                            {tFolders(group.coords ? "editLocationAction" : "locationAction")}
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onSelect={() => renameDeployment(group)}>
+                            <PencilIcon />
+                            {tFolders("renameAction")}
+                          </DropdownMenuItem>
+                          {folder ? (
+                            <>
+                              <DropdownMenuSeparator />
+                              <DropdownMenuItem
+                                variant="destructive"
+                                onSelect={() => confirmDeleteFolder(group)}
+                              >
+                                <Trash2Icon />
+                                {tFolders("deleteAction")}
+                              </DropdownMenuItem>
+                            </>
+                          ) : null}
+                        </DropdownMenuContent>
+                      </DropdownMenu>
                     ) : null}
                   </div>
                 </div>
@@ -584,6 +821,7 @@ export function AccountAudioViewer({
                       did={did}
                       host={host}
                       items={group.items}
+                      location={group.coords ? { ...group.coords, label: group.name } : null}
                       selectable={canDelete}
                       selectedUris={selectedUris}
                       onToggleSelect={toggleSelect}
@@ -592,8 +830,8 @@ export function AccountAudioViewer({
                 </div>
               </section>
             );
-            // Owners and org admins get a right-click menu on the folder —
-            // the same actions as the header buttons, plus "Add to project".
+            // Owners and org admins also get a right-click menu on the
+            // folder — the same actions as the header's Edit menu.
             if (!canDelete || !folder) {
               return <div key={group.key || "other"}>{section}</div>;
             }
@@ -605,7 +843,11 @@ export function AccountAudioViewer({
                     <FolderKanbanIcon />
                     {tFolders("addToProject.action")}
                   </ContextMenuItem>
-                  <ContextMenuItem onSelect={() => renameFolder(folder)}>
+                  <ContextMenuItem onSelect={() => setLocationFor(group)}>
+                    <MapPinIcon />
+                    {tFolders(group.coords ? "editLocationAction" : "locationAction")}
+                  </ContextMenuItem>
+                  <ContextMenuItem onSelect={() => renameDeployment(group)}>
                     <PencilIcon />
                     {tFolders("renameAction")}
                   </ContextMenuItem>

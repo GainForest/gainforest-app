@@ -19,6 +19,12 @@ import type { AudioPace, AudioSeries } from "./model";
  * The window ends at the last day with data, not at the deadline: the point
  * is where the grantee stands today, and drawing months of empty future would
  * flatten the part that matters.
+ *
+ * Before the grant window opens the chart still draws — Bumiscan tracks the
+ * line the whole time. The axis then anchors on the first upload instead of
+ * the (future) grant start, the required line lies flat at zero, and the
+ * readout calls the balance a head start rather than a pace verdict: nothing
+ * is asked of a grantee whose window has not opened.
  */
 
 const DAY_MS = 86_400_000;
@@ -85,15 +91,20 @@ export function AudioPaceChart({
     const requiredPace = targetMinutes / grantDays;
 
     const lastMs = Date.parse(series.days[series.days.length - 1]!);
+    // Before the window opens the grant start lies beyond the data, so the
+    // axis anchors on the eve of the first upload instead: the line rises
+    // from zero, and nothing is required of any day it covers.
+    const preWindow = startMs > lastMs;
+    const floorMs = preWindow ? Date.parse(series.days[0]!) - DAY_MS : startMs;
     const option = RANGES.find((r) => r.id === range)!;
     const windowStartMs =
-      option.days == null ? startMs : Math.max(startMs, lastMs - (option.days - 1) * DAY_MS);
+      option.days == null ? floorMs : Math.max(floorMs, lastMs - (option.days - 1) * DAY_MS);
 
     const spanDays = Math.max(1, (lastMs - windowStartMs) / DAY_MS);
     const startVal = seriesValueAt(series, windowStartMs);
     const endVal = series.values[series.values.length - 1]!;
     const actualGrowth = endVal - startVal;
-    const requiredGrowth = requiredPace * spanDays;
+    const requiredGrowth = preWindow ? 0 : requiredPace * spanDays;
 
     const pts: { ms: number; v: number }[] = [{ ms: windowStartMs, v: startVal }];
     for (let i = 0; i < series.days.length; i += 1) {
@@ -103,6 +114,7 @@ export function AudioPaceChart({
     if (pts[pts.length - 1]!.ms !== lastMs) pts.push({ ms: lastMs, v: endVal });
 
     return {
+      preWindow,
       windowStartMs,
       lastMs,
       startVal,
@@ -117,6 +129,7 @@ export function AudioPaceChart({
   }, [series, range, targetMinutes, grantStart, deadline]);
 
   const ahead = view.delta >= 0;
+  const preWindow = view.preWindow;
 
   // Geometry. Same proportions as the Bumiscan chart.
   const VW = 720;
@@ -152,6 +165,10 @@ export function AudioPaceChart({
   const minutes = (value: number) => format.number(Math.round(value));
   const rate = (value: number) =>
     t("perDay", { rate: format.number(Math.round(value * 10) / 10) });
+  // "Since grant" is the wrong name for a range that predates the grant.
+  const rangeLabel = (id: RangeId) =>
+    preWindow && id === "all" ? t("ranges.allUpcoming") : t(`ranges.${id}`);
+  const opensLabel = day(Date.parse(grantStart));
 
   return (
     <section className="flex flex-col gap-3 rounded-2xl border border-border bg-surface p-4">
@@ -192,7 +209,7 @@ export function AudioPaceChart({
                 : "text-muted-foreground hover:text-foreground",
             )}
           >
-            {t(`ranges.${option.id}`)}
+            {rangeLabel(option.id)}
           </button>
         ))}
       </div>
@@ -201,7 +218,9 @@ export function AudioPaceChart({
       <div className="flex flex-wrap items-end justify-between gap-x-6 gap-y-3">
         <div>
           <div className="text-[10px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">
-            {t("vsPaceNeeded", { range: t(`ranges.${range}`) })}
+            {preWindow
+              ? t("upcomingEyebrow", { range: rangeLabel(range) })
+              : t("vsPaceNeeded", { range: rangeLabel(range) })}
           </div>
           <div
             className={cn(
@@ -213,7 +232,9 @@ export function AudioPaceChart({
             {minutes(Math.abs(view.delta))}
           </div>
           <div className="mt-0.5 text-xs text-muted-foreground">
-            {t(ahead ? "aheadPhrase" : "behindPhrase", { phrase: t(`phrases.${range}`) })}
+            {preWindow
+              ? t("upcomingPhrase", { date: opensLabel })
+              : t(ahead ? "aheadPhrase" : "behindPhrase", { phrase: t(`phrases.${range}`) })}
           </div>
         </div>
         <div className="text-right text-xs text-muted-foreground">
@@ -222,11 +243,23 @@ export function AudioPaceChart({
             {t("actual")}
           </div>
           <div>
-            <span className="font-medium text-foreground">+{minutes(view.requiredGrowth)}</span>{" "}
-            {t("needed")}
+            {preWindow ? (
+              t("upcomingNeeded", { date: opensLabel })
+            ) : (
+              <>
+                <span className="font-medium text-foreground">+{minutes(view.requiredGrowth)}</span>{" "}
+                {t("needed")}
+              </>
+            )}
           </div>
           <div className="mt-0.5 text-[11px] tabular-nums">
-            {t("rates", { actual: rate(view.actualPace), needed: rate(view.requiredPace) })}
+            {preWindow
+              ? t("upcomingRates", {
+                  actual: rate(view.actualPace),
+                  needed: rate(pace.requiredPerDay ?? view.requiredPace),
+                  date: opensLabel,
+                })
+              : t("rates", { actual: rate(view.actualPace), needed: rate(view.requiredPace) })}
           </div>
         </div>
       </div>
@@ -351,9 +384,11 @@ export function AudioPaceChart({
         <span>
           {pace.status === "met"
             ? t("overallMet")
-            : t(pace.deltaVsPace >= 0 ? "overallAhead" : "overallBehind", {
-                minutes: minutes(Math.abs(pace.deltaVsPace)),
-              })}
+            : preWindow
+              ? t("overallUpcoming", { date: opensLabel })
+              : t(pace.deltaVsPace >= 0 ? "overallAhead" : "overallBehind", {
+                  minutes: minutes(Math.abs(pace.deltaVsPace)),
+                })}
         </span>
       </div>
     </section>

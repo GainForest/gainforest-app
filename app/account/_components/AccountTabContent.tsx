@@ -5,6 +5,7 @@ import { notFound } from "next/navigation";
 import { BadgeCheckIcon, ChevronRightIcon } from "lucide-react";
 import { getLocale, getTranslations } from "next-intl/server";
 import { AccountGalleryClient } from "./AccountGalleryClient";
+import { ManageActionRow, type ManageAction } from "./ManageActionRow";
 import type { GalleryProjectOption } from "./AccountGalleryUploader";
 import { canCreateRecord } from "../../(manage)/manage/_lib/cgs-permissions";
 import { RichText } from "../../_components/RichText";
@@ -32,30 +33,7 @@ import { getEntriesForActivities } from "@/app/cert/[did]/[rkey]/_components/tim
 import { resolveTimelineReferences } from "@/app/cert/[did]/[rkey]/_components/timeline/timelineReferenceResolver";
 import { ProjectTimelineReadonly } from "@/app/projects/[did]/[rkey]/_components/ProjectTimelineReadonly";
 import type { AccountRouteData } from "../_lib/account-route";
-import { accountDonationsPath, accountObservationsPath, accountPath, accountProjectsPath } from "../_lib/account-route";
-
-type ManageAction = {
-  href: string;
-  label: string;
-  description: string;
-};
-
-function ManageActionRow({ action }: { action?: ManageAction | null }) {
-  if (!action) return null;
-
-  return (
-    <Link
-      href={action.href}
-      className="mt-6 flex items-center justify-between gap-4 rounded-2xl border border-border/70 bg-muted/50 px-4 py-3 text-sm transition-colors hover:bg-muted"
-    >
-      <span className="min-w-0">
-        <span className="block font-medium text-foreground">{action.label}</span>
-        <span className="mt-0.5 block text-muted-foreground">{action.description}</span>
-      </span>
-      <ChevronRightIcon className="h-4 w-4 shrink-0 text-muted-foreground" />
-    </Link>
-  );
-}
+import { accountDonationsPath, accountObservationsManagePath, accountObservationsPath, accountPath, accountProjectsPath } from "../_lib/account-route";
 
 function DataCouncilAvatar({ member }: { member: PublicDataCouncilMember }) {
   const mono = monogram(member.displayName?.trim() || "Member", member.did);
@@ -301,15 +279,24 @@ export async function AccountHomeTabContent({ account }: { account: AccountRoute
 // of at-a-glance stat tiles that link into each tab, and a slim share card.
 // Replaces the bulky right-hand sidebar that used to crowd the Certs page.
 export async function AccountOverviewTabContent({ account, did }: { account: AccountRouteData; did: string }) {
-  const [tabsT, shareT, locale, projects, receipts, observationSummary] = await Promise.all([
+  const [tabsT, shareT, locale, projects, receipts, observationSummary, session] = await Promise.all([
     getTranslations("common.accountTabs"),
     getTranslations("marketplace.account.sidebar"),
     getLocale(),
     fetchProjectsByDid(did, 1000).then((page) => page.records).catch(() => []),
     fetchReceipts().catch(() => []),
     fetchObservationSummaryByDid(did).catch(() => null),
+    fetchAuthSession().catch(() => ({ isLoggedIn: false }) as AuthSession),
   ]);
-  const donationCount = receipts.filter((receipt) => receipt.from?.type === "did" && receipt.from.id === did).length;
+  // The Donations tab shows the owner their own anonymous donations (matched
+  // server-side via their donor hash), so the at-a-glance tile must count them
+  // too — otherwise a donor who just gave anonymously lands on "0 Donations".
+  // Owner-only: the public still sees only publicly attributed receipts.
+  const viewerIsOwner = session.isLoggedIn && session.did === did;
+  const anonymousDonations = viewerIsOwner ? await fetchOwnAnonymousReceipts(did).catch(() => []) : [];
+  const donationCount =
+    receipts.filter((receipt) => receipt.from?.type === "did" && receipt.from.id === did).length +
+    anonymousDonations.length;
   const hasAbout = Boolean(account.detail?.richBody?.length || account.detail?.blurb);
 
   // Keep in step with ACCOUNT_OVERVIEW_FOLDER_IDS — the loading placeholder
@@ -429,16 +416,42 @@ export async function AccountDonationsTabContent({ account, did }: { account: Ac
 // tab — the same surface as the old /manage URL — so they never need to leave
 // for a separate manage page. Anyone without manage access sees the read-only
 // public view instead.
-export async function AccountObservationsTabContent({ account, did }: { account: AccountRouteData; did: string }) {
+//
+// `publicViewOnly` is the staged tab/manage split: the page passes it for
+// viewers whose tools live on the dedicated manage page (GainForest admins for
+// now). They get the same public view as any visitor, plus a signpost row
+// across to the manage page.
+export async function AccountObservationsTabContent({
+  account,
+  did,
+  publicViewOnly = false,
+}: {
+  account: AccountRouteData;
+  did: string;
+  publicViewOnly?: boolean;
+}) {
   const access = await resolveAccountManageAccess(account.urlIdentifier).catch(() => null);
-  if (access?.status === "allowed") {
+  if (access?.status === "allowed" && !publicViewOnly) {
     return <ObservationsSection target={access.target} />;
   }
 
+  let manageAction: ManageAction | null = null;
+  if (access?.status === "allowed") {
+    const t = await getTranslations("common.observationsManage");
+    manageAction = {
+      href: accountObservationsManagePath(account.urlIdentifier),
+      label: t("rowTitle"),
+      description: t("rowDescription"),
+    };
+  }
+
   return (
-    <Suspense fallback={<InlineCardGridSkeleton />}>
-      <RecordExplorer kind="occurrence" ownerDid={did} showHero={false} hideOccurrenceFilters defaultOccurrenceMedia="all" />
-    </Suspense>
+    <>
+      <ManageActionRow action={manageAction} />
+      <Suspense fallback={<InlineCardGridSkeleton />}>
+        <RecordExplorer kind="occurrence" ownerDid={did} showHero={false} hideOccurrenceFilters defaultOccurrenceMedia="all" />
+      </Suspense>
+    </>
   );
 }
 

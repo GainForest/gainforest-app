@@ -209,7 +209,7 @@ export function AudioMothGuide() {
         <p className="mx-auto mt-2 max-w-lg text-sm leading-relaxed text-muted-foreground">{t("finish.text")}</p>
         <div className="mt-6 grid gap-3 sm:grid-cols-3">
           <FinishLink href={APP_URL} text={t("finish.tool")} external />
-          <FinishLink href="/observations/audio" text={t("finish.soundscape")} />
+          <FinishLink href="/observations/audio?tab=soundscape" text={t("finish.soundscape")} />
           <FinishLink href={ARBIMON_URL} text={t("finish.arbimon")} external />
         </div>
       </section>

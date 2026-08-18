@@ -246,11 +246,13 @@ export default async function RootLayout({ children }: { children: React.ReactNo
                     <UploadTrayProvider>
                       <ChromeGate authSession={authSession}>{children}</ChromeGate>
                       <UploadTray />
+                      {/* The modal chrome mounts at the bottom of the provider
+                          tree — inside UploadTrayProvider — so inline modal
+                          content pushed via pushModal keeps access to the
+                          app-level contexts above this line (e.g. the
+                          AddObservationsModal's useUploadTray). */}
+                      <ModalHost />
                     </UploadTrayProvider>
-                    {/* The modal chrome mounts at the bottom of the provider
-                        tree so inline modal content pushed via pushModal keeps
-                        access to the app-level contexts above this line. */}
-                    <ModalHost />
                   </AppCartProvider>
                 </AccountDrawerProvider>
               </ModalProvider>

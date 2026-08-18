@@ -281,7 +281,7 @@
       "eyebrow": "Reto BioBlitz Semanal",
       "titlePrefix": "Reto",
       "titleEmphasis": "BioBlitz",
-      "description": "Una carrera semanal y amistosa para registrar biodiversidad al aire libre. Añade observaciones con tus propias fotos subidas. Las personas y las plantas en maceta no cuentan.",
+      "description": "Una carrera semanal y amistosa para registrar biodiversidad al aire libre con tus propias fotos subidas. Desde la Ronda 8, las fotos de animales valen 2 puntos, las de plantas 1 punto, y nombrar la especie suma 0,5 puntos extra. Las personas y las plantas en maceta no cuentan.",
       "program": "Parte del programa Klarna AI for Climate Resilience, con GainForest."
     },
     "rsvp": {
@@ -340,7 +340,7 @@
           "winners": {
             "title": "4. Selección de ganadores",
             "paragraphs": {
-              "p1": "El premio a Más observaciones se basa en el mayor número de observaciones válidas durante la ronda. El premio a Mejor foto se selecciona con los criterios descritos en la página de BioBlitz, incluida la calidad de la imagen, el tema y la participación de la comunidad cuando corresponda.",
+              "p1": "Desde la Ronda 8, el premio a la Mayor puntuación se basa en la puntuación total más alta de observaciones válidas durante la ronda: cada foto válida de animal vale 2 puntos, cada foto válida de planta vale 1 punto, y cualquiera suma 0,5 puntos extra cuando la especie está identificada en lugar de quedar sin identificar. En rondas anteriores, este premio se basaba en el mayor número de observaciones válidas. El premio a Mejor foto se selecciona con los criterios descritos en la página de BioBlitz, incluida la calidad de la imagen, el tema y la participación de la comunidad cuando corresponda.",
               "p2": "GainForest puede revisar entradas, resolver empates, corregir errores de conteo y descalificar entradas no válidas. Las decisiones son definitivas en la medida permitida por la ley."
             }
           },
@@ -504,6 +504,10 @@
         "title": "Más observaciones",
         "blurb": "Para quien registre más avistamientos válidos en la ronda."
       },
+      "highestPoints": {
+        "title": "Mayor puntuación",
+        "blurb": "Para quien logre la mayor puntuación en la ronda: 2 puntos por foto de animal, 1 por foto de planta y +0,5 si nombras la especie."
+      },
       "bestPicture": {
         "title": "Mejor foto",
         "blurb": "Para la foto de naturaleza más impactante de la semana, elegida por el equipo."
@@ -522,7 +526,7 @@
         },
         "review": {
           "title": "Revisa el nombre de la especie",
-          "blurb": "Confirma o corrige el nombre sugerido: tu conocimiento importa."
+          "blurb": "Confirma o corrige el nombre sugerido: desde la Ronda 8, una especie nombrada suma 0,5 puntos extra."
         }
       },
       "proof": {
@@ -536,6 +540,7 @@
       "title": "Tabla de esta ronda",
       "live": "En vivo",
       "subtitleLive": "Quién lidera ahora mismo con observaciones fotográficas válidas.",
+      "subtitleLivePoints": "Quién lidera en puntos ahora mismo con observaciones fotográficas válidas.",
       "subtitleEnded": "Clasificación final de esta ronda.",
       "subtitleUpcoming": "Sé la primera persona en la tabla cuando abra la ronda.",
       "subtitleAll": "Quienes tienen más observaciones fotográficas válidas en todo el reto.",
@@ -545,6 +550,8 @@
       },
       "leader": "En cabeza",
       "observations": "{count, plural, one {# observación} other {# observaciones}}",
+      "points": "{points} ptos",
+      "pointsFull": "{points, plural, one {# punto} other {# puntos}}",
       "openCollector": "Abrir el perfil en una pestaña nueva",
       "rankAriaLabel": "Puesto {rank}",
       "org": {
@@ -563,6 +570,9 @@
       "stats": {
         "observations": "Observaciones esta ronda",
         "observationsAll": "Observaciones (histórico)",
+        "animals": "Animales",
+        "plants": "Plantas",
+        "named": "Especies nombradas",
         "collectors": "Participantes",
         "timeLeft": "Tiempo restante"
       },
@@ -584,7 +594,26 @@
         "title": "No se pudo cargar la tabla",
         "description": "Inténtalo de nuevo en un momento."
       },
-      "cta": "Añade tus observaciones"
+      "cta": "Añade tus observaciones",
+      "pointsGuide": {
+        "title": "Cómo se calculan los puntos",
+        "animalValue": "2 ptos",
+        "animalLabel": "Por foto de animal",
+        "plantValue": "1 pto",
+        "plantLabel": "Por foto de planta",
+        "namedValue": "+0,5 ptos",
+        "namedLabel": "Especie nombrada",
+        "note": "Los puntos comenzaron en la Ronda 8. El total es: fotos de animales × 2, más fotos de plantas × 1, más 0,5 por cada especie nombrada. Toca una fila de la tabla para ver el cálculo de esa persona."
+      },
+      "breakdown": {
+        "toggle": "Cómo se calcularon los puntos",
+        "animals": "{count, plural, one {# foto de animal} other {# fotos de animales}} × 2",
+        "plants": "{count, plural, one {# foto de planta} other {# fotos de plantas}} × 1",
+        "labeled": "{count, plural, one {# especie nombrada} other {# especies nombradas}} × 0,5",
+        "ineligible": "{count, plural, one {# foto no calificó} other {# fotos no calificaron}}",
+        "total": "Puntos totales",
+        "profile": "Abrir perfil"
+      }
     },
     "winners": {
       "title": "Ganadores anteriores",
@@ -597,7 +626,11 @@
       "finalHint": "Estos ganadores están confirmados y no cambiarán.",
       "provisionalHint": "Clasificación actual: puede cambiar hasta que se confirmen los ganadores.",
       "compact": "Recientes",
+      "newer": "Rondas recientes",
+      "older": "Rondas anteriores",
+      "page": "{page} de {total}",
       "mostSubmitted": "Más envíos",
+      "highestPoints": "Mayor puntuación",
       "mostLiked": "Más me gusta",
       "award": {
         "action": "Otorgar insignias a los ganadores",
@@ -606,6 +639,7 @@
         "error": "No se pudieron actualizar las insignias o el estado del correo. Inténtalo de nuevo.",
         "notification": {
           "mostObservations": "Correo de más observaciones",
+          "highestPoints": "Correo de mayor puntuación",
           "bestPicture": "Correo de mejor foto",
           "sent": "Enviado",
           "delayed": "Retrasado; seguiremos intentándolo",
@@ -851,7 +885,9 @@
           "confirmed": "Confirmado",
           "payout": "Libera ${amount} · pago {tranche}",
           "reviewNote": "GainForest confirma cada hito: cada hito confirmado libera la siguiente parte de tu subvención.",
-          "pending": "Sin confirmar"
+          "pending": "Sin confirmar",
+          "dueOn": "Vence {date}",
+          "overdue": "Venció {date}"
         },
         "metadata": {
           "title": "Mi subvención",
@@ -867,7 +903,8 @@
             "1w": "Semana",
             "1m": "Mes",
             "6m": "6 meses",
-            "all": "Desde la subvención"
+            "all": "Desde la subvención",
+            "allUpcoming": "Todas las subidas"
           },
           "phrases": {
             "1w": "esta semana",
@@ -878,6 +915,10 @@
           "vsPaceNeeded": "frente al ritmo necesario · {range}",
           "behindPhrase": "por detrás del ritmo necesario {phrase}",
           "aheadPhrase": "por delante del ritmo necesario {phrase}",
+          "upcomingEyebrow": "ventaja inicial · {range}",
+          "upcomingPhrase": "acumulados antes de que la ventana de la subvención abra el {date}",
+          "upcomingNeeded": "0 necesarios hasta el {date}",
+          "upcomingRates": "{actual} real · {needed} necesario desde el {date}",
           "actual": "real",
           "needed": "necesario",
           "perDay": "{rate}/día",
@@ -887,6 +928,7 @@
           "focus": "{minutes} min el {date}",
           "overallBehind": "En total {minutes} min por detrás del ritmo de toda la subvención",
           "overallAhead": "En total {minutes} min por delante del ritmo de toda la subvención",
+          "overallUpcoming": "La ventana de la subvención abre el {date} · cada minuto ya subido es ventaja",
           "overallMet": "Meta de grabación alcanzada"
         }
       },

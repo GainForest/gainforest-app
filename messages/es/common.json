@@ -110,6 +110,7 @@
       "settings": "Configuración",
       "projects": "Proyectos",
       "observations": "Observaciones",
+      "events": "Eventos",
       "donations": "Donaciones",
       "grants": "Subvenciones",
       "organizationHome": "Inicio de la organización",
@@ -269,6 +270,14 @@
         "title": "Cuenta",
         "description": "Nombre de usuario y seguridad de acceso"
       },
+      "profile": {
+        "title": "Perfil público",
+        "description": "Lo que muestra tu página pública"
+      },
+      "members": {
+        "title": "Miembros",
+        "description": "Personas, roles y el Consejo de Datos"
+      },
       "connections": {
         "title": "Conexiones",
         "description": "Cuentas sociales y servicios externos"
@@ -281,6 +290,13 @@
         "title": "Opciones avanzadas",
         "description": "Datos de la cuenta y eliminación"
       }
+    },
+    "location": {
+      "title": "Ubicación",
+      "description": "Dónde tiene su sede esta cuenta; se muestra en el perfil público.",
+      "notSet": "Sin ubicación",
+      "edit": "Editar",
+      "saveError": "No se pudo guardar la ubicación. Inténtalo de nuevo."
     }
   },
   "bumicertCard": {
@@ -489,6 +505,30 @@
     "endorsementsGiven": "Respaldos",
     "equipment": "Equipos",
     "more": "Más"
+  },
+  "accountAudio": {
+    "viewsAria": "Vistas de audio",
+    "recordings": "Grabaciones",
+    "soundscapes": "Paisajes sonoros",
+    "soundscapesCount": "{count, plural, one {# paisaje sonoro} other {# paisajes sonoros}}",
+    "soundscapesLoadError": "Los paisajes sonoros no se pudieron cargar en este momento.",
+    "soundscapesEmptyTitle": "Aún no hay paisajes sonoros",
+    "soundscapesEmptyBody": "Un paisaje sonoro convierte grabaciones de campo en un retrato sonoro de 24 horas. Cuando este perfil publique uno, aparecerá aquí para que cualquiera pueda escucharlo.",
+    "soundscapesBuildCta": "Crea uno con tus grabaciones"
+  },
+  "observationsManage": {
+    "metaTitle": "Gestionar observaciones — {name}",
+    "title": "Gestionar observaciones",
+    "description": "Añade, edita y agrupa los avistamientos de naturaleza guardados en este perfil.",
+    "rowTitle": "Gestionar observaciones",
+    "rowDescription": "Añade, edita y agrupa los avistamientos de este perfil."
+  },
+  "audioManage": {
+    "metaTitle": "Gestionar grabaciones — {name}",
+    "title": "Gestionar grabaciones",
+    "description": "Sube, etiqueta y organiza las grabaciones de campo guardadas en este perfil.",
+    "rowTitle": "Gestionar grabaciones",
+    "rowDescription": "Sube, etiqueta y organiza las grabaciones de este perfil."
   },
   "equipment": {
     "metadataTitle": "Equipos — {name}",
@@ -993,6 +1033,7 @@
       "inputPlaceholder": "Correo o usuario de Bluesky",
       "inputAria": "Correo o usuario de Bluesky del miembro",
       "invite": "Invitar",
+      "refresh": "Actualizar",
       "ownerHelp": "Ingresa un correo para enviar una invitación, o un usuario de Bluesky para agregar a alguien de inmediato.",
       "adminHelp": "Agrega miembros normales por usuario de Bluesky, o invítalos por correo. Pide a una persona propietaria que agregue a otro administrador.",
       "locked": "Solo propietarios y administradores pueden invitar o quitar miembros.",
@@ -1098,6 +1139,7 @@
       "following": "Siguiendo",
       "project": "Proyectos",
       "observation": "Avistamientos",
+      "audio": "Grabaciones",
       "organization": "Organizaciones",
       "donation": "Donaciones",
       "post": "Publicaciones"
@@ -1107,7 +1149,8 @@
       "observation": "compartió un avistamiento",
       "organization": "registró una organización",
       "donation": "hizo una donación",
-      "post": "compartió una novedad"
+      "post": "compartió una novedad",
+      "audio": "subió grabaciones de campo"
     },
     "to": "a",
     "anonymous": "Alguien",
@@ -1129,6 +1172,11 @@
       "likesAcross": "{count, plural, one {# me gusta en estos avistamientos} other {# me gusta en estos avistamientos}}",
       "commentsHeading": "Comentarios sobre estos avistamientos",
       "commentOn": "en {species}"
+    },
+    "audioUpload": {
+      "recordings": "{count, plural, one {# grabación subida} other {# grabaciones subidas}}",
+      "browse": "Explorar grabaciones",
+      "recorderFallback": "Grabadora de campo"
     },
     "profileCard": {
       "unnamed": "Cuenta sin nombre",
@@ -1274,6 +1322,11 @@
         "labelWithRound": "BioBlitz {roundName} — más observaciones",
         "description": "Ganó una ronda de BioBlitz por la mayor cantidad de observaciones."
       },
+      "bioblitz-most-images-points": {
+        "label": "BioBlitz — mayor puntuación",
+        "labelWithRound": "BioBlitz {roundName} — mayor puntuación",
+        "description": "Ganó una ronda de BioBlitz con la mayor puntuación."
+      },
       "bioblitz-best-picture": {
         "label": "BioBlitz — mejor foto",
         "labelWithRound": "BioBlitz {roundName} — mejor foto",
@@ -1357,7 +1410,24 @@
       "slotsFull": "Las diez plazas están ocupadas. Quita a alguien antes de añadir a otra persona o grupo.",
       "remove": "Quitar de la subvención",
       "removing": "Quitando…",
-      "removeConfirm": "¿Quitar a «{name}» de la subvención? Se conservan los hitos y los documentos, pero esa cuenta pierde el acceso al panel de la subvención y la plaza queda libre."
+      "removeConfirm": "¿Quitar a «{name}» de la subvención? Se conservan los hitos y los documentos, pero esa cuenta pierde el acceso al panel de la subvención y la plaza queda libre.",
+      "dueDateLabel": "Fecha límite de {title}",
+      "overdue": "Vencido",
+      "customMilestone": "Personalizado",
+      "milestoneNameLabel": "Nombre del hito",
+      "milestoneNamePlaceholder": "p. ej. Taller de formación comunitaria",
+      "addMilestone": "Añadir hito",
+      "addingMilestone": "Añadiendo…",
+      "addMilestoneDueLabel": "Fecha límite",
+      "addMilestoneHint": "Añade un paso solo para este beneficiario, con su propio nombre, descripción y fecha límite. El beneficiario lo ve de inmediato en su página de la subvención.",
+      "removeMilestone": "Quitar {title}",
+      "removeMilestoneConfirm": "¿Quitar «{title}» de los hitos de este beneficiario? El beneficiario dejará de verlo.",
+      "editMilestone": "Editar {title}",
+      "editSave": "Guardar",
+      "editCancel": "Cancelar",
+      "milestoneDescriptionLabel": "Descripción del hito",
+      "milestoneDescriptionPlaceholder": "Describe en qué consiste este paso (opcional)",
+      "programCopyHint": "Deja el nombre o la descripción en blanco para usar el texto estándar del programa."
     },
     "pages": {
       "hub": {
@@ -1423,17 +1493,20 @@
       "ended": "Finalizada"
     },
     "observations": "{count, plural, one {# observación} other {# observaciones}}",
+    "points": "{points, plural, one {# punto} other {# puntos}}",
     "ignored": "Ignorada",
     "counted": "Cuenta",
     "notCounted": "No cuenta",
     "prize": {
       "most-observations": "Más observaciones",
+      "highest-points": "Mayor puntuación",
       "best-picture": "Mejor foto"
     },
     "openProfile": "Abrir perfil",
     "joined": "Se unió el {date}",
     "download": {
       "most-observations": "Kit de más observaciones",
+      "highest-points": "Kit de mayor puntuación",
       "best-picture": "Kit de mejor foto"
     },
     "ignore": "Ignorar",
@@ -1850,15 +1923,49 @@
   "observationsHub": {
     "ariaLabel": "Tipos de observación",
     "photos": "Fotos",
-    "audio": "Audio",
-    "devices": "Dispositivos"
+    "audio": "Audio"
   },
   "audiomoth": {
     "audioHub": {
       "title": "Audio",
       "subtitle": "Sube grabaciones desde la tarjeta SD de un AudioMoth, organízalas en despliegues y etiqueta lo que escuchas: las observaciones de audio viven aquí.",
       "metaTitle": "Observaciones de audio",
-      "metaDescription": "Sube grabaciones de AudioMoth, gestiona despliegues, etiqueta especies y explora paisajes sonoros dentro de Observaciones."
+      "metaDescription": "Sube grabaciones de AudioMoth, gestiona despliegues, etiqueta especies y explora paisajes sonoros dentro de Observaciones.",
+      "librarySubtitle": "Todos los despliegues y grabaciones que has subido, en un solo lugar: reprodúcelas, muévelas entre despliegues, renómbralas o elimínalas.",
+      "yourRecordings": "Tus grabaciones",
+      "soundscapesTitle": "Audio",
+      "soundscapesLede": "Grabaciones de campo y retratos sonoros de 24 horas desde grabadoras por todo GainForest. Toca un reloj para escuchar un lugar a esa hora del día.",
+      "soundscapesEmptyTitle": "Aún no hay audio publicado",
+      "soundscapesEmptyBody": "Cuando alguien suba grabaciones de campo, o las convierta en un paisaje sonoro, aparecerán aquí para que cualquiera pueda escucharlas.",
+      "soundscapesEmptyCta": "Crea uno con tus grabaciones",
+      "publicPill": "Público",
+      "searchPlaceholder": "Buscar proyectos o paisajes sonoros",
+      "allProjects": "Todos los proyectos",
+      "filterByProject": "Filtrar por proyecto",
+      "sortBy": "Ordenar proyectos",
+      "sortRecentlyAdded": "Añadidos recientemente",
+      "sortRecentlyRecorded": "Grabados recientemente",
+      "openProject": "Abrir proyecto",
+      "openAccount": "Abrir perfil",
+      "noProject": "(sin proyecto)",
+      "projectMeta": "{project} · {recorders, plural, one {# grabadora} other {# grabadoras}} · {recordings, number} grabaciones",
+      "soundscapeSlot": "Paisaje sonoro",
+      "recordingsSlot": "Grabaciones",
+      "recorderFallback": "Grabadora de campo",
+      "slotRecordings": "{count, number} grabaciones",
+      "soundscapeFallback": "Paisaje sonoro",
+      "dateUnavailable": "Fecha no disponible",
+      "showMoreFromProject": "{count, plural, one {Mostrar # más de este proyecto} other {Mostrar # más de este proyecto}}",
+      "showFewer": "Mostrar menos",
+      "voiceKeyTitle": "Clave de grupos de voces",
+      "noMatches": "Ningún proyecto coincide con estos filtros.",
+      "clearFilters": "Borrar filtros",
+      "browseRecordings": "Explorar grabaciones",
+      "unknownOrganization": "Responsable del proyecto"
+    },
+    "library": {
+      "signInTitle": "Inicia sesión para ver tus archivos",
+      "signInBody": "Tus grabaciones y despliegues subidos aparecerán aquí cuando inicies sesión."
     },
     "devicesHub": {
       "title": "Dispositivos"
@@ -2030,7 +2137,7 @@
     },
     "mainTabs": {
       "setup": "Configuración",
-      "deployments": "Despliegue",
+      "library": "Grabaciones",
       "upload": "Subir",
       "label": "Etiquetar",
       "identifications": "Identificaciones",
@@ -2119,15 +2226,10 @@
     },
     "deployments": {
       "intro": "Los despliegues registran dónde y cuándo se colocó un AudioMoth en el campo. Cada uno reproduce un tono acústico que ajusta el reloj, la ubicación y el ID de despliegue del grabador.",
+      "sectionTitle": "Despliegues",
+      "deploymentCount": "{count, plural, one {# despliegue} other {# despliegues}}",
       "createButton": "Crear despliegue",
-      "signInTitle": "Inicia sesión para ver tus despliegues",
-      "signInBody": "Tus despliegues se guardan en tu cuenta. Inicia sesión para crearlos y gestionarlos.",
-      "loadErrorTitle": "No se pudieron cargar los despliegues",
-      "loadError": "Algo salió mal al cargar tus despliegues. Inténtalo de nuevo.",
-      "emptyTitle": "Aún no hay despliegues",
-      "emptyBody": "Crea tu primer despliegue para configurar un AudioMoth en el campo con el tono acústico.",
       "untitled": "Despliegue sin nombre",
-      "copyId": "Copiar ID de despliegue",
       "delete": "Eliminar despliegue",
       "confirmDelete": "Confirmar eliminación",
       "cancel": "Cancelar",
@@ -2137,7 +2239,7 @@
       "siteNameLabel": "Nombre del sitio (opcional)",
       "siteNamePlaceholder": "Sendero del río, parcela 3…",
       "deploymentIdLabel": "ID de despliegue",
-      "newId": "Generar un nuevo ID",
+      "deploymentIdHint": "Se genera automáticamente para este despliegue.",
       "latitudeLabel": "Latitud",
       "longitudeLabel": "Longitud",
       "useLocation": "Usar mi ubicación actual",
@@ -2170,7 +2272,7 @@
       "deployedLabel": "Desplegado",
       "equipmentLinked": "Unidad vinculada",
       "metadataTitle": "{name} — Despliegue",
-      "detailBack": "Volver a los despliegues",
+      "detailBack": "Volver a las grabaciones",
       "mapTitle": "Ubicación del despliegue",
       "equipmentUsedLabel": "AudioMoth utilizado",
       "protocolLabel": "Protocolo",
@@ -2179,8 +2281,8 @@
       "attachWaiting": "{count, plural, one {# grabación se está subiendo en segundo plano — se adjuntará al despliegue que crees.} other {# grabaciones se están subiendo en segundo plano — se adjuntarán al despliegue que crees.}}",
       "attaching": "Adjuntando {count, plural, one {# grabación} other {# grabaciones}} al nuevo despliegue…",
       "attachDone": "{count, plural, one {# grabación adjuntada al nuevo despliegue.} other {# grabaciones adjuntadas al nuevo despliegue.}}",
-      "attachPartial": "{moved} adjuntadas · {failed} no se pudieron mover — se quedan en la carpeta de la tarjeta.",
-      "attachFailed": "No se pudo adjuntar el lote — las grabaciones se quedan en la carpeta de la tarjeta."
+      "attachPartial": "{moved} adjuntadas · {failed} no se pudieron mover — se quedan en el despliegue de la tarjeta.",
+      "attachFailed": "No se pudo adjuntar el lote — las grabaciones se quedan en el despliegue de la tarjeta."
     },
     "upload": {
       "intro": "Inserta la tarjeta SD de un AudioMoth y elígela abajo. Las grabaciones se reconocen por el ID de despliegue incluido en cada archivo, se guardan en un almacenamiento de archivo seguro y se registran en tu cuenta.",
@@ -2204,8 +2306,6 @@
       "unmatchedTitle": "Despliegue no encontrado en tu cuenta",
       "noIdTitle": "Estas grabaciones no tienen ID de despliegue",
       "groupCount": "{count} grabaciones",
-      "assignLabel": "Vincular a un despliegue (opcional)",
-      "assignNone": "Sin despliegue",
       "unreadable": "{count} archivos no se pudieron leer como grabaciones WAV y se omitirán.",
       "moreFiles": "…y {count} grabaciones más",
       "previewToggle": "Guardar vistas previas reproducibles",
@@ -2227,19 +2327,19 @@
       "errorSaveConnection": "El archivo se envió, pero el internet se cortó antes de terminar. Toca “Reintentar archivos fallidos”.",
       "errorSaveFailed": "El archivo se subió, pero no se pudo guardar en tu cuenta. Inténtalo de nuevo.",
       "deploymentFallback": "Creado automáticamente al subir grabaciones de la tarjeta SD.",
-      "groupNameLabel": "Ponle nombre a esta subida",
-      "groupNameHelp": "Estas grabaciones se agruparán con este nombre en tu perfil, para que puedas encontrarlas después.",
+      "groupNameLabel": "Ponle nombre a este despliegue",
+      "groupNameHelp": "Ponle el nombre del despliegue del que provienen estas grabaciones. Una salida anterior también vale. Se agruparán con este nombre en tu perfil para que puedas encontrarlas después.",
       "groupNamePlaceholder": "p. ej. Borde del bosque — abril 2024",
-      "groupNameRequired": "Primero ponle un nombre a esta subida.",
+      "groupNameRequired": "Primero ponle un nombre a este despliegue.",
       "folderTitle": "¿Dónde deben ir estas grabaciones?",
-      "folderExistingHelp": "Añádelas a una carpeta que ya tengas, para que todo lo de este sitio quede junto.",
-      "folderResumedHelp": "Ya tienes una carpeta con este nombre, así que estas grabaciones se añadirán a ella en lugar de crear una nueva.",
-      "folderExistingAction": "Elegir una carpeta existente",
-      "folderNewAction": "Nueva carpeta",
-      "folderSearchPlaceholder": "Busca en tus carpetas",
-      "folderNoMatch": "Ninguna carpeta coincide con tu búsqueda.",
-      "folderRequired": "Elige primero una carpeta.",
-      "folderLoading": "Cargando tus carpetas…",
+      "folderExistingHelp": "Añádelas a un despliegue que ya tengas, para que todo lo de este sitio quede junto.",
+      "folderResumedHelp": "Ya tienes un despliegue con este nombre, así que estas grabaciones se añadirán a él en lugar de crear uno nuevo.",
+      "folderExistingAction": "Elegir un despliegue existente",
+      "folderNewAction": "Añadir un despliegue",
+      "folderSearchPlaceholder": "Busca en tus despliegues",
+      "folderNoMatch": "Ningún despliegue coincide con tu búsqueda.",
+      "folderRequired": "Elige primero un despliegue.",
+      "folderLoading": "Cargando tus despliegues…",
       "groupRemarks": "Creado al subir una carpeta de grabaciones.",
       "discovering": "Buscando grabaciones… {count} archivos encontrados",
       "readFailed": "No se pudo leer la tarjeta SD. Retírala y vuelve a insertarla, luego inténtalo de nuevo, o arrastra la carpeta a esta página.",
@@ -3309,6 +3409,10 @@
     "allUploaded": "{count} subidas · {size}"
   },
   "soundscape": {
+    "autoPublish": {
+      "note": "El paisaje sonoro de esta carpeta está publicado en el perfil y se actualiza a medida que continúa el análisis.",
+      "view": "Abrirlo"
+    },
     "meta": {
       "title": "Paisaje sonoro",
       "description": "Crea un reloj de paisaje sonoro de 24 horas a partir de las grabaciones de audio ya subidas a tu cuenta."
@@ -3347,12 +3451,12 @@
       "tooShort": "Demasiado corta para analizarla (necesita al menos {seconds} segundos)"
     },
     "groups": {
-      "title": "Carpetas",
-      "hint": "Cada paisaje sonoro se crea a partir de una carpeta de grabaciones: elige la carpeta con la que trabajar.",
-      "hintSingle": "Este paisaje sonoro se crea a partir de tu única carpeta de grabaciones.",
+      "title": "Despliegues",
+      "hint": "Cada paisaje sonoro se crea a partir de un despliegue de grabaciones: elige el despliegue con el que trabajar.",
+      "hintSingle": "Este paisaje sonoro se crea a partir de tu único despliegue de grabaciones.",
       "chip": "{name} · {count, plural, one {# grabación} other {# grabaciones}}",
-      "unassigned": "Sin carpeta",
-      "unknown": "Carpeta eliminada"
+      "unassigned": "Sin despliegue",
+      "unknown": "Despliegue eliminado"
     },
     "bands": {
       "rumble": "Retumbo",
@@ -3457,38 +3561,43 @@
     }
   },
   "recordingFolders": {
+    "editAction": "Editar",
     "renameAction": "Renombrar",
     "deleteAction": "Eliminar",
-    "emptyFolder": "Todavía no hay grabaciones en esta carpeta.",
+    "emptyFolder": "Todavía no hay grabaciones en este despliegue.",
     "moveAction": "Mover",
     "moveTitle": "Mover {count, plural, one {# grabación} other {# grabaciones}}",
-    "moveBody": "Elige la carpeta a la que pertenecen estas grabaciones. Mover no cambia nada más: el audio, su análisis y lo que ya se haya compartido siguen igual.",
+    "moveBody": "Elige el despliegue al que pertenecen estas grabaciones. Mover no cambia nada más: el audio, su análisis y lo que ya se haya compartido siguen igual.",
     "moveProgress": "Moviendo… {done} de {total}",
     "movePartial": "{count, plural, one {# grabación no se pudo mover} other {# grabaciones no se pudieron mover}}. Inténtalo de nuevo.",
     "moveFailed": "No se pudieron mover las grabaciones. Inténtalo de nuevo.",
-    "newFolderRemarks": "Creada al mover grabaciones a una carpeta nueva.",
-    "renameTitle": "Renombrar carpeta",
-    "renameBody": "Solo cambia el nombre de la carpeta: las grabaciones que contiene se quedan donde están, igual que lo que ya se haya compartido a partir de ellas.",
-    "nameLabel": "Nombre de la carpeta",
+    "newFolderRemarks": "Creado al mover grabaciones a un despliegue nuevo.",
+    "renameTitle": "Renombrar despliegue",
+    "renameBody": "Solo cambia el nombre del despliegue: las grabaciones que contiene se quedan donde están, igual que lo que ya se haya compartido a partir de ellas.",
+    "nameLabel": "Nombre del despliegue",
     "namePlaceholder": "p. ej. Ribera, estación seca",
-    "nameRequired": "Ponle un nombre a la carpeta.",
+    "nameRequired": "Ponle un nombre al despliegue.",
     "save": "Guardar",
     "saving": "Guardando…",
     "cancel": "Cancelar",
-    "renameFailed": "No se pudo renombrar la carpeta. Inténtalo de nuevo.",
+    "renameFailed": "No se pudo renombrar el despliegue. Inténtalo de nuevo.",
+    "locationAction": "Fijar ubicación",
+    "editLocationAction": "Editar ubicación",
+    "locationTitle": "Fijar la ubicación del despliegue",
+    "locationBody": "¿Dónde se desplegó «{name}»?",
     "deleteTitle": "¿Eliminar «{name}»?",
-    "deleteBody": "{count, plural, =0 {La carpeta se eliminará permanentemente. Esto no se puede deshacer.} one {La carpeta y la # grabación que contiene se eliminarán permanentemente: se borran el archivo original archivado, la vista previa reproducible, el espectrograma, el análisis y todas las identificaciones marcadas en ella. Esto no se puede deshacer.} other {La carpeta y las # grabaciones que contiene se eliminarán permanentemente: se borran los archivos originales archivados, las vistas previas reproducibles, los espectrogramas, los análisis y todas las identificaciones marcadas en ellas. Esto no se puede deshacer.}}",
+    "deleteBody": "{count, plural, =0 {El despliegue se eliminará permanentemente. Esto no se puede deshacer.} one {El despliegue y la # grabación que contiene se eliminarán permanentemente: se borran el archivo original archivado, la vista previa reproducible, el espectrograma, el análisis y todas las identificaciones marcadas en ella. Esto no se puede deshacer.} other {El despliegue y las # grabaciones que contiene se eliminarán permanentemente: se borran los archivos originales archivados, las vistas previas reproducibles, los espectrogramas, los análisis y todas las identificaciones marcadas en ellas. Esto no se puede deshacer.}}",
     "identificationsIncluded": "{count, plural, one {Esto incluye # identificación guardada, que también se eliminará.} other {Esto incluye # identificaciones guardadas, que también se eliminarán.}}",
     "deleteProgress": "Eliminando… {done} de {total}",
-    "deletePartial": "{count, plural, one {# grabación no se pudo eliminar} other {# grabaciones no se pudieron eliminar}}, así que la carpeta se conservó. Inténtalo de nuevo.",
-    "deleteFailed": "No se pudo eliminar la carpeta. Inténtalo de nuevo.",
+    "deletePartial": "{count, plural, one {# grabación no se pudo eliminar} other {# grabaciones no se pudieron eliminar}}, así que el despliegue se conservó. Inténtalo de nuevo.",
+    "deleteFailed": "No se pudo eliminar el despliegue. Inténtalo de nuevo.",
     "addToProject": {
       "action": "Añadir a un proyecto",
       "title": "Añadir “{name}” a un proyecto",
-      "body": "La carpeta se une a la línea de tiempo de evidencia del proyecto; sus grabaciones se quedan exactamente donde están.",
+      "body": "El despliegue se une a la línea de tiempo de evidencia del proyecto; sus grabaciones se quedan exactamente donde están.",
       "noteLabel": "Nota (opcional)",
       "notePlaceholder": "¿Qué muestran estas grabaciones?",
-      "defaultNote": "{count, plural, =0 {Una carpeta de grabadora.} one {Una carpeta de grabadora con # grabación.} other {Una carpeta de grabadora con # grabaciones.}}",
+      "defaultNote": "{count, plural, =0 {Un despliegue de grabadora.} one {Un despliegue de grabadora con # grabación.} other {Un despliegue de grabadora con # grabaciones.}}",
       "untitledProject": "Proyecto sin título",
       "loading": "Cargando tus proyectos…",
       "loadError": "No se pudieron cargar tus proyectos. Inténtalo de nuevo en un momento.",
@@ -3505,7 +3614,7 @@
       "viewProject": "Abrir el proyecto",
       "close": "Cerrar",
       "cancel": "Cancelar",
-      "failed": "No se pudo añadir la carpeta. Inténtalo de nuevo."
+      "failed": "No se pudo añadir el despliegue. Inténtalo de nuevo."
     }
   },
   "hypercerts": {

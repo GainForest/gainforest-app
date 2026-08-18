@@ -1,6 +1,7 @@
 "use client";
 
 import { useId, useState, type ChangeEvent } from "react";
+import type { LeafletLinearDocument } from "@/app/_lib/leaflet-richtext";
 import { FileSpreadsheetIcon, XIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
@@ -18,11 +19,13 @@ import { CONTENT_TYPE_NATURE_OBSERVATIONS, type EvidenceSubmitter } from "./type
  */
 export function NatureCsvUpload({
   caption,
+  captionDocument,
   captionTitle,
   isSubmitting,
   submitDrafts,
 }: {
   caption: string;
+  captionDocument: LeafletLinearDocument | null;
   captionTitle: string | null;
   isSubmitting: boolean;
   submitDrafts: EvidenceSubmitter;
@@ -56,6 +59,7 @@ export function NatureCsvUpload({
       contentType: CONTENT_TYPE_NATURE_OBSERVATIONS,
       contents: [file],
       note: caption,
+      textDocument: captionDocument,
     };
     submitDrafts([draft], () => {
       setFile(null);

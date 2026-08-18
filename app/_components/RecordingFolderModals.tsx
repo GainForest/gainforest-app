@@ -26,6 +26,7 @@ import {
   type UploadFolderOptionItem,
 } from "@/app/audiomoth/_components/UploadFolderPicker";
 import { activeUploadFolderMode, type UploadFolderMode } from "@/app/_lib/audiomoth/upload-folder";
+import { LocationEditorModal } from "@/app/(manage)/manage/_modals/LocationEditorModal";
 
 const FOLDER_NAME_MAX = 120;
 
@@ -107,6 +108,57 @@ export function RenameFolderModal({
         </Button>
       </ModalFooter>
     </ModalContent>
+  );
+}
+
+/**
+ * Set or correct where a deployment's recorder stood — the manual override
+ * for deployments that came in by uploading past SD-card audio, which the
+ * chime flow never asked coordinates for.
+ *
+ * A thin skin over the one location editor the app already has (the
+ * organization-location modal): search for the place, enter coordinates by
+ * hand, drag the pin to fine-tune. Deployment coordinates are a measurement,
+ * so the editor runs in exact-point mode — no "approximate location" fuzzing
+ * — while still allowing the owner to remove an existing location.
+ */
+export function SetDeploymentLocationModal({
+  name,
+  initial,
+  onSave,
+}: {
+  /** The deployment's display name, for the dialog copy. */
+  name: string;
+  /** The currently stored coordinates, when the deployment has any. */
+  initial: { lat: number; lon: number } | null;
+  /** Persists the override or removes it when passed null. */
+  onSave: (location: { lat: number; lon: number } | null) => Promise<void>;
+}) {
+  const t = useTranslations("common.recordingFolders");
+  return (
+    <LocationEditorModal
+      title={t("locationTitle")}
+      description={t("locationBody", { name })}
+      pointOnly
+      allowRemove
+      current={
+        initial
+          ? {
+              name: `${initial.lat.toFixed(5)}, ${initial.lon.toFixed(5)}`,
+              countryCode: null,
+              latitude: initial.lat,
+              longitude: initial.lon,
+            }
+          : null
+      }
+      onConfirm={async (choice) => {
+        if (!choice) {
+          await onSave(null);
+          return;
+        }
+        await onSave({ lat: choice.place.latitude, lon: choice.place.longitude });
+      }}
+    />
   );
 }
 

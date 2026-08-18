@@ -9,6 +9,7 @@ import {
   parseSoundscapeRecord,
   parseSoundscapeSummary,
   soundscapeDates,
+  soundscapeDeploymentName,
   soundscapeHref,
   soundscapePoints,
   sourceForMinute,
@@ -107,6 +108,25 @@ describe("capSourceRecordings", () => {
       source({ minuteOfDay: index, audioUri: `at://x${index}` }),
     );
     expect(capSourceRecordings(many, 10)).toHaveLength(10);
+  });
+});
+
+describe("soundscapeDeploymentName", () => {
+  it("pulls the recorder name from a named title", () => {
+    expect(soundscapeDeploymentName("Soundscape · Ingles 2 · 2024-04-08 – 2024-04-09")).toBe("Ingles 2");
+    expect(soundscapeDeploymentName("Soundscape · inn3 · 2024-04-08 – 2024-04-11")).toBe("inn3");
+  });
+
+  it("works regardless of the localized prefix word", () => {
+    expect(soundscapeDeploymentName("Paisaje sonoro · Ingles 2 · 2024-04-08")).toBe("Ingles 2");
+    expect(soundscapeDeploymentName("Mandhari ya sauti · inn3 · 2024-04-08")).toBe("inn3");
+  });
+
+  it("returns null when the title carries no name", () => {
+    expect(soundscapeDeploymentName("Soundscape · 2024-04-08 – 2024-04-09")).toBeNull();
+    expect(soundscapeDeploymentName("")).toBeNull();
+    expect(soundscapeDeploymentName(null)).toBeNull();
+    expect(soundscapeDeploymentName(undefined)).toBeNull();
   });
 });
 

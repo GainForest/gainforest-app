@@ -176,6 +176,26 @@
       "cart": "Kikapu",
       "checkout": "Malipo"
     },
+    "projectUpdates": {
+      "title": "Kitunga cha masasisho ya mradi",
+      "description": "Kihariri cha WYSIWYG cha kuandika masasisho ya mradi, na ratiba inayoyaonyesha — sawasawa na yanavyoonekana kwenye ukurasa wa Cert.",
+      "mockNote": "Kuchapisha sasisho huweka rekodi kwenye akaunti halisi, kwa hivyo onyesho hili la awali halifanyi hivyo kamwe. Masasisho yaliyoandikwa hapa hutumia kitunga, uthibitishaji na ratiba za uzalishaji, lakini hubaki kwenye ukurasa huu na hupotea ukipakia upya.",
+      "mockBadge": "Hali ya majaribio · hakuna kinachochapishwa",
+      "cardTitle": "Masasisho ya mradi",
+      "cardDescription": "Andika sasisho lenye muundo — herufi nzito, vichwa, orodha, nukuu, viungo — kisha ulione kwenye ratiba.",
+      "composerLabel": "Andika sasisho",
+      "timelineLabel": "Masasisho yaliyochapishwa",
+      "seedTitle": "Wiki ya tatu ya upandaji — ripoti ya mwavuli wa miti",
+      "seedHeading": "Ripoti ya kitalu",
+      "seedIntro": "Wiki hii timu ya uwandani ilipanda",
+      "seedIntroBold": "miche 1,200",
+      "seedIntroTail": "katika eneo la urejeshaji la kaskazini.",
+      "seedListOne": "Kiwango cha kuishi kimebaki 94%",
+      "seedListTwo": "Wajitolea wapya wawili wa jamii walijiunga",
+      "seedQuote": "Msitu unarudi haraka kuliko yeyote kati yetu alivyotarajia.",
+      "seedPlainTitle": "Mvua zilifika mapema",
+      "seedPlainBody": "Sasisho fupi la maandishi wazi lililoandikwa kabla ya muundo kuwepo. Lazima lionekane bila mabadiliko."
+    },
     "projectVisibility": {
       "title": "Kadi ya mwonekano wa mradi",
       "description": "Kadi iliyo kwenye Dhibiti → Miradi inayoieleza akaunti kilicho cha hadhara na kama inaonyeshwa kwenye kurasa za uchunguzi, katika kila hali yake.",
@@ -266,8 +286,22 @@
       "cardDescription": "Ruzuku yangu na chati yake ya mwendo wa sauti, nyuma na mbele ya lengo.",
       "upcoming": {
         "title": "Kabla ruzuku haijaanza",
-        "description": "Kipindi bado hakijaanza, hivyo hakuna hukumu ya mwendo wala chati — ni lini kinaanza na kitahitaji nini tu."
+        "description": "Kipindi bado hakijaanza, hivyo chati inaonyesha kila upakiaji kama mwanzo mzuri — mstari unaohitajika unabaki tambarare hadi kifunguke."
       }
+    },
+    "communityEvents": {
+      "title": "Matukio ya jamii",
+      "description": "Ugunduzi wa matukio, ukurasa wa tukio na fomu ya kuandaa ya uzalishaji kwa data ya majaribio — kuthibitisha, orodha za kusubiri, kuchapisha na kughairi vyote vinafanya kazi kwenye kumbukumbu.",
+      "cardTitle": "Matukio ya jamii",
+      "cardDescription": "Vinjari, thibitisha, jiunge na orodha ya kusubiri, na andaa tukio — vipengele vya uzalishaji kwa data ya kumbukumbu, pamoja na hali ya kutokuwa na akaunti.",
+      "mockBadge": "Hali ya majaribio · hakuna maandishi",
+      "eyebrow": "Sajili ya uzoefu wa UI",
+      "tabDiscovery": "Ugunduzi",
+      "tabDetail": "Ukurasa wa tukio",
+      "tabHost": "Fomu ya kuandaa",
+      "signedInToggle": "Umeingia",
+      "signInPrompt": "Kitendo hiki kingekuomba uingie. Washa “Umeingia” kuiga kikao.",
+      "dismiss": "Ondoa"
     }
   },
   "myCards": {

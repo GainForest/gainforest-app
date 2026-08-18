@@ -59,6 +59,23 @@
       "title": "Adicionar atualização",
       "composerDescription": "Escreva uma breve atualização. Anexe sons, observações, árvores ou arquivos se ajudarem.",
       "captionPlaceholder": "Compartilhe uma atualização rápida do projeto. Você pode publicar só texto ou anexar evidências abaixo.",
+      "titlePlaceholder": "Título (opcional)",
+      "editor": {
+        "bold": "Negrito",
+        "italic": "Itálico",
+        "underline": "Sublinhado",
+        "strikethrough": "Tachado",
+        "heading": "Título",
+        "subheading": "Subtítulo",
+        "quote": "Citação",
+        "bulletedList": "Lista com marcadores",
+        "numberedList": "Lista numerada",
+        "addLink": "Adicionar link",
+        "removeLink": "Remover link",
+        "linkUrlPlaceholder": "https://example.org",
+        "applyLink": "Aplicar",
+        "cancelLink": "Cancelar"
+      },
       "attachLabel": "Anexar evidência opcional:",
       "attachingType": "Anexando {type}",
       "postUpdate": "Publicar atualização",
@@ -374,7 +391,8 @@
       "published": "Publicado",
       "firstSiteBoundary": "Primeiro limite do local",
       "firstSiteBoundaryMap": "Mapa do primeiro limite do local",
-      "contributors": "Colaboradores"
+      "contributors": "Colaboradores",
+      "noLocationSet": "Nenhuma localização definida"
     },
     "headerTabs": {
       "overview": "Visão geral",
