@@ -97,6 +97,7 @@
     "messageHint": "Uma palavra de incentivo ou o motivo da sua doação. Quem receber poderá vê-la.",
     "messagePlaceholder": "Adicione uma mensagem (opcional)…",
     "messageAnonymousNote": "Sua mensagem não será exibida com o seu nome.",
+    "bioblitzAwardNote": "Esta mensagem identifica o pagamento como prémio do BioBlitz e não pode ser alterada.",
     "tipNone": "Sem gorjeta",
     "cardsPreviewTitle": "Bumicerts que você receberá",
     "cardsUnavailableNote": "Os Bumicerts estão disponíveis apenas para doações a projetos qualificados. Esta finalização não inclui nenhum.",

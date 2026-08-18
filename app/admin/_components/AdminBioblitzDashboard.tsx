@@ -6,10 +6,13 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import {
   CheckIcon,
+  CircleCheckIcon,
   DownloadIcon,
   EyeOffIcon,
   ExternalLinkIcon,
   Loader2Icon,
+  SendIcon,
+  WalletIcon,
 } from "lucide-react";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
@@ -20,8 +23,14 @@ import type {
   BioblitzAdminRegistrant,
   BioblitzAdminRoundCount,
   BioblitzAdminRoundData,
+  BioblitzPrizePaymentStatus,
   BioblitzWinnerPrize,
+  BioblitzWinnerWallet,
 } from "@/app/admin/_lib/bioblitz-dashboard-types";
+import { useModal } from "@/components/ui/modal/context";
+import { ACCOUNT_SUPPORT_RKEY } from "@/app/_components/cart/CartProvider";
+import { AmountModal } from "@/app/cert/[did]/[rkey]/_components/donate/DonationModals";
+import { bioblitzPrizeAmountUsd, type BioblitzPrize } from "@/lib/bioblitz-prizes";
 import { cn } from "@/lib/utils";
 
 async function loadRound(roundId: number, signal: AbortSignal): Promise<BioblitzAdminRoundData> {
@@ -96,7 +105,9 @@ export function AdminBioblitzDashboard({
   canManage: boolean;
 }) {
   const t = useTranslations("common.adminBioblitzDashboard");
+  const accountT = useTranslations("common.accountSupport");
   const locale = useLocale();
+  const { pushModal, show } = useModal();
   const visibleRounds = useMemo(() => [...rounds].sort((a, b) => b.id - a.id), [rounds]);
   const safeDefaultRoundId = visibleRounds.some((round) => round.id === defaultRoundId)
     ? defaultRoundId
@@ -224,6 +235,37 @@ export function AdminBioblitzDashboard({
     } finally {
       setBusyKey(null);
     }
+  }
+
+  async function openPayPrizeModal(registrant: BioblitzAdminRegistrant, prize: BioblitzWinnerPrize) {
+    if (!selectedRound || !canManage) return;
+    const prizeAmount = bioblitzPrizeAmountUsd(prize as BioblitzPrize);
+    pushModal(
+      {
+        id: `bioblitz-pay-${registrant.did}-${prize}`,
+        content: (
+          <AmountModal
+            bumicert={{
+              kind: "account",
+              organizationDid: registrant.did,
+              rkey: ACCOUNT_SUPPORT_RKEY,
+              title: registrant.displayName || t("unnamed"),
+              organizationName: registrant.displayName || t("unnamed"),
+              image: registrant.avatarUrl,
+            }}
+            fundingConfig={null}
+            initialAmount={prizeAmount}
+            awardMeta={{
+              type: "bioblitz",
+              roundId: selectedRound.id,
+              prize: prize as BioblitzPrize,
+            }}
+          />
+        ),
+      },
+      true,
+    );
+    await show();
   }
 
   return (
@@ -358,7 +400,7 @@ export function AdminBioblitzDashboard({
                         const downloading = busyKey === key;
                         return canManage && registrant.availablePackages.includes(prize) ? (
                           <Button
-                            key={prize}
+                            key={`download-${prize}`}
                             type="button"
                             size="sm"
                             variant="outline"
@@ -374,6 +416,58 @@ export function AdminBioblitzDashboard({
                             )}
                           </Button>
                         ) : null;
+                      })}
+                      {/* Prize payment UI for winners */}
+                      {canManage && registrant.wins.map((prize) => {
+                        const paymentStatus = registrant.prizePayments?.find((p) => p.prize === prize);
+                        const prizeLabel = prize === "best-picture"
+                          ? t("prize.best-picture")
+                          : bioblitzRoundUsesPoints(selectedRoundId)
+                            ? t("prize.highest-points")
+                            : t("prize.most-observations");
+
+                        // No wallet connected
+                        if (!registrant.wallet) {
+                          return (
+                            <span
+                              key={`pay-${prize}`}
+                              className="inline-flex items-center gap-1.5 rounded-full border border-amber-500/25 bg-amber-500/[0.06] px-2.5 py-1 text-[11px] font-medium text-amber-700 dark:text-amber-300"
+                            >
+                              <WalletIcon className="size-3" aria-hidden />
+                              {t("noWallet")}
+                            </span>
+                          );
+                        }
+
+                        // Already paid
+                        if (paymentStatus?.paid) {
+                          return (
+                            <span
+                              key={`pay-${prize}`}
+                              className="inline-flex items-center gap-1.5 rounded-full border border-emerald-500/25 bg-emerald-500/[0.06] px-2.5 py-1 text-[11px] font-medium text-emerald-700 dark:text-emerald-300"
+                              title={paymentStatus.paidAt ? t("paidAt", { date: formatShortDate(paymentStatus.paidAt, locale) }) : undefined}
+                            >
+                              <CircleCheckIcon className="size-3" aria-hidden />
+                              {t("alreadyPaid", { prize: prizeLabel })}
+                            </span>
+                          );
+                        }
+
+                        // Wallet connected, not paid - show Pay button
+                        return (
+                          <Button
+                            key={`pay-${prize}`}
+                            type="button"
+                            size="sm"
+                            variant="outline"
+                            className="h-8 gap-1.5 rounded-full border-emerald-500/20 bg-emerald-500/[0.06] px-3 text-xs text-emerald-700 hover:bg-emerald-500/10 dark:text-emerald-300"
+                            disabled={Boolean(busyKey)}
+                            onClick={() => openPayPrizeModal(registrant, prize)}
+                          >
+                            <SendIcon className="size-3.5" aria-hidden />
+                            {t("payPrize", { amount: bioblitzPrizeAmountUsd(prize as BioblitzPrize) })}
+                          </Button>
+                        );
                       })}
                       {canChangeCounting ? (
                         <Button

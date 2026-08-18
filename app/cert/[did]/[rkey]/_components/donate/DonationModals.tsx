@@ -13,7 +13,7 @@ import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { useModal } from "@/components/ui/modal/context";
 import { ModalContent, ModalDescription, ModalFooter, ModalHeader, ModalTitle } from "@/components/ui/modal/modal";
-import { cartItemKey, useCart } from "@/app/_components/cart/CartProvider";
+import { cartItemKey, useCart, type BioblitzAwardMeta } from "@/app/_components/cart/CartProvider";
 
 export type DonationBumicert = {
   organizationDid: string;
@@ -58,11 +58,17 @@ export function AmountModal({
   bumicert,
   fundingConfig,
   onAddedToCart,
+  initialAmount: propsInitialAmount,
+  awardMeta,
 }: {
   bumicert: DonationBumicert;
   fundingConfig: DonationFundingConfig;
   /** Overrides route navigation while keeping the production amount UI intact. */
   onAddedToCart?: () => void;
+  /** Optional pre-filled amount in USD (e.g., for bioblitz prize payments). */
+  initialAmount?: number;
+  /** Optional award metadata for deterministic receipt tracking. */
+  awardMeta?: BioblitzAwardMeta;
 }) {
   const t = useTranslations("cart.amountModal");
   const accountT = useTranslations("common.accountSupport");
@@ -76,9 +82,12 @@ export function AmountModal({
   const alreadyInCart = items.some(
     (item) => cartItemKey(item) === cartItemKey({ orgDid: bumicert.organizationDid, rkey: bumicert.rkey }),
   );
-  const initialAmount = presets.includes(DEFAULT_AMOUNT) ? DEFAULT_AMOUNT : presets[Math.floor(presets.length / 2)] ?? DEFAULT_AMOUNT;
-  const [amount, setAmount] = useState(initialAmount);
-  const [customInput, setCustomInput] = useState(String(initialAmount));
+  // Use the provided initialAmount if valid, otherwise fall back to preset logic
+  const computedInitialAmount = propsInitialAmount && Number.isFinite(propsInitialAmount) && propsInitialAmount > 0
+    ? propsInitialAmount
+    : presets.includes(DEFAULT_AMOUNT) ? DEFAULT_AMOUNT : presets[Math.floor(presets.length / 2)] ?? DEFAULT_AMOUNT;
+  const [amount, setAmount] = useState(computedInitialAmount);
+  const [customInput, setCustomInput] = useState(String(computedInitialAmount));
 
   const isValid =
     Number.isFinite(amount) &&
@@ -109,6 +118,7 @@ export function AmountModal({
       amountUsd: amount,
       minUsd: minDonation,
       maxUsd: maxDonation,
+      ...(awardMeta ? { awardMeta } : {}),
     });
     await hide();
     clear();

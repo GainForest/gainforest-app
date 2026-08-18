@@ -21,6 +21,7 @@ import type {
   BioblitzWinnerPrize,
 } from "./bioblitz-dashboard-types";
 import { loadBioblitzConfirmedWinners, type BioblitzConfirmedWinner } from "./bioblitz-confirmed-winners";
+import { fetchWinnersWalletAndPaymentStatus } from "./bioblitz-prize-payments";
 
 export class BioblitzAdminRoundNotFoundError extends Error {
   constructor() {
@@ -188,6 +189,38 @@ export async function loadBioblitzAdminRound(
       next.availablePackages.push(winner.prize);
     }
     rows.set(winner.did, next);
+  }
+
+  // Fetch wallet and payment status for winners (for prize payment UI)
+  // Wrapped in try-catch to ensure wallet fetching never breaks winner display
+  if (winners.length > 0) {
+    try {
+      // Group by DID to avoid duplicate fetches
+      const groupedByDid = new Map<string, BioblitzWinnerPrize[]>();
+      for (const winner of winners) {
+        const existing = groupedByDid.get(winner.did) ?? [];
+        existing.push(winner.prize);
+        groupedByDid.set(winner.did, existing);
+      }
+      const walletPaymentInputs = [...groupedByDid.entries()].map(([did, prizes]) => ({
+        did,
+        roundId: round.id,
+        prizes,
+      }));
+      const walletPaymentStatus = await fetchWinnersWalletAndPaymentStatus(walletPaymentInputs).catch(
+        () => new Map<string, { wallet: null; payments: [] }>(),
+      );
+      for (const [did, status] of walletPaymentStatus) {
+        const registrant = rows.get(did);
+        if (registrant) {
+          registrant.wallet = status.wallet;
+          registrant.prizePayments = status.payments;
+        }
+      }
+    } catch (error) {
+      // Log but don't fail - wallet info is optional enhancement
+      console.warn("[admin-bioblitz] Failed to fetch wallet/payment status for winners:", error);
+    }
   }
 
   return {

@@ -33,6 +33,7 @@ import { Popover, PopoverAnchor, PopoverContent } from "@/components/ui/popover"
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { clampDonationMessage, DONATION_MESSAGE_MAX_LENGTH, sanitizeDonationMessage } from "@/lib/donation/message";
+import { bioblitzPrizeReceiptMessage, bioblitzRoundUsesPoints } from "@/lib/bioblitz-prizes";
 import type { AuthSession } from "@/app/_lib/auth";
 import { SocialGlyph } from "@/app/_components/SocialIcon";
 import { blockExplorerUrl } from "@/app/_lib/urls";
@@ -309,6 +310,27 @@ export function CheckoutView({
   const [anonymous, setAnonymous] = useState(false);
   const [message, setMessage] = useState("");
   const messageCountId = `${useId()}-count`;
+
+  // Bioblitz award: compute the deterministic message and track if we're in award mode
+  const bioblitzAward = useMemo(() => {
+    const awardItem = items.find((item) => item.awardMeta?.type === "bioblitz");
+    if (!awardItem?.awardMeta || awardItem.awardMeta.type !== "bioblitz") return null;
+    const { roundId, prize } = awardItem.awardMeta;
+    return {
+      roundId,
+      prize,
+      message: bioblitzPrizeReceiptMessage(roundId, prize, bioblitzRoundUsesPoints(roundId)),
+    };
+  }, [items]);
+
+  // Pre-fill the message for bioblitz awards when the cart hydrates
+  const bioblitzMessageSetRef = useRef(false);
+  useEffect(() => {
+    if (hydrated && bioblitzAward && !bioblitzMessageSetRef.current) {
+      setMessage(bioblitzAward.message);
+      bioblitzMessageSetRef.current = true;
+    }
+  }, [hydrated, bioblitzAward]);
   const [phase, setPhase] = useState<"review" | "paying" | "done">("review");
   const [lineStates, setLineStates] = useState<Record<string, LineState>>({});
   const [completed, setCompleted] = useState<CompletedLine[]>([]);
@@ -978,7 +1000,8 @@ export function CheckoutView({
                 value={message}
                 onChange={(event) => setMessage(clampDonationMessage(event.target.value))}
                 maxLength={DONATION_MESSAGE_MAX_LENGTH * 2}
-                disabled={paying}
+                disabled={paying || Boolean(bioblitzAward)}
+                readOnly={Boolean(bioblitzAward)}
                 rows={3}
                 placeholder={t("messagePlaceholder")}
                 aria-label={t("messagePlaceholder")}
@@ -986,7 +1009,11 @@ export function CheckoutView({
                 className="min-h-20 resize-none rounded-xl border-border/60 bg-background shadow-none"
               />
               <div className="mt-2 flex items-center justify-between gap-3 text-xs text-muted-foreground">
-                <span className="min-w-0 truncate">{anonymous || !authSession.isLoggedIn ? t("messageAnonymousNote") : ""}</span>
+                <span className="min-w-0 truncate">
+                  {bioblitzAward
+                    ? t("bioblitzAwardNote")
+                    : anonymous || !authSession.isLoggedIn ? t("messageAnonymousNote") : ""}
+                </span>
                 <span id={messageCountId} className="shrink-0 tabular-nums text-muted-foreground/60">{Array.from(message).length}/{DONATION_MESSAGE_MAX_LENGTH}</span>
               </div>
             </section>

@@ -10,6 +10,18 @@
  */
 
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
+import type { BioblitzPrize } from "@/lib/bioblitz-prizes";
+
+/**
+ * Award metadata for bioblitz prize payments. When present, the checkout
+ * flow will set a deterministic receipt message to enable "already paid"
+ * tracking.
+ */
+export type BioblitzAwardMeta = {
+  type: "bioblitz";
+  roundId: number;
+  prize: BioblitzPrize;
+};
 
 export type CartItem = {
   /** Project donation or direct support for a user/organization account. */
@@ -24,6 +36,8 @@ export type CartItem = {
   amountUsd: number;
   minUsd: number | null;
   maxUsd: number | null;
+  /** Optional award metadata for deterministic receipt tracking. */
+  awardMeta?: BioblitzAwardMeta;
 };
 
 const DEFAULT_TIP_PERCENT = 10;
@@ -55,6 +69,15 @@ function sanitizeTipPercent(value: unknown): number {
   return Math.min(MAX_TIP_PERCENT, Math.max(0, Math.round(parsed)));
 }
 
+function parseBioblitzAwardMeta(value: unknown): BioblitzAwardMeta | null {
+  if (!value || typeof value !== "object") return null;
+  const meta = value as Partial<BioblitzAwardMeta>;
+  if (meta.type !== "bioblitz") return null;
+  if (typeof meta.roundId !== "number" || !Number.isInteger(meta.roundId) || meta.roundId <= 0) return null;
+  if (meta.prize !== "most-observations" && meta.prize !== "best-picture") return null;
+  return { type: "bioblitz", roundId: meta.roundId, prize: meta.prize };
+}
+
 function parseStoredCart(raw: string | null): StoredCart {
   const empty: StoredCart = { items: [], tipPercent: DEFAULT_TIP_PERCENT };
   if (!raw) return empty;
@@ -75,6 +98,8 @@ function parseStoredCart(raw: string | null): StoredCart {
       ) {
         continue;
       }
+      // Preserve bioblitz award metadata if present and valid
+      const awardMeta = parseBioblitzAwardMeta(item.awardMeta);
       items.push({
         kind: item.kind === "account" ? "account" : "project",
         orgDid: item.orgDid,
@@ -85,6 +110,7 @@ function parseStoredCart(raw: string | null): StoredCart {
         amountUsd,
         minUsd: typeof item.minUsd === "number" && Number.isFinite(item.minUsd) ? item.minUsd : null,
         maxUsd: typeof item.maxUsd === "number" && Number.isFinite(item.maxUsd) ? item.maxUsd : null,
+        ...(awardMeta ? { awardMeta } : {}),
       });
     }
     return { items, tipPercent: sanitizeTipPercent(parsed.tipPercent) };
