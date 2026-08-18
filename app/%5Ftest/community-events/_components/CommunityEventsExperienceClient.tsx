@@ -7,7 +7,7 @@
  * (EventsDiscoveryClient, EventDetailClient, HostEventClient) unchanged. Only
  * the adapter behind them is mocked: fixture events and RSVPs held in local
  * state, no indexer, no PDS, no proxy writes, no sign-in redirect, no
- * uploads. RSVP, waitlist promotion, publishing, editing and cancelling all
+ * uploads. RSVP, publishing, editing and cancelling all
  * work — against memory.
  */
 
@@ -70,7 +70,6 @@ function initialFixtures(): { events: CommunityEvent[]; rsvps: Map<string, strin
         { $type: "community.lexicon.location.address", country: "GB", locality: "Ipswich", name: "Marsh Lane car park, Ipswich Wetlands" },
       ],
       "app.gainforest.event": {
-        capacity: 30,
         agenda: [
           { time: "6:30", text: "Meet at the Marsh Lane gate" },
           { time: "6:45", text: "Walk the east hide loop and count in pairs" },
@@ -105,7 +104,7 @@ function initialFixtures(): { events: CommunityEvent[]; rsvps: Map<string, strin
       startsAt: daysFromNow(24, 14, 0),
       mode: "community.lexicon.calendar.event#inperson",
       locations: [{ $type: "community.lexicon.location.address", country: "KE", locality: "Nairobi", name: "Karura Forest gate B" }],
-      "app.gainforest.event": { capacity: 20 },
+      "app.gainforest.event": {},
     }),
     fixtureEvent("did:plc:mockhosttomas", "night-walk-frogs", {
       name: "Night Walk: Frogs of the Kinabatangan",
@@ -113,14 +112,13 @@ function initialFixtures(): { events: CommunityEvent[]; rsvps: Map<string, strin
       startsAt: daysFromNow(31, 19, 30),
       mode: "community.lexicon.calendar.event#inperson",
       locations: [{ $type: "community.lexicon.location.address", country: "MY", locality: "Sabah", name: "Sukau jetty" }],
-      "app.gainforest.event": { capacity: 2 },
+      "app.gainforest.event": {},
     }),
   ];
 
   const rsvps = new Map<string, string[]>([
     [events[0].uri, ["did:plc:mockhosttomas", "did:plc:mockhostwanjiru", "did:plc:attendee3", "did:plc:attendee4"]],
     [events[2].uri, ["did:plc:attendee1", "did:plc:attendee2"]],
-    // Full event (capacity 2) with someone already waiting.
     [events[4].uri, ["did:plc:attendee1", "did:plc:attendee2", "did:plc:attendee3"]],
   ]);
   return { events, rsvps };
@@ -190,7 +188,6 @@ export function CommunityEventsExperienceClient() {
           geo: null,
           onlineUrl: form.onlineUrl.trim() || null,
           eventPageUrl: null,
-          capacity: form.capacity.trim() ? Number(form.capacity) : null,
           cover: null,
           agenda: form.agenda.filter((a) => a.text.trim()),
           themeTag: form.themeTag.trim() || null,
@@ -216,7 +213,6 @@ export function CommunityEventsExperienceClient() {
               geo: null,
               onlineUrl: form.onlineUrl.trim() || null,
               eventPageUrl: null,
-              capacity: form.capacity.trim() ? Number(form.capacity) : null,
               cover: null,
               agenda: form.agenda.filter((a) => a.text.trim()),
               themeTag: form.themeTag.trim() || null,

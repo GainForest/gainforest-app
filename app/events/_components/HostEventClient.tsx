@@ -667,22 +667,6 @@ export function HostEventClient({ adapter = liveEventsAdapter }: { adapter?: Eve
               <div className="rounded-3xl border border-border-soft bg-surface p-5 shadow-sm">
                 <p className="font-semibold text-foreground">{isEditing ? t("editTitle") : t("title")}</p>
 
-                <div className="mt-4">
-                  <label className="text-sm font-medium text-foreground" htmlFor="event-capacity">
-                    {t("sections.capacity.title")}
-                  </label>
-                  <input
-                    id="event-capacity"
-                    type="number"
-                    min={1}
-                    value={form.capacity}
-                    onChange={(e) => update({ capacity: e.target.value })}
-                    placeholder={t("capacityPlaceholder")}
-                    className="mt-1.5 w-full rounded-2xl border border-border bg-surface px-3.5 py-2.5 text-sm text-foreground placeholder:text-muted-foreground/60 focus:border-primary focus:outline-none"
-                  />
-                  {form.capacity.trim() ? <p className="mt-1 text-xs text-muted-foreground">{t("sections.capacity.waitlistNote")}</p> : null}
-                </div>
-
                 <div className="mt-4" ref={(el) => void (fieldRefs.current.guidelines = el)}>
                   <label className="flex cursor-pointer items-start gap-2.5 text-sm text-foreground">
                     <input

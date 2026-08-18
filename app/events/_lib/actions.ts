@@ -64,7 +64,6 @@ async function dataUrlToFile(dataUrl: string): Promise<File> {
 function formToDraftRecord(form: EventFormState, eventPageUrl: string | null, cover: Record<string, unknown> | null): CommunityEventDraftRecord {
   const startsAt = formDateTimeToIso(form.date, form.startTime);
   const endsAt = form.endTime ? formDateTimeToIso(form.date, form.endTime) : null;
-  const capacity = form.capacity.trim() ? Math.max(1, Math.floor(Number(form.capacity))) : null;
   return {
     name: form.name,
     description: form.description.trim() || null,
@@ -77,7 +76,6 @@ function formToDraftRecord(form: EventFormState, eventPageUrl: string | null, co
     geo: null,
     onlineUrl: form.onlineUrl.trim() || null,
     eventPageUrl,
-    capacity: Number.isFinite(capacity as number) ? capacity : null,
     cover,
     agenda: form.agenda.filter((item) => item.text.trim()).map((item) => ({ time: item.time.trim(), text: item.text.trim() })),
     themeTag: form.themeTag.trim() || null,
@@ -169,8 +167,7 @@ export async function rsvpToCommunityEvent(eventUri: string): Promise<void> {
 }
 
 /** Cancel the viewer's RSVP: delete the beacon like and every RSVP record of
- *  theirs pointing at this event. The next person on the waitlist becomes
- *  "going" purely by position — no hand-off write needed. */
+ *  theirs pointing at this event. */
 export async function cancelCommunityEventRsvp(eventUri: string, viewerDid: string, viewerLikeUri: string | null): Promise<void> {
   if (viewerLikeUri) {
     await deleteFeedLike(rkeyOf(viewerLikeUri)).catch(() => undefined);

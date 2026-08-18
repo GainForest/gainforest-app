@@ -8,8 +8,8 @@
  * a first-class calendar event anywhere community lexicons are consumed, and
  * an event a known host created on Smoke Signal shows up here too.
  *
- * GainForest-only niceties the community lexicon has no field for (capacity,
- * cover photo, agenda, a meeting note…) ride along under ONE
+ * GainForest-only niceties the community lexicon has no field for (cover
+ * photo, agenda, a meeting note…) ride along under ONE
  * namespaced extension key — `app.gainforest.event` — which other consumers
  * ignore, per the protocol's unknown-field tolerance. Nothing in the
  * extension is required to render the event.
@@ -25,8 +25,8 @@
  * Attendance counting ALSO can't come from the un-indexed RSVP collection, so
  * RSVPing dual-writes: the interoperable RSVP record (for Smoke Signal) plus
  * an `app.gainforest.feed.like` whose subject is the event record (for the
- * indexer). "N going", waitlist order and the viewer's own RSVP all read from
- * the indexed likes; the RSVP record is the interop artifact. If the indexer
+ * indexer). "N going" and the viewer's own RSVP both read from the indexed
+ * likes; the RSVP record is the interop artifact. If the indexer
  * ever ingests `community.lexicon.calendar.rsvp`, counting can switch over
  * and the beacon like can be retired.
  */
@@ -94,7 +94,6 @@ export type CommunityEvent = {
   /** Join link for virtual/hybrid events. */
   onlineUrl: string | null;
   // — GainForest extension (all optional) —
-  capacity: number | null;
   /** Cover photo blob CID in the host's repo (resolve via resolveBlobUrl). */
   coverRef: string | null;
   agenda: EventAgendaItem[];
@@ -108,7 +107,7 @@ export type CommunityEvent = {
 
 export type EventAttendance = {
   uri: string;
-  /** All RSVPs, earliest first — position decides going vs waitlist. */
+  /** All RSVPs, earliest first. */
   dids: string[];
   total: number;
   /** The viewer's beacon like, when they have RSVPd. */
@@ -116,15 +115,12 @@ export type EventAttendance = {
 };
 
 /** What the trailing control on a card / the RSVP panel should show. */
-export type ViewerRsvpState = "rsvp" | "going" | "waitlisted" | "full" | "finished" | "cancelled";
+export type ViewerRsvpState = "rsvp" | "going" | "finished" | "cancelled";
 
 export type EventCrowd = {
   going: number;
-  waiting: number;
-  spotsLeft: number | null;
-  isFull: boolean;
   viewerState: ViewerRsvpState;
-  /** Dids currently inside capacity, earliest first (for faces). */
+  /** Attending dids, earliest first (for faces). */
   goingDids: string[];
 };
 
@@ -253,7 +249,6 @@ export function parseCommunityEvent(uri: string, value: unknown): CommunityEvent
     country,
     geo,
     onlineUrl,
-    capacity: num(ext.capacity),
     coverRef: coverRefOf(ext.cover),
     agenda: parseAgenda(ext.agenda),
     themeTag: str(ext.themeTag),
@@ -284,10 +279,8 @@ export function isEventCancelled(event: CommunityEvent): boolean {
 }
 
 /**
- * Everything the RSVP controls need, derived from the ordered RSVP list:
- * the first `capacity` RSVPs are going, later ones wait — so when someone
- * cancels, the head of the waitlist naturally becomes "going" with no
- * hand-off write.
+ * Everything the RSVP controls need, derived from the ordered RSVP list.
+ * Events are uncapped: everyone who RSVPs is going.
  */
 export function deriveEventCrowd(
   event: CommunityEvent,
@@ -296,20 +289,13 @@ export function deriveEventCrowd(
   nowMs: number,
 ): EventCrowd {
   const dids = attendance?.dids ?? [];
-  const capacity = event.capacity;
-  const going = capacity !== null ? Math.min(dids.length, capacity) : dids.length;
-  const waiting = capacity !== null ? Math.max(0, dids.length - capacity) : 0;
-  const spotsLeft = capacity !== null ? Math.max(0, capacity - dids.length) : null;
-  const isFull = capacity !== null && dids.length >= capacity;
 
   let viewerState: ViewerRsvpState = "rsvp";
-  const viewerIndex = viewerDid ? dids.indexOf(viewerDid) : -1;
   if (isEventCancelled(event)) viewerState = "cancelled";
   else if (isEventFinished(event, nowMs)) viewerState = "finished";
-  else if (viewerIndex >= 0) viewerState = capacity !== null && viewerIndex >= capacity ? "waitlisted" : "going";
-  else if (isFull) viewerState = "full";
+  else if (viewerDid && dids.includes(viewerDid)) viewerState = "going";
 
-  return { going, waiting, spotsLeft, isFull, viewerState, goingDids: capacity !== null ? dids.slice(0, capacity) : dids };
+  return { going: dids.length, viewerState, goingDids: dids };
 }
 
 // ── Discovery: host DIDs from the announce-post tag ────────────────────────
@@ -558,7 +544,6 @@ export type CommunityEventDraftRecord = {
   geo: { latitude: number; longitude: number } | null;
   onlineUrl: string | null;
   eventPageUrl: string | null;
-  capacity: number | null;
   cover: Record<string, unknown> | null;
   agenda: EventAgendaItem[];
   themeTag: string | null;
@@ -602,7 +587,6 @@ export function buildCommunityEventRecord(
   }
 
   const extension: Record<string, unknown> = {};
-  if (draft.capacity !== null) extension.capacity = draft.capacity;
   if (draft.cover) extension.cover = draft.cover;
   if (draft.agenda.length > 0) extension.agenda = draft.agenda;
   if (draft.themeTag) extension.themeTag = draft.themeTag;

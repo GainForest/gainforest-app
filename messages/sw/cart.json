@@ -292,9 +292,9 @@
     },
     "communityEvents": {
       "title": "Matukio ya jamii",
-      "description": "Ugunduzi wa matukio, ukurasa wa tukio na fomu ya kuandaa ya uzalishaji kwa data ya majaribio — kuthibitisha, orodha za kusubiri, kuchapisha na kughairi vyote vinafanya kazi kwenye kumbukumbu.",
+      "description": "Ugunduzi wa matukio, ukurasa wa tukio na fomu ya kuandaa ya uzalishaji kwa data ya majaribio — kuthibitisha, kuchapisha na kughairi vyote vinafanya kazi kwenye kumbukumbu.",
       "cardTitle": "Matukio ya jamii",
-      "cardDescription": "Vinjari, thibitisha, jiunge na orodha ya kusubiri, na andaa tukio — vipengele vya uzalishaji kwa data ya kumbukumbu, pamoja na hali ya kutokuwa na akaunti.",
+      "cardDescription": "Vinjari, thibitisha, na andaa tukio — vipengele vya uzalishaji kwa data ya kumbukumbu, pamoja na hali ya kutokuwa na akaunti.",
       "mockBadge": "Hali ya majaribio · hakuna maandishi",
       "eyebrow": "Onyesho la awali",
       "tabDiscovery": "Ugunduzi",

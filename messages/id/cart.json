@@ -292,9 +292,9 @@
     },
     "communityEvents": {
       "title": "Acara komunitas",
-      "description": "Penemuan acara, halaman acara, dan formulir penyelenggara produksi dengan data contoh — daftar hadir, daftar tunggu, penerbitan, dan pembatalan semuanya bekerja di memori.",
+      "description": "Penemuan acara, halaman acara, dan formulir penyelenggara produksi dengan data contoh — daftar hadir, penerbitan, dan pembatalan semuanya bekerja di memori.",
       "cardTitle": "Acara komunitas",
-      "cardDescription": "Jelajahi, daftar hadir, masuk daftar tunggu, dan adakan acara — komponen produksi dengan data di memori, termasuk mode tanpa masuk.",
+      "cardDescription": "Jelajahi, daftar hadir, dan adakan acara — komponen produksi dengan data di memori, termasuk mode tanpa masuk.",
       "mockBadge": "Mode uji · tanpa penulisan",
       "eyebrow": "Pratinjau",
       "tabDiscovery": "Penemuan",

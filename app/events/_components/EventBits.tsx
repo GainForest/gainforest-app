@@ -113,8 +113,8 @@ export function FaceStack({
 
 /**
  * The trailing control on a card, by state — the only interactive element on
- * a card besides the card itself. "RSVP" / "Join waitlist" act in place;
- * "You're going" / "On the waitlist" open the event (cancel lives there).
+ * a card besides the card itself. "RSVP" acts in place; "You're going" opens
+ * the event (cancel lives there).
  */
 export function RsvpTrailingControl({
   state,
@@ -134,11 +134,11 @@ export function RsvpTrailingControl({
       </span>
     );
   }
-  if (state === "going" || state === "waitlisted") {
+  if (state === "going") {
     return (
       <span className="inline-flex items-center gap-1 rounded-full border border-primary/40 bg-primary/10 px-3.5 py-1.5 text-xs font-semibold text-primary">
-        {state === "going" ? <CheckIcon className="size-3.5" aria-hidden /> : null}
-        {state === "going" ? t("going") : t("waitlisted")}
+        <CheckIcon className="size-3.5" aria-hidden />
+        {t("going")}
       </span>
     );
   }
@@ -153,7 +153,7 @@ export function RsvpTrailingControl({
       }}
       className="rounded-full border border-border bg-surface px-4 py-1.5 text-xs font-semibold text-foreground transition-colors hover:border-primary/50 hover:text-primary disabled:opacity-60"
     >
-      {busy ? "…" : state === "full" ? t("joinWaitlist") : t("rsvp")}
+      {busy ? "…" : t("rsvp")}
     </button>
   );
 }

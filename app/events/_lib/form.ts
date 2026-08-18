@@ -25,7 +25,6 @@ export type EventFormState = {
   /** Cover already stored on the record being edited (keep unless replaced). */
   existingCoverRef: string | null;
   agenda: EventAgendaItem[];
-  capacity: string;
   themeTag: string;
   meetingNote: string;
   goodToKnow: string;
@@ -47,7 +46,6 @@ export function emptyEventForm(): EventFormState {
     coverDataUrl: null,
     existingCoverRef: null,
     agenda: [],
-    capacity: "",
     themeTag: "",
     meetingNote: "",
     goodToKnow: "",
@@ -74,7 +72,6 @@ export function eventToForm(event: CommunityEvent): EventFormState {
     description: event.description ?? "",
     existingCoverRef: event.coverRef,
     agenda: event.agenda,
-    capacity: event.capacity !== null ? String(event.capacity) : "",
     themeTag: event.themeTag ?? "",
     meetingNote: event.meetingNote ?? "",
     goodToKnow: event.goodToKnow ?? "",

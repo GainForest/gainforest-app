@@ -3,10 +3,10 @@
 /**
  * /events/[did]/[rkey] — the event page. Cover, title + key facts, the
  * host's description, the optional agenda, host card, opt-in attendee list,
- * and the RSVP panel (sticky on desktop, a pinned bar on mobile) with the
- * wireframe's full state set: default → confirmed (meeting point revealed,
- * cancel behind a confirmation) → full/waitlist → finished — plus the
- * host-cancelled banner and the organizer's own view (Edit / Cancel event).
+ * and the RSVP panel (sticky on desktop, a pinned bar on mobile): default →
+ * confirmed (meeting point revealed, cancel behind a confirmation) →
+ * finished — plus the host-cancelled banner and the organizer's own view
+ * (Edit / Cancel event).
  */
 
 import Link from "next/link";
@@ -267,7 +267,6 @@ export function EventDetailClient({
             <h3 className="font-semibold text-foreground">{t("organizer.youAreHost")}</h3>
             <p className="mt-1 text-sm text-muted-foreground">
               {tCard("goingCount", { count: crowd.going })}
-              {crowd.waiting > 0 ? ` · ${t("peopleWaiting", { count: crowd.waiting })}` : crowd.spotsLeft !== null ? ` · ${tCard("spotsLeft", { count: crowd.spotsLeft })}` : ""}
             </p>
             {!cancelled ? (
               <div className="mt-4 space-y-2">
@@ -294,7 +293,7 @@ export function EventDetailClient({
         <div>
           <p className="text-sm text-muted-foreground">{t("finishedNote")}</p>
         </div>
-      ) : crowd.viewerState === "going" || crowd.viewerState === "waitlisted" ? (
+      ) : crowd.viewerState === "going" ? (
         panelMode === "cancelConfirm" ? (
           <div>
             <h3 className="font-semibold text-foreground">{t("cancelTitle")}</h3>
@@ -314,22 +313,16 @@ export function EventDetailClient({
               <span className="grid size-6 place-items-center rounded-full bg-primary text-primary-foreground">
                 <CheckIcon className="size-4" aria-hidden />
               </span>
-              {crowd.viewerState === "going" ? t("youreGoing") : t("onWaitlist")}
+              {t("youreGoing")}
             </p>
             <p className="mt-2 text-sm leading-6 text-muted-foreground">
-              {crowd.viewerState === "going" ? (
+              {eventLongDateLine(event, locale)}
+              {event.meetingNote ? (
                 <>
-                  {eventLongDateLine(event, locale)}
-                  {event.meetingNote ? (
-                    <>
-                      {" · "}
-                      {t("meetingPoint", { note: event.meetingNote })}
-                    </>
-                  ) : null}
+                  {" · "}
+                  {t("meetingPoint", { note: event.meetingNote })}
                 </>
-              ) : (
-                t("waitlistNote")
-              )}
+              ) : null}
             </p>
             <div className="mt-4 space-y-2">
               {shareCalendarRow}
@@ -358,35 +351,15 @@ export function EventDetailClient({
           <p className="mt-2 text-xs text-muted-foreground">
             {event.mode === "virtual" ? tCard("joinAnywhere") : event.meetingNote ? t("meetingPointAfter") : (event.locationName ?? "")}
           </p>
-          {crowd.viewerState === "full" ? (
-            <>
-              <p className="mt-3 text-sm font-medium text-foreground">{t("fullTitle")}</p>
-              <button
-                type="button"
-                disabled={busy}
-                onClick={() => void handleRsvp()}
-                className="mt-2 w-full rounded-full border border-border px-4 py-2.5 text-sm font-semibold text-foreground transition-colors hover:border-primary/50 disabled:opacity-60"
-              >
-                {busy ? "…" : t("joinTheWaitlist")}
-              </button>
-              {crowd.waiting > 0 ? <p className="mt-2 text-center text-xs text-muted-foreground">{t("peopleWaiting", { count: crowd.waiting })}</p> : null}
-            </>
-          ) : (
-            <>
-              <button
-                type="button"
-                disabled={busy}
-                onClick={() => void handleRsvp()}
-                className="mt-3 w-full rounded-full bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary-dark disabled:opacity-60"
-              >
-                {busy ? "…" : t("rsvpCta")}
-              </button>
-              <p className="mt-2 text-center text-xs text-muted-foreground">
-                {tCard("goingCount", { count: crowd.going })}
-                {crowd.spotsLeft !== null ? ` · ${tCard("spotsLeft", { count: crowd.spotsLeft })}` : ""}
-              </p>
-            </>
-          )}
+          <button
+            type="button"
+            disabled={busy}
+            onClick={() => void handleRsvp()}
+            className="mt-3 w-full rounded-full bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary-dark disabled:opacity-60"
+          >
+            {busy ? "…" : t("rsvpCta")}
+          </button>
+          <p className="mt-2 text-center text-xs text-muted-foreground">{tCard("goingCount", { count: crowd.going })}</p>
           <div className="mt-3">{shareCalendarRow}</div>
         </div>
       )}
@@ -532,16 +505,13 @@ export function EventDetailClient({
         <div className="fixed inset-x-0 bottom-0 z-30 border-t border-border-soft bg-surface/95 px-4 py-3 backdrop-blur lg:hidden">
           <div className="mx-auto flex max-w-5xl items-center justify-between gap-3">
             <div className="min-w-0 text-sm">
-              <p className="truncate font-semibold text-foreground">
-                {t("freeShort")}
-                {crowd.spotsLeft !== null ? ` · ${tCard("spotsLeft", { count: crowd.spotsLeft })}` : ""}
-              </p>
+              <p className="truncate font-semibold text-foreground">{t("freeShort")}</p>
               <p className="truncate text-xs text-muted-foreground">{eventLongDateLine(event, locale)}</p>
             </div>
-            {crowd.viewerState === "going" || crowd.viewerState === "waitlisted" ? (
+            {crowd.viewerState === "going" ? (
               <span className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-primary/40 bg-primary/10 px-4 py-2 text-sm font-semibold text-primary">
                 <CheckCircle2Icon className="size-4" aria-hidden />
-                {crowd.viewerState === "going" ? t("youreGoing") : t("onWaitlist")}
+                {t("youreGoing")}
               </span>
             ) : (
               <button
@@ -550,7 +520,7 @@ export function EventDetailClient({
                 onClick={() => void handleRsvp()}
                 className="shrink-0 rounded-full bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground disabled:opacity-60"
               >
-                {crowd.viewerState === "full" ? t("joinTheWaitlist") : t("rsvpShort")}
+                {t("rsvpShort")}
               </button>
             )}
           </div>

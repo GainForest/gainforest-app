@@ -52,13 +52,9 @@
   "card": {
     "rsvp": "Thibitisha",
     "going": "Utahudhuria",
-    "waitlisted": "Kwenye orodha ya kusubiri",
-    "joinWaitlist": "Jiunge na kusubiri",
     "finished": "Tukio limekwisha",
     "cancelledShort": "Limeghairiwa",
-    "full": "Limejaa",
     "goingCount": "{count} watahudhuria",
-    "spotsLeft": "{count, plural, one {nafasi # imebaki} other {nafasi # zimebaki}}",
     "inPerson": "Ana kwa ana",
     "online": "Mtandaoni",
     "hybrid": "Ana kwa ana + mtandaoni",
@@ -92,17 +88,12 @@
     "goodToKnow": "Vizuri kujua",
     "freeToAttend": "Kuhudhuria ni bure.",
     "youreGoing": "Utahudhuria",
-    "onWaitlist": "Kwenye orodha ya kusubiri",
     "meetingPoint": "Mahali pa kukutana: {note}",
-    "waitlistNote": "Una nafasi kwenye foleni. Nafasi ikitokea, unapanda kiotomatiki.",
     "cancelMyRsvp": "Ghairi uthibitisho wangu",
     "cancelTitle": "Ughairi uthibitisho wako?",
-    "cancelBody": "Nafasi yako inampata mtu anayefuata kwenye orodha ya kusubiri. Unaweza kuthibitisha tena kukiwa na nafasi.",
+    "cancelBody": "Nafasi yako inakuwa wazi kwa mtu mwingine. Unaweza kujiandikisha tena ikiwa kuna nafasi.",
     "keepSpot": "Baki na nafasi yangu",
     "cancelConfirm": "Ghairi uthibitisho",
-    "fullTitle": "Tukio hili limejaa.",
-    "joinTheWaitlist": "Jiunge na orodha ya kusubiri",
-    "peopleWaiting": "{count, plural, one {mtu # anasubiri} other {watu # wanasubiri}}",
     "finishedNote": "Tukio hili limekwisha.",
     "actionFailed": "Haikuhifadhiwa. Tafadhali jaribu tena.",
     "organizer": {
@@ -136,13 +127,6 @@
     "countryLabel": "Nchi",
     "onlineUrlLabel": "Watu wanajiunga wapi mtandaoni?",
     "remove": "Ondoa",
-    "sections": {
-      "capacity": {
-        "title": "Weka kikomo cha idadi ya watu",
-        "waitlistNote": "Waliojisajili zaidi wanaingia kwenye orodha ya kusubiri."
-      }
-    },
-    "capacityPlaceholder": "Bila kikomo",
     "descriptionPlaceholder": "Sentensi chache. Mtakachofanya, ni kwa ajili ya nani, cha kubeba.",
     "coverRemove": "Ondoa picha",
     "coverAdd": "Ongeza picha ya jalada",

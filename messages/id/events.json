@@ -52,13 +52,9 @@
   "card": {
     "rsvp": "Daftar hadir",
     "going": "Kamu akan hadir",
-    "waitlisted": "Dalam daftar tunggu",
-    "joinWaitlist": "Masuk daftar tunggu",
     "finished": "Acara selesai",
     "cancelledShort": "Dibatalkan",
-    "full": "Penuh",
     "goingCount": "{count} akan hadir",
-    "spotsLeft": "{count, plural, other {# tempat tersisa}}",
     "inPerson": "Tatap muka",
     "online": "Daring",
     "hybrid": "Tatap muka + daring",
@@ -92,17 +88,12 @@
     "goodToKnow": "Perlu diketahui",
     "freeToAttend": "Gratis untuk hadir.",
     "youreGoing": "Kamu akan hadir",
-    "onWaitlist": "Dalam daftar tunggu",
     "meetingPoint": "Titik kumpul: {note}",
-    "waitlistNote": "Kamu punya tempat dalam antrean. Jika ada tempat kosong, kamu naik otomatis.",
     "cancelMyRsvp": "Batalkan kehadiran saya",
     "cancelTitle": "Batalkan kehadiranmu?",
-    "cancelBody": "Tempatmu diberikan ke orang berikutnya dalam daftar tunggu. Kamu bisa mendaftar lagi jika masih ada tempat.",
+    "cancelBody": "Tempatmu terbuka untuk orang lain. Kamu bisa RSVP lagi jika masih ada tempat.",
     "keepSpot": "Pertahankan tempat saya",
     "cancelConfirm": "Batalkan kehadiran",
-    "fullTitle": "Acara ini penuh.",
-    "joinTheWaitlist": "Masuk daftar tunggu",
-    "peopleWaiting": "{count, plural, other {# orang menunggu}}",
     "finishedNote": "Acara ini telah selesai.",
     "actionFailed": "Gagal menyimpan. Silakan coba lagi.",
     "organizer": {
@@ -136,13 +127,6 @@
     "countryLabel": "Negara",
     "onlineUrlLabel": "Di mana orang bergabung secara daring?",
     "remove": "Hapus",
-    "sections": {
-      "capacity": {
-        "title": "Batasi jumlah orang",
-        "waitlistNote": "Pendaftar tambahan masuk daftar tunggu."
-      }
-    },
-    "capacityPlaceholder": "Tanpa batas",
     "descriptionPlaceholder": "Beberapa kalimat. Apa yang akan dilakukan, untuk siapa, apa yang perlu dibawa.",
     "coverRemove": "Hapus foto",
     "coverAdd": "Tambahkan foto sampul",

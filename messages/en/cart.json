@@ -292,9 +292,9 @@
     },
     "communityEvents": {
       "title": "Community events",
-      "description": "The production events discovery, event page and host form on fixture data — RSVP, waitlists, publishing and cancelling all work in memory.",
+      "description": "The production events discovery, event page and host form on fixture data — RSVP, publishing and cancelling all work in memory.",
       "cardTitle": "Community events",
-      "cardDescription": "Browse, RSVP, join a waitlist, and host an event — production components on in-memory fixtures, with a signed-out mode.",
+      "cardDescription": "Browse, RSVP, and host an event — production components on in-memory fixtures, with a signed-out mode.",
       "mockBadge": "Mock mode · no writes",
       "eyebrow": "Preview",
       "tabDiscovery": "Discovery",

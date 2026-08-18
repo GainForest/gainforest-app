@@ -52,13 +52,9 @@
   "card": {
     "rsvp": "Confirmar",
     "going": "Você vai",
-    "waitlisted": "Na lista de espera",
-    "joinWaitlist": "Entrar na espera",
     "finished": "Evento encerrado",
     "cancelledShort": "Cancelado",
-    "full": "Lotado",
     "goingCount": "{count} confirmados",
-    "spotsLeft": "{count, plural, one {# vaga restante} other {# vagas restantes}}",
     "inPerson": "Presencial",
     "online": "On-line",
     "hybrid": "Presencial + on-line",
@@ -92,17 +88,12 @@
     "goodToKnow": "Bom saber",
     "freeToAttend": "Participação gratuita.",
     "youreGoing": "Você vai",
-    "onWaitlist": "Na lista de espera",
     "meetingPoint": "Ponto de encontro: {note}",
-    "waitlistNote": "Você tem um lugar na fila. Se uma vaga abrir, você sobe automaticamente.",
     "cancelMyRsvp": "Cancelar minha confirmação",
     "cancelTitle": "Cancelar sua confirmação?",
-    "cancelBody": "Sua vaga vai para a próxima pessoa da lista de espera. Você pode confirmar de novo se houver lugar.",
+    "cancelBody": "Sua vaga fica livre para outra pessoa. Você pode confirmar presença de novo se houver espaço.",
     "keepSpot": "Manter minha vaga",
     "cancelConfirm": "Cancelar confirmação",
-    "fullTitle": "Este evento está lotado.",
-    "joinTheWaitlist": "Entrar na lista de espera",
-    "peopleWaiting": "{count, plural, one {# pessoa na espera} other {# pessoas na espera}}",
     "finishedNote": "Este evento já terminou.",
     "actionFailed": "Não foi possível salvar. Tente novamente.",
     "organizer": {
@@ -136,13 +127,6 @@
     "countryLabel": "País",
     "onlineUrlLabel": "Onde as pessoas entram on-line?",
     "remove": "Remover",
-    "sections": {
-      "capacity": {
-        "title": "Limitar o número de pessoas",
-        "waitlistNote": "Inscrições extras entram numa lista de espera."
-      }
-    },
-    "capacityPlaceholder": "Sem limite",
     "descriptionPlaceholder": "Algumas frases. O que vão fazer, para quem é, o que levar.",
     "coverRemove": "Remover foto",
     "coverAdd": "Adicione uma foto de capa",

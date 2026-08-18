@@ -292,9 +292,9 @@
     },
     "communityEvents": {
       "title": "Eventos comunitários",
-      "description": "A descoberta de eventos, a página do evento e o formulário de organização de produção com dados de exemplo — confirmar, listas de espera, publicar e cancelar funcionam em memória.",
+      "description": "A descoberta de eventos, a página do evento e o formulário de organização de produção com dados de exemplo — confirmar, publicar e cancelar funcionam em memória.",
       "cardTitle": "Eventos comunitários",
-      "cardDescription": "Explore, confirme presença, entre numa lista de espera e organize um evento — componentes de produção com dados em memória, incluindo um modo sem sessão.",
+      "cardDescription": "Explore, confirme presença e organize um evento — componentes de produção com dados em memória, incluindo um modo sem sessão.",
       "mockBadge": "Modo de teste · sem gravações",
       "eyebrow": "Pré-visualização",
       "tabDiscovery": "Descoberta",

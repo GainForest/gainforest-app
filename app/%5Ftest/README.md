@@ -37,7 +37,7 @@ The first registered experience lives at `/_test/donation-flow` and stages the r
 
 ## Community events experience
 
-`/_test/community-events` renders the production Events surfaces — `EventsDiscoveryClient`, `EventDetailClient`, and `HostEventClient` — behind a fixture `EventsAdapter`. RSVP, waitlist promotion (a full event with a queue is included), publishing, editing, and host-cancelling all mutate in-memory fixtures only; the adapter never touches the indexer, a PDS, the manage proxy, or blob upload, and its sign-in hand-off shows an inline notice instead of redirecting. A "Signed in" toggle simulates the signed-out RSVP prompt. Card links point at the real `/events` routes (fixtures only exist inside the experience), so the tab bar at the top is the supported way to move between the mock views.
+`/_test/community-events` renders the production Events surfaces — `EventsDiscoveryClient`, `EventDetailClient`, and `HostEventClient` — behind a fixture `EventsAdapter`. RSVP, publishing, editing, and host-cancelling all mutate in-memory fixtures only; the adapter never touches the indexer, a PDS, the manage proxy, or blob upload, and its sign-in hand-off shows an inline notice instead of redirecting. A "Signed in" toggle simulates the signed-out RSVP prompt. Card links point at the real `/events` routes (fixtures only exist inside the experience), so the tab bar at the top is the supported way to move between the mock views.
 
 ## Project updates experience
 

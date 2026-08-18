@@ -30,10 +30,7 @@ function formatPlaceLine(event: CommunityEvent, t: ReturnType<typeof useTranslat
 }
 
 function crowdLine(crowd: EventCrowd, t: ReturnType<typeof useTranslations<"events.card">>): string {
-  if (crowd.isFull) return `${t("full")} · ${t("goingCount", { count: crowd.going })}`;
-  const parts = [t("goingCount", { count: crowd.going })];
-  if (crowd.spotsLeft !== null) parts.push(t("spotsLeft", { count: crowd.spotsLeft }));
-  return parts.join(" · ");
+  return t("goingCount", { count: crowd.going });
 }
 
 export function EventListCard({ data, busy, onRsvp }: { data: EventCardData; busy: boolean; onRsvp: (() => void) | null }) {

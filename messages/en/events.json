@@ -52,13 +52,9 @@
   "card": {
     "rsvp": "RSVP",
     "going": "You're going",
-    "waitlisted": "On the waitlist",
-    "joinWaitlist": "Join waitlist",
     "finished": "Event finished",
     "cancelledShort": "Cancelled",
-    "full": "Full",
     "goingCount": "{count} going",
-    "spotsLeft": "{count, plural, one {# spot left} other {# spots left}}",
     "inPerson": "In person",
     "online": "Online",
     "hybrid": "In person + online",
@@ -92,17 +88,12 @@
     "goodToKnow": "Good to know",
     "freeToAttend": "Free to attend.",
     "youreGoing": "You're going",
-    "onWaitlist": "On the waitlist",
     "meetingPoint": "Meeting point: {note}",
-    "waitlistNote": "You have a place in the queue. If a spot frees up, you move up automatically.",
     "cancelMyRsvp": "Cancel my RSVP",
     "cancelTitle": "Cancel your RSVP?",
-    "cancelBody": "Your spot goes to the next person on the waitlist. You can RSVP again if there is room.",
+    "cancelBody": "Your spot opens up for someone else. You can RSVP again any time there is room.",
     "keepSpot": "Keep my spot",
     "cancelConfirm": "Cancel RSVP",
-    "fullTitle": "This event is full.",
-    "joinTheWaitlist": "Join the waitlist",
-    "peopleWaiting": "{count, plural, one {# person waiting} other {# people waiting}}",
     "finishedNote": "This event has finished.",
     "actionFailed": "That did not save. Please try again.",
     "organizer": {
@@ -136,13 +127,6 @@
     "countryLabel": "Country",
     "onlineUrlLabel": "Where do people join online?",
     "remove": "Remove",
-    "sections": {
-      "capacity": {
-        "title": "Limit the number of people",
-        "waitlistNote": "Extra sign-ups join a waitlist."
-      }
-    },
-    "capacityPlaceholder": "No limit",
     "descriptionPlaceholder": "A few sentences. What you'll do, who it's for, what to bring.",
     "coverRemove": "Remove photo",
     "coverAdd": "Add a cover photo",
